@@ -1,0 +1,11 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": ["src/main.tsx", "eslint.config.js", "eslint-local-rules/index.ts"],
+  "project": ["src/**/*.{ts,tsx}"],
+  "ignore": ["eslint-local-rules/build/**"],
+  "ignoreExportsUsedInFile": {
+    "interface": true,
+    "type": true
+  },
+  "tags": ["-lintignore"]
+}
