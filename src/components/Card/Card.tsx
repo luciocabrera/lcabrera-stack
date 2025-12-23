@@ -12,6 +12,8 @@ export const Card = ({
   padding,
   ...props
 }: CardProps) => {
+  const isInteractive = interactive === 'clickable' || interactive === 'hoverable';
+
   return (
     <div
       data-testid="card"
@@ -20,8 +22,9 @@ export const Card = ({
         cardStyles.base,
         cardStyles.elevation[elevation],
         padding && cardStyles.padding[padding],
-        cardStyles.interactive[interactive],
         cardStyles.color[color],
+        isInteractive && cardStyles.rippleBase,
+        cardStyles.interactive[interactive],
       )}
     >
       {children}

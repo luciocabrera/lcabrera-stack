@@ -41,6 +41,8 @@ export const colors = stylex.defineVars({
 
   // Interactive states
   hover: 'var(--hover)',
+  // Shadows
+  shadowHover: 'var(--shadow-hover)',
   info: 'var(--info)',
   infoBackground: 'var(--info-background)',
   infoHover: 'var(--info-hover)',

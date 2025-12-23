@@ -13,6 +13,21 @@ const baseStyles = stylex.create({
     overflow: 'hidden',
     transition: `all ${transitions.normal} ${easing.easeInOut}`,
     backgroundColor: colors.surfacePrimary,
+    position: 'relative',
+  },
+
+  // Ripple effect base
+  rippleBase: {
+    backgroundPosition: 'center',
+    transition: {
+      default: 'background-color 0.8s, background-size 0.8s',
+      ':active': 'background-color 0s, background-size 0s',
+    },
+    backgroundSize: {
+      default: '0%',
+      ':hover': '15000%',
+      ':active': '100%',
+    },
   },
 });
 
@@ -65,11 +80,27 @@ const paddingVariants = stylex.create({
 // Interactive variants
 const interactiveVariants = stylex.create({
   clickable: {
+    backgroundPosition: 'center',
+    backgroundImage: {
+      ':hover': `radial-gradient(circle, transparent 1%, ${colors.hover} 1%)`,
+    },
+    boxShadow: {
+      ':hover': colors.shadowHover,
+    },
     cursor: 'pointer',
+    // transform: {
+    //   ':hover': 'translateY(-2px)',
+    // },
   },
 
   hoverable: {
+    boxShadow: {
+      ':hover': colors.shadowHover,
+    },
     cursor: 'pointer',
+    // transform: {
+    //   ':hover': 'translateY(-2px)',
+    // },
   },
 
   static: {},
@@ -124,4 +155,5 @@ export const cardStyles = {
   elevation: elevationVariants,
   interactive: interactiveVariants,
   padding: paddingVariants,
+  rippleBase: baseStyles.rippleBase,
 };

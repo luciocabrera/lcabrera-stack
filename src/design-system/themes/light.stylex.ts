@@ -46,6 +46,8 @@ export const lightTheme = stylex.createTheme(colors, {
 
   // Interactive states
   hover: 'rgba(0, 0, 0, 0.04)',
+  // Shadows
+  shadowHover: '0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.08)',
   // Semantic colors - Info (Cyan)
   info: '#1098ad',
   infoBackground: '#4263eb21',
