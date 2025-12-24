@@ -11,12 +11,29 @@ import {
   CardHeader,
   CardTitle,
 } from './components/Card';
-import { ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from './components/Icons';
+import {
+  ErrorIcon,
+  InfoIcon,
+  MenuCloseIcon,
+  MenuIcon,
+  SettingsIcon,
+  SuccessIcon,
+  WarningIcon,
+} from './components/Icons';
+import {
+  SidePanel,
+  SidePanelBody,
+  SidePanelFooter,
+  SidePanelHeader,
+  SidePanelTitle,
+} from './components/SidePanel';
 import { darkTheme } from './design-system/themes/dark.stylex';
 import { lightTheme } from './design-system/themes/light.stylex';
 
 const App = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isLeftPanelOpen, setIsLeftPanelOpen] = useState(false);
+  const [isRightPanelOpen, setIsRightPanelOpen] = useState(false);
 
   const handleToggleTheme = () => {
     setIsDarkMode(!isDarkMode);
@@ -173,7 +190,84 @@ const App = () => {
             </div>
           </div>
         </section>
+
+        {/* Side Panel Section */}
+        <section {...stylex.props(styles.section)}>
+          <h2 {...stylex.props(styles.sectionTitle)}>Side Panels</h2>
+
+          <div {...stylex.props(styles.subsection)}>
+            <h3 {...stylex.props(styles.subsectionTitle)}>Positions & Sizes</h3>
+            <div {...stylex.props(styles.buttonGrid)}>
+              <Button onClick={() => setIsLeftPanelOpen(true)}>
+                <MenuIcon style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }} />
+                Open Left Panel
+              </Button>
+              <Button onClick={() => setIsRightPanelOpen(true)}>
+                Open Right Panel
+                <MenuIcon style={{ width: '1rem', height: '1rem', marginLeft: '0.5rem' }} />
+              </Button>
+            </div>
+          </div>
+        </section>
       </div>
+
+      {/* Side Panels */}
+      <SidePanel
+        isOpen={isLeftPanelOpen}
+        onClose={() => setIsLeftPanelOpen(false)}
+        position="left"
+        size="md"
+      >
+        <SidePanelHeader>
+          <SidePanelTitle icon={<SettingsIcon />}>Settings</SidePanelTitle>
+        </SidePanelHeader>
+        <SidePanelBody>
+          <p>This is a left-positioned side panel with medium size.</p>
+          <p>It includes a header with an icon, a scrollable body, and a footer with actions.</p>
+          <p>Press Escape or click the overlay to close.</p>
+        </SidePanelBody>
+        <SidePanelFooter>
+          <Button size="sm" width="full" onClick={() => setIsLeftPanelOpen(false)}>
+            <MenuCloseIcon style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }} />
+            Close
+          </Button>
+        </SidePanelFooter>
+      </SidePanel>
+
+      <SidePanel
+        isOpen={isRightPanelOpen}
+        onClose={() => setIsRightPanelOpen(false)}
+        position="right"
+        size="lg"
+      >
+        <SidePanelHeader>
+          <SidePanelTitle icon={<InfoIcon />}>Information</SidePanelTitle>
+        </SidePanelHeader>
+        <SidePanelBody>
+          <Card elevation="sm">
+            <CardBody>
+              <CardTitle icon={<SuccessIcon />}>Composable Design</CardTitle>
+              <CardDescription>
+                Side panels work great with other components like cards!
+              </CardDescription>
+            </CardBody>
+          </Card>
+          <div style={{ marginTop: '1rem' }}>
+            <p>This right panel is larger (lg size).</p>
+            <p>You can put any content here, including other components.</p>
+          </div>
+        </SidePanelBody>
+        <SidePanelFooter>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <Button size="sm" color="ghost" width="full" onClick={() => setIsRightPanelOpen(false)}>
+              Cancel
+            </Button>
+            <Button size="sm" width="full" onClick={() => setIsRightPanelOpen(false)}>
+              Confirm
+            </Button>
+          </div>
+        </SidePanelFooter>
+      </SidePanel>
     </div>
   );
 };

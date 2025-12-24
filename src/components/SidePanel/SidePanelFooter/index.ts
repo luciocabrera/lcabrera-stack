@@ -1,0 +1,1 @@
+export { SidePanelFooter } from './SidePanelFooter';
