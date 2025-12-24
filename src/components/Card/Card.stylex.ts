@@ -88,9 +88,6 @@ const interactiveVariants = stylex.create({
       ':hover': colors.shadowHover,
     },
     cursor: 'pointer',
-    // transform: {
-    //   ':hover': 'translateY(-2px)',
-    // },
   },
 
   hoverable: {
@@ -98,9 +95,6 @@ const interactiveVariants = stylex.create({
       ':hover': colors.shadowHover,
     },
     cursor: 'pointer',
-    // transform: {
-    //   ':hover': 'translateY(-2px)',
-    // },
   },
 
   static: {},
