@@ -5,14 +5,14 @@ import { colors } from '@/design-system/tokens/colors.stylex';
 
 const baseStyles = stylex.create({
   overlay: {
+    transition: `opacity ${transitions.normal} ${easing.easeInOut}`,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    position: 'fixed',
+    zIndex: 1000,
     bottom: 0,
     left: 0,
-    position: 'fixed',
     right: 0,
     top: 0,
-    transition: `opacity ${transitions.normal} ${easing.easeInOut}`,
-    zIndex: 1000,
   },
 
   overlayHidden: {
@@ -25,17 +25,17 @@ const baseStyles = stylex.create({
   },
 
   panel: {
-    backgroundColor: colors.surfacePrimary,
     borderColor: colors.borderPrimary,
-    bottom: 0,
+    overflow: 'hidden',
+    transition: `transform ${transitions.normal} ${easing.easeInOut}`,
+    backgroundColor: colors.surfacePrimary,
     boxShadow: shadows.xl,
     display: 'flex',
     flexDirection: 'column',
-    overflow: 'hidden',
     position: 'fixed',
-    top: 0,
-    transition: `transform ${transitions.normal} ${easing.easeInOut}`,
     zIndex: 1001,
+    bottom: 0,
+    top: 0,
   },
 });
 
