@@ -11,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from './components/Card';
+import { ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from './components/Icons';
 import { darkTheme } from './design-system/themes/dark.stylex';
 import { lightTheme } from './design-system/themes/light.stylex';
 
@@ -144,28 +145,28 @@ const App = () => {
             <div {...stylex.props(styles.cardGrid)}>
               <Card color="primary" elevation="sm">
                 <CardBody>
-                  <CardTitle>Primary Card</CardTitle>
+                  <CardTitle icon={<InfoIcon />}>Primary Card</CardTitle>
                   <CardDescription>This card uses the primary brand color.</CardDescription>
                 </CardBody>
               </Card>
 
               <Card color="success" elevation="sm">
                 <CardBody>
-                  <CardTitle>Success Card</CardTitle>
+                  <CardTitle icon={<SuccessIcon />}>Success Card</CardTitle>
                   <CardDescription>Perfect for success messages.</CardDescription>
                 </CardBody>
               </Card>
 
               <Card color="warning" elevation="sm">
                 <CardBody>
-                  <CardTitle>Warning Card</CardTitle>
+                  <CardTitle icon={<WarningIcon />}>Warning Card</CardTitle>
                   <CardDescription>Use this for warnings.</CardDescription>
                 </CardBody>
               </Card>
 
               <Card color="error" elevation="sm">
                 <CardBody>
-                  <CardTitle>Error Card</CardTitle>
+                  <CardTitle icon={<ErrorIcon />}>Error Card</CardTitle>
                   <CardDescription>Display error messages here.</CardDescription>
                 </CardBody>
               </Card>
