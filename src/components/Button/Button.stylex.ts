@@ -26,15 +26,16 @@ const baseStyles = stylex.create({
     transition: `opacity ${transitions.fast} ${easing.easeInOut}`,
     alignItems: 'center',
     appearance: 'none',
+    containerName: 'button',
+    containerType: 'inline-size',
     cursor: { default: 'pointer', ':disabled': 'not-allowed' },
     display: 'inline-flex',
     fontFamily: typography.fontFamily,
     fontWeight: typography.fontWeightMedium,
     justifyContent: 'center',
-    opacity: { default: 1, ':disabled': 0.6, ':hover': 0.85, },
+    opacity: { default: 1, ':disabled': 0.6, ':hover': 0.85 },
     position: 'relative',
     userSelect: 'none',
-    
   },
 
   // Base ripple effect

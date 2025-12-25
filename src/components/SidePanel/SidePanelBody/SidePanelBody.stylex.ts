@@ -5,9 +5,9 @@ import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const sidePanelBodyStyles = stylex.create({
   body: {
-    color: colors.textPrimary,
-    flex: '1',
-    overflowY: 'auto',
     padding: spacing.lg,
+    flex: '1',
+    color: colors.textPrimary,
+    overflowY: 'auto',
   },
 });

@@ -4,7 +4,6 @@ import type { ButtonProps } from './Button.types';
 
 import { buttonStyles } from './Button.stylex';
 
-
 export const Button = ({
   children,
   color = 'primary',
@@ -17,6 +16,7 @@ export const Button = ({
 }: ButtonProps) => {
   return (
     <button
+      data-testid="button"
       disabled={isDisabled}
       {...rest}
       type={type}

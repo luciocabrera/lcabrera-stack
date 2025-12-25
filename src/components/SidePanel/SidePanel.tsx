@@ -53,27 +53,27 @@ export const SidePanel = ({
   }, [onClose]);
 
   // Handle backdrop click when using showModal()
-  const handleDialogClick = (e: React.MouseEvent<HTMLDialogElement>) => {
-    const dialog = dialogRef.current;
-    if (!dialog || !onClose) return;
+  // const handleDialogClick = (e: React.MouseEvent<HTMLDialogElement>) => {
+  //   const dialog = dialogRef.current;
+  //   if (!dialog || !onClose) return;
 
-    // Check if click was on the backdrop (outside dialog content)
-    const rect = dialog.getBoundingClientRect();
-    const didClickOutside =
-      e.clientX < rect.left ||
-      e.clientX > rect.right ||
-      e.clientY < rect.top ||
-      e.clientY > rect.bottom;
+  //   // Check if click was on the backdrop (outside dialog content)
+  //   const rect = dialog.getBoundingClientRect();
+  //   const didClickOutside =
+  //     e.clientX < rect.left ||
+  //     e.clientX > rect.right ||
+  //     e.clientY < rect.top ||
+  //     e.clientY > rect.bottom;
 
-    if (didClickOutside) {
-      onClose();
-    }
-  };
+  //   if (didClickOutside) {
+  //     onClose();
+  //   }
+  // };
 
   return (
     <dialog
       data-testid="side-panel"
-      onClick={handleDialogClick}
+      // onClick={handleDialogClick}
       ref={dialogRef}
       {...props}
       {...stylex.props(

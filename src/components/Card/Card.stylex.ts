@@ -19,6 +19,8 @@ const baseStyles = stylex.create({
     overflow: 'hidden',
     transition: `all ${transitions.normal} ${easing.easeInOut}`,
     backgroundColor: colors.surfacePrimary,
+    containerName: 'card',
+    containerType: 'inline-size',
     position: 'relative',
   },
 

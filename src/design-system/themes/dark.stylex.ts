@@ -2,79 +2,85 @@ import * as stylex from '@stylexjs/stylex';
 
 import { colors } from '../tokens/colors.stylex';
 
-/**
- * Dark Theme
- * Defines color values for dark mode
- */
-
 export const darkTheme = stylex.createTheme(colors, {
-  active: 'rgba(255, 255, 255, 0.1)',
-  // Background colors
-  backgroundPrimary: '#1a1b1e',
-  backgroundSecondary: '#25262b',
+  /* --- Brand Base Colors --- */
+  // brandPrimary: 'oklch(68% 0.06 266)', // lighter for dark backgrounds
+  // brandSecondary: 'oklch(63% 0.06 300)',
+  // success: 'oklch(70% 0.06 160)',
+  // warning: 'oklch(64% 0.08 80)',
+  // error: 'oklch(74% 0.10 25)',
+  // info: 'oklch(78% 0.19 220)',
+  // brandPrimary: 'oklch(48% 0.05 266)',
+  // brandSecondary: 'oklch(49% 0.06 300)',
+  brandPrimary: 'oklch(0.36 0.15 261.66)',
+  brandSecondary: 'oklch(48% 0.05 266)',
+  success: 'oklch(52% 0.06 160)',
+  warning: 'oklch(44% 0.08 80)',
+  error: 'oklch(0.48095 0.14876 27.27312)',
+  info: 'oklch(66% 0.19 220)',
 
-  backgroundTertiary: '#2c2e33',
-  borderFocus: '#5c7cfa',
-  // Border colors
-  borderPrimary: '#373a40',
+  /* Derivatives (reverse logic vs light theme) */
+  brandPrimaryHover: 'oklch(from brandPrimary l+0.06 c+0.01)',
+  brandPrimaryActive: 'oklch(from brandPrimary l-0.08 c+0.01)',
 
-  borderSecondary: '#2c2e33',
-  // Brand colors - Primary (Blue)
-  brandPrimary: '#4b5068',
-  brandPrimaryActive: '#3d4254',
-  brandPrimaryBackground: '#4263eb21',
-  brandPrimaryCardText: '#ffffff',
-  brandPrimaryHover: '#43495e',
+  brandPrimaryBackground: 'oklch(28% 0.05 266)',
+  brandPrimaryCardText: 'oklch(85% 0.08 266)',
+  brandPrimaryText: 'oklch(100% 0 0)',
 
-  brandPrimaryText: '#ffffff',
-  // Brand colors - Secondary (Purple)
-  brandSecondary: '#584c64',
-  brandSecondaryActive: '#665872',
+  brandSecondaryHover: 'oklch(from brandSecondary l+0.06 c+0.02)',
+  brandSecondaryActive: 'oklch(from brandSecondary l-0.08 c+0.02)',
+  brandSecondaryText: 'oklch(100% 0 0)',
 
-  brandSecondaryHover: '#60526b',
-  brandSecondaryText: '#ffffff',
-  disabled: '#373a40',
-  disabledText: '#5c5f66',
+  /* Semantic Colors (dark UI tuned) */
+  // errorBackground: 'oklch(28% 0.06 25)',
 
-  // Semantic colors - Error (Red)
-  error: '#7e5151',
-  errorBackground: '#dbb5b54d',
-  errorCardText: '#ffffff',
-  errorHover: '#8e5f5f',
-  errorText: '#ffffff',
+  errorBackground: 'oklch(92% 0.03 25 / 0.32)',
+  errorCardText: 'oklch(88% 0.08 25)',
+  errorHover: 'oklch(from error l+0.08 c+0.02 h)',
+  errorText: 'oklch(100% 0 0)',
 
-  // Interactive states
-  hover: 'rgba(255, 255, 255, 0.05)',
-  // Shadows
-  shadowHover: '0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2)',
-  // Semantic colors - Info (Cyan)
-  info: '#22b8cf',
-  infoBackground: '#4263eb21',
-  infoHover: '#3bc9db',
+  // successBackground: 'oklch(0.29 0.1 155.23 / 0.5)',
+  successBackground: 'oklch(92% 0.02 160 / 0.32)',
+  successCardText: 'oklch(85% 0.07 160)',
+  // successCardText: 'oklch(38% 0.09 160)',
+  successHover: 'oklch(from success l+0.08 c+0.02 h)',
+  successText: 'oklch(100% 0 0)',
 
-  infoText: '#1a1b1e',
-  // Semantic colors - Success (Green)
-  success: '#50665b',
-  successBackground: '#7a947d3b',
-  successCardText: '#ffffff',
-  successHover: '#5d7267',
+  // warningBackground: 'oklch(0.32 0.07 77.86 / 0.49)',
+  warningBackground: 'oklch(92% 0.03 80 / 0.32)',
+  warningCardText: 'oklch(88% 0.09 80)',
+  warningHover: 'oklch(from warning l+0.08 c+0.03 h)',
+  warningText: 'oklch(100% 0 0)',
 
-  successText: '#ffffff',
-  surfaceElevated: '#373a40',
-  // Surface colors
-  surfacePrimary: '#25262b',
-  surfaceSecondary: '#2c2e33',
+  // infoBackground: 'oklch(0.24 0.11 261.62 / 0.77)',
+  infoBackground: 'oklch(92% 0.03 220 / 0.32)',
+  infoHover: 'oklch(from info l+0.10 c+0.03 h)',
+  infoText: 'oklch(100% 0 0)',
 
-  textInverse: '#1a1b1e',
-  // Text colors
-  textPrimary: '#f8f9fa',
-  textSecondary: '#ced4da',
-  textTertiary: '#adb5bd',
+  /* --- Neutral System for Dark UI --- */
+  backgroundPrimary: 'oklch(14% 0 0)', // base dark surface
+  backgroundSecondary: 'oklch(18% 0.005 250)',
+  backgroundTertiary: 'oklch(22% 0.008 250)',
 
-  // Semantic colors - Warning (Yellow)
-  warning:'#5C4A38',// '#8b7856',
-  warningBackground: '#ecdfa75c',
-  warningCardText: '#ffffff',
-  warningHover: '#9a8563',
-  warningText: '#ffffff',
+  surfacePrimary: 'oklch(17% 0.005 250)',
+  surfaceSecondary: 'oklch(22% 0.008 250)',
+  surfaceElevated: 'oklch(26% 0.008 250)',
+
+  borderPrimary: 'oklch(34% 0.008 250)',
+  borderSecondary: 'oklch(28% 0.005 250)',
+  borderFocus: 'oklch(from brandPrimary l+0.12 c+0.05)',
+
+  /* --- Typography Inversion --- */
+  textPrimary: 'oklch(92% 0.01 250)', // light text
+  textSecondary: 'oklch(75% 0.01 250)',
+  textTertiary: 'oklch(60% 0.01 250)',
+  textInverse: 'oklch(12% 0.01 250)',
+
+  disabled: 'oklch(30% 0.01 250)',
+  disabledText: 'oklch(54% 0.008 250)',
+
+  /* Interaction + shadows */
+  hover: 'oklch(100% 0 0 / 0.05)',
+  active: 'oklch(100% 0 0 / 0.10)',
+  shadowHover: '0 20px 25px -5px oklch(0% 0 0 / 0.45), 0 10px 10px -5px oklch(0% 0 0 / 0.28)',
 });

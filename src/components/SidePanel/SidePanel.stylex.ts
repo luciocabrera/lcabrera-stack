@@ -18,6 +18,8 @@ const baseStyles = stylex.create({
     // Custom styles
     backgroundColor: colors.surfacePrimary,
     boxShadow: shadows.xl,
+    containerName: 'side-panel',
+    containerType: 'inline-size',
     display: 'flex',
     flexDirection: 'column',
     position: 'fixed',
