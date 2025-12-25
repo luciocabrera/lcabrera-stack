@@ -1,5 +1,6 @@
+// component
 import * as stylex from '@stylexjs/stylex';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 import type { SidePanelProps } from './SidePanel.types';
 
@@ -10,70 +11,82 @@ export const SidePanel = ({
   isOpen,
   onClose,
   position = 'right',
-  showOverlay = true,
+  shouldShowOverlay = true,
   size = 'md',
   ...props
 }: SidePanelProps) => {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
   useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
+      // Use showModal() for backdrop support
+      if (shouldShowOverlay) {
+        dialog.showModal();
+      } else {
+        dialog.show();
+      }
     } else {
-      document.body.style.overflow = '';
+      if (dialog.open) {
+        dialog.close();
+      }
     }
+  }, [isOpen, shouldShowOverlay]);
 
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
-
-  const handleOverlayClick = () => {
-    if (onClose) {
-      onClose();
-    }
-  };
-
-  const handleKeyDown = (event: KeyboardEvent) => {
-    if (event.key === 'Escape' && onClose) {
-      onClose();
-    }
-  };
-
+  // Handle native dialog close event (ESC key)
   useEffect(() => {
-    if (isOpen) {
-      document.addEventListener('keydown', handleKeyDown);
-    }
+    const dialog = dialogRef.current;
+    if (!dialog) return;
 
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
+    const handleClose = () => {
+      if (onClose) {
+        onClose();
+      }
     };
-  }, [handleKeyDown, isOpen, onClose]);
+
+    dialog.addEventListener('close', handleClose);
+    return () => {
+      dialog.removeEventListener('close', handleClose);
+    };
+  }, [onClose]);
+
+  // Handle backdrop click when using showModal()
+  const handleDialogClick = (e: React.MouseEvent<HTMLDialogElement>) => {
+    const dialog = dialogRef.current;
+    if (!dialog || !onClose) return;
+
+    // Check if click was on the backdrop (outside dialog content)
+    const rect = dialog.getBoundingClientRect();
+    const didClickOutside =
+      e.clientX < rect.left ||
+      e.clientX > rect.right ||
+      e.clientY < rect.top ||
+      e.clientY > rect.bottom;
+
+    if (didClickOutside) {
+      onClose();
+    }
+  };
 
   return (
-    <>
-      {showOverlay && (
-        <div
-          data-testid="side-panel-overlay"
-          onClick={handleOverlayClick}
-          {...stylex.props(
-            sidePanelStyles.overlay,
-            isOpen ? sidePanelStyles.overlayVisible : sidePanelStyles.overlayHidden,
-          )}
-        />
+    <dialog
+      data-testid="side-panel"
+      onClick={handleDialogClick}
+      ref={dialogRef}
+      {...props}
+      {...stylex.props(
+        sidePanelStyles.base,
+        sidePanelStyles.size[size],
+        sidePanelStyles.position[position],
+        isOpen
+          ? sidePanelStyles.position[position === 'left' ? 'leftOpen' : 'rightOpen']
+          : sidePanelStyles.position[position === 'left' ? 'leftClosed' : 'rightClosed'],
+        shouldShowOverlay ? sidePanelStyles.withBackdrop : sidePanelStyles.withoutBackdrop,
       )}
-      <div
-        data-testid="side-panel"
-        {...props}
-        {...stylex.props(
-          sidePanelStyles.base,
-          sidePanelStyles.size[size],
-          sidePanelStyles.position[position],
-          isOpen
-            ? sidePanelStyles.position[position === 'left' ? 'leftOpen' : 'rightOpen']
-            : sidePanelStyles.position[position === 'left' ? 'leftClosed' : 'rightClosed'],
-        )}
-      >
-        {children}
-      </div>
-    </>
+    >
+      <div {...stylex.props(sidePanelStyles.content)}>{children}</div>
+    </dialog>
   );
 };

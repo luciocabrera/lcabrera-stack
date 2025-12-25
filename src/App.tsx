@@ -198,13 +198,13 @@ const App = () => {
           <div {...stylex.props(styles.subsection)}>
             <h3 {...stylex.props(styles.subsectionTitle)}>Positions & Sizes</h3>
             <div {...stylex.props(styles.buttonGrid)}>
-              <Button onClick={() => setIsLeftPanelOpen(true)}>
-                <MenuIcon style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }} />
+              <Button onClick={() => { setIsLeftPanelOpen(true); }}>
+                <MenuIcon style={{ height: '1rem', marginRight: '0.5rem', width: '1rem' }} />
                 Open Left Panel
               </Button>
-              <Button onClick={() => setIsRightPanelOpen(true)}>
+              <Button onClick={() => { setIsRightPanelOpen(true); }}>
                 Open Right Panel
-                <MenuIcon style={{ width: '1rem', height: '1rem', marginLeft: '0.5rem' }} />
+                <MenuIcon style={{ height: '1rem', marginLeft: '0.5rem', width: '1rem' }} />
               </Button>
             </div>
           </div>
@@ -214,7 +214,7 @@ const App = () => {
       {/* Side Panels */}
       <SidePanel
         isOpen={isLeftPanelOpen}
-        onClose={() => setIsLeftPanelOpen(false)}
+        onClose={() => { setIsLeftPanelOpen(false); }}
         position="left"
         size="md"
       >
@@ -227,8 +227,8 @@ const App = () => {
           <p>Press Escape or click the overlay to close.</p>
         </SidePanelBody>
         <SidePanelFooter>
-          <Button size="sm" width="full" onClick={() => setIsLeftPanelOpen(false)}>
-            <MenuCloseIcon style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }} />
+          <Button onClick={() => { setIsLeftPanelOpen(false); }} size="sm" width="full">
+            <MenuCloseIcon style={{ height: '1rem', marginRight: '0.5rem', width: '1rem' }} />
             Close
           </Button>
         </SidePanelFooter>
@@ -236,7 +236,7 @@ const App = () => {
 
       <SidePanel
         isOpen={isRightPanelOpen}
-        onClose={() => setIsRightPanelOpen(false)}
+        onClose={() => { setIsRightPanelOpen(false); }}
         position="right"
         size="lg"
       >
@@ -259,10 +259,10 @@ const App = () => {
         </SidePanelBody>
         <SidePanelFooter>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <Button size="sm" color="ghost" width="full" onClick={() => setIsRightPanelOpen(false)}>
+            <Button color="ghost" onClick={() => { setIsRightPanelOpen(false); }} size="sm" width="full">
               Cancel
             </Button>
-            <Button size="sm" width="full" onClick={() => setIsRightPanelOpen(false)}>
+            <Button onClick={() => { setIsRightPanelOpen(false); }} size="sm" width="full">
               Confirm
             </Button>
           </div>

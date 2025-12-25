@@ -1,33 +1,21 @@
+// styles
 import * as stylex from '@stylexjs/stylex';
 
 import { easing, shadows, transitions } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 
 const baseStyles = stylex.create({
-  overlay: {
-    transition: `opacity ${transitions.normal} ${easing.easeInOut}`,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    position: 'fixed',
-    zIndex: 1000,
-    bottom: 0,
-    left: 0,
-    right: 0,
-    top: 0,
-  },
+  dialog: {
+    margin: 0,
+    padding: 0,
+    // Reset default dialog styles
+    borderColor: 'transparent',
+    borderStyle: 'none',
+    borderWidth: 0,
 
-  overlayHidden: {
-    opacity: 0,
-    pointerEvents: 'none',
-  },
-
-  overlayVisible: {
-    opacity: 1,
-  },
-
-  panel: {
-    borderColor: colors.borderPrimary,
     overflow: 'hidden',
     transition: `transform ${transitions.normal} ${easing.easeInOut}`,
+    // Custom styles
     backgroundColor: colors.surfacePrimary,
     boxShadow: shadows.xl,
     display: 'flex',
@@ -35,7 +23,31 @@ const baseStyles = stylex.create({
     position: 'fixed',
     zIndex: 1001,
     bottom: 0,
+    height: '100vh',
+    maxHeight: 'none',
+    maxWidth: 'none',
     top: 0,
+  },
+
+  // Style the native backdrop
+  withBackdrop: {
+    '::backdrop': {
+      transition: `opacity ${transitions.normal} ${easing.easeInOut}`,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+  },
+
+  withoutBackdrop: {
+    '::backdrop': {
+      backgroundColor: 'transparent',
+    },
+  },
+
+  content: {
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+    width: '100%',
   },
 });
 
@@ -44,6 +56,7 @@ const positionVariants = stylex.create({
     borderRightStyle: 'solid',
     borderRightWidth: '1px',
     left: 0,
+    right: 'auto',
   },
 
   leftClosed: {
@@ -57,6 +70,7 @@ const positionVariants = stylex.create({
   right: {
     borderLeftStyle: 'solid',
     borderLeftWidth: '1px',
+    left: 'auto',
     right: 0,
   },
 
@@ -84,10 +98,10 @@ const sizeVariants = stylex.create({
 });
 
 export const sidePanelStyles = {
-  base: baseStyles.panel,
-  overlay: baseStyles.overlay,
-  overlayHidden: baseStyles.overlayHidden,
-  overlayVisible: baseStyles.overlayVisible,
+  base: baseStyles.dialog,
+  withBackdrop: baseStyles.withBackdrop,
+  withoutBackdrop: baseStyles.withoutBackdrop,
+  content: baseStyles.content,
   position: positionVariants,
   size: sizeVariants,
 };
