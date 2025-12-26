@@ -1,7 +1,9 @@
+import type { StyleXStyles } from '@stylexjs/stylex';
 import type { ComponentPropsWithoutRef } from 'react';
 
 export type ButtonProps = ComponentPropsWithoutRef<'button'> & {
   color?: ButtonColor;
+  customStylex?: StyleXStyles;
   isDisabled?: boolean;
   size?: ButtonSize;
   variant?: ButtonStyle;

@@ -7,6 +7,7 @@ import { buttonStyles } from './Button.stylex';
 export const Button = ({
   children,
   color = 'primary',
+  customStylex,
   isDisabled = false,
   size = 'md',
   type = 'button',
@@ -28,6 +29,7 @@ export const Button = ({
         buttonStyles.color[color],
         buttonStyles.style[variant],
         buttonStyles.width[width],
+        customStylex,
       )}
     >
       {children}

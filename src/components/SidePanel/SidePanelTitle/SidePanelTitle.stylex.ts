@@ -10,12 +10,12 @@ export const sidePanelTitleStyles = stylex.create({
     width: spacing.lg,
   },
   title: {
+    margin: 0,
+    gap: spacing.xs,
     alignItems: 'center',
     color: colors.textPrimary,
     display: 'flex',
     fontSize: typography.fontSizeXl,
     fontWeight: typography.fontWeightSemibold,
-    gap: spacing.xs,
-    margin: 0,
   },
 });
