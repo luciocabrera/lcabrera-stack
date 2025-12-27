@@ -3,6 +3,69 @@ import { useState } from 'react';
 
 import { styles } from './App.stylex';
 import { Button } from './components/Button/Button';
+import { VirtualizedTable } from './components/VirtualizedTable';
+// ...existing code...
+// Generate mock data for the table
+const columnDefs = Array.from({ length: 20 }, (_, i) => ({
+  key: `col${i + 1}`,
+  label: `Column ${i + 1}`,
+  type: i % 5 === 0
+    ? 'number'
+    : i % 5 === 1
+    ? 'string'
+    : i % 5 === 2
+    ? 'boolean'
+    : i % 5 === 3
+    ? 'date'
+    : 'currency',
+}));
+
+function randomCurrency() {
+  return (Math.random() * 10_000).toFixed(2);
+}
+
+function randomDate() {
+  const start = new Date(2010, 0, 1).getTime();
+  const end = new Date(2030, 0, 1).getTime();
+  return new Date(start + Math.random() * (end - start));
+}
+
+function randomString(length: number) {
+  const chars = 'abcdefghijklmnopqrstuvwxyz';
+  return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+}
+
+const tableData = Array.from({ length: 10_000 }, (_, rowIdx) => {
+  const row: Record<string, any> = {};
+  for (const [colIdx, col] of columnDefs.entries()) {
+    switch (col.type) {
+      case 'boolean': {
+        row[col.key] = Math.random() > 0.5;
+        break;
+      }
+      case 'currency': {
+        row[col.key] = `$${randomCurrency()}`;
+        break;
+      }
+      case 'date': {
+        row[col.key] = randomDate().toISOString().slice(0, 10);
+        break;
+      }
+      case 'number': {
+        row[col.key] = rowIdx * colIdx;
+        break;
+      }
+      case 'string': {
+        row[col.key] = randomString(8);
+        break;
+      }
+      default: {
+        row[col.key] = '';
+      }
+    }
+  }
+  return row;
+});
 import {
   Card,
   CardBody,
@@ -156,6 +219,21 @@ const App = () => {
               </Card>
             </div>
           </div>
+
+          {/* Table Showcase Section */}
+          <section {...stylex.props(styles.section)}>
+            <h2 {...stylex.props(styles.sectionTitle)}>Table</h2>
+            <div style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.04)', maxWidth: '100%', overflowX: 'auto', width: '100%' }}>
+              {/* Virtualized Table Component */}
+              <VirtualizedTable
+                columns={columnDefs.map(col => ({ key: col.key, label: col.label, minWidth: 120 }))}
+                data={tableData}
+                height={400}
+                overscan={6}
+                rowHeight={32}
+              />
+            </div>
+          </section>
 
           <div {...stylex.props(styles.subsection)}>
             <h3 {...stylex.props(styles.subsectionTitle)}>Colored Cards</h3>
