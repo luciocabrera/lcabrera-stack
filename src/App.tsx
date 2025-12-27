@@ -3,7 +3,7 @@ import { useState } from 'react';
 
 import { styles } from './App.stylex';
 import { Button } from './components/Button/Button';
-import { VirtualizedTable } from './components/VirtualizedTable';
+import { VirtualizedTable } from './components/Table';
 // ...existing code...
 // Generate mock data for the table
 const columnDefs = Array.from({ length: 20 }, (_, i) => ({

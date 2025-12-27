@@ -3,25 +3,25 @@ import { useRef } from 'react';
 
 import type { VirtualizedTableProps } from './VirtualizedTable.types';
 
-import { Table } from '../Table';
-import { VirtualizedTableBody } from './components/VirtualizedTableBody';
-import { VirtualizedTableHeader } from './components/VirtualizedTableHeader';
+import { Table } from './Table';
+import { TableBody } from './TableBody';
+import { TableHeader } from './TableHeader';
 import { styles } from './VirtualizedTable.stylex';
 
-export function VirtualizedTable<T extends Record<string, unknown>>({
+export const VirtualizedTable = <T extends Record<string, unknown>>({
   columns,
   data,
   height = 400,
   overscan = 6,
   rowHeight = 32,
-}: VirtualizedTableProps<T>) {
+}: VirtualizedTableProps<T>) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   return (
     <div ref={containerRef} {...stylex.props(styles.container(height))}>
       <Table density="compact" isBordered isStriped>
-        <VirtualizedTableHeader columns={columns} />
-        <VirtualizedTableBody
+        <TableHeader columns={columns} />
+        <TableBody
           columns={columns}
           data={data}
           overscan={overscan}
@@ -31,4 +31,4 @@ export function VirtualizedTable<T extends Record<string, unknown>>({
       </Table>
     </div>
   );
-}
+};

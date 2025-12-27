@@ -1,13 +1,18 @@
 import * as stylex from '@stylexjs/stylex';
 
-export const tableBodyStyles = stylex.create({
-  viewport: {
+export const styles = stylex.create({
+  body: (height: number) => ({
+    display: 'grid',
     position: 'relative',
-    overflowY: 'auto',
-    width: '100%',
-  },
-  spacer: {
-    position: 'relative',
-    width: '100%',
-  },
+    height,
+  }),
+  spacerCell: (height: number) => ({
+    padding: 0,
+    borderStyle: 'none',
+    borderWidth: 0,
+    height,
+  }),
+  spacerRow: (height: number) => ({
+    height,
+  }),
 });

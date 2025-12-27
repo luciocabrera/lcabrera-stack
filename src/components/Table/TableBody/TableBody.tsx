@@ -1,58 +1,79 @@
 import * as stylex from '@stylexjs/stylex';
+import { useEffect, useState } from 'react';
 
 import type { TableBodyProps } from './TableBody.types';
 
-import { TableRow } from '../TableRow/TableRow';
-import { tableBodyStyles } from './TableBody.stylex';
+import { TableCell } from '../TableCell';
+import { TableRow } from '../TableRow';
+import { styles } from './TableBody.stylex';
 
-const DEFAULT_ROW_HEIGHT = 48;
+export const TableBody = <T extends Record<string, unknown>>({
+  columns,
+  data,
+  overscan,
+  rowHeight,
+  tableContainerRef,
+}: TableBodyProps<T>) => {
+  const [scrollTop, setScrollTop] = useState(0);
+  const [containerHeight, setContainerHeight] = useState(400);
 
-export function TableBody<Row>(props: TableBodyProps<Row>) {
-  const {
-    customStylex,
-    emptyState,
-    getRowKey,
-    isStriped = false,
-    renderRow,
-    rowHeight = DEFAULT_ROW_HEIGHT,
-    rows,
-    ...rest
-  } = props;
+  useEffect(() => {
+    const container = tableContainerRef.current;
 
-  if (!rows || rows.length === 0) {
-    return (
-      <tbody
-        data-testid="table-body-empty"
-        {...rest}
-        {...stylex.props(tableBodyStyles.viewport, customStylex)}
-      >
-        <tr>
-          <td colSpan={1000}>{emptyState}</td>
-        </tr>
-      </tbody>
-    );
-  }
+    function updateHeight() {
+      setContainerHeight(container?.offsetHeight ?? 400);
+    }
 
-  const safeRowHeight = Math.max(1, rowHeight);
+    const handleScroll = () => {
+      setScrollTop(container?.scrollTop ?? 0);
+    };
+
+    updateHeight();
+    container?.addEventListener('scroll', handleScroll);
+    window.addEventListener('resize', updateHeight);
+
+    return () => {
+      container?.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', updateHeight);
+    };
+  }, [tableContainerRef]);
+
+  const totalRows = data.length;
+  const visibleCount = Math.ceil(containerHeight / rowHeight);
+  const startIndex = Math.max(0, Math.floor(scrollTop / rowHeight) - overscan);
+  const endIndex = Math.min(totalRows, startIndex + visibleCount + overscan * 2);
+  const offsetY = startIndex * rowHeight;
+  const visibleRows = data.slice(startIndex, endIndex);
+  const totalHeight = totalRows * rowHeight;
+  const bottomSpacerHeight = totalHeight - (offsetY + visibleRows.length * rowHeight);
+
   return (
-    <tbody
-      data-testid="table-body"
-      {...rest}
-      {...stylex.props(tableBodyStyles.viewport, customStylex)}
-    >
-      {rows.map((row, index) => {
-        const key = getRowKey ? getRowKey(row, index) : index;
-        const isRowStriped = isStriped && index % 2 === 1;
+    <tbody data-testid="table-body" {...stylex.props(styles.body(totalHeight))}>
+      {/* Top spacer row */}
+      {offsetY > 0 && (
+        <tr aria-hidden="true" {...stylex.props(styles.spacerRow(offsetY))}>
+          <td colSpan={columns.length} {...stylex.props(styles.spacerCell(offsetY))} />
+        </tr>
+      )}
+      {visibleRows.map((row, index) => {
+        const rowIndex = startIndex + index;
+        const isStriped = rowIndex % 2 === 1;
         return (
-          <TableRow
-            isStriped={isRowStriped}
-            key={key}
-            style={{ height: safeRowHeight, minHeight: safeRowHeight }}
-          >
-            {renderRow(row, index)}
+          <TableRow isStriped={isStriped} key={rowIndex}>
+            {columns.map((col) => (
+              <TableCell key={col.key} minWidth={col.minWidth ?? 120}>
+                {col.key in row ? String(row[col.key]) : ''}
+              </TableCell>
+            ))}
           </TableRow>
         );
       })}
+      {/* Bottom spacer row */}
+      {totalRows > 0 && bottomSpacerHeight > 0 && (
+        <tr aria-hidden="true" {...stylex.props(styles.spacerRow(bottomSpacerHeight))}>
+          <td colSpan={columns.length} {...stylex.props(styles.spacerCell(bottomSpacerHeight))} />
+        </tr>
+      )}
     </tbody>
   );
-}
+};

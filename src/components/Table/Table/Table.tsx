@@ -4,7 +4,7 @@ import type { TableProps } from './Table.types';
 
 import { tableStyles } from './Table.stylex';
 
-export function Table(props: TableProps) {
+export const Table = (props: TableProps) => {
   const {
     children,
     customStylex,
@@ -30,4 +30,4 @@ export function Table(props: TableProps) {
       {children}
     </table>
   );
-}
+};

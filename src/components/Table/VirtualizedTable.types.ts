@@ -1,4 +1,9 @@
-import type { VirtualizedTableColumn } from './types';
+export type VirtualizedTableColumn = {
+  key: string;
+  label: string;
+  minWidth?: number;
+};
+
 
 export type VirtualizedTableProps<T extends Record<string, unknown>> = {
   columns: VirtualizedTableColumn[];
