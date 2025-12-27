@@ -1,0 +1,1 @@
+export { SortAscIcon } from './SortAscIcon';

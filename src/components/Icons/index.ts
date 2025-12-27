@@ -1,7 +1,12 @@
+export { CheckIcon } from './CheckIcon';
 export { ErrorIcon } from './ErrorIcon';
 export { InfoIcon } from './InfoIcon';
 export { MenuCloseIcon } from './MenuCloseIcon';
 export { MenuIcon } from './MenuIcon';
+export { MoreVerticalIcon } from './MoreVerticalIcon';
 export { SettingsIcon } from './SettingsIcon';
+export { SortAscIcon } from './SortAscIcon';
+export { SortDescIcon } from './SortDescIcon';
+export { SortNeutralIcon } from './SortNeutralIcon';
 export { SuccessIcon } from './SuccessIcon';
 export { WarningIcon } from './WarningIcon';

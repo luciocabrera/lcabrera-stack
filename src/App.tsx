@@ -1,7 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 
-import type { VirtualizedTableColumn } from './components/Table';
+import type { VirtualizedTableColumn } from './components/Table/VirtualizedTable.types';
 
 import { styles } from './App.stylex';
 import { Button } from './components/Button/Button';

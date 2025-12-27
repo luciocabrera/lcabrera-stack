@@ -1,0 +1,1 @@
+export { MoreVerticalIcon } from './MoreVerticalIcon';
