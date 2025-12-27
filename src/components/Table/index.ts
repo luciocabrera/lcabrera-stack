@@ -1,2 +1,16 @@
+export { Table } from './Table';
+export type { TableCustomStylex, TableDensity, TableProps } from './Table/Table.types';
+export { TableBody } from './TableBody';
+export type { TableBodyProps, VirtualizedTableColumn } from './TableBody/TableBody.types';
+export { TableBodyCell } from './TableBodyCell';
+export type { TableBodyCellDataType, TableBodyCellProps } from './TableBodyCell/TableBodyCell.types';
+export { TableCell } from './TableCell';
+export type { TableCellProps } from './TableCell/TableCell.types';
+export { TableHeader } from './TableHeader';
+export type { TableHeaderProps } from './TableHeader/TableHeader.types';
+export { TableHeaderCell } from './TableHeaderCell';
+export type { SortDirection, TableHeaderCellProps } from './TableHeaderCell/TableHeaderCell.types';
+export { TableRow } from './TableRow';
+export type { TableRowProps } from './TableRow/TableRow.types';
 export { VirtualizedTable } from './VirtualizedTable';
 export type { VirtualizedTableProps } from './VirtualizedTable.types';

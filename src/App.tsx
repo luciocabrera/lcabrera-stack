@@ -1,15 +1,15 @@
 import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 
+import type { VirtualizedTableColumn } from './components/Table';
+
 import { styles } from './App.stylex';
 import { Button } from './components/Button/Button';
 import { VirtualizedTable } from './components/Table';
-// ...existing code...
+
 // Generate mock data for the table
-const columnDefs = Array.from({ length: 20 }, (_, i) => ({
-  key: `col${i + 1}`,
-  label: `Column ${i + 1}`,
-  type: i % 5 === 0
+const columnDefs: VirtualizedTableColumn[] = Array.from({ length: 20 }, (_, i) => ({
+  dataType: i % 5 === 0
     ? 'number'
     : i % 5 === 1
     ? 'string'
@@ -18,6 +18,8 @@ const columnDefs = Array.from({ length: 20 }, (_, i) => ({
     : i % 5 === 3
     ? 'date'
     : 'currency',
+  key: `col${i + 1}`,
+  label: `Column ${i + 1}`,
 }));
 
 function randomCurrency() {
@@ -36,9 +38,9 @@ function randomString(length: number) {
 }
 
 const tableData = Array.from({ length: 10_000 }, (_, rowIdx) => {
-  const row: Record<string, any> = {};
+  const row: Record<string, unknown> = {};
   for (const [colIdx, col] of columnDefs.entries()) {
-    switch (col.type) {
+    switch (col.dataType) {
       case 'boolean': {
         row[col.key] = Math.random() > 0.5;
         break;

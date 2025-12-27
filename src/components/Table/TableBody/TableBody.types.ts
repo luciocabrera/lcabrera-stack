@@ -23,6 +23,7 @@ export type TableBodyProps<T extends Record<string, unknown>> =
   };
 
 export type VirtualizedTableColumn = {
+  dataType?: 'boolean' | 'currency' | 'date' | 'number' | 'string';
   key: string;
   label: string;
   minWidth?: number;

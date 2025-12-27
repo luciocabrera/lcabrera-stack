@@ -13,12 +13,11 @@ export const Table = (props: TableProps) => {
     isStriped = false,
     ...rest
   } = props;
-  // Only set data-striped if boolean
-  const dataStriped = typeof isStriped === 'boolean' ? { 'data-striped': String(isStriped) } : {};
+
   return (
     <table
+      data-striped={isStriped}
       data-testid="table"
-      {...dataStriped}
       {...rest}
       {...stylex.props(
         tableStyles.base,

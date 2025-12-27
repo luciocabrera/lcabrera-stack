@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 import type { TableBodyProps } from './TableBody.types';
 
-import { TableCell } from '../TableCell';
+import { TableBodyCell } from '../TableBodyCell';
 import { TableRow } from '../TableRow';
 import { styles } from './TableBody.stylex';
 
@@ -61,9 +61,12 @@ export const TableBody = <T extends Record<string, unknown>>({
         return (
           <TableRow isStriped={isStriped} key={rowIndex}>
             {columns.map((col) => (
-              <TableCell key={col.key} minWidth={col.minWidth ?? 120}>
-                {col.key in row ? String(row[col.key]) : ''}
-              </TableCell>
+              <TableBodyCell
+                dataType={col.dataType}
+                key={col.key}
+                minWidth={col.minWidth ?? 120}
+                value={col.key in row ? row[col.key] : ''}
+              />
             ))}
           </TableRow>
         );
