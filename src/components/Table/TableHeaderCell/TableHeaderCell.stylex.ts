@@ -15,6 +15,9 @@ export const tableHeaderCellStyles = stylex.create({
     display: 'flex',
     fontSize: typography.fontSizeSm,
     fontWeight: typography.fontWeightSemibold,
+    borderRightColor: colors.borderSecondary,
+    borderRightStyle: 'solid',
+    borderRightWidth: 1,
     minWidth: 0,
   },
   content: {

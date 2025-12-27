@@ -17,6 +17,7 @@ export const tableRowStyles = stylex.create({
     width: '100%',
   },
   header: {
+    padding: 0,
     backgroundColor: colors.surfaceSecondary,
   },
   striped: {
