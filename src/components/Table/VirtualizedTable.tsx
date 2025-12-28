@@ -18,15 +18,8 @@ export const VirtualizedTable = <T extends Record<string, unknown>>({
   const containerRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div
-      ref={containerRef}
-      {...stylex.props(styles.container(height))}
-    >
-      <Table
-        density='compact'
-        isBordered
-        isStriped
-      >
+    <div ref={containerRef} {...stylex.props(styles.container(height))}>
+      <Table density='compact' isBordered isStriped>
         <TableHeader columns={columns} />
         <TableBody
           columns={columns}

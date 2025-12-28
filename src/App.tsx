@@ -9,7 +9,9 @@ import { VirtualizedTable } from './components/Table';
 
 // Generate mock data for the table
 const columnDefs: VirtualizedTableColumn[] = Array.from(
-  { length: 20 },
+  {
+    length: 20,
+  },
   (_, i) => ({
     dataType:
       i % 5 === 0
@@ -39,42 +41,49 @@ function randomDate() {
 function randomString(length: number) {
   const chars = 'abcdefghijklmnopqrstuvwxyz';
   return Array.from(
-    { length },
+    {
+      length,
+    },
     () => chars[Math.floor(Math.random() * chars.length)],
   ).join('');
 }
 
-const tableData = Array.from({ length: 10_000 }, (_, rowIdx) => {
-  const row: Record<string, unknown> = {};
-  for (const [colIdx, col] of columnDefs.entries()) {
-    switch (col.dataType) {
-      case 'boolean': {
-        row[col.key] = Math.random() > 0.5;
-        break;
-      }
-      case 'currency': {
-        row[col.key] = `$${randomCurrency()}`;
-        break;
-      }
-      case 'date': {
-        row[col.key] = randomDate().toISOString().slice(0, 10);
-        break;
-      }
-      case 'number': {
-        row[col.key] = rowIdx * colIdx;
-        break;
-      }
-      case 'string': {
-        row[col.key] = randomString(8);
-        break;
-      }
-      default: {
-        row[col.key] = '';
+const tableData = Array.from(
+  {
+    length: 10_000,
+  },
+  (_, rowIdx) => {
+    const row: Record<string, unknown> = {};
+    for (const [colIdx, col] of columnDefs.entries()) {
+      switch (col.dataType) {
+        case 'boolean': {
+          row[col.key] = Math.random() > 0.5;
+          break;
+        }
+        case 'currency': {
+          row[col.key] = `$${randomCurrency()}`;
+          break;
+        }
+        case 'date': {
+          row[col.key] = randomDate().toISOString().slice(0, 10);
+          break;
+        }
+        case 'number': {
+          row[col.key] = rowIdx * colIdx;
+          break;
+        }
+        case 'string': {
+          row[col.key] = randomString(8);
+          break;
+        }
+        default: {
+          row[col.key] = '';
+        }
       }
     }
-  }
-  return row;
-});
+    return row;
+  },
+);
 import {
   Card,
   CardBody,
@@ -116,10 +125,7 @@ const App = () => {
       <div {...stylex.props(styles.container)}>
         <header {...stylex.props(styles.header)}>
           <h1 {...stylex.props(styles.title)}>Design System Showcase</h1>
-          <Button
-            color='ghost'
-            onClick={handleToggleTheme}
-          >
+          <Button color='ghost' onClick={handleToggleTheme}>
             {isDarkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
           </Button>
         </header>
@@ -198,19 +204,13 @@ const App = () => {
                   <p>This card includes a footer section.</p>
                 </CardBody>
                 <CardFooter>
-                  <Button
-                    size='sm'
-                    width='full'
-                  >
+                  <Button size='sm' width='full'>
                     Action
                   </Button>
                 </CardFooter>
               </Card>
 
-              <Card
-                elevation='lg'
-                padding='lg'
-              >
+              <Card elevation='lg' padding='lg'>
                 <CardTitle>Custom Padding</CardTitle>
                 <CardDescription>
                   This card has custom padding applied.
@@ -222,10 +222,7 @@ const App = () => {
           <div {...stylex.props(styles.subsection)}>
             <h3 {...stylex.props(styles.subsectionTitle)}>Interactive Cards</h3>
             <div {...stylex.props(styles.cardGrid)}>
-              <Card
-                elevation='sm'
-                interactive='hoverable'
-              >
+              <Card elevation='sm' interactive='hoverable'>
                 <CardBody>
                   <CardTitle>Hoverable Card</CardTitle>
                   <CardDescription>
@@ -281,10 +278,7 @@ const App = () => {
           <div {...stylex.props(styles.subsection)}>
             <h3 {...stylex.props(styles.subsectionTitle)}>Colored Cards</h3>
             <div {...stylex.props(styles.cardGrid)}>
-              <Card
-                color='primary'
-                elevation='sm'
-              >
+              <Card color='primary' elevation='sm'>
                 <CardBody>
                   <CardTitle icon={<InfoIcon />}>Primary Card</CardTitle>
                   <CardDescription>
@@ -293,10 +287,7 @@ const App = () => {
                 </CardBody>
               </Card>
 
-              <Card
-                color='success'
-                elevation='sm'
-              >
+              <Card color='success' elevation='sm'>
                 <CardBody>
                   <CardTitle icon={<SuccessIcon />}>Success Card</CardTitle>
                   <CardDescription>
@@ -305,20 +296,14 @@ const App = () => {
                 </CardBody>
               </Card>
 
-              <Card
-                color='warning'
-                elevation='sm'
-              >
+              <Card color='warning' elevation='sm'>
                 <CardBody>
                   <CardTitle icon={<WarningIcon />}>Warning Card</CardTitle>
                   <CardDescription>Use this for warnings.</CardDescription>
                 </CardBody>
               </Card>
 
-              <Card
-                color='error'
-                elevation='sm'
-              >
+              <Card color='error' elevation='sm'>
                 <CardBody>
                   <CardTitle icon={<ErrorIcon />}>Error Card</CardTitle>
                   <CardDescription>
@@ -399,7 +384,11 @@ const App = () => {
             width='full'
           >
             <MenuCloseIcon
-              style={{ height: '1rem', marginRight: '0.5rem', width: '1rem' }}
+              style={{
+                height: '1rem',
+                marginRight: '0.5rem',
+                width: '1rem',
+              }}
             />
             Close
           </Button>
@@ -426,13 +415,22 @@ const App = () => {
               </CardDescription>
             </CardBody>
           </Card>
-          <div style={{ marginTop: '1rem' }}>
+          <div
+            style={{
+              marginTop: '1rem',
+            }}
+          >
             <p>This right panel is larger (lg size).</p>
             <p>You can put any content here, including other components.</p>
           </div>
         </SidePanelBody>
         <SidePanelFooter>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <div
+            style={{
+              display: 'flex',
+              gap: '0.5rem',
+            }}
+          >
             <Button
               color='ghost'
               onClick={() => {

@@ -7,13 +7,5 @@
   "arrowParens": "always",
   "bracketSpacing": true,
   "endOfLine": "lf",
-  "tabWidth": 2,
-  "overrides": [
-    {
-      "files": "*.tsx",
-      "options": {
-        "printWidth": 1
-      }
-    }
-  ]
+  "tabWidth": 2
 }

@@ -9,9 +9,6 @@ export const SortDescIcon = (props: IconProps) => (
     xmlns='http://www.w3.org/2000/svg'
     {...props}
   >
-    <path
-      d='M6 9L2 4H10L6 9Z'
-      fill='currentColor'
-    />
+    <path d='M6 9L2 4H10L6 9Z' fill='currentColor' />
   </svg>
 );

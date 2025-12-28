@@ -28,7 +28,10 @@ export const TableHeaderCell = ({
 
   return (
     <th
-      style={{ minWidth, width }}
+      style={{
+        minWidth,
+        width,
+      }}
       {...rest}
       {...stylex.props(
         tableHeaderCellStyles.base,

@@ -20,7 +20,10 @@ export const TableBodyCell = ({
 
   return (
     <td
-      style={{ minWidth, width }}
+      style={{
+        minWidth,
+        width,
+      }}
       {...rest}
       {...stylex.props(
         tableBodyCellStyles.base,
@@ -29,7 +32,10 @@ export const TableBodyCell = ({
         customStylex,
       )}
     >
-      {renderCellContent({ dataType, value })}
+      {renderCellContent({
+        dataType,
+        value,
+      })}
     </td>
   );
 };

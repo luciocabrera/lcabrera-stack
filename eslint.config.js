@@ -67,12 +67,6 @@ export default defineConfig(
     rules: {
       // Conflicts: Ensure core sorting is off for perfectionist
       'sort-imports': 'off',
-      // JSX formatting - one prop per line with proper indentation
-      'react/jsx-max-props-per-line': ['error', { maximum: 1 }],
-      'react/jsx-first-prop-new-line': ['error', 'multiline-multiprop'],
-      'react/jsx-closing-bracket-location': ['error', 'line-aligned'],
-      'react/jsx-indent': ['error', 2],
-      'react/jsx-indent-props': ['error', 2],
 
       // Stronger TypeScript enforcement
       '@typescript-eslint/consistent-type-imports': [
