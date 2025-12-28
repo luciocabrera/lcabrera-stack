@@ -1,6 +1,6 @@
 import type { ComponentPropsWithoutRef } from 'react';
 
-import type { TableCustomStylex } from '../Table/Table.types';
+import type { TableCustomStylex } from '../TableBase/TableBase.types';
 
 export type SortDirection = 'asc' | 'desc' | undefined;
 

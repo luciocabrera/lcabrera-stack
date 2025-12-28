@@ -1,11 +1,11 @@
 import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 
-import type { VirtualizedTableColumn } from './components/Table/VirtualizedTable.types';
+import type { VirtualizedTableColumn } from './components/Table/Table.types';
 
 import { styles } from './App.stylex';
 import { Button } from './components/Button';
-import { VirtualizedTable } from './components/Table';
+import { Table } from './components/Table';
 
 // Generate mock data for the table
 const columnDefs: VirtualizedTableColumn[] = Array.from(
@@ -261,7 +261,7 @@ const App = () => {
               }}
             >
               {/* Virtualized Table Component */}
-              <VirtualizedTable
+              <Table
                 columns={columnDefs.map((col) => ({
                   key: col.key,
                   label: col.label,

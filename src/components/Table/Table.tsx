@@ -1,25 +1,25 @@
 import * as stylex from '@stylexjs/stylex';
 import { useRef } from 'react';
 
-import type { VirtualizedTableProps } from './VirtualizedTable.types';
+import type { TableProps } from './Table.types';
 
-import { Table } from './Table';
+import { styles } from './Table.stylex';
+import { TableBase } from './TableBase';
 import { TableBody } from './TableBody';
 import { TableHeader } from './TableHeader';
-import { styles } from './VirtualizedTable.stylex';
 
-export const VirtualizedTable = <T extends Record<string, unknown>>({
+export const Table = <T extends Record<string, unknown>>({
   columns,
   data,
   height = 400,
   overscan = 6,
   rowHeight = 32,
-}: VirtualizedTableProps<T>) => {
+}: TableProps<T>) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   return (
     <div ref={containerRef} {...stylex.props(styles.container(height))}>
-      <Table density='compact' isBordered isStriped>
+      <TableBase density='compact' isBordered isStriped>
         <TableHeader columns={columns} />
         <TableBody
           columns={columns}
@@ -28,7 +28,7 @@ export const VirtualizedTable = <T extends Record<string, unknown>>({
           rowHeight={rowHeight}
           tableContainerRef={containerRef}
         />
-      </Table>
+      </TableBase>
     </div>
   );
 };

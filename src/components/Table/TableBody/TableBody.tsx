@@ -1,5 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
-import { useEffect, useState } from 'react';
+
+import { useVirtualization } from '@/hooks/useVirtualization';
 
 import type { TableBodyProps } from './TableBody.types';
 
@@ -14,42 +15,21 @@ export const TableBody = <T extends Record<string, unknown>>({
   rowHeight,
   tableContainerRef,
 }: TableBodyProps<T>) => {
-  const [scrollTop, setScrollTop] = useState(0);
-  const [containerHeight, setContainerHeight] = useState(400);
+  const {
+    bottomSpacerHeight,
+    endIndex,
+    offsetY,
+    startIndex,
+    totalHeight,
+  } = useVirtualization({
+    containerRef: tableContainerRef,
+    itemHeight: rowHeight,
+    overscan,
+    totalItems: data.length,
+  });
 
-  useEffect(() => {
-    const container = tableContainerRef.current;
-
-    function updateHeight() {
-      setContainerHeight(container?.offsetHeight ?? 400);
-    }
-
-    const handleScroll = () => {
-      setScrollTop(container?.scrollTop ?? 0);
-    };
-
-    updateHeight();
-    container?.addEventListener('scroll', handleScroll);
-    window.addEventListener('resize', updateHeight);
-
-    return () => {
-      container?.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', updateHeight);
-    };
-  }, [tableContainerRef]);
-
-  const totalRows = data.length;
-  const visibleCount = Math.ceil(containerHeight / rowHeight);
-  const startIndex = Math.max(0, Math.floor(scrollTop / rowHeight) - overscan);
-  const endIndex = Math.min(
-    totalRows,
-    startIndex + visibleCount + overscan * 2,
-  );
-  const offsetY = startIndex * rowHeight;
   const visibleRows = data.slice(startIndex, endIndex);
-  const totalHeight = totalRows * rowHeight;
-  const bottomSpacerHeight =
-    totalHeight - (offsetY + visibleRows.length * rowHeight);
+  const totalRows = data.length;
 
   return (
     <tbody data-testid='table-body' {...stylex.props(styles.body(totalHeight))}>

@@ -5,6 +5,13 @@ import type {
 } from '@stylexjs/stylex';
 import type { ComponentPropsWithoutRef } from 'react';
 
+export type TableBaseProps = ComponentPropsWithoutRef<'table'> & {
+  customStylex?: TableCustomStylex;
+  density?: TableDensity;
+  isBordered?: boolean;
+  isStriped?: boolean;
+};
+
 export type TableCustomStylex = StyleXArray<
   | boolean
   | CompiledStyles
@@ -14,10 +21,3 @@ export type TableCustomStylex = StyleXArray<
 >;
 
 export type TableDensity = 'comfortable' | 'compact';
-
-export type TableProps = ComponentPropsWithoutRef<'div'> & {
-  customStylex?: TableCustomStylex;
-  density?: TableDensity;
-  isBordered?: boolean;
-  isStriped?: boolean;
-};

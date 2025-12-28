@@ -1,10 +1,10 @@
 import * as stylex from '@stylexjs/stylex';
 
-import type { TableProps } from './Table.types';
+import type { TableBaseProps } from './TableBase.types';
 
-import { tableStyles } from './Table.stylex';
+import { tableStyles } from './TableBase.stylex';
 
-export const Table = (props: TableProps) => {
+export const TableBase = (props: TableBaseProps) => {
   const {
     children,
     customStylex,
