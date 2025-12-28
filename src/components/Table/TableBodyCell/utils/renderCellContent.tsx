@@ -7,14 +7,14 @@ import type { TableColumnDataType } from '../../Table.types';
 import { tableBodyCellStyles } from '../TableBodyCell.stylex';
 
 type RenderCellContentArgs = {
-  columnLabel?: string;
   dataType: TableColumnDataType;
+  label?: string;
   value: unknown;
 };
 
 export const renderCellContent = ({
-  columnLabel,
   dataType,
+  label: columnLabel,
   value,
 }: RenderCellContentArgs) => {
   switch (dataType) {

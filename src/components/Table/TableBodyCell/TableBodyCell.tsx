@@ -6,9 +6,9 @@ import { tableBodyCellStyles } from './TableBodyCell.stylex';
 import { detectDataType, renderCellContent } from './utils';
 
 export const TableBodyCell = ({
-  columnLabel,
   customStylex,
   dataType: dataTypeProp,
+  label,
   minWidth,
   value,
   width,
@@ -30,8 +30,8 @@ export const TableBodyCell = ({
       )}
     >
       {renderCellContent({
-        columnLabel,
         dataType,
+        label,
         value,
       })}
     </td>
