@@ -7,6 +7,19 @@ import { styles } from './App.stylex';
 import { Button } from './components/Button';
 import { Table } from './components/Table';
 
+function mulberry32(seed: number) {
+  let value = seed;
+  return () => {
+    value |= 0;
+    value = (value + 0x6d2b79f5) | 0;
+    let t = Math.imul(value ^ (value >>> 15), 1 | value);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+const rng = mulberry32(123456789);
+
 // Generate mock data for the table
 const columnDefs: TableColumn[] = Array.from(
   {
@@ -29,13 +42,13 @@ const columnDefs: TableColumn[] = Array.from(
 );
 
 function randomCurrency() {
-  return (Math.random() * 10_000).toFixed(2);
+  return (rng() * 10_000).toFixed(2);
 }
 
 function randomDate() {
   const start = new Date(2010, 0, 1).getTime();
   const end = new Date(2030, 0, 1).getTime();
-  return new Date(start + Math.random() * (end - start));
+  return new Date(start + rng() * (end - start));
 }
 
 function randomString(length: number) {
@@ -44,7 +57,7 @@ function randomString(length: number) {
     {
       length,
     },
-    () => chars[Math.floor(Math.random() * chars.length)],
+    () => chars[Math.floor(rng() * chars.length)],
   ).join('');
 }
 
@@ -57,7 +70,7 @@ const tableData = Array.from(
     for (const [colIdx, col] of columnDefs.entries()) {
       switch (col.dataType) {
         case 'boolean': {
-          row[col.key] = Math.random() > 0.5;
+          row[col.key] = rng() > 0.5;
           break;
         }
         case 'currency': {

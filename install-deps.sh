@@ -10,7 +10,10 @@ echo "📦 Installing production dependencies..."
 yarn add \
   react \
   react-dom \
-  @stylexjs/stylex
+  @stylexjs/stylex \
+  @react-router/node \
+  @react-router/serve \
+  react-router
 
 echo ""
 echo "🛠️  Installing development dependencies..."
@@ -38,7 +41,9 @@ yarn add -D \
   eslint-plugin-react-dom \
   @stylexjs/unplugin \
   unplugin \
-  eslint-plugin-react
+  eslint-plugin-react \
+  @react-router/dev \
+  vite-plugin-babel
 
 echo ""
 echo "✅ All dependencies installed successfully!"
