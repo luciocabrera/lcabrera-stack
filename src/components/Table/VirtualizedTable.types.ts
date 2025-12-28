@@ -1,4 +1,9 @@
-import type { VirtualizedTableColumn } from './TableBody/TableBody.types';
+export type VirtualizedTableColumn = {
+  dataType?: 'boolean' | 'currency' | 'date' | 'number' | 'string';
+  key: string;
+  label: string;
+  minWidth?: number;
+};
 
 export type VirtualizedTableProps<T extends Record<string, unknown>> = {
   columns: VirtualizedTableColumn[];
@@ -7,5 +12,3 @@ export type VirtualizedTableProps<T extends Record<string, unknown>> = {
   overscan?: number;
   rowHeight?: number;
 };
-
-export { type VirtualizedTableColumn } from './TableBody/TableBody.types';

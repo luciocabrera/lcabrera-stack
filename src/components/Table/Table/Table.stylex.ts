@@ -1,21 +1,14 @@
 import * as stylex from '@stylexjs/stylex';
 
-import {
-  borderRadius,
-  shadows,
-  spacing,
-} from '@/design-system/tokens/base.stylex';
+import { spacing } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 
 const baseStyles = stylex.create({
   table: {
-    borderColor: colors.borderPrimary,
-    borderRadius: borderRadius.lg,
-    borderStyle: 'solid',
-    borderWidth: '1px',
     overflow: 'visible',
     backgroundColor: colors.surfacePrimary,
-    boxShadow: shadows.sm,
+    borderCollapse: 'separate',
+    borderSpacing: 0,
     display: 'table',
     flexDirection: 'column',
     minWidth: 0,
@@ -26,7 +19,6 @@ const baseStyles = stylex.create({
 const tableVariants = stylex.create({
   borderless: {
     borderWidth: 0,
-    boxShadow: shadows.none,
   },
 });
 
