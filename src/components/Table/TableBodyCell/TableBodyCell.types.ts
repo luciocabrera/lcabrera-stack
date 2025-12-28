@@ -10,6 +10,7 @@ export type TableBodyCellDataType =
   | 'string';
 
 export type TableBodyCellProps = ComponentPropsWithoutRef<'td'> & {
+  columnLabel?: string;
   customStylex?: TableCustomStylex;
   dataType?: TableBodyCellDataType;
   minWidth?: number | string;

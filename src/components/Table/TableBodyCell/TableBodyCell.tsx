@@ -6,6 +6,7 @@ import { tableBodyCellStyles } from './TableBodyCell.stylex';
 import { detectDataType, renderCellContent } from './utils';
 
 export const TableBodyCell = ({
+  columnLabel,
   customStylex,
   dataType: dataTypeProp,
   minWidth,
@@ -20,19 +21,16 @@ export const TableBodyCell = ({
 
   return (
     <td
-      style={{
-        minWidth,
-        width,
-      }}
       {...rest}
       {...stylex.props(
-        tableBodyCellStyles.base,
+        tableBodyCellStyles.base(minWidth, width),
         isRightAligned && tableBodyCellStyles.alignRight,
         isCentered && tableBodyCellStyles.alignCenter,
         customStylex,
       )}
     >
       {renderCellContent({
+        columnLabel,
         dataType,
         value,
       })}

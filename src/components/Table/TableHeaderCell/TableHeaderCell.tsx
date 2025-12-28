@@ -4,9 +4,9 @@ import { MoreVerticalIcon } from '@/components/Icons';
 
 import type { TableHeaderCellProps } from './TableHeaderCell.types';
 
-import { SortIcon } from './components';
 import { tableHeaderCellStyles } from './TableHeaderCell.stylex';
 import { getNextSortDirection } from './utils';
+import { SortIcon } from './SortIcon';
 
 export const TableHeaderCell = ({
   customStylex,
@@ -28,13 +28,9 @@ export const TableHeaderCell = ({
 
   return (
     <th
-      style={{
-        minWidth,
-        width,
-      }}
       {...rest}
       {...stylex.props(
-        tableHeaderCellStyles.base,
+        tableHeaderCellStyles.base(minWidth, width),
         isSticky && tableHeaderCellStyles.sticky,
         customStylex,
       )}

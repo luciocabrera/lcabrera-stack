@@ -82,6 +82,7 @@ export const darkTheme = stylex.createTheme(colors, {
   /* Interaction + shadows */
   hover: 'oklch(100% 0 0 / 0.05)',
   active: 'oklch(100% 0 0 / 0.10)',
+  overlay: 'oklch(0% 0 0 / 0.7)', // modal/dialog backdrop (darker for dark theme)
   shadowHover:
     '0 20px 25px -5px oklch(0% 0 0 / 0.45), 0 10px 10px -5px oklch(0% 0 0 / 0.28)',
 });

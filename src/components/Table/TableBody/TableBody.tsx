@@ -69,6 +69,7 @@ export const TableBody = <T extends Record<string, unknown>>({
           <TableRow isStriped={isStriped} key={rowIndex}>
             {columns.map((col) => (
               <TableBodyCell
+                columnLabel={col.label}
                 dataType={col.dataType}
                 key={col.key}
                 minWidth={col.minWidth ?? 120}

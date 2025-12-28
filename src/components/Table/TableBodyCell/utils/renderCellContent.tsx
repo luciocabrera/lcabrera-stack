@@ -7,20 +7,28 @@ import type { TableBodyCellDataType } from '../TableBodyCell.types';
 import { tableBodyCellStyles } from '../TableBodyCell.stylex';
 
 type RenderCellContentArgs = {
+  columnLabel?: string;
   dataType: TableBodyCellDataType;
   value: unknown;
 };
 
 export const renderCellContent = ({
+  columnLabel,
   dataType,
   value,
 }: RenderCellContentArgs) => {
   switch (dataType) {
     case 'boolean': {
       const isChecked = Boolean(value);
+      const label = columnLabel
+        ? `${columnLabel}: ${isChecked ? 'Yes' : 'No'}`
+        : isChecked
+          ? 'Checked'
+          : 'Unchecked';
       return (
         <div
           aria-checked={isChecked}
+          aria-label={label}
           role='checkbox'
           {...stylex.props(
             tableBodyCellStyles.checkbox,

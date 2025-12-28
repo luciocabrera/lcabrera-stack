@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { typography } from '@/design-system/tokens/base.stylex';
+import { borderRadius, typography } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const tableBodyCellStyles = stylex.create({
@@ -12,7 +12,7 @@ export const tableBodyCellStyles = stylex.create({
     justifyContent: 'flex-end',
     textAlign: 'right',
   },
-  base: {
+  base: (minWidth?: number | string, width?: number | string) => ({
     flex: '1 1 0%',
     paddingBlock: 'var(--table-padding-block)',
     paddingInline: 'var(--table-padding-inline)',
@@ -21,11 +21,12 @@ export const tableBodyCellStyles = stylex.create({
     display: 'flex',
     fontSize: typography.fontSizeSm,
     fontWeight: typography.fontWeightNormal,
-    minWidth: 0,
-  },
+    minWidth: minWidth ?? null,
+    width: width ?? null,
+  }),
   checkbox: {
     borderColor: colors.borderPrimary,
-    borderRadius: 3,
+    borderRadius: borderRadius.sm,
     borderStyle: 'solid',
     borderWidth: 1,
     alignItems: 'center',
@@ -39,6 +40,6 @@ export const tableBodyCellStyles = stylex.create({
   checkboxChecked: {
     borderColor: colors.brandPrimary,
     backgroundColor: colors.brandPrimary,
-    color: '#ffffff',
+    color: colors.textInverse,
   },
 });

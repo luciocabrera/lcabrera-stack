@@ -1,12 +1,16 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { typography } from '@/design-system/tokens/base.stylex';
+import {
+  borderRadius,
+  spacing,
+  typography,
+} from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const tableHeaderCellStyles = stylex.create({
-  base: {
+  base: (minWidth?: number | string, width?: number | string) => ({
     flex: '1 1 0%',
-    gap: 8,
+    gap: spacing.xs,
     paddingBlock: 'var(--table-padding-block)',
     paddingInline: 'var(--table-padding-inline)',
     alignItems: 'center',
@@ -18,8 +22,9 @@ export const tableHeaderCellStyles = stylex.create({
     borderRightColor: colors.borderSecondary,
     borderRightStyle: 'solid',
     borderRightWidth: 1,
-    minWidth: 0,
-  },
+    minWidth: minWidth ?? null,
+    width: width ?? null,
+  }),
   content: {
     flex: '1',
     overflow: 'hidden',
@@ -27,14 +32,14 @@ export const tableHeaderCellStyles = stylex.create({
     whiteSpace: 'nowrap',
   },
   controls: {
-    gap: 4,
+    gap: spacing.xxs,
     alignItems: 'center',
     display: 'flex',
     flexShrink: 0,
   },
   settingsButton: {
     padding: 0,
-    borderRadius: 4,
+    borderRadius: borderRadius.sm,
     borderStyle: 'none',
     alignItems: 'center',
     backgroundColor: {
@@ -53,7 +58,7 @@ export const tableHeaderCellStyles = stylex.create({
   },
   sortButton: {
     padding: 0,
-    borderRadius: 4,
+    borderRadius: borderRadius.sm,
     borderStyle: 'none',
     alignItems: 'center',
     backgroundColor: {

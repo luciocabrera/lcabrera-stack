@@ -1,4 +1,3 @@
-// styles
 import * as stylex from '@stylexjs/stylex';
 
 import {
@@ -39,7 +38,7 @@ const baseStyles = stylex.create({
   withBackdrop: {
     '::backdrop': {
       transition: `opacity ${transitions.normal} ${easing.easeInOut}`,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      backgroundColor: colors.overlay,
     },
   },
 
