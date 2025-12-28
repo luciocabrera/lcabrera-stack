@@ -2,17 +2,12 @@ import type { ComponentPropsWithoutRef } from 'react';
 
 import type { CustomStylex } from '@/design-system/common.types';
 
-export type TableBodyCellDataType =
-  | 'boolean'
-  | 'currency'
-  | 'date'
-  | 'number'
-  | 'string';
+import type { TableColumnDataType } from '../Table.types';
 
 export type TableBodyCellProps = ComponentPropsWithoutRef<'td'> & {
   columnLabel?: string;
   customStylex?: CustomStylex;
-  dataType?: TableBodyCellDataType;
+  dataType?: TableColumnDataType;
   minWidth?: number | string;
   value: unknown;
   width?: number | string;

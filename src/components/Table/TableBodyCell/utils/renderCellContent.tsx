@@ -2,13 +2,13 @@ import * as stylex from '@stylexjs/stylex';
 
 import { CheckIcon } from '@/components/Icons';
 
-import type { TableBodyCellDataType } from '../TableBodyCell.types';
+import type { TableColumnDataType } from '../../Table.types';
 
 import { tableBodyCellStyles } from '../TableBodyCell.stylex';
 
 type RenderCellContentArgs = {
   columnLabel?: string;
-  dataType: TableBodyCellDataType;
+  dataType: TableColumnDataType;
   value: unknown;
 };
 
