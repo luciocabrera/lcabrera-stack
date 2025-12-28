@@ -42,7 +42,7 @@ export const TableHeaderCell = ({
           <button
             aria-label={`Sort by ${label}`}
             onClick={handleSort}
-            type="button"
+            type='button'
             {...stylex.props(
               tableHeaderCellStyles.sortButton,
               sortDirection !== undefined && tableHeaderCellStyles.sortButtonActive,
@@ -55,7 +55,7 @@ export const TableHeaderCell = ({
           <button
             aria-label={`Settings for ${label}`}
             onClick={onSettingsClick}
-            type="button"
+            type='button'
             {...stylex.props(tableHeaderCellStyles.settingsButton)}
           >
             <MoreVerticalIcon />

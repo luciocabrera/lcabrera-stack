@@ -6,7 +6,11 @@ import { sidePanelBodyStyles } from './SidePanelBody.stylex';
 
 export const SidePanelBody = ({ children, ...props }: SidePanelBodyProps) => {
   return (
-    <div data-testid="side-panel-body" {...props} {...stylex.props(sidePanelBodyStyles.body)}>
+    <div
+      data-testid='side-panel-body'
+      {...props}
+      {...stylex.props(sidePanelBodyStyles.body)}
+    >
       {children}
     </div>
   );

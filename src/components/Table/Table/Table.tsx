@@ -17,7 +17,7 @@ export const Table = (props: TableProps) => {
   return (
     <table
       data-striped={isStriped}
-      data-testid="table"
+      data-testid='table'
       {...rest}
       {...stylex.props(
         tableStyles.base,

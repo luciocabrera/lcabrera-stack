@@ -18,7 +18,7 @@ export const renderCellContent = ({ dataType, value }: RenderCellContentArgs) =>
       return (
         <div
           aria-checked={isChecked}
-          role="checkbox"
+          role='checkbox'
           {...stylex.props(
             tableBodyCellStyles.checkbox,
             isChecked && tableBodyCellStyles.checkboxChecked,

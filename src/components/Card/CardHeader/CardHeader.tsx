@@ -6,7 +6,11 @@ import { cardHeaderStyles } from './CardHeader.stylex';
 
 export const CardHeader = ({ children, ...props }: CardHeaderProps) => {
   return (
-    <div data-testid="card-header" {...props} {...stylex.props(cardHeaderStyles.header)}>
+    <div
+      data-testid='card-header'
+      {...props}
+      {...stylex.props(cardHeaderStyles.header)}
+    >
       {children}
     </div>
   );

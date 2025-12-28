@@ -9,5 +9,5 @@ export const styles = stylex.create({
     scrollbarWidth: 'thin',
     height,
     width: '100%',
-  })
+  }),
 });

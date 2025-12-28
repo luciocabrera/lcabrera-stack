@@ -7,7 +7,7 @@ import { sidePanelHeaderStyles } from './SidePanelHeader.stylex';
 export const SidePanelHeader = ({ children, ...props }: SidePanelHeaderProps) => {
   return (
     <div
-      data-testid="side-panel-header"
+      data-testid='side-panel-header'
       {...props}
       {...stylex.props(sidePanelHeaderStyles.header)}
     >

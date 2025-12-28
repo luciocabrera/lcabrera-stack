@@ -37,7 +37,8 @@ yarn add -D \
   eslint-plugin-react-x \
   eslint-plugin-react-dom \
   @stylexjs/unplugin \
-  unplugin
+  unplugin \
+  eslint-plugin-react
 
 echo ""
 echo "✅ All dependencies installed successfully!"

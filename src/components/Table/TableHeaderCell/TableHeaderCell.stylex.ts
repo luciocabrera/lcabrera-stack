@@ -38,11 +38,11 @@ export const tableHeaderCellStyles = stylex.create({
     borderStyle: 'none',
     alignItems: 'center',
     backgroundColor: {
-      'default': 'transparent',
+      default: 'transparent',
       ':hover': colors.hover,
     },
     color: {
-      'default': colors.textTertiary,
+      default: colors.textTertiary,
       ':hover': colors.textSecondary,
     },
     cursor: 'pointer',
@@ -57,11 +57,11 @@ export const tableHeaderCellStyles = stylex.create({
     borderStyle: 'none',
     alignItems: 'center',
     backgroundColor: {
-      'default': 'transparent',
+      default: 'transparent',
       ':hover': colors.hover,
     },
     color: {
-      'default': colors.textTertiary,
+      default: colors.textTertiary,
       ':hover': colors.textSecondary,
     },
     cursor: 'pointer',

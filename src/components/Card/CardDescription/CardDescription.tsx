@@ -7,7 +7,7 @@ import { cardDescriptionStyles } from './CardDescription.stylex';
 export const CardDescription = ({ children, ...props }: CardDescriptionProps) => {
   return (
     <p
-      data-testid="card-description"
+      data-testid='card-description'
       {...props}
       {...stylex.props(cardDescriptionStyles.description)}
     >

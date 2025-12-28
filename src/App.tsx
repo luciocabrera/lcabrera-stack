@@ -9,15 +9,16 @@ import { VirtualizedTable } from './components/Table';
 
 // Generate mock data for the table
 const columnDefs: VirtualizedTableColumn[] = Array.from({ length: 20 }, (_, i) => ({
-  dataType: i % 5 === 0
-    ? 'number'
-    : i % 5 === 1
-    ? 'string'
-    : i % 5 === 2
-    ? 'boolean'
-    : i % 5 === 3
-    ? 'date'
-    : 'currency',
+  dataType:
+    i % 5 === 0
+      ? 'number'
+      : i % 5 === 1
+        ? 'string'
+        : i % 5 === 2
+          ? 'boolean'
+          : i % 5 === 3
+            ? 'date'
+            : 'currency',
   key: `col${i + 1}`,
   label: `Column ${i + 1}`,
 }));
@@ -109,7 +110,10 @@ const App = () => {
       <div {...stylex.props(styles.container)}>
         <header {...stylex.props(styles.header)}>
           <h1 {...stylex.props(styles.title)}>Design System Showcase</h1>
-          <Button color="ghost" onClick={handleToggleTheme}>
+          <Button
+            color='ghost'
+            onClick={handleToggleTheme}
+          >
             {isDarkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
           </Button>
         </header>
@@ -121,31 +125,31 @@ const App = () => {
           <div {...stylex.props(styles.subsection)}>
             <h3 {...stylex.props(styles.subsectionTitle)}>Colors</h3>
             <div {...stylex.props(styles.buttonGrid)}>
-              <Button color="primary">Primary</Button>
-              <Button color="secondary">Secondary</Button>
-              <Button color="success">Success</Button>
-              <Button color="warning">Warning</Button>
-              <Button color="error">Error</Button>
-              <Button color="ghost">Ghost</Button>
-              <Button color="outline">Outline</Button>
+              <Button color='primary'>Primary</Button>
+              <Button color='secondary'>Secondary</Button>
+              <Button color='success'>Success</Button>
+              <Button color='warning'>Warning</Button>
+              <Button color='error'>Error</Button>
+              <Button color='ghost'>Ghost</Button>
+              <Button color='outline'>Outline</Button>
             </div>
           </div>
 
           <div {...stylex.props(styles.subsection)}>
             <h3 {...stylex.props(styles.subsectionTitle)}>Sizes</h3>
             <div {...stylex.props(styles.buttonGrid)}>
-              <Button size="sm">Small</Button>
-              <Button size="md">Medium</Button>
-              <Button size="lg">Large</Button>
+              <Button size='sm'>Small</Button>
+              <Button size='md'>Medium</Button>
+              <Button size='lg'>Large</Button>
             </div>
           </div>
 
           <div {...stylex.props(styles.subsection)}>
             <h3 {...stylex.props(styles.subsectionTitle)}>Variants</h3>
             <div {...stylex.props(styles.buttonGrid)}>
-              <Button variant="solid">Solid</Button>
-              <Button variant="flat">Flat</Button>
-              <Button variant="elevated">Elevated</Button>
+              <Button variant='solid'>Solid</Button>
+              <Button variant='flat'>Flat</Button>
+              <Button variant='elevated'>Elevated</Button>
             </div>
           </div>
 
@@ -154,7 +158,7 @@ const App = () => {
             <div {...stylex.props(styles.buttonGrid)}>
               <Button>Normal</Button>
               <Button isDisabled>Disabled</Button>
-              <Button width="full">Full Width</Button>
+              <Button width='full'>Full Width</Button>
             </div>
           </div>
         </section>
@@ -166,7 +170,7 @@ const App = () => {
           <div {...stylex.props(styles.subsection)}>
             <h3 {...stylex.props(styles.subsectionTitle)}>Basic Cards</h3>
             <div {...stylex.props(styles.cardGrid)}>
-              <Card elevation="sm">
+              <Card elevation='sm'>
                 <CardHeader>
                   <CardTitle>Card Title</CardTitle>
                   <CardDescription>This is a simple card with header and body</CardDescription>
@@ -176,7 +180,7 @@ const App = () => {
                 </CardBody>
               </Card>
 
-              <Card elevation="md">
+              <Card elevation='md'>
                 <CardHeader>
                   <CardTitle>With Footer</CardTitle>
                 </CardHeader>
@@ -184,13 +188,19 @@ const App = () => {
                   <p>This card includes a footer section.</p>
                 </CardBody>
                 <CardFooter>
-                  <Button size="sm" width="full">
+                  <Button
+                    size='sm'
+                    width='full'
+                  >
                     Action
                   </Button>
                 </CardFooter>
               </Card>
 
-              <Card elevation="lg" padding="lg">
+              <Card
+                elevation='lg'
+                padding='lg'
+              >
                 <CardTitle>Custom Padding</CardTitle>
                 <CardDescription>This card has custom padding applied.</CardDescription>
               </Card>
@@ -200,7 +210,10 @@ const App = () => {
           <div {...stylex.props(styles.subsection)}>
             <h3 {...stylex.props(styles.subsectionTitle)}>Interactive Cards</h3>
             <div {...stylex.props(styles.cardGrid)}>
-              <Card elevation="sm" interactive="hoverable">
+              <Card
+                elevation='sm'
+                interactive='hoverable'
+              >
                 <CardBody>
                   <CardTitle>Hoverable Card</CardTitle>
                   <CardDescription>Hover over this card to see the effect.</CardDescription>
@@ -208,8 +221,8 @@ const App = () => {
               </Card>
 
               <Card
-                elevation="sm"
-                interactive="clickable"
+                elevation='sm'
+                interactive='clickable'
                 onClick={() => {
                   alert('Card clicked!');
                 }}
@@ -225,10 +238,22 @@ const App = () => {
           {/* Table Showcase Section */}
           <section {...stylex.props(styles.section)}>
             <h2 {...stylex.props(styles.sectionTitle)}>Table</h2>
-            <div style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.04)', maxWidth: '100%', overflowX: 'auto', width: '100%' }}>
+            <div
+              style={{
+                borderRadius: 8,
+                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                maxWidth: '100%',
+                overflowX: 'auto',
+                width: '100%',
+              }}
+            >
               {/* Virtualized Table Component */}
               <VirtualizedTable
-                columns={columnDefs.map(col => ({ key: col.key, label: col.label, minWidth: 120 }))}
+                columns={columnDefs.map((col) => ({
+                  key: col.key,
+                  label: col.label,
+                  minWidth: 120,
+                }))}
                 data={tableData}
                 height={400}
                 overscan={6}
@@ -240,28 +265,40 @@ const App = () => {
           <div {...stylex.props(styles.subsection)}>
             <h3 {...stylex.props(styles.subsectionTitle)}>Colored Cards</h3>
             <div {...stylex.props(styles.cardGrid)}>
-              <Card color="primary" elevation="sm">
+              <Card
+                color='primary'
+                elevation='sm'
+              >
                 <CardBody>
                   <CardTitle icon={<InfoIcon />}>Primary Card</CardTitle>
                   <CardDescription>This card uses the primary brand color.</CardDescription>
                 </CardBody>
               </Card>
 
-              <Card color="success" elevation="sm">
+              <Card
+                color='success'
+                elevation='sm'
+              >
                 <CardBody>
                   <CardTitle icon={<SuccessIcon />}>Success Card</CardTitle>
                   <CardDescription>Perfect for success messages.</CardDescription>
                 </CardBody>
               </Card>
 
-              <Card color="warning" elevation="sm">
+              <Card
+                color='warning'
+                elevation='sm'
+              >
                 <CardBody>
                   <CardTitle icon={<WarningIcon />}>Warning Card</CardTitle>
                   <CardDescription>Use this for warnings.</CardDescription>
                 </CardBody>
               </Card>
 
-              <Card color="error" elevation="sm">
+              <Card
+                color='error'
+                elevation='sm'
+              >
                 <CardBody>
                   <CardTitle icon={<ErrorIcon />}>Error Card</CardTitle>
                   <CardDescription>Display error messages here.</CardDescription>
@@ -278,11 +315,19 @@ const App = () => {
           <div {...stylex.props(styles.subsection)}>
             <h3 {...stylex.props(styles.subsectionTitle)}>Positions & Sizes</h3>
             <div {...stylex.props(styles.buttonGrid)}>
-              <Button onClick={() => { setIsLeftPanelOpen(true); }}>
+              <Button
+                onClick={() => {
+                  setIsLeftPanelOpen(true);
+                }}
+              >
                 <MenuIcon style={{ height: '1rem', marginRight: '0.5rem', width: '1rem' }} />
                 Open Left Panel
               </Button>
-              <Button onClick={() => { setIsRightPanelOpen(true); }}>
+              <Button
+                onClick={() => {
+                  setIsRightPanelOpen(true);
+                }}
+              >
                 Open Right Panel
                 <MenuIcon style={{ height: '1rem', marginLeft: '0.5rem', width: '1rem' }} />
               </Button>
@@ -294,9 +339,11 @@ const App = () => {
       {/* Side Panels */}
       <SidePanel
         isOpen={isLeftPanelOpen}
-        onClose={() => { setIsLeftPanelOpen(false); }}
-        position="left"
-        size="md"
+        onClose={() => {
+          setIsLeftPanelOpen(false);
+        }}
+        position='left'
+        size='md'
       >
         <SidePanelHeader>
           <SidePanelTitle icon={<SettingsIcon />}>Settings</SidePanelTitle>
@@ -307,7 +354,13 @@ const App = () => {
           <p>Press Escape or click the overlay to close.</p>
         </SidePanelBody>
         <SidePanelFooter>
-          <Button onClick={() => { setIsLeftPanelOpen(false); }} size="sm" width="full">
+          <Button
+            onClick={() => {
+              setIsLeftPanelOpen(false);
+            }}
+            size='sm'
+            width='full'
+          >
             <MenuCloseIcon style={{ height: '1rem', marginRight: '0.5rem', width: '1rem' }} />
             Close
           </Button>
@@ -316,15 +369,17 @@ const App = () => {
 
       <SidePanel
         isOpen={isRightPanelOpen}
-        onClose={() => { setIsRightPanelOpen(false); }}
-        position="right"
-        size="lg"
+        onClose={() => {
+          setIsRightPanelOpen(false);
+        }}
+        position='right'
+        size='lg'
       >
         <SidePanelHeader>
           <SidePanelTitle icon={<InfoIcon />}>Information</SidePanelTitle>
         </SidePanelHeader>
         <SidePanelBody>
-          <Card elevation="sm">
+          <Card elevation='sm'>
             <CardBody>
               <CardTitle icon={<SuccessIcon />}>Composable Design</CardTitle>
               <CardDescription>
@@ -339,10 +394,23 @@ const App = () => {
         </SidePanelBody>
         <SidePanelFooter>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <Button color="ghost" onClick={() => { setIsRightPanelOpen(false); }} size="sm" width="full">
+            <Button
+              color='ghost'
+              onClick={() => {
+                setIsRightPanelOpen(false);
+              }}
+              size='sm'
+              width='full'
+            >
               Cancel
             </Button>
-            <Button onClick={() => { setIsRightPanelOpen(false); }} size="sm" width="full">
+            <Button
+              onClick={() => {
+                setIsRightPanelOpen(false);
+              }}
+              size='sm'
+              width='full'
+            >
               Confirm
             </Button>
           </div>

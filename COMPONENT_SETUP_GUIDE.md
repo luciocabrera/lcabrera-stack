@@ -1,11 +1,13 @@
 # Component Setup Instructions - React Component Structure Guide
 
 ## Overview
+
 This guide provides a standardized approach for creating React components following best practices for maintainability, scalability, and testability. Each component follows a consistent folder structure with proper separation of concerns.
 
 ## Component Structure
 
 ### Directory Layout
+
 Each component should have its own directory containing the following files:
 
 ```
@@ -23,6 +25,7 @@ ComponentName/
 **Purpose:** Define all TypeScript types and interfaces for the component.
 
 **Template:**
+
 ```typescript
 import type { ComponentPropsWithoutRef } from 'react';
 
@@ -41,6 +44,7 @@ export type ComponentNameProps = ComponentPropsWithoutRef<'div'> & {
 ```
 
 **Guidelines:**
+
 - Use `ComponentPropsWithoutRef<'element'>` for most cases
 - Use `ComponentPropsWithRef<'element'>` when the component needs to forward refs
 - Replace `'div'` with the appropriate HTML element tag (e.g., `'button'`, `'h1'`, `'p'`, `'section'`)
@@ -53,6 +57,7 @@ export type ComponentNameProps = ComponentPropsWithoutRef<'div'> & {
 **Purpose:** Contains all StyleX styles for the component.
 
 **Template:**
+
 ```typescript
 import * as stylex from '@stylexjs/stylex';
 
@@ -67,13 +72,13 @@ export const componentNameStyles = stylex.create({
     borderRadius: borderRadius.md,
     fontSize: typography.fontSizeBase,
   },
-  
+
   // Variants (optional)
   variant_primary: {
     backgroundColor: colors.brandPrimary,
     color: colors.brandPrimaryText,
   },
-  
+
   variant_secondary: {
     backgroundColor: colors.brandSecondary,
     color: colors.brandSecondaryText,
@@ -82,6 +87,7 @@ export const componentNameStyles = stylex.create({
 ```
 
 **Guidelines:**
+
 - Use design system tokens instead of hardcoded values
 - Create separate style definitions for variants
 - Use descriptive naming for style keys
@@ -93,6 +99,7 @@ export const componentNameStyles = stylex.create({
 **Purpose:** The main React component implementation.
 
 **Template:**
+
 ```typescript
 import * as stylex from '@stylexjs/stylex';
 
@@ -100,15 +107,15 @@ import type { ComponentNameProps } from './ComponentName.types';
 
 import { componentNameStyles } from './ComponentName.stylex';
 
-export const ComponentName = ({ 
-  children, 
+export const ComponentName = ({
+  children,
   variant = 'primary',
-  ...props 
+  ...props
 }: ComponentNameProps) => {
   return (
-    <div 
-      data-testid="component-name" 
-      {...props} 
+    <div
+      data-testid="component-name"
+      {...props}
       {...stylex.props(
         componentNameStyles.base,
         variant && componentNameStyles[`variant_${variant}`]
@@ -121,6 +128,7 @@ export const ComponentName = ({
 ```
 
 **Guidelines:**
+
 - Import type definitions from the `.types.ts` file
 - Import styles from the `.stylex.ts` file
 - Use destructuring with rest props (`...props`) to allow HTML attributes to be passed through
@@ -135,12 +143,14 @@ export const ComponentName = ({
 **Purpose:** Provides a clean import path for the component.
 
 **Template:**
+
 ```typescript
 export { ComponentName } from './ComponentName';
 export type { ComponentNameProps } from './ComponentName.types';
 ```
 
 **Guidelines:**
+
 - Export the component
 - Export types that consumers might need
 - Keep it simple - just re-exports
@@ -151,6 +161,7 @@ export type { ComponentNameProps } from './ComponentName.types';
 When you have multiple related components in a parent directory, create an `index.ts` file that exports all components:
 
 **Template:**
+
 ```typescript
 export { ComponentOne } from './ComponentOne';
 export type { ComponentOneProps } from './ComponentOne';
@@ -161,11 +172,13 @@ export type { ComponentTwoProps } from './ComponentTwo';
 ## Step-by-Step Implementation Process
 
 ### Step 1: Create Directory Structure
+
 ```bash
 mkdir src/components/ComponentName
 ```
 
 ### Step 2: Create Types File
+
 1. Create `ComponentName.types.ts`
 2. Decide which HTML element the component renders
 3. Choose between `ComponentPropsWithoutRef` or `ComponentPropsWithRef`
@@ -173,6 +186,7 @@ mkdir src/components/ComponentName
 5. Define union types for variants if needed
 
 ### Step 3: Create Styles File
+
 1. Create `ComponentName.stylex.ts`
 2. Import necessary design tokens
 3. Define base styles using `stylex.create()`
@@ -180,6 +194,7 @@ mkdir src/components/ComponentName
 5. Export the styles object
 
 ### Step 4: Create Component Implementation
+
 1. Create `ComponentName.tsx`
 2. Import types and styles
 3. Implement the component with proper destructuring
@@ -188,16 +203,20 @@ mkdir src/components/ComponentName
 6. Ensure props are spread in the right order
 
 ### Step 5: Create Barrel Export
+
 1. Create `index.ts`
 2. Export component and types
 3. Verify clean import path works
 
 ### Step 6: Update Parent Index (if applicable)
+
 1. Update parent directory's `index.ts`
 2. Add exports for the new component
 
 ### Step 7: Quality Checks
+
 Run the following commands to ensure quality:
+
 ```bash
 # Format code
 yarn format
@@ -212,26 +231,31 @@ yarn tsc --noEmit
 ## Naming Conventions
 
 ### File Names
+
 - Use PascalCase for component files: `CardHeader.tsx`
 - Include component name in all related files: `CardHeader.types.ts`, `CardHeader.stylex.ts`
 - Use `index.ts` for barrel exports
 
 ### Component Names
+
 - Use PascalCase: `CardHeader`
 - Be descriptive and specific
 - Follow the pattern: `ParentComponentChildPart` (e.g., `CardHeader`, `CardBody`)
 
 ### Test IDs
+
 - Use kebab-case: `data-testid="card-header"`
 - Match the component name in lowercase with hyphens
 - Be descriptive and unique within the application
 
 ### Type Names
+
 - Suffix with `Props`: `CardHeaderProps`
 - Use PascalCase for all type names
 - Create specific types for variants: `CardColor`, `CardElevation`
 
 ### Style Objects
+
 - Suffix with `Styles`: `cardHeaderStyles`
 - Use camelCase for the exported object
 - Use snake_case for variant keys: `variant_primary`, `size_lg`
@@ -239,6 +263,7 @@ yarn tsc --noEmit
 ## Common Patterns
 
 ### Pattern 1: Simple Component
+
 For simple components that just wrap an HTML element:
 
 ```typescript
@@ -257,6 +282,7 @@ export const ComponentName = ({ children, ...props }: ComponentNameProps) => {
 ```
 
 ### Pattern 2: Component with Variants
+
 For components with different visual variants:
 
 ```typescript
@@ -275,12 +301,12 @@ export const styles = stylex.create({
 });
 
 // ComponentName.tsx
-export const ComponentName = ({ 
+export const ComponentName = ({
   variant = 'primary',
-  ...props 
+  ...props
 }: ComponentNameProps) => {
   return (
-    <button 
+    <button
       data-testid="component-name"
       {...props}
       {...stylex.props(
@@ -293,6 +319,7 @@ export const ComponentName = ({
 ```
 
 ### Pattern 3: Component with Multiple Style Options
+
 For components with size, color, and other options:
 
 ```typescript
@@ -315,14 +342,14 @@ export const styles = {
 };
 
 // ComponentName.tsx
-export const ComponentName = ({ 
+export const ComponentName = ({
   size = 'md',
   color = 'primary',
   elevated = false,
-  ...props 
+  ...props
 }: ComponentNameProps) => {
   return (
-    <div 
+    <div
       data-testid="component-name"
       {...props}
       {...stylex.props(
@@ -339,6 +366,7 @@ export const ComponentName = ({
 ## Testing Considerations
 
 ### Test IDs
+
 Always add `data-testid` attributes to make components testable:
 
 ```typescript
@@ -346,6 +374,7 @@ Always add `data-testid` attributes to make components testable:
 ```
 
 ### Usage in Tests
+
 ```typescript
 // In your test file
 import { render, screen } from '@testing-library/react';
@@ -363,14 +392,15 @@ test('renders component', () => {
 **CRITICAL:** Always spread props in this order:
 
 ```typescript
-<element 
-  data-testid="..." 
+<element
+  data-testid="..."
   {...props}              // Spread custom props first
   {...stylex.props(...)}  // StyleX props last (to prevent overrides)
 >
 ```
 
 This ensures:
+
 1. Custom HTML attributes can be passed through
 2. StyleX styles are applied correctly
 3. Consumers can override styles if needed
@@ -397,6 +427,7 @@ import { colors } from '@/design-system/tokens/colors.stylex';
 ## Design System Integration
 
 ### Using Design Tokens
+
 Always use design tokens from the design system:
 
 ```typescript
@@ -425,20 +456,24 @@ export const styles = stylex.create({
 ### Available Design Tokens
 
 **Spacing:**
+
 - `spacing.xs`, `spacing.sm`, `spacing.md`, `spacing.lg`, `spacing.xl`
 
 **Typography:**
+
 - `typography.fontSizeXs` through `typography.fontSize3xl`
 - `typography.fontWeightNormal`, `typography.fontWeightMedium`, `typography.fontWeightSemibold`, `typography.fontWeightBold`
 - `typography.lineHeightTight`, `typography.lineHeightNormal`, `typography.lineHeightRelaxed`
 
 **Colors:**
+
 - `colors.textPrimary`, `colors.textSecondary`
 - `colors.brandPrimary`, `colors.brandSecondary`
 - `colors.success`, `colors.error`, `colors.warning`, `colors.info`
 - And many more...
 
 **Border Radius:**
+
 - `borderRadius.sm`, `borderRadius.md`, `borderRadius.lg`, `borderRadius.full`
 
 ## Example: Complete Component
@@ -446,6 +481,7 @@ export const styles = stylex.create({
 Here's a complete example of the CardHeader component:
 
 ### CardHeader.types.ts
+
 ```typescript
 import type { ComponentPropsWithoutRef } from 'react';
 
@@ -453,6 +489,7 @@ export type CardHeaderProps = ComponentPropsWithoutRef<'div'>;
 ```
 
 ### CardHeader.stylex.ts
+
 ```typescript
 import * as stylex from '@stylexjs/stylex';
 
@@ -470,6 +507,7 @@ export const cardHeaderStyles = stylex.create({
 ```
 
 ### CardHeader.tsx
+
 ```typescript
 import * as stylex from '@stylexjs/stylex';
 
@@ -487,6 +525,7 @@ export const CardHeader = ({ children, ...props }: CardHeaderProps) => {
 ```
 
 ### index.ts
+
 ```typescript
 export { CardHeader } from './CardHeader';
 ```
@@ -557,6 +596,7 @@ When asking an LLM to create a component following this structure, use this prom
 ---
 
 **Prompt:**
+
 ```
 Create a React component named [ComponentName] following these requirements:
 
@@ -596,11 +636,13 @@ Additional requirements:
 - [List any variants needed]
 - [Any other custom requirements]
 ```
+
 ---
 
 ## Conclusion
 
 Following this structure ensures:
+
 - **Consistency** across the codebase
 - **Maintainability** with clear separation of concerns
 - **Testability** with data-testid attributes

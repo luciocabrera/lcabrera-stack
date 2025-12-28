@@ -10,6 +10,7 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 import reactX from 'eslint-plugin-react-x';
 import reactDom from 'eslint-plugin-react-dom';
+import reactPlugin from 'eslint-plugin-react';
 
 import { defineConfig, globalIgnores } from 'eslint/config';
 import localRules from './eslint-local-rules/build/index.js';
@@ -31,6 +32,8 @@ export default defineConfig(
   reactX.configs['recommended-typescript'],
   // Enable lint rules for React DOM
   reactDom.configs.recommended,
+  reactPlugin.configs.flat.recommended,
+  reactPlugin.configs.flat['jsx-runtime'],
 
   // 3. Sorting (Perfectionist)
   perfectionist.configs['recommended-natural'],
@@ -43,6 +46,7 @@ export default defineConfig(
     files: ['**/*.ts', '**/*.tsx'], // Target specific files for TypeScript-aware rules
     languageOptions: {
       ecmaVersion: 'latest',
+      ...reactPlugin.configs.flat.recommended.languageOptions,
       globals: globals.browser,
       parserOptions: {
         // Enables powerful, type-aware rules across the project
@@ -55,9 +59,20 @@ export default defineConfig(
       '@stylexjs': stylex,
       'local-rules': localRules,
     },
+    settings: {
+      react: {
+        version: 'detect',
+      },
+    },
     rules: {
       // Conflicts: Ensure core sorting is off for perfectionist
       'sort-imports': 'off',
+      // JSX formatting - one prop per line with proper indentation
+      'react/jsx-max-props-per-line': ['error', { maximum: 1 }],
+      'react/jsx-first-prop-new-line': ['error', 'multiline-multiprop'],
+      'react/jsx-closing-bracket-location': ['error', 'line-aligned'],
+      'react/jsx-indent': ['error', 2],
+      'react/jsx-indent-props': ['error', 2],
 
       // Stronger TypeScript enforcement
       '@typescript-eslint/consistent-type-imports': [

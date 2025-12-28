@@ -6,7 +6,11 @@ import { cardFooterStyles } from './CardFooter.stylex';
 
 export const CardFooter = ({ children, ...props }: CardFooterProps) => {
   return (
-    <div data-testid="card-footer" {...props} {...stylex.props(cardFooterStyles.footer)}>
+    <div
+      data-testid='card-footer'
+      {...props}
+      {...stylex.props(cardFooterStyles.footer)}
+    >
       {children}
     </div>
   );

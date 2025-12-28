@@ -16,7 +16,7 @@ export const Card = ({
 
   return (
     <div
-      data-testid="card"
+      data-testid='card'
       {...props}
       {...stylex.props(
         cardStyles.base,

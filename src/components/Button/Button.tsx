@@ -17,7 +17,7 @@ export const Button = ({
 }: ButtonProps) => {
   return (
     <button
-      data-testid="button"
+      data-testid='button'
       disabled={isDisabled}
       {...rest}
       type={type}

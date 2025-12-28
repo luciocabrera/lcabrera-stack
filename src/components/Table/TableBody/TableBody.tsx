@@ -48,18 +48,30 @@ export const TableBody = <T extends Record<string, unknown>>({
   const bottomSpacerHeight = totalHeight - (offsetY + visibleRows.length * rowHeight);
 
   return (
-    <tbody data-testid="table-body" {...stylex.props(styles.body(totalHeight))}>
+    <tbody
+      data-testid='table-body'
+      {...stylex.props(styles.body(totalHeight))}
+    >
       {/* Top spacer row */}
       {offsetY > 0 && (
-        <tr aria-hidden="true" {...stylex.props(styles.spacerRow(offsetY))}>
-          <td colSpan={columns.length} {...stylex.props(styles.spacerCell(offsetY))} />
+        <tr
+          aria-hidden='true'
+          {...stylex.props(styles.spacerRow(offsetY))}
+        >
+          <td
+            colSpan={columns.length}
+            {...stylex.props(styles.spacerCell(offsetY))}
+          />
         </tr>
       )}
       {visibleRows.map((row, index) => {
         const rowIndex = startIndex + index;
         const isStriped = rowIndex % 2 === 1;
         return (
-          <TableRow isStriped={isStriped} key={rowIndex}>
+          <TableRow
+            isStriped={isStriped}
+            key={rowIndex}
+          >
             {columns.map((col) => (
               <TableBodyCell
                 dataType={col.dataType}
@@ -73,8 +85,14 @@ export const TableBody = <T extends Record<string, unknown>>({
       })}
       {/* Bottom spacer row */}
       {totalRows > 0 && bottomSpacerHeight > 0 && (
-        <tr aria-hidden="true" {...stylex.props(styles.spacerRow(bottomSpacerHeight))}>
-          <td colSpan={columns.length} {...stylex.props(styles.spacerCell(bottomSpacerHeight))} />
+        <tr
+          aria-hidden='true'
+          {...stylex.props(styles.spacerRow(bottomSpacerHeight))}
+        >
+          <td
+            colSpan={columns.length}
+            {...stylex.props(styles.spacerCell(bottomSpacerHeight))}
+          />
         </tr>
       )}
     </tbody>

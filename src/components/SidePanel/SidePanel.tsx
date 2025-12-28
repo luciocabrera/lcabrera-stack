@@ -72,7 +72,7 @@ export const SidePanel = ({
 
   return (
     <dialog
-      data-testid="side-panel"
+      data-testid='side-panel'
       // onClick={handleDialogClick}
       ref={dialogRef}
       {...props}

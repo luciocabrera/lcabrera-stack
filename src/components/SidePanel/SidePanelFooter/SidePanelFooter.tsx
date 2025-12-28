@@ -7,7 +7,7 @@ import { sidePanelFooterStyles } from './SidePanelFooter.stylex';
 export const SidePanelFooter = ({ children, ...props }: SidePanelFooterProps) => {
   return (
     <div
-      data-testid="side-panel-footer"
+      data-testid='side-panel-footer'
       {...props}
       {...stylex.props(sidePanelFooterStyles.footer)}
     >

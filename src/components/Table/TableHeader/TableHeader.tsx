@@ -8,7 +8,7 @@ import { tableHeaderStyles } from './TableHeader.stylex';
 
 export const TableHeader = ({ columns, customStylex, ...rest }: TableHeaderProps) => (
   <thead
-    data-testid="table-header"
+    data-testid='table-header'
     {...rest}
     {...stylex.props(tableHeaderStyles.container, customStylex)}
   >
