@@ -1,4 +1,3 @@
-export { Table } from './Table';
 export type {
   TableCustomStylex,
   TableDensity,
