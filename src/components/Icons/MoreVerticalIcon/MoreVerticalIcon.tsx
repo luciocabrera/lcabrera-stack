@@ -9,8 +9,23 @@ export const MoreVerticalIcon = (props: IconProps) => (
     xmlns='http://www.w3.org/2000/svg'
     {...props}
   >
-    <circle cx='6' cy='2' fill='currentColor' r='1' />
-    <circle cx='6' cy='6' fill='currentColor' r='1' />
-    <circle cx='6' cy='10' fill='currentColor' r='1' />
+    <circle
+      cx='6'
+      cy='2'
+      fill='currentColor'
+      r='1'
+    />
+    <circle
+      cx='6'
+      cy='6'
+      fill='currentColor'
+      r='1'
+    />
+    <circle
+      cx='6'
+      cy='10'
+      fill='currentColor'
+      r='1'
+    />
   </svg>
 );

@@ -116,7 +116,10 @@ const App = () => {
       <div {...stylex.props(styles.container)}>
         <header {...stylex.props(styles.header)}>
           <h1 {...stylex.props(styles.title)}>Design System Showcase</h1>
-          <Button color='ghost' onClick={handleToggleTheme}>
+          <Button
+            color='ghost'
+            onClick={handleToggleTheme}
+          >
             {isDarkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
           </Button>
         </header>
@@ -195,13 +198,19 @@ const App = () => {
                   <p>This card includes a footer section.</p>
                 </CardBody>
                 <CardFooter>
-                  <Button size='sm' width='full'>
+                  <Button
+                    size='sm'
+                    width='full'
+                  >
                     Action
                   </Button>
                 </CardFooter>
               </Card>
 
-              <Card elevation='lg' padding='lg'>
+              <Card
+                elevation='lg'
+                padding='lg'
+              >
                 <CardTitle>Custom Padding</CardTitle>
                 <CardDescription>
                   This card has custom padding applied.
@@ -213,7 +222,10 @@ const App = () => {
           <div {...stylex.props(styles.subsection)}>
             <h3 {...stylex.props(styles.subsectionTitle)}>Interactive Cards</h3>
             <div {...stylex.props(styles.cardGrid)}>
-              <Card elevation='sm' interactive='hoverable'>
+              <Card
+                elevation='sm'
+                interactive='hoverable'
+              >
                 <CardBody>
                   <CardTitle>Hoverable Card</CardTitle>
                   <CardDescription>
@@ -269,7 +281,10 @@ const App = () => {
           <div {...stylex.props(styles.subsection)}>
             <h3 {...stylex.props(styles.subsectionTitle)}>Colored Cards</h3>
             <div {...stylex.props(styles.cardGrid)}>
-              <Card color='primary' elevation='sm'>
+              <Card
+                color='primary'
+                elevation='sm'
+              >
                 <CardBody>
                   <CardTitle icon={<InfoIcon />}>Primary Card</CardTitle>
                   <CardDescription>
@@ -278,7 +293,10 @@ const App = () => {
                 </CardBody>
               </Card>
 
-              <Card color='success' elevation='sm'>
+              <Card
+                color='success'
+                elevation='sm'
+              >
                 <CardBody>
                   <CardTitle icon={<SuccessIcon />}>Success Card</CardTitle>
                   <CardDescription>
@@ -287,14 +305,20 @@ const App = () => {
                 </CardBody>
               </Card>
 
-              <Card color='warning' elevation='sm'>
+              <Card
+                color='warning'
+                elevation='sm'
+              >
                 <CardBody>
                   <CardTitle icon={<WarningIcon />}>Warning Card</CardTitle>
                   <CardDescription>Use this for warnings.</CardDescription>
                 </CardBody>
               </Card>
 
-              <Card color='error' elevation='sm'>
+              <Card
+                color='error'
+                elevation='sm'
+              >
                 <CardBody>
                   <CardTitle icon={<ErrorIcon />}>Error Card</CardTitle>
                   <CardDescription>

@@ -52,10 +52,16 @@ export const TableBody = <T extends Record<string, unknown>>({
     totalHeight - (offsetY + visibleRows.length * rowHeight);
 
   return (
-    <tbody data-testid='table-body' {...stylex.props(styles.body(totalHeight))}>
+    <tbody
+      data-testid='table-body'
+      {...stylex.props(styles.body(totalHeight))}
+    >
       {/* Top spacer row */}
       {offsetY > 0 && (
-        <tr aria-hidden='true' {...stylex.props(styles.spacerRow(offsetY))}>
+        <tr
+          aria-hidden='true'
+          {...stylex.props(styles.spacerRow(offsetY))}
+        >
           <td
             colSpan={columns.length}
             {...stylex.props(styles.spacerCell(offsetY))}
@@ -66,7 +72,10 @@ export const TableBody = <T extends Record<string, unknown>>({
         const rowIndex = startIndex + index;
         const isStriped = rowIndex % 2 === 1;
         return (
-          <TableRow isStriped={isStriped} key={rowIndex}>
+          <TableRow
+            isStriped={isStriped}
+            key={rowIndex}
+          >
             {columns.map((col) => (
               <TableBodyCell
                 dataType={col.dataType}
