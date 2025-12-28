@@ -4,9 +4,9 @@ import { MoreVerticalIcon } from '@/components/Icons';
 
 import type { TableHeaderCellProps } from './TableHeaderCell.types';
 
+import { SortIcon } from './SortIcon';
 import { tableHeaderCellStyles } from './TableHeaderCell.stylex';
 import { getNextSortDirection } from './utils';
-import { SortIcon } from './SortIcon';
 
 export const TableHeaderCell = ({
   customStylex,

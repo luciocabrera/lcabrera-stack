@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { CheckIcon } from '@/components/Icons/CheckIcon';
+import { CheckIcon } from '@/components/Icons';
 
 import type { TableBodyCellDataType } from '../TableBodyCell.types';
 

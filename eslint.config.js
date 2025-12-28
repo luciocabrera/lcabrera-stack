@@ -174,6 +174,11 @@ export default defineConfig(
       'perfectionist/sort-objects': 'off',
       'perfectionist/sort-object-types': 'off',
 
+      // StyleX dynamic styles require positional parameters (not object destructuring)
+      'local-rules/destructuring-for-functions': 'off',
+      // StyleX requires null (not undefined) for optional style values
+      'unicorn/no-null': 'off',
+
       '@typescript-eslint/naming-convention': [
         'error',
         {

@@ -4,6 +4,7 @@ import {
   borderRadius,
   spacing,
   typography,
+  zIndex,
 } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 
@@ -81,7 +82,7 @@ export const tableHeaderCellStyles = stylex.create({
   sticky: {
     backgroundColor: colors.surfaceSecondary,
     position: 'sticky',
-    zIndex: 10,
+    zIndex: zIndex.sticky,
     top: 0,
   },
 });

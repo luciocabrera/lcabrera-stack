@@ -4,6 +4,7 @@ import {
   easing,
   shadows,
   transitions,
+  zIndex,
 } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 
@@ -26,7 +27,7 @@ const baseStyles = stylex.create({
     display: 'flex',
     flexDirection: 'column',
     position: 'fixed',
-    zIndex: 1001,
+    zIndex: zIndex.sticky,
     bottom: 0,
     height: '100vh',
     maxHeight: 'none',
