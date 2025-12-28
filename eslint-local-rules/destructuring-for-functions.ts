@@ -7,7 +7,8 @@ import type { Rule } from 'eslint';
 const rule: Rule.RuleModule = {
   meta: {
     docs: {
-      description: 'Enforce object parameter pattern for functions with multiple parameters',
+      description:
+        'Enforce object parameter pattern for functions with multiple parameters',
       recommended: false,
     },
     messages: {

@@ -10,7 +10,8 @@ const rule: Rule.RuleModule = {
   meta: {
     docs: {
       category: 'Stylistic Issues',
-      description: 'Enforce separate type imports instead of inline type imports',
+      description:
+        'Enforce separate type imports instead of inline type imports',
       recommended: false,
     },
     fixable: 'code',
@@ -31,14 +32,16 @@ const rule: Rule.RuleModule = {
         if (node.importKind === 'type') {
           const hasRedundantInlineTypes = node.specifiers.some(
             (specifier: any) =>
-              specifier.type === 'ImportSpecifier' && specifier.importKind === 'type',
+              specifier.type === 'ImportSpecifier' &&
+              specifier.importKind === 'type',
           );
 
           if (hasRedundantInlineTypes) {
             const redundantNames = node.specifiers
               .filter(
                 (specifier: any) =>
-                  specifier.type === 'ImportSpecifier' && specifier.importKind === 'type',
+                  specifier.type === 'ImportSpecifier' &&
+                  specifier.importKind === 'type',
               )
               .map((specifier: any) => specifier.imported.name)
               .join(', ');
@@ -59,7 +62,9 @@ const rule: Rule.RuleModule = {
                       return `${specifier.imported.name} as ${specifier.local.name}`;
                     }
                   })
-                  .filter((name: string | null): name is string => name !== null)
+                  .filter(
+                    (name: string | null): name is string => name !== null,
+                  )
                   .join(', ');
 
                 const fromClause = sourceCode.getText(node.source);
@@ -77,7 +82,8 @@ const rule: Rule.RuleModule = {
         // Case 2: Check if this is a regular import with inline type specifiers
         const hasInlineTypes = node.specifiers.some(
           (specifier: any) =>
-            specifier.type === 'ImportSpecifier' && specifier.importKind === 'type',
+            specifier.type === 'ImportSpecifier' &&
+            specifier.importKind === 'type',
         );
 
         if (!hasInlineTypes) {
@@ -87,7 +93,8 @@ const rule: Rule.RuleModule = {
         // Check if ALL imports are types (not mixed)
         const allTypes = node.specifiers.every(
           (specifier: any) =>
-            specifier.type === 'ImportSpecifier' && specifier.importKind === 'type',
+            specifier.type === 'ImportSpecifier' &&
+            specifier.importKind === 'type',
         );
 
         if (!allTypes) {

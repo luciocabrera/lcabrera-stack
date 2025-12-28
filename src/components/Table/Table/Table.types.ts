@@ -1,8 +1,16 @@
-import type { CompiledStyles, InlineStyles, StyleXArray } from '@stylexjs/stylex';
+import type {
+  CompiledStyles,
+  InlineStyles,
+  StyleXArray,
+} from '@stylexjs/stylex';
 import type { ComponentPropsWithoutRef } from 'react';
 
 export type TableCustomStylex = StyleXArray<
-  boolean | CompiledStyles | null | Readonly<[CompiledStyles, InlineStyles]> | undefined
+  | boolean
+  | CompiledStyles
+  | null
+  | Readonly<[CompiledStyles, InlineStyles]>
+  | undefined
 >;
 
 export type TableDensity = 'comfortable' | 'compact';

@@ -6,7 +6,11 @@ import { TableHeaderCell } from '../TableHeaderCell';
 import { TableRow } from '../TableRow';
 import { tableHeaderStyles } from './TableHeader.stylex';
 
-export const TableHeader = ({ columns, customStylex, ...rest }: TableHeaderProps) => (
+export const TableHeader = ({
+  columns,
+  customStylex,
+  ...rest
+}: TableHeaderProps) => (
   <thead
     data-testid='table-header'
     {...rest}

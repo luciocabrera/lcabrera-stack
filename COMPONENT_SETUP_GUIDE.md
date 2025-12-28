@@ -62,7 +62,11 @@ export type ComponentNameProps = ComponentPropsWithoutRef<'div'> & {
 import * as stylex from '@stylexjs/stylex';
 
 // Import design tokens
-import { spacing, typography, borderRadius } from '@/design-system/tokens/base.stylex';
+import {
+  spacing,
+  typography,
+  borderRadius,
+} from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const componentNameStyles = stylex.create({

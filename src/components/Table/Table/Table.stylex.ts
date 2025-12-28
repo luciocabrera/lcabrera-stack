@@ -1,6 +1,10 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { borderRadius, shadows, spacing } from '@/design-system/tokens/base.stylex';
+import {
+  borderRadius,
+  shadows,
+  spacing,
+} from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 
 const baseStyles = stylex.create({

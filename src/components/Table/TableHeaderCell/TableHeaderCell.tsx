@@ -45,7 +45,8 @@ export const TableHeaderCell = ({
             type='button'
             {...stylex.props(
               tableHeaderCellStyles.sortButton,
-              sortDirection !== undefined && tableHeaderCellStyles.sortButtonActive,
+              sortDirection !== undefined &&
+                tableHeaderCellStyles.sortButtonActive,
             )}
           >
             <SortIcon direction={sortDirection} />

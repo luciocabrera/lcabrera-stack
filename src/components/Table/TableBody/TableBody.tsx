@@ -41,23 +41,21 @@ export const TableBody = <T extends Record<string, unknown>>({
   const totalRows = data.length;
   const visibleCount = Math.ceil(containerHeight / rowHeight);
   const startIndex = Math.max(0, Math.floor(scrollTop / rowHeight) - overscan);
-  const endIndex = Math.min(totalRows, startIndex + visibleCount + overscan * 2);
+  const endIndex = Math.min(
+    totalRows,
+    startIndex + visibleCount + overscan * 2,
+  );
   const offsetY = startIndex * rowHeight;
   const visibleRows = data.slice(startIndex, endIndex);
   const totalHeight = totalRows * rowHeight;
-  const bottomSpacerHeight = totalHeight - (offsetY + visibleRows.length * rowHeight);
+  const bottomSpacerHeight =
+    totalHeight - (offsetY + visibleRows.length * rowHeight);
 
   return (
-    <tbody
-      data-testid='table-body'
-      {...stylex.props(styles.body(totalHeight))}
-    >
+    <tbody data-testid='table-body' {...stylex.props(styles.body(totalHeight))}>
       {/* Top spacer row */}
       {offsetY > 0 && (
-        <tr
-          aria-hidden='true'
-          {...stylex.props(styles.spacerRow(offsetY))}
-        >
+        <tr aria-hidden='true' {...stylex.props(styles.spacerRow(offsetY))}>
           <td
             colSpan={columns.length}
             {...stylex.props(styles.spacerCell(offsetY))}
@@ -68,10 +66,7 @@ export const TableBody = <T extends Record<string, unknown>>({
         const rowIndex = startIndex + index;
         const isStriped = rowIndex % 2 === 1;
         return (
-          <TableRow
-            isStriped={isStriped}
-            key={rowIndex}
-          >
+          <TableRow isStriped={isStriped} key={rowIndex}>
             {columns.map((col) => (
               <TableBodyCell
                 dataType={col.dataType}

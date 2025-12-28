@@ -81,9 +81,15 @@ export const SidePanel = ({
         sidePanelStyles.size[size],
         sidePanelStyles.position[position],
         isOpen
-          ? sidePanelStyles.position[position === 'left' ? 'leftOpen' : 'rightOpen']
-          : sidePanelStyles.position[position === 'left' ? 'leftClosed' : 'rightClosed'],
-        shouldShowOverlay ? sidePanelStyles.withBackdrop : sidePanelStyles.withoutBackdrop,
+          ? sidePanelStyles.position[
+              position === 'left' ? 'leftOpen' : 'rightOpen'
+            ]
+          : sidePanelStyles.position[
+              position === 'left' ? 'leftClosed' : 'rightClosed'
+            ],
+        shouldShowOverlay
+          ? sidePanelStyles.withBackdrop
+          : sidePanelStyles.withoutBackdrop,
       )}
     >
       <div {...stylex.props(sidePanelStyles.content)}>{children}</div>

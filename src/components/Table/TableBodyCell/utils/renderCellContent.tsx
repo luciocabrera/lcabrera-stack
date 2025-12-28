@@ -11,7 +11,10 @@ type RenderCellContentArgs = {
   value: unknown;
 };
 
-export const renderCellContent = ({ dataType, value }: RenderCellContentArgs) => {
+export const renderCellContent = ({
+  dataType,
+  value,
+}: RenderCellContentArgs) => {
   switch (dataType) {
     case 'boolean': {
       const isChecked = Boolean(value);

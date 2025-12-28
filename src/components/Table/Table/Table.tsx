@@ -21,7 +21,9 @@ export const Table = (props: TableProps) => {
       {...rest}
       {...stylex.props(
         tableStyles.base,
-        density === 'compact' ? tableStyles.density.compact : tableStyles.density.comfortable,
+        density === 'compact'
+          ? tableStyles.density.compact
+          : tableStyles.density.comfortable,
         !isBordered && tableStyles.variants.borderless,
         customStylex,
       )}

@@ -82,5 +82,6 @@ export const darkTheme = stylex.createTheme(colors, {
   /* Interaction + shadows */
   hover: 'oklch(100% 0 0 / 0.05)',
   active: 'oklch(100% 0 0 / 0.10)',
-  shadowHover: '0 20px 25px -5px oklch(0% 0 0 / 0.45), 0 10px 10px -5px oklch(0% 0 0 / 0.28)',
+  shadowHover:
+    '0 20px 25px -5px oklch(0% 0 0 / 0.45), 0 10px 10px -5px oklch(0% 0 0 / 0.28)',
 });

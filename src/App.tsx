@@ -8,20 +8,23 @@ import { Button } from './components/Button/Button';
 import { VirtualizedTable } from './components/Table';
 
 // Generate mock data for the table
-const columnDefs: VirtualizedTableColumn[] = Array.from({ length: 20 }, (_, i) => ({
-  dataType:
-    i % 5 === 0
-      ? 'number'
-      : i % 5 === 1
-        ? 'string'
-        : i % 5 === 2
-          ? 'boolean'
-          : i % 5 === 3
-            ? 'date'
-            : 'currency',
-  key: `col${i + 1}`,
-  label: `Column ${i + 1}`,
-}));
+const columnDefs: VirtualizedTableColumn[] = Array.from(
+  { length: 20 },
+  (_, i) => ({
+    dataType:
+      i % 5 === 0
+        ? 'number'
+        : i % 5 === 1
+          ? 'string'
+          : i % 5 === 2
+            ? 'boolean'
+            : i % 5 === 3
+              ? 'date'
+              : 'currency',
+    key: `col${i + 1}`,
+    label: `Column ${i + 1}`,
+  }),
+);
 
 function randomCurrency() {
   return (Math.random() * 10_000).toFixed(2);
@@ -35,7 +38,10 @@ function randomDate() {
 
 function randomString(length: number) {
   const chars = 'abcdefghijklmnopqrstuvwxyz';
-  return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+  return Array.from(
+    { length },
+    () => chars[Math.floor(Math.random() * chars.length)],
+  ).join('');
 }
 
 const tableData = Array.from({ length: 10_000 }, (_, rowIdx) => {
@@ -110,10 +116,7 @@ const App = () => {
       <div {...stylex.props(styles.container)}>
         <header {...stylex.props(styles.header)}>
           <h1 {...stylex.props(styles.title)}>Design System Showcase</h1>
-          <Button
-            color='ghost'
-            onClick={handleToggleTheme}
-          >
+          <Button color='ghost' onClick={handleToggleTheme}>
             {isDarkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
           </Button>
         </header>
@@ -173,10 +176,14 @@ const App = () => {
               <Card elevation='sm'>
                 <CardHeader>
                   <CardTitle>Card Title</CardTitle>
-                  <CardDescription>This is a simple card with header and body</CardDescription>
+                  <CardDescription>
+                    This is a simple card with header and body
+                  </CardDescription>
                 </CardHeader>
                 <CardBody>
-                  <p>Card content goes here. You can add any content you want.</p>
+                  <p>
+                    Card content goes here. You can add any content you want.
+                  </p>
                 </CardBody>
               </Card>
 
@@ -188,21 +195,17 @@ const App = () => {
                   <p>This card includes a footer section.</p>
                 </CardBody>
                 <CardFooter>
-                  <Button
-                    size='sm'
-                    width='full'
-                  >
+                  <Button size='sm' width='full'>
                     Action
                   </Button>
                 </CardFooter>
               </Card>
 
-              <Card
-                elevation='lg'
-                padding='lg'
-              >
+              <Card elevation='lg' padding='lg'>
                 <CardTitle>Custom Padding</CardTitle>
-                <CardDescription>This card has custom padding applied.</CardDescription>
+                <CardDescription>
+                  This card has custom padding applied.
+                </CardDescription>
               </Card>
             </div>
           </div>
@@ -210,13 +213,12 @@ const App = () => {
           <div {...stylex.props(styles.subsection)}>
             <h3 {...stylex.props(styles.subsectionTitle)}>Interactive Cards</h3>
             <div {...stylex.props(styles.cardGrid)}>
-              <Card
-                elevation='sm'
-                interactive='hoverable'
-              >
+              <Card elevation='sm' interactive='hoverable'>
                 <CardBody>
                   <CardTitle>Hoverable Card</CardTitle>
-                  <CardDescription>Hover over this card to see the effect.</CardDescription>
+                  <CardDescription>
+                    Hover over this card to see the effect.
+                  </CardDescription>
                 </CardBody>
               </Card>
 
@@ -229,7 +231,9 @@ const App = () => {
               >
                 <CardBody>
                   <CardTitle>Clickable Card</CardTitle>
-                  <CardDescription>Click this card to trigger an action.</CardDescription>
+                  <CardDescription>
+                    Click this card to trigger an action.
+                  </CardDescription>
                 </CardBody>
               </Card>
             </div>
@@ -265,43 +269,37 @@ const App = () => {
           <div {...stylex.props(styles.subsection)}>
             <h3 {...stylex.props(styles.subsectionTitle)}>Colored Cards</h3>
             <div {...stylex.props(styles.cardGrid)}>
-              <Card
-                color='primary'
-                elevation='sm'
-              >
+              <Card color='primary' elevation='sm'>
                 <CardBody>
                   <CardTitle icon={<InfoIcon />}>Primary Card</CardTitle>
-                  <CardDescription>This card uses the primary brand color.</CardDescription>
+                  <CardDescription>
+                    This card uses the primary brand color.
+                  </CardDescription>
                 </CardBody>
               </Card>
 
-              <Card
-                color='success'
-                elevation='sm'
-              >
+              <Card color='success' elevation='sm'>
                 <CardBody>
                   <CardTitle icon={<SuccessIcon />}>Success Card</CardTitle>
-                  <CardDescription>Perfect for success messages.</CardDescription>
+                  <CardDescription>
+                    Perfect for success messages.
+                  </CardDescription>
                 </CardBody>
               </Card>
 
-              <Card
-                color='warning'
-                elevation='sm'
-              >
+              <Card color='warning' elevation='sm'>
                 <CardBody>
                   <CardTitle icon={<WarningIcon />}>Warning Card</CardTitle>
                   <CardDescription>Use this for warnings.</CardDescription>
                 </CardBody>
               </Card>
 
-              <Card
-                color='error'
-                elevation='sm'
-              >
+              <Card color='error' elevation='sm'>
                 <CardBody>
                   <CardTitle icon={<ErrorIcon />}>Error Card</CardTitle>
-                  <CardDescription>Display error messages here.</CardDescription>
+                  <CardDescription>
+                    Display error messages here.
+                  </CardDescription>
                 </CardBody>
               </Card>
             </div>
@@ -320,7 +318,13 @@ const App = () => {
                   setIsLeftPanelOpen(true);
                 }}
               >
-                <MenuIcon style={{ height: '1rem', marginRight: '0.5rem', width: '1rem' }} />
+                <MenuIcon
+                  style={{
+                    height: '1rem',
+                    marginRight: '0.5rem',
+                    width: '1rem',
+                  }}
+                />
                 Open Left Panel
               </Button>
               <Button
@@ -329,7 +333,13 @@ const App = () => {
                 }}
               >
                 Open Right Panel
-                <MenuIcon style={{ height: '1rem', marginLeft: '0.5rem', width: '1rem' }} />
+                <MenuIcon
+                  style={{
+                    height: '1rem',
+                    marginLeft: '0.5rem',
+                    width: '1rem',
+                  }}
+                />
               </Button>
             </div>
           </div>
@@ -350,7 +360,10 @@ const App = () => {
         </SidePanelHeader>
         <SidePanelBody>
           <p>This is a left-positioned side panel with medium size.</p>
-          <p>It includes a header with an icon, a scrollable body, and a footer with actions.</p>
+          <p>
+            It includes a header with an icon, a scrollable body, and a footer
+            with actions.
+          </p>
           <p>Press Escape or click the overlay to close.</p>
         </SidePanelBody>
         <SidePanelFooter>
@@ -361,7 +374,9 @@ const App = () => {
             size='sm'
             width='full'
           >
-            <MenuCloseIcon style={{ height: '1rem', marginRight: '0.5rem', width: '1rem' }} />
+            <MenuCloseIcon
+              style={{ height: '1rem', marginRight: '0.5rem', width: '1rem' }}
+            />
             Close
           </Button>
         </SidePanelFooter>

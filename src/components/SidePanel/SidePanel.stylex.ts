@@ -1,7 +1,11 @@
 // styles
 import * as stylex from '@stylexjs/stylex';
 
-import { easing, shadows, transitions } from '@/design-system/tokens/base.stylex';
+import {
+  easing,
+  shadows,
+  transitions,
+} from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 
 const baseStyles = stylex.create({

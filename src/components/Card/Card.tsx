@@ -12,7 +12,8 @@ export const Card = ({
   padding,
   ...props
 }: CardProps) => {
-  const isInteractive = interactive === 'clickable' || interactive === 'hoverable';
+  const isInteractive =
+    interactive === 'clickable' || interactive === 'hoverable';
 
   return (
     <div

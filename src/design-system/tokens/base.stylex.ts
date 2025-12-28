@@ -19,7 +19,8 @@ export const spacing = stylex.defineVars({
 
 // Typography scale
 export const typography = stylex.defineVars({
-  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+  fontFamily:
+    '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   fontFamilyMono: '"Fira Code", "Courier New", monospace',
 
   fontSize2xl: '1.5rem', // 24px

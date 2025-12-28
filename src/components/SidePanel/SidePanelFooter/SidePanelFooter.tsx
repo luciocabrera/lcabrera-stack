@@ -4,7 +4,10 @@ import type { SidePanelFooterProps } from './SidePanelFooter.types';
 
 import { sidePanelFooterStyles } from './SidePanelFooter.stylex';
 
-export const SidePanelFooter = ({ children, ...props }: SidePanelFooterProps) => {
+export const SidePanelFooter = ({
+  children,
+  ...props
+}: SidePanelFooterProps) => {
   return (
     <div
       data-testid='side-panel-footer'

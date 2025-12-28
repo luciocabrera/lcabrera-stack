@@ -4,7 +4,10 @@ import type { CardDescriptionProps } from './CardDescription.types';
 
 import { cardDescriptionStyles } from './CardDescription.stylex';
 
-export const CardDescription = ({ children, ...props }: CardDescriptionProps) => {
+export const CardDescription = ({
+  children,
+  ...props
+}: CardDescriptionProps) => {
   return (
     <p
       data-testid='card-description'
