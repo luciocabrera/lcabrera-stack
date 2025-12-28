@@ -1,6 +1,6 @@
 import type { ComponentPropsWithoutRef } from 'react';
 
-import type { TableCustomStylex } from '../TableBase/TableBase.types';
+import type { CustomStylex } from '@/design-system/common.types';
 
 export type TableBodyCellDataType =
   | 'boolean'
@@ -11,7 +11,7 @@ export type TableBodyCellDataType =
 
 export type TableBodyCellProps = ComponentPropsWithoutRef<'td'> & {
   columnLabel?: string;
-  customStylex?: TableCustomStylex;
+  customStylex?: CustomStylex;
   dataType?: TableBodyCellDataType;
   minWidth?: number | string;
   value: unknown;

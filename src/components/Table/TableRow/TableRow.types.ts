@@ -1,13 +1,9 @@
 import type { ComponentPropsWithoutRef } from 'react';
 
-import type { TableCustomStylex } from '../TableBase/TableBase.types';
+import type { CustomStylex } from '@/design-system/common.types';
 
 export type TableRowProps = ComponentPropsWithoutRef<'div'> & {
-  customStylex?: TableCustomStylex;
+  customStylex?: CustomStylex;
   isHeader?: boolean;
   isStriped?: boolean;
-  virtualizedStyle?: {
-    height: number;
-    top: number;
-  };
 };

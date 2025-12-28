@@ -6,11 +6,11 @@ import { TableHeaderCell } from '../TableHeaderCell';
 import { TableRow } from '../TableRow';
 import { tableHeaderStyles } from './TableHeader.stylex';
 
-export const TableHeader = ({
+export const TableHeader = <TData extends Record<string, unknown>>({
   columns,
   customStylex,
   ...rest
-}: TableHeaderProps) => (
+}: TableHeaderProps<TData>) => (
   <thead
     data-testid='table-header'
     {...rest}

@@ -8,25 +8,20 @@ import { TableBodyCell } from '../TableBodyCell';
 import { TableRow } from '../TableRow';
 import { styles } from './TableBody.stylex';
 
-export const TableBody = <T extends Record<string, unknown>>({
+export const TableBody = <TData extends Record<string, unknown>>({
   columns,
   data,
   overscan,
-  rowHeight,
+  rowHeight = 32,
   tableContainerRef,
-}: TableBodyProps<T>) => {
-  const {
-    bottomSpacerHeight,
-    endIndex,
-    offsetY,
-    startIndex,
-    totalHeight,
-  } = useVirtualization({
-    containerRef: tableContainerRef,
-    itemHeight: rowHeight,
-    overscan,
-    totalItems: data.length,
-  });
+}: TableBodyProps<TData>) => {
+  const { bottomSpacerHeight, endIndex, offsetY, startIndex, totalHeight } =
+    useVirtualization({
+      containerRef: tableContainerRef,
+      itemHeight: rowHeight,
+      overscan,
+      totalItems: data.length,
+    });
 
   const visibleRows = data.slice(startIndex, endIndex);
   const totalRows = data.length;

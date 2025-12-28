@@ -1,23 +1,10 @@
-import type {
-  CompiledStyles,
-  InlineStyles,
-  StyleXArray,
-} from '@stylexjs/stylex';
-import type { ComponentPropsWithoutRef } from 'react';
+import type { ComponentPropsWithRef } from 'react';
 
-export type TableBaseProps = ComponentPropsWithoutRef<'table'> & {
-  customStylex?: TableCustomStylex;
-  density?: TableDensity;
-  isBordered?: boolean;
-  isStriped?: boolean;
-};
+import type { TableProps } from '../Table.types';
 
-export type TableCustomStylex = StyleXArray<
-  | boolean
-  | CompiledStyles
-  | null
-  | Readonly<[CompiledStyles, InlineStyles]>
-  | undefined
->;
-
-export type TableDensity = 'comfortable' | 'compact';
+export type TableBaseProps<TData extends Record<string, unknown>> =
+  ComponentPropsWithRef<'table'> &
+    Pick<
+      TableProps<TData>,
+      'customStylex' | 'density' | 'isBordered' | 'isStriped'
+    >;

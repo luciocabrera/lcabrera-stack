@@ -1,12 +1,9 @@
-import type { ComponentPropsWithoutRef, RefObject } from 'react';
+import type { ComponentPropsWithRef, RefObject } from 'react';
 
-import type { TableColumn } from '../Table.types';
+import type { TableProps } from '../Table.types';
 
-export type TableBodyProps<T extends Record<string, unknown>> =
-  ComponentPropsWithoutRef<'tbody'> & {
-    columns: TableColumn[];
-    data: T[];
-    overscan: number;
-    rowHeight: number;
-    tableContainerRef: RefObject<HTMLDivElement | null>;
-  };
+export type TableBodyProps<TData extends Record<string, unknown>> =
+  ComponentPropsWithRef<'tbody'> &
+    Pick<TableProps<TData>, 'columns' | 'data' | 'overscan' | 'rowHeight'> & {
+      tableContainerRef: RefObject<HTMLDivElement | null>;
+    };

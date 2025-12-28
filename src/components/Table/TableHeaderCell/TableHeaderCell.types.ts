@@ -1,11 +1,11 @@
 import type { ComponentPropsWithoutRef } from 'react';
 
-import type { TableCustomStylex } from '../TableBase/TableBase.types';
+import type { CustomStylex } from '@/design-system/common.types';
 
 export type SortDirection = 'asc' | 'desc' | undefined;
 
 export type TableHeaderCellProps = ComponentPropsWithoutRef<'th'> & {
-  customStylex?: TableCustomStylex;
+  customStylex?: CustomStylex;
   hasSettings?: boolean;
   isSortable?: boolean;
   isSticky?: boolean;

@@ -1,9 +1,9 @@
-import type { ComponentPropsWithoutRef } from 'react';
+import type { ComponentPropsWithoutRef, RefObject } from 'react';
 
-import type { TableColumn } from '../Table.types';
-import type { TableCustomStylex } from '../TableBase/TableBase.types';
+import type { TableProps } from '../Table.types';
 
-export type TableHeaderProps = ComponentPropsWithoutRef<'thead'> & {
-  columns: TableColumn[];
-  customStylex?: TableCustomStylex;
-};
+export type TableHeaderProps<TData extends Record<string, unknown>> =
+  ComponentPropsWithoutRef<'thead'> &
+    Pick<TableProps<TData>, 'columns' | 'customStylex'> & {
+      tableContainerRef: RefObject<HTMLDivElement | null>;
+    };

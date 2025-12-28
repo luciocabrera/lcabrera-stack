@@ -4,7 +4,9 @@ import type { TableBaseProps } from './TableBase.types';
 
 import { tableStyles } from './TableBase.stylex';
 
-export const TableBase = (props: TableBaseProps) => {
+export const TableBase = <TData extends Record<string, unknown>>(
+  props: TableBaseProps<TData>,
+) => {
   const {
     children,
     customStylex,
