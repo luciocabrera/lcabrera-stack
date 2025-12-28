@@ -5,9 +5,6 @@ export type TableColumn = {
   minWidth?: number;
 };
 
-// Alias for virtualized table usage
-export type VirtualizedTableColumn = TableColumn;
-
 export type TableProps<T extends Record<string, unknown>> = {
   columns: TableColumn[];
   data: T[];
@@ -15,3 +12,4 @@ export type TableProps<T extends Record<string, unknown>> = {
   overscan?: number;
   rowHeight?: number;
 };
+

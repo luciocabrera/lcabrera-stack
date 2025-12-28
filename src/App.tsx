@@ -1,14 +1,14 @@
 import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 
-import type { VirtualizedTableColumn } from './components/Table/Table.types';
+import type { TableColumn } from './components/Table/Table.types';
 
 import { styles } from './App.stylex';
 import { Button } from './components/Button';
 import { Table } from './components/Table';
 
 // Generate mock data for the table
-const columnDefs: VirtualizedTableColumn[] = Array.from(
+const columnDefs: TableColumn[] = Array.from(
   {
     length: 20,
   },

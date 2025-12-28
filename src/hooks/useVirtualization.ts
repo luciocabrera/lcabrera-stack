@@ -2,7 +2,7 @@ import type { RefObject } from 'react';
 
 import { useEffect, useState } from 'react';
 
-export type UseVirtualizationOptions = {
+export type UseVirtualizationArgs = {
   containerRef: RefObject<HTMLElement | null>;
   defaultContainerHeight?: number;
   itemHeight: number;
@@ -25,16 +25,18 @@ export const useVirtualization = ({
   itemHeight,
   overscan = 3,
   totalItems,
-}: UseVirtualizationOptions): UseVirtualizationResult => {
+}: UseVirtualizationArgs): UseVirtualizationResult => {
   const [scrollTop, setScrollTop] = useState(0);
-  const [containerHeight, setContainerHeight] = useState(defaultContainerHeight);
+  const [containerHeight, setContainerHeight] = useState(
+    defaultContainerHeight,
+  );
 
   useEffect(() => {
     const container = containerRef.current;
 
-    function updateHeight() {
+    const updateHeight = () => {
       setContainerHeight(container?.offsetHeight ?? defaultContainerHeight);
-    }
+    };
 
     const handleScroll = () => {
       setScrollTop(container?.scrollTop ?? 0);
@@ -59,7 +61,8 @@ export const useVirtualization = ({
   const offsetY = startIndex * itemHeight;
   const totalHeight = totalItems * itemHeight;
   const visibleItemsCount = endIndex - startIndex;
-  const bottomSpacerHeight = totalHeight - (offsetY + visibleItemsCount * itemHeight);
+  const bottomSpacerHeight =
+    totalHeight - (offsetY + visibleItemsCount * itemHeight);
 
   return {
     bottomSpacerHeight,
