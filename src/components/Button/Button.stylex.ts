@@ -62,7 +62,7 @@ const baseStyles = stylex.create({
 });
 
 // Ripple variants for each color
-export const rippleVariants = stylex.create({
+const rippleVariants = stylex.create({
   error: {
     backgroundColor: {
       ':disabled': 'transparent',
@@ -149,7 +149,7 @@ export const rippleVariants = stylex.create({
 });
 
 // Size variants
-export const sizeVariants = stylex.create({
+const sizeVariants = stylex.create({
   lg: {
     borderRadius: borderRadius.lg,
     paddingInline: spacing.lg,
@@ -173,7 +173,7 @@ export const sizeVariants = stylex.create({
 });
 
 // Color variants
-export const colorVariants = stylex.create({
+const colorVariants = stylex.create({
   error: {
     backgroundColor: colors.error,
     color: colors.errorText,
@@ -214,7 +214,7 @@ export const colorVariants = stylex.create({
 });
 
 // Style variants
-export const styleVariants = stylex.create({
+const styleVariants = stylex.create({
   elevated: {
     boxShadow: shadows.md,
   },
@@ -229,7 +229,7 @@ export const styleVariants = stylex.create({
 });
 
 // Width variants
-export const widthVariants = stylex.create({
+const widthVariants = stylex.create({
   auto: {
     width: 'auto',
   },
