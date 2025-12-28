@@ -4,7 +4,7 @@ import { useState } from 'react';
 import type { VirtualizedTableColumn } from './components/Table/VirtualizedTable.types';
 
 import { styles } from './App.stylex';
-import { Button } from './components/Button/Button';
+import { Button } from './components/Button';
 import { VirtualizedTable } from './components/Table';
 
 // Generate mock data for the table
