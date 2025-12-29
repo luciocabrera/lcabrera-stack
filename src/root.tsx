@@ -2,42 +2,21 @@ import { Links, Meta, Outlet, Scripts, ScrollRestoration } from 'react-router';
 
 import type { Route } from './+types/root';
 
-import { DevStyleXInject } from './DevStyleXInject';
-
+import { DevStyleXInject } from './components/DevStyleXInject';
 import stylexCssHref from './stylex.css?url';
-import './stylex.css?url';
 
 export const links: Route.LinksFunction = () => [
   { href: '/favicon.ico', rel: 'icon' },
   { href: '/index.css', rel: 'stylesheet' },
-    { href: '/stylex.css', rel: 'stylesheet' },
+  { href: '/stylex.css', rel: 'stylesheet' },
 ];
-
-export function Layout({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang='en'>
-      <head>
-        <meta charSet='utf-8' />
-        <meta content='width=device-width, initial-scale=1' name='viewport' />
-        <Meta />
-        <DevStyleXInject cssHref={stylexCssHref} />
-        <Links />
-      </head>
-      <body>
-        {children}
-        <ScrollRestoration />
-        <Scripts />
-      </body>
-    </html>
-  );
-}
 
 export default function App() {
   return <Outlet />;
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
-  let message = 'Oops!';
+  const message = 'Oops!';
   let details = 'An unexpected error occurred.';
   let stack: string | undefined;
 
@@ -56,5 +35,24 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
         </pre>
       )}
     </main>
+  );
+}
+
+export function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang='en'>
+      <head>
+        <meta charSet='utf-8' />
+        <meta content='width=device-width, initial-scale=1' name='viewport' />
+        <Meta />
+        <DevStyleXInject cssHref={stylexCssHref} />
+        <Links />
+      </head>
+      <body>
+        {children}
+        <ScrollRestoration />
+        <Scripts />
+      </body>
+    </html>
   );
 }
