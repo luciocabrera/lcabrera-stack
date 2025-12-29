@@ -9,28 +9,33 @@ export type ToolbarButtonConfig = Omit<ButtonProps, 'children' | 'width'> & {
   type: 'button';
 };
 
-export type ToolbarButtonItemProps = ComponentPropsWithoutRef<'button'> & Pick<ButtonProps, 'color' | 'isDisabled' | 'size'> & {
-  icon?: ReactNode;
-  label: string;
-};
+export type ToolbarButtonItemProps = ComponentPropsWithoutRef<'button'> &
+  Pick<ButtonProps, 'color' | 'isDisabled' | 'size'> & {
+    icon?: ReactNode;
+    label: string;
+  };
 
 export type ToolbarItemConfig = ToolbarButtonConfig | ToolbarLinkConfig;
 
-export type ToolbarLinkConfig = Omit<NavLinkProps, 'children' | 'className' | 'to'> & {
+export type ToolbarLinkConfig = Omit<
+  NavLinkProps,
+  'children' | 'className' 
+> & {
   color?: Pick<ButtonProps, 'color'>['color'];
   icon?: ReactNode;
   label: string;
-  to: string;
+//   to: string;
   type: 'link';
 };
 
-export type ToolbarLinkItemProps = Pick<NavLinkProps, 'end'> & {
+export type ToolbarLinkItemProps = NavLinkProps & {
   color?: Pick<ButtonProps, 'color'>['color'];
   icon?: ReactNode;
   isActive?: boolean;
   label: string;
+  orientation?: 'horizontal' | 'vertical';
   size?: ToolbarSize;
-  to: string;
+//   to: string;
 };
 
 export type ToolbarOrientation = 'horizontal' | 'vertical';

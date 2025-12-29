@@ -58,6 +58,7 @@ export const Toolbar = ({
                   end={item.end}
                   icon={item.icon}
                   label={item.label}
+                  orientation={orientation}
                   size={size}
                   to={item.to}
                 />

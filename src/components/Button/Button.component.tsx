@@ -23,8 +23,6 @@ export const Button = ({
       type={type}
       {...stylex.props(
         buttonStyles.base,
-        buttonStyles.rippleBase,
-        buttonStyles.ripple[color],
         buttonStyles.size[size],
         buttonStyles.color[color],
         buttonStyles.style[variant],

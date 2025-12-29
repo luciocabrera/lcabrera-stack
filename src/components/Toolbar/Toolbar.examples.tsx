@@ -17,6 +17,7 @@ export const SidePanelToolbarExample = () => {
       label: 'Home',
       to: '/',
       type: 'link',
+      color: 'primary',
     },
     {
       end: false,
@@ -24,12 +25,14 @@ export const SidePanelToolbarExample = () => {
       label: 'Dashboard',
       to: '/dashboard',
       type: 'link',
+      color: 'outline',
     },
     {
       icon: <FileTextIcon size={20} />,
       label: 'Documents',
       to: '/documents',
       type: 'link',
+      color: 'ghost',
     },
     {
       icon: <SettingsIcon size={20} />,
