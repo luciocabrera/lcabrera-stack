@@ -7,8 +7,8 @@ import {
   spacing,
   transitions,
   typography,
-} from '../../design-system/tokens/base.stylex';
-import { colors } from '../../design-system/tokens/colors.stylex';
+} from '@/design-system/tokens/base.stylex';
+import { colors } from '@/design-system/tokens/colors.stylex';
 
 /**
  * Button Component Styles
@@ -22,20 +22,29 @@ const baseStyles = stylex.create({
     borderWidth: '0',
     gap: spacing.xs,
     overflow: 'hidden',
-    textDecoration: 'none',
-    transition: `opacity ${transitions.fast} ${easing.easeInOut}`,
     alignItems: 'center',
     appearance: 'none',
+    textDecoration: 'none',
     containerName: 'button',
     containerType: 'inline-size',
-    cursor: { default: 'pointer', ':disabled': 'not-allowed' },
+    transition: `opacity ${transitions.fast} ${easing.easeInOut}`,
+    cursor: { default: 'pointer', ':disabled': 'not-allowed', },
     display: 'inline-flex',
     fontFamily: typography.fontFamily,
     fontWeight: typography.fontWeightMedium,
     justifyContent: 'center',
-    opacity: { default: 1, ':disabled': 0.6, ':hover': 0.85 },
+    opacity: { default: 1, ':disabled': 0.6, ':hover': 0.85, },
     position: 'relative',
     userSelect: 'none',
+  },
+
+  buttonLabel: {
+    '@container button (max-width: 60px)': {
+      display: 'none',
+    },
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
   },
 
   // Base ripple effect
@@ -252,6 +261,7 @@ const widthVariants = stylex.create({
 export const buttonStyles = {
   base: baseStyles.button,
   color: colorVariants,
+  label: baseStyles.buttonLabel,
   ripple: rippleVariants,
   rippleBase: baseStyles.rippleBase,
   size: sizeVariants,

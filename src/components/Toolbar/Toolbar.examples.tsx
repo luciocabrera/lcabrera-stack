@@ -53,6 +53,7 @@ export const SidePanelToolbarExample = () => {
 export const HorizontalToolbarExample = () => {
   const actionItems: ToolbarItemConfig[] = [
     {
+      color: 'outline',
       icon: <FileTextIcon size={20} />,
       label: 'Save',
       onClick: () => {
@@ -78,6 +79,46 @@ export const HorizontalToolbarExample = () => {
       type: 'button',
     },
     {
+      color: 'outline',
+      icon: <UserIcon size={20} />,
+      label: 'Settings',
+      to: '/settings',
+      type: 'link',
+    },
+    {
+      color: 'error',
+      icon: <SettingsIcon size={20} />,
+      label: 'Logout',
+      onClick: () => {
+        console.warn('Logout clicked');
+      },
+      type: 'button',
+    },
+  ];
+
+  return (
+    <Toolbar
+      aria-label='Document actions'
+      data-testid='document-actions'
+      items={actionItems}
+      orientation='horizontal'
+    />
+  );
+};
+
+export const HorizontalToolbarExampleShort = () => {
+  const actionItems: ToolbarItemConfig[] = [
+    {
+      color: 'primary',
+      icon: <SettingsIcon size={20} />,
+      label: 'Publish',
+      onClick: () => {
+        console.warn('Publish clicked');
+      },
+      type: 'button',
+    },
+    {
+      color: 'outline',
       icon: <UserIcon size={20} />,
       label: 'Settings',
       to: '/settings',

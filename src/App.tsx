@@ -121,9 +121,9 @@ import {
   SidePanelHeader,
   SidePanelTitle,
 } from './components/SidePanel';
+import { HorizontalToolbarExample, HorizontalToolbarExampleShort } from './components/Toolbar/Toolbar.examples';
 import { darkTheme } from './design-system/themes/dark.stylex';
 import { lightTheme } from './design-system/themes/light.stylex';
-import { HorizontalToolbarExample } from './components/Toolbar/Toolbar.examples';
 
 const App = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -439,6 +439,7 @@ const App = () => {
           </div>
 
           <HorizontalToolbarExample />
+          <HorizontalToolbarExampleShort />
         </SidePanelBody>
         <SidePanelFooter>
           <div

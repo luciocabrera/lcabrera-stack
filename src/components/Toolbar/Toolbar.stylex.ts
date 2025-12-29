@@ -4,13 +4,13 @@ import { spacing } from '@/design-system/tokens/base.stylex';
 
 export const styles = stylex.create({
   toolbar: {
+    margin: 0,
+    padding: 0,
+    gap: spacing.xs,
+    listStyle: 'none',
     containerName: 'toolbar',
     containerType: 'inline-size',
     display: 'flex',
-    gap: spacing.xs,
-    listStyle: 'none',
-    margin: 0,
-    padding: 0,
     width: '100%',
   },
 
@@ -28,8 +28,8 @@ export const styles = stylex.create({
   },
 
   toolbarItem: {
-    display: 'flex',
     flex: '0 0 auto',
+    display: 'flex',
   },
 
   toolbarItemResponsive: {

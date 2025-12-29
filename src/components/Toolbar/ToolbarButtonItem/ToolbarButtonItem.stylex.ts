@@ -11,6 +11,9 @@ export const styles = stylex.create({
   },
 
   itemLabel: {
+    '@container button (max-width: 60px)': {
+      display: 'none',
+    },
     flex: 1,
     overflow: 'hidden',
     textOverflow: 'ellipsis',

@@ -54,6 +54,7 @@ export const Toolbar = ({
                 />
               ) : (
                 <ToolbarLinkItem
+                  color={item.color}
                   end={item.end}
                   icon={item.icon}
                   label={item.label}
