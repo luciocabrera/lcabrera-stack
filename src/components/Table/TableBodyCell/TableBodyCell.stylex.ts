@@ -40,6 +40,6 @@ export const tableBodyCellStyles = stylex.create({
   checkboxChecked: {
     borderColor: colors.brandPrimary,
     backgroundColor: colors.brandPrimary,
-    color: colors.textInverse,
+    color: colors.brandPrimaryText,
   },
 });

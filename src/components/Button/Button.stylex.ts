@@ -175,7 +175,9 @@ const sizeVariants = stylex.create({
 // Color variants
 const colorVariants = stylex.create({
   error: {
-    backgroundColor: colors.error,
+    backgroundColor: {
+      default: colors.error,
+    },
     color: colors.errorText,
   },
 
@@ -193,22 +195,30 @@ const colorVariants = stylex.create({
   },
 
   primary: {
-    backgroundColor: colors.brandPrimary,
+    backgroundColor: {
+      default: colors.brandPrimary,
+    },
     color: colors.brandPrimaryText,
   },
 
   secondary: {
-    backgroundColor: colors.brandSecondary,
+    backgroundColor: {
+      default: colors.brandSecondary,
+    },
     color: colors.brandSecondaryText,
   },
 
   success: {
-    backgroundColor: colors.success,
+    backgroundColor: {
+      default: colors.success,
+    },
     color: colors.successText,
   },
 
   warning: {
-    backgroundColor: colors.warning,
+    backgroundColor: {
+      default: colors.warning,
+    },
     color: colors.warningText,
   },
 });

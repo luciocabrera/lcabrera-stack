@@ -8,7 +8,7 @@ export const TableRow = ({
   children,
   customStylex,
   isHeader = false,
-  isStriped = false,
+  isStriped = true,
   ...rest
 }: TableRowProps) => {
   return (

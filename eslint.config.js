@@ -277,7 +277,56 @@ export default defineConfig(
     },
   },
 
-  // 8. Ignores
+  // 8. React Router config override - Allow configuration object properties
+  {
+    files: ['react-router.config.ts'],
+    rules: {
+      '@typescript-eslint/naming-convention': [
+        'error',
+        {
+          selector: ['variable', 'classProperty', 'typeProperty', 'parameter'],
+          types: ['boolean'],
+          format: ['PascalCase'],
+          prefix: [
+            'is',
+            'should',
+            'has',
+            'can',
+            'did',
+            'will',
+            'was',
+            'are',
+            'does',
+          ],
+        },
+        {
+          selector: 'objectLiteralProperty',
+          format: null, // Allow any format for React Router config objects (like ssr, basename, etc.)
+        },
+        {
+          selector: 'import',
+          format: ['camelCase', 'PascalCase'],
+        },
+        {
+          selector: 'default',
+          format: ['camelCase'],
+          leadingUnderscore: 'allow',
+          trailingUnderscore: 'allow',
+        },
+        {
+          selector: 'variable',
+          format: ['camelCase', 'UPPER_CASE', 'PascalCase'],
+        },
+        {
+          selector: 'function',
+          format: ['camelCase', 'PascalCase'],
+        },
+        { selector: 'typeLike', format: ['PascalCase'] },
+      ],
+    },
+  },
+
+  // 9. Ignores
   globalIgnores([
     'build/',
     'out/',

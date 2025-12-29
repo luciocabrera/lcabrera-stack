@@ -1,13 +1,9 @@
+import { reactRouter } from '@react-router/dev/vite';
 import stylex from '@stylexjs/unplugin';
-// import react from '@vitejs/plugin-react';
-import babel from 'vite-plugin-babel';
 import { fileURLToPath, URL } from 'node:url';
 import { defineConfig } from 'vite';
-import { reactRouter } from '@react-router/dev/vite';
+import babel from 'vite-plugin-babel';
 
-// const rootDir = fileURLToPath(new URL('.', import.meta.url));
-
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [
     stylex.vite({
@@ -17,19 +13,13 @@ export default defineConfig({
       // dev: process.env.NODE_ENV === 'development',
       useCSSLayers: true,
     }),
-    // react({
-    //   babel: {
-    //     plugins: [['babel-plugin-react-compiler']],
-    //   },
-    // }),
-    // reactRouter(),
     reactRouter(),
     babel({
-      filter: /\.[jt]sx?$/,
       babelConfig: {
-        presets: ['@babel/preset-typescript'], // if you use TypeScript
         plugins: [['babel-plugin-react-compiler']],
+        presets: ['@babel/preset-typescript'],
       },
+      filter: /\.[jt]sx?$/,
     }),
   ],
   resolve: {
