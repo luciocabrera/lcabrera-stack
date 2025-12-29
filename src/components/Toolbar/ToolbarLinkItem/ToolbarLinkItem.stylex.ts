@@ -6,6 +6,10 @@ import {
   transitions,
 } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
+import {
+  rippleBase,
+  rippleVariants,
+} from '@/design-system/tokens/commons.stylex';
 
 export const styles = stylex.create({
   item: {
@@ -17,6 +21,10 @@ export const styles = stylex.create({
     display: 'flex',
     gap: spacing.sm,
     justifyContent: 'center',
+    opacity: {
+      default: 1,
+      ':hover': 0.85,
+    },
     outline: {
       ':focus-visible': `2px solid ${colors.borderFocus}`,
     },
@@ -24,12 +32,8 @@ export const styles = stylex.create({
       ':focus-visible': 2,
     },
     textDecoration: 'none',
-    transition: `background-color ${transitions.fast}, opacity ${transitions.fast}`,
+    transition: `opacity ${transitions.fast}`,
     width: '100%',
-    opacity: {
-      default: 1,
-      ':hover': 0.85,
-    },
   },
 
   itemActive: {
@@ -39,17 +43,14 @@ export const styles = stylex.create({
   },
 
   itemError: {
-    backgroundColor: {
-      ':hover': colors.errorHover,
-      default: colors.error,
-    },
+    backgroundColor: colors.error,
     color: colors.errorText,
   },
 
   itemGhost: {
     backgroundColor: {
-      ':hover': colors.hover,
       default: 'transparent',
+      ':hover': colors.hover,
     },
     color: colors.textPrimary,
   },
@@ -88,8 +89,8 @@ export const styles = stylex.create({
 
   itemOutline: {
     backgroundColor: {
-      ':hover': colors.hover,
       default: 'transparent',
+      ':hover': colors.hover,
     },
     borderColor: colors.borderPrimary,
     borderStyle: 'solid',
@@ -98,18 +99,12 @@ export const styles = stylex.create({
   },
 
   itemPrimary: {
-    backgroundColor: {
-      ':hover': colors.brandPrimaryHover,
-      default: colors.brandPrimary,
-    },
+    backgroundColor: colors.brandPrimary,
     color: colors.brandPrimaryText,
   },
 
   itemSecondary: {
-    backgroundColor: {
-      ':hover': colors.brandSecondaryHover,
-      default: colors.brandSecondary,
-    },
+    backgroundColor: colors.brandSecondary,
     color: colors.brandSecondaryText,
   },
 
@@ -121,18 +116,17 @@ export const styles = stylex.create({
   },
 
   itemSuccess: {
-    backgroundColor: {
-      ':hover': colors.successHover,
-      default: colors.success,
-    },
+    backgroundColor: colors.success,
     color: colors.successText,
   },
 
   itemWarning: {
-    backgroundColor: {
-      ':hover': colors.warningHover,
-      default: colors.warning,
-    },
+    backgroundColor: colors.warning,
     color: colors.warningText,
   },
 });
+
+export const rippleStyles = {
+  base: rippleBase.ripple,
+  variants: rippleVariants,
+};

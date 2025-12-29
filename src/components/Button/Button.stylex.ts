@@ -9,6 +9,10 @@ import {
   typography,
 } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
+import {
+  rippleBase as sharedRippleBase,
+  rippleVariants as sharedRippleVariants,
+} from '@/design-system/tokens/commons.stylex';
 
 /**
  * Button Component Styles
@@ -46,115 +50,6 @@ const baseStyles = stylex.create({
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
   },
-
-  // Base ripple effect
-  rippleBase: {
-    backgroundPosition: 'center',
-    transition: {
-      default: 'background-color 0.8s, background-size 0.8s',
-      ':disabled': 'none',
-      ':active': 'background-color 0s, background-size 0s',
-    },
-    backgroundColor: {
-      ':disabled': 'transparent',
-    },
-    backgroundImage: {
-      ':disabled': 'none',
-    },
-    backgroundSize: {
-      default: '0%',
-      ':disabled': '0%',
-      ':hover': '15000%',
-      ':active': '100%',
-    },
-  },
-});
-
-// Ripple variants for each color
-const rippleVariants = stylex.create({
-  error: {
-    backgroundColor: {
-      ':disabled': 'transparent',
-      ':hover': colors.errorHover,
-      ':active': colors.error,
-    },
-    backgroundImage: {
-      ':disabled': 'none',
-      ':hover': `radial-gradient(circle, transparent 1%, ${colors.errorHover} 1%)`,
-    },
-  },
-
-  ghost: {
-    backgroundColor: {
-      ':disabled': 'transparent',
-      ':hover': colors.hover,
-      ':active': colors.active,
-    },
-    backgroundImage: {
-      ':disabled': 'none',
-      ':hover': `radial-gradient(circle, transparent 1%, ${colors.hover} 1%)`,
-    },
-  },
-
-  outline: {
-    backgroundColor: {
-      ':disabled': 'transparent',
-      ':hover': colors.hover,
-      ':active': colors.active,
-    },
-    backgroundImage: {
-      ':disabled': 'none',
-      ':hover': `radial-gradient(circle, transparent 1%, ${colors.hover} 1%)`,
-    },
-  },
-
-  primary: {
-    backgroundColor: {
-      ':disabled': 'transparent',
-      ':hover': colors.brandPrimaryHover,
-      ':active': colors.brandPrimaryActive,
-    },
-    backgroundImage: {
-      ':disabled': 'none',
-      ':hover': `radial-gradient(circle, transparent 1%, ${colors.brandPrimaryHover} 1%)`,
-    },
-  },
-
-  secondary: {
-    backgroundColor: {
-      ':disabled': 'transparent',
-      ':hover': colors.brandSecondaryHover,
-      ':active': colors.brandSecondaryActive,
-    },
-    backgroundImage: {
-      ':disabled': 'none',
-      ':hover': `radial-gradient(circle, transparent 1%, ${colors.brandSecondaryHover} 1%)`,
-    },
-  },
-
-  success: {
-    backgroundColor: {
-      ':disabled': 'transparent',
-      ':hover': colors.successHover,
-      ':active': colors.success,
-    },
-    backgroundImage: {
-      ':disabled': 'none',
-      ':hover': `radial-gradient(circle, transparent 1%, ${colors.successHover} 1%)`,
-    },
-  },
-
-  warning: {
-    backgroundColor: {
-      ':disabled': 'transparent',
-      ':hover': colors.warningHover,
-      ':active': colors.warning,
-    },
-    backgroundImage: {
-      ':disabled': 'none',
-      ':hover': `radial-gradient(circle, transparent 1%, ${colors.warningHover} 1%)`,
-    },
-  },
 });
 
 // Size variants
@@ -184,14 +79,15 @@ const sizeVariants = stylex.create({
 // Color variants
 const colorVariants = stylex.create({
   error: {
-    backgroundColor: {
-      default: colors.error,
-    },
+    backgroundColor: colors.error,
     color: colors.errorText,
   },
 
   ghost: {
-    backgroundColor: 'transparent',
+    backgroundColor: {
+      default: 'transparent',
+      ':hover': colors.hover,
+    },
     color: colors.textPrimary,
   },
 
@@ -199,35 +95,30 @@ const colorVariants = stylex.create({
     borderColor: colors.borderPrimary,
     borderStyle: 'solid',
     borderWidth: '1px',
-    backgroundColor: 'transparent',
+    backgroundColor: {
+      default: 'transparent',
+      ':hover': colors.hover,
+    },
     color: colors.textPrimary,
   },
 
   primary: {
-    backgroundColor: {
-      default: colors.brandPrimary,
-    },
+    backgroundColor: colors.brandPrimary,
     color: colors.brandPrimaryText,
   },
 
   secondary: {
-    backgroundColor: {
-      default: colors.brandSecondary,
-    },
+    backgroundColor: colors.brandSecondary,
     color: colors.brandSecondaryText,
   },
 
   success: {
-    backgroundColor: {
-      default: colors.success,
-    },
+    backgroundColor: colors.success,
     color: colors.successText,
   },
 
   warning: {
-    backgroundColor: {
-      default: colors.warning,
-    },
+    backgroundColor: colors.warning,
     color: colors.warningText,
   },
 });
@@ -262,8 +153,8 @@ export const buttonStyles = {
   base: baseStyles.button,
   color: colorVariants,
   label: baseStyles.buttonLabel,
-  ripple: rippleVariants,
-  rippleBase: baseStyles.rippleBase,
+  ripple: sharedRippleVariants,
+  rippleBase: sharedRippleBase.ripple,
   size: sizeVariants,
   style: styleVariants,
   width: widthVariants,

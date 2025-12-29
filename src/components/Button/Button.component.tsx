@@ -15,6 +15,8 @@ export const Button = ({
   width = 'auto',
   ...rest
 }: ButtonProps) => {
+  const hasRipple = color === 'ghost' || color === 'outline';
+
   return (
     <button
       data-testid='button'
@@ -23,8 +25,8 @@ export const Button = ({
       type={type}
       {...stylex.props(
         buttonStyles.base,
-        buttonStyles.rippleBase,
-        buttonStyles.ripple[color],
+        hasRipple && buttonStyles.rippleBase,
+        hasRipple && buttonStyles.ripple[color],
         buttonStyles.size[size],
         buttonStyles.color[color],
         buttonStyles.style[variant],

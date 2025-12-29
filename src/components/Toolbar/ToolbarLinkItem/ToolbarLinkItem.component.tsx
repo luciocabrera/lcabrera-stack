@@ -3,7 +3,7 @@ import { NavLink } from 'react-router';
 
 import type { ToolbarLinkItemProps } from '../Toolbar.types';
 
-import { styles } from './ToolbarLinkItem.stylex';
+import { rippleStyles, styles } from './ToolbarLinkItem.stylex';
 
 export const ToolbarLinkItem = ({
   color = 'ghost',
@@ -31,11 +31,15 @@ export const ToolbarLinkItem = ({
                 ? styles.itemOutline
                 : styles.itemGhost;
 
+  const hasRipple = color === 'ghost' || color === 'outline';
+
   return (
     <NavLink
       className={({ isActive }) =>
         stylex.props(
           styles.item,
+          hasRipple && rippleStyles.base,
+          hasRipple && rippleStyles.variants[color],
           sizeStyle,
           colorStyle,
           isActive && styles.itemActive,
