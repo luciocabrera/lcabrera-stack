@@ -21,6 +21,7 @@ export const SidePanelToolbarExample = () => {
     },
     {
       color: 'outline',
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       end: false,
       icon: <BarChartIcon size={20} />,
       label: 'Dashboard',

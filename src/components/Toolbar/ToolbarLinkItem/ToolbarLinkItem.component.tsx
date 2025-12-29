@@ -13,18 +13,19 @@ export const ToolbarLinkItem = ({
   size = 'md',
   ...props
 }: ToolbarLinkItemProps) => {
-  console.log('ToolbarLinkItem props:', { color, icon, label, orientation, size, ...props });
+  
   return (
     <NavLink
-      className={({ isActive }) =>
-        stylex.props(
+      className={({ isActive }) => {
+        const classNameValue = stylex.props(
           linkItemStyles.base,
           linkItemStyles.orientation[orientation],
           linkItemStyles.size[size],
           linkItemStyles.color[color],
           isActive && linkItemStyles.active,
-        ).className!
-      }
+        ).className;
+        return classNameValue ?? '';
+      }}
       {...props}
     >
       {icon && <span {...stylex.props(linkItemStyles.icon)}>{icon}</span>}

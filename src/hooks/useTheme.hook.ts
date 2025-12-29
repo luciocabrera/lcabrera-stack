@@ -13,7 +13,7 @@ import { ThemeContext } from '@/contexts/ThemeContext';
 export const useTheme = (): ThemeContextValue => {
   const context = use(ThemeContext);
 
-  if (context === null) {
+  if (context === undefined) {
     throw new Error('useTheme must be used within a ThemeProvider');
   }
 

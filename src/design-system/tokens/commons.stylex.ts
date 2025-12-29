@@ -22,14 +22,14 @@ export const baseInteractiveStyles = stylex.create({
     outline: {
       ':focus-visible': `2px solid ${colors.borderFocus}`,
     },
-    alignItems: 'center',
     overflow: 'hidden',
+    textDecoration: 'none',
+    transition: `opacity ${transitions.fast} ${easing.easeInOut}`,
+    alignItems: 'center',
     appearance: 'none',
     containerType: 'inline-size',
-    textDecoration: 'none',
     cursor: 'pointer',
     display: 'inline-flex',
-    transition: `opacity ${transitions.fast} ${easing.easeInOut}`,
     fontFamily: typography.fontFamily,
     fontWeight: typography.fontWeightMedium,
     justifyContent: 'center',
@@ -38,7 +38,7 @@ export const baseInteractiveStyles = stylex.create({
       ':hover': 0.85,
     },
     outlineOffset: {
-      ':focus-visible': 2,
+      ':focus-visible': '2px',
     },
     position: 'relative',
     userSelect: 'none',
@@ -46,10 +46,11 @@ export const baseInteractiveStyles = stylex.create({
   },
 
   label: {
-    '@container (max-width: 60px)': {
-      display: 'none',
-    },
     overflow: 'hidden',
+    display: {
+      default: 'block',
+      '@container (max-width: 60px)': 'none',
+    },
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
   },

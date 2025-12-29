@@ -13,7 +13,7 @@ import { ThemeContext } from './ThemeContext.context';
  * Wraps the application to provide theme context to all child components
  */
 export const ThemeProvider = ({ children, defaultTheme = 'light' }: ThemeProviderProps) => {
-  const [theme, setTheme] = useLocalStorage<ThemeMode>('theme', defaultTheme);
+  const [theme, setTheme] = useLocalStorage<ThemeMode>({ initialValue: defaultTheme, key: 'theme' });
 
   const value = useMemo(
     () => ({

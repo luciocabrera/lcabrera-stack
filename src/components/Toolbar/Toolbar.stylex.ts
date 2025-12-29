@@ -15,10 +15,10 @@ export const styles = stylex.create({
   },
 
   toolbarHorizontal: {
-    '@container toolbar (max-width: 400px)': {
-      flexDirection: 'column',
+    flexDirection: {
+      default: 'row',
+      '@container toolbar (max-width: 400px)': 'column',
     },
-    flexDirection: 'row',
     flexWrap: 'wrap',
   },
 
@@ -33,8 +33,9 @@ export const styles = stylex.create({
   },
 
   toolbarItemResponsive: {
-    '@container toolbar (max-width: 400px)': {
-      flex: '1 1 100%',
+    flex: {
+      default: '0 0 auto',
+      '@container toolbar (max-width: 400px)': '1 1 100%',
     },
   },
 });

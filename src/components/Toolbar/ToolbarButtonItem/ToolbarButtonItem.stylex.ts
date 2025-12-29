@@ -11,11 +11,12 @@ export const styles = stylex.create({
   },
 
   itemLabel: {
-    '@container button (max-width: 60px)': {
-      display: 'none',
-    },
-    flex: 1,
+    flex: '1 1 auto',
     overflow: 'hidden',
+    display: {
+      default: 'block',
+      '@container button (max-width: 60px)': 'none',
+    },
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
   },
