@@ -13,26 +13,26 @@ import { Toolbar } from '@/components/Toolbar';
 export const SidePanelToolbarExample = () => {
   const navItems: ToolbarItemConfig[] = [
     {
+      color: 'primary',
       icon: <HomeIcon size={20} />,
       label: 'Home',
       to: '/',
       type: 'link',
-      color: 'primary',
     },
     {
+      color: 'outline',
       end: false,
       icon: <BarChartIcon size={20} />,
       label: 'Dashboard',
       to: '/dashboard',
       type: 'link',
-      color: 'outline',
     },
     {
+      color: 'ghost',
       icon: <FileTextIcon size={20} />,
       label: 'Documents',
       to: '/documents',
       type: 'link',
-      color: 'ghost',
     },
     {
       icon: <SettingsIcon size={20} />,

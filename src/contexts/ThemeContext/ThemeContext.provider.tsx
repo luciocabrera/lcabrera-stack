@@ -4,8 +4,9 @@ import type { ThemeMode } from '@/types/theme.types';
 
 import { useLocalStorage } from '@/hooks/useLocalStorage.hook';
 
-import { ThemeContext } from './ThemeContext.context';
 import type { ThemeProviderProps } from './ThemeContext.types';
+
+import { ThemeContext } from './ThemeContext.context';
 
 /**
  * ThemeProvider component that manages theme state and persistence

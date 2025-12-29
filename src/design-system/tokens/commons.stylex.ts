@@ -16,31 +16,31 @@ import { colors } from './colors.stylex';
 // Base interactive element (button/link) styles
 export const baseInteractiveStyles = stylex.create({
   element: {
-    alignItems: 'center',
-    appearance: 'none',
     borderStyle: 'none',
     borderWidth: '0',
+    gap: spacing.xs,
+    outline: {
+      ':focus-visible': `2px solid ${colors.borderFocus}`,
+    },
+    alignItems: 'center',
+    overflow: 'hidden',
+    appearance: 'none',
     containerType: 'inline-size',
+    textDecoration: 'none',
     cursor: 'pointer',
     display: 'inline-flex',
+    transition: `opacity ${transitions.fast} ${easing.easeInOut}`,
     fontFamily: typography.fontFamily,
     fontWeight: typography.fontWeightMedium,
-    gap: spacing.xs,
     justifyContent: 'center',
     opacity: {
       default: 1,
       ':hover': 0.85,
     },
-    outline: {
-      ':focus-visible': `2px solid ${colors.borderFocus}`,
-    },
     outlineOffset: {
       ':focus-visible': 2,
     },
-    overflow: 'hidden',
     position: 'relative',
-    textDecoration: 'none',
-    transition: `opacity ${transitions.fast} ${easing.easeInOut}`,
     userSelect: 'none',
     width: '100%',
   },
@@ -75,11 +75,11 @@ export const rippleBase = stylex.create({
 export const colorVariants = stylex.create({
   error: {
     backgroundColor: colors.error,
-    color: colors.errorText,
     backgroundImage: {
       default: 'none',
       ':hover': `radial-gradient(circle, oklch(100% 0 0 / 0.2) 1%, transparent 1%)`,
     },
+    color: colors.errorText,
   },
 
   ghost: {
@@ -87,11 +87,11 @@ export const colorVariants = stylex.create({
       default: 'transparent',
       ':hover': colors.hover,
     },
-    color: colors.textPrimary,
     backgroundImage: {
       default: 'none',
       ':hover': `radial-gradient(circle, transparent 1%, ${colors.hover} 1%)`,
     },
+    color: colors.textPrimary,
   },
 
   outline: {
@@ -102,77 +102,77 @@ export const colorVariants = stylex.create({
       default: 'transparent',
       ':hover': colors.hover,
     },
-    color: colors.textPrimary,
     backgroundImage: {
       default: 'none',
       ':hover': `radial-gradient(circle, transparent 1%, ${colors.hover} 1%)`,
     },
+    color: colors.textPrimary,
   },
 
   primary: {
     backgroundColor: colors.brandPrimary,
-    color: colors.brandPrimaryText,
     backgroundImage: {
       default: 'none',
       ':hover': `radial-gradient(circle, oklch(100% 0 0 / 0.2) 1%, transparent 1%)`,
     },
+    color: colors.brandPrimaryText,
   },
 
   secondary: {
     backgroundColor: colors.brandSecondary,
-    color: colors.brandSecondaryText,
     backgroundImage: {
       default: 'none',
       ':hover': `radial-gradient(circle, oklch(100% 0 0 / 0.2) 1%, transparent 1%)`,
     },
+    color: colors.brandSecondaryText,
   },
 
   success: {
     backgroundColor: colors.success,
-    color: colors.successText,
     backgroundImage: {
       default: 'none',
       ':hover': `radial-gradient(circle, oklch(100% 0 0 / 0.2) 1%, transparent 1%)`,
     },
+    color: colors.successText,
   },
 
   warning: {
     backgroundColor: colors.warning,
-    color: colors.warningText,
     backgroundImage: {
       default: 'none',
       ':hover': `radial-gradient(circle, oklch(0% 0 0 / 0.1) 1%, transparent 1%)`,
     },
+    color: colors.warningText,
   },
 });
 
 // Shared size variants for buttons and links
 export const sizeVariants = stylex.create({
   lg: {
+    borderRadius: borderRadius.lg,
     paddingBlock: spacing.md,
     paddingInline: spacing.lg,
+    fontSize: typography.fontSizeLg,
     height: '3rem',
     minHeight: '3rem',
-    borderRadius: borderRadius.lg,
-    fontSize: typography.fontSizeLg,
   },
 
   md: {
+    borderRadius: borderRadius.md,
     paddingBlock: spacing.sm,
     paddingInline: spacing.md,
+    fontSize: typography.fontSizeMd,
     height: '2.5rem',
     minHeight: '2.5rem',
-    borderRadius: borderRadius.md,
-    fontSize: typography.fontSizeMd,
   },
 
   sm: {
+    borderRadius: borderRadius.sm,
     paddingBlock: spacing.xs,
     paddingInline: spacing.sm,
+    fontSize: typography.fontSizeSm,
     height: '2rem',
     minHeight: '2rem',
-    borderRadius: borderRadius.sm,
-    fontSize: typography.fontSizeSm,
   },
 });
 

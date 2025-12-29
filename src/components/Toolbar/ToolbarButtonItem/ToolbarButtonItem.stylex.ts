@@ -5,8 +5,8 @@ export const styles = stylex.create({
     alignItems: 'center',
     display: 'flex',
     flexShrink: 0,
-    height: 20,
     justifyContent: 'center',
+    height: 20,
     width: 20,
   },
 
