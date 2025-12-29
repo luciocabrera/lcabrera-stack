@@ -1,6 +1,6 @@
 import type { IconProps } from '../Icons.types';
 
-export const MoreVerticalIcon = (props: IconProps) => (
+export const MoreVerticalIcon = ({ size = 24, ...props }: IconProps) => (
   <svg
     fill='none'
     height='12'

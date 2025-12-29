@@ -9,6 +9,7 @@ export type ButtonProps = ComponentPropsWithoutRef<'button'> & {
   variant?: ButtonStyle;
   width?: ButtonWidth;
 };
+
 type ButtonColor =
   | 'error'
   | 'ghost'
@@ -17,6 +18,7 @@ type ButtonColor =
   | 'secondary'
   | 'success'
   | 'warning';
+
 type ButtonSize = 'lg' | 'md' | 'sm';
 type ButtonStyle = 'elevated' | 'flat' | 'solid';
 

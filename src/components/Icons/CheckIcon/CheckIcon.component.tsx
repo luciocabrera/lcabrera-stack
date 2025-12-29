@@ -1,11 +1,11 @@
 import type { IconProps } from '../Icons.types';
 
-export const CheckIcon = (props: IconProps) => (
+export const CheckIcon = ({ size = 10, ...props }: IconProps) => (
   <svg
     fill='none'
-    height='10'
+    height={size}
     viewBox='0 0 10 10'
-    width='10'
+    width={size}
     xmlns='http://www.w3.org/2000/svg'
     {...props}
   >

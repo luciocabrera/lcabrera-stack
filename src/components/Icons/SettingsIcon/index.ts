@@ -1,1 +1,1 @@
-export { SettingsIcon } from './SettingsIcon';
+export { SettingsIcon } from './SettingsIcon.component';

@@ -1,6 +1,6 @@
 import type { IconProps } from '../Icons.types';
 
-export const SettingsIcon = (props: IconProps) => (
+export const SettingsIcon = ({ size = 24, ...props }: IconProps) => (
   <svg
     fill='none'
     stroke='currentColor'

@@ -1,1 +1,1 @@
-export { MoreVerticalIcon } from './MoreVerticalIcon';
+export { MoreVerticalIcon } from './MoreVerticalIcon.component';

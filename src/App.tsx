@@ -123,6 +123,7 @@ import {
 } from './components/SidePanel';
 import { darkTheme } from './design-system/themes/dark.stylex';
 import { lightTheme } from './design-system/themes/light.stylex';
+import { HorizontalToolbarExample } from './components/Toolbar/Toolbar.examples';
 
 const App = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -436,6 +437,8 @@ const App = () => {
             <p>This right panel is larger (lg size).</p>
             <p>You can put any content here, including other components.</p>
           </div>
+
+          <HorizontalToolbarExample />
         </SidePanelBody>
         <SidePanelFooter>
           <div

@@ -1,11 +1,11 @@
 import type { IconProps } from '../Icons.types';
 
-export const SortAscIcon = (props: IconProps) => (
+export const SortAscIcon = ({ size = 12, ...props }: IconProps) => (
   <svg
     fill='none'
-    height='12'
+    height={size}
     viewBox='0 0 12 12'
-    width='12'
+    width={size}
     xmlns='http://www.w3.org/2000/svg'
     {...props}
   >

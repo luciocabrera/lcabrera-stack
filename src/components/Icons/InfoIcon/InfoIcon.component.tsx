@@ -1,6 +1,6 @@
 import type { IconProps } from '../Icons.types';
 
-export const MenuCloseIcon = (props: IconProps) => (
+export const InfoIcon = ({ size = 24, ...props }: IconProps) => (
   <svg
     fill='none'
     stroke='currentColor'
@@ -11,7 +11,8 @@ export const MenuCloseIcon = (props: IconProps) => (
     xmlns='http://www.w3.org/2000/svg'
     {...props}
   >
-    <path d='M18 6 6 18' />
-    <path d='m6 6 12 12' />
+    <circle cx='12' cy='12' r='10' />
+    <path d='M12 16v-4' />
+    <path d='M12 8h.01' />
   </svg>
 );

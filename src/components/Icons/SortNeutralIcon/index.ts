@@ -1,1 +1,1 @@
-export { SortNeutralIcon } from './SortNeutralIcon';
+export { SortNeutralIcon } from './SortNeutralIcon.component';

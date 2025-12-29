@@ -1,1 +1,1 @@
-export { SortDescIcon } from './SortDescIcon';
+export { SortDescIcon } from './SortDescIcon.component';

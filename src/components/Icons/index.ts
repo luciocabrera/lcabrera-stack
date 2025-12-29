@@ -1,5 +1,8 @@
+export { BarChartIcon } from './BarChartIcon';
 export { CheckIcon } from './CheckIcon';
 export { ErrorIcon } from './ErrorIcon';
+export { FileTextIcon } from './FileTextIcon';
+export { HomeIcon } from './HomeIcon';
 export { InfoIcon } from './InfoIcon';
 export { MenuCloseIcon } from './MenuCloseIcon';
 export { MenuIcon } from './MenuIcon';
@@ -9,4 +12,5 @@ export { SortAscIcon } from './SortAscIcon';
 export { SortDescIcon } from './SortDescIcon';
 export { SortNeutralIcon } from './SortNeutralIcon';
 export { SuccessIcon } from './SuccessIcon';
+export { UserIcon } from './UserIcon';
 export { WarningIcon } from './WarningIcon';

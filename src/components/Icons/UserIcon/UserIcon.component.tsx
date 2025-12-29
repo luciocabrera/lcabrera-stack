@@ -1,6 +1,6 @@
 import type { IconProps } from '../Icons.types';
 
-export const InfoIcon = (props: IconProps) => (
+export const UserIcon = ({ size = 24, ...props }: IconProps) => (
   <svg
     fill='none'
     stroke='currentColor'
@@ -11,8 +11,7 @@ export const InfoIcon = (props: IconProps) => (
     xmlns='http://www.w3.org/2000/svg'
     {...props}
   >
-    <circle cx='12' cy='12' r='10' />
-    <path d='M12 16v-4' />
-    <path d='M12 8h.01' />
+    <path d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2' />
+    <circle cx='12' cy='7' r='4' />
   </svg>
 );

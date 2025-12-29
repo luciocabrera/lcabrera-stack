@@ -1,6 +1,6 @@
 import type { IconProps } from '../Icons.types';
 
-export const SuccessIcon = (props: IconProps) => (
+export const MenuCloseIcon = ({ size = 24, ...props }: IconProps) => (
   <svg
     fill='none'
     stroke='currentColor'
@@ -11,7 +11,7 @@ export const SuccessIcon = (props: IconProps) => (
     xmlns='http://www.w3.org/2000/svg'
     {...props}
   >
-    <circle cx='12' cy='12' r='10' />
-    <path d='m9 12 2 2 4-4' />
+    <path d='M18 6 6 18' />
+    <path d='m6 6 12 12' />
   </svg>
 );

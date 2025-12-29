@@ -1,1 +1,1 @@
-export { WarningIcon } from './WarningIcon';
+export { WarningIcon } from './WarningIcon.component';
