@@ -3,7 +3,7 @@
   "entry": ["eslint-local-rules/index.ts"],
   "project": ["src/**/*.{ts,tsx}"],
   "ignore": ["eslint-local-rules/build/**"],
-  "ignoreDependencies": [],
+  "ignoreDependencies": ["babel-plugin-react-compiler"],
   "ignoreExportsUsedInFile": {
     "interface": true,
     "type": true
