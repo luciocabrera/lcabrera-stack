@@ -22,7 +22,6 @@ yarn add -D \
   @types/node \
   @types/react \
   @types/react-dom \
-  @vitejs/plugin-react \
   babel-plugin-react-compiler \
   eslint \
   eslint-config-prettier \

@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { useVirtualization } from '@/hooks/useVirtualization.hook';
+import { useVirtualization } from '@/hooks';
 
 import type { TableBodyProps } from './TableBody.types';
 
