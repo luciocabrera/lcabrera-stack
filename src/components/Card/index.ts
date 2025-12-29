@@ -1,4 +1,4 @@
-export { Card } from './Card';
+export { Card } from './Card.component';
 export type {
   CardColor,
   CardElevation,

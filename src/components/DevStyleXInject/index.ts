@@ -1,1 +1,1 @@
-export { DevStyleXInject } from './DevStyleXInject';
+export { DevStyleXInject } from './DevStyleXInject.component';

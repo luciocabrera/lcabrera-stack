@@ -1,1 +1,1 @@
-export { SidePanelBody } from './SidePanelBody';
+export { SidePanelBody } from './SidePanelBody.component';
