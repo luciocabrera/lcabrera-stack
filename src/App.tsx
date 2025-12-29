@@ -121,7 +121,11 @@ import {
   SidePanelHeader,
   SidePanelTitle,
 } from './components/SidePanel';
-import { HorizontalToolbarExample, HorizontalToolbarExampleShort } from './components/Toolbar/Toolbar.examples';
+import {
+  HorizontalToolbarExample,
+  HorizontalToolbarExampleShort,
+  SidePanelToolbarExample,
+} from './components/Toolbar/Toolbar.examples';
 import { darkTheme } from './design-system/themes/dark.stylex';
 import { lightTheme } from './design-system/themes/light.stylex';
 
@@ -143,7 +147,7 @@ const App = () => {
             {isDarkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
           </Button>
         </header>
-
+        <SidePanelToolbarExample />
         {/* Button Section */}
         <section {...stylex.props(styles.section)}>
           <h2 {...stylex.props(styles.sectionTitle)}>Buttons</h2>

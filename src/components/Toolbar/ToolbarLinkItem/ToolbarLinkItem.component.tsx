@@ -13,6 +13,7 @@ export const ToolbarLinkItem = ({
   size = 'md',
   ...props
 }: ToolbarLinkItemProps) => {
+  console.log('ToolbarLinkItem props:', { color, icon, label, orientation, size, ...props });
   return (
     <NavLink
       className={({ isActive }) =>

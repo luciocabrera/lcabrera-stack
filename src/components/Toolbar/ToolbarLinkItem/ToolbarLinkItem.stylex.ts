@@ -15,8 +15,7 @@ export const styles = stylex.create({
   },
 
   itemActive: {
-    backgroundColor: colors.brandPrimaryBackground,
-    color: colors.brandPrimary,
+    backgroundColor: colors.brandPrimary,
     fontWeight: 600,
   },
 
