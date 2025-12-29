@@ -1,1 +1,1 @@
-export { TableBase } from './TableBase';
+export { TableBase } from './TableBase.component';

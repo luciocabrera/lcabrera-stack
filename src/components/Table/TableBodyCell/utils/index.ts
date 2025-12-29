@@ -1,2 +1,2 @@
-export { detectDataType } from './detectDataType';
-export { renderCellContent } from './renderCellContent';
+export { detectDataType } from './detectDataType.util';
+export { renderCellContent } from './renderCellContent.util';

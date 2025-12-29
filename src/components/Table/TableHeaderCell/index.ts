@@ -1,4 +1,4 @@
-export { TableHeaderCell } from './TableHeaderCell';
+export { TableHeaderCell } from './TableHeaderCell.component';
 export type {
   SortDirection,
   TableHeaderCellProps,

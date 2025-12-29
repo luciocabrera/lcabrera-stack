@@ -1,1 +1,1 @@
-export { SidePanelFooter } from './SidePanelFooter';
+export { SidePanelFooter } from './SidePanelFooter.component';

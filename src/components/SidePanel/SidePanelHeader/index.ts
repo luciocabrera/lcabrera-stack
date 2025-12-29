@@ -1,1 +1,1 @@
-export { SidePanelHeader } from './SidePanelHeader';
+export { SidePanelHeader } from './SidePanelHeader.component';

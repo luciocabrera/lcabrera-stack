@@ -1,1 +1,1 @@
-export { SidePanelTitle } from './SidePanelTitle';
+export { SidePanelTitle } from './SidePanelTitle.component';
