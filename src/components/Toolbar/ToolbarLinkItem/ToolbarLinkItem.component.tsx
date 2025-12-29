@@ -31,15 +31,13 @@ export const ToolbarLinkItem = ({
                 ? styles.itemOutline
                 : styles.itemGhost;
 
-  const hasRipple = color === 'ghost' || color === 'outline';
-
   return (
     <NavLink
       className={({ isActive }) =>
         stylex.props(
           styles.item,
-          hasRipple && rippleStyles.base,
-          hasRipple && rippleStyles.variants[color],
+          rippleStyles.base,
+          rippleStyles.variants[color],
           sizeStyle,
           colorStyle,
           isActive && styles.itemActive,

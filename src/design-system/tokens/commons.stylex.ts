@@ -27,7 +27,7 @@ export const rippleVariants = stylex.create({
   error: {
     backgroundImage: {
       default: 'none',
-      ':hover': `radial-gradient(circle, transparent 1%, ${colors.errorHover} 1%)`,
+      ':hover': `radial-gradient(circle, ${colors.errorHover} 1%, ${colors.error} 1%)`,
     },
   },
 
@@ -46,18 +46,30 @@ export const rippleVariants = stylex.create({
   },
 
   primary: {
-    backgroundImage: 'none',
+    backgroundImage: {
+      default: 'none',
+      ':hover': `radial-gradient(circle, ${colors.brandPrimaryHover} 1%, ${colors.brandPrimary} 1%)`,
+    },
   },
 
   secondary: {
-    backgroundImage: 'none',
+    backgroundImage: {
+      default: 'none',
+      ':hover': `radial-gradient(circle, ${colors.brandSecondaryHover} 1%, ${colors.brandSecondary} 1%)`,
+    },
   },
 
   success: {
-    backgroundImage: 'none',
+    backgroundImage: {
+      default: 'none',
+      ':hover': `radial-gradient(circle, ${colors.successHover} 1%, ${colors.success} 1%)`,
+    },
   },
 
   warning: {
-    backgroundImage: 'none',
+    backgroundImage: {
+      default: 'none',
+      ':hover': `radial-gradient(circle, ${colors.warningHover} 1%, ${colors.warning} 1%)`,
+    },
   },
 });
