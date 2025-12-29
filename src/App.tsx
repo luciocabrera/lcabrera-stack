@@ -124,30 +124,23 @@ import {
 import {
   HorizontalToolbarExample,
   HorizontalToolbarExampleShort,
-  SidePanelToolbarExample,
 } from './components/Toolbar/Toolbar.examples';
-import { darkTheme } from './design-system/themes/dark.stylex';
-import { lightTheme } from './design-system/themes/light.stylex';
+import { useTheme } from './hooks/useTheme.hook';
 
 const App = () => {
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const { isDarkMode, toggleTheme } = useTheme();
   const [isLeftPanelOpen, setIsLeftPanelOpen] = useState(false);
   const [isRightPanelOpen, setIsRightPanelOpen] = useState(false);
 
-  const handleToggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-  };
-
   return (
-    <div {...stylex.props(styles.app, isDarkMode ? darkTheme : lightTheme)}>
+    <div {...stylex.props(styles.app)}>
       <div {...stylex.props(styles.container)}>
         <header {...stylex.props(styles.header)}>
           <h1 {...stylex.props(styles.title)}>Design System Showcase</h1>
-          <Button color='ghost' onClick={handleToggleTheme}>
+          <Button color='ghost' onClick={toggleTheme}>
             {isDarkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
           </Button>
         </header>
-        <SidePanelToolbarExample />
         {/* Button Section */}
         <section {...stylex.props(styles.section)}>
           <h2 {...stylex.props(styles.sectionTitle)}>Buttons</h2>
