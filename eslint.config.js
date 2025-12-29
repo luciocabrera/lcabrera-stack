@@ -158,6 +158,8 @@ export default defineConfig(
       'local-rules/destructuring-for-functions': 'warn',
       'local-rules/no-inline-type-imports': 'error',
       'local-rules/merge-duplicate-imports': 'error',
+      'local-rules/no-type-definitions-in-components': 'error',
+      'local-rules/single-component-export': 'error',
       'local-rules/type-suffix-naming': 'error',
 
       // StyleX validation rules
@@ -326,8 +328,17 @@ export default defineConfig(
     },
   },
 
-  // 9. Ignores
+  // 9. Root and route entry files override - Allow multiple exports for React Router
+  {
+    files: ['src/root.tsx', 'src/root/**/index.ts', 'src/routes/**/index.tsx'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
+    },
+  },
+
+  // 10. Ignores
   globalIgnores([
+    '.react-router/',
     'build/',
     'out/',
     'dist/',
