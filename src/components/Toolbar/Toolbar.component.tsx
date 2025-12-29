@@ -9,6 +9,7 @@ import { ToolbarLinkItem } from './ToolbarLinkItem';
 export const Toolbar = ({
   items,
   orientation = 'vertical',
+  size = 'md',
   ...props
 }: ToolbarProps) => {
   return (
@@ -16,14 +17,18 @@ export const Toolbar = ({
       role='navigation'
       {...props}
       {...stylex.props(
-        styles.toolbar(orientation),
-        orientation === 'horizontal' && styles.toolbarHorizontal,
+        styles.toolbar,
+        orientation === 'horizontal'
+          ? styles.toolbarHorizontal
+          : styles.toolbarVertical,
       )}
     >
       <ul
         {...stylex.props(
-          styles.toolbar(orientation),
-          orientation === 'horizontal' && styles.toolbarHorizontal,
+          styles.toolbar,
+          orientation === 'horizontal'
+            ? styles.toolbarHorizontal
+            : styles.toolbarVertical,
         )}
       >
         {items.map((item) => {
@@ -44,7 +49,7 @@ export const Toolbar = ({
                   isDisabled={item.isDisabled}
                   label={item.label}
                   onClick={item.onClick}
-                  size={item.size}
+                  size={item.size ?? size}
                   type={item.type}
                 />
               ) : (
@@ -52,6 +57,7 @@ export const Toolbar = ({
                   end={item.end}
                   icon={item.icon}
                   label={item.label}
+                  size={size}
                   to={item.to}
                 />
               )}

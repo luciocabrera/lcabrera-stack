@@ -3,19 +3,24 @@ import { NavLink } from 'react-router';
 
 import type { ToolbarLinkItemProps } from '../Toolbar.types';
 
-import { styles } from '../Toolbar.stylex';
+import { styles } from './ToolbarLinkItem.stylex';
 
 export const ToolbarLinkItem = ({
   end,
   icon,
   label,
+  size = 'md',
   to,
   ...props
 }: ToolbarLinkItemProps) => {
+  const sizeStyle =
+    size === 'lg' ? styles.itemLg : size === 'sm' ? styles.itemSm : styles.itemMd;
+
   return (
     <NavLink
       className={({ isActive }) =>
-        stylex.props(styles.item, isActive && styles.itemActive).className!
+        stylex.props(styles.item, sizeStyle, isActive && styles.itemActive)
+          .className!
       }
       end={end}
       to={to}

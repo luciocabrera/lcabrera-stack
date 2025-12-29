@@ -3,6 +3,8 @@ import type { NavLinkProps } from 'react-router';
 
 import type { ButtonProps } from '../Button/Button.types';
 
+export type ToolbarSize = 'lg' | 'md' | 'sm';
+
 export type ToolbarButtonConfig = Omit<ButtonProps, 'children' | 'width'> & {
   icon?: ReactNode;
   label: string;
@@ -27,6 +29,7 @@ export type ToolbarLinkItemProps = Pick<NavLinkProps, 'end'> & {
   icon?: ReactNode;
   isActive?: boolean;
   label: string;
+  size?: ToolbarSize;
   to: string;
 };
 
@@ -35,4 +38,5 @@ export type ToolbarOrientation = 'horizontal' | 'vertical';
 export type ToolbarProps = ComponentPropsWithoutRef<'nav'> & {
   items: ToolbarItemConfig[];
   orientation?: ToolbarOrientation;
+  size?: ToolbarSize;
 };

@@ -6,6 +6,7 @@ export type {
   ToolbarLinkConfig,
   ToolbarLinkItemProps,
   ToolbarProps,
+  ToolbarSize,
 } from './Toolbar.types';
 export { ToolbarButtonItem } from './ToolbarButtonItem';
 export { ToolbarLinkItem } from './ToolbarLinkItem';
