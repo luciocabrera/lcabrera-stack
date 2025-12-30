@@ -13,24 +13,27 @@ export const Table = <T extends Record<string, unknown>>({
   data,
   overscan = 6,
   rowHeight = 32,
+  useFlexWrapper = true,
 }: TableProps<T>) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  return (
-    <div {...stylex.props(styles.wrapper)}>
-      <div ref={containerRef} {...stylex.props(styles.container)}>
-        <TableBase density='compact' isBordered isStriped>
-          <TableHeader columns={columns} />
-          <TableBody
-            columns={columns}
-            data={data}
-            overscan={overscan}
-            rowHeight={rowHeight}
-            tableContainerRef={containerRef}
-          />
-        </TableBase>
-      </div>
+  const tableContent = (
+    <div ref={containerRef} {...stylex.props(styles.container)}>
+      <TableBase density='compact' isBordered isStriped>
+        <TableHeader columns={columns} />
+        <TableBody
+          columns={columns}
+          data={data}
+          overscan={overscan}
+          rowHeight={rowHeight}
+          tableContainerRef={containerRef}
+        />
+      </TableBase>
     </div>
   );
+
+  if (!useFlexWrapper) return tableContent;
+
+  return <div {...stylex.props(styles.wrapper)}>{tableContent}</div>;
 };
 // #5a7cdd

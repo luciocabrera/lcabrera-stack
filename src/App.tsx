@@ -264,11 +264,14 @@ const App = () => {
             <h2 {...stylex.props(styles.sectionTitle)}>Table</h2>
             <div
               style={{
+                    display: 'flex',
                 borderRadius: 8,
-                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                // boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
                 maxWidth: '100%',
-                overflowX: 'auto',
-                width: '100%',
+                // overflowX: 'auto',
+                // width: '100%',
+                height:'400px',
+                    boxSizing: 'border-box',
               }}
             >
               {/* Virtualized Table Component */}
@@ -279,9 +282,9 @@ const App = () => {
                   minWidth: 120,
                 }))}
                 data={tableData}
-                height={400}
                 overscan={6}
                 rowHeight={32}
+                useFlexWrapper={false}
               />
             </div>
           </section>

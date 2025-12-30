@@ -23,6 +23,7 @@ export type TableProps<TData extends Record<string, unknown>> = BaseProps & {
   data: TData[];
   overscan?: number;
   rowHeight?: number;
+  useFlexWrapper?: boolean;
 };
 
 type BaseProps = ComponentPropsWithRef<'table'> & {
