@@ -111,15 +111,13 @@ export const CarSales = () => {
         <h1>Car Sales Data</h1>
         <p>Total Records: {carSales.length}</p>
       </div>
-      <div {...stylex.props(styles.tableWrapper)}>
-        <Table<CarSale>
-          columns={columns}
-          data={carSales}
-          density='comfortable'
-          isBordered
-          isStriped
-        />
-      </div>
+      <Table<CarSale>
+        columns={columns}
+        data={carSales}
+        density='comfortable'
+        isBordered
+        isStriped
+      />
     </div>
   );
 };

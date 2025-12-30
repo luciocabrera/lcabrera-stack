@@ -17,8 +17,4 @@ export const styles = stylex.create({
   header: {
     flexShrink: 0,
   },
-  tableWrapper: {
-    flex: 1,
-    minHeight: 0,
-  },
 });

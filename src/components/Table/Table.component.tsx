@@ -17,17 +17,19 @@ export const Table = <T extends Record<string, unknown>>({
   const containerRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div ref={containerRef} {...stylex.props(styles.container)}>
-      <TableBase density='compact' isBordered isStriped>
-        <TableHeader columns={columns} />
-        <TableBody
-          columns={columns}
-          data={data}
-          overscan={overscan}
-          rowHeight={rowHeight}
-          tableContainerRef={containerRef}
-        />
-      </TableBase>
+    <div {...stylex.props(styles.wrapper)}>
+      <div ref={containerRef} {...stylex.props(styles.container)}>
+        <TableBase density='compact' isBordered isStriped>
+          <TableHeader columns={columns} />
+          <TableBody
+            columns={columns}
+            data={data}
+            overscan={overscan}
+            rowHeight={rowHeight}
+            tableContainerRef={containerRef}
+          />
+        </TableBase>
+      </div>
     </div>
   );
 };

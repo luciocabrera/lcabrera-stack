@@ -4,6 +4,10 @@ import { borderRadius, shadows } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const styles = stylex.create({
+  wrapper: {
+    flex: 1,
+    minHeight: 0,
+  },
   container: {
     borderColor: colors.borderPrimary,
     borderRadius: borderRadius.lg,
