@@ -1,13 +1,12 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { CheckIcon } from '@/components/Icons';
-import {
-  formatCurrency,
-  formatDate,
-  formatNumber,
-} from '@/utils/formatters';
+import type {
+  TableColumnDataType,
+  TableColumnFormat,
+} from '@/components/Table/Table.types';
 
-import type { TableColumnDataType, TableColumnFormat } from '../../Table.types';
+import { CheckIcon } from '@/components/Icons';
+import { formatCurrency, formatDate, formatNumber } from '@/utils/formatters';
 
 import { tableBodyCellStyles } from '../TableBodyCell.stylex';
 
