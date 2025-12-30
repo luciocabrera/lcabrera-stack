@@ -7,6 +7,7 @@ import {
   orientationVariants,
   rippleBase,
   sizeVariants,
+  widthVariants,
 } from '@/design-system/tokens/commons.stylex';
 
 /**
@@ -40,17 +41,6 @@ const styleVariants = stylex.create({
 
   solid: {
     boxShadow: shadows.sm,
-  },
-});
-
-// Width variants
-const widthVariants = stylex.create({
-  auto: {
-    width: 'auto',
-  },
-
-  full: {
-    width: '100%',
   },
 });
 

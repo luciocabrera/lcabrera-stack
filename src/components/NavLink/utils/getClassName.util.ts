@@ -4,6 +4,7 @@ import type {
   DesignSystemColor,
   DesignSystemOrientation,
   DesignSystemSize,
+  DesignSystemWidth,
 } from '@/types/design-system.types';
 
 import type { linkItemStyles } from '../NavLink.stylex';
@@ -14,6 +15,7 @@ type GetClassNameArgs = {
   orientation: DesignSystemOrientation;
   size: DesignSystemSize;
   styles: typeof linkItemStyles;
+  width?: DesignSystemWidth;
 };
 
 export const getClassName = ({
@@ -21,12 +23,14 @@ export const getClassName = ({
   isActive,
   orientation,
   size,
-  styles
+  styles,
+  width = 'auto',
 }: GetClassNameArgs) =>
   stylex.props(
     styles.base,
     styles.orientation[orientation],
     styles.size[size],
     styles.color[color],
+    styles.width[width],
     isActive && styles.active,
   ).className ?? '';

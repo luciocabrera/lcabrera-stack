@@ -12,6 +12,7 @@ export const NavLink = ({
   icon,
   orientation = 'vertical',
   size = 'md',
+  width = 'full',
   ...props
 }: NavLinkProps) => {
   return (
@@ -23,6 +24,7 @@ export const NavLink = ({
           orientation,
           size,
           styles: linkItemStyles,
+          width,
         });
         return classNameValue;
       }}

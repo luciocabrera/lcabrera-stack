@@ -5,6 +5,7 @@ import type {
   DesignSystemColor,
   DesignSystemOrientation,
   DesignSystemSize,
+  DesignSystemWidth,
 } from '@/types/design-system.types';
 
 export type NavLinkProps = Omit<RouterNavLinkProps, 'children'> & {
@@ -14,4 +15,5 @@ export type NavLinkProps = Omit<RouterNavLinkProps, 'children'> & {
   isActive?: boolean;
   orientation?: DesignSystemOrientation;
   size?: DesignSystemSize;
+  width?: DesignSystemWidth;
 };

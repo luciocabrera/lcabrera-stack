@@ -7,6 +7,7 @@ import {
   orientationVariants,
   rippleBase,
   sizeVariants,
+  widthVariants,
 } from '@/design-system/tokens/commons.stylex';
 
 export const styles = stylex.create({
@@ -19,7 +20,6 @@ export const styles = stylex.create({
     color: colors.brandPrimaryText,
     fontWeight: 600,
   },
-
 });
 
 export const linkItemStyles = {
@@ -34,4 +34,5 @@ export const linkItemStyles = {
   label: baseInteractiveStyles.label,
   orientation: orientationVariants,
   size: sizeVariants,
+  width: widthVariants,
 };

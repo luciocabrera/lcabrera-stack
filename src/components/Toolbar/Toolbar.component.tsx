@@ -51,7 +51,7 @@ export const Toolbar = ({
                   onClick={item.onClick}
                   size={item.size ?? size}
                   type={item.type}
-                       width='full'
+                  width='full'
                 >
                   {item.label}
                 </Button>
@@ -63,6 +63,7 @@ export const Toolbar = ({
                   orientation={orientation}
                   size={size}
                   to={item.to}
+                  width='full'
                 >
                   {item.label}
                 </NavLink>

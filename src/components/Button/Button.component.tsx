@@ -13,7 +13,7 @@ export const Button = ({
   size = 'md',
   type = 'button',
   variant = 'solid',
-  width = 'auto',
+  width = 'full',
   ...rest
 }: ButtonProps) => {
   return (
