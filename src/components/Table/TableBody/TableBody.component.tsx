@@ -12,6 +12,7 @@ import { styles } from './TableBody.stylex';
 export const TableBody = <TData extends Record<string, unknown>>({
   columns,
   data,
+  locale,
   overscan,
   rowHeight = 32,
   tableContainerRef,
@@ -38,8 +39,10 @@ export const TableBody = <TData extends Record<string, unknown>>({
             {columns.map((col) => (
               <TableBodyCell
                 dataType={col.dataType}
+                format={col.format}
                 key={col.key}
                 label={col.label}
+                locale={locale}
                 minWidth={col.minWidth ?? 120}
                 value={col.key in row ? row[col.key] : ''}
               />

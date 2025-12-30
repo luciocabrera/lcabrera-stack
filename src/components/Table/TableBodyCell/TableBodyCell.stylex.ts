@@ -42,4 +42,12 @@ export const tableBodyCellStyles = stylex.create({
     backgroundColor: colors.brandPrimary,
     color: colors.brandPrimaryText,
   },
+  /** Text content with ellipsis overflow */
+  textContent: {
+    overflow: 'hidden',
+    display: 'block',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    width: '100%',
+  },
 });

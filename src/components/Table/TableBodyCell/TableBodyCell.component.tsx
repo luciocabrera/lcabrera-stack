@@ -8,7 +8,9 @@ import { detectDataType, renderCellContent } from './utils';
 export const TableBodyCell = ({
   customStylex,
   dataType: dataTypeProp,
+  format,
   label,
+  locale,
   minWidth,
   value,
   width,
@@ -18,6 +20,15 @@ export const TableBodyCell = ({
 
   const isRightAligned = dataType === 'number' || dataType === 'currency';
   const isCentered = dataType === 'boolean' || dataType === 'date';
+  const hasEllipsis = dataType !== 'boolean';
+
+  const content = renderCellContent({
+    dataType,
+    format,
+    label,
+    locale,
+    value,
+  });
 
   return (
     <td
@@ -29,11 +40,16 @@ export const TableBodyCell = ({
         customStylex,
       )}
     >
-      {renderCellContent({
-        dataType,
-        label,
-        value,
-      })}
+      {hasEllipsis ? (
+        <span
+          title={typeof content === 'string' ? content : undefined}
+          {...stylex.props(tableBodyCellStyles.textContent)}
+        >
+          {content}
+        </span>
+      ) : (
+        content
+      )}
     </td>
   );
 };

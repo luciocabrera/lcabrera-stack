@@ -12,6 +12,7 @@ export const Table = <T extends Record<string, unknown>>({
   columns,
   data,
   isFlexWrapperEnabled = true,
+  locale,
   overscan = 6,
   rowHeight = 32,
 }: TableProps<T>) => {
@@ -24,6 +25,7 @@ export const Table = <T extends Record<string, unknown>>({
         <TableBody
           columns={columns}
           data={data}
+          locale={locale}
           overscan={overscan}
           rowHeight={rowHeight}
           tableContainerRef={containerRef}
