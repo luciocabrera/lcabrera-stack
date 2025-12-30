@@ -1,9 +1,9 @@
 import type { ComponentPropsWithoutRef, ReactNode } from 'react';
-import type { NavLinkProps } from 'react-router';
 
 import type { DesignSystemOrientation, DesignSystemSize } from '@/types/design-system.types';
 
 import type { ButtonProps } from '../Button/Button.types';
+import type { NavLinkProps } from '../NavLink/NavLink.types';
 
 export type ToolbarButtonConfig = Omit<ButtonProps, 'children' | 'width'> & {
   icon?: ReactNode;

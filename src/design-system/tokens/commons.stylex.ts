@@ -16,7 +16,8 @@ import { colors } from './colors.stylex';
 // Base interactive element (button/link) styles
 export const baseInteractiveStyles = stylex.create({
   element: {
-    borderStyle: 'none',
+    borderColor: 'transparent',
+    borderStyle: 'solid',
     borderWidth: '0',
     gap: spacing.xs,
     outline: {
@@ -27,6 +28,7 @@ export const baseInteractiveStyles = stylex.create({
     transition: `opacity ${transitions.fast} ${easing.easeInOut}`,
     alignItems: 'center',
     appearance: 'none',
+    boxSizing: 'border-box',
     containerType: 'inline-size',
     cursor: 'pointer',
     display: 'inline-flex',
@@ -117,7 +119,6 @@ export const colorVariants = stylex.create({
 
   outline: {
     borderColor: colors.borderPrimary,
-    borderStyle: 'solid',
     borderWidth: '1px',
     backgroundColor: {
       default: 'transparent',

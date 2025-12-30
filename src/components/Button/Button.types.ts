@@ -3,6 +3,7 @@ import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 
 import type {
   DesignSystemColor,
+  DesignSystemOrientation,
   DesignSystemSize,
   DesignSystemStyle,
   DesignSystemWidth,
@@ -13,6 +14,7 @@ export type ButtonProps = ComponentPropsWithoutRef<'button'> & {
   customStylex?: StyleXStyles;
   icon?: ReactNode;
   isDisabled?: boolean;
+  orientation?: DesignSystemOrientation;
   size?: DesignSystemSize;
   variant?: DesignSystemStyle;
   width?: DesignSystemWidth;

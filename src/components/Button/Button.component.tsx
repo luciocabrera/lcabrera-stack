@@ -10,6 +10,7 @@ export const Button = ({
   customStylex,
   icon,
   isDisabled = false,
+  orientation = 'vertical',
   size = 'md',
   type = 'button',
   variant = 'solid',
@@ -24,6 +25,7 @@ export const Button = ({
       type={type}
       {...stylex.props(
         buttonStyles.base,
+        buttonStyles.orientation[orientation],
         buttonStyles.size[size],
         buttonStyles.color[color],
         buttonStyles.style[variant],

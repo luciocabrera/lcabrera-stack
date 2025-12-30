@@ -49,6 +49,7 @@ export const Toolbar = ({
                   icon={item.icon}
                   isDisabled={item.isDisabled}
                   onClick={item.onClick}
+                  orientation={orientation}
                   size={item.size ?? size}
                   type={item.type}
                   width='full'
@@ -61,7 +62,7 @@ export const Toolbar = ({
                   end={item.end}
                   icon={item.icon}
                   orientation={orientation}
-                  size={size}
+                  size={item.size ?? size}
                   to={item.to}
                   width='full'
                 >

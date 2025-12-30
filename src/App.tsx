@@ -282,9 +282,9 @@ const App = () => {
                   minWidth: 120,
                 }))}
                 data={tableData}
+                isFlexWrapperEnabled={false}
                 overscan={6}
                 rowHeight={32}
-                useFlexWrapper={false}
               />
             </div>
           </section>
