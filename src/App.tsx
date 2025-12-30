@@ -21,11 +21,8 @@ function mulberry32(seed: number) {
 const rng = mulberry32(123_456_789);
 
 // Generate mock data for the table
-const columnDefs: TableColumn[] = Array.from(
-  {
-    length: 20,
-  },
-  (_, i) => ({
+const columnDefs: TableColumn[] = [...Array.from({ length: 20 }).keys()].map(
+  (i) => ({
     dataType:
       i % 5 === 0
         ? 'number'
@@ -61,42 +58,37 @@ function randomString(length: number) {
   ).join('');
 }
 
-const tableData = Array.from(
-  {
-    length: 10_000,
-  },
-  (_, rowIdx) => {
-    const row: Record<string, unknown> = {};
-    for (const [colIdx, col] of columnDefs.entries()) {
-      switch (col.dataType) {
-        case 'boolean': {
-          row[col.key] = rng() > 0.5;
-          break;
-        }
-        case 'currency': {
-          row[col.key] = `$${randomCurrency()}`;
-          break;
-        }
-        case 'date': {
-          row[col.key] = randomDate().toISOString().slice(0, 10);
-          break;
-        }
-        case 'number': {
-          row[col.key] = rowIdx * colIdx;
-          break;
-        }
-        case 'string': {
-          row[col.key] = randomString(8);
-          break;
-        }
-        default: {
-          row[col.key] = '';
-        }
+const tableData = [...Array.from({ length: 10_000 }).keys()].map((rowIdx) => {
+  const row: Record<string, unknown> = {};
+  for (const [colIdx, col] of columnDefs.entries()) {
+    switch (col.dataType) {
+      case 'boolean': {
+        row[col.key] = rng() > 0.5;
+        break;
+      }
+      case 'currency': {
+        row[col.key] = `$${randomCurrency()}`;
+        break;
+      }
+      case 'date': {
+        row[col.key] = randomDate().toISOString().slice(0, 10);
+        break;
+      }
+      case 'number': {
+        row[col.key] = rowIdx * colIdx;
+        break;
+      }
+      case 'string': {
+        row[col.key] = randomString(8);
+        break;
+      }
+      default: {
+        row[col.key] = '';
       }
     }
-    return row;
-  },
-);
+  }
+  return row;
+});
 import {
   Card,
   CardBody,

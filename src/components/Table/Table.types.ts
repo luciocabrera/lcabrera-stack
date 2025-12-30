@@ -41,10 +41,14 @@ export type TableProps<TData extends Record<string, unknown>> = BaseProps & {
   columns: TableColumn[];
   data: TData[];
   isFlexWrapperEnabled?: boolean;
+  /** Show loading skeleton overlay */
+  isLoading?: boolean;
   /** Locale for formatting (defaults to navigator.language) */
   locale?: string;
   overscan?: number;
   rowHeight?: number;
+  /** Fallback skeleton row count when container not measured */
+  skeletonRowCount?: number;
 };
 
 type BaseProps = ComponentPropsWithRef<'table'> & {

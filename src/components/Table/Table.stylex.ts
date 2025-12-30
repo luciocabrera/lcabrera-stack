@@ -4,10 +4,6 @@ import { borderRadius, shadows } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const styles = stylex.create({
-  wrapper: {
-    flex: '1',
-    minHeight: 0,
-  },
   container: {
     borderColor: colors.borderPrimary,
     borderRadius: borderRadius.lg,
@@ -15,9 +11,14 @@ export const styles = stylex.create({
     borderWidth: '1px',
     overflow: 'auto',
     boxShadow: shadows.sm,
+    position: 'relative',
     scrollbarColor: `${colors.borderSecondary} transparent`,
     scrollbarWidth: 'thin',
     height: '100%',
     width: '100%',
+  },
+  wrapper: {
+    flex: '1',
+    minHeight: 0,
   },
 });
