@@ -21,7 +21,6 @@ export type TableDensity = 'comfortable' | 'compact';
 export type TableProps<TData extends Record<string, unknown>> = BaseProps & {
   columns: TableColumn[];
   data: TData[];
-  height?: number;
   overscan?: number;
   rowHeight?: number;
 };

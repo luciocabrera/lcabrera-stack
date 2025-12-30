@@ -2,11 +2,12 @@ import { useLoaderData } from 'react-router';
 
 import type { TableColumn } from '@/components/Table/Table.types';
 import type { CarSale } from '@/services';
+import * as stylex from '@stylexjs/stylex';
 
 import { Table } from '@/components/Table';
 
 import type { loader } from './car-sales.loader';
-
+import { styles } from './CarSales.stylex';
 // Define table columns for car sales data
 const columns: TableColumn[] = [
   {
@@ -105,17 +106,20 @@ export const CarSales = () => {
   const { carSales } = useLoaderData<typeof loader>();
 
   return (
-    <div>
-      <h1>Car Sales Data</h1>
-      <p>Total Records: {carSales.length}</p>
-      <Table<CarSale>
-        columns={columns}
-        data={carSales}
-        density='comfortable'
-        height={600}
-        isBordered
-        isStriped
-      />
+    <div {...stylex.props(styles.container)}>
+      <div {...stylex.props(styles.header)}>
+        <h1>Car Sales Data</h1>
+        <p>Total Records: {carSales.length}</p>
+      </div>
+      <div {...stylex.props(styles.tableWrapper)}>
+        <Table<CarSale>
+          columns={columns}
+          data={carSales}
+          density='comfortable'
+          isBordered
+          isStriped
+        />
+      </div>
     </div>
   );
 };

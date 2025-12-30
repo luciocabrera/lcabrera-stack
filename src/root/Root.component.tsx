@@ -19,7 +19,9 @@ const RootContent = () => {
       <Button color='ghost' onClick={toggleTheme}>
         {isDarkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
       </Button>
-      <Outlet />
+      <div {...stylex.props(styles.outletWrapper)}>
+        <Outlet />
+      </div>
     </div>
   );
 };

@@ -11,14 +11,13 @@ import { TableHeader } from './TableHeader';
 export const Table = <T extends Record<string, unknown>>({
   columns,
   data,
-  height = 400,
   overscan = 6,
   rowHeight = 32,
 }: TableProps<T>) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div ref={containerRef} {...stylex.props(styles.container(height))}>
+    <div ref={containerRef} {...stylex.props(styles.container)}>
       <TableBase density='compact' isBordered isStriped>
         <TableHeader columns={columns} />
         <TableBody
@@ -32,3 +31,4 @@ export const Table = <T extends Record<string, unknown>>({
     </div>
   );
 };
+// #5a7cdd

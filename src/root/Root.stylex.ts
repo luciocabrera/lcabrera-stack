@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 
-import {  typography } from '@/design-system/tokens/base.stylex';
+import { typography } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const styles = stylex.create({
@@ -9,5 +9,15 @@ export const styles = stylex.create({
     backgroundColor: colors.backgroundPrimary,
     color: colors.textPrimary,
     fontFamily: typography.fontFamily,
-    minHeight: '100vh',
-  }});
+    height: '100vh',
+    display: 'flex',
+    maxWidth: '100dvw',
+    flexDirection: 'column',
+    overflow: 'hidden',
+  },
+  outletWrapper: {
+    flex: 1,
+    minHeight: 0,
+    overflow: 'auto',
+  },
+});
