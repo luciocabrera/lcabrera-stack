@@ -1,6 +1,8 @@
 import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 import type { NavLinkProps } from 'react-router';
 
+import type { DesignSystemOrientation, DesignSystemSize } from '@/types/design-system.types';
+
 import type { ButtonProps } from '../Button/Button.types';
 
 export type ToolbarButtonConfig = Omit<ButtonProps, 'children' | 'width'> & {
@@ -24,26 +26,12 @@ export type ToolbarLinkConfig = Omit<
   color?: Pick<ButtonProps, 'color'>['color'];
   icon?: ReactNode;
   label: string;
-//   to: string;
   type: 'link';
 };
 
-export type ToolbarLinkItemProps = NavLinkProps & {
-  color?: Pick<ButtonProps, 'color'>['color'];
-  icon?: ReactNode;
-  isActive?: boolean;
-  label: string;
-  orientation?: 'horizontal' | 'vertical';
-  size?: ToolbarSize;
-//   to: string;
-};
-
-export type ToolbarOrientation = 'horizontal' | 'vertical';
-
 export type ToolbarProps = ComponentPropsWithoutRef<'nav'> & {
   items: ToolbarItemConfig[];
-  orientation?: ToolbarOrientation;
-  size?: ToolbarSize;
+  orientation?: DesignSystemOrientation;
+  size?: DesignSystemSize;
 };
 
-export type ToolbarSize = 'lg' | 'md' | 'sm';

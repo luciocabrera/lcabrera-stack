@@ -46,6 +46,7 @@ export const baseInteractiveStyles = stylex.create({
   },
 
   label: {
+    flex: '1 1 auto',
     overflow: 'hidden',
     display: {
       default: 'block',
@@ -53,6 +54,15 @@ export const baseInteractiveStyles = stylex.create({
     },
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
+  },
+
+  icon: {
+    alignItems: 'center',
+    display: 'flex',
+    flexShrink: 0,
+    justifyContent: 'center',
+    height: 20,
+    width: 20,
   },
 });
 

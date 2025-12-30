@@ -1,4 +1,3 @@
-import type { ToolbarItemConfig } from '@/components/Toolbar';
 
 import {
   BarChartIcon,
@@ -7,7 +6,11 @@ import {
   SettingsIcon,
   UserIcon,
 } from '@/components/Icons';
-import { Toolbar } from '@/components/Toolbar';
+
+import type { ToolbarItemConfig } from './Toolbar.types';
+
+import  { Toolbar } from './Toolbar.component';
+
 
 // Example usage with SidePanel
 export const SidePanelToolbarExample = () => {
@@ -39,6 +42,12 @@ export const SidePanelToolbarExample = () => {
       icon: <SettingsIcon size={20} />,
       label: 'Settings',
       to: '/settings',
+      type: 'link',
+    },
+        {
+      icon: <SettingsIcon size={20} />,
+      label: 'Cars Sales',
+      to: '/car-sales',
       type: 'link',
     },
   ];

@@ -1,25 +1,19 @@
 import type { StyleXStyles } from '@stylexjs/stylex';
-import type { ComponentPropsWithoutRef } from 'react';
+import type { ComponentPropsWithoutRef, ReactNode } from 'react';
+
+import type {
+  DesignSystemColor,
+  DesignSystemSize,
+  DesignSystemStyle,
+  DesignSystemWidth,
+} from '@/types/design-system.types';
 
 export type ButtonProps = ComponentPropsWithoutRef<'button'> & {
-  color?: ButtonColor;
+  color?: DesignSystemColor;
   customStylex?: StyleXStyles;
+  icon?: ReactNode;
   isDisabled?: boolean;
-  size?: ButtonSize;
-  variant?: ButtonStyle;
-  width?: ButtonWidth;
+  size?: DesignSystemSize;
+  variant?: DesignSystemStyle;
+  width?: DesignSystemWidth;
 };
-
-type ButtonColor =
-  | 'error'
-  | 'ghost'
-  | 'outline'
-  | 'primary'
-  | 'secondary'
-  | 'success'
-  | 'warning';
-
-type ButtonSize = 'lg' | 'md' | 'sm';
-type ButtonStyle = 'elevated' | 'flat' | 'solid';
-
-type ButtonWidth = 'auto' | 'full';

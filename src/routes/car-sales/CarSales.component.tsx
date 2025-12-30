@@ -1,12 +1,13 @@
+import * as stylex from '@stylexjs/stylex';
 import { useLoaderData } from 'react-router';
 
 import type { TableColumn } from '@/components/Table/Table.types';
 import type { CarSale } from '@/services';
-import * as stylex from '@stylexjs/stylex';
 
 import { Table } from '@/components/Table';
 
 import type { loader } from './car-sales.loader';
+
 import { styles } from './CarSales.stylex';
 // Define table columns for car sales data
 const columns: TableColumn[] = [

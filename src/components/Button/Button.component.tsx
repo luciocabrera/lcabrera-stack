@@ -8,6 +8,7 @@ export const Button = ({
   children,
   color = 'primary',
   customStylex,
+  icon,
   isDisabled = false,
   size = 'md',
   type = 'button',
@@ -30,7 +31,8 @@ export const Button = ({
         customStylex,
       )}
     >
-      {children}
+      {icon && <span {...stylex.props(buttonStyles.icon)}>{icon}</span>}
+      <span {...stylex.props(buttonStyles.label)}>{children}</span>
     </button>
   );
 };

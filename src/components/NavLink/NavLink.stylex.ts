@@ -20,14 +20,6 @@ export const styles = stylex.create({
     fontWeight: 600,
   },
 
-  itemIcon: {
-    alignItems: 'center',
-    display: 'flex',
-    flexShrink: 0,
-    justifyContent: 'center',
-    height: 20,
-    width: 20,
-  },
 });
 
 export const linkItemStyles = {
@@ -38,7 +30,7 @@ export const linkItemStyles = {
     ...rippleBase.ripple,
   },
   color: colorVariants,
-  icon: styles.itemIcon,
+  icon: baseInteractiveStyles.icon,
   label: baseInteractiveStyles.label,
   orientation: orientationVariants,
   size: sizeVariants,

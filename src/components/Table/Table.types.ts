@@ -1,6 +1,6 @@
 import type { ComponentPropsWithRef } from 'react';
 
-import type { CustomStylex } from '@/design-system/common.types';
+import type { CustomStylex } from '@/types/design-system.types';
 
 export type TableColumn = {
   dataType?: TableColumnDataType;

@@ -6,7 +6,6 @@ import { colors } from '@/design-system/tokens/colors.stylex';
 export const tableHeaderStyles = stylex.create({
   container: {
     backgroundColor: colors.surfaceSecondary,
-    // Use box-shadow instead of border for sticky headers to avoid visual glitches
     boxShadow: `inset 0 -1px 0 0 ${colors.borderPrimary}`,
     position: 'sticky',
     zIndex: zIndex.sticky,

@@ -61,6 +61,7 @@ export const buttonStyles = {
     ...rippleBase.ripple,
   },
   color: colorVariants,
+  icon: baseInteractiveStyles.icon,
   label: baseInteractiveStyles.label,
   orientation: orientationVariants,
   size: sizeVariants,

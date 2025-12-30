@@ -1,10 +1,11 @@
 import * as stylex from '@stylexjs/stylex';
 
+import { Button } from '@/components/Button';
+import { NavLink } from '@/components/NavLink';
+
 import type { ToolbarProps } from './Toolbar.types';
 
 import { styles } from './Toolbar.stylex';
-import { ToolbarButtonItem } from './ToolbarButtonItem';
-import { ToolbarLinkItem } from './ToolbarLinkItem';
 
 export const Toolbar = ({
   items,
@@ -43,25 +44,28 @@ export const Toolbar = ({
               )}
             >
               {item.type === 'button' ? (
-                <ToolbarButtonItem
+                <Button
                   color={item.color}
                   icon={item.icon}
                   isDisabled={item.isDisabled}
-                  label={item.label}
                   onClick={item.onClick}
                   size={item.size ?? size}
                   type={item.type}
-                />
+                       width='full'
+                >
+                  {item.label}
+                </Button>
               ) : (
-                <ToolbarLinkItem
+                <NavLink
                   color={item.color}
                   end={item.end}
                   icon={item.icon}
-                  label={item.label}
                   orientation={orientation}
                   size={size}
                   to={item.to}
-                />
+                >
+                  {item.label}
+                </NavLink>
               )}
             </li>
           );

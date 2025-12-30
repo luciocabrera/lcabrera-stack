@@ -1,6 +1,6 @@
 import type { ComponentPropsWithoutRef } from 'react';
 
-import type { CustomStylex } from '@/design-system/common.types';
+import type { CustomStylex } from '@/types/design-system.types';
 
 export type TableRowProps = ComponentPropsWithoutRef<'div'> & {
   customStylex?: CustomStylex;
