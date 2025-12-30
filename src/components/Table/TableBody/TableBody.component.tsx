@@ -9,24 +9,45 @@ import { TableBodyCell } from '../TableBodyCell';
 import { TableRow } from '../TableRow';
 import { styles } from './TableBody.stylex';
 
+const DEFAULT_PLACEHOLDER_ROW_COUNT = 15;
+
+/**
+ * Generates placeholder data for skeleton loading state
+ */
+const generatePlaceholderData = <TData extends Record<string, unknown>>(
+  columns: { key: string }[],
+  rowCount: number,
+): TData[] =>
+  Array.from({ length: rowCount }, () =>
+    Object.fromEntries(columns.map((col) => [col.key, ''])),
+  ) as TData[];
+
 export const TableBody = <TData extends Record<string, unknown>>({
   columns,
   data,
+  isLoading = false,
   locale,
   overscan,
+  placeholderRowCount = DEFAULT_PLACEHOLDER_ROW_COUNT,
   rowHeight = 32,
   tableContainerRef,
 }: TableBodyProps<TData>) => {
+  // Use placeholder data when loading with no data
+  const effectiveData =
+    isLoading && data.length === 0
+      ? generatePlaceholderData<TData>(columns, placeholderRowCount)
+      : data;
+
   const { bottomSpacerHeight, endIndex, offsetY, startIndex, totalHeight } =
     useVirtualization({
       containerRef: tableContainerRef,
       itemHeight: rowHeight,
       overscan,
-      totalItems: data.length,
+      totalItems: effectiveData.length,
     });
 
-  const visibleRows = data.slice(startIndex, endIndex);
-  const totalRows = data.length;
+  const visibleRows = effectiveData.slice(startIndex, endIndex);
+  const totalRows = effectiveData.length;
 
   return (
     <tbody data-testid='table-body' {...stylex.props(styles.body(totalHeight))}>
@@ -40,6 +61,7 @@ export const TableBody = <TData extends Record<string, unknown>>({
               <TableBodyCell
                 dataType={col.dataType}
                 format={col.format}
+                isLoading={isLoading}
                 key={col.key}
                 label={col.label}
                 locale={locale}

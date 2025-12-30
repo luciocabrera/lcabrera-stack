@@ -3,6 +3,14 @@ import * as stylex from '@stylexjs/stylex';
 import { borderRadius, typography } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 
+/**
+ * Pulse animation for skeleton loading effect
+ */
+const pulseAnimation = stylex.keyframes({
+  from: { opacity: 0.3 },
+  to: { opacity: 0.6 },
+});
+
 export const tableBodyCellStyles = stylex.create({
   alignCenter: {
     justifyContent: 'center',
@@ -22,6 +30,7 @@ export const tableBodyCellStyles = stylex.create({
     fontSize: typography.fontSizeSm,
     fontWeight: typography.fontWeightNormal,
     minWidth: minWidth ?? null,
+    position: 'relative',
     width: width ?? null,
   }),
   checkbox: {
@@ -49,5 +58,18 @@ export const tableBodyCellStyles = stylex.create({
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
     width: '100%',
+  },
+  /** Loading overlay for skeleton effect */
+  loadingOverlay: {
+    animationDirection: 'alternate',
+    animationDuration: '0.75s',
+    animationIterationCount: 'infinite',
+    animationName: pulseAnimation,
+    animationTimingFunction: 'ease-in-out',
+    backgroundColor: 'rgba(128, 128, 128, 0.15)',
+    borderRadius: borderRadius.sm,
+    inset: 0,
+    pointerEvents: 'none',
+    position: 'absolute',
   },
 });

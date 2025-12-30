@@ -3,6 +3,20 @@
  * Handles database queries for car sales data
  */
 
+/**
+ * Simulated API delay in milliseconds for testing loading states.
+ * Set to 0 for production or to disable delay.
+ */
+const FAKE_API_DELAY_MS = 4000;
+
+/**
+ * Helper to add artificial delay for testing loading states
+ */
+const delay = (ms: number): Promise<void> =>
+  new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+
 export type CarSale = {
   buyer_address: string;
   buyer_email: string;
@@ -48,6 +62,11 @@ export const carSalesApi = {
    * Fetch car sales data
    */
   fetchCarSales: async (): Promise<CarSalesResponse> => {
+    // Add fake delay for testing skeleton/loading states
+    if (FAKE_API_DELAY_MS > 0) {
+      await delay(FAKE_API_DELAY_MS);
+    }
+
     const response = await fetch(`${API_BASE_URL}/car-sales`);
 
     if (!response.ok) {

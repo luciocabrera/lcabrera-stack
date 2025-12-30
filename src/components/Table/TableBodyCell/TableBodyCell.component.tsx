@@ -9,6 +9,7 @@ export const TableBodyCell = ({
   customStylex,
   dataType: dataTypeProp,
   format,
+  isLoading = false,
   label,
   locale,
   minWidth,
@@ -50,6 +51,7 @@ export const TableBodyCell = ({
       ) : (
         content
       )}
+      {isLoading && <div {...stylex.props(tableBodyCellStyles.loadingOverlay)} />}
     </td>
   );
 };

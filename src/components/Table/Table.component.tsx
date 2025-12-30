@@ -3,53 +3,40 @@ import { useRef } from 'react';
 
 import type { TableProps } from './Table.types';
 
-import { useSkeletonRowCount } from './hooks';
 import { styles } from './Table.stylex';
 import { TableBase } from './TableBase';
 import { TableBody } from './TableBody';
-import { TableBodySkeleton } from './TableBodySkeleton';
 import { TableHeader } from './TableHeader';
 import { TableOverlay } from './TableOverlay';
 
 export const Table = <T extends Record<string, unknown>>({
   columns,
   data,
+  density = 'compact',
+  isBordered = false,
   isFlexWrapperEnabled = true,
   isLoading = false,
+  isStriped = false,
   locale,
   overscan = 6,
   rowHeight = 32,
-  skeletonRowCount: fallbackRowCount = 10,
 }: TableProps<T>) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const skeletonRowCount = useSkeletonRowCount({
-    containerRef,
-    fallbackRowCount,
-    rowHeight,
-  });
-
   const tableContent = (
     <div ref={containerRef} {...stylex.props(styles.container)}>
-      <TableOverlay isVisible={isLoading} />
-      <TableBase density='compact' isBordered isStriped>
-        <TableHeader columns={columns} />
-        {isLoading ? (
-          <TableBodySkeleton
-            columns={columns}
-            rowCount={skeletonRowCount}
-            rowHeight={rowHeight}
-          />
-        ) : (
-          <TableBody
-            columns={columns}
-            data={data}
-            locale={locale}
-            overscan={overscan}
-            rowHeight={rowHeight}
-            tableContainerRef={containerRef}
-          />
-        )}
+      <TableOverlay isVisible={isLoading && data.length > 0} />
+      <TableBase density={density} isBordered={isBordered} isStriped={isStriped}>
+        <TableHeader columns={columns} isLoading={isLoading} />
+        <TableBody
+          columns={columns}
+          data={data}
+          isLoading={isLoading}
+          locale={locale}
+          overscan={overscan}
+          rowHeight={rowHeight}
+          tableContainerRef={containerRef}
+        />
       </TableBase>
     </div>
   );

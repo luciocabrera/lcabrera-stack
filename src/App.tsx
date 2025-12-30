@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { useState } from 'react';
+import { Suspense, use, useState } from 'react';
 
 import type { TableColumn } from './components/Table/Table.types';
 
@@ -89,6 +89,84 @@ const tableData = [...Array.from({ length: 10_000 }).keys()].map((rowIdx) => {
   }
   return row;
 });
+
+/**
+ * Simulated API delay in milliseconds
+ * Adjust this value to test loading states
+ */
+const FAKE_API_DELAY_MS = 2000;
+
+/**
+ * Simulate fetching table data from an API
+ */
+const fetchTableData = (): Promise<Record<string, unknown>[]> =>
+  new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(tableData);
+    }, FAKE_API_DELAY_MS);
+  });
+
+/**
+ * Table section that loads data asynchronously
+ * Uses React 19's use() hook for Suspense integration
+ */
+type AsyncTableSectionProps = {
+  dataPromise: Promise<Record<string, unknown>[]>;
+};
+
+const AsyncTableSection = ({ dataPromise }: AsyncTableSectionProps) => {
+  const data = use(dataPromise);
+
+  return (
+    <Table
+      columns={columnDefs.map((col) => ({
+        key: col.key,
+        label: col.label,
+        minWidth: 120,
+      }))}
+      data={data}
+      isFlexWrapperEnabled={false}
+      overscan={6}
+      rowHeight={32}
+    />
+  );
+};
+
+/**
+ * Loading fallback for the table
+ */
+const TableLoadingFallback = () => (
+  <div
+    style={{
+      alignItems: 'center',
+      display: 'flex',
+      height: '100%',
+      justifyContent: 'center',
+      width: '100%',
+    }}
+  >
+    <div style={{ textAlign: 'center' }}>
+      <div
+        style={{
+          animation: 'spin 1s linear infinite',
+          border: '3px solid #e5e7eb',
+          borderRadius: '50%',
+          borderTopColor: '#3b82f6',
+          height: 40,
+          margin: '0 auto 16px',
+          width: 40,
+        }}
+      />
+      <p style={{ color: '#6b7280', margin: 0 }}>Loading table data...</p>
+      <style>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
+    </div>
+  </div>
+);
+
 import {
   Card,
   CardBody,
@@ -119,10 +197,26 @@ import {
 } from './components/Toolbar/Toolbar.examples';
 import { useTheme } from './hooks/useTheme.hook';
 
+// Create the promise once, outside the component to avoid refetching on re-renders
+// In a real app, you'd use React Query, SWR, or similar
+let tableDataPromise: Promise<Record<string, unknown>[]> | undefined;
+
+const getTableDataPromise = () => {
+  tableDataPromise ??= fetchTableData();
+  return tableDataPromise;
+};
+
 const App = () => {
   const { isDarkMode, toggleTheme } = useTheme();
   const [isLeftPanelOpen, setIsLeftPanelOpen] = useState(false);
   const [isRightPanelOpen, setIsRightPanelOpen] = useState(false);
+  const [tableKey, setTableKey] = useState(0);
+
+  // Function to reload the table data (for testing)
+  const reloadTableData = () => {
+    tableDataPromise = undefined; // Reset the promise
+    setTableKey((prev) => prev + 1); // Force re-mount
+  };
 
   return (
     <div {...stylex.props(styles.app)}>
@@ -254,30 +348,27 @@ const App = () => {
           {/* Table Showcase Section */}
           <section {...stylex.props(styles.section)}>
             <h2 {...stylex.props(styles.sectionTitle)}>Table</h2>
+            <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+              <Button color='secondary' onClick={reloadTableData}>
+                🔄 Reload Table Data (Test Loading)
+              </Button>
+              <span style={{ alignSelf: 'center', color: '#6b7280', fontSize: 14 }}>
+                Simulated delay: {FAKE_API_DELAY_MS}ms
+              </span>
+            </div>
             <div
               style={{
-                    borderRadius: 8,
+                borderRadius: 8,
                 boxSizing: 'border-box',
                 display: 'flex',
-                // overflowX: 'auto',
-                // width: '100%',
-                height:'400px',
-                    // boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                height: '400px',
                 maxWidth: '100%',
               }}
             >
-              {/* Virtualized Table Component */}
-              <Table
-                columns={columnDefs.map((col) => ({
-                  key: col.key,
-                  label: col.label,
-                  minWidth: 120,
-                }))}
-                data={tableData}
-                isFlexWrapperEnabled={false}
-                overscan={6}
-                rowHeight={32}
-              />
+              {/* Virtualized Table Component with Suspense */}
+              <Suspense fallback={<TableLoadingFallback />} key={tableKey}>
+                <AsyncTableSection dataPromise={getTableDataPromise()} />
+              </Suspense>
             </div>
           </section>
 

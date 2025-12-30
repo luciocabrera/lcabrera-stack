@@ -11,6 +11,7 @@ import { getNextSortDirection } from './utils';
 export const TableHeaderCell = ({
   customStylex,
   hasSettings = false,
+  isLoading = false,
   isSortable = false,
   isSticky = true,
   label,
@@ -35,6 +36,10 @@ export const TableHeaderCell = ({
         customStylex,
       )}
     >
+      {/* Loading overlay */}
+      {isLoading && (
+        <div {...stylex.props(tableHeaderCellStyles.loadingOverlay)} />
+      )}
       <span {...stylex.props(tableHeaderCellStyles.content)}>{label}</span>
       <div {...stylex.props(tableHeaderCellStyles.controls)}>
         {isSortable && (

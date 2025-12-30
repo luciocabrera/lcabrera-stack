@@ -8,6 +8,14 @@ import {
 } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 
+/**
+ * Pulse animation for skeleton loading effect
+ */
+const pulseAnimation = stylex.keyframes({
+  from: { opacity: 0.3 },
+  to: { opacity: 0.6 },
+});
+
 export const tableHeaderCellStyles = stylex.create({
   base: (minWidth?: number | string, width?: number | string) => ({
     flex: '1 1 0%',
@@ -24,6 +32,7 @@ export const tableHeaderCellStyles = stylex.create({
     borderRightStyle: 'solid',
     borderRightWidth: 1,
     minWidth: minWidth ?? null,
+    position: 'relative',
     width: width ?? null,
   }),
   content: {
@@ -78,6 +87,18 @@ export const tableHeaderCellStyles = stylex.create({
   },
   sortButtonActive: {
     color: colors.textPrimary,
+  },
+  loadingOverlay: {
+    animationDirection: 'alternate',
+    animationDuration: '0.75s',
+    animationIterationCount: 'infinite',
+    animationName: pulseAnimation,
+    animationTimingFunction: 'ease-in-out',
+    backgroundColor: 'rgba(128, 128, 128, 0.15)',
+    borderRadius: borderRadius.sm,
+    inset: 0,
+    pointerEvents: 'none',
+    position: 'absolute',
   },
   sticky: {
     backgroundColor: colors.surfaceSecondary,

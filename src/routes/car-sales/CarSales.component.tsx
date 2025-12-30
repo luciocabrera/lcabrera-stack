@@ -1,8 +1,9 @@
 import * as stylex from '@stylexjs/stylex';
+import { Suspense, use } from 'react';
 import { useLoaderData } from 'react-router';
 
 import type { TableColumn } from '@/components/Table/Table.types';
-import type { CarSale } from '@/services';
+import type { CarSale, CarSalesResponse } from '@/services';
 
 import { Table } from '@/components/Table';
 
@@ -104,21 +105,54 @@ const columns: TableColumn[] = [
 ];
 
 export const CarSales = () => {
-  const { carSales } = useLoaderData<typeof loader>();
+  const { carSalesPromise } = useLoaderData<typeof loader>();
 
   return (
     <div {...stylex.props(styles.container)}>
       <div {...stylex.props(styles.header)}>
         <h1>Car Sales Data</h1>
-        <p>Total Records: {carSales.length}</p>
       </div>
+      <Suspense
+        fallback={
+          <Table<CarSale>
+            columns={columns}
+            data={[]}
+            density='comfortable'
+            isBordered
+            isLoading
+            isStriped
+          />
+        }
+      >
+        <CarSalesTable dataPromise={carSalesPromise} />
+      </Suspense>
+    </div>
+  );
+};
+
+/**
+ * Async table component that uses React 19's use() hook
+ */
+const CarSalesTable = ({
+  dataPromise,
+}: {
+  dataPromise: Promise<CarSalesResponse>;
+}) => {
+  const response = use(dataPromise);
+
+  return (
+    <>
+      {/* <div {...stylex.props(styles.header)}>
+        <p style={{ marginTop: -40 }}>Total Records: {response.data.length}</p>
+      </div> */}
       <Table<CarSale>
         columns={columns}
-        data={carSales}
+        data={response.data}
         density='comfortable'
-        isBordered
+             isBordered
+        // isLoading
         isStriped
       />
-    </div>
+    </>
   );
 };

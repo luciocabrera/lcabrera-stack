@@ -47,8 +47,6 @@ export type TableProps<TData extends Record<string, unknown>> = BaseProps & {
   locale?: string;
   overscan?: number;
   rowHeight?: number;
-  /** Fallback skeleton row count when container not measured */
-  skeletonRowCount?: number;
 };
 
 type BaseProps = ComponentPropsWithRef<'table'> & {

@@ -7,6 +7,8 @@ import type { TableColumn } from '../Table.types';
 export type TableBodyCellProps = ComponentPropsWithoutRef<'td'> &
   Pick<TableColumn, 'dataType' | 'format' | 'label' | 'minWidth'> & {
     customStylex?: CustomStylex;
+    /** Whether the cell is in loading state */
+    isLoading?: boolean;
     /** Locale for formatting */
     locale?: string;
     value: unknown;

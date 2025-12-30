@@ -5,13 +5,14 @@ export const tableBodySkeletonStyles = stylex.create({
     display: 'block',
   },
   cell: (minWidth?: number) => ({
-    padding: '8px 12px',
+    flex: '1 1 0%',
+    paddingBlock: 'var(--table-padding-block)',
+    paddingInline: 'var(--table-padding-inline)',
     alignItems: 'center',
     display: 'flex',
     minWidth: minWidth ?? 100,
   }),
-  row: (height: number) => ({
-    display: 'flex',
-    height,
+  row: (height?: number) => ({
+    height: height ?? null,
   }),
 });

@@ -3,9 +3,8 @@ import * as stylex from '@stylexjs/stylex';
 import type { TableBodySkeletonProps } from './TableBodySkeleton.types';
 
 import { SkeletonCell } from '../SkeletonCell';
+import { TableRow } from '../TableRow';
 import { tableBodySkeletonStyles } from './TableBodySkeleton.stylex';
-
-const DEFAULT_ROW_HEIGHT = 40;
 
 /**
  * Skeleton placeholder for table body during loading
@@ -16,13 +15,14 @@ const DEFAULT_ROW_HEIGHT = 40;
 export const TableBodySkeleton = ({
   columns,
   rowCount,
-  rowHeight = DEFAULT_ROW_HEIGHT,
+  rowHeight,
 }: TableBodySkeletonProps) => (
   <tbody aria-hidden='true' {...stylex.props(tableBodySkeletonStyles.body)}>
     {[...Array.from({ length: rowCount }).keys()].map((rowIndex) => (
-      <tr
+      <TableRow
+        customStylex={tableBodySkeletonStyles.row(rowHeight)}
+        isStriped={false}
         key={`skeleton-row-${String(rowIndex)}`}
-        {...stylex.props(tableBodySkeletonStyles.row(rowHeight))}
       >
         {columns.map((column) => (
           <td
@@ -32,7 +32,7 @@ export const TableBodySkeleton = ({
             <SkeletonCell dataType={column.dataType} />
           </td>
         ))}
-      </tr>
+      </TableRow>
     ))}
   </tbody>
 );

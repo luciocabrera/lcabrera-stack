@@ -9,6 +9,7 @@ import { tableHeaderStyles } from './TableHeader.stylex';
 export const TableHeader = <TData extends Record<string, unknown>>({
   columns,
   customStylex,
+  isLoading = false,
   ...rest
 }: TableHeaderProps<TData>) => (
   <thead
@@ -20,6 +21,7 @@ export const TableHeader = <TData extends Record<string, unknown>>({
       {columns.map((col) => (
         <TableHeaderCell
           hasSettings
+          isLoading={isLoading}
           isSortable
           key={col.key}
           label={col.label}
