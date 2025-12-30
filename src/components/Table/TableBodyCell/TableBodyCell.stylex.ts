@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import * as stylex from '@stylexjs/stylex';
 
 import { borderRadius, typography } from '@/design-system/tokens/base.stylex';
@@ -7,8 +8,11 @@ import { colors } from '@/design-system/tokens/colors.stylex';
  * Pulse animation for skeleton loading effect
  */
 const pulseAnimation = stylex.keyframes({
-  from: { opacity: 0.3 },
-  to: { opacity: 0.6 },
+  '0%': { opacity: 0.4 },
+  '25%': { opacity: 0.6 },
+  '50%': { opacity: 0.8 },
+  '75%': { opacity: 0.6 },
+  '100%': { opacity: 0.4 },
 });
 
 export const tableBodyCellStyles = stylex.create({
@@ -29,8 +33,8 @@ export const tableBodyCellStyles = stylex.create({
     display: 'flex',
     fontSize: typography.fontSizeSm,
     fontWeight: typography.fontWeightNormal,
-    minWidth: minWidth ?? null,
     position: 'relative',
+    minWidth: minWidth ?? null,
     width: width ?? null,
   }),
   checkbox: {
@@ -61,14 +65,13 @@ export const tableBodyCellStyles = stylex.create({
   },
   /** Loading overlay for skeleton effect */
   loadingOverlay: {
-    animationDirection: 'alternate',
-    animationDuration: '0.75s',
+    inset: 0,
+    borderRadius: borderRadius.sm,
+    animationDuration: '1.2s',
     animationIterationCount: 'infinite',
     animationName: pulseAnimation,
     animationTimingFunction: 'ease-in-out',
-    backgroundColor: 'rgba(128, 128, 128, 0.15)',
-    borderRadius: borderRadius.sm,
-    inset: 0,
+    backgroundColor: 'rgba(120, 120, 120, 0.25)',
     pointerEvents: 'none',
     position: 'absolute',
   },

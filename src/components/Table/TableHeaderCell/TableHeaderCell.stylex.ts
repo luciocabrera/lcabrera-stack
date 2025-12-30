@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import * as stylex from '@stylexjs/stylex';
 
 import {
@@ -12,8 +13,11 @@ import { colors } from '@/design-system/tokens/colors.stylex';
  * Pulse animation for skeleton loading effect
  */
 const pulseAnimation = stylex.keyframes({
-  from: { opacity: 0.3 },
-  to: { opacity: 0.6 },
+  '0%': { opacity: 0.4 },
+  '25%': { opacity: 0.6 },
+  '50%': { opacity: 0.8 },
+  '75%': { opacity: 0.6 },
+  '100%': { opacity: 0.4 },
 });
 
 export const tableHeaderCellStyles = stylex.create({
@@ -28,11 +32,11 @@ export const tableHeaderCellStyles = stylex.create({
     display: 'flex',
     fontSize: typography.fontSizeSm,
     fontWeight: typography.fontWeightSemibold,
+    position: 'relative',
     borderRightColor: colors.borderSecondary,
     borderRightStyle: 'solid',
     borderRightWidth: 1,
     minWidth: minWidth ?? null,
-    position: 'relative',
     width: width ?? null,
   }),
   content: {
@@ -89,12 +93,11 @@ export const tableHeaderCellStyles = stylex.create({
     color: colors.textPrimary,
   },
   loadingOverlay: {
-    animationDirection: 'alternate',
-    animationDuration: '0.75s',
+    animationDuration: '1.2s',
     animationIterationCount: 'infinite',
     animationName: pulseAnimation,
     animationTimingFunction: 'ease-in-out',
-    backgroundColor: 'rgba(128, 128, 128, 0.15)',
+    backgroundColor: 'rgba(120, 120, 120, 0.25)',
     borderRadius: borderRadius.sm,
     inset: 0,
     pointerEvents: 'none',

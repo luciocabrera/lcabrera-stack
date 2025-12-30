@@ -7,7 +7,7 @@
  * Simulated API delay in milliseconds for testing loading states.
  * Set to 0 for production or to disable delay.
  */
-const FAKE_API_DELAY_MS = 4000;
+const FAKE_API_DELAY_MS = 3000;
 
 /**
  * Helper to add artificial delay for testing loading states
