@@ -5,16 +5,19 @@ import { borderRadius, typography } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 
 /**
- * Pulse animation for skeleton loading effect
+ * Shimmer animation for skeleton loading effect
  */
-const pulseAnimation = stylex.keyframes({
-  '0%': { opacity: 0.4 },
-  '25%': { opacity: 0.6 },
-  '50%': { opacity: 0.8 },
-  '75%': { opacity: 0.6 },
-  '100%': { opacity: 0.4 },
+const shimmerAnimation = stylex.keyframes({
+  '0%': { transform: 'translateX(-100%)' },
+  '100%': { transform: 'translateX(100%)' },
 });
-
+// const pulseAnimation = stylex.keyframes({
+//   '0%': { opacity: 0.4 },
+//   '25%': { opacity: 0.6 },
+//   '50%': { opacity: 0.8 },
+//   '75%': { opacity: 0.6 },
+//   '100%': { opacity: 0.4 },
+// });
 export const tableBodyCellStyles = stylex.create({
   alignCenter: {
     justifyContent: 'center',
@@ -63,16 +66,29 @@ export const tableBodyCellStyles = stylex.create({
     whiteSpace: 'nowrap',
     width: '100%',
   },
-  /** Loading overlay for skeleton effect */
+  /** Loading overlay container for shimmer effect */
   loadingOverlay: {
     inset: 0,
     borderRadius: borderRadius.sm,
-    animationDuration: '1.2s',
-    animationIterationCount: 'infinite',
-    animationName: pulseAnimation,
-    animationTimingFunction: 'ease-in-out',
-    backgroundColor: 'rgba(120, 120, 120, 0.25)',
+    overflow: 'hidden',
+    backgroundColor: colors.hover,
     pointerEvents: 'none',
     position: 'absolute',
+
+    // animationDuration: '1.2s',
+    // animationIterationCount: 'infinite',
+    // animationName: pulseAnimation,
+    // animationTimingFunction: 'ease-in-out',
+    // backgroundColor: 'rgba(120, 120, 120, 0.25)',
+  },
+  /** Shimmer wave that moves across the overlay */
+  shimmerWave: {
+    animationDuration: '1.5s',
+    animationIterationCount: 'infinite',
+    animationName: shimmerAnimation,
+    animationTimingFunction: 'ease-in-out',
+    backgroundImage: `linear-gradient(90deg, transparent 0%, ${colors.surfacePrimary} 50%, transparent 100%)`,
+    height: '100%',
+    width: '100%',
   },
 });

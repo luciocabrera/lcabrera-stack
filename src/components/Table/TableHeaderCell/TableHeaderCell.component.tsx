@@ -36,9 +36,11 @@ export const TableHeaderCell = ({
         customStylex,
       )}
     >
-      {/* Loading overlay */}
+      {/* Loading overlay with shimmer */}
       {isLoading && (
-        <div {...stylex.props(tableHeaderCellStyles.loadingOverlay)} />
+        <div {...stylex.props(tableHeaderCellStyles.loadingOverlay)}>
+          <div {...stylex.props(tableHeaderCellStyles.shimmerWave)} />
+        </div>
       )}
       <span {...stylex.props(tableHeaderCellStyles.content)}>{label}</span>
       <div {...stylex.props(tableHeaderCellStyles.controls)}>

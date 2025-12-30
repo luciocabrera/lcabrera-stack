@@ -51,7 +51,11 @@ export const TableBodyCell = ({
       ) : (
         content
       )}
-      {isLoading && <div {...stylex.props(tableBodyCellStyles.loadingOverlay)} />}
+      {isLoading && (
+        <div {...stylex.props(tableBodyCellStyles.loadingOverlay)}>
+          <div {...stylex.props(tableBodyCellStyles.shimmerWave)} />
+        </div>
+      )}
     </td>
   );
 };

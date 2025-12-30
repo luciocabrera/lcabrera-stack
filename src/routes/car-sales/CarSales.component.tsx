@@ -142,14 +142,11 @@ const CarSalesTable = ({
 
   return (
     <>
-      {/* <div {...stylex.props(styles.header)}>
-        <p style={{ marginTop: -40 }}>Total Records: {response.data.length}</p>
-      </div> */}
       <Table<CarSale>
         columns={columns}
         data={response.data}
         density='comfortable'
-             isBordered
+        isBordered
         // isLoading
         isStriped
       />
