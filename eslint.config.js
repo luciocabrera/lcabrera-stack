@@ -1,25 +1,23 @@
 import eslint from '@eslint/js';
+import stylex from '@stylexjs/eslint-plugin';
 import eslintConfigPrettier from 'eslint-config-prettier/flat';
 import perfectionist from 'eslint-plugin-perfectionist';
+import reactPlugin from 'eslint-plugin-react';
+import reactDom from 'eslint-plugin-react-dom';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
+import reactX from 'eslint-plugin-react-x';
 import security from 'eslint-plugin-security';
-import stylex from '@stylexjs/eslint-plugin';
 import unicorn from 'eslint-plugin-unicorn';
+import { defineConfig, globalIgnores } from 'eslint/config';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
-import reactX from 'eslint-plugin-react-x';
-import reactDom from 'eslint-plugin-react-dom';
-import reactPlugin from 'eslint-plugin-react';
 
-import { defineConfig, globalIgnores } from 'eslint/config';
 import localRules from './eslint-local-rules/build/index.js';
 
 export default defineConfig(
-  // 1. Core ESLint and TypeScript Recommended
+  // 1. Core ESLint
   eslint.configs.recommended,
-  ...tseslint.configs.strictTypeChecked,
-  ...tseslint.configs.stylisticTypeChecked,
   // Add security recommended config here (good spot: after core but before styling/sorting)
   security.configs.recommended,
   unicorn.configs.recommended,
@@ -41,8 +39,27 @@ export default defineConfig(
   // 4. Formatting (Prettier - Must be last to disable conflicts)
   eslintConfigPrettier,
 
-  // 5. Custom Configuration, Plugins, and Overrides
+  // 5. JavaScript files configuration (for Node.js server files, etc.)
   {
+    files: ['**/*.js', '**/*.mjs', '**/*.cjs'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      globals: {
+        ...globals.node,
+      },
+    },
+    rules: {
+      'no-console': 'off',
+      'unicorn/prevent-abbreviations': 'off',
+    },
+  },
+
+  // 6. Custom Configuration, Plugins, and Overrides for TypeScript files
+  {
+    extends: [
+      ...tseslint.configs.strictTypeChecked,
+      ...tseslint.configs.stylisticTypeChecked,
+    ],
     files: ['**/*.ts', '**/*.tsx'], // Target specific files for TypeScript-aware rules
     languageOptions: {
       ecmaVersion: 'latest',
@@ -59,42 +76,39 @@ export default defineConfig(
       '@stylexjs': stylex,
       'local-rules': localRules,
     },
-    settings: {
-      react: {
-        version: 'detect',
-      },
-    },
     rules: {
-      // Conflicts: Ensure core sorting is off for perfectionist
-      'sort-imports': 'off',
+      '@stylexjs/sort-keys': 'warn',
 
-      // Stronger TypeScript enforcement
-      '@typescript-eslint/consistent-type-imports': [
-        'error',
-        { prefer: 'type-imports', disallowTypeAnnotations: true },
-      ],
+      // StyleX validation rules
+      '@stylexjs/valid-styles': 'error',
+
+      // Disable unicorn rules that conflict with our type-first standard
+      '@typescript-eslint/consistent-type-definitions': ['error', 'type'], // Enforce type over interface
       '@typescript-eslint/consistent-type-exports': [
         'error',
         { fixMixedExportsWithInlineTypeSpecifier: false },
       ],
-      '@typescript-eslint/no-explicit-any': 'error', // Ban any completely
-      '@typescript-eslint/no-unsafe-call': 'error',
-      '@typescript-eslint/no-unsafe-member-access': 'error',
-      '@typescript-eslint/no-unsafe-return': 'error',
-      '@typescript-eslint/no-unsafe-assignment': 'error',
-      '@typescript-eslint/no-explicit-any': 'error',
-      // '@typescript-eslint/strict-boolean-expressions': 'warn',
-      '@typescript-eslint/no-unused-vars': [
+      // Stronger TypeScript enforcement
+      '@typescript-eslint/consistent-type-imports': [
         'error',
-        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+        { disallowTypeAnnotations: true, prefer: 'type-imports' },
       ],
-      '@typescript-eslint/no-floating-promises': 'error',
-      '@typescript-eslint/no-misused-promises': 'error',
-
       // Naming convention (excellent)
       '@typescript-eslint/naming-convention': [
         'error',
         {
+          format: ['PascalCase'],
+          prefix: [
+            'is',
+            'should',
+            'has',
+            'can',
+            'did',
+            'will',
+            'was',
+            'are',
+            'does',
+          ],
           selector: [
             'variable',
             'classProperty',
@@ -103,38 +117,43 @@ export default defineConfig(
             'parameter',
           ],
           types: ['boolean'],
-          format: ['PascalCase'],
-          prefix: [
-            'is',
-            'should',
-            'has',
-            'can',
-            'did',
-            'will',
-            'was',
-            'are',
-            'does',
-          ],
         },
         {
-          selector: 'import',
           format: ['camelCase', 'PascalCase'], // Allow PascalCase for React component imports
+          selector: 'import',
         },
         {
-          selector: 'default',
           format: ['camelCase'],
           leadingUnderscore: 'allow',
+          selector: 'default',
           trailingUnderscore: 'allow',
         },
         {
-          selector: 'variable',
           format: ['camelCase', 'UPPER_CASE', 'PascalCase'],
+          selector: 'variable',
         },
         {
-          selector: 'function',
           format: ['camelCase', 'PascalCase'], // Allow PascalCase for React components
+          selector: 'function',
         },
-        { selector: 'typeLike', format: ['PascalCase'] },
+        { format: ['PascalCase'], selector: 'typeLike' },
+      ],
+      '@typescript-eslint/no-explicit-any': 'error', // Ban any completely
+      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-floating-promises': 'error',
+      '@typescript-eslint/no-misused-promises': 'error',
+      '@typescript-eslint/no-non-null-assertion': 'warn', // Warn instead of error
+      '@typescript-eslint/no-unsafe-assignment': 'error',
+      '@typescript-eslint/no-unsafe-call': 'error',
+
+      '@typescript-eslint/no-unsafe-member-access': 'error',
+
+      '@typescript-eslint/no-unsafe-return': 'error',
+
+      // '@typescript-eslint/strict-boolean-expressions': 'warn',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
 
       '@typescript-eslint/restrict-template-expressions': [
@@ -143,49 +162,43 @@ export default defineConfig(
           allowNumber: true,
         },
       ],
-
-      // General Rules
-      'no-console': ['error', { allow: ['warn', 'error'] }], // Stricter: ban debug logs
-
-      // Unicorn Configuration - Disable overly aggressive rules
-      'unicorn/prevent-abbreviations': 'off', // Too aggressive, conflicts with common naming patterns
-      'unicorn/filename-case': 'off', // Allow PascalCase for React component files
-      // Disable unicorn rules that conflict with our type-first standard
-      '@typescript-eslint/consistent-type-definitions': ['error', 'type'], // Enforce type over interface
-      '@typescript-eslint/no-non-null-assertion': 'warn', // Warn instead of error
-
       // Custom local rules
       'local-rules/destructuring-for-functions': 'warn',
-      'local-rules/no-inline-type-imports': 'error',
       'local-rules/merge-duplicate-imports': 'error',
+      'local-rules/no-inline-type-imports': 'error',
+
       'local-rules/no-type-definitions-in-components': 'error',
       'local-rules/single-component-export': 'error',
       'local-rules/type-suffix-naming': 'error',
+      // General Rules
+      'no-console': ['error', { allow: ['warn', 'error'] }], // Stricter: ban debug logs
+      // Disable security false positives for StyleX object property access
+      'security/detect-object-injection': 'off',
+      // Conflicts: Ensure core sorting is off for perfectionist
+      'sort-imports': 'off',
 
-      // StyleX validation rules
-      '@stylexjs/valid-styles': 'error',
-      '@stylexjs/sort-keys': 'warn',
+      'unicorn/filename-case': 'off', // Allow PascalCase for React component files
+      // Unicorn Configuration - Disable overly aggressive rules
+      'unicorn/prevent-abbreviations': 'off', // Too aggressive, conflicts with common naming patterns
+    },
+    settings: {
+      react: {
+        version: 'detect',
+      },
     },
   },
 
-  // 6. StyleX files override - Allow CSS pseudo-selectors and other CSS properties
+  // 7. API type files override - Allow snake_case for database/API schema matching
   {
-    files: ['**/*.stylex.ts'],
+    files: ['**/*.api.ts', '**/services/**/*.ts'],
     rules: {
-      // Disable perfectionist sorting for StyleX files - use StyleX's own sorting
-      'perfectionist/sort-objects': 'off',
-      'perfectionist/sort-object-types': 'off',
-
-      // StyleX dynamic styles require positional parameters (not object destructuring)
-      'local-rules/destructuring-for-functions': 'off',
-      // StyleX requires null (not undefined) for optional style values
-      'unicorn/no-null': 'off',
-
       '@typescript-eslint/naming-convention': [
         'error',
         {
-          selector: ['variable', 'classProperty', 'typeProperty', 'parameter'],
-          types: ['boolean'],
+          format: ['camelCase', 'snake_case'], // Allow snake_case for API/DB fields
+          selector: 'typeProperty',
+        },
+        {
           format: ['PascalCase'],
           prefix: [
             'is',
@@ -198,47 +211,101 @@ export default defineConfig(
             'are',
             'does',
           ],
+          selector: ['variable', 'classProperty', 'parameter'],
+          types: ['boolean'],
         },
         {
-          selector: 'objectLiteralProperty',
-          format: null, // Allow any format for object properties in StyleX files
-          custom: {
-            regex: '^(:|@|>|\\+|~|\\[|\\*|&|\\.|#|-|[a-z][a-zA-Z0-9]*)',
-            match: true,
-          },
-        },
-        {
-          selector: 'import',
           format: ['camelCase', 'PascalCase'],
+          selector: 'import',
         },
         {
-          selector: 'default',
           format: ['camelCase'],
           leadingUnderscore: 'allow',
+          selector: 'default',
           trailingUnderscore: 'allow',
         },
         {
-          selector: 'variable',
           format: ['camelCase', 'UPPER_CASE', 'PascalCase'],
+          selector: 'variable',
         },
         {
-          selector: 'function',
           format: ['camelCase', 'PascalCase'],
+          selector: 'function',
         },
-        { selector: 'typeLike', format: ['PascalCase'] },
+        { format: ['PascalCase'], selector: 'typeLike' },
       ],
     },
   },
 
-  // 7. Vite config override - Allow configuration object properties
+  // 8. StyleX files override - Allow CSS pseudo-selectors and other CSS properties
+  {
+    files: ['**/*.stylex.ts'],
+    rules: {
+      '@typescript-eslint/naming-convention': [
+        'error',
+        {
+          format: ['PascalCase'],
+          prefix: [
+            'is',
+            'should',
+            'has',
+            'can',
+            'did',
+            'will',
+            'was',
+            'are',
+            'does',
+          ],
+          selector: ['variable', 'classProperty', 'typeProperty', 'parameter'],
+          types: ['boolean'],
+        },
+        {
+          custom: {
+            match: true,
+            regex: String.raw`^(:|@|>|\+|~|\[|\*|&|\.|#|-|[a-z][a-zA-Z0-9]*)`,
+          },
+          format: null, // Allow any format for object properties in StyleX files
+          selector: 'objectLiteralProperty',
+        },
+        {
+          format: ['camelCase', 'PascalCase'],
+          selector: 'import',
+        },
+        {
+          format: ['camelCase'],
+          leadingUnderscore: 'allow',
+          selector: 'default',
+          trailingUnderscore: 'allow',
+        },
+        {
+          format: ['camelCase', 'UPPER_CASE', 'PascalCase'],
+          selector: 'variable',
+        },
+        {
+          format: ['camelCase', 'PascalCase'],
+          selector: 'function',
+        },
+        { format: ['PascalCase'], selector: 'typeLike' },
+      ],
+      // StyleX dynamic styles require positional parameters (not object destructuring)
+      'local-rules/destructuring-for-functions': 'off',
+
+      'perfectionist/sort-object-types': 'off',
+      // Disable perfectionist sorting for StyleX files - use StyleX's own sorting
+      'perfectionist/sort-objects': 'off',
+
+      // StyleX requires null (not undefined) for optional style values
+      'unicorn/no-null': 'off',
+    },
+  },
+
+  // 9. Vite config override - Allow configuration object properties
   {
     files: ['vite.config.ts', 'vite.config.js'],
     rules: {
       '@typescript-eslint/naming-convention': [
         'error',
         {
-          selector: ['variable', 'classProperty', 'typeProperty', 'parameter'],
-          types: ['boolean'],
           format: ['PascalCase'],
           prefix: [
             'is',
@@ -251,43 +318,43 @@ export default defineConfig(
             'are',
             'does',
           ],
+          selector: ['variable', 'classProperty', 'typeProperty', 'parameter'],
+          types: ['boolean'],
         },
         {
-          selector: 'objectLiteralProperty',
           format: null, // Allow any format for Vite config objects (like @/, unstable_moduleResolution)
+          selector: 'objectLiteralProperty',
         },
         {
-          selector: 'import',
           format: ['camelCase', 'PascalCase'],
+          selector: 'import',
         },
         {
-          selector: 'default',
           format: ['camelCase'],
           leadingUnderscore: 'allow',
+          selector: 'default',
           trailingUnderscore: 'allow',
         },
         {
-          selector: 'variable',
           format: ['camelCase', 'UPPER_CASE', 'PascalCase'],
+          selector: 'variable',
         },
         {
-          selector: 'function',
           format: ['camelCase', 'PascalCase'],
+          selector: 'function',
         },
-        { selector: 'typeLike', format: ['PascalCase'] },
+        { format: ['PascalCase'], selector: 'typeLike' },
       ],
     },
   },
 
-  // 8. React Router config override - Allow configuration object properties
+  // 10. React Router config override - Allow configuration object properties
   {
     files: ['react-router.config.ts'],
     rules: {
       '@typescript-eslint/naming-convention': [
         'error',
         {
-          selector: ['variable', 'classProperty', 'typeProperty', 'parameter'],
-          types: ['boolean'],
           format: ['PascalCase'],
           prefix: [
             'is',
@@ -300,35 +367,37 @@ export default defineConfig(
             'are',
             'does',
           ],
+          selector: ['variable', 'classProperty', 'typeProperty', 'parameter'],
+          types: ['boolean'],
         },
         {
-          selector: 'objectLiteralProperty',
           format: null, // Allow any format for React Router config objects (like ssr, basename, etc.)
+          selector: 'objectLiteralProperty',
         },
         {
-          selector: 'import',
           format: ['camelCase', 'PascalCase'],
+          selector: 'import',
         },
         {
-          selector: 'default',
           format: ['camelCase'],
           leadingUnderscore: 'allow',
+          selector: 'default',
           trailingUnderscore: 'allow',
         },
         {
-          selector: 'variable',
           format: ['camelCase', 'UPPER_CASE', 'PascalCase'],
+          selector: 'variable',
         },
         {
-          selector: 'function',
           format: ['camelCase', 'PascalCase'],
+          selector: 'function',
         },
-        { selector: 'typeLike', format: ['PascalCase'] },
+        { format: ['PascalCase'], selector: 'typeLike' },
       ],
     },
   },
 
-  // 9. Root and route entry files override - Allow multiple exports for React Router
+  // 11. Root and route entry files override - Allow multiple exports for React Router
   {
     files: ['src/root.tsx', 'src/root/**/index.ts', 'src/routes/**/index.tsx'],
     rules: {
@@ -336,7 +405,7 @@ export default defineConfig(
     },
   },
 
-  // 10. Ignores
+  // 12. Ignores
   globalIgnores([
     '.react-router/',
     'build/',
@@ -344,8 +413,6 @@ export default defineConfig(
     'dist/',
     'node_modules/',
     'eslint-local-rules/',
-    '*.js',
-    '*.mjs',
     'guidelines/playwright_config.ts',
     'scripts/',
   ]),

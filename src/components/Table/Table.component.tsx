@@ -11,9 +11,9 @@ import { TableHeader } from './TableHeader';
 export const Table = <T extends Record<string, unknown>>({
   columns,
   data,
+  isFlexWrapperEnabled = true,
   overscan = 6,
   rowHeight = 32,
-  useFlexWrapper = true,
 }: TableProps<T>) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -32,8 +32,9 @@ export const Table = <T extends Record<string, unknown>>({
     </div>
   );
 
-  if (!useFlexWrapper) return tableContent;
+  if (isFlexWrapperEnabled)
+    return <div {...stylex.props(styles.wrapper)}>{tableContent}</div>;
 
-  return <div {...stylex.props(styles.wrapper)}>{tableContent}</div>;
+  return tableContent;
 };
 // #5a7cdd

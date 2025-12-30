@@ -9,9 +9,9 @@ export type CarSale = {
   buyer_name: string;
   buyer_phone: string;
   car_id: number;
-  city: string | null;
+  city: null | string;
   color: string;
-  country: string | null;
+  country: null | string;
   date_of_ingress: string;
   date_of_sale: string;
   engine: string;
@@ -23,7 +23,7 @@ export type CarSale = {
   loan_provider: string;
   mileage: number;
   model: string;
-  postal_code: string | null;
+  postal_code: null | string;
   profit: number;
   purchase_price: number;
   sale_price: number;
@@ -31,7 +31,7 @@ export type CarSale = {
   seller_email: string;
   seller_name: string;
   seller_phone: string;
-  state: string | null;
+  state: null | string;
   transmission: string;
   year: number;
 };
@@ -54,6 +54,7 @@ export const carSalesApi = {
       throw new Error(`Failed to fetch car sales: ${response.statusText}`);
     }
 
-    return response.json();
+    const data = (await response.json()) as CarSalesResponse;
+    return data;
   },
 };

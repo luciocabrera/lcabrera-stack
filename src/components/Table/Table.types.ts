@@ -21,9 +21,9 @@ export type TableDensity = 'comfortable' | 'compact';
 export type TableProps<TData extends Record<string, unknown>> = BaseProps & {
   columns: TableColumn[];
   data: TData[];
+  isFlexWrapperEnabled?: boolean;
   overscan?: number;
   rowHeight?: number;
-  useFlexWrapper?: boolean;
 };
 
 type BaseProps = ComponentPropsWithRef<'table'> & {

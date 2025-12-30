@@ -1,6 +1,6 @@
+const cors = require('cors');
 const express = require('express');
 const { Pool } = require('pg');
-const cors = require('cors');
 
 const app = express();
 const port = 3001;
@@ -11,15 +11,15 @@ app.use(express.json());
 
 // PostgreSQL connection
 const pool = new Pool({
-  user: 'root',
-  host: 'localhost',
   database: 'car_sales_db',
+  host: 'localhost',
   password: 'ty3-6url-c088l3r-kr44l',
   port: 5432,
+  user: 'root',
 });
 
 // Get all car sales
-app.get('/api/car-sales', async (req, res) => {
+app.get('/api/car-sales', async (request, res) => {
   try {
     const result = await pool.query('SELECT * FROM car_sales ORDER BY car_id');
     res.json({

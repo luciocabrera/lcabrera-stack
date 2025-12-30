@@ -264,14 +264,14 @@ const App = () => {
             <h2 {...stylex.props(styles.sectionTitle)}>Table</h2>
             <div
               style={{
-                    display: 'flex',
-                borderRadius: 8,
-                // boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-                maxWidth: '100%',
+                    borderRadius: 8,
+                boxSizing: 'border-box',
+                display: 'flex',
                 // overflowX: 'auto',
                 // width: '100%',
                 height:'400px',
-                    boxSizing: 'border-box',
+                    // boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                maxWidth: '100%',
               }}
             >
               {/* Virtualized Table Component */}
