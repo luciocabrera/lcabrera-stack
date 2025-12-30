@@ -1,5 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
-import { Outlet } from 'react-router';
+import { Outlet, useLoaderData } from 'react-router';
+
+import type { ThemeMode } from '@/types/theme.types';
 
 import { Button } from '@/components/Button';
 import { SidePanelToolbarExample } from '@/components/Toolbar/Toolbar.examples';
@@ -27,8 +29,10 @@ const RootContent = () => {
 };
 
 export const Root = () => {
+  const { theme } = useLoaderData<{ theme?: ThemeMode }>();
+
   return (
-    <ThemeProvider defaultTheme='light'>
+    <ThemeProvider defaultTheme='light' initialTheme={theme}>
       <RootContent />
     </ThemeProvider>
   );
