@@ -18,7 +18,7 @@ export const baseInteractiveStyles = stylex.create({
   element: {
     borderColor: 'transparent',
     borderStyle: 'solid',
-    borderWidth: '0',
+    borderWidth: '1px', // Always 1px for consistent sizing across all variants
     gap: spacing.xs,
     outline: {
       ':focus-visible': `2px solid ${colors.borderFocus}`,
@@ -97,6 +97,7 @@ export const widthVariants = stylex.create({
 // Ripple variants for each color
 export const colorVariants = stylex.create({
   error: {
+    borderColor: colors.error,
     backgroundColor: colors.error,
     backgroundImage: {
       default: 'none',
@@ -106,6 +107,7 @@ export const colorVariants = stylex.create({
   },
 
   ghost: {
+    borderColor: 'transparent',
     backgroundColor: {
       default: 'transparent',
       ':hover': colors.hover,
@@ -119,7 +121,6 @@ export const colorVariants = stylex.create({
 
   outline: {
     borderColor: colors.borderPrimary,
-    borderWidth: '1px',
     backgroundColor: {
       default: 'transparent',
       ':hover': colors.hover,
@@ -132,6 +133,7 @@ export const colorVariants = stylex.create({
   },
 
   primary: {
+    borderColor: colors.brandPrimary,
     backgroundColor: colors.brandPrimary,
     backgroundImage: {
       default: 'none',
@@ -141,6 +143,7 @@ export const colorVariants = stylex.create({
   },
 
   secondary: {
+    borderColor: colors.brandSecondary,
     backgroundColor: colors.brandSecondary,
     backgroundImage: {
       default: 'none',
@@ -150,6 +153,7 @@ export const colorVariants = stylex.create({
   },
 
   success: {
+    borderColor: colors.success,
     backgroundColor: colors.success,
     backgroundImage: {
       default: 'none',
@@ -159,6 +163,7 @@ export const colorVariants = stylex.create({
   },
 
   warning: {
+    borderColor: colors.warning,
     backgroundColor: colors.warning,
     backgroundImage: {
       default: 'none',
