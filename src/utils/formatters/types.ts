@@ -1,14 +1,3 @@
-/**
- * Format option types for table cell formatting
- */
-
-/**
- * Union type for all format options based on data type
- */
-export type ColumnFormatOptions =
-  | CurrencyFormatOptions
-  | DateFormatOptions
-  | NumberFormatOptions;
 
 export type CurrencyFormatOptions = {
   /** Currency code (e.g., 'USD', 'EUR', 'GBP') */

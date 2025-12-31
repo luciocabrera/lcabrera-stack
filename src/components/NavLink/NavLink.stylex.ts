@@ -10,7 +10,7 @@ import {
   widthVariants,
 } from '@/design-system/tokens/commons.stylex';
 
-export const styles = stylex.create({
+const styles = stylex.create({
   item: {
     containerName: 'toolbarLink',
   },

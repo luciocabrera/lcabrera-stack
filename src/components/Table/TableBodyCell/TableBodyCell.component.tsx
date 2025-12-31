@@ -2,7 +2,7 @@ import * as stylex from '@stylexjs/stylex';
 
 import type { TableBodyCellProps } from './TableBodyCell.types';
 
-import { tableBodyCellStyles } from './TableBodyCell.stylex';
+import { skelletonStyles, tableBodyCellStyles } from './TableBodyCell.stylex';
 import { detectDataType, renderCellContent } from './utils';
 
 export const TableBodyCell = ({
@@ -21,7 +21,6 @@ export const TableBodyCell = ({
 
   const isRightAligned = dataType === 'number' || dataType === 'currency';
   const isCentered = dataType === 'boolean' || dataType === 'date';
-  const hasEllipsis = dataType !== 'boolean';
 
   const content = renderCellContent({
     dataType,
@@ -41,19 +40,16 @@ export const TableBodyCell = ({
         customStylex,
       )}
     >
-      {hasEllipsis ? (
-        <span
-          title={typeof content === 'string' ? content : undefined}
-          {...stylex.props(tableBodyCellStyles.textContent)}
-        >
-          {content}
-        </span>
-      ) : (
-        content
-      )}
+      <span
+        title={typeof content === 'string' ? content : undefined}
+        {...stylex.props(tableBodyCellStyles.textContent)}
+      >
+        {content}
+      </span>
+
       {isLoading && (
-        <div {...stylex.props(tableBodyCellStyles.loadingOverlay)}>
-          <div {...stylex.props(tableBodyCellStyles.shimmerWave)} />
+        <div {...stylex.props(skelletonStyles.loadingOverlay)}>
+          <div {...stylex.props(skelletonStyles.shimmerWave)} />
         </div>
       )}
     </td>

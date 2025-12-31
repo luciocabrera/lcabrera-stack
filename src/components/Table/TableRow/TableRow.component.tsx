@@ -16,8 +16,9 @@ export const TableRow = ({
       {...rest}
       {...stylex.props(
         tableRowStyles.base,
-        isHeader && tableRowStyles.header,
+
         isStriped && tableRowStyles.striped,
+        isHeader && tableRowStyles.header,
         customStylex,
       )}
     >

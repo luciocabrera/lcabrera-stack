@@ -10,10 +10,8 @@ export type TableHeaderCellProps = ComponentPropsWithoutRef<'th'> &
   Pick<TableColumn, 'label' | 'minWidth'> & {
     customStylex?: CustomStylex;
     hasSettings?: boolean;
-    /** Show skeleton loading state */
     isLoading?: boolean;
     isSortable?: boolean;
-    isSticky?: boolean;
     onSettingsClick?: () => void;
     onSort?: (direction: SortDirection) => void;
     sortDirection?: SortDirection;

@@ -5,13 +5,14 @@ export {
   useTablePersistence,
 } from './hooks';
 // Skeleton components
-export { SkeletonCell } from './SkeletonCell';
 
 // Main Table component
 export { Table } from './Table.component';
-export type { TableColumn, TableColumnDataType, TableProps } from './Table.types';
-
-export { TableBodySkeleton } from './TableBodySkeleton';
+export type {
+  TableColumn,
+  TableColumnDataType,
+  TableProps,
+} from './Table.types';
 
 // Context
 export { TableContext, TableProvider } from './TableContext';
@@ -60,7 +61,6 @@ export {
   useSetSorting,
   useSetTableData,
 } from './TableContext';
-export { TableOverlay } from './TableOverlay';
 
 // Suspense
 export { TableSuspenseBoundary } from './TableSuspenseBoundary';

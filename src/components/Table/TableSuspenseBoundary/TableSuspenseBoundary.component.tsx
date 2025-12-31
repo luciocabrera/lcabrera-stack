@@ -23,17 +23,8 @@ const TableDataResolver = <TData extends Record<string, unknown>>({
  */
 const TableSkeletonFallback = <TData extends Record<string, unknown>>({
   columns,
-  skeletonRowCount,
-}: Pick<
-  TableSuspenseBoundaryProps<TData>,
-  'columns' | 'skeletonRowCount'
->) => (
-  <Table<TData>
-    columns={columns}
-    data={[]}
-    isLoading
-    skeletonRowCount={skeletonRowCount}
-  />
+}: Pick<TableSuspenseBoundaryProps<TData>, 'columns' | 'skeletonRowCount'>) => (
+  <Table<TData> columns={columns} data={[]} isLoading />
 );
 
 /**
@@ -55,9 +46,7 @@ const TableSkeletonFallback = <TData extends Record<string, unknown>>({
  * </TableSuspenseBoundary>
  * ```
  */
-export const TableSuspenseBoundary = <
-  TData extends Record<string, unknown>,
->({
+export const TableSuspenseBoundary = <TData extends Record<string, unknown>>({
   children,
   columns,
   dataPromise,

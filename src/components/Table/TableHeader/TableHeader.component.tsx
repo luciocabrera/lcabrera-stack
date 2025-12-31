@@ -26,6 +26,7 @@ export const TableHeader = <TData extends Record<string, unknown>>({
           key={col.key}
           label={col.label}
           minWidth={col.minWidth ?? 120}
+           width={col.minWidth ?? 120}
         />
       ))}
     </TableRow>

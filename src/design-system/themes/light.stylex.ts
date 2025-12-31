@@ -47,7 +47,7 @@ export const lightTheme = stylex.createTheme(colors, {
 
   /* Neutral scale (unified grey ramp for typography & surfaces) */
   backgroundPrimary: 'oklch(99% 0 0)', // white
-  backgroundSecondary: 'oklch(97.5% 0.003 250)', // #f8f9fa equivalent
+  backgroundSecondary: 'oklch(97.5% 0.006 250)', // #f8f9fa equivalent
   backgroundTertiary: 'oklch(95% 0.005 250)', // #f1f3f5
   surfacePrimary: 'oklch(99% 0 0)',
   surfaceSecondary: 'oklch(97.5% 0.003 250)',

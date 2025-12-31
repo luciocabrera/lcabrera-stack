@@ -1,14 +1,11 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { spacing } from '@/design-system/tokens/base.stylex';
+import { borderRadius } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const tableRowStyles = stylex.create({
   base: {
-    paddingBlock: 'var(--table-padding-block)',
-    paddingInline: 'var(--table-padding-inline)',
     alignItems: 'center',
-    columnGap: spacing.sm,
     display: 'flex',
     borderBottomColor: colors.borderSecondary,
     borderBottomStyle: 'solid',
@@ -18,7 +15,9 @@ export const tableRowStyles = stylex.create({
   },
   header: {
     padding: 0,
+    borderRadius: borderRadius.lg,
     backgroundColor: colors.surfaceSecondary,
+    height: 40,
   },
   striped: {
     backgroundColor: { ':nth-child(even)': colors.backgroundSecondary },

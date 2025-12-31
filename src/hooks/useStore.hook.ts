@@ -79,8 +79,6 @@ export const useStore = <TData extends Record<string, unknown>>(
   };
 };
 
-export type TStoreReturn = ReturnType<typeof useStore>;
-
 /**
  * Tuple type for store selector hooks
  * [selectedValue, setter]

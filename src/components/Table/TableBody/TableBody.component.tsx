@@ -60,6 +60,7 @@ export const TableBody = <TData extends Record<string, unknown>>({
                 locale={locale}
                 minWidth={col.minWidth ?? 120}
                 value={col.key in row ? row[col.key] : ''}
+                width={col.minWidth ?? 120}
               />
             ))}
           </TableRow>

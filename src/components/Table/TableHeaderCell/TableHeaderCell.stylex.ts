@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 import * as stylex from '@stylexjs/stylex';
 
 import {
@@ -8,37 +7,37 @@ import {
   zIndex,
 } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
-
-/**
- * Shimmer animation for skeleton loading effect
- */
-const shimmerAnimation = stylex.keyframes({
-  '0%': { transform: 'translateX(-100%)' },
-  '100%': { transform: 'translateX(100%)' },
-});
+import { skelleton } from '@/design-system/tokens/commons.stylex';
 
 export const tableHeaderCellStyles = stylex.create({
   base: (minWidth?: number | string, width?: number | string) => ({
-    flex: '1 1 0%',
-    gap: spacing.xs,
-    paddingBlock: 'var(--table-padding-block)',
-    paddingInline: 'var(--table-padding-inline)',
+    borderColor: 'green',
+    borderStyle: 'solid',
+    paddingInline: '6px', // 'var(--table-padding-inline)',
     alignItems: 'center',
-    backgroundColor: colors.surfaceSecondary,
     color: colors.textSecondary,
     display: 'flex',
     fontSize: typography.fontSizeSm,
     fontWeight: typography.fontWeightSemibold,
-    position: 'relative',
+    justifyContent: 'flex-start',
+    position: 'sticky',
+    zIndex: zIndex.sticky,
     borderRightColor: colors.borderSecondary,
     borderRightStyle: 'solid',
     borderRightWidth: 1,
+    height: '100%',
+    maxHeight: '100%',
+    maxWidth: width ?? null,
     minWidth: minWidth ?? null,
+    top: 0,
     width: width ?? null,
   }),
   content: {
     flex: '1',
     overflow: 'hidden',
+    alignItems: 'center',
+    display: 'flex',
+    justifyContent: 'flex-start',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
   },
@@ -89,29 +88,6 @@ export const tableHeaderCellStyles = stylex.create({
   sortButtonActive: {
     color: colors.textPrimary,
   },
-  /** Loading overlay container for shimmer effect */
-  loadingOverlay: {
-    inset: 0,
-    borderRadius: borderRadius.sm,
-    overflow: 'hidden',
-    backgroundColor: colors.hover,
-    pointerEvents: 'none',
-    position: 'absolute',
-  },
-  /** Shimmer wave that moves across the overlay */
-  shimmerWave: {
-    animationDuration: '1.5s',
-    animationIterationCount: 'infinite',
-    animationName: shimmerAnimation,
-    animationTimingFunction: 'ease-in-out',
-    backgroundImage: `linear-gradient(90deg, transparent 0%, ${colors.surfacePrimary} 50%, transparent 100%)`,
-    height: '100%',
-    width: '100%',
-  },
-  sticky: {
-    backgroundColor: colors.surfaceSecondary,
-    position: 'sticky',
-    zIndex: zIndex.sticky,
-    top: 0,
-  },
 });
+
+export const skelletonStyles = { ...skelleton };

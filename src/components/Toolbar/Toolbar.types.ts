@@ -11,12 +11,6 @@ export type ToolbarButtonConfig = Omit<ButtonProps, 'children' | 'width'> & {
   type: 'button';
 };
 
-export type ToolbarButtonItemProps = ComponentPropsWithoutRef<'button'> &
-  Pick<ButtonProps, 'color' | 'isDisabled' | 'size'> & {
-    icon?: ReactNode;
-    label: string;
-  };
-
 export type ToolbarItemConfig = ToolbarButtonConfig | ToolbarLinkConfig;
 
 export type ToolbarLinkConfig = Omit<

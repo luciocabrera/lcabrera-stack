@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import * as stylex from '@stylexjs/stylex';
 
 import {
@@ -8,6 +9,11 @@ import {
   typography,
 } from './base.stylex';
 import { colors } from './colors.stylex';
+
+const shimmerAnimation = stylex.keyframes({
+  '0%': { transform: 'translateX(-100%)' },
+  '100%': { transform: 'translateX(100%)' },
+});
 
 /**
  * Common reusable styles shared across components
@@ -211,5 +217,28 @@ export const orientationVariants = stylex.create({
 
   vertical: {
     justifyContent: 'flex-start',
+  },
+});
+
+
+export const skelleton = stylex.create({
+  /** Loading overlay container for shimmer effect */
+  loadingOverlay: {
+    inset: 0,
+    borderRadius: borderRadius.sm,
+    overflow: 'hidden',
+    backgroundColor: colors.hover,
+    pointerEvents: 'none',
+    position: 'absolute',
+  },
+  /** Shimmer wave that moves across the overlay */
+  shimmerWave: {
+    animationDuration: '1.5s',
+    animationIterationCount: 'infinite',
+    animationName: shimmerAnimation,
+    animationTimingFunction: 'ease-in-out',
+    backgroundImage: `linear-gradient(90deg, transparent 0%, ${colors.surfacePrimary} 50%, transparent 100%)`,
+    height: '100%',
+    width: '100%',
   },
 });

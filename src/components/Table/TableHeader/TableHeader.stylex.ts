@@ -1,10 +1,11 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { zIndex } from '@/design-system/tokens/base.stylex';
+import { borderRadius, zIndex } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const tableHeaderStyles = stylex.create({
   container: {
+    borderRadius: borderRadius.lg,
     backgroundColor: colors.surfaceSecondary,
     boxShadow: `inset 0 -1px 0 0 ${colors.borderPrimary}`,
     position: 'sticky',

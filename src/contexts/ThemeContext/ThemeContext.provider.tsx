@@ -13,9 +13,15 @@ import { ThemeContext } from './ThemeContext.context';
  * Uses cookies as primary storage for SSR compatibility, with localStorage sync
  * Wraps the application to provide theme context to all child components
  */
-export const ThemeProvider = ({ children, defaultTheme = 'light', initialTheme }: ThemeProviderProps) => {
+export const ThemeProvider = ({
+  children,
+  defaultTheme = 'light',
+  initialTheme,
+}: ThemeProviderProps) => {
   // Use initialTheme from loader (cookie) if available, otherwise fall back to defaultTheme
-  const [theme, setThemeState] = useState<ThemeMode>(() => initialTheme ?? defaultTheme);
+  const [theme, setThemeState] = useState<ThemeMode>(
+    () => initialTheme ?? defaultTheme,
+  );
 
   const setTheme = useCallback((newTheme: ThemeMode) => {
     setThemeState(newTheme);

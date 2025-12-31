@@ -147,7 +147,6 @@ const CarSalesTable = ({
         data={response.data}
         density='comfortable'
         isBordered
-         isLoading
         isStriped
       />
     </>

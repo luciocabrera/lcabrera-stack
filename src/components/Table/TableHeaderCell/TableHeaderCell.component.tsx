@@ -5,7 +5,10 @@ import { MoreVerticalIcon } from '@/components/Icons';
 import type { TableHeaderCellProps } from './TableHeaderCell.types';
 
 import { SortIcon } from './SortIcon';
-import { tableHeaderCellStyles } from './TableHeaderCell.stylex';
+import {
+  skelletonStyles,
+  tableHeaderCellStyles,
+} from './TableHeaderCell.stylex';
 import { getNextSortDirection } from './utils';
 
 export const TableHeaderCell = ({
@@ -13,7 +16,6 @@ export const TableHeaderCell = ({
   hasSettings = false,
   isLoading = false,
   isSortable = false,
-  isSticky = true,
   label,
   minWidth,
   onSettingsClick,
@@ -32,14 +34,14 @@ export const TableHeaderCell = ({
       {...rest}
       {...stylex.props(
         tableHeaderCellStyles.base(minWidth, width),
-        isSticky && tableHeaderCellStyles.sticky,
+        // isSticky && tableHeaderCellStyles.sticky,
         customStylex,
       )}
     >
       {/* Loading overlay with shimmer */}
       {isLoading && (
-        <div {...stylex.props(tableHeaderCellStyles.loadingOverlay)}>
-          <div {...stylex.props(tableHeaderCellStyles.shimmerWave)} />
+        <div {...stylex.props(skelletonStyles.loadingOverlay)}>
+          <div {...stylex.props(skelletonStyles.shimmerWave)} />
         </div>
       )}
       <span {...stylex.props(tableHeaderCellStyles.content)}>{label}</span>
