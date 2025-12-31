@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 
-import type { Route } from './+types/car-sales';
+import type { Route } from './+types/root';
 
 import { styles } from './car-sales.errorBoundary.stylex';
 
@@ -20,7 +20,9 @@ export const ErrorBoundary = ({ error }: Route.ErrorBoundaryProps) => {
       <h2 {...stylex.props(styles.title)}>Error Loading Data</h2>
       <p>{details}</p>
       <button
-        onClick={() => { globalThis.location.reload(); }}
+        onClick={() => {
+          globalThis.location.reload();
+        }}
         type='button'
         {...stylex.props(styles.retryButton)}
       >

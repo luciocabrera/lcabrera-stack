@@ -1,10 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
 
-/**
- * CarSales Component Styles
- * Full-height flex layout for responsive table
- */
-
 export const styles = stylex.create({
   container: {
     padding: '1rem',
