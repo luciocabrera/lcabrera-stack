@@ -11,6 +11,7 @@ export const NavLink = ({
   color = 'ghost',
   icon,
   orientation = 'vertical',
+  prefetch = 'intent',
   size = 'md',
   width = 'full',
   ...props
@@ -28,6 +29,7 @@ export const NavLink = ({
         });
         return classNameValue;
       }}
+      prefetch={prefetch}
       {...props}
     >
       {icon && <span {...stylex.props(linkItemStyles.icon)}>{icon}</span>}

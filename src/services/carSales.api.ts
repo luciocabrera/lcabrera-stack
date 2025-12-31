@@ -61,20 +61,22 @@ const API_BASE_URL = 'http://localhost:3001/api';
 export const carSalesApi = {
   /**
    * Fetch car sales data
+   * Returns a promise (non-blocking) to enable React streaming with Suspense
    */
-  fetchCarSales: async (): Promise<CarSalesResponse> => {
+  fetchCarSales: (): Promise<CarSalesResponse> => {
+    const fetchData = (): Promise<CarSalesResponse> =>
+      fetch(`${API_BASE_URL}/car-sales`).then((response) => {
+        if (!response.ok) {
+          throw new Error(`Failed to fetch car sales: ${response.statusText}`);
+        }
+        return response.json() as Promise<CarSalesResponse>;
+      });
+
     // Add fake delay for testing skeleton/loading states
     if (FAKE_API_DELAY_MS > 0) {
-      await delay(FAKE_API_DELAY_MS);
+      return delay(FAKE_API_DELAY_MS).then(fetchData);
     }
 
-    const response = await fetch(`${API_BASE_URL}/car-sales`);
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch car sales: ${response.statusText}`);
-    }
-
-    const data = (await response.json()) as CarSalesResponse;
-    return data;
+    return fetchData();
   },
 };

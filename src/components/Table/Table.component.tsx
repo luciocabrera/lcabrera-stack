@@ -7,7 +7,6 @@ import { styles } from './Table.stylex';
 import { TableBase } from './TableBase';
 import { TableBody } from './TableBody';
 import { TableHeader } from './TableHeader';
-import { TableOverlay } from './TableOverlay';
 
 export const Table = <T extends Record<string, unknown>>({
   columns,
@@ -25,7 +24,7 @@ export const Table = <T extends Record<string, unknown>>({
 
   const tableContent = (
     <div ref={containerRef} {...stylex.props(styles.container)}>
-      <TableOverlay isVisible={isLoading && data.length > 0} />
+      {/* <TableOverlay isVisible={isLoading && data.length > 0} /> */}
       <TableBase density={density} isBordered={isBordered} isStriped={isStriped}>
         <TableHeader columns={columns} isLoading={isLoading} />
         <TableBody

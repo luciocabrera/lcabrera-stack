@@ -8,19 +8,9 @@ import { SpacerRow } from '../SpacerRow';
 import { TableBodyCell } from '../TableBodyCell';
 import { TableRow } from '../TableRow';
 import { styles } from './TableBody.stylex';
+import { generatePlaceholderData } from './utils';
 
 const DEFAULT_PLACEHOLDER_ROW_COUNT = 15;
-
-/**
- * Generates placeholder data for skeleton loading state
- */
-const generatePlaceholderData = <TData extends Record<string, unknown>>(
-  columns: { key: string }[],
-  rowCount: number,
-): TData[] =>
-  Array.from({ length: rowCount }, () =>
-    Object.fromEntries(columns.map((col) => [col.key, ''])),
-  ) as TData[];
 
 export const TableBody = <TData extends Record<string, unknown>>({
   columns,
@@ -35,7 +25,10 @@ export const TableBody = <TData extends Record<string, unknown>>({
   // Use placeholder data when loading with no data
   const effectiveData =
     isLoading && data.length === 0
-      ? generatePlaceholderData<TData>(columns, placeholderRowCount)
+      ? generatePlaceholderData<TData>({
+          columns,
+          rowCount: placeholderRowCount,
+        })
       : data;
 
   const { bottomSpacerHeight, endIndex, offsetY, startIndex, totalHeight } =
