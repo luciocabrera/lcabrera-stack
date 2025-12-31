@@ -1,31 +1,9 @@
-import { Suspense, use } from 'react';
+import { Suspense } from 'react';
+
+import { Table } from '@/components/Table';
+import { TableDataResolver } from '@/components/Table/TableDataResolver';
 
 import type { TableSuspenseBoundaryProps } from './TableSuspenseBoundary.types';
-
-import { Table } from '../Table.component';
-
-/**
- * Inner component that uses React 19's `use()` hook to unwrap the promise
- */
-const TableDataResolver = <TData extends Record<string, unknown>>({
-  children,
-  dataPromise,
-}: {
-  children: (data: TData[]) => React.ReactNode;
-  dataPromise: Promise<TData[]>;
-}) => {
-  const data = use(dataPromise);
-  return <>{children(data)}</>;
-};
-
-/**
- * Table skeleton fallback for Suspense boundary
- */
-const TableSkeletonFallback = <TData extends Record<string, unknown>>({
-  columns,
-}: Pick<TableSuspenseBoundaryProps<TData>, 'columns' | 'skeletonRowCount'>) => (
-  <Table<TData> columns={columns} data={[]} isLoading />
-);
 
 /**
  * Suspense boundary wrapper for Table with data promise
@@ -35,31 +13,36 @@ const TableSkeletonFallback = <TData extends Record<string, unknown>>({
  *
  * @example
  * ```tsx
- * // In your route component
- * const dataPromise = fetchTableData();
- *
+ * // When API returns data array directly
  * <TableSuspenseBoundary
  *   dataPromise={dataPromise}
  *   columns={columns}
  * >
  *   {(data) => <Table columns={columns} data={data} />}
  * </TableSuspenseBoundary>
+ *
+ * // When API returns a response object with data property
+ * <TableSuspenseBoundary
+ *   dataPromise={responsePromise}
+ *   dataSelector={(response) => response.data}
+ *   columns={columns}
+ * >
+ *   {(data) => <Table columns={columns} data={data} />}
+ * </TableSuspenseBoundary>
  * ```
  */
-export const TableSuspenseBoundary = <TData extends Record<string, unknown>>({
+export const TableSuspenseBoundary = <
+  TData extends Record<string, unknown>,
+  TResponse = TData[],
+>({
   children,
   columns,
   dataPromise,
-  skeletonRowCount,
-}: TableSuspenseBoundaryProps<TData>) => (
-  <Suspense
-    fallback={
-      <TableSkeletonFallback<TData>
-        columns={columns}
-        skeletonRowCount={skeletonRowCount}
-      />
-    }
-  >
-    <TableDataResolver dataPromise={dataPromise}>{children}</TableDataResolver>
+  dataSelector,
+}: TableSuspenseBoundaryProps<TData, TResponse>) => (
+  <Suspense fallback={<Table<TData> columns={columns} data={[]} isLoading />}>
+    <TableDataResolver dataPromise={dataPromise} dataSelector={dataSelector}>
+      {children}
+    </TableDataResolver>
   </Suspense>
 );

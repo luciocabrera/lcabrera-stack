@@ -1,10 +1,9 @@
 import * as stylex from '@stylexjs/stylex';
-import { Suspense, use } from 'react';
 import { useLoaderData } from 'react-router';
 
 import type { CarSale, CarSalesResponse } from '@/services';
 
-import { Table } from '@/components/Table';
+import { Table, TableSuspenseBoundary } from '@/components/Table';
 
 import type { loader } from './car-sales.loader';
 
@@ -19,43 +18,22 @@ export const CarSales = () => {
       <div {...stylex.props(styles.header)}>
         <h1>Car Sales Data</h1>
       </div>
-      <Suspense
-        fallback={
-          <Table<CarSale>
+
+      <TableSuspenseBoundary<CarSale, CarSalesResponse>
+        columns={columns}
+        dataPromise={carSalesPromise}
+        dataSelector={(response) => response.data}
+      >
+        {(data) => (
+          <Table
             columns={columns}
-            data={[]}
+            data={data}
             density='comfortable'
             isBordered
-            isLoading
             isStriped
           />
-        }
-      >
-        <CarSalesTable dataPromise={carSalesPromise} />
-      </Suspense>
+        )}
+      </TableSuspenseBoundary>
     </div>
-  );
-};
-
-/**
- * Async table component that uses React 19's use() hook
- */
-const CarSalesTable = ({
-  dataPromise,
-}: {
-  dataPromise: Promise<CarSalesResponse>;
-}) => {
-  const response = use(dataPromise);
-
-  return (
-    <>
-      <Table<CarSale>
-        columns={columns}
-        data={response.data}
-        density='comfortable'
-        isBordered
-        isStriped
-      />
-    </>
   );
 };
