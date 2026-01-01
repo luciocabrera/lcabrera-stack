@@ -4,6 +4,7 @@ export { useMetaStore, useTableStore } from './hooks';
 export {
   useColumnFilters,
   useColumnPinning,
+  useColumnSizing,
   useHasMore,
   usePagination,
   useRowSelection,
@@ -18,9 +19,11 @@ export {
 // Hooks - Actions
 export {
   useAppendTableData,
+  useResetColumnSizing,
   useSelectAllRows,
   useSelectRow,
   useSetColumnFilters,
+  useSetColumnSizing,
   useSetError,
   useSetLoading,
   useSetLoadingMore,
@@ -41,6 +44,7 @@ export { TableProvider } from './TableContext.provider';
 export type {
   ColumnFiltersState,
   ColumnPinningState,
+  ColumnSizingState,
   LoadMoreHandler,
   PaginationState,
   RowSelectionState,

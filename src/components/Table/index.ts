@@ -9,6 +9,7 @@ export {
 // Main Table component
 export { Table } from './Table.component';
 export type {
+  ColumnSizingState,
   TableColumn,
   TableColumnDataType,
   TableProps,
@@ -36,6 +37,7 @@ export type {
 export {
   useColumnFilters,
   useColumnPinning,
+  useColumnSizing,
   useHasMore,
   useMetaStore,
   usePagination,
@@ -51,9 +53,11 @@ export {
 // Context Hooks - Actions
 export {
   useAppendTableData,
+  useResetColumnSizing,
   useSelectAllRows,
   useSelectRow,
   useSetColumnFilters,
+  useSetColumnSizing,
   useSetError,
   useSetLoading,
   useSetLoadingMore,

@@ -41,7 +41,7 @@ export const TableSuspenseBoundary = <
   dataSelector,
 }: TableSuspenseBoundaryProps<TData, TResponse>) => (
   <Suspense fallback={<Table<TData> columns={columns} data={[]} isLoading />}>
-    <TableDataResolver dataPromise={dataPromise} dataSelector={dataSelector}>
+    <TableDataResolver<TData, TResponse> dataPromise={dataPromise} dataSelector={dataSelector}>
       {children}
     </TableDataResolver>
   </Suspense>

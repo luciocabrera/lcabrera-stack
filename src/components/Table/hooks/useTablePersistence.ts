@@ -5,6 +5,7 @@ import { parseCookies } from '@/utils/theme-cookie.util';
 import type {
   ColumnFiltersState,
   ColumnPinningState,
+  ColumnSizingState,
   PaginationState,
   SortingState,
   StorageType,
@@ -16,6 +17,7 @@ const PERSISTENCE_VERSION = 1;
 type PersistedState = {
   columnFilters?: ColumnFiltersState;
   columnPinning?: ColumnPinningState;
+  columnSizing?: ColumnSizingState;
   pagination?: PaginationState;
   sorting?: SortingState;
   version: number;
@@ -28,6 +30,7 @@ type UseTablePersistenceArgs = {
   getState: () => {
     columnFilters: ColumnFiltersState;
     columnPinning: ColumnPinningState;
+    columnSizing: ColumnSizingState;
     pagination: PaginationState;
     sorting: SortingState;
   };
@@ -123,6 +126,7 @@ const readPersistedState = ({
     'sorting',
     'columnFilters',
     'columnPinning',
+    'columnSizing',
     'pagination',
   ];
 
@@ -229,6 +233,7 @@ export const useTablePersistence = ({
       'sorting',
       'columnFilters',
       'columnPinning',
+      'columnSizing',
       'pagination',
     ];
 

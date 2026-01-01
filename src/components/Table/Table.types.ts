@@ -7,14 +7,30 @@ import type {
   NumberFormatOptions,
 } from '@/utils/formatters';
 
+/**
+ * Column sizing state - maps column key to custom width
+ */
+export type ColumnSizingState = Record<string, number>;
+
 export type TableColumn = {
   dataType?: TableColumnDataType;
   /** Format options for the column based on data type */
   format?: TableColumnFormat;
   key: string;
   label: string;
+  maxWidth?: number;
   minWidth?: number;
 };
+
+/**
+ * Default minimum column width when not specified
+ */
+export const DEFAULT_MIN_COLUMN_WIDTH = 60;
+
+/**
+ * Default maximum column width when not specified
+ */
+export const DEFAULT_MAX_COLUMN_WIDTH = 600;
 
 export type TableColumnDataType =
   | 'boolean'
@@ -46,6 +62,8 @@ export type TableProps<TData extends Record<string, unknown>> = BaseProps & {
   /** Locale for formatting (defaults to navigator.language) */
   locale?: string;
   overscan?: number;
+  /** Persistence key for storing table state (e.g., column widths) */
+  persistenceKey?: string;
   rowHeight?: number;
 };
 

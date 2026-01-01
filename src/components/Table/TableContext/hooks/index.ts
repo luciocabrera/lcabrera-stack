@@ -1,9 +1,11 @@
 // Action hooks
 export {
   useAppendTableData,
+  useResetColumnSizing,
   useSelectAllRows,
   useSelectRow,
   useSetColumnFilters,
+  useSetColumnSizing,
   useSetError,
   useSetLoading,
   useSetLoadingMore,
@@ -16,6 +18,7 @@ export {
 export {
   useColumnFilters,
   useColumnPinning,
+  useColumnSizing,
   useHasMore,
   usePagination,
   useRowSelection,

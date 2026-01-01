@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 
 import type {
   ColumnFiltersState,
+  ColumnSizingState,
   PaginationState,
   SortingState,
   TableState,
@@ -195,4 +196,41 @@ export const useSetError = () => {
     },
     [metaStore],
   );
+};
+
+/**
+ * Hook to update column sizing (resize)
+ */
+export const useSetColumnSizing = () => {
+  const { tableStore } = useTableContextValue();
+
+  return useCallback(
+    (columnKey: string, width: number | undefined) => {
+      const current = tableStore.get()?.columnSizing ?? {};
+
+      let columnSizing: ColumnSizingState;
+      if (width === undefined) {
+        // Remove the key by creating new object without it
+        const { [columnKey]: unusedColumn, ...rest } = current;
+        void unusedColumn; // Explicitly mark as intentionally unused
+        columnSizing = rest;
+      } else {
+        columnSizing = { ...current, [columnKey]: width };
+      }
+
+      tableStore.set({ columnSizing } as Partial<TableState<unknown>>);
+    },
+    [tableStore],
+  );
+};
+
+/**
+ * Hook to reset all column sizing
+ */
+export const useResetColumnSizing = () => {
+  const { tableStore } = useTableContextValue();
+
+  return useCallback(() => {
+    tableStore.set({ columnSizing: {} } as Partial<TableState<unknown>>);
+  }, [tableStore]);
 };

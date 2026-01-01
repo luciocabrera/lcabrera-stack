@@ -9,6 +9,4 @@ export type TableSuspenseBoundaryProps<TData, TResponse = TData[]> = {
   dataPromise: Promise<TResponse>;
   /** Function to extract data array from the response. Defaults to identity (response is the data array). */
   dataSelector?: (response: TResponse) => TData[];
-  /** Fallback skeleton row count */
-  skeletonRowCount?: number;
 };

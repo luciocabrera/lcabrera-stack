@@ -4,6 +4,8 @@ import { MoreVerticalIcon } from '@/components/Icons';
 
 import type { TableHeaderCellProps } from './TableHeaderCell.types';
 
+import { useColumnResize } from '../hooks';
+import { DEFAULT_MIN_COLUMN_WIDTH } from '../Table.types';
 import { SortIcon } from './SortIcon';
 import {
   skelletonStyles,
@@ -12,12 +14,16 @@ import {
 import { getNextSortDirection } from './utils';
 
 export const TableHeaderCell = ({
+  columnKey,
   customStylex,
   hasSettings = false,
   isLoading = false,
   isSortable = false,
   label,
+  maxWidth,
   minWidth,
+  onResize,
+  onResizeDoubleClick,
   onSettingsClick,
   onSort,
   sortDirection,
@@ -27,6 +33,27 @@ export const TableHeaderCell = ({
   const handleSort = () => {
     if (!isSortable || !onSort) return;
     onSort(getNextSortDirection(sortDirection));
+  };
+
+  const currentWidth =
+    typeof width === 'number' ? width : minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
+
+  const { isResizing, onMouseDown } = useColumnResize({
+    columnKey,
+    currentWidth,
+    maxWidth,
+    minWidth,
+    onResize:
+      onResize ??
+      (() => {
+        // No-op when onResize is not provided
+      }),
+  });
+
+  const handleResizeDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    onResizeDoubleClick?.(columnKey);
   };
 
   return (
@@ -71,6 +98,23 @@ export const TableHeaderCell = ({
           </button>
         )}
       </div>
+      {/* Resize handle */}
+      {onResize && (
+        <div
+          aria-label={`Resize ${label} column`}
+          onDoubleClick={handleResizeDoubleClick}
+          onMouseDown={onMouseDown}
+          role='separator'
+          {...stylex.props(tableHeaderCellStyles.resizeHandle)}
+        >
+          <div
+            {...stylex.props(
+              tableHeaderCellStyles.resizeHandleLine,
+              isResizing && tableHeaderCellStyles.resizeHandleActive,
+            )}
+          />
+        </div>
+      )}
     </th>
   );
 };

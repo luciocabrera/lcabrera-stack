@@ -24,6 +24,11 @@ export type ColumnPinningState = {
 };
 
 /**
+ * Column sizing state - maps column key to custom width
+ */
+export type ColumnSizingState = Record<string, number>;
+
+/**
  * Infinite scroll load more handler
  */
 export type LoadMoreHandler<TData> = () => Promise<{
@@ -91,6 +96,8 @@ export type TablePersistenceConfig = {
   columnFilters?: StorageType;
   /** Persist column pinning */
   columnPinning?: StorageType;
+  /** Persist column sizing (custom widths) */
+  columnSizing?: StorageType;
   /** Persist pagination */
   pagination?: StorageType;
   /** Persist sorting */
@@ -121,6 +128,8 @@ export type TableState<TData> = {
   columnFilters: ColumnFiltersState;
   /** Column pinning state */
   columnPinning: ColumnPinningState;
+  /** Column sizing state (custom widths) */
+  columnSizing: ColumnSizingState;
   /** Table data array */
   data: TData[];
   /** Pagination state */

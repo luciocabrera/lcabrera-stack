@@ -3,6 +3,7 @@ import type { UseStoreSelector } from '@/hooks';
 import type {
   ColumnFiltersState,
   ColumnPinningState,
+  ColumnSizingState,
   PaginationState,
   RowSelectionState,
   SortingState,
@@ -55,6 +56,14 @@ export const useColumnPinning = <TData>(): UseStoreSelector<
   ColumnPinningState,
   TableState<TData>
 > => useTableStore<ColumnPinningState, TData>((state) => state.columnPinning);
+
+/**
+ * Select column sizing state
+ */
+export const useColumnSizing = <TData>(): UseStoreSelector<
+  ColumnSizingState,
+  TableState<TData>
+> => useTableStore<ColumnSizingState, TData>((state) => state.columnSizing);
 
 /**
  * Select pagination state

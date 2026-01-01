@@ -8,10 +8,14 @@ export type SortDirection = 'asc' | 'desc' | undefined;
 
 export type TableHeaderCellProps = ComponentPropsWithoutRef<'th'> &
   Pick<TableColumn, 'label' | 'minWidth'> & {
+    columnKey: string;
     customStylex?: CustomStylex;
     hasSettings?: boolean;
     isLoading?: boolean;
     isSortable?: boolean;
+    maxWidth?: number;
+    onResize?: (columnKey: string, width: number) => void;
+    onResizeDoubleClick?: (columnKey: string) => void;
     onSettingsClick?: () => void;
     onSort?: (direction: SortDirection) => void;
     sortDirection?: SortDirection;

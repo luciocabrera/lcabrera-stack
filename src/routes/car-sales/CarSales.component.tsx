@@ -31,6 +31,7 @@ export const CarSales = () => {
             density='comfortable'
             isBordered
             isStriped
+            persistenceKey='car-sales-table'
           />
         )}
       </TableSuspenseBoundary>

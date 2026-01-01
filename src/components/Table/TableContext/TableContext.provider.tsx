@@ -16,6 +16,7 @@ const getInitialTableState = <TData,>(
 ): TableState<TData> => ({
   columnFilters: {},
   columnPinning: { left: [], right: [] },
+  columnSizing: {},
   data: initialData,
   pagination: { pageIndex: 0, pageSize: 50 },
   rowSelection: {},
