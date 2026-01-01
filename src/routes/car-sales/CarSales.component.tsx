@@ -23,6 +23,7 @@ export const CarSales = () => {
         columns={columns}
         dataPromise={carSalesPromise}
         dataSelector={(response) => response.data}
+        persistenceKey='car-sales-table'
       >
         {(data) => (
           <Table

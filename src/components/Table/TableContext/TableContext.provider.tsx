@@ -1,22 +1,25 @@
 import { useStore } from '@/hooks';
 
-import type {
-  TableMeta,
-  TableProviderProps,
-  TableState,
-} from './TableContext.types';
+import type { ColumnSizingState, TableMeta, TableProviderProps, TableState } from './TableContext.types';
 
+import { getPersistedColumnSizing } from '../hooks/useTablePersistence';
 import { TableContext } from './TableContext.context';
+
+type GetInitialTableStateArgs<TData> = {
+  initialColumnSizing?: ColumnSizingState;
+  initialData?: TData[];
+};
 
 /**
  * Default initial table state
  */
-const getInitialTableState = <TData,>(
-  initialData: TData[] = [],
-): TableState<TData> => ({
+const getInitialTableState = <TData,>({
+  initialColumnSizing = {},
+  initialData = [],
+}: GetInitialTableStateArgs<TData>): TableState<TData> => ({
   columnFilters: {},
   columnPinning: { left: [], right: [] },
-  columnSizing: {},
+  columnSizing: initialColumnSizing,
   data: initialData,
   pagination: { pageIndex: 0, pageSize: 50 },
   rowSelection: {},
@@ -60,9 +63,16 @@ export const TableProvider = <TData extends Record<string, unknown>>({
   children,
   initialData = [],
   initialMeta,
+  persistenceKey,
 }: TableProviderProps<TData>) => {
+  // Read persisted column sizing synchronously during initialization
+  // This avoids a flash of wrong column widths on first render
+  const initialColumnSizing = persistenceKey
+    ? getPersistedColumnSizing(persistenceKey)
+    : {};
+
   const tableStore = useStore<TableState<TData>>(
-    getInitialTableState(initialData),
+    getInitialTableState({ initialColumnSizing, initialData }),
   );
 
   const metaStore = useStore<TableMeta>(

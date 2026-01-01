@@ -14,6 +14,56 @@ import type {
 
 const PERSISTENCE_VERSION = 1;
 
+/**
+ * Get storage key with prefix
+ */
+const getStorageKey = (persistenceKey: string) =>
+  `table-state-${persistenceKey}`;
+
+/**
+ * Read from localStorage (extracted for reuse)
+ */
+const readFromLocalStorage = (key: string): string | undefined => {
+  if (typeof localStorage === 'undefined') return undefined;
+
+  try {
+    return localStorage.getItem(key) ?? undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+/**
+ * Read persisted column sizing synchronously (for SSR-safe initialization)
+ *
+ * This function can be called during component initialization to read
+ * persisted column widths without waiting for useEffect.
+ */
+export const getPersistedColumnSizing = (
+  persistenceKey: string,
+): ColumnSizingState => {
+  if (typeof localStorage === 'undefined') return {};
+
+  const sliceKey = `${getStorageKey(persistenceKey)}-columnSizing`;
+  const rawValue = readFromLocalStorage(sliceKey);
+
+  if (rawValue) {
+    try {
+      const parsed = JSON.parse(rawValue) as {
+        value: ColumnSizingState;
+        version: number;
+      };
+      if (parsed.version === PERSISTENCE_VERSION) {
+        return parsed.value;
+      }
+    } catch {
+      // Invalid JSON, return empty
+    }
+  }
+
+  return {};
+};
+
 type PersistedState = {
   columnFilters?: ColumnFiltersState;
   columnPinning?: ColumnPinningState;
@@ -39,12 +89,6 @@ type UseTablePersistenceArgs = {
   /** Callback to restore state from persistence */
   restoreState: (state: Partial<PersistedState>) => void;
 };
-
-/**
- * Get storage key with prefix
- */
-const getStorageKey = (persistenceKey: string) =>
-  `table-state-${persistenceKey}`;
 
 /**
  * Read from cookie
@@ -73,19 +117,6 @@ const writeToCookie = ({ key, value }: WriteToCookieArgs) => {
   // Using assignment is required for cookie setting
   // eslint-disable-next-line unicorn/no-document-cookie
   document.cookie = cookieValue;
-};
-
-/**
- * Read from localStorage
- */
-const readFromLocalStorage = (key: string): string | undefined => {
-  if (typeof localStorage === 'undefined') return undefined;
-
-  try {
-    return localStorage.getItem(key) ?? undefined;
-  } catch {
-    return undefined;
-  }
 };
 
 type WriteToLocalStorageArgs = {
