@@ -11,7 +11,7 @@ import { skelleton } from '@/design-system/tokens/commons.stylex';
 
 export const tableHeaderCellStyles = stylex.create({
   base: (minWidth?: number | string, width?: number | string) => ({
-    borderColor: 'green',
+    borderColor: 'red',
     borderStyle: 'solid',
     paddingInline: '6px', // 'var(--table-padding-inline)',
     alignItems: 'center',
@@ -28,7 +28,7 @@ export const tableHeaderCellStyles = stylex.create({
     height: '100%',
     maxHeight: '100%',
     maxWidth: width ?? null,
-    minWidth: minWidth ?? null,
+    minWidth: minWidth ?? width ?? null,
     top: 0,
     width: width ?? null,
   }),

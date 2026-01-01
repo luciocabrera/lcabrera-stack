@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { borderRadius, typography } from '@/design-system/tokens/base.stylex';
+import {  typography } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 import { skelleton } from '@/design-system/tokens/commons.stylex';
 
@@ -29,24 +29,6 @@ export const tableBodyCellStyles = stylex.create({
     minWidth: minWidth ?? width ?? null,
     width: width ?? minWidth ?? null,
   }),
-  checkbox: {
-    borderColor: colors.borderPrimary,
-    borderRadius: borderRadius.sm,
-    borderStyle: 'solid',
-    borderWidth: 1,
-    alignItems: 'center',
-    backgroundColor: 'transparent',
-    color: colors.textPrimary,
-    display: 'flex',
-    justifyContent: 'center',
-    height: 16,
-    width: 16,
-  },
-  checkboxChecked: {
-    borderColor: colors.brandPrimary,
-    backgroundColor: colors.brandPrimary,
-    color: colors.brandPrimaryText,
-  },
   /** Text content with ellipsis overflow */
   textContent: {
     overflow: 'hidden',

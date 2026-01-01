@@ -1,21 +1,15 @@
-import * as stylex from '@stylexjs/stylex';
-
 import type {
   TableColumnDataType,
   TableColumnFormat,
 } from '@/components/Table/Table.types';
 
-import { CheckIcon } from '@/components/Icons';
+import { TableCheckDisplay } from '@/components/Table/TableCheckDisplay';
 import { formatCurrency, formatDate, formatNumber } from '@/utils/formatters';
-
-import { tableBodyCellStyles } from '../TableBodyCell.stylex';
 
 type RenderCellContentArgs = {
   dataType: TableColumnDataType;
-  /** Column format options */
   format?: TableColumnFormat;
   label?: string;
-  /** Table-level locale override */
   locale?: string;
   value: unknown;
 };
@@ -23,31 +17,13 @@ type RenderCellContentArgs = {
 export const renderCellContent = ({
   dataType,
   format,
-  label: columnLabel,
+  label,
   locale,
   value,
 }: RenderCellContentArgs) => {
   switch (dataType) {
     case 'boolean': {
-      const isChecked = Boolean(value);
-      const label = columnLabel
-        ? `${columnLabel}: ${isChecked ? 'Yes' : 'No'}`
-        : isChecked
-          ? 'Checked'
-          : 'Unchecked';
-      return (
-        <div
-          aria-checked={isChecked}
-          aria-label={label}
-          role='checkbox'
-          {...stylex.props(
-            tableBodyCellStyles.checkbox,
-            isChecked && tableBodyCellStyles.checkboxChecked,
-          )}
-        >
-          {isChecked && <CheckIcon />}
-        </div>
-      );
+      return <TableCheckDisplay label={label} value={value} />;
     }
     case 'currency': {
       // Handle both number and numeric string values
