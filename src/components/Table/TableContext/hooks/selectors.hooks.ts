@@ -4,6 +4,7 @@ import type {
   ColumnFiltersState,
   ColumnPinningState,
   ColumnSizingState,
+  PaginationMeta,
   PaginationState,
   RowSelectionState,
   SortingState,
@@ -104,3 +105,11 @@ export const useTableError = (): UseStoreSelector<
   string | undefined,
   TableMeta
 > => useMetaStore((state) => state.error);
+
+/**
+ * Select pagination metadata (for infinite scroll)
+ */
+export const usePaginationMeta = (): UseStoreSelector<
+  PaginationMeta,
+  TableMeta
+> => useMetaStore((state) => state.paginationMeta);

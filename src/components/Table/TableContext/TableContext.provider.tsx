@@ -42,6 +42,7 @@ const getInitialMetaState = ({
   hasMore: false,
   isLoading: initialData.length === 0,
   isLoadingMore: false,
+  paginationMeta: {},
   totalRows: initialData.length,
   ...overrides,
 });

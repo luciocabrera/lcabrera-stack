@@ -61,7 +61,6 @@ export const TableHeaderCell = ({
       {...rest}
       {...stylex.props(
         tableHeaderCellStyles.base(minWidth, width),
-        // isSticky && tableHeaderCellStyles.sticky,
         customStylex,
       )}
     >

@@ -10,9 +10,21 @@ export {
 export { Table } from './Table.component';
 export type {
   ColumnSizingState,
+  CursorParams,
+  InfiniteScrollConfig,
+  InfiniteScrollResponse,
+  OffsetLimitParams,
+  PageBasedParams,
+  PaginationParams,
+  PaginationStrategy,
   TableColumn,
   TableColumnDataType,
   TableProps,
+} from './Table.types';
+export {
+  DEFAULT_INFINITE_SCROLL_THRESHOLD,
+  DEFAULT_MAX_COLUMN_WIDTH,
+  DEFAULT_MIN_COLUMN_WIDTH,
 } from './Table.types';
 
 // Context
@@ -22,6 +34,7 @@ export type {
   ColumnFiltersState,
   ColumnPinningState,
   LoadMoreHandler,
+  PaginationMeta,
   PaginationState,
   RowSelectionState,
   SortDirection,
@@ -41,6 +54,7 @@ export {
   useHasMore,
   useMetaStore,
   usePagination,
+  usePaginationMeta,
   useRowSelection,
   useSorting,
   useTableData,
@@ -62,6 +76,7 @@ export {
   useSetLoading,
   useSetLoadingMore,
   useSetPagination,
+  useSetPaginationMeta,
   useSetSorting,
   useSetTableData,
 } from './TableContext';

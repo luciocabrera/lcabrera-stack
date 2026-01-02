@@ -4,15 +4,20 @@ import { useVirtualization } from '@/hooks';
 
 import type { TableBodyProps } from './TableBody.types';
 
+import { LoadingMoreRow } from '../LoadingMoreRow';
 import { SpacerRow } from '../SpacerRow';
 import { DEFAULT_MIN_COLUMN_WIDTH } from '../Table.types';
 import { TableBodyCell } from '../TableBodyCell';
-import { useColumnSizing } from '../TableContext/hooks';
+import {
+  useColumnSizing,
+  useTableLoadingMore,
+  useTotalRows,
+} from '../TableContext/hooks';
 import { TableRow } from '../TableRow';
 import { styles } from './TableBody.stylex';
 import { generatePlaceholderData } from './utils';
 
-const DEFAULT_PLACEHOLDER_ROW_COUNT = 15;
+const DEFAULT_PLACEHOLDER_ROW_COUNT = 30;
 
 export const TableBody = <TData extends Record<string, unknown>>({
   columns,
@@ -25,6 +30,8 @@ export const TableBody = <TData extends Record<string, unknown>>({
   tableContainerRef,
 }: TableBodyProps<TData>) => {
   const [columnSizing] = useColumnSizing<TData>();
+  const [isLoadingMore] = useTableLoadingMore();
+  const [totalCount] = useTotalRows();
 
   // Use placeholder data when loading with no data
   const effectiveData =
@@ -80,6 +87,14 @@ export const TableBody = <TData extends Record<string, unknown>>({
       {/* Bottom spacer row */}
       {totalRows > 0 && bottomSpacerHeight > 0 && (
         <SpacerRow colSpan={columns.length} height={bottomSpacerHeight} />
+      )}
+      {/* Loading more indicator */}
+      {isLoadingMore && (
+        <LoadingMoreRow
+          colSpan={columns.length}
+          currentCount={data.length}
+          totalCount={totalCount}
+        />
       )}
     </tbody>
   );

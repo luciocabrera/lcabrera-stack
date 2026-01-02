@@ -32,6 +32,80 @@ export const DEFAULT_MIN_COLUMN_WIDTH = 60;
  */
 export const DEFAULT_MAX_COLUMN_WIDTH = 600;
 
+/**
+ * Default threshold (in pixels) for triggering infinite scroll load
+ */
+export const DEFAULT_INFINITE_SCROLL_THRESHOLD = 200;
+
+/**
+ * Parameters for cursor-based pagination strategy
+ */
+export type CursorParams = {
+  cursor: string;
+  limit: number;
+};
+
+/**
+ * Configuration for infinite scroll behavior
+ */
+export type InfiniteScrollConfig<TData> = {
+  /** Initial page size for first load */
+  initialPageSize: number;
+  /** Whether infinite scroll is enabled */
+  isEnabled: boolean;
+  /** Page size for subsequent loads */
+  loadMorePageSize: number;
+  /** Callback to load more data with strategy-specific params */
+  onLoadMore: (
+    params: PaginationParams,
+  ) => Promise<InfiniteScrollResponse<TData>>;
+  /** Pagination strategy to use */
+  strategy: PaginationStrategy;
+  /** Distance from bottom (px) to trigger load. Defaults to DEFAULT_INFINITE_SCROLL_THRESHOLD */
+  threshold?: number;
+};
+
+/**
+ * Response from infinite scroll load more callback
+ */
+export type InfiniteScrollResponse<TData> = {
+  data: TData[];
+  hasMore: boolean;
+  /** Next cursor for cursor-based pagination */
+  nextCursor?: string;
+  /** Total number of rows available */
+  totalRows?: number;
+};
+
+/**
+ * Parameters for offset-limit pagination strategy
+ */
+export type OffsetLimitParams = {
+  limit: number;
+  skip: number;
+};
+
+/**
+ * Parameters for page-based pagination strategy
+ */
+export type PageBasedParams = {
+  page: number;
+  pageSize: number;
+};
+
+/**
+ * Union of all pagination parameter types
+ */
+export type PaginationParams =
+  | CursorParams
+  | OffsetLimitParams
+  | PageBasedParams;
+
+/**
+ * Pagination strategy for infinite scroll
+ */
+export type PaginationStrategy = 'cursor' | 'offset-limit' | 'page-based';
+
 export type TableColumnDataType =
   | 'boolean'
   | 'currency'
@@ -56,11 +130,17 @@ export type TableDensity = 'comfortable' | 'compact';
 export type TableProps<TData extends Record<string, unknown>> = BaseProps & {
   columns: TableColumn[];
   data: TData[];
+  /** Configuration for infinite scroll behavior */
+  infiniteScrollConfig?: InfiniteScrollConfig<TData>;
   isFlexWrapperEnabled?: boolean;
   /** Show loading skeleton overlay */
   isLoading?: boolean;
   /** Locale for formatting (defaults to navigator.language) */
   locale?: string;
+  /** Callback when filters change (server-side filtering) */
+  onFilterChange?: (filters: Record<string, unknown>) => Promise<void>;
+  /** Callback when sorting changes (server-side sorting) */
+  onSortChange?: (sorting: { columnKey: string; direction: 'asc' | 'desc' }[]) => Promise<void>;
   overscan?: number;
   /** Persistence key for storing table state (e.g., column widths) */
   persistenceKey?: string;

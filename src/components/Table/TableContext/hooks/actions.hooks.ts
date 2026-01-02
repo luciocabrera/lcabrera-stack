@@ -3,6 +3,7 @@ import { useCallback } from 'react';
 import type {
   ColumnFiltersState,
   ColumnSizingState,
+  PaginationMeta,
   PaginationState,
   SortingState,
   TableState,
@@ -193,6 +194,21 @@ export const useSetError = () => {
   return useCallback(
     (error: string | undefined) => {
       metaStore.set({ error, isLoading: false, isLoadingMore: false });
+    },
+    [metaStore],
+  );
+};
+
+/**
+ * Hook to set pagination metadata (for infinite scroll)
+ */
+export const useSetPaginationMeta = () => {
+  const { metaStore } = useTableContextValue();
+
+  return useCallback(
+    (meta: Partial<PaginationMeta>) => {
+      const current = metaStore.get()?.paginationMeta ?? {};
+      metaStore.set({ paginationMeta: { ...current, ...meta } });
     },
     [metaStore],
   );

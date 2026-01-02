@@ -10,6 +10,7 @@ export {
   useSetLoading,
   useSetLoadingMore,
   useSetPagination,
+  useSetPaginationMeta,
   useSetSorting,
   useSetTableData,
 } from './actions.hooks';
@@ -21,6 +22,7 @@ export {
   useColumnSizing,
   useHasMore,
   usePagination,
+  usePaginationMeta,
   useRowSelection,
   useSorting,
   useTableData,

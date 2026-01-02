@@ -3,8 +3,9 @@ import { use, useEffect, useRef } from 'react';
 
 import type { TableProps } from './Table.types';
 
-import { useTablePersistence } from './hooks';
+import { useInfiniteScroll, useTablePersistence } from './hooks';
 import { styles } from './Table.stylex';
+import { DEFAULT_INFINITE_SCROLL_THRESHOLD } from './Table.types';
 import { TableBase } from './TableBase';
 import { TableBody } from './TableBody';
 import { TableContext, TableProvider, useColumnSizing } from './TableContext';
@@ -14,6 +15,7 @@ const TableContent = <T extends Record<string, unknown>>({
   columns,
   data,
   density = 'compact',
+  infiniteScrollConfig,
   isBordered = false,
   isLoading = false,
   isStriped = false,
@@ -28,12 +30,30 @@ const TableContent = <T extends Record<string, unknown>>({
   const [columnSizing] = useColumnSizing<T>();
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Set up infinite scroll if configured
+  useInfiniteScroll({
+    initialPageSize: infiniteScrollConfig?.initialPageSize ?? 50,
+    isEnabled: infiniteScrollConfig?.isEnabled ?? false,
+    loadMorePageSize: infiniteScrollConfig?.loadMorePageSize ?? 50,
+    onLoadMore: infiniteScrollConfig?.onLoadMore ?? (() => Promise.resolve({ data: [], hasMore: false })),
+    scrollContainerRef: containerRef,
+    strategy: infiniteScrollConfig?.strategy ?? 'offset-limit',
+    threshold: infiniteScrollConfig?.threshold ?? DEFAULT_INFINITE_SCROLL_THRESHOLD,
+  });
+
   // Set up persistence if persistenceKey provided
   const { persistSlice } = useTablePersistence({
     config: {
       columnSizing: persistenceKey ? 'localStorage' : undefined,
     },
-    getState: () => tableStore?.get() ?? {},
+    getState: () =>
+      tableStore?.get() ?? {
+        columnFilters: {},
+        columnPinning: { left: [], right: [] },
+        columnSizing: {},
+        pagination: { pageIndex: 0, pageSize: 50 },
+        sorting: [],
+      },
     persistenceKey: persistenceKey ?? 'default-table',
     restoreState: (state) => {
       tableStore?.set(state);
@@ -85,11 +105,14 @@ export const Table = <T extends Record<string, unknown>>({
   columns,
   data,
   density = 'compact',
+  infiniteScrollConfig,
   isBordered = false,
   isFlexWrapperEnabled = true,
   isLoading = false,
   isStriped = false,
   locale,
+  onFilterChange,
+  onSortChange,
   overscan = 6,
   persistenceKey,
   rowHeight = 32,
@@ -100,10 +123,13 @@ export const Table = <T extends Record<string, unknown>>({
         columns={columns}
         data={data}
         density={density}
+        infiniteScrollConfig={infiniteScrollConfig}
         isBordered={isBordered}
         isLoading={isLoading}
         isStriped={isStriped}
         locale={locale}
+        onFilterChange={onFilterChange}
+        onSortChange={onSortChange}
         overscan={overscan}
         persistenceKey={persistenceKey}
         rowHeight={rowHeight}

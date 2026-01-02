@@ -38,6 +38,18 @@ export type LoadMoreHandler<TData> = () => Promise<{
 }>;
 
 /**
+ * Pagination metadata for infinite scroll strategies
+ */
+export type PaginationMeta = {
+  /** Current cursor for cursor-based pagination */
+  cursor?: string;
+  /** Current offset for offset-limit pagination */
+  offset?: number;
+  /** Current page for page-based pagination */
+  page?: number;
+};
+
+/**
  * Pagination state
  */
 export type PaginationState = {
@@ -84,6 +96,8 @@ export type TableMeta = {
   isLoading: boolean;
   /** Loading more rows (infinite scroll) */
   isLoadingMore: boolean;
+  /** Pagination metadata for tracking current position */
+  paginationMeta: PaginationMeta;
   /** Total number of rows (for progress indication) */
   totalRows: number;
 };
