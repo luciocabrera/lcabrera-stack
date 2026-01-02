@@ -149,7 +149,7 @@ export const useInfiniteScroll = <TData>({
 
       const result: InfiniteScrollResponse<TData> = await onLoadMore(params);
 
-      appendData(result.data, result.hasMore, result.totalRows);
+      appendData({ hasMore: result.hasMore, newData: result.data, totalRows: result.totalRows ?? 0 });
       
       // Update pagination metadata after successful load
       switch (strategy) {

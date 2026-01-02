@@ -56,7 +56,15 @@ export type CarSalesResponse = {
   total: number;
 };
 
-const API_BASE_URL = 'http://localhost:3001/api';
+// Use absolute URL for SSR (server-side), relative URL for client (proxied by Vite)
+const getApiBaseUrl = () => {
+  if (globalThis.window === undefined) {
+    // Server-side (SSR)
+    return 'http://localhost:3001/api';
+  }
+  // Client-side (browser)
+  return '/api';
+};
 
 export const carSalesApi = {
   /**
@@ -65,12 +73,43 @@ export const carSalesApi = {
    */
   fetchCarSales: (): Promise<CarSalesResponse> => {
     const fetchData = (): Promise<CarSalesResponse> =>
-      fetch(`${API_BASE_URL}/car-sales`).then((response) => {
+      fetch(`${getApiBaseUrl()}/car-sales`).then((response) => {
         if (!response.ok) {
           throw new Error(`Failed to fetch car sales: ${response.statusText}`);
         }
         return response.json() as Promise<CarSalesResponse>;
       });
+
+    // Add fake delay for testing skeleton/loading states
+    if (FAKE_API_DELAY_MS > 0) {
+      return delay(FAKE_API_DELAY_MS).then(fetchData);
+    }
+
+    return fetchData();
+  },
+
+  /**
+   * Fetch car sales data with pagination (offset-limit strategy)
+   * @param skip - Number of records to skip
+   * @param limit - Number of records to fetch
+   */
+  fetchCarSalesPaginated: (
+    skip: number,
+    limit: number,
+  ): Promise<CarSalesResponse & { hasMore: boolean }> => {
+    const url = `${getApiBaseUrl()}/car-sales/paginated?skip=${skip}&limit=${limit}`;
+    console.log('🌐 Fetching from URL:', url);
+    
+    const fetchData = () =>
+      fetch(url).then(
+        (response) => {
+          console.log('📡 Response status:', response.status, response.statusText);
+          if (!response.ok) {
+            throw new Error(`Failed to fetch car sales: ${response.statusText}`);
+          }
+          return response.json() as Promise<CarSalesResponse & { hasMore: boolean }>;
+        },
+      );
 
     // Add fake delay for testing skeleton/loading states
     if (FAKE_API_DELAY_MS > 0) {

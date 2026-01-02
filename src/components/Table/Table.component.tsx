@@ -8,7 +8,12 @@ import { styles } from './Table.stylex';
 import { DEFAULT_INFINITE_SCROLL_THRESHOLD } from './Table.types';
 import { TableBase } from './TableBase';
 import { TableBody } from './TableBody';
-import { TableContext, TableProvider, useColumnSizing } from './TableContext';
+import {
+  TableContext,
+  TableProvider,
+  useColumnSizing,
+  useTableData,
+} from './TableContext';
 import { TableHeader } from './TableHeader';
 
 const TableContent = <T extends Record<string, unknown>>({
@@ -28,17 +33,24 @@ const TableContent = <T extends Record<string, unknown>>({
   const context = use(TableContext);
   const tableStore = context?.tableStore;
   const [columnSizing] = useColumnSizing<T>();
+  const [storeData] = useTableData<T>();
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Use data from store if available (for infinite scroll), otherwise use prop
+  const effectiveData = storeData.length > 0 ? storeData : data;
 
   // Set up infinite scroll if configured
   useInfiniteScroll({
     initialPageSize: infiniteScrollConfig?.initialPageSize ?? 50,
     isEnabled: infiniteScrollConfig?.isEnabled ?? false,
     loadMorePageSize: infiniteScrollConfig?.loadMorePageSize ?? 50,
-    onLoadMore: infiniteScrollConfig?.onLoadMore ?? (() => Promise.resolve({ data: [], hasMore: false })),
+    onLoadMore:
+      infiniteScrollConfig?.onLoadMore ??
+      (() => Promise.resolve({ data: [], hasMore: false })),
     scrollContainerRef: containerRef,
     strategy: infiniteScrollConfig?.strategy ?? 'offset-limit',
-    threshold: infiniteScrollConfig?.threshold ?? DEFAULT_INFINITE_SCROLL_THRESHOLD,
+    threshold:
+      infiniteScrollConfig?.threshold ?? DEFAULT_INFINITE_SCROLL_THRESHOLD,
   });
 
   // Set up persistence if persistenceKey provided
@@ -85,11 +97,15 @@ const TableContent = <T extends Record<string, unknown>>({
   return (
     <div ref={containerRef} {...stylex.props(styles.container)}>
       {/* <TableOverlay isVisible={isLoading && data.length > 0} /> */}
-      <TableBase density={density} isBordered={isBordered} isStriped={isStriped}>
+      <TableBase
+        density={density}
+        isBordered={isBordered}
+        isStriped={isStriped}
+      >
         <TableHeader columns={columns} isLoading={isLoading} />
         <TableBody
           columns={columns}
-          data={data}
+          data={effectiveData}
           isLoading={isLoading}
           locale={locale}
           overscan={overscan}
@@ -106,6 +122,7 @@ export const Table = <T extends Record<string, unknown>>({
   data,
   density = 'compact',
   infiniteScrollConfig,
+  initialMeta,
   isBordered = false,
   isFlexWrapperEnabled = true,
   isLoading = false,
@@ -118,7 +135,11 @@ export const Table = <T extends Record<string, unknown>>({
   rowHeight = 32,
 }: TableProps<T>) => {
   const tableContent = (
-    <TableProvider<T> initialData={data} persistenceKey={persistenceKey}>
+    <TableProvider<T>
+      initialData={data}
+      initialMeta={initialMeta}
+      persistenceKey={persistenceKey}
+    >
       <TableContent
         columns={columns}
         data={data}

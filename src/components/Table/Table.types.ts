@@ -132,6 +132,8 @@ export type TableProps<TData extends Record<string, unknown>> = BaseProps & {
   data: TData[];
   /** Configuration for infinite scroll behavior */
   infiniteScrollConfig?: InfiniteScrollConfig<TData>;
+  /** Initial metadata for table state (hasMore, totalRows, paginationMeta) */
+  initialMeta?: { hasMore?: boolean; paginationMeta?: Record<string, unknown>; totalRows?: number };
   isFlexWrapperEnabled?: boolean;
   /** Show loading skeleton overlay */
   isLoading?: boolean;

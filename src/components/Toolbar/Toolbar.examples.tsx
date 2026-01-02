@@ -1,4 +1,3 @@
-
 import {
   BarChartIcon,
   FileTextIcon,
@@ -9,8 +8,7 @@ import {
 
 import type { ToolbarItemConfig } from './Toolbar.types';
 
-import  { Toolbar } from './Toolbar.component';
-
+import { Toolbar } from './Toolbar.component';
 
 // Example usage with SidePanel
 export const SidePanelToolbarExample = () => {
@@ -44,10 +42,16 @@ export const SidePanelToolbarExample = () => {
       to: '/settings',
       type: 'link',
     },
-        {
+    {
       icon: <SettingsIcon size={20} />,
       label: 'Cars Sales',
       to: '/car-sales',
+      type: 'link',
+    },
+    {
+      icon: <SettingsIcon size={20} />,
+      label: 'Cars Sales Infinite',
+      to: '/car-sales-infinite',
       type: 'link',
     },
   ];
