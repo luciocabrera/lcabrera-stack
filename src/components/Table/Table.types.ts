@@ -12,31 +12,6 @@ import type {
  */
 export type ColumnSizingState = Record<string, number>;
 
-export type TableColumn = {
-  dataType?: TableColumnDataType;
-  /** Format options for the column based on data type */
-  format?: TableColumnFormat;
-  key: string;
-  label: string;
-  maxWidth?: number;
-  minWidth?: number;
-};
-
-/**
- * Default minimum column width when not specified
- */
-export const DEFAULT_MIN_COLUMN_WIDTH = 60;
-
-/**
- * Default maximum column width when not specified
- */
-export const DEFAULT_MAX_COLUMN_WIDTH = 600;
-
-/**
- * Default threshold (in pixels) for triggering infinite scroll load
- */
-export const DEFAULT_INFINITE_SCROLL_THRESHOLD = 200;
-
 /**
  * Parameters for cursor-based pagination strategy
  */
@@ -106,6 +81,16 @@ export type PaginationParams =
  */
 export type PaginationStrategy = 'cursor' | 'offset-limit' | 'page-based';
 
+export type TableColumn = {
+  dataType?: TableColumnDataType;
+  /** Format options for the column based on data type */
+  format?: TableColumnFormat;
+  key: string;
+  label: string;
+  maxWidth?: number;
+  minWidth?: number;
+};
+
 export type TableColumnDataType =
   | 'boolean'
   | 'currency'
@@ -133,7 +118,11 @@ export type TableProps<TData extends Record<string, unknown>> = BaseProps & {
   /** Configuration for infinite scroll behavior */
   infiniteScrollConfig?: InfiniteScrollConfig<TData>;
   /** Initial metadata for table state (hasMore, totalRows, paginationMeta) */
-  initialMeta?: { hasMore?: boolean; paginationMeta?: Record<string, unknown>; totalRows?: number };
+  initialMeta?: {
+    hasMore?: boolean;
+    paginationMeta?: Record<string, unknown>;
+    totalRows?: number;
+  };
   isFlexWrapperEnabled?: boolean;
   /** Show loading skeleton overlay */
   isLoading?: boolean;
@@ -142,7 +131,9 @@ export type TableProps<TData extends Record<string, unknown>> = BaseProps & {
   /** Callback when filters change (server-side filtering) */
   onFilterChange?: (filters: Record<string, unknown>) => Promise<void>;
   /** Callback when sorting changes (server-side sorting) */
-  onSortChange?: (sorting: { columnKey: string; direction: 'asc' | 'desc' }[]) => Promise<void>;
+  onSortChange?: (
+    sorting: { columnKey: string; direction: 'asc' | 'desc' }[],
+  ) => Promise<void>;
   overscan?: number;
   /** Persistence key for storing table state (e.g., column widths) */
   persistenceKey?: string;

@@ -2,6 +2,11 @@ import type { ComponentPropsWithoutRef } from 'react';
 
 import type { TableProps } from '../Table.types';
 
+export type HandleResizeParams = {
+  columnKey: string;
+  width: number;
+};
+
 export type TableHeaderProps<TData extends Record<string, unknown>> =
   ComponentPropsWithoutRef<'thead'> &
     Pick<TableProps<TData>, 'columns' | 'customStylex'> & {

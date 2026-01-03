@@ -25,3 +25,6 @@ dist-ssr
 *.sw?
 eslint-local-rules/build/
 .react-router/
+
+.env
+react-router-0.cpuprofile

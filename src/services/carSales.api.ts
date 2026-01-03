@@ -98,12 +98,12 @@ export const carSalesApi = {
     limit: number,
   ): Promise<CarSalesResponse & { hasMore: boolean }> => {
     const url = `${getApiBaseUrl()}/car-sales/paginated?skip=${skip}&limit=${limit}`;
-    console.log('🌐 Fetching from URL:', url);
+    console.warn('🌐 Fetching from URL:', url);
     
     const fetchData = () =>
       fetch(url).then(
         (response) => {
-          console.log('📡 Response status:', response.status, response.statusText);
+          console.warn('📡 Response status:', response.status, response.statusText);
           if (!response.ok) {
             throw new Error(`Failed to fetch car sales: ${response.statusText}`);
           }

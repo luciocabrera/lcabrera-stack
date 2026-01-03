@@ -1,11 +1,11 @@
 import * as stylex from '@stylexjs/stylex';
 
 import { MoreVerticalIcon } from '@/components/Icons';
+import { useColumnResize } from '@/components/Table/hooks';
+import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
 
 import type { TableHeaderCellProps } from './TableHeaderCell.types';
 
-import { useColumnResize } from '../hooks';
-import { DEFAULT_MIN_COLUMN_WIDTH } from '../Table.types';
 import { SortIcon } from './SortIcon';
 import {
   skelletonStyles,

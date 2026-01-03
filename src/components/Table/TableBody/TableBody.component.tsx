@@ -1,23 +1,20 @@
 import * as stylex from '@stylexjs/stylex';
 
+import { SpacerRow } from '@/components/Table/SpacerRow';
+import {
+  DEFAULT_MIN_COLUMN_WIDTH,
+  DEFAULT_PLACEHOLDER_ROW_COUNT,
+  DEFAULT_ROW_HEIGHT,
+} from '@/components/Table/Table.constants';
+import { TableBodyCell } from '@/components/Table/TableBodyCell';
+import { useColumnSizing } from '@/components/Table/TableContext/hooks';
+import { TableRow } from '@/components/Table/TableRow';
 import { useVirtualization } from '@/hooks';
 
 import type { TableBodyProps } from './TableBody.types';
 
-import { LoadingMoreRow } from '../LoadingMoreRow';
-import { SpacerRow } from '../SpacerRow';
-import { DEFAULT_MIN_COLUMN_WIDTH } from '../Table.types';
-import { TableBodyCell } from '../TableBodyCell';
-import {
-  useColumnSizing,
-  useTableLoadingMore,
-  useTotalRows,
-} from '../TableContext/hooks';
-import { TableRow } from '../TableRow';
 import { styles } from './TableBody.stylex';
 import { generatePlaceholderData } from './utils';
-
-const DEFAULT_PLACEHOLDER_ROW_COUNT = 30;
 
 export const TableBody = <TData extends Record<string, unknown>>({
   columns,
@@ -26,12 +23,10 @@ export const TableBody = <TData extends Record<string, unknown>>({
   locale,
   overscan,
   placeholderRowCount = DEFAULT_PLACEHOLDER_ROW_COUNT,
-  rowHeight = 32,
+  rowHeight = DEFAULT_ROW_HEIGHT,
   tableContainerRef,
 }: TableBodyProps<TData>) => {
   const [columnSizing] = useColumnSizing<TData>();
-  const [isLoadingMore] = useTableLoadingMore();
-  const [totalCount] = useTotalRows();
 
   // Use placeholder data when loading with no data
   const effectiveData =
@@ -89,13 +84,13 @@ export const TableBody = <TData extends Record<string, unknown>>({
         <SpacerRow colSpan={columns.length} height={bottomSpacerHeight} />
       )}
       {/* Loading more indicator */}
-      {isLoadingMore && (
+      {/* {isLoadingMore && (
         <LoadingMoreRow
           colSpan={columns.length}
           currentCount={data.length}
           totalCount={totalCount}
         />
-      )}
+      )} */}
     </tbody>
   );
 };

@@ -1,13 +1,21 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { DEFAULT_MAX_COLUMN_WIDTH, DEFAULT_MIN_COLUMN_WIDTH } from '../Table.types';
+import {
+  DEFAULT_MAX_COLUMN_WIDTH,
+  DEFAULT_MIN_COLUMN_WIDTH,
+} from '@/components/Table/Table.constants';
+
+export type OnResizeParams = {
+  columnKey: string;
+  width: number;
+};
 
 export type UseColumnResizeArgs = {
   columnKey: string;
   currentWidth: number | undefined;
   maxWidth?: number;
   minWidth?: number;
-  onResize: (columnKey: string, width: number) => void;
+  onResize: (params: OnResizeParams) => void;
 };
 
 export type UseColumnResizeReturn = {
@@ -31,7 +39,7 @@ export type UseColumnResizeReturn = {
  *   currentWidth: columnSizing[column.key],
  *   minWidth: column.minWidth,
  *   maxWidth: column.maxWidth,
- *   onResize: (key, width) => setColumnSizing(key, width),
+ *   onResize: ({ columnKey, width }) => setColumnSizing(columnKey, width),
  * });
  * ```
  */
@@ -43,13 +51,16 @@ export const useColumnResize = ({
   onResize,
 }: UseColumnResizeArgs): UseColumnResizeReturn => {
   const [isResizing, setIsResizing] = useState(false);
-  const resizeDataRef = useRef<undefined | {
-    animationFrameId: number | undefined;
-    initialWidth: number;
-    initialX: number;
-    maxWidth: number;
-    minWidth: number;
-  }>(undefined);
+  const resizeDataRef = useRef<
+    | undefined
+    | {
+        animationFrameId: number | undefined;
+        initialWidth: number;
+        initialX: number;
+        maxWidth: number;
+        minWidth: number;
+      }
+  >(undefined);
 
   const handleMouseMove = useCallback(
     (event: MouseEvent) => {
@@ -71,7 +82,7 @@ export const useColumnResize = ({
           Math.min(maxWidth, initialWidth + delta),
         );
 
-        onResize(columnKey, newWidth);
+        onResize({ columnKey, width: newWidth });
       });
 
       resizeDataRef.current.animationFrameId = newAnimationFrameId;

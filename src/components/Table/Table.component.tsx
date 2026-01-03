@@ -4,8 +4,8 @@ import { use, useEffect, useRef } from 'react';
 import type { TableProps } from './Table.types';
 
 import { useInfiniteScroll, useTablePersistence } from './hooks';
+import { DEFAULT_INFINITE_SCROLL_THRESHOLD } from './Table.constants';
 import { styles } from './Table.stylex';
-import { DEFAULT_INFINITE_SCROLL_THRESHOLD } from './Table.types';
 import { TableBase } from './TableBase';
 import { TableBody } from './TableBody';
 import {
@@ -13,6 +13,7 @@ import {
   TableProvider,
   useColumnSizing,
   useTableData,
+  useTableLoadingMore,
 } from './TableContext';
 import { TableHeader } from './TableHeader';
 
@@ -34,6 +35,7 @@ const TableContent = <T extends Record<string, unknown>>({
   const tableStore = context?.tableStore;
   const [columnSizing] = useColumnSizing<T>();
   const [storeData] = useTableData<T>();
+  const [isLoadingMore] = useTableLoadingMore();
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Use data from store if available (for infinite scroll), otherwise use prop
@@ -96,17 +98,16 @@ const TableContent = <T extends Record<string, unknown>>({
 
   return (
     <div ref={containerRef} {...stylex.props(styles.container)}>
-      {/* <TableOverlay isVisible={isLoading && data.length > 0} /> */}
       <TableBase
         density={density}
         isBordered={isBordered}
         isStriped={isStriped}
       >
-        <TableHeader columns={columns} isLoading={isLoading} />
+        <TableHeader columns={columns} isLoading={isLoading || isLoadingMore} />
         <TableBody
           columns={columns}
           data={effectiveData}
-          isLoading={isLoading}
+          isLoading={isLoading || isLoadingMore}
           locale={locale}
           overscan={overscan}
           rowHeight={rowHeight}

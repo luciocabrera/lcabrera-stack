@@ -4,6 +4,11 @@ import type { CustomStylex } from '@/types/design-system.types';
 
 import type { TableColumn } from '../Table.types';
 
+export type OnResizeParams = {
+  columnKey: string;
+  width: number;
+};
+
 export type SortDirection = 'asc' | 'desc' | undefined;
 
 export type TableHeaderCellProps = ComponentPropsWithoutRef<'th'> &
@@ -14,7 +19,7 @@ export type TableHeaderCellProps = ComponentPropsWithoutRef<'th'> &
     isLoading?: boolean;
     isSortable?: boolean;
     maxWidth?: number;
-    onResize?: (columnKey: string, width: number) => void;
+    onResize?: (params: OnResizeParams) => void;
     onResizeDoubleClick?: (columnKey: string) => void;
     onSettingsClick?: () => void;
     onSort?: (direction: SortDirection) => void;

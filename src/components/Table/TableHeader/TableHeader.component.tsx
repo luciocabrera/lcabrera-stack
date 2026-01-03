@@ -1,14 +1,15 @@
 import * as stylex from '@stylexjs/stylex';
 
-import type { TableHeaderProps } from './TableHeader.types';
-
-import { DEFAULT_MIN_COLUMN_WIDTH } from '../Table.types';
+import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
 import {
   useColumnSizing,
   useSetColumnSizing,
-} from '../TableContext/hooks';
-import { TableHeaderCell } from '../TableHeaderCell';
-import { TableRow } from '../TableRow';
+} from '@/components/Table/TableContext/hooks';
+import { TableHeaderCell } from '@/components/Table/TableHeaderCell';
+import { TableRow } from '@/components/Table/TableRow';
+
+import type { HandleResizeParams, TableHeaderProps } from './TableHeader.types';
+
 import { tableHeaderStyles } from './TableHeader.stylex';
 
 export const TableHeader = <TData extends Record<string, unknown>>({
@@ -20,7 +21,7 @@ export const TableHeader = <TData extends Record<string, unknown>>({
   const [columnSizing] = useColumnSizing<TData>();
   const setColumnSizing = useSetColumnSizing();
 
-  const handleResize = (columnKey: string, width: number) => {
+  const handleResize = ({ columnKey, width }: HandleResizeParams) => {
     setColumnSizing(columnKey, width);
   };
 
