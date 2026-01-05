@@ -28,6 +28,7 @@ export const CarSales = () => {
             data={data}
             density='comfortable'
             isBordered
+            isClientSortingEnabled
             isStriped
             persistenceKey='car-sales-table'
             title='Car Sales Data'

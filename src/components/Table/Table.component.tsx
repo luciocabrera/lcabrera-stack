@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { use, useEffect, useRef } from 'react';
+import { use, useEffect, useMemo, useRef } from 'react';
 
 import type { TableProps } from './Table.types';
 
@@ -15,11 +15,13 @@ import {
   TableContext,
   TableProvider,
   useColumnSizing,
+  useSorting,
   useTableData,
   useTableLoadingMore,
 } from './TableContext';
 import { TableHeader } from './TableHeader';
 import { TableTitle } from './TableTitle';
+import { compareValues } from './utils/compareValues.util';
 
 const TableContent = <T extends Record<string, unknown>>({
   actions,
@@ -29,9 +31,11 @@ const TableContent = <T extends Record<string, unknown>>({
   icon,
   infiniteScrollConfig,
   isBordered = false,
+  isClientSortingEnabled = false,
   isLoading = false,
   isStriped = false,
   locale,
+  onSortChange,
   overscan = 6,
   persistenceKey,
   rowHeight = 32,
@@ -43,10 +47,62 @@ const TableContent = <T extends Record<string, unknown>>({
   const [columnSizing] = useColumnSizing<T>();
   const [storeData] = useTableData<T>();
   const [isLoadingMore] = useTableLoadingMore();
+  const [sorting] = useSorting();
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Use data from store if available (for infinite scroll), otherwise use prop
   const effectiveData = storeData.length > 0 ? storeData : data;
+
+  // Determine sorting mode: client, server, or none
+  const sortingMode = onSortChange ? 'server' : isClientSortingEnabled ? 'client' : 'none';
+
+  // Server-side sorting: call onSortChange when sorting state changes
+  useEffect(() => {
+    if (sortingMode === 'server' && onSortChange && sorting.length > 0) {
+      void onSortChange({
+        sorting: sorting.map((sort) => ({
+          columnKey: sort.columnKey,
+          direction: sort.direction,
+        })),
+      });
+    }
+  }, [sorting, sortingMode, onSortChange]);
+
+  // Client-side sorting: apply sorting to data
+   
+  const sortedData = useMemo(() => {
+    if (sortingMode !== 'client' || sorting.length === 0) {
+      return effectiveData;
+    }
+
+    const firstSort = sorting[0];
+    if (!firstSort) {
+      return effectiveData;
+    }
+
+    const column = columns.find((col) => col.key === firstSort.columnKey);
+    
+    if (!column) {
+      return effectiveData;
+    }
+
+    return effectiveData.toSorted((a, b) => { // eslint-disable-line local-rules/destructuring-for-functions
+      const aValue = a[firstSort.columnKey as keyof T];
+      const bValue = b[firstSort.columnKey as keyof T];
+      
+       
+      const comparison: number = compareValues({
+        a: aValue,
+        b: bValue,
+        type: column.dataType ?? 'string',
+      });
+
+      return firstSort.direction === 'desc' ? -comparison : comparison;
+    });
+  }, [sortingMode, sorting, effectiveData, columns]);
+
+  // Use sorted data for rendering
+  const dataToRender = sortingMode === 'client' ? sortedData : effectiveData;
 
   // Set up infinite scroll if configured
   useInfiniteScroll({
@@ -120,7 +176,7 @@ const TableContent = <T extends Record<string, unknown>>({
           <TableHeader columns={columns} isLoading={isLoading || isLoadingMore} />
           <TableBody
             columns={columns}
-            data={effectiveData}
+            data={dataToRender}
             isLoading={isLoading || isLoadingMore}
             locale={locale}
             overscan={overscan}
@@ -142,6 +198,7 @@ export const Table = <T extends Record<string, unknown>>({
   infiniteScrollConfig,
   initialMeta,
   isBordered = false,
+  isClientSortingEnabled = false,
   isFlexWrapperEnabled = true,
   isLoading = false,
   isStriped = false,
@@ -167,6 +224,8 @@ export const Table = <T extends Record<string, unknown>>({
         icon={icon}
         infiniteScrollConfig={infiniteScrollConfig}
         isBordered={isBordered}
+         
+        isClientSortingEnabled={isClientSortingEnabled}
         isLoading={isLoading}
         isStriped={isStriped}
         locale={locale}

@@ -3,6 +3,7 @@ import type { ComponentPropsWithoutRef } from 'react';
 import type { CustomStylex } from '@/types/design-system.types';
 
 import type { TableColumn } from '../Table.types';
+import type { HandleSortParams } from '../TableHeader';
 
 export type OnResizeParams = {
   columnKey: string;
@@ -22,7 +23,7 @@ export type TableHeaderCellProps = ComponentPropsWithoutRef<'th'> &
     onResize?: (params: OnResizeParams) => void;
     onResizeDoubleClick?: (columnKey: string) => void;
     onSettingsClick?: () => void;
-    onSort?: (direction: SortDirection) => void;
+    onSort?: (params: HandleSortParams) => void;
     sortDirection?: SortDirection;
     width?: number | string;
   };

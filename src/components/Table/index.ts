@@ -5,10 +5,12 @@ export {
   useSkeletonRowCount,
   useTablePersistence,
 } from './hooks';
-// Skeleton components
 
 // Main Table component
 export { Table } from './Table.component';
+
+// Skeleton components
+
 export {
   DEFAULT_INFINITE_SCROLL_THRESHOLD,
   DEFAULT_MAX_COLUMN_WIDTH,
@@ -20,6 +22,7 @@ export type {
   InfiniteScrollConfig,
   InfiniteScrollResponse,
   OffsetLimitParams,
+  OnSortChangeArgs,
   PageBasedParams,
   PaginationParams,
   PaginationStrategy,
@@ -30,7 +33,6 @@ export type {
 } from './Table.types';
 // Context
 export { TableContext, TableProvider } from './TableContext';
-
 export type {
   ColumnFiltersState,
   ColumnPinningState,
@@ -81,8 +83,11 @@ export {
   useSetSorting,
   useSetTableData,
 } from './TableContext';
+
 // Suspense
 export { TableSuspenseBoundary } from './TableSuspenseBoundary';
-
 export type { TableSuspenseBoundaryProps } from './TableSuspenseBoundary';
+
 export { TableTitle } from './TableTitle';
+// Utilities
+export { compareValues } from './utils/compareValues.util';

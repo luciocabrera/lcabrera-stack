@@ -32,7 +32,8 @@ export const TableHeaderCell = ({
 }: TableHeaderCellProps) => {
   const handleSort = () => {
     if (!isSortable || !onSort) return;
-    onSort(getNextSortDirection(sortDirection));
+    const nextDirection = getNextSortDirection(sortDirection);
+    onSort({ columnKey, direction: nextDirection });
   };
 
   const currentWidth =

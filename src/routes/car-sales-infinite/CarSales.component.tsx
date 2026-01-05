@@ -5,6 +5,7 @@ import { useLoaderData } from 'react-router';
 import type {
   InfiniteScrollConfig,
   OffsetLimitParams,
+  OnSortChangeArgs,
 } from '@/components/Table';
 import type { CarSale } from '@/services';
 
@@ -15,6 +16,14 @@ import type { loader } from './car-sales.loader';
 
 import { columns } from './CarSales.constants';
 import { styles } from './CarSales.stylex';
+
+const handleSortChange = ({ sorting }: OnSortChangeArgs) => {
+  // eslint-disable-next-line no-console
+  console.log('Sorting changed:', sorting);
+  // TODO: Fetch sorted data from server
+  // Example: return carSalesApi.fetchCarSalesPaginated(0, 50, sorting);
+  return Promise.resolve();
+};
 
 export const CarSales = () => {
   const { carSalesPromise } = useLoaderData<typeof loader>();
@@ -89,6 +98,7 @@ export const CarSales = () => {
             }
             isBordered
             isStriped
+            onSortChange={handleSortChange}
             persistenceKey='car-sales-infinite-table'
             title='Car Sales Data - Infinite Scroll'
           />

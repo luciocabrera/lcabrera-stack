@@ -62,6 +62,10 @@ export type OffsetLimitParams = {
   skip: number;
 };
 
+export type OnSortChangeArgs = {
+  sorting: { columnKey: string; direction: 'asc' | 'desc' }[];
+};
+
 /**
  * Parameters for page-based pagination strategy
  */
@@ -87,6 +91,8 @@ export type TableColumn = {
   dataType?: TableColumnDataType;
   /** Format options for the column based on data type */
   format?: TableColumnFormat;
+  /** Whether this column is sortable (default: true) */
+  isSortable?: boolean;
   key: string;
   label: string;
   maxWidth?: number;
@@ -125,6 +131,8 @@ export type TableProps<TData extends Record<string, unknown>> = BaseProps & {
     paginationMeta?: Record<string, unknown>;
     totalRows?: number;
   };
+  /** Enable client-side sorting when all data is available (default: false) */
+  isClientSortingEnabled?: boolean;
   isFlexWrapperEnabled?: boolean;
   /** Show loading skeleton overlay */
   isLoading?: boolean;
@@ -132,10 +140,8 @@ export type TableProps<TData extends Record<string, unknown>> = BaseProps & {
   locale?: string;
   /** Callback when filters change (server-side filtering) */
   onFilterChange?: (filters: Record<string, unknown>) => Promise<void>;
-  /** Callback when sorting changes (server-side sorting) */
-  onSortChange?: (
-    sorting: { columnKey: string; direction: 'asc' | 'desc' }[],
-  ) => Promise<void>;
+  /** Callback when sorting changes (server-side sorting). If provided, sorting is server-controlled */
+  onSortChange?: (args: OnSortChangeArgs) => Promise<void>;
   overscan?: number;
   /** Persistence key for storing table state (e.g., column widths) */
   persistenceKey?: string;

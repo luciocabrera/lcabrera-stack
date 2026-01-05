@@ -1,10 +1,16 @@
 import type { ComponentPropsWithoutRef } from 'react';
 
 import type { TableProps } from '../Table.types';
+import type { SortDirection } from '../TableContext';
 
 export type HandleResizeParams = {
   columnKey: string;
   width: number;
+};
+
+export type HandleSortParams = {
+  columnKey: string;
+  direction: SortDirection;
 };
 
 export type TableHeaderProps<TData extends Record<string, unknown>> =
