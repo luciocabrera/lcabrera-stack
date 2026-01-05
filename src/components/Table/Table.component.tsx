@@ -40,7 +40,7 @@ const TableContent = <T extends Record<string, unknown>>({
   persistenceKey,
   rowHeight = 32,
   title,
-}: Omit<TableProps<T>, 'initialMeta' | 'isFlexWrapperEnabled'>) => {
+}: Omit<TableProps<T>, 'initialMeta' | 'initialSorting' | 'isFlexWrapperEnabled'>) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const context = use(TableContext);
   const tableStore = context?.tableStore;
@@ -69,35 +69,32 @@ const TableContent = <T extends Record<string, unknown>>({
   }, [sorting, sortingMode, onSortChange]);
 
   // Client-side sorting: apply sorting to data
-   
   const sortedData = useMemo(() => {
     if (sortingMode !== 'client' || sorting.length === 0) {
       return effectiveData;
     }
 
-    const firstSort = sorting[0];
-    if (!firstSort) {
-      return effectiveData;
-    }
-
-    const column = columns.find((col) => col.key === firstSort.columnKey);
-    
-    if (!column) {
-      return effectiveData;
-    }
-
     return effectiveData.toSorted((a, b) => { // eslint-disable-line local-rules/destructuring-for-functions
-      const aValue = a[firstSort.columnKey as keyof T];
-      const bValue = b[firstSort.columnKey as keyof T];
-      
-       
-      const comparison: number = compareValues({
-        a: aValue,
-        b: bValue,
-        type: column.dataType ?? 'string',
-      });
+      // Sort by each column in order until we find a difference
+      for (const sort of sorting) {
+        const column = columns.find((col) => col.key === sort.columnKey);
+        if (!column) continue;
 
-      return firstSort.direction === 'desc' ? -comparison : comparison;
+        const aValue = a[sort.columnKey as keyof T];
+        const bValue = b[sort.columnKey as keyof T];
+        
+        const comparison: number = compareValues({
+          a: aValue,
+          b: bValue,
+          type: column.dataType ?? 'string',
+        });
+
+        if (comparison !== 0) {
+          return sort.direction === 'desc' ? -comparison : comparison;
+        }
+        // If equal, continue to next sort column
+      }
+      return 0; // All sort columns are equal
     });
   }, [sortingMode, sorting, effectiveData, columns]);
 
@@ -192,11 +189,13 @@ const TableContent = <T extends Record<string, unknown>>({
 export const Table = <T extends Record<string, unknown>>({
   actions,
   columns,
+  columnSizing: initialColumnSizing,
   data,
   density = 'compact',
   icon,
   infiniteScrollConfig,
   initialMeta,
+  initialSorting,
   isBordered = false,
   isClientSortingEnabled = false,
   isFlexWrapperEnabled = true,
@@ -212,8 +211,10 @@ export const Table = <T extends Record<string, unknown>>({
 }: TableProps<T>) => {
   const tableContent = (
     <TableProvider<T>
+      initialColumnSizing={initialColumnSizing}
       initialData={data}
       initialMeta={initialMeta}
+      initialSorting={initialSorting}
       persistenceKey={persistenceKey}
     >
       <TableContent
@@ -224,7 +225,6 @@ export const Table = <T extends Record<string, unknown>>({
         icon={icon}
         infiniteScrollConfig={infiniteScrollConfig}
         isBordered={isBordered}
-         
         isClientSortingEnabled={isClientSortingEnabled}
         isLoading={isLoading}
         isStriped={isStriped}

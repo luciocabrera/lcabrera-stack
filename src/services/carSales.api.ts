@@ -93,12 +93,24 @@ export const carSalesApi = {
    * Fetch car sales data with pagination (offset-limit strategy)
    * @param skip - Number of records to skip
    * @param limit - Number of records to fetch
+   * @param sorting - Optional sorting configuration
    */
   fetchCarSalesPaginated: (
     skip: number,
     limit: number,
+    sorting?: { columnKey: string; direction: 'asc' | 'desc' }[],
   ): Promise<CarSalesResponse & { hasMore: boolean }> => {
-    const url = `${getApiBaseUrl()}/car-sales/paginated?skip=${skip}&limit=${limit}`;
+    const params = new URLSearchParams({
+      limit: limit.toString(),
+      skip: skip.toString(),
+    });
+
+    // Add sorting parameters if provided
+    if (sorting && sorting.length > 0) {
+      params.append('sort', JSON.stringify(sorting));
+    }
+
+    const url = `${getApiBaseUrl()}/car-sales/paginated?${params.toString()}`;
     console.warn('🌐 Fetching from URL:', url);
     
     const fetchData = () =>

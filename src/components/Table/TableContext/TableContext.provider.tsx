@@ -65,8 +65,10 @@ const getInitialMetaState = ({
  */
 export const TableProvider = <TData extends Record<string, unknown>>({
   children,
+  initialColumnSizing,
   initialData = [],
   initialMeta,
+  initialSorting,
   persistenceKey,
 }: TableProviderProps<TData>) => {
   // Read persisted state from cookies (SSR-safe)
@@ -75,10 +77,20 @@ export const TableProvider = <TData extends Record<string, unknown>>({
     ? readPersistedStateFromCookie({ persistenceKey })
     : {};
 
+  // Loader-provided column sizing takes precedence over persisted state
+  const effectiveColumnSizing = initialColumnSizing && Object.keys(initialColumnSizing).length > 0 
+    ? initialColumnSizing 
+    : (persistedState as Partial<TableState<TData>>).columnSizing;
+
   const tableStore = useStore<TableState<TData>>(
     getInitialTableState({ 
+      initialColumnSizing: effectiveColumnSizing,
       initialData, 
-      initialPersistedState: persistedState as Partial<TableState<TData>>,
+      initialPersistedState: {
+        ...(persistedState as Partial<TableState<TData>>),
+        // Override with loader-provided sorting
+        ...(initialSorting ? { sorting: initialSorting } : {}),
+      },
     }),
   );
 

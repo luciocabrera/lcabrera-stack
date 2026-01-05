@@ -25,5 +25,6 @@ export type TableHeaderCellProps = ComponentPropsWithoutRef<'th'> &
     onSettingsClick?: () => void;
     onSort?: (params: HandleSortParams) => void;
     sortDirection?: SortDirection;
+    sortIndex?: number;
     width?: number | string;
   };

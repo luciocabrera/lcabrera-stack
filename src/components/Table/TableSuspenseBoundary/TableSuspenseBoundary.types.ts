@@ -1,12 +1,14 @@
 import type { ReactNode } from 'react';
 
-import type { TableColumn } from '../Table.types';
+import type { ColumnSizingState, TableColumn } from '../TableContext';
 
 export type TableSuspenseBoundaryProps<TData, TResponse = TData[]> = {
   /** Child render function receiving resolved data */
   children: (data: TData[]) => React.ReactNode;
   /** Column definitions for skeleton */
   columns: TableColumn[];
+  /** Column sizing state for skeleton */
+  columnSizing?: ColumnSizingState;
   /** Promise that resolves to table data or a response containing table data */
   dataPromise: Promise<TResponse>;
   /** Function to extract data array from the response. Defaults to identity (response is the data array). */

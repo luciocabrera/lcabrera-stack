@@ -39,11 +39,31 @@ app.get('/api/car-sales/paginated', async (request, res) => {
   try {
     const skip = Number.parseInt(request.query.skip) || 0;
     const limit = Number.parseInt(request.query.limit) || 50;
+    const sortParam = request.query.sort;
+    
     console.log(`   → skip: ${skip}, limit: ${limit}`);
+    
+    // Parse sorting parameter
+    let orderByClause = 'ORDER BY car_id';
+    if (sortParam) {
+      try {
+        const sorting = JSON.parse(sortParam);
+        if (Array.isArray(sorting) && sorting.length > 0) {
+          const orderByParts = sorting.map(sort => {
+            const direction = sort.direction === 'desc' ? 'DESC' : 'ASC';
+            return `${sort.columnKey} ${direction}`;
+          });
+          orderByClause = `ORDER BY ${orderByParts.join(', ')}`;
+          console.log(`   → Sorting: ${orderByClause}`);
+        }
+      } catch (error) {
+        console.error('   ⚠️ Error parsing sort parameter:', error);
+      }
+    }
 
-    // Get paginated data
+    // Get paginated data with sorting
     const dataResult = await pool.query(
-      'SELECT * FROM car_sales ORDER BY car_id LIMIT $1 OFFSET $2',
+      `SELECT * FROM car_sales ${orderByClause} LIMIT $1 OFFSET $2`,
       [limit, skip],
     );
     console.log(`   → Query executed, got ${dataResult.rows.length} rows`);

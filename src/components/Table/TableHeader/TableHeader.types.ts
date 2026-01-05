@@ -11,6 +11,7 @@ export type HandleResizeParams = {
 export type HandleSortParams = {
   columnKey: string;
   direction: SortDirection;
+  isMultiSort?: boolean;
 };
 
 export type TableHeaderProps<TData extends Record<string, unknown>> =

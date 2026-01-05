@@ -27,13 +27,15 @@ export const TableHeaderCell = ({
   onSettingsClick,
   onSort,
   sortDirection,
+  sortIndex,
   width,
   ...rest
 }: TableHeaderCellProps) => {
-  const handleSort = () => {
+  const handleSort = (event: React.MouseEvent) => {
     if (!isSortable || !onSort) return;
     const nextDirection = getNextSortDirection(sortDirection);
-    onSort({ columnKey, direction: nextDirection });
+    const isMultiSort = event.shiftKey;
+    onSort({ columnKey, direction: nextDirection, isMultiSort });
   };
 
   const currentWidth =
@@ -76,7 +78,7 @@ export const TableHeaderCell = ({
         {isSortable && (
           <button
             aria-label={`Sort by ${label}`}
-            onClick={handleSort}
+            onClick={(e) => { handleSort(e); }}
             type='button'
             {...stylex.props(
               tableHeaderCellStyles.sortButton,

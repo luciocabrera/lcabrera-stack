@@ -122,6 +122,8 @@ export type TableDensity = 'comfortable' | 'compact';
 
 export type TableProps<TData extends Record<string, unknown>> = BaseProps & {
   columns: TableColumn[];
+  /** Column sizing state - custom widths for columns */
+  columnSizing?: ColumnSizingState;
   data: TData[];
   /** Configuration for infinite scroll behavior */
   infiniteScrollConfig?: InfiniteScrollConfig<TData>;
@@ -131,6 +133,8 @@ export type TableProps<TData extends Record<string, unknown>> = BaseProps & {
     paginationMeta?: Record<string, unknown>;
     totalRows?: number;
   };
+  /** Initial sorting state */
+  initialSorting?: SortingState;
   /** Enable client-side sorting when all data is available (default: false) */
   isClientSortingEnabled?: boolean;
   isFlexWrapperEnabled?: boolean;

@@ -37,6 +37,7 @@ export const TableSuspenseBoundary = <
 >({
   children,
   columns,
+  columnSizing,
   dataPromise,
   dataSelector,
   persistenceKey,
@@ -46,6 +47,7 @@ export const TableSuspenseBoundary = <
     fallback={
       <Table<TData>
         columns={columns}
+        columnSizing={columnSizing}
         data={[]}
         isLoading
         persistenceKey={persistenceKey}

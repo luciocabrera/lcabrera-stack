@@ -35,12 +35,26 @@ export const TableHeader = <TData extends Record<string, unknown>>({
   };
 
   const handleSort = useCallback(
-    ({ columnKey, direction }: HandleSortParams) => {
-      // Single-column sorting: replace existing sorts
-      const newSorting = [{ columnKey, direction }];
-      setSorting(newSorting);
+    ({ columnKey, direction, isMultiSort }: HandleSortParams) => {
+      if (isMultiSort) {
+        // Multi-column sorting: add or update this column
+        const existingIndex = sorting.findIndex((s) => s.columnKey === columnKey);
+        
+        if (existingIndex === -1) {
+          // Add new sort
+          setSorting([...sorting, { columnKey, direction }]);
+        } else {
+          // Update existing sort
+          const newSorting = [...sorting];
+          newSorting[existingIndex] = { columnKey, direction };
+          setSorting(newSorting);
+        }
+      } else {
+        // Single-column sorting: replace existing sorts
+        setSorting([{ columnKey, direction }]);
+      }
     },
-    [setSorting],
+    [setSorting, sorting],
   );
 
   return (
@@ -57,6 +71,7 @@ export const TableHeader = <TData extends Record<string, unknown>>({
           // Find current sort for this column
           const currentSort = sorting.find((s) => s.columnKey === col.key);
           const sortDirection = currentSort?.direction;
+          const sortIndex = currentSort ? sorting.indexOf(currentSort) : undefined;
 
           return (
             <TableHeaderCell
@@ -72,6 +87,7 @@ export const TableHeader = <TData extends Record<string, unknown>>({
               onResizeDoubleClick={handleResizeDoubleClick}
               onSort={handleSort}
               sortDirection={sortDirection}
+              sortIndex={sortIndex}
               width={finalWidth ?? effectiveMinWidth}
             />
           );

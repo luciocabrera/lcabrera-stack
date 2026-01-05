@@ -124,10 +124,14 @@ export type TablePersistenceConfig = {
 export type TableProviderProps<TData> = {
   /** Child components */
   children: React.ReactNode;
+  /** Initial column sizing state */
+  initialColumnSizing?: ColumnSizingState;
   /** Initial data (can be empty array for loading state) */
   initialData?: TData[];
   /** Initial meta state overrides */
   initialMeta?: Partial<TableMeta>;
+  /** Initial sorting state */
+  initialSorting?: SortingState;
   /** Persistence configuration */
   persistenceConfig?: TablePersistenceConfig;
   /** Required key for persistence storage */
