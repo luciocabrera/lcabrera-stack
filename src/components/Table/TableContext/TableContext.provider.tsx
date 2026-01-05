@@ -2,8 +2,8 @@ import { useStore } from '@/hooks';
 
 import type { ColumnSizingState, TableMeta, TableProviderProps, TableState } from './TableContext.types';
 
-import { getPersistedStateFromCookie } from '../hooks/useTablePersistence';
-import { TableContext } from './TableContext.context';
+import { readPersistedStateFromCookie } from '../hooks/tablePersistence.helper';
+import { TableContext, type TableContextValue } from './TableContext.context';
 
 type GetInitialTableStateArgs<TData> = {
   initialColumnSizing?: ColumnSizingState;
@@ -72,7 +72,7 @@ export const TableProvider = <TData extends Record<string, unknown>>({
   // Read persisted state from cookies (SSR-safe)
   // Cookies are available during SSR, avoiding hydration mismatches
   const persistedState = persistenceKey
-    ? getPersistedStateFromCookie({ persistenceKey })
+    ? readPersistedStateFromCookie({ persistenceKey })
     : {};
 
   const tableStore = useStore<TableState<TData>>(
@@ -87,6 +87,10 @@ export const TableProvider = <TData extends Record<string, unknown>>({
   );
 
   return (
-    <TableContext value={{ metaStore, tableStore }}>{children}</TableContext>
+    <TableContext 
+      value={{ metaStore, tableStore } as TableContextValue<unknown>}
+    >
+      {children}
+    </TableContext>
   );
 };

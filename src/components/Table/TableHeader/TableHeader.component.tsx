@@ -22,11 +22,11 @@ export const TableHeader = <TData extends Record<string, unknown>>({
   const setColumnSizing = useSetColumnSizing();
 
   const handleResize = ({ columnKey, width }: HandleResizeParams) => {
-    setColumnSizing(columnKey, width);
+    setColumnSizing({ columnKey, width });
   };
 
   const handleResizeDoubleClick = (columnKey: string) => {
-    setColumnSizing(columnKey, undefined);
+    setColumnSizing({ columnKey, width: undefined });
   };
 
   return (

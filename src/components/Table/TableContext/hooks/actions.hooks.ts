@@ -26,6 +26,11 @@ type SelectRowArgs = {
   rowId: string;
 };
 
+type SetColumnSizingArgs = {
+  columnKey: string;
+  width: number | undefined;
+};
+
 type SetTableDataArgs = {
   data: unknown[];
   totalRows?: number;
@@ -221,7 +226,7 @@ export const useSetColumnSizing = () => {
   const { tableStore } = useTableContextValue();
 
   return useCallback(
-    (columnKey: string, width: number | undefined) => {
+    ({ columnKey, width }: SetColumnSizingArgs) => {
       const current = tableStore.get()?.columnSizing ?? {};
 
       let columnSizing: ColumnSizingState;
