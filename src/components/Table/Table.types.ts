@@ -1,4 +1,4 @@
-import type { ComponentPropsWithRef } from 'react';
+import type { ComponentPropsWithRef, ReactNode } from 'react';
 
 import type { CustomStylex } from '@/types/design-system.types';
 import type {
@@ -6,6 +6,8 @@ import type {
   DateFormatOptions,
   NumberFormatOptions,
 } from '@/utils/formatters';
+
+export type { TableTitleProps } from './TableTitle';
 
 /**
  * Column sizing state - maps column key to custom width
@@ -141,8 +143,12 @@ export type TableProps<TData extends Record<string, unknown>> = BaseProps & {
 };
 
 type BaseProps = ComponentPropsWithRef<'table'> & {
+  /** Optional actions to display in the table title header */
+  actions?: ReactNode;
   customStylex?: CustomStylex;
   density?: TableDensity;
+  icon?: ReactNode;
   isBordered?: boolean;
   isStriped?: boolean;
+  title?: string;
 };

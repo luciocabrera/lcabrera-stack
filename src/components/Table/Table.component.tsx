@@ -4,7 +4,10 @@ import { use, useEffect, useRef } from 'react';
 import type { TableProps } from './Table.types';
 
 import { useInfiniteScroll, useTablePersistence } from './hooks';
-import { DEFAULT_INFINITE_SCROLL_THRESHOLD } from './Table.constants';
+import {
+  DEFAULT_INFINITE_SCROLL_THRESHOLD,
+  DEFAULT_ROW_HEIGHT,
+} from './Table.constants';
 import { styles } from './Table.stylex';
 import { TableBase } from './TableBase';
 import { TableBody } from './TableBody';
@@ -16,11 +19,14 @@ import {
   useTableLoadingMore,
 } from './TableContext';
 import { TableHeader } from './TableHeader';
+import { TableTitle } from './TableTitle';
 
 const TableContent = <T extends Record<string, unknown>>({
+  actions,
   columns,
   data,
   density = 'compact',
+  icon,
   infiniteScrollConfig,
   isBordered = false,
   isLoading = false,
@@ -29,7 +35,8 @@ const TableContent = <T extends Record<string, unknown>>({
   overscan = 6,
   persistenceKey,
   rowHeight = 32,
-}: Omit<TableProps<T>, 'isFlexWrapperEnabled'>) => {
+  title,
+}: Omit<TableProps<T>, 'initialMeta' | 'isFlexWrapperEnabled'>) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const context = use(TableContext);
   const tableStore = context?.tableStore;
@@ -97,31 +104,36 @@ const TableContent = <T extends Record<string, unknown>>({
   }, [columnSizing, persistSlice, persistenceKey]);
 
   return (
-    <div ref={containerRef} {...stylex.props(styles.container)}>
-      <TableBase
-        density={density}
-        isBordered={isBordered}
-        isStriped={isStriped}
-      >
-        <TableHeader columns={columns} isLoading={isLoading || isLoadingMore} />
-        <TableBody
-          columns={columns}
-          data={effectiveData}
-          isLoading={isLoading || isLoadingMore}
-          locale={locale}
-          overscan={overscan}
-          rowHeight={rowHeight}
-          tableContainerRef={containerRef}
-        />
-      </TableBase>
+    <div {...stylex.props(styles.outerContainer)}>
+      <TableTitle actions={actions} icon={icon} title={title} />
+      <div ref={containerRef} {...stylex.props(styles.container)}>
+        <TableBase
+          density={density}
+          isBordered={isBordered}
+          isStriped={isStriped}
+        >
+          <TableHeader columns={columns} isLoading={isLoading || isLoadingMore} />
+          <TableBody
+            columns={columns}
+            data={effectiveData}
+            isLoading={isLoading || isLoadingMore}
+            locale={locale}
+            overscan={overscan}
+            rowHeight={rowHeight}
+            tableContainerRef={containerRef}
+          />
+        </TableBase>
+      </div>
     </div>
   );
 };
 
 export const Table = <T extends Record<string, unknown>>({
+  actions,
   columns,
   data,
   density = 'compact',
+  icon,
   infiniteScrollConfig,
   initialMeta,
   isBordered = false,
@@ -133,7 +145,8 @@ export const Table = <T extends Record<string, unknown>>({
   onSortChange,
   overscan = 6,
   persistenceKey,
-  rowHeight = 32,
+  rowHeight = DEFAULT_ROW_HEIGHT,
+  title,
 }: TableProps<T>) => {
   const tableContent = (
     <TableProvider<T>
@@ -142,9 +155,11 @@ export const Table = <T extends Record<string, unknown>>({
       persistenceKey={persistenceKey}
     >
       <TableContent
+        actions={actions}
         columns={columns}
         data={data}
         density={density}
+        icon={icon}
         infiniteScrollConfig={infiniteScrollConfig}
         isBordered={isBordered}
         isLoading={isLoading}
@@ -155,6 +170,7 @@ export const Table = <T extends Record<string, unknown>>({
         overscan={overscan}
         persistenceKey={persistenceKey}
         rowHeight={rowHeight}
+        title={title}
       />
     </TableProvider>
   );

@@ -1,8 +1,11 @@
 import * as stylex from '@stylexjs/stylex';
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { useLoaderData } from 'react-router';
 
-import type { InfiniteScrollConfig, OffsetLimitParams } from '@/components/Table';
+import type {
+  InfiniteScrollConfig,
+  OffsetLimitParams,
+} from '@/components/Table';
 import type { CarSale } from '@/services';
 
 import { Table, TableSuspenseBoundary } from '@/components/Table';
@@ -15,7 +18,7 @@ import { styles } from './CarSales.stylex';
 
 export const CarSales = () => {
   const { carSalesPromise } = useLoaderData<typeof loader>();
-  const [totalCount, setTotalCount] = useState<number | undefined>();
+  // const [totalCount, setTotalCount] = useState<number | undefined>();
   const initialMetaRef = useRef<null | {
     dataLength: number;
     hasMore: boolean;
@@ -31,7 +34,7 @@ export const CarSales = () => {
       const response = await carSalesApi.fetchCarSalesPaginated(skip, limit);
 
       // Update total count
-      setTotalCount(response.total);
+      // setTotalCount(response.total);
 
       return {
         data: response.data,
@@ -45,14 +48,10 @@ export const CarSales = () => {
 
   return (
     <div {...stylex.props(styles.container)}>
-      <div {...stylex.props(styles.header)}>
-        <h1>Car Sales Data - Infinite Scroll</h1>
-        {totalCount !== undefined && (
-          <p>Total records: {totalCount.toLocaleString()}</p>
-        )}
-      </div>
-
-      <TableSuspenseBoundary<CarSale, { data: CarSale[]; hasMore: boolean; total: number }>
+      <TableSuspenseBoundary<
+        CarSale,
+        { data: CarSale[]; hasMore: boolean; total: number }
+      >
         columns={columns}
         dataPromise={carSalesPromise}
         dataSelector={(response) => {
@@ -64,11 +63,12 @@ export const CarSales = () => {
           };
           // Update total count
           queueMicrotask(() => {
-            setTotalCount(response.total);
+            // setTotalCount(response.total);
           });
           return response.data;
         }}
         persistenceKey='car-sales-infinite-table'
+        title='Car Sales Data - Infinite Scroll'
       >
         {(data) => (
           <Table
@@ -80,7 +80,9 @@ export const CarSales = () => {
               initialMetaRef.current
                 ? {
                     hasMore: initialMetaRef.current.hasMore,
-                    paginationMeta: { offset: initialMetaRef.current.dataLength },
+                    paginationMeta: {
+                      offset: initialMetaRef.current.dataLength,
+                    },
                     totalRows: initialMetaRef.current.total,
                   }
                 : undefined
@@ -88,6 +90,7 @@ export const CarSales = () => {
             isBordered
             isStriped
             persistenceKey='car-sales-infinite-table'
+            title='Car Sales Data - Infinite Scroll'
           />
         )}
       </TableSuspenseBoundary>

@@ -15,15 +15,12 @@ export const CarSales = () => {
 
   return (
     <div {...stylex.props(styles.container)}>
-      <div {...stylex.props(styles.header)}>
-        <h1>Car Sales Data</h1>
-      </div>
-
       <TableSuspenseBoundary<CarSale, CarSalesResponse>
         columns={columns}
         dataPromise={carSalesPromise}
         dataSelector={(response) => response.data}
         persistenceKey='car-sales-table'
+        title='Car Sales Data'
       >
         {(data) => (
           <Table
@@ -33,6 +30,7 @@ export const CarSales = () => {
             isBordered
             isStriped
             persistenceKey='car-sales-table'
+            title='Car Sales Data'
           />
         )}
       </TableSuspenseBoundary>

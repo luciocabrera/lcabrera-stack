@@ -119,15 +119,27 @@ const AsyncTableSection = ({ dataPromise }: AsyncTableSectionProps) => {
 
   return (
     <Table
+      actions={
+        <>
+          <Button color='outline' size='sm'>
+            Export
+          </Button>
+          <Button color='primary' size='sm'>
+            Add Row
+          </Button>
+        </>
+      }
       columns={columnDefs.map((col) => ({
         key: col.key,
         label: col.label,
         minWidth: 120,
       }))}
       data={data}
+      icon={<span>📊</span>}
       isFlexWrapperEnabled={false}
       overscan={6}
       rowHeight={32}
+      title='Data Table'
     />
   );
 };

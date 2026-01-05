@@ -25,8 +25,8 @@ export type {
   TableColumn,
   TableColumnDataType,
   TableProps,
+  TableTitleProps,
 } from './Table.types';
-
 // Context
 export { TableContext, TableProvider } from './TableContext';
 
@@ -63,6 +63,7 @@ export {
   useTableStore,
   useTotalRows,
 } from './TableContext';
+
 // Context Hooks - Actions
 export {
   useAppendTableData,
@@ -79,7 +80,8 @@ export {
   useSetSorting,
   useSetTableData,
 } from './TableContext';
-
 // Suspense
 export { TableSuspenseBoundary } from './TableSuspenseBoundary';
+
 export type { TableSuspenseBoundaryProps } from './TableSuspenseBoundary';
+export { TableTitle } from './TableTitle';

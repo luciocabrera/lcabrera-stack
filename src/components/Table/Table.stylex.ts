@@ -4,18 +4,25 @@ import { borderRadius, shadows } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const styles = stylex.create({
-  container: {
+  outerContainer: {
     borderColor: colors.borderPrimary,
     borderRadius: borderRadius.lg,
     borderStyle: 'solid',
     borderWidth: '1px',
-    overflow: 'auto',
+    overflow: 'hidden',
     boxShadow: shadows.sm,
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+    width: '100%',
+  },
+  container: {
+    flex: '1',
+    overflow: 'auto',
     position: 'relative',
     scrollbarColor: `${colors.borderSecondary} transparent`,
     scrollbarWidth: 'thin',
-    height: '100%',
-    width: '100%',
+    minHeight: 0,
   },
   wrapper: {
     flex: '1',

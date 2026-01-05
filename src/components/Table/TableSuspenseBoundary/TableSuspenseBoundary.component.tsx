@@ -40,6 +40,7 @@ export const TableSuspenseBoundary = <
   dataPromise,
   dataSelector,
   persistenceKey,
+  title,
 }: TableSuspenseBoundaryProps<TData, TResponse>) => (
   <Suspense
     fallback={
@@ -48,10 +49,14 @@ export const TableSuspenseBoundary = <
         data={[]}
         isLoading
         persistenceKey={persistenceKey}
+        title={title}
       />
     }
   >
-    <TableDataResolver<TData, TResponse> dataPromise={dataPromise} dataSelector={dataSelector}>
+    <TableDataResolver<TData, TResponse>
+      dataPromise={dataPromise}
+      dataSelector={dataSelector}
+    >
       {children}
     </TableDataResolver>
   </Suspense>
