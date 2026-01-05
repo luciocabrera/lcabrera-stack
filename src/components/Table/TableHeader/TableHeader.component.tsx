@@ -37,8 +37,8 @@ export const TableHeader = <TData extends Record<string, unknown>>({
     >
       <TableRow isHeader>
         {columns.map((col) => {
-          const finalWidth =
-            columnSizing[col.key] ?? col.minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
+          const finalWidth = columnSizing[col.key];
+          const effectiveMinWidth = col.minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
 
           return (
             <TableHeaderCell
@@ -49,10 +49,10 @@ export const TableHeader = <TData extends Record<string, unknown>>({
               key={col.key}
               label={col.label}
               maxWidth={col.maxWidth}
-              minWidth={col.minWidth ?? DEFAULT_MIN_COLUMN_WIDTH}
+              minWidth={effectiveMinWidth}
               onResize={handleResize}
               onResizeDoubleClick={handleResizeDoubleClick}
-              width={finalWidth}
+              width={finalWidth ?? effectiveMinWidth}
             />
           );
         })}

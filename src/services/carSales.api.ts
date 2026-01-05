@@ -58,6 +58,7 @@ export type CarSalesResponse = {
 
 // Use absolute URL for SSR (server-side), relative URL for client (proxied by Vite)
 const getApiBaseUrl = () => {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (globalThis.window === undefined) {
     // Server-side (SSR)
     return 'http://localhost:3001/api';

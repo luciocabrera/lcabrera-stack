@@ -2,12 +2,13 @@ import { useStore } from '@/hooks';
 
 import type { ColumnSizingState, TableMeta, TableProviderProps, TableState } from './TableContext.types';
 
-import { getPersistedColumnSizing } from '../hooks/useTablePersistence';
+import { getPersistedStateFromCookie } from '../hooks/useTablePersistence';
 import { TableContext } from './TableContext.context';
 
 type GetInitialTableStateArgs<TData> = {
   initialColumnSizing?: ColumnSizingState;
   initialData?: TData[];
+  initialPersistedState?: Partial<Omit<TableState<TData>, 'data'>>;
 };
 
 /**
@@ -16,6 +17,7 @@ type GetInitialTableStateArgs<TData> = {
 const getInitialTableState = <TData,>({
   initialColumnSizing = {},
   initialData = [],
+  initialPersistedState = {},
 }: GetInitialTableStateArgs<TData>): TableState<TData> => ({
   columnFilters: {},
   columnPinning: { left: [], right: [] },
@@ -24,6 +26,7 @@ const getInitialTableState = <TData,>({
   pagination: { pageIndex: 0, pageSize: 50 },
   rowSelection: {},
   sorting: [],
+  ...initialPersistedState,
 });
 
 type GetInitialMetaStateArgs = {
@@ -66,14 +69,17 @@ export const TableProvider = <TData extends Record<string, unknown>>({
   initialMeta,
   persistenceKey,
 }: TableProviderProps<TData>) => {
-  // Read persisted column sizing synchronously during initialization
-  // This avoids a flash of wrong column widths on first render
-  const initialColumnSizing = persistenceKey
-    ? getPersistedColumnSizing(persistenceKey)
+  // Read persisted state from cookies (SSR-safe)
+  // Cookies are available during SSR, avoiding hydration mismatches
+  const persistedState = persistenceKey
+    ? getPersistedStateFromCookie({ persistenceKey })
     : {};
 
   const tableStore = useStore<TableState<TData>>(
-    getInitialTableState({ initialColumnSizing, initialData }),
+    getInitialTableState({ 
+      initialData, 
+      initialPersistedState: persistedState as Partial<TableState<TData>>,
+    }),
   );
 
   const metaStore = useStore<TableMeta>(

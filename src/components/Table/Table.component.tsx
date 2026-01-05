@@ -63,9 +63,14 @@ const TableContent = <T extends Record<string, unknown>>({
   });
 
   // Set up persistence if persistenceKey provided
+  // Using cookies for column-specific settings so they're available during SSR
   const { persistSlice } = useTablePersistence({
     config: {
-      columnSizing: persistenceKey ? 'localStorage' : undefined,
+      columnFilters: persistenceKey ? 'localStorage' : undefined,
+      columnPinning: persistenceKey ? 'cookie' : undefined,
+      columnSizing: persistenceKey ? 'cookie' : undefined,
+      pagination: persistenceKey ? 'localStorage' : undefined,
+      sorting: persistenceKey ? 'cookie' : undefined,
     },
     getState: () =>
       tableStore?.get() ?? {

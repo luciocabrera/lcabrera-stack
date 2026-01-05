@@ -38,6 +38,8 @@ const readFromLocalStorage = (key: string): string | undefined => {
  *
  * This function can be called during component initialization to read
  * persisted column widths without waiting for useEffect.
+ * 
+ * @deprecated Use getPersistedStateFromCookie instead for SSR support
  */
 export const getPersistedColumnSizing = (
   persistenceKey: string,
@@ -62,6 +64,90 @@ export const getPersistedColumnSizing = (
   }
 
   return {};
+};
+
+/**
+ * Read from cookie (SSR-safe)
+ */
+const readFromCookieSSR = (key: string, cookieString?: string): string | undefined => {
+  // In browser, use document.cookie
+  if (typeof document !== 'undefined' && !cookieString) {
+    const cookies = parseCookies(document.cookie);
+    return cookies[key];
+  }
+  
+  // In SSR or when cookie string is provided
+  if (cookieString) {
+    const cookies = parseCookies(cookieString);
+    return cookies[key];
+  }
+  
+  return undefined;
+};
+
+type GetPersistedStateFromCookieArgs = {
+  /** Optional cookie string for SSR context */
+  cookieString?: string;
+  persistenceKey: string;
+};
+
+/**
+ * Read persisted state from cookies synchronously (SSR-safe)
+ * 
+ * This function can be called during SSR to initialize table state
+ * from cookies sent with the request.
+ * 
+ * @example
+ * ```tsx
+ * // In browser
+ * const state = getPersistedStateFromCookie({ persistenceKey: 'my-table' });
+ * 
+ * // In SSR (React Router loader)
+ * export async function loader({ request }) {
+ *   const cookieHeader = request.headers.get('Cookie');
+ *   const state = getPersistedStateFromCookie({ 
+ *     persistenceKey: 'my-table',
+ *     cookieString: cookieHeader 
+ *   });
+ *   return { initialTableState: state };
+ * }
+ * ```
+ */
+export const getPersistedStateFromCookie = ({
+  cookieString,
+  persistenceKey,
+}: GetPersistedStateFromCookieArgs): Partial<PersistedState> => {
+  const result: Partial<PersistedState> = {};
+  const storageKey = getStorageKey(persistenceKey);
+  
+  const slices: (keyof Omit<PersistedState, 'version'>)[] = [
+    'sorting',
+    'columnFilters',
+    'columnPinning',
+    'columnSizing',
+    'pagination',
+  ];
+
+  for (const slice of slices) {
+    const sliceKey = `${storageKey}-${slice}`;
+    const rawValue = readFromCookieSSR(sliceKey, cookieString);
+
+    if (rawValue) {
+      try {
+        const parsed = JSON.parse(decodeURIComponent(rawValue)) as {
+          value: unknown;
+          version: number;
+        };
+        if (parsed.version === PERSISTENCE_VERSION) {
+          result[slice] = parsed.value as never;
+        }
+      } catch {
+        // Invalid JSON, skip
+      }
+    }
+  }
+
+  return result;
 };
 
 type PersistedState = {

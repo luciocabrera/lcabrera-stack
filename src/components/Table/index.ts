@@ -1,5 +1,6 @@
 // Hooks
 export {
+  getPersistedStateFromCookie,
   useInfiniteScroll,
   useSkeletonRowCount,
   useTablePersistence,
