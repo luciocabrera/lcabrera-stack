@@ -54,17 +54,3 @@ export const setThemeCookie = (theme: ThemeMode): void => {
   /* eslint-disable-next-line unicorn/no-document-cookie */
   globalThis.document.cookie = `${THEME_COOKIE_NAME}=${theme}; path=/; max-age=${maxAge}; SameSite=Lax`;
 };
-
-/**
- * Get theme from cookie on client side
- */
-export const getClientThemeCookie = (): ThemeMode | undefined => {
-  // SSR guard - document may not exist on server
-  /* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */
-  if (globalThis.document === undefined) {
-    return undefined;
-  }
-
-   
-  return getThemeFromCookie(globalThis.document.cookie);
-};

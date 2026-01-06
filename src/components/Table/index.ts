@@ -36,7 +36,6 @@ export { TableContext, TableProvider } from './TableContext';
 export type {
   ColumnFiltersState,
   ColumnPinningState,
-  LoadMoreHandler,
   PaginationState,
   RowSelectionState,
   SortDirection,

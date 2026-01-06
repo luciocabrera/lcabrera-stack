@@ -161,33 +161,3 @@ export const HorizontalToolbarExampleShort = () => {
     />
   );
 };
-
-// Example usage mixing buttons and links
-export const MixedToolbarExample = () => {
-  const mixedItems: ToolbarItemConfig[] = [
-    {
-      icon: <UserIcon size={20} />,
-      label: 'Profile',
-      to: '/profile',
-      type: 'link',
-    },
-    {
-      color: 'error',
-      icon: <SettingsIcon size={20} />,
-      label: 'Logout',
-      onClick: () => {
-        console.warn('Logout clicked');
-      },
-      type: 'button',
-    },
-  ];
-
-  return (
-    <Toolbar
-      aria-label='User menu'
-      data-testid='user-menu'
-      items={mixedItems}
-      orientation='vertical'
-    />
-  );
-};

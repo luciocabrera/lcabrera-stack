@@ -39,15 +39,6 @@ export type ColumnSizingState = Record<string, number>;
 export type ColumnVisibilityState = Set<string>;
 
 /**
- * Infinite scroll load more handler
- */
-export type LoadMoreHandler<TData> = () => Promise<{
-  data: TData[];
-  hasMore: boolean;
-  totalRows: number;
-}>;
-
-/**
  * Pagination metadata for infinite scroll strategies
  */
 export type PaginationMeta = {

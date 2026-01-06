@@ -53,7 +53,6 @@ export type {
   ColumnPinningState,
   ColumnSizingState,
   ColumnVisibilityState,
-  LoadMoreHandler,
   PaginationState,
   RowSelectionState,
   SortDirection,
