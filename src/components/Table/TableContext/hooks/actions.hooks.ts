@@ -2,7 +2,9 @@ import { useCallback } from 'react';
 
 import type {
   ColumnFiltersState,
+  ColumnOrderState,
   ColumnSizingState,
+  ColumnVisibilityState,
   PaginationMeta,
   PaginationState,
   SortingState,
@@ -63,6 +65,34 @@ export const useSetColumnFilters = () => {
   return useCallback(
     (columnFilters: ColumnFiltersState) => {
       tableStore.set({ columnFilters } as Partial<TableState<unknown>>);
+    },
+    [tableStore],
+  );
+};
+
+/**
+ * Hook to update column order
+ */
+export const useSetColumnOrder = () => {
+  const { tableStore } = useTableContextValue();
+
+  return useCallback(
+    (columnOrder: ColumnOrderState) => {
+      tableStore.set({ columnOrder } as Partial<TableState<unknown>>);
+    },
+    [tableStore],
+  );
+};
+
+/**
+ * Hook to update column visibility
+ */
+export const useSetColumnVisibility = () => {
+  const { tableStore } = useTableContextValue();
+
+  return useCallback(
+    (columnVisibility: ColumnVisibilityState) => {
+      tableStore.set({ columnVisibility } as Partial<TableState<unknown>>);
     },
     [tableStore],
   );

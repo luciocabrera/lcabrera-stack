@@ -8,6 +8,8 @@ export const sidePanelBodyStyles = stylex.create({
     padding: spacing.lg,
     flex: '1',
     color: colors.textPrimary,
+    scrollbarColor: `${colors.borderSecondary} transparent`,
+    scrollbarWidth: 'thin',
     overflowY: 'auto',
   },
 });

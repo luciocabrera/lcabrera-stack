@@ -1,190 +1,11 @@
 import * as stylex from '@stylexjs/stylex';
-import { use, useEffect, useMemo, useRef } from 'react';
 
 import type { TableProps } from './Table.types';
 
-import { useInfiniteScroll, useTablePersistence } from './hooks';
-import {
-  DEFAULT_INFINITE_SCROLL_THRESHOLD,
-  DEFAULT_ROW_HEIGHT,
-} from './Table.constants';
+import { DEFAULT_ROW_HEIGHT } from './Table.constants';
 import { styles } from './Table.stylex';
-import { TableBase } from './TableBase';
-import { TableBody } from './TableBody';
-import {
-  TableContext,
-  TableProvider,
-  useColumnSizing,
-  useSorting,
-  useTableData,
-  useTableLoadingMore,
-} from './TableContext';
-import { TableHeader } from './TableHeader';
-import { TableTitle } from './TableTitle';
-import { compareValues } from './utils/compareValues.util';
-
-const TableContent = <T extends Record<string, unknown>>({
-  actions,
-  columns,
-  data,
-  density = 'compact',
-  icon,
-  infiniteScrollConfig,
-  isBordered = false,
-  isClientSortingEnabled = false,
-  isLoading = false,
-  isStriped = false,
-  locale,
-  onSortChange,
-  overscan = 6,
-  persistenceKey,
-  rowHeight = 32,
-  title,
-}: Omit<TableProps<T>, 'initialMeta' | 'initialSorting' | 'isFlexWrapperEnabled'>) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const context = use(TableContext);
-  const tableStore = context?.tableStore;
-  const [columnSizing] = useColumnSizing<T>();
-  const [storeData] = useTableData<T>();
-  const [isLoadingMore] = useTableLoadingMore();
-  const [sorting] = useSorting();
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Use data from store if available (for infinite scroll), otherwise use prop
-  const effectiveData = storeData.length > 0 ? storeData : data;
-
-  // Determine sorting mode: client, server, or none
-  const sortingMode = onSortChange ? 'server' : isClientSortingEnabled ? 'client' : 'none';
-
-  // Server-side sorting: call onSortChange when sorting state changes
-  useEffect(() => {
-    if (sortingMode === 'server' && onSortChange && sorting.length > 0) {
-      void onSortChange({
-        sorting: sorting.map((sort) => ({
-          columnKey: sort.columnKey,
-          direction: sort.direction,
-        })),
-      });
-    }
-  }, [sorting, sortingMode, onSortChange]);
-
-  // Client-side sorting: apply sorting to data
-  const sortedData = useMemo(() => {
-    if (sortingMode !== 'client' || sorting.length === 0) {
-      return effectiveData;
-    }
-
-    return effectiveData.toSorted((a, b) => { // eslint-disable-line local-rules/destructuring-for-functions
-      // Sort by each column in order until we find a difference
-      for (const sort of sorting) {
-        const column = columns.find((col) => col.key === sort.columnKey);
-        if (!column) continue;
-
-        const aValue = a[sort.columnKey as keyof T];
-        const bValue = b[sort.columnKey as keyof T];
-        
-        const comparison: number = compareValues({
-          a: aValue,
-          b: bValue,
-          type: column.dataType ?? 'string',
-        });
-
-        if (comparison !== 0) {
-          return sort.direction === 'desc' ? -comparison : comparison;
-        }
-        // If equal, continue to next sort column
-      }
-      return 0; // All sort columns are equal
-    });
-  }, [sortingMode, sorting, effectiveData, columns]);
-
-  // Use sorted data for rendering
-  const dataToRender = sortingMode === 'client' ? sortedData : effectiveData;
-
-  // Set up infinite scroll if configured
-  useInfiniteScroll({
-    initialPageSize: infiniteScrollConfig?.initialPageSize ?? 50,
-    isEnabled: infiniteScrollConfig?.isEnabled ?? false,
-    loadMorePageSize: infiniteScrollConfig?.loadMorePageSize ?? 50,
-    onLoadMore:
-      infiniteScrollConfig?.onLoadMore ??
-      (() => Promise.resolve({ data: [], hasMore: false })),
-    scrollContainerRef: containerRef,
-    strategy: infiniteScrollConfig?.strategy ?? 'offset-limit',
-    threshold:
-      infiniteScrollConfig?.threshold ?? DEFAULT_INFINITE_SCROLL_THRESHOLD,
-  });
-
-  // Set up persistence if persistenceKey provided
-  // Using cookies for column-specific settings so they're available during SSR
-  const { persistSlice } = useTablePersistence({
-    config: {
-      columnFilters: persistenceKey ? 'localStorage' : undefined,
-      columnPinning: persistenceKey ? 'cookie' : undefined,
-      columnSizing: persistenceKey ? 'cookie' : undefined,
-      pagination: persistenceKey ? 'localStorage' : undefined,
-      sorting: persistenceKey ? 'cookie' : undefined,
-    },
-    getState: () =>
-      tableStore?.get() ?? {
-        columnFilters: {},
-        columnPinning: { left: [], right: [] },
-        columnSizing: {},
-        pagination: { pageIndex: 0, pageSize: 50 },
-        sorting: [],
-      },
-    persistenceKey: persistenceKey ?? 'default-table',
-    restoreState: (state) => {
-      tableStore?.set(state);
-    },
-  });
-
-  // Debounced persistence for column sizing
-  useEffect(() => {
-    if (!persistenceKey) return;
-
-    // Clear existing timer
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
-
-    // Set new timer
-    debounceTimerRef.current = setTimeout(() => {
-      persistSlice('columnSizing');
-    }, 300);
-
-    // Cleanup
-    return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
-    };
-  }, [columnSizing, persistSlice, persistenceKey]);
-
-  return (
-    <div {...stylex.props(styles.outerContainer)}>
-      <TableTitle actions={actions} icon={icon} title={title} />
-      <div ref={containerRef} {...stylex.props(styles.container)}>
-        <TableBase
-          density={density}
-          isBordered={isBordered}
-          isStriped={isStriped}
-        >
-          <TableHeader columns={columns} isLoading={isLoading || isLoadingMore} />
-          <TableBody
-            columns={columns}
-            data={dataToRender}
-            isLoading={isLoading || isLoadingMore}
-            locale={locale}
-            overscan={overscan}
-            rowHeight={rowHeight}
-            tableContainerRef={containerRef}
-          />
-        </TableBase>
-      </div>
-    </div>
-  );
-};
+import { TableContent } from './TableContent';
+import { TableProvider } from './TableContext';
 
 export const Table = <T extends Record<string, unknown>>({
   actions,
@@ -194,6 +15,8 @@ export const Table = <T extends Record<string, unknown>>({
   density = 'compact',
   icon,
   infiniteScrollConfig,
+  initialColumnOrder,
+  initialColumnVisibility,
   initialMeta,
   initialSorting,
   isBordered = false,
@@ -209,9 +32,13 @@ export const Table = <T extends Record<string, unknown>>({
   rowHeight = DEFAULT_ROW_HEIGHT,
   title,
 }: TableProps<T>) => {
+   
   const tableContent = (
+     
     <TableProvider<T>
+      initialColumnOrder={initialColumnOrder}
       initialColumnSizing={initialColumnSizing}
+      initialColumnVisibility={initialColumnVisibility}
       initialData={data}
       initialMeta={initialMeta}
       initialSorting={initialSorting}

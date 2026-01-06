@@ -3,7 +3,9 @@ import { useCallback } from 'react';
 
 import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
 import {
+  useColumnOrder,
   useColumnSizing,
+  useColumnVisibility,
   useSetColumnSizing,
   useSetSorting,
   useSorting,
@@ -23,8 +25,24 @@ export const TableHeader = <TData extends Record<string, unknown>>({
 }: TableHeaderProps<TData>) => {
   const [columnSizing] = useColumnSizing<TData>();
   const [sorting] = useSorting<TData>();
+  const [columnOrder] = useColumnOrder<TData>();
+  const [columnVisibility] = useColumnVisibility<TData>();
   const setColumnSizing = useSetColumnSizing();
   const setSorting = useSetSorting();
+
+  // Filter visible columns
+  const visibleColumns = columns.filter((col) => !columnVisibility.has(col.key));
+
+  // Apply column order
+  const orderedColumns =
+    columnOrder.length > 0
+      ? [
+          ...columnOrder
+            .map((key) => visibleColumns.find((col) => col.key === key))
+            .filter((col): col is NonNullable<typeof col> => col !== undefined),
+          ...visibleColumns.filter((col) => !columnOrder.includes(col.key)),
+        ]
+      : visibleColumns;
 
   const handleResize = ({ columnKey, width }: HandleResizeParams) => {
     setColumnSizing({ columnKey, width });
@@ -64,7 +82,7 @@ export const TableHeader = <TData extends Record<string, unknown>>({
       {...stylex.props(tableHeaderStyles.container, customStylex)}
     >
       <TableRow isHeader>
-        {columns.map((col) => {
+        {orderedColumns.map((col) => {
           const finalWidth = columnSizing[col.key];
           const effectiveMinWidth = col.minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
 

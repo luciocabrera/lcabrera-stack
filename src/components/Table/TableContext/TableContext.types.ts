@@ -14,6 +14,11 @@
 export type ColumnFiltersState = Record<string, unknown>;
 
 /**
+ * Column order state - array of column keys in display order
+ */
+export type ColumnOrderState = string[];
+
+/**
  * Column pinning state
  */
 export type ColumnPinningState = {
@@ -27,6 +32,11 @@ export type ColumnPinningState = {
  * Column sizing state - maps column key to custom width
  */
 export type ColumnSizingState = Record<string, number>;
+
+/**
+ * Column visibility state - Set of visible column keys
+ */
+export type ColumnVisibilityState = Set<string>;
 
 /**
  * Infinite scroll load more handler
@@ -108,10 +118,14 @@ export type TableMeta = {
 export type TablePersistenceConfig = {
   /** Persist column filters */
   columnFilters?: StorageType;
+  /** Persist column order */
+  columnOrder?: StorageType;
   /** Persist column pinning */
   columnPinning?: StorageType;
   /** Persist column sizing (custom widths) */
   columnSizing?: StorageType;
+  /** Persist column visibility */
+  columnVisibility?: StorageType;
   /** Persist pagination */
   pagination?: StorageType;
   /** Persist sorting */
@@ -124,8 +138,12 @@ export type TablePersistenceConfig = {
 export type TableProviderProps<TData> = {
   /** Child components */
   children: React.ReactNode;
+  /** Initial column order state */
+  initialColumnOrder?: ColumnOrderState;
   /** Initial column sizing state */
   initialColumnSizing?: ColumnSizingState;
+  /** Initial column visibility state */
+  initialColumnVisibility?: ColumnVisibilityState;
   /** Initial data (can be empty array for loading state) */
   initialData?: TData[];
   /** Initial meta state overrides */
@@ -144,10 +162,14 @@ export type TableProviderProps<TData> = {
 export type TableState<TData> = {
   /** Column filters state */
   columnFilters: ColumnFiltersState;
+  /** Column order state */
+  columnOrder: ColumnOrderState;
   /** Column pinning state */
   columnPinning: ColumnPinningState;
   /** Column sizing state (custom widths) */
   columnSizing: ColumnSizingState;
+  /** Column visibility state */
+  columnVisibility: ColumnVisibilityState;
   /** Table data array */
   data: TData[];
   /** Pagination state */

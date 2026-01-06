@@ -40,6 +40,8 @@ export const TableSuspenseBoundary = <
   columnSizing,
   dataPromise,
   dataSelector,
+  initialColumnOrder,
+  initialColumnVisibility,
   persistenceKey,
   title,
 }: TableSuspenseBoundaryProps<TData, TResponse>) => (
@@ -49,6 +51,8 @@ export const TableSuspenseBoundary = <
         columns={columns}
         columnSizing={columnSizing}
         data={[]}
+        initialColumnOrder={initialColumnOrder}
+        initialColumnVisibility={initialColumnVisibility}
         isLoading
         persistenceKey={persistenceKey}
         title={title}

@@ -9,12 +9,17 @@ import { sidePanelStyles } from './SidePanel.stylex';
 export const SidePanel = ({
   children,
   isOpen,
+  isPinned,
   onClose,
+  onPinChange,
   position = 'right',
   shouldShowOverlay = true,
   size = 'md',
   ...props
 }: SidePanelProps) => {
+  // isPinned and onPinChange are kept in props for future implementation
+  void isPinned;
+  void onPinChange;
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {

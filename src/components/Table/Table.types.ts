@@ -7,6 +7,8 @@ import type {
   NumberFormatOptions,
 } from '@/utils/formatters';
 
+import type { SortingState } from './TableContext';
+
 export type { TableTitleProps } from './TableTitle';
 
 /**
@@ -127,6 +129,10 @@ export type TableProps<TData extends Record<string, unknown>> = BaseProps & {
   data: TData[];
   /** Configuration for infinite scroll behavior */
   infiniteScrollConfig?: InfiniteScrollConfig<TData>;
+  /** Initial column order (for SSR hydration) */
+  initialColumnOrder?: string[];
+  /** Initial column visibility (for SSR hydration) */
+  initialColumnVisibility?: Set<string>;
   /** Initial metadata for table state (hasMore, totalRows, paginationMeta) */
   initialMeta?: {
     hasMore?: boolean;

@@ -7,8 +7,10 @@ import {
 
 import type {
   ColumnFiltersState,
+  ColumnOrderState,
   ColumnPinningState,
   ColumnSizingState,
+  ColumnVisibilityState,
   PaginationState,
   SortingState,
   StorageType,
@@ -19,8 +21,10 @@ export const PERSISTENCE_VERSION = 1;
 
 export type PersistedState = {
   columnFilters?: ColumnFiltersState;
+  columnOrder?: ColumnOrderState;
   columnPinning?: ColumnPinningState;
   columnSizing?: ColumnSizingState;
+  columnVisibility?: ColumnVisibilityState;
   pagination?: PaginationState;
   sorting?: SortingState;
   version: number;
@@ -56,8 +60,10 @@ export const readPersistedState = ({
   const slices: (keyof TablePersistenceConfig)[] = [
     'sorting',
     'columnFilters',
+    'columnOrder',
     'columnPinning',
     'columnSizing',
+    'columnVisibility',
     'pagination',
   ];
 
@@ -78,7 +84,11 @@ export const readPersistedState = ({
           version: number;
         };
         if (parsed.version === PERSISTENCE_VERSION) {
-          result[slice] = parsed.value as never;
+          // Convert array to Set for columnVisibility
+          // eslint-disable-next-line security/detect-object-injection
+          result[slice] = (slice === 'columnVisibility' && Array.isArray(parsed.value)
+            ? new Set(parsed.value as string[])
+            : parsed.value) as never;
         }
       } catch {
         // Invalid JSON, ignore
@@ -126,8 +136,10 @@ export const readPersistedStateFromCookie = ({
   const slices: (keyof Omit<PersistedState, 'version'>)[] = [
     'sorting',
     'columnFilters',
+    'columnOrder',
     'columnPinning',
     'columnSizing',
+    'columnVisibility',
     'pagination',
   ];
 
@@ -142,7 +154,11 @@ export const readPersistedStateFromCookie = ({
           version: number;
         };
         if (parsed.version === PERSISTENCE_VERSION) {
-          result[slice] = parsed.value as never;
+          // Convert array to Set for columnVisibility
+          // eslint-disable-next-line security/detect-object-injection
+          result[slice] = (slice === 'columnVisibility' && Array.isArray(parsed.value)
+            ? new Set(parsed.value as string[])
+            : parsed.value) as never;
         }
       } catch {
         // Invalid JSON, skip
@@ -162,6 +178,7 @@ type WriteStateSliceArgs = {
 
 /**
  * Write state slice to storage
+ * Special handling for ColumnVisibilityState (Set → Array for JSON serialization)
  */
 export const writeStateSlice = ({
   persistenceKey,
@@ -170,7 +187,13 @@ export const writeStateSlice = ({
   value,
 }: WriteStateSliceArgs): void => {
   const sliceKey = `${getStorageKey({ persistenceKey })}-${slice}`;
-  const serialized = JSON.stringify({ value, version: PERSISTENCE_VERSION });
+  
+  // Convert Set to Array for columnVisibility
+  const serializableValue = slice === 'columnVisibility' && value instanceof Set
+    ? [...value]
+    : value;
+    
+  const serialized = JSON.stringify({ value: serializableValue, version: PERSISTENCE_VERSION });
 
   if (storageType === 'cookie') {
     writeToCookie({ key: sliceKey, value: serialized });

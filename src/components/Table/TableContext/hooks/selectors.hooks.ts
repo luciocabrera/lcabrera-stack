@@ -2,8 +2,10 @@ import type { UseStoreSelector } from '@/hooks';
 
 import type {
   ColumnFiltersState,
+  ColumnOrderState,
   ColumnPinningState,
   ColumnSizingState,
+  ColumnVisibilityState,
   PaginationMeta,
   PaginationState,
   RowSelectionState,
@@ -113,3 +115,19 @@ export const usePaginationMeta = (): UseStoreSelector<
   PaginationMeta,
   TableMeta
 > => useMetaStore((state) => state.paginationMeta);
+
+/**
+ * Select column order state
+ */
+export const useColumnOrder = <TData>(): UseStoreSelector<
+  ColumnOrderState,
+  TableState<TData>
+> => useTableStore<ColumnOrderState, TData>((state) => state.columnOrder);
+
+/**
+ * Select column visibility state
+ */
+export const useColumnVisibility = <TData>(): UseStoreSelector<
+  ColumnVisibilityState,
+  TableState<TData>
+> => useTableStore<ColumnVisibilityState, TData>((state) => state.columnVisibility);

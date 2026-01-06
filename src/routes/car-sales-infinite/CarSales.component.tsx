@@ -8,10 +8,8 @@ import type {
 } from '@/components/Table';
 import type { CarSale } from '@/services';
 
-import {
-  Table,
-  TableSuspenseBoundary,
-} from '@/components/Table';
+import { Table } from '@/components/Table';
+import { TableSuspenseBoundary } from '@/components/Table/TableSuspenseBoundary/TableSuspenseBoundary.component';
 import { carSalesApi } from '@/services';
 
 import type { loader } from './car-sales.loader';
@@ -21,7 +19,7 @@ import { columns } from './CarSales.constants';
 import { styles } from './CarSales.stylex';
 
 export const CarSales = () => {
-  const { carSalesPromise, columnSizing, sorting } = useLoaderData<typeof loader>();
+  const { carSalesPromise, columnOrder, columnSizing, columnVisibility, sorting } = useLoaderData<typeof loader>();
 
   return (
     <div {...stylex.props(styles.container)}>
@@ -33,11 +31,15 @@ export const CarSales = () => {
         columnSizing={columnSizing}
         dataPromise={carSalesPromise}
         dataSelector={(response) => response.data}
+        initialColumnOrder={columnOrder}
+        initialColumnVisibility={columnVisibility}
         title='Car Sales Data - Infinite Scroll'
       >
         {(data) => (
           <CarSalesTable
+            columnOrder={columnOrder}
             columnSizing={columnSizing}
+            columnVisibility={columnVisibility}
             initialData={data}
             sorting={sorting}
           />
@@ -47,7 +49,7 @@ export const CarSales = () => {
   );
 };
 
-const CarSalesTable = ({ columnSizing, initialData, sorting: currentSorting }: CarSalesTableProps) => {
+const CarSalesTable = ({ columnOrder, columnSizing, columnVisibility, initialData, sorting: currentSorting }: CarSalesTableProps) => {
   const [, setSearchParams] = useSearchParams();
 
   const handleSortChange = ({ sorting }: OnSortChangeArgs) => {
@@ -95,12 +97,13 @@ const CarSalesTable = ({ columnSizing, initialData, sorting: currentSorting }: C
 
   return (
     <Table
-      key={sortKey}
       columns={columns}
       columnSizing={columnSizing}
       data={initialData}
       density='comfortable'
       infiniteScrollConfig={infiniteScrollConfig}
+      initialColumnOrder={columnOrder}
+      initialColumnVisibility={columnVisibility}
       initialMeta={{
         hasMore: true,
         paginationMeta: {
@@ -110,6 +113,7 @@ const CarSalesTable = ({ columnSizing, initialData, sorting: currentSorting }: C
       initialSorting={currentSorting ?? []}
       isBordered
       isStriped
+      key={sortKey}
       onSortChange={handleSortChange}
       persistenceKey='car-sales-infinite-table'
       title='Car Sales Data - Infinite Scroll'

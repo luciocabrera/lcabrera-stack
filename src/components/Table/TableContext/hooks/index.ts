@@ -5,7 +5,9 @@ export {
   useSelectAllRows,
   useSelectRow,
   useSetColumnFilters,
+  useSetColumnOrder,
   useSetColumnSizing,
+  useSetColumnVisibility,
   useSetError,
   useSetLoading,
   useSetLoadingMore,
@@ -18,8 +20,10 @@ export {
 // Selector hooks
 export {
   useColumnFilters,
+  useColumnOrder,
   useColumnPinning,
   useColumnSizing,
+  useColumnVisibility,
   useHasMore,
   usePagination,
   usePaginationMeta,

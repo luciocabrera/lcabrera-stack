@@ -27,7 +27,7 @@ export const TableHeaderCell = ({
   onSettingsClick,
   onSort,
   sortDirection,
-  sortIndex,
+  sortIndex: _sortIndex, // Rename to indicate unused
   width,
   ...rest
 }: TableHeaderCellProps) => {

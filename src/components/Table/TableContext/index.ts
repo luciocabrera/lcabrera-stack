@@ -3,8 +3,10 @@ export { useMetaStore, useTableStore } from './hooks';
 // Hooks - Selectors
 export {
   useColumnFilters,
+  useColumnOrder,
   useColumnPinning,
   useColumnSizing,
+  useColumnVisibility,
   useHasMore,
   usePagination,
   usePaginationMeta,
@@ -24,7 +26,9 @@ export {
   useSelectAllRows,
   useSelectRow,
   useSetColumnFilters,
+  useSetColumnOrder,
   useSetColumnSizing,
+  useSetColumnVisibility,
   useSetError,
   useSetLoading,
   useSetLoadingMore,
@@ -45,8 +49,10 @@ export { TableProvider } from './TableContext.provider';
 // Types
 export type {
   ColumnFiltersState,
+  ColumnOrderState,
   ColumnPinningState,
   ColumnSizingState,
+  ColumnVisibilityState,
   LoadMoreHandler,
   PaginationState,
   RowSelectionState,

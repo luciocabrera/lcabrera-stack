@@ -2,8 +2,10 @@ import { useCallback, useEffect } from 'react';
 
 import type {
   ColumnFiltersState,
+  ColumnOrderState,
   ColumnPinningState,
   ColumnSizingState,
+  ColumnVisibilityState,
   PaginationState,
   SortingState,
   TablePersistenceConfig,
@@ -21,8 +23,10 @@ type UseTablePersistenceArgs = {
   /** Callback to get current state for a slice */
   getState: () => {
     columnFilters: ColumnFiltersState;
+    columnOrder: ColumnOrderState;
     columnPinning: ColumnPinningState;
     columnSizing: ColumnSizingState;
+    columnVisibility: ColumnVisibilityState;
     pagination: PaginationState;
     sorting: SortingState;
   };
@@ -69,6 +73,7 @@ export const useTablePersistence = ({
       if (!storageType) return;
 
       const currentState = getState();
+      // eslint-disable-next-line security/detect-object-injection
       const value = currentState[slice];
       writeStateSlice({ persistenceKey, slice, storageType, value });
     },
@@ -80,8 +85,10 @@ export const useTablePersistence = ({
     const slices: (keyof TablePersistenceConfig)[] = [
       'sorting',
       'columnFilters',
+      'columnOrder',
       'columnPinning',
       'columnSizing',
+      'columnVisibility',
       'pagination',
     ];
 

@@ -1,0 +1,75 @@
+import type { ChangeEvent, FocusEvent } from 'react';
+
+import * as stylex from '@stylexjs/stylex';
+import { useId, useState } from 'react';
+
+import type { ToggleSwitchProps } from './ToggleSwitch.types';
+
+import { styles } from './ToggleSwitch.stylex';
+
+export const ToggleSwitch = ({
+  isChecked,
+  isDisabled,
+  label,
+  onChange,
+  ...props
+}: ToggleSwitchProps) => {
+  const [isFocused, setIsFocused] = useState(false);
+
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    onChange(event.target.checked);
+  };
+
+  const handleFocus = (event: FocusEvent<HTMLInputElement>) => {
+    setIsFocused(true);
+    props.onFocus?.(event);
+  };
+
+  const handleBlur = (event: FocusEvent<HTMLInputElement>) => {
+    setIsFocused(false);
+    props.onBlur?.(event);
+  };
+
+  const generatedId = useId();
+  const id = props.id ?? generatedId;
+
+  return (
+    <div {...stylex.props(styles.container)}>
+      <label
+        {...stylex.props(
+          styles.track,
+          isChecked && styles.track_checked,
+          isDisabled && styles.track_disabled,
+          isFocused && styles.track_focus,
+        )}
+        htmlFor={id}
+      >
+        <input
+          {...props}
+          {...stylex.props(styles.input)}
+          aria-checked={isChecked}
+          checked={isChecked}
+          disabled={isDisabled}
+          id={id}
+          onBlur={handleBlur}
+          onChange={handleChange}
+          onFocus={handleFocus}
+          role='switch'
+          type='checkbox'
+        />
+        <span
+          {...stylex.props(styles.thumb, isChecked && styles.thumb_checked)}
+          aria-hidden='true'
+        />
+      </label>
+      {label && (
+        <label
+          {...stylex.props(styles.label, isDisabled && styles.label_disabled)}
+          htmlFor={id}
+        >
+          {label}
+        </label>
+      )}
+    </div>
+  );
+};

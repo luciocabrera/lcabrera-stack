@@ -7,7 +7,11 @@ import {
   DEFAULT_ROW_HEIGHT,
 } from '@/components/Table/Table.constants';
 import { TableBodyCell } from '@/components/Table/TableBodyCell';
-import { useColumnSizing } from '@/components/Table/TableContext/hooks';
+import {
+  useColumnOrder,
+  useColumnSizing,
+  useColumnVisibility,
+} from '@/components/Table/TableContext/hooks';
 import { TableRow } from '@/components/Table/TableRow';
 import { useVirtualization } from '@/hooks';
 
@@ -27,6 +31,22 @@ export const TableBody = <TData extends Record<string, unknown>>({
   tableContainerRef,
 }: TableBodyProps<TData>) => {
   const [columnSizing] = useColumnSizing<TData>();
+  const [columnOrder] = useColumnOrder<TData>();
+  const [columnVisibility] = useColumnVisibility<TData>();
+
+  // Filter visible columns
+  const visibleColumns = columns.filter((col) => !columnVisibility.has(col.key));
+
+  // Apply column order
+  const orderedColumns =
+    columnOrder.length > 0
+      ? [
+          ...columnOrder
+            .map((key) => visibleColumns.find((col) => col.key === key))
+            .filter((col): col is NonNullable<typeof col> => col !== undefined),
+          ...visibleColumns.filter((col) => !columnOrder.includes(col.key)),
+        ]
+      : visibleColumns;
 
   // Use placeholder data when loading with no data
   const effectiveData =
@@ -51,12 +71,12 @@ export const TableBody = <TData extends Record<string, unknown>>({
   return (
     <tbody data-testid='table-body' {...stylex.props(styles.body(totalHeight))}>
       {/* Top spacer row */}
-      {offsetY > 0 && <SpacerRow colSpan={columns.length} height={offsetY} />}
+      {offsetY > 0 && <SpacerRow colSpan={orderedColumns.length} height={offsetY} />}
       {visibleRows.map((row, index) => {
         const rowIndex = startIndex + index;
         return (
           <TableRow key={rowIndex}>
-            {columns.map((col) => {
+            {orderedColumns.map((col) => {
               const finalWidth =
                 columnSizing[col.key] ??
                 col.minWidth ??
@@ -81,7 +101,7 @@ export const TableBody = <TData extends Record<string, unknown>>({
       })}
       {/* Bottom spacer row */}
       {totalRows > 0 && bottomSpacerHeight > 0 && (
-        <SpacerRow colSpan={columns.length} height={bottomSpacerHeight} />
+        <SpacerRow colSpan={orderedColumns.length} height={bottomSpacerHeight} />
       )}
       {/* Loading more indicator */}
       {/* {isLoadingMore && (

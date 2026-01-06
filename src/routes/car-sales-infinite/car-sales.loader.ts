@@ -1,7 +1,10 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
-import { carSalesApi } from '@/services';
 import { readPersistedStateFromCookie } from '@/components/Table/hooks/tablePersistence.helper';
+import { carSalesApi } from '@/services';
+import { readTableStateFromURL } from '@/utils/urlState';
+
+const PERSISTENCE_KEY = 'car-sales-infinite-table';
 
 /**
  * Loader for car sales route
@@ -10,24 +13,35 @@ import { readPersistedStateFromCookie } from '@/components/Table/hooks/tablePers
  * The route will render immediately with the skeleton while data loads.
  */
 export const loader = ({ request }: LoaderFunctionArgs) => {
-  // Parse sorting from URL search params
   const url = new URL(request.url);
-  const sortParam = url.searchParams.get('sort');
-  const sorting = sortParam ? JSON.parse(sortParam) : undefined;
-
-  // Read persisted column widths from cookies
-  const cookieHeader = request.headers.get('Cookie');
-  const persistedState = readPersistedStateFromCookie({
-    cookieString: cookieHeader ?? undefined,
-    persistenceKey: 'car-sales-infinite-table',
+  
+  // Read table state from URL params (priority)
+  const urlState = readTableStateFromURL({
+    persistenceKey: PERSISTENCE_KEY,
+    searchParams: url.searchParams,
   });
+
+  // Read persisted state from cookies (fallback)
+  const cookieHeader = request.headers.get('Cookie');
+  const cookieState = readPersistedStateFromCookie({
+    cookieString: cookieHeader ?? undefined,
+    persistenceKey: PERSISTENCE_KEY,
+  });
+
+  // Merge URL state (priority) with cookie state (fallback)
+  const columnOrder = urlState?.columnOrder ?? cookieState.columnOrder ?? [];
+  const columnVisibility = urlState?.columnVisibility ?? cookieState.columnVisibility ?? new Set<string>();
+  const sorting = urlState?.sorting ?? cookieState.sorting ?? [];
+  const columnSizing = cookieState.columnSizing ?? {};
 
   // Return the promise directly (not awaited) for Suspense streaming
   const carSalesPromise = carSalesApi.fetchCarSalesPaginated(0, 50, sorting);
 
   return {
     carSalesPromise,
-    columnSizing: persistedState.columnSizing ?? {},
+    columnOrder,
+    columnSizing,
+    columnVisibility,
     sorting,
   };
 };

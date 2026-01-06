@@ -14,6 +14,10 @@ export type TableSuspenseBoundaryProps<TData, TResponse = TData[]> = {
   /** Function to extract data array from the response. Defaults to identity (response is the data array). */
   dataSelector?: (response: TResponse) => TData[];
   icon?: ReactNode;
+  /** Initial column order (for SSR hydration and skeleton) */
+  initialColumnOrder?: string[];
+  /** Initial column visibility (for SSR hydration and skeleton) */
+  initialColumnVisibility?: Set<string>;
   /** Persistence key for restoring column widths in loading state */
   persistenceKey?: string;
   title?: string;

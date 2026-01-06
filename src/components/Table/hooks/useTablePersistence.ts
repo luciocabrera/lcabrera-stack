@@ -69,6 +69,7 @@ export const useTablePersistence = ({
       if (!storageType) return;
 
       const currentState = getState();
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const value = currentState[slice];
       writeStateSlice({ persistenceKey, slice, storageType, value });
     },

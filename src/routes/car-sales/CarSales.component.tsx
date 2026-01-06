@@ -3,7 +3,8 @@ import { useLoaderData } from 'react-router';
 
 import type { CarSale, CarSalesResponse } from '@/services';
 
-import { Table, TableSuspenseBoundary } from '@/components/Table';
+import { Table } from '@/components/Table';
+import { TableSuspenseBoundary } from '@/components/Table/TableSuspenseBoundary/TableSuspenseBoundary.component';
 
 import type { loader } from './car-sales.loader';
 
