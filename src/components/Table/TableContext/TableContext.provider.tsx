@@ -1,8 +1,15 @@
 import { useStore } from '@/hooks';
 
-import type { ColumnOrderState, ColumnSizingState, ColumnVisibilityState, TableMeta, TableProviderProps, TableState } from './TableContext.types';
+import type {
+  ColumnOrderState,
+  ColumnSizingState,
+  ColumnVisibilityState,
+  TableMeta,
+  TableProviderProps,
+  TableState,
+} from './TableContext.types';
 
-import { readPersistedStateFromCookie } from '../hooks/tablePersistence.helper';
+import { readPersistedStateFromCookie } from '../utils';
 import { TableContext, type TableContextValue } from './TableContext.context';
 
 type GetInitialTableStateArgs<TData> = {
@@ -86,24 +93,27 @@ export const TableProvider = <TData extends Record<string, unknown>>({
     : {};
 
   // Loader-provided values take precedence over persisted state
-  const effectiveColumnSizing = initialColumnSizing && Object.keys(initialColumnSizing).length > 0 
-    ? initialColumnSizing 
-    : (persistedState as Partial<TableState<TData>>).columnSizing;
+  const effectiveColumnSizing =
+    initialColumnSizing && Object.keys(initialColumnSizing).length > 0
+      ? initialColumnSizing
+      : (persistedState as Partial<TableState<TData>>).columnSizing;
 
-  const effectiveColumnOrder = initialColumnOrder && initialColumnOrder.length > 0
-    ? initialColumnOrder
-    : (persistedState as Partial<TableState<TData>>).columnOrder;
+  const effectiveColumnOrder =
+    initialColumnOrder && initialColumnOrder.length > 0
+      ? initialColumnOrder
+      : (persistedState as Partial<TableState<TData>>).columnOrder;
 
-  const effectiveColumnVisibility = initialColumnVisibility && initialColumnVisibility.size > 0
-    ? initialColumnVisibility
-    : (persistedState as Partial<TableState<TData>>).columnVisibility;
+  const effectiveColumnVisibility =
+    initialColumnVisibility && initialColumnVisibility.size > 0
+      ? initialColumnVisibility
+      : (persistedState as Partial<TableState<TData>>).columnVisibility;
 
   const tableStore = useStore<TableState<TData>>(
-    getInitialTableState({ 
+    getInitialTableState({
       initialColumnOrder: effectiveColumnOrder,
       initialColumnSizing: effectiveColumnSizing,
       initialColumnVisibility: effectiveColumnVisibility,
-      initialData, 
+      initialData,
       initialPersistedState: {
         ...(persistedState as Partial<TableState<TData>>),
         // Override with loader-provided values
@@ -117,7 +127,7 @@ export const TableProvider = <TData extends Record<string, unknown>>({
   );
 
   return (
-    <TableContext 
+    <TableContext
       value={{ metaStore, tableStore } as TableContextValue<unknown>}
     >
       {children}

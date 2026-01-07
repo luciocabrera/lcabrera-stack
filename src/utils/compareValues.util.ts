@@ -1,4 +1,4 @@
-import type { TableColumnDataType } from '../Table.types';
+import type { TableColumnDataType } from '../components/Table/Table.types';
 
 type CompareValuesArgs = {
   a: unknown;

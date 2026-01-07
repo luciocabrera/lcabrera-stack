@@ -1,6 +1,6 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
-import { readPersistedStateFromCookie } from '@/components/Table/hooks/tablePersistence.helper';
+import { readPersistedStateFromCookie } from '@/components/Table/utils';
 import { carSalesApi } from '@/services';
 import { readTableStateFromURL } from '@/utils/urlState';
 

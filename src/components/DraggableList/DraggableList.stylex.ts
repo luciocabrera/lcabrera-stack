@@ -29,7 +29,7 @@ export const styles = stylex.create({
       default: 'none',
       ':focus-visible': `2px solid ${colors.brandPrimary}`,
     },
-    paddingBlock: spacing.sm,
+    paddingBlock: spacing.xxs,
     paddingInline: spacing.md,
     transition: `background-color ${transitions.fast}, border-color ${transitions.fast}`,
     alignItems: 'center',
@@ -48,6 +48,7 @@ export const styles = stylex.create({
       ':focus-visible': '2px',
     },
     userSelect: 'none',
+    height: '34px',
   },
   item_dragging: {
     cursor: 'grabbing',

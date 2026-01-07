@@ -97,7 +97,7 @@ export const useInfiniteScroll = <TData>({
   const [paginationMeta] = usePaginationMeta() as [PaginationMeta, (value: Partial<PaginationMeta>) => void];
   const setLoadingMore = useSetLoadingMore();
   const setPaginationMeta = useSetPaginationMeta();
-  const appendData = useAppendTableData<TData>();
+  const appendData = useAppendTableData();
   const setError = useSetError();
 
   // Ref to prevent multiple simultaneous loads

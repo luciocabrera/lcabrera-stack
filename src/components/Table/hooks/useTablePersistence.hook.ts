@@ -10,12 +10,9 @@ import type {
   SortingState,
   TablePersistenceConfig,
 } from '../TableContext';
-import type { PersistedState } from './tablePersistence.helper';
 
-import {
-  readPersistedState,
-  writeStateSlice,
-} from './tablePersistence.helper';
+import { type PersistedState, readPersistedState, writeStateSlice } from '../utils';
+
 
 type UseTablePersistenceArgs = {
   /** Configuration for which slices to persist and how */

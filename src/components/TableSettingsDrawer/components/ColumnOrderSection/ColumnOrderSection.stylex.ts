@@ -6,8 +6,8 @@ import { colors } from '@/design-system/tokens/colors.stylex';
 export const styles = stylex.create({
   container: {
     gap: spacing.md,
-    paddingBlock: spacing.md,
-    paddingInline: spacing.md,
+    // paddingBlock: spacing.md,
+    // paddingInline: spacing.md,
     display: 'flex',
     flexDirection: 'column',
   },

@@ -1,3 +1,6 @@
+// Utilities
+export { compareValues } from '../../utils/compareValues.util';
+
 // Hooks
 export {
   readPersistedStateFromCookie,
@@ -6,11 +9,10 @@ export {
   useTablePersistence,
 } from './hooks';
 
-// Main Table component
-export { Table } from './Table.component';
-
 // Skeleton components
 
+// Main Table component
+export { Table } from './Table.component';
 export {
   DEFAULT_INFINITE_SCROLL_THRESHOLD,
   DEFAULT_MAX_COLUMN_WIDTH,
@@ -33,6 +35,7 @@ export type {
 } from './Table.types';
 // Context
 export { TableContext, TableProvider } from './TableContext';
+
 export type {
   ColumnFiltersState,
   ColumnPinningState,
@@ -82,11 +85,8 @@ export {
   useSetSorting,
   useSetTableData,
 } from './TableContext';
-
 // Suspense
 export { TableSuspenseBoundary } from './TableSuspenseBoundary';
-export type { TableSuspenseBoundaryProps } from './TableSuspenseBoundary';
 
+export type { TableSuspenseBoundaryProps } from './TableSuspenseBoundary';
 export { TableTitle } from './TableTitle';
-// Utilities
-export { compareValues } from './utils/compareValues.util';

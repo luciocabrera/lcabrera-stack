@@ -5,7 +5,7 @@ import type { ComponentPropsWithoutRef } from 'react';
  */
 export type ToggleSwitchProps = Omit<
   ComponentPropsWithoutRef<'input'>,
-  'type'
+  'onChange' | 'type'
 > & {
   /** Whether the toggle is checked */
   isChecked: boolean;

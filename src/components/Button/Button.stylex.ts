@@ -34,11 +34,9 @@ const styleVariants = stylex.create({
   elevated: {
     boxShadow: shadows.md,
   },
-
   flat: {
     boxShadow: shadows.none,
   },
-
   solid: {
     boxShadow: shadows.sm,
   },

@@ -5,7 +5,10 @@ import type { DraggableItem } from '@/components/DraggableList';
 import { DraggableList } from '@/components/DraggableList';
 import { ToggleSwitch } from '@/components/ToggleSwitch';
 
-import type { ColumnOrderSectionProps } from './ColumnOrderSection.types';
+import type {
+  ColumnOrderSectionProps,
+  HandleToggleVisibilityArgs,
+} from './ColumnOrderSection.types';
 
 import { styles } from './ColumnOrderSection.stylex';
 
@@ -22,7 +25,7 @@ export const ColumnOrderSection = ({
     columnOrder.length > 0
       ? columnOrder
           .map((key) => columns.find((col) => col.key === key))
-          .filter((col): col is typeof columns[0] => col !== undefined)
+          .filter((col): col is (typeof columns)[0] => col !== undefined)
       : columns;
 
   // Add any columns not in columnOrder to the end
@@ -34,10 +37,7 @@ export const ColumnOrderSection = ({
   const handleToggleVisibility = ({
     columnKey,
     isVisible,
-  }: {
-    columnKey: string;
-    isVisible: boolean;
-  }) => {
+  }: HandleToggleVisibilityArgs) => {
     const newVisibility = new Set(columnVisibility);
     if (isVisible) {
       newVisibility.delete(columnKey);
@@ -61,7 +61,10 @@ export const ColumnOrderSection = ({
           isChecked={!columnVisibility.has(col.key)}
           label='Show'
           onChange={(isChecked) => {
-            handleToggleVisibility({ columnKey: col.key, isVisible: isChecked });
+            handleToggleVisibility({
+              columnKey: col.key,
+              isVisible: isChecked,
+            });
           }}
         />
       </div>

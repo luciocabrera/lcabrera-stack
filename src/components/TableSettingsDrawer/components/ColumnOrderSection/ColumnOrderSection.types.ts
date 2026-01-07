@@ -18,3 +18,9 @@ export type ColumnOrderSectionProps = ComponentPropsWithoutRef<'div'> & {
   /** Callback when column visibility changes */
   onColumnVisibilityChange: (columnVisibility: ColumnVisibilityState) => void;
 };
+
+
+export type HandleToggleVisibilityArgs = {
+  columnKey: string;
+  isVisible: boolean;
+};

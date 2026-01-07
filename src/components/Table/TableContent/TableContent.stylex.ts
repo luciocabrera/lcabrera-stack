@@ -24,4 +24,8 @@ export const styles = stylex.create({
     scrollbarWidth: 'thin',
     minHeight: 0,
   },
+  settingsButton:{
+    alignItems: 'center',
+    justifyContent: 'center',
+  }
 });

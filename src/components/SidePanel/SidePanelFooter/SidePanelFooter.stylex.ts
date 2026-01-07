@@ -5,7 +5,9 @@ import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const sidePanelFooterStyles = stylex.create({
   footer: {
-    padding: spacing.lg,
+    padding: spacing.sm,
+    gap: spacing.md,
+    display: 'flex',
     flexShrink: 0,
     borderTopColor: colors.borderPrimary,
     borderTopStyle: 'solid',

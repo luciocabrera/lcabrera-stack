@@ -4,10 +4,11 @@ import { borderRadius, spacing } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const styles = stylex.create({
+  button: { alignItems: 'center', justifyContent: 'center' },
   container: {
     gap: spacing.md,
-    paddingBlock: spacing.md,
-    paddingInline: spacing.md,
+    // paddingBlock: spacing.md,
+    // paddingInline: spacing.md,
     display: 'flex',
     flexDirection: 'column',
   },

@@ -81,6 +81,7 @@ export const SortingSection = ({
           <Button
             aria-label={`Sort ${item.direction === 'asc' ? 'ascending' : 'descending'}`}
             color='ghost'
+            customStylex={styles.button}
             icon={
               item.direction === 'asc' ? (
                 <SortAscIcon size={16} />
@@ -96,6 +97,7 @@ export const SortingSection = ({
           <Button
             aria-label='Remove sort'
             color='ghost'
+            customStylex={styles.button}
             onClick={() => {
               handleRemoveSort(item.columnKey);
             }}
@@ -142,7 +144,7 @@ export const SortingSection = ({
         </Button>
       </div>
 
-      <div>
+      <div  {...stylex.props(styles.container)}>
         <h3 {...stylex.props(styles.header)}>Sort Order</h3>
         {sortItems.length === 0 ? (
           <p {...stylex.props(styles.emptyState)}>
