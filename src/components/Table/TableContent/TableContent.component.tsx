@@ -33,6 +33,7 @@ export const TableContent = <T extends Record<string, unknown>>({
 }: TableContentProps<T>) => {
   const {
     columnOrder,
+    columnSizing,
     columnVisibility,
     containerRef,
     dataToRender,
@@ -40,6 +41,7 @@ export const TableContent = <T extends Record<string, unknown>>({
     isSettingsOpen,
     isSettingsPinned,
     setColumnOrder,
+    setColumnSizing,
     setColumnVisibility,
     setIsSettingsOpen,
     setIsSettingsPinned,
@@ -101,6 +103,7 @@ export const TableContent = <T extends Record<string, unknown>>({
       <TableSettingsDrawer
         columnOrder={columnOrder}
         columns={columns}
+        columnSizing={columnSizing}
         columnVisibility={columnVisibility}
         isOpen={isSettingsOpen}
         isPinned={isSettingsPinned}
@@ -108,6 +111,7 @@ export const TableContent = <T extends Record<string, unknown>>({
           setIsSettingsOpen(false);
         }}
         onColumnOrderChange={setColumnOrder}
+        onColumnSizingChange={setColumnSizing}
         onColumnVisibilityChange={setColumnVisibility}
         onPinChange={setIsSettingsPinned}
         onSortingChange={setSorting}

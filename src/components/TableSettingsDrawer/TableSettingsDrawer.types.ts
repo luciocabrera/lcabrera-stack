@@ -1,6 +1,7 @@
-import type { ComponentPropsWithoutRef } from 'react';
-
-import type { TableColumn } from '@/components/Table/Table.types';
+import type {
+  ColumnSizingState,
+  TableColumn,
+} from '@/components/Table/Table.types';
 import type {
   ColumnOrderState,
   ColumnVisibilityState,
@@ -10,11 +11,13 @@ import type {
 /**
  * TableSettingsDrawer component props
  */
-export type TableSettingsDrawerProps = ComponentPropsWithoutRef<'div'> & {
+export type TableSettingsDrawerProps = {
   /** Current column order state */
   columnOrder: ColumnOrderState;
   /** Available table columns */
   columns: TableColumn[];
+  /** Current column sizing state */
+  columnSizing: ColumnSizingState;
   /** Current column visibility state */
   columnVisibility: ColumnVisibilityState;
   /** Whether the drawer is open */
@@ -25,6 +28,8 @@ export type TableSettingsDrawerProps = ComponentPropsWithoutRef<'div'> & {
   onClose: () => void;
   /** Callback when column order changes */
   onColumnOrderChange: (columnOrder: ColumnOrderState) => void;
+  /** Callback when column sizing changes */
+  onColumnSizingChange: (columnSizing: ColumnSizingState) => void;
   /** Callback when column visibility changes */
   onColumnVisibilityChange: (columnVisibility: ColumnVisibilityState) => void;
   /** Callback when pin state changes */

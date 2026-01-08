@@ -1,4 +1,3 @@
-// component
 import * as stylex from '@stylexjs/stylex';
 import { useEffect, useRef } from 'react';
 
@@ -11,7 +10,6 @@ export const SidePanel = ({
   isOpen,
   isPinned,
   onClose,
-  onPinChange,
   position = 'right',
   shouldShowOverlay = true,
   size = 'md',

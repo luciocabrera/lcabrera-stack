@@ -36,13 +36,13 @@ const baseStyles = stylex.create({
   },
 
   pinned: {
-    position: 'relative',
-    zIndex: 'auto',
+    overflow: 'hidden',
     flexShrink: 0,
+    position: 'relative',
     transform: 'none',
+    zIndex: 'auto',
     height: '100%', // Match parent height
     maxHeight: '100%',
-    overflow: 'hidden',
   },
 
   // Style the native backdrop

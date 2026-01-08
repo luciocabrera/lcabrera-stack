@@ -12,14 +12,14 @@ export const sidePanelHeaderStyles = stylex.create({
     borderBottomWidth: '1px',
   },
   content: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     gap: spacing.md,
+    alignItems: 'center',
+    display: 'flex',
+    justifyContent: 'space-between',
   },
   actions: {
-    display: 'flex',
-    alignItems: 'center',
     gap: spacing.sm,
+    alignItems: 'center',
+    display: 'flex',
   },
 });

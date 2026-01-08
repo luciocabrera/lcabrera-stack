@@ -6,7 +6,6 @@ export type SidePanelProps = ComponentPropsWithoutRef<'dialog'> & {
   isOpen: boolean;
   isPinned?: boolean;
   onClose?: () => void;
-  onPinChange?: (isPinned: boolean) => void;
   position?: SidePanelPosition;
   shouldShowOverlay?: boolean;
   size?: SidePanelSize;

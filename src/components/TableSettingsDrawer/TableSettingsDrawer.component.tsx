@@ -16,16 +16,19 @@ import { Tabs } from '@/components/Tabs';
 import type { TableSettingsDrawerProps } from './TableSettingsDrawer.types';
 
 import { ColumnOrderSection } from './components/ColumnOrderSection';
+import { GeneralSettingsSection } from './components/GeneralSettingsSection';
 import { SortingSection } from './components/SortingSection';
 
 export const TableSettingsDrawer = ({
   columnOrder,
   columns,
+  columnSizing,
   columnVisibility,
   isOpen,
   isPinned,
   onClose,
   onColumnOrderChange,
+  onColumnSizingChange,
   onColumnVisibilityChange,
   onPinChange,
   onSortingChange,
@@ -35,6 +38,7 @@ export const TableSettingsDrawer = ({
   const initialPendingState = useMemo(
     () => ({
       columnOrder,
+      columnSizing,
       columnVisibility,
       sorting,
     }),
@@ -49,6 +53,9 @@ export const TableSettingsDrawer = ({
   const [pendingColumnOrder, setPendingColumnOrder] = useState(
     initialPendingState.columnOrder,
   );
+  const [pendingColumnSizing, setPendingColumnSizing] = useState(
+    initialPendingState.columnSizing,
+  );
   const [pendingColumnVisibility, setPendingColumnVisibility] = useState(
     initialPendingState.columnVisibility,
   );
@@ -57,12 +64,14 @@ export const TableSettingsDrawer = ({
   useEffect(() => {
     setPendingSorting(initialPendingState.sorting);
     setPendingColumnOrder(initialPendingState.columnOrder);
+    setPendingColumnSizing(initialPendingState.columnSizing);
     setPendingColumnVisibility(initialPendingState.columnVisibility);
   }, [initialPendingState]);
 
   const handleAccept = () => {
     onSortingChange(pendingSorting);
     onColumnOrderChange(pendingColumnOrder);
+    onColumnSizingChange(pendingColumnSizing);
     onColumnVisibilityChange(pendingColumnVisibility);
     onClose();
   };
@@ -71,11 +80,22 @@ export const TableSettingsDrawer = ({
     // Reset to original values
     setPendingSorting(sorting);
     setPendingColumnOrder(columnOrder);
+    setPendingColumnSizing(columnSizing);
     setPendingColumnVisibility(columnVisibility);
     onClose();
   };
 
   const tabs: TabItem[] = [
+    {
+      children: (
+        <GeneralSettingsSection
+          columns={columns}
+          onColumnSizingChange={setPendingColumnSizing}
+        />
+      ),
+      header: 'General',
+      key: 'general',
+    },
     {
       children: (
         <SortingSection
@@ -107,7 +127,6 @@ export const TableSettingsDrawer = ({
       isOpen={isOpen}
       isPinned={isPinned}
       onClose={handleCancel}
-      onPinChange={onPinChange}
       position='right'
       size='md'
     >

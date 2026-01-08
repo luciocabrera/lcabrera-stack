@@ -212,13 +212,13 @@ export const sizeVariants = stylex.create({
     borderRadius: borderRadius.sm,
     paddingBlock: spacing.xs,
     paddingInline: spacing.xs,
+    alignItems: 'center',
     fontSize: typography.fontSizeSm,
+    justifyContent: 'center',
     height: '1.75rem',
     minHeight: '1.75rem',
-    width: '1.75rem',
     minWidth: '1.75rem',
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: '1.75rem',
   },
 });
 

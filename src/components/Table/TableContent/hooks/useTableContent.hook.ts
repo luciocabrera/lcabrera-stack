@@ -1,4 +1,4 @@
-import { use, useEffect, useMemo, useRef, useState } from 'react';
+import { use, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { compareValues } from '@/utils/compareValues.util';
 
@@ -12,10 +12,12 @@ import {
 import { DEFAULT_INFINITE_SCROLL_THRESHOLD } from '../../Table.constants';
 import {
   TableContext,
+  type TableState,
   useColumnOrder,
   useColumnSizing,
   useColumnVisibility,
   useSetColumnOrder,
+  useSetColumnSizing,
   useSetColumnVisibility,
   useSetSorting,
   useSorting,
@@ -43,6 +45,7 @@ type UseTableContentReturn<T extends Record<string, unknown>> = {
   isSettingsOpen: boolean;
   isSettingsPinned: boolean;
   setColumnOrder: (order: string[]) => void;
+  setColumnSizing: (sizing: Record<string, number>) => void;
   setColumnVisibility: (visibility: Set<string>) => void;
   setIsSettingsOpen: (isOpen: boolean) => void;
   setIsSettingsPinned: (isPinned: boolean) => void;
@@ -75,8 +78,20 @@ export const useTableContent = <T extends Record<string, unknown>>({
   const [isLoadingMore] = useTableLoadingMore();
   const [sorting] = useSorting<T>();
   const setColumnOrder = useSetColumnOrder();
+  const setColumnSizing = useSetColumnSizing();
   const setColumnVisibility = useSetColumnVisibility();
   const setSorting = useSetSorting();
+
+  // Wrapper to set entire columnSizing state at once
+  const setBulkColumnSizing = useCallback(
+    (newColumnSizing: Record<string, number>) => {
+      if (!tableStore) return;
+      tableStore.set({
+        columnSizing: newColumnSizing,
+      } as Partial<TableState<T>>);
+    },
+    [tableStore],
+  );
 
   // Sync table state with URL search params (higher priority than cookies)
   const { initialState } = useTableSearchParams({
@@ -249,6 +264,7 @@ export const useTableContent = <T extends Record<string, unknown>>({
     isSettingsOpen,
     isSettingsPinned,
     setColumnOrder,
+    setColumnSizing: setBulkColumnSizing,
     setColumnVisibility,
     setIsSettingsOpen,
     setIsSettingsPinned,
