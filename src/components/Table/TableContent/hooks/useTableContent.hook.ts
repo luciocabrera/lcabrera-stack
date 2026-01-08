@@ -17,7 +17,6 @@ import {
   useColumnSizing,
   useColumnVisibility,
   useSetColumnOrder,
-  useSetColumnSizing,
   useSetColumnVisibility,
   useSetSorting,
   useSorting,
@@ -78,7 +77,6 @@ export const useTableContent = <T extends Record<string, unknown>>({
   const [isLoadingMore] = useTableLoadingMore();
   const [sorting] = useSorting<T>();
   const setColumnOrder = useSetColumnOrder();
-  const setColumnSizing = useSetColumnSizing();
   const setColumnVisibility = useSetColumnVisibility();
   const setSorting = useSetSorting();
 

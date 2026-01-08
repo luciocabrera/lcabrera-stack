@@ -14,3 +14,8 @@ export type GeneralSettingsSectionProps = ComponentPropsWithoutRef<'div'> & {
   /** Callback when column sizing changes */
   onColumnSizingChange: (columnSizing: ColumnSizingState) => void;
 };
+
+/**
+ * Width preset options for column sizing
+ */
+export type WidthPreset = 'default' | 'max' | 'min' | undefined;

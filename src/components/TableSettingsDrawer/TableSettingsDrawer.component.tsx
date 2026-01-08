@@ -136,9 +136,7 @@ export const TableSettingsDrawer = ({
             <Button
               aria-label={isPinned ? 'Unpin drawer' : 'Pin drawer'}
               color='ghost'
-              icon={
-                isPinned ? <PinIcon size={16} /> : <PinOffIcon size={16} />
-              }
+              icon={isPinned ? <PinIcon size={16} /> : <PinOffIcon size={16} />}
               onClick={() => {
                 onPinChange(!isPinned);
               }}

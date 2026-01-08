@@ -1,13 +1,13 @@
 import * as stylex from '@stylexjs/stylex';
+import { useState } from 'react';
 
 import { Button } from '@/components/Button';
-import {
-  MaximizeIcon,
-  MinimizeIcon,
-  RefreshIcon,
-} from '@/components/Icons';
+import { MaximizeIcon, MinimizeIcon, RefreshIcon } from '@/components/Icons';
 
-import type { GeneralSettingsSectionProps } from './GeneralSettingsSection.types';
+import type {
+  GeneralSettingsSectionProps,
+  WidthPreset,
+} from './GeneralSettingsSection.types';
 
 import { styles } from './GeneralSettingsSection.stylex';
 
@@ -16,29 +16,47 @@ export const GeneralSettingsSection = ({
   onColumnSizingChange,
   ...props
 }: GeneralSettingsSectionProps) => {
-  const handleSetMinWidths = () => {
-    const newSizing: Record<string, number> = {};
-    for (const col of columns) {
-      if (col.minWidth) {
-        newSizing[col.key] = col.minWidth;
-      }
-    }
-    onColumnSizingChange(newSizing);
-  };
+  const [selectedPreset, setSelectedPreset] = useState<WidthPreset>();
 
-  const handleSetMaxWidths = () => {
-    const newSizing: Record<string, number> = {};
-    for (const col of columns) {
-      if (col.maxWidth) {
-        newSizing[col.key] = col.maxWidth;
-      }
-    }
-    onColumnSizingChange(newSizing);
-  };
+  const handleToggle = (preset: 'default' | 'max' | 'min') => {
+    const newPreset = selectedPreset === preset ? undefined : preset;
+    setSelectedPreset(newPreset);
 
-  const handleResetToDefault = () => {
-    // Reset all column widths (empty object means use default widths)
-    onColumnSizingChange({});
+    if (newPreset === undefined) {
+      // Deselected - revert to current state (do nothing)
+      return;
+    }
+
+    switch (newPreset) {
+      case 'default': {
+        onColumnSizingChange({});
+
+        break;
+      }
+      case 'max': {
+        const newSizing: Record<string, number> = {};
+        for (const col of columns) {
+          if (col.maxWidth) {
+            newSizing[col.key] = col.maxWidth;
+          }
+        }
+        onColumnSizingChange(newSizing);
+
+        break;
+      }
+      case 'min': {
+        const newSizing: Record<string, number> = {};
+        for (const col of columns) {
+          if (col.minWidth) {
+            newSizing[col.key] = col.minWidth;
+          }
+        }
+        onColumnSizingChange(newSizing);
+
+        break;
+      }
+      // No default
+    }
   };
 
   const hasMinWidthsConfigured = columns.some((col) => col.minWidth);
@@ -50,29 +68,35 @@ export const GeneralSettingsSection = ({
         <h3 {...stylex.props(styles.sectionTitle)}>Column Widths</h3>
         <div {...stylex.props(styles.buttonGroup)}>
           <Button
-            color='outline'
+            color={selectedPreset === 'min' ? 'primary' : 'outline'}
             disabled={!hasMinWidthsConfigured}
             icon={<MinimizeIcon size={16} />}
-            onClick={handleSetMinWidths}
+            onClick={() => {
+              handleToggle('min');
+            }}
             size='sm'
             width='full'
           >
             Set All to Min Width
           </Button>
           <Button
-            color='outline'
+            color={selectedPreset === 'max' ? 'primary' : 'outline'}
             disabled={!hasMaxWidthsConfigured}
             icon={<MaximizeIcon size={16} />}
-            onClick={handleSetMaxWidths}
+            onClick={() => {
+              handleToggle('max');
+            }}
             size='sm'
             width='full'
           >
             Set All to Max Width
           </Button>
           <Button
-            color='outline'
+            color={selectedPreset === 'default' ? 'primary' : 'outline'}
             icon={<RefreshIcon size={16} />}
-            onClick={handleResetToDefault}
+            onClick={() => {
+              handleToggle('default');
+            }}
             size='sm'
             width='full'
           >
@@ -82,8 +106,8 @@ export const GeneralSettingsSection = ({
       </div>
 
       <div {...stylex.props(styles.infoBox)}>
-        Apply these settings to quickly adjust all column widths at once. Changes
-        will be reflected after clicking Accept.
+        Select a preset to adjust all column widths at once. Changes will be
+        reflected after clicking Accept.
       </div>
     </div>
   );

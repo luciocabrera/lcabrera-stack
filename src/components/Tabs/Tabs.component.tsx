@@ -1,7 +1,7 @@
 import type { KeyboardEvent } from 'react';
 
 import * as stylex from '@stylexjs/stylex';
-import { useRef, useState } from 'react';
+import { Activity, useRef, useState } from 'react';
 
 import type { TabsProps } from './Tabs.types';
 
@@ -48,8 +48,6 @@ export const Tabs = ({ defaultSelectedTab, tabs, ...props }: TabsProps) => {
     }
   };
 
-  const activeTabContent = tabs.find((tab) => tab.key === activeTab);
-
   return (
     <div {...stylex.props(styles.container)} {...props}>
       <div aria-label='Settings tabs' onKeyDown={handleKeyDown} role='tablist'>
@@ -80,17 +78,22 @@ export const Tabs = ({ defaultSelectedTab, tabs, ...props }: TabsProps) => {
         </div>
       </div>
       <div {...stylex.props(styles.tabContent)}>
-        {activeTabContent && (
-          <div
-            {...stylex.props(styles.tabPanel)}
-            aria-labelledby={`tab-${activeTab}`}
-            id={`tabpanel-${activeTab}`}
-            role='tabpanel'
-            tabIndex={0}
+        {tabs.map((tab) => (
+          <Activity
+            key={tab.key}
+            mode={activeTab === tab.key ? 'visible' : 'hidden'}
           >
-            {activeTabContent.children}
-          </div>
-        )}
+            <div
+              {...stylex.props(styles.tabPanel)}
+              aria-labelledby={`tab-${tab.key}`}
+              id={`tabpanel-${tab.key}`}
+              role='tabpanel'
+              tabIndex={0}
+            >
+              {tab.children}
+            </div>
+          </Activity>
+        ))}
       </div>
     </div>
   );
