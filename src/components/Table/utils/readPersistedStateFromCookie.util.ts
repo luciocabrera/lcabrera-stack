@@ -62,9 +62,11 @@ export const readPersistedStateFromCookie = ({
         if (parsed.version === PERSISTENCE_VERSION) {
           // Convert array to Set for columnVisibility
           // eslint-disable-next-line security/detect-object-injection
-          result[slice] = (slice === 'columnVisibility' && Array.isArray(parsed.value)
-            ? new Set(parsed.value as string[])
-            : parsed.value) as never;
+          result[slice] = (
+            slice === 'columnVisibility' && Array.isArray(parsed.value)
+              ? new Set(parsed.value as string[])
+              : parsed.value
+          ) as never;
         }
       } catch {
         // Invalid JSON, skip

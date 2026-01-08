@@ -1,6 +1,9 @@
 import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 
-import type { DesignSystemOrientation, DesignSystemSize } from '@/types/design-system.types';
+import type {
+  DesignSystemOrientation,
+  DesignSystemSize,
+} from '@/types/design-system.types';
 
 import type { ButtonProps } from '../Button/Button.types';
 import type { NavLinkProps } from '../NavLink/NavLink.types';
@@ -13,10 +16,7 @@ export type ToolbarButtonConfig = Omit<ButtonProps, 'children' | 'width'> & {
 
 export type ToolbarItemConfig = ToolbarButtonConfig | ToolbarLinkConfig;
 
-export type ToolbarLinkConfig = Omit<
-  NavLinkProps,
-  'children' | 'className' 
-> & {
+export type ToolbarLinkConfig = Omit<NavLinkProps, 'children' | 'className'> & {
   color?: Pick<ButtonProps, 'color'>['color'];
   icon?: ReactNode;
   label: string;
@@ -28,4 +28,3 @@ export type ToolbarProps = ComponentPropsWithoutRef<'nav'> & {
   orientation?: DesignSystemOrientation;
   size?: DesignSystemSize;
 };
-

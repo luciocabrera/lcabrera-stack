@@ -42,7 +42,7 @@ const items = [
   orientation='vertical'
   aria-label='Main navigation'
   data-testid='main-toolbar'
-/>
+/>;
 ```
 
 ### Horizontal Action Bar
@@ -70,7 +70,7 @@ const actions = [
   items={actions}
   orientation='horizontal'
   aria-label='Document actions'
-/>
+/>;
 ```
 
 ### Mixed Buttons and Links
@@ -91,51 +91,51 @@ const mixedItems = [
   },
 ];
 
-<Toolbar items={mixedItems} aria-label='User menu' />
+<Toolbar items={mixedItems} aria-label='User menu' />;
 ```
 
 ## Props
 
 ### ToolbarProps
 
-| Prop | Type | Required | Default | Description |
-|------|------|----------|---------|-------------|
-| `items` | `ToolbarItem[]` | ✅ | - | Array of toolbar items (buttons or links) |
-| `orientation` | `'horizontal' \| 'vertical'` | - | `'vertical'` | Layout direction |
-| `aria-label` | `string` | ✅ | - | Accessible label for the navigation |
-| `data-testid` | `string` | - | - | Test identifier for the toolbar |
+| Prop          | Type                         | Required | Default      | Description                               |
+| ------------- | ---------------------------- | -------- | ------------ | ----------------------------------------- |
+| `items`       | `ToolbarItem[]`              | ✅       | -            | Array of toolbar items (buttons or links) |
+| `orientation` | `'horizontal' \| 'vertical'` | -        | `'vertical'` | Layout direction                          |
+| `aria-label`  | `string`                     | ✅       | -            | Accessible label for the navigation       |
+| `data-testid` | `string`                     | -        | -            | Test identifier for the toolbar           |
 
 ### ToolbarButtonItem
 
-| Prop | Type | Required | Description |
-|------|------|----------|-------------|
-| `type` | `'button'` | ✅ | Item type |
-| `label` | `string` | ✅ | Button text |
-| `icon` | `ReactNode` | - | Optional icon |
-| `onClick` | `() => void` | - | Click handler |
-| `color` | `ButtonProps['color']` | - | Button color variant |
-| `size` | `ButtonProps['size']` | - | Button size (defaults to 'md') |
-| `isDisabled` | `boolean` | - | Disabled state |
-| `data-testid` | `string` | - | Test identifier |
+| Prop          | Type                   | Required | Description                    |
+| ------------- | ---------------------- | -------- | ------------------------------ |
+| `type`        | `'button'`             | ✅       | Item type                      |
+| `label`       | `string`               | ✅       | Button text                    |
+| `icon`        | `ReactNode`            | -        | Optional icon                  |
+| `onClick`     | `() => void`           | -        | Click handler                  |
+| `color`       | `ButtonProps['color']` | -        | Button color variant           |
+| `size`        | `ButtonProps['size']`  | -        | Button size (defaults to 'md') |
+| `isDisabled`  | `boolean`              | -        | Disabled state                 |
+| `data-testid` | `string`               | -        | Test identifier                |
 
 ### ToolbarLinkItem
 
-| Prop | Type | Required | Description |
-|------|------|----------|-------------|
-| `type` | `'link'` | ✅ | Item type |
-| `to` | `string` | ✅ | Navigation target |
-| `label` | `string` | ✅ | Link text |
-| `icon` | `ReactNode` | - | Optional icon |
-| `end` | `boolean` | - | Match exact path only |
-| `aria-current` | `string` | - | Current page indicator |
-| `data-testid` | `string` | - | Test identifier |
+| Prop           | Type        | Required | Description            |
+| -------------- | ----------- | -------- | ---------------------- |
+| `type`         | `'link'`    | ✅       | Item type              |
+| `to`           | `string`    | ✅       | Navigation target      |
+| `label`        | `string`    | ✅       | Link text              |
+| `icon`         | `ReactNode` | -        | Optional icon          |
+| `end`          | `boolean`   | -        | Match exact path only  |
+| `aria-current` | `string`    | -        | Current page indicator |
+| `data-testid`  | `string`    | -        | Test identifier        |
 
 ## Responsive Behavior
 
 The Toolbar uses container queries to adapt its layout:
 
 - **Vertical orientation**: Always displays items in a column
-- **Horizontal orientation**: 
+- **Horizontal orientation**:
   - Wraps items by default
   - Switches to column layout when container width < 400px
 
@@ -173,6 +173,7 @@ If not provided, items get auto-generated IDs: `toolbar-item-0`, `toolbar-item-1
 ## Examples
 
 See [Toolbar.examples.tsx](./Toolbar.examples.tsx) for complete usage examples including:
+
 - SidePanel integration
 - Horizontal action bars
 - Mixed button/link configurations

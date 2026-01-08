@@ -1,7 +1,4 @@
-import {
-  writeToCookie,
-  writeToLocalStorage,
-} from '@/utils/storage';
+import { writeToCookie, writeToLocalStorage } from '@/utils/storage';
 
 import type { StorageType, TablePersistenceConfig } from '../TableContext';
 
@@ -26,13 +23,15 @@ export const writeStateSlice = ({
   value,
 }: WriteStateSliceArgs): void => {
   const sliceKey = `${getStorageKey({ persistenceKey })}-${slice}`;
-  
+
   // Convert Set to Array for columnVisibility
-  const serializableValue = slice === 'columnVisibility' && value instanceof Set
-    ? [...value]
-    : value;
-    
-  const serialized = JSON.stringify({ value: serializableValue, version: PERSISTENCE_VERSION });
+  const serializableValue =
+    slice === 'columnVisibility' && value instanceof Set ? [...value] : value;
+
+  const serialized = JSON.stringify({
+    value: serializableValue,
+    version: PERSISTENCE_VERSION,
+  });
 
   if (storageType === 'cookie') {
     writeToCookie({ key: sliceKey, value: serialized });

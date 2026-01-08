@@ -1,7 +1,10 @@
 import type { ComponentPropsWithoutRef } from 'react';
 
 import type { TableColumn } from '@/components/Table/Table.types';
-import type { SortDirection, SortingState } from '@/components/Table/TableContext';
+import type {
+  SortDirection,
+  SortingState,
+} from '@/components/Table/TableContext';
 
 /**
  * SortingSection component props

@@ -36,4 +36,3 @@ export const formatDate = ({
     return date.toLocaleDateString();
   }
 };
-

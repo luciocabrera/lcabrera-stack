@@ -4,7 +4,11 @@ import { compareValues } from '@/utils/compareValues.util';
 
 import type { TableContentProps } from '../TableContent.types';
 
-import { useInfiniteScroll, useTablePersistence, useTableSearchParams } from '../../hooks';
+import {
+  useInfiniteScroll,
+  useTablePersistence,
+  useTableSearchParams,
+} from '../../hooks';
 import { DEFAULT_INFINITE_SCROLL_THRESHOLD } from '../../Table.constants';
 import {
   TableContext,
@@ -42,7 +46,9 @@ type UseTableContentReturn<T extends Record<string, unknown>> = {
   setColumnVisibility: (visibility: Set<string>) => void;
   setIsSettingsOpen: (isOpen: boolean) => void;
   setIsSettingsPinned: (isPinned: boolean) => void;
-  setSorting: (sorting: { columnKey: string; direction: 'asc' | 'desc' }[]) => void;
+  setSorting: (
+    sorting: { columnKey: string; direction: 'asc' | 'desc' }[],
+  ) => void;
   sorting: { columnKey: string; direction: 'asc' | 'desc' }[];
 };
 

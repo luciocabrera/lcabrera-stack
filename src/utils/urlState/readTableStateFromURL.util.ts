@@ -17,12 +17,12 @@ const PARAM_KEY = 'tableState';
 /**
  * Read table state from URL search params (for SSR)
  * Convenience wrapper around readStateFromURL for table-specific state
- * 
+ *
  * @param params - Configuration object
  * @param params.persistenceKey - The persistence key prefix for the table
  * @param params.searchParams - URLSearchParams object to read from
  * @returns Decoded table state or undefined if parameter doesn't exist or decoding fails
- * 
+ *
  * @example
  * ```ts
  * // In a React Router loader

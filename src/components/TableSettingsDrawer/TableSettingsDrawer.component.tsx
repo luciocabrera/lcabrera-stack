@@ -43,8 +43,12 @@ export const TableSettingsDrawer = ({
     [isOpen],
   );
 
-  const [pendingSorting, setPendingSorting] = useState(initialPendingState.sorting);
-  const [pendingColumnOrder, setPendingColumnOrder] = useState(initialPendingState.columnOrder);
+  const [pendingSorting, setPendingSorting] = useState(
+    initialPendingState.sorting,
+  );
+  const [pendingColumnOrder, setPendingColumnOrder] = useState(
+    initialPendingState.columnOrder,
+  );
   const [pendingColumnVisibility, setPendingColumnVisibility] = useState(
     initialPendingState.columnVisibility,
   );

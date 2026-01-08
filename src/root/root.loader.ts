@@ -1,6 +1,6 @@
 import { getThemeFromCookie } from '@/utils/theme-cookie.util';
 
-import type { Route } from "../+types/root";
+import type { Route } from '../+types/root';
 
 /**
  * Loader to get theme from cookies for SSR hydration

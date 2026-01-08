@@ -364,7 +364,9 @@ const App = () => {
               <Button color='secondary' onClick={reloadTableData}>
                 🔄 Reload Table Data (Test Loading)
               </Button>
-              <span style={{ alignSelf: 'center', color: '#6b7280', fontSize: 14 }}>
+              <span
+                style={{ alignSelf: 'center', color: '#6b7280', fontSize: 14 }}
+              >
                 Simulated delay: {FAKE_API_DELAY_MS}ms
               </span>
             </div>

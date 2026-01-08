@@ -39,7 +39,7 @@ export const TableHeaderCell = ({
   };
 
   const currentWidth =
-    typeof width === 'number' ? width : minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
+    typeof width === 'number' ? width : (minWidth ?? DEFAULT_MIN_COLUMN_WIDTH);
 
   const { isResizing, onMouseDown } = useColumnResize({
     columnKey,
@@ -78,7 +78,9 @@ export const TableHeaderCell = ({
         {isSortable && (
           <button
             aria-label={`Sort by ${label}`}
-            onClick={(e) => { handleSort(e); }}
+            onClick={(e) => {
+              handleSort(e);
+            }}
             type='button'
             {...stylex.props(
               tableHeaderCellStyles.sortButton,

@@ -20,8 +20,8 @@ export type TableContextValue<TData> = {
  * Uses external stores with useSyncExternalStore for granular updates.
  * Components can subscribe to specific slices of state via selector hooks.
  */
-export const TableContext = createContext<TableContextValue<unknown> | undefined>(
-  undefined,
-);
+export const TableContext = createContext<
+  TableContextValue<unknown> | undefined
+>(undefined);
 
 TableContext.displayName = 'TableContext';

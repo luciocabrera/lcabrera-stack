@@ -19,7 +19,13 @@ import { columns } from './CarSales.constants';
 import { styles } from './CarSales.stylex';
 
 export const CarSales = () => {
-  const { carSalesPromise, columnOrder, columnSizing, columnVisibility, sorting } = useLoaderData<typeof loader>();
+  const {
+    carSalesPromise,
+    columnOrder,
+    columnSizing,
+    columnVisibility,
+    sorting,
+  } = useLoaderData<typeof loader>();
 
   return (
     <div {...stylex.props(styles.container)}>
@@ -49,7 +55,13 @@ export const CarSales = () => {
   );
 };
 
-const CarSalesTable = ({ columnOrder, columnSizing, columnVisibility, initialData, sorting: currentSorting }: CarSalesTableProps) => {
+const CarSalesTable = ({
+  columnOrder,
+  columnSizing,
+  columnVisibility,
+  initialData,
+  sorting: currentSorting,
+}: CarSalesTableProps) => {
   const [, setSearchParams] = useSearchParams();
 
   const handleSortChange = ({ sorting }: OnSortChangeArgs) => {

@@ -13,7 +13,11 @@ import {
 import { TableHeaderCell } from '@/components/Table/TableHeaderCell';
 import { TableRow } from '@/components/Table/TableRow';
 
-import type { HandleResizeParams, HandleSortParams, TableHeaderProps } from './TableHeader.types';
+import type {
+  HandleResizeParams,
+  HandleSortParams,
+  TableHeaderProps,
+} from './TableHeader.types';
 
 import { tableHeaderStyles } from './TableHeader.stylex';
 
@@ -31,7 +35,9 @@ export const TableHeader = <TData extends Record<string, unknown>>({
   const setSorting = useSetSorting();
 
   // Filter visible columns
-  const visibleColumns = columns.filter((col) => !columnVisibility.has(col.key));
+  const visibleColumns = columns.filter(
+    (col) => !columnVisibility.has(col.key),
+  );
 
   // Apply column order
   const orderedColumns =
@@ -56,8 +62,10 @@ export const TableHeader = <TData extends Record<string, unknown>>({
     ({ columnKey, direction, isMultiSort }: HandleSortParams) => {
       if (isMultiSort) {
         // Multi-column sorting: add or update this column
-        const existingIndex = sorting.findIndex((s) => s.columnKey === columnKey);
-        
+        const existingIndex = sorting.findIndex(
+          (s) => s.columnKey === columnKey,
+        );
+
         if (existingIndex === -1) {
           // Add new sort
           setSorting([...sorting, { columnKey, direction }]);
@@ -89,7 +97,9 @@ export const TableHeader = <TData extends Record<string, unknown>>({
           // Find current sort for this column
           const currentSort = sorting.find((s) => s.columnKey === col.key);
           const sortDirection = currentSort?.direction;
-          const sortIndex = currentSort ? sorting.indexOf(currentSort) : undefined;
+          const sortIndex = currentSort
+            ? sorting.indexOf(currentSort)
+            : undefined;
 
           return (
             <TableHeaderCell

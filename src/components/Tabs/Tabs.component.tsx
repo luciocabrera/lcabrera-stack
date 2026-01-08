@@ -7,11 +7,7 @@ import type { TabsProps } from './Tabs.types';
 
 import { styles } from './Tabs.stylex';
 
-export const Tabs = ({
-  defaultSelectedTab,
-  tabs,
-  ...props
-}: TabsProps) => {
+export const Tabs = ({ defaultSelectedTab, tabs, ...props }: TabsProps) => {
   const [activeTab, setActiveTab] = useState(
     defaultSelectedTab ?? tabs[0]?.key ?? '',
   );
@@ -56,11 +52,7 @@ export const Tabs = ({
 
   return (
     <div {...stylex.props(styles.container)} {...props}>
-      <div
-        aria-label='Settings tabs'
-        onKeyDown={handleKeyDown}
-        role='tablist'
-      >
+      <div aria-label='Settings tabs' onKeyDown={handleKeyDown} role='tablist'>
         <div {...stylex.props(styles.tabList)}>
           {tabs.map((tab, index) => (
             <button

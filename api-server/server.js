@@ -40,16 +40,16 @@ app.get('/api/car-sales/paginated', async (request, res) => {
     const skip = Number.parseInt(request.query.skip) || 0;
     const limit = Number.parseInt(request.query.limit) || 50;
     const sortParam = request.query.sort;
-    
+
     console.log(`   → skip: ${skip}, limit: ${limit}`);
-    
+
     // Parse sorting parameter
     let orderByClause = 'ORDER BY car_id';
     if (sortParam) {
       try {
         const sorting = JSON.parse(sortParam);
         if (Array.isArray(sorting) && sorting.length > 0) {
-          const orderByParts = sorting.map(sort => {
+          const orderByParts = sorting.map((sort) => {
             const direction = sort.direction === 'desc' ? 'DESC' : 'ASC';
             return `${sort.columnKey} ${direction}`;
           });
@@ -82,9 +82,14 @@ app.get('/api/car-sales/paginated', async (request, res) => {
       total,
     };
 
-    console.log(`   ✓ Returning ${dataResult.rows.length} rows, hasMore: ${hasMore}, total: ${total}`);
+    console.log(
+      `   ✓ Returning ${dataResult.rows.length} rows, hasMore: ${hasMore}, total: ${total}`,
+    );
     console.log(`   ✓ Response keys:`, Object.keys(responseData));
-    console.log(`   ✓ First row keys:`, dataResult.rows.length > 0 ? Object.keys(dataResult.rows[0]) : 'no rows');
+    console.log(
+      `   ✓ First row keys:`,
+      dataResult.rows.length > 0 ? Object.keys(dataResult.rows[0]) : 'no rows',
+    );
 
     res.json(responseData);
   } catch (error) {

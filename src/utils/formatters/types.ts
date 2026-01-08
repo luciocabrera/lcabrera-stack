@@ -1,4 +1,3 @@
-
 export type CurrencyFormatOptions = {
   /** Currency code (e.g., 'USD', 'EUR', 'GBP') */
   currency?: string;

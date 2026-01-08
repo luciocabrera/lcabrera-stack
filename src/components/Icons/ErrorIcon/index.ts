@@ -1,1 +1,1 @@
-export { ErrorIcon } from './ErrorIcon.component';  
+export { ErrorIcon } from './ErrorIcon.component';

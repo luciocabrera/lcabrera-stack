@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 
-import {  typography } from '@/design-system/tokens/base.stylex';
+import { typography } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 import { skelleton } from '@/design-system/tokens/commons.stylex';
 
@@ -38,8 +38,7 @@ export const tableBodyCellStyles = stylex.create({
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
     width: '100%',
-  }
+  },
 });
-
 
 export const skelletonStyles = { ...skelleton };

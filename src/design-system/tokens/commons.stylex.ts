@@ -220,7 +220,6 @@ export const orientationVariants = stylex.create({
   },
 });
 
-
 export const skelleton = stylex.create({
   /** Loading overlay container for shimmer effect */
   loadingOverlay: {

@@ -32,9 +32,7 @@ export const Table = <T extends Record<string, unknown>>({
   rowHeight = DEFAULT_ROW_HEIGHT,
   title,
 }: TableProps<T>) => {
-   
   const tableContent = (
-     
     <TableProvider<T>
       initialColumnOrder={initialColumnOrder}
       initialColumnSizing={initialColumnSizing}

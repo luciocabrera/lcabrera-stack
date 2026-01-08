@@ -11,8 +11,11 @@ import type {
   TablePersistenceConfig,
 } from '../TableContext';
 
-import { type PersistedState, readPersistedState, writeStateSlice } from '../utils';
-
+import {
+  type PersistedState,
+  readPersistedState,
+  writeStateSlice,
+} from '../utils';
 
 type UseTablePersistenceArgs = {
   /** Configuration for which slices to persist and how */

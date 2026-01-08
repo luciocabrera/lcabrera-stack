@@ -63,4 +63,3 @@ export type {
   TableProviderProps,
   TableState,
 } from './TableContext.types';
-

@@ -40,10 +40,7 @@ export const SortingSection = ({
       return;
     }
 
-    onSortChange([
-      ...sorting,
-      { columnKey: selectedColumn, direction: 'asc' },
-    ]);
+    onSortChange([...sorting, { columnKey: selectedColumn, direction: 'asc' }]);
     setSelectedColumn('');
   };
 
@@ -144,7 +141,7 @@ export const SortingSection = ({
         </Button>
       </div>
 
-      <div  {...stylex.props(styles.container)}>
+      <div {...stylex.props(styles.container)}>
         <h3 {...stylex.props(styles.header)}>Sort Order</h3>
         {sortItems.length === 0 ? (
           <p {...stylex.props(styles.emptyState)}>
@@ -152,7 +149,10 @@ export const SortingSection = ({
           </p>
         ) : (
           <div {...stylex.props(styles.sortList)}>
-            <DraggableList items={draggableItems} onOrderChange={handleReorder} />
+            <DraggableList
+              items={draggableItems}
+              onOrderChange={handleReorder}
+            />
           </div>
         )}
       </div>

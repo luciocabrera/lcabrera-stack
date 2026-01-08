@@ -23,7 +23,9 @@ export const parseCookies = (cookieHeader: string): Record<string, string> => {
 /**
  * Get theme from cookie header (for server-side use)
  */
-export const getThemeFromCookie = (cookieHeader: null | string): ThemeMode | undefined => {
+export const getThemeFromCookie = (
+  cookieHeader: null | string,
+): ThemeMode | undefined => {
   if (!cookieHeader) {
     return undefined;
   }

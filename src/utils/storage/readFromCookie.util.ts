@@ -7,7 +7,7 @@ type ReadFromCookieArgs = {
 
 /**
  * Read from cookie (SSR-safe)
- * 
+ *
  * @param key - The cookie key to read
  * @param cookieString - Optional cookie string for SSR context. If not provided, uses document.cookie
  */

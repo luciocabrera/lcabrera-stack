@@ -130,4 +130,7 @@ export const useColumnOrder = <TData>(): UseStoreSelector<
 export const useColumnVisibility = <TData>(): UseStoreSelector<
   ColumnVisibilityState,
   TableState<TData>
-> => useTableStore<ColumnVisibilityState, TData>((state) => state.columnVisibility);
+> =>
+  useTableStore<ColumnVisibilityState, TData>(
+    (state) => state.columnVisibility,
+  );

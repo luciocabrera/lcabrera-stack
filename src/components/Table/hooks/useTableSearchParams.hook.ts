@@ -45,7 +45,7 @@ export const useTableSearchParams = ({
   const [searchParams, setSearchParams] = useSearchParams();
   const debounceTimerRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const hasInitialized = useRef(false);
-  
+
   // Read initial state from URL synchronously (before first render)
   // Store as plain variable instead of ref to avoid ref access during render
   const initialState = (() => {
@@ -61,7 +61,7 @@ export const useTableSearchParams = ({
   // Sync state changes to URL (debounced)
   useEffect(() => {
     if (!isEnabled) return;
-    
+
     // Skip first update to avoid overwriting URL on mount
     if (!hasInitialized.current) {
       hasInitialized.current = true;
@@ -83,7 +83,8 @@ export const useTableSearchParams = ({
       };
 
       // Only update URL if there's actually state to persist
-      const hasState = state.columnOrder ?? state.columnVisibility ?? state.sorting;
+      const hasState =
+        state.columnOrder ?? state.columnVisibility ?? state.sorting;
 
       setSearchParams(
         (prev) => {

@@ -5,12 +5,12 @@ type DecodeOptions = {
 
 /**
  * Decode Base64 URL-safe string to state object
- * 
+ *
  * @param params - Configuration object
  * @param params.encoded - Base64 URL-safe encoded string
  * @param params.convertArraysToSets - Optional array of keys that should be converted from arrays to Sets
  * @returns Decoded state object or undefined if decoding fails
- * 
+ *
  * @example
  * ```ts
  * const encoded = "eyJzb3J0aW5nIjpbeyJjb2x1bW5LZXkiOiJuYW1lIiwiZGlyZWN0aW9uIjoiYXNjIn1dfQ";

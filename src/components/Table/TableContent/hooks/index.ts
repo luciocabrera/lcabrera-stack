@@ -1,1 +1,1 @@
-export * from './useTableContent.hook'
+export * from './useTableContent.hook';

@@ -27,5 +27,4 @@ export type DesignSystemSize = 'lg' | 'md' | 'sm';
 
 export type DesignSystemStyle = 'elevated' | 'flat' | 'solid';
 
-
 export type DesignSystemWidth = 'auto' | 'full';

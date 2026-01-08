@@ -35,7 +35,9 @@ export const TableBody = <TData extends Record<string, unknown>>({
   const [columnVisibility] = useColumnVisibility<TData>();
 
   // Filter visible columns
-  const visibleColumns = columns.filter((col) => !columnVisibility.has(col.key));
+  const visibleColumns = columns.filter(
+    (col) => !columnVisibility.has(col.key),
+  );
 
   // Apply column order
   const orderedColumns =
@@ -71,7 +73,9 @@ export const TableBody = <TData extends Record<string, unknown>>({
   return (
     <tbody data-testid='table-body' {...stylex.props(styles.body(totalHeight))}>
       {/* Top spacer row */}
-      {offsetY > 0 && <SpacerRow colSpan={orderedColumns.length} height={offsetY} />}
+      {offsetY > 0 && (
+        <SpacerRow colSpan={orderedColumns.length} height={offsetY} />
+      )}
       {visibleRows.map((row, index) => {
         const rowIndex = startIndex + index;
         return (
@@ -101,7 +105,10 @@ export const TableBody = <TData extends Record<string, unknown>>({
       })}
       {/* Bottom spacer row */}
       {totalRows > 0 && bottomSpacerHeight > 0 && (
-        <SpacerRow colSpan={orderedColumns.length} height={bottomSpacerHeight} />
+        <SpacerRow
+          colSpan={orderedColumns.length}
+          height={bottomSpacerHeight}
+        />
       )}
       {/* Loading more indicator */}
       {/* {isLoadingMore && (

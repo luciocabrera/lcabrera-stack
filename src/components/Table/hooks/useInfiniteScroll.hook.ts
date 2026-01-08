@@ -94,7 +94,10 @@ export const useInfiniteScroll = <TData>({
   const [isLoadingMore] = useTableLoadingMore();
   const [hasMore] = useHasMore();
   const [currentData] = useTableData<TData>();
-  const [paginationMeta] = usePaginationMeta() as [PaginationMeta, (value: Partial<PaginationMeta>) => void];
+  const [paginationMeta] = usePaginationMeta() as [
+    PaginationMeta,
+    (value: Partial<PaginationMeta>) => void,
+  ];
   const setLoadingMore = useSetLoadingMore();
   const setPaginationMeta = useSetPaginationMeta();
   const appendData = useAppendTableData();
@@ -113,9 +116,9 @@ export const useInfiniteScroll = <TData>({
       // Calculate pagination parameters based on strategy
       const isInitialLoad = currentData.length === 0;
       const pageSize = isInitialLoad ? initialPageSize : loadMorePageSize;
-      
+
       let params: CursorParams | OffsetLimitParams | PageBasedParams;
-      
+
       switch (strategy) {
         case 'cursor': {
           params = {
@@ -143,14 +146,20 @@ export const useInfiniteScroll = <TData>({
 
         default: {
           const exhaustiveCheck: never = strategy;
-          throw new Error(`Unknown pagination strategy: ${String(exhaustiveCheck)}`);
+          throw new Error(
+            `Unknown pagination strategy: ${String(exhaustiveCheck)}`,
+          );
         }
       }
 
       const result: InfiniteScrollResponse<TData> = await onLoadMore(params);
 
-      appendData({ hasMore: result.hasMore, newData: result.data, totalRows: result.totalRows ?? 0 });
-      
+      appendData({
+        hasMore: result.hasMore,
+        newData: result.data,
+        totalRows: result.totalRows ?? 0,
+      });
+
       // Update pagination metadata after successful load
       switch (strategy) {
         case 'cursor': {

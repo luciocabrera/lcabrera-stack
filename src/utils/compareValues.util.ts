@@ -8,15 +8,15 @@ type CompareValuesArgs = {
 
 /**
  * Compare two values for sorting purposes
- * 
+ *
  * Handles different data types and null/undefined values consistently.
  * Null/undefined values are always sorted to the end.
- * 
+ *
  * @param a - First value to compare
  * @param b - Second value to compare
  * @param type - The type of data being compared (affects comparison logic)
  * @returns Negative if a < b, positive if a > b, 0 if equal
- * 
+ *
  * @example
  * ```ts
  * compareValues({ a: 5, b: 10, type: 'number' }) // -5
@@ -32,7 +32,7 @@ export const compareValues = ({
   // Handle nullish values - always sort to the end
   const isANull = a === null || a === undefined;
   const isBNull = b === null || b === undefined;
-  
+
   if (isANull && isBNull) return 0;
   if (isANull) return 1;
   if (isBNull) return -1;

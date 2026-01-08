@@ -8,13 +8,13 @@ type ReadStateParams = {
 
 /**
  * Read and decode state from URL search parameters
- * 
+ *
  * @param params - Configuration object
  * @param params.key - The search parameter key to read from
  * @param params.searchParams - URLSearchParams object to read from
  * @param params.convertArraysToSets - Optional array of keys to convert from arrays to Sets
  * @returns Decoded state object or undefined if parameter doesn't exist or decoding fails
- * 
+ *
  * @example
  * ```ts
  * // In a React Router loader

@@ -14,7 +14,7 @@ const PERSISTENCE_KEY = 'car-sales-infinite-table';
  */
 export const loader = ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
-  
+
   // Read table state from URL params (priority)
   const urlState = readTableStateFromURL({
     persistenceKey: PERSISTENCE_KEY,
@@ -30,7 +30,10 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
 
   // Merge URL state (priority) with cookie state (fallback)
   const columnOrder = urlState?.columnOrder ?? cookieState.columnOrder ?? [];
-  const columnVisibility = urlState?.columnVisibility ?? cookieState.columnVisibility ?? new Set<string>();
+  const columnVisibility =
+    urlState?.columnVisibility ??
+    cookieState.columnVisibility ??
+    new Set<string>();
   const sorting = urlState?.sorting ?? cookieState.sorting ?? [];
   const columnSizing = cookieState.columnSizing ?? {};
 

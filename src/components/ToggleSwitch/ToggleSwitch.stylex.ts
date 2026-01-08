@@ -1,6 +1,10 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { borderRadius, spacing, transitions } from '@/design-system/tokens/base.stylex';
+import {
+  borderRadius,
+  spacing,
+  transitions,
+} from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const styles = stylex.create({
@@ -18,8 +22,7 @@ export const styles = stylex.create({
     height: '1px',
     width: '1px',
   },
-   
-   
+
   track: {
     padding: '2px',
     borderColor: {
@@ -31,10 +34,8 @@ export const styles = stylex.create({
     borderWidth: '1px',
     transition: `background-color ${transitions.fast}, border-color ${transitions.fast}`,
     backgroundColor: colors.surfaceSecondary,
-     
-     
-     
-    cursor: 'pointer',  
+
+    cursor: 'pointer',
     display: 'inline-flex',
     position: 'relative',
     height: '24px',
