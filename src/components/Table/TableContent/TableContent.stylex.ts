@@ -4,6 +4,16 @@ import { borderRadius, shadows } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const styles = stylex.create({
+  wrapper: {
+    display: 'flex',
+    height: '100%',
+    width: '100%',
+    position: 'relative',
+    gap: 0,
+    containerName: 'table-wrapper',
+    containerType: 'size',
+    overflow: 'hidden',
+  },
   outerContainer: {
     borderColor: colors.borderPrimary,
     borderRadius: borderRadius.lg,
@@ -14,7 +24,8 @@ export const styles = stylex.create({
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
-    width: '100%',
+    flex: '1',
+    minWidth: 0,
   },
   container: {
     flex: '1',
@@ -23,9 +34,5 @@ export const styles = stylex.create({
     scrollbarColor: `${colors.borderSecondary} transparent`,
     scrollbarWidth: 'thin',
     minHeight: 0,
-  },
-  settingsButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });

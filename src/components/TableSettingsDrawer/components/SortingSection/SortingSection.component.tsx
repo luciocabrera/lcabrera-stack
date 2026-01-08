@@ -78,7 +78,6 @@ export const SortingSection = ({
           <Button
             aria-label={`Sort ${item.direction === 'asc' ? 'ascending' : 'descending'}`}
             color='ghost'
-            customStylex={styles.button}
             icon={
               item.direction === 'asc' ? (
                 <SortAscIcon size={16} />
@@ -89,16 +88,15 @@ export const SortingSection = ({
             onClick={() => {
               handleToggleDirection(item.columnKey);
             }}
-            size='sm'
+            size='mini'
           />
           <Button
             aria-label='Remove sort'
             color='ghost'
-            customStylex={styles.button}
             onClick={() => {
               handleRemoveSort(item.columnKey);
             }}
-            size='sm'
+            size='mini'
           >
             ×
           </Button>

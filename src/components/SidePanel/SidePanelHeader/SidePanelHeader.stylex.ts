@@ -11,4 +11,15 @@ export const sidePanelHeaderStyles = stylex.create({
     borderBottomStyle: 'solid',
     borderBottomWidth: '1px',
   },
+  content: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.md,
+  },
+  actions: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
 });

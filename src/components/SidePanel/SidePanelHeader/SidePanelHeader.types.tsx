@@ -1,3 +1,5 @@
-import type { ComponentPropsWithoutRef } from 'react';
+import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 
-export type SidePanelHeaderProps = ComponentPropsWithoutRef<'div'>;
+export type SidePanelHeaderProps = ComponentPropsWithoutRef<'div'> & {
+  actions?: ReactNode;
+};

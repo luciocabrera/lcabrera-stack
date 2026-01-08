@@ -35,6 +35,16 @@ const baseStyles = stylex.create({
     top: 0,
   },
 
+  pinned: {
+    position: 'relative',
+    zIndex: 'auto',
+    flexShrink: 0,
+    transform: 'none',
+    height: '100%', // Match parent height
+    maxHeight: '100%',
+    overflow: 'hidden',
+  },
+
   // Style the native backdrop
   withBackdrop: {
     '::backdrop': {
@@ -105,6 +115,7 @@ const sizeVariants = stylex.create({
 
 export const sidePanelStyles = {
   base: baseStyles.dialog,
+  pinned: baseStyles.pinned,
   withBackdrop: baseStyles.withBackdrop,
   withoutBackdrop: baseStyles.withoutBackdrop,
   content: baseStyles.content,

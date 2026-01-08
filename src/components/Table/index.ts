@@ -1,9 +1,9 @@
 // Utilities
 export { compareValues } from '../../utils/compareValues.util';
+export { readPersistedStateFromCookie } from './utils';
 
 // Hooks
 export {
-  readPersistedStateFromCookie,
   useInfiniteScroll,
   useSkeletonRowCount,
   useTablePersistence,

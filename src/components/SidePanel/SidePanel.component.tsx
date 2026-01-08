@@ -17,18 +17,18 @@ export const SidePanel = ({
   size = 'md',
   ...props
 }: SidePanelProps) => {
-  // isPinned and onPinChange are kept in props for future implementation
-  void isPinned;
-  void onPinChange;
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const shouldShowBackdrop = shouldShowOverlay && !isPinned;
 
   useEffect(() => {
+    if (isPinned) return; // Skip dialog management when pinned
+
     const dialog = dialogRef.current;
     if (!dialog) return;
 
     if (isOpen) {
       // Use showModal() for backdrop support
-      if (shouldShowOverlay) {
+      if (shouldShowBackdrop) {
         dialog.showModal();
       } else {
         dialog.show();
@@ -38,10 +38,12 @@ export const SidePanel = ({
         dialog.close();
       }
     }
-  }, [isOpen, shouldShowOverlay]);
+  }, [isOpen, isPinned, shouldShowBackdrop]);
 
   // Handle native dialog close event (ESC key)
   useEffect(() => {
+    if (isPinned) return; // Skip when pinned
+
     const dialog = dialogRef.current;
     if (!dialog) return;
 
@@ -55,49 +57,52 @@ export const SidePanel = ({
     return () => {
       dialog.removeEventListener('close', handleClose);
     };
-  }, [onClose]);
+  }, [onClose, isPinned]);
 
-  // Handle backdrop click when using showModal()
-  // const handleDialogClick = (e: React.MouseEvent<HTMLDialogElement>) => {
-  //   const dialog = dialogRef.current;
-  //   if (!dialog || !onClose) return;
+  const panelStyles = stylex.props(
+    sidePanelStyles.base,
+    sidePanelStyles.size[size],
+    sidePanelStyles.position[position],
+    isOpen || isPinned
+      ? sidePanelStyles.position[position === 'left' ? 'leftOpen' : 'rightOpen']
+      : sidePanelStyles.position[
+          position === 'left' ? 'leftClosed' : 'rightClosed'
+        ],
+    shouldShowBackdrop
+      ? sidePanelStyles.withBackdrop
+      : sidePanelStyles.withoutBackdrop,
+    isPinned && sidePanelStyles.pinned,
+  );
 
-  //   // Check if click was on the backdrop (outside dialog content)
-  //   const rect = dialog.getBoundingClientRect();
-  //   const didClickOutside =
-  //     e.clientX < rect.left ||
-  //     e.clientX > rect.right ||
-  //     e.clientY < rect.top ||
-  //     e.clientY > rect.bottom;
+  const content = (
+    <div {...stylex.props(sidePanelStyles.content)}>{children}</div>
+  );
 
-  //   if (didClickOutside) {
-  //     onClose();
-  //   }
-  // };
+  // When pinned, render as an aside instead of dialog
+  if (isPinned) {
+    return (
+      <aside
+        aria-label='Settings panel'
+        aria-modal='false'
+        data-testid='side-panel'
+        role='complementary'
+        {...props}
+        {...panelStyles}
+      >
+        {content}
+      </aside>
+    );
+  }
 
+  // When not pinned, use dialog element
   return (
     <dialog
       data-testid='side-panel'
-      // onClick={handleDialogClick}
       ref={dialogRef}
       {...props}
-      {...stylex.props(
-        sidePanelStyles.base,
-        sidePanelStyles.size[size],
-        sidePanelStyles.position[position],
-        isOpen
-          ? sidePanelStyles.position[
-              position === 'left' ? 'leftOpen' : 'rightOpen'
-            ]
-          : sidePanelStyles.position[
-              position === 'left' ? 'leftClosed' : 'rightClosed'
-            ],
-        shouldShowOverlay
-          ? sidePanelStyles.withBackdrop
-          : sidePanelStyles.withoutBackdrop,
-      )}
+      {...panelStyles}
     >
-      <div {...stylex.props(sidePanelStyles.content)}>{children}</div>
+      {content}
     </dialog>
   );
 };

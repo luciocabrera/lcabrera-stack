@@ -55,46 +55,47 @@ export const TableContent = <T extends Record<string, unknown>>({
   });
 
   return (
-    <div {...stylex.props(styles.outerContainer)}>
-      <TableTitle
-        actions={
-          <>
-            {actions}
-            <Button
-              aria-label='Table settings'
-              color='ghost'
-              customStylex={styles.settingsButton}
-              icon={<SettingsIcon size={16} />}
-              onClick={() => {
-                setIsSettingsOpen(true);
-              }}
-              size='sm'
+    <div {...stylex.props(styles.wrapper)}>
+      <div {...stylex.props(styles.outerContainer)}>
+        <TableTitle
+          actions={
+            <>
+              {actions}
+              <Button
+                aria-label='Table settings'
+                color='ghost'
+                icon={<SettingsIcon size={16} />}
+                onClick={() => {
+                  setIsSettingsOpen(true);
+                }}
+                size='mini'
+              />
+            </>
+          }
+          icon={icon}
+          title={title}
+        />
+        <div ref={containerRef} {...stylex.props(styles.container)}>
+          <TableBase
+            density={density}
+            isBordered={isBordered}
+            isStriped={isStriped}
+          >
+            <TableHeader
+              columns={columns}
+              isLoading={isLoading || isLoadingMore}
             />
-          </>
-        }
-        icon={icon}
-        title={title}
-      />
-      <div ref={containerRef} {...stylex.props(styles.container)}>
-        <TableBase
-          density={density}
-          isBordered={isBordered}
-          isStriped={isStriped}
-        >
-          <TableHeader
-            columns={columns}
-            isLoading={isLoading || isLoadingMore}
-          />
-          <TableBody
-            columns={columns}
-            data={dataToRender}
-            isLoading={isLoading || isLoadingMore}
-            locale={locale}
-            overscan={overscan}
-            rowHeight={rowHeight}
-            tableContainerRef={containerRef}
-          />
-        </TableBase>
+            <TableBody
+              columns={columns}
+              data={dataToRender}
+              isLoading={isLoading || isLoadingMore}
+              locale={locale}
+              overscan={overscan}
+              rowHeight={rowHeight}
+              tableContainerRef={containerRef}
+            />
+          </TableBase>
+        </div>
       </div>
 
       <TableSettingsDrawer

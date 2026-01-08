@@ -207,6 +207,19 @@ export const sizeVariants = stylex.create({
     height: '2rem',
     minHeight: '2rem',
   },
+
+  mini: {
+    borderRadius: borderRadius.sm,
+    paddingBlock: spacing.xs,
+    paddingInline: spacing.xs,
+    fontSize: typography.fontSizeSm,
+    height: '1.75rem',
+    minHeight: '1.75rem',
+    width: '1.75rem',
+    minWidth: '1.75rem',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
 
 // Orientation variants for buttons and links in toolbars/navs

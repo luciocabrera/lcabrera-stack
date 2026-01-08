@@ -23,7 +23,7 @@ export type DesignSystemColor =
 
 export type DesignSystemOrientation = 'horizontal' | 'vertical';
 
-export type DesignSystemSize = 'lg' | 'md' | 'sm';
+export type DesignSystemSize = 'lg' | 'md' | 'mini' | 'sm';
 
 export type DesignSystemStyle = 'elevated' | 'flat' | 'solid';
 

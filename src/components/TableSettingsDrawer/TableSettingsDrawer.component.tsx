@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { TabItem } from '@/components/Tabs';
 
 import { Button } from '@/components/Button';
-import { SettingsIcon } from '@/components/Icons';
+import { PinIcon, PinOffIcon, SettingsIcon } from '@/components/Icons';
 import {
   SidePanel,
   SidePanelBody,
@@ -111,7 +111,24 @@ export const TableSettingsDrawer = ({
       position='right'
       size='md'
     >
-      <SidePanelHeader>
+      <SidePanelHeader
+        actions={
+          onPinChange && (
+            <Button
+              aria-label={isPinned ? 'Unpin drawer' : 'Pin drawer'}
+              color='ghost'
+              icon={
+                isPinned ? <PinIcon size={16} /> : <PinOffIcon size={16} />
+              }
+              onClick={() => {
+                onPinChange(!isPinned);
+              }}
+              size='mini'
+              title={isPinned ? 'Unpin drawer' : 'Pin drawer'}
+            />
+          )
+        }
+      >
         <SidePanelTitle icon={<SettingsIcon size={20} />}>
           Table Settings
         </SidePanelTitle>
@@ -120,11 +137,11 @@ export const TableSettingsDrawer = ({
         <Tabs tabs={tabs} />
       </SidePanelBody>
       <SidePanelFooter>
-        <Button color='ghost' onClick={handleCancel}>
-          Cancel
-        </Button>
-        <Button color='primary' onClick={handleAccept}>
+        <Button color='primary' onClick={handleAccept} size='sm'>
           Accept
+        </Button>
+        <Button color='outline' onClick={handleCancel} size='sm'>
+          Cancel
         </Button>
       </SidePanelFooter>
     </SidePanel>

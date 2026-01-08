@@ -5,6 +5,7 @@ import type { SidePanelHeaderProps } from './SidePanelHeader.types';
 import { sidePanelHeaderStyles } from './SidePanelHeader.stylex';
 
 export const SidePanelHeader = ({
+  actions,
   children,
   ...props
 }: SidePanelHeaderProps) => {
@@ -14,7 +15,12 @@ export const SidePanelHeader = ({
       {...props}
       {...stylex.props(sidePanelHeaderStyles.header)}
     >
-      {children}
+      <div {...stylex.props(sidePanelHeaderStyles.content)}>
+        {children}
+        {actions && (
+          <div {...stylex.props(sidePanelHeaderStyles.actions)}>{actions}</div>
+        )}
+      </div>
     </div>
   );
 };
