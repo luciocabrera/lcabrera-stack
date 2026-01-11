@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { SelectFilterInputProps } from './SelectFilterInput.types';
 
@@ -7,13 +7,17 @@ import { styles } from './SelectFilterInput.stylex';
 
 export const SelectFilterInput = ({
   filter,
+  hasMore = false,
+  isLoadingMore = false,
   onChange,
+  onLoadMore,
   options,
 }: SelectFilterInputProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedValues, setSelectedValues] = useState<string[]>(
     filter?.values ?? [],
   );
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const filteredOptions = useMemo(() => {
     if (!searchTerm) return options;
@@ -58,6 +62,33 @@ export const SelectFilterInput = ({
     filteredOptions.length > 0 &&
     filteredOptions.every((option) => selectedValues.includes(option));
 
+  // Handle scroll for infinite loading
+  const handleScroll = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container || !onLoadMore || !hasMore || isLoadingMore) {
+      return;
+    }
+
+    const { clientHeight, scrollHeight, scrollTop } = container;
+    const scrollThreshold = 50; // Load more when 50px from bottom
+
+    if (scrollHeight - scrollTop - clientHeight < scrollThreshold) {
+      console.warn('📜 [SelectFilterInput] Near bottom, loading more options...');
+      onLoadMore();
+    }
+  }, [onLoadMore, hasMore, isLoadingMore]);
+
+  // Attach scroll listener
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    container.addEventListener('scroll', handleScroll);
+    return () => {
+      container.removeEventListener('scroll', handleScroll);
+    };
+  }, [handleScroll]);
+
   return (
     <div {...stylex.props(styles.container)}>
       {options.length > 5 && (
@@ -71,7 +102,7 @@ export const SelectFilterInput = ({
           {...stylex.props(styles.searchInput)}
         />
       )}
-      <div {...stylex.props(styles.optionsList)}>
+      <div ref={scrollContainerRef} {...stylex.props(styles.optionsList)}>
         {filteredOptions.length > 1 && (
           <label {...stylex.props(styles.option)}>
             <input
@@ -101,6 +132,11 @@ export const SelectFilterInput = ({
               <span {...stylex.props(styles.label)}>{option}</span>
             </label>
           ))
+        )}
+        {isLoadingMore && (
+          <div {...stylex.props(styles.loadingMore)}>
+            Loading more options...
+          </div>
         )}
       </div>
     </div>

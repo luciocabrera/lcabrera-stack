@@ -15,9 +15,9 @@ export const styles = stylex.create({
     flexDirection: 'column',
   },
   label: {
+    color: colors.textPrimary,
     cursor: 'pointer',
     fontSize: '0.875rem',
-    color: colors.textPrimary,
   },
   noResults: {
     padding: spacing.sm,
@@ -44,8 +44,10 @@ export const styles = stylex.create({
     gap: spacing.xs,
     display: 'flex',
     flexDirection: 'column',
+    minHeight: '12rem',
     maxHeight: '12rem',
     overflowY: 'auto',
+    position: 'relative',
   },
   searchInput: {
     padding: `${spacing.xs} ${spacing.sm}`,
@@ -63,5 +65,17 @@ export const styles = stylex.create({
     backgroundColor: colors.surfacePrimary,
     color: colors.textPrimary,
     fontSize: '0.875rem',
+  },
+  loadingMore: {
+    color: colors.textSecondary,
+    fontSize: '0.875rem',
+    padding: spacing.sm,
+    textAlign: 'center',
+    position: 'sticky',
+    bottom: '0',
+    backgroundColor: colors.surfacePrimary,
+    borderTopWidth: '1px',
+    borderTopStyle: 'solid',
+    borderTopColor: colors.borderPrimary,
   },
 });

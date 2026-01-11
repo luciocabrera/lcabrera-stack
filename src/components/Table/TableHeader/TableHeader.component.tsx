@@ -95,34 +95,38 @@ export const TableHeader = <TData extends Record<string, unknown>>({
   const columnFilterOptions = useMemo(() => {
     const options: Record<string, string[]> = {};
 
-    columns.forEach((col) => {
+    for (const col of columns) {
       // Only calculate for filterable columns
-      if (col.isFilterable === false) return;
+      if (col.isFilterable === false) continue;
 
       // Use provided filterOptions if available
       if (col.filterOptions) {
         options[col.key] = col.filterOptions;
-        return;
+        continue;
       }
 
-      // Calculate from data for string/currency columns (client-side)
-      // Only if we have data loaded
-      if (data.length > 0 && (col.dataType === 'string' || col.dataType === 'currency')) {
+      // Calculate from data for string/currency columns (client-side fallback)
+      // Only if we have data loaded and no fetchFilterOptions function
+      if (
+        data.length > 0 &&
+        !col.fetchFilterOptions &&
+        (col.dataType === 'string' || col.dataType === 'currency')
+      ) {
         const uniqueValues = new Set<string>();
         
-        data.forEach((row) => {
+        for (const row of data) {
           const value = row[col.key];
-          if (value != null && value !== '') {
+          if (value !== undefined && value !== null && value !== '') {
             uniqueValues.add(String(value));
           }
-        });
+        }
 
         if (uniqueValues.size > 0 && uniqueValues.size <= 100) {
           // Only use facet filter if we have reasonable number of options
-          options[col.key] = [...uniqueValues].sort();
+          options[col.key] = [...uniqueValues].toSorted();
         }
       }
-    });
+    }
 
     return options;
   }, [columns, data]);
@@ -149,6 +153,7 @@ export const TableHeader = <TData extends Record<string, unknown>>({
             <TableHeaderCell
               columnKey={col.key}
               dataType={col.dataType}
+              fetchFilterOptions={col.fetchFilterOptions}
               filter={columnFilters[col.key]}
               filterOptions={columnFilterOptions[col.key]}
               hasSettings

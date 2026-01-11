@@ -374,6 +374,64 @@ app.get('/api/enterprise-orders/paginated', async (request, res) => {
   }
 });
 
+// Get distinct values for a column (for filter options)
+app.get('/api/enterprise-orders/distinct/:columnName', async (request, res) => {
+  console.log(`🎯 [Distinct] Request for column: ${request.params.columnName}, query:`, request.query);
+  try {
+    const { columnName } = request.params;
+    const limit = Number.parseInt(request.query.limit) || 100;
+    const offset = Number.parseInt(request.query.offset) || 0;
+
+    console.log(`   → offset: ${offset}, limit: ${limit}`);
+
+    // Validate column name to prevent SQL injection
+    const allowedColumns = [
+      'order_status',
+      'priority',
+      'customer_email',
+      'customer_type',
+      'payment_status',
+      'payment_method',
+      'product_category',
+      'product_subcategory',
+      'shipping_city',
+      'shipping_state',
+      'shipping_country',
+      'carrier',
+      'warehouse_location',
+    ];
+
+    if (!allowedColumns.includes(columnName)) {
+      console.log(`   ❌ Invalid column name: ${columnName}`);
+      return res.status(400).json({ error: 'Invalid column name' });
+    }
+
+    // Query for distinct values, filtering out nulls and empty strings
+    const query = `
+      SELECT DISTINCT ${columnName} as value 
+      FROM enterprise_orders 
+      WHERE ${columnName} IS NOT NULL AND ${columnName} != ''
+      ORDER BY ${columnName}
+      LIMIT $1 OFFSET $2
+    `;
+
+    console.log(`   → Final query: ${query.replace(/\s+/g, ' ').trim()}`);
+    console.log(`   → Query params: [${limit}, ${offset}]`);
+
+    const result = await pool.query(query, [limit, offset]);
+    const values = result.rows.map((row) => row.value);
+    const hasMore = values.length === limit;
+
+    console.log(`   → Query executed, got ${values.length} distinct values`);
+    console.log(`   ✓ Returning ${values.length} values, hasMore: ${hasMore}`);
+
+    res.json({ hasMore, values });
+  } catch (error) {
+    console.error('❌ Error fetching distinct values:', error);
+    res.status(500).json({ error: 'Failed to fetch distinct values' });
+  }
+});
+
 app.listen(port, () => {
   console.log(`🚀 API server running at http://localhost:${port}`);
 });

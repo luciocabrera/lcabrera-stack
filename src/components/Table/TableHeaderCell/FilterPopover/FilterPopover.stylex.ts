@@ -13,7 +13,7 @@ export const styles = stylex.create({
     borderWidth: '1px',
     backgroundColor: colors.surfacePrimary,
     boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
-    maxWidth: '24rem',
+    width: '24rem',
     minWidth: '20rem',
   },
   content: {
@@ -63,5 +63,13 @@ export const styles = stylex.create({
     borderTopColor: colors.borderPrimary,
     borderTopStyle: 'solid',
     borderTopWidth: '1px',
+  },
+  loadingContainer: {
+    padding: spacing.md,
+    textAlign: 'center',
+    color: colors.contentPrimary,
+    fontSize: typography.fontSizeSm,
+    fontWeight: typography.fontWeightNormal,
+    lineHeight: typography.lineHeightNormal,
   },
 });

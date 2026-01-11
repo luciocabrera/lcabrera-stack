@@ -16,6 +16,7 @@ export type TableHeaderCellProps = ComponentPropsWithoutRef<'th'> &
   Pick<TableColumn, 'dataType' | 'label' | 'minWidth'> & {
     columnKey: string;
     customStylex?: CustomStylex;
+    fetchFilterOptions?: (offset?: number) => Promise<{ hasMore: boolean; values: string[] }>;
     filter?: ColumnFilter | null;
     /** Unique values for facet filter (select filter) */
     filterOptions?: string[];

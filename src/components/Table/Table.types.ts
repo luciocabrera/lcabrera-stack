@@ -161,8 +161,8 @@ export type TableColumn = {
   dataType?: TableColumnDataType;
   /** Static options for select/multiSelect filters */
   filterOptions?: string[];
-  /** Async function to fetch filter options from server (for facet filters) */
-  fetchFilterOptions?: () => Promise<string[]>;
+  /** Async function to fetch filter options from server (for facet filters with pagination) */
+  fetchFilterOptions?: (offset?: number) => Promise<{ hasMore: boolean; values: string[] }>;
   /** Format options for the column based on data type */
   format?: TableColumnFormat;
   /** Whether this column can be filtered (default: true) */

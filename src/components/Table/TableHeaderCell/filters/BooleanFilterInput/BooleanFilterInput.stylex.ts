@@ -10,9 +10,9 @@ export const styles = stylex.create({
     flexDirection: 'column',
   },
   label: {
+    color: colors.textPrimary,
     cursor: 'pointer',
     fontSize: '0.875rem',
-    color: colors.textPrimary,
   },
   radio: {
     cursor: 'pointer',

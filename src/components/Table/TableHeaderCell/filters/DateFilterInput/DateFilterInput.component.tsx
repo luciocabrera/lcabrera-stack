@@ -39,7 +39,6 @@ export const DateFilterInput = ({ filter, onChange }: DateFilterInputProps) => {
     val: string;
   }) => {
     const { end, op, val } = args;
-    console.log('📅 [DateFilterInput] updateFilter called:', { end, op, val });
     if (op === 'between') {
       if (val && end) {
         const filterValue = {
@@ -48,7 +47,6 @@ export const DateFilterInput = ({ filter, onChange }: DateFilterInputProps) => {
           value: val,
           value2: end,
         };
-        console.log('📅 [DateFilterInput] Calling onChange with:', filterValue);
         onChange(filterValue as never);
       }
     } else {
@@ -58,7 +56,6 @@ export const DateFilterInput = ({ filter, onChange }: DateFilterInputProps) => {
           type: 'date',
           value: val,
         };
-        console.log('📅 [DateFilterInput] Calling onChange with:', filterValue);
         onChange(filterValue as never);
       }
     }

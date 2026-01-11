@@ -164,4 +164,26 @@ export const enterpriseOrdersApi = {
 
     return fetchData();
   },
+
+  /**
+   * Fetch distinct values for a column (for dynamic filter options)
+   */
+  fetchDistinctValues: async (
+    columnName: string,
+    offset = 0,
+    limit = 50,
+  ): Promise<{ hasMore: boolean; values: string[] }> => {
+    const url = `${getApiBaseUrl()}/enterprise-orders/distinct/${columnName}?limit=${limit}&offset=${offset}`;
+    console.warn('🎯 [Orders] Fetching distinct values for:', columnName, 'offset:', offset);
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error(
+        `API request failed: ${response.status} ${response.statusText}`,
+      );
+    }
+
+    return response.json() as Promise<{ hasMore: boolean; values: string[] }>;
+  },
 };

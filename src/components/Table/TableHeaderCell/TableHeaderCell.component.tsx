@@ -20,6 +20,7 @@ export const TableHeaderCell = ({
   columnKey,
   customStylex,
   dataType,
+  fetchFilterOptions,
   filter,
   filterOptions,
   hasSettings = false,
@@ -110,6 +111,7 @@ export const TableHeaderCell = ({
             />
             <FilterPopover
               column={{ dataType, key: columnKey, label }}
+              fetchFilterOptions={fetchFilterOptions}
               filter={filter}
               filterOptions={filterOptions}
               onApply={onFilterApply ?? (() => {})}

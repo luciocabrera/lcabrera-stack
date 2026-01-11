@@ -1,5 +1,7 @@
 import type { TableColumn } from '@/components/Table/Table.types';
 
+import { enterpriseOrdersApi } from '@/services';
+
 export const columns: TableColumn[] = [
   {
     dataType: 'number',
@@ -54,6 +56,10 @@ export const columns: TableColumn[] = [
   },
   {
     dataType: 'string',
+    fetchFilterOptions: async (offset = 0) => {
+      const result = await enterpriseOrdersApi.fetchDistinctValues('customer_email', offset);
+      return { hasMore: result.hasMore, values: result.values };
+    },
     key: 'customer_email',
     label: 'Email',
     maxWidth: 280,
@@ -168,6 +174,10 @@ export const columns: TableColumn[] = [
   },
   {
     dataType: 'string',
+    fetchFilterOptions: async (offset = 0) => {
+      const result = await enterpriseOrdersApi.fetchDistinctValues('shipping_city', offset);
+      return { hasMore: result.hasMore, values: result.values };
+    },
     key: 'shipping_city',
     label: 'Ship City',
     maxWidth: 180,
@@ -175,6 +185,10 @@ export const columns: TableColumn[] = [
   },
   {
     dataType: 'string',
+    fetchFilterOptions: async (offset = 0) => {
+      const result = await enterpriseOrdersApi.fetchDistinctValues('shipping_state', offset);
+      return { hasMore: result.hasMore, values: result.values };
+    },
     key: 'shipping_state',
     label: 'Ship State',
     maxWidth: 150,
@@ -182,6 +196,10 @@ export const columns: TableColumn[] = [
   },
   {
     dataType: 'string',
+    fetchFilterOptions: async (offset = 0) => {
+      const result = await enterpriseOrdersApi.fetchDistinctValues('shipping_country', offset);
+      return { hasMore: result.hasMore, values: result.values };
+    },
     key: 'shipping_country',
     label: 'Ship Country',
     maxWidth: 180,
@@ -189,6 +207,10 @@ export const columns: TableColumn[] = [
   },
   {
     dataType: 'string',
+    fetchFilterOptions: async (offset = 0) => {
+      const result = await enterpriseOrdersApi.fetchDistinctValues('carrier', offset);
+      return { hasMore: result.hasMore, values: result.values };
+    },
     key: 'carrier',
     label: 'Carrier',
     maxWidth: 150,
@@ -196,6 +218,10 @@ export const columns: TableColumn[] = [
   },
   {
     dataType: 'string',
+    fetchFilterOptions: async (offset = 0) => {
+      const result = await enterpriseOrdersApi.fetchDistinctValues('warehouse_location', offset);
+      return { hasMore: result.hasMore, values: result.values };
+    },
     key: 'warehouse_location',
     label: 'Warehouse',
     maxWidth: 180,
