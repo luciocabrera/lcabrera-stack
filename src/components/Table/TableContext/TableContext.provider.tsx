@@ -78,6 +78,7 @@ const getInitialMetaState = ({
  */
 export const TableProvider = <TData extends Record<string, unknown>>({
   children,
+  initialColumnFilters,
   initialColumnOrder,
   initialColumnSizing,
   initialColumnVisibility,
@@ -117,6 +118,7 @@ export const TableProvider = <TData extends Record<string, unknown>>({
       initialPersistedState: {
         ...(persistedState as Partial<TableState<TData>>),
         // Override with loader-provided values
+        ...(initialColumnFilters ? { columnFilters: initialColumnFilters } : {}),
         ...(initialSorting ? { sorting: initialSorting } : {}),
       },
     }),

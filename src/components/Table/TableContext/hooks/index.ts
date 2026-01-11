@@ -1,9 +1,12 @@
 // Action hooks
 export {
   useAppendTableData,
+  useClearAllColumnFilters,
+  useClearColumnFilter,
   useResetColumnSizing,
   useSelectAllRows,
   useSelectRow,
+  useSetColumnFilter,
   useSetColumnFilters,
   useSetColumnOrder,
   useSetColumnSizing,

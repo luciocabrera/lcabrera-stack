@@ -1,4 +1,5 @@
 import type {
+  ColumnFiltersState,
   ColumnOrderState,
   ColumnVisibilityState,
   SortingState,
@@ -9,6 +10,7 @@ import { readStateFromURL } from './readStateFromURL.util';
 type TableSearchParamsState = {
   columnOrder?: ColumnOrderState;
   columnVisibility?: ColumnVisibilityState;
+  filters?: ColumnFiltersState;
   sorting?: SortingState;
 };
 

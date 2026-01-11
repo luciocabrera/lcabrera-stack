@@ -99,6 +99,281 @@ app.get('/api/car-sales/paginated', async (request, res) => {
   }
 });
 
+// Get enterprise orders with pagination, sorting, and advanced filtering
+app.get('/api/enterprise-orders/paginated', async (request, res) => {
+  console.log(`📦 [Orders] Request received - query:`, request.query);
+  try {
+    const skip = Number.parseInt(request.query.skip) || 0;
+    const limit = Number.parseInt(request.query.limit) || 50;
+    const sortParam = request.query.sort;
+    const filterParam = request.query.filter;
+
+    console.log(`   → skip: ${skip}, limit: ${limit}`);
+
+    // Parse sorting parameter
+    let orderByClause = 'ORDER BY order_id DESC';
+    if (sortParam) {
+      try {
+        const sorting = JSON.parse(sortParam);
+        if (Array.isArray(sorting) && sorting.length > 0) {
+          const orderByParts = sorting.map((sort) => {
+            const direction = sort.direction === 'desc' ? 'DESC' : 'ASC';
+            return `${sort.columnKey} ${direction}`;
+          });
+          orderByClause = `ORDER BY ${orderByParts.join(', ')}`;
+          console.log(`   → Sorting: ${orderByClause}`);
+        }
+      } catch (error) {
+        console.error('   ⚠️ Error parsing sort parameter:', error);
+      }
+    }
+
+    // Parse advanced filters
+    let whereConditions = [];
+    let queryParams = [];
+    let paramCounter = 1;
+
+    if (filterParam) {
+      try {
+        const filters = JSON.parse(filterParam);
+        console.log(`   → Filters received:`, filters);
+
+        for (const columnName of Object.keys(filters)) {
+          const filterConfig = filters[columnName];
+
+          if (!filterConfig || Object.keys(filterConfig).length === 0) {
+            continue;
+          }
+
+          // Text filters (LIKE, equals, not equals, contains, starts with, ends with)
+          if (filterConfig.type === 'text' && filterConfig.value) {
+            const value = filterConfig.value;
+            switch (filterConfig.operator) {
+              case 'contains': {
+                whereConditions.push(`${columnName} ILIKE $${paramCounter}`);
+                queryParams.push(`%${value}%`);
+                paramCounter++;
+                break;
+              }
+              case 'endsWith': {
+                whereConditions.push(`${columnName} ILIKE $${paramCounter}`);
+                queryParams.push(`%${value}`);
+                paramCounter++;
+                break;
+              }
+              case 'equals': {
+                whereConditions.push(`${columnName} = $${paramCounter}`);
+                queryParams.push(value);
+                paramCounter++;
+                break;
+              }
+              case 'notContains': {
+                whereConditions.push(
+                  `${columnName} NOT ILIKE $${paramCounter}`,
+                );
+                queryParams.push(`%${value}%`);
+                paramCounter++;
+                break;
+              }
+              case 'notEquals': {
+                whereConditions.push(`${columnName} != $${paramCounter}`);
+                queryParams.push(value);
+                paramCounter++;
+                break;
+              }
+              case 'startsWith': {
+                whereConditions.push(`${columnName} ILIKE $${paramCounter}`);
+                queryParams.push(`${value}%`);
+                paramCounter++;
+                break;
+              }
+            }
+          }
+
+          // Number filters (equals, not equals, greater than, less than, between)
+          if (
+            filterConfig.type === 'number' &&
+            filterConfig.value !== undefined &&
+            filterConfig.value !== null &&
+            filterConfig.value !== ''
+          ) {
+            const value = Number(filterConfig.value);
+            switch (filterConfig.operator) {
+              case 'between': {
+                if (
+                  filterConfig.value2 !== undefined &&
+                  filterConfig.value2 !== null
+                ) {
+                  whereConditions.push(
+                    `${columnName} BETWEEN $${paramCounter} AND $${paramCounter + 1}`,
+                  );
+                  queryParams.push(value, Number(filterConfig.value2));
+                  paramCounter += 2;
+                }
+                break;
+              }
+              case 'equals': {
+                whereConditions.push(`${columnName} = $${paramCounter}`);
+                queryParams.push(value);
+                paramCounter++;
+                break;
+              }
+              case 'greaterThan': {
+                whereConditions.push(`${columnName} > $${paramCounter}`);
+                queryParams.push(value);
+                paramCounter++;
+                break;
+              }
+              case 'greaterThanOrEqual': {
+                whereConditions.push(`${columnName} >= $${paramCounter}`);
+                queryParams.push(value);
+                paramCounter++;
+                break;
+              }
+              case 'lessThan': {
+                whereConditions.push(`${columnName} < $${paramCounter}`);
+                queryParams.push(value);
+                paramCounter++;
+                break;
+              }
+              case 'lessThanOrEqual': {
+                whereConditions.push(`${columnName} <= $${paramCounter}`);
+                queryParams.push(value);
+                paramCounter++;
+                break;
+              }
+              case 'notEquals': {
+                whereConditions.push(`${columnName} != $${paramCounter}`);
+                queryParams.push(value);
+                paramCounter++;
+                break;
+              }
+            }
+          }
+
+          // Date filters (equals, before, after, between)
+          if (filterConfig.type === 'date' && filterConfig.value) {
+            switch (filterConfig.operator) {
+              case 'after': {
+                whereConditions.push(`${columnName} > $${paramCounter}::date`);
+                queryParams.push(filterConfig.value);
+                paramCounter++;
+                break;
+              }
+              case 'before': {
+                whereConditions.push(`${columnName} < $${paramCounter}::date`);
+                queryParams.push(filterConfig.value);
+                paramCounter++;
+                break;
+              }
+              case 'between': {
+                if (filterConfig.value2) {
+                  whereConditions.push(
+                    `${columnName} BETWEEN $${paramCounter}::date AND $${paramCounter + 1}::date`,
+                  );
+                  queryParams.push(filterConfig.value, filterConfig.value2);
+                  paramCounter += 2;
+                }
+                break;
+              }
+              case 'equals': {
+                whereConditions.push(`${columnName} = $${paramCounter}::date`);
+                queryParams.push(filterConfig.value);
+                paramCounter++;
+                break;
+              }
+            }
+          }
+
+          // Boolean filters
+          if (
+            filterConfig.type === 'boolean' &&
+            filterConfig.value !== undefined &&
+            filterConfig.value !== null
+          ) {
+            whereConditions.push(`${columnName} = $${paramCounter}`);
+            queryParams.push(
+              filterConfig.value === 'true' || filterConfig.value === true,
+            );
+            paramCounter++;
+          }
+
+          // Select/Multi-select filters (IN clause)
+          if (
+            filterConfig.type === 'select' ||
+            filterConfig.type === 'multiSelect'
+          ) {
+            if (
+              filterConfig.values &&
+              Array.isArray(filterConfig.values) &&
+              filterConfig.values.length > 0
+            ) {
+              const placeholders = filterConfig.values
+                .map((_, index) => `$${paramCounter + index}`)
+                .join(', ');
+              whereConditions.push(`${columnName} IN (${placeholders})`);
+              queryParams.push(...filterConfig.values);
+              paramCounter += filterConfig.values.length;
+            } else if (filterConfig.value) {
+              whereConditions.push(`${columnName} = $${paramCounter}`);
+              queryParams.push(filterConfig.value);
+              paramCounter++;
+            }
+          }
+        }
+
+        console.log(`   → WHERE conditions: ${whereConditions.join(' AND ')}`);
+        console.log(`   → Query params:`, queryParams);
+      } catch (error) {
+        console.error('   ⚠️ Error parsing filter parameter:', error);
+      }
+    }
+
+    const whereClause =
+      whereConditions.length > 0
+        ? 'WHERE ' + whereConditions.join(' AND ')
+        : '';
+
+    // Build the main query
+    const dataQuery = `SELECT * FROM enterprise_orders ${whereClause} ${orderByClause} LIMIT $${paramCounter} OFFSET $${paramCounter + 1}`;
+    const countQuery = `SELECT COUNT(*) FROM enterprise_orders ${whereClause}`;
+
+    // Add limit and offset to params
+    queryParams.push(limit, skip);
+
+    console.log(`   → Final query: ${dataQuery}`);
+
+    // Get paginated data with sorting and filtering
+    const dataResult = await pool.query(dataQuery, queryParams);
+    console.log(`   → Query executed, got ${dataResult.rows.length} rows`);
+
+    // Get total count with same filters (excluding limit and offset)
+    const countParams = queryParams.slice(0, -2); // Remove limit and offset
+    const countResult = await pool.query(countQuery, countParams);
+    const total = Number.parseInt(countResult.rows[0].count);
+    console.log(`   → Total count: ${total}`);
+
+    // Calculate if there are more rows
+    const hasMore = skip + dataResult.rows.length < total;
+
+    const responseData = {
+      data: dataResult.rows,
+      hasMore,
+      total,
+    };
+
+    console.log(
+      `   ✓ Returning ${dataResult.rows.length} rows, hasMore: ${hasMore}, total: ${total}`,
+    );
+
+    res.json(responseData);
+  } catch (error) {
+    console.error('❌ Error fetching paginated enterprise orders:', error);
+    console.error('   Stack:', error.stack);
+    res.status(500).json({ error: 'Failed to fetch enterprise orders data' });
+  }
+});
+
 app.listen(port, () => {
   console.log(`🚀 API server running at http://localhost:${port}`);
 });

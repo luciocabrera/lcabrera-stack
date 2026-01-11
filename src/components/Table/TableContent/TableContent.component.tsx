@@ -85,6 +85,7 @@ export const TableContent = <T extends Record<string, unknown>>({
           >
             <TableHeader
               columns={columns}
+              data={dataToRender}
               isLoading={isLoading || isLoadingMore}
             />
             <TableBody

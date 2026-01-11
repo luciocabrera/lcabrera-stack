@@ -1,4 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
+import { useId } from 'react';
 
 import { MoreVerticalIcon } from '@/components/Icons';
 import { useColumnResize } from '@/components/Table/hooks';
@@ -6,6 +7,8 @@ import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
 
 import type { TableHeaderCellProps } from './TableHeaderCell.types';
 
+import { FilterButton } from './FilterButton';
+import { FilterPopover } from './FilterPopover';
 import { SortIcon } from './SortIcon';
 import {
   skelletonStyles,
@@ -16,12 +19,18 @@ import { getNextSortDirection } from './utils';
 export const TableHeaderCell = ({
   columnKey,
   customStylex,
+  dataType,
+  filter,
+  filterOptions,
   hasSettings = false,
+  isFilterable = false,
   isLoading = false,
   isSortable = false,
   label,
   maxWidth,
   minWidth,
+  onFilterApply,
+  onFilterClear,
   onResize,
   onResizeDoubleClick,
   onSettingsClick,
@@ -31,6 +40,8 @@ export const TableHeaderCell = ({
   width,
   ...rest
 }: TableHeaderCellProps) => {
+  const filterPopoverId = useId();
+
   const handleSort = (event: React.MouseEvent) => {
     if (!isSortable || !onSort) return;
     const nextDirection = getNextSortDirection(sortDirection);
@@ -90,6 +101,22 @@ export const TableHeaderCell = ({
           >
             <SortIcon direction={sortDirection} />
           </button>
+        )}
+        {isFilterable && dataType && (
+          <>
+            <FilterButton
+              isActive={!!filter}
+              popoverTargetId={filterPopoverId}
+            />
+            <FilterPopover
+              column={{ dataType, key: columnKey, label }}
+              filter={filter}
+              filterOptions={filterOptions}
+              onApply={onFilterApply ?? (() => {})}
+              onClear={onFilterClear ?? (() => {})}
+              popoverId={filterPopoverId}
+            />
+          </>
         )}
         {hasSettings && (
           <button

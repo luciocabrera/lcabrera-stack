@@ -18,19 +18,27 @@ export {
   DEFAULT_MIN_COLUMN_WIDTH,
 } from './Table.constants';
 export type {
+  BooleanFilter,
+  ColumnFilter,
+  ColumnFiltersState,
   ColumnSizingState,
   CursorParams,
+  DateFilter,
   InfiniteScrollConfig,
   InfiniteScrollResponse,
+  NumberFilter,
   OffsetLimitParams,
+  OnFilterChangeArgs,
   OnSortChangeArgs,
   PageBasedParams,
   PaginationParams,
   PaginationStrategy,
+  SelectFilter,
   TableColumn,
   TableColumnDataType,
   TableProps,
   TableTitleProps,
+  TextFilter,
 } from './Table.types';
 // Context
 export { TableContext, TableProvider } from './TableContext';

@@ -129,6 +129,8 @@ export type TablePersistenceConfig = {
 export type TableProviderProps<TData> = {
   /** Child components */
   children: React.ReactNode;
+  /** Initial column filters state */
+  initialColumnFilters?: ColumnFiltersState;
   /** Initial column order state */
   initialColumnOrder?: ColumnOrderState;
   /** Initial column sizing state */

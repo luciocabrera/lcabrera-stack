@@ -2,6 +2,7 @@ export { BarChartIcon } from './BarChartIcon';
 export { CheckIcon } from './CheckIcon';
 export { ErrorIcon } from './ErrorIcon';
 export { FileTextIcon } from './FileTextIcon';
+export { FilterIcon } from './FilterIcon';
 export { HomeIcon } from './HomeIcon';
 export { InfoIcon } from './InfoIcon';
 export { MaximizeIcon } from './MaximizeIcon';

@@ -15,6 +15,7 @@ export const Table = <T extends Record<string, unknown>>({
   density = 'compact',
   icon,
   infiniteScrollConfig,
+  initialColumnFilters,
   initialColumnOrder,
   initialColumnVisibility,
   initialMeta,
@@ -34,6 +35,7 @@ export const Table = <T extends Record<string, unknown>>({
 }: TableProps<T>) => {
   const tableContent = (
     <TableProvider<T>
+      initialColumnFilters={initialColumnFilters}
       initialColumnOrder={initialColumnOrder}
       initialColumnSizing={initialColumnSizing}
       initialColumnVisibility={initialColumnVisibility}

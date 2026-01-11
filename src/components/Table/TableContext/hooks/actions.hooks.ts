@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 
 import type {
+  ColumnFilter,
   ColumnFiltersState,
   ColumnOrderState,
   ColumnSizingState,
@@ -31,6 +32,11 @@ type SelectRowArgs = {
 type SetColumnSizingArgs = {
   columnKey: string;
   width: number | undefined;
+};
+
+type SetColumnFilterArgs = {
+  columnKey: string;
+  filter: ColumnFilter | null | undefined;
 };
 
 type SetTableDataArgs = {
@@ -68,6 +74,61 @@ export const useSetColumnFilters = () => {
     },
     [tableStore],
   );
+};
+
+/**
+ * Hook to update a single column filter
+ */
+export const useSetColumnFilter = () => {
+  const { tableStore } = useTableContextValue();
+
+  return useCallback(
+    ({ columnKey, filter }: SetColumnFilterArgs) => {
+      const current = tableStore.get()?.columnFilters ?? {};
+
+      let columnFilters: ColumnFiltersState;
+      if (filter === null || filter === undefined) {
+        // Remove the filter by creating new object without it
+        const { [columnKey]: unusedFilter, ...rest } = current;
+        void unusedFilter; // Explicitly mark as intentionally unused
+        columnFilters = rest;
+      } else {
+        columnFilters = { ...current, [columnKey]: filter };
+      }
+
+      tableStore.set({ columnFilters } as Partial<TableState<unknown>>);
+    },
+    [tableStore],
+  );
+};
+
+/**
+ * Hook to clear a single column filter
+ */
+export const useClearColumnFilter = () => {
+  const { tableStore } = useTableContextValue();
+
+  return useCallback(
+    (columnKey: string) => {
+      const current = tableStore.get()?.columnFilters ?? {};
+      const { [columnKey]: unusedFilter, ...rest } = current;
+      void unusedFilter; // Explicitly mark as intentionally unused
+
+      tableStore.set({ columnFilters: rest } as Partial<TableState<unknown>>);
+    },
+    [tableStore],
+  );
+};
+
+/**
+ * Hook to clear all column filters
+ */
+export const useClearAllColumnFilters = () => {
+  const { tableStore } = useTableContextValue();
+
+  return useCallback(() => {
+    tableStore.set({ columnFilters: {} } as Partial<TableState<unknown>>);
+  }, [tableStore]);
 };
 
 /**

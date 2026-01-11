@@ -54,6 +54,12 @@ export const SidePanelToolbarExample = () => {
       to: '/car-sales-infinite',
       type: 'link',
     },
+    {
+      icon: <SettingsIcon size={20} />,
+      label: 'Enterprise Orders',
+      to: '/enterprise-orders',
+      type: 'link',
+    },
   ];
 
   return (

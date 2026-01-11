@@ -1,11 +1,14 @@
 import * as stylex from '@stylexjs/stylex';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
 import {
+  useClearColumnFilter,
+  useColumnFilters,
   useColumnOrder,
   useColumnSizing,
   useColumnVisibility,
+  useSetColumnFilter,
   useSetColumnSizing,
   useSetSorting,
   useSorting,
@@ -24,6 +27,7 @@ import { tableHeaderStyles } from './TableHeader.stylex';
 export const TableHeader = <TData extends Record<string, unknown>>({
   columns,
   customStylex,
+  data = [],
   isLoading = false,
   ...rest
 }: TableHeaderProps<TData>) => {
@@ -31,8 +35,11 @@ export const TableHeader = <TData extends Record<string, unknown>>({
   const [sorting] = useSorting<TData>();
   const [columnOrder] = useColumnOrder<TData>();
   const [columnVisibility] = useColumnVisibility<TData>();
+  const [columnFilters] = useColumnFilters<TData>();
   const setColumnSizing = useSetColumnSizing();
   const setSorting = useSetSorting();
+  const setColumnFilter = useSetColumnFilter();
+  const clearColumnFilter = useClearColumnFilter();
 
   // Filter visible columns
   const visibleColumns = columns.filter(
@@ -83,6 +90,43 @@ export const TableHeader = <TData extends Record<string, unknown>>({
     [setSorting, sorting],
   );
 
+  // Calculate unique values for facet filters (client-side)
+  // This creates a map of columnKey -> unique values from the data
+  const columnFilterOptions = useMemo(() => {
+    const options: Record<string, string[]> = {};
+
+    columns.forEach((col) => {
+      // Only calculate for filterable columns
+      if (col.isFilterable === false) return;
+
+      // Use provided filterOptions if available
+      if (col.filterOptions) {
+        options[col.key] = col.filterOptions;
+        return;
+      }
+
+      // Calculate from data for string/currency columns (client-side)
+      // Only if we have data loaded
+      if (data.length > 0 && (col.dataType === 'string' || col.dataType === 'currency')) {
+        const uniqueValues = new Set<string>();
+        
+        data.forEach((row) => {
+          const value = row[col.key];
+          if (value != null && value !== '') {
+            uniqueValues.add(String(value));
+          }
+        });
+
+        if (uniqueValues.size > 0 && uniqueValues.size <= 100) {
+          // Only use facet filter if we have reasonable number of options
+          options[col.key] = [...uniqueValues].sort();
+        }
+      }
+    });
+
+    return options;
+  }, [columns, data]);
+
   return (
     <thead
       data-testid='table-header'
@@ -104,13 +148,23 @@ export const TableHeader = <TData extends Record<string, unknown>>({
           return (
             <TableHeaderCell
               columnKey={col.key}
+              dataType={col.dataType}
+              filter={columnFilters[col.key]}
+              filterOptions={columnFilterOptions[col.key]}
               hasSettings
+              isFilterable={col.isFilterable !== false}
               isLoading={isLoading}
               isSortable={col.isSortable !== false}
               key={col.key}
               label={col.label}
               maxWidth={col.maxWidth}
               minWidth={effectiveMinWidth}
+              onFilterApply={(filter) => {
+                setColumnFilter({ columnKey: col.key, filter });
+              }}
+              onFilterClear={() => {
+                clearColumnFilter(col.key);
+              }}
               onResize={handleResize}
               onResizeDoubleClick={handleResizeDoubleClick}
               onSort={handleSort}

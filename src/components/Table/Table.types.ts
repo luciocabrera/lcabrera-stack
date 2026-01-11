@@ -12,6 +12,29 @@ import type { SortingState } from './TableContext';
 export type { TableTitleProps } from './TableTitle';
 
 /**
+ * Boolean column filter
+ */
+export type BooleanFilter = {
+  type: 'boolean';
+  value: boolean;
+};
+
+/**
+ * Union type for all filter types based on column data type
+ */
+export type ColumnFilter =
+  | BooleanFilter
+  | DateFilter
+  | NumberFilter
+  | SelectFilter
+  | TextFilter;
+
+/**
+ * Column filters state - maps column key to filter configuration
+ */
+export type ColumnFiltersState = Record<string, ColumnFilter>;
+
+/**
  * Column sizing state - maps column key to custom width
  */
 export type ColumnSizingState = Record<string, number>;
@@ -22,6 +45,18 @@ export type ColumnSizingState = Record<string, number>;
 export type CursorParams = {
   cursor: string;
   limit: number;
+};
+
+/**
+ * Date column filter
+ */
+export type DateFilter = {
+  operator: 'after' | 'before' | 'between' | 'equals';
+  type: 'date';
+  /** ISO date string */
+  value: string;
+  /** Second date for 'between' operator (ISO string) */
+  value2?: string;
 };
 
 /**
@@ -57,11 +92,33 @@ export type InfiniteScrollResponse<TData> = {
 };
 
 /**
+ * Number/currency column filter
+ */
+export type NumberFilter = {
+  operator:
+    | 'between'
+    | 'equals'
+    | 'greaterThan'
+    | 'greaterThanOrEqual'
+    | 'lessThan'
+    | 'lessThanOrEqual'
+    | 'notEquals';
+  type: 'number';
+  value: number;
+  /** Second value for 'between' operator */
+  value2?: number;
+};
+
+/**
  * Parameters for offset-limit pagination strategy
  */
 export type OffsetLimitParams = {
   limit: number;
   skip: number;
+};
+
+export type OnFilterChangeArgs = {
+  filters: ColumnFiltersState;
 };
 
 export type OnSortChangeArgs = {
@@ -89,10 +146,27 @@ export type PaginationParams =
  */
 export type PaginationStrategy = 'cursor' | 'offset-limit' | 'page-based';
 
+/**
+ * Select/multi-select column filter
+ */
+export type SelectFilter = {
+  type: 'multiSelect' | 'select';
+  /** Single value for 'select' type */
+  value?: string;
+  /** Multiple values for 'multiSelect' type */
+  values?: string[];
+};
+
 export type TableColumn = {
   dataType?: TableColumnDataType;
+  /** Static options for select/multiSelect filters */
+  filterOptions?: string[];
+  /** Async function to fetch filter options from server (for facet filters) */
+  fetchFilterOptions?: () => Promise<string[]>;
   /** Format options for the column based on data type */
   format?: TableColumnFormat;
+  /** Whether this column can be filtered (default: true) */
+  isFilterable?: boolean;
   /** Whether this column is sortable (default: true) */
   isSortable?: boolean;
   key: string;
@@ -129,6 +203,8 @@ export type TableProps<TData extends Record<string, unknown>> = BaseProps & {
   data: TData[];
   /** Configuration for infinite scroll behavior */
   infiniteScrollConfig?: InfiniteScrollConfig<TData>;
+  /** Initial column filters (for SSR hydration) */
+  initialColumnFilters?: ColumnFiltersState;
   /** Initial column order (for SSR hydration) */
   initialColumnOrder?: string[];
   /** Initial column visibility (for SSR hydration) */
@@ -149,13 +225,28 @@ export type TableProps<TData extends Record<string, unknown>> = BaseProps & {
   /** Locale for formatting (defaults to navigator.language) */
   locale?: string;
   /** Callback when filters change (server-side filtering) */
-  onFilterChange?: (filters: Record<string, unknown>) => Promise<void>;
+  onFilterChange?: (args: OnFilterChangeArgs) => Promise<void>;
   /** Callback when sorting changes (server-side sorting). If provided, sorting is server-controlled */
   onSortChange?: (args: OnSortChangeArgs) => Promise<void>;
   overscan?: number;
   /** Persistence key for storing table state (e.g., column widths) */
   persistenceKey?: string;
   rowHeight?: number;
+};
+
+/**
+ * Text/string column filter
+ */
+export type TextFilter = {
+  operator:
+    | 'contains'
+    | 'endsWith'
+    | 'equals'
+    | 'notContains'
+    | 'notEquals'
+    | 'startsWith';
+  type: 'text';
+  value: string;
 };
 
 type BaseProps = ComponentPropsWithRef<'table'> & {
