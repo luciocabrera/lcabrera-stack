@@ -29,7 +29,7 @@ export const NavLink = ({
         });
         return classNameValue;
       }}
-      prefetch={prefetch}
+      // prefetch={prefetch}
       {...props}
     >
       {icon && <span {...stylex.props(linkItemStyles.icon)}>{icon}</span>}

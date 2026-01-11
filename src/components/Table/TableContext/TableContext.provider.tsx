@@ -109,6 +109,9 @@ export const TableProvider = <TData extends Record<string, unknown>>({
       ? initialColumnVisibility
       : (persistedState as Partial<TableState<TData>>).columnVisibility;
 
+  console.log('🎯 [TableProvider] initialColumnFilters:', initialColumnFilters);
+  console.log('🎯 [TableProvider] persistedState:', persistedState);
+
   const tableStore = useStore<TableState<TData>>(
     getInitialTableState({
       initialColumnOrder: effectiveColumnOrder,

@@ -1,7 +1,8 @@
 import * as stylex from '@stylexjs/stylex';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { Button } from '@/components/Button';
+import { MenuCloseIcon } from '@/components/Icons';
 
 import type { FilterPopoverProps, ToggleEvent } from './FilterPopover.types';
 
@@ -21,6 +22,13 @@ export const FilterPopover = ({
   popoverId,
 }: FilterPopoverProps) => {
   const popoverRef = useRef<HTMLDivElement>(null);
+  // Local state to track the current filter value before applying
+  const [localFilter, setLocalFilter] = useState(filter);
+
+  // Sync local filter with prop when it changes externally
+  useEffect(() => {
+    setLocalFilter(filter);
+  }, [filter]);
 
   // Handle popover toggle events
   useEffect(() => {
@@ -52,8 +60,8 @@ export const FilterPopover = ({
         return (
           <BooleanFilterInput
             // eslint-disable-next-line unicorn/no-null
-            filter={filter?.type === 'boolean' ? filter : null}
-            onChange={onApply}
+            filter={localFilter?.type === 'boolean' ? localFilter : null}
+            onChange={setLocalFilter}
           />
         );
       }
@@ -62,8 +70,8 @@ export const FilterPopover = ({
         return (
           <NumberFilterInput
             // eslint-disable-next-line unicorn/no-null
-            filter={filter?.type === 'number' ? filter : null}
-            onChange={onApply}
+            filter={localFilter?.type === 'number' ? localFilter : null}
+            onChange={setLocalFilter}
           />
         );
       }
@@ -71,8 +79,8 @@ export const FilterPopover = ({
         return (
           <DateFilterInput
             // eslint-disable-next-line unicorn/no-null
-            filter={filter?.type === 'date' ? filter : null}
-            onChange={onApply}
+            filter={localFilter?.type === 'date' ? localFilter : null}
+            onChange={setLocalFilter}
           />
         );
       }
@@ -82,8 +90,8 @@ export const FilterPopover = ({
           return (
             <SelectFilterInput
               // eslint-disable-next-line unicorn/no-null
-              filter={filter?.type === 'select' ? filter : null}
-              onChange={onApply}
+              filter={localFilter?.type === 'select' ? localFilter : null}
+              onChange={setLocalFilter}
               options={filterOptions}
             />
           );
@@ -92,8 +100,8 @@ export const FilterPopover = ({
         return (
           <TextFilterInput
             // eslint-disable-next-line unicorn/no-null
-            filter={filter?.type === 'text' ? filter : null}
-            onChange={onApply}
+            filter={localFilter?.type === 'text' ? localFilter : null}
+            onChange={setLocalFilter}
           />
         );
       }
@@ -114,12 +122,28 @@ export const FilterPopover = ({
       <div {...stylex.props(styles.content)}>
         <div {...stylex.props(styles.header)}>
           <h3 {...stylex.props(styles.title)}>Filter: {column.label}</h3>
+          <button
+            aria-label='Close filter'
+            onClick={() => {
+              // Reset local filter to current applied filter when closing without applying
+              setLocalFilter(filter);
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore - hidePopover not in TS types yet
+              popoverRef.current?.hidePopover();
+            }}
+            type='button'
+            // @ts-expect-error - stylex types issue
+            {...stylex.props(styles.closeButton)}
+          >
+            <MenuCloseIcon size={16} />
+          </button>
         </div>
         <div {...stylex.props(styles.body)}>{renderFilterInput()}</div>
         <div {...stylex.props(styles.footer)}>
           <Button
             color='outline'
             onClick={() => {
+              setLocalFilter(undefined);
               onClear();
               // eslint-disable-next-line @typescript-eslint/ban-ts-comment
               // @ts-ignore - hidePopover not in TS types yet
@@ -132,6 +156,8 @@ export const FilterPopover = ({
           <Button
             color='primary'
             onClick={() => {
+              console.warn('🎯 [FilterPopover] Apply clicked with localFilter:', localFilter);
+              onApply(localFilter);
               // eslint-disable-next-line @typescript-eslint/ban-ts-comment
               // @ts-ignore - hidePopover not in TS types yet
               popoverRef.current?.hidePopover();

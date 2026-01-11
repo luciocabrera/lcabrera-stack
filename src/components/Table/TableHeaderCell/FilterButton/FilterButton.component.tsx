@@ -23,8 +23,9 @@ export const FilterButton = ({
         />
       }
       onClick={onClick}
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      {...(popoverTargetId ? ({ popovertarget: popoverTargetId } as any) : {})}
+      {...(popoverTargetId
+        ? ({ popovertarget: popoverTargetId } as Record<string, unknown>)
+        : {})}
       size='sm'
       variant='flat'
       {...stylex.props(styles.button)}

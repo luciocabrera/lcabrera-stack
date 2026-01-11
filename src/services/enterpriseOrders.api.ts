@@ -134,6 +134,8 @@ export const enterpriseOrdersApi = {
 
     const url = `${getApiBaseUrl()}/enterprise-orders/paginated?${params.toString()}`;
     console.warn('🌐 [Orders] Fetching from URL:', url);
+    console.warn('🌐 [Orders] Filter object:', filter);
+    console.warn('🌐 [Orders] Sorting:', sorting);
 
     const fetchData = () =>
       fetch(url).then((response) => {

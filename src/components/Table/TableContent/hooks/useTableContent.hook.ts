@@ -13,6 +13,7 @@ import { DEFAULT_INFINITE_SCROLL_THRESHOLD } from '../../Table.constants';
 import {
   TableContext,
   type TableState,
+  useColumnFilters,
   useColumnOrder,
   useColumnSizing,
   useColumnVisibility,
@@ -29,7 +30,9 @@ type UseTableContentArgs<T extends Record<string, unknown>> = Pick<
   | 'columns'
   | 'data'
   | 'infiniteScrollConfig'
+  | 'initialColumnFilters'
   | 'isClientSortingEnabled'
+  | 'onFilterChange'
   | 'onSortChange'
   | 'persistenceKey'
 >;
@@ -58,7 +61,9 @@ export const useTableContent = <T extends Record<string, unknown>>({
   columns,
   data,
   infiniteScrollConfig,
+  initialColumnFilters,
   isClientSortingEnabled = false,
+  onFilterChange,
   onSortChange,
   persistenceKey,
 }: UseTableContentArgs<T>): UseTableContentReturn<T> => {
@@ -67,9 +72,14 @@ export const useTableContent = <T extends Record<string, unknown>>({
 
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const initialFiltersRef = useRef(initialColumnFilters);
+
+  console.log('📋 [useTableContent] initialColumnFilters prop:', initialColumnFilters);
+  console.log('📋 [useTableContent] initialFiltersRef.current:', initialFiltersRef.current);
 
   const context = use(TableContext);
   const tableStore = context?.tableStore;
+  const [columnFilters] = useColumnFilters<T>();
   const [columnSizing] = useColumnSizing<T>();
   const [columnOrder] = useColumnOrder<T>();
   const [columnVisibility] = useColumnVisibility<T>();
@@ -137,6 +147,25 @@ export const useTableContent = <T extends Record<string, unknown>>({
       });
     }
   }, [sorting, sortingMode, onSortChange]);
+
+  // Server-side filtering: call onFilterChange when columnFilters state changes
+  useEffect(() => {
+    // Only call onFilterChange if filters have changed from the initial state
+    // This avoids redundant calls when filters are loaded from URL/cookies
+    const initialFilters = initialFiltersRef.current ?? {};
+    const hasChanged = JSON.stringify(columnFilters) !== JSON.stringify(initialFilters);
+    
+    console.log('🔄 [Filter Effect] columnFilters:', columnFilters);
+    console.log('🔄 [Filter Effect] initialFilters:', initialFilters);
+    console.log('🔄 [Filter Effect] hasChanged:', hasChanged);
+    
+    if (onFilterChange && hasChanged) {
+      console.log('🔄 [Filter Effect] Calling onFilterChange with:', columnFilters);
+      void onFilterChange({
+        filters: columnFilters,
+      });
+    }
+  }, [columnFilters, onFilterChange]);
 
   // Client-side sorting: apply sorting to data
   const sortedData = useMemo(() => {

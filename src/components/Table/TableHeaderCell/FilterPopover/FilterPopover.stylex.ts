@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { spacing } from '@/design-system/tokens/base.stylex';
+import { spacing, typography } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const styles = stylex.create({
@@ -26,11 +26,31 @@ export const styles = stylex.create({
     borderBottomColor: colors.borderPrimary,
     borderBottomStyle: 'solid',
     borderBottomWidth: '1px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   title: {
     margin: 0,
-    fontSize: '0.875rem',
-    fontWeight: 600,
+    fontSize: typography.fontSizeSm,
+    fontWeight: typography.fontWeightSemibold,
+    color: colors.textPrimary,
+  },
+  closeButton: {
+    padding: spacing.xxs,
+    borderWidth: '0',
+    backgroundColor: 'transparent',
+    color: colors.textSecondary,
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: '0.25rem',
+    transition: 'background-color 0.15s ease',
+    ':hover': {
+      backgroundColor: colors.surfaceSecondary,
+      color: colors.textPrimary,
+    },
   },
   body: {
     padding: `0 ${spacing.md}`,

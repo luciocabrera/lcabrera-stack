@@ -12,6 +12,7 @@ export const styles = stylex.create({
   label: {
     cursor: 'pointer',
     fontSize: '0.875rem',
+    color: colors.textPrimary,
   },
   radio: {
     cursor: 'pointer',

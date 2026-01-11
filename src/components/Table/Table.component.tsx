@@ -51,6 +51,7 @@ export const Table = <T extends Record<string, unknown>>({
         density={density}
         icon={icon}
         infiniteScrollConfig={infiniteScrollConfig}
+        initialColumnFilters={initialColumnFilters}
         isBordered={isBordered}
         isClientSortingEnabled={isClientSortingEnabled}
         isLoading={isLoading}

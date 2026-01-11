@@ -21,6 +21,10 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
     searchParams: url.searchParams,
   });
 
+  // Read standalone filters param (for server-side filtering)
+  const filtersParam = url.searchParams.get('filters');
+  const filtersFromParam = filtersParam ? JSON.parse(filtersParam) : undefined;
+
   // Read persisted state from cookies (fallback)
   const cookieHeader = request.headers.get('Cookie');
   const cookieState = readPersistedStateFromCookie({
@@ -35,8 +39,15 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
     cookieState.columnVisibility ??
     new Set<string>();
   const sorting = urlState?.sorting ?? cookieState.sorting ?? [];
-  const filters = urlState?.filters ?? cookieState.columnFilters ?? {};
+  // Use standalone filters param (priority), then urlState, then cookie
+  const filters = filtersFromParam ?? urlState?.filters ?? cookieState.columnFilters ?? {};
   const columnSizing = cookieState.columnSizing ?? {};
+
+  console.log('🔍 [Loader] URL State:', urlState);
+  console.log('🔍 [Loader] Standalone filters param:', filtersFromParam);
+  console.log('🔍 [Loader] Cookie State:', cookieState);
+  console.log('🔍 [Loader] Final filters:', filters);
+  console.log('🔍 [Loader] Final sorting:', sorting);
 
   // Return the promise directly (not awaited) for Suspense streaming
   const enterpriseOrdersPromise =
