@@ -16,15 +16,15 @@ export const styles = stylex.create({
     fontWeight: 'bold',
   },
   retryButton: {
-    ':hover': {
-      backgroundColor: '#2563eb',
-    },
     padding: '0.5rem 1rem',
     borderColor: 'transparent',
     borderRadius: '0.375rem',
     borderStyle: 'none',
     borderWidth: 0,
-    backgroundColor: '#3b82f6',
+    backgroundColor: {
+      default: '#3b82f6',
+      ':hover': '#2563eb',
+    },
     color: 'white',
     cursor: 'pointer',
     fontSize: '1rem',

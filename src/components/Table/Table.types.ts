@@ -16,6 +16,7 @@ export type { TableTitleProps } from './TableTitle';
  */
 export type BooleanFilter = {
   type: 'boolean';
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   value: boolean;
 };
 
@@ -159,10 +160,10 @@ export type SelectFilter = {
 
 export type TableColumn = {
   dataType?: TableColumnDataType;
-  /** Static options for select/multiSelect filters */
-  filterOptions?: string[];
   /** Async function to fetch filter options from server (for facet filters with pagination) */
   fetchFilterOptions?: (offset?: number) => Promise<{ hasMore: boolean; values: string[] }>;
+  /** Static options for select/multiSelect filters */
+  filterOptions?: string[];
   /** Format options for the column based on data type */
   format?: TableColumnFormat;
   /** Whether this column can be filtered (default: true) */

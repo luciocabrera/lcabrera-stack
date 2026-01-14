@@ -1,5 +1,8 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
+import type { ColumnFiltersState, SortingState } from '@/components/Table';
+import type { EnterpriseOrdersResponse } from '@/services';
+
 import { readPersistedStateFromCookie } from '@/components/Table/utils';
 import { enterpriseOrdersApi } from '@/services';
 import { readTableStateFromURL } from '@/utils/urlState';
@@ -23,7 +26,9 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
 
   // Read standalone filters param (for server-side filtering)
   const filtersParam = url.searchParams.get('filters');
-  const filtersFromParam = filtersParam ? JSON.parse(filtersParam) : undefined;
+  const filtersFromParam: ColumnFiltersState | undefined = filtersParam
+    ? (JSON.parse(filtersParam) as ColumnFiltersState)
+    : undefined;
 
   // Read persisted state from cookies (fallback)
   const cookieHeader = request.headers.get('Cookie');
@@ -33,30 +38,32 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
   });
 
   // Merge URL state (priority) with cookie state (fallback)
-  const columnOrder = urlState?.columnOrder ?? cookieState.columnOrder ?? [];
-  const columnVisibility =
+  const columnOrder: string[] = urlState?.columnOrder ?? cookieState.columnOrder ?? [];
+  const columnVisibility: Set<string> =
     urlState?.columnVisibility ??
     cookieState.columnVisibility ??
     new Set<string>();
-  const sorting = urlState?.sorting ?? cookieState.sorting ?? [];
+  const sorting: SortingState = urlState?.sorting ?? cookieState.sorting ?? [];
   // Use standalone filters param (priority), then urlState, then cookie
-  const filters = filtersFromParam ?? urlState?.filters ?? cookieState.columnFilters ?? {};
-  const columnSizing = cookieState.columnSizing ?? {};
+  const filters: ColumnFiltersState =
+    filtersFromParam ?? urlState?.filters ?? cookieState.columnFilters ?? {};
+  const columnSizing: Record<string, number> = cookieState.columnSizing ?? {};
 
-  console.log('🔍 [Loader] URL State:', urlState);
-  console.log('🔍 [Loader] Standalone filters param:', filtersFromParam);
-  console.log('🔍 [Loader] Cookie State:', cookieState);
-  console.log('🔍 [Loader] Final filters:', filters);
-  console.log('🔍 [Loader] Final sorting:', sorting);
+  console.warn('🔍 [Loader] URL State:', urlState);
+  console.warn('🔍 [Loader] Standalone filters param:', filtersFromParam);
+  console.warn('🔍 [Loader] Cookie State:', cookieState);
+  console.warn('🔍 [Loader] Final filters:', filters);
+  console.warn('🔍 [Loader] Final sorting:', sorting);
 
   // Return the promise directly (not awaited) for Suspense streaming
-  const enterpriseOrdersPromise =
-    enterpriseOrdersApi.fetchEnterpriseOrdersPaginated({
-      filter: filters,
-      limit: 50,
-      skip: 0,
-      sorting,
-    });
+  const enterpriseOrdersPromise: Promise<
+    EnterpriseOrdersResponse & { hasMore: boolean }
+  > = enterpriseOrdersApi.fetchEnterpriseOrdersPaginated({
+    filter: filters,
+    limit: 50,
+    skip: 0,
+    sorting,
+  });
 
   return {
     columnOrder,

@@ -88,11 +88,11 @@ const CarSalesTable = ({
     onLoadMore: async (params) => {
       const { limit, skip } = params as OffsetLimitParams;
       // Include current sorting when loading more data
-      const response = await carSalesApi.fetchCarSalesPaginated(
-        skip,
+      const response = await carSalesApi.fetchCarSalesPaginated({
         limit,
-        currentSorting,
-      );
+        skip,
+        sorting: currentSorting,
+      });
 
       return {
         data: response.data,

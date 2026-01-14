@@ -5,7 +5,7 @@ import * as stylex from '@stylexjs/stylex';
 import type { DraggableListProps } from './DraggableList.types';
 
 import { styles } from './DraggableList.stylex';
-import { useDraggableList } from './useDraggableList.hook';
+import { useDraggableList } from './hooks';
 
 const handleDragOver = (event: DragEvent<HTMLLIElement>) => {
   event.preventDefault();
@@ -23,7 +23,6 @@ export const DraggableList = ({
 
   return (
     <ul {...stylex.props(styles.list)} role='list'>
-      {}
       {items.map((item) => {
         const isDragging = dragItemId.current === item.id;
 
@@ -53,7 +52,6 @@ export const DraggableList = ({
             <span {...stylex.props(styles.dragHandle)} aria-label='Drag handle'>
               ≡
             </span>
-            {}
             <div {...stylex.props(styles.content)}>{item.content}</div>
           </li>
         );

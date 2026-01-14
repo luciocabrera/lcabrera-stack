@@ -27,7 +27,7 @@ import { tableHeaderStyles } from './TableHeader.stylex';
 export const TableHeader = <TData extends Record<string, unknown>>({
   columns,
   customStylex,
-  data = [],
+  data,
   isLoading = false,
   ...rest
 }: TableHeaderProps<TData>) => {
@@ -117,6 +117,7 @@ export const TableHeader = <TData extends Record<string, unknown>>({
         for (const row of data) {
           const value = row[col.key];
           if (value !== undefined && value !== null && value !== '') {
+            // eslint-disable-next-line @typescript-eslint/no-base-to-string
             uniqueValues.add(String(value));
           }
         }

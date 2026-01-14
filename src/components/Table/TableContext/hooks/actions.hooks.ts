@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 
+import type { ColumnFilter } from '../../Table.types';
 import type {
-  ColumnFilter,
   ColumnFiltersState,
   ColumnOrderState,
   ColumnSizingState,
@@ -29,14 +29,14 @@ type SelectRowArgs = {
   rowId: string;
 };
 
-type SetColumnSizingArgs = {
-  columnKey: string;
-  width: number | undefined;
-};
-
 type SetColumnFilterArgs = {
   columnKey: string;
   filter: ColumnFilter | null | undefined;
+};
+
+type SetColumnSizingArgs = {
+  columnKey: string;
+  width: number | undefined;
 };
 
 type SetTableDataArgs = {

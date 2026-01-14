@@ -15,9 +15,9 @@ import { Tabs } from '@/components/Tabs';
 
 import type { TableSettingsDrawerProps } from './TableSettingsDrawer.types';
 
-import { ColumnOrderSection } from './components/ColumnOrderSection';
-import { GeneralSettingsSection } from './components/GeneralSettingsSection';
-import { SortingSection } from './components/SortingSection';
+import { ColumnOrderSection } from './ColumnOrderSection';
+import { GeneralSettingsSection } from './GeneralSettingsSection';
+import { SortingSection } from './SortingSection';
 
 export const TableSettingsDrawer = ({
   columnOrder,

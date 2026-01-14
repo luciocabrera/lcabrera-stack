@@ -146,7 +146,7 @@ export const FilterPopover = ({
               // eslint-disable-next-line unicorn/no-null
               filter={localFilter?.type === 'select' ? localFilter : null}
               hasMore={hasMoreOptions}
-              isLoadingMore={isFetchingOptions && fetchedOptions !== undefined}
+              isLoadingMore={isFetchingOptions}
               onChange={setLocalFilter}
               onLoadMore={handleLoadMoreOptions}
               options={effectiveFilterOptions}

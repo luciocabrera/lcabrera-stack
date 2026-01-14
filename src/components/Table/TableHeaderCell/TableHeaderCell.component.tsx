@@ -114,8 +114,8 @@ export const TableHeaderCell = ({
               fetchFilterOptions={fetchFilterOptions}
               filter={filter}
               filterOptions={filterOptions}
-              onApply={onFilterApply ?? (() => {})}
-              onClear={onFilterClear ?? (() => {})}
+              onApply={onFilterApply ?? undefined}
+              onClear={onFilterClear ?? undefined}
               popoverId={filterPopoverId}
             />
           </>

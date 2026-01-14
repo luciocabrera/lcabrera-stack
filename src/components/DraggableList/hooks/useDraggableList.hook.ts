@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import type {
   DraggableItem,
   UseDraggableListProps,
-} from './DraggableList.types';
+} from '../DraggableList.types';
 
 /**
  * Hook for managing draggable list state with native HTML5 drag and drop

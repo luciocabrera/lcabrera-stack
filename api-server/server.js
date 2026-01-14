@@ -415,7 +415,7 @@ app.get('/api/enterprise-orders/distinct/:columnName', async (request, res) => {
       LIMIT $1 OFFSET $2
     `;
 
-    console.log(`   → Final query: ${query.replace(/\s+/g, ' ').trim()}`);
+    console.log(`   → Final query: ${query.replaceAll(/\s+/g, ' ').trim()}`);
     console.log(`   → Query params: [${limit}, ${offset}]`);
 
     const result = await pool.query(query, [limit, offset]);

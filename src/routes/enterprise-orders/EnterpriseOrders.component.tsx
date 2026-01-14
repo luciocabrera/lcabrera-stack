@@ -20,6 +20,7 @@ import { columns } from './EnterpriseOrders.constants';
 import { styles } from './EnterpriseOrders.stylex';
 
 export const EnterpriseOrders = () => {
+  const loaderData = useLoaderData<typeof loader>();
   const {
     columnOrder,
     columnSizing,
@@ -27,10 +28,10 @@ export const EnterpriseOrders = () => {
     enterpriseOrdersPromise,
     filters,
     sorting,
-  } = useLoaderData<typeof loader>();
+  } = loaderData;
 
-  console.log('🎬 [EnterpriseOrders] Loader data filters:', filters);
-  console.log('🎬 [EnterpriseOrders] Loader data sorting:', sorting);
+  console.warn('🎬 [EnterpriseOrders] Loader data filters:', filters);
+  console.warn('🎬 [EnterpriseOrders] Loader data sorting:', sorting);
 
   return (
     <div {...stylex.props(styles.container)}>
@@ -71,8 +72,8 @@ const EnterpriseOrdersTable = ({
 }: EnterpriseOrdersTableProps) => {
   const [, setSearchParams] = useSearchParams();
 
-  console.log('📊 [EnterpriseOrdersTable] currentFilters:', currentFilters);
-  console.log('📊 [EnterpriseOrdersTable] currentSorting:', currentSorting);
+  console.warn('📊 [EnterpriseOrdersTable] currentFilters:', currentFilters);
+  console.warn('📊 [EnterpriseOrdersTable] currentSorting:', currentSorting);
 
   const handleSortChange = ({ sorting }: OnSortChangeArgs) => {
     // Type guard to ensure sorting is properly typed
@@ -112,7 +113,7 @@ const EnterpriseOrdersTable = ({
     onLoadMore: async (params) => {
       const { limit, skip } = params as OffsetLimitParams;
       // Include current sorting and filters when loading more data
-      console.log('🔄 [onLoadMore] Using filters:', currentFilters, 'and sorting:', currentSorting);
+      console.warn('🔄 [onLoadMore] Using filters:', currentFilters, 'and sorting:', currentSorting);
       const response = await enterpriseOrdersApi.fetchEnterpriseOrdersPaginated(
         {
           filter: currentFilters,

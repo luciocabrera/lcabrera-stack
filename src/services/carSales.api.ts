@@ -91,15 +91,16 @@ export const carSalesApi = {
 
   /**
    * Fetch car sales data with pagination (offset-limit strategy)
-   * @param skip - Number of records to skip
-   * @param limit - Number of records to fetch
-   * @param sorting - Optional sorting configuration
    */
-  fetchCarSalesPaginated: (
-    skip: number,
-    limit: number,
-    sorting?: { columnKey: string; direction: 'asc' | 'desc' }[],
-  ): Promise<CarSalesResponse & { hasMore: boolean }> => {
+  fetchCarSalesPaginated: ({
+    limit,
+    skip,
+    sorting,
+  }: {
+    limit: number;
+    skip: number;
+    sorting?: { columnKey: string; direction: 'asc' | 'desc' }[];
+  }): Promise<CarSalesResponse & { hasMore: boolean }> => {
     const params = new URLSearchParams({
       limit: limit.toString(),
       skip: skip.toString(),

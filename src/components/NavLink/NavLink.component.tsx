@@ -7,11 +7,11 @@ import { linkItemStyles } from './NavLink.stylex';
 import { getClassName } from './utils';
 
 export const NavLink = ({
+  _prefetch = 'intent',
   children,
   color = 'ghost',
   icon,
   orientation = 'vertical',
-  prefetch = 'intent',
   size = 'md',
   width = 'full',
   ...props

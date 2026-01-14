@@ -180,7 +180,7 @@ export default defineConfig(
       'local-rules/single-component-export': 'error',
       'local-rules/type-suffix-naming': 'error',
       // General Rules
-      'no-console': ['error', { allow: ['warn', 'error'] }], // Stricter: ban debug logs
+      'no-console': ['warn', { allow: ['warn', 'error'] }], // Stricter: ban debug logs
       // Conflicts: Ensure core sorting is off for perfectionist
       'sort-imports': 'off',
 

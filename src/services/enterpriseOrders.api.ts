@@ -87,6 +87,7 @@ export type EnterpriseOrdersResponse = {
 
 // Use absolute URL for SSR (server-side), relative URL for client (proxied by Vite)
 const getApiBaseUrl = () => {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (globalThis.window === undefined) {
     // Server-side: use absolute URL
     return 'http://localhost:3001/api';
@@ -106,6 +107,32 @@ export type FetchEnterpriseOrdersParams = {
  * Enterprise Orders API
  */
 export const enterpriseOrdersApi = {
+  /**
+   * Fetch distinct values for a column (for dynamic filter options)
+   */
+  fetchDistinctValues: async ({
+    columnName,
+    limit = 50,
+    offset = 0,
+  }: {
+    columnName: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<{ hasMore: boolean; values: string[] }> => {
+    const url = `${getApiBaseUrl()}/enterprise-orders/distinct/${columnName}?limit=${limit}&offset=${offset}`;
+    console.warn('🎯 [Orders] Fetching distinct values for:', columnName, 'offset:', offset);
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error(
+        `API request failed: ${response.status} ${response.statusText}`,
+      );
+    }
+
+    return response.json() as Promise<{ hasMore: boolean; values: string[] }>;
+  },
+
   /**
    * Fetch enterprise orders data with pagination (offset-limit strategy)
    */
@@ -163,27 +190,5 @@ export const enterpriseOrdersApi = {
     }
 
     return fetchData();
-  },
-
-  /**
-   * Fetch distinct values for a column (for dynamic filter options)
-   */
-  fetchDistinctValues: async (
-    columnName: string,
-    offset = 0,
-    limit = 50,
-  ): Promise<{ hasMore: boolean; values: string[] }> => {
-    const url = `${getApiBaseUrl()}/enterprise-orders/distinct/${columnName}?limit=${limit}&offset=${offset}`;
-    console.warn('🎯 [Orders] Fetching distinct values for:', columnName, 'offset:', offset);
-
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error(
-        `API request failed: ${response.status} ${response.statusText}`,
-      );
-    }
-
-    return response.json() as Promise<{ hasMore: boolean; values: string[] }>;
   },
 };
