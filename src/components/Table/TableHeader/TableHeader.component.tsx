@@ -16,6 +16,7 @@ import {
 import { TableHeaderCell } from '@/components/Table/TableHeaderCell';
 import { TableRow } from '@/components/Table/TableRow';
 
+import type { ColumnFilter } from '../Table.types';
 import type {
   HandleResizeParams,
   HandleSortParams,
@@ -155,7 +156,7 @@ export const TableHeader = <TData extends Record<string, unknown>>({
               columnKey={col.key}
               dataType={col.dataType}
               fetchFilterOptions={col.fetchFilterOptions}
-              filter={columnFilters[col.key]}
+              filter={columnFilters[col.key] as ColumnFilter | undefined}
               filterOptions={columnFilterOptions[col.key]}
               hasSettings
               isFilterable={col.isFilterable !== false}
