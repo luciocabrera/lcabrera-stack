@@ -48,12 +48,22 @@ export const FilterPopover = ({
           setIsFetchingOptions(true);
           void fetchFilterOptions(0)
             .then((result: { hasMore: boolean; values: string[] }) => {
-              console.warn('✅ [FilterPopover] Fetched options for', column.key, ':', result.values.length, 'hasMore:', result.hasMore);
+              console.warn(
+                '✅ [FilterPopover] Fetched options for',
+                column.key,
+                ':',
+                result.values.length,
+                'hasMore:',
+                result.hasMore,
+              );
               setFetchedOptions(result.values);
               setHasMoreOptions(result.hasMore);
             })
             .catch((error: unknown) => {
-              console.error('❌ [FilterPopover] Failed to fetch options:', error);
+              console.error(
+                '❌ [FilterPopover] Failed to fetch options:',
+                error,
+              );
             })
             .finally(() => {
               setIsFetchingOptions(false);
@@ -78,14 +88,26 @@ export const FilterPopover = ({
 
   // Handle loading more filter options (infinite scroll)
   const handleLoadMoreOptions = useCallback(() => {
-    if (!fetchFilterOptions || !fetchedOptions || isFetchingOptions || !hasMoreOptions) {
+    if (
+      !fetchFilterOptions ||
+      !fetchedOptions ||
+      isFetchingOptions ||
+      !hasMoreOptions
+    ) {
       return;
     }
 
     setIsFetchingOptions(true);
     void fetchFilterOptions(fetchedOptions.length)
       .then((result: { hasMore: boolean; values: string[] }) => {
-        console.warn('✅ [FilterPopover] Loaded more options for', column.key, ':', result.values.length, 'hasMore:', result.hasMore);
+        console.warn(
+          '✅ [FilterPopover] Loaded more options for',
+          column.key,
+          ':',
+          result.values.length,
+          'hasMore:',
+          result.hasMore,
+        );
         setFetchedOptions((prev) => [...(prev ?? []), ...result.values]);
         setHasMoreOptions(result.hasMore);
       })
@@ -95,14 +117,18 @@ export const FilterPopover = ({
       .finally(() => {
         setIsFetchingOptions(false);
       });
-  }, [fetchFilterOptions, fetchedOptions, isFetchingOptions, hasMoreOptions, column.key]);
+  }, [
+    fetchFilterOptions,
+    fetchedOptions,
+    isFetchingOptions,
+    hasMoreOptions,
+    column.key,
+  ]);
 
   const renderFilterInput = () => {
     if (isFetchingOptions) {
       return (
-        <div {...stylex.props(styles.loadingContainer)}>
-          Loading options...
-        </div>
+        <div {...stylex.props(styles.loadingContainer)}>Loading options...</div>
       );
     }
 
@@ -212,7 +238,10 @@ export const FilterPopover = ({
           <Button
             color='primary'
             onClick={() => {
-              console.warn('🎯 [FilterPopover] Apply clicked with localFilter:', localFilter);
+              console.warn(
+                '🎯 [FilterPopover] Apply clicked with localFilter:',
+                localFilter,
+              );
               onApply(localFilter);
               // eslint-disable-next-line @typescript-eslint/ban-ts-comment
               // @ts-ignore - hidePopover not in TS types yet

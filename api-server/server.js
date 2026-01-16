@@ -376,7 +376,10 @@ app.get('/api/enterprise-orders/paginated', async (request, res) => {
 
 // Get distinct values for a column (for filter options)
 app.get('/api/enterprise-orders/distinct/:columnName', async (request, res) => {
-  console.log(`🎯 [Distinct] Request for column: ${request.params.columnName}, query:`, request.query);
+  console.log(
+    `🎯 [Distinct] Request for column: ${request.params.columnName}, query:`,
+    request.query,
+  );
   try {
     const { columnName } = request.params;
     const limit = Number.parseInt(request.query.limit) || 100;

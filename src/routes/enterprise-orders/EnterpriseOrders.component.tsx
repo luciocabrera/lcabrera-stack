@@ -113,7 +113,12 @@ const EnterpriseOrdersTable = ({
     onLoadMore: async (params) => {
       const { limit, skip } = params as OffsetLimitParams;
       // Include current sorting and filters when loading more data
-      console.warn('🔄 [onLoadMore] Using filters:', currentFilters, 'and sorting:', currentSorting);
+      console.warn(
+        '🔄 [onLoadMore] Using filters:',
+        currentFilters,
+        'and sorting:',
+        currentSorting,
+      );
       const response = await enterpriseOrdersApi.fetchEnterpriseOrdersPaginated(
         {
           filter: currentFilters,

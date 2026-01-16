@@ -114,7 +114,7 @@ export const TableHeader = <TData extends Record<string, unknown>>({
         (col.dataType === 'string' || col.dataType === 'currency')
       ) {
         const uniqueValues = new Set<string>();
-        
+
         for (const row of data) {
           const value = row[col.key];
           if (value !== undefined && value !== null && value !== '') {

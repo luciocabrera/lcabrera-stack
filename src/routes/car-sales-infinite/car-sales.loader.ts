@@ -38,7 +38,11 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
   const columnSizing = cookieState.columnSizing ?? {};
 
   // Return the promise directly (not awaited) for Suspense streaming
-  const carSalesPromise = carSalesApi.fetchCarSalesPaginated({ limit: 50, skip: 0, sorting });
+  const carSalesPromise = carSalesApi.fetchCarSalesPaginated({
+    limit: 50,
+    skip: 0,
+    sorting,
+  });
 
   return {
     carSalesPromise,

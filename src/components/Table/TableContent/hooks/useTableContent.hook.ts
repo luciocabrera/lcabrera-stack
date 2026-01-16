@@ -74,8 +74,14 @@ export const useTableContent = <T extends Record<string, unknown>>({
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const initialFiltersRef = useRef(initialColumnFilters);
 
-  console.warn('📋 [useTableContent] initialColumnFilters prop:', initialColumnFilters);
-  console.warn('📋 [useTableContent] initialFiltersRef.current:', initialFiltersRef.current);
+  console.warn(
+    '📋 [useTableContent] initialColumnFilters prop:',
+    initialColumnFilters,
+  );
+  console.warn(
+    '📋 [useTableContent] initialFiltersRef.current:',
+    initialFiltersRef.current,
+  );
 
   const context = use(TableContext);
   const tableStore = context?.tableStore;
@@ -153,14 +159,18 @@ export const useTableContent = <T extends Record<string, unknown>>({
     // Only call onFilterChange if filters have changed from the initial state
     // This avoids redundant calls when filters are loaded from URL/cookies
     const initialFilters = initialFiltersRef.current ?? {};
-    const hasChanged = JSON.stringify(columnFilters) !== JSON.stringify(initialFilters);
-    
+    const hasChanged =
+      JSON.stringify(columnFilters) !== JSON.stringify(initialFilters);
+
     console.warn('🔄 [Filter Effect] columnFilters:', columnFilters);
     console.warn('🔄 [Filter Effect] initialFilters:', initialFilters);
     console.warn('🔄 [Filter Effect] hasChanged:', hasChanged);
-    
+
     if (onFilterChange && hasChanged) {
-      console.warn('🔄 [Filter Effect] Calling onFilterChange with:', columnFilters);
+      console.warn(
+        '🔄 [Filter Effect] Calling onFilterChange with:',
+        columnFilters,
+      );
       void onFilterChange({
         filters: columnFilters,
       });

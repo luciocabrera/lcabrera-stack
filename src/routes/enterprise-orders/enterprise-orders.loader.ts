@@ -38,7 +38,8 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
   });
 
   // Merge URL state (priority) with cookie state (fallback)
-  const columnOrder: string[] = urlState?.columnOrder ?? cookieState.columnOrder ?? [];
+  const columnOrder: string[] =
+    urlState?.columnOrder ?? cookieState.columnOrder ?? [];
   const columnVisibility: Set<string> =
     urlState?.columnVisibility ??
     cookieState.columnVisibility ??

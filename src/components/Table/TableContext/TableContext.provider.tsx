@@ -109,7 +109,10 @@ export const TableProvider = <TData extends Record<string, unknown>>({
       ? initialColumnVisibility
       : (persistedState as Partial<TableState<TData>>).columnVisibility;
 
-  console.warn('🎯 [TableProvider] initialColumnFilters:', initialColumnFilters);
+  console.warn(
+    '🎯 [TableProvider] initialColumnFilters:',
+    initialColumnFilters,
+  );
   console.warn('🎯 [TableProvider] persistedState:', persistedState);
 
   const tableStore = useStore<TableState<TData>>(
@@ -121,7 +124,9 @@ export const TableProvider = <TData extends Record<string, unknown>>({
       initialPersistedState: {
         ...(persistedState as Partial<TableState<TData>>),
         // Override with loader-provided values
-        ...(initialColumnFilters ? { columnFilters: initialColumnFilters } : {}),
+        ...(initialColumnFilters
+          ? { columnFilters: initialColumnFilters }
+          : {}),
         ...(initialSorting ? { sorting: initialSorting } : {}),
       },
     }),

@@ -8,7 +8,6 @@ import type {
 
 import { styles } from './NumberFilterInput.stylex';
 
-
 export const NumberFilterInput = ({
   filter,
   onChange,

@@ -57,7 +57,10 @@ export const columns: TableColumn[] = [
   {
     dataType: 'string',
     fetchFilterOptions: async (offset = 0) => {
-      const result = await enterpriseOrdersApi.fetchDistinctValues({ columnName: 'customer_email', offset });
+      const result = await enterpriseOrdersApi.fetchDistinctValues({
+        columnName: 'customer_email',
+        offset,
+      });
       return { hasMore: result.hasMore, values: result.values };
     },
     key: 'customer_email',
@@ -175,7 +178,10 @@ export const columns: TableColumn[] = [
   {
     dataType: 'string',
     fetchFilterOptions: async (offset = 0) => {
-      const result = await enterpriseOrdersApi.fetchDistinctValues({ columnName: 'shipping_city', offset });
+      const result = await enterpriseOrdersApi.fetchDistinctValues({
+        columnName: 'shipping_city',
+        offset,
+      });
       return { hasMore: result.hasMore, values: result.values };
     },
     key: 'shipping_city',
@@ -186,7 +192,10 @@ export const columns: TableColumn[] = [
   {
     dataType: 'string',
     fetchFilterOptions: async (offset = 0) => {
-      const result = await enterpriseOrdersApi.fetchDistinctValues({ columnName: 'shipping_state', offset });
+      const result = await enterpriseOrdersApi.fetchDistinctValues({
+        columnName: 'shipping_state',
+        offset,
+      });
       return { hasMore: result.hasMore, values: result.values };
     },
     key: 'shipping_state',
@@ -197,7 +206,10 @@ export const columns: TableColumn[] = [
   {
     dataType: 'string',
     fetchFilterOptions: async (offset = 0) => {
-      const result = await enterpriseOrdersApi.fetchDistinctValues({ columnName: 'shipping_country', offset });
+      const result = await enterpriseOrdersApi.fetchDistinctValues({
+        columnName: 'shipping_country',
+        offset,
+      });
       return { hasMore: result.hasMore, values: result.values };
     },
     key: 'shipping_country',
@@ -208,7 +220,10 @@ export const columns: TableColumn[] = [
   {
     dataType: 'string',
     fetchFilterOptions: async (offset = 0) => {
-      const result = await enterpriseOrdersApi.fetchDistinctValues({ columnName: 'carrier', offset });
+      const result = await enterpriseOrdersApi.fetchDistinctValues({
+        columnName: 'carrier',
+        offset,
+      });
       return { hasMore: result.hasMore, values: result.values };
     },
     key: 'carrier',
@@ -219,7 +234,10 @@ export const columns: TableColumn[] = [
   {
     dataType: 'string',
     fetchFilterOptions: async (offset = 0) => {
-      const result = await enterpriseOrdersApi.fetchDistinctValues({ columnName: 'warehouse_location', offset });
+      const result = await enterpriseOrdersApi.fetchDistinctValues({
+        columnName: 'warehouse_location',
+        offset,
+      });
       return { hasMore: result.hasMore, values: result.values };
     },
     key: 'warehouse_location',

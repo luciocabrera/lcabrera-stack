@@ -120,7 +120,12 @@ export const enterpriseOrdersApi = {
     offset?: number;
   }): Promise<{ hasMore: boolean; values: string[] }> => {
     const url = `${getApiBaseUrl()}/enterprise-orders/distinct/${columnName}?limit=${limit}&offset=${offset}`;
-    console.warn('🎯 [Orders] Fetching distinct values for:', columnName, 'offset:', offset);
+    console.warn(
+      '🎯 [Orders] Fetching distinct values for:',
+      columnName,
+      'offset:',
+      offset,
+    );
 
     const response = await fetch(url);
 

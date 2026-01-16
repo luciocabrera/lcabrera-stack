@@ -161,7 +161,9 @@ export type SelectFilter = {
 export type TableColumn = {
   dataType?: TableColumnDataType;
   /** Async function to fetch filter options from server (for facet filters with pagination) */
-  fetchFilterOptions?: (offset?: number) => Promise<{ hasMore: boolean; values: string[] }>;
+  fetchFilterOptions?: (
+    offset?: number,
+  ) => Promise<{ hasMore: boolean; values: string[] }>;
   /** Static options for select/multiSelect filters */
   filterOptions?: string[];
   /** Format options for the column based on data type */

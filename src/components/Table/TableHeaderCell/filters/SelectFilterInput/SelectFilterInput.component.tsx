@@ -73,7 +73,9 @@ export const SelectFilterInput = ({
     const scrollThreshold = 50; // Load more when 50px from bottom
 
     if (scrollHeight - scrollTop - clientHeight < scrollThreshold) {
-      console.warn('📜 [SelectFilterInput] Near bottom, loading more options...');
+      console.warn(
+        '📜 [SelectFilterInput] Near bottom, loading more options...',
+      );
       onLoadMore();
     }
   }, [onLoadMore, hasMore, isLoadingMore]);
