@@ -8,8 +8,8 @@ import {
   transitions,
 } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
+import { rippleBase } from '@/design-system/tokens/commons.stylex';
 
-// Base card styles
 const baseStyles = stylex.create({
   card: {
     borderColor: colors.borderPrimary,
@@ -22,20 +22,6 @@ const baseStyles = stylex.create({
     containerName: 'card',
     containerType: 'inline-size',
     position: 'relative',
-  },
-
-  // Ripple effect base
-  rippleBase: {
-    backgroundPosition: 'center',
-    transition: {
-      default: 'background-color 0.8s, background-size 0.8s',
-      ':active': 'background-color 0s, background-size 0s',
-    },
-    backgroundSize: {
-      default: '0%',
-      ':hover': '15000%',
-      ':active': '100%',
-    },
   },
 });
 
@@ -157,5 +143,5 @@ export const cardStyles = {
   elevation: elevationVariants,
   interactive: interactiveVariants,
   padding: paddingVariants,
-  rippleBase: baseStyles.rippleBase,
+  rippleBase: rippleBase.ripple,
 };

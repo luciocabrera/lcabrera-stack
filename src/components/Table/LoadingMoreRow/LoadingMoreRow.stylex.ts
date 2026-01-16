@@ -1,5 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 
+import { typography } from '@/design-system/tokens/base.stylex';
+
 const shimmerKeyframes = stylex.keyframes({
   from: { transform: 'translateX(-100%)' },
   to: { transform: 'translateX(100%)' },
@@ -18,7 +20,7 @@ export const styles = stylex.create({
     justifyContent: 'center',
   },
   count: {
-    fontSize: '0.875rem',
+    fontSize: typography.fontSizeSm,
   },
   row: {
     borderTopColor: 'var(--color-border-subtle)',
@@ -45,6 +47,6 @@ export const styles = stylex.create({
     width: '100%',
   },
   text: {
-    fontSize: '0.875rem',
+    fontSize: typography.fontSizeSm,
   },
 });

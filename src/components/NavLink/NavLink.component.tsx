@@ -7,11 +7,11 @@ import { linkItemStyles } from './NavLink.stylex';
 import { getClassName } from './utils';
 
 export const NavLink = ({
-  _prefetch = 'intent',
   children,
   color = 'ghost',
   icon,
   orientation = 'vertical',
+  prefetch = 'none',
   size = 'md',
   width = 'full',
   ...props
@@ -29,7 +29,7 @@ export const NavLink = ({
         });
         return classNameValue;
       }}
-      // prefetch={prefetch}
+      prefetch={prefetch}
       {...props}
     >
       {icon && <span {...stylex.props(linkItemStyles.icon)}>{icon}</span>}

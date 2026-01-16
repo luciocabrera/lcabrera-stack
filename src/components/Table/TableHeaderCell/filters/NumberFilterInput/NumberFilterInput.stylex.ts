@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { spacing } from '@/design-system/tokens/base.stylex';
+import { spacing, typography } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const styles = stylex.create({
@@ -24,7 +24,7 @@ export const styles = stylex.create({
     },
     backgroundColor: colors.surfacePrimary,
     color: colors.textPrimary,
-    fontSize: '0.875rem',
+    fontSize: typography.fontSizeSm,
   },
   inputGroup: {
     gap: spacing.sm,
@@ -47,10 +47,10 @@ export const styles = stylex.create({
     backgroundColor: colors.surfacePrimary,
     color: colors.textPrimary,
     cursor: 'pointer',
-    fontSize: '0.875rem',
+    fontSize: typography.fontSizeSm,
   },
   separator: {
     color: colors.textSecondary,
-    fontSize: '0.875rem',
+    fontSize: typography.fontSizeSm,
   },
 });

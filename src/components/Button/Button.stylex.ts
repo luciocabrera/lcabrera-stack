@@ -10,12 +10,6 @@ import {
   widthVariants,
 } from '@/design-system/tokens/commons.stylex';
 
-/**
- * Button Component Styles
- * Supports multiple variants and sizes
- */
-
-// Button-specific styles
 const buttonSpecificStyles = stylex.create({
   button: {
     containerName: 'button',
@@ -29,7 +23,6 @@ const buttonSpecificStyles = stylex.create({
   },
 });
 
-// Style variants
 const styleVariants = stylex.create({
   elevated: {
     boxShadow: shadows.md,

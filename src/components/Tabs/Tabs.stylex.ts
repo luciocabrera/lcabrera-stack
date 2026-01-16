@@ -4,6 +4,7 @@ import {
   borderRadius,
   spacing,
   transitions,
+  typography,
 } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 
@@ -44,7 +45,7 @@ export const styles = stylex.create({
     },
     cursor: 'pointer',
     fontFamily: 'inherit',
-    fontSize: '0.875rem',
+    fontSize: typography.fontSizeSm,
     fontWeight: 500,
     outlineOffset: {
       default: '0px',

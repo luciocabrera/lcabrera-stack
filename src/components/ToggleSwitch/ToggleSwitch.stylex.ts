@@ -4,6 +4,7 @@ import {
   borderRadius,
   spacing,
   transitions,
+  typography,
 } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 
@@ -68,7 +69,7 @@ export const styles = stylex.create({
   label: {
     color: colors.textPrimary,
     cursor: 'pointer',
-    fontSize: '0.875rem',
+    fontSize: typography.fontSizeSm,
     userSelect: 'none',
   },
   label_disabled: {

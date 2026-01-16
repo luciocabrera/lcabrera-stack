@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { borderRadius, spacing } from '@/design-system/tokens/base.stylex';
+import { borderRadius, spacing, typography } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const styles = stylex.create({
@@ -19,7 +19,7 @@ export const styles = stylex.create({
 
   sectionTitle: {
     color: colors.textSecondary,
-    fontSize: '0.875rem',
+    fontSize: typography.fontSizeSm,
     fontWeight: 600,
     letterSpacing: '0.05em',
     textTransform: 'uppercase',
@@ -36,7 +36,7 @@ export const styles = stylex.create({
     borderRadius: borderRadius.md,
     backgroundColor: colors.surfaceSecondary,
     color: colors.textSecondary,
-    fontSize: '0.875rem',
+    fontSize: typography.fontSizeSm,
     lineHeight: 1.5,
   },
 });

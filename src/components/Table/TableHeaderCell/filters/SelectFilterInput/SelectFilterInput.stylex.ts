@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { spacing } from '@/design-system/tokens/base.stylex';
+import { spacing, typography } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const styles = stylex.create({
@@ -17,12 +17,12 @@ export const styles = stylex.create({
   label: {
     color: colors.textPrimary,
     cursor: 'pointer',
-    fontSize: '0.875rem',
+    fontSize: typography.fontSizeSm,
   },
   noResults: {
     padding: spacing.sm,
     color: colors.textSecondary,
-    fontSize: '0.875rem',
+    fontSize: typography.fontSizeSm,
     textAlign: 'center',
   },
   option: {
@@ -64,13 +64,13 @@ export const styles = stylex.create({
     },
     backgroundColor: colors.surfacePrimary,
     color: colors.textPrimary,
-    fontSize: '0.875rem',
+    fontSize: typography.fontSizeSm,
   },
   loadingMore: {
     padding: spacing.sm,
     backgroundColor: colors.surfacePrimary,
     color: colors.textSecondary,
-    fontSize: '0.875rem',
+    fontSize: typography.fontSizeSm,
     position: 'sticky',
     textAlign: 'center',
     borderTopColor: colors.borderPrimary,
