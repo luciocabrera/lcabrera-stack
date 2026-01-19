@@ -5,7 +5,11 @@ import type { TextFilterInputProps } from './TextFilterInput.types';
 
 import { styles } from './TextFilterInput.stylex';
 
-export const TextFilterInput = ({ filter, onChange }: TextFilterInputProps) => {
+export const TextFilterInput = ({
+  filter,
+  onChange,
+  onOperatorChange,
+}: TextFilterInputProps) => {
   const [operator, setOperator] = useState<
     | 'contains'
     | 'endsWith'
@@ -13,7 +17,7 @@ export const TextFilterInput = ({ filter, onChange }: TextFilterInputProps) => {
     | 'notContains'
     | 'notEquals'
     | 'startsWith'
-  >(filter?.operator ?? 'contains');
+  >(filter?.operator ?? 'equals');
   const [value, setValue] = useState(filter?.value ?? '');
 
   const handleOperatorChange = (
@@ -26,8 +30,15 @@ export const TextFilterInput = ({ filter, onChange }: TextFilterInputProps) => {
       | 'startsWith',
   ) => {
     setOperator(newOperator);
-    if (value) {
-      onChange({ operator: newOperator, type: 'text', value });
+    onOperatorChange?.(newOperator);
+    // Only update filter if we have a value or if operator is equals/notEquals
+    if (value || newOperator === 'equals' || newOperator === 'notEquals') {
+      if (value) {
+        onChange({ operator: newOperator, type: 'text', value });
+      } else {
+        // eslint-disable-next-line unicorn/no-null
+        onChange(null);
+      }
     }
   };
 
@@ -35,8 +46,14 @@ export const TextFilterInput = ({ filter, onChange }: TextFilterInputProps) => {
     setValue(newValue);
     if (newValue) {
       onChange({ operator, type: 'text', value: newValue });
+    } else {
+      // eslint-disable-next-line unicorn/no-null
+      onChange(null);
     }
   };
+
+  const showInput =
+    operator !== 'equals' && operator !== 'notEquals';
 
   return (
     <div {...stylex.props(styles.container)}>
@@ -55,22 +72,24 @@ export const TextFilterInput = ({ filter, onChange }: TextFilterInputProps) => {
         value={operator}
         {...stylex.props(styles.select)}
       >
-        <option value='contains'>Contains</option>
-        <option value='endsWith'>Ends with</option>
         <option value='equals'>Equals</option>
-        <option value='notContains'>Does not contain</option>
         <option value='notEquals'>Does not equal</option>
+        <option value='contains'>Contains</option>
+        <option value='notContains'>Does not contain</option>
         <option value='startsWith'>Starts with</option>
+        <option value='endsWith'>Ends with</option>
       </select>
-      <input
-        onChange={(e) => {
-          handleValueChange(e.target.value);
-        }}
-        placeholder='Enter text...'
-        type='text'
-        value={value}
-        {...stylex.props(styles.input)}
-      />
+      {showInput && (
+        <input
+          onChange={(e) => {
+            handleValueChange(e.target.value);
+          }}
+          placeholder='Enter text...'
+          type='text'
+          value={value}
+          {...stylex.props(styles.input)}
+        />
+      )}
     </div>
   );
 };

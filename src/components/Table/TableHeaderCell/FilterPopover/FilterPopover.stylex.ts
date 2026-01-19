@@ -12,18 +12,19 @@ export const styles = stylex.create({
     borderRadius: '0.5rem',
     borderStyle: 'solid',
     borderWidth: '1px',
+    overflow: 'hidden',
+    transition: 'opacity 0.15s ease',
     backgroundColor: colors.surfacePrimary,
     boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
+    // Hide initially to prevent flash at 0,0 before positioning
+    opacity: 0,
     // Fixed positioning for manual placement via JavaScript
     position: 'fixed',
     minWidth: '20rem',
     width: '24rem',
-    // Hide initially to prevent flash at 0,0 before positioning
-    opacity: 0,
-    transition: 'opacity 0.15s ease',
   },
   content: {
-    gap: spacing.md,
+    gap: spacing.sm,
     display: 'flex',
     flexDirection: 'column',
   },
@@ -79,5 +80,24 @@ export const styles = stylex.create({
     fontWeight: typography.fontWeightNormal,
     lineHeight: typography.lineHeightNormal,
     textAlign: 'center',
+  },
+  divider: {
+    borderTopColor: colors.borderPrimary,
+    borderTopStyle: 'solid',
+    borderTopWidth: '1px',
+    marginBottom: spacing.sm,
+    marginTop: spacing.sm,
+  },
+  dividerText: {
+    padding: `0 ${spacing.sm}`,
+    color: colors.textSecondary,
+    fontSize: typography.fontSizeXs,
+    fontWeight: typography.fontWeightMedium,
+    textTransform: 'uppercase',
+  },
+  stringFilterContainer: {
+    gap: spacing.sm,
+    display: 'flex',
+    flexDirection: 'column',
   },
 });

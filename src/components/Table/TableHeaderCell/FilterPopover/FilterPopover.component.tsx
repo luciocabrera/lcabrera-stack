@@ -29,6 +29,15 @@ export const FilterPopover = ({
   const [fetchedOptions, setFetchedOptions] = useState<string[]>();
   const [isFetchingOptions, setIsFetchingOptions] = useState(false);
   const [hasMoreOptions, setHasMoreOptions] = useState(false);
+  // Track the selected text operator for conditional rendering
+  const [textOperator, setTextOperator] = useState<
+    | 'contains'
+    | 'endsWith'
+    | 'equals'
+    | 'notContains'
+    | 'notEquals'
+    | 'startsWith'
+  >('equals');
 
   // Sync local filter with prop when it changes externally
   useEffect(() => {
@@ -43,6 +52,9 @@ export const FilterPopover = ({
     const handlePopoverToggle = (e: Event) => {
       const toggleEvent = e as ToggleEvent;
       if (toggleEvent.newState === 'open') {
+        // Lock body scroll to prevent outer scrollbar
+        document.body.style.overflow = 'hidden';
+        
         // Position popover relative to the trigger button
         const triggerButton = document.querySelector<HTMLElement>(
           `[popovertarget="${popoverId}"]`,
@@ -52,26 +64,37 @@ export const FilterPopover = ({
         const buttonRect = triggerButton.getBoundingClientRect();
         const popoverRect = popover.getBoundingClientRect();
 
-        // Position below the button with a small gap
-        const top = buttonRect.bottom + 4; // 4px gap
-        const left = buttonRect.left;
+        // Calculate available space with some padding
+        const SPACING = 8;
+        const OFFSET = 4; // Offset between button and popover
+        const spaceBelow = window.innerHeight - buttonRect.bottom - SPACING - OFFSET;
+        const spaceAbove = buttonRect.top - SPACING - OFFSET;
+        const shouldPositionAbove = spaceBelow < popoverRect.height && spaceAbove > spaceBelow;
+
+        // Calculate max height based on available space
+        const maxHeight = shouldPositionAbove ? spaceAbove : spaceBelow;
 
         // Check if popover would go off-screen on the right
+        const left = buttonRect.left;
         const rightEdge = left + popoverRect.width;
         const adjustedLeft =
           rightEdge > window.innerWidth
-            ? window.innerWidth - popoverRect.width - 8
+            ? window.innerWidth - popoverRect.width - SPACING
             : left;
 
-        // Check if popover would go off-screen on the bottom
-        const bottomEdge = top + popoverRect.height;
-        const adjustedTop =
-          bottomEdge > window.innerHeight
-            ? buttonRect.top - popoverRect.height - 4 // Position above button
-            : top;
-
         popover.style.left = `${adjustedLeft}px`;
-        popover.style.top = `${adjustedTop}px`;
+        popover.style.maxHeight = `${maxHeight}px`;
+        
+        if (shouldPositionAbove) {
+          // Position above button - anchor to bottom of viewport
+          popover.style.bottom = `${window.innerHeight - buttonRect.top + 4}px`;
+          popover.style.top = 'auto';
+        } else {
+          // Position below button - anchor to top
+          popover.style.top = `${buttonRect.bottom + 4}px`;
+          popover.style.bottom = 'auto';
+        }
+        
         popover.style.margin = '0';
         popover.style.opacity = '1';
 
@@ -109,6 +132,9 @@ export const FilterPopover = ({
             (firstInput as HTMLElement).focus();
           }
         }, 0);
+      } else if (toggleEvent.newState === 'closed') {
+        // Unlock body scroll when popover closes
+        document.body.style.overflow = '';
       }
     };
 
@@ -205,19 +231,32 @@ export const FilterPopover = ({
       case 'string': {
         // Use SelectFilterInput if we have filter options (facet filter)
         if (effectiveFilterOptions && effectiveFilterOptions.length > 0) {
+          const showSelectList =
+            textOperator === 'equals' || textOperator === 'notEquals';
+
           return (
-            <SelectFilterInput
-              // eslint-disable-next-line unicorn/no-null
-              filter={localFilter?.type === 'select' ? localFilter : null}
-              hasMore={hasMoreOptions}
-              isLoadingMore={isFetchingOptions}
-              onChange={setLocalFilter}
-              onLoadMore={handleLoadMoreOptions}
-              options={effectiveFilterOptions}
-            />
+            <div {...stylex.props(styles.stringFilterContainer)}>
+              <TextFilterInput
+                // eslint-disable-next-line unicorn/no-null
+                filter={localFilter?.type === 'text' ? localFilter : null}
+                onChange={setLocalFilter}
+                onOperatorChange={setTextOperator}
+              />
+              {showSelectList && (
+                <SelectFilterInput
+                  // eslint-disable-next-line unicorn/no-null
+                  filter={localFilter?.type === 'select' ? localFilter : null}
+                    hasMore={hasMoreOptions}
+                    isLoadingMore={isFetchingOptions}
+                    onChange={setLocalFilter}
+                    onLoadMore={handleLoadMoreOptions}
+                    options={effectiveFilterOptions}
+                  />
+              )}
+            </div>
           );
         }
-        // Otherwise use TextFilterInput
+        // Otherwise use TextFilterInput only
         return (
           <TextFilterInput
             // eslint-disable-next-line unicorn/no-null
