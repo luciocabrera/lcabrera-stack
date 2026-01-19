@@ -18,6 +18,9 @@ export const styles = stylex.create({
     position: 'fixed',
     minWidth: '20rem',
     width: '24rem',
+    // Hide initially to prevent flash at 0,0 before positioning
+    opacity: 0,
+    transition: 'opacity 0.15s ease',
   },
   content: {
     gap: spacing.md,

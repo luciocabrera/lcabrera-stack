@@ -1,5 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
-import { useState } from 'react';
+
+import { Button } from '@/components/Button';
 
 import type { BooleanFilterInputProps } from './BooleanFilterInput.types';
 
@@ -9,15 +10,20 @@ export const BooleanFilterInput = ({
   filter,
   onChange,
 }: BooleanFilterInputProps) => {
-  const [selectedValue, setSelectedValue] = useState<'all' | 'false' | 'true'>(
-    filter ? (filter.value ? 'true' : 'false') : 'all',
-  );
+  // Derive selected value directly from filter prop (no local state needed)
+  const selectedValue: 'all' | 'false' | 'true' = filter
+    ? filter.value
+      ? 'true'
+      : 'false'
+    : 'all';
 
   const handleChange = (newValue: 'all' | 'false' | 'true') => {
-    setSelectedValue(newValue);
-    if (newValue !== 'all') {
+    if (newValue === 'all') {
+      // eslint-disable-next-line unicorn/no-null
+      onChange(null);
+    } else {
       onChange({
-        type: 'boolean',
+        type: 'boolean' as const,
         // eslint-disable-next-line @typescript-eslint/naming-convention
         value: newValue === 'true',
       });
@@ -26,44 +32,36 @@ export const BooleanFilterInput = ({
 
   return (
     <div {...stylex.props(styles.container)}>
-      <div {...stylex.props(styles.radioGroup)}>
-        <label {...stylex.props(styles.radioOption)}>
-          <input
-            checked={selectedValue === 'all'}
-            name='boolean-filter'
-            onChange={() => {
-              handleChange('all');
-            }}
-            type='radio'
-            {...stylex.props(styles.radio)}
-          />
-          <span {...stylex.props(styles.label)}>All</span>
-        </label>
-        <label {...stylex.props(styles.radioOption)}>
-          <input
-            checked={selectedValue === 'true'}
-            name='boolean-filter'
-            onChange={() => {
-              handleChange('true');
-            }}
-            type='radio'
-            {...stylex.props(styles.radio)}
-          />
-          <span {...stylex.props(styles.label)}>True</span>
-        </label>
-        <label {...stylex.props(styles.radioOption)}>
-          <input
-            checked={selectedValue === 'false'}
-            name='boolean-filter'
-            onChange={() => {
-              handleChange('false');
-            }}
-            type='radio'
-            {...stylex.props(styles.radio)}
-          />
-          <span {...stylex.props(styles.label)}>False</span>
-        </label>
-      </div>
+      <Button
+        color={selectedValue === 'all' ? 'primary' : 'outline'}
+        onClick={() => {
+          handleChange('all');
+        }}
+        size='sm'
+        width='full'
+      >
+        All
+      </Button>
+      <Button
+        color={selectedValue === 'true' ? 'primary' : 'outline'}
+        onClick={() => {
+          handleChange('true');
+        }}
+        size='sm'
+        width='full'
+      >
+        True
+      </Button>
+      <Button
+        color={selectedValue === 'false' ? 'primary' : 'outline'}
+        onClick={() => {
+          handleChange('false');
+        }}
+        size='sm'
+        width='full'
+      >
+        False
+      </Button>
     </div>
   );
 };

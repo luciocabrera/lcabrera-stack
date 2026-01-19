@@ -73,6 +73,7 @@ export const FilterPopover = ({
         popover.style.left = `${adjustedLeft}px`;
         popover.style.top = `${adjustedTop}px`;
         popover.style.margin = '0';
+        popover.style.opacity = '1';
 
         // Fetch options when popover opens (if needed)
         if (fetchFilterOptions && !fetchedOptions && !isFetchingOptions) {
@@ -269,6 +270,7 @@ export const FilterPopover = ({
               popoverRef.current?.hidePopover();
             }}
             size='sm'
+            width='full'
           >
             Clear
           </Button>
@@ -285,6 +287,7 @@ export const FilterPopover = ({
               popoverRef.current?.hidePopover();
             }}
             size='sm'
+            width='full'
           >
             Apply
           </Button>
