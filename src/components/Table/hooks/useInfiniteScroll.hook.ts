@@ -5,9 +5,9 @@ import type {
   InfiniteScrollResponse,
   OffsetLimitParams,
   PageBasedParams,
+  PaginationMeta,
   PaginationStrategy,
 } from '../Table.types';
-import type { PaginationMeta } from '../TableContext/TableContext.types';
 
 import {
   useAppendTableData,

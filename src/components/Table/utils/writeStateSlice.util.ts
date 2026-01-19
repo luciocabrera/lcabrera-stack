@@ -1,6 +1,6 @@
 import { writeToCookie, writeToLocalStorage } from '@/utils/storage';
 
-import type { StorageType, TablePersistenceConfig } from '../TableContext';
+import type { StorageType, TablePersistenceConfig } from '../Table.types';
 
 import { getStorageKey } from './getStorageKey.util';
 import { PERSISTENCE_VERSION } from './persistence.constants';

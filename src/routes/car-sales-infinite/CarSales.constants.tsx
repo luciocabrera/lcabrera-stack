@@ -1,6 +1,5 @@
 import type { TableColumn } from '@/components/Table/Table.types';
 
-
 export const PERSISTENCE_KEY = 'car-sales-infinite-table';
 
 export const COLUMNS: TableColumn[] = [

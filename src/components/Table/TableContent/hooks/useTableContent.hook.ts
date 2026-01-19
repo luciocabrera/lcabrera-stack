@@ -1,18 +1,15 @@
 import { use, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { compareValues } from '@/utils/compareValues.util';
-
-import type { TableContentProps } from '../TableContent.types';
+import type { TableState } from '@/components/Table/Table.types';
 
 import {
   useInfiniteScroll,
   useTablePersistence,
   useTableSearchParams,
-} from '../../hooks';
-import { DEFAULT_INFINITE_SCROLL_THRESHOLD } from '../../Table.constants';
+} from '@/components/Table/hooks';
+import { DEFAULT_INFINITE_SCROLL_THRESHOLD } from '@/components/Table/Table.constants';
 import {
   TableContext,
-  type TableState,
   useColumnFilters,
   useColumnOrder,
   useColumnSizing,
@@ -23,7 +20,10 @@ import {
   useSorting,
   useTableData,
   useTableLoadingMore,
-} from '../../TableContext';
+} from '@/components/Table/TableContext';
+import { compareValues } from '@/utils/compareValues.util';
+
+import type { TableContentProps } from '../TableContent.types';
 
 type UseTableContentArgs<T extends Record<string, unknown>> = Pick<
   TableContentProps<T>,

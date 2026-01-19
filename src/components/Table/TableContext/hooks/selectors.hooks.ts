@@ -12,7 +12,7 @@ import type {
   SortingState,
   TableMeta,
   TableState,
-} from '../TableContext.types';
+} from '../../Table.types';
 
 import { useMetaStore, useTableStore } from './useTableStore.hook';
 

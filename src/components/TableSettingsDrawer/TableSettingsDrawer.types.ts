@@ -1,12 +1,10 @@
 import type {
-  ColumnSizingState,
-  TableColumn,
-} from '@/components/Table/Table.types';
-import type {
   ColumnOrderState,
+  ColumnSizingState,
   ColumnVisibilityState,
   SortingState,
-} from '@/components/Table/TableContext';
+  TableColumn,
+} from '@/components/Table';
 
 /**
  * TableSettingsDrawer component props

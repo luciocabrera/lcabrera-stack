@@ -5,9 +5,9 @@ import type {
   ColumnSizingState,
   ColumnVisibilityState,
   TableMeta,
-  TableProviderProps,
   TableState,
-} from './TableContext.types';
+} from '../Table.types';
+import type { TableProviderProps } from './TableContext.types';
 
 import { readPersistedStateFromCookie } from '../utils';
 import { TableContext, type TableContextValue } from './TableContext.context';
@@ -94,17 +94,17 @@ export const TableProvider = <TData extends Record<string, unknown>>({
     : {};
 
   // Loader-provided values take precedence over persisted state
-  const effectiveColumnSizing =
+  const effectiveColumnSizing: ColumnSizingState | undefined =
     initialColumnSizing && Object.keys(initialColumnSizing).length > 0
       ? initialColumnSizing
       : (persistedState as Partial<TableState<TData>>).columnSizing;
 
-  const effectiveColumnOrder =
+  const effectiveColumnOrder: ColumnOrderState | undefined =
     initialColumnOrder && initialColumnOrder.length > 0
       ? initialColumnOrder
       : (persistedState as Partial<TableState<TData>>).columnOrder;
 
-  const effectiveColumnVisibility =
+  const effectiveColumnVisibility: ColumnVisibilityState | undefined =
     initialColumnVisibility && initialColumnVisibility.size > 0
       ? initialColumnVisibility
       : (persistedState as Partial<TableState<TData>>).columnVisibility;

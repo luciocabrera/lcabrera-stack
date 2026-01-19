@@ -48,29 +48,31 @@ export const FilterPopover = ({
           `[popovertarget="${popoverId}"]`,
         );
         if (!triggerButton) return;
-        
+
         const buttonRect = triggerButton.getBoundingClientRect();
         const popoverRect = popover.getBoundingClientRect();
-          
-          // Position below the button with a small gap
-          const top = buttonRect.bottom + 4; // 4px gap
-          const left = buttonRect.left;
-          
-          // Check if popover would go off-screen on the right
-          const rightEdge = left + popoverRect.width;
-          const adjustedLeft = rightEdge > window.innerWidth 
-            ? window.innerWidth - popoverRect.width - 8 
+
+        // Position below the button with a small gap
+        const top = buttonRect.bottom + 4; // 4px gap
+        const left = buttonRect.left;
+
+        // Check if popover would go off-screen on the right
+        const rightEdge = left + popoverRect.width;
+        const adjustedLeft =
+          rightEdge > window.innerWidth
+            ? window.innerWidth - popoverRect.width - 8
             : left;
-          
-          // Check if popover would go off-screen on the bottom
-          const bottomEdge = top + popoverRect.height;
-          const adjustedTop = bottomEdge > window.innerHeight
+
+        // Check if popover would go off-screen on the bottom
+        const bottomEdge = top + popoverRect.height;
+        const adjustedTop =
+          bottomEdge > window.innerHeight
             ? buttonRect.top - popoverRect.height - 4 // Position above button
             : top;
-          
-          popover.style.left = `${adjustedLeft}px`;
-          popover.style.top = `${adjustedTop}px`;
-          popover.style.margin = '0';
+
+        popover.style.left = `${adjustedLeft}px`;
+        popover.style.top = `${adjustedTop}px`;
+        popover.style.margin = '0';
 
         // Fetch options when popover opens (if needed)
         if (fetchFilterOptions && !fetchedOptions && !isFetchingOptions) {
@@ -113,7 +115,13 @@ export const FilterPopover = ({
     return () => {
       popover.removeEventListener('toggle', handlePopoverToggle);
     };
-  }, [fetchFilterOptions, fetchedOptions, isFetchingOptions, column.key, popoverId]);
+  }, [
+    fetchFilterOptions,
+    fetchedOptions,
+    isFetchingOptions,
+    column.key,
+    popoverId,
+  ]);
 
   // Handle loading more filter options (infinite scroll)
   const handleLoadMoreOptions = useCallback(() => {

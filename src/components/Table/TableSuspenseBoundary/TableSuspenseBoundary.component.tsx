@@ -1,9 +1,10 @@
 import { Suspense } from 'react';
 
-import { Table } from '@/components/Table';
 import { TableDataResolver } from '@/components/Table/TableDataResolver';
 
 import type { TableSuspenseBoundaryProps } from './TableSuspenseBoundary.types';
+
+import { Table } from '../Table.component';
 
 /**
  * Suspense boundary wrapper for Table with data promise

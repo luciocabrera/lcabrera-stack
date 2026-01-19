@@ -1,10 +1,10 @@
 import type { ComponentPropsWithoutRef } from 'react';
 
-import type { TableColumn } from '@/components/Table/Table.types';
 import type {
   ColumnOrderState,
   ColumnVisibilityState,
-} from '@/components/Table/TableContext';
+  TableColumn,
+} from '@/components/Table';
 
 /**
  * ColumnOrderSection component props

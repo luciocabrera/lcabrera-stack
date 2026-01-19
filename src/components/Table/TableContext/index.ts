@@ -22,9 +22,11 @@ export {
 // Hooks - Actions
 export {
   useAppendTableData,
+  useClearColumnFilter,
   useResetColumnSizing,
   useSelectAllRows,
   useSelectRow,
+  useSetColumnFilter,
   useSetColumnFilters,
   useSetColumnOrder,
   useSetColumnSizing,
@@ -45,21 +47,3 @@ export type { TableContextValue } from './TableContext.context';
 
 // Provider
 export { TableProvider } from './TableContext.provider';
-
-// Types
-export type {
-  ColumnFiltersState,
-  ColumnOrderState,
-  ColumnPinningState,
-  ColumnSizingState,
-  ColumnVisibilityState,
-  PaginationState,
-  RowSelectionState,
-  SortDirection,
-  SortingState,
-  StorageType,
-  TableMeta,
-  TablePersistenceConfig,
-  TableProviderProps,
-  TableState,
-} from './TableContext.types';

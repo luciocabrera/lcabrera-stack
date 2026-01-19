@@ -7,7 +7,7 @@ import type {
   ColumnOrderState,
   ColumnVisibilityState,
   SortingState,
-} from '../TableContext';
+} from '../Table.types';
 
 type TableSearchParamsState = {
   columnOrder?: ColumnOrderState;

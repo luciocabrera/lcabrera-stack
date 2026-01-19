@@ -3,4 +3,3 @@ export type ApiConfig = {
   localhost: { apiHost: string };
   prod: { apiHost: string };
 };
-

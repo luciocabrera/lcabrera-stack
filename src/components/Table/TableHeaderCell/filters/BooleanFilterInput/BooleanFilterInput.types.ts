@@ -1,4 +1,4 @@
-import type { BooleanFilter } from '@/components/Table';
+import type { BooleanFilter } from '../../../Table.types';
 
 export type BooleanFilterInputProps = {
   filter: BooleanFilter | null | undefined;

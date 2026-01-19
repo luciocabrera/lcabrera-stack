@@ -18,7 +18,7 @@ export type InfiniteScrollLoadMoreParams = {
 export type InfiniteScrollLoadMoreResult<TData> = {
   data: TData[];
   hasMore: boolean;
-  total?: number;
+  total: number;
 };
 
 export type TableLayoutInfiniteScrollConfig<TData> = {
@@ -28,39 +28,32 @@ export type TableLayoutInfiniteScrollConfig<TData> = {
 };
 
 export type TableLayoutProps<TData extends Record<string, unknown>> = {
-  /** Column order from loader/URL state */
+  /** Column order from loader/URL state (optional) */
   columnOrder?: ColumnOrderState;
-  /** Column definitions */
+  /** Column definitions (required) */
   columns: TableColumn[];
-  /** Column sizing from loader/URL state */
+  /** Column sizing from loader/URL state (optional) */
   columnSizing?: ColumnSizingState;
-  /** Column visibility from loader/URL state */
+  /** Column visibility from loader/URL state (optional) */
   columnVisibility?: ColumnVisibilityState;
-  /** Promise that resolves to the initial data */
+  /** Promise that resolves to the initial data (required) */
   dataPromise: Promise<unknown>;
-  /** Function to extract data array from the promise response */
+  /** Function to extract data array from the promise response (required) */
   dataSelector: (response: unknown) => TData[];
-  /** Table density (default: 'comfortable') */
+  /** Table density (optional, default: 'comfortable') */
   density?: TableDensity;
-  /** Active filters from loader/URL state */
+  /** Active filters from loader/URL state (optional) */
   filters?: ColumnFiltersState;
-  /** Infinite scroll configuration */
+  /** Infinite scroll configuration (required) */
   infiniteScrollConfig: TableLayoutInfiniteScrollConfig<TData>;
-  /** Show table borders (default: true) */
+  /** Show table borders (optional, default: true) */
   isBordered?: boolean;
-  /** Show striped rows (default: true) */
+  /** Show striped rows (optional, default: true) */
   isStriped?: boolean;
-  /** Key for persisting table state */
+  /** Key for persisting table state (required) */
   persistenceKey: string;
-  /** Active sorting from loader/URL state */
+  /** Active sorting from loader/URL state (optional) */
   sorting?: SortingState;
-  /** Table title */
+  /** Table title (required) */
   title: string;
-};
-
-export type TableLayoutInnerProps<TData extends Record<string, unknown>> = Omit<
-  TableLayoutProps<TData>,
-  'dataPromise' | 'dataSelector'
-> & {
-  initialData: TData[];
 };

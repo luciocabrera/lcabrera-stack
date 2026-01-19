@@ -1,4 +1,4 @@
-import type { ColumnFilter, TableColumn } from '@/components/Table';
+import type { ColumnFilter, TableColumn } from '../../Table.types';
 
 export type FilterPopoverProps = {
   column: TableColumn;

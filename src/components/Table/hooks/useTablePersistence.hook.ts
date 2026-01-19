@@ -9,7 +9,7 @@ import type {
   PaginationState,
   SortingState,
   TablePersistenceConfig,
-} from '../TableContext';
+} from '../Table.types';
 
 import {
   type PersistedState,

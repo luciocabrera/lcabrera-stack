@@ -2,7 +2,7 @@ import { createContext } from 'react';
 
 import type { TStore } from '@/hooks';
 
-import type { TableMeta, TableState } from './TableContext.types';
+import type { TableMeta, TableState } from '../Table.types';
 
 /**
  * Table context value containing both stores

@@ -1,34 +1,26 @@
 import * as stylex from '@stylexjs/stylex';
-import { useSearchParams } from 'react-router';
 
-import type {
-  InfiniteScrollConfig,
-  OffsetLimitParams,
-  OnFilterChangeArgs,
-  OnSortChangeArgs,
-} from '@/components/Table';
-
-import { Table } from '@/components/Table';
 import { TableSuspenseBoundary } from '@/components/Table/TableSuspenseBoundary';
 
-import type { TableLayoutInnerProps, TableLayoutProps } from './TableLayout.types';
+import type { TableLayoutProps } from './TableLayout.types';
 
 import { styles } from './TableLayout.stylex';
+import { TableLayoutInner } from './TableLayoutInner';
 
 /**
  * Reusable layout component for pages that display tables with infinite scroll
- * 
+ *
  * Handles common patterns like:
  * - Suspense boundary for initial data loading
  * - URL state synchronization (sorting, filters)
  * - Infinite scroll configuration
  * - Table remounting on state changes
- * 
+ *
  * @example
  * ```tsx
  * export const MyDataRoute = () => {
  *   const loaderData = useLoaderData<typeof loader>();
- *   
+ *
  *   return (
  *     <TableLayout
  *       columns={columns}
@@ -65,6 +57,15 @@ export const TableLayout = <TData extends Record<string, unknown>>({
   sorting,
   title,
 }: TableLayoutProps<TData>) => {
+  // Provide safe defaults for optional props with proper type guards
+  const normalizedColumnOrder: string[] =
+    (columnOrder as string[] | undefined) ?? [];
+  const normalizedColumnVisibility: Set<string> =
+    (columnVisibility as Set<string> | undefined) ?? new Set<string>();
+  const normalizedDensity: 'comfortable' | 'compact' = density as
+    | 'comfortable'
+    | 'compact';
+
   return (
     <div {...stylex.props(styles.container)}>
       <TableSuspenseBoundary<TData, unknown>
@@ -72,17 +73,17 @@ export const TableLayout = <TData extends Record<string, unknown>>({
         columnSizing={columnSizing}
         dataPromise={dataPromise}
         dataSelector={dataSelector}
-        initialColumnOrder={columnOrder}
-        initialColumnVisibility={columnVisibility}
+        initialColumnOrder={normalizedColumnOrder}
+        initialColumnVisibility={normalizedColumnVisibility}
         title={title}
       >
         {(data) => (
-          <TableLayoutInner
-            columnOrder={columnOrder}
+          <TableLayoutInner<TData>
+            columnOrder={normalizedColumnOrder}
             columns={columns}
             columnSizing={columnSizing}
-            columnVisibility={columnVisibility}
-            density={density}
+            columnVisibility={normalizedColumnVisibility}
+            density={normalizedDensity}
             filters={filters}
             infiniteScrollConfig={infiniteConfigProp}
             initialData={data}
@@ -95,108 +96,5 @@ export const TableLayout = <TData extends Record<string, unknown>>({
         )}
       </TableSuspenseBoundary>
     </div>
-  );
-};
-
-const TableLayoutInner = <TData extends Record<string, unknown>>({
-  columnOrder,
-  columns,
-  columnSizing,
-  columnVisibility,
-  density,
-  filters: currentFilters,
-  infiniteScrollConfig: infiniteConfigProp,
-  initialData,
-  isBordered,
-  isStriped,
-  persistenceKey,
-  sorting: currentSorting,
-  title,
-}: TableLayoutInnerProps<TData>) => {
-  const [, setSearchParams] = useSearchParams();
-
-  const handleSortChange = ({ sorting }: OnSortChangeArgs) => {
-    if (!Array.isArray(sorting)) return Promise.resolve();
-
-    setSearchParams((params) => {
-      if (sorting.length > 0) {
-        params.set('sort', JSON.stringify(sorting));
-      } else {
-        params.delete('sort');
-      }
-      return params;
-    });
-
-    return Promise.resolve();
-  };
-
-  const handleFilterChange = ({ filters }: OnFilterChangeArgs) => {
-    setSearchParams((params) => {
-      if (Object.keys(filters).length > 0) {
-        params.set('filters', JSON.stringify(filters));
-      } else {
-        params.delete('filters');
-      }
-      return params;
-    });
-
-    return Promise.resolve();
-  };
-
-  const infiniteScrollConfig: InfiniteScrollConfig<TData> = {
-    initialPageSize: 50,
-    isEnabled: true,
-    loadMorePageSize: 50,
-    onLoadMore: async (params) => {
-      const { limit, skip } = params as OffsetLimitParams;
-      
-      // Call the provided onLoadMore with current state
-      const result = await infiniteConfigProp.onLoadMore({
-        filters: currentFilters,
-        limit,
-        skip,
-        sorting: currentSorting,
-      });
-
-      return {
-        data: result.data,
-        hasMore: result.hasMore,
-        totalRows: result.total ?? result.data.length,
-      };
-    },
-    strategy: 'offset-limit',
-    threshold: 200,
-  };
-
-  // Generate key to force Table remount when state changes
-  const sortKey = currentSorting ? JSON.stringify(currentSorting) : 'default';
-  const filterKey = currentFilters ? JSON.stringify(currentFilters) : 'default';
-  const tableKey = `${sortKey}-${filterKey}`;
-
-  return (
-    <Table
-      columns={columns}
-      columnSizing={columnSizing}
-      data={initialData}
-      density={density}
-      infiniteScrollConfig={infiniteScrollConfig}
-      initialColumnFilters={currentFilters ?? {}}
-      initialColumnOrder={columnOrder}
-      initialColumnVisibility={columnVisibility}
-      initialMeta={{
-        hasMore: true,
-        paginationMeta: {
-          offset: initialData.length,
-        },
-      }}
-      initialSorting={currentSorting ?? []}
-      isBordered={isBordered}
-      isStriped={isStriped}
-      key={tableKey}
-      onFilterChange={handleFilterChange}
-      onSortChange={handleSortChange}
-      persistenceKey={persistenceKey}
-      title={title}
-    />
   );
 };

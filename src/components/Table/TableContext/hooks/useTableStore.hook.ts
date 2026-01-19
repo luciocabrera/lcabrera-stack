@@ -2,8 +2,8 @@ import { use, useCallback, useSyncExternalStore } from 'react';
 
 import type { UseStoreSelector } from '@/hooks';
 
+import type { TableMeta, TableState } from '../../Table.types';
 import type { TableContextValue } from '../TableContext.context';
-import type { TableMeta, TableState } from '../TableContext.types';
 
 import { TableContext } from '../TableContext.context';
 

@@ -4,7 +4,7 @@ import { readPersistedStateFromCookie } from '@/components/Table/utils';
 import { carSalesApi } from '@/services';
 import { readTableStateFromURL } from '@/utils/urlState';
 
-const PERSISTENCE_KEY = 'car-sales-infinite-table';
+import { PERSISTENCE_KEY } from './CarSales.constants';
 
 /**
  * Loader for car sales route

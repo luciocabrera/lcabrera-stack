@@ -1,4 +1,4 @@
-import type { DateFilter } from '@/components/Table';
+import type { DateFilter } from '../../../Table.types';
 
 export type DateFilterInputProps = {
   filter: DateFilter | null | undefined;

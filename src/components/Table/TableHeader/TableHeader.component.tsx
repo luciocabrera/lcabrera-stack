@@ -1,7 +1,14 @@
 import * as stylex from '@stylexjs/stylex';
 import { useCallback, useMemo } from 'react';
 
-import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
+import type { ColumnFilter } from '../Table.types';
+import type {
+  HandleResizeParams,
+  HandleSortParams,
+  TableHeaderProps,
+} from './TableHeader.types';
+
+import { DEFAULT_MIN_COLUMN_WIDTH } from '../Table.constants';
 import {
   useClearColumnFilter,
   useColumnFilters,
@@ -12,17 +19,9 @@ import {
   useSetColumnSizing,
   useSetSorting,
   useSorting,
-} from '@/components/Table/TableContext/hooks';
-import { TableHeaderCell } from '@/components/Table/TableHeaderCell';
-import { TableRow } from '@/components/Table/TableRow';
-
-import type { ColumnFilter } from '../Table.types';
-import type {
-  HandleResizeParams,
-  HandleSortParams,
-  TableHeaderProps,
-} from './TableHeader.types';
-
+} from '../TableContext';
+import { TableHeaderCell } from '../TableHeaderCell';
+import { TableRow } from '../TableRow';
 import { tableHeaderStyles } from './TableHeader.stylex';
 
 export const TableHeader = <TData extends Record<string, unknown>>({

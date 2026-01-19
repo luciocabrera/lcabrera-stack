@@ -1,7 +1,6 @@
 import type { ComponentPropsWithoutRef } from 'react';
 
-import type { TableProps } from '../Table.types';
-import type { SortDirection } from '../TableContext';
+import type { SortDirection, TableProps } from '../Table.types';
 
 export type HandleResizeParams = {
   columnKey: string;

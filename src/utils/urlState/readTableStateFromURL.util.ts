@@ -3,7 +3,7 @@ import type {
   ColumnOrderState,
   ColumnVisibilityState,
   SortingState,
-} from '@/components/Table/TableContext';
+} from '@/components/Table';
 
 import { readStateFromURL } from './readStateFromURL.util';
 

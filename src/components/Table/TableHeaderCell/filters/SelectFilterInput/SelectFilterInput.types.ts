@@ -1,4 +1,4 @@
-import type { SelectFilter } from '@/components/Table';
+import type { SelectFilter } from '../../../Table.types';
 
 export type SelectFilterInputProps = {
   filter: null | SelectFilter | undefined;

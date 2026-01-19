@@ -1,4 +1,4 @@
-import type { TextFilter } from '@/components/Table';
+import type { TextFilter } from '../../../Table.types';
 
 export type TextFilterInputProps = {
   filter: null | TextFilter | undefined;

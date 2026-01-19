@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-import type { ColumnSizingState, TableColumn } from '../TableContext';
+import type { ColumnSizingState, TableColumn } from '../Table.types';
 
 export type TableSuspenseBoundaryProps<TData, TResponse = TData[]> = {
   /** Child render function receiving resolved data */

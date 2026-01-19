@@ -10,11 +10,7 @@ const isLocalIp = (hostname: string): boolean => {
   }
 
   // Check for private IP ranges (10.x.x.x, 172.16-31.x.x, 192.168.x.x)
-  const ipPatterns = [
-    /^10\./,
-    /^172\.(1[6-9]|2\d|3[01])\./,
-    /^192\.168\./,
-  ];
+  const ipPatterns = [/^10\./, /^172\.(1[6-9]|2\d|3[01])\./, /^192\.168\./];
 
   return ipPatterns.some((pattern) => pattern.test(hostname));
 };
@@ -70,7 +66,7 @@ export const getApiBaseUrl = (requestUrl?: string): string => {
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
       return CONFIG.localhost.apiHost;
     }
-    
+
     // For private IPs, use the same IP but with API port 3001
     return `${protocol}//${hostname}:3001/api`;
   }

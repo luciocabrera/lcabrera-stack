@@ -1,6 +1,6 @@
 import { readFromCookie, readFromLocalStorage } from '@/utils/storage';
 
-import type { TablePersistenceConfig } from '../TableContext';
+import type { TablePersistenceConfig } from '../Table.types';
 import type { PersistedState } from './persistence.types';
 
 import { getStorageKey } from './getStorageKey.util';
