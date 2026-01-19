@@ -1,9 +1,14 @@
 import * as stylex from '@stylexjs/stylex';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import { useVirtualization } from '@/hooks/useVirtualization.hook';
+
 import type { SelectFilterInputProps } from './SelectFilterInput.types';
 
 import { styles } from './SelectFilterInput.stylex';
+import { VirtualizedOption } from './VirtualizedOption';
+
+const ITEM_HEIGHT = 32; // Height of each checkbox option in pixels
 
 export const SelectFilterInput = ({
   filter,
@@ -25,6 +30,23 @@ export const SelectFilterInput = ({
       option.toLowerCase().includes(searchTerm.toLowerCase()),
     );
   }, [options, searchTerm]);
+
+  // Add 1 to total items for "Select All" checkbox if showing it
+  const totalItems = filteredOptions.length > 1 ? filteredOptions.length + 1 : filteredOptions.length;
+
+  const {
+    bottomSpacerHeight,
+    endIndex,
+    offsetY,
+    startIndex,
+    totalHeight,
+  } = useVirtualization({
+    containerRef: scrollContainerRef,
+    defaultContainerHeight: 300,
+    itemHeight: ITEM_HEIGHT,
+    overscan: 5,
+    totalItems,
+  });
 
   const handleToggle = (option: string) => {
     const newSelectedValues = selectedValues.includes(option)
@@ -105,35 +127,29 @@ export const SelectFilterInput = ({
         />
       )}
       <div ref={scrollContainerRef} {...stylex.props(styles.optionsList)}>
-        {filteredOptions.length > 1 && (
-          <label {...stylex.props(styles.option)}>
-            <input
-              checked={isAllSelected}
-              onChange={handleSelectAll}
-              type='checkbox'
-              {...stylex.props(styles.checkbox)}
-            />
-            <span {...stylex.props(styles.label)}>
-              {isAllSelected ? 'Deselect All' : 'Select All'}
-            </span>
-          </label>
-        )}
         {filteredOptions.length === 0 ? (
           <div {...stylex.props(styles.noResults)}>No options found</div>
         ) : (
-          filteredOptions.map((option) => (
-            <label key={option} {...stylex.props(styles.option)}>
-              <input
-                checked={selectedValues.includes(option)}
-                onChange={() => {
-                  handleToggle(option);
-                }}
-                type='checkbox'
-                {...stylex.props(styles.checkbox)}
-              />
-              <span {...stylex.props(styles.label)}>{option}</span>
-            </label>
-          ))
+          <div {...stylex.props(styles.virtualContainer(totalHeight))}>
+            <div {...stylex.props(styles.virtualOffset(offsetY))}>
+              {Array.from({ length: endIndex - startIndex }).map((_, i) => {
+                const index = startIndex + i;
+                
+                return (
+                  <VirtualizedOption
+                    filteredOptions={filteredOptions}
+                    index={index}
+                    isAllSelected={isAllSelected}
+                    key={index === 0 && filteredOptions.length > 1 ? 'select-all' : filteredOptions[filteredOptions.length > 1 ? index - 1 : index] ?? `option-${index}`}
+                    onSelectAll={handleSelectAll}
+                    onToggle={handleToggle}
+                    selectedValues={selectedValues}
+                  />
+                );
+              })}
+            </div>
+            <div {...stylex.props(styles.virtualSpacer(bottomSpacerHeight))} />
+          </div>
         )}
         {isLoadingMore && (
           <div {...stylex.props(styles.loadingMore)}>

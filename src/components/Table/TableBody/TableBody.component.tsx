@@ -72,7 +72,6 @@ export const TableBody = <TData extends Record<string, unknown>>({
 
   return (
     <tbody data-testid='table-body' {...stylex.props(styles.body(totalHeight))}>
-      {/* Top spacer row */}
       {offsetY > 0 && (
         <SpacerRow colSpan={orderedColumns.length} height={offsetY} />
       )}
@@ -103,21 +102,12 @@ export const TableBody = <TData extends Record<string, unknown>>({
           </TableRow>
         );
       })}
-      {/* Bottom spacer row */}
       {totalRows > 0 && bottomSpacerHeight > 0 && (
         <SpacerRow
           colSpan={orderedColumns.length}
           height={bottomSpacerHeight}
         />
       )}
-      {/* Loading more indicator */}
-      {/* {isLoadingMore && (
-        <LoadingMoreRow
-          colSpan={columns.length}
-          currentCount={data.length}
-          totalCount={totalCount}
-        />
-      )} */}
     </tbody>
   );
 };

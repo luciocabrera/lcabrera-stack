@@ -78,4 +78,14 @@ export const styles = stylex.create({
     borderTopWidth: '1px',
     bottom: '0',
   },
+  virtualContainer: (height: number) => ({
+    position: 'relative',
+    height,
+  }),
+  virtualOffset: (offsetY: number) => ({
+    transform: `translateY(${offsetY}px)`,
+  }),
+  virtualSpacer: (height: number) => ({
+    height,
+  }),
 });

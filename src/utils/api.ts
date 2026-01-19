@@ -60,6 +60,11 @@ export const getApiBaseUrl = (requestUrl?: string): string => {
   const { hostname, protocol } = globalThis.location;
   const isDev = import.meta.env.DEV;
 
+  // In development, always use the Vite proxy
+  if (isDev) {
+    return '/api';
+  }
+
   // Check if it's localhost or a private IP
   if (isLocalIp(hostname)) {
     // For localhost aliases, use the configured localhost URL
@@ -72,7 +77,5 @@ export const getApiBaseUrl = (requestUrl?: string): string => {
   }
 
   // Use appropriate config based on environment
-  return isDev
-    ? CONFIG.dev.apiHost
-    : `${protocol}//${hostname}${CONFIG.prod.apiHost}`;
+  return `${protocol}//${hostname}${CONFIG.prod.apiHost}`;
 };
