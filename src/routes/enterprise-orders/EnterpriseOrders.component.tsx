@@ -10,13 +10,13 @@ import type {
 import type { EnterpriseOrder } from '@/services';
 
 import { Table } from '@/components/Table';
-import { TableSuspenseBoundary } from '@/components/Table/TableSuspenseBoundary/TableSuspenseBoundary.component';
+import { TableSuspenseBoundary } from '@/components/Table/TableSuspenseBoundary';
 import { enterpriseOrdersApi } from '@/services';
 
 import type { loader } from './enterprise-orders.loader';
 import type { EnterpriseOrdersTableProps } from './EnterpriseOrders.types';
 
-import { columns } from './EnterpriseOrders.constants';
+import { COLUMNS, PERSISTENCE_KEY } from './EnterpriseOrders.constants';
 import { styles } from './EnterpriseOrders.stylex';
 
 export const EnterpriseOrders = () => {
@@ -39,7 +39,7 @@ export const EnterpriseOrders = () => {
         EnterpriseOrder,
         { data: EnterpriseOrder[]; hasMore: boolean; total: number }
       >
-        columns={columns}
+        columns={COLUMNS}
         columnSizing={columnSizing}
         dataPromise={enterpriseOrdersPromise}
         dataSelector={(response) => response.data}
@@ -145,7 +145,7 @@ const EnterpriseOrdersTable = ({
 
   return (
     <Table
-      columns={columns}
+      columns={COLUMNS}
       columnSizing={columnSizing}
       data={initialData}
       density='comfortable'
@@ -165,7 +165,7 @@ const EnterpriseOrdersTable = ({
       key={tableKey}
       onFilterChange={handleFilterChange}
       onSortChange={handleSortChange}
-      persistenceKey='enterprise-orders-table'
+      persistenceKey={PERSISTENCE_KEY}
       title='Enterprise Orders - Infinite Scroll'
     />
   );

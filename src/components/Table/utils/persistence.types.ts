@@ -6,7 +6,7 @@ import type {
   ColumnVisibilityState,
   PaginationState,
   SortingState,
-} from '../TableContext';
+} from '../Table.types';
 
 export type PersistedState = {
   columnFilters?: ColumnFiltersState;

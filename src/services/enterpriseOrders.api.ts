@@ -1,3 +1,5 @@
+import { getApiBaseUrl } from '@/utils/api';
+
 /**
  * Enterprise Orders API Service
  * Handles database queries for enterprise orders data
@@ -85,20 +87,10 @@ export type EnterpriseOrdersResponse = {
   total: number;
 };
 
-// Use absolute URL for SSR (server-side), relative URL for client (proxied by Vite)
-const getApiBaseUrl = () => {
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  if (globalThis.window === undefined) {
-    // Server-side: use absolute URL
-    return 'http://localhost:3001/api';
-  }
-  // Client-side: use relative URL (proxied by Vite)
-  return '/api';
-};
-
 export type FetchEnterpriseOrdersParams = {
   filter?: Record<string, unknown>;
   limit: number;
+  requestUrl?: string;
   skip: number;
   sorting?: { columnKey: string; direction: 'asc' | 'desc' }[];
 };
@@ -114,12 +106,14 @@ export const enterpriseOrdersApi = {
     columnName,
     limit = 50,
     offset = 0,
+    requestUrl,
   }: {
     columnName: string;
     limit?: number;
     offset?: number;
+    requestUrl?: string;
   }): Promise<{ hasMore: boolean; values: string[] }> => {
-    const url = `${getApiBaseUrl()}/enterprise-orders/distinct/${columnName}?limit=${limit}&offset=${offset}`;
+    const url = `${getApiBaseUrl(requestUrl)}/enterprise-orders/distinct/${columnName}?limit=${limit}&offset=${offset}`;
     console.warn(
       '🎯 [Orders] Fetching distinct values for:',
       columnName,
@@ -144,6 +138,7 @@ export const enterpriseOrdersApi = {
   fetchEnterpriseOrdersPaginated: ({
     filter,
     limit,
+    requestUrl,
     skip,
     sorting,
   }: FetchEnterpriseOrdersParams): Promise<
@@ -164,7 +159,7 @@ export const enterpriseOrdersApi = {
       params.append('filter', JSON.stringify(filter));
     }
 
-    const url = `${getApiBaseUrl()}/enterprise-orders/paginated?${params.toString()}`;
+    const url = `${getApiBaseUrl(requestUrl)}/enterprise-orders/paginated?${params.toString()}`;
     console.warn('🌐 [Orders] Fetching from URL:', url);
     console.warn('🌐 [Orders] Filter object:', filter);
     console.warn('🌐 [Orders] Sorting:', sorting);

@@ -5,6 +5,7 @@ import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const styles = stylex.create({
   popover: {
+    inset: 'auto',
     margin: 0,
     padding: 0,
     borderColor: colors.borderPrimary,
@@ -13,6 +14,8 @@ export const styles = stylex.create({
     borderWidth: '1px',
     backgroundColor: colors.surfacePrimary,
     boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
+    // Fixed positioning for manual placement via JavaScript
+    position: 'fixed',
     minWidth: '20rem',
     width: '24rem',
   },

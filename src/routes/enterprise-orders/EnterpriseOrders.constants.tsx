@@ -2,7 +2,9 @@ import type { TableColumn } from '@/components/Table/Table.types';
 
 import { enterpriseOrdersApi } from '@/services';
 
-export const columns: TableColumn[] = [
+export const PERSISTENCE_KEY = 'enterprise-orders-table';
+
+export const COLUMNS: TableColumn[] = [
   {
     dataType: 'number',
     key: 'order_id',
@@ -70,7 +72,13 @@ export const columns: TableColumn[] = [
   },
   {
     dataType: 'string',
-    filterOptions: ['Regular', 'Premium', 'Enterprise', 'Government'],
+    fetchFilterOptions: async (offset = 0) => {
+      const result = await enterpriseOrdersApi.fetchDistinctValues({
+        columnName: 'customer_type',
+        offset,
+      });
+      return { hasMore: result.hasMore, values: result.values };
+    },
     key: 'customer_type',
     label: 'Customer Type',
     maxWidth: 180,

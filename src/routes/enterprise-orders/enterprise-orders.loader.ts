@@ -7,7 +7,7 @@ import { readPersistedStateFromCookie } from '@/components/Table/utils';
 import { enterpriseOrdersApi } from '@/services';
 import { readTableStateFromURL } from '@/utils/urlState';
 
-const PERSISTENCE_KEY = 'enterprise-orders-table';
+import { PERSISTENCE_KEY } from './EnterpriseOrders.constants';
 
 /**
  * Loader for enterprise orders route
@@ -62,6 +62,7 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
   > = enterpriseOrdersApi.fetchEnterpriseOrdersPaginated({
     filter: filters,
     limit: 50,
+    requestUrl: request.url,
     skip: 0,
     sorting,
   });

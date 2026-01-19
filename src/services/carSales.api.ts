@@ -1,3 +1,5 @@
+import { getApiBaseUrl } from '@/utils/api';
+
 /**
  * Car Sales API Service
  * Handles database queries for car sales data
@@ -56,25 +58,14 @@ export type CarSalesResponse = {
   total: number;
 };
 
-// Use absolute URL for SSR (server-side), relative URL for client (proxied by Vite)
-const getApiBaseUrl = () => {
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  if (globalThis.window === undefined) {
-    // Server-side (SSR)
-    return 'http://localhost:3001/api';
-  }
-  // Client-side (browser)
-  return '/api';
-};
-
 export const carSalesApi = {
   /**
    * Fetch car sales data
    * Returns a promise (non-blocking) to enable React streaming with Suspense
    */
-  fetchCarSales: (): Promise<CarSalesResponse> => {
+  fetchCarSales: (requestUrl?: string): Promise<CarSalesResponse> => {
     const fetchData = (): Promise<CarSalesResponse> =>
-      fetch(`${getApiBaseUrl()}/car-sales`).then((response) => {
+      fetch(`${getApiBaseUrl(requestUrl)}/car-sales`).then((response) => {
         if (!response.ok) {
           throw new Error(`Failed to fetch car sales: ${response.statusText}`);
         }
@@ -94,10 +85,12 @@ export const carSalesApi = {
    */
   fetchCarSalesPaginated: ({
     limit,
+    requestUrl,
     skip,
     sorting,
   }: {
     limit: number;
+    requestUrl?: string;
     skip: number;
     sorting?: { columnKey: string; direction: 'asc' | 'desc' }[];
   }): Promise<CarSalesResponse & { hasMore: boolean }> => {
@@ -111,7 +104,7 @@ export const carSalesApi = {
       params.append('sort', JSON.stringify(sorting));
     }
 
-    const url = `${getApiBaseUrl()}/car-sales/paginated?${params.toString()}`;
+    const url = `${getApiBaseUrl(requestUrl)}/car-sales/paginated?${params.toString()}`;
     console.warn('🌐 Fetching from URL:', url);
 
     const fetchData = () =>

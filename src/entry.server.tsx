@@ -62,6 +62,8 @@ function handleBotRequest(
       {
         onAllReady() {
           const body = new PassThrough();
+          // Increase max listeners to prevent warning with compression middleware
+          body.setMaxListeners(20);
 
           responseHeaders.set('Content-Type', 'text/html');
 
@@ -111,6 +113,8 @@ function handleBrowserRequest(
         },
         onShellReady() {
           const body = new PassThrough();
+          // Increase max listeners to prevent warning with compression middleware
+          body.setMaxListeners(20);
 
           responseHeaders.set('Content-Type', 'text/html');
 

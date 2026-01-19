@@ -35,7 +35,7 @@ export const FilterPopover = ({
     setLocalFilter(filter);
   }, [filter]);
 
-  // Handle popover toggle events
+  // Handle popover toggle events and positioning
   useEffect(() => {
     const popover = popoverRef.current;
     if (!popover) return;
@@ -43,6 +43,35 @@ export const FilterPopover = ({
     const handlePopoverToggle = (e: Event) => {
       const toggleEvent = e as ToggleEvent;
       if (toggleEvent.newState === 'open') {
+        // Position popover relative to the trigger button
+        const triggerButton = document.querySelector<HTMLElement>(
+          `[popovertarget="${popoverId}"]`,
+        );
+        if (!triggerButton) return;
+        
+        const buttonRect = triggerButton.getBoundingClientRect();
+        const popoverRect = popover.getBoundingClientRect();
+          
+          // Position below the button with a small gap
+          const top = buttonRect.bottom + 4; // 4px gap
+          const left = buttonRect.left;
+          
+          // Check if popover would go off-screen on the right
+          const rightEdge = left + popoverRect.width;
+          const adjustedLeft = rightEdge > window.innerWidth 
+            ? window.innerWidth - popoverRect.width - 8 
+            : left;
+          
+          // Check if popover would go off-screen on the bottom
+          const bottomEdge = top + popoverRect.height;
+          const adjustedTop = bottomEdge > window.innerHeight
+            ? buttonRect.top - popoverRect.height - 4 // Position above button
+            : top;
+          
+          popover.style.left = `${adjustedLeft}px`;
+          popover.style.top = `${adjustedTop}px`;
+          popover.style.margin = '0';
+
         // Fetch options when popover opens (if needed)
         if (fetchFilterOptions && !fetchedOptions && !isFetchingOptions) {
           setIsFetchingOptions(true);
@@ -84,7 +113,7 @@ export const FilterPopover = ({
     return () => {
       popover.removeEventListener('toggle', handlePopoverToggle);
     };
-  }, [fetchFilterOptions, fetchedOptions, isFetchingOptions, column.key]);
+  }, [fetchFilterOptions, fetchedOptions, isFetchingOptions, column.key, popoverId]);
 
   // Handle loading more filter options (infinite scroll)
   const handleLoadMoreOptions = useCallback(() => {

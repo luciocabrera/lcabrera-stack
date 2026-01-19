@@ -8,10 +8,9 @@
  * - Infinite scroll metadata
  */
 
-/**
- * Filter state for columns
- */
-export type ColumnFiltersState = Record<string, unknown>;
+import type { ColumnFiltersState } from '../Table.types';
+
+export type { ColumnFiltersState };
 
 /**
  * Column order state - array of column keys in display order
