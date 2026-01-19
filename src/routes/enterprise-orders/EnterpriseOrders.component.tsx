@@ -1,26 +1,15 @@
-import * as stylex from '@stylexjs/stylex';
-import { useLoaderData, useSearchParams } from 'react-router';
+import { useLoaderData } from 'react-router';
 
-import type {
-  InfiniteScrollConfig,
-  OffsetLimitParams,
-  OnFilterChangeArgs,
-  OnSortChangeArgs,
-} from '@/components/Table';
 import type { EnterpriseOrder } from '@/services';
 
-import { Table } from '@/components/Table';
-import { TableSuspenseBoundary } from '@/components/Table/TableSuspenseBoundary';
+import { TableLayout } from '@/layouts/TableLayout';
 import { enterpriseOrdersApi } from '@/services';
 
 import type { loader } from './enterprise-orders.loader';
-import type { EnterpriseOrdersTableProps } from './EnterpriseOrders.types';
 
 import { COLUMNS, PERSISTENCE_KEY } from './EnterpriseOrders.constants';
-import { styles } from './EnterpriseOrders.stylex';
 
 export const EnterpriseOrders = () => {
-  const loaderData = useLoaderData<typeof loader>();
   const {
     columnOrder,
     columnSizing,
@@ -28,144 +17,38 @@ export const EnterpriseOrders = () => {
     enterpriseOrdersPromise,
     filters,
     sorting,
-  } = loaderData;
-
-  console.warn('🎬 [EnterpriseOrders] Loader data filters:', filters);
-  console.warn('🎬 [EnterpriseOrders] Loader data sorting:', sorting);
+  } = useLoaderData<typeof loader>();
 
   return (
-    <div {...stylex.props(styles.container)}>
-      <TableSuspenseBoundary<
-        EnterpriseOrder,
-        { data: EnterpriseOrder[]; hasMore: boolean; total: number }
-      >
-        columns={COLUMNS}
-        columnSizing={columnSizing}
-        dataPromise={enterpriseOrdersPromise}
-        dataSelector={(response) => response.data}
-        initialColumnOrder={columnOrder}
-        initialColumnVisibility={columnVisibility}
-        title='Enterprise Orders - Infinite Scroll'
-      >
-        {(data) => (
-          <EnterpriseOrdersTable
-            columnOrder={columnOrder}
-            columnSizing={columnSizing}
-            columnVisibility={columnVisibility}
-            filters={filters}
-            initialData={data}
-            sorting={sorting}
-          />
-        )}
-      </TableSuspenseBoundary>
-    </div>
-  );
-};
-
-const EnterpriseOrdersTable = ({
-  columnOrder,
-  columnSizing,
-  columnVisibility,
-  filters: currentFilters,
-  initialData,
-  sorting: currentSorting,
-}: EnterpriseOrdersTableProps) => {
-  const [, setSearchParams] = useSearchParams();
-
-  console.warn('📊 [EnterpriseOrdersTable] currentFilters:', currentFilters);
-  console.warn('📊 [EnterpriseOrdersTable] currentSorting:', currentSorting);
-
-  const handleSortChange = ({ sorting }: OnSortChangeArgs) => {
-    // Type guard to ensure sorting is properly typed
-    if (!Array.isArray(sorting)) return Promise.resolve();
-
-    // Update URL params to trigger loader re-fetch
-    setSearchParams((params) => {
-      if (sorting.length > 0) {
-        params.set('sort', JSON.stringify(sorting));
-      } else {
-        params.delete('sort');
-      }
-      return params;
-    });
-
-    return Promise.resolve();
-  };
-
-  const handleFilterChange = ({ filters }: OnFilterChangeArgs) => {
-    // Update URL params to trigger loader re-fetch
-    setSearchParams((params) => {
-      if (Object.keys(filters).length > 0) {
-        params.set('filters', JSON.stringify(filters));
-      } else {
-        params.delete('filters');
-      }
-      return params;
-    });
-
-    return Promise.resolve();
-  };
-
-  const infiniteScrollConfig: InfiniteScrollConfig<EnterpriseOrder> = {
-    initialPageSize: 50,
-    isEnabled: true,
-    loadMorePageSize: 50,
-    onLoadMore: async (params) => {
-      const { limit, skip } = params as OffsetLimitParams;
-      // Include current sorting and filters when loading more data
-      console.warn(
-        '🔄 [onLoadMore] Using filters:',
-        currentFilters,
-        'and sorting:',
-        currentSorting,
-      );
-      const response = await enterpriseOrdersApi.fetchEnterpriseOrdersPaginated(
-        {
-          filter: currentFilters,
-          limit,
-          skip,
-          sorting: currentSorting,
-        },
-      );
-
-      return {
-        data: response.data,
-        hasMore: response.hasMore,
-        totalRows: response.total,
-      };
-    },
-    strategy: 'offset-limit',
-    threshold: 200,
-  };
-
-  // Use sorting and filters as key to force Table remount when they change
-  const sortKey = currentSorting ? JSON.stringify(currentSorting) : 'default';
-  const filterKey = currentFilters ? JSON.stringify(currentFilters) : 'default';
-  const tableKey = `${sortKey}-${filterKey}`;
-
-  return (
-    <Table
+    <TableLayout<EnterpriseOrder>
+      columnOrder={columnOrder}
       columns={COLUMNS}
       columnSizing={columnSizing}
-      data={initialData}
-      density='comfortable'
-      infiniteScrollConfig={infiniteScrollConfig}
-      initialColumnFilters={currentFilters ?? {}}
-      initialColumnOrder={columnOrder}
-      initialColumnVisibility={columnVisibility}
-      initialMeta={{
-        hasMore: true,
-        paginationMeta: {
-          offset: initialData.length,
+      columnVisibility={columnVisibility}
+      dataPromise={enterpriseOrdersPromise}
+      dataSelector={(response) =>
+        (response as { data: EnterpriseOrder[] }).data
+      }
+      filters={filters}
+      infiniteScrollConfig={{
+        onLoadMore: async ({ filters, limit, skip, sorting }) => {
+          const response =
+            await enterpriseOrdersApi.fetchEnterpriseOrdersPaginated({
+              filter: filters,
+              limit,
+              skip,
+              sorting,
+            });
+
+          return {
+            data: response.data,
+            hasMore: response.hasMore,
+            total: response.total,
+          };
         },
       }}
-      initialSorting={currentSorting ?? []}
-      isBordered
-      isStriped
-      key={tableKey}
-      onFilterChange={handleFilterChange}
-      onSortChange={handleSortChange}
       persistenceKey={PERSISTENCE_KEY}
+      sorting={sorting}
       title='Enterprise Orders - Infinite Scroll'
     />
   );
