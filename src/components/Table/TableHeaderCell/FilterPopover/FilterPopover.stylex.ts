@@ -16,6 +16,9 @@ export const styles = stylex.create({
     transition: 'opacity 0.15s ease',
     backgroundColor: colors.surfacePrimary,
     boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
+    // display: 'flex',
+    // flexDirection: 'column',
+    // flexWrap: 'wrap',
     // Hide initially to prevent flash at 0,0 before positioning
     opacity: 0,
     // Fixed positioning for manual placement via JavaScript
@@ -25,6 +28,7 @@ export const styles = stylex.create({
     width: '24rem',
   }),
   content: {
+    // flex: '1',
     gap: spacing.sm,
     display: 'flex',
     flexDirection: 'column',

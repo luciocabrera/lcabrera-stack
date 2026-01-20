@@ -42,12 +42,14 @@ export const styles = stylex.create({
   },
   optionsList: {
     gap: spacing.xs,
+    overflow: 'hidden',
     display: 'flex',
     flexDirection: 'column',
     position: 'relative',
+        maxHeight: '10rem',
+    // height: '12.5rem',
+    // flex: '1',
     minHeight: '10rem',
-    maxHeight: '10rem',
-    overflow: 'hidden',
   },
   searchInput: {
     padding: `${spacing.xs} ${spacing.sm}`,
