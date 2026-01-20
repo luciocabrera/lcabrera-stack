@@ -244,6 +244,7 @@ export const FiltersSection = ({
                         handleRemoveFilter(columnKey);
                       }}
                       size='mini'
+                      width='auto'
                     />
                   </div>
                   {isExpanded && (

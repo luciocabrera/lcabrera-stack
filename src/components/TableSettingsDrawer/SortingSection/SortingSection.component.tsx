@@ -5,7 +5,7 @@ import type { DraggableItem } from '@/components/DraggableList';
 
 import { Button } from '@/components/Button';
 import { DraggableList } from '@/components/DraggableList';
-import { SortAscIcon, SortDescIcon } from '@/components/Icons';
+import { MenuCloseIcon, SortAscIcon, SortDescIcon } from '@/components/Icons';
 
 import type { SortingSectionProps, SortItem } from './SortingSection.types';
 
@@ -93,13 +93,12 @@ export const SortingSection = ({
           <Button
             aria-label='Remove sort'
             color='ghost'
+            icon={<MenuCloseIcon size={16} />}
             onClick={() => {
               handleRemoveSort(item.columnKey);
             }}
             size='mini'
-          >
-            ×
-          </Button>
+          />
         </div>
       </div>
     ),

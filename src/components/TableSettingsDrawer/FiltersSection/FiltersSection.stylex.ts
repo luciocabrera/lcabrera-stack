@@ -62,16 +62,18 @@ export const styles = stylex.create({
     backgroundColor: colors.surfacePrimary,
   },
   filterItemHeader: {
-    padding: spacing.sm,
+    paddingBlock: spacing.xxs,
+    paddingInline: spacing.md,
     gap: spacing.sm,
     alignItems: 'center',
     display: 'flex',
     justifyContent: 'space-between',
+    height: '34px',
   },
   filterToggle: {
     padding: 0,
     borderWidth: 0,
-    gap: spacing.sm,
+    gap: spacing.xs,
     alignItems: 'center',
     backgroundColor: 'transparent',
     color: colors.textPrimary,
@@ -90,6 +92,7 @@ export const styles = stylex.create({
     flexGrow: 1,
     fontSize: typography.fontSizeSm,
     fontWeight: 500,
+    textAlign: 'left',
   },
   invalidBadge: {
     color: colors.error,
