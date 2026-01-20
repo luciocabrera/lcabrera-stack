@@ -12,12 +12,10 @@ export const styles = stylex.create({
     gap: spacing.md,
     display: 'flex',
     flexDirection: 'column',
+    height: '100%',
   },
   clearSection: {
-    borderBottomColor: colors.borderPrimary,
-    borderBottomStyle: 'solid',
-    borderBottomWidth: '1px',
-    paddingBottom: spacing.sm,
+    paddingTop: spacing.sm,
   },
   header: {
     margin: 0,
@@ -45,6 +43,7 @@ export const styles = stylex.create({
     width: '100%',
   },
   filtersListContainer: {
+    flex: '1',
     gap: spacing.sm,
     display: 'flex',
     flexDirection: 'column',

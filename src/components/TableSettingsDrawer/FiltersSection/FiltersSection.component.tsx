@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/Button';
 import { MenuCloseIcon } from '@/components/Icons';
@@ -19,9 +19,64 @@ export const FiltersSection = ({
   const [expandedFilters, setExpandedFilters] = useState<Set<string>>(
     () => new Set(),
   );
+  // Track fetched options for columns with fetchFilterOptions
+  const [fetchedOptions, setFetchedOptions] = useState<Record<string, string[]>>({});
+  // Track hasMore state for pagination
+  const [hasMoreOptions, setHasMoreOptions] = useState<Record<string, boolean>>({});
+  // Track loading state for each column
+  const [loadingOptions, setLoadingOptions] = useState<Record<string, boolean>>({});
 
   // Filter to only filterable columns
   const filterableColumns = columns.filter((col) => col.isFilterable !== false);
+
+  // Fetch filter options for columns that need them
+  useEffect(() => {
+    const fetchOptionsForColumns = async () => {
+      for (const [columnKey] of Object.entries(filters)) {
+        const column = filterableColumns.find((col) => col.key === columnKey);
+        if (column?.fetchFilterOptions && !fetchedOptions[columnKey]) {
+          try {
+            const result = await column.fetchFilterOptions(0);
+            // fetchFilterOptions can return either string[] or {values: string[], hasMore: boolean}
+            const options = Array.isArray(result) ? result : result.values;
+            const hasMore = Array.isArray(result) ? false : result.hasMore;
+            setFetchedOptions((prev) => ({ ...prev, [columnKey]: options }));
+            setHasMoreOptions((prev) => ({ ...prev, [columnKey]: hasMore }));
+          } catch (error) {
+            console.error(`Failed to fetch options for ${columnKey}:`, error);
+          }
+        }
+      }
+    };
+
+    fetchOptionsForColumns();
+  }, [filters, filterableColumns]);
+
+  // Handle loading more options for a specific column
+  const handleLoadMoreOptions = async (columnKey: string) => {
+    const column = filterableColumns.find((col) => col.key === columnKey);
+    if (!column?.fetchFilterOptions || loadingOptions[columnKey] || !hasMoreOptions[columnKey]) {
+      return;
+    }
+
+    setLoadingOptions((prev) => ({ ...prev, [columnKey]: true }));
+    try {
+      const currentOptions = fetchedOptions[columnKey] ?? [];
+      const result = await column.fetchFilterOptions(currentOptions.length);
+      const newOptions = Array.isArray(result) ? result : result.values;
+      const hasMore = Array.isArray(result) ? false : result.hasMore;
+      
+      setFetchedOptions((prev) => ({
+        ...prev,
+        [columnKey]: [...currentOptions, ...newOptions],
+      }));
+      setHasMoreOptions((prev) => ({ ...prev, [columnKey]: hasMore }));
+    } catch (error) {
+      console.error(`Failed to load more options for ${columnKey}:`, error);
+    } finally {
+      setLoadingOptions((prev) => ({ ...prev, [columnKey]: false }));
+    }
+  };
 
   // Get columns that don't have filters yet (for "Add Filter" dropdown)
   const availableColumns = filterableColumns;
@@ -50,9 +105,12 @@ export const FiltersSection = ({
         break;
       }
       default: {
-        // Check if column has filter options
-        initialFilter = column.filterOptions && column.filterOptions.length > 0
-          ? { type: 'multiSelect' as const, values: [] }
+        // Check if column has filter options (static or fetchable)
+        // Use text filter with 'equals' operator for columns with options
+        // so the select list shows up immediately
+        const hasOptions = (column.filterOptions && column.filterOptions.length > 0) || Boolean(column.fetchFilterOptions);
+        initialFilter = hasOptions
+          ? { operator: 'equals' as const, type: 'text' as const, value: '' }
           : { operator: 'equals' as const, type: 'text' as const, value: '' };
         break;
       }
@@ -103,19 +161,6 @@ export const FiltersSection = ({
 
   return (
     <div {...stylex.props(styles.container)} {...props}>
-      {/* Clear All Filters Section */}
-      {hasFilters && (
-        <div {...stylex.props(styles.clearSection)}>
-          <Button
-            color='outline'
-            onClick={handleClearAll}
-            size='sm'
-            width='full'
-          >
-            Clear All Filters
-          </Button>
-        </div>
-      )}
 
       {/* Add Filter Section */}
       <div {...stylex.props(styles.addSection)}>
@@ -199,16 +244,29 @@ export const FiltersSection = ({
                   </div>
                   {isExpanded && (
                     <div {...stylex.props(styles.filterItemContent)}>
-                      <FilterEditor
-                        column={column}
-                        filter={filter}
-                        filterOptions={column.filterOptions}
-                        onChange={(newFilter) => {
-                          if (newFilter) {
-                            handleFilterChange({ columnKey, filter: newFilter });
-                          }
-                        }}
-                      />
+                      {(() => {
+                        const effectiveOptions = fetchedOptions[columnKey] ?? column.filterOptions;
+                        console.log('🎨 [FiltersSection] Rendering FilterEditor for:', columnKey, 'column:', column, 'staticOptions:', column.filterOptions, 'fetchedOptions:', fetchedOptions[columnKey], 'effectiveOptions:', effectiveOptions, 'filter:', filter);
+                        return (
+                          <FilterEditor
+                            column={column}
+                            filter={filter}
+                            filterOptions={effectiveOptions}
+                            hasMore={hasMoreOptions[columnKey] ?? false}
+                            isLoadingOptions={loadingOptions[columnKey] ?? false}
+                            onChange={(newFilter) => {
+                              if (newFilter) {
+                                handleFilterChange({ columnKey, filter: newFilter });
+                              }
+                            }}
+                            onLoadMoreOptions={
+                              column.fetchFilterOptions && hasMoreOptions[columnKey]
+                                ? () => handleLoadMoreOptions(columnKey)
+                                : undefined
+                            }
+                          />
+                        );
+                      })()}
                     </div>
                   )}
                 </div>
@@ -221,6 +279,19 @@ export const FiltersSection = ({
           </p>
         )}
       </div>
+            {/* Clear All Filters Section */}
+      {hasFilters && (
+        <div {...stylex.props(styles.clearSection)}>
+          <Button
+            color='outline'
+            onClick={handleClearAll}
+            size='sm'
+            width='full'
+          >
+            Clear All Filters
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

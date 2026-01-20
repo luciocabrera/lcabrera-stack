@@ -30,6 +30,7 @@ export const FilterPopover = ({
   const [isFetchingOptions, setIsFetchingOptions] = useState(false);
   const [hasMoreOptions, setHasMoreOptions] = useState(false);
   // Track the selected text operator for conditional rendering
+  // Initialize with the filter's operator if it exists, otherwise default to 'equals'
   const [textOperator, setTextOperator] = useState<
     | 'contains'
     | 'endsWith'
@@ -37,11 +38,15 @@ export const FilterPopover = ({
     | 'notContains'
     | 'notEquals'
     | 'startsWith'
-  >('equals');
+  >(filter?.type === 'text' && filter.operator ? filter.operator : 'equals');
 
   // Sync local filter with prop when it changes externally
   useEffect(() => {
     setLocalFilter(filter);
+    // Also sync textOperator if it's a text filter
+    if (filter?.type === 'text' && filter.operator) {
+      setTextOperator(filter.operator);
+    }
   }, [filter]);
 
   // Handle popover toggle events and positioning

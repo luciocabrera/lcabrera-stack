@@ -7,6 +7,8 @@ export type FilterEditorProps = {
   filter: ColumnFilter | null | undefined;
   /** Static filter options for select filters */
   filterOptions?: string[];
+  /** Whether there are more options to load */
+  hasMore?: boolean;
   /** Whether the filter is currently loading options */
   isLoadingOptions?: boolean;
   /** Whether the filter value is valid */

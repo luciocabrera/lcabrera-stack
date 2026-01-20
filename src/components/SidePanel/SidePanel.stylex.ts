@@ -105,7 +105,7 @@ const sizeVariants = stylex.create({
   },
 
   md: {
-    width: '20rem', // 320px
+    width: '24rem', // 320px
   },
 
   sm: {

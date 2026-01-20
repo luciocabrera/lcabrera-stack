@@ -10,7 +10,7 @@ import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const styles = stylex.create({
   container: {
-    gap: spacing.md,
+    gap: spacing.sm,
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
@@ -64,6 +64,7 @@ export const styles = stylex.create({
     borderBottomColor: colors.brandPrimary,
   },
   tabContent: {
+    padding: `${spacing.sm} ${spacing.md}`,
     flex: '1',
     overflow: 'auto',
     minHeight: 0,
