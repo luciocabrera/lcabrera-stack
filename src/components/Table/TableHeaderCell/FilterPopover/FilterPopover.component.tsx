@@ -20,6 +20,11 @@ export const FilterPopover = ({
   popoverId,
 }: FilterPopoverProps) => {
   const popoverRef = useRef<HTMLDivElement>(null);
+
+  // Initialize text operator from filter
+  const initialTextOperator: 'contains' | 'endsWith' | 'equals' | 'notContains' | 'notEquals' | 'startsWith' =
+    filter?.type === 'text' ? filter.operator : 'equals';
+
   // Local state to track the current filter value before applying
   const [localFilter, setLocalFilter] = useState(filter);
   // Track the current text operator for string columns
@@ -30,21 +35,12 @@ export const FilterPopover = ({
     | 'notContains'
     | 'notEquals'
     | 'startsWith'
-  >('equals');
+  >(initialTextOperator);
   // State for dynamically fetched options
   const [fetchedOptions, setFetchedOptions] = useState<string[]>();
   const [isFetchingOptions, setIsFetchingOptions] = useState(false);
   const [hasMoreOptions, setHasMoreOptions] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
-  // Sync localFilter when filter prop changes
-  useEffect(() => {
-    setLocalFilter(filter);
-    // Also sync the text operator from the filter
-    if (filter?.type === 'text') {
-      setCurrentTextOperator(filter.operator);
-    }
-  }, [filter]);
 
   const hasOptions =
     Boolean(filterOptions && filterOptions.length > 0) ||
