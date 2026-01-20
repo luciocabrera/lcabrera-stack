@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 
 import { BooleanFilterInput } from '@/components/Table/TableHeaderCell/filters/BooleanFilterInput';
 import { DateFilterInput } from '@/components/Table/TableHeaderCell/filters/DateFilterInput';
@@ -20,26 +20,11 @@ export const FilterEditor = ({
   onChange,
   onLoadMoreOptions,
 }: FilterEditorProps) => {
-  // Track text operator state for string columns with options
-  const [textOperator, setTextOperator] = useState<
-    | 'contains'
-    | 'endsWith'
-    | 'equals'
-    | 'notContains'
-    | 'notEquals'
-    | 'startsWith'
-  >('equals');
-
-  // Sync textOperator with the filter's operator
-  useEffect(() => {
-    console.log('🔧 [FilterEditor] useEffect - filter:', filter, 'textOperator:', textOperator);
-    if (filter?.type === 'text' && filter.operator) {
-      console.log('🔧 [FilterEditor] Setting textOperator to:', filter.operator);
-      setTextOperator(filter.operator);
-    }
-  }, [filter]);
-
-  console.log('🔧 [FilterEditor] Render - column:', column.key, 'dataType:', column.dataType, 'filterOptions:', filterOptions, 'filter:', filter, 'textOperator:', textOperator);
+  // Derive text operator from filter (no need for local state)
+  const textOperator = useMemo(
+    () => (filter?.type === 'text' ? filter.operator : 'equals'),
+    [filter],
+  );
 
   const renderFilterInput = () => {
     switch (column.dataType) {
@@ -73,15 +58,22 @@ export const FilterEditor = ({
         if (filterOptions && filterOptions.length > 0) {
           const isSelectListVisible =
             textOperator === 'equals' || textOperator === 'notEquals';
-          
-          console.log('🔧 [FilterEditor] String with options - textOperator:', textOperator, 'isSelectListVisible:', isSelectListVisible, 'filterOptions.length:', filterOptions.length);
 
           return (
             <div {...stylex.props(styles.stringFilterContainer)}>
               <TextFilterInput
                 filter={filter?.type === 'text' ? filter : undefined}
                 onChange={onChange}
-                onOperatorChange={setTextOperator}
+                onOperatorChange={(operator) => {
+                  // Update filter with new operator by creating a new text filter or updating existing
+                  const currentFilter = filter?.type === 'text' ? filter : undefined;
+                  onChange({
+                    ...currentFilter,
+                    operator,
+                    type: 'text',
+                    value: currentFilter?.value ?? '',
+                  });
+                }}
               />
               {isSelectListVisible && (
                 <SelectFilterInput
@@ -101,7 +93,6 @@ export const FilterEditor = ({
           );
         }
         // Otherwise use TextFilterInput only
-        console.log('🔧 [FilterEditor] String without options');
         return (
           <TextFilterInput
             filter={filter?.type === 'text' ? filter : undefined}

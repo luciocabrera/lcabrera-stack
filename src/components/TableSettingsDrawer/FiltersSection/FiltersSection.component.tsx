@@ -49,8 +49,10 @@ export const FiltersSection = ({
       }
     };
 
-    fetchOptionsForColumns();
+    void fetchOptionsForColumns();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters, filterableColumns]);
+  // Note: fetchedOptions intentionally excluded from deps to avoid infinite loop
 
   // Handle loading more options for a specific column
   const handleLoadMoreOptions = async (columnKey: string) => {
@@ -108,7 +110,9 @@ export const FiltersSection = ({
         // Check if column has filter options (static or fetchable)
         // Use text filter with 'equals' operator for columns with options
         // so the select list shows up immediately
-        const hasOptions = (column.filterOptions && column.filterOptions.length > 0) || Boolean(column.fetchFilterOptions);
+        const hasOptions =
+          Boolean(column.filterOptions && column.filterOptions.length > 0) ||
+          Boolean(column.fetchFilterOptions);
         initialFilter = hasOptions
           ? { operator: 'equals' as const, type: 'text' as const, value: '' }
           : { operator: 'equals' as const, type: 'text' as const, value: '' };
@@ -246,7 +250,6 @@ export const FiltersSection = ({
                     <div {...stylex.props(styles.filterItemContent)}>
                       {(() => {
                         const effectiveOptions = fetchedOptions[columnKey] ?? column.filterOptions;
-                        console.log('🎨 [FiltersSection] Rendering FilterEditor for:', columnKey, 'column:', column, 'staticOptions:', column.filterOptions, 'fetchedOptions:', fetchedOptions[columnKey], 'effectiveOptions:', effectiveOptions, 'filter:', filter);
                         return (
                           <FilterEditor
                             column={column}
@@ -261,7 +264,9 @@ export const FiltersSection = ({
                             }}
                             onLoadMoreOptions={
                               column.fetchFilterOptions && hasMoreOptions[columnKey]
-                                ? () => handleLoadMoreOptions(columnKey)
+                                ? () => {
+                                    void handleLoadMoreOptions(columnKey);
+                                  }
                                 : undefined
                             }
                           />

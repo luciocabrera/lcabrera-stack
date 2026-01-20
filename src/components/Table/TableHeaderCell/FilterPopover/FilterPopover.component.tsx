@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Button } from '@/components/Button';
 import { MenuCloseIcon } from '@/components/Icons';
+import { usePopoverPositioning } from '@/hooks/usePopoverPositioning.hook';
 
 import type { FilterPopoverProps, ToggleEvent } from './FilterPopover.types';
 
@@ -29,8 +30,8 @@ export const FilterPopover = ({
   const [fetchedOptions, setFetchedOptions] = useState<string[]>();
   const [isFetchingOptions, setIsFetchingOptions] = useState(false);
   const [hasMoreOptions, setHasMoreOptions] = useState(false);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   // Track the selected text operator for conditional rendering
-  // Initialize with the filter's operator if it exists, otherwise default to 'equals'
   const [textOperator, setTextOperator] = useState<
     | 'contains'
     | 'endsWith'
@@ -38,18 +39,35 @@ export const FilterPopover = ({
     | 'notContains'
     | 'notEquals'
     | 'startsWith'
-  >(filter?.type === 'text' && filter.operator ? filter.operator : 'equals');
+  >('equals');
 
-  // Sync local filter with prop when it changes externally
+  // Sync textOperator when filter changes
   useEffect(() => {
-    setLocalFilter(filter);
-    // Also sync textOperator if it's a text filter
-    if (filter?.type === 'text' && filter.operator) {
+    if (filter?.type === 'text') {
       setTextOperator(filter.operator);
     }
   }, [filter]);
 
-  // Handle popover toggle events and positioning
+  // Sync localFilter when filter prop changes
+  useEffect(() => {
+    setLocalFilter(filter);
+  }, [filter]);
+
+  const hasOptions =
+    Boolean(filterOptions && filterOptions.length > 0) ||
+    Boolean(fetchFilterOptions);
+
+  // Use positioning hook
+  const { resetPositioning } = usePopoverPositioning({
+    columnDataType: column.dataType,
+    hasOptions,
+    isOpen: isPopoverOpen,
+    popoverId,
+    popoverRef,
+    recalculateDeps: [textOperator, fetchedOptions],
+  });
+
+  // Handle popover toggle events
   useEffect(() => {
     const popover = popoverRef.current;
     if (!popover) return;
@@ -57,51 +75,9 @@ export const FilterPopover = ({
     const handlePopoverToggle = (e: Event) => {
       const toggleEvent = e as ToggleEvent;
       if (toggleEvent.newState === 'open') {
+        setIsPopoverOpen(true);
         // Lock body scroll to prevent outer scrollbar
         document.body.style.overflow = 'hidden';
-        
-        // Position popover relative to the trigger button
-        const triggerButton = document.querySelector<HTMLElement>(
-          `[popovertarget="${popoverId}"]`,
-        );
-        if (!triggerButton) return;
-
-        const buttonRect = triggerButton.getBoundingClientRect();
-        const popoverRect = popover.getBoundingClientRect();
-
-        // Calculate available space with some padding
-        const SPACING = 8;
-        const OFFSET = 4; // Offset between button and popover
-        const spaceBelow = window.innerHeight - buttonRect.bottom - SPACING - OFFSET;
-        const spaceAbove = buttonRect.top - SPACING - OFFSET;
-        const shouldPositionAbove = spaceBelow < popoverRect.height && spaceAbove > spaceBelow;
-
-        // Calculate max height based on available space
-        const maxHeight = shouldPositionAbove ? spaceAbove : spaceBelow;
-
-        // Check if popover would go off-screen on the right
-        const left = buttonRect.left;
-        const rightEdge = left + popoverRect.width;
-        const adjustedLeft =
-          rightEdge > window.innerWidth
-            ? window.innerWidth - popoverRect.width - SPACING
-            : left;
-
-        popover.style.left = `${adjustedLeft}px`;
-        popover.style.maxHeight = `${maxHeight}px`;
-        
-        if (shouldPositionAbove) {
-          // Position above button - anchor to bottom of viewport
-          popover.style.bottom = `${window.innerHeight - buttonRect.top + 4}px`;
-          popover.style.top = 'auto';
-        } else {
-          // Position below button - anchor to top
-          popover.style.top = `${buttonRect.bottom + 4}px`;
-          popover.style.bottom = 'auto';
-        }
-        
-        popover.style.margin = '0';
-        popover.style.opacity = '1';
 
         // Fetch options when popover opens (if needed)
         if (fetchFilterOptions && !fetchedOptions && !isFetchingOptions) {
@@ -137,9 +113,12 @@ export const FilterPopover = ({
             (firstInput as HTMLElement).focus();
           }
         }, 0);
-      } else if (toggleEvent.newState === 'closed') {
+      } else {
+        setIsPopoverOpen(false);
         // Unlock body scroll when popover closes
         document.body.style.overflow = '';
+        // Reset positioning for next open
+        resetPositioning();
       }
     };
 
@@ -152,7 +131,7 @@ export const FilterPopover = ({
     fetchedOptions,
     isFetchingOptions,
     column.key,
-    popoverId,
+    resetPositioning,
   ]);
 
   // Handle loading more filter options (infinite scroll)
@@ -245,13 +224,15 @@ export const FilterPopover = ({
               />
               {isSelectListVisible && (
                 <SelectFilterInput
-                  filter={localFilter?.type === 'select' ? localFilter : undefined}
-                    hasMore={hasMoreOptions}
-                    isLoadingMore={isFetchingOptions}
-                    onChange={setLocalFilter}
-                    onLoadMore={handleLoadMoreOptions}
-                    options={effectiveFilterOptions}
-                  />
+                  filter={
+                    localFilter?.type === 'select' ? localFilter : undefined
+                  }
+                  hasMore={hasMoreOptions}
+                  isLoadingMore={isFetchingOptions}
+                  onChange={setLocalFilter}
+                  onLoadMore={handleLoadMoreOptions}
+                  options={effectiveFilterOptions}
+                />
               )}
             </div>
           );
