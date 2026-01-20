@@ -14,6 +14,13 @@ export const COLUMNS: TableColumn[] = [
   },
   {
     dataType: 'string',
+    fetchFilterOptions: async (offset = 0) => {
+      const result = await enterpriseOrdersApi.fetchDistinctValues({
+        columnName: 'order_number',
+        offset,
+      });
+      return { hasMore: result.hasMore, values: result.values };
+    },
     key: 'order_number',
     label: 'Order #',
     maxWidth: 180,

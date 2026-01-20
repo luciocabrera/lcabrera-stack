@@ -125,11 +125,14 @@ export const SelectFilterInput = ({
           {...stylex.props(styles.searchInput)}
         />
       )}
-      <div ref={scrollContainerRef} {...stylex.props(styles.optionsList)}>
+      <div {...stylex.props(styles.optionsList)}>
         {filteredOptions.length === 0 ? (
           <div {...stylex.props(styles.noResults)}>No options found</div>
         ) : (
-          <div {...stylex.props(styles.virtualContainer(totalHeight))}>
+          <div
+            ref={scrollContainerRef}
+            {...stylex.props(styles.virtualContainer(totalHeight))}
+          >
             <div {...stylex.props(styles.virtualOffset(offsetY))}>
               {Array.from({ length: endIndex - startIndex }).map((_, i) => {
                 const index = startIndex + i;

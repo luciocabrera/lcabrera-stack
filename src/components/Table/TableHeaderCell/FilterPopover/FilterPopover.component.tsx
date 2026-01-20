@@ -7,11 +7,7 @@ import { usePopoverPositioning } from '@/hooks/usePopoverPositioning.hook';
 
 import type { FilterPopoverProps, ToggleEvent } from './FilterPopover.types';
 
-import { BooleanFilterInput } from '../filters/BooleanFilterInput';
-import { DateFilterInput } from '../filters/DateFilterInput';
-import { NumberFilterInput } from '../filters/NumberFilterInput';
-import { SelectFilterInput } from '../filters/SelectFilterInput';
-import { TextFilterInput } from '../filters/TextFilterInput';
+import { FilterInputs } from '../filters/FilterInputs';
 import { styles } from './FilterPopover.stylex';
 
 export const FilterPopover = ({
@@ -26,13 +22,8 @@ export const FilterPopover = ({
   const popoverRef = useRef<HTMLDivElement>(null);
   // Local state to track the current filter value before applying
   const [localFilter, setLocalFilter] = useState(filter);
-  // State for dynamically fetched options
-  const [fetchedOptions, setFetchedOptions] = useState<string[]>();
-  const [isFetchingOptions, setIsFetchingOptions] = useState(false);
-  const [hasMoreOptions, setHasMoreOptions] = useState(false);
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  // Track the selected text operator for conditional rendering
-  const [textOperator, setTextOperator] = useState<
+  // Track the current text operator for string columns
+  const [currentTextOperator, setCurrentTextOperator] = useState<
     | 'contains'
     | 'endsWith'
     | 'equals'
@@ -40,22 +31,27 @@ export const FilterPopover = ({
     | 'notEquals'
     | 'startsWith'
   >('equals');
-
-  // Sync textOperator when filter changes
-  useEffect(() => {
-    if (filter?.type === 'text') {
-      setTextOperator(filter.operator);
-    }
-  }, [filter]);
+  // State for dynamically fetched options
+  const [fetchedOptions, setFetchedOptions] = useState<string[]>();
+  const [isFetchingOptions, setIsFetchingOptions] = useState(false);
+  const [hasMoreOptions, setHasMoreOptions] = useState(false);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   // Sync localFilter when filter prop changes
   useEffect(() => {
     setLocalFilter(filter);
+    // Also sync the text operator from the filter
+    if (filter?.type === 'text') {
+      setCurrentTextOperator(filter.operator);
+    }
   }, [filter]);
 
   const hasOptions =
     Boolean(filterOptions && filterOptions.length > 0) ||
     Boolean(fetchFilterOptions);
+
+  // Use fetched options if available, otherwise fall back to provided options
+  const effectiveFilterOptions = fetchedOptions ?? filterOptions;
 
   // Use positioning hook
   const { resetPositioning } = usePopoverPositioning({
@@ -64,7 +60,7 @@ export const FilterPopover = ({
     isOpen: isPopoverOpen,
     popoverId,
     popoverRef,
-    recalculateDeps: [textOperator, fetchedOptions],
+    recalculateDeps: [effectiveFilterOptions],
   });
 
   // Handle popover toggle events
@@ -84,22 +80,11 @@ export const FilterPopover = ({
           setIsFetchingOptions(true);
           void fetchFilterOptions(0)
             .then((result: { hasMore: boolean; values: string[] }) => {
-              console.warn(
-                '✅ [FilterPopover] Fetched options for',
-                column.key,
-                ':',
-                result.values.length,
-                'hasMore:',
-                result.hasMore,
-              );
               setFetchedOptions(result.values);
               setHasMoreOptions(result.hasMore);
             })
             .catch((error: unknown) => {
-              console.error(
-                '❌ [FilterPopover] Failed to fetch options:',
-                error,
-              );
+              console.error('[FilterPopover] Failed to fetch options:', error);
             })
             .finally(() => {
               setIsFetchingOptions(false);
@@ -148,14 +133,6 @@ export const FilterPopover = ({
     setIsFetchingOptions(true);
     void fetchFilterOptions(fetchedOptions.length)
       .then((result: { hasMore: boolean; values: string[] }) => {
-        console.warn(
-          '✅ [FilterPopover] Loaded more options for',
-          column.key,
-          ':',
-          result.values.length,
-          'hasMore:',
-          result.hasMore,
-        );
         setFetchedOptions((prev) => [...(prev ?? []), ...result.values]);
         setHasMoreOptions(result.hasMore);
       })
@@ -170,7 +147,6 @@ export const FilterPopover = ({
     fetchedOptions,
     isFetchingOptions,
     hasMoreOptions,
-    column.key,
   ]);
 
   const renderFilterInput = () => {
@@ -180,76 +156,33 @@ export const FilterPopover = ({
       );
     }
 
-    // Use fetched options if available, otherwise fall back to provided options
-    const effectiveFilterOptions = fetchedOptions ?? filterOptions;
-
-    switch (column.dataType) {
-      case 'boolean': {
-        return (
-          <BooleanFilterInput
-            filter={localFilter?.type === 'boolean' ? localFilter : undefined}
-            onChange={setLocalFilter}
-          />
-        );
-      }
-      case 'currency':
-      case 'number': {
-        return (
-          <NumberFilterInput
-            filter={localFilter?.type === 'number' ? localFilter : undefined}
-            onChange={setLocalFilter}
-          />
-        );
-      }
-      case 'date': {
-        return (
-          <DateFilterInput
-            filter={localFilter?.type === 'date' ? localFilter : undefined}
-            onChange={setLocalFilter}
-          />
-        );
-      }
-      case 'string': {
-        // Use SelectFilterInput if we have filter options (facet filter)
-        if (effectiveFilterOptions && effectiveFilterOptions.length > 0) {
-          const isSelectListVisible =
-            textOperator === 'equals' || textOperator === 'notEquals';
-
-          return (
-            <div {...stylex.props(styles.stringFilterContainer)}>
-              <TextFilterInput
-                filter={localFilter?.type === 'text' ? localFilter : undefined}
-                onChange={setLocalFilter}
-                onOperatorChange={setTextOperator}
-              />
-              {isSelectListVisible && (
-                <SelectFilterInput
-                  filter={
-                    localFilter?.type === 'select' ? localFilter : undefined
-                  }
-                  hasMore={hasMoreOptions}
-                  isLoadingMore={isFetchingOptions}
-                  onChange={setLocalFilter}
-                  onLoadMore={handleLoadMoreOptions}
-                  options={effectiveFilterOptions}
-                />
-              )}
-            </div>
-          );
-        }
-        // Otherwise use TextFilterInput only
-        return (
-          <TextFilterInput
-            filter={localFilter?.type === 'text' ? localFilter : undefined}
-            onChange={setLocalFilter}
-          />
-        );
-      }
-      default: {
-        return;
-      }
-    }
+    return (
+      <FilterInputs
+        column={column}
+        currentTextOperator={currentTextOperator}
+        filter={localFilter ?? undefined}
+        filterOptions={effectiveFilterOptions}
+        hasMore={hasMoreOptions}
+        isLoadingOptions={isFetchingOptions}
+        onChange={setLocalFilter}
+        onLoadMoreOptions={handleLoadMoreOptions}
+        onTextOperatorChange={setCurrentTextOperator}
+      />
+    );
   };
+
+  // Fixed heights for both use cases
+  // 20rem: When list is visible (string column with options AND operator is equals/notEquals)
+  // 12rem: All other cases (no list)
+  const isListShowing =
+    column.dataType === 'string' &&
+    hasOptions &&
+    (currentTextOperator === 'equals' || currentTextOperator === 'notEquals');
+
+  console.warn(
+    `[FilterPopover] column: ${column.key}, dataType: ${column.dataType}, hasOptions: ${hasOptions}, currentOperator: ${currentTextOperator}, isListShowing: ${isListShowing}`,
+  );
+  const popoverMinHeight = isListShowing ? '25rem' : '12rem';
 
   return (
     <div
@@ -257,7 +190,7 @@ export const FilterPopover = ({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       {...({ popover: 'auto' } as any)}
       ref={popoverRef}
-      {...stylex.props(styles.popover)}
+      {...stylex.props(styles.popover(popoverMinHeight))}
     >
       <div {...stylex.props(styles.content)}>
         <div {...stylex.props(styles.header)}>

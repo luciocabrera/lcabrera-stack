@@ -389,6 +389,7 @@ app.get('/api/enterprise-orders/distinct/:columnName', async (request, res) => {
 
     // Validate column name to prevent SQL injection
     const allowedColumns = [
+      'order_number',
       'order_status',
       'priority',
       'customer_email',

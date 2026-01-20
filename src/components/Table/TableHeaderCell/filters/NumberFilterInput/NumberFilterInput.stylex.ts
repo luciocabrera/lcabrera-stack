@@ -18,6 +18,7 @@ export const styles = stylex.create({
     borderRadius: '0.25rem',
     borderStyle: 'solid',
     borderWidth: '1px',
+    flex: '1',
     outline: {
       default: 'revert',
       ':focus': 'none',
@@ -25,6 +26,7 @@ export const styles = stylex.create({
     backgroundColor: colors.surfacePrimary,
     color: colors.textPrimary,
     fontSize: typography.fontSizeSm,
+    minWidth: 0,
   },
   inputGroup: {
     gap: spacing.sm,

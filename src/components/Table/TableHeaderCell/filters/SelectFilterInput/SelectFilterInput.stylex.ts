@@ -45,9 +45,9 @@ export const styles = stylex.create({
     display: 'flex',
     flexDirection: 'column',
     position: 'relative',
-    maxHeight: '10rem',
     minHeight: '10rem',
-    overflowY: 'auto',
+    maxHeight: '10rem',
+    overflow: 'hidden',
   },
   searchInput: {
     padding: `${spacing.xs} ${spacing.sm}`,
@@ -81,6 +81,7 @@ export const styles = stylex.create({
   virtualContainer: (height: number) => ({
     position: 'relative',
     height,
+    overflowY: 'auto',
   }),
   virtualOffset: (offsetY: number) => ({
     transform: `translateY(${offsetY}px)`,
