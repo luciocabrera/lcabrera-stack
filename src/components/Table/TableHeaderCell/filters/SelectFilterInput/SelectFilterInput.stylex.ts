@@ -45,8 +45,8 @@ export const styles = stylex.create({
     display: 'flex',
     flexDirection: 'column',
     position: 'relative',
-    maxHeight: '12rem',
-    minHeight: '12rem',
+    maxHeight: '10rem',
+    minHeight: '10rem',
     overflowY: 'auto',
   },
   searchInput: {
