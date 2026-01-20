@@ -114,17 +114,15 @@ export const SelectFilterInput = ({
 
   return (
     <div {...stylex.props(styles.container)}>
-      {options.length > 5 && (
-        <input
-          onChange={(e) => {
-            setSearchTerm(e.target.value);
-          }}
-          placeholder='Search options...'
-          type='text'
-          value={searchTerm}
-          {...stylex.props(styles.searchInput)}
-        />
-      )}
+      <input
+        onChange={(e) => {
+          setSearchTerm(e.target.value);
+        }}
+        placeholder='Search options...'
+        type='text'
+        value={searchTerm}
+        {...stylex.props(styles.searchInput)}
+      />
       <div {...stylex.props(styles.optionsList)}>
         {filteredOptions.length === 0 ? (
           <div {...stylex.props(styles.noResults)}>No options found</div>

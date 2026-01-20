@@ -25,6 +25,7 @@ export const styles = stylex.create({
     backgroundColor: colors.surfacePrimary,
     color: colors.textPrimary,
     fontSize: typography.fontSizeSm,
+    flex: '1',
   },
   inputGroup: {
     gap: spacing.sm,
