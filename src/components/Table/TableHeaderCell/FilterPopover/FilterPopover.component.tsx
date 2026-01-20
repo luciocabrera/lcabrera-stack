@@ -203,8 +203,7 @@ export const FilterPopover = ({
       case 'boolean': {
         return (
           <BooleanFilterInput
-            // eslint-disable-next-line unicorn/no-null
-            filter={localFilter?.type === 'boolean' ? localFilter : null}
+            filter={localFilter?.type === 'boolean' ? localFilter : undefined}
             onChange={setLocalFilter}
           />
         );
@@ -213,8 +212,7 @@ export const FilterPopover = ({
       case 'number': {
         return (
           <NumberFilterInput
-            // eslint-disable-next-line unicorn/no-null
-            filter={localFilter?.type === 'number' ? localFilter : null}
+            filter={localFilter?.type === 'number' ? localFilter : undefined}
             onChange={setLocalFilter}
           />
         );
@@ -222,8 +220,7 @@ export const FilterPopover = ({
       case 'date': {
         return (
           <DateFilterInput
-            // eslint-disable-next-line unicorn/no-null
-            filter={localFilter?.type === 'date' ? localFilter : null}
+            filter={localFilter?.type === 'date' ? localFilter : undefined}
             onChange={setLocalFilter}
           />
         );
@@ -231,21 +228,19 @@ export const FilterPopover = ({
       case 'string': {
         // Use SelectFilterInput if we have filter options (facet filter)
         if (effectiveFilterOptions && effectiveFilterOptions.length > 0) {
-          const showSelectList =
+          const isSelectListVisible =
             textOperator === 'equals' || textOperator === 'notEquals';
 
           return (
             <div {...stylex.props(styles.stringFilterContainer)}>
               <TextFilterInput
-                // eslint-disable-next-line unicorn/no-null
-                filter={localFilter?.type === 'text' ? localFilter : null}
+                filter={localFilter?.type === 'text' ? localFilter : undefined}
                 onChange={setLocalFilter}
                 onOperatorChange={setTextOperator}
               />
-              {showSelectList && (
+              {isSelectListVisible && (
                 <SelectFilterInput
-                  // eslint-disable-next-line unicorn/no-null
-                  filter={localFilter?.type === 'select' ? localFilter : null}
+                  filter={localFilter?.type === 'select' ? localFilter : undefined}
                     hasMore={hasMoreOptions}
                     isLoadingMore={isFetchingOptions}
                     onChange={setLocalFilter}
@@ -259,8 +254,7 @@ export const FilterPopover = ({
         // Otherwise use TextFilterInput only
         return (
           <TextFilterInput
-            // eslint-disable-next-line unicorn/no-null
-            filter={localFilter?.type === 'text' ? localFilter : null}
+            filter={localFilter?.type === 'text' ? localFilter : undefined}
             onChange={setLocalFilter}
           />
         );

@@ -14,8 +14,10 @@ export {
 // Hooks - Actions
 export {
   useAppendTableData,
+  useClearAllColumnFilters,
   useClearColumnFilter,
   useSetColumnFilter,
+  useSetColumnFilters,
   useSetColumnOrder,
   useSetColumnSizing,
   useSetColumnVisibility,

@@ -16,10 +16,13 @@ import { Tabs } from '@/components/Tabs';
 import type { TableSettingsDrawerProps } from './TableSettingsDrawer.types';
 
 import { ColumnOrderSection } from './ColumnOrderSection';
+import { FiltersSection } from './FiltersSection';
+import { validateFilter } from './FiltersSection/FilterEditor';
 import { GeneralSettingsSection } from './GeneralSettingsSection';
 import { SortingSection } from './SortingSection';
 
 export const TableSettingsDrawer = ({
+  columnFilters,
   columnOrder,
   columns,
   columnSizing,
@@ -27,6 +30,7 @@ export const TableSettingsDrawer = ({
   isOpen,
   isPinned,
   onClose,
+  onColumnFiltersChange,
   onColumnOrderChange,
   onColumnSizingChange,
   onColumnVisibilityChange,
@@ -37,6 +41,7 @@ export const TableSettingsDrawer = ({
   // Local state for pending changes - reset when drawer opens
   const initialPendingState = useMemo(
     () => ({
+      columnFilters,
       columnOrder,
       columnSizing,
       columnVisibility,
@@ -47,6 +52,9 @@ export const TableSettingsDrawer = ({
     [isOpen],
   );
 
+  const [pendingColumnFilters, setPendingColumnFilters] = useState(
+    initialPendingState.columnFilters,
+  );
   const [pendingSorting, setPendingSorting] = useState(
     initialPendingState.sorting,
   );
@@ -62,13 +70,26 @@ export const TableSettingsDrawer = ({
 
   // Update pending state when initialPendingState changes (when drawer opens with new values)
   useEffect(() => {
+    setPendingColumnFilters(initialPendingState.columnFilters);
     setPendingSorting(initialPendingState.sorting);
     setPendingColumnOrder(initialPendingState.columnOrder);
     setPendingColumnSizing(initialPendingState.columnSizing);
     setPendingColumnVisibility(initialPendingState.columnVisibility);
   }, [initialPendingState]);
 
+  // Validate all filters before allowing accept
+  const areFiltersValid = useMemo(() => {
+    return Object.values(pendingColumnFilters).every((filter) =>
+      validateFilter(filter),
+    );
+  }, [pendingColumnFilters]);
+
   const handleAccept = () => {
+    if (!areFiltersValid) {
+      // Don't allow accept if filters are invalid
+      return;
+    }
+    onColumnFiltersChange(pendingColumnFilters);
     onSortingChange(pendingSorting);
     onColumnOrderChange(pendingColumnOrder);
     onColumnSizingChange(pendingColumnSizing);
@@ -78,6 +99,7 @@ export const TableSettingsDrawer = ({
 
   const handleCancel = () => {
     // Reset to original values
+    setPendingColumnFilters(columnFilters);
     setPendingSorting(sorting);
     setPendingColumnOrder(columnOrder);
     setPendingColumnSizing(columnSizing);
@@ -106,6 +128,20 @@ export const TableSettingsDrawer = ({
       ),
       header: 'Sorting',
       key: 'sorting',
+    },
+    {
+      children: (
+        <FiltersSection
+          columns={columns}
+          filters={pendingColumnFilters}
+          onFiltersChange={setPendingColumnFilters}
+        />
+      ),
+      header: (() => {
+        const filterCount = Object.keys(pendingColumnFilters).length;
+        return filterCount > 0 ? `Filters (${filterCount})` : 'Filters';
+      })(),
+      key: 'filters',
     },
     {
       children: (
@@ -154,7 +190,17 @@ export const TableSettingsDrawer = ({
         <Tabs tabs={tabs} />
       </SidePanelBody>
       <SidePanelFooter>
-        <Button color='primary' onClick={handleAccept} size='sm'>
+        <Button
+          color='primary'
+          isDisabled={!areFiltersValid}
+          onClick={handleAccept}
+          size='sm'
+          title={
+            areFiltersValid
+              ? undefined
+              : 'Please fix invalid filters before accepting'
+          }
+        >
           Accept
         </Button>
         <Button color='outline' onClick={handleCancel} size='sm'>

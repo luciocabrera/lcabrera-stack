@@ -1,4 +1,5 @@
 import type {
+  ColumnFiltersState,
   ColumnOrderState,
   ColumnSizingState,
   ColumnVisibilityState,
@@ -10,6 +11,8 @@ import type {
  * TableSettingsDrawer component props
  */
 export type TableSettingsDrawerProps = {
+  /** Current column filters state */
+  columnFilters: ColumnFiltersState;
   /** Current column order state */
   columnOrder: ColumnOrderState;
   /** Available table columns */
@@ -24,6 +27,8 @@ export type TableSettingsDrawerProps = {
   isPinned?: boolean;
   /** Callback when drawer should close */
   onClose: () => void;
+  /** Callback when column filters change */
+  onColumnFiltersChange: (columnFilters: ColumnFiltersState) => void;
   /** Callback when column order changes */
   onColumnOrderChange: (columnOrder: ColumnOrderState) => void;
   /** Callback when column sizing changes */

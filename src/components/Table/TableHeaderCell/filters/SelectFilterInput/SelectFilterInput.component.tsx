@@ -56,8 +56,7 @@ export const SelectFilterInput = ({
     setSelectedValues(newSelectedValues);
 
     if (newSelectedValues.length === 0) {
-      // eslint-disable-next-line unicorn/no-null
-      onChange(null);
+      onChange();
     } else {
       onChange({
         type: 'select',

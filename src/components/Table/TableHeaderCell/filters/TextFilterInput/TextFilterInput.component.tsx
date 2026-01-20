@@ -36,8 +36,7 @@ export const TextFilterInput = ({
       if (value) {
         onChange({ operator: newOperator, type: 'text', value });
       } else {
-        // eslint-disable-next-line unicorn/no-null
-        onChange(null);
+        onChange();
       }
     }
   };
@@ -47,12 +46,11 @@ export const TextFilterInput = ({
     if (newValue) {
       onChange({ operator, type: 'text', value: newValue });
     } else {
-      // eslint-disable-next-line unicorn/no-null
-      onChange(null);
+      onChange();
     }
   };
 
-  const showInput =
+  const isInputVisible =
     operator !== 'equals' && operator !== 'notEquals';
 
   return (
@@ -79,7 +77,7 @@ export const TextFilterInput = ({
         <option value='startsWith'>Starts with</option>
         <option value='endsWith'>Ends with</option>
       </select>
-      {showInput && (
+      {isInputVisible && (
         <input
           onChange={(e) => {
             handleValueChange(e.target.value);

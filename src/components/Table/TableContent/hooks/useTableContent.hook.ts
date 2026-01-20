@@ -14,6 +14,7 @@ import {
   useColumnOrder,
   useColumnSizing,
   useColumnVisibility,
+  useSetColumnFilters,
   useSetColumnOrder,
   useSetColumnVisibility,
   useSetSorting,
@@ -38,6 +39,7 @@ type UseTableContentArgs<T extends Record<string, unknown>> = Pick<
 >;
 
 type UseTableContentReturn<T extends Record<string, unknown>> = {
+  columnFilters: Record<string, unknown>;
   columnOrder: string[];
   columnSizing: Record<string, number>;
   columnVisibility: Set<string>;
@@ -46,6 +48,7 @@ type UseTableContentReturn<T extends Record<string, unknown>> = {
   isLoadingMore: boolean;
   isSettingsOpen: boolean;
   isSettingsPinned: boolean;
+  setColumnFilters: (filters: Record<string, unknown>) => void;
   setColumnOrder: (order: string[]) => void;
   setColumnSizing: (sizing: Record<string, number>) => void;
   setColumnVisibility: (visibility: Set<string>) => void;
@@ -92,6 +95,7 @@ export const useTableContent = <T extends Record<string, unknown>>({
   const [storeData] = useTableData<T>();
   const [isLoadingMore] = useTableLoadingMore();
   const [sorting] = useSorting<T>();
+  const setColumnFilters = useSetColumnFilters();
   const setColumnOrder = useSetColumnOrder();
   const setColumnVisibility = useSetColumnVisibility();
   const setSorting = useSetSorting();
@@ -292,6 +296,7 @@ export const useTableContent = <T extends Record<string, unknown>>({
   }, [sorting, persistSlice, persistenceKey]);
 
   return {
+    columnFilters,
     columnOrder,
     columnSizing,
     columnVisibility,
@@ -300,6 +305,7 @@ export const useTableContent = <T extends Record<string, unknown>>({
     isLoadingMore,
     isSettingsOpen,
     isSettingsPinned,
+    setColumnFilters,
     setColumnOrder,
     setColumnSizing: setBulkColumnSizing,
     setColumnVisibility,

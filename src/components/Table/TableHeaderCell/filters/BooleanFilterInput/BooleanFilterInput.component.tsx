@@ -19,8 +19,7 @@ export const BooleanFilterInput = ({
 
   const handleChange = (newValue: 'all' | 'false' | 'true') => {
     if (newValue === 'all') {
-      // eslint-disable-next-line unicorn/no-null
-      onChange(null);
+      onChange();
     } else {
       onChange({
         type: 'boolean' as const,

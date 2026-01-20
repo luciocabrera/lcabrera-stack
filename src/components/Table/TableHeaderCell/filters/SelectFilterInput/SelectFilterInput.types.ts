@@ -1,10 +1,10 @@
 import type { SelectFilter } from '../../../Table.types';
 
 export type SelectFilterInputProps = {
-  filter: null | SelectFilter | undefined;
+  filter: SelectFilter | undefined;
   hasMore?: boolean;
   isLoadingMore?: boolean;
-  onChange: (filter: null | SelectFilter | undefined) => void;
+  onChange: (filter: SelectFilter | undefined) => void;
   onLoadMore?: () => void;
   options: string[];
 };
