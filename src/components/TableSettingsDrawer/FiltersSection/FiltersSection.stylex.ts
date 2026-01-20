@@ -44,7 +44,7 @@ export const styles = stylex.create({
   },
   filtersListContainer: {
     flex: '1',
-    gap: spacing.sm,
+    gap: spacing.md,
     display: 'flex',
     flexDirection: 'column',
   },
@@ -62,9 +62,9 @@ export const styles = stylex.create({
     backgroundColor: colors.surfacePrimary,
   },
   filterItemHeader: {
+    gap: spacing.sm,
     paddingBlock: spacing.xxs,
     paddingInline: spacing.md,
-    gap: spacing.sm,
     alignItems: 'center',
     display: 'flex',
     justifyContent: 'space-between',
