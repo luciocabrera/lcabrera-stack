@@ -9,7 +9,7 @@ export type HandleResizeParams = {
 
 export type HandleSortParams = {
   columnKey: string;
-  direction: SortDirection;
+  direction?: SortDirection;
   isMultiSort?: boolean;
 };
 

@@ -1,5 +1,5 @@
-import type { SortDirection } from '../TableHeaderCell.types';
+import type { SortDirection } from '../../Table.types';
 
 export type SortIconProps = {
-  direction: SortDirection;
+  direction: SortDirection | undefined;
 };

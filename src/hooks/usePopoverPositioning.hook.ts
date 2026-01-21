@@ -115,7 +115,7 @@ export const usePopoverPositioning = ({
 
     popover.style.margin = '0';
     popover.style.opacity = '1';
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [
     isOpen,
     popoverId,

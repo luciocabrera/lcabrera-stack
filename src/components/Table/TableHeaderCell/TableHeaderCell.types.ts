@@ -1,15 +1,13 @@
 import type { StyleXStyles } from '@stylexjs/stylex';
 import type { ComponentPropsWithoutRef } from 'react';
 
-import type { ColumnFilter, TableColumn } from '../Table.types';
+import type { ColumnFilter, SortDirection, TableColumn } from '../Table.types';
 import type { HandleSortParams } from '../TableHeader/TableHeader.types';
 
 export type OnResizeParams = {
   columnKey: string;
   width: number;
 };
-
-export type SortDirection = 'asc' | 'desc' | undefined;
 
 export type TableHeaderCellProps = ComponentPropsWithoutRef<'th'> &
   Pick<TableColumn, 'dataType' | 'label' | 'minWidth'> & {
@@ -26,8 +24,8 @@ export type TableHeaderCellProps = ComponentPropsWithoutRef<'th'> &
     isLoading?: boolean;
     isSortable?: boolean;
     maxWidth?: number;
-    onFilterApply?: (filter?: ColumnFilter) => void;
-    onFilterClear?: () => void;
+    onFilterApply: (filter?: ColumnFilter) => void;
+    onFilterClear: () => void;
     onResize?: (params: OnResizeParams) => void;
     onResizeDoubleClick?: (columnKey: string) => void;
     onSettingsClick?: () => void;
