@@ -62,6 +62,13 @@ export const TableContent = <T extends Record<string, unknown>>({
     persistenceKey,
   });
 
+  const handleCloseSettings = () => {
+    setIsSettingsOpen(false);
+  };
+  const handleOpenSettings = () => {
+    setIsSettingsOpen(true);
+  };
+
   return (
     <div {...stylex.props(styles.wrapper)}>
       <div {...stylex.props(styles.outerContainer)}>
@@ -73,9 +80,7 @@ export const TableContent = <T extends Record<string, unknown>>({
                 aria-label='Table settings'
                 color='ghost'
                 icon={<SettingsIcon size={16} />}
-                onClick={() => {
-                  setIsSettingsOpen(true);
-                }}
+                onClick={handleOpenSettings}
                 size='mini'
               />
             </>
@@ -115,9 +120,7 @@ export const TableContent = <T extends Record<string, unknown>>({
         columnVisibility={columnVisibility}
         isOpen={isSettingsOpen}
         isPinned={isSettingsPinned}
-        onClose={() => {
-          setIsSettingsOpen(false);
-        }}
+        onClose={handleCloseSettings}
         onColumnFiltersChange={setColumnFilters}
         onColumnOrderChange={setColumnOrder}
         onColumnSizingChange={setColumnSizing}

@@ -1,6 +1,6 @@
+import type { StyleXStyles } from '@stylexjs/stylex';
 import type { ComponentPropsWithRef, ReactNode } from 'react';
 
-import type { CustomStylex } from '@/types/design-system.types';
 import type {
   CurrencyFormatOptions,
   DateFormatOptions,
@@ -382,7 +382,7 @@ export type TextFilter = {
 type BaseProps = ComponentPropsWithRef<'table'> & {
   /** Optional actions to display in the table title header */
   actions?: ReactNode;
-  customStylex?: CustomStylex;
+  customStylex?: StyleXStyles;
   density?: TableDensity;
   icon?: ReactNode;
   isBordered?: boolean;

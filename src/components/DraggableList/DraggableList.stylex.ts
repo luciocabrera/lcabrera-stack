@@ -50,11 +50,11 @@ export const styles = stylex.create({
     userSelect: 'none',
     height: '34px',
   },
-  item_dragging: {
+  itemDragging: {
     cursor: 'grabbing',
     opacity: 0.5,
   },
-  item_dragOver: {
+  itemDragOver: {
     borderColor: colors.brandPrimary,
     borderStyle: 'dashed',
   },

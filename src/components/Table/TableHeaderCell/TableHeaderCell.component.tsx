@@ -37,7 +37,6 @@ export const TableHeaderCell = ({
   onSettingsClick,
   onSort,
   sortDirection,
-  sortIndex: _sortIndex, // Rename to indicate unused
   width,
   ...rest
 }: TableHeaderCellProps) => {
@@ -114,8 +113,8 @@ export const TableHeaderCell = ({
               fetchFilterOptions={fetchFilterOptions}
               filter={filter}
               filterOptions={filterOptions}
-              onApply={onFilterApply ?? undefined}
-              onClear={onFilterClear ?? undefined}
+              onApply={onFilterApply}
+              onClear={onFilterClear}
               popoverId={filterPopoverId}
             />
           </>

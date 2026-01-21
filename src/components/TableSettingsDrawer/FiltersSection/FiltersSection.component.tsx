@@ -20,11 +20,17 @@ export const FiltersSection = ({
     () => new Set(),
   );
   // Track fetched options for columns with fetchFilterOptions
-  const [fetchedOptions, setFetchedOptions] = useState<Record<string, string[]>>({});
+  const [fetchedOptions, setFetchedOptions] = useState<
+    Record<string, string[]>
+  >({});
   // Track hasMore state for pagination
-  const [hasMoreOptions, setHasMoreOptions] = useState<Record<string, boolean>>({});
+  const [hasMoreOptions, setHasMoreOptions] = useState<Record<string, boolean>>(
+    {},
+  );
   // Track loading state for each column
-  const [loadingOptions, setLoadingOptions] = useState<Record<string, boolean>>({});
+  const [loadingOptions, setLoadingOptions] = useState<Record<string, boolean>>(
+    {},
+  );
 
   // Filter to only filterable columns
   const filterableColumns = columns.filter((col) => col.isFilterable !== false);
@@ -57,7 +63,11 @@ export const FiltersSection = ({
   // Handle loading more options for a specific column
   const handleLoadMoreOptions = async (columnKey: string) => {
     const column = filterableColumns.find((col) => col.key === columnKey);
-    if (!column?.fetchFilterOptions || loadingOptions[columnKey] || !hasMoreOptions[columnKey]) {
+    if (
+      !column?.fetchFilterOptions ||
+      loadingOptions[columnKey] ||
+      !hasMoreOptions[columnKey]
+    ) {
       return;
     }
 
@@ -67,7 +77,7 @@ export const FiltersSection = ({
       const result = await column.fetchFilterOptions(currentOptions.length);
       const newOptions = Array.isArray(result) ? result : result.values;
       const hasMore = Array.isArray(result) ? false : result.hasMore;
-      
+
       setFetchedOptions((prev) => ({
         ...prev,
         [columnKey]: [...currentOptions, ...newOptions],
@@ -99,11 +109,19 @@ export const FiltersSection = ({
       }
       case 'currency':
       case 'number': {
-        initialFilter = { operator: 'equals' as const, type: 'number' as const, value: 0 };
+        initialFilter = {
+          operator: 'equals' as const,
+          type: 'number' as const,
+          value: 0,
+        };
         break;
       }
       case 'date': {
-        initialFilter = { operator: 'equals' as const, type: 'date' as const, value: '' };
+        initialFilter = {
+          operator: 'equals' as const,
+          type: 'date' as const,
+          value: '',
+        };
         break;
       }
       default: {
@@ -122,7 +140,7 @@ export const FiltersSection = ({
 
     const newFilters = { ...filters, [selectedColumn]: initialFilter };
     onFiltersChange(newFilters);
-    
+
     // Expand the newly added filter
     setExpandedFilters(new Set([selectedColumn, ...expandedFilters]));
     setSelectedColumn('');
@@ -140,7 +158,13 @@ export const FiltersSection = ({
     setExpandedFilters(newExpanded);
   };
 
-  const handleFilterChange = ({ columnKey, filter }: { columnKey: string; filter: typeof filters[string] }) => {
+  const handleFilterChange = ({
+    columnKey,
+    filter,
+  }: {
+    columnKey: string;
+    filter: (typeof filters)[string];
+  }) => {
     const newFilters = { ...filters, [columnKey]: filter };
     onFiltersChange(newFilters);
   };
@@ -165,7 +189,6 @@ export const FiltersSection = ({
 
   return (
     <div {...stylex.props(styles.container)} {...props}>
-
       {/* Add Filter Section */}
       <div {...stylex.props(styles.addSection)}>
         <h3 {...stylex.props(styles.header)}>Add Filter</h3>
@@ -203,7 +226,9 @@ export const FiltersSection = ({
         {hasFilters ? (
           <div {...stylex.props(styles.filtersList)}>
             {filterEntries.map(([columnKey, filter]) => {
-              const column = filterableColumns.find((col) => col.key === columnKey);
+              const column = filterableColumns.find(
+                (col) => col.key === columnKey,
+              );
               if (!column) return;
 
               const isExpanded = expandedFilters.has(columnKey);
@@ -250,21 +275,28 @@ export const FiltersSection = ({
                   {isExpanded && (
                     <div {...stylex.props(styles.filterItemContent)}>
                       {(() => {
-                        const effectiveOptions = fetchedOptions[columnKey] ?? column.filterOptions;
+                        const effectiveOptions =
+                          fetchedOptions[columnKey] ?? column.filterOptions;
                         return (
                           <FilterEditor
                             column={column}
                             filter={filter}
                             filterOptions={effectiveOptions}
                             hasMore={hasMoreOptions[columnKey] ?? false}
-                            isLoadingOptions={loadingOptions[columnKey] ?? false}
+                            isLoadingOptions={
+                              loadingOptions[columnKey] ?? false
+                            }
                             onChange={(newFilter) => {
                               if (newFilter) {
-                                handleFilterChange({ columnKey, filter: newFilter });
+                                handleFilterChange({
+                                  columnKey,
+                                  filter: newFilter,
+                                });
                               }
                             }}
                             onLoadMoreOptions={
-                              column.fetchFilterOptions && hasMoreOptions[columnKey]
+                              column.fetchFilterOptions &&
+                              hasMoreOptions[columnKey]
                                 ? () => {
                                     void handleLoadMoreOptions(columnKey);
                                   }
@@ -285,7 +317,7 @@ export const FiltersSection = ({
           </p>
         )}
       </div>
-            {/* Clear All Filters Section */}
+      {/* Clear All Filters Section */}
       {hasFilters && (
         <div {...stylex.props(styles.clearSection)}>
           <Button

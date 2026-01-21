@@ -4,7 +4,10 @@ import type { SelectAllOptionProps } from './SelectAllOption.types';
 
 import { styles } from '../SelectFilterInput.stylex';
 
-export const SelectAllOption = ({ isAllSelected, onSelectAll }: SelectAllOptionProps) => (
+export const SelectAllOption = ({
+  isAllSelected,
+  onSelectAll,
+}: SelectAllOptionProps) => (
   <label {...stylex.props(styles.option)}>
     <input
       checked={isAllSelected}

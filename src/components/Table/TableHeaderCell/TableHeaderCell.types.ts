@@ -1,9 +1,8 @@
+import type { StyleXStyles } from '@stylexjs/stylex';
 import type { ComponentPropsWithoutRef } from 'react';
 
-import type { CustomStylex } from '@/types/design-system.types';
-
 import type { ColumnFilter, TableColumn } from '../Table.types';
-import type { HandleSortParams } from '../TableHeader';
+import type { HandleSortParams } from '../TableHeader/TableHeader.types';
 
 export type OnResizeParams = {
   columnKey: string;
@@ -15,11 +14,11 @@ export type SortDirection = 'asc' | 'desc' | undefined;
 export type TableHeaderCellProps = ComponentPropsWithoutRef<'th'> &
   Pick<TableColumn, 'dataType' | 'label' | 'minWidth'> & {
     columnKey: string;
-    customStylex?: CustomStylex;
+    customStylex?: StyleXStyles;
     fetchFilterOptions?: (
       offset?: number,
     ) => Promise<{ hasMore: boolean; values: string[] }>;
-    filter?: ColumnFilter | null;
+    filter?: ColumnFilter;
     /** Unique values for facet filter (select filter) */
     filterOptions?: string[];
     hasSettings?: boolean;
@@ -27,7 +26,7 @@ export type TableHeaderCellProps = ComponentPropsWithoutRef<'th'> &
     isLoading?: boolean;
     isSortable?: boolean;
     maxWidth?: number;
-    onFilterApply?: (filter: ColumnFilter | null | undefined) => void;
+    onFilterApply?: (filter?: ColumnFilter) => void;
     onFilterClear?: () => void;
     onResize?: (params: OnResizeParams) => void;
     onResizeDoubleClick?: (columnKey: string) => void;

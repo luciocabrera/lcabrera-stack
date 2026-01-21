@@ -50,8 +50,7 @@ export const TextFilterInput = ({
     }
   };
 
-  const isInputVisible =
-    operator !== 'equals' && operator !== 'notEquals';
+  const isInputVisible = operator !== 'equals' && operator !== 'notEquals';
 
   return (
     <div {...stylex.props(styles.container)}>

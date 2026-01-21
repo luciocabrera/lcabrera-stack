@@ -1,12 +1,14 @@
-import type { CustomStylex } from '@/types/design-system.types';
+import type { StyleXStyles } from '@stylexjs/stylex';
+import type { ComponentPropsWithoutRef } from 'react';
 
-export type FilterButtonProps = {
+export type FilterButtonProps = Omit<
+  ComponentPropsWithoutRef<'button'>,
+  'color'
+> & {
   /** Custom styles */
-  customStylex?: CustomStylex;
+  customStylex?: StyleXStyles;
   /** Whether the column has an active filter */
   isActive?: boolean;
-  /** Click handler */
-  onClick?: () => void;
   /** Popover target ID for HTML Popover API */
   popoverTargetId?: string;
 };

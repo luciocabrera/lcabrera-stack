@@ -5,9 +5,9 @@ export type FilterPopoverProps = {
   fetchFilterOptions?: (
     offset?: number,
   ) => Promise<{ hasMore: boolean; values: string[] }>;
-  filter: ColumnFilter | null | undefined;
+  filter?: ColumnFilter;
   filterOptions?: string[];
-  onApply: (filter: ColumnFilter | null | undefined) => void;
+  onApply: (filter?: ColumnFilter) => void;
   onClear: () => void;
   popoverId: string;
 };

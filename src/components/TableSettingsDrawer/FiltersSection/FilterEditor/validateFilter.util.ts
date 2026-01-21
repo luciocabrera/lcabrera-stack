@@ -39,10 +39,7 @@ export const validateFilter = (
       if (filter.value === undefined) return false;
       // Between operator needs both values
       if (filter.operator === 'between') {
-        return (
-          filter.value2 !== undefined &&
-          filter.value2 > filter.value
-        );
+        return filter.value2 !== undefined && filter.value2 > filter.value;
       }
       return true;
     }

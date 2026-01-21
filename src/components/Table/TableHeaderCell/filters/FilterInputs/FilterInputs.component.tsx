@@ -42,7 +42,8 @@ export const FilterInputs = ({
     // Then derive from filter
     if (filter?.type === 'text') return filter.operator;
     // Select filters don't have operators - they implicitly use 'equals'
-    if (filter?.type === 'select' || filter?.type === 'multiSelect') return 'equals';
+    if (filter?.type === 'select' || filter?.type === 'multiSelect')
+      return 'equals';
     return localTextOperator;
   }, [filter, localTextOperator, parentTextOperator]);
 
@@ -78,17 +79,22 @@ export const FilterInputs = ({
         // Additionally show SelectFilterInput when options are available and operator is equals/notEquals
         const hasOptions = filterOptions && filterOptions.length > 0;
         const isSelectListVisible =
-          hasOptions && (textOperator === 'equals' || textOperator === 'notEquals');
+          hasOptions &&
+          (textOperator === 'equals' || textOperator === 'notEquals');
 
         return (
           <div {...stylex.props(styles.stringFilterContainer)}>
             <TextFilterInput
               filter={filter?.type === 'text' ? filter : undefined}
               onChange={onChange}
-              onOperatorChange={hasOptions ? (operator) => {
-                setLocalTextOperator(operator);
-                onTextOperatorChange?.(operator);
-              } : undefined}
+              onOperatorChange={
+                hasOptions
+                  ? (operator) => {
+                      setLocalTextOperator(operator);
+                      onTextOperatorChange?.(operator);
+                    }
+                  : undefined
+              }
             />
             {isSelectListVisible && (
               <SelectFilterInput

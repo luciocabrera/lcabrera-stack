@@ -1,4 +1,8 @@
-import type { ColumnFilter, ColumnFiltersState, TableColumn } from '@/components/Table/Table.types';
+import type {
+  ColumnFilter,
+  ColumnFiltersState,
+  TableColumn,
+} from '@/components/Table/Table.types';
 
 export type FilterItem = {
   columnKey: string;

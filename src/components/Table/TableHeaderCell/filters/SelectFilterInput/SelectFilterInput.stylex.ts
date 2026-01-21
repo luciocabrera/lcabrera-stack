@@ -46,7 +46,7 @@ export const styles = stylex.create({
     display: 'flex',
     flexDirection: 'column',
     position: 'relative',
-        maxHeight: '10rem',
+    maxHeight: '10rem',
     // height: '12.5rem',
     // flex: '1',
     minHeight: '10rem',

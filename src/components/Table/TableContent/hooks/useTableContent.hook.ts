@@ -38,27 +38,27 @@ type UseTableContentArgs<T extends Record<string, unknown>> = Pick<
   | 'persistenceKey'
 >;
 
-type UseTableContentReturn<T extends Record<string, unknown>> = {
-  columnFilters: Record<string, unknown>;
-  columnOrder: string[];
-  columnSizing: Record<string, number>;
-  columnVisibility: Set<string>;
-  containerRef: React.RefObject<HTMLDivElement | null>;
-  dataToRender: T[];
-  isLoadingMore: boolean;
-  isSettingsOpen: boolean;
-  isSettingsPinned: boolean;
-  setColumnFilters: (filters: Record<string, unknown>) => void;
-  setColumnOrder: (order: string[]) => void;
-  setColumnSizing: (sizing: Record<string, number>) => void;
-  setColumnVisibility: (visibility: Set<string>) => void;
-  setIsSettingsOpen: (isOpen: boolean) => void;
-  setIsSettingsPinned: (isPinned: boolean) => void;
-  setSorting: (
-    sorting: { columnKey: string; direction: 'asc' | 'desc' }[],
-  ) => void;
-  sorting: { columnKey: string; direction: 'asc' | 'desc' }[];
-};
+// type UseTableContentReturn<T extends Record<string, unknown>> = {
+//   columnFilters: Record<string, unknown>;
+//   columnOrder: string[];
+//   columnSizing: Record<string, number>;
+//   columnVisibility: Set<string>;
+//   containerRef: React.RefObject<HTMLDivElement | null>;
+//   dataToRender: T[];
+//   isLoadingMore: boolean;
+//   isSettingsOpen: boolean;
+//   isSettingsPinned: boolean;
+//   setColumnFilters: (filters: Record<string, unknown>) => void;
+//   setColumnOrder: (order: string[]) => void;
+//   setColumnSizing: (sizing: Record<string, number>) => void;
+//   setColumnVisibility: (visibility: Set<string>) => void;
+//   setIsSettingsOpen: (isOpen: boolean) => void;
+//   setIsSettingsPinned: (isPinned: boolean) => void;
+//   setSorting: (
+//     sorting: { columnKey: string; direction: 'asc' | 'desc' }[],
+//   ) => void;
+//   sorting: { columnKey: string; direction: 'asc' | 'desc' }[];
+// };
 
 export const useTableContent = <T extends Record<string, unknown>>({
   columns,
@@ -69,7 +69,7 @@ export const useTableContent = <T extends Record<string, unknown>>({
   onFilterChange,
   onSortChange,
   persistenceKey,
-}: UseTableContentArgs<T>): UseTableContentReturn<T> => {
+}: UseTableContentArgs<T>) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isSettingsPinned, setIsSettingsPinned] = useState(false);
 

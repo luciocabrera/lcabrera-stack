@@ -34,8 +34,8 @@ export const DraggableList = ({
             key={item.id}
             {...stylex.props(
               styles.item,
-              isDragging && styles.item_dragging,
-              isDragOver && styles.item_dragOver,
+              isDragging && styles.itemDragging,
+              isDragOver && styles.itemDragOver,
             )}
             draggable
             onDragEnd={handleDragEnd}

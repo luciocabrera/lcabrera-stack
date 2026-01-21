@@ -4,7 +4,11 @@ import type { SelectOptionProps } from './SelectOption.types';
 
 import { styles } from '../SelectFilterInput.stylex';
 
-export const SelectOption = ({ isSelected, onToggle, option }: SelectOptionProps) => (
+export const SelectOption = ({
+  isSelected,
+  onToggle,
+  option,
+}: SelectOptionProps) => (
   <label {...stylex.props(styles.option)}>
     <input
       checked={isSelected}

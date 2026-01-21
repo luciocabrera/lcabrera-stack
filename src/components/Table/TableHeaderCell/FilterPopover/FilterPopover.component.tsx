@@ -7,8 +7,8 @@ import { usePopoverPositioning } from '@/hooks/usePopoverPositioning.hook';
 
 import type { FilterPopoverProps, ToggleEvent } from './FilterPopover.types';
 
-import { FilterInputs } from '../filters/FilterInputs';
 import { styles } from './FilterPopover.stylex';
+import { renderFilterInput } from './utils';
 
 export const FilterPopover = ({
   column,
@@ -22,8 +22,13 @@ export const FilterPopover = ({
   const popoverRef = useRef<HTMLDivElement>(null);
 
   // Initialize text operator from filter
-  const initialTextOperator: 'contains' | 'endsWith' | 'equals' | 'notContains' | 'notEquals' | 'startsWith' =
-    filter?.type === 'text' ? filter.operator : 'equals';
+  const initialTextOperator:
+    | 'contains'
+    | 'endsWith'
+    | 'equals'
+    | 'notContains'
+    | 'notEquals'
+    | 'startsWith' = filter?.type === 'text' ? filter.operator : 'equals';
 
   // Local state to track the current filter value before applying
   const [localFilter, setLocalFilter] = useState(filter);
@@ -138,34 +143,7 @@ export const FilterPopover = ({
       .finally(() => {
         setIsFetchingOptions(false);
       });
-  }, [
-    fetchFilterOptions,
-    fetchedOptions,
-    isFetchingOptions,
-    hasMoreOptions,
-  ]);
-
-  const renderFilterInput = () => {
-    if (isFetchingOptions) {
-      return (
-        <div {...stylex.props(styles.loadingContainer)}>Loading options...</div>
-      );
-    }
-
-    return (
-      <FilterInputs
-        column={column}
-        currentTextOperator={currentTextOperator}
-        filter={localFilter ?? undefined}
-        filterOptions={effectiveFilterOptions}
-        hasMore={hasMoreOptions}
-        isLoadingOptions={isFetchingOptions}
-        onChange={setLocalFilter}
-        onLoadMoreOptions={handleLoadMoreOptions}
-        onTextOperatorChange={setCurrentTextOperator}
-      />
-    );
-  };
+  }, [fetchFilterOptions, fetchedOptions, isFetchingOptions, hasMoreOptions]);
 
   // Fixed heights for both use cases
   // 20rem: When list is visible (string column with options AND operator is equals/notEquals)
@@ -179,6 +157,18 @@ export const FilterPopover = ({
     `[FilterPopover] column: ${column.key}, dataType: ${column.dataType}, hasOptions: ${hasOptions}, currentOperator: ${currentTextOperator}, isListShowing: ${isListShowing}`,
   );
   const popoverMinHeight = isListShowing ? '25rem' : '12rem';
+
+  const content = renderFilterInput({
+    column,
+    currentTextOperator,
+    effectiveFilterOptions,
+    filter: localFilter,
+    handleLoadMoreOptions,
+    hasMoreOptions,
+    isFetchingOptions,
+    setCurrentTextOperator,
+    setLocalFilter,
+  });
 
   return (
     <div
@@ -206,7 +196,7 @@ export const FilterPopover = ({
             <MenuCloseIcon size={16} />
           </button>
         </div>
-        <div {...stylex.props(styles.body)}>{renderFilterInput()}</div>
+        <div {...stylex.props(styles.body)}>{content}</div>
         <div {...stylex.props(styles.footer)}>
           <Button
             color='outline'

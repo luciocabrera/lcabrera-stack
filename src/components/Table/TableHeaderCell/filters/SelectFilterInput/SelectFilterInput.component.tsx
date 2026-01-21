@@ -32,21 +32,19 @@ export const SelectFilterInput = ({
   }, [options, searchTerm]);
 
   // Add 1 to total items for "Select All" checkbox if showing it
-  const totalItems = filteredOptions.length > 1 ? filteredOptions.length + 1 : filteredOptions.length;
+  const totalItems =
+    filteredOptions.length > 1
+      ? filteredOptions.length + 1
+      : filteredOptions.length;
 
-  const {
-    bottomSpacerHeight,
-    endIndex,
-    offsetY,
-    startIndex,
-    totalHeight,
-  } = useVirtualization({
-    containerRef: scrollContainerRef,
-    defaultContainerHeight: 300,
-    itemHeight: ITEM_HEIGHT,
-    overscan: 5,
-    totalItems,
-  });
+  const { bottomSpacerHeight, endIndex, offsetY, startIndex, totalHeight } =
+    useVirtualization({
+      containerRef: scrollContainerRef,
+      defaultContainerHeight: 300,
+      itemHeight: ITEM_HEIGHT,
+      overscan: 5,
+      totalItems,
+    });
 
   const handleToggle = (option: string) => {
     const newSelectedValues = selectedValues.includes(option)
@@ -134,13 +132,19 @@ export const SelectFilterInput = ({
             <div {...stylex.props(styles.virtualOffset(offsetY))}>
               {Array.from({ length: endIndex - startIndex }).map((_, i) => {
                 const index = startIndex + i;
-                
+
                 return (
                   <VirtualizedOption
                     filteredOptions={filteredOptions}
                     index={index}
                     isAllSelected={isAllSelected}
-                    key={index === 0 && filteredOptions.length > 1 ? 'select-all' : filteredOptions[filteredOptions.length > 1 ? index - 1 : index] ?? `option-${index}`}
+                    key={
+                      index === 0 && filteredOptions.length > 1
+                        ? 'select-all'
+                        : (filteredOptions[
+                            filteredOptions.length > 1 ? index - 1 : index
+                          ] ?? `option-${index}`)
+                    }
                     onSelectAll={handleSelectAll}
                     onToggle={handleToggle}
                     selectedValues={selectedValues}

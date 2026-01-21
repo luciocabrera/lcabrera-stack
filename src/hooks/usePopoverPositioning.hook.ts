@@ -59,7 +59,8 @@ export const usePopoverPositioning = ({
     if (!triggerButton) return;
 
     const buttonRect = triggerButton.getBoundingClientRect();
-    const spaceBelow = window.innerHeight - buttonRect.bottom - SPACING - OFFSET;
+    const spaceBelow =
+      window.innerHeight - buttonRect.bottom - SPACING - OFFSET;
     const spaceAbove = buttonRect.top - SPACING - OFFSET;
 
     // Get intrinsic popover height
@@ -115,7 +116,14 @@ export const usePopoverPositioning = ({
     popover.style.margin = '0';
     popover.style.opacity = '1';
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, popoverId, popoverRef, columnDataType, hasOptions, JSON.stringify(recalculateDeps)]);
+  }, [
+    isOpen,
+    popoverId,
+    popoverRef,
+    columnDataType,
+    hasOptions,
+    JSON.stringify(recalculateDeps),
+  ]);
 
   const resetPositioning = useCallback(() => {
     initialPositionRef.current = undefined;

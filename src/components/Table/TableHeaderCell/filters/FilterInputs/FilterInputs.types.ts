@@ -4,7 +4,13 @@ export type FilterInputsProps = {
   /** Column configuration */
   column: TableColumn;
   /** Current text operator for string filters */
-  currentTextOperator?: 'contains' | 'endsWith' | 'equals' | 'notContains' | 'notEquals' | 'startsWith';
+  currentTextOperator?:
+    | 'contains'
+    | 'endsWith'
+    | 'equals'
+    | 'notContains'
+    | 'notEquals'
+    | 'startsWith';
   /** Current filter value */
   filter?: ColumnFilter;
   /** Static or fetched filter options for select/multiselect */
@@ -18,5 +24,13 @@ export type FilterInputsProps = {
   /** Callback to load more options (for infinite scroll) */
   onLoadMoreOptions?: () => void;
   /** Callback when text operator changes */
-  onTextOperatorChange?: (operator: 'contains' | 'endsWith' | 'equals' | 'notContains' | 'notEquals' | 'startsWith') => void;
+  onTextOperatorChange?: (
+    operator:
+      | 'contains'
+      | 'endsWith'
+      | 'equals'
+      | 'notContains'
+      | 'notEquals'
+      | 'startsWith',
+  ) => void;
 };
