@@ -2,7 +2,11 @@ import type { RefObject } from 'react';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { ESTIMATED_MAX_HEIGHT, OFFSET, SPACING } from '@/constants/popover.constants';
+import {
+  ESTIMATED_MAX_HEIGHT,
+  OFFSET,
+  SPACING,
+} from '@/constants/popover.constants';
 
 export type PopoverPositioning = {
   /** Whether positioning has been calculated */
@@ -25,7 +29,6 @@ export type UsePopoverPositioningArgs = {
   /** Dependencies that trigger recalculation (e.g., content changes) */
   recalculateDeps?: unknown[];
 };
-
 
 /**
  * Custom hook to handle smart popover positioning that:
@@ -120,7 +123,6 @@ export const usePopoverPositioning = ({
 
     popover.style.margin = '0';
     popover.style.opacity = '1';
-     
   }, [
     isOpen,
     popoverId,

@@ -18,4 +18,3 @@ export type FilterEditorProps = {
   /** Callback when more options need to be loaded */
   onLoadMoreOptions?: () => void;
 };
-

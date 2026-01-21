@@ -3,7 +3,6 @@ import type {
   TableColumn,
 } from '@/components/Table/Table.types';
 
-
 export type FiltersSectionProps = {
   /** Available columns */
   columns: TableColumn[];
