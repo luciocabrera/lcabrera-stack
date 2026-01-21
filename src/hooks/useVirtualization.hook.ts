@@ -10,14 +10,7 @@ export type UseVirtualizationArgs = {
   totalItems: number;
 };
 
-export type UseVirtualizationResult = {
-  bottomSpacerHeight: number;
-  endIndex: number;
-  offsetY: number;
-  startIndex: number;
-  totalHeight: number;
-  visibleCount: number;
-};
+export type UseVirtualizationReturn = ReturnType<typeof useVirtualization>;
 
 export const useVirtualization = ({
   containerRef,
@@ -25,7 +18,7 @@ export const useVirtualization = ({
   itemHeight,
   overscan = 3,
   totalItems,
-}: UseVirtualizationArgs): UseVirtualizationResult => {
+}: UseVirtualizationArgs) => {
   const [scrollTop, setScrollTop] = useState(0);
   const [containerHeight, setContainerHeight] = useState(
     defaultContainerHeight,

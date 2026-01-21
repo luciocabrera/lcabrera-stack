@@ -1,6 +1,8 @@
 import type { RefObject } from 'react';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+import { ESTIMATED_MAX_HEIGHT, OFFSET, SPACING } from '@/constants/popover.constants';
 
 export type PopoverPositioning = {
   /** Whether positioning has been calculated */
@@ -24,9 +26,6 @@ export type UsePopoverPositioningArgs = {
   recalculateDeps?: unknown[];
 };
 
-const SPACING = 8;
-const OFFSET = 4;
-const ESTIMATED_MAX_HEIGHT = 400;
 
 /**
  * Custom hook to handle smart popover positioning that:
@@ -45,6 +44,12 @@ export const usePopoverPositioning = ({
 }: UsePopoverPositioningArgs): PopoverPositioning => {
   const initialPositionRef = useRef<'above' | 'below' | undefined>(undefined);
   const [isPositioned, setIsPositioned] = useState(false);
+
+  // Memoize the stringified recalculateDeps to avoid triggering effects unnecessarily
+  const recalculateDepsKey = useMemo(
+    () => JSON.stringify(recalculateDeps),
+    [recalculateDeps],
+  );
 
   // Calculate and apply positioning when popover opens
   useEffect(() => {
@@ -122,7 +127,7 @@ export const usePopoverPositioning = ({
     popoverRef,
     columnDataType,
     hasOptions,
-    JSON.stringify(recalculateDeps),
+    recalculateDepsKey,
   ]);
 
   const resetPositioning = useCallback(() => {

@@ -19,7 +19,3 @@ export type FilterEditorProps = {
   onLoadMoreOptions?: () => void;
 };
 
-export type FilterValidationResult = {
-  isValid: boolean;
-  message?: string;
-};
