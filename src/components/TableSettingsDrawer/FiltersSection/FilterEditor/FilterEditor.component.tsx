@@ -12,8 +12,7 @@ export const FilterEditor = ({
   filterOptions,
   hasMore = false,
   isLoadingOptions = false,
-  onChange,
-  onLoadMoreOptions,
+  ...rest
 }: FilterEditorProps) => {
   return (
     <div {...stylex.props(styles.container)} data-testid='filter-editor'>
@@ -23,8 +22,7 @@ export const FilterEditor = ({
         filterOptions={filterOptions}
         hasMore={hasMore}
         isLoadingOptions={isLoadingOptions}
-        onChange={onChange}
-        onLoadMoreOptions={onLoadMoreOptions}
+        {...rest}
       />
     </div>
   );

@@ -107,6 +107,10 @@ export const TableSettingsDrawer = ({
     onClose();
   };
 
+  const handleTogglePin = () => {
+    onPinChange?.(!isPinned);
+  };
+
   const tabs: TabItem[] = [
     {
       children: (
@@ -173,9 +177,7 @@ export const TableSettingsDrawer = ({
               aria-label={isPinned ? 'Unpin drawer' : 'Pin drawer'}
               color='ghost'
               icon={isPinned ? <PinIcon size={16} /> : <PinOffIcon size={16} />}
-              onClick={() => {
-                onPinChange(!isPinned);
-              }}
+              onClick={handleTogglePin}
               size='mini'
               title={isPinned ? 'Unpin drawer' : 'Pin drawer'}
             />

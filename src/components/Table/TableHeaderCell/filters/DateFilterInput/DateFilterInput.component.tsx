@@ -16,19 +16,24 @@ export const DateFilterInput = ({ filter, onChange }: DateFilterInputProps) => {
     filter?.operator === 'between' ? (filter.value2 ?? '') : '',
   );
 
-  const handleOperatorChange = (
-    newOperator: 'after' | 'before' | 'between' | 'equals',
-  ) => {
+  const handleOperatorChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newOperator = e.target.value as
+      | 'after'
+      | 'before'
+      | 'between'
+      | 'equals';
     setOperator(newOperator);
     updateFilter({ end: endDate, op: newOperator, val: value });
   };
 
-  const handleValueChange = (newValue: string) => {
+  const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
     setValue(newValue);
     updateFilter({ end: endDate, op: operator, val: newValue });
   };
 
-  const handleEndDateChange = (newEndDate: string) => {
+  const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newEndDate = e.target.value;
     setEndDate(newEndDate);
     updateFilter({ end: newEndDate, op: operator, val: value });
   };
@@ -64,11 +69,7 @@ export const DateFilterInput = ({ filter, onChange }: DateFilterInputProps) => {
   return (
     <div {...stylex.props(styles.container)}>
       <select
-        onChange={(e) => {
-          handleOperatorChange(
-            e.target.value as 'after' | 'before' | 'between' | 'equals',
-          );
-        }}
+        onChange={handleOperatorChange}
         value={operator}
         {...stylex.props(styles.select)}
       >
@@ -80,18 +81,14 @@ export const DateFilterInput = ({ filter, onChange }: DateFilterInputProps) => {
       {operator === 'between' ? (
         <div {...stylex.props(styles.inputGroup)}>
           <input
-            onChange={(e) => {
-              handleValueChange(e.target.value);
-            }}
+            onChange={handleValueChange}
             type='date'
             value={value}
             {...stylex.props(styles.input)}
           />
           <span {...stylex.props(styles.separator)}>to</span>
           <input
-            onChange={(e) => {
-              handleEndDateChange(e.target.value);
-            }}
+            onChange={handleEndDateChange}
             type='date'
             value={endDate}
             {...stylex.props(styles.input)}
@@ -99,9 +96,7 @@ export const DateFilterInput = ({ filter, onChange }: DateFilterInputProps) => {
         </div>
       ) : (
         <input
-          onChange={(e) => {
-            handleValueChange(e.target.value);
-          }}
+          onChange={handleValueChange}
           type='date'
           value={value}
           {...stylex.props(styles.input)}

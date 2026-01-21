@@ -47,76 +47,76 @@ export const FilterInputs = ({
     return localTextOperator;
   }, [filter, localTextOperator, parentTextOperator]);
 
-  const renderFilterInput = () => {
-    switch (column.dataType) {
-      case 'boolean': {
-        return (
-          <BooleanFilterInput
-            filter={filter?.type === 'boolean' ? filter : undefined}
-            onChange={onChange}
-          />
-        );
-      }
-      case 'currency':
-      case 'number': {
-        return (
-          <NumberFilterInput
-            filter={filter?.type === 'number' ? filter : undefined}
-            onChange={onChange}
-          />
-        );
-      }
-      case 'date': {
-        return (
-          <DateFilterInput
-            filter={filter?.type === 'date' ? filter : undefined}
-            onChange={onChange}
-          />
-        );
-      }
-      default: {
-        // String columns - always show TextFilterInput
-        // Additionally show SelectFilterInput when options are available and operator is equals/notEquals
-        const hasOptions = filterOptions && filterOptions.length > 0;
-        const isSelectListVisible =
-          hasOptions &&
-          (textOperator === 'equals' || textOperator === 'notEquals');
+  // const renderFilterInput = () => {
+  switch (column.dataType) {
+    case 'boolean': {
+      return (
+        <BooleanFilterInput
+          filter={filter?.type === 'boolean' ? filter : undefined}
+          onChange={onChange}
+        />
+      );
+    }
+    case 'currency':
+    case 'number': {
+      return (
+        <NumberFilterInput
+          filter={filter?.type === 'number' ? filter : undefined}
+          onChange={onChange}
+        />
+      );
+    }
+    case 'date': {
+      return (
+        <DateFilterInput
+          filter={filter?.type === 'date' ? filter : undefined}
+          onChange={onChange}
+        />
+      );
+    }
+    default: {
+      // String columns - always show TextFilterInput
+      // Additionally show SelectFilterInput when options are available and operator is equals/notEquals
+      const hasOptions = filterOptions && filterOptions.length > 0;
+      const isSelectListVisible =
+        hasOptions &&
+        (textOperator === 'equals' || textOperator === 'notEquals');
 
-        return (
-          <div {...stylex.props(styles.stringFilterContainer)}>
-            <TextFilterInput
-              filter={filter?.type === 'text' ? filter : undefined}
-              onChange={onChange}
-              onOperatorChange={
-                hasOptions
-                  ? (operator) => {
-                      setLocalTextOperator(operator);
-                      onTextOperatorChange?.(operator);
-                    }
+      return (
+        <div {...stylex.props(styles.stringFilterContainer)}>
+          <TextFilterInput
+            filter={filter?.type === 'text' ? filter : undefined}
+            onChange={onChange}
+            onOperatorChange={
+              hasOptions
+                ? (operator) => {
+                    setLocalTextOperator(operator);
+                    onTextOperatorChange?.(operator);
+                  }
+                : undefined
+            }
+          />
+          {isSelectListVisible && (
+            <SelectFilterInput
+              filter={
+                filter?.type === 'select' || filter?.type === 'multiSelect'
+                  ? filter
                   : undefined
               }
+              hasMore={hasMore}
+              isLoadingMore={isLoadingOptions}
+              onChange={onChange}
+              onLoadMore={onLoadMoreOptions}
+              options={filterOptions}
             />
-            {isSelectListVisible && (
-              <SelectFilterInput
-                filter={
-                  filter?.type === 'select' || filter?.type === 'multiSelect'
-                    ? filter
-                    : undefined
-                }
-                hasMore={hasMore}
-                isLoadingMore={isLoadingOptions}
-                onChange={onChange}
-                onLoadMore={onLoadMoreOptions}
-                options={filterOptions}
-              />
-            )}
-          </div>
-        );
-      }
+          )}
+        </div>
+      );
     }
-  };
+  }
+  // };
 
-  return renderFilterInput();
+  // return renderFilterInput();
 };
 
 FilterInputs.displayName = 'FilterInputs';

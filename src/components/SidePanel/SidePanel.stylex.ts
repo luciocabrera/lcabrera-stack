@@ -12,14 +12,11 @@ const baseStyles = stylex.create({
   dialog: {
     margin: 0,
     padding: 0,
-    // Reset default dialog styles
     borderColor: 'transparent',
     borderStyle: 'none',
     borderWidth: 0,
-
     overflow: 'hidden',
     transition: `transform ${transitions.normal} ${easing.easeInOut}`,
-    // Custom styles
     backgroundColor: colors.surfacePrimary,
     boxShadow: shadows.xl,
     containerName: 'side-panel',
@@ -103,13 +100,11 @@ const sizeVariants = stylex.create({
   lg: {
     width: '28rem', // 448px
   },
-
   md: {
-    width: '24rem', // 320px
+    width: '24rem', // 384px
   },
-
   sm: {
-    width: '16rem', // 256px
+    width: '20rem', // 320px
   },
 });
 

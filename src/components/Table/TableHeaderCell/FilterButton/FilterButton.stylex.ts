@@ -9,7 +9,4 @@ export const styles = stylex.create({
     minHeight: 'unset',
     minWidth: 'unset',
   },
-  icon: {
-    // Base icon styles
-  },
 });
