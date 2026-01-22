@@ -24,12 +24,6 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
     searchParams: url.searchParams,
   });
 
-  // Read standalone filters param (for server-side filtering)
-  const filtersParam = url.searchParams.get('filters');
-  const filtersFromParam: ColumnFiltersState | undefined = filtersParam
-    ? (JSON.parse(filtersParam) as ColumnFiltersState)
-    : undefined;
-
   // Read persisted state from cookies (fallback)
   const cookieHeader = request.headers.get('Cookie');
   const cookieState = readPersistedStateFromCookie({
@@ -47,11 +41,10 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
   const sorting: SortingState = urlState?.sorting ?? cookieState.sorting ?? [];
   // Use standalone filters param (priority), then urlState, then cookie
   const filters: ColumnFiltersState =
-    filtersFromParam ?? urlState?.filters ?? cookieState.columnFilters ?? {};
+    urlState?.filters ?? cookieState.columnFilters ?? {};
   const columnSizing: Record<string, number> = cookieState.columnSizing ?? {};
 
   console.warn('🔍 [Loader] URL State:', urlState);
-  console.warn('🔍 [Loader] Standalone filters param:', filtersFromParam);
   console.warn('🔍 [Loader] Cookie State:', cookieState);
   console.warn('🔍 [Loader] Final filters:', filters);
   console.warn('🔍 [Loader] Final sorting:', sorting);

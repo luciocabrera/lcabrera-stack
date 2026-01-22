@@ -64,7 +64,6 @@ export const useTableContent = <T extends Record<string, unknown>>({
   columns,
   data,
   infiniteScrollConfig,
-  initialColumnFilters,
   isClientSortingEnabled = false,
   onFilterChange,
   onSortChange,
@@ -75,16 +74,6 @@ export const useTableContent = <T extends Record<string, unknown>>({
 
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const initialFiltersRef = useRef(initialColumnFilters);
-
-  console.warn(
-    '📋 [useTableContent] initialColumnFilters prop:',
-    initialColumnFilters,
-  );
-  console.warn(
-    '📋 [useTableContent] initialFiltersRef.current:',
-    initialFiltersRef.current,
-  );
 
   const context = use(TableContext);
   const tableStore = context?.tableStore;
@@ -162,15 +151,11 @@ export const useTableContent = <T extends Record<string, unknown>>({
   useEffect(() => {
     // Only call onFilterChange if filters have changed from the initial state
     // This avoids redundant calls when filters are loaded from URL/cookies
-    const initialFilters = initialFiltersRef.current ?? {};
-    const hasChanged =
-      JSON.stringify(columnFilters) !== JSON.stringify(initialFilters);
+    // const initialFilters = initialFiltersRef.current ?? {};
+    // const hasChanged =
+    //   JSON.stringify(columnFilters) !== JSON.stringify(initialFilters);
 
-    console.warn('🔄 [Filter Effect] columnFilters:', columnFilters);
-    console.warn('🔄 [Filter Effect] initialFilters:', initialFilters);
-    console.warn('🔄 [Filter Effect] hasChanged:', hasChanged);
-
-    if (onFilterChange && hasChanged) {
+    if (onFilterChange) {
       console.warn(
         '🔄 [Filter Effect] Calling onFilterChange with:',
         columnFilters,
@@ -233,7 +218,7 @@ export const useTableContent = <T extends Record<string, unknown>>({
   // Using cookies for column-specific settings so they're available during SSR
   const { persistSlice } = useTablePersistence({
     config: {
-      columnFilters: persistenceKey ? 'localStorage' : undefined,
+      columnFilters: persistenceKey ? 'cookie' : undefined,
       columnOrder: persistenceKey ? 'cookie' : undefined,
       columnPinning: persistenceKey ? 'cookie' : undefined,
       columnSizing: persistenceKey ? 'cookie' : undefined,
@@ -294,6 +279,11 @@ export const useTableContent = <T extends Record<string, unknown>>({
     if (!persistenceKey) return;
     persistSlice('sorting');
   }, [sorting, persistSlice, persistenceKey]);
+
+  useEffect(() => {
+    if (!persistenceKey) return;
+    persistSlice('columnFilters');
+  }, [columnFilters, persistSlice, persistenceKey]);
 
   return {
     columnFilters,

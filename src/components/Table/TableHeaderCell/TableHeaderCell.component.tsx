@@ -37,6 +37,7 @@ export const TableHeaderCell = ({
   onSettingsClick,
   onSort,
   sortDirection,
+  sortIndex: _sortIndex,
   width,
   ...rest
 }: TableHeaderCellProps) => {

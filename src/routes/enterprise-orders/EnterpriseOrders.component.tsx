@@ -19,6 +19,14 @@ export const EnterpriseOrders = () => {
     sorting,
   } = useLoaderData<typeof loader>();
 
+  console.log('EnterpriseOrders rendered:', {
+    columnOrder,
+    columnSizing,
+    columnVisibility,
+    filters,
+    sorting,
+  });
+
   return (
     <TableLayout<EnterpriseOrder>
       columnOrder={columnOrder}
