@@ -196,6 +196,8 @@ export type RowSelectionState = Record<string, boolean>;
  * Select/multi-select column filter
  */
 export type SelectFilter = {
+  /** Operator for select filter (defaults to 'equals' if not specified) */
+  operator?: 'equals' | 'notEquals';
   type: 'multiSelect' | 'select';
   /** Single value for 'select' type */
   value?: string;

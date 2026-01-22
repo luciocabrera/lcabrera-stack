@@ -10,6 +10,20 @@ import type { FilterPopoverProps, ToggleEvent } from './FilterPopover.types';
 import { styles } from './FilterPopover.stylex';
 import { renderFilterInput } from './utils';
 
+/**
+ * Get the current operator from a filter
+ */
+const getOperatorFromFilter = (
+  filter: FilterPopoverProps['filter'],
+): string | undefined => {
+  if (!filter) return undefined;
+  if (filter.type === 'text') return filter.operator;
+  if (filter.type === 'select' || filter.type === 'multiSelect') {
+    return filter.operator;
+  }
+  return undefined;
+};
+
 export const FilterPopover = ({
   column,
   fetchFilterOptions,
@@ -21,31 +35,18 @@ export const FilterPopover = ({
 }: FilterPopoverProps) => {
   const popoverRef = useRef<HTMLDivElement>(null);
 
-  // Initialize text operator from filter
-  const initialTextOperator:
-    | 'contains'
-    | 'endsWith'
-    | 'equals'
-    | 'notContains'
-    | 'notEquals'
-    | 'startsWith' = filter?.type === 'text' ? filter.operator : 'equals';
-
   // Local state to track the current filter value before applying
   const [localFilter, setLocalFilter] = useState(filter);
-  // Track the current text operator for string columns
-  const [currentTextOperator, setCurrentTextOperator] = useState<
-    | 'contains'
-    | 'endsWith'
-    | 'equals'
-    | 'notContains'
-    | 'notEquals'
-    | 'startsWith'
-  >(initialTextOperator);
   // State for dynamically fetched options
   const [fetchedOptions, setFetchedOptions] = useState<string[]>();
   const [isFetchingOptions, setIsFetchingOptions] = useState(false);
   const [hasMoreOptions, setHasMoreOptions] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  // Sync local state when filter prop changes (e.g., from URL)
+  useEffect(() => {
+    setLocalFilter(filter);
+  }, [filter]);
 
   const hasOptions =
     Boolean(filterOptions && filterOptions.length > 0) ||
@@ -145,28 +146,29 @@ export const FilterPopover = ({
       });
   }, [fetchFilterOptions, fetchedOptions, isFetchingOptions, hasMoreOptions]);
 
+  // Get current operator from the local filter to determine if we're showing a list
+  const currentOperator = getOperatorFromFilter(localFilter);
+
   // Fixed heights for both use cases
-  // 20rem: When list is visible (string column with options AND operator is equals/notEquals)
+  // 25rem: When list is visible (string column with options AND operator is equals/notEquals)
   // 12rem: All other cases (no list)
   const isListShowing =
     column.dataType === 'string' &&
     hasOptions &&
-    (currentTextOperator === 'equals' || currentTextOperator === 'notEquals');
+    (currentOperator === 'equals' || currentOperator === 'notEquals');
 
   console.warn(
-    `[FilterPopover] column: ${column.key}, dataType: ${column.dataType}, hasOptions: ${hasOptions}, currentOperator: ${currentTextOperator}, isListShowing: ${isListShowing}`,
+    `[FilterPopover] column: ${column.key}, dataType: ${column.dataType}, hasOptions: ${hasOptions}, currentOperator: ${currentOperator}, isListShowing: ${isListShowing}`,
   );
   const popoverMinHeight = isListShowing ? '25rem' : '12rem';
 
   const content = renderFilterInput({
     column,
-    currentTextOperator,
     effectiveFilterOptions,
     filter: localFilter,
     handleLoadMoreOptions,
     hasMoreOptions,
     isFetchingOptions,
-    setCurrentTextOperator,
     setLocalFilter,
   });
 

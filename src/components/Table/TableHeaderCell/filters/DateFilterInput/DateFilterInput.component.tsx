@@ -1,29 +1,60 @@
 import * as stylex from '@stylexjs/stylex';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
-import type { DateFilterInputProps } from './DateFilterInput.types';
+import type { DateFilter } from '@/components/Table/Table.types';
+
+import type { DateFilterInputProps, UpdateDateFilterArgs } from './DateFilterInput.types';
 
 import { styles } from './DateFilterInput.stylex';
 
-export const DateFilterInput = ({ filter, onChange }: DateFilterInputProps) => {
-  const [operator, setOperator] = useState<
-    'after' | 'before' | 'between' | 'equals'
-  >(filter?.operator ?? 'equals');
-  const [value, setValue] = useState(
-    filter?.operator === 'between' ? filter.value : (filter?.value ?? ''),
-  );
-  const [endDate, setEndDate] = useState(
-    filter?.operator === 'between' ? (filter.value2 ?? '') : '',
-  );
+const computeInitialValue = (filter: DateFilter | undefined): string => {
+  if (filter?.operator === 'between') {
+    return filter.value;
+  }
+  return filter?.value ?? '';
+};
 
-  const handleOperatorChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newOperator = e.target.value as
-      | 'after'
-      | 'before'
-      | 'between'
-      | 'equals';
-    setOperator(newOperator);
-    updateFilter({ end: endDate, op: newOperator, val: value });
+const computeInitialEndDate = (filter: DateFilter | undefined): string => {
+  if (filter?.operator === 'between') {
+    return filter.value2 ?? '';
+  }
+  return '';
+};
+
+export const DateFilterInput = ({
+  filter,
+  onChange,
+  operator,
+}: DateFilterInputProps) => {
+  const initialValue = useMemo(() => computeInitialValue(filter), [filter]);
+  const initialEndDate = useMemo(() => computeInitialEndDate(filter), [filter]);
+
+  const [value, setValue] = useState(initialValue);
+  const [endDate, setEndDate] = useState(initialEndDate);
+
+  const updateFilter = ({ end, op, val }: UpdateDateFilterArgs) => {
+    if (op === 'between') {
+      if (val && end) {
+        onChange({
+          operator: 'between',
+          type: 'date',
+          value: val,
+          value2: end,
+        });
+      } else {
+        onChange();
+      }
+      return;
+    }
+    if (val) {
+      onChange({
+        operator: op,
+        type: 'date',
+        value: val,
+      });
+    } else {
+      onChange();
+    }
   };
 
   const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,46 +69,8 @@ export const DateFilterInput = ({ filter, onChange }: DateFilterInputProps) => {
     updateFilter({ end: newEndDate, op: operator, val: value });
   };
 
-  const updateFilter = (args: {
-    end: string;
-    op: 'after' | 'before' | 'between' | 'equals';
-    val: string;
-  }) => {
-    const { end, op, val } = args;
-    if (op === 'between') {
-      if (val && end) {
-        const filterValue = {
-          operator: 'between',
-          type: 'date',
-          value: val,
-          value2: end,
-        };
-        onChange(filterValue as never);
-      }
-    } else {
-      if (val) {
-        const filterValue = {
-          operator: op,
-          type: 'date',
-          value: val,
-        };
-        onChange(filterValue as never);
-      }
-    }
-  };
-
   return (
     <div {...stylex.props(styles.container)}>
-      <select
-        onChange={handleOperatorChange}
-        value={operator}
-        {...stylex.props(styles.select)}
-      >
-        <option value='after'>After</option>
-        <option value='before'>Before</option>
-        <option value='between'>Between</option>
-        <option value='equals'>Equals</option>
-      </select>
       {operator === 'between' ? (
         <div {...stylex.props(styles.inputGroup)}>
           <input

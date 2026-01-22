@@ -2,7 +2,9 @@ import type { NumberFilter } from '../../../Table.types';
 
 export type NumberFilterInputProps = {
   filter: NumberFilter | undefined;
-  onChange: (filter: NumberFilter | undefined) => void;
+  onChange: (filter?: NumberFilter) => void;
+  /** The operator is now controlled by FilterInputs */
+  operator: NumberFilter['operator'];
 };
 
 export type UpdateFilterArgs = {

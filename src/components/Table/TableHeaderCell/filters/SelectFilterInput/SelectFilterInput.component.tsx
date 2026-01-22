@@ -10,6 +10,7 @@ import { VirtualizedOption } from './VirtualizedOption';
 
 const ITEM_HEIGHT = 32; // Height of each checkbox option in pixels
 
+/** Pure value selector (checkboxes list) - operator is controlled by FilterInputs */
 export const SelectFilterInput = ({
   filter,
   hasMore = false,
