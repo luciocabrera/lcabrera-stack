@@ -8,7 +8,7 @@ import type {
   OperatorType,
   TextOperatorType,
 } from '@/components/Table/constants';
-import type { TextFilter } from '@/components/Table/Table.types';
+import type { ColumnFilter, TextFilter } from '@/components/Table/Table.types';
 
 import {
   DATE_OPERATORS,
@@ -56,41 +56,10 @@ export const FilterInputs = ({
   const handleOperatorChange = (newOperator: OperatorType) => {
     setOperator(newOperator);
 
-    // Update existing filter with new operator if we have values
-    if (!filter) {
-      return;
-    }
+    if (!filter || filter.type === 'boolean') return;
 
-    switch (column.dataType) {
-      case 'currency':
-      case 'number': {
-        if (filter.value) {
-          onChange({ ...filter, operator: newOperator as NumberOperatorType });
-        }
-        break;
-      }
-      case 'date': {
-        if (filter.value) {
-          onChange({ ...filter, operator: newOperator as DateOperatorType });
-        }
-        break;
-      }
-      default: {
-        if (
-          (filter.type === 'select' || filter.type === 'multiSelect') &&
-          filter.values?.length
-        ) {
-          onChange({
-            ...filter,
-            operator: newOperator as 'equals' | 'notEquals',
-          });
-        } else if (filter.value) {
-          // String/text columns - can be text, select, or multiSelect filter types
-          onChange({ ...filter, operator: newOperator as TextOperatorType });
-        }
-        break;
-      }
-    }
+    // Update filter with new operator - the select dropdown only shows valid operators for the column type
+    onChange({ ...filter, operator: newOperator } as ColumnFilter);
   };
 
   // Render based on data type
