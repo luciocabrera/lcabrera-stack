@@ -1,7 +1,7 @@
 import type { TableColumn } from '@/components/Table/Table.types';
-import type { ColumnFilter } from '@/types/filterOperators.types';
+import type { ColumnFilter, OperatorType } from '@/types/filterOperators.types';
 
-export type FilterInputsProps = {
+export type InputContentProps = {
   /** Column configuration */
   column: TableColumn;
   /** Current filter value */
@@ -9,11 +9,13 @@ export type FilterInputsProps = {
   /** Static or fetched filter options for select/multiselect */
   filterOptions?: string[];
   /** Whether there are more options to load */
-  hasMore?: boolean;
+  hasMore: boolean;
   /** Whether currently loading more options */
-  isLoadingOptions?: boolean;
+  isLoadingOptions: boolean;
   /** Callback when filter changes */
   onChange: (filter?: ColumnFilter) => void;
   /** Callback to load more options (for infinite scroll) */
   onLoadMoreOptions?: () => void;
+  /** Current operator */
+  operator: OperatorType;
 };

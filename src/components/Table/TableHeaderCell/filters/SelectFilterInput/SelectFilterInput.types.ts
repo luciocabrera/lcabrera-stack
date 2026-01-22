@@ -1,6 +1,5 @@
-import type { SelectFilter } from '../../../Table.types';
+import type { SelectFilter } from '@/types/filterOperators.types';
 
-/** SelectFilterInput is a pure value selector (checkboxes list) */
 export type SelectFilterInputProps = {
   filter: SelectFilter | undefined;
   hasMore?: boolean;

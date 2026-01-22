@@ -1,7 +1,12 @@
 import type { StyleXStyles } from '@stylexjs/stylex';
 import type { ComponentPropsWithoutRef } from 'react';
 
-import type { ColumnFilter, SortDirection, TableColumn } from '../Table.types';
+import type {
+  SortDirection,
+  TableColumn,
+} from '@/components/Table/Table.types';
+import type { ColumnFilter } from '@/types/filterOperators.types';
+
 import type { HandleSortParams } from '../TableHeader/TableHeader.types';
 
 export type OnResizeParams = {

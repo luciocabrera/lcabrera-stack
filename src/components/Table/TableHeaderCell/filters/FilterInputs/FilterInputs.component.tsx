@@ -1,29 +1,14 @@
 import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 
-import type {
-  DateOperatorType,
-  NumberOperatorType,
-  OperatorOption,
-  OperatorType,
-  TextOperatorType,
-} from '@/components/Table/constants';
-import type { ColumnFilter, TextFilter } from '@/components/Table/Table.types';
-
-import {
-  DATE_OPERATORS,
-  NUMBER_OPERATORS,
-  TEXT_OPERATORS,
-} from '@/components/Table/constants';
+import type { ColumnFilter, OperatorType } from '@/types/filterOperators.types';
 
 import type { FilterInputsProps } from './FilterInputs.types';
 
 import { BooleanFilterInput } from '../BooleanFilterInput';
-import { DateFilterInput } from '../DateFilterInput';
-import { NumberFilterInput } from '../NumberFilterInput';
-import { SelectFilterInput } from '../SelectFilterInput';
-import { TextFilterInput } from '../TextFilterInput';
 import { styles } from './FilterInputs.stylex';
+import { InputContent } from './InputContent';
+import { getOperatorFromFilter, getOperatorOptions } from './utils';
 
 /**
  * Shared component for rendering filter inputs based on column data type.
@@ -39,21 +24,14 @@ export const FilterInputs = ({
   onChange,
   onLoadMoreOptions,
 }: FilterInputsProps) => {
-  // Get operator from filter or default to 'equals'
-  const getOperatorFromFilter = (): OperatorType => {
-    if (!filter) return 'equals';
-    if (column.dataType === 'boolean') return 'equals';
-    if ('operator' in filter && filter.operator) {
-      return filter.operator;
-    }
-    return 'equals';
-  };
-
   // Track the operator for non-boolean data types
-  const [operator, setOperator] = useState<OperatorType>(getOperatorFromFilter);
+  const [operator, setOperator] = useState<OperatorType>(() =>
+    getOperatorFromFilter({ dataType: column.dataType, filter }),
+  );
 
   // Handle operator change
-  const handleOperatorChange = (newOperator: OperatorType) => {
+  const handleOperatorChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newOperator = e.target.value as OperatorType;
     setOperator(newOperator);
 
     if (!filter || filter.type === 'boolean') return;
@@ -73,85 +51,12 @@ export const FilterInputs = ({
     );
   }
 
-  // Determine operator options and input content based on data type
-  let operatorOptions: OperatorOption<OperatorType>[];
-  let inputContent: React.ReactNode;
-
-  switch (column.dataType) {
-    case 'currency':
-    case 'number': {
-      operatorOptions = NUMBER_OPERATORS as OperatorOption<OperatorType>[];
-      inputContent = (
-        <NumberFilterInput
-          filter={filter}
-          onChange={onChange}
-          operator={operator as NumberOperatorType}
-        />
-      );
-      break;
-    }
-
-    case 'date': {
-      operatorOptions = DATE_OPERATORS as OperatorOption<OperatorType>[];
-      inputContent = (
-        <DateFilterInput
-          filter={filter}
-          onChange={onChange}
-          operator={operator as DateOperatorType}
-        />
-      );
-      break;
-    }
-
-    default: {
-      // String columns
-      const hasOptions = filterOptions && filterOptions.length > 0;
-      const textOp = operator as TextOperatorType;
-
-      // Show SelectFilterInput when options are available AND operator is equals/notEquals
-      const shouldShowSelectList =
-        hasOptions && (textOp === 'equals' || textOp === 'notEquals');
-
-      operatorOptions = TEXT_OPERATORS as OperatorOption<OperatorType>[];
-      inputContent = shouldShowSelectList ? (
-        <SelectFilterInput
-          filter={
-            filter?.type === 'select' || filter?.type === 'multiSelect'
-              ? filter
-              : undefined
-          }
-          hasMore={hasMore}
-          isLoadingMore={isLoadingOptions}
-          onChange={(selectFilter) => {
-            if (selectFilter) {
-              onChange({
-                ...selectFilter,
-                operator: textOp === 'notEquals' ? 'notEquals' : 'equals',
-              });
-            } else {
-              onChange();
-            }
-          }}
-          onLoadMore={onLoadMoreOptions}
-          options={filterOptions}
-        />
-      ) : (
-        <TextFilterInput
-          filter={filter as TextFilter}
-          onChange={onChange}
-          operator={textOp}
-        />
-      );
-      break;
-    }
-  }
+  const operatorOptions = getOperatorOptions({ dataType: column.dataType });
 
   return (
     <div {...stylex.props(styles.container)}>
       <select
-        onChange={(e) => {
-          handleOperatorChange(e.target.value as OperatorType);
-        }}
+        onChange={handleOperatorChange}
         value={operator}
         {...stylex.props(styles.select)}
       >
@@ -161,7 +66,16 @@ export const FilterInputs = ({
           </option>
         ))}
       </select>
-      {inputContent}
+      <InputContent
+        column={column}
+        filter={filter}
+        filterOptions={filterOptions}
+        hasMore={hasMore}
+        isLoadingOptions={isLoadingOptions}
+        onChange={onChange}
+        onLoadMoreOptions={onLoadMoreOptions}
+        operator={operator}
+      />
     </div>
   );
 };

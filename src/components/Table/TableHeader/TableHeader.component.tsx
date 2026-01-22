@@ -1,7 +1,8 @@
 import * as stylex from '@stylexjs/stylex';
 import { useCallback, useMemo } from 'react';
 
-import type { ColumnFilter } from '../Table.types';
+import type { ColumnFilter } from '@/types/filterOperators.types';
+
 import type {
   HandleResizeParams,
   HandleSortParams,

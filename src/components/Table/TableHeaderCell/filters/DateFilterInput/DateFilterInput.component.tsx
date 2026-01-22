@@ -1,9 +1,12 @@
 import * as stylex from '@stylexjs/stylex';
 import { useMemo, useState } from 'react';
 
-import type { DateFilter } from '@/components/Table/Table.types';
+import type { DateFilter } from '@/types/filterOperators.types';
 
-import type { DateFilterInputProps, UpdateDateFilterArgs } from './DateFilterInput.types';
+import type {
+  DateFilterInputProps,
+  UpdateDateFilterArgs,
+} from './DateFilterInput.types';
 
 import { styles } from './DateFilterInput.stylex';
 

@@ -1,4 +1,4 @@
-import type { NumberFilter } from '../../../Table.types';
+import type { NumberFilter } from '@/types/filterOperators.types';
 
 export type NumberFilterInputProps = {
   filter: NumberFilter | undefined;

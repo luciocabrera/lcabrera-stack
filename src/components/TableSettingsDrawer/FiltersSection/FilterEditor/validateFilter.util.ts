@@ -1,4 +1,4 @@
-import type { ColumnFilter } from '@/components/Table/Table.types';
+import type { ColumnFilter } from '@/types/filterOperators.types';
 
 /**
  * Validates a filter to ensure required fields are populated

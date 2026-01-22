@@ -1,7 +1,6 @@
 import { useCallback } from 'react';
 
 import type {
-  ColumnFilter,
   ColumnFiltersState,
   ColumnOrderState,
   ColumnSizingState,
@@ -10,7 +9,8 @@ import type {
   PaginationState,
   SortingState,
   TableState,
-} from '../../Table.types';
+} from '@/components/Table/Table.types';
+import type { ColumnFilter } from '@/types/filterOperators.types';
 
 import { useTableContextValue } from './useTableStore.hook';
 

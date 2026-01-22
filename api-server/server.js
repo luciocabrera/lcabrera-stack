@@ -312,14 +312,20 @@ app.get('/api/enterprise-orders/paginated', async (request, res) => {
                 .map((_, index) => `$${paramCounter + index}`)
                 .join(', ');
               // Use NOT IN for notEquals operator, IN for equals (default)
-              const inOperator = filterConfig.operator === 'notEquals' ? 'NOT IN' : 'IN';
-              whereConditions.push(`${columnName} ${inOperator} (${placeholders})`);
+              const inOperator =
+                filterConfig.operator === 'notEquals' ? 'NOT IN' : 'IN';
+              whereConditions.push(
+                `${columnName} ${inOperator} (${placeholders})`,
+              );
               queryParams.push(...filterConfig.values);
               paramCounter += filterConfig.values.length;
             } else if (filterConfig.value) {
               // Single value - use != for notEquals, = for equals
-              const eqOperator = filterConfig.operator === 'notEquals' ? '!=' : '=';
-              whereConditions.push(`${columnName} ${eqOperator} $${paramCounter}`);
+              const eqOperator =
+                filterConfig.operator === 'notEquals' ? '!=' : '=';
+              whereConditions.push(
+                `${columnName} ${eqOperator} $${paramCounter}`,
+              );
               queryParams.push(filterConfig.value);
               paramCounter++;
             }

@@ -1,15 +1,16 @@
 import * as stylex from '@stylexjs/stylex';
 import { useMemo, useState } from 'react';
 
-import type { NumberFilter } from '@/components/Table/Table.types';
+import type { NumberFilter } from '@/types/filterOperators.types';
 
-import type { NumberFilterInputProps, UpdateFilterArgs } from './NumberFilterInput.types';
+import type {
+  NumberFilterInputProps,
+  UpdateFilterArgs,
+} from './NumberFilterInput.types';
 
 import { styles } from './NumberFilterInput.stylex';
 
-const computeInitialValue = (
-  filter: NumberFilter | undefined,
-): '' | number => {
+const computeInitialValue = (filter: NumberFilter | undefined): '' | number => {
   if (filter?.operator === 'between') {
     return filter.value;
   }
@@ -31,7 +32,10 @@ export const NumberFilterInput = ({
   operator,
 }: NumberFilterInputProps) => {
   const initialValue = useMemo(() => computeInitialValue(filter), [filter]);
-  const initialMaxValue = useMemo(() => computeInitialMaxValue(filter), [filter]);
+  const initialMaxValue = useMemo(
+    () => computeInitialMaxValue(filter),
+    [filter],
+  );
 
   const [value, setValue] = useState<'' | number>(initialValue);
   const [maxValue, setMaxValue] = useState<'' | number>(initialMaxValue);

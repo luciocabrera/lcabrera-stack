@@ -1,6 +1,7 @@
 import type { StyleXStyles } from '@stylexjs/stylex';
 import type { ComponentPropsWithRef, ReactNode } from 'react';
 
+import type { ColumnFilter } from '@/types/filterOperators.types';
 import type {
   CurrencyFormatOptions,
   DateFormatOptions,
@@ -8,25 +9,6 @@ import type {
 } from '@/utils/formatters';
 
 export type { TableTitleProps } from './TableTitle';
-
-/**
- * Boolean column filter
- */
-export type BooleanFilter = {
-  type: 'boolean';
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  value: boolean;
-};
-
-/**
- * Union type for all filter types based on column data type
- */
-export type ColumnFilter =
-  | BooleanFilter
-  | DateFilter
-  | NumberFilter
-  | SelectFilter
-  | TextFilter;
 
 /**
  * Column filters state - maps column key to filter configuration
@@ -67,18 +49,6 @@ export type CursorParams = {
 };
 
 /**
- * Date column filter
- */
-export type DateFilter = {
-  operator: 'after' | 'before' | 'between' | 'equals';
-  type: 'date';
-  /** ISO date string */
-  value: string;
-  /** Second date for 'between' operator (ISO string) */
-  value2?: string;
-};
-
-/**
  * Configuration for infinite scroll behavior
  */
 export type InfiniteScrollConfig<TData> = {
@@ -108,24 +78,6 @@ export type InfiniteScrollResponse<TData> = {
   nextCursor?: string;
   /** Total number of rows available */
   totalRows?: number;
-};
-
-/**
- * Number/currency column filter
- */
-export type NumberFilter = {
-  operator:
-    | 'between'
-    | 'equals'
-    | 'greaterThan'
-    | 'greaterThanOrEqual'
-    | 'lessThan'
-    | 'lessThanOrEqual'
-    | 'notEquals';
-  type: 'number';
-  value: number;
-  /** Second value for 'between' operator */
-  value2?: number;
 };
 
 /**
@@ -191,19 +143,6 @@ export type PaginationStrategy = 'cursor' | 'offset-limit' | 'page-based';
  * Row selection state (row id -> selected)
  */
 export type RowSelectionState = Record<string, boolean>;
-
-/**
- * Select/multi-select column filter
- */
-export type SelectFilter = {
-  /** Operator for select filter (defaults to 'equals' if not specified) */
-  operator?: 'equals' | 'notEquals';
-  type: 'multiSelect' | 'select';
-  /** Single value for 'select' type */
-  value?: string;
-  /** Multiple values for 'multiSelect' type */
-  values?: string[];
-};
 
 /**
  * Sort direction for a column
@@ -341,7 +280,6 @@ export type TableProps<TData extends Record<string, unknown>> = BaseProps & {
   persistenceKey?: string;
   rowHeight?: number;
 };
-
 /**
  * Main table state stored in tableStore
  */
@@ -364,21 +302,6 @@ export type TableState<TData> = {
   rowSelection: RowSelectionState;
   /** Sorting state */
   sorting: SortingState;
-};
-
-/**
- * Text/string column filter
- */
-export type TextFilter = {
-  operator:
-    | 'contains'
-    | 'endsWith'
-    | 'equals'
-    | 'notContains'
-    | 'notEquals'
-    | 'startsWith';
-  type: 'text';
-  value: string;
 };
 
 type BaseProps = ComponentPropsWithRef<'table'> & {

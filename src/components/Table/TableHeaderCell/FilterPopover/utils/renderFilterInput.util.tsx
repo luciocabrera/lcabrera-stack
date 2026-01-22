@@ -1,6 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 
-import type { ColumnFilter, TableColumn } from '@/components/Table/Table.types';
+import type { TableColumn } from '@/components/Table/Table.types';
+import type { ColumnFilter } from '@/types/filterOperators.types';
 
 import { FilterInputs } from '../../filters/FilterInputs';
 import { styles } from '../FilterPopover.stylex';

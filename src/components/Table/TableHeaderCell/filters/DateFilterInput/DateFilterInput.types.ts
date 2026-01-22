@@ -1,4 +1,4 @@
-import type { DateFilter } from '../../../Table.types';
+import type { DateFilter } from '@/types/filterOperators.types';
 
 export type DateFilterInputProps = {
   filter: DateFilter | undefined;
