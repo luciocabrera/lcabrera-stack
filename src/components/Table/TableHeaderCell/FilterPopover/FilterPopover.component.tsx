@@ -8,21 +8,7 @@ import { usePopoverPositioning } from '@/hooks/usePopoverPositioning.hook';
 import type { FilterPopoverProps, ToggleEvent } from './FilterPopover.types';
 
 import { styles } from './FilterPopover.stylex';
-import { renderFilterInput } from './utils';
-
-/**
- * Get the current operator from a filter
- */
-const getOperatorFromFilter = (
-  filter: FilterPopoverProps['filter'],
-): string | undefined => {
-  if (!filter) return undefined;
-  if (filter.type === 'text') return filter.operator;
-  if (filter.type === 'select' || filter.type === 'multiSelect') {
-    return filter.operator;
-  }
-  return undefined;
-};
+import { getOperatorFromFilter, renderFilterInput } from './utils';
 
 export const FilterPopover = ({
   column,

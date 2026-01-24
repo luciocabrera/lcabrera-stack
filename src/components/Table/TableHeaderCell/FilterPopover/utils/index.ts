@@ -1,1 +1,2 @@
-export { renderFilterInput } from './renderFilterInput.util';
+export * from './getOperatorFromFilter';
+export * from './renderFilterInput.util';
