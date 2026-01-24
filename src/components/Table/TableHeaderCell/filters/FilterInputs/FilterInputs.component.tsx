@@ -1,7 +1,13 @@
 import * as stylex from '@stylexjs/stylex';
 import { useMemo } from 'react';
 
-import type { ColumnFilter, OperatorType } from '@/types/filterOperators.types';
+import type {
+  ColumnFilter,
+  DateOperatorType,
+  NumberOperatorType,
+  OperatorType,
+  TextOperatorType,
+} from '@/types/filterOperators.types';
 
 import type { FilterInputsProps } from './FilterInputs.types';
 
@@ -30,14 +36,41 @@ export const FilterInputs = ({
     [column.dataType, filter],
   );
 
+  // TODO: I think we should to use the data type
   // Handle operator change - updates parent filter state directly
   const handleOperatorChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newOperator = e.target.value as OperatorType;
 
-    if (!filter || filter.type === 'boolean') return;
+    // Boolean filters don't have operators
+    if (filter?.type === 'boolean') return;
 
-    // Update filter with new operator - the select dropdown only shows valid operators for the column type
-    onChange({ ...filter, operator: newOperator } as ColumnFilter);
+    // If filter exists, update it with new operator
+    if (filter) {
+      onChange({ ...filter, operator: newOperator } as ColumnFilter);
+      return;
+    }
+
+    // No filter yet - create initial filter based on column data type
+    if (column.dataType === 'number') {
+      onChange({
+        operator: newOperator as NumberOperatorType,
+        type: 'number',
+        value: undefined as unknown as number,
+      });
+    } else if (column.dataType === 'date') {
+      onChange({
+        operator: newOperator as DateOperatorType,
+        type: 'date',
+        value: '',
+      });
+    } else {
+      // String type (text filter)
+      onChange({
+        operator: newOperator as TextOperatorType,
+        type: 'text',
+        value: '',
+      });
+    }
   };
 
   // Render based on data type
