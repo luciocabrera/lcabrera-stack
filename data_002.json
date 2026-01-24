@@ -1,0 +1,387 @@
+{
+  "capturedAt": "2026-01-24T15:34:12.360Z",
+  "components": [
+    {
+      "avgTimeMs": 12.72,
+      "name": "TableContent",
+      "renderCount": 20,
+      "totalTimeMs": 254.5
+    },
+    {
+      "avgTimeMs": 19.48,
+      "name": "Table",
+      "renderCount": 12,
+      "totalTimeMs": 233.8
+    },
+    {
+      "avgTimeMs": 19.51,
+      "name": "TableHeader",
+      "renderCount": 12,
+      "totalTimeMs": 234.1
+    },
+    {
+      "avgTimeMs": 19.3,
+      "name": "TableHeaderCell:order_id",
+      "renderCount": 12,
+      "totalTimeMs": 231.6
+    },
+    {
+      "avgTimeMs": 19.22,
+      "name": "FilterPopover:order_id",
+      "renderCount": 12,
+      "totalTimeMs": 230.7
+    },
+    {
+      "avgTimeMs": 19.13,
+      "name": "TableHeaderCell:order_status",
+      "renderCount": 12,
+      "totalTimeMs": 229.6
+    },
+    {
+      "avgTimeMs": 19.08,
+      "name": "FilterPopover:order_status",
+      "renderCount": 12,
+      "totalTimeMs": 229
+    },
+    {
+      "avgTimeMs": 22.55,
+      "name": "TableHeaderCell:priority",
+      "renderCount": 10,
+      "totalTimeMs": 225.5
+    },
+    {
+      "avgTimeMs": 22.47,
+      "name": "FilterPopover:priority",
+      "renderCount": 10,
+      "totalTimeMs": 224.7
+    },
+    {
+      "avgTimeMs": 22.18,
+      "name": "TableHeaderCell:customer_name",
+      "renderCount": 10,
+      "totalTimeMs": 221.8
+    },
+    {
+      "avgTimeMs": 22.1,
+      "name": "FilterPopover:customer_name",
+      "renderCount": 10,
+      "totalTimeMs": 221
+    },
+    {
+      "avgTimeMs": 21.65,
+      "name": "TableHeaderCell:customer_email",
+      "renderCount": 10,
+      "totalTimeMs": 216.5
+    },
+    {
+      "avgTimeMs": 21.57,
+      "name": "FilterPopover:customer_email",
+      "renderCount": 10,
+      "totalTimeMs": 215.7
+    },
+    {
+      "avgTimeMs": 21.44,
+      "name": "TableHeaderCell:customer_type",
+      "renderCount": 10,
+      "totalTimeMs": 214.4
+    },
+    {
+      "avgTimeMs": 21.37,
+      "name": "FilterPopover:customer_type",
+      "renderCount": 10,
+      "totalTimeMs": 213.7
+    },
+    {
+      "avgTimeMs": 21.26,
+      "name": "TableHeaderCell:is_vip_customer",
+      "renderCount": 10,
+      "totalTimeMs": 212.6
+    },
+    {
+      "avgTimeMs": 21.19,
+      "name": "FilterPopover:is_vip_customer",
+      "renderCount": 10,
+      "totalTimeMs": 211.9
+    },
+    {
+      "avgTimeMs": 19.05,
+      "name": "TableHeaderCell:loyalty_points",
+      "renderCount": 10,
+      "totalTimeMs": 190.5
+    },
+    {
+      "avgTimeMs": 18.95,
+      "name": "FilterPopover:loyalty_points",
+      "renderCount": 10,
+      "totalTimeMs": 189.5
+    },
+    {
+      "avgTimeMs": 18.81,
+      "name": "TableHeaderCell:total_amount",
+      "renderCount": 10,
+      "totalTimeMs": 188.1
+    },
+    {
+      "avgTimeMs": 18.75,
+      "name": "FilterPopover:total_amount",
+      "renderCount": 10,
+      "totalTimeMs": 187.5
+    },
+    {
+      "avgTimeMs": 18.54,
+      "name": "TableHeaderCell:subtotal",
+      "renderCount": 10,
+      "totalTimeMs": 185.4
+    },
+    {
+      "avgTimeMs": 18.46,
+      "name": "FilterPopover:subtotal",
+      "renderCount": 10,
+      "totalTimeMs": 184.6
+    },
+    {
+      "avgTimeMs": 18.35,
+      "name": "TableHeaderCell:tax_amount",
+      "renderCount": 10,
+      "totalTimeMs": 183.5
+    },
+    {
+      "avgTimeMs": 18.27,
+      "name": "FilterPopover:tax_amount",
+      "renderCount": 10,
+      "totalTimeMs": 182.7
+    },
+    {
+      "avgTimeMs": 18.19,
+      "name": "TableHeaderCell:shipping_cost",
+      "renderCount": 10,
+      "totalTimeMs": 181.9
+    },
+    {
+      "avgTimeMs": 18.11,
+      "name": "FilterPopover:shipping_cost",
+      "renderCount": 10,
+      "totalTimeMs": 181.1
+    },
+    {
+      "avgTimeMs": 17.9,
+      "name": "TableHeaderCell:discount_amount",
+      "renderCount": 10,
+      "totalTimeMs": 179
+    },
+    {
+      "avgTimeMs": 17.83,
+      "name": "FilterPopover:discount_amount",
+      "renderCount": 10,
+      "totalTimeMs": 178.3
+    },
+    {
+      "avgTimeMs": 17.73,
+      "name": "TableHeaderCell:payment_status",
+      "renderCount": 10,
+      "totalTimeMs": 177.3
+    },
+    {
+      "avgTimeMs": 17.66,
+      "name": "FilterPopover:payment_status",
+      "renderCount": 10,
+      "totalTimeMs": 176.6
+    },
+    {
+      "avgTimeMs": 17.2,
+      "name": "TableHeaderCell:payment_method",
+      "renderCount": 10,
+      "totalTimeMs": 172
+    },
+    {
+      "avgTimeMs": 17.14,
+      "name": "FilterPopover:payment_method",
+      "renderCount": 10,
+      "totalTimeMs": 171.4
+    },
+    {
+      "avgTimeMs": 16.95,
+      "name": "TableHeaderCell:product_category",
+      "renderCount": 10,
+      "totalTimeMs": 169.5
+    },
+    {
+      "avgTimeMs": 16.89,
+      "name": "FilterPopover:product_category",
+      "renderCount": 10,
+      "totalTimeMs": 168.9
+    },
+    {
+      "avgTimeMs": 16.52,
+      "name": "TableHeaderCell:product_subcategory",
+      "renderCount": 10,
+      "totalTimeMs": 165.2
+    },
+    {
+      "avgTimeMs": 16.46,
+      "name": "FilterPopover:product_subcategory",
+      "renderCount": 10,
+      "totalTimeMs": 164.6
+    },
+    {
+      "avgTimeMs": 16.12,
+      "name": "TableHeaderCell:quantity",
+      "renderCount": 10,
+      "totalTimeMs": 161.2
+    },
+    {
+      "avgTimeMs": 16.07,
+      "name": "FilterPopover:quantity",
+      "renderCount": 10,
+      "totalTimeMs": 160.7
+    },
+    {
+      "avgTimeMs": 15.97,
+      "name": "TableHeaderCell:unit_price",
+      "renderCount": 10,
+      "totalTimeMs": 159.7
+    },
+    {
+      "avgTimeMs": 15.91,
+      "name": "FilterPopover:unit_price",
+      "renderCount": 10,
+      "totalTimeMs": 159.1
+    },
+    {
+      "avgTimeMs": 15.82,
+      "name": "TableHeaderCell:shipping_city",
+      "renderCount": 10,
+      "totalTimeMs": 158.2
+    },
+    {
+      "avgTimeMs": 15.75,
+      "name": "FilterPopover:shipping_city",
+      "renderCount": 10,
+      "totalTimeMs": 157.5
+    },
+    {
+      "avgTimeMs": 15.62,
+      "name": "TableHeaderCell:shipping_state",
+      "renderCount": 10,
+      "totalTimeMs": 156.2
+    },
+    {
+      "avgTimeMs": 15.57,
+      "name": "FilterPopover:shipping_state",
+      "renderCount": 10,
+      "totalTimeMs": 155.7
+    },
+    {
+      "avgTimeMs": 15.46,
+      "name": "TableHeaderCell:shipping_country",
+      "renderCount": 10,
+      "totalTimeMs": 154.6
+    },
+    {
+      "avgTimeMs": 15.4,
+      "name": "FilterPopover:shipping_country",
+      "renderCount": 10,
+      "totalTimeMs": 154
+    },
+    {
+      "avgTimeMs": 15.27,
+      "name": "TableHeaderCell:carrier",
+      "renderCount": 10,
+      "totalTimeMs": 152.7
+    },
+    {
+      "avgTimeMs": 15.22,
+      "name": "FilterPopover:carrier",
+      "renderCount": 10,
+      "totalTimeMs": 152.2
+    },
+    {
+      "avgTimeMs": 15.09,
+      "name": "TableHeaderCell:warehouse_location",
+      "renderCount": 10,
+      "totalTimeMs": 150.9
+    },
+    {
+      "avgTimeMs": 15.03,
+      "name": "FilterPopover:warehouse_location",
+      "renderCount": 10,
+      "totalTimeMs": 150.3
+    },
+    {
+      "avgTimeMs": 14.94,
+      "name": "TableHeaderCell:is_rush_order",
+      "renderCount": 10,
+      "totalTimeMs": 149.4
+    },
+    {
+      "avgTimeMs": 14.88,
+      "name": "FilterPopover:is_rush_order",
+      "renderCount": 10,
+      "totalTimeMs": 148.8
+    },
+    {
+      "avgTimeMs": 14.76,
+      "name": "TableHeaderCell:is_gift",
+      "renderCount": 10,
+      "totalTimeMs": 147.6
+    },
+    {
+      "avgTimeMs": 14.71,
+      "name": "FilterPopover:is_gift",
+      "renderCount": 10,
+      "totalTimeMs": 147.1
+    },
+    {
+      "avgTimeMs": 14.23,
+      "name": "TableHeaderCell:customer_rating",
+      "renderCount": 10,
+      "totalTimeMs": 142.3
+    },
+    {
+      "avgTimeMs": 14.15,
+      "name": "FilterPopover:customer_rating",
+      "renderCount": 10,
+      "totalTimeMs": 141.5
+    },
+    {
+      "avgTimeMs": 14.02,
+      "name": "TableHeaderCell:delivery_date",
+      "renderCount": 10,
+      "totalTimeMs": 140.2
+    },
+    {
+      "avgTimeMs": 13.95,
+      "name": "FilterPopover:delivery_date",
+      "renderCount": 10,
+      "totalTimeMs": 139.5
+    },
+    {
+      "avgTimeMs": 13.83,
+      "name": "TableHeaderCell:shipped_date",
+      "renderCount": 10,
+      "totalTimeMs": 138.3
+    },
+    {
+      "avgTimeMs": 13.76,
+      "name": "FilterPopover:shipped_date",
+      "renderCount": 10,
+      "totalTimeMs": 137.6
+    },
+    {
+      "avgTimeMs": 12.44,
+      "name": "TableBody",
+      "renderCount": 10,
+      "totalTimeMs": 124.4
+    }
+  ],
+  "summary": {
+    "avgRendersPerComponent": 10,
+    "componentCount": 62,
+    "totalRenders": 642
+  },
+  "url": "http://127.0.0.1:5173/enterprise-orders?enterprise-orders-table-tableState=eyJjb2x1bW5PcmRlciI6WyJvcmRlcl9kYXRlIiwib3JkZXJfaWQiLCJvcmRlcl9udW1iZXIiLCJvcmRlcl9zdGF0dXMiLCJwcmlvcml0eSIsImN1c3RvbWVyX25hbWUiLCJjdXN0b21lcl9lbWFpbCIsImN1c3RvbWVyX3R5cGUiLCJpc192aXBfY3VzdG9tZXIiLCJsb3lhbHR5X3BvaW50cyIsInRvdGFsX2Ftb3VudCIsInN1YnRvdGFsIiwidGF4X2Ftb3VudCIsInNoaXBwaW5nX2Nvc3QiLCJkaXNjb3VudF9hbW91bnQiLCJwYXltZW50X3N0YXR1cyIsInBheW1lbnRfbWV0aG9kIiwicHJvZHVjdF9jYXRlZ29yeSIsInByb2R1Y3Rfc3ViY2F0ZWdvcnkiLCJxdWFudGl0eSIsInVuaXRfcHJpY2UiLCJzaGlwcGluZ19jaXR5Iiwic2hpcHBpbmdfc3RhdGUiLCJzaGlwcGluZ19jb3VudHJ5IiwiY2FycmllciIsIndhcmVob3VzZV9sb2NhdGlvbiIsImlzX3J1c2hfb3JkZXIiLCJpc19naWZ0IiwiY3VzdG9tZXJfcmF0aW5nIiwiZGVsaXZlcnlfZGF0ZSIsInNoaXBwZWRfZGF0ZSJdLCJjb2x1bW5WaXNpYmlsaXR5IjpbIm9yZGVyX251bWJlciIsIm9yZGVyX2RhdGUiXX0"
+}
+127.0.0.1:5173/enterprise-orders?filters=%7B"priority"%3A%7B"type"%3A"select"%2C"values"%3A%5B"Low"%5D%2C"operator"%3A"notEquals"%7D%2C"order_status"%3A%7B"type"%3A"select"%2C"values"%3A%5B"Processing"%2C"Pending"%5D%2C"operator"%3A"equals"%7D%2C"order_date"%3A%7B"operator"%3A"after"%2C"type"%3A"date"%2C"value"%3A"2010-01-01"%7D%2C"order_number"%3A%7B"operator"%3A"contains"%2C"type"%3A"text"%2C"value"%3A"000"%7D%2C"customer_email"%3A%7B"operator"%3A"contains"%2C"type"%3A"text"%2C"value"%3A"hotma"%7D%2C"customer_type"%3A%7B"operator"%3A"notContains"%2C"type"%3A"text"%2C"value"%3A"sin"%7D%2C"total_amount"%3A%7B"operator"%3A"greaterThanOrEqual"%2C"type"%3A"number"%2C"value"%3A10000%7D%2C"subtotal"%3A%7B"operator"%3A"greaterThan"%2C"type"%3A"number"%2C"value"%3A10500%7D%2C"is_vip_customer"%3A%7B"type"%3A"boolean"%2C"value"%3Afalse%7D%2C"payment_status"%3A%7B"type"%3A"select"%2C"values"%3A%5B"Pending"%2C"Paid"%5D%2C"operator"%3A"equals"%7D%2C"is_rush_order"%3A%7B"type"%3A"boolean"%2C"value"%3Atrue%7D%2C"is_gift"%3A%7B"type"%3A"boolean"%2C"value"%3Atrue%7D%2C"shipping_country"%3A%7B"type"%3A"select"%2C"values"%3A%5B"Argentina"%2C"Australia"%2C"Austria"%2C"Brazil"%2C"Canada"%2C"China"%2C"Colombia"%2C"Denmark"%2C"Finland"%2C"France"%2C"Germany"%2C"India"%2C"Ireland"%2C"Italy"%2C"Japan"%2C"Netherlands"%2C"New+Zealand"%2C"Norway"%2C"Poland"%2C"Singapore"%2C"South+Korea"%2C"Spain"%2C"Switzerland"%2C"United+States"%5D%2C"operator"%3A"equals"%7D%7D
+http://127.0.0.1:5173/enterprise-orders?enterprise-orders-table-tableState=eyJjb2x1bW5PcmRlciI6WyJpc192aXBfY3VzdG9tZXIiLCJwcmlvcml0eSIsImN1c3RvbWVyX3R5cGUiLCJpc19ydXNoX29yZGVyIiwiaXNfZ2lmdCIsIm9yZGVyX2RhdGUiLCJvcmRlcl9pZCIsIm9yZGVyX251bWJlciIsIm9yZGVyX3N0YXR1cyIsImN1c3RvbWVyX25hbWUiLCJjdXN0b21lcl9lbWFpbCIsImxveWFsdHlfcG9pbnRzIiwidG90YWxfYW1vdW50Iiwic3VidG90YWwiLCJ0YXhfYW1vdW50Iiwic2hpcHBpbmdfY29zdCIsImRpc2NvdW50X2Ftb3VudCIsInBheW1lbnRfc3RhdHVzIiwicGF5bWVudF9tZXRob2QiLCJwcm9kdWN0X2NhdGVnb3J5IiwicHJvZHVjdF9zdWJjYXRlZ29yeSIsInF1YW50aXR5IiwidW5pdF9wcmljZSIsInNoaXBwaW5nX2NpdHkiLCJzaGlwcGluZ19zdGF0ZSIsInNoaXBwaW5nX2NvdW50cnkiLCJjYXJyaWVyIiwid2FyZWhvdXNlX2xvY2F0aW9uIiwiY3VzdG9tZXJfcmF0aW5nIiwiZGVsaXZlcnlfZGF0ZSIsInNoaXBwZWRfZGF0ZSJdLCJjb2x1bW5WaXNpYmlsaXR5IjpbIm9yZGVyX251bWJlciIsIm9yZGVyX2RhdGUiXSwic29ydGluZyI6W3siY29sdW1uS2V5IjoiaXNfdmlwX2N1c3RvbWVyIiwiZGlyZWN0aW9uIjoiYXNjIn0seyJjb2x1bW5LZXkiOiJwcmlvcml0eSIsImRpcmVjdGlvbiI6ImFzYyJ9LHsiY29sdW1uS2V5IjoiY3VzdG9tZXJfdHlwZSIsImRpcmVjdGlvbiI6ImFzYyJ9LHsiY29sdW1uS2V5IjoiaXNfcnVzaF9vcmRlciIsImRpcmVjdGlvbiI6ImFzYyJ9LHsiY29sdW1uS2V5IjoiaXNfZ2lmdCIsImRpcmVjdGlvbiI6ImFzYyJ9XX0&filters=%7B%22is_vip_customer%22%3A%7B%22type%22%3A%22boolean%22%2C%22value%22%3Atrue%7D%2C%22priority%22%3A%7B%22type%22%3A%22select%22%2C%22values%22%3A%5B%22Low%22%5D%2C%22operator%22%3A%22equals%22%7D%2C%22customer_type%22%3A%7B%22type%22%3A%22select%22%2C%22values%22%3A%5B%22Business%22%2C%22Educational%22%2C%22Enterprise%22%5D%2C%22operator%22%3A%22equals%22%7D%2C%22is_rush_order%22%3A%7B%22type%22%3A%22boolean%22%2C%22value%22%3Afalse%7D%2C%22is_gift%22%3A%7B%22type%22%3A%22boolean%22%2C%22value%22%3Atrue%7D%7D&sort=%5B%7B%22columnKey%22%3A%22is_vip_customer%22%2C%22direction%22%3A%22asc%22%7D%2C%7B%22columnKey%22%3A%22priority%22%2C%22direction%22%3A%22asc%22%7D%2C%7B%22columnKey%22%3A%22customer_type%22%2C%22direction%22%3A%22asc%22%7D%2C%7B%22columnKey%22%3A%22is_rush_order%22%2C%22direction%22%3A%22asc%22%7D%2C%7B%22columnKey%22%3A%22is_gift%22%2C%22direction%22%3A%22asc%22%7D%5D
+
+http://127.0.0.1:5173/enterprise-orders?enterprise-orders-table-tableState=eyJjb2x1bW5PcmRlciI6WyJpc192aXBfY3VzdG9tZXIiLCJwcmlvcml0eSIsImN1c3RvbWVyX3R5cGUiLCJpc19ydXNoX29yZGVyIiwiaXNfZ2lmdCIsIm9yZGVyX2RhdGUiLCJvcmRlcl9pZCIsIm9yZGVyX251bWJlciIsIm9yZGVyX3N0YXR1cyIsImN1c3RvbWVyX25hbWUiLCJjdXN0b21lcl9lbWFpbCIsImxveWFsdHlfcG9pbnRzIiwidG90YWxfYW1vdW50Iiwic3VidG90YWwiLCJ0YXhfYW1vdW50Iiwic2hpcHBpbmdfY29zdCIsImRpc2NvdW50X2Ftb3VudCIsInBheW1lbnRfc3RhdHVzIiwicGF5bWVudF9tZXRob2QiLCJwcm9kdWN0X2NhdGVnb3J5IiwicHJvZHVjdF9zdWJjYXRlZ29yeSIsInF1YW50aXR5IiwidW5pdF9wcmljZSIsInNoaXBwaW5nX2NpdHkiLCJzaGlwcGluZ19zdGF0ZSIsInNoaXBwaW5nX2NvdW50cnkiLCJjYXJyaWVyIiwid2FyZWhvdXNlX2xvY2F0aW9uIiwiY3VzdG9tZXJfcmF0aW5nIiwiZGVsaXZlcnlfZGF0ZSIsInNoaXBwZWRfZGF0ZSJdLCJjb2x1bW5WaXNpYmlsaXR5IjpbIm9yZGVyX251bWJlciIsIm9yZGVyX2RhdGUiXSwic29ydGluZyI6W3siY29sdW1uS2V5IjoiaXNfdmlwX2N1c3RvbWVyIiwiZGlyZWN0aW9uIjoiYXNjIn0seyJjb2x1bW5LZXkiOiJwcmlvcml0eSIsImRpcmVjdGlvbiI6ImFzYyJ9LHsiY29sdW1uS2V5IjoiY3VzdG9tZXJfdHlwZSIsImRpcmVjdGlvbiI6ImFzYyJ9LHsiY29sdW1uS2V5IjoiaXNfcnVzaF9vcmRlciIsImRpcmVjdGlvbiI6ImFzYyJ9LHsiY29sdW1uS2V5IjoiaXNfZ2lmdCIsImRpcmVjdGlvbiI6ImFzYyJ9XX0&filters=%7B%22is_vip_customer%22%3A%7B%22type%22%3A%22boolean%22%2C%22value%22%3Atrue%7D%2C%22priority%22%3A%7B%22operator%22%3A%22notContains%22%2C%22type%22%3A%22text%22%2C%22value%22%3A%22critic%22%7D%2C%22customer_type%22%3A%7B%22type%22%3A%22select%22%2C%22values%22%3A%5B%22Business%22%2C%22Educational%22%2C%22Enterprise%22%5D%2C%22operator%22%3A%22equals%22%7D%2C%22is_rush_order%22%3A%7B%22type%22%3A%22boolean%22%2C%22value%22%3Atrue%7D%2C%22is_gift%22%3A%7B%22type%22%3A%22boolean%22%2C%22value%22%3Afalse%7D%2C%22order_id%22%3A%7B%22operator%22%3A%22greaterThanOrEqual%22%2C%22type%22%3A%22number%22%2C%22value%22%3A10000%7D%2C%22order_status%22%3A%7B%22type%22%3A%22select%22%2C%22values%22%3A%5B%22Pending%22%2C%22Processing%22%2C%22Shipped%22%2C%22Delivered%22%2C%22Cancelled%22%2C%22Returned%22%5D%2C%22operator%22%3A%22equals%22%7D%2C%22customer_email%22%3A%7B%22operator%22%3A%22contains%22%2C%22type%22%3A%22text%22%2C%22value%22%3A%22hotmail%22%7D%2C%22loyalty_points%22%3A%7B%22operator%22%3A%22greaterThan%22%2C%22type%22%3A%22number%22%2C%22value%22%3A2000%7D%7D&sort=%5B%7B%22columnKey%22%3A%22is_vip_customer%22%2C%22direction%22%3A%22asc%22%7D%2C%7B%22columnKey%22%3A%22priority%22%2C%22direction%22%3A%22asc%22%7D%2C%7B%22columnKey%22%3A%22customer_type%22%2C%22direction%22%3A%22asc%22%7D%2C%7B%22columnKey%22%3A%22is_rush_order%22%2C%22direction%22%3A%22asc%22%7D%2C%7B%22columnKey%22%3A%22is_gift%22%2C%22direction%22%3A%22asc%22%7D%5D
