@@ -36,7 +36,9 @@ export const FilterPopover = ({
   const popoverRef = useRef<HTMLDivElement>(null);
   // Ref to always access latest filter value (avoids stale closure in toggle handler)
   const filterRef = useRef(filter);
-  filterRef.current = filter;
+  useEffect(() => {
+    filterRef.current = filter;
+  }, [filter]);
 
   // Local state to track the current filter value before applying
   // Reset imperatively on popover open, not via effect

@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 
 import type { ColumnFilter, OperatorType } from '@/types/filterOperators.types';
 
@@ -24,24 +24,15 @@ export const FilterInputs = ({
   onChange,
   onLoadMoreOptions,
 }: FilterInputsProps) => {
-  // Track the operator for non-boolean data types
-  const [operator, setOperator] = useState<OperatorType>(() =>
-    getOperatorFromFilter({ dataType: column.dataType, filter }),
+  // Derive operator directly from filter prop - always in sync with parent state
+  const operator = useMemo<OperatorType>(
+    () => getOperatorFromFilter({ dataType: column.dataType, filter }),
+    [column.dataType, filter],
   );
 
-  // Sync internal operator state when filter prop changes (e.g., on popover reopen)
-  useEffect(() => {
-    const newOperator = getOperatorFromFilter({
-      dataType: column.dataType,
-      filter,
-    });
-    setOperator(newOperator);
-  }, [column.dataType, filter]);
-
-  // Handle operator change
+  // Handle operator change - updates parent filter state directly
   const handleOperatorChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newOperator = e.target.value as OperatorType;
-    setOperator(newOperator);
 
     if (!filter || filter.type === 'boolean') return;
 
