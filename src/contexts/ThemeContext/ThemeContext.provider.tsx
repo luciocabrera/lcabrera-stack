@@ -27,9 +27,6 @@ export const ThemeProvider = ({
     setThemeState(newTheme);
     // Sync to cookie for SSR
     setThemeCookie(newTheme);
-    // Also sync to localStorage for legacy support
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    globalThis.localStorage?.setItem('theme', JSON.stringify(newTheme));
   }, []);
 
   const toggleTheme = useCallback(() => {

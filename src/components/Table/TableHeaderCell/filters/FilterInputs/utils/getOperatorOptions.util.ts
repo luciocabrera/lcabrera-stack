@@ -1,14 +1,10 @@
 import type { TableColumnDataType } from '@/components/Table/Table.types';
-import type {
-  OperatorOption,
-  OperatorType,
-} from '@/types/filterOperators.types';
 
 import {
   DATE_OPERATORS,
   NUMBER_OPERATORS,
   TEXT_OPERATORS,
-} from '@/components/Table/constants';
+} from '@/constants/filterOperators.constants';
 
 export type GetOperatorOptionsParams = {
   dataType?: TableColumnDataType;
@@ -17,9 +13,7 @@ export type GetOperatorOptionsParams = {
 /**
  * Gets the available operator options based on column data type.
  */
-export const getOperatorOptions = ({
-  dataType,
-}: GetOperatorOptionsParams): OperatorOption<OperatorType>[] => {
+export const getOperatorOptions = ({ dataType }: GetOperatorOptionsParams) => {
   switch (dataType) {
     case 'currency':
     case 'number': {

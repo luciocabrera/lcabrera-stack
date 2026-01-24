@@ -10,8 +10,6 @@ export type UseVirtualizationArgs = {
   totalItems: number;
 };
 
-export type UseVirtualizationReturn = ReturnType<typeof useVirtualization>;
-
 export const useVirtualization = ({
   containerRef,
   defaultContainerHeight = 400,

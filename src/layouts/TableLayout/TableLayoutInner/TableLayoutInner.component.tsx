@@ -8,6 +8,12 @@ import type {
 } from '@/components/Table';
 
 import { Table } from '@/components/Table';
+import {
+  INFINITE_SCROLL_THRESHOLD,
+  INITIAL_PAGE_SIZE,
+  LOAD_MORE_PAGE_SIZE,
+  STRATEGY,
+} from '@/components/Table/Table.constants';
 
 import type { TableLayoutInnerProps } from './TableLayoutInner.types';
 
@@ -57,9 +63,9 @@ export const TableLayoutInner = <TData extends Record<string, unknown>>({
   };
 
   const infiniteScrollConfig: InfiniteScrollConfig<TData> = {
-    initialPageSize: 50,
+    initialPageSize: INITIAL_PAGE_SIZE,
     isEnabled: true,
-    loadMorePageSize: 50,
+    loadMorePageSize: LOAD_MORE_PAGE_SIZE,
     onLoadMore: async (params) => {
       const { limit, skip } = params as OffsetLimitParams;
 
@@ -77,8 +83,8 @@ export const TableLayoutInner = <TData extends Record<string, unknown>>({
         totalRows: result.total,
       };
     },
-    strategy: 'offset-limit',
-    threshold: 200,
+    strategy: STRATEGY,
+    threshold: INFINITE_SCROLL_THRESHOLD,
   };
 
   // Generate key to force Table remount when state changes

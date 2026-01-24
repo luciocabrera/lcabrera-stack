@@ -38,9 +38,9 @@ export const ToggleSwitch = ({
       <label
         {...stylex.props(
           styles.track,
-          isChecked && styles.track_checked,
-          isDisabled && styles.track_disabled,
-          isFocused && styles.track_focus,
+          isChecked && styles.trackChecked,
+          isDisabled && styles.trackDisabled,
+          isFocused && styles.trackFocus,
         )}
         htmlFor={id}
       >
@@ -58,13 +58,13 @@ export const ToggleSwitch = ({
           type='checkbox'
         />
         <span
-          {...stylex.props(styles.thumb, isChecked && styles.thumb_checked)}
+          {...stylex.props(styles.thumb, isChecked && styles.thumbChecked)}
           aria-hidden='true'
         />
       </label>
       {label && (
         <label
-          {...stylex.props(styles.label, isDisabled && styles.label_disabled)}
+          {...stylex.props(styles.label, isDisabled && styles.labelDisabled)}
           htmlFor={id}
         >
           {label}

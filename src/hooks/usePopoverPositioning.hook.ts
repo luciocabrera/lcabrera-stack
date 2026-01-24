@@ -8,14 +8,7 @@ import {
   SPACING,
 } from '@/constants/popover.constants';
 
-export type PopoverPositioning = {
-  /** Whether positioning has been calculated */
-  isPositioned: boolean;
-  /** Reset positioning (call when closing) */
-  resetPositioning: () => void;
-};
-
-export type UsePopoverPositioningArgs = {
+type UsePopoverPositioningArgs = {
   /** Column data type to estimate max height */
   columnDataType?: string;
   /** Whether the column has filter options that could expand the content */
@@ -44,7 +37,7 @@ export const usePopoverPositioning = ({
   popoverId,
   popoverRef,
   recalculateDeps = [],
-}: UsePopoverPositioningArgs): PopoverPositioning => {
+}: UsePopoverPositioningArgs) => {
   const initialPositionRef = useRef<'above' | 'below' | undefined>(undefined);
   const [isPositioned, setIsPositioned] = useState(false);
 

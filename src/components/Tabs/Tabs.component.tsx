@@ -11,7 +11,7 @@ export const Tabs = ({ defaultSelectedTab, tabs, ...props }: TabsProps) => {
   const [activeTab, setActiveTab] = useState(
     defaultSelectedTab ?? tabs[0]?.key ?? '',
   );
-  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const tabRefs = useRef<Map<string, HTMLButtonElement | null>>(new Map());
   const activeIndex = tabs.findIndex((tab) => tab.key === activeTab);
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -41,9 +41,11 @@ export const Tabs = ({ defaultSelectedTab, tabs, ...props }: TabsProps) => {
       }
     }
 
-    if (newIndex !== activeIndex) {
-      setActiveTab(tabs[newIndex].key);
-      tabRefs.current[newIndex]?.focus();
+    const newTab = tabs[newIndex];
+
+    if (newIndex !== activeIndex && newTab) {
+      setActiveTab(newTab.key);
+      tabRefs.current.get(newTab.key)?.focus();
       event.preventDefault();
     }
   };
@@ -52,15 +54,15 @@ export const Tabs = ({ defaultSelectedTab, tabs, ...props }: TabsProps) => {
     <div {...stylex.props(styles.container)} {...props}>
       <div aria-label='Settings tabs' onKeyDown={handleKeyDown} role='tablist'>
         <div {...stylex.props(styles.tabList)}>
-          {tabs.map((tab, index) => (
+          {tabs.map((tab) => (
             <button
               key={tab.key}
               ref={(el) => {
-                tabRefs.current[index] = el;
+                tabRefs.current.set(tab.key, el);
               }}
               {...stylex.props(
                 styles.tabButton,
-                activeTab === tab.key && styles.tabButton_active,
+                activeTab === tab.key && styles.tabButtonActive,
               )}
               aria-controls={`tabpanel-${tab.key}`}
               aria-selected={activeTab === tab.key}

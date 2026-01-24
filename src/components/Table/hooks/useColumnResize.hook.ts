@@ -18,11 +18,6 @@ export type UseColumnResizeArgs = {
   onResize: (params: OnResizeParams) => void;
 };
 
-export type UseColumnResizeReturn = {
-  isResizing: boolean;
-  onMouseDown: (event: React.MouseEvent<HTMLDivElement>) => void;
-};
-
 /**
  * Hook for handling column resize with mouse drag
  *
@@ -49,7 +44,7 @@ export const useColumnResize = ({
   maxWidth,
   minWidth,
   onResize,
-}: UseColumnResizeArgs): UseColumnResizeReturn => {
+}: UseColumnResizeArgs) => {
   const [isResizing, setIsResizing] = useState(false);
   const resizeDataRef = useRef<
     | undefined

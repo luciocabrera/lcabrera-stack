@@ -7,7 +7,12 @@ import {
   useTablePersistence,
   useTableSearchParams,
 } from '@/components/Table/hooks';
-import { DEFAULT_INFINITE_SCROLL_THRESHOLD } from '@/components/Table/Table.constants';
+import {
+  INFINITE_SCROLL_THRESHOLD,
+  INITIAL_PAGE_SIZE,
+  LOAD_MORE_PAGE_SIZE,
+  STRATEGY,
+} from '@/components/Table/Table.constants';
 import {
   TableContext,
   useColumnFilters,
@@ -37,28 +42,6 @@ type UseTableContentArgs<T extends Record<string, unknown>> = Pick<
   | 'onSortChange'
   | 'persistenceKey'
 >;
-
-// type UseTableContentReturn<T extends Record<string, unknown>> = {
-//   columnFilters: Record<string, unknown>;
-//   columnOrder: string[];
-//   columnSizing: Record<string, number>;
-//   columnVisibility: Set<string>;
-//   containerRef: React.RefObject<HTMLDivElement | null>;
-//   dataToRender: T[];
-//   isLoadingMore: boolean;
-//   isSettingsOpen: boolean;
-//   isSettingsPinned: boolean;
-//   setColumnFilters: (filters: Record<string, unknown>) => void;
-//   setColumnOrder: (order: string[]) => void;
-//   setColumnSizing: (sizing: Record<string, number>) => void;
-//   setColumnVisibility: (visibility: Set<string>) => void;
-//   setIsSettingsOpen: (isOpen: boolean) => void;
-//   setIsSettingsPinned: (isPinned: boolean) => void;
-//   setSorting: (
-//     sorting: { columnKey: string; direction: 'asc' | 'desc' }[],
-//   ) => void;
-//   sorting: { columnKey: string; direction: 'asc' | 'desc' }[];
-// };
 
 export const useTableContent = <T extends Record<string, unknown>>({
   columns,
@@ -202,16 +185,16 @@ export const useTableContent = <T extends Record<string, unknown>>({
 
   // Set up infinite scroll if configured
   useInfiniteScroll({
-    initialPageSize: infiniteScrollConfig?.initialPageSize ?? 50,
+    initialPageSize: infiniteScrollConfig?.initialPageSize ?? INITIAL_PAGE_SIZE,
     isEnabled: infiniteScrollConfig?.isEnabled ?? false,
-    loadMorePageSize: infiniteScrollConfig?.loadMorePageSize ?? 50,
+    loadMorePageSize:
+      infiniteScrollConfig?.loadMorePageSize ?? LOAD_MORE_PAGE_SIZE,
     onLoadMore:
       infiniteScrollConfig?.onLoadMore ??
       (() => Promise.resolve({ data: [], hasMore: false })),
     scrollContainerRef: containerRef,
-    strategy: infiniteScrollConfig?.strategy ?? 'offset-limit',
-    threshold:
-      infiniteScrollConfig?.threshold ?? DEFAULT_INFINITE_SCROLL_THRESHOLD,
+    strategy: infiniteScrollConfig?.strategy ?? STRATEGY,
+    threshold: infiniteScrollConfig?.threshold ?? INFINITE_SCROLL_THRESHOLD,
   });
 
   // Set up persistence if persistenceKey provided

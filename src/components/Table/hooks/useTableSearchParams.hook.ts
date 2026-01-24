@@ -23,10 +23,6 @@ type UseTableSearchParamsArgs = {
   sorting: SortingState;
 };
 
-type UseTableSearchParamsReturn = {
-  initialState: Partial<TableSearchParamsState> | undefined;
-};
-
 const PARAM_KEY = 'tableState';
 const DEBOUNCE_MS = 500;
 
@@ -41,7 +37,7 @@ export const useTableSearchParams = ({
   isEnabled,
   persistenceKey,
   sorting,
-}: UseTableSearchParamsArgs): UseTableSearchParamsReturn => {
+}: UseTableSearchParamsArgs) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const debounceTimerRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const hasInitialized = useRef(false);

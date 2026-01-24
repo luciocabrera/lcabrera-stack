@@ -59,7 +59,7 @@ export const styles = stylex.create({
     borderTopStyle: 'none',
     marginBottom: '-1px',
   },
-  tabButton_active: {
+  tabButtonActive: {
     color: colors.brandPrimary,
     borderBottomColor: colors.brandPrimary,
   },

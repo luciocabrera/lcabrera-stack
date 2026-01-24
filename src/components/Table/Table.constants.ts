@@ -8,11 +8,11 @@ export const DEFAULT_MIN_COLUMN_WIDTH = 60;
  */
 export const DEFAULT_MAX_COLUMN_WIDTH = 600;
 
-/**
- * Default threshold (in pixels) for triggering infinite scroll load
- */
-export const DEFAULT_INFINITE_SCROLL_THRESHOLD = 200;
-
 export const DEFAULT_PLACEHOLDER_ROW_COUNT = 30;
 
 export const DEFAULT_ROW_HEIGHT = 32;
+
+export const INITIAL_PAGE_SIZE = 50;
+export const LOAD_MORE_PAGE_SIZE = 50;
+export const INFINITE_SCROLL_THRESHOLD = 200;
+export const STRATEGY = 'offset-limit';

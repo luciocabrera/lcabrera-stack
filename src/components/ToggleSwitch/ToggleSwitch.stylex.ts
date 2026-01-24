@@ -42,15 +42,15 @@ export const styles = stylex.create({
     height: '24px',
     width: '44px',
   },
-  track_checked: {
+  trackChecked: {
     borderColor: colors.brandPrimary,
     backgroundColor: colors.brandPrimary,
   },
-  track_disabled: {
+  trackDisabled: {
     cursor: 'not-allowed',
     opacity: 0.5,
   },
-  track_focus: {
+  trackFocus: {
     outline: `2px solid ${colors.brandPrimary}`,
     outlineOffset: '2px',
   },
@@ -63,7 +63,7 @@ export const styles = stylex.create({
     height: '18px',
     width: '18px',
   },
-  thumb_checked: {
+  thumbChecked: {
     transform: 'translateX(20px)',
   },
   label: {
@@ -72,7 +72,7 @@ export const styles = stylex.create({
     fontSize: typography.fontSizeSm,
     userSelect: 'none',
   },
-  label_disabled: {
+  labelDisabled: {
     cursor: 'not-allowed',
     opacity: 0.5,
   },
