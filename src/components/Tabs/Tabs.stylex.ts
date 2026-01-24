@@ -64,8 +64,8 @@ export const styles = stylex.create({
     borderBottomColor: colors.brandPrimary,
   },
   tabContent: {
-    // Always reserve space for scrollbar to prevent layout shift when content overflows
-    scrollbarGutter: 'stable',
+    // Reserve space for scrollbar on both edges to keep content visually centered
+    scrollbarGutter: 'stable both-edges',
     padding: `${spacing.sm} ${spacing.md}`,
     flex: '1',
     overflow: 'auto',
