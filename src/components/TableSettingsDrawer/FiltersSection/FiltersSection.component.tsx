@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/Button';
 import { MenuCloseIcon } from '@/components/Icons';
+import { InfoBox } from '@/components/InfoBox';
 
 import type { FiltersSectionProps } from './FiltersSection.types';
 
@@ -312,12 +313,12 @@ export const FiltersSection = ({
             })}
           </div>
         ) : (
-          <p {...stylex.props(styles.emptyState)}>
+          <InfoBox>
             No filters applied. Add a filter above to start filtering.
-          </p>
+          </InfoBox>
         )}
       </div>
-      {/* Clear All Filters Section */}
+      {/* Reset Filters Section */}
       {hasFilters && (
         <div {...stylex.props(styles.clearSection)}>
           <Button
@@ -326,7 +327,7 @@ export const FiltersSection = ({
             size='sm'
             width='full'
           >
-            Clear All Filters
+            Reset Filters
           </Button>
         </div>
       )}

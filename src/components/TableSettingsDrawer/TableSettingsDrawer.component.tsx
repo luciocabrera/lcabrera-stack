@@ -130,7 +130,10 @@ export const TableSettingsDrawer = ({
           sorting={pendingSorting}
         />
       ),
-      header: 'Sorting',
+      header: (() => {
+        const sortCount = pendingSorting.length;
+        return sortCount > 0 ? `Sorting (${sortCount})` : 'Sorting';
+      })(),
       key: 'sorting',
     },
     {
@@ -157,7 +160,11 @@ export const TableSettingsDrawer = ({
           onColumnVisibilityChange={setPendingColumnVisibility}
         />
       ),
-      header: 'Columns',
+      header: (() => {
+        // columnVisibility contains hidden columns, so visible = total - hidden
+        const visibleCount = columns.length - pendingColumnVisibility.size;
+        return `Columns (${visibleCount}/${columns.length})`;
+      })(),
       key: 'columns',
     },
   ];

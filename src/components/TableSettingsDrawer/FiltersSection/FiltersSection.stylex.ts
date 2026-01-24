@@ -106,11 +106,4 @@ export const styles = stylex.create({
     borderTopStyle: 'solid',
     borderTopWidth: '1px',
   },
-  emptyState: {
-    paddingBlock: spacing.lg,
-    color: colors.textTertiary,
-    fontSize: typography.fontSizeSm,
-    fontStyle: 'italic',
-    textAlign: 'center',
-  },
 });
