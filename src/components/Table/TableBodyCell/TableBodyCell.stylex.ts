@@ -29,12 +29,14 @@ export const tableBodyCellStyles = stylex.create({
     minWidth: minWidth ?? width ?? null,
     width: width ?? minWidth ?? null,
   }),
+  /** For boolean checkbox content - don't take full width so flex centering works */
+  booleanContent: {
+    width: 'auto',
+  },
   /** Text content with ellipsis overflow */
   textContent: {
     overflow: 'hidden',
-    alignItems: 'center',
     display: 'block',
-    justifyContent: 'flex-start',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
     width: '100%',

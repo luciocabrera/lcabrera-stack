@@ -21,6 +21,7 @@ export const TableBodyCell = ({
 
   const isRightAligned = dataType === 'number' || dataType === 'currency';
   const isCentered = dataType === 'boolean' || dataType === 'date';
+  const isBoolean = dataType === 'boolean';
 
   const content = renderCellContent({
     dataType,
@@ -42,11 +43,13 @@ export const TableBodyCell = ({
     >
       <span
         title={typeof content === 'string' ? content : undefined}
-        {...stylex.props(tableBodyCellStyles.textContent)}
+        {...stylex.props(
+          tableBodyCellStyles.textContent,
+          isBoolean && tableBodyCellStyles.booleanContent,
+        )}
       >
         {content}
       </span>
-
       {isLoading && (
         <div {...stylex.props(skelletonStyles.loadingOverlay)}>
           <div {...stylex.props(skelletonStyles.shimmerWave)} />
