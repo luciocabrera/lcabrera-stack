@@ -29,7 +29,6 @@ export const tableBodyCellStyles = stylex.create({
     minWidth: minWidth ?? width ?? null,
     width: width ?? minWidth ?? null,
   }),
-  /** For boolean checkbox content - don't take full width so flex centering works */
   booleanContent: {
     width: 'auto',
   },
