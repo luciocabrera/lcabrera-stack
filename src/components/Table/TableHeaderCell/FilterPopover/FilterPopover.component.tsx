@@ -148,9 +148,6 @@ export const FilterPopover = ({
     hasOptions &&
     (currentOperator === 'equals' || currentOperator === 'notEquals');
 
-  console.warn(
-    `[FilterPopover] column: ${column.key}, dataType: ${column.dataType}, hasOptions: ${hasOptions}, currentOperator: ${currentOperator}, isListShowing: ${isListShowing}`,
-  );
   const popoverMinHeight = isListShowing ? '25rem' : '12rem';
 
   const content = renderFilterInput({
@@ -208,10 +205,6 @@ export const FilterPopover = ({
           <Button
             color='primary'
             onClick={() => {
-              console.warn(
-                '🎯 [FilterPopover] Apply clicked with localFilter:',
-                localFilter,
-              );
               onApply(localFilter);
               // eslint-disable-next-line @typescript-eslint/ban-ts-comment
               // @ts-ignore - hidePopover not in TS types yet

@@ -139,10 +139,6 @@ export const useTableContent = <T extends Record<string, unknown>>({
     //   JSON.stringify(columnFilters) !== JSON.stringify(initialFilters);
 
     if (onFilterChange) {
-      console.warn(
-        '🔄 [Filter Effect] Calling onFilterChange with:',
-        columnFilters,
-      );
       void onFilterChange({
         filters: columnFilters,
       });

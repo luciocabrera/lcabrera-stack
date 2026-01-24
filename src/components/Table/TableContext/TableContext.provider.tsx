@@ -110,12 +110,6 @@ export const TableProvider = <TData extends Record<string, unknown>>({
       ? initialColumnVisibility
       : (persistedState as Partial<TableState<TData>>).columnVisibility;
 
-  console.warn(
-    '🎯 [TableProvider] initialColumnFilters:',
-    initialColumnFilters,
-  );
-  console.warn('🎯 [TableProvider] persistedState:', persistedState);
-
   // Deep freeze columnFilters in dev mode to detect accidental mutations
   const frozenColumnFilters = initialColumnFilters
     ? deepFreeze(initialColumnFilters)

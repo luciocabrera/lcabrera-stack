@@ -44,11 +44,6 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
     urlState?.filters ?? cookieState.columnFilters ?? {};
   const columnSizing: Record<string, number> = cookieState.columnSizing ?? {};
 
-  console.warn('🔍 [Loader] URL State:', urlState);
-  console.warn('🔍 [Loader] Cookie State:', cookieState);
-  console.warn('🔍 [Loader] Final filters:', filters);
-  console.warn('🔍 [Loader] Final sorting:', sorting);
-
   // Return the promise directly (not awaited) for Suspense streaming
   const enterpriseOrdersPromise: Promise<
     EnterpriseOrdersResponse & { hasMore: boolean }
