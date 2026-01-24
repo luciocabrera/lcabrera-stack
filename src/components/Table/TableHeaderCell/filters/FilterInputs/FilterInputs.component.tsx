@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import type { ColumnFilter, OperatorType } from '@/types/filterOperators.types';
 
@@ -28,6 +28,15 @@ export const FilterInputs = ({
   const [operator, setOperator] = useState<OperatorType>(() =>
     getOperatorFromFilter({ dataType: column.dataType, filter }),
   );
+
+  // Sync internal operator state when filter prop changes (e.g., on popover reopen)
+  useEffect(() => {
+    const newOperator = getOperatorFromFilter({
+      dataType: column.dataType,
+      filter,
+    });
+    setOperator(newOperator);
+  }, [column.dataType, filter]);
 
   // Handle operator change
   const handleOperatorChange = (e: React.ChangeEvent<HTMLSelectElement>) => {

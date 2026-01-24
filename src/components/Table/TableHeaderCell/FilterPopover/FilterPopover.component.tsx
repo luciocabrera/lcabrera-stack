@@ -34,19 +34,18 @@ export const FilterPopover = ({
   popoverId,
 }: FilterPopoverProps) => {
   const popoverRef = useRef<HTMLDivElement>(null);
+  // Ref to always access latest filter value (avoids stale closure in toggle handler)
+  const filterRef = useRef(filter);
+  filterRef.current = filter;
 
   // Local state to track the current filter value before applying
+  // Reset imperatively on popover open, not via effect
   const [localFilter, setLocalFilter] = useState(filter);
   // State for dynamically fetched options
   const [fetchedOptions, setFetchedOptions] = useState<string[]>();
   const [isFetchingOptions, setIsFetchingOptions] = useState(false);
   const [hasMoreOptions, setHasMoreOptions] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
-  // Sync local state when filter prop changes (e.g., from URL)
-  useEffect(() => {
-    setLocalFilter(filter);
-  }, [filter]);
 
   const hasOptions =
     Boolean(filterOptions && filterOptions.length > 0) ||
@@ -74,6 +73,10 @@ export const FilterPopover = ({
       const toggleEvent = e as ToggleEvent;
       if (toggleEvent.newState === 'open') {
         setIsPopoverOpen(true);
+        // Reset local filter to committed value from URL/context on every open
+        // This ensures any unapplied draft changes are discarded
+        // Use ref to get the latest filter value (avoids stale closure)
+        setLocalFilter(filterRef.current);
         // Lock body scroll to prevent outer scrollbar
         document.body.style.overflow = 'hidden';
 

@@ -1,4 +1,5 @@
 import { useStore } from '@/hooks';
+import { deepFreeze } from '@/utils';
 
 import type {
   ColumnOrderState,
@@ -115,6 +116,11 @@ export const TableProvider = <TData extends Record<string, unknown>>({
   );
   console.warn('🎯 [TableProvider] persistedState:', persistedState);
 
+  // Deep freeze columnFilters in dev mode to detect accidental mutations
+  const frozenColumnFilters = initialColumnFilters
+    ? deepFreeze(initialColumnFilters)
+    : undefined;
+
   const tableStore = useStore<TableState<TData>>(
     getInitialTableState({
       initialColumnOrder: effectiveColumnOrder,
@@ -124,8 +130,8 @@ export const TableProvider = <TData extends Record<string, unknown>>({
       initialPersistedState: {
         ...(persistedState as Partial<TableState<TData>>),
         // Override with loader-provided values
-        ...(initialColumnFilters
-          ? { columnFilters: initialColumnFilters }
+        ...(frozenColumnFilters
+          ? { columnFilters: frozenColumnFilters }
           : {}),
         ...(initialSorting ? { sorting: initialSorting } : {}),
       },
