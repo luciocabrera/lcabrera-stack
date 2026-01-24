@@ -6,10 +6,4 @@ export const styles = stylex.create({
     flexDirection: 'column',
     width: '100%',
   },
-  stringFilterContainer: {
-    gap: '0.75rem',
-    display: 'flex',
-    flexDirection: 'column',
-    width: '100%',
-  },
 });

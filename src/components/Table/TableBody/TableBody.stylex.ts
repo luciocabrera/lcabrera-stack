@@ -6,13 +6,4 @@ export const styles = stylex.create({
     position: 'relative',
     height,
   }),
-  spacerCell: (height: number) => ({
-    padding: 0,
-    borderStyle: 'none',
-    borderWidth: 0,
-    height,
-  }),
-  spacerRow: (height: number) => ({
-    height,
-  }),
 });

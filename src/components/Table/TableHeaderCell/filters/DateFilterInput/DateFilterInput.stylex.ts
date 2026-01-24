@@ -32,24 +32,6 @@ export const styles = stylex.create({
     alignItems: 'center',
     display: 'flex',
   },
-  select: {
-    padding: `${spacing.xs} ${spacing.sm}`,
-    borderColor: {
-      default: colors.borderPrimary,
-      ':focus': colors.borderFocus,
-    },
-    borderRadius: '0.25rem',
-    borderStyle: 'solid',
-    borderWidth: '1px',
-    outline: {
-      default: 'revert',
-      ':focus': 'none',
-    },
-    backgroundColor: colors.surfacePrimary,
-    color: colors.textPrimary,
-    cursor: 'pointer',
-    fontSize: typography.fontSizeSm,
-  },
   separator: {
     color: colors.textSecondary,
     fontSize: typography.fontSizeSm,

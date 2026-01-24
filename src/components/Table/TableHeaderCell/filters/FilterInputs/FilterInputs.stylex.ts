@@ -27,9 +27,4 @@ export const styles = stylex.create({
     cursor: 'pointer',
     fontSize: typography.fontSizeSm,
   },
-  stringFilterContainer: {
-    gap: spacing.sm,
-    display: 'flex',
-    flexDirection: 'column',
-  },
 });

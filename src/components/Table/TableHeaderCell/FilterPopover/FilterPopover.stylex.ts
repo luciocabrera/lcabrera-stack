@@ -89,23 +89,4 @@ export const styles = stylex.create({
     lineHeight: typography.lineHeightNormal,
     textAlign: 'center',
   },
-  divider: {
-    borderTopColor: colors.borderPrimary,
-    borderTopStyle: 'solid',
-    borderTopWidth: '1px',
-    marginBottom: spacing.sm,
-    marginTop: spacing.sm,
-  },
-  dividerText: {
-    padding: `0 ${spacing.sm}`,
-    color: colors.textSecondary,
-    fontSize: typography.fontSizeXs,
-    fontWeight: typography.fontWeightMedium,
-    textTransform: 'uppercase',
-  },
-  stringFilterContainer: {
-    gap: spacing.sm,
-    display: 'flex',
-    flexDirection: 'column',
-  },
 });

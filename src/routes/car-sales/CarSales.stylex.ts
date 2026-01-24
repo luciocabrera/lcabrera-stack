@@ -9,7 +9,4 @@ export const styles = stylex.create({
     flexDirection: 'column',
     height: '100%',
   },
-  header: {
-    flexShrink: 0,
-  },
 });
