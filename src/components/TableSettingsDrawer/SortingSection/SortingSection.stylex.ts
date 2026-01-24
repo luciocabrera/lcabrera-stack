@@ -60,11 +60,8 @@ export const styles = stylex.create({
     display: 'flex',
     flexShrink: 0,
   },
-  emptyState: {
-    paddingBlock: spacing.lg,
-    color: colors.textTertiary,
-    fontSize: typography.fontSizeSm,
-    fontStyle: 'italic',
-    textAlign: 'center',
+  resetSection: {
+    marginTop: 'auto',
+    paddingTop: spacing.md,
   },
 });

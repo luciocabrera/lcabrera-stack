@@ -6,6 +6,7 @@ import type { DraggableItem } from '@/components/DraggableList';
 import { Button } from '@/components/Button';
 import { DraggableList } from '@/components/DraggableList';
 import { MenuCloseIcon, SortAscIcon, SortDescIcon } from '@/components/Icons';
+import { InfoBox } from '@/components/InfoBox';
 
 import type { SortingSectionProps, SortItem } from './SortingSection.types';
 
@@ -67,6 +68,10 @@ export const SortingSection = ({
       };
     });
     onSortChange(newSorting);
+  };
+
+  const handleResetSorting = () => {
+    onSortChange([]);
   };
 
   // Convert sort items to draggable items
@@ -141,9 +146,9 @@ export const SortingSection = ({
       <div {...stylex.props(styles.container)}>
         <h3 {...stylex.props(styles.header)}>Sort Order</h3>
         {sortItems.length === 0 ? (
-          <p {...stylex.props(styles.emptyState)}>
+          <InfoBox>
             No sorting applied. Add a column above to start sorting.
-          </p>
+          </InfoBox>
         ) : (
           <div {...stylex.props(styles.sortList)}>
             <DraggableList
@@ -153,6 +158,20 @@ export const SortingSection = ({
           </div>
         )}
       </div>
+
+      {/* Reset Sorting Section */}
+      {sortItems.length > 0 && (
+        <div {...stylex.props(styles.resetSection)}>
+          <Button
+            color='outline'
+            onClick={handleResetSorting}
+            size='sm'
+            width='full'
+          >
+            Reset Sorting
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

@@ -9,6 +9,9 @@ export const styles = stylex.create({
     backgroundColor: colors.backgroundPrimary,
     color: colors.textPrimary,
     fontFamily: typography.fontFamily,
+    // Scrollbar styling
+    scrollbarColor: `${colors.borderSecondary} transparent`,
+    scrollbarWidth: 'thin',
     minHeight: '100vh',
   },
 

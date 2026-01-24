@@ -3,7 +3,12 @@ import { useEffect, useMemo, useState } from 'react';
 import type { TabItem } from '@/components/Tabs';
 
 import { Button } from '@/components/Button';
-import { PinIcon, PinOffIcon, SettingsIcon } from '@/components/Icons';
+import {
+  MenuCloseIcon,
+  PinIcon,
+  PinOffIcon,
+  SettingsIcon,
+} from '@/components/Icons';
 import {
   SidePanel,
   SidePanelBody,
@@ -94,6 +99,10 @@ export const TableSettingsDrawer = ({
     onColumnOrderChange(pendingColumnOrder);
     onColumnSizingChange(pendingColumnSizing);
     onColumnVisibilityChange(pendingColumnVisibility);
+    // Unpin if pinned, then close
+    if (isPinned) {
+      onPinChange?.(false);
+    }
     onClose();
   };
 
@@ -104,6 +113,10 @@ export const TableSettingsDrawer = ({
     setPendingColumnOrder(columnOrder);
     setPendingColumnSizing(columnSizing);
     setPendingColumnVisibility(columnVisibility);
+    // Unpin if pinned, then close
+    if (isPinned) {
+      onPinChange?.(false);
+    }
     onClose();
   };
 
@@ -179,16 +192,28 @@ export const TableSettingsDrawer = ({
     >
       <SidePanelHeader
         actions={
-          onPinChange && (
+          <>
+            {onPinChange && (
+              <Button
+                aria-label={isPinned ? 'Unpin drawer' : 'Pin drawer'}
+                color='ghost'
+                icon={
+                  isPinned ? <PinIcon size={16} /> : <PinOffIcon size={16} />
+                }
+                onClick={handleTogglePin}
+                size='mini'
+                title={isPinned ? 'Unpin drawer' : 'Pin drawer'}
+              />
+            )}
             <Button
-              aria-label={isPinned ? 'Unpin drawer' : 'Pin drawer'}
+              aria-label='Close drawer'
               color='ghost'
-              icon={isPinned ? <PinIcon size={16} /> : <PinOffIcon size={16} />}
-              onClick={handleTogglePin}
+              icon={<MenuCloseIcon size={16} />}
+              onClick={handleCancel}
               size='mini'
-              title={isPinned ? 'Unpin drawer' : 'Pin drawer'}
+              title='Close'
             />
-          )
+          </>
         }
       >
         <SidePanelTitle icon={<SettingsIcon size={20} />}>

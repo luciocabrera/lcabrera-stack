@@ -3,6 +3,7 @@ import { useState } from 'react';
 
 import { Button } from '@/components/Button';
 import { MaximizeIcon, MinimizeIcon, RefreshIcon } from '@/components/Icons';
+import { InfoBox } from '@/components/InfoBox';
 
 import type {
   GeneralSettingsSectionProps,
@@ -105,10 +106,10 @@ export const GeneralSettingsSection = ({
         </div>
       </div>
 
-      <div {...stylex.props(styles.infoBox)}>
+      <InfoBox>
         Select a preset to adjust all column widths at once. Changes will be
         reflected after clicking Accept.
-      </div>
+      </InfoBox>
     </div>
   );
 };

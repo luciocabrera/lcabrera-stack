@@ -17,7 +17,10 @@ export const styles = stylex.create({
   },
   outletWrapper: {
     flex: '1 1 auto',
-    overflow: 'hidden',
+    // Scrollbar styling
+    scrollbarColor: `${colors.borderSecondary} transparent`,
+    scrollbarWidth: 'thin',
     minHeight: 0,
+    overflowY: 'auto',
   },
 });

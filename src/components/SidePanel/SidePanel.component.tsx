@@ -18,6 +18,16 @@ export const SidePanel = ({
   const dialogRef = useRef<HTMLDialogElement>(null);
   const shouldShowBackdrop = shouldShowOverlay && !isPinned;
 
+  // Close dialog when switching to pinned mode
+  useEffect(() => {
+    if (isPinned) {
+      const dialog = dialogRef.current;
+      if (dialog?.open) {
+        dialog.close();
+      }
+    }
+  }, [isPinned]);
+
   useEffect(() => {
     if (isPinned) return; // Skip dialog management when pinned
 
