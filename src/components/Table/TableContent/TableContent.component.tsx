@@ -36,23 +36,13 @@ export const TableContent = <T extends Record<string, unknown>>({
   useRenderTracker('TableContent');
 
   const {
-    columnFilters,
-    columnOrder,
-    columnSizing,
-    columnVisibility,
     containerRef,
     dataToRender,
     isLoadingMore,
     isSettingsOpen,
     isSettingsPinned,
-    setColumnFilters,
-    setColumnOrder,
-    setColumnSizing,
-    setColumnVisibility,
     setIsSettingsOpen,
     setIsSettingsPinned,
-    setSorting,
-    sorting,
   } = useTableContent({
     columns,
     data,
@@ -114,21 +104,11 @@ export const TableContent = <T extends Record<string, unknown>>({
       </div>
 
       <TableSettingsDrawer
-        columnFilters={columnFilters}
-        columnOrder={columnOrder}
         columns={columns}
-        columnSizing={columnSizing}
-        columnVisibility={columnVisibility}
         isOpen={isSettingsOpen}
         isPinned={isSettingsPinned}
         onClose={handleCloseSettings}
-        onColumnFiltersChange={setColumnFilters}
-        onColumnOrderChange={setColumnOrder}
-        onColumnSizingChange={setColumnSizing}
-        onColumnVisibilityChange={setColumnVisibility}
         onPinChange={setIsSettingsPinned}
-        onSortingChange={setSorting}
-        sorting={sorting}
       />
     </div>
   );

@@ -38,10 +38,34 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
     urlState?.columnVisibility ??
     cookieState.columnVisibility ??
     new Set<string>();
-  const sorting: SortingState = urlState?.sorting ?? cookieState.sorting ?? [];
-  // Use standalone filters param (priority), then urlState, then cookie
-  const filters: ColumnFiltersState =
-    urlState?.filters ?? cookieState.columnFilters ?? {};
+
+    //  const sorting: SortingState = urlState?.sorting ?? cookieState.sorting ?? [];
+  //  const filters: ColumnFiltersState = urlState?.filters ?? cookieState.columnFilters ?? {};
+  // Read sorting from standalone param only
+  // Don't fall back to cookie - URL is the source of truth for sorting
+  // If sort= param is absent, sorting should be empty (user may have reset it)
+  const standaloneSortParam = url.searchParams.get('sort');
+  let sorting: SortingState = [];
+  if (standaloneSortParam) {
+    try {
+      sorting = JSON.parse(standaloneSortParam) as SortingState;
+    } catch {
+      // Invalid JSON, use empty array
+    }
+  }
+  
+  // Read filters from standalone param only
+  // Don't fall back to cookie - URL is the source of truth for filters
+  // If filters= param is absent, filters should be empty (user may have reset them)
+  const standaloneFiltersParam = url.searchParams.get('filters');
+  let filters: ColumnFiltersState = {};
+  if (standaloneFiltersParam) {
+    try {
+      filters = JSON.parse(standaloneFiltersParam) as ColumnFiltersState;
+    } catch {
+      // Invalid JSON, use empty object
+    }
+  }
   const columnSizing: Record<string, number> = cookieState.columnSizing ?? {};
 
   // Return the promise directly (not awaited) for Suspense streaming
