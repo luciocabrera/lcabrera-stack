@@ -4,6 +4,7 @@ import { useId } from 'react';
 import { MoreVerticalIcon } from '@/components/Icons';
 import { useColumnResize } from '@/components/Table/hooks';
 import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
+import { useRenderTracker } from '@/utils/performance';
 
 import type { TableHeaderCellProps } from './TableHeaderCell.types';
 
@@ -41,6 +42,7 @@ export const TableHeaderCell = ({
   width,
   ...rest
 }: TableHeaderCellProps) => {
+  useRenderTracker(`TableHeaderCell:${columnKey}`);
   const filterPopoverId = useId();
 
   const handleSort = (event: React.MouseEvent) => {

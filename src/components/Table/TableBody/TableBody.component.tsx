@@ -14,6 +14,7 @@ import {
 } from '@/components/Table/TableContext/hooks';
 import { TableRow } from '@/components/Table/TableRow';
 import { useVirtualization } from '@/hooks';
+import { useRenderTracker } from '@/utils/performance';
 
 import type { TableBodyProps } from './TableBody.types';
 
@@ -30,6 +31,7 @@ export const TableBody = <TData extends Record<string, unknown>>({
   rowHeight = DEFAULT_ROW_HEIGHT,
   tableContainerRef,
 }: TableBodyProps<TData>) => {
+  useRenderTracker('TableBody');
   const [columnSizing] = useColumnSizing<TData>();
   const [columnOrder] = useColumnOrder<TData>();
   const [columnVisibility] = useColumnVisibility<TData>();

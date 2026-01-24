@@ -3,6 +3,7 @@ import * as stylex from '@stylexjs/stylex';
 import { Button } from '@/components/Button';
 import { SettingsIcon } from '@/components/Icons';
 import { TableSettingsDrawer } from '@/components/TableSettingsDrawer';
+import { useRenderTracker } from '@/utils/performance';
 
 import type { TableContentProps } from './TableContent.types';
 
@@ -32,6 +33,8 @@ export const TableContent = <T extends Record<string, unknown>>({
   rowHeight = 32,
   title,
 }: TableContentProps<T>) => {
+  useRenderTracker('TableContent');
+
   const {
     columnFilters,
     columnOrder,

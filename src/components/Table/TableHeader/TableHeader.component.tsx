@@ -3,6 +3,8 @@ import { useCallback, useMemo } from 'react';
 
 import type { ColumnFilter } from '@/types/filterOperators.types';
 
+import { useRenderTracker } from '@/utils/performance';
+
 import type {
   HandleResizeParams,
   HandleSortParams,
@@ -32,6 +34,7 @@ export const TableHeader = <TData extends Record<string, unknown>>({
   isLoading = false,
   ...rest
 }: TableHeaderProps<TData>) => {
+  useRenderTracker('TableHeader');
   const [columnSizing] = useColumnSizing<TData>();
   const [sorting] = useSorting<TData>();
   const [columnOrder] = useColumnOrder<TData>();

@@ -1,5 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 
+import { useRenderTracker } from '@/utils/performance';
+
 import type { TableProps } from './Table.types';
 
 import { DEFAULT_ROW_HEIGHT } from './Table.constants';
@@ -33,6 +35,8 @@ export const Table = <T extends Record<string, unknown>>({
   rowHeight = DEFAULT_ROW_HEIGHT,
   title,
 }: TableProps<T>) => {
+  useRenderTracker('Table');
+
   const tableContent = (
     <TableProvider<T>
       initialColumnFilters={initialColumnFilters}

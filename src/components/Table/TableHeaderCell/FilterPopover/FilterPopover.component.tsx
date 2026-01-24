@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/Button';
 import { MenuCloseIcon } from '@/components/Icons';
 import { usePopoverPositioning } from '@/hooks/usePopoverPositioning.hook';
+import { useRenderTracker } from '@/utils/performance';
 
 import type { FilterPopoverProps, ToggleEvent } from './FilterPopover.types';
 
@@ -19,6 +20,7 @@ export const FilterPopover = ({
   onClear,
   popoverId,
 }: FilterPopoverProps) => {
+  useRenderTracker(`FilterPopover:${column.key}`);
   const popoverRef = useRef<HTMLDivElement>(null);
   // Ref to always access latest filter value (avoids stale closure in toggle handler)
   const filterRef = useRef(filter);

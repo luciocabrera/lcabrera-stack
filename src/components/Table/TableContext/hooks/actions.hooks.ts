@@ -346,3 +346,17 @@ export const useResetColumnSizing = () => {
     tableStore.set({ columnSizing: {} } as Partial<TableState<unknown>>);
   }, [tableStore]);
 };
+
+/**
+ * Hook to set entire column sizing state at once (bulk update)
+ */
+export const useBulkSetColumnSizing = () => {
+  const { tableStore } = useTableContextValue();
+
+  return useCallback(
+    (columnSizing: ColumnSizingState) => {
+      tableStore.set({ columnSizing } as Partial<TableState<unknown>>);
+    },
+    [tableStore],
+  );
+};
