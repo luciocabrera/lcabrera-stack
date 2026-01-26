@@ -4,6 +4,7 @@ import { useSearchParams } from 'react-router';
 import { encodeStateToURL, readStateFromURL } from '@/utils/urlState';
 
 import type {
+  ColumnFiltersState,
   ColumnOrderState,
   ColumnVisibilityState,
   SortingState,
@@ -12,10 +13,10 @@ import type {
 type TableSearchParamsState = {
   columnOrder?: ColumnOrderState;
   columnVisibility?: ColumnVisibilityState;
-  sorting?: SortingState;
 };
 
 type UseTableSearchParamsArgs = {
+  columnFilters: ColumnFiltersState;
   columnOrder: ColumnOrderState;
   columnVisibility: ColumnVisibilityState;
   isEnabled: boolean;
@@ -24,14 +25,16 @@ type UseTableSearchParamsArgs = {
 };
 
 const PARAM_KEY = 'tableState';
-const DEBOUNCE_MS = 500;
+const DEBOUNCE_MS = 0;
 
 /**
  * Hook to sync table state with URL search params
- * Uses Base64 encoding for compact URL representation
+ * - columnOrder and columnVisibility use Base64 encoding (tableState param)
+ * - sorting and filters use standalone JSON params for readability
  * Priority: URL params > cookies (cookies handled by useTablePersistence)
  */
 export const useTableSearchParams = ({
+  columnFilters,
   columnOrder,
   columnVisibility,
   isEnabled,
@@ -41,6 +44,8 @@ export const useTableSearchParams = ({
   const [searchParams, setSearchParams] = useSearchParams();
   const debounceTimerRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const hasInitialized = useRef(false);
+  const prevSortingRef = useRef<SortingState>(sorting);
+  const prevFiltersRef = useRef<ColumnFiltersState>(columnFilters);
 
   // Read initial state from URL synchronously (before first render)
   // Store as plain variable instead of ref to avoid ref access during render
@@ -54,7 +59,51 @@ export const useTableSearchParams = ({
     }) as Partial<TableSearchParamsState> | undefined;
   })();
 
-  // Sync state changes to URL (debounced)
+  // Immediate update for sorting and filters (no debounce)
+  // This is critical because the loader reads these from URL and needs fresh values
+  useEffect(() => {
+    if (!isEnabled) return;
+    if (!hasInitialized.current) return;
+
+    const didSortingChange =
+      JSON.stringify(sorting) !== JSON.stringify(prevSortingRef.current);
+    const didFiltersChange =
+      JSON.stringify(columnFilters) !== JSON.stringify(prevFiltersRef.current);
+
+    if (!didSortingChange && !didFiltersChange) return;
+
+    prevSortingRef.current = sorting;
+    prevFiltersRef.current = columnFilters;
+
+    const hasFilters = Object.keys(columnFilters).length > 0;
+    const hasSorting = sorting.length > 0;
+
+    setSearchParams(
+      (prev) => {
+        const newParams = new URLSearchParams(prev);
+
+        // Handle filters as standalone param (readable JSON)
+        if (hasFilters) {
+          newParams.set('filters', JSON.stringify(columnFilters));
+        } else {
+          newParams.delete('filters');
+        }
+
+        // Handle sorting as standalone param (readable JSON)
+        if (hasSorting) {
+          newParams.set('sort', JSON.stringify(sorting));
+        } else {
+          newParams.delete('sort');
+        }
+
+        return newParams;
+      },
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      { replace: true },
+    );
+  }, [sorting, columnFilters, isEnabled, setSearchParams]);
+
+  // Debounced update for column order/visibility (these don't affect loader)
   useEffect(() => {
     if (!isEnabled) return;
 
@@ -71,24 +120,23 @@ export const useTableSearchParams = ({
 
     // Set new timer
     debounceTimerRef.current = setTimeout(() => {
-      const state: TableSearchParamsState = {
+      // Base64 encoded state (columnOrder, columnVisibility only)
+      const tableState: TableSearchParamsState = {
         columnOrder: columnOrder.length > 0 ? columnOrder : undefined,
         columnVisibility:
           columnVisibility.size > 0 ? columnVisibility : undefined,
-        sorting: sorting.length > 0 ? sorting : undefined,
       };
 
-      // Only update URL if there's actually state to persist
-      const hasState =
-        state.columnOrder ?? state.columnVisibility ?? state.sorting;
+      const hasTableState = tableState.columnOrder ?? tableState.columnVisibility;
 
       setSearchParams(
         (prev) => {
           const newParams = new URLSearchParams(prev);
           const key = `${persistenceKey}-${PARAM_KEY}`;
 
-          if (hasState) {
-            newParams.set(key, encodeStateToURL(state));
+          // Handle Base64 tableState (columnOrder, columnVisibility)
+          if (hasTableState) {
+            newParams.set(key, encodeStateToURL(tableState));
           } else {
             newParams.delete(key);
           }
@@ -96,7 +144,7 @@ export const useTableSearchParams = ({
           return newParams;
         },
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        { replace: true }, // Use replace to avoid polluting browser history
+        { replace: true },
       );
     }, DEBOUNCE_MS);
 
@@ -109,7 +157,6 @@ export const useTableSearchParams = ({
   }, [
     columnOrder,
     columnVisibility,
-    sorting,
     isEnabled,
     persistenceKey,
     setSearchParams,

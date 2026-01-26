@@ -34,6 +34,12 @@ type UseTablePersistenceArgs = {
   persistenceKey: string;
   /** Callback to restore state from persistence */
   restoreState: (state: Partial<PersistedState>) => void;
+  /**
+   * Skip hydration from cookies on mount.
+   * Set to true when the loader already handles initial state from URL/cookies.
+   * @default false
+   */
+  skipHydration?: boolean;
 };
 
 /**
@@ -57,14 +63,18 @@ export const useTablePersistence = ({
   getState,
   persistenceKey,
   restoreState,
+  skipHydration = false,
 }: UseTablePersistenceArgs) => {
-  // Hydrate on mount
+  // Hydrate on mount (only if not skipped)
+  // Skip when loader already handles initial state from URL/cookies
   useEffect(() => {
+    if (skipHydration) return;
+    
     const persisted = readPersistedState({ config, persistenceKey });
     if (Object.keys(persisted).length > 0) {
       restoreState(persisted);
     }
-  }, [persistenceKey, config, restoreState]);
+  }, [persistenceKey, config, restoreState, skipHydration]);
 
   // Persist specific slice
   const persistSlice = useCallback(

@@ -20,10 +20,10 @@ export const SelectFilterInput = ({
   options,
 }: SelectFilterInputProps) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedValues, setSelectedValues] = useState<string[]>(
-    filter?.values ?? [],
-  );
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Derive selectedValues from filter prop - fully controlled by parent
+  const selectedValues = filter?.values ?? [];
 
   const filteredOptions = useMemo(() => {
     if (!searchTerm) return options;
@@ -52,10 +52,9 @@ export const SelectFilterInput = ({
       ? selectedValues.filter((v) => v !== option)
       : [...selectedValues, option];
 
-    setSelectedValues(newSelectedValues);
-
     if (newSelectedValues.length === 0) {
-      onChange();
+      // Clear the filter
+      onChange(void 0);
     } else {
       onChange({
         type: 'select',
@@ -68,9 +67,10 @@ export const SelectFilterInput = ({
     const isAllSelected = filteredOptions.length === selectedValues.length;
     const newSelectedValues = isAllSelected ? [] : filteredOptions;
 
-    setSelectedValues(newSelectedValues);
-
-    if (newSelectedValues.length > 0) {
+    if (newSelectedValues.length === 0) {
+      // Clear the filter
+      onChange(void 0);
+    } else {
       onChange({
         type: 'select',
         values: newSelectedValues,

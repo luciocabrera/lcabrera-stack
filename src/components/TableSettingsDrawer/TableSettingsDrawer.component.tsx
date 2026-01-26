@@ -20,6 +20,18 @@ import { Tabs } from '@/components/Tabs';
 
 import type { TableSettingsDrawerProps } from './TableSettingsDrawer.types';
 
+import {
+  useBulkSetColumnSizing,
+  useColumnFilters,
+  useColumnOrder,
+  useColumnSizing,
+  useColumnVisibility,
+  useSetColumnFilters,
+  useSetColumnOrder,
+  useSetColumnVisibility,
+  useSetSorting,
+  useSorting,
+} from '../Table/TableContext';
 import { ColumnOrderSection } from './ColumnOrderSection';
 import { FiltersSection } from './FiltersSection';
 import { validateFilter } from './FiltersSection/FilterEditor';
@@ -27,60 +39,56 @@ import { GeneralSettingsSection } from './GeneralSettingsSection';
 import { SortingSection } from './SortingSection';
 
 export const TableSettingsDrawer = ({
-  columnFilters,
-  columnOrder,
   columns,
-  columnSizing,
-  columnVisibility,
   isOpen,
   isPinned,
   onClose,
-  onColumnFiltersChange,
-  onColumnOrderChange,
-  onColumnSizingChange,
-  onColumnVisibilityChange,
   onPinChange,
-  onSortingChange,
-  sorting,
 }: TableSettingsDrawerProps) => {
-  // Local state for pending changes - reset when drawer opens
-  const initialPendingState = useMemo(
-    () => ({
-      columnFilters,
-      columnOrder,
-      columnSizing,
-      columnVisibility,
-      sorting,
-    }),
-    // Only reset when drawer opens
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isOpen],
-  );
+  // Subscribe to table state from context
+  const [columnFilters] = useColumnFilters();
+  const [columnOrder] = useColumnOrder();
+  const [columnSizing] = useColumnSizing();
+  const [columnVisibility] = useColumnVisibility();
+  const [sorting] = useSorting();
 
-  const [pendingColumnFilters, setPendingColumnFilters] = useState(
-    initialPendingState.columnFilters,
-  );
-  const [pendingSorting, setPendingSorting] = useState(
-    initialPendingState.sorting,
-  );
-  const [pendingColumnOrder, setPendingColumnOrder] = useState(
-    initialPendingState.columnOrder,
-  );
-  const [pendingColumnSizing, setPendingColumnSizing] = useState(
-    initialPendingState.columnSizing,
-  );
-  const [pendingColumnVisibility, setPendingColumnVisibility] = useState(
-    initialPendingState.columnVisibility,
-  );
+  // Get setters
+  const setColumnFilters = useSetColumnFilters();
+  const setColumnOrder = useSetColumnOrder();
+  const setColumnVisibility = useSetColumnVisibility();
+  const setSorting = useSetSorting();
+  const setColumnSizing = useBulkSetColumnSizing();
+
+  // Local state for pending changes - reset when drawer opens
+  // const initialPendingState = useMemo(
+  //   () => ({
+  //     columnFilters,
+  //     columnOrder,
+  //     columnSizing,
+  //     columnVisibility,
+  //     sorting,
+  //   }),
+  //   // Only reset when drawer opens
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  //   [isOpen],
+  // );
+
+  const [pendingColumnFilters, setPendingColumnFilters] =
+    useState(columnFilters);
+  const [pendingSorting, setPendingSorting] = useState(sorting);
+  const [pendingColumnOrder, setPendingColumnOrder] = useState(columnOrder);
+  const [pendingColumnSizing, setPendingColumnSizing] = useState(columnSizing);
+  const [pendingColumnVisibility, setPendingColumnVisibility] =
+    useState(columnVisibility);
 
   // Update pending state when initialPendingState changes (when drawer opens with new values)
   useEffect(() => {
-    setPendingColumnFilters(initialPendingState.columnFilters);
-    setPendingSorting(initialPendingState.sorting);
-    setPendingColumnOrder(initialPendingState.columnOrder);
-    setPendingColumnSizing(initialPendingState.columnSizing);
-    setPendingColumnVisibility(initialPendingState.columnVisibility);
-  }, [initialPendingState]);
+    setPendingColumnFilters(columnFilters);
+    setPendingSorting(sorting);
+    setPendingColumnOrder(columnOrder);
+    setPendingColumnSizing(columnSizing);
+    setPendingColumnVisibility(columnVisibility);
+  }, [columnFilters, sorting, columnOrder, columnSizing, columnVisibility]);
 
   // Validate all filters before allowing accept
   const areFiltersValid = useMemo(() => {
@@ -90,15 +98,22 @@ export const TableSettingsDrawer = ({
   }, [pendingColumnFilters]);
 
   const handleAccept = () => {
+    console.log('ACCEPTING SETTINGS:', {
+      pendingColumnFilters,
+      pendingColumnOrder,
+      pendingColumnSizing,
+      pendingColumnVisibility,
+      pendingSorting,
+    });
     if (!areFiltersValid) {
       // Don't allow accept if filters are invalid
       return;
     }
-    onColumnFiltersChange(pendingColumnFilters);
-    onSortingChange(pendingSorting);
-    onColumnOrderChange(pendingColumnOrder);
-    onColumnSizingChange(pendingColumnSizing);
-    onColumnVisibilityChange(pendingColumnVisibility);
+    setColumnFilters(pendingColumnFilters);
+    setSorting(pendingSorting);
+    setColumnOrder(pendingColumnOrder);
+    setColumnSizing(pendingColumnSizing);
+    setColumnVisibility(pendingColumnVisibility);
     // Unpin if pinned, then close
     if (isPinned) {
       onPinChange?.(false);
@@ -106,7 +121,22 @@ export const TableSettingsDrawer = ({
     onClose();
   };
 
+  // const handleReinitialize = () => {
+  //   setPendingColumnFilters(columnFilters);
+  //   setPendingSorting(sorting);
+  //   setPendingColumnOrder(columnOrder);
+  //   setPendingColumnSizing(columnSizing);
+  //   setPendingColumnVisibility(columnVisibility);
+  // };
+
   const handleCancel = () => {
+    console.log('cancelling SETTINGS:', {
+      columnFilters,
+      columnOrder,
+      columnSizing,
+      columnVisibility,
+      sorting,
+    });
     // Reset to original values
     setPendingColumnFilters(columnFilters);
     setPendingSorting(sorting);
@@ -114,13 +144,13 @@ export const TableSettingsDrawer = ({
     setPendingColumnSizing(columnSizing);
     setPendingColumnVisibility(columnVisibility);
     // Unpin if pinned, then close
-    if (isPinned) {
-      onPinChange?.(false);
-    }
+    if (isPinned) onPinChange?.(false);
+
     onClose();
   };
 
   const handleTogglePin = () => {
+
     onPinChange?.(!isPinned);
   };
 

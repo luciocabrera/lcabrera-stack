@@ -85,6 +85,7 @@ export const useTableContent = <T extends Record<string, unknown>>({
 
   // Sync table state with URL search params (higher priority than cookies)
   const { initialState } = useTableSearchParams({
+    columnFilters,
     columnOrder,
     columnVisibility,
     isEnabled: !!persistenceKey,
@@ -93,12 +94,10 @@ export const useTableContent = <T extends Record<string, unknown>>({
   });
 
   // Apply initial state from URL on mount (if available)
+  // Note: sorting and filters are now read directly by the loader from standalone params
   useEffect(() => {
     if (!initialState) return;
 
-    if (initialState.sorting) {
-      setSorting(initialState.sorting);
-    }
     if (initialState.columnOrder) {
       setColumnOrder(initialState.columnOrder);
     }
@@ -195,6 +194,7 @@ export const useTableContent = <T extends Record<string, unknown>>({
 
   // Set up persistence if persistenceKey provided
   // Using cookies for column-specific settings so they're available during SSR
+  // Skip hydration since the loader already handles initial state from URL/cookies
   const { persistSlice } = useTablePersistence({
     config: {
       columnFilters: persistenceKey ? 'cookie' : undefined,
@@ -219,6 +219,7 @@ export const useTableContent = <T extends Record<string, unknown>>({
     restoreState: (state) => {
       tableStore?.set(state);
     },
+    skipHydration: true, // Loader already handles initial state from URL/cookies
   });
 
   // Debounced persistence for column sizing (cookies only, not in URL)

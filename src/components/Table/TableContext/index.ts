@@ -14,6 +14,7 @@ export {
 // Hooks - Actions
 export {
   useAppendTableData,
+  useBulkSetColumnSizing,
   useClearAllColumnFilters,
   useClearColumnFilter,
   useSetColumnFilter,
