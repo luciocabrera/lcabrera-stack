@@ -140,3 +140,9 @@ export const useColumnVisibility = <TData>(): UseStoreSelector<
   useTableStore<ColumnVisibilityState, TData>(
     (state) => state.columnVisibility,
   );
+
+
+  export const useTablePersistenceKey = <TData>(): UseStoreSelector<
+  string ,
+  TableState<TData>
+> => useTableStore((state) => state.persistenceKey);

@@ -23,8 +23,6 @@ import {
 type UseInfiniteScrollArgs<TData> = {
   /** Initial page size for first load */
   initialPageSize: number;
-  /** Whether infinite scroll is enabled */
-  isEnabled?: boolean;
   /** Page size for subsequent loads */
   loadMorePageSize: number;
   /** Handler to load more data with strategy-specific params */
@@ -39,52 +37,8 @@ type UseInfiniteScrollArgs<TData> = {
   threshold?: number;
 };
 
-/**
- * Hook for infinite scroll loading with pagination strategy support
- *
- * Detects when scroll reaches near bottom and triggers data loading.
- * Supports multiple pagination strategies: cursor, offset-limit, page-based.
- * Integrates with TableContext for loading state and data appending.
- *
- * @example
- * ```tsx
- * // Offset-limit strategy
- * useInfiniteScroll({
- *   strategy: 'offset-limit',
- *   initialPageSize: 100,
- *   loadMorePageSize: 50,
- *   scrollContainerRef: tableContainerRef,
- *   onLoadMore: async ({ skip, limit }) => {
- *     const response = await fetchData(skip, limit);
- *     return {
- *       data: response.items,
- *       hasMore: response.hasMore,
- *       totalRows: response.total,
- *     };
- *   },
- * });
- *
- * // Cursor strategy
- * useInfiniteScroll({
- *   strategy: 'cursor',
- *   initialPageSize: 100,
- *   loadMorePageSize: 50,
- *   scrollContainerRef: tableContainerRef,
- *   onLoadMore: async ({ cursor, limit }) => {
- *     const response = await fetchData(cursor, limit);
- *     return {
- *       data: response.items,
- *       hasMore: response.hasMore,
- *       nextCursor: response.nextCursor,
- *       totalRows: response.total,
- *     };
- *   },
- * });
- * ```
- */
 export const useInfiniteScroll = <TData>({
   initialPageSize,
-  isEnabled = true,
   loadMorePageSize,
   onLoadMore,
   scrollContainerRef,
@@ -106,7 +60,13 @@ export const useInfiniteScroll = <TData>({
   // Ref to prevent multiple simultaneous loads
   const isLoadingRef = useRef(false);
 
+  console.log('useInfiniteScroll :', { scrollContainerRef, threshold });
+
   const handleLoadMore = useCallback(async (): Promise<void> => {
+    console.log('useInfiniteScroll - handleLoadMore:', {
+      hasMore,
+      isLoadingRef: isLoadingRef.current,
+    });
     if (isLoadingRef.current || !hasMore) return;
 
     isLoadingRef.current = true;
@@ -207,16 +167,33 @@ export const useInfiniteScroll = <TData>({
   ]);
 
   useEffect(() => {
-    if (!isEnabled) return;
+    console.log('useInfiniteScroll - useEffect:', {
+      scrollContainerRef,
+      threshold,
+    });
 
     const scrollContainer = scrollContainerRef.current;
     if (!scrollContainer) return;
 
     const handleScroll = () => {
+      console.log('useInfiniteScroll - handleScroll - before :', {
+        hasMore,
+        isLoadingMore,
+
+        threshold,
+      });
       if (isLoadingMore || !hasMore) return;
 
       const { clientHeight, scrollHeight, scrollTop } = scrollContainer;
       const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+
+      console.log('useInfiniteScroll - handleScroll - after :', {
+        clientHeight,
+        distanceFromBottom,
+        scrollHeight,
+        scrollTop,
+        threshold,
+      });
 
       if (distanceFromBottom <= threshold) {
         void handleLoadMore();
@@ -229,14 +206,7 @@ export const useInfiniteScroll = <TData>({
     return () => {
       scrollContainer.removeEventListener('scroll', handleScroll);
     };
-  }, [
-    isEnabled,
-    scrollContainerRef,
-    threshold,
-    isLoadingMore,
-    hasMore,
-    handleLoadMore,
-  ]);
+  }, [scrollContainerRef, threshold, isLoadingMore, hasMore, handleLoadMore]);
 
   return {
     /** Manually trigger load more */

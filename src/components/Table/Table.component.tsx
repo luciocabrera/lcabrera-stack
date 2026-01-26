@@ -28,7 +28,7 @@ export const Table = <T extends Record<string, unknown>>({
   isStriped = false,
   locale,
   overscan = 6,
-  persistenceKey,
+  // persistenceKey,
   rowHeight = DEFAULT_ROW_HEIGHT,
   title,
 
@@ -48,7 +48,7 @@ export const Table = <T extends Record<string, unknown>>({
       isStriped={isStriped}
       locale={locale}
       overscan={overscan}
-      persistenceKey={persistenceKey}
+      // persistenceKey={persistenceKey}
       rowHeight={rowHeight}
       title={title}
     />

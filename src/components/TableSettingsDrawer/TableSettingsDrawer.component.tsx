@@ -27,7 +27,6 @@ import {
   useColumnOrder,
   useColumnSizing,
   useColumnVisibility,
-  useIsImperativeUpdateRef,
   useSorting,
 } from '../Table/TableContext';
 import { useColumns } from '../Table/TableContext/hooks/selectors.hooks';
@@ -38,12 +37,10 @@ import { GeneralSettingsSection } from './GeneralSettingsSection';
 import { SortingSection } from './SortingSection';
 
 export const TableSettingsDrawer = ({
-  // columns,
   isOpen,
   isPinned,
   onClose,
   onPinChange,
-  // onUpdateURLState,
 }: TableSettingsDrawerProps) => {
   // Subscribe to table state from context
 
@@ -54,30 +51,9 @@ export const TableSettingsDrawer = ({
   const [columnVisibility] = useColumnVisibility();
   const [sorting] = useSorting();
 
-  // Ref to signal that drawer is doing an imperative update
-  // This tells effects to skip their URL sync
-  const isImperativeUpdateRef = useIsImperativeUpdateRef();
-
-  // Get batch setter for all table settings at once
-  // This prevents race conditions when updating multiple settings
-
   const batchSetTableSettings = useBatchSetTableSettings() as (
     settings: BatchTableSettingsUpdate,
   ) => void;
-
-  // Local state for pending changes - reset when drawer opens
-  // const initialPendingState = useMemo(
-  //   () => ({
-  //     columnFilters,
-  //     columnOrder,
-  //     columnSizing,
-  //     columnVisibility,
-  //     sorting,
-  //   }),
-  //   // Only reset when drawer opens
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  //   [isOpen],
-  // );
 
   const [pendingColumnFilters, setPendingColumnFilters] =
     useState(columnFilters);
@@ -112,10 +88,6 @@ export const TableSettingsDrawer = ({
     console.log('[handleAccept] pendingSorting:', pendingSorting);
     console.log('[handleAccept] pendingColumnFilters:', pendingColumnFilters);
 
-    // Set flag to tell effects to skip their URL sync
-    // We're handling URL update directly via onUpdateURLState
-    isImperativeUpdateRef.current = true;
-
     // Batch update all store state at once
     // This prevents race conditions where intermediate updates trigger
     // the sync effect and overwrite pending values with stale store values
@@ -129,37 +101,12 @@ export const TableSettingsDrawer = ({
 
     console.log('[handleAccept] After batchSetTableSettings');
 
-    // Imperatively update URL with new state
-    // This avoids effect-based sync which can cause circular updates
-    // onUpdateURLState?.({
-    //   columnFilters: pendingColumnFilters,
-    //   columnOrder: pendingColumnOrder,
-    //   columnVisibility: pendingColumnVisibility,
-    //   sorting: pendingSorting,
-    // });
-
-    console.log('[handleAccept] After onUpdateURLState');
-
-    // Clear the flag after a microtask to allow navigation to complete
-    // This ensures effects that run immediately after see the flag as true
-    queueMicrotask(() => {
-      isImperativeUpdateRef.current = false;
-    });
-
     // Unpin if pinned, then close
     if (isPinned) {
       onPinChange?.(false);
     }
     onClose();
   };
-
-  // const handleReinitialize = () => {
-  //   setPendingColumnFilters(columnFilters);
-  //   setPendingSorting(sorting);
-  //   setPendingColumnOrder(columnOrder);
-  //   setPendingColumnSizing(columnSizing);
-  //   setPendingColumnVisibility(columnVisibility);
-  // };
 
   const handleCancel = () => {
     // Reset to original values

@@ -29,10 +29,6 @@ export type TableHeaderCellProps = ComponentPropsWithoutRef<'th'> &
     isLoading?: boolean;
     isSortable?: boolean;
     maxWidth?: number;
-    // onFilterApply: (params: HandleFilterParams) => void;
-    // onFilterClear: () => void;
-    // onResize?: (params: OnResizeParams) => void;
-    // onResizeDoubleClick?: (columnKey: string) => void;
     onSettingsClick?: () => void;
     onSort?: (params: HandleSortParams) => void;
     sortDirection?: SortDirection;

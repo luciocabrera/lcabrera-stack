@@ -24,9 +24,9 @@ export const TableLayout = <TData extends Record<string, unknown>>({
   sorting,
   title,
 }: TableLayoutProps<TData>) => {
-  const sortKey = JSON.stringify(sorting);
-  const filterKey = JSON.stringify(filters);
-  const tableKey = `${sortKey}-${filterKey}`;
+  // const sortKey = JSON.stringify(sorting);
+  // const filterKey = JSON.stringify(filters);
+  // const tableKey = `${sortKey}-${filterKey}`;
 
   return (
     <div {...stylex.props(styles.container)}>
@@ -42,7 +42,7 @@ export const TableLayout = <TData extends Record<string, unknown>>({
         <TableSuspenseBoundary<TData, unknown>
           dataPromise={dataPromise}
           dataSelector={dataSelector}
-          persistenceKey={persistenceKey}
+          // persistenceKey={persistenceKey}
           title={title}
         >
           {(data) => (
@@ -52,8 +52,8 @@ export const TableLayout = <TData extends Record<string, unknown>>({
               infiniteScrollConfig={infiniteScrollConfig}
               isBordered={isBordered}
               isStriped={isStriped}
-              key={tableKey}
-              persistenceKey={persistenceKey}
+              // key={tableKey}
+              // persistenceKey={persistenceKey}
               title={title}
             />
           )}

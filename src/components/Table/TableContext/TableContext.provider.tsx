@@ -1,5 +1,3 @@
-import { useRef } from 'react';
-
 import { useStore } from '@/hooks';
 import { deepFreeze } from '@/utils';
 
@@ -24,6 +22,8 @@ type GetInitialTableStateArgs<TData> = {
   initialColumnVisibility?: ColumnVisibilityState;
   initialData?: TData[];
   initialPersistedState?: Partial<Omit<TableState<TData>, 'data'>>;
+  /** Required key for persistence storage */
+  persistenceKey: string;
 };
 
 /**
@@ -36,6 +36,7 @@ const getInitialTableState = <TData,>({
   initialColumnVisibility = new Set<string>(),
   initialData = [],
   initialPersistedState = {},
+  persistenceKey,
 }: GetInitialTableStateArgs<TData>): TableState<TData> => ({
   columnFilters: {},
   columnOrder: initialColumnOrder,
@@ -45,6 +46,7 @@ const getInitialTableState = <TData,>({
   columnVisibility: initialColumnVisibility,
   data: initialData,
   pagination: { pageIndex: 0, pageSize: 50 },
+  persistenceKey,
   rowSelection: {},
   sorting: [],
   ...initialPersistedState,
@@ -110,7 +112,8 @@ export const TableProvider = <TData extends Record<string, unknown>>({
   console.log('[TableProvider] Mount/Render:', {
     effectiveSorting,
     initialSorting,
-    persistedStateSorting: (persistedState as Partial<TableState<TData>>).sorting,
+    persistedStateSorting: (persistedState as Partial<TableState<TData>>)
+      .sorting,
     persistenceKey,
   });
 
@@ -135,9 +138,6 @@ export const TableProvider = <TData extends Record<string, unknown>>({
     ? deepFreeze(initialColumnFilters)
     : undefined;
 
-  // Ref to track when an imperative update is in progress
-  // When true, effects should skip syncing to URL to avoid race conditions
-  const isImperativeUpdateRef = useRef(false);
 
   const tableStore = useStore<TableState<TData>>(
     getInitialTableState({
@@ -154,8 +154,11 @@ export const TableProvider = <TData extends Record<string, unknown>>({
           : { columnFilters: frozenColumnFilters }),
         // Use effectiveSorting which reads from current URL to handle race conditions
         // during navigation transitions when loader data might be stale
-        ...(effectiveSorting === undefined ? {} : { sorting: effectiveSorting }),
+        ...(effectiveSorting === undefined
+          ? {}
+          : { sorting: effectiveSorting }),
       },
+      persistenceKey,
     }),
   );
 
@@ -165,7 +168,12 @@ export const TableProvider = <TData extends Record<string, unknown>>({
 
   return (
     <TableContext
-      value={{ isImperativeUpdateRef, metaStore, tableStore } as TableContextValue<unknown>}
+      value={
+        {
+          metaStore,
+          tableStore,
+        } as TableContextValue<unknown>
+      }
     >
       {children}
     </TableContext>

@@ -1,8 +1,6 @@
 import {
-  type RefObject,
   use,
   useCallback,
-  useRef,
   useSyncExternalStore,
 } from 'react';
 
@@ -22,21 +20,6 @@ export const useTableContextValue = (): TableContextValue<unknown> => {
     throw new Error('useTableContext must be used within a TableProvider');
   }
   return context;
-};
-
-/**
- * Hook to access the imperative update flag ref
- * Used by drawer to signal that it's doing a batch update + navigation
- * so that effects should skip their own URL sync
- *
- * Returns a fallback ref if context isn't available yet (shouldn't happen
- * in normal usage but provides safety)
- */
-export const useIsImperativeUpdateRef = (): RefObject<boolean> => {
-  const context = use(TableContext);
-  // Fallback ref in case context isn't ready (shouldn't normally happen)
-  const fallbackRef = useRef(false);
-  return context?.isImperativeUpdateRef ?? fallbackRef;
 };
 
 /**

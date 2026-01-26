@@ -44,5 +44,5 @@ export type TableProviderProps<TData> = {
   /** Persistence configuration */
   persistenceConfig?: TablePersistenceConfig;
   /** Required key for persistence storage */
-  persistenceKey?: string;
+  persistenceKey: string;
 };

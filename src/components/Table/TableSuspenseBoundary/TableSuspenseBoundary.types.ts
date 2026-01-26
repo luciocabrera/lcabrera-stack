@@ -19,6 +19,6 @@ export type TableSuspenseBoundaryProps<TData, TResponse = TData[]> = {
   /** Initial column visibility (for SSR hydration and skeleton) */
   // initialColumnVisibility?: Set<string>;
   /** Persistence key for restoring column widths in loading state */
-  persistenceKey?: string;
+  // persistenceKey?: string;
   title?: string;
 };

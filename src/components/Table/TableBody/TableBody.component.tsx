@@ -23,7 +23,6 @@ import { styles } from './TableBody.stylex';
 import { generatePlaceholderData } from './utils';
 
 export const TableBody = <TData extends Record<string, unknown>>({
-  // columns,
   data,
   isLoading = false,
   locale,
@@ -34,7 +33,7 @@ export const TableBody = <TData extends Record<string, unknown>>({
 }: TableBodyProps<TData>) => {
   useRenderTracker('TableBody');
 
-    const [columns] = useColumns<TData>();
+  const [columns] = useColumns<TData>();
   const [columnSizing] = useColumnSizing<TData>();
   const [columnOrder] = useColumnOrder<TData>();
   const [columnVisibility] = useColumnVisibility<TData>();

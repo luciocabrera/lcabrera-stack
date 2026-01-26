@@ -21,18 +21,18 @@ import { compareValues } from '@/utils/compareValues.util';
 
 import type { TableContentProps } from '../TableContent.types';
 
-import { useColumns } from '../../TableContext/hooks/selectors.hooks';
+import { useColumns, useTablePersistenceKey } from '../../TableContext/hooks/selectors.hooks';
 
 type UseTableContentArgs<T extends Record<string, unknown>> = Pick<
   TableContentProps<T>,
-  'data' | 'infiniteScrollConfig' | 'isClientSortingEnabled' | 'persistenceKey'
+  'data' | 'infiniteScrollConfig' | 'isClientSortingEnabled' 
 >;
 
 export const useTableContent = <T extends Record<string, unknown>>({
   data,
   infiniteScrollConfig,
   isClientSortingEnabled = false,
-  persistenceKey,
+  // persistenceKey,
 }: UseTableContentArgs<T>) => {
   const [columns] = useColumns<T>();
 
@@ -49,6 +49,7 @@ export const useTableContent = <T extends Record<string, unknown>>({
   const [storeData] = useTableData<T>();
   const [isLoadingMore] = useTableLoadingMore();
   const [sorting] = useSorting<T>();
+  const [persistenceKey] = useTablePersistenceKey();
 
   // Use data from store if available (for infinite scroll), otherwise use prop
   const effectiveData = storeData.length > 0 ? storeData : data;
@@ -96,9 +97,7 @@ export const useTableContent = <T extends Record<string, unknown>>({
     isEnabled: infiniteScrollConfig?.isEnabled ?? false,
     loadMorePageSize:
       infiniteScrollConfig?.loadMorePageSize ?? LOAD_MORE_PAGE_SIZE,
-    onLoadMore:
-      infiniteScrollConfig?.onLoadMore ??
-      (() => Promise.resolve({ data: [], hasMore: false })),
+    onLoadMore: infiniteScrollConfig?.onLoadMore,
     scrollContainerRef: containerRef,
     strategy: infiniteScrollConfig?.strategy ?? STRATEGY,
     threshold: infiniteScrollConfig?.threshold ?? INFINITE_SCROLL_THRESHOLD,
@@ -112,7 +111,7 @@ export const useTableContent = <T extends Record<string, unknown>>({
       tableStore?.get() ?? {
         columnSizing: {},
       },
-    persistenceKey: persistenceKey ?? 'default-table',
+    persistenceKey,
   });
 
   // Debounced persistence for column sizing (cookies only, not in URL)

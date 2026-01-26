@@ -26,7 +26,7 @@ export const TableContent = <T extends Record<string, unknown>>({
   isStriped = false,
   locale,
   overscan = 6,
-  persistenceKey,
+  // persistenceKey,
   rowHeight = 32,
   title,
 }: TableContentProps<T>) => {
@@ -44,7 +44,7 @@ export const TableContent = <T extends Record<string, unknown>>({
     data,
     infiniteScrollConfig,
     isClientSortingEnabled,
-    persistenceKey,
+    // persistenceKey,
   });
 
   const handleCloseSettings = () => {

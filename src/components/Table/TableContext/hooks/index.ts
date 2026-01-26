@@ -45,7 +45,6 @@ export {
 
 // Core store hooks
 export {
-  useIsImperativeUpdateRef,
   useMetaStore,
   useTableStore,
 } from './useTableStore.hook';

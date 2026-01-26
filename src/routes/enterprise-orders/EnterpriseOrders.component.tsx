@@ -40,7 +40,7 @@ export const EnterpriseOrders = () => {
         initialPageSize: INITIAL_PAGE_SIZE,
         isEnabled: true,
         loadMorePageSize: LOAD_MORE_PAGE_SIZE,
-        onLoadMore: async ({ filters, limit, skip, sorting }) => {
+        onLoadMore: async ({ limit, skip }) => {
           const response =
             await enterpriseOrdersApi.fetchEnterpriseOrdersPaginated({
               filter: filters,
@@ -48,6 +48,8 @@ export const EnterpriseOrders = () => {
               skip,
               sorting,
             });
+            console.log('EnterpriseOrders - onLoadMore :', { hasMore: response.hasMore, limit, response,             skip,
+            total: response.total, });
 
           return {
             data: response.data,

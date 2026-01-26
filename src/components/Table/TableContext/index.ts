@@ -31,9 +31,6 @@ export {
 
 export type { BatchTableSettingsUpdate } from './hooks';
 
-// Imperative update ref hook
-export { useIsImperativeUpdateRef } from './hooks';
-
 // Context
 export { TableContext } from './TableContext.context';
 

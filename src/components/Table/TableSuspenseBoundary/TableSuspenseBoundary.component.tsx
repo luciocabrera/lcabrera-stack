@@ -13,7 +13,7 @@ export const TableSuspenseBoundary = <
   children,
   dataPromise,
   dataSelector,
-  persistenceKey,
+  // persistenceKey,
   title,
 }: TableSuspenseBoundaryProps<TData, TResponse>) => (
   <Suspense
@@ -21,7 +21,7 @@ export const TableSuspenseBoundary = <
       <Table<TData>
         data={[]}
         isLoading
-        persistenceKey={persistenceKey}
+        // persistenceKey={persistenceKey}
         title={title}
       />
     }
