@@ -24,6 +24,12 @@ export const writeStateSlice = ({
 }: WriteStateSliceArgs): void => {
   const sliceKey = `${getStorageKey({ persistenceKey })}-${slice}`;
 
+  console.log('writeStateSlice', {
+    sliceKey,
+    storageType,
+    value,
+  });
+
   // Convert Set to Array for columnVisibility
   const serializableValue =
     slice === 'columnVisibility' && value instanceof Set ? [...value] : value;

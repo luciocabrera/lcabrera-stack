@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useSearchParams } from 'react-router';
 
 import type {
   ColumnFiltersState,
@@ -12,6 +13,7 @@ import type {
 } from '@/components/Table/Table.types';
 import type { ColumnFilter } from '@/types/filterOperators.types';
 
+import { writeStateSlice } from '../../utils';
 import { useTableContextValue } from './useTableStore.hook';
 
 // ============================================================================
@@ -31,7 +33,7 @@ type SelectRowArgs = {
 
 type SetColumnFilterArgs = {
   columnKey: string;
-  filter: ColumnFilter | null | undefined;
+  filter?: ColumnFilter | null;
 };
 
 type SetColumnSizingArgs = {
@@ -67,12 +69,30 @@ export const useSetSorting = () => {
  */
 export const useSetColumnFilters = () => {
   const { tableStore } = useTableContextValue();
+  const [, setSearchParams] = useSearchParams();
+  const tableState = tableStore.get();
+  const persistenceKey = tableState?.persistenceKey ?? '';
 
   return useCallback(
     (columnFilters: ColumnFiltersState) => {
-      tableStore.set({ columnFilters } as Partial<TableState<unknown>>);
+      // Persist to falling back storage mechanism (cookie/localStorage)
+      writeStateSlice({
+        persistenceKey,
+        slice: 'columnFilters',
+        storageType: 'cookie',
+        value: columnFilters,
+      });
+      setSearchParams((params) => {
+        if (Object.keys(columnFilters).length > 0) {
+          params.set('filters', JSON.stringify(columnFilters));
+        } else {
+          params.delete('filters');
+        }
+        return params;
+      });
+      tableStore.set({ columnFilters });
     },
-    [tableStore],
+    [persistenceKey, setSearchParams, tableStore],
   );
 };
 
@@ -81,13 +101,17 @@ export const useSetColumnFilters = () => {
  */
 export const useSetColumnFilter = () => {
   const { tableStore } = useTableContextValue();
+  const [, setSearchParams] = useSearchParams();
+
+  const tableState = tableStore.get();
+  const persistenceKey = tableState?.persistenceKey ?? '';
 
   return useCallback(
     ({ columnKey, filter }: SetColumnFilterArgs) => {
-      const current = tableStore.get()?.columnFilters ?? {};
-
       let columnFilters: ColumnFiltersState;
+      const current = tableState?.columnFilters ?? {};
       if (filter === null || filter === undefined) {
+        // TODO: Improve later, i don't like this pattern
         // Remove the filter by creating new object without it
         const { [columnKey]: unusedFilter, ...rest } = current;
         void unusedFilter; // Explicitly mark as intentionally unused
@@ -96,9 +120,28 @@ export const useSetColumnFilter = () => {
         columnFilters = { ...current, [columnKey]: filter };
       }
 
-      tableStore.set({ columnFilters } as Partial<TableState<unknown>>);
+      // Persist to falling back storage mechanism (cookie/localStorage)
+      writeStateSlice({
+        persistenceKey,
+        slice: 'columnFilters',
+        storageType: 'cookie',
+        value: columnFilters,
+      });
+
+      // Update URL search params
+      setSearchParams((params) => {
+        if (Object.keys(columnFilters).length > 0) {
+          params.set('filters', JSON.stringify(columnFilters));
+        } else {
+          params.delete('filters');
+        }
+        return params;
+      });
+
+      // Update table context state
+      tableStore.set({ columnFilters });
     },
-    [tableStore],
+    [tableState?.columnFilters, persistenceKey, setSearchParams, tableStore],
   );
 };
 
@@ -107,16 +150,36 @@ export const useSetColumnFilter = () => {
  */
 export const useClearColumnFilter = () => {
   const { tableStore } = useTableContextValue();
+  const [, setSearchParams] = useSearchParams();
+
+  const tableState = tableStore.get();
+  const persistenceKey = tableState?.persistenceKey ?? '';
 
   return useCallback(
     (columnKey: string) => {
-      const current = tableStore.get()?.columnFilters ?? {};
+      const current = tableState?.columnFilters ?? {};
       const { [columnKey]: unusedFilter, ...rest } = current;
       void unusedFilter; // Explicitly mark as intentionally unused
 
-      tableStore.set({ columnFilters: rest } as Partial<TableState<unknown>>);
+      // Persist to falling back storage mechanism (cookie/localStorage)
+      writeStateSlice({
+        persistenceKey,
+        slice: 'columnFilters',
+        storageType: 'cookie',
+        value: rest,
+      });
+
+      setSearchParams((params) => {
+        if (Object.keys(rest).length > 0) {
+          params.set('filters', JSON.stringify(rest));
+        } else {
+          params.delete('filters');
+        }
+        return params;
+      });
+      tableStore.set({ columnFilters: rest });
     },
-    [tableStore],
+    [persistenceKey, setSearchParams, tableState?.columnFilters, tableStore],
   );
 };
 
@@ -125,10 +188,34 @@ export const useClearColumnFilter = () => {
  */
 export const useClearAllColumnFilters = () => {
   const { tableStore } = useTableContextValue();
+  const [, setSearchParams] = useSearchParams();
+  const tableState = tableStore.get();
+  const persistenceKey = tableState?.persistenceKey ?? '';
 
   return useCallback(() => {
-    tableStore.set({ columnFilters: {} } as Partial<TableState<unknown>>);
-  }, [tableStore]);
+    const current = tableState?.columnFilters ?? {};
+
+    if (Object.keys(current).length === 0) {
+      // No filters to clear
+      return;
+    }
+    // Persist to falling back storage mechanism (cookie/localStorage)
+    writeStateSlice({
+      persistenceKey,
+      slice: 'columnFilters',
+      storageType: 'cookie',
+      value: {},
+    });
+    setSearchParams((params) => {
+      if (Object.keys(current).length > 0) {
+        params.set('filters', JSON.stringify(current));
+      } else {
+        params.delete('filters');
+      }
+      return params;
+    });
+    tableStore.set({ columnFilters: {} });
+  }, [persistenceKey, setSearchParams, tableState?.columnFilters, tableStore]);
 };
 
 /**
@@ -358,5 +445,117 @@ export const useBulkSetColumnSizing = () => {
       tableStore.set({ columnSizing } as Partial<TableState<unknown>>);
     },
     [tableStore],
+  );
+};
+
+export type BatchTableSettingsUpdate = {
+  columnFilters: ColumnFiltersState;
+  columnOrder: ColumnOrderState;
+  columnSizing: ColumnSizingState;
+  columnVisibility: ColumnVisibilityState;
+  sorting: SortingState;
+};
+
+/**
+ * Hook to batch update all table settings at once
+ * This prevents intermediate state updates that could trigger effects
+ * between individual setter calls
+ */
+export const useBatchSetTableSettings = (): ((
+  settings: BatchTableSettingsUpdate,
+) => void) => {
+  const { tableStore } = useTableContextValue();
+  const [, setSearchParams] = useSearchParams();
+  const tableState = tableStore.get();
+  const persistenceKey = tableState?.persistenceKey ?? '';
+
+  return useCallback(
+    (settings: BatchTableSettingsUpdate) => {
+      console.log('[batchSetTableSettings] Before:', {
+        currentFilters: tableState?.columnFilters,
+        currentSorting: tableState?.sorting,
+      });
+      console.log('[batchSetTableSettings] Setting:', {
+        columnFilters: settings.columnFilters,
+        sorting: settings.sorting,
+      });
+
+      // Persist to falling back storage mechanism (cookie/localStorage)
+
+      const slices: (keyof BatchTableSettingsUpdate)[] = [
+        'sorting',
+        'columnFilters',
+        'columnOrder',
+        'columnSizing',
+        'columnVisibility',
+      ];
+
+      for (const slice of slices) {
+        writeStateSlice({
+          persistenceKey,
+          slice,
+          storageType: 'cookie',
+          value: settings[slice],
+        });
+      }
+      // writeStateSlice({
+      //   persistenceKey,
+      //   slice: 'columnFilters',
+      //   storageType: 'cookie',
+      //   value: settings.columnFilters,
+      // });
+      // writeStateSlice({
+      //   persistenceKey,
+      //   slice: 'sorting',
+      //   storageType: 'cookie',
+      //   value: settings.sorting,
+      // });
+      // writeStateSlice({
+      //   persistenceKey,
+      //   slice: 'columnOrder',
+      //   storageType: 'cookie',
+      //   value: settings.columnOrder,
+      // });
+      // writeStateSlice({
+      //   persistenceKey,
+      //   slice: 'columnVisibility',
+      //   storageType: 'cookie',
+      //   value: settings.columnVisibility,
+      // });
+      // writeStateSlice({
+      //   persistenceKey,
+      //   slice: 'columnSizing',
+      //   storageType: 'cookie',
+      //   value: settings.columnSizing,
+      // });
+
+      setSearchParams((params) => {
+        if (Object.keys(settings.columnFilters).length > 0) {
+          params.set('filters', JSON.stringify(settings.columnFilters));
+        } else {
+          params.delete('filters');
+        }
+        if (Object.keys(settings.sorting).length > 0) {
+          params.set('sort', JSON.stringify(settings.sorting));
+        } else {
+          params.delete('sort');
+        }
+        return params;
+      });
+
+      tableStore.set(settings);
+
+      console.log('[batchSetTableSettings] After:', {
+        newFilters: tableStore.get()?.columnFilters,
+        newSorting: tableStore.get()?.sorting,
+      });
+    },
+    [
+      persistenceKey,
+      setSearchParams,
+      tableState?.columnFilters,
+      tableState?.sorting,
+      tableStore,
+    ],
   );
 };

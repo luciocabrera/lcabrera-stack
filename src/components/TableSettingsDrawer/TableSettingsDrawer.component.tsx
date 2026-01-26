@@ -18,20 +18,19 @@ import {
 } from '@/components/SidePanel';
 import { Tabs } from '@/components/Tabs';
 
+import type { BatchTableSettingsUpdate } from '../Table/TableContext';
 import type { TableSettingsDrawerProps } from './TableSettingsDrawer.types';
 
 import {
-  useBulkSetColumnSizing,
+  useBatchSetTableSettings,
   useColumnFilters,
   useColumnOrder,
   useColumnSizing,
   useColumnVisibility,
-  useSetColumnFilters,
-  useSetColumnOrder,
-  useSetColumnVisibility,
-  useSetSorting,
+  useIsImperativeUpdateRef,
   useSorting,
 } from '../Table/TableContext';
+import { useColumns } from '../Table/TableContext/hooks/selectors.hooks';
 import { ColumnOrderSection } from './ColumnOrderSection';
 import { FiltersSection } from './FiltersSection';
 import { validateFilter } from './FiltersSection/FilterEditor';
@@ -39,25 +38,32 @@ import { GeneralSettingsSection } from './GeneralSettingsSection';
 import { SortingSection } from './SortingSection';
 
 export const TableSettingsDrawer = ({
-  columns,
+  // columns,
   isOpen,
   isPinned,
   onClose,
   onPinChange,
+  // onUpdateURLState,
 }: TableSettingsDrawerProps) => {
   // Subscribe to table state from context
+
+  const [columns] = useColumns();
   const [columnFilters] = useColumnFilters();
   const [columnOrder] = useColumnOrder();
   const [columnSizing] = useColumnSizing();
   const [columnVisibility] = useColumnVisibility();
   const [sorting] = useSorting();
 
-  // Get setters
-  const setColumnFilters = useSetColumnFilters();
-  const setColumnOrder = useSetColumnOrder();
-  const setColumnVisibility = useSetColumnVisibility();
-  const setSorting = useSetSorting();
-  const setColumnSizing = useBulkSetColumnSizing();
+  // Ref to signal that drawer is doing an imperative update
+  // This tells effects to skip their URL sync
+  const isImperativeUpdateRef = useIsImperativeUpdateRef();
+
+  // Get batch setter for all table settings at once
+  // This prevents race conditions when updating multiple settings
+
+  const batchSetTableSettings = useBatchSetTableSettings() as (
+    settings: BatchTableSettingsUpdate,
+  ) => void;
 
   // Local state for pending changes - reset when drawer opens
   // const initialPendingState = useMemo(
@@ -98,22 +104,48 @@ export const TableSettingsDrawer = ({
   }, [pendingColumnFilters]);
 
   const handleAccept = () => {
-    console.log('ACCEPTING SETTINGS:', {
-      pendingColumnFilters,
-      pendingColumnOrder,
-      pendingColumnSizing,
-      pendingColumnVisibility,
-      pendingSorting,
-    });
     if (!areFiltersValid) {
       // Don't allow accept if filters are invalid
       return;
     }
-    setColumnFilters(pendingColumnFilters);
-    setSorting(pendingSorting);
-    setColumnOrder(pendingColumnOrder);
-    setColumnSizing(pendingColumnSizing);
-    setColumnVisibility(pendingColumnVisibility);
+
+    console.log('[handleAccept] pendingSorting:', pendingSorting);
+    console.log('[handleAccept] pendingColumnFilters:', pendingColumnFilters);
+
+    // Set flag to tell effects to skip their URL sync
+    // We're handling URL update directly via onUpdateURLState
+    isImperativeUpdateRef.current = true;
+
+    // Batch update all store state at once
+    // This prevents race conditions where intermediate updates trigger
+    // the sync effect and overwrite pending values with stale store values
+    batchSetTableSettings({
+      columnFilters: pendingColumnFilters,
+      columnOrder: pendingColumnOrder,
+      columnSizing: pendingColumnSizing,
+      columnVisibility: pendingColumnVisibility,
+      sorting: pendingSorting,
+    });
+
+    console.log('[handleAccept] After batchSetTableSettings');
+
+    // Imperatively update URL with new state
+    // This avoids effect-based sync which can cause circular updates
+    // onUpdateURLState?.({
+    //   columnFilters: pendingColumnFilters,
+    //   columnOrder: pendingColumnOrder,
+    //   columnVisibility: pendingColumnVisibility,
+    //   sorting: pendingSorting,
+    // });
+
+    console.log('[handleAccept] After onUpdateURLState');
+
+    // Clear the flag after a microtask to allow navigation to complete
+    // This ensures effects that run immediately after see the flag as true
+    queueMicrotask(() => {
+      isImperativeUpdateRef.current = false;
+    });
+
     // Unpin if pinned, then close
     if (isPinned) {
       onPinChange?.(false);
@@ -130,13 +162,6 @@ export const TableSettingsDrawer = ({
   // };
 
   const handleCancel = () => {
-    console.log('cancelling SETTINGS:', {
-      columnFilters,
-      columnOrder,
-      columnSizing,
-      columnVisibility,
-      sorting,
-    });
     // Reset to original values
     setPendingColumnFilters(columnFilters);
     setPendingSorting(sorting);
@@ -150,7 +175,6 @@ export const TableSettingsDrawer = ({
   };
 
   const handleTogglePin = () => {
-
     onPinChange?.(!isPinned);
   };
 

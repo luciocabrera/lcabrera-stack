@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react';
-import { useSearchParams } from 'react-router';
+import { useCallback } from 'react';
+import { useLocation, useSearchParams } from 'react-router';
 
 import { encodeStateToURL, readStateFromURL } from '@/utils/urlState';
 
@@ -15,40 +15,41 @@ type TableSearchParamsState = {
   columnVisibility?: ColumnVisibilityState;
 };
 
-type UseTableSearchParamsArgs = {
+type UpdateURLStateArgs = {
   columnFilters: ColumnFiltersState;
   columnOrder: ColumnOrderState;
   columnVisibility: ColumnVisibilityState;
-  isEnabled: boolean;
-  persistenceKey: string;
   sorting: SortingState;
 };
 
+type UseTableSearchParamsArgs = {
+  isEnabled: boolean;
+  persistenceKey: string;
+};
+
 const PARAM_KEY = 'tableState';
-const DEBOUNCE_MS = 0;
 
 /**
- * Hook to sync table state with URL search params
+ * Hook to sync table state with URL search params (imperative approach)
  * - columnOrder and columnVisibility use Base64 encoding (tableState param)
  * - sorting and filters use standalone JSON params for readability
- * Priority: URL params > cookies (cookies handled by useTablePersistence)
+ * 
+ * This hook provides an imperative function to update URL state,
+ * rather than using effects. This avoids circular dependencies where
+ * URL changes trigger loader reruns that could restore stale state.
+ * 
+ * Call `updateURLState` explicitly when user confirms changes (e.g., Accept button).
  */
 export const useTableSearchParams = ({
-  columnFilters,
-  columnOrder,
-  columnVisibility,
   isEnabled,
   persistenceKey,
-  sorting,
 }: UseTableSearchParamsArgs) => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const debounceTimerRef = useRef<NodeJS.Timeout | undefined>(undefined);
-  const hasInitialized = useRef(false);
-  const prevSortingRef = useRef<SortingState>(sorting);
-  const prevFiltersRef = useRef<ColumnFiltersState>(columnFilters);
+  // const navigate = useNavigate();
+  const location = useLocation();
+  // const revalidator = useRevalidator();
 
   // Read initial state from URL synchronously (before first render)
-  // Store as plain variable instead of ref to avoid ref access during render
   const initialState = (() => {
     if (!isEnabled) return;
 
@@ -59,110 +60,98 @@ export const useTableSearchParams = ({
     }) as Partial<TableSearchParamsState> | undefined;
   })();
 
-  // Immediate update for sorting and filters (no debounce)
-  // This is critical because the loader reads these from URL and needs fresh values
-  useEffect(() => {
-    if (!isEnabled) return;
-    if (!hasInitialized.current) return;
+  /**
+   * Imperatively update URL with new table state.
+   * Call this when user explicitly confirms changes (Accept/Apply).
+   * 
+   * Uses navigate() instead of setSearchParams() to perform an atomic
+   * URL update that triggers the loader immediately, avoiding race
+   * conditions with effects that might re-add removed params.
+   */
+  const updateURLState = useCallback(
+    ({
+      columnFilters,
+      columnOrder,
+      columnVisibility,
+      sorting,
+    }: UpdateURLStateArgs) => {
+      if (!isEnabled) return;
 
-    const didSortingChange =
-      JSON.stringify(sorting) !== JSON.stringify(prevSortingRef.current);
-    const didFiltersChange =
-      JSON.stringify(columnFilters) !== JSON.stringify(prevFiltersRef.current);
+      const hasFilters = Object.keys(columnFilters).length > 0;
+      const hasSorting = sorting.length > 0;
 
-    if (!didSortingChange && !didFiltersChange) return;
+      // Debug logging
+      console.log('[updateURLState] Called with:', {
+        filtersCount: Object.keys(columnFilters).length,
+        hasFilters,
+        hasSorting,
+        sortingLength: sorting.length,
+      });
 
-    prevSortingRef.current = sorting;
-    prevFiltersRef.current = columnFilters;
+      // Build new URL params from scratch to ensure clean state
+      const newParams = new URLSearchParams();
+      const key = `${persistenceKey}-${PARAM_KEY}`;
 
-    const hasFilters = Object.keys(columnFilters).length > 0;
-    const hasSorting = sorting.length > 0;
-
-    setSearchParams(
-      (prev) => {
-        const newParams = new URLSearchParams(prev);
-
-        // Handle filters as standalone param (readable JSON)
-        if (hasFilters) {
-          newParams.set('filters', JSON.stringify(columnFilters));
-        } else {
-          newParams.delete('filters');
+      // Preserve existing params that we don't manage
+      for (const [paramKey, value] of searchParams.entries()) {
+        if (paramKey !== key && paramKey !== 'sort' && paramKey !== 'filters') {
+          newParams.set(paramKey, value);
         }
-
-        // Handle sorting as standalone param (readable JSON)
-        if (hasSorting) {
-          newParams.set('sort', JSON.stringify(sorting));
-        } else {
-          newParams.delete('sort');
-        }
-
-        return newParams;
-      },
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      { replace: true },
-    );
-  }, [sorting, columnFilters, isEnabled, setSearchParams]);
-
-  // Debounced update for column order/visibility (these don't affect loader)
-  useEffect(() => {
-    if (!isEnabled) return;
-
-    // Skip first update to avoid overwriting URL on mount
-    if (!hasInitialized.current) {
-      hasInitialized.current = true;
-      return;
-    }
-
-    // Clear existing timer
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
-
-    // Set new timer
-    debounceTimerRef.current = setTimeout(() => {
-      // Base64 encoded state (columnOrder, columnVisibility only)
-      const tableState: TableSearchParamsState = {
-        columnOrder: columnOrder.length > 0 ? columnOrder : undefined,
-        columnVisibility:
-          columnVisibility.size > 0 ? columnVisibility : undefined,
-      };
-
-      const hasTableState = tableState.columnOrder ?? tableState.columnVisibility;
-
-      setSearchParams(
-        (prev) => {
-          const newParams = new URLSearchParams(prev);
-          const key = `${persistenceKey}-${PARAM_KEY}`;
-
-          // Handle Base64 tableState (columnOrder, columnVisibility)
-          if (hasTableState) {
-            newParams.set(key, encodeStateToURL(tableState));
-          } else {
-            newParams.delete(key);
-          }
-
-          return newParams;
-        },
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        { replace: true },
-      );
-    }, DEBOUNCE_MS);
-
-    // Cleanup
-    return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
       }
-    };
-  }, [
-    columnOrder,
-    columnVisibility,
-    isEnabled,
-    persistenceKey,
-    setSearchParams,
-  ]);
+
+      const tableState: TableSearchParamsState = {
+        columnOrder: columnOrder.length > 0 ? columnOrder : void 0,
+        columnVisibility: columnVisibility.size > 0 ? columnVisibility : void 0,
+      };
+      const hasTableState =
+        tableState.columnOrder ?? tableState.columnVisibility;
+
+      // Handle Base64 tableState (columnOrder, columnVisibility)
+      if (hasTableState) {
+        newParams.set(key, encodeStateToURL(tableState));
+      }
+
+      // Handle filters as standalone param (readable JSON)
+      if (hasFilters) {
+        newParams.set('filters', JSON.stringify(columnFilters));
+      }
+
+      // Handle sorting as standalone param (readable JSON)
+      if (hasSorting) {
+        newParams.set('sort', JSON.stringify(sorting));
+      }
+
+      console.log('[updateURLState] Navigating with params:', {
+        newFilters: newParams.get('filters'),
+        newSort: newParams.get('sort'),
+      });
+
+      setSearchParams(newParams);
+
+      const newSearch = newParams.toString();
+      const newUrl = `${location.pathname}${newSearch ? `?${newSearch}` : ''}`;
+      
+      console.log('[updateURLState] New URL:', newUrl);
+      console.log('[updateURLState] Current location.pathname:', location.pathname);
+      console.log('[updateURLState] newParams.toString():', newSearch);
+      console.log('[updateURLState] Will navigate to:', newUrl);
+      
+      // Use navigate to update URL and trigger loader
+      // Then explicitly revalidate to ensure loader runs with new params
+      // void navigate(newUrl, { replace: true, preventScrollReset: true });
+      
+      // Force loader revalidation after URL update
+      // This ensures the loader sees the new URL params
+      queueMicrotask(() => {
+        console.log('[updateURLState] Calling revalidator.revalidate()');
+        // revalidator.revalidate();
+      });
+    },
+    [isEnabled, persistenceKey, setSearchParams, location.pathname, searchParams],
+  );
 
   return {
     initialState,
+    updateURLState,
   };
 };

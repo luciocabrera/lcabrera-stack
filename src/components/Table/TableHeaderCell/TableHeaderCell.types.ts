@@ -7,7 +7,7 @@ import type {
 } from '@/components/Table/Table.types';
 import type { ColumnFilter } from '@/types/filterOperators.types';
 
-import type { HandleSortParams } from '../TableHeader/TableHeader.types';
+import type {  HandleSortParams } from '../TableHeader/TableHeader.types';
 
 export type OnResizeParams = {
   columnKey: string;
@@ -29,10 +29,10 @@ export type TableHeaderCellProps = ComponentPropsWithoutRef<'th'> &
     isLoading?: boolean;
     isSortable?: boolean;
     maxWidth?: number;
-    onFilterApply: (filter?: ColumnFilter) => void;
-    onFilterClear: () => void;
-    onResize?: (params: OnResizeParams) => void;
-    onResizeDoubleClick?: (columnKey: string) => void;
+    // onFilterApply: (params: HandleFilterParams) => void;
+    // onFilterClear: () => void;
+    // onResize?: (params: OnResizeParams) => void;
+    // onResizeDoubleClick?: (columnKey: string) => void;
     onSettingsClick?: () => void;
     onSort?: (params: HandleSortParams) => void;
     sortDirection?: SortDirection;

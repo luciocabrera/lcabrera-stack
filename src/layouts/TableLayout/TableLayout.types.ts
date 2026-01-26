@@ -3,6 +3,7 @@ import type {
   ColumnOrderState,
   ColumnSizingState,
   ColumnVisibilityState,
+  InfiniteScrollConfig,
   SortingState,
   TableColumn,
   TableDensity,
@@ -21,12 +22,7 @@ export type InfiniteScrollLoadMoreResult<TData> = {
   total: number;
 };
 
-export type TableLayoutInfiniteScrollConfig<TData> = {
-  onLoadMore: (
-    params: InfiniteScrollLoadMoreParams,
-  ) => Promise<InfiniteScrollLoadMoreResult<TData>>;
-};
-
+ 
 export type TableLayoutProps<TData extends Record<string, unknown>> = {
   /** Column order from loader/URL state (optional) */
   columnOrder?: ColumnOrderState;
@@ -45,7 +41,7 @@ export type TableLayoutProps<TData extends Record<string, unknown>> = {
   /** Active filters from loader/URL state (optional) */
   filters?: ColumnFiltersState;
   /** Infinite scroll configuration (required) */
-  infiniteScrollConfig: TableLayoutInfiniteScrollConfig<TData>;
+  infiniteScrollConfig: InfiniteScrollConfig<TData>;
   /** Show table borders (optional, default: true) */
   isBordered?: boolean;
   /** Show striped rows (optional, default: true) */

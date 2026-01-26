@@ -60,7 +60,10 @@ export type InfiniteScrollConfig<TData> = {
   loadMorePageSize: number;
   /** Callback to load more data with strategy-specific params */
   onLoadMore: (
-    params: PaginationParams,
+    params: PaginationParams & {
+      filters?: ColumnFiltersState;
+      sorting?: SortingState;
+    },
   ) => Promise<InfiniteScrollResponse<TData>>;
   /** Pagination strategy to use */
   strategy: PaginationStrategy;
@@ -120,9 +123,9 @@ export type PaginationMeta = {
  * Union of all pagination parameter types
  */
 export type PaginationParams =
-  | CursorParams
+  // | CursorParams
   | OffsetLimitParams
-  | PageBasedParams;
+  // | PageBasedParams;
 
 /**
  * Pagination state
@@ -244,18 +247,18 @@ export type TablePersistenceConfig = {
 };
 
 export type TableProps<TData extends Record<string, unknown>> = BaseProps & {
-  columns: TableColumn[];
+  // columns: TableColumn[];
   /** Column sizing state - custom widths for columns */
-  columnSizing?: ColumnSizingState;
+  // columnSizing?: ColumnSizingState;
   data: TData[];
   /** Configuration for infinite scroll behavior */
   infiniteScrollConfig?: InfiniteScrollConfig<TData>;
   /** Initial column filters (for SSR hydration) */
-  initialColumnFilters?: ColumnFiltersState;
+  // initialColumnFilters?: ColumnFiltersState;
   /** Initial column order (for SSR hydration) */
-  initialColumnOrder?: string[];
+  // initialColumnOrder?: string[];
   /** Initial column visibility (for SSR hydration) */
-  initialColumnVisibility?: Set<string>;
+  // initialColumnVisibility?: Set<string>;
   /** Initial metadata for table state (hasMore, totalRows, paginationMeta) */
   initialMeta?: {
     hasMore?: boolean;
@@ -263,7 +266,7 @@ export type TableProps<TData extends Record<string, unknown>> = BaseProps & {
     totalRows?: number;
   };
   /** Initial sorting state */
-  initialSorting?: SortingState;
+  // initialSorting?: SortingState;
   /** Enable client-side sorting when all data is available (default: false) */
   isClientSortingEnabled?: boolean;
   isFlexWrapperEnabled?: boolean;
@@ -272,9 +275,9 @@ export type TableProps<TData extends Record<string, unknown>> = BaseProps & {
   /** Locale for formatting (defaults to navigator.language) */
   locale?: string;
   /** Callback when filters change (server-side filtering) */
-  onFilterChange?: (args: OnFilterChangeArgs) => Promise<void>;
-  /** Callback when sorting changes (server-side sorting). If provided, sorting is server-controlled */
-  onSortChange?: (args: OnSortChangeArgs) => Promise<void>;
+  // onFilterChange?: (args: OnFilterChangeArgs) => Promise<void>;
+  // /** Callback when sorting changes (server-side sorting). If provided, sorting is server-controlled */
+  // onSortChange?: (args: OnSortChangeArgs) => Promise<void>;
   overscan?: number;
   /** Persistence key for storing table state (e.g., column widths) */
   persistenceKey?: string;
@@ -290,6 +293,7 @@ export type TableState<TData> = {
   columnOrder: ColumnOrderState;
   /** Column pinning state */
   columnPinning: ColumnPinningState;
+  columns: TableColumn[];
   /** Column sizing state (custom widths) */
   columnSizing: ColumnSizingState;
   /** Column visibility state */
@@ -298,9 +302,11 @@ export type TableState<TData> = {
   data: TData[];
   /** Pagination state */
   pagination: PaginationState;
+  /** Persistence key for storing table state (e.g., column widths) */
+  persistenceKey: string;
   /** Row selection state */
   rowSelection: RowSelectionState;
-  /** Sorting state */
+    /** Sorting state */
   sorting: SortingState;
 };
 

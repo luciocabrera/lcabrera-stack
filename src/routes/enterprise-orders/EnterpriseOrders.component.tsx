@@ -2,6 +2,12 @@ import { useLoaderData } from 'react-router';
 
 import type { EnterpriseOrder } from '@/services';
 
+import {
+  INFINITE_SCROLL_THRESHOLD,
+  INITIAL_PAGE_SIZE,
+  LOAD_MORE_PAGE_SIZE,
+  STRATEGY,
+} from '@/components/Table/Table.constants';
 import { TableLayout } from '@/layouts/TableLayout';
 import { enterpriseOrdersApi } from '@/services';
 
@@ -31,6 +37,9 @@ export const EnterpriseOrders = () => {
       }
       filters={filters}
       infiniteScrollConfig={{
+        initialPageSize: INITIAL_PAGE_SIZE,
+        isEnabled: true,
+        loadMorePageSize: LOAD_MORE_PAGE_SIZE,
         onLoadMore: async ({ filters, limit, skip, sorting }) => {
           const response =
             await enterpriseOrdersApi.fetchEnterpriseOrdersPaginated({
@@ -46,6 +55,8 @@ export const EnterpriseOrders = () => {
             total: response.total,
           };
         },
+        strategy: STRATEGY,
+        threshold: INFINITE_SCROLL_THRESHOLD,
       }}
       persistenceKey={PERSISTENCE_KEY}
       sorting={sorting}

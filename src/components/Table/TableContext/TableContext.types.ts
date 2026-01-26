@@ -14,6 +14,7 @@ import type {
   ColumnSizingState,
   ColumnVisibilityState,
   SortingState,
+  TableColumn,
   TableMeta,
   TablePersistenceConfig,
 } from '../Table.types';
@@ -28,6 +29,8 @@ export type TableProviderProps<TData> = {
   initialColumnFilters?: ColumnFiltersState;
   /** Initial column order state */
   initialColumnOrder?: ColumnOrderState;
+  /** Column definitions (required) */
+  initialColumns: TableColumn[];
   /** Initial column sizing state */
   initialColumnSizing?: ColumnSizingState;
   /** Initial column visibility state */

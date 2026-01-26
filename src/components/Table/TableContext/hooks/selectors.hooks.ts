@@ -44,6 +44,12 @@ export const useColumnFilters = <TData>(): UseStoreSelector<
   TableState<TData>
 > => useTableStore<ColumnFiltersState, TData>((state) => state.columnFilters);
 
+
+export const useColumns = <TData>(): UseStoreSelector<
+  TableState<TData>['columns'],
+  TableState<TData>
+> => useTableStore<TableState<TData>['columns'], TData>((state) => state.columns);
+
 /**
  * Select row selection state
  */

@@ -8,6 +8,7 @@ import { useRenderTracker } from '@/utils/performance';
 
 import type { FilterPopoverProps, ToggleEvent } from './FilterPopover.types';
 
+import { useClearColumnFilter, useSetColumnFilter } from '../../TableContext';
 import { styles } from './FilterPopover.stylex';
 import { getOperatorFromFilter, renderFilterInput } from './utils';
 
@@ -16,11 +17,14 @@ export const FilterPopover = ({
   fetchFilterOptions,
   filter,
   filterOptions,
-  onApply,
-  onClear,
+  // onApply,
+  // onClear,
   popoverId,
 }: FilterPopoverProps) => {
   useRenderTracker(`FilterPopover:${column.key}`);
+
+  const clearColumnFilter = useClearColumnFilter();
+    const setColumnFilter = useSetColumnFilter();
   const popoverRef = useRef<HTMLDivElement>(null);
   // Ref to always access latest filter value (avoids stale closure in toggle handler)
   const filterRef = useRef(filter);
@@ -139,6 +143,29 @@ export const FilterPopover = ({
       });
   }, [fetchFilterOptions, fetchedOptions, isFetchingOptions, hasMoreOptions]);
 
+  const handleClear = () => {
+    setLocalFilter(undefined);
+    clearColumnFilter(column.key);
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore - hidePopover not in TS types yet
+    popoverRef.current?.hidePopover();
+  };
+
+  const handleApply = () => {
+    setColumnFilter({ columnKey: column.key, filter: localFilter });
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore - hidePopover not in TS types yet
+    popoverRef.current?.hidePopover();
+  };
+
+  const handleClose = () => {
+    // Reset local filter to current applied filter when closing without applying
+    setLocalFilter(filter);
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore - hidePopover not in TS types yet
+    popoverRef.current?.hidePopover();
+  };
+
   // Get current operator from the local filter to determine if we're showing a list
   const currentOperator = getOperatorFromFilter(localFilter);
 
@@ -175,13 +202,7 @@ export const FilterPopover = ({
           <h3 {...stylex.props(styles.title)}>Filter: {column.label}</h3>
           <button
             aria-label='Close filter'
-            onClick={() => {
-              // Reset local filter to current applied filter when closing without applying
-              setLocalFilter(filter);
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore - hidePopover not in TS types yet
-              popoverRef.current?.hidePopover();
-            }}
+            onClick={handleClose}
             type='button'
             {...stylex.props(styles.closeButton)}
           >
@@ -190,31 +211,10 @@ export const FilterPopover = ({
         </div>
         <div {...stylex.props(styles.body)}>{content}</div>
         <div {...stylex.props(styles.footer)}>
-          <Button
-            color='outline'
-            onClick={() => {
-              setLocalFilter(undefined);
-              onClear();
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore - hidePopover not in TS types yet
-              popoverRef.current?.hidePopover();
-            }}
-            size='sm'
-            width='full'
-          >
+          <Button color='outline' onClick={handleClear} size='sm' width='full'>
             Clear
           </Button>
-          <Button
-            color='primary'
-            onClick={() => {
-              onApply(localFilter);
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore - hidePopover not in TS types yet
-              popoverRef.current?.hidePopover();
-            }}
-            size='sm'
-            width='full'
-          >
+          <Button color='primary' onClick={handleApply} size='sm' width='full'>
             Apply
           </Button>
         </div>

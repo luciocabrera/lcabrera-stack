@@ -1,11 +1,8 @@
-import { use, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-
-import type { TableState } from '@/components/Table/Table.types';
+import { use, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   useInfiniteScroll,
   useTablePersistence,
-  useTableSearchParams,
 } from '@/components/Table/hooks';
 import {
   INFINITE_SCROLL_THRESHOLD,
@@ -15,14 +12,7 @@ import {
 } from '@/components/Table/Table.constants';
 import {
   TableContext,
-  useColumnFilters,
-  useColumnOrder,
   useColumnSizing,
-  useColumnVisibility,
-  useSetColumnFilters,
-  useSetColumnOrder,
-  useSetColumnVisibility,
-  useSetSorting,
   useSorting,
   useTableData,
   useTableLoadingMore,
@@ -31,27 +21,21 @@ import { compareValues } from '@/utils/compareValues.util';
 
 import type { TableContentProps } from '../TableContent.types';
 
+import { useColumns } from '../../TableContext/hooks/selectors.hooks';
+
 type UseTableContentArgs<T extends Record<string, unknown>> = Pick<
   TableContentProps<T>,
-  | 'columns'
-  | 'data'
-  | 'infiniteScrollConfig'
-  | 'initialColumnFilters'
-  | 'isClientSortingEnabled'
-  | 'onFilterChange'
-  | 'onSortChange'
-  | 'persistenceKey'
+  'data' | 'infiniteScrollConfig' | 'isClientSortingEnabled' | 'persistenceKey'
 >;
 
 export const useTableContent = <T extends Record<string, unknown>>({
-  columns,
   data,
   infiniteScrollConfig,
   isClientSortingEnabled = false,
-  onFilterChange,
-  onSortChange,
   persistenceKey,
 }: UseTableContentArgs<T>) => {
+  const [columns] = useColumns<T>();
+
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isSettingsPinned, setIsSettingsPinned] = useState(false);
 
@@ -60,89 +44,17 @@ export const useTableContent = <T extends Record<string, unknown>>({
 
   const context = use(TableContext);
   const tableStore = context?.tableStore;
-  const [columnFilters] = useColumnFilters<T>();
+
   const [columnSizing] = useColumnSizing<T>();
-  const [columnOrder] = useColumnOrder<T>();
-  const [columnVisibility] = useColumnVisibility<T>();
   const [storeData] = useTableData<T>();
   const [isLoadingMore] = useTableLoadingMore();
   const [sorting] = useSorting<T>();
-  const setColumnFilters = useSetColumnFilters();
-  const setColumnOrder = useSetColumnOrder();
-  const setColumnVisibility = useSetColumnVisibility();
-  const setSorting = useSetSorting();
-
-  // Wrapper to set entire columnSizing state at once
-  const setBulkColumnSizing = useCallback(
-    (newColumnSizing: Record<string, number>) => {
-      if (!tableStore) return;
-      tableStore.set({
-        columnSizing: newColumnSizing,
-      } as Partial<TableState<T>>);
-    },
-    [tableStore],
-  );
-
-  // Sync table state with URL search params (higher priority than cookies)
-  const { initialState } = useTableSearchParams({
-    columnFilters,
-    columnOrder,
-    columnVisibility,
-    isEnabled: !!persistenceKey,
-    persistenceKey: persistenceKey ?? 'default-table',
-    sorting,
-  });
-
-  // Apply initial state from URL on mount (if available)
-  // Note: sorting and filters are now read directly by the loader from standalone params
-  useEffect(() => {
-    if (!initialState) return;
-
-    if (initialState.columnOrder) {
-      setColumnOrder(initialState.columnOrder);
-    }
-    if (initialState.columnVisibility) {
-      setColumnVisibility(initialState.columnVisibility);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run on mount
 
   // Use data from store if available (for infinite scroll), otherwise use prop
   const effectiveData = storeData.length > 0 ? storeData : data;
 
   // Determine sorting mode: client, server, or none
-  const sortingMode = onSortChange
-    ? 'server'
-    : isClientSortingEnabled
-      ? 'client'
-      : 'none';
-
-  // Server-side sorting: call onSortChange when sorting state changes
-  useEffect(() => {
-    if (sortingMode === 'server' && onSortChange && sorting.length > 0) {
-      void onSortChange({
-        sorting: sorting.map((sort) => ({
-          columnKey: sort.columnKey,
-          direction: sort.direction,
-        })),
-      });
-    }
-  }, [sorting, sortingMode, onSortChange]);
-
-  // Server-side filtering: call onFilterChange when columnFilters state changes
-  useEffect(() => {
-    // Only call onFilterChange if filters have changed from the initial state
-    // This avoids redundant calls when filters are loaded from URL/cookies
-    // const initialFilters = initialFiltersRef.current ?? {};
-    // const hasChanged =
-    //   JSON.stringify(columnFilters) !== JSON.stringify(initialFilters);
-
-    if (onFilterChange) {
-      void onFilterChange({
-        filters: columnFilters,
-      });
-    }
-  }, [columnFilters, onFilterChange]);
+  const sortingMode = isClientSortingEnabled ? 'client' : 'server';
 
   // Client-side sorting: apply sorting to data
   const sortedData = useMemo(() => {
@@ -196,30 +108,11 @@ export const useTableContent = <T extends Record<string, unknown>>({
   // Using cookies for column-specific settings so they're available during SSR
   // Skip hydration since the loader already handles initial state from URL/cookies
   const { persistSlice } = useTablePersistence({
-    config: {
-      columnFilters: persistenceKey ? 'cookie' : undefined,
-      columnOrder: persistenceKey ? 'cookie' : undefined,
-      columnPinning: persistenceKey ? 'cookie' : undefined,
-      columnSizing: persistenceKey ? 'cookie' : undefined,
-      columnVisibility: persistenceKey ? 'cookie' : undefined,
-      pagination: persistenceKey ? 'localStorage' : undefined,
-      sorting: persistenceKey ? 'cookie' : undefined,
-    },
     getState: () =>
       tableStore?.get() ?? {
-        columnFilters: {},
-        columnOrder: [],
-        columnPinning: { left: [], right: [] },
         columnSizing: {},
-        columnVisibility: new Set<string>(),
-        pagination: { pageIndex: 0, pageSize: 50 },
-        sorting: [],
       },
     persistenceKey: persistenceKey ?? 'default-table',
-    restoreState: (state) => {
-      tableStore?.set(state);
-    },
-    skipHydration: true, // Loader already handles initial state from URL/cookies
   });
 
   // Debounced persistence for column sizing (cookies only, not in URL)
@@ -233,7 +126,7 @@ export const useTableContent = <T extends Record<string, unknown>>({
 
     // Set new timer
     debounceTimerRef.current = setTimeout(() => {
-      persistSlice('columnSizing');
+      persistSlice();
     }, 300);
 
     // Cleanup
@@ -244,44 +137,13 @@ export const useTableContent = <T extends Record<string, unknown>>({
     };
   }, [columnSizing, persistSlice, persistenceKey]);
 
-  // Persist to cookies as fallback (in case URL is cleared)
-  useEffect(() => {
-    if (!persistenceKey) return;
-    persistSlice('columnOrder');
-  }, [columnOrder, persistSlice, persistenceKey]);
-
-  useEffect(() => {
-    if (!persistenceKey) return;
-    persistSlice('columnVisibility');
-  }, [columnVisibility, persistSlice, persistenceKey]);
-
-  useEffect(() => {
-    if (!persistenceKey) return;
-    persistSlice('sorting');
-  }, [sorting, persistSlice, persistenceKey]);
-
-  useEffect(() => {
-    if (!persistenceKey) return;
-    persistSlice('columnFilters');
-  }, [columnFilters, persistSlice, persistenceKey]);
-
   return {
-    columnFilters,
-    columnOrder,
-    columnSizing,
-    columnVisibility,
     containerRef,
     dataToRender,
     isLoadingMore,
     isSettingsOpen,
     isSettingsPinned,
-    setColumnFilters,
-    setColumnOrder,
-    setColumnSizing: setBulkColumnSizing,
-    setColumnVisibility,
     setIsSettingsOpen,
     setIsSettingsPinned,
-    setSorting,
-    sorting,
   };
 };

@@ -45,6 +45,8 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
   // Don't fall back to cookie - URL is the source of truth for sorting
   // If sort= param is absent, sorting should be empty (user may have reset it)
   const standaloneSortParam = url.searchParams.get('sort');
+  console.log('[LOADER] URL:', request.url);
+  console.log('[LOADER] standaloneSortParam:', standaloneSortParam);
   let sorting: SortingState = [];
   if (standaloneSortParam) {
     try {
@@ -53,6 +55,7 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
       // Invalid JSON, use empty array
     }
   }
+  console.log('[LOADER] Final sorting:', {sorting, urlState });
   
   // Read filters from standalone param only
   // Don't fall back to cookie - URL is the source of truth for filters

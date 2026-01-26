@@ -5,6 +5,36 @@ const { Pool } = require('pg');
 const app = express();
 const port = 3001;
 
+// Helper to format SQL query for pgAdmin (copy-paste ready)
+function formatQueryForPgAdmin(query, params = []) {
+  let formattedQuery = query;
+  params.forEach((param, index) => {
+    const placeholder = `$${index + 1}`;
+    let value;
+    if (param === null) {
+      value = 'NULL';
+    } else if (typeof param === 'string') {
+      value = `'${param.replace(/'/g, "''")}'`;
+    } else if (typeof param === 'boolean') {
+      value = param ? 'TRUE' : 'FALSE';
+    } else if (param instanceof Date) {
+      value = `'${param.toISOString()}'`;
+    } else {
+      value = String(param);
+    }
+    formattedQuery = formattedQuery.replace(placeholder, value);
+  });
+  return formattedQuery;
+}
+
+// Log query in pgAdmin-ready format
+function logPgAdminQuery(label, query, params = []) {
+  console.log(`\n📋 [pgAdmin] ${label}:`);
+  console.log('─'.repeat(60));
+  console.log(formatQueryForPgAdmin(query, params));
+  console.log('─'.repeat(60) + '\n');
+}
+
 // Enable CORS for React app
 app.use(cors());
 app.use(express.json());
@@ -352,6 +382,7 @@ app.get('/api/enterprise-orders/paginated', async (request, res) => {
     queryParams.push(limit, skip);
 
     console.log(`   → Final query: ${dataQuery}`);
+    logPgAdminQuery('Data Query', dataQuery, queryParams);
 
     // Get paginated data with sorting and filtering
     const dataResult = await pool.query(dataQuery, queryParams);
@@ -359,6 +390,7 @@ app.get('/api/enterprise-orders/paginated', async (request, res) => {
 
     // Get total count with same filters (excluding limit and offset)
     const countParams = queryParams.slice(0, -2); // Remove limit and offset
+    logPgAdminQuery('Count Query', countQuery, countParams);
     const countResult = await pool.query(countQuery, countParams);
     const total = Number.parseInt(countResult.rows[0].count);
     console.log(`   → Total count: ${total}`);

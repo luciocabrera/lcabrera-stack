@@ -1,49 +1,40 @@
 import * as stylex from '@stylexjs/stylex';
-import { useCallback, useMemo } from 'react';
-
-import type { ColumnFilter } from '@/types/filterOperators.types';
+import { useMemo } from 'react';
+import { useSearchParams } from 'react-router';
 
 import { useRenderTracker } from '@/utils/performance';
 
-import type {
-  HandleResizeParams,
-  HandleSortParams,
-  TableHeaderProps,
-} from './TableHeader.types';
+import type { HandleSortParams, TableHeaderProps } from './TableHeader.types';
 
 import { DEFAULT_MIN_COLUMN_WIDTH } from '../Table.constants';
 import {
-  useClearColumnFilter,
   useColumnFilters,
   useColumnOrder,
   useColumnSizing,
   useColumnVisibility,
-  useSetColumnFilter,
-  useSetColumnSizing,
   useSetSorting,
   useSorting,
 } from '../TableContext';
+import { useColumns } from '../TableContext/hooks/selectors.hooks';
 import { TableHeaderCell } from '../TableHeaderCell';
 import { TableRow } from '../TableRow';
 import { tableHeaderStyles } from './TableHeader.stylex';
 
 export const TableHeader = <TData extends Record<string, unknown>>({
-  columns,
   customStylex,
   data,
   isLoading = false,
   ...rest
 }: TableHeaderProps<TData>) => {
   useRenderTracker('TableHeader');
+  const [columns] = useColumns<TData>();
+  const [, setSearchParams] = useSearchParams();
   const [columnSizing] = useColumnSizing<TData>();
   const [sorting] = useSorting<TData>();
   const [columnOrder] = useColumnOrder<TData>();
   const [columnVisibility] = useColumnVisibility<TData>();
   const [columnFilters] = useColumnFilters<TData>();
-  const setColumnSizing = useSetColumnSizing();
   const setSorting = useSetSorting();
-  const setColumnFilter = useSetColumnFilter();
-  const clearColumnFilter = useClearColumnFilter();
 
   // Filter visible columns
   const visibleColumns = columns.filter(
@@ -61,38 +52,31 @@ export const TableHeader = <TData extends Record<string, unknown>>({
         ]
       : visibleColumns;
 
-  const handleResize = ({ columnKey, width }: HandleResizeParams) => {
-    setColumnSizing({ columnKey, width });
-  };
+  const handleSort = ({ columnKey, direction }: HandleSortParams) => {
+    const currentSort = sorting.find((s) => s.columnKey === columnKey);
+    if (currentSort && currentSort.direction === direction) {
+      // No change in sort
+      return;
+    }
+    const newSorting = sorting.filter((s) => s.columnKey !== columnKey);
+    if (direction) {
+      newSorting.push({ columnKey, direction });
+    }
 
-  const handleResizeDoubleClick = (columnKey: string) => {
-    setColumnSizing({ columnKey, width: undefined });
-  };
-
-  const handleSort = useCallback(
-    ({ columnKey, direction, isMultiSort }: HandleSortParams) => {
-      if (isMultiSort) {
-        // Multi-column sorting: add or update this column
-        const existingIndex = sorting.findIndex(
-          (s) => s.columnKey === columnKey,
-        );
-
-        if (existingIndex === -1) {
-          // Add new sort
-          setSorting([...sorting, { columnKey, direction }]);
-        } else {
-          // Update existing sort
-          const newSorting = [...sorting];
-          newSorting[existingIndex] = { columnKey, direction };
-          setSorting(newSorting);
-        }
+    setSearchParams((params) => {
+      console.log('[handleSortChange] Setting URL params, sorting.length:', {
+        newSorting,
+        sorting,
+      });
+      if (newSorting.length > 0) {
+        params.set('sort', JSON.stringify(newSorting));
       } else {
-        // Single-column sorting: replace existing sorts
-        setSorting([{ columnKey, direction }]);
+        params.delete('sort');
       }
-    },
-    [setSorting, sorting],
-  );
+      return params;
+    });
+    setSorting(newSorting);
+  };
 
   // Calculate unique values for facet filters (client-side)
   // This creates a map of columnKey -> unique values from the data
@@ -159,7 +143,7 @@ export const TableHeader = <TData extends Record<string, unknown>>({
               columnKey={col.key}
               dataType={col.dataType}
               fetchFilterOptions={col.fetchFilterOptions}
-              filter={columnFilters[col.key] as ColumnFilter | undefined}
+              filter={columnFilters[col.key]}
               filterOptions={columnFilterOptions[col.key]}
               hasSettings
               isFilterable={col.isFilterable !== false}
@@ -169,14 +153,6 @@ export const TableHeader = <TData extends Record<string, unknown>>({
               label={col.label}
               maxWidth={col.maxWidth}
               minWidth={effectiveMinWidth}
-              onFilterApply={(filter) => {
-                setColumnFilter({ columnKey: col.key, filter });
-              }}
-              onFilterClear={() => {
-                clearColumnFilter(col.key);
-              }}
-              onResize={handleResize}
-              onResizeDoubleClick={handleResizeDoubleClick}
               onSort={handleSort}
               sortDirection={sortDirection}
               sortIndex={sortIndex}

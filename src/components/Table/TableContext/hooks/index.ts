@@ -1,6 +1,7 @@
 // Action hooks
 export {
   useAppendTableData,
+  useBatchSetTableSettings,
   useBulkSetColumnSizing,
   useClearAllColumnFilters,
   useClearColumnFilter,
@@ -20,6 +21,8 @@ export {
   useSetSorting,
   useSetTableData,
 } from './actions.hooks';
+
+export type { BatchTableSettingsUpdate } from './actions.hooks';
 
 // Selector hooks
 export {
@@ -41,4 +44,8 @@ export {
 } from './selectors.hooks';
 
 // Core store hooks
-export { useMetaStore, useTableStore } from './useTableStore.hook';
+export {
+  useIsImperativeUpdateRef,
+  useMetaStore,
+  useTableStore,
+} from './useTableStore.hook';

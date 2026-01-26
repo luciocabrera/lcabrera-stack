@@ -18,11 +18,12 @@ import { useRenderTracker } from '@/utils/performance';
 
 import type { TableBodyProps } from './TableBody.types';
 
+import { useColumns } from '../TableContext/hooks/selectors.hooks';
 import { styles } from './TableBody.stylex';
 import { generatePlaceholderData } from './utils';
 
 export const TableBody = <TData extends Record<string, unknown>>({
-  columns,
+  // columns,
   data,
   isLoading = false,
   locale,
@@ -32,6 +33,8 @@ export const TableBody = <TData extends Record<string, unknown>>({
   tableContainerRef,
 }: TableBodyProps<TData>) => {
   useRenderTracker('TableBody');
+
+    const [columns] = useColumns<TData>();
   const [columnSizing] = useColumnSizing<TData>();
   const [columnOrder] = useColumnOrder<TData>();
   const [columnVisibility] = useColumnVisibility<TData>();

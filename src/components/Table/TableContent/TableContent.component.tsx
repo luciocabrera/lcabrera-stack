@@ -16,7 +16,6 @@ import { styles } from './TableContent.stylex';
 
 export const TableContent = <T extends Record<string, unknown>>({
   actions,
-  columns,
   data,
   density = 'compact',
   icon,
@@ -26,8 +25,6 @@ export const TableContent = <T extends Record<string, unknown>>({
   isLoading = false,
   isStriped = false,
   locale,
-  onFilterChange,
-  onSortChange,
   overscan = 6,
   persistenceKey,
   rowHeight = 32,
@@ -44,12 +41,9 @@ export const TableContent = <T extends Record<string, unknown>>({
     setIsSettingsOpen,
     setIsSettingsPinned,
   } = useTableContent({
-    columns,
     data,
     infiniteScrollConfig,
     isClientSortingEnabled,
-    onFilterChange,
-    onSortChange,
     persistenceKey,
   });
 
@@ -86,12 +80,10 @@ export const TableContent = <T extends Record<string, unknown>>({
             isStriped={isStriped}
           >
             <TableHeader
-              columns={columns}
               data={dataToRender}
               isLoading={isLoading || isLoadingMore}
             />
             <TableBody
-              columns={columns}
               data={dataToRender}
               isLoading={isLoading || isLoadingMore}
               locale={locale}
@@ -104,7 +96,6 @@ export const TableContent = <T extends Record<string, unknown>>({
       </div>
 
       <TableSettingsDrawer
-        columns={columns}
         isOpen={isSettingsOpen}
         isPinned={isSettingsPinned}
         onClose={handleCloseSettings}

@@ -14,6 +14,7 @@ export {
 // Hooks - Actions
 export {
   useAppendTableData,
+  useBatchSetTableSettings,
   useBulkSetColumnSizing,
   useClearAllColumnFilters,
   useClearColumnFilter,
@@ -27,6 +28,11 @@ export {
   useSetPaginationMeta,
   useSetSorting,
 } from './hooks';
+
+export type { BatchTableSettingsUpdate } from './hooks';
+
+// Imperative update ref hook
+export { useIsImperativeUpdateRef } from './hooks';
 
 // Context
 export { TableContext } from './TableContext.context';

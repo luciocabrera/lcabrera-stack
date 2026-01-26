@@ -1,3 +1,5 @@
+import { useRef } from 'react';
+
 import { useStore } from '@/hooks';
 import { deepFreeze } from '@/utils';
 
@@ -5,6 +7,8 @@ import type {
   ColumnOrderState,
   ColumnSizingState,
   ColumnVisibilityState,
+  SortingState,
+  TableColumn,
   TableMeta,
   TableState,
 } from '../Table.types';
@@ -15,6 +19,7 @@ import { TableContext, type TableContextValue } from './TableContext.context';
 
 type GetInitialTableStateArgs<TData> = {
   initialColumnOrder?: ColumnOrderState;
+  initialColumns: TableColumn[];
   initialColumnSizing?: ColumnSizingState;
   initialColumnVisibility?: ColumnVisibilityState;
   initialData?: TData[];
@@ -26,6 +31,7 @@ type GetInitialTableStateArgs<TData> = {
  */
 const getInitialTableState = <TData,>({
   initialColumnOrder = [],
+  initialColumns,
   initialColumnSizing = {},
   initialColumnVisibility = new Set<string>(),
   initialData = [],
@@ -34,6 +40,7 @@ const getInitialTableState = <TData,>({
   columnFilters: {},
   columnOrder: initialColumnOrder,
   columnPinning: { left: [], right: [] },
+  columns: initialColumns,
   columnSizing: initialColumnSizing,
   columnVisibility: initialColumnVisibility,
   data: initialData,
@@ -81,6 +88,7 @@ export const TableProvider = <TData extends Record<string, unknown>>({
   children,
   initialColumnFilters,
   initialColumnOrder,
+  initialColumns,
   initialColumnSizing,
   initialColumnVisibility,
   initialData = [],
@@ -93,6 +101,18 @@ export const TableProvider = <TData extends Record<string, unknown>>({
   const persistedState = persistenceKey
     ? readPersistedStateFromCookie({ persistenceKey })
     : {};
+
+  // Trust initialSorting from loader - it's the source of truth
+  // The loader reads sorting directly from the URL's sort= param
+  // Don't read from window.location here - causes race conditions during navigation
+  const effectiveSorting: SortingState | undefined = initialSorting;
+
+  console.log('[TableProvider] Mount/Render:', {
+    effectiveSorting,
+    initialSorting,
+    persistedStateSorting: (persistedState as Partial<TableState<TData>>).sorting,
+    persistenceKey,
+  });
 
   // Loader-provided values take precedence over persisted state
   const effectiveColumnSizing: ColumnSizingState | undefined =
@@ -115,19 +135,26 @@ export const TableProvider = <TData extends Record<string, unknown>>({
     ? deepFreeze(initialColumnFilters)
     : undefined;
 
+  // Ref to track when an imperative update is in progress
+  // When true, effects should skip syncing to URL to avoid race conditions
+  const isImperativeUpdateRef = useRef(false);
+
   const tableStore = useStore<TableState<TData>>(
     getInitialTableState({
       initialColumnOrder: effectiveColumnOrder,
+      initialColumns,
       initialColumnSizing: effectiveColumnSizing,
       initialColumnVisibility: effectiveColumnVisibility,
       initialData,
       initialPersistedState: {
         ...(persistedState as Partial<TableState<TData>>),
-        // Override with loader-provided values
-        ...(frozenColumnFilters
-          ? { columnFilters: frozenColumnFilters }
-          : {}),
-        ...(initialSorting ? { sorting: initialSorting } : {}),
+        // Override with loader-provided values (use explicit check, not truthy)
+        ...(frozenColumnFilters === undefined
+          ? {}
+          : { columnFilters: frozenColumnFilters }),
+        // Use effectiveSorting which reads from current URL to handle race conditions
+        // during navigation transitions when loader data might be stale
+        ...(effectiveSorting === undefined ? {} : { sorting: effectiveSorting }),
       },
     }),
   );
@@ -138,7 +165,7 @@ export const TableProvider = <TData extends Record<string, unknown>>({
 
   return (
     <TableContext
-      value={{ metaStore, tableStore } as TableContextValue<unknown>}
+      value={{ isImperativeUpdateRef, metaStore, tableStore } as TableContextValue<unknown>}
     >
       {children}
     </TableContext>

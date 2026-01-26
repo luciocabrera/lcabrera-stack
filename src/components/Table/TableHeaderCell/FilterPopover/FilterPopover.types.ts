@@ -1,6 +1,8 @@
 import type { TableColumn } from '@/components/Table/Table.types';
 import type { ColumnFilter } from '@/types/filterOperators.types';
 
+// import type { HandleFilterParams } from '../../TableHeader/TableHeader.types';
+
 export type FilterPopoverProps = {
   column: TableColumn;
   fetchFilterOptions?: (
@@ -8,8 +10,8 @@ export type FilterPopoverProps = {
   ) => Promise<{ hasMore: boolean; values: string[] }>;
   filter?: ColumnFilter;
   filterOptions?: string[];
-  onApply: (filter?: ColumnFilter) => void;
-  onClear: () => void;
+  // onApply: (params: HandleFilterParams) => void;
+  // onClear: () => void;
   popoverId: string;
 };
 

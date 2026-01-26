@@ -6,8 +6,10 @@ import { useColumnResize } from '@/components/Table/hooks';
 import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
 import { useRenderTracker } from '@/utils/performance';
 
+import type { HandleResizeParams } from '../TableHeader/TableHeader.types';
 import type { TableHeaderCellProps } from './TableHeaderCell.types';
 
+import { useSetColumnSizing } from '../TableContext';
 import { FilterButton } from './FilterButton';
 import { FilterPopover } from './FilterPopover';
 import { SortIcon } from './SortIcon';
@@ -31,10 +33,6 @@ export const TableHeaderCell = ({
   label,
   maxWidth,
   minWidth,
-  onFilterApply,
-  onFilterClear,
-  onResize,
-  onResizeDoubleClick,
   onSettingsClick,
   onSort,
   sortDirection,
@@ -44,12 +42,17 @@ export const TableHeaderCell = ({
 }: TableHeaderCellProps) => {
   useRenderTracker(`TableHeaderCell:${columnKey}`);
   const filterPopoverId = useId();
+  const setColumnSizing = useSetColumnSizing();
 
-  const handleSort = (event: React.MouseEvent) => {
+  const handleResize = ({ columnKey, width }: HandleResizeParams) => {
+    setColumnSizing({ columnKey, width });
+  };
+
+  const handleSort = () => {
     if (!isSortable || !onSort) return;
     const nextDirection = getNextSortDirection(sortDirection);
-    const isMultiSort = event.shiftKey;
-    onSort({ columnKey, direction: nextDirection, isMultiSort });
+    // const isMultiSort = event.shiftKey;
+    onSort({ columnKey, direction: nextDirection });
   };
 
   const currentWidth =
@@ -60,17 +63,13 @@ export const TableHeaderCell = ({
     currentWidth,
     maxWidth,
     minWidth,
-    onResize:
-      onResize ??
-      (() => {
-        // No-op when onResize is not provided
-      }),
+    onResize: handleResize,
   });
 
   const handleResizeDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
     event.preventDefault();
     event.stopPropagation();
-    onResizeDoubleClick?.(columnKey);
+    setColumnSizing({ columnKey, width: undefined });
   };
 
   return (
@@ -92,9 +91,7 @@ export const TableHeaderCell = ({
         {isSortable && (
           <button
             aria-label={`Sort by ${label}`}
-            onClick={(e) => {
-              handleSort(e);
-            }}
+            onClick={handleSort}
             type='button'
             {...stylex.props(
               tableHeaderCellStyles.sortButton,
@@ -116,8 +113,6 @@ export const TableHeaderCell = ({
               fetchFilterOptions={fetchFilterOptions}
               filter={filter}
               filterOptions={filterOptions}
-              onApply={onFilterApply}
-              onClear={onFilterClear}
               popoverId={filterPopoverId}
             />
           </>
@@ -134,22 +129,20 @@ export const TableHeaderCell = ({
         )}
       </div>
       {/* Resize handle */}
-      {onResize && (
+      <div
+        aria-label={`Resize ${label} column`}
+        onDoubleClick={handleResizeDoubleClick}
+        onMouseDown={onMouseDown}
+        role='separator'
+        {...stylex.props(tableHeaderCellStyles.resizeHandle)}
+      >
         <div
-          aria-label={`Resize ${label} column`}
-          onDoubleClick={handleResizeDoubleClick}
-          onMouseDown={onMouseDown}
-          role='separator'
-          {...stylex.props(tableHeaderCellStyles.resizeHandle)}
-        >
-          <div
-            {...stylex.props(
-              tableHeaderCellStyles.resizeHandleLine,
-              isResizing && tableHeaderCellStyles.resizeHandleActive,
-            )}
-          />
-        </div>
-      )}
+          {...stylex.props(
+            tableHeaderCellStyles.resizeHandleLine,
+            isResizing && tableHeaderCellStyles.resizeHandleActive,
+          )}
+        />
+      </div>
     </th>
   );
 };
