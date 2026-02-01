@@ -5,7 +5,7 @@ import type { EnterpriseOrdersResponse } from '@/services';
 
 import { readPersistedStateFromCookie } from '@/components/Table/utils';
 import { enterpriseOrdersApi } from '@/services';
-import { readTableStateFromURL } from '@/utils/urlState';
+import { encodeStateToURL, readTableStateFromURL } from '@/utils/urlState';
 
 import { PERSISTENCE_KEY } from './EnterpriseOrders.constants';
 
@@ -39,14 +39,24 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
     cookieState.columnVisibility ??
     new Set<string>();
 
-    //  const sorting: SortingState = urlState?.sorting ?? cookieState.sorting ?? [];
+  //  const sorting: SortingState = urlState?.sorting ?? cookieState.sorting ?? [];
   //  const filters: ColumnFiltersState = urlState?.filters ?? cookieState.columnFilters ?? {};
   // Read sorting from standalone param only
   // Don't fall back to cookie - URL is the source of truth for sorting
   // If sort= param is absent, sorting should be empty (user may have reset it)
   const standaloneSortParam = url.searchParams.get('sort');
+  const decodedSortParam = standaloneSortParam
+    ? decodeURIComponent(standaloneSortParam)
+    : null;
+  const encodedSortParam = encodeURIComponent(standaloneSortParam ?? '');
+  // const encoded64= encodeStateToURL(JSON.parse(standaloneSortParam??'{}'));
+
   console.log('[LOADER] URL:', request.url);
-  console.log('[LOADER] standaloneSortParam:', standaloneSortParam);
+  console.log('[LOADER] standaloneSortParam:', {
+    decodedSortParam,
+    encodedSortParam,
+    standaloneSortParam,
+  });
   let sorting: SortingState = [];
   if (standaloneSortParam) {
     try {
@@ -55,8 +65,7 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
       // Invalid JSON, use empty array
     }
   }
-  console.log('[LOADER] Final sorting:', {sorting, urlState });
-  
+
   // Read filters from standalone param only
   // Don't fall back to cookie - URL is the source of truth for filters
   // If filters= param is absent, filters should be empty (user may have reset them)
@@ -69,18 +78,23 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
       // Invalid JSON, use empty object
     }
   }
+  console.log('[LOADER] Final sorting:', {
+    standaloneFiltersParam,
+    standaloneSortParam,
+    urlState,
+  });
+
   const columnSizing: Record<string, number> = cookieState.columnSizing ?? {};
 
   // Return the promise directly (not awaited) for Suspense streaming
-  const enterpriseOrdersPromise: Promise<
-    EnterpriseOrdersResponse & { hasMore: boolean }
-  > = enterpriseOrdersApi.fetchEnterpriseOrdersPaginated({
-    filter: filters,
-    limit: 50,
-    requestUrl: request.url,
-    skip: 0,
-    sorting,
-  });
+  const enterpriseOrdersPromise: Promise<EnterpriseOrdersResponse> =
+    enterpriseOrdersApi.fetchEnterpriseOrdersPaginated({
+      filter: filters,
+      limit: 50,
+      requestUrl: request.url,
+      skip: 0,
+      sorting,
+    });
 
   return {
     columnOrder,
@@ -88,6 +102,7 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
     columnVisibility,
     enterpriseOrdersPromise,
     filters,
+    key: `${standaloneSortParam ?? ''}${standaloneFiltersParam ?? ''}`,
     sorting,
   };
 };

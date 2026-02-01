@@ -16,3 +16,5 @@ export const INITIAL_PAGE_SIZE = 50;
 export const LOAD_MORE_PAGE_SIZE = 50;
 export const INFINITE_SCROLL_THRESHOLD = 200;
 export const STRATEGY = 'offset-limit';
+
+export const DEFAULT_OVERSCAN = 6;

@@ -1,64 +1,67 @@
 import * as stylex from '@stylexjs/stylex';
 
 import { Table } from '@/components/Table';
-import { TableProvider } from '@/components/Table/TableContext';
+import { TableConfigProvider } from '@/components/Table/TableContext';
 import { TableSuspenseBoundary } from '@/components/Table/TableSuspenseBoundary';
 
 import type { TableLayoutProps } from './TableLayout.types';
 
 import { styles } from './TableLayout.stylex';
 
-export const TableLayout = <TData extends Record<string, unknown>>({
+export const TableLayout = <
+  TData extends Record<string, unknown>,
+  TResponse = Record<string, unknown>,
+>({
   columnOrder,
   columns,
   columnSizing,
   columnVisibility,
   dataPromise,
   dataSelector,
+  dataTotalSelector,
   density = 'comfortable',
   filters,
-  infiniteScrollConfig,
   isBordered = true,
   isStriped = true,
+  onLoadMore,
   persistenceKey,
   sorting,
   title,
-}: TableLayoutProps<TData>) => {
-  // const sortKey = JSON.stringify(sorting);
-  // const filterKey = JSON.stringify(filters);
-  // const tableKey = `${sortKey}-${filterKey}`;
+}: TableLayoutProps<TData, TResponse>) => {
+  const columnsState = {
+    columnFilters: filters,
+    columnOrder,
+    columns,
+    columnSizing,
+    columnVisibility,
+    sorting,
+  };
+
+  const metaState = {
+    density,
+    isBordered,
+    isStriped,
+    persistenceKey,
+    title,
+  };
 
   return (
     <div {...stylex.props(styles.container)}>
-      <TableProvider<TData>
-        initialColumnFilters={filters}
-        initialColumnOrder={columnOrder}
-        initialColumns={columns}
-        initialColumnSizing={columnSizing}
-        initialColumnVisibility={columnVisibility}
-        initialSorting={sorting}
-        persistenceKey={persistenceKey}
+      <TableConfigProvider<TData>
+        columnsState={columnsState}
+        metaState={metaState}
       >
-        <TableSuspenseBoundary<TData, unknown>
-          dataPromise={dataPromise}
-          dataSelector={dataSelector}
-          // persistenceKey={persistenceKey}
-          title={title}
-        >
-          {(data) => (
-            <Table<TData>
-              data={data}
-              density={density}
-              infiniteScrollConfig={infiniteScrollConfig}
-              isBordered={isBordered}
-              isStriped={isStriped}
-              // key={tableKey}
-              // persistenceKey={persistenceKey}
-              title={title}
+        <TableSuspenseBoundary<TData, TResponse> dataPromise={dataPromise}>
+          {(response) => (
+            <Table<TData, TResponse>
+              dataSelector={dataSelector}
+              dataTotalSelector={dataTotalSelector}
+              onLoadMore={onLoadMore}
+              response={response}
             />
           )}
         </TableSuspenseBoundary>
-      </TableProvider>
+      </TableConfigProvider>
     </div>
   );
 };

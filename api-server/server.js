@@ -8,13 +8,13 @@ const port = 3001;
 // Helper to format SQL query for pgAdmin (copy-paste ready)
 function formatQueryForPgAdmin(query, params = []) {
   let formattedQuery = query;
-  params.forEach((param, index) => {
+  for (const [index, param] of params.entries()) {
     const placeholder = `$${index + 1}`;
     let value;
     if (param === null) {
       value = 'NULL';
     } else if (typeof param === 'string') {
-      value = `'${param.replace(/'/g, "''")}'`;
+      value = `'${param.replaceAll('\'', "''")}'`;
     } else if (typeof param === 'boolean') {
       value = param ? 'TRUE' : 'FALSE';
     } else if (param instanceof Date) {
@@ -23,7 +23,7 @@ function formatQueryForPgAdmin(query, params = []) {
       value = String(param);
     }
     formattedQuery = formattedQuery.replace(placeholder, value);
-  });
+  }
   return formattedQuery;
 }
 

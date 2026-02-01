@@ -4,54 +4,40 @@ import { useRenderTracker } from '@/utils/performance';
 
 import type { TableProps } from './Table.types';
 
-import { DEFAULT_ROW_HEIGHT } from './Table.constants';
 import { styles } from './Table.stylex';
 import { TableContent } from './TableContent';
+import { TableDataProvider } from './TableContext';
 
-/**
- * Table component - renders the table content.
- * 
- * NOTE: This component expects to be wrapped in a TableProvider!
- * When using TableLayout, the provider is already set up.
- * For standalone usage, wrap with TableProvider manually.
- */
-export const Table = <T extends Record<string, unknown>>({
+export const Table = <TData extends Record<string, unknown>, TResponse>({
   actions,
-  data,
-  density = 'compact',
+  dataSelector,
+  dataTotalSelector,
   icon,
-  infiniteScrollConfig,
-  isBordered = false,
-  isClientSortingEnabled = false,
   isFlexWrapperEnabled = true,
-  isLoading = false,
-  isStriped = false,
-  locale,
-  overscan = 6,
-  // persistenceKey,
-  rowHeight = DEFAULT_ROW_HEIGHT,
-  title,
-
-}: TableProps<T>) => {
+  onLoadMore,
+  response,
+}: TableProps<TData, TResponse>) => {
   useRenderTracker('Table');
+  const data = dataSelector
+    ? dataSelector(response)
+    : ([] as unknown as TData[]);
+  const totalRows = dataTotalSelector
+    ? dataTotalSelector(response)
+    : data.length;
 
   const tableContent = (
-    <TableContent
-      actions={actions}
-      data={data}
-      density={density}
-      icon={icon}
-      infiniteScrollConfig={infiniteScrollConfig}
-      isBordered={isBordered}
-      isClientSortingEnabled={isClientSortingEnabled}
-      isLoading={isLoading}
-      isStriped={isStriped}
-      locale={locale}
-      overscan={overscan}
-      // persistenceKey={persistenceKey}
-      rowHeight={rowHeight}
-      title={title}
-    />
+    <TableDataProvider<TData>
+      dataState={{
+        data,
+        totalRows,
+      }}
+    >
+      <TableContent
+        actions={actions}
+        icon={icon}
+        onLoadMore={onLoadMore}
+      />
+    </TableDataProvider>
   );
 
   if (isFlexWrapperEnabled)

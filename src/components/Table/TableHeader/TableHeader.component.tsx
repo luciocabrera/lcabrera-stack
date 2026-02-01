@@ -2,55 +2,37 @@ import * as stylex from '@stylexjs/stylex';
 import { useMemo } from 'react';
 import { useSearchParams } from 'react-router';
 
+import { useSetColumnsSorting } from '@/components/Table/TableContext/hooks/store/columns/actions';
+import {
+  useGetColumnFilters,
+  useGetColumns,
+  useGetColumnSizing,
+  useGetColumnsSorting,
+  useGetEffectiveColumns,
+} from '@/components/Table/TableContext/hooks/store/columns/selectors';
 import { useRenderTracker } from '@/utils/performance';
 
 import type { HandleSortParams, TableHeaderProps } from './TableHeader.types';
 
 import { DEFAULT_MIN_COLUMN_WIDTH } from '../Table.constants';
-import {
-  useColumnFilters,
-  useColumnOrder,
-  useColumnSizing,
-  useColumnVisibility,
-  useSetSorting,
-  useSorting,
-} from '../TableContext';
-import { useColumns } from '../TableContext/hooks/selectors.hooks';
 import { TableHeaderCell } from '../TableHeaderCell';
 import { TableRow } from '../TableRow';
 import { tableHeaderStyles } from './TableHeader.stylex';
 
-export const TableHeader = <TData extends Record<string, unknown>>({
+export const TableHeader = <TData extends Record<string, unknown>, TResponse>({
   customStylex,
-  data,
-  isLoading = false,
   ...rest
-}: TableHeaderProps<TData>) => {
+}: TableHeaderProps<TData, TResponse>) => {
   useRenderTracker('TableHeader');
-  const [columns] = useColumns<TData>();
+
+  const columns = useGetColumns<TData>();
+  const columnSizing = useGetColumnSizing();
+  const sorting = useGetColumnsSorting();
+  const effectiveColumns = useGetEffectiveColumns();
+  const columnFilters = useGetColumnFilters();
+
   const [, setSearchParams] = useSearchParams();
-  const [columnSizing] = useColumnSizing<TData>();
-  const [sorting] = useSorting<TData>();
-  const [columnOrder] = useColumnOrder<TData>();
-  const [columnVisibility] = useColumnVisibility<TData>();
-  const [columnFilters] = useColumnFilters<TData>();
-  const setSorting = useSetSorting();
-
-  // Filter visible columns
-  const visibleColumns = columns.filter(
-    (col) => !columnVisibility.has(col.key),
-  );
-
-  // Apply column order
-  const orderedColumns =
-    columnOrder.length > 0
-      ? [
-          ...columnOrder
-            .map((key) => visibleColumns.find((col) => col.key === key))
-            .filter((col): col is NonNullable<typeof col> => col !== undefined),
-          ...visibleColumns.filter((col) => !columnOrder.includes(col.key)),
-        ]
-      : visibleColumns;
+  const setSorting = useSetColumnsSorting();
 
   const handleSort = ({ columnKey, direction }: HandleSortParams) => {
     const currentSort = sorting.find((s) => s.columnKey === columnKey);
@@ -93,32 +75,10 @@ export const TableHeader = <TData extends Record<string, unknown>>({
         continue;
       }
 
-      // Calculate from data for string/currency columns (client-side fallback)
-      // Only if we have data loaded and no fetchFilterOptions function
-      if (
-        data.length > 0 &&
-        !col.fetchFilterOptions &&
-        (col.dataType === 'string' || col.dataType === 'currency')
-      ) {
-        const uniqueValues = new Set<string>();
-
-        for (const row of data) {
-          const value = row[col.key];
-          if (value !== undefined && value !== null && value !== '') {
-            // eslint-disable-next-line @typescript-eslint/no-base-to-string
-            uniqueValues.add(String(value));
-          }
-        }
-
-        if (uniqueValues.size > 0 && uniqueValues.size <= 100) {
-          // Only use facet filter if we have reasonable number of options
-          options[col.key] = [...uniqueValues].toSorted();
-        }
-      }
     }
 
     return options;
-  }, [columns, data]);
+  }, [columns]);
 
   return (
     <thead
@@ -127,7 +87,7 @@ export const TableHeader = <TData extends Record<string, unknown>>({
       {...stylex.props(tableHeaderStyles.container, customStylex)}
     >
       <TableRow isHeader>
-        {orderedColumns.map((col) => {
+        {effectiveColumns.map((col) => {
           const finalWidth = columnSizing[col.key];
           const effectiveMinWidth = col.minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
 
@@ -147,7 +107,6 @@ export const TableHeader = <TData extends Record<string, unknown>>({
               filterOptions={columnFilterOptions[col.key]}
               hasSettings
               isFilterable={col.isFilterable !== false}
-              isLoading={isLoading}
               isSortable={col.isSortable !== false}
               key={col.key}
               label={col.label}

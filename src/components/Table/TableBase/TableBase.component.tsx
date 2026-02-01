@@ -2,20 +2,21 @@ import * as stylex from '@stylexjs/stylex';
 
 import type { TableBaseProps } from './TableBase.types';
 
+import {
+  useGetTableDensity,
+  useGetTableIsBordered,
+  useGetTableIsStriped,
+} from '../TableContext/hooks/store/meta/selectors';
 import { tableStyles } from './TableBase.stylex';
 
-export const TableBase = <TData extends Record<string, unknown>>(
-  props: TableBaseProps<TData>,
-) => {
-  const {
-    children,
-    customStylex,
-    density = 'comfortable',
-    isBordered = true,
-    isStriped = false,
-    ...rest
-  } = props;
-
+export const TableBase = <TData extends Record<string, unknown>,TResponse>({
+  children,
+  customStylex,
+  ...rest
+}: TableBaseProps<TData, TResponse>) => {
+  const isStriped = useGetTableIsStriped();
+  const isBordered = useGetTableIsBordered();
+  const density = useGetTableDensity();
   return (
     <table
       data-striped={isStriped}

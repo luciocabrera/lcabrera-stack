@@ -7,6 +7,4 @@ export type TableTitleProps = {
   customStylex?: StyleXStyles;
   /** Optional icon to display before the title */
   icon?: ReactNode;
-  /** The title text */
-  title?: string;
 };

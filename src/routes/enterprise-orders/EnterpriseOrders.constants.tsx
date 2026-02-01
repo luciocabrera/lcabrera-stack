@@ -1,10 +1,10 @@
 import type { TableColumn } from '@/components/Table/Table.types';
 
-import { enterpriseOrdersApi } from '@/services';
+import { type EnterpriseOrder, enterpriseOrdersApi } from '@/services';
 
 export const PERSISTENCE_KEY = 'enterprise-orders-table';
 
-export const COLUMNS: TableColumn[] = [
+export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   {
     dataType: 'number',
     key: 'order_id',

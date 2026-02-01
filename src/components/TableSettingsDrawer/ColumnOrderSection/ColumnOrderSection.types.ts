@@ -3,7 +3,6 @@ import type { ComponentPropsWithoutRef } from 'react';
 import type {
   ColumnOrderState,
   ColumnVisibilityState,
-  TableColumn,
 } from '@/components/Table';
 
 /**
@@ -12,8 +11,6 @@ import type {
 export type ColumnOrderSectionProps = ComponentPropsWithoutRef<'div'> & {
   /** Current column order state */
   columnOrder: ColumnOrderState;
-  /** Available columns */
-  columns: TableColumn[];
   /** Current column visibility state */
   columnVisibility: ColumnVisibilityState;
   /** Callback when column order changes */

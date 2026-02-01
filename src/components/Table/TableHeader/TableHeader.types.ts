@@ -17,12 +17,11 @@ export type HandleResizeParams = {
 export type HandleSortParams = {
   columnKey: string;
   direction?: SortDirection;
-    // isMultiSort?: boolean;
+  // isMultiSort?: boolean;
 };
 
-export type TableHeaderProps<TData extends Record<string, unknown>> =
-  ComponentPropsWithoutRef<'thead'> &
-    Pick<TableProps<TData>,  'customStylex' | 'data'> & {
-      /** Show skeleton loading state in header cells */
-      isLoading?: boolean;
-    };
+export type TableHeaderProps<
+  TData extends Record<string, unknown>,
+  TResponse,
+> = ComponentPropsWithoutRef<'thead'> &
+  Pick<TableProps<TData, TResponse>, 'customStylex'>;

@@ -7,15 +7,15 @@ import type {
 } from '@/components/Table/Table.types';
 import type { ColumnFilter } from '@/types/filterOperators.types';
 
-import type {  HandleSortParams } from '../TableHeader/TableHeader.types';
+import type { HandleSortParams } from '../TableHeader/TableHeader.types';
 
 export type OnResizeParams = {
   columnKey: string;
   width: number;
 };
 
-export type TableHeaderCellProps = ComponentPropsWithoutRef<'th'> &
-  Pick<TableColumn, 'dataType' | 'label' | 'minWidth'> & {
+export type TableHeaderCellProps<TData> = ComponentPropsWithoutRef<'th'> &
+  Pick<TableColumn<TData>, 'dataType' | 'label' | 'minWidth'> & {
     columnKey: string;
     customStylex?: StyleXStyles;
     fetchFilterOptions?: (
@@ -26,7 +26,6 @@ export type TableHeaderCellProps = ComponentPropsWithoutRef<'th'> &
     filterOptions?: string[];
     hasSettings?: boolean;
     isFilterable?: boolean;
-    isLoading?: boolean;
     isSortable?: boolean;
     maxWidth?: number;
     onSettingsClick?: () => void;

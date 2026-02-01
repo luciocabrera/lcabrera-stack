@@ -1,6 +1,11 @@
 import type { TableProps } from '../Table.types';
 
-export type TableContentProps<T extends Record<string, unknown>> = Omit<
-  TableProps<T>,
-  'initialMeta' | 'isFlexWrapperEnabled'
+export type TableContentProps<
+  TData extends Record<string, unknown>,
+  TResponse,
+> = Pick<
+  TableProps<TData, TResponse>,
+  | 'actions'
+  | 'icon'
+  | 'onLoadMore'
 >;

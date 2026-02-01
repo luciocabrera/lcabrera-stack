@@ -14,37 +14,21 @@ import { TableTitle } from '../TableTitle';
 import { useTableContent } from './hooks';
 import { styles } from './TableContent.stylex';
 
-export const TableContent = <T extends Record<string, unknown>>({
+export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   actions,
-  data,
-  density = 'compact',
   icon,
-  infiniteScrollConfig,
-  isBordered = false,
-  isClientSortingEnabled = false,
-  isLoading = false,
-  isStriped = false,
-  locale,
-  overscan = 6,
-  // persistenceKey,
-  rowHeight = 32,
-  title,
-}: TableContentProps<T>) => {
+  onLoadMore,
+}: TableContentProps<TData, TResponse>) => {
   useRenderTracker('TableContent');
 
   const {
     containerRef,
-    dataToRender,
-    isLoadingMore,
     isSettingsOpen,
     isSettingsPinned,
     setIsSettingsOpen,
     setIsSettingsPinned,
-  } = useTableContent({
-    data,
-    infiniteScrollConfig,
-    isClientSortingEnabled,
-    // persistenceKey,
+  } = useTableContent<TData, TResponse>({
+    onLoadMore,
   });
 
   const handleCloseSettings = () => {
@@ -71,26 +55,11 @@ export const TableContent = <T extends Record<string, unknown>>({
             </>
           }
           icon={icon}
-          title={title}
         />
         <div ref={containerRef} {...stylex.props(styles.container)}>
-          <TableBase
-            density={density}
-            isBordered={isBordered}
-            isStriped={isStriped}
-          >
-            <TableHeader
-              data={dataToRender}
-              isLoading={isLoading || isLoadingMore}
-            />
-            <TableBody
-              data={dataToRender}
-              isLoading={isLoading || isLoadingMore}
-              locale={locale}
-              overscan={overscan}
-              rowHeight={rowHeight}
-              tableContainerRef={containerRef}
-            />
+          <TableBase>
+            <TableHeader  />
+            <TableBody  tableContainerRef={containerRef} />
           </TableBase>
         </div>
       </div>

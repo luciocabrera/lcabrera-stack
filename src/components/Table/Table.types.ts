@@ -40,55 +40,37 @@ export type ColumnSizingState = Record<string, number>;
  */
 export type ColumnVisibilityState = Set<string>;
 
-/**
- * Parameters for cursor-based pagination strategy
- */
-export type CursorParams = {
-  cursor: string;
-  limit: number;
-};
+// /**
+//  * Parameters for cursor-based pagination strategy
+//  */
+// export type CursorParams = {
+//   cursor: string;
+//   limit: number;
+// };
 
 /**
  * Configuration for infinite scroll behavior
  */
-export type InfiniteScrollConfig<TData> = {
-  /** Initial page size for first load */
-  initialPageSize: number;
-  /** Whether infinite scroll is enabled */
-  isEnabled: boolean;
-  /** Page size for subsequent loads */
-  loadMorePageSize: number;
-  /** Callback to load more data with strategy-specific params */
-  onLoadMore: (
-    params: PaginationParams & {
-      filters?: ColumnFiltersState;
-      sorting?: SortingState;
-    },
-  ) => Promise<InfiniteScrollResponse<TData>>;
-  /** Pagination strategy to use */
-  strategy: PaginationStrategy;
-  /** Distance from bottom (px) to trigger load. Defaults to DEFAULT_INFINITE_SCROLL_THRESHOLD */
-  threshold?: number;
-};
+// export type InfiniteScrollConfig<TData> = {
+
+//   /** Callback to load more data with strategy-specific params */
+//   onLoadMore: (
+//     params: PaginationState & {
+//       filters?: ColumnFiltersState;
+//       sorting?: SortingState;
+//     },
+//   ) => Promise<InfiniteScrollResponse<TData>>;
+
+// };
 
 /**
  * Response from infinite scroll load more callback
  */
 export type InfiniteScrollResponse<TData> = {
   data: TData[];
-  hasMore: boolean;
-  /** Next cursor for cursor-based pagination */
-  nextCursor?: string;
+
   /** Total number of rows available */
   totalRows?: number;
-};
-
-/**
- * Parameters for offset-limit pagination strategy
- */
-export type OffsetLimitParams = {
-  limit: number;
-  skip: number;
 };
 
 export type OnFilterChangeArgs = {
@@ -99,43 +81,51 @@ export type OnSortChangeArgs = {
   sorting: { columnKey: string; direction: 'asc' | 'desc' }[];
 };
 
-/**
- * Parameters for page-based pagination strategy
- */
-export type PageBasedParams = {
-  page: number;
-  pageSize: number;
-};
+// /**
+//  * Union of all pagination parameter types
+//  */
+// export type PaginationParams =
+//   // | CursorParams
+//   PaginationState;
+
+// /**
+//  * Parameters for page-based pagination strategy
+//  */
+// export type PageBasedParams = {
+//   page: number;
+//   pageSize: number;
+// };
+
+// /**
+//  * Pagination metadata for infinite scroll strategies
+//  */
+// export type PaginationMeta = {
+//   /** Current cursor for cursor-based pagination */
+//   cursor?: string;
+//   /** Current offset for offset-limit pagination */
+//   offset?: number;
+//   /** Current page for page-based pagination */
+//   page?: number;
+// };
 
 /**
- * Pagination metadata for infinite scroll strategies
- */
-export type PaginationMeta = {
-  /** Current cursor for cursor-based pagination */
-  cursor?: string;
-  /** Current offset for offset-limit pagination */
-  offset?: number;
-  /** Current page for page-based pagination */
-  page?: number;
-};
-
-/**
- * Union of all pagination parameter types
- */
-export type PaginationParams =
-  // | CursorParams
-  | OffsetLimitParams
-  // | PageBasedParams;
-
-/**
- * Pagination state
+ * Parameters for offset-limit pagination strategy
  */
 export type PaginationState = {
-  /** Current page index (0-based) */
-  pageIndex: number;
-  /** Number of rows per page */
-  pageSize: number;
+  limit: number;
+  skip: number;
 };
+// | PageBasedParams;
+
+// /**
+//  * Pagination state
+//  */
+// export type PaginationState = {
+//   /** Current page index (0-based) */
+//   pageIndex: number;
+//   /** Number of rows per page */
+//   pageSize: number;
+// };
 
 /**
  * Pagination strategy for infinite scroll
@@ -167,7 +157,7 @@ export type SortingState = {
  */
 export type StorageType = 'cookie' | 'localStorage';
 
-export type TableColumn = {
+export type TableColumn<TData> = {
   dataType?: TableColumnDataType;
   /** Async function to fetch filter options from server (for facet filters with pagination) */
   fetchFilterOptions?: (
@@ -181,7 +171,7 @@ export type TableColumn = {
   isFilterable?: boolean;
   /** Whether this column is sortable (default: true) */
   isSortable?: boolean;
-  key: string;
+  key: keyof TData & string;
   label: string;
   maxWidth?: number;
   minWidth?: number;
@@ -206,24 +196,66 @@ export type TableColumnFormat = {
   number?: NumberFormatOptions;
 };
 
-export type TableDensity = 'comfortable' | 'compact';
-
 /**
- * Table metadata stored in metaStore
+ * Main table state stored in tableStore
  */
-export type TableMeta = {
-  /** Error message if data fetch failed */
-  error: string | undefined;
+export type TableColumnsState<TData> = {
+  /** Column filters state */
+  columnFilters: ColumnFiltersState;
+  /** Column order state */
+  columnOrder: ColumnOrderState;
+  /** Column pinning state */
+  columnPinning: ColumnPinningState;
+  columns: TableColumn<TData>[];
+  /** Column sizing state (custom widths) */
+  columnSizing: ColumnSizingState;
+  /** Column visibility state */
+  columnVisibility: ColumnVisibilityState;
+  effectiveColumns: TableColumn<TData>[];
+  /** Sorting state */
+  sorting: SortingState;
+};
+
+export type TableDataState<TData> = {
+  /** Table data array */
+  data: TData[]; /** Pagination state */
   /** Whether there are more rows to load (infinite scroll) */
   hasMore: boolean;
   /** Initial loading state */
   isLoading: boolean;
   /** Loading more rows (infinite scroll) */
   isLoadingMore: boolean;
-  /** Pagination metadata for tracking current position */
-  paginationMeta: PaginationMeta;
+  pagination: PaginationState;
+  totalLoadedRows: number;
   /** Total number of rows (for progress indication) */
   totalRows: number;
+};
+
+export type TableDensity = 'comfortable' | 'compact';
+
+export type TableMetaState = {
+  density: TableDensity;
+  /** Error message if data fetch failed */
+  error?: string;
+
+  /** Initial page size for first load */
+  initialPageSize: number;
+  isBordered: boolean;
+  isStriped: boolean;
+  /** Page size for subsequent loads */
+  loadMorePageSize: number;
+  /** Locale for formatting (defaults to navigator.language) */
+  locale?: string;
+  overscan: number;
+  /** Persistence key for storing table state (e.g., column widths) */
+  persistenceKey: string;
+
+  placeholderRowCount: number;
+  rowHeight: number;
+  /** Distance from bottom (px) to trigger load. Defaults to DEFAULT_INFINITE_SCROLL_THRESHOLD */
+  threshold: number;
+
+    title?: string;
 };
 
 /**
@@ -246,77 +278,25 @@ export type TablePersistenceConfig = {
   sorting?: StorageType;
 };
 
-export type TableProps<TData extends Record<string, unknown>> = BaseProps & {
-  // columns: TableColumn[];
-  /** Column sizing state - custom widths for columns */
-  // columnSizing?: ColumnSizingState;
-  data: TData[];
-  /** Configuration for infinite scroll behavior */
-  infiniteScrollConfig?: InfiniteScrollConfig<TData>;
-  /** Initial column filters (for SSR hydration) */
-  // initialColumnFilters?: ColumnFiltersState;
-  /** Initial column order (for SSR hydration) */
-  // initialColumnOrder?: string[];
-  /** Initial column visibility (for SSR hydration) */
-  // initialColumnVisibility?: Set<string>;
-  /** Initial metadata for table state (hasMore, totalRows, paginationMeta) */
-  initialMeta?: {
-    hasMore?: boolean;
-    paginationMeta?: Record<string, unknown>;
-    totalRows?: number;
-  };
-  /** Initial sorting state */
-  // initialSorting?: SortingState;
-  /** Enable client-side sorting when all data is available (default: false) */
+export type TableProps<
+  TData extends Record<string, unknown>,
+  TResponse,
+> = BaseProps & {
+  // data: TData[];
+  dataSelector?: (response: TResponse) => TData[];
+  dataTotalSelector?: (response: TResponse) => number;
+    /** Enable client-side sorting when all data is available (default: false) */
   isClientSortingEnabled?: boolean;
+  /** Configuration for infinite scroll behavior */
+
   isFlexWrapperEnabled?: boolean;
-  /** Show loading skeleton overlay */
-  isLoading?: boolean;
-  /** Locale for formatting (defaults to navigator.language) */
-  locale?: string;
-  /** Callback when filters change (server-side filtering) */
-  // onFilterChange?: (args: OnFilterChangeArgs) => Promise<void>;
-  // /** Callback when sorting changes (server-side sorting). If provided, sorting is server-controlled */
-  // onSortChange?: (args: OnSortChangeArgs) => Promise<void>;
-  overscan?: number;
-  /** Persistence key for storing table state (e.g., column widths) */
-  persistenceKey?: string;
-  rowHeight?: number;
-};
-/**
- * Main table state stored in tableStore
- */
-export type TableState<TData> = {
-  /** Column filters state */
-  columnFilters: ColumnFiltersState;
-  /** Column order state */
-  columnOrder: ColumnOrderState;
-  /** Column pinning state */
-  columnPinning: ColumnPinningState;
-  columns: TableColumn[];
-  /** Column sizing state (custom widths) */
-  columnSizing: ColumnSizingState;
-  /** Column visibility state */
-  columnVisibility: ColumnVisibilityState;
-  /** Table data array */
-  data: TData[];
-  /** Pagination state */
-  pagination: PaginationState;
-  /** Persistence key for storing table state (e.g., column widths) */
-  persistenceKey: string;
-  /** Row selection state */
-  rowSelection: RowSelectionState;
-    /** Sorting state */
-  sorting: SortingState;
+  onLoadMore?: (params: PaginationState) => Promise<TResponse>;
+  response: TResponse;
 };
 
 type BaseProps = ComponentPropsWithRef<'table'> & {
   /** Optional actions to display in the table title header */
   actions?: ReactNode;
   customStylex?: StyleXStyles;
-  density?: TableDensity;
   icon?: ReactNode;
-  isBordered?: boolean;
-  isStriped?: boolean;
-  title?: string;
 };

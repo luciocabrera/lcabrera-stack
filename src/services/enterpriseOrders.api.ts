@@ -84,6 +84,7 @@ export type EnterpriseOrder = {
 
 export type EnterpriseOrdersResponse = {
   data: EnterpriseOrder[];
+  hasMore?: boolean;
   total: number;
 };
 

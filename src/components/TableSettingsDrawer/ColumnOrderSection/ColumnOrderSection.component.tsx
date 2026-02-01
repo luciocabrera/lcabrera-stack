@@ -3,6 +3,7 @@ import * as stylex from '@stylexjs/stylex';
 import type { DraggableItem } from '@/components/DraggableList';
 
 import { DraggableList } from '@/components/DraggableList';
+import { useGetColumns } from '@/components/Table/TableContext/hooks/store/columns/selectors/useGetColumns.hook';
 import { ToggleSwitch } from '@/components/ToggleSwitch';
 
 import type {
@@ -14,12 +15,12 @@ import { styles } from './ColumnOrderSection.stylex';
 
 export const ColumnOrderSection = ({
   columnOrder,
-  columns,
   columnVisibility,
   onColumnOrderChange,
   onColumnVisibilityChange,
   ...props
 }: ColumnOrderSectionProps) => {
+  const columns = useGetColumns();
   // Build ordered column list (use columnOrder if available, otherwise use column definition order)
   const orderedColumns =
     columnOrder.length > 0

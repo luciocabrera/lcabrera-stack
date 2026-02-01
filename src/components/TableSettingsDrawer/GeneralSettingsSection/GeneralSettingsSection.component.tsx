@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/Button';
 import { MaximizeIcon, MinimizeIcon, RefreshIcon } from '@/components/Icons';
 import { InfoBox } from '@/components/InfoBox';
+import { useGetColumns } from '@/components/Table/TableContext/hooks/store/columns/selectors/useGetColumns.hook';
 
 import type {
   GeneralSettingsSectionProps,
@@ -13,10 +14,11 @@ import type {
 import { styles } from './GeneralSettingsSection.stylex';
 
 export const GeneralSettingsSection = ({
-  columns,
   onColumnSizingChange,
   ...props
 }: GeneralSettingsSectionProps) => {
+  const columns = useGetColumns();
+
   const [selectedPreset, setSelectedPreset] = useState<WidthPreset>();
 
   const handleToggle = (preset: 'default' | 'max' | 'min') => {

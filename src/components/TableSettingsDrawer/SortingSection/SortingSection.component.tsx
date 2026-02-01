@@ -7,17 +7,19 @@ import { Button } from '@/components/Button';
 import { DraggableList } from '@/components/DraggableList';
 import { MenuCloseIcon, SortAscIcon, SortDescIcon } from '@/components/Icons';
 import { InfoBox } from '@/components/InfoBox';
+import { useGetColumns } from '@/components/Table/TableContext/hooks/store/columns/selectors/useGetColumns.hook';
 
 import type { SortingSectionProps, SortItem } from './SortingSection.types';
 
 import { styles } from './SortingSection.stylex';
 
 export const SortingSection = ({
-  columns,
   onSortChange,
   sorting,
   ...props
 }: SortingSectionProps) => {
+  const columns = useGetColumns();
+
   const [selectedColumn, setSelectedColumn] = useState('');
 
   // Filter to only sortable columns

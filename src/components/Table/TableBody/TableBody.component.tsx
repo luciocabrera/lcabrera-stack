@@ -1,89 +1,56 @@
 import * as stylex from '@stylexjs/stylex';
 
 import { SpacerRow } from '@/components/Table/SpacerRow';
-import {
-  DEFAULT_MIN_COLUMN_WIDTH,
-  DEFAULT_PLACEHOLDER_ROW_COUNT,
-  DEFAULT_ROW_HEIGHT,
-} from '@/components/Table/Table.constants';
+import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
 import { TableBodyCell } from '@/components/Table/TableBodyCell';
 import {
-  useColumnOrder,
-  useColumnSizing,
-  useColumnVisibility,
-} from '@/components/Table/TableContext/hooks';
+  useGetColumnSizing,
+  useGetEffectiveColumns,
+} from '@/components/Table/TableContext/hooks/store/columns/selectors';
+import {
+  useGetTableOverscan,
+  useGetTableRowHeight,
+} from '@/components/Table/TableContext/hooks/store/meta/selectors';
 import { TableRow } from '@/components/Table/TableRow';
 import { useVirtualization } from '@/hooks';
 import { useRenderTracker } from '@/utils/performance';
 
 import type { TableBodyProps } from './TableBody.types';
 
-import { useColumns } from '../TableContext/hooks/selectors.hooks';
+import { useGetTableData } from '../TableContext/hooks/store/data/selectors';
 import { styles } from './TableBody.stylex';
-import { generatePlaceholderData } from './utils';
 
-export const TableBody = <TData extends Record<string, unknown>>({
-  data,
-  isLoading = false,
-  locale,
-  overscan,
-  placeholderRowCount = DEFAULT_PLACEHOLDER_ROW_COUNT,
-  rowHeight = DEFAULT_ROW_HEIGHT,
-  tableContainerRef,
-}: TableBodyProps<TData>) => {
+export const TableBody = ({ tableContainerRef }: TableBodyProps) => {
   useRenderTracker('TableBody');
 
-  const [columns] = useColumns<TData>();
-  const [columnSizing] = useColumnSizing<TData>();
-  const [columnOrder] = useColumnOrder<TData>();
-  const [columnVisibility] = useColumnVisibility<TData>();
-
-  // Filter visible columns
-  const visibleColumns = columns.filter(
-    (col) => !columnVisibility.has(col.key),
-  );
-
-  // Apply column order
-  const orderedColumns =
-    columnOrder.length > 0
-      ? [
-          ...columnOrder
-            .map((key) => visibleColumns.find((col) => col.key === key))
-            .filter((col): col is NonNullable<typeof col> => col !== undefined),
-          ...visibleColumns.filter((col) => !columnOrder.includes(col.key)),
-        ]
-      : visibleColumns;
-
-  // Use placeholder data when loading with no data
-  const effectiveData =
-    isLoading && data.length === 0
-      ? generatePlaceholderData<TData>({
-          columns,
-          rowCount: placeholderRowCount,
-        })
-      : data;
+  const columnSizing = useGetColumnSizing();
+  const effectiveColumns = useGetEffectiveColumns();
+  const rowHeight = useGetTableRowHeight();
+  const overscan = useGetTableOverscan();
+  const data = useGetTableData();
 
   const { bottomSpacerHeight, endIndex, offsetY, startIndex, totalHeight } =
     useVirtualization({
       containerRef: tableContainerRef,
       itemHeight: rowHeight,
       overscan,
-      totalItems: effectiveData.length,
+      totalItems: data.length,
     });
 
-  const visibleRows = effectiveData.slice(startIndex, endIndex);
-  const totalRows = effectiveData.length;
+  const visibleRows = data.slice(startIndex, endIndex);
+  const totalRows = data.length;
 
   return (
     <tbody data-testid='table-body' {...stylex.props(styles.body(totalHeight))}>
       {offsetY > 0 && (
-        <SpacerRow colSpan={orderedColumns.length} height={offsetY} />
+        <SpacerRow colSpan={effectiveColumns.length} height={offsetY} />
       )}
       {visibleRows.map((row, index) => {
         const rowIndex = startIndex + index;
+        const rowData = row as Record<string, unknown>;
         return (
           <TableRow key={rowIndex}>
-            {orderedColumns.map((col) => {
+            {effectiveColumns.map((col) => {
               const finalWidth =
                 columnSizing[col.key] ??
                 col.minWidth ??
@@ -93,12 +60,10 @@ export const TableBody = <TData extends Record<string, unknown>>({
                 <TableBodyCell
                   dataType={col.dataType}
                   format={col.format}
-                  isLoading={isLoading}
                   key={col.key}
                   label={col.label}
-                  locale={locale}
                   minWidth={col.minWidth ?? DEFAULT_MIN_COLUMN_WIDTH}
-                  value={col.key in row ? row[col.key] : ''}
+                  value={col.key in rowData ? rowData[col.key] : ''}
                   width={finalWidth}
                 />
               );
@@ -108,7 +73,7 @@ export const TableBody = <TData extends Record<string, unknown>>({
       })}
       {totalRows > 0 && bottomSpacerHeight > 0 && (
         <SpacerRow
-          colSpan={orderedColumns.length}
+          colSpan={effectiveColumns.length}
           height={bottomSpacerHeight}
         />
       )}

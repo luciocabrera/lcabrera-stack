@@ -16,20 +16,20 @@ import {
   SidePanelHeader,
   SidePanelTitle,
 } from '@/components/SidePanel';
+import {
+  useGetColumnFilters,
+  useGetColumnOrder,
+  useGetColumns,
+  useGetColumnSizing,
+  useGetColumnsSorting,
+  useGetColumnVisibility,
+} from '@/components/Table/TableContext/hooks/store/columns/selectors';
 import { Tabs } from '@/components/Tabs';
 
 import type { BatchTableSettingsUpdate } from '../Table/TableContext';
 import type { TableSettingsDrawerProps } from './TableSettingsDrawer.types';
 
-import {
-  useBatchSetTableSettings,
-  useColumnFilters,
-  useColumnOrder,
-  useColumnSizing,
-  useColumnVisibility,
-  useSorting,
-} from '../Table/TableContext';
-import { useColumns } from '../Table/TableContext/hooks/selectors.hooks';
+import { useBatchSetTableSettings } from '../Table/TableContext/hooks/store/columns/actions';
 import { ColumnOrderSection } from './ColumnOrderSection';
 import { FiltersSection } from './FiltersSection';
 import { validateFilter } from './FiltersSection/FilterEditor';
@@ -44,12 +44,12 @@ export const TableSettingsDrawer = ({
 }: TableSettingsDrawerProps) => {
   // Subscribe to table state from context
 
-  const [columns] = useColumns();
-  const [columnFilters] = useColumnFilters();
-  const [columnOrder] = useColumnOrder();
-  const [columnSizing] = useColumnSizing();
-  const [columnVisibility] = useColumnVisibility();
-  const [sorting] = useSorting();
+  const columns = useGetColumns();
+  const columnSizing = useGetColumnSizing();
+  const columnsOrder = useGetColumnOrder();
+  const columnVisibility = useGetColumnVisibility();
+  const columnFilters = useGetColumnFilters();
+  const columnsSorting = useGetColumnsSorting();
 
   const batchSetTableSettings = useBatchSetTableSettings() as (
     settings: BatchTableSettingsUpdate,
@@ -57,8 +57,8 @@ export const TableSettingsDrawer = ({
 
   const [pendingColumnFilters, setPendingColumnFilters] =
     useState(columnFilters);
-  const [pendingSorting, setPendingSorting] = useState(sorting);
-  const [pendingColumnOrder, setPendingColumnOrder] = useState(columnOrder);
+  const [pendingSorting, setPendingSorting] = useState(columnsSorting);
+  const [pendingColumnOrder, setPendingColumnOrder] = useState(columnsOrder);
   const [pendingColumnSizing, setPendingColumnSizing] = useState(columnSizing);
   const [pendingColumnVisibility, setPendingColumnVisibility] =
     useState(columnVisibility);
@@ -66,11 +66,11 @@ export const TableSettingsDrawer = ({
   // Update pending state when initialPendingState changes (when drawer opens with new values)
   useEffect(() => {
     setPendingColumnFilters(columnFilters);
-    setPendingSorting(sorting);
-    setPendingColumnOrder(columnOrder);
+    setPendingSorting(columnsSorting);
+    setPendingColumnOrder(columnsOrder);
     setPendingColumnSizing(columnSizing);
     setPendingColumnVisibility(columnVisibility);
-  }, [columnFilters, sorting, columnOrder, columnSizing, columnVisibility]);
+  }, [columnFilters, columnsSorting, columnsOrder, columnSizing, columnVisibility]);
 
   // Validate all filters before allowing accept
   const areFiltersValid = useMemo(() => {
@@ -111,8 +111,8 @@ export const TableSettingsDrawer = ({
   const handleCancel = () => {
     // Reset to original values
     setPendingColumnFilters(columnFilters);
-    setPendingSorting(sorting);
-    setPendingColumnOrder(columnOrder);
+    setPendingSorting(columnsSorting);
+    setPendingColumnOrder(columnsOrder);
     setPendingColumnSizing(columnSizing);
     setPendingColumnVisibility(columnVisibility);
     // Unpin if pinned, then close
@@ -129,7 +129,6 @@ export const TableSettingsDrawer = ({
     {
       children: (
         <GeneralSettingsSection
-          columns={columns}
           onColumnSizingChange={setPendingColumnSizing}
         />
       ),
@@ -139,7 +138,6 @@ export const TableSettingsDrawer = ({
     {
       children: (
         <SortingSection
-          columns={columns}
           onSortChange={setPendingSorting}
           sorting={pendingSorting}
         />
@@ -153,7 +151,6 @@ export const TableSettingsDrawer = ({
     {
       children: (
         <FiltersSection
-          columns={columns}
           filters={pendingColumnFilters}
           onFiltersChange={setPendingColumnFilters}
         />
@@ -168,7 +165,6 @@ export const TableSettingsDrawer = ({
       children: (
         <ColumnOrderSection
           columnOrder={pendingColumnOrder}
-          columns={columns}
           columnVisibility={pendingColumnVisibility}
           onColumnOrderChange={setPendingColumnOrder}
           onColumnVisibilityChange={setPendingColumnVisibility}

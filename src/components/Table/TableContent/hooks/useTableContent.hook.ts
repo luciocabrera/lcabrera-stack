@@ -1,40 +1,29 @@
-import { use, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
+import { useInfiniteScroll } from '@/components/Table/hooks';
+import { useGetColumnSizing } from '@/components/Table/TableContext/hooks/store/columns/selectors';
 import {
-  useInfiniteScroll,
-  useTablePersistence,
-} from '@/components/Table/hooks';
-import {
-  INFINITE_SCROLL_THRESHOLD,
-  INITIAL_PAGE_SIZE,
-  LOAD_MORE_PAGE_SIZE,
-  STRATEGY,
-} from '@/components/Table/Table.constants';
-import {
-  TableContext,
-  useColumnSizing,
-  useSorting,
-  useTableData,
-  useTableLoadingMore,
-} from '@/components/Table/TableContext';
-import { compareValues } from '@/utils/compareValues.util';
+  useGetTablePersistencyKey,
+  useGetTableThreshold,
+} from '@/components/Table/TableContext/hooks/store/meta/selectors';
+import { writeStateSlice } from '@/components/Table/utils';
 
 import type { TableContentProps } from '../TableContent.types';
 
-import { useColumns, useTablePersistenceKey } from '../../TableContext/hooks/selectors.hooks';
+type UseTableContentArgs<
+  TData extends Record<string, unknown>,
+  TResponse,
+> = Pick<TableContentProps<TData, TResponse>, 'onLoadMore'>;
 
-type UseTableContentArgs<T extends Record<string, unknown>> = Pick<
-  TableContentProps<T>,
-  'data' | 'infiniteScrollConfig' | 'isClientSortingEnabled' 
->;
-
-export const useTableContent = <T extends Record<string, unknown>>({
-  data,
-  infiniteScrollConfig,
-  isClientSortingEnabled = false,
-  // persistenceKey,
-}: UseTableContentArgs<T>) => {
-  const [columns] = useColumns<T>();
+export const useTableContent = <
+  TData extends Record<string, unknown>,
+  TResponse,
+>({
+  onLoadMore,
+}: UseTableContentArgs<TData, TResponse>) => {
+  const columnSizing = useGetColumnSizing();
+  const persistenceKey = useGetTablePersistencyKey();
+  const threshold = useGetTableThreshold();
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isSettingsPinned, setIsSettingsPinned] = useState(false);
@@ -42,76 +31,11 @@ export const useTableContent = <T extends Record<string, unknown>>({
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const context = use(TableContext);
-  const tableStore = context?.tableStore;
-
-  const [columnSizing] = useColumnSizing<T>();
-  const [storeData] = useTableData<T>();
-  const [isLoadingMore] = useTableLoadingMore();
-  const [sorting] = useSorting<T>();
-  const [persistenceKey] = useTablePersistenceKey();
-
-  // Use data from store if available (for infinite scroll), otherwise use prop
-  const effectiveData = storeData.length > 0 ? storeData : data;
-
-  // Determine sorting mode: client, server, or none
-  const sortingMode = isClientSortingEnabled ? 'client' : 'server';
-
-  // Client-side sorting: apply sorting to data
-  const sortedData = useMemo(() => {
-    if (sortingMode !== 'client' || sorting.length === 0) {
-      return effectiveData;
-    }
-
-    // eslint-disable-next-line local-rules/destructuring-for-functions
-    return effectiveData.toSorted((a, b) => {
-      // Sort by each column in order until we find a difference
-      for (const sort of sorting) {
-        const column = columns.find((col) => col.key === sort.columnKey);
-        if (!column) continue;
-
-        const aValue = a[sort.columnKey as keyof T];
-        const bValue = b[sort.columnKey as keyof T];
-
-        const comparison: number = compareValues({
-          a: aValue,
-          b: bValue,
-          type: column.dataType ?? 'string',
-        });
-
-        if (comparison !== 0) {
-          return sort.direction === 'desc' ? -comparison : comparison;
-        }
-        // If equal, continue to next sort column
-      }
-      return 0; // All sort columns are equal
-    });
-  }, [sortingMode, sorting, effectiveData, columns]);
-
-  // Use sorted data for rendering
-  const dataToRender = sortingMode === 'client' ? sortedData : effectiveData;
-
   // Set up infinite scroll if configured
   useInfiniteScroll({
-    initialPageSize: infiniteScrollConfig?.initialPageSize ?? INITIAL_PAGE_SIZE,
-    isEnabled: infiniteScrollConfig?.isEnabled ?? false,
-    loadMorePageSize:
-      infiniteScrollConfig?.loadMorePageSize ?? LOAD_MORE_PAGE_SIZE,
-    onLoadMore: infiniteScrollConfig?.onLoadMore,
+    onLoadMore,
     scrollContainerRef: containerRef,
-    strategy: infiniteScrollConfig?.strategy ?? STRATEGY,
-    threshold: infiniteScrollConfig?.threshold ?? INFINITE_SCROLL_THRESHOLD,
-  });
-
-  // Set up persistence if persistenceKey provided
-  // Using cookies for column-specific settings so they're available during SSR
-  // Skip hydration since the loader already handles initial state from URL/cookies
-  const { persistSlice } = useTablePersistence({
-    getState: () =>
-      tableStore?.get() ?? {
-        columnSizing: {},
-      },
-    persistenceKey,
+    threshold,
   });
 
   // Debounced persistence for column sizing (cookies only, not in URL)
@@ -125,7 +49,12 @@ export const useTableContent = <T extends Record<string, unknown>>({
 
     // Set new timer
     debounceTimerRef.current = setTimeout(() => {
-      persistSlice();
+      writeStateSlice({
+        persistenceKey,
+        slice: 'columnSizing',
+        storageType: 'cookie',
+        value: columnSizing,
+      });
     }, 300);
 
     // Cleanup
@@ -134,12 +63,10 @@ export const useTableContent = <T extends Record<string, unknown>>({
         clearTimeout(debounceTimerRef.current);
       }
     };
-  }, [columnSizing, persistSlice, persistenceKey]);
+  }, [columnSizing, persistenceKey]);
 
   return {
     containerRef,
-    dataToRender,
-    isLoadingMore,
     isSettingsOpen,
     isSettingsPinned,
     setIsSettingsOpen,

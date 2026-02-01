@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/Button';
 import { MenuCloseIcon } from '@/components/Icons';
 import { InfoBox } from '@/components/InfoBox';
+import { useGetColumns } from '@/components/Table/TableContext/hooks/store/columns/selectors';
 
 import type { FiltersSectionProps } from './FiltersSection.types';
 
@@ -11,11 +12,11 @@ import { FilterEditor, validateFilter } from './FilterEditor';
 import { styles } from './FiltersSection.stylex';
 
 export const FiltersSection = ({
-  columns,
   filters,
   onFiltersChange,
   ...props
 }: FiltersSectionProps) => {
+  const columns = useGetColumns();
   const [selectedColumn, setSelectedColumn] = useState('');
   const [expandedFilters, setExpandedFilters] = useState<Set<string>>(
     () => new Set(),

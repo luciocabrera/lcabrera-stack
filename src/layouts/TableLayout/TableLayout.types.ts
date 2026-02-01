@@ -3,12 +3,11 @@ import type {
   ColumnOrderState,
   ColumnSizingState,
   ColumnVisibilityState,
-  InfiniteScrollConfig,
+  PaginationState,
   SortingState,
   TableColumn,
   TableDensity,
 } from '@/components/Table';
-
 export type InfiniteScrollLoadMoreParams = {
   filters?: ColumnFiltersState;
   limit: number;
@@ -22,34 +21,37 @@ export type InfiniteScrollLoadMoreResult<TData> = {
   total: number;
 };
 
- 
-export type TableLayoutProps<TData extends Record<string, unknown>> = {
+export type TableLayoutProps<
+  TData extends Record<string, unknown>,
+  TResponse,
+> = {
   /** Column order from loader/URL state (optional) */
   columnOrder?: ColumnOrderState;
   /** Column definitions (required) */
-  columns: TableColumn[];
+  columns: TableColumn<TData>[];
   /** Column sizing from loader/URL state (optional) */
   columnSizing?: ColumnSizingState;
   /** Column visibility from loader/URL state (optional) */
   columnVisibility?: ColumnVisibilityState;
   /** Promise that resolves to the initial data (required) */
-  dataPromise: Promise<unknown>;
+  dataPromise: Promise<TResponse>;
   /** Function to extract data array from the promise response (required) */
-  dataSelector: (response: unknown) => TData[];
+  dataSelector: (response: TResponse) => TData[];
+  dataTotalSelector?: (response: TResponse) => number;
   /** Table density (optional, default: 'comfortable') */
   density?: TableDensity;
   /** Active filters from loader/URL state (optional) */
   filters?: ColumnFiltersState;
-  /** Infinite scroll configuration (required) */
-  infiniteScrollConfig: InfiniteScrollConfig<TData>;
   /** Show table borders (optional, default: true) */
   isBordered?: boolean;
   /** Show striped rows (optional, default: true) */
   isStriped?: boolean;
+  onLoadMore: (params: PaginationState) => Promise<TResponse>;
   /** Key for persisting table state (required) */
   persistenceKey: string;
   /** Active sorting from loader/URL state (optional) */
   sorting?: SortingState;
+
   /** Table title (required) */
   title: string;
 };

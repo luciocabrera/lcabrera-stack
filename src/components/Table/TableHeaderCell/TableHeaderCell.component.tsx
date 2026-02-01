@@ -4,12 +4,16 @@ import { useId } from 'react';
 import { MoreVerticalIcon } from '@/components/Icons';
 import { useColumnResize } from '@/components/Table/hooks';
 import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
+import { useSetColumnSizing } from '@/components/Table/TableContext/hooks/store/columns/actions';
+import {
+  useGetTableIsLoading,
+  useGetTableIsLoadingMore,
+} from '@/components/Table/TableContext/hooks/store/data/selectors';
 import { useRenderTracker } from '@/utils/performance';
 
 import type { HandleResizeParams } from '../TableHeader/TableHeader.types';
 import type { TableHeaderCellProps } from './TableHeaderCell.types';
 
-import { useSetColumnSizing } from '../TableContext';
 import { FilterButton } from './FilterButton';
 import { FilterPopover } from './FilterPopover';
 import { SortIcon } from './SortIcon';
@@ -19,7 +23,7 @@ import {
 } from './TableHeaderCell.stylex';
 import { getNextSortDirection } from './utils';
 
-export const TableHeaderCell = ({
+export const TableHeaderCell = <TData extends Record<string, unknown>>({
   columnKey,
   customStylex,
   dataType,
@@ -28,7 +32,6 @@ export const TableHeaderCell = ({
   filterOptions,
   hasSettings = false,
   isFilterable = false,
-  isLoading = false,
   isSortable = false,
   label,
   maxWidth,
@@ -39,9 +42,16 @@ export const TableHeaderCell = ({
   sortIndex: _sortIndex,
   width,
   ...rest
-}: TableHeaderCellProps) => {
+}: TableHeaderCellProps<TData>) => {
   useRenderTracker(`TableHeaderCell:${columnKey}`);
+
   const filterPopoverId = useId();
+
+  const isLoading = useGetTableIsLoading();
+  const isLoadingMore = useGetTableIsLoadingMore();
+
+  const isLoadingState = isLoading || isLoadingMore;
+
   const setColumnSizing = useSetColumnSizing();
 
   const handleResize = ({ columnKey, width }: HandleResizeParams) => {
@@ -81,7 +91,7 @@ export const TableHeaderCell = ({
       )}
     >
       {/* Loading overlay with shimmer */}
-      {isLoading && (
+      {isLoadingState && (
         <div {...stylex.props(skelletonStyles.loadingOverlay)}>
           <div {...stylex.props(skelletonStyles.shimmerWave)} />
         </div>

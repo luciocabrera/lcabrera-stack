@@ -2,14 +2,15 @@ import * as stylex from '@stylexjs/stylex';
 
 import type { TableTitleProps } from './TableTitle.types';
 
+import { useGetTableTitle } from '../TableContext/hooks/store/meta/selectors';
 import { styles } from './TableTitle.stylex';
 
 export const TableTitle = ({
   actions,
   customStylex,
   icon,
-  title,
 }: TableTitleProps) => {
+  const title = useGetTableTitle();
   if (!title && !icon && !actions) {
     return;
   }

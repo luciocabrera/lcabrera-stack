@@ -3,8 +3,8 @@ import type { ColumnFilter } from '@/types/filterOperators.types';
 
 // import type { HandleFilterParams } from '../../TableHeader/TableHeader.types';
 
-export type FilterPopoverProps = {
-  column: TableColumn;
+export type FilterPopoverProps<TData> = {
+  column: TableColumn<TData>;
   fetchFilterOptions?: (
     offset?: number,
   ) => Promise<{ hasMore: boolean; values: string[] }>;

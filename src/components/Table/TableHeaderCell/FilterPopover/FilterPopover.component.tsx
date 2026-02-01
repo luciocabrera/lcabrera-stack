@@ -8,23 +8,24 @@ import { useRenderTracker } from '@/utils/performance';
 
 import type { FilterPopoverProps, ToggleEvent } from './FilterPopover.types';
 
-import { useClearColumnFilter, useSetColumnFilter } from '../../TableContext';
+import {
+  useResetColumnFilter,
+  useSetColumnFilter,
+} from '../../TableContext/hooks/store/columns/actions';
 import { styles } from './FilterPopover.stylex';
 import { getOperatorFromFilter, renderFilterInput } from './utils';
 
-export const FilterPopover = ({
+export const FilterPopover = <TData,>({
   column,
   fetchFilterOptions,
   filter,
   filterOptions,
-  // onApply,
-  // onClear,
   popoverId,
-}: FilterPopoverProps) => {
+}: FilterPopoverProps<TData>) => {
   useRenderTracker(`FilterPopover:${column.key}`);
 
-  const clearColumnFilter = useClearColumnFilter();
-    const setColumnFilter = useSetColumnFilter();
+  const resetColumnFilter = useResetColumnFilter();
+  const setColumnFilter = useSetColumnFilter();
   const popoverRef = useRef<HTMLDivElement>(null);
   // Ref to always access latest filter value (avoids stale closure in toggle handler)
   const filterRef = useRef(filter);
@@ -145,7 +146,7 @@ export const FilterPopover = ({
 
   const handleClear = () => {
     setLocalFilter(undefined);
-    clearColumnFilter(column.key);
+    resetColumnFilter(column.key);
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore - hidePopover not in TS types yet
     popoverRef.current?.hidePopover();

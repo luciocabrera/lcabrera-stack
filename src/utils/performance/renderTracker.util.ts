@@ -83,6 +83,21 @@ export const trackRenderComplete = (
  */
 export const renderStats = {
   /**
+   * Copy stats to clipboard (if available)
+   * Returns the JSON string for fallback
+   */
+  copy: async (): Promise<string> => {
+    const json = renderStats.toJSON();
+    try {
+      await navigator.clipboard.writeText(json);
+      console.log('✅ Stats copied to clipboard!');
+    } catch {
+      console.log('📋 Copy manually:', json);
+    }
+    return json;
+  },
+
+  /**
    * Get all stats as an array sorted by render count
    */
   getAll: (): (RenderRecord & { name: string })[] => {
@@ -184,21 +199,6 @@ export const renderStats = {
     };
 
     return JSON.stringify(exportData, null, 2);
-  },
-
-  /**
-   * Copy stats to clipboard (if available)
-   * Returns the JSON string for fallback
-   */
-  copy: async (): Promise<string> => {
-    const json = renderStats.toJSON();
-    try {
-      await navigator.clipboard.writeText(json);
-      console.log('✅ Stats copied to clipboard!');
-    } catch {
-      console.log('📋 Copy manually:', json);
-    }
-    return json;
   },
 };
 
