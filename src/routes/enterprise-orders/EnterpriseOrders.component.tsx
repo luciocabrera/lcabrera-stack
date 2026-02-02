@@ -31,28 +31,14 @@ export const EnterpriseOrders = () => {
       dataTotalSelector={(response) => response.total}
       filters={filters}
       key={key}
-      onLoadMore={async ({ limit, skip }) => {
-        const response =
-          await enterpriseOrdersApi.fetchEnterpriseOrdersPaginated({
-            filter: filters,
-            limit,
-            skip,
-            sorting,
-          });
-        // console.log('EnterpriseOrders - onLoadMore :', {
-        //   hasMore: response.hasMore,
-        //   limit,
-        //   response,
-        //   skip,
-        //   total: response.total,
-        // });
-
-        return {
-          data: response.data,
-          hasMore: response.hasMore,
-          total: response.total,
-        };
-      }}
+      onLoadMore={async ({ limit, skip }) =>
+        enterpriseOrdersApi.fetchEnterpriseOrdersPaginated({
+          filter: filters,
+          limit,
+          skip,
+          sorting,
+        })
+      }
       persistenceKey={PERSISTENCE_KEY}
       sorting={sorting}
       title='Enterprise Orders - Infinite Scroll'

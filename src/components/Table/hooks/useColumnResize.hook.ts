@@ -1,9 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import {  useCallback, useEffect, useRef, useState } from 'react';
 
 import {
   DEFAULT_MAX_COLUMN_WIDTH,
   DEFAULT_MIN_COLUMN_WIDTH,
 } from '@/components/Table/Table.constants';
+
+import {  useSyncColumnsSizing } from '../TableContext/hooks/store/columns/actions';
 
 export type OnResizeParams = {
   columnKey: string;
@@ -46,6 +48,7 @@ export const useColumnResize = ({
   onResize,
 }: UseColumnResizeArgs) => {
   const [isResizing, setIsResizing] = useState(false);
+  const syncColumnsSizing = useSyncColumnsSizing();
   const resizeDataRef = useRef<
     | undefined
     | {
@@ -93,11 +96,12 @@ export const useColumnResize = ({
 
     resizeDataRef.current = undefined;
     setIsResizing(false);
+    syncColumnsSizing();
 
     // Re-enable text selection
     document.body.style.userSelect = '';
     document.body.style.cursor = '';
-  }, []);
+  }, [syncColumnsSizing]);
 
   const onMouseDown = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {

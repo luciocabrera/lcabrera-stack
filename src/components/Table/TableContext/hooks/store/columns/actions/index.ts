@@ -9,3 +9,5 @@ export * from './useSetColumnsOrder.hook';
 export * from './useSetColumnsSizing.hook';
 export * from './useSetColumnsSorting.hook';
 export * from './useSetColumnsVisibility.hook';
+
+export * from './useSyncColumnsSizing.hook';

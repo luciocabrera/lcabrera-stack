@@ -34,6 +34,8 @@ export const Table = <TData extends Record<string, unknown>, TResponse>({
     >
       <TableContent
         actions={actions}
+        dataSelector={dataSelector}
+        dataTotalSelector={dataTotalSelector}
         icon={icon}
         onLoadMore={onLoadMore}
       />

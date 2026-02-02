@@ -1,16 +1,9 @@
 import { createContext } from 'react';
 
-import type {
-  TableDataState,
-} from '@/components/Table/Table.types';
-import type { TStore } from '@/hooks';
+import type { TableDataContextValue } from './TableDataContext.types';
 
 import { getInitialDataState } from './utils';
 
-export type TableDataContextValue = {
-  /** Store managing data-related state */
-  dataStore: TStore<TableDataState<unknown>>;
-};
 
 /**
  * Data context for sharing state across table components

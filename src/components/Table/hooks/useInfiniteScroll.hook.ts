@@ -1,32 +1,36 @@
 import { useEffect } from 'react';
 
-import { useGetTableIsLoadingMore } from '@/components/Table/TableContext/hooks/store/data/selectors';
+import type { InfiniteScroll } from '@/types/ui.types';
 
-import type { InfiniteScrollResponse, PaginationState } from '../Table.types';
+import { useGetTableIsLoadingMore } from '@/components/Table/TableContext/hooks/store/data/selectors';
 
 import { useFetchMoreData } from '../TableContext/hooks/store/data/actions';
 import { useGetTableHasMore } from '../TableContext/hooks/store/data/selectors';
 
-type UseInfiniteScrollArgs<TData> = {
-  /** Handler to load more data with strategy-specific params */
-  onLoadMore?: (
-    params: PaginationState,
-  ) => Promise<InfiniteScrollResponse<TData>>;
+type UseInfiniteScrollArgs<TData, TResponse> = InfiniteScroll<
+  TData,
+  TResponse
+> & {
   /** Reference to the scrollable container */
   scrollContainerRef: React.RefObject<HTMLElement | null>;
   /** Pixels from bottom to trigger  */
   threshold: number;
 };
 
-export const useInfiniteScroll = <TData>({
+export const useInfiniteScroll = <
+  TData extends Record<string, unknown>,
+  TResponse,
+>({
+  dataSelector,
+  dataTotalSelector,
   onLoadMore,
   scrollContainerRef,
   threshold,
-}: UseInfiniteScrollArgs<TData>) => {
+}: UseInfiniteScrollArgs<TData, TResponse>) => {
   const isLoadingMore = useGetTableIsLoadingMore();
   const hasMore = useGetTableHasMore();
 
-  const fetchMoreData = useFetchMoreData<TData>();
+  const fetchMoreData = useFetchMoreData<TData, TResponse>();
 
   useEffect(() => {
     const scrollContainer = scrollContainerRef.current;
@@ -39,7 +43,7 @@ export const useInfiniteScroll = <TData>({
       const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
 
       if (distanceFromBottom <= threshold && onLoadMore) {
-        void fetchMoreData({ onLoadMore });
+        void fetchMoreData({ dataSelector, dataTotalSelector, onLoadMore });
       }
     };
 
@@ -56,5 +60,7 @@ export const useInfiniteScroll = <TData>({
     hasMore,
     fetchMoreData,
     onLoadMore,
+    dataSelector,
+    dataTotalSelector,
   ]);
 };

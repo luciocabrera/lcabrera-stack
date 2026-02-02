@@ -2,6 +2,7 @@ import type { StyleXStyles } from '@stylexjs/stylex';
 import type { ComponentPropsWithRef, ReactNode } from 'react';
 
 import type { ColumnFilter } from '@/types/filterOperators.types';
+import type { InfiniteScroll } from '@/types/ui.types';
 import type {
   CurrencyFormatOptions,
   DateFormatOptions,
@@ -40,32 +41,7 @@ export type ColumnSizingState = Record<string, number>;
  */
 export type ColumnVisibilityState = Set<string>;
 
-// /**
-//  * Parameters for cursor-based pagination strategy
-//  */
-// export type CursorParams = {
-//   cursor: string;
-//   limit: number;
-// };
 
-/**
- * Configuration for infinite scroll behavior
- */
-// export type InfiniteScrollConfig<TData> = {
-
-//   /** Callback to load more data with strategy-specific params */
-//   onLoadMore: (
-//     params: PaginationState & {
-//       filters?: ColumnFiltersState;
-//       sorting?: SortingState;
-//     },
-//   ) => Promise<InfiniteScrollResponse<TData>>;
-
-// };
-
-/**
- * Response from infinite scroll load more callback
- */
 export type InfiniteScrollResponse<TData> = {
   data: TData[];
 
@@ -81,55 +57,6 @@ export type OnSortChangeArgs = {
   sorting: { columnKey: string; direction: 'asc' | 'desc' }[];
 };
 
-// /**
-//  * Union of all pagination parameter types
-//  */
-// export type PaginationParams =
-//   // | CursorParams
-//   PaginationState;
-
-// /**
-//  * Parameters for page-based pagination strategy
-//  */
-// export type PageBasedParams = {
-//   page: number;
-//   pageSize: number;
-// };
-
-// /**
-//  * Pagination metadata for infinite scroll strategies
-//  */
-// export type PaginationMeta = {
-//   /** Current cursor for cursor-based pagination */
-//   cursor?: string;
-//   /** Current offset for offset-limit pagination */
-//   offset?: number;
-//   /** Current page for page-based pagination */
-//   page?: number;
-// };
-
-/**
- * Parameters for offset-limit pagination strategy
- */
-export type PaginationState = {
-  limit: number;
-  skip: number;
-};
-// | PageBasedParams;
-
-// /**
-//  * Pagination state
-//  */
-// export type PaginationState = {
-//   /** Current page index (0-based) */
-//   pageIndex: number;
-//   /** Number of rows per page */
-//   pageSize: number;
-// };
-
-/**
- * Pagination strategy for infinite scroll
- */
 export type PaginationStrategy = 'cursor' | 'offset-limit' | 'page-based';
 
 /**
@@ -225,7 +152,7 @@ export type TableDataState<TData> = {
   isLoading: boolean;
   /** Loading more rows (infinite scroll) */
   isLoadingMore: boolean;
-  pagination: PaginationState;
+  // pagination: PaginationState;
   totalLoadedRows: number;
   /** Total number of rows (for progress indication) */
   totalRows: number;
@@ -237,7 +164,6 @@ export type TableMetaState = {
   density: TableDensity;
   /** Error message if data fetch failed */
   error?: string;
-
   /** Initial page size for first load */
   initialPageSize: number;
   isBordered: boolean;
@@ -247,15 +173,11 @@ export type TableMetaState = {
   /** Locale for formatting (defaults to navigator.language) */
   locale?: string;
   overscan: number;
-  /** Persistence key for storing table state (e.g., column widths) */
   persistenceKey: string;
-
   placeholderRowCount: number;
   rowHeight: number;
-  /** Distance from bottom (px) to trigger load. Defaults to DEFAULT_INFINITE_SCROLL_THRESHOLD */
   threshold: number;
-
-    title?: string;
+  title?: string;
 };
 
 /**
@@ -281,21 +203,13 @@ export type TablePersistenceConfig = {
 export type TableProps<
   TData extends Record<string, unknown>,
   TResponse,
-> = BaseProps & {
-  // data: TData[];
-  dataSelector?: (response: TResponse) => TData[];
-  dataTotalSelector?: (response: TResponse) => number;
-    /** Enable client-side sorting when all data is available (default: false) */
-  isClientSortingEnabled?: boolean;
-  /** Configuration for infinite scroll behavior */
-
-  isFlexWrapperEnabled?: boolean;
-  onLoadMore?: (params: PaginationState) => Promise<TResponse>;
-  response: TResponse;
-};
+> = BaseProps &
+  InfiniteScroll<TData, TResponse> & {
+    isFlexWrapperEnabled?: boolean;
+    response: TResponse;
+  };
 
 type BaseProps = ComponentPropsWithRef<'table'> & {
-  /** Optional actions to display in the table title header */
   actions?: ReactNode;
   customStylex?: StyleXStyles;
   icon?: ReactNode;

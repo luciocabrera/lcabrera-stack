@@ -1,37 +1,46 @@
-import type {
-  InfiniteScrollResponse,
-  PaginationState,
-} from '@/components/Table/Table.types';
+import type { PaginationState } from '@/components/Table/Table.types';
 
 import { useTableConfigContextValue } from '@/components/Table/TableContext/hooks/useTableConfigContextValue.hook';
 import { useTableDataContextValue } from '@/components/Table/TableContext/hooks/useTableDataContextValue.hook';
 
-type AppendTableDataArgs<TData> = {
-  onLoadMore: (
-    params: PaginationState,
-  ) => Promise<InfiniteScrollResponse<TData>>;
+type AppendTableDataArgs<TData extends Record<string, unknown>, TResponse> = {
+  dataSelector?: (response: TResponse) => TData[];
+  dataTotalSelector?: (response: TResponse) => number;
+  onLoadMore: (params: PaginationState) => Promise<TResponse>;
 };
 
-export const useFetchMoreData = <TData>() => {
+export const useFetchMoreData = <
+  TData extends Record<string, unknown>,
+  TResponse,
+>() => {
   const { dataStore } = useTableDataContextValue();
   const { metaStore } = useTableConfigContextValue();
   const dataState = dataStore.get();
 
-  return async ({ onLoadMore }: AppendTableDataArgs<TData>) => {
+  return async ({
+    dataSelector,
+    dataTotalSelector,
+    onLoadMore,
+  }: AppendTableDataArgs<TData, TResponse>) => {
     const currentData = dataState?.data ?? [];
-    const currentTotalRows = dataState?.totalRows ?? currentData.length;
 
     try {
       dataStore.set({
         isLoadingMore: true,
       });
-      const result = await onLoadMore({
+      const response = await onLoadMore({
         limit: 50,
         skip: currentData.length,
       });
-      const combinedData = [...currentData, ...result.data];
+      const data = dataSelector
+        ? dataSelector(response)
+        : ([] as unknown as TData[]);
+      const combinedData = [...currentData, ...data];
       const totalLoadedRows = combinedData.length;
-      const totalRows = result.total ?? currentTotalRows;
+      const totalRows = dataTotalSelector
+        ? dataTotalSelector(response)
+        : (dataState?.totalRows ?? totalLoadedRows);
+
       dataStore.set({
         data: combinedData,
         hasMore: totalRows > totalLoadedRows,

@@ -1,4 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
+import { useRef, useState } from 'react';
 
 import { Button } from '@/components/Button';
 import { SettingsIcon } from '@/components/Icons';
@@ -7,28 +8,36 @@ import { useRenderTracker } from '@/utils/performance';
 
 import type { TableContentProps } from './TableContent.types';
 
+import { useInfiniteScroll } from '../hooks';
 import { TableBase } from '../TableBase';
 import { TableBody } from '../TableBody';
+import { useGetTableThreshold } from '../TableContext/hooks/store/meta/selectors';
 import { TableHeader } from '../TableHeader';
 import { TableTitle } from '../TableTitle';
-import { useTableContent } from './hooks';
 import { styles } from './TableContent.stylex';
 
 export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   actions,
+  dataSelector,
+  dataTotalSelector,
   icon,
   onLoadMore,
 }: TableContentProps<TData, TResponse>) => {
   useRenderTracker('TableContent');
 
-  const {
-    containerRef,
-    isSettingsOpen,
-    isSettingsPinned,
-    setIsSettingsOpen,
-    setIsSettingsPinned,
-  } = useTableContent<TData, TResponse>({
+  const threshold = useGetTableThreshold();
+
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isSettingsPinned, setIsSettingsPinned] = useState(false);
+
+  useInfiniteScroll({
+    dataSelector,
+    dataTotalSelector,
     onLoadMore,
+    scrollContainerRef: containerRef,
+    threshold,
   });
 
   const handleCloseSettings = () => {
@@ -58,8 +67,8 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
         />
         <div ref={containerRef} {...stylex.props(styles.container)}>
           <TableBase>
-            <TableHeader  />
-            <TableBody  tableContainerRef={containerRef} />
+            <TableHeader />
+            <TableBody tableContainerRef={containerRef} />
           </TableBase>
         </div>
       </div>

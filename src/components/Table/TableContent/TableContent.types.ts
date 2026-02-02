@@ -6,6 +6,8 @@ export type TableContentProps<
 > = Pick<
   TableProps<TData, TResponse>,
   | 'actions'
+  | 'dataSelector'
+  | 'dataTotalSelector'
   | 'icon'
   | 'onLoadMore'
 >;

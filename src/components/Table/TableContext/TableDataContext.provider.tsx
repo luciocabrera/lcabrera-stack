@@ -2,12 +2,12 @@ import type { TableDataState } from '@/components/Table/Table.types';
 
 import { useStore } from '@/hooks';
 
-import type { TableDataProviderProps } from './TableDataContext.types';
+import type {
+  TableDataContextValue,
+  TableDataProviderProps,
+} from './TableDataContext.types';
 
-import {
-  TableDataContext,
-  type TableDataContextValue,
-} from './TableDataContext.context';
+import { TableDataContext } from './TableDataContext.context';
 import { getInitialDataState } from './utils';
 
 export const TableDataProvider = <TData extends Record<string, unknown>>({
