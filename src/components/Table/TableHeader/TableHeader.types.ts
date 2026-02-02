@@ -2,7 +2,7 @@ import type { ComponentPropsWithoutRef } from 'react';
 
 import type { ColumnFilter } from '@/types/filterOperators.types';
 
-import type { SortDirection, TableProps } from '../Table.types';
+import type {  TableProps } from '../Table.types';
 
 export type HandleFilterParams = {
   columnKey: string;
@@ -14,10 +14,6 @@ export type HandleResizeParams = {
   width: number;
 };
 
-export type HandleSortParams = {
-  columnKey: string;
-  direction?: SortDirection;
-};
 
 export type TableHeaderProps<
   TData extends Record<string, unknown>,

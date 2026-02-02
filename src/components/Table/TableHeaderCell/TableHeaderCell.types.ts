@@ -1,13 +1,9 @@
 import type { StyleXStyles } from '@stylexjs/stylex';
 import type { ComponentPropsWithoutRef } from 'react';
 
-import type {
-  SortDirection,
-  TableColumn,
-} from '@/components/Table/Table.types';
+import type { TableColumn } from '@/components/Table/Table.types';
 import type { ColumnFilter } from '@/types/filterOperators.types';
-
-import type { HandleSortParams } from '../TableHeader/TableHeader.types';
+import type { SortDirection } from '@/types/ui.types';
 
 export type OnResizeParams = {
   columnKey: string;
@@ -29,7 +25,7 @@ export type TableHeaderCellProps<TData> = ComponentPropsWithoutRef<'th'> &
     isSortable?: boolean;
     maxWidth?: number;
     onSettingsClick?: () => void;
-    onSort?: (params: HandleSortParams) => void;
+    // onSort?: (params: HandleSortParams) => void;
     sortDirection?: SortDirection;
     sortIndex?: number;
     width?: number | string;

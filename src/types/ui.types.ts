@@ -6,14 +6,24 @@ export type InfiniteScroll<
 > = {
   dataSelector?: (response: TResponse) => TData[];
   dataTotalSelector?: (response: TResponse) => number;
-  onLoadMore?: (params: PaginationState) => Promise<TResponse>;
+  onLoadMore?: (params: Pagination) => Promise<TResponse>;
 };
 
 export type LayoutProps = {
   children: ReactNode;
 };
 
-export type PaginationState = {
+export type Pagination = {
   limit: number;
   skip: number;
+};
+
+export type SortDirection = 'asc' | 'desc' | undefined;
+
+
+export type Sorting = {
+  /** Column key being sorted */
+  columnKey: string;
+  /** Sort direction */
+  direction?: SortDirection;
 };

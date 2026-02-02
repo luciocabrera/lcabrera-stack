@@ -1,38 +1,38 @@
 import { useCallback } from 'react';
 import { useSearchParams } from 'react-router';
 
-import type { ColumnFiltersState } from '@/components/Table/Table.types';
+import type { SortingState } from '@/components/Table/Table.types';
 
 import { useTableConfigContextValue } from '@/components/Table/TableContext/hooks/useTableConfigContextValue.hook';
-import { writeStateSlice } from '@/components/Table/utils';
+import { writeStateSlice } from '@/components/Table/utils/writeStateSlice.util';
 
 /**
- * Hook to update column filters
+ * Hook to update sorting state
  */
-export const useSetColumnFilters = () => {
+export const useSetColumnsSortings = () => {
   const { columnsStore, metaStore } = useTableConfigContextValue();
   const [, setSearchParams] = useSearchParams();
 
   const persistenceKey = metaStore.get()?.persistenceKey ?? '';
 
   return useCallback(
-    (columnFilters: ColumnFiltersState) => {
+    (sorting: SortingState) => {
       writeStateSlice({
         persistenceKey,
-        slice: 'columnFilters',
+        slice: 'sorting',
         storageType: 'cookie',
-        value: columnFilters,
+        value: sorting,
       });
       setSearchParams((params) => {
-        if (Object.keys(columnFilters).length > 0) {
-          params.set('filters', JSON.stringify(columnFilters));
+        if (Object.keys(sorting).length > 0) {
+          params.set('sort', JSON.stringify(sorting));
         } else {
-          params.delete('filters');
+          params.delete('sort');
         }
         return params;
       });
-      columnsStore.set({ columnFilters });
+      columnsStore.set({ sorting });
     },
-    [persistenceKey, setSearchParams, columnsStore],
+    [columnsStore, persistenceKey, setSearchParams],
   );
 };

@@ -1,8 +1,8 @@
-import type { SortDirection } from '@/components/Table/Table.types';
+import type { SortDirection } from '@/types/ui.types';
 
 export const getNextSortDirection = (
-  currentDirection: SortDirection | undefined,
-): SortDirection | undefined => {
+  currentDirection: SortDirection,
+): SortDirection => {
   // Cycle through: undefined -> asc -> desc -> undefined
   if (currentDirection === undefined) return 'asc';
 

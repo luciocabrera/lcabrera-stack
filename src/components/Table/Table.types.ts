@@ -2,7 +2,7 @@ import type { StyleXStyles } from '@stylexjs/stylex';
 import type { ComponentPropsWithRef, ReactNode } from 'react';
 
 import type { ColumnFilter } from '@/types/filterOperators.types';
-import type { InfiniteScroll } from '@/types/ui.types';
+import type { InfiniteScroll, Sorting } from '@/types/ui.types';
 import type {
   CurrencyFormatOptions,
   DateFormatOptions,
@@ -41,7 +41,6 @@ export type ColumnSizingState = Record<string, number>;
  */
 export type ColumnVisibilityState = Set<string>;
 
-
 export type InfiniteScrollResponse<TData> = {
   data: TData[];
 
@@ -54,7 +53,7 @@ export type OnFilterChangeArgs = {
 };
 
 export type OnSortChangeArgs = {
-  sorting: { columnKey: string; direction: 'asc' | 'desc' }[];
+  sorting: Sorting[];
 };
 
 export type PaginationStrategy = 'cursor' | 'offset-limit' | 'page-based';
@@ -65,19 +64,9 @@ export type PaginationStrategy = 'cursor' | 'offset-limit' | 'page-based';
 export type RowSelectionState = Record<string, boolean>;
 
 /**
- * Sort direction for a column
- */
-export type SortDirection = 'asc' | 'desc';
-
-/**
  * Sorting state for a single column
  */
-export type SortingState = {
-  /** Column key being sorted */
-  columnKey: string;
-  /** Sort direction */
-  direction: SortDirection;
-}[];
+export type SortingState = Sorting[];
 
 /**
  * Storage type for persistence
@@ -98,7 +87,7 @@ export type TableColumn<TData> = {
   isFilterable?: boolean;
   /** Whether this column is sortable (default: true) */
   isSortable?: boolean;
-  key: keyof TData & string;
+  key: (keyof TData & string) | string;
   label: string;
   maxWidth?: number;
   minWidth?: number;

@@ -4,14 +4,16 @@ import { useId } from 'react';
 import { MoreVerticalIcon } from '@/components/Icons';
 import { useColumnResize } from '@/components/Table/hooks';
 import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
-import { useSetColumnSizing } from '@/components/Table/TableContext/hooks/store/columns/actions';
+import {
+  useSetColumnSizing,
+  useSetColumnSorting,
+} from '@/components/Table/TableContext/hooks/store/columns/actions';
 import {
   useGetTableIsLoading,
   useGetTableIsLoadingMore,
 } from '@/components/Table/TableContext/hooks/store/data/selectors';
 import { useRenderTracker } from '@/utils/performance';
 
-import type { HandleResizeParams } from '../TableHeader/TableHeader.types';
 import type { TableHeaderCellProps } from './TableHeaderCell.types';
 
 import { FilterButton } from './FilterButton';
@@ -37,7 +39,6 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
   maxWidth,
   minWidth,
   onSettingsClick,
-  onSort,
   sortDirection,
   sortIndex: _sortIndex,
   width,
@@ -53,16 +54,13 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
   const isLoadingState = isLoading || isLoadingMore;
 
   const setColumnSizing = useSetColumnSizing();
-
-  const handleResize = ({ columnKey, width }: HandleResizeParams) => {
-    setColumnSizing({ columnKey, width });
-  };
+  const setSorting = useSetColumnSorting();
 
   const handleSort = () => {
-    if (!isSortable || !onSort) return;
+    if (!isSortable) return;
     const nextDirection = getNextSortDirection(sortDirection);
     // const isMultiSort = event.shiftKey;
-    onSort({ columnKey, direction: nextDirection });
+    setSorting({ columnKey, direction: nextDirection });
   };
 
   const currentWidth =
@@ -73,7 +71,7 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
     currentWidth,
     maxWidth,
     minWidth,
-    onResize: handleResize,
+    onResize: setColumnSizing,
   });
 
   const handleResizeDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
