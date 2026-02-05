@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import { Button } from '@/components/Button';
 import { SettingsIcon } from '@/components/Icons';
 import { TableSettingsDrawer } from '@/components/TableSettingsDrawer';
+import { TableDrawerProvider } from '@/components/TableSettingsDrawer/TableDrawerContext/TableDrawerContext.provider';
 import { useRenderTracker } from '@/utils/performance';
 
 import type { TableContentProps } from './TableContent.types';
@@ -72,13 +73,14 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
           </TableBase>
         </div>
       </div>
-
-      <TableSettingsDrawer
-        isOpen={isSettingsOpen}
-        isPinned={isSettingsPinned}
-        onClose={handleCloseSettings}
-        onPinChange={setIsSettingsPinned}
-      />
+      <TableDrawerProvider>
+        <TableSettingsDrawer
+          isOpen={isSettingsOpen}
+          isPinned={isSettingsPinned}
+          onClose={handleCloseSettings}
+          onPinChange={setIsSettingsPinned}
+        />
+      </TableDrawerProvider>
     </div>
   );
 };

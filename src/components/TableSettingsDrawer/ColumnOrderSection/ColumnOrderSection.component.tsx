@@ -11,20 +11,27 @@ import type {
   HandleToggleVisibilityArgs,
 } from './ColumnOrderSection.types';
 
+import { useSetColumnsOrder, useSetColumnsVisibility } from '../TableDrawerContext/hooks/store/columns/actions';
+import { useGetColumnOrder, useGetColumnVisibility } from '../TableDrawerContext/hooks/store/columns/selectors';
 import { styles } from './ColumnOrderSection.stylex';
 
 export const ColumnOrderSection = ({
-  columnOrder,
-  columnVisibility,
-  onColumnOrderChange,
-  onColumnVisibilityChange,
+  // columnOrder,
+  // columnVisibility,
+  // onColumnOrderChange,
+  // onColumnVisibilityChange,
   ...props
 }: ColumnOrderSectionProps) => {
   const columns = useGetColumns();
+  const columnsOrder =useGetColumnOrder();
+  const columnVisibility = useGetColumnVisibility();
+
+  const onColumnOrderChange = useSetColumnsOrder();
+  const onColumnVisibilityChange = useSetColumnsVisibility();
   // Build ordered column list (use columnOrder if available, otherwise use column definition order)
   const orderedColumns =
-    columnOrder.length > 0
-      ? columnOrder
+    columnsOrder.length > 0
+      ? columnsOrder
           .map((key) => columns.find((col) => col.key === key))
           .filter((col): col is (typeof columns)[0] => col !== undefined)
       : columns;

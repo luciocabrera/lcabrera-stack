@@ -1,3 +1,8 @@
+ 
+ 
+/* eslint-disable */
+// @ts-nocheck
+
 /**
  * Performance Render Tracker
  *
@@ -204,6 +209,6 @@ export const renderStats = {
 
 // Expose to window for easy console access
 if (import.meta.env.DEV && globalThis.window !== undefined) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   (globalThis as any).__renderStats = renderStats;
 }

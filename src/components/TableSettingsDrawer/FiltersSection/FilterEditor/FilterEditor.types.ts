@@ -1,9 +1,10 @@
 import type { TableColumn } from '@/components/Table/Table.types';
 import type { ColumnFilter } from '@/types/filterOperators.types';
 
-export type FilterEditorProps = {
+
+export type FilterEditorProps<TData> = {
   /** The column being filtered */
-  column: TableColumn;
+  column: TableColumn<TData>;
   /** Current filter value */
   filter: ColumnFilter | null | undefined;
   /** Static filter options for select filters */

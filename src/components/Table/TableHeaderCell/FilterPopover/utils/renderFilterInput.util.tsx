@@ -6,8 +6,8 @@ import type { ColumnFilter } from '@/types/filterOperators.types';
 import { FilterInputs } from '../../filters/FilterInputs';
 import { styles } from '../FilterPopover.stylex';
 
-type RenderFilterInputArgs = {
-  column: TableColumn;
+type RenderFilterInputArgs<TData> = {
+  column: TableColumn<TData>;
   effectiveFilterOptions?: string[] | undefined;
   filter?: ColumnFilter | undefined;
   handleLoadMoreOptions: () => void;
@@ -16,7 +16,7 @@ type RenderFilterInputArgs = {
   setLocalFilter: (filter: ColumnFilter | undefined) => void;
 };
 
-export const renderFilterInput = ({
+export const renderFilterInput = <TData,>({
   column,
   effectiveFilterOptions,
   filter,
@@ -24,7 +24,7 @@ export const renderFilterInput = ({
   hasMoreOptions,
   isFetchingOptions,
   setLocalFilter,
-}: RenderFilterInputArgs) => {
+}: RenderFilterInputArgs<TData>) => {
   if (isFetchingOptions) {
     return (
       <div {...stylex.props(styles.loadingContainer)}>Loading options...</div>

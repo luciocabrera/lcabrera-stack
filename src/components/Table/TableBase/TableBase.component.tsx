@@ -9,14 +9,15 @@ import {
 } from '../TableContext/hooks/store/meta/selectors';
 import { tableStyles } from './TableBase.stylex';
 
-export const TableBase = <TData extends Record<string, unknown>,TResponse>({
+export const TableBase = <TData extends Record<string, unknown>, TResponse>({
   children,
   customStylex,
   ...rest
 }: TableBaseProps<TData, TResponse>) => {
-  const isStriped = useGetTableIsStriped();
-  const isBordered = useGetTableIsBordered();
   const density = useGetTableDensity();
+  const isBordered = useGetTableIsBordered();
+  const isStriped = useGetTableIsStriped();
+
   return (
     <table
       data-striped={isStriped}

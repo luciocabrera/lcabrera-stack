@@ -6,17 +6,16 @@ import { MenuCloseIcon } from '@/components/Icons';
 import { InfoBox } from '@/components/InfoBox';
 import { useGetColumns } from '@/components/Table/TableContext/hooks/store/columns/selectors';
 
-import type { FiltersSectionProps } from './FiltersSection.types';
-
+import { useSetColumnFilters } from '../TableDrawerContext/hooks/store/columns/actions';
+import { useGetColumnFilters } from '../TableDrawerContext/hooks/store/columns/selectors';
 import { FilterEditor, validateFilter } from './FilterEditor';
 import { styles } from './FiltersSection.stylex';
 
-export const FiltersSection = ({
-  filters,
-  onFiltersChange,
-  ...props
-}: FiltersSectionProps) => {
+export const FiltersSection = () => {
   const columns = useGetColumns();
+  const onFiltersChange = useSetColumnFilters();
+
+  const filters = useGetColumnFilters();
   const [selectedColumn, setSelectedColumn] = useState('');
   const [expandedFilters, setExpandedFilters] = useState<Set<string>>(
     () => new Set(),
@@ -190,7 +189,7 @@ export const FiltersSection = ({
   const hasFilters = filterEntries.length > 0;
 
   return (
-    <div {...stylex.props(styles.container)} {...props}>
+    <div {...stylex.props(styles.container)}>
       {/* Add Filter Section */}
       <div {...stylex.props(styles.addSection)}>
         <h3 {...stylex.props(styles.header)}>Add Filter</h3>

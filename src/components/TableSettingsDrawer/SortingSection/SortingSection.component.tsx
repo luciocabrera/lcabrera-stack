@@ -11,14 +11,17 @@ import { useGetColumns } from '@/components/Table/TableContext/hooks/store/colum
 
 import type { SortingSectionProps, SortItem } from './SortingSection.types';
 
+import { useSetColumnsSortings } from '../TableDrawerContext/hooks/store/columns/actions';
+import { useGetColumnsSorting } from '../TableDrawerContext/hooks/store/columns/selectors';
 import { styles } from './SortingSection.stylex';
 
 export const SortingSection = ({
-  onSortChange,
-  sorting,
+
   ...props
 }: SortingSectionProps) => {
   const columns = useGetColumns();
+  const sorting= useGetColumnsSorting();
+  const onSortChange = useSetColumnsSortings();
 
   const [selectedColumn, setSelectedColumn] = useState('');
 

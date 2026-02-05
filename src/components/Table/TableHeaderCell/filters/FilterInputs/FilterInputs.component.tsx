@@ -21,7 +21,7 @@ import { getOperatorFromFilter, getOperatorOptions } from './utils';
  * The operator dropdown is rendered here based on data type.
  * Used by both FilterPopover (column header) and FilterEditor (table settings).
  */
-export const FilterInputs = ({
+export const FilterInputs = <TData,>({
   column,
   filter,
   filterOptions,
@@ -29,7 +29,7 @@ export const FilterInputs = ({
   isLoadingOptions = false,
   onChange,
   onLoadMoreOptions,
-}: FilterInputsProps) => {
+}: FilterInputsProps<TData>) => {
   // Derive operator directly from filter prop - always in sync with parent state
   const operator = useMemo<OperatorType>(
     () => getOperatorFromFilter({ dataType: column.dataType, filter }),

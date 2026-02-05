@@ -25,10 +25,10 @@ export const TableHeader = <TData extends Record<string, unknown>, TResponse>({
   useRenderTracker('TableHeader');
 
   const columns = useGetColumns<TData>();
-  const columnSizing = useGetColumnSizing();
-  const sorting = useGetColumnsSorting();
-  const effectiveColumns = useGetEffectiveColumns();
   const columnFilters = useGetColumnFilters();
+  const columnSizing = useGetColumnSizing();
+  const effectiveColumns = useGetEffectiveColumns();
+  const sorting = useGetColumnsSorting();
 
   const normalizedColumns = useMemo(() => {
     const cols = {} as Record<
@@ -55,8 +55,8 @@ export const TableHeader = <TData extends Record<string, unknown>, TResponse>({
     >
       <TableRow isHeader>
         {effectiveColumns.map((col) => {
-          const finalWidth = columnSizing[col.key];
           const effectiveMinWidth = col.minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
+          const finalWidth = columnSizing[col.key] ?? effectiveMinWidth;
           const sortDirection = normalizedColumns[col.key]?.sortDirection;
           const sortIndex = normalizedColumns[col.key]?.sortIndex;
 
@@ -76,7 +76,7 @@ export const TableHeader = <TData extends Record<string, unknown>, TResponse>({
               minWidth={effectiveMinWidth}
               sortDirection={sortDirection}
               sortIndex={sortIndex}
-              width={finalWidth ?? effectiveMinWidth}
+              width={finalWidth}
             />
           );
         })}

@@ -25,9 +25,9 @@ export const TableBody = ({ tableContainerRef }: TableBodyProps) => {
 
   const columnSizing = useGetColumnSizing();
   const effectiveColumns = useGetEffectiveColumns();
+  const data = useGetTableData();
   const rowHeight = useGetTableRowHeight();
   const overscan = useGetTableOverscan();
-  const data = useGetTableData();
 
   const { bottomSpacerHeight, endIndex, offsetY, startIndex, totalHeight } =
     useVirtualization({
@@ -51,10 +51,9 @@ export const TableBody = ({ tableContainerRef }: TableBodyProps) => {
         return (
           <TableRow key={rowIndex}>
             {effectiveColumns.map((col) => {
-              const finalWidth =
-                columnSizing[col.key] ??
-                col.minWidth ??
-                DEFAULT_MIN_COLUMN_WIDTH;
+              const effectiveMinWidth =
+                col.minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
+              const finalWidth = columnSizing[col.key] ?? effectiveMinWidth;
 
               return (
                 <TableBodyCell
@@ -62,7 +61,7 @@ export const TableBody = ({ tableContainerRef }: TableBodyProps) => {
                   format={col.format}
                   key={col.key}
                   label={col.label}
-                  minWidth={col.minWidth ?? DEFAULT_MIN_COLUMN_WIDTH}
+                  minWidth={effectiveMinWidth}
                   value={col.key in rowData ? rowData[col.key] : ''}
                   width={finalWidth}
                 />

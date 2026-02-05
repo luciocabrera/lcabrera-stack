@@ -6,17 +6,17 @@ import type { FilterEditorProps } from './FilterEditor.types';
 
 import { styles } from './FilterEditor.stylex';
 
-export const FilterEditor = ({
+export const FilterEditor = <TData,>({
   column,
   filter,
   filterOptions,
   hasMore = false,
   isLoadingOptions = false,
   ...rest
-}: FilterEditorProps) => {
+}: FilterEditorProps<TData>) => {
   return (
     <div {...stylex.props(styles.container)} data-testid='filter-editor'>
-      <FilterInputs
+      <FilterInputs<TData>
         column={column}
         filter={filter ?? undefined}
         filterOptions={filterOptions}

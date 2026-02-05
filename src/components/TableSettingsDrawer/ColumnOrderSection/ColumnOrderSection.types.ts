@@ -1,23 +1,9 @@
 import type { ComponentPropsWithoutRef } from 'react';
 
-import type {
-  ColumnOrderState,
-  ColumnVisibilityState,
-} from '@/components/Table';
-
 /**
  * ColumnOrderSection component props
  */
-export type ColumnOrderSectionProps = ComponentPropsWithoutRef<'div'> & {
-  /** Current column order state */
-  columnOrder: ColumnOrderState;
-  /** Current column visibility state */
-  columnVisibility: ColumnVisibilityState;
-  /** Callback when column order changes */
-  onColumnOrderChange: (columnOrder: ColumnOrderState) => void;
-  /** Callback when column visibility changes */
-  onColumnVisibilityChange: (columnVisibility: ColumnVisibilityState) => void;
-};
+export type ColumnOrderSectionProps = ComponentPropsWithoutRef<'div'>;
 
 export type HandleToggleVisibilityArgs = {
   columnKey: string;

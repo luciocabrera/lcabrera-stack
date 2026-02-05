@@ -15,7 +15,7 @@ import { TextFilterInput } from '../../TextFilterInput';
 /**
  * Renders the appropriate filter input based on column data type.
  */
-export const InputContent = ({
+export const InputContent = <TData,>({
   column,
   filter,
   filterOptions,
@@ -24,7 +24,7 @@ export const InputContent = ({
   onChange,
   onLoadMoreOptions,
   operator,
-}: InputContentProps) => {
+}: InputContentProps<TData>) => {
   switch (column.dataType) {
     case 'currency':
     case 'number': {

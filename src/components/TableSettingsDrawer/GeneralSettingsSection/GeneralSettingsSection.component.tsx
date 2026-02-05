@@ -11,13 +11,14 @@ import type {
   WidthPreset,
 } from './GeneralSettingsSection.types';
 
+import { useSetColumnsSizing } from '../TableDrawerContext/hooks/store/columns/actions';
 import { styles } from './GeneralSettingsSection.stylex';
 
 export const GeneralSettingsSection = ({
-  onColumnSizingChange,
   ...props
 }: GeneralSettingsSectionProps) => {
   const columns = useGetColumns();
+  const setColumnsSizing = useSetColumnsSizing();
 
   const [selectedPreset, setSelectedPreset] = useState<WidthPreset>();
 
@@ -32,7 +33,7 @@ export const GeneralSettingsSection = ({
 
     switch (newPreset) {
       case 'default': {
-        onColumnSizingChange({});
+        setColumnsSizing({});
 
         break;
       }
@@ -43,7 +44,7 @@ export const GeneralSettingsSection = ({
             newSizing[col.key] = col.maxWidth;
           }
         }
-        onColumnSizingChange(newSizing);
+        setColumnsSizing(newSizing);
 
         break;
       }
@@ -54,7 +55,7 @@ export const GeneralSettingsSection = ({
             newSizing[col.key] = col.minWidth;
           }
         }
-        onColumnSizingChange(newSizing);
+        setColumnsSizing(newSizing);
 
         break;
       }
