@@ -4,7 +4,6 @@ import type {
   ColumnPinningState,
   ColumnSizingState,
   ColumnVisibilityState,
-  PaginationState,
   SortingState,
 } from '../Table.types';
 
@@ -14,7 +13,6 @@ export type PersistedState = {
   columnPinning?: ColumnPinningState;
   columnSizing?: ColumnSizingState;
   columnVisibility?: ColumnVisibilityState;
-  pagination?: PaginationState;
   sorting?: SortingState;
   version: number;
 };

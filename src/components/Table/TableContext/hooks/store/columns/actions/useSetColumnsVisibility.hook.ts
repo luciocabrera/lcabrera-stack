@@ -1,7 +1,7 @@
 import type { ColumnVisibilityState } from '@/components/Table/Table.types';
 
 import { useTableConfigContextValue } from '@/components/Table/TableContext/hooks/useTableConfigContextValue.hook';
-import { getEffectiveColumns } from '@/components/Table/TableContext/utils/getEffectiveColumns.util';
+import { getEffectiveColumns } from '@/components/Table/utils/getEffectiveColumns.util';
 
 /**
  * Hook to update column visibility

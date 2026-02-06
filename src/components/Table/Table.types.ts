@@ -128,6 +128,7 @@ export type TableColumnsState<TData> = {
   /** Column visibility state */
   columnVisibility: ColumnVisibilityState;
   effectiveColumns: TableColumn<TData>[];
+  normalizedColumns: NormalizedColumnsState<TData>;
   /** Sorting state */
   sorting: SortingState;
 };
@@ -201,3 +202,11 @@ type BaseProps = ComponentPropsWithRef<'table'> & {
   customStylex?: StyleXStyles;
   icon?: ReactNode;
 };
+
+type NormalizedColumnsState<TData> = Record<
+  (keyof TData & string) | string,
+  TableColumn<TData> & {
+    sortDirection?: 'asc' | 'desc';
+    sortIndex?: number;
+  }
+>;

@@ -1,7 +1,10 @@
 import type { ColumnOrderState } from '@/components/Table/Table.types';
 
 import { useTableConfigContextValue } from '@/components/Table/TableContext/hooks/useTableConfigContextValue.hook';
-import { getEffectiveColumns } from '@/components/Table/TableContext/utils/getEffectiveColumns.util';
+import {
+  getEffectiveColumns,
+  getNormalizedColummns,
+} from '@/components/Table/utils';
 
 /**
  * Hook to update column order
@@ -16,7 +19,12 @@ export const useSetColumnsOrder = () => {
     columnVisibility: columnsState?.columnVisibility,
   });
 
+  const normalizedColumns = getNormalizedColummns({
+    columns: columnsState?.columns ?? [],
+    sorting: columnsState?.sorting ?? [],
+  });
+
   return (columnOrder: ColumnOrderState) => {
-    columnsStore.set({ columnOrder, effectiveColumns });
+    columnsStore.set({ columnOrder, effectiveColumns, normalizedColumns });
   };
 };

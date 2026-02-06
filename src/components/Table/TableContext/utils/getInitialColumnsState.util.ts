@@ -1,6 +1,9 @@
 import type { TableColumnsState } from '@/components/Table/Table.types';
 
-import { getEffectiveColumns } from './getEffectiveColumns.util';
+import {
+  getEffectiveColumns,
+  getNormalizedColummns,
+} from '@/components/Table/utils';
 
 type GetInitialTableStateArgs<TData> = Partial<TableColumnsState<TData>>;
 
@@ -19,6 +22,11 @@ export const getInitialColumnsState = <TData>({
     columnVisibility,
   });
 
+  const normalizedColumns = getNormalizedColummns<TData>({
+    columns,
+    sorting,
+  });
+
   return {
     columnFilters,
     columnOrder,
@@ -27,6 +35,7 @@ export const getInitialColumnsState = <TData>({
     columnSizing,
     columnVisibility,
     effectiveColumns,
+    normalizedColumns,
     sorting,
   };
 };

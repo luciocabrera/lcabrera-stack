@@ -9,8 +9,11 @@ import type {
 } from '@/components/Table/Table.types';
 
 import { useTableConfigContextValue } from '@/components/Table/TableContext/hooks/useTableConfigContextValue.hook';
-import { getEffectiveColumns } from '@/components/Table/TableContext/utils/getEffectiveColumns.util';
-import { writeStateSlice } from '@/components/Table/utils';
+import {
+  getEffectiveColumns,
+  getNormalizedColummns,
+  writeStateSlice,
+} from '@/components/Table/utils';
 
 export type BatchTableSettingsUpdate = {
   columnFilters: ColumnFiltersState;
@@ -27,11 +30,16 @@ export const useBatchSetTableSettings = () => {
   const persistenceKey = metaStore.get()?.persistenceKey ?? '';
 
   return (settings: BatchTableSettingsUpdate) => {
-  const effectiveColumns = getEffectiveColumns({
-    columnOrder: settings.columnOrder,
-    columns: columnsState?.columns ?? [],
-    columnVisibility: settings.columnVisibility,
-  });
+    const effectiveColumns = getEffectiveColumns({
+      columnOrder: settings.columnOrder,
+      columns: columnsState?.columns ?? [],
+      columnVisibility: settings.columnVisibility,
+    });
+
+    const normalizedColumns = getNormalizedColummns({
+      columns: columnsState?.columns ?? [],
+      sorting: settings.sorting,
+    });
 
     const slices: (keyof BatchTableSettingsUpdate)[] = [
       'sorting',
@@ -64,6 +72,6 @@ export const useBatchSetTableSettings = () => {
       return params;
     });
 
-    columnsStore.set({ ...settings, effectiveColumns });
+    columnsStore.set({ ...settings, effectiveColumns, normalizedColumns });
   };
 };

@@ -1,7 +1,5 @@
 import type { TableDataState } from '@/components/Table/Table.types';
 
-import { INITIAL_PAGE_SIZE } from '@/components/Table/Table.constants';
-
 type GetInitialDataStateArgs<TData> = Partial<TableDataState<TData>>;
 
 export const getInitialDataState = <TData>({
@@ -16,7 +14,6 @@ export const getInitialDataState = <TData>({
     hasMore: totalRows > totalLoadedRows,
     isLoading,
     isLoadingMore,
-    pagination: { limit: INITIAL_PAGE_SIZE, skip: totalLoadedRows },
     totalLoadedRows,
     totalRows,
   };

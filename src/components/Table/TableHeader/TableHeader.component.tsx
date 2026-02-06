@@ -1,16 +1,13 @@
 import * as stylex from '@stylexjs/stylex';
-import { useMemo } from 'react';
 
 import {
   useGetColumnFilters,
-  useGetColumns,
   useGetColumnSizing,
-  useGetColumnsSorting,
   useGetEffectiveColumns,
+  useGetNormalizedColumns,
 } from '@/components/Table/TableContext/hooks/store/columns/selectors';
 import { useRenderTracker } from '@/utils/performance';
 
-import type { TableColumn } from '../Table.types';
 import type { TableHeaderProps } from './TableHeader.types';
 
 import { DEFAULT_MIN_COLUMN_WIDTH } from '../Table.constants';
@@ -24,28 +21,10 @@ export const TableHeader = <TData extends Record<string, unknown>, TResponse>({
 }: TableHeaderProps<TData, TResponse>) => {
   useRenderTracker({ componentName: 'TableHeader' });
 
-  const columns = useGetColumns<TData>();
   const columnFilters = useGetColumnFilters();
   const columnSizing = useGetColumnSizing();
   const effectiveColumns = useGetEffectiveColumns();
-  const sorting = useGetColumnsSorting();
-
-  const normalizedColumns = useMemo(() => {
-    const cols = {} as Record<
-      keyof TData | string,
-      TableColumn<TData> & {
-        sortDirection?: 'asc' | 'desc';
-        sortIndex?: number;
-      }
-    >;
-    for (const col of columns) {
-      const currentSort = sorting.find((s) => s.columnKey === col.key);
-      const sortDirection = currentSort?.direction;
-      const sortIndex = currentSort ? sorting.indexOf(currentSort) : undefined;
-      cols[col.key] = { ...col, sortDirection, sortIndex };
-    }
-    return cols;
-  }, [columns, sorting]);
+  const normalizedColumns = useGetNormalizedColumns();
 
   return (
     <thead

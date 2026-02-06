@@ -2,7 +2,7 @@ import { useLoaderData } from 'react-router';
 
 import type { EnterpriseOrder, EnterpriseOrdersResponse } from '@/services';
 
-import { TableLayout } from '@/layouts/TableLayout';
+import { TableLayout } from '@/components/Table/TableLayout';
 import { enterpriseOrdersApi } from '@/services';
 
 import type { loader } from './enterprise-orders.loader';
