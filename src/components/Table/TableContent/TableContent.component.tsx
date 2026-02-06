@@ -3,8 +3,8 @@ import { useRef, useState } from 'react';
 
 import { Button } from '@/components/Button';
 import { SettingsIcon } from '@/components/Icons';
-import { TableSettingsDrawer } from '@/components/TableSettingsDrawer';
-import { TableDrawerProvider } from '@/components/TableSettingsDrawer/TableDrawerContext/TableDrawerContext.provider';
+import { TableSettingsDrawer } from '@/components/Table/TableSettingsDrawer';
+import { TableDrawerProvider } from '@/components/Table/TableSettingsDrawer/TableDrawerContext/TableDrawerContext.provider';
 import { useRenderTracker } from '@/utils/performance';
 
 import type { TableContentProps } from './TableContent.types';
@@ -24,14 +24,13 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   icon,
   onLoadMore,
 }: TableContentProps<TData, TResponse>) => {
-  useRenderTracker('TableContent');
+  useRenderTracker({ componentName: 'TableContent' });
 
   const threshold = useGetTableThreshold();
 
   const containerRef = useRef<HTMLDivElement>(null);
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isSettingsPinned, setIsSettingsPinned] = useState(false);
 
   useInfiniteScroll({
     dataSelector,
@@ -76,9 +75,7 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
       <TableDrawerProvider>
         <TableSettingsDrawer
           isOpen={isSettingsOpen}
-          isPinned={isSettingsPinned}
           onClose={handleCloseSettings}
-          onPinChange={setIsSettingsPinned}
         />
       </TableDrawerProvider>
     </div>

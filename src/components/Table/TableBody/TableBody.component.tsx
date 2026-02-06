@@ -21,7 +21,7 @@ import { useGetTableData } from '../TableContext/hooks/store/data/selectors';
 import { styles } from './TableBody.stylex';
 
 export const TableBody = ({ tableContainerRef }: TableBodyProps) => {
-  useRenderTracker('TableBody');
+  useRenderTracker({ componentName: 'TableBody' });
 
   const columnSizing = useGetColumnSizing();
   const effectiveColumns = useGetEffectiveColumns();

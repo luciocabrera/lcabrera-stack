@@ -20,36 +20,18 @@ export type BatchTableSettingsUpdate = {
   sorting: SortingState;
 };
 
-/**
- * Hook to batch update all table settings at once
- * This prevents intermediate state updates that could trigger effects
- * between individual setter calls
- */
-export const useBatchSetTableSettings = (): ((
-  settings: BatchTableSettingsUpdate,
-) => void) => {
+export const useBatchSetTableSettings = () => {
   const { columnsStore, metaStore } = useTableConfigContextValue();
   const [, setSearchParams] = useSearchParams();
   const columnsState = columnsStore.get();
   const persistenceKey = metaStore.get()?.persistenceKey ?? '';
 
-  const effectiveColumns = getEffectiveColumns({
-    columnOrder: columnsState?.columnOrder,
-    columns: columnsState?.columns ?? [],
-    columnVisibility: columnsState?.columnVisibility,
-  });
-
   return (settings: BatchTableSettingsUpdate) => {
-    console.log('[batchSetTableSettings] Before:', {
-      currentFilters: columnsState?.columnFilters,
-      currentSorting: columnsState?.sorting,
-    });
-    console.log('[batchSetTableSettings] Setting:', {
-      columnFilters: settings.columnFilters,
-      sorting: settings.sorting,
-    });
-
-    // Persist to falling back storage mechanism (cookie/localStorage)
+  const effectiveColumns = getEffectiveColumns({
+    columnOrder: settings.columnOrder,
+    columns: columnsState?.columns ?? [],
+    columnVisibility: settings.columnVisibility,
+  });
 
     const slices: (keyof BatchTableSettingsUpdate)[] = [
       'sorting',
@@ -83,10 +65,5 @@ export const useBatchSetTableSettings = (): ((
     });
 
     columnsStore.set({ ...settings, effectiveColumns });
-
-    console.log('[batchSetTableSettings] After:', {
-      newFilters: columnsStore.get()?.columnFilters,
-      newSorting: columnsStore.get()?.sorting,
-    });
   };
 };

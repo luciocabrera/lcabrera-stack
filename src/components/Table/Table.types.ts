@@ -2,12 +2,12 @@ import type { StyleXStyles } from '@stylexjs/stylex';
 import type { ComponentPropsWithRef, ReactNode } from 'react';
 
 import type { ColumnFilter } from '@/types/filterOperators.types';
-import type { InfiniteScroll, Sorting } from '@/types/ui.types';
 import type {
   CurrencyFormatOptions,
   DateFormatOptions,
   NumberFormatOptions,
-} from '@/utils/formatters';
+} from '@/types/format.types';
+import type { InfiniteScroll, Sorting } from '@/types/ui.types';
 
 export type { TableTitleProps } from './TableTitle';
 
@@ -183,8 +183,6 @@ export type TablePersistenceConfig = {
   columnSizing?: StorageType;
   /** Persist column visibility */
   columnVisibility?: StorageType;
-  /** Persist pagination */
-  pagination?: StorageType;
   /** Persist sorting */
   sorting?: StorageType;
 };

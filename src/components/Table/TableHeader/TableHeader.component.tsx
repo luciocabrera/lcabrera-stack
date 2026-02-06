@@ -22,7 +22,7 @@ export const TableHeader = <TData extends Record<string, unknown>, TResponse>({
   customStylex,
   ...rest
 }: TableHeaderProps<TData, TResponse>) => {
-  useRenderTracker('TableHeader');
+  useRenderTracker({ componentName: 'TableHeader' });
 
   const columns = useGetColumns<TData>();
   const columnFilters = useGetColumnFilters();

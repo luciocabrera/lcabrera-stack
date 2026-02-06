@@ -22,7 +22,7 @@ export const FilterPopover = <TData,>({
   filterOptions,
   popoverId,
 }: FilterPopoverProps<TData>) => {
-  useRenderTracker(`FilterPopover:${column.key}`);
+  useRenderTracker({ componentName: `FilterPopover:${column.key}` });
 
   const resetColumnFilter = useResetColumnFilter();
   const setColumnFilter = useSetColumnFilter();

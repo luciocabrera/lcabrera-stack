@@ -16,10 +16,6 @@ import { useGetColumnOrder, useGetColumnVisibility } from '../TableDrawerContext
 import { styles } from './ColumnOrderSection.stylex';
 
 export const ColumnOrderSection = ({
-  // columnOrder,
-  // columnVisibility,
-  // onColumnOrderChange,
-  // onColumnVisibilityChange,
   ...props
 }: ColumnOrderSectionProps) => {
   const columns = useGetColumns();

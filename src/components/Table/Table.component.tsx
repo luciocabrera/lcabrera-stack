@@ -17,7 +17,7 @@ export const Table = <TData extends Record<string, unknown>, TResponse>({
   onLoadMore,
   response,
 }: TableProps<TData, TResponse>) => {
-  useRenderTracker('Table');
+  useRenderTracker({ componentName: 'Table' });
   const data = dataSelector
     ? dataSelector(response)
     : ([] as unknown as TData[]);

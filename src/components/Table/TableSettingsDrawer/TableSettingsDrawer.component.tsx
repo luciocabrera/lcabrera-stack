@@ -1,4 +1,4 @@
-// import { useMemo } from 'react';
+import { useState } from 'react';
 
 import type { TabItem } from '@/components/Tabs';
 
@@ -16,7 +16,6 @@ import {
   SidePanelHeader,
   SidePanelTitle,
 } from '@/components/SidePanel';
-// import { useGetColumns } from '@/components/Table/TableContext/hooks/store/columns/selectors';
 import { Tabs } from '@/components/Tabs';
 
 import type { TableSettingsDrawerProps } from './TableSettingsDrawer.types';
@@ -33,45 +32,21 @@ import {
 
 export const TableSettingsDrawer = ({
   isOpen,
-  isPinned,
   onClose,
-  onPinChange,
 }: TableSettingsDrawerProps) => {
-  // Subscribe to table state from context
-
-  // const columns = useGetColumns();
-  // const columnSizing = useGetColumnSizing();
-  // const columnsOrder = useGetColumnOrder();
-  // const columnVisibility = useGetColumnVisibility();
-  // const columnFilters = useGetColumnFilters();
-  // const columnsSorting = useGetColumnsSorting();
-
   const batchSetTableDrawerSettings = useBatchSetTableDrawerSettings();
   const resetTableDrawerSettings = useResetTableSettings();
 
-  // const [pendingColumnFilters, setPendingColumnFilters] =
-  //   useState(columnFilters);
-  // const [pendingSorting, setPendingSorting] = useState(columnsSorting);
-  // const [pendingColumnOrder, setPendingColumnOrder] = useState(columnsOrder);
-  // const [pendingColumnSizing, setPendingColumnSizing] = useState(columnSizing);
-  // const [pendingColumnVisibility, setPendingColumnVisibility] =
-  //   useState(columnVisibility);
+  const [isPinned, setIsPinned] = useState(false);
 
-  // Update pending state when initialPendingState changes (when drawer opens with new values)
-  // useEffect(() => {
-  //   setPendingColumnFilters(columnFilters);
-  //   setPendingSorting(columnsSorting);
-  //   setPendingColumnOrder(columnsOrder);
-  //   setPendingColumnSizing(columnSizing);
-  //   setPendingColumnVisibility(columnVisibility);
-  // }, [
-  //   columnFilters,
-  //   columnsSorting,
-  //   columnsOrder,
-  //   columnSizing,
-  //   columnVisibility,
-  // ]);
-const areFiltersValid = true; // TODO: implement filter validation
+  const areFiltersValid = true; // TODO: implement filter validation
+  const pinButtonTitle = isPinned ? 'Unpin drawer' : 'Pin drawer';
+  // const acceptButtonTitle = areFiltersValid
+  //   ? undefined
+  //   : 'Please fix invalid filters before accepting';
+
+  const acceptButtonTitle = 'Please fix invalid filters before accepting';
+
   // Validate all filters before allowing accept
   // const areFiltersValid = useMemo(() => {
   //   return Object.values(pendingColumnFilters).every((filter) =>
@@ -85,36 +60,25 @@ const areFiltersValid = true; // TODO: implement filter validation
     //   return;
     // }
 
-    // Batch update all store state at once
-    // This prevents race conditions where intermediate updates trigger
-    // the sync effect and overwrite pending values with stale store values
     batchSetTableDrawerSettings();
-
-    // console.log('[handleAccept] After batchSetTableSettings');
 
     // Unpin if pinned, then close
     if (isPinned) {
-      onPinChange?.(false);
+      setIsPinned(false);
     }
     onClose();
   };
 
   const handleCancel = () => {
-    // Reset to original values
-    // setPendingColumnFilters(columnFilters);
-    // setPendingSorting(columnsSorting);
-    // setPendingColumnOrder(columnsOrder);
-    // setPendingColumnSizing(columnSizing);
-    // setPendingColumnVisibility(columnVisibility);
     resetTableDrawerSettings();
     // Unpin if pinned, then close
-    if (isPinned) onPinChange?.(false);
+    if (isPinned) setIsPinned(false);
 
     onClose();
   };
 
   const handleTogglePin = () => {
-    onPinChange?.(!isPinned);
+    setIsPinned(!isPinned);
   };
 
   const tabs: TabItem[] = [
@@ -159,18 +123,14 @@ const areFiltersValid = true; // TODO: implement filter validation
       <SidePanelHeader
         actions={
           <>
-            {onPinChange && (
-              <Button
-                aria-label={isPinned ? 'Unpin drawer' : 'Pin drawer'}
-                color='ghost'
-                icon={
-                  isPinned ? <PinIcon size={16} /> : <PinOffIcon size={16} />
-                }
-                onClick={handleTogglePin}
-                size='mini'
-                title={isPinned ? 'Unpin drawer' : 'Pin drawer'}
-              />
-            )}
+            <Button
+              aria-label={pinButtonTitle}
+              color='ghost'
+              icon={isPinned ? <PinIcon size={16} /> : <PinOffIcon size={16} />}
+              onClick={handleTogglePin}
+              size='mini'
+              title={pinButtonTitle}
+            />
             <Button
               aria-label='Close drawer'
               color='ghost'
@@ -195,11 +155,7 @@ const areFiltersValid = true; // TODO: implement filter validation
           isDisabled={!areFiltersValid}
           onClick={handleAccept}
           size='sm'
-          title={
-            areFiltersValid
-              ? undefined
-              : 'Please fix invalid filters before accepting'
-          }
+          title={acceptButtonTitle}
         >
           Accept
         </Button>

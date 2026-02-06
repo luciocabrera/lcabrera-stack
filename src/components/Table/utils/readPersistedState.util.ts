@@ -29,7 +29,6 @@ export const readPersistedState = ({
     'columnPinning',
     'columnSizing',
     'columnVisibility',
-    'pagination',
   ];
 
   for (const slice of slices) {

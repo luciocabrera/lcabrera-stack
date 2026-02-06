@@ -1,4 +1,4 @@
-import type { CurrencyFormatOptions } from './types';
+import type { CurrencyFormatOptions } from '../../types/format.types';
 
 import { DEFAULT_CURRENCY } from './formatters.constants';
 import { getDefaultLocale } from './getDefaultLocale.util';

@@ -3,10 +3,10 @@ import type {
   ColumnOrderState,
   ColumnSizingState,
   ColumnVisibilityState,
-  PaginationState,
   SortingState,
   TableColumn,
   TableDensity,
+  TableProps,
 } from '@/components/Table';
 export type InfiniteScrollLoadMoreParams = {
   filters?: ColumnFiltersState;
@@ -24,7 +24,10 @@ export type InfiniteScrollLoadMoreResult<TData> = {
 export type TableLayoutProps<
   TData extends Record<string, unknown>,
   TResponse,
-> = {
+> = Pick<
+  TableProps<TData, TResponse>,
+  'dataSelector' | 'dataTotalSelector' | 'onLoadMore'
+> & {
   /** Column order from loader/URL state (optional) */
   columnOrder?: ColumnOrderState;
   /** Column definitions (required) */
@@ -36,8 +39,8 @@ export type TableLayoutProps<
   /** Promise that resolves to the initial data (required) */
   dataPromise: Promise<TResponse>;
   /** Function to extract data array from the promise response (required) */
-  dataSelector: (response: TResponse) => TData[];
-  dataTotalSelector?: (response: TResponse) => number;
+  // dataSelector: (response: TResponse) => TData[];
+  // dataTotalSelector?: (response: TResponse) => number;
   /** Table density (optional, default: 'comfortable') */
   density?: TableDensity;
   /** Active filters from loader/URL state (optional) */
@@ -46,7 +49,7 @@ export type TableLayoutProps<
   isBordered?: boolean;
   /** Show striped rows (optional, default: true) */
   isStriped?: boolean;
-  onLoadMore: (params: PaginationState) => Promise<TResponse>;
+  // onLoadMore: (params: InfiniteScrollLoadMoreParams) => Promise<TResponse>;
   /** Key for persisting table state (required) */
   persistenceKey: string;
   /** Active sorting from loader/URL state (optional) */

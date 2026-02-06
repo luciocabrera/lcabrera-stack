@@ -44,7 +44,7 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
   width,
   ...rest
 }: TableHeaderCellProps<TData>) => {
-  useRenderTracker(`TableHeaderCell:${columnKey}`);
+  useRenderTracker({ componentName: `TableHeaderCell:${columnKey}` });
 
   const filterPopoverId = useId();
 

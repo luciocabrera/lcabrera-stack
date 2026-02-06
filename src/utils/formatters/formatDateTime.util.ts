@@ -1,4 +1,4 @@
-import type { DateFormatOptions } from './types';
+import type { DateFormatOptions } from '../../types/format.types';
 
 import { DEFAULT_DATE_PRESET } from './formatters.constants';
 import { getDefaultLocale } from './getDefaultLocale.util';

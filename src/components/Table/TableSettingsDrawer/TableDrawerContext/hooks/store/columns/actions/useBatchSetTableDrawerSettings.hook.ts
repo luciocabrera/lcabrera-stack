@@ -30,6 +30,15 @@ export const useBatchSetTableDrawerSettings = () => {
 
   return () => {
     const columnsState = columnsStore.get();
+        console.log('[useBatchSetTableDrawerSettings] Before:', {
+
+        columnFilters: columnsState?.columnFilters ?? ({} as ColumnFiltersState),
+        columnOrder: columnsState?.columnOrder ?? ([] as ColumnOrderState),
+        columnSizing: columnsState?.columnSizing ?? ({} as ColumnSizingState),
+        columnVisibility: columnsState?.columnVisibility ?? ({} as ColumnVisibilityState),
+        sorting: columnsState?.sorting ?? ([] as SortingState),
+      
+    });
  
       batchSetTableSettings({
         columnFilters: columnsState?.columnFilters ?? ({} as ColumnFiltersState),
