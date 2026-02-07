@@ -147,23 +147,18 @@ export const FilterPopover = <TData,>({
   const handleClear = () => {
     setLocalFilter(undefined);
     resetColumnFilter(column.key);
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore - hidePopover not in TS types yet
     popoverRef.current?.hidePopover();
   };
 
   const handleApply = () => {
     setColumnFilter({ columnKey: column.key, filter: localFilter });
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore - hidePopover not in TS types yet
     popoverRef.current?.hidePopover();
   };
 
   const handleClose = () => {
     // Reset local filter to current applied filter when closing without applying
     setLocalFilter(filter);
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore - hidePopover not in TS types yet
+
     popoverRef.current?.hidePopover();
   };
 
@@ -193,14 +188,13 @@ export const FilterPopover = <TData,>({
   return (
     <div
       id={popoverId}
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      {...({ popover: 'auto' } as any)}
+      popover='auto'
       ref={popoverRef}
       {...stylex.props(styles.popover(popoverMinHeight))}
     >
       <div {...stylex.props(styles.content)}>
         <div {...stylex.props(styles.header)}>
-          <h3 {...stylex.props(styles.title)}>Filter: {column.label}</h3>
+          <p {...stylex.props(styles.title)}>Filter: {column.label}</p>
           <button
             aria-label='Close filter'
             onClick={handleClose}
@@ -212,11 +206,11 @@ export const FilterPopover = <TData,>({
         </div>
         <div {...stylex.props(styles.body)}>{content}</div>
         <div {...stylex.props(styles.footer)}>
-          <Button color='outline' onClick={handleClear} size='sm' width='full'>
-            Clear
-          </Button>
           <Button color='primary' onClick={handleApply} size='sm' width='full'>
             Apply
+          </Button>
+          <Button color='outline' onClick={handleClear} size='sm' width='full'>
+            Clear
           </Button>
         </div>
       </div>

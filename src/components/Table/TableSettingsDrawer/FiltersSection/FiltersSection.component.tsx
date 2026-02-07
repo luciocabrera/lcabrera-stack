@@ -13,9 +13,10 @@ import { styles } from './FiltersSection.stylex';
 
 export const FiltersSection = () => {
   const columns = useGetColumns();
-  const onFiltersChange = useSetColumnFilters();
-
   const filters = useGetColumnFilters();
+
+    const onFiltersChange = useSetColumnFilters();
+    
   const [selectedColumn, setSelectedColumn] = useState('');
   const [expandedFilters, setExpandedFilters] = useState<Set<string>>(
     () => new Set(),
