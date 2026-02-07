@@ -5,11 +5,6 @@ import type { TableColumn } from '@/components/Table/Table.types';
 import type { ColumnFilter } from '@/types/filterOperators.types';
 import type { SortDirection } from '@/types/ui.types';
 
-export type OnResizeParams = {
-  columnKey: string;
-  width: number;
-};
-
 export type TableHeaderCellProps<TData> = ComponentPropsWithoutRef<'th'> &
   Pick<TableColumn<TData>, 'dataType' | 'label' | 'minWidth'> & {
     columnKey: string;

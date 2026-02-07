@@ -8,18 +8,6 @@ import type {
   TableDensity,
   TableProps,
 } from '@/components/Table';
-export type InfiniteScrollLoadMoreParams = {
-  filters?: ColumnFiltersState;
-  limit: number;
-  skip: number;
-  sorting?: SortingState;
-};
-
-export type InfiniteScrollLoadMoreResult<TData> = {
-  data: TData[];
-  hasMore: boolean;
-  total: number;
-};
 
 export type TableLayoutProps<
   TData extends Record<string, unknown>,

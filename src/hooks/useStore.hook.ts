@@ -78,12 +78,3 @@ export const useStore = <TData extends Record<string, unknown>>(
     subscribe,
   };
 };
-
-/**
- * Tuple type for store selector hooks
- * [selectedValue, setter]
- */
-export type UseStoreSelector<SelectorOutput, TData> = [
-  SelectorOutput,
-  (value: Partial<TData>) => void,
-];

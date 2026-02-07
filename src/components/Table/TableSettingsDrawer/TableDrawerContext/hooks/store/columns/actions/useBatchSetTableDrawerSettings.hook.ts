@@ -10,7 +10,7 @@ import { useBatchSetTableSettings } from '@/components/Table/TableContext/hooks/
 
 import { useTableDrawerContextValue } from '../../../useTableDrawerContextValue.hook';
 
-export type BatchTableSettingsUpdate = {
+type BatchTableSettingsUpdate = {
   columnFilters: ColumnFiltersState;
   columnOrder: ColumnOrderState;
   columnSizing: ColumnSizingState;

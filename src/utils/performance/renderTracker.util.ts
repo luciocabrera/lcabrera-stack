@@ -85,6 +85,7 @@ export const trackRenderComplete = (
 
 /**
  * Get render statistics
+ * @knipignore - Exported for browser console usage (window.__renderStats)
  */
 export const renderStats = {
   /**

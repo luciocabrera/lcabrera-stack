@@ -1,6 +1,5 @@
 export * from './useGetColumnFilters.hook';
 export * from './useGetColumnOrder.hook';
-export * from './useGetColumnPinning.hook';
 export * from './useGetColumns.hook';
 export * from './useGetColumnSizing.hook';
 export * from './useGetColumnsSorting.hook';

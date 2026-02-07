@@ -41,28 +41,6 @@ export type ColumnSizingState = Record<string, number>;
  */
 export type ColumnVisibilityState = Set<string>;
 
-export type InfiniteScrollResponse<TData> = {
-  data: TData[];
-
-  /** Total number of rows available */
-  totalRows?: number;
-};
-
-export type OnFilterChangeArgs = {
-  filters: ColumnFiltersState;
-};
-
-export type OnSortChangeArgs = {
-  sorting: Sorting[];
-};
-
-export type PaginationStrategy = 'cursor' | 'offset-limit' | 'page-based';
-
-/**
- * Row selection state (row id -> selected)
- */
-export type RowSelectionState = Record<string, boolean>;
-
 /**
  * Sorting state for a single column
  */
