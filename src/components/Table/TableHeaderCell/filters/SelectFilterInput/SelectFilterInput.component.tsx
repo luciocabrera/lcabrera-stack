@@ -1,7 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { useVirtualization } from '@/hooks/useVirtualization.hook';
+import { useVirtualization } from '@/hooks';
 
 import type { SelectFilterInputProps } from './SelectFilterInput.types';
 

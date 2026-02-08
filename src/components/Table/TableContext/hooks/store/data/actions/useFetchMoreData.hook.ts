@@ -1,13 +1,15 @@
-import type { PaginationState } from '@/components/Table/Table.types';
+
+
+import type { InfiniteScroll } from '@/types/ui.types';
 
 import { useTableConfigContextValue } from '@/components/Table/TableContext/hooks/useTableConfigContextValue.hook';
 import { useTableDataContextValue } from '@/components/Table/TableContext/hooks/useTableDataContextValue.hook';
 
-type AppendTableDataArgs<TData extends Record<string, unknown>, TResponse> = {
-  dataSelector?: (response: TResponse) => TData[];
-  dataTotalSelector?: (response: TResponse) => number;
-  onLoadMore: (params: PaginationState) => Promise<TResponse>;
-};
+
+type FetchMoreDataArgs<TData, TResponse> = Omit<InfiniteScroll<
+  TData,
+  TResponse
+>,'hasMore' | 'isLoadingMore'>;
 
 export const useFetchMoreData = <
   TData extends Record<string, unknown>,
@@ -21,8 +23,12 @@ export const useFetchMoreData = <
     dataSelector,
     dataTotalSelector,
     onLoadMore,
-  }: AppendTableDataArgs<TData, TResponse>) => {
+  }: FetchMoreDataArgs<TData, TResponse>) => {
     const currentData = dataState?.data ?? [];
+
+    if (!onLoadMore) {
+      throw new Error('onLoadMore callback is required');
+    }
 
     try {
       dataStore.set({

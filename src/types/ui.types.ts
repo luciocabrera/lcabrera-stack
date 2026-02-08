@@ -6,6 +6,8 @@ export type InfiniteScroll<
 > = {
   dataSelector?: (response: TResponse) => TData[];
   dataTotalSelector?: (response: TResponse) => number;
+  hasMore: boolean;
+  isLoadingMore: boolean;
   onLoadMore?: (params: Pagination) => Promise<TResponse>;
 };
 

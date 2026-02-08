@@ -12,6 +12,11 @@ import type { TableContentProps } from './TableContent.types';
 import { useInfiniteScroll } from '../hooks';
 import { TableBase } from '../TableBase';
 import { TableBody } from '../TableBody';
+import { useFetchMoreData } from '../TableContext/hooks/store/data/actions';
+import {
+  useGetTableHasMore,
+  useGetTableIsLoadingMore,
+} from '../TableContext/hooks/store/data/selectors';
 import { useGetTableThreshold } from '../TableContext/hooks/store/meta/selectors';
 import { TableHeader } from '../TableHeader';
 import { TableTitle } from '../TableTitle';
@@ -27,6 +32,10 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   useRenderTracker({ componentName: 'TableContent' });
 
   const threshold = useGetTableThreshold();
+  const isLoadingMore = useGetTableIsLoadingMore();
+  const hasMore = useGetTableHasMore();
+
+  const fetchMoreData = useFetchMoreData<TData, TResponse>();
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -35,6 +44,9 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   useInfiniteScroll({
     dataSelector,
     dataTotalSelector,
+    fetchMoreData,
+    hasMore,
+    isLoadingMore,
     onLoadMore,
     scrollContainerRef: containerRef,
     threshold,

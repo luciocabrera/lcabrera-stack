@@ -2,15 +2,18 @@ import { useEffect } from 'react';
 
 import type { InfiniteScroll } from '@/types/ui.types';
 
-import { useGetTableIsLoadingMore } from '@/components/Table/TableContext/hooks/store/data/selectors';
-
-import { useFetchMoreData } from '../TableContext/hooks/store/data/actions';
-import { useGetTableHasMore } from '../TableContext/hooks/store/data/selectors';
-
 type UseInfiniteScrollArgs<TData, TResponse> = InfiniteScroll<
   TData,
   TResponse
 > & {
+  fetchMoreData: ({
+    dataSelector,
+    dataTotalSelector,
+    onLoadMore,
+  }: Omit<
+    InfiniteScroll<TData, TResponse>,
+    'hasMore' | 'isLoadingMore'
+  >) => Promise<void>;
   /** Reference to the scrollable container */
   scrollContainerRef: React.RefObject<HTMLElement | null>;
   /** Pixels from bottom to trigger  */
@@ -23,14 +26,14 @@ export const useInfiniteScroll = <
 >({
   dataSelector,
   dataTotalSelector,
+  fetchMoreData,
+  hasMore,
+  isLoadingMore,
   onLoadMore,
   scrollContainerRef,
   threshold,
 }: UseInfiniteScrollArgs<TData, TResponse>) => {
-  const isLoadingMore = useGetTableIsLoadingMore();
-  const hasMore = useGetTableHasMore();
-
-  const fetchMoreData = useFetchMoreData<TData, TResponse>();
+  // const fetchMoreData = useFetchMoreData<TData, TResponse>();
 
   useEffect(() => {
     const scrollContainer = scrollContainerRef.current;
