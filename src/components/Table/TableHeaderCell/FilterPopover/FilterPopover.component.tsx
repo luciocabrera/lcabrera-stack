@@ -12,21 +12,29 @@ import {
   useResetColumnFilter,
   useSetColumnFilter,
 } from '../../TableContext/hooks/store/columns/actions';
+import {
+  useGetColumnFilters,
+  useGetNormalizedColumn,
+} from '../../TableContext/hooks/store/columns/selectors';
 import { styles } from './FilterPopover.stylex';
 import { getOperatorFromFilter, renderFilterInput } from './utils';
 
 export const FilterPopover = <TData,>({
-  column,
-  fetchFilterOptions,
-  filter,
-  filterOptions,
+  columnKey,
   popoverId,
 }: FilterPopoverProps<TData>) => {
-  useRenderTracker({ componentName: `FilterPopover:${column.key}` });
+  useRenderTracker({ componentName: `FilterPopover:${columnKey}` });
+
+  const column = useGetNormalizedColumn<TData>(columnKey);
+  const columnFilters = useGetColumnFilters();
+
+  const { dataType, fetchFilterOptions, filterOptions } = column;
+  const filter = columnFilters[columnKey];
 
   const resetColumnFilter = useResetColumnFilter();
   const setColumnFilter = useSetColumnFilter();
   const popoverRef = useRef<HTMLDivElement>(null);
+
   // Ref to always access latest filter value (avoids stale closure in toggle handler)
   const filterRef = useRef(filter);
   useEffect(() => {
@@ -51,7 +59,7 @@ export const FilterPopover = <TData,>({
 
   // Use positioning hook
   const { resetPositioning } = usePopoverPositioning({
-    columnDataType: column.dataType,
+    columnDataType: dataType,
     hasOptions,
     isOpen: isPopoverOpen,
     popoverId,

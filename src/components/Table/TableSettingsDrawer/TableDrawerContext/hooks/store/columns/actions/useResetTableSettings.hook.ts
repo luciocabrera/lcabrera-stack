@@ -10,13 +10,7 @@ import { useTableConfigContextValue } from '@/components/Table/TableContext/hook
 
 import { useTableDrawerContextValue } from '../../../useTableDrawerContextValue.hook';
 
-type BatchTableSettingsUpdate = {
-  columnFilters: ColumnFiltersState;
-  columnOrder: ColumnOrderState;
-  columnSizing: ColumnSizingState;
-  columnVisibility: ColumnVisibilityState;
-  sorting: SortingState;
-};
+
 
 export const useResetTableSettings = () => {
   const { columnsStore } = useTableConfigContextValue();

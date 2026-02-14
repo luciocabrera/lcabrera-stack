@@ -47,6 +47,7 @@ export const SelectFilterInput = ({
       totalItems,
     });
 
+
   const handleToggle = (option: string) => {
     const newSelectedValues = selectedValues.includes(option)
       ? selectedValues.filter((v) => v !== option)

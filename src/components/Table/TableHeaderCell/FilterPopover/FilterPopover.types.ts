@@ -1,14 +1,7 @@
-import type { TableColumn } from '@/components/Table/Table.types';
-import type { ColumnFilter } from '@/types/filterOperators.types';
-
+import type { DataKey } from '@/components/Table/Table.types';
 
 export type FilterPopoverProps<TData> = {
-  column: TableColumn<TData>;
-  fetchFilterOptions?: (
-    offset?: number,
-  ) => Promise<{ hasMore: boolean; values: string[] }>;
-  filter?: ColumnFilter;
-  filterOptions?: string[];
+  columnKey: DataKey<TData>;
   popoverId: string;
 };
 

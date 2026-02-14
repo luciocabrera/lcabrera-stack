@@ -5,7 +5,7 @@ import type { TableConfigContextValue } from './TableConfigContext.types';
 import { getInitialColumnsState, getInitialMetaState } from './utils';
 
 export const TableConfigContext = createContext<TableConfigContextValue>({
-  columnsStore: getInitialColumnsState<unknown>({}),
+  columnsStore: getInitialColumnsState({}),
   metaStore: getInitialMetaState({}),
 } as unknown as TableConfigContextValue);
 

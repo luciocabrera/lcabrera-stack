@@ -5,9 +5,9 @@ import type {
 } from '@/components/Table/Table.types';
 
 type GetEffectiveColumnsArgs<TData> = {
-  columnOrder?: ColumnOrderState;
+  columnOrder?: ColumnOrderState<TData>;
   columns: TableColumn<TData>[];
-  columnVisibility?: ColumnVisibilityState;
+  columnVisibility?: ColumnVisibilityState<TData>;
 };
 
 export const getEffectiveColumns = <TData>({

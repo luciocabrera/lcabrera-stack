@@ -5,10 +5,10 @@ import { useTableDrawerContextValue } from '../../../useTableDrawerContextValue.
 /**
  * Hook to update column order
  */
-export const useSetColumnsOrder = () => {
+export const useSetColumnsOrder = <TData>() => {
   const { columnsStore } = useTableDrawerContextValue();
 
-  return (columnOrder: ColumnOrderState) => {
+  return (columnOrder: ColumnOrderState<TData>) => {
     columnsStore.set({ columnOrder });
   };
 };

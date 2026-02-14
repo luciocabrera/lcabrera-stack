@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { useSearchParams } from 'react-router';
 
 import type {
@@ -15,33 +16,38 @@ import {
   writeStateSlice,
 } from '@/components/Table/utils';
 
-export type BatchTableSettingsUpdate = {
-  columnFilters: ColumnFiltersState;
-  columnOrder: ColumnOrderState;
-  columnSizing: ColumnSizingState;
-  columnVisibility: ColumnVisibilityState;
-  sorting: SortingState;
+export type BatchTableSettingsUpdate<TData> = {
+  columnFilters: ColumnFiltersState<TData>;
+  columnOrder: ColumnOrderState<TData>;
+  columnSizing: ColumnSizingState<TData>;
+  columnVisibility: ColumnVisibilityState<TData>;
+  sorting: SortingState<TData>;
 };
 
-export const useBatchSetTableSettings = () => {
-  const { columnsStore, metaStore } = useTableConfigContextValue();
+export const useBatchSetTableSettings = <TData>() => {
+  const { columnsStore, metaStore } = useTableConfigContextValue<TData>();
   const [, setSearchParams] = useSearchParams();
   const columnsState = columnsStore.get();
   const persistenceKey = metaStore.get()?.persistenceKey ?? '';
 
-  return (settings: BatchTableSettingsUpdate) => {
+  return useCallback((settings: BatchTableSettingsUpdate<TData>) => {
     const effectiveColumns = getEffectiveColumns({
       columnOrder: settings.columnOrder,
       columns: columnsState?.columns ?? [],
       columnVisibility: settings.columnVisibility,
     });
 
+    
+
     const normalizedColumns = getNormalizedColummns({
       columns: columnsState?.columns ?? [],
       sorting: settings.sorting,
     });
 
-    const slices: (keyof BatchTableSettingsUpdate)[] = [
+    console.log('[useBatchSetTableSettings] Effective Columns:', effectiveColumns);
+    console.log('[useBatchSetTableSettings] Normalized Columns:', normalizedColumns);
+
+    const slices: (keyof BatchTableSettingsUpdate<TData>)[] = [
       'sorting',
       'columnFilters',
       'columnOrder',
@@ -73,5 +79,5 @@ export const useBatchSetTableSettings = () => {
     });
 
     columnsStore.set({ ...settings, effectiveColumns, normalizedColumns });
-  };
+  }, [columnsStore, persistenceKey, setSearchParams, columnsState]);
 };

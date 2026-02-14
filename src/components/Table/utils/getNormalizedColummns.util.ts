@@ -2,7 +2,7 @@ import type { SortingState, TableColumn } from '../Table.types';
 
 type GetNormalizedColumnsArgs<TData> = {
   columns: TableColumn<TData>[];
-  sorting: SortingState;
+  sorting: SortingState<TData>;
 };
 
 export const getNormalizedColummns = <TData>({

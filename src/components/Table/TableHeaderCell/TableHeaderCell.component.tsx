@@ -16,6 +16,10 @@ import { useRenderTracker } from '@/utils/performance';
 
 import type { TableHeaderCellProps } from './TableHeaderCell.types';
 
+import {
+  useGetColumnSizing,
+  useGetNormalizedColumn,
+} from '../TableContext/hooks/store/columns/selectors';
 import { FilterButton } from './FilterButton';
 import { FilterPopover } from './FilterPopover';
 import { SortIcon } from './SortIcon';
@@ -28,33 +32,30 @@ import { getNextSortDirection } from './utils';
 export const TableHeaderCell = <TData extends Record<string, unknown>>({
   columnKey,
   customStylex,
-  dataType,
-  fetchFilterOptions,
-  filter,
-  filterOptions,
   hasSettings = false,
-  isFilterable = false,
-  isSortable = false,
-  label,
-  maxWidth,
-  minWidth,
   onSettingsClick,
-  sortDirection,
-  sortIndex: _sortIndex,
-  width,
   ...rest
 }: TableHeaderCellProps<TData>) => {
   useRenderTracker({ componentName: `TableHeaderCell:${columnKey}` });
 
   const filterPopoverId = useId();
-
+  const columnSizing = useGetColumnSizing();
+  const column = useGetNormalizedColumn<TData>(columnKey);
   const isLoading = useGetTableIsLoading();
   const isLoadingMore = useGetTableIsLoadingMore();
 
-  const isLoadingState = isLoading || isLoadingMore;
-
   const setColumnSizing = useSetColumnSizing();
   const setSorting = useSetColumnSorting();
+
+  const { dataType, label, maxWidth, minWidth } = column;
+
+  const effectiveMinWidth = minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
+  const currentWidth = columnSizing[column.key] ?? effectiveMinWidth;
+  const sortDirection = column.sortDirection;
+
+  const isFilterable = column.isFilterable !== false;
+  const isSortable = column.isSortable !== false;
+  const isLoadingState = isLoading || isLoadingMore;
 
   const handleSort = () => {
     if (!isSortable) return;
@@ -63,14 +64,11 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
     setSorting({ columnKey, direction: nextDirection });
   };
 
-  const currentWidth =
-    typeof width === 'number' ? width : (minWidth ?? DEFAULT_MIN_COLUMN_WIDTH);
-
   const { isResizing, onMouseDown } = useColumnResize({
     columnKey,
     currentWidth,
     maxWidth,
-    minWidth,
+    minWidth: effectiveMinWidth,
     onResize: setColumnSizing,
   });
 
@@ -84,7 +82,7 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
     <th
       {...rest}
       {...stylex.props(
-        tableHeaderCellStyles.base(minWidth, width),
+        tableHeaderCellStyles.base(effectiveMinWidth, currentWidth),
         customStylex,
       )}
     >
@@ -112,17 +110,8 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
         )}
         {isFilterable && dataType && (
           <>
-            <FilterButton
-              isActive={!!filter}
-              popoverTargetId={filterPopoverId}
-            />
-            <FilterPopover
-              column={{ dataType, key: columnKey, label }}
-              fetchFilterOptions={fetchFilterOptions}
-              filter={filter}
-              filterOptions={filterOptions}
-              popoverId={filterPopoverId}
-            />
+            <FilterButton popoverTargetId={filterPopoverId} />
+            <FilterPopover columnKey={columnKey} popoverId={filterPopoverId} />
           </>
         )}
         {hasSettings && (

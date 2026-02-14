@@ -2,9 +2,9 @@ import type { TStore } from '@/hooks/useStore.hook';
 
 import type { TableColumnsState, TableMetaState } from '../Table.types';
 
-export type TableConfigContextValue = {
+export type TableConfigContextValue<TData = Record<string, unknown>> = {
   /** Store managing column-related state */
-  columnsStore: TStore<TableColumnsState<unknown>>;
+  columnsStore: TStore<TableColumnsState<TData>>;
   /** Store managing meta-related state */
   metaStore: TStore<TableMetaState>;
 };

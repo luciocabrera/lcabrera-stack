@@ -17,13 +17,13 @@ export type TableLayoutProps<
   'dataSelector' | 'dataTotalSelector' | 'onLoadMore'
 > & {
   /** Column order from loader/URL state (optional) */
-  columnOrder?: ColumnOrderState;
+  columnOrder?: ColumnOrderState<TData>;
   /** Column definitions (required) */
   columns: TableColumn<TData>[];
   /** Column sizing from loader/URL state (optional) */
-  columnSizing?: ColumnSizingState;
+  columnSizing?: ColumnSizingState<TData>;
   /** Column visibility from loader/URL state (optional) */
-  columnVisibility?: ColumnVisibilityState;
+  columnVisibility?: ColumnVisibilityState<TData>;
   /** Promise that resolves to the initial data (required) */
   dataPromise: Promise<TResponse>;
   /** Function to extract data array from the promise response (required) */
@@ -32,7 +32,7 @@ export type TableLayoutProps<
   /** Table density (optional, default: 'comfortable') */
   density?: TableDensity;
   /** Active filters from loader/URL state (optional) */
-  filters?: ColumnFiltersState;
+  filters?: ColumnFiltersState<TData>;
   /** Show table borders (optional, default: true) */
   isBordered?: boolean;
   /** Show striped rows (optional, default: true) */
@@ -41,7 +41,7 @@ export type TableLayoutProps<
   /** Key for persisting table state (required) */
   persistenceKey: string;
   /** Active sorting from loader/URL state (optional) */
-  sorting?: SortingState;
+  sorting?: SortingState<TData>;
 
   /** Table title (required) */
   title: string;

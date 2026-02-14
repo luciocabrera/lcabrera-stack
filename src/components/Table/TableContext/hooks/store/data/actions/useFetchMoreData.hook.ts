@@ -12,11 +12,11 @@ type FetchMoreDataArgs<TData, TResponse> = Omit<InfiniteScroll<
 >,'hasMore' | 'isLoadingMore'>;
 
 export const useFetchMoreData = <
-  TData extends Record<string, unknown>,
+  TData,
   TResponse,
 >() => {
   const { dataStore } = useTableDataContextValue();
-  const { metaStore } = useTableConfigContextValue();
+  const { metaStore } = useTableConfigContextValue<TData>();
   const dataState = dataStore.get();
 
   return async ({

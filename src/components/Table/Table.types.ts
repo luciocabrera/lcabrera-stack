@@ -14,37 +14,57 @@ export type { TableTitleProps } from './TableTitle';
 /**
  * Column filters state - maps column key to filter configuration
  */
-export type ColumnFiltersState = Record<string, ColumnFilter>;
-
+export type ColumnFiltersState<TData=Record<string, unknown>> = Record<DataKey<TData>, ColumnFilter>;
 /**
  * Column order state - array of column keys in display order
  */
-export type ColumnOrderState = string[];
+export type ColumnOrderState<TData=Record<string, unknown>> = DataKey<TData>[];
 
 /**
  * Column pinning state
  */
-export type ColumnPinningState = {
+export type ColumnPinningState<TData=Record<string, unknown>> = {
   /** Columns pinned to the left */
-  left: string[];
+  left: DataKey<TData>[];
   /** Columns pinned to the right */
-  right: string[];
-};
+  right: DataKey<TData>[];
+};    
 
 /**
  * Column sizing state - maps column key to custom width
  */
-export type ColumnSizingState = Record<string, number>;
+export type ColumnSizingState<TData=Record<string, unknown>> = Record<DataKey<TData>, number>;
 
 /**
  * Column visibility state - Set of visible column keys
  */
-export type ColumnVisibilityState = Set<string>;
+export type ColumnVisibilityState<TData=Record<string, unknown>> = Set<DataKey<TData>>;
+
+export type DataKey<TData> = (keyof TData & string) | string;
+
+export type FilterData = {
+  data: string[];
+  hasMore: boolean;
+  isLoading: boolean;
+  isLoadingMore: boolean;
+  totalLoadedRows: number;
+  totalRows: number;
+};
+
+export type FiltersDataState<TData=Record<string, unknown>> = Record<DataKey<TData>, FilterData>;
+
+export type NormalizedColumnsState<TData=Record<string, unknown>> = Record<
+  DataKey<TData>,
+  TableColumn<TData> & {
+    sortDirection?: 'asc' | 'desc';
+    sortIndex?: number;
+  }
+>;
 
 /**
  * Sorting state for a single column
  */
-export type SortingState = Sorting[];
+export type SortingState<TData=Record<string, unknown>> = Sorting<TData>[];
 
 /**
  * Storage type for persistence
@@ -93,22 +113,22 @@ export type TableColumnFormat = {
 /**
  * Main table state stored in tableStore
  */
-export type TableColumnsState<TData> = {
+export type TableColumnsState<TData=Record<string, unknown>> = {
   /** Column filters state */
-  columnFilters: ColumnFiltersState;
+  columnFilters: ColumnFiltersState<TData>;
   /** Column order state */
-  columnOrder: ColumnOrderState;
+  columnOrder: ColumnOrderState<TData>;
   /** Column pinning state */
-  columnPinning: ColumnPinningState;
+  columnPinning: ColumnPinningState<TData>;
   columns: TableColumn<TData>[];
   /** Column sizing state (custom widths) */
-  columnSizing: ColumnSizingState;
+  columnSizing: ColumnSizingState<TData>;
   /** Column visibility state */
-  columnVisibility: ColumnVisibilityState;
+  columnVisibility: ColumnVisibilityState<TData>;
   effectiveColumns: TableColumn<TData>[];
   normalizedColumns: NormalizedColumnsState<TData>;
   /** Sorting state */
-  sorting: SortingState;
+  sorting: SortingState<TData>;
 };
 
 export type TableDataState<TData> = {
@@ -180,11 +200,3 @@ type BaseProps = ComponentPropsWithRef<'table'> & {
   customStylex?: StyleXStyles;
   icon?: ReactNode;
 };
-
-type NormalizedColumnsState<TData> = Record<
-  (keyof TData & string) | string,
-  TableColumn<TData> & {
-    sortDirection?: 'asc' | 'desc';
-    sortIndex?: number;
-  }
->;

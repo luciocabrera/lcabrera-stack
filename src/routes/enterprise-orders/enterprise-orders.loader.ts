@@ -1,11 +1,11 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
 import type { ColumnFiltersState, SortingState } from '@/components/Table';
-import type { EnterpriseOrdersResponse } from '@/services';
+import type { EnterpriseOrder, EnterpriseOrdersResponse } from '@/services';
 
 import { readPersistedStateFromCookie } from '@/components/Table/utils';
 import { enterpriseOrdersApi } from '@/services';
-import { encodeStateToURL, readTableStateFromURL } from '@/utils/urlState';
+import { readTableStateFromURL } from '@/utils/urlState';
 
 import { PERSISTENCE_KEY } from './EnterpriseOrders.constants';
 
@@ -32,12 +32,12 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
   });
 
   // Merge URL state (priority) with cookie state (fallback)
-  const columnOrder: string[] =
-    urlState?.columnOrder ?? cookieState.columnOrder ?? [];
-  const columnVisibility: Set<string> =
-    urlState?.columnVisibility ??
+  const columnOrder = (urlState?.columnOrder ??
+    cookieState.columnOrder ??
+    []) as (keyof EnterpriseOrder)[];
+  const columnVisibility = (urlState?.columnVisibility ??
     cookieState.columnVisibility ??
-    new Set<string>();
+    new Set()) as Set<keyof EnterpriseOrder>;
 
   //  const sorting: SortingState = urlState?.sorting ?? cookieState.sorting ?? [];
   //  const filters: ColumnFiltersState = urlState?.filters ?? cookieState.columnFilters ?? {};
@@ -45,22 +45,13 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
   // Don't fall back to cookie - URL is the source of truth for sorting
   // If sort= param is absent, sorting should be empty (user may have reset it)
   const standaloneSortParam = url.searchParams.get('sort');
-  const decodedSortParam = standaloneSortParam
-    ? decodeURIComponent(standaloneSortParam)
-    : null;
-  const encodedSortParam = encodeURIComponent(standaloneSortParam ?? '');
-  // const encoded64= encodeStateToURL(JSON.parse(standaloneSortParam??'{}'));
 
-  console.log('[LOADER] URL:', request.url);
-  console.log('[LOADER] standaloneSortParam:', {
-    decodedSortParam,
-    encodedSortParam,
-    standaloneSortParam,
-  });
-  let sorting: SortingState = [];
+  let sorting: SortingState<EnterpriseOrder> = [];
   if (standaloneSortParam) {
     try {
-      sorting = JSON.parse(standaloneSortParam) as SortingState;
+      sorting = JSON.parse(
+        standaloneSortParam,
+      ) as SortingState<EnterpriseOrder>;
     } catch {
       // Invalid JSON, use empty array
     }
@@ -70,21 +61,19 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
   // Don't fall back to cookie - URL is the source of truth for filters
   // If filters= param is absent, filters should be empty (user may have reset them)
   const standaloneFiltersParam = url.searchParams.get('filters');
-  let filters: ColumnFiltersState = {};
+  let filters: ColumnFiltersState<EnterpriseOrder> = {};
   if (standaloneFiltersParam) {
     try {
-      filters = JSON.parse(standaloneFiltersParam) as ColumnFiltersState;
+      filters = JSON.parse(
+        standaloneFiltersParam,
+      ) as ColumnFiltersState<EnterpriseOrder>;
     } catch {
       // Invalid JSON, use empty object
     }
   }
-  console.log('[LOADER] Final sorting:', {
-    standaloneFiltersParam,
-    standaloneSortParam,
-    urlState,
-  });
 
-  const columnSizing: Record<string, number> = cookieState.columnSizing ?? {};
+  const columnSizing: Record<keyof EnterpriseOrder, number> =
+    (cookieState.columnSizing ?? {}) as Record<keyof EnterpriseOrder, number>;
 
   // Return the promise directly (not awaited) for Suspense streaming
   const enterpriseOrdersPromise: Promise<EnterpriseOrdersResponse> =
@@ -93,7 +82,14 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
       limit: 50,
       requestUrl: request.url,
       skip: 0,
-      sorting,
+      sorting: sorting.filter(
+        (
+          s,
+        ): s is {
+          columnKey: keyof EnterpriseOrder;
+          direction: 'asc' | 'desc';
+        } => s.direction !== undefined,
+      ),
     });
 
   return {
@@ -103,6 +99,11 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
     enterpriseOrdersPromise,
     filters,
     key: `${standaloneSortParam ?? ''}${standaloneFiltersParam ?? ''}`,
-    sorting,
+    sorting: sorting.filter(
+      (
+        s,
+      ): s is { columnKey: keyof EnterpriseOrder; direction: 'asc' | 'desc' } =>
+        s.direction !== undefined,
+    ),
   };
 };

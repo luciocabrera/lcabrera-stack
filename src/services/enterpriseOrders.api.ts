@@ -1,3 +1,5 @@
+import type { ColumnFiltersState, SortingState } from '@/components/Table';
+
 import { getApiBaseUrl } from '@/utils/api';
 
 /**
@@ -89,11 +91,11 @@ export type EnterpriseOrdersResponse = {
 };
 
 export type FetchEnterpriseOrdersParams = {
-  filter?: Record<string, unknown>;
+  filter?: ColumnFiltersState<EnterpriseOrder>;
   limit: number;
   requestUrl?: string;
   skip: number;
-  sorting?: { columnKey: string; direction: 'asc' | 'desc' }[];
+  sorting?: SortingState<EnterpriseOrder>;
 };
 
 /**
@@ -109,7 +111,7 @@ export const enterpriseOrdersApi = {
     offset = 0,
     requestUrl,
   }: {
-    columnName: string;
+    columnName: keyof EnterpriseOrder;
     limit?: number;
     offset?: number;
     requestUrl?: string;
