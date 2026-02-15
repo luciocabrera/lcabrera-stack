@@ -4,8 +4,6 @@ import type { ColumnFilter } from '@/types/filterOperators.types';
 export type FilterInputsProps<TData> = {
   /** Column key to identify which filter data to use from context */
   columnKey: DataKey<TData>;
-  /** Column configuration */
-  column: TableColumn<TData>;
   /** Current filter value */
   filter?: ColumnFilter;
   /** Callback when filter changes */

@@ -17,25 +17,28 @@ import { BooleanFilterInput } from '../BooleanFilterInput';
 import { styles } from './FilterInputs.stylex';
 import { InputContent } from './InputContent';
 import { getOperatorFromFilter, getOperatorOptions } from './utils';
+import { useGetNormalizedColumn } from '@/components/Table/TableContext/hooks/store/columns/selectors/useGetNormalizedColumn.hook';
 
 /**
  * Shared component for rendering filter inputs based on column data type.
  * The operator dropdown is rendered here based on data type.
  * Used by both FilterPopover (column header) and FilterEditor (table settings).
- * 
+ *
  * Now uses context for filter data - no more prop drilling!
  */
 export const FilterInputs = <TData,>({
   columnKey,
-  column,
   filter,
   onChange,
 }: FilterInputsProps<TData>) => {
   // === SELECTORS (subscribe to state) ===
+  const column = useGetNormalizedColumn<TData>(columnKey);
   const filterData = useGetFilterData<TData>(columnKey);
 
   // === ACTIONS (get mutation functions) ===
-  const fetchMoreFilterData = useFetchMoreFilterData<string, unknown>(String(columnKey));
+  const fetchMoreFilterData = useFetchMoreFilterData<string, unknown>(
+    columnKey,
+  );
 
   // Determine effective filter options
   const effectiveFilterOptions = useMemo(() => {
@@ -48,7 +51,8 @@ export const FilterInputs = <TData,>({
   }, [filterData?.data, column.filterOptions]);
 
   const hasMore = filterData?.hasMore ?? false;
-  const isLoadingOptions = filterData?.isLoading || filterData?.isLoadingMore || false;
+  const isLoadingOptions =
+    filterData?.isLoading || filterData?.isLoadingMore || false;
 
   // Handle loading more options
   const handleLoadMoreOptions = useCallback(() => {

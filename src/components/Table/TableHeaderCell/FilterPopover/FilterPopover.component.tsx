@@ -175,7 +175,6 @@ export const FilterPopover = <TData,>({
         <div {...stylex.props(styles.body)}>
           <FilterInputs
             columnKey={columnKey}
-            column={column}
             filter={localFilter}
             onChange={setLocalFilter}
           />
