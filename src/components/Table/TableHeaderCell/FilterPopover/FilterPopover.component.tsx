@@ -30,14 +30,15 @@ export const FilterPopover = <TData,>({
 
   const column = useGetNormalizedColumn<TData>(columnKey);
   const columnFilters = useGetColumnFilters();
+  const filterData = useGetFilterData<TData>(columnKey);
 
   const { dataType, fetchFilterOptions, filterOptions } = column;
   const filter = columnFilters[columnKey];
 
   const resetColumnFilter = useResetColumnFilter();
   const setColumnFilter = useSetColumnFilter();
-  const fetchFilterData = useFetchFilterData<string, unknown>(String(columnKey));
-  const filterData = useGetFilterData<TData>(columnKey);
+  const fetchFilterData = useFetchFilterData<string, unknown>(columnKey);
+
   const popoverRef = useRef<HTMLDivElement>(null);
 
   // Ref to always access latest filter value (avoids stale closure in toggle handler)
@@ -55,14 +56,25 @@ export const FilterPopover = <TData,>({
     Boolean(filterOptions && filterOptions.length > 0) ||
     Boolean(fetchFilterOptions);
 
-  // Use positioning hook - recalculate when filter data loads
+  // Determine if the select list is visible (needed for positioning recalculation)
+  const currentOperator = getOperatorFromFilter(localFilter);
+  const isListShowing =
+    dataType === 'string' &&
+    hasOptions &&
+    (currentOperator === 'equals' || currentOperator === 'notEquals');
+
+  // Use positioning hook - recalculate when filter data loads or content type changes
   const { resetPositioning } = usePopoverPositioning({
     columnDataType: dataType,
     hasOptions,
     isOpen: isPopoverOpen,
     popoverId,
     popoverRef,
-    recalculateDeps: [filterData?.data.length, filterData?.isLoading],
+    recalculateDeps: [
+      filterData?.data.length,
+      filterData?.isLoading,
+      isListShowing,
+    ],
   });
 
   // Handle popover toggle events
@@ -136,17 +148,9 @@ export const FilterPopover = <TData,>({
     popoverRef.current?.hidePopover();
   };
 
-  // Get current operator from the local filter to determine if we're showing a list
-  const currentOperator = getOperatorFromFilter(localFilter);
-
   // Fixed heights for both use cases
   // 25rem: When list is visible (string column with options AND operator is equals/notEquals)
   // 12rem: All other cases (no list)
-  const isListShowing =
-    column.dataType === 'string' &&
-    hasOptions &&
-    (currentOperator === 'equals' || currentOperator === 'notEquals');
-
   const popoverMinHeight = isListShowing ? '25rem' : '12rem';
 
   return (
