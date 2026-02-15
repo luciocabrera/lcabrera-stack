@@ -16,8 +16,9 @@ import {
   useGetColumnFilters,
   useGetNormalizedColumn,
 } from '../../TableContext/hooks/store/columns/selectors';
+import { FilterInputs } from '../filters/FilterInputs';
 import { styles } from './FilterPopover.stylex';
-import { getOperatorFromFilter, renderFilterInput } from './utils';
+import { getOperatorFromFilter } from './utils';
 
 export const FilterPopover = <TData,>({
   columnKey,
@@ -183,16 +184,6 @@ export const FilterPopover = <TData,>({
 
   const popoverMinHeight = isListShowing ? '25rem' : '12rem';
 
-  const content = renderFilterInput({
-    column,
-    effectiveFilterOptions,
-    filter: localFilter,
-    handleLoadMoreOptions,
-    hasMoreOptions,
-    isFetchingOptions,
-    setLocalFilter,
-  });
-
   return (
     <div
       id={popoverId}
@@ -212,7 +203,17 @@ export const FilterPopover = <TData,>({
             <MenuCloseIcon size={16} />
           </button>
         </div>
-        <div {...stylex.props(styles.body)}>{content}</div>
+        <div {...stylex.props(styles.body)}>
+          <FilterInputs
+            column={column}
+            filter={localFilter}
+            filterOptions={effectiveFilterOptions}
+            hasMore={hasMoreOptions}
+            isLoadingOptions={isFetchingOptions}
+            onChange={setLocalFilter}
+            onLoadMoreOptions={handleLoadMoreOptions}
+          />
+        </div>
         <div {...stylex.props(styles.footer)}>
           <Button color='primary' onClick={handleApply} size='sm' width='full'>
             Apply

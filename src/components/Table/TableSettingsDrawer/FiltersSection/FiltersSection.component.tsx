@@ -15,8 +15,8 @@ export const FiltersSection = () => {
   const columns = useGetColumns();
   const filters = useGetColumnFilters();
 
-    const onFiltersChange = useSetColumnFilters();
-    
+  const onFiltersChange = useSetColumnFilters();
+
   const [selectedColumn, setSelectedColumn] = useState('');
   const [expandedFilters, setExpandedFilters] = useState<Set<string>>(
     () => new Set(),
