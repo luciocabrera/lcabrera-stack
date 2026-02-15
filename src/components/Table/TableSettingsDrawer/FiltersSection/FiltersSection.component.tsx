@@ -4,12 +4,57 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/Button';
 import { MenuCloseIcon } from '@/components/Icons';
 import { InfoBox } from '@/components/InfoBox';
+import type { DataKey, TableColumn } from '@/components/Table/Table.types';
 import { useGetColumns } from '@/components/Table/TableContext/hooks/store/columns/selectors';
+import { useFetchFilterData } from '@/components/Table/TableContext/hooks/store/filters/actions';
+import type { ColumnFilter } from '@/types/filterOperators.types';
 
 import { useSetColumnFilters } from '../TableDrawerContext/hooks/store/columns/actions';
 import { useGetColumnFilters } from '../TableDrawerContext/hooks/store/columns/selectors';
 import { FilterEditor, validateFilter } from './FilterEditor';
 import { styles } from './FiltersSection.stylex';
+
+/**
+ * Wrapper component that fetches filter data when rendered
+ */
+const FilterEditorWithFetch = <TData,>({
+  columnKey,
+  column,
+  filter,
+  onChange,
+}: {
+  columnKey: DataKey<TData>;
+  column: TableColumn<TData>;
+  filter: ColumnFilter | null | undefined;
+  onChange: (filter: ColumnFilter | null | undefined) => void;
+}) => {
+  const fetchFilterData = useFetchFilterData<string, unknown>(String(columnKey));
+
+  useEffect(() => {
+    // Fetch filter data when component mounts if column has fetchFilterOptions
+    if (column.fetchFilterOptions) {
+      void fetchFilterData({
+        dataSelector: column.filterOptionsDataSelector,
+        dataTotalSelector: column.filterOptionsDataTotalSelector,
+        onLoadMore: column.fetchFilterOptions,
+      });
+    }
+  }, [
+    column.fetchFilterOptions,
+    column.filterOptionsDataSelector,
+    column.filterOptionsDataTotalSelector,
+    fetchFilterData,
+  ]);
+
+  return (
+    <FilterEditor
+      columnKey={columnKey}
+      column={column}
+      filter={filter}
+      onChange={onChange}
+    />
+  );
+};
 
 export const FiltersSection = () => {
   const columns = useGetColumns();
@@ -21,76 +66,9 @@ export const FiltersSection = () => {
   const [expandedFilters, setExpandedFilters] = useState<Set<string>>(
     () => new Set(),
   );
-  // Track fetched options for columns with fetchFilterOptions
-  const [fetchedOptions, setFetchedOptions] = useState<
-    Record<string, string[]>
-  >({});
-  // Track hasMore state for pagination
-  const [hasMoreOptions, setHasMoreOptions] = useState<Record<string, boolean>>(
-    {},
-  );
-  // Track loading state for each column
-  const [loadingOptions, setLoadingOptions] = useState<Record<string, boolean>>(
-    {},
-  );
 
   // Filter to only filterable columns
   const filterableColumns = columns.filter((col) => col.isFilterable !== false);
-
-  // Fetch filter options for columns that need them
-  useEffect(() => {
-    const fetchOptionsForColumns = async () => {
-      for (const [columnKey] of Object.entries(filters)) {
-        const column = filterableColumns.find((col) => col.key === columnKey);
-        if (column?.fetchFilterOptions && !fetchedOptions[columnKey]) {
-          try {
-            const result = await column.fetchFilterOptions(0);
-            // fetchFilterOptions can return either string[] or {values: string[], hasMore: boolean}
-            const options = Array.isArray(result) ? result : result.values;
-            const hasMore = Array.isArray(result) ? false : result.hasMore;
-            setFetchedOptions((prev) => ({ ...prev, [columnKey]: options }));
-            setHasMoreOptions((prev) => ({ ...prev, [columnKey]: hasMore }));
-          } catch (error) {
-            console.error(`Failed to fetch options for ${columnKey}:`, error);
-          }
-        }
-      }
-    };
-
-    void fetchOptionsForColumns();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters, filterableColumns]);
-  // Note: fetchedOptions intentionally excluded from deps to avoid infinite loop
-
-  // Handle loading more options for a specific column
-  const handleLoadMoreOptions = async (columnKey: string) => {
-    const column = filterableColumns.find((col) => col.key === columnKey);
-    if (
-      !column?.fetchFilterOptions ||
-      loadingOptions[columnKey] ||
-      !hasMoreOptions[columnKey]
-    ) {
-      return;
-    }
-
-    setLoadingOptions((prev) => ({ ...prev, [columnKey]: true }));
-    try {
-      const currentOptions = fetchedOptions[columnKey] ?? [];
-      const result = await column.fetchFilterOptions(currentOptions.length);
-      const newOptions = Array.isArray(result) ? result : result.values;
-      const hasMore = Array.isArray(result) ? false : result.hasMore;
-
-      setFetchedOptions((prev) => ({
-        ...prev,
-        [columnKey]: [...currentOptions, ...newOptions],
-      }));
-      setHasMoreOptions((prev) => ({ ...prev, [columnKey]: hasMore }));
-    } catch (error) {
-      console.error(`Failed to load more options for ${columnKey}:`, error);
-    } finally {
-      setLoadingOptions((prev) => ({ ...prev, [columnKey]: false }));
-    }
-  };
 
   // Get columns that don't have filters yet (for "Add Filter" dropdown)
   const availableColumns = filterableColumns;
@@ -276,37 +254,19 @@ export const FiltersSection = () => {
                   </div>
                   {isExpanded && (
                     <div {...stylex.props(styles.filterItemContent)}>
-                      {(() => {
-                        const effectiveOptions =
-                          fetchedOptions[columnKey] ?? column.filterOptions;
-                        return (
-                          <FilterEditor
-                            column={column}
-                            filter={filter}
-                            filterOptions={effectiveOptions}
-                            hasMore={hasMoreOptions[columnKey] ?? false}
-                            isLoadingOptions={
-                              loadingOptions[columnKey] ?? false
-                            }
-                            onChange={(newFilter) => {
-                              if (newFilter) {
-                                handleFilterChange({
-                                  columnKey,
-                                  filter: newFilter,
-                                });
-                              }
-                            }}
-                            onLoadMoreOptions={
-                              column.fetchFilterOptions &&
-                              hasMoreOptions[columnKey]
-                                ? () => {
-                                    void handleLoadMoreOptions(columnKey);
-                                  }
-                                : undefined
-                            }
-                          />
-                        );
-                      })()}
+                      <FilterEditorWithFetch
+                        columnKey={columnKey}
+                        column={column}
+                        filter={filter}
+                        onChange={(newFilter) => {
+                          if (newFilter) {
+                            handleFilterChange({
+                              columnKey,
+                              filter: newFilter,
+                            });
+                          }
+                        }}
+                      />
                     </div>
                   )}
                 </div>

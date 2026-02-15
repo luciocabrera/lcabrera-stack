@@ -25,6 +25,14 @@ export const TextFilterInput = ({
   return (
     <div {...stylex.props(styles.container)}>
       <input
+        autoComplete="off"
+        data-1p-ignore="true"
+        data-bwignore="true"
+        data-form-type="other"
+        data-lpignore="true"
+        data-np-checked="1"
+        data-np-ignore="1"
+        name={`filter-text-${Math.random().toString(36).substring(7)}`}
         onChange={(e) => {
           handleValueChange(e.target.value);
         }}

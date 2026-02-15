@@ -80,6 +80,14 @@ export const NumberFilterInput = ({
       {operator === 'between' ? (
         <div {...stylex.props(styles.inputGroup)}>
           <input
+            autoComplete="off"
+            data-1p-ignore="true"
+            data-bwignore="true"
+            data-form-type="other"
+            data-lpignore="true"
+            data-np-checked="1"
+            data-np-ignore="1"
+            name={`filter-number-min-${Math.random().toString(36).substring(7)}`}
             onChange={(e) => {
               handleValueChange(
                 e.target.value === '' ? '' : Number(e.target.value),
@@ -92,6 +100,14 @@ export const NumberFilterInput = ({
           />
           <span {...stylex.props(styles.separator)}>to</span>
           <input
+            autoComplete="off"
+            data-1p-ignore="true"
+            data-bwignore="true"
+            data-form-type="other"
+            data-lpignore="true"
+            data-np-checked="1"
+            data-np-ignore="1"
+            name={`filter-number-max-${Math.random().toString(36).substring(7)}`}
             onChange={(e) => {
               handleMaxValueChange(
                 e.target.value === '' ? '' : Number(e.target.value),
@@ -105,6 +121,14 @@ export const NumberFilterInput = ({
         </div>
       ) : (
         <input
+          autoComplete="off"
+          data-1p-ignore="true"
+          data-bwignore="true"
+          data-form-type="other"
+          data-lpignore="true"
+          data-np-checked="1"
+          data-np-ignore="1"
+          name={`filter-number-${Math.random().toString(36).substring(7)}`}
           onChange={(e) => {
             handleValueChange(
               e.target.value === '' ? '' : Number(e.target.value),

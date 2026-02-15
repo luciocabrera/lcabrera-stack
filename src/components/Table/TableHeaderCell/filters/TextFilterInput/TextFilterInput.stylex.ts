@@ -14,16 +14,17 @@ export const styles = stylex.create({
     borderColor: {
       default: colors.borderPrimary,
       ':focus': colors.borderFocus,
+      ':focus-visible': colors.borderFocus,
     },
     borderRadius: '0.25rem',
     borderStyle: 'solid',
     borderWidth: '1px',
-    outline: {
-      default: 'revert',
-      ':focus': 'none',
-    },
+    boxShadow: 'none !important',
+    outline: 'none !important',
+    outlineOffset: '0 !important',
     backgroundColor: colors.surfacePrimary,
     color: colors.textPrimary,
     fontSize: typography.fontSizeSm,
+    transition: 'border-color 0.15s ease',
   },
 });

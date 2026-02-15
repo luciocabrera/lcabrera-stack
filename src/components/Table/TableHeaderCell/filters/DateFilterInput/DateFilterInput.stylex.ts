@@ -14,18 +14,19 @@ export const styles = stylex.create({
     borderColor: {
       default: colors.borderPrimary,
       ':focus': colors.borderFocus,
+      ':focus-visible': colors.borderFocus,
     },
     borderRadius: '0.25rem',
     borderStyle: 'solid',
     borderWidth: '1px',
+    boxShadow: 'none !important',
     flex: '1',
-    outline: {
-      default: 'revert',
-      ':focus': 'none',
-    },
+    outline: 'none !important',
+    outlineOffset: '0 !important',
     backgroundColor: colors.surfacePrimary,
     color: colors.textPrimary,
     fontSize: typography.fontSizeSm,
+    transition: 'border-color 0.15s ease',
   },
   inputGroup: {
     gap: spacing.sm,

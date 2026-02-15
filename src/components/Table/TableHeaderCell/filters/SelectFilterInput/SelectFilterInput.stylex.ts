@@ -18,6 +18,11 @@ export const styles = stylex.create({
     color: colors.textPrimary,
     cursor: 'pointer',
     fontSize: typography.fontSizeSm,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    flex: 1, // Take remaining space after checkbox
+    minWidth: 0, // Allow shrinking below content size
   },
   noResults: {
     padding: spacing.sm,
@@ -39,34 +44,32 @@ export const styles = stylex.create({
     },
     cursor: 'pointer',
     display: 'flex',
+    minWidth: 0, // Allow flex children to shrink below content size
+    overflow: 'hidden',
   },
   optionsList: {
     gap: spacing.xs,
-    overflow: 'hidden',
     display: 'flex',
     flexDirection: 'column',
     position: 'relative',
-    maxHeight: '10rem',
-    // height: '12.5rem',
-    // flex: '1',
-    minHeight: '10rem',
   },
   searchInput: {
     padding: `${spacing.xs} ${spacing.sm}`,
     borderColor: {
       default: colors.borderPrimary,
       ':focus': colors.borderFocus,
+      ':focus-visible': colors.borderFocus,
     },
     borderRadius: '0.25rem',
     borderStyle: 'solid',
     borderWidth: '1px',
-    outline: {
-      default: 'revert',
-      ':focus': 'none',
-    },
+    boxShadow: 'none !important',
+    outline: 'none !important',
+    outlineOffset: '0 !important',
     backgroundColor: colors.surfacePrimary,
     color: colors.textPrimary,
     fontSize: typography.fontSizeSm,
+    transition: 'border-color 0.15s ease',
   },
   loadingMore: {
     padding: spacing.sm,
@@ -83,6 +86,8 @@ export const styles = stylex.create({
   virtualContainer: (height: number) => ({
     position: 'relative',
     height,
+    maxHeight: '18.75rem', // 300px - matches defaultContainerHeight in SelectFilterInput
+    overflowX: 'hidden',
     overflowY: 'auto',
   }),
   virtualOffset: (offsetY: number) => ({

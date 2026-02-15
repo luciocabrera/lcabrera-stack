@@ -1,6 +1,9 @@
 import type { TStore } from '@/hooks/useStore.hook';
 
-import type { FiltersDataState, TableDataState } from '../Table.types';
+import type {
+  FiltersDataState,
+  TableDataState,
+} from '../Table.types';
 
 export type TableDataContextValue = {
   /** Store managing data-related state */

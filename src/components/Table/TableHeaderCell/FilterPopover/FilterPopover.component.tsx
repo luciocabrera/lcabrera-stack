@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { Button } from '@/components/Button';
 import { MenuCloseIcon } from '@/components/Icons';
@@ -16,6 +16,8 @@ import {
   useGetColumnFilters,
   useGetNormalizedColumn,
 } from '../../TableContext/hooks/store/columns/selectors';
+import { useFetchFilterData } from '../../TableContext/hooks/store/filters/actions';
+import { useGetFilterData } from '../../TableContext/hooks/store/filters/selectors';
 import { FilterInputs } from '../filters/FilterInputs';
 import { styles } from './FilterPopover.stylex';
 import { getOperatorFromFilter } from './utils';
@@ -34,6 +36,8 @@ export const FilterPopover = <TData,>({
 
   const resetColumnFilter = useResetColumnFilter();
   const setColumnFilter = useSetColumnFilter();
+  const fetchFilterData = useFetchFilterData<string, unknown>(String(columnKey));
+  const filterData = useGetFilterData<TData>(columnKey);
   const popoverRef = useRef<HTMLDivElement>(null);
 
   // Ref to always access latest filter value (avoids stale closure in toggle handler)
@@ -45,27 +49,20 @@ export const FilterPopover = <TData,>({
   // Local state to track the current filter value before applying
   // Reset imperatively on popover open, not via effect
   const [localFilter, setLocalFilter] = useState(filter);
-  // State for dynamically fetched options
-  const [fetchedOptions, setFetchedOptions] = useState<string[]>();
-  const [isFetchingOptions, setIsFetchingOptions] = useState(false);
-  const [hasMoreOptions, setHasMoreOptions] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const hasOptions =
     Boolean(filterOptions && filterOptions.length > 0) ||
     Boolean(fetchFilterOptions);
 
-  // Use fetched options if available, otherwise fall back to provided options
-  const effectiveFilterOptions = fetchedOptions ?? filterOptions;
-
-  // Use positioning hook
+  // Use positioning hook - recalculate when filter data loads
   const { resetPositioning } = usePopoverPositioning({
     columnDataType: dataType,
     hasOptions,
     isOpen: isPopoverOpen,
     popoverId,
     popoverRef,
-    recalculateDeps: [effectiveFilterOptions],
+    recalculateDeps: [filterData?.data.length, filterData?.isLoading],
   });
 
   // Handle popover toggle events
@@ -84,20 +81,13 @@ export const FilterPopover = <TData,>({
         // Lock body scroll to prevent outer scrollbar
         document.body.style.overflow = 'hidden';
 
-        // Fetch options when popover opens (if needed)
-        if (fetchFilterOptions && !fetchedOptions && !isFetchingOptions) {
-          setIsFetchingOptions(true);
-          void fetchFilterOptions(0)
-            .then((result: { hasMore: boolean; values: string[] }) => {
-              setFetchedOptions(result.values);
-              setHasMoreOptions(result.hasMore);
-            })
-            .catch((error: unknown) => {
-              console.error('[FilterPopover] Failed to fetch options:', error);
-            })
-            .finally(() => {
-              setIsFetchingOptions(false);
-            });
+        // Fetch filter options on open if needed (uses context store)
+        if (fetchFilterOptions) {
+          void fetchFilterData({
+            dataSelector: column.filterOptionsDataSelector,
+            dataTotalSelector: column.filterOptionsDataTotalSelector,
+            onLoadMore: fetchFilterOptions,
+          });
         }
 
         // Focus first input when popover opens
@@ -121,37 +111,12 @@ export const FilterPopover = <TData,>({
       popover.removeEventListener('toggle', handlePopoverToggle);
     };
   }, [
+    column.filterOptionsDataSelector,
+    column.filterOptionsDataTotalSelector,
+    fetchFilterData,
     fetchFilterOptions,
-    fetchedOptions,
-    isFetchingOptions,
-    column.key,
     resetPositioning,
   ]);
-
-  // Handle loading more filter options (infinite scroll)
-  const handleLoadMoreOptions = useCallback(() => {
-    if (
-      !fetchFilterOptions ||
-      !fetchedOptions ||
-      isFetchingOptions ||
-      !hasMoreOptions
-    ) {
-      return;
-    }
-
-    setIsFetchingOptions(true);
-    void fetchFilterOptions(fetchedOptions.length)
-      .then((result: { hasMore: boolean; values: string[] }) => {
-        setFetchedOptions((prev) => [...(prev ?? []), ...result.values]);
-        setHasMoreOptions(result.hasMore);
-      })
-      .catch((error: unknown) => {
-        console.error('❌ [FilterPopover] Failed to load more options:', error);
-      })
-      .finally(() => {
-        setIsFetchingOptions(false);
-      });
-  }, [fetchFilterOptions, fetchedOptions, isFetchingOptions, hasMoreOptions]);
 
   const handleClear = () => {
     setLocalFilter(undefined);
@@ -205,13 +170,10 @@ export const FilterPopover = <TData,>({
         </div>
         <div {...stylex.props(styles.body)}>
           <FilterInputs
+            columnKey={columnKey}
             column={column}
             filter={localFilter}
-            filterOptions={effectiveFilterOptions}
-            hasMore={hasMoreOptions}
-            isLoadingOptions={isFetchingOptions}
             onChange={setLocalFilter}
-            onLoadMoreOptions={handleLoadMoreOptions}
           />
         </div>
         <div {...stylex.props(styles.footer)}>

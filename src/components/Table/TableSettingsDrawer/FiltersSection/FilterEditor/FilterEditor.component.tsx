@@ -7,22 +7,18 @@ import type { FilterEditorProps } from './FilterEditor.types';
 import { styles } from './FilterEditor.stylex';
 
 export const FilterEditor = <TData,>({
+  columnKey,
   column,
   filter,
-  filterOptions,
-  hasMore = false,
-  isLoadingOptions = false,
-  ...rest
+  onChange,
 }: FilterEditorProps<TData>) => {
   return (
     <div {...stylex.props(styles.container)} data-testid='filter-editor'>
       <FilterInputs<TData>
+        columnKey={columnKey}
         column={column}
         filter={filter ?? undefined}
-        filterOptions={filterOptions}
-        hasMore={hasMore}
-        isLoadingOptions={isLoadingOptions}
-        {...rest}
+        onChange={onChange}
       />
     </div>
   );

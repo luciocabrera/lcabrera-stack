@@ -74,9 +74,13 @@ export type StorageType = 'cookie' | 'localStorage';
 export type TableColumn<TData> = {
   dataType?: TableColumnDataType;
   /** Async function to fetch filter options from server (for facet filters with pagination) */
-  fetchFilterOptions?: (
-    offset?: number,
-  ) => Promise<{ hasMore: boolean; values: string[] }>;
+  fetchFilterOptions?: <TResponse>(
+    params: { limit: number; skip: number },
+  ) => Promise<TResponse>;
+  /** Selector to extract options array from fetchFilterOptions response */
+  filterOptionsDataSelector?: <TResponse>(response: TResponse) => string[];
+  /** Selector to extract total count from fetchFilterOptions response */
+  filterOptionsDataTotalSelector?: <TResponse>(response: TResponse) => number;
   /** Static options for select/multiSelect filters */
   filterOptions?: string[];
   /** Format options for the column based on data type */

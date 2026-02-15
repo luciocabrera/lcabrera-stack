@@ -14,13 +14,17 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   },
   {
     dataType: 'string',
-    fetchFilterOptions: async (offset = 0) => {
+    fetchFilterOptions: async ({ limit = 50, skip = 0 }) => {
       const result = await enterpriseOrdersApi.fetchDistinctValues({
         columnName: 'order_number',
-        offset,
+        limit,
+        offset: skip,
       });
       return { hasMore: result.hasMore, values: result.values };
     },
+    filterOptionsDataSelector: (response: { values: string[]; hasMore: boolean }) => response.values,
+    filterOptionsDataTotalSelector: (response: { values: string[]; hasMore: boolean }) => 
+      response.hasMore ? Infinity : response.values.length,
     key: 'order_number',
     label: 'Order #',
     maxWidth: 180,
@@ -65,13 +69,17 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   },
   {
     dataType: 'string',
-    fetchFilterOptions: async (offset = 0) => {
+    fetchFilterOptions: async ({ limit = 50, skip = 0 }) => {
       const result = await enterpriseOrdersApi.fetchDistinctValues({
         columnName: 'customer_email',
-        offset,
+        limit,
+        offset: skip,
       });
       return { hasMore: result.hasMore, values: result.values };
     },
+    filterOptionsDataSelector: (response: { values: string[]; hasMore: boolean }) => response.values,
+    filterOptionsDataTotalSelector: (response: { values: string[]; hasMore: boolean }) => 
+      response.hasMore ? Infinity : response.values.length,
     key: 'customer_email',
     label: 'Email',
     maxWidth: 280,
@@ -79,13 +87,17 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   },
   {
     dataType: 'string',
-    fetchFilterOptions: async (offset = 0) => {
+    fetchFilterOptions: async ({ limit = 50, skip = 0 }) => {
       const result = await enterpriseOrdersApi.fetchDistinctValues({
         columnName: 'customer_type',
-        offset,
+        limit,
+        offset: skip,
       });
       return { hasMore: result.hasMore, values: result.values };
     },
+    filterOptionsDataSelector: (response: { values: string[]; hasMore: boolean }) => response.values,
+    filterOptionsDataTotalSelector: (response: { values: string[]; hasMore: boolean }) => 
+      response.hasMore ? Infinity : response.values.length,
     key: 'customer_type',
     label: 'Customer Type',
     maxWidth: 180,
@@ -192,13 +204,17 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   },
   {
     dataType: 'string',
-    fetchFilterOptions: async (offset = 0) => {
+    fetchFilterOptions: async ({ limit = 50, skip = 0 }) => {
       const result = await enterpriseOrdersApi.fetchDistinctValues({
         columnName: 'shipping_city',
-        offset,
+        limit,
+        offset: skip,
       });
       return { hasMore: result.hasMore, values: result.values };
     },
+    filterOptionsDataSelector: (response: { values: string[]; hasMore: boolean }) => response.values,
+    filterOptionsDataTotalSelector: (response: { values: string[]; hasMore: boolean }) => 
+      response.hasMore ? Infinity : response.values.length,
     key: 'shipping_city',
     label: 'Ship City',
     maxWidth: 180,
@@ -206,13 +222,17 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   },
   {
     dataType: 'string',
-    fetchFilterOptions: async (offset = 0) => {
+    fetchFilterOptions: async ({ limit = 50, skip = 0 }) => {
       const result = await enterpriseOrdersApi.fetchDistinctValues({
         columnName: 'shipping_state',
-        offset,
+        limit,
+        offset: skip,
       });
       return { hasMore: result.hasMore, values: result.values };
     },
+    filterOptionsDataSelector: (response: { values: string[]; hasMore: boolean }) => response.values,
+    filterOptionsDataTotalSelector: (response: { values: string[]; hasMore: boolean }) => 
+      response.hasMore ? Infinity : response.values.length,
     key: 'shipping_state',
     label: 'Ship State',
     maxWidth: 150,
@@ -220,13 +240,17 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   },
   {
     dataType: 'string',
-    fetchFilterOptions: async (offset = 0) => {
+    fetchFilterOptions: async ({ limit = 50, skip = 0 }) => {
       const result = await enterpriseOrdersApi.fetchDistinctValues({
         columnName: 'shipping_country',
-        offset,
+        limit,
+        offset: skip,
       });
       return { hasMore: result.hasMore, values: result.values };
     },
+    filterOptionsDataSelector: (response: { values: string[]; hasMore: boolean }) => response.values,
+    filterOptionsDataTotalSelector: (response: { values: string[]; hasMore: boolean }) => 
+      response.hasMore ? Infinity : response.values.length,
     key: 'shipping_country',
     label: 'Ship Country',
     maxWidth: 180,
@@ -234,13 +258,17 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   },
   {
     dataType: 'string',
-    fetchFilterOptions: async (offset = 0) => {
+    fetchFilterOptions: async ({ limit = 50, skip = 0 }) => {
       const result = await enterpriseOrdersApi.fetchDistinctValues({
         columnName: 'carrier',
-        offset,
+        limit,
+        offset: skip,
       });
       return { hasMore: result.hasMore, values: result.values };
     },
+    filterOptionsDataSelector: (response: { values: string[]; hasMore: boolean }) => response.values,
+    filterOptionsDataTotalSelector: (response: { values: string[]; hasMore: boolean }) => 
+      response.hasMore ? Infinity : response.values.length,
     key: 'carrier',
     label: 'Carrier',
     maxWidth: 150,
@@ -248,13 +276,17 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   },
   {
     dataType: 'string',
-    fetchFilterOptions: async (offset = 0) => {
+    fetchFilterOptions: async ({ limit = 50, skip = 0 }) => {
       const result = await enterpriseOrdersApi.fetchDistinctValues({
         columnName: 'warehouse_location',
-        offset,
+        limit,
+        offset: skip,
       });
       return { hasMore: result.hasMore, values: result.values };
     },
+    filterOptionsDataSelector: (response: { values: string[]; hasMore: boolean }) => response.values,
+    filterOptionsDataTotalSelector: (response: { values: string[]; hasMore: boolean }) => 
+      response.hasMore ? Infinity : response.values.length,
     key: 'warehouse_location',
     label: 'Warehouse',
     maxWidth: 180,
