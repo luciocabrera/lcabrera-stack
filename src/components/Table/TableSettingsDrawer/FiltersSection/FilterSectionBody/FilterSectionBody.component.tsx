@@ -1,0 +1,34 @@
+import { useGetNormalizedColumn } from '@/components/Table/TableContext/hooks/store/columns/selectors';
+import { useFetchFilterData } from '@/components/Table/TableContext/hooks/store/filters/actions';
+import { useEffect } from 'react';
+import { FilterEditor } from '../FilterEditor';
+import type { FilterSectionBodyProps } from './FilterSectionBody.types';
+
+export const FilterSectionBody = <TData,>({
+  columnKey,
+  filter,
+  onChange,
+}: FilterSectionBodyProps<TData>) => {
+  const column = useGetNormalizedColumn<TData>(columnKey);
+  const fetchFilterData = useFetchFilterData<string, unknown>(columnKey);
+
+  useEffect(() => {
+    // Fetch filter data when component mounts if column has fetchFilterOptions
+    if (column.fetchFilterOptions) {
+      void fetchFilterData({
+        dataSelector: column.filterOptionsDataSelector,
+        dataTotalSelector: column.filterOptionsDataTotalSelector,
+        onLoadMore: column.fetchFilterOptions,
+      });
+    }
+  }, [
+    column.fetchFilterOptions,
+    column.filterOptionsDataSelector,
+    column.filterOptionsDataTotalSelector,
+    fetchFilterData,
+  ]);
+
+  return (
+    <FilterEditor columnKey={columnKey} filter={filter} onChange={onChange} />
+  );
+};

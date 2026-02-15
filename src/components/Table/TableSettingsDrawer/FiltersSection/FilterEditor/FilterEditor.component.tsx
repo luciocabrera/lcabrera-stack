@@ -8,7 +8,6 @@ import { styles } from './FilterEditor.stylex';
 
 export const FilterEditor = <TData,>({
   columnKey,
-  column,
   filter,
   onChange,
 }: FilterEditorProps<TData>) => {
@@ -16,7 +15,6 @@ export const FilterEditor = <TData,>({
     <div {...stylex.props(styles.container)} data-testid='filter-editor'>
       <FilterInputs<TData>
         columnKey={columnKey}
-        column={column}
         filter={filter ?? undefined}
         onChange={onChange}
       />

@@ -66,7 +66,6 @@ export const SelectFilterInput = <TData,>({
   };
 
   const handleSelectAll = () => {
-    const isAllSelected = filteredOptions.length === selectedValues.length;
     const newSelectedValues = isAllSelected ? [] : filteredOptions;
 
     if (newSelectedValues.length === 0) {

@@ -11,15 +11,19 @@ import type {
   HandleToggleVisibilityArgs,
 } from './ColumnOrderSection.types';
 
-import { useSetColumnsOrder, useSetColumnsVisibility } from '../TableDrawerContext/hooks/store/columns/actions';
-import { useGetColumnOrder, useGetColumnVisibility } from '../TableDrawerContext/hooks/store/columns/selectors';
+import {
+  useSetColumnsOrder,
+  useSetColumnsVisibility,
+} from '../TableDrawerContext/hooks/store/columns/actions';
+import {
+  useGetColumnOrder,
+  useGetColumnVisibility,
+} from '../TableDrawerContext/hooks/store/columns/selectors';
 import { styles } from './ColumnOrderSection.stylex';
 
-export const ColumnOrderSection = ({
-  ...props
-}: ColumnOrderSectionProps) => {
+export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
   const columns = useGetColumns();
-  const columnsOrder =useGetColumnOrder();
+  const columnsOrder = useGetColumnOrder();
   const columnVisibility = useGetColumnVisibility();
 
   const onColumnOrderChange = useSetColumnsOrder();
