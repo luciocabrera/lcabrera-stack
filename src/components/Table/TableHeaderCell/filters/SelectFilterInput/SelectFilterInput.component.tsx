@@ -7,6 +7,9 @@ import type { SelectFilterInputProps } from './SelectFilterInput.types';
 
 import { styles } from './SelectFilterInput.stylex';
 import { VirtualizedOption } from './VirtualizedOption';
+import { useFetchMoreFilterData } from '@/components/Table/TableContext/hooks/store/filters/actions';
+import { useGetNormalizedColumn } from '@/components/Table/TableContext/hooks/store/columns/selectors';
+import { useGetFilterData } from '@/components/Table/TableContext/hooks/store/filters/selectors';
 
 const ITEM_HEIGHT = 32; // Height of each checkbox option in pixels
 
@@ -14,14 +17,22 @@ const ITEM_HEIGHT = 32; // Height of each checkbox option in pixels
 export const SelectFilterInput = <TData,>({
   columnKey,
   filter,
-  hasMore = false,
-  isLoadingMore = false,
   onChange,
-  onLoadMore,
   options,
 }: SelectFilterInputProps<TData>) => {
+  const column = useGetNormalizedColumn<TData>(columnKey);
+  const filterData = useGetFilterData<TData>(columnKey);
+
+  const fetchMoreFilterData = useFetchMoreFilterData<string, unknown>(
+    columnKey,
+  );
+
   const [searchTerm, setSearchTerm] = useState('');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const { isLoading, isLoadingMore, hasMore } = filterData;
+
+  const isLoadingOptions = isLoading || isLoadingMore || false;
 
   // Derive selectedValues from filter prop - fully controlled by parent
   const selectedValues = filter?.values ?? [];
@@ -47,7 +58,6 @@ export const SelectFilterInput = <TData,>({
       overscan: 5,
       totalItems,
     });
-
 
   const handleToggle = (option: string) => {
     const newSelectedValues = selectedValues.includes(option)
@@ -83,10 +93,29 @@ export const SelectFilterInput = <TData,>({
     filteredOptions.length > 0 &&
     filteredOptions.every((option) => selectedValues.includes(option));
 
+  const handleLoadMoreOptions = useCallback(() => {
+    if (!column.fetchFilterOptions || !hasMore || isLoadingOptions) {
+      return;
+    }
+
+    void fetchMoreFilterData({
+      dataSelector: column.filterOptionsDataSelector,
+      dataTotalSelector: column.filterOptionsDataTotalSelector,
+      onLoadMore: column.fetchFilterOptions,
+    });
+  }, [
+    column.fetchFilterOptions,
+    column.filterOptionsDataSelector,
+    column.filterOptionsDataTotalSelector,
+    fetchMoreFilterData,
+    hasMore,
+    isLoadingOptions,
+  ]);
+
   // Handle scroll for infinite loading
   const handleScroll = useCallback(() => {
     const container = scrollContainerRef.current;
-    if (!container || !onLoadMore || !hasMore || isLoadingMore) {
+    if (!container || !handleLoadMoreOptions || !hasMore || isLoadingMore) {
       return;
     }
 
@@ -94,9 +123,9 @@ export const SelectFilterInput = <TData,>({
     const scrollThreshold = 50; // Load more when 50px from bottom
 
     if (scrollHeight - scrollTop - clientHeight < scrollThreshold) {
-      onLoadMore();
+      handleLoadMoreOptions();
     }
-  }, [onLoadMore, hasMore, isLoadingMore]);
+  }, [handleLoadMoreOptions, hasMore, isLoadingMore]);
 
   // Attach scroll listener
   useEffect(() => {
@@ -112,13 +141,13 @@ export const SelectFilterInput = <TData,>({
   return (
     <div {...stylex.props(styles.container)}>
       <input
-        autoComplete="off"
-        data-1p-ignore="true"
-        data-bwignore="true"
-        data-form-type="other"
-        data-lpignore="true"
-        data-np-checked="1"
-        data-np-ignore="1"
+        autoComplete='off'
+        data-1p-ignore='true'
+        data-bwignore='true'
+        data-form-type='other'
+        data-lpignore='true'
+        data-np-checked='1'
+        data-np-ignore='1'
         name={`filter-search-${columnKey}`}
         onChange={(e) => {
           setSearchTerm(e.target.value);

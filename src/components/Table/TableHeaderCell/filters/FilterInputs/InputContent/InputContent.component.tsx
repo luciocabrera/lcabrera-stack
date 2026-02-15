@@ -20,10 +20,10 @@ dataType,
   columnKey,
   filter,
   filterOptions,
-  hasMore,
-  isLoadingOptions,
+  // hasMore,
+  // isLoadingOptions,
   onChange,
-  onLoadMoreOptions,
+  // onLoadMoreOptions,
   operator,
 }: InputContentProps<TData>) => {
   switch (dataType) {
@@ -68,8 +68,8 @@ dataType,
                 ? filter
                 : undefined
             }
-            hasMore={hasMore}
-            isLoadingMore={isLoadingOptions}
+            // hasMore={hasMore}
+            // isLoadingMore={isLoadingOptions}
             onChange={(selectFilter) => {
               if (selectFilter) {
                 onChange({
@@ -80,7 +80,7 @@ dataType,
                 onChange();
               }
             }}
-            onLoadMore={onLoadMoreOptions}
+            // onLoadMore={onLoadMoreOptions}
             options={filterOptions}
           />
         );

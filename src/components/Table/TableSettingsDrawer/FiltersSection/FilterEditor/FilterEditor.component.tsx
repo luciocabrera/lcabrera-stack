@@ -15,11 +15,10 @@ export const FilterEditor = <TData,>({
     <div {...stylex.props(styles.container)} data-testid='filter-editor'>
       <FilterInputs<TData>
         columnKey={columnKey}
-        filter={filter ?? undefined}
+        filter={filter}
         onChange={onChange}
       />
     </div>
   );
 };
 
-FilterEditor.displayName = 'FilterEditor';

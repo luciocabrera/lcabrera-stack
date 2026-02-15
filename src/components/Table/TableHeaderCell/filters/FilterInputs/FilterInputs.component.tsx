@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 
 import type {
   ColumnFilter,
@@ -10,8 +10,6 @@ import type {
 } from '@/types/filterOperators.types';
 
 import type { FilterInputsProps } from './FilterInputs.types';
-
-import { useFetchMoreFilterData } from '@/components/Table/TableContext/hooks/store/filters/actions';
 import { useGetFilterData } from '@/components/Table/TableContext/hooks/store/filters/selectors';
 import { BooleanFilterInput } from '../BooleanFilterInput';
 import { styles } from './FilterInputs.stylex';
@@ -35,11 +33,6 @@ export const FilterInputs = <TData,>({
   const column = useGetNormalizedColumn<TData>(columnKey);
   const filterData = useGetFilterData<TData>(columnKey);
 
-  // === ACTIONS (get mutation functions) ===
-  const fetchMoreFilterData = useFetchMoreFilterData<string, unknown>(
-    columnKey,
-  );
-
   // Determine effective filter options
   const effectiveFilterOptions = useMemo(() => {
     // Use context data if available (fetched async)
@@ -49,30 +42,6 @@ export const FilterInputs = <TData,>({
     // Fallback to static options from column config
     return column.filterOptions ?? [];
   }, [filterData?.data, column.filterOptions]);
-
-  const hasMore = filterData?.hasMore ?? false;
-  const isLoadingOptions =
-    filterData?.isLoading || filterData?.isLoadingMore || false;
-
-  // Handle loading more options
-  const handleLoadMoreOptions = useCallback(() => {
-    if (!column.fetchFilterOptions || !hasMore || isLoadingOptions) {
-      return;
-    }
-
-    void fetchMoreFilterData({
-      dataSelector: column.filterOptionsDataSelector,
-      dataTotalSelector: column.filterOptionsDataTotalSelector,
-      onLoadMore: column.fetchFilterOptions,
-    });
-  }, [
-    column.fetchFilterOptions,
-    column.filterOptionsDataSelector,
-    column.filterOptionsDataTotalSelector,
-    fetchMoreFilterData,
-    hasMore,
-    isLoadingOptions,
-  ]);
 
   // Derive operator directly from filter prop - always in sync with parent state
   const operator = useMemo<OperatorType>(
@@ -148,10 +117,7 @@ export const FilterInputs = <TData,>({
         columnKey={columnKey}
         filter={filter}
         filterOptions={effectiveFilterOptions}
-        hasMore={hasMore}
-        isLoadingOptions={isLoadingOptions}
         onChange={onChange}
-        onLoadMoreOptions={handleLoadMoreOptions}
         operator={operator}
       />
     </div>
