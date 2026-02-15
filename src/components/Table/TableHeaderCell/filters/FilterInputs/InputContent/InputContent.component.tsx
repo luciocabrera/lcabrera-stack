@@ -16,7 +16,8 @@ import { TextFilterInput } from '../../TextFilterInput';
  * Renders the appropriate filter input based on column data type.
  */
 export const InputContent = <TData,>({
-  column,
+dataType,
+  columnKey,
   filter,
   filterOptions,
   hasMore,
@@ -25,11 +26,12 @@ export const InputContent = <TData,>({
   onLoadMoreOptions,
   operator,
 }: InputContentProps<TData>) => {
-  switch (column.dataType) {
+  switch (dataType) {
     case 'currency':
     case 'number': {
       return (
         <NumberFilterInput
+          columnKey={columnKey}
           filter={filter?.type === 'number' ? filter : undefined}
           onChange={onChange}
           operator={operator as NumberOperatorType}
@@ -40,6 +42,7 @@ export const InputContent = <TData,>({
     case 'date': {
       return (
         <DateFilterInput
+          columnKey={columnKey}
           filter={filter?.type === 'date' ? filter : undefined}
           onChange={onChange}
           operator={operator as DateOperatorType}
@@ -59,6 +62,7 @@ export const InputContent = <TData,>({
       if (shouldShowSelectList) {
         return (
           <SelectFilterInput
+            columnKey={columnKey}
             filter={
               filter?.type === 'select' || filter?.type === 'multiSelect'
                 ? filter
@@ -84,6 +88,7 @@ export const InputContent = <TData,>({
 
       return (
         <TextFilterInput
+          columnKey={columnKey}
           filter={filter as TextFilter}
           onChange={onChange}
           operator={textOp}

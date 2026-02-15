@@ -17,7 +17,7 @@ export const FilterButton = ({
       aria-label={isActive ? 'Edit filter' : 'Add filter'}
       icon={<FilterIcon {...stylex.props([isActive && styles.activeIcon])} />}
       {...(popoverTargetId
-        ? ({ popovertarget: popoverTargetId } as Record<string, unknown>)
+        ? ({ popoverTarget: popoverTargetId } as Record<string, unknown>)
         : {})}
       size='sm'
       variant='flat'

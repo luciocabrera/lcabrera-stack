@@ -140,7 +140,8 @@ export const FilterInputs = <TData,>({
         ))}
       </select>
       <InputContent
-        column={column}
+        dataType={column.dataType}
+        columnKey={columnKey}
         filter={filter}
         filterOptions={effectiveFilterOptions}
         hasMore={hasMore}

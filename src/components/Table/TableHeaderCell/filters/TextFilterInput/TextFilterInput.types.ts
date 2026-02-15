@@ -1,6 +1,8 @@
+import type { DataKey } from '@/components/Table/Table.types';
 import type { TextFilter } from '@/types/filterOperators.types';
 
-export type TextFilterInputProps = {
+export type TextFilterInputProps<TData> = {
+  columnKey: DataKey<TData>;
   filter?: TextFilter | undefined;
   onChange: (filter?: TextFilter) => void;
   /** The operator is now controlled by FilterInputs */

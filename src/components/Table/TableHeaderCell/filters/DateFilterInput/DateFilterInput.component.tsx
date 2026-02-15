@@ -25,6 +25,7 @@ const computeInitialEndDate = (filter: DateFilter | undefined): string => {
 };
 
 export const DateFilterInput = ({
+  columnKey,
   filter,
   onChange,
   operator,
@@ -84,7 +85,7 @@ export const DateFilterInput = ({
             data-lpignore="true"
             data-np-checked="1"
             data-np-ignore="1"
-            name={`filter-date-start-${Math.random().toString(36).substring(7)}`}
+            name={`filter-date-start-${columnKey}`}
             onChange={handleValueChange}
             type='date'
             value={value}
@@ -99,7 +100,7 @@ export const DateFilterInput = ({
             data-lpignore="true"
             data-np-checked="1"
             data-np-ignore="1"
-            name={`filter-date-end-${Math.random().toString(36).substring(7)}`}
+            name={`filter-date-end-${columnKey}`}
             onChange={handleEndDateChange}
             type='date'
             value={endDate}
@@ -115,7 +116,7 @@ export const DateFilterInput = ({
           data-lpignore="true"
           data-np-checked="1"
           data-np-ignore="1"
-          name={`filter-date-${Math.random().toString(36).substring(7)}`}
+          name={`filter-date-${columnKey}`}
           onChange={handleValueChange}
           type='date'
           value={value}

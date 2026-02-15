@@ -11,14 +11,15 @@ import { VirtualizedOption } from './VirtualizedOption';
 const ITEM_HEIGHT = 32; // Height of each checkbox option in pixels
 
 /** Pure value selector (checkboxes list) - operator is controlled by FilterInputs */
-export const SelectFilterInput = ({
+export const SelectFilterInput = <TData,>({
+  columnKey,
   filter,
   hasMore = false,
   isLoadingMore = false,
   onChange,
   onLoadMore,
   options,
-}: SelectFilterInputProps) => {
+}: SelectFilterInputProps<TData>) => {
   const [searchTerm, setSearchTerm] = useState('');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -119,7 +120,7 @@ export const SelectFilterInput = ({
         data-lpignore="true"
         data-np-checked="1"
         data-np-ignore="1"
-        name={`filter-search-${Math.random().toString(36).substring(7)}`}
+        name={`filter-search-${columnKey}`}
         onChange={(e) => {
           setSearchTerm(e.target.value);
         }}
@@ -160,11 +161,6 @@ export const SelectFilterInput = ({
               })}
             </div>
             <div {...stylex.props(styles.virtualSpacer(bottomSpacerHeight))} />
-          </div>
-        )}
-        {isLoadingMore && (
-          <div {...stylex.props(styles.loadingMore)}>
-            Loading more options...
           </div>
         )}
       </div>

@@ -5,11 +5,12 @@ import type { TextFilterInputProps } from './TextFilterInput.types';
 
 import { styles } from './TextFilterInput.stylex';
 
-export const TextFilterInput = ({
+export const TextFilterInput = <TData,>({
+  columnKey,
   filter,
   onChange,
   operator,
-}: TextFilterInputProps) => {
+}: TextFilterInputProps<TData>) => {
   const initialValue = useMemo(() => filter?.value ?? '', [filter?.value]);
   const [value, setValue] = useState(initialValue);
 
@@ -32,7 +33,7 @@ export const TextFilterInput = ({
         data-lpignore="true"
         data-np-checked="1"
         data-np-ignore="1"
-        name={`filter-text-${Math.random().toString(36).substring(7)}`}
+        name={`filter-text-${columnKey}`}
         onChange={(e) => {
           handleValueChange(e.target.value);
         }}
