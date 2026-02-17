@@ -20,7 +20,7 @@ import { useGetNormalizedColumn } from '@/components/Table/TableContext/hooks/st
 /**
  * Shared component for rendering filter inputs based on column data type.
  * The operator dropdown is rendered here based on data type.
- * Used by both FilterPopover (column header) and FilterEditor (table settings).
+ * Used by both FilterPopover (column header) and FilterSectionBody (table settings drawer).
  *
  * Now uses context for filter data - no more prop drilling!
  */

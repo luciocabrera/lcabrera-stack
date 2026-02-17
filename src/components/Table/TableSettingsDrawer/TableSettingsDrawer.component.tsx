@@ -22,7 +22,6 @@ import type { TableSettingsDrawerProps } from './TableSettingsDrawer.types';
 
 import { ColumnOrderSection } from './ColumnOrderSection';
 import { FiltersSection } from './FiltersSection';
-// import { validateFilter } from './FiltersSection/FilterEditor';
 import { GeneralSettingsSection } from './GeneralSettingsSection';
 import { SortingSection } from './SortingSection';
 import {
@@ -41,18 +40,8 @@ export const TableSettingsDrawer = ({
 
   const areFiltersValid = true; // TODO: implement filter validation
   const pinButtonTitle = isPinned ? 'Unpin drawer' : 'Pin drawer';
-  // const acceptButtonTitle = areFiltersValid
-  //   ? undefined
-  //   : 'Please fix invalid filters before accepting';
 
   const acceptButtonTitle = 'Please fix invalid filters before accepting';
-
-  // Validate all filters before allowing accept
-  // const areFiltersValid = useMemo(() => {
-  //   return Object.values(pendingColumnFilters).every((filter) =>
-  //     validateFilter(filter),
-  //   );
-  // }, [pendingColumnFilters]);
 
   const handleAccept = () => {
     // if (!areFiltersValid) {
@@ -90,19 +79,11 @@ export const TableSettingsDrawer = ({
     {
       children: <SortingSection />,
       header: ' Sorting',
-      // header: (() => {
-      //   const sortCount = pendingSorting.length;
-      //   return sortCount > 0 ? `Sorting (${sortCount})` : 'Sorting';
-      // })(),
       key: 'sorting',
     },
     {
       children: <FiltersSection />,
       header: 'Filters',
-      // header: (() => {
-      //   const filterCount = Object.keys(pendingColumnFilters).length;
-      //   return filterCount > 0 ? `Filters (${filterCount})` : 'Filters';
-      // })(),
       key: 'filters',
     },
     {

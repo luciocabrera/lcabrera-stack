@@ -10,7 +10,7 @@ import type { ActiveFiltersListProps } from './ActiveFiltersList.types';
 import { useSetColumnFilters } from '../../TableDrawerContext/hooks/store/columns/actions';
 import { useGetColumnFilters } from '../../TableDrawerContext/hooks/store/columns/selectors';
 import { FilterSectionBody } from '../FilterSectionBody';
-import { validateFilter } from '../FilterEditor';
+import { validateFilter } from '../validateFilter.util';
 import { styles } from './ActiveFiltersList.stylex';
 
 export const ActiveFiltersList = ({

@@ -64,29 +64,19 @@ export const SelectFilterInput = <TData,>({
       ? selectedValues.filter((v) => v !== option)
       : [...selectedValues, option];
 
-    if (newSelectedValues.length === 0) {
-      // Clear the filter
-      onChange(void 0);
-    } else {
-      onChange({
-        type: 'select',
-        values: newSelectedValues,
-      });
-    }
+    onChange({
+      type: 'select',
+      values: newSelectedValues,
+    });
   };
 
   const handleSelectAll = () => {
     const newSelectedValues = isAllSelected ? [] : filteredOptions;
 
-    if (newSelectedValues.length === 0) {
-      // Clear the filter
-      onChange(void 0);
-    } else {
-      onChange({
-        type: 'select',
-        values: newSelectedValues,
-      });
-    }
+    onChange({
+      type: 'select',
+      values: newSelectedValues,
+    });
   };
 
   const isAllSelected =

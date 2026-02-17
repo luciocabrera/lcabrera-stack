@@ -76,8 +76,6 @@ dataType,
                   ...selectFilter,
                   operator: textOp === 'notEquals' ? 'notEquals' : 'equals',
                 });
-              } else {
-                onChange();
               }
             }}
             // onLoadMore={onLoadMoreOptions}

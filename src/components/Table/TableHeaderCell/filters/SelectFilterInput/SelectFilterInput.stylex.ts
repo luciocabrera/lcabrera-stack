@@ -19,6 +19,7 @@ export const styles = stylex.create({
     cursor: 'pointer',
     fontSize: typography.fontSizeSm,
     overflow: 'hidden',
+    textAlign: 'left',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
     flex: 1, // Take remaining space after checkbox
@@ -31,13 +32,14 @@ export const styles = stylex.create({
     textAlign: 'center',
   },
   option: {
-    padding: spacing.xs,
+    padding: `${spacing.xs} ${spacing.sm}`,
     borderRadius: {
       default: '0',
       ':hover': '0.25rem',
     },
     gap: spacing.sm,
     alignItems: 'center',
+    justifyContent: 'flex-start',
     backgroundColor: {
       default: 'transparent',
       ':hover': colors.surfaceSecondary,
