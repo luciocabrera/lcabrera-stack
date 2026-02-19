@@ -1,6 +1,6 @@
 import { decodeStateFromURL } from './decodeStateFromURL.util';
 
-type ReadStateParams = {
+type ReadStateFromURLArgs = {
   convertArraysToSets?: string[];
   key: string;
   searchParams: URLSearchParams;
@@ -33,7 +33,7 @@ export const readStateFromURL = ({
   convertArraysToSets,
   key,
   searchParams,
-}: ReadStateParams): Record<string, unknown> | undefined => {
+}: ReadStateFromURLArgs): Record<string, unknown> | undefined => {
   const paramValue = searchParams.get(key);
   if (paramValue) {
     return decodeStateFromURL({

@@ -1,4 +1,4 @@
-type DecodeOptions = {
+type DecodeStateFromURLArgs = {
   convertArraysToSets?: string[];
   encoded: string;
 };
@@ -21,7 +21,7 @@ type DecodeOptions = {
 export const decodeStateFromURL = ({
   convertArraysToSets,
   encoded,
-}: DecodeOptions): Record<string, unknown> | undefined => {
+}: DecodeStateFromURLArgs): Record<string, unknown> | undefined => {
   try {
     // Restore Base64 padding and standard characters
     const base64 = encoded

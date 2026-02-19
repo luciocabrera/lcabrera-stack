@@ -7,6 +7,11 @@ import type {
 
 import { readStateFromURL } from './readStateFromURL.util';
 
+type ReadTableStateFromURLArgs = {
+  persistenceKey: string;
+  searchParams: URLSearchParams;
+};
+
 type TableSearchParamsState = {
   columnOrder?: ColumnOrderState;
   columnVisibility?: ColumnVisibilityState;
@@ -41,10 +46,7 @@ const PARAM_KEY = 'tableState';
 export const readTableStateFromURL = ({
   persistenceKey,
   searchParams,
-}: {
-  persistenceKey: string;
-  searchParams: URLSearchParams;
-}): Partial<TableSearchParamsState> | undefined => {
+}: ReadTableStateFromURLArgs): Partial<TableSearchParamsState> | undefined => {
   return readStateFromURL({
     convertArraysToSets: ['columnVisibility'],
     key: `${persistenceKey}-${PARAM_KEY}`,

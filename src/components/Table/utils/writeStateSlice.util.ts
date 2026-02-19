@@ -6,6 +6,7 @@ import { getStorageKey } from './getStorageKey.util';
 import { PERSISTENCE_VERSION } from './persistence.constants';
 
 type WriteStateSliceArgs = {
+  headers?: Headers;
   persistenceKey: string;
   slice: keyof TablePersistenceConfig;
   storageType: StorageType;
@@ -17,6 +18,7 @@ type WriteStateSliceArgs = {
  * Special handling for ColumnVisibilityState (Set → Array for JSON serialization)
  */
 export const writeStateSlice = ({
+  headers,
   persistenceKey,
   slice,
   storageType,
@@ -40,7 +42,7 @@ export const writeStateSlice = ({
   });
 
   if (storageType === 'cookie') {
-    writeToCookie({ key: sliceKey, value: serialized });
+    writeToCookie({ headers, key: sliceKey, value: serialized });
   } else {
     writeToLocalStorage({ key: sliceKey, value: serialized });
   }
