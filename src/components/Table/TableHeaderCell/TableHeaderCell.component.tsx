@@ -2,8 +2,6 @@ import * as stylex from '@stylexjs/stylex';
 import { useId } from 'react';
 
 import { MoreVerticalIcon } from '@/components/Icons';
-import { useColumnResize } from '@/components/Table/hooks';
-import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
 import {
   useSetColumnSizing,
   useSetColumnSorting,
@@ -12,6 +10,8 @@ import {
   useGetTableIsLoading,
   useGetTableIsLoadingMore,
 } from '@/components/Table/contexts/TableData/data/selectors';
+import { useColumnResize } from '@/components/Table/hooks';
+import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
 import { useRenderTracker } from '@/utils/performance';
 
 import type { TableHeaderCellProps } from './TableHeaderCell.types';

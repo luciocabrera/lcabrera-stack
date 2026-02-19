@@ -24,6 +24,7 @@ TableContext (single context)
 ```
 
 ### Problem
+
 When ANY state changes, ALL components using `useTableStore` or `useMetaStore` get notified, even if they only care about a specific slice of state.
 
 While `useSyncExternalStore` with selectors helps, the store still notifies ALL subscribers, and React re-runs the selector function for each.
@@ -41,6 +42,7 @@ TableMetaContext       → Loading states, pagination meta
 ```
 
 ### Benefits
+
 1. **Granular subscriptions** - Filter changes don't notify sorting consumers
 2. **Better React Compiler optimization** - Smaller context = better memoization boundaries
 3. **Clearer API** - Components declare exactly what they need
@@ -51,6 +53,7 @@ TableMetaContext       → Loading states, pagination meta
 ### Phase 1: Create New Context Files
 
 #### 1.1 TableDataContext
+
 ```tsx
 // TableDataContext.context.ts
 import { createContext } from 'react';
@@ -64,10 +67,12 @@ export type TableDataContextValue<TData> = {
   dataStore: TStore<TableDataState<TData>>;
 };
 
-export const TableDataContext = createContext<TableDataContextValue<unknown> | null>(null);
+export const TableDataContext =
+  createContext<TableDataContextValue<unknown> | null>(null);
 ```
 
 #### 1.2 TableFiltersContext
+
 ```tsx
 // TableFiltersContext.context.ts
 import { createContext } from 'react';
@@ -89,10 +94,12 @@ export type TableFiltersContextValue = {
   filtersStore: TStore<TableFiltersState>;
 };
 
-export const TableFiltersContext = createContext<TableFiltersContextValue | null>(null);
+export const TableFiltersContext =
+  createContext<TableFiltersContextValue | null>(null);
 ```
 
 #### 1.3 TableSortingContext
+
 ```tsx
 // TableSortingContext.context.ts
 import { createContext } from 'react';
@@ -113,15 +120,22 @@ export type TableSortingContextValue = {
   sortingStore: TStore<TableSortingState>;
 };
 
-export const TableSortingContext = createContext<TableSortingContextValue | null>(null);
+export const TableSortingContext =
+  createContext<TableSortingContextValue | null>(null);
 ```
 
 #### 1.4 TableColumnsContext
+
 ```tsx
 // TableColumnsContext.context.ts
 import { createContext } from 'react';
 import type { TStore } from '@/hooks';
-import type { ColumnOrderState, ColumnSizingState, ColumnVisibilityState, ColumnPinningState } from '../Table.types';
+import type {
+  ColumnOrderState,
+  ColumnSizingState,
+  ColumnVisibilityState,
+  ColumnPinningState,
+} from '../Table.types';
 
 export type TableColumnsState = {
   columnOrder: ColumnOrderState;
@@ -142,10 +156,12 @@ export type TableColumnsContextValue = {
   columnsStore: TStore<TableColumnsState>;
 };
 
-export const TableColumnsContext = createContext<TableColumnsContextValue | null>(null);
+export const TableColumnsContext =
+  createContext<TableColumnsContextValue | null>(null);
 ```
 
 #### 1.5 TableMetaContext (keep existing, rename)
+
 ```tsx
 // TableMetaContext.context.ts
 import { createContext } from 'react';
@@ -156,7 +172,9 @@ export type TableMetaContextValue = {
   metaStore: TStore<TableMeta>;
 };
 
-export const TableMetaContext = createContext<TableMetaContextValue | null>(null);
+export const TableMetaContext = createContext<TableMetaContextValue | null>(
+  null,
+);
 ```
 
 ### Phase 2: Create Combined Provider
@@ -196,7 +214,8 @@ export const TableProvider = <TData extends Record<string, unknown>>({
     columnOrder: initialColumnOrder ?? persistedState.columnOrder ?? [],
     columnPinning: { left: [], right: [] },
     columnSizing: initialColumnSizing ?? persistedState.columnSizing ?? {},
-    columnVisibility: initialColumnVisibility ?? persistedState.columnVisibility ?? new Set(),
+    columnVisibility:
+      initialColumnVisibility ?? persistedState.columnVisibility ?? new Set(),
   });
 
   const metaStore = useStore<TableMeta>({
@@ -210,43 +229,58 @@ export const TableProvider = <TData extends Record<string, unknown>>({
   });
 
   // Create stable action objects
-  const filtersActions = useMemo<TableFiltersActions>(() => ({
-    clearColumnFilter: (columnKey) => {
-      const current = filtersStore.get()?.columnFilters ?? {};
-      const { [columnKey]: _, ...rest } = current;
-      filtersStore.set({ columnFilters: rest });
-    },
-    setColumnFilter: (columnKey, filter) => {
-      const current = filtersStore.get()?.columnFilters ?? {};
-      filtersStore.set({ columnFilters: { ...current, [columnKey]: filter } });
-    },
-    setColumnFilters: (filters) => {
-      filtersStore.set({ columnFilters: filters });
-    },
-  }), [filtersStore]);
+  const filtersActions = useMemo<TableFiltersActions>(
+    () => ({
+      clearColumnFilter: (columnKey) => {
+        const current = filtersStore.get()?.columnFilters ?? {};
+        const { [columnKey]: _, ...rest } = current;
+        filtersStore.set({ columnFilters: rest });
+      },
+      setColumnFilter: (columnKey, filter) => {
+        const current = filtersStore.get()?.columnFilters ?? {};
+        filtersStore.set({
+          columnFilters: { ...current, [columnKey]: filter },
+        });
+      },
+      setColumnFilters: (filters) => {
+        filtersStore.set({ columnFilters: filters });
+      },
+    }),
+    [filtersStore],
+  );
 
-  const sortingActions = useMemo<TableSortingActions>(() => ({
-    setSorting: (sorting) => {
-      sortingStore.set({ sorting });
-    },
-    toggleSort: ({ columnKey, isMultiSort }) => {
-      const current = sortingStore.get()?.sorting ?? [];
-      // ... toggle logic
-    },
-  }), [sortingStore]);
+  const sortingActions = useMemo<TableSortingActions>(
+    () => ({
+      setSorting: (sorting) => {
+        sortingStore.set({ sorting });
+      },
+      toggleSort: ({ columnKey, isMultiSort }) => {
+        const current = sortingStore.get()?.sorting ?? [];
+        // ... toggle logic
+      },
+    }),
+    [sortingStore],
+  );
 
-  const columnsActions = useMemo<TableColumnsActions>(() => ({
-    setColumnOrder: (order) => columnsStore.set({ columnOrder: order }),
-    setColumnPinning: (pinning) => columnsStore.set({ columnPinning: pinning }),
-    setColumnSizing: (sizing) => columnsStore.set({ columnSizing: sizing }),
-    setColumnVisibility: (visibility) => columnsStore.set({ columnVisibility: visibility }),
-  }), [columnsStore]);
+  const columnsActions = useMemo<TableColumnsActions>(
+    () => ({
+      setColumnOrder: (order) => columnsStore.set({ columnOrder: order }),
+      setColumnPinning: (pinning) =>
+        columnsStore.set({ columnPinning: pinning }),
+      setColumnSizing: (sizing) => columnsStore.set({ columnSizing: sizing }),
+      setColumnVisibility: (visibility) =>
+        columnsStore.set({ columnVisibility: visibility }),
+    }),
+    [columnsStore],
+  );
 
   return (
     <TableDataContext value={{ dataStore }}>
       <TableFiltersContext value={{ actions: filtersActions, filtersStore }}>
         <TableSortingContext value={{ actions: sortingActions, sortingStore }}>
-          <TableColumnsContext value={{ actions: columnsActions, columnsStore }}>
+          <TableColumnsContext
+            value={{ actions: columnsActions, columnsStore }}
+          >
             <TableMetaContext value={{ metaStore }}>
               {children}
             </TableMetaContext>
@@ -264,8 +298,9 @@ export const TableProvider = <TData extends Record<string, unknown>>({
 // hooks/useFilters.hook.ts
 export const useColumnFilters = () => {
   const ctx = use(TableFiltersContext);
-  if (!ctx) throw new Error('useColumnFilters must be used within TableProvider');
-  
+  if (!ctx)
+    throw new Error('useColumnFilters must be used within TableProvider');
+
   return useSyncExternalStore(
     ctx.filtersStore.subscribe,
     () => ctx.filtersStore.get()?.columnFilters ?? {},
@@ -275,7 +310,8 @@ export const useColumnFilters = () => {
 
 export const useSetColumnFilter = () => {
   const ctx = use(TableFiltersContext);
-  if (!ctx) throw new Error('useSetColumnFilter must be used within TableProvider');
+  if (!ctx)
+    throw new Error('useSetColumnFilter must be used within TableProvider');
   return ctx.actions.setColumnFilter;
 };
 
@@ -283,7 +319,7 @@ export const useSetColumnFilter = () => {
 export const useSorting = () => {
   const ctx = use(TableSortingContext);
   if (!ctx) throw new Error('useSorting must be used within TableProvider');
-  
+
   return useSyncExternalStore(
     ctx.sortingStore.subscribe,
     () => ctx.sortingStore.get()?.sorting ?? [],
@@ -297,10 +333,12 @@ export const useSorting = () => {
 ### Phase 4: Migration Strategy
 
 #### Step 1: Add new contexts alongside existing (non-breaking)
+
 - Create new context files
 - Export from index alongside existing hooks
 
 #### Step 2: Create adapter hooks
+
 ```tsx
 // Temporary adapters that use old context but expose new API
 export const useColumnFiltersV2 = () => {
@@ -311,17 +349,20 @@ export const useColumnFiltersV2 = () => {
 ```
 
 #### Step 3: Migrate components one by one
+
 - Start with leaf components (FilterPopover)
 - Work up to parent components
 - Run render tracker to verify improvements
 
 #### Step 4: Remove old context
+
 - Once all components migrated
 - Remove TableContext and useTableStore
 
 ## Expected Results
 
 ### Before (Current)
+
 ```
 FilterPopover render → triggers because ANY tableStore change
 - columnFilters change: re-render ✓ (needed)
@@ -331,6 +372,7 @@ FilterPopover render → triggers because ANY tableStore change
 ```
 
 ### After (Split Contexts)
+
 ```
 FilterPopover render → only triggers on filtersStore change
 - columnFilters change: re-render ✓ (needed)
@@ -361,14 +403,14 @@ src/components/Table/TableContext/
 
 ## Timeline Estimate
 
-| Phase | Description | Effort |
-|-------|-------------|--------|
-| 1 | Create context files | 2 hours |
-| 2 | Create combined provider | 3 hours |
-| 3 | Create focused hooks | 2 hours |
-| 4 | Migrate components | 4 hours |
-| 5 | Testing & cleanup | 2 hours |
-| **Total** | | **~13 hours** |
+| Phase     | Description              | Effort        |
+| --------- | ------------------------ | ------------- |
+| 1         | Create context files     | 2 hours       |
+| 2         | Create combined provider | 3 hours       |
+| 3         | Create focused hooks     | 2 hours       |
+| 4         | Migrate components       | 4 hours       |
+| 5         | Testing & cleanup        | 2 hours       |
+| **Total** |                          | **~13 hours** |
 
 ## Notes
 

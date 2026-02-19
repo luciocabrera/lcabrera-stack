@@ -25,28 +25,35 @@ import { useTableDrawerContextValue } from '../../../useTableDrawerContextValue.
  */
 export const useBatchSetTableDrawerSettings = () => {
   const { columnsStore } = useTableDrawerContextValue();
-    
+
   const batchSetTableSettings = useBatchSetTableSettings();
 
   return () => {
-
     const columnsState = columnsStore.get();
-        console.log('[useBatchSetTableDrawerSettings] Before:', {
-
-        columnFilters: columnsState?.columnFilters ?? ({} as ColumnFiltersState<unknown>),
-        columnOrder: columnsState?.columnOrder ?? ([] as ColumnOrderState<unknown>),
-        columnSizing: columnsState?.columnSizing ?? ({} as ColumnSizingState<unknown>),
-        columnVisibility: columnsState?.columnVisibility ?? ({} as ColumnVisibilityState<unknown>),
-        sorting: columnsState?.sorting ?? ([] as SortingState<unknown>),
+    console.log('[useBatchSetTableDrawerSettings] Before:', {
+      columnFilters:
+        columnsState?.columnFilters ?? ({} as ColumnFiltersState<unknown>),
+      columnOrder:
+        columnsState?.columnOrder ?? ([] as ColumnOrderState<unknown>),
+      columnSizing:
+        columnsState?.columnSizing ?? ({} as ColumnSizingState<unknown>),
+      columnVisibility:
+        columnsState?.columnVisibility ??
+        ({} as ColumnVisibilityState<unknown>),
+      sorting: columnsState?.sorting ?? ([] as SortingState<unknown>),
     });
- 
-      batchSetTableSettings({
-        columnFilters: columnsState?.columnFilters ?? ({} as ColumnFiltersState<unknown>),
-        columnOrder: columnsState?.columnOrder ?? ([] as ColumnOrderState<unknown>),
-        columnSizing: columnsState?.columnSizing ?? ({} as ColumnSizingState<unknown>),
-        columnVisibility: columnsState?.columnVisibility ?? ({} as ColumnVisibilityState<unknown>),
-        sorting: columnsState?.sorting ?? ([] as SortingState<unknown>),
-      });
-      
+
+    batchSetTableSettings({
+      columnFilters:
+        columnsState?.columnFilters ?? ({} as ColumnFiltersState<unknown>),
+      columnOrder:
+        columnsState?.columnOrder ?? ([] as ColumnOrderState<unknown>),
+      columnSizing:
+        columnsState?.columnSizing ?? ({} as ColumnSizingState<unknown>),
+      columnVisibility:
+        columnsState?.columnVisibility ??
+        ({} as ColumnVisibilityState<unknown>),
+      sorting: columnsState?.sorting ?? ([] as SortingState<unknown>),
+    });
   };
 };

@@ -30,7 +30,6 @@ export const EnterpriseOrders = () => {
       dataSelector={(response) => response.data}
       dataTotalSelector={(response) => response.total}
       filters={filters}
-      suspenseKey={key}
       onLoadMore={async ({ limit, skip }) =>
         enterpriseOrdersApi.fetchEnterpriseOrdersPaginated({
           filter: filters,
@@ -41,6 +40,7 @@ export const EnterpriseOrders = () => {
       }
       persistenceKey={PERSISTENCE_KEY}
       sorting={sorting}
+      suspenseKey={key}
       title='Enterprise Orders - Infinite Scroll'
     />
   );

@@ -1,6 +1,7 @@
 import type { InfiniteScroll } from '@/types/ui.types';
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+
 import { useTableDataContextValue } from '../useFiltersDataContextValue.hook';
 
 type FetchFilterDataArgs<TData, TResponse> = Omit<
@@ -25,7 +26,10 @@ export const useFetchFilterData = <TData, TResponse>(columnKey: string) => {
     const currentFilterData = filtersDataState?.[columnKey];
 
     if (!currentFilterData) {
-      console.error('[useFetchFilterData] Filter data not initialized for column:', columnKey);
+      console.error(
+        '[useFetchFilterData] Filter data not initialized for column:',
+        columnKey,
+      );
       throw new Error(`Filter data not initialized for column: ${columnKey}`);
     }
 
@@ -41,9 +45,9 @@ export const useFetchFilterData = <TData, TResponse>(columnKey: string) => {
 
     try {
       filtersDataStore.set({
-        [columnKey]: { 
-          ...currentFilterData, 
-          isLoading: true 
+        [columnKey]: {
+          ...currentFilterData,
+          isLoading: true,
         },
       });
 
@@ -79,9 +83,9 @@ export const useFetchFilterData = <TData, TResponse>(columnKey: string) => {
       });
 
       filtersDataStore.set({
-        [columnKey]: { 
-          ...currentFilterData, 
-          isLoading: false 
+        [columnKey]: {
+          ...currentFilterData,
+          isLoading: false,
         },
       });
     }

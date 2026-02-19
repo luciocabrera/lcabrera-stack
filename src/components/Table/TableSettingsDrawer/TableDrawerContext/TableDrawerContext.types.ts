@@ -16,5 +16,5 @@ export type TableDrawerContextValue = {
 };
 
 export type TableDrawerProviderProps = {
-  children: React.ReactNode
+  children: React.ReactNode;
 };

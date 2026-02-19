@@ -5,5 +5,5 @@ export * from './useGetColumnSizing.hook';
 export * from './useGetColumnsSorting.hook';
 export * from './useGetColumnVisibility.hook';
 export * from './useGetEffectiveColumns.hook';
-export * from'./useGetNormalizedColumn.hook';
+export * from './useGetNormalizedColumn.hook';
 export * from './useGetNormalizedColumns.hook';

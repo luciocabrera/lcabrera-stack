@@ -1,15 +1,15 @@
 import * as stylex from '@stylexjs/stylex';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import { useGetNormalizedColumn } from '@/components/Table/contexts/TableConfig/columns/selectors';
+import { useFetchMoreFilterData } from '@/components/Table/contexts/TableData/filters/actions';
+import { useGetFilterData } from '@/components/Table/contexts/TableData/filters/selectors';
 import { useVirtualization } from '@/hooks';
 
 import type { SelectFilterInputProps } from './SelectFilterInput.types';
 
 import { styles } from './SelectFilterInput.stylex';
 import { VirtualizedOption } from './VirtualizedOption';
-import { useFetchMoreFilterData } from '@/components/Table/contexts/TableData/filters/actions';
-import { useGetNormalizedColumn } from '@/components/Table/contexts/TableConfig/columns/selectors';
-import { useGetFilterData } from '@/components/Table/contexts/TableData/filters/selectors';
 
 const ITEM_HEIGHT = 32; // Height of each checkbox option in pixels
 
@@ -31,7 +31,7 @@ export const SelectFilterInput = <TData,>({
   const [searchTerm, setSearchTerm] = useState('');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  const { isLoading, isLoadingMore, hasMore } = filterData;
+  const { hasMore, isLoading, isLoadingMore } = filterData;
 
   const isLoadingOptions = isLoading || isLoadingMore || false;
 
@@ -51,14 +51,13 @@ export const SelectFilterInput = <TData,>({
       ? filteredOptions.length + 1
       : filteredOptions.length;
 
-  const { endIndex, offsetY, startIndex, totalHeight } =
-    useVirtualization({
-      containerRef: scrollContainerRef,
-      defaultContainerHeight: 300,
-      itemHeight: ITEM_HEIGHT,
-      overscan: 5,
-      totalItems,
-    });
+  const { endIndex, offsetY, startIndex, totalHeight } = useVirtualization({
+    containerRef: scrollContainerRef,
+    defaultContainerHeight: 300,
+    itemHeight: ITEM_HEIGHT,
+    overscan: 5,
+    totalItems,
+  });
 
   const handleToggle = (option: string) => {
     const newSelectedValues = selectedValues.includes(option)

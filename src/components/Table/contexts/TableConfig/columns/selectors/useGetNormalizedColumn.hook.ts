@@ -1,4 +1,7 @@
-import type { DataKey, NormalizedColumnsState } from '@/components/Table/Table.types';
+import type {
+  DataKey,
+  NormalizedColumnsState,
+} from '@/components/Table/Table.types';
 
 import { useColumnsStore } from '../useColumnsStore.hook';
 

@@ -15,14 +15,14 @@ export const styles = stylex.create({
     flexDirection: 'column',
   },
   label: {
+    flex: 1, // Take remaining space after checkbox
+    overflow: 'hidden',
     color: colors.textPrimary,
     cursor: 'pointer',
     fontSize: typography.fontSizeSm,
-    overflow: 'hidden',
     textAlign: 'left',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
-    flex: 1, // Take remaining space after checkbox
     minWidth: 0, // Allow shrinking below content size
   },
   noResults: {
@@ -38,16 +38,16 @@ export const styles = stylex.create({
       ':hover': '0.25rem',
     },
     gap: spacing.sm,
+    overflow: 'hidden',
     alignItems: 'center',
-    justifyContent: 'flex-start',
     backgroundColor: {
       default: 'transparent',
       ':hover': colors.surfaceSecondary,
     },
     cursor: 'pointer',
     display: 'flex',
+    justifyContent: 'flex-start',
     minWidth: 0, // Allow flex children to shrink below content size
-    overflow: 'hidden',
   },
   optionsList: {
     gap: spacing.xs,
@@ -59,19 +59,19 @@ export const styles = stylex.create({
     padding: `${spacing.xs} ${spacing.sm}`,
     borderColor: {
       default: colors.borderPrimary,
-      ':focus': colors.borderFocus,
       ':focus-visible': colors.borderFocus,
+      ':focus': colors.borderFocus,
     },
     borderRadius: '0.25rem',
     borderStyle: 'solid',
     borderWidth: '1px',
-    boxShadow: 'none !important',
     outline: 'none !important',
-    outlineOffset: '0 !important',
+    transition: 'border-color 0.15s ease',
     backgroundColor: colors.surfacePrimary,
+    boxShadow: 'none !important',
     color: colors.textPrimary,
     fontSize: typography.fontSizeSm,
-    transition: 'border-color 0.15s ease',
+    outlineOffset: '0 !important',
   },
   loadingMore: {
     padding: spacing.sm,

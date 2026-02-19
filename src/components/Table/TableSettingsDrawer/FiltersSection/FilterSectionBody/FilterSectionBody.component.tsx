@@ -1,7 +1,9 @@
-import { FilterInputs } from '@/components/Table/TableHeaderCell/filters/FilterInputs';
+import { useEffect } from 'react';
+
 import { useGetNormalizedColumn } from '@/components/Table/contexts/TableConfig/columns/selectors';
 import { useFetchFilterData } from '@/components/Table/contexts/TableData/filters/actions';
-import { useEffect } from 'react';
+import { FilterInputs } from '@/components/Table/TableHeaderCell/filters/FilterInputs';
+
 import type { FilterSectionBodyProps } from './FilterSectionBody.types';
 
 /**
@@ -33,10 +35,6 @@ export const FilterSectionBody = <TData,>({
   ]);
 
   return (
-    <FilterInputs
-      columnKey={columnKey}
-      filter={filter}
-      onChange={onChange}
-    />
+    <FilterInputs columnKey={columnKey} filter={filter} onChange={onChange} />
   );
 };

@@ -17,7 +17,7 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   },
   {
     dataType: 'string',
-    fetchFilterOptions: async ({ limit = 50, skip = 0 }) => {
+    fetchFilterOptions: async ({ limit, skip }) => {
       const result = await enterpriseOrdersApi.fetchDistinctValues({
         columnName: 'order_number',
         limit,
@@ -75,7 +75,7 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   },
   {
     dataType: 'string',
-    fetchFilterOptions: async ({ limit = 50, skip = 0 }) => {
+    fetchFilterOptions: async ({ limit, skip }) => {
       const result = await enterpriseOrdersApi.fetchDistinctValues({
         columnName: 'customer_email',
         limit,
@@ -94,7 +94,7 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   },
   {
     dataType: 'string',
-    fetchFilterOptions: async ({ limit = 50, skip = 0 }) => {
+    fetchFilterOptions: async ({ limit, skip }) => {
       const result = await enterpriseOrdersApi.fetchDistinctValues({
         columnName: 'customer_type',
         limit,
@@ -221,7 +221,7 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   },
   {
     dataType: 'string',
-    fetchFilterOptions: async ({ limit = 50, skip = 0 }) => {
+    fetchFilterOptions: async ({ limit, skip }) => {
       const result = await enterpriseOrdersApi.fetchDistinctValues({
         columnName: 'shipping_city',
         limit,
@@ -240,7 +240,7 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   },
   {
     dataType: 'string',
-    fetchFilterOptions: async ({ limit = 50, skip = 0 }) => {
+    fetchFilterOptions: async ({ limit, skip }) => {
       const result = await enterpriseOrdersApi.fetchDistinctValues({
         columnName: 'shipping_state',
         limit,
@@ -259,7 +259,7 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   },
   {
     dataType: 'string',
-    fetchFilterOptions: async ({ limit = 50, skip = 0 }) => {
+    fetchFilterOptions: async ({ limit, skip }) => {
       const result = await enterpriseOrdersApi.fetchDistinctValues({
         columnName: 'shipping_country',
         limit,
@@ -278,7 +278,7 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   },
   {
     dataType: 'string',
-    fetchFilterOptions: async ({ limit = 50, skip = 0 }) => {
+    fetchFilterOptions: async ({ limit, skip }) => {
       const result = await enterpriseOrdersApi.fetchDistinctValues({
         columnName: 'carrier',
         limit,
@@ -297,7 +297,7 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   },
   {
     dataType: 'string',
-    fetchFilterOptions: async ({ limit = 50, skip = 0 }) => {
+    fetchFilterOptions: async ({ limit, skip }) => {
       const result = await enterpriseOrdersApi.fetchDistinctValues({
         columnName: 'warehouse_location',
         limit,

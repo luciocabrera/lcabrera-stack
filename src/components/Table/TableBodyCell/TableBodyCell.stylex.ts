@@ -16,7 +16,7 @@ export const tableBodyCellStyles = stylex.create({
   base: (minWidth?: number | string, width?: number | string) => ({
     borderColor: 'green',
     borderStyle: 'solid',
-    paddingInline: '6px', 
+    paddingInline: '6px',
     alignItems: 'center',
     color: colors.textPrimary,
     display: 'flex',

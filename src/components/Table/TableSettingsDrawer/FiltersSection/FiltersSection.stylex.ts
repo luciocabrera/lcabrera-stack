@@ -10,4 +10,3 @@ export const styles = stylex.create({
     height: '100%',
   },
 });
-

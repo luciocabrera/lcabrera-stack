@@ -42,7 +42,7 @@ The Table component implements a scalable, performant data table with advanced f
 │   - Density, borders   │
 │   - Persistence config │
 └────────────────────────┘
-                          
+
 ┌─────────────────────────────────────────────────────────────┐
 │                    UI Components Layer                       │
 │  (TableHeader, TableBody, TableHeaderCell, etc.)            │
@@ -68,12 +68,13 @@ export type TStore<TData> = {
   get: () => TData | undefined;
   getServerSnapshot: () => TData | undefined;
   reset: () => void;
-  set: (value: Partial<TData>) => void;  // Shallow merge
+  set: (value: Partial<TData>) => void; // Shallow merge
   subscribe: (callback: () => void) => () => void;
 };
 ```
 
 **Key Features**:
+
 - **Shallow merge**: `set()` merges partial updates with current state
 - **Shallow equality check**: Only notifies subscribers if state actually changed
 - **SSR support**: `getServerSnapshot()` returns initial state for hydration
@@ -86,6 +87,7 @@ export type TStore<TData> = {
 **Purpose**: Manages configuration that changes infrequently
 
 **State Stores**:
+
 1. **columnsStore** (`TableColumnsState<TData>`):
    - `columns`: Array of column definitions
    - `columnFilters`: Filter configurations per column
@@ -110,6 +112,7 @@ export type TStore<TData> = {
 **Purpose**: Manages data that changes frequently during runtime
 
 **State Stores**:
+
 1. **dataStore** (`TableDataState<TData>`):
    - `data`: Array of table rows
    - `totalRows`: Total count (for pagination)
@@ -134,6 +137,7 @@ export type TStore<TData> = {
      ```
 
 **Initialization**:
+
 - `getInitialDataState()`: Sets up data store with initial rows
 - `getInitialFiltersDataState()`: Pre-creates filter data entries for ALL columns (prevents undefined access errors)
 
@@ -175,7 +179,8 @@ export const useColumnsStore = <TSelected, TData = unknown>(
   const state = useSyncExternalStore(
     columnsStore.subscribe,
     () => selector(columnsStore.get() as TableColumnsState<TData>),
-    () => selector(columnsStore.getServerSnapshot() as TableColumnsState<TData>),
+    () =>
+      selector(columnsStore.getServerSnapshot() as TableColumnsState<TData>),
   );
 
   return state;
@@ -183,6 +188,7 @@ export const useColumnsStore = <TSelected, TData = unknown>(
 ```
 
 **Key Benefits**:
+
 - Components subscribe only to the specific state slice they need
 - Automatic re-render when that slice changes
 - SSR-safe with server snapshot
@@ -192,6 +198,7 @@ export const useColumnsStore = <TSelected, TData = unknown>(
 **Purpose**: Read specific slices of state
 
 **Characteristics**:
+
 - Stateless functions that accept a selector
 - Return computed or direct state values
 - Enable granular subscriptions
@@ -222,6 +229,7 @@ export const useGetFilterData = <TData>(columnKey: DataKey<TData>) =>
 **Purpose**: Mutate state through well-defined operations
 
 **Characteristics**:
+
 - Encapsulate business logic
 - Handle side effects (persistence, URL updates, async operations)
 - Return callbacks for use in event handlers
@@ -235,25 +243,26 @@ export const useGetFilterData = <TData>(columnKey: DataKey<TData>) =>
 export const useSetColumnSorting = <TData>() => {
   const { columnsStore } = useTableConfigContextValue<TData>();
 
-  return useCallback(({ columnKey, direction }: SetColumnSortingArgs<TData>) => {
-    const columnsState = columnsStore.get();
-    
-    // Business logic: update sorting array
-    const newSorting = direction 
-      ? [{ key: columnKey, direction }]
-      : [];
-    
-    // Persist to storage
-    writeStateSlice({
-      persistenceKey,
-      slice: 'sorting',
-      storageType: 'cookie',
-      value: newSorting,
-    });
-    
-    // Update store
-    columnsStore.set({ sorting: newSorting });
-  }, [columnsStore]);
+  return useCallback(
+    ({ columnKey, direction }: SetColumnSortingArgs<TData>) => {
+      const columnsState = columnsStore.get();
+
+      // Business logic: update sorting array
+      const newSorting = direction ? [{ key: columnKey, direction }] : [];
+
+      // Persist to storage
+      writeStateSlice({
+        persistenceKey,
+        slice: 'sorting',
+        storageType: 'cookie',
+        value: newSorting,
+      });
+
+      // Update store
+      columnsStore.set({ sorting: newSorting });
+    },
+    [columnsStore],
+  );
 };
 ```
 
@@ -271,18 +280,18 @@ export const useFetchMoreData = <TData, TResponse>() => {
     try {
       // Set loading state
       dataStore.set({ isLoadingMore: true });
-      
+
       // Fetch new data
       const response = await onLoadMore({
         limit: 50,
         skip: currentData.length,
       });
-      
+
       // Process and merge
       const data = dataSelector(response);
       const combinedData = [...currentData, ...data];
       const totalRows = dataTotalSelector(response);
-      
+
       // Update store with results
       dataStore.set({
         data: combinedData,
@@ -293,8 +302,8 @@ export const useFetchMoreData = <TData, TResponse>() => {
       });
     } catch (error) {
       // Handle error in meta store
-      metaStore.set({ 
-        error: error instanceof Error ? error.message : 'Failed to load data'
+      metaStore.set({
+        error: error instanceof Error ? error.message : 'Failed to load data',
       });
       dataStore.set({ isLoadingMore: false });
     }
@@ -307,34 +316,34 @@ export const useFetchMoreData = <TData, TResponse>() => {
 ```typescript
 export const useFetchMoreFilterData = <TData, TResponse>(columnKey: string) => {
   const { filtersDataStore } = useTableDataContextValue();
-  
+
   return async ({ dataSelector, onLoadMore }) => {
     const filtersDataState = filtersDataStore.get();
     const currentFilterData = filtersDataState?.[columnKey];
-    
+
     if (!currentFilterData) {
       throw new Error(`Filter data not initialized for column: ${columnKey}`);
     }
-    
+
     const currentData = currentFilterData.data;
-    
+
     try {
       // Set loading state for this specific column
       filtersDataStore.set({
-        [columnKey]: { 
-          ...currentFilterData, 
-          isLoadingMore: true 
+        [columnKey]: {
+          ...currentFilterData,
+          isLoadingMore: true,
         },
       });
-      
+
       const response = await onLoadMore({
         limit: 50,
         skip: currentData.length,
       });
-      
+
       const data = dataSelector(response);
       const combinedData: string[] = [...currentData, ...data];
-      
+
       // Update only this column's filter data
       filtersDataStore.set({
         [columnKey]: {
@@ -347,9 +356,9 @@ export const useFetchMoreFilterData = <TData, TResponse>(columnKey: string) => {
       });
     } catch (error) {
       filtersDataStore.set({
-        [columnKey]: { 
-          ...currentFilterData, 
-          isLoadingMore: false 
+        [columnKey]: {
+          ...currentFilterData,
+          isLoadingMore: false,
         },
       });
     }
@@ -378,25 +387,25 @@ export const TableHeaderCell = <TData,>({ columnKey }: Props<TData>) => {
   const columnSizing = useGetColumnSizing();
   const column = useGetNormalizedColumn<TData>(columnKey);
   const isLoading = useGetTableIsLoading();
-  
+
   // === ACTIONS (get mutation functions) ===
   const setColumnSizing = useSetColumnSizing();
   const setSorting = useSetColumnSorting();
-  
+
   // === DERIVED VALUES ===
   const currentWidth = columnSizing[column.key] ?? minWidth;
   const sortDirection = column.sortDirection;
-  
+
   // === EVENT HANDLERS ===
   const handleSort = () => {
     const nextDirection = getNextSortDirection(sortDirection);
     setSorting({ columnKey, direction: nextDirection });
   };
-  
+
   const handleResize = (width: number) => {
     setColumnSizing({ columnKey, width });
   };
-  
+
   return (
     <th>
       <span>{column.label}</span>
@@ -410,7 +419,7 @@ export const TableHeaderCell = <TData,>({ columnKey }: Props<TData>) => {
 
 ### Benefits of This Pattern
 
-1. **Clear Data Flow**: 
+1. **Clear Data Flow**:
    - State flows down via selectors
    - Events flow up via actions
 
@@ -439,6 +448,7 @@ export const TableHeaderCell = <TData,>({ columnKey }: Props<TData>) => {
 **Purpose**: Render only visible rows for performance
 
 **How it works**:
+
 1. Tracks scroll position of container
 2. Calculates which row indices are visible
 3. Returns `startIndex`, `endIndex`, `offsetY`, `bottomSpacerHeight`
@@ -476,6 +486,7 @@ return (
 **Purpose**: Load more data when user scrolls near bottom
 
 **How it works**:
+
 1. Listens to scroll events on container
 2. Calculates distance from bottom
 3. When distance < threshold, calls `fetchMoreData` action
@@ -492,10 +503,10 @@ const isLoadingMore = useGetTableIsLoadingMore();
 useInfiniteScroll({
   dataSelector,
   dataTotalSelector,
-  fetchMoreData,        // Action from context
-  hasMore,              // Selector from context
-  isLoadingMore,        // Selector from context
-  onLoadMore,           // Callback from props
+  fetchMoreData, // Action from context
+  hasMore, // Selector from context
+  isLoadingMore, // Selector from context
+  onLoadMore, // Callback from props
   scrollContainerRef,
   threshold: 100,
 });
@@ -510,6 +521,7 @@ useInfiniteScroll({
 **Flow**:
 
 1. **Initialization** (`getInitialFiltersDataState`):
+
    ```typescript
    for (const col of columns) {
      cols[col.key] = {
@@ -524,6 +536,7 @@ useInfiniteScroll({
    ```
 
 2. **Initial Load** (FilterPopover opens):
+
    ```typescript
    const result = await fetchFilterOptions(0);
    setFetchedOptions(result.values);
@@ -531,9 +544,10 @@ useInfiniteScroll({
    ```
 
 3. **Load More** (user scrolls in dropdown):
+
    ```typescript
    const fetchMoreFilterData = useFetchMoreFilterData(columnKey);
-   
+
    // On scroll near bottom:
    await fetchMoreFilterData({
      dataSelector,
@@ -542,12 +556,13 @@ useInfiniteScroll({
    ```
 
 4. **Render**:
+
    ```tsx
    const filterData = useGetFilterData(columnKey);
-   
+
    return (
      <select>
-       {filterData.data.map(option => (
+       {filterData.data.map((option) => (
          <option key={option}>{option}</option>
        ))}
        {filterData.isLoadingMore && <Spinner />}
@@ -559,7 +574,8 @@ useInfiniteScroll({
 
 **Where**: Actions that modify persisted state
 
-**Mechanism**: 
+**Mechanism**:
+
 - `writeStateSlice()` saves to cookie/localStorage
 - `readStateSlice()` restores on mount
 - URL search params for shareable state
@@ -594,7 +610,7 @@ Only notify subscribers if state actually changed:
 const set = (value: Partial<TData>) => {
   const prev = store.current;
   const next = { ...prev, ...value };
-  
+
   if (!shallowEqual({ objA: prev, objB: next })) {
     store.current = next;
     for (const callback of listeners.current) callback();
@@ -629,9 +645,12 @@ Only render visible rows (e.g., 20 out of 10,000).
 Actions return stable callbacks via `useCallback`:
 
 ```typescript
-return useCallback(({ columnKey, direction }) => {
-  // mutation logic
-}, [columnsStore, metaStore]);
+return useCallback(
+  ({ columnKey, direction }) => {
+    // mutation logic
+  },
+  [columnsStore, metaStore],
+);
 ```
 
 ---
@@ -643,9 +662,11 @@ return useCallback(({ columnKey, direction }) => {
 All components are generic over `TData`:
 
 ```typescript
-export const Table = <TData extends Record<string, unknown>, TResponse>({
-  // props
-}: TableProps<TData, TResponse>) => {
+export const Table = <TData extends Record<string, unknown>, TResponse>(
+  {
+    // props
+  }: TableProps<TData, TResponse>,
+) => {
   // ...
 };
 ```
@@ -674,6 +695,7 @@ const columnsStore = useStore<TableColumnsState<TData>>(initialState);
 ## Migration Guide for Other Components
 
 Use this architecture when building components that need:
+
 - ✅ Complex state with multiple related pieces
 - ✅ Frequent state updates (e.g., real-time data)
 - ✅ Granular re-render control
@@ -686,6 +708,7 @@ Use this architecture when building components that need:
 #### 1. Identify State Domains
 
 Split state into logical domains:
+
 - **Config**: Changes infrequently (settings, columns, layout)
 - **Data**: Changes frequently (items, loading states)
 - **UI**: Transient state (modals, selections)
@@ -693,6 +716,7 @@ Split state into logical domains:
 #### 2. Create Context Providers
 
 For each domain, create:
+
 - Context definition
 - Provider component
 - Context value hook
@@ -723,7 +747,7 @@ export const useMyStore = <TSelected>(
   selector: (state: MyState) => TSelected,
 ) => {
   const { store } = useMyContextValue();
-  
+
   return useSyncExternalStore(
     store.subscribe,
     () => selector(store.get() as MyState),
@@ -738,12 +762,10 @@ Create a selector for each state slice:
 
 ```typescript
 // selectors/useGetItems.hook.ts
-export const useGetItems = () =>
-  useMyStore((state) => state.items);
+export const useGetItems = () => useMyStore((state) => state.items);
 
 // selectors/useGetIsLoading.hook.ts
-export const useGetIsLoading = () =>
-  useMyStore((state) => state.isLoading);
+export const useGetIsLoading = () => useMyStore((state) => state.isLoading);
 ```
 
 #### 5. Build Actions
@@ -754,18 +776,21 @@ Create an action for each mutation:
 // actions/useAddItem.hook.ts
 export const useAddItem = () => {
   const { store } = useMyContextValue();
-  
-  return useCallback((item: Item) => {
-    const state = store.get();
-    const newItems = [...state.items, item];
-    store.set({ items: newItems });
-  }, [store]);
+
+  return useCallback(
+    (item: Item) => {
+      const state = store.get();
+      const newItems = [...state.items, item];
+      store.set({ items: newItems });
+    },
+    [store],
+  );
 };
 
 // actions/useFetchItems.hook.ts
 export const useFetchItems = () => {
   const { store } = useMyContextValue();
-  
+
   return async () => {
     store.set({ isLoading: true });
     try {
@@ -786,18 +811,18 @@ export const MyComponent = () => {
   // Selectors
   const items = useGetItems();
   const isLoading = useGetIsLoading();
-  
+
   // Actions
   const addItem = useAddItem();
   const fetchItems = useFetchItems();
-  
+
   // Handlers
   const handleAdd = () => addItem({ id: Date.now(), name: 'New' });
-  
+
   useEffect(() => {
     void fetchItems();
   }, [fetchItems]);
-  
+
   return (
     <div>
       {isLoading ? <Spinner /> : items.map(item => <Item key={item.id} {...item} />)}
@@ -810,12 +835,13 @@ export const MyComponent = () => {
 #### 7. Add Virtualization (if needed)
 
 ```typescript
-const { startIndex, endIndex, offsetY, bottomSpacerHeight } =
-  useVirtualization({
+const { startIndex, endIndex, offsetY, bottomSpacerHeight } = useVirtualization(
+  {
     containerRef,
     itemHeight: 50,
     totalItems: items.length,
-  });
+  },
+);
 
 const visibleItems = items.slice(startIndex, endIndex);
 ```
@@ -923,15 +949,18 @@ When actions depend on context state, access it inside the action:
 ```typescript
 export const useToggleSorting = () => {
   const { columnsStore } = useTableConfigContextValue();
-  
-  return useCallback((columnKey: string) => {
-    const state = columnsStore.get();
-    const currentSorting = state?.sorting ?? [];
-    const existing = currentSorting.find(s => s.key === columnKey);
-    
-    const newDirection = existing?.direction === 'asc' ? 'desc' : 'asc';
-    // ... update logic
-  }, [columnsStore]);
+
+  return useCallback(
+    (columnKey: string) => {
+      const state = columnsStore.get();
+      const currentSorting = state?.sorting ?? [];
+      const existing = currentSorting.find((s) => s.key === columnKey);
+
+      const newDirection = existing?.direction === 'asc' ? 'desc' : 'asc';
+      // ... update logic
+    },
+    [columnsStore],
+  );
 };
 ```
 
@@ -943,7 +972,7 @@ When action needs to update multiple stores:
 export const useResetTable = () => {
   const { columnsStore, metaStore } = useTableConfigContextValue();
   const { dataStore } = useTableDataContextValue();
-  
+
   return useCallback(() => {
     columnsStore.reset();
     metaStore.reset();
@@ -963,7 +992,7 @@ columnsStore.set({ normalizedColumns });
 
 // Then use a simple selector
 export const useGetNormalizedColumns = () =>
-  useColumnsStore(state => state.normalizedColumns);
+  useColumnsStore((state) => state.normalizedColumns);
 ```
 
 ---

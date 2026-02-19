@@ -1,5 +1,3 @@
- 
- 
 /* eslint-disable */
 // @ts-nocheck
 
@@ -135,7 +133,9 @@ export const renderStats = {
       avgRendersPerComponent:
         all.length > 0 ? Math.round(totalRenders / all.length) : 0,
       componentCount: all.length,
-      mostRendered: all.slice(0, 10).map((r) => ({ count: r.count, name: r.name })),
+      mostRendered: all
+        .slice(0, 10)
+        .map((r) => ({ count: r.count, name: r.name })),
       totalRenders,
     };
   },
@@ -157,7 +157,7 @@ export const renderStats = {
     console.log('Top 10 most rendered:');
     console.table(
       summary.mostRendered.map((r) => ({
-        'Component': r.name,
+        Component: r.name,
         'Render Count': r.count,
       })),
     );
@@ -166,7 +166,7 @@ export const renderStats = {
     console.table(
       all.map((r) => ({
         'Avg Time (ms)': r.count > 0 ? (r.totalTime / r.count).toFixed(2) : 0,
-        'Component': r.name,
+        Component: r.name,
         'Render Count': r.count,
         'Total Time (ms)': r.totalTime.toFixed(2),
       })),
@@ -210,6 +210,5 @@ export const renderStats = {
 
 // Expose to window for easy console access
 if (import.meta.env.DEV && globalThis.window !== undefined) {
-   
   (globalThis as any).__renderStats = renderStats;
 }

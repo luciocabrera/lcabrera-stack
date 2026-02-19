@@ -2,7 +2,6 @@ import eslint from '@eslint/js';
 import stylex from '@stylexjs/eslint-plugin';
 import eslintConfigPrettier from 'eslint-config-prettier/flat';
 import perfectionist from 'eslint-plugin-perfectionist';
-import reactPlugin from 'eslint-plugin-react';
 import reactDom from 'eslint-plugin-react-dom';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
@@ -30,8 +29,6 @@ export default defineConfig(
   reactX.configs['recommended-typescript'],
   // Enable lint rules for React DOM
   reactDom.configs.recommended,
-  reactPlugin.configs.flat.recommended,
-  reactPlugin.configs.flat['jsx-runtime'],
 
   // 3. Sorting (Perfectionist)
   perfectionist.configs['recommended-natural'],
@@ -39,16 +36,7 @@ export default defineConfig(
   // 4. Formatting (Prettier - Must be last to disable conflicts)
   eslintConfigPrettier,
 
-  // 5. React settings - Apply globally for all files
-  {
-    settings: {
-      react: {
-        version: 'detect',
-      },
-    },
-  },
-
-  // 6. JavaScript files configuration (for Node.js server files, etc.)
+  // 5. JavaScript files configuration (for Node.js server files, etc.)
   {
     files: ['**/*.js', '**/*.mjs', '**/*.cjs'],
     languageOptions: {
@@ -64,7 +52,7 @@ export default defineConfig(
     },
   },
 
-  // 7. Custom Configuration, Plugins, and Overrides for TypeScript files
+  // 6. Custom Configuration, Plugins, and Overrides for TypeScript files
   {
     extends: [
       ...tseslint.configs.strictTypeChecked,
@@ -73,7 +61,6 @@ export default defineConfig(
     files: ['**/*.ts', '**/*.tsx'], // Target specific files for TypeScript-aware rules
     languageOptions: {
       ecmaVersion: 'latest',
-      ...reactPlugin.configs.flat.recommended.languageOptions,
       globals: globals.browser,
       parserOptions: {
         // Enables powerful, type-aware rules across the project
@@ -190,7 +177,7 @@ export default defineConfig(
     },
   },
 
-  // 8. Component files override - Disable security false positives for StyleX object property access
+  // 7. Component files override - Disable security false positives for StyleX object property access
   {
     files: ['**/*.component.tsx'],
     rules: {
@@ -198,7 +185,7 @@ export default defineConfig(
     },
   },
 
-  // 9. API type files override - Allow snake_case for database/API schema matching
+  // 8. API type files override - Allow snake_case for database/API schema matching
   {
     files: ['**/*.api.ts', '**/services/**/*.ts'],
     rules: {
@@ -247,7 +234,7 @@ export default defineConfig(
     },
   },
 
-  // 10. StyleX files override - Allow CSS pseudo-selectors and other CSS properties
+  // 9. StyleX files override - Allow CSS pseudo-selectors and other CSS properties
   {
     files: ['**/*.stylex.ts'],
     rules: {
@@ -309,7 +296,7 @@ export default defineConfig(
     },
   },
 
-  // 11. Vite config override - Allow configuration object properties
+  // 10. Vite config override - Allow configuration object properties
   {
     files: ['vite.config.ts', 'vite.config.js'],
     rules: {
@@ -358,7 +345,7 @@ export default defineConfig(
     },
   },
 
-  // 12. React Router config override - Allow configuration object properties
+  // 11. React Router config override - Allow configuration object properties
   {
     files: ['react-router.config.ts'],
     rules: {
@@ -407,7 +394,7 @@ export default defineConfig(
     },
   },
 
-  // 13. Root and route entry files override - Allow multiple exports for React Router
+  // 12. Root and route entry files override - Allow multiple exports for React Router
   {
     files: ['src/root.tsx', 'src/root/**/index.ts', 'src/routes/**/index.tsx'],
     rules: {
@@ -415,7 +402,7 @@ export default defineConfig(
     },
   },
 
-  // 14. Ignores
+  // 13. Ignores
   globalIgnores([
     '.react-router/',
     'build/',
@@ -427,7 +414,7 @@ export default defineConfig(
     'scripts/',
   ]),
 
-  // 15. ESLint config file override - Allow null for format: null patterns
+  // 14. ESLint config file override - Allow null for format: null patterns
   {
     files: ['eslint.config.js', 'eslint.config.mjs'],
     rules: {

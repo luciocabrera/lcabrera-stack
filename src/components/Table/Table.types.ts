@@ -14,31 +14,40 @@ export type { TableTitleProps } from './TableTitle';
 /**
  * Column filters state - maps column key to filter configuration
  */
-export type ColumnFiltersState<TData=Record<string, unknown>> = Record<DataKey<TData>, ColumnFilter>;
+export type ColumnFiltersState<TData = Record<string, unknown>> = Record<
+  DataKey<TData>,
+  ColumnFilter
+>;
 /**
  * Column order state - array of column keys in display order
  */
-export type ColumnOrderState<TData=Record<string, unknown>> = DataKey<TData>[];
+export type ColumnOrderState<TData = Record<string, unknown>> =
+  DataKey<TData>[];
 
 /**
  * Column pinning state
  */
-export type ColumnPinningState<TData=Record<string, unknown>> = {
+export type ColumnPinningState<TData = Record<string, unknown>> = {
   /** Columns pinned to the left */
   left: DataKey<TData>[];
   /** Columns pinned to the right */
   right: DataKey<TData>[];
-};    
+};
 
 /**
  * Column sizing state - maps column key to custom width
  */
-export type ColumnSizingState<TData=Record<string, unknown>> = Record<DataKey<TData>, number>;
+export type ColumnSizingState<TData = Record<string, unknown>> = Record<
+  DataKey<TData>,
+  number
+>;
 
 /**
  * Column visibility state - Set of visible column keys
  */
-export type ColumnVisibilityState<TData=Record<string, unknown>> = Set<DataKey<TData>>;
+export type ColumnVisibilityState<TData = Record<string, unknown>> = Set<
+  DataKey<TData>
+>;
 
 export type DataKey<TData> = (keyof TData & string) | string;
 
@@ -51,9 +60,21 @@ export type FilterData = {
   totalRows: number;
 };
 
-export type FiltersDataState<TData=Record<string, unknown>> = Record<DataKey<TData>, FilterData>;
+/**
+ * Response shape returned by fetchFilterOptions.
+ * Contains paginated distinct values for a column's filter dropdown.
+ */
+export type FilterOptionsResponse = {
+  hasMore: boolean;
+  values: string[];
+};
 
-export type NormalizedColumnsState<TData=Record<string, unknown>> = Record<
+export type FiltersDataState<TData = Record<string, unknown>> = Record<
+  DataKey<TData>,
+  FilterData
+>;
+
+export type NormalizedColumnsState<TData = Record<string, unknown>> = Record<
   DataKey<TData>,
   TableColumn<TData> & {
     sortDirection?: 'asc' | 'desc';
@@ -64,34 +85,26 @@ export type NormalizedColumnsState<TData=Record<string, unknown>> = Record<
 /**
  * Sorting state for a single column
  */
-export type SortingState<TData=Record<string, unknown>> = Sorting<TData>[];
+export type SortingState<TData = Record<string, unknown>> = Sorting<TData>[];
 
 /**
  * Storage type for persistence
  */
 export type StorageType = 'cookie' | 'localStorage';
 
-/**
- * Response shape returned by fetchFilterOptions.
- * Contains paginated distinct values for a column's filter dropdown.
- */
-export type FilterOptionsResponse = {
-  hasMore: boolean;
-  values: string[];
-};
-
 export type TableColumn<TData> = {
   dataType?: TableColumnDataType;
   /** Async function to fetch filter options from server (for facet filters with pagination) */
-  fetchFilterOptions?: (
-    params: { limit: number; skip: number },
-  ) => Promise<FilterOptionsResponse>;
+  fetchFilterOptions?: (params: {
+    limit: number;
+    skip: number;
+  }) => Promise<FilterOptionsResponse>;
+  /** Static options for select/multiSelect filters */
+  filterOptions?: string[];
   /** Selector to extract options array from fetchFilterOptions response */
   filterOptionsDataSelector?: (response: FilterOptionsResponse) => string[];
   /** Selector to extract total count from fetchFilterOptions response */
   filterOptionsDataTotalSelector?: (response: FilterOptionsResponse) => number;
-  /** Static options for select/multiSelect filters */
-  filterOptions?: string[];
   /** Format options for the column based on data type */
   format?: TableColumnFormat;
   /** Whether this column can be filtered (default: true) */
@@ -126,7 +139,7 @@ export type TableColumnFormat = {
 /**
  * Main table state stored in tableStore
  */
-export type TableColumnsState<TData=Record<string, unknown>> = {
+export type TableColumnsState<TData = Record<string, unknown>> = {
   /** Column filters state */
   columnFilters: ColumnFiltersState<TData>;
   /** Column order state */

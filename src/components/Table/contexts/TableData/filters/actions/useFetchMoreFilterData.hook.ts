@@ -1,6 +1,7 @@
 import type { InfiniteScroll } from '@/types/ui.types';
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+
 import { useTableDataContextValue } from '../useFiltersDataContextValue.hook';
 
 type FetchMoreFilterDataArgs<TData, TResponse> = Omit<
@@ -31,9 +32,9 @@ export const useFetchMoreFilterData = <TData, TResponse>(columnKey: string) => {
 
     try {
       filtersDataStore.set({
-        [columnKey]: { 
-          ...currentFilterData, 
-          isLoadingMore: true 
+        [columnKey]: {
+          ...currentFilterData,
+          isLoadingMore: true,
         },
       });
       const response = await onLoadMore({
@@ -68,9 +69,9 @@ export const useFetchMoreFilterData = <TData, TResponse>(columnKey: string) => {
       });
 
       filtersDataStore.set({
-        [columnKey]: { 
-          ...currentFilterData, 
-          isLoadingMore: false 
+        [columnKey]: {
+          ...currentFilterData,
+          isLoadingMore: false,
         },
       });
     }

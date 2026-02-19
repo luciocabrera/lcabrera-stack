@@ -14,7 +14,7 @@ function formatQueryForPgAdmin(query, params = []) {
     if (param === null) {
       value = 'NULL';
     } else if (typeof param === 'string') {
-      value = `'${param.replaceAll('\'', "''")}'`;
+      value = `'${param.replaceAll("'", "''")}'`;
     } else if (typeof param === 'boolean') {
       value = param ? 'TRUE' : 'FALSE';
     } else if (param instanceof Date) {

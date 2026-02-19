@@ -9,15 +9,15 @@ import { useRenderTracker } from '@/utils/performance';
 
 import type { TableContentProps } from './TableContent.types';
 
-import { useInfiniteScroll } from '../hooks';
-import { TableBase } from '../TableBase';
-import { TableBody } from '../TableBody';
+import { useGetTableThreshold } from '../contexts/TableConfig/meta/selectors';
 import { useFetchMoreData } from '../contexts/TableData/data/actions';
 import {
   useGetTableHasMore,
   useGetTableIsLoadingMore,
 } from '../contexts/TableData/data/selectors';
-import { useGetTableThreshold } from '../contexts/TableConfig/meta/selectors';
+import { useInfiniteScroll } from '../hooks';
+import { TableBase } from '../TableBase';
+import { TableBody } from '../TableBody';
 import { TableHeader } from '../TableHeader';
 import { TableTitle } from '../TableTitle';
 import { styles } from './TableContent.stylex';

@@ -3,15 +3,15 @@ import type { TablePersistenceConfig } from '../Table.types';
 import { getStorageKey } from './getStorageKey.util';
 import { PERSISTENCE_VERSION } from './persistence.constants';
 
+type SerializedStateSlice = {
+  key: string;
+  value: string;
+};
+
 type SerializeStateSliceArgs = {
   persistenceKey: string;
   slice: keyof TablePersistenceConfig;
   value: unknown;
-};
-
-type SerializedStateSlice = {
-  key: string;
-  value: string;
 };
 
 /**

@@ -2,10 +2,7 @@ import type { ReactNode } from 'react';
 
 import type { DataKey } from '@/components/Table/Table.types';
 
-export type InfiniteScroll<
-  TData,
-  TResponse,
-> = {
+export type InfiniteScroll<TData, TResponse> = {
   dataSelector?: (response: TResponse) => TData[];
   dataTotalSelector?: (response: TResponse) => number;
   hasMore?: boolean;
@@ -23,7 +20,6 @@ export type Pagination = {
 };
 
 export type SortDirection = 'asc' | 'desc' | undefined;
-
 
 export type Sorting<TData> = {
   /** Column key being sorted */

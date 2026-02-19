@@ -8,4 +8,4 @@ export const TableDrawerContext = createContext<TableDrawerContextValue>({
   columnsStore: getInitialColumnsState<unknown>({}),
 } as unknown as TableDrawerContextValue);
 
-TableDrawerContext.displayName = 'TableDrawerContext';  
+TableDrawerContext.displayName = 'TableDrawerContext';

@@ -12,38 +12,41 @@ export const useSetColumnSorting = <TData>() => {
 
   const persistenceKey = metaStore.get()?.persistenceKey ?? '';
 
-  return useCallback(({ columnKey, direction }: Sorting<TData>) => {
-    const columnsState = columnsStore.get();
-    const sorting = columnsState?.sorting ?? [];
-    const currentSort = sorting.find((s) => s.columnKey === columnKey);
+  return useCallback(
+    ({ columnKey, direction }: Sorting<TData>) => {
+      const columnsState = columnsStore.get();
+      const sorting = columnsState?.sorting ?? [];
+      const currentSort = sorting.find((s) => s.columnKey === columnKey);
 
-    if (currentSort?.direction === direction) {
-      // No change in sort
-      return;
-    }
-    const newSorting = sorting
-      .map((s) => {
-        if (s.columnKey === columnKey) {
-          return { columnKey, direction };
-        }
-        return s;
-      })
-      .filter((s) => s.direction); // Remove any with undefined direction
-
-    writeStateSlice({
-      persistenceKey,
-      slice: 'sorting',
-      storageType: 'cookie',
-      value: newSorting,
-    });
-    setSearchParams((params) => {
-      if (newSorting.length > 0) {
-        params.set('sort', JSON.stringify(newSorting));
-      } else {
-        params.delete('sort');
+      if (currentSort?.direction === direction) {
+        // No change in sort
+        return;
       }
-      return params;
-    });
-    columnsStore.set({ sorting: newSorting });
-  }, [columnsStore, persistenceKey, setSearchParams]);
+      const newSorting = sorting
+        .map((s) => {
+          if (s.columnKey === columnKey) {
+            return { columnKey, direction };
+          }
+          return s;
+        })
+        .filter((s) => s.direction); // Remove any with undefined direction
+
+      writeStateSlice({
+        persistenceKey,
+        slice: 'sorting',
+        storageType: 'cookie',
+        value: newSorting,
+      });
+      setSearchParams((params) => {
+        if (newSorting.length > 0) {
+          params.set('sort', JSON.stringify(newSorting));
+        } else {
+          params.delete('sort');
+        }
+        return params;
+      });
+      columnsStore.set({ sorting: newSorting });
+    },
+    [columnsStore, persistenceKey, setSearchParams],
+  );
 };

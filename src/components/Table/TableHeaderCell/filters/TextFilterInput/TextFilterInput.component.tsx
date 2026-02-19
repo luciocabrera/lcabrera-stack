@@ -26,13 +26,13 @@ export const TextFilterInput = <TData,>({
   return (
     <div {...stylex.props(styles.container)}>
       <input
-        autoComplete="off"
-        data-1p-ignore="true"
-        data-bwignore="true"
-        data-form-type="other"
-        data-lpignore="true"
-        data-np-checked="1"
-        data-np-ignore="1"
+        autoComplete='off'
+        data-1p-ignore='true'
+        data-bwignore='true'
+        data-form-type='other'
+        data-lpignore='true'
+        data-np-checked='1'
+        data-np-ignore='1'
         name={`filter-text-${columnKey}`}
         onChange={(e) => {
           handleValueChange(e.target.value);

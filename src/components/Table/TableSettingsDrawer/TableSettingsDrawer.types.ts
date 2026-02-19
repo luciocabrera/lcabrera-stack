@@ -3,5 +3,4 @@ export type TableSettingsDrawerProps = {
   isOpen: boolean;
   /** Callback when drawer should close */
   onClose: () => void;
-
 };

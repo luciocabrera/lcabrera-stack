@@ -16,8 +16,8 @@ import { TextFilterInput } from '../../TextFilterInput';
  * Renders the appropriate filter input based on column data type.
  */
 export const InputContent = <TData,>({
-  dataType,
   columnKey,
+  dataType,
   filter,
   filterOptions,
   listMaxHeight,

@@ -1,6 +1,7 @@
 import type { InfiniteScroll } from '@/types/ui.types';
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+
 import { useTableDataContextValue } from '../useTableDataContextValue.hook';
 
 type FetchMoreDataArgs<TData, TResponse> = Omit<

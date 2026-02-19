@@ -10,8 +10,6 @@ import { useTableConfigContextValue } from '@/components/Table/contexts/TableCon
 
 import { useTableDrawerContextValue } from '../../../useTableDrawerContextValue.hook';
 
-
-
 export const useResetTableSettings = () => {
   const { columnsStore } = useTableConfigContextValue();
   const { columnsStore: columnsDrawerStore } = useTableDrawerContextValue();

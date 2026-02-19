@@ -15,12 +15,9 @@ import { useSetColumnsSortings } from '../TableDrawerContext/hooks/store/columns
 import { useGetColumnsSorting } from '../TableDrawerContext/hooks/store/columns/selectors';
 import { styles } from './SortingSection.stylex';
 
-export const SortingSection = ({
-
-  ...props
-}: SortingSectionProps) => {
+export const SortingSection = ({ ...props }: SortingSectionProps) => {
   const columns = useGetColumns();
-  const sorting= useGetColumnsSorting();
+  const sorting = useGetColumnsSorting();
   const onSortChange = useSetColumnsSortings();
 
   const [selectedColumn, setSelectedColumn] = useState('');

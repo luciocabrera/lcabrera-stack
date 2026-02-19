@@ -1,8 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { SpacerRow } from '@/components/Table/SpacerRow';
-import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
-import { TableBodyCell } from '@/components/Table/TableBodyCell';
 import {
   useGetColumnSizing,
   useGetEffectiveColumns,
@@ -11,6 +8,9 @@ import {
   useGetTableOverscan,
   useGetTableRowHeight,
 } from '@/components/Table/contexts/TableConfig/meta/selectors';
+import { SpacerRow } from '@/components/Table/SpacerRow';
+import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
+import { TableBodyCell } from '@/components/Table/TableBodyCell';
 import { TableRow } from '@/components/Table/TableRow';
 import { useVirtualization } from '@/hooks';
 import { useRenderTracker } from '@/utils/performance';

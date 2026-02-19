@@ -78,13 +78,13 @@ export const DateFilterInput = ({
       {operator === 'between' ? (
         <div {...stylex.props(styles.inputGroup)}>
           <input
-            autoComplete="off"
-            data-1p-ignore="true"
-            data-bwignore="true"
-            data-form-type="other"
-            data-lpignore="true"
-            data-np-checked="1"
-            data-np-ignore="1"
+            autoComplete='off'
+            data-1p-ignore='true'
+            data-bwignore='true'
+            data-form-type='other'
+            data-lpignore='true'
+            data-np-checked='1'
+            data-np-ignore='1'
             name={`filter-date-start-${columnKey}`}
             onChange={handleValueChange}
             type='date'
@@ -93,13 +93,13 @@ export const DateFilterInput = ({
           />
           <span {...stylex.props(styles.separator)}>to</span>
           <input
-            autoComplete="off"
-            data-1p-ignore="true"
-            data-bwignore="true"
-            data-form-type="other"
-            data-lpignore="true"
-            data-np-checked="1"
-            data-np-ignore="1"
+            autoComplete='off'
+            data-1p-ignore='true'
+            data-bwignore='true'
+            data-form-type='other'
+            data-lpignore='true'
+            data-np-checked='1'
+            data-np-ignore='1'
             name={`filter-date-end-${columnKey}`}
             onChange={handleEndDateChange}
             type='date'
@@ -109,13 +109,13 @@ export const DateFilterInput = ({
         </div>
       ) : (
         <input
-          autoComplete="off"
-          data-1p-ignore="true"
-          data-bwignore="true"
-          data-form-type="other"
-          data-lpignore="true"
-          data-np-checked="1"
-          data-np-ignore="1"
+          autoComplete='off'
+          data-1p-ignore='true'
+          data-bwignore='true'
+          data-form-type='other'
+          data-lpignore='true'
+          data-np-checked='1'
+          data-np-ignore='1'
           name={`filter-date-${columnKey}`}
           onChange={handleValueChange}
           type='date'

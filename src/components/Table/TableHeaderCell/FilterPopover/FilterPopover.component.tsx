@@ -3,11 +3,6 @@ import { useEffect, useRef, useState } from 'react';
 
 import { Button } from '@/components/Button';
 import { MenuCloseIcon } from '@/components/Icons';
-import { usePopoverPositioning } from '@/hooks/usePopoverPositioning.hook';
-import { useRenderTracker } from '@/utils/performance';
-
-import type { FilterPopoverProps, ToggleEvent } from './FilterPopover.types';
-
 import {
   useResetColumnFilter,
   useSetColumnFilter,
@@ -18,6 +13,11 @@ import {
 } from '@/components/Table/contexts/TableConfig/columns/selectors';
 import { useFetchFilterData } from '@/components/Table/contexts/TableData/filters/actions';
 import { useGetFilterData } from '@/components/Table/contexts/TableData/filters/selectors';
+import { usePopoverPositioning } from '@/hooks/usePopoverPositioning.hook';
+import { useRenderTracker } from '@/utils/performance';
+
+import type { FilterPopoverProps, ToggleEvent } from './FilterPopover.types';
+
 import { FilterInputs } from '../filters/FilterInputs';
 import { styles } from './FilterPopover.stylex';
 import { getOperatorFromFilter } from './utils';
@@ -176,7 +176,7 @@ export const FilterPopover = <TData,>({
           <FilterInputs
             columnKey={columnKey}
             filter={localFilter}
-            listMaxHeight="10rem"
+            listMaxHeight='10rem'
             onChange={setLocalFilter}
           />
         </div>

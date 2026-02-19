@@ -11,9 +11,11 @@ From the console logs, we can see significant re-rendering:
 ## Root Cause Analysis
 
 ### 1. Context Cascade Effect
+
 When any part of the table state changes, ALL components consuming the context re-render.
 
 **Current Architecture:**
+
 ```
 TableProvider
 ├── TableContext (single context with tableStore + metaStore)
@@ -28,14 +30,17 @@ TableProvider
 ```
 
 ### 2. FilterPopover Rendering Every Column
+
 Each `FilterPopover` is a separate component instance. When the parent `TableHeaderCell` re-renders, all 30 FilterPopovers re-render.
 
 The console.warn in FilterPopover runs on every render:
+
 ```tsx
 console.warn('[FilterPopover] column:', column.key, ...);
 ```
 
 ### 3. Object Creation in Render
+
 Creating new objects/arrays during render causes child components to see "new" props even if values haven't changed.
 
 ## Performance Measurement Tools
@@ -43,6 +48,7 @@ Creating new objects/arrays during render causes child components to see "new" p
 ### 1. Render Tracker (Created)
 
 Use `__renderStats` in browser console:
+
 ```js
 // After navigating around
 __renderStats.print();
@@ -52,16 +58,19 @@ __renderStats.reset();
 ```
 
 ### 2. React DevTools Profiler
+
 - Enable "Record why each component rendered"
 - Look for "Context changed" and "Props changed"
 
 ### 3. React Compiler Analysis
+
 Check if React Compiler is memoizing correctly:
+
 ```bash
 # In vite.config.ts, enable logging
 babel: {
   plugins: [
-    ['babel-plugin-react-compiler', { 
+    ['babel-plugin-react-compiler', {
       runtimeModule: 'react-compiler-runtime',
       logger: { logLevel: 'info' }
     }]
@@ -90,6 +99,7 @@ Split the single TableContext into multiple focused contexts:
 ```
 
 **Benefits:**
+
 - Components only subscribe to what they need
 - Filter changes don't re-render sorting UI
 - Meta changes (loading) don't re-render data display
@@ -103,10 +113,7 @@ Current `useSyncExternalStore` already supports selectors, but we need to ensure
 const [columnFilters] = useTableStore((state) => state.columnFilters);
 
 // ✅ Good - stable selector reference
-const selectColumnFilters = useCallback(
-  (state) => state.columnFilters,
-  []
-);
+const selectColumnFilters = useCallback((state) => state.columnFilters, []);
 const [columnFilters] = useTableStore(selectColumnFilters);
 ```
 
@@ -121,7 +128,7 @@ export const FilterPopover = memo(({ column, filter, ... }) => {
       console.log('[FilterPopover] mounted:', column.key);
     }
   }, [column.key]);
-  
+
   // ...
 });
 ```
@@ -143,22 +150,24 @@ const COLUMNS = [...]; // module-level constant
 ### Strategy 5: Virtualization (High Impact for Large Data)
 
 For tables with many rows, virtualize:
+
 - Only render visible rows
 - Use `@tanstack/react-virtual` or similar
 
 ## Implementation Priority
 
-| Priority | Strategy | Effort | Impact |
-|----------|----------|--------|--------|
-| 1 | Remove debug console.logs | Low | Medium |
-| 2 | Memoize FilterPopover | Low | Medium |
-| 3 | Stable column definitions | Low | Medium |
-| 4 | Split Context | High | High |
-| 5 | Row Virtualization | Medium | High (for large datasets) |
+| Priority | Strategy                  | Effort | Impact                    |
+| -------- | ------------------------- | ------ | ------------------------- |
+| 1        | Remove debug console.logs | Low    | Medium                    |
+| 2        | Memoize FilterPopover     | Low    | Medium                    |
+| 3        | Stable column definitions | Low    | Medium                    |
+| 4        | Split Context             | High   | High                      |
+| 5        | Row Virtualization        | Medium | High (for large datasets) |
 
 ## Quick Wins (Do First)
 
 ### 1. Remove/Guard Console Logs
+
 ```tsx
 // Replace all console.warn in hot paths with:
 if (import.meta.env.DEV && __DEBUG_FILTERS__) {
@@ -167,17 +176,21 @@ if (import.meta.env.DEV && __DEBUG_FILTERS__) {
 ```
 
 ### 2. Memoize Static Components
+
 ```tsx
 // FilterPopover - only re-render when filter/column changes
-export const FilterPopover = memo(({ column, filter, onApply }) => {
-  // ...
-}, (prev, next) => {
-  return prev.column.key === next.column.key && 
-         prev.filter === next.filter;
-});
+export const FilterPopover = memo(
+  ({ column, filter, onApply }) => {
+    // ...
+  },
+  (prev, next) => {
+    return prev.column.key === next.column.key && prev.filter === next.filter;
+  },
+);
 ```
 
 ### 3. Use `use` Hook Efficiently
+
 React 19's `use` hook with context should batch better, verify we're using it correctly.
 
 ## Measurement Baseline
@@ -191,6 +204,7 @@ Before making changes, establish a baseline:
 5. Document the numbers
 
 **Target Metrics:**
+
 - FilterPopover: Should render 1x per column on mount, not 30x
 - TableHeaderCell: Should render 1x per column
 - EnterpriseOrders: Should render 1-2x on initial load
