@@ -1,11 +1,15 @@
-import type { ReactNode } from 'react';
+import type { TableProps } from '../Table.types';
 
-export type TableSuspenseBoundaryProps<TData, TResponse = TData[]> = {
+export type TableSuspenseBoundaryProps<
+  TData extends Record<string, unknown>,
+  TResponse = TData[],
+> = Pick<
+  TableProps<TData, TResponse>,
+  | 'dataSelector'
+  | 'icon'
+> & {
   /** Child render function receiving resolved data */
   children: (response: TResponse) => React.ReactNode;
   /** Promise that resolves to table data or a response containing table data */
   dataPromise: Promise<TResponse>;
-  /** Function to extract data array from the response. Defaults to identity (response is the data array). */
-  dataSelector?: (response: TResponse) => TData[];
-  icon?: ReactNode;
 };
