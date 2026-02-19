@@ -1,6 +1,6 @@
 import { FilterInputs } from '@/components/Table/TableHeaderCell/filters/FilterInputs';
-import { useGetNormalizedColumn } from '@/components/Table/TableContext/hooks/store/columns/selectors';
-import { useFetchFilterData } from '@/components/Table/TableContext/hooks/store/filters/actions';
+import { useGetNormalizedColumn } from '@/components/Table/contexts/TableConfig/columns/selectors';
+import { useFetchFilterData } from '@/components/Table/contexts/TableData/filters/actions';
 import { useEffect } from 'react';
 import type { FilterSectionBodyProps } from './FilterSectionBody.types';
 

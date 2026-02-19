@@ -11,13 +11,13 @@ import type { FilterPopoverProps, ToggleEvent } from './FilterPopover.types';
 import {
   useResetColumnFilter,
   useSetColumnFilter,
-} from '@/components/Table/TableContext/hooks/store/columns/actions';
+} from '@/components/Table/contexts/TableConfig/columns/actions';
 import {
   useGetColumnFilters,
   useGetNormalizedColumn,
-} from '@/components/Table/TableContext/hooks/store/columns/selectors';
-import { useFetchFilterData } from '@/components/Table/TableContext/hooks/store/filters/actions';
-import { useGetFilterData } from '@/components/Table/TableContext/hooks/store/filters/selectors';
+} from '@/components/Table/contexts/TableConfig/columns/selectors';
+import { useFetchFilterData } from '@/components/Table/contexts/TableData/filters/actions';
+import { useGetFilterData } from '@/components/Table/contexts/TableData/filters/selectors';
 import { FilterInputs } from '../filters/FilterInputs';
 import { styles } from './FilterPopover.stylex';
 import { getOperatorFromFilter } from './utils';

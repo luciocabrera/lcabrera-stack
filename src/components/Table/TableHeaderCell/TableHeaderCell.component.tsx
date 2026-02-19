@@ -7,11 +7,11 @@ import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
 import {
   useSetColumnSizing,
   useSetColumnSorting,
-} from '@/components/Table/TableContext/hooks/store/columns/actions';
+} from '@/components/Table/contexts/TableConfig/columns/actions';
 import {
   useGetTableIsLoading,
   useGetTableIsLoadingMore,
-} from '@/components/Table/TableContext/hooks/store/data/selectors';
+} from '@/components/Table/contexts/TableData/data/selectors';
 import { useRenderTracker } from '@/utils/performance';
 
 import type { TableHeaderCellProps } from './TableHeaderCell.types';
@@ -19,7 +19,7 @@ import type { TableHeaderCellProps } from './TableHeaderCell.types';
 import {
   useGetColumnSizing,
   useGetNormalizedColumn,
-} from '../TableContext/hooks/store/columns/selectors';
+} from '../contexts/TableConfig/columns/selectors';
 import { FilterButton } from './FilterButton';
 import { FilterPopover } from './FilterPopover';
 import { SortIcon } from './SortIcon';

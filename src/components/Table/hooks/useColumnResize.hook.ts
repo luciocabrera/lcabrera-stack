@@ -5,7 +5,7 @@ import {
   DEFAULT_MIN_COLUMN_WIDTH,
 } from '@/components/Table/Table.constants';
 
-import {  useSyncColumnsSizing } from '../TableContext/hooks/store/columns/actions';
+import {  useSyncColumnsSizing } from '../contexts/TableConfig/columns/actions';
 
 export type OnResizeParams = {
   columnKey: string;

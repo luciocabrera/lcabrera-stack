@@ -7,9 +7,9 @@ import type { SelectFilterInputProps } from './SelectFilterInput.types';
 
 import { styles } from './SelectFilterInput.stylex';
 import { VirtualizedOption } from './VirtualizedOption';
-import { useFetchMoreFilterData } from '@/components/Table/TableContext/hooks/store/filters/actions';
-import { useGetNormalizedColumn } from '@/components/Table/TableContext/hooks/store/columns/selectors';
-import { useGetFilterData } from '@/components/Table/TableContext/hooks/store/filters/selectors';
+import { useFetchMoreFilterData } from '@/components/Table/contexts/TableData/filters/actions';
+import { useGetNormalizedColumn } from '@/components/Table/contexts/TableConfig/columns/selectors';
+import { useGetFilterData } from '@/components/Table/contexts/TableData/filters/selectors';
 
 const ITEM_HEIGHT = 32; // Height of each checkbox option in pixels
 

@@ -3,8 +3,8 @@ import {
   useGetColumnOrder,
   useGetColumnSizing,
   useGetColumnVisibility,
-} from '@/components/Table/TableContext/hooks/store/columns/selectors';
-import { useGetColumnsSorting } from '@/components/Table/TableContext/hooks/store/columns/selectors/useGetColumnsSorting.hook';
+} from '@/components/Table/contexts/TableConfig/columns/selectors';
+import { useGetColumnsSorting } from '@/components/Table/contexts/TableConfig/columns/selectors/useGetColumnsSorting.hook';
 import { useStore } from '@/hooks';
 
 import type {

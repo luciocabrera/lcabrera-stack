@@ -10,12 +10,12 @@ import type {
 } from '@/types/filterOperators.types';
 
 import type { FilterInputsProps } from './FilterInputs.types';
-import { useGetFilterData } from '@/components/Table/TableContext/hooks/store/filters/selectors';
+import { useGetFilterData } from '@/components/Table/contexts/TableData/filters/selectors';
 import { BooleanFilterInput } from '../BooleanFilterInput';
 import { styles } from './FilterInputs.stylex';
 import { InputContent } from './InputContent';
 import { getOperatorFromFilter, getOperatorOptions } from './utils';
-import { useGetNormalizedColumn } from '@/components/Table/TableContext/hooks/store/columns/selectors/useGetNormalizedColumn.hook';
+import { useGetNormalizedColumn } from '@/components/Table/contexts/TableConfig/columns/selectors/useGetNormalizedColumn.hook';
 
 /**
  * Shared component for rendering filter inputs based on column data type.

@@ -1,6 +1,6 @@
 import { createContext } from 'react';
 
-import { getInitialColumnsState } from '@/components/Table/TableContext/utils';
+import { getInitialColumnsState } from '@/components/Table/contexts/TableConfig/utils';
 
 import type { TableDrawerContextValue } from './TableDrawerContext.types';
 

@@ -2,7 +2,7 @@ import * as stylex from '@stylexjs/stylex';
 
 import type { TableTitleProps } from './TableTitle.types';
 
-import { useGetTableTitle } from '../TableContext/hooks/store/meta/selectors';
+import { useGetTableTitle } from '../contexts/TableConfig/meta/selectors';
 import { styles } from './TableTitle.stylex';
 
 export const TableTitle = ({

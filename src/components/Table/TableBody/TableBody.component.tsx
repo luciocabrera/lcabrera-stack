@@ -6,18 +6,18 @@ import { TableBodyCell } from '@/components/Table/TableBodyCell';
 import {
   useGetColumnSizing,
   useGetEffectiveColumns,
-} from '@/components/Table/TableContext/hooks/store/columns/selectors';
+} from '@/components/Table/contexts/TableConfig/columns/selectors';
 import {
   useGetTableOverscan,
   useGetTableRowHeight,
-} from '@/components/Table/TableContext/hooks/store/meta/selectors';
+} from '@/components/Table/contexts/TableConfig/meta/selectors';
 import { TableRow } from '@/components/Table/TableRow';
 import { useVirtualization } from '@/hooks';
 import { useRenderTracker } from '@/utils/performance';
 
 import type { TableBodyProps } from './TableBody.types';
 
-import { useGetTableData } from '../TableContext/hooks/store/data/selectors';
+import { useGetTableData } from '../contexts/TableData/data/selectors';
 import { styles } from './TableBody.stylex';
 
 export const TableBody = ({ tableContainerRef }: TableBodyProps) => {

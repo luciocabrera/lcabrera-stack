@@ -1,7 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 
 import { Table } from '@/components/Table';
-import { TableConfigProvider } from '@/components/Table/TableContext';
+import { TableConfigProvider } from '@/components/Table/contexts';
 import { TableSuspenseBoundary } from '@/components/Table/TableSuspenseBoundary';
 
 import type { TableLayoutProps } from './TableLayout.types';

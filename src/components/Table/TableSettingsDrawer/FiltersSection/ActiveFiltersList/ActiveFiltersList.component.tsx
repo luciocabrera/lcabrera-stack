@@ -3,7 +3,7 @@ import * as stylex from '@stylexjs/stylex';
 import { Button } from '@/components/Button';
 import { MenuCloseIcon } from '@/components/Icons';
 import { InfoBox } from '@/components/InfoBox';
-import { useGetNormalizedColumns } from '@/components/Table/TableContext/hooks/store/columns/selectors';
+import { useGetNormalizedColumns } from '@/components/Table/contexts/TableConfig/columns/selectors';
 
 import type { ActiveFiltersListProps } from './ActiveFiltersList.types';
 

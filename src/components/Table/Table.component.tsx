@@ -6,7 +6,7 @@ import type { TableProps } from './Table.types';
 
 import { styles } from './Table.stylex';
 import { TableContent } from './TableContent';
-import { TableDataProvider } from './TableContext';
+import { TableDataProvider } from './contexts';
 
 export const Table = <TData extends Record<string, unknown>, TResponse>({
   actions,

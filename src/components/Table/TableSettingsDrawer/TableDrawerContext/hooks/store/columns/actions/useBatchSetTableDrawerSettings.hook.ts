@@ -6,7 +6,7 @@ import type {
   SortingState,
 } from '@/components/Table/Table.types';
 
-import { useBatchSetTableSettings } from '@/components/Table/TableContext/hooks/store/columns/actions';
+import { useBatchSetTableSettings } from '@/components/Table/contexts/TableConfig/columns/actions';
 
 import { useTableDrawerContextValue } from '../../../useTableDrawerContextValue.hook';
 

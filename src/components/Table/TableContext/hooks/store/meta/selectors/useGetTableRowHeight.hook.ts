@@ -1,4 +1,0 @@
-import { useMetaStore } from '@/components/Table/TableContext/hooks/store/meta/useMetaStore.hook';
-
-export const useGetTableRowHeight = () =>
-  useMetaStore<number>((state) => state.rowHeight);

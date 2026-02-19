@@ -12,12 +12,12 @@ import type { TableContentProps } from './TableContent.types';
 import { useInfiniteScroll } from '../hooks';
 import { TableBase } from '../TableBase';
 import { TableBody } from '../TableBody';
-import { useFetchMoreData } from '../TableContext/hooks/store/data/actions';
+import { useFetchMoreData } from '../contexts/TableData/data/actions';
 import {
   useGetTableHasMore,
   useGetTableIsLoadingMore,
-} from '../TableContext/hooks/store/data/selectors';
-import { useGetTableThreshold } from '../TableContext/hooks/store/meta/selectors';
+} from '../contexts/TableData/data/selectors';
+import { useGetTableThreshold } from '../contexts/TableConfig/meta/selectors';
 import { TableHeader } from '../TableHeader';
 import { TableTitle } from '../TableTitle';
 import { styles } from './TableContent.stylex';

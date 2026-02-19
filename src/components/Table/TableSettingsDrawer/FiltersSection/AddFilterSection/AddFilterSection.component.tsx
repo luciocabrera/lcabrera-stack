@@ -5,7 +5,7 @@ import { Button } from '@/components/Button';
 import {
   useGetColumns,
   useGetNormalizedColumns,
-} from '@/components/Table/TableContext/hooks/store/columns/selectors';
+} from '@/components/Table/contexts/TableConfig/columns/selectors';
 
 import type { AddFilterSectionProps } from './AddFilterSection.types';
 

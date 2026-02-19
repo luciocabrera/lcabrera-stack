@@ -1,7 +1,7 @@
 import { Table } from '../Table.component';
 import { generatePlaceholderData } from '../TableBody/utils';
-import { useGetColumns } from '../TableContext/hooks/store/columns/selectors';
-import { useGetTablePlaceholderRowCount } from '../TableContext/hooks/store/meta/selectors';
+import { useGetColumns } from '../contexts/TableConfig/columns/selectors';
+import { useGetTablePlaceholderRowCount } from '../contexts/TableConfig/meta/selectors';
 
 export const TableSkeleton = () => {
   const columns = useGetColumns<Record<string, unknown>>();

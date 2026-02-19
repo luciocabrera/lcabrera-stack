@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/Button';
 import { MaximizeIcon, MinimizeIcon, RefreshIcon } from '@/components/Icons';
 import { InfoBox } from '@/components/InfoBox';
-import { useGetColumns } from '@/components/Table/TableContext/hooks/store/columns/selectors/useGetColumns.hook';
+import { useGetColumns } from '@/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
 
 import type {
   GeneralSettingsSectionProps,

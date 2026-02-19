@@ -3,7 +3,7 @@ import * as stylex from '@stylexjs/stylex';
 import type { DraggableItem } from '@/components/DraggableList';
 
 import { DraggableList } from '@/components/DraggableList';
-import { useGetColumns } from '@/components/Table/TableContext/hooks/store/columns/selectors/useGetColumns.hook';
+import { useGetColumns } from '@/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
 import { ToggleSwitch } from '@/components/ToggleSwitch';
 
 import type {

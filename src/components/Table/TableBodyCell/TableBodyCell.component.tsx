@@ -3,7 +3,7 @@ import * as stylex from '@stylexjs/stylex';
 import {
   useGetTableIsLoading,
   useGetTableIsLoadingMore,
-} from '@/components/Table/TableContext/hooks/store/data/selectors';
+} from '@/components/Table/contexts/TableData/data/selectors';
 
 import type { TableBodyCellProps } from './TableBodyCell.types';
 

@@ -6,7 +6,7 @@ import {
   useGetTableDensity,
   useGetTableIsBordered,
   useGetTableIsStriped,
-} from '../TableContext/hooks/store/meta/selectors';
+} from '../contexts/TableConfig/meta/selectors';
 import { tableStyles } from './TableBase.stylex';
 
 export const TableBase = <TData extends Record<string, unknown>, TResponse>({

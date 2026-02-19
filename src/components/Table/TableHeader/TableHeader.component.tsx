@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { useGetEffectiveColumns } from '@/components/Table/TableContext/hooks/store/columns/selectors';
+import { useGetEffectiveColumns } from '@/components/Table/contexts/TableConfig/columns/selectors';
 import { useRenderTracker } from '@/utils/performance';
 
 import type { TableHeaderProps } from './TableHeader.types';
