@@ -4,8 +4,9 @@ import { useSearchParams } from 'react-router';
 import type { ColumnFiltersState, DataKey } from '@/components/Table/Table.types';
 import type { ColumnFilter } from '@/types/filterOperators.types';
 
+import { usePersistCookieAction } from '@/components/Table/hooks';
 import { useTableConfigContextValue } from '@/components/Table/TableContext/hooks/useTableConfigContextValue.hook';
-import { writeStateSlice } from '@/components/Table/utils';
+import { serializeStateSlice } from '@/components/Table/utils';
 
 type SetColumnFilterArgs<TData> = {
   columnKey: DataKey<TData>;
@@ -14,10 +15,14 @@ type SetColumnFilterArgs<TData> = {
 
 /**
  * Hook to update a single column filter
+ *
+ * Persists the filter state to a cookie via server action (Set-Cookie header)
+ * using useFetcher, ensuring the cookie is set server-side.
  */
 export const useSetColumnFilter =  <TData>() => {
   const { columnsStore, metaStore } = useTableConfigContextValue<TData>();
   const [, setSearchParams] = useSearchParams();
+  const persistCookie = usePersistCookieAction();
 
   const columnsState = columnsStore.get();
   const persistenceKey = metaStore.get()?.persistenceKey ?? '';
@@ -35,13 +40,13 @@ export const useSetColumnFilter =  <TData>() => {
       columnFilters = { ...current, [columnKey]: filter };
     }
 
-    // Persist to falling back storage mechanism (cookie/localStorage)
-    writeStateSlice({
+    // Persist to cookie via server action (Set-Cookie header)
+    const { key, value } = serializeStateSlice({
       persistenceKey,
       slice: 'columnFilters',
-      storageType: 'cookie',
       value: columnFilters,
     });
+    persistCookie({ key, value });
 
     // Update URL search params
     setSearchParams((params) => {
@@ -55,5 +60,5 @@ export const useSetColumnFilter =  <TData>() => {
 
     // Update table context state
     columnsStore.set({ columnFilters });
-  }, [columnsStore, persistenceKey, setSearchParams, columnsState]);
+  }, [columnsStore, persistCookie, persistenceKey, setSearchParams, columnsState]);
 };

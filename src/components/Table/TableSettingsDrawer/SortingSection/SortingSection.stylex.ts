@@ -12,6 +12,7 @@ export const styles = stylex.create({
     gap: spacing.md,
     display: 'flex',
     flexDirection: 'column',
+    height: '100%',
   },
   header: {
     margin: 0,
@@ -60,8 +61,13 @@ export const styles = stylex.create({
     display: 'flex',
     flexShrink: 0,
   },
+  sortOrderSection: {
+    gap: spacing.md,
+    display: 'flex',
+    flexDirection: 'column',
+  },
   resetSection: {
     marginTop: 'auto',
-    paddingTop: spacing.md,
+    paddingTop: spacing.sm,
   },
 });

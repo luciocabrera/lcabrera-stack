@@ -148,7 +148,7 @@ export const SortingSection = ({
         </Button>
       </div>
 
-      <div {...stylex.props(styles.container)}>
+      <div {...stylex.props(styles.sortOrderSection)}>
         <h3 {...stylex.props(styles.header)}>Sort Order</h3>
         {sortItems.length === 0 ? (
           <InfoBox>

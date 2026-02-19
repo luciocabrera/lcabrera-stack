@@ -1,4 +1,7 @@
-import type { TableColumn } from '@/components/Table/Table.types';
+import type {
+  FilterOptionsResponse,
+  TableColumn,
+} from '@/components/Table/Table.types';
 
 import { type EnterpriseOrder, enterpriseOrdersApi } from '@/services';
 
@@ -22,8 +25,9 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
       });
       return { hasMore: result.hasMore, values: result.values };
     },
-    filterOptionsDataSelector: (response: { values: string[]; hasMore: boolean }) => response.values,
-    filterOptionsDataTotalSelector: (response: { values: string[]; hasMore: boolean }) => 
+    filterOptionsDataSelector: (response: FilterOptionsResponse) =>
+      response.values,
+    filterOptionsDataTotalSelector: (response: FilterOptionsResponse) =>
       response.hasMore ? Infinity : response.values.length,
     key: 'order_number',
     label: 'Order #',
@@ -40,12 +44,14 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   {
     dataType: 'string',
     filterOptions: [
+      'Cancelled',
+      'Delivered',
+      'On Hold',
       'Pending',
       'Processing',
-      'Shipped',
-      'Delivered',
-      'Cancelled',
+      'Refunded',
       'Returned',
+      'Shipped',
     ],
     key: 'order_status',
     label: 'Status',
@@ -54,7 +60,7 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   },
   {
     dataType: 'string',
-    filterOptions: ['Low', 'Medium', 'High', 'Urgent'],
+    filterOptions: ['Critical', 'High', 'Low', 'Normal', 'Urgent'],
     key: 'priority',
     label: 'Priority',
     maxWidth: 130,
@@ -77,8 +83,9 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
       });
       return { hasMore: result.hasMore, values: result.values };
     },
-    filterOptionsDataSelector: (response: { values: string[]; hasMore: boolean }) => response.values,
-    filterOptionsDataTotalSelector: (response: { values: string[]; hasMore: boolean }) => 
+    filterOptionsDataSelector: (response: FilterOptionsResponse) =>
+      response.values,
+    filterOptionsDataTotalSelector: (response: FilterOptionsResponse) =>
       response.hasMore ? Infinity : response.values.length,
     key: 'customer_email',
     label: 'Email',
@@ -95,8 +102,9 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
       });
       return { hasMore: result.hasMore, values: result.values };
     },
-    filterOptionsDataSelector: (response: { values: string[]; hasMore: boolean }) => response.values,
-    filterOptionsDataTotalSelector: (response: { values: string[]; hasMore: boolean }) => 
+    filterOptionsDataSelector: (response: FilterOptionsResponse) =>
+      response.values,
+    filterOptionsDataTotalSelector: (response: FilterOptionsResponse) =>
       response.hasMore ? Infinity : response.values.length,
     key: 'customer_type',
     label: 'Customer Type',
@@ -154,7 +162,14 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   },
   {
     dataType: 'string',
-    filterOptions: ['Pending', 'Paid', 'Failed', 'Refunded'],
+    filterOptions: [
+      'Cancelled',
+      'Failed',
+      'Paid',
+      'Partially Paid',
+      'Pending',
+      'Refunded',
+    ],
     key: 'payment_status',
     label: 'Payment Status',
     maxWidth: 160,
@@ -163,11 +178,13 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   {
     dataType: 'string',
     filterOptions: [
-      'Credit Card',
-      'Debit Card',
-      'PayPal',
       'Bank Transfer',
       'Cash',
+      'Check',
+      'Credit Card',
+      'Cryptocurrency',
+      'Debit Card',
+      'PayPal',
     ],
     key: 'payment_method',
     label: 'Payment Method',
@@ -212,8 +229,9 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
       });
       return { hasMore: result.hasMore, values: result.values };
     },
-    filterOptionsDataSelector: (response: { values: string[]; hasMore: boolean }) => response.values,
-    filterOptionsDataTotalSelector: (response: { values: string[]; hasMore: boolean }) => 
+    filterOptionsDataSelector: (response: FilterOptionsResponse) =>
+      response.values,
+    filterOptionsDataTotalSelector: (response: FilterOptionsResponse) =>
       response.hasMore ? Infinity : response.values.length,
     key: 'shipping_city',
     label: 'Ship City',
@@ -230,8 +248,9 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
       });
       return { hasMore: result.hasMore, values: result.values };
     },
-    filterOptionsDataSelector: (response: { values: string[]; hasMore: boolean }) => response.values,
-    filterOptionsDataTotalSelector: (response: { values: string[]; hasMore: boolean }) => 
+    filterOptionsDataSelector: (response: FilterOptionsResponse) =>
+      response.values,
+    filterOptionsDataTotalSelector: (response: FilterOptionsResponse) =>
       response.hasMore ? Infinity : response.values.length,
     key: 'shipping_state',
     label: 'Ship State',
@@ -248,8 +267,9 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
       });
       return { hasMore: result.hasMore, values: result.values };
     },
-    filterOptionsDataSelector: (response: { values: string[]; hasMore: boolean }) => response.values,
-    filterOptionsDataTotalSelector: (response: { values: string[]; hasMore: boolean }) => 
+    filterOptionsDataSelector: (response: FilterOptionsResponse) =>
+      response.values,
+    filterOptionsDataTotalSelector: (response: FilterOptionsResponse) =>
       response.hasMore ? Infinity : response.values.length,
     key: 'shipping_country',
     label: 'Ship Country',
@@ -266,8 +286,9 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
       });
       return { hasMore: result.hasMore, values: result.values };
     },
-    filterOptionsDataSelector: (response: { values: string[]; hasMore: boolean }) => response.values,
-    filterOptionsDataTotalSelector: (response: { values: string[]; hasMore: boolean }) => 
+    filterOptionsDataSelector: (response: FilterOptionsResponse) =>
+      response.values,
+    filterOptionsDataTotalSelector: (response: FilterOptionsResponse) =>
       response.hasMore ? Infinity : response.values.length,
     key: 'carrier',
     label: 'Carrier',
@@ -284,8 +305,9 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
       });
       return { hasMore: result.hasMore, values: result.values };
     },
-    filterOptionsDataSelector: (response: { values: string[]; hasMore: boolean }) => response.values,
-    filterOptionsDataTotalSelector: (response: { values: string[]; hasMore: boolean }) => 
+    filterOptionsDataSelector: (response: FilterOptionsResponse) =>
+      response.values,
+    filterOptionsDataTotalSelector: (response: FilterOptionsResponse) =>
       response.hasMore ? Infinity : response.values.length,
     key: 'warehouse_location',
     label: 'Warehouse',

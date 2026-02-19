@@ -42,7 +42,12 @@ export type TableLayoutProps<
   persistenceKey: string;
   /** Active sorting from loader/URL state (optional) */
   sorting?: SortingState<TData>;
-
+  /**
+   * Key to reset only the Suspense boundary when data changes.
+   * Unlike React's `key` prop on the whole component, this only remounts
+   * the data-fetching boundary without destroying the table config store.
+   */
+  suspenseKey?: string;
   /** Table title (required) */
   title: string;
 };

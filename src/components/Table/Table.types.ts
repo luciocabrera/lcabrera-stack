@@ -71,16 +71,25 @@ export type SortingState<TData=Record<string, unknown>> = Sorting<TData>[];
  */
 export type StorageType = 'cookie' | 'localStorage';
 
+/**
+ * Response shape returned by fetchFilterOptions.
+ * Contains paginated distinct values for a column's filter dropdown.
+ */
+export type FilterOptionsResponse = {
+  hasMore: boolean;
+  values: string[];
+};
+
 export type TableColumn<TData> = {
   dataType?: TableColumnDataType;
   /** Async function to fetch filter options from server (for facet filters with pagination) */
-  fetchFilterOptions?: <TResponse>(
+  fetchFilterOptions?: (
     params: { limit: number; skip: number },
-  ) => Promise<TResponse>;
+  ) => Promise<FilterOptionsResponse>;
   /** Selector to extract options array from fetchFilterOptions response */
-  filterOptionsDataSelector?: <TResponse>(response: TResponse) => string[];
+  filterOptionsDataSelector?: (response: FilterOptionsResponse) => string[];
   /** Selector to extract total count from fetchFilterOptions response */
-  filterOptionsDataTotalSelector?: <TResponse>(response: TResponse) => number;
+  filterOptionsDataTotalSelector?: (response: FilterOptionsResponse) => number;
   /** Static options for select/multiSelect filters */
   filterOptions?: string[];
   /** Format options for the column based on data type */

@@ -478,6 +478,6 @@ app.get('/api/enterprise-orders/distinct/:columnName', async (request, res) => {
   }
 });
 
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
   console.log(`🚀 API server running at http://localhost:${port}`);
 });

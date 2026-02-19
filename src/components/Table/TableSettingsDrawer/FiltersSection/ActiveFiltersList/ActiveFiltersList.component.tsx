@@ -120,6 +120,9 @@ export const ActiveFiltersList = ({
                             columnKey,
                             filter: newFilter,
                           });
+                        } else {
+                          // undefined means "clear filter" (e.g. boolean "All" selection)
+                          handleRemoveFilter(columnKey);
                         }
                       }}
                     />

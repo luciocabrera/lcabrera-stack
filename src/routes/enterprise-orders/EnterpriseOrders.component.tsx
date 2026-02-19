@@ -30,7 +30,7 @@ export const EnterpriseOrders = () => {
       dataSelector={(response) => response.data}
       dataTotalSelector={(response) => response.total}
       filters={filters}
-      key={key}
+      suspenseKey={key}
       onLoadMore={async ({ limit, skip }) =>
         enterpriseOrdersApi.fetchEnterpriseOrdersPaginated({
           filter: filters,

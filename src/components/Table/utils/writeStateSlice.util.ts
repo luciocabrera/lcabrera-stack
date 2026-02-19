@@ -2,8 +2,7 @@ import { writeToCookie, writeToLocalStorage } from '@/utils/storage';
 
 import type { StorageType, TablePersistenceConfig } from '../Table.types';
 
-import { getStorageKey } from './getStorageKey.util';
-import { PERSISTENCE_VERSION } from './persistence.constants';
+import { serializeStateSlice } from './serializeStateSlice.util';
 
 type WriteStateSliceArgs = {
   headers?: Headers;
@@ -14,8 +13,10 @@ type WriteStateSliceArgs = {
 };
 
 /**
- * Write state slice to storage
+ * Write state slice to storage (client-side or SSR via headers)
  * Special handling for ColumnVisibilityState (Set → Array for JSON serialization)
+ *
+ * For server action persistence via useFetcher, use serializeStateSlice + usePersistCookieAction instead.
  */
 export const writeStateSlice = ({
   headers,
@@ -24,26 +25,15 @@ export const writeStateSlice = ({
   storageType,
   value,
 }: WriteStateSliceArgs): void => {
-  const sliceKey = `${getStorageKey({ persistenceKey })}-${slice}`;
-
-  console.log('writeStateSlice', {
-    sliceKey,
-    storageType,
+  const { key, value: serialized } = serializeStateSlice({
+    persistenceKey,
+    slice,
     value,
   });
 
-  // Convert Set to Array for columnVisibility
-  const serializableValue =
-    slice === 'columnVisibility' && value instanceof Set ? [...value] : value;
-
-  const serialized = JSON.stringify({
-    value: serializableValue,
-    version: PERSISTENCE_VERSION,
-  });
-
   if (storageType === 'cookie') {
-    writeToCookie({ headers, key: sliceKey, value: serialized });
+    writeToCookie({ headers, key, value: serialized });
   } else {
-    writeToLocalStorage({ key: sliceKey, value: serialized });
+    writeToLocalStorage({ key, value: serialized });
   }
 };

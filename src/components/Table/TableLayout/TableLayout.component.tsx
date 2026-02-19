@@ -26,6 +26,7 @@ export const TableLayout = <
   onLoadMore,
   persistenceKey,
   sorting,
+  suspenseKey,
   title,
 }: TableLayoutProps<TData, TResponse>) => {
   const columnsState = {
@@ -51,7 +52,10 @@ export const TableLayout = <
         columnsState={columnsState}
         metaState={metaState}
       >
-        <TableSuspenseBoundary<TData, TResponse> dataPromise={dataPromise}>
+        <TableSuspenseBoundary<TData, TResponse>
+          dataPromise={dataPromise}
+          key={suspenseKey}
+        >
           {(response) => (
             <Table<TData, TResponse>
               dataSelector={dataSelector}
