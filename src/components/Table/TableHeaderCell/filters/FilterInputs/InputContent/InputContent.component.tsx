@@ -16,14 +16,12 @@ import { TextFilterInput } from '../../TextFilterInput';
  * Renders the appropriate filter input based on column data type.
  */
 export const InputContent = <TData,>({
-dataType,
+  dataType,
   columnKey,
   filter,
   filterOptions,
-  // hasMore,
-  // isLoadingOptions,
+  listMaxHeight,
   onChange,
-  // onLoadMoreOptions,
   operator,
 }: InputContentProps<TData>) => {
   switch (dataType) {
@@ -68,8 +66,7 @@ dataType,
                 ? filter
                 : undefined
             }
-            // hasMore={hasMore}
-            // isLoadingMore={isLoadingOptions}
+            listMaxHeight={listMaxHeight}
             onChange={(selectFilter) => {
               if (selectFilter) {
                 onChange({
@@ -78,7 +75,6 @@ dataType,
                 });
               }
             }}
-            // onLoadMore={onLoadMoreOptions}
             options={filterOptions}
           />
         );

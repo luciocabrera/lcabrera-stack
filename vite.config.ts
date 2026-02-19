@@ -1,7 +1,3 @@
-/* eslint-disable unicorn/no-null */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable security/detect-non-literal-fs-filename */
 import { reactRouter } from '@react-router/dev/vite';
 import stylex from '@stylexjs/unplugin';
 import fs from 'node:fs';

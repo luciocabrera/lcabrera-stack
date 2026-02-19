@@ -17,6 +17,7 @@ const ITEM_HEIGHT = 32; // Height of each checkbox option in pixels
 export const SelectFilterInput = <TData,>({
   columnKey,
   filter,
+  listMaxHeight = '18.75rem',
   onChange,
   options,
 }: SelectFilterInputProps<TData>) => {
@@ -50,7 +51,7 @@ export const SelectFilterInput = <TData,>({
       ? filteredOptions.length + 1
       : filteredOptions.length;
 
-  const { bottomSpacerHeight, endIndex, offsetY, startIndex, totalHeight } =
+  const { endIndex, offsetY, startIndex, totalHeight } =
     useVirtualization({
       containerRef: scrollContainerRef,
       defaultContainerHeight: 300,
@@ -153,32 +154,33 @@ export const SelectFilterInput = <TData,>({
         ) : (
           <div
             ref={scrollContainerRef}
-            {...stylex.props(styles.virtualContainer(totalHeight))}
+            {...stylex.props(styles.virtualContainer(listMaxHeight))}
           >
-            <div {...stylex.props(styles.virtualOffset(offsetY))}>
-              {Array.from({ length: endIndex - startIndex }).map((_, i) => {
-                const index = startIndex + i;
+            <div {...stylex.props(styles.virtualScrollArea(totalHeight))}>
+              <div {...stylex.props(styles.virtualOffset(offsetY))}>
+                {Array.from({ length: endIndex - startIndex }).map((_, i) => {
+                  const index = startIndex + i;
 
-                return (
-                  <VirtualizedOption
-                    filteredOptions={filteredOptions}
-                    index={index}
-                    isAllSelected={isAllSelected}
-                    key={
-                      index === 0 && filteredOptions.length > 1
-                        ? 'select-all'
-                        : (filteredOptions[
-                            filteredOptions.length > 1 ? index - 1 : index
-                          ] ?? `option-${index}`)
-                    }
-                    onSelectAll={handleSelectAll}
-                    onToggle={handleToggle}
-                    selectedValues={selectedValues}
-                  />
-                );
-              })}
+                  return (
+                    <VirtualizedOption
+                      filteredOptions={filteredOptions}
+                      index={index}
+                      isAllSelected={isAllSelected}
+                      key={
+                        index === 0 && filteredOptions.length > 1
+                          ? 'select-all'
+                          : (filteredOptions[
+                              filteredOptions.length > 1 ? index - 1 : index
+                            ] ?? `option-${index}`)
+                      }
+                      onSelectAll={handleSelectAll}
+                      onToggle={handleToggle}
+                      selectedValues={selectedValues}
+                    />
+                  );
+                })}
+              </div>
             </div>
-            <div {...stylex.props(styles.virtualSpacer(bottomSpacerHeight))} />
           </div>
         )}
       </div>

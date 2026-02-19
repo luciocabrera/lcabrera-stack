@@ -85,17 +85,17 @@ export const styles = stylex.create({
     borderTopWidth: '1px',
     bottom: '0',
   },
-  virtualContainer: (height: number) => ({
+  virtualContainer: (maxHeight: string) => ({
     position: 'relative',
-    height,
-    maxHeight: '18.75rem', // 300px - matches defaultContainerHeight in SelectFilterInput
+    maxHeight,
     overflowX: 'hidden',
     overflowY: 'auto',
   }),
+  virtualScrollArea: (height: number) => ({
+    position: 'relative',
+    height,
+  }),
   virtualOffset: (offsetY: number) => ({
     transform: `translateY(${offsetY}px)`,
-  }),
-  virtualSpacer: (height: number) => ({
-    height,
   }),
 });

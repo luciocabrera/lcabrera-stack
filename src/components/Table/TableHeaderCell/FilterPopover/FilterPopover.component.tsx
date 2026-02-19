@@ -176,6 +176,7 @@ export const FilterPopover = <TData,>({
           <FilterInputs
             columnKey={columnKey}
             filter={localFilter}
+            listMaxHeight="10rem"
             onChange={setLocalFilter}
           />
         </div>

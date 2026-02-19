@@ -27,6 +27,7 @@ import { useGetNormalizedColumn } from '@/components/Table/TableContext/hooks/st
 export const FilterInputs = <TData,>({
   columnKey,
   filter,
+  listMaxHeight,
   onChange,
 }: FilterInputsProps<TData>) => {
   // === SELECTORS (subscribe to state) ===
@@ -117,6 +118,7 @@ export const FilterInputs = <TData,>({
         columnKey={columnKey}
         filter={filter}
         filterOptions={effectiveFilterOptions}
+        listMaxHeight={listMaxHeight}
         onChange={onChange}
         operator={operator}
       />

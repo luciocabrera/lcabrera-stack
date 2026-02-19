@@ -47,10 +47,8 @@ export const usePopoverPositioning = ({
     [recalculateDeps],
   );
 
-  // Calculate and apply positioning when popover opens
-  useEffect(() => {
-    if (!isOpen) return;
-
+  // Reusable positioning calculation
+  const applyPositioning = useCallback(() => {
     const popover = popoverRef.current;
     if (!popover) return;
 
@@ -104,7 +102,6 @@ export const usePopoverPositioning = ({
     // Apply positioning
     popover.style.left = `${adjustedLeft}px`;
     popover.style.maxHeight = `${maxHeight}px`;
-    popover.style.overflowY = 'auto';
 
     if (shouldUsePositionAbove) {
       popover.style.bottom = `${window.innerHeight - buttonRect.top + OFFSET}px`;
@@ -116,14 +113,28 @@ export const usePopoverPositioning = ({
 
     popover.style.margin = '0';
     popover.style.opacity = '1';
-  }, [
-    isOpen,
-    popoverId,
-    popoverRef,
-    columnDataType,
-    hasOptions,
-    recalculateDepsKey,
-  ]);
+  }, [columnDataType, hasOptions, popoverId, popoverRef]);
+
+  // Calculate and apply positioning when popover opens or content changes
+  useEffect(() => {
+    if (!isOpen) return;
+    applyPositioning();
+  }, [isOpen, applyPositioning, recalculateDepsKey]);
+
+  // Reposition on window resize while open
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleResize = () => {
+      applyPositioning();
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [isOpen, applyPositioning]);
 
   const resetPositioning = useCallback(() => {
     initialPositionRef.current = undefined;
