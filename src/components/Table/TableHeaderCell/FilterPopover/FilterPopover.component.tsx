@@ -16,7 +16,7 @@ import { useRenderTracker } from '@/utils/performance';
 
 import type { FilterPopoverProps, ToggleEvent } from './FilterPopover.types';
 
-import { FilterInputs } from '../filters/FilterInputs';
+import { FilterInputs } from '../../filters/FilterInputs';
 import { styles } from './FilterPopover.stylex';
 import { getOperatorFromFilter } from './utils';
 

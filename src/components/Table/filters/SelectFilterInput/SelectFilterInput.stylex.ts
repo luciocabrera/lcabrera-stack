@@ -28,8 +28,8 @@ export const styles = stylex.create({
   noResults: {
     alignItems: 'center',
     display: 'flex',
-    height: '100%',
     justifyContent: 'center',
+    height: '100%',
   },
   option: {
     padding: `${spacing.xs} ${spacing.sm}`,

@@ -1,4 +1,4 @@
-import { FilterInputs } from '@/components/Table/TableHeaderCell/filters/FilterInputs';
+import { FilterInputs } from '@/components/Table/filters/FilterInputs';
 
 import type { FilterSectionBodyProps } from './FilterSectionBody.types';
 
