@@ -1,40 +1,15 @@
-import { useEffect } from 'react';
-
-import { useGetNormalizedColumn } from '@/components/Table/contexts/TableConfig/columns/selectors';
-import { useFetchFilterData } from '@/components/Table/contexts/TableData/filters/actions';
 import { FilterInputs } from '@/components/Table/TableHeaderCell/filters/FilterInputs';
 
 import type { FilterSectionBodyProps } from './FilterSectionBody.types';
 
 /**
- * Wraps FilterInputs with fetch-on-mount behavior for the drawer.
- * Uses the same FilterInputs shared with FilterPopover — no extra wrapper.
+ * Thin wrapper around FilterInputs for the drawer.
+ * Data fetching is handled internally by SelectFilterInput.
  */
 export const FilterSectionBody = <TData,>({
   columnKey,
   filter,
   onChange,
-}: FilterSectionBodyProps<TData>) => {
-  const column = useGetNormalizedColumn<TData>(columnKey);
-  const fetchFilterData = useFetchFilterData<string, unknown>(columnKey);
-
-  useEffect(() => {
-    // Fetch filter data when component mounts if column has fetchFilterOptions
-    if (column.fetchFilterOptions) {
-      void fetchFilterData({
-        dataSelector: column.filterOptionsDataSelector,
-        dataTotalSelector: column.filterOptionsDataTotalSelector,
-        onLoadMore: column.fetchFilterOptions,
-      });
-    }
-  }, [
-    column.fetchFilterOptions,
-    column.filterOptionsDataSelector,
-    column.filterOptionsDataTotalSelector,
-    fetchFilterData,
-  ]);
-
-  return (
-    <FilterInputs columnKey={columnKey} filter={filter} onChange={onChange} />
-  );
-};
+}: FilterSectionBodyProps<TData>) => (
+  <FilterInputs columnKey={columnKey} filter={filter} onChange={onChange} />
+);

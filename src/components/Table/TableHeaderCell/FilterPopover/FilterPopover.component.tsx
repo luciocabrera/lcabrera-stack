@@ -1,8 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 import { useEffect, useRef, useState } from 'react';
 
-import type { FilterOptionsResponse } from '@/components/Table/Table.types';
-
 import { Button } from '@/components/Button';
 import { MenuCloseIcon } from '@/components/Icons';
 import {
@@ -13,8 +11,6 @@ import {
   useGetColumnFilters,
   useGetNormalizedColumn,
 } from '@/components/Table/contexts/TableConfig/columns/selectors';
-import { useFetchFilterData } from '@/components/Table/contexts/TableData/filters/actions';
-import { useGetFilterData } from '@/components/Table/contexts/TableData/filters/selectors';
 import { usePopoverPositioning } from '@/hooks/usePopoverPositioning.hook';
 import { useRenderTracker } from '@/utils/performance';
 
@@ -32,14 +28,12 @@ export const FilterPopover = <TData,>({
 
   const column = useGetNormalizedColumn<TData>(columnKey);
   const columnFilters = useGetColumnFilters();
-  const filterData = useGetFilterData<TData>(columnKey);
 
   const { dataType, fetchFilterOptions, filterOptions } = column;
   const filter = columnFilters[columnKey];
 
   const resetColumnFilter = useResetColumnFilter();
   const setColumnFilter = useSetColumnFilter();
-  const fetchFilterData = useFetchFilterData<string, FilterOptionsResponse>(columnKey);
 
   const popoverRef = useRef<HTMLDivElement>(null);
 
@@ -54,9 +48,8 @@ export const FilterPopover = <TData,>({
   const [localFilter, setLocalFilter] = useState(filter);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const hasOptions =
-    Boolean(filterOptions && filterOptions.length > 0) ||
-    Boolean(fetchFilterOptions);
+  // Determine if column supports options (from static config or async fetch)
+  const hasOptions = Boolean(filterOptions) || Boolean(fetchFilterOptions);
 
   // Determine if the select list is visible (needed for positioning recalculation)
   const currentOperator = getOperatorFromFilter(localFilter);
@@ -65,18 +58,14 @@ export const FilterPopover = <TData,>({
     hasOptions &&
     (currentOperator === 'equals' || currentOperator === 'notEquals');
 
-  // Use positioning hook - recalculate when filter data loads or content type changes
+  // Use positioning hook - recalculate when content type changes (operator switch)
   const { resetPositioning } = usePopoverPositioning({
     columnDataType: dataType,
     hasOptions,
     isOpen: isPopoverOpen,
     popoverId,
     popoverRef,
-    recalculateDeps: [
-      filterData.data.length,
-      filterData.isLoading,
-      isListShowing,
-    ],
+    recalculateDeps: [isListShowing],
   });
 
   // Handle popover toggle events
@@ -94,15 +83,6 @@ export const FilterPopover = <TData,>({
         setLocalFilter(filterRef.current);
         // Lock body scroll to prevent outer scrollbar
         document.body.style.overflow = 'hidden';
-
-        // Fetch filter options on open if needed (uses context store)
-        if (fetchFilterOptions) {
-          void fetchFilterData({
-            dataSelector: column.filterOptionsDataSelector,
-            dataTotalSelector: column.filterOptionsDataTotalSelector,
-            onLoadMore: fetchFilterOptions,
-          });
-        }
 
         // Focus first input when popover opens
         setTimeout(() => {
@@ -124,13 +104,7 @@ export const FilterPopover = <TData,>({
     return () => {
       popover.removeEventListener('toggle', handlePopoverToggle);
     };
-  }, [
-    column.filterOptionsDataSelector,
-    column.filterOptionsDataTotalSelector,
-    fetchFilterData,
-    fetchFilterOptions,
-    resetPositioning,
-  ]);
+  }, [resetPositioning]);
 
   const handleClear = () => {
     setLocalFilter(undefined);

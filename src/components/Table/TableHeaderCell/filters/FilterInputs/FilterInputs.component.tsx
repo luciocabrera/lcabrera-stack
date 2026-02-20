@@ -10,7 +10,6 @@ import type {
 } from '@/types/filterOperators.types';
 
 import { useGetNormalizedColumn } from '@/components/Table/contexts/TableConfig/columns/selectors/useGetNormalizedColumn.hook';
-import { useGetFilterData } from '@/components/Table/contexts/TableData/filters/selectors';
 
 import type { FilterInputsProps } from './FilterInputs.types';
 
@@ -34,17 +33,10 @@ export const FilterInputs = <TData,>({
 }: FilterInputsProps<TData>) => {
   // === SELECTORS (subscribe to state) ===
   const column = useGetNormalizedColumn<TData>(columnKey);
-  const filterData = useGetFilterData<TData>(columnKey);
 
-  // Determine effective filter options
-  const effectiveFilterOptions = useMemo(() => {
-    // Use context data if available (fetched async)
-    if (filterData.data.length > 0) {
-      return filterData.data;
-    }
-    // Fallback to static options from column config
-    return column.filterOptions ?? [];
-  }, [filterData.data, column.filterOptions]);
+  // Static filter options from column config
+  // Async-fetched options are handled internally by SelectFilterInput
+  const staticFilterOptions = column.filterOptions ?? [];
 
   // Derive operator directly from filter prop - always in sync with parent state
   const operator = useMemo<OperatorType>(
@@ -119,7 +111,8 @@ export const FilterInputs = <TData,>({
         columnKey={columnKey}
         dataType={column.dataType}
         filter={filter}
-        filterOptions={effectiveFilterOptions}
+        filterOptions={staticFilterOptions}
+        hasFetchableOptions={Boolean(column.fetchFilterOptions)}
         listMaxHeight={listMaxHeight}
         onChange={onChange}
         operator={operator}

@@ -10,12 +10,12 @@ export type InputContentProps<TData> = {
   filter?: ColumnFilter;
   /** Static or fetched filter options for select/multiselect */
   filterOptions?: string[];
-  /** Whether there are more options to load */
-  /** Max height for the virtual options list (CSS value, e.g. '12rem') */
+  /** Whether the column has an async fetcher for filter options */
+  hasFetchableOptions: boolean;
+  /** Height for the virtual options list (CSS value, e.g. '12rem') */
   listMaxHeight?: string;
   /** Callback when filter changes */
   onChange: (filter?: ColumnFilter) => void;
-  /** Callback to load more options (for infinite scroll) */
 
   operator: OperatorType;
 };

@@ -86,9 +86,9 @@ export const styles = stylex.create({
     borderTopWidth: '1px',
     bottom: '0',
   },
-  virtualContainer: (maxHeight: string) => ({
+  virtualContainer: (height: string) => ({
     position: 'relative',
-    maxHeight,
+    height,
     overflowX: 'hidden',
     overflowY: 'auto',
   }),

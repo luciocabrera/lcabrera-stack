@@ -1,8 +1,13 @@
 import * as stylex from '@stylexjs/stylex';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import type { FilterOptionsResponse } from '@/components/Table/Table.types';
+
 import { useGetNormalizedColumn } from '@/components/Table/contexts/TableConfig/columns/selectors';
-import { useFetchMoreFilterData } from '@/components/Table/contexts/TableData/filters/actions';
+import {
+  useFetchFilterData,
+  useFetchMoreFilterData,
+} from '@/components/Table/contexts/TableData/filters/actions';
 import { useGetFilterData } from '@/components/Table/contexts/TableData/filters/selectors';
 import { useVirtualization } from '@/hooks';
 
@@ -24,7 +29,10 @@ export const SelectFilterInput = <TData,>({
   const column = useGetNormalizedColumn<TData>(columnKey);
   const filterData = useGetFilterData<TData>(columnKey);
 
-  const fetchMoreFilterData = useFetchMoreFilterData<string, unknown>(
+  const fetchFilterData = useFetchFilterData<string, FilterOptionsResponse>(
+    columnKey,
+  );
+  const fetchMoreFilterData = useFetchMoreFilterData<string, FilterOptionsResponse>(
     columnKey,
   );
 
@@ -38,12 +46,20 @@ export const SelectFilterInput = <TData,>({
   // Derive selectedValues from filter prop - fully controlled by parent
   const selectedValues = filter?.values ?? [];
 
+  // Use store data (async-fetched) with fallback to static options prop
+  const effectiveOptions = useMemo(() => {
+    if (filterData.data.length > 0) {
+      return filterData.data;
+    }
+    return options;
+  }, [filterData.data, options]);
+
   const filteredOptions = useMemo(() => {
-    if (!searchTerm) return options;
-    return options.filter((option) =>
+    if (!searchTerm) return effectiveOptions;
+    return effectiveOptions.filter((option) =>
       option.toLowerCase().includes(searchTerm.toLowerCase()),
     );
-  }, [options, searchTerm]);
+  }, [effectiveOptions, searchTerm]);
 
   // Add 1 to total items for "Select All" checkbox if showing it
   const totalItems =
@@ -117,6 +133,22 @@ export const SelectFilterInput = <TData,>({
     }
   }, [handleLoadMoreOptions, hasMore, isLoadingMore]);
 
+  // Fetch initial filter data on mount if column supports async filter options
+  useEffect(() => {
+    if (column.fetchFilterOptions) {
+      void fetchFilterData({
+        dataSelector: column.filterOptionsDataSelector,
+        dataTotalSelector: column.filterOptionsDataTotalSelector,
+        onLoadMore: column.fetchFilterOptions,
+      });
+    }
+  }, [
+    column.fetchFilterOptions,
+    column.filterOptionsDataSelector,
+    column.filterOptionsDataTotalSelector,
+    fetchFilterData,
+  ]);
+
   // Attach scroll listener
   useEffect(() => {
     const container = scrollContainerRef.current;
@@ -148,13 +180,13 @@ export const SelectFilterInput = <TData,>({
         {...stylex.props(styles.searchInput)}
       />
       <div {...stylex.props(styles.optionsList)}>
-        {filteredOptions.length === 0 ? (
-          <div {...stylex.props(styles.noResults)}>No options found</div>
-        ) : (
-          <div
-            ref={scrollContainerRef}
-            {...stylex.props(styles.virtualContainer(listMaxHeight))}
-          >
+        <div
+          ref={scrollContainerRef}
+          {...stylex.props(styles.virtualContainer(listMaxHeight))}
+        >
+          {filteredOptions.length === 0 ? (
+            <div {...stylex.props(styles.noResults)}>No options found</div>
+          ) : (
             <div {...stylex.props(styles.virtualScrollArea(totalHeight))}>
               <div {...stylex.props(styles.virtualOffset(offsetY))}>
                 {Array.from({ length: endIndex - startIndex }).map((_, i) => {
@@ -180,8 +212,8 @@ export const SelectFilterInput = <TData,>({
                 })}
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
