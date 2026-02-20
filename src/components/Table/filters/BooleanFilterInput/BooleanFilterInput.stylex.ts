@@ -1,15 +1,5 @@
-import * as stylex from '@stylexjs/stylex';
-
-import { spacing } from '@/design-system/tokens/base.stylex';
-
-const baseStyles = stylex.create({
-  container: {
-    gap: spacing.sm,
-    display: 'flex',
-    flexDirection: 'column',
-  },
-});
+import { filterBaseStyles } from '@/design-system/tokens/filters.stylex';
 
 export const styles = {
-  container: baseStyles.container,
+  container: filterBaseStyles.container,
 };

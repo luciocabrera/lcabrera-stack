@@ -2,17 +2,13 @@ import * as stylex from '@stylexjs/stylex';
 
 import { spacing, typography } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
+import { filterBaseStyles } from '@/design-system/tokens/filters.stylex';
 
-export const styles = stylex.create({
+const localStyles = stylex.create({
   checkbox: {
     cursor: 'pointer',
     height: '1rem',
     width: '1rem',
-  },
-  container: {
-    gap: spacing.sm,
-    display: 'flex',
-    flexDirection: 'column',
   },
   label: {
     flex: '1', // Take remaining space after checkbox
@@ -24,6 +20,18 @@ export const styles = stylex.create({
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
     minWidth: 0, // Allow shrinking below content size
+  },
+  loadingMore: {
+    padding: spacing.sm,
+    backgroundColor: colors.surfacePrimary,
+    color: colors.textSecondary,
+    fontSize: typography.fontSizeSm,
+    position: 'sticky',
+    textAlign: 'center',
+    borderTopColor: colors.borderPrimary,
+    borderTopStyle: 'solid',
+    borderTopWidth: '1px',
+    bottom: '0',
   },
   noResults: {
     alignItems: 'center',
@@ -55,48 +63,31 @@ export const styles = stylex.create({
     flexDirection: 'column',
     position: 'relative',
   },
-  searchInput: {
-    padding: `${spacing.xs} ${spacing.sm}`,
-    borderColor: {
-      default: colors.borderPrimary,
-      ':focus-visible': colors.borderFocus,
-      ':focus': colors.borderFocus,
-    },
-    borderRadius: '0.25rem',
-    borderStyle: 'solid',
-    borderWidth: '1px',
-    outline: 'none !important',
-    transition: 'border-color 0.15s ease',
-    backgroundColor: colors.surfacePrimary,
-    boxShadow: 'none !important',
-    color: colors.textPrimary,
-    fontSize: typography.fontSizeSm,
-     
-    outlineOffset: null,
-  },
-  loadingMore: {
-    padding: spacing.sm,
-    backgroundColor: colors.surfacePrimary,
-    color: colors.textSecondary,
-    fontSize: typography.fontSizeSm,
-    position: 'sticky',
-    textAlign: 'center',
-    borderTopColor: colors.borderPrimary,
-    borderTopStyle: 'solid',
-    borderTopWidth: '1px',
-    bottom: '0',
-  },
   virtualContainer: (height: string) => ({
     position: 'relative',
     height,
     overflowX: 'hidden',
     overflowY: 'auto',
   }),
+  virtualOffset: (offsetY: number) => ({
+    transform: `translateY(${offsetY}px)`,
+  }),
   virtualScrollArea: (height: number) => ({
     position: 'relative',
     height,
   }),
-  virtualOffset: (offsetY: number) => ({
-    transform: `translateY(${offsetY}px)`,
-  }),
 });
+
+export const styles = {
+  checkbox: localStyles.checkbox,
+  container: filterBaseStyles.container,
+  label: localStyles.label,
+  loadingMore: localStyles.loadingMore,
+  noResults: localStyles.noResults,
+  option: localStyles.option,
+  optionsList: localStyles.optionsList,
+  searchInput: filterBaseStyles.input,
+  virtualContainer: localStyles.virtualContainer,
+  virtualOffset: localStyles.virtualOffset,
+  virtualScrollArea: localStyles.virtualScrollArea,
+};
