@@ -1,11 +1,40 @@
 import * as stylex from '@stylexjs/stylex';
-import { Suspense, use, useState } from 'react';
+import { useState } from 'react';
 
 import type { TableColumn } from './components/Table/Table.types';
 
 import { styles } from './App.stylex';
 import { Button } from './components/Button';
-import { Table } from './components/Table';
+import {
+  Card,
+  CardBody,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from './components/Card';
+import {
+  ErrorIcon,
+  InfoIcon,
+  MenuCloseIcon,
+  MenuIcon,
+  SettingsIcon,
+  SuccessIcon,
+  WarningIcon,
+} from './components/Icons';
+import {
+  SidePanel,
+  SidePanelBody,
+  SidePanelFooter,
+  SidePanelHeader,
+  SidePanelTitle,
+} from './components/SidePanel';
+import { TableLayout } from './components/Table/TableLayout';
+import {
+  HorizontalToolbarExample,
+  HorizontalToolbarExampleShort,
+} from './components/Toolbar/Toolbar.examples';
+import { useTheme } from './hooks/useTheme.hook';
 
 function mulberry32(seed: number) {
   let value = seed;
@@ -20,23 +49,24 @@ function mulberry32(seed: number) {
 
 const rng = mulberry32(123_456_789);
 
+type MockResponse = {
+  data: MockRow[];
+  total: number;
+};
+
+type MockRow = Record<string, boolean | number | string>;
+
 // Generate mock data for the table
-const columnDefs: TableColumn[] = [...Array.from({ length: 20 }).keys()].map(
-  (i) => ({
-    dataType:
-      i % 5 === 0
-        ? 'number'
-        : i % 5 === 1
-          ? 'string'
-          : i % 5 === 2
-            ? 'boolean'
-            : i % 5 === 3
-              ? 'date'
-              : 'currency',
-    key: `col${i + 1}`,
-    label: `Column ${i + 1}`,
-  }),
-);
+const COLUMNS: TableColumn<MockRow>[] = [
+  ...Array.from({ length: 20 }).keys(),
+].map((i) => ({
+  dataType: (
+    ['number', 'string', 'boolean', 'date', 'currency'] as const
+  )[i % 5],
+  key: `col${i + 1}`,
+  label: `Column ${i + 1}`,
+  minWidth: 120,
+}));
 
 function randomCurrency() {
   return (rng() * 10_000).toFixed(2);
@@ -58,9 +88,11 @@ function randomString(length: number) {
   ).join('');
 }
 
-const tableData = [...Array.from({ length: 10_000 }).keys()].map((rowIdx) => {
-  const row: Record<string, unknown> = {};
-  for (const [colIdx, col] of columnDefs.entries()) {
+const tableData: MockRow[] = [
+  ...Array.from({ length: 10_000 }).keys(),
+].map((rowIdx) => {
+  const row: MockRow = {};
+  for (const [colIdx, col] of COLUMNS.entries()) {
     switch (col.dataType) {
       case 'boolean': {
         row[col.key] = rng() > 0.5;
@@ -96,122 +128,21 @@ const tableData = [...Array.from({ length: 10_000 }).keys()].map((rowIdx) => {
  */
 const FAKE_API_DELAY_MS = 2000;
 
+const PERSISTENCE_KEY = 'app-showcase-table';
+
 /**
  * Simulate fetching table data from an API
  */
-const fetchTableData = (): Promise<Record<string, unknown>[]> =>
+const fetchTableData = (): Promise<MockResponse> =>
   new Promise((resolve) => {
     setTimeout(() => {
-      resolve(tableData);
+      resolve({ data: tableData, total: tableData.length });
     }, FAKE_API_DELAY_MS);
   });
 
-/**
- * Table section that loads data asynchronously
- * Uses React 19's use() hook for Suspense integration
- */
-type AsyncTableSectionProps = {
-  dataPromise: Promise<Record<string, unknown>[]>;
-};
-
-const AsyncTableSection = ({ dataPromise }: AsyncTableSectionProps) => {
-  const data = use(dataPromise);
-
-  return (
-    <Table
-      actions={
-        <>
-          <Button color='outline' size='sm'>
-            Export
-          </Button>
-          <Button color='primary' size='sm'>
-            Add Row
-          </Button>
-        </>
-      }
-      columns={columnDefs.map((col) => ({
-        key: col.key,
-        label: col.label,
-        minWidth: 120,
-      }))}
-      data={data}
-      icon={<span>📊</span>}
-      isFlexWrapperEnabled={false}
-      overscan={6}
-      rowHeight={32}
-      title='Data Table'
-    />
-  );
-};
-
-/**
- * Loading fallback for the table
- */
-const TableLoadingFallback = () => (
-  <div
-    style={{
-      alignItems: 'center',
-      display: 'flex',
-      height: '100%',
-      justifyContent: 'center',
-      width: '100%',
-    }}
-  >
-    <div style={{ textAlign: 'center' }}>
-      <div
-        style={{
-          animation: 'spin 1s linear infinite',
-          border: '3px solid #e5e7eb',
-          borderRadius: '50%',
-          borderTopColor: '#3b82f6',
-          height: 40,
-          margin: '0 auto 16px',
-          width: 40,
-        }}
-      />
-      <p style={{ color: '#6b7280', margin: 0 }}>Loading table data...</p>
-      <style>{`
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
-    </div>
-  </div>
-);
-
-import {
-  Card,
-  CardBody,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from './components/Card';
-import {
-  ErrorIcon,
-  InfoIcon,
-  MenuCloseIcon,
-  MenuIcon,
-  SettingsIcon,
-  SuccessIcon,
-  WarningIcon,
-} from './components/Icons';
-import {
-  SidePanel,
-  SidePanelBody,
-  SidePanelFooter,
-  SidePanelHeader,
-  SidePanelTitle,
-} from './components/SidePanel';
-import {
-  HorizontalToolbarExample,
-  HorizontalToolbarExampleShort,
-} from './components/Toolbar/Toolbar.examples';
-import { useTheme } from './hooks/useTheme.hook';
-
 // Create the promise once, outside the component to avoid refetching on re-renders
 // In a real app, you'd use React Query, SWR, or similar
-let tableDataPromise: Promise<Record<string, unknown>[]> | undefined;
+let tableDataPromise: Promise<MockResponse> | undefined;
 
 const getTableDataPromise = () => {
   tableDataPromise ??= fetchTableData();
@@ -379,10 +310,15 @@ const App = () => {
                 maxWidth: '100%',
               }}
             >
-              {/* Virtualized Table Component with Suspense */}
-              <Suspense fallback={<TableLoadingFallback />} key={tableKey}>
-                <AsyncTableSection dataPromise={getTableDataPromise()} />
-              </Suspense>
+              <TableLayout<MockRow, MockResponse>
+                columns={COLUMNS}
+                dataPromise={getTableDataPromise()}
+                dataSelector={(response) => response.data}
+                dataTotalSelector={(response) => response.total}
+                persistenceKey={PERSISTENCE_KEY}
+                suspenseKey={String(tableKey)}
+                title='Data Table'
+              />
             </div>
           </section>
 
