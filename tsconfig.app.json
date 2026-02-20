@@ -39,5 +39,8 @@
     "**/.server/**/*",
     "**/.client/**/*",
     ".react-router/types/**/*"
+  ],
+  "exclude": [
+    "utils"
   ]
 }

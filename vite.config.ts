@@ -1,54 +1,11 @@
 import { reactRouter } from '@react-router/dev/vite';
 import stylex from '@stylexjs/unplugin';
-import fs from 'node:fs';
-import path from 'node:path';
 import { fileURLToPath, URL } from 'node:url';
-import { defineConfig, type Plugin } from 'vite';
+import { defineConfig } from 'vite';
 import babel from 'vite-plugin-babel';
-// Workaround plugin to fix React Router's stale asset references
-function fixReactRouterAssets(): Plugin {
-  return {
-    enforce: 'post',
-    name: 'fix-react-router-assets',
-    writeBundle() {
-      // Read the server manifest to check for stale references
-      const serverManifestPath = path.join(
-        process.cwd(),
-        'build/server/.vite/manifest.json',
-      );
 
-      if (fs.existsSync(serverManifestPath)) {
-        const manifest = JSON.parse(
-          fs.readFileSync(serverManifestPath, 'utf8'),
-        );
-        const serverBuild = manifest['virtual:react-router/server-build'];
+import { fixReactRouterAssets } from './utils/fixReactRouterAssets.plugin';
 
-        if (serverBuild?.assets) {
-          // Get actual generated CSS files
-          const serverAssetsDir = path.join(
-            process.cwd(),
-            'build/server/assets',
-          );
-          const actualFiles = fs.existsSync(serverAssetsDir)
-            ? fs.readdirSync(serverAssetsDir)
-            : [];
-          const actualStylexCss = actualFiles.find((f) =>
-            f.startsWith('stylex-'),
-          );
-
-          // Update the manifest with correct asset reference
-          if (actualStylexCss) {
-            serverBuild.assets = [`assets/${actualStylexCss}`];
-            fs.writeFileSync(
-              serverManifestPath,
-              JSON.stringify(manifest, null, 2),
-            );
-          }
-        }
-      }
-    },
-  };
-}
 export default defineConfig({
   plugins: [
     stylex.vite({

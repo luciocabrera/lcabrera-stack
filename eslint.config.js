@@ -412,6 +412,7 @@ export default defineConfig(
     'eslint-local-rules/',
     'guidelines/playwright_config.ts',
     'scripts/',
+    'utils/',
   ]),
 
   // 14. ESLint config file override - Allow null for format: null patterns
