@@ -19,7 +19,6 @@ export const InputContent = <TData,>({
   columnKey,
   dataType,
   filter,
-  filterOptions,
   hasFetchableOptions,
   listMaxHeight,
   onChange,
@@ -48,16 +47,13 @@ export const InputContent = <TData,>({
         />
       );
     }
-
     default: {
       // String columns
-      const hasOptions =
-        !!(hasFetchableOptions ?? (filterOptions && filterOptions.length > 0));
       const textOp = operator as TextOperatorType;
 
       // Show SelectFilterInput when column supports options AND operator is equals/notEquals
       const shouldShowSelectList =
-        hasOptions && (textOp === 'equals' || textOp === 'notEquals');
+        hasFetchableOptions && (textOp === 'equals' || textOp === 'notEquals');
 
       if (shouldShowSelectList) {
         return (
@@ -77,7 +73,6 @@ export const InputContent = <TData,>({
                 });
               }
             }}
-            options={filterOptions}
           />
         );
       }

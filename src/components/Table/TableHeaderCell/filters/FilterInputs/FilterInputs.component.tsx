@@ -34,10 +34,6 @@ export const FilterInputs = <TData,>({
   // === SELECTORS (subscribe to state) ===
   const column = useGetNormalizedColumn<TData>(columnKey);
 
-  // Static filter options from column config
-  // Async-fetched options are handled internally by SelectFilterInput
-  const staticFilterOptions = column.filterOptions ?? [];
-
   // Derive operator directly from filter prop - always in sync with parent state
   const operator = useMemo<OperatorType>(
     () => getOperatorFromFilter({ dataType: column.dataType, filter }),
@@ -111,7 +107,6 @@ export const FilterInputs = <TData,>({
         columnKey={columnKey}
         dataType={column.dataType}
         filter={filter}
-        filterOptions={staticFilterOptions}
         hasFetchableOptions={Boolean(column.fetchFilterOptions)}
         listMaxHeight={listMaxHeight}
         onChange={onChange}

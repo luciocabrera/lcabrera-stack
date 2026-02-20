@@ -61,12 +61,10 @@ export const AddFilterSection = ({
         break;
       }
       default: {
-        // Check if column has filter options (static or fetchable)
+        // Check if column has fetchable filter options
         // Use text filter with 'equals' operator for columns with options
         // so the select list shows up immediately
-        const hasOptions =
-          Boolean(column.filterOptions && column.filterOptions.length > 0) ||
-          Boolean(column.fetchFilterOptions);
+        const hasOptions = Boolean(column.fetchFilterOptions);
         initialFilter = hasOptions
           ? { operator: 'equals' as const, type: 'text' as const, value: '' }
           : { operator: 'equals' as const, type: 'text' as const, value: '' };

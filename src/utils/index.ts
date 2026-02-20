@@ -1,3 +1,4 @@
+export * from './createStaticFilterOptions.util';
 export * from './formatters';
 export * from './performance';
 export * from './shallowEqual.util';

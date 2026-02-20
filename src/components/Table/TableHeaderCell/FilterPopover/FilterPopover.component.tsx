@@ -8,8 +8,8 @@ import {
   useSetColumnFilter,
 } from '@/components/Table/contexts/TableConfig/columns/actions';
 import {
-  useGetColumnFilters,
   useGetNormalizedColumn,
+  useGetNormalizedColumnFilters,
 } from '@/components/Table/contexts/TableConfig/columns/selectors';
 import { usePopoverPositioning } from '@/hooks/usePopoverPositioning.hook';
 import { useRenderTracker } from '@/utils/performance';
@@ -27,10 +27,9 @@ export const FilterPopover = <TData,>({
   useRenderTracker({ componentName: `FilterPopover:${columnKey}` });
 
   const column = useGetNormalizedColumn<TData>(columnKey);
-  const columnFilters = useGetColumnFilters();
+  const filter = useGetNormalizedColumnFilters<TData>(columnKey);
 
-  const { dataType, fetchFilterOptions, filterOptions } = column;
-  const filter = columnFilters[columnKey];
+  const { dataType, fetchFilterOptions } = column;
 
   const resetColumnFilter = useResetColumnFilter();
   const setColumnFilter = useSetColumnFilter();
@@ -45,11 +44,13 @@ export const FilterPopover = <TData,>({
 
   // Local state to track the current filter value before applying
   // Reset imperatively on popover open, not via effect
-  const [localFilter, setLocalFilter] = useState(filter);
+  const [localFilter, setLocalFilter] = useState<typeof filter | undefined>(
+    filter,
+  );
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  // Determine if column supports options (from static config or async fetch)
-  const hasOptions = Boolean(filterOptions) || Boolean(fetchFilterOptions);
+  // Determine if column supports options (async fetch)
+  const hasOptions = Boolean(fetchFilterOptions);
 
   // Determine if the select list is visible (needed for positioning recalculation)
   const currentOperator = getOperatorFromFilter(localFilter);

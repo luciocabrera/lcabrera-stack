@@ -99,8 +99,6 @@ export type TableColumn<TData> = {
     limit: number;
     skip: number;
   }) => Promise<FilterOptionsResponse>;
-  /** Static options for select/multiSelect filters */
-  filterOptions?: string[];
   /** Selector to extract options array from fetchFilterOptions response */
   filterOptionsDataSelector?: (response: FilterOptionsResponse) => string[];
   /** Selector to extract total count from fetchFilterOptions response */

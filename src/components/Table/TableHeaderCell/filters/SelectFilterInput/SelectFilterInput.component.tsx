@@ -25,7 +25,6 @@ export const SelectFilterInput = <TData,>({
   filter,
   listMaxHeight = '18.75rem',
   onChange,
-  options,
 }: SelectFilterInputProps<TData>) => {
   const column = useGetNormalizedColumn<TData>(columnKey);
   const filterData = useGetFilterData<TData>(columnKey);
@@ -47,13 +46,8 @@ export const SelectFilterInput = <TData,>({
   // Derive selectedValues from filter prop - fully controlled by parent
   const selectedValues = filter?.values ?? [];
 
-  // Use store data (async-fetched) with fallback to static options prop
-  const effectiveOptions = useMemo(() => {
-    if (filterData.data.length > 0) {
-      return filterData.data;
-    }
-    return options;
-  }, [filterData.data, options]);
+  // Options from store (populated by fetchFilterData / fetchMoreFilterData)
+  const effectiveOptions = filterData.data;
 
   const filteredOptions = useMemo(() => {
     if (!searchTerm) return effectiveOptions;

@@ -4,6 +4,7 @@ import type {
 } from '@/components/Table/Table.types';
 
 import { type EnterpriseOrder, enterpriseOrdersApi } from '@/services';
+import { createStaticFilterOptions } from '@/utils/createStaticFilterOptions.util';
 
 export const PERSISTENCE_KEY = 'enterprise-orders-table';
 
@@ -43,7 +44,7 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   },
   {
     dataType: 'string',
-    filterOptions: [
+    ...createStaticFilterOptions<EnterpriseOrder>([
       'Cancelled',
       'Delivered',
       'On Hold',
@@ -52,7 +53,7 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
       'Refunded',
       'Returned',
       'Shipped',
-    ],
+    ]),
     key: 'order_status',
     label: 'Status',
     maxWidth: 150,
@@ -60,7 +61,7 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   },
   {
     dataType: 'string',
-    filterOptions: ['Critical', 'High', 'Low', 'Normal', 'Urgent'],
+    ...createStaticFilterOptions<EnterpriseOrder>(['Critical', 'High', 'Low', 'Normal', 'Urgent']),
     key: 'priority',
     label: 'Priority',
     maxWidth: 130,
@@ -162,14 +163,14 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   },
   {
     dataType: 'string',
-    filterOptions: [
+    ...createStaticFilterOptions<EnterpriseOrder>([
       'Cancelled',
       'Failed',
       'Paid',
       'Partially Paid',
       'Pending',
       'Refunded',
-    ],
+    ]),
     key: 'payment_status',
     label: 'Payment Status',
     maxWidth: 160,
@@ -177,7 +178,7 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   },
   {
     dataType: 'string',
-    filterOptions: [
+    ...createStaticFilterOptions<EnterpriseOrder>([
       'Bank Transfer',
       'Cash',
       'Check',
@@ -185,7 +186,7 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
       'Cryptocurrency',
       'Debit Card',
       'PayPal',
-    ],
+    ]),
     key: 'payment_method',
     label: 'Payment Method',
     maxWidth: 180,

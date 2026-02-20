@@ -8,8 +8,6 @@ export type InputContentProps<TData> = {
   dataType: TableColumn<TData>['dataType'];
   /** Current filter value */
   filter?: ColumnFilter;
-  /** Static or fetched filter options for select/multiselect */
-  filterOptions?: string[];
   /** Whether the column has an async fetcher for filter options */
   hasFetchableOptions: boolean;
   /** Height for the virtual options list (CSS value, e.g. '12rem') */
