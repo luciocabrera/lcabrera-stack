@@ -21,5 +21,5 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const headers = new Headers();
   headers.append('Set-Cookie', buildCookieString({ key, value }));
 
-  return new Response(null, { headers, status: 204 });
+  return new Response(undefined, { headers, status: 204 });
 };

@@ -23,7 +23,7 @@ export const usePersistCookieAction = () => {
 
   return useCallback(
     ({ key, value }: PersistCookieArgs) => {
-      fetcher.submit(
+      void fetcher.submit(
         { key, value },
         { action: PERSIST_COOKIE_ACTION, method: 'POST' },
       );

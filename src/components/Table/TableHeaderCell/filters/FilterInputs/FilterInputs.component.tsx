@@ -39,12 +39,12 @@ export const FilterInputs = <TData,>({
   // Determine effective filter options
   const effectiveFilterOptions = useMemo(() => {
     // Use context data if available (fetched async)
-    if (filterData?.data && filterData.data.length > 0) {
+    if (filterData.data.length > 0) {
       return filterData.data;
     }
     // Fallback to static options from column config
     return column.filterOptions ?? [];
-  }, [filterData?.data, column.filterOptions]);
+  }, [filterData.data, column.filterOptions]);
 
   // Derive operator directly from filter prop - always in sync with parent state
   const operator = useMemo<OperatorType>(

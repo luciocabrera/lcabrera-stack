@@ -26,7 +26,7 @@ export const styles = stylex.create({
     boxShadow: 'none !important',
     color: colors.textPrimary,
     fontSize: typography.fontSizeSm,
-    outlineOffset: '0 !important',
+    outlineOffset: '0px',
     minWidth: 0,
   },
   inputGroup: {

@@ -413,6 +413,7 @@ export default defineConfig(
     'guidelines/playwright_config.ts',
     'scripts/',
     'utils/',
+    'src/utils/performance/renderTracker.util.ts',
   ]),
 
   // 14. ESLint config file override - Allow null for format: null patterns

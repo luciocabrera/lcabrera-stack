@@ -17,7 +17,7 @@ export const Tabs = ({ defaultSelectedTab, tabs, ...props }: TabsProps) => {
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (tabs.length === 0) return;
 
-    let newIndex = activeIndex;
+    let newIndex: number;
 
     switch (event.key) {
       case 'ArrowLeft': {

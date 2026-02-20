@@ -23,7 +23,7 @@ export const useSetColumnSizing = <TData>() => {
       const current = (columnsStore.get()?.columnSizing ??
         {}) as ColumnSizingState<TData>;
 
-      let columnSizing = {} as ColumnSizingState<TData>;
+      let columnSizing: ColumnSizingState<TData>;
       if (width === undefined) {
         // Remove the key by creating new object without it
         const { [columnKey]: unusedColumn, ...rest } = current;
