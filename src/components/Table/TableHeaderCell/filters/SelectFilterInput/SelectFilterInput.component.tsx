@@ -105,7 +105,7 @@ export const SelectFilterInput = <TData,>({
   // Handle scroll for infinite loading
   const handleScroll = useCallback(() => {
     const container = scrollContainerRef.current;
-    if (!container || !handleLoadMoreOptions || !hasMore || isLoadingMore) {
+    if (!container || !hasMore || isLoadingMore) {
       return;
     }
 

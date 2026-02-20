@@ -1,6 +1,8 @@
 import * as stylex from '@stylexjs/stylex';
 import { useEffect, useRef, useState } from 'react';
 
+import type { FilterOptionsResponse } from '@/components/Table/Table.types';
+
 import { Button } from '@/components/Button';
 import { MenuCloseIcon } from '@/components/Icons';
 import {
@@ -37,7 +39,7 @@ export const FilterPopover = <TData,>({
 
   const resetColumnFilter = useResetColumnFilter();
   const setColumnFilter = useSetColumnFilter();
-  const fetchFilterData = useFetchFilterData<string, unknown>(columnKey);
+  const fetchFilterData = useFetchFilterData<string, FilterOptionsResponse>(columnKey);
 
   const popoverRef = useRef<HTMLDivElement>(null);
 
@@ -71,8 +73,8 @@ export const FilterPopover = <TData,>({
     popoverId,
     popoverRef,
     recalculateDeps: [
-      filterData?.data.length,
-      filterData?.isLoading,
+      filterData.data.length,
+      filterData.isLoading,
       isListShowing,
     ],
   });

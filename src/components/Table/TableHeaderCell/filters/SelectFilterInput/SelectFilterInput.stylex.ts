@@ -15,7 +15,7 @@ export const styles = stylex.create({
     flexDirection: 'column',
   },
   label: {
-    flex: 1, // Take remaining space after checkbox
+    flex: '1', // Take remaining space after checkbox
     overflow: 'hidden',
     color: colors.textPrimary,
     cursor: 'pointer',
@@ -71,7 +71,8 @@ export const styles = stylex.create({
     boxShadow: 'none !important',
     color: colors.textPrimary,
     fontSize: typography.fontSizeSm,
-    outlineOffset: '0 !important',
+     
+    outlineOffset: null,
   },
   loadingMore: {
     padding: spacing.sm,
