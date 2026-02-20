@@ -52,7 +52,7 @@ export const InputContent = <TData,>({
     default: {
       // String columns
       const hasOptions =
-        hasFetchableOptions || (filterOptions && filterOptions.length > 0);
+        !!(hasFetchableOptions ?? (filterOptions && filterOptions.length > 0));
       const textOp = operator as TextOperatorType;
 
       // Show SelectFilterInput when column supports options AND operator is equals/notEquals

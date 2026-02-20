@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { FilterOptionsResponse } from '@/components/Table/Table.types';
 
+import { InfoBox } from '@/components/InfoBox';
 import { useGetNormalizedColumn } from '@/components/Table/contexts/TableConfig/columns/selectors';
 import {
   useFetchFilterData,
@@ -185,7 +186,9 @@ export const SelectFilterInput = <TData,>({
           {...stylex.props(styles.virtualContainer(listMaxHeight))}
         >
           {filteredOptions.length === 0 ? (
-            <div {...stylex.props(styles.noResults)}>No options found</div>
+            <div {...stylex.props(styles.noResults)}>
+              <InfoBox>No options found</InfoBox>
+            </div>
           ) : (
             <div {...stylex.props(styles.virtualScrollArea(totalHeight))}>
               <div {...stylex.props(styles.virtualOffset(offsetY))}>

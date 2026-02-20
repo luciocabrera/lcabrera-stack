@@ -26,10 +26,10 @@ export const styles = stylex.create({
     minWidth: 0, // Allow shrinking below content size
   },
   noResults: {
-    padding: spacing.sm,
-    color: colors.textSecondary,
-    fontSize: typography.fontSizeSm,
-    textAlign: 'center',
+    alignItems: 'center',
+    display: 'flex',
+    height: '100%',
+    justifyContent: 'center',
   },
   option: {
     padding: `${spacing.xs} ${spacing.sm}`,
