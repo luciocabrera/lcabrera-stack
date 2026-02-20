@@ -6,6 +6,7 @@ import { TableLayout } from '@/components/Table/TableLayout';
 import { carSalesApi } from '@/services';
 
 import type { loader } from './car-sales.loader';
+import type { CarSalesPaginatedResponse } from './CarSales.types';
 
 import { COLUMNS, PERSISTENCE_KEY } from './CarSales.constants';
 
@@ -15,34 +16,31 @@ export const CarSales = () => {
     columnOrder,
     columnSizing,
     columnVisibility,
+    filters,
+    key,
     sorting,
   } = useLoaderData<typeof loader>();
 
   return (
-    <TableLayout<CarSale>
+    <TableLayout<CarSale, CarSalesPaginatedResponse>
       columnOrder={columnOrder}
       columns={COLUMNS}
       columnSizing={columnSizing}
       columnVisibility={columnVisibility}
       dataPromise={carSalesPromise}
-      dataSelector={(response) => (response as { data: CarSale[] }).data}
-      infiniteScrollConfig={{
-        onLoadMore: async ({ limit, skip, sorting }) => {
-          const response = await carSalesApi.fetchCarSalesPaginated({
-            limit,
-            skip,
-            sorting,
-          });
-
-          return {
-            data: response.data,
-            hasMore: response.hasMore,
-            total: response.total,
-          };
-        },
-      }}
+      dataSelector={(response) => response.data}
+      dataTotalSelector={(response) => response.total}
+      filters={filters}
+      onLoadMore={async ({ limit, skip }) =>
+        carSalesApi.fetchCarSalesPaginated({
+          limit,
+          skip,
+          sorting,
+        })
+      }
       persistenceKey={PERSISTENCE_KEY}
       sorting={sorting}
+      suspenseKey={key}
       title='Car Sales Data - Infinite Scroll'
     />
   );

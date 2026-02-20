@@ -1,6 +1,9 @@
 import type { TableColumn } from '@/components/Table/Table.types';
+import type { CarSale } from '@/services';
 
-export const columns: TableColumn[] = [
+export const PERSISTENCE_KEY = 'car-sales-table';
+
+export const COLUMNS: TableColumn<CarSale>[] = [
   {
     dataType: 'number',
     key: 'car_id',
