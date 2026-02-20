@@ -32,9 +32,10 @@ export const SelectFilterInput = <TData,>({
   const fetchFilterData = useFetchFilterData<string, FilterOptionsResponse>(
     columnKey,
   );
-  const fetchMoreFilterData = useFetchMoreFilterData<string, FilterOptionsResponse>(
-    columnKey,
-  );
+  const fetchMoreFilterData = useFetchMoreFilterData<
+    string,
+    FilterOptionsResponse
+  >(columnKey);
 
   const [searchTerm, setSearchTerm] = useState('');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -61,6 +62,10 @@ export const SelectFilterInput = <TData,>({
     filteredOptions.length > 1
       ? filteredOptions.length + 1
       : filteredOptions.length;
+
+  const isAllSelected =
+    filteredOptions.length > 0 &&
+    filteredOptions.every((option) => selectedValues.includes(option));
 
   const { endIndex, offsetY, startIndex, totalHeight } = useVirtualization({
     containerRef: scrollContainerRef,
@@ -90,9 +95,9 @@ export const SelectFilterInput = <TData,>({
     });
   };
 
-  const isAllSelected =
-    filteredOptions.length > 0 &&
-    filteredOptions.every((option) => selectedValues.includes(option));
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
 
   const handleLoadMoreOptions = useCallback(() => {
     if (!column.fetchFilterOptions || !hasMore || isLoadingOptions) {
@@ -166,9 +171,7 @@ export const SelectFilterInput = <TData,>({
         data-np-checked='1'
         data-np-ignore='1'
         name={`filter-search-${columnKey}`}
-        onChange={(e) => {
-          setSearchTerm(e.target.value);
-        }}
+        onChange={handleSearchChange}
         placeholder='Search options...'
         type='text'
         value={searchTerm}
