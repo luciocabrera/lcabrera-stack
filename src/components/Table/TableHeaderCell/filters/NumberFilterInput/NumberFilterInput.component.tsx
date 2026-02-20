@@ -66,12 +66,18 @@ export const NumberFilterInput = <TData,>({
     });
   };
 
-  const handleValueChange = (newValue: '' | number) => {
+  const handleValueChange = (
+    e: React.ChangeEvent<HTMLInputElement, HTMLInputElement>,
+  ) => {
+    const newValue = e.target.value === '' ? '' : Number(e.target.value);
     setValue(newValue);
     updateFilter({ maxVal: maxValue, op: operator, val: newValue });
   };
 
-  const handleMaxValueChange = (newMaxValue: '' | number) => {
+  const handleMaxValueChange = (
+    e: React.ChangeEvent<HTMLInputElement, HTMLInputElement>,
+  ) => {
+    const newMaxValue = e.target.value === '' ? '' : Number(e.target.value);
     setMaxValue(newMaxValue);
     updateFilter({ maxVal: newMaxValue, op: operator, val: value });
   };
@@ -89,11 +95,7 @@ export const NumberFilterInput = <TData,>({
             data-np-checked='1'
             data-np-ignore='1'
             name={`filter-number-min-${columnKey}`}
-            onChange={(e) => {
-              handleValueChange(
-                e.target.value === '' ? '' : Number(e.target.value),
-              );
-            }}
+            onChange={handleValueChange}
             placeholder='Min'
             type='number'
             value={value}
@@ -109,11 +111,7 @@ export const NumberFilterInput = <TData,>({
             data-np-checked='1'
             data-np-ignore='1'
             name={`filter-number-max-${columnKey}`}
-            onChange={(e) => {
-              handleMaxValueChange(
-                e.target.value === '' ? '' : Number(e.target.value),
-              );
-            }}
+            onChange={handleMaxValueChange}
             placeholder='Max'
             type='number'
             value={maxValue}
@@ -130,11 +128,7 @@ export const NumberFilterInput = <TData,>({
           data-np-checked='1'
           data-np-ignore='1'
           name={`filter-number-${columnKey}`}
-          onChange={(e) => {
-            handleValueChange(
-              e.target.value === '' ? '' : Number(e.target.value),
-            );
-          }}
+          onChange={handleValueChange}
           placeholder='Enter number...'
           type='number'
           value={value}
