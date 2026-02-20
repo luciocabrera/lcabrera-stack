@@ -40,7 +40,6 @@ yarn add -D \
   eslint-plugin-react-dom \
   @stylexjs/unplugin \
   unplugin \
-  eslint-plugin-react \
   @react-router/dev \
   vite-plugin-babel
 
