@@ -197,6 +197,7 @@ export const SelectFilterInput = <TData,>({
                       filteredOptions={filteredOptions}
                       index={index}
                       isAllSelected={isAllSelected}
+                      isLoading={isLoadingOptions}
                       key={
                         index === 0 && filteredOptions.length > 1
                           ? 'select-all'

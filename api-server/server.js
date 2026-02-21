@@ -423,6 +423,9 @@ app.get('/api/enterprise-orders/distinct/:columnName', async (request, res) => {
     request.query,
   );
   try {
+    // ⏱️ Artificial delay for testing loading shimmer (remove in production)
+    await new Promise((resolve) => setTimeout(resolve, 10_000));
+
     const { columnName } = request.params;
     const limit = Number.parseInt(request.query.limit) || 100;
     const offset = Number.parseInt(request.query.offset) || 0;

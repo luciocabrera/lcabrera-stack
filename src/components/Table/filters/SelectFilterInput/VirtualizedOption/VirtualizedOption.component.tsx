@@ -7,6 +7,7 @@ export const VirtualizedOption = ({
   filteredOptions,
   index,
   isAllSelected,
+  isLoading,
   onSelectAll,
   onToggle,
   selectedValues,
@@ -18,6 +19,7 @@ export const VirtualizedOption = ({
     return (
       <SelectAllOption
         isAllSelected={isAllSelected}
+        isLoading={isLoading}
         onSelectAll={onSelectAll}
       />
     );
@@ -31,6 +33,7 @@ export const VirtualizedOption = ({
 
   return (
     <SelectOption
+      isLoading={isLoading}
       isSelected={selectedValues.includes(option)}
       onToggle={() => {
         onToggle(option);
