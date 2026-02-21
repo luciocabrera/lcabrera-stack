@@ -216,6 +216,7 @@ export type TableProps<
 > = BaseProps &
   InfiniteScroll<TData, TResponse> & {
     isFlexWrapperEnabled?: boolean;
+    isLoading?: boolean;
     response: TResponse;
   };
 

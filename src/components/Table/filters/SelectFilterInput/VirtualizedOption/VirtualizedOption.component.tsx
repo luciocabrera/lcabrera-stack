@@ -29,15 +29,17 @@ export const VirtualizedOption = ({
   const optionIndex = hasMultipleOptions ? index - 1 : index;
   const option = filteredOptions[optionIndex];
 
-  if (!option) return;
+  const handleToggle = () => {
+    if (option) onToggle(option);
+  };
+
+  if (option === undefined) return;
 
   return (
     <SelectOption
       isLoading={isLoading}
       isSelected={selectedValues.includes(option)}
-      onToggle={() => {
-        onToggle(option);
-      }}
+      onToggle={handleToggle}
       option={option}
     />
   );

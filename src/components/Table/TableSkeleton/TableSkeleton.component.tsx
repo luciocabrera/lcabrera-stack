@@ -1,3 +1,5 @@
+import type { SkeletonResponse } from './TableSkeleton.types';
+
 import { useGetColumns } from '../contexts/TableConfig/columns/selectors';
 import { useGetTablePlaceholderRowCount } from '../contexts/TableConfig/meta/selectors';
 import { Table } from '../Table.component';
@@ -11,7 +13,9 @@ export const TableSkeleton = () => {
     rowCount: placeholderRowCount,
   });
   return (
-    <Table<Record<string, unknown>, unknown>
+    <Table<Record<string, unknown>, SkeletonResponse>
+      dataSelector={(response) => response.data}
+      isLoading
       response={{ data: effectiveData }}
     />
   );

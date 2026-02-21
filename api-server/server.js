@@ -133,6 +133,9 @@ app.get('/api/car-sales/paginated', async (request, res) => {
 app.get('/api/enterprise-orders/paginated', async (request, res) => {
   console.log(`📦 [Orders] Request received - query:`, request.query);
   try {
+    // ⏱️ Artificial delay for testing loading states (remove in production)
+    await new Promise((resolve) => setTimeout(resolve, 3_000));
+
     const skip = Number.parseInt(request.query.skip) || 0;
     const limit = Number.parseInt(request.query.limit) || 50;
     const sortParam = request.query.sort;

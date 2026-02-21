@@ -17,11 +17,9 @@ export const SelectAllOption = ({
       type='checkbox'
       {...stylex.props(styles.checkbox)}
     />
-    {!isLoading && (
-      <span {...stylex.props(styles.label)}>
-        {isAllSelected ? 'Deselect All' : 'Select All'}
-      </span>
-    )}
+    <span {...stylex.props(styles.label)}>
+      {isAllSelected ? 'Deselect All' : 'Select All'}
+    </span>
     {isLoading && (
       <div {...stylex.props(skeletonStyles.loadingOverlay)}>
         <div {...stylex.props(skeletonStyles.shimmerWave)} />

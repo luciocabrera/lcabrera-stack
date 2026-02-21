@@ -14,6 +14,7 @@ export const Table = <TData extends Record<string, unknown>, TResponse>({
   dataTotalSelector,
   icon,
   isFlexWrapperEnabled = true,
+  isLoading = false,
   onLoadMore,
   response,
 }: TableProps<TData, TResponse>) => {
@@ -29,6 +30,7 @@ export const Table = <TData extends Record<string, unknown>, TResponse>({
     <TableDataProvider<TData>
       dataState={{
         data,
+        isLoading,
         totalRows,
       }}
     >

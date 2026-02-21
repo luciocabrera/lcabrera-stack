@@ -4,7 +4,7 @@ type GetInitialDataStateArgs<TData> = Partial<TableDataState<TData>>;
 
 export const getInitialDataState = <TData>({
   data = [],
-  isLoading = false,
+  isLoading = true,
   isLoadingMore = false,
   totalRows = 0,
 }: GetInitialDataStateArgs<TData>): TableDataState<TData> => {

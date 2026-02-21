@@ -15,13 +15,10 @@ import { useVirtualization } from '@/hooks';
 import type { SelectFilterInputProps } from './SelectFilterInput.types';
 
 import { styles } from './SelectFilterInput.stylex';
+import { SkeletonOptions } from './SkeletonOptions';
 import { VirtualizedOption } from './VirtualizedOption';
 
 const ITEM_HEIGHT = 32; // Height of each checkbox option in pixels
-const PLACEHOLDER_COUNT = 8;
-const PLACEHOLDER_OPTIONS = Array.from({ length: PLACEHOLDER_COUNT }).map(
-  (_, i) => `placeholder-${i}`,
-);
 
 /** Pure value selector (checkboxes list) - operator is controlled by FilterInputs */
 export const SelectFilterInput = <TData,>({
@@ -54,14 +51,14 @@ export const SelectFilterInput = <TData,>({
   // Options from store (populated by fetchFilterData / fetchMoreFilterData)
   const effectiveOptions = filterData.data;
 
+  const isInitialLoading = isLoading && effectiveOptions.length === 0;
+
   const filteredOptions = useMemo(() => {
-    if (isLoadingOptions && effectiveOptions.length === 0)
-      return PLACEHOLDER_OPTIONS;
     if (!searchTerm) return effectiveOptions;
     return effectiveOptions.filter((option) =>
       option.toLowerCase().includes(searchTerm.toLowerCase()),
     );
-  }, [effectiveOptions, isLoadingOptions, searchTerm]);
+  }, [effectiveOptions, searchTerm]);
 
   // Add 1 to total items for "Select All" checkbox if showing it
   const totalItems =
@@ -188,11 +185,13 @@ export const SelectFilterInput = <TData,>({
           ref={scrollContainerRef}
           {...stylex.props(styles.virtualContainer(listMaxHeight))}
         >
-          {filteredOptions.length === 0 && !isLoading ? (
+          {isInitialLoading ? (
+            <SkeletonOptions />
+          ) : filteredOptions.length === 0 ? (
             <div {...stylex.props(styles.noResults)}>
               <InfoBox>No options found</InfoBox>
             </div>
-          ) : filteredOptions.length === 0 ? undefined : (
+          ) : (
             <div {...stylex.props(styles.virtualScrollArea(totalHeight))}>
               <div {...stylex.props(styles.virtualOffset(offsetY))}>
                 {Array.from({ length: endIndex - startIndex }).map((_, i) => {
