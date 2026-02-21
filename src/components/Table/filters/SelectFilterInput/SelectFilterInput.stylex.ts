@@ -59,6 +59,10 @@ const localStyles = stylex.create({
     position: 'relative', // Anchor for shimmer overlay
     minWidth: 0, // Allow flex children to shrink below content size
   },
+  optionDisabled: {
+    cursor: 'default',
+    pointerEvents: 'none',
+  },
   optionsList: {
     gap: spacing.xs,
     display: 'flex',
@@ -89,6 +93,7 @@ export const styles = {
   loadingMore: localStyles.loadingMore,
   noResults: localStyles.noResults,
   option: localStyles.option,
+  optionDisabled: localStyles.optionDisabled,
   optionsList: localStyles.optionsList,
   searchInput: filterBaseStyles.input,
   virtualContainer: localStyles.virtualContainer,

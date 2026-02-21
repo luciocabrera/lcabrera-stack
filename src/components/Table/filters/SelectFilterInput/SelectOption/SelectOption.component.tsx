@@ -10,14 +10,15 @@ export const SelectOption = ({
   onToggle,
   option,
 }: SelectOptionProps) => (
-  <label {...stylex.props(styles.option)}>
+  <label {...stylex.props(styles.option, isLoading && styles.optionDisabled)}>
     <input
       checked={isSelected}
+      disabled={isLoading}
       onChange={onToggle}
       type='checkbox'
       {...stylex.props(styles.checkbox)}
     />
-    <span {...stylex.props(styles.label)}>{option}</span>
+    {!isLoading && <span {...stylex.props(styles.label)}>{option}</span>}
     {isLoading && (
       <div {...stylex.props(skeletonStyles.loadingOverlay)}>
         <div {...stylex.props(skeletonStyles.shimmerWave)} />
