@@ -13,6 +13,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const key = formData.get('key');
   const value = formData.get('value');
+  const currentUrl = formData.get('currentUrl');
+  const searchParamKey = formData.get('searchParamKey');
+  const searchParamValue = formData.get('searchParamValue');
 
   if (typeof key !== 'string' || typeof value !== 'string') {
     return new Response('Missing key or value', { status: 400 });
@@ -21,5 +24,18 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const headers = new Headers();
   headers.append('Set-Cookie', buildCookieString({ key, value }));
 
-  return new Response(undefined, { headers, status: 204 });
+  let nextSearch: string | undefined;
+  if (typeof currentUrl === 'string' && typeof searchParamKey === 'string') {
+    const url = new URL(currentUrl, request.url);
+
+    if (typeof searchParamValue === 'string' && searchParamValue.length > 0) {
+      url.searchParams.set(searchParamKey, searchParamValue);
+    } else {
+      url.searchParams.delete(searchParamKey);
+    }
+
+    nextSearch = url.search;
+  }
+
+  return Response.json({ nextSearch }, { headers, status: 200 });
 };
