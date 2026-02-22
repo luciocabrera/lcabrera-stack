@@ -4,12 +4,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { FilterOptionsResponse } from '@/components/Table/Table.types';
 
 import { InfoBox } from '@/components/InfoBox';
-import { useGetNormalizedColumn } from '@/components/Table/contexts/TableConfig/columns/selectors';
 import {
   useFetchFilterData,
   useFetchMoreFilterData,
 } from '@/components/Table/contexts/FiltersData/filters/actions';
 import { useGetFilterData } from '@/components/Table/contexts/FiltersData/filters/selectors';
+import { useGetNormalizedColumn } from '@/components/Table/contexts/TableConfig/columns/selectors';
 import { useVirtualization } from '@/hooks';
 
 import type { SelectFilterInputProps } from './SelectFilterInput.types';
