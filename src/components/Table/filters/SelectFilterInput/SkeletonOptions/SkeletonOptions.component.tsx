@@ -1,7 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
 
-import type { PlaceholderMapperParams } from './SkeletonOptions.types';
-
 import { skeletonStyles, styles } from '../SelectFilterInput.stylex';
 
 const SKELETON_ROW_COUNT = 8;
@@ -9,7 +7,8 @@ const SKELETON_ROW_COUNT = 8;
 export const SkeletonOptions = () => {
   const placeholders = Array.from(
     { length: SKELETON_ROW_COUNT },
-    ({ index }: PlaceholderMapperParams) => ({
+    // eslint-disable-next-line local-rules/destructuring-for-functions
+    (_, index) => ({
       key: index,
     }),
   );
