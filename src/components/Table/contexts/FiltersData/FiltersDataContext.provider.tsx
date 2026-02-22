@@ -5,8 +5,8 @@ import { useStore } from '@/hooks';
 import type { FiltersDataContextValue } from './FiltersDataContext.types';
 
 import { useGetColumns } from '../TableConfig/columns/selectors';
-import { FiltersDataContext } from './FiltersDataContext.context';
 import { getInitialFiltersDataState } from '../TableData/utils';
+import { FiltersDataContext } from './FiltersDataContext.context';
 
 type FiltersDataProviderProps = {
   children: React.ReactNode;
