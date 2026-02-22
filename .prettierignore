@@ -1,5 +1,6 @@
 .react-router/
 build/
 dist/
+miscelanious/
 node_modules/
 eslint-local-rules/

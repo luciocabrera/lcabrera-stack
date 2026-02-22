@@ -60,9 +60,9 @@ type MockRow = Record<string, boolean | number | string>;
 const COLUMNS: TableColumn<MockRow>[] = [
   ...Array.from({ length: 20 }).keys(),
 ].map((i) => ({
-  dataType: (
-    ['number', 'string', 'boolean', 'date', 'currency'] as const
-  )[i % 5],
+  dataType: (['number', 'string', 'boolean', 'date', 'currency'] as const)[
+    i % 5
+  ],
   key: `col${i + 1}`,
   label: `Column ${i + 1}`,
   minWidth: 120,
@@ -88,39 +88,39 @@ function randomString(length: number) {
   ).join('');
 }
 
-const tableData: MockRow[] = [
-  ...Array.from({ length: 10_000 }).keys(),
-].map((rowIdx) => {
-  const row: MockRow = {};
-  for (const [colIdx, col] of COLUMNS.entries()) {
-    switch (col.dataType) {
-      case 'boolean': {
-        row[col.key] = rng() > 0.5;
-        break;
-      }
-      case 'currency': {
-        row[col.key] = `$${randomCurrency()}`;
-        break;
-      }
-      case 'date': {
-        row[col.key] = randomDate().toISOString().slice(0, 10);
-        break;
-      }
-      case 'number': {
-        row[col.key] = rowIdx * colIdx;
-        break;
-      }
-      case 'string': {
-        row[col.key] = randomString(8);
-        break;
-      }
-      default: {
-        row[col.key] = '';
+const tableData: MockRow[] = [...Array.from({ length: 10_000 }).keys()].map(
+  (rowIdx) => {
+    const row: MockRow = {};
+    for (const [colIdx, col] of COLUMNS.entries()) {
+      switch (col.dataType) {
+        case 'boolean': {
+          row[col.key] = rng() > 0.5;
+          break;
+        }
+        case 'currency': {
+          row[col.key] = `$${randomCurrency()}`;
+          break;
+        }
+        case 'date': {
+          row[col.key] = randomDate().toISOString().slice(0, 10);
+          break;
+        }
+        case 'number': {
+          row[col.key] = rowIdx * colIdx;
+          break;
+        }
+        case 'string': {
+          row[col.key] = randomString(8);
+          break;
+        }
+        default: {
+          row[col.key] = '';
+        }
       }
     }
-  }
-  return row;
-});
+    return row;
+  },
+);
 
 /**
  * Simulated API delay in milliseconds

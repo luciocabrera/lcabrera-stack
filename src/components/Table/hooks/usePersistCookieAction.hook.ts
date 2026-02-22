@@ -30,7 +30,9 @@ type PersistCookieArgs<TSlice> = {
  *   searchParamValue: '{"status":"active"}',
  * });
  */
-type PersistTableStateAction = <TSlice>(args: PersistCookieArgs<TSlice>) => void;
+type PersistTableStateAction = <TSlice>(
+  args: PersistCookieArgs<TSlice>,
+) => void;
 
 type PersistTableStateActionData = {
   nextSearch?: string;
@@ -75,4 +77,3 @@ export const usePersistTableStateAction = (): PersistTableStateAction => {
     );
   };
 };
-

@@ -65,9 +65,7 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
     columnSizing,
     columnVisibility,
     sorting: sorting.filter(
-      (
-        s,
-      ): s is { columnKey: keyof CarSale; direction: 'asc' | 'desc' } =>
+      (s): s is { columnKey: keyof CarSale; direction: 'asc' | 'desc' } =>
         s.direction !== undefined,
     ),
   };

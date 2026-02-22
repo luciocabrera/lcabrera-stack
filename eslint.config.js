@@ -408,6 +408,7 @@ export default defineConfig(
     'build/',
     'out/',
     'dist/',
+    'miscelanious/',
     'node_modules/',
     'eslint-local-rules/',
     'guidelines/playwright_config.ts',

@@ -8,8 +8,8 @@ import { useGetNormalizedColumn } from '@/components/Table/contexts/TableConfig/
 import {
   useFetchFilterData,
   useFetchMoreFilterData,
-} from '@/components/Table/contexts/TableData/filters/actions';
-import { useGetFilterData } from '@/components/Table/contexts/TableData/filters/selectors';
+} from '@/components/Table/contexts/FiltersData/filters/actions';
+import { useGetFilterData } from '@/components/Table/contexts/FiltersData/filters/selectors';
 import { useVirtualization } from '@/hooks';
 
 import type { SelectFilterInputProps } from './SelectFilterInput.types';

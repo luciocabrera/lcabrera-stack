@@ -4,7 +4,7 @@ import type { InfiniteScroll } from '@/types/ui.types';
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 
-import { useFiltersDataContextValue } from '../../../FiltersData/useFiltersDataContextValue.hook';
+import { useFiltersDataContextValue } from '../../useFiltersDataContextValue.hook';
 
 type FetchFilterDataArgs<TData, TResponse> = Omit<
   InfiniteScroll<TData, TResponse>,
@@ -33,9 +33,7 @@ export const useFetchFilterData = <TData, TResponse>(columnKey: string) => {
           '[useFetchFilterData] Filter data not initialized for column:',
           columnKey,
         );
-        throw new Error(
-          `Filter data not initialized for column: ${columnKey}`,
-        );
+        throw new Error(`Filter data not initialized for column: ${columnKey}`);
       }
 
       // Skip if already loaded or currently loading

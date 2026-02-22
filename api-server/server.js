@@ -134,7 +134,7 @@ app.get('/api/enterprise-orders/paginated', async (request, res) => {
   console.log(`📦 [Orders] Request received - query:`, request.query);
   try {
     // ⏱️ Artificial delay for testing loading states (remove in production)
-    await new Promise((resolve) => setTimeout(resolve, 3_000));
+    await new Promise((resolve) => setTimeout(resolve, 3000));
 
     const skip = Number.parseInt(request.query.skip) || 0;
     const limit = Number.parseInt(request.query.limit) || 50;

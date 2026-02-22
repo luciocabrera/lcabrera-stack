@@ -61,7 +61,13 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   },
   {
     dataType: 'string',
-    ...createStaticFilterOptions<EnterpriseOrder>(['Critical', 'High', 'Low', 'Normal', 'Urgent']),
+    ...createStaticFilterOptions<EnterpriseOrder>([
+      'Critical',
+      'High',
+      'Low',
+      'Normal',
+      'Urgent',
+    ]),
     key: 'priority',
     label: 'Priority',
     maxWidth: 130,

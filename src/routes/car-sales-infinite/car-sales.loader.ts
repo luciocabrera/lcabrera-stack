@@ -75,9 +75,7 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
       requestUrl: request.url,
       skip: 0,
       sorting: sorting.filter(
-        (
-          s,
-        ): s is { columnKey: keyof CarSale; direction: 'asc' | 'desc' } =>
+        (s): s is { columnKey: keyof CarSale; direction: 'asc' | 'desc' } =>
           s.direction !== undefined,
       ),
     });
@@ -90,9 +88,7 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
     filters,
     key: `${standaloneSortParam ?? ''}${standaloneFiltersParam ?? ''}`,
     sorting: sorting.filter(
-      (
-        s,
-      ): s is { columnKey: keyof CarSale; direction: 'asc' | 'desc' } =>
+      (s): s is { columnKey: keyof CarSale; direction: 'asc' | 'desc' } =>
         s.direction !== undefined,
     ),
   };
