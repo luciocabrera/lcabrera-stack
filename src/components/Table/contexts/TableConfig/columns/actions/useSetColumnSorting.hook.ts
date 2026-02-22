@@ -1,11 +1,13 @@
 import type { Sorting } from '@/types/ui.types';
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { useTableDataContextValue } from '@/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
 import { usePersistTableStateAction } from '@/components/Table/hooks';
 import { getNormalizedColummns } from '@/components/Table/utils';
 
 export const useSetColumnSorting = <TData>() => {
   const { columnsStore, metaStore } = useTableConfigContextValue<TData>();
+  const { dataStore } = useTableDataContextValue();
   const persistTableState = usePersistTableStateAction();
 
   const persistenceKey = metaStore.get()?.persistenceKey ?? '';
@@ -42,6 +44,9 @@ export const useSetColumnSorting = <TData>() => {
       columns: columnsState?.columns ?? [],
       sorting: newSorting,
     });
+
+    // Show loading feedback immediately
+    dataStore.set({ isLoading: true });
 
     // Persist to cookie and sync URL params in one action
     persistTableState({

@@ -5,6 +5,7 @@ import type {
 import type { ColumnFilter } from '@/types/filterOperators.types';
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { useTableDataContextValue } from '@/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
 import { usePersistTableStateAction } from '@/components/Table/hooks';
 
 type SetColumnFilterArgs<TData> = {
@@ -20,6 +21,7 @@ type SetColumnFilterArgs<TData> = {
  */
 export const useSetColumnFilter = <TData>() => {
   const { columnsStore, metaStore } = useTableConfigContextValue<TData>();
+  const { dataStore } = useTableDataContextValue();
   const persistTableState = usePersistTableStateAction();
 
   const columnsState = columnsStore.get();
@@ -38,6 +40,9 @@ export const useSetColumnFilter = <TData>() => {
     } else {
       columnFilters = { ...current, [columnKey]: filter };
     }
+
+    // Show loading feedback immediately
+    dataStore.set({ isLoading: true });
 
     // Persist to cookie and sync URL params in one action
     persistTableState<ColumnFiltersState<TData>>({
