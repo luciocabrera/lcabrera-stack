@@ -1,11 +1,18 @@
-import { useCallback } from 'react';
-import { useFetcher } from 'react-router';
+import { useEffect } from 'react';
+import { useFetcher, useLocation, useSearchParams } from 'react-router';
+
+import type { TablePersistenceConfig } from '../Table.types';
+
+import { serializeStateSlice } from '../utils';
 
 const PERSIST_COOKIE_ACTION = '/_action/persist-cookie';
 
-type PersistCookieArgs = {
-  key: string;
-  value: string;
+type PersistCookieArgs<TSlice> = {
+  persistenceKey: string;
+  searchParamKey?: string;
+  searchParamValue?: string;
+  slice: keyof TablePersistenceConfig;
+  valueSlice: TSlice;
 };
 
 /**
@@ -15,19 +22,57 @@ type PersistCookieArgs = {
  * which sets the cookie server-side via Set-Cookie response header.
  *
  * @example
- * const persistCookie = usePersistCookieAction();
- * persistCookie({ key: 'table-state-orders-columnFilters', value: '{"status":"active"}' });
+ * const persistTableState = usePersistTableStateAction();
+ * persistTableState({
+ *   persistenceKey: 'table-state-orders-columnFilters',
+ *   valueSlice: { status: 'active' },
+ *   searchParamKey: 'filters',
+ *   searchParamValue: '{"status":"active"}',
+ * });
  */
-export const usePersistCookieAction = () => {
-  const fetcher = useFetcher();
+type PersistTableStateAction = <TSlice>(args: PersistCookieArgs<TSlice>) => void;
 
-  return useCallback(
-    ({ key, value }: PersistCookieArgs) => {
-      void fetcher.submit(
-        { key, value },
-        { action: PERSIST_COOKIE_ACTION, method: 'POST' },
-      );
-    },
-    [fetcher],
-  );
+type PersistTableStateActionData = {
+  nextSearch?: string;
 };
+
+export const usePersistTableStateAction = (): PersistTableStateAction => {
+  const fetcher = useFetcher<PersistTableStateActionData>();
+  const location = useLocation();
+  const [, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    const nextSearch = fetcher.data?.nextSearch;
+
+    if (typeof nextSearch === 'string') {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      setSearchParams(new URLSearchParams(nextSearch), { replace: true });
+    }
+  }, [fetcher.data?.nextSearch, setSearchParams]);
+
+  return <TSlice>({
+    persistenceKey,
+    searchParamKey,
+    searchParamValue,
+    slice,
+    valueSlice,
+  }: PersistCookieArgs<TSlice>) => {
+    const { key, value } = serializeStateSlice({
+      persistenceKey,
+      slice,
+      value: valueSlice,
+    });
+    const currentUrl = `${location.pathname}${location.search}`;
+    void fetcher.submit(
+      {
+        currentUrl,
+        key,
+        searchParamKey: searchParamKey ?? '',
+        searchParamValue: searchParamValue ?? '',
+        value,
+      },
+      { action: PERSIST_COOKIE_ACTION, method: 'POST' },
+    );
+  };
+};
+

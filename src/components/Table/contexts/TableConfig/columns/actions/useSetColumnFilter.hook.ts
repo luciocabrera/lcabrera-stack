@@ -1,6 +1,3 @@
-import { useCallback } from 'react';
-import { useSearchParams } from 'react-router';
-
 import type {
   ColumnFiltersState,
   DataKey,
@@ -8,8 +5,7 @@ import type {
 import type { ColumnFilter } from '@/types/filterOperators.types';
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
-import { usePersistCookieAction } from '@/components/Table/hooks';
-import { serializeStateSlice } from '@/components/Table/utils';
+import { usePersistTableStateAction } from '@/components/Table/hooks';
 
 type SetColumnFilterArgs<TData> = {
   columnKey: DataKey<TData>;
@@ -24,54 +20,38 @@ type SetColumnFilterArgs<TData> = {
  */
 export const useSetColumnFilter = <TData>() => {
   const { columnsStore, metaStore } = useTableConfigContextValue<TData>();
-  const [, setSearchParams] = useSearchParams();
-  const persistCookie = usePersistCookieAction();
+  const persistTableState = usePersistTableStateAction();
 
   const columnsState = columnsStore.get();
   const persistenceKey = metaStore.get()?.persistenceKey ?? '';
 
-  return useCallback(
-    ({ columnKey, filter }: SetColumnFilterArgs<TData>) => {
-      let columnFilters = {} as ColumnFiltersState<TData>;
-      const current = (columnsState?.columnFilters ??
-        {}) as ColumnFiltersState<TData>;
-      if (filter === null || filter === undefined) {
-        // TODO: Improve later, i don't like this pattern
-        // Remove the filter by creating new object without it
-        const { [columnKey]: unusedFilter, ...rest } = current;
-        void unusedFilter; // Explicitly mark as intentionally unused
-        columnFilters = rest as ColumnFiltersState<TData>;
-      } else {
-        columnFilters = { ...current, [columnKey]: filter };
-      }
+  return ({ columnKey, filter }: SetColumnFilterArgs<TData>) => {
+    const current = (columnsState?.columnFilters ??
+      {}) as ColumnFiltersState<TData>;
+    let columnFilters: ColumnFiltersState<TData>;
+    if (filter === null || filter === undefined) {
+      // TODO: Improve later, i don't like this pattern
+      // Remove the filter by creating new object without it
+      const { [columnKey]: unusedFilter, ...rest } = current;
+      void unusedFilter; // Explicitly mark as intentionally unused
+      columnFilters = rest as ColumnFiltersState<TData>;
+    } else {
+      columnFilters = { ...current, [columnKey]: filter };
+    }
 
-      // Persist to cookie via server action (Set-Cookie header)
-      const { key, value } = serializeStateSlice({
-        persistenceKey,
-        slice: 'columnFilters',
-        value: columnFilters,
-      });
-      persistCookie({ key, value });
-
-      // Update URL search params
-      setSearchParams((params) => {
-        if (Object.keys(columnFilters).length > 0) {
-          params.set('filters', JSON.stringify(columnFilters));
-        } else {
-          params.delete('filters');
-        }
-        return params;
-      });
-
-      // Update table context state
-      columnsStore.set({ columnFilters });
-    },
-    [
-      columnsStore,
-      persistCookie,
+    // Persist to cookie and sync URL params in one action
+    persistTableState<ColumnFiltersState<TData>>({
       persistenceKey,
-      setSearchParams,
-      columnsState,
-    ],
-  );
+      searchParamKey: 'filters',
+      searchParamValue:
+        Object.keys(columnFilters).length > 0
+          ? JSON.stringify(columnFilters)
+          : undefined,
+      slice: 'columnFilters',
+      valueSlice: columnFilters,
+    });
+
+    // Update table context state
+    columnsStore.set({ columnFilters });
+  };
 };
