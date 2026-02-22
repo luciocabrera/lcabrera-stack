@@ -1,7 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 
 import { Table } from '@/components/Table';
-import { TableConfigProvider } from '@/components/Table/contexts';
+import { FiltersDataProvider, TableConfigProvider } from '@/components/Table/contexts';
 import { TableSuspenseBoundary } from '@/components/Table/TableSuspenseBoundary';
 
 import type { TableLayoutProps } from './TableLayout.types';
@@ -52,19 +52,21 @@ export const TableLayout = <
         columnsState={columnsState}
         metaState={metaState}
       >
-        <TableSuspenseBoundary<TData, TResponse>
-          dataPromise={dataPromise}
-          key={suspenseKey}
-        >
-          {(response) => (
-            <Table<TData, TResponse>
-              dataSelector={dataSelector}
-              dataTotalSelector={dataTotalSelector}
-              onLoadMore={onLoadMore}
-              response={response}
-            />
-          )}
-        </TableSuspenseBoundary>
+        <FiltersDataProvider<TData>>
+          <TableSuspenseBoundary<TData, TResponse>
+            dataPromise={dataPromise}
+            key={suspenseKey}
+          >
+            {(response) => (
+              <Table<TData, TResponse>
+                dataSelector={dataSelector}
+                dataTotalSelector={dataTotalSelector}
+                onLoadMore={onLoadMore}
+                response={response}
+              />
+            )}
+          </TableSuspenseBoundary>
+        </FiltersDataProvider>
       </TableConfigProvider>
     </div>
   );

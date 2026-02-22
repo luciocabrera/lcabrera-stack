@@ -1,9 +1,6 @@
-import { use } from 'react';
+import { useFiltersDataContextValue } from '../../FiltersData/useFiltersDataContextValue.hook';
 
-import { TableDataContext } from '../TableDataContext.context';
-
-export const useTableDataContextValue = () => {
-  const context = use(TableDataContext);
-
-  return context;
-};
+/**
+ * @deprecated Use useFiltersDataContextValue from FiltersData context directly.
+ */
+export const useTableDataContextValue = useFiltersDataContextValue;

@@ -2,12 +2,12 @@ import { useSyncExternalStore } from 'react';
 
 import type { FiltersDataState } from '@/components/Table/Table.types';
 
-import { useTableDataContextValue } from './useFiltersDataContextValue.hook';
+import { useFiltersDataContextValue } from '../../FiltersData/useFiltersDataContextValue.hook';
 
 export const useFiltersStore = <TSelected, TData = unknown>(
   selector: (state: FiltersDataState<TData>) => TSelected,
 ) => {
-  const { filtersDataStore } = useTableDataContextValue();
+  const { filtersDataStore } = useFiltersDataContextValue();
 
   const state = useSyncExternalStore(
     filtersDataStore.subscribe,

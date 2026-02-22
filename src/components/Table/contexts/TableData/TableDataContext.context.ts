@@ -2,7 +2,7 @@ import { createContext } from 'react';
 
 import type { TableDataContextValue } from './TableDataContext.types';
 
-import { getInitialDataState, getInitialFiltersDataState } from './utils';
+import { getInitialDataState } from './utils';
 
 /**
  * Data context for sharing state across table components
@@ -12,7 +12,6 @@ import { getInitialDataState, getInitialFiltersDataState } from './utils';
  */
 export const TableDataContext = createContext<TableDataContextValue>({
   dataStore: getInitialDataState<unknown>({}),
-  filtersDataStore: getInitialFiltersDataState<unknown>({ columns: [] }), // Assuming similar initial state for filters
 } as unknown as TableDataContextValue);
 
 TableDataContext.displayName = 'TableDataContext';
