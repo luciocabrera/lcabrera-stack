@@ -1,5 +1,7 @@
 import type { ActionFunctionArgs } from 'react-router';
 
+import { redirect } from 'react-router';
+
 import { buildCookieString } from '@/utils/storage/buildCookieString.util';
 
 /**
@@ -21,10 +23,6 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     return new Response('Missing key or value', { status: 400 });
   }
 
-  const headers = new Headers();
-  headers.append('Set-Cookie', buildCookieString({ key, value }));
-
-  let nextSearch: string | undefined;
   if (typeof currentUrl === 'string' && typeof searchParamKey === 'string') {
     const url = new URL(currentUrl, request.url);
 
@@ -34,8 +32,11 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       url.searchParams.delete(searchParamKey);
     }
 
-    nextSearch = url.search;
+    const headers = new Headers();
+    headers.append('Set-Cookie', buildCookieString({ key, value }));
+
+    // Redirect to the new URL
+    return redirect(url.href, { headers });
   }
 
-  return Response.json({ nextSearch }, { headers, status: 200 });
 };

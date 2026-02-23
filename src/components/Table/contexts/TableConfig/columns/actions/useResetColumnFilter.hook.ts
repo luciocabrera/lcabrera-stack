@@ -1,43 +1,55 @@
-import { useCallback } from 'react';
-import { useSearchParams } from 'react-router';
+import type { ColumnFiltersState } from '@/components/Table/Table.types';
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
-import { writeStateSlice } from '@/components/Table/utils';
+import { useTableDataContextValue } from '@/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
+import { usePersistTableStateAction } from '@/components/Table/hooks';
 
 /**
  * Hook to clear a single column filter
  */
 export const useResetColumnFilter = () => {
   const { columnsStore, metaStore } = useTableConfigContextValue();
-  const [, setSearchParams] = useSearchParams();
+  const { dataStore } = useTableDataContextValue();
+  const persistTableState = usePersistTableStateAction();
 
   const columnsState = columnsStore.get();
   const persistenceKey = metaStore.get()?.persistenceKey ?? '';
 
-  return useCallback(
-    (columnKey: string) => {
-      const current = columnsState?.columnFilters ?? {};
-      const { [columnKey]: unusedFilter, ...rest } = current;
-      void unusedFilter; // Explicitly mark as intentionally unused
+  return (columnKey: string) => {
+    const current = columnsState?.columnFilters ?? {};
+    const { [columnKey]: unusedFilter, ...rest } = current;
+    void unusedFilter; // Explicitly mark as intentionally unused
 
-      // Persist to falling back storage mechanism (cookie/localStorage)
-      writeStateSlice({
-        persistenceKey,
-        slice: 'columnFilters',
-        storageType: 'cookie',
-        value: rest,
-      });
+    // Show loading feedback immediately
+    dataStore.set({ isLoading: true });
 
-      setSearchParams((params) => {
-        if (Object.keys(rest).length > 0) {
-          params.set('filters', JSON.stringify(rest));
-        } else {
-          params.delete('filters');
-        }
-        return params;
-      });
-      columnsStore.set({ columnFilters: rest });
-    },
-    [columnsStore, persistenceKey, setSearchParams, columnsState],
-  );
+    // Persist to falling back storage mechanism (cookie/localStorage)
+    // writeStateSlice({
+    //   persistenceKey,
+    //   slice: 'columnFilters',
+    //   storageType: 'cookie',
+    //   value: rest,
+    // });
+
+    // setSearchParams((params) => {
+    //   if (Object.keys(rest).length > 0) {
+    //     params.set('filters', JSON.stringify(rest));
+    //   } else {
+    //     params.delete('filters');
+    //   }
+    //   return params;
+    // });
+
+    // Persist to cookie and sync URL params in one action
+    persistTableState<ColumnFiltersState>({
+      persistenceKey,
+      searchParamKey: 'filters',
+      searchParamValue:
+        Object.keys(rest).length > 0 ? JSON.stringify(rest) : undefined,
+      slice: 'columnFilters',
+      valueSlice: rest,
+    });
+
+    columnsStore.set({ columnFilters: rest });
+  };
 };

@@ -1,5 +1,4 @@
-import { useEffect } from 'react';
-import { useFetcher, useLocation, useSearchParams } from 'react-router';
+import { useFetcher, useLocation } from 'react-router';
 
 import type { TablePersistenceConfig } from '../Table.types';
 
@@ -34,23 +33,9 @@ type PersistTableStateAction = <TSlice>(
   args: PersistCookieArgs<TSlice>,
 ) => void;
 
-type PersistTableStateActionData = {
-  nextSearch?: string;
-};
-
 export const usePersistTableStateAction = (): PersistTableStateAction => {
-  const fetcher = useFetcher<PersistTableStateActionData>();
+  const fetcher = useFetcher();
   const location = useLocation();
-  const [, setSearchParams] = useSearchParams();
-
-  useEffect(() => {
-    const nextSearch = fetcher.data?.nextSearch;
-
-    if (typeof nextSearch === 'string') {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      setSearchParams(new URLSearchParams(nextSearch), { replace: true });
-    }
-  }, [fetcher.data?.nextSearch, setSearchParams]);
 
   return <TSlice>({
     persistenceKey,
