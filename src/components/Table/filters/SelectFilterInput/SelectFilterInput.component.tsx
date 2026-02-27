@@ -65,7 +65,9 @@ export const SelectFilterInput = <TData,>({
       listMaxHeight={listMaxHeight}
       name={`filter-search-${columnKey}`}
       onChange={onChange}
-      onFetchInitial={column.fetchFilterOptions ? handleFetchInitial : undefined}
+      onFetchInitial={
+        column.fetchFilterOptions ? handleFetchInitial : undefined
+      }
       onFetchMore={column.fetchFilterOptions ? handleFetchMore : undefined}
     />
   );

@@ -16,10 +16,7 @@ export const useClickOutside = ({
 }: UseClickOutsideArgs): void => {
   useEffect(() => {
     const handleMouseDown = (event: MouseEvent) => {
-      if (
-        ref.current &&
-        !ref.current.contains(event.target as Node)
-      ) {
+      if (ref.current && !ref.current.contains(event.target as Node)) {
         onClickOutside();
       }
     };

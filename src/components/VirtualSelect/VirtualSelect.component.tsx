@@ -88,9 +88,7 @@ export const VirtualSelect = ({
       >
         {hasSelection ? (
           mode === 'single' ? (
-            <span {...stylex.props(styles.triggerLabel)}>
-              {selected[0]}
-            </span>
+            <span {...stylex.props(styles.triggerLabel)}>{selected[0]}</span>
           ) : (
             selected.map((value) => (
               <Tag

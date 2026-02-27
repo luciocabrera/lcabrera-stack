@@ -375,7 +375,9 @@ const App = () => {
             <h2 {...stylex.props(styles.sectionTitle)}>VirtualSelect</h2>
 
             <div {...stylex.props(styles.subsection)}>
-              <h3 {...stylex.props(styles.subsectionTitle)}>Single Select (static options)</h3>
+              <h3 {...stylex.props(styles.subsectionTitle)}>
+                Single Select (static options)
+              </h3>
               <div style={{ maxWidth: '20rem' }}>
                 <VirtualSelect
                   mode='single'
@@ -386,12 +388,17 @@ const App = () => {
                 />
               </div>
               <p style={{ color: '#6b7280', fontSize: 13, marginTop: 8 }}>
-                Selected: {singleSelected.length > 0 ? singleSelected.join(', ') : '(none)'}
+                Selected:{' '}
+                {singleSelected.length > 0
+                  ? singleSelected.join(', ')
+                  : '(none)'}
               </p>
             </div>
 
             <div {...stylex.props(styles.subsection)}>
-              <h3 {...stylex.props(styles.subsectionTitle)}>Multi Select (static options)</h3>
+              <h3 {...stylex.props(styles.subsectionTitle)}>
+                Multi Select (static options)
+              </h3>
               <div style={{ maxWidth: '20rem' }}>
                 <VirtualSelect
                   mode='multi'
@@ -402,7 +409,8 @@ const App = () => {
                 />
               </div>
               <p style={{ color: '#6b7280', fontSize: 13, marginTop: 8 }}>
-                Selected: {multiSelected.length > 0 ? multiSelected.join(', ') : '(none)'}
+                Selected:{' '}
+                {multiSelected.length > 0 ? multiSelected.join(', ') : '(none)'}
               </p>
             </div>
 
@@ -427,7 +435,8 @@ const App = () => {
                 {fetchDataState.isLoadingMore && ' — Loading more...'}
               </p>
               <p style={{ color: '#6b7280', fontSize: 13, marginTop: 4 }}>
-                Selected: {fetchSelected.length > 0 ? fetchSelected.join(', ') : '(none)'}
+                Selected:{' '}
+                {fetchSelected.length > 0 ? fetchSelected.join(', ') : '(none)'}
               </p>
             </div>
           </section>
