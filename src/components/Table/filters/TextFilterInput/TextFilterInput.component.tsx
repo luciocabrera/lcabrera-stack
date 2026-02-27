@@ -14,7 +14,8 @@ export const TextFilterInput = <TData,>({
   const initialValue = useMemo(() => filter?.value ?? '', [filter?.value]);
   const [value, setValue] = useState(initialValue);
 
-  const handleValueChange = (newValue: string) => {
+  const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
     setValue(newValue);
     if (newValue) {
       onChange({ operator, type: 'text', value: newValue });
@@ -25,23 +26,23 @@ export const TextFilterInput = <TData,>({
 
   return (
     <div {...stylex.props(styles.container)}>
-      <input
-        autoComplete='off'
-        data-1p-ignore='true'
-        data-bwignore='true'
-        data-form-type='other'
-        data-lpignore='true'
-        data-np-checked='1'
-        data-np-ignore='1'
-        name={`filter-text-${columnKey}`}
-        onChange={(e) => {
-          handleValueChange(e.target.value);
-        }}
-        placeholder='Enter text...'
-        type='text'
-        value={value}
-        {...stylex.props(styles.input)}
-      />
+      <div {...stylex.props(styles.inputWrapper)}>
+        <input
+          autoComplete='off'
+          data-1p-ignore='true'
+          data-bwignore='true'
+          data-form-type='other'
+          data-lpignore='true'
+          data-np-checked='1'
+          data-np-ignore='1'
+          name={`filter-text-${columnKey}`}
+          onChange={handleValueChange}
+          placeholder='Enter text...'
+          type='text'
+          value={value}
+          {...stylex.props(styles.input)}
+        />
+      </div>
     </div>
   );
 };

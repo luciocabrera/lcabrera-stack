@@ -125,21 +125,23 @@ export const VirtualList = ({
 
   return (
     <div {...stylex.props(styles.container)}>
-      <input
-        autoComplete='off'
-        data-1p-ignore='true'
-        data-bwignore='true'
-        data-form-type='other'
-        data-lpignore='true'
-        data-np-checked='1'
-        data-np-ignore='1'
-        name={name}
-        onChange={handleSearchChange}
-        placeholder='Search options...'
+      <div {...stylex.props(styles.searchInputWrapper)}>
+        <input
+          autoComplete='off'
+          data-1p-ignore='true'
+          data-bwignore='true'
+          data-form-type='other'
+          data-lpignore='true'
+          data-np-checked='1'
+          data-np-ignore='1'
+          name={name}
+          onChange={handleSearchChange}
+          placeholder='Search options...'
         type='text'
-        value={searchTerm}
-        {...stylex.props(styles.searchInput)}
-      />
+          value={searchTerm}
+          {...stylex.props(styles.searchInput)}
+        />
+      </div>
       <div {...stylex.props(styles.optionsList)}>
         <div
           ref={scrollContainerRef}

@@ -96,6 +96,7 @@ export const styles = {
   optionDisabled: localStyles.optionDisabled,
   optionsList: localStyles.optionsList,
   searchInput: filterBaseStyles.input,
+  searchInputWrapper: filterBaseStyles.inputWrapper,
   virtualContainer: localStyles.virtualContainer,
   virtualOffset: localStyles.virtualOffset,
   virtualScrollArea: localStyles.virtualScrollArea,
