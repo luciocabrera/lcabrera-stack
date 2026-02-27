@@ -6,8 +6,8 @@ import { useVirtualization } from '@/hooks';
 
 import type { VirtualListProps } from './VirtualList.types';
 
-import { SkeletonOptions } from '../Table/filters/SelectFilterInput/SkeletonOptions';
-import { VirtualizedOption } from '../Table/filters/SelectFilterInput/VirtualizedOption';
+import { SkeletonOptions } from './SkeletonOptions';
+import { VirtualizedOption } from './VirtualizedOption';
 import { styles } from './VirtualList.stylex';
 
 const ITEM_HEIGHT = 32;

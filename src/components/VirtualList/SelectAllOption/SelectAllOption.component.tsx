@@ -2,7 +2,7 @@ import * as stylex from '@stylexjs/stylex';
 
 import type { SelectAllOptionProps } from './SelectAllOption.types';
 
-import { skeletonStyles, styles } from '../SelectFilterInput.stylex';
+import { skeletonStyles, styles } from '../VirtualList.stylex';
 
 export const SelectAllOption = ({
   isAllSelected,
