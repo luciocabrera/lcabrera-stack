@@ -1,7 +1,8 @@
 import * as stylex from '@stylexjs/stylex';
-import { useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 import type { TableColumn } from './components/Table/Table.types';
+import type { VirtualListDataState } from './components/VirtualList';
 
 import { styles } from './App.stylex';
 import { Button } from './components/Button';
@@ -34,6 +35,7 @@ import {
   HorizontalToolbarExample,
   HorizontalToolbarExampleShort,
 } from './components/Toolbar/Toolbar.examples';
+import { VirtualSelect } from './components/VirtualSelect';
 import { useTheme } from './hooks/useTheme.hook';
 
 function mulberry32(seed: number) {
@@ -130,6 +132,36 @@ const FAKE_API_DELAY_MS = 2000;
 
 const PERSISTENCE_KEY = 'app-showcase-table';
 
+// --- VirtualSelect showcase data ---
+const STATIC_FRUITS = [
+  'Apple',
+  'Banana',
+  'Cherry',
+  'Date',
+  'Elderberry',
+  'Fig',
+  'Grape',
+  'Honeydew',
+  'Kiwi',
+  'Lemon',
+  'Mango',
+  'Nectarine',
+  'Orange',
+  'Papaya',
+  'Quince',
+  'Raspberry',
+  'Strawberry',
+  'Tangerine',
+  'Watermelon',
+];
+
+// Large dataset for fetch simulation (5000 cities)
+const LARGE_DATASET = [...Array.from({ length: 5000 }).keys()].map(
+  (i) => `City_${String(i + 1).padStart(5, '0')}`,
+);
+const FETCH_PAGE_SIZE = 50;
+const FETCH_DELAY_MS = 800;
+
 /**
  * Simulate fetching table data from an API
  */
@@ -154,6 +186,56 @@ const App = () => {
   const [isLeftPanelOpen, setIsLeftPanelOpen] = useState(false);
   const [isRightPanelOpen, setIsRightPanelOpen] = useState(false);
   const [tableKey, setTableKey] = useState(0);
+
+  // --- VirtualSelect showcase state ---
+  const [singleSelected, setSingleSelected] = useState<string[]>([]);
+  const [multiSelected, setMultiSelected] = useState<string[]>([]);
+  const [fetchSelected, setFetchSelected] = useState<string[]>([]);
+  const [fetchDataState, setFetchDataState] = useState<VirtualListDataState>({
+    data: [],
+    hasMore: true,
+    isLoading: false,
+    isLoadingMore: false,
+  });
+
+  const fetchedCountRef = useRef(0);
+
+  const handleFetchInitial = useCallback(() => {
+    setFetchDataState({
+      data: [],
+      hasMore: true,
+      isLoading: true,
+      isLoadingMore: false,
+    });
+    fetchedCountRef.current = 0;
+
+    setTimeout(() => {
+      const page = LARGE_DATASET.slice(0, FETCH_PAGE_SIZE);
+      fetchedCountRef.current = FETCH_PAGE_SIZE;
+      setFetchDataState({
+        data: page,
+        hasMore: FETCH_PAGE_SIZE < LARGE_DATASET.length,
+        isLoading: false,
+        isLoadingMore: false,
+      });
+    }, FETCH_DELAY_MS);
+  }, []);
+
+  const handleFetchMore = useCallback(() => {
+    setFetchDataState((prev) => ({ ...prev, isLoadingMore: true }));
+
+    setTimeout(() => {
+      const nextCount = fetchedCountRef.current + FETCH_PAGE_SIZE;
+      const nextPage = LARGE_DATASET.slice(0, nextCount);
+      fetchedCountRef.current = nextCount;
+      setFetchDataState({
+        data: nextPage,
+        hasMore: nextCount < LARGE_DATASET.length,
+        isLoading: false,
+        isLoadingMore: false,
+      });
+    }, FETCH_DELAY_MS);
+  }, []);
 
   // Function to reload the table data (for testing)
   const reloadTableData = () => {
@@ -287,6 +369,68 @@ const App = () => {
               </Card>
             </div>
           </div>
+
+          {/* Table Showcase Section */}
+          <section {...stylex.props(styles.section)}>
+            <h2 {...stylex.props(styles.sectionTitle)}>VirtualSelect</h2>
+
+            <div {...stylex.props(styles.subsection)}>
+              <h3 {...stylex.props(styles.subsectionTitle)}>Single Select (static options)</h3>
+              <div style={{ maxWidth: '20rem' }}>
+                <VirtualSelect
+                  mode='single'
+                  onChange={setSingleSelected}
+                  options={STATIC_FRUITS}
+                  placeholder='Pick a fruit...'
+                  selected={singleSelected}
+                />
+              </div>
+              <p style={{ color: '#6b7280', fontSize: 13, marginTop: 8 }}>
+                Selected: {singleSelected.length > 0 ? singleSelected.join(', ') : '(none)'}
+              </p>
+            </div>
+
+            <div {...stylex.props(styles.subsection)}>
+              <h3 {...stylex.props(styles.subsectionTitle)}>Multi Select (static options)</h3>
+              <div style={{ maxWidth: '20rem' }}>
+                <VirtualSelect
+                  mode='multi'
+                  onChange={setMultiSelected}
+                  options={STATIC_FRUITS}
+                  placeholder='Pick fruits...'
+                  selected={multiSelected}
+                />
+              </div>
+              <p style={{ color: '#6b7280', fontSize: 13, marginTop: 8 }}>
+                Selected: {multiSelected.length > 0 ? multiSelected.join(', ') : '(none)'}
+              </p>
+            </div>
+
+            <div {...stylex.props(styles.subsection)}>
+              <h3 {...stylex.props(styles.subsectionTitle)}>
+                Fetch Mode (5,000 items, paginated {FETCH_PAGE_SIZE} at a time)
+              </h3>
+              <div style={{ maxWidth: '20rem' }}>
+                <VirtualSelect
+                  dataState={fetchDataState}
+                  mode='multi'
+                  onChange={setFetchSelected}
+                  onFetchInitial={handleFetchInitial}
+                  onFetchMore={handleFetchMore}
+                  placeholder='Search cities...'
+                  selected={fetchSelected}
+                />
+              </div>
+              <p style={{ color: '#6b7280', fontSize: 13, marginTop: 8 }}>
+                Loaded: {fetchDataState.data.length} / {LARGE_DATASET.length}
+                {fetchDataState.isLoading && ' — Loading...'}
+                {fetchDataState.isLoadingMore && ' — Loading more...'}
+              </p>
+              <p style={{ color: '#6b7280', fontSize: 13, marginTop: 4 }}>
+                Selected: {fetchSelected.length > 0 ? fetchSelected.join(', ') : '(none)'}
+              </p>
+            </div>
+          </section>
 
           {/* Table Showcase Section */}
           <section {...stylex.props(styles.section)}>

@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import type {
   ColumnFilter,
@@ -10,6 +10,7 @@ import type {
 } from '@/types/filterOperators.types';
 
 import { useGetNormalizedColumn } from '@/components/Table/contexts/TableConfig/columns/selectors/useGetNormalizedColumn.hook';
+import { VirtualSelect } from '@/components/VirtualSelect';
 
 import type { FilterInputsProps } from './FilterInputs.types';
 
@@ -40,42 +41,68 @@ export const FilterInputs = <TData,>({
     [column.dataType, filter],
   );
 
-  // TODO: I think we should to use the data type
-  // Handle operator change - updates parent filter state directly
-  const handleOperatorChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newOperator = e.target.value as OperatorType;
+  const operatorOptions = useMemo(
+    () => getOperatorOptions({ dataType: column.dataType }),
+    [column.dataType],
+  );
 
-    // Boolean filters don't have operators
-    if (filter?.type === 'boolean') return;
+  // Map operator options to labels for VirtualSelect display
+  const operatorLabels = useMemo(
+    () => operatorOptions.map((op) => op.label),
+    [operatorOptions],
+  );
 
-    // If filter exists, update it with new operator
-    if (filter) {
-      onChange({ ...filter, operator: newOperator } as ColumnFilter);
-      return;
-    }
+  // Resolve current operator value to its label for VirtualSelect selected state
+  const selectedOperatorLabel = useMemo(() => {
+    const match = operatorOptions.find((op) => op.value === operator);
+    return match ? [match.label] : [];
+  }, [operator, operatorOptions]);
 
-    // No filter yet - create initial filter based on column data type
-    if (column.dataType === 'number') {
-      onChange({
-        operator: newOperator as NumberOperatorType,
-        type: 'number',
-        value: undefined as unknown as number,
-      });
-    } else if (column.dataType === 'date') {
-      onChange({
-        operator: newOperator as DateOperatorType,
-        type: 'date',
-        value: '',
-      });
-    } else {
-      // String type (text filter)
-      onChange({
-        operator: newOperator as TextOperatorType,
-        type: 'text',
-        value: '',
-      });
-    }
-  };
+  const handleOperatorChange = useCallback(
+    (selectedLabels: string[]) => {
+      const selectedLabel = selectedLabels[0];
+      if (!selectedLabel) return;
+
+      const matchingOp = operatorOptions.find(
+        (op) => op.label === selectedLabel,
+      );
+      if (!matchingOp) return;
+
+      const newOperator = matchingOp.value;
+
+      // Boolean filters don't have operators
+      if (filter?.type === 'boolean') return;
+
+      // If filter exists, update it with new operator
+      if (filter) {
+        onChange({ ...filter, operator: newOperator } as ColumnFilter);
+        return;
+      }
+
+      // No filter yet - create initial filter based on column data type
+      if (column.dataType === 'number') {
+        onChange({
+          operator: newOperator as NumberOperatorType,
+          type: 'number',
+          value: undefined as unknown as number,
+        });
+      } else if (column.dataType === 'date') {
+        onChange({
+          operator: newOperator as DateOperatorType,
+          type: 'date',
+          value: '',
+        });
+      } else {
+        // String type (text filter)
+        onChange({
+          operator: newOperator as TextOperatorType,
+          type: 'text',
+          value: '',
+        });
+      }
+    },
+    [column.dataType, filter, onChange, operatorOptions],
+  );
 
   // Render based on data type
   // Boolean has no operator dropdown - render directly
@@ -88,21 +115,15 @@ export const FilterInputs = <TData,>({
     );
   }
 
-  const operatorOptions = getOperatorOptions({ dataType: column.dataType });
-
   return (
     <div {...stylex.props(styles.container)}>
-      <select
+      <VirtualSelect
+        mode='single'
         onChange={handleOperatorChange}
-        value={operator}
-        {...stylex.props(styles.select)}
-      >
-        {operatorOptions.map((op) => (
-          <option key={op.value} value={op.value}>
-            {op.label}
-          </option>
-        ))}
-      </select>
+        options={operatorLabels}
+        placeholder='Select operator...'
+        selected={selectedOperatorLabel}
+      />
       <InputContent
         columnKey={columnKey}
         dataType={column.dataType}

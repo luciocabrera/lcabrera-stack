@@ -1,5 +1,7 @@
 export type VirtualizedOptionProps = {
   filteredOptions: string[];
+  hasCheckboxes?: boolean;
+  hasSelectAll?: boolean;
   index: number;
   isAllSelected: boolean;
   isLoading: boolean;

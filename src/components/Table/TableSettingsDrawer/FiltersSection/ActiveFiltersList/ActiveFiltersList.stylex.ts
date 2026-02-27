@@ -32,7 +32,7 @@ export const styles = stylex.create({
     borderRadius: borderRadius.md,
     borderStyle: 'solid',
     borderWidth: '1px',
-    overflow: 'hidden',
+    overflow: 'visible',
     backgroundColor: colors.surfacePrimary,
   },
   filterItemHeader: {

@@ -12,7 +12,7 @@ export const styles = stylex.create({
     borderRadius: '0.5rem',
     borderStyle: 'solid',
     borderWidth: '1px',
-    overflow: 'hidden',
+    overflow: 'visible',
     transition: 'opacity 0.15s ease',
     backgroundColor: colors.surfacePrimary,
     boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
@@ -65,7 +65,7 @@ export const styles = stylex.create({
   body: {
     padding: `0 ${spacing.md}`,
     flex: '1',
-    overflow: 'hidden',
+    overflow: 'visible',
   },
   footer: {
     padding: spacing.md,

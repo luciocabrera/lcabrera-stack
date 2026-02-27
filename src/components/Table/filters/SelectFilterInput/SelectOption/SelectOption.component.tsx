@@ -5,20 +5,28 @@ import type { SelectOptionProps } from './SelectOption.types';
 import { skeletonStyles, styles } from '../SelectFilterInput.stylex';
 
 export const SelectOption = ({
+  hasCheckbox = true,
   isLoading,
   isSelected,
   onToggle,
   option,
 }: SelectOptionProps) => (
   <label {...stylex.props(styles.option, isLoading && styles.optionDisabled)}>
-    <input
-      checked={isSelected}
-      disabled={isLoading}
-      onChange={onToggle}
-      type='checkbox'
-      {...stylex.props(styles.checkbox)}
-    />
-    <span {...stylex.props(styles.label)}>{option}</span>
+    {hasCheckbox && (
+      <input
+        checked={isSelected}
+        disabled={isLoading}
+        onChange={onToggle}
+        type='checkbox'
+        {...stylex.props(styles.checkbox)}
+      />
+    )}
+    <span
+      onClick={hasCheckbox ? undefined : onToggle}
+      {...stylex.props(styles.label)}
+    >
+      {option}
+    </span>
     {isLoading && (
       <div {...stylex.props(skeletonStyles.loadingOverlay)}>
         <div {...stylex.props(skeletonStyles.shimmerWave)} />
