@@ -6,7 +6,7 @@ import { serializeStateSlice } from '../utils';
 
 const PERSIST_COOKIE_ACTION = '/_action/persist-cookie';
 
-type PersistCookieArgs<TSlice> = {
+type PersistCookieEntry<TSlice = unknown> = {
   persistenceKey: string;
   searchParamKey?: string;
   searchParamValue?: string;
@@ -20,45 +20,66 @@ type PersistCookieArgs<TSlice> = {
  * Uses useFetcher to POST to the /api/persist-cookie resource route,
  * which sets the cookie server-side via Set-Cookie response header.
  *
+ * Supports both a single entry and a batch of entries.
+ *
  * @example
+ * // Single entry
  * const persistTableState = usePersistTableStateAction();
  * persistTableState({
- *   persistenceKey: 'table-state-orders-columnFilters',
+ *   persistenceKey: 'table-state-orders',
+ *   slice: 'columnFilters',
  *   valueSlice: { status: 'active' },
  *   searchParamKey: 'filters',
  *   searchParamValue: '{"status":"active"}',
  * });
+ *
+ * @example
+ * // Batch entries
+ * persistTableState([
+ *   { persistenceKey: 'table-state-orders', slice: 'columnFilters', valueSlice: filters, searchParamKey: 'filters', searchParamValue: JSON.stringify(filters) },
+ *   { persistenceKey: 'table-state-orders', slice: 'sorting', valueSlice: sorting, searchParamKey: 'sort', searchParamValue: JSON.stringify(sorting) },
+ *   { persistenceKey: 'table-state-orders', slice: 'columnOrder', valueSlice: columnOrder },
+ * ]);
  */
-type PersistTableStateAction = <TSlice>(
-  args: PersistCookieArgs<TSlice>,
-) => void;
+type PersistTableStateAction = {
+  <TSlice>(entry: PersistCookieEntry<TSlice>): void;
+  (entries: PersistCookieEntry[]): void;
+};
 
 export const usePersistTableStateAction = (): PersistTableStateAction => {
   const fetcher = useFetcher();
   const location = useLocation();
 
-  return <TSlice>({
-    persistenceKey,
-    searchParamKey,
-    searchParamValue,
-    slice,
-    valueSlice,
-  }: PersistCookieArgs<TSlice>) => {
-    const { key, value } = serializeStateSlice({
-      persistenceKey,
-      slice,
-      value: valueSlice,
-    });
+  return ((args: PersistCookieEntry | PersistCookieEntry[]) => {
+    const entries = Array.isArray(args) ? args : [args];
     const currentUrl = `${location.pathname}${location.search}`;
-    void fetcher.submit(
-      {
-        currentUrl,
-        key,
-        searchParamKey: searchParamKey ?? '',
-        searchParamValue: searchParamValue ?? '',
-        value,
+
+    const serializedEntries = entries.map(
+      ({
+        persistenceKey,
+        searchParamKey,
+        searchParamValue,
+        slice,
+        valueSlice,
+      }) => {
+        const { key, value } = serializeStateSlice({
+          persistenceKey,
+          slice,
+          value: valueSlice,
+        });
+
+        return {
+          key,
+          searchParamKey: searchParamKey ?? '',
+          searchParamValue: searchParamValue ?? '',
+          value,
+        };
       },
+    );
+
+    void fetcher.submit(
+      { currentUrl, entries: JSON.stringify(serializedEntries) },
       { action: PERSIST_COOKIE_ACTION, method: 'POST' },
     );
-  };
+  }) as PersistTableStateAction;
 };

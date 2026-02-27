@@ -1,5 +1,4 @@
 import { useCallback } from 'react';
-import { useSearchParams } from 'react-router';
 
 import type {
   ColumnFiltersState,
@@ -10,10 +9,10 @@ import type {
 } from '@/components/Table/Table.types';
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { usePersistTableStateAction } from '@/components/Table/hooks';
 import {
   getEffectiveColumns,
   getNormalizedColummns,
-  writeStateSlice,
 } from '@/components/Table/utils';
 
 export type BatchTableSettingsUpdate<TData> = {
@@ -26,7 +25,7 @@ export type BatchTableSettingsUpdate<TData> = {
 
 export const useBatchSetTableSettings = <TData>() => {
   const { columnsStore, metaStore } = useTableConfigContextValue<TData>();
-  const [, setSearchParams] = useSearchParams();
+  const persistTableState = usePersistTableStateAction();
   const columnsState = columnsStore.get();
   const persistenceKey = metaStore.get()?.persistenceKey ?? '';
 
@@ -43,48 +42,46 @@ export const useBatchSetTableSettings = <TData>() => {
         sorting: settings.sorting,
       });
 
-      console.log(
-        '[useBatchSetTableSettings] Effective Columns:',
-        effectiveColumns,
-      );
-      console.log(
-        '[useBatchSetTableSettings] Normalized Columns:',
-        normalizedColumns,
-      );
-
-      const slices: (keyof BatchTableSettingsUpdate<TData>)[] = [
-        'sorting',
-        'columnFilters',
-        'columnOrder',
-        'columnSizing',
-        'columnVisibility',
-      ];
-
-      for (const slice of slices) {
-        writeStateSlice({
+      persistTableState([
+        {
           persistenceKey,
-          slice,
-          storageType: 'cookie',
-          value: settings[slice],
-        });
-      }
-
-      setSearchParams((params) => {
-        if (Object.keys(settings.columnFilters).length > 0) {
-          params.set('filters', JSON.stringify(settings.columnFilters));
-        } else {
-          params.delete('filters');
-        }
-        if (Object.keys(settings.sorting).length > 0) {
-          params.set('sort', JSON.stringify(settings.sorting));
-        } else {
-          params.delete('sort');
-        }
-        return params;
-      });
+          searchParamKey: 'filters',
+          searchParamValue:
+            Object.keys(settings.columnFilters).length > 0
+              ? JSON.stringify(settings.columnFilters)
+              : undefined,
+          slice: 'columnFilters',
+          valueSlice: settings.columnFilters,
+        },
+        {
+          persistenceKey,
+          searchParamKey: 'sort',
+          searchParamValue:
+            Object.keys(settings.sorting).length > 0
+              ? JSON.stringify(settings.sorting)
+              : undefined,
+          slice: 'sorting',
+          valueSlice: settings.sorting,
+        },
+        {
+          persistenceKey,
+          slice: 'columnOrder',
+          valueSlice: settings.columnOrder,
+        },
+        {
+          persistenceKey,
+          slice: 'columnSizing',
+          valueSlice: settings.columnSizing,
+        },
+        {
+          persistenceKey,
+          slice: 'columnVisibility',
+          valueSlice: settings.columnVisibility,
+        },
+      ]);
 
       columnsStore.set({ ...settings, effectiveColumns, normalizedColumns });
     },
-    [columnsStore, persistenceKey, setSearchParams, columnsState],
+    [columnsStore, columnsState, persistTableState, persistenceKey],
   );
 };

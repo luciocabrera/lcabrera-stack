@@ -51,7 +51,7 @@ export const useFetchMoreFilterData = <TData, TResponse>(columnKey: string) => {
         const totalLoadedRows = combinedData.length;
         const totalRows = dataTotalSelector
           ? dataTotalSelector(response)
-          : (currentFilterData.totalRows ?? totalLoadedRows);
+          : (currentFilterData.totalRows || totalLoadedRows);
 
         filtersDataStore.set({
           [columnKey]: {

@@ -23,23 +23,6 @@ export const useResetColumnFilter = () => {
     // Show loading feedback immediately
     dataStore.set({ isLoading: true });
 
-    // Persist to falling back storage mechanism (cookie/localStorage)
-    // writeStateSlice({
-    //   persistenceKey,
-    //   slice: 'columnFilters',
-    //   storageType: 'cookie',
-    //   value: rest,
-    // });
-
-    // setSearchParams((params) => {
-    //   if (Object.keys(rest).length > 0) {
-    //     params.set('filters', JSON.stringify(rest));
-    //   } else {
-    //     params.delete('filters');
-    //   }
-    //   return params;
-    // });
-
     // Persist to cookie and sync URL params in one action
     persistTableState<ColumnFiltersState>({
       persistenceKey,
