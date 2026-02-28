@@ -4,12 +4,12 @@ import { Button } from '@/components/Button';
 import { MenuCloseIcon } from '@/components/Icons';
 import { InfoBox } from '@/components/InfoBox';
 import { useGetNormalizedColumns } from '@/components/Table/contexts/TableConfig/columns/selectors';
+import { FilterInputs } from '@/components/Table/filters/FilterInputs/FilterInputs.component';
 
 import type { ActiveFiltersListProps } from './ActiveFiltersList.types';
 
 import { useSetColumnFilters } from '../../TableDrawerContext/hooks/store/columns/actions';
 import { useGetColumnFilters } from '../../TableDrawerContext/hooks/store/columns/selectors';
-import { FilterSectionBody } from '../FilterSectionBody';
 import { validateFilter } from '../validateFilter.util';
 import { styles } from './ActiveFiltersList.stylex';
 
@@ -57,6 +57,24 @@ export const ActiveFiltersList = ({
   }) => {
     const newFilters = { ...filters, [columnKey]: filter };
     onFiltersChange(newFilters);
+  };
+
+  const handleToggle = ({
+    columnKey,
+    filter,
+  }: {
+    columnKey: string;
+    filter?: (typeof filters)[string];
+  }) => {
+    if (filter) {
+      handleFilterChange({
+        columnKey,
+        filter,
+      });
+    } else {
+      // undefined means "clear filter" (e.g. boolean "All" selection)
+      handleRemoveFilter(columnKey);
+    }
   };
 
   return (
@@ -111,7 +129,14 @@ export const ActiveFiltersList = ({
                 </div>
                 {isExpanded && (
                   <div {...stylex.props(styles.filterItemContent)}>
-                    <FilterSectionBody
+                    <FilterInputs
+                      columnKey={columnKey}
+                      filter={filter}
+                      onChange={(newFilter) => {
+                        handleToggle({ columnKey, filter: newFilter });
+                      }}
+                    />
+                    {/* <FilterSectionBody
                       columnKey={columnKey}
                       filter={filter}
                       onChange={(newFilter) => {
@@ -125,7 +150,7 @@ export const ActiveFiltersList = ({
                           handleRemoveFilter(columnKey);
                         }
                       }}
-                    />
+                    /> */}
                   </div>
                 )}
               </div>

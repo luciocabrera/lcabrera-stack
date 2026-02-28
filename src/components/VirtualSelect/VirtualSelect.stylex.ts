@@ -31,7 +31,7 @@ const localStyles = stylex.create({
   dropdown: {
     borderColor: colors.borderPrimary,
     borderRadius: borderRadius.md,
-    borderStyle: 'solid',
+    borderStyle: 'none',
     borderWidth: '1px',
     overflow: 'hidden',
     backgroundColor: colors.surfacePrimary,

@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 
-const localStyles = stylex.create({
+export const styles = stylex.create({
   selectOverride: {
     borderRadius: 0,
     borderStyle: 'none',
@@ -9,6 +9,3 @@ const localStyles = stylex.create({
   },
 });
 
-export const styles = {
-  selectOverride: localStyles.selectOverride,
-};

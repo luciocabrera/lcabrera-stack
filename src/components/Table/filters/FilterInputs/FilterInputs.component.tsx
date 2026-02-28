@@ -120,6 +120,7 @@ export const FilterInputs = <TData,>({
   return (
     <div {...stylex.props(styles.container)}>
       <VirtualSelect
+        // customStylex={here}
         mode='single'
         onChange={handleOperatorChange}
         onOpenChange={setIsOperatorOpen}

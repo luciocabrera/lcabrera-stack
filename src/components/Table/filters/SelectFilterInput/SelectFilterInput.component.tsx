@@ -60,10 +60,7 @@ export const SelectFilterInput = <TData,>({
     fetchMoreFilterData,
   ]);
 
-  const selectedValues = useMemo(
-    () => filter?.values ?? [],
-    [filter?.values],
-  );
+  const selectedValues = useMemo(() => filter?.values ?? [], [filter?.values]);
 
   const handleChange = useCallback(
     (selected: string[]) => {
@@ -80,10 +77,8 @@ export const SelectFilterInput = <TData,>({
       listMaxHeight={listMaxHeight}
       mode='multi'
       onChange={handleChange}
-      onFetchInitial={
-        column.fetchFilterOptions ? handleFetchInitial : undefined
-      }
-      onFetchMore={column.fetchFilterOptions ? handleFetchMore : undefined}
+      onFetchInitial={handleFetchInitial}
+      onFetchMore={handleFetchMore}
       selected={selectedValues}
     />
   );
