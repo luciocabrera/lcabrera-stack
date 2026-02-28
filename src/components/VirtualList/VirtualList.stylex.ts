@@ -64,6 +64,10 @@ const localStyles = stylex.create({
     pointerEvents: 'none',
   },
   optionsList: {
+    borderColor: colors.borderPrimary,
+    borderRadius: '0.25rem',
+    borderStyle: 'solid',
+    borderWidth: '1px',
     gap: spacing.xs,
     display: 'flex',
     flexDirection: 'column',
