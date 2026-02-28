@@ -1,5 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 import { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 
 import type { SidePanelProps } from './SidePanel.types';
 
@@ -10,6 +11,7 @@ export const SidePanel = ({
   isOpen,
   isPinned,
   onClose,
+  portalContainer,
   position = 'right',
   shouldShowOverlay = true,
   size = 'md',
@@ -88,7 +90,7 @@ export const SidePanel = ({
 
   // When pinned, render as an aside instead of dialog
   if (isPinned) {
-    return (
+    const aside = (
       <aside
         aria-label='Settings panel'
         aria-modal='false'
@@ -100,6 +102,13 @@ export const SidePanel = ({
         {content}
       </aside>
     );
+
+    // Portal into the specified container when provided (e.g. FilterDrawer inside a <th>)
+    if (portalContainer?.current) {
+      return createPortal(aside, portalContainer.current);
+    }
+
+    return aside;
   }
 
   // When not pinned, use dialog element

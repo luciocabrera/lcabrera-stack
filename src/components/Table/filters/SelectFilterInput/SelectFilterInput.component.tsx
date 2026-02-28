@@ -63,6 +63,18 @@ export const SelectFilterInput = <TData,>({
 
   const selectedValues = useMemo(() => filter?.values ?? [], [filter?.values]);
 
+  // Map FilterData → VirtualListDataState (totalRows → totalCount)
+  const dataState = useMemo(
+    () => ({
+      data: filterData.data,
+      hasMore: filterData.hasMore,
+      isLoading: filterData.isLoading,
+      isLoadingMore: filterData.isLoadingMore,
+      totalCount: filterData.totalRows,
+    }),
+    [filterData],
+  );
+
   const handleChange = useCallback(
     (selected: string[]) => {
       onChange({ type: 'select', values: selected });
@@ -73,7 +85,7 @@ export const SelectFilterInput = <TData,>({
   return (
     <VirtualSelect
       customStylex={styles.selectOverride}
-      dataState={filterData}
+      dataState={dataState}
       isAlwaysOpen
       listMaxHeight={listMaxHeight}
       mode='multi'

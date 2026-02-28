@@ -34,12 +34,14 @@ const baseStyles = stylex.create({
 
   pinned: {
     overflow: 'hidden',
+    boxShadow: shadows.xl,
     flexShrink: 0,
     position: 'relative',
-    transform: 'none',
     zIndex: 'auto',
-    height: '100%', // Match parent height
-    maxHeight: '100%',
+    borderLeftColor: colors.borderPrimary,
+    borderLeftStyle: 'solid',
+    borderLeftWidth: '1px',
+    height: '100%',
   },
 
   // Style the native backdrop

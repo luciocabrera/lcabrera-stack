@@ -4,7 +4,12 @@ import type { TabItem } from '@/components/Tabs';
 import type { SortDirection } from '@/types/ui.types';
 
 import { Button } from '@/components/Button';
-import { MenuCloseIcon, MoreVerticalIcon } from '@/components/Icons';
+import {
+  MenuCloseIcon,
+  PinIcon,
+  PinOffIcon,
+  SettingsIcon,
+} from '@/components/Icons';
 import {
   SidePanel,
   SidePanelBody,
@@ -21,6 +26,7 @@ import {
   useGetNormalizedColumn,
   useGetNormalizedColumnFilters,
 } from '@/components/Table/contexts/TableConfig/columns/selectors';
+import { useTableWrapperRef } from '@/components/Table/contexts/TableWrapper';
 import { Tabs } from '@/components/Tabs';
 import { useRenderTracker } from '@/utils/performance';
 
@@ -39,6 +45,7 @@ export const FilterDrawer = <TData,>({
 
   const column = useGetNormalizedColumn<TData>(columnKey);
   const filter = useGetNormalizedColumnFilters<TData>(columnKey);
+  const wrapperRef = useTableWrapperRef();
 
   const resetColumnFilter = useResetColumnFilter();
   const setColumnFilter = useSetColumnFilter();
@@ -53,6 +60,9 @@ export const FilterDrawer = <TData,>({
   const [localSortDirection, setLocalSortDirection] = useState<SortDirection>(
     column.sortDirection,
   );
+
+  const [isPinned, setIsPinned] = useState(false);
+  const pinButtonTitle = isPinned ? 'Unpin drawer' : 'Pin drawer';
 
   // Ref to capture committed values when the drawer opens (for cancel/discard)
   const filterOnOpenRef = useRef(filter);
@@ -73,6 +83,7 @@ export const FilterDrawer = <TData,>({
   const handleAccept = () => {
     setColumnFilter({ columnKey: column.key, filter: localFilter });
     setColumnSorting({ columnKey, direction: localSortDirection });
+    if (isPinned) setIsPinned(false);
     onClose();
   };
 
@@ -80,7 +91,12 @@ export const FilterDrawer = <TData,>({
     // Discard draft changes
     setLocalFilter(filterOnOpenRef.current);
     setLocalSortDirection(sortOnOpenRef.current);
+    if (isPinned) setIsPinned(false);
     onClose();
+  };
+
+  const handleTogglePin = () => {
+    setIsPinned(!isPinned);
   };
 
   const handleClearAll = () => {
@@ -134,23 +150,35 @@ export const FilterDrawer = <TData,>({
   return (
     <SidePanel
       isOpen={isOpen}
+      isPinned={isPinned}
       onClose={handleCancel}
+      portalContainer={wrapperRef}
       position='right'
       size='md'
     >
       <SidePanelHeader
         actions={
-          <Button
-            aria-label='Close column drawer'
-            color='ghost'
-            icon={<MenuCloseIcon size={16} />}
-            onClick={handleCancel}
-            size='mini'
-            title='Close'
-          />
+          <>
+            <Button
+              aria-label={pinButtonTitle}
+              color='ghost'
+              icon={isPinned ? <PinIcon size={16} /> : <PinOffIcon size={16} />}
+              onClick={handleTogglePin}
+              size='mini'
+              title={pinButtonTitle}
+            />
+            <Button
+              aria-label='Close column drawer'
+              color='ghost'
+              icon={<MenuCloseIcon size={16} />}
+              onClick={handleCancel}
+              size='mini'
+              title='Close'
+            />
+          </>
         }
       >
-        <SidePanelTitle icon={<MoreVerticalIcon size={20} />}>
+        <SidePanelTitle icon={<SettingsIcon size={20} />}>
           {column.label}
         </SidePanelTitle>
       </SidePanelHeader>

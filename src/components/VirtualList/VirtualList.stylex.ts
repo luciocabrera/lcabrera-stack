@@ -107,6 +107,15 @@ const localStyles = stylex.create({
     position: 'relative',
     height,
   }),
+  loadedCount: {
+    padding: `${spacing.xxs} ${spacing.sm}`,
+    color: colors.textSecondary,
+    fontSize: typography.fontSizeXs,
+    textAlign: 'left',
+    // borderTopColor: colors.borderPrimary,
+    // borderTopStyle: 'solid' as const,
+    // borderTopWidth: '1px',
+  },
 });
 
 export const skeletonStyles = { ...skelleton };
@@ -116,6 +125,7 @@ export const styles = {
   container: filterBaseStyles.container,
   containerFill: localStyles.containerFill,
   label: localStyles.label,
+  loadedCount: localStyles.loadedCount,
   loadingMore: localStyles.loadingMore,
   noResults: localStyles.noResults,
   option: localStyles.option,

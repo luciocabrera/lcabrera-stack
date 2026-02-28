@@ -192,6 +192,17 @@ export const VirtualList = ({
           )}
         </div>
       </div>
+      {/* Loaded count legend */}
+      {dataState.data.length > 0 ? (
+        <p {...stylex.props(styles.loadedCount)}>
+          Loaded: {dataState.data.length}
+          {Number.isFinite(dataState.totalCount) && dataState.totalCount
+            ? ` / ${dataState.totalCount}`
+            : ''}
+          {dataState.isLoading && ' — Loading...'}
+          {dataState.isLoadingMore && ' — Loading more...'}
+        </p>
+      ) : undefined}
     </div>
   );
 };

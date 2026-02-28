@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 
 import { Button } from '@/components/Button';
 import { SettingsIcon } from '@/components/Icons';
@@ -15,6 +15,7 @@ import {
   useGetTableHasMore,
   useGetTableIsLoadingMore,
 } from '../contexts/TableData/data/selectors';
+import { TableWrapperContext } from '../contexts/TableWrapper/TableWrapperContext.context';
 import { useInfiniteScroll } from '../hooks';
 import { TableBase } from '../TableBase';
 import { TableBody } from '../TableBody';
@@ -38,8 +39,11 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   const fetchMoreData = useFetchMoreData<TData, TResponse>();
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  const wrapperContextValue = useMemo(() => ({ wrapperRef }), []);
 
   useInfiniteScroll({
     dataSelector,
@@ -60,36 +64,38 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   };
 
   return (
-    <div {...stylex.props(styles.wrapper)}>
-      <div {...stylex.props(styles.outerContainer)}>
-        <TableTitle
-          actions={
-            <>
-              {actions}
-              <Button
-                aria-label='Table settings'
-                color='ghost'
-                icon={<SettingsIcon size={16} />}
-                onClick={handleOpenSettings}
-                size='mini'
-              />
-            </>
-          }
-          icon={icon}
-        />
-        <div ref={containerRef} {...stylex.props(styles.container)}>
-          <TableBase>
-            <TableHeader />
-            <TableBody tableContainerRef={containerRef} />
-          </TableBase>
+    <TableWrapperContext value={wrapperContextValue}>
+      <div ref={wrapperRef} {...stylex.props(styles.wrapper)}>
+        <div {...stylex.props(styles.outerContainer)}>
+          <TableTitle
+            actions={
+              <>
+                {actions}
+                <Button
+                  aria-label='Table settings'
+                  color='ghost'
+                  icon={<SettingsIcon size={16} />}
+                  onClick={handleOpenSettings}
+                  size='mini'
+                />
+              </>
+            }
+            icon={icon}
+          />
+          <div ref={containerRef} {...stylex.props(styles.container)}>
+            <TableBase>
+              <TableHeader />
+              <TableBody tableContainerRef={containerRef} />
+            </TableBase>
+          </div>
         </div>
+        <TableDrawerProvider>
+          <TableSettingsDrawer
+            isOpen={isSettingsOpen}
+            onClose={handleCloseSettings}
+          />
+        </TableDrawerProvider>
       </div>
-      <TableDrawerProvider>
-        <TableSettingsDrawer
-          isOpen={isSettingsOpen}
-          onClose={handleCloseSettings}
-        />
-      </TableDrawerProvider>
-    </div>
+    </TableWrapperContext>
   );
 };

@@ -100,11 +100,6 @@ const localStyles = stylex.create({
     fontSize: typography.fontSizeSm,
     minWidth: 0,
   },
-  loadedCount: {
-    color: colors.textSecondary,
-    fontSize: typography.fontSizeXs,
-    marginTop: spacing.xxs,
-  },
   overflowTag: {
     padding: `0 ${spacing.xs}`,
     borderRadius: borderRadius.sm,
@@ -133,7 +128,6 @@ export const styles = {
   dropdownBase: localStyles.dropdown,
   dropdownStatic: localStyles.dropdownStatic,
   dropdownStaticFill: localStyles.dropdownStaticFill,
-  loadedCount: localStyles.loadedCount,
   overflowTag: localStyles.overflowTag,
   trigger: localStyles.trigger,
   triggerClamped: localStyles.triggerClamped,

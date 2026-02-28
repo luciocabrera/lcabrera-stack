@@ -50,7 +50,6 @@ export const VirtualSelect = ({
   placeholder = 'Select...',
   selected,
   shouldFillHeight = false,
-  shouldShowLoadedCount = true,
 }: VirtualSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -208,16 +207,6 @@ export const VirtualSelect = ({
             shouldFillHeight={shouldFillHeight}
           />
         </div>
-      )}
-
-      {/* Loaded count legend */}
-      {shouldShowLoadedCount && effectiveDataState.totalCount && (
-        <p {...stylex.props(styles.loadedCount)}>
-          Loaded: {effectiveDataState.data.length} /{' '}
-          {effectiveDataState.totalCount}
-          {effectiveDataState.isLoading && ' — Loading...'}
-          {effectiveDataState.isLoadingMore && ' — Loading more...'}
-        </p>
       )}
     </div>
   );

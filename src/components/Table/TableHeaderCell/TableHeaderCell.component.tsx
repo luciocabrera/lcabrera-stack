@@ -110,11 +110,11 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
         )}
         {isFilterable && dataType && (
           <>
-            <FilterButton onClick={() => setIsFilterOpen(true)} />
+            <FilterButton onClick={() => { setIsFilterOpen(true); }} />
             <FilterDrawer
               columnKey={columnKey}
               isOpen={isFilterOpen}
-              onClose={() => setIsFilterOpen(false)}
+              onClose={() => { setIsFilterOpen(false); }}
             />
           </>
         )}
