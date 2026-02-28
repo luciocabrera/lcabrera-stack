@@ -21,7 +21,6 @@ export const styles = stylex.create({
     fontSize: typography.fontSizeSm,
     fontWeight: 600,
     letterSpacing: '0.05em',
-    textTransform: 'uppercase',
   },
 
   buttonGroup: {

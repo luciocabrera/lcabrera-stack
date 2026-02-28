@@ -14,7 +14,6 @@ export const styles = stylex.create({
     color: colors.textSecondary,
     fontSize: typography.fontSizeSm,
     fontWeight: 600,
-    textTransform: 'uppercase',
     marginBottom: spacing.xs,
   },
   columnItem: {

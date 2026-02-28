@@ -11,7 +11,10 @@ export const SelectOption = ({
   onToggle,
   option,
 }: SelectOptionProps) => (
-  <label {...stylex.props(styles.option, isLoading && styles.optionDisabled)}>
+  <label
+    onClick={hasCheckbox ? undefined : onToggle}
+    {...stylex.props(styles.option, isLoading && styles.optionDisabled)}
+  >
     {hasCheckbox && (
       <input
         checked={isSelected}
@@ -21,10 +24,7 @@ export const SelectOption = ({
         {...stylex.props(styles.checkbox)}
       />
     )}
-    <span
-      onClick={hasCheckbox ? undefined : onToggle}
-      {...stylex.props(styles.label)}
-    >
+    <span {...stylex.props(styles.label)}>
       {option}
     </span>
     {isLoading && (

@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import type { DraggableItem } from '@/components/DraggableList';
 
@@ -8,6 +8,7 @@ import { DraggableList } from '@/components/DraggableList';
 import { MenuCloseIcon, SortAscIcon, SortDescIcon } from '@/components/Icons';
 import { InfoBox } from '@/components/InfoBox';
 import { useGetColumns } from '@/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
+import { VirtualSelect } from '@/components/VirtualSelect';
 
 import type { SortingSectionProps, SortItem } from './SortingSection.types';
 
@@ -24,6 +25,37 @@ export const SortingSection = ({ ...props }: SortingSectionProps) => {
 
   // Filter to only sortable columns
   const sortableColumns = columns.filter((col) => col.isSortable !== false);
+
+  // Get columns not yet in sort list
+  const availableColumns = sortableColumns.filter(
+    (col) => !sorting.some((s) => s.columnKey === col.key),
+  );
+
+  // Map available columns to label strings for VirtualSelect
+  const availableColumnLabels = useMemo(
+    () => availableColumns.map((col) => col.label),
+    [availableColumns],
+  );
+
+  // Resolve selected column key to its label for VirtualSelect
+  const selectedColumnLabel = useMemo(() => {
+    if (!selectedColumn) return [];
+    const col = sortableColumns.find((c) => c.key === selectedColumn);
+    return col ? [col.label] : [];
+  }, [selectedColumn, sortableColumns]);
+
+  const handleColumnSelect = useCallback(
+    (selectedLabels: string[]) => {
+      const label = selectedLabels[0];
+      if (!label) {
+        setSelectedColumn('');
+        return;
+      }
+      const col = availableColumns.find((c) => c.label === label);
+      setSelectedColumn(col?.key ?? '');
+    },
+    [availableColumns],
+  );
 
   // Convert sorting state to sort items with labels
   const sortItems: SortItem[] = sorting.map((sort) => ({
@@ -112,29 +144,17 @@ export const SortingSection = ({ ...props }: SortingSectionProps) => {
     id: item.columnKey,
   }));
 
-  // Get columns not yet in sort list
-  const availableColumns = sortableColumns.filter(
-    (col) => !sorting.some((s) => s.columnKey === col.key),
-  );
-
   return (
     <div {...stylex.props(styles.container)} {...props}>
       <div {...stylex.props(styles.addSection)}>
         <h3 {...stylex.props(styles.header)}>Add Sort Column</h3>
-        <select
-          {...stylex.props(styles.select)}
-          onChange={(e) => {
-            setSelectedColumn(e.target.value);
-          }}
-          value={selectedColumn}
-        >
-          <option value=''>Select a column...</option>
-          {availableColumns.map((col) => (
-            <option key={col.key} value={col.key}>
-              {col.label}
-            </option>
-          ))}
-        </select>
+        <VirtualSelect
+          mode='single'
+          onChange={handleColumnSelect}
+          options={availableColumnLabels}
+          placeholder='Select a column...'
+          selected={selectedColumnLabel}
+        />
         <Button
           isDisabled={!selectedColumn}
           onClick={handleAddSort}

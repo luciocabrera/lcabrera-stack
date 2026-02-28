@@ -1,11 +1,12 @@
 import * as stylex from '@stylexjs/stylex';
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { Button } from '@/components/Button';
 import {
   useGetColumns,
   useGetNormalizedColumns,
 } from '@/components/Table/contexts/TableConfig/columns/selectors';
+import { VirtualSelect } from '@/components/VirtualSelect';
 
 import type { AddFilterSectionProps } from './AddFilterSection.types';
 
@@ -28,6 +29,40 @@ export const AddFilterSection = ({
 
   // Filter to only filterable columns
   const filterableColumns = columns.filter((col) => col.isFilterable !== false);
+
+  // Map filterable columns to label strings for VirtualSelect
+  const filterableColumnLabels = useMemo(
+    () =>
+      filterableColumns.map((col) => {
+        const hasActiveFilter = Boolean(filters[col.key]);
+        return hasActiveFilter ? `${col.label} ⚠️ (filtered)` : col.label;
+      }),
+    [filterableColumns, filters],
+  );
+
+  // Resolve selected column key to its label for VirtualSelect
+  const selectedColumnLabel = useMemo(() => {
+    if (!selectedColumn) return [];
+    const col = filterableColumns.find((c) => c.key === selectedColumn);
+    if (!col) return [];
+    const hasActiveFilter = Boolean(filters[col.key]);
+    return [hasActiveFilter ? `${col.label} ⚠️ (filtered)` : col.label];
+  }, [filterableColumns, filters, selectedColumn]);
+
+  const handleColumnSelect = useCallback(
+    (selectedLabels: string[]) => {
+      const label = selectedLabels[0];
+      if (!label) {
+        setSelectedColumn('');
+        return;
+      }
+      // Strip the " ⚠️ (filtered)" suffix when matching
+      const cleanLabel = label.replace(' ⚠️ (filtered)', '');
+      const col = filterableColumns.find((c) => c.label === cleanLabel);
+      setSelectedColumn(col?.key ?? '');
+    },
+    [filterableColumns],
+  );
 
   const handleAddFilter = () => {
     if (!selectedColumn) return;
@@ -83,24 +118,13 @@ export const AddFilterSection = ({
   return (
     <div {...stylex.props(styles.container)}>
       <h3 {...stylex.props(styles.header)}>Add Filter</h3>
-      <select
-        {...stylex.props(styles.select)}
-        onChange={(e) => {
-          setSelectedColumn(e.target.value);
-        }}
-        value={selectedColumn}
-      >
-        <option value=''>Select a column...</option>
-        {filterableColumns.map((col) => {
-          const hasActiveFilter = Boolean(filters[col.key]);
-          return (
-            <option key={col.key} value={col.key}>
-              {col.label}
-              {hasActiveFilter ? ' ⚠️ (filtered)' : ''}
-            </option>
-          );
-        })}
-      </select>
+      <VirtualSelect
+        mode='single'
+        onChange={handleColumnSelect}
+        options={filterableColumnLabels}
+        placeholder='Select a column...'
+        selected={selectedColumnLabel}
+      />
       <Button
         isDisabled={!selectedColumn}
         onClick={handleAddFilter}
