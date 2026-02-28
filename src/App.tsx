@@ -431,7 +431,7 @@ const App = () => {
                   onFetchMore={handleFetchMore}
                   placeholder='Search cities...'
                   selected={fetchSelected}
-                  showLoadedCount
+                  shouldShowLoadedCount
                 />
               </div>
               <p style={{ color: '#6b7280', fontSize: 13, marginTop: 4 }}>

@@ -142,7 +142,9 @@ export const VirtualList = ({
           {...stylex.props(styles.searchInput)}
         />
       </div>
-      <div {...stylex.props(styles.optionsList)}>
+      <div
+        {...stylex.props(styles.optionsList)}
+      >
         <div
           ref={scrollContainerRef}
           {...stylex.props(styles.virtualContainer(listMaxHeight))}

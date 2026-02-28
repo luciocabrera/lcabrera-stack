@@ -23,7 +23,7 @@ export const VirtualSelect = ({
   options = [],
   placeholder = 'Select...',
   selected,
-  showLoadedCount = true,
+  shouldShowLoadedCount = true,
 }: VirtualSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -133,7 +133,7 @@ export const VirtualSelect = ({
       )}
 
       {/* Loaded count legend */}
-      {showLoadedCount && effectiveDataState.totalCount  && (
+      {shouldShowLoadedCount && effectiveDataState.totalCount  && (
         <p {...stylex.props(styles.loadedCount)}>
           Loaded: {effectiveDataState.data.length} /{' '}
           {effectiveDataState.totalCount}
