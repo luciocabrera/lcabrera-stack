@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import type { FilterOptionsResponse } from '@/components/Table/Table.types';
 
@@ -8,7 +8,7 @@ import {
 } from '@/components/Table/contexts/FiltersData/filters/actions';
 import { useGetFilterData } from '@/components/Table/contexts/FiltersData/filters/selectors';
 import { useGetNormalizedColumn } from '@/components/Table/contexts/TableConfig/columns/selectors';
-import { VirtualList } from '@/components/VirtualList';
+import { VirtualSelect } from '@/components/VirtualSelect';
 
 import type { SelectFilterInputProps } from './SelectFilterInput.types';
 
@@ -58,17 +58,30 @@ export const SelectFilterInput = <TData,>({
     fetchMoreFilterData,
   ]);
 
+  const selectedValues = useMemo(
+    () => filter?.values ?? [],
+    [filter?.values],
+  );
+
+  const handleChange = useCallback(
+    (selected: string[]) => {
+      onChange({ type: 'select', values: selected });
+    },
+    [onChange],
+  );
+
   return (
-    <VirtualList
+    <VirtualSelect
       dataState={filterData}
-      filter={filter}
+      isAlwaysOpen
       listMaxHeight={listMaxHeight}
-      name={`filter-search-${columnKey}`}
-      onChange={onChange}
+      mode='multi'
+      onChange={handleChange}
       onFetchInitial={
         column.fetchFilterOptions ? handleFetchInitial : undefined
       }
       onFetchMore={column.fetchFilterOptions ? handleFetchMore : undefined}
+      selected={selectedValues}
     />
   );
 };

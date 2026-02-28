@@ -71,6 +71,8 @@ export const InputContent = <TData,>({
                   ...selectFilter,
                   operator: textOp === 'notEquals' ? 'notEquals' : 'equals',
                 });
+              } else {
+                onChange();
               }
             }}
           />
