@@ -21,4 +21,6 @@ export type VirtualSelectProps = {
   placeholder?: string;
   /** Currently selected value(s) */
   selected: string[];
+  /** Show a "Loaded: x / total" legend below the trigger */
+  showLoadedCount?: boolean;
 };

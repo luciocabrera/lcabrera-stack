@@ -22,6 +22,7 @@ export const VirtualSelect = ({
   options = [],
   placeholder = 'Select...',
   selected,
+  showLoadedCount = true,
 }: VirtualSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -122,6 +123,16 @@ export const VirtualSelect = ({
             onFetchMore={onFetchMore}
           />
         </div>
+      )}
+
+      {/* Loaded count legend */}
+      {showLoadedCount && effectiveDataState.totalCount != null && (
+        <p {...stylex.props(styles.loadedCount)}>
+          Loaded: {effectiveDataState.data.length} /{' '}
+          {effectiveDataState.totalCount}
+          {effectiveDataState.isLoading && ' — Loading...'}
+          {effectiveDataState.isLoadingMore && ' — Loading more...'}
+        </p>
       )}
     </div>
   );

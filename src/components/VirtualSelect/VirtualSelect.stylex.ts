@@ -26,7 +26,7 @@ const localStyles = stylex.create({
     width: '100%',
   },
   dropdown: {
-    borderColor: colors.borderPrimary,
+    borderColor: colors.borderFocus,
     borderRadius: borderRadius.md,
     borderStyle: 'solid',
     borderWidth: '1px',
@@ -80,12 +80,18 @@ const localStyles = stylex.create({
     fontSize: typography.fontSizeSm,
     minWidth: 0,
   },
+  loadedCount: {
+    color: colors.textSecondary,
+    fontSize: typography.fontSizeXs,
+    marginTop: spacing.xxs,
+  },
 });
 
 export const styles = {
   chevron: localStyles.chevron,
   container: localStyles.container,
   dropdown: localStyles.dropdown,
+  loadedCount: localStyles.loadedCount,
   trigger: localStyles.trigger,
   triggerLabel: localStyles.triggerLabel,
   triggerOpen: localStyles.triggerOpen,

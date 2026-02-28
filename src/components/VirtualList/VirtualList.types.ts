@@ -5,6 +5,8 @@ export type VirtualListDataState = {
   hasMore: boolean;
   isLoading: boolean;
   isLoadingMore: boolean;
+  /** Total number of items available (used for "Loaded: x / total" display) */
+  totalCount?: number;
 };
 
 export type VirtualListProps = {

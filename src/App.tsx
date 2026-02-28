@@ -196,6 +196,7 @@ const App = () => {
     hasMore: true,
     isLoading: false,
     isLoadingMore: false,
+    totalCount: LARGE_DATASET.length,
   });
 
   const fetchedCountRef = useRef(0);
@@ -206,6 +207,7 @@ const App = () => {
       hasMore: true,
       isLoading: true,
       isLoadingMore: false,
+      totalCount: LARGE_DATASET.length,
     });
     fetchedCountRef.current = 0;
 
@@ -217,6 +219,7 @@ const App = () => {
         hasMore: FETCH_PAGE_SIZE < LARGE_DATASET.length,
         isLoading: false,
         isLoadingMore: false,
+        totalCount: LARGE_DATASET.length,
       });
     }, FETCH_DELAY_MS);
   }, []);
@@ -233,6 +236,7 @@ const App = () => {
         hasMore: nextCount < LARGE_DATASET.length,
         isLoading: false,
         isLoadingMore: false,
+        totalCount: LARGE_DATASET.length,
       });
     }, FETCH_DELAY_MS);
   }, []);
@@ -427,13 +431,9 @@ const App = () => {
                   onFetchMore={handleFetchMore}
                   placeholder='Search cities...'
                   selected={fetchSelected}
+                  showLoadedCount
                 />
               </div>
-              <p style={{ color: '#6b7280', fontSize: 13, marginTop: 8 }}>
-                Loaded: {fetchDataState.data.length} / {LARGE_DATASET.length}
-                {fetchDataState.isLoading && ' — Loading...'}
-                {fetchDataState.isLoadingMore && ' — Loading more...'}
-              </p>
               <p style={{ color: '#6b7280', fontSize: 13, marginTop: 4 }}>
                 Selected:{' '}
                 {fetchSelected.length > 0 ? fetchSelected.join(', ') : '(none)'}
