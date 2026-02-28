@@ -190,6 +190,7 @@ const App = () => {
   // --- VirtualSelect showcase state ---
   const [singleSelected, setSingleSelected] = useState<string[]>([]);
   const [multiSelected, setMultiSelected] = useState<string[]>([]);
+  const [alwaysOpenSelected, setAlwaysOpenSelected] = useState<string[]>([]);
   const [fetchSelected, setFetchSelected] = useState<string[]>([]);
   const [fetchDataState, setFetchDataState] = useState<VirtualListDataState>({
     data: [],
@@ -437,6 +438,28 @@ const App = () => {
               <p style={{ color: '#6b7280', fontSize: 13, marginTop: 4 }}>
                 Selected:{' '}
                 {fetchSelected.length > 0 ? fetchSelected.join(', ') : '(none)'}
+              </p>
+            </div>
+
+            <div {...stylex.props(styles.subsection)}>
+              <h3 {...stylex.props(styles.subsectionTitle)}>
+                Always Open (isAlwaysOpen)
+              </h3>
+              <div style={{ maxWidth: '20rem' }}>
+                <VirtualSelect
+                  isAlwaysOpen
+                  mode='multi'
+                  onChange={setAlwaysOpenSelected}
+                  options={STATIC_FRUITS}
+                  placeholder='Pick fruits...'
+                  selected={alwaysOpenSelected}
+                />
+              </div>
+              <p style={{ color: '#6b7280', fontSize: 13, marginTop: 8 }}>
+                Selected:{' '}
+                {alwaysOpenSelected.length > 0
+                  ? alwaysOpenSelected.join(', ')
+                  : '(none)'}
               </p>
             </div>
           </section>

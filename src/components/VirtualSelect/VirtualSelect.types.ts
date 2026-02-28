@@ -5,6 +5,8 @@ export type VirtualSelectMode = 'multi' | 'single';
 export type VirtualSelectProps = {
   /** Current state of async-loaded data (for fetch mode). Mutually exclusive with `options`. */
   dataState?: VirtualListDataState;
+  /** When true, the list is always visible without a trigger button */
+  isAlwaysOpen?: boolean;
   /** Height for the virtual dropdown list (CSS value, e.g. '18.75rem') */
   listMaxHeight?: string;
   /** Selection mode: 'single' closes on select, 'multi' shows checkboxes + select all */

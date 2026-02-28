@@ -14,6 +14,7 @@ import { styles } from './VirtualSelect.stylex';
 
 export const VirtualSelect = ({
   dataState,
+  isAlwaysOpen = false,
   listMaxHeight = '18.75rem',
   mode,
   onChange,
@@ -82,6 +83,7 @@ export const VirtualSelect = ({
   );
 
   const hasSelection = selected.length > 0;
+  const isListVisible = isAlwaysOpen ? true : isOpen;
 
   return (
     <div ref={containerRef} {...stylex.props(styles.container)}>
@@ -89,9 +91,9 @@ export const VirtualSelect = ({
       <div
         aria-expanded={isOpen}
         aria-haspopup='listbox'
-        onClick={handleToggleDropdown}
+        onClick={isAlwaysOpen ? undefined : handleToggleDropdown}
         role='combobox'
-        tabIndex={0}
+        tabIndex={isAlwaysOpen ? undefined : 0}
         {...stylex.props(styles.trigger, isOpen && styles.triggerOpen)}
       >
         {hasSelection ? (
@@ -113,12 +115,17 @@ export const VirtualSelect = ({
             {placeholder}
           </span>
         )}
-        <span {...stylex.props(styles.chevron(isOpen))} />
+        {!isAlwaysOpen && <span {...stylex.props(styles.chevron(isOpen))} />}
       </div>
 
       {/* Dropdown */}
-      {isOpen && (
-        <div role='listbox' {...stylex.props(styles.dropdown)}>
+      {isListVisible && (
+        <div
+          role='listbox'
+          {...stylex.props(
+            isAlwaysOpen ? styles.dropdownStatic : styles.dropdown,
+          )}
+        >
           <VirtualList
             dataState={effectiveDataState}
             filter={{ type: 'select', values: selected }}
