@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { useCallback, useMemo } from 'react';
+import { Activity, useCallback, useMemo, useState } from 'react';
 
 import type {
   ColumnFilter,
@@ -34,6 +34,8 @@ export const FilterInputs = <TData,>({
 }: FilterInputsProps<TData>) => {
   // === SELECTORS (subscribe to state) ===
   const column = useGetNormalizedColumn<TData>(columnKey);
+
+  const [isOperatorOpen, setIsOperatorOpen] = useState(false);
 
   // Derive operator directly from filter prop - always in sync with parent state
   const operator = useMemo<OperatorType>(
@@ -120,19 +122,22 @@ export const FilterInputs = <TData,>({
       <VirtualSelect
         mode='single'
         onChange={handleOperatorChange}
+        onOpenChange={setIsOperatorOpen}
         options={operatorLabels}
         placeholder='Select operator...'
         selected={selectedOperatorLabel}
       />
-      <InputContent
-        columnKey={columnKey}
-        dataType={column.dataType}
-        filter={filter}
-        hasFetchableOptions={Boolean(column.fetchFilterOptions)}
-        listMaxHeight={listMaxHeight}
-        onChange={onChange}
-        operator={operator}
-      />
+      <Activity mode={isOperatorOpen ? 'hidden' : 'visible'}>
+        <InputContent
+          columnKey={columnKey}
+          dataType={column.dataType}
+          filter={filter}
+          hasFetchableOptions={Boolean(column.fetchFilterOptions)}
+          listMaxHeight={listMaxHeight}
+          onChange={onChange}
+          operator={operator}
+        />
+      </Activity>
     </div>
   );
 };

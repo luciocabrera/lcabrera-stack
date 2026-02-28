@@ -31,7 +31,7 @@ const localStyles = stylex.create({
     // borderStyle: 'solid',
     // borderWidth: '1px',
     overflow: 'hidden',
-    // backgroundColor: colors.surfacePrimary,
+     backgroundColor: colors.surfaceSecondary ,
     boxShadow: shadows.lg,
     display: 'flex',
     flexDirection: 'column',

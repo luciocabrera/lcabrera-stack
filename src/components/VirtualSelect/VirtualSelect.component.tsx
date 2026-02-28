@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { VirtualListDataState } from '@/components/VirtualList';
 import type { SelectFilter } from '@/types/filterOperators.types';
@@ -19,6 +19,7 @@ export const VirtualSelect = ({
   onChange,
   onFetchInitial,
   onFetchMore,
+  onOpenChange,
   options = [],
   placeholder = 'Select...',
   selected,
@@ -27,10 +28,16 @@ export const VirtualSelect = ({
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    onOpenChange?.(isOpen);
+  }, [isOpen, onOpenChange]);
+
+  const handleClose = useCallback(() => {
+    setIsOpen(false);
+  }, []);
+
   useClickOutside({
-    onClickOutside: () => {
-      setIsOpen(false);
-    },
+    onClickOutside: handleClose,
     ref: containerRef,
   });
 
@@ -46,9 +53,9 @@ export const VirtualSelect = ({
     [dataState, options],
   );
 
-  const handleToggleDropdown = () => {
+  const handleToggleDropdown = useCallback(() => {
     setIsOpen((isCurrentlyOpen) => !isCurrentlyOpen);
-  };
+  }, []);
 
   const handleVirtualListChange = useCallback(
     (filter?: SelectFilter) => {
@@ -58,13 +65,13 @@ export const VirtualSelect = ({
         // Find the newly added value (not in current selected)
         const newValue = values.find((v) => !selected.includes(v));
         onChange(newValue ? [newValue] : []);
-        setIsOpen(false);
+        handleClose();
         return;
       }
 
       onChange(values);
     },
-    [mode, onChange, selected],
+    [handleClose, mode, onChange, selected],
   );
 
   const handleRemoveTag = useCallback(

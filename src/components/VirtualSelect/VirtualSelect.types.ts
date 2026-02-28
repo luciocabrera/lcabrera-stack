@@ -15,6 +15,8 @@ export type VirtualSelectProps = {
   onFetchInitial?: () => Promise<void> | void;
   /** Callback to fetch more data on scroll */
   onFetchMore?: () => Promise<void> | void;
+  /** Called when the dropdown opens or closes */
+  onOpenChange?: (isOpen: boolean) => void;
   /** Static options (used when no dataState provided) */
   options?: string[];
   /** Placeholder text when nothing is selected */
