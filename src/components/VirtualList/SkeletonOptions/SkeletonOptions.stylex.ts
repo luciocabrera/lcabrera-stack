@@ -5,7 +5,7 @@ import { skelleton } from '@/design-system/tokens/commons.stylex';
 
 export const styles = stylex.create({
   option: {
-    padding: `${spacing.xs} ${spacing.sm}`,
+    padding: `${spacing.xxs} ${spacing.sm}`,
     gap: spacing.sm,
     overflow: 'hidden',
     alignItems: 'center',

@@ -252,7 +252,7 @@ export const skelleton = stylex.create({
     backgroundColor: colors.hover,
     pointerEvents: 'none',
     position: 'relative',
-    height: '1rem',
+    height: `calc(2rem - ${spacing.xxs} * 2)`,
   },
   /** Shimmer wave that moves across the overlay */
   shimmerWave: {
