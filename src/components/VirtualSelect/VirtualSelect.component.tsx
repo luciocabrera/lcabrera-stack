@@ -13,6 +13,7 @@ import type { VirtualSelectProps } from './VirtualSelect.types';
 import { styles } from './VirtualSelect.stylex';
 
 export const VirtualSelect = ({
+  customStylex,
   dataState,
   isAlwaysOpen = false,
   listMaxHeight = '18.75rem',
@@ -123,7 +124,9 @@ export const VirtualSelect = ({
         <div
           role='listbox'
           {...stylex.props(
-            isAlwaysOpen ? styles.dropdownStatic : styles.dropdown,
+            styles.dropdownBase,
+            isAlwaysOpen ? styles.dropdownStatic : styles.dropdownAbsolute,
+            customStylex,
           )}
         >
           <VirtualList
@@ -140,7 +143,7 @@ export const VirtualSelect = ({
       )}
 
       {/* Loaded count legend */}
-      {shouldShowLoadedCount && effectiveDataState.totalCount  && (
+      {shouldShowLoadedCount && effectiveDataState.totalCount && (
         <p {...stylex.props(styles.loadedCount)}>
           Loaded: {effectiveDataState.data.length} /{' '}
           {effectiveDataState.totalCount}

@@ -1,6 +1,10 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { spacing, typography } from '@/design-system/tokens/base.stylex';
+import {
+  borderRadius,
+  spacing,
+  typography,
+} from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 import { skelleton } from '@/design-system/tokens/commons.stylex';
 import { filterBaseStyles } from '@/design-system/tokens/filters.stylex';
@@ -65,8 +69,8 @@ const localStyles = stylex.create({
   },
   optionsList: {
     borderColor: colors.borderPrimary,
-    borderRadius: 0,
-    borderStyle: 'none',
+    borderRadius: borderRadius.md,
+    borderStyle: 'solid',
     gap: spacing.xs,
     backgroundColor: colors.surfacePrimary,
     display: 'flex',

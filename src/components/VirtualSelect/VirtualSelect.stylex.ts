@@ -22,6 +22,9 @@ const localStyles = stylex.create({
     width: 0,
   }),
   container: {
+
+    // display: 'flex',
+    // flexDirection: 'column',
     position: 'relative',
     width: '100%',
   },
@@ -32,17 +35,21 @@ const localStyles = stylex.create({
     borderWidth: '1px',
     overflow: 'hidden',
     backgroundColor: colors.surfacePrimary,
-    boxShadow: shadows.lg,
     display: 'flex',
     flexDirection: 'column',
+        marginTop: spacing.sm,
+  },
+  dropdownAbsolute: {
+    boxShadow: shadows.lg,
     position: 'absolute',
     zIndex: zIndex.dropdown,
-    // borderTopLeftRadius: 0,
-    // borderTopRightRadius: 0,
     left: 0,
     marginTop: spacing.sm,
     right: 0,
     top: '100%',
+  },
+  dropdownStatic: {
+    position: 'relative',
   },
   trigger: {
     padding: `${spacing.xs} ${spacing.sm}`,
@@ -82,17 +89,6 @@ const localStyles = stylex.create({
     fontSize: typography.fontSizeSm,
     minWidth: 0,
   },
-  dropdownStatic: {
-    borderColor: colors.borderPrimary,
-    borderRadius: borderRadius.md,
-    borderStyle: 'solid',
-    borderWidth: '1px',
-    overflow: 'hidden',
-    backgroundColor: colors.surfacePrimary,
-    display: 'flex',
-    flexDirection: 'column',
-    position: 'relative',
-  },
   loadedCount: {
     color: colors.textSecondary,
     fontSize: typography.fontSizeXs,
@@ -103,7 +99,8 @@ const localStyles = stylex.create({
 export const styles = {
   chevron: localStyles.chevron,
   container: localStyles.container,
-  dropdown: localStyles.dropdown,
+  dropdownAbsolute: localStyles.dropdownAbsolute,
+  dropdownBase: localStyles.dropdown,
   dropdownStatic: localStyles.dropdownStatic,
   loadedCount: localStyles.loadedCount,
   trigger: localStyles.trigger,

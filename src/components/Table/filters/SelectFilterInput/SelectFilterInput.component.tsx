@@ -12,6 +12,8 @@ import { VirtualSelect } from '@/components/VirtualSelect';
 
 import type { SelectFilterInputProps } from './SelectFilterInput.types';
 
+import { styles } from './SelectFilterInput.stylex';
+
 /** Pure value selector (checkboxes list) - operator is controlled by FilterInputs */
 export const SelectFilterInput = <TData,>({
   columnKey,
@@ -72,6 +74,7 @@ export const SelectFilterInput = <TData,>({
 
   return (
     <VirtualSelect
+      customStylex={styles.selectOverride}
       dataState={filterData}
       isAlwaysOpen
       listMaxHeight={listMaxHeight}
