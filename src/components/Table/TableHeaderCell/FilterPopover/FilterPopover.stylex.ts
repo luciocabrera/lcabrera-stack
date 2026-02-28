@@ -4,7 +4,7 @@ import { spacing, typography } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const styles = stylex.create({
-  popover: (minHeight?: string) => ({
+  popover: {
     inset: 'auto',
     margin: 0,
     padding: 0,
@@ -19,10 +19,9 @@ export const styles = stylex.create({
     opacity: 0,
     // Fixed positioning for manual placement via JavaScript
     position: 'fixed',
-    minHeight: minHeight ?? 'auto',
     minWidth: '24rem',
     width: '24rem',
-  }),
+  },
   content: {
     gap: spacing.sm,
     display: 'flex',

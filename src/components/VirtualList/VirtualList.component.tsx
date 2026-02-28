@@ -22,6 +22,7 @@ export const VirtualList = ({
   onChange,
   onFetchInitial,
   onFetchMore,
+  shouldFillHeight = false,
 }: VirtualListProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -124,7 +125,7 @@ export const VirtualList = ({
   }, [handleScroll]);
 
   return (
-    <div {...stylex.props(styles.container)}>
+    <div {...stylex.props(styles.container, shouldFillHeight ? styles.containerFill : undefined)}>
       <div {...stylex.props(styles.searchInputWrapper)}>
         <input
           autoComplete='off'
@@ -143,11 +144,15 @@ export const VirtualList = ({
         />
       </div>
       <div
-        {...stylex.props(styles.optionsList)}
+        {...stylex.props(styles.optionsList, shouldFillHeight ? styles.optionsListFill : undefined)}
       >
         <div
           ref={scrollContainerRef}
-          {...stylex.props(styles.virtualContainer(listMaxHeight))}
+          {...stylex.props(
+            shouldFillHeight
+              ? styles.virtualContainerFill
+              : styles.virtualContainer(listMaxHeight),
+          )}
         >
           {isInitialLoading ? (
             <SkeletonOptions />

@@ -22,7 +22,7 @@ import { getOperatorFromFilter, getOperatorOptions } from './utils';
 /**
  * Shared component for rendering filter inputs based on column data type.
  * The operator dropdown is rendered here based on data type.
- * Used by both FilterPopover (column header) and FilterSectionBody (table settings drawer).
+ * Used by both FilterDrawer (column header) and FilterSectionBody (table settings drawer).
  *
  * Now uses context for filter data - no more prop drilling!
  */
@@ -31,6 +31,7 @@ export const FilterInputs = <TData,>({
   filter,
   listMaxHeight,
   onChange,
+  shouldFillHeight = false,
 }: FilterInputsProps<TData>) => {
   // === SELECTORS (subscribe to state) ===
   const column = useGetNormalizedColumn<TData>(columnKey);
@@ -118,7 +119,7 @@ export const FilterInputs = <TData,>({
   }
 
   return (
-    <div {...stylex.props(styles.container)}>
+    <div {...stylex.props(styles.container, shouldFillHeight ? styles.containerFill : undefined)}>
       <VirtualSelect
         customStylex={styles.operatorOverride}
         mode='single'
@@ -137,6 +138,7 @@ export const FilterInputs = <TData,>({
           listMaxHeight={listMaxHeight}
           onChange={onChange}
           operator={operator}
+          shouldFillHeight={shouldFillHeight}
         />
       </Activity>
     </div>

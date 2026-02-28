@@ -23,6 +23,7 @@ export const InputContent = <TData,>({
   listMaxHeight,
   onChange,
   operator,
+  shouldFillHeight = false,
 }: InputContentProps<TData>) => {
   switch (dataType) {
     case 'currency':
@@ -75,6 +76,7 @@ export const InputContent = <TData,>({
                 onChange();
               }
             }}
+            shouldFillHeight={shouldFillHeight}
           />
         );
       }

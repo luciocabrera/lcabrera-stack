@@ -7,4 +7,6 @@ export type SelectFilterInputProps<TData> = {
   /** Height for the virtual options list (CSS value, e.g. '12rem') */
   listMaxHeight?: string;
   onChange: (filter?: SelectFilter) => void;
+  /** When true, the list expands to fill all available vertical space */
+  shouldFillHeight?: boolean;
 };

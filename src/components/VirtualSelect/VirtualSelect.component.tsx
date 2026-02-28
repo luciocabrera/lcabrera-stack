@@ -8,9 +8,33 @@ import { Tag } from '@/components/Tag';
 import { VirtualList } from '@/components/VirtualList';
 import { useClickOutside } from '@/hooks';
 
-import type { VirtualSelectProps } from './VirtualSelect.types';
+import type {
+  CountVisibleTagsArgs,
+  VirtualSelectProps,
+} from './VirtualSelect.types';
 
-import { styles } from './VirtualSelect.stylex';
+import { styles, TRIGGER_MAX_HEIGHT } from './VirtualSelect.stylex';
+
+/**
+ * Counts how many tag children fit within height limit.
+ * Returns adjusted count reserving space for the "+N more" overflow tag.
+ */
+const countVisibleTags = ({ totalCount, trigger }: CountVisibleTagsArgs): number => {
+  const children = [...trigger.children] as HTMLElement[];
+  const tagElements = children.filter((child) => !child.dataset.chevron);
+
+  let fittingCount = 0;
+  for (const tag of tagElements) {
+    if (tag.offsetTop + tag.offsetHeight <= TRIGGER_MAX_HEIGHT) {
+      fittingCount++;
+    } else {
+      break;
+    }
+  }
+
+  const overflow = totalCount - fittingCount;
+  return overflow > 0 && fittingCount > 0 ? fittingCount - 1 : fittingCount;
+};
 
 export const VirtualSelect = ({
   customStylex,
@@ -25,10 +49,13 @@ export const VirtualSelect = ({
   options = [],
   placeholder = 'Select...',
   selected,
+  shouldFillHeight = false,
   shouldShowLoadedCount = true,
 }: VirtualSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
+  const [visibleTagCount, setVisibleTagCount] = useState(selected.length);
 
   useEffect(() => {
     onOpenChange?.(isOpen);
@@ -86,37 +113,75 @@ export const VirtualSelect = ({
   const hasSelection = selected.length > 0;
   const isListVisible = isAlwaysOpen ? true : isOpen;
 
+  // Subscribe to trigger size changes via ResizeObserver so tag overflow
+  // is recalculated whenever the container resizes (e.g. tags added/removed).
+  useEffect(() => {
+    const trigger = triggerRef.current;
+    if (mode !== 'multi' || !trigger) return;
+
+    const observer = new ResizeObserver(() => {
+      setVisibleTagCount(countVisibleTags({ totalCount: selected.length, trigger }));
+    });
+    observer.observe(trigger);
+
+    // Also run immediately for the initial measurement
+    setVisibleTagCount(countVisibleTags({ totalCount: selected.length, trigger }));
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [mode, selected]);
+
+  const computedVisibleCount =
+    mode === 'multi' && hasSelection ? visibleTagCount : selected.length;
+  const overflowCount = selected.length - computedVisibleCount;
+  const visibleTags = selected.slice(0, computedVisibleCount);
+
   return (
-    <div ref={containerRef} {...stylex.props(styles.container)}>
+    <div ref={containerRef} {...stylex.props(styles.container, shouldFillHeight ? styles.containerFill : undefined)}>
       {/* Trigger / input area */}
       <div
         aria-expanded={isOpen}
         aria-haspopup='listbox'
         onClick={isAlwaysOpen ? undefined : handleToggleDropdown}
+        ref={triggerRef}
         role='combobox'
         tabIndex={isAlwaysOpen ? undefined : 0}
-        {...stylex.props(styles.trigger, isOpen && styles.triggerOpen)}
+        {...stylex.props(
+          styles.trigger,
+          isOpen && styles.triggerOpen,
+          mode === 'multi' && styles.triggerClamped,
+        )}
       >
         {hasSelection ? (
           mode === 'single' ? (
             <span {...stylex.props(styles.triggerLabel)}>{selected[0]}</span>
           ) : (
-            selected.map((value) => (
-              <Tag
-                key={value}
-                label={value}
-                onRemove={() => {
-                  handleRemoveTag(value);
-                }}
-              />
-            ))
+            <>
+              {visibleTags.map((value) => (
+                <Tag
+                  key={value}
+                  label={value}
+                  onRemove={() => {
+                    handleRemoveTag(value);
+                  }}
+                />
+              ))}
+              {overflowCount > 0 && (
+                <span {...stylex.props(styles.overflowTag)}>
+                  +{overflowCount} more
+                </span>
+              )}
+            </>
           )
         ) : (
           <span {...stylex.props(styles.triggerPlaceholder)}>
             {placeholder}
           </span>
         )}
-        {!isAlwaysOpen && <span {...stylex.props(styles.chevron(isOpen))} />}
+        {!isAlwaysOpen && (
+          <span data-chevron {...stylex.props(styles.chevron(isOpen))} />
+        )}
       </div>
 
       {/* Dropdown */}
@@ -125,7 +190,9 @@ export const VirtualSelect = ({
           role='listbox'
           {...stylex.props(
             styles.dropdownBase,
-            isAlwaysOpen ? styles.dropdownStatic : styles.dropdownAbsolute,
+            isAlwaysOpen
+              ? (shouldFillHeight ? styles.dropdownStaticFill : styles.dropdownStatic)
+              : styles.dropdownAbsolute,
             customStylex,
           )}
         >
@@ -138,6 +205,7 @@ export const VirtualSelect = ({
             onChange={handleVirtualListChange}
             onFetchInitial={onFetchInitial}
             onFetchMore={onFetchMore}
+            shouldFillHeight={shouldFillHeight}
           />
         </div>
       )}

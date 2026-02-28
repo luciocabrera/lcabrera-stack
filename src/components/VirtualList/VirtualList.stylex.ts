@@ -79,12 +79,27 @@ const localStyles = stylex.create({
     borderTopStyle: 'solid',
     borderTopWidth: '1px',
   },
+  optionsListFill: {
+    flex: '1',
+    overflow: 'hidden',
+    minHeight: 0,
+  },
+  containerFill: {
+    flex: '1',
+    minHeight: 0,
+  },
   virtualContainer: (height: string) => ({
     position: 'relative',
     height,
     overflowX: 'hidden',
     overflowY: 'auto',
   }),
+  virtualContainerFill: {
+    flex: '1',
+    position: 'relative',
+    overflowX: 'hidden',
+    overflowY: 'auto',
+  },
   virtualOffset: (offsetY: number) => ({
     transform: `translateY(${offsetY}px)`,
   }),
@@ -99,15 +114,18 @@ export const skeletonStyles = { ...skelleton };
 export const styles = {
   checkbox: localStyles.checkbox,
   container: filterBaseStyles.container,
+  containerFill: localStyles.containerFill,
   label: localStyles.label,
   loadingMore: localStyles.loadingMore,
   noResults: localStyles.noResults,
   option: localStyles.option,
   optionDisabled: localStyles.optionDisabled,
   optionsList: localStyles.optionsList,
+  optionsListFill: localStyles.optionsListFill,
   searchInput: filterBaseStyles.input,
   searchInputWrapper: filterBaseStyles.inputWrapper,
   virtualContainer: localStyles.virtualContainer,
+  virtualContainerFill: localStyles.virtualContainerFill,
   virtualOffset: localStyles.virtualOffset,
   virtualScrollArea: localStyles.virtualScrollArea,
 };

@@ -2,13 +2,18 @@ import type { StyleXStyles } from '@stylexjs/stylex';
 
 import type { VirtualListDataState } from '@/components/VirtualList';
 
+export type CountVisibleTagsArgs = {
+  totalCount: number;
+  trigger: HTMLDivElement;
+};
+
 export type VirtualSelectMode = 'multi' | 'single';
 
 export type VirtualSelectProps = {
-  /** Current state of async-loaded data (for fetch mode). Mutually exclusive with `options`. */
-  dataState?: VirtualListDataState;
   /** Optional StyleX overrides for the list container (background, border, etc.) */
   customStylex?: StyleXStyles;
+  /** Current state of async-loaded data (for fetch mode). Mutually exclusive with `options`. */
+  dataState?: VirtualListDataState;
   /** When true, the list is always visible without a trigger button */
   isAlwaysOpen?: boolean;
   /** Height for the virtual dropdown list (CSS value, e.g. '18.75rem') */
@@ -29,6 +34,8 @@ export type VirtualSelectProps = {
   placeholder?: string;
   /** Currently selected value(s) */
   selected: string[];
+  /** When true, the component expands to fill all available vertical space */
+  shouldFillHeight?: boolean;
   /** Show a "Loaded: x / total" legend below the trigger */
   shouldShowLoadedCount?: boolean;
 };

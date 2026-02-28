@@ -16,4 +16,6 @@ export type InputContentProps<TData> = {
   onChange: (filter?: ColumnFilter) => void;
 
   operator: OperatorType;
+  /** When true, the list expands to fill all available vertical space */
+  shouldFillHeight?: boolean;
 };

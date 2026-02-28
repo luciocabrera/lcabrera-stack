@@ -20,7 +20,6 @@ export type VirtualListProps = {
   hasSelectAll?: boolean;
   /** Height for the virtual options list (CSS value, e.g. '12rem') */
   listMaxHeight?: string;
-  /** Name attribute for the search input */
   name?: string;
   /** Called when the selection changes */
   onChange: (filter?: SelectFilter) => void;
@@ -28,4 +27,7 @@ export type VirtualListProps = {
   onFetchInitial?: () => Promise<void> | void;
   /** Callback to fetch more data on scroll (infinite loading) */
   onFetchMore?: () => Promise<void> | void;
+  /** Name attribute for the search input */
+  /** When true, the list expands to fill all available vertical space */
+  shouldFillHeight?: boolean;
 };

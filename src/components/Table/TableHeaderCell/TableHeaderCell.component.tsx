@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { useId } from 'react';
+import { useState } from 'react';
 
 import { MoreVerticalIcon } from '@/components/Icons';
 import {
@@ -21,7 +21,7 @@ import {
   useGetNormalizedColumn,
 } from '../contexts/TableConfig/columns/selectors';
 import { FilterButton } from './FilterButton';
-import { FilterPopover } from './FilterPopover';
+import { FilterDrawer } from './FilterDrawer';
 import { SortIcon } from './SortIcon';
 import {
   skelletonStyles,
@@ -38,7 +38,7 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
 }: TableHeaderCellProps<TData>) => {
   useRenderTracker({ componentName: `TableHeaderCell:${columnKey}` });
 
-  const filterPopoverId = useId();
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const columnSizing = useGetColumnSizing();
   const column = useGetNormalizedColumn<TData>(columnKey);
   const isLoading = useGetTableIsLoading();
@@ -110,8 +110,12 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
         )}
         {isFilterable && dataType && (
           <>
-            <FilterButton popoverTargetId={filterPopoverId} />
-            <FilterPopover columnKey={columnKey} popoverId={filterPopoverId} />
+            <FilterButton onClick={() => setIsFilterOpen(true)} />
+            <FilterDrawer
+              columnKey={columnKey}
+              isOpen={isFilterOpen}
+              onClose={() => setIsFilterOpen(false)}
+            />
           </>
         )}
         {hasSettings && (

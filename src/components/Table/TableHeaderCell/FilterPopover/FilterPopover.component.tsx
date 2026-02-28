@@ -61,8 +61,6 @@ export const FilterPopover = <TData,>({
 
   // Use positioning hook - recalculate when content type changes (operator switch)
   const { resetPositioning } = usePopoverPositioning({
-    columnDataType: dataType,
-    hasOptions,
     isOpen: isPopoverOpen,
     popoverId,
     popoverRef,
@@ -125,17 +123,12 @@ export const FilterPopover = <TData,>({
     popoverRef.current?.hidePopover();
   };
 
-  // Fixed heights for both use cases
-  // 25rem: When list is visible (string column with options AND operator is equals/notEquals)
-  // 12rem: All other cases (no list)
-  const popoverMinHeight = isListShowing ? '25rem' : '12rem';
-
   return (
     <div
       id={popoverId}
       popover='auto'
       ref={popoverRef}
-      {...stylex.props(styles.popover(popoverMinHeight))}
+      {...stylex.props(styles.popover)}
     >
       <div {...stylex.props(styles.content)}>
         <div {...stylex.props(styles.header)}>

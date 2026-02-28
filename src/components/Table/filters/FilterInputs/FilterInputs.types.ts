@@ -10,4 +10,6 @@ export type FilterInputsProps<TData> = {
   listMaxHeight?: string;
   /** Callback when filter changes */
   onChange: (filter?: ColumnFilter) => void;
+  /** When true, the component expands to fill all available vertical space */
+  shouldFillHeight?: boolean;
 };

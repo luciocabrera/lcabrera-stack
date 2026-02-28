@@ -28,6 +28,12 @@ const localStyles = stylex.create({
     position: 'relative',
     width: '100%',
   },
+  containerFill: {
+    flex: '1',
+    display: 'flex',
+    flexDirection: 'column',
+    minHeight: 0,
+  },
   dropdown: {
     borderColor: colors.borderPrimary,
     borderRadius: borderRadius.md,
@@ -50,6 +56,11 @@ const localStyles = stylex.create({
   },
   dropdownStatic: {
     position: 'relative',
+  },
+  dropdownStaticFill: {
+    flex: '1',
+    position: 'relative',
+    minHeight: 0,
   },
   trigger: {
     padding: `${spacing.xs} ${spacing.sm}`,
@@ -94,16 +105,38 @@ const localStyles = stylex.create({
     fontSize: typography.fontSizeXs,
     marginTop: spacing.xxs,
   },
+  overflowTag: {
+    padding: `0 ${spacing.xs}`,
+    borderRadius: borderRadius.sm,
+    alignItems: 'center',
+    backgroundColor: colors.surfaceSecondary,
+    color: colors.textSecondary,
+    display: 'inline-flex',
+    flexShrink: 0,
+    fontSize: typography.fontSizeXs,
+    lineHeight: typography.lineHeightTight,
+  },
+  triggerClamped: {
+    overflow: 'hidden',
+    maxHeight: '5rem',
+  },
 });
+
+/** Maximum visible height (px) for the trigger area before tags overflow */
+export const TRIGGER_MAX_HEIGHT = 80;
 
 export const styles = {
   chevron: localStyles.chevron,
   container: localStyles.container,
+  containerFill: localStyles.containerFill,
   dropdownAbsolute: localStyles.dropdownAbsolute,
   dropdownBase: localStyles.dropdown,
   dropdownStatic: localStyles.dropdownStatic,
+  dropdownStaticFill: localStyles.dropdownStaticFill,
   loadedCount: localStyles.loadedCount,
+  overflowTag: localStyles.overflowTag,
   trigger: localStyles.trigger,
+  triggerClamped: localStyles.triggerClamped,
   triggerLabel: localStyles.triggerLabel,
   triggerOpen: localStyles.triggerOpen,
   triggerPlaceholder: localStyles.triggerPlaceholder,

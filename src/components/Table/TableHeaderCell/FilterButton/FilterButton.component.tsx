@@ -9,16 +9,14 @@ import { styles } from './FilterButton.stylex';
 
 export const FilterButton = ({
   isActive = false,
-  popoverTargetId,
+  onClick,
   ...rest
 }: FilterButtonProps) => {
   return (
     <Button
       aria-label={isActive ? 'Edit filter' : 'Add filter'}
       icon={<FilterIcon {...stylex.props([isActive && styles.activeIcon])} />}
-      {...(popoverTargetId
-        ? ({ popoverTarget: popoverTargetId } as Record<string, unknown>)
-        : {})}
+      onClick={onClick}
       size='sm'
       variant='flat'
       {...stylex.props(styles.button)}

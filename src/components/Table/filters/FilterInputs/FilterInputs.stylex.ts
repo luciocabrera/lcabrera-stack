@@ -3,6 +3,10 @@ import * as stylex from '@stylexjs/stylex';
 import { filterBaseStyles } from '@/design-system/tokens/filters.stylex';
 
 const localStyles = stylex.create({
+  containerFill: {
+    flex: '1',
+    minHeight: 0,
+  },
   operatorOverride: {
     borderRadius: 0,
     overflow: 'visible',
@@ -17,6 +21,7 @@ const localStyles = stylex.create({
 
 export const styles = {
   container: filterBaseStyles.container,
+  containerFill: localStyles.containerFill,
   operatorOverride: localStyles.operatorOverride,
   select: filterBaseStyles.select,
 };

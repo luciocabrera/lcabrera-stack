@@ -20,6 +20,7 @@ export const SelectFilterInput = <TData,>({
   filter,
   listMaxHeight,
   onChange,
+  shouldFillHeight = false,
 }: SelectFilterInputProps<TData>) => {
   const column = useGetNormalizedColumn<TData>(columnKey);
   const filterData = useGetFilterData<TData>(columnKey);
@@ -80,6 +81,7 @@ export const SelectFilterInput = <TData,>({
       onFetchInitial={handleFetchInitial}
       onFetchMore={handleFetchMore}
       selected={selectedValues}
+      shouldFillHeight={shouldFillHeight}
     />
   );
 };

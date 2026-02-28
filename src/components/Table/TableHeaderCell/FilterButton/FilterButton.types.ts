@@ -9,6 +9,4 @@ export type FilterButtonProps = Omit<
   customStylex?: StyleXStyles;
   /** Whether the column has an active filter */
   isActive?: boolean;
-  /** Popover target ID for HTML Popover API */
-  popoverTargetId?: string;
 };
