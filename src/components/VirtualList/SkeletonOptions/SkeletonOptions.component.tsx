@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { skeletonStyles, styles } from '../VirtualList.stylex';
+import { skeletonStyles, styles } from './SkeletonOptions.stylex';
 
 const SKELETON_ROW_COUNT = 8;
 

@@ -137,7 +137,7 @@ export const VirtualList = ({
           name={name}
           onChange={handleSearchChange}
           placeholder='Search options...'
-        type='text'
+          type='text'
           value={searchTerm}
           {...stylex.props(styles.searchInput)}
         />
@@ -158,6 +158,12 @@ export const VirtualList = ({
               <div {...stylex.props(styles.virtualOffset(offsetY))}>
                 {Array.from({ length: endIndex - startIndex }).map((_, i) => {
                   const index = startIndex + i;
+                  const key =
+                    index === 0 && shouldShowSelectAll
+                      ? 'select-all'
+                      : (filteredOptions[
+                          shouldShowSelectAll ? index - 1 : index
+                        ] ?? `option-${index}`);
 
                   return (
                     <VirtualizedOption
@@ -167,13 +173,7 @@ export const VirtualList = ({
                       index={index}
                       isAllSelected={isAllSelected}
                       isLoading={isLoadingOptions}
-                      key={
-                        index === 0 && shouldShowSelectAll
-                          ? 'select-all'
-                          : (filteredOptions[
-                              shouldShowSelectAll ? index - 1 : index
-                            ] ?? `option-${index}`)
-                      }
+                      key={key}
                       onSelectAll={handleSelectAll}
                       onToggle={handleToggle}
                       selectedValues={selectedValues}
