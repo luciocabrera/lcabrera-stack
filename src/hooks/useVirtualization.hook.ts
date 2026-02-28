@@ -57,6 +57,7 @@ export const useVirtualization = ({
 
   return {
     bottomSpacerHeight,
+    containerHeight,
     endIndex,
     offsetY,
     startIndex,

@@ -56,7 +56,7 @@ export const VirtualList = ({
     filteredOptions.length > 0 &&
     filteredOptions.every((option) => selectedValues.includes(option));
 
-  const { endIndex, offsetY, startIndex, totalHeight } = useVirtualization({
+  const { containerHeight, endIndex, offsetY, startIndex, totalHeight } = useVirtualization({
     containerRef: scrollContainerRef,
     defaultContainerHeight: 300,
     itemHeight: ITEM_HEIGHT,
@@ -155,7 +155,7 @@ export const VirtualList = ({
           )}
         >
           {isInitialLoading ? (
-            <SkeletonOptions />
+            <SkeletonOptions containerHeight={containerHeight} />
           ) : filteredOptions.length === 0 ? (
             <div {...stylex.props(styles.noResults)}>
               <InfoBox>No options found</InfoBox>

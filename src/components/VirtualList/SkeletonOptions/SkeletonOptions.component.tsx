@@ -1,12 +1,21 @@
 import * as stylex from '@stylexjs/stylex';
 
+import type { SkeletonOptionsProps } from './SkeletonOptions.types';
+
 import { skeletonStyles, styles } from './SkeletonOptions.stylex';
 
-const SKELETON_ROW_COUNT = 8;
+const DEFAULT_SKELETON_ROW_COUNT = 8;
+const ITEM_HEIGHT = 32;
 
-export const SkeletonOptions = () => {
+export const SkeletonOptions = ({
+  containerHeight,
+}: SkeletonOptionsProps) => {
+  const count = containerHeight && containerHeight > 0
+    ? Math.floor(containerHeight / ITEM_HEIGHT)
+    : DEFAULT_SKELETON_ROW_COUNT;
+
   const placeholders = Array.from(
-    { length: SKELETON_ROW_COUNT },
+    { length: count },
     // eslint-disable-next-line local-rules/destructuring-for-functions
     (_, index) => ({
       key: index,
