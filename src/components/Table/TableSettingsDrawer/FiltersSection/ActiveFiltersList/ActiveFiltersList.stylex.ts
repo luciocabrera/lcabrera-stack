@@ -6,24 +6,12 @@ import {
   typography,
 } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
+import { drawerSectionStyles } from '@/design-system/tokens/drawerSection.stylex';
 
-export const styles = stylex.create({
+const localStyles = stylex.create({
   container: {
     flex: '1',
     gap: spacing.md,
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  header: {
-    margin: 0,
-    color: colors.textSecondary,
-    fontSize: typography.fontSizeSm,
-    fontWeight: 600,
-    // textTransform: 'uppercase',
-    marginBottom: spacing.xs,
-  },
-  filtersList: {
-    gap: spacing.sm,
     display: 'flex',
     flexDirection: 'column',
   },
@@ -81,3 +69,16 @@ export const styles = stylex.create({
     borderTopWidth: '1px',
   },
 });
+
+export const styles = {
+  container: localStyles.container,
+  filterItem: localStyles.filterItem,
+  filterItemContent: localStyles.filterItemContent,
+  filterItemHeader: localStyles.filterItemHeader,
+  filterItemLabel: localStyles.filterItemLabel,
+  filterToggle: localStyles.filterToggle,
+  filterToggleIcon: localStyles.filterToggleIcon,
+  filtersList: drawerSectionStyles.list,
+  header: drawerSectionStyles.header,
+  invalidBadge: localStyles.invalidBadge,
+};

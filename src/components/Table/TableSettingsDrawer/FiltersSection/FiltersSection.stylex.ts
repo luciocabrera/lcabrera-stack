@@ -1,12 +1,5 @@
-import * as stylex from '@stylexjs/stylex';
+import { drawerSectionStyles } from '@/design-system/tokens/drawerSection.stylex';
 
-import { spacing } from '@/design-system/tokens/base.stylex';
-
-export const styles = stylex.create({
-  container: {
-    gap: spacing.md,
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
-  },
-});
+export const styles = {
+  container: drawerSectionStyles.containerFull,
+};

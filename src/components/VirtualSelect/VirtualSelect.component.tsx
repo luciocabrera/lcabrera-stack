@@ -126,7 +126,7 @@ export const VirtualSelect = ({
       )}
 
       {/* Loaded count legend */}
-      {showLoadedCount && effectiveDataState.totalCount != null && (
+      {showLoadedCount && effectiveDataState.totalCount  && (
         <p {...stylex.props(styles.loadedCount)}>
           Loaded: {effectiveDataState.data.length} /{' '}
           {effectiveDataState.totalCount}

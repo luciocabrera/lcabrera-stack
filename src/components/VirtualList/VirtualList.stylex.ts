@@ -69,9 +69,11 @@ const localStyles = stylex.create({
     borderStyle: 'solid',
     borderWidth: '1px',
     gap: spacing.xs,
+    backgroundColor: colors.surfacePrimary,
     display: 'flex',
     flexDirection: 'column',
     position: 'relative',
+    // borderTopColor: 'transparent',
   },
   virtualContainer: (height: string) => ({
     position: 'relative',
