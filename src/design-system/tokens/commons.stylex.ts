@@ -234,14 +234,25 @@ export const orientationVariants = stylex.create({
 });
 
 export const skelleton = stylex.create({
-  /** Loading overlay container for shimmer effect */
+  /** Loading overlay container for shimmer effect (absolute, covers parent) */
   loadingOverlay: {
-    inset: 0,
     borderRadius: borderRadius.sm,
+    insetBlock: spacing.xxs,
+    insetInline: 0,
     overflow: 'hidden',
     backgroundColor: colors.hover,
     pointerEvents: 'none',
     position: 'absolute',
+  },
+  /** Inline skeleton bar placeholder (flow-based, for skeleton-only rows) */
+  placeholderBar: {
+    borderRadius: borderRadius.sm,
+    flex: '1',
+    overflow: 'hidden',
+    backgroundColor: colors.hover,
+    pointerEvents: 'none',
+    position: 'relative',
+    height: '1rem',
   },
   /** Shimmer wave that moves across the overlay */
   shimmerWave: {

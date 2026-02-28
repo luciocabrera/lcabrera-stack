@@ -2,6 +2,7 @@ import * as stylex from '@stylexjs/stylex';
 
 import { spacing, typography } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
+import { skelleton } from '@/design-system/tokens/commons.stylex';
 import { filterBaseStyles } from '@/design-system/tokens/filters.stylex';
 
 const localStyles = stylex.create({
@@ -82,6 +83,8 @@ const localStyles = stylex.create({
     height,
   }),
 });
+
+export const skeletonStyles = { ...skelleton };
 
 export const styles = {
   checkbox: localStyles.checkbox,

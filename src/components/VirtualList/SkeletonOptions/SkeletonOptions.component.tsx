@@ -19,8 +19,7 @@ export const SkeletonOptions = () => {
           key={item.key}
           {...stylex.props(styles.option, styles.optionDisabled)}
         >
-          <div {...stylex.props(styles.checkbox)} />
-          <div {...stylex.props(skeletonStyles.loadingOverlay)}>
+          <div {...stylex.props(skeletonStyles.placeholderBar)}>
             <div {...stylex.props(skeletonStyles.shimmerWave)} />
           </div>
         </div>
