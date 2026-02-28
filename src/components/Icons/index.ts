@@ -15,6 +15,7 @@ export { PinOffIcon } from './PinOffIcon';
 export { RefreshIcon } from './RefreshIcon';
 export { SettingsIcon } from './SettingsIcon';
 export { SortAscIcon } from './SortAscIcon';
+export { SortClearIcon } from './SortClearIcon';
 export { SortDescIcon } from './SortDescIcon';
 export { SortNeutralIcon } from './SortNeutralIcon';
 export { SuccessIcon } from './SuccessIcon';

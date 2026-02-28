@@ -1,7 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 
 import { Button } from '@/components/Button';
-import { SortAscIcon, SortDescIcon } from '@/components/Icons';
+import { SortAscIcon, SortClearIcon, SortDescIcon } from '@/components/Icons';
 
 import type { SortingSectionProps } from './SortingSection.types';
 
@@ -47,6 +47,7 @@ export const SortingSection = <TData,>({
         </Button>
         <Button
           color='outline'
+          icon={<SortClearIcon size={16} />}
           isDisabled={sortDirection === undefined}
           onClick={handleClear}
           size='sm'
