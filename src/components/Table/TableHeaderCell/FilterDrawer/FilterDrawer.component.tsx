@@ -106,6 +106,10 @@ export const FilterDrawer = <TData,>({
     onClose();
   };
 
+  const handleResetFilter = () => {
+    setLocalFilter(undefined);
+  };
+
   const isFilterable = column.isFilterable !== false;
   const isSortable = column.isSortable !== false;
 
@@ -123,6 +127,7 @@ export const FilterDrawer = <TData,>({
                 columnKey={columnKey}
                 filter={localFilter}
                 onChange={setLocalFilter}
+                onReset={handleResetFilter}
               />
             ),
             header: 'Filter',

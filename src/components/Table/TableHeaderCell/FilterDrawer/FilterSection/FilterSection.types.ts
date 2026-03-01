@@ -5,4 +5,5 @@ export type FilterSectionProps<TData> = {
   columnKey: DataKey<TData>;
   filter: ColumnFilter | undefined;
   onChange: (filter: ColumnFilter | undefined) => void;
+  onReset: () => void;
 };
