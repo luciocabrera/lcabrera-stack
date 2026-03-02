@@ -3,43 +3,21 @@ import { useTableConfigContextValue } from '@/components/Table/contexts/TableCon
 import { useColumnDrawerContextValue } from '../../../useColumnDrawerContextValue.hook';
 
 /**
- * Provides reset operations for the column drawer store.
- * - `clearAll`: clears filter, sizing, and sorting to undefined
- * - `resetToTableState`: restores drawer state from the current table state
+ * Restores the drawer state from the current table state for this column.
  */
-export const useResetColumnSettings = () => {
+export const useResetToTableState = () => {
   const { columnsStore } = useTableConfigContextValue();
   const { columnStore } = useColumnDrawerContextValue();
 
-  const getColumnKey = () => {
+  return () => {
     const columnKey = columnStore.get()?.columnKey;
 
     if (!columnKey) {
       console.warn(
-        '[useResetColumnSettings] No columnKey found in column drawer store.',
+        '[useResetToTableState] No columnKey found in column drawer store.',
       );
+      return;
     }
-
-    return columnKey;
-  };
-
-  const clearAll = () => {
-    const columnKey = getColumnKey();
-
-    if (!columnKey) return;
-
-    columnStore.set({
-      columnFilter: undefined,
-      columnKey,
-      columnSizing: undefined,
-      sorting: undefined,
-    });
-  };
-
-  const resetToTableState = () => {
-    const columnKey = getColumnKey();
-
-    if (!columnKey) return;
 
     const columnsState = columnsStore.get();
 
@@ -68,6 +46,4 @@ export const useResetColumnSettings = () => {
       sorting,
     });
   };
-
-  return { clearAll, resetToTableState };
 };

@@ -43,7 +43,7 @@ export const ColumnSettingsDrawer = <TData,>({
   const wrapperRef = useTableWrapperRef();
 
   const batchSetColumnDrawerSettings = useBatchSetColumnDrawerSettings();
-  const resetColumnDrawerSettings = useResetColumnSettings();
+  const { clearAll, resetToTableState } = useResetColumnSettings();
 
   const [isPinned, setIsPinned] = useState(false);
   const pinButtonTitle = isPinned ? 'Unpin drawer' : 'Pin drawer';
@@ -64,7 +64,7 @@ export const ColumnSettingsDrawer = <TData,>({
   };
 
   const handleCancel = () => {
-    resetColumnDrawerSettings();
+    resetToTableState();
     // Unpin if pinned, then close
     if (isPinned) setIsPinned(false);
 
@@ -76,10 +76,8 @@ export const ColumnSettingsDrawer = <TData,>({
   };
 
   const handleClearAll = () => {
-    //
-    // Reset sizing draft back to original, then batch commit
-    resetColumnDrawerSettings();
-
+    clearAll();
+    batchSetColumnDrawerSettings();
     onClose();
   };
 
