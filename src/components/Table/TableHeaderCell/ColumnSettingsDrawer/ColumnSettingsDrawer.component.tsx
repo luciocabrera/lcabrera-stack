@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 
 import type { TabItem } from '@/components/Tabs';
-import type { SortDirection } from '@/types/ui.types';
 
 import { Button } from '@/components/Button';
 import {
@@ -17,81 +16,58 @@ import {
   SidePanelHeader,
   SidePanelTitle,
 } from '@/components/SidePanel';
-import {
-  useResetColumnFilter,
-  useSetColumnFilter,
-  useSetColumnSorting,
-} from '@/components/Table/contexts/TableConfig/columns/actions';
-import {
-  useGetNormalizedColumn,
-  useGetNormalizedColumnFilters,
-} from '@/components/Table/contexts/TableConfig/columns/selectors';
+import { useGetNormalizedColumn } from '@/components/Table/contexts/TableConfig/columns/selectors';
 import { useTableWrapperRef } from '@/components/Table/contexts/TableWrapper';
 import { Tabs } from '@/components/Tabs';
 import { useRenderTracker } from '@/utils/performance';
 
-import type { FilterDrawerProps } from './FilterDrawer.types';
+import type { ColumnSettingsDrawerProps } from './ColumnSettingsDrawer.types';
 
+import {
+  useBatchSetColumnDrawerSettings,
+  useResetColumnSettings,
+} from './ColumnDrawerContext/hooks/store/columns/actions';
 import { DetailsSection } from './DetailsSection';
 import { FilterSection } from './FilterSection';
+import { GeneralSection } from './GeneralSection';
 import { SortingSection } from './SortingSection';
 
-export const FilterDrawer = <TData,>({
+export const ColumnSettingsDrawer = <TData,>({
   columnKey,
   isOpen,
   onClose,
-}: FilterDrawerProps<TData>) => {
-  useRenderTracker({ componentName: `FilterDrawer:${columnKey}` });
+}: ColumnSettingsDrawerProps<TData>) => {
+  useRenderTracker({ componentName: `ColumnSettingsDrawer:${columnKey}` });
 
   const column = useGetNormalizedColumn<TData>(columnKey);
-  const filter = useGetNormalizedColumnFilters<TData>(columnKey);
   const wrapperRef = useTableWrapperRef();
 
-  const resetColumnFilter = useResetColumnFilter();
-  const setColumnFilter = useSetColumnFilter();
-  const setColumnSorting = useSetColumnSorting();
-
-  // Local draft state for filter (applied on Accept)
-  const [localFilter, setLocalFilter] = useState<typeof filter | undefined>(
-    filter,
-  );
-
-  // Local draft state for sorting (applied on Accept)
-  const [localSortDirection, setLocalSortDirection] = useState<SortDirection>(
-    column.sortDirection,
-  );
+  const batchSetColumnDrawerSettings = useBatchSetColumnDrawerSettings();
+  const resetColumnDrawerSettings = useResetColumnSettings();
 
   const [isPinned, setIsPinned] = useState(false);
   const pinButtonTitle = isPinned ? 'Unpin drawer' : 'Pin drawer';
 
-  // Ref to capture committed values when the drawer opens (for cancel/discard)
-  const filterOnOpenRef = useRef(filter);
-  const sortOnOpenRef = useRef(column.sortDirection);
-
-  // Sync local state when drawer opens
-  useEffect(() => {
-    if (isOpen) {
-      filterOnOpenRef.current = filter;
-      sortOnOpenRef.current = column.sortDirection;
-      setLocalFilter(filter);
-      setLocalSortDirection(column.sortDirection);
-    }
-    // Only react to isOpen transitions — values are captured at open time
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
-
   const handleAccept = () => {
-    setColumnFilter({ columnKey: column.key, filter: localFilter });
-    setColumnSorting({ columnKey, direction: localSortDirection });
-    if (isPinned) setIsPinned(false);
+    // if (!areFiltersValid) {
+    //   // Don't allow accept if filters are invalid
+    //   return;
+    // }
+
+    batchSetColumnDrawerSettings();
+
+    // Unpin if pinned, then close
+    if (isPinned) {
+      setIsPinned(false);
+    }
     onClose();
   };
 
   const handleCancel = () => {
-    // Discard draft changes
-    setLocalFilter(filterOnOpenRef.current);
-    setLocalSortDirection(sortOnOpenRef.current);
+    resetColumnDrawerSettings();
+    // Unpin if pinned, then close
     if (isPinned) setIsPinned(false);
+
     onClose();
   };
 
@@ -100,20 +76,22 @@ export const FilterDrawer = <TData,>({
   };
 
   const handleClearAll = () => {
-    setLocalFilter(undefined);
-    resetColumnFilter(column.key);
-    setColumnSorting({ columnKey, direction: undefined });
-    onClose();
-  };
+    //
+    // Reset sizing draft back to original, then batch commit
+    resetColumnDrawerSettings();
 
-  const handleResetFilter = () => {
-    setLocalFilter(undefined);
+    onClose();
   };
 
   const isFilterable = column.isFilterable !== false;
   const isSortable = column.isSortable !== false;
 
   const tabs: TabItem[] = [
+    {
+      children: <GeneralSection columnKey={columnKey} />,
+      header: 'General',
+      key: 'general',
+    },
     {
       children: <DetailsSection columnKey={columnKey} />,
       header: 'Details',
@@ -122,14 +100,7 @@ export const FilterDrawer = <TData,>({
     ...(isFilterable && column.dataType
       ? [
           {
-            children: (
-              <FilterSection
-                columnKey={columnKey}
-                filter={localFilter}
-                onChange={setLocalFilter}
-                onReset={handleResetFilter}
-              />
-            ),
+            children: <FilterSection columnKey={columnKey} />,
             header: 'Filter',
             key: 'filter',
           },
@@ -138,13 +109,7 @@ export const FilterDrawer = <TData,>({
     ...(isSortable
       ? [
           {
-            children: (
-              <SortingSection
-                columnKey={columnKey}
-                onChange={setLocalSortDirection}
-                sortDirection={localSortDirection}
-              />
-            ),
+            children: <SortingSection columnKey={columnKey} />,
             header: 'Sorting',
             key: 'sorting',
           },

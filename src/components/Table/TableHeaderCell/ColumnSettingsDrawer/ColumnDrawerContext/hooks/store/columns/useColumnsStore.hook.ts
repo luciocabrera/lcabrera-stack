@@ -1,0 +1,20 @@
+import { useSyncExternalStore } from 'react';
+
+import type { ColumnDrawerState } from '../../../ColumnDrawerContext.types';
+
+import { useColumnDrawerContextValue } from '../../useColumnDrawerContextValue.hook';
+
+export const useColumnsStore = <TSelected, TData = unknown>(
+  selector: (state: ColumnDrawerState<TData>) => TSelected,
+) => {
+  const { columnStore } = useColumnDrawerContextValue();
+
+  const state = useSyncExternalStore(
+    columnStore.subscribe,
+    () => selector(columnStore.get() as ColumnDrawerState<TData>),
+    () =>
+      selector(columnStore.getServerSnapshot() as ColumnDrawerState<TData>),
+  );
+
+  return state;
+};

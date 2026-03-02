@@ -20,8 +20,9 @@ import {
   useGetColumnSizing,
   useGetNormalizedColumn,
 } from '../contexts/TableConfig/columns/selectors';
+import { ColumnSettingsDrawer } from './ColumnSettingsDrawer';
+import { ColumnDrawerProvider } from './ColumnSettingsDrawer/ColumnDrawerContext/ColumnDrawerContext.provider';
 import { FilterButton } from './FilterButton';
-import { FilterDrawer } from './FilterDrawer';
 import { SortIcon } from './SortIcon';
 import {
   skelletonStyles,
@@ -110,12 +111,20 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
         )}
         {isFilterable && dataType && (
           <>
-            <FilterButton onClick={() => { setIsFilterOpen(true); }} />
-            <FilterDrawer
-              columnKey={columnKey}
-              isOpen={isFilterOpen}
-              onClose={() => { setIsFilterOpen(false); }}
+            <FilterButton
+              onClick={() => {
+                setIsFilterOpen(true);
+              }}
             />
+            <ColumnDrawerProvider columnKey={columnKey}>
+              <ColumnSettingsDrawer
+                columnKey={columnKey}
+                isOpen={isFilterOpen}
+                onClose={() => {
+                  setIsFilterOpen(false);
+                }}
+              />
+            </ColumnDrawerProvider>
           </>
         )}
         {hasSettings && (

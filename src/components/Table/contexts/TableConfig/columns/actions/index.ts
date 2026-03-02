@@ -1,3 +1,4 @@
+export * from './useBatchSetColumnSettings.hook';
 export * from './useBatchSetTableSettings.hook';
 export * from './useResetColumnFilter.hook';
 export * from './useSetColumnFilter.hook';

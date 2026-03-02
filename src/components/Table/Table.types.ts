@@ -134,6 +134,15 @@ export type TableColumnFormat = {
   number?: NumberFormatOptions;
 };
 
+export type TableColumnSettingsState<TData = Record<string, unknown>> = {
+  /** Column filters state */
+  columnFilters: ColumnFiltersState<TData>;
+  /** Column sizing state (custom widths) */
+  columnSizing: ColumnSizingState<TData>;
+  /** Sorting state */
+  sorting: Sorting<TData>;
+};
+
 /**
  * Main table state stored in tableStore
  */
