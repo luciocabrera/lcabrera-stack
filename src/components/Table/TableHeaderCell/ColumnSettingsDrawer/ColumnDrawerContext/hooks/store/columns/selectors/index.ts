@@ -1,2 +1,2 @@
-export * from './useGetColumnFilters.hook';
-export * from './useGetColumnsSorting.hook';
+export * from './useGetColumnFilter.hook';
+export * from './useGetColumnSorting.hook';

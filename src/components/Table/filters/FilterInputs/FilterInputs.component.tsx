@@ -119,7 +119,12 @@ export const FilterInputs = <TData,>({
   }
 
   return (
-    <div {...stylex.props(styles.container, shouldFillHeight ? styles.containerFill : undefined)}>
+    <div
+      {...stylex.props(
+        styles.container,
+        shouldFillHeight ? styles.containerFill : undefined,
+      )}
+    >
       <VirtualSelect
         customStylex={styles.operatorOverride}
         mode='single'

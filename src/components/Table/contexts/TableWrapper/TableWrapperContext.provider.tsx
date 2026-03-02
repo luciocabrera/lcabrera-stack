@@ -11,7 +11,5 @@ export const TableWrapperProvider = ({
 
   const value = useMemo(() => ({ wrapperRef }), []);
 
-  return (
-    <TableWrapperContext value={value}>{children}</TableWrapperContext>
-  );
+  return <TableWrapperContext value={value}>{children}</TableWrapperContext>;
 };

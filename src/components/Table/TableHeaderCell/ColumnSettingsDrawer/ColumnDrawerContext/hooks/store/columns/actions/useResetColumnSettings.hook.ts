@@ -2,45 +2,47 @@ import { useTableConfigContextValue } from '@/components/Table/contexts/TableCon
 
 import { useColumnDrawerContextValue } from '../../../useColumnDrawerContextValue.hook';
 
-// TODO: We need to filter the values for the current column
-
+/**
+ * Resets the drawer state back to the current table state for this column.
+ */
 export const useResetColumnSettings = () => {
   const { columnsStore } = useTableConfigContextValue();
-  const { columnStore: columnsDrawerStore } = useColumnDrawerContextValue();
+  const { columnStore } = useColumnDrawerContextValue();
 
   return () => {
     const columnsState = columnsStore.get();
-    const columnKey = columnsDrawerStore.get()?.columnKey;
+    const columnKey = columnStore.get()?.columnKey;
 
     if (!columnKey) {
       console.warn(
-        '[useResetColumnSettings] No columnKey found in column drawer store. Cannot reset settings.',
+        '[useResetColumnSettings] No columnKey found in column drawer store.',
       );
       return;
     }
 
     const allColumnFilters = columnsState?.columnFilters;
-    const filterValue =
+    const columnFilter =
       allColumnFilters && Object.hasOwn(allColumnFilters, columnKey)
-        ? allColumnFilters[columnKey]
+        ? // eslint-disable-next-line security/detect-object-injection -- Safe: guarded by Object.hasOwn
+          allColumnFilters[columnKey]
         : undefined;
 
     const allColumnSizing = columnsState?.columnSizing;
-    const columnWidth =
+    const columnSizing =
       allColumnSizing && Object.hasOwn(allColumnSizing, columnKey)
-        ? allColumnSizing[columnKey]
+        ? // eslint-disable-next-line security/detect-object-injection -- Safe: guarded by Object.hasOwn
+          allColumnSizing[columnKey]
         : undefined;
 
-    const columnSorting = columnsState?.sorting.find(
+    const sorting = columnsState?.sorting.find(
       (sort) => sort.columnKey === columnKey,
-    ) ?? { columnKey, direction: undefined };
+    )?.direction;
 
-    columnsDrawerStore.set({
-      columnFilters: filterValue ? { [columnKey]: filterValue } : {},
+    columnStore.set({
+      columnFilter,
       columnKey,
-      columnSizing:
-        columnWidth === undefined ? {} : { [columnKey]: columnWidth },
-      sorting: columnSorting,
+      columnSizing,
+      sorting,
     });
   };
 };

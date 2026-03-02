@@ -19,7 +19,10 @@ import { styles, TRIGGER_MAX_HEIGHT } from './VirtualSelect.stylex';
  * Counts how many tag children fit within height limit.
  * Returns adjusted count reserving space for the "+N more" overflow tag.
  */
-const countVisibleTags = ({ totalCount, trigger }: CountVisibleTagsArgs): number => {
+const countVisibleTags = ({
+  totalCount,
+  trigger,
+}: CountVisibleTagsArgs): number => {
   const children = [...trigger.children] as HTMLElement[];
   const tagElements = children.filter((child) => !child.dataset.chevron);
 
@@ -119,12 +122,16 @@ export const VirtualSelect = ({
     if (mode !== 'multi' || !trigger) return;
 
     const observer = new ResizeObserver(() => {
-      setVisibleTagCount(countVisibleTags({ totalCount: selected.length, trigger }));
+      setVisibleTagCount(
+        countVisibleTags({ totalCount: selected.length, trigger }),
+      );
     });
     observer.observe(trigger);
 
     // Also run immediately for the initial measurement
-    setVisibleTagCount(countVisibleTags({ totalCount: selected.length, trigger }));
+    setVisibleTagCount(
+      countVisibleTags({ totalCount: selected.length, trigger }),
+    );
 
     return () => {
       observer.disconnect();
@@ -137,7 +144,13 @@ export const VirtualSelect = ({
   const visibleTags = selected.slice(0, computedVisibleCount);
 
   return (
-    <div ref={containerRef} {...stylex.props(styles.container, shouldFillHeight ? styles.containerFill : undefined)}>
+    <div
+      ref={containerRef}
+      {...stylex.props(
+        styles.container,
+        shouldFillHeight ? styles.containerFill : undefined,
+      )}
+    >
       {/* Trigger / input area */}
       <div
         aria-expanded={isOpen}
@@ -190,7 +203,9 @@ export const VirtualSelect = ({
           {...stylex.props(
             styles.dropdownBase,
             isAlwaysOpen
-              ? (shouldFillHeight ? styles.dropdownStaticFill : styles.dropdownStatic)
+              ? shouldFillHeight
+                ? styles.dropdownStaticFill
+                : styles.dropdownStatic
               : styles.dropdownAbsolute,
             customStylex,
           )}

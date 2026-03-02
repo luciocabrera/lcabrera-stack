@@ -24,9 +24,7 @@ export const SelectOption = ({
         {...stylex.props(styles.checkbox)}
       />
     )}
-    <span {...stylex.props(styles.label)}>
-      {option}
-    </span>
+    <span {...stylex.props(styles.label)}>{option}</span>
     {isLoading && (
       <div {...stylex.props(skeletonStyles.loadingOverlay)}>
         <div {...stylex.props(skeletonStyles.shimmerWave)} />

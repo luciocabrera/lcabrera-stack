@@ -2,9 +2,7 @@ import type { RefObject } from 'react';
 
 import { useCallback, useEffect, useMemo } from 'react';
 
-import {
-  SPACING,
-} from '@/constants/popover.constants';
+import { SPACING } from '@/constants/popover.constants';
 
 type UsePopoverPositioningArgs = {
   /** Whether the popover is currently open */
@@ -29,7 +27,6 @@ export const usePopoverPositioning = ({
   popoverRef,
   recalculateDeps = [],
 }: UsePopoverPositioningArgs) => {
-
   // Memoize the stringified recalculateDeps to avoid triggering effects unnecessarily
   const recalculateDepsKey = useMemo(
     () => JSON.stringify(recalculateDeps),

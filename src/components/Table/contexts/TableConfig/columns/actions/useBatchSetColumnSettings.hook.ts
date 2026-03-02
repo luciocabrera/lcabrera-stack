@@ -1,57 +1,62 @@
 import type {
   ColumnFiltersState,
   ColumnSizingState,
-  ColumnVisibilityState,
 } from '@/components/Table/Table.types';
-import type { Sorting } from '@/types/ui.types';
+import type { ColumnFilter } from '@/types/filterOperators.types';
+import type { SortDirection } from '@/types/ui.types';
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { usePersistTableStateAction } from '@/components/Table/hooks';
-import {
-  getEffectiveColumns,
-  getNormalizedColummns,
-} from '@/components/Table/utils';
+import { getNormalizedColummns } from '@/components/Table/utils';
 
-export type BatchColumnSettingsUpdate<TData> = {
-  columnFilters?: ColumnFiltersState<TData>;
-  // columnOrder?: ColumnOrderState<TData>;
-  columnSizing?: ColumnSizingState<TData>;
-  columnVisibility?: ColumnVisibilityState<TData>;
-  sorting?: Sorting<TData>;
+export type BatchColumnSettingsUpdate = {
+  /** Single column filter value */
+  columnFilter: ColumnFilter | undefined;
+  /** Column key being updated */
+  columnKey: string;
+  /** Single column width value */
+  columnSizing: number | undefined;
+  /** Sort direction for this column */
+  sorting: SortDirection;
 };
 
-export const useBatchSetColumnSettings = <TData>() => {
-  const { columnsStore, metaStore } = useTableConfigContextValue<TData>();
+export const useBatchSetColumnSettings = () => {
+  const { columnsStore, metaStore } = useTableConfigContextValue();
   const persistTableState = usePersistTableStateAction();
 
-  return (settings: BatchColumnSettingsUpdate<TData>) => {
+  return (settings: BatchColumnSettingsUpdate) => {
     const columnsState = columnsStore.get();
     const persistenceKey = metaStore.get()?.persistenceKey ?? '';
-    const newSorting = [...(columnsState?.sorting ?? [])];
-    if (settings.sorting) {
-      newSorting.push(settings.sorting);
-    }
+    const { columnFilter, columnKey, columnSizing, sorting } = settings;
 
-    // const newColumnsOrder = [
-    //   ...(columnsState?.columnOrder ?? []),
-    //   ...(settings.columnOrder ?? []),
-    // ];
+    // Sorting: remove existing entry for this column, re-add if direction defined
+    const baseSorting = (columnsState?.sorting ?? []).filter(
+      (s) => s.columnKey !== columnKey,
+    );
+    const newSorting = sorting
+      ? [...baseSorting, { columnKey, direction: sorting }]
+      : baseSorting;
 
-    const newColumnFilters = {
-      ...columnsState?.columnFilters,
-      ...settings.columnFilters,
-    };
+    // Filters: remove this column entry, then re-add if filter exists
+    const baseFilters = Object.fromEntries(
+      Object.entries(
+        (columnsState?.columnFilters ?? {}) as ColumnFiltersState,
+      ).filter(([key]) => key !== columnKey),
+    );
+    const newColumnFilters = columnFilter
+      ? { ...baseFilters, [columnKey]: columnFilter }
+      : baseFilters;
 
-    const newColumnSizing = {
-      ...columnsState?.columnSizing,
-      ...settings.columnSizing,
-    };
-
-    const effectiveColumns = getEffectiveColumns({
-      columnOrder: columnsState?.columnOrder ?? [],
-      columns: columnsState?.columns ?? [],
-      columnVisibility: settings.columnVisibility,
-    });
+    // Sizing: remove this column entry, then re-add if size exists
+    const baseSizing = Object.fromEntries(
+      Object.entries(
+        (columnsState?.columnSizing ?? {}) as ColumnSizingState,
+      ).filter(([key]) => key !== columnKey),
+    );
+    const newColumnSizing =
+      columnSizing === undefined
+        ? baseSizing
+        : { ...baseSizing, [columnKey]: columnSizing };
 
     const normalizedColumns = getNormalizedColummns({
       columns: columnsState?.columns ?? [],
@@ -73,9 +78,7 @@ export const useBatchSetColumnSettings = <TData>() => {
         persistenceKey,
         searchParamKey: 'sort',
         searchParamValue:
-          Object.keys(newSorting).length > 0
-            ? JSON.stringify(newSorting)
-            : undefined,
+          newSorting.length > 0 ? JSON.stringify(newSorting) : undefined,
         slice: 'sorting',
         valueSlice: newSorting,
       },
@@ -84,24 +87,11 @@ export const useBatchSetColumnSettings = <TData>() => {
         slice: 'columnSizing',
         valueSlice: newColumnSizing,
       },
-      {
-        persistenceKey,
-        slice: 'columnVisibility',
-        valueSlice: settings.columnVisibility,
-      },
     ]);
 
-    console.log('[useBatchSetColumnSettings] Updating columns state with:', {
-      ...settings,
-      columnsState,
-      effectiveColumns,
-      normalizedColumns,
-      sorting: newSorting,
-    });
-
     columnsStore.set({
-      ...settings,
-      effectiveColumns,
+      columnFilters: newColumnFilters,
+      columnSizing: newColumnSizing,
       normalizedColumns,
       sorting: newSorting,
     });

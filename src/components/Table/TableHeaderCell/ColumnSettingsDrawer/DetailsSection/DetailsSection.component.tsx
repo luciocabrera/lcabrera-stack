@@ -63,9 +63,7 @@ export const DetailsSection = <TData,>({
         >
           <span {...stylex.props(styles.label)}>{detail.label}</span>
           {detail.isBadge ? (
-            <span
-              {...stylex.props(styles.badge, getBadgeStyle(detail.value))}
-            >
+            <span {...stylex.props(styles.badge, getBadgeStyle(detail.value))}>
               {detail.value}
             </span>
           ) : (

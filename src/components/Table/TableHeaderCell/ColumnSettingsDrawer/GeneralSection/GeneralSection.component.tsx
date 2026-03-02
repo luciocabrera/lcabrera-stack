@@ -4,33 +4,24 @@ import { useState } from 'react';
 import { Button } from '@/components/Button';
 import { MaximizeIcon, MinimizeIcon, RefreshIcon } from '@/components/Icons';
 import { InfoBox } from '@/components/InfoBox';
-import {
-  useGetColumnSizing,
-  useGetNormalizedColumn,
-  useGetNormalizedColumnSize,
-} from '@/components/Table/contexts/TableConfig/columns/selectors';
+import { useGetNormalizedColumn } from '@/components/Table/contexts/TableConfig/columns/selectors';
 import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
 
 import type { GeneralSectionProps, WidthPreset } from './GeneralSection.types';
 
-import { useSetColumnsSizing } from '../ColumnDrawerContext/hooks/store/columns/actions';
+import { useSetColumnSizing } from '../ColumnDrawerContext/hooks/store/columns/actions';
 import { styles } from './GeneralSection.stylex';
 
 export const GeneralSection = <TData,>({
   columnKey,
 }: GeneralSectionProps<TData>) => {
   const column = useGetNormalizedColumn<TData>(columnKey);
-  const columnSizing = useGetColumnSizing();
-  const columnSize = useGetNormalizedColumnSize(columnKey);
-  const setColumnsSizing = useSetColumnsSizing();
+  const setColumnSizing = useSetColumnSizing();
 
   const { maxWidth, minWidth } = column;
 
   const effectiveMinWidth = minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
   const effectiveMaxWidth = maxWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
-  // const currentWidth = columnSizing[column.key] ?? effectiveMinWidth;
-
-  console.log('[GeneralSection] Current sizing from store:', {columnSize, columnSizing});
 
   const [selectedPreset, setSelectedPreset] = useState<WidthPreset>();
 
@@ -43,27 +34,19 @@ export const GeneralSection = <TData,>({
       return;
     }
 
-    // Build new sizing by copying current and updating only this column
-    const baseSizing = { ...columnSizing };
-
     switch (newPreset) {
       case 'default': {
-        // Remove custom width for this column
-        // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-        delete baseSizing[columnKey];
-        setColumnsSizing({});
+        setColumnSizing(undefined);
 
         break;
       }
       case 'max': {
-        baseSizing[columnKey] = effectiveMaxWidth;
-        setColumnsSizing(baseSizing);
+        setColumnSizing(effectiveMaxWidth);
 
         break;
       }
       case 'min': {
-        baseSizing[columnKey] = effectiveMinWidth;
-        setColumnsSizing(baseSizing);
+        setColumnSizing(effectiveMinWidth);
 
         break;
       }

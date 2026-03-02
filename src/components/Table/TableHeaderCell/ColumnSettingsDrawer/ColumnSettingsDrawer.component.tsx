@@ -109,7 +109,7 @@ export const ColumnSettingsDrawer = <TData,>({
     ...(isSortable
       ? [
           {
-            children: <SortingSection columnKey={columnKey} />,
+            children: <SortingSection />,
             header: 'Sorting',
             key: 'sorting',
           },

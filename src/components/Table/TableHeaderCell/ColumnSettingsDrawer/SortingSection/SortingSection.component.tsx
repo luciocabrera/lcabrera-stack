@@ -1,40 +1,28 @@
 import * as stylex from '@stylexjs/stylex';
 
-import type { SortDirection } from '@/types/ui.types';
-
 import { Button } from '@/components/Button';
 import { SortAscIcon, SortClearIcon, SortDescIcon } from '@/components/Icons';
 
 import type { SortingSectionProps } from './SortingSection.types';
 
-import { useSetColumnsSortings } from '../ColumnDrawerContext/hooks/store/columns/actions';
-import { useColumnsStore } from '../ColumnDrawerContext/hooks/store/columns/useColumnsStore.hook';
+import { useSetColumnSorting } from '../ColumnDrawerContext/hooks/store/columns/actions';
+import { useGetColumnSorting } from '../ColumnDrawerContext/hooks/store/columns/selectors';
 import { styles } from './SortingSection.stylex';
 
-export const SortingSection = <TData,>({
-  columnKey,
-}: SortingSectionProps<TData>) => {
-  const sortDirection = useColumnsStore<SortDirection>(
-    (state) => state.sorting.direction,
-  );
-  const setColumnsSortings = useSetColumnsSortings();
+export const SortingSection = (_props: SortingSectionProps) => {
+  const sortDirection = useGetColumnSorting();
+  const setColumnSorting = useSetColumnSorting();
 
   const handleAsc = () => {
-    setColumnsSortings({
-      columnKey,
-      direction: sortDirection === 'asc' ? undefined : 'asc',
-    });
+    setColumnSorting(sortDirection === 'asc' ? undefined : 'asc');
   };
 
   const handleDesc = () => {
-    setColumnsSortings({
-      columnKey,
-      direction: sortDirection === 'desc' ? undefined : 'desc',
-    });
+    setColumnSorting(sortDirection === 'desc' ? undefined : 'desc');
   };
 
   const handleClear = () => {
-    setColumnsSortings({ columnKey, direction: undefined });
+    setColumnSorting(undefined);
   };
 
   return (

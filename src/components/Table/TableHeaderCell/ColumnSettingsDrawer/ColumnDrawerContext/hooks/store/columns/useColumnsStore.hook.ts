@@ -12,8 +12,7 @@ export const useColumnsStore = <TSelected, TData = unknown>(
   const state = useSyncExternalStore(
     columnStore.subscribe,
     () => selector(columnStore.get() as ColumnDrawerState<TData>),
-    () =>
-      selector(columnStore.getServerSnapshot() as ColumnDrawerState<TData>),
+    () => selector(columnStore.getServerSnapshot() as ColumnDrawerState<TData>),
   );
 
   return state;

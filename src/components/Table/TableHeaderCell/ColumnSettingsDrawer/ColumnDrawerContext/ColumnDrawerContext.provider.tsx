@@ -16,29 +16,31 @@ export const ColumnDrawerProvider = ({
   const columnsState = columnsStore.get();
 
   const allColumnFilters = columnsState?.columnFilters;
-  const filterValue =
+  const columnFilter =
     allColumnFilters && Object.hasOwn(allColumnFilters, columnKey)
-      ? allColumnFilters[columnKey]
+      ? // eslint-disable-next-line security/detect-object-injection -- Safe: guarded by Object.hasOwn
+        allColumnFilters[columnKey]
       : undefined;
 
   const allColumnSizing = columnsState?.columnSizing;
-  const columnWidth =
+  const columnSizing =
     allColumnSizing && Object.hasOwn(allColumnSizing, columnKey)
-      ? allColumnSizing[columnKey]
+      ? // eslint-disable-next-line security/detect-object-injection -- Safe: guarded by Object.hasOwn
+        allColumnSizing[columnKey]
       : undefined;
 
-  const columnSorting = columnsState?.sorting.find(
+  const sorting = columnsState?.sorting.find(
     (sort) => sort.columnKey === columnKey,
-  ) ?? { columnKey, direction: undefined };
+  )?.direction;
 
   const initialState: ColumnDrawerState<unknown> = {
-    columnFilters: filterValue ? { [columnKey]: filterValue } : {},
+    columnFilter,
     columnKey,
-    columnSizing: columnWidth === undefined ? {} : { [columnKey]: columnWidth },
-    sorting: columnSorting,
+    columnSizing,
+    sorting,
   };
 
-  console.log('[ColumnDrawerProvider] Initial state:', initialState);
+  console.log('Initializing ColumnDrawerProvider with state:', initialState);
 
   const columnStore = useStore<ColumnDrawerState<unknown>>(initialState);
 

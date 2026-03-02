@@ -8,4 +8,3 @@ export const styles = stylex.create({
     backgroundColor: 'transparent',
   },
 });
-

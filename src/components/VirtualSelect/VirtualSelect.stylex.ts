@@ -22,7 +22,6 @@ const localStyles = stylex.create({
     width: 0,
   }),
   container: {
-
     // display: 'flex',
     // flexDirection: 'column',
     position: 'relative',
@@ -43,7 +42,7 @@ const localStyles = stylex.create({
     backgroundColor: colors.surfacePrimary,
     display: 'flex',
     flexDirection: 'column',
-        marginTop: spacing.sm,
+    marginTop: spacing.sm,
   },
   dropdownAbsolute: {
     boxShadow: shadows.lg,

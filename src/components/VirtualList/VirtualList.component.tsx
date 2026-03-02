@@ -56,13 +56,14 @@ export const VirtualList = ({
     filteredOptions.length > 0 &&
     filteredOptions.every((option) => selectedValues.includes(option));
 
-  const { containerHeight, endIndex, offsetY, startIndex, totalHeight } = useVirtualization({
-    containerRef: scrollContainerRef,
-    defaultContainerHeight: 300,
-    itemHeight: ITEM_HEIGHT,
-    overscan: 5,
-    totalItems,
-  });
+  const { containerHeight, endIndex, offsetY, startIndex, totalHeight } =
+    useVirtualization({
+      containerRef: scrollContainerRef,
+      defaultContainerHeight: 300,
+      itemHeight: ITEM_HEIGHT,
+      overscan: 5,
+      totalItems,
+    });
 
   const handleToggle = (option: string) => {
     const newSelectedValues = selectedValues.includes(option)
@@ -125,7 +126,12 @@ export const VirtualList = ({
   }, [handleScroll]);
 
   return (
-    <div {...stylex.props(styles.container, shouldFillHeight ? styles.containerFill : undefined)}>
+    <div
+      {...stylex.props(
+        styles.container,
+        shouldFillHeight ? styles.containerFill : undefined,
+      )}
+    >
       <div {...stylex.props(styles.searchInputWrapper)}>
         <input
           autoComplete='off'
@@ -144,7 +150,10 @@ export const VirtualList = ({
         />
       </div>
       <div
-        {...stylex.props(styles.optionsList, shouldFillHeight ? styles.optionsListFill : undefined)}
+        {...stylex.props(
+          styles.optionsList,
+          shouldFillHeight ? styles.optionsListFill : undefined,
+        )}
       >
         <div
           ref={scrollContainerRef}
