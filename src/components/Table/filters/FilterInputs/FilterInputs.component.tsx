@@ -56,10 +56,12 @@ export const FilterInputs = <TData,>({
   );
 
   // Resolve current operator value to its label for VirtualSelect selected state
+  // When filter is undefined (reset), show empty to display placeholder
   const selectedOperatorLabel = useMemo(() => {
+    if (!filter) return [];
     const match = operatorOptions.find((op) => op.value === operator);
     return match ? [match.label] : [];
-  }, [operator, operatorOptions]);
+  }, [filter, operator, operatorOptions]);
 
   const handleOperatorChange = useCallback(
     (selectedLabels: string[]) => {
@@ -134,7 +136,7 @@ export const FilterInputs = <TData,>({
         placeholder='Select operator...'
         selected={selectedOperatorLabel}
       />
-      <Activity mode={isOperatorOpen ? 'hidden' : 'visible'}>
+      <Activity mode={isOperatorOpen || !filter ? 'hidden' : 'visible'}>
         <InputContent
           columnKey={columnKey}
           dataType={column.dataType}

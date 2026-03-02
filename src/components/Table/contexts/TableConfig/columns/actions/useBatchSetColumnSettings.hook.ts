@@ -11,13 +11,13 @@ import { getNormalizedColummns } from '@/components/Table/utils';
 
 export type BatchColumnSettingsUpdate = {
   /** Single column filter value */
-  columnFilter: ColumnFilter | undefined;
+  columnFilter?: ColumnFilter ;
   /** Column key being updated */
   columnKey: string;
   /** Single column width value */
-  columnSizing: number | undefined;
+  columnSizing?: number ;
   /** Sort direction for this column */
-  sorting: SortDirection;
+  sorting?: SortDirection;
 };
 
 export const useBatchSetColumnSettings = () => {
@@ -29,13 +29,21 @@ export const useBatchSetColumnSettings = () => {
     const persistenceKey = metaStore.get()?.persistenceKey ?? '';
     const { columnFilter, columnKey, columnSizing, sorting } = settings;
 
-    // Sorting: remove existing entry for this column, re-add if direction defined
-    const baseSorting = (columnsState?.sorting ?? []).filter(
-      (s) => s.columnKey !== columnKey,
+    // Sorting: update in-place to preserve order, or remove if undefined
+    const existingSorting = columnsState?.sorting ?? [];
+    const existingIndex = existingSorting.findIndex(
+      (s) => s.columnKey === columnKey,
     );
+
+    const hasExistingSort = existingIndex !== -1;
+
     const newSorting = sorting
-      ? [...baseSorting, { columnKey, direction: sorting }]
-      : baseSorting;
+      ? hasExistingSort
+        ? existingSorting.map((s) =>
+            s.columnKey === columnKey ? { columnKey, direction: sorting } : s,
+          )
+        : [...existingSorting, { columnKey, direction: sorting }]
+      : existingSorting.filter((s) => s.columnKey !== columnKey);
 
     // Filters: remove this column entry, then re-add if filter exists
     const baseFilters = Object.fromEntries(
