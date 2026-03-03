@@ -103,5 +103,6 @@ export const useBatchSetColumnSettings = () => {
       normalizedColumns,
       sorting: newSorting,
     });
+    metaStore.set({ isColumnSettingsOpen: false });
   };
 };

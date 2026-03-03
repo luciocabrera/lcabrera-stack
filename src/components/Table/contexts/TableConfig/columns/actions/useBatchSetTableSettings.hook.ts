@@ -13,6 +13,8 @@ import {
   getNormalizedColummns,
 } from '@/components/Table/utils';
 
+import { useTableDataContextValue } from '../../../TableData/data/useTableDataContextValue.hook';
+
 export type BatchTableSettingsUpdate<TData> = {
   columnFilters: ColumnFiltersState<TData>;
   columnOrder: ColumnOrderState<TData>;
@@ -23,9 +25,13 @@ export type BatchTableSettingsUpdate<TData> = {
 
 export const useBatchSetTableSettings = <TData>() => {
   const { columnsStore, metaStore } = useTableConfigContextValue<TData>();
+  const { dataStore } = useTableDataContextValue();
   const persistTableState = usePersistTableStateAction();
 
   return (settings: BatchTableSettingsUpdate<TData>) => {
+    dataStore.set({
+      isLoadingMore: true,
+    });
     const columnsState = columnsStore.get();
     const persistenceKey = metaStore.get()?.persistenceKey ?? '';
 
@@ -80,5 +86,8 @@ export const useBatchSetTableSettings = <TData>() => {
 
     columnsStore.set({ ...settings, effectiveColumns, normalizedColumns });
     metaStore.set({ isTableSettingsOpen: false });
+    dataStore.set({
+      isLoadingMore: false,
+    });
   };
 };

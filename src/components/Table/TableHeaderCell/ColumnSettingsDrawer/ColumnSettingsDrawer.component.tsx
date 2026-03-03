@@ -61,7 +61,6 @@ export const ColumnSettingsDrawer = ({
     if (isPinned) {
       setIsPinned(false);
     }
-    toogleTableIsColumnSettingsOpen();
   };
 
   const handleCancel = () => {
