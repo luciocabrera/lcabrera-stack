@@ -1,5 +1,4 @@
 import * as stylex from '@stylexjs/stylex';
-import { useState } from 'react';
 
 import { MoreVerticalIcon } from '@/components/Icons';
 import {
@@ -20,8 +19,7 @@ import {
   useGetColumnSizing,
   useGetNormalizedColumn,
 } from '../contexts/TableConfig/columns/selectors';
-import { ColumnSettingsDrawer } from './ColumnSettingsDrawer';
-import { ColumnDrawerProvider } from './ColumnSettingsDrawer/ColumnDrawerContext/ColumnDrawerContext.provider';
+import { useSetTableColumnSelectedKey, useToogleTableIsColumnSettingsOpen } from '../contexts/TableConfig/meta/actions';
 import { FilterButton } from './FilterButton';
 import { SortIcon } from './SortIcon';
 import {
@@ -34,12 +32,11 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
   columnKey,
   customStylex,
   hasSettings = false,
-  onSettingsClick,
   ...rest
 }: TableHeaderCellProps<TData>) => {
   useRenderTracker({ componentName: `TableHeaderCell:${columnKey}` });
 
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  // const [isFilterOpen, setIsFilterOpen] = useState(false);
   const columnSizing = useGetColumnSizing();
   const column = useGetNormalizedColumn<TData>(columnKey);
   const isLoading = useGetTableIsLoading();
@@ -47,23 +44,17 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
 
   const setColumnSizing = useSetColumnSizing();
   const setSorting = useSetColumnSorting();
+  const setTableColumnSelectedKey = useSetTableColumnSelectedKey();
+  const toogleTableIsColumnSettingsOpen = useToogleTableIsColumnSettingsOpen();
 
   const { dataType, label, maxWidth, minWidth } = column;
 
   const effectiveMinWidth = minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
   const currentWidth = columnSizing[column.key] ?? effectiveMinWidth;
   const sortDirection = column.sortDirection;
-
   const isFilterable = column.isFilterable !== false;
   const isSortable = column.isSortable !== false;
   const isLoadingState = isLoading || isLoadingMore;
-
-  const handleSort = () => {
-    if (!isSortable) return;
-    const nextDirection = getNextSortDirection(sortDirection);
-    // const isMultiSort = event.shiftKey;
-    setSorting({ columnKey, direction: nextDirection });
-  };
 
   const { isResizing, onMouseDown } = useColumnResize({
     columnKey,
@@ -73,6 +64,18 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
     onResize: setColumnSizing,
   });
 
+  const handleSort = () => {
+    if (!isSortable) return;
+    const nextDirection = getNextSortDirection(sortDirection);
+    // const isMultiSort = event.shiftKey;
+    setSorting({ columnKey, direction: nextDirection });
+  };
+
+  const handleOpenSettings = () => {
+    setTableColumnSelectedKey(columnKey);
+    toogleTableIsColumnSettingsOpen();
+  };
+
   const handleResizeDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
     event.preventDefault();
     event.stopPropagation();
@@ -80,43 +83,49 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
   };
 
   return (
-    <th
-      {...rest}
-      {...stylex.props(
-        tableHeaderCellStyles.base(effectiveMinWidth, currentWidth),
-        customStylex,
-      )}
-    >
-      {/* Loading overlay with shimmer */}
-      {isLoadingState && (
-        <div {...stylex.props(skelletonStyles.loadingOverlay)}>
-          <div {...stylex.props(skelletonStyles.shimmerWave)} />
-        </div>
-      )}
-      <span {...stylex.props(tableHeaderCellStyles.content)}>{label}</span>
-      <div {...stylex.props(tableHeaderCellStyles.controls)}>
-        {isSortable && (
-          <button
-            aria-label={`Sort by ${label}`}
-            onClick={handleSort}
-            type='button'
-            {...stylex.props(
-              tableHeaderCellStyles.sortButton,
-              sortDirection !== undefined &&
-                tableHeaderCellStyles.sortButtonActive,
-            )}
-          >
-            <SortIcon direction={sortDirection} />
-          </button>
+    <>
+      {/* <ColumnDrawerProvider columnKey={columnKey}>
+        <ColumnSettingsDrawer
+          columnKey={columnKey}
+          isOpen={isFilterOpen}
+          onClose={() => {
+            setIsFilterOpen(false);
+          }}
+        />
+      </ColumnDrawerProvider> */}
+      <th
+        {...rest}
+        {...stylex.props(
+          tableHeaderCellStyles.base(effectiveMinWidth, currentWidth),
+          customStylex,
         )}
-        {isFilterable && dataType && (
-          <>
-            <FilterButton
-              onClick={() => {
-                setIsFilterOpen(true);
-              }}
-            />
-            <ColumnDrawerProvider columnKey={columnKey}>
+      >
+        {/* Loading overlay with shimmer */}
+        {isLoadingState && (
+          <div {...stylex.props(skelletonStyles.loadingOverlay)}>
+            <div {...stylex.props(skelletonStyles.shimmerWave)} />
+          </div>
+        )}
+        <span {...stylex.props(tableHeaderCellStyles.content)}>{label}</span>
+        <div {...stylex.props(tableHeaderCellStyles.controls)}>
+          {isSortable && (
+            <button
+              aria-label={`Sort by ${label}`}
+              onClick={handleSort}
+              type='button'
+              {...stylex.props(
+                tableHeaderCellStyles.sortButton,
+                sortDirection !== undefined &&
+                  tableHeaderCellStyles.sortButtonActive,
+              )}
+            >
+              <SortIcon direction={sortDirection} />
+            </button>
+          )}
+          {isFilterable && dataType && (
+            <>
+              <FilterButton onClick={handleOpenSettings} />
+              {/* <ColumnDrawerProvider columnKey={columnKey}>
               <ColumnSettingsDrawer
                 columnKey={columnKey}
                 isOpen={isFilterOpen}
@@ -124,35 +133,36 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
                   setIsFilterOpen(false);
                 }}
               />
-            </ColumnDrawerProvider>
-          </>
-        )}
-        {hasSettings && (
-          <button
-            aria-label={`Settings for ${label}`}
-            onClick={onSettingsClick}
-            type='button'
-            {...stylex.props(tableHeaderCellStyles.settingsButton)}
-          >
-            <MoreVerticalIcon />
-          </button>
-        )}
-      </div>
-      {/* Resize handle */}
-      <div
-        aria-label={`Resize ${label} column`}
-        onDoubleClick={handleResizeDoubleClick}
-        onMouseDown={onMouseDown}
-        role='separator'
-        {...stylex.props(tableHeaderCellStyles.resizeHandle)}
-      >
-        <div
-          {...stylex.props(
-            tableHeaderCellStyles.resizeHandleLine,
-            isResizing && tableHeaderCellStyles.resizeHandleActive,
+            </ColumnDrawerProvider> */}
+            </>
           )}
-        />
-      </div>
-    </th>
+          {hasSettings && (
+            <button
+              aria-label={`Settings for ${label}`}
+              onClick={handleOpenSettings}
+              type='button'
+              {...stylex.props(tableHeaderCellStyles.settingsButton)}
+            >
+              <MoreVerticalIcon />
+            </button>
+          )}
+        </div>
+        {/* Resize handle */}
+        <div
+          aria-label={`Resize ${label} column`}
+          onDoubleClick={handleResizeDoubleClick}
+          onMouseDown={onMouseDown}
+          role='separator'
+          {...stylex.props(tableHeaderCellStyles.resizeHandle)}
+        >
+          <div
+            {...stylex.props(
+              tableHeaderCellStyles.resizeHandleLine,
+              isResizing && tableHeaderCellStyles.resizeHandleActive,
+            )}
+          />
+        </div>
+      </th>
+    </>
   );
 };

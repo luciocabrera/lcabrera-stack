@@ -182,13 +182,16 @@ export type TableDataState<TData> = {
 export type TableDensity = 'comfortable' | 'compact';
 
 export type TableMetaState = {
+  columnSelectedKey?: string;
   density: TableDensity;
   /** Error message if data fetch failed */
   error?: string;
   /** Initial page size for first load */
   initialPageSize: number;
   isBordered: boolean;
+  isColumnSettingsOpen: boolean;
   isStriped: boolean;
+  isTableSettingsOpen: boolean;
   /** Page size for subsequent loads */
   loadMorePageSize: number;
   /** Locale for formatting (defaults to navigator.language) */

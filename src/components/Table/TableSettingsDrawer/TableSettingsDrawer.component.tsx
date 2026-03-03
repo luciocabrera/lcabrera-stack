@@ -18,8 +18,7 @@ import {
 } from '@/components/SidePanel';
 import { Tabs } from '@/components/Tabs';
 
-import type { TableSettingsDrawerProps } from './TableSettingsDrawer.types';
-
+import { useToogleTableIsTableSettingsOpen } from '../contexts/TableConfig/meta/actions';
 import { ColumnOrderSection } from './ColumnOrderSection';
 import { FiltersSection } from './FiltersSection';
 import { GeneralSettingsSection } from './GeneralSettingsSection';
@@ -29,13 +28,10 @@ import {
   useResetTableSettings,
 } from './TableDrawerContext/hooks/store/columns/actions';
 
-export const TableSettingsDrawer = ({
-  isOpen,
-  onClose,
-}: TableSettingsDrawerProps) => {
+export const TableSettingsDrawer = () => {
   const batchSetTableDrawerSettings = useBatchSetTableDrawerSettings();
   const resetTableDrawerSettings = useResetTableSettings();
-
+  const toogleTableIsTableSettingsOpen = useToogleTableIsTableSettingsOpen();
   const [isPinned, setIsPinned] = useState(false);
 
   const areFiltersValid = true; // TODO: implement filter validation
@@ -55,7 +51,7 @@ export const TableSettingsDrawer = ({
     if (isPinned) {
       setIsPinned(false);
     }
-    onClose();
+    toogleTableIsTableSettingsOpen();
   };
 
   const handleCancel = () => {
@@ -63,7 +59,7 @@ export const TableSettingsDrawer = ({
     // Unpin if pinned, then close
     if (isPinned) setIsPinned(false);
 
-    onClose();
+    toogleTableIsTableSettingsOpen();
   };
 
   const handleTogglePin = () => {
@@ -95,7 +91,7 @@ export const TableSettingsDrawer = ({
 
   return (
     <SidePanel
-      isOpen={isOpen}
+      isOpen={true}
       isPinned={isPinned}
       onClose={handleCancel}
       position='right'

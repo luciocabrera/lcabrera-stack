@@ -23,6 +23,7 @@ import { useRenderTracker } from '@/utils/performance';
 
 import type { ColumnSettingsDrawerProps } from './ColumnSettingsDrawer.types';
 
+import { useToogleTableIsColumnSettingsOpen } from '../../contexts/TableConfig/meta/actions';
 import {
   useBatchSetColumnDrawerSettings,
   useResetColumnSettings,
@@ -32,18 +33,18 @@ import { FilterSection } from './FilterSection';
 import { GeneralSection } from './GeneralSection';
 import { SortingSection } from './SortingSection';
 
-export const ColumnSettingsDrawer = <TData,>({
-  columnKey,
-  isOpen,
-  onClose,
-}: ColumnSettingsDrawerProps<TData>) => {
+export const ColumnSettingsDrawer = ({columnKey}:ColumnSettingsDrawerProps) => {
+
+
   useRenderTracker({ componentName: `ColumnSettingsDrawer:${columnKey}` });
 
-  const column = useGetNormalizedColumn<TData>(columnKey);
+  const column = useGetNormalizedColumn<unknown>(columnKey);
   const wrapperRef = useTableWrapperRef();
 
   const batchSetColumnDrawerSettings = useBatchSetColumnDrawerSettings();
   const { clearAll, resetToTableState } = useResetColumnSettings();
+
+  const toogleTableIsColumnSettingsOpen = useToogleTableIsColumnSettingsOpen();
 
   const [isPinned, setIsPinned] = useState(false);
   const pinButtonTitle = isPinned ? 'Unpin drawer' : 'Pin drawer';
@@ -60,7 +61,7 @@ export const ColumnSettingsDrawer = <TData,>({
     if (isPinned) {
       setIsPinned(false);
     }
-    onClose();
+    toogleTableIsColumnSettingsOpen();
   };
 
   const handleCancel = () => {
@@ -68,7 +69,7 @@ export const ColumnSettingsDrawer = <TData,>({
     // Unpin if pinned, then close
     if (isPinned) setIsPinned(false);
 
-    onClose();
+    toogleTableIsColumnSettingsOpen();
   };
 
   const handleTogglePin = () => {
@@ -78,7 +79,7 @@ export const ColumnSettingsDrawer = <TData,>({
   const handleClearAll = () => {
     clearAll();
     batchSetColumnDrawerSettings();
-    onClose();
+    toogleTableIsColumnSettingsOpen();
   };
 
   const isFilterable = column.isFilterable !== false;
@@ -117,7 +118,7 @@ export const ColumnSettingsDrawer = <TData,>({
 
   return (
     <SidePanel
-      isOpen={isOpen}
+      isOpen={true}
       isPinned={isPinned}
       onClose={handleCancel}
       portalContainer={wrapperRef}

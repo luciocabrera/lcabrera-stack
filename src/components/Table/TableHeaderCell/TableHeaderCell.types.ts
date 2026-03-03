@@ -16,7 +16,7 @@ export type TableHeaderCellProps<TData> = ComponentPropsWithoutRef<'th'> & {
   // isFilterable?: boolean;
   // isSortable?: boolean;
   // maxWidth?: number;
-  onSettingsClick?: () => void;
+  // onSettingsClick?: () => void;
   // onSort?: (params: HandleSortParams) => void;
   // sortDirection?: SortDirection;
   // sortIndex?: number;
