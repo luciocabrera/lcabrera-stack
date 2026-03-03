@@ -23,10 +23,10 @@ import { useRenderTracker } from '@/utils/performance';
 
 import type { ColumnSettingsDrawerProps } from './ColumnSettingsDrawer.types';
 
-import { useToogleTableIsColumnSettingsOpen } from '../../contexts/TableConfig/meta/actions';
 import {
   useBatchSetColumnDrawerSettings,
-  useResetColumnSettings,
+  useClearAllColumnSettings,
+  useResetToTableState,
 } from './ColumnDrawerContext/hooks/store/columns/actions';
 import { DetailsSection } from './DetailsSection';
 import { FilterSection } from './FilterSection';
@@ -42,11 +42,11 @@ export const ColumnSettingsDrawer = ({
   const wrapperRef = useTableWrapperRef();
 
   const batchSetColumnDrawerSettings = useBatchSetColumnDrawerSettings();
-  const { clearAll, resetToTableState } = useResetColumnSettings();
-
-  const toogleTableIsColumnSettingsOpen = useToogleTableIsColumnSettingsOpen();
+  const resetToTableState = useResetToTableState();
+  const clearAllColumnSettings = useClearAllColumnSettings();
 
   const [isPinned, setIsPinned] = useState(false);
+
   const pinButtonTitle = isPinned ? 'Unpin drawer' : 'Pin drawer';
 
   const handleAccept = () => {
@@ -57,18 +57,13 @@ export const ColumnSettingsDrawer = ({
 
     batchSetColumnDrawerSettings();
 
-    // Unpin if pinned, then close
-    if (isPinned) {
-      setIsPinned(false);
-    }
+    if (isPinned) setIsPinned(false);
   };
 
   const handleCancel = () => {
     resetToTableState();
-    // Unpin if pinned, then close
-    if (isPinned) setIsPinned(false);
 
-    toogleTableIsColumnSettingsOpen();
+    if (isPinned) setIsPinned(false);
   };
 
   const handleTogglePin = () => {
@@ -76,9 +71,8 @@ export const ColumnSettingsDrawer = ({
   };
 
   const handleClearAll = () => {
-    clearAll();
+    clearAllColumnSettings();
     batchSetColumnDrawerSettings();
-    toogleTableIsColumnSettingsOpen();
   };
 
   const isFilterable = column.isFilterable !== false;

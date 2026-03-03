@@ -1,3 +1,5 @@
+import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+
 import { useColumnDrawerContextValue } from '../../../useColumnDrawerContextValue.hook';
 
 /**
@@ -5,7 +7,7 @@ import { useColumnDrawerContextValue } from '../../../useColumnDrawerContextValu
  */
 export const useClearAllColumnSettings = () => {
   const { columnStore } = useColumnDrawerContextValue();
-
+  const { metaStore } = useTableConfigContextValue();
   return () => {
     const columnKey = columnStore.get()?.columnKey;
 
@@ -22,5 +24,6 @@ export const useClearAllColumnSettings = () => {
       columnSizing: undefined,
       sorting: undefined,
     });
+    metaStore.set({ isColumnSettingsOpen: false });
   };
 };

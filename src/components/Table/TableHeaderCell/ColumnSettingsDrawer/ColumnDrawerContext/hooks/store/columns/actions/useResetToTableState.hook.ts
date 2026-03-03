@@ -6,7 +6,7 @@ import { useColumnDrawerContextValue } from '../../../useColumnDrawerContextValu
  * Restores the drawer state from the current table state for this column.
  */
 export const useResetToTableState = () => {
-  const { columnsStore } = useTableConfigContextValue();
+  const { columnsStore, metaStore } = useTableConfigContextValue();
   const { columnStore } = useColumnDrawerContextValue();
 
   return () => {
@@ -45,5 +45,6 @@ export const useResetToTableState = () => {
       columnSizing,
       sorting,
     });
+    metaStore.set({ isColumnSettingsOpen: false });
   };
 };
