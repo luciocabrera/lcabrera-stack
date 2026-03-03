@@ -47,7 +47,7 @@ type PersistTableStateAction = {
 };
 
 export const usePersistTableStateAction = (): PersistTableStateAction => {
-  const fetcher = useFetcher();
+  const fetcher = useFetcher({ key: 'persist-table-state' });
   const location = useLocation();
 
   return ((args: PersistCookieEntry | PersistCookieEntry[]) => {
