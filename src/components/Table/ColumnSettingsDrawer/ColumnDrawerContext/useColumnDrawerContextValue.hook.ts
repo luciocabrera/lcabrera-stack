@@ -1,6 +1,6 @@
 import { use } from 'react';
 
-import { ColumnDrawerContext } from '../ColumnDrawerContext.context';
+import { ColumnDrawerContext } from './ColumnDrawerContext.context';
 
 export const useColumnDrawerContextValue = () => {
   const context = use(ColumnDrawerContext);

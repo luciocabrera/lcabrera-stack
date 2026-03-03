@@ -1,6 +1,5 @@
+import { useColumnDrawerContextValue } from '@/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/useColumnDrawerContextValue.hook';
 import { useBatchSetColumnSettings } from '@/components/Table/contexts/TableConfig/columns/actions';
-
-import { useColumnDrawerContextValue } from '../../../useColumnDrawerContextValue.hook';
 
 /**
  * Hook to batch update all table settings at once.

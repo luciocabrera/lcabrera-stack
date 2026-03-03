@@ -1,6 +1,6 @@
 import type { SortDirection } from '@/types/ui.types';
 
-import { useColumnDrawerContextValue } from '../../../useColumnDrawerContextValue.hook';
+import { useColumnDrawerContextValue } from '@/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/useColumnDrawerContextValue.hook';
 
 /**
  * Hook to update the sort direction for this column

@@ -27,7 +27,7 @@ import {
   useBatchSetColumnDrawerSettings,
   useClearAllColumnSettings,
   useResetToTableState,
-} from './ColumnDrawerContext/hooks/store/columns/actions';
+} from './ColumnDrawerContext/columns/actions';
 import { DetailsSection } from './DetailsSection';
 import { FilterSection } from './FilterSection';
 import { GeneralSection } from './GeneralSection';

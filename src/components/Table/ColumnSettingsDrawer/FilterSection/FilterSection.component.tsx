@@ -5,9 +5,9 @@ import { drawerSectionStyles } from '@/design-system/tokens/drawerSection.stylex
 
 import type { FilterSectionProps } from './FilterSection.types';
 
-import { FilterInputs } from '../../../filters/FilterInputs';
-import { useSetColumnFilter } from '../ColumnDrawerContext/hooks/store/columns/actions';
-import { useGetColumnFilter } from '../ColumnDrawerContext/hooks/store/columns/selectors';
+import { FilterInputs } from '../../filters/FilterInputs';
+import { useSetColumnFilter } from '../ColumnDrawerContext/columns/actions';
+import { useGetColumnFilter } from '../ColumnDrawerContext/columns/selectors';
 import { styles } from './FilterSection.stylex';
 
 export const FilterSection = <TData,>({

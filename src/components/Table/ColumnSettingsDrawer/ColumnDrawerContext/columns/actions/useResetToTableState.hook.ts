@@ -1,6 +1,5 @@
+import { useColumnDrawerContextValue } from '@/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/useColumnDrawerContextValue.hook';
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
-
-import { useColumnDrawerContextValue } from '../../../useColumnDrawerContextValue.hook';
 
 /**
  * Restores the drawer state from the current table state for this column.

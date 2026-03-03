@@ -86,86 +86,64 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
   };
 
   return (
-    <>
-      {/* <ColumnDrawerProvider columnKey={columnKey}>
-        <ColumnSettingsDrawer
-          columnKey={columnKey}
-          isOpen={isFilterOpen}
-          onClose={() => {
-            setIsFilterOpen(false);
-          }}
-        />
-      </ColumnDrawerProvider> */}
-      <th
-        {...rest}
-        {...stylex.props(
-          tableHeaderCellStyles.base(effectiveMinWidth, currentWidth),
-          customStylex,
-        )}
-      >
-        {/* Loading overlay with shimmer */}
-        {isLoadingState && (
-          <div {...stylex.props(skelletonStyles.loadingOverlay)}>
-            <div {...stylex.props(skelletonStyles.shimmerWave)} />
-          </div>
-        )}
-        <span {...stylex.props(tableHeaderCellStyles.content)}>{label}</span>
-        <div {...stylex.props(tableHeaderCellStyles.controls)}>
-          {isSortable && (
-            <button
-              aria-label={`Sort by ${label}`}
-              onClick={handleSort}
-              type='button'
-              {...stylex.props(
-                tableHeaderCellStyles.sortButton,
-                sortDirection !== undefined &&
-                  tableHeaderCellStyles.sortButtonActive,
-              )}
-            >
-              <SortIcon direction={sortDirection} />
-            </button>
-          )}
-          {isFilterable && dataType && (
-            <>
-              <FilterButton onClick={handleOpenSettings} />
-              {/* <ColumnDrawerProvider columnKey={columnKey}>
-              <ColumnSettingsDrawer
-                columnKey={columnKey}
-                isOpen={isFilterOpen}
-                onClose={() => {
-                  setIsFilterOpen(false);
-                }}
-              />
-            </ColumnDrawerProvider> */}
-            </>
-          )}
-          {hasSettings && (
-            <button
-              aria-label={`Settings for ${label}`}
-              onClick={handleOpenSettings}
-              type='button'
-              {...stylex.props(tableHeaderCellStyles.settingsButton)}
-            >
-              <MoreVerticalIcon />
-            </button>
-          )}
+    <th
+      {...rest}
+      {...stylex.props(
+        tableHeaderCellStyles.base(effectiveMinWidth, currentWidth),
+        customStylex,
+      )}
+    >
+      {/* Loading overlay with shimmer */}
+      {isLoadingState && (
+        <div {...stylex.props(skelletonStyles.loadingOverlay)}>
+          <div {...stylex.props(skelletonStyles.shimmerWave)} />
         </div>
-        {/* Resize handle */}
-        <div
-          aria-label={`Resize ${label} column`}
-          onDoubleClick={handleResizeDoubleClick}
-          onMouseDown={onMouseDown}
-          role='separator'
-          {...stylex.props(tableHeaderCellStyles.resizeHandle)}
-        >
-          <div
+      )}
+      <span {...stylex.props(tableHeaderCellStyles.content)}>{label}</span>
+      <div {...stylex.props(tableHeaderCellStyles.controls)}>
+        {isSortable && (
+          <button
+            aria-label={`Sort by ${label}`}
+            onClick={handleSort}
+            type='button'
             {...stylex.props(
-              tableHeaderCellStyles.resizeHandleLine,
-              isResizing && tableHeaderCellStyles.resizeHandleActive,
+              tableHeaderCellStyles.sortButton,
+              sortDirection !== undefined &&
+                tableHeaderCellStyles.sortButtonActive,
             )}
-          />
-        </div>
-      </th>
-    </>
+          >
+            <SortIcon direction={sortDirection} />
+          </button>
+        )}
+        {isFilterable && dataType && (
+          <FilterButton onClick={handleOpenSettings} />
+        )}
+        {hasSettings && (
+          <button
+            aria-label={`Settings for ${label}`}
+            onClick={handleOpenSettings}
+            type='button'
+            {...stylex.props(tableHeaderCellStyles.settingsButton)}
+          >
+            <MoreVerticalIcon />
+          </button>
+        )}
+      </div>
+      {/* Resize handle */}
+      <div
+        aria-label={`Resize ${label} column`}
+        onDoubleClick={handleResizeDoubleClick}
+        onMouseDown={onMouseDown}
+        role='separator'
+        {...stylex.props(tableHeaderCellStyles.resizeHandle)}
+      >
+        <div
+          {...stylex.props(
+            tableHeaderCellStyles.resizeHandleLine,
+            isResizing && tableHeaderCellStyles.resizeHandleActive,
+          )}
+        />
+      </div>
+    </th>
   );
 };
