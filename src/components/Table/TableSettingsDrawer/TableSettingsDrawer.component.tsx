@@ -32,7 +32,7 @@ export const TableSettingsDrawer = () => {
   const batchSetTableDrawerSettings = useBatchSetTableDrawerSettings();
   const resetTableDrawerSettings = useResetTableSettings();
   const toogleTableIsTableSettingsOpen = useToogleTableIsTableSettingsOpen();
-  
+
   const [isPinned, setIsPinned] = useState(false);
 
   const areFiltersValid = true; // TODO: implement filter validation

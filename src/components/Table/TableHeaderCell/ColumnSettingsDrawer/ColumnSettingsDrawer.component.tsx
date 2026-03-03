@@ -33,9 +33,9 @@ import { FilterSection } from './FilterSection';
 import { GeneralSection } from './GeneralSection';
 import { SortingSection } from './SortingSection';
 
-export const ColumnSettingsDrawer = ({columnKey}:ColumnSettingsDrawerProps) => {
-
-
+export const ColumnSettingsDrawer = ({
+  columnKey,
+}: ColumnSettingsDrawerProps) => {
   useRenderTracker({ componentName: `ColumnSettingsDrawer:${columnKey}` });
 
   const column = useGetNormalizedColumn<unknown>(columnKey);

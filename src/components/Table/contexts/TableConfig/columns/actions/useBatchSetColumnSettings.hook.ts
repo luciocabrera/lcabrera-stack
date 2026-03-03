@@ -11,11 +11,11 @@ import { getNormalizedColummns } from '@/components/Table/utils';
 
 export type BatchColumnSettingsUpdate = {
   /** Single column filter value */
-  columnFilter?: ColumnFilter ;
+  columnFilter?: ColumnFilter;
   /** Column key being updated */
   columnKey: string;
   /** Single column width value */
-  columnSizing?: number ;
+  columnSizing?: number;
   /** Sort direction for this column */
   sorting?: SortDirection;
 };

@@ -19,7 +19,10 @@ import {
   useGetColumnSizing,
   useGetNormalizedColumn,
 } from '../contexts/TableConfig/columns/selectors';
-import { useSetTableColumnSelectedKey, useToogleTableIsColumnSettingsOpen } from '../contexts/TableConfig/meta/actions';
+import {
+  useSetTableColumnSelectedKey,
+  useToogleTableIsColumnSettingsOpen,
+} from '../contexts/TableConfig/meta/actions';
 import { FilterButton } from './FilterButton';
 import { SortIcon } from './SortIcon';
 import {
