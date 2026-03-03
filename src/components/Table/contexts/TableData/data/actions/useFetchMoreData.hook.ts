@@ -10,7 +10,7 @@ type FetchMoreDataArgs<TData, TResponse> = Omit<
 >;
 
 export const useFetchMoreData = <TData, TResponse>() => {
-  const { dataStore } = useTableDataContextValue();
+  const { dataStore } = useTableDataContextValue<TData>();
   const { metaStore } = useTableConfigContextValue<TData>();
   const dataState = dataStore.get();
 
