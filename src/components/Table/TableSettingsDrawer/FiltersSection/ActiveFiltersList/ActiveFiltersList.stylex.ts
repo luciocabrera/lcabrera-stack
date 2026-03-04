@@ -67,6 +67,8 @@ const localStyles = stylex.create({
   filterItemContent: {
     padding: spacing.md,
     backgroundColor: colors.surfaceSecondary,
+    borderBottomLeftRadius: borderRadius.md,
+    borderBottomRightRadius: borderRadius.md,
     borderTopColor: colors.borderPrimary,
     borderTopStyle: 'solid',
     borderTopWidth: '1px',
