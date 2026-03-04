@@ -1,2 +1,2 @@
-export * from './FiltersDataContext.provider';
-export * from './useFiltersDataContextValue.hook';
+export { FiltersDataProvider } from './FiltersDataContext.provider';
+export { useFiltersDataContextValue } from './useFiltersDataContextValue.hook';

@@ -1,1 +1,1 @@
-export * from './getSelectedColumnLabel.util';
+export { getSelectedColumnLabel } from './getSelectedColumnLabel.util';

@@ -1,4 +1,4 @@
-export * from './FiltersData';
-export * from './TableConfig';
-export * from './TableData';
-export * from './TableWrapper';
+export { FiltersDataProvider, useFiltersDataContextValue } from './FiltersData';
+export { TableConfigProvider } from './TableConfig';
+export { TableDataProvider } from './TableData';
+export { TableWrapperProvider, useTableWrapperRef } from './TableWrapper';

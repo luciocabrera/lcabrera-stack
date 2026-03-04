@@ -1,1 +1,1 @@
-export * from './getInitialDataState.util';
+export { getInitialDataState } from './getInitialDataState.util';

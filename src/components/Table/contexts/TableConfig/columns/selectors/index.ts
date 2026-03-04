@@ -1,12 +1,11 @@
-export * from './useGetColumnFilters.hook';
-export * from './useGetColumnOrder.hook';
-export * from './useGetColumns.hook';
-export * from './useGetColumnSizing.hook';
-export * from './useGetColumnsSorting.hook';
-export * from './useGetColumnVisibility.hook';
-export * from './useGetEffectiveColumns.hook';
-export * from './useGetNormalizedColumn.hook';
-export * from './useGetNormalizedColumnFilters.hook';
-export * from './useGetNormalizedColumns.hook';
-
-export * from './useGetNormalizedColumnSize.hook';
+export { useGetColumnFilters } from './useGetColumnFilters.hook';
+export { useGetColumnOrder } from './useGetColumnOrder.hook';
+export { useGetColumns } from './useGetColumns.hook';
+export { useGetColumnSizing } from './useGetColumnSizing.hook';
+export { useGetColumnsSorting } from './useGetColumnsSorting.hook';
+export { useGetColumnVisibility } from './useGetColumnVisibility.hook';
+export { useGetEffectiveColumns } from './useGetEffectiveColumns.hook';
+export { useGetNormalizedColumn } from './useGetNormalizedColumn.hook';
+export { useGetNormalizedColumnFilters } from './useGetNormalizedColumnFilters.hook';
+export { useGetNormalizedColumns } from './useGetNormalizedColumns.hook';
+export { useGetNormalizedColumnSize } from './useGetNormalizedColumnSize.hook';

@@ -10,8 +10,8 @@ import { useClickOutside } from '@/hooks';
 
 import type { VirtualSelectProps } from './VirtualSelect.types';
 
-import { styles } from './VirtualSelect.stylex';
 import { countVisibleTags } from './utils';
+import { styles } from './VirtualSelect.stylex';
 
 export const VirtualSelect = ({
   customStylex,

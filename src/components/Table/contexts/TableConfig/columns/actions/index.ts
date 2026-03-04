@@ -1,7 +1,9 @@
-export * from './useBatchSetColumnSettings.hook';
-export * from './useBatchSetTableSettings.hook';
-export * from './useResetColumnFilter.hook';
-export * from './useSetColumnFilter.hook';
-export * from './useSetColumnSizing.hook';
-export * from './useSetColumnSorting.hook';
-export * from './useSyncColumnsSizing.hook';
+export type { BatchColumnSettingsUpdate } from './useBatchSetColumnSettings.hook';
+export { useBatchSetColumnSettings } from './useBatchSetColumnSettings.hook';
+export type { BatchTableSettingsUpdate } from './useBatchSetTableSettings.hook';
+export { useBatchSetTableSettings } from './useBatchSetTableSettings.hook';
+export { useResetColumnFilter } from './useResetColumnFilter.hook';
+export { useSetColumnFilter } from './useSetColumnFilter.hook';
+export { useSetColumnSizing } from './useSetColumnSizing.hook';
+export { useSetColumnSorting } from './useSetColumnSorting.hook';
+export { useSyncColumnsSizing } from './useSyncColumnsSizing.hook';

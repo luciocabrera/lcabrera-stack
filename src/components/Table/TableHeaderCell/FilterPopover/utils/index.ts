@@ -1,1 +1,1 @@
-export * from './getOperatorFromFilter';
+export { getOperatorFromFilter } from './getOperatorFromFilter';

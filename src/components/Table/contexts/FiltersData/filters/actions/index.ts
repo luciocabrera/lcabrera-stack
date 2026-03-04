@@ -1,2 +1,2 @@
-export * from './useFetchFilterData.hook';
-export * from './useFetchMoreFilterData.hook';
+export { useFetchFilterData } from './useFetchFilterData.hook';
+export { useFetchMoreFilterData } from './useFetchMoreFilterData.hook';

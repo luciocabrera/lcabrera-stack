@@ -1,1 +1,1 @@
-export * from './generatePlaceholderData.util';
+export { generatePlaceholderData } from './generatePlaceholderData.util';

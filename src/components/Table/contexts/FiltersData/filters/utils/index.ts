@@ -1,1 +1,1 @@
-export * from './getInitialFiltersDataState.util';
+export { getInitialFiltersDataState } from './getInitialFiltersDataState.util';

@@ -1,1 +1,1 @@
-export * from './useGetFilterData.hook';
+export { useGetFilterData } from './useGetFilterData.hook';

@@ -1,1 +1,1 @@
-export * from './TableDataContext.provider';
+export { TableDataProvider } from './TableDataContext.provider';

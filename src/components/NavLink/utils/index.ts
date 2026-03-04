@@ -1,1 +1,1 @@
-export * from './getClassName.util';
+export { getClassName } from './getClassName.util';

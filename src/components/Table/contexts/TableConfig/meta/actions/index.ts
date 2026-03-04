@@ -1,3 +1,3 @@
-export * from './useSetTableColumnSelectedKey.hook';
-export * from './useToogleTableIsColumnSettingsOpen.hook';
-export * from './useToogleTableIsTableSettingsOpen.hook';
+export { useSetTableColumnSelectedKey } from './useSetTableColumnSelectedKey.hook';
+export { useToogleTableIsColumnSettingsOpen } from './useToogleTableIsColumnSettingsOpen.hook';
+export { useToogleTableIsTableSettingsOpen } from './useToogleTableIsTableSettingsOpen.hook';

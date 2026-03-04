@@ -1,1 +1,1 @@
-export * from './useFiltersStore.hook';
+export { useFiltersStore } from './useFiltersStore.hook';

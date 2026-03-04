@@ -1,1 +1,1 @@
-export * from './useFetchMoreData.hook';
+export { useFetchMoreData } from './useFetchMoreData.hook';

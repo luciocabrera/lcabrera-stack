@@ -1,1 +1,1 @@
-export * from './TableConfigContext.provider';
+export { TableConfigProvider } from './TableConfigContext.provider';
