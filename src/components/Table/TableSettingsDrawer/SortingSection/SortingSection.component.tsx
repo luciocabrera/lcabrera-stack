@@ -16,7 +16,9 @@ import { VirtualSelect } from '@/components/VirtualSelect';
 
 import type { SortingSectionProps, SortItem } from './SortingSection.types';
 
-import { useSetColumnsSortings } from '../TableDrawerContext/actions';
+import {
+  useSetColumnsSortings,
+} from '../TableDrawerContext/actions';
 import { useGetColumnsSorting } from '../TableDrawerContext/selectors';
 import { styles } from './SortingSection.stylex';
 import { SortingSectionFooter } from './SortingSectionFooter';
@@ -161,9 +163,12 @@ export const SortingSection = ({ ...props }: SortingSectionProps) => {
       </div>
 
       <div {...stylex.props(styles.sortOrderSection)}>
-        <h3 {...stylex.props(styles.header)}>
-          Sort Order ({sortItems.length})
-        </h3>
+        <div {...stylex.props(styles.headerRow)}>
+          <h3 {...stylex.props(styles.headerTitle)}>
+            Sort Order ({sortItems.length})
+          </h3>
+          <SortingSectionFooter variant='toolbar' />
+        </div>
         {sortItems.length === 0 ? (
           <InfoBox>
             No sorting applied. Add a column above to start sorting.

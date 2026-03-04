@@ -3,6 +3,8 @@ import * as stylex from '@stylexjs/stylex';
 import { Button } from '@/components/Button';
 import { EraserIcon, ListOrderedIcon, RefreshIcon } from '@/components/Icons';
 
+import type { SortingSectionFooterProps } from './SortingSectionFooter.types';
+
 import {
   useClearSorting,
   useResetSorting,
@@ -11,7 +13,9 @@ import {
 import { useGetColumnsSorting } from '../../TableDrawerContext/selectors';
 import { styles } from './SortingSectionFooter.stylex';
 
-export const SortingSectionFooter = () => {
+export const SortingSectionFooter = ({
+  variant = 'footer',
+}: SortingSectionFooterProps) => {
   const sorting = useGetColumnsSorting();
 
   const sortByColumnOrder = useSortByColumnOrder();
@@ -20,35 +24,44 @@ export const SortingSectionFooter = () => {
 
   const hasSorting = sorting.length > 0;
 
+  const isToolbar = variant === 'toolbar';
+  const buttonColor = isToolbar ? 'ghost' : 'outline';
+  const buttonSize = isToolbar ? 'mini' : 'sm';
+  const buttonWidth = isToolbar ? 'auto' : 'full';
+  const iconSize = isToolbar ? 14 : 16;
+
   return (
-    <div {...stylex.props(styles.container)}>
+    <div {...stylex.props(isToolbar ? styles.toolbar : styles.container)}>
       <Button
-        color='outline'
-        icon={<ListOrderedIcon size={16} />}
+        aria-label='Sort by Column Order'
+        color={buttonColor}
+        icon={<ListOrderedIcon size={iconSize} />}
         onClick={sortByColumnOrder}
-        size='sm'
-        width='full'
+        size={buttonSize}
+        width={buttonWidth}
       >
-        Sort by Column Order
+        {!isToolbar && 'Sort by Column Order'}
       </Button>
       <Button
-        color='outline'
-        icon={<EraserIcon size={16} />}
+        aria-label='Clear Sorting'
+        color={buttonColor}
+        icon={<EraserIcon size={iconSize} />}
         isDisabled={!hasSorting}
         onClick={clearSorting}
-        size='sm'
-        width='full'
+        size={buttonSize}
+        width={buttonWidth}
       >
-        Clear Sorting
+        {!isToolbar && 'Clear Sorting'}
       </Button>
       <Button
-        color='outline'
-        icon={<RefreshIcon size={16} />}
+        aria-label='Reset Sorting'
+        color={buttonColor}
+        icon={<RefreshIcon size={iconSize} />}
         onClick={resetSorting}
-        size='sm'
-        width='full'
+        size={buttonSize}
+        width={buttonWidth}
       >
-        Reset Sorting
+        {!isToolbar && 'Reset Sorting'}
       </Button>
     </div>
   );

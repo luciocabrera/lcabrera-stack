@@ -32,6 +32,28 @@ export const drawerSectionStyles = stylex.create({
     fontWeight: 600,
     marginBottom: spacing.xs,
   },
+  /** Flex row for section header with title and toolbar buttons. */
+  headerRow: {
+    gap: spacing.sm,
+    alignItems: 'center',
+    display: 'flex',
+    justifyContent: 'space-between',
+    marginBottom: spacing.xs,
+  },
+  /** Header title inside a headerRow (no bottom margin, grows). */
+  headerTitle: {
+    margin: 0,
+    color: colors.textSecondary,
+    fontSize: typography.fontSizeSm,
+    fontWeight: 600,
+  },
+  /** Toolbar group for mini buttons inside a headerRow. */
+  headerToolbar: {
+    gap: spacing.xxs,
+    alignItems: 'center',
+    display: 'flex',
+    flexShrink: 0,
+  },
   /** Subsection wrapper with `gap: sm` (e.g. add-column form area). */
   subsection: {
     gap: spacing.sm,

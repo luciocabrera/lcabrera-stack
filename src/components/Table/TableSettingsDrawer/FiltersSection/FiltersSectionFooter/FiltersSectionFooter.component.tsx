@@ -14,6 +14,7 @@ import { styles } from './FiltersSectionFooter.stylex';
 
 export const FiltersSectionFooter = ({
   onClearAll,
+  variant = 'footer',
 }: FiltersSectionFooterProps) => {
   const filters = useGetColumnFilters();
 
@@ -27,26 +28,34 @@ export const FiltersSectionFooter = ({
     onClearAll?.();
   };
 
+  const isToolbar = variant === 'toolbar';
+  const buttonColor = isToolbar ? 'ghost' : 'outline';
+  const buttonSize = isToolbar ? 'mini' : 'sm';
+  const buttonWidth = isToolbar ? 'auto' : 'full';
+  const iconSize = isToolbar ? 14 : 16;
+
   return (
-    <div {...stylex.props(styles.container)}>
+    <div {...stylex.props(isToolbar ? styles.toolbar : styles.container)}>
       <Button
-        color='outline'
-        icon={<EraserIcon size={16} />}
+        aria-label='Clear Filters'
+        color={buttonColor}
+        icon={<EraserIcon size={iconSize} />}
         isDisabled={!hasFilters}
         onClick={handleClear}
-        size='sm'
-        width='full'
+        size={buttonSize}
+        width={buttonWidth}
       >
-        Clear Filters
+        {!isToolbar && 'Clear Filters'}
       </Button>
       <Button
-        color='outline'
-        icon={<RefreshIcon size={16} />}
+        aria-label='Reset Filters'
+        color={buttonColor}
+        icon={<RefreshIcon size={iconSize} />}
         onClick={resetFilters}
-        size='sm'
-        width='full'
+        size={buttonSize}
+        width={buttonWidth}
       >
-        Reset Filters
+        {!isToolbar && 'Reset Filters'}
       </Button>
     </div>
   );

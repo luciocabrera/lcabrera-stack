@@ -10,6 +10,7 @@ import type { ActiveFiltersListProps } from './ActiveFiltersList.types';
 
 import { useSetColumnFilters } from '../../TableDrawerContext/actions';
 import { useGetColumnFilters } from '../../TableDrawerContext/selectors';
+import { FiltersSectionFooter } from '../FiltersSectionFooter';
 import { validateFilter } from '../validateFilter.util';
 import { styles } from './ActiveFiltersList.stylex';
 
@@ -79,9 +80,12 @@ export const ActiveFiltersList = ({
 
   return (
     <div {...stylex.props(styles.container)}>
-      <h3 {...stylex.props(styles.header)}>
-        Active Filters ({filterEntries.length})
-      </h3>
+      <div {...stylex.props(styles.headerRow)}>
+        <h3 {...stylex.props(styles.headerTitle)}>
+          Active Filters ({filterEntries.length})
+        </h3>
+        <FiltersSectionFooter variant='toolbar' />
+      </div>
       {hasFilters ? (
         <div {...stylex.props(styles.filtersList)}>
           {filterEntries.map(([columnKey, filter]) => {
