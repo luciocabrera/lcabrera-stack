@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
 import type { TextFilterInputProps } from './TextFilterInput.types';
 
@@ -11,7 +11,7 @@ export const TextFilterInput = <TData,>({
   onChange,
   operator,
 }: TextFilterInputProps<TData>) => {
-  const initialValue = useMemo(() => filter?.value ?? '', [filter?.value]);
+  const initialValue = filter?.value ?? '';
   const [value, setValue] = useState(initialValue);
 
   const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {

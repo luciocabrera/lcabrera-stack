@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { InfoBox } from '@/components/InfoBox';
 import { useVirtualization } from '@/hooks';
@@ -39,12 +39,11 @@ export const VirtualList = ({
 
   const isInitialLoading = isLoading && effectiveOptions.length === 0;
 
-  const filteredOptions = useMemo(() => {
-    if (!searchTerm) return effectiveOptions;
-    return effectiveOptions.filter((option) =>
-      option.toLowerCase().includes(searchTerm.toLowerCase()),
-    );
-  }, [effectiveOptions, searchTerm]);
+  const filteredOptions = searchTerm
+    ? effectiveOptions.filter((option) =>
+        option.toLowerCase().includes(searchTerm.toLowerCase()),
+      )
+    : effectiveOptions;
 
   const shouldShowSelectAll = hasSelectAll && filteredOptions.length > 1;
 

@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
 import type { NumberFilter } from '@/types/filterOperators.types';
 
@@ -32,11 +32,8 @@ export const NumberFilterInput = <TData,>({
   onChange,
   operator,
 }: NumberFilterInputProps<TData>) => {
-  const initialValue = useMemo(() => computeInitialValue(filter), [filter]);
-  const initialMaxValue = useMemo(
-    () => computeInitialMaxValue(filter),
-    [filter],
-  );
+  const initialValue = computeInitialValue(filter);
+  const initialMaxValue = computeInitialMaxValue(filter);
 
   const [value, setValue] = useState<'' | number>(initialValue);
   const [maxValue, setMaxValue] = useState<'' | number>(initialMaxValue);

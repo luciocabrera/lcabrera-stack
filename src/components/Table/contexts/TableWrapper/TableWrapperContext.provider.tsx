@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react';
+import { useRef } from 'react';
 
 import type { TableWrapperProviderProps } from './TableWrapperContext.types';
 
@@ -9,7 +9,7 @@ export const TableWrapperProvider = ({
 }: TableWrapperProviderProps) => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
 
-  const value = useMemo(() => ({ wrapperRef }), []);
-
-  return <TableWrapperContext value={value}>{children}</TableWrapperContext>;
+  return (
+    <TableWrapperContext value={{ wrapperRef }}>{children}</TableWrapperContext>
+  );
 };

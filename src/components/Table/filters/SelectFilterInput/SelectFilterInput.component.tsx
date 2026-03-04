@@ -1,5 +1,3 @@
-import { useCallback, useMemo } from 'react';
-
 import type { FilterOptionsResponse } from '@/components/Table/Table.types';
 
 import {
@@ -13,8 +11,6 @@ import { VirtualSelect } from '@/components/VirtualSelect';
 import type { SelectFilterInputProps } from './SelectFilterInput.types';
 
 import { styles } from './SelectFilterInput.stylex';
-
-/** Pure value selector (checkboxes list) - operator is controlled by FilterInputs */
 export const SelectFilterInput = <TData,>({
   columnKey,
   filter,
@@ -33,54 +29,38 @@ export const SelectFilterInput = <TData,>({
     FilterOptionsResponse
   >(columnKey);
 
-  const handleFetchInitial = useCallback(async () => {
+  const handleFetchInitial = async () => {
     if (!column.fetchFilterOptions) return;
     await fetchFilterData({
       dataSelector: column.filterOptionsDataSelector,
       dataTotalSelector: column.filterOptionsDataTotalSelector,
       onLoadMore: column.fetchFilterOptions,
     });
-  }, [
-    column.fetchFilterOptions,
-    column.filterOptionsDataSelector,
-    column.filterOptionsDataTotalSelector,
-    fetchFilterData,
-  ]);
+  };
 
-  const handleFetchMore = useCallback(async () => {
+  const handleFetchMore = async () => {
     if (!column.fetchFilterOptions) return;
     await fetchMoreFilterData({
       dataSelector: column.filterOptionsDataSelector,
       dataTotalSelector: column.filterOptionsDataTotalSelector,
       onLoadMore: column.fetchFilterOptions,
     });
-  }, [
-    column.fetchFilterOptions,
-    column.filterOptionsDataSelector,
-    column.filterOptionsDataTotalSelector,
-    fetchMoreFilterData,
-  ]);
+  };
 
-  const selectedValues = useMemo(() => filter?.values ?? [], [filter?.values]);
+  const selectedValues = filter?.values ?? [];
 
   // Map FilterData → VirtualListDataState (totalRows → totalCount)
-  const dataState = useMemo(
-    () => ({
-      data: filterData.data,
-      hasMore: filterData.hasMore,
-      isLoading: filterData.isLoading,
-      isLoadingMore: filterData.isLoadingMore,
-      totalCount: filterData.totalRows,
-    }),
-    [filterData],
-  );
+  const dataState = {
+    data: filterData.data,
+    hasMore: filterData.hasMore,
+    isLoading: filterData.isLoading,
+    isLoadingMore: filterData.isLoadingMore,
+    totalCount: filterData.totalRows,
+  };
 
-  const handleChange = useCallback(
-    (selected: string[]) => {
-      onChange({ type: 'select', values: selected });
-    },
-    [onChange],
-  );
+  const handleChange = (selected: string[]) => {
+    onChange({ type: 'select', values: selected });
+  };
 
   return (
     <VirtualSelect

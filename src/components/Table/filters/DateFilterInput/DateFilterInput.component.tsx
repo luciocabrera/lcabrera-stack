@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
 import type { DateFilter } from '@/types/filterOperators.types';
 
@@ -30,8 +30,8 @@ export const DateFilterInput = ({
   onChange,
   operator,
 }: DateFilterInputProps) => {
-  const initialValue = useMemo(() => computeInitialValue(filter), [filter]);
-  const initialEndDate = useMemo(() => computeInitialEndDate(filter), [filter]);
+  const initialValue = computeInitialValue(filter);
+  const initialEndDate = computeInitialEndDate(filter);
 
   const [value, setValue] = useState(initialValue);
   const [endDate, setEndDate] = useState(initialEndDate);

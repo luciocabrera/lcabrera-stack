@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import type { ThemeMode } from '@/types/theme.types';
 
@@ -33,15 +33,12 @@ export const ThemeProvider = ({
     setTheme(theme === 'dark' ? 'light' : 'dark');
   }, [theme, setTheme]);
 
-  const value = useMemo(
-    () => ({
-      isDarkMode: theme === 'dark',
-      setTheme,
-      theme,
-      toggleTheme,
-    }),
-    [theme, setTheme, toggleTheme],
-  );
+  const value = {
+    isDarkMode: theme === 'dark',
+    setTheme,
+    theme,
+    toggleTheme,
+  };
 
   return <ThemeContext value={value}>{children}</ThemeContext>;
 };

@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { useCallback, useMemo, useState } from 'react';
+import { useState } from 'react';
 
 import type { DraggableItem } from '@/components/DraggableList';
 
@@ -15,47 +15,41 @@ import type { SortingSectionProps, SortItem } from './SortingSection.types';
 import { useSetColumnsSortings } from '../TableDrawerContext/hooks/store/columns/actions';
 import { useGetColumnsSorting } from '../TableDrawerContext/hooks/store/columns/selectors';
 import { styles } from './SortingSection.stylex';
+import { getSelectedColumnLabel } from './utils';
 
 export const SortingSection = ({ ...props }: SortingSectionProps) => {
   const columns = useGetColumns();
   const sorting = useGetColumnsSorting();
+
   const onSortChange = useSetColumnsSortings();
 
   const [selectedColumn, setSelectedColumn] = useState('');
 
   // Filter to only sortable columns
   const sortableColumns = columns.filter((col) => col.isSortable !== false);
-
   // Get columns not yet in sort list
   const availableColumns = sortableColumns.filter(
     (col) => !sorting.some((s) => s.columnKey === col.key),
   );
 
   // Map available columns to label strings for VirtualSelect
-  const availableColumnLabels = useMemo(
-    () => availableColumns.map((col) => col.label),
-    [availableColumns],
-  );
+  const availableColumnLabels = availableColumns.map((col) => col.label);
 
   // Resolve selected column key to its label for VirtualSelect
-  const selectedColumnLabel = useMemo(() => {
-    if (!selectedColumn) return [];
-    const col = sortableColumns.find((c) => c.key === selectedColumn);
-    return col ? [col.label] : [];
-  }, [selectedColumn, sortableColumns]);
+  const selectedColumnLabel = getSelectedColumnLabel({
+    selectedColumn,
+    sortableColumns,
+  });
 
-  const handleColumnSelect = useCallback(
-    (selectedLabels: string[]) => {
-      const label = selectedLabels[0];
-      if (!label) {
-        setSelectedColumn('');
-        return;
-      }
-      const col = availableColumns.find((c) => c.label === label);
-      setSelectedColumn(col?.key ?? '');
-    },
-    [availableColumns],
-  );
+  const handleColumnSelect = (selectedLabels: string[]) => {
+    const label = selectedLabels[0];
+    if (!label) {
+      setSelectedColumn('');
+      return;
+    }
+    const col = availableColumns.find((c) => c.label === label);
+    setSelectedColumn(col?.key ?? '');
+  };
 
   // Convert sorting state to sort items with labels
   const sortItems: SortItem[] = sorting.map((sort) => ({

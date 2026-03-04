@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { useCallback, useMemo, useState } from 'react';
+import { useState } from 'react';
 
 import { Button } from '@/components/Button';
 import {
@@ -13,6 +13,7 @@ import type { AddFilterSectionProps } from './AddFilterSection.types';
 import { useSetColumnFilters } from '../../TableDrawerContext/hooks/store/columns/actions';
 import { useGetColumnFilters } from '../../TableDrawerContext/hooks/store/columns/selectors';
 import { styles } from './AddFilterSection.stylex';
+import { getSelectedColumnLabel } from './utils';
 
 export const AddFilterSection = ({
   expandedFilters,
@@ -29,40 +30,30 @@ export const AddFilterSection = ({
 
   // Filter to only filterable columns
   const filterableColumns = columns.filter((col) => col.isFilterable !== false);
-
   // Map filterable columns to label strings for VirtualSelect
-  const filterableColumnLabels = useMemo(
-    () =>
-      filterableColumns.map((col) => {
-        const hasActiveFilter = Boolean(filters[col.key]);
-        return hasActiveFilter ? `${col.label} ⚠️ (filtered)` : col.label;
-      }),
-    [filterableColumns, filters],
-  );
+  const filterableColumnLabels = filterableColumns.map((col) => {
+    const hasActiveFilter = Boolean(filters[col.key]);
+    return hasActiveFilter ? `${col.label} ⚠️ (filtered)` : col.label;
+  });
 
   // Resolve selected column key to its label for VirtualSelect
-  const selectedColumnLabel = useMemo(() => {
-    if (!selectedColumn) return [];
-    const col = filterableColumns.find((c) => c.key === selectedColumn);
-    if (!col) return [];
-    const hasActiveFilter = Boolean(filters[col.key]);
-    return [hasActiveFilter ? `${col.label} ⚠️ (filtered)` : col.label];
-  }, [filterableColumns, filters, selectedColumn]);
+  const selectedColumnLabel = getSelectedColumnLabel({
+    filterableColumns,
+    filters,
+    selectedColumn,
+  });
 
-  const handleColumnSelect = useCallback(
-    (selectedLabels: string[]) => {
-      const label = selectedLabels[0];
-      if (!label) {
-        setSelectedColumn('');
-        return;
-      }
-      // Strip the " ⚠️ (filtered)" suffix when matching
-      const cleanLabel = label.replace(' ⚠️ (filtered)', '');
-      const col = filterableColumns.find((c) => c.label === cleanLabel);
-      setSelectedColumn(col?.key ?? '');
-    },
-    [filterableColumns],
-  );
+  const handleColumnSelect = (selectedLabels: string[]) => {
+    const label = selectedLabels[0];
+    if (!label) {
+      setSelectedColumn('');
+      return;
+    }
+    // Strip the " ⚠️ (filtered)" suffix when matching
+    const cleanLabel = label.replace(' ⚠️ (filtered)', '');
+    const col = filterableColumns.find((c) => c.label === cleanLabel);
+    setSelectedColumn(col?.key ?? '');
+  };
 
   const handleAddFilter = () => {
     if (!selectedColumn) return;

@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import type { VirtualListDataState } from '@/components/VirtualList';
 import type { SelectFilter } from '@/types/filterOperators.types';
@@ -63,9 +63,9 @@ export const VirtualSelect = ({
     onOpenChange?.(isOpen);
   }, [isOpen, onOpenChange]);
 
-  const handleClose = useCallback(() => {
+  const handleClose = () => {
     setIsOpen(false);
-  }, []);
+  };
 
   useClickOutside({
     onClickOutside: handleClose,
@@ -73,44 +73,34 @@ export const VirtualSelect = ({
   });
 
   // Static mode: wrap options in a VirtualListDataState
-  const effectiveDataState: VirtualListDataState = useMemo(
-    () =>
-      dataState ?? {
-        data: options,
-        hasMore: false,
-        isLoading: false,
-        isLoadingMore: false,
-      },
-    [dataState, options],
-  );
+  const effectiveDataState: VirtualListDataState = dataState ?? {
+    data: options,
+    hasMore: false,
+    isLoading: false,
+    isLoadingMore: false,
+  };
 
-  const handleToggleDropdown = useCallback(() => {
+  const handleToggleDropdown = () => {
     setIsOpen((isCurrentlyOpen) => !isCurrentlyOpen);
-  }, []);
+  };
 
-  const handleVirtualListChange = useCallback(
-    (filter?: SelectFilter) => {
-      const values = filter?.values ?? [];
+  const handleVirtualListChange = (filter?: SelectFilter) => {
+    const values = filter?.values ?? [];
 
-      if (mode === 'single') {
-        // Find the newly added value (not in current selected)
-        const newValue = values.find((v) => !selected.includes(v));
-        onChange(newValue ? [newValue] : []);
-        handleClose();
-        return;
-      }
+    if (mode === 'single') {
+      // Find the newly added value (not in current selected)
+      const newValue = values.find((v) => !selected.includes(v));
+      onChange(newValue ? [newValue] : []);
+      handleClose();
+      return;
+    }
 
-      onChange(values);
-    },
-    [handleClose, mode, onChange, selected],
-  );
+    onChange(values);
+  };
 
-  const handleRemoveTag = useCallback(
-    (option: string) => {
-      onChange(selected.filter((v) => v !== option));
-    },
-    [onChange, selected],
-  );
+  const handleRemoveTag = (option: string) => {
+    onChange(selected.filter((v) => v !== option));
+  };
 
   const hasSelection = selected.length > 0;
   const isListVisible = isAlwaysOpen ? true : isOpen;

@@ -1,11 +1,10 @@
 import * as stylex from '@stylexjs/stylex';
-import { Activity, useCallback, useMemo, useState } from 'react';
+import { Activity, useCallback, useState } from 'react';
 
 import type {
   ColumnFilter,
   DateOperatorType,
   NumberOperatorType,
-  OperatorType,
   TextOperatorType,
 } from '@/types/filterOperators.types';
 
@@ -17,7 +16,11 @@ import type { FilterInputsProps } from './FilterInputs.types';
 import { BooleanFilterInput } from '../BooleanFilterInput';
 import { styles } from './FilterInputs.stylex';
 import { InputContent } from './InputContent';
-import { getOperatorFromFilter, getOperatorOptions } from './utils';
+import {
+  getOperatorFromFilter,
+  getOperatorOptions,
+  getSelectedOperatorLabel,
+} from './utils';
 
 /**
  * Shared component for rendering filter inputs based on column data type.
@@ -39,29 +42,17 @@ export const FilterInputs = <TData,>({
   const [isOperatorOpen, setIsOperatorOpen] = useState(false);
 
   // Derive operator directly from filter prop - always in sync with parent state
-  const operator = useMemo<OperatorType>(
-    () => getOperatorFromFilter({ dataType: column.dataType, filter }),
-    [column.dataType, filter],
-  );
-
-  const operatorOptions = useMemo(
-    () => getOperatorOptions({ dataType: column.dataType }),
-    [column.dataType],
-  );
-
+  const operator = getOperatorFromFilter({ dataType: column.dataType, filter });
+  const operatorOptions = getOperatorOptions({ dataType: column.dataType });
   // Map operator options to labels for VirtualSelect display
-  const operatorLabels = useMemo(
-    () => operatorOptions.map((op) => op.label),
-    [operatorOptions],
-  );
-
+  const operatorLabels = operatorOptions.map((op) => op.label);
   // Resolve current operator value to its label for VirtualSelect selected state
   // When filter is undefined (reset), show empty to display placeholder
-  const selectedOperatorLabel = useMemo(() => {
-    if (!filter) return [];
-    const match = operatorOptions.find((op) => op.value === operator);
-    return match ? [match.label] : [];
-  }, [filter, operator, operatorOptions]);
+  const selectedOperatorLabel = getSelectedOperatorLabel({
+    filter,
+    operator,
+    operatorOptions,
+  });
 
   const handleOperatorChange = useCallback(
     (selectedLabels: string[]) => {

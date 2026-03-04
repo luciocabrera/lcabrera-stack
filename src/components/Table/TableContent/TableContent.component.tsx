@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { useMemo, useRef } from 'react';
+import { useRef } from 'react';
 
 import { Button } from '@/components/Button';
 import { SettingsIcon } from '@/components/Icons';
@@ -43,7 +43,7 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   const containerRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  const wrapperContextValue = useMemo(() => ({ wrapperRef }), []);
+  const wrapperContextValue = { wrapperRef };
 
   useInfiniteScroll({
     dataSelector,
