@@ -10,8 +10,8 @@ import { VirtualSelect } from '@/components/VirtualSelect';
 
 import type { AddFilterSectionProps } from './AddFilterSection.types';
 
-import { useSetColumnFilters } from '../../TableDrawerContext/hooks/store/columns/actions';
-import { useGetColumnFilters } from '../../TableDrawerContext/hooks/store/columns/selectors';
+import { useSetColumnFilters } from '../../TableDrawerContext/actions';
+import { useGetColumnFilters } from '../../TableDrawerContext/selectors';
 import { styles } from './AddFilterSection.stylex';
 import { getSelectedColumnLabel } from './utils';
 

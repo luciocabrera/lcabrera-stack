@@ -26,7 +26,7 @@ import { SortingSection } from './SortingSection';
 import {
   useBatchSetTableDrawerSettings,
   useResetTableSettings,
-} from './TableDrawerContext/hooks/store/columns/actions';
+} from './TableDrawerContext/actions';
 
 export const TableSettingsDrawer = () => {
   const batchSetTableDrawerSettings = useBatchSetTableDrawerSettings();

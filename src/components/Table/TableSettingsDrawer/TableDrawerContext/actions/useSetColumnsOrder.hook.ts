@@ -1,6 +1,6 @@
 import type { ColumnOrderState } from '@/components/Table/Table.types';
 
-import { useTableDrawerContextValue } from '../../../useTableDrawerContextValue.hook';
+import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook';
 
 /**
  * Hook to update column order

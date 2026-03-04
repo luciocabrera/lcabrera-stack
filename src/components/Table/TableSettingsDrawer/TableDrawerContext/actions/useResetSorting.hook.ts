@@ -2,7 +2,7 @@ import type { SortingState } from '@/components/Table/Table.types';
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 
-import { useTableDrawerContextValue } from '../../../useTableDrawerContextValue.hook';
+import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook';
 
 /**
  * Hook to reset sorting to the original table configuration state

@@ -1,6 +1,6 @@
 import type { SortingState } from '@/components/Table/Table.types';
 
-import { useTableDrawerContextValue } from '../../../useTableDrawerContextValue.hook';
+import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook';
 
 /**
  * Hook to update sorting state

@@ -8,8 +8,8 @@ import { FilterInputs } from '@/components/Table/filters/FilterInputs/FilterInpu
 
 import type { ActiveFiltersListProps } from './ActiveFiltersList.types';
 
-import { useSetColumnFilters } from '../../TableDrawerContext/hooks/store/columns/actions';
-import { useGetColumnFilters } from '../../TableDrawerContext/hooks/store/columns/selectors';
+import { useSetColumnFilters } from '../../TableDrawerContext/actions';
+import { useGetColumnFilters } from '../../TableDrawerContext/selectors';
 import { validateFilter } from '../validateFilter.util';
 import { styles } from './ActiveFiltersList.stylex';
 

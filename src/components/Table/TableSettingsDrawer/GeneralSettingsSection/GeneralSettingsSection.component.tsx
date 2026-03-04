@@ -19,12 +19,12 @@ import {
   useSetColumnFilters,
   useSetColumnsSizing,
   useSetColumnsSortings,
-} from '../TableDrawerContext/hooks/store/columns/actions';
+} from '../TableDrawerContext/actions';
 import {
   useGetColumnFilters,
   useGetColumnOrder,
   useGetColumnsSorting,
-} from '../TableDrawerContext/hooks/store/columns/selectors';
+} from '../TableDrawerContext/selectors';
 import { styles } from './GeneralSettingsSection.stylex';
 
 export const GeneralSettingsSection = ({
@@ -179,12 +179,7 @@ export const GeneralSettingsSection = ({
           >
             Clear Filters
           </Button>
-          <Button
-            color='outline'
-            onClick={resetFilters}
-            size='sm'
-            width='full'
-          >
+          <Button color='outline' onClick={resetFilters} size='sm' width='full'>
             Reset Filters
           </Button>
         </div>
@@ -202,12 +197,7 @@ export const GeneralSettingsSection = ({
           >
             Clear Sorting
           </Button>
-          <Button
-            color='outline'
-            onClick={resetSorting}
-            size='sm'
-            width='full'
-          >
+          <Button color='outline' onClick={resetSorting} size='sm' width='full'>
             Reset Sorting
           </Button>
           <Button

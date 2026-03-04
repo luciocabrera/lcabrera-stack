@@ -14,11 +14,11 @@ import type {
 import {
   useSetColumnsOrder,
   useSetColumnsVisibility,
-} from '../TableDrawerContext/hooks/store/columns/actions';
+} from '../TableDrawerContext/actions';
 import {
   useGetColumnOrder,
   useGetColumnVisibility,
-} from '../TableDrawerContext/hooks/store/columns/selectors';
+} from '../TableDrawerContext/selectors';
 import { styles } from './ColumnOrderSection.stylex';
 
 export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
@@ -83,9 +83,9 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
   return (
     <div {...stylex.props(styles.container)} {...props}>
       <h3 {...stylex.props(styles.header)}>
-        Column Order & Visibility ({allOrderedColumns.length -
-          columnVisibility.size}
-        /{allOrderedColumns.length})
+        Column Order & Visibility (
+        {allOrderedColumns.length - columnVisibility.size}/
+        {allOrderedColumns.length})
       </h3>
       <DraggableList items={draggableItems} onOrderChange={handleReorder} />
     </div>

@@ -15,11 +15,11 @@ import type { SortingSectionProps, SortItem } from './SortingSection.types';
 import {
   useResetSorting,
   useSetColumnsSortings,
-} from '../TableDrawerContext/hooks/store/columns/actions';
+} from '../TableDrawerContext/actions';
 import {
   useGetColumnOrder,
   useGetColumnsSorting,
-} from '../TableDrawerContext/hooks/store/columns/selectors';
+} from '../TableDrawerContext/selectors';
 import { styles } from './SortingSection.stylex';
 import { getSelectedColumnLabel } from './utils';
 
@@ -223,12 +223,7 @@ export const SortingSection = ({ ...props }: SortingSectionProps) => {
         >
           Clear Sorting
         </Button>
-        <Button
-          color='outline'
-          onClick={resetSorting}
-          size='sm'
-          width='full'
-        >
+        <Button color='outline' onClick={resetSorting} size='sm' width='full'>
           Reset Sorting
         </Button>
       </div>

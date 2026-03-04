@@ -6,7 +6,7 @@ import type {
   SortingState,
 } from '@/components/Table/Table.types';
 
-import { useTableDrawerContextValue } from '../../../useTableDrawerContextValue.hook';
+import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook';
 
 /**
  * Hook to clear all table settings to empty defaults

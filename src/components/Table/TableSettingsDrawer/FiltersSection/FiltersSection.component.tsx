@@ -1,8 +1,8 @@
 import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 
-import { useSetColumnFilters } from '../TableDrawerContext/hooks/store/columns/actions';
-import { useGetColumnFilters } from '../TableDrawerContext/hooks/store/columns/selectors';
+import { useSetColumnFilters } from '../TableDrawerContext/actions';
+import { useGetColumnFilters } from '../TableDrawerContext/selectors';
 import { ActiveFiltersList } from './ActiveFiltersList';
 import { AddFilterSection } from './AddFilterSection';
 import { styles } from './FiltersSection.stylex';

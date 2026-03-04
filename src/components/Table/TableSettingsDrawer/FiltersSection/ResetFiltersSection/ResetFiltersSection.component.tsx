@@ -4,7 +4,7 @@ import { Button } from '@/components/Button';
 
 import type { ResetFiltersSectionProps } from './ResetFiltersSection.types';
 
-import { useResetFilters } from '../../TableDrawerContext/hooks/store/columns/actions';
+import { useResetFilters } from '../../TableDrawerContext/actions';
 import { styles } from './ResetFiltersSection.stylex';
 
 export const ResetFiltersSection = ({
