@@ -4,7 +4,7 @@ import type { DraggableItem } from '@/components/DraggableList';
 
 import { Button } from '@/components/Button';
 import { DraggableList } from '@/components/DraggableList';
-import { ListOrderedIcon, RefreshIcon } from '@/components/Icons';
+import { ColumnsOrderIcon, RefreshIcon } from '@/components/Icons';
 import { useGetColumns } from '@/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
 import { ToggleSwitch } from '@/components/ToggleSwitch';
 
@@ -100,7 +100,7 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
       <div {...stylex.props(styles.resetSection)}>
         <Button
           color='outline'
-          icon={<ListOrderedIcon size={16} />}
+          icon={<ColumnsOrderIcon size={16} />}
           isDisabled={columnsSorting.length === 0}
           onClick={orderColumnsBySorting}
           size='sm'

@@ -3,6 +3,7 @@ import { useState } from 'react';
 
 import { Button } from '@/components/Button';
 import {
+  ColumnsOrderIcon,
   EraserIcon,
   ListOrderedIcon,
   MaximizeIcon,
@@ -19,6 +20,8 @@ import type {
 
 import {
   useClearAllSettings,
+  useOrderColumnsBySorting,
+  useResetColumnOrderAndVisibility,
   useResetFilters,
   useResetSorting,
   useResetTableSettings,
@@ -42,6 +45,8 @@ export const GeneralSettingsSection = ({
   const sorting = useGetColumnsSorting();
 
   const clearAllSettings = useClearAllSettings();
+  const orderColumnsBySorting = useOrderColumnsBySorting();
+  const resetColumnOrderAndVisibility = useResetColumnOrderAndVisibility();
   const resetFilters = useResetFilters();
   const resetSorting = useResetSorting();
   const resetTableSettings = useResetTableSettings();
@@ -203,6 +208,15 @@ export const GeneralSettingsSection = ({
         <div {...stylex.props(styles.buttonGroup)}>
           <Button
             color='outline'
+            icon={<ListOrderedIcon size={16} />}
+            onClick={handleSortByColumnOrder}
+            size='sm'
+            width='full'
+          >
+            Sort by Column Order
+          </Button>
+          <Button
+            color='outline'
             icon={<EraserIcon size={16} />}
             isDisabled={!hasSorting}
             onClick={handleClearSorting}
@@ -220,14 +234,30 @@ export const GeneralSettingsSection = ({
           >
             Reset Sorting
           </Button>
+        </div>
+      </div>
+
+      <div {...stylex.props(styles.section)}>
+        <h3 {...stylex.props(styles.sectionTitle)}>Columns</h3>
+        <div {...stylex.props(styles.buttonGroup)}>
           <Button
             color='outline'
-            icon={<ListOrderedIcon size={16} />}
-            onClick={handleSortByColumnOrder}
+            icon={<ColumnsOrderIcon size={16} />}
+            isDisabled={!hasSorting}
+            onClick={orderColumnsBySorting}
             size='sm'
             width='full'
           >
-            Sort by Column Order
+            Order by Sorting
+          </Button>
+          <Button
+            color='outline'
+            icon={<RefreshIcon size={16} />}
+            onClick={resetColumnOrderAndVisibility}
+            size='sm'
+            width='full'
+          >
+            Reset Order & Visibility
           </Button>
         </div>
       </div>
