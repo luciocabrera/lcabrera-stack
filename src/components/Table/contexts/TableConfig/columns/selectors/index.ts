@@ -8,4 +8,3 @@ export { useGetEffectiveColumns } from './useGetEffectiveColumns.hook';
 export { useGetNormalizedColumn } from './useGetNormalizedColumn.hook';
 export { useGetNormalizedColumnFilters } from './useGetNormalizedColumnFilters.hook';
 export { useGetNormalizedColumns } from './useGetNormalizedColumns.hook';
-export { useGetNormalizedColumnSize } from './useGetNormalizedColumnSize.hook';

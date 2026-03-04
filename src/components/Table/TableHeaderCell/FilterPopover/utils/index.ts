@@ -1,1 +1,0 @@
-export { getOperatorFromFilter } from './getOperatorFromFilter';

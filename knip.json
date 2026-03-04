@@ -2,7 +2,6 @@
   "$schema": "https://unpkg.com/knip@5/schema.json",
   "entry": ["eslint-local-rules/index.ts"],
   "project": ["src/**/*.{ts,tsx}"],
-  "ignore": ["eslint-local-rules/build/**"],
   "ignoreDependencies": ["babel-plugin-react-compiler"],
   "ignoreExportsUsedInFile": {
     "interface": true,
