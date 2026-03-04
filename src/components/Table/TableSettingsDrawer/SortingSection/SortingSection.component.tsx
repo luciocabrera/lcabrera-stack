@@ -12,7 +12,10 @@ import { VirtualSelect } from '@/components/VirtualSelect';
 
 import type { SortingSectionProps, SortItem } from './SortingSection.types';
 
-import { useSetColumnsSortings } from '../TableDrawerContext/hooks/store/columns/actions';
+import {
+  useResetSorting,
+  useSetColumnsSortings,
+} from '../TableDrawerContext/hooks/store/columns/actions';
 import {
   useGetColumnOrder,
   useGetColumnsSorting,
@@ -26,6 +29,7 @@ export const SortingSection = ({ ...props }: SortingSectionProps) => {
   const sorting = useGetColumnsSorting();
 
   const onSortChange = useSetColumnsSortings();
+  const resetSorting = useResetSorting();
 
   const [selectedColumn, setSelectedColumn] = useState('');
 
@@ -102,7 +106,7 @@ export const SortingSection = ({ ...props }: SortingSectionProps) => {
     onSortChange(newSorting);
   };
 
-  const handleResetSorting = () => {
+  const handleClearSorting = () => {
     onSortChange([]);
   };
 
@@ -200,7 +204,7 @@ export const SortingSection = ({ ...props }: SortingSectionProps) => {
         )}
       </div>
 
-      {/* Reset Sorting Section */}
+      {/* Sorting Actions */}
       <div {...stylex.props(styles.resetSection)}>
         <Button
           color='outline'
@@ -213,7 +217,15 @@ export const SortingSection = ({ ...props }: SortingSectionProps) => {
         <Button
           color='outline'
           isDisabled={sortItems.length === 0}
-          onClick={handleResetSorting}
+          onClick={handleClearSorting}
+          size='sm'
+          width='full'
+        >
+          Clear Sorting
+        </Button>
+        <Button
+          color='outline'
+          onClick={resetSorting}
           size='sm'
           width='full'
         >

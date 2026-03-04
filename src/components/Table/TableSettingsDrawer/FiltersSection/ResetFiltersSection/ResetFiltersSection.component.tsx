@@ -4,12 +4,14 @@ import { Button } from '@/components/Button';
 
 import type { ResetFiltersSectionProps } from './ResetFiltersSection.types';
 
+import { useResetFilters } from '../../TableDrawerContext/hooks/store/columns/actions';
 import { styles } from './ResetFiltersSection.stylex';
 
 export const ResetFiltersSection = ({
   isDisabled = false,
   onClearAll,
 }: ResetFiltersSectionProps) => {
+  const resetFilters = useResetFilters();
   return (
     <div {...stylex.props(styles.container)}>
       <Button
@@ -19,6 +21,9 @@ export const ResetFiltersSection = ({
         size='sm'
         width='full'
       >
+        Clear Filters
+      </Button>
+      <Button color='outline' onClick={resetFilters} size='sm' width='full'>
         Reset Filters
       </Button>
     </div>

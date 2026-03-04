@@ -12,6 +12,9 @@ import type {
 } from './GeneralSettingsSection.types';
 
 import {
+  useClearAllSettings,
+  useResetFilters,
+  useResetSorting,
   useResetTableSettings,
   useSetColumnFilters,
   useSetColumnsSizing,
@@ -32,6 +35,9 @@ export const GeneralSettingsSection = ({
   const filters = useGetColumnFilters();
   const sorting = useGetColumnsSorting();
 
+  const clearAllSettings = useClearAllSettings();
+  const resetFilters = useResetFilters();
+  const resetSorting = useResetSorting();
   const resetTableSettings = useResetTableSettings();
   const setColumnFilters = useSetColumnFilters();
   const setColumnsSizing = useSetColumnsSizing();
@@ -87,11 +93,11 @@ export const GeneralSettingsSection = ({
   const hasMinWidthsConfigured = columns.some((col) => col.minWidth);
   const hasMaxWidthsConfigured = columns.some((col) => col.maxWidth);
 
-  const handleResetFilters = () => {
+  const handleClearFilters = () => {
     setColumnFilters({});
   };
 
-  const handleResetSorting = () => {
+  const handleClearSorting = () => {
     setColumnsSortings([]);
   };
 
@@ -167,7 +173,15 @@ export const GeneralSettingsSection = ({
           <Button
             color='outline'
             isDisabled={!hasFilters}
-            onClick={handleResetFilters}
+            onClick={handleClearFilters}
+            size='sm'
+            width='full'
+          >
+            Clear Filters
+          </Button>
+          <Button
+            color='outline'
+            onClick={resetFilters}
             size='sm'
             width='full'
           >
@@ -182,7 +196,15 @@ export const GeneralSettingsSection = ({
           <Button
             color='outline'
             isDisabled={!hasSorting}
-            onClick={handleResetSorting}
+            onClick={handleClearSorting}
+            size='sm'
+            width='full'
+          >
+            Clear Sorting
+          </Button>
+          <Button
+            color='outline'
+            onClick={resetSorting}
             size='sm'
             width='full'
           >
@@ -200,8 +222,16 @@ export const GeneralSettingsSection = ({
       </div>
 
       <div {...stylex.props(styles.section)}>
-        <h3 {...stylex.props(styles.sectionTitle)}>Reset All</h3>
+        <h3 {...stylex.props(styles.sectionTitle)}>All Settings</h3>
         <div {...stylex.props(styles.buttonGroup)}>
+          <Button
+            color='outline'
+            onClick={clearAllSettings}
+            size='sm'
+            width='full'
+          >
+            Clear All Settings
+          </Button>
           <Button
             color='outline'
             onClick={resetTableSettings}
