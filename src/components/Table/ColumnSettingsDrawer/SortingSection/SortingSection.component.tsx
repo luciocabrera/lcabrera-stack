@@ -5,8 +5,8 @@ import { SortAscIcon, SortClearIcon, SortDescIcon } from '@/components/Icons';
 
 import type { SortingSectionProps } from './SortingSection.types';
 
-import { useSetColumnSorting } from '../ColumnDrawerContext/columns/actions';
-import { useGetColumnSorting } from '../ColumnDrawerContext/columns/selectors';
+import { useSetColumnSorting } from '../ColumnDrawerContext/actions';
+import { useGetColumnSorting } from '../ColumnDrawerContext/selectors';
 import { styles } from './SortingSection.stylex';
 
 export const SortingSection = (_props: SortingSectionProps) => {
