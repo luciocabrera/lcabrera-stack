@@ -21,7 +21,10 @@ const localStyles = stylex.create({
     borderStyle: 'solid',
     borderWidth: '1px',
     overflow: 'visible',
-    backgroundColor: colors.surfacePrimary,
+    backgroundColor: {
+      default: colors.surfaceSecondary,
+      ':hover': colors.surfaceElevated,
+    },
   },
   filterItemHeader: {
     gap: spacing.sm,
