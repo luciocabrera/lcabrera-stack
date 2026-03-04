@@ -1,5 +1,7 @@
 export { useBatchSetTableDrawerSettings } from './useBatchSetTableDrawerSettings.hook';
 export { useClearAllSettings } from './useClearAllSettings.hook';
+export { useOrderColumnsBySorting } from './useOrderColumnsBySorting.hook';
+export { useResetColumnOrderAndVisibility } from './useResetColumnOrderAndVisibility.hook';
 export { useResetFilters } from './useResetFilters.hook';
 export { useResetSorting } from './useResetSorting.hook';
 export { useResetTableSettings } from './useResetTableSettings.hook';
