@@ -1,6 +1,4 @@
-import type { SortingState } from '@/components/Table/Table.types';
-
-import { useGetColumns } from '@/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
+import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 
 import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook';
 
@@ -10,14 +8,16 @@ import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook';
  * ordered by the current column order (or definition order as fallback).
  */
 export const useSortByColumnOrder = () => {
-  const columns = useGetColumns();
+  const { columnsStore } = useTableConfigContextValue();
   const { columnsStore: columnsDrawerStore } = useTableDrawerContextValue();
 
   return () => {
+    const columnsState = columnsStore.get();
     const drawerState = columnsDrawerStore.get();
     const columnOrder = drawerState?.columnOrder ?? [];
 
-    const sortableColumns = columns.filter((col) => col.isSortable !== false);
+    const sortableColumns =
+      columnsState?.columns.filter((col) => col.isSortable !== false) ?? [];
 
     const orderedSortable =
       columnOrder.length > 0
@@ -28,11 +28,13 @@ export const useSortByColumnOrder = () => {
             )
         : sortableColumns;
 
+    const sorting = orderedSortable.map((col) => ({
+      columnKey: col.key,
+      direction: 'asc' as const,
+    }));
+
     columnsDrawerStore.set({
-      sorting: orderedSortable.map((col) => ({
-        columnKey: col.key,
-        direction: 'asc' as const,
-      })) as SortingState,
+      sorting,
     });
   };
 };
