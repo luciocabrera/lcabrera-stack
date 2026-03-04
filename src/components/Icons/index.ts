@@ -6,6 +6,7 @@ export { FileTextIcon } from './FileTextIcon';
 export { FilterIcon } from './FilterIcon';
 export { HomeIcon } from './HomeIcon';
 export { InfoIcon } from './InfoIcon';
+export { ListOrderedIcon } from './ListOrderedIcon';
 export { MaximizeIcon } from './MaximizeIcon';
 export { MenuCloseIcon } from './MenuCloseIcon';
 export { MenuIcon } from './MenuIcon';

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/Button';
 import {
   EraserIcon,
+  ListOrderedIcon,
   MaximizeIcon,
   MinimizeIcon,
   RefreshIcon,
@@ -221,6 +222,7 @@ export const GeneralSettingsSection = ({
           </Button>
           <Button
             color='outline'
+            icon={<ListOrderedIcon size={16} />}
             onClick={handleSortByColumnOrder}
             size='sm'
             width='full'

@@ -7,6 +7,7 @@ import { Button } from '@/components/Button';
 import { DraggableList } from '@/components/DraggableList';
 import {
   EraserIcon,
+  ListOrderedIcon,
   MenuCloseIcon,
   RefreshIcon,
   SortAscIcon,
@@ -214,6 +215,7 @@ export const SortingSection = ({ ...props }: SortingSectionProps) => {
       <div {...stylex.props(styles.resetSection)}>
         <Button
           color='outline'
+          icon={<ListOrderedIcon size={16} />}
           onClick={handleSortByColumnOrder}
           size='sm'
           width='full'
