@@ -11,16 +11,37 @@ import type {
   WidthPreset,
 } from './GeneralSettingsSection.types';
 
-import { useSetColumnsSizing } from '../TableDrawerContext/hooks/store/columns/actions';
+import {
+  useResetTableSettings,
+  useSetColumnFilters,
+  useSetColumnsSizing,
+  useSetColumnsSortings,
+} from '../TableDrawerContext/hooks/store/columns/actions';
+import {
+  useGetColumnFilters,
+  useGetColumnOrder,
+  useGetColumnsSorting,
+} from '../TableDrawerContext/hooks/store/columns/selectors';
 import { styles } from './GeneralSettingsSection.stylex';
 
 export const GeneralSettingsSection = ({
   ...props
 }: GeneralSettingsSectionProps) => {
   const columns = useGetColumns();
+  const columnOrder = useGetColumnOrder();
+  const filters = useGetColumnFilters();
+  const sorting = useGetColumnsSorting();
+
+  const resetTableSettings = useResetTableSettings();
+  const setColumnFilters = useSetColumnFilters();
   const setColumnsSizing = useSetColumnsSizing();
+  const setColumnsSortings = useSetColumnsSortings();
 
   const [selectedPreset, setSelectedPreset] = useState<WidthPreset>();
+
+  const sortableColumns = columns.filter((col) => col.isSortable !== false);
+  const hasFilters = Object.keys(filters).length > 0;
+  const hasSorting = sorting.length > 0;
 
   const handleToggle = (preset: 'default' | 'max' | 'min') => {
     const newPreset = selectedPreset === preset ? undefined : preset;
@@ -65,6 +86,32 @@ export const GeneralSettingsSection = ({
 
   const hasMinWidthsConfigured = columns.some((col) => col.minWidth);
   const hasMaxWidthsConfigured = columns.some((col) => col.maxWidth);
+
+  const handleResetFilters = () => {
+    setColumnFilters({});
+  };
+
+  const handleResetSorting = () => {
+    setColumnsSortings([]);
+  };
+
+  const handleSortByColumnOrder = () => {
+    const orderedSortable =
+      columnOrder.length > 0
+        ? columnOrder
+            .map((key) => sortableColumns.find((col) => col.key === key))
+            .filter(
+              (col): col is (typeof sortableColumns)[0] => col !== undefined,
+            )
+        : sortableColumns;
+
+    setColumnsSortings(
+      orderedSortable.map((col) => ({
+        columnKey: col.key,
+        direction: 'asc' as const,
+      })),
+    );
+  };
 
   return (
     <div {...stylex.props(styles.container)} {...props}>
@@ -113,6 +160,58 @@ export const GeneralSettingsSection = ({
         Select a preset to adjust all column widths at once. Changes will be
         reflected after clicking Accept.
       </InfoBox>
+
+      <div {...stylex.props(styles.section)}>
+        <h3 {...stylex.props(styles.sectionTitle)}>Filters</h3>
+        <div {...stylex.props(styles.buttonGroup)}>
+          <Button
+            color='outline'
+            isDisabled={!hasFilters}
+            onClick={handleResetFilters}
+            size='sm'
+            width='full'
+          >
+            Reset Filters
+          </Button>
+        </div>
+      </div>
+
+      <div {...stylex.props(styles.section)}>
+        <h3 {...stylex.props(styles.sectionTitle)}>Sorting</h3>
+        <div {...stylex.props(styles.buttonGroup)}>
+          <Button
+            color='outline'
+            isDisabled={!hasSorting}
+            onClick={handleResetSorting}
+            size='sm'
+            width='full'
+          >
+            Reset Sorting
+          </Button>
+          <Button
+            color='outline'
+            onClick={handleSortByColumnOrder}
+            size='sm'
+            width='full'
+          >
+            Sort by Column Order
+          </Button>
+        </div>
+      </div>
+
+      <div {...stylex.props(styles.section)}>
+        <h3 {...stylex.props(styles.sectionTitle)}>Reset All</h3>
+        <div {...stylex.props(styles.buttonGroup)}>
+          <Button
+            color='outline'
+            onClick={resetTableSettings}
+            size='sm'
+            width='full'
+          >
+            Reset All Settings
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };
