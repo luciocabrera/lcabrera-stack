@@ -1,5 +1,6 @@
 export { BarChartIcon } from './BarChartIcon';
 export { CheckIcon } from './CheckIcon';
+export { EraserIcon } from './EraserIcon';
 export { ErrorIcon } from './ErrorIcon';
 export { FileTextIcon } from './FileTextIcon';
 export { FilterIcon } from './FilterIcon';

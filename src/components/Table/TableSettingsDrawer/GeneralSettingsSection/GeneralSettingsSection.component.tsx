@@ -2,7 +2,12 @@ import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 
 import { Button } from '@/components/Button';
-import { MaximizeIcon, MinimizeIcon, RefreshIcon } from '@/components/Icons';
+import {
+  EraserIcon,
+  MaximizeIcon,
+  MinimizeIcon,
+  RefreshIcon,
+} from '@/components/Icons';
 import { InfoBox } from '@/components/InfoBox';
 import { useGetColumns } from '@/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
 
@@ -172,6 +177,7 @@ export const GeneralSettingsSection = ({
         <div {...stylex.props(styles.buttonGroup)}>
           <Button
             color='outline'
+            icon={<EraserIcon size={16} />}
             isDisabled={!hasFilters}
             onClick={handleClearFilters}
             size='sm'
@@ -179,7 +185,13 @@ export const GeneralSettingsSection = ({
           >
             Clear Filters
           </Button>
-          <Button color='outline' onClick={resetFilters} size='sm' width='full'>
+          <Button
+            color='outline'
+            icon={<RefreshIcon size={16} />}
+            onClick={resetFilters}
+            size='sm'
+            width='full'
+          >
             Reset Filters
           </Button>
         </div>
@@ -190,6 +202,7 @@ export const GeneralSettingsSection = ({
         <div {...stylex.props(styles.buttonGroup)}>
           <Button
             color='outline'
+            icon={<EraserIcon size={16} />}
             isDisabled={!hasSorting}
             onClick={handleClearSorting}
             size='sm'
@@ -197,7 +210,13 @@ export const GeneralSettingsSection = ({
           >
             Clear Sorting
           </Button>
-          <Button color='outline' onClick={resetSorting} size='sm' width='full'>
+          <Button
+            color='outline'
+            icon={<RefreshIcon size={16} />}
+            onClick={resetSorting}
+            size='sm'
+            width='full'
+          >
             Reset Sorting
           </Button>
           <Button
@@ -216,6 +235,7 @@ export const GeneralSettingsSection = ({
         <div {...stylex.props(styles.buttonGroup)}>
           <Button
             color='outline'
+            icon={<EraserIcon size={16} />}
             onClick={clearAllSettings}
             size='sm'
             width='full'
@@ -224,6 +244,7 @@ export const GeneralSettingsSection = ({
           </Button>
           <Button
             color='outline'
+            icon={<RefreshIcon size={16} />}
             onClick={resetTableSettings}
             size='sm'
             width='full'

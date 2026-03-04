@@ -5,7 +5,13 @@ import type { DraggableItem } from '@/components/DraggableList';
 
 import { Button } from '@/components/Button';
 import { DraggableList } from '@/components/DraggableList';
-import { MenuCloseIcon, SortAscIcon, SortDescIcon } from '@/components/Icons';
+import {
+  EraserIcon,
+  MenuCloseIcon,
+  RefreshIcon,
+  SortAscIcon,
+  SortDescIcon,
+} from '@/components/Icons';
 import { InfoBox } from '@/components/InfoBox';
 import { useGetColumns } from '@/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
 import { VirtualSelect } from '@/components/VirtualSelect';
@@ -216,6 +222,7 @@ export const SortingSection = ({ ...props }: SortingSectionProps) => {
         </Button>
         <Button
           color='outline'
+          icon={<EraserIcon size={16} />}
           isDisabled={sortItems.length === 0}
           onClick={handleClearSorting}
           size='sm'
@@ -223,7 +230,13 @@ export const SortingSection = ({ ...props }: SortingSectionProps) => {
         >
           Clear Sorting
         </Button>
-        <Button color='outline' onClick={resetSorting} size='sm' width='full'>
+        <Button
+          color='outline'
+          icon={<RefreshIcon size={16} />}
+          onClick={resetSorting}
+          size='sm'
+          width='full'
+        >
           Reset Sorting
         </Button>
       </div>
