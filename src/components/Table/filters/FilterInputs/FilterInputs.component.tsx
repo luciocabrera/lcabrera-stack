@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { Activity, useCallback, useState } from 'react';
+import { Activity, useState } from 'react';
 
 import type {
   ColumnFilter,
@@ -54,51 +54,46 @@ export const FilterInputs = <TData,>({
     operatorOptions,
   });
 
-  const handleOperatorChange = useCallback(
-    (selectedLabels: string[]) => {
-      const selectedLabel = selectedLabels[0];
-      if (!selectedLabel) return;
+  const handleOperatorChange = (selectedLabels: string[]) => {
+    const selectedLabel = selectedLabels[0];
+    if (!selectedLabel) return;
 
-      const matchingOp = operatorOptions.find(
-        (op) => op.label === selectedLabel,
-      );
-      if (!matchingOp) return;
+    const matchingOp = operatorOptions.find((op) => op.label === selectedLabel);
+    if (!matchingOp) return;
 
-      const newOperator = matchingOp.value;
+    const newOperator = matchingOp.value;
 
-      // Boolean filters don't have operators
-      if (filter?.type === 'boolean') return;
+    // Boolean filters don't have operators
+    if (filter?.type === 'boolean') return;
 
-      // If filter exists, update it with new operator
-      if (filter) {
-        onChange({ ...filter, operator: newOperator } as ColumnFilter);
-        return;
-      }
+    // If filter exists, update it with new operator
+    if (filter) {
+      onChange({ ...filter, operator: newOperator } as ColumnFilter);
+      return;
+    }
 
-      // No filter yet - create initial filter based on column data type
-      if (column.dataType === 'number') {
-        onChange({
-          operator: newOperator as NumberOperatorType,
-          type: 'number',
-          value: undefined as unknown as number,
-        });
-      } else if (column.dataType === 'date') {
-        onChange({
-          operator: newOperator as DateOperatorType,
-          type: 'date',
-          value: '',
-        });
-      } else {
-        // String type (text filter)
-        onChange({
-          operator: newOperator as TextOperatorType,
-          type: 'text',
-          value: '',
-        });
-      }
-    },
-    [column.dataType, filter, onChange, operatorOptions],
-  );
+    // No filter yet - create initial filter based on column data type
+    if (column.dataType === 'number') {
+      onChange({
+        operator: newOperator as NumberOperatorType,
+        type: 'number',
+        value: undefined as unknown as number,
+      });
+    } else if (column.dataType === 'date') {
+      onChange({
+        operator: newOperator as DateOperatorType,
+        type: 'date',
+        value: '',
+      });
+    } else {
+      // String type (text filter)
+      onChange({
+        operator: newOperator as TextOperatorType,
+        type: 'text',
+        value: '',
+      });
+    }
+  };
 
   // Render based on data type
   // Boolean has no operator dropdown - render directly

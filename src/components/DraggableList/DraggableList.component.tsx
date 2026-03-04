@@ -1,15 +1,10 @@
-import type { DragEvent } from 'react';
-
 import * as stylex from '@stylexjs/stylex';
 
 import type { DraggableListProps } from './DraggableList.types';
 
 import { styles } from './DraggableList.stylex';
 import { useDraggableList } from './hooks';
-
-const handleDragOver = (event: DragEvent<HTMLLIElement>) => {
-  event.preventDefault();
-};
+import { handleDragOver } from './utils';
 
 export const DraggableList = ({
   items: initialItems,

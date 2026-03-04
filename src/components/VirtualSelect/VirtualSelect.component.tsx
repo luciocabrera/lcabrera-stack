@@ -8,36 +8,10 @@ import { Tag } from '@/components/Tag';
 import { VirtualList } from '@/components/VirtualList';
 import { useClickOutside } from '@/hooks';
 
-import type {
-  CountVisibleTagsArgs,
-  VirtualSelectProps,
-} from './VirtualSelect.types';
+import type { VirtualSelectProps } from './VirtualSelect.types';
 
-import { styles, TRIGGER_MAX_HEIGHT } from './VirtualSelect.stylex';
-
-/**
- * Counts how many tag children fit within height limit.
- * Returns adjusted count reserving space for the "+N more" overflow tag.
- */
-const countVisibleTags = ({
-  totalCount,
-  trigger,
-}: CountVisibleTagsArgs): number => {
-  const children = [...trigger.children] as HTMLElement[];
-  const tagElements = children.filter((child) => !child.dataset.chevron);
-
-  let fittingCount = 0;
-  for (const tag of tagElements) {
-    if (tag.offsetTop + tag.offsetHeight <= TRIGGER_MAX_HEIGHT) {
-      fittingCount++;
-    } else {
-      break;
-    }
-  }
-
-  const overflow = totalCount - fittingCount;
-  return overflow > 0 && fittingCount > 0 ? fittingCount - 1 : fittingCount;
-};
+import { styles } from './VirtualSelect.stylex';
+import { countVisibleTags } from './utils';
 
 export const VirtualSelect = ({
   customStylex,

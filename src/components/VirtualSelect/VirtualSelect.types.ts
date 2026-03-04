@@ -2,11 +2,6 @@ import type { StyleXStyles } from '@stylexjs/stylex';
 
 import type { VirtualListDataState } from '@/components/VirtualList';
 
-export type CountVisibleTagsArgs = {
-  totalCount: number;
-  trigger: HTMLDivElement;
-};
-
 export type VirtualSelectMode = 'multi' | 'single';
 
 export type VirtualSelectProps = {

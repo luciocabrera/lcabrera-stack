@@ -1,28 +1,13 @@
 import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 
-import type { DateFilter } from '@/types/filterOperators.types';
-
 import type {
   DateFilterInputProps,
   UpdateDateFilterArgs,
 } from './DateFilterInput.types';
 
 import { styles } from './DateFilterInput.stylex';
-
-const computeInitialValue = (filter: DateFilter | undefined): string => {
-  if (filter?.operator === 'between') {
-    return filter.value;
-  }
-  return filter?.value ?? '';
-};
-
-const computeInitialEndDate = (filter: DateFilter | undefined): string => {
-  if (filter?.operator === 'between') {
-    return filter.value2 ?? '';
-  }
-  return '';
-};
+import { computeInitialEndDate, computeInitialValue } from './utils';
 
 export const DateFilterInput = ({
   columnKey,

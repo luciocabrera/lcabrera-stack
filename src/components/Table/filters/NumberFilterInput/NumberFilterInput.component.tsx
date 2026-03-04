@@ -1,30 +1,13 @@
 import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 
-import type { NumberFilter } from '@/types/filterOperators.types';
-
 import type {
   NumberFilterInputProps,
   UpdateFilterArgs,
 } from './NumberFilterInput.types';
 
 import { styles } from './NumberFilterInput.stylex';
-
-const computeInitialValue = (filter: NumberFilter | undefined): '' | number => {
-  if (filter?.operator === 'between') {
-    return filter.value;
-  }
-  return filter?.value ?? '';
-};
-
-const computeInitialMaxValue = (
-  filter: NumberFilter | undefined,
-): '' | number => {
-  if (filter?.operator === 'between') {
-    return filter.value2 ?? '';
-  }
-  return '';
-};
+import { computeInitialMaxValue, computeInitialValue } from './utils';
 
 export const NumberFilterInput = <TData,>({
   columnKey,

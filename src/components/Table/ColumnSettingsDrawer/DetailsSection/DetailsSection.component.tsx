@@ -5,12 +5,7 @@ import { useGetNormalizedColumn } from '@/components/Table/contexts/TableConfig/
 import type { DetailItem, DetailsSectionProps } from './DetailsSection.types';
 
 import { styles } from './DetailsSection.stylex';
-
-const getBadgeStyle = (value: string) => {
-  if (value === 'Yes') return styles.badgeYes;
-  if (value === 'No') return styles.badgeNo;
-  return styles.badgeNone;
-};
+import { getBadgeStyle } from './utils';
 
 export const DetailsSection = <TData,>({
   columnKey,
