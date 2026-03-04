@@ -3,9 +3,7 @@ import { useState } from 'react';
 
 import { Button } from '@/components/Button';
 import {
-  ColumnsOrderIcon,
   EraserIcon,
-  ListOrderedIcon,
   MaximizeIcon,
   MinimizeIcon,
   RefreshIcon,
@@ -18,47 +16,26 @@ import type {
   WidthPreset,
 } from './GeneralSettingsSection.types';
 
+import { ColumnOrderSectionFooter } from '../ColumnOrderSection/ColumnOrderSectionFooter';
+import { FiltersSectionFooter } from '../FiltersSection/FiltersSectionFooter';
+import { SortingSectionFooter } from '../SortingSection/SortingSectionFooter';
 import {
   useClearAllSettings,
-  useOrderColumnsBySorting,
-  useResetColumnOrderAndVisibility,
-  useResetFilters,
-  useResetSorting,
   useResetTableSettings,
-  useSetColumnFilters,
   useSetColumnsSizing,
-  useSetColumnsSortings,
 } from '../TableDrawerContext/actions';
-import {
-  useGetColumnFilters,
-  useGetColumnOrder,
-  useGetColumnsSorting,
-} from '../TableDrawerContext/selectors';
 import { styles } from './GeneralSettingsSection.stylex';
 
 export const GeneralSettingsSection = ({
   ...props
 }: GeneralSettingsSectionProps) => {
   const columns = useGetColumns();
-  const columnOrder = useGetColumnOrder();
-  const filters = useGetColumnFilters();
-  const sorting = useGetColumnsSorting();
 
   const clearAllSettings = useClearAllSettings();
-  const orderColumnsBySorting = useOrderColumnsBySorting();
-  const resetColumnOrderAndVisibility = useResetColumnOrderAndVisibility();
-  const resetFilters = useResetFilters();
-  const resetSorting = useResetSorting();
   const resetTableSettings = useResetTableSettings();
-  const setColumnFilters = useSetColumnFilters();
   const setColumnsSizing = useSetColumnsSizing();
-  const setColumnsSortings = useSetColumnsSortings();
 
   const [selectedPreset, setSelectedPreset] = useState<WidthPreset>();
-
-  const sortableColumns = columns.filter((col) => col.isSortable !== false);
-  const hasFilters = Object.keys(filters).length > 0;
-  const hasSorting = sorting.length > 0;
 
   const handleToggle = (preset: 'default' | 'max' | 'min') => {
     const newPreset = selectedPreset === preset ? undefined : preset;
@@ -103,32 +80,6 @@ export const GeneralSettingsSection = ({
 
   const hasMinWidthsConfigured = columns.some((col) => col.minWidth);
   const hasMaxWidthsConfigured = columns.some((col) => col.maxWidth);
-
-  const handleClearFilters = () => {
-    setColumnFilters({});
-  };
-
-  const handleClearSorting = () => {
-    setColumnsSortings([]);
-  };
-
-  const handleSortByColumnOrder = () => {
-    const orderedSortable =
-      columnOrder.length > 0
-        ? columnOrder
-            .map((key) => sortableColumns.find((col) => col.key === key))
-            .filter(
-              (col): col is (typeof sortableColumns)[0] => col !== undefined,
-            )
-        : sortableColumns;
-
-    setColumnsSortings(
-      orderedSortable.map((col) => ({
-        columnKey: col.key,
-        direction: 'asc' as const,
-      })),
-    );
-  };
 
   return (
     <div {...stylex.props(styles.container)} {...props}>
@@ -180,86 +131,17 @@ export const GeneralSettingsSection = ({
 
       <div {...stylex.props(styles.section)}>
         <h3 {...stylex.props(styles.sectionTitle)}>Filters</h3>
-        <div {...stylex.props(styles.buttonGroup)}>
-          <Button
-            color='outline'
-            icon={<EraserIcon size={16} />}
-            isDisabled={!hasFilters}
-            onClick={handleClearFilters}
-            size='sm'
-            width='full'
-          >
-            Clear Filters
-          </Button>
-          <Button
-            color='outline'
-            icon={<RefreshIcon size={16} />}
-            onClick={resetFilters}
-            size='sm'
-            width='full'
-          >
-            Reset Filters
-          </Button>
-        </div>
+        <FiltersSectionFooter />
       </div>
 
       <div {...stylex.props(styles.section)}>
         <h3 {...stylex.props(styles.sectionTitle)}>Sorting</h3>
-        <div {...stylex.props(styles.buttonGroup)}>
-          <Button
-            color='outline'
-            icon={<ListOrderedIcon size={16} />}
-            onClick={handleSortByColumnOrder}
-            size='sm'
-            width='full'
-          >
-            Sort by Column Order
-          </Button>
-          <Button
-            color='outline'
-            icon={<EraserIcon size={16} />}
-            isDisabled={!hasSorting}
-            onClick={handleClearSorting}
-            size='sm'
-            width='full'
-          >
-            Clear Sorting
-          </Button>
-          <Button
-            color='outline'
-            icon={<RefreshIcon size={16} />}
-            onClick={resetSorting}
-            size='sm'
-            width='full'
-          >
-            Reset Sorting
-          </Button>
-        </div>
+        <SortingSectionFooter />
       </div>
 
       <div {...stylex.props(styles.section)}>
         <h3 {...stylex.props(styles.sectionTitle)}>Columns</h3>
-        <div {...stylex.props(styles.buttonGroup)}>
-          <Button
-            color='outline'
-            icon={<ColumnsOrderIcon size={16} />}
-            isDisabled={!hasSorting}
-            onClick={orderColumnsBySorting}
-            size='sm'
-            width='full'
-          >
-            Order by Sorting
-          </Button>
-          <Button
-            color='outline'
-            icon={<RefreshIcon size={16} />}
-            onClick={resetColumnOrderAndVisibility}
-            size='sm'
-            width='full'
-          >
-            Reset Order & Visibility
-          </Button>
-        </div>
+        <ColumnOrderSectionFooter />
       </div>
 
       <div {...stylex.props(styles.section)}>

@@ -6,10 +6,7 @@ import type { DraggableItem } from '@/components/DraggableList';
 import { Button } from '@/components/Button';
 import { DraggableList } from '@/components/DraggableList';
 import {
-  EraserIcon,
-  ListOrderedIcon,
   MenuCloseIcon,
-  RefreshIcon,
   SortAscIcon,
   SortDescIcon,
 } from '@/components/Icons';
@@ -19,24 +16,17 @@ import { VirtualSelect } from '@/components/VirtualSelect';
 
 import type { SortingSectionProps, SortItem } from './SortingSection.types';
 
-import {
-  useResetSorting,
-  useSetColumnsSortings,
-} from '../TableDrawerContext/actions';
-import {
-  useGetColumnOrder,
-  useGetColumnsSorting,
-} from '../TableDrawerContext/selectors';
+import { useSetColumnsSortings } from '../TableDrawerContext/actions';
+import { useGetColumnsSorting } from '../TableDrawerContext/selectors';
 import { styles } from './SortingSection.stylex';
+import { SortingSectionFooter } from './SortingSectionFooter';
 import { getSelectedColumnLabel } from './utils';
 
 export const SortingSection = ({ ...props }: SortingSectionProps) => {
   const columns = useGetColumns();
-  const columnOrder = useGetColumnOrder();
   const sorting = useGetColumnsSorting();
 
   const onSortChange = useSetColumnsSortings();
-  const resetSorting = useResetSorting();
 
   const [selectedColumn, setSelectedColumn] = useState('');
 
@@ -111,29 +101,6 @@ export const SortingSection = ({ ...props }: SortingSectionProps) => {
       };
     });
     onSortChange(newSorting);
-  };
-
-  const handleClearSorting = () => {
-    onSortChange([]);
-  };
-
-  const handleSortByColumnOrder = () => {
-    // Use column order if set, otherwise fall back to definition order
-    const orderedSortable =
-      columnOrder.length > 0
-        ? columnOrder
-            .map((key) => sortableColumns.find((col) => col.key === key))
-            .filter(
-              (col): col is (typeof sortableColumns)[0] => col !== undefined,
-            )
-        : sortableColumns;
-
-    onSortChange(
-      orderedSortable.map((col) => ({
-        columnKey: col.key,
-        direction: 'asc' as const,
-      })),
-    );
   };
 
   // Convert sort items to draggable items
@@ -211,37 +178,7 @@ export const SortingSection = ({ ...props }: SortingSectionProps) => {
         )}
       </div>
 
-      {/* Sorting Actions */}
-      <div {...stylex.props(styles.resetSection)}>
-        <Button
-          color='outline'
-          icon={<ListOrderedIcon size={16} />}
-          onClick={handleSortByColumnOrder}
-          size='sm'
-          width='full'
-        >
-          Sort by Column Order
-        </Button>
-        <Button
-          color='outline'
-          icon={<EraserIcon size={16} />}
-          isDisabled={sortItems.length === 0}
-          onClick={handleClearSorting}
-          size='sm'
-          width='full'
-        >
-          Clear Sorting
-        </Button>
-        <Button
-          color='outline'
-          icon={<RefreshIcon size={16} />}
-          onClick={resetSorting}
-          size='sm'
-          width='full'
-        >
-          Reset Sorting
-        </Button>
-      </div>
+      <SortingSectionFooter />
     </div>
   );
 };

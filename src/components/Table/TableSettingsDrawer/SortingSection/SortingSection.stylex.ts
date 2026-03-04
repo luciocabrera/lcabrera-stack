@@ -4,7 +4,6 @@ export const styles = {
   addSection: drawerSectionStyles.subsection,
   container: drawerSectionStyles.containerFull,
   header: drawerSectionStyles.header,
-  resetSection: drawerSectionStyles.resetSection,
   sortItem: drawerSectionStyles.itemRow,
   sortItemControls: drawerSectionStyles.itemControls,
   sortItemLabel: drawerSectionStyles.itemLabel,

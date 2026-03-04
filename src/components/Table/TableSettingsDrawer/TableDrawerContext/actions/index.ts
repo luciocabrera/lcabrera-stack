@@ -1,5 +1,7 @@
 export { useBatchSetTableDrawerSettings } from './useBatchSetTableDrawerSettings.hook';
 export { useClearAllSettings } from './useClearAllSettings.hook';
+export { useClearFilters } from './useClearFilters.hook';
+export { useClearSorting } from './useClearSorting.hook';
 export { useOrderColumnsBySorting } from './useOrderColumnsBySorting.hook';
 export { useResetColumnOrderAndVisibility } from './useResetColumnOrderAndVisibility.hook';
 export { useResetFilters } from './useResetFilters.hook';
@@ -10,3 +12,4 @@ export { useSetColumnsOrder } from './useSetColumnsOrder.hook';
 export { useSetColumnsSizing } from './useSetColumnsSizing.hook';
 export { useSetColumnsSortings } from './useSetColumnsSortings.hook';
 export { useSetColumnsVisibility } from './useSetColumnsVisibility.hook';
+export { useSortByColumnOrder } from './useSortByColumnOrder.hook';

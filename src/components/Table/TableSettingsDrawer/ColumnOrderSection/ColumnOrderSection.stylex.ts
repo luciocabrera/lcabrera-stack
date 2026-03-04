@@ -5,5 +5,4 @@ export const styles = {
   columnLabel: drawerSectionStyles.itemLabel,
   container: drawerSectionStyles.containerFull,
   header: drawerSectionStyles.header,
-  resetSection: drawerSectionStyles.resetSection,
 };

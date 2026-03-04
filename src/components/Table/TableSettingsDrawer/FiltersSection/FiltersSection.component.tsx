@@ -2,11 +2,10 @@ import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 
 import { useSetColumnFilters } from '../TableDrawerContext/actions';
-import { useGetColumnFilters } from '../TableDrawerContext/selectors';
 import { ActiveFiltersList } from './ActiveFiltersList';
 import { AddFilterSection } from './AddFilterSection';
 import { styles } from './FiltersSection.stylex';
-import { ResetFiltersSection } from './ResetFiltersSection';
+import { FiltersSectionFooter } from './FiltersSectionFooter';
 
 /**
  * Orchestrator component for the filters section.
@@ -15,16 +14,13 @@ import { ResetFiltersSection } from './ResetFiltersSection';
  */
 
 export const FiltersSection = () => {
-  const filters = useGetColumnFilters();
   const onFiltersChange = useSetColumnFilters();
 
   const [expandedFilters, setExpandedFilters] = useState<Set<string>>(
     () => new Set(),
   );
 
-  const hasFilters = Object.keys(filters).length > 0;
-
-  const handleClearAll = () => {
+  const handleClearLocalState = () => {
     onFiltersChange({});
     setExpandedFilters(new Set());
   };
@@ -39,10 +35,7 @@ export const FiltersSection = () => {
         expandedFilters={expandedFilters}
         onExpandedFiltersChange={setExpandedFilters}
       />
-      <ResetFiltersSection
-        isDisabled={!hasFilters}
-        onClearAll={handleClearAll}
-      />
+      <FiltersSectionFooter onClearAll={handleClearLocalState} />
     </div>
   );
 };

@@ -2,9 +2,7 @@ import * as stylex from '@stylexjs/stylex';
 
 import type { DraggableItem } from '@/components/DraggableList';
 
-import { Button } from '@/components/Button';
 import { DraggableList } from '@/components/DraggableList';
-import { ColumnsOrderIcon, RefreshIcon } from '@/components/Icons';
 import { useGetColumns } from '@/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
 import { ToggleSwitch } from '@/components/ToggleSwitch';
 
@@ -14,28 +12,23 @@ import type {
 } from './ColumnOrderSection.types';
 
 import {
-  useOrderColumnsBySorting,
-  useResetColumnOrderAndVisibility,
   useSetColumnsOrder,
   useSetColumnsVisibility,
 } from '../TableDrawerContext/actions';
 import {
   useGetColumnOrder,
-  useGetColumnsSorting,
   useGetColumnVisibility,
 } from '../TableDrawerContext/selectors';
 import { styles } from './ColumnOrderSection.stylex';
+import { ColumnOrderSectionFooter } from './ColumnOrderSectionFooter';
 
 export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
   const columns = useGetColumns();
   const columnsOrder = useGetColumnOrder();
   const columnVisibility = useGetColumnVisibility();
-  const columnsSorting = useGetColumnsSorting();
 
   const setColumnsOrder = useSetColumnsOrder();
   const setColumnsVisibility = useSetColumnsVisibility();
-  const orderColumnsBySorting = useOrderColumnsBySorting();
-  const resetColumnOrderAndVisibility = useResetColumnOrderAndVisibility();
   // Build ordered column list (use columnOrder if available, otherwise use column definition order)
   const orderedColumns =
     columnsOrder.length > 0
@@ -97,27 +90,7 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
       </h3>
       <DraggableList items={draggableItems} onOrderChange={handleReorder} />
 
-      <div {...stylex.props(styles.resetSection)}>
-        <Button
-          color='outline'
-          icon={<ColumnsOrderIcon size={16} />}
-          isDisabled={columnsSorting.length === 0}
-          onClick={orderColumnsBySorting}
-          size='sm'
-          width='full'
-        >
-          Order by Sorting
-        </Button>
-        <Button
-          color='outline'
-          icon={<RefreshIcon size={16} />}
-          onClick={resetColumnOrderAndVisibility}
-          size='sm'
-          width='full'
-        >
-          Reset Order & Visibility
-        </Button>
-      </div>
+      <ColumnOrderSectionFooter />
     </div>
   );
 };
