@@ -82,7 +82,11 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
 
   return (
     <div {...stylex.props(styles.container)} {...props}>
-      <h3 {...stylex.props(styles.header)}>Column Order & Visibility</h3>
+      <h3 {...stylex.props(styles.header)}>
+        Column Order & Visibility ({allOrderedColumns.length -
+          columnVisibility.size}
+        /{allOrderedColumns.length})
+      </h3>
       <DraggableList items={draggableItems} onOrderChange={handleReorder} />
     </div>
   );

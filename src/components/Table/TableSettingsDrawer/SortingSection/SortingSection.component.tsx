@@ -160,7 +160,9 @@ export const SortingSection = ({ ...props }: SortingSectionProps) => {
       </div>
 
       <div {...stylex.props(styles.sortOrderSection)}>
-        <h3 {...stylex.props(styles.header)}>Sort Order</h3>
+        <h3 {...stylex.props(styles.header)}>
+          Sort Order ({sortItems.length})
+        </h3>
         {sortItems.length === 0 ? (
           <InfoBox>
             No sorting applied. Add a column above to start sorting.

@@ -79,7 +79,9 @@ export const ActiveFiltersList = ({
 
   return (
     <div {...stylex.props(styles.container)}>
-      <h3 {...stylex.props(styles.header)}>Active Filters</h3>
+      <h3 {...stylex.props(styles.header)}>
+        Active Filters ({filterEntries.length})
+      </h3>
       {hasFilters ? (
         <div {...stylex.props(styles.filtersList)}>
           {filterEntries.map(([columnKey, filter]) => {

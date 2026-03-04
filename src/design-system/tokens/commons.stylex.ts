@@ -179,6 +179,7 @@ export const colorVariants = stylex.create({
   },
 });
 
+export type SizeVariant = keyof typeof sizeVariants;
 // Shared size variants for buttons and links
 export const sizeVariants = stylex.create({
   lg: {
