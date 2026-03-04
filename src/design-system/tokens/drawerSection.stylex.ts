@@ -66,7 +66,11 @@ export const drawerSectionStyles = stylex.create({
   },
   /** Bottom-anchored reset/action area. */
   resetSection: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: spacing.sm,
     marginTop: 'auto',
+    paddingBottom: spacing.sm,
     paddingTop: spacing.sm,
   },
 });

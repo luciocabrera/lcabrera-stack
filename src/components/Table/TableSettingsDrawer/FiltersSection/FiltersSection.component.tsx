@@ -39,7 +39,10 @@ export const FiltersSection = () => {
         expandedFilters={expandedFilters}
         onExpandedFiltersChange={setExpandedFilters}
       />
-      {hasFilters && <ResetFiltersSection onClearAll={handleClearAll} />}
+      <ResetFiltersSection
+        isDisabled={!hasFilters}
+        onClearAll={handleClearAll}
+      />
     </div>
   );
 };

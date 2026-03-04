@@ -13,12 +13,16 @@ import { VirtualSelect } from '@/components/VirtualSelect';
 import type { SortingSectionProps, SortItem } from './SortingSection.types';
 
 import { useSetColumnsSortings } from '../TableDrawerContext/hooks/store/columns/actions';
-import { useGetColumnsSorting } from '../TableDrawerContext/hooks/store/columns/selectors';
+import {
+  useGetColumnOrder,
+  useGetColumnsSorting,
+} from '../TableDrawerContext/hooks/store/columns/selectors';
 import { styles } from './SortingSection.stylex';
 import { getSelectedColumnLabel } from './utils';
 
 export const SortingSection = ({ ...props }: SortingSectionProps) => {
   const columns = useGetColumns();
+  const columnOrder = useGetColumnOrder();
   const sorting = useGetColumnsSorting();
 
   const onSortChange = useSetColumnsSortings();
@@ -102,6 +106,25 @@ export const SortingSection = ({ ...props }: SortingSectionProps) => {
     onSortChange([]);
   };
 
+  const handleSortByColumnOrder = () => {
+    // Use column order if set, otherwise fall back to definition order
+    const orderedSortable =
+      columnOrder.length > 0
+        ? columnOrder
+            .map((key) => sortableColumns.find((col) => col.key === key))
+            .filter(
+              (col): col is (typeof sortableColumns)[0] => col !== undefined,
+            )
+        : sortableColumns;
+
+    onSortChange(
+      orderedSortable.map((col) => ({
+        columnKey: col.key,
+        direction: 'asc' as const,
+      })),
+    );
+  };
+
   // Convert sort items to draggable items
   const draggableItems: DraggableItem[] = sortItems.map((item) => ({
     content: (
@@ -178,18 +201,25 @@ export const SortingSection = ({ ...props }: SortingSectionProps) => {
       </div>
 
       {/* Reset Sorting Section */}
-      {sortItems.length > 0 && (
-        <div {...stylex.props(styles.resetSection)}>
-          <Button
-            color='outline'
-            onClick={handleResetSorting}
-            size='sm'
-            width='full'
-          >
-            Reset Sorting
-          </Button>
-        </div>
-      )}
+      <div {...stylex.props(styles.resetSection)}>
+        <Button
+          color='outline'
+          onClick={handleSortByColumnOrder}
+          size='sm'
+          width='full'
+        >
+          Sort by Column Order
+        </Button>
+        <Button
+          color='outline'
+          isDisabled={sortItems.length === 0}
+          onClick={handleResetSorting}
+          size='sm'
+          width='full'
+        >
+          Reset Sorting
+        </Button>
+      </div>
     </div>
   );
 };
