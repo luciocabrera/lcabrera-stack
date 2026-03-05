@@ -65,6 +65,7 @@ export const darkTheme = stylex.createTheme(colors, {
   surfacePrimary: 'oklch(17% 0.005 250)',
   surfaceSecondary: 'oklch(22% 0.008 250)',
   surfaceElevated: 'oklch(26% 0.008 250)',
+  surfaceStripe: 'oklch(100% 0 0 / 0.02)',
 
   borderPrimary: 'oklch(34% 0.008 250)',
   borderSecondary: 'oklch(28% 0.005 250)',

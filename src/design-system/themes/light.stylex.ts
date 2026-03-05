@@ -52,6 +52,7 @@ export const lightTheme = stylex.createTheme(colors, {
   surfacePrimary: 'oklch(99% 0 0)',
   surfaceSecondary: 'oklch(97.5% 0.003 250)',
   surfaceElevated: 'oklch(100% 0 0)',
+  surfaceStripe: 'oklch(0% 0 0 / 0.02)',
 
   borderPrimary: 'oklch(86% 0.004 250)',
   borderSecondary: 'oklch(92% 0.004 250)',

@@ -55,6 +55,7 @@ const localStyles = stylex.create({
     alignItems: 'center',
     backgroundColor: {
       default: 'transparent',
+      ':nth-child(even)': colors.surfaceStripe,
       ':hover': colors.surfaceSecondary,
     },
     cursor: 'pointer',

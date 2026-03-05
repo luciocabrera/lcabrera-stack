@@ -60,6 +60,7 @@ export const colors = stylex.defineVars({
   // Surface colors (for cards, modals, etc.)
   surfacePrimary: 'var(--surface-primary)',
   surfaceSecondary: 'var(--surface-secondary)',
+  surfaceStripe: 'var(--surface-stripe)',
 
   textInverse: 'var(--text-inverse)',
   // Text colors
