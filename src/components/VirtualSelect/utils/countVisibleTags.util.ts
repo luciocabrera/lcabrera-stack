@@ -6,14 +6,16 @@ export type CountVisibleTagsArgs = {
 };
 /**
  * Counts how many tag children fit within height limit.
- * Returns adjusted count reserving space for the "+N more" overflow tag.
+ * Always shows at least 1 tag when items are selected.
  */
 export const countVisibleTags = ({
   totalCount,
   trigger,
 }: CountVisibleTagsArgs) => {
   const children = [...trigger.children] as HTMLElement[];
-  const tagElements = children.filter((child) => !child.dataset.chevron);
+  const tagElements = children.filter(
+    (child) => !child.dataset.chevron && !child.dataset.overflow,
+  );
 
   let fittingCount = 0;
   for (const tag of tagElements) {
@@ -24,6 +26,5 @@ export const countVisibleTags = ({
     }
   }
 
-  const overflow = totalCount - fittingCount;
-  return overflow > 0 && fittingCount > 0 ? fittingCount - 1 : fittingCount;
+  return Math.max(fittingCount, Math.min(1, totalCount));
 };

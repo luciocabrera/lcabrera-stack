@@ -82,6 +82,11 @@ export const VirtualSelect = ({
   // Subscribe to trigger size changes via ResizeObserver so tag overflow
   // is recalculated whenever the container resizes (e.g. tags added/removed).
   useEffect(() => {
+    // Reset to show all tags so the DOM measurement can converge downward
+    setVisibleTagCount(selected.length);
+  }, [selected.length]);
+
+  useEffect(() => {
     const trigger = triggerRef.current;
     if (mode !== 'multi' || !trigger) return;
 
@@ -106,6 +111,7 @@ export const VirtualSelect = ({
     mode === 'multi' && hasSelection ? visibleTagCount : selected.length;
   const overflowCount = selected.length - computedVisibleCount;
   const visibleTags = selected.slice(0, computedVisibleCount);
+  const hasOverflow = overflowCount > 0;
 
   return (
     <div
@@ -127,6 +133,7 @@ export const VirtualSelect = ({
           styles.trigger,
           isOpen && styles.triggerOpen,
           mode === 'multi' && styles.triggerClamped,
+          mode === 'multi' && hasOverflow && styles.triggerClampedLocked,
         )}
       >
         {hasSelection ? (
@@ -144,7 +151,7 @@ export const VirtualSelect = ({
                 />
               ))}
               {overflowCount > 0 && (
-                <span {...stylex.props(styles.overflowTag)}>
+                <span data-overflow {...stylex.props(styles.overflowTag)}>
                   +{overflowCount} more
                 </span>
               )}
