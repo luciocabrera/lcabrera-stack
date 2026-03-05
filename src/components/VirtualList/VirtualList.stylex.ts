@@ -73,6 +73,7 @@ const localStyles = stylex.create({
     borderStyle: 'solid',
     borderWidth: '1px',
     gap: spacing.xs,
+    overflow: 'hidden',
     backgroundColor: colors.surfacePrimary,
     display: 'flex',
     flexDirection: 'column',

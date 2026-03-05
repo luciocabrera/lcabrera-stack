@@ -38,7 +38,6 @@ const localStyles = stylex.create({
     borderRadius: borderRadius.md,
     borderStyle: 'none',
     borderWidth: '1px',
-    overflow: 'hidden',
     backgroundColor: colors.surfacePrimary,
     display: 'flex',
     flexDirection: 'column',

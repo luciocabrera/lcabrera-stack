@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import { Button } from '@/components/Button';
 import {
@@ -27,6 +27,11 @@ export const AddFilterSection = ({
   // === ACTIONS (get mutation functions) ===
   const onFiltersChange = useSetColumnFilters();
   const [selectedColumn, setSelectedColumn] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const handleOpenChange = useCallback((isOpen: boolean) => {
+    setIsDropdownOpen(isOpen);
+  }, []);
 
   // Filter to only filterable columns
   const filterableColumns = columns.filter((col) => col.isFilterable !== false);
@@ -112,18 +117,21 @@ export const AddFilterSection = ({
       <VirtualSelect
         mode='single'
         onChange={handleColumnSelect}
+        onOpenChange={handleOpenChange}
         options={filterableColumnLabels}
         placeholder='Select a column...'
         selected={selectedColumnLabel}
       />
-      <Button
-        isDisabled={!selectedColumn}
-        onClick={handleAddFilter}
-        size='sm'
-        width='full'
-      >
-        Add
-      </Button>
+      {!isDropdownOpen && (
+        <Button
+          isDisabled={!selectedColumn}
+          onClick={handleAddFilter}
+          size='sm'
+          width='full'
+        >
+          Add
+        </Button>
+      )}
     </div>
   );
 };
