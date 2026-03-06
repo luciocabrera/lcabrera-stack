@@ -15,14 +15,6 @@ export const styles = stylex.create({
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
   },
-  removeButton: {
-    flexShrink: 0,
-    marginLeft: 'auto',
-  },
-  removeIcon: {
-    fontSize: typography.fontSizeXs,
-    lineHeight: 1,
-  },
   tag: {
     padding: `${spacing.xxs} ${spacing.xs}`,
     borderColor: colors.borderPrimary,
