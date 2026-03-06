@@ -908,18 +908,18 @@
   resolved "https://registry.yarnpkg.com/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.57.1.tgz#a03348e7b559c792b6277cc58874b89ef46e1e72"
   integrity sha512-mxRFDdHIWRxg3UfIIAwCm6NzvxG0jDX/wBN6KsQFTvKFqqg9vTrWUE68qEjHt19A5wwx5X5aUi2zuZT7YR0jrA==
 
-"@stylexjs/babel-plugin@0.18.0":
-  version "0.18.0"
-  resolved "https://registry.yarnpkg.com/@stylexjs/babel-plugin/-/babel-plugin-0.18.0.tgz#7ee103f5d4149a39d213261eb3967710e13f92e2"
-  integrity sha512-23GSDEiJrkPXYdIE4enYDJhg4klDYylqlxnTlSOJCatd2hDH7RFJ+Dk0ChMlcLNs2hoRmeJm8zjHJvyv3L47ag==
+"@stylexjs/babel-plugin@0.18.1":
+  version "0.18.1"
+  resolved "https://registry.yarnpkg.com/@stylexjs/babel-plugin/-/babel-plugin-0.18.1.tgz#9d5cc47d9c386077c27af0dde3a3a6852722b97c"
+  integrity sha512-T3JkuyLqfOiwbhiLtS3yrrDRW5P9NK0NGbeZrQ8qX9xYgEgC2t3fqL+U1DvUuvBXod5dEpXH7YiIzTpSfK8kmQ==
   dependencies:
     "@babel/core" "^7.26.8"
     "@babel/helper-module-imports" "^7.25.9"
     "@babel/traverse" "^7.26.8"
     "@babel/types" "^7.26.8"
     "@dual-bundle/import-meta-resolve" "^4.1.0"
-    "@stylexjs/shared" "0.18.0"
-    "@stylexjs/stylex" "0.18.0"
+    "@stylexjs/shared" "0.18.1"
+    "@stylexjs/stylex" "0.18.1"
     postcss-value-parser "^4.1.0"
 
 "@stylexjs/eslint-plugin@^0.17.5":
@@ -937,30 +937,30 @@
   resolved "https://registry.yarnpkg.com/@stylexjs/shared/-/shared-0.17.5.tgz#75b338b21a18297a68c812d0d074d28d843ecd37"
   integrity sha512-Q8HwrvfOl2SBKzjb3+HgaH1mUGBqFcWIwgKvZMyhkXIqhmGMrWA3vdTxtzEpuYiFH7AOPuzebpOJn/3rIqK7iA==
 
-"@stylexjs/shared@0.18.0":
-  version "0.18.0"
-  resolved "https://registry.yarnpkg.com/@stylexjs/shared/-/shared-0.18.0.tgz#2731777fb80cd7a0ede8067b33b7d2bff4f5c0d2"
-  integrity sha512-uGh9TLj5YM3bT9qu28YNu4QrqHsC61Ll4Z2QMDSNEdKGIfTPtsS1lsQs26/RpNA3VTw9ZRsUW5WCNBhM1TpUGQ==
+"@stylexjs/shared@0.18.1":
+  version "0.18.1"
+  resolved "https://registry.yarnpkg.com/@stylexjs/shared/-/shared-0.18.1.tgz#a63a387a351e0eb4501361d323446901d04b5634"
+  integrity sha512-YtzdWT0DpuKB14h+BAc95vUxpiCmJdFkCaFKAEjmKhLfbUaaowm+BKlKBYXAoUjWSzP6a55CznApcNQVr+fbQg==
 
-"@stylexjs/stylex@0.18.0", "@stylexjs/stylex@^0.18.0":
-  version "0.18.0"
-  resolved "https://registry.yarnpkg.com/@stylexjs/stylex/-/stylex-0.18.0.tgz#f197bf40719061717de489e6d29f59ed9229b4f7"
-  integrity sha512-AmZ4qtGJCZrVTka5RLRWgl14pIz0db/1YW8b+xh1P+igTWEaUrmUGKNItobUpPkM2Gexq4lHP53YuGuWgE9eDQ==
+"@stylexjs/stylex@0.18.1", "@stylexjs/stylex@^0.18.1":
+  version "0.18.1"
+  resolved "https://registry.yarnpkg.com/@stylexjs/stylex/-/stylex-0.18.1.tgz#1b48bf645cc028404199ba4561b4bcb56203656d"
+  integrity sha512-EQUUnOCM0wq7B0OIrQum+tLckE8Dm+zjZgemxKQ28z1ajV65D8HHlfbaTEj3VtYuUOUT6VrQZQvzwkdEDxOUkA==
   dependencies:
     css-mediaquery "^0.1.2"
     invariant "^2.2.4"
     styleq "0.2.1"
 
-"@stylexjs/unplugin@^0.18.0":
-  version "0.18.0"
-  resolved "https://registry.yarnpkg.com/@stylexjs/unplugin/-/unplugin-0.18.0.tgz#e08cbe5b7f7914ef7ce8a6716681bfe93baacfd3"
-  integrity sha512-5OMfyHO5/HEY/NeynCeM76bVALrwCoPYQA1+qRH2rBnRokqi1e719gcwfenqc5GRP08QGeT12GIbCSMqpJ8AiA==
+"@stylexjs/unplugin@^0.18.1":
+  version "0.18.1"
+  resolved "https://registry.yarnpkg.com/@stylexjs/unplugin/-/unplugin-0.18.1.tgz#6da9407d7223fef0e6b4d4cde7718171bf224611"
+  integrity sha512-gT12x6SDxMcfL9XjEK8stuXbMYzN5XYRBJgcP7kkcNzh+f2pYFKlnF3B63cHDL1ErXZWBUk4NsoqUVnzPZIH7A==
   dependencies:
     "@babel/core" "^7.26.8"
     "@babel/plugin-syntax-flow" "^7.26.0"
     "@babel/plugin-syntax-jsx" "^7.25.9"
     "@babel/plugin-syntax-typescript" "^7.25.9"
-    "@stylexjs/babel-plugin" "0.18.0"
+    "@stylexjs/babel-plugin" "0.18.1"
     browserslist "^4.24.0"
     lightningcss "^1.29.1"
 
@@ -986,10 +986,10 @@
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.15.tgz#596a1747233694d50f6ad8a7869fcb6f56cf5841"
   integrity sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==
 
-"@types/node@^25.3.3":
-  version "25.3.3"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-25.3.3.tgz#605862544ee7ffd7a936bcbf0135a14012f1e549"
-  integrity sha512-DpzbrH7wIcBaJibpKo9nnSQL0MTRdnWttGyE5haGwK86xgMOkFLp7vEyfQPGLOJh5wNYiJ3V9PmUMDhV9u8kkQ==
+"@types/node@^25.3.5":
+  version "25.3.5"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-25.3.5.tgz#beccb5915561f7a9970ace547ad44d6cdbf39b46"
+  integrity sha512-oX8xrhvpiyRCQkG1MFchB09f+cXftgIXb3a7UUa4Y3wpmZPw5tyZGTLWhlESOLq1Rq6oDlc8npVU2/9xiCuXMA==
   dependencies:
     undici-types "~7.18.0"
 
