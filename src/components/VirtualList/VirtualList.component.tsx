@@ -13,6 +13,7 @@ import { useVirtualization } from '@/hooks';
 
 import type { ListFilterMode, VirtualListProps } from './VirtualList.types';
 
+import { Tooltip } from '../Tooltip';
 import { SkeletonOptions } from './SkeletonOptions';
 import { getFilteredOptions } from './utils';
 import { VirtualizedOption } from './VirtualizedOption';
@@ -243,11 +244,23 @@ export const VirtualList = ({
                   color={listFilterMode === mode ? 'secondary' : 'ghost'}
                   icon={
                     mode === 'all' ? (
-                      <ListAllIcon size={16} />
+                      <>
+                        <span popoverTarget='mypopover'>
+                          <ListAllIcon size={16} />
+                        </span>
+                        <div id='mypopover' popover='manual' role='tooltip'>
+                            <button  popoverTarget="mypopover" popoverTargetAction="hide">❌</button>
+                          Popover content
+                        </div>
+                      </>
                     ) : mode === 'selected' ? (
-                      <ListCheckedIcon size={16} />
+                   <Tooltip content='Show only selected options' placement='top'>
+                        <ListCheckedIcon size={16} />
+                      </Tooltip>
                     ) : (
+                                <Tooltip content='Show only unselected options' placement='bottom'>
                       <ListUncheckedIcon size={16} />
+                    </Tooltip>
                     )
                   }
                   key={mode}
