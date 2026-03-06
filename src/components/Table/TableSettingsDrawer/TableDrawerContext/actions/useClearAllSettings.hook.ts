@@ -19,7 +19,7 @@ export const useClearAllSettings = () => {
       columnFilters: {} as ColumnFiltersState,
       columnOrder: [] as ColumnOrderState,
       columnSizing: {} as ColumnSizingState,
-      columnVisibility: {} as ColumnVisibilityState,
+      columnVisibility: new Set() as ColumnVisibilityState,
       sorting: [] as SortingState,
     });
   };
