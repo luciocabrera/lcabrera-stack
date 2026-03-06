@@ -164,6 +164,7 @@ export const VirtualList = ({
           <Button
             aria-label='Clear search'
             color='ghost'
+            customStylex={styles.clearButton}
             icon={<MenuCloseIcon size={16} />}
             onClick={handleClearSearch}
             size='embedded'
