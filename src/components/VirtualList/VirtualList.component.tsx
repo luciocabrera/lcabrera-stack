@@ -249,18 +249,29 @@ export const VirtualList = ({
                           <ListAllIcon size={16} />
                         </span>
                         <div id='mypopover' popover='manual' role='tooltip'>
-                            <button  popoverTarget="mypopover" popoverTargetAction="hide">❌</button>
+                          <button
+                            popoverTarget='mypopover'
+                            popoverTargetAction='hide'
+                          >
+                            ❌
+                          </button>
                           Popover content
                         </div>
                       </>
                     ) : mode === 'selected' ? (
-                   <Tooltip content='Show only selected options' placement='top'>
+                      <Tooltip
+                        content='Show only selected options'
+                        placement='top'
+                      >
                         <ListCheckedIcon size={16} />
                       </Tooltip>
                     ) : (
-                                <Tooltip content='Show only unselected options' placement='bottom'>
-                      <ListUncheckedIcon size={16} />
-                    </Tooltip>
+                      <Tooltip
+                        content='Show only unselected options, including "Select All" if enabled, it shows all unchecked options which are the unselected ones'
+                        placement='bottom'
+                      >
+                        <ListUncheckedIcon size={16} />
+                      </Tooltip>
                     )
                   }
                   key={mode}
