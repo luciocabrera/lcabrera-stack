@@ -1,12 +1,20 @@
 import * as stylex from '@stylexjs/stylex';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import { Button } from '@/components/Button';
+import {
+  ListAllIcon,
+  ListCheckedIcon,
+  ListUncheckedIcon,
+  MenuCloseIcon,
+} from '@/components/Icons';
 import { InfoBox } from '@/components/InfoBox';
 import { useVirtualization } from '@/hooks';
 
-import type { VirtualListProps } from './VirtualList.types';
+import type { ListFilterMode, VirtualListProps } from './VirtualList.types';
 
 import { SkeletonOptions } from './SkeletonOptions';
+import { getFilteredOptions } from './utils';
 import { VirtualizedOption } from './VirtualizedOption';
 import { styles } from './VirtualList.stylex';
 
@@ -25,25 +33,23 @@ export const VirtualList = ({
   shouldFillHeight = false,
 }: VirtualListProps) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [listFilterMode, setListFilterMode] = useState<ListFilterMode>('all');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const { hasMore, isLoading, isLoadingMore } = dataState;
-
   const isLoadingOptions = isLoading || isLoadingMore || false;
-
   // Derive selectedValues from filter prop - fully controlled by parent
   const selectedValues = filter?.values ?? [];
-
   // Options from dataState (populated externally or passed statically)
   const effectiveOptions = dataState.data;
-
   const isInitialLoading = isLoading && effectiveOptions.length === 0;
 
-  const filteredOptions = searchTerm
-    ? effectiveOptions.filter((option) =>
-        option.toLowerCase().includes(searchTerm.toLowerCase()),
-      )
-    : effectiveOptions;
+  const filteredOptions = getFilteredOptions({
+    listFilterMode,
+    options: effectiveOptions,
+    searchTerm,
+    selectedValues,
+  });
 
   const shouldShowSelectAll = hasSelectAll && filteredOptions.length > 1;
 
@@ -86,6 +92,10 @@ export const VirtualList = ({
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
+  };
+
+  const handleClearSearch = () => {
+    setSearchTerm('');
   };
 
   const handleLoadMore = useCallback(() => {
@@ -145,8 +155,22 @@ export const VirtualList = ({
           placeholder='Search options...'
           type='text'
           value={searchTerm}
-          {...stylex.props(styles.searchInput)}
+          {...stylex.props(
+            styles.searchInput,
+            searchTerm ? styles.searchInputWithClear : undefined,
+          )}
         />
+        {searchTerm && (
+          <Button
+            aria-label='Clear search'
+            color='ghost'
+            icon={<MenuCloseIcon size={16} />}
+            onClick={handleClearSearch}
+            size='embedded'
+            variant='flat'
+            width='auto'
+          />
+        )}
       </div>
       <div
         {...stylex.props(
@@ -200,16 +224,43 @@ export const VirtualList = ({
           )}
         </div>
       </div>
-      {/* Loaded count legend */}
+      {/* Footer: loaded count + list filter */}
       {dataState.data.length > 0 ? (
-        <p {...stylex.props(styles.loadedCount)}>
-          Loaded: {dataState.data.length}
-          {Number.isFinite(dataState.totalCount) && dataState.totalCount
-            ? ` / ${dataState.totalCount}`
-            : ''}
-          {dataState.isLoading && ' — Loading...'}
-          {dataState.isLoadingMore && ' — Loading more...'}
-        </p>
+        <div {...stylex.props(styles.footer)}>
+          <p {...stylex.props(styles.loadedCount)}>
+            Loaded: {dataState.data.length}
+            {Number.isFinite(dataState.totalCount) && dataState.totalCount
+              ? ` / ${dataState.totalCount}`
+              : ''}
+            {dataState.isLoading && ' — Loading...'}
+            {dataState.isLoadingMore && ' — Loading more...'}
+          </p>
+          {hasCheckboxes && (
+            <div {...stylex.props(styles.listFilterGroup)}>
+              {(['all', 'selected', 'unselected'] as const).map((mode) => (
+                <Button
+                  color={listFilterMode === mode ? 'secondary' : 'ghost'}
+                  icon={
+                    mode === 'all' ? (
+                      <ListAllIcon size={16} />
+                    ) : mode === 'selected' ? (
+                      <ListCheckedIcon size={16} />
+                    ) : (
+                      <ListUncheckedIcon size={16} />
+                    )
+                  }
+                  key={mode}
+                  onClick={() => {
+                    setListFilterMode(mode);
+                  }}
+                  size='mini'
+                  variant='flat'
+                  width='auto'
+                />
+              ))}
+            </div>
+          )}
+        </div>
       ) : undefined}
     </div>
   );

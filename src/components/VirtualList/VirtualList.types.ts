@@ -1,5 +1,7 @@
 import type { SelectFilter } from '@/types/filterOperators.types';
 
+export type ListFilterMode = 'all' | 'selected' | 'unselected';
+
 export type VirtualListDataState = {
   data: string[];
   hasMore: boolean;

@@ -102,6 +102,19 @@ export const widthVariants = stylex.create({
 
 // Ripple variants for each color
 export const colorVariants = stylex.create({
+  'danger-ghost': {
+    borderColor: 'transparent',
+    backgroundColor: {
+      default: 'transparent',
+      ':hover': colors.error,
+    },
+    backgroundImage: 'none',
+    color: {
+      default: colors.textSecondary,
+      ':hover': colors.errorText,
+    },
+  },
+
   error: {
     borderColor: colors.error,
     backgroundColor: colors.error,
@@ -182,6 +195,19 @@ export const colorVariants = stylex.create({
 export type SizeVariant = keyof typeof sizeVariants;
 // Shared size variants for buttons and links
 export const sizeVariants = stylex.create({
+  embedded: {
+    borderRadius: borderRadius.sm,
+    paddingBlock:spacing.xxs,
+    paddingInline: spacing.xxs,
+    alignItems: 'center',
+    fontSize: typography.fontSizeXs,
+    justifyContent: 'center',
+    height: '1.25rem',
+    minHeight: '1.25rem',
+        minWidth: '1.25rem',
+    width: '1.25rem',
+  },
+
   lg: {
     borderRadius: borderRadius.lg,
     paddingBlock: spacing.md,

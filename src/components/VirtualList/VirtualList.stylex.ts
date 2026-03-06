@@ -109,13 +109,36 @@ const localStyles = stylex.create({
     height,
   }),
   loadedCount: {
-    padding: `${spacing.xxs} ${spacing.sm}`,
     color: colors.textSecondary,
     fontSize: typography.fontSizeXs,
     textAlign: 'left',
-    // borderTopColor: colors.borderPrimary,
-    // borderTopStyle: 'solid' as const,
-    // borderTopWidth: '1px',
+  },
+  clearButton: {
+    position: 'absolute',
+    transform: 'translateY(-50%)',
+    right: spacing.xs,
+    top: '50%',
+  },
+  footer: {
+    alignItems: 'center',
+    display: 'flex',
+    justifyContent: 'space-between',
+  },
+  listFilterButton: {
+    borderRadius: 0,
+  },
+  listFilterButtonActive: {
+    borderColor: colors.borderFocus,
+    borderRadius: 0,
+  },
+  listFilterGroup: {
+    borderRadius: borderRadius.sm,
+    gap: spacing.xxs,
+    overflow: 'hidden',
+    display: 'flex',
+  },
+  searchInputWithClear: {
+    paddingRight: '2rem',
   },
 });
 
@@ -123,9 +146,14 @@ export const skeletonStyles = { ...skelleton };
 
 export const styles = {
   checkbox: localStyles.checkbox,
+  clearButton: localStyles.clearButton,
   container: filterBaseStyles.container,
   containerFill: localStyles.containerFill,
+  footer: localStyles.footer,
   label: localStyles.label,
+  listFilterButton: localStyles.listFilterButton,
+  listFilterButtonActive: localStyles.listFilterButtonActive,
+  listFilterGroup: localStyles.listFilterGroup,
   loadedCount: localStyles.loadedCount,
   loadingMore: localStyles.loadingMore,
   noResults: localStyles.noResults,
@@ -134,6 +162,7 @@ export const styles = {
   optionsList: localStyles.optionsList,
   optionsListFill: localStyles.optionsListFill,
   searchInput: filterBaseStyles.input,
+  searchInputWithClear: localStyles.searchInputWithClear,
   searchInputWrapper: filterBaseStyles.inputWrapper,
   virtualContainer: localStyles.virtualContainer,
   virtualContainerFill: localStyles.virtualContainerFill,
