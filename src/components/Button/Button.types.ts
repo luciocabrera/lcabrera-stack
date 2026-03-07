@@ -16,6 +16,8 @@ export type ButtonProps = ComponentPropsWithoutRef<'button'> & {
   isDisabled?: boolean;
   orientation?: DesignSystemOrientation;
   size?: DesignSystemSize;
+  tooltipContent?: ReactNode;
+  tooltipPlacement?: 'bottom' | 'left' | 'right' | 'top';
   variant?: DesignSystemStyle;
   width?: DesignSystemWidth;
 };

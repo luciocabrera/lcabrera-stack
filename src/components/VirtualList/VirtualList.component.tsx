@@ -13,7 +13,6 @@ import { useVirtualization } from '@/hooks';
 
 import type { ListFilterMode, VirtualListProps } from './VirtualList.types';
 
-import { Tooltip } from '../Tooltip';
 import { SkeletonOptions } from './SkeletonOptions';
 import { getFilteredOptions } from './utils';
 import { VirtualizedOption } from './VirtualizedOption';
@@ -239,50 +238,36 @@ export const VirtualList = ({
           </p>
           {hasCheckboxes && (
             <div {...stylex.props(styles.listFilterGroup)}>
-              {(['all', 'selected', 'unselected'] as const).map((mode) => (
-                <Button
-                  color={listFilterMode === mode ? 'secondary' : 'ghost'}
-                  icon={
-                    mode === 'all' ? (
-                      <>
-                        <span popoverTarget='mypopover'>
-                          <ListAllIcon size={16} />
-                        </span>
-                        <div id='mypopover' popover='manual' role='tooltip'>
-                          <button
-                            popoverTarget='mypopover'
-                            popoverTargetAction='hide'
-                          >
-                            ❌
-                          </button>
-                          Popover content
-                        </div>
-                      </>
-                    ) : mode === 'selected' ? (
-                      <Tooltip
-                        content='Show only selected options'
-                        placement='top'
-                      >
-                        <ListCheckedIcon size={16} />
-                      </Tooltip>
-                    ) : (
-                      <Tooltip
-                        content='Show only unselected options, including "Select All" if enabled, it shows all unchecked options which are the unselected ones'
-                        placement='bottom'
-                      >
-                        <ListUncheckedIcon size={16} />
-                      </Tooltip>
-                    )
-                  }
-                  key={mode}
-                  onClick={() => {
-                    setListFilterMode(mode);
-                  }}
-                  size='mini'
-                  variant='flat'
-                  width='auto'
-                />
-              ))}
+              {(['all', 'selected', 'unselected'] as const).map((mode) => {
+                const icon =
+                  mode === 'all' ? (
+                    <ListAllIcon size={16} />
+                  ) : mode === 'selected' ? (
+                    <ListCheckedIcon size={16} />
+                  ) : (
+                    <ListUncheckedIcon size={16} />
+                  );
+                const tooltipContent =
+                  mode === 'all'
+                    ? 'Show all options'
+                    : mode === 'selected'
+                      ? 'Show only selected options, it shows all checked options which are the selected ones'
+                      : 'Show only unselected options, including "Select All" if enabled, it shows all unchecked options which are the unselected ones';
+                return (
+                  <Button
+                    color={listFilterMode === mode ? 'secondary' : 'ghost'}
+                    icon={icon}
+                    key={mode}
+                    onClick={() => {
+                      setListFilterMode(mode);
+                    }}
+                    size='mini'
+                    tooltipContent={tooltipContent}
+                    variant='flat'
+                    width='auto'
+                  />
+                );
+              })}
             </div>
           )}
         </div>

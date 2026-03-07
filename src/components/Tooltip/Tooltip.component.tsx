@@ -1,18 +1,10 @@
 import * as stylex from '@stylexjs/stylex';
 import { useCallback, useId, useRef, useState } from 'react';
 
-import type { TooltipPlacement, TooltipProps } from './Tooltip.types';
+import type { TooltipProps } from './Tooltip.types';
 
+import { ARROW_STYLES, POSITION_AREA, TRANSITION_DURATION_MS } from './Tooltip.constants';
 import { styles } from './Tooltip.stylex';
-
-const TRANSITION_DURATION_MS = 150;
-
-const POSITION_AREA: Record<TooltipPlacement, string> = {
-  bottom: 'bottom',
-  left: 'left',
-  right: 'right',
-  top: 'top',
-};
 
 export const Tooltip = ({
   children,
@@ -49,6 +41,7 @@ export const Tooltip = ({
         onFocus={show}
         onMouseEnter={show}
         onMouseLeave={hide}
+        popoverTarget={id}
         style={{ anchorName }}
         {...stylex.props(styles.trigger)}
       >
@@ -71,6 +64,9 @@ export const Tooltip = ({
           transform: isVisible ? 'translate(0, 0)' : undefined,
         }}
       >
+        <span
+          {...stylex.props(styles.arrow, ARROW_STYLES[placement])}
+        />
         {content}
       </div>
     </>

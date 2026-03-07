@@ -2,6 +2,7 @@ import * as stylex from '@stylexjs/stylex';
 
 import type { ButtonProps } from './Button.types';
 
+import { Tooltip } from '../Tooltip';
 import { buttonStyles } from './Button.stylex';
 
 export const Button = ({
@@ -12,12 +13,14 @@ export const Button = ({
   isDisabled = false,
   orientation = 'vertical',
   size = 'md',
+  tooltipContent,
+  tooltipPlacement = 'top',
   type = 'button',
   variant = 'solid',
   width = 'full',
   ...rest
 }: ButtonProps) => {
-  return (
+  const button = (
     <button
       data-testid='button'
       disabled={isDisabled}
@@ -37,4 +40,14 @@ export const Button = ({
       <span {...stylex.props(buttonStyles.label)}>{children}</span>
     </button>
   );
+
+  if (tooltipContent) {
+    return (
+      <Tooltip content={tooltipContent} placement={tooltipPlacement}>
+        {button}
+      </Tooltip>
+    );
+  }
+
+  return button;
 };
