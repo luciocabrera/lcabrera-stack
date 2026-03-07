@@ -1,10 +1,15 @@
 import * as stylex from '@stylexjs/stylex';
-import { useCallback, useId, useRef, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 
-import type { TooltipProps } from './Tooltip.types';
+import type { ArrowOffsetParams, TooltipProps } from './Tooltip.types';
 
-import { ARROW_STYLES, POSITION_AREA, TRANSITION_DURATION_MS } from './Tooltip.constants';
+import { ARROW_STYLES, HALF_ARROW, TRANSITION_DURATION_MS } from './Tooltip.constants';
 import { styles } from './Tooltip.stylex';
+
+const getArrowOffset = ({
+  tooltipStart,
+  triggerCenter,
+}: ArrowOffsetParams): number => triggerCenter - tooltipStart - HALF_ARROW;
 
 export const Tooltip = ({
   children,
@@ -12,26 +17,41 @@ export const Tooltip = ({
   placement = 'top',
 }: TooltipProps) => {
   const id = useId();
+  const triggerRef = useRef<HTMLSpanElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const hideTimeoutRef = useRef<number>(0);
   const [isVisible, setIsVisible] = useState(false);
+  const [arrowOffset, setArrowOffset] = useState<number | undefined>();
   const anchorName = `--tooltip-${id.replaceAll(':', '')}`;
 
-  const show = useCallback(() => {
+  const show = () => {
     clearTimeout(hideTimeoutRef.current);
     tooltipRef.current?.showPopover();
     requestAnimationFrame(() => {
       setIsVisible(true);
+      if (triggerRef.current && tooltipRef.current) {
+        const triggerRect = triggerRef.current.getBoundingClientRect();
+        const tooltipRect = tooltipRef.current.getBoundingClientRect();
+        const isVertical = placement === 'top' || placement === 'bottom';
+        const offset = getArrowOffset({
+          placement,
+          tooltipStart: isVertical ? tooltipRect.left : tooltipRect.top,
+          triggerCenter: isVertical
+            ? triggerRect.left + triggerRect.width / 2
+            : triggerRect.top + triggerRect.height / 2,
+        });
+        setArrowOffset(offset);
+      }
     });
-  }, []);
+  };
 
-  const hide = useCallback(() => {
+  const hide = () => {
     setIsVisible(false);
     const timeoutId = globalThis.setTimeout(() => {
       tooltipRef.current?.hidePopover();
     }, TRANSITION_DURATION_MS);
     hideTimeoutRef.current = timeoutId as unknown as number;
-  }, []);
+  };
 
   return (
     <>
@@ -42,8 +62,8 @@ export const Tooltip = ({
         onMouseEnter={show}
         onMouseLeave={hide}
         popoverTarget={id}
-        style={{ anchorName }}
-        {...stylex.props(styles.trigger)}
+        ref={triggerRef}
+        {...stylex.props(styles.trigger(anchorName))}
       >
         {children}
       </span>
@@ -53,19 +73,20 @@ export const Tooltip = ({
         ref={tooltipRef}
         role='tooltip'
         {...stylex.props(
-          styles.tooltip,
+          styles.tooltip(anchorName),
           styles[placement],
+          isVisible ? styles.tooltipVisible : undefined,
         )}
-        style={{
-          justifySelf: 'anchor-center',
-          opacity: isVisible ? 1 : 0,
-          positionAnchor: anchorName,
-          positionArea: POSITION_AREA[placement],
-          transform: isVisible ? 'translate(0, 0)' : undefined,
-        }}
       >
         <span
           {...stylex.props(styles.arrow, ARROW_STYLES[placement])}
+          style={
+            arrowOffset === undefined
+              ? undefined
+              : placement === 'top' || placement === 'bottom'
+                ? { left: `${arrowOffset}px`, marginLeft: 0 }
+                : { marginTop: 0, top: `${arrowOffset}px` }
+          }
         />
         {content}
       </div>

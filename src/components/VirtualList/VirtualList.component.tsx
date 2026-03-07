@@ -251,8 +251,8 @@ export const VirtualList = ({
                   mode === 'all'
                     ? 'Show all options'
                     : mode === 'selected'
-                      ? 'Show only selected options, it shows all checked options which are the selected ones'
-                      : 'Show only unselected options, including "Select All" if enabled, it shows all unchecked options which are the unselected ones';
+                      ? 'Show only selected options'
+                      : 'Show only unselected options';
                 return (
                   <Button
                     color={listFilterMode === mode ? 'secondary' : 'ghost'}

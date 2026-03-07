@@ -1,15 +1,10 @@
-import type { TooltipPlacement } from './Tooltip.types';
-
 import { styles } from './Tooltip.stylex';
 
 export const TRANSITION_DURATION_MS = 150;
 
-export const POSITION_AREA: Record<TooltipPlacement, string> = {
-  bottom: 'bottom',
-  left: 'left',
-  right: 'right',
-  top: 'top',
-};
+// Must match tooltip.arrowSize token in base.stylex.ts
+export const ARROW_SIZE = 12;
+export const HALF_ARROW = ARROW_SIZE / 2;
 
 export const ARROW_STYLES = {
   bottom: styles.arrowBottom,

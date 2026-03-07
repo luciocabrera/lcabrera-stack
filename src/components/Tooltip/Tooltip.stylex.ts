@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @stylexjs/valid-styles */
 import * as stylex from '@stylexjs/stylex';
 
 import {
@@ -5,17 +8,19 @@ import {
   easing,
   shadows,
   spacing,
+  tooltip,
   transitions,
   typography,
-  zIndex,
 } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const styles = stylex.create({
-  trigger: {
+  trigger: (anchorName) => ({
+    anchorName,
     display: 'inline-flex',
-  },
-  tooltip: {
+  }),
+  tooltip: (positionAnchor) => ({
+    positionAnchor,
     inset: 'unset',
     margin: 0,
     borderColor: 'transparent',
@@ -23,63 +28,71 @@ export const styles = stylex.create({
     borderStyle: 'none',
     borderWidth: 0,
     overflow: 'visible',
-    paddingBlock: spacing.xxs,
-    paddingInline: spacing.xs,
+    paddingBlock: spacing.sm,
+    paddingInline: spacing.sm,
     transition: `opacity ${transitions.fast} ${easing.easeInOut}, transform ${transitions.fast} ${easing.easeInOut}`,
     backdropFilter: 'blur(8px)',
     backgroundColor: colors.surfaceElevated,
     boxShadow: shadows.md,
     color: colors.textPrimary,
     fontSize: typography.fontSizeXs,
+    justifySelf: 'anchor-center',
     lineHeight: typography.lineHeightTight,
     opacity: 0,
     pointerEvents: 'none',
     whiteSpace: 'pre-line',
     wordWrap: 'break-word',
-    zIndex: zIndex.tooltip,
     maxWidth: '16rem',
+  }),
+  tooltipVisible: {
+    opacity: 1,
+    transform: 'translate(0, 0)',
   },
   arrow: {
     backgroundColor: colors.surfaceElevated,
     position: 'absolute',
     transform: 'rotate(45deg)',
-    height: '8px',
-    width: '8px',
+    height: tooltip.arrowSize,
+    width: tooltip.arrowSize,
   },
   arrowTop: {
-    bottom: '-4px',
+    bottom: tooltip.arrowOffset,
     left: '50%',
-    marginLeft: '-4px',
+    marginLeft: tooltip.arrowOffset,
   },
   arrowBottom: {
     left: '50%',
-    marginLeft: '-4px',
-    top: '-4px',
+    marginLeft: tooltip.arrowOffset,
+    top: tooltip.arrowOffset,
   },
   arrowLeft: {
-    marginTop: '-4px',
-    right: '-4px',
+    marginTop: tooltip.arrowOffset,
+    right: tooltip.arrowOffset,
     top: '50%',
   },
   arrowRight: {
-    left: '-4px',
-    marginTop: '-4px',
+    left: tooltip.arrowOffset,
+    marginTop: tooltip.arrowOffset,
     top: '50%',
   },
   top: {
-    transform: 'translateY(4px)',
-    marginBottom: spacing.xxs,
+    positionArea: 'top',
+    transform: `translateY(${tooltip.slideDistance})`,
+    marginBottom: spacing.xs,
   },
   bottom: {
-    transform: 'translateY(-4px)',
-    marginTop: spacing.xxs,
+    positionArea: 'bottom',
+    transform: `translateY(calc(-1 * ${tooltip.slideDistance}))`,
+    marginTop: spacing.xs,
   },
   left: {
-    transform: 'translateX(4px)',
-    marginRight: spacing.xxs,
+    positionArea: 'left',
+    transform: `translateX(${tooltip.slideDistance})`,
+    marginRight: spacing.xs,
   },
   right: {
-    transform: 'translateX(-4px)',
-    marginLeft: spacing.xxs,
+    positionArea: 'right',
+    transform: `translateX(calc(-1 * ${tooltip.slideDistance}))`,
+    marginLeft: spacing.xs,
   },
 });

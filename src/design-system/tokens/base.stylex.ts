@@ -85,3 +85,10 @@ export const easing = stylex.defineVars({
   easeOut: 'cubic-bezier(0, 0, 0.2, 1)',
   linear: 'linear',
 });
+
+// Tooltip tokens
+export const tooltip = stylex.defineVars({
+  arrowOffset: '-6px',
+  arrowSize: '12px',
+  slideDistance: '4px',
+});
