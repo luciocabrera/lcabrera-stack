@@ -116,6 +116,9 @@ const localStyles = stylex.create({
     overflow: 'hidden',
     maxHeight: '5rem',
   },
+  triggerStatic: {
+    cursor: 'default',
+  },
 });
 
 /** Maximum visible height (px) for the trigger area before tags overflow */
@@ -132,6 +135,7 @@ export const styles = {
   overflowTag: localStyles.overflowTag,
   trigger: localStyles.trigger,
   triggerClamped: localStyles.triggerClamped,
+  triggerStatic: localStyles.triggerStatic,
   triggerLabel: localStyles.triggerLabel,
   triggerOpen: localStyles.triggerOpen,
   triggerPlaceholder: localStyles.triggerPlaceholder,

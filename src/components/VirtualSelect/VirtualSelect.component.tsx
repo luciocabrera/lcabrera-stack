@@ -127,6 +127,7 @@ export const VirtualSelect = ({
           styles.trigger,
           isOpen && styles.triggerOpen,
           mode === 'multi' && styles.triggerClamped,
+          isAlwaysOpen && styles.triggerStatic,
         )}
       >
         {hasSelection ? (
