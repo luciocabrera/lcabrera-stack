@@ -22,8 +22,6 @@ const localStyles = stylex.create({
     width: 0,
   }),
   container: {
-    // display: 'flex',
-    // flexDirection: 'column',
     position: 'relative',
     width: '100%',
   },
@@ -64,7 +62,6 @@ const localStyles = stylex.create({
     padding: `${spacing.xs} ${spacing.sm}`,
     borderColor: {
       default: colors.borderPrimary,
-      // ':focus-visible': colors.borderFocus,
     },
     borderRadius: borderRadius.sm,
     borderStyle: 'solid',
