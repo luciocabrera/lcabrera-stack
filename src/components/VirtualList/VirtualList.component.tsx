@@ -82,7 +82,9 @@ export const VirtualList = ({
   };
 
   const handleSelectAll = () => {
-    const newSelectedValues = isAllSelected ? [] : filteredOptions;
+    const newSelectedValues = isAllSelected
+      ? selectedValues.filter((v) => !filteredOptions.includes(v))
+      : [...new Set([...selectedValues, ...filteredOptions])];
 
     onChange({
       type: 'select',
