@@ -1,12 +1,16 @@
 import * as stylex from '@stylexjs/stylex';
 
 import { Button } from '@/components/Button';
+import { EraserIcon, RefreshIcon } from '@/components/Icons';
 import { drawerSectionStyles } from '@/design-system/tokens/drawerSection.stylex';
 
 import type { FilterSectionProps } from './FilterSection.types';
 
 import { FilterInputs } from '../../filters/FilterInputs';
-import { useSetColumnFilter } from '../ColumnDrawerContext/actions';
+import {
+  useResetColumnFilter,
+  useSetColumnFilter,
+} from '../ColumnDrawerContext/actions';
 import { useGetColumnFilter } from '../ColumnDrawerContext/selectors';
 import { styles } from './FilterSection.stylex';
 
@@ -15,6 +19,7 @@ export const FilterSection = <TData,>({
 }: FilterSectionProps<TData>) => {
   const columnFilter = useGetColumnFilter();
   const setColumnFilter = useSetColumnFilter();
+  const resetColumnFilter = useResetColumnFilter();
 
   const handleChange = (
     newFilter: Parameters<typeof FilterInputs>[0]['filter'],
@@ -22,9 +27,11 @@ export const FilterSection = <TData,>({
     setColumnFilter(newFilter);
   };
 
-  const handleReset = () => {
+  const handleClear = () => {
     setColumnFilter(undefined);
   };
+
+  const hasFilter = columnFilter !== undefined;
 
   return (
     <div {...stylex.props(styles.container)}>
@@ -35,7 +42,23 @@ export const FilterSection = <TData,>({
         shouldFillHeight
       />
       <div {...stylex.props(drawerSectionStyles.resetSection)}>
-        <Button color='outline' onClick={handleReset} size='sm' width='full'>
+        <Button
+          color='outline'
+          icon={<EraserIcon size={16} />}
+          isDisabled={!hasFilter}
+          onClick={handleClear}
+          size='sm'
+          width='full'
+        >
+          Clear Filter
+        </Button>
+        <Button
+          color='outline'
+          icon={<RefreshIcon size={16} />}
+          onClick={resetColumnFilter}
+          size='sm'
+          width='full'
+        >
           Reset Filter
         </Button>
       </div>

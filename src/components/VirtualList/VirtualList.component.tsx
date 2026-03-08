@@ -249,12 +249,19 @@ export const VirtualList = ({
                   ) : (
                     <ListUncheckedIcon size={16} />
                   );
-                const tooltipContent =
+                const count =
+                  mode === 'all'
+                    ? effectiveOptions.length
+                    : mode === 'selected'
+                      ? selectedValues.length
+                      : effectiveOptions.length - selectedValues.length;
+                const tooltipLabel =
                   mode === 'all'
                     ? 'Show all options'
                     : mode === 'selected'
                       ? 'Show only selected options'
                       : 'Show only unselected options';
+                const tooltipContent = `${tooltipLabel} (${count})`;
                 return (
                   <Button
                     color={listFilterMode === mode ? 'secondary' : 'ghost'}
