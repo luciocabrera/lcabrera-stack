@@ -6,8 +6,27 @@
 
 set -e
 
-echo "📦 Installing production dependencies..."
-yarn add \
+echo "Select a package manager:"
+echo "  1) npm"
+echo "  2) yarn"
+echo "  3) pnpm"
+read -r -p "Enter choice [1-3]: " choice
+
+case "$choice" in
+  1) PM="npm";  ADD="npm install";    ADD_DEV="npm install -D" ;;
+  2) PM="yarn"; ADD="yarn add";       ADD_DEV="yarn add -D" ;;
+  3) PM="pnpm"; ADD="pnpm add";       ADD_DEV="pnpm add -D" ;;
+  *) echo "❌ Invalid choice. Exiting."; exit 1 ;;
+esac
+
+if ! command -v "$PM" &> /dev/null; then
+  echo "❌ $PM is not installed. Please install it first."
+  exit 1
+fi
+
+echo ""
+echo "📦 Installing production dependencies with $PM..."
+$ADD \
   react \
   react-dom \
   @stylexjs/stylex \
@@ -16,8 +35,8 @@ yarn add \
   react-router
 
 echo ""
-echo "🛠️  Installing development dependencies..."
-yarn add -D \
+echo "🛠️  Installing development dependencies with $PM..."
+$ADD_DEV \
   @eslint/js \
   @types/node \
   @types/react \
@@ -44,4 +63,4 @@ yarn add -D \
   vite-plugin-babel
 
 echo ""
-echo "✅ All dependencies installed successfully!"
+echo "✅ All dependencies installed successfully with $PM!"
