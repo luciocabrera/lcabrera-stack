@@ -23,26 +23,18 @@ export const NumberFilterInput = <TData,>({
 
   const updateFilter = ({ maxVal, op, val }: UpdateFilterArgs) => {
     if (op === 'between') {
-      if (val === '' || maxVal === '') {
-        onChange();
-        return;
-      }
       onChange({
         operator: 'between',
         type: 'number',
-        value: val,
-        value2: maxVal,
+        value: val === '' ? (undefined as unknown as number) : val,
+        value2: maxVal === '' ? undefined : maxVal,
       });
-      return;
-    }
-    if (val === '') {
-      onChange();
       return;
     }
     onChange({
       operator: op,
       type: 'number',
-      value: val,
+      value: val === '' ? (undefined as unknown as number) : val,
     });
   };
 

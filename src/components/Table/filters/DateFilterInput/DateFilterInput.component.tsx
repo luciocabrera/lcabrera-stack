@@ -23,27 +23,19 @@ export const DateFilterInput = ({
 
   const updateFilter = ({ end, op, val }: UpdateDateFilterArgs) => {
     if (op === 'between') {
-      if (val && end) {
-        onChange({
-          operator: 'between',
-          type: 'date',
-          value: val,
-          value2: end,
-        });
-      } else {
-        onChange();
-      }
-      return;
-    }
-    if (val) {
       onChange({
-        operator: op,
+        operator: 'between',
         type: 'date',
         value: val,
+        value2: end || undefined,
       });
-    } else {
-      onChange();
+      return;
     }
+    onChange({
+      operator: op,
+      type: 'date',
+      value: val,
+    });
   };
 
   const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {

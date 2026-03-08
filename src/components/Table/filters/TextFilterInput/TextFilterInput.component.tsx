@@ -17,11 +17,7 @@ export const TextFilterInput = <TData,>({
   const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setValue(newValue);
-    if (newValue) {
-      onChange({ operator, type: 'text', value: newValue });
-    } else {
-      onChange();
-    }
+    onChange({ operator, type: 'text', value: newValue });
   };
 
   return (
