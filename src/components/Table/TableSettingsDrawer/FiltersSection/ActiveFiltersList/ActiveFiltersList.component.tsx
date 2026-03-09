@@ -18,11 +18,9 @@ export const ActiveFiltersList = ({
   expandedFilters,
   onExpandedFiltersChange,
 }: ActiveFiltersListProps) => {
-  // === SELECTORS (subscribe to state) ===
   const filters = useGetColumnFilters();
   const normalizedColumns = useGetNormalizedColumns();
 
-  // === ACTIONS (get mutation functions) ===
   const onFiltersChange = useSetColumnFilters();
   const filterEntries = Object.entries(filters);
   const hasFilters = filterEntries.length > 0;
@@ -142,21 +140,6 @@ export const ActiveFiltersList = ({
                         handleToggle({ columnKey, filter: newFilter });
                       }}
                     />
-                    {/* <FilterSectionBody
-                      columnKey={columnKey}
-                      filter={filter}
-                      onChange={(newFilter) => {
-                        if (newFilter) {
-                          handleFilterChange({
-                            columnKey,
-                            filter: newFilter,
-                          });
-                        } else {
-                          // undefined means "clear filter" (e.g. boolean "All" selection)
-                          handleRemoveFilter(columnKey);
-                        }
-                      }}
-                    /> */}
                   </div>
                 )}
               </div>
