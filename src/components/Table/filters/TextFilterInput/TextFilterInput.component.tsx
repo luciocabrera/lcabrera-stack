@@ -6,7 +6,6 @@ import type { TextFilterInputProps } from './TextFilterInput.types';
 import { styles } from './TextFilterInput.stylex';
 
 export const TextFilterInput = <TData,>({
-  columnKey,
   filter,
   onChange,
   operator,
@@ -24,14 +23,11 @@ export const TextFilterInput = <TData,>({
     <div {...stylex.props(styles.container)}>
       <div {...stylex.props(styles.inputWrapper)}>
         <input
-          autoComplete='off'
+          autoComplete='one-time-code'
           data-1p-ignore='true'
           data-bwignore='true'
           data-form-type='other'
           data-lpignore='true'
-          data-np-checked='1'
-          data-np-ignore='1'
-          name={`filter-text-${columnKey}`}
           onChange={handleValueChange}
           placeholder='Enter text...'
           type='text'

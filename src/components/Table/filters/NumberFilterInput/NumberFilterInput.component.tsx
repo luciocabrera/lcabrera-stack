@@ -10,7 +10,6 @@ import { styles } from './NumberFilterInput.stylex';
 import { computeInitialMaxValue, computeInitialValue } from './utils';
 
 export const NumberFilterInput = <TData,>({
-  columnKey,
   filter,
   onChange,
   operator,
@@ -59,14 +58,11 @@ export const NumberFilterInput = <TData,>({
       {operator === 'between' ? (
         <div {...stylex.props(styles.inputGroup)}>
           <input
-            autoComplete='off'
+            autoComplete='one-time-code'
             data-1p-ignore='true'
             data-bwignore='true'
             data-form-type='other'
             data-lpignore='true'
-            data-np-checked='1'
-            data-np-ignore='1'
-            name={`filter-number-min-${columnKey}`}
             onChange={handleValueChange}
             placeholder='Min'
             type='number'
@@ -75,14 +71,11 @@ export const NumberFilterInput = <TData,>({
           />
           <span {...stylex.props(styles.separator)}>to</span>
           <input
-            autoComplete='off'
+            autoComplete='one-time-code'
             data-1p-ignore='true'
             data-bwignore='true'
             data-form-type='other'
             data-lpignore='true'
-            data-np-checked='1'
-            data-np-ignore='1'
-            name={`filter-number-max-${columnKey}`}
             onChange={handleMaxValueChange}
             placeholder='Max'
             type='number'
@@ -92,14 +85,11 @@ export const NumberFilterInput = <TData,>({
         </div>
       ) : (
         <input
-          autoComplete='off'
+          autoComplete='one-time-code'
           data-1p-ignore='true'
           data-bwignore='true'
           data-form-type='other'
           data-lpignore='true'
-          data-np-checked='1'
-          data-np-ignore='1'
-          name={`filter-number-${columnKey}`}
           onChange={handleValueChange}
           placeholder='Enter number...'
           type='number'

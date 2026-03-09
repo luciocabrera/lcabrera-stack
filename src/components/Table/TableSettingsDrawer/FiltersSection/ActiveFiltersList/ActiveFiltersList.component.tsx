@@ -6,7 +6,11 @@ import { InfoBox } from '@/components/InfoBox';
 import { useGetNormalizedColumns } from '@/components/Table/contexts/TableConfig/columns/selectors';
 import { FilterInputs } from '@/components/Table/filters/FilterInputs/FilterInputs.component';
 
-import type { ActiveFiltersListProps } from './ActiveFiltersList.types';
+import type {
+  ActiveFiltersListProps,
+  HandleFilterChangeArgs,
+  HandleToggleArgs,
+} from './ActiveFiltersList.types';
 
 import { useSetColumnFilters } from '../../TableDrawerContext/actions';
 import { useGetColumnFilters } from '../../TableDrawerContext/selectors';
@@ -37,7 +41,7 @@ export const ActiveFiltersList = ({
 
   const handleRemoveFilter = (columnKey: string) => {
     const newFilters = { ...filters };
-    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+  
     delete newFilters[columnKey];
     onFiltersChange(newFilters);
 
@@ -50,21 +54,12 @@ export const ActiveFiltersList = ({
   const handleFilterChange = ({
     columnKey,
     filter,
-  }: {
-    columnKey: string;
-    filter: (typeof filters)[string];
-  }) => {
+  }: HandleFilterChangeArgs) => {
     const newFilters = { ...filters, [columnKey]: filter };
     onFiltersChange(newFilters);
   };
 
-  const handleToggle = ({
-    columnKey,
-    filter,
-  }: {
-    columnKey: string;
-    filter?: (typeof filters)[string];
-  }) => {
+  const handleToggle = ({ columnKey, filter }: HandleToggleArgs) => {
     if (filter) {
       handleFilterChange({
         columnKey,
