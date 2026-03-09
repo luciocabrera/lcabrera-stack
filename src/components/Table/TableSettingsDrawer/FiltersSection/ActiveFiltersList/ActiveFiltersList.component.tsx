@@ -40,10 +40,13 @@ export const ActiveFiltersList = ({
   };
 
   const handleRemoveFilter = (columnKey: string) => {
-    const newFilters = { ...filters };
-  
-    delete newFilters[columnKey];
-    onFiltersChange(newFilters);
+    const remainingFilters: typeof filters = {};
+    for (const [key, value] of Object.entries(filters)) {
+      if (key !== columnKey) {
+        remainingFilters[key] = value;
+      }
+    }
+    onFiltersChange(remainingFilters);
 
     // Remove from expanded set
     const newExpanded = new Set(expandedFilters);
@@ -66,7 +69,6 @@ export const ActiveFiltersList = ({
         filter,
       });
     } else {
-      // undefined means "clear filter" (e.g. boolean "All" selection)
       handleRemoveFilter(columnKey);
     }
   };
