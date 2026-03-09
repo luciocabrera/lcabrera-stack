@@ -2,10 +2,11 @@ import * as stylex from '@stylexjs/stylex';
 
 import type { SkeletonOptionsProps } from './SkeletonOptions.types';
 
+import {
+  DEFAULT_SKELETON_ROW_COUNT,
+  ITEM_HEIGHT,
+} from '../VirtualList.constants';
 import { skeletonStyles, styles } from './SkeletonOptions.stylex';
-
-const DEFAULT_SKELETON_ROW_COUNT = 8;
-const ITEM_HEIGHT = 32;
 
 export const SkeletonOptions = ({ containerHeight }: SkeletonOptionsProps) => {
   const count =

@@ -11,5 +11,3 @@ import { styles } from './InfoBox.stylex';
 export const InfoBox = ({ children }: InfoBoxProps) => {
   return <div {...stylex.props(styles.container)}>{children}</div>;
 };
-
-InfoBox.displayName = 'InfoBox';

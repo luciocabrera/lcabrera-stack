@@ -9,3 +9,5 @@ export const DEFAULT_CONTAINER_HEIGHT = 300;
 
 /** Distance from the bottom (px) at which infinite-scroll triggers a fetch */
 export const SCROLL_THRESHOLD = 50;
+
+export const DEFAULT_SKELETON_ROW_COUNT = 8;

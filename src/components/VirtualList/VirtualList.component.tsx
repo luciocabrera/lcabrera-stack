@@ -2,12 +2,7 @@ import * as stylex from '@stylexjs/stylex';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Button } from '@/components/Button';
-import {
-  ListAllIcon,
-  ListCheckedIcon,
-  ListUncheckedIcon,
-  MenuCloseIcon,
-} from '@/components/Icons';
+import { MenuCloseIcon } from '@/components/Icons';
 import { InfoBox } from '@/components/InfoBox';
 import { ICON_SIZE_MD } from '@/design-system/constants';
 import { useVirtualization } from '@/hooks';
@@ -24,6 +19,7 @@ import {
   SCROLL_THRESHOLD,
 } from './VirtualList.constants';
 import { styles } from './VirtualList.stylex';
+import { VirtualListFooter } from './VirtualListFooter';
 
 export const VirtualList = ({
   dataState,
@@ -230,60 +226,14 @@ export const VirtualList = ({
           )}
         </div>
       </div>
-      {/* Footer: loaded count + list filter */}
-      {dataState.data.length > 0 ? (
-        <div {...stylex.props(styles.footer)}>
-          <p {...stylex.props(styles.loadedCount)}>
-            Loaded: {dataState.data.length}
-            {Number.isFinite(dataState.totalCount) && dataState.totalCount
-              ? ` / ${dataState.totalCount}`
-              : ''}
-            {dataState.isLoading && ' — Loading...'}
-            {dataState.isLoadingMore && ' — Loading more...'}
-          </p>
-          {hasCheckboxes && (
-            <div {...stylex.props(styles.listFilterGroup)}>
-              {(['all', 'selected', 'unselected'] as const).map((mode) => {
-                const icon =
-                  mode === 'all' ? (
-                    <ListAllIcon size={ICON_SIZE_MD} />
-                  ) : mode === 'selected' ? (
-                    <ListCheckedIcon size={ICON_SIZE_MD} />
-                  ) : (
-                    <ListUncheckedIcon size={ICON_SIZE_MD} />
-                  );
-                const count =
-                  mode === 'all'
-                    ? effectiveOptions.length
-                    : mode === 'selected'
-                      ? selectedValues.length
-                      : effectiveOptions.length - selectedValues.length;
-                const tooltipLabel =
-                  mode === 'all'
-                    ? 'Show all options'
-                    : mode === 'selected'
-                      ? 'Show only selected options'
-                      : 'Show only unselected options';
-                const tooltipContent = `${tooltipLabel} (${count})`;
-                return (
-                  <Button
-                    color={listFilterMode === mode ? 'secondary' : 'ghost'}
-                    icon={icon}
-                    key={mode}
-                    onClick={() => {
-                      setListFilterMode(mode);
-                    }}
-                    size='mini'
-                    tooltipContent={tooltipContent}
-                    variant='flat'
-                    width='auto'
-                  />
-                );
-              })}
-            </div>
-          )}
-        </div>
-      ) : undefined}
+      <VirtualListFooter
+        dataState={dataState}
+        effectiveOptions={effectiveOptions}
+        hasCheckboxes={hasCheckboxes}
+        listFilterMode={listFilterMode}
+        selectedValues={selectedValues}
+        setListFilterMode={setListFilterMode}
+      />
     </div>
   );
 };
