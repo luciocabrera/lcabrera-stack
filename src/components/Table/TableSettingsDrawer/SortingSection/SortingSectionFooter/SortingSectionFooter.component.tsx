@@ -2,6 +2,7 @@ import * as stylex from '@stylexjs/stylex';
 
 import { Button } from '@/components/Button';
 import { EraserIcon, ListOrderedIcon, RefreshIcon } from '@/components/Icons';
+import { ICON_SIZE_MD, ICON_SIZE_SM } from '@/design-system/constants';
 
 import type { SortingSectionFooterProps } from './SortingSectionFooter.types';
 
@@ -28,7 +29,7 @@ export const SortingSectionFooter = ({
   const buttonColor = isToolbar ? 'ghost' : 'outline';
   const buttonSize = isToolbar ? 'mini' : 'sm';
   const buttonWidth = isToolbar ? 'auto' : 'full';
-  const iconSize = isToolbar ? 14 : 16;
+  const iconSize = isToolbar ? ICON_SIZE_SM : ICON_SIZE_MD;
 
   return (
     <div {...stylex.props(isToolbar ? styles.toolbar : styles.container)}>

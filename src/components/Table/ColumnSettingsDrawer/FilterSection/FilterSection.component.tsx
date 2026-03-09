@@ -2,6 +2,7 @@ import * as stylex from '@stylexjs/stylex';
 
 import { Button } from '@/components/Button';
 import { EraserIcon, RefreshIcon } from '@/components/Icons';
+import { ICON_SIZE_MD } from '@/design-system/constants';
 import { drawerSectionStyles } from '@/design-system/tokens/drawerSection.stylex';
 
 import type { FilterSectionProps } from './FilterSection.types';
@@ -38,7 +39,7 @@ export const FilterSection = <TData,>({
       <div {...stylex.props(drawerSectionStyles.resetSection)}>
         <Button
           color='outline'
-          icon={<EraserIcon size={16} />}
+          icon={<EraserIcon size={ICON_SIZE_MD} />}
           isDisabled={!hasFilter}
           onClick={handleClear}
           size='sm'
@@ -48,7 +49,7 @@ export const FilterSection = <TData,>({
         </Button>
         <Button
           color='outline'
-          icon={<RefreshIcon size={16} />}
+          icon={<RefreshIcon size={ICON_SIZE_MD} />}
           onClick={resetColumnFilter}
           size='sm'
           width='full'

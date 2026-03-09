@@ -17,6 +17,7 @@ import {
   SidePanelTitle,
 } from '@/components/SidePanel';
 import { Tabs } from '@/components/Tabs';
+import { ICON_SIZE_LG, ICON_SIZE_MD } from '@/design-system/constants';
 
 import { useToogleTableIsTableSettingsOpen } from '../contexts/TableConfig/meta/actions';
 import { ColumnOrderSection } from './ColumnOrderSection';
@@ -103,7 +104,7 @@ export const TableSettingsDrawer = () => {
             <Button
               aria-label={pinButtonTitle}
               color='ghost'
-              icon={isPinned ? <PinIcon size={16} /> : <PinOffIcon size={16} />}
+              icon={isPinned ? <PinIcon size={ICON_SIZE_MD} /> : <PinOffIcon size={ICON_SIZE_MD} />}
               onClick={handleTogglePin}
               size='mini'
               title={pinButtonTitle}
@@ -111,7 +112,7 @@ export const TableSettingsDrawer = () => {
             <Button
               aria-label='Close drawer'
               color='ghost'
-              icon={<MenuCloseIcon size={16} />}
+              icon={<MenuCloseIcon size={ICON_SIZE_MD} />}
               onClick={handleCancel}
               size='mini'
               title='Close'
@@ -119,7 +120,7 @@ export const TableSettingsDrawer = () => {
           </>
         }
       >
-        <SidePanelTitle icon={<SettingsIcon size={20} />}>
+        <SidePanelTitle icon={<SettingsIcon size={ICON_SIZE_LG} />}>
           Table Settings
         </SidePanelTitle>
       </SidePanelHeader>

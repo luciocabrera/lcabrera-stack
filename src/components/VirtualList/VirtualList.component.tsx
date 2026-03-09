@@ -9,6 +9,7 @@ import {
   MenuCloseIcon,
 } from '@/components/Icons';
 import { InfoBox } from '@/components/InfoBox';
+import { ICON_SIZE_MD } from '@/design-system/constants';
 import { useVirtualization } from '@/hooks';
 
 import type { ListFilterMode, VirtualListProps } from './VirtualList.types';
@@ -16,16 +17,20 @@ import type { ListFilterMode, VirtualListProps } from './VirtualList.types';
 import { SkeletonOptions } from './SkeletonOptions';
 import { getFilteredOptions } from './utils';
 import { VirtualizedOption } from './VirtualizedOption';
+import {
+  DEFAULT_CONTAINER_HEIGHT,
+  ITEM_HEIGHT,
+  LIST_MAX_HEIGHT,
+  SCROLL_THRESHOLD,
+} from './VirtualList.constants';
 import { styles } from './VirtualList.stylex';
-
-const ITEM_HEIGHT = 32;
 
 export const VirtualList = ({
   dataState,
   filter,
   hasCheckboxes = true,
   hasSelectAll = true,
-  listMaxHeight = '18.75rem',
+  listMaxHeight = LIST_MAX_HEIGHT,
   name,
   onChange,
   onFetchInitial,
@@ -64,7 +69,7 @@ export const VirtualList = ({
   const { containerHeight, endIndex, offsetY, startIndex, totalHeight } =
     useVirtualization({
       containerRef: scrollContainerRef,
-      defaultContainerHeight: 300,
+      defaultContainerHeight: DEFAULT_CONTAINER_HEIGHT,
       itemHeight: ITEM_HEIGHT,
       overscan: 5,
       totalItems,
@@ -111,9 +116,7 @@ export const VirtualList = ({
     if (!container || !hasMore || isLoadingMore) return;
 
     const { clientHeight, scrollHeight, scrollTop } = container;
-    const scrollThreshold = 50;
-
-    if (scrollHeight - scrollTop - clientHeight < scrollThreshold) {
+    if (scrollHeight - scrollTop - clientHeight < SCROLL_THRESHOLD) {
       handleLoadMore();
     }
   }, [handleLoadMore, hasMore, isLoadingMore]);
@@ -167,7 +170,7 @@ export const VirtualList = ({
             aria-label='Clear search'
             color='ghost'
             customStylex={styles.clearButton}
-            icon={<MenuCloseIcon size={16} />}
+            icon={<MenuCloseIcon size={ICON_SIZE_MD} />}
             onClick={handleClearSearch}
             size='embedded'
             variant='flat'
@@ -243,11 +246,11 @@ export const VirtualList = ({
               {(['all', 'selected', 'unselected'] as const).map((mode) => {
                 const icon =
                   mode === 'all' ? (
-                    <ListAllIcon size={16} />
+                    <ListAllIcon size={ICON_SIZE_MD} />
                   ) : mode === 'selected' ? (
-                    <ListCheckedIcon size={16} />
+                    <ListCheckedIcon size={ICON_SIZE_MD} />
                   ) : (
-                    <ListUncheckedIcon size={16} />
+                    <ListUncheckedIcon size={ICON_SIZE_MD} />
                   );
                 const count =
                   mode === 'all'

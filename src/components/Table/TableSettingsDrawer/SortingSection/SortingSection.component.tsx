@@ -9,6 +9,7 @@ import { MenuCloseIcon, SortAscIcon, SortDescIcon } from '@/components/Icons';
 import { InfoBox } from '@/components/InfoBox';
 import { useGetColumns } from '@/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
 import { VirtualSelect } from '@/components/VirtualSelect';
+import { ICON_SIZE_MD } from '@/design-system/constants';
 
 import type { SortingSectionProps, SortItem } from './SortingSection.types';
 
@@ -110,9 +111,9 @@ export const SortingSection = ({ ...props }: SortingSectionProps) => {
             color='ghost'
             icon={
               item.direction === 'asc' ? (
-                <SortAscIcon size={16} />
+                <SortAscIcon size={ICON_SIZE_MD} />
               ) : (
-                <SortDescIcon size={16} />
+                <SortDescIcon size={ICON_SIZE_MD} />
               )
             }
             onClick={() => {
@@ -123,7 +124,7 @@ export const SortingSection = ({ ...props }: SortingSectionProps) => {
           <Button
             aria-label='Remove sort'
             color='ghost'
-            icon={<MenuCloseIcon size={16} />}
+            icon={<MenuCloseIcon size={ICON_SIZE_MD} />}
             onClick={() => {
               handleRemoveSort(item.columnKey);
             }}

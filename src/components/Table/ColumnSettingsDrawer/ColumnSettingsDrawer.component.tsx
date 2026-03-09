@@ -19,6 +19,7 @@ import {
 import { useGetNormalizedColumn } from '@/components/Table/contexts/TableConfig/columns/selectors';
 import { useTableWrapperRef } from '@/components/Table/contexts/TableWrapper';
 import { Tabs } from '@/components/Tabs';
+import { ICON_SIZE_LG, ICON_SIZE_MD } from '@/design-system/constants';
 import { useRenderTracker } from '@/utils/performance';
 
 import type { ColumnSettingsDrawerProps } from './ColumnSettingsDrawer.types';
@@ -111,7 +112,7 @@ export const ColumnSettingsDrawer = ({
             <Button
               aria-label={pinButtonTitle}
               color='ghost'
-              icon={isPinned ? <PinIcon size={16} /> : <PinOffIcon size={16} />}
+              icon={isPinned ? <PinIcon size={ICON_SIZE_MD} /> : <PinOffIcon size={ICON_SIZE_MD} />}
               onClick={handleTogglePin}
               size='mini'
               title={pinButtonTitle}
@@ -119,7 +120,7 @@ export const ColumnSettingsDrawer = ({
             <Button
               aria-label='Close column drawer'
               color='ghost'
-              icon={<MenuCloseIcon size={16} />}
+              icon={<MenuCloseIcon size={ICON_SIZE_MD} />}
               onClick={handleCancel}
               size='mini'
               title='Close'
@@ -127,7 +128,7 @@ export const ColumnSettingsDrawer = ({
           </>
         }
       >
-        <SidePanelTitle icon={<SettingsIcon size={20} />}>
+        <SidePanelTitle icon={<SettingsIcon size={ICON_SIZE_LG} />}>
           {column.label}
         </SidePanelTitle>
       </SidePanelHeader>

@@ -2,6 +2,7 @@ import * as stylex from '@stylexjs/stylex';
 
 import { Button } from '@/components/Button';
 import { SortAscIcon, SortClearIcon, SortDescIcon } from '@/components/Icons';
+import { ICON_SIZE_MD } from '@/design-system/constants';
 
 import type { SortingSectionProps } from './SortingSection.types';
 
@@ -30,7 +31,7 @@ export const SortingSection = (_props: SortingSectionProps) => {
       <div {...stylex.props(styles.list)}>
         <Button
           color={sortDirection === 'asc' ? 'primary' : 'outline'}
-          icon={<SortAscIcon size={16} />}
+          icon={<SortAscIcon size={ICON_SIZE_MD} />}
           onClick={handleAsc}
           size='sm'
           width='full'
@@ -39,7 +40,7 @@ export const SortingSection = (_props: SortingSectionProps) => {
         </Button>
         <Button
           color={sortDirection === 'desc' ? 'primary' : 'outline'}
-          icon={<SortDescIcon size={16} />}
+          icon={<SortDescIcon size={ICON_SIZE_MD} />}
           onClick={handleDesc}
           size='sm'
           width='full'
@@ -48,7 +49,7 @@ export const SortingSection = (_props: SortingSectionProps) => {
         </Button>
         <Button
           color='outline'
-          icon={<SortClearIcon size={16} />}
+          icon={<SortClearIcon size={ICON_SIZE_MD} />}
           isDisabled={sortDirection === undefined}
           onClick={handleClear}
           size='sm'

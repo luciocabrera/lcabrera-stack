@@ -5,6 +5,7 @@ import { MenuCloseIcon } from '@/components/Icons';
 import { InfoBox } from '@/components/InfoBox';
 import { useGetNormalizedColumns } from '@/components/Table/contexts/TableConfig/columns/selectors';
 import { FilterInputs } from '@/components/Table/filters/FilterInputs/FilterInputs.component';
+import { ICON_SIZE_MD } from '@/design-system/constants';
 
 import type {
   ActiveFiltersListProps,
@@ -120,7 +121,7 @@ export const ActiveFiltersList = ({
                   <Button
                     aria-label={`Remove ${column.label} filter`}
                     color='ghost'
-                    icon={<MenuCloseIcon size={16} />}
+                    icon={<MenuCloseIcon size={ICON_SIZE_MD} />}
                     onClick={() => {
                       handleRemoveFilter(columnKey);
                     }}

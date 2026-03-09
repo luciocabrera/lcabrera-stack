@@ -10,6 +10,7 @@ import {
 } from '@/components/Icons';
 import { InfoBox } from '@/components/InfoBox';
 import { useGetColumns } from '@/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
+import { ICON_SIZE_MD } from '@/design-system/constants';
 
 import type {
   GeneralSettingsSectionProps,
@@ -89,7 +90,7 @@ export const GeneralSettingsSection = ({
           <Button
             color={selectedPreset === 'min' ? 'primary' : 'outline'}
             disabled={!hasMinWidthsConfigured}
-            icon={<MinimizeIcon size={16} />}
+            icon={<MinimizeIcon size={ICON_SIZE_MD} />}
             onClick={() => {
               handleToggle('min');
             }}
@@ -101,7 +102,7 @@ export const GeneralSettingsSection = ({
           <Button
             color={selectedPreset === 'max' ? 'primary' : 'outline'}
             disabled={!hasMaxWidthsConfigured}
-            icon={<MaximizeIcon size={16} />}
+            icon={<MaximizeIcon size={ICON_SIZE_MD} />}
             onClick={() => {
               handleToggle('max');
             }}
@@ -112,7 +113,7 @@ export const GeneralSettingsSection = ({
           </Button>
           <Button
             color={selectedPreset === 'default' ? 'primary' : 'outline'}
-            icon={<RefreshIcon size={16} />}
+            icon={<RefreshIcon size={ICON_SIZE_MD} />}
             onClick={() => {
               handleToggle('default');
             }}
@@ -149,7 +150,7 @@ export const GeneralSettingsSection = ({
         <div {...stylex.props(styles.buttonGroup)}>
           <Button
             color='outline'
-            icon={<EraserIcon size={16} />}
+            icon={<EraserIcon size={ICON_SIZE_MD} />}
             onClick={clearAllSettings}
             size='sm'
             width='full'
@@ -158,7 +159,7 @@ export const GeneralSettingsSection = ({
           </Button>
           <Button
             color='outline'
-            icon={<RefreshIcon size={16} />}
+            icon={<RefreshIcon size={ICON_SIZE_MD} />}
             onClick={resetTableSettings}
             size='sm'
             width='full'

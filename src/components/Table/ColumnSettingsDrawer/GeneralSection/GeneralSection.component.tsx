@@ -11,6 +11,7 @@ import {
 import { InfoBox } from '@/components/InfoBox';
 import { useGetNormalizedColumn } from '@/components/Table/contexts/TableConfig/columns/selectors';
 import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
+import { ICON_SIZE_MD } from '@/design-system/constants';
 
 import type { GeneralSectionProps, WidthPreset } from './GeneralSection.types';
 
@@ -75,7 +76,7 @@ export const GeneralSection = <TData,>({
           <Button
             color={selectedPreset === 'min' ? 'primary' : 'outline'}
             disabled={!hasMinWidth}
-            icon={<MinimizeIcon size={16} />}
+            icon={<MinimizeIcon size={ICON_SIZE_MD} />}
             onClick={() => {
               handleToggle('min');
             }}
@@ -87,7 +88,7 @@ export const GeneralSection = <TData,>({
           <Button
             color={selectedPreset === 'max' ? 'primary' : 'outline'}
             disabled={!hasMaxWidth}
-            icon={<MaximizeIcon size={16} />}
+            icon={<MaximizeIcon size={ICON_SIZE_MD} />}
             onClick={() => {
               handleToggle('max');
             }}
@@ -98,7 +99,7 @@ export const GeneralSection = <TData,>({
           </Button>
           <Button
             color={selectedPreset === 'default' ? 'primary' : 'outline'}
-            icon={<RefreshIcon size={16} />}
+            icon={<RefreshIcon size={ICON_SIZE_MD} />}
             onClick={() => {
               handleToggle('default');
             }}
@@ -120,7 +121,7 @@ export const GeneralSection = <TData,>({
         <div {...stylex.props(styles.buttonGroup)}>
           <Button
             color='outline'
-            icon={<EraserIcon size={16} />}
+            icon={<EraserIcon size={ICON_SIZE_MD} />}
             onClick={clearAllSettings}
             size='sm'
             width='full'
@@ -129,7 +130,7 @@ export const GeneralSection = <TData,>({
           </Button>
           <Button
             color='outline'
-            icon={<RefreshIcon size={16} />}
+            icon={<RefreshIcon size={ICON_SIZE_MD} />}
             onClick={resetAllSettings}
             size='sm'
             width='full'
