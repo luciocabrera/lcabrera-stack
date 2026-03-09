@@ -36,18 +36,14 @@ export const FilterInputs = <TData,>({
   onChange,
   shouldFillHeight = false,
 }: FilterInputsProps<TData>) => {
-  // === SELECTORS (subscribe to state) ===
   const column = useGetNormalizedColumn<TData>(columnKey);
 
   const [isOperatorOpen, setIsOperatorOpen] = useState(false);
 
-  // Derive operator directly from filter prop - always in sync with parent state
   const operator = getOperatorFromFilter({ dataType: column.dataType, filter });
   const operatorOptions = getOperatorOptions({ dataType: column.dataType });
-  // Map operator options to labels for VirtualSelect display
   const operatorLabels = operatorOptions.map((op) => op.label);
-  // Resolve current operator value to its label for VirtualSelect selected state
-  // When filter is undefined (reset), show empty to display placeholder
+
   const selectedOperatorLabel = getSelectedOperatorLabel({
     filter,
     operator,

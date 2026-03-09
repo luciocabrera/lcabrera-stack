@@ -61,7 +61,6 @@ export const GeneralSection = <TData,>({
 
         break;
       }
-      // No default
     }
   };
 
