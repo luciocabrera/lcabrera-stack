@@ -5,20 +5,14 @@ import type { DraggableItem } from '@/components/DraggableList';
 
 import { Button } from '@/components/Button';
 import { DraggableList } from '@/components/DraggableList';
-import {
-  MenuCloseIcon,
-  SortAscIcon,
-  SortDescIcon,
-} from '@/components/Icons';
+import { MenuCloseIcon, SortAscIcon, SortDescIcon } from '@/components/Icons';
 import { InfoBox } from '@/components/InfoBox';
 import { useGetColumns } from '@/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
 import { VirtualSelect } from '@/components/VirtualSelect';
 
 import type { SortingSectionProps, SortItem } from './SortingSection.types';
 
-import {
-  useSetColumnsSortings,
-} from '../TableDrawerContext/actions';
+import { useSetColumnsSortings } from '../TableDrawerContext/actions';
 import { useGetColumnsSorting } from '../TableDrawerContext/selectors';
 import { styles } from './SortingSection.stylex';
 import { SortingSectionFooter } from './SortingSectionFooter';

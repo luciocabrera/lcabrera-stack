@@ -2,14 +2,23 @@ import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 
 import { Button } from '@/components/Button';
-import { MaximizeIcon, MinimizeIcon, RefreshIcon } from '@/components/Icons';
+import {
+  EraserIcon,
+  MaximizeIcon,
+  MinimizeIcon,
+  RefreshIcon,
+} from '@/components/Icons';
 import { InfoBox } from '@/components/InfoBox';
 import { useGetNormalizedColumn } from '@/components/Table/contexts/TableConfig/columns/selectors';
 import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
 
 import type { GeneralSectionProps, WidthPreset } from './GeneralSection.types';
 
-import { useSetColumnSizing } from '../ColumnDrawerContext/actions';
+import {
+  useClearAllColumnDrawerSettings,
+  useResetAllColumnDrawerSettings,
+  useSetColumnSizing,
+} from '../ColumnDrawerContext/actions';
 import { styles } from './GeneralSection.stylex';
 
 export const GeneralSection = <TData,>({
@@ -17,6 +26,8 @@ export const GeneralSection = <TData,>({
 }: GeneralSectionProps<TData>) => {
   const column = useGetNormalizedColumn<TData>(columnKey);
   const setColumnSizing = useSetColumnSizing();
+  const clearAllSettings = useClearAllColumnDrawerSettings();
+  const resetAllSettings = useResetAllColumnDrawerSettings();
 
   const { maxWidth, minWidth } = column;
 
@@ -104,6 +115,30 @@ export const GeneralSection = <TData,>({
         Select a preset to adjust this column's width. Changes will be reflected
         after clicking Accept.
       </InfoBox>
+
+      <div {...stylex.props(styles.section)}>
+        <h3 {...stylex.props(styles.sectionTitle)}>All Settings</h3>
+        <div {...stylex.props(styles.buttonGroup)}>
+          <Button
+            color='outline'
+            icon={<EraserIcon size={16} />}
+            onClick={clearAllSettings}
+            size='sm'
+            width='full'
+          >
+            Clear All Settings
+          </Button>
+          <Button
+            color='outline'
+            icon={<RefreshIcon size={16} />}
+            onClick={resetAllSettings}
+            size='sm'
+            width='full'
+          >
+            Reset All Settings
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };

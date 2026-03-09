@@ -3,7 +3,11 @@ import { useId, useRef, useState } from 'react';
 
 import type { ArrowOffsetParams, TooltipProps } from './Tooltip.types';
 
-import { ARROW_STYLES, HALF_ARROW, TRANSITION_DURATION_MS } from './Tooltip.constants';
+import {
+  ARROW_STYLES,
+  HALF_ARROW,
+  TRANSITION_DURATION_MS,
+} from './Tooltip.constants';
 import { styles } from './Tooltip.stylex';
 
 const getArrowOffset = ({

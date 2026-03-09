@@ -197,14 +197,14 @@ export type SizeVariant = keyof typeof sizeVariants;
 export const sizeVariants = stylex.create({
   embedded: {
     borderRadius: borderRadius.sm,
-    paddingBlock:spacing.xxs,
+    paddingBlock: spacing.xxs,
     paddingInline: spacing.xxs,
     alignItems: 'center',
     fontSize: typography.fontSizeXs,
     justifyContent: 'center',
     height: '1.25rem',
     minHeight: '1.25rem',
-        minWidth: '1.25rem',
+    minWidth: '1.25rem',
     width: '1.25rem',
   },
 

@@ -17,9 +17,7 @@ export const getFilteredOptions = ({
 
   if (searchTerm) {
     const term = searchTerm.toLowerCase();
-    result = result.filter((option) =>
-      option.toLowerCase().includes(term),
-    );
+    result = result.filter((option) => option.toLowerCase().includes(term));
   }
 
   if (listFilterMode === 'selected') {

@@ -1,5 +1,7 @@
 export { useBatchSetColumnDrawerSettings } from './useBatchSetColumnDrawerSettings.hook';
+export { useClearAllColumnDrawerSettings } from './useClearAllColumnDrawerSettings.hook';
 export { useClearAllColumnSettings } from './useClearAllColumnSettings.hook';
+export { useResetAllColumnDrawerSettings } from './useResetAllColumnDrawerSettings.hook';
 export { useResetColumnFilter } from './useResetColumnFilter.hook';
 export { useResetToTableState } from './useResetToTableState.hook';
 export { useSetColumnFilter } from './useSetColumnFilter.hook';

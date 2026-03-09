@@ -25,7 +25,6 @@ import type { ColumnSettingsDrawerProps } from './ColumnSettingsDrawer.types';
 
 import {
   useBatchSetColumnDrawerSettings,
-  useClearAllColumnSettings,
   useResetToTableState,
 } from './ColumnDrawerContext/actions';
 import { DetailsSection } from './DetailsSection';
@@ -43,18 +42,12 @@ export const ColumnSettingsDrawer = ({
 
   const batchSetColumnDrawerSettings = useBatchSetColumnDrawerSettings();
   const resetToTableState = useResetToTableState();
-  const clearAllColumnSettings = useClearAllColumnSettings();
 
   const [isPinned, setIsPinned] = useState(false);
 
   const pinButtonTitle = isPinned ? 'Unpin drawer' : 'Pin drawer';
 
   const handleAccept = () => {
-    // if (!areFiltersValid) {
-    //   // Don't allow accept if filters are invalid
-    //   return;
-    // }
-
     batchSetColumnDrawerSettings();
 
     if (isPinned) setIsPinned(false);
@@ -68,11 +61,6 @@ export const ColumnSettingsDrawer = ({
 
   const handleTogglePin = () => {
     setIsPinned(!isPinned);
-  };
-
-  const handleClearAll = () => {
-    clearAllColumnSettings();
-    batchSetColumnDrawerSettings();
   };
 
   const isFilterable = column.isFilterable !== false;
@@ -150,9 +138,6 @@ export const ColumnSettingsDrawer = ({
       <SidePanelFooter>
         <Button color='primary' onClick={handleAccept} size='sm'>
           Accept
-        </Button>
-        <Button color='outline' onClick={handleClearAll} size='sm'>
-          Clear All
         </Button>
         <Button color='outline' onClick={handleCancel} size='sm'>
           Cancel
