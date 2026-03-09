@@ -92,5 +92,3 @@ export const InputContent = <TData,>({
     }
   }
 };
-
-InputContent.displayName = 'InputContent';

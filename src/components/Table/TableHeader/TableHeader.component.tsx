@@ -5,7 +5,6 @@ import { useRenderTracker } from '@/utils/performance';
 
 import type { TableHeaderProps } from './TableHeader.types';
 
-// import { DEFAULT_MIN_COLUMN_WIDTH } from '../Table.constants';
 import { TableHeaderCell } from '../TableHeaderCell';
 import { TableRow } from '../TableRow';
 import { tableHeaderStyles } from './TableHeader.stylex';
@@ -17,8 +16,6 @@ export const TableHeader = <TData extends Record<string, unknown>, TResponse>({
   useRenderTracker({ componentName: 'TableHeader' });
 
   const effectiveColumns = useGetEffectiveColumns();
-
-  console.log('[TableHeader] Effective Columns:', effectiveColumns);
 
   return (
     <thead

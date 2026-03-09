@@ -50,7 +50,6 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
   const toogleTableIsColumnSettingsOpen = useToogleTableIsColumnSettingsOpen();
 
   const { label, maxWidth, minWidth } = column;
-
   const effectiveMinWidth = minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
   const currentWidth = columnSizing[column.key] ?? effectiveMinWidth;
   const sortDirection = column.sortDirection;
