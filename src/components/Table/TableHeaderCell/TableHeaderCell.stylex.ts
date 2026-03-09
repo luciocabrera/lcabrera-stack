@@ -1,7 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 
 import {
-  borderRadius,
   spacing,
   typography,
   zIndex,
@@ -49,44 +48,8 @@ export const tableHeaderCellStyles = stylex.create({
   },
   settingsButton: {
     padding: 0,
-    borderRadius: borderRadius.sm,
-    borderStyle: 'none',
-    alignItems: 'center',
-    backgroundColor: {
-      default: 'transparent',
-      ':hover': colors.hover,
-    },
-    color: {
-      default: colors.textTertiary,
-      ':hover': colors.textSecondary,
-    },
-    cursor: 'pointer',
-    display: 'flex',
-    justifyContent: 'center',
     height: 20,
     width: 20,
-  },
-  sortButton: {
-    padding: 0,
-    borderRadius: borderRadius.sm,
-    borderStyle: 'none',
-    alignItems: 'center',
-    backgroundColor: {
-      default: 'transparent',
-      ':hover': colors.hover,
-    },
-    color: {
-      default: colors.textTertiary,
-      ':hover': colors.textSecondary,
-    },
-    cursor: 'pointer',
-    display: 'flex',
-    justifyContent: 'center',
-    height: 20,
-    width: 20,
-  },
-  sortButtonActive: {
-    color: colors.textPrimary,
   },
   resizeHandle: {
     alignItems: 'center',

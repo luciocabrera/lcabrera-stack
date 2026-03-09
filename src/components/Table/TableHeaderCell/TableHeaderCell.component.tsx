@@ -1,5 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 
+import { Button } from '@/components/Button';
 import { MoreVerticalIcon } from '@/components/Icons';
 import {
   useSetColumnSizing,
@@ -23,7 +24,6 @@ import {
   useSetTableColumnSelectedKey,
   useToogleTableIsColumnSettingsOpen,
 } from '../contexts/TableConfig/meta/actions';
-import { FilterButton } from './FilterButton';
 import { SortIcon } from './SortIcon';
 import {
   skelletonStyles,
@@ -39,7 +39,6 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
 }: TableHeaderCellProps<TData>) => {
   useRenderTracker({ componentName: `TableHeaderCell:${columnKey}` });
 
-  // const [isFilterOpen, setIsFilterOpen] = useState(false);
   const columnSizing = useGetColumnSizing();
   const column = useGetNormalizedColumn<TData>(columnKey);
   const isLoading = useGetTableIsLoading();
@@ -50,12 +49,11 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
   const setTableColumnSelectedKey = useSetTableColumnSelectedKey();
   const toogleTableIsColumnSettingsOpen = useToogleTableIsColumnSettingsOpen();
 
-  const { dataType, label, maxWidth, minWidth } = column;
+  const { label, maxWidth, minWidth } = column;
 
   const effectiveMinWidth = minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
   const currentWidth = columnSizing[column.key] ?? effectiveMinWidth;
   const sortDirection = column.sortDirection;
-  const isFilterable = column.isFilterable !== false;
   const isSortable = column.isSortable !== false;
   const isLoadingState = isLoading || isLoadingMore;
 
@@ -70,7 +68,6 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
   const handleSort = () => {
     if (!isSortable) return;
     const nextDirection = getNextSortDirection(sortDirection);
-    // const isMultiSort = event.shiftKey;
     setSorting({ columnKey, direction: nextDirection });
   };
 
@@ -102,31 +99,24 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
       <span {...stylex.props(tableHeaderCellStyles.content)}>{label}</span>
       <div {...stylex.props(tableHeaderCellStyles.controls)}>
         {isSortable && (
-          <button
+          <Button
             aria-label={`Sort by ${label}`}
+            color='ghost'
+            customStylex={tableHeaderCellStyles.settingsButton}
+            icon={<SortIcon direction={sortDirection} />}
             onClick={handleSort}
-            type='button'
-            {...stylex.props(
-              tableHeaderCellStyles.sortButton,
-              sortDirection !== undefined &&
-                tableHeaderCellStyles.sortButtonActive,
-            )}
-          >
-            <SortIcon direction={sortDirection} />
-          </button>
-        )}
-        {isFilterable && dataType && (
-          <FilterButton onClick={handleOpenSettings} />
+            size='embedded'
+          />
         )}
         {hasSettings && (
-          <button
+          <Button
             aria-label={`Settings for ${label}`}
+            color='ghost'
+            customStylex={tableHeaderCellStyles.settingsButton}
+            icon={<MoreVerticalIcon size={14} />}
             onClick={handleOpenSettings}
-            type='button'
-            {...stylex.props(tableHeaderCellStyles.settingsButton)}
-          >
-            <MoreVerticalIcon />
-          </button>
+            size='embedded'
+          />
         )}
       </div>
       {/* Resize handle */}
