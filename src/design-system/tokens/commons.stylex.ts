@@ -201,10 +201,10 @@ export const sizeVariants = stylex.create({
     alignItems: 'center',
     fontSize: typography.fontSizeXs,
     justifyContent: 'center',
-    height: '1.25rem',
-    minHeight: '1.25rem',
-    minWidth: '1.25rem',
-    width: '1.25rem',
+    height: spacing.lg,
+    minHeight: spacing.lg,
+    minWidth: spacing.lg,
+    width: spacing.lg,
   },
 
   lg: {
@@ -212,8 +212,8 @@ export const sizeVariants = stylex.create({
     paddingBlock: spacing.md,
     paddingInline: spacing.lg,
     fontSize: typography.fontSizeLg,
-    height: '3rem',
-    minHeight: '3rem',
+    height: spacing.xxl,
+    minHeight: spacing.xxl,
   },
 
   md: {
@@ -230,8 +230,8 @@ export const sizeVariants = stylex.create({
     paddingBlock: spacing.xs,
     paddingInline: spacing.sm,
     fontSize: typography.fontSizeSm,
-    height: '2rem',
-    minHeight: '2rem',
+    height: spacing.xl,
+    minHeight: spacing.xl,
   },
 
   mini: {
@@ -267,8 +267,8 @@ export const skelleton = stylex.create({
     insetInline: 0,
     overflow: 'hidden',
     backgroundColor: colors.hover,
-    pointerEvents: 'none',
     position: 'absolute',
+    zIndex: 1,
   },
   /** Inline skeleton bar placeholder (flow-based, for skeleton-only rows) */
   placeholderBar: {

@@ -48,8 +48,6 @@ export const tableHeaderCellStyles = stylex.create({
   },
   settingsButton: {
     padding: 0,
-    height: 20,
-    width: 20,
   },
   resizeHandle: {
     alignItems: 'center',
