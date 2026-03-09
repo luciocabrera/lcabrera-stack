@@ -46,23 +46,6 @@ export const ColumnSettingsDrawer = ({
   const [isPinned, setIsPinned] = useState(false);
 
   const pinButtonTitle = isPinned ? 'Unpin drawer' : 'Pin drawer';
-
-  const handleAccept = () => {
-    batchSetColumnDrawerSettings();
-
-    if (isPinned) setIsPinned(false);
-  };
-
-  const handleCancel = () => {
-    resetToTableState();
-
-    if (isPinned) setIsPinned(false);
-  };
-
-  const handleTogglePin = () => {
-    setIsPinned(!isPinned);
-  };
-
   const isFilterable = column.isFilterable !== false;
   const isSortable = column.isSortable !== false;
 
@@ -96,6 +79,22 @@ export const ColumnSettingsDrawer = ({
         ]
       : []),
   ];
+
+  const handleAccept = () => {
+    batchSetColumnDrawerSettings();
+
+    if (isPinned) setIsPinned(false);
+  };
+
+  const handleCancel = () => {
+    resetToTableState();
+
+    if (isPinned) setIsPinned(false);
+  };
+
+  const handleTogglePin = () => {
+    setIsPinned(!isPinned);
+  };
 
   return (
     <SidePanel

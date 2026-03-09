@@ -21,24 +21,18 @@ export const FilterSection = <TData,>({
   const setColumnFilter = useSetColumnFilter();
   const resetColumnFilter = useResetColumnFilter();
 
-  const handleChange = (
-    newFilter: Parameters<typeof FilterInputs>[0]['filter'],
-  ) => {
-    setColumnFilter(newFilter);
-  };
+  const hasFilter = columnFilter !== undefined;
 
   const handleClear = () => {
     setColumnFilter(undefined);
   };
-
-  const hasFilter = columnFilter !== undefined;
 
   return (
     <div {...stylex.props(styles.container)}>
       <FilterInputs
         columnKey={columnKey}
         filter={columnFilter}
-        onChange={handleChange}
+        onChange={setColumnFilter}
         shouldFillHeight
       />
       <div {...stylex.props(drawerSectionStyles.resetSection)}>
