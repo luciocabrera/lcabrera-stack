@@ -25,6 +25,7 @@ export const getInitialColumnsState = <TData>({
 }: GetInitialTableStateArgs<TData>) => {
   const effectiveColumns = getEffectiveColumns<TData>({
     columnOrder,
+    columnPinning,
     columns,
     columnVisibility,
   });

@@ -15,11 +15,13 @@ export const useBatchSetColumnDrawerSettings = () => {
 
     if (!columnState) return;
 
-    const { columnFilter, columnKey, columnSizing, sorting } = columnState;
+    const { columnFilter, columnKey, columnPinning, columnSizing, sorting } =
+      columnState;
 
     batchSetColumnSettings({
       columnFilter,
       columnKey,
+      columnPinning,
       columnSizing,
       sorting,
     });
