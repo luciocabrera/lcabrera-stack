@@ -17,6 +17,7 @@ export const TableBodyCell = <TData extends Record<string, unknown>>({
   label,
   locale,
   minWidth,
+  pinInfo,
   value,
   width,
   ...rest
@@ -45,6 +46,12 @@ export const TableBodyCell = <TData extends Record<string, unknown>>({
         tableBodyCellStyles.base(minWidth, width),
         isRightAligned && tableBodyCellStyles.alignRight,
         isCentered && tableBodyCellStyles.alignCenter,
+        pinInfo?.side === 'left' &&
+          tableBodyCellStyles.pinnedLeft(pinInfo.offset),
+        pinInfo?.side === 'right' &&
+          tableBodyCellStyles.pinnedRight(pinInfo.offset),
+        pinInfo?.isLastPinnedLeft && tableBodyCellStyles.pinnedShadowLeft,
+        pinInfo?.isFirstPinnedRight && tableBodyCellStyles.pinnedShadowRight,
         customStylex,
       )}
     >

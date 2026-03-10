@@ -1,6 +1,8 @@
 import * as stylex from '@stylexjs/stylex';
+import { useMemo } from 'react';
 
 import {
+  useGetColumnPinning,
   useGetColumnSizing,
   useGetEffectiveColumns,
 } from '@/components/Table/contexts/TableConfig/columns/selectors';
@@ -12,6 +14,7 @@ import { SpacerRow } from '@/components/Table/SpacerRow';
 import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
 import { TableBodyCell } from '@/components/Table/TableBodyCell';
 import { TableRow } from '@/components/Table/TableRow';
+import { getPinnedColumnOffsets } from '@/components/Table/utils';
 import { useVirtualization } from '@/hooks';
 import { useRenderTracker } from '@/utils/performance';
 
@@ -23,9 +26,15 @@ import { styles } from './TableBody.stylex';
 export const TableBody = ({ tableContainerRef }: TableBodyProps) => {
   useRenderTracker({ componentName: 'TableBody' });
 
+  const columnPinning = useGetColumnPinning();
   const columnSizing = useGetColumnSizing();
   const effectiveColumns = useGetEffectiveColumns();
   const data = useGetTableData();
+
+  const pinnedOffsets = useMemo(
+    () => getPinnedColumnOffsets({ columnPinning, columnSizing, effectiveColumns }),
+    [columnPinning, columnSizing, effectiveColumns],
+  );
   const rowHeight = useGetTableRowHeight();
   const overscan = useGetTableOverscan();
 
@@ -62,6 +71,7 @@ export const TableBody = ({ tableContainerRef }: TableBodyProps) => {
                   key={col.key}
                   label={col.label}
                   minWidth={effectiveMinWidth}
+                  pinInfo={pinnedOffsets[col.key]}
                   value={col.key in rowData ? rowData[col.key] : ''}
                   width={finalWidth}
                 />
