@@ -18,12 +18,12 @@ export type ColumnFiltersState<TData = Record<string, unknown>> = Record<
   DataKey<TData>,
   ColumnFilter
 >;
+
 /**
  * Column order state - array of column keys in display order
  */
 export type ColumnOrderState<TData = Record<string, unknown>> =
   DataKey<TData>[];
-
 /**
  * Column pinning state
  */
@@ -81,6 +81,13 @@ export type NormalizedColumnsState<TData = Record<string, unknown>> = Record<
     sortIndex?: number;
   }
 >;
+
+export type PinnedColumnInfo = {
+  isFirstPinnedRight: boolean;
+  isLastPinnedLeft: boolean;
+  offset: number;
+  side: 'left' | 'right';
+};
 
 /**
  * Sorting state for a single column

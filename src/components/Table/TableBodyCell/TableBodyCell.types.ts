@@ -1,7 +1,10 @@
 import type { StyleXStyles } from '@stylexjs/stylex';
 import type { ComponentPropsWithoutRef } from 'react';
 
-import type { TableColumn } from '../Table.types';
+import type {
+  PinnedColumnInfo,
+  TableColumn,
+} from '@/components/Table/Table.types';
 
 export type TableBodyCellProps<TData extends Record<string, unknown>> =
   ComponentPropsWithoutRef<'td'> &
@@ -9,6 +12,7 @@ export type TableBodyCellProps<TData extends Record<string, unknown>> =
       customStylex?: StyleXStyles;
       /** Locale for formatting */
       locale?: string;
+      pinInfo?: PinnedColumnInfo;
       value: unknown;
       width?: number | string;
     };

@@ -1,6 +1,7 @@
 import type {
   ColumnFiltersState,
   ColumnOrderState,
+  ColumnPinningState,
   ColumnSizingState,
   ColumnVisibilityState,
   SortingState,
@@ -18,6 +19,8 @@ export type TableLayoutProps<
 > & {
   /** Column order from loader/URL state (optional) */
   columnOrder?: ColumnOrderState<TData>;
+  /** Column pinning from loader/URL state (optional) */
+  columnPinning?: ColumnPinningState<TData>;
   /** Column definitions (required) */
   columns: TableColumn<TData>[];
   /** Column sizing from loader/URL state (optional) */

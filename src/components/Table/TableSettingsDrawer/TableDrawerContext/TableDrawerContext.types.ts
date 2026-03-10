@@ -5,6 +5,7 @@ export type TableDrawerColumnsState<TData> = Pick<
   TableColumnsState<TData>,
   | 'columnFilters'
   | 'columnOrder'
+  | 'columnPinning'
   | 'columnSizing'
   | 'columnVisibility'
   | 'sorting'

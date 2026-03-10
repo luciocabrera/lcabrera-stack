@@ -15,11 +15,13 @@ export type ColumnDrawerProviderProps<TData> = {
 
 export type ColumnDrawerState<TData> = {
   /** Filter for this specific column */
-  columnFilter: ColumnFilter | undefined;
+  columnFilter?: ColumnFilter;
   /** The column key this drawer is managing */
   columnKey: DataKey<TData>;
+  /** Pin side for this specific column */
+  columnPinning?: 'left' | 'right';
   /** Width for this specific column */
-  columnSizing: number | undefined;
+  columnSizing?: number;
   /** Sort direction for this specific column */
   sorting: SortDirection;
 };
