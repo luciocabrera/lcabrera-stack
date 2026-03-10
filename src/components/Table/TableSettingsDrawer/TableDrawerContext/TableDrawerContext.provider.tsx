@@ -1,6 +1,7 @@
 import {
   useGetColumnFilters,
   useGetColumnOrder,
+  useGetColumnPinning,
   useGetColumnSizing,
   useGetColumnVisibility,
 } from '@/components/Table/contexts/TableConfig/columns/selectors';
@@ -15,6 +16,7 @@ import type {
 import { TableDrawerContext } from './TableDrawerContext.context';
 
 export const TableDrawerProvider = ({ children }: TableDrawerProviderProps) => {
+  const columnPinning = useGetColumnPinning();
   const columnSizing = useGetColumnSizing();
   const columnsOrder = useGetColumnOrder();
   const columnVisibility = useGetColumnVisibility();
@@ -24,6 +26,7 @@ export const TableDrawerProvider = ({ children }: TableDrawerProviderProps) => {
   const columnsStore = useStore<TableDrawerColumnsState<unknown>>({
     columnFilters,
     columnOrder: columnsOrder,
+    columnPinning,
     columnSizing,
     columnVisibility,
     sorting: columnsSorting,
