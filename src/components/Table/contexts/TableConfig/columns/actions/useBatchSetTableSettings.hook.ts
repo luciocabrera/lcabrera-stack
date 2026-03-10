@@ -1,23 +1,24 @@
 import type {
   ColumnFiltersState,
   ColumnOrderState,
+  ColumnPinningState,
   ColumnSizingState,
   ColumnVisibilityState,
   SortingState,
 } from '@/components/Table/Table.types';
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { useTableDataContextValue } from '@/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
 import { usePersistTableStateAction } from '@/components/Table/hooks';
 import {
   getEffectiveColumns,
   getNormalizedColummns,
 } from '@/components/Table/utils';
 
-import { useTableDataContextValue } from '../../../TableData/data/useTableDataContextValue.hook';
-
 export type BatchTableSettingsUpdate<TData> = {
   columnFilters: ColumnFiltersState<TData>;
   columnOrder: ColumnOrderState<TData>;
+  columnPinning: ColumnPinningState<TData>;
   columnSizing: ColumnSizingState<TData>;
   columnVisibility: ColumnVisibilityState<TData>;
   sorting: SortingState<TData>;
@@ -37,6 +38,7 @@ export const useBatchSetTableSettings = <TData>() => {
 
     const effectiveColumns = getEffectiveColumns({
       columnOrder: settings.columnOrder,
+      columnPinning: settings.columnPinning,
       columns: columnsState?.columns ?? [],
       columnVisibility: settings.columnVisibility,
     });
@@ -81,6 +83,11 @@ export const useBatchSetTableSettings = <TData>() => {
         persistenceKey,
         slice: 'columnVisibility',
         valueSlice: settings.columnVisibility,
+      },
+      {
+        persistenceKey,
+        slice: 'columnPinning',
+        valueSlice: settings.columnPinning,
       },
     ]);
 

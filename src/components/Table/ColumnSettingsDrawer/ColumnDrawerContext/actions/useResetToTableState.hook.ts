@@ -38,9 +38,17 @@ export const useResetToTableState = () => {
       (sort) => sort.columnKey === columnKey,
     )?.direction;
 
+    const currentPinning = columnsState?.columnPinning;
+    const columnPinning = currentPinning?.left.includes(columnKey)
+      ? 'left'
+      : currentPinning?.right.includes(columnKey)
+        ? 'right'
+        : undefined;
+
     columnStore.set({
       columnFilter,
       columnKey,
+      columnPinning,
       columnSizing,
       sorting,
     });

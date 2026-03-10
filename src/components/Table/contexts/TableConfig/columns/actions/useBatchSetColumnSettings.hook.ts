@@ -1,5 +1,6 @@
 import type {
   ColumnFiltersState,
+  ColumnPinningState,
   ColumnSizingState,
 } from '@/components/Table/Table.types';
 import type { ColumnFilter } from '@/types/filterOperators.types';
@@ -7,13 +8,15 @@ import type { SortDirection } from '@/types/ui.types';
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { usePersistTableStateAction } from '@/components/Table/hooks';
-import { getNormalizedColummns } from '@/components/Table/utils';
+import { getEffectiveColumns, getNormalizedColummns } from '@/components/Table/utils';
 
 export type BatchColumnSettingsUpdate = {
   /** Single column filter value */
   columnFilter?: ColumnFilter;
   /** Column key being updated */
   columnKey: string;
+  /** Pin side for this column */
+  columnPinning?: 'left' | 'right' | undefined;
   /** Single column width value */
   columnSizing?: number;
   /** Sort direction for this column */
@@ -27,7 +30,8 @@ export const useBatchSetColumnSettings = () => {
   return (settings: BatchColumnSettingsUpdate) => {
     const columnsState = columnsStore.get();
     const persistenceKey = metaStore.get()?.persistenceKey ?? '';
-    const { columnFilter, columnKey, columnSizing, sorting } = settings;
+    const { columnFilter, columnKey, columnPinning, columnSizing, sorting } =
+      settings;
 
     // Sorting: update in-place to preserve order, or remove if undefined
     const existingSorting = columnsState?.sorting ?? [];
@@ -66,9 +70,30 @@ export const useBatchSetColumnSettings = () => {
         ? baseSizing
         : { ...baseSizing, [columnKey]: columnSizing };
 
+    // Pinning: remove from both sides, then re-add if pinned
+    const currentPinning = columnsState?.columnPinning ?? {
+      left: [],
+      right: [],
+    };
+    const newPinning: ColumnPinningState<unknown> = {
+      left: currentPinning.left.filter((k) => k !== columnKey),
+      right: currentPinning.right.filter((k) => k !== columnKey),
+    };
+    if (columnPinning === 'left')
+      newPinning.left = [...newPinning.left, columnKey];
+    if (columnPinning === 'right')
+      newPinning.right = [...newPinning.right, columnKey];
+
     const normalizedColumns = getNormalizedColummns({
       columns: columnsState?.columns ?? [],
       sorting: newSorting,
+    });
+
+    const effectiveColumns = getEffectiveColumns({
+      columnOrder: columnsState?.columnOrder,
+      columnPinning: newPinning,
+      columns: columnsState?.columns ?? [],
+      columnVisibility: columnsState?.columnVisibility,
     });
 
     persistTableState([
@@ -95,11 +120,18 @@ export const useBatchSetColumnSettings = () => {
         slice: 'columnSizing',
         valueSlice: newColumnSizing,
       },
+      {
+        persistenceKey,
+        slice: 'columnPinning',
+        valueSlice: newPinning,
+      },
     ]);
 
     columnsStore.set({
       columnFilters: newColumnFilters,
+      columnPinning: newPinning,
       columnSizing: newColumnSizing,
+      effectiveColumns,
       normalizedColumns,
       sorting: newSorting,
     });

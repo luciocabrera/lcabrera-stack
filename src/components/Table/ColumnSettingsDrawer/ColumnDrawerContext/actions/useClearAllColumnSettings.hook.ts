@@ -20,6 +20,7 @@ export const useClearAllColumnSettings = () => {
     columnStore.set({
       columnFilter: undefined,
       columnKey,
+      columnPinning: undefined,
       columnSizing: undefined,
       sorting: undefined,
     });
