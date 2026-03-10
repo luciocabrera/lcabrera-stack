@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { typography } from '@/design-system/tokens/base.stylex';
+import { typography, zIndex } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 import { skelleton } from '@/design-system/tokens/commons.stylex';
 
@@ -29,6 +29,30 @@ export const tableBodyCellStyles = stylex.create({
     minWidth: minWidth ?? width ?? null,
     width: width ?? minWidth ?? null,
   }),
+  pinnedLeft: (offset: number) => ({
+    backgroundColor: 'blue', //find proper color token
+    position: 'sticky',
+    zIndex: `calc(${zIndex.sticky} - 1)`,
+    left: offset,
+  }),
+  pinnedRight: (offset: number) => ({
+    backgroundColor: 'red', //find proper color token
+    position: 'sticky',
+    zIndex: `calc(${zIndex.sticky} - 1)`,
+    right: offset,
+  }),
+  pinnedShadowLeft: {
+    boxShadow: '4px 0 8px -2px rgba(0, 0, 0, 0.08)',
+    borderRightColor: colors.borderPrimary,
+    borderRightStyle: 'solid',
+    borderRightWidth: 2,
+  },
+  pinnedShadowRight: {
+    boxShadow: '-4px 0 8px -2px rgba(0, 0, 0, 0.08)',
+    borderLeftColor: colors.borderPrimary,
+    borderLeftStyle: 'solid',
+    borderLeftWidth: 2,
+  },
   booleanContent: {
     width: 'auto',
   },

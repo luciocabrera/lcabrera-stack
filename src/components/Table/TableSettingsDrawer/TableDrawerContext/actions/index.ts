@@ -8,6 +8,7 @@ export { useResetFilters } from './useResetFilters.hook';
 export { useResetSorting } from './useResetSorting.hook';
 export { useResetTableSettings } from './useResetTableSettings.hook';
 export { useSetColumnFilters } from './useSetColumnFilters.hook';
+export { useSetColumnPinning } from './useSetColumnPinning.hook';
 export { useSetColumnsOrder } from './useSetColumnsOrder.hook';
 export { useSetColumnsSizing } from './useSetColumnsSizing.hook';
 export { useSetColumnsSortings } from './useSetColumnsSortings.hook';

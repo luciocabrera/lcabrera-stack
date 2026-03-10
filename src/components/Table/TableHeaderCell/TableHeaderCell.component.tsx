@@ -1,8 +1,9 @@
 import * as stylex from '@stylexjs/stylex';
 
 import { Button } from '@/components/Button';
-import { MoreVerticalIcon } from '@/components/Icons';
+import { MoreVerticalIcon, PinIcon, PinOffIcon } from '@/components/Icons';
 import {
+  useSetColumnPinning,
   useSetColumnSizing,
   useSetColumnSorting,
 } from '@/components/Table/contexts/TableConfig/columns/actions';
@@ -35,6 +36,7 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
   columnKey,
   customStylex,
   hasSettings = false,
+  pinInfo,
   ...rest
 }: TableHeaderCellProps<TData>) => {
   useRenderTracker({ componentName: `TableHeaderCell:${columnKey}` });
@@ -45,6 +47,7 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
   const isLoadingMore = useGetTableIsLoadingMore();
 
   const setColumnSizing = useSetColumnSizing();
+  const setColumnPinning = useSetColumnPinning();
   const setSorting = useSetColumnSorting();
   const setTableColumnSelectedKey = useSetTableColumnSelectedKey();
   const toogleTableIsColumnSettingsOpen = useToogleTableIsColumnSettingsOpen();
@@ -81,11 +84,37 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
     setColumnSizing({ columnKey, width: undefined });
   };
 
+  const handlePinCycle = () => {
+    const currentSide = pinInfo?.side;
+    const nextSide =
+      currentSide === undefined
+        ? 'left'
+        : currentSide === 'left'
+          ? 'right'
+          : undefined;
+    setColumnPinning({ columnKey, side: nextSide });
+  };
+
+  const pinnedStylex =
+    pinInfo?.side === 'left'
+      ? tableHeaderCellStyles.pinnedLeft(pinInfo.offset)
+      : pinInfo?.side === 'right'
+        ? tableHeaderCellStyles.pinnedRight(pinInfo.offset)
+        : undefined;
+
+  const shadowStylex = pinInfo?.isLastPinnedLeft
+    ? tableHeaderCellStyles.pinnedShadowLeft
+    : pinInfo?.isFirstPinnedRight
+      ? tableHeaderCellStyles.pinnedShadowRight
+      : undefined;
+
   return (
     <th
       {...rest}
       {...stylex.props(
         tableHeaderCellStyles.base(effectiveMinWidth, currentWidth),
+        pinnedStylex,
+        shadowStylex,
         customStylex,
       )}
     >
@@ -97,6 +126,26 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
       )}
       <span {...stylex.props(tableHeaderCellStyles.content)}>{label}</span>
       <div {...stylex.props(tableHeaderCellStyles.controls)}>
+        <Button
+          aria-label={
+            pinInfo?.side === undefined
+              ? `Pin ${label} left`
+              : pinInfo.side === 'left'
+                ? `Pin ${label} right`
+                : `Unpin ${label}`
+          }
+          color='ghost'
+          customStylex={tableHeaderCellStyles.settingsButton}
+          icon={
+            pinInfo?.side ? (
+              <PinIcon size={14} />
+            ) : (
+              <PinOffIcon size={14} />
+            )
+          }
+          onClick={handlePinCycle}
+          size='embedded'
+        />
         {isSortable && (
           <Button
             aria-label={`Sort by ${label}`}

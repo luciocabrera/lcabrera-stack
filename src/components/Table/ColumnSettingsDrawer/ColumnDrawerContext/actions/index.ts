@@ -4,5 +4,6 @@ export { useResetAllColumnDrawerSettings } from './useResetAllColumnDrawerSettin
 export { useResetColumnFilter } from './useResetColumnFilter.hook';
 export { useResetToTableState } from './useResetToTableState.hook';
 export { useSetColumnFilter } from './useSetColumnFilter.hook';
+export { useSetColumnPinning } from './useSetColumnPinning.hook';
 export { useSetColumnSizing } from './useSetColumnSizing.hook';
 export { useSetColumnSorting } from './useSetColumnSorting.hook';

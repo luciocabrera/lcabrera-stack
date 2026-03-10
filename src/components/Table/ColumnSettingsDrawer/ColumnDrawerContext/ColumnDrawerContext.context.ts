@@ -1,8 +1,8 @@
 import { createContext } from 'react';
 
-import { getInitialColumnsState } from '@/components/Table/contexts/TableConfig/utils';
-
 import type { ColumnDrawerContextValue } from './ColumnDrawerContext.types';
+
+import { getInitialColumnsState } from './utils';
 
 export const ColumnDrawerContext = createContext<ColumnDrawerContextValue>({
   columnStore: getInitialColumnsState<unknown>({}),

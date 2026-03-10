@@ -1,17 +1,20 @@
 import type {
   ColumnOrderState,
+  ColumnPinningState,
   ColumnVisibilityState,
   TableColumn,
 } from '@/components/Table/Table.types';
 
 type GetEffectiveColumnsArgs<TData> = {
   columnOrder?: ColumnOrderState<TData>;
+  columnPinning?: ColumnPinningState<TData>;
   columns: TableColumn<TData>[];
   columnVisibility?: ColumnVisibilityState<TData>;
 };
 
 export const getEffectiveColumns = <TData>({
   columnOrder,
+  columnPinning,
   columns,
   columnVisibility,
 }: GetEffectiveColumnsArgs<TData>) => {
@@ -30,5 +33,30 @@ export const getEffectiveColumns = <TData>({
           ...visibleColumns.filter((col) => !columnOrder.includes(col.key)),
         ]
       : visibleColumns;
-  return orderedColumns;
+
+  // Apply pinning order: left pinned → unpinned → right pinned
+  if (!columnPinning) return orderedColumns;
+
+  console.log('Applying pinning with columnPinning:', columnPinning);
+
+  const leftPinned = columnPinning.left ?? [];
+  const rightPinned = columnPinning.right ?? [];
+
+  if (leftPinned.length === 0 && rightPinned.length === 0)
+    return orderedColumns;
+
+  const pinnedLeftCols = leftPinned
+    .map((key) => orderedColumns.find((col) => col.key === key))
+    .filter((col): col is NonNullable<typeof col> => col !== undefined);
+
+  const pinnedRightCols = rightPinned
+    .map((key) => orderedColumns.find((col) => col.key === key))
+    .filter((col): col is NonNullable<typeof col> => col !== undefined);
+
+  const unpinnedCols = orderedColumns.filter(
+    (col) =>
+      !leftPinned.includes(col.key) && !rightPinned.includes(col.key),
+  );
+
+  return [...pinnedLeftCols, ...unpinnedCols, ...pinnedRightCols];
 };

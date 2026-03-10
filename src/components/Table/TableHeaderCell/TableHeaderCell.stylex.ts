@@ -31,6 +31,27 @@ export const tableHeaderCellStyles = stylex.create({
     top: 0,
     width: width ?? null,
   }),
+  pinnedLeft: (offset: number) => ({
+    backgroundColor: colors.surfaceSecondary,
+    zIndex: `calc(${zIndex.sticky} + 2)`,
+    left: offset,
+  }),
+  pinnedRight: (offset: number) => ({
+    backgroundColor: colors.surfaceSecondary,
+    zIndex: `calc(${zIndex.sticky} + 2)`,
+    right: offset,
+  }),
+  pinnedShadowLeft: {
+    boxShadow: '4px 0 8px -2px rgba(0, 0, 0, 0.12)',
+    borderRightColor: colors.borderPrimary,
+    borderRightWidth: 2,
+  },
+  pinnedShadowRight: {
+    boxShadow: '-4px 0 8px -2px rgba(0, 0, 0, 0.12)',
+    borderLeftColor: colors.borderPrimary,
+    borderLeftStyle: 'solid',
+    borderLeftWidth: 2,
+  },
   content: {
     flex: '1',
     overflow: 'hidden',

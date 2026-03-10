@@ -1,5 +1,6 @@
 export { useGetColumnFilters } from './useGetColumnFilters.hook';
 export { useGetColumnOrder } from './useGetColumnOrder.hook';
+export { useGetColumnPinning } from './useGetColumnPinning.hook';
 export { useGetColumns } from './useGetColumns.hook';
 export { useGetColumnSizing } from './useGetColumnSizing.hook';
 export { useGetColumnVisibility } from './useGetColumnVisibility.hook';
