@@ -10,7 +10,7 @@ import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const styles = stylex.create({
   container: {
-    gap: spacing.sm,
+    gap: spacing.xs,
     alignItems: 'center',
     display: 'flex',
   },
@@ -25,7 +25,7 @@ export const styles = stylex.create({
   },
 
   track: {
-    padding: '2px',
+    padding: '1px',
     borderColor: {
       default: colors.borderPrimary,
       ':hover': colors.borderSecondary,
@@ -40,7 +40,7 @@ export const styles = stylex.create({
     display: 'inline-flex',
     position: 'relative',
     height: '24px',
-    width: '44px',
+    width: '36px',
   },
   trackChecked: {
     borderColor: colors.brandPrimary,
@@ -51,8 +51,8 @@ export const styles = stylex.create({
     opacity: 0.5,
   },
   trackFocus: {
-    outline: `2px solid ${colors.brandPrimary}`,
-    outlineOffset: '2px',
+    outline: `1px solid ${colors.brandPrimary}`,
+    outlineOffset: '1px',
   },
   thumb: {
     borderRadius: borderRadius.full,
@@ -64,7 +64,7 @@ export const styles = stylex.create({
     width: '18px',
   },
   thumbChecked: {
-    transform: 'translateX(20px)',
+    transform: 'translateX(12px)',
   },
   label: {
     color: colors.textPrimary,

@@ -1,6 +1,7 @@
 import type {
   ColumnFiltersState,
   ColumnOrderState,
+  ColumnPinningState,
   ColumnSizingState,
   ColumnVisibilityState,
   SortingState,
@@ -18,6 +19,7 @@ export const useClearAllSettings = () => {
     columnsStore.set({
       columnFilters: {} as ColumnFiltersState,
       columnOrder: [] as ColumnOrderState,
+      columnPinning: { left: [], right: [] } as ColumnPinningState,
       columnSizing: {} as ColumnSizingState,
       columnVisibility: new Set() as ColumnVisibilityState,
       sorting: [] as SortingState,

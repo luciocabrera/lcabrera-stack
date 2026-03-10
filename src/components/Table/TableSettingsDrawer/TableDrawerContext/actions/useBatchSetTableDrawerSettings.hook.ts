@@ -1,6 +1,7 @@
 import type {
   ColumnFiltersState,
   ColumnOrderState,
+  ColumnPinningState,
   ColumnSizingState,
   ColumnVisibilityState,
   SortingState,
@@ -13,6 +14,7 @@ import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook';
 // type BatchTableSettingsUpdate<TData> = {
 //   columnFilters: ColumnFiltersState;
 //   columnOrder: ColumnOrderState;
+//   columnPinning: ColumnPinningState;  
 //   columnSizing: ColumnSizingState;
 //   columnVisibility: ColumnVisibilityState;
 //   sorting: SortingState;
@@ -35,6 +37,9 @@ export const useBatchSetTableDrawerSettings = () => {
         columnsState?.columnFilters ?? ({} as ColumnFiltersState<unknown>),
       columnOrder:
         columnsState?.columnOrder ?? ([] as ColumnOrderState<unknown>),
+      columnPinning:
+        columnsState?.columnPinning ??
+        ({ left: [], right: [] } as ColumnPinningState<unknown>),
       columnSizing:
         columnsState?.columnSizing ?? ({} as ColumnSizingState<unknown>),
       columnVisibility:

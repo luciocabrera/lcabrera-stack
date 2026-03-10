@@ -1,6 +1,7 @@
 import type {
   ColumnFiltersState,
   ColumnOrderState,
+  ColumnPinningState,
   ColumnSizingState,
   ColumnVisibilityState,
   SortingState,
@@ -20,6 +21,9 @@ export const useResetTableSettings = () => {
     columnsDrawerStore.set({
       columnFilters: columnsState?.columnFilters ?? ({} as ColumnFiltersState),
       columnOrder: columnsState?.columnOrder ?? ([] as ColumnOrderState),
+      columnPinning:
+        columnsState?.columnPinning ??
+        ({ left: [], right: [] } as ColumnPinningState),
       columnSizing: columnsState?.columnSizing ?? ({} as ColumnSizingState),
       columnVisibility:
         columnsState?.columnVisibility ?? ({} as ColumnVisibilityState),
