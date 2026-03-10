@@ -6,6 +6,7 @@ import { colors } from '@/design-system/tokens/colors.stylex';
 export const tableRowStyles = stylex.create({
   base: {
     alignItems: 'center',
+    backgroundColor: colors.surfacePrimary,
     display: 'flex',
     borderBottomColor: colors.borderSecondary,
     borderBottomStyle: 'solid',

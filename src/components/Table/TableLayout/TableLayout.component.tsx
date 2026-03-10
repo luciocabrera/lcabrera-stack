@@ -16,6 +16,7 @@ export const TableLayout = <
   TResponse = Record<string, unknown>,
 >({
   columnOrder,
+  columnPinning,
   columns,
   columnSizing,
   columnVisibility,
@@ -35,6 +36,7 @@ export const TableLayout = <
   const columnsState = {
     columnFilters: filters,
     columnOrder,
+    columnPinning,
     columns,
     columnSizing,
     columnVisibility,

@@ -1,5 +1,4 @@
 import * as stylex from '@stylexjs/stylex';
-import { useMemo } from 'react';
 
 import {
   useGetColumnPinning,
@@ -31,10 +30,11 @@ export const TableBody = ({ tableContainerRef }: TableBodyProps) => {
   const effectiveColumns = useGetEffectiveColumns();
   const data = useGetTableData();
 
-  const pinnedOffsets = useMemo(
-    () => getPinnedColumnOffsets({ columnPinning, columnSizing, effectiveColumns }),
-    [columnPinning, columnSizing, effectiveColumns],
-  );
+  const pinnedOffsets = getPinnedColumnOffsets({
+    columnPinning,
+    columnSizing,
+    effectiveColumns,
+  });
   const rowHeight = useGetTableRowHeight();
   const overscan = useGetTableOverscan();
 
