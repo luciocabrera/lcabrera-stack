@@ -47,8 +47,8 @@ export const UnpinConflictModal = ({
       title='Unpin Conflict'
     >
       <p {...stylex.props(styles.description)}>
-        Unpinning <strong>{columnLabel}</strong> would leave a gap in the{' '}
-        {side}-pinned columns. Choose how to resolve this:
+        Unpinning <strong>{columnLabel}</strong> would leave a gap in the {side}
+        -pinned columns. Choose how to resolve this:
       </p>
       <RadioOptionGroup
         name='unpin-conflict-resolution'

@@ -20,7 +20,6 @@ export const getInitialColumnsState = <TData>({
   columnVisibility = new Set<string>(),
   sorting = [],
 }: GetInitialTableStateArgs<TData>) => {
-
   const effectiveColumns = getEffectiveColumns<TData>({
     columnOrder,
     columnPinning,

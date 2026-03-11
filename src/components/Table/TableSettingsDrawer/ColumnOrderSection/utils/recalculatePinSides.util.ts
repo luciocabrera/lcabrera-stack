@@ -21,8 +21,14 @@ export const recalculatePinSides = ({
   const newRight: string[] = [];
 
   const allPinned = [
-    ...columnPinning.left.map((key) => ({ key, originalSide: 'left' as const })),
-    ...columnPinning.right.map((key) => ({ key, originalSide: 'right' as const })),
+    ...columnPinning.left.map((key) => ({
+      key,
+      originalSide: 'left' as const,
+    })),
+    ...columnPinning.right.map((key) => ({
+      key,
+      originalSide: 'right' as const,
+    })),
   ];
 
   for (const { key, originalSide } of allPinned) {
@@ -49,8 +55,10 @@ export const recalculatePinSides = ({
   // Preserve order: sort by position in newOrder
   const orderIndex = new Map(newOrder.map((key, i) => [key, i]));
   const sortByOrder = (keys: string[]) =>
-    // eslint-disable-next-line local-rules/destructuring-for-functions
-    keys.toSorted((a, b) => (orderIndex.get(a) ?? 0) - (orderIndex.get(b) ?? 0));
+    keys.toSorted(
+      // eslint-disable-next-line local-rules/destructuring-for-functions
+      (a, b) => (orderIndex.get(a) ?? 0) - (orderIndex.get(b) ?? 0),
+    );
 
   return {
     left: sortByOrder(newLeft),

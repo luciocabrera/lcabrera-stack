@@ -2,7 +2,10 @@ import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 
 import type { DraggableItem } from '@/components/DraggableList';
-import type { ColumnOrderState, ColumnPinningState } from '@/components/Table/Table.types';
+import type {
+  ColumnOrderState,
+  ColumnPinningState,
+} from '@/components/Table/Table.types';
 
 import { DraggableList } from '@/components/DraggableList';
 import { SidePanelSectionHeader } from '@/components/SidePanel';
@@ -35,7 +38,11 @@ import { OrderConflictModal } from './OrderConflictModal';
 import { PinConflictModal } from './PinConflictModal';
 import { PinSideModal } from './PinSideModal';
 import { UnpinConflictModal } from './UnpinConflictModal';
-import { detectPinOrderConflict, recalculatePinSides, resolvePinOrderConflict } from './utils';
+import {
+  detectPinOrderConflict,
+  recalculatePinSides,
+  resolvePinOrderConflict,
+} from './utils';
 
 export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
   const columns = useGetColumns();
@@ -119,7 +126,12 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
       newOrder: newColumnOrder,
     });
 
-    if (!detectPinOrderConflict({ columnPinning: recalculatedPinning, newOrder: newColumnOrder })) {
+    if (
+      !detectPinOrderConflict({
+        columnPinning: recalculatedPinning,
+        newOrder: newColumnOrder,
+      })
+    ) {
       setColumnsOrder(newColumnOrder);
       setColumnPinning(recalculatedPinning);
       return;
@@ -196,9 +208,16 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
         right: columnPinning.right.filter((k) => k !== columnKey),
       };
 
-      const currentOrder = allOrderedColumns.map((col) => col.key) as ColumnOrderState;
+      const currentOrder = allOrderedColumns.map(
+        (col) => col.key,
+      ) as ColumnOrderState;
 
-      if (!detectPinOrderConflict({ columnPinning: newPinning, newOrder: currentOrder })) {
+      if (
+        !detectPinOrderConflict({
+          columnPinning: newPinning,
+          newOrder: currentOrder,
+        })
+      ) {
         setColumnPinning(newPinning);
         return;
       }
