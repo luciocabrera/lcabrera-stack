@@ -51,7 +51,7 @@ export const modalStyles = stylex.create({
     gap: spacing.sm,
     alignItems: 'flex-start',
     display: 'flex',
-     flexShrink: 0,
+    flexShrink: 0,
     justifyContent: 'space-between',
     borderBottomColor: colors.borderSecondary,
     borderBottomStyle: 'solid',

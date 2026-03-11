@@ -137,11 +137,7 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
           color='ghost'
           customStylex={tableHeaderCellStyles.settingsButton}
           icon={
-            pinInfo?.side ? (
-              <PinIcon size={14} />
-            ) : (
-              <PinOffIcon size={14} />
-            )
+            pinInfo?.side ? <PinIcon size={14} /> : <PinOffIcon size={14} />
           }
           onClick={handlePinCycle}
           size='embedded'

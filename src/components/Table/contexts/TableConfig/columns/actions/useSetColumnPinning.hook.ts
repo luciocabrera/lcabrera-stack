@@ -1,4 +1,7 @@
-import type { ColumnPinningState, DataKey } from '@/components/Table/Table.types';
+import type {
+  ColumnPinningState,
+  DataKey,
+} from '@/components/Table/Table.types';
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { usePersistTableStateAction } from '@/components/Table/hooks';

@@ -4,4 +4,4 @@ export { getPinnedColumnOffsets } from './getPinnedColumnOffsets.util';
 export { readPersistedStateFromCookie } from './readPersistedStateFromCookie.util';
 export { serializeStateSlice } from './serializeStateSlice.util';
 export { syncColumnOrderWithPinning } from './syncColumnOrderWithPinning.util';
-export { writeStateSlice } from './writeStateSlice.util'; 
+export { writeStateSlice } from './writeStateSlice.util';

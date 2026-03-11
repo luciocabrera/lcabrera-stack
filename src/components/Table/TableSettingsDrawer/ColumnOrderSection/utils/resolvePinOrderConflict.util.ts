@@ -1,4 +1,7 @@
-import type { ColumnOrderState, ColumnPinningState } from '@/components/Table/Table.types';
+import type {
+  ColumnOrderState,
+  ColumnPinningState,
+} from '@/components/Table/Table.types';
 
 import type { OrderConflictResolution } from '../ColumnOrderSection.types';
 
@@ -43,7 +46,10 @@ export const resolvePinOrderConflict = ({
 const removeConflictingPins = ({
   columnPinning,
   newOrder,
-}: Omit<ResolvePinOrderConflictArgs, 'resolution'>): ResolvePinOrderConflictResult => {
+}: Omit<
+  ResolvePinOrderConflictArgs,
+  'resolution'
+>): ResolvePinOrderConflictResult => {
   const validLeft: string[] = [];
   for (const key of newOrder) {
     if (columnPinning.left.includes(key)) {
@@ -75,17 +81,17 @@ const removeConflictingPins = ({
 const pinToMatchOrder = ({
   columnPinning,
   newOrder,
-}: Omit<ResolvePinOrderConflictArgs, 'resolution'>): ResolvePinOrderConflictResult => {
-  const leftPinned = newOrder.filter((key) =>
-    columnPinning.left.includes(key),
-  );
+}: Omit<
+  ResolvePinOrderConflictArgs,
+  'resolution'
+>): ResolvePinOrderConflictResult => {
+  const leftPinned = newOrder.filter((key) => columnPinning.left.includes(key));
   const rightPinned = newOrder.filter((key) =>
     columnPinning.right.includes(key),
   );
   const middle = newOrder.filter(
     (key) =>
-      !columnPinning.left.includes(key) &&
-      !columnPinning.right.includes(key),
+      !columnPinning.left.includes(key) && !columnPinning.right.includes(key),
   );
 
   return {

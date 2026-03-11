@@ -14,7 +14,7 @@ import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook';
 // type BatchTableSettingsUpdate<TData> = {
 //   columnFilters: ColumnFiltersState;
 //   columnOrder: ColumnOrderState;
-//   columnPinning: ColumnPinningState;  
+//   columnPinning: ColumnPinningState;
 //   columnSizing: ColumnSizingState;
 //   columnVisibility: ColumnVisibilityState;
 //   sorting: SortingState;

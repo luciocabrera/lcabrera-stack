@@ -2,11 +2,11 @@ import * as stylex from '@stylexjs/stylex';
 import { useCallback, useState } from 'react';
 
 import { Button } from '@/components/Button';
+import { SidePanelSectionHeader } from '@/components/SidePanel';
 import {
   useGetColumns,
   useGetNormalizedColumns,
 } from '@/components/Table/contexts/TableConfig/columns/selectors';
-import { SidePanelSectionHeader } from '@/components/SidePanel';
 import { VirtualSelect } from '@/components/VirtualSelect';
 
 import type { AddFilterSectionProps } from './AddFilterSection.types';

@@ -46,9 +46,7 @@ export const OrderConflictModal = ({
       onClose={handleCancel}
       title='Order & Pinning Conflict'
     >
-      <p {...stylex.props(styles.description)}>
-        {description}
-      </p>
+      <p {...stylex.props(styles.description)}>{description}</p>
       <RadioOptionGroup
         name='sort-order-conflict-resolution'
         onChange={(value) => {

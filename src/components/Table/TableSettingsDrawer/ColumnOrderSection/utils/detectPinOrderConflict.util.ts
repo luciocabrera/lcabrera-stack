@@ -1,4 +1,7 @@
-import type { ColumnOrderState, ColumnPinningState } from '@/components/Table/Table.types';
+import type {
+  ColumnOrderState,
+  ColumnPinningState,
+} from '@/components/Table/Table.types';
 
 type DetectPinOrderConflictArgs = {
   columnPinning: ColumnPinningState;

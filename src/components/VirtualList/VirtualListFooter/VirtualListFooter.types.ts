@@ -1,4 +1,7 @@
-import type { ListFilterMode, VirtualListDataState } from '../VirtualList.types';
+import type {
+  ListFilterMode,
+  VirtualListDataState,
+} from '../VirtualList.types';
 
 export type VirtualListFooterProps = {
   dataState: VirtualListDataState;

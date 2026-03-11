@@ -215,7 +215,9 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
           columnPinning.right.includes(key),
         );
         const insertAt =
-          firstRightPinnedIndex === -1 ? newOrder.length : firstRightPinnedIndex;
+          firstRightPinnedIndex === -1
+            ? newOrder.length
+            : firstRightPinnedIndex;
         newOrder.splice(insertAt, 0, column.key);
       }
 
@@ -274,9 +276,7 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
     });
   };
 
-  const handleOrderConflictAccept = (
-    resolution: OrderConflictResolution,
-  ) => {
+  const handleOrderConflictAccept = (resolution: OrderConflictResolution) => {
     const result = resolvePinOrderConflict({
       columnPinning,
       newOrder: orderConflict.pendingOrder,
