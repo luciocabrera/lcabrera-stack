@@ -2,7 +2,7 @@ import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 
 import type { DraggableItem } from '@/components/DraggableList';
-import type { ColumnOrderState } from '@/components/Table/Table.types';
+import type { ColumnOrderState, ColumnPinningState } from '@/components/Table/Table.types';
 
 import { DraggableList } from '@/components/DraggableList';
 import { SidePanelSectionHeader } from '@/components/SidePanel';
@@ -14,6 +14,8 @@ import type {
   HandleToggleVisibilityArgs,
   OrderConflictResolution,
   PinConflictResolution,
+  PinSide,
+  UnpinConflictResolution,
 } from './ColumnOrderSection.types';
 
 import {
@@ -31,7 +33,9 @@ import { styles } from './ColumnOrderSection.stylex';
 import { ColumnOrderSectionFooter } from './ColumnOrderSectionFooter';
 import { OrderConflictModal } from './OrderConflictModal';
 import { PinConflictModal } from './PinConflictModal';
-import { detectPinOrderConflict, resolvePinOrderConflict } from './utils';
+import { PinSideModal } from './PinSideModal';
+import { UnpinConflictModal } from './UnpinConflictModal';
+import { detectPinOrderConflict, recalculatePinSides, resolvePinOrderConflict } from './utils';
 
 export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
   const columns = useGetColumns();
@@ -45,7 +49,20 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
 
   const computeOrderBySorting = useComputeOrderBySorting();
 
+  const [pinSideModal, setPinSideModal] = useState<{
+    columnKey: string;
+    columnLabel: string;
+    isOpen: boolean;
+  }>({ columnKey: '', columnLabel: '', isOpen: false });
+
   const [conflictModal, setConflictModal] = useState<{
+    columnKey: string;
+    columnLabel: string;
+    isOpen: boolean;
+    side: 'left' | 'right';
+  }>({ columnKey: '', columnLabel: '', isOpen: false, side: 'left' });
+
+  const [unpinConflictModal, setUnpinConflictModal] = useState<{
     columnKey: string;
     columnLabel: string;
     isOpen: boolean;
@@ -56,10 +73,12 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
     description: string;
     isOpen: boolean;
     pendingOrder: ColumnOrderState;
+    pendingPinning: ColumnPinningState;
   }>({
     description: '',
     isOpen: false,
     pendingOrder: [] as unknown as ColumnOrderState,
+    pendingPinning: { left: [], right: [] },
   });
 
   // Build ordered column list (use columnOrder if available, otherwise use column definition order)
@@ -94,8 +113,15 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
       (item) => item.id,
     ) as ColumnOrderState;
 
-    if (!detectPinOrderConflict({ columnPinning, newOrder: newColumnOrder })) {
+    // Recalculate pin sides based on new positions (closest edge)
+    const recalculatedPinning = recalculatePinSides({
+      columnPinning,
+      newOrder: newColumnOrder,
+    });
+
+    if (!detectPinOrderConflict({ columnPinning: recalculatedPinning, newOrder: newColumnOrder })) {
       setColumnsOrder(newColumnOrder);
+      setColumnPinning(recalculatedPinning);
       return;
     }
 
@@ -104,6 +130,7 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
         'Dragging this column broke the pinning layout. Pinned columns must stay at the edges. Choose how to proceed:',
       isOpen: true,
       pendingOrder: newColumnOrder,
+      pendingPinning: recalculatedPinning,
     });
   };
 
@@ -164,17 +191,53 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
     isPinning: boolean;
   }) => {
     if (!isPinning) {
-      // Unpinning — just remove
-      setColumnPinning({
+      const newPinning = {
         left: columnPinning.left.filter((k) => k !== columnKey),
         right: columnPinning.right.filter((k) => k !== columnKey),
+      };
+
+      const currentOrder = allOrderedColumns.map((col) => col.key) as ColumnOrderState;
+
+      if (!detectPinOrderConflict({ columnPinning: newPinning, newOrder: currentOrder })) {
+        setColumnPinning(newPinning);
+        return;
+      }
+
+      const side = columnPinning.left.includes(columnKey) ? 'left' : 'right';
+      const col = allOrderedColumns.find((c) => c.key === columnKey);
+      setUnpinConflictModal({
+        columnKey,
+        columnLabel: col?.label ?? columnKey,
+        isOpen: true,
+        side,
       });
       return;
     }
 
+    const col = allOrderedColumns.find((c) => c.key === columnKey);
+    setPinSideModal({
+      columnKey,
+      columnLabel: col?.label ?? columnKey,
+      isOpen: true,
+    });
+  };
+
+  const resolveSide = ({
+    columnKey,
+    pinSide,
+  }: {
+    columnKey: string;
+    pinSide: PinSide;
+  }): 'left' | 'right' => {
+    if (pinSide !== 'closest-edge') return pinSide;
     const index = allOrderedColumns.findIndex((col) => col.key === columnKey);
     const midpoint = Math.floor(allOrderedColumns.length / 2);
-    const side = index < midpoint ? 'left' : 'right';
+    return index < midpoint ? 'left' : 'right';
+  };
+
+  const handlePinSideAccept = (pinSide: PinSide) => {
+    const { columnKey } = pinSideModal;
+    const side = resolveSide({ columnKey, pinSide });
 
     if (isContiguousPin({ columnKey, side })) {
       applyPin({ columnKey, side });
@@ -187,6 +250,86 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
         side,
       });
     }
+
+    setPinSideModal((prev) => ({ ...prev, isOpen: false }));
+  };
+
+  const handlePinSideCancel = () => {
+    setPinSideModal((prev) => ({ ...prev, isOpen: false }));
+  };
+
+  const handleUnpinConflictAccept = (resolution: UnpinConflictResolution) => {
+    const { columnKey, side } = unpinConflictModal;
+    const index = allOrderedColumns.findIndex((col) => col.key === columnKey);
+
+    if (resolution === 'unpin-beyond') {
+      const newPinning = {
+        left: [...columnPinning.left],
+        right: [...columnPinning.right],
+      };
+
+      if (side === 'left') {
+        // Unpin this column and all left-pinned columns after it (towards center)
+        const keysToUnpin = new Set(
+          allOrderedColumns
+            .slice(index)
+            .map((col) => col.key)
+            .filter((key) => newPinning.left.includes(key)),
+        );
+        newPinning.left = newPinning.left.filter((k) => !keysToUnpin.has(k));
+      } else {
+        // Unpin this column and all right-pinned columns before it (towards center)
+        const keysToUnpin = new Set(
+          allOrderedColumns
+            .slice(0, index + 1)
+            .map((col) => col.key)
+            .filter((key) => newPinning.right.includes(key)),
+        );
+        newPinning.right = newPinning.right.filter((k) => !keysToUnpin.has(k));
+      }
+
+      setColumnPinning(newPinning);
+    } else {
+      // reorder-to-fill: remove pin and move remaining pinned columns together
+      const newPinning = {
+        left: columnPinning.left.filter((k) => k !== columnKey),
+        right: columnPinning.right.filter((k) => k !== columnKey),
+      };
+
+      const newOrder = allOrderedColumns
+        .filter((col) => col.key !== columnKey)
+        .map((col) => col.key);
+
+      if (side === 'left') {
+        // Insert after the last left-pinned column
+        let lastLeftPinnedIndex = -1;
+        for (const [i, key] of newOrder.entries()) {
+          if (newPinning.left.includes(key)) {
+            lastLeftPinnedIndex = i;
+          }
+        }
+        newOrder.splice(lastLeftPinnedIndex + 1, 0, columnKey);
+      } else {
+        // Insert before the first right-pinned column
+        const firstRightPinnedIndex = newOrder.findIndex((key) =>
+          newPinning.right.includes(key),
+        );
+        const insertAt =
+          firstRightPinnedIndex === -1
+            ? newOrder.length
+            : firstRightPinnedIndex;
+        newOrder.splice(insertAt, 0, columnKey);
+      }
+
+      setColumnsOrder(newOrder as ColumnOrderState);
+      setColumnPinning(newPinning);
+    }
+
+    setUnpinConflictModal((prev) => ({ ...prev, isOpen: false }));
+  };
+
+  const handleUnpinConflictCancel = () => {
+    setUnpinConflictModal((prev) => ({ ...prev, isOpen: false }));
   };
 
   const handleConflictAccept = (resolution: PinConflictResolution) => {
@@ -273,12 +416,13 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
         'Reordering columns by sorting will move pinned columns out of their pinned positions. Choose how to proceed:',
       isOpen: true,
       pendingOrder: newOrder,
+      pendingPinning: columnPinning,
     });
   };
 
   const handleOrderConflictAccept = (resolution: OrderConflictResolution) => {
     const result = resolvePinOrderConflict({
-      columnPinning,
+      columnPinning: orderConflict.pendingPinning,
       newOrder: orderConflict.pendingOrder,
       resolution,
     });
@@ -339,12 +483,25 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
       <DraggableList items={draggableItems} onOrderChange={handleReorder} />
 
       <ColumnOrderSectionFooter onOrderBySorting={handleOrderBySorting} />
+      <PinSideModal
+        columnLabel={pinSideModal.columnLabel}
+        isOpen={pinSideModal.isOpen}
+        onAccept={handlePinSideAccept}
+        onCancel={handlePinSideCancel}
+      />
       <PinConflictModal
         columnLabel={conflictModal.columnLabel}
         isOpen={conflictModal.isOpen}
         onAccept={handleConflictAccept}
         onCancel={handleConflictCancel}
         side={conflictModal.side}
+      />
+      <UnpinConflictModal
+        columnLabel={unpinConflictModal.columnLabel}
+        isOpen={unpinConflictModal.isOpen}
+        onAccept={handleUnpinConflictAccept}
+        onCancel={handleUnpinConflictCancel}
+        side={unpinConflictModal.side}
       />
       <OrderConflictModal
         description={orderConflict.description}

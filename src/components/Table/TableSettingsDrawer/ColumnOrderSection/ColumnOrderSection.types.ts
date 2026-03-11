@@ -13,3 +13,7 @@ export type OrderConflictResolution =
   | 'reset-all-pins';
 
 export type PinConflictResolution = 'move-column' | 'pin-all-between';
+
+export type PinSide = 'closest-edge' | 'left' | 'right';
+
+export type UnpinConflictResolution = 'reorder-to-fill' | 'unpin-beyond';
