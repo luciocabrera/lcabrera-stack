@@ -1,55 +1,28 @@
 import * as stylex from '@stylexjs/stylex';
 
 import { Button } from '@/components/Button';
-import { EraserIcon, PinLeftIcon, PinRightIcon, RefreshIcon } from '@/components/Icons';
-import { ICON_SIZE_MD, ICON_SIZE_SM } from '@/design-system/constants';
+import { PinLeftIcon, PinRightIcon } from '@/components/Icons';
+import { ICON_SIZE_MD } from '@/design-system/constants';
 
 import type { PinningSectionProps } from './PinningSection.types';
 
-import {
-  useResetColumnPinning,
-  useSetColumnPinning,
-} from '../ColumnDrawerContext/actions';
+import { useSetColumnPinning } from '../ColumnDrawerContext/actions';
 import { useGetColumnPinning } from '../ColumnDrawerContext/selectors';
 import { styles } from './PinningSection.stylex';
+import { PinningSectionToolbar } from './PinningSectionToolbar';
 
 export const PinningSection = <TData,>({
   columnKey: _columnKey,
 }: PinningSectionProps<TData>) => {
   const columnPinning = useGetColumnPinning();
   const setColumnPinning = useSetColumnPinning();
-  const resetColumnPinning = useResetColumnPinning();
-
-  const hasPinning = columnPinning !== undefined;
-
-  const handleClear = () => {
-    setColumnPinning(undefined);
-  };
 
   return (
     <div {...stylex.props(styles.container)}>
       <div {...stylex.props(styles.section)}>
         <div {...stylex.props(styles.headerRow)}>
           <h3 {...stylex.props(styles.headerTitle)}>Column Pinning</h3>
-          <div {...stylex.props(styles.headerToolbar)}>
-            <Button
-              aria-label='Clear Pinning'
-              color='ghost'
-              icon={<EraserIcon size={ICON_SIZE_SM} />}
-              isDisabled={!hasPinning}
-              onClick={handleClear}
-              size='mini'
-              width='auto'
-            />
-            <Button
-              aria-label='Reset Pinning'
-              color='ghost'
-              icon={<RefreshIcon size={ICON_SIZE_SM} />}
-              onClick={resetColumnPinning}
-              size='mini'
-              width='auto'
-            />
-          </div>
+          <PinningSectionToolbar variant='toolbar' />
         </div>
         <div {...stylex.props(styles.buttonGroup)}>
           <Button
@@ -76,27 +49,7 @@ export const PinningSection = <TData,>({
           </Button>
         </div>
       </div>
-      <div {...stylex.props(styles.resetSection)}>
-        <Button
-          color='outline'
-          icon={<EraserIcon size={ICON_SIZE_MD} />}
-          isDisabled={!hasPinning}
-          onClick={handleClear}
-          size='sm'
-          width='full'
-        >
-          Clear Pinning
-        </Button>
-        <Button
-          color='outline'
-          icon={<RefreshIcon size={ICON_SIZE_MD} />}
-          onClick={resetColumnPinning}
-          size='sm'
-          width='full'
-        >
-          Reset Pinning
-        </Button>
-      </div>
+      <PinningSectionToolbar />
     </div>
   );
 };
