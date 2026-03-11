@@ -3,36 +3,13 @@ import { useState } from 'react';
 
 import { Button } from '@/components/Button';
 import { Modal } from '@/components/Modal';
+import { RadioOptionGroup } from '@/components/RadioOptionGroup';
 
-import type { SortOrderConflictResolution } from '../utils';
+import type { SortOrderConflictResolution } from '../ColumnOrderSection.types';
 import type { SortOrderConflictModalProps } from './SortOrderConflictModal.types';
 
-import { pinConflictModalStyles } from '../PinConflictModal/PinConflictModal.stylex';
-
-const RESOLUTIONS: {
-  description: string;
-  label: string;
-  value: SortOrderConflictResolution;
-}[] = [
-  {
-    description:
-      'Apply the new sorting order and remove any pinning that no longer matches.',
-    label: 'Apply order & remove conflicting pins',
-    value: 'remove-conflicting-pins',
-  },
-  {
-    description:
-      'Apply the new sorting order and clear all column pinning.',
-    label: 'Apply order & reset all pins',
-    value: 'reset-all-pins',
-  },
-  {
-    description:
-      'Move pinned columns to the edges so both the new order and all existing pins are preserved.',
-    label: 'Apply order & keep all pins',
-    value: 'pin-to-match-order',
-  },
-];
+import { RESOLUTIONS } from './SortOrderConflictModal.constants';
+import { styles } from './SortOrderConflictModal.stylex';
 
 export const SortOrderConflictModal = ({
   isOpen,
@@ -68,42 +45,18 @@ export const SortOrderConflictModal = ({
       onClose={handleCancel}
       title='Sorting & Pinning Conflict'
     >
-      <p {...stylex.props(pinConflictModalStyles.description)}>
+      <p {...stylex.props(styles.description)}>
         Reordering columns by sorting will move pinned columns out of their
         pinned positions. Choose how to proceed:
       </p>
-      <div {...stylex.props(pinConflictModalStyles.options)}>
-        {RESOLUTIONS.map((res) => (
-          <label
-            key={res.value}
-            {...stylex.props(
-              pinConflictModalStyles.option,
-              selectedResolution === res.value &&
-                pinConflictModalStyles.optionSelected,
-            )}
-          >
-            <input
-              {...stylex.props(pinConflictModalStyles.radio)}
-              checked={selectedResolution === res.value}
-              name='sort-order-conflict-resolution'
-              onChange={() => {
-                setSelectedResolution(res.value);
-              }}
-              type='radio'
-              value={res.value}
-            />
-            <span>
-              <span {...stylex.props(pinConflictModalStyles.optionLabel)}>
-                {res.label}
-              </span>
-              <br />
-              <span {...stylex.props(pinConflictModalStyles.description)}>
-                {res.description}
-              </span>
-            </span>
-          </label>
-        ))}
-      </div>
+      <RadioOptionGroup
+        name='sort-order-conflict-resolution'
+        onChange={(value) => {
+          setSelectedResolution(value as SortOrderConflictResolution);
+        }}
+        options={RESOLUTIONS}
+        value={selectedResolution}
+      />
     </Modal>
   );
 };

@@ -1,3 +1,5 @@
+import type { PinConflictResolution } from '../ColumnOrderSection.types';
+
 export type PinConflictModalProps = {
   columnLabel: string;
   isOpen: boolean;
@@ -5,5 +7,3 @@ export type PinConflictModalProps = {
   onCancel: () => void;
   side: 'left' | 'right';
 };
-
-export type PinConflictResolution = 'move-column' | 'pin-all-between';

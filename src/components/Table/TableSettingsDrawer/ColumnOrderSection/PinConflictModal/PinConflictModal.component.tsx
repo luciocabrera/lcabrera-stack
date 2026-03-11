@@ -3,13 +3,12 @@ import { useState } from 'react';
 
 import { Button } from '@/components/Button';
 import { Modal } from '@/components/Modal';
+import { RadioOptionGroup } from '@/components/RadioOptionGroup';
 
-import type {
-  PinConflictModalProps,
-  PinConflictResolution,
-} from './PinConflictModal.types';
+import type { PinConflictResolution } from '../ColumnOrderSection.types';
+import type { PinConflictModalProps } from './PinConflictModal.types';
 
-import { pinConflictModalStyles } from './PinConflictModal.stylex';
+import { styles } from './PinConflictModal.stylex';
 
 export const PinConflictModal = ({
   columnLabel,
@@ -30,7 +29,7 @@ export const PinConflictModal = ({
     onCancel();
     setSelectedResolution('move-column');
   };
-// TODO: create components for the options, to avoid repeating the same structure and styles for each option, and to make the code more readable --- IGNORE ---
+
   return (
     <Modal
       footer={
@@ -47,54 +46,27 @@ export const PinConflictModal = ({
       onClose={handleCancel}
       title='Pin Conflict'
     >
-      <p {...stylex.props(pinConflictModalStyles.description)}>
+      <p {...stylex.props(styles.description)}>
         <strong>{columnLabel}</strong> is not adjacent to the {side}-pinned
         columns. Choose how to resolve this:
       </p>
-      <div {...stylex.props(pinConflictModalStyles.options)}>
-        <label
-          {...stylex.props(
-            pinConflictModalStyles.option,
-            selectedResolution === 'move-column' &&
-              pinConflictModalStyles.optionSelected,
-          )}
-        >
-          <input
-            {...stylex.props(pinConflictModalStyles.radio)}
-            checked={selectedResolution === 'move-column'}
-            name='pin-conflict-resolution'
-            onChange={() => {
-              setSelectedResolution('move-column');
-            }}
-            type='radio'
-            value='move-column'
-          />
-          <span {...stylex.props(pinConflictModalStyles.optionLabel)}>
-            Move column next to {side}-pinned columns
-          </span>
-        </label>
-        <label
-          {...stylex.props(
-            pinConflictModalStyles.option,
-            selectedResolution === 'pin-all-between' &&
-              pinConflictModalStyles.optionSelected,
-          )}
-        >
-          <input
-            {...stylex.props(pinConflictModalStyles.radio)}
-            checked={selectedResolution === 'pin-all-between'}
-            name='pin-conflict-resolution'
-            onChange={() => {
-              setSelectedResolution('pin-all-between');
-            }}
-            type='radio'
-            value='pin-all-between'
-          />
-          <span {...stylex.props(pinConflictModalStyles.optionLabel)}>
-            Pin all columns between edge and this column
-          </span>
-        </label>
-      </div>
+      <RadioOptionGroup
+        name='pin-conflict-resolution'
+        onChange={(value) => {
+          setSelectedResolution(value as PinConflictResolution);
+        }}
+        options={[
+          {
+            label: `Move column next to ${side}-pinned columns`,
+            value: 'move-column',
+          },
+          {
+            label: 'Pin all columns between edge and this column',
+            value: 'pin-all-between',
+          },
+        ]}
+        value={selectedResolution}
+      />
     </Modal>
   );
 };

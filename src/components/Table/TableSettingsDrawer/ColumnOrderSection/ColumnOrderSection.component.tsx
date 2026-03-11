@@ -12,9 +12,9 @@ import { ToggleSwitch } from '@/components/ToggleSwitch';
 import type {
   ColumnOrderSectionProps,
   HandleToggleVisibilityArgs,
+  PinConflictResolution,
+  SortOrderConflictResolution,
 } from './ColumnOrderSection.types';
-import type { PinConflictResolution } from './PinConflictModal';
-import type { SortOrderConflictResolution } from './utils';
 
 import {
   useComputeOrderBySorting,

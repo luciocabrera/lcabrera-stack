@@ -1,9 +1,6 @@
 import type { ColumnOrderState, ColumnPinningState } from '@/components/Table/Table.types';
 
-export type SortOrderConflictResolution =
-  | 'pin-to-match-order'
-  | 'remove-conflicting-pins'
-  | 'reset-all-pins';
+import type { SortOrderConflictResolution } from '../ColumnOrderSection.types';
 
 type ResolvePinOrderConflictArgs = {
   columnPinning: ColumnPinningState;

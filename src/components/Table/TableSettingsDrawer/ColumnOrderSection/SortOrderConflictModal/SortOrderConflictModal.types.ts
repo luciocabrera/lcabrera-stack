@@ -1,4 +1,4 @@
-import type { SortOrderConflictResolution } from '../utils';
+import type { SortOrderConflictResolution } from '../ColumnOrderSection.types';
 
 export type SortOrderConflictModalProps = {
   isOpen: boolean;
