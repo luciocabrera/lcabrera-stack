@@ -2,7 +2,7 @@ import * as stylex from '@stylexjs/stylex';
 
 import { Button } from '@/components/Button';
 import { EraserIcon, PinIcon, RefreshIcon } from '@/components/Icons';
-import { ICON_SIZE_MD } from '@/design-system/constants';
+import { ICON_SIZE_MD, ICON_SIZE_SM } from '@/design-system/constants';
 
 import type { PinningSectionProps } from './PinningSection.types';
 
@@ -29,7 +29,28 @@ export const PinningSection = <TData,>({
   return (
     <div {...stylex.props(styles.container)}>
       <div {...stylex.props(styles.section)}>
-        <h3 {...stylex.props(styles.sectionTitle)}>Column Pinning</h3>
+        <div {...stylex.props(styles.headerRow)}>
+          <h3 {...stylex.props(styles.headerTitle)}>Column Pinning</h3>
+          <div {...stylex.props(styles.headerToolbar)}>
+            <Button
+              aria-label='Clear Pinning'
+              color='ghost'
+              icon={<EraserIcon size={ICON_SIZE_SM} />}
+              isDisabled={!hasPinning}
+              onClick={handleClear}
+              size='mini'
+              width='auto'
+            />
+            <Button
+              aria-label='Reset Pinning'
+              color='ghost'
+              icon={<RefreshIcon size={ICON_SIZE_SM} />}
+              onClick={resetColumnPinning}
+              size='mini'
+              width='auto'
+            />
+          </div>
+        </div>
         <div {...stylex.props(styles.buttonGroup)}>
           <Button
             color={columnPinning === 'left' ? 'primary' : 'outline'}

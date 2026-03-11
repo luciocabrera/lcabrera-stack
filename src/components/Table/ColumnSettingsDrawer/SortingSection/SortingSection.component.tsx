@@ -2,7 +2,7 @@ import * as stylex from '@stylexjs/stylex';
 
 import { Button } from '@/components/Button';
 import { EraserIcon, RefreshIcon, SortAscIcon, SortDescIcon } from '@/components/Icons';
-import { ICON_SIZE_MD } from '@/design-system/constants';
+import { ICON_SIZE_MD, ICON_SIZE_SM } from '@/design-system/constants';
 
 import type { SortingSectionProps } from './SortingSection.types';
 
@@ -35,7 +35,28 @@ export const SortingSection = (_props: SortingSectionProps) => {
   return (
     <div {...stylex.props(styles.container)}>
       <div {...stylex.props(styles.section)}>
-        <h3 {...stylex.props(styles.sectionTitle)}>Column Sorting</h3>
+        <div {...stylex.props(styles.headerRow)}>
+          <h3 {...stylex.props(styles.headerTitle)}>Column Sorting</h3>
+          <div {...stylex.props(styles.headerToolbar)}>
+            <Button
+              aria-label='Clear Sorting'
+              color='ghost'
+              icon={<EraserIcon size={ICON_SIZE_SM} />}
+              isDisabled={!hasSorting}
+              onClick={handleClear}
+              size='mini'
+              width='auto'
+            />
+            <Button
+              aria-label='Reset Sorting'
+              color='ghost'
+              icon={<RefreshIcon size={ICON_SIZE_SM} />}
+              onClick={resetColumnSorting}
+              size='mini'
+              width='auto'
+            />
+          </div>
+        </div>
         <div {...stylex.props(styles.list)}>
         <Button
           color={sortDirection === 'asc' ? 'primary' : 'outline'}

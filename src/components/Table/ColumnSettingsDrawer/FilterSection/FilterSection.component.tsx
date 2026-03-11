@@ -2,7 +2,7 @@ import * as stylex from '@stylexjs/stylex';
 
 import { Button } from '@/components/Button';
 import { EraserIcon, RefreshIcon } from '@/components/Icons';
-import { ICON_SIZE_MD } from '@/design-system/constants';
+import { ICON_SIZE_MD, ICON_SIZE_SM } from '@/design-system/constants';
 
 import type { FilterSectionProps } from './FilterSection.types';
 
@@ -30,7 +30,28 @@ export const FilterSection = <TData,>({
   return (
     <div {...stylex.props(styles.container)}>
       <div {...stylex.props(styles.section)}>
-        <h3 {...stylex.props(styles.sectionTitle)}>Column Filter</h3>
+        <div {...stylex.props(styles.headerRow)}>
+          <h3 {...stylex.props(styles.headerTitle)}>Column Filter</h3>
+          <div {...stylex.props(styles.headerToolbar)}>
+            <Button
+              aria-label='Clear Filter'
+              color='ghost'
+              icon={<EraserIcon size={ICON_SIZE_SM} />}
+              isDisabled={!hasFilter}
+              onClick={handleClear}
+              size='mini'
+              width='auto'
+            />
+            <Button
+              aria-label='Reset Filter'
+              color='ghost'
+              icon={<RefreshIcon size={ICON_SIZE_SM} />}
+              onClick={resetColumnFilter}
+              size='mini'
+              width='auto'
+            />
+          </div>
+        </div>
         <FilterInputs
           columnKey={columnKey}
           filter={columnFilter}
