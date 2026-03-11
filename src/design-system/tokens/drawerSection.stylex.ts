@@ -38,7 +38,7 @@ export const drawerSectionStyles = stylex.create({
     alignItems: 'center',
     display: 'flex',
     justifyContent: 'space-between',
-    marginBottom: spacing.xs,
+    height: 28,
   },
   /** Header title inside a headerRow (no bottom margin, grows). */
   headerTitle: {

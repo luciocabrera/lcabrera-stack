@@ -9,6 +9,10 @@ import {
   RefreshIcon,
 } from '@/components/Icons';
 import { InfoBox } from '@/components/InfoBox';
+import {
+  SidePanelSection,
+  SidePanelSectionHeader,
+} from '@/components/SidePanel';
 import { useGetNormalizedColumn } from '@/components/Table/contexts/TableConfig/columns/selectors';
 import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
 import { ICON_SIZE_MD } from '@/design-system/constants';
@@ -70,8 +74,8 @@ export const GeneralSection = <TData,>({
 
   return (
     <div {...stylex.props(styles.container)}>
-      <div {...stylex.props(styles.section)}>
-        <h3 {...stylex.props(styles.sectionTitle)}>Column Width</h3>
+      <SidePanelSection>
+        <SidePanelSectionHeader title='Column Width' />
         <div {...stylex.props(styles.buttonGroup)}>
           <Button
             color={selectedPreset === 'min' ? 'primary' : 'outline'}
@@ -109,15 +113,15 @@ export const GeneralSection = <TData,>({
             Reset to Default Width
           </Button>
         </div>
-      </div>
+      </SidePanelSection>
 
       <InfoBox>
         Select a preset to adjust this column's width. Changes will be reflected
         after clicking Accept.
       </InfoBox>
 
-      <div {...stylex.props(styles.section)}>
-        <h3 {...stylex.props(styles.sectionTitle)}>All Settings</h3>
+      <SidePanelSection>
+        <SidePanelSectionHeader title='All Settings' />
         <div {...stylex.props(styles.buttonGroup)}>
           <Button
             color='outline'
@@ -138,7 +142,7 @@ export const GeneralSection = <TData,>({
             Reset All Settings
           </Button>
         </div>
-      </div>
+      </SidePanelSection>
     </div>
   );
 };

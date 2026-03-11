@@ -1,8 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { drawerSectionStyles } from '@/design-system/tokens/drawerSection.stylex';
-
-const localStyles = stylex.create({
+export const styles = stylex.create({
   container: {
     flex: '1',
     display: 'flex',
@@ -11,7 +9,3 @@ const localStyles = stylex.create({
     minHeight: 0,
   },
 });
-
-export const styles = {
-  container: localStyles.container,
-};
