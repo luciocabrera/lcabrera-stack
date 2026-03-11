@@ -1,16 +1,21 @@
 import * as stylex from '@stylexjs/stylex';
 
 import { Button } from '@/components/Button';
-import { ColumnsOrderIcon, RefreshIcon } from '@/components/Icons';
+import { ColumnsOrderIcon, EraserIcon, RefreshIcon } from '@/components/Icons';
 import { ICON_SIZE_MD, ICON_SIZE_SM } from '@/design-system/constants';
 
 import type { ColumnOrderSectionFooterProps } from './ColumnOrderSectionFooter.types';
 
 import {
+  useClearColumnOrderSection,
   useOrderColumnsBySorting,
   useResetColumnOrderAndVisibility,
 } from '../../TableDrawerContext/actions';
-import { useGetColumnsSorting } from '../../TableDrawerContext/selectors';
+import {
+  useGetColumnPinning,
+  useGetColumnsSorting,
+  useGetColumnVisibility,
+} from '../../TableDrawerContext/selectors';
 import { styles } from './ColumnOrderSectionFooter.stylex';
 
 export const ColumnOrderSectionFooter = ({
@@ -18,11 +23,17 @@ export const ColumnOrderSectionFooter = ({
   variant = 'footer',
 }: ColumnOrderSectionFooterProps) => {
   const sorting = useGetColumnsSorting();
+  const pinning = useGetColumnPinning();
+  const visibility = useGetColumnVisibility();
 
   const orderColumnsBySorting = useOrderColumnsBySorting();
+  const clearColumnOrderSection = useClearColumnOrderSection();
   const resetColumnOrderAndVisibility = useResetColumnOrderAndVisibility();
 
   const hasSorting = sorting.length > 0;
+  const hasPinning = pinning.left.length > 0 || pinning.right.length > 0;
+  const hasHiddenColumns = visibility instanceof Set && visibility.size > 0;
+  const hasClearableState = hasPinning || hasHiddenColumns;
 
   const handleOrderBySorting = () => {
     if (onOrderBySorting) {
@@ -50,6 +61,17 @@ export const ColumnOrderSectionFooter = ({
         width={buttonWidth}
       >
         {!isToolbar && 'Order by Sorting'}
+      </Button>
+      <Button
+        aria-label='Clear Visibility & Pinning'
+        color={buttonColor}
+        icon={<EraserIcon size={iconSize} />}
+        isDisabled={!hasClearableState}
+        onClick={clearColumnOrderSection}
+        size={buttonSize}
+        width={buttonWidth}
+      >
+        {!isToolbar && 'Clear Visibility & Pinning'}
       </Button>
       <Button
         aria-label='Reset Order & Visibility'
