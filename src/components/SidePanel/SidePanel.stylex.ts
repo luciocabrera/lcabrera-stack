@@ -100,10 +100,10 @@ const positionVariants = stylex.create({
 
 const sizeVariants = stylex.create({
   lg: {
-    width: '28rem', // 448px
+    width: '32rem', // 512px
   },
   md: {
-    width: '24rem', // 384px
+    width: '26rem', // 416px
   },
   sm: {
     width: '20rem', // 320px

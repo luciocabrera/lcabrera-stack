@@ -31,6 +31,7 @@ import {
 import { DetailsSection } from './DetailsSection';
 import { FilterSection } from './FilterSection';
 import { GeneralSection } from './GeneralSection';
+import { PinningSection } from './PinningSection';
 import { SortingSection } from './SortingSection';
 
 export const ColumnSettingsDrawer = ({
@@ -56,11 +57,6 @@ export const ColumnSettingsDrawer = ({
       header: 'General',
       key: 'general',
     },
-    {
-      children: <DetailsSection columnKey={columnKey} />,
-      header: 'Details',
-      key: 'details',
-    },
     ...(isFilterable && column.dataType
       ? [
           {
@@ -79,6 +75,16 @@ export const ColumnSettingsDrawer = ({
           },
         ]
       : []),
+    {
+      children: <PinningSection columnKey={columnKey} />,
+      header: 'Pinning',
+      key: 'pinning',
+    },
+    {
+      children: <DetailsSection columnKey={columnKey} />,
+      header: 'Details',
+      key: 'details',
+    },
   ];
 
   const handleAccept = () => {
@@ -112,7 +118,13 @@ export const ColumnSettingsDrawer = ({
             <Button
               aria-label={pinButtonTitle}
               color='ghost'
-              icon={isPinned ? <PinIcon size={ICON_SIZE_MD} /> : <PinOffIcon size={ICON_SIZE_MD} />}
+              icon={
+                isPinned ? (
+                  <PinIcon size={ICON_SIZE_MD} />
+                ) : (
+                  <PinOffIcon size={ICON_SIZE_MD} />
+                )
+              }
               onClick={handleTogglePin}
               size='mini'
               title={pinButtonTitle}

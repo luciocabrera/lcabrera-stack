@@ -74,15 +74,16 @@ export const TableSettingsDrawer = () => {
       key: 'general',
     },
     {
-      children: <SortingSection />,
-      header: ' Sorting',
-      key: 'sorting',
-    },
-    {
       children: <FiltersSection />,
       header: 'Filters',
       key: 'filters',
     },
+    {
+      children: <SortingSection />,
+      header: ' Sorting',
+      key: 'sorting',
+    },
+
     {
       children: <ColumnOrderSection />,
       header: 'Columns',
@@ -104,7 +105,13 @@ export const TableSettingsDrawer = () => {
             <Button
               aria-label={pinButtonTitle}
               color='ghost'
-              icon={isPinned ? <PinIcon size={ICON_SIZE_MD} /> : <PinOffIcon size={ICON_SIZE_MD} />}
+              icon={
+                isPinned ? (
+                  <PinIcon size={ICON_SIZE_MD} />
+                ) : (
+                  <PinOffIcon size={ICON_SIZE_MD} />
+                )
+              }
               onClick={handleTogglePin}
               size='mini'
               title={pinButtonTitle}

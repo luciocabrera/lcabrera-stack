@@ -6,8 +6,6 @@ import {
   EraserIcon,
   MaximizeIcon,
   MinimizeIcon,
-  PinIcon,
-  PinOffIcon,
   RefreshIcon,
 } from '@/components/Icons';
 import { InfoBox } from '@/components/InfoBox';
@@ -20,18 +18,14 @@ import type { GeneralSectionProps, WidthPreset } from './GeneralSection.types';
 import {
   useClearAllColumnDrawerSettings,
   useResetAllColumnDrawerSettings,
-  useSetColumnPinning,
   useSetColumnSizing,
 } from '../ColumnDrawerContext/actions';
-import { useGetColumnPinning } from '../ColumnDrawerContext/selectors';
 import { styles } from './GeneralSection.stylex';
 
 export const GeneralSection = <TData,>({
   columnKey,
 }: GeneralSectionProps<TData>) => {
   const column = useGetNormalizedColumn<TData>(columnKey);
-  const columnPinning = useGetColumnPinning();
-  const setColumnPinning = useSetColumnPinning();
   const setColumnSizing = useSetColumnSizing();
   const clearAllSettings = useClearAllColumnDrawerSettings();
   const resetAllSettings = useResetAllColumnDrawerSettings();
@@ -121,46 +115,6 @@ export const GeneralSection = <TData,>({
         Select a preset to adjust this column's width. Changes will be reflected
         after clicking Accept.
       </InfoBox>
-
-      <div {...stylex.props(styles.section)}>
-        <h3 {...stylex.props(styles.sectionTitle)}>Column Pinning</h3>
-        <div {...stylex.props(styles.buttonGroup)}>
-          <Button
-            color={columnPinning === 'left' ? 'primary' : 'outline'}
-            icon={<PinIcon size={ICON_SIZE_MD} />}
-            onClick={() => {
-              setColumnPinning(columnPinning === 'left' ? undefined : 'left');
-            }}
-            size='sm'
-            width='full'
-          >
-            Pin Left
-          </Button>
-          <Button
-            color={columnPinning === 'right' ? 'primary' : 'outline'}
-            icon={<PinIcon size={ICON_SIZE_MD} />}
-            onClick={() => {
-              setColumnPinning(columnPinning === 'right' ? undefined : 'right');
-            }}
-            size='sm'
-            width='full'
-          >
-            Pin Right
-          </Button>
-          <Button
-            color='outline'
-            disabled={columnPinning === undefined}
-            icon={<PinOffIcon size={ICON_SIZE_MD} />}
-            onClick={() => {
-              setColumnPinning(undefined);
-            }}
-            size='sm'
-            width='full'
-          >
-            Unpin
-          </Button>
-        </div>
-      </div>
 
       <div {...stylex.props(styles.section)}>
         <h3 {...stylex.props(styles.sectionTitle)}>All Settings</h3>
