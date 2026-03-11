@@ -173,8 +173,8 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
       if (side === 'left') {
         // Insert after the last left-pinned column
         let lastLeftPinnedIndex = -1;
-        for (let i = 0; i < newOrder.length; i++) {
-          if (columnPinning.left.includes(newOrder[i])) {
+        for (const [i, key] of newOrder.entries()) {
+          if (columnPinning.left.includes(key)) {
             lastLeftPinnedIndex = i;
           }
         }

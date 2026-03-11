@@ -9,7 +9,10 @@ import {
 } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 
-const localStyles = stylex.create({
+/** Maximum visible height (px) for the trigger area before tags overflow */
+const TRIGGER_MAX_HEIGHT = 88;
+
+export const styles = stylex.create({
   chevron: (isOpen: boolean) => ({
     borderColor: isOpen
       ? `transparent transparent ${colors.textSecondary} transparent`
@@ -31,7 +34,7 @@ const localStyles = stylex.create({
     flexDirection: 'column',
     minHeight: 0,
   },
-  dropdown: {
+  dropdownBase: {
     borderColor: colors.borderPrimary,
     borderRadius: borderRadius.md,
     borderStyle: 'none',
@@ -114,29 +117,9 @@ const localStyles = stylex.create({
   },
   triggerClamped: {
     overflow: 'hidden',
-    maxHeight: '5rem',
+    maxHeight: `${TRIGGER_MAX_HEIGHT}px`,
   },
   triggerStatic: {
     cursor: 'default',
   },
 });
-
-/** Maximum visible height (px) for the trigger area before tags overflow */
-export const TRIGGER_MAX_HEIGHT = 80;
-
-export const styles = {
-  chevron: localStyles.chevron,
-  container: localStyles.container,
-  containerFill: localStyles.containerFill,
-  dropdownAbsolute: localStyles.dropdownAbsolute,
-  dropdownBase: localStyles.dropdown,
-  dropdownStatic: localStyles.dropdownStatic,
-  dropdownStaticFill: localStyles.dropdownStaticFill,
-  overflowTag: localStyles.overflowTag,
-  trigger: localStyles.trigger,
-  triggerClamped: localStyles.triggerClamped,
-  triggerStatic: localStyles.triggerStatic,
-  triggerLabel: localStyles.triggerLabel,
-  triggerOpen: localStyles.triggerOpen,
-  triggerPlaceholder: localStyles.triggerPlaceholder,
-};
