@@ -1,7 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 
 import { Button } from '@/components/Button';
-import { EraserIcon, PinIcon, RefreshIcon } from '@/components/Icons';
+import { EraserIcon, PinLeftIcon, PinRightIcon, RefreshIcon } from '@/components/Icons';
 import { ICON_SIZE_MD, ICON_SIZE_SM } from '@/design-system/constants';
 
 import type { PinningSectionProps } from './PinningSection.types';
@@ -54,7 +54,7 @@ export const PinningSection = <TData,>({
         <div {...stylex.props(styles.buttonGroup)}>
           <Button
             color={columnPinning === 'left' ? 'primary' : 'outline'}
-            icon={<PinIcon size={ICON_SIZE_MD} />}
+            icon={<PinLeftIcon size={ICON_SIZE_MD} />}
             onClick={() => {
               setColumnPinning(columnPinning === 'left' ? undefined : 'left');
             }}
@@ -65,7 +65,7 @@ export const PinningSection = <TData,>({
           </Button>
           <Button
             color={columnPinning === 'right' ? 'primary' : 'outline'}
-            icon={<PinIcon size={ICON_SIZE_MD} />}
+            icon={<PinRightIcon size={ICON_SIZE_MD} />}
             onClick={() => {
               setColumnPinning(columnPinning === 'right' ? undefined : 'right');
             }}
