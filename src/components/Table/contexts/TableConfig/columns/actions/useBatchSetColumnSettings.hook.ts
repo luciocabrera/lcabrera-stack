@@ -8,7 +8,11 @@ import type { SortDirection } from '@/types/ui.types';
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { usePersistTableStateAction } from '@/components/Table/hooks';
-import { getEffectiveColumns, getNormalizedColummns } from '@/components/Table/utils';
+import {
+  getEffectiveColumns,
+  getNormalizedColummns,
+  syncColumnOrderWithPinning,
+} from '@/components/Table/utils';
 
 export type BatchColumnSettingsUpdate = {
   /** Single column filter value */
@@ -84,15 +88,26 @@ export const useBatchSetColumnSettings = () => {
     if (columnPinning === 'right')
       newPinning.right = [...newPinning.right, columnKey];
 
+    // Column Order: sync order to reflect pinning position
+    const currentOrder = columnsState?.columnOrder ?? [];
+    const columns = columnsState?.columns ?? [];
+    const newColumnOrder = syncColumnOrderWithPinning({
+      columnKey,
+      columnPinning,
+      columns,
+      currentOrder,
+      newPinning,
+    });
+
     const normalizedColumns = getNormalizedColummns({
-      columns: columnsState?.columns ?? [],
+      columns,
       sorting: newSorting,
     });
 
     const effectiveColumns = getEffectiveColumns({
-      columnOrder: columnsState?.columnOrder,
+      columnOrder: newColumnOrder,
       columnPinning: newPinning,
-      columns: columnsState?.columns ?? [],
+      columns,
       columnVisibility: columnsState?.columnVisibility,
     });
 
@@ -125,10 +140,16 @@ export const useBatchSetColumnSettings = () => {
         slice: 'columnPinning',
         valueSlice: newPinning,
       },
+      {
+        persistenceKey,
+        slice: 'columnOrder',
+        valueSlice: newColumnOrder,
+      },
     ]);
 
     columnsStore.set({
       columnFilters: newColumnFilters,
+      columnOrder: newColumnOrder,
       columnPinning: newPinning,
       columnSizing: newColumnSizing,
       effectiveColumns,
