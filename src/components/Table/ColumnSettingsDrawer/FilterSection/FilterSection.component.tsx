@@ -3,7 +3,6 @@ import * as stylex from '@stylexjs/stylex';
 import { Button } from '@/components/Button';
 import { EraserIcon, RefreshIcon } from '@/components/Icons';
 import { ICON_SIZE_MD } from '@/design-system/constants';
-import { drawerSectionStyles } from '@/design-system/tokens/drawerSection.stylex';
 
 import type { FilterSectionProps } from './FilterSection.types';
 
@@ -30,13 +29,16 @@ export const FilterSection = <TData,>({
 
   return (
     <div {...stylex.props(styles.container)}>
-      <FilterInputs
-        columnKey={columnKey}
-        filter={columnFilter}
-        onChange={setColumnFilter}
-        shouldFillHeight
-      />
-      <div {...stylex.props(drawerSectionStyles.resetSection)}>
+      <div {...stylex.props(styles.section)}>
+        <h3 {...stylex.props(styles.sectionTitle)}>Column Filter</h3>
+        <FilterInputs
+          columnKey={columnKey}
+          filter={columnFilter}
+          onChange={setColumnFilter}
+          shouldFillHeight
+        />
+      </div>
+      <div {...stylex.props(styles.resetSection)}>
         <Button
           color='outline'
           icon={<EraserIcon size={ICON_SIZE_MD} />}

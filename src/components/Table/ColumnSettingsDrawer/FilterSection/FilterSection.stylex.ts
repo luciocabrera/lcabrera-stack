@@ -1,5 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 
+import { drawerSectionStyles } from '@/design-system/tokens/drawerSection.stylex';
+
 const localStyles = stylex.create({
   container: {
     flex: '1',
@@ -12,4 +14,7 @@ const localStyles = stylex.create({
 
 export const styles = {
   container: localStyles.container,
+  resetSection: drawerSectionStyles.resetSection,
+  section: drawerSectionStyles.container,
+  sectionTitle: drawerSectionStyles.sectionTitle,
 };

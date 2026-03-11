@@ -2,6 +2,8 @@ export { useBatchSetColumnDrawerSettings } from './useBatchSetColumnDrawerSettin
 export { useClearAllColumnDrawerSettings } from './useClearAllColumnDrawerSettings.hook';
 export { useResetAllColumnDrawerSettings } from './useResetAllColumnDrawerSettings.hook';
 export { useResetColumnFilter } from './useResetColumnFilter.hook';
+export { useResetColumnPinning } from './useResetColumnPinning.hook';
+export { useResetColumnSorting } from './useResetColumnSorting.hook';
 export { useResetToTableState } from './useResetToTableState.hook';
 export { useSetColumnFilter } from './useSetColumnFilter.hook';
 export { useSetColumnPinning } from './useSetColumnPinning.hook';

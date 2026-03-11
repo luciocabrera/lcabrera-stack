@@ -86,6 +86,14 @@ export const drawerSectionStyles = stylex.create({
     display: 'flex',
     flexShrink: 0,
   },
+  /** Section title: secondary text, small bold, with letter-spacing. */
+  sectionTitle: {
+    margin: 0,
+    color: colors.textSecondary,
+    fontSize: typography.fontSizeSm,
+    fontWeight: 600,
+    letterSpacing: '0.05em',
+  },
   /** Bottom-anchored reset/action area. */
   resetSection: {
     gap: spacing.sm,
