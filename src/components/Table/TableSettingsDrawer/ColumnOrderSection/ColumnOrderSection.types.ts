@@ -7,9 +7,9 @@ export type HandleToggleVisibilityArgs = {
   isVisible: boolean;
 };
 
-export type PinConflictResolution = 'move-column' | 'pin-all-between';
-
-export type SortOrderConflictResolution =
+export type OrderConflictResolution =
   | 'pin-to-match-order'
   | 'remove-conflicting-pins'
   | 'reset-all-pins';
+
+export type PinConflictResolution = 'move-column' | 'pin-all-between';

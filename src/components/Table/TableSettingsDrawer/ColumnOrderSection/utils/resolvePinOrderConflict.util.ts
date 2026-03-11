@@ -1,11 +1,11 @@
 import type { ColumnOrderState, ColumnPinningState } from '@/components/Table/Table.types';
 
-import type { SortOrderConflictResolution } from '../ColumnOrderSection.types';
+import type { OrderConflictResolution } from '../ColumnOrderSection.types';
 
 type ResolvePinOrderConflictArgs = {
   columnPinning: ColumnPinningState;
   newOrder: ColumnOrderState;
-  resolution: SortOrderConflictResolution;
+  resolution: OrderConflictResolution;
 };
 
 type ResolvePinOrderConflictResult = {

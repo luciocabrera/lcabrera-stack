@@ -12,8 +12,8 @@ import { ToggleSwitch } from '@/components/ToggleSwitch';
 import type {
   ColumnOrderSectionProps,
   HandleToggleVisibilityArgs,
+  OrderConflictResolution,
   PinConflictResolution,
-  SortOrderConflictResolution,
 } from './ColumnOrderSection.types';
 
 import {
@@ -29,8 +29,8 @@ import {
 } from '../TableDrawerContext/selectors';
 import { styles } from './ColumnOrderSection.stylex';
 import { ColumnOrderSectionFooter } from './ColumnOrderSectionFooter';
+import { OrderConflictModal } from './OrderConflictModal';
 import { PinConflictModal } from './PinConflictModal';
-import { SortOrderConflictModal } from './SortOrderConflictModal';
 import { detectPinOrderConflict, resolvePinOrderConflict } from './utils';
 
 export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
@@ -52,10 +52,15 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
     side: 'left' | 'right';
   }>({ columnKey: '', columnLabel: '', isOpen: false, side: 'left' });
 
-  const [sortOrderConflict, setSortOrderConflict] = useState<{
+  const [orderConflict, setOrderConflict] = useState<{
+    description: string;
     isOpen: boolean;
     pendingOrder: ColumnOrderState;
-  }>({ isOpen: false, pendingOrder: [] as unknown as ColumnOrderState });
+  }>({
+    description: '',
+    isOpen: false,
+    pendingOrder: [] as unknown as ColumnOrderState,
+  });
 
   // Build ordered column list (use columnOrder if available, otherwise use column definition order)
   const orderedColumns =
@@ -85,8 +90,21 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
   };
 
   const handleReorder = (reorderedItems: DraggableItem[]) => {
-    const newColumnOrder = reorderedItems.map((item) => item.id);
-    setColumnsOrder(newColumnOrder);
+    const newColumnOrder = reorderedItems.map(
+      (item) => item.id,
+    ) as ColumnOrderState;
+
+    if (!detectPinOrderConflict({ columnPinning, newOrder: newColumnOrder })) {
+      setColumnsOrder(newColumnOrder);
+      return;
+    }
+
+    setOrderConflict({
+      description:
+        'Dragging this column broke the pinning layout. Pinned columns must stay at the edges. Choose how to proceed:',
+      isOpen: true,
+      pendingOrder: newColumnOrder,
+    });
   };
 
   const isContiguousPin = ({
@@ -248,25 +266,30 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
       return;
     }
 
-    setSortOrderConflict({ isOpen: true, pendingOrder: newOrder });
+    setOrderConflict({
+      description:
+        'Reordering columns by sorting will move pinned columns out of their pinned positions. Choose how to proceed:',
+      isOpen: true,
+      pendingOrder: newOrder,
+    });
   };
 
-  const handleSortOrderConflictAccept = (
-    resolution: SortOrderConflictResolution,
+  const handleOrderConflictAccept = (
+    resolution: OrderConflictResolution,
   ) => {
     const result = resolvePinOrderConflict({
       columnPinning,
-      newOrder: sortOrderConflict.pendingOrder,
+      newOrder: orderConflict.pendingOrder,
       resolution,
     });
 
     setColumnsOrder(result.columnOrder);
     setColumnPinning(result.columnPinning);
-    setSortOrderConflict((prev) => ({ ...prev, isOpen: false }));
+    setOrderConflict((prev) => ({ ...prev, isOpen: false }));
   };
 
-  const handleSortOrderConflictCancel = () => {
-    setSortOrderConflict((prev) => ({ ...prev, isOpen: false }));
+  const handleOrderConflictCancel = () => {
+    setOrderConflict((prev) => ({ ...prev, isOpen: false }));
   };
 
   // Convert columns to draggable items
@@ -323,10 +346,11 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
         onCancel={handleConflictCancel}
         side={conflictModal.side}
       />
-      <SortOrderConflictModal
-        isOpen={sortOrderConflict.isOpen}
-        onAccept={handleSortOrderConflictAccept}
-        onCancel={handleSortOrderConflictCancel}
+      <OrderConflictModal
+        description={orderConflict.description}
+        isOpen={orderConflict.isOpen}
+        onAccept={handleOrderConflictAccept}
+        onCancel={handleOrderConflictCancel}
       />
     </div>
   );

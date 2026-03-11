@@ -7,12 +7,12 @@ export const RESOLUTIONS: (RadioOption & {
 })[] = [
   {
     description:
-      'Apply the new sorting order and remove any pinning that no longer matches.',
+      'Apply the new column order and remove any pinning that no longer matches.',
     label: 'Apply order & remove conflicting pins',
     value: 'remove-conflicting-pins',
   },
   {
-    description: 'Apply the new sorting order and clear all column pinning.',
+    description: 'Apply the new column order and clear all column pinning.',
     label: 'Apply order & reset all pins',
     value: 'reset-all-pins',
   },

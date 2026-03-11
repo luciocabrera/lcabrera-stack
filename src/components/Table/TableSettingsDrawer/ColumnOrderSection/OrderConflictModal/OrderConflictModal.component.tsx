@@ -5,19 +5,20 @@ import { Button } from '@/components/Button';
 import { Modal } from '@/components/Modal';
 import { RadioOptionGroup } from '@/components/RadioOptionGroup';
 
-import type { SortOrderConflictResolution } from '../ColumnOrderSection.types';
-import type { SortOrderConflictModalProps } from './SortOrderConflictModal.types';
+import type { OrderConflictResolution } from '../ColumnOrderSection.types';
+import type { OrderConflictModalProps } from './OrderConflictModal.types';
 
-import { RESOLUTIONS } from './SortOrderConflictModal.constants';
-import { styles } from './SortOrderConflictModal.stylex';
+import { RESOLUTIONS } from './OrderConflictModal.constants';
+import { styles } from './OrderConflictModal.stylex';
 
-export const SortOrderConflictModal = ({
+export const OrderConflictModal = ({
+  description,
   isOpen,
   onAccept,
   onCancel,
-}: SortOrderConflictModalProps) => {
+}: OrderConflictModalProps) => {
   const [selectedResolution, setSelectedResolution] =
-    useState<SortOrderConflictResolution>('remove-conflicting-pins');
+    useState<OrderConflictResolution>('remove-conflicting-pins');
 
   const handleAccept = () => {
     onAccept(selectedResolution);
@@ -43,16 +44,15 @@ export const SortOrderConflictModal = ({
       }
       isOpen={isOpen}
       onClose={handleCancel}
-      title='Sorting & Pinning Conflict'
+      title='Order & Pinning Conflict'
     >
       <p {...stylex.props(styles.description)}>
-        Reordering columns by sorting will move pinned columns out of their
-        pinned positions. Choose how to proceed:
+        {description}
       </p>
       <RadioOptionGroup
         name='sort-order-conflict-resolution'
         onChange={(value) => {
-          setSelectedResolution(value as SortOrderConflictResolution);
+          setSelectedResolution(value as OrderConflictResolution);
         }}
         options={RESOLUTIONS}
         value={selectedResolution}
