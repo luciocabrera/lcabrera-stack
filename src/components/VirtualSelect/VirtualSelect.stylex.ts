@@ -10,7 +10,7 @@ import {
 import { colors } from '@/design-system/tokens/colors.stylex';
 
 /** Maximum visible height (px) for the trigger area before tags overflow */
-const TRIGGER_MAX_HEIGHT = 88;
+export const TRIGGER_MAX_HEIGHT = 88;
 
 export const styles = stylex.create({
   chevron: (isOpen: boolean) => ({

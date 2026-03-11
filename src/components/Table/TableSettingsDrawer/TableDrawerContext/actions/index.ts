@@ -2,6 +2,7 @@ export { useBatchSetTableDrawerSettings } from './useBatchSetTableDrawerSettings
 export { useClearAllSettings } from './useClearAllSettings.hook';
 export { useClearFilters } from './useClearFilters.hook';
 export { useClearSorting } from './useClearSorting.hook';
+export { useComputeOrderBySorting } from './useComputeOrderBySorting.hook';
 export { useOrderColumnsBySorting } from './useOrderColumnsBySorting.hook';
 export { useResetColumnOrderAndVisibility } from './useResetColumnOrderAndVisibility.hook';
 export { useResetFilters } from './useResetFilters.hook';

@@ -14,6 +14,7 @@ import { useGetColumnsSorting } from '../../TableDrawerContext/selectors';
 import { styles } from './ColumnOrderSectionFooter.stylex';
 
 export const ColumnOrderSectionFooter = ({
+  onOrderBySorting,
   variant = 'footer',
 }: ColumnOrderSectionFooterProps) => {
   const sorting = useGetColumnsSorting();
@@ -22,6 +23,14 @@ export const ColumnOrderSectionFooter = ({
   const resetColumnOrderAndVisibility = useResetColumnOrderAndVisibility();
 
   const hasSorting = sorting.length > 0;
+
+  const handleOrderBySorting = () => {
+    if (onOrderBySorting) {
+      onOrderBySorting();
+    } else {
+      orderColumnsBySorting();
+    }
+  };
 
   const isToolbar = variant === 'toolbar';
   const buttonColor = isToolbar ? 'ghost' : 'outline';
@@ -36,7 +45,7 @@ export const ColumnOrderSectionFooter = ({
         color={buttonColor}
         icon={<ColumnsOrderIcon size={iconSize} />}
         isDisabled={!hasSorting}
-        onClick={orderColumnsBySorting}
+        onClick={handleOrderBySorting}
         size={buttonSize}
         width={buttonWidth}
       >

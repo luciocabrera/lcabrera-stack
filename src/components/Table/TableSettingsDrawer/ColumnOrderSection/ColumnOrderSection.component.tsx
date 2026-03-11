@@ -2,6 +2,7 @@ import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 
 import type { DraggableItem } from '@/components/DraggableList';
+import type { ColumnOrderState } from '@/components/Table/Table.types';
 
 import { DraggableList } from '@/components/DraggableList';
 import { SidePanelSectionHeader } from '@/components/SidePanel';
@@ -13,8 +14,10 @@ import type {
   HandleToggleVisibilityArgs,
 } from './ColumnOrderSection.types';
 import type { PinConflictResolution } from './PinConflictModal';
+import type { SortOrderConflictResolution } from './utils';
 
 import {
+  useComputeOrderBySorting,
   useSetColumnPinning,
   useSetColumnsOrder,
   useSetColumnsVisibility,
@@ -27,6 +30,8 @@ import {
 import { styles } from './ColumnOrderSection.stylex';
 import { ColumnOrderSectionFooter } from './ColumnOrderSectionFooter';
 import { PinConflictModal } from './PinConflictModal';
+import { SortOrderConflictModal } from './SortOrderConflictModal';
+import { detectPinOrderConflict, resolvePinOrderConflict } from './utils';
 
 export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
   const columns = useGetColumns();
@@ -38,12 +43,19 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
   const setColumnsOrder = useSetColumnsOrder();
   const setColumnsVisibility = useSetColumnsVisibility();
 
+  const computeOrderBySorting = useComputeOrderBySorting();
+
   const [conflictModal, setConflictModal] = useState<{
     columnKey: string;
     columnLabel: string;
     isOpen: boolean;
     side: 'left' | 'right';
   }>({ columnKey: '', columnLabel: '', isOpen: false, side: 'left' });
+
+  const [sortOrderConflict, setSortOrderConflict] = useState<{
+    isOpen: boolean;
+    pendingOrder: ColumnOrderState;
+  }>({ isOpen: false, pendingOrder: [] as unknown as ColumnOrderState });
 
   // Build ordered column list (use columnOrder if available, otherwise use column definition order)
   const orderedColumns =
@@ -228,6 +240,35 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
     setConflictModal((prev) => ({ ...prev, isOpen: false }));
   };
 
+  const handleOrderBySorting = () => {
+    const newOrder = computeOrderBySorting();
+
+    if (!detectPinOrderConflict({ columnPinning, newOrder })) {
+      setColumnsOrder(newOrder);
+      return;
+    }
+
+    setSortOrderConflict({ isOpen: true, pendingOrder: newOrder });
+  };
+
+  const handleSortOrderConflictAccept = (
+    resolution: SortOrderConflictResolution,
+  ) => {
+    const result = resolvePinOrderConflict({
+      columnPinning,
+      newOrder: sortOrderConflict.pendingOrder,
+      resolution,
+    });
+
+    setColumnsOrder(result.columnOrder);
+    setColumnPinning(result.columnPinning);
+    setSortOrderConflict((prev) => ({ ...prev, isOpen: false }));
+  };
+
+  const handleSortOrderConflictCancel = () => {
+    setSortOrderConflict((prev) => ({ ...prev, isOpen: false }));
+  };
+
   // Convert columns to draggable items
   const draggableItems: DraggableItem[] = allOrderedColumns.map((col) => {
     const isPinned =
@@ -265,17 +306,27 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
     <div {...stylex.props(styles.container)} {...props}>
       <SidePanelSectionHeader
         title={`Column Order & Visibility (${allOrderedColumns.length - columnVisibility.size}/${allOrderedColumns.length})`}
-        toolbar={<ColumnOrderSectionFooter variant='toolbar' />}
+        toolbar={
+          <ColumnOrderSectionFooter
+            onOrderBySorting={handleOrderBySorting}
+            variant='toolbar'
+          />
+        }
       />
       <DraggableList items={draggableItems} onOrderChange={handleReorder} />
 
-      <ColumnOrderSectionFooter />
+      <ColumnOrderSectionFooter onOrderBySorting={handleOrderBySorting} />
       <PinConflictModal
         columnLabel={conflictModal.columnLabel}
         isOpen={conflictModal.isOpen}
         onAccept={handleConflictAccept}
         onCancel={handleConflictCancel}
         side={conflictModal.side}
+      />
+      <SortOrderConflictModal
+        isOpen={sortOrderConflict.isOpen}
+        onAccept={handleSortOrderConflictAccept}
+        onCancel={handleSortOrderConflictCancel}
       />
     </div>
   );

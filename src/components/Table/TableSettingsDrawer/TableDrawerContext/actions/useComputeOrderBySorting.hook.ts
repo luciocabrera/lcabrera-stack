@@ -5,15 +5,15 @@ import { useTableConfigContextValue } from '@/components/Table/contexts/TableCon
 import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook';
 
 /**
- * Hook to reorder columns based on current sorting.
- * Sorted columns come first (in their sort order),
+ * Hook to compute the column order based on current sorting,
+ * without applying it. Sorted columns come first (in their sort order),
  * remaining columns follow in their default/original order.
  */
-export const useOrderColumnsBySorting = () => {
+export const useComputeOrderBySorting = () => {
   const { columnsStore } = useTableConfigContextValue();
   const { columnsStore: columnsDrawerStore } = useTableDrawerContextValue();
 
-  return () => {
+  return (): ColumnOrderState => {
     const drawerState = columnsDrawerStore.get();
     const sorting = drawerState?.sorting ?? [];
 
@@ -30,8 +30,6 @@ export const useOrderColumnsBySorting = () => {
       (key) => !sortedKeys.includes(key),
     );
 
-    const columnOrder = [...sortedKeys, ...remainingKeys] as ColumnOrderState;
-
-    columnsDrawerStore.set({ columnOrder });
+    return [...sortedKeys, ...remainingKeys] as ColumnOrderState;
   };
 };
