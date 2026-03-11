@@ -4,6 +4,7 @@ import { useState } from 'react';
 import type { DraggableItem } from '@/components/DraggableList';
 
 import { DraggableList } from '@/components/DraggableList';
+import { SidePanelSectionHeader } from '@/components/SidePanel';
 import { useGetColumns } from '@/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
 import { ToggleSwitch } from '@/components/ToggleSwitch';
 
@@ -262,14 +263,10 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
 
   return (
     <div {...stylex.props(styles.container)} {...props}>
-      <div {...stylex.props(styles.headerRow)}>
-        <h3 {...stylex.props(styles.headerTitle)}>
-          Column Order & Visibility (
-          {allOrderedColumns.length - columnVisibility.size}/
-          {allOrderedColumns.length})
-        </h3>
-        <ColumnOrderSectionFooter variant='toolbar' />
-      </div>
+      <SidePanelSectionHeader
+        title={`Column Order & Visibility (${allOrderedColumns.length - columnVisibility.size}/${allOrderedColumns.length})`}
+        toolbar={<ColumnOrderSectionFooter variant='toolbar' />}
+      />
       <DraggableList items={draggableItems} onOrderChange={handleReorder} />
 
       <ColumnOrderSectionFooter />

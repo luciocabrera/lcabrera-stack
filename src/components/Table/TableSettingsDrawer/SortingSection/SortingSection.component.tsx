@@ -7,6 +7,10 @@ import { Button } from '@/components/Button';
 import { DraggableList } from '@/components/DraggableList';
 import { MenuCloseIcon, SortAscIcon, SortDescIcon } from '@/components/Icons';
 import { InfoBox } from '@/components/InfoBox';
+import {
+  SidePanelSection,
+  SidePanelSectionHeader,
+} from '@/components/SidePanel';
 import { useGetColumns } from '@/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
 import { VirtualSelect } from '@/components/VirtualSelect';
 import { ICON_SIZE_MD } from '@/design-system/constants';
@@ -139,7 +143,7 @@ export const SortingSection = ({ ...props }: SortingSectionProps) => {
   return (
     <div {...stylex.props(styles.container)} {...props}>
       <div {...stylex.props(styles.addSection)}>
-        <h3 {...stylex.props(styles.header)}>Add Sort Column</h3>
+        <SidePanelSectionHeader title='Add Sort Column' />
         <VirtualSelect
           mode='single'
           onChange={handleColumnSelect}
@@ -157,13 +161,11 @@ export const SortingSection = ({ ...props }: SortingSectionProps) => {
         </Button>
       </div>
 
-      <div {...stylex.props(styles.sortOrderSection)}>
-        <div {...stylex.props(styles.headerRow)}>
-          <h3 {...stylex.props(styles.headerTitle)}>
-            Sort Order ({sortItems.length})
-          </h3>
-          <SortingSectionFooter variant='toolbar' />
-        </div>
+      <SidePanelSection>
+        <SidePanelSectionHeader
+          title={`Sort Order (${sortItems.length})`}
+          toolbar={<SortingSectionFooter variant='toolbar' />}
+        />
         {sortItems.length === 0 ? (
           <InfoBox>
             No sorting applied. Add a column above to start sorting.
@@ -176,7 +178,7 @@ export const SortingSection = ({ ...props }: SortingSectionProps) => {
             />
           </div>
         )}
-      </div>
+      </SidePanelSection>
 
       <SortingSectionFooter />
     </div>

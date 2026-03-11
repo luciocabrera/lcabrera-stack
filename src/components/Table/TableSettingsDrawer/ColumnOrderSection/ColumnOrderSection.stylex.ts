@@ -4,7 +4,4 @@ export const styles = {
   columnItem: drawerSectionStyles.itemRow,
   columnLabel: drawerSectionStyles.itemLabel,
   container: drawerSectionStyles.containerFull,
-  header: drawerSectionStyles.header,
-  headerRow: drawerSectionStyles.headerRow,
-  headerTitle: drawerSectionStyles.headerTitle,
 };

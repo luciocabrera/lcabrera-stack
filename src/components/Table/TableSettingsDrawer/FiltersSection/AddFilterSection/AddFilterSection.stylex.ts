@@ -2,5 +2,4 @@ import { drawerSectionStyles } from '@/design-system/tokens/drawerSection.stylex
 
 export const styles = {
   container: drawerSectionStyles.subsection,
-  header: drawerSectionStyles.header,
 };

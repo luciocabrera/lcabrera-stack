@@ -84,8 +84,5 @@ export const styles = {
   filterToggle: localStyles.filterToggle,
   filterToggleIcon: localStyles.filterToggleIcon,
   filtersList: drawerSectionStyles.list,
-  header: drawerSectionStyles.header,
-  headerRow: drawerSectionStyles.headerRow,
-  headerTitle: drawerSectionStyles.headerTitle,
   invalidBadge: localStyles.invalidBadge,
 };

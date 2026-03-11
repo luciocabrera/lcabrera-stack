@@ -6,6 +6,7 @@ import {
   useGetColumns,
   useGetNormalizedColumns,
 } from '@/components/Table/contexts/TableConfig/columns/selectors';
+import { SidePanelSectionHeader } from '@/components/SidePanel';
 import { VirtualSelect } from '@/components/VirtualSelect';
 
 import type { AddFilterSectionProps } from './AddFilterSection.types';
@@ -113,7 +114,7 @@ export const AddFilterSection = ({
 
   return (
     <div {...stylex.props(styles.container)}>
-      <h3 {...stylex.props(styles.header)}>Add Filter</h3>
+      <SidePanelSectionHeader title='Add Filter' />
       <VirtualSelect
         mode='single'
         onChange={handleColumnSelect}

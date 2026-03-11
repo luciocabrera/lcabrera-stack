@@ -3,6 +3,7 @@ import * as stylex from '@stylexjs/stylex';
 import { Button } from '@/components/Button';
 import { MenuCloseIcon } from '@/components/Icons';
 import { InfoBox } from '@/components/InfoBox';
+import { SidePanelSectionHeader } from '@/components/SidePanel';
 import { useGetNormalizedColumns } from '@/components/Table/contexts/TableConfig/columns/selectors';
 import { FilterInputs } from '@/components/Table/filters/FilterInputs/FilterInputs.component';
 import { ICON_SIZE_MD } from '@/design-system/constants';
@@ -76,12 +77,10 @@ export const ActiveFiltersList = ({
 
   return (
     <div {...stylex.props(styles.container)}>
-      <div {...stylex.props(styles.headerRow)}>
-        <h3 {...stylex.props(styles.headerTitle)}>
-          Active Filters ({filterEntries.length})
-        </h3>
-        <FiltersSectionFooter variant='toolbar' />
-      </div>
+      <SidePanelSectionHeader
+        title={`Active Filters (${filterEntries.length})`}
+        toolbar={<FiltersSectionFooter variant='toolbar' />}
+      />
       {hasFilters ? (
         <div {...stylex.props(styles.filtersList)}>
           {filterEntries.map(([columnKey, filter]) => {

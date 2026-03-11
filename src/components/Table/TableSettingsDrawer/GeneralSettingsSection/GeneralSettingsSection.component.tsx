@@ -9,6 +9,10 @@ import {
   RefreshIcon,
 } from '@/components/Icons';
 import { InfoBox } from '@/components/InfoBox';
+import {
+  SidePanelSection,
+  SidePanelSectionHeader,
+} from '@/components/SidePanel';
 import { useGetColumns } from '@/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
 import { ICON_SIZE_MD } from '@/design-system/constants';
 
@@ -84,8 +88,8 @@ export const GeneralSettingsSection = ({
 
   return (
     <div {...stylex.props(styles.container)} {...props}>
-      <div {...stylex.props(styles.section)}>
-        <h3 {...stylex.props(styles.sectionTitle)}>Column Widths</h3>
+      <SidePanelSection>
+        <SidePanelSectionHeader title='Column Widths' />
         <div {...stylex.props(styles.buttonGroup)}>
           <Button
             color={selectedPreset === 'min' ? 'primary' : 'outline'}
@@ -123,30 +127,30 @@ export const GeneralSettingsSection = ({
             Reset to Default Widths
           </Button>
         </div>
-      </div>
+      </SidePanelSection>
 
       <InfoBox>
         Select a preset to adjust all column widths at once. Changes will be
         reflected after clicking Accept.
       </InfoBox>
 
-      <div {...stylex.props(styles.section)}>
-        <h3 {...stylex.props(styles.sectionTitle)}>Filters</h3>
+      <SidePanelSection>
+        <SidePanelSectionHeader title='Filters' />
         <FiltersSectionFooter />
-      </div>
+      </SidePanelSection>
 
-      <div {...stylex.props(styles.section)}>
-        <h3 {...stylex.props(styles.sectionTitle)}>Sorting</h3>
+      <SidePanelSection>
+        <SidePanelSectionHeader title='Sorting' />
         <SortingSectionFooter />
-      </div>
+      </SidePanelSection>
 
-      <div {...stylex.props(styles.section)}>
-        <h3 {...stylex.props(styles.sectionTitle)}>Columns</h3>
+      <SidePanelSection>
+        <SidePanelSectionHeader title='Columns' />
         <ColumnOrderSectionFooter />
-      </div>
+      </SidePanelSection>
 
-      <div {...stylex.props(styles.section)}>
-        <h3 {...stylex.props(styles.sectionTitle)}>All Settings</h3>
+      <SidePanelSection>
+        <SidePanelSectionHeader title='All Settings' />
         <div {...stylex.props(styles.buttonGroup)}>
           <Button
             color='outline'
@@ -167,7 +171,7 @@ export const GeneralSettingsSection = ({
             Reset All Settings
           </Button>
         </div>
-      </div>
+      </SidePanelSection>
     </div>
   );
 };
