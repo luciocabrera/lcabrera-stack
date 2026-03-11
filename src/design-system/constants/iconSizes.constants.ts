@@ -3,6 +3,8 @@
  * These map to the `size` prop accepted by all Icon components.
  */
 
+export const ICON_SIZE_XXS = 10;
+
 /** 12px – compact contexts (e.g. Tag close icon) */
 export const ICON_SIZE_XS = 12;
 

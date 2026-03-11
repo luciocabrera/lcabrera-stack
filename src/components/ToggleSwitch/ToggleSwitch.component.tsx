@@ -3,6 +3,9 @@ import type { ChangeEvent, FocusEvent } from 'react';
 import * as stylex from '@stylexjs/stylex';
 import { useId, useState } from 'react';
 
+import { CheckIcon } from '@/components/Icons';
+import { ICON_SIZE_XXS } from '@/design-system/constants';
+
 import type { ToggleSwitchProps } from './ToggleSwitch.types';
 
 import { styles } from './ToggleSwitch.stylex';
@@ -60,7 +63,9 @@ export const ToggleSwitch = ({
         <span
           {...stylex.props(styles.thumb, isChecked && styles.thumbChecked)}
           aria-hidden='true'
-        />
+        >
+          {isChecked && <CheckIcon size={ICON_SIZE_XXS} />}
+        </span>
       </label>
       {label && (
         <label

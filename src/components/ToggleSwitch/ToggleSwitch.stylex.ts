@@ -35,11 +35,10 @@ export const styles = stylex.create({
     borderWidth: '1px',
     transition: `background-color ${transitions.fast}, border-color ${transitions.fast}`,
     backgroundColor: colors.surfaceSecondary,
-
     cursor: 'pointer',
     display: 'inline-flex',
     position: 'relative',
-    height: '24px',
+    height: spacing.lg,
     width: '36px',
   },
   trackChecked: {
@@ -57,14 +56,18 @@ export const styles = stylex.create({
   thumb: {
     borderRadius: borderRadius.full,
     transition: `transform ${transitions.fast}`,
+    alignItems: 'center',
     backgroundColor: colors.surfacePrimary,
     boxShadow: '0 1px 3px rgba(0, 0, 0, 0.3)',
+    color: colors.textPrimary,
+    display: 'flex',
+    justifyContent: 'center',
     transform: 'translateX(0)',
     height: '18px',
     width: '18px',
   },
   thumbChecked: {
-    transform: 'translateX(12px)',
+    transform: `translateX(${spacing.sm})`,
   },
   label: {
     color: colors.textPrimary,
