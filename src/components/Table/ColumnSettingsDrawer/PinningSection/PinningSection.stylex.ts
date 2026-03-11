@@ -15,7 +15,4 @@ const localStyles = stylex.create({
 export const styles = {
   buttonGroup: drawerSectionStyles.list,
   container: localStyles.container,
-  headerRow: drawerSectionStyles.headerRow,
-  headerTitle: drawerSectionStyles.headerTitle,
-  section: drawerSectionStyles.container,
 };

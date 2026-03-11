@@ -1,5 +1,10 @@
 import * as stylex from '@stylexjs/stylex';
 
+import {
+  SidePanelSection,
+  SidePanelSectionHeader,
+} from '@/components/SidePanel';
+
 import type { FilterSectionProps } from './FilterSection.types';
 
 import { FilterInputs } from '../../filters/FilterInputs';
@@ -16,18 +21,18 @@ export const FilterSection = <TData,>({
 
   return (
     <div {...stylex.props(styles.container)}>
-      <div {...stylex.props(styles.section)}>
-        <div {...stylex.props(styles.headerRow)}>
-          <h3 {...stylex.props(styles.headerTitle)}>Column Filter</h3>
-          <FilterSectionToolbar variant='toolbar' />
-        </div>
+      <SidePanelSection>
+        <SidePanelSectionHeader
+          title='Column Filter'
+          toolbar={<FilterSectionToolbar variant='toolbar' />}
+        />
         <FilterInputs
           columnKey={columnKey}
           filter={columnFilter}
           onChange={setColumnFilter}
           shouldFillHeight
         />
-      </div>
+      </SidePanelSection>
       <FilterSectionToolbar />
     </div>
   );

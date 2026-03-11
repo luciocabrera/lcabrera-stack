@@ -14,7 +14,4 @@ const localStyles = stylex.create({
 
 export const styles = {
   container: localStyles.container,
-  headerRow: drawerSectionStyles.headerRow,
-  headerTitle: drawerSectionStyles.headerTitle,
-  section: drawerSectionStyles.container,
 };

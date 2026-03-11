@@ -2,6 +2,10 @@ import * as stylex from '@stylexjs/stylex';
 
 import { Button } from '@/components/Button';
 import { SortAscIcon, SortDescIcon } from '@/components/Icons';
+import {
+  SidePanelSection,
+  SidePanelSectionHeader,
+} from '@/components/SidePanel';
 import { ICON_SIZE_MD } from '@/design-system/constants';
 
 import type { SortingSectionProps } from './SortingSection.types';
@@ -25,11 +29,11 @@ export const SortingSection = (_props: SortingSectionProps) => {
 
   return (
     <div {...stylex.props(styles.container)}>
-      <div {...stylex.props(styles.section)}>
-        <div {...stylex.props(styles.headerRow)}>
-          <h3 {...stylex.props(styles.headerTitle)}>Column Sorting</h3>
-          <SortingSectionToolbar variant='toolbar' />
-        </div>
+      <SidePanelSection>
+        <SidePanelSectionHeader
+          title='Column Sorting'
+          toolbar={<SortingSectionToolbar variant='toolbar' />}
+        />
         <div {...stylex.props(styles.list)}>
           <Button
             color={sortDirection === 'asc' ? 'primary' : 'outline'}
@@ -50,7 +54,7 @@ export const SortingSection = (_props: SortingSectionProps) => {
             Descending
           </Button>
         </div>
-      </div>
+      </SidePanelSection>
       <SortingSectionToolbar />
     </div>
   );
