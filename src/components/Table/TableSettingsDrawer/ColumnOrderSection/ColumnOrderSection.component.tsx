@@ -22,7 +22,6 @@ import type {
 } from './ColumnOrderSection.types';
 
 import {
-  useComputeOrderBySorting,
   useSetColumnPinning,
   useSetColumnsOrder,
   useSetColumnsVisibility,
@@ -30,6 +29,7 @@ import {
 import {
   useGetColumnOrder,
   useGetColumnPinning,
+  useGetColumnsSorting,
   useGetColumnVisibility,
 } from '../TableDrawerContext/selectors';
 import { styles } from './ColumnOrderSection.stylex';
@@ -49,12 +49,11 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
   const columnsOrder = useGetColumnOrder();
   const columnPinning = useGetColumnPinning();
   const columnVisibility = useGetColumnVisibility();
+  const sorting = useGetColumnsSorting();
 
   const setColumnPinning = useSetColumnPinning();
   const setColumnsOrder = useSetColumnsOrder();
   const setColumnsVisibility = useSetColumnsVisibility();
-
-  const computeOrderBySorting = useComputeOrderBySorting();
 
   const [pinSideModal, setPinSideModal] = useState<{
     columnKey: string;
@@ -158,14 +157,14 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
     if (side === 'left') {
       // All columns from index 0 to index-1 must be pinned left
       for (let i = 0; i < index; i++) {
-        if (!columnPinning.left.includes(allOrderedColumns[i].key)) {
+        if (!columnPinning.left.includes(allOrderedColumns[i]?.key ?? '')) {
           return false;
         }
       }
     } else {
       // All columns from index+1 to end must be pinned right
       for (let i = index + 1; i < allOrderedColumns.length; i++) {
-        if (!columnPinning.right.includes(allOrderedColumns[i].key)) {
+        if (!columnPinning.right.includes(allOrderedColumns[i]?.key ?? '')) {
           return false;
         }
       }
@@ -361,26 +360,27 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
         .filter((col) => col.key !== columnKey)
         .map((col) => col.key);
       const column = allOrderedColumns[index];
-
-      if (side === 'left') {
-        // Insert after the last left-pinned column
-        let lastLeftPinnedIndex = -1;
-        for (const [i, key] of newOrder.entries()) {
-          if (columnPinning.left.includes(key)) {
-            lastLeftPinnedIndex = i;
+      if (column?.key) {
+        if (side === 'left') {
+          // Insert after the last left-pinned column
+          let lastLeftPinnedIndex = -1;
+          for (const [i, key] of newOrder.entries()) {
+            if (columnPinning.left.includes(key)) {
+              lastLeftPinnedIndex = i;
+            }
           }
+          newOrder.splice(lastLeftPinnedIndex + 1, 0, column.key);
+        } else {
+          // Insert before the first right-pinned column
+          const firstRightPinnedIndex = newOrder.findIndex((key) =>
+            columnPinning.right.includes(key),
+          );
+          const insertAt =
+            firstRightPinnedIndex === -1
+              ? newOrder.length
+              : firstRightPinnedIndex;
+          newOrder.splice(insertAt, 0, column.key);
         }
-        newOrder.splice(lastLeftPinnedIndex + 1, 0, column.key);
-      } else {
-        // Insert before the first right-pinned column
-        const firstRightPinnedIndex = newOrder.findIndex((key) =>
-          columnPinning.right.includes(key),
-        );
-        const insertAt =
-          firstRightPinnedIndex === -1
-            ? newOrder.length
-            : firstRightPinnedIndex;
-        newOrder.splice(insertAt, 0, column.key);
       }
 
       setColumnsOrder(newOrder);
@@ -394,7 +394,7 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
 
       if (side === 'left') {
         for (let i = 0; i <= index; i++) {
-          const key = allOrderedColumns[i].key;
+          const key = allOrderedColumns[i]?.key ?? '';
           if (!newPinning.left.includes(key)) {
             // Remove from right if present
             newPinning.right = newPinning.right.filter((k) => k !== key);
@@ -403,7 +403,7 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
         }
       } else {
         for (let i = index; i < allOrderedColumns.length; i++) {
-          const key = allOrderedColumns[i].key;
+          const key = allOrderedColumns[i]?.key ?? '';
           if (!newPinning.right.includes(key)) {
             // Remove from left if present
             newPinning.left = newPinning.left.filter((k) => k !== key);
@@ -423,7 +423,11 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
   };
 
   const handleOrderBySorting = () => {
-    const newOrder = computeOrderBySorting();
+    const sortedKeys = sorting.map((s) => s.columnKey);
+    const remainingKeys = columnsOrder.filter(
+      (key) => !sortedKeys.includes(key),
+    );
+    const newOrder = [...sortedKeys, ...remainingKeys] as ColumnOrderState;
 
     if (!detectPinOrderConflict({ columnPinning, newOrder })) {
       setColumnsOrder(newOrder);

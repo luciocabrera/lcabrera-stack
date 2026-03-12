@@ -1,11 +1,6 @@
-import {
-  useGetColumnFilters,
-  useGetColumnOrder,
-  useGetColumnPinning,
-  useGetColumnSizing,
-  useGetColumnVisibility,
-} from '@/components/Table/contexts/TableConfig/columns/selectors';
-import { useGetColumnsSorting } from '@/components/Table/contexts/TableConfig/columns/selectors/useGetColumnsSorting.hook';
+import type { TableColumnsState } from '@/components/Table/Table.types';
+
+import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { useStore } from '@/hooks';
 
 import type {
@@ -16,20 +11,26 @@ import type {
 import { TableDrawerContext } from './TableDrawerContext.context';
 
 export const TableDrawerProvider = ({ children }: TableDrawerProviderProps) => {
-  const columnPinning = useGetColumnPinning();
-  const columnSizing = useGetColumnSizing();
-  const columnsOrder = useGetColumnOrder();
-  const columnVisibility = useGetColumnVisibility();
-  const columnFilters = useGetColumnFilters();
-  const columnsSorting = useGetColumnsSorting();
+  const { columnsStore: tableColumnsStore } = useTableConfigContextValue();
 
-  const columnsStore = useStore<TableDrawerColumnsState<unknown>>({
+  const tableColumnsState =
+    tableColumnsStore.get() ?? ({} as TableColumnsState<unknown>);
+  const {
     columnFilters,
-    columnOrder: columnsOrder,
+    columnOrder,
     columnPinning,
     columnSizing,
     columnVisibility,
-    sorting: columnsSorting,
+    sorting,
+  } = tableColumnsState;
+
+  const columnsStore = useStore<TableDrawerColumnsState<unknown>>({
+    columnFilters,
+    columnOrder,
+    columnPinning,
+    columnSizing,
+    columnVisibility,
+    sorting,
   });
 
   return (
