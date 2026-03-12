@@ -30,19 +30,15 @@ const elevationVariants = stylex.create({
   flat: {
     boxShadow: shadows.none,
   },
-
   lg: {
     boxShadow: shadows.lg,
   },
-
   md: {
     boxShadow: shadows.md,
   },
-
   sm: {
     boxShadow: shadows.sm,
   },
-
   xl: {
     boxShadow: shadows.xl,
   },
@@ -53,19 +49,15 @@ const paddingVariants = stylex.create({
   lg: {
     padding: spacing.lg,
   },
-
   md: {
     padding: spacing.md,
   },
-
   none: {
     padding: 0,
   },
-
   sm: {
     padding: spacing.sm,
   },
-
   xl: {
     padding: spacing.xl,
   },
@@ -83,14 +75,12 @@ const interactiveVariants = stylex.create({
     },
     cursor: 'pointer',
   },
-
   hoverable: {
     boxShadow: {
       ':hover': colors.shadowHover,
     },
     cursor: 'pointer',
   },
-
   static: {},
 });
 
@@ -100,36 +90,30 @@ const colorVariants = stylex.create({
     borderColor: colors.borderPrimary,
     backgroundColor: colors.surfacePrimary,
   },
-
   error: {
     borderColor: colors.error,
     backgroundColor: colors.errorBackground,
     color: colors.errorCardText,
   },
-
   info: {
     borderColor: colors.info,
     backgroundColor: colors.infoBackground,
   },
-
   primary: {
     borderColor: colors.brandPrimary,
     backgroundColor: colors.brandPrimaryBackground,
     color: colors.brandPrimaryCardText,
   },
-
   secondary: {
     borderColor: colors.brandSecondary,
     backgroundColor: colors.brandSecondary,
     color: colors.brandSecondaryText,
   },
-
   success: {
     borderColor: colors.success,
     backgroundColor: colors.successBackground,
     color: colors.successCardText,
   },
-
   warning: {
     borderColor: colors.warning,
     backgroundColor: colors.warningBackground,

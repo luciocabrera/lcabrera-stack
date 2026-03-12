@@ -37,7 +37,6 @@ export const styles = stylex.create({
       default: colors.surfaceSecondary,
       ':hover': colors.surfaceElevated,
     },
-
     cursor: {
       default: 'grab',
       ':active': 'grabbing',
@@ -60,13 +59,12 @@ export const styles = stylex.create({
   },
   dragHandle: {
     color: colors.textTertiary,
-
     cursor: {
       default: 'grab',
       ':active': 'grabbing',
     },
     flexShrink: 0,
-    fontFamily: 'monospace',
+    // fontFamily: 'monospace',
     fontSize: '1.25rem',
     lineHeight: 1,
   },

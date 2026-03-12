@@ -14,7 +14,6 @@ const styles = stylex.create({
   item: {
     containerName: 'toolbarLink',
   },
-
   itemActive: {
     backgroundColor: colors.brandPrimary,
     color: colors.brandPrimaryText,
