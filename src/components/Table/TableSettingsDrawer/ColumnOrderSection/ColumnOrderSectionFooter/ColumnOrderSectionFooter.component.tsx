@@ -2,31 +2,30 @@ import * as stylex from '@stylexjs/stylex';
 
 import { Button } from '@/components/Button';
 import { ColumnsOrderIcon, EraserIcon, RefreshIcon } from '@/components/Icons';
-import { ICON_SIZE_MD, ICON_SIZE_SM } from '@/design-system/constants';
-
-import type { ColumnOrderSectionFooterProps } from './ColumnOrderSectionFooter.types';
-
 import {
   useClearColumnOrderSection,
-  useOrderColumnsBySorting,
   useResetColumnOrderAndVisibility,
-} from '../../TableDrawerContext/actions';
+} from '@/components/Table/TableSettingsDrawer/TableDrawerContext/actions';
 import {
   useGetColumnPinning,
   useGetColumnsSorting,
   useGetColumnVisibility,
-} from '../../TableDrawerContext/selectors';
+} from '@/components/Table/TableSettingsDrawer/TableDrawerContext/selectors';
+import { ICON_SIZE_MD, ICON_SIZE_SM } from '@/design-system/constants';
+
+import type { ColumnOrderSectionFooterProps } from './ColumnOrderSectionFooter.types';
+
+import { useOrderBySorting } from '../ColumnOrderSectionContext/actions';
 import { styles } from './ColumnOrderSectionFooter.stylex';
 
 export const ColumnOrderSectionFooter = ({
-  onOrderBySorting,
   variant = 'footer',
 }: ColumnOrderSectionFooterProps) => {
   const sorting = useGetColumnsSorting();
   const pinning = useGetColumnPinning();
   const visibility = useGetColumnVisibility();
 
-  const orderColumnsBySorting = useOrderColumnsBySorting();
+  const orderBySorting = useOrderBySorting();
   const clearColumnOrderSection = useClearColumnOrderSection();
   const resetColumnOrderAndVisibility = useResetColumnOrderAndVisibility();
 
@@ -34,14 +33,6 @@ export const ColumnOrderSectionFooter = ({
   const hasPinning = pinning.left.length > 0 || pinning.right.length > 0;
   const hasHiddenColumns = visibility instanceof Set && visibility.size > 0;
   const hasClearableState = hasPinning || hasHiddenColumns;
-
-  const handleOrderBySorting = () => {
-    if (onOrderBySorting) {
-      onOrderBySorting();
-    } else {
-      orderColumnsBySorting();
-    }
-  };
 
   const isToolbar = variant === 'toolbar';
   const buttonColor = isToolbar ? 'ghost' : 'outline';
@@ -56,7 +47,7 @@ export const ColumnOrderSectionFooter = ({
         color={buttonColor}
         icon={<ColumnsOrderIcon size={iconSize} />}
         isDisabled={!hasSorting}
-        onClick={handleOrderBySorting}
+        onClick={orderBySorting}
         size={buttonSize}
         width={buttonWidth}
       >

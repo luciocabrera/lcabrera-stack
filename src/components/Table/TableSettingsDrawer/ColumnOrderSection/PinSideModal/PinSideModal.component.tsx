@@ -8,23 +8,24 @@ import { RadioOptionGroup } from '@/components/RadioOptionGroup';
 import type { PinSide } from '../ColumnOrderSection.types';
 import type { PinSideModalProps } from './PinSideModal.types';
 
+import {
+  useAcceptPinSide,
+  useCancelPinSide,
+} from '../ColumnOrderSectionContext/actions';
 import { styles } from './PinSideModal.stylex';
 
-export const PinSideModal = ({
-  columnLabel,
-  isOpen,
-  onAccept,
-  onCancel,
-}: PinSideModalProps) => {
+export const PinSideModal = ({ columnLabel, isOpen }: PinSideModalProps) => {
   const [selectedSide, setSelectedSide] = useState<PinSide>('closest-edge');
+  const acceptPinSide = useAcceptPinSide();
+  const cancelPinSide = useCancelPinSide();
 
   const handleAccept = () => {
-    onAccept(selectedSide);
+    acceptPinSide(selectedSide);
     setSelectedSide('closest-edge');
   };
 
   const handleCancel = () => {
-    onCancel();
+    cancelPinSide();
     setSelectedSide('closest-edge');
   };
 

@@ -21,6 +21,7 @@ import { ICON_SIZE_LG, ICON_SIZE_MD } from '@/design-system/constants';
 
 import { useToogleTableIsTableSettingsOpen } from '../contexts/TableConfig/meta/actions';
 import { ColumnOrderSection } from './ColumnOrderSection';
+import { ColumnOrderSectionProvider } from './ColumnOrderSection/ColumnOrderSectionContext/ColumnOrderSectionContext.provider';
 import { FiltersSection } from './FiltersSection';
 import { GeneralSettingsSection } from './GeneralSettingsSection';
 import { SortingSection } from './SortingSection';
@@ -85,7 +86,11 @@ export const TableSettingsDrawer = () => {
     },
 
     {
-      children: <ColumnOrderSection />,
+      children: (
+        <ColumnOrderSectionProvider>
+          <ColumnOrderSection />
+        </ColumnOrderSectionProvider>
+      ),
       header: 'Columns',
       key: 'columns',
     },

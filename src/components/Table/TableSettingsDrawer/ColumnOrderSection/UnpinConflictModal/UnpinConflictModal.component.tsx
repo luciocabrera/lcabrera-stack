@@ -8,25 +8,29 @@ import { RadioOptionGroup } from '@/components/RadioOptionGroup';
 import type { UnpinConflictResolution } from '../ColumnOrderSection.types';
 import type { UnpinConflictModalProps } from './UnpinConflictModal.types';
 
+import {
+  useAcceptUnpinConflict,
+  useCancelUnpinConflict,
+} from '../ColumnOrderSectionContext/actions';
 import { styles } from './UnpinConflictModal.stylex';
 
 export const UnpinConflictModal = ({
   columnLabel,
   isOpen,
-  onAccept,
-  onCancel,
   side,
 }: UnpinConflictModalProps) => {
   const [selectedResolution, setSelectedResolution] =
     useState<UnpinConflictResolution>('unpin-beyond');
+  const acceptUnpinConflict = useAcceptUnpinConflict();
+  const cancelUnpinConflict = useCancelUnpinConflict();
 
   const handleAccept = () => {
-    onAccept(selectedResolution);
+    acceptUnpinConflict(selectedResolution);
     setSelectedResolution('unpin-beyond');
   };
 
   const handleCancel = () => {
-    onCancel();
+    cancelUnpinConflict();
     setSelectedResolution('unpin-beyond');
   };
 

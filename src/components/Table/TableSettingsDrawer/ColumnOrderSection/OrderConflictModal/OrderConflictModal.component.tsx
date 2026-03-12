@@ -8,25 +8,29 @@ import { RadioOptionGroup } from '@/components/RadioOptionGroup';
 import type { OrderConflictResolution } from '../ColumnOrderSection.types';
 import type { OrderConflictModalProps } from './OrderConflictModal.types';
 
+import {
+  useAcceptOrderConflict,
+  useCancelOrderConflict,
+} from '../ColumnOrderSectionContext/actions';
 import { RESOLUTIONS } from './OrderConflictModal.constants';
 import { styles } from './OrderConflictModal.stylex';
 
 export const OrderConflictModal = ({
   description,
   isOpen,
-  onAccept,
-  onCancel,
 }: OrderConflictModalProps) => {
   const [selectedResolution, setSelectedResolution] =
     useState<OrderConflictResolution>('remove-conflicting-pins');
+  const acceptOrderConflict = useAcceptOrderConflict();
+  const cancelOrderConflict = useCancelOrderConflict();
 
   const handleAccept = () => {
-    onAccept(selectedResolution);
+    acceptOrderConflict(selectedResolution);
     setSelectedResolution('remove-conflicting-pins');
   };
 
   const handleCancel = () => {
-    onCancel();
+    cancelOrderConflict();
     setSelectedResolution('remove-conflicting-pins');
   };
 
