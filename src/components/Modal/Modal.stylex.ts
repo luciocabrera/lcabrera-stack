@@ -32,6 +32,7 @@ export const modalStyles = stylex.create({
     backgroundColor: colors.surfacePrimary,
     boxShadow: shadows.xl,
     color: colors.textPrimary,
+    textAlign: 'left',
     zIndex: zIndex.modal,
     maxHeight: '85vh',
     maxWidth: '480px',

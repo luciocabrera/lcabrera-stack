@@ -16,6 +16,8 @@ import type { ColumnOrderSectionProps } from './ColumnOrderSection.types';
 
 import { styles } from './ColumnOrderSection.stylex';
 import {
+  useAcceptPinSide,
+  useCancelPinSide,
   useReorderColumns,
   useToggleColumnPin,
   useToggleColumnVisibility,
@@ -29,7 +31,7 @@ import {
 import { ColumnOrderSectionFooter } from './ColumnOrderSectionFooter';
 import { OrderConflictModal } from './OrderConflictModal';
 import { PinConflictModal } from './PinConflictModal';
-import { PinSideModal } from './PinSideModal';
+import { PinSideModal } from '@/components/PinSideModal';
 import { UnpinConflictModal } from './UnpinConflictModal';
 import { buildAllOrderedColumns } from './utils';
 
@@ -38,7 +40,6 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
   const columnsOrder = useGetColumnOrder();
   const columnPinning = useGetColumnPinning();
   const columnVisibility = useGetColumnVisibility();
-
   const pinSideModal = useGetPinSideModal();
   const conflictModal = useGetConflictModal();
   const unpinConflictModal = useGetUnpinConflictModal();
@@ -47,6 +48,8 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
   const toggleColumnVisibility = useToggleColumnVisibility();
   const reorderColumns = useReorderColumns();
   const toggleColumnPin = useToggleColumnPin();
+  const acceptPinSide = useAcceptPinSide();
+  const cancelPinSide = useCancelPinSide();
 
   const allOrderedColumns = buildAllOrderedColumns({ columns, columnsOrder });
 
@@ -95,6 +98,8 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
       <PinSideModal
         columnLabel={pinSideModal.columnLabel}
         isOpen={pinSideModal.isOpen}
+        onAccept={acceptPinSide}
+        onCancel={cancelPinSide}
       />
       <PinConflictModal
         columnLabel={conflictModal.columnLabel}

@@ -5,27 +5,26 @@ import { Button } from '@/components/Button';
 import { Modal } from '@/components/Modal';
 import { RadioOptionGroup } from '@/components/RadioOptionGroup';
 
-import type { PinSide } from '../ColumnOrderSection.types';
+import type { PinSide } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
 import type { PinSideModalProps } from './PinSideModal.types';
 
-import {
-  useAcceptPinSide,
-  useCancelPinSide,
-} from '../ColumnOrderSectionContext/actions';
 import { styles } from './PinSideModal.stylex';
 
-export const PinSideModal = ({ columnLabel, isOpen }: PinSideModalProps) => {
+export const PinSideModal = ({
+  columnLabel,
+  isOpen,
+  onAccept,
+  onCancel,
+}: PinSideModalProps) => {
   const [selectedSide, setSelectedSide] = useState<PinSide>('closest-edge');
-  const acceptPinSide = useAcceptPinSide();
-  const cancelPinSide = useCancelPinSide();
 
   const handleAccept = () => {
-    acceptPinSide(selectedSide);
+    onAccept(selectedSide);
     setSelectedSide('closest-edge');
   };
 
   const handleCancel = () => {
-    cancelPinSide();
+    onCancel();
     setSelectedSide('closest-edge');
   };
 

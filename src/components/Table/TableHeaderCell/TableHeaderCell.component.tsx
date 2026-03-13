@@ -1,7 +1,9 @@
 import * as stylex from '@stylexjs/stylex';
+import { useState } from 'react';
 
 import { Button } from '@/components/Button';
 import { MoreVerticalIcon, PinIcon, PinOffIcon } from '@/components/Icons';
+import { PinSideModal } from '@/components/PinSideModal';
 import {
   useSetColumnPinning,
   useSetColumnSizing,
@@ -25,6 +27,7 @@ import {
   useSetTableColumnSelectedKey,
   useToogleTableIsColumnSettingsOpen,
 } from '../contexts/TableConfig/meta/actions';
+import { useHeaderCellPinAccept } from './hooks/useHeaderCellPinAccept.hook';
 import { SortIcon } from './SortIcon';
 import {
   skelletonStyles,
@@ -51,6 +54,9 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
   const setSorting = useSetColumnSorting();
   const setTableColumnSelectedKey = useSetTableColumnSelectedKey();
   const toogleTableIsColumnSettingsOpen = useToogleTableIsColumnSettingsOpen();
+  const acceptPinSide = useHeaderCellPinAccept({ columnKey });
+
+  const [isPinSideModalOpen, setIsPinSideModalOpen] = useState(false);
 
   const { label, maxWidth, minWidth } = column;
   const effectiveMinWidth = minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
@@ -84,15 +90,21 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
     setColumnSizing({ columnKey, width: undefined });
   };
 
-  const handlePinCycle = () => {
-    const currentSide = pinInfo?.side;
-    const nextSide =
-      currentSide === undefined
-        ? 'left'
-        : currentSide === 'left'
-          ? 'right'
-          : undefined;
-    setColumnPinning({ columnKey, side: nextSide });
+  const handlePinClick = () => {
+    if (pinInfo?.side) {
+      setColumnPinning({ columnKey, side: undefined });
+    } else {
+      setIsPinSideModalOpen(true);
+    }
+  };
+
+  const handlePinAccept = (side: Parameters<typeof acceptPinSide>[0]) => {
+    acceptPinSide(side);
+    setIsPinSideModalOpen(false);
+  };
+
+  const handlePinCancel = () => {
+    setIsPinSideModalOpen(false);
   };
 
   const pinnedStylex =
@@ -128,18 +140,14 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
       <div {...stylex.props(tableHeaderCellStyles.controls)}>
         <Button
           aria-label={
-            pinInfo?.side === undefined
-              ? `Pin ${label} left`
-              : pinInfo.side === 'left'
-                ? `Pin ${label} right`
-                : `Unpin ${label}`
+            pinInfo?.side ? `Unpin ${label}` : `Pin ${label}`
           }
           color='ghost'
           customStylex={tableHeaderCellStyles.settingsButton}
           icon={
             pinInfo?.side ? <PinIcon size={14} /> : <PinOffIcon size={14} />
           }
-          onClick={handlePinCycle}
+          onClick={handlePinClick}
           size='embedded'
         />
         {isSortable && (
@@ -163,6 +171,12 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
           />
         )}
       </div>
+      <PinSideModal
+        columnLabel={label}
+        isOpen={isPinSideModalOpen}
+        onAccept={handlePinAccept}
+        onCancel={handlePinCancel}
+      />
       {/* Resize handle */}
       <div
         aria-label={`Resize ${label} column`}
