@@ -64,6 +64,20 @@ export const TableBody = ({ tableContainerRef }: TableBodyProps) => {
                 col.minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
               const finalWidth = columnSizing[col.key] ?? effectiveMinWidth;
 
+              if (col.render) {
+                return (
+                  <TableBodyCell
+                    key={col.key}
+                    label={''}
+                    minWidth={effectiveMinWidth}
+                    pinInfo={pinnedOffsets[col.key]}
+                    width={finalWidth}
+                  >
+                    {col.render(rowData)}
+                  </TableBodyCell>
+                );
+              }
+
               return (
                 <TableBodyCell
                   dataType={col.dataType}

@@ -1,5 +1,5 @@
 import type { StyleXStyles } from '@stylexjs/stylex';
-import type { ComponentPropsWithoutRef } from 'react';
+import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 
 import type {
   PinnedColumnInfo,
@@ -9,10 +9,12 @@ import type {
 export type TableBodyCellProps<TData extends Record<string, unknown>> =
   ComponentPropsWithoutRef<'td'> &
     Pick<TableColumn<TData>, 'dataType' | 'format' | 'label' | 'minWidth'> & {
+      /** Custom content that overrides the default cell rendering */
+      children?: ReactNode;
       customStylex?: StyleXStyles;
       /** Locale for formatting */
       locale?: string;
       pinInfo?: PinnedColumnInfo;
-      value: unknown;
+      value?: unknown;
       width?: number | string;
     };

@@ -65,7 +65,7 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
   const [isPinSideModalOpen, setIsPinSideModalOpen] = useState(false);
   const [pinConflict, setPinConflict] = useState<PinConflictState>({ isOpen: false, side: 'left' });
 
-  const { label, maxWidth, minWidth } = column;
+  const { isHeaderHidden, label, maxWidth, minWidth } = column;
   const effectiveMinWidth = minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
   const currentWidth = columnSizing[column.key] ?? effectiveMinWidth;
   const sortDirection = column.sortDirection;
@@ -153,69 +153,73 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
           <div {...stylex.props(skelletonStyles.shimmerWave)} />
         </div>
       )}
-      <span {...stylex.props(tableHeaderCellStyles.content)}>{label}</span>
-      <div {...stylex.props(tableHeaderCellStyles.controls)}>
-        <Button
-          aria-label={
-            pinInfo?.side ? `Unpin ${label}` : `Pin ${label}`
-          }
-          color='ghost'
-          customStylex={tableHeaderCellStyles.settingsButton}
-          icon={
-            pinInfo?.side ? <PinIcon size={14} /> : <PinOffIcon size={14} />
-          }
-          onClick={handlePinClick}
-          size='embedded'
-        />
-        {isSortable && (
-          <Button
-            aria-label={`Sort by ${label}`}
-            color='ghost'
-            customStylex={tableHeaderCellStyles.settingsButton}
-            icon={<SortIcon direction={sortDirection} />}
-            onClick={handleSort}
-            size='embedded'
+      {!isHeaderHidden && (
+        <>
+          <span {...stylex.props(tableHeaderCellStyles.content)}>{label}</span>
+          <div {...stylex.props(tableHeaderCellStyles.controls)}>
+            <Button
+              aria-label={
+                pinInfo?.side ? `Unpin ${label}` : `Pin ${label}`
+              }
+              color='ghost'
+              customStylex={tableHeaderCellStyles.settingsButton}
+              icon={
+                pinInfo?.side ? <PinIcon size={14} /> : <PinOffIcon size={14} />
+              }
+              onClick={handlePinClick}
+              size='embedded'
+            />
+            {isSortable && (
+              <Button
+                aria-label={`Sort by ${label}`}
+                color='ghost'
+                customStylex={tableHeaderCellStyles.settingsButton}
+                icon={<SortIcon direction={sortDirection} />}
+                onClick={handleSort}
+                size='embedded'
+              />
+            )}
+            {hasSettings && (
+              <Button
+                aria-label={`Settings for ${label}`}
+                color='ghost'
+                customStylex={tableHeaderCellStyles.settingsButton}
+                icon={<MoreVerticalIcon size={14} />}
+                onClick={handleOpenSettings}
+                size='embedded'
+              />
+            )}
+          </div>
+          <PinSideModal
+            columnLabel={label}
+            isOpen={isPinSideModalOpen}
+            onAccept={handlePinAccept}
+            onCancel={handlePinCancel}
           />
-        )}
-        {hasSettings && (
-          <Button
-            aria-label={`Settings for ${label}`}
-            color='ghost'
-            customStylex={tableHeaderCellStyles.settingsButton}
-            icon={<MoreVerticalIcon size={14} />}
-            onClick={handleOpenSettings}
-            size='embedded'
+          <PinConflictModal
+            columnLabel={label}
+            isOpen={pinConflict.isOpen}
+            onAccept={handlePinConflictAccept}
+            onCancel={handlePinConflictCancel}
+            side={pinConflict.side}
           />
-        )}
-      </div>
-      <PinSideModal
-        columnLabel={label}
-        isOpen={isPinSideModalOpen}
-        onAccept={handlePinAccept}
-        onCancel={handlePinCancel}
-      />
-      <PinConflictModal
-        columnLabel={label}
-        isOpen={pinConflict.isOpen}
-        onAccept={handlePinConflictAccept}
-        onCancel={handlePinConflictCancel}
-        side={pinConflict.side}
-      />
-      {/* Resize handle */}
-      <div
-        aria-label={`Resize ${label} column`}
-        onDoubleClick={handleResizeDoubleClick}
-        onMouseDown={onMouseDown}
-        role='separator'
-        {...stylex.props(tableHeaderCellStyles.resizeHandle)}
-      >
-        <div
-          {...stylex.props(
-            tableHeaderCellStyles.resizeHandleLine,
-            isResizing && tableHeaderCellStyles.resizeHandleActive,
-          )}
-        />
-      </div>
+          {/* Resize handle */}
+          <div
+            aria-label={`Resize ${label} column`}
+            onDoubleClick={handleResizeDoubleClick}
+            onMouseDown={onMouseDown}
+            role='separator'
+            {...stylex.props(tableHeaderCellStyles.resizeHandle)}
+          >
+            <div
+              {...stylex.props(
+                tableHeaderCellStyles.resizeHandleLine,
+                isResizing && tableHeaderCellStyles.resizeHandleActive,
+              )}
+            />
+          </div>
+        </>
+      )}
     </th>
   );
 };

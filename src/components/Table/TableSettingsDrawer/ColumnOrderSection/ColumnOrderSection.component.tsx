@@ -55,7 +55,8 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
   const acceptPinConflict = useAcceptPinConflict();
   const cancelPinConflict = useCancelPinConflict();
 
-  const allOrderedColumns = buildAllOrderedColumns({ columns, columnsOrder });
+  const settingsColumns = columns.filter((col) => !col.render);
+  const allOrderedColumns = buildAllOrderedColumns({ columns: settingsColumns, columnsOrder });
 
   // Convert columns to draggable items
   const draggableItems: DraggableItem[] = allOrderedColumns.map((col) => {

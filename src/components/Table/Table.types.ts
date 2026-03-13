@@ -114,12 +114,16 @@ export type TableColumn<TData> = {
   format?: TableColumnFormat;
   /** Whether this column can be filtered (default: true) */
   isFilterable?: boolean;
+  /** Whether to hide the header content (label, controls, resize handle) */
+  isHeaderHidden?: boolean;
   /** Whether this column is sortable (default: true) */
   isSortable?: boolean;
   key: (keyof TData & string) | string;
   label: string;
   maxWidth?: number;
   minWidth?: number;
+  /** Custom render function for body cells. Receives the row data. */
+  render?: (row: TData) => ReactNode;
 };
 
 export type TableColumnDataType =

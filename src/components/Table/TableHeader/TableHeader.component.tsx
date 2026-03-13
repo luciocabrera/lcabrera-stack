@@ -40,7 +40,7 @@ export const TableHeader = <TData extends Record<string, unknown>, TResponse>({
         {effectiveColumns.map((col) => (
           <TableHeaderCell
             columnKey={col.key}
-            hasSettings
+            hasSettings={!col.isHeaderHidden}
             key={col.key}
             pinInfo={pinnedOffsets[col.key]}
           />
