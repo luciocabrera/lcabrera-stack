@@ -3,6 +3,7 @@ import * as stylex from '@stylexjs/stylex';
 import type { DraggableItem } from '@/components/DraggableList';
 
 import { DraggableList } from '@/components/DraggableList';
+import { PinSideModal } from '@/components/PinSideModal';
 import { SidePanelSectionHeader } from '@/components/SidePanel';
 import { useGetColumns } from '@/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
 import {
@@ -33,7 +34,6 @@ import {
 import { ColumnOrderSectionFooter } from './ColumnOrderSectionFooter';
 import { OrderConflictModal } from './OrderConflictModal';
 import { PinConflictModal } from './PinConflictModal';
-import { PinSideModal } from '@/components/PinSideModal';
 import { UnpinConflictModal } from './UnpinConflictModal';
 import { buildAllOrderedColumns } from './utils';
 

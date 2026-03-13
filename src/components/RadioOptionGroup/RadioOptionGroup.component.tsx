@@ -20,7 +20,10 @@ export const RadioOptionGroup = ({
         )}
       >
         <input
-          {...stylex.props(styles.radio)}
+          {...stylex.props(
+            styles.radio,
+            value === option.value && styles.radioChecked,
+          )}
           checked={value === option.value}
           name={name}
           onChange={() => {
