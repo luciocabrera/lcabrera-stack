@@ -8,29 +8,25 @@ import { RadioOptionGroup } from '@/components/RadioOptionGroup';
 import type { PinConflictResolution } from '../ColumnOrderSection.types';
 import type { PinConflictModalProps } from './PinConflictModal.types';
 
-import {
-  useAcceptPinConflict,
-  useCancelPinConflict,
-} from '../ColumnOrderSectionContext/actions';
 import { styles } from './PinConflictModal.stylex';
 
 export const PinConflictModal = ({
   columnLabel,
   isOpen,
+  onAccept,
+  onCancel,
   side,
 }: PinConflictModalProps) => {
   const [selectedResolution, setSelectedResolution] =
     useState<PinConflictResolution>('move-column');
-  const acceptPinConflict = useAcceptPinConflict();
-  const cancelPinConflict = useCancelPinConflict();
 
   const handleAccept = () => {
-    acceptPinConflict(selectedResolution);
+    onAccept(selectedResolution);
     setSelectedResolution('move-column');
   };
 
   const handleCancel = () => {
-    cancelPinConflict();
+    onCancel();
     setSelectedResolution('move-column');
   };
 

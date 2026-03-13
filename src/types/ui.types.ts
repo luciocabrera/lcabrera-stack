@@ -19,6 +19,11 @@ export type Pagination = {
   skip: number;
 };
 
+export type PinConflictState = {
+  isOpen: boolean;
+  side: 'left' | 'right';
+};
+
 export type PinSide = 'closest-edge' | 'left' | 'right';
 
 export type SortDirection = 'asc' | 'desc' | undefined;

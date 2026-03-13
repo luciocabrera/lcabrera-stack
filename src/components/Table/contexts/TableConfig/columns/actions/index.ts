@@ -1,6 +1,7 @@
-export type { BatchColumnSettingsUpdate } from './useBatchSetColumnSettings.hook';
+
+export { useAcceptHeaderPinConflict } from './useAcceptHeaderPinConflict.hook';
+export { useAcceptHeaderPinSide } from './useAcceptHeaderPinSide.hook';
 export { useBatchSetColumnSettings } from './useBatchSetColumnSettings.hook';
-export type { BatchTableSettingsUpdate } from './useBatchSetTableSettings.hook';
 export { useBatchSetTableSettings } from './useBatchSetTableSettings.hook';
 export { useSetColumnPinning } from './useSetColumnPinning.hook';
 export { useSetColumnSizing } from './useSetColumnSizing.hook';

@@ -1,10 +1,15 @@
 import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 
+import type { PinConflictResolution } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
+import type { PinConflictState, PinSide } from '@/types/ui.types';
+
 import { Button } from '@/components/Button';
 import { MoreVerticalIcon, PinIcon, PinOffIcon } from '@/components/Icons';
 import { PinSideModal } from '@/components/PinSideModal';
 import {
+  useAcceptHeaderPinConflict,
+  useAcceptHeaderPinSide,
   useSetColumnPinning,
   useSetColumnSizing,
   useSetColumnSorting,
@@ -15,6 +20,7 @@ import {
 } from '@/components/Table/contexts/TableData/data/selectors';
 import { useColumnResize } from '@/components/Table/hooks';
 import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
+import { PinConflictModal } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/PinConflictModal';
 import { useRenderTracker } from '@/utils/performance';
 
 import type { TableHeaderCellProps } from './TableHeaderCell.types';
@@ -27,7 +33,6 @@ import {
   useSetTableColumnSelectedKey,
   useToogleTableIsColumnSettingsOpen,
 } from '../contexts/TableConfig/meta/actions';
-import { useHeaderCellPinAccept } from './hooks/useHeaderCellPinAccept.hook';
 import { SortIcon } from './SortIcon';
 import {
   skelletonStyles,
@@ -54,9 +59,11 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
   const setSorting = useSetColumnSorting();
   const setTableColumnSelectedKey = useSetTableColumnSelectedKey();
   const toogleTableIsColumnSettingsOpen = useToogleTableIsColumnSettingsOpen();
-  const acceptPinSide = useHeaderCellPinAccept({ columnKey });
+  const acceptHeaderPinSide = useAcceptHeaderPinSide<TData>();
+  const acceptHeaderPinConflict = useAcceptHeaderPinConflict<TData>();
 
   const [isPinSideModalOpen, setIsPinSideModalOpen] = useState(false);
+  const [pinConflict, setPinConflict] = useState<PinConflictState>({ isOpen: false, side: 'left' });
 
   const { label, maxWidth, minWidth } = column;
   const effectiveMinWidth = minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
@@ -98,13 +105,23 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
     }
   };
 
-  const handlePinAccept = (side: Parameters<typeof acceptPinSide>[0]) => {
-    acceptPinSide(side);
+  const handlePinAccept = (pinSide: PinSide) => {
+    const conflict = acceptHeaderPinSide({ columnKey, pinSide });
+    if (conflict) setPinConflict(conflict);
     setIsPinSideModalOpen(false);
   };
 
   const handlePinCancel = () => {
     setIsPinSideModalOpen(false);
+  };
+
+  const handlePinConflictAccept = (resolution: PinConflictResolution) => {
+    acceptHeaderPinConflict({ columnKey, resolution, side: pinConflict.side });
+    setPinConflict({ isOpen: false, side: 'left' });
+  };
+
+  const handlePinConflictCancel = () => {
+    setPinConflict({ isOpen: false, side: 'left' });
   };
 
   const pinnedStylex =
@@ -176,6 +193,13 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
         isOpen={isPinSideModalOpen}
         onAccept={handlePinAccept}
         onCancel={handlePinCancel}
+      />
+      <PinConflictModal
+        columnLabel={label}
+        isOpen={pinConflict.isOpen}
+        onAccept={handlePinConflictAccept}
+        onCancel={handlePinConflictCancel}
+        side={pinConflict.side}
       />
       {/* Resize handle */}
       <div
