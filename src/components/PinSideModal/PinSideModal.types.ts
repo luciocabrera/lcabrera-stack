@@ -1,4 +1,4 @@
-import type { PinSide } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
+import type { PinSide } from '@/types/ui.types';
 
 export type PinSideModalProps = {
   columnLabel: string;

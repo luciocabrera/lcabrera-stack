@@ -1,5 +1,5 @@
 import type { DataKey } from '@/components/Table/Table.types';
-import type { PinSide } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
+import type { PinSide } from '@/types/ui.types';
 
 import { useSetColumnPinning } from '@/components/Table/contexts/TableConfig/columns/actions';
 import {
@@ -30,7 +30,7 @@ export const useHeaderCellPinAccept = <TData>({
 
     const side = resolveClosestEdgeSide({
       allOrderedColumns,
-      columnKey: columnKey as string,
+      columnKey,
       pinSide,
     });
 

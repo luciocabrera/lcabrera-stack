@@ -1,11 +1,12 @@
 import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 
+import type { PinSide } from '@/types/ui.types';
+
 import { Button } from '@/components/Button';
 import { Modal } from '@/components/Modal';
 import { RadioOptionGroup } from '@/components/RadioOptionGroup';
 
-import type { PinSide } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
 import type { PinSideModalProps } from './PinSideModal.types';
 
 import { styles } from './PinSideModal.stylex';

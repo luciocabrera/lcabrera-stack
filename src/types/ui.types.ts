@@ -19,6 +19,8 @@ export type Pagination = {
   skip: number;
 };
 
+export type PinSide = 'closest-edge' | 'left' | 'right';
+
 export type SortDirection = 'asc' | 'desc' | undefined;
 
 export type Sorting<TData> = {

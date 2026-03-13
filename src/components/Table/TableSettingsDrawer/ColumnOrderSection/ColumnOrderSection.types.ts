@@ -14,6 +14,6 @@ export type OrderConflictResolution =
 
 export type PinConflictResolution = 'move-column' | 'pin-all-between';
 
-export type PinSide = 'closest-edge' | 'left' | 'right';
+export type { PinSide } from '@/types/ui.types';
 
 export type UnpinConflictResolution = 'reorder-to-fill' | 'unpin-beyond';
