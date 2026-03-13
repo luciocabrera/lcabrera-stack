@@ -12,7 +12,10 @@ export type OrderConflictResolution =
   | 'remove-conflicting-pins'
   | 'reset-all-pins';
 
-export type PinConflictResolution = 'move-column' | 'pin-all-between';
+export type PinConflictResolution =
+  | 'move-column'
+  | 'pin-all-between'
+  | 'pin-only';
 
 export type { PinSide } from '@/types/ui.types';
 

@@ -53,6 +53,10 @@ export const useAcceptPinConflict = () => {
         columnOrder: newOrder as ColumnOrderState,
         columnPinning: applyPin({ columnKey, columnPinning, side }),
       });
+    } else if (resolution === 'pin-only') {
+      drawerColumnsStore.set({
+        columnPinning: applyPin({ columnKey, columnPinning, side }),
+      });
     } else {
       // Pin all columns between the edge and this column
       const newPinning = {

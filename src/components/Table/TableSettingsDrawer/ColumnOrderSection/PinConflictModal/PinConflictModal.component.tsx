@@ -68,6 +68,10 @@ export const PinConflictModal = ({
             label: 'Pin all columns between edge and this column',
             value: 'pin-all-between',
           },
+          {
+            label: 'Pin without changing column order',
+            value: 'pin-only',
+          },
         ]}
         value={selectedResolution}
       />
