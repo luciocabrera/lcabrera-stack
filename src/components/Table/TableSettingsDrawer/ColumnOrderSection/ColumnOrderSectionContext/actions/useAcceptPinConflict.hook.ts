@@ -35,54 +35,62 @@ export const useAcceptPinConflict = () => {
     });
     const index = allOrderedColumns.findIndex((col) => col.key === columnKey);
 
-    if (resolution === 'move-column') {
-      const newOrder = allOrderedColumns
-        .filter((col) => col.key !== columnKey)
-        .map((col) => col.key);
-      const column = allOrderedColumns[index];
-      if (column?.key) {
-        insertAdjacentToPinnedGroup({
-          columnKey: column.key,
-          columnPinning,
-          order: newOrder,
-          side,
+    switch (resolution) {
+      case 'move-column': {
+        const newOrder = allOrderedColumns
+          .filter((col) => col.key !== columnKey)
+          .map((col) => col.key);
+        const column = allOrderedColumns[index];
+        if (column?.key) {
+          insertAdjacentToPinnedGroup({
+            columnKey: column.key,
+            columnPinning,
+            order: newOrder,
+            side,
+          });
+        }
+
+        drawerColumnsStore.set({
+          columnOrder: newOrder as ColumnOrderState,
+          columnPinning: applyPin({ columnKey, columnPinning, side }),
         });
+        break;
       }
 
-      drawerColumnsStore.set({
-        columnOrder: newOrder as ColumnOrderState,
-        columnPinning: applyPin({ columnKey, columnPinning, side }),
-      });
-    } else if (resolution === 'pin-only') {
-      drawerColumnsStore.set({
-        columnPinning: applyPin({ columnKey, columnPinning, side }),
-      });
-    } else {
-      // Pin all columns between the edge and this column
-      const newPinning = {
-        left: [...columnPinning.left],
-        right: [...columnPinning.right],
-      };
+      case 'pin-all-between': {
+        const newPinning = {
+          left: [...columnPinning.left],
+          right: [...columnPinning.right],
+        };
 
-      if (side === 'left') {
-        for (let i = 0; i <= index; i++) {
-          const key = allOrderedColumns[i]?.key ?? '';
-          if (!newPinning.left.includes(key)) {
-            newPinning.right = newPinning.right.filter((k) => k !== key);
-            newPinning.left.push(key);
+        if (side === 'left') {
+          for (let i = 0; i <= index; i++) {
+            const key = allOrderedColumns[i]?.key ?? '';
+            if (!newPinning.left.includes(key)) {
+              newPinning.right = newPinning.right.filter((k) => k !== key);
+              newPinning.left.push(key);
+            }
+          }
+        } else {
+          for (let i = index; i < allOrderedColumns.length; i++) {
+            const key = allOrderedColumns[i]?.key ?? '';
+            if (!newPinning.right.includes(key)) {
+              newPinning.left = newPinning.left.filter((k) => k !== key);
+              newPinning.right.push(key);
+            }
           }
         }
-      } else {
-        for (let i = index; i < allOrderedColumns.length; i++) {
-          const key = allOrderedColumns[i]?.key ?? '';
-          if (!newPinning.right.includes(key)) {
-            newPinning.left = newPinning.left.filter((k) => k !== key);
-            newPinning.right.push(key);
-          }
-        }
+
+        drawerColumnsStore.set({ columnPinning: newPinning });
+        break;
       }
 
-      drawerColumnsStore.set({ columnPinning: newPinning });
+      case 'pin-only': {
+        drawerColumnsStore.set({
+          columnPinning: applyPin({ columnKey, columnPinning, side }),
+        });
+        break;
+      }
     }
 
     modalsStore.set({
