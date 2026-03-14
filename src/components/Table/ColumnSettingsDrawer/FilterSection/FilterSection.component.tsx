@@ -1,9 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 
-import {
-  SidePanelSection,
-  SidePanelSectionHeader,
-} from '@/components/SidePanel';
+import { SidePanelSectionHeader } from '@/components/SidePanel';
 
 import type { FilterSectionProps } from './FilterSection.types';
 
@@ -21,7 +18,7 @@ export const FilterSection = <TData,>({
 
   return (
     <div {...stylex.props(styles.container)}>
-      <SidePanelSection>
+      <div {...stylex.props(styles.section)}>
         <SidePanelSectionHeader
           title='Column Filter'
           toolbar={<FilterSectionToolbar variant='toolbar' />}
@@ -32,7 +29,7 @@ export const FilterSection = <TData,>({
           onChange={setColumnFilter}
           shouldFillHeight
         />
-      </SidePanelSection>
+      </div>
       <FilterSectionToolbar />
     </div>
   );
