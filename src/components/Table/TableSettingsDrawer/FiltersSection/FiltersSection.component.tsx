@@ -19,6 +19,7 @@ export const FiltersSection = () => {
   const [expandedFilters, setExpandedFilters] = useState<Set<string>>(
     () => new Set(),
   );
+  const [isAddFilterOpen, setIsAddFilterOpen] = useState(false);
 
   const handleClearLocalState = () => {
     onFiltersChange({});
@@ -29,13 +30,17 @@ export const FiltersSection = () => {
     <div {...stylex.props(styles.container)}>
       <AddFilterSection
         expandedFilters={expandedFilters}
+        onDropdownOpenChange={setIsAddFilterOpen}
         onExpandedFiltersChange={setExpandedFilters}
       />
-      <ActiveFiltersList
-        expandedFilters={expandedFilters}
-        onExpandedFiltersChange={setExpandedFilters}
-      />
-      <FiltersSectionFooter onClearAll={handleClearLocalState} />
+      <div {...stylex.props(styles.restArea)}>
+        {isAddFilterOpen && <div {...stylex.props(styles.overlay)} />}
+        <ActiveFiltersList
+          expandedFilters={expandedFilters}
+          onExpandedFiltersChange={setExpandedFilters}
+        />
+        <FiltersSectionFooter onClearAll={handleClearLocalState} />
+      </div>
     </div>
   );
 };

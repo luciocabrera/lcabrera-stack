@@ -12,8 +12,8 @@ import { filterBaseStyles } from '@/design-system/tokens/filters.stylex';
 const localStyles = stylex.create({
   checkbox: {
     cursor: 'pointer',
-    height: '1rem',
-    width: '1rem',
+    height: spacing.md,
+    width: spacing.md,
   },
   label: {
     flex: '1', // Take remaining space after checkbox
@@ -48,7 +48,7 @@ const localStyles = stylex.create({
     padding: `${spacing.xs} ${spacing.sm}`,
     borderRadius: {
       default: '0',
-      ':hover': '0.25rem',
+      ':hover': borderRadius.sm,
     },
     gap: spacing.sm,
     overflow: 'hidden',
@@ -108,21 +108,11 @@ const localStyles = stylex.create({
     position: 'relative',
     height,
   }),
-  loadedCount: {
-    color: colors.textSecondary,
-    fontSize: typography.fontSizeXs,
-    textAlign: 'left',
-  },
   clearButton: {
     position: 'absolute',
     transform: 'translateY(-50%)',
     right: spacing.xs,
     top: '50%',
-  },
-  footer: {
-    alignItems: 'center',
-    display: 'flex',
-    justifyContent: 'space-between',
   },
   listFilterButton: {
     borderRadius: 0,
@@ -131,14 +121,8 @@ const localStyles = stylex.create({
     borderColor: colors.borderFocus,
     borderRadius: 0,
   },
-  listFilterGroup: {
-    borderRadius: borderRadius.sm,
-    gap: spacing.xxs,
-    overflow: 'hidden',
-    display: 'flex',
-  },
   searchInputWithClear: {
-    paddingRight: '2rem',
+    paddingRight: spacing.xl,
   },
 });
 
@@ -149,12 +133,9 @@ export const styles = {
   clearButton: localStyles.clearButton,
   container: filterBaseStyles.container,
   containerFill: localStyles.containerFill,
-  footer: localStyles.footer,
   label: localStyles.label,
   listFilterButton: localStyles.listFilterButton,
   listFilterButtonActive: localStyles.listFilterButtonActive,
-  listFilterGroup: localStyles.listFilterGroup,
-  loadedCount: localStyles.loadedCount,
   loadingMore: localStyles.loadingMore,
   noResults: localStyles.noResults,
   option: localStyles.option,

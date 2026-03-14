@@ -18,6 +18,7 @@ import { getSelectedColumnLabel } from './utils';
 
 export const AddFilterSection = ({
   expandedFilters,
+  onDropdownOpenChange,
   onExpandedFiltersChange,
 }: AddFilterSectionProps) => {
   // === SELECTORS (subscribe to state) ===
@@ -30,9 +31,13 @@ export const AddFilterSection = ({
   const [selectedColumn, setSelectedColumn] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  const handleOpenChange = useCallback((isOpen: boolean) => {
-    setIsDropdownOpen(isOpen);
-  }, []);
+  const handleOpenChange = useCallback(
+    (isOpen: boolean) => {
+      setIsDropdownOpen(isOpen);
+      onDropdownOpenChange?.(isOpen);
+    },
+    [onDropdownOpenChange],
+  );
 
   // Filter to only filterable columns
   const filterableColumns = columns.filter((col) => col.isFilterable !== false);

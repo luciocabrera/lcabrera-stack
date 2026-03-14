@@ -10,7 +10,7 @@ import { ICON_SIZE_MD } from '@/design-system/constants';
 
 import type { VirtualListFooterProps } from './VirtualListFooter.types';
 
-import { styles } from '../VirtualList.stylex';
+import { styles } from './VirtualListFooter.stylex';
 
 export const VirtualListFooter = ({
   dataState,

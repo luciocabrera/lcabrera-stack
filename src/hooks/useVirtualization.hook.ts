@@ -26,7 +26,13 @@ export const useVirtualization = ({
     const container = containerRef.current;
 
     const updateHeight = () => {
-      setContainerHeight(container?.offsetHeight ?? defaultContainerHeight);
+      const measured = container?.offsetHeight ?? 0;
+      // Skip zero measurements (e.g. display:none from Activity hidden)
+      // to preserve the last valid height and avoid layout shifts
+      if (measured > 0) {
+        setContainerHeight(measured);
+      }
+
     };
 
     const handleScroll = () => {

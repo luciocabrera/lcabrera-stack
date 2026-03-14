@@ -6,6 +6,7 @@ import { InfoBox } from '@/components/InfoBox';
 import { SidePanelSectionHeader } from '@/components/SidePanel';
 import { useGetNormalizedColumns } from '@/components/Table/contexts/TableConfig/columns/selectors';
 import { FilterInputs } from '@/components/Table/filters/FilterInputs/FilterInputs.component';
+import { LIST_MAX_HEIGHT } from '@/components/VirtualList/VirtualList.constants';
 import { ICON_SIZE_MD } from '@/design-system/constants';
 
 import type {
@@ -133,6 +134,7 @@ export const ActiveFiltersList = ({
                     <FilterInputs
                       columnKey={columnKey}
                       filter={filter}
+                      listMaxHeight={LIST_MAX_HEIGHT}
                       onChange={(newFilter) => {
                         handleToggle({ columnKey, filter: newFilter });
                       }}

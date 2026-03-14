@@ -110,7 +110,7 @@ export const FilterInputs = <TData,>({
       )}
     >
       <VirtualSelect
-        customStylex={styles.operatorOverride}
+        customStylex={shouldFillHeight ? styles.operatorOverride : undefined}
         mode='single'
         onChange={handleOperatorChange}
         onOpenChange={setIsOperatorOpen}
