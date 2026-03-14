@@ -45,6 +45,6 @@ export const writeToCookie = ({
   // Client: use document.cookie
   if (typeof document === 'undefined') return;
 
-  // Using assignment is required for cookie setting
+  // eslint-disable-next-line unicorn/no-document-cookie -- Assignment is the only way to set cookies
   document.cookie = cookieValue;
 };

@@ -1,4 +1,3 @@
-export { ErrorBoundary } from './enterprise-orders.errorBoundary';
 export { loader } from './enterprise-orders.loader';
 export { meta } from './enterprise-orders.meta';
 export { EnterpriseOrders as default } from './EnterpriseOrders.component';

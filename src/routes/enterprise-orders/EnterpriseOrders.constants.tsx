@@ -1,8 +1,13 @@
+import { Link } from 'react-router';
+
 import type {
   FilterOptionsResponse,
   TableColumn,
 } from '@/components/Table/Table.types';
 
+import { Button } from '@/components/Button';
+import { EyeIcon } from '@/components/Icons';
+import { ICON_SIZE_XS } from '@/design-system/constants/iconSizes.constants';
 import { type EnterpriseOrder, enterpriseOrdersApi } from '@/services';
 import { createStaticFilterOptions } from '@/utils/createStaticFilterOptions.util';
 
@@ -355,5 +360,23 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
     label: 'Shipped Date',
     maxWidth: 150,
     minWidth: 130,
+  },
+  {
+    isHeaderHidden: true,
+    key: 'actions',
+    label: 'Actions',
+    maxWidth: 60,
+    minWidth: 60,
+    render: (row) => (
+      <Link to={`/enterprise-orders/${String(row.order_id)}`}>
+        <Button
+          aria-label={`View order ${String(row.order_id)}`}
+          color='ghost'
+          icon={<EyeIcon size={ICON_SIZE_XS} />}
+          size='embedded'
+          width='auto'
+        />
+      </Link>
+    ),
   },
 ];

@@ -3,6 +3,7 @@ export { CheckIcon } from './CheckIcon';
 export { ColumnsOrderIcon } from './ColumnsOrderIcon';
 export { EraserIcon } from './EraserIcon';
 export { ErrorIcon } from './ErrorIcon';
+export { EyeIcon } from './EyeIcon';
 export { FileTextIcon } from './FileTextIcon';
 export { FilterIcon } from './FilterIcon';
 export { HomeIcon } from './HomeIcon';

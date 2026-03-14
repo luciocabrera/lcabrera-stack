@@ -6,5 +6,8 @@ export default [
   route('settings', 'routes/settings/root.ts'),
   route('car-sales', 'routes/car-sales/root.ts'),
   route('car-sales-infinite', 'routes/car-sales-infinite/root.ts'),
-  route('enterprise-orders', 'routes/enterprise-orders/root.ts'),
+  route('enterprise-orders', 'routes/enterprise-orders/layout.ts', [
+    index('routes/enterprise-orders/root.ts'),
+    route(':orderId', 'routes/enterprise-orders/order-detail/root.ts'),
+  ]),
 ] satisfies RouteConfig;

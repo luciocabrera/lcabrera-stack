@@ -84,6 +84,10 @@ export type EnterpriseOrder = {
   weight_kg: string;
 };
 
+export type EnterpriseOrderDetailResponse = {
+  data: EnterpriseOrder;
+};
+
 export type EnterpriseOrdersResponse = {
   data: EnterpriseOrder[];
   hasMore?: boolean;
@@ -133,6 +137,30 @@ export const enterpriseOrdersApi = {
     }
 
     return response.json() as Promise<{ hasMore: boolean; values: string[] }>;
+  },
+
+  /**
+   * Fetch a single enterprise order by ID
+   */
+  fetchEnterpriseOrderById: async ({
+    orderId,
+    requestUrl,
+  }: {
+    orderId: number;
+    requestUrl?: string;
+  }): Promise<EnterpriseOrderDetailResponse> => {
+    const url = `${getApiBaseUrl(requestUrl)}/enterprise-orders/${orderId}`;
+    console.warn('🎯 [Orders] Fetching order by ID:', orderId);
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error(
+        `API request failed: ${response.status} ${response.statusText}`,
+      );
+    }
+
+    return response.json() as Promise<EnterpriseOrderDetailResponse>;
   },
 
   /**

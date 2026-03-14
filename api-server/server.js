@@ -484,6 +484,35 @@ app.get('/api/enterprise-orders/distinct/:columnName', async (request, res) => {
   }
 });
 
+// Get a single enterprise order by ID
+app.get('/api/enterprise-orders/:orderId', async (request, res) => {
+  const orderId = Number.parseInt(request.params.orderId, 10);
+
+  if (Number.isNaN(orderId)) {
+    return res.status(400).json({ error: 'Invalid order ID' });
+  }
+
+  console.log(`📦 [Order Detail] Fetching order #${orderId}`);
+
+  try {
+    const query = 'SELECT * FROM enterprise_orders WHERE order_id = $1';
+    logPgAdminQuery('Order Detail Query', query, [orderId]);
+
+    const result = await pool.query(query, [orderId]);
+
+    if (result.rows.length === 0) {
+      console.log(`   ❌ Order #${orderId} not found`);
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    console.log(`   ✓ Found order #${orderId}`);
+    res.json({ data: result.rows[0] });
+  } catch (error) {
+    console.error('❌ Error fetching enterprise order:', error);
+    res.status(500).json({ error: 'Failed to fetch enterprise order' });
+  }
+});
+
 app.listen(port, '0.0.0.0', () => {
   console.log(`🚀 API server running at http://localhost:${port}`);
 });
