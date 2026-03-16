@@ -2,7 +2,11 @@ import type { ColumnOrderState } from '@/components/Table/Table.types';
 import type { OrderConflictResolution } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
-import { resolvePinOrderConflict } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
+import {
+  getStaticColumnKeys,
+  resolvePinOrderConflict,
+  restoreStaticColumnOrder,
+} from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 import { useTableDrawerContextValue } from '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
 
 import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
@@ -27,35 +31,19 @@ export const useAcceptOrderConflict = () => {
     });
 
     const tableColumnsState = tableColumnsStore.get();
-    const columns = tableColumnsState?.columns ?? [];
-    const staticKeys = new Set<string>(
-      columns.filter((col) => col.isStatic).map((col) => col.key),
-    );
+    const staticKeys = getStaticColumnKeys(tableColumnsState?.columns ?? []);
+    const currentOrder =
+      drawerColumnsStore.get()?.columnOrder ?? ([] as ColumnOrderState);
 
-    let finalOrder = result.columnOrder;
+    const finalOrder = restoreStaticColumnOrder({
+      currentOrder,
+      newOrder: result.columnOrder,
+      staticKeys,
+    });
+
+    // Restore default pinning for static columns
     let finalPinning = result.columnPinning;
-
     if (staticKeys.size > 0) {
-      // Restore static columns to their original positions
-      const currentOrder =
-        drawerColumnsStore.get()?.columnOrder ?? ([] as ColumnOrderState);
-
-      if (currentOrder.length > 0) {
-        const withoutStatic = finalOrder.filter((key) => !staticKeys.has(key));
-        const staticPositions = currentOrder
-          .map((key, index) =>
-            staticKeys.has(key) ? { index, key } : undefined,
-          )
-          .filter((entry) => entry !== undefined);
-
-        for (const { index, key } of staticPositions) {
-          withoutStatic.splice(index, 0, key);
-        }
-
-        finalOrder = withoutStatic as ColumnOrderState;
-      }
-
-      // Restore default pinning for static columns
       const defaultPinning = tableColumnsState?.columnPinning ?? {
         left: [],
         right: [],

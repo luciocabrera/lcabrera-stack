@@ -4,7 +4,11 @@ import type {
 } from '@/components/Table/Table.types';
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
-import { detectPinOrderConflict } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
+import {
+  detectPinOrderConflict,
+  getStaticColumnKeys,
+  restoreStaticColumnOrder,
+} from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 import { useTableDrawerContextValue } from '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
 
 import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
@@ -20,35 +24,22 @@ export const useOrderBySorting = () => {
   const { modalsStore } = useColumnOrderSectionContextValue();
 
   return () => {
-    const columns = tableColumnsStore.get()?.columns ?? [];
-    const staticKeys = new Set<string>(
-      columns.filter((col) => col.isStatic).map((col) => col.key),
-    );
-
     const drawerState = drawerColumnsStore.get();
     const sorting = drawerState?.sorting ?? ([] as SortingState);
     const columnsOrder = drawerState?.columnOrder ?? ([] as ColumnOrderState);
     const columnPinning = drawerState?.columnPinning ?? { left: [], right: [] };
+    const staticKeys = getStaticColumnKeys(tableColumnsStore.get()?.columns ?? []);
 
     const sortedKeys = sorting.map((s) => s.columnKey);
     const remainingKeys = columnsOrder.filter(
       (key) => !sortedKeys.includes(key),
     );
-    let newOrder = [...sortedKeys, ...remainingKeys] as ColumnOrderState;
 
-    // Restore static columns to their original positions
-    if (staticKeys.size > 0 && columnsOrder.length > 0) {
-      const withoutStatic = newOrder.filter((key) => !staticKeys.has(key));
-      const staticPositions = columnsOrder
-        .map((key, index) => (staticKeys.has(key) ? { index, key } : undefined))
-        .filter((entry) => entry !== undefined);
-
-      for (const { index, key } of staticPositions) {
-        withoutStatic.splice(index, 0, key);
-      }
-
-      newOrder = withoutStatic as ColumnOrderState;
-    }
+    const newOrder = restoreStaticColumnOrder({
+      currentOrder: columnsOrder,
+      newOrder: [...sortedKeys, ...remainingKeys] as ColumnOrderState,
+      staticKeys,
+    });
 
     if (!detectPinOrderConflict({ columnPinning, newOrder })) {
       drawerColumnsStore.set({ columnOrder: newOrder });
