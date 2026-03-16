@@ -6,19 +6,32 @@ import type {
 type RecalculatePinSidesArgs = {
   columnPinning: ColumnPinningState;
   newOrder: ColumnOrderState;
+  staticKeys?: Set<string>;
 };
 
 /**
  * Recalculates pin sides for pinned columns based on their new position.
  * Each pinned column is assigned to the closest edge (left or right).
  * If equidistant from both edges, the original side is preserved.
+ * Static columns are preserved in their original pin side.
  */
 export const recalculatePinSides = ({
   columnPinning,
   newOrder,
+  staticKeys,
 }: RecalculatePinSidesArgs): ColumnPinningState => {
   const newLeft: string[] = [];
   const newRight: string[] = [];
+
+  // Preserve static columns in their original pin side
+  if (staticKeys) {
+    for (const key of columnPinning.left) {
+      if (staticKeys.has(key)) newLeft.push(key);
+    }
+    for (const key of columnPinning.right) {
+      if (staticKeys.has(key)) newRight.push(key);
+    }
+  }
 
   const allPinned = [
     ...columnPinning.left.map((key) => ({
@@ -32,6 +45,8 @@ export const recalculatePinSides = ({
   ];
 
   for (const { key, originalSide } of allPinned) {
+    if (staticKeys?.has(key)) continue;
+
     const index = newOrder.indexOf(key);
     if (index === -1) continue;
 

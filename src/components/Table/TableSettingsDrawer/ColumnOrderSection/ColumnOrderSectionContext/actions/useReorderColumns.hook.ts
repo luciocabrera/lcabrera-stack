@@ -40,12 +40,14 @@ export const useReorderColumns = () => {
     const recalculatedPinning = recalculatePinSides({
       columnPinning,
       newOrder: finalOrder,
+      staticKeys,
     });
 
     if (
       !detectPinOrderConflict({
         columnPinning: recalculatedPinning,
         newOrder: finalOrder,
+        staticKeys,
       })
     ) {
       drawerColumnsStore.set({

@@ -40,7 +40,7 @@ export const useOrderBySorting = () => {
       staticKeys,
     });
 
-    if (!detectPinOrderConflict({ columnPinning, newOrder })) {
+    if (!detectPinOrderConflict({ columnPinning, newOrder, staticKeys })) {
       drawerColumnsStore.set({ columnOrder: newOrder });
       return;
     }

@@ -28,6 +28,8 @@ export const useToggleColumnPin = () => {
     const column = tableColumnsState?.normalizedColumns[columnKey];
     if (column?.isStatic) return;
 
+    const staticKeys = tableColumnsState?.staticKeys ?? new Set<string>();
+
     const drawerState = drawerColumnsStore.get();
     const columnsOrder = drawerState?.columnOrder ?? ([] as ColumnOrderState);
     const columnPinning = drawerState?.columnPinning ?? { left: [], right: [] };
@@ -51,6 +53,7 @@ export const useToggleColumnPin = () => {
         !detectPinOrderConflict({
           columnPinning: newPinning,
           newOrder: currentOrder,
+          staticKeys,
         })
       ) {
         drawerColumnsStore.set({ columnPinning: newPinning });
