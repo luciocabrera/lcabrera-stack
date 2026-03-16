@@ -50,10 +50,13 @@ export const useAcceptHeaderPinSide = <TData>() => {
       return { isOpen: true, side };
     }
 
+    const staticKeys = columnsState?.staticKeys;
+
     const newPinning = applyPin({
       columnKey,
       columnPinning: columnPinning as ColumnPinningState,
       side,
+      staticKeys,
     });
 
     const effectiveColumns = getEffectiveColumns({

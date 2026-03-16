@@ -23,7 +23,9 @@ export const useAcceptPinConflict = () => {
     const conflictModal = modalsStore.get()?.conflictModal;
     if (!conflictModal) return;
 
-    const columns = tableColumnsStore.get()?.columns ?? [];
+    const tableState = tableColumnsStore.get();
+    const columns = tableState?.columns ?? [];
+    const staticKeys = tableState?.staticKeys;
     const drawerState = drawerColumnsStore.get();
     const columnsOrder = drawerState?.columnOrder ?? ([] as ColumnOrderState);
     const columnPinning = drawerState?.columnPinning ?? { left: [], right: [] };
@@ -52,7 +54,7 @@ export const useAcceptPinConflict = () => {
 
         drawerColumnsStore.set({
           columnOrder: newOrder as ColumnOrderState,
-          columnPinning: applyPin({ columnKey, columnPinning, side }),
+          columnPinning: applyPin({ columnKey, columnPinning, side, staticKeys }),
         });
         break;
       }
@@ -87,7 +89,7 @@ export const useAcceptPinConflict = () => {
 
       case 'pin-only': {
         drawerColumnsStore.set({
-          columnPinning: applyPin({ columnKey, columnPinning, side }),
+          columnPinning: applyPin({ columnKey, columnPinning, side, staticKeys }),
         });
         break;
       }

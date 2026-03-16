@@ -31,6 +31,8 @@ export const useAcceptHeaderPinConflict = <TData>() => {
     const currentPinning = columnsState?.columnPinning ?? { left: [], right: [] } as ColumnPinningState<TData>;
     const persistenceKey = metaStore.get()?.persistenceKey ?? '';
 
+    const staticKeys = columnsState?.staticKeys;
+
     const allOrderedColumns = buildAllOrderedColumns({ columns, columnsOrder });
     const index = allOrderedColumns.findIndex((col) => col.key === columnKey);
 
@@ -57,6 +59,7 @@ export const useAcceptHeaderPinConflict = <TData>() => {
           columnKey,
           columnPinning: currentPinning as ColumnPinningState,
           side,
+          staticKeys,
         }) as ColumnPinningState<TData>;
         break;
       }
@@ -92,6 +95,7 @@ export const useAcceptHeaderPinConflict = <TData>() => {
           columnKey,
           columnPinning: currentPinning as ColumnPinningState,
           side,
+          staticKeys,
         }) as ColumnPinningState<TData>;
         break;
       }

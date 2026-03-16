@@ -24,7 +24,9 @@ export const useAcceptPinSide = () => {
     const pinSideModal = modalsStore.get()?.pinSideModal;
     if (!pinSideModal) return;
 
-    const columns = tableColumnsStore.get()?.columns ?? [];
+    const tableState = tableColumnsStore.get();
+    const columns = tableState?.columns ?? [];
+    const staticKeys = tableState?.staticKeys;
     const drawerState = drawerColumnsStore.get();
     const columnsOrder = drawerState?.columnOrder ?? ([] as ColumnOrderState);
     const columnPinning = drawerState?.columnPinning ?? { left: [], right: [] };
@@ -49,7 +51,7 @@ export const useAcceptPinSide = () => {
 
     if (isContiguousPin) {
       drawerColumnsStore.set({
-        columnPinning: applyPin({ columnKey, columnPinning, side }),
+        columnPinning: applyPin({ columnKey, columnPinning, side, staticKeys }),
       });
     } else {
       const col = allOrderedColumns.find((c) => c.key === columnKey);
