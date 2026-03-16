@@ -28,7 +28,7 @@ export const useRenderTracker = ({
   componentName,
   ...options
 }: UseRenderTrackerOptions & { componentName: string }): void => {
-  // eslint-disable-next-line react-hooks/purity -- Performance tracking is intentionally side-effectful
+  // eslint-disable-next-line react-hooks/purity, react-x/purity -- Performance tracking is intentionally side-effectful
   const renderStartTime = useRef(performance.now());
   const prevPropsRef = useRef<Record<string, unknown>>(undefined);
 
@@ -52,7 +52,7 @@ export const useRenderTracker = ({
       }
 
       if (changedProps.length > 0) {
-        // eslint-disable-next-line no-console -- Console logging is intentional for performance tracking
+        // eslint-disable-next-line no-console, react-x/purity -- Console logging is intentional for performance tracking
         console.log(
           `[${componentName}] Props changed:`,
           changedProps.join(', '),
@@ -61,7 +61,7 @@ export const useRenderTracker = ({
     }
 
     prevPropsRef.current = options.logProps;
-    // eslint-disable-next-line react-hooks/purity -- Performance tracking is intentionally side-effectful
+    // eslint-disable-next-line react-hooks/purity, react-x/purity -- Performance tracking is intentionally side-effectful
     renderStartTime.current = performance.now();
   }
 
