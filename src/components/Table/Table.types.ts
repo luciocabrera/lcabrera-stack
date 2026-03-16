@@ -118,7 +118,7 @@ export type TableColumn<TData> = {
   isHeaderHidden?: boolean;
   /** Whether this column is sortable (default: true) */
   isSortable?: boolean;
-  key: (keyof TData & string) | string;
+  key: 'actions' | (keyof TData & string);
   label: string;
   maxWidth?: number;
   minWidth?: number;

@@ -166,7 +166,7 @@ export const enterpriseOrdersApi = {
   /**
    * Fetch enterprise orders data with pagination (offset-limit strategy)
    */
-  fetchEnterpriseOrdersPaginated: ({
+  fetchEnterpriseOrdersPaginated: async ({
     filter,
     limit,
     requestUrl,
