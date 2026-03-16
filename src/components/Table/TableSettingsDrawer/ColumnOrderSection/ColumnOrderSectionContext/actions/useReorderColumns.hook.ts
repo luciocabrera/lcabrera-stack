@@ -22,44 +22,47 @@ export const useReorderColumns = () => {
 
   return (reorderedItems: DraggableItem[]) => {
     const columns = tableColumnsStore.get()?.columns ?? [];
-    const staticKeys = new Set(
+    const staticKeys = new Set<string>(
       columns.filter((col) => col.isStatic).map((col) => col.key),
     );
 
-    // If any static column changed position, restore original positions
-    const currentOrder = drawerColumnsStore.get()?.columnOrder ?? ([] as ColumnOrderState);
+    const drawerColumnsState = drawerColumnsStore.get();
+    const currentOrder = drawerColumnsState?.columnOrder ?? ([] as ColumnOrderState);
+
+    let finalOrder = reorderedItems.map((item) => item.id) as ColumnOrderState;
+
+    // Restore static columns to their original positions
     if (staticKeys.size > 0 && currentOrder.length > 0) {
-      const reorderedOrder = reorderedItems.map((item) => item.id);
-      const hasStaticMoved = [...staticKeys].some((key) => {
-        const originalIndex = currentOrder.indexOf(key);
-        const newIndex = reorderedOrder.indexOf(key);
-        return originalIndex !== -1 && newIndex !== -1 && originalIndex !== newIndex;
-      });
-      if (hasStaticMoved) return;
+      const withoutStatic = finalOrder.filter((key) => !staticKeys.has(key));
+      const staticPositions = currentOrder
+        .map((key, index) => (staticKeys.has(key) ? { index, key } : undefined))
+        .filter((entry) => entry !== undefined);
+
+      for (const { index, key } of staticPositions) {
+        withoutStatic.splice(index, 0, key);
+      }
+
+      finalOrder = withoutStatic as ColumnOrderState;
     }
 
-    const columnPinning = drawerColumnsStore.get()?.columnPinning ?? {
+    const columnPinning = drawerColumnsState?.columnPinning ?? {
       left: [],
       right: [],
     };
 
-    const newColumnOrder = reorderedItems.map(
-      (item) => item.id,
-    ) as ColumnOrderState;
-
     const recalculatedPinning = recalculatePinSides({
       columnPinning,
-      newOrder: newColumnOrder,
+      newOrder: finalOrder,
     });
 
     if (
       !detectPinOrderConflict({
         columnPinning: recalculatedPinning,
-        newOrder: newColumnOrder,
+        newOrder: finalOrder,
       })
     ) {
       drawerColumnsStore.set({
-        columnOrder: newColumnOrder,
+        columnOrder: finalOrder,
         columnPinning: recalculatedPinning,
       });
       return;
@@ -70,7 +73,7 @@ export const useReorderColumns = () => {
         description:
           'Dragging this column broke the pinning layout. Pinned columns must stay at the edges. Choose how to proceed:',
         isOpen: true,
-        pendingOrder: newColumnOrder,
+        pendingOrder: finalOrder,
         pendingPinning: recalculatedPinning,
       },
     });
