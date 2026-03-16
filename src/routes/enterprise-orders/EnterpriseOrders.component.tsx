@@ -7,7 +7,7 @@ import { enterpriseOrdersApi } from '@/services';
 
 import type { loader } from './enterprise-orders.loader';
 
-import { COLUMNS, PERSISTENCE_KEY } from './EnterpriseOrders.constants';
+import { COLUMNS, DEFAULT_COLUMN_PINNING, PERSISTENCE_KEY } from './EnterpriseOrders.constants';
 
 export const EnterpriseOrders = () => {
   const {
@@ -29,6 +29,7 @@ export const EnterpriseOrders = () => {
       dataPromise={enterpriseOrdersPromise}
       dataSelector={(response) => response.data}
       dataTotalSelector={(response) => response.total}
+      defaultColumnPinning={DEFAULT_COLUMN_PINNING}
       filters={filters}
       onLoadMore={async ({ limit, skip }) =>
         enterpriseOrdersApi.fetchEnterpriseOrdersPaginated({

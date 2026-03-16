@@ -32,6 +32,8 @@ export type TableLayoutProps<
   /** Function to extract data array from the promise response (required) */
   // dataSelector: (response: TResponse) => TData[];
   // dataTotalSelector?: (response: TResponse) => number;
+  /** Default column pinning applied when no persisted state exists (optional) */
+  defaultColumnPinning?: ColumnPinningState<TData>;
   /** Table density (optional, default: 'comfortable') */
   density?: TableDensity;
   /** Active filters from loader/URL state (optional) */

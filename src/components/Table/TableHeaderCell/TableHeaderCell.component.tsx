@@ -70,6 +70,8 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
   const currentWidth = columnSizing[column.key] ?? effectiveMinWidth;
   const sortDirection = column.sortDirection;
   const isSortable = column.isSortable !== false;
+  const isResizable = column.isResizable !== false && !column.isStatic;
+  const isStatic = column.isStatic === true;
   const isLoadingState = isLoading || isLoadingMore;
 
   const { isResizing, onMouseDown } = useColumnResize({
@@ -157,18 +159,20 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
         <>
           <span {...stylex.props(tableHeaderCellStyles.content)}>{label}</span>
           <div {...stylex.props(tableHeaderCellStyles.controls)}>
-            <Button
-              aria-label={
-                pinInfo?.side ? `Unpin ${label}` : `Pin ${label}`
-              }
-              color='ghost'
-              customStylex={tableHeaderCellStyles.settingsButton}
-              icon={
-                pinInfo?.side ? <PinIcon size={14} /> : <PinOffIcon size={14} />
-              }
-              onClick={handlePinClick}
-              size='embedded'
-            />
+            {!isStatic && (
+              <Button
+                aria-label={
+                  pinInfo?.side ? `Unpin ${label}` : `Pin ${label}`
+                }
+                color='ghost'
+                customStylex={tableHeaderCellStyles.settingsButton}
+                icon={
+                  pinInfo?.side ? <PinIcon size={14} /> : <PinOffIcon size={14} />
+                }
+                onClick={handlePinClick}
+                size='embedded'
+              />
+            )}
             {isSortable && (
               <Button
                 aria-label={`Sort by ${label}`}
@@ -190,34 +194,40 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
               />
             )}
           </div>
-          <PinSideModal
-            columnLabel={label}
-            isOpen={isPinSideModalOpen}
-            onAccept={handlePinAccept}
-            onCancel={handlePinCancel}
-          />
-          <PinConflictModal
-            columnLabel={label}
-            isOpen={pinConflict.isOpen}
-            onAccept={handlePinConflictAccept}
-            onCancel={handlePinConflictCancel}
-            side={pinConflict.side}
-          />
+          {!isStatic && (
+            <>
+              <PinSideModal
+                columnLabel={label}
+                isOpen={isPinSideModalOpen}
+                onAccept={handlePinAccept}
+                onCancel={handlePinCancel}
+              />
+              <PinConflictModal
+                columnLabel={label}
+                isOpen={pinConflict.isOpen}
+                onAccept={handlePinConflictAccept}
+                onCancel={handlePinConflictCancel}
+                side={pinConflict.side}
+              />
+            </>
+          )}
           {/* Resize handle */}
-          <div
-            aria-label={`Resize ${label} column`}
-            onDoubleClick={handleResizeDoubleClick}
-            onMouseDown={onMouseDown}
-            role='separator'
-            {...stylex.props(tableHeaderCellStyles.resizeHandle)}
-          >
+          {isResizable && (
             <div
-              {...stylex.props(
-                tableHeaderCellStyles.resizeHandleLine,
-                isResizing && tableHeaderCellStyles.resizeHandleActive,
-              )}
-            />
-          </div>
+              aria-label={`Resize ${label} column`}
+              onDoubleClick={handleResizeDoubleClick}
+              onMouseDown={onMouseDown}
+              role='separator'
+              {...stylex.props(tableHeaderCellStyles.resizeHandle)}
+            >
+              <div
+                {...stylex.props(
+                  tableHeaderCellStyles.resizeHandleLine,
+                  isResizing && tableHeaderCellStyles.resizeHandleActive,
+                )}
+              />
+            </div>
+          )}
         </>
       )}
     </th>

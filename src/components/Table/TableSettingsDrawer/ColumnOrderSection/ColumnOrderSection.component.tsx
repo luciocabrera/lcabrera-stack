@@ -3,6 +3,7 @@ import * as stylex from '@stylexjs/stylex';
 import type { DraggableItem } from '@/components/DraggableList';
 
 import { DraggableList } from '@/components/DraggableList';
+import { LockIcon } from '@/components/Icons';
 import { PinSideModal } from '@/components/PinSideModal';
 import { SidePanelSectionHeader } from '@/components/SidePanel';
 import { useGetColumns } from '@/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
@@ -55,7 +56,7 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
   const acceptPinConflict = useAcceptPinConflict();
   const cancelPinConflict = useCancelPinConflict();
 
-  const settingsColumns = columns.filter((col) => !col.render);
+  const settingsColumns = columns.filter((col) => !col.render || col.isStatic);
   const allOrderedColumns = buildAllOrderedColumns({ columns: settingsColumns, columnsOrder });
 
   // Convert columns to draggable items
@@ -63,13 +64,16 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
     const isPinned =
       columnPinning.left.includes(col.key) ||
       columnPinning.right.includes(col.key);
+    const isStatic = col.isStatic === true;
 
     return {
       content: (
         <div {...stylex.props(styles.columnItem)}>
+          {isStatic && <LockIcon size={14} />}
           <span {...stylex.props(styles.columnLabel)}>{col.label}</span>
           <ToggleSwitch
             isChecked={isPinned}
+            isDisabled={isStatic}
             label='Pin'
             onChange={(isChecked) => {
               toggleColumnPin({ columnKey: col.key, isPinning: isChecked });
@@ -77,6 +81,7 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
           />
           <ToggleSwitch
             isChecked={!columnVisibility.has(col.key)}
+            isDisabled={isStatic}
             label='Show'
             onChange={(isChecked) => {
               toggleColumnVisibility({
@@ -88,6 +93,7 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
         </div>
       ),
       id: col.key,
+      isDraggable: !isStatic,
     };
   });
 

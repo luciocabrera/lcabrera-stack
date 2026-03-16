@@ -12,6 +12,7 @@ export { ListAllIcon } from './ListAllIcon';
 export { ListCheckedIcon } from './ListCheckedIcon';
 export { ListOrderedIcon } from './ListOrderedIcon';
 export { ListUncheckedIcon } from './ListUncheckedIcon';
+export { LockIcon } from './LockIcon';
 export { MaximizeIcon } from './MaximizeIcon';
 export { MenuCloseIcon } from './MenuCloseIcon';
 export { MenuIcon } from './MenuIcon';

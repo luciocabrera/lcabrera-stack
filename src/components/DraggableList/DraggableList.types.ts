@@ -8,6 +8,8 @@ export type DraggableItem = {
   content: ReactNode;
   /** Unique identifier for the item */
   id: string;
+  /** Whether this item can be dragged (default: true) */
+  isDraggable?: boolean;
 };
 
 /**

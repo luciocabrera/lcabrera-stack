@@ -50,6 +50,7 @@ export const ColumnSettingsDrawer = ({
   const pinButtonTitle = isPinned ? 'Unpin drawer' : 'Pin drawer';
   const isFilterable = column.isFilterable !== false;
   const isSortable = column.isSortable !== false;
+  const isStatic = column.isStatic === true;
 
   const tabs: TabItem[] = [
     {
@@ -75,11 +76,15 @@ export const ColumnSettingsDrawer = ({
           },
         ]
       : []),
-    {
-      children: <PinningSection columnKey={columnKey} />,
-      header: 'Pinning',
-      key: 'pinning',
-    },
+    ...(isStatic
+      ? []
+      : [
+          {
+            children: <PinningSection columnKey={columnKey} />,
+            header: 'Pinning',
+            key: 'pinning',
+          },
+        ]),
     {
       children: <DetailsSection columnKey={columnKey} />,
       header: 'Details',

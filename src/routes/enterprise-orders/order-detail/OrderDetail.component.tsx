@@ -110,10 +110,12 @@ const getStatusBadgeStyle = (status: string) => {
   }
 };
 
-const formatValue = (
-  value: boolean | null | number | string | undefined,
-  format?: 'boolean' | 'currency' | 'date',
-): string => {
+type FormatValueArgs = {
+  format?: 'boolean' | 'currency' | 'date';
+  value: boolean | null | number | string | undefined;
+};
+
+const formatValue = ({ format, value }: FormatValueArgs): string => {
   if (value === null || value === undefined || value === '') {
     return '—';
   }
@@ -148,7 +150,7 @@ const formatValue = (
 };
 
 const Field = ({ format, label, value }: { format?: FieldConfig['format']; label: string; value: boolean | null | number | string | undefined }) => {
-  const formatted = formatValue(value, format);
+  const formatted = formatValue({ format, value });
   const isEmpty = formatted === '—';
 
   return (

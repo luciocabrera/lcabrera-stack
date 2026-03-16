@@ -23,6 +23,7 @@ export const TableLayout = <
   dataPromise,
   dataSelector,
   dataTotalSelector,
+  defaultColumnPinning,
   density = 'comfortable',
   filters,
   isBordered = true,
@@ -36,7 +37,7 @@ export const TableLayout = <
   const columnsState = {
     columnFilters: filters,
     columnOrder,
-    columnPinning,
+    columnPinning: columnPinning ?? defaultColumnPinning,
     columns,
     columnSizing,
     columnVisibility,

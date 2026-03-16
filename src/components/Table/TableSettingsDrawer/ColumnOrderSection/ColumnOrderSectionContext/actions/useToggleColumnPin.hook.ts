@@ -9,6 +9,10 @@ import { useTableDrawerContextValue } from '@/components/Table/TableSettingsDraw
 
 import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
 
+type UseToggleColumnPinArgs = {
+  columnKey: string;
+  isPinning: boolean;
+};
 /**
  * Hook to toggle column pinning on/off.
  * Opens the appropriate modal when conflicts are detected.
@@ -18,14 +22,12 @@ export const useToggleColumnPin = () => {
   const { columnsStore: drawerColumnsStore } = useTableDrawerContextValue();
   const { modalsStore } = useColumnOrderSectionContextValue();
 
-  return ({
-    columnKey,
-    isPinning,
-  }: {
-    columnKey: string;
-    isPinning: boolean;
-  }) => {
-    const columns = tableColumnsStore.get()?.columns ?? [];
+  return ({ columnKey, isPinning }: UseToggleColumnPinArgs) => {
+    const tableColumnsState = tableColumnsStore.get();
+    const columns = tableColumnsState?.columns ?? [];
+    const column = tableColumnsState?.normalizedColumns[columnKey];
+    if (column?.isStatic) return;
+
     const drawerState = drawerColumnsStore.get();
     const columnsOrder = drawerState?.columnOrder ?? ([] as ColumnOrderState);
     const columnPinning = drawerState?.columnPinning ?? { left: [], right: [] };

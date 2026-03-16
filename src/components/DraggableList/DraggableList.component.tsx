@@ -24,6 +24,8 @@ export const DraggableList = ({
         const isDragOver =
           dragItemId.current !== undefined && dragItemId.current !== item.id;
 
+        const canDrag = item.isDraggable !== false;
+
         return (
           <li
             key={item.id}
@@ -32,21 +34,27 @@ export const DraggableList = ({
               isDragging && styles.itemDragging,
               isDragOver && styles.itemDragOver,
             )}
-            draggable
-            onDragEnd={handleDragEnd}
+            draggable={canDrag}
+            onDragEnd={canDrag ? handleDragEnd : undefined}
             onDragEnter={() => {
               handleDragEnter(item.id);
             }}
             onDragOver={handleDragOver}
-            onDragStart={() => {
-              handleDragStart(item.id);
-            }}
+            onDragStart={
+              canDrag
+                ? () => {
+                    handleDragStart(item.id);
+                  }
+                : undefined
+            }
             role='option'
             tabIndex={0}
           >
-            <span {...stylex.props(styles.dragHandle)} aria-label='Drag handle'>
-              ≡
-            </span>
+            {canDrag && (
+              <span {...stylex.props(styles.dragHandle)} aria-label='Drag handle'>
+                ≡
+              </span>
+            )}
             <div {...stylex.props(styles.content)}>{item.content}</div>
           </li>
         );

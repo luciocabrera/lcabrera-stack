@@ -116,8 +116,16 @@ export type TableColumn<TData> = {
   isFilterable?: boolean;
   /** Whether to hide the header content (label, controls, resize handle) */
   isHeaderHidden?: boolean;
+  /** Whether this column can be resized by the user (default: true) */
+  isResizable?: boolean;
   /** Whether this column is sortable (default: true) */
   isSortable?: boolean;
+  /**
+   * Whether this column is fully locked from user modifications.
+   * When true, the column cannot be reordered, pinned/unpinned, resized, or hidden.
+   * This is a read-only configuration — it cannot be changed at runtime.
+   */
+  isStatic?: boolean;
   key: 'actions' | (keyof TData & string);
   label: string;
   maxWidth?: number;

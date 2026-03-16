@@ -1,6 +1,7 @@
 import { Link } from 'react-router';
 
 import type {
+  ColumnPinningState,
   FilterOptionsResponse,
   TableColumn,
 } from '@/components/Table/Table.types';
@@ -12,6 +13,11 @@ import { type EnterpriseOrder, enterpriseOrdersApi } from '@/services';
 import { createStaticFilterOptions } from '@/utils/createStaticFilterOptions.util';
 
 export const PERSISTENCE_KEY = 'enterprise-orders-table';
+
+export const DEFAULT_COLUMN_PINNING: ColumnPinningState<EnterpriseOrder> = {
+  left: [],
+  right: ['actions'],
+};
 
 export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   {
@@ -363,6 +369,7 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   },
   {
     isHeaderHidden: true,
+    isStatic: true,
     key: 'actions',
     label: 'Actions',
     maxWidth: 60,
