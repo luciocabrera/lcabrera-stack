@@ -24,11 +24,18 @@ export const useAcceptHeaderPinConflict = <TData>() => {
   const { columnsStore, metaStore } = useTableConfigContextValue<TData>();
   const persistTableState = usePersistTableStateAction();
 
-  return ({ columnKey, resolution, side }: AcceptHeaderPinConflictArgs<TData>) => {
+  return ({
+    columnKey,
+    resolution,
+    side,
+  }: AcceptHeaderPinConflictArgs<TData>) => {
     const columnsState = columnsStore.get();
     const columns = columnsState?.columns ?? [];
-    const columnsOrder = columnsState?.columnOrder ?? ([] as ColumnOrderState<TData>);
-    const currentPinning = columnsState?.columnPinning ?? { left: [], right: [] } as ColumnPinningState<TData>;
+    const columnsOrder =
+      columnsState?.columnOrder ?? ([] as ColumnOrderState<TData>);
+    const currentPinning =
+      columnsState?.columnPinning ??
+      ({ left: [], right: [] } as ColumnPinningState<TData>);
     const persistenceKey = metaStore.get()?.persistenceKey ?? '';
 
     const staticKeys = columnsState?.staticKeys;
@@ -112,16 +119,25 @@ export const useAcceptHeaderPinConflict = <TData>() => {
       columnPinning: newPinning,
       effectiveColumns,
     };
-    const persistUpdates = [
-      { persistenceKey, slice: 'columnPinning', valueSlice: newPinning },
-    ];
 
     if (newOrder) {
       updates.columnOrder = newOrder;
-      persistUpdates.push({ persistenceKey, slice: 'columnOrder', valueSlice: newOrder });
+      persistTableState([
+        {
+          persistenceKey,
+          slice: 'columnPinning' as const,
+          valueSlice: newPinning,
+        },
+        { persistenceKey, slice: 'columnOrder' as const, valueSlice: newOrder },
+      ]);
+    } else {
+      persistTableState({
+        persistenceKey,
+        slice: 'columnPinning' as const,
+        valueSlice: newPinning,
+      });
     }
 
-    persistTableState(persistUpdates);
     columnsStore.set(updates);
   };
 };
