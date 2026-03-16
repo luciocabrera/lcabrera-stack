@@ -9,7 +9,6 @@ import type { Rule } from 'eslint';
 const rule: Rule.RuleModule = {
   meta: {
     docs: {
-      category: 'Best Practices',
       description:
         'Merge duplicate imports from the same source into a single import statement',
       recommended: false,

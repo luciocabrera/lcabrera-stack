@@ -9,7 +9,6 @@ import type { Rule } from 'eslint';
 const rule: Rule.RuleModule = {
   meta: {
     docs: {
-      category: 'Stylistic Issues',
       description:
         'Enforce separate type imports instead of inline type imports',
       recommended: false,

@@ -39,7 +39,7 @@ const rule: Rule.RuleModule = {
             },
             fix(fixer) {
               // Find all references to this type in the file
-              const sourceCode = context.getSourceCode();
+              const sourceCode = context.sourceCode;
               const text = sourceCode.getText();
               const fixes = [];
 
