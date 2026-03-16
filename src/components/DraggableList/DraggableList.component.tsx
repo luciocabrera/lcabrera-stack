@@ -33,6 +33,7 @@ export const DraggableList = ({
               styles.item,
               isDragging && styles.itemDragging,
               isDragOver && styles.itemDragOver,
+              !canDrag && styles.itemNotDraggable,
             )}
             draggable={canDrag}
             onDragEnd={canDrag ? handleDragEnd : undefined}

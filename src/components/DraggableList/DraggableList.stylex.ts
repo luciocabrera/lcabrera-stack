@@ -53,6 +53,9 @@ export const styles = stylex.create({
     cursor: 'grabbing',
     opacity: 0.5,
   },
+  itemNotDraggable: {
+    cursor: 'default',
+  },
   itemDragOver: {
     borderColor: colors.brandPrimary,
     borderStyle: 'dashed',
