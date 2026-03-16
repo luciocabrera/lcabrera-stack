@@ -33,13 +33,14 @@ export const styles = stylex.create({
     display: 'flex',
     flexDirection: 'column',
     minHeight: 0,
-  },
+  },//isOperatorOpen
   dropdownBase: {
     borderColor: colors.borderPrimary,
     borderRadius: borderRadius.md,
     borderStyle: 'none',
     borderWidth: '1px',
-    backgroundColor: colors.surfacePrimary,
+    // backgroundColor: colors.surfacePrimary,
+    // backgroundColor: colors.surfaceSecondary,
     display: 'flex',
     flexDirection: 'column',
     marginTop: spacing.sm,

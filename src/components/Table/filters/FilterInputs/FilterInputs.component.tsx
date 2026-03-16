@@ -102,6 +102,19 @@ export const FilterInputs = <TData,>({
     );
   }
 
+  const inputComponent = (
+    <InputContent
+      columnKey={columnKey}
+      dataType={column.dataType}
+      filter={filter}
+      hasFetchableOptions={Boolean(column.fetchFilterOptions)}
+      listMaxHeight={listMaxHeight}
+      onChange={onChange}
+      operator={operator}
+      shouldFillHeight={shouldFillHeight}
+    />
+  );
+
   return (
     <div
       {...stylex.props(
@@ -118,20 +131,17 @@ export const FilterInputs = <TData,>({
         placeholder='Select operator...'
         selected={selectedOperatorLabel}
       />
-      <Activity mode={isOperatorOpen || !filter ? 'hidden' : 'visible'}>
-        <InputContent
-          columnKey={columnKey}
-          dataType={column.dataType}
-          filter={filter}
-          hasFetchableOptions={Boolean(column.fetchFilterOptions)}
-          listMaxHeight={listMaxHeight}
-          onChange={onChange}
-          operator={operator}
-          shouldFillHeight={shouldFillHeight}
-        />
-      </Activity>
+      {shouldFillHeight ? (
+        <Activity mode={isOperatorOpen || !filter ? 'hidden' : 'visible'}>
+          {inputComponent}
+        </Activity>
+      ) : (
+        filter && (
+          <div {...stylex.props(isOperatorOpen && styles.contentHidden)}>
+            {inputComponent}
+          </div>
+        )
+      )}
     </div>
   );
 };
-
-FilterInputs.displayName = 'FilterInputs';

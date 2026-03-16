@@ -7,6 +7,9 @@ const localStyles = stylex.create({
     flex: '1',
     minHeight: 0,
   },
+  contentHidden: {
+    visibility: 'hidden',
+  },
   operatorOverride: {
     borderRadius: 0,
     overflow: 'visible',
@@ -22,6 +25,7 @@ const localStyles = stylex.create({
 export const styles = {
   container: filterBaseStyles.container,
   containerFill: localStyles.containerFill,
+  contentHidden: localStyles.contentHidden,
   operatorOverride: localStyles.operatorOverride,
   select: filterBaseStyles.select,
 };
