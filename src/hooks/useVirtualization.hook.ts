@@ -22,6 +22,18 @@ export const useVirtualization = ({
     defaultContainerHeight,
   );
 
+  const visibleCount = Math.ceil(containerHeight / itemHeight);
+  const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
+  const endIndex = Math.min(
+    totalItems,
+    startIndex + visibleCount + overscan * 2,
+  );
+  const offsetY = startIndex * itemHeight;
+  const totalHeight = totalItems * itemHeight;
+  const visibleItemsCount = endIndex - startIndex;
+  const bottomSpacerHeight =
+    totalHeight - (offsetY + visibleItemsCount * itemHeight);
+
   useEffect(() => {
     const container = containerRef.current;
 
@@ -32,7 +44,6 @@ export const useVirtualization = ({
       if (measured > 0) {
         setContainerHeight(measured);
       }
-
     };
 
     const handleScroll = () => {
@@ -48,18 +59,6 @@ export const useVirtualization = ({
       window.removeEventListener('resize', updateHeight);
     };
   }, [containerRef, defaultContainerHeight]);
-
-  const visibleCount = Math.ceil(containerHeight / itemHeight);
-  const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
-  const endIndex = Math.min(
-    totalItems,
-    startIndex + visibleCount + overscan * 2,
-  );
-  const offsetY = startIndex * itemHeight;
-  const totalHeight = totalItems * itemHeight;
-  const visibleItemsCount = endIndex - startIndex;
-  const bottomSpacerHeight =
-    totalHeight - (offsetY + visibleItemsCount * itemHeight);
 
   return {
     bottomSpacerHeight,

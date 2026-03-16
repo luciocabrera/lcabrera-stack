@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 
 import type {
   DraggableItem,
@@ -13,13 +13,15 @@ export const useDraggableList = ({
   onOrderChange,
 }: UseDraggableListProps) => {
   const [items, setItems] = useState<DraggableItem[]>(initialItems);
+  const [prevInitialItems, setPrevInitialItems] = useState(initialItems);
   const dragItemId = useRef<string | undefined>(undefined);
   const dragOverItemId = useRef<string | undefined>(undefined);
 
-  // Sync local state with prop changes
-  useEffect(() => {
+  // Sync local state with prop changes (adjust state during render, not in an effect)
+  if (prevInitialItems !== initialItems) {
+    setPrevInitialItems(initialItems);
     setItems(initialItems);
-  }, [initialItems]);
+  }
 
   const handleDragStart = (id: string) => {
     dragItemId.current = id;
@@ -32,6 +34,11 @@ export const useDraggableList = ({
   const handleDragEnd = () => {
     const fromId = dragItemId.current;
     const toId = dragOverItemId.current;
+    const fromIndex = items.findIndex((item) => item.id === fromId);
+    const toIndex = items.findIndex((item) => item.id === toId);
+    const updatedItems = [...items];
+
+    const [movedItem] = updatedItems.splice(fromIndex, 1);
 
     if (!fromId || !toId || fromId === toId) {
       dragItemId.current = undefined;
@@ -39,19 +46,11 @@ export const useDraggableList = ({
       return;
     }
 
-    const fromIndex = items.findIndex((item) => item.id === fromId);
-
-    const toIndex = items.findIndex((item) => item.id === toId);
-
     if (fromIndex === -1 || toIndex === -1) {
       dragItemId.current = undefined;
       dragOverItemId.current = undefined;
       return;
     }
-
-    const updatedItems = [...items];
-
-    const [movedItem] = updatedItems.splice(fromIndex, 1);
 
     if (!movedItem) {
       dragItemId.current = undefined;
