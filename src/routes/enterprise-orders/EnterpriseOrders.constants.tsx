@@ -368,7 +368,9 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
     minWidth: 130,
   },
   {
+    isFilterable: false,
     isHeaderHidden: true,
+    isSortable: false,
     isStatic: true,
     key: 'actions',
     label: 'Actions',

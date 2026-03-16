@@ -88,7 +88,7 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
         ): s is {
           columnKey: keyof EnterpriseOrder;
           direction: 'asc' | 'desc';
-        } => s.direction !== undefined,
+        } => s.direction !== undefined && s.columnKey !== 'actions',
       ),
     });
 
@@ -103,7 +103,7 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
       (
         s,
       ): s is { columnKey: keyof EnterpriseOrder; direction: 'asc' | 'desc' } =>
-        s.direction !== undefined,
+        s.direction !== undefined && s.columnKey !== 'actions',
     ),
   };
 };

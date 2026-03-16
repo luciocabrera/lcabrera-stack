@@ -9,6 +9,8 @@ export const useSetColumnsSortings = () => {
   const { columnsStore } = useTableDrawerContextValue();
 
   return (sorting: SortingState) => {
-    columnsStore.set({ sorting });
+    columnsStore.set({
+      sorting: sorting.filter((s) => s.columnKey !== 'actions'),
+    });
   };
 };

@@ -13,6 +13,8 @@ export const useSetColumnSorting = <TData>() => {
   const persistenceKey = metaStore.get()?.persistenceKey ?? '';
 
   return ({ columnKey, direction }: Sorting<TData>) => {
+    if (columnKey === 'actions') return;
+
     const columnsState = columnsStore.get();
     const sorting = columnsState?.sorting ?? [];
     const currentSort = sorting.find((s) => s.columnKey === columnKey);

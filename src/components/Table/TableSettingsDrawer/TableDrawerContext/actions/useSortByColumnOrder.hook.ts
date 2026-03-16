@@ -17,7 +17,9 @@ export const useSortByColumnOrder = () => {
     const columnOrder = drawerState?.columnOrder ?? [];
 
     const sortableColumns =
-      columnsState?.columns.filter((col) => col.isSortable !== false) ?? [];
+      columnsState?.columns.filter(
+        (col) => col.isSortable !== false && col.key !== 'actions',
+      ) ?? [];
 
     const orderedSortable =
       columnOrder.length > 0
