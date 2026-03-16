@@ -4,7 +4,6 @@ import type { ColumnOrderState } from '@/components/Table/Table.types';
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import {
   detectPinOrderConflict,
-  getStaticColumnKeys,
   recalculatePinSides,
   restoreStaticColumnOrder,
 } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
@@ -25,7 +24,7 @@ export const useReorderColumns = () => {
   return (reorderedItems: DraggableItem[]) => {
     const drawerColumnsState = drawerColumnsStore.get();
     const currentOrder = drawerColumnsState?.columnOrder ?? ([] as ColumnOrderState);
-    const staticKeys = getStaticColumnKeys(tableColumnsStore.get()?.columns ?? []);
+    const staticKeys = tableColumnsStore.get()?.staticKeys ?? new Set<string>();
 
     const finalOrder = restoreStaticColumnOrder({
       currentOrder,

@@ -172,6 +172,8 @@ export type TableColumnsState<TData = Record<string, unknown>> = {
   normalizedColumns: NormalizedColumnsState<TData>;
   /** Sorting state */
   sorting: SortingState<TData>;
+  /** Keys of columns marked as static (computed once from columns) */
+  staticKeys: Set<string>;
 };
 
 export type TableDataState<TData> = {

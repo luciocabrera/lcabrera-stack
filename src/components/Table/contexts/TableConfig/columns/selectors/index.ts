@@ -7,3 +7,4 @@ export { useGetColumnVisibility } from './useGetColumnVisibility.hook';
 export { useGetEffectiveColumns } from './useGetEffectiveColumns.hook';
 export { useGetNormalizedColumn } from './useGetNormalizedColumn.hook';
 export { useGetNormalizedColumns } from './useGetNormalizedColumns.hook';
+export { useGetStaticColumnKeys } from './useGetStaticColumnKeys.hook';

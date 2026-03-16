@@ -3,7 +3,6 @@ import type { OrderConflictResolution } from '@/components/Table/TableSettingsDr
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import {
-  getStaticColumnKeys,
   resolvePinOrderConflict,
   restoreStaticColumnOrder,
 } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
@@ -31,7 +30,7 @@ export const useAcceptOrderConflict = () => {
     });
 
     const tableColumnsState = tableColumnsStore.get();
-    const staticKeys = getStaticColumnKeys(tableColumnsState?.columns ?? []);
+    const staticKeys = tableColumnsState?.staticKeys ?? new Set<string>();
     const currentOrder =
       drawerColumnsStore.get()?.columnOrder ?? ([] as ColumnOrderState);
 

@@ -2,7 +2,6 @@ export { applyPin } from './applyPin.util';
 export { buildAllOrderedColumns } from './buildAllOrderedColumns.util';
 export { detectPinOrderConflict } from './detectPinOrderConflict.util';
 export { getIsContiguousPin } from './getIsContiguousPin.util';
-export { getStaticColumnKeys } from './getStaticColumnKeys.util';
 export { insertAdjacentToPinnedGroup } from './insertAdjacentToPinnedGroup.util';
 export { recalculatePinSides } from './recalculatePinSides.util';
 export { resolveClosestEdgeSide } from './resolveClosestEdgeSide.util';

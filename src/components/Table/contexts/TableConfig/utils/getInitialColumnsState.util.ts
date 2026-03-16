@@ -7,6 +7,7 @@ import type {
 import {
   getEffectiveColumns,
   getNormalizedColummns,
+  getStaticColumnKeys,
 } from '@/components/Table/utils';
 
 type GetInitialTableStateArgs<TData> = Partial<TableColumnsState<TData>>;
@@ -32,6 +33,8 @@ export const getInitialColumnsState = <TData>({
     sorting,
   });
 
+  const staticKeys = getStaticColumnKeys<TData>(columns);
+
   return {
     columnFilters,
     columnOrder,
@@ -42,5 +45,6 @@ export const getInitialColumnsState = <TData>({
     effectiveColumns,
     normalizedColumns,
     sorting,
+    staticKeys,
   };
 };

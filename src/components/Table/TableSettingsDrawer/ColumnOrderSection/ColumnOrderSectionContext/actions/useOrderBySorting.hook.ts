@@ -6,7 +6,6 @@ import type {
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import {
   detectPinOrderConflict,
-  getStaticColumnKeys,
   restoreStaticColumnOrder,
 } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 import { useTableDrawerContextValue } from '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
@@ -28,7 +27,7 @@ export const useOrderBySorting = () => {
     const sorting = drawerState?.sorting ?? ([] as SortingState);
     const columnsOrder = drawerState?.columnOrder ?? ([] as ColumnOrderState);
     const columnPinning = drawerState?.columnPinning ?? { left: [], right: [] };
-    const staticKeys = getStaticColumnKeys(tableColumnsStore.get()?.columns ?? []);
+    const staticKeys = tableColumnsStore.get()?.staticKeys ?? new Set<string>();
 
     const sortedKeys = sorting.map((s) => s.columnKey);
     const remainingKeys = columnsOrder.filter(
