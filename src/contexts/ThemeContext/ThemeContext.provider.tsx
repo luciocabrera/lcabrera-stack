@@ -19,7 +19,7 @@ export const ThemeProvider = ({
   initialTheme,
 }: ThemeProviderProps) => {
   // Use initialTheme from loader (cookie) if available, otherwise fall back to defaultTheme
-  const [theme, setThemeState] = useState<ThemeMode>(
+  const [themeState, setThemeState] = useState<ThemeMode>(
     () => initialTheme ?? defaultTheme,
   );
 
@@ -30,13 +30,13 @@ export const ThemeProvider = ({
   }, []);
 
   const toggleTheme = useCallback(() => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
-  }, [theme, setTheme]);
+    setTheme(themeState === 'dark' ? 'light' : 'dark');
+  }, [themeState, setTheme]);
 
   const value = {
-    isDarkMode: theme === 'dark',
+    isDarkMode: themeState === 'dark',
     setTheme,
-    theme,
+    theme: themeState,
     toggleTheme,
   };
 
