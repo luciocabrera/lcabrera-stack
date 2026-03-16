@@ -8,6 +8,7 @@ import type { SortDirection } from '@/types/ui.types';
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { usePersistTableStateAction } from '@/components/Table/hooks';
+import { applyPin } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 import {
   getEffectiveColumns,
   getNormalizedColummns,
@@ -74,19 +75,23 @@ export const useBatchSetColumnSettings = () => {
         ? baseSizing
         : { ...baseSizing, [columnKey]: columnSizing };
 
-    // Pinning: remove from both sides, then re-add if pinned
+    // Pinning: remove from both sides, then re-add respecting static column positions
     const currentPinning = columnsState?.columnPinning ?? {
       left: [],
       right: [],
     };
-    const newPinning: ColumnPinningState<unknown> = {
-      left: currentPinning.left.filter((k) => k !== columnKey),
-      right: currentPinning.right.filter((k) => k !== columnKey),
-    };
-    if (columnPinning === 'left')
-      newPinning.left = [...newPinning.left, columnKey];
-    if (columnPinning === 'right')
-      newPinning.right = [...newPinning.right, columnKey];
+    const staticKeys = columnsState?.staticKeys;
+    const newPinning: ColumnPinningState<unknown> = columnPinning
+      ? (applyPin({
+          columnKey,
+          columnPinning: currentPinning as ColumnPinningState,
+          side: columnPinning,
+          staticKeys,
+        }) as ColumnPinningState<unknown>)
+      : {
+          left: currentPinning.left.filter((k) => k !== columnKey),
+          right: currentPinning.right.filter((k) => k !== columnKey),
+        };
 
     // Column Order: sync order to reflect pinning position
     const currentOrder = columnsState?.columnOrder ?? [];
