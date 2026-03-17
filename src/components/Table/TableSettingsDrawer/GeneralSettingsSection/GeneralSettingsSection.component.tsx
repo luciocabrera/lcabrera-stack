@@ -42,6 +42,9 @@ export const GeneralSettingsSection = ({
 
   const [selectedPreset, setSelectedPreset] = useState<WidthPreset>();
 
+  const hasMinWidthsConfigured = columns.some((col) => col.minWidth);
+  const hasMaxWidthsConfigured = columns.some((col) => col.maxWidth);
+
   const handleToggle = (preset: 'default' | 'max' | 'min') => {
     const newPreset = selectedPreset === preset ? undefined : preset;
     setSelectedPreset(newPreset);
@@ -82,9 +85,6 @@ export const GeneralSettingsSection = ({
       // No default
     }
   };
-
-  const hasMinWidthsConfigured = columns.some((col) => col.minWidth);
-  const hasMaxWidthsConfigured = columns.some((col) => col.maxWidth);
 
   return (
     <div {...stylex.props(styles.container)} {...props}>
