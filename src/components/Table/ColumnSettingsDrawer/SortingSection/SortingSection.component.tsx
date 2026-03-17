@@ -5,6 +5,7 @@ import { SortAscIcon, SortDescIcon } from '@/components/Icons';
 import {
   SidePanelSection,
   SidePanelSectionHeader,
+  SidePanelSectionMain,
 } from '@/components/SidePanel';
 import { ICON_SIZE_MD } from '@/design-system/constants';
 
@@ -28,7 +29,7 @@ export const SortingSection = (_props: SortingSectionProps) => {
   };
 
   return (
-    <div {...stylex.props(styles.container)}>
+    <SidePanelSectionMain>
       <SidePanelSection>
         <SidePanelSectionHeader
           title='Column Sorting'
@@ -56,6 +57,6 @@ export const SortingSection = (_props: SortingSectionProps) => {
         </div>
       </SidePanelSection>
       <SortingSectionToolbar />
-    </div>
+    </SidePanelSectionMain>
   );
 };

@@ -5,7 +5,7 @@ import type { DraggableItem } from '@/components/DraggableList';
 import { DraggableList } from '@/components/DraggableList';
 import { LockIcon } from '@/components/Icons';
 import { PinSideModal } from '@/components/PinSideModal';
-import { SidePanelSectionHeader } from '@/components/SidePanel';
+import { SidePanelSectionHeader, SidePanelSectionMain } from '@/components/SidePanel';
 import { useGetColumns } from '@/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
 import {
   useGetColumnOrder,
@@ -98,7 +98,7 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
   });
 
   return (
-    <div {...stylex.props(styles.container)} {...props}>
+    <SidePanelSectionMain {...props}>
       <SidePanelSectionHeader
         title={`Column Order & Visibility (${allOrderedColumns.length - columnVisibility.size}/${allOrderedColumns.length})`}
         toolbar={<ColumnOrderSectionFooter variant='toolbar' />}
@@ -128,6 +128,6 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
         description={orderConflict.description}
         isOpen={orderConflict.isOpen}
       />
-    </div>
+    </SidePanelSectionMain>
   );
 };

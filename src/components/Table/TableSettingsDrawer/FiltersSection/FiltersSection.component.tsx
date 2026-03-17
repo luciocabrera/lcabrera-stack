@@ -1,6 +1,8 @@
 import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 
+import { SidePanelSectionMain } from '@/components/SidePanel';
+
 import { useSetColumnFilters } from '../TableDrawerContext/actions';
 import { ActiveFiltersList } from './ActiveFiltersList';
 import { AddFilterSection } from './AddFilterSection';
@@ -27,7 +29,7 @@ export const FiltersSection = () => {
   };
 
   return (
-    <div {...stylex.props(styles.container)}>
+    <SidePanelSectionMain>
       <AddFilterSection
         expandedFilters={expandedFilters}
         onDropdownOpenChange={setIsAddFilterOpen}
@@ -41,6 +43,6 @@ export const FiltersSection = () => {
         />
         <FiltersSectionFooter onClearAll={handleClearLocalState} />
       </div>
-    </div>
+    </SidePanelSectionMain>
   );
 };

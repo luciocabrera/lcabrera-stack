@@ -12,6 +12,7 @@ import { InfoBox } from '@/components/InfoBox';
 import {
   SidePanelSection,
   SidePanelSectionHeader,
+  SidePanelSectionMain,
 } from '@/components/SidePanel';
 import { useGetColumns } from '@/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
 import { ICON_SIZE_MD } from '@/design-system/constants';
@@ -87,7 +88,7 @@ export const GeneralSettingsSection = ({
   };
 
   return (
-    <div {...stylex.props(styles.container)} {...props}>
+    <SidePanelSectionMain {...props}>
       <SidePanelSection>
         <SidePanelSectionHeader title='Column Widths' />
         <div {...stylex.props(styles.buttonGroup)}>
@@ -172,6 +173,6 @@ export const GeneralSettingsSection = ({
           </Button>
         </div>
       </SidePanelSection>
-    </div>
+    </SidePanelSectionMain>
   );
 };

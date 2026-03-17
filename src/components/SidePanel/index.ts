@@ -4,4 +4,5 @@ export { SidePanelFooter } from './SidePanelFooter';
 export { SidePanelHeader } from './SidePanelHeader';
 export { SidePanelSection } from './SidePanelSection';
 export { SidePanelSectionHeader } from './SidePanelSectionHeader';
+export { SidePanelSectionMain } from './SidePanelSectionMain';
 export { SidePanelTitle } from './SidePanelTitle';

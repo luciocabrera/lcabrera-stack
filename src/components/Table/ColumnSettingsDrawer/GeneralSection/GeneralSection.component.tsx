@@ -12,6 +12,7 @@ import { InfoBox } from '@/components/InfoBox';
 import {
   SidePanelSection,
   SidePanelSectionHeader,
+  SidePanelSectionMain,
 } from '@/components/SidePanel';
 import { useGetNormalizedColumn } from '@/components/Table/contexts/TableConfig/columns/selectors';
 import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
@@ -73,7 +74,7 @@ export const GeneralSection = <TData,>({
   const hasMaxWidth = column.maxWidth !== undefined;
 
   return (
-    <div {...stylex.props(styles.container)}>
+    <SidePanelSectionMain>
       <SidePanelSection>
         <SidePanelSectionHeader title='Column Width' />
         <div {...stylex.props(styles.buttonGroup)}>
@@ -143,6 +144,6 @@ export const GeneralSection = <TData,>({
           </Button>
         </div>
       </SidePanelSection>
-    </div>
+    </SidePanelSectionMain>
   );
 };

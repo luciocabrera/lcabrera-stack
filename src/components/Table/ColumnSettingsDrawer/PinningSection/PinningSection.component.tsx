@@ -5,6 +5,7 @@ import { PinLeftIcon, PinRightIcon } from '@/components/Icons';
 import {
   SidePanelSection,
   SidePanelSectionHeader,
+  SidePanelSectionMain,
 } from '@/components/SidePanel';
 import { ICON_SIZE_MD } from '@/design-system/constants';
 
@@ -22,7 +23,7 @@ export const PinningSection = <TData,>({
   const setColumnPinning = useSetColumnPinning();
 
   return (
-    <div {...stylex.props(styles.container)}>
+    <SidePanelSectionMain>
       <SidePanelSection>
         <SidePanelSectionHeader
           title='Column Pinning'
@@ -54,6 +55,6 @@ export const PinningSection = <TData,>({
         </div>
       </SidePanelSection>
       <PinningSectionToolbar />
-    </div>
+    </SidePanelSectionMain>
   );
 };

@@ -10,6 +10,7 @@ import { InfoBox } from '@/components/InfoBox';
 import {
   SidePanelSection,
   SidePanelSectionHeader,
+  SidePanelSectionMain,
 } from '@/components/SidePanel';
 import { useGetColumns } from '@/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
 import { VirtualSelect } from '@/components/VirtualSelect';
@@ -141,7 +142,7 @@ export const SortingSection = ({ ...props }: SortingSectionProps) => {
   }));
 
   return (
-    <div {...stylex.props(styles.container)} {...props}>
+    <SidePanelSectionMain {...props}>
       <div {...stylex.props(styles.addSection)}>
         <SidePanelSectionHeader title='Add Sort Column' />
         <VirtualSelect
@@ -181,6 +182,6 @@ export const SortingSection = ({ ...props }: SortingSectionProps) => {
       </SidePanelSection>
 
       <SortingSectionFooter />
-    </div>
+    </SidePanelSectionMain>
   );
 };

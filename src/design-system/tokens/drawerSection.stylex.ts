@@ -24,6 +24,14 @@ export const drawerSectionStyles = stylex.create({
     flexDirection: 'column',
     height: '100%',
   },
+  /** Main content area for drawer section tabs — fills height, pushes footer to bottom. */
+  sectionMain: {
+    flex: '1',
+    gap: spacing.md,
+    display: 'flex',
+    flexDirection: 'column',
+    minHeight: 0,
+  },
   /** Section header: secondary text, small bold, with bottom margin. */
   header: {
     margin: 0,
