@@ -102,7 +102,7 @@ export const drawerSectionStyles = stylex.create({
     fontWeight: 600,
     letterSpacing: '0.05em',
   },
-  /** Bottom-anchored reset/action area. */
+  /** Bottom-anchored reset/action area for section footers. */
   resetSection: {
     gap: spacing.sm,
     display: 'flex',
@@ -110,5 +110,8 @@ export const drawerSectionStyles = stylex.create({
     marginTop: 'auto',
     paddingBottom: spacing.sm,
     paddingTop: spacing.sm,
+  },
+  generalSection: {
+    paddingBottom: spacing.sm,
   },
 });

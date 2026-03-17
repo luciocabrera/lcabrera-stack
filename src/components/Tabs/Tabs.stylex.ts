@@ -66,9 +66,10 @@ export const styles = stylex.create({
   tabContent: {
     // Reserve space for scrollbar on both edges to keep content visually centered
     scrollbarGutter: 'stable both-edges',
-    padding: `${spacing.sm} ${spacing.md}`,
     flex: '1',
     overflow: 'auto',
+    // padding: `${spacing.sm} ${spacing.md}`,
+    paddingInline: spacing.sm,
     minHeight: 0,
   },
   tabPanel: {

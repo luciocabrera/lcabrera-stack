@@ -152,7 +152,7 @@ export const GeneralSettingsSection = ({
 
       <SidePanelSection>
         <SidePanelSectionHeader title='All Settings' />
-        <div {...stylex.props(styles.buttonGroup)}>
+        <div {...stylex.props(styles.buttonGroup, styles.generalSection)}>
           <Button
             color='outline'
             icon={<EraserIcon size={ICON_SIZE_MD} />}
