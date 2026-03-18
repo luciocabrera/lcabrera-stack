@@ -35,7 +35,12 @@ export const FiltersSection = () => {
         onDropdownOpenChange={setIsAddFilterOpen}
         onExpandedFiltersChange={setExpandedFilters}
       />
-      <div {...stylex.props(styles.restArea)}>
+      <div
+        {...stylex.props(
+          styles.restArea,
+          isAddFilterOpen && styles.restAreaOverflowHidden,
+        )}
+      >
         {isAddFilterOpen && <div {...stylex.props(styles.overlay)} />}
         <ActiveFiltersList
           expandedFilters={expandedFilters}

@@ -18,4 +18,7 @@ export const styles = stylex.create({
     position: 'relative',
     minHeight: 0,
   },
+  restAreaOverflowHidden: {
+    overflow: 'hidden',
+  },
 });
