@@ -11,6 +11,7 @@ import {
   SidePanelSection,
   SidePanelSectionHeader,
   SidePanelSectionMain,
+  SidePanelSectionOverlay,
 } from '@/components/SidePanel';
 import { useGetColumns } from '@/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
 import { VirtualSelect } from '@/components/VirtualSelect';
@@ -31,6 +32,7 @@ export const SortingSection = ({ ...props }: SortingSectionProps) => {
   const onSortChange = useSetColumnsSortings();
 
   const [selectedColumn, setSelectedColumn] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   // Filter to only sortable columns
   const sortableColumns = columns.filter((col) => col.isSortable !== false);
@@ -148,40 +150,45 @@ export const SortingSection = ({ ...props }: SortingSectionProps) => {
         <VirtualSelect
           mode='single'
           onChange={handleColumnSelect}
+          onOpenChange={setIsDropdownOpen}
           options={availableColumnLabels}
           placeholder='Select a column...'
           selected={selectedColumnLabel}
         />
-        <Button
-          isDisabled={!selectedColumn}
-          onClick={handleAddSort}
-          size='sm'
-          width='full'
-        >
-          Add
-        </Button>
+        {!isDropdownOpen && (
+          <Button
+            isDisabled={!selectedColumn}
+            onClick={handleAddSort}
+            size='sm'
+            width='full'
+          >
+            Add
+          </Button>
+        )}
       </div>
 
-      <SidePanelSection>
-        <SidePanelSectionHeader
-          title={`Sort Order (${sortItems.length})`}
-          toolbar={<SortingSectionFooter variant='toolbar' />}
-        />
-        {sortItems.length === 0 ? (
-          <InfoBox>
-            No sorting applied. Add a column above to start sorting.
-          </InfoBox>
-        ) : (
-          <div {...stylex.props(styles.sortList)}>
-            <DraggableList
-              items={draggableItems}
-              onOrderChange={handleReorder}
-            />
-          </div>
-        )}
-      </SidePanelSection>
+      <SidePanelSectionOverlay isOpen={isDropdownOpen}>
+        <SidePanelSection>
+          <SidePanelSectionHeader
+            title={`Sort Order (${sortItems.length})`}
+            toolbar={<SortingSectionFooter variant='toolbar' />}
+          />
+          {sortItems.length === 0 ? (
+            <InfoBox>
+              No sorting applied. Add a column above to start sorting.
+            </InfoBox>
+          ) : (
+            <div {...stylex.props(styles.sortList)}>
+              <DraggableList
+                items={draggableItems}
+                onOrderChange={handleReorder}
+              />
+            </div>
+          )}
+        </SidePanelSection>
 
-      <SortingSectionFooter />
+        <SortingSectionFooter />
+      </SidePanelSectionOverlay>
     </SidePanelSectionMain>
   );
 };
