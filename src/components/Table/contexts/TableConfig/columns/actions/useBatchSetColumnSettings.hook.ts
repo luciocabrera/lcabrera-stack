@@ -47,13 +47,16 @@ export const useBatchSetColumnSettings = () => {
 
     const hasExistingSort = existingIndex !== -1;
 
-    const newSorting = sorting
-      ? hasExistingSort
-        ? existingSorting.map((s) =>
-            s.columnKey === columnKey ? { columnKey, direction: sorting } : s,
-          )
-        : [...existingSorting, { columnKey, direction: sorting }]
-      : existingSorting.filter((s) => s.columnKey !== columnKey);
+    let newSorting;
+    if (!sorting) {
+      newSorting = existingSorting.filter((s) => s.columnKey !== columnKey);
+    } else if (hasExistingSort) {
+      newSorting = existingSorting.map((s) =>
+        s.columnKey === columnKey ? { columnKey, direction: sorting } : s,
+      );
+    } else {
+      newSorting = [...existingSorting, { columnKey, direction: sorting }];
+    }
 
     // Filters: remove this column entry, then re-add if filter exists
     const baseFilters = Object.fromEntries(
@@ -82,13 +85,13 @@ export const useBatchSetColumnSettings = () => {
       right: [],
     };
     const staticKeys = columnsState?.staticKeys;
-    const newPinning: ColumnPinningState<unknown> = columnPinning
-      ? (applyPin({
+    const newPinning: ColumnPinningState = columnPinning
+      ? applyPin({
           columnKey,
           columnPinning: currentPinning as ColumnPinningState,
           side: columnPinning,
           staticKeys,
-        }) as ColumnPinningState<unknown>)
+        })
       : {
           left: currentPinning.left.filter((k) => k !== columnKey),
           right: currentPinning.right.filter((k) => k !== columnKey),

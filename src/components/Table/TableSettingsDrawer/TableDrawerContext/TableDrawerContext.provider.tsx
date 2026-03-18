@@ -14,7 +14,7 @@ export const TableDrawerProvider = ({ children }: TableDrawerProviderProps) => {
   const { columnsStore: tableColumnsStore } = useTableConfigContextValue();
 
   const tableColumnsState =
-    tableColumnsStore.get() ?? ({} as TableColumnsState<unknown>);
+    tableColumnsStore.get() ?? ({} as TableColumnsState);
   const {
     columnFilters,
     columnOrder,
@@ -24,7 +24,9 @@ export const TableDrawerProvider = ({ children }: TableDrawerProviderProps) => {
     sorting,
   } = tableColumnsState;
 
-  const columnsStore = useStore<TableDrawerColumnsState<unknown>>({
+  const columnsStore = useStore<
+    TableDrawerColumnsState<Record<string, unknown>>
+  >({
     columnFilters,
     columnOrder,
     columnPinning,

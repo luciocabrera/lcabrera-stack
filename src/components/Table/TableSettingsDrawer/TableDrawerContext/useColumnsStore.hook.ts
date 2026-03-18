@@ -4,7 +4,7 @@ import type { TableColumnsState } from '@/components/Table/Table.types';
 
 import { useTableDrawerContextValue } from './useTableDrawerContextValue.hook';
 
-export const useColumnsStore = <TSelected, TData = unknown>(
+export const useColumnsStore = <TSelected, TData = Record<string, unknown>>(
   selector: (state: TableColumnsState<TData>) => TSelected,
 ) => {
   const { columnsStore } = useTableDrawerContextValue();

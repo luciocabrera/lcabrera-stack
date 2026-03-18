@@ -7,7 +7,11 @@ import { enterpriseOrdersApi } from '@/services';
 
 import type { loader } from './enterprise-orders.loader';
 
-import { COLUMNS, DEFAULT_COLUMN_PINNING, PERSISTENCE_KEY } from './EnterpriseOrders.constants';
+import {
+  COLUMNS,
+  DEFAULT_COLUMN_PINNING,
+  PERSISTENCE_KEY,
+} from './EnterpriseOrders.constants';
 
 export const EnterpriseOrders = () => {
   const {

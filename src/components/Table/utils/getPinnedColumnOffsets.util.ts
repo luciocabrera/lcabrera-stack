@@ -1,6 +1,7 @@
 import type {
   ColumnPinningState,
   ColumnSizingState,
+  DataKey,
   PinnedColumnInfo,
   TableColumn,
 } from '@/components/Table/Table.types';
@@ -13,12 +14,15 @@ type GetPinnedColumnOffsetsArgs<TData> = {
   effectiveColumns: TableColumn<TData>[];
 };
 
-export const getPinnedColumnOffsets = <TData>({
+export const getPinnedColumnOffsets = <TData = Record<string, unknown>>({
   columnPinning,
   columnSizing,
   effectiveColumns,
-}: GetPinnedColumnOffsetsArgs<TData>): Record<string, PinnedColumnInfo> => {
-  const result = new Map<string, PinnedColumnInfo>();
+}: GetPinnedColumnOffsetsArgs<TData>): Record<
+  DataKey<TData>,
+  PinnedColumnInfo
+> => {
+  const result = new Map<DataKey<TData>, PinnedColumnInfo>();
   const { left: leftPinned, right: rightPinned } = columnPinning;
 
   if (leftPinned.length === 0 && rightPinned.length === 0) {

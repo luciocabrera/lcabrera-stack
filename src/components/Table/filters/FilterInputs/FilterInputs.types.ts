@@ -1,7 +1,7 @@
 import type { DataKey } from '@/components/Table/Table.types';
 import type { ColumnFilter } from '@/types/filterOperators.types';
 
-export type FilterInputsProps<TData> = {
+export type FilterInputsProps<TData = Record<string, unknown>> = {
   /** Column key to identify which filter data to use from context */
   columnKey: DataKey<TData>;
   /** Current filter value */

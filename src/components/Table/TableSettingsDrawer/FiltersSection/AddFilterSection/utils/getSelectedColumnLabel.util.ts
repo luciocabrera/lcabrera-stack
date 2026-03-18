@@ -4,7 +4,7 @@ import type {
 } from '@/components/Table/Table.types';
 
 type GetSelectedColumnLabelArgs = {
-  filterableColumns: TableColumn<unknown>[];
+  filterableColumns: TableColumn<Record<string, unknown>>[];
   filters: ColumnFiltersState;
   selectedColumn: string;
 };

@@ -1,5 +1,7 @@
 import type { Sorting } from '@/types/ui.types';
 
+import type { SortingState } from '@/components/Table/Table.types';
+
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { useTableDataContextValue } from '@/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
 import { usePersistTableStateAction } from '@/components/Table/hooks';
@@ -55,7 +57,7 @@ export const useSetColumnSorting = <TData>() => {
     persistTableState({
       persistenceKey,
       searchParamKey: 'sort',
-      searchParamValue: serializeSortingToURL(newSorting),
+      searchParamValue: serializeSortingToURL(newSorting as SortingState),
       slice: 'sorting',
       valueSlice: newSorting,
     });

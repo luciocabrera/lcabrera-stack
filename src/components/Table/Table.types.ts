@@ -49,7 +49,7 @@ export type ColumnVisibilityState<TData = Record<string, unknown>> = Set<
   DataKey<TData>
 >;
 
-export type DataKey<TData> = (keyof TData & string) | string;
+export type DataKey<TData> = 'actions' | (keyof TData & string);
 
 export type FilterData = {
   data: string[];
@@ -126,7 +126,7 @@ export type TableColumn<TData> = {
    * This is a read-only configuration — it cannot be changed at runtime.
    */
   isStatic?: boolean;
-  key: 'actions' | (keyof TData & string);
+  key: DataKey<TData>;
   label: string;
   maxWidth?: number;
   minWidth?: number;
@@ -178,7 +178,7 @@ export type TableColumnsState<TData = Record<string, unknown>> = {
 
 export type TableDataState<TData> = {
   /** Table data array */
-  data: TData[]; /** Pagination state */
+  data: TData[] /** Pagination state */;
   /** Whether there are more rows to load (infinite scroll) */
   hasMore: boolean;
   /** Initial loading state */

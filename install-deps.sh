@@ -37,6 +37,7 @@ $ADD \
 echo ""
 echo "🛠️  Installing development dependencies with $PM..."
 $ADD_DEV \
+  vitest \
   @eslint/js \
   @types/node \
   @types/react \

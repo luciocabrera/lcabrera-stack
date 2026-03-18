@@ -25,7 +25,7 @@ export type BatchTableSettingsUpdate<TData> = {
   sorting: SortingState<TData>;
 };
 
-export const useBatchSetTableSettings = <TData>() => {
+export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
   const { columnsStore, metaStore } = useTableConfigContextValue<TData>();
   const { dataStore } = useTableDataContextValue();
   const persistTableState = usePersistTableStateAction();
@@ -60,7 +60,9 @@ export const useBatchSetTableSettings = <TData>() => {
       {
         persistenceKey,
         searchParamKey: 'sort',
-        searchParamValue: serializeSortingToURL(settings.sorting),
+        searchParamValue: serializeSortingToURL(
+          settings.sorting as SortingState,
+        ),
         slice: 'sorting',
         valueSlice: settings.sorting,
       },

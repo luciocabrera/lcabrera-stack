@@ -34,12 +34,12 @@ import { GeneralSection } from './GeneralSection';
 import { PinningSection } from './PinningSection';
 import { SortingSection } from './SortingSection';
 
-export const ColumnSettingsDrawer = ({
+export const ColumnSettingsDrawer = <TData extends Record<string, unknown>>({
   columnKey,
-}: ColumnSettingsDrawerProps) => {
+}: ColumnSettingsDrawerProps<TData>) => {
   useRenderTracker({ componentName: `ColumnSettingsDrawer:${columnKey}` });
 
-  const column = useGetNormalizedColumn<unknown>(columnKey);
+  const column = useGetNormalizedColumn<TData>(columnKey);
   const wrapperRef = useTableWrapperRef();
 
   const batchSetColumnDrawerSettings = useBatchSetColumnDrawerSettings();

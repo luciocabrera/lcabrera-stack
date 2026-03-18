@@ -1,3 +1,5 @@
-export type ColumnSettingsDrawerProps = {
-  columnKey: string;
+import type { DataKey } from '../Table.types';
+
+export type ColumnSettingsDrawerProps<TData = Record<string, unknown>> = {
+  columnKey: DataKey<TData>;
 };

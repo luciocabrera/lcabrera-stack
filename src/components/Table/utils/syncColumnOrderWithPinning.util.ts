@@ -6,9 +6,9 @@ import type {
 type SyncColumnOrderWithPinningArgs = {
   columnKey: string;
   columnPinning: 'left' | 'right' | undefined;
-  columns: TableColumn<unknown>[];
+  columns: TableColumn<Record<string, unknown>>[];
   currentOrder: string[];
-  newPinning: ColumnPinningState<unknown>;
+  newPinning: ColumnPinningState<Record<string, unknown>>;
 };
 
 /**

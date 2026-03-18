@@ -3,10 +3,10 @@ import type { LoaderFunctionArgs } from 'react-router';
 import { enterpriseOrdersApi } from '@/services';
 
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
-  const orderId = Number.parseInt(params.orderId!, 10);
+  const orderId = Number.parseInt(params.orderId ?? '', 10);
 
   if (Number.isNaN(orderId)) {
-    // eslint-disable-next-line @typescript-eslint/only-throw-error -- React Router expects thrown Response objects
+    // oxlint-disable-next-line @typescript-eslint/only-throw-error -- React Router expects thrown Response objects
     throw new Response('Invalid order ID', { status: 400 });
   }
 

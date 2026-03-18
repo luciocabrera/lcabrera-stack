@@ -1,6 +1,6 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
-import type { SortingState } from '@/components/Table';
+import type { ColumnSizingState, SortingState } from '@/components/Table';
 import type { CarSale, CarSalesResponse } from '@/services';
 
 import { readPersistedStateFromCookie } from '@/components/Table/utils';
@@ -50,8 +50,8 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
     sorting = deserializeSortingFromURL<CarSale>(standaloneSortParam);
   }
 
-  const columnSizing: Record<keyof CarSale, number> =
-    (cookieState.columnSizing ?? {}) as Record<keyof CarSale, number>;
+  const columnSizing: ColumnSizingState<CarSale> = (cookieState.columnSizing ??
+    {}) as ColumnSizingState<CarSale>;
 
   // Return the promise directly (not awaited) for Suspense streaming
   const carSalesPromise: Promise<CarSalesResponse> = carSalesApi.fetchCarSales(

@@ -1,4 +1,4 @@
-/// <reference types="vite/client" />
+/// <reference types="vite-plus/client" />
 
 // StyleX virtual modules
 declare module 'virtual:stylex:runtime' {

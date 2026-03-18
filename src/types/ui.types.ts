@@ -28,7 +28,7 @@ export type PinSide = 'closest-edge' | 'left' | 'right';
 
 export type SortDirection = 'asc' | 'desc' | undefined;
 
-export type Sorting<TData> = {
+export type Sorting<TData = Record<string, unknown>> = {
   /** Column key being sorted */
   columnKey: DataKey<TData>;
   /** Sort direction */

@@ -1,19 +1,11 @@
 import * as stylex from '@stylexjs/stylex';
 import { useId, useRef, useState } from 'react';
 
-import type { ArrowOffsetParams, TooltipProps } from './Tooltip.types';
+import type { TooltipProps } from './Tooltip.types';
 
-import {
-  ARROW_STYLES,
-  HALF_ARROW,
-  TRANSITION_DURATION_MS,
-} from './Tooltip.constants';
+import { ARROW_STYLES, TRANSITION_DURATION_MS } from './Tooltip.constants';
 import { styles } from './Tooltip.stylex';
-
-const getArrowOffset = ({
-  tooltipStart,
-  triggerCenter,
-}: ArrowOffsetParams): number => triggerCenter - tooltipStart - HALF_ARROW;
+import { getArrowOffset, getArrowStyle } from './utils';
 
 export const Tooltip = ({
   children,
@@ -83,14 +75,11 @@ export const Tooltip = ({
         )}
       >
         <span
-          {...stylex.props(styles.arrow, ARROW_STYLES[placement])}
-          style={
-            arrowOffset === undefined
-              ? undefined
-              : placement === 'top' || placement === 'bottom'
-                ? { left: `${arrowOffset}px`, marginLeft: 0 }
-                : { marginTop: 0, top: `${arrowOffset}px` }
-          }
+          {...stylex.props(
+            styles.arrow,
+            ARROW_STYLES[placement],
+            arrowOffset !== undefined && getArrowStyle(placement, arrowOffset),
+          )}
         />
         {content}
       </div>

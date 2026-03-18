@@ -28,5 +28,9 @@ export const FiltersDataProvider = <TData extends Record<string, unknown>>({
     filtersDataStore,
   } as FiltersDataContextValue<TData>;
 
-  return <FiltersDataContext value={value}>{children}</FiltersDataContext>;
+  return (
+    <FiltersDataContext value={value as FiltersDataContextValue}>
+      {children}
+    </FiltersDataContext>
+  );
 };

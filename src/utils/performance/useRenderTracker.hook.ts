@@ -45,7 +45,6 @@ export const useRenderTracker = ({
       const prevProps = prevPropsRef.current;
 
       for (const key of Object.keys(currentProps)) {
-        // eslint-disable-next-line security/detect-object-injection -- Safe: iterating over known object keys
         if (currentProps[key] !== prevProps[key]) {
           changedProps.push(key);
         }

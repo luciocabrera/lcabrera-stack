@@ -38,7 +38,7 @@ import {
   skelletonStyles,
   tableHeaderCellStyles,
 } from './TableHeaderCell.stylex';
-import { getNextSortDirection } from './utils';
+import { getNextSortDirection, getPinnedStyle, getShadowStyle } from './utils';
 
 export const TableHeaderCell = <TData extends Record<string, unknown>>({
   columnKey,
@@ -49,21 +49,24 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
 }: TableHeaderCellProps<TData>) => {
   useRenderTracker({ componentName: `TableHeaderCell:${columnKey}` });
 
-  const columnSizing = useGetColumnSizing();
+  const columnSizing = useGetColumnSizing<TData>();
   const column = useGetNormalizedColumn<TData>(columnKey);
   const isLoading = useGetTableIsLoading();
   const isLoadingMore = useGetTableIsLoadingMore();
 
-  const setColumnSizing = useSetColumnSizing();
-  const setColumnPinning = useSetColumnPinning();
-  const setSorting = useSetColumnSorting();
+  const setColumnSizing = useSetColumnSizing<TData>();
+  const setColumnPinning = useSetColumnPinning<TData>();
+  const setSorting = useSetColumnSorting<TData>();
   const setTableColumnSelectedKey = useSetTableColumnSelectedKey();
   const toogleTableIsColumnSettingsOpen = useToogleTableIsColumnSettingsOpen();
   const acceptHeaderPinSide = useAcceptHeaderPinSide<TData>();
   const acceptHeaderPinConflict = useAcceptHeaderPinConflict<TData>();
 
   const [isPinSideModalOpen, setIsPinSideModalOpen] = useState(false);
-  const [pinConflict, setPinConflict] = useState<PinConflictState>({ isOpen: false, side: 'left' });
+  const [pinConflict, setPinConflict] = useState<PinConflictState>({
+    isOpen: false,
+    side: 'left',
+  });
 
   const { isHeaderHidden, label, maxWidth, minWidth } = column;
   const effectiveMinWidth = minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
@@ -126,18 +129,9 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
     setPinConflict({ isOpen: false, side: 'left' });
   };
 
-  const pinnedStylex =
-    pinInfo?.side === 'left'
-      ? tableHeaderCellStyles.pinnedLeft(pinInfo.offset)
-      : pinInfo?.side === 'right'
-        ? tableHeaderCellStyles.pinnedRight(pinInfo.offset)
-        : undefined;
+  const pinnedStylex = getPinnedStyle(pinInfo);
 
-  const shadowStylex = pinInfo?.isLastPinnedLeft
-    ? tableHeaderCellStyles.pinnedShadowLeft
-    : pinInfo?.isFirstPinnedRight
-      ? tableHeaderCellStyles.pinnedShadowRight
-      : undefined;
+  const shadowStylex = getShadowStyle(pinInfo);
 
   return (
     <th
@@ -161,13 +155,15 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
           <div {...stylex.props(tableHeaderCellStyles.controls)}>
             {!isStatic && (
               <Button
-                aria-label={
-                  pinInfo?.side ? `Unpin ${label}` : `Pin ${label}`
-                }
+                aria-label={pinInfo?.side ? `Unpin ${label}` : `Pin ${label}`}
                 color='ghost'
                 customStylex={tableHeaderCellStyles.settingsButton}
                 icon={
-                  pinInfo?.side ? <PinIcon size={14} /> : <PinOffIcon size={14} />
+                  pinInfo?.side ? (
+                    <PinIcon size={14} />
+                  ) : (
+                    <PinOffIcon size={14} />
+                  )
                 }
                 onClick={handlePinClick}
                 size='embedded'

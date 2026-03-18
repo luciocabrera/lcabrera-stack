@@ -1,4 +1,3 @@
-
 export { useAcceptHeaderPinConflict } from './useAcceptHeaderPinConflict.hook';
 export { useAcceptHeaderPinSide } from './useAcceptHeaderPinSide.hook';
 export { useBatchSetColumnSettings } from './useBatchSetColumnSettings.hook';

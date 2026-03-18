@@ -24,11 +24,17 @@ export const useAcceptHeaderPinSide = <TData>() => {
   const { columnsStore, metaStore } = useTableConfigContextValue<TData>();
   const persistTableState = usePersistTableStateAction();
 
-  return ({ columnKey, pinSide }: AcceptHeaderPinSideArgs<TData>): PinConflictState | undefined => {
+  return ({
+    columnKey,
+    pinSide,
+  }: AcceptHeaderPinSideArgs<TData>): PinConflictState | undefined => {
     const columnsState = columnsStore.get();
     const columns = columnsState?.columns ?? [];
-    const columnsOrder = columnsState?.columnOrder ?? ([] as ColumnOrderState<TData>);
-    const columnPinning = columnsState?.columnPinning ?? { left: [], right: [] } as ColumnPinningState<TData>;
+    const columnsOrder =
+      columnsState?.columnOrder ?? ([] as ColumnOrderState<TData>);
+    const columnPinning =
+      columnsState?.columnPinning ??
+      ({ left: [], right: [] } as ColumnPinningState<TData>);
     const persistenceKey = metaStore.get()?.persistenceKey ?? '';
 
     const allOrderedColumns = buildAllOrderedColumns({ columns, columnsOrder });
@@ -61,7 +67,7 @@ export const useAcceptHeaderPinSide = <TData>() => {
 
     const effectiveColumns = getEffectiveColumns({
       columnOrder: columnsState?.columnOrder,
-      columnPinning: newPinning,
+      columnPinning: newPinning as ColumnPinningState<TData>,
       columns,
       columnVisibility: columnsState?.columnVisibility,
     });

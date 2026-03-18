@@ -23,7 +23,8 @@ export const useReorderColumns = () => {
 
   return (reorderedItems: DraggableItem[]) => {
     const drawerColumnsState = drawerColumnsStore.get();
-    const currentOrder = drawerColumnsState?.columnOrder ?? ([] as ColumnOrderState);
+    const currentOrder =
+      drawerColumnsState?.columnOrder ?? ([] as ColumnOrderState);
     const staticKeys = tableColumnsStore.get()?.staticKeys ?? new Set<string>();
 
     const finalOrder = restoreStaticColumnOrder({

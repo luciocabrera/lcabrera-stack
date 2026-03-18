@@ -33,7 +33,7 @@ export const styles = stylex.create({
     display: 'flex',
     flexDirection: 'column',
     minHeight: 0,
-  },//isOperatorOpen
+  }, //isOperatorOpen
   dropdownBase: {
     borderColor: colors.borderPrimary,
     borderRadius: borderRadius.md,

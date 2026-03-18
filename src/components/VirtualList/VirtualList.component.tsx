@@ -188,13 +188,15 @@ export const VirtualList = ({
               : styles.virtualContainer(listMaxHeight),
           )}
         >
-          {isInitialLoading ? (
+          {isInitialLoading && (
             <SkeletonOptions containerHeight={containerHeight} />
-          ) : filteredOptions.length === 0 ? (
+          )}
+          {!isInitialLoading && filteredOptions.length === 0 && (
             <div {...stylex.props(styles.noResults)}>
               <InfoBox>No options found</InfoBox>
             </div>
-          ) : (
+          )}
+          {!isInitialLoading && filteredOptions.length > 0 && (
             <div {...stylex.props(styles.virtualScrollArea(totalHeight))}>
               <div {...stylex.props(styles.virtualOffset(offsetY))}>
                 {Array.from({ length: endIndex - startIndex }).map((_, i) => {

@@ -16,8 +16,13 @@ export const deserializeFiltersFromURL = <TData>(
 
     const result = Object.fromEntries(
       Object.entries(parsed)
-        .map(([columnKey, value]) => [columnKey, deserializeFilter(value)] as const)
-        .filter((entry): entry is [string, ColumnFilter] => entry[1] !== undefined),
+        .map(
+          ([columnKey, value]) =>
+            [columnKey, deserializeFilter(value)] as const,
+        )
+        .filter(
+          (entry): entry is [string, ColumnFilter] => entry[1] !== undefined,
+        ),
     );
 
     return result as ColumnFiltersState<TData>;

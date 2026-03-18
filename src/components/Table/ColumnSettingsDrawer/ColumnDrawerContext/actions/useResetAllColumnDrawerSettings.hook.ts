@@ -1,5 +1,6 @@
 import { useColumnDrawerContextValue } from '@/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/useColumnDrawerContextValue.hook';
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { getColumnPinSide } from '@/components/Table/utils';
 
 /**
  * Resets all column drawer settings from the current table state without closing the drawer.
@@ -18,27 +19,23 @@ export const useResetAllColumnDrawerSettings = () => {
     const allColumnFilters = columnsState?.columnFilters;
     const columnFilter =
       allColumnFilters && Object.hasOwn(allColumnFilters, columnKey)
-        ? // eslint-disable-next-line security/detect-object-injection -- Safe: guarded by Object.hasOwn
-          allColumnFilters[columnKey]
+        ? allColumnFilters[columnKey]
         : undefined;
 
     const allColumnSizing = columnsState?.columnSizing;
     const columnSizing =
       allColumnSizing && Object.hasOwn(allColumnSizing, columnKey)
-        ? // eslint-disable-next-line security/detect-object-injection -- Safe: guarded by Object.hasOwn
-          allColumnSizing[columnKey]
+        ? allColumnSizing[columnKey]
         : undefined;
 
     const sorting = columnsState?.sorting.find(
       (sort) => sort.columnKey === columnKey,
     )?.direction;
 
-    const currentPinning = columnsState?.columnPinning;
-    const columnPinning = currentPinning?.left.includes(columnKey)
-      ? 'left'
-      : currentPinning?.right.includes(columnKey)
-        ? 'right'
-        : undefined;
+    const columnPinning = getColumnPinSide(
+      columnsState?.columnPinning,
+      columnKey,
+    );
 
     columnStore.set({
       columnFilter,

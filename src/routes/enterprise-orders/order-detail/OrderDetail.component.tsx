@@ -7,7 +7,7 @@ import { Button } from '@/components/Button';
 import { Card, CardBody, CardHeader, CardTitle } from '@/components/Card';
 
 import type { loader } from './order-detail.loader';
-import type { FieldConfig } from './OrderDetail.types';
+import type { FieldConfig, FormatValueArgs } from './OrderDetail.types';
 
 import { styles } from './OrderDetail.stylex';
 
@@ -110,11 +110,6 @@ const getStatusBadgeStyle = (status: string) => {
   }
 };
 
-type FormatValueArgs = {
-  format?: 'boolean' | 'currency' | 'date';
-  value: boolean | null | number | string | undefined;
-};
-
 const formatValue = ({ format, value }: FormatValueArgs): string => {
   if (value === null || value === undefined || value === '') {
     return '—';
@@ -149,7 +144,15 @@ const formatValue = ({ format, value }: FormatValueArgs): string => {
   }
 };
 
-const Field = ({ format, label, value }: { format?: FieldConfig['format']; label: string; value: boolean | null | number | string | undefined }) => {
+const Field = ({
+  format,
+  label,
+  value,
+}: {
+  format?: FieldConfig['format'];
+  label: string;
+  value: boolean | null | number | string | undefined;
+}) => {
   const formatted = formatValue({ format, value });
   const isEmpty = formatted === '—';
 
@@ -211,16 +214,12 @@ const NotesSection = ({ order }: { order: EnterpriseOrder }) => {
             {hasOrderNotes && (
               <div {...stylex.props(styles.field)}>
                 <span {...stylex.props(styles.fieldLabel)}>Order Notes</span>
-                <p {...stylex.props(styles.notesText)}>
-                  {order.order_notes}
-                </p>
+                <p {...stylex.props(styles.notesText)}>{order.order_notes}</p>
               </div>
             )}
             {hasInternalNotes && (
               <div {...stylex.props(styles.field)}>
-                <span {...stylex.props(styles.fieldLabel)}>
-                  Internal Notes
-                </span>
+                <span {...stylex.props(styles.fieldLabel)}>Internal Notes</span>
                 <p {...stylex.props(styles.notesText)}>
                   {order.internal_notes}
                 </p>
@@ -265,11 +264,7 @@ export const OrderDetail = () => {
           order={order}
           title='Order Information'
         />
-        <FieldSection
-          fields={CUSTOMER_FIELDS}
-          order={order}
-          title='Customer'
-        />
+        <FieldSection fields={CUSTOMER_FIELDS} order={order} title='Customer' />
         <FieldSection
           fields={FINANCIAL_FIELDS}
           order={order}

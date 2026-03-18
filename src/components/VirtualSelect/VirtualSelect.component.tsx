@@ -10,7 +10,7 @@ import { useClickOutside } from '@/hooks';
 
 import type { VirtualSelectProps } from './VirtualSelect.types';
 
-import { countVisibleTags } from './utils';
+import { countVisibleTags, getDropdownStyle } from './utils';
 import { styles } from './VirtualSelect.stylex';
 
 export const VirtualSelect = ({
@@ -167,11 +167,7 @@ export const VirtualSelect = ({
           role='listbox'
           {...stylex.props(
             styles.dropdownBase,
-            isAlwaysOpen
-              ? shouldFillHeight
-                ? styles.dropdownStaticFill
-                : styles.dropdownStatic
-              : styles.dropdownAbsolute,
+            getDropdownStyle(isAlwaysOpen, shouldFillHeight),
             customStylex,
           )}
         >

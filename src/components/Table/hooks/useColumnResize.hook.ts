@@ -58,7 +58,7 @@ export const useColumnResize = ({
         maxWidth: number;
         minWidth: number;
       }
-  >(undefined);
+  >(null);
 
   const handleMouseMove = useCallback(
     (event: MouseEvent) => {

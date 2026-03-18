@@ -52,7 +52,10 @@ export const DraggableList = ({
             tabIndex={0}
           >
             {canDrag && (
-              <span {...stylex.props(styles.dragHandle)} aria-label='Drag handle'>
+              <span
+                {...stylex.props(styles.dragHandle)}
+                aria-label='Drag handle'
+              >
                 ≡
               </span>
             )}

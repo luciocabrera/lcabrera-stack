@@ -35,27 +35,25 @@ export const VirtualListFooter = ({
       {hasCheckboxes && (
         <div {...stylex.props(styles.listFilterGroup)}>
           {(['all', 'selected', 'unselected'] as const).map((mode) => {
-            const icon =
-              mode === 'all' ? (
-                <ListAllIcon size={ICON_SIZE_MD} />
-              ) : mode === 'selected' ? (
-                <ListCheckedIcon size={ICON_SIZE_MD} />
-              ) : (
-                <ListUncheckedIcon size={ICON_SIZE_MD} />
-              );
-            const count =
-              mode === 'all'
-                ? effectiveOptions.length
-                : mode === 'selected'
-                  ? selectedValues.length
-                  : effectiveOptions.length - selectedValues.length;
-            const tooltipLabel =
-              mode === 'all'
-                ? 'Show all options'
-                : mode === 'selected'
-                  ? 'Show only selected options'
-                  : 'Show only unselected options';
-            const tooltipContent = `${tooltipLabel} (${count})`;
+            const modeConfig = {
+              all: {
+                count: effectiveOptions.length,
+                icon: <ListAllIcon size={ICON_SIZE_MD} />,
+                tooltip: 'Show all options',
+              },
+              selected: {
+                count: selectedValues.length,
+                icon: <ListCheckedIcon size={ICON_SIZE_MD} />,
+                tooltip: 'Show only selected options',
+              },
+              unselected: {
+                count: effectiveOptions.length - selectedValues.length,
+                icon: <ListUncheckedIcon size={ICON_SIZE_MD} />,
+                tooltip: 'Show only unselected options',
+              },
+            } as const;
+            const { count, icon, tooltip } = modeConfig[mode];
+            const tooltipContent = `${tooltip} (${count})`;
             return (
               <Button
                 color={listFilterMode === mode ? 'secondary' : 'ghost'}

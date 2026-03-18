@@ -29,8 +29,10 @@ export const TableBodyCell = <TData extends Record<string, unknown>>({
   const dataType = dataTypeProp ?? detectDataType(value);
 
   const isLoadingState = isLoading || isLoadingMore;
-  const isRightAligned = !hasCustomContent && (dataType === 'number' || dataType === 'currency');
-  const isCentered = !hasCustomContent && (dataType === 'boolean' || dataType === 'date');
+  const isRightAligned =
+    !hasCustomContent && (dataType === 'number' || dataType === 'currency');
+  const isCentered =
+    !hasCustomContent && (dataType === 'boolean' || dataType === 'date');
   const isBoolean = dataType === 'boolean';
 
   const content = hasCustomContent

@@ -5,7 +5,10 @@ import type { DraggableItem } from '@/components/DraggableList';
 import { DraggableList } from '@/components/DraggableList';
 import { LockIcon } from '@/components/Icons';
 import { PinSideModal } from '@/components/PinSideModal';
-import { SidePanelSectionHeader, SidePanelSectionMain } from '@/components/SidePanel';
+import {
+  SidePanelSectionHeader,
+  SidePanelSectionMain,
+} from '@/components/SidePanel';
 import { useGetColumns } from '@/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
 import {
   useGetColumnOrder,
@@ -57,7 +60,10 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
   const cancelPinConflict = useCancelPinConflict();
 
   const settingsColumns = columns.filter((col) => !col.render || col.isStatic);
-  const allOrderedColumns = buildAllOrderedColumns({ columns: settingsColumns, columnsOrder });
+  const allOrderedColumns = buildAllOrderedColumns({
+    columns: settingsColumns,
+    columnsOrder,
+  });
 
   // Convert columns to draggable items
   const draggableItems: DraggableItem[] = allOrderedColumns.map((col) => {

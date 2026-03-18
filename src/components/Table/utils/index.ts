@@ -1,3 +1,4 @@
+export { getColumnPinSide } from './getColumnPinSide.util';
 export { getEffectiveColumns } from './getEffectiveColumns.util';
 export { getNormalizedColummns } from './getNormalizedColummns.util';
 export { getPinnedColumnOffsets } from './getPinnedColumnOffsets.util';

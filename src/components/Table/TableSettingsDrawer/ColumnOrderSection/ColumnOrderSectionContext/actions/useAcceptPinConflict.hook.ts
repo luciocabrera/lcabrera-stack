@@ -54,7 +54,12 @@ export const useAcceptPinConflict = () => {
 
         drawerColumnsStore.set({
           columnOrder: newOrder as ColumnOrderState,
-          columnPinning: applyPin({ columnKey, columnPinning, side, staticKeys }),
+          columnPinning: applyPin({
+            columnKey,
+            columnPinning,
+            side,
+            staticKeys,
+          }),
         });
         break;
       }
@@ -89,7 +94,12 @@ export const useAcceptPinConflict = () => {
 
       case 'pin-only': {
         drawerColumnsStore.set({
-          columnPinning: applyPin({ columnKey, columnPinning, side, staticKeys }),
+          columnPinning: applyPin({
+            columnKey,
+            columnPinning,
+            side,
+            staticKeys,
+          }),
         });
         break;
       }

@@ -6,6 +6,6 @@ export const useSetColumnPinning = <TData>() => {
   const { columnsStore } = useTableDrawerContextValue();
 
   return (columnPinning: ColumnPinningState<TData>) => {
-    columnsStore.set({ columnPinning });
+    columnsStore.set({ columnPinning: columnPinning as ColumnPinningState });
   };
 };

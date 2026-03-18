@@ -33,19 +33,15 @@ export const useBatchSetTableDrawerSettings = () => {
     const columnsState = columnsStore.get();
 
     batchSetTableSettings({
-      columnFilters:
-        columnsState?.columnFilters ?? ({} as ColumnFiltersState<unknown>),
-      columnOrder:
-        columnsState?.columnOrder ?? ([] as ColumnOrderState<unknown>),
+      columnFilters: columnsState?.columnFilters ?? ({} as ColumnFiltersState),
+      columnOrder: columnsState?.columnOrder ?? ([] as ColumnOrderState),
       columnPinning:
         columnsState?.columnPinning ??
-        ({ left: [], right: [] } as ColumnPinningState<unknown>),
-      columnSizing:
-        columnsState?.columnSizing ?? ({} as ColumnSizingState<unknown>),
+        ({ left: [], right: [] } as ColumnPinningState),
+      columnSizing: columnsState?.columnSizing ?? ({} as ColumnSizingState),
       columnVisibility:
-        columnsState?.columnVisibility ??
-        ({} as ColumnVisibilityState<unknown>),
-      sorting: columnsState?.sorting ?? ([] as SortingState<unknown>),
+        columnsState?.columnVisibility ?? ({} as ColumnVisibilityState),
+      sorting: columnsState?.sorting ?? ([] as SortingState),
     });
   };
 };

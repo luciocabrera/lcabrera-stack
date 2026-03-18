@@ -1,6 +1,10 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
-import type { ColumnFiltersState, SortingState } from '@/components/Table';
+import type {
+  ColumnFiltersState,
+  ColumnSizingState,
+  SortingState,
+} from '@/components/Table';
 import type { CarSale, CarSalesResponse } from '@/services';
 
 import { readPersistedStateFromCookie } from '@/components/Table/utils';
@@ -54,13 +58,13 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
 
   // Read filters from standalone param only
   const standaloneFiltersParam = url.searchParams.get('filters');
-  let filters: ColumnFiltersState<CarSale> = {};
+  let filters: ColumnFiltersState<CarSale> = {} as ColumnFiltersState<CarSale>;
   if (standaloneFiltersParam) {
     filters = deserializeFiltersFromURL<CarSale>(standaloneFiltersParam);
   }
 
-  const columnSizing: Record<keyof CarSale, number> =
-    (cookieState.columnSizing ?? {}) as Record<keyof CarSale, number>;
+  const columnSizing: ColumnSizingState<CarSale> = (cookieState.columnSizing ??
+    {}) as ColumnSizingState<CarSale>;
 
   // Return the promise directly (not awaited) for Suspense streaming
   const carSalesPromise: Promise<CarSalesResponse & { hasMore: boolean }> =

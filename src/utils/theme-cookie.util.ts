@@ -12,7 +12,6 @@ export const parseCookies = (cookieHeader: string): Record<string, string> => {
   for (const cookie of cookieHeader.split(';')) {
     const [name, ...valueParts] = cookie.trim().split('=');
     if (name) {
-      // eslint-disable-next-line security/detect-object-injection
       cookies[name] = valueParts.join('=');
     }
   }
@@ -31,7 +30,6 @@ export const getThemeFromCookie = (
   }
 
   const cookies = parseCookies(cookieHeader);
-  // eslint-disable-next-line security/detect-object-injection
   const theme = cookies[THEME_COOKIE_NAME];
 
   if (theme === 'dark' || theme === 'light') {

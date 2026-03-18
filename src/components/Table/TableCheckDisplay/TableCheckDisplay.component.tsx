@@ -11,11 +11,10 @@ export const TableCheckDisplay = ({
   value,
 }: TableCheckDisplayProps) => {
   const isChecked = Boolean(value);
-  const label = columnLabel
-    ? `${columnLabel}: ${isChecked ? 'Yes' : 'No'}`
-    : isChecked
-      ? 'Checked'
-      : 'Unchecked';
+  let label = isChecked ? 'Checked' : 'Unchecked';
+  if (columnLabel) {
+    label = `${columnLabel}: ${isChecked ? 'Yes' : 'No'}`;
+  }
   return (
     <div
       aria-checked={isChecked}

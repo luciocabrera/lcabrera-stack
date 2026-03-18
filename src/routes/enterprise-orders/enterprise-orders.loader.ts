@@ -1,11 +1,19 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
-import type { ColumnFiltersState, SortingState } from '@/components/Table';
+import type {
+  ColumnFiltersState,
+  ColumnSizingState,
+  SortingState,
+} from '@/components/Table';
 import type { EnterpriseOrder, EnterpriseOrdersResponse } from '@/services';
 
 import { readPersistedStateFromCookie } from '@/components/Table/utils';
 import { enterpriseOrdersApi } from '@/services';
-import { deserializeFiltersFromURL, deserializeSortingFromURL, readTableStateFromURL } from '@/utils/urlState';
+import {
+  deserializeFiltersFromURL,
+  deserializeSortingFromURL,
+  readTableStateFromURL,
+} from '@/utils/urlState';
 
 import { PERSISTENCE_KEY } from './EnterpriseOrders.constants';
 
@@ -55,13 +63,16 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
   // Don't fall back to cookie - URL is the source of truth for filters
   // If filters= param is absent, filters should be empty (user may have reset them)
   const standaloneFiltersParam = url.searchParams.get('filters');
-  let filters: ColumnFiltersState<EnterpriseOrder> = {};
+  let filters: ColumnFiltersState<EnterpriseOrder> =
+    {} as ColumnFiltersState<EnterpriseOrder>;
   if (standaloneFiltersParam) {
-    filters = deserializeFiltersFromURL<EnterpriseOrder>(standaloneFiltersParam);
+    filters = deserializeFiltersFromURL<EnterpriseOrder>(
+      standaloneFiltersParam,
+    );
   }
 
-  const columnSizing: Record<keyof EnterpriseOrder, number> =
-    (cookieState.columnSizing ?? {}) as Record<keyof EnterpriseOrder, number>;
+  const columnSizing: ColumnSizingState<EnterpriseOrder> =
+    (cookieState.columnSizing ?? {}) as ColumnSizingState<EnterpriseOrder>;
 
   // Return the promise directly (not awaited) for Suspense streaming
   const enterpriseOrdersPromise: Promise<EnterpriseOrdersResponse> =

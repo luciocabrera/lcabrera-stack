@@ -5,7 +5,7 @@ import type { SortDirection } from '@/types/ui.types';
 
 export type ColumnDrawerContextValue = {
   /** Store managing column-related state */
-  columnStore: TStore<ColumnDrawerState<unknown>>;
+  columnStore: TStore<ColumnDrawerState<Record<string, unknown>>>;
 };
 
 export type ColumnDrawerProviderProps<TData> = {

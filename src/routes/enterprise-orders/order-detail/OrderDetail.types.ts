@@ -5,3 +5,8 @@ export type FieldConfig = {
   key: keyof EnterpriseOrder;
   label: string;
 };
+
+export type FormatValueArgs = {
+  format?: 'boolean' | 'currency' | 'date';
+  value: boolean | null | number | string | undefined;
+};

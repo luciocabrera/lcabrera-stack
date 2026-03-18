@@ -1,4 +1,5 @@
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { getColumnPinSide } from '@/components/Table/utils';
 import { useStore } from '@/hooks';
 
 import type {
@@ -11,36 +12,32 @@ import { ColumnDrawerContext } from './ColumnDrawerContext.context';
 export const ColumnDrawerProvider = ({
   children,
   columnKey,
-}: ColumnDrawerProviderProps<unknown>) => {
+}: ColumnDrawerProviderProps<Record<string, unknown>>) => {
   const { columnsStore } = useTableConfigContextValue();
   const columnsState = columnsStore.get();
 
   const allColumnFilters = columnsState?.columnFilters;
   const columnFilter =
     allColumnFilters && Object.hasOwn(allColumnFilters, columnKey)
-      ? // eslint-disable-next-line security/detect-object-injection -- Safe: guarded by Object.hasOwn
-        allColumnFilters[columnKey]
+      ? allColumnFilters[columnKey]
       : undefined;
 
   const allColumnSizing = columnsState?.columnSizing;
   const columnSizing =
     allColumnSizing && Object.hasOwn(allColumnSizing, columnKey)
-      ? // eslint-disable-next-line security/detect-object-injection -- Safe: guarded by Object.hasOwn
-        allColumnSizing[columnKey]
+      ? allColumnSizing[columnKey]
       : undefined;
 
   const sorting = columnsState?.sorting.find(
     (sort) => sort.columnKey === columnKey,
   )?.direction;
 
-  const currentPinning = columnsState?.columnPinning;
-  const columnPinning = currentPinning?.left.includes(columnKey)
-    ? 'left'
-    : currentPinning?.right.includes(columnKey)
-      ? 'right'
-      : undefined;
+  const columnPinning = getColumnPinSide(
+    columnsState?.columnPinning,
+    columnKey,
+  );
 
-  const initialState: ColumnDrawerState<unknown> = {
+  const initialState: ColumnDrawerState<Record<string, unknown>> = {
     columnFilter,
     columnKey,
     columnPinning,
@@ -48,9 +45,8 @@ export const ColumnDrawerProvider = ({
     sorting,
   };
 
-  console.log('Initializing ColumnDrawerProvider with state:', initialState);
-
-  const columnStore = useStore<ColumnDrawerState<unknown>>(initialState);
+  const columnStore =
+    useStore<ColumnDrawerState<Record<string, unknown>>>(initialState);
 
   return (
     <ColumnDrawerContext value={{ columnStore }}>

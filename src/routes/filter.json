@@ -87,6 +87,6 @@
     "value": "hotma"
   },
   "order_date": {
-    "date":"between|1980-01-01|2026-01-01"
+    "date": "between|1980-01-01|2026-01-01"
   }
 }

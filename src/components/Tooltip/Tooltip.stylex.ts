@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* oxlint-disable @typescript-eslint/no-unsafe-assignment */
 
 /* eslint-disable @stylexjs/valid-styles */
 import * as stylex from '@stylexjs/stylex';
@@ -75,6 +75,14 @@ export const styles = stylex.create({
     marginTop: tooltip.arrowOffset,
     top: '50%',
   },
+  arrowPositionHorizontal: (offset: number) => ({
+    left: `${offset}px`,
+    marginLeft: 0,
+  }),
+  arrowPositionVertical: (offset: number) => ({
+    marginTop: 0,
+    top: `${offset}px`,
+  }),
   top: {
     positionArea: 'top',
     transform: `translateY(${tooltip.slideDistance})`,

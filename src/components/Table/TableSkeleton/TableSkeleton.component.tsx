@@ -6,7 +6,7 @@ import { Table } from '../Table.component';
 import { generatePlaceholderData } from '../TableBody/utils';
 
 export const TableSkeleton = () => {
-  const columns = useGetColumns<Record<string, unknown>>();
+  const columns = useGetColumns();
   const placeholderRowCount = useGetTablePlaceholderRowCount();
   const effectiveData = generatePlaceholderData<Record<string, unknown>>({
     columns,

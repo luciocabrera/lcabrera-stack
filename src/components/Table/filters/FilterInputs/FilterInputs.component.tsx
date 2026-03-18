@@ -29,7 +29,7 @@ import {
  *
  * Now uses context for filter data - no more prop drilling!
  */
-export const FilterInputs = <TData,>({
+export const FilterInputs = <TData = Record<string, unknown>>({
   columnKey,
   filter,
   listMaxHeight,

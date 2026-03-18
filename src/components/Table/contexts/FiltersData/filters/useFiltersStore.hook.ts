@@ -4,7 +4,7 @@ import type { FiltersDataState } from '@/components/Table/Table.types';
 
 import { useFiltersDataContextValue } from '../useFiltersDataContextValue.hook';
 
-export const useFiltersStore = <TSelected, TData = unknown>(
+export const useFiltersStore = <TSelected, TData = Record<string, unknown>>(
   selector: (state: FiltersDataState<TData>) => TSelected,
 ) => {
   const { filtersDataStore } = useFiltersDataContextValue();

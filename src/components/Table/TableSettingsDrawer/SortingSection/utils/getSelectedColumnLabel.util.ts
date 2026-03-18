@@ -2,7 +2,7 @@ import type { TableColumn } from '@/components/Table/Table.types';
 
 type GetSelectedColumnLabelArgs = {
   selectedColumn: string;
-  sortableColumns: TableColumn<unknown>[];
+  sortableColumns: TableColumn<Record<string, unknown>>[];
 };
 
 export const getSelectedColumnLabel = ({

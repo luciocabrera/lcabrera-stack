@@ -13,7 +13,7 @@ export type TableDrawerColumnsState<TData> = Pick<
 
 export type TableDrawerContextValue = {
   /** Store managing column-related state */
-  columnsStore: TStore<TableDrawerColumnsState<unknown>>;
+  columnsStore: TStore<TableDrawerColumnsState<Record<string, unknown>>>;
 };
 
 export type TableDrawerProviderProps = {

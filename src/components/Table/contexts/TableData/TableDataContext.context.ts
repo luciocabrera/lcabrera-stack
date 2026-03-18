@@ -11,7 +11,7 @@ import { getInitialDataState } from './utils';
  * Components can subscribe to specific slices of state via selector hooks.
  */
 export const TableDataContext = createContext<TableDataContextValue>({
-  dataStore: getInitialDataState<unknown>({}),
+  dataStore: getInitialDataState<Record<string, unknown>>({}),
 } as unknown as TableDataContextValue);
 
 TableDataContext.displayName = 'TableDataContext';

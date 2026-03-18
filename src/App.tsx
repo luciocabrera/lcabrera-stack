@@ -42,10 +42,11 @@ function mulberry32(seed: number) {
   let value = seed;
   return () => {
     value = Math.trunc(value);
+    // oxlint-disable-next-line unicorn/number-literal-case -- formatter lowercases hex digits
     value = Math.trunc(value + 0x6d_2b_79_f5);
     let t = Math.imul(value ^ (value >>> 15), 1 | value);
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4_294_967_296;
+    return Math.trunc(t ^ (t >>> 14)) / 4_294_967_296;
   };
 }
 

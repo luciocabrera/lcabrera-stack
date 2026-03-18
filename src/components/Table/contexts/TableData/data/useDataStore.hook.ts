@@ -4,7 +4,7 @@ import type { TableDataState } from '@/components/Table/Table.types';
 
 import { useTableDataContextValue } from './useTableDataContextValue.hook';
 
-export const useDataStore = <TSelected, TData = unknown>(
+export const useDataStore = <TSelected, TData = Record<string, unknown>>(
   selector: (state: TableDataState<TData>) => TSelected,
 ) => {
   const { dataStore } = useTableDataContextValue();
