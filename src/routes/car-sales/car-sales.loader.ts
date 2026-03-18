@@ -4,6 +4,7 @@ import type { SortingState } from '@/components/Table';
 import type { CarSale, CarSalesResponse } from '@/services';
 
 import { readPersistedStateFromCookie } from '@/components/Table/utils';
+import { deserializeSortingFromURL } from '@/components/Table/utils';
 import { carSalesApi } from '@/services';
 import { readTableStateFromURL } from '@/utils/urlState';
 
@@ -44,11 +45,7 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
 
   let sorting: SortingState<CarSale> = [];
   if (standaloneSortParam) {
-    try {
-      sorting = JSON.parse(standaloneSortParam) as SortingState<CarSale>;
-    } catch {
-      // Invalid JSON, use empty array
-    }
+    sorting = deserializeSortingFromURL<CarSale>(standaloneSortParam);
   }
 
   const columnSizing: Record<keyof CarSale, number> =

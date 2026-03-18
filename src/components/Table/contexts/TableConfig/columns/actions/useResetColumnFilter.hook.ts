@@ -3,6 +3,7 @@ import type { ColumnFiltersState } from '@/components/Table/Table.types';
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { useTableDataContextValue } from '@/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
 import { usePersistTableStateAction } from '@/components/Table/hooks';
+import { serializeFiltersToURL } from '@/components/Table/utils';
 
 /**
  * Hook to clear a single column filter
@@ -27,8 +28,7 @@ export const useResetColumnFilter = () => {
     persistTableState<ColumnFiltersState>({
       persistenceKey,
       searchParamKey: 'filters',
-      searchParamValue:
-        Object.keys(rest).length > 0 ? JSON.stringify(rest) : undefined,
+      searchParamValue: serializeFiltersToURL(rest),
       slice: 'columnFilters',
       valueSlice: rest,
     });

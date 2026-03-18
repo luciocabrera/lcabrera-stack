@@ -1,8 +1,12 @@
+export { deserializeFiltersFromURL } from './deserializeFiltersFromURL.util';
+export { deserializeSortingFromURL } from './deserializeSortingFromURL.util';
 export { getEffectiveColumns } from './getEffectiveColumns.util';
 export { getNormalizedColummns } from './getNormalizedColummns.util';
 export { getPinnedColumnOffsets } from './getPinnedColumnOffsets.util';
 export { getStaticColumnKeys } from './getStaticColumnKeys.util';
 export { readPersistedStateFromCookie } from './readPersistedStateFromCookie.util';
+export { serializeFiltersToURL } from './serializeFiltersToURL.util';
+export { serializeSortingToURL } from './serializeSortingToURL.util';
 export { serializeStateSlice } from './serializeStateSlice.util';
 export { syncColumnOrderWithPinning } from './syncColumnOrderWithPinning.util';
 export { writeStateSlice } from './writeStateSlice.util';

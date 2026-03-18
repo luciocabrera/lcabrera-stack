@@ -13,6 +13,8 @@ import { usePersistTableStateAction } from '@/components/Table/hooks';
 import {
   getEffectiveColumns,
   getNormalizedColummns,
+  serializeFiltersToURL,
+  serializeSortingToURL,
 } from '@/components/Table/utils';
 
 export type BatchTableSettingsUpdate<TData> = {
@@ -52,20 +54,14 @@ export const useBatchSetTableSettings = <TData>() => {
       {
         persistenceKey,
         searchParamKey: 'filters',
-        searchParamValue:
-          Object.keys(settings.columnFilters).length > 0
-            ? JSON.stringify(settings.columnFilters)
-            : undefined,
+        searchParamValue: serializeFiltersToURL(settings.columnFilters),
         slice: 'columnFilters',
         valueSlice: settings.columnFilters,
       },
       {
         persistenceKey,
         searchParamKey: 'sort',
-        searchParamValue:
-          Object.keys(settings.sorting).length > 0
-            ? JSON.stringify(settings.sorting)
-            : undefined,
+        searchParamValue: serializeSortingToURL(settings.sorting),
         slice: 'sorting',
         valueSlice: settings.sorting,
       },

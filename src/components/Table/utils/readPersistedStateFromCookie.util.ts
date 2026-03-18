@@ -46,7 +46,6 @@ export const readPersistedStateFromCookie = ({
     'columnPinning',
     'columnSizing',
     'columnVisibility',
-    'pagination',
   ];
 
   for (const slice of slices) {

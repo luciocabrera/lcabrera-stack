@@ -3,7 +3,7 @@ import type { LoaderFunctionArgs } from 'react-router';
 import type { ColumnFiltersState, SortingState } from '@/components/Table';
 import type { CarSale, CarSalesResponse } from '@/services';
 
-import { readPersistedStateFromCookie } from '@/components/Table/utils';
+import { deserializeFiltersFromURL, deserializeSortingFromURL, readPersistedStateFromCookie } from '@/components/Table/utils';
 import { carSalesApi } from '@/services';
 import { readTableStateFromURL } from '@/utils/urlState';
 
@@ -45,24 +45,14 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
 
   let sorting: SortingState<CarSale> = [];
   if (standaloneSortParam) {
-    try {
-      sorting = JSON.parse(standaloneSortParam) as SortingState<CarSale>;
-    } catch {
-      // Invalid JSON, use empty array
-    }
+    sorting = deserializeSortingFromURL<CarSale>(standaloneSortParam);
   }
 
   // Read filters from standalone param only
   const standaloneFiltersParam = url.searchParams.get('filters');
   let filters: ColumnFiltersState<CarSale> = {};
   if (standaloneFiltersParam) {
-    try {
-      filters = JSON.parse(
-        standaloneFiltersParam,
-      ) as ColumnFiltersState<CarSale>;
-    } catch {
-      // Invalid JSON, use empty object
-    }
+    filters = deserializeFiltersFromURL<CarSale>(standaloneFiltersParam);
   }
 
   const columnSizing: Record<keyof CarSale, number> =

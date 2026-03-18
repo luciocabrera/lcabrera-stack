@@ -12,6 +12,8 @@ import { applyPin } from '@/components/Table/TableSettingsDrawer/ColumnOrderSect
 import {
   getEffectiveColumns,
   getNormalizedColummns,
+  serializeFiltersToURL,
+  serializeSortingToURL,
   syncColumnOrderWithPinning,
 } from '@/components/Table/utils';
 
@@ -120,18 +122,14 @@ export const useBatchSetColumnSettings = () => {
       {
         persistenceKey,
         searchParamKey: 'filters',
-        searchParamValue:
-          Object.keys(newColumnFilters).length > 0
-            ? JSON.stringify(newColumnFilters)
-            : undefined,
+        searchParamValue: serializeFiltersToURL(newColumnFilters),
         slice: 'columnFilters',
         valueSlice: newColumnFilters,
       },
       {
         persistenceKey,
         searchParamKey: 'sort',
-        searchParamValue:
-          newSorting.length > 0 ? JSON.stringify(newSorting) : undefined,
+        searchParamValue: serializeSortingToURL(newSorting),
         slice: 'sorting',
         valueSlice: newSorting,
       },

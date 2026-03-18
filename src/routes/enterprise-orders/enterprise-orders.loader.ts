@@ -3,7 +3,7 @@ import type { LoaderFunctionArgs } from 'react-router';
 import type { ColumnFiltersState, SortingState } from '@/components/Table';
 import type { EnterpriseOrder, EnterpriseOrdersResponse } from '@/services';
 
-import { readPersistedStateFromCookie } from '@/components/Table/utils';
+import { deserializeFiltersFromURL, deserializeSortingFromURL, readPersistedStateFromCookie } from '@/components/Table/utils';
 import { enterpriseOrdersApi } from '@/services';
 import { readTableStateFromURL } from '@/utils/urlState';
 
@@ -48,13 +48,7 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
 
   let sorting: SortingState<EnterpriseOrder> = [];
   if (standaloneSortParam) {
-    try {
-      sorting = JSON.parse(
-        standaloneSortParam,
-      ) as SortingState<EnterpriseOrder>;
-    } catch {
-      // Invalid JSON, use empty array
-    }
+    sorting = deserializeSortingFromURL<EnterpriseOrder>(standaloneSortParam);
   }
 
   // Read filters from standalone param only
@@ -63,13 +57,7 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
   const standaloneFiltersParam = url.searchParams.get('filters');
   let filters: ColumnFiltersState<EnterpriseOrder> = {};
   if (standaloneFiltersParam) {
-    try {
-      filters = JSON.parse(
-        standaloneFiltersParam,
-      ) as ColumnFiltersState<EnterpriseOrder>;
-    } catch {
-      // Invalid JSON, use empty object
-    }
+    filters = deserializeFiltersFromURL<EnterpriseOrder>(standaloneFiltersParam);
   }
 
   const columnSizing: Record<keyof EnterpriseOrder, number> =

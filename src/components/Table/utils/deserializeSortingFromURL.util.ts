@@ -1,0 +1,24 @@
+import type { SortingState } from '../Table.types';
+
+type CompactSorting = Record<string, 'asc' | 'desc'>;
+
+/**
+ * Deserialize a compact sorting URL param back to SortingState.
+ *
+ * Converts `{"name":"asc"}` back to `[{ columnKey: "name", direction: "asc" }]`.
+ * Preserves insertion order from the object.
+ */
+export const deserializeSortingFromURL = <TData>(
+  param: string,
+): SortingState<TData> => {
+  try {
+    const parsed = JSON.parse(param) as CompactSorting;
+
+    return Object.entries(parsed).map(([columnKey, direction]) => ({
+      columnKey: columnKey as SortingState<TData>[number]['columnKey'],
+      direction,
+    }));
+  } catch {
+    return [];
+  }
+};

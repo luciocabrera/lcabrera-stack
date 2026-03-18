@@ -7,6 +7,7 @@ import type { ColumnFilter } from '@/types/filterOperators.types';
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { useTableDataContextValue } from '@/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
 import { usePersistTableStateAction } from '@/components/Table/hooks';
+import { serializeFiltersToURL } from '@/components/Table/utils';
 
 type SetColumnFilterArgs<TData> = {
   columnKey: DataKey<TData>;
@@ -48,10 +49,7 @@ export const useSetColumnFilter = <TData>() => {
     persistTableState<ColumnFiltersState<TData>>({
       persistenceKey,
       searchParamKey: 'filters',
-      searchParamValue:
-        Object.keys(columnFilters).length > 0
-          ? JSON.stringify(columnFilters)
-          : undefined,
+      searchParamValue: serializeFiltersToURL(columnFilters),
       slice: 'columnFilters',
       valueSlice: columnFilters,
     });
