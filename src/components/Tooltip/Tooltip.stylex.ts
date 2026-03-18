@@ -15,11 +15,11 @@ import {
 import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const styles = stylex.create({
-  trigger: (anchorName) => ({
+  trigger: (anchorName: string) => ({
     anchorName,
     display: 'inline-flex',
   }),
-  tooltip: (positionAnchor) => ({
+  tooltip: (positionAnchor: string) => ({
     positionAnchor,
     inset: 'unset',
     margin: 0,
