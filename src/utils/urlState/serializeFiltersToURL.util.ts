@@ -1,23 +1,7 @@
+import type { ColumnFiltersState } from '@/components/Table';
 import type { ColumnFilter } from '@/types/filterOperators.types';
 
-import type { ColumnFiltersState } from '../Table.types';
-
-/** Short operator codes for URL serialization */
-const OPERATOR_TO_SHORT: Record<string, string> = {
-  after: 'af',
-  before: 'bf',
-  between: 'bw',
-  contains: 'ct',
-  endsWith: 'ew',
-  equals: 'eq',
-  greaterThan: 'gt',
-  greaterThanOrEqual: 'gte',
-  lessThan: 'lt',
-  lessThanOrEqual: 'lte',
-  notContains: 'nct',
-  notEquals: 'neq',
-  startsWith: 'sw',
-};
+import { OPERATOR_TO_SHORT } from '@/constants/filterOperators.constants';
 
 type CompactFilterValue = boolean | unknown[];
 

@@ -13,9 +13,8 @@ import { usePersistTableStateAction } from '@/components/Table/hooks';
 import {
   getEffectiveColumns,
   getNormalizedColummns,
-  serializeFiltersToURL,
-  serializeSortingToURL,
 } from '@/components/Table/utils';
+import { serializeFiltersToURL, serializeSortingToURL } from '@/utils/urlState';
 
 export type BatchTableSettingsUpdate<TData> = {
   columnFilters: ColumnFiltersState<TData>;

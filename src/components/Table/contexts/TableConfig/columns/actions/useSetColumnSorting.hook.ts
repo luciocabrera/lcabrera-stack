@@ -3,10 +3,8 @@ import type { Sorting } from '@/types/ui.types';
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { useTableDataContextValue } from '@/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
 import { usePersistTableStateAction } from '@/components/Table/hooks';
-import {
-  getNormalizedColummns,
-  serializeSortingToURL,
-} from '@/components/Table/utils';
+import { getNormalizedColummns } from '@/components/Table/utils';
+import { serializeSortingToURL } from '@/utils/urlState';
 
 export const useSetColumnSorting = <TData>() => {
   const { columnsStore, metaStore } = useTableConfigContextValue<TData>();

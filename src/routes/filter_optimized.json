@@ -1,0 +1,95 @@
+{
+  "priority": {
+    "type": "select",
+    "values": ["Low"],
+    "operator": "notEquals"
+  },
+  "order_status": {
+    "type": "select",
+    "values": ["Processing", "Pending"],
+    "operator": "equals"
+  },
+  "payment_date": {
+    "operator": "after",
+    "type": "date",
+    "value": "2010-01-01"
+  },
+  "order_number": {
+    "operator": "contains",
+    "type": "text",
+    "value": "000"
+  },
+  "customer_type": {
+    "operator": "notEquals",
+    "type": "text",
+    "value": "sin"
+  },
+  "total_amount": {
+    "operator": "greaterThanOrEqual",
+    "type": "number",
+    "value": 10000
+  },
+  "subtotal": {
+    "operator": "greaterThan",
+    "type": "number",
+    "value": 10500
+  },
+  "is_vip_customer": {
+    "type": "boolean",
+    "value": false
+  },
+  "payment_status": {
+    "type": "select",
+    "values": ["Pending", "Paid", "Failed", "Partially+Paid", "Refunded"],
+    "operator": "equals"
+  },
+  "is_rush_order": {
+    "type": "boolean",
+    "value": true
+  },
+  "is_gift": {
+    "type": "boolean",
+    "value": true
+  },
+  "shipping_country": {
+    "type": "select",
+    "values": [
+      "Argentina",
+      "Australia",
+      "Austria",
+      "Brazil",
+      "Canada",
+      "China",
+      "Colombia",
+      "Denmark",
+      "Finland",
+      "France",
+      "Germany",
+      "India",
+      "Ireland",
+      "Italy",
+      "Japan",
+      "Netherlands",
+      "New+Zealand",
+      "Norway",
+      "Poland",
+      "Singapore",
+      "South+Korea",
+      "Spain",
+      "Switzerland",
+      "United+States"
+    ],
+    "operator": "equals"
+  },
+  "customer_email": {
+    "operator": "contains",
+    "type": "text",
+    "value": "hotma"
+  },
+  "order_date": {
+    "operator": "between",
+    "type": "date",
+    "value": "1980-01-01",
+    "value2": "2026-01-01"
+  }
+}

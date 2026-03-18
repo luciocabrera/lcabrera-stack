@@ -12,10 +12,9 @@ import { applyPin } from '@/components/Table/TableSettingsDrawer/ColumnOrderSect
 import {
   getEffectiveColumns,
   getNormalizedColummns,
-  serializeFiltersToURL,
-  serializeSortingToURL,
   syncColumnOrderWithPinning,
 } from '@/components/Table/utils';
+import { serializeFiltersToURL, serializeSortingToURL } from '@/utils/urlState';
 
 export type BatchColumnSettingsUpdate = {
   /** Single column filter value */

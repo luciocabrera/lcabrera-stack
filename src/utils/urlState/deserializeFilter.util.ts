@@ -1,35 +1,25 @@
 import type { ColumnFilter } from '@/types/filterOperators.types';
 
-import type { ColumnFiltersState } from '../Table.types';
-
-/** Short code → full operator name */
-const SHORT_TO_OPERATOR = new Map([
-  ['af', 'after'],
-  ['bf', 'before'],
-  ['bw', 'between'],
-  ['ct', 'contains'],
-  ['eq', 'equals'],
-  ['ew', 'endsWith'],
-  ['gt', 'greaterThan'],
-  ['gte', 'greaterThanOrEqual'],
-  ['lt', 'lessThan'],
-  ['lte', 'lessThanOrEqual'],
-  ['nct', 'notContains'],
-  ['neq', 'notEquals'],
-  ['sw', 'startsWith'],
-]);
-
-const KNOWN_OPERATORS = new Set(SHORT_TO_OPERATOR.keys());
-
-const DATE_OPERATORS = new Set(['af', 'bf', 'bw', 'eq']);
-const TEXT_OPERATORS = new Set(['ct', 'eq', 'ew', 'nct', 'neq', 'sw']);
-const isDateValue = (v: unknown): boolean =>
-  typeof v === 'string' && /^\d{4}-\d{2}-\d{2}/.test(v);
+import {
+  DATE_OPERATOR_SHORT_CODES,
+  KNOWN_OPERATOR_SHORT_CODES,
+  SHORT_TO_OPERATOR,
+  TEXT_OPERATOR_SHORT_CODES,
+} from '@/constants/filterOperators.constants';
 
 const expandOperator = (short: string): string =>
   SHORT_TO_OPERATOR.get(short) ?? short;
 
-const deserializeFilter = (value: unknown): ColumnFilter | undefined => {
+const isDateValue = (v: unknown): boolean =>
+  typeof v === 'string' && /^\d{4}-\d{2}-\d{2}/.test(v);
+
+/**
+ * Deserialize a single compact filter value back to a ColumnFilter.
+ *
+ * Infers the filter type from the value shape and expands short operator codes.
+ * Returns undefined if the value cannot be parsed.
+ */
+export const deserializeFilter = (value: unknown): ColumnFilter | undefined => {
   // Boolean: bare true/false
   if (typeof value === 'boolean') {
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -52,7 +42,7 @@ const deserializeFilter = (value: unknown): ColumnFilter | undefined => {
   }
 
   // If first element is a known operator code → typed filter
-  if (typeof first === 'string' && KNOWN_OPERATORS.has(first)) {
+  if (typeof first === 'string' && KNOWN_OPERATOR_SHORT_CODES.has(first)) {
     const op = expandOperator(first);
 
     // Number filter: operator + numeric value(s)
@@ -72,7 +62,7 @@ const deserializeFilter = (value: unknown): ColumnFilter | undefined => {
     }
 
     // Date filter: date operators + date-like string
-    if (DATE_OPERATORS.has(first) && isDateValue(arr[1])) {
+    if (DATE_OPERATOR_SHORT_CODES.has(first) && isDateValue(arr[1])) {
       return first === 'bw'
         ? {
             operator: 'between',
@@ -88,7 +78,7 @@ const deserializeFilter = (value: unknown): ColumnFilter | undefined => {
     }
 
     // Text filter: text operators + string value
-    if (TEXT_OPERATORS.has(first) && typeof arr[1] === 'string') {
+    if (TEXT_OPERATOR_SHORT_CODES.has(first) && typeof arr[1] === 'string') {
       return {
         operator: op as 'contains',
         type: 'text',
@@ -103,27 +93,4 @@ const deserializeFilter = (value: unknown): ColumnFilter | undefined => {
   }
 
   return undefined;
-};
-
-/**
- * Deserialize a compact filters URL param back to ColumnFiltersState.
- *
- * Infers filter types from value shapes and expands short operator codes.
- */
-export const deserializeFiltersFromURL = <TData>(
-  param: string,
-): ColumnFiltersState<TData> => {
-  try {
-    const parsed = JSON.parse(param) as Record<string, unknown>;
-
-    const result = Object.fromEntries(
-      Object.entries(parsed)
-        .map(([columnKey, value]) => [columnKey, deserializeFilter(value)] as const)
-        .filter((entry): entry is [string, ColumnFilter] => entry[1] !== undefined),
-    );
-
-    return result as ColumnFiltersState<TData>;
-  } catch {
-    return {} as ColumnFiltersState<TData>;
-  }
 };

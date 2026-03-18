@@ -1,4 +1,4 @@
-import type { SortingState } from '../Table.types';
+import type { SortingState } from '@/components/Table';
 
 type CompactSorting = Record<string, 'asc' | 'desc'>;
 

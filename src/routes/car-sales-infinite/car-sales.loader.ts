@@ -3,9 +3,13 @@ import type { LoaderFunctionArgs } from 'react-router';
 import type { ColumnFiltersState, SortingState } from '@/components/Table';
 import type { CarSale, CarSalesResponse } from '@/services';
 
-import { deserializeFiltersFromURL, deserializeSortingFromURL, readPersistedStateFromCookie } from '@/components/Table/utils';
+import { readPersistedStateFromCookie } from '@/components/Table/utils';
 import { carSalesApi } from '@/services';
-import { readTableStateFromURL } from '@/utils/urlState';
+import {
+  deserializeFiltersFromURL,
+  deserializeSortingFromURL,
+  readTableStateFromURL,
+} from '@/utils/urlState';
 
 import { PERSISTENCE_KEY } from './CarSales.constants';
 

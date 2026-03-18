@@ -4,9 +4,11 @@ import type { SortingState } from '@/components/Table';
 import type { CarSale, CarSalesResponse } from '@/services';
 
 import { readPersistedStateFromCookie } from '@/components/Table/utils';
-import { deserializeSortingFromURL } from '@/components/Table/utils';
 import { carSalesApi } from '@/services';
-import { readTableStateFromURL } from '@/utils/urlState';
+import {
+  deserializeSortingFromURL,
+  readTableStateFromURL,
+} from '@/utils/urlState';
 
 import { PERSISTENCE_KEY } from './CarSales.constants';
 
