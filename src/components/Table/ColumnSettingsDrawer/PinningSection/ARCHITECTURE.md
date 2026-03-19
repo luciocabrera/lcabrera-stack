@@ -36,8 +36,10 @@ graph LR
   PSToolbar --> Icons2["EraserIcon, RefreshIcon"]
   PSToolbar --> useResetColumnPinning["useResetColumnPinning (action)"]
 
-  PS_stylex["PinningSection.stylex"] --> drawerSectionStyles
-  PST_stylex["PinningSectionToolbar.stylex"] --> drawerSectionStyles
+  PS --> PS_stylex["PinningSection.stylex"]
+  PSToolbar --> PST_stylex["PinningSectionToolbar.stylex"]
+  PS_stylex --> drawerSectionStyles
+  PST_stylex --> drawerSectionStyles
 ```
 
 ## Render Flow
