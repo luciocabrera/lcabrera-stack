@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 
 import { Button } from '@/components/Button';
 import { SidePanelSectionHeader } from '@/components/SidePanel';
@@ -21,23 +21,13 @@ export const AddFilterSection = ({
   onDropdownOpenChange,
   onExpandedFiltersChange,
 }: AddFilterSectionProps) => {
-  // === SELECTORS (subscribe to state) ===
   const columns = useGetColumns();
   const filters = useGetColumnFilters();
   const normalizedColumns = useGetNormalizedColumns();
 
-  // === ACTIONS (get mutation functions) ===
   const onFiltersChange = useSetColumnFilters();
   const [selectedColumn, setSelectedColumn] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
-  const handleOpenChange = useCallback(
-    (isOpen: boolean) => {
-      setIsDropdownOpen(isOpen);
-      onDropdownOpenChange?.(isOpen);
-    },
-    [onDropdownOpenChange],
-  );
 
   // Filter to only filterable columns
   const filterableColumns = columns.filter((col) => col.isFilterable !== false);
@@ -47,12 +37,16 @@ export const AddFilterSection = ({
     return hasActiveFilter ? `${col.label} ⚠️ (filtered)` : col.label;
   });
 
-  // Resolve selected column key to its label for VirtualSelect
   const selectedColumnLabel = getSelectedColumnLabel({
     filterableColumns,
     filters,
     selectedColumn,
   });
+
+  const handleOpenChange = (isOpen: boolean) => {
+    setIsDropdownOpen(isOpen);
+    onDropdownOpenChange?.(isOpen);
+  };
 
   const handleColumnSelect = (selectedLabels: string[]) => {
     const label = selectedLabels[0];
