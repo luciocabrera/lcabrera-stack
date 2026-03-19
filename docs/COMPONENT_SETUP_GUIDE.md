@@ -78,12 +78,12 @@ export const componentNameStyles = stylex.create({
   },
 
   // Variants (optional)
-  variant_primary: {
+  primary: {
     backgroundColor: colors.brandPrimary,
     color: colors.brandPrimaryText,
   },
 
-  variant_secondary: {
+  secondary: {
     backgroundColor: colors.brandSecondary,
     color: colors.brandSecondaryText,
   },
@@ -260,9 +260,8 @@ yarn tsc --noEmit
 
 ### Style Objects
 
-- Suffix with `Styles`: `cardHeaderStyles`
 - Use camelCase for the exported object
-- Use snake_case for variant keys: `variant_primary`, `size_lg`
+- Use camelCase for variant keys: `primary`, `lg`
 
 ## Common Patterns
 
@@ -299,9 +298,9 @@ export type ComponentNameProps = ComponentPropsWithoutRef<'button'> & {
 // ComponentName.stylex.ts
 export const styles = stylex.create({
   base: { /* base styles */ },
-  variant_primary: { /* primary variant */ },
-  variant_secondary: { /* secondary variant */ },
-  variant_tertiary: { /* tertiary variant */ },
+  primary: { /* primary variant */ },
+  secondary: { /* secondary variant */ },
+  tertiary: { /* tertiary variant */ },
 });
 
 // ComponentName.tsx
@@ -548,7 +547,7 @@ Use this checklist when creating a new component:
   - [ ] Define base styles
   - [ ] Create variants if needed
   - [ ] Export styles object
-- [ ] Create `.tsx` file with component implementation
+- [ ] Create `.component.tsx` file with component implementation
   - [ ] Import types and styles
   - [ ] Add `data-testid` attribute
   - [ ] Spread props correctly
@@ -558,9 +557,9 @@ Use this checklist when creating a new component:
   - [ ] Export types
 - [ ] Update parent `index.ts` if applicable
 - [ ] Run quality checks
-  - [ ] `yarn format`
-  - [ ] `yarn lint`
-  - [ ] `yarn tsc --noEmit`
+  - [ ] `format`
+  - [ ] `lint`
+  - [ ] `tsc --noEmit`
 - [ ] Test the component
   - [ ] Component renders correctly
   - [ ] Props are properly passed through

@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react';
 import type { VirtualListDataState } from '@/components/VirtualList';
 import type { SelectFilter } from '@/types/filterOperators.types';
 
-import { Tag } from '@/components/Tag';
 import { VirtualList } from '@/components/VirtualList';
 import { useClickOutside } from '@/hooks';
 
@@ -12,6 +11,7 @@ import type { VirtualSelectProps } from './VirtualSelect.types';
 
 import { countVisibleTags, getDropdownStyle } from './utils';
 import { styles } from './VirtualSelect.stylex';
+import { VirtualSelectTrigger } from './VirtualSelectTrigger';
 
 export const VirtualSelect = ({
   customStylex,
@@ -28,23 +28,17 @@ export const VirtualSelect = ({
   selected,
   shouldFillHeight = false,
 }: VirtualSelectProps) => {
-  const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
   const [visibleTagCount, setVisibleTagCount] = useState(selected.length);
+  const [isOpen, setIsOpen] = useState(false);
 
-  useEffect(() => {
-    onOpenChange?.(isOpen);
-  }, [isOpen, onOpenChange]);
-
-  const handleClose = () => {
-    setIsOpen(false);
-  };
-
-  useClickOutside({
-    onClickOutside: handleClose,
-    ref: containerRef,
-  });
+  const hasSelection = selected.length > 0;
+  const isListVisible = isAlwaysOpen ? true : isOpen;
+  const computedVisibleCount =
+    mode === 'multi' && hasSelection ? visibleTagCount : selected.length;
+  const overflowCount = selected.length - computedVisibleCount;
+  const visibleTags = selected.slice(0, computedVisibleCount);
 
   // Static mode: wrap options in a VirtualListDataState
   const effectiveDataState: VirtualListDataState = dataState ?? {
@@ -54,30 +48,9 @@ export const VirtualSelect = ({
     isLoadingMore: false,
   };
 
-  const handleToggleDropdown = () => {
-    setIsOpen((isCurrentlyOpen) => !isCurrentlyOpen);
-  };
-
-  const handleVirtualListChange = (filter?: SelectFilter) => {
-    const values = filter?.values ?? [];
-
-    if (mode === 'single') {
-      // Find the newly added value (not in current selected)
-      const newValue = values.find((v) => !selected.includes(v));
-      onChange(newValue ? [newValue] : []);
-      handleClose();
-      return;
-    }
-
-    onChange(values);
-  };
-
-  const handleRemoveTag = (option: string) => {
-    onChange(selected.filter((v) => v !== option));
-  };
-
-  const hasSelection = selected.length > 0;
-  const isListVisible = isAlwaysOpen ? true : isOpen;
+  useEffect(() => {
+    onOpenChange?.(isOpen);
+  }, [isOpen, onOpenChange]);
 
   // Subscribe to trigger size changes via ResizeObserver so tag overflow
   // is recalculated whenever the container resizes (e.g. tags added/removed).
@@ -102,10 +75,36 @@ export const VirtualSelect = ({
     };
   }, [mode, selected]);
 
-  const computedVisibleCount =
-    mode === 'multi' && hasSelection ? visibleTagCount : selected.length;
-  const overflowCount = selected.length - computedVisibleCount;
-  const visibleTags = selected.slice(0, computedVisibleCount);
+  const handleClose = () => {
+    setIsOpen(false);
+  };
+
+  useClickOutside({
+    onClickOutside: handleClose,
+    ref: containerRef,
+  });
+
+  const handleToggleDropdown = () => {
+    setIsOpen((isCurrentlyOpen) => !isCurrentlyOpen);
+  };
+
+  const handleVirtualListChange = (filter?: SelectFilter) => {
+    const values = filter?.values ?? [];
+
+    if (mode === 'single') {
+      // Find the newly added value (not in current selected)
+      const newValue = values.find((v) => !selected.includes(v));
+      onChange(newValue ? [newValue] : []);
+      handleClose();
+      return;
+    }
+
+    onChange(values);
+  };
+
+  const handleRemoveTag = (option: string) => {
+    onChange(selected.filter((v) => v !== option));
+  };
 
   return (
     <div
@@ -115,52 +114,18 @@ export const VirtualSelect = ({
         shouldFillHeight ? styles.containerFill : undefined,
       )}
     >
-      {/* Trigger / input area */}
-      <div
-        aria-expanded={isOpen}
-        aria-haspopup='listbox'
-        onClick={isAlwaysOpen ? undefined : handleToggleDropdown}
-        ref={triggerRef}
-        role='combobox'
-        tabIndex={isAlwaysOpen ? undefined : 0}
-        {...stylex.props(
-          styles.trigger,
-          isOpen && styles.triggerOpen,
-          mode === 'multi' && styles.triggerClamped,
-          isAlwaysOpen && styles.triggerStatic,
-        )}
-      >
-        {hasSelection ? (
-          mode === 'single' ? (
-            <span {...stylex.props(styles.triggerLabel)}>{selected[0]}</span>
-          ) : (
-            <>
-              {visibleTags.map((value) => (
-                <Tag
-                  key={value}
-                  label={value}
-                  onRemove={() => {
-                    handleRemoveTag(value);
-                  }}
-                />
-              ))}
-              {overflowCount > 0 && (
-                <span data-overflow {...stylex.props(styles.overflowTag)}>
-                  +{overflowCount} more
-                </span>
-              )}
-            </>
-          )
-        ) : (
-          <span {...stylex.props(styles.triggerPlaceholder)}>
-            {placeholder}
-          </span>
-        )}
-        {!isAlwaysOpen && (
-          <span data-chevron {...stylex.props(styles.chevron(isOpen))} />
-        )}
-      </div>
-
+      <VirtualSelectTrigger
+        isAlwaysOpen={isAlwaysOpen}
+        isOpen={isOpen}
+        mode={mode}
+        onRemoveTag={handleRemoveTag}
+        onToggle={handleToggleDropdown}
+        overflowCount={overflowCount}
+        placeholder={placeholder}
+        selected={selected}
+        triggerRef={triggerRef}
+        visibleTags={visibleTags}
+      />
       {/* Dropdown */}
       {isListVisible && (
         <div

@@ -1,4 +1,4 @@
-import { TRIGGER_MAX_HEIGHT } from '../VirtualSelect.stylex';
+import { TRIGGER_MAX_HEIGHT } from '../VirtualSelectTrigger';
 
 export type CountVisibleTagsArgs = {
   totalCount: number;
