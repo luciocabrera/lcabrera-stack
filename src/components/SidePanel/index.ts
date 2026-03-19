@@ -2,6 +2,7 @@ export { SidePanel } from './SidePanel.component';
 export { SidePanelBody } from './SidePanelBody';
 export { SidePanelFooter } from './SidePanelFooter';
 export { SidePanelHeader } from './SidePanelHeader';
+export { SidePanelHeaderToolbar } from './SidePanelHeaderToolbar';
 export { SidePanelSection } from './SidePanelSection';
 export { SidePanelSectionHeader } from './SidePanelSectionHeader';
 export { SidePanelSectionMain } from './SidePanelSectionMain';

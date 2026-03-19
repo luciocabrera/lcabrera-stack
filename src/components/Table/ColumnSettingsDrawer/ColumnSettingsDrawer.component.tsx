@@ -3,23 +3,19 @@ import { useState } from 'react';
 import type { TabItem } from '@/components/Tabs';
 
 import { Button } from '@/components/Button';
-import {
-  MenuCloseIcon,
-  PinIcon,
-  PinOffIcon,
-  SettingsIcon,
-} from '@/components/Icons';
+import { SettingsIcon } from '@/components/Icons';
 import {
   SidePanel,
   SidePanelBody,
   SidePanelFooter,
   SidePanelHeader,
+  SidePanelHeaderToolbar,
   SidePanelTitle,
 } from '@/components/SidePanel';
 import { useGetNormalizedColumn } from '@/components/Table/contexts/TableConfig/columns/selectors';
 import { useTableWrapperRef } from '@/components/Table/contexts/TableWrapper';
 import { Tabs } from '@/components/Tabs';
-import { ICON_SIZE_LG, ICON_SIZE_MD } from '@/design-system/constants';
+import { ICON_SIZE_LG } from '@/design-system/constants';
 import { useRenderTracker } from '@/utils/performance';
 
 import type { ColumnSettingsDrawerProps } from './ColumnSettingsDrawer.types';
@@ -47,7 +43,6 @@ export const ColumnSettingsDrawer = <TData extends Record<string, unknown>>({
 
   const [isPinned, setIsPinned] = useState(false);
 
-  const pinButtonTitle = isPinned ? 'Unpin drawer' : 'Pin drawer';
   const isFilterable = column.isFilterable !== false;
   const isSortable = column.isSortable !== false;
   const isStatic = column.isStatic === true;
@@ -119,30 +114,11 @@ export const ColumnSettingsDrawer = <TData extends Record<string, unknown>>({
     >
       <SidePanelHeader
         actions={
-          <>
-            <Button
-              aria-label={pinButtonTitle}
-              color='ghost'
-              icon={
-                isPinned ? (
-                  <PinIcon size={ICON_SIZE_MD} />
-                ) : (
-                  <PinOffIcon size={ICON_SIZE_MD} />
-                )
-              }
-              onClick={handleTogglePin}
-              size='mini'
-              title={pinButtonTitle}
-            />
-            <Button
-              aria-label='Close column drawer'
-              color='ghost'
-              icon={<MenuCloseIcon size={ICON_SIZE_MD} />}
-              onClick={handleCancel}
-              size='mini'
-              title='Close'
-            />
-          </>
+          <SidePanelHeaderToolbar
+            isPinned={isPinned}
+            onClose={handleCancel}
+            onTogglePin={handleTogglePin}
+          />
         }
       >
         <SidePanelTitle icon={<SettingsIcon size={ICON_SIZE_LG} />}>

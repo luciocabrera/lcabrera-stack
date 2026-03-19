@@ -3,21 +3,17 @@ import { useState } from 'react';
 import type { TabItem } from '@/components/Tabs';
 
 import { Button } from '@/components/Button';
-import {
-  MenuCloseIcon,
-  PinIcon,
-  PinOffIcon,
-  SettingsIcon,
-} from '@/components/Icons';
+import { SettingsIcon } from '@/components/Icons';
 import {
   SidePanel,
   SidePanelBody,
   SidePanelFooter,
   SidePanelHeader,
+  SidePanelHeaderToolbar,
   SidePanelTitle,
 } from '@/components/SidePanel';
 import { Tabs } from '@/components/Tabs';
-import { ICON_SIZE_LG, ICON_SIZE_MD } from '@/design-system/constants';
+import { ICON_SIZE_LG } from '@/design-system/constants';
 
 import { useToogleTableIsTableSettingsOpen } from '../contexts/TableConfig/meta/actions';
 import { ColumnOrderSection } from './ColumnOrderSection';
@@ -38,8 +34,6 @@ export const TableSettingsDrawer = () => {
   const [isPinned, setIsPinned] = useState(false);
 
   const areFiltersValid = true; // TODO: implement filter validation
-  const pinButtonTitle = isPinned ? 'Unpin drawer' : 'Pin drawer';
-
   const acceptButtonTitle = 'Please fix invalid filters before accepting';
 
   const handleAccept = () => {
@@ -106,30 +100,11 @@ export const TableSettingsDrawer = () => {
     >
       <SidePanelHeader
         actions={
-          <>
-            <Button
-              aria-label={pinButtonTitle}
-              color='ghost'
-              icon={
-                isPinned ? (
-                  <PinIcon size={ICON_SIZE_MD} />
-                ) : (
-                  <PinOffIcon size={ICON_SIZE_MD} />
-                )
-              }
-              onClick={handleTogglePin}
-              size='mini'
-              title={pinButtonTitle}
-            />
-            <Button
-              aria-label='Close drawer'
-              color='ghost'
-              icon={<MenuCloseIcon size={ICON_SIZE_MD} />}
-              onClick={handleCancel}
-              size='mini'
-              title='Close'
-            />
-          </>
+          <SidePanelHeaderToolbar
+            isPinned={isPinned}
+            onClose={handleCancel}
+            onTogglePin={handleTogglePin}
+          />
         }
       >
         <SidePanelTitle icon={<SettingsIcon size={ICON_SIZE_LG} />}>

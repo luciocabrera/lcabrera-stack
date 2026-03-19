@@ -15,6 +15,11 @@ SidePanel/
 │   ├── SidePanelHeader.types.tsx     → extends div + actions?: ReactNode
 │   └── SidePanelHeader.stylex.ts
 │
+├── SidePanelHeaderToolbar/           → Reusable pin + close buttons for drawer headers
+│   ├── index.ts
+│   ├── SidePanelHeaderToolbar.component.tsx
+│   └── SidePanelHeaderToolbar.types.ts → isPinned, onClose, onTogglePin
+│
 ├── SidePanelTitle/                   → h2 heading with optional icon
 │   ├── index.ts
 │   ├── SidePanelTitle.component.tsx
@@ -68,6 +73,9 @@ graph LR
 
   SidePanel.stylex --> base.stylex
   SidePanel.stylex --> colors.stylex
+
+  SidePanelHeaderToolbar --> Button
+  SidePanelHeaderToolbar --> Icons["PinIcon / PinOffIcon / MenuCloseIcon"]
 
   SidePanelHeader --> SidePanelHeader.stylex
   SidePanelHeader.stylex --> base.stylex
@@ -190,6 +198,7 @@ graph LR
 | Component                 | HTML Element | Extra Props                            | Key Styles                                                      |
 | ------------------------- | ------------ | -------------------------------------- | --------------------------------------------------------------- |
 | `SidePanelHeader`         | `div`        | `actions?: ReactNode`                  | `padding: lg`, bottom border, flex row with actions             |
+| `SidePanelHeaderToolbar`  | fragment     | `isPinned`, `onClose`, `onTogglePin`   | No styles — composes Button + Icons                             |
 | `SidePanelTitle`          | `h2`         | `icon?: ReactNode`                     | `fontSize: xl`, `fontWeight: semibold`, flex with icon          |
 | `SidePanelBody`           | `div`        | —                                      | `flex: 1`, `overflowY: auto`, thin scrollbar                    |
 | `SidePanelFooter`         | `div`        | —                                      | `padding: sm`, top border, flex row                             |
@@ -206,6 +215,7 @@ graph TD
   SidePanel --> SidePanelBody
   SidePanel --> SidePanelFooter
 
+  SidePanelHeader --> SidePanelHeaderToolbar
   SidePanelHeader --> SidePanelTitle
 
   SidePanelBody --> SidePanelSectionOverlay
