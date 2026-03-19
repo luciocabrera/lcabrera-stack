@@ -918,7 +918,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 // Component
-import { Form } from 'react-router-dom';
+import { Form } from 'react-router';
 
 export const CreateUserForm = () => {
   const navigation = useNavigation();
@@ -1384,7 +1384,7 @@ ESLint must enforce this order with `eslint-plugin-import`:
 ```typescript
 // ✅ Correct order
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 import * as stylex from '@stylexjs/stylex';
 import { z } from 'zod';
