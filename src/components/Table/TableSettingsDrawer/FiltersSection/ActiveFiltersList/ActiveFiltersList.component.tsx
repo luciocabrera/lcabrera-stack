@@ -17,7 +17,7 @@ import type {
 
 import { useSetColumnFilters } from '../../TableDrawerContext/actions';
 import { useGetColumnFilters } from '../../TableDrawerContext/selectors';
-import { FiltersSectionFooter } from '../FiltersSectionFooter';
+import { FiltersSectionToolbar } from '../FiltersSectionToolbar';
 import { validateFilter } from '../validateFilter.util';
 import { styles } from './ActiveFiltersList.stylex';
 
@@ -80,7 +80,7 @@ export const ActiveFiltersList = ({
     <div {...stylex.props(styles.container)}>
       <SidePanelSectionHeader
         title={`Active Filters (${filterEntries.length})`}
-        toolbar={<FiltersSectionFooter variant='toolbar' />}
+        toolbar={<FiltersSectionToolbar variant='toolbar' />}
       />
       {hasFilters ? (
         <div {...stylex.props(styles.filtersList)}>

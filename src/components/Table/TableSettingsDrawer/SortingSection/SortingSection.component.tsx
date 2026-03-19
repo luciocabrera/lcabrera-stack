@@ -9,7 +9,7 @@ import type { SortingSectionProps } from './SortingSection.types';
 
 import { ActiveSortList } from './ActiveSortList';
 import { AddSortSection } from './AddSortSection';
-import { SortingSectionFooter } from './SortingSectionFooter';
+import { SortingSectionToolbar } from './SortingSectionToolbar';
 
 export const SortingSection = ({ ...props }: SortingSectionProps) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -20,7 +20,7 @@ export const SortingSection = ({ ...props }: SortingSectionProps) => {
 
       <SidePanelSectionOverlay isOpen={isDropdownOpen}>
         <ActiveSortList />
-        <SortingSectionFooter />
+        <SortingSectionToolbar />
       </SidePanelSectionOverlay>
     </SidePanelSectionMain>
   );

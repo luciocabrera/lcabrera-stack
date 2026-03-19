@@ -4,7 +4,7 @@ import { Button } from '@/components/Button';
 import { EraserIcon, ListOrderedIcon, RefreshIcon } from '@/components/Icons';
 import { ICON_SIZE_MD, ICON_SIZE_SM } from '@/design-system/constants';
 
-import type { SortingSectionFooterProps } from './SortingSectionFooter.types';
+import type { SortingSectionToolbarProps } from './SortingSectionToolbar.types';
 
 import {
   useClearSorting,
@@ -12,11 +12,11 @@ import {
   useSortByColumnOrder,
 } from '../../TableDrawerContext/actions';
 import { useGetColumnsSorting } from '../../TableDrawerContext/selectors';
-import { styles } from './SortingSectionFooter.stylex';
+import { styles } from './SortingSectionToolbar.stylex';
 
-export const SortingSectionFooter = ({
+export const SortingSectionToolbar = ({
   variant = 'footer',
-}: SortingSectionFooterProps) => {
+}: SortingSectionToolbarProps) => {
   const sorting = useGetColumnsSorting();
 
   const sortByColumnOrder = useSortByColumnOrder();

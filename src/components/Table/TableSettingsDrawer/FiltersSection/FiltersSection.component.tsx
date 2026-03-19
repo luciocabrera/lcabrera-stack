@@ -8,7 +8,7 @@ import {
 import { useSetColumnFilters } from '../TableDrawerContext/actions';
 import { ActiveFiltersList } from './ActiveFiltersList';
 import { AddFilterSection } from './AddFilterSection';
-import { FiltersSectionFooter } from './FiltersSectionFooter';
+import { FiltersSectionToolbar } from './FiltersSectionToolbar';
 
 /**
  * Orchestrator component for the filters section.
@@ -41,7 +41,7 @@ export const FiltersSection = () => {
           expandedFilters={expandedFilters}
           onExpandedFiltersChange={setExpandedFilters}
         />
-        <FiltersSectionFooter onClearAll={handleClearLocalState} />
+        <FiltersSectionToolbar onClearAll={handleClearLocalState} />
       </SidePanelSectionOverlay>
     </SidePanelSectionMain>
   );

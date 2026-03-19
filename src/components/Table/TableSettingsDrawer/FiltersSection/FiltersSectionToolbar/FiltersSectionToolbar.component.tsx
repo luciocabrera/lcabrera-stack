@@ -4,19 +4,19 @@ import { Button } from '@/components/Button';
 import { EraserIcon, RefreshIcon } from '@/components/Icons';
 import { ICON_SIZE_MD, ICON_SIZE_SM } from '@/design-system/constants';
 
-import type { FiltersSectionFooterProps } from './FiltersSectionFooter.types';
+import type { FiltersSectionToolbarProps } from './FiltersSectionToolbar.types';
 
 import {
   useClearFilters,
   useResetFilters,
 } from '../../TableDrawerContext/actions';
 import { useGetColumnFilters } from '../../TableDrawerContext/selectors';
-import { styles } from './FiltersSectionFooter.stylex';
+import { styles } from './FiltersSectionToolbar.stylex';
 
-export const FiltersSectionFooter = ({
+export const FiltersSectionToolbar = ({
   onClearAll,
   variant = 'footer',
-}: FiltersSectionFooterProps) => {
+}: FiltersSectionToolbarProps) => {
   const filters = useGetColumnFilters();
 
   const clearFilters = useClearFilters();
@@ -61,4 +61,4 @@ export const FiltersSectionFooter = ({
   );
 };
 
-FiltersSectionFooter.displayName = 'FiltersSectionFooter';
+FiltersSectionToolbar.displayName = 'FiltersSectionToolbar';

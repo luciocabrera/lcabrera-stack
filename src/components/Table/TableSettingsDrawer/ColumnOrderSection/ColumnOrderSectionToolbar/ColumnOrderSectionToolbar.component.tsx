@@ -13,14 +13,14 @@ import {
 } from '@/components/Table/TableSettingsDrawer/TableDrawerContext/selectors';
 import { ICON_SIZE_MD, ICON_SIZE_SM } from '@/design-system/constants';
 
-import type { ColumnOrderSectionFooterProps } from './ColumnOrderSectionFooter.types';
+import type { ColumnOrderSectionToolbarProps } from './ColumnOrderSectionToolbar.types';
 
 import { useOrderBySorting } from '../ColumnOrderSectionContext/actions';
-import { styles } from './ColumnOrderSectionFooter.stylex';
+import { styles } from './ColumnOrderSectionToolbar.stylex';
 
-export const ColumnOrderSectionFooter = ({
+export const ColumnOrderSectionToolbar = ({
   variant = 'footer',
-}: ColumnOrderSectionFooterProps) => {
+}: ColumnOrderSectionToolbarProps) => {
   const sorting = useGetColumnsSorting();
   const pinning = useGetColumnPinning();
   const visibility = useGetColumnVisibility();

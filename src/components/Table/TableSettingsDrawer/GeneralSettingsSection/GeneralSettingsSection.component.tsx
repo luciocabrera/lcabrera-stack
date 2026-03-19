@@ -22,9 +22,9 @@ import type {
   WidthPreset,
 } from './GeneralSettingsSection.types';
 
-import { ColumnOrderSectionFooter } from '../ColumnOrderSection/ColumnOrderSectionFooter';
-import { FiltersSectionFooter } from '../FiltersSection/FiltersSectionFooter';
-import { SortingSectionFooter } from '../SortingSection/SortingSectionFooter';
+import { ColumnOrderSectionToolbar } from '../ColumnOrderSection/ColumnOrderSectionToolbar';
+import { FiltersSectionToolbar } from '../FiltersSection/FiltersSectionToolbar';
+import { SortingSectionToolbar } from '../SortingSection/SortingSectionToolbar';
 import {
   useClearAllSettings,
   useResetTableSettings,
@@ -137,17 +137,17 @@ export const GeneralSettingsSection = ({
 
       <SidePanelSection>
         <SidePanelSectionHeader title='Filters' />
-        <FiltersSectionFooter />
+        <FiltersSectionToolbar />
       </SidePanelSection>
 
       <SidePanelSection>
         <SidePanelSectionHeader title='Sorting' />
-        <SortingSectionFooter />
+        <SortingSectionToolbar />
       </SidePanelSection>
 
       <SidePanelSection>
         <SidePanelSectionHeader title='Columns' />
-        <ColumnOrderSectionFooter />
+        <ColumnOrderSectionToolbar />
       </SidePanelSection>
 
       <SidePanelSection>

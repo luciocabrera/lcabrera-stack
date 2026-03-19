@@ -35,7 +35,7 @@ import {
   useGetPinSideModal,
   useGetUnpinConflictModal,
 } from './ColumnOrderSectionContext/selectors';
-import { ColumnOrderSectionFooter } from './ColumnOrderSectionFooter';
+import { ColumnOrderSectionToolbar } from './ColumnOrderSectionToolbar';
 import { OrderConflictModal } from './OrderConflictModal';
 import { PinConflictModal } from './PinConflictModal';
 import { UnpinConflictModal } from './UnpinConflictModal';
@@ -107,11 +107,11 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
     <SidePanelSectionMain {...props}>
       <SidePanelSectionHeader
         title={`Column Order & Visibility (${allOrderedColumns.length - columnVisibility.size}/${allOrderedColumns.length})`}
-        toolbar={<ColumnOrderSectionFooter variant='toolbar' />}
+        toolbar={<ColumnOrderSectionToolbar variant='toolbar' />}
       />
       <DraggableList items={draggableItems} onOrderChange={reorderColumns} />
 
-      <ColumnOrderSectionFooter />
+      <ColumnOrderSectionToolbar />
       <PinSideModal
         columnLabel={pinSideModal.columnLabel}
         isOpen={pinSideModal.isOpen}

@@ -18,7 +18,7 @@ import type { SortItem } from '../SortingSection.types';
 import { useSetColumnsSortings } from '../../TableDrawerContext/actions';
 import { useGetColumnsSorting } from '../../TableDrawerContext/selectors';
 import { styles } from './ActiveSortList.stylex';
-import { SortingSectionFooter } from '../SortingSectionFooter';
+import { SortingSectionToolbar } from '../SortingSectionToolbar';
 
 export const ActiveSortList = () => {
   const columns = useGetColumns();
@@ -102,7 +102,7 @@ export const ActiveSortList = () => {
     <SidePanelSection>
       <SidePanelSectionHeader
         title={`Sort Order (${sortItems.length})`}
-        toolbar={<SortingSectionFooter variant='toolbar' />}
+        toolbar={<SortingSectionToolbar variant='toolbar' />}
       />
       {sortItems.length === 0 ? (
         <InfoBox>

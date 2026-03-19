@@ -16,11 +16,13 @@ export const Tooltip = ({
   const triggerRef = useRef<HTMLSpanElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const hideTimeoutRef = useRef<number>(0);
+
   const [isVisible, setIsVisible] = useState(false);
   const [arrowOffset, setArrowOffset] = useState<number | undefined>();
+
   const anchorName = `--tooltip-${id.replaceAll(':', '')}`;
 
-  const show = () => {
+  const handleShow = () => {
     clearTimeout(hideTimeoutRef.current);
     tooltipRef.current?.showPopover();
     requestAnimationFrame(() => {
@@ -41,7 +43,7 @@ export const Tooltip = ({
     });
   };
 
-  const hide = () => {
+  const handleHide = () => {
     setIsVisible(false);
     const timeoutId = globalThis.setTimeout(() => {
       tooltipRef.current?.hidePopover();
@@ -53,10 +55,10 @@ export const Tooltip = ({
     <>
       <span
         aria-describedby={id}
-        onBlur={hide}
-        onFocus={show}
-        onMouseEnter={show}
-        onMouseLeave={hide}
+        onBlur={handleHide}
+        onFocus={handleShow}
+        onMouseEnter={handleShow}
+        onMouseLeave={handleHide}
         popoverTarget={id}
         ref={triggerRef}
         {...stylex.props(styles.trigger(anchorName))}
