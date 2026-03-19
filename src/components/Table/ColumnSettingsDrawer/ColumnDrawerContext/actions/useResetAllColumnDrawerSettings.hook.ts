@@ -3,13 +3,14 @@ import { useTableConfigContextValue } from '@/components/Table/contexts/TableCon
 import { getColumnPinSide } from '@/components/Table/utils';
 
 /**
- * Resets all column drawer settings from the current table state without closing the drawer.
+ * Resets all column drawer settings from the current table state.
+ * Optionally closes the drawer when shouldCloseDrawer is true.
  */
 export const useResetAllColumnDrawerSettings = () => {
-  const { columnsStore } = useTableConfigContextValue();
+  const { columnsStore, metaStore } = useTableConfigContextValue();
   const { columnStore } = useColumnDrawerContextValue();
 
-  return () => {
+  return (shouldCloseDrawer?: boolean) => {
     const columnKey = columnStore.get()?.columnKey;
 
     if (!columnKey) return;
@@ -44,5 +45,9 @@ export const useResetAllColumnDrawerSettings = () => {
       columnSizing,
       sorting,
     });
+
+    if (shouldCloseDrawer) {
+      metaStore.set({ isColumnSettingsOpen: false });
+    }
   };
 };

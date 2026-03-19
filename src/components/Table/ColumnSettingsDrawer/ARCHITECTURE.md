@@ -15,12 +15,10 @@ ColumnSettingsDrawer/
 │   ├── useColumnDrawerContextValue.hook.ts → use(ColumnDrawerContext)
 │   ├── useColumnsStore.hook.ts            → useSyncExternalStore + selector
 │   │
-│   ├── actions/                           → 11 action hooks (set/reset/clear)
+│   ├── actions/                           → 9 action hooks (set/reset/clear)
 │   │   ├── useBatchSetColumnDrawerSettings  → Push all drawer state to table
-│   │   ├── useClearAllColumnDrawerSettings  → Clear all fields (stay open)
-│   │   ├── useClearAllColumnSettings        → Clear all fields + close drawer
-│   │   ├── useResetAllColumnDrawerSettings  → Reset all from table (stay open)
-│   │   ├── useResetToTableState             → Reset all from table + close drawer
+│   │   ├── useClearAllColumnDrawerSettings  → Clear all fields (optionally close drawer)
+│   │   ├── useResetAllColumnDrawerSettings  → Reset all from table (optionally close drawer)
 │   │   ├── useResetColumnFilter             → Reset filter from table
 │   │   ├── useResetColumnPinning            → Reset pinning from table
 │   │   ├── useResetColumnSorting            → Reset sorting from table
@@ -131,7 +129,7 @@ graph TD
 ## State Management: ColumnDrawerContext
 
 Store-based context pattern using `useStore` + `useSyncExternalStore` with
-11 action hooks and 3 selector hooks.
+9 action hooks and 3 selector hooks.
 
 See [ColumnDrawerContext/ARCHITECTURE.md](ColumnDrawerContext/ARCHITECTURE.md) for full details.
 
@@ -139,8 +137,8 @@ See [ColumnDrawerContext/ARCHITECTURE.md](ColumnDrawerContext/ARCHITECTURE.md) f
 
 - **Accept**: `useBatchSetColumnDrawerSettings` reads all drawer state and pushes it to
   `TableConfigContext` via `useBatchSetColumnSettings`
-- **Cancel**: `useResetToTableState` reads current table state back into the drawer store
-  and closes the drawer via `metaStore.set({ isColumnSettingsOpen: false })`
+- **Cancel**: `useResetAllColumnDrawerSettings(true)` reads current table state back into
+  the drawer store and closes the drawer via `metaStore.set({ isColumnSettingsOpen: false })`
 
 ## Tab Sections
 

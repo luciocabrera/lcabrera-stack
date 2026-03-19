@@ -21,16 +21,15 @@ export const SortingSectionToolbar = ({
   const resetColumnSorting = useResetColumnSorting();
 
   const hasSorting = sortDirection !== undefined;
-
-  const handleClear = () => {
-    setColumnSorting(undefined);
-  };
-
   const isToolbar = variant === 'toolbar';
   const buttonColor = isToolbar ? 'ghost' : 'outline';
   const buttonSize = isToolbar ? 'mini' : 'sm';
   const buttonWidth = isToolbar ? 'auto' : 'full';
   const iconSize = isToolbar ? ICON_SIZE_SM : ICON_SIZE_MD;
+
+  const handleClear = () => {
+    setColumnSorting(undefined);
+  };
 
   return (
     <div {...stylex.props(isToolbar ? styles.toolbar : styles.container)}>

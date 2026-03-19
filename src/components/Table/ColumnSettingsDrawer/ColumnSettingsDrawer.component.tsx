@@ -22,7 +22,7 @@ import type { ColumnSettingsDrawerProps } from './ColumnSettingsDrawer.types';
 
 import {
   useBatchSetColumnDrawerSettings,
-  useResetToTableState,
+  useResetAllColumnDrawerSettings,
 } from './ColumnDrawerContext/actions';
 import { DetailsSection } from './DetailsSection';
 import { FilterSection } from './FilterSection';
@@ -39,7 +39,7 @@ export const ColumnSettingsDrawer = <TData extends Record<string, unknown>>({
   const wrapperRef = useTableWrapperRef();
 
   const batchSetColumnDrawerSettings = useBatchSetColumnDrawerSettings();
-  const resetToTableState = useResetToTableState();
+  const resetAllColumnDrawerSettings = useResetAllColumnDrawerSettings();
 
   const [isPinned, setIsPinned] = useState(false);
 
@@ -94,7 +94,7 @@ export const ColumnSettingsDrawer = <TData extends Record<string, unknown>>({
   };
 
   const handleCancel = () => {
-    resetToTableState();
+    resetAllColumnDrawerSettings(true);
 
     if (isPinned) setIsPinned(false);
   };

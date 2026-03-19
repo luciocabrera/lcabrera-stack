@@ -13,12 +13,10 @@ ColumnDrawerContext/
 ├── useColumnDrawerContextValue.hook.ts    → use(ColumnDrawerContext)
 ├── useColumnsStore.hook.ts                → useSyncExternalStore + selector
 │
-├── actions/                               → 11 hooks that write to the store
+├── actions/                               → 9 hooks that write to the store
 │   ├── useBatchSetColumnDrawerSettings    → Push all drawer state to table
-│   ├── useClearAllColumnDrawerSettings    → Clear all fields (stay open)
-│   ├── useClearAllColumnSettings          → Clear all fields + close drawer
-│   ├── useResetAllColumnDrawerSettings    → Reset all from table (stay open)
-│   ├── useResetToTableState               → Reset all from table + close drawer
+│   ├── useClearAllColumnDrawerSettings    → Clear all fields (optionally close drawer)
+│   ├── useResetAllColumnDrawerSettings    → Reset all from table (optionally close drawer)
 │   ├── useResetColumnFilter               → Reset filter from table
 │   ├── useResetColumnPinning              → Reset pinning from table
 │   ├── useResetColumnSorting              → Reset sorting from table
@@ -95,20 +93,18 @@ graph TD
 Actions are hooks that return a callback. Each callback reads the store, validates
 `columnKey`, and calls `columnStore.set(partial)`.
 
-| Hook                              | Reads From             | Writes To     | Side Effect                                     |
-| --------------------------------- | ---------------------- | ------------- | ----------------------------------------------- |
-| `useSetColumnFilter`              | —                      | `columnStore` | —                                               |
-| `useSetColumnSizing`              | —                      | `columnStore` | —                                               |
-| `useSetColumnSorting`             | —                      | `columnStore` | —                                               |
-| `useSetColumnPinning`             | —                      | `columnStore` | —                                               |
-| `useClearAllColumnDrawerSettings` | `columnStore`          | `columnStore` | Sets all fields to `undefined`                  |
-| `useClearAllColumnSettings`       | `columnStore`          | `columnStore` | Also closes drawer via `metaStore`              |
-| `useResetColumnFilter`            | `columnsStore` (table) | `columnStore` | —                                               |
-| `useResetColumnPinning`           | `columnsStore` (table) | `columnStore` | —                                               |
-| `useResetColumnSorting`           | `columnsStore` (table) | `columnStore` | —                                               |
-| `useResetAllColumnDrawerSettings` | `columnsStore` (table) | `columnStore` | Resets all fields                               |
-| `useResetToTableState`            | `columnsStore` (table) | `columnStore` | Also closes drawer via `metaStore`              |
-| `useBatchSetColumnDrawerSettings` | `columnStore`          | —             | Pushes to table via `useBatchSetColumnSettings` |
+| Hook                              | Reads From             | Writes To     | Side Effect                                                   |
+| --------------------------------- | ---------------------- | ------------- | ------------------------------------------------------------- |
+| `useSetColumnFilter`              | —                      | `columnStore` | —                                                             |
+| `useSetColumnSizing`              | —                      | `columnStore` | —                                                             |
+| `useSetColumnSorting`             | —                      | `columnStore` | —                                                             |
+| `useSetColumnPinning`             | —                      | `columnStore` | —                                                             |
+| `useClearAllColumnDrawerSettings` | `columnStore`          | `columnStore` | Sets all to `undefined`; closes drawer if `shouldCloseDrawer` |
+| `useResetColumnFilter`            | `columnsStore` (table) | `columnStore` | —                                                             |
+| `useResetColumnPinning`           | `columnsStore` (table) | `columnStore` | —                                                             |
+| `useResetColumnSorting`           | `columnsStore` (table) | `columnStore` | —                                                             |
+| `useResetAllColumnDrawerSettings` | `columnsStore` (table) | `columnStore` | Resets all fields; closes drawer if `shouldCloseDrawer`       |
+| `useBatchSetColumnDrawerSettings` | `columnStore`          | —             | Pushes to table via `useBatchSetColumnSettings`               |
 
 ### Action Categories
 
@@ -122,16 +118,14 @@ graph TD
   end
 
   subgraph "Clear (set to undefined)"
-    C1["useClearAllColumnDrawerSettings"]
-    C2["useClearAllColumnSettings"]
+    C1["useClearAllColumnDrawerSettings(shouldCloseDrawer?)"]
   end
 
   subgraph "Reset (read table → write store)"
     R1["useResetColumnFilter"]
     R2["useResetColumnPinning"]
     R3["useResetColumnSorting"]
-    R4["useResetAllColumnDrawerSettings"]
-    R5["useResetToTableState"]
+    R4["useResetAllColumnDrawerSettings(shouldCloseDrawer?)"]
   end
 
   subgraph "Commit"
@@ -139,12 +133,12 @@ graph TD
   end
 
   S1 & S2 & S3 & S4 -->|"columnStore.set()"| DS["Drawer Store"]
-  C1 & C2 -->|"columnStore.set(all undefined)"| DS
-  R1 & R2 & R3 & R4 & R5 -->|"read table → columnStore.set()"| DS
+  C1 -->|"columnStore.set(all undefined)"| DS
+  R1 & R2 & R3 & R4 -->|"read table → columnStore.set()"| DS
   B1 -->|"read store → batchSetColumnSettings()"| TS["Table Store"]
 
-  C2 -->|"metaStore.set(close)"| Meta["metaStore"]
-  R5 -->|"metaStore.set(close)"| Meta
+  C1 -->|"if shouldCloseDrawer"| Meta["metaStore"]
+  R4 -->|"if shouldCloseDrawer"| Meta
 ```
 
 ## Selectors
@@ -160,13 +154,13 @@ Components only re-render when their selected slice changes.
 
 ## Consumers
 
-| Consumer               | Uses Actions                                    | Uses Selectors   |
-| ---------------------- | ----------------------------------------------- | ---------------- |
-| `GeneralSection`       | setColumnSizing, clearAll, resetAll             | —                |
-| `FilterSection`        | setColumnFilter                                 | getColumnFilter  |
-| `SortingSection`       | setColumnSorting                                | getColumnSorting |
-| `PinningSection`       | setColumnPinning                                | getColumnPinning |
-| `FilterToolbar`        | setColumnFilter, resetColumnFilter              | getColumnFilter  |
-| `SortingToolbar`       | setColumnSorting, resetColumnSorting            | getColumnSorting |
-| `PinningToolbar`       | setColumnPinning, resetColumnPinning            | getColumnPinning |
-| `ColumnSettingsDrawer` | batchSetColumnDrawerSettings, resetToTableState | —                |
+| Consumer               | Uses Actions                                                     | Uses Selectors   |
+| ---------------------- | ---------------------------------------------------------------- | ---------------- |
+| `GeneralSection`       | setColumnSizing, clearAll, resetAll                              | —                |
+| `FilterSection`        | setColumnFilter                                                  | getColumnFilter  |
+| `SortingSection`       | setColumnSorting                                                 | getColumnSorting |
+| `PinningSection`       | setColumnPinning                                                 | getColumnPinning |
+| `FilterToolbar`        | setColumnFilter, resetColumnFilter                               | getColumnFilter  |
+| `SortingToolbar`       | setColumnSorting, resetColumnSorting                             | getColumnSorting |
+| `PinningToolbar`       | setColumnPinning, resetColumnPinning                             | getColumnPinning |
+| `ColumnSettingsDrawer` | batchSetColumnDrawerSettings, resetAllColumnDrawerSettings(true) | —                |
