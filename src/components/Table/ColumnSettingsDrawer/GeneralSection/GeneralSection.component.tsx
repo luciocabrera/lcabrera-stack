@@ -31,16 +31,18 @@ export const GeneralSection = <TData,>({
   columnKey,
 }: GeneralSectionProps<TData>) => {
   const column = useGetNormalizedColumn<TData>(columnKey);
+
   const setColumnSizing = useSetColumnSizing();
   const clearAllSettings = useClearAllColumnDrawerSettings();
   const resetAllSettings = useResetAllColumnDrawerSettings();
 
-  const { maxWidth, minWidth } = column;
+  const [selectedPreset, setSelectedPreset] = useState<WidthPreset>();
 
+  const { maxWidth, minWidth } = column;
   const effectiveMinWidth = minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
   const effectiveMaxWidth = maxWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
-
-  const [selectedPreset, setSelectedPreset] = useState<WidthPreset>();
+  const hasMinWidth = column.minWidth !== undefined;
+  const hasMaxWidth = column.maxWidth !== undefined;
 
   const handleToggle = (preset: 'default' | 'max' | 'min') => {
     const newPreset = selectedPreset === preset ? undefined : preset;
@@ -69,9 +71,6 @@ export const GeneralSection = <TData,>({
       }
     }
   };
-
-  const hasMinWidth = column.minWidth !== undefined;
-  const hasMaxWidth = column.maxWidth !== undefined;
 
   return (
     <SidePanelSectionMain>

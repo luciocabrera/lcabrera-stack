@@ -21,16 +21,15 @@ export const PinningSectionToolbar = ({
   const resetColumnPinning = useResetColumnPinning();
 
   const hasPinning = columnPinning !== undefined;
-
-  const handleClear = () => {
-    setColumnPinning(undefined);
-  };
-
   const isToolbar = variant === 'toolbar';
   const buttonColor = isToolbar ? 'ghost' : 'outline';
   const buttonSize = isToolbar ? 'mini' : 'sm';
   const buttonWidth = isToolbar ? 'auto' : 'full';
   const iconSize = isToolbar ? ICON_SIZE_SM : ICON_SIZE_MD;
+
+  const handleClear = () => {
+    setColumnPinning(undefined);
+  };
 
   return (
     <div {...stylex.props(isToolbar ? styles.toolbar : styles.container)}>
