@@ -1,6 +1,7 @@
 import type {
   ColumnFiltersState,
   ColumnSizingState,
+  DataKey,
   TableColumnsState,
 } from '@/components/Table/Table.types';
 
@@ -18,7 +19,7 @@ export const getInitialColumnsState = <TData>({
   columnPinning = { left: [], right: [] },
   columns = [],
   columnSizing = {} as ColumnSizingState<TData>,
-  columnVisibility = new Set<string>(),
+  columnVisibility = new Set<DataKey<TData>>(),
   sorting = [],
 }: GetInitialTableStateArgs<TData>) => {
   const effectiveColumns = getEffectiveColumns<TData>({
