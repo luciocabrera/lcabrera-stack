@@ -17,20 +17,20 @@ export const FilterSectionToolbar = ({
   variant = 'footer',
 }: FilterSectionToolbarProps) => {
   const columnFilter = useGetColumnFilter();
+
   const setColumnFilter = useSetColumnFilter();
   const resetColumnFilter = useResetColumnFilter();
 
   const hasFilter = columnFilter !== undefined;
-
-  const handleClear = () => {
-    setColumnFilter(undefined);
-  };
-
   const isToolbar = variant === 'toolbar';
   const buttonColor = isToolbar ? 'ghost' : 'outline';
   const buttonSize = isToolbar ? 'mini' : 'sm';
   const buttonWidth = isToolbar ? 'auto' : 'full';
   const iconSize = isToolbar ? ICON_SIZE_SM : ICON_SIZE_MD;
+
+  const handleClear = () => {
+    setColumnFilter(undefined);
+  };
 
   return (
     <div {...stylex.props(isToolbar ? styles.toolbar : styles.container)}>
