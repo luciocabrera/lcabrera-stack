@@ -10,12 +10,7 @@ export const useClearAllColumnSettings = () => {
   return () => {
     const columnKey = columnStore.get()?.columnKey;
 
-    if (!columnKey) {
-      console.warn(
-        '[useClearAllColumnSettings] No columnKey found in column drawer store.',
-      );
-      return;
-    }
+    if (!columnKey) return;
 
     columnStore.set({
       columnFilter: undefined,

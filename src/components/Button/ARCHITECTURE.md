@@ -21,7 +21,7 @@ graph LR
   Button.types -.-> design-system.types
 
   Button.stylex --> commons.stylex
-  commons.stylex --> base.stylex
+  Button.stylex --> base.stylex
 ```
 
 ## Render Flow
