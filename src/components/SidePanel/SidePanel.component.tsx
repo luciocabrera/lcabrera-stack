@@ -18,7 +18,22 @@ export const SidePanel = ({
   ...props
 }: SidePanelProps) => {
   const dialogRef = useRef<HTMLDialogElement>(null);
+
   const shouldShowBackdrop = shouldShowOverlay && !isPinned;
+  const panelStyles = stylex.props(
+    sidePanelStyles.base,
+    sidePanelStyles.size[size],
+    sidePanelStyles.position[position],
+    isOpen || isPinned
+      ? sidePanelStyles.position[position === 'left' ? 'leftOpen' : 'rightOpen']
+      : sidePanelStyles.position[
+          position === 'left' ? 'leftClosed' : 'rightClosed'
+        ],
+    shouldShowBackdrop
+      ? sidePanelStyles.withBackdrop
+      : sidePanelStyles.withoutBackdrop,
+    isPinned && sidePanelStyles.pinned,
+  );
 
   // Close dialog when switching to pinned mode
   useEffect(() => {
@@ -68,21 +83,6 @@ export const SidePanel = ({
       dialog.removeEventListener('close', handleClose);
     };
   }, [onClose, isPinned]);
-
-  const panelStyles = stylex.props(
-    sidePanelStyles.base,
-    sidePanelStyles.size[size],
-    sidePanelStyles.position[position],
-    isOpen || isPinned
-      ? sidePanelStyles.position[position === 'left' ? 'leftOpen' : 'rightOpen']
-      : sidePanelStyles.position[
-          position === 'left' ? 'leftClosed' : 'rightClosed'
-        ],
-    shouldShowBackdrop
-      ? sidePanelStyles.withBackdrop
-      : sidePanelStyles.withoutBackdrop,
-    isPinned && sidePanelStyles.pinned,
-  );
 
   const content = (
     <div {...stylex.props(sidePanelStyles.content)}>{children}</div>

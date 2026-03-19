@@ -67,7 +67,6 @@ export const styles = stylex.create({
       ':active': 'grabbing',
     },
     flexShrink: 0,
-    // fontFamily: 'monospace',
     fontSize: '1.25rem',
     lineHeight: 1,
   },
