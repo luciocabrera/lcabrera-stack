@@ -1,3 +1,454 @@
+# Project Instructions — vite-react-compiler
+
+## 1. Project Overview
+
+This is a **React 19 + TypeScript + StyleX + React Router 7** application with SSR support, built using the **Vite+** unified toolchain (`vp` CLI). It demonstrates enterprise-grade patterns including a feature-rich data Table component with custom store-based state management, virtualization, infinite scroll, and granular subscriptions via `useSyncExternalStore`.
+
+### Tech Stack
+
+- **Runtime:** React 19 (with React Compiler via `babel-plugin-react-compiler`)
+- **Routing:** React Router 7 (with SSR, loaders, actions)
+- **Styling:** StyleX (`@stylexjs/stylex`) — exclusive, no CSS modules, no styled-components
+- **Toolchain:** Vite+ (`vp` CLI) wrapping Vite, Rolldown, Vitest, Oxlint, Oxfmt
+- **Language:** TypeScript (strict mode)
+- **Package Manager:** pnpm (managed through `vp`)
+
+---
+
+## 2. Source Structure
+
+```
+src/
+├── components/          # Reusable UI components (Button, Card, Modal, Table, etc.)
+│   └── Table/           # Enterprise data table with custom store architecture
+│       ├── contexts/    # Split context providers (TableConfig, TableData, FiltersData)
+│       ├── hooks/       # Table-specific hooks (resize, infinite scroll, persistence)
+│       ├── filters/     # Filter UI components
+│       └── [SubComponents]/  # Each sub-component in its own directory
+├── constants/           # App-level constants (api.constants.ts, filterOperators.constants.ts)
+├── contexts/            # App-level contexts (ThemeContext/)
+├── design-system/       # Design tokens, themes, constants
+│   ├── tokens/          # StyleX token definitions (base.stylex, colors.stylex)
+│   ├── themes/          # Theme variants
+│   └── constants/       # Design constants
+├── hooks/               # Shared hooks (useStore, useVirtualization, useTheme, useClickOutside)
+├── routes/              # React Router route modules (loaders, actions, components)
+│   ├── home/
+│   ├── car-sales/
+│   ├── car-sales-infinite/
+│   ├── enterprise-orders/
+│   ├── settings/
+│   └── api/             # API resource routes
+├── services/            # External API integrations (carSales.api.ts, enterpriseOrders.api.ts)
+├── types/               # Global type definitions
+├── utils/               # Shared utilities (formatters, storage, URL state, performance)
+├── root.tsx             # App root with providers
+├── routes.ts            # Route configuration
+└── entry.server.tsx     # SSR entry point
+```
+
+---
+
+## 3. Toolchain — Vite+ (`vp`)
+
+**Never use pnpm/npm/yarn directly.** All operations go through `vp`:
+
+| Task                 | Command                                |
+| -------------------- | -------------------------------------- |
+| Install dependencies | `vp install`                           |
+| Dev server           | `vp dev`                               |
+| Build for production | `vp build` (runs `react-router build`) |
+| Lint (with fix)      | `vp lint . --fix`                      |
+| Lint (check only)    | `vp lint .`                            |
+| Format               | `vp fmt .`                             |
+| Format check         | `vp fmt --check .`                     |
+| Type check           | `react-router typegen && tsc --noEmit` |
+| Run tests            | `vp test`                              |
+| Full validation      | `vp check` then `vp test`              |
+| Add a package        | `vp add <package>`                     |
+| Remove a package     | `vp remove <package>`                  |
+
+**Critical:** Import from `vite-plus` not `vite`/`vitest` directly. Example: `import { defineConfig } from 'vite-plus'` and `import { expect, test, vi } from 'vite-plus/test'`.
+
+### Agent Checklist
+
+- Run `vp install` after pulling changes and before starting work.
+- **Always verify zero linting errors and zero TypeScript errors before considering any task complete.** Run `vp lint .` and `react-router typegen && tsc --noEmit` (or `vp check`) after every change.
+- Run `vp check` and `vp test` to validate all changes before finishing.
+
+---
+
+## 4. TypeScript Standards
+
+### Strict Configuration
+
+The project enforces `strict: true` with additional flags: `noUncheckedIndexedAccess`, `noFallthroughCasesInSwitch`, `noUncheckedSideEffectImports`, `noUnusedLocals`, `noUnusedParameters`.
+
+### Mandatory Rules
+
+- **Always use `type`, never `interface`** — prevents declaration merging, supports unions/intersections.
+- **All type properties must be `readonly`** — enforces immutability at the type level.
+- **Use `ReadonlyArray<T>` for arrays in types** — prevents accidental mutation.
+- **Never use `any`** — use `unknown` with type guards instead.
+- **Never use `React.FC`** — use explicit arrow functions with typed props.
+
+### Function Parameters
+
+- **2+ params or likely-to-grow functions → use object parameters** with an `Args` suffix type.
+- **Single primitive/complex param → direct typing is acceptable.**
+
+```typescript
+// ✅ Object params with Args suffix
+type FormatCurrencyArgs = {
+  readonly amount: number;
+  readonly currency: string;
+};
+export const formatCurrency = ({ amount, currency }: FormatCurrencyArgs): string => { ... };
+
+// ✅ Single param
+export const formatDate = (date: Date): string => { ... };
+```
+
+### Naming Conventions for Types
+
+| Context         | Suffix              | Example              |
+| --------------- | ------------------- | -------------------- |
+| Function params | `Args`              | `CalculateTotalArgs` |
+| Component props | `Props`             | `ButtonProps`        |
+| Hook params     | `Args`              | `UseUserDataArgs`    |
+| Return types    | `Result` / `Return` | `FetchUserResult`    |
+
+### Discriminated Unions for State
+
+```typescript
+type FetchState<T> =
+  | { readonly status: 'idle' }
+  | { readonly status: 'loading' }
+  | { readonly status: 'success'; readonly data: T }
+  | { readonly status: 'error'; readonly error: Error };
+```
+
+### Branded Types for IDs
+
+```typescript
+type UserId = string & { readonly __brand: 'UserId' };
+```
+
+---
+
+## 5. Component Standards
+
+### Component File Structure (Bundle Pattern)
+
+Every component gets its own directory:
+
+```
+ComponentName/
+├── ComponentName.component.tsx           # Implementation
+├── ComponentName.types.ts      # Type definitions
+├── ComponentName.stylex.ts     # StyleX styles
+├── ComponentName.test.tsx      # Tests (colocated)
+└── index.ts                    # Barrel export (public API)
+```
+
+### File Naming Suffixes
+
+| Type      | Pattern                      | Example                     |
+| --------- | ---------------------------- | --------------------------- |
+| Component | `*.component.tsx`            | `LoginButton.component.tsx` |
+| Hook      | `*.hook.ts`                  | `useAuthStatus.hook.ts`     |
+| Utility   | `*.util.ts`                  | `dateFormatter.util.ts`     |
+| Service   | `*.service.ts` or `*.api.ts` | `userApi.service.ts`        |
+| Style     | `*.stylex.ts`                | `Card.stylex.ts`            |
+| Type      | `*.types.ts`                 | `Card.types.ts`             |
+| Test      | `*.test.tsx`                 | `Card.test.tsx`             |
+| Constant  | `*.constants.ts`             | `api.constants.ts`          |
+| Schema    | `*.schema.ts`                | `user.schema.ts`            |
+
+### Component Declaration
+
+```typescript
+type ButtonProps = {
+  readonly disabled?: boolean;
+  readonly label: string;
+  readonly onClick: () => void;
+};
+
+export const Button = ({ disabled = false, label, onClick }: ButtonProps) => {
+  return <button disabled={disabled} onClick={onClick}>{label}</button>;
+};
+```
+
+### Barrel Files
+
+Each directory exposes a controlled public API via `index.ts`. Use explicit named exports, never `export *`.
+
+```typescript
+export { Button } from './Button';
+export type { ButtonProps } from './Button.types';
+```
+
+### Props Naming
+
+| Type                | Pattern                | Example                       |
+| ------------------- | ---------------------- | ----------------------------- |
+| Event handler props | `on[Event]`            | `onClick`, `onSave`           |
+| Internal handlers   | `handle[Event]`        | `handleClick`, `handleSubmit` |
+| Boolean props       | `is/has/should[State]` | `isLoading`, `hasError`       |
+| Render props        | `render[Thing]`        | `renderHeader`, `renderEmpty` |
+
+### Alphabetical Sorting (Mandatory Everywhere)
+
+- **Destructured props** — alphabetical
+- **JSX props** — alphabetical
+- **Type/object keys** — alphabetical (`id` may come first as exception)
+- **Import specifiers** — alphabetical
+- Enforced by `eslint-plugin-perfectionist`
+
+### Composition Over Configuration
+
+Prefer composition (children, slots) over props-driven configuration to avoid prop explosion.
+
+---
+
+## 6. Styling — StyleX Only
+
+### Rules
+
+- **All styling uses StyleX.** No inline styles, no CSS modules, no styled-components, no Tailwind.
+- Styles live in `*.stylex.ts` files alongside their component.
+- Use design system tokens from `@/design-system/tokens/` instead of hardcoded values.
+
+### Pattern
+
+```typescript
+// Component.stylex.ts
+import * as stylex from '@stylexjs/stylex';
+import { spacing, borderRadius } from '@/design-system/tokens/base.stylex';
+import { colors } from '@/design-system/tokens/colors.stylex';
+
+export const styles = stylex.create({
+  base: { padding: spacing.md, borderRadius: borderRadius.md },
+  primary: { backgroundColor: colors.brandPrimary },
+  disabled: { opacity: 0.5, cursor: 'not-allowed' },
+});
+
+// Component.tsx
+<button {...stylex.props(styles.base, variant === 'primary' && styles.primary)} />
+```
+
+### Forbidden
+
+- `style={...}` (inline styles) — runtime cost, no type safety
+- `onClick={() => handler()}` in JSX — creates new reference each render, breaks memoization
+- CSS Modules, Styled Components, Tailwind — inconsistent with architecture
+
+---
+
+## 7. Functional Programming & Immutability
+
+- **All `*.util.ts` functions must be pure** — same input → same output, no side effects.
+- **Never mutate data.** Use spread syntax, `.map()`, `.filter()`, `.reduce()`.
+- **Use functional array operations exclusively.** No imperative `for` loops for data transformations.
+- **Never mutate props.** Use `[...array].sort()` or `useMemo` instead of `array.sort()`.
+- **`as const` for literal objects/arrays** where applicable.
+
+---
+
+## 8. Data Layer — React Router 7
+
+### Data Fetching
+
+**Zero `useEffect` for data fetching.** All server data flows through React Router loaders/actions.
+
+- **Read operations:** `loader` functions → consumed via `useLoaderData<typeof loader>()`
+- **Write operations:** `action` functions → triggered via `useFetcher` or `<Form>`
+
+```typescript
+// Route loader
+export const loader = async ({ params }: LoaderFunctionArgs) => {
+  const data = await api.fetchData(params.id);
+  return data;
+};
+
+// Component
+const MyPage = () => {
+  const data = useLoaderData<typeof loader>();
+  return <div>{data.name}</div>;
+};
+```
+
+### Client State
+
+- **Local UI state:** `useState`, `useReducer`
+- **Shared UI state:** React Context with `use()` (React 19) — **never `useContext`**
+- **No Redux.** Use Context or Zustand if global client state is needed.
+
+---
+
+## 9. React 19 Specific Patterns
+
+### Mandatory Migrations
+
+- **`use()` replaces `useContext()`** — `use()` can be called conditionally, supports Promises.
+- **`useActionState`** for form actions with pending state.
+- **`useFormStatus`** for submit button pending states from child components.
+- **`useOptimistic`** for instant UI feedback during async operations.
+- **`useTransition`** for non-urgent updates (search, filtering).
+
+### Context Pattern
+
+```typescript
+import { use } from 'react';
+
+const ThemeContext = createContext<Theme | undefined>(undefined);
+
+export const useTheme = () => {
+  const theme = use(ThemeContext);
+  if (!theme) throw new Error('useTheme must be used within ThemeProvider');
+  return theme;
+};
+```
+
+---
+
+## 10. Table Component Architecture
+
+The Table is the project's most complex component. It uses a custom store-based state management pattern.
+
+### Architecture Layers
+
+```
+Table.component.tsx (entry point)
+├── TableConfigProvider (infrequent changes)
+│   ├── columnsStore — column definitions, sorting, filters, visibility, sizing, order, pinning
+│   └── metaStore — UI preferences (density, borders), pagination, persistence config
+├── TableDataProvider (frequent changes)
+│   ├── dataStore — table rows, loading states, pagination info
+│   └── filtersDataStore — per-column filter dropdown data with async pagination
+└── UI Components Layer
+    └── Each component uses Actions (write) + Selectors (read)
+```
+
+### Store Pattern (`useSyncExternalStore`)
+
+Foundation hook: `useStore.hook.ts` — shallow merge on `set()`, shallow equality checks, SSR-safe.
+
+### Action/Selector Pattern
+
+```
+store/{domain}/
+├── use{Domain}Store.hook.ts        # Base store hook
+├── actions/                         # State mutations (useSet*, useReset*, useFetch*)
+│   ├── useSetColumnFilter.hook.ts
+│   └── index.ts
+└── selectors/                       # State reads (useGet*)
+    ├── useGetColumnFilters.hook.ts
+    └── index.ts
+```
+
+- **Selectors:** stateless, return computed/direct values, enable granular subscriptions.
+- **Actions:** encapsulate business logic, handle side effects (persistence, URL updates, async).
+- **Component pattern:** import selectors for reads, import actions for writes, use action callbacks in event handlers.
+
+### Store State Access Rule
+
+**Never call `store.get()` more than once per action execution.** Capture the snapshot into a single variable, then read properties from it. Multiple `.get()` calls may return different snapshots if a concurrent update occurs between them, leading to inconsistent state.
+
+```typescript
+// ✅ Correct — single snapshot, multiple reads
+const columnsState = columnsStore.get();
+const columns = columnsState?.columns ?? [];
+const columnsOrder =
+  columnsState?.columnOrder ?? ([] as ColumnOrderState<TData>);
+const currentPinning =
+  columnsState?.columnPinning ??
+  ({ left: [], right: [] } as ColumnPinningState<TData>);
+
+// ❌ Forbidden — calling .get() multiple times
+const columns = columnsStore.get()?.columns ?? [];
+const columnsOrder =
+  columnsStore.get()?.columnOrder ?? ([] as ColumnOrderState<TData>);
+const currentPinning = columnsStore.get()?.columnPinning ?? {
+  left: [],
+  right: [],
+};
+```
+
+This rule applies to every store: `columnsStore`, `dataStore`, `filtersDataStore`, `metaStore`.
+
+### Key Features
+
+- **Virtualization** (`useVirtualization.hook.ts`): Renders only visible rows.
+- **Infinite Scroll** (`useInfiniteScroll.hook.ts`): Loads more data when scrolling near bottom.
+- **Filter Dropdowns with Async Data**: Each column has its own filter data store entry with pagination.
+- **State Persistence**: Actions persist to cookies/localStorage via `writeStateSlice()`.
+
+---
+
+## 11. Import Standards
+
+### Alias
+
+Use `@/` as the root alias for `src/`. Relative imports only within the same directory.
+
+```typescript
+// ✅
+import { Button } from '@/components/Button';
+import { styles } from './Card.stylex';
+
+// ❌
+import { Button } from '../../../../components/Button';
+```
+
+### Import Order (enforced by ESLint)
+
+1. **React & Core Libraries** (`react`, `react-router`)
+2. **External Dependencies** (`@stylexjs/stylex`, `zod`)
+3. **Internal Absolute Imports** (`@/features/...`, `@/components/...`)
+4. **Relative Imports** (`./styles`, `../hooks`)
+5. **Type Imports** (last, with `import type`)
+
+---
+
+## 12. Error Handling & Validation
+
+- **Error Boundaries:** All route components must be wrapped in error boundaries using `useRouteError`.
+- **Input Validation:** Use Zod schemas for runtime type safety (especially in loaders/actions).
+- **Type Guards:** Use `is` return type for runtime type narrowing with `unknown` data.
+- **Environment Variables:** Validate with Zod schema, never commit secrets.
+
+---
+
+## 13. Performance Guidelines
+
+- React Compiler handles most memoization automatically — favor correct code over manual optimization.
+- Table performance: granular subscriptions via selectors, row virtualization, split contexts to minimize re-render cascades.
+
+---
+
+## 14. Testing
+
+- Tests colocated with components (`ComponentName.test.tsx`).
+- Use `@testing-library/react` for component tests.
+- Import test utilities from `vite-plus/test` (not `vitest` directly).
+- 80% minimum unit test coverage target.
+
+---
+
+## 15. Security
+
+- Protect routes with authentication guards.
+- Never commit secrets — use validated environment variables.
+
+---
+
+## 16. Documentation
+
+- JSDoc comments on all exported functions, types, and components.
+- Each feature directory should have a README.
+- Architecture docs live in `docs/` and component-level `ARCHITECTURE.md` files.
+
 <!--VITE PLUS START-->
 
 # Using Vite+, the Unified Toolchain for the Web
