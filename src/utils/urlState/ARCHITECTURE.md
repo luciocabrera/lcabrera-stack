@@ -64,9 +64,9 @@ Decodes URL-safe Base64 state and optionally rehydrates arrays into sets.
 
 ```mermaid
 flowchart TD
-  A[decodeStateFromURL args] --> B[Restore Base64 chars and padding]
+  A[Decode state from URL value] --> B[Restore Base64 chars and padding]
   B --> C[Decode Base64 and parse JSON]
-  C --> D{convertArraysToSets provided}
+  C --> D{Convert arrays to sets provided}
   D -- no --> E[Return parsed object]
   D -- yes --> F[For each key: Array -> Set]
   F --> E
@@ -81,7 +81,7 @@ Reads named query param and decodes via `decodeStateFromURL`.
 ```mermaid
 flowchart TD
   A[Read state from URL params] --> B[Read query param by key]
-  B --> C{value exists}
+  B --> C{Value exists}
   C -- no --> D[Return undefined]
   C -- yes --> E[Decode param value]
   E --> F[Return decoded object or undefined]
@@ -93,7 +93,7 @@ Table-specific wrapper around `readStateFromURL`.
 
 ```mermaid
 flowchart TD
-  A[readTableStateFromURL args] --> B[Build key from persistenceKey and tableState suffix]
+  A[Read table state from URL] --> B[Build key from persistence key and tableState suffix]
   B --> C[readStateFromURL with convertArraysToSets: columnVisibility]
   C --> D[Cast to Partial<TableSearchParamsState>]
   D --> E[Return state or undefined]
@@ -112,11 +112,11 @@ Compacts sorting array into object map for shorter query payload.
 
 ```mermaid
 flowchart TD
-  A[serializeSortingToURL(sorting)] --> B{sorting empty?}
+  A[Serialize sorting to URL] --> B{Sorting empty}
   B -- yes --> C[undefined]
   B -- no --> D[Filter entries with direction]
   D --> E[Map to key direction pairs]
-  E --> F{entries empty}
+  E --> F{Entries empty}
   F -- yes --> G[undefined]
   F -- no --> H[Build object and stringify]
 ```
@@ -132,7 +132,7 @@ Rebuilds sorting array from compact object representation.
 
 ```mermaid
 flowchart TD
-  A[deserializeSortingFromURL(param)] --> B[JSON.parse]
+  A[Deserialize sorting from URL] --> B[JSON.parse]
   B --> C[Object.entries(parsed)]
   C --> D[Map entries to sorting items]
   D --> E[Return SortingState]
@@ -146,7 +146,7 @@ Compacts column filters into JSON string using short operator codes and reduced 
 
 ```mermaid
 flowchart TD
-  A[serializeFiltersToURL(filters)] --> B{No filters}
+  A[Serialize filters to URL] --> B{No filters}
   B -- yes --> C[undefined]
   B -- no --> D[Serialize each column filter]
   D --> E[Object.fromEntries compact object]
@@ -165,11 +165,11 @@ Infers filter type from compact value shape and expands short codes.
 
 ```mermaid
 flowchart TD
-  A[deserializeFilter(value)] --> B{boolean value}
+  A[Deserialize single filter] --> B{Boolean value}
   B -- yes --> C[Return boolean filter]
-  B -- no --> D{array value}
+  B -- no --> D{Array value}
   D -- no --> E[undefined]
-  D -- yes --> F{empty array}
+  D -- yes --> F{Empty array}
   F -- yes --> E
   F -- no --> G[Read first token]
 
@@ -178,11 +178,11 @@ flowchart TD
 
   G --> J{Known operator code}
   J -- yes --> K[Expand operator]
-  K --> L{numeric payload}
+  K --> L{Numeric payload}
   L -- yes --> M[number filter]
-  K --> N{date-like payload with date operator}
+  K --> N{Date like payload with date operator}
   N -- yes --> O[date filter]
-  K --> P{text operator with string payload}
+  K --> P{Text operator with string payload}
   P -- yes --> Q[text filter]
 
   J -- no --> R{All strings array}

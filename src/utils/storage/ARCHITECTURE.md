@@ -35,7 +35,7 @@ Builds a one-year cookie string with URL-encoded value.
 ```mermaid
 flowchart TD
   A[buildCookieString args] --> B[Set expiry to now plus one year]
-  B --> C[encodeURIComponent(value)]
+  B --> C[Encode cookie value]
   C --> D[Return cookie string with expires path and SameSite Lax]
 ```
 
@@ -50,13 +50,13 @@ Reads cookie value in browser or SSR context.
 
 ```mermaid
 flowchart TD
-  A[readFromCookie args] --> B{document exists and cookieString missing}
+  A[Read from cookie] --> B{Document exists and cookie string missing}
   B -- yes --> C[Parse browser cookies]
-  C --> D[Return cookies[key]]
+  C --> D[Return cookie value]
 
-  B -- no --> E{cookieString provided}
+  B -- no --> E{Cookie string provided}
   E -- yes --> F[Parse provided cookie string]
-  F --> G[Return cookies[key]]
+  F --> G[Return cookie value]
   E -- no --> H[Return undefined]
 ```
 
@@ -71,10 +71,10 @@ Writes cookies in either server response headers or browser runtime.
 
 ```mermaid
 flowchart TD
-  A[writeToCookie args] --> B[buildCookieString]
-  B --> C{headers provided}
+  A[Write to cookie] --> B[Build cookie string]
+  B --> C{Headers provided}
   C -- yes --> D[Append Set Cookie header]
-  C -- no --> E{document exists}
+  C -- no --> E{Document exists}
   E -- no --> F[Return]
   E -- yes --> G[Write browser cookie]
 ```
@@ -91,10 +91,10 @@ Safely writes to localStorage without throwing on restricted environments.
 
 ```mermaid
 flowchart TD
-  A[writeToLocalStorage args] --> B{localStorage exists}
+  A[Write to localStorage] --> B{LocalStorage exists}
   B -- no --> C[Return]
-  B -- yes --> D[try localStorage.setItem]
-  D --> E{throws}
+  B -- yes --> D[Attempt storage write]
+  D --> E{Throws}
   E -- yes --> F[Swallow error]
   E -- no --> G[Done]
 ```

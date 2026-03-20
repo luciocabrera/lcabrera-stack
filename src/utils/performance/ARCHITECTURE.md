@@ -17,9 +17,9 @@ performance/
 
 ```mermaid
 graph TD
-  Index[index.ts] --> Hook[useRenderTracker.hook.ts]
-  Hook --> Util[renderTracker.util.ts]
-  Util --> Window[window.__renderStats (DEV only)]
+  Index[Performance index] --> Hook[Use render tracker hook]
+  Hook --> Util[Render tracker utility]
+  Util --> Window[Window render stats in development]
 ```
 
 ## Utilities
