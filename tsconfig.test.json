@@ -1,9 +1,0 @@
-{
-  "extends": "./tsconfig.app.json",
-  "compilerOptions": {
-    // Remove erasableSyntaxOnly — OXC's napi bindings don't support this TS 5.5+ option
-    "erasableSyntaxOnly": false,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false
-  }
-}

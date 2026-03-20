@@ -53,20 +53,20 @@ src/
 
 **Never use pnpm/npm/yarn directly.** All operations go through `vp`:
 
-| Task                 | Command                                |
-| -------------------- | -------------------------------------- |
-| Install dependencies | `vp install`                           |
-| Dev server           | `vp dev`                               |
-| Build for production | `vp build` (runs `react-router build`) |
-| Lint (with fix)      | `vp lint . --fix`                      |
-| Lint (check only)    | `vp lint .`                            |
-| Format               | `vp fmt .`                             |
-| Format check         | `vp fmt --check .`                     |
-| Type check           | `react-router typegen && tsc --noEmit` |
-| Run tests            | `vp test`                              |
-| Full validation      | `vp check` then `vp test`              |
-| Add a package        | `vp add <package>`                     |
-| Remove a package     | `vp remove <package>`                  |
+| Task                 | Command                                             |
+| -------------------- | --------------------------------------------------- |
+| Install dependencies | `vp install`                                        |
+| Dev server           | `vp dev`                                            |
+| Build for production | `vp build` (runs `react-router build`)              |
+| Lint (with fix)      | `vp lint . --fix`                                   |
+| Lint (check only)    | `vp lint .`                                         |
+| Format               | `vp fmt .`                                          |
+| Format check         | `vp fmt --check .`                                  |
+| Type check           | `react-router typegen && tsc --noEmit`              |
+| Run tests            | `node node_modules/.bin/vitest run`                 |
+| Full validation      | `vp check` then `node node_modules/.bin/vitest run` |
+| Add a package        | `vp add <package>`                                  |
+| Remove a package     | `vp remove <package>`                               |
 
 **Critical:** Import from `vite-plus` not `vite`/`vitest` directly. Example: `import { defineConfig } from 'vite-plus'` and `import { expect, test, vi } from 'vite-plus/test'`.
 
@@ -74,7 +74,7 @@ src/
 
 - Run `vp install` after pulling changes and before starting work.
 - **Always verify zero linting errors and zero TypeScript errors before considering any task complete.** Run `vp lint .` and `react-router typegen && tsc --noEmit` (or `vp check`) after every change.
-- Run `vp check` and `vp test` to validate all changes before finishing.
+- Run `vp check` and `node node_modules/.bin/vitest run` to validate all changes before finishing.
 
 ---
 
@@ -471,8 +471,10 @@ Run these steps **in order** after every code change:
 vp fmt          # 1. auto-format (Oxfmt)
 vp lint         # 2. lint (Oxlint) — fix all reported issues
 vp check        # 3. TypeScript type-check — zero errors required
-vp test         # 4. unit/integration tests — all must pass
+node node_modules/.bin/vitest run  # 4. unit/integration tests — all must pass
 ```
+
+> **Note:** Use `node node_modules/.bin/vitest run` instead of `vp test` — `vp test` has a known OXC transform bug with `erasableSyntaxOnly: true` in tsconfig that causes all test suites to fail.
 
 If any step fails, fix the issue before proceeding to the next step.
 
@@ -564,5 +566,5 @@ These commands map to their corresponding tools. For example, `vp dev --port 300
 ## Review Checklist for Agents
 
 - [ ] Run `vp install` after pulling remote changes and before getting started.
-- [ ] Run `vp check` and `vp test` to validate changes.
+- [ ] Run `vp check` and `node node_modules/.bin/vitest run` to validate changes.
 <!--VITE PLUS END-->
