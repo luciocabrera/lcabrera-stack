@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 
 import { Button } from '@/components/Button';
 import { SidePanelSectionHeader } from '@/components/SidePanel';
@@ -11,7 +11,6 @@ import type { AddSortSectionProps } from './AddSortSection.types';
 import { useSetColumnsSortings } from '../../TableDrawerContext/actions';
 import { useGetColumnsSorting } from '../../TableDrawerContext/selectors';
 import { styles } from './AddSortSection.stylex';
-import { getSelectedColumnLabel } from '../utils';
 
 export const AddSortSection = ({
   onDropdownOpenChange,
@@ -23,39 +22,19 @@ export const AddSortSection = ({
   const [selectedColumn, setSelectedColumn] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  const handleOpenChange = useCallback(
-    (isOpen: boolean) => {
-      setIsDropdownOpen(isOpen);
-      onDropdownOpenChange?.(isOpen);
-    },
-    [onDropdownOpenChange],
-  );
-
-  // Filter to only sortable columns
-  const sortableColumns = columns.filter((col) => col.isSortable !== false);
-  // Get columns not yet in sort list
-  const availableColumns = sortableColumns.filter(
-    (col) => !sorting.some((s) => s.columnKey === col.key),
-  );
-
-  // Map available columns to label strings for VirtualSelect
-  const availableColumnLabels = availableColumns.map((col) => col.label);
-
-  // Resolve selected column key to its label for VirtualSelect
-  const selectedColumnLabel = getSelectedColumnLabel({
-    selectedColumn,
-    sortableColumns,
-  });
-
-  const handleColumnSelect = (selectedLabels: string[]) => {
-    const label = selectedLabels[0];
-    if (!label) {
-      setSelectedColumn('');
-      return;
-    }
-    const col = availableColumns.find((c) => c.label === label);
-    setSelectedColumn(col?.key ?? '');
+  const handleOpenChange = (isOpen: boolean) => {
+    setIsDropdownOpen(isOpen);
+    onDropdownOpenChange?.(isOpen);
   };
+
+  // Filter to only sortable columns not already in the sort list
+  const availableColumnOptions = columns
+    .filter(
+      (col) =>
+        col.isSortable !== false &&
+        !sorting.some((s) => s.columnKey === col.key),
+    )
+    .map((col) => ({ label: col.label, value: col.key }));
 
   const handleAddSort = () => {
     if (!selectedColumn) return;
@@ -75,11 +54,13 @@ export const AddSortSection = ({
       <SidePanelSectionHeader title='Add Sort Column' />
       <VirtualSelect
         mode='single'
-        onChange={handleColumnSelect}
+        onChange={(values) => {
+          setSelectedColumn(values[0] ?? '');
+        }}
         onOpenChange={handleOpenChange}
-        options={availableColumnLabels}
+        options={availableColumnOptions}
         placeholder='Select a column...'
-        selected={selectedColumnLabel}
+        selected={selectedColumn ? [selectedColumn] : []}
       />
       {!isDropdownOpen && (
         <Button

@@ -5,7 +5,7 @@ import type { SortingState } from '@/components/Table/Table.types';
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { useTableDataContextValue } from '@/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
 import { usePersistTableStateAction } from '@/components/Table/hooks';
-import { getNormalizedColummns } from '@/components/Table/utils';
+import { getNormalizedColumns } from '@/components/Table/utils';
 import { serializeSortingToURL } from '@/utils/urlState';
 
 export const useSetColumnSorting = <TData>() => {
@@ -45,7 +45,7 @@ export const useSetColumnSorting = <TData>() => {
       newSorting = [...sorting, { columnKey, direction }];
     }
 
-    const normalizedColumns = getNormalizedColummns({
+    const normalizedColumns = getNormalizedColumns({
       columns: columnsState?.columns ?? [],
       sorting: newSorting,
     });

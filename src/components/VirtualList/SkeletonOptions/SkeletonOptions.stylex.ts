@@ -1,7 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 
 import { spacing } from '@/design-system/tokens/base.stylex';
-import { skelleton } from '@/design-system/tokens/commons.stylex';
+import { skeleton } from '@/design-system/tokens/commons.stylex';
 
 export const styles = stylex.create({
   option: {
@@ -21,6 +21,6 @@ export const styles = stylex.create({
 });
 
 export const skeletonStyles = {
-  placeholderBar: skelleton.placeholderBar,
-  shimmerWave: skelleton.shimmerWave,
+  placeholderBar: skeleton.placeholderBar,
+  shimmerWave: skeleton.shimmerWave,
 };

@@ -5,7 +5,7 @@ type GetNormalizedColumnsArgs<TData> = {
   sorting: SortingState<TData>;
 };
 
-export const getNormalizedColummns = <TData>({
+export const getNormalizedColumns = <TData>({
   columns,
   sorting,
 }: GetNormalizedColumnsArgs<TData>) => {

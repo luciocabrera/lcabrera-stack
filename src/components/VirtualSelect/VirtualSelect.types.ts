@@ -4,6 +4,11 @@ import type { VirtualListDataState } from '@/components/VirtualList';
 
 export type VirtualSelectMode = 'multi' | 'single';
 
+export type VirtualSelectOption = {
+  label: string;
+  value: string;
+};
+
 export type VirtualSelectProps = {
   /** Optional StyleX overrides for the list container (background, border, etc.) */
   customStylex?: StyleXStyles;
@@ -23,8 +28,8 @@ export type VirtualSelectProps = {
   onFetchMore?: () => Promise<void> | void;
   /** Called when the dropdown opens or closes */
   onOpenChange?: (isOpen: boolean) => void;
-  /** Static options (used when no dataState provided) */
-  options?: string[];
+  /** Static options — plain strings (value = label) or { label, value } pairs for key/display separation */
+  options?: string[] | VirtualSelectOption[];
   /** Placeholder text when nothing is selected */
   placeholder?: string;
   /** Currently selected value(s) */

@@ -53,20 +53,20 @@ src/
 
 **Never use pnpm/npm/yarn directly.** All operations go through `vp`:
 
-| Task                 | Command                                |
-| -------------------- | -------------------------------------- |
-| Install dependencies | `vp install`                           |
-| Dev server           | `vp dev`                               |
-| Build for production | `vp build` (runs `react-router build`) |
-| Lint (with fix)      | `vp lint . --fix`                      |
-| Lint (check only)    | `vp lint .`                            |
-| Format               | `vp fmt .`                             |
-| Format check         | `vp fmt --check .`                     |
-| Type check           | `react-router typegen && tsc --noEmit` |
-| Run tests            | `vp test`                              |
-| Full validation      | `vp check` then `vp test`              |
-| Add a package        | `vp add <package>`                     |
-| Remove a package     | `vp remove <package>`                  |
+| Task                 | Command                                             |
+| -------------------- | --------------------------------------------------- |
+| Install dependencies | `vp install`                                        |
+| Dev server           | `vp dev`                                            |
+| Build for production | `vp build` (runs `react-router build`)              |
+| Lint (with fix)      | `vp lint . --fix`                                   |
+| Lint (check only)    | `vp lint .`                                         |
+| Format               | `vp fmt .`                                          |
+| Format check         | `vp fmt --check .`                                  |
+| Type check           | `react-router typegen && tsc --noEmit`              |
+| Run tests            | `node node_modules/.bin/vitest run`                 |
+| Full validation      | `vp check` then `node node_modules/.bin/vitest run` |
+| Add a package        | `vp add <package>`                                  |
+| Remove a package     | `vp remove <package>`                               |
 
 **Critical:** Import from `vite-plus` not `vite`/`vitest` directly. Example: `import { defineConfig } from 'vite-plus'` and `import { expect, test, vi } from 'vite-plus/test'`.
 
@@ -74,7 +74,7 @@ src/
 
 - Run `vp install` after pulling changes and before starting work.
 - **Always verify zero linting errors and zero TypeScript errors before considering any task complete.** Run `vp lint .` and `react-router typegen && tsc --noEmit` (or `vp check`) after every change.
-- Run `vp check` and `vp test` to validate all changes before finishing.
+- Run `vp check` and `node node_modules/.bin/vitest run` to validate all changes before finishing.
 
 ---
 
@@ -463,6 +463,24 @@ Before making **any** code change, read every `ARCHITECTURE.md` that covers the 
 
 If no `ARCHITECTURE.md` exists yet for the area you are changing, create one **before** implementing.
 
+### Reuse Before You Build
+
+Before creating any new component, hook, utility, constant, or type, **consult `src/INVENTORY.md`** first.
+
+**Rules:**
+
+1. If an artifact already exists that covers the need — **use it**.
+2. If an artifact almost covers the need but is too specific — **enhance it to be more generic** rather than creating a new one. Update its `ARCHITECTURE.md` row and `INVENTORY.md` description after.
+3. Only create something new when nothing in the inventory is a reasonable fit.
+
+**Examples of preferred enhancements over new artifacts:**
+
+- A util that formats dates for one preset → add a `preset` parameter to make it general
+- A hook that manages one store shape → make the shape generic with `<TState>`
+- A component that only accepts `string[]` options → extend to accept `{ label, value }[]` as well (backward-compatible)
+
+When in doubt: a codebase with 18 components and 25 utilities that each do one thing well is better than 40 components and 50 utilities with overlapping concerns.
+
 ### Post-Change Quality Gate
 
 Run these steps **in order** after every code change:
@@ -471,8 +489,10 @@ Run these steps **in order** after every code change:
 vp fmt          # 1. auto-format (Oxfmt)
 vp lint         # 2. lint (Oxlint) — fix all reported issues
 vp check        # 3. TypeScript type-check — zero errors required
-vp test         # 4. unit/integration tests — all must pass
+node node_modules/.bin/vitest run  # 4. unit/integration tests — all must pass
 ```
+
+> **Note:** Use `node node_modules/.bin/vitest run` instead of `vp test` — `vp test` has a known OXC transform bug with `erasableSyntaxOnly: true` in tsconfig that causes all test suites to fail.
 
 If any step fails, fix the issue before proceeding to the next step.
 
@@ -487,6 +507,8 @@ After the quality gate passes, update every `ARCHITECTURE.md` affected by the ch
 - **New dependency added** → update the Dependencies diagram in the affected `ARCHITECTURE.md`.
 - **New naming/structural convention established** → update `src/components/PATTERNS.md`.
 - **New architectural decision made** → add a new ADR to `docs/decisions/` following the ADR-NNN naming scheme.
+- **New artifact created or existing artifact enhanced/renamed** → update the relevant row in `src/INVENTORY.md`.
+- **New artifact created or existing artifact enhanced/renamed** → update the relevant row in `src/INVENTORY.md`.
 
 Documentation updates must be part of the **same commit** as the code change.
 

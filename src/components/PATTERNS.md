@@ -60,6 +60,20 @@ className={`button ${isActive ? 'active' : ''}`}
 
 **Consumer overrides:** When a component accepts a `customStylex?: StyleXStyles` prop, it must always be the **last** argument to `stylex.props()` so it wins over all defaults.
 
+**Known exception — React Router `NavLink`:** React Router's `NavLink` requires a `className` render-function to expose `isActive`. Use `stylex.props(...).className` inside it — never pass raw class strings:
+
+```tsx
+// ✅ Correct — stylex.props() is still the source of truth
+<RouterNavLink
+  className={({ isActive }) =>
+    stylex.props(styles.link, isActive && styles.linkActive).className ?? ''
+  }
+/>
+
+// ❌ Wrong — raw string bypasses StyleX entirely
+className={({ isActive }) => isActive ? 'active' : 'inactive'}
+```
+
 **Shared tokens over local values:** Always reach for a design token before writing a raw value:
 
 ```tsx

@@ -14,7 +14,6 @@ import type { AddFilterSectionProps } from './AddFilterSection.types';
 import { useSetColumnFilters } from '../../TableDrawerContext/actions';
 import { useGetColumnFilters } from '../../TableDrawerContext/selectors';
 import { styles } from './AddFilterSection.stylex';
-import { getSelectedColumnLabel } from './utils';
 
 export const AddFilterSection = ({
   expandedFilters,
@@ -29,35 +28,20 @@ export const AddFilterSection = ({
   const [selectedColumn, setSelectedColumn] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  // Filter to only filterable columns
-  const filterableColumns = columns.filter((col) => col.isFilterable !== false);
-  // Map filterable columns to label strings for VirtualSelect
-  const filterableColumnLabels = filterableColumns.map((col) => {
-    const hasActiveFilter = Boolean(filters[col.key]);
-    return hasActiveFilter ? `${col.label} ⚠️ (filtered)` : col.label;
-  });
-
-  const selectedColumnLabel = getSelectedColumnLabel({
-    filterableColumns,
-    filters,
-    selectedColumn,
-  });
+  // Filter to only filterable columns and build { label, value } options
+  const filterableColumnOptions = columns
+    .filter((col) => col.isFilterable !== false)
+    .map((col) => {
+      const hasActiveFilter = Boolean(filters[col.key]);
+      return {
+        label: hasActiveFilter ? `${col.label} ⚠️ (filtered)` : col.label,
+        value: col.key,
+      };
+    });
 
   const handleOpenChange = (isOpen: boolean) => {
     setIsDropdownOpen(isOpen);
     onDropdownOpenChange?.(isOpen);
-  };
-
-  const handleColumnSelect = (selectedLabels: string[]) => {
-    const label = selectedLabels[0];
-    if (!label) {
-      setSelectedColumn('');
-      return;
-    }
-    // Strip the " ⚠️ (filtered)" suffix when matching
-    const cleanLabel = label.replace(' ⚠️ (filtered)', '');
-    const col = filterableColumns.find((c) => c.label === cleanLabel);
-    setSelectedColumn(col?.key ?? '');
   };
 
   const handleAddFilter = () => {
@@ -116,11 +100,13 @@ export const AddFilterSection = ({
       <SidePanelSectionHeader title='Add Filter' />
       <VirtualSelect
         mode='single'
-        onChange={handleColumnSelect}
+        onChange={(values) => {
+          setSelectedColumn(values[0] ?? '');
+        }}
         onOpenChange={handleOpenChange}
-        options={filterableColumnLabels}
+        options={filterableColumnOptions}
         placeholder='Select a column...'
-        selected={selectedColumnLabel}
+        selected={selectedColumn ? [selectedColumn] : []}
       />
       {!isDropdownOpen && (
         <Button

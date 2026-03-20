@@ -11,7 +11,7 @@ import { usePersistTableStateAction } from '@/components/Table/hooks';
 import { applyPin } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 import {
   getEffectiveColumns,
-  getNormalizedColummns,
+  getNormalizedColumns,
   syncColumnOrderWithPinning,
 } from '@/components/Table/utils';
 import { serializeFiltersToURL, serializeSortingToURL } from '@/utils/urlState';
@@ -108,7 +108,7 @@ export const useBatchSetColumnSettings = () => {
       newPinning,
     });
 
-    const normalizedColumns = getNormalizedColummns({
+    const normalizedColumns = getNormalizedColumns({
       columns,
       sorting: newSorting,
     });

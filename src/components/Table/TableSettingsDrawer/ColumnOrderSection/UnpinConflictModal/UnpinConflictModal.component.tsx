@@ -57,7 +57,7 @@ export const UnpinConflictModal = ({
       <RadioOptionGroup
         name='unpin-conflict-resolution'
         onChange={(value) => {
-          setSelectedResolution(value as UnpinConflictResolution);
+          setSelectedResolution(value);
         }}
         options={[
           {

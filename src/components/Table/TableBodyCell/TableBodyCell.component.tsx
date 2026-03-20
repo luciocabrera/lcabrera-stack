@@ -7,7 +7,7 @@ import {
 
 import type { TableBodyCellProps } from './TableBodyCell.types';
 
-import { skelletonStyles, tableBodyCellStyles } from './TableBodyCell.stylex';
+import { skeletonStyles, tableBodyCellStyles } from './TableBodyCell.stylex';
 import { detectDataType, renderCellContent } from './utils';
 
 export const TableBodyCell = <TData extends Record<string, unknown>>({
@@ -75,8 +75,8 @@ export const TableBodyCell = <TData extends Record<string, unknown>>({
         </span>
       )}
       {isLoadingState && (
-        <div {...stylex.props(skelletonStyles.loadingOverlay)}>
-          <div {...stylex.props(skelletonStyles.shimmerWave)} />
+        <div {...stylex.props(skeletonStyles.loadingOverlay)}>
+          <div {...stylex.props(skeletonStyles.shimmerWave)} />
         </div>
       )}
     </td>
