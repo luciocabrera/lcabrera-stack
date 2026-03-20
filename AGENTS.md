@@ -463,6 +463,24 @@ Before making **any** code change, read every `ARCHITECTURE.md` that covers the 
 
 If no `ARCHITECTURE.md` exists yet for the area you are changing, create one **before** implementing.
 
+### Reuse Before You Build
+
+Before creating any new component, hook, utility, constant, or type, **consult `src/INVENTORY.md`** first.
+
+**Rules:**
+
+1. If an artifact already exists that covers the need — **use it**.
+2. If an artifact almost covers the need but is too specific — **enhance it to be more generic** rather than creating a new one. Update its `ARCHITECTURE.md` row and `INVENTORY.md` description after.
+3. Only create something new when nothing in the inventory is a reasonable fit.
+
+**Examples of preferred enhancements over new artifacts:**
+
+- A util that formats dates for one preset → add a `preset` parameter to make it general
+- A hook that manages one store shape → make the shape generic with `<TState>`
+- A component that only accepts `string[]` options → extend to accept `{ label, value }[]` as well (backward-compatible)
+
+When in doubt: a codebase with 18 components and 25 utilities that each do one thing well is better than 40 components and 50 utilities with overlapping concerns.
+
 ### Post-Change Quality Gate
 
 Run these steps **in order** after every code change:
@@ -489,6 +507,8 @@ After the quality gate passes, update every `ARCHITECTURE.md` affected by the ch
 - **New dependency added** → update the Dependencies diagram in the affected `ARCHITECTURE.md`.
 - **New naming/structural convention established** → update `src/components/PATTERNS.md`.
 - **New architectural decision made** → add a new ADR to `docs/decisions/` following the ADR-NNN naming scheme.
+- **New artifact created or existing artifact enhanced/renamed** → update the relevant row in `src/INVENTORY.md`.
+- **New artifact created or existing artifact enhanced/renamed** → update the relevant row in `src/INVENTORY.md`.
 
 Documentation updates must be part of the **same commit** as the code change.
 
