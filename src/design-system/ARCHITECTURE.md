@@ -56,16 +56,88 @@ graph TD
 
 Static design values defined with `stylex.defineVars`. These never change between themes.
 
-| Export         | Contents                                                        |
-| -------------- | --------------------------------------------------------------- |
-| `spacing`      | `xxs` 4px → `xxxl` 64px (8-step scale)                          |
-| `typography`   | Font family, size scale (`xs`–`3xl`), weights, line heights     |
-| `borderRadius` | `none`, `sm` 4px, `md` 8px, `lg` 12px, `xl` 16px, `full` 9999px |
-| `shadows`      | `none`, `sm`, `md`, `lg`, `xl` — static rgba shadows            |
-| `zIndex`       | `base` 0 → `tooltip` 1500 (5-step layering scale)               |
-| `transitions`  | `fast` 150ms, `normal` 200ms, `slow` 300ms, `slower` 500ms      |
-| `easing`       | `easeIn`, `easeOut`, `easeInOut`, `linear`                      |
-| `tooltip`      | Arrow size, arrow offset, slide distance                        |
+#### `spacing`
+
+| Token  | rem     | px   |
+| ------ | ------- | ---- |
+| `xxs`  | 0.25rem | 4px  |
+| `xs`   | 0.5rem  | 8px  |
+| `sm`   | 0.75rem | 12px |
+| `md`   | 1rem    | 16px |
+| `lg`   | 1.5rem  | 24px |
+| `xl`   | 2rem    | 32px |
+| `xxl`  | 3rem    | 48px |
+| `xxxl` | 4rem    | 64px |
+
+#### `typography`
+
+| Token                | Value                                                               |
+| -------------------- | ------------------------------------------------------------------- |
+| `fontFamily`         | `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif` |
+| `fontFamilyMono`     | `"Fira Code", "Courier New", monospace`                             |
+| `fontSizeXs`         | 0.75rem (12px)                                                      |
+| `fontSizeSm`         | 0.875rem (14px)                                                     |
+| `fontSizeMd`         | 1rem (16px)                                                         |
+| `fontSizeLg`         | 1.125rem (18px)                                                     |
+| `fontSizeXl`         | 1.25rem (20px)                                                      |
+| `fontSize2xl`        | 1.5rem (24px)                                                       |
+| `fontSize3xl`        | 2rem (32px)                                                         |
+| `fontWeightNormal`   | 400                                                                 |
+| `fontWeightMedium`   | 500                                                                 |
+| `fontWeightSemibold` | 600                                                                 |
+| `fontWeightBold`     | 700                                                                 |
+| `lineHeightTight`    | 1.25                                                                |
+| `lineHeightNormal`   | 1.5                                                                 |
+| `lineHeightRelaxed`  | 1.75                                                                |
+
+#### `borderRadius`
+
+| Token  | Value          |
+| ------ | -------------- |
+| `none` | 0              |
+| `sm`   | 0.25rem (4px)  |
+| `md`   | 0.5rem (8px)   |
+| `lg`   | 0.75rem (12px) |
+| `xl`   | 1rem (16px)    |
+| `full` | 9999px         |
+
+#### `shadows`
+
+| Token  | Description                     |
+| ------ | ------------------------------- |
+| `none` | none                            |
+| `sm`   | subtle 1px lift (cards at rest) |
+| `md`   | elevated card / popover         |
+| `lg`   | dropdown / overlay shadow       |
+| `xl`   | modal / high-elevation surface  |
+
+#### `zIndex` — Layering Scale
+
+| Token      | Value | Usage                          |
+| ---------- | ----- | ------------------------------ |
+| `base`     | 0     | Default document flow          |
+| `sticky`   | 1100  | Sticky table headers/columns   |
+| `dropdown` | 1000  | Dropdowns, VirtualSelect panel |
+| `modal`    | 1300  | Modal dialogs                  |
+| `popover`  | 1400  | Popovers above modals          |
+| `tooltip`  | 1500  | Tooltips (always on top)       |
+
+#### `transitions` & `easing`
+
+| Token    | Value | Token       | Curve                          |
+| -------- | ----- | ----------- | ------------------------------ |
+| `fast`   | 150ms | `easeIn`    | `cubic-bezier(0.4, 0, 1, 1)`   |
+| `normal` | 200ms | `easeOut`   | `cubic-bezier(0, 0, 0.2, 1)`   |
+| `slow`   | 300ms | `easeInOut` | `cubic-bezier(0.4, 0, 0.2, 1)` |
+| `slower` | 500ms | `linear`    | `linear`                       |
+
+#### `tooltip` (component-specific)
+
+| Token           | Value | Purpose                                |
+| --------------- | ----- | -------------------------------------- |
+| `arrowSize`     | 12px  | Width and height of the rotated square |
+| `arrowOffset`   | -6px  | Pulls arrow flush to the tooltip edge  |
+| `slideDistance` | 4px   | Entrance/exit translate distance       |
 
 ---
 
@@ -100,9 +172,32 @@ Reusable `stylex.create` rule sets shared across interactive components (Button,
 | `rippleBase.ripple`             | Radial ripple expansion animation on `:active`                                            |
 | `widthVariants`                 | `auto` / `full` width                                                                     |
 | `colorVariants`                 | `primary`, `secondary`, `ghost`, `outline`, `error`, `danger-ghost`, `success`, `warning` |
-| `sizeVariants`                  | `embedded`, `mini`, `sm`, `md`, `lg` (height + padding + font-size per size)              |
+| `sizeVariants`                  | `embedded`, `mini`, `sm`, `md`, `lg` — see table below                                    |
 | `orientationVariants`           | `horizontal` (center-justified) / `vertical` (start-justified) for nav rendering          |
 | `skelleton`                     | `loadingOverlay` and `placeholderBar` with shimmer keyframe animation                     |
+
+#### `sizeVariants` — Exact Dimensions
+
+| Size       | Height         | paddingBlock | paddingInline | fontSize  | borderRadius |
+| ---------- | -------------- | ------------ | ------------- | --------- | ------------ |
+| `embedded` | 1.5rem (24px)  | xxs (4px)    | xxs (4px)     | xs (12px) | sm (4px)     |
+| `mini`     | 1.75rem (28px) | xs (8px)     | xs (8px)      | sm (14px) | sm (4px)     |
+| `sm`       | 2rem (32px)    | xs (8px)     | sm (12px)     | sm (14px) | sm (4px)     |
+| `md`       | 2.5rem (40px)  | sm (12px)    | md (16px)     | md (16px) | md (8px)     |
+| `lg`       | 3rem (48px)    | md (16px)    | lg (24px)     | lg (18px) | lg (12px)    |
+
+#### `colorVariants` — Visual Behaviour
+
+| Color          | Background       | Border           | Text                 | Hover effect        |
+| -------------- | ---------------- | ---------------- | -------------------- | ------------------- |
+| `primary`      | `brandPrimary`   | `brandPrimary`   | `brandPrimaryText`   | radial white ripple |
+| `secondary`    | `brandSecondary` | `brandSecondary` | `brandSecondaryText` | radial white ripple |
+| `ghost`        | transparent      | transparent      | `textPrimary`        | `hover` bg + ripple |
+| `outline`      | transparent      | `borderPrimary`  | `textPrimary`        | `hover` bg + ripple |
+| `error`        | `error`          | `error`          | `errorText`          | radial white ripple |
+| `success`      | `success`        | `success`        | `successText`        | radial white ripple |
+| `warning`      | `warning`        | `warning`        | `warningText`        | radial dark ripple  |
+| `danger-ghost` | transparent      | transparent      | `textSecondary`      | `error` bg on hover |
 
 ---
 
