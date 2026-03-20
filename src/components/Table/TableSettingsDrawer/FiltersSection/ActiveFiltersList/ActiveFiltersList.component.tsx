@@ -5,7 +5,7 @@ import { MenuCloseIcon } from '@/components/Icons';
 import { InfoBox } from '@/components/InfoBox';
 import { SidePanelSectionHeader } from '@/components/SidePanel';
 import { useGetNormalizedColumns } from '@/components/Table/contexts/TableConfig/columns/selectors';
-import { FilterInputs } from '@/components/Table/filters/FilterInputs/FilterInputs.component';
+import { FilterInputs } from '@/components/Table/filters/FilterInputs';
 import { LIST_MAX_HEIGHT } from '@/components/VirtualList/VirtualList.constants';
 import { ICON_SIZE_MD } from '@/design-system/constants';
 
