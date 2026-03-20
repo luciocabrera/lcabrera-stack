@@ -458,6 +458,8 @@ Before making **any** code change, read every `ARCHITECTURE.md` that covers the 
 - The component/hook/util directory being modified (e.g. `src/components/Table/ARCHITECTURE.md`)
 - Parent directories if the change crosses boundaries (e.g. `src/hooks/ARCHITECTURE.md`)
 - Shared type files (`src/types/ARCHITECTURE.md`) when filter or UI types are involved
+- `src/components/PATTERNS.md` — always read this before creating or modifying any component; it defines naming conventions, StyleX composition order, the drawer-section pattern, filter contract, context+store pattern, and props-forwarding rules
+- `docs/decisions/` — read the relevant ADR(s) before working in an area they cover (Modal → ADR-001, Tooltip → ADR-002, store → ADR-003, memoization → ADR-004, styling → ADR-005)
 
 If no `ARCHITECTURE.md` exists yet for the area you are changing, create one **before** implementing.
 
@@ -483,6 +485,8 @@ After the quality gate passes, update every `ARCHITECTURE.md` affected by the ch
 - **New hook/util introduced** → add it to the parent directory `ARCHITECTURE.md` and create its own if the directory is new.
 - **Type added/changed** → update `src/types/ARCHITECTURE.md`.
 - **New dependency added** → update the Dependencies diagram in the affected `ARCHITECTURE.md`.
+- **New naming/structural convention established** → update `src/components/PATTERNS.md`.
+- **New architectural decision made** → add a new ADR to `docs/decisions/` following the ADR-NNN naming scheme.
 
 Documentation updates must be part of the **same commit** as the code change.
 
