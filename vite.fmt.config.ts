@@ -1,0 +1,22 @@
+import type { FormatOptions } from 'oxfmt';
+
+export const fmtConfig: FormatOptions = {
+  arrowParens: 'always',
+  bracketSpacing: true,
+  endOfLine: 'lf',
+  ignorePatterns: [
+    '.react-router/',
+    'build/',
+    'dist/',
+    'miscelanious/',
+    'node_modules/',
+    'eslint-local-rules/',
+  ],
+  jsxSingleQuote: true,
+  printWidth: 80,
+  semi: true,
+  singleQuote: true,
+  sortPackageJson: false,
+  tabWidth: 2,
+  trailingComma: 'all',
+};
