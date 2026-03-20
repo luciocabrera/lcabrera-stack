@@ -449,6 +449,43 @@ import { Button } from '../../../../components/Button';
 - Each feature directory should have a README.
 - Architecture docs live in `docs/` and component-level `ARCHITECTURE.md` files.
 
+### Architecture-First Workflow
+
+Before making **any** code change, read every `ARCHITECTURE.md` that covers the files you are about to touch. These files document intent, data flow, and constraints that are not always visible from the code alone.
+
+**Where to look:**
+
+- The component/hook/util directory being modified (e.g. `src/components/Table/ARCHITECTURE.md`)
+- Parent directories if the change crosses boundaries (e.g. `src/hooks/ARCHITECTURE.md`)
+- Shared type files (`src/types/ARCHITECTURE.md`) when filter or UI types are involved
+
+If no `ARCHITECTURE.md` exists yet for the area you are changing, create one **before** implementing.
+
+### Post-Change Quality Gate
+
+Run these steps **in order** after every code change:
+
+```bash
+vp fmt          # 1. auto-format (Oxfmt)
+vp lint         # 2. lint (Oxlint) — fix all reported issues
+vp check        # 3. TypeScript type-check — zero errors required
+vp test         # 4. unit/integration tests — all must pass
+```
+
+If any step fails, fix the issue before proceeding to the next step.
+
+### Documentation Update Rule
+
+After the quality gate passes, update every `ARCHITECTURE.md` affected by the change:
+
+- **Props added/removed** → update the Props table in the component's `ARCHITECTURE.md`.
+- **Render flow changed** → update the relevant Mermaid diagram.
+- **New hook/util introduced** → add it to the parent directory `ARCHITECTURE.md` and create its own if the directory is new.
+- **Type added/changed** → update `src/types/ARCHITECTURE.md`.
+- **New dependency added** → update the Dependencies diagram in the affected `ARCHITECTURE.md`.
+
+Documentation updates must be part of the **same commit** as the code change.
+
 <!--VITE PLUS START-->
 
 # Using Vite+, the Unified Toolchain for the Web
@@ -514,7 +551,7 @@ These commands map to their corresponding tools. For example, `vp dev --port 300
 
 - **Using the package manager directly:** Do not use pnpm, npm, or Yarn directly. Vite+ can handle all package manager operations.
 - **Always use Vite commands to run tools:** Don't attempt to run `vp vitest` or `vp oxlint`. They do not exist. Use `vp test` and `vp lint` instead.
-- **Running scripts:** Vite+ commands take precedence over `package.json` scripts. If there is a `test` script defined in `scripts` that conflicts with the built-in `vp test` command, run it using `vp run test`.
+- **Running scripts:** Vite+ built-in commands (`vp dev`, `vp build`, `vp test`, etc.) always run the Vite+ built-in tool, not any `package.json` script of the same name. To run a custom script that shares a name with a built-in command, use `vp run <script>`. For example, if you have a custom `dev` script that runs multiple services concurrently, run it with `vp run dev`, not `vp dev` (which always starts Vite's dev server).
 - **Do not install Vitest, Oxlint, Oxfmt, or tsdown directly:** Vite+ wraps these tools. They must not be installed directly. You cannot upgrade these tools by installing their latest versions. Always use Vite+ commands.
 - **Use Vite+ wrappers for one-off binaries:** Use `vp dlx` instead of package-manager-specific `dlx`/`npx` commands.
 - **Import JavaScript modules from `vite-plus`:** Instead of importing from `vite` or `vitest`, all modules should be imported from the project's `vite-plus` dependency. For example, `import { defineConfig } from 'vite-plus';` or `import { expect, test, vi } from 'vite-plus/test';`. You must not install `vitest` to import test utilities.
