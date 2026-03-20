@@ -6,7 +6,7 @@ import {
   typography,
 } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
-import { skelleton } from '@/design-system/tokens/commons.stylex';
+import { skeleton } from '@/design-system/tokens/commons.stylex';
 import { filterBaseStyles } from '@/design-system/tokens/filters.stylex';
 
 const localStyles = stylex.create({
@@ -126,7 +126,7 @@ const localStyles = stylex.create({
   },
 });
 
-export const skeletonStyles = { ...skelleton };
+export const skeletonStyles = { ...skeleton };
 
 export const styles = {
   checkbox: localStyles.checkbox,

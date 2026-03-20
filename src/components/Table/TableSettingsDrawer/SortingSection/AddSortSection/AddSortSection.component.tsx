@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 
 import { Button } from '@/components/Button';
 import { SidePanelSectionHeader } from '@/components/SidePanel';
@@ -23,13 +23,10 @@ export const AddSortSection = ({
   const [selectedColumn, setSelectedColumn] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  const handleOpenChange = useCallback(
-    (isOpen: boolean) => {
-      setIsDropdownOpen(isOpen);
-      onDropdownOpenChange?.(isOpen);
-    },
-    [onDropdownOpenChange],
-  );
+  const handleOpenChange = (isOpen: boolean) => {
+    setIsDropdownOpen(isOpen);
+    onDropdownOpenChange?.(isOpen);
+  };
 
   // Filter to only sortable columns
   const sortableColumns = columns.filter((col) => col.isSortable !== false);

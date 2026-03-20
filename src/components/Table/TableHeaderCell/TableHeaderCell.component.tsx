@@ -35,7 +35,7 @@ import {
 } from '../contexts/TableConfig/meta/actions';
 import { SortIcon } from './SortIcon';
 import {
-  skelletonStyles,
+  skeletonStyles,
   tableHeaderCellStyles,
 } from './TableHeaderCell.stylex';
 import { getNextSortDirection, getPinnedStyle, getShadowStyle } from './utils';
@@ -145,8 +145,8 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
     >
       {/* Loading overlay with shimmer */}
       {isLoadingState && (
-        <div {...stylex.props(skelletonStyles.loadingOverlay)}>
-          <div {...stylex.props(skelletonStyles.shimmerWave)} />
+        <div {...stylex.props(skeletonStyles.loadingOverlay)}>
+          <div {...stylex.props(skeletonStyles.shimmerWave)} />
         </div>
       )}
       {!isHeaderHidden && (

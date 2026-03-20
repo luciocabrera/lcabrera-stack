@@ -259,7 +259,7 @@ export const orientationVariants = stylex.create({
   },
 });
 
-export const skelleton = stylex.create({
+export const skeleton = stylex.create({
   /** Loading overlay container for shimmer effect (absolute, covers parent) */
   loadingOverlay: {
     borderRadius: borderRadius.sm,

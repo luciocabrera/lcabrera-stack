@@ -12,7 +12,7 @@ import { useTableDataContextValue } from '@/components/Table/contexts/TableData/
 import { usePersistTableStateAction } from '@/components/Table/hooks';
 import {
   getEffectiveColumns,
-  getNormalizedColummns,
+  getNormalizedColumns,
 } from '@/components/Table/utils';
 import { serializeFiltersToURL, serializeSortingToURL } from '@/utils/urlState';
 
@@ -44,7 +44,7 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
       columnVisibility: settings.columnVisibility,
     });
 
-    const normalizedColumns = getNormalizedColummns({
+    const normalizedColumns = getNormalizedColumns({
       columns: columnsState?.columns ?? [],
       sorting: settings.sorting,
     });

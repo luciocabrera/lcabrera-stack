@@ -7,7 +7,7 @@ import type {
 
 import {
   getEffectiveColumns,
-  getNormalizedColummns,
+  getNormalizedColumns,
   getStaticColumnKeys,
 } from '@/components/Table/utils';
 
@@ -29,7 +29,7 @@ export const getInitialColumnsState = <TData>({
     columnVisibility,
   });
 
-  const normalizedColumns = getNormalizedColummns<TData>({
+  const normalizedColumns = getNormalizedColumns<TData>({
     columns,
     sorting,
   });
