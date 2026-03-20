@@ -4,12 +4,12 @@ import type { RadioOptionGroupProps } from './RadioOptionGroup.types';
 
 import { styles } from './RadioOptionGroup.stylex';
 
-export const RadioOptionGroup = ({
+export const RadioOptionGroup = <TValue extends string>({
   name,
   onChange,
   options,
   value,
-}: RadioOptionGroupProps) => (
+}: RadioOptionGroupProps<TValue>) => (
   <div {...stylex.props(styles.container)}>
     {options.map((option) => (
       <label

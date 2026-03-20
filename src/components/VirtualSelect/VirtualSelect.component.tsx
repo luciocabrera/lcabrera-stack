@@ -7,7 +7,10 @@ import type { SelectFilter } from '@/types/filterOperators.types';
 import { VirtualList } from '@/components/VirtualList';
 import { useClickOutside } from '@/hooks';
 
-import type { VirtualSelectProps } from './VirtualSelect.types';
+import type {
+  VirtualSelectOption,
+  VirtualSelectProps,
+} from './VirtualSelect.types';
 
 import { countVisibleTags, getDropdownStyle } from './utils';
 import { styles } from './VirtualSelect.stylex';
@@ -33,16 +36,26 @@ export const VirtualSelect = ({
   const [visibleTagCount, setVisibleTagCount] = useState(selected.length);
   const [isOpen, setIsOpen] = useState(false);
 
+  // Normalize to { label, value } pairs — plain strings become { label: x, value: x }
+  const optionEntries: VirtualSelectOption[] = options.map((o) =>
+    typeof o === 'string' ? { label: o, value: o } : o,
+  );
+
+  // Map selected values → display labels for VirtualList and Trigger
+  const selectedLabels = selected.map(
+    (v) => optionEntries.find((o) => o.value === v)?.label ?? v,
+  );
+
   const hasSelection = selected.length > 0;
   const isListVisible = isAlwaysOpen ? true : isOpen;
   const computedVisibleCount =
     mode === 'multi' && hasSelection ? visibleTagCount : selected.length;
   const overflowCount = selected.length - computedVisibleCount;
-  const visibleTags = selected.slice(0, computedVisibleCount);
+  const visibleTags = selectedLabels.slice(0, computedVisibleCount);
 
-  // Static mode: wrap options in a VirtualListDataState
+  // Static mode: wrap option labels in a VirtualListDataState
   const effectiveDataState: VirtualListDataState = dataState ?? {
-    data: options,
+    data: optionEntries.map((o) => o.label),
     hasMore: false,
     isLoading: false,
     isLoadingMore: false,
@@ -89,21 +102,27 @@ export const VirtualSelect = ({
   };
 
   const handleVirtualListChange = (filter?: SelectFilter) => {
-    const values = filter?.values ?? [];
+    const selectedInListLabels = filter?.values ?? [];
+
+    // Map display labels back to values before reporting to parent
+    const selectedValues = selectedInListLabels.map(
+      (label) => optionEntries.find((o) => o.label === label)?.value ?? label,
+    );
 
     if (mode === 'single') {
       // Find the newly added value (not in current selected)
-      const newValue = values.find((v) => !selected.includes(v));
+      const newValue = selectedValues.find((v) => !selected.includes(v));
       onChange(newValue ? [newValue] : []);
       handleClose();
       return;
     }
 
-    onChange(values);
+    onChange(selectedValues);
   };
 
-  const handleRemoveTag = (option: string) => {
-    onChange(selected.filter((v) => v !== option));
+  const handleRemoveTag = (label: string) => {
+    const value = optionEntries.find((o) => o.label === label)?.value ?? label;
+    onChange(selected.filter((v) => v !== value));
   };
 
   return (
@@ -138,7 +157,7 @@ export const VirtualSelect = ({
         >
           <VirtualList
             dataState={effectiveDataState}
-            filter={{ type: 'select', values: selected }}
+            filter={{ type: 'select', values: selectedLabels }}
             hasCheckboxes={mode === 'multi'}
             hasSelectAll={mode === 'multi'}
             listMaxHeight={listMaxHeight}

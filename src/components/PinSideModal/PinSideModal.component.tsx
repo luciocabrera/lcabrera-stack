@@ -51,7 +51,7 @@ export const PinSideModal = ({
       <RadioOptionGroup
         name='pin-side-selection'
         onChange={(value) => {
-          setSelectedSide(value as PinSide);
+          setSelectedSide(value);
         }}
         options={[
           {

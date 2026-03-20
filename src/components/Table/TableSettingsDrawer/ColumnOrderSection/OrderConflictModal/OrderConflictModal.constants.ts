@@ -2,9 +2,7 @@ import type { RadioOption } from '@/components/RadioOptionGroup/RadioOptionGroup
 
 import type { OrderConflictResolution } from '../ColumnOrderSection.types';
 
-export const RESOLUTIONS: (RadioOption & {
-  value: OrderConflictResolution;
-})[] = [
+export const RESOLUTIONS: RadioOption<OrderConflictResolution>[] = [
   {
     description:
       'Apply the new column order and remove any pinning that no longer matches.',

@@ -53,7 +53,7 @@ export const PinConflictModal = ({
       <RadioOptionGroup
         name='pin-conflict-resolution'
         onChange={(value) => {
-          setSelectedResolution(value as PinConflictResolution);
+          setSelectedResolution(value);
         }}
         options={[
           {

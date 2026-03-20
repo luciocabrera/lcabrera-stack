@@ -54,7 +54,7 @@ export const OrderConflictModal = ({
       <RadioOptionGroup
         name='sort-order-conflict-resolution'
         onChange={(value) => {
-          setSelectedResolution(value as OrderConflictResolution);
+          setSelectedResolution(value);
         }}
         options={RESOLUTIONS}
         value={selectedResolution}
