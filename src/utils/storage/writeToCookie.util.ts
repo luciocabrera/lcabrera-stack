@@ -5,9 +5,9 @@ type WriteToCookieArgs = {
    * Optional response headers for SSR context.
    * When provided, appends a Set-Cookie header instead of using document.cookie.
    */
-  headers?: Headers;
-  key: string;
-  value: string;
+  readonly headers?: Headers;
+  readonly key: string;
+  readonly value: string;
 };
 
 /**

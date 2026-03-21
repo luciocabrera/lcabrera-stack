@@ -9,9 +9,9 @@ type SerializedStateSlice = {
 };
 
 type SerializeStateSliceArgs = {
-  persistenceKey: string;
-  slice: keyof TablePersistenceConfig;
-  value: unknown;
+  readonly persistenceKey: string;
+  readonly slice: keyof TablePersistenceConfig;
+  readonly value: unknown;
 };
 
 /**

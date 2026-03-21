@@ -5,11 +5,11 @@ import type { StorageType, TablePersistenceConfig } from '../Table.types';
 import { serializeStateSlice } from './serializeStateSlice.util';
 
 type WriteStateSliceArgs = {
-  headers?: Headers;
-  persistenceKey: string;
-  slice: keyof TablePersistenceConfig;
-  storageType: StorageType;
-  value: unknown;
+  readonly headers?: Headers;
+  readonly persistenceKey: string;
+  readonly slice: keyof TablePersistenceConfig;
+  readonly storageType: StorageType;
+  readonly value: unknown;
 };
 
 /**

@@ -6,9 +6,9 @@ import type {
 import type { OrderConflictResolution } from '../ColumnOrderSection.types';
 
 type ResolvePinOrderConflictArgs = {
-  columnPinning: ColumnPinningState;
-  newOrder: ColumnOrderState;
-  resolution: OrderConflictResolution;
+  readonly columnPinning: ColumnPinningState;
+  readonly newOrder: ColumnOrderState;
+  readonly resolution: OrderConflictResolution;
 };
 
 type ResolvePinOrderConflictResult = {

@@ -4,9 +4,9 @@ import type {
 } from '@/components/Table/Table.types';
 
 type GetSelectedColumnLabelArgs = {
-  filterableColumns: TableColumn<Record<string, unknown>>[];
-  filters: ColumnFiltersState;
-  selectedColumn: string;
+  readonly filterableColumns: TableColumn<Record<string, unknown>>[];
+  readonly filters: ColumnFiltersState;
+  readonly selectedColumn: string;
 };
 
 export const getSelectedColumnLabel = ({

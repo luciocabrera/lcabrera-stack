@@ -5,9 +5,9 @@ import type {
 } from '@/types/filterOperators.types';
 
 type GetSelectedOperatorLabelArgs = {
-  filter?: ColumnFilter;
-  operator: OperatorType;
-  operatorOptions: OperatorOption[];
+  readonly filter?: ColumnFilter;
+  readonly operator: OperatorType;
+  readonly operatorOptions: OperatorOption[];
 };
 
 export const getSelectedOperatorLabel = ({

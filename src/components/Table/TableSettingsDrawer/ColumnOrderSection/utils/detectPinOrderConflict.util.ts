@@ -4,9 +4,9 @@ import type {
 } from '@/components/Table/Table.types';
 
 type DetectPinOrderConflictArgs = {
-  columnPinning: ColumnPinningState;
-  newOrder: ColumnOrderState;
-  staticKeys?: Set<string>;
+  readonly columnPinning: ColumnPinningState;
+  readonly newOrder: ColumnOrderState;
+  readonly staticKeys?: Set<string>;
 };
 
 /**

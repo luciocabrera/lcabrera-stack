@@ -46,4 +46,19 @@ describe('insertAdjacentToPinnedGroup', () => {
     });
     expect(result).toEqual(['id', 'name', 'status']);
   });
+
+  it('does not mutate input order', () => {
+    const order = ['id', 'name', 'age'];
+
+    const result = insertAdjacentToPinnedGroup({
+      columnKey: 'status',
+      columnPinning: { left: ['id'], right: [] },
+      order,
+      side: 'left',
+    });
+
+    expect(order).toEqual(['id', 'name', 'age']);
+    expect(result).toEqual(['id', 'status', 'name', 'age']);
+    expect(result).not.toBe(order);
+  });
 });

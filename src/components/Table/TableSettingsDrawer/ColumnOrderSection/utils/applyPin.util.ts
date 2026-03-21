@@ -1,10 +1,10 @@
 import type { ColumnPinningState } from '@/components/Table/Table.types';
 
 type ApplyPinArgs = {
-  columnKey: string;
-  columnPinning: ColumnPinningState;
-  side: 'left' | 'right';
-  staticKeys?: Set<string>;
+  readonly columnKey: string;
+  readonly columnPinning: ColumnPinningState;
+  readonly side: 'left' | 'right';
+  readonly staticKeys?: Set<string>;
 };
 
 /**

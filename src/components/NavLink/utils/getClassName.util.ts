@@ -10,12 +10,12 @@ import type {
 import type { linkItemStyles } from '../NavLink.stylex';
 
 type GetClassNameArgs = {
-  color: DesignSystemColor;
-  isActive: boolean;
-  orientation: DesignSystemOrientation;
-  size: DesignSystemSize;
-  styles: typeof linkItemStyles;
-  width?: DesignSystemWidth;
+  readonly color: DesignSystemColor;
+  readonly isActive: boolean;
+  readonly orientation: DesignSystemOrientation;
+  readonly size: DesignSystemSize;
+  readonly styles: typeof linkItemStyles;
+  readonly width?: DesignSystemWidth;
 };
 
 export const getClassName = ({

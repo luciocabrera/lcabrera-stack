@@ -1,9 +1,9 @@
 import type { ColumnOrderState } from '@/components/Table/Table.types';
 
 type RestoreStaticColumnOrderArgs = {
-  currentOrder: ColumnOrderState;
-  newOrder: ColumnOrderState;
-  staticKeys: Set<string>;
+  readonly currentOrder: ColumnOrderState;
+  readonly newOrder: ColumnOrderState;
+  readonly staticKeys: Set<string>;
 };
 
 /**

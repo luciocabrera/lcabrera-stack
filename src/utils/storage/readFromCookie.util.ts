@@ -1,8 +1,8 @@
 import { parseCookies } from '../theme-cookie.util';
 
 type ReadFromCookieArgs = {
-  cookieString?: string;
-  key: string;
+  readonly cookieString?: string;
+  readonly key: string;
 };
 
 /**

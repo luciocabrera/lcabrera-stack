@@ -8,8 +8,8 @@ import type {
 import { readStateFromURL } from './readStateFromURL.util';
 
 type ReadTableStateFromURLArgs = {
-  persistenceKey: string;
-  searchParams: URLSearchParams;
+  readonly persistenceKey: string;
+  readonly searchParams: URLSearchParams;
 };
 
 type TableSearchParamsState = {

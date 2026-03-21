@@ -1,5 +1,5 @@
 type GetStorageKeyArgs = {
-  persistenceKey: string;
+  readonly persistenceKey: string;
 };
 
 /**

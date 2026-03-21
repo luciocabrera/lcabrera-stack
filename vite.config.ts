@@ -26,7 +26,7 @@ export default defineConfig({
         plugins: [['babel-plugin-react-compiler']],
         presets: ['@babel/preset-typescript'],
       },
-      filter: /\.[jt]sx?$/,
+      filter: /(?<!\.test)\.[jt]sx?$/,
     }),
   ],
   resolve: {

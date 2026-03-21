@@ -4,11 +4,11 @@ import type {
 } from '@/components/Table/Table.types';
 
 type SyncColumnOrderWithPinningArgs = {
-  columnKey: string;
-  columnPinning: 'left' | 'right' | undefined;
-  columns: TableColumn<Record<string, unknown>>[];
-  currentOrder: string[];
-  newPinning: ColumnPinningState<Record<string, unknown>>;
+  readonly columnKey: string;
+  readonly columnPinning: 'left' | 'right' | undefined;
+  readonly columns: TableColumn<Record<string, unknown>>[];
+  readonly currentOrder: string[];
+  readonly newPinning: ColumnPinningState<Record<string, unknown>>;
 };
 
 /**

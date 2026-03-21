@@ -1,6 +1,6 @@
 type WriteToLocalStorageArgs = {
-  key: string;
-  value: string;
+  readonly key: string;
+  readonly value: string;
 };
 
 /**

@@ -6,8 +6,8 @@ import { getStorageKey } from './getStorageKey.util';
 import { PERSISTENCE_VERSION } from './persistence.constants';
 
 type ReadPersistedStateFromCookieArgs = {
-  cookieString?: string;
-  persistenceKey: string;
+  readonly cookieString?: string;
+  readonly persistenceKey: string;
 };
 
 /**

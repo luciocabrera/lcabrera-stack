@@ -1,6 +1,6 @@
 type DecodeStateFromURLArgs = {
-  convertArraysToSets?: string[];
-  encoded: string;
+  readonly convertArraysToSets?: string[];
+  readonly encoded: string;
 };
 
 /**
