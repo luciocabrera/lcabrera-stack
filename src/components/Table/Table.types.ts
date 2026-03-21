@@ -198,6 +198,7 @@ export type TableDataState<TData> = {
 export type TableDensity = 'comfortable' | 'compact';
 
 export type TableMetaState = {
+  readonly columnOverscan: number;
   readonly columnSelectedKey?: string;
   readonly density: TableDensity;
   /** Error message if data fetch failed */

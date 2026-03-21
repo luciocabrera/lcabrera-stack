@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 
 import type { ThemeMode } from '@/types/theme.types';
 
-import { setThemeCookie } from '@/utils/theme-cookie.util';
+import { setThemeCookie } from '@/utils/theme';
 
 import type { ThemeProviderProps } from './ThemeContext.types';
 

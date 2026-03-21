@@ -1,23 +1,9 @@
 import type { ThemeMode } from '@/types/theme.types';
 
+import { parseCookies } from '../storage/parseCookies.util';
+
 const THEME_COOKIE_NAME = 'theme';
 const COOKIE_MAX_AGE_DAYS = 365; // 1 year
-
-/**
- * Parse cookies from a cookie header string
- */
-export const parseCookies = (cookieHeader: string): Record<string, string> => {
-  const cookies: Record<string, string> = {};
-
-  for (const cookie of cookieHeader.split(';')) {
-    const [name, ...valueParts] = cookie.trim().split('=');
-    if (name) {
-      cookies[name] = valueParts.join('=');
-    }
-  }
-
-  return cookies;
-};
 
 /**
  * Get theme from cookie header (for server-side use)

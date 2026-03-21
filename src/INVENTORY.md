@@ -6,50 +6,67 @@ Before creating anything new, check this inventory. If something here does the j
 
 ## Components
 
-| Component          | Location                       | Description                                                                         |
-| ------------------ | ------------------------------ | ----------------------------------------------------------------------------------- |
-| `Button`           | `components/Button/`           | Interactive button — 8 color variants, 5 sizes, icon, loading, tooltip              |
-| `Card`             | `components/Card/`             | Container with elevation, color, padding, and optional interactivity                |
-| `DevStyleXInject`  | `components/DevStyleXInject/`  | Dev-only StyleX CSS injector for HMR; must be at app root                           |
-| `DraggableList`    | `components/DraggableList/`    | Drag-and-drop reorderable list using native drag events                             |
-| `Icons`            | `components/Icons/`            | 30 SVG icon components (see `Icons/index.ts` for full list)                         |
-| `InfoBox`          | `components/InfoBox/`          | Styled container for informational messages and empty states                        |
-| `Modal`            | `components/Modal/`            | Native `<dialog>` modal with title, footer, Esc-to-close                            |
-| `NavLink`          | `components/NavLink/`          | Router-aware navigation link with color, size, icon, orientation                    |
-| `PinSideModal`     | `components/PinSideModal/`     | Modal for choosing column pin side (left / right / closest-edge)                    |
-| `RadioOptionGroup` | `components/RadioOptionGroup/` | Generic `<TValue extends string>` radio button group                                |
-| `SidePanel`        | `components/SidePanel/`        | Off-canvas panel with 10 sub-components, pinning, portal support                    |
-| `Table`            | `components/Table/`            | Full-featured data table — sort, filter, pin, resize, virtualize, persist           |
-| `Tabs`             | `components/Tabs/`             | Keyboard-navigable tab bar using React 19 `<Activity>`                              |
-| `Tag`              | `components/Tag/`              | Label chip with optional remove button                                              |
-| `ToggleSwitch`     | `components/ToggleSwitch/`     | Accessible boolean toggle (controlled, `role="switch"`)                             |
-| `Toolbar`          | `components/Toolbar/`          | Horizontal/vertical toolbar of Button/NavLink items                                 |
-| `Tooltip`          | `components/Tooltip/`          | CSS Anchor + Popover API tooltip, 4 placements, animated                            |
-| `VirtualList`      | `components/VirtualList/`      | Virtualized list with search, select-all, checkboxes, lazy load                     |
-| `VirtualSelect`    | `components/VirtualSelect/`    | Dropdown select backed by `VirtualList`; `string[]` or `{ label, value }[]` options |
+| Component          | Location                       | Description                                                                            |
+| ------------------ | ------------------------------ | -------------------------------------------------------------------------------------- |
+| `Button`           | `components/Button/`           | Interactive button — 8 color variants, 5 sizes, icon, loading, tooltip                 |
+| `Card`             | `components/Card/`             | Container with elevation, color, padding, and optional interactivity                   |
+| `DevStyleXInject`  | `components/DevStyleXInject/`  | Dev-only StyleX CSS injector for HMR; must be at app root                              |
+| `DraggableList`    | `components/DraggableList/`    | Drag-and-drop reorderable list using native drag events                                |
+| `Icons`            | `components/Icons/`            | 30 SVG icon components (see `Icons/index.ts` for full list)                            |
+| `InfoBox`          | `components/InfoBox/`          | Styled container for informational messages and empty states                           |
+| `Modal`            | `components/Modal/`            | Native `<dialog>` modal with title, footer, Esc-to-close                               |
+| `NavLink`          | `components/NavLink/`          | Router-aware navigation link with color, size, icon, orientation                       |
+| `PinSideModal`     | `components/PinSideModal/`     | Modal for choosing column pin side (left / right / closest-edge)                       |
+| `RadioOptionGroup` | `components/RadioOptionGroup/` | Generic `<TValue extends string>` radio button group                                   |
+| `SidePanel`        | `components/SidePanel/`        | Off-canvas panel with 10 sub-components, pinning, portal support                       |
+| `Table`            | `components/Table/`            | Full-featured data table — sort, filter, pin, resize, row + column virtualise, persist |
+| `Tabs`             | `components/Tabs/`             | Keyboard-navigable tab bar using React 19 `<Activity>`                                 |
+| `Tag`              | `components/Tag/`              | Label chip with optional remove button                                                 |
+| `ToggleSwitch`     | `components/ToggleSwitch/`     | Accessible boolean toggle (controlled, `role="switch"`)                                |
+| `Toolbar`          | `components/Toolbar/`          | Horizontal/vertical toolbar of Button/NavLink items                                    |
+| `Tooltip`          | `components/Tooltip/`          | CSS Anchor + Popover API tooltip, 4 placements, animated                               |
+| `VirtualList`      | `components/VirtualList/`      | Virtualized list with search, select-all, checkboxes, lazy load                        |
+| `VirtualSelect`    | `components/VirtualSelect/`    | Dropdown select backed by `VirtualList`; `string[]` or `{ label, value }[]` options    |
 
 ---
 
 ## Hooks
 
-| Hook                | Location                          | Description                                                                               |
-| ------------------- | --------------------------------- | ----------------------------------------------------------------------------------------- |
-| `useClickOutside`   | `hooks/useClickOutside.hook.ts`   | Fires callback when a `mousedown` occurs outside a given ref                              |
-| `useStore`          | `hooks/useStore.hook.ts`          | Ref-based external store with shallow-equality guard, subscribe, reset, SSR snapshot      |
-| `useTheme`          | `hooks/useTheme.hook.ts`          | Returns `{ theme, setTheme }` from `ThemeContext` via React 19 `use()`                    |
-| `useVirtualization` | `hooks/useVirtualization.hook.ts` | Computes `startIndex`, `endIndex`, `totalHeight`, `offsetY` for a scrollable virtual list |
+| Hook                      | Location                                | Description                                                                                                   |
+| ------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `useClickOutside`         | `hooks/useClickOutside.hook.ts`         | Fires callback when a `mousedown` occurs outside a given ref                                                  |
+| `useStore`                | `hooks/useStore.hook.ts`                | Ref-based external store with shallow-equality guard, subscribe, reset, SSR snapshot                          |
+| `useTheme`                | `hooks/useTheme.hook.ts`                | Returns `{ theme, setTheme }` from `ThemeContext` via React 19 `use()`                                        |
+| `useColumnVirtualization` | `hooks/useColumnVirtualization.hook.ts` | Computes `startIndex`, `endIndex`, `leftSpacerWidth`, `rightSpacerWidth` for horizontal column virtualisation |
+| `useVirtualization`       | `hooks/useVirtualization.hook.ts`       | Computes `startIndex`, `endIndex`, `totalHeight`, `offsetY` for a scrollable virtual list                     |
 
 ---
 
 ## Utility Functions
 
-### `src/utils/`
+### `src/utils/api/`
 
-| Function                                | Location                                  | Description                                                                   |
-| --------------------------------------- | ----------------------------------------- | ----------------------------------------------------------------------------- |
-| `createStaticFilterOptions`             | `utils/createStaticFilterOptions.util.ts` | Wraps a `string[]` into a `FilterOptionsResponse`-compatible paginated object |
-| `shallowEqual`                          | `utils/shallowEqual.util.ts`              | `{ objA, objB }` → `boolean`; one-level key+value equality check              |
-| `getThemeFromCookie` / `setThemeCookie` | `utils/theme-cookie.util.ts`              | Read/write theme mode to a cookie (SSR-safe)                                  |
+| Function        | Location                | Description                                                                      |
+| --------------- | ----------------------- | -------------------------------------------------------------------------------- |
+| `getApiBaseUrl` | `utils/api/api.util.ts` | Resolves API base URL for SSR/client via request URL, env var, or hostname logic |
+
+### `src/utils/comparison/`
+
+| Function       | Location                                | Description                                                      |
+| -------------- | --------------------------------------- | ---------------------------------------------------------------- |
+| `shallowEqual` | `utils/comparison/shallowEqual.util.ts` | `{ objA, objB }` → `boolean`; one-level key+value equality check |
+
+### `src/utils/filters/`
+
+| Function                    | Location                                          | Description                                                                   |
+| --------------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `createStaticFilterOptions` | `utils/filters/createStaticFilterOptions.util.ts` | Wraps a `string[]` into a `FilterOptionsResponse`-compatible paginated object |
+
+### `src/utils/theme/`
+
+| Function                                | Location                           | Description                                  |
+| --------------------------------------- | ---------------------------------- | -------------------------------------------- |
+| `getThemeFromCookie` / `setThemeCookie` | `utils/theme/theme-cookie.util.ts` | Read/write theme mode to a cookie (SSR-safe) |
 
 ### `src/utils/formatters/`
 
@@ -64,12 +81,13 @@ Before creating anything new, check this inventory. If something here does the j
 
 ### `src/utils/storage/`
 
-| Function              | Location                                    | Description                                                                       |
-| --------------------- | ------------------------------------------- | --------------------------------------------------------------------------------- |
-| `buildCookieString`   | `utils/storage/buildCookieString.util.ts`   | Serialises key/value to a `Set-Cookie` string (1y expiry, `SameSite=Lax`)         |
-| `readFromCookie`      | `utils/storage/readFromCookie.util.ts`      | Reads a named cookie value from `document.cookie` or a provided string (SSR-safe) |
-| `writeToCookie`       | `utils/storage/writeToCookie.util.ts`       | Writes a cookie via `document.cookie` or returns a `Set-Cookie` header (SSR-safe) |
-| `writeToLocalStorage` | `utils/storage/writeToLocalStorage.util.ts` | Writes to `localStorage` with error handling for quota/disabled scenarios         |
+| Function              | Location                                    | Description                                                                        |
+| --------------------- | ------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `buildCookieString`   | `utils/storage/buildCookieString.util.ts`   | Serialises key/value to a `Set-Cookie` string (1y expiry, `SameSite=Lax`)          |
+| `parseCookies`        | `utils/storage/parseCookies.util.ts`        | Splits a raw `Cookie:` header string into a `Record<string, string>` key/value map |
+| `readFromCookie`      | `utils/storage/readFromCookie.util.ts`      | Reads a named cookie value from `document.cookie` or a provided string (SSR-safe)  |
+| `writeToCookie`       | `utils/storage/writeToCookie.util.ts`       | Writes a cookie via `document.cookie` or returns a `Set-Cookie` header (SSR-safe)  |
+| `writeToLocalStorage` | `utils/storage/writeToLocalStorage.util.ts` | Writes to `localStorage` with error handling for quota/disabled scenarios          |
 
 ### `src/utils/urlState/`
 

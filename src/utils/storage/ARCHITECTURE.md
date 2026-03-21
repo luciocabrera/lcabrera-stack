@@ -9,6 +9,7 @@ storage/
 ├── ARCHITECTURE.md
 ├── index.ts
 ├── buildCookieString.util.ts
+├── parseCookies.util.ts
 ├── readFromCookie.util.ts
 ├── writeToCookie.util.ts
 └── writeToLocalStorage.util.ts
@@ -18,12 +19,13 @@ storage/
 
 ```mermaid
 graph TD
-  Index[Storage index] --> Read[Read from cookie utility]
+  Index[Storage index] --> Parse[Parse cookies utility]
+  Index --> Read[Read from cookie utility]
   Index --> WriteCookie[Write to cookie utility]
   Index --> WriteLocal[Write to localStorage utility]
 
   WriteCookie --> BuildCookie[Build cookie string utility]
-  Read --> Parse[Parse cookies helper]
+  Read --> Parse
 ```
 
 ## Utilities

@@ -6,21 +6,23 @@ Custom React hooks shared across the application.
 
 ```
 hooks/
-├── index.ts                        → Barrel export
-├── useClickOutside.hook.ts         → Detect mousedown outside a DOM element
-├── useStore.hook.ts                → Lightweight external store (useSyncExternalStore-compatible)
-├── useTheme.hook.ts                → Access ThemeContext via React 19 use()
-└── useVirtualization.hook.ts       → Virtual-scroll geometry computation
+├── index.ts                              → Barrel export
+├── useClickOutside.hook.ts               → Detect mousedown outside a DOM element
+├── useColumnVirtualization.hook.ts       → Horizontal virtual-scroll geometry computation
+├── useStore.hook.ts                      → Lightweight external store (useSyncExternalStore-compatible)
+├── useTheme.hook.ts                      → Access ThemeContext via React 19 use()
+└── useVirtualization.hook.ts             → Vertical virtual-scroll geometry computation
 ```
 
 ## Hook Summary
 
-| Hook                | Category      | Returns                                | Key dependency                           |
-| ------------------- | ------------- | -------------------------------------- | ---------------------------------------- |
-| `useClickOutside`   | DOM event     | `void`                                 | `document` mousedown                     |
-| `useStore`          | State mgmt    | `TStore<TData>`                        | `useRef`, `shallowEqual`                 |
-| `useTheme`          | Context       | `ThemeContextValue`                    | `ThemeContext`, `use()`                  |
-| `useVirtualization` | Layout/scroll | `{ startIndex, endIndex, offsetY, … }` | `ResizeObserver`-like via `resize` event |
+| Hook                      | Category      | Returns                                        | Key dependency                           |
+| ------------------------- | ------------- | ---------------------------------------------- | ---------------------------------------- |
+| `useClickOutside`         | DOM event     | `void`                                         | `document` mousedown                     |
+| `useColumnVirtualization` | Layout/scroll | `{ startIndex, endIndex, leftSpacerWidth, … }` | scroll/resize events on container        |
+| `useStore`                | State mgmt    | `TStore<TData>`                                | `useRef`, `shallowEqual`                 |
+| `useTheme`                | Context       | `ThemeContextValue`                            | `ThemeContext`, `use()`                  |
+| `useVirtualization`       | Layout/scroll | `{ startIndex, endIndex, offsetY, … }`         | `ResizeObserver`-like via `resize` event |
 
 ---
 
@@ -54,6 +56,66 @@ graph TD
 | `onClickOutside` | `() => void`                     | Called on outside mousedown       |
 
 > Both `ref` and `onClickOutside` are dependencies of the `useEffect`. Consumers should stabilise `onClickOutside` with `useCallback` to avoid re-registering the listener on every render.
+
+---
+
+## `useColumnVirtualization`
+
+Computes the horizontal virtual-scroll window for a list of columns with
+variable widths. Mirrors the geometry logic of `useVirtualization` but for
+the X-axis and variable-width items.
+
+### Signature
+
+```ts
+useColumnVirtualization(args: UseColumnVirtualizationArgs): UseColumnVirtualizationReturn
+```
+
+### `UseColumnVirtualizationArgs`
+
+| Field                   | Type                             | Default | Description                                     |
+| ----------------------- | -------------------------------- | ------- | ----------------------------------------------- |
+| `columnWidths`          | `readonly number[]`              | —       | Pixel widths of the non-pinned (center) columns |
+| `containerRef`          | `RefObject<HTMLElement \| null>` | —       | Scrollable container element                    |
+| `defaultContainerWidth` | `number`                         | `800`   | Fallback width before DOM measurement           |
+| `overscan`              | `number`                         | `2`     | Extra columns rendered beyond each visible edge |
+
+### `UseColumnVirtualizationReturn`
+
+| Field              | Type     | Description                                               |
+| ------------------ | -------- | --------------------------------------------------------- |
+| `startIndex`       | `number` | First rendered center-column index (inclusive)            |
+| `endIndex`         | `number` | Last rendered center-column index (exclusive)             |
+| `leftSpacerWidth`  | `number` | Pixel width of the spacer cell inserted before the window |
+| `rightSpacerWidth` | `number` | Pixel width of the spacer cell inserted after the window  |
+| `totalWidth`       | `number` | Sum of all center-column widths                           |
+
+### Geometry
+
+```
+←──────────────── totalWidth ─────────────────→
+┌──────────────────────────────────────────────┐
+│ [skipped]  │  rendered window  │  [skipped]  │
+│← leftSpacer→← startIdx…endIdx →← rightSpacer→│
+└──────────────────────────────────────────────┘
+       ↑ container viewport ↑
+```
+
+### Usage in `TableHeader` / `TableBody`
+
+```tsx
+const { startIndex, endIndex, leftSpacerWidth, rightSpacerWidth } =
+  useColumnVirtualization({ columnWidths, containerRef, overscan });
+
+// Per row:
+[
+  ...leftPinnedCells,
+  leftSpacerWidth > 0 && <SpacerCell width={leftSpacerWidth} />,
+  ...centerCols.slice(startIndex, endIndex).map(renderCell),
+  rightSpacerWidth > 0 && <SpacerCell width={rightSpacerWidth} />,
+  ...rightPinnedCells,
+];
+```
 
 ---
 

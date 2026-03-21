@@ -58,12 +58,13 @@ Table/
 ├── TableLayout/                   → Route-level entry with provider stack
 ├── TableContent/                  → Layout: title + scroll area + drawers
 ├── TableBase/                     → <table> with density/border/stripe styles
-├── TableHeader/                   → <thead> → TableRow → TableHeaderCell[]
+├── TableHeader/                   → <thead> → TableRow → TableHeaderCell[] (column-virtualised)
 ├── TableHeaderCell/               → Interactive <th>: sort, pin, resize, settings
-├── TableBody/                     → Virtualized <tbody> with row windowing
+├── TableBody/                     → Virtualised <tbody>: row + column windowing
 ├── TableBodyCell/                 → Auto-formatted <td> with type detection
 ├── TableRow/                      → Styled <tr> with stripe/header variants
-├── SpacerRow/                     → Virtual scroll spacer <tr>
+├── SpacerRow/                     → Vertical virtual-scroll spacer <tr>
+├── SpacerCell/                    → Horizontal virtual-scroll spacer <td>/<th>
 ├── TableTitle/                    → Title bar with icon + actions slot
 ├── TableCheckDisplay/             → Boolean checkbox display
 ├── TableSkeleton/                 → Loading placeholder (reuses Table)
@@ -177,6 +178,7 @@ See [hooks/ARCHITECTURE.md](hooks/ARCHITECTURE.md) and
 | TableBodyCell         | [TableBodyCell/ARCHITECTURE.md](TableBodyCell/ARCHITECTURE.md)                 |
 | TableRow              | [TableRow/ARCHITECTURE.md](TableRow/ARCHITECTURE.md)                           |
 | SpacerRow             | [SpacerRow/ARCHITECTURE.md](SpacerRow/ARCHITECTURE.md)                         |
+| SpacerCell            | [SpacerCell/ARCHITECTURE.md](SpacerCell/ARCHITECTURE.md)                       |
 | TableTitle            | [TableTitle/ARCHITECTURE.md](TableTitle/ARCHITECTURE.md)                       |
 | TableCheckDisplay     | [TableCheckDisplay/ARCHITECTURE.md](TableCheckDisplay/ARCHITECTURE.md)         |
 | TableSkeleton         | [TableSkeleton/ARCHITECTURE.md](TableSkeleton/ARCHITECTURE.md)                 |
