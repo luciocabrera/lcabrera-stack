@@ -5,7 +5,20 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Modal } from './Modal.component';
 
+const savedClose = HTMLDialogElement.prototype.close.bind(
+  HTMLDialogElement.prototype,
+);
+const savedShow = HTMLDialogElement.prototype.show.bind(
+  HTMLDialogElement.prototype,
+);
+const savedShowModal = HTMLDialogElement.prototype.showModal.bind(
+  HTMLDialogElement.prototype,
+);
+
 afterEach(() => {
+  HTMLDialogElement.prototype.close = savedClose;
+  HTMLDialogElement.prototype.show = savedShow;
+  HTMLDialogElement.prototype.showModal = savedShowModal;
   cleanup();
 });
 

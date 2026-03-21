@@ -5,7 +5,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Tooltip } from './Tooltip.component';
 
+// eslint-disable-next-line typescript-eslint/unbound-method -- Saving prototype method for teardown restore; binding would create a new function and break restoration
+const savedShowPopover = HTMLElement.prototype.showPopover;
+// eslint-disable-next-line typescript-eslint/unbound-method -- Saving prototype method for teardown restore; binding would create a new function and break restoration
+const savedHidePopover = HTMLElement.prototype.hidePopover;
+
 afterEach(() => {
+  HTMLElement.prototype.showPopover = savedShowPopover;
+  HTMLElement.prototype.hidePopover = savedHidePopover;
   cleanup();
 });
 
@@ -35,8 +42,8 @@ describe('Tooltip', () => {
   });
 
   it('shows popover when trigger receives focus', () => {
-    const showPopover = vi.fn();
-    HTMLElement.prototype.showPopover = showPopover;
+    const showPopoverSpy = vi.fn();
+    HTMLElement.prototype.showPopover = showPopoverSpy;
 
     render(
       <Tooltip content='Focus tooltip'>
@@ -50,6 +57,6 @@ describe('Tooltip', () => {
     }
 
     fireEvent.focus(triggerSpan);
-    expect(showPopover).toHaveBeenCalled();
+    expect(showPopoverSpy).toHaveBeenCalled();
   });
 });

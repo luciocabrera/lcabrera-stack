@@ -16,6 +16,14 @@ export default defineConfig({
     },
   },
   run: runConfig,
+  server: {
+    proxy: {
+      '/api': {
+        changeOrigin: true,
+        target: 'http://localhost:3001',
+      },
+    },
+  },
   staged: {
     '*': 'vp check --fix',
   },

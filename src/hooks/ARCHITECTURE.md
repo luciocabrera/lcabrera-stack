@@ -21,13 +21,13 @@ hooks/
 
 ## Hook Summary
 
-| Hook                      | Category      | Returns                                        | Key dependency                           |
-| ------------------------- | ------------- | ---------------------------------------------- | ---------------------------------------- |
-| `useClickOutside`         | DOM event     | `void`                                         | `document` mousedown                     |
-| `useColumnVirtualization` | Layout/scroll | `{ startIndex, endIndex, leftSpacerWidth, … }` | scroll/resize events on container        |
-| `useStore`                | State mgmt    | `TStore<TData>`                                | `useRef`, `shallowEqual`                 |
-| `useTheme`                | Context       | `ThemeContextValue`                            | `ThemeContext`, `use()`                  |
-| `useVirtualization`       | Layout/scroll | `{ startIndex, endIndex, offsetY, … }`         | `ResizeObserver`-like via `resize` event |
+| Hook                      | Category      | Returns                                        | Key dependency                                |
+| ------------------------- | ------------- | ---------------------------------------------- | --------------------------------------------- |
+| `useClickOutside`         | DOM event     | `void`                                         | `document` mousedown                          |
+| `useColumnVirtualization` | Layout/scroll | `{ startIndex, endIndex, leftSpacerWidth, … }` | `ResizeObserver` + scroll events on container |
+| `useStore`                | State mgmt    | `TStore<TData>`                                | `useRef`, `shallowEqual`                      |
+| `useTheme`                | Context       | `ThemeContextValue`                            | `ThemeContext`, `use()`                       |
+| `useVirtualization`       | Layout/scroll | `{ startIndex, endIndex, offsetY, … }`         | `ResizeObserver`-like via `resize` event      |
 
 ---
 
@@ -72,6 +72,19 @@ the X-axis and variable-width items.
 
 Implementation details:
 
+- Initializes `containerWidth` from `containerRef.current.offsetWidth` when
+  available, falling back to `defaultContainerWidth` only when measurement is
+  unavailable.
+- Uses isomorphic layout effect so initial width/scroll sync runs before paint
+  on the client, reducing first-frame layout shift.
+- Attempts an immediate `offsetWidth` measurement on mount (fast path); falls
+  through when the measurement returns 0 (e.g. due to CSS `container-type:size`
+  containment on an ancestor requiring an extra browser layout pass).
+- Installs a `ResizeObserver` on the container element instead of listening to
+  `window.resize`. `ResizeObserver` fires after the browser resolves layout
+  (including containment passes), covers initial mount, and tracks container
+  size changes that do not trigger a window resize (sidebar toggles, panel
+  resizes, etc.).
 - Syncs initial `scrollLeft` on mount so restored horizontal position is
   reflected before first user interaction.
 - Uses a passive scroll listener to avoid blocking native scrolling.

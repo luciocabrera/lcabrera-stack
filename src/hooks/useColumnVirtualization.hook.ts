@@ -10,7 +10,7 @@ export type UseColumnVirtualizationArgs = {
   readonly columnWidths: readonly number[];
   /** Ref to the horizontally scrollable container element. */
   readonly containerRef: RefObject<HTMLElement | null>;
-  /** Fallback container width used before the DOM is measured. Default: 800. */
+  /** Fallback container width used before the DOM is measured. Defaults to 1920; corrected immediately by the ResizeObserver after mount. */
   readonly defaultContainerWidth?: number;
   /** Extra columns rendered beyond each edge of the visible window. Default: 2. */
   readonly overscan?: number;
@@ -43,11 +43,14 @@ export type UseColumnVirtualizationReturn = {
 export const useColumnVirtualization = ({
   columnWidths,
   containerRef,
-  defaultContainerWidth = 800,
-  overscan = 10,
+  defaultContainerWidth = 1920,
+  overscan = 12,
 }: UseColumnVirtualizationArgs): UseColumnVirtualizationReturn => {
   const [scrollLeft, setScrollLeft] = useState(0);
-  const [containerWidth, setContainerWidth] = useState(defaultContainerWidth);
+  const [containerWidth, setContainerWidth] = useState(() => {
+    const measured = containerRef.current?.offsetWidth ?? 0;
+    return measured > 0 ? measured : defaultContainerWidth;
+  });
   const rafIdRef = useRef(-1);
 
   const cumulativeWidths = useMemo(() => {
@@ -67,10 +70,18 @@ export const useColumnVirtualization = ({
 
     const updateWidth = () => {
       const measured = container?.offsetWidth ?? 0;
-      // Skip zero measurements (e.g. display:none) to preserve last valid width
       if (measured > 0) {
         // eslint-disable-next-line react-x/set-state-in-effect -- State must be set from DOM measurement (offsetWidth); cannot be derived during render
         setContainerWidth(measured);
+      } else {
+        // Container measured zero (e.g. CSS containment, flex sizing not yet resolved).
+        // Fall back to the viewport width when it is also non-zero (real browser).
+        // When innerWidth is 0 (jsdom, display:none) the old value is preserved.
+        const vw = globalThis.window.innerWidth;
+        if (vw > 0) {
+          // eslint-disable-next-line react-x/set-state-in-effect -- Viewport width is a DOM measurement; cannot be derived during render
+          setContainerWidth(vw);
+        }
       }
     };
 
@@ -96,10 +107,26 @@ export const useColumnVirtualization = ({
       setScrollLeft(container?.scrollLeft ?? 0);
     };
 
+    // Attempt an immediate measurement — succeeds when layout is already
+    // resolved at effect time (e.g. unit tests with a pre-populated ref or
+    // fast-path re-renders).
     updateWidth();
+
+    // ResizeObserver fires after the browser finishes layout, including the
+    // extra passes required by CSS containment / container-type:size on
+    // ancestor elements. It covers both:
+    //   • the initial mount when the immediate measurement returned 0, and
+    //   • future container size changes (sidebar toggle, panel resize, etc.).
+    const resizeObserver = new ResizeObserver(() => {
+      updateWidth();
+    });
+
+    if (container) {
+      resizeObserver.observe(container);
+    }
+
     syncScrollPosition();
     container?.addEventListener('scroll', handleScroll, { passive: true });
-    globalThis.addEventListener('resize', updateWidth);
 
     return () => {
       if (rafIdRef.current >= 0) {
@@ -107,7 +134,7 @@ export const useColumnVirtualization = ({
         rafIdRef.current = -1;
       }
       container?.removeEventListener('scroll', handleScroll);
-      globalThis.removeEventListener('resize', updateWidth);
+      resizeObserver.disconnect();
     };
   }, [containerRef]);
 
