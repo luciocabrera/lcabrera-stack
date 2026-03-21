@@ -9,6 +9,7 @@ informational, reading from `TableConfigContext` via `useGetNormalizedColumn`.
 DetailsSection/
 ├── index.ts                       → Barrel export
 ├── DetailsSection.component.tsx   → Metadata list with badge styling
+├── DetailsSection.test.tsx        → Unit tests for metadata rendering and fallback values
 ├── DetailsSection.types.ts        → Props + DetailItem type
 ├── DetailsSection.stylex.ts       → Full custom styles (base.stylex + colors.stylex)
 │

@@ -16,8 +16,8 @@ export type CardInteractive = 'clickable' | 'hoverable' | 'static';
 export type CardPadding = 'lg' | 'md' | 'none' | 'sm' | 'xl';
 
 export type CardProps = ComponentPropsWithoutRef<'div'> & {
-  color?: CardColor;
-  elevation?: CardElevation;
-  interactive?: CardInteractive;
-  padding?: CardPadding;
+  readonly color?: CardColor;
+  readonly elevation?: CardElevation;
+  readonly interactive?: CardInteractive;
+  readonly padding?: CardPadding;
 };

@@ -5,11 +5,11 @@ import type { ReactNode } from 'react';
  */
 export type DraggableItem = {
   /** Content to render for this item */
-  content: ReactNode;
+  readonly content: ReactNode;
   /** Unique identifier for the item */
-  id: string;
+  readonly id: string;
   /** Whether this item can be dragged (default: true) */
-  isDraggable?: boolean;
+  readonly isDraggable?: boolean;
 };
 
 /**
@@ -17,9 +17,9 @@ export type DraggableItem = {
  */
 export type DraggableListProps = {
   /** Array of draggable items */
-  items: DraggableItem[];
+  readonly items: DraggableItem[];
   /** Callback when order changes */
-  onOrderChange?: (items: DraggableItem[]) => void;
+  readonly onOrderChange?: (items: DraggableItem[]) => void;
 };
 
 /**
@@ -27,7 +27,7 @@ export type DraggableListProps = {
  */
 export type UseDraggableListProps = {
   /** Initial items array */
-  initialItems: DraggableItem[];
+  readonly initialItems: DraggableItem[];
   /** Callback when order changes */
-  onOrderChange?: (items: DraggableItem[]) => void;
+  readonly onOrderChange?: (items: DraggableItem[]) => void;
 };

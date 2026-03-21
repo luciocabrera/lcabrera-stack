@@ -9,6 +9,7 @@ own context provider.
 ```
 TableDrawersSection/
 ├── TableDrawersSection.component.tsx   → Conditional drawer rendering
+├── TableDrawersSection.test.tsx        → Unit tests for drawer selection and provider wiring
 └── index.ts                            → Barrel export
 ```
 

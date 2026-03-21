@@ -1,0 +1,159 @@
+// @vitest-environment jsdom
+
+import type { ReactNode, RefObject } from 'react';
+
+import { render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+
+import { TableBody } from './TableBody.component';
+
+type MockTableBodyCellProps = {
+  readonly children?: ReactNode;
+  readonly label?: string;
+  readonly value?: unknown;
+};
+
+const useGetColumnPinningMock = vi.fn();
+const useGetColumnSizingMock = vi.fn();
+const useGetEffectiveColumnsMock = vi.fn();
+const useGetTableDataMock = vi.fn();
+const useGetTableOverscanMock = vi.fn();
+const useGetTableRowHeightMock = vi.fn();
+const useVirtualizationMock = vi.fn();
+const getPinnedColumnOffsetsMock = vi.fn();
+const useRenderTrackerMock = vi.fn();
+
+const MockSpacerRow = ({ height }: { readonly height: number }) => (
+  <tr>
+    <td>Spacer:{height}</td>
+  </tr>
+);
+
+const MockTableRow = ({ children }: { readonly children: ReactNode }) => (
+  <tr>{children}</tr>
+);
+
+const MockTableBodyCell = ({
+  children,
+  label,
+  value,
+}: MockTableBodyCellProps) => (
+  <td>{children ?? `${String(label)}:${String(value)}`}</td>
+);
+
+vi.mock('@/components/Table/contexts/TableConfig/columns/selectors', () => ({
+  useGetColumnPinning: useGetColumnPinningMock,
+  useGetColumnSizing: useGetColumnSizingMock,
+  useGetEffectiveColumns: useGetEffectiveColumnsMock,
+}));
+
+vi.mock('@/components/Table/contexts/TableConfig/meta/selectors', () => ({
+  useGetTableOverscan: useGetTableOverscanMock,
+  useGetTableRowHeight: useGetTableRowHeightMock,
+}));
+
+vi.mock('@/components/Table/SpacerRow', () => ({
+  SpacerRow: MockSpacerRow,
+}));
+
+vi.mock('@/components/Table/TableBodyCell', () => ({
+  TableBodyCell: MockTableBodyCell,
+}));
+
+vi.mock('@/components/Table/TableRow', () => ({
+  TableRow: MockTableRow,
+}));
+
+vi.mock('@/components/Table/utils', () => ({
+  getPinnedColumnOffsets: getPinnedColumnOffsetsMock,
+}));
+
+vi.mock('@/hooks', () => ({
+  useVirtualization: useVirtualizationMock,
+}));
+
+vi.mock('@/utils/performance', () => ({
+  useRenderTracker: useRenderTrackerMock,
+}));
+
+vi.mock('../contexts/TableData/data/selectors', () => ({
+  useGetTableData: useGetTableDataMock,
+}));
+
+describe('TableBody', () => {
+  it('renders visible rows and spacer rows from virtualization output', () => {
+    useGetColumnPinningMock.mockReturnValue({ left: [], right: [] });
+    useGetColumnSizingMock.mockReturnValue({});
+    useGetEffectiveColumnsMock.mockReturnValue([
+      { key: 'name', label: 'Name' },
+      { key: 'amount', label: 'Amount' },
+    ]);
+    useGetTableDataMock.mockReturnValue([
+      { amount: 10, name: 'A' },
+      { amount: 20, name: 'B' },
+      { amount: 30, name: 'C' },
+    ]);
+    useGetTableOverscanMock.mockReturnValue(3);
+    useGetTableRowHeightMock.mockReturnValue(44);
+    getPinnedColumnOffsetsMock.mockReturnValue({});
+    useVirtualizationMock.mockReturnValue({
+      bottomSpacerHeight: 50,
+      endIndex: 2,
+      offsetY: 30,
+      startIndex: 0,
+      totalHeight: 500,
+    });
+
+    const tableContainerRef = {
+      current: document.createElement('div'),
+    } as RefObject<HTMLDivElement | null>;
+
+    render(
+      <table>
+        <TableBody tableContainerRef={tableContainerRef} />
+      </table>,
+    );
+
+    expect(screen.getByTestId('table-body').tagName).toBe('TBODY');
+    expect(screen.getByText('Name:A').textContent).toBe('Name:A');
+    expect(screen.getByText('Amount:10').textContent).toBe('Amount:10');
+    expect(screen.getByText('Name:B').textContent).toBe('Name:B');
+    expect(screen.getByText('Spacer:30').textContent).toBe('Spacer:30');
+    expect(screen.getByText('Spacer:50').textContent).toBe('Spacer:50');
+  });
+
+  it('uses custom column render when provided', () => {
+    useGetColumnPinningMock.mockReturnValue({ left: [], right: [] });
+    useGetColumnSizingMock.mockReturnValue({});
+    useGetEffectiveColumnsMock.mockReturnValue([
+      {
+        key: 'name',
+        label: 'Name',
+        render: (row: Record<string, unknown>) => `custom:${String(row.name)}`,
+      },
+    ]);
+    useGetTableDataMock.mockReturnValue([{ name: 'Z' }]);
+    useGetTableOverscanMock.mockReturnValue(2);
+    useGetTableRowHeightMock.mockReturnValue(40);
+    getPinnedColumnOffsetsMock.mockReturnValue({});
+    useVirtualizationMock.mockReturnValue({
+      bottomSpacerHeight: 0,
+      endIndex: 1,
+      offsetY: 0,
+      startIndex: 0,
+      totalHeight: 40,
+    });
+
+    const tableContainerRef = {
+      current: document.createElement('div'),
+    } as RefObject<HTMLDivElement | null>;
+
+    render(
+      <table>
+        <TableBody tableContainerRef={tableContainerRef} />
+      </table>,
+    );
+
+    expect(screen.getByText('custom:Z').textContent).toBe('custom:Z');
+  });
+});

@@ -8,6 +8,7 @@ Virtualized `<tbody>` that renders only the visible row window using
 ```
 TableBody/
 ├── TableBody.component.tsx   → <tbody> with virtualization + row mapping
+├── TableBody.test.tsx        → Unit tests for virtualization window and custom cell rendering
 ├── TableBody.types.ts        → TableBodyProps (tableContainerRef)
 ├── TableBody.stylex.ts       → Body height for scroll area
 ├── index.ts                  → Barrel export

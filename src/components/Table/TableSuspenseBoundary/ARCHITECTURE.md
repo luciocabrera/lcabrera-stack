@@ -8,6 +8,7 @@ fallback. Delegates promise resolution to `TableDataResolver`.
 ```
 TableSuspenseBoundary/
 ├── TableSuspenseBoundary.component.tsx   → <Suspense fallback={TableSkeleton}>
+├── TableSuspenseBoundary.test.tsx        → Unit tests for fallback and resolved render states
 ├── TableSuspenseBoundary.types.ts        → Props (dataPromise, children render fn)
 └── index.ts                              → Barrel export
 ```

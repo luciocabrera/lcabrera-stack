@@ -6,6 +6,7 @@
 ColumnSettingsDrawer/
 ├── index.ts                              → Barrel export: ColumnSettingsDrawer + types
 ├── ColumnSettingsDrawer.component.tsx     → Root: SidePanel with tabbed sections
+├── ColumnSettingsDrawer.test.tsx          → Unit tests for conditional tabs and footer actions
 ├── ColumnSettingsDrawer.types.ts          → Props: { columnKey }
 │
 ├── ColumnDrawerContext/                   → Store-based context for drawer state

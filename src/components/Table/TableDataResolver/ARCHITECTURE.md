@@ -8,6 +8,7 @@ then passes the result to its children render function.
 ```
 TableDataResolver/
 ├── TableDataResolver.component.tsx   → use(dataPromise) → children(response)
+├── TableDataResolver.test.tsx        → Unit test for Promise resolution and children rendering
 ├── TableDataResolver.types.ts        → Props (dataPromise, children render fn)
 └── index.ts                          → Barrel export
 ```

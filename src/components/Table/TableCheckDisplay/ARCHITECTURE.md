@@ -8,6 +8,7 @@ Read-only — shows a check icon when the value is truthy.
 ```
 TableCheckDisplay/
 ├── TableCheckDisplay.component.tsx   → Checkbox with ARIA attributes
+├── TableCheckDisplay.test.tsx        → Unit tests for checked and unchecked accessible states
 ├── TableCheckDisplay.types.tsx       → TableCheckDisplayProps (label, value)
 ├── TableCheckDisplay.stylex.ts       → Checkbox styling + checked variant
 └── index.ts                          → Barrel export

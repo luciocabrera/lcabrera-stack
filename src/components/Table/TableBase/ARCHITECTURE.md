@@ -8,6 +8,7 @@ border, and stripe styles from `TableConfigContext` meta state.
 ```
 TableBase/
 ├── TableBase.component.tsx   → <table> with density/border/stripe StyleX
+├── TableBase.test.tsx        → Unit tests for selector-driven attributes and native props
 ├── TableBase.types.ts        → TableBaseProps extends <table> + customStylex
 ├── TableBase.stylex.ts       → Base, density (compact/comfortable), borderless
 └── index.ts                  → Barrel export

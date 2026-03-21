@@ -17,15 +17,15 @@ export type ButtonProps = Omit<
   ComponentPropsWithoutRef<'button'>,
   'onClick'
 > & {
-  color?: DesignSystemColor;
-  customStylex?: StyleXStyles;
-  icon?: ReactNode;
-  isDisabled?: boolean;
-  onClick?: (() => void) | MouseEventHandler<HTMLButtonElement>;
-  orientation?: DesignSystemOrientation;
-  size?: DesignSystemSize;
-  tooltipContent?: ReactNode;
-  tooltipPlacement?: 'bottom' | 'left' | 'right' | 'top';
-  variant?: DesignSystemStyle;
-  width?: DesignSystemWidth;
+  readonly color?: DesignSystemColor;
+  readonly customStylex?: StyleXStyles;
+  readonly icon?: ReactNode;
+  readonly isDisabled?: boolean;
+  readonly onClick?: (() => void) | MouseEventHandler<HTMLButtonElement>;
+  readonly orientation?: DesignSystemOrientation;
+  readonly size?: DesignSystemSize;
+  readonly tooltipContent?: ReactNode;
+  readonly tooltipPlacement?: 'bottom' | 'left' | 'right' | 'top';
+  readonly variant?: DesignSystemStyle;
+  readonly width?: DesignSystemWidth;
 };

@@ -49,6 +49,7 @@ graph TD
 ```
 Table/
 ├── Table.component.tsx            → Inner entry: data → TableDataProvider → TableContent
+├── Table.test.tsx                 → Unit tests for response mapping and wrapper behavior
 ├── Table.types.ts                 → 25+ exported types (columns, state, props)
 ├── Table.constants.ts             → Defaults (row height, page size, thresholds)
 ├── Table.stylex.ts                → Flex wrapper styles

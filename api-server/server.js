@@ -3,7 +3,20 @@ const express = require('express');
 const { Pool } = require('pg');
 
 const app = express();
-const port = 3001;
+const port = Number.parseInt(
+  process.env.API_PORT ?? process.env.PORT ?? '3001',
+  10,
+);
+const enterpriseOrdersDelayMs = Number.parseInt(
+  process.env.ENTERPRISE_ORDERS_DELAY_MS ?? '3000',
+  10,
+);
+const distinctValuesDelayMs = Number.parseInt(
+  process.env.DISTINCT_VALUES_DELAY_MS ?? '10000',
+  10,
+);
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // Helper to format SQL query for pgAdmin (copy-paste ready)
 function formatQueryForPgAdmin(query, params = []) {
@@ -41,11 +54,11 @@ app.use(express.json());
 
 // PostgreSQL connection
 const pool = new Pool({
-  database: 'car_sales_db',
-  host: 'localhost',
-  password: 'ty3-6url-c088l3r-kr44l',
-  port: 5432,
-  user: 'root',
+  database: process.env.DB_NAME ?? 'car_sales_db',
+  host: process.env.DB_HOST ?? 'localhost',
+  password: process.env.DB_PASSWORD ?? 'root',
+  port: Number.parseInt(process.env.DB_PORT ?? '5432', 10),
+  user: process.env.DB_USER ?? 'root',
 });
 
 // Get all car sales
@@ -133,8 +146,10 @@ app.get('/api/car-sales/paginated', async (request, res) => {
 app.get('/api/enterprise-orders/paginated', async (request, res) => {
   console.log(`📦 [Orders] Request received - query:`, request.query);
   try {
-    // ⏱️ Artificial delay for testing loading states (remove in production)
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+    // ⏱️ Optional artificial delay for testing loading states
+    if (enterpriseOrdersDelayMs > 0) {
+      await sleep(enterpriseOrdersDelayMs);
+    }
 
     const skip = Number.parseInt(request.query.skip) || 0;
     const limit = Number.parseInt(request.query.limit) || 50;
@@ -426,8 +441,10 @@ app.get('/api/enterprise-orders/distinct/:columnName', async (request, res) => {
     request.query,
   );
   try {
-    // ⏱️ Artificial delay for testing loading shimmer (remove in production)
-    await new Promise((resolve) => setTimeout(resolve, 10_000));
+    // ⏱️ Optional artificial delay for testing loading shimmer
+    if (distinctValuesDelayMs > 0) {
+      await sleep(distinctValuesDelayMs);
+    }
 
     const { columnName } = request.params;
     const limit = Number.parseInt(request.query.limit) || 100;
@@ -515,4 +532,7 @@ app.get('/api/enterprise-orders/:orderId', async (request, res) => {
 
 app.listen(port, '0.0.0.0', () => {
   console.log(`🚀 API server running at http://localhost:${port}`);
+  console.log(
+    `🛠️ Delays: enterpriseOrders=${enterpriseOrdersDelayMs}ms, distinctValues=${distinctValuesDelayMs}ms`,
+  );
 });

@@ -7,6 +7,7 @@ Optional title bar displayed above the table with icon, heading, and action slot
 ```
 TableTitle/
 ├── TableTitle.component.tsx   → Conditionally renders title/icon/actions
+├── TableTitle.test.tsx        → Unit tests for empty, title, and slot rendering states
 ├── TableTitle.types.ts        → TableTitleProps (actions, customStylex, icon)
 ├── TableTitle.stylex.ts       → Container, titleSection, icon, actions layout
 └── index.ts                   → Barrel export
