@@ -6,6 +6,8 @@ import { PassThrough } from 'node:stream';
 import { renderToPipeableStream } from 'react-dom/server';
 import { ServerRouter } from 'react-router';
 
+import { getRequestCspNonce } from '@/utils/security';
+
 /**
  * Stream timeout in milliseconds.
  * Configurable via STREAM_TIMEOUT_MS environment variable.
@@ -53,6 +55,8 @@ function handleBotRequest(
   responseHeaders: Headers,
   routerContext: EntryContext,
 ) {
+  const cspNonce = getRequestCspNonce(request);
+
   // eslint-disable-next-line local-rules/destructuring-for-functions -- Promise constructor signature is fixed
   return new Promise((resolve, reject) => {
     let isDidError = false;
@@ -60,6 +64,7 @@ function handleBotRequest(
     const { abort, pipe } = renderToPipeableStream(
       <ServerRouter context={routerContext} url={request.url} />,
       {
+        nonce: cspNonce,
         onAllReady() {
           const body = new PassThrough();
           // Increase max listeners to prevent warning with compression middleware
@@ -97,6 +102,8 @@ function handleBrowserRequest(
   responseHeaders: Headers,
   routerContext: EntryContext,
 ) {
+  const cspNonce = getRequestCspNonce(request);
+
   // eslint-disable-next-line local-rules/destructuring-for-functions -- Promise constructor signature is fixed
   return new Promise((resolve, reject) => {
     let isDidError = false;
@@ -104,6 +111,7 @@ function handleBrowserRequest(
     const { abort, pipe } = renderToPipeableStream(
       <ServerRouter context={routerContext} url={request.url} />,
       {
+        nonce: cspNonce,
         onError(error: unknown) {
           isDidError = true;
           console.error('Streaming error:', error);

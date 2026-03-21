@@ -68,6 +68,12 @@ Before creating anything new, check this inventory. If something here does the j
 | --------------------------------------- | ---------------------------------- | -------------------------------------------- |
 | `getThemeFromCookie` / `setThemeCookie` | `utils/theme/theme-cookie.util.ts` | Read/write theme mode to a cookie (SSR-safe) |
 
+### `src/utils/security/`
+
+| Function             | Location                          | Description                                            |
+| -------------------- | --------------------------------- | ------------------------------------------------------ |
+| `getRequestCspNonce` | `utils/security/cspNonce.util.ts` | Reads standardized `x-csp-nonce` header from a request |
+
 ### `src/utils/formatters/`
 
 | Function                   | Location                                            | Description                                                          |
@@ -117,14 +123,15 @@ Before creating anything new, check this inventory. If something here does the j
 
 ## Types
 
-| Key Exports                                                                                                  | Location                         | Description                                      |
-| ------------------------------------------------------------------------------------------------------------ | -------------------------------- | ------------------------------------------------ |
-| `DesignSystemColor`, `DesignSystemSize`, `DesignSystemOrientation`, `DesignSystemStyle`, `DesignSystemWidth` | `types/design-system.types.ts`   | Union types for all design-system prop values    |
-| `BooleanFilter`, `DateFilter`, `NumberFilter`, `SelectFilter`, `TextFilter`, `ColumnFilter`                  | `types/filterOperators.types.ts` | Discriminated union for all column filter states |
-| `DateFormatPreset`, `DateFormatOptions`, `CurrencyFormatOptions`, `NumberFormatOptions`                      | `types/format.types.ts`          | Options for the formatter utilities              |
-| `ThemeMode`, `ThemeContextValue`                                                                             | `types/theme.types.ts`           | Light/dark mode enum and context shape           |
-| `InfiniteScroll`, `Pagination`, `PinSide`, `SortDirection`, `Sorting`, `PinConflictState`                    | `types/ui.types.ts`              | Shared UI primitive types                        |
-| `ApiConfig`                                                                                                  | `types/api.types.ts`             | API config shape keyed by environment            |
+| Key Exports                                                                                                  | Location                         | Description                                       |
+| ------------------------------------------------------------------------------------------------------------ | -------------------------------- | ------------------------------------------------- |
+| `DesignSystemColor`, `DesignSystemSize`, `DesignSystemOrientation`, `DesignSystemStyle`, `DesignSystemWidth` | `types/design-system.types.ts`   | Union types for all design-system prop values     |
+| `BooleanFilter`, `DateFilter`, `NumberFilter`, `SelectFilter`, `TextFilter`, `ColumnFilter`                  | `types/filterOperators.types.ts` | Discriminated union for all column filter states  |
+| `DateFormatPreset`, `DateFormatOptions`, `CurrencyFormatOptions`, `NumberFormatOptions`                      | `types/format.types.ts`          | Options for the formatter utilities               |
+| `ThemeMode`, `ThemeContextValue`                                                                             | `types/theme.types.ts`           | Light/dark mode enum and context shape            |
+| `InfiniteScroll`, `Pagination`, `PinSide`, `SortDirection`, `Sorting`, `PinConflictState`                    | `types/ui.types.ts`              | Shared UI primitive types                         |
+| `ApiConfig`                                                                                                  | `types/api.types.ts`             | API config shape keyed by environment             |
+| `DbSanityPayload`                                                                                            | `root/Root.types.ts`             | Dev preflight response shape for `/api/db-sanity` |
 
 ---
 
