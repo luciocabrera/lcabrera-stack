@@ -1,16 +1,16 @@
 export type RadioOption<TValue extends string = string> = {
-  description?: string;
-  label: string;
-  value: TValue;
+  readonly description?: string;
+  readonly label: string;
+  readonly value: TValue;
 };
 
 export type RadioOptionGroupProps<TValue extends string = string> = {
   /** Radio group name attribute */
-  name: string;
+  readonly name: string;
   /** Called when the selected value changes */
-  onChange: (value: TValue) => void;
+  readonly onChange: (value: TValue) => void;
   /** Available options */
-  options: RadioOption<TValue>[];
+  readonly options: readonly RadioOption<TValue>[];
   /** Currently selected value */
-  value: TValue;
+  readonly value: TValue;
 };

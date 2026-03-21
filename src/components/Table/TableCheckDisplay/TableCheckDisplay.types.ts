@@ -1,4 +1,4 @@
 export type TableCheckDisplayProps = {
-  label?: string;
-  value: unknown;
+  readonly label?: string;
+  readonly value: unknown;
 };
