@@ -10,4 +10,7 @@ export default [
     index('routes/enterprise-orders/root.ts'),
     route(':orderId', 'routes/enterprise-orders/order-detail/root.ts'),
   ]),
+  route('wide-alltypes-150', 'routes/wide-alltypes-150/layout.ts', [
+    index('routes/wide-alltypes-150/root.ts'),
+  ]),
 ] satisfies RouteConfig;

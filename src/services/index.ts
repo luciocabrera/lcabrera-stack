@@ -7,3 +7,8 @@ export type {
   EnterpriseOrdersResponse,
   FetchEnterpriseOrdersParams,
 } from './enterpriseOrders.api';
+export { wideAlltypes150Api } from './wideAlltypes150.api';
+export type {
+  WideAlltypes150,
+  WideAlltypes150Response,
+} from './wideAlltypes150.api';

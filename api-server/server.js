@@ -530,6 +530,69 @@ app.get('/api/enterprise-orders/:orderId', async (request, res) => {
   }
 });
 
+// Get wide_alltypes_150 with pagination and sorting (stress-test of 150 columns × 1M rows)
+app.get('/api/wide-alltypes-150/paginated', async (request, res) => {
+  console.log(`🗄️ [Wide150] Request received - query:`, request.query);
+  try {
+    const skip = Number.parseInt(request.query.skip) || 0;
+    const limit = Math.min(Number.parseInt(request.query.limit) || 50, 200);
+    const sortParam = request.query.sort;
+
+    let orderByClause = 'ORDER BY id ASC';
+    if (sortParam) {
+      try {
+        const sorting = JSON.parse(sortParam);
+        if (Array.isArray(sorting) && sorting.length > 0) {
+          const orderByParts = sorting.map((sort) => {
+            const direction = sort.direction === 'desc' ? 'DESC' : 'ASC';
+            return `${sort.columnKey} ${direction}`;
+          });
+          orderByClause = `ORDER BY ${orderByParts.join(', ')}`;
+          console.log(`   → Sorting: ${orderByClause}`);
+        }
+      } catch (error) {
+        console.error('   ⚠️ Error parsing sort parameter:', error);
+      }
+    }
+
+    const dataResult = await pool.query(
+      `SELECT * FROM wide_alltypes_150 ${orderByClause} LIMIT $1 OFFSET $2`,
+      [limit, skip],
+    );
+
+    // Serialize Buffer (bytea) to hex strings and plain objects (jsonb/interval) to JSON strings
+    const rows = dataResult.rows.map((row) => {
+      const processed = { ...row };
+      for (const [key, value] of Object.entries(processed)) {
+        if (Buffer.isBuffer(value)) {
+          processed[key] = value.toString('hex');
+        } else if (
+          value !== null &&
+          typeof value === 'object' &&
+          !Array.isArray(value)
+        ) {
+          processed[key] = JSON.stringify(value);
+        }
+      }
+      return processed;
+    });
+
+    const countResult = await pool.query(
+      'SELECT COUNT(*) FROM wide_alltypes_150',
+    );
+    const total = Number.parseInt(countResult.rows[0].count);
+    const hasMore = skip + rows.length < total;
+
+    console.log(
+      `   ✓ Returning ${rows.length} rows, hasMore: ${hasMore}, total: ${total}`,
+    );
+    res.json({ data: rows, hasMore, total });
+  } catch (error) {
+    console.error('❌ Error fetching wide_alltypes_150:', error);
+    res.status(500).json({ error: 'Failed to fetch wide_alltypes_150 data' });
+  }
+});
+
 app.listen(port, '0.0.0.0', () => {
   console.log(`🚀 API server running at http://localhost:${port}`);
   console.log(

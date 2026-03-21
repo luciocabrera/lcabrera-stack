@@ -37,9 +37,7 @@ export const getPinnedColumnOffsets = <TData = Record<string, unknown>>({
   for (const key of leftPinned) {
     const col = effectiveColumns.find((c) => c.key === key);
     if (!col) continue;
-    const sized = columnSizing[col.key as keyof typeof columnSizing] as
-      | number
-      | undefined;
+    const sized = columnSizing[col.key] as number | undefined;
     const width = sized ?? col.minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
     result.set(key, {
       isFirstPinnedRight: false,
@@ -62,9 +60,7 @@ export const getPinnedColumnOffsets = <TData = Record<string, unknown>>({
   for (const key of [...rightPinned].toReversed()) {
     const col = effectiveColumns.find((c) => c.key === key);
     if (!col) continue;
-    const sized = columnSizing[col.key as keyof typeof columnSizing] as
-      | number
-      | undefined;
+    const sized = columnSizing[col.key] as number | undefined;
     const width = sized ?? col.minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
     result.set(key, {
       isFirstPinnedRight: false,
