@@ -3,8 +3,8 @@ import type { RefObject } from 'react';
 import { useEffect } from 'react';
 
 type UseClickOutsideArgs = {
-  onClickOutside: () => void;
-  ref: RefObject<HTMLElement | null>;
+  readonly onClickOutside: () => void;
+  readonly ref: RefObject<HTMLElement | null>;
 };
 
 /**

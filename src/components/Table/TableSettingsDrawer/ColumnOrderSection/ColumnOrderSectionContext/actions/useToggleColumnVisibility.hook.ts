@@ -4,8 +4,8 @@ import { useTableConfigContextValue } from '@/components/Table/contexts/TableCon
 import { useTableDrawerContextValue } from '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
 
 type UseToggleColumnVisibilityArgs = {
-  columnKey: string;
-  isVisible: boolean;
+  readonly columnKey: string;
+  readonly isVisible: boolean;
 };
 /**
  * Hook to toggle a column's visibility.

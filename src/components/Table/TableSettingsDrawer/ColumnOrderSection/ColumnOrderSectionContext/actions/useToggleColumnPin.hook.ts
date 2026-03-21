@@ -10,8 +10,8 @@ import { useTableDrawerContextValue } from '@/components/Table/TableSettingsDraw
 import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
 
 type UseToggleColumnPinArgs = {
-  columnKey: string;
-  isPinning: boolean;
+  readonly columnKey: string;
+  readonly isPinning: boolean;
 };
 /**
  * Hook to toggle column pinning on/off.
