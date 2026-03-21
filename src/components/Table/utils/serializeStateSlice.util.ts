@@ -4,8 +4,8 @@ import { getStorageKey } from './getStorageKey.util';
 import { PERSISTENCE_VERSION } from './persistence.constants';
 
 type SerializedStateSlice = {
-  key: string;
-  value: string;
+  readonly key: string;
+  readonly value: string;
 };
 
 type SerializeStateSliceArgs = {

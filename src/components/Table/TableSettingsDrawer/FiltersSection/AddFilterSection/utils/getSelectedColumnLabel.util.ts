@@ -4,7 +4,7 @@ import type {
 } from '@/components/Table/Table.types';
 
 type GetSelectedColumnLabelArgs = {
-  readonly filterableColumns: TableColumn<Record<string, unknown>>[];
+  readonly filterableColumns: readonly TableColumn<Record<string, unknown>>[];
   readonly filters: ColumnFiltersState;
   readonly selectedColumn: string;
 };

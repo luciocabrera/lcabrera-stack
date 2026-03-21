@@ -4,7 +4,7 @@ import { DEFAULT_CURRENCY } from './formatters.constants';
 import { getDefaultLocale } from './getDefaultLocale.util';
 
 type FormatCurrencyArgs = CurrencyFormatOptions & {
-  value: number;
+  readonly value: number;
 };
 
 /**

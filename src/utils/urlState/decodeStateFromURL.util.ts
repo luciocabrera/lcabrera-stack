@@ -1,5 +1,5 @@
 type DecodeStateFromURLArgs = {
-  readonly convertArraysToSets?: string[];
+  readonly convertArraysToSets?: readonly string[];
   readonly encoded: string;
 };
 

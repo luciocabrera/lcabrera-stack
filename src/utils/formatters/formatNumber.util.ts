@@ -3,7 +3,7 @@ import type { NumberFormatOptions } from '../../types/format.types';
 import { getDefaultLocale } from './getDefaultLocale.util';
 
 type FormatNumberArgs = NumberFormatOptions & {
-  value: number;
+  readonly value: number;
 };
 
 /**

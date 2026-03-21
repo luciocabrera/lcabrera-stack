@@ -4,7 +4,7 @@ import type {
 } from '@/components/Table/Table.types';
 
 type GetInitialFiltersDataStateArgs<TData> = {
-  columns: TableColumn<TData>[];
+  readonly columns: readonly TableColumn<TData>[];
 };
 export const getInitialFiltersDataState = <TData>({
   columns,

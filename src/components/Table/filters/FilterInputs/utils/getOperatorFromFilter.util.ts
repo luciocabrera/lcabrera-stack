@@ -2,8 +2,8 @@ import type { TableColumnDataType } from '@/components/Table/Table.types';
 import type { ColumnFilter, OperatorType } from '@/types/filterOperators.types';
 
 export type GetOperatorFromFilterParams = {
-  dataType?: TableColumnDataType;
-  filter: ColumnFilter | undefined;
+  readonly dataType?: TableColumnDataType;
+  readonly filter: ColumnFilter | undefined;
 };
 
 /**

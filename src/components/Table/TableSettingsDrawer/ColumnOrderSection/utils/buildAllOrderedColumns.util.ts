@@ -4,8 +4,8 @@ import type {
 } from '@/components/Table/Table.types';
 
 type BuildAllOrderedColumnsArgs<TData> = {
-  columns: TableColumn<TData>[];
-  columnsOrder: ColumnOrderState;
+  readonly columns: readonly TableColumn<TData>[];
+  readonly columnsOrder: ColumnOrderState;
 };
 
 /**

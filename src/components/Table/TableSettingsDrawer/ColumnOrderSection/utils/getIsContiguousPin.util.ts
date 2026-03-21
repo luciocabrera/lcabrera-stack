@@ -4,10 +4,10 @@ import type {
 } from '@/components/Table/Table.types';
 
 type GetIsContiguousPinArgs<TData> = {
-  allOrderedColumns: TableColumn<TData>[];
-  columnKey: string;
-  columnPinning: ColumnPinningState;
-  side: 'left' | 'right';
+  readonly allOrderedColumns: readonly TableColumn<TData>[];
+  readonly columnKey: string;
+  readonly columnPinning: ColumnPinningState;
+  readonly side: 'left' | 'right';
 };
 
 /**

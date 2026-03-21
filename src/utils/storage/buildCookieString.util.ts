@@ -5,8 +5,8 @@ export const buildCookieString = ({
   key,
   value,
 }: {
-  key: string;
-  value: string;
+  readonly key: string;
+  readonly value: string;
 }): string => {
   const expires = new Date();
   expires.setFullYear(expires.getFullYear() + 1);

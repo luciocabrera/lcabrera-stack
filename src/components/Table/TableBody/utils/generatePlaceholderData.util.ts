@@ -1,6 +1,6 @@
 type GeneratePlaceholderDataParams = {
-  columns: { key: string }[];
-  rowCount: number;
+  readonly columns: readonly { readonly key: string }[];
+  readonly rowCount: number;
 };
 
 /**

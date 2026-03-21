@@ -1,7 +1,7 @@
 import { decodeStateFromURL } from './decodeStateFromURL.util';
 
 type ReadStateFromURLArgs = {
-  readonly convertArraysToSets?: string[];
+  readonly convertArraysToSets?: readonly string[];
   readonly key: string;
   readonly searchParams: URLSearchParams;
 };

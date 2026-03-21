@@ -3,9 +3,9 @@ import type { TableColumn } from '@/components/Table/Table.types';
 import type { PinSide } from '../ColumnOrderSection.types';
 
 type ResolveClosestEdgeSideArgs<TData> = {
-  allOrderedColumns: TableColumn<TData>[];
-  columnKey: string;
-  pinSide: PinSide;
+  readonly allOrderedColumns: readonly TableColumn<TData>[];
+  readonly columnKey: string;
+  readonly pinSide: PinSide;
 };
 
 /**

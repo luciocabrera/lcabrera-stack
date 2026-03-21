@@ -7,7 +7,7 @@ import {
 } from '@/constants/filterOperators.constants';
 
 export type GetOperatorOptionsParams = {
-  dataType?: TableColumnDataType;
+  readonly dataType?: TableColumnDataType;
 };
 
 /**

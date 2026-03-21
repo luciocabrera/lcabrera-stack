@@ -1,8 +1,8 @@
 import type { SortingState, TableColumn } from '../Table.types';
 
 type GetNormalizedColumnsArgs<TData> = {
-  columns: TableColumn<TData>[];
-  sorting: SortingState<TData>;
+  readonly columns: readonly TableColumn<TData>[];
+  readonly sorting: SortingState<TData>;
 };
 
 export const getNormalizedColumns = <TData>({

@@ -6,7 +6,7 @@ import { getDefaultLocale } from './getDefaultLocale.util';
 import { parseDate } from './parseDate.util';
 
 type FormatDateArgs = DateFormatOptions & {
-  value: unknown;
+  readonly value: unknown;
 };
 
 /**

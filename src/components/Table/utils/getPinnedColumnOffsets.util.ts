@@ -9,9 +9,9 @@ import type {
 import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
 
 type GetPinnedColumnOffsetsArgs<TData> = {
-  columnPinning: ColumnPinningState<TData>;
-  columnSizing: ColumnSizingState<TData>;
-  effectiveColumns: TableColumn<TData>[];
+  readonly columnPinning: ColumnPinningState<TData>;
+  readonly columnSizing: ColumnSizingState<TData>;
+  readonly effectiveColumns: readonly TableColumn<TData>[];
 };
 
 export const getPinnedColumnOffsets = <TData = Record<string, unknown>>({

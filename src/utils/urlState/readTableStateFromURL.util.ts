@@ -13,10 +13,10 @@ type ReadTableStateFromURLArgs = {
 };
 
 type TableSearchParamsState = {
-  columnOrder?: ColumnOrderState;
-  columnVisibility?: ColumnVisibilityState;
-  filters?: ColumnFiltersState;
-  sorting?: SortingState;
+  readonly columnOrder?: ColumnOrderState;
+  readonly columnVisibility?: ColumnVisibilityState;
+  readonly filters?: ColumnFiltersState;
+  readonly sorting?: SortingState;
 };
 
 const PARAM_KEY = 'tableState';

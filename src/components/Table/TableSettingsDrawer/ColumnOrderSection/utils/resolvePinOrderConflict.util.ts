@@ -12,8 +12,8 @@ type ResolvePinOrderConflictArgs = {
 };
 
 type ResolvePinOrderConflictResult = {
-  columnOrder: ColumnOrderState;
-  columnPinning: ColumnPinningState;
+  readonly columnOrder: ColumnOrderState;
+  readonly columnPinning: ColumnPinningState;
 };
 
 /**

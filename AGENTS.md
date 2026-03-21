@@ -88,7 +88,7 @@ The project enforces `strict: true` with additional flags: `noUncheckedIndexedAc
 
 - **Always use `type`, never `interface`** — prevents declaration merging, supports unions/intersections.
 - **All type properties must be `readonly`** — enforces immutability at the type level.
-- **Use `ReadonlyArray<T>` for arrays in types** — prevents accidental mutation.
+- **Use `readonly T[]` for arrays in types** — prevents accidental mutation. Never use `ReadonlyArray<T>` (the `readonly T[]` shorthand is preferred throughout this codebase).
 - **Never use `any`** — use `unknown` with type guards instead.
 - **Never use `React.FC`** — use explicit arrow functions with typed props.
 - **For `eslint-plugin-unicorn(no-nested-ternary)` violations, rewrite logic using `if/else` or early returns** — do not "fix" by adding parentheses around nested ternaries, because formatter/lint cycles may remove them and re-trigger the error.

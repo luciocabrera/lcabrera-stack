@@ -6,8 +6,8 @@ import type {
 type SyncColumnOrderWithPinningArgs = {
   readonly columnKey: string;
   readonly columnPinning: 'left' | 'right' | undefined;
-  readonly columns: TableColumn<Record<string, unknown>>[];
-  readonly currentOrder: string[];
+  readonly columns: readonly TableColumn<Record<string, unknown>>[];
+  readonly currentOrder: readonly string[];
   readonly newPinning: ColumnPinningState<Record<string, unknown>>;
 };
 

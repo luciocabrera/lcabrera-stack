@@ -6,10 +6,10 @@ import type {
 } from '@/components/Table/Table.types';
 
 type GetEffectiveColumnsArgs<TData> = {
-  columnOrder?: ColumnOrderState<TData>;
-  columnPinning?: ColumnPinningState<TData>;
-  columns: TableColumn<TData>[];
-  columnVisibility?: ColumnVisibilityState<TData>;
+  readonly columnOrder?: ColumnOrderState<TData>;
+  readonly columnPinning?: ColumnPinningState<TData>;
+  readonly columns: readonly TableColumn<TData>[];
+  readonly columnVisibility?: ColumnVisibilityState<TData>;
 };
 
 export const getEffectiveColumns = <TData>({
