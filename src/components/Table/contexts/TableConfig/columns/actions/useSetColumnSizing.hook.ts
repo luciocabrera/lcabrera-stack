@@ -8,8 +8,8 @@ import type {
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 
 type SetColumnSizingArgs<TData> = {
-  columnKey: DataKey<TData>;
-  width: number | undefined;
+  readonly columnKey: DataKey<TData>;
+  readonly width: number | undefined;
 };
 
 /**

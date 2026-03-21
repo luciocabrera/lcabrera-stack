@@ -16,8 +16,8 @@ import {
 import { getEffectiveColumns } from '@/components/Table/utils';
 
 type AcceptHeaderPinSideArgs<TData> = {
-  columnKey: DataKey<TData>;
-  pinSide: PinSide;
+  readonly columnKey: DataKey<TData>;
+  readonly pinSide: PinSide;
 };
 
 export const useAcceptHeaderPinSide = <TData>() => {

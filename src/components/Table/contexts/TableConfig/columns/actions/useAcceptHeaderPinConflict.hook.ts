@@ -15,9 +15,9 @@ import {
 import { getEffectiveColumns } from '@/components/Table/utils';
 
 type AcceptHeaderPinConflictArgs<TData> = {
-  columnKey: DataKey<TData>;
-  resolution: PinConflictResolution;
-  side: 'left' | 'right';
+  readonly columnKey: DataKey<TData>;
+  readonly resolution: PinConflictResolution;
+  readonly side: 'left' | 'right';
 };
 
 export const useAcceptHeaderPinConflict = <TData>() => {

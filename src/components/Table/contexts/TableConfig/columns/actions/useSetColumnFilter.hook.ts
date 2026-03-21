@@ -10,8 +10,8 @@ import { usePersistTableStateAction } from '@/components/Table/hooks';
 import { serializeFiltersToURL } from '@/utils/urlState';
 
 type SetColumnFilterArgs<TData> = {
-  columnKey: DataKey<TData>;
-  filter?: ColumnFilter | null;
+  readonly columnKey: DataKey<TData>;
+  readonly filter?: ColumnFilter | null;
 };
 
 /**

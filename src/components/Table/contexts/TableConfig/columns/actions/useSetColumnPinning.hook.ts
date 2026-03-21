@@ -8,8 +8,8 @@ import { usePersistTableStateAction } from '@/components/Table/hooks';
 import { getEffectiveColumns } from '@/components/Table/utils';
 
 type SetColumnPinningArgs<TData> = {
-  columnKey: DataKey<TData>;
-  side: 'left' | 'right' | undefined;
+  readonly columnKey: DataKey<TData>;
+  readonly side: 'left' | 'right' | undefined;
 };
 
 export const useSetColumnPinning = <TData>() => {

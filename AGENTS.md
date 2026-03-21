@@ -97,6 +97,7 @@ The project enforces `strict: true` with additional flags: `noUncheckedIndexedAc
 
 - **2+ params or likely-to-grow functions → use object parameters** with an `Args` suffix type.
 - **Single primitive/complex param → direct typing is acceptable.**
+- **Hook signatures should use readonly argument objects** (for `*Args` hook parameter types). Keep callback parameter types compatible with callers (for example React state setters) and avoid over-constraining callback inputs when it breaks assignability.
 
 ```typescript
 // ✅ Object params with Args suffix
