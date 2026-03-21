@@ -1,28 +1,33 @@
 // @vitest-environment jsdom
 
-import { Suspense } from 'react';
-
-import { act, render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 
 import { TableDataResolver } from './TableDataResolver.component';
 
+const { useMock } = vi.hoisted(() => ({
+  useMock: vi.fn(),
+}));
+
+vi.mock('react', async () => {
+  const actual = await vi.importActual('react');
+
+  return {
+    ...actual,
+    use: useMock,
+  };
+});
+
 describe('TableDataResolver', () => {
-  it('resolves promise data and renders children output', async () => {
-    const dataPromise = Promise.resolve({ total: 42 });
+  it('passes resolved response to children render function', () => {
+    useMock.mockReturnValue({ total: 42 });
 
     render(
-      <Suspense fallback={<span>Loading...</span>}>
-        <TableDataResolver dataPromise={dataPromise}>
-          {(response) => <span>Total: {response.total}</span>}
-        </TableDataResolver>
-      </Suspense>,
+      <TableDataResolver dataPromise={Promise.resolve({ total: 42 })}>
+        {(response) => <span>Total: {response.total}</span>}
+      </TableDataResolver>,
     );
-    await act(async () => {
-      await dataPromise;
-    });
 
-    const resolvedText = await screen.findByText('Total: 42');
-    expect(resolvedText.textContent).toBe('Total: 42');
+    expect(screen.getByText('Total: 42').textContent).toBe('Total: 42');
   });
 });

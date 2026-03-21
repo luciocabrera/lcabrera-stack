@@ -68,7 +68,7 @@ src/
 | Add a package        | `vp add <package>`                                  |
 | Remove a package     | `vp remove <package>`                               |
 
-**Critical:** Import from `vite-plus` not `vite`/`vitest` directly. Example: `import { defineConfig } from 'vite-plus'` and `import { expect, test, vi } from 'vite-plus/test'`.
+**Critical:** Import Vite config from `vite-plus`, not `vite`, for tooling integration. Example: `import { defineConfig } from 'vite-plus'`. For tests, import from `vitest`, e.g. `import { expect, test, vi } from 'vitest'`.
 
 ### Agent Checklist
 
