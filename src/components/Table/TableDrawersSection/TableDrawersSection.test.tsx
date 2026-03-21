@@ -12,28 +12,41 @@ type ProviderProps = {
   readonly columnKey?: string;
 };
 
-const useGetTableColumnSelectedKeyMock = vi.fn();
-const useGetTableIsColumnSettingsOpenMock = vi.fn();
-const useGetTableIsTableSettingsOpenMock = vi.fn();
-const useRenderTrackerMock = vi.fn();
+const {
+  useGetTableColumnSelectedKeyMock,
+  useGetTableIsColumnSettingsOpenMock,
+  useGetTableIsTableSettingsOpenMock,
+  useRenderTrackerMock,
+} = vi.hoisted(() => ({
+  useGetTableColumnSelectedKeyMock: vi.fn(),
+  useGetTableIsColumnSettingsOpenMock: vi.fn(),
+  useGetTableIsTableSettingsOpenMock: vi.fn(),
+  useRenderTrackerMock: vi.fn(),
+}));
 
-const MockTableSettingsDrawer = () => <div>Table Settings Drawer</div>;
+function MockColumnDrawerProvider({ children, columnKey }: ProviderProps) {
+  return (
+    <div data-column-key={columnKey} data-testid='column-drawer-provider'>
+      {children}
+    </div>
+  );
+}
 
-const MockTableDrawerProvider = ({ children }: ProviderProps) => (
-  <div data-testid='table-drawer-provider'>{children}</div>
-);
-
-const MockColumnSettingsDrawer = ({
+function MockColumnSettingsDrawer({
   columnKey,
 }: {
   readonly columnKey: string;
-}) => <div>Column Settings Drawer: {columnKey}</div>;
+}) {
+  return <div>Column Settings Drawer: {columnKey}</div>;
+}
 
-const MockColumnDrawerProvider = ({ children, columnKey }: ProviderProps) => (
-  <div data-column-key={columnKey} data-testid='column-drawer-provider'>
-    {children}
-  </div>
-);
+function MockTableDrawerProvider({ children }: ProviderProps) {
+  return <div data-testid='table-drawer-provider'>{children}</div>;
+}
+
+function MockTableSettingsDrawer() {
+  return <div>Table Settings Drawer</div>;
+}
 
 vi.mock('@/components/Table/TableSettingsDrawer', () => ({
   TableSettingsDrawer: MockTableSettingsDrawer,

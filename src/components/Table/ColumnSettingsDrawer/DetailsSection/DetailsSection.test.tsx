@@ -1,15 +1,21 @@
 // @vitest-environment jsdom
 
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { cleanup, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { DetailsSection } from './DetailsSection.component';
 
-const useGetNormalizedColumnMock = vi.fn();
+const { useGetNormalizedColumnMock } = vi.hoisted(() => ({
+  useGetNormalizedColumnMock: vi.fn(),
+}));
 
 vi.mock('@/components/Table/contexts/TableConfig/columns/selectors', () => ({
   useGetNormalizedColumn: useGetNormalizedColumnMock,
 }));
+
+afterEach(() => {
+  cleanup();
+});
 
 describe('DetailsSection', () => {
   it('renders column metadata values', () => {
@@ -60,7 +66,7 @@ describe('DetailsSection', () => {
 
     render(<DetailsSection columnKey='status' />);
 
-    expect(screen.getByText('—').textContent).toBe('—');
+    expect(screen.getAllByText('—')).toHaveLength(3);
     expect(screen.getByText('None').textContent).toBe('None');
   });
 });

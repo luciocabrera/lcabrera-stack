@@ -20,20 +20,29 @@ type MockTableDataProviderProps = {
   };
 };
 
-const useRenderTrackerMock = vi.fn();
+const { useRenderTrackerMock } = vi.hoisted(() => ({
+  useRenderTrackerMock: vi.fn(),
+}));
 
-const MockTableDataProvider = ({
+function MockTableContent({ onLoadMore }: MockTableContentProps) {
+  return (
+    <div
+      data-has-load-more={String(Boolean(onLoadMore))}
+      data-testid='content'
+    />
+  );
+}
+
+function MockTableDataProvider({
   children,
   dataState,
-}: MockTableDataProviderProps) => (
-  <div data-state={JSON.stringify(dataState)} data-testid='provider'>
-    {children}
-  </div>
-);
-
-const MockTableContent = ({ onLoadMore }: MockTableContentProps) => (
-  <div data-has-load-more={String(Boolean(onLoadMore))} data-testid='content' />
-);
+}: MockTableDataProviderProps) {
+  return (
+    <div data-state={JSON.stringify(dataState)} data-testid='provider'>
+      {children}
+    </div>
+  );
+}
 
 vi.mock('@/utils/performance', () => ({
   useRenderTracker: useRenderTrackerMock,

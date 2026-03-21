@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
-import { render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { TableBase } from './TableBase.component';
 
@@ -20,6 +20,10 @@ vi.mock('../contexts/TableConfig/meta/selectors', () => ({
   useGetTableIsBordered: useGetTableIsBorderedMock,
   useGetTableIsStriped: useGetTableIsStripedMock,
 }));
+
+afterEach(() => {
+  cleanup();
+});
 
 describe('TableBase', () => {
   beforeEach(() => {

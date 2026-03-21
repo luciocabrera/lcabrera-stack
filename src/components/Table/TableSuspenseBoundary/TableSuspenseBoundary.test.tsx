@@ -1,15 +1,21 @@
 // @vitest-environment jsdom
 
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { act, cleanup, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { TableSuspenseBoundary } from './TableSuspenseBoundary.component';
 
-const MockTableSkeleton = () => <div>Loading table skeleton</div>;
+function MockTableSkeleton() {
+  return <div>Loading table skeleton</div>;
+}
 
 vi.mock('../TableSkeleton', () => ({
   TableSkeleton: MockTableSkeleton,
 }));
+
+afterEach(() => {
+  cleanup();
+});
 
 describe('TableSuspenseBoundary', () => {
   it('renders suspense fallback while data promise is pending', () => {
@@ -27,11 +33,16 @@ describe('TableSuspenseBoundary', () => {
   });
 
   it('renders children when data promise resolves', async () => {
+    const dataPromise = Promise.resolve(12);
+
     render(
-      <TableSuspenseBoundary dataPromise={Promise.resolve(12)}>
+      <TableSuspenseBoundary dataPromise={dataPromise}>
         {(response) => <span>Resolved: {response}</span>}
       </TableSuspenseBoundary>,
     );
+    await act(async () => {
+      await dataPromise;
+    });
 
     const resolved = await screen.findByText('Resolved: 12');
     expect(resolved.textContent).toBe('Resolved: 12');

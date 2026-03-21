@@ -2,8 +2,8 @@
 
 import type { ReactNode } from 'react';
 
-import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { ColumnSettingsDrawer } from './ColumnSettingsDrawer.component';
 
@@ -30,64 +30,99 @@ type MockTitleProps = {
   readonly icon?: ReactNode;
 };
 
-const batchSetColumnDrawerSettingsMock = vi.fn();
-const resetAllColumnDrawerSettingsMock = vi.fn();
-const useGetNormalizedColumnMock = vi.fn();
-const useRenderTrackerMock = vi.fn();
-const getBatchSetColumnDrawerSettingsMock = () =>
-  batchSetColumnDrawerSettingsMock;
-const getResetAllColumnDrawerSettingsMock = () =>
-  resetAllColumnDrawerSettingsMock;
-const getTableWrapperRefMock = vi.fn();
+const {
+  batchSetColumnDrawerSettingsMock,
+  resetAllColumnDrawerSettingsMock,
+  useGetNormalizedColumnMock,
+  useRenderTrackerMock,
+  useTableWrapperRefMock,
+} = vi.hoisted(() => ({
+  batchSetColumnDrawerSettingsMock: vi.fn(),
+  resetAllColumnDrawerSettingsMock: vi.fn(),
+  useGetNormalizedColumnMock: vi.fn(),
+  useRenderTrackerMock: vi.fn(),
+  useTableWrapperRefMock: vi.fn(),
+}));
 
-const MockSettingsIcon = () => <span>settings-icon</span>;
+function MockButton({ children, onClick }: MockButtonProps) {
+  return (
+    <button onClick={onClick} type='button'>
+      {children}
+    </button>
+  );
+}
 
-const MockButton = ({ children, onClick }: MockButtonProps) => (
-  <button onClick={onClick} type='button'>
-    {children}
-  </button>
-);
+function MockDetailsSection() {
+  return <div>Details</div>;
+}
 
-const MockSidePanel = ({ children }: MockSidePanelProps) => (
-  <div data-testid='side-panel'>{children}</div>
-);
+function MockFilterSection() {
+  return <div>Filter</div>;
+}
 
-const MockSidePanelHeader = ({
-  actions,
-  children,
-}: MockSidePanelHeaderProps) => (
-  <div>
-    {actions}
-    {children}
-  </div>
-);
+function MockGeneralSection() {
+  return <div>General</div>;
+}
 
-const MockSidePanelTitle = ({ children, icon }: MockTitleProps) => (
-  <h2>
-    {icon}
-    {children}
-  </h2>
-);
+function MockPinningSection() {
+  return <div>Pinning</div>;
+}
 
-const MockTabs = ({ tabs }: MockTabsProps) => (
-  <div data-testid='tabs'>{tabs.map((tab) => tab.header).join('|')}</div>
-);
+function MockSettingsIcon() {
+  return <span>settings-icon</span>;
+}
 
-const MockSidePanelBody = ({ children }: MockSidePanelProps) => (
-  <div>{children}</div>
-);
+function MockSidePanel({ children }: MockSidePanelProps) {
+  return <div data-testid='side-panel'>{children}</div>;
+}
 
-const MockSidePanelFooter = ({ children }: MockSidePanelProps) => (
-  <div>{children}</div>
-);
+function MockSidePanelBody({ children }: MockSidePanelProps) {
+  return <div>{children}</div>;
+}
 
-const MockSidePanelHeaderToolbar = () => <div>toolbar</div>;
+function MockSidePanelFooter({ children }: MockSidePanelProps) {
+  return <div>{children}</div>;
+}
 
-const MockDetailsSection = () => <div>Details</div>;
-const MockFilterSection = () => <div>Filter</div>;
-const MockGeneralSection = () => <div>General</div>;
-const MockPinningSection = () => <div>Pinning</div>;
-const MockSortingSection = () => <div>Sorting</div>;
+function MockSidePanelHeader({ actions, children }: MockSidePanelHeaderProps) {
+  return (
+    <div>
+      {actions}
+      {children}
+    </div>
+  );
+}
+
+function MockSidePanelHeaderToolbar() {
+  return <div>toolbar</div>;
+}
+
+function MockSidePanelTitle({ children, icon }: MockTitleProps) {
+  return (
+    <h2>
+      {icon}
+      {children}
+    </h2>
+  );
+}
+
+function MockSortingSection() {
+  return <div>Sorting</div>;
+}
+
+function MockTabs({ tabs }: MockTabsProps) {
+  return (
+    <div data-testid='tabs'>{tabs.map((tab) => tab.header).join('|')}</div>
+  );
+}
+
+function MockUseBatchSetColumnDrawerSettings() {
+  return batchSetColumnDrawerSettingsMock;
+}
+
+function MockUseResetAllColumnDrawerSettings() {
+  return resetAllColumnDrawerSettingsMock;
+}
 
 vi.mock('@/components/Button', () => ({
   Button: MockButton,
@@ -111,7 +146,7 @@ vi.mock('@/components/Table/contexts/TableConfig/columns/selectors', () => ({
 }));
 
 vi.mock('@/components/Table/contexts/TableWrapper', () => ({
-  useTableWrapperRef: getTableWrapperRefMock,
+  useTableWrapperRef: useTableWrapperRefMock,
 }));
 
 vi.mock('@/components/Tabs', () => ({
@@ -123,8 +158,8 @@ vi.mock('@/utils/performance', () => ({
 }));
 
 vi.mock('./ColumnDrawerContext/actions', () => ({
-  useBatchSetColumnDrawerSettings: getBatchSetColumnDrawerSettingsMock,
-  useResetAllColumnDrawerSettings: getResetAllColumnDrawerSettingsMock,
+  useBatchSetColumnDrawerSettings: MockUseBatchSetColumnDrawerSettings,
+  useResetAllColumnDrawerSettings: MockUseResetAllColumnDrawerSettings,
 }));
 
 vi.mock('./DetailsSection', () => ({
@@ -146,6 +181,10 @@ vi.mock('./PinningSection', () => ({
 vi.mock('./SortingSection', () => ({
   SortingSection: MockSortingSection,
 }));
+
+afterEach(() => {
+  cleanup();
+});
 
 describe('ColumnSettingsDrawer', () => {
   it('includes all conditional tabs for filterable, sortable, non-static columns', () => {

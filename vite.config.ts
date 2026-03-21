@@ -8,6 +8,9 @@ import { fixReactRouterAssets } from './utils/fixReactRouterAssets.plugin.ts';
 import { lintConfig } from './vite.lint.config.ts';
 import { fmtConfig } from './vite.fmt.config.ts';
 
+const isVitestRun = process.env.VITEST === 'true';
+const reactRouterPlugin = isVitestRun ? [] : [reactRouter()];
+
 export default defineConfig({
   fmt: fmtConfig,
   lint: lintConfig,
@@ -20,7 +23,7 @@ export default defineConfig({
       useCSSLayers: true,
     }),
     fixReactRouterAssets(),
-    reactRouter(),
+    ...reactRouterPlugin,
     babel({
       babelConfig: {
         plugins: [['babel-plugin-react-compiler']],

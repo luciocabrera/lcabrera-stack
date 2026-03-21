@@ -2,7 +2,7 @@
 
 import { Suspense } from 'react';
 
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import { TableDataResolver } from './TableDataResolver.component';
@@ -18,6 +18,9 @@ describe('TableDataResolver', () => {
         </TableDataResolver>
       </Suspense>,
     );
+    await act(async () => {
+      await dataPromise;
+    });
 
     const resolvedText = await screen.findByText('Total: 42');
     expect(resolvedText.textContent).toBe('Total: 42');

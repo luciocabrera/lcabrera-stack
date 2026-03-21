@@ -13,33 +13,43 @@ type MockTableBodyCellProps = {
   readonly value?: unknown;
 };
 
-const useGetColumnPinningMock = vi.fn();
-const useGetColumnSizingMock = vi.fn();
-const useGetEffectiveColumnsMock = vi.fn();
-const useGetTableDataMock = vi.fn();
-const useGetTableOverscanMock = vi.fn();
-const useGetTableRowHeightMock = vi.fn();
-const useVirtualizationMock = vi.fn();
-const getPinnedColumnOffsetsMock = vi.fn();
-const useRenderTrackerMock = vi.fn();
+const {
+  getPinnedColumnOffsetsMock,
+  useGetColumnPinningMock,
+  useGetColumnSizingMock,
+  useGetEffectiveColumnsMock,
+  useGetTableDataMock,
+  useGetTableOverscanMock,
+  useGetTableRowHeightMock,
+  useRenderTrackerMock,
+  useVirtualizationMock,
+} = vi.hoisted(() => ({
+  getPinnedColumnOffsetsMock: vi.fn(),
+  useGetColumnPinningMock: vi.fn(),
+  useGetColumnSizingMock: vi.fn(),
+  useGetEffectiveColumnsMock: vi.fn(),
+  useGetTableDataMock: vi.fn(),
+  useGetTableOverscanMock: vi.fn(),
+  useGetTableRowHeightMock: vi.fn(),
+  useRenderTrackerMock: vi.fn(),
+  useVirtualizationMock: vi.fn(),
+}));
 
-const MockSpacerRow = ({ height }: { readonly height: number }) => (
-  <tr>
-    <td>Spacer:{height}</td>
-  </tr>
-);
+function MockSpacerRow({ height }: { readonly height: number }) {
+  return (
+    <tr>
+      <td>Spacer:{height}</td>
+    </tr>
+  );
+}
 
-const MockTableRow = ({ children }: { readonly children: ReactNode }) => (
-  <tr>{children}</tr>
-);
+function MockTableBodyCell({ children, label, value }: MockTableBodyCellProps) {
+  return <td>{children ?? `${String(label)}:${String(value)}`}</td>;
+}
 
-const MockTableBodyCell = ({
-  children,
-  label,
-  value,
-}: MockTableBodyCellProps) => (
-  <td>{children ?? `${String(label)}:${String(value)}`}</td>
-);
+function MockTableRow({ children }: { readonly children: ReactNode }) {
+  return <tr>{children}</tr>;
+}
 
 vi.mock('@/components/Table/contexts/TableConfig/columns/selectors', () => ({
   useGetColumnPinning: useGetColumnPinningMock,

@@ -5,7 +5,9 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { TableTitle } from './TableTitle.component';
 
-const useGetTableTitleMock = vi.fn();
+const { useGetTableTitleMock } = vi.hoisted(() => ({
+  useGetTableTitleMock: vi.fn(),
+}));
 
 vi.mock('../contexts/TableConfig/meta/selectors', () => ({
   useGetTableTitle: useGetTableTitleMock,
