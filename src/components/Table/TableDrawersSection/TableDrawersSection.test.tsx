@@ -7,9 +7,13 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { TableDrawersSection } from './TableDrawersSection.component';
 
-type ProviderProps = {
+type ColumnDrawerProviderProps = {
   readonly children: ReactNode;
   readonly columnKey?: string;
+};
+
+type TableDrawerProviderProps = {
+  readonly children: ReactNode;
 };
 
 const {
@@ -24,7 +28,10 @@ const {
   useRenderTrackerMock: vi.fn(),
 }));
 
-function MockColumnDrawerProvider({ children, columnKey }: ProviderProps) {
+function MockColumnDrawerProvider({
+  children,
+  columnKey,
+}: ColumnDrawerProviderProps) {
   return (
     <div data-column-key={columnKey} data-testid='column-drawer-provider'>
       {children}
@@ -40,7 +47,7 @@ function MockColumnSettingsDrawer({
   return <div>Column Settings Drawer: {columnKey}</div>;
 }
 
-function MockTableDrawerProvider({ children }: ProviderProps) {
+function MockTableDrawerProvider({ children }: TableDrawerProviderProps) {
   return <div data-testid='table-drawer-provider'>{children}</div>;
 }
 
