@@ -35,7 +35,7 @@ This will:
 
 ```bash
 cd /home/lucio/workspace/frameworks/vite-react-compiler/api-server
-node server.js
+vp run start
 ```
 
 The API will be available at `http://localhost:3001`
@@ -44,7 +44,7 @@ The API will be available at `http://localhost:3001`
 
 ```bash
 cd /home/lucio/workspace/frameworks/vite-react-compiler
-npm run dev
+vp dev
 ```
 
 ### 4. Navigate to Route

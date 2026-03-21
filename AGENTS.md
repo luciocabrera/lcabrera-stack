@@ -63,8 +63,8 @@ src/
 | Format               | `vp fmt .`                                                                   |
 | Format check         | `vp fmt --check .`                                                           |
 | Type check           | `react-router typegen && tsc --noEmit`                                       |
-| Run tests            | `node node_modules/.bin/vitest run`                                          |
-| Full validation      | `vp check` then `node node_modules/.bin/vitest run`                          |
+| Run tests            | `vp run test`                                                                |
+| Full validation      | `vp check` then `vp run test`                                                |
 | Add a package        | `vp add <package>`                                                           |
 | Remove a package     | `vp remove <package>`                                                        |
 
@@ -74,7 +74,7 @@ src/
 
 - Run `vp install` after pulling changes and before starting work.
 - **Always verify zero linting errors and zero TypeScript errors before considering any task complete.** Run `vp lint .` and `react-router typegen && tsc --noEmit` (or `vp check`) after every change.
-- Run `vp check` and `node node_modules/.bin/vitest run` to validate all changes before finishing.
+- Run `vp check` and `vp run test` to validate all changes before finishing.
 
 ---
 
@@ -491,10 +491,10 @@ Run these steps **in order** after every code change:
 vp fmt          # 1. auto-format (Oxfmt)
 vp lint         # 2. lint (Oxlint) — fix all reported issues
 vp check        # 3. TypeScript type-check — zero errors required
-node node_modules/.bin/vitest run  # 4. unit/integration tests — all must pass
+vp run test     # 4. unit/integration tests — all must pass
 ```
 
-> **Note:** Use `node node_modules/.bin/vitest run` instead of `vp test` — `vp test` has a known OXC transform bug with `erasableSyntaxOnly: true` in tsconfig that causes all test suites to fail.
+> **Note:** Use `vp run test` instead of `vp test` — this repo defines a custom Vite+ `test` task that runs `node node_modules/vitest/vitest.mjs run`, avoiding the `vp test` OXC transform bug with `erasableSyntaxOnly: true` in tsconfig.
 
 If any step fails, fix the issue before proceeding to the next step.
 
@@ -579,7 +579,7 @@ These commands map to their corresponding tools. For example, `vp dev --port 300
 
 - **Using the package manager directly:** Do not use pnpm, npm, or Yarn directly. Vite+ can handle all package manager operations.
 - **Always use Vite commands to run tools:** Don't attempt to run `vp vitest` or `vp oxlint`. They do not exist. Use `vp test` and `vp lint` instead.
-- **Running scripts:** Vite+ built-in commands (`vp dev`, `vp build`, `vp test`, etc.) always run the Vite+ built-in tool, not any `package.json` script of the same name. To run a custom script that shares a name with a built-in command, use `vp run <script>`. For example, if you have a custom `dev` script that runs multiple services concurrently, run it with `vp run dev`, not `vp dev` (which always starts Vite's dev server). In this repo, use `vp run build` for the production SSR bundle because `vp build` only emits client assets and does not create `build/server/index.js`.
+- **Running scripts:** Vite+ built-in commands (`vp dev`, `vp build`, `vp test`, etc.) always run the Vite+ built-in tool, not any `package.json` script of the same name. To run a custom script that shares a name with a built-in command, use `vp run <script>`. For example, if you have a custom `dev` script that runs multiple services concurrently, run it with `vp run dev`, not `vp dev` (which always starts Vite's dev server).
 - **Do not install Vitest, Oxlint, Oxfmt, or tsdown directly:** Vite+ wraps these tools. They must not be installed directly. You cannot upgrade these tools by installing their latest versions. Always use Vite+ commands.
 - **Use Vite+ wrappers for one-off binaries:** Use `vp dlx` instead of package-manager-specific `dlx`/`npx` commands.
 - **Import JavaScript modules from `vite-plus`:** Instead of importing from `vite` or `vitest`, all modules should be imported from the project's `vite-plus` dependency. For example, `import { defineConfig } from 'vite-plus';` or `import { expect, test, vi } from 'vite-plus/test';`. You must not install `vitest` to import test utilities.

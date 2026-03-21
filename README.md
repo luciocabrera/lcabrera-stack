@@ -1,75 +1,116 @@
-# React + TypeScript + Vite
+# vite-react-compiler
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React 19 + TypeScript + StyleX + React Router 7 application with SSR support,
+built on Vite+.
 
-Currently, two official plugins are available:
+## Overview
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- React 19 with React Compiler
+- React Router 7 loaders/actions and SSR
+- StyleX-only styling
+- Vite+ workflow with task definitions for build, start, and test
+- Enterprise-style table implementation with virtualization, persistence, and
+  infinite scrolling
 
-## React Compiler
+## Requirements
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+- Node.js
+- `vp` installed and available on PATH
 
-Note: This will impact Vite dev & build performances.
+## Install
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+```bash
+vp install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Main Commands
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x';
-import reactDom from 'eslint-plugin-react-dom';
+```bash
+# Development app server
+vp dev
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+# Production SSR build
+vp run build
+
+# Start production SSR server
+vp run start
+
+# Run tests
+vp run test
+
+# Watch tests
+vp run test:watch
+
+# Full validation
+vp check
+vp run test
 ```
+
+## Important Command Notes
+
+- Use `vp run build`, not `vp build`, for the production SSR bundle.
+- `vp run build` emits `build/server/index.js`.
+- `vp run start` serves `build/server/index.js` and rebuilds it if missing.
+- Use `vp run test`, not `vp test`, because this repo uses a custom Vitest
+  command to avoid the Vite+ built-in test-path issue in this setup.
+
+## API Server
+
+The frontend proxies `/api` requests to `http://localhost:3001`.
+
+Start the API server from the nested workspace package:
+
+```bash
+cd api-server
+vp run start
+```
+
+## Routes
+
+Key routes currently available:
+
+- `/`
+- `/settings`
+- `/car-sales`
+- `/car-sales-infinite`
+- `/enterprise-orders`
+- `/wide-alltypes-150`
+
+## Build Output
+
+Production builds generate:
+
+- `build/client/*` for browser assets
+- `build/server/index.js` for the SSR server entry
+
+## Project Structure
+
+```text
+src/
+  components/
+  contexts/
+  design-system/
+  hooks/
+  routes/
+  services/
+  types/
+  utils/
+api-server/
+docs/
+```
+
+## Quality Gate
+
+Use this sequence before finishing changes:
+
+```bash
+vp check
+vp run test
+```
+
+## Related Docs
+
+- `AGENTS.md`
+- `CLAUDE.md`
+- `GEMINI.md`
+- `src/routes/enterprise-orders/README.md`
