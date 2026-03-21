@@ -29,9 +29,9 @@ export type ColumnOrderState<TData = Record<string, unknown>> =
  */
 export type ColumnPinningState<TData = Record<string, unknown>> = {
   /** Columns pinned to the left */
-  left: DataKey<TData>[];
+  readonly left: DataKey<TData>[];
   /** Columns pinned to the right */
-  right: DataKey<TData>[];
+  readonly right: DataKey<TData>[];
 };
 
 /**
@@ -52,12 +52,12 @@ export type ColumnVisibilityState<TData = Record<string, unknown>> = Set<
 export type DataKey<TData> = 'actions' | (keyof TData & string);
 
 export type FilterData = {
-  data: string[];
-  hasMore: boolean;
-  isLoading: boolean;
-  isLoadingMore: boolean;
-  totalLoadedRows: number;
-  totalRows: number;
+  readonly data: string[];
+  readonly hasMore: boolean;
+  readonly isLoading: boolean;
+  readonly isLoadingMore: boolean;
+  readonly totalLoadedRows: number;
+  readonly totalRows: number;
 };
 
 /**
@@ -65,8 +65,8 @@ export type FilterData = {
  * Contains paginated distinct values for a column's filter dropdown.
  */
 export type FilterOptionsResponse = {
-  hasMore: boolean;
-  values: string[];
+  readonly hasMore: boolean;
+  readonly values: string[];
 };
 
 export type FiltersDataState<TData = Record<string, unknown>> = Record<
@@ -77,16 +77,16 @@ export type FiltersDataState<TData = Record<string, unknown>> = Record<
 export type NormalizedColumnsState<TData = Record<string, unknown>> = Record<
   DataKey<TData>,
   TableColumn<TData> & {
-    sortDirection?: 'asc' | 'desc';
-    sortIndex?: number;
+    readonly sortDirection?: 'asc' | 'desc';
+    readonly sortIndex?: number;
   }
 >;
 
 export type PinnedColumnInfo = {
-  isFirstPinnedRight: boolean;
-  isLastPinnedLeft: boolean;
-  offset: number;
-  side: 'left' | 'right';
+  readonly isFirstPinnedRight: boolean;
+  readonly isLastPinnedLeft: boolean;
+  readonly offset: number;
+  readonly side: 'left' | 'right';
 };
 
 /**
@@ -100,38 +100,42 @@ export type SortingState<TData = Record<string, unknown>> = Sorting<TData>[];
 export type StorageType = 'cookie' | 'localStorage';
 
 export type TableColumn<TData> = {
-  dataType?: TableColumnDataType;
+  readonly dataType?: TableColumnDataType;
   /** Async function to fetch filter options from server (for facet filters with pagination) */
-  fetchFilterOptions?: (params: {
-    limit: number;
-    skip: number;
+  readonly fetchFilterOptions?: (params: {
+    readonly limit: number;
+    readonly skip: number;
   }) => Promise<FilterOptionsResponse>;
   /** Selector to extract options array from fetchFilterOptions response */
-  filterOptionsDataSelector?: (response: FilterOptionsResponse) => string[];
+  readonly filterOptionsDataSelector?: (
+    response: FilterOptionsResponse,
+  ) => string[];
   /** Selector to extract total count from fetchFilterOptions response */
-  filterOptionsDataTotalSelector?: (response: FilterOptionsResponse) => number;
+  readonly filterOptionsDataTotalSelector?: (
+    response: FilterOptionsResponse,
+  ) => number;
   /** Format options for the column based on data type */
-  format?: TableColumnFormat;
+  readonly format?: TableColumnFormat;
   /** Whether this column can be filtered (default: true) */
-  isFilterable?: boolean;
+  readonly isFilterable?: boolean;
   /** Whether to hide the header content (label, controls, resize handle) */
-  isHeaderHidden?: boolean;
+  readonly isHeaderHidden?: boolean;
   /** Whether this column can be resized by the user (default: true) */
-  isResizable?: boolean;
+  readonly isResizable?: boolean;
   /** Whether this column is sortable (default: true) */
-  isSortable?: boolean;
+  readonly isSortable?: boolean;
   /**
    * Whether this column is fully locked from user modifications.
    * When true, the column cannot be reordered, pinned/unpinned, resized, or hidden.
    * This is a read-only configuration — it cannot be changed at runtime.
    */
-  isStatic?: boolean;
-  key: DataKey<TData>;
-  label: string;
-  maxWidth?: number;
-  minWidth?: number;
+  readonly isStatic?: boolean;
+  readonly key: DataKey<TData>;
+  readonly label: string;
+  readonly maxWidth?: number;
+  readonly minWidth?: number;
   /** Custom render function for body cells. Receives the row data. */
-  render?: (row: TData) => ReactNode;
+  readonly render?: (row: TData) => ReactNode;
 };
 
 export type TableColumnDataType =
@@ -146,11 +150,11 @@ export type TableColumnDataType =
  */
 export type TableColumnFormat = {
   /** Currency formatting options (for dataType: 'currency') */
-  currency?: CurrencyFormatOptions;
+  readonly currency?: CurrencyFormatOptions;
   /** Date formatting options (for dataType: 'date') */
-  date?: DateFormatOptions;
+  readonly date?: DateFormatOptions;
   /** Number formatting options (for dataType: 'number') */
-  number?: NumberFormatOptions;
+  readonly number?: NumberFormatOptions;
 };
 
 /**
@@ -158,62 +162,62 @@ export type TableColumnFormat = {
  */
 export type TableColumnsState<TData = Record<string, unknown>> = {
   /** Column filters state */
-  columnFilters: ColumnFiltersState<TData>;
+  readonly columnFilters: ColumnFiltersState<TData>;
   /** Column order state */
-  columnOrder: ColumnOrderState<TData>;
+  readonly columnOrder: ColumnOrderState<TData>;
   /** Column pinning state */
-  columnPinning: ColumnPinningState<TData>;
-  columns: TableColumn<TData>[];
+  readonly columnPinning: ColumnPinningState<TData>;
+  readonly columns: TableColumn<TData>[];
   /** Column sizing state (custom widths) */
-  columnSizing: ColumnSizingState<TData>;
+  readonly columnSizing: ColumnSizingState<TData>;
   /** Column visibility state */
-  columnVisibility: ColumnVisibilityState<TData>;
-  effectiveColumns: TableColumn<TData>[];
-  normalizedColumns: NormalizedColumnsState<TData>;
+  readonly columnVisibility: ColumnVisibilityState<TData>;
+  readonly effectiveColumns: TableColumn<TData>[];
+  readonly normalizedColumns: NormalizedColumnsState<TData>;
   /** Sorting state */
-  sorting: SortingState<TData>;
+  readonly sorting: SortingState<TData>;
   /** Keys of columns marked as static (computed once from columns) */
-  staticKeys: Set<string>;
+  readonly staticKeys: Set<string>;
 };
 
 export type TableDataState<TData> = {
   /** Table data array */
-  data: TData[] /** Pagination state */;
+  readonly data: TData[] /** Pagination state */;
   /** Whether there are more rows to load (infinite scroll) */
-  hasMore: boolean;
+  readonly hasMore: boolean;
   /** Initial loading state */
-  isLoading: boolean;
+  readonly isLoading: boolean;
   /** Loading more rows (infinite scroll) */
-  isLoadingMore: boolean;
+  readonly isLoadingMore: boolean;
   // pagination: PaginationState;
-  totalLoadedRows: number;
+  readonly totalLoadedRows: number;
   /** Total number of rows (for progress indication) */
-  totalRows: number;
+  readonly totalRows: number;
 };
 
 export type TableDensity = 'comfortable' | 'compact';
 
 export type TableMetaState = {
-  columnSelectedKey?: string;
-  density: TableDensity;
+  readonly columnSelectedKey?: string;
+  readonly density: TableDensity;
   /** Error message if data fetch failed */
-  error?: string;
+  readonly error?: string;
   /** Initial page size for first load */
-  initialPageSize: number;
-  isBordered: boolean;
-  isColumnSettingsOpen: boolean;
-  isStriped: boolean;
-  isTableSettingsOpen: boolean;
+  readonly initialPageSize: number;
+  readonly isBordered: boolean;
+  readonly isColumnSettingsOpen: boolean;
+  readonly isStriped: boolean;
+  readonly isTableSettingsOpen: boolean;
   /** Page size for subsequent loads */
-  loadMorePageSize: number;
+  readonly loadMorePageSize: number;
   /** Locale for formatting (defaults to navigator.language) */
-  locale?: string;
-  overscan: number;
-  persistenceKey: string;
-  placeholderRowCount: number;
-  rowHeight: number;
-  threshold: number;
-  title?: string;
+  readonly locale?: string;
+  readonly overscan: number;
+  readonly persistenceKey: string;
+  readonly placeholderRowCount: number;
+  readonly rowHeight: number;
+  readonly threshold: number;
+  readonly title?: string;
 };
 
 /**
@@ -221,17 +225,17 @@ export type TableMetaState = {
  */
 export type TablePersistenceConfig = {
   /** Persist column filters */
-  columnFilters?: StorageType;
+  readonly columnFilters?: StorageType;
   /** Persist column order */
-  columnOrder?: StorageType;
+  readonly columnOrder?: StorageType;
   /** Persist column pinning */
-  columnPinning?: StorageType;
+  readonly columnPinning?: StorageType;
   /** Persist column sizing (custom widths) */
-  columnSizing?: StorageType;
+  readonly columnSizing?: StorageType;
   /** Persist column visibility */
-  columnVisibility?: StorageType;
+  readonly columnVisibility?: StorageType;
   /** Persist sorting */
-  sorting?: StorageType;
+  readonly sorting?: StorageType;
 };
 
 export type TableProps<
@@ -239,13 +243,13 @@ export type TableProps<
   TResponse,
 > = BaseProps &
   InfiniteScroll<TData, TResponse> & {
-    isFlexWrapperEnabled?: boolean;
-    isLoading?: boolean;
-    response: TResponse;
+    readonly isFlexWrapperEnabled?: boolean;
+    readonly isLoading?: boolean;
+    readonly response: TResponse;
   };
 
 type BaseProps = ComponentPropsWithRef<'table'> & {
-  actions?: ReactNode;
-  customStylex?: StyleXStyles;
-  icon?: ReactNode;
+  readonly actions?: ReactNode;
+  readonly customStylex?: StyleXStyles;
+  readonly icon?: ReactNode;
 };

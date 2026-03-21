@@ -1,18 +1,18 @@
 import type { ReactNode } from 'react';
 
 export type ArrowOffsetParams = {
-  placement: TooltipPlacement;
-  tooltipStart: number;
-  triggerCenter: number;
+  readonly placement: TooltipPlacement;
+  readonly tooltipStart: number;
+  readonly triggerCenter: number;
 };
 
 export type TooltipPlacement = 'bottom' | 'left' | 'right' | 'top';
 
 export type TooltipProps = {
   /** The element that triggers the tooltip on hover/focus */
-  children: ReactNode;
+  readonly children: ReactNode;
   /** Tooltip content — text string or rich content */
-  content: ReactNode;
+  readonly content: ReactNode;
   /** Preferred placement relative to the trigger */
-  placement?: TooltipPlacement;
+  readonly placement?: TooltipPlacement;
 };

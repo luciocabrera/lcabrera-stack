@@ -1,5 +1,5 @@
 export type UnpinConflictModalProps = {
-  columnLabel: string;
-  isOpen: boolean;
-  side: 'left' | 'right';
+  readonly columnLabel: string;
+  readonly isOpen: boolean;
+  readonly side: 'left' | 'right';
 };

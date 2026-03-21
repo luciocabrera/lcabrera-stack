@@ -10,11 +10,11 @@ export type TableBodyCellProps<TData extends Record<string, unknown>> =
   ComponentPropsWithoutRef<'td'> &
     Pick<TableColumn<TData>, 'dataType' | 'format' | 'label' | 'minWidth'> & {
       /** Custom content that overrides the default cell rendering */
-      children?: ReactNode;
-      customStylex?: StyleXStyles;
+      readonly children?: ReactNode;
+      readonly customStylex?: StyleXStyles;
       /** Locale for formatting */
-      locale?: string;
-      pinInfo?: PinnedColumnInfo;
-      value?: unknown;
-      width?: number | string;
+      readonly locale?: string;
+      readonly pinInfo?: PinnedColumnInfo;
+      readonly value?: unknown;
+      readonly width?: number | string;
     };

@@ -24,15 +24,15 @@ export const useSetColumnPinning = <TData>() => {
     };
     const persistenceKey = metaStore.get()?.persistenceKey ?? '';
 
-    // Remove from both sides first
-    const newPinning: ColumnPinningState<TData> = {
-      left: currentPinning.left.filter((k) => k !== columnKey),
-      right: currentPinning.right.filter((k) => k !== columnKey),
-    };
+    const left = currentPinning.left.filter((k) => k !== columnKey);
+    const right = currentPinning.right.filter((k) => k !== columnKey);
 
-    // Add to specified side
-    if (side === 'left') newPinning.left = [...newPinning.left, columnKey];
-    if (side === 'right') newPinning.right = [...newPinning.right, columnKey];
+    const newPinning: ColumnPinningState<TData> =
+      side === 'left'
+        ? { left: [...left, columnKey], right }
+        : side === 'right'
+          ? { left, right: [...right, columnKey] }
+          : { left, right };
 
     const effectiveColumns = getEffectiveColumns({
       columnOrder: columnsState?.columnOrder,

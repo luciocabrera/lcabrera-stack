@@ -1,5 +1,5 @@
 export type SidePanelHeaderToolbarProps = {
-  isPinned: boolean;
-  onClose: () => void;
-  onTogglePin: () => void;
+  readonly isPinned: boolean;
+  readonly onClose: () => void;
+  readonly onTogglePin: () => void;
 };

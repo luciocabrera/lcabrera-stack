@@ -6,10 +6,10 @@ import type { TStore } from '@/hooks/useStore.hook';
 
 export type FiltersDataContextValue<TData = Record<string, unknown>> = {
   /** Store managing filters lookup data */
-  filtersDataStore: TStore<FiltersDataState<TData>>;
+  readonly filtersDataStore: TStore<FiltersDataState<TData>>;
 };
 
 export type FiltersDataProviderProps<TData> = {
-  children: React.ReactNode;
-  columns: TableColumn<TData>[];
+  readonly children: React.ReactNode;
+  readonly columns: TableColumn<TData>[];
 };

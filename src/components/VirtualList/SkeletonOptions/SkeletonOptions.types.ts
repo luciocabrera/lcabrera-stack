@@ -1,3 +1,3 @@
 export type SkeletonOptionsProps = {
-  containerHeight?: number;
+  readonly containerHeight?: number;
 };

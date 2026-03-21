@@ -3,33 +3,33 @@ import type { SelectFilter } from '@/types/filterOperators.types';
 export type ListFilterMode = 'all' | 'selected' | 'unselected';
 
 export type VirtualListDataState = {
-  data: string[];
-  hasMore: boolean;
-  isLoading: boolean;
-  isLoadingMore: boolean;
+  readonly data: readonly string[];
+  readonly hasMore: boolean;
+  readonly isLoading: boolean;
+  readonly isLoadingMore: boolean;
   /** Total number of items available (used for "Loaded: x / total" display) */
-  totalCount?: number;
+  readonly totalCount?: number;
 };
 
 export type VirtualListProps = {
   /** Current state of the data (from async fetch or static) */
-  dataState: VirtualListDataState;
+  readonly dataState: VirtualListDataState;
   /** Current filter state (selected values) */
-  filter?: SelectFilter;
+  readonly filter?: SelectFilter;
   /** Whether to show checkboxes next to options (default: true) */
-  hasCheckboxes?: boolean;
+  readonly hasCheckboxes?: boolean;
   /** Whether to show "Select All" option when multiple options exist (default: true) */
-  hasSelectAll?: boolean;
+  readonly hasSelectAll?: boolean;
   /** Height for the virtual options list (CSS value, e.g. '12rem') */
-  listMaxHeight?: string;
-  name?: string;
+  readonly listMaxHeight?: string;
+  readonly name?: string;
   /** Called when the selection changes */
-  onChange: (filter?: SelectFilter) => void;
+  readonly onChange: (filter?: SelectFilter) => void;
   /** Callback to fetch initial data on mount */
-  onFetchInitial?: () => Promise<void> | void;
+  readonly onFetchInitial?: () => Promise<void> | void;
   /** Callback to fetch more data on scroll (infinite loading) */
-  onFetchMore?: () => Promise<void> | void;
+  readonly onFetchMore?: () => Promise<void> | void;
   /** Name attribute for the search input */
   /** When true, the list expands to fill all available vertical space */
-  shouldFillHeight?: boolean;
+  readonly shouldFillHeight?: boolean;
 };

@@ -5,37 +5,37 @@ import type { VirtualListDataState } from '@/components/VirtualList';
 export type VirtualSelectMode = 'multi' | 'single';
 
 export type VirtualSelectOption = {
-  label: string;
-  value: string;
+  readonly label: string;
+  readonly value: string;
 };
 
 export type VirtualSelectProps = {
   /** Optional StyleX overrides for the list container (background, border, etc.) */
-  customStylex?: StyleXStyles;
+  readonly customStylex?: StyleXStyles;
   /** Current state of async-loaded data (for fetch mode). Mutually exclusive with `options`. */
-  dataState?: VirtualListDataState;
+  readonly dataState?: VirtualListDataState;
   /** When true, the list is always visible without a trigger button */
-  isAlwaysOpen?: boolean;
+  readonly isAlwaysOpen?: boolean;
   /** Height for the virtual dropdown list (CSS value, e.g. '18.75rem') */
-  listMaxHeight?: string;
+  readonly listMaxHeight?: string;
   /** Selection mode: 'single' closes on select, 'multi' shows checkboxes + select all */
-  mode: VirtualSelectMode;
+  readonly mode: VirtualSelectMode;
   /** Called when the selection changes */
-  onChange: (selected: string[]) => void;
+  readonly onChange: (selected: string[]) => void;
   /** Callback to fetch initial data on mount */
-  onFetchInitial?: () => Promise<void> | void;
+  readonly onFetchInitial?: () => Promise<void> | void;
   /** Callback to fetch more data on scroll */
-  onFetchMore?: () => Promise<void> | void;
+  readonly onFetchMore?: () => Promise<void> | void;
   /** Called when the dropdown opens or closes */
-  onOpenChange?: (isOpen: boolean) => void;
+  readonly onOpenChange?: (isOpen: boolean) => void;
   /** Static options — plain strings (value = label) or { label, value } pairs for key/display separation */
-  options?: string[] | VirtualSelectOption[];
+  readonly options?: string[] | VirtualSelectOption[];
   /** Placeholder text when nothing is selected */
-  placeholder?: string;
+  readonly placeholder?: string;
   /** Currently selected value(s) */
-  selected: string[];
+  readonly selected: string[];
   /** When true, the component expands to fill all available vertical space */
-  shouldFillHeight?: boolean;
+  readonly shouldFillHeight?: boolean;
   /** Show a "Loaded: x / total" legend below the trigger */
-  shouldShowLoadedCount?: boolean;
+  readonly shouldShowLoadedCount?: boolean;
 };

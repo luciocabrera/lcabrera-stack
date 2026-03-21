@@ -72,28 +72,31 @@ export const useAcceptHeaderPinConflict = <TData>() => {
       }
 
       case 'pin-all-between': {
-        newPinning = {
-          left: [...currentPinning.left],
-          right: [...currentPinning.right],
-        };
+        let nextLeft = [...currentPinning.left] as DataKey<TData>[];
+        let nextRight = [...currentPinning.right] as DataKey<TData>[];
 
         if (side === 'left') {
           for (let i = 0; i <= index; i++) {
             const colKey = allOrderedColumns[i]?.key ?? '';
-            if (!newPinning.left.includes(colKey as DataKey<TData>)) {
-              newPinning.right = newPinning.right.filter((k) => k !== colKey);
-              newPinning.left.push(colKey as DataKey<TData>);
+            if (!nextLeft.includes(colKey as DataKey<TData>)) {
+              nextRight = nextRight.filter((k) => k !== colKey);
+              nextLeft = [...nextLeft, colKey as DataKey<TData>];
             }
           }
         } else {
           for (let i = index; i < allOrderedColumns.length; i++) {
             const colKey = allOrderedColumns[i]?.key ?? '';
-            if (!newPinning.right.includes(colKey as DataKey<TData>)) {
-              newPinning.left = newPinning.left.filter((k) => k !== colKey);
-              newPinning.right.push(colKey as DataKey<TData>);
+            if (!nextRight.includes(colKey as DataKey<TData>)) {
+              nextLeft = nextLeft.filter((k) => k !== colKey);
+              nextRight = [...nextRight, colKey as DataKey<TData>];
             }
           }
         }
+
+        newPinning = {
+          left: nextLeft,
+          right: nextRight,
+        };
         break;
       }
 

@@ -13,9 +13,11 @@ export type TableDrawerColumnsState<TData> = Pick<
 
 export type TableDrawerContextValue = {
   /** Store managing column-related state */
-  columnsStore: TStore<TableDrawerColumnsState<Record<string, unknown>>>;
+  readonly columnsStore: TStore<
+    TableDrawerColumnsState<Record<string, unknown>>
+  >;
 };
 
 export type TableDrawerProviderProps = {
-  children: React.ReactNode;
+  readonly children: React.ReactNode;
 };

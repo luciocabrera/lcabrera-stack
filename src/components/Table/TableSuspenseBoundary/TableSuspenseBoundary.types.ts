@@ -5,7 +5,7 @@ export type TableSuspenseBoundaryProps<
   TResponse = TData[],
 > = Pick<TableProps<TData, TResponse>, 'dataSelector' | 'icon'> & {
   /** Child render function receiving resolved data */
-  children: (response: TResponse) => React.ReactNode;
+  readonly children: (response: TResponse) => React.ReactNode;
   /** Promise that resolves to table data or a response containing table data */
-  dataPromise: Promise<TResponse>;
+  readonly dataPromise: Promise<TResponse>;
 };

@@ -3,7 +3,7 @@ import type { ColumnPinningState } from '@/components/Table/Table.types';
 type InsertAdjacentToPinnedGroupArgs = {
   readonly columnKey: string;
   readonly columnPinning: ColumnPinningState;
-  readonly order: ReadonlyArray<string>;
+  readonly order: readonly string[];
   readonly side: 'left' | 'right';
 };
 

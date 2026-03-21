@@ -5,11 +5,11 @@ import type { ComponentPropsWithoutRef, ReactNode } from 'react';
  */
 export type TabItem = {
   /** Content to display when tab is active */
-  children: ReactNode;
+  readonly children: ReactNode;
   /** Text or element to display in tab header */
-  header: ReactNode;
+  readonly header: ReactNode;
   /** Unique identifier for the tab */
-  key: string;
+  readonly key: string;
 };
 
 /**
@@ -17,7 +17,7 @@ export type TabItem = {
  */
 export type TabsProps = ComponentPropsWithoutRef<'div'> & {
   /** Initially selected tab key (defaults to first tab) */
-  defaultSelectedTab?: string;
+  readonly defaultSelectedTab?: string;
   /** Array of tab configurations */
-  tabs: TabItem[];
+  readonly tabs: TabItem[];
 };

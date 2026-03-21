@@ -2,9 +2,9 @@ import type { DataKey } from '@/components/Table/Table.types';
 import type { TextFilter } from '@/types/filterOperators.types';
 
 export type TextFilterInputProps<TData> = {
-  columnKey: DataKey<TData>;
-  filter?: TextFilter | undefined;
-  onChange: (filter?: TextFilter) => void;
+  readonly columnKey: DataKey<TData>;
+  readonly filter?: TextFilter | undefined;
+  readonly onChange: (filter?: TextFilter) => void;
   /** The operator is now controlled by FilterInputs */
-  operator: TextFilter['operator'];
+  readonly operator: TextFilter['operator'];
 };

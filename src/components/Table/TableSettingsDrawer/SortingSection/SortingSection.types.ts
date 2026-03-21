@@ -5,7 +5,7 @@ import type { SortDirection } from '@/types/ui.types';
 export type SortingSectionProps = ComponentPropsWithoutRef<'div'>;
 
 export type SortItem = {
-  columnKey: string;
-  direction: SortDirection;
-  label: string;
+  readonly columnKey: string;
+  readonly direction: SortDirection;
+  readonly label: string;
 };

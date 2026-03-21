@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
 export type TableDataResolverProps<TResponse> = {
-  children: (response: TResponse) => ReactNode;
-  dataPromise: Promise<TResponse>;
+  readonly children: (response: TResponse) => ReactNode;
+  readonly dataPromise: Promise<TResponse>;
 };

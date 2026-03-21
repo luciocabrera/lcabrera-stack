@@ -1,5 +1,5 @@
 import type { DataKey } from '../Table.types';
 
 export type ColumnSettingsDrawerProps<TData = Record<string, unknown>> = {
-  columnKey: DataKey<TData>;
+  readonly columnKey: DataKey<TData>;
 };

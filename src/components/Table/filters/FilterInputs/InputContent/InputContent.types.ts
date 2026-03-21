@@ -3,19 +3,19 @@ import type { ColumnFilter, OperatorType } from '@/types/filterOperators.types';
 
 export type InputContentProps<TData> = {
   /** Column key (for stable input names) */
-  columnKey: DataKey<TData>;
+  readonly columnKey: DataKey<TData>;
   /** Column configuration */
-  dataType: TableColumn<TData>['dataType'];
+  readonly dataType: TableColumn<TData>['dataType'];
   /** Current filter value */
-  filter?: ColumnFilter;
+  readonly filter?: ColumnFilter;
   /** Whether the column has an async fetcher for filter options */
-  hasFetchableOptions: boolean;
+  readonly hasFetchableOptions: boolean;
   /** Height for the virtual options list (CSS value, e.g. '12rem') */
-  listMaxHeight?: string;
+  readonly listMaxHeight?: string;
   /** Callback when filter changes */
-  onChange: (filter?: ColumnFilter) => void;
+  readonly onChange: (filter?: ColumnFilter) => void;
 
-  operator: OperatorType;
+  readonly operator: OperatorType;
   /** When true, the list expands to fill all available vertical space */
-  shouldFillHeight?: boolean;
+  readonly shouldFillHeight?: boolean;
 };

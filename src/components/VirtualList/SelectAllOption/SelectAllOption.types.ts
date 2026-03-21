@@ -1,5 +1,5 @@
 export type SelectAllOptionProps = {
-  isAllSelected: boolean;
-  isLoading: boolean;
-  onSelectAll: () => void;
+  readonly isAllSelected: boolean;
+  readonly isLoading: boolean;
+  readonly onSelectAll: () => void;
 };

@@ -6,13 +6,13 @@ import type { TStore } from '@/hooks/useStore.hook';
 
 export type TableConfigContextValue<TData = Record<string, unknown>> = {
   /** Store managing column-related state */
-  columnsStore: TStore<TableColumnsState<TData>>;
+  readonly columnsStore: TStore<TableColumnsState<TData>>;
   /** Store managing meta-related state */
-  metaStore: TStore<TableMetaState>;
+  readonly metaStore: TStore<TableMetaState>;
 };
 
 export type TableConfigProviderProps<TData> = {
-  children: React.ReactNode;
-  columnsState?: Partial<TableColumnsState<TData>>;
-  metaState?: Partial<TableMetaState>;
+  readonly children: React.ReactNode;
+  readonly columnsState?: Partial<TableColumnsState<TData>>;
+  readonly metaState?: Partial<TableMetaState>;
 };

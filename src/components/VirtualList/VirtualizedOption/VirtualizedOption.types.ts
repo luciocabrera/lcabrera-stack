@@ -1,11 +1,11 @@
 export type VirtualizedOptionProps = {
-  filteredOptions: string[];
-  hasCheckboxes?: boolean;
-  hasSelectAll?: boolean;
-  index: number;
-  isAllSelected: boolean;
-  isLoading: boolean;
-  onSelectAll: () => void;
-  onToggle: (option: string) => void;
-  selectedValues: string[];
+  readonly filteredOptions: readonly string[];
+  readonly hasCheckboxes?: boolean;
+  readonly hasSelectAll?: boolean;
+  readonly index: number;
+  readonly isAllSelected: boolean;
+  readonly isLoading: boolean;
+  readonly onSelectAll: () => void;
+  readonly onToggle: (option: string) => void;
+  readonly selectedValues: readonly string[];
 };

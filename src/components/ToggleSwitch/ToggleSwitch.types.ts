@@ -8,11 +8,11 @@ export type ToggleSwitchProps = Omit<
   'onChange' | 'type'
 > & {
   /** Whether the toggle is checked */
-  isChecked: boolean;
+  readonly isChecked: boolean;
   /** Whether the toggle is disabled */
-  isDisabled?: boolean;
+  readonly isDisabled?: boolean;
   /** Label text for the toggle */
-  label?: string;
+  readonly label?: string;
   /** Callback when toggle state changes */
-  onChange: (isChecked: boolean) => void;
+  readonly onChange: (isChecked: boolean) => void;
 };

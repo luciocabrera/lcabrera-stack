@@ -9,11 +9,11 @@ import type {
 } from '@/types/design-system.types';
 
 export type NavLinkProps = Omit<RouterNavLinkProps, 'children'> & {
-  children: ReactNode;
-  color?: DesignSystemColor;
-  icon?: ReactNode;
-  isActive?: boolean;
-  orientation?: DesignSystemOrientation;
-  size?: DesignSystemSize;
-  width?: DesignSystemWidth;
+  readonly children: ReactNode;
+  readonly color?: DesignSystemColor;
+  readonly icon?: ReactNode;
+  readonly isActive?: boolean;
+  readonly orientation?: DesignSystemOrientation;
+  readonly size?: DesignSystemSize;
+  readonly width?: DesignSystemWidth;
 };

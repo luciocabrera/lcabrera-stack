@@ -1,5 +1,5 @@
 export type AddFilterSectionProps = {
-  expandedFilters: Set<string>;
-  onDropdownOpenChange?: (isOpen: boolean) => void;
-  onExpandedFiltersChange: (expandedFilters: Set<string>) => void;
+  readonly expandedFilters: Set<string>;
+  readonly onDropdownOpenChange?: (isOpen: boolean) => void;
+  readonly onExpandedFiltersChange: (expandedFilters: Set<string>) => void;
 };

@@ -4,10 +4,10 @@ import type {
 } from '../VirtualList.types';
 
 export type VirtualListFooterProps = {
-  dataState: VirtualListDataState;
-  effectiveOptions: string[];
-  hasCheckboxes: boolean;
-  listFilterMode: ListFilterMode;
-  selectedValues: string[];
-  setListFilterMode: (mode: ListFilterMode) => void;
+  readonly dataState: VirtualListDataState;
+  readonly effectiveOptions: readonly string[];
+  readonly hasCheckboxes: boolean;
+  readonly listFilterMode: ListFilterMode;
+  readonly selectedValues: readonly string[];
+  readonly setListFilterMode: (mode: ListFilterMode) => void;
 };

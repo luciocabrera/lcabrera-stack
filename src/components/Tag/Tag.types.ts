@@ -1,4 +1,4 @@
 export type TagProps = {
-  label: string;
-  onRemove: () => void;
+  readonly label: string;
+  readonly onRemove: () => void;
 };

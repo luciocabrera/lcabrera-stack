@@ -8,11 +8,11 @@ import type {
 } from '../Table.types';
 
 export type PersistedState = {
-  columnFilters?: ColumnFiltersState;
-  columnOrder?: ColumnOrderState;
-  columnPinning?: ColumnPinningState;
-  columnSizing?: ColumnSizingState;
-  columnVisibility?: ColumnVisibilityState;
-  sorting?: SortingState;
-  version: number;
+  readonly columnFilters?: ColumnFiltersState;
+  readonly columnOrder?: ColumnOrderState;
+  readonly columnPinning?: ColumnPinningState;
+  readonly columnSizing?: ColumnSizingState;
+  readonly columnVisibility?: ColumnVisibilityState;
+  readonly sorting?: SortingState;
+  readonly version: number;
 };

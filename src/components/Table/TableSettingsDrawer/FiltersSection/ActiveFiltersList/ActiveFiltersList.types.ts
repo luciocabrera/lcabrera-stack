@@ -1,16 +1,16 @@
 import type { ColumnFiltersState } from '@/components/Table';
 
 export type ActiveFiltersListProps = {
-  expandedFilters: Set<string>;
-  onExpandedFiltersChange: (expandedFilters: Set<string>) => void;
+  readonly expandedFilters: Set<string>;
+  readonly onExpandedFiltersChange: (expandedFilters: Set<string>) => void;
 };
 
 export type HandleFilterChangeArgs = {
-  columnKey: string;
-  filter: ColumnFiltersState[string];
+  readonly columnKey: string;
+  readonly filter: ColumnFiltersState[string];
 };
 
 export type HandleToggleArgs = {
-  columnKey: string;
-  filter?: ColumnFiltersState[string];
+  readonly columnKey: string;
+  readonly filter?: ColumnFiltersState[string];
 };

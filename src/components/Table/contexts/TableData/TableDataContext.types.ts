@@ -3,10 +3,10 @@ import type { TStore } from '@/hooks/useStore.hook';
 
 export type TableDataContextValue<TData = Record<string, unknown>> = {
   /** Store managing data-related state */
-  dataStore: TStore<TableDataState<TData>>;
+  readonly dataStore: TStore<TableDataState<TData>>;
 };
 
 export type TableDataProviderProps<TData = Record<string, unknown>> = {
-  children: React.ReactNode;
-  dataState?: Partial<TableDataState<TData>>;
+  readonly children: React.ReactNode;
+  readonly dataState?: Partial<TableDataState<TData>>;
 };

@@ -1,7 +1,7 @@
 export type SelectOptionProps = {
-  hasCheckbox?: boolean;
-  isLoading: boolean;
-  isSelected: boolean;
-  onToggle: () => void;
-  option: string;
+  readonly hasCheckbox?: boolean;
+  readonly isLoading: boolean;
+  readonly isSelected: boolean;
+  readonly onToggle: () => void;
+  readonly option: string;
 };

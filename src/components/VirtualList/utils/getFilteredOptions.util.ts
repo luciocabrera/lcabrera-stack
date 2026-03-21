@@ -2,9 +2,9 @@ import type { ListFilterMode } from '../VirtualList.types';
 
 export type GetFilteredOptionsArgs = {
   readonly listFilterMode: ListFilterMode;
-  readonly options: string[];
+  readonly options: readonly string[];
   readonly searchTerm: string;
-  readonly selectedValues: string[];
+  readonly selectedValues: readonly string[];
 };
 
 export const getFilteredOptions = ({

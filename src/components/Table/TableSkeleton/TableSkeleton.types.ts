@@ -1,3 +1,3 @@
 export type SkeletonResponse = {
-  data: Record<string, unknown>[];
+  readonly data: Record<string, unknown>[];
 };

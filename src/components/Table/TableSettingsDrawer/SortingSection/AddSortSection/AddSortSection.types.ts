@@ -1,3 +1,3 @@
 export type AddSortSectionProps = {
-  onDropdownOpenChange?: (isOpen: boolean) => void;
+  readonly onDropdownOpenChange?: (isOpen: boolean) => void;
 };

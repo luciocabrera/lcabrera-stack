@@ -1,4 +1,4 @@
 export type OrderConflictModalProps = {
-  description: string;
-  isOpen: boolean;
+  readonly description: string;
+  readonly isOpen: boolean;
 };

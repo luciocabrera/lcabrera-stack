@@ -1,4 +1,4 @@
 export type SpacerRowProps = {
-  colSpan: number;
-  height: number;
+  readonly colSpan: number;
+  readonly height: number;
 };

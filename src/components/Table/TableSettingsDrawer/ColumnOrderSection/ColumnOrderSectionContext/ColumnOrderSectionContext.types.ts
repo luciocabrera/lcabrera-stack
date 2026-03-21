@@ -6,36 +6,36 @@ import type { TStore } from '@/hooks/useStore.hook';
 
 export type ColumnOrderSectionContextValue = {
   /** Store managing column order section modal state */
-  modalsStore: TStore<ColumnOrderSectionModalsState>;
+  readonly modalsStore: TStore<ColumnOrderSectionModalsState>;
 };
 
 export type ColumnOrderSectionModalsState = {
-  conflictModal: ConflictModalState;
-  orderConflict: OrderConflictModalState;
-  pinSideModal: PinSideModalState;
-  unpinConflictModal: ConflictModalState;
+  readonly conflictModal: ConflictModalState;
+  readonly orderConflict: OrderConflictModalState;
+  readonly pinSideModal: PinSideModalState;
+  readonly unpinConflictModal: ConflictModalState;
 };
 
 export type ColumnOrderSectionProviderProps = {
-  children: React.ReactNode;
+  readonly children: React.ReactNode;
 };
 
 export type ConflictModalState = {
-  columnKey: string;
-  columnLabel: string;
-  isOpen: boolean;
-  side: 'left' | 'right';
+  readonly columnKey: string;
+  readonly columnLabel: string;
+  readonly isOpen: boolean;
+  readonly side: 'left' | 'right';
 };
 
 export type OrderConflictModalState = {
-  description: string;
-  isOpen: boolean;
-  pendingOrder: ColumnOrderState;
-  pendingPinning: ColumnPinningState;
+  readonly description: string;
+  readonly isOpen: boolean;
+  readonly pendingOrder: ColumnOrderState;
+  readonly pendingPinning: ColumnPinningState;
 };
 
 export type PinSideModalState = {
-  columnKey: string;
-  columnLabel: string;
-  isOpen: boolean;
+  readonly columnKey: string;
+  readonly columnLabel: string;
+  readonly isOpen: boolean;
 };

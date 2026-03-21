@@ -8,22 +8,22 @@ import type {
 } from '@/types/design-system.types';
 
 export type ToolbarButtonConfig = Omit<ButtonProps, 'children' | 'width'> & {
-  icon?: ReactNode;
-  label: string;
-  type: 'button';
+  readonly icon?: ReactNode;
+  readonly label: string;
+  readonly type: 'button';
 };
 
 export type ToolbarItemConfig = ToolbarButtonConfig | ToolbarLinkConfig;
 
 export type ToolbarLinkConfig = Omit<NavLinkProps, 'children' | 'className'> & {
-  color?: Pick<ButtonProps, 'color'>['color'];
-  icon?: ReactNode;
-  label: string;
-  type: 'link';
+  readonly color?: Pick<ButtonProps, 'color'>['color'];
+  readonly icon?: ReactNode;
+  readonly label: string;
+  readonly type: 'link';
 };
 
 export type ToolbarProps = ComponentPropsWithoutRef<'nav'> & {
-  items: ToolbarItemConfig[];
-  orientation?: DesignSystemOrientation;
-  size?: DesignSystemSize;
+  readonly items: ToolbarItemConfig[];
+  readonly orientation?: DesignSystemOrientation;
+  readonly size?: DesignSystemSize;
 };

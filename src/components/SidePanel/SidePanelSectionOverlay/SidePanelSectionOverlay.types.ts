@@ -1,4 +1,4 @@
 export type SidePanelSectionOverlayProps = {
-  children: React.ReactNode;
-  isOpen: boolean;
+  readonly children: React.ReactNode;
+  readonly isOpen: boolean;
 };
