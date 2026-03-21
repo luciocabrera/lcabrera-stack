@@ -70,7 +70,7 @@ export const useAcceptUnpinConflict = () => {
         .filter((col) => col.key !== columnKey)
         .map((col) => col.key);
 
-      insertAdjacentToPinnedGroup({
+      const reorderedOrder = insertAdjacentToPinnedGroup({
         columnKey,
         columnPinning: newPinning,
         order: newOrder,
@@ -78,7 +78,7 @@ export const useAcceptUnpinConflict = () => {
       });
 
       drawerColumnsStore.set({
-        columnOrder: newOrder as ColumnOrderState,
+        columnOrder: reorderedOrder as ColumnOrderState,
         columnPinning: newPinning,
       });
     }

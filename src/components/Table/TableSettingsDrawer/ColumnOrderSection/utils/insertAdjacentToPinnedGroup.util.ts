@@ -1,17 +1,17 @@
 import type { ColumnPinningState } from '@/components/Table/Table.types';
 
 type InsertAdjacentToPinnedGroupArgs = {
-  columnKey: string;
-  columnPinning: ColumnPinningState;
-  order: string[];
-  side: 'left' | 'right';
+  readonly columnKey: string;
+  readonly columnPinning: ColumnPinningState;
+  readonly order: string[];
+  readonly side: 'left' | 'right';
 };
 
 /**
  * Inserts a column adjacent to the pinned group on the given side.
  * - For 'left': inserts after the last left-pinned column.
  * - For 'right': inserts before the first right-pinned column.
- * Returns the new order array (mutates in place for efficiency).
+ * Returns a new order array without mutating the input.
  */
 export const insertAdjacentToPinnedGroup = ({
   columnKey,
@@ -19,22 +19,24 @@ export const insertAdjacentToPinnedGroup = ({
   order,
   side,
 }: InsertAdjacentToPinnedGroupArgs): string[] => {
+  const nextOrder = [...order];
+
   if (side === 'left') {
     let lastLeftPinnedIndex = -1;
-    for (const [i, key] of order.entries()) {
+    for (const [i, key] of nextOrder.entries()) {
       if (columnPinning.left.includes(key)) {
         lastLeftPinnedIndex = i;
       }
     }
-    order.splice(lastLeftPinnedIndex + 1, 0, columnKey);
+    nextOrder.splice(lastLeftPinnedIndex + 1, 0, columnKey);
   } else {
-    const firstRightPinnedIndex = order.findIndex((key) =>
+    const firstRightPinnedIndex = nextOrder.findIndex((key) =>
       columnPinning.right.includes(key),
     );
     const insertAt =
-      firstRightPinnedIndex === -1 ? order.length : firstRightPinnedIndex;
-    order.splice(insertAt, 0, columnKey);
+      firstRightPinnedIndex === -1 ? nextOrder.length : firstRightPinnedIndex;
+    nextOrder.splice(insertAt, 0, columnKey);
   }
 
-  return order;
+  return nextOrder;
 };

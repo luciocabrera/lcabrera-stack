@@ -39,12 +39,12 @@ export const useAcceptPinConflict = () => {
 
     switch (resolution) {
       case 'move-column': {
-        const newOrder = allOrderedColumns
+        let newOrder = allOrderedColumns
           .filter((col) => col.key !== columnKey)
           .map((col) => col.key);
         const column = allOrderedColumns[index];
         if (column?.key) {
-          insertAdjacentToPinnedGroup({
+          newOrder = insertAdjacentToPinnedGroup({
             columnKey: column.key,
             columnPinning,
             order: newOrder,

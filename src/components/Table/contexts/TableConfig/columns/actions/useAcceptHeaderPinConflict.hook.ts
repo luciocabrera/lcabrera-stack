@@ -54,12 +54,12 @@ export const useAcceptHeaderPinConflict = <TData>() => {
 
         const column = allOrderedColumns[index];
         if (column?.key) {
-          insertAdjacentToPinnedGroup({
+          newOrder = insertAdjacentToPinnedGroup({
             columnKey: column.key,
             columnPinning: currentPinning as ColumnPinningState,
             order: newOrder,
             side,
-          });
+          }) as ColumnOrderState<TData>;
         }
 
         newPinning = applyPin({

@@ -1,6 +1,6 @@
 type ShallowEqualArgs<T extends Record<string, unknown>> = {
-  objA: T | undefined;
-  objB: T | undefined;
+  readonly objA: T | undefined;
+  readonly objB: T | undefined;
 };
 
 /**
