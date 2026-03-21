@@ -1,29 +1,40 @@
 // @vitest-environment jsdom
 
-import type { ReactNode } from 'react';
-import type { NavLinkProps as RouterNavLinkProps } from 'react-router';
+import type {
+  NavLinkRenderProps,
+  NavLinkProps as RouterNavLinkProps,
+} from 'react-router';
 
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { NavLink } from './NavLink.component';
 
-afterEach(() => {
-  cleanup();
-});
+afterEach(cleanup);
+
+const mockRenderProps: NavLinkRenderProps = {
+  isActive: false,
+  isPending: false,
+  isTransitioning: false,
+};
+
+const MockRouterNavLink = ({ children, className }: RouterNavLinkProps) => {
+  const resolvedClassName =
+    typeof className === 'function'
+      ? className(mockRenderProps)
+      : (className ?? '');
+  const resolvedChildren =
+    typeof children === 'function' ? children(mockRenderProps) : children;
+
+  return (
+    <a className={resolvedClassName} href='#'>
+      {resolvedChildren}
+    </a>
+  );
+};
 
 vi.mock('react-router', () => ({
-  NavLink: ({ children, className }: RouterNavLinkProps) => {
-    const resolvedClassName =
-      typeof className === 'function'
-        ? className({ isActive: false, isPending: false, isTransitioning: false })
-        : (className ?? '');
-    return (
-      <a className={resolvedClassName} href='#'>
-        {children}
-      </a>
-    );
-  },
+  NavLink: MockRouterNavLink,
 }));
 
 describe('NavLink', () => {

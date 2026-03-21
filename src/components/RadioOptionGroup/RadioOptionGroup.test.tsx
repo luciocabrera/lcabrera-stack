@@ -37,7 +37,10 @@ describe('RadioOptionGroup', () => {
       />,
     );
 
-    expect((screen.getByRole('radio', { name: /Option B/i }) as HTMLInputElement).checked).toBe(true);
+    expect(
+      screen.getByRole<HTMLInputElement>('radio', { name: /Option B/i })
+        .checked,
+    ).toBe(true);
   });
 
   it('calls onChange with the selected value when a radio is clicked', () => {
@@ -67,6 +70,8 @@ describe('RadioOptionGroup', () => {
       />,
     );
 
-    expect(screen.getByText('With description').textContent).toBe('With description');
+    expect(screen.getByText('With description').textContent).toBe(
+      'With description',
+    );
   });
 });

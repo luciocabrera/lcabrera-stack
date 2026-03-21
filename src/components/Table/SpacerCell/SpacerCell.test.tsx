@@ -11,7 +11,7 @@ describe('SpacerCell', () => {
       <table>
         <thead>
           <tr>
-            <SpacerCell isHeader />
+            <SpacerCell isHeader width={40} />
           </tr>
         </thead>
       </table>,
@@ -27,7 +27,7 @@ describe('SpacerCell', () => {
       <table>
         <tbody>
           <tr>
-            <SpacerCell />
+            <SpacerCell width={40} />
           </tr>
         </tbody>
       </table>,

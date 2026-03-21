@@ -49,18 +49,14 @@ describe('Toolbar', () => {
 
   it('renders button items', () => {
     const onClick = vi.fn();
-    render(
-      <Toolbar items={[{ label: 'Refresh', onClick, type: 'button' }]} />,
-    );
+    render(<Toolbar items={[{ label: 'Refresh', onClick, type: 'button' }]} />);
     const button = screen.getByRole('button', { name: 'Refresh' });
     fireEvent.click(button);
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 
   it('renders link items', () => {
-    render(
-      <Toolbar items={[{ label: 'Home', to: '/home', type: 'link' }]} />,
-    );
+    render(<Toolbar items={[{ label: 'Home', to: '/home', type: 'link' }]} />);
     expect(screen.getByText('Home').textContent).toBe('Home');
   });
 });

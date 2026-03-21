@@ -4,9 +4,9 @@ Theme-domain cookie management — reading and writing the user's preferred them
 
 ## Files
 
-| File                   | Description                                                              |
-| ---------------------- | ------------------------------------------------------------------------ |
-| `theme-cookie.util.ts` | `parseCookies`, `getThemeFromCookie` (server), `setThemeCookie` (client) |
+| File                   | Description                                                                         |
+| ---------------------- | ----------------------------------------------------------------------------------- |
+| `theme-cookie.util.ts` | `getThemeFromCookie` (server, uses shared cookie parser), `setThemeCookie` (client) |
 
 ## Function Responsibilities
 

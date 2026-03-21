@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { CardDescription } from './CardDescription.component';
 
 describe('CardDescription', () => {
-  it('renders children inside a p element with data-testid=\'card-description\'', () => {
+  it("renders children inside a p element with data-testid='card-description'", () => {
     render(<CardDescription>Some description text</CardDescription>);
 
     const description = screen.getByTestId('card-description');

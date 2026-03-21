@@ -9,9 +9,15 @@ afterEach(cleanup);
 
 describe('SidePanelHeader', () => {
   it('renders children inside the header', () => {
-    render(<SidePanelHeader><h2>Panel Title</h2></SidePanelHeader>);
+    render(
+      <SidePanelHeader>
+        <h2>Panel Title</h2>
+      </SidePanelHeader>,
+    );
 
-    expect(screen.getByTestId('side-panel-header').textContent).toContain('Panel Title');
+    expect(screen.getByTestId('side-panel-header').textContent).toContain(
+      'Panel Title',
+    );
   });
 
   it('renders actions slot when provided', () => {
@@ -21,6 +27,8 @@ describe('SidePanelHeader', () => {
       </SidePanelHeader>,
     );
 
-    expect(screen.getByRole('button', { name: 'Close' }).tagName).toBe('BUTTON');
+    expect(screen.getByRole('button', { name: 'Close' }).tagName).toBe(
+      'BUTTON',
+    );
   });
 });

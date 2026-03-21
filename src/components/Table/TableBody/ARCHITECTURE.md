@@ -16,7 +16,11 @@ TableBody/
 ├── index.ts                  → Barrel export
 │
 └── utils/
-    └── generatePlaceholderData.util.ts → Creates skeleton row objects
+  ├── ARCHITECTURE.md                 → TableBody utility architecture
+  ├── buildTableBodyCellDescriptor.util.ts → Derives pure cell descriptor data
+  ├── generatePlaceholderData.util.ts → Creates skeleton row objects
+  ├── getTotalVisibleColumnCount.util.ts → Computes spacer-row colSpan
+  └── index.ts                        → Utility barrel exports
 ```
 
 ## Context Dependencies
@@ -89,5 +93,10 @@ For each visible row, every rendered column produces a `TableBodyCell`:
 
 - **Custom render**: If `column.render` is defined, call it with row data
 - **Default render**: Pass `value`, `dataType`, `format`, `label` to auto-format
+- Pure cell descriptor data is derived in `utils/buildTableBodyCellDescriptor.util.ts`
+- Cell rendering callback creation is extracted to `utils/createRenderTableBodyCell.util.ts`
+- Column-group mapping is handled by `utils/renderTableBodyColumnGroup.util.ts`
+- A shared internal renderer still maps left-pinned, center-visible, and
+  right-pinned groups to `TableBodyCell` to keep JSX props consistent across groups.
 
 Each cell receives computed `pinInfo` from `getPinnedColumnOffsets()`.

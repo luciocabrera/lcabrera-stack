@@ -44,10 +44,12 @@ describe('Tooltip', () => {
       </Tooltip>,
     );
 
-    const triggerSpan = document.querySelector('[aria-describedby]') as HTMLElement;
-    if (triggerSpan) {
-      fireEvent.focus(triggerSpan);
+    const triggerSpan = document.querySelector('[aria-describedby]');
+    if (triggerSpan === null) {
+      throw new Error('Expected tooltip trigger to exist');
     }
+
+    fireEvent.focus(triggerSpan);
     expect(showPopover).toHaveBeenCalled();
   });
 });

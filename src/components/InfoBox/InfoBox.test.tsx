@@ -7,8 +7,14 @@ import { InfoBox } from './InfoBox.component';
 
 describe('InfoBox', () => {
   it('renders children content', () => {
-    render(<InfoBox><p>Informational message</p></InfoBox>);
+    render(
+      <InfoBox>
+        <p>Informational message</p>
+      </InfoBox>,
+    );
 
-    expect(screen.getByText('Informational message').textContent).toBe('Informational message');
+    expect(screen.getByText('Informational message').textContent).toBe(
+      'Informational message',
+    );
   });
 });

@@ -54,7 +54,7 @@ describe('SelectAllOption', () => {
         onSelectAll={() => void 0}
       />,
     );
-    const checkbox = screen.getByRole('checkbox');
+    const checkbox = screen.getByRole<HTMLInputElement>('checkbox');
     expect(checkbox.checked).toBe(true);
   });
 
@@ -66,7 +66,7 @@ describe('SelectAllOption', () => {
         onSelectAll={() => void 0}
       />,
     );
-    const checkbox = screen.getByRole('checkbox');
+    const checkbox = screen.getByRole<HTMLInputElement>('checkbox');
     expect(checkbox.disabled).toBe(true);
   });
 });

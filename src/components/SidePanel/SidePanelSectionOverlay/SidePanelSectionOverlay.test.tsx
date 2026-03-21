@@ -15,7 +15,9 @@ describe('SidePanelSectionOverlay', () => {
       </SidePanelSectionOverlay>,
     );
 
-    expect(screen.getByText('Always visible').textContent).toBe('Always visible');
+    expect(screen.getByText('Always visible').textContent).toBe(
+      'Always visible',
+    );
   });
 
   it('shows overlay when isOpen is true', () => {

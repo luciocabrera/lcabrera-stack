@@ -17,19 +17,6 @@ export const streamTimeout = Number(process.env.STREAM_TIMEOUT_MS) || 15_000;
 
 const ABORT_DELAY = streamTimeout + 1000;
 
-const CSP_NONCE_HEADER_NAMES = ['x-csp-nonce', 'csp-nonce'] as const;
-
-const getRequestCspNonce = (request: Request): string | undefined => {
-  for (const headerName of CSP_NONCE_HEADER_NAMES) {
-    const value = request.headers.get(headerName);
-    if (value) {
-      return value;
-    }
-  }
-
-  return undefined;
-};
-
 /**
  * Server-side request handler for React Router 7 streaming.
  * Implements proper Suspense streaming with bot detection.

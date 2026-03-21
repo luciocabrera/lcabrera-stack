@@ -8,7 +8,7 @@ import { CardTitle } from './CardTitle.component';
 afterEach(cleanup);
 
 describe('CardTitle', () => {
-  it('renders children inside an h3 with data-testid=\'card-title\'', () => {
+  it("renders children inside an h3 with data-testid='card-title'", () => {
     render(<CardTitle>My Title</CardTitle>);
 
     const title = screen.getByTestId('card-title');
@@ -17,7 +17,11 @@ describe('CardTitle', () => {
   });
 
   it('renders icon slot when icon prop is provided', () => {
-    render(<CardTitle icon={<span data-testid='title-icon'>🔔</span>}>Title with Icon</CardTitle>);
+    render(
+      <CardTitle icon={<span data-testid='title-icon'>🔔</span>}>
+        Title with Icon
+      </CardTitle>,
+    );
 
     expect(screen.getByTestId('title-icon')).not.toBeNull();
   });

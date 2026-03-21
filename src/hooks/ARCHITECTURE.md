@@ -11,7 +11,12 @@ hooks/
 ├── useColumnVirtualization.hook.ts       → Horizontal virtual-scroll geometry computation
 ├── useStore.hook.ts                      → Lightweight external store (useSyncExternalStore-compatible)
 ├── useTheme.hook.ts                      → Access ThemeContext via React 19 use()
-└── useVirtualization.hook.ts             → Vertical virtual-scroll geometry computation
+├── useVirtualization.hook.ts             → Vertical virtual-scroll geometry computation
+└── utils/
+  ├── ARCHITECTURE.md                   → Hook-local utility architecture
+  ├── findFirstOutOfViewIndex.util.ts   → Binary search for first start >= viewport end
+  ├── findFirstVisibleIndex.util.ts     → Binary search for first right-edge > viewport start
+  └── index.ts                          → Utility barrel exports
 ```
 
 ## Hook Summary
@@ -64,6 +69,15 @@ graph TD
 Computes the horizontal virtual-scroll window for a list of columns with
 variable widths. Mirrors the geometry logic of `useVirtualization` but for
 the X-axis and variable-width items.
+
+Implementation details:
+
+- Syncs initial `scrollLeft` on mount so restored horizontal position is
+  reflected before first user interaction.
+- Uses a passive scroll listener to avoid blocking native scrolling.
+- Memoizes cumulative column start offsets and resolves visible boundaries via
+  binary search.
+- Binary-search logic is extracted to `hooks/utils/` as reusable pure utils.
 
 ### Signature
 

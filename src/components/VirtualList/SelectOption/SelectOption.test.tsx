@@ -33,7 +33,7 @@ describe('SelectOption', () => {
         option='Option B'
       />,
     );
-    const checkbox = screen.getByRole('checkbox');
+    const checkbox = screen.getByRole<HTMLInputElement>('checkbox');
     expect(checkbox.checked).toBe(true);
   });
 
@@ -63,7 +63,7 @@ describe('SelectOption', () => {
         option='Loading option'
       />,
     );
-    const checkbox = screen.getByRole('checkbox');
+    const checkbox = screen.getByRole<HTMLInputElement>('checkbox');
     expect(checkbox.disabled).toBe(true);
   });
 

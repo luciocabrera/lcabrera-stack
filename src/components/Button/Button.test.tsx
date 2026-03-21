@@ -1,14 +1,19 @@
 // @vitest-environment jsdom
 
-import { type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const { MockTooltip } = vi.hoisted(() => ({
-  MockTooltip: vi.fn(({ children }: { readonly children: ReactNode }) => (
-    <div data-testid='tooltip'>{children}</div>
-  )),
+  MockTooltip: vi.fn(
+    ({
+      children,
+    }: {
+      readonly children: ReactNode;
+      readonly content?: string;
+    }) => <div data-testid='tooltip'>{children}</div>,
+  ),
 }));
 
 vi.mock('../Tooltip', () => ({
@@ -29,7 +34,7 @@ describe('Button', () => {
   it('renders as disabled when isDisabled is true', () => {
     render(<Button isDisabled>Disabled</Button>);
 
-    expect((screen.getByTestId('button') as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getByTestId<HTMLButtonElement>('button').disabled).toBe(true);
   });
 
   it('renders icon slot when icon prop is provided', () => {

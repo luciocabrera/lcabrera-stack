@@ -11,9 +11,7 @@ const { MockButton } = vi.hoisted(() => ({
     }: {
       readonly 'aria-label'?: string;
       readonly onClick?: React.MouseEventHandler<HTMLButtonElement>;
-    }) => (
-      <button aria-label={ariaLabel} onClick={onClick} />
-    ),
+    }) => <button aria-label={ariaLabel} onClick={onClick} />,
   ),
 }));
 

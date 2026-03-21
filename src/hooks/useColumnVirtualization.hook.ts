@@ -1,6 +1,8 @@
 import type { RefObject } from 'react';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+
+import { findFirstOutOfViewIndex, findFirstVisibleIndex } from './utils';
 
 /** Arguments for the useColumnVirtualization hook. */
 export type UseColumnVirtualizationArgs = {
@@ -47,6 +49,18 @@ export const useColumnVirtualization = ({
   const [scrollLeft, setScrollLeft] = useState(0);
   const [containerWidth, setContainerWidth] = useState(defaultContainerWidth);
 
+  const cumulativeWidths = useMemo(() => {
+    const cumulative: number[] = [];
+    let totalWidth = 0;
+
+    for (const width of columnWidths) {
+      cumulative.push(totalWidth);
+      totalWidth += width;
+    }
+
+    return { cumulative, totalWidth };
+  }, [columnWidths]);
+
   useEffect(() => {
     const container = containerRef.current;
 
@@ -64,13 +78,19 @@ export const useColumnVirtualization = ({
       setScrollLeft(container?.scrollLeft ?? 0);
     };
 
+    const syncScrollPosition = () => {
+      // eslint-disable-next-line react-x/set-state-in-effect -- Scroll position must be read from DOM event; cannot be derived during render
+      setScrollLeft(container?.scrollLeft ?? 0);
+    };
+
     updateWidth();
-    container?.addEventListener('scroll', handleScroll);
-    window.addEventListener('resize', updateWidth);
+    syncScrollPosition();
+    container?.addEventListener('scroll', handleScroll, { passive: true });
+    globalThis.addEventListener('resize', updateWidth);
 
     return () => {
       container?.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', updateWidth);
+      globalThis.removeEventListener('resize', updateWidth);
     };
   }, [containerRef]);
 
@@ -86,41 +106,32 @@ export const useColumnVirtualization = ({
     };
   }
 
-  // Build cumulative start-position for each column: cumulativeWidths[i] is the
-  // pixel offset at which column i begins.
-  const cumulativeWidths: number[] = [];
-  let totalWidth = 0;
-  for (const width of columnWidths) {
-    cumulativeWidths.push(totalWidth);
-    totalWidth += width;
-  }
+  const { cumulative, totalWidth } = cumulativeWidths;
 
   const viewStart = scrollLeft;
   const viewEnd = scrollLeft + containerWidth;
 
-  // First column whose right edge exceeds viewStart (partially or fully visible)
-  const firstVisibleIdx = cumulativeWidths.findIndex((colStart, i) => {
-    const colWidth = columnWidths[i] ?? 0;
-    return colStart + colWidth > viewStart;
+  const firstVisibleIdx = findFirstVisibleIndex({
+    starts: cumulative,
+    viewStart,
+    widths: columnWidths,
   });
-
   const startIndex =
-    firstVisibleIdx === -1
+    firstVisibleIdx >= totalColumns
       ? totalColumns
       : Math.max(0, firstVisibleIdx - overscan);
 
-  // First column whose left edge is past viewEnd (fully scrolled off right)
-  const firstOutOfViewIdx = cumulativeWidths.findIndex(
-    (colStart) => colStart >= viewEnd,
-  );
-
+  const firstOutOfViewIdx = findFirstOutOfViewIndex({
+    starts: cumulative,
+    viewEnd,
+  });
   const endIndex =
-    firstOutOfViewIdx === -1
+    firstOutOfViewIdx >= totalColumns
       ? totalColumns
       : Math.min(totalColumns, firstOutOfViewIdx + overscan);
 
-  const leftSpacerWidth = cumulativeWidths[startIndex] ?? 0;
-  const endSpacerStart = cumulativeWidths[endIndex] ?? totalWidth;
+  const leftSpacerWidth = cumulative[startIndex] ?? 0;
+  const endSpacerStart = cumulative[endIndex] ?? totalWidth;
   const rightSpacerWidth = totalWidth - endSpacerStart;
 
   return {

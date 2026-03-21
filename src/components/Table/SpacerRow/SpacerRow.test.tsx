@@ -10,7 +10,7 @@ describe('SpacerRow', () => {
     const { container } = render(
       <table>
         <tbody>
-          <SpacerRow height={40} />
+          <SpacerRow colSpan={1} height={40} />
         </tbody>
       </table>,
     );
