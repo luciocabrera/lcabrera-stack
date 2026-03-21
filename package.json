@@ -7,7 +7,7 @@
     "build:eslint-rules": "tsc -p eslint-local-rules/tsconfig.json",
     "build": "react-router build",
     "dev": "react-router dev",
-    "start": "react-router-serve ./build/server/index.js",
+    "start": "if [ ! -f ./build/server/index.js ]; then react-router build; fi && react-router-serve ./build/server/index.js",
     "lint": "vp lint . --fix",
     "lint:check": "vp lint .",
     "format": "vp fmt .",
