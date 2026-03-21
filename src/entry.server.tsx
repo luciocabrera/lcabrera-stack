@@ -8,6 +8,20 @@ import { ServerRouter } from 'react-router';
 
 import { getRequestCspNonce } from '@/utils/security';
 
+import stylexCssHref from './stylex.css?url';
+
+/**
+ * Adds HTTP Link headers for critical CSS preloading.
+ * Browsers process these headers before parsing the HTML body,
+ * eliminating the critical request chain for CSS resources.
+ */
+const addPreloadHeaders = (headers: Headers) => {
+  headers.append(
+    'Link',
+    `</index.css>; rel=preload; as=style, <${stylexCssHref}>; rel=preload; as=style`,
+  );
+};
+
 /**
  * Stream timeout in milliseconds.
  * Configurable via STREAM_TIMEOUT_MS environment variable.
@@ -56,6 +70,7 @@ function handleBotRequest(
   routerContext: EntryContext,
 ) {
   const cspNonce = getRequestCspNonce(request);
+  addPreloadHeaders(responseHeaders);
 
   // eslint-disable-next-line local-rules/destructuring-for-functions -- Promise constructor signature is fixed
   return new Promise((resolve, reject) => {
@@ -103,6 +118,7 @@ function handleBrowserRequest(
   routerContext: EntryContext,
 ) {
   const cspNonce = getRequestCspNonce(request);
+  addPreloadHeaders(responseHeaders);
 
   // eslint-disable-next-line local-rules/destructuring-for-functions -- Promise constructor signature is fixed
   return new Promise((resolve, reject) => {
