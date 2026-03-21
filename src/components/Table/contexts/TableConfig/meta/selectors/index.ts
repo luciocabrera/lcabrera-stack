@@ -1,3 +1,4 @@
+export { useGetTableColumnOverscan } from './useGetTableColumnOverscan.hook';
 export { useGetTableColumnSelectedKey } from './useGetTableColumnSelectedKey.hook';
 export { useGetTableDensity } from './useGetTableDensity.hook';
 export { useGetTableIsBordered } from './useGetTableIsBordered.hook';

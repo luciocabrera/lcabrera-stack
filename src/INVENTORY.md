@@ -6,38 +6,39 @@ Before creating anything new, check this inventory. If something here does the j
 
 ## Components
 
-| Component          | Location                       | Description                                                                         |
-| ------------------ | ------------------------------ | ----------------------------------------------------------------------------------- |
-| `Button`           | `components/Button/`           | Interactive button — 8 color variants, 5 sizes, icon, loading, tooltip              |
-| `Card`             | `components/Card/`             | Container with elevation, color, padding, and optional interactivity                |
-| `DevStyleXInject`  | `components/DevStyleXInject/`  | Dev-only StyleX CSS injector for HMR; must be at app root                           |
-| `DraggableList`    | `components/DraggableList/`    | Drag-and-drop reorderable list using native drag events                             |
-| `Icons`            | `components/Icons/`            | 30 SVG icon components (see `Icons/index.ts` for full list)                         |
-| `InfoBox`          | `components/InfoBox/`          | Styled container for informational messages and empty states                        |
-| `Modal`            | `components/Modal/`            | Native `<dialog>` modal with title, footer, Esc-to-close                            |
-| `NavLink`          | `components/NavLink/`          | Router-aware navigation link with color, size, icon, orientation                    |
-| `PinSideModal`     | `components/PinSideModal/`     | Modal for choosing column pin side (left / right / closest-edge)                    |
-| `RadioOptionGroup` | `components/RadioOptionGroup/` | Generic `<TValue extends string>` radio button group                                |
-| `SidePanel`        | `components/SidePanel/`        | Off-canvas panel with 10 sub-components, pinning, portal support                    |
-| `Table`            | `components/Table/`            | Full-featured data table — sort, filter, pin, resize, virtualize, persist           |
-| `Tabs`             | `components/Tabs/`             | Keyboard-navigable tab bar using React 19 `<Activity>`                              |
-| `Tag`              | `components/Tag/`              | Label chip with optional remove button                                              |
-| `ToggleSwitch`     | `components/ToggleSwitch/`     | Accessible boolean toggle (controlled, `role="switch"`)                             |
-| `Toolbar`          | `components/Toolbar/`          | Horizontal/vertical toolbar of Button/NavLink items                                 |
-| `Tooltip`          | `components/Tooltip/`          | CSS Anchor + Popover API tooltip, 4 placements, animated                            |
-| `VirtualList`      | `components/VirtualList/`      | Virtualized list with search, select-all, checkboxes, lazy load                     |
-| `VirtualSelect`    | `components/VirtualSelect/`    | Dropdown select backed by `VirtualList`; `string[]` or `{ label, value }[]` options |
+| Component          | Location                       | Description                                                                            |
+| ------------------ | ------------------------------ | -------------------------------------------------------------------------------------- |
+| `Button`           | `components/Button/`           | Interactive button — 8 color variants, 5 sizes, icon, loading, tooltip                 |
+| `Card`             | `components/Card/`             | Container with elevation, color, padding, and optional interactivity                   |
+| `DevStyleXInject`  | `components/DevStyleXInject/`  | Dev-only StyleX CSS injector for HMR; must be at app root                              |
+| `DraggableList`    | `components/DraggableList/`    | Drag-and-drop reorderable list using native drag events                                |
+| `Icons`            | `components/Icons/`            | 30 SVG icon components (see `Icons/index.ts` for full list)                            |
+| `InfoBox`          | `components/InfoBox/`          | Styled container for informational messages and empty states                           |
+| `Modal`            | `components/Modal/`            | Native `<dialog>` modal with title, footer, Esc-to-close                               |
+| `NavLink`          | `components/NavLink/`          | Router-aware navigation link with color, size, icon, orientation                       |
+| `PinSideModal`     | `components/PinSideModal/`     | Modal for choosing column pin side (left / right / closest-edge)                       |
+| `RadioOptionGroup` | `components/RadioOptionGroup/` | Generic `<TValue extends string>` radio button group                                   |
+| `SidePanel`        | `components/SidePanel/`        | Off-canvas panel with 10 sub-components, pinning, portal support                       |
+| `Table`            | `components/Table/`            | Full-featured data table — sort, filter, pin, resize, row + column virtualise, persist |
+| `Tabs`             | `components/Tabs/`             | Keyboard-navigable tab bar using React 19 `<Activity>`                                 |
+| `Tag`              | `components/Tag/`              | Label chip with optional remove button                                                 |
+| `ToggleSwitch`     | `components/ToggleSwitch/`     | Accessible boolean toggle (controlled, `role="switch"`)                                |
+| `Toolbar`          | `components/Toolbar/`          | Horizontal/vertical toolbar of Button/NavLink items                                    |
+| `Tooltip`          | `components/Tooltip/`          | CSS Anchor + Popover API tooltip, 4 placements, animated                               |
+| `VirtualList`      | `components/VirtualList/`      | Virtualized list with search, select-all, checkboxes, lazy load                        |
+| `VirtualSelect`    | `components/VirtualSelect/`    | Dropdown select backed by `VirtualList`; `string[]` or `{ label, value }[]` options    |
 
 ---
 
 ## Hooks
 
-| Hook                | Location                          | Description                                                                               |
-| ------------------- | --------------------------------- | ----------------------------------------------------------------------------------------- |
-| `useClickOutside`   | `hooks/useClickOutside.hook.ts`   | Fires callback when a `mousedown` occurs outside a given ref                              |
-| `useStore`          | `hooks/useStore.hook.ts`          | Ref-based external store with shallow-equality guard, subscribe, reset, SSR snapshot      |
-| `useTheme`          | `hooks/useTheme.hook.ts`          | Returns `{ theme, setTheme }` from `ThemeContext` via React 19 `use()`                    |
-| `useVirtualization` | `hooks/useVirtualization.hook.ts` | Computes `startIndex`, `endIndex`, `totalHeight`, `offsetY` for a scrollable virtual list |
+| Hook                      | Location                                | Description                                                                                                   |
+| ------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `useClickOutside`         | `hooks/useClickOutside.hook.ts`         | Fires callback when a `mousedown` occurs outside a given ref                                                  |
+| `useStore`                | `hooks/useStore.hook.ts`                | Ref-based external store with shallow-equality guard, subscribe, reset, SSR snapshot                          |
+| `useTheme`                | `hooks/useTheme.hook.ts`                | Returns `{ theme, setTheme }` from `ThemeContext` via React 19 `use()`                                        |
+| `useColumnVirtualization` | `hooks/useColumnVirtualization.hook.ts` | Computes `startIndex`, `endIndex`, `leftSpacerWidth`, `rightSpacerWidth` for horizontal column virtualisation |
+| `useVirtualization`       | `hooks/useVirtualization.hook.ts`       | Computes `startIndex`, `endIndex`, `totalHeight`, `offsetY` for a scrollable virtual list                     |
 
 ---
 

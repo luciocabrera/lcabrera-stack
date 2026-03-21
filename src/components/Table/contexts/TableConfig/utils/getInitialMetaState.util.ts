@@ -1,6 +1,7 @@
 import type { TableMetaState } from '@/components/Table/Table.types';
 
 import {
+  DEFAULT_COLUMN_OVERSCAN,
   DEFAULT_OVERSCAN,
   DEFAULT_PLACEHOLDER_ROW_COUNT,
   DEFAULT_ROW_HEIGHT,
@@ -12,6 +13,7 @@ import {
 type GetInitialMetaStateArgs = Partial<TableMetaState>;
 
 export const getInitialMetaState = ({
+  columnOverscan = DEFAULT_COLUMN_OVERSCAN,
   density = 'compact',
   error,
   initialPageSize = INITIAL_PAGE_SIZE,
@@ -27,6 +29,7 @@ export const getInitialMetaState = ({
   threshold = INFINITE_SCROLL_THRESHOLD,
   ...rest
 }: GetInitialMetaStateArgs): TableMetaState => ({
+  columnOverscan,
   density,
   error,
   initialPageSize,

@@ -43,7 +43,7 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   const containerRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  const wrapperContextValue = { wrapperRef };
+  const wrapperContextValue = { containerRef, wrapperRef };
 
   useInfiniteScroll({
     dataSelector,

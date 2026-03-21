@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  DEFAULT_COLUMN_OVERSCAN,
   DEFAULT_OVERSCAN,
   DEFAULT_PLACEHOLDER_ROW_COUNT,
   DEFAULT_ROW_HEIGHT,
@@ -14,6 +15,7 @@ import { getInitialMetaState } from './getInitialMetaState.util';
 describe('getInitialMetaState', () => {
   it('returns default values when no args provided', () => {
     const result = getInitialMetaState({});
+    expect(result.columnOverscan).toBe(DEFAULT_COLUMN_OVERSCAN);
     expect(result.density).toBe('compact');
     expect(result.isBordered).toBe(true);
     expect(result.isStriped).toBe(true);
@@ -30,9 +32,11 @@ describe('getInitialMetaState', () => {
 
   it('allows overriding individual fields', () => {
     const result = getInitialMetaState({
+      columnOverscan: 4,
       density: 'comfortable',
       isBordered: false,
     });
+    expect(result.columnOverscan).toBe(4);
     expect(result.density).toBe('comfortable');
     expect(result.isBordered).toBe(false);
   });

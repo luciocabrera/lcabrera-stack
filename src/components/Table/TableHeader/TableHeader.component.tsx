@@ -5,11 +5,18 @@ import {
   useGetColumnSizing,
   useGetEffectiveColumns,
 } from '@/components/Table/contexts/TableConfig/columns/selectors';
-import { getPinnedColumnOffsets } from '@/components/Table/utils';
+import { useGetTableColumnOverscan } from '@/components/Table/contexts/TableConfig/meta/selectors';
+import { useTableContainerRef } from '@/components/Table/contexts/TableWrapper';
+import {
+  getPinnedColumnOffsets,
+  splitColumnsByPinning,
+} from '@/components/Table/utils';
+import { useColumnVirtualization } from '@/hooks';
 import { useRenderTracker } from '@/utils/performance';
 
 import type { TableHeaderProps } from './TableHeader.types';
 
+import { SpacerCell } from '../SpacerCell';
 import { TableHeaderCell } from '../TableHeaderCell';
 import { TableRow } from '../TableRow';
 import { tableHeaderStyles } from './TableHeader.stylex';
@@ -23,12 +30,26 @@ export const TableHeader = <TData extends Record<string, unknown>, TResponse>({
   const effectiveColumns = useGetEffectiveColumns();
   const columnPinning = useGetColumnPinning();
   const columnSizing = useGetColumnSizing();
+  const columnOverscan = useGetTableColumnOverscan();
+  const containerRef = useTableContainerRef();
 
   const pinnedOffsets = getPinnedColumnOffsets({
     columnPinning,
     columnSizing,
     effectiveColumns,
   });
+
+  const { centerCols, centerColumnWidths, leftPinnedCols, rightPinnedCols } =
+    splitColumnsByPinning({ columnPinning, columnSizing, effectiveColumns });
+
+  const { endIndex, leftSpacerWidth, rightSpacerWidth, startIndex } =
+    useColumnVirtualization({
+      columnWidths: centerColumnWidths,
+      containerRef,
+      overscan: columnOverscan,
+    });
+
+  const visibleCenterCols = centerCols.slice(startIndex, endIndex);
 
   return (
     <thead
@@ -37,7 +58,27 @@ export const TableHeader = <TData extends Record<string, unknown>, TResponse>({
       {...stylex.props(tableHeaderStyles.container, customStylex)}
     >
       <TableRow isHeader>
-        {effectiveColumns.map((col) => (
+        {leftPinnedCols.map((col) => (
+          <TableHeaderCell
+            columnKey={col.key}
+            hasSettings={!col.isHeaderHidden}
+            key={col.key}
+            pinInfo={pinnedOffsets[col.key]}
+          />
+        ))}
+        {leftSpacerWidth > 0 && <SpacerCell isHeader width={leftSpacerWidth} />}
+        {visibleCenterCols.map((col) => (
+          <TableHeaderCell
+            columnKey={col.key}
+            hasSettings={!col.isHeaderHidden}
+            key={col.key}
+            pinInfo={pinnedOffsets[col.key]}
+          />
+        ))}
+        {rightSpacerWidth > 0 && (
+          <SpacerCell isHeader width={rightSpacerWidth} />
+        )}
+        {rightPinnedCols.map((col) => (
           <TableHeaderCell
             columnKey={col.key}
             hasSettings={!col.isHeaderHidden}
