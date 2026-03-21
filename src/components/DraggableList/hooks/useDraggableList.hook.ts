@@ -12,7 +12,7 @@ export const useDraggableList = ({
   initialItems,
   onOrderChange,
 }: UseDraggableListProps) => {
-  const [items, setItems] = useState<DraggableItem[]>(initialItems);
+  const [items, setItems] = useState<DraggableItem[]>([...initialItems]);
   const [prevInitialItems, setPrevInitialItems] = useState(initialItems);
   // eslint-disable-next-line unicorn/no-useless-undefined
   const dragItemId = useRef<string | undefined>(undefined);
@@ -22,7 +22,7 @@ export const useDraggableList = ({
   // Sync local state with prop changes (adjust state during render, not in an effect)
   if (prevInitialItems !== initialItems) {
     setPrevInitialItems(initialItems);
-    setItems(initialItems);
+    setItems([...initialItems]);
   }
 
   const handleDragStart = (id: string) => {

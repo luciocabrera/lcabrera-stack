@@ -91,6 +91,7 @@ The project enforces `strict: true` with additional flags: `noUncheckedIndexedAc
 - **Use `ReadonlyArray<T>` for arrays in types** — prevents accidental mutation.
 - **Never use `any`** — use `unknown` with type guards instead.
 - **Never use `React.FC`** — use explicit arrow functions with typed props.
+- **For `eslint-plugin-unicorn(no-nested-ternary)` violations, rewrite logic using `if/else` or early returns** — do not "fix" by adding parentheses around nested ternaries, because formatter/lint cycles may remove them and re-trigger the error.
 
 ### Function Parameters
 

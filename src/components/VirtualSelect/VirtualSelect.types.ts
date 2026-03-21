@@ -29,11 +29,11 @@ export type VirtualSelectProps = {
   /** Called when the dropdown opens or closes */
   readonly onOpenChange?: (isOpen: boolean) => void;
   /** Static options — plain strings (value = label) or { label, value } pairs for key/display separation */
-  readonly options?: string[] | VirtualSelectOption[];
+  readonly options?: readonly string[] | readonly VirtualSelectOption[];
   /** Placeholder text when nothing is selected */
   readonly placeholder?: string;
   /** Currently selected value(s) */
-  readonly selected: string[];
+  readonly selected: readonly string[];
   /** When true, the component expands to fill all available vertical space */
   readonly shouldFillHeight?: boolean;
   /** Show a "Loaded: x / total" legend below the trigger */

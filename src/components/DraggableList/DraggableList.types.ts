@@ -17,7 +17,7 @@ export type DraggableItem = {
  */
 export type DraggableListProps = {
   /** Array of draggable items */
-  readonly items: DraggableItem[];
+  readonly items: readonly DraggableItem[];
   /** Callback when order changes */
   readonly onOrderChange?: (items: DraggableItem[]) => void;
 };
@@ -27,7 +27,7 @@ export type DraggableListProps = {
  */
 export type UseDraggableListProps = {
   /** Initial items array */
-  readonly initialItems: DraggableItem[];
+  readonly initialItems: readonly DraggableItem[];
   /** Callback when order changes */
   readonly onOrderChange?: (items: DraggableItem[]) => void;
 };

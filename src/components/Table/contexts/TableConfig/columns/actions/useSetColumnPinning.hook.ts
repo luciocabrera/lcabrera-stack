@@ -27,12 +27,14 @@ export const useSetColumnPinning = <TData>() => {
     const left = currentPinning.left.filter((k) => k !== columnKey);
     const right = currentPinning.right.filter((k) => k !== columnKey);
 
-    const newPinning: ColumnPinningState<TData> =
-      side === 'left'
-        ? { left: [...left, columnKey], right }
-        : side === 'right'
-          ? { left, right: [...right, columnKey] }
-          : { left, right };
+    let newPinning: ColumnPinningState<TData>;
+    if (side === 'left') {
+      newPinning = { left: [...left, columnKey], right };
+    } else if (side === 'right') {
+      newPinning = { left, right: [...right, columnKey] };
+    } else {
+      newPinning = { left, right };
+    }
 
     const effectiveColumns = getEffectiveColumns({
       columnOrder: columnsState?.columnOrder,

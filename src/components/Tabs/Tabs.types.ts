@@ -19,5 +19,5 @@ export type TabsProps = ComponentPropsWithoutRef<'div'> & {
   /** Initially selected tab key (defaults to first tab) */
   readonly defaultSelectedTab?: string;
   /** Array of tab configurations */
-  readonly tabs: TabItem[];
+  readonly tabs: readonly TabItem[];
 };

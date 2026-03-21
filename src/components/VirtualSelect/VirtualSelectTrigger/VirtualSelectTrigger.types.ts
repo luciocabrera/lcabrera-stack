@@ -10,7 +10,7 @@ export type VirtualSelectTriggerProps = {
   readonly onToggle: () => void;
   readonly overflowCount: number;
   readonly placeholder: string;
-  readonly selected: string[];
+  readonly selected: readonly string[];
   readonly triggerRef: RefObject<HTMLDivElement | null>;
-  readonly visibleTags: string[];
+  readonly visibleTags: readonly string[];
 };
