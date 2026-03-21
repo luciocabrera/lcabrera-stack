@@ -6,6 +6,8 @@ import { PassThrough } from 'node:stream';
 import { renderToPipeableStream } from 'react-dom/server';
 import { ServerRouter } from 'react-router';
 
+import { getRequestCspNonce } from '@/utils/security';
+
 /**
  * Stream timeout in milliseconds.
  * Configurable via STREAM_TIMEOUT_MS environment variable.

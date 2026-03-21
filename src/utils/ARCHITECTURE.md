@@ -18,6 +18,8 @@ utils/
 │   └── ARCHITECTURE.md      -> Locale-aware date/number/currency formatters
 ├── performance/
 │   └── ARCHITECTURE.md      -> Render tracking utilities
+├── security/
+│   └── ARCHITECTURE.md      -> Security helpers (CSP nonce parsing)
 ├── storage/
 │   └── ARCHITECTURE.md      -> Cookie/localStorage read/write utilities
 ├── theme/
@@ -35,6 +37,7 @@ graph TD
   Filters[filters/]
   Formatters[formatters/]
   Performance[performance/]
+  Security[security/]
   Storage[storage/]
   Theme[theme/]
   URLState[urlState/]
@@ -55,6 +58,7 @@ graph TD
 | `filters/`     | `createStaticFilterOptions` — static array → Table filter contract       |
 | `formatters/`  | `formatDate`, `formatCurrency`, `formatNumber`, `parseDate`, etc.        |
 | `performance/` | `renderTracker`, `useRenderTracker` — dev-time render inspection         |
+| `security/`    | `getRequestCspNonce` — standardized `x-csp-nonce` request header parser  |
 | `storage/`     | `parseCookies`, `readFromCookie`, `writeToCookie`, `writeToLocalStorage` |
 | `theme/`       | `getThemeFromCookie`, `setThemeCookie`                                   |
 | `urlState/`    | `encodeStateToURL`, `decodeStateFromURL`, `readTableStateFromURL`        |
