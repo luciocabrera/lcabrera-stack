@@ -1,6 +1,8 @@
 import type { RefObject } from 'react';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+
+import { findFirstOutOfViewIndex, findFirstVisibleIndex } from './utils';
 
 /** Arguments for the useColumnVirtualization hook. */
 export type UseColumnVirtualizationArgs = {
@@ -8,7 +10,7 @@ export type UseColumnVirtualizationArgs = {
   readonly columnWidths: readonly number[];
   /** Ref to the horizontally scrollable container element. */
   readonly containerRef: RefObject<HTMLElement | null>;
-  /** Fallback container width used before the DOM is measured. Default: 800. */
+  /** Fallback container width used before the DOM is measured. Defaults to 1920; corrected immediately by the ResizeObserver after mount. */
   readonly defaultContainerWidth?: number;
   /** Extra columns rendered beyond each edge of the visible window. Default: 2. */
   readonly overscan?: number;
@@ -41,36 +43,98 @@ export type UseColumnVirtualizationReturn = {
 export const useColumnVirtualization = ({
   columnWidths,
   containerRef,
-  defaultContainerWidth = 800,
-  overscan = 2,
+  defaultContainerWidth = 1920,
+  overscan = 12,
 }: UseColumnVirtualizationArgs): UseColumnVirtualizationReturn => {
   const [scrollLeft, setScrollLeft] = useState(0);
-  const [containerWidth, setContainerWidth] = useState(defaultContainerWidth);
+  const [containerWidth, setContainerWidth] = useState(() => {
+    const measured = containerRef.current?.offsetWidth ?? 0;
+    return measured > 0 ? measured : defaultContainerWidth;
+  });
+  const rafIdRef = useRef(-1);
+
+  const cumulativeWidths = useMemo(() => {
+    const cumulative: number[] = [];
+    let totalWidth = 0;
+
+    for (const width of columnWidths) {
+      cumulative.push(totalWidth);
+      totalWidth += width;
+    }
+
+    return { cumulative, totalWidth };
+  }, [columnWidths]);
 
   useEffect(() => {
     const container = containerRef.current;
 
     const updateWidth = () => {
       const measured = container?.offsetWidth ?? 0;
-      // Skip zero measurements (e.g. display:none) to preserve last valid width
       if (measured > 0) {
         // eslint-disable-next-line react-x/set-state-in-effect -- State must be set from DOM measurement (offsetWidth); cannot be derived during render
         setContainerWidth(measured);
+      } else {
+        // Container measured zero (e.g. CSS containment, flex sizing not yet resolved).
+        // Fall back to the viewport width when it is also non-zero (real browser).
+        // When innerWidth is 0 (jsdom, display:none) the old value is preserved.
+        const vw = globalThis.window.innerWidth;
+        if (vw > 0) {
+          // eslint-disable-next-line react-x/set-state-in-effect -- Viewport width is a DOM measurement; cannot be derived during render
+          setContainerWidth(vw);
+        }
       }
     };
 
     const handleScroll = () => {
+      if (rafIdRef.current >= 0) {
+        return;
+      }
+
+      rafIdRef.current = globalThis.requestAnimationFrame(() => {
+        rafIdRef.current = -1;
+        // eslint-disable-next-line react-x/set-state-in-effect -- Scroll position must be read from DOM event; cannot be derived during render
+        setScrollLeft(container?.scrollLeft ?? 0);
+      });
+    };
+
+    const syncScrollPosition = () => {
+      if (rafIdRef.current >= 0) {
+        globalThis.cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = -1;
+      }
+
       // eslint-disable-next-line react-x/set-state-in-effect -- Scroll position must be read from DOM event; cannot be derived during render
       setScrollLeft(container?.scrollLeft ?? 0);
     };
 
+    // Attempt an immediate measurement — succeeds when layout is already
+    // resolved at effect time (e.g. unit tests with a pre-populated ref or
+    // fast-path re-renders).
     updateWidth();
-    container?.addEventListener('scroll', handleScroll);
-    window.addEventListener('resize', updateWidth);
+
+    // ResizeObserver fires after the browser finishes layout, including the
+    // extra passes required by CSS containment / container-type:size on
+    // ancestor elements. It covers both:
+    //   • the initial mount when the immediate measurement returned 0, and
+    //   • future container size changes (sidebar toggle, panel resize, etc.).
+    const resizeObserver = new ResizeObserver(() => {
+      updateWidth();
+    });
+
+    if (container) {
+      resizeObserver.observe(container);
+    }
+
+    syncScrollPosition();
+    container?.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
+      if (rafIdRef.current >= 0) {
+        globalThis.cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = -1;
+      }
       container?.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', updateWidth);
+      resizeObserver.disconnect();
     };
   }, [containerRef]);
 
@@ -86,41 +150,32 @@ export const useColumnVirtualization = ({
     };
   }
 
-  // Build cumulative start-position for each column: cumulativeWidths[i] is the
-  // pixel offset at which column i begins.
-  const cumulativeWidths: number[] = [];
-  let totalWidth = 0;
-  for (const width of columnWidths) {
-    cumulativeWidths.push(totalWidth);
-    totalWidth += width;
-  }
+  const { cumulative, totalWidth } = cumulativeWidths;
 
   const viewStart = scrollLeft;
   const viewEnd = scrollLeft + containerWidth;
 
-  // First column whose right edge exceeds viewStart (partially or fully visible)
-  const firstVisibleIdx = cumulativeWidths.findIndex((colStart, i) => {
-    const colWidth = columnWidths[i] ?? 0;
-    return colStart + colWidth > viewStart;
+  const firstVisibleIdx = findFirstVisibleIndex({
+    starts: cumulative,
+    viewStart,
+    widths: columnWidths,
   });
-
   const startIndex =
-    firstVisibleIdx === -1
+    firstVisibleIdx >= totalColumns
       ? totalColumns
       : Math.max(0, firstVisibleIdx - overscan);
 
-  // First column whose left edge is past viewEnd (fully scrolled off right)
-  const firstOutOfViewIdx = cumulativeWidths.findIndex(
-    (colStart) => colStart >= viewEnd,
-  );
-
+  const firstOutOfViewIdx = findFirstOutOfViewIndex({
+    starts: cumulative,
+    viewEnd,
+  });
   const endIndex =
-    firstOutOfViewIdx === -1
+    firstOutOfViewIdx >= totalColumns
       ? totalColumns
       : Math.min(totalColumns, firstOutOfViewIdx + overscan);
 
-  const leftSpacerWidth = cumulativeWidths[startIndex] ?? 0;
-  const endSpacerStart = cumulativeWidths[endIndex] ?? totalWidth;
+  const leftSpacerWidth = cumulative[startIndex] ?? 0;
+  const endSpacerStart = cumulative[endIndex] ?? totalWidth;
   const rightSpacerWidth = totalWidth - endSpacerStart;
 
   return {

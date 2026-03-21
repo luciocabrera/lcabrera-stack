@@ -65,6 +65,38 @@ cd api-server
 vp run start
 ```
 
+### DB Recovery And Backup
+
+If API responses suddenly return `total: 0`, first check DB sanity:
+
+```bash
+curl http://localhost:3001/api/db-sanity
+```
+
+Seed all API tables in one command:
+
+```bash
+cd api-server
+vp run seed
+```
+
+Create a backup dump:
+
+```bash
+docker exec -i postgres_container pg_dump -U root -d car_sales_db > car_sales_db.dump.sql
+```
+
+Restore from a dump:
+
+```bash
+cat car_sales_db.dump.sql | docker exec -i postgres_container psql -U root -d car_sales_db
+```
+
+Important:
+
+- Avoid `docker compose down -v` unless you intentionally want to delete DB data.
+- Keep one stable compose project path/name so Docker reuses the same volume.
+
 ## Routes
 
 Key routes currently available:

@@ -44,6 +44,23 @@ Before creating anything new, check this inventory. If something here does the j
 
 ## Utility Functions
 
+### `src/hooks/utils/`
+
+| Function                  | Location                                      | Description                                                          |
+| ------------------------- | --------------------------------------------- | -------------------------------------------------------------------- |
+| `findFirstVisibleIndex`   | `hooks/utils/findFirstVisibleIndex.util.ts`   | Binary search: first index where `starts[i] + widths[i] > viewStart` |
+| `findFirstOutOfViewIndex` | `hooks/utils/findFirstOutOfViewIndex.util.ts` | Binary search: first index where `starts[i] >= viewEnd`              |
+
+### `src/components/Table/TableBody/utils/`
+
+| Function                       | Location                                                                | Description                                                           |
+| ------------------------------ | ----------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `buildTableBodyCellDescriptor` | `components/Table/TableBody/utils/buildTableBodyCellDescriptor.util.ts` | Derives render-ready body-cell descriptor data from column + row      |
+| `createRenderTableBodyCell`    | `components/Table/TableBody/utils/createRenderTableBodyCell.util.ts`    | Creates bound row-cell renderer from sizing/pinning + descriptor util |
+| `generatePlaceholderData`      | `components/Table/TableBody/utils/generatePlaceholderData.util.ts`      | Builds empty placeholder rows keyed by visible columns                |
+| `getTotalVisibleColumnCount`   | `components/Table/TableBody/utils/getTotalVisibleColumnCount.util.ts`   | Counts pinned, center, and spacer cells for spacer-row `colSpan`      |
+| `renderTableBodyColumnGroup`   | `components/Table/TableBody/utils/renderTableBodyColumnGroup.util.ts`   | Maps a column group through the shared body-cell renderer             |
+
 ### `src/utils/api/`
 
 | Function        | Location                | Description                                                                      |

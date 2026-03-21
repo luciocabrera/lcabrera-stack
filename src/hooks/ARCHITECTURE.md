@@ -11,18 +11,23 @@ hooks/
 ├── useColumnVirtualization.hook.ts       → Horizontal virtual-scroll geometry computation
 ├── useStore.hook.ts                      → Lightweight external store (useSyncExternalStore-compatible)
 ├── useTheme.hook.ts                      → Access ThemeContext via React 19 use()
-└── useVirtualization.hook.ts             → Vertical virtual-scroll geometry computation
+├── useVirtualization.hook.ts             → Vertical virtual-scroll geometry computation
+└── utils/
+  ├── ARCHITECTURE.md                   → Hook-local utility architecture
+  ├── findFirstOutOfViewIndex.util.ts   → Binary search for first start >= viewport end
+  ├── findFirstVisibleIndex.util.ts     → Binary search for first right-edge > viewport start
+  └── index.ts                          → Utility barrel exports
 ```
 
 ## Hook Summary
 
-| Hook                      | Category      | Returns                                        | Key dependency                           |
-| ------------------------- | ------------- | ---------------------------------------------- | ---------------------------------------- |
-| `useClickOutside`         | DOM event     | `void`                                         | `document` mousedown                     |
-| `useColumnVirtualization` | Layout/scroll | `{ startIndex, endIndex, leftSpacerWidth, … }` | scroll/resize events on container        |
-| `useStore`                | State mgmt    | `TStore<TData>`                                | `useRef`, `shallowEqual`                 |
-| `useTheme`                | Context       | `ThemeContextValue`                            | `ThemeContext`, `use()`                  |
-| `useVirtualization`       | Layout/scroll | `{ startIndex, endIndex, offsetY, … }`         | `ResizeObserver`-like via `resize` event |
+| Hook                      | Category      | Returns                                        | Key dependency                                |
+| ------------------------- | ------------- | ---------------------------------------------- | --------------------------------------------- |
+| `useClickOutside`         | DOM event     | `void`                                         | `document` mousedown                          |
+| `useColumnVirtualization` | Layout/scroll | `{ startIndex, endIndex, leftSpacerWidth, … }` | `ResizeObserver` + scroll events on container |
+| `useStore`                | State mgmt    | `TStore<TData>`                                | `useRef`, `shallowEqual`                      |
+| `useTheme`                | Context       | `ThemeContextValue`                            | `ThemeContext`, `use()`                       |
+| `useVirtualization`       | Layout/scroll | `{ startIndex, endIndex, offsetY, … }`         | `ResizeObserver`-like via `resize` event      |
 
 ---
 
@@ -64,6 +69,30 @@ graph TD
 Computes the horizontal virtual-scroll window for a list of columns with
 variable widths. Mirrors the geometry logic of `useVirtualization` but for
 the X-axis and variable-width items.
+
+Implementation details:
+
+- Initializes `containerWidth` from `containerRef.current.offsetWidth` when
+  available, falling back to `defaultContainerWidth` only when measurement is
+  unavailable.
+- Uses isomorphic layout effect so initial width/scroll sync runs before paint
+  on the client, reducing first-frame layout shift.
+- Attempts an immediate `offsetWidth` measurement on mount (fast path); falls
+  through when the measurement returns 0 (e.g. due to CSS `container-type:size`
+  containment on an ancestor requiring an extra browser layout pass).
+- Installs a `ResizeObserver` on the container element instead of listening to
+  `window.resize`. `ResizeObserver` fires after the browser resolves layout
+  (including containment passes), covers initial mount, and tracks container
+  size changes that do not trigger a window resize (sidebar toggles, panel
+  resizes, etc.).
+- Syncs initial `scrollLeft` on mount so restored horizontal position is
+  reflected before first user interaction.
+- Uses a passive scroll listener to avoid blocking native scrolling.
+- Batches scroll-driven `scrollLeft` updates with `requestAnimationFrame` to
+  reduce re-render pressure during rapid horizontal scrolling.
+- Memoizes cumulative column start offsets and resolves visible boundaries via
+  binary search.
+- Binary-search logic is extracted to `hooks/utils/` as reusable pure utils.
 
 ### Signature
 

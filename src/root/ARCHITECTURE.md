@@ -1,6 +1,6 @@
 # Root Architecture
 
-Root route composition for app-wide document layout, SSR hydration scripts, startup diagnostics, and initial theme state.
+Root route composition for app-wide document layout, SSR hydration scripts, and initial theme/csp loader state.
 
 ## Files
 

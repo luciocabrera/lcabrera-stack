@@ -3,9 +3,12 @@
 import type { RefObject } from 'react';
 
 import { act, renderHook } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useColumnVirtualization } from './useColumnVirtualization.hook';
+
+// Captured ResizeObserver callback so tests can trigger it directly.
+let capturedResizeCallback: (() => void) | undefined;
 
 type CreateContainerArgs = {
   readonly offsetWidth: number;
@@ -31,7 +34,56 @@ const createContainer = ({
   return container;
 };
 
+beforeEach(() => {
+  capturedResizeCallback = undefined;
+
+  vi.stubGlobal(
+    'ResizeObserver',
+    class {
+      public disconnect = vi.fn();
+      public observe = vi.fn();
+      public unobserve = vi.fn();
+      public constructor(callback: () => void) {
+        capturedResizeCallback = callback;
+      }
+    },
+  );
+
+  vi.spyOn(globalThis, 'requestAnimationFrame').mockImplementation(
+    (callback) => {
+      callback(0);
+      return 1;
+    },
+  );
+  vi.spyOn(globalThis, 'cancelAnimationFrame').mockImplementation(
+    (_id) => void 0,
+  );
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
+  vi.unstubAllGlobals();
+});
+
 describe('useColumnVirtualization', () => {
+  it('prefers measured container width over default fallback on initial render', () => {
+    const container = createContainer({ offsetWidth: 1200 });
+    const containerRef = {
+      current: container,
+    } as RefObject<HTMLElement | null>;
+
+    const { result } = renderHook(() =>
+      useColumnVirtualization({
+        columnWidths: [200, 200, 200, 200, 200, 200, 200],
+        containerRef,
+        defaultContainerWidth: 300,
+        overscan: 0,
+      }),
+    );
+
+    expect(result.current.endIndex).toBe(6);
+  });
+
   it('returns the full range when all columns fit in the viewport', () => {
     const container = createContainer({ offsetWidth: 800 });
     const containerRef = {
@@ -123,14 +175,14 @@ describe('useColumnVirtualization', () => {
 
     expect(result.current.endIndex).toBe(4);
 
-    // Simulate resize to 0 (e.g. display:none)
+    // Simulate the ResizeObserver reporting a zero-width measurement (e.g. display:none)
     Object.defineProperty(container, 'offsetWidth', {
       configurable: true,
       value: 0,
     });
 
     act(() => {
-      globalThis.dispatchEvent(new Event('resize'));
+      capturedResizeCallback?.();
     });
 
     // With zero width the hook would compute endIndex=0 (past the last column).

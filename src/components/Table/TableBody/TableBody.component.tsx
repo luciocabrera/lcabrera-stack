@@ -11,8 +11,6 @@ import {
   useGetTableRowHeight,
 } from '@/components/Table/contexts/TableConfig/meta/selectors';
 import { SpacerRow } from '@/components/Table/SpacerRow';
-import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
-import { TableBodyCell } from '@/components/Table/TableBodyCell';
 import { TableRow } from '@/components/Table/TableRow';
 import {
   getPinnedColumnOffsets,
@@ -27,6 +25,11 @@ import { useGetTableData } from '../contexts/TableData/data/selectors';
 import { useTableContainerRef } from '../contexts/TableWrapper';
 import { SpacerCell } from '../SpacerCell';
 import { styles } from './TableBody.stylex';
+import {
+  createRenderTableBodyCell,
+  getTotalVisibleColumnCount,
+  renderTableBodyColumnGroup,
+} from './utils/index';
 
 export const TableBody = ({ tableContainerRef }: TableBodyProps) => {
   useRenderTracker({ componentName: 'TableBody' });
@@ -71,13 +74,18 @@ export const TableBody = ({ tableContainerRef }: TableBodyProps) => {
   const visibleCenterCols = centerCols.slice(colStartIndex, colEndIndex);
   const visibleRows = data.slice(startIndex, endIndex);
   const totalRows = data.length;
-  // Total visible column count (pinned + visible center) for SpacerRow colSpan
-  const totalVisibleColCount =
-    leftPinnedCols.length +
-    (leftSpacerWidth > 0 ? 1 : 0) +
-    visibleCenterCols.length +
-    (rightSpacerWidth > 0 ? 1 : 0) +
-    rightPinnedCols.length;
+  const totalVisibleColCount = getTotalVisibleColumnCount({
+    leftPinnedCount: leftPinnedCols.length,
+    leftSpacerWidth,
+    rightPinnedCount: rightPinnedCols.length,
+    rightSpacerWidth,
+    visibleCenterCount: visibleCenterCols.length,
+  });
+
+  const renderBodyCell = createRenderTableBodyCell({
+    columnSizing,
+    pinnedOffsets,
+  });
 
   return (
     <tbody data-testid='table-body' {...stylex.props(styles.body(totalHeight))}>
@@ -89,103 +97,22 @@ export const TableBody = ({ tableContainerRef }: TableBodyProps) => {
         const rowData = row as Record<string, unknown>;
         return (
           <TableRow key={rowIndex}>
-            {leftPinnedCols.map((col) => {
-              const effectiveMinWidth =
-                col.minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
-              const finalWidth = columnSizing[col.key] ?? effectiveMinWidth;
-
-              if (col.render) {
-                return (
-                  <TableBodyCell
-                    key={col.key}
-                    label={''}
-                    minWidth={effectiveMinWidth}
-                    pinInfo={pinnedOffsets[col.key]}
-                    width={finalWidth}
-                  >
-                    {col.render(rowData)}
-                  </TableBodyCell>
-                );
-              }
-
-              return (
-                <TableBodyCell
-                  dataType={col.dataType}
-                  format={col.format}
-                  key={col.key}
-                  label={col.label}
-                  minWidth={effectiveMinWidth}
-                  pinInfo={pinnedOffsets[col.key]}
-                  value={col.key in rowData ? rowData[col.key] : ''}
-                  width={finalWidth}
-                />
-              );
+            {renderTableBodyColumnGroup({
+              columns: leftPinnedCols,
+              renderCell: renderBodyCell,
+              rowData,
             })}
             {leftSpacerWidth > 0 && <SpacerCell width={leftSpacerWidth} />}
-            {visibleCenterCols.map((col) => {
-              const effectiveMinWidth =
-                col.minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
-              const finalWidth = columnSizing[col.key] ?? effectiveMinWidth;
-
-              if (col.render) {
-                return (
-                  <TableBodyCell
-                    key={col.key}
-                    label={''}
-                    minWidth={effectiveMinWidth}
-                    pinInfo={pinnedOffsets[col.key]}
-                    width={finalWidth}
-                  >
-                    {col.render(rowData)}
-                  </TableBodyCell>
-                );
-              }
-
-              return (
-                <TableBodyCell
-                  dataType={col.dataType}
-                  format={col.format}
-                  key={col.key}
-                  label={col.label}
-                  minWidth={effectiveMinWidth}
-                  pinInfo={pinnedOffsets[col.key]}
-                  value={col.key in rowData ? rowData[col.key] : ''}
-                  width={finalWidth}
-                />
-              );
+            {renderTableBodyColumnGroup({
+              columns: visibleCenterCols,
+              renderCell: renderBodyCell,
+              rowData,
             })}
             {rightSpacerWidth > 0 && <SpacerCell width={rightSpacerWidth} />}
-            {rightPinnedCols.map((col) => {
-              const effectiveMinWidth =
-                col.minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
-              const finalWidth = columnSizing[col.key] ?? effectiveMinWidth;
-
-              if (col.render) {
-                return (
-                  <TableBodyCell
-                    key={col.key}
-                    label={''}
-                    minWidth={effectiveMinWidth}
-                    pinInfo={pinnedOffsets[col.key]}
-                    width={finalWidth}
-                  >
-                    {col.render(rowData)}
-                  </TableBodyCell>
-                );
-              }
-
-              return (
-                <TableBodyCell
-                  dataType={col.dataType}
-                  format={col.format}
-                  key={col.key}
-                  label={col.label}
-                  minWidth={effectiveMinWidth}
-                  pinInfo={pinnedOffsets[col.key]}
-                  value={col.key in rowData ? rowData[col.key] : ''}
-                  width={finalWidth}
-                />
-              );
+            {renderTableBodyColumnGroup({
+              columns: rightPinnedCols,
+              renderCell: renderBodyCell,
+              rowData,
             })}
           </TableRow>
         );
