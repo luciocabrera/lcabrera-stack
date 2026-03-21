@@ -3,7 +3,7 @@
 import type { RefObject } from 'react';
 
 import { act, renderHook } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useColumnVirtualization } from './useColumnVirtualization.hook';
 
@@ -30,6 +30,22 @@ const createContainer = ({
 
   return container;
 };
+
+beforeEach(() => {
+  vi.spyOn(globalThis, 'requestAnimationFrame').mockImplementation(
+    (callback) => {
+      callback(0);
+      return 1;
+    },
+  );
+  vi.spyOn(globalThis, 'cancelAnimationFrame').mockImplementation(
+    (_id) => void 0,
+  );
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 describe('useColumnVirtualization', () => {
   it('returns the full range when all columns fit in the viewport', () => {

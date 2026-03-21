@@ -1,6 +1,6 @@
 import type { RefObject } from 'react';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { findFirstOutOfViewIndex, findFirstVisibleIndex } from './utils';
 
@@ -44,10 +44,11 @@ export const useColumnVirtualization = ({
   columnWidths,
   containerRef,
   defaultContainerWidth = 800,
-  overscan = 2,
+  overscan = 10,
 }: UseColumnVirtualizationArgs): UseColumnVirtualizationReturn => {
   const [scrollLeft, setScrollLeft] = useState(0);
   const [containerWidth, setContainerWidth] = useState(defaultContainerWidth);
+  const rafIdRef = useRef(-1);
 
   const cumulativeWidths = useMemo(() => {
     const cumulative: number[] = [];
@@ -74,11 +75,23 @@ export const useColumnVirtualization = ({
     };
 
     const handleScroll = () => {
-      // eslint-disable-next-line react-x/set-state-in-effect -- Scroll position must be read from DOM event; cannot be derived during render
-      setScrollLeft(container?.scrollLeft ?? 0);
+      if (rafIdRef.current >= 0) {
+        return;
+      }
+
+      rafIdRef.current = globalThis.requestAnimationFrame(() => {
+        rafIdRef.current = -1;
+        // eslint-disable-next-line react-x/set-state-in-effect -- Scroll position must be read from DOM event; cannot be derived during render
+        setScrollLeft(container?.scrollLeft ?? 0);
+      });
     };
 
     const syncScrollPosition = () => {
+      if (rafIdRef.current >= 0) {
+        globalThis.cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = -1;
+      }
+
       // eslint-disable-next-line react-x/set-state-in-effect -- Scroll position must be read from DOM event; cannot be derived during render
       setScrollLeft(container?.scrollLeft ?? 0);
     };
@@ -89,6 +102,10 @@ export const useColumnVirtualization = ({
     globalThis.addEventListener('resize', updateWidth);
 
     return () => {
+      if (rafIdRef.current >= 0) {
+        globalThis.cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = -1;
+      }
       container?.removeEventListener('scroll', handleScroll);
       globalThis.removeEventListener('resize', updateWidth);
     };

@@ -75,6 +75,8 @@ Implementation details:
 - Syncs initial `scrollLeft` on mount so restored horizontal position is
   reflected before first user interaction.
 - Uses a passive scroll listener to avoid blocking native scrolling.
+- Batches scroll-driven `scrollLeft` updates with `requestAnimationFrame` to
+  reduce re-render pressure during rapid horizontal scrolling.
 - Memoizes cumulative column start offsets and resolves visible boundaries via
   binary search.
 - Binary-search logic is extracted to `hooks/utils/` as reusable pure utils.
