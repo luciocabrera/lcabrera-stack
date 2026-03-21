@@ -1,4 +1,4 @@
-import { parseCookies } from '../theme-cookie.util';
+import { parseCookies } from './parseCookies.util';
 
 type ReadFromCookieArgs = {
   readonly cookieString?: string;

@@ -10,7 +10,7 @@ import { Button } from '@/components/Button';
 import { EyeIcon } from '@/components/Icons';
 import { ICON_SIZE_XS } from '@/design-system/constants/iconSizes.constants';
 import { type EnterpriseOrder, enterpriseOrdersApi } from '@/services';
-import { createStaticFilterOptions } from '@/utils/createStaticFilterOptions.util';
+import { createStaticFilterOptions } from '@/utils/filters';
 
 export const PERSISTENCE_KEY = 'enterprise-orders-table';
 

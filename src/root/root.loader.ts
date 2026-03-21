@@ -1,4 +1,4 @@
-import { getThemeFromCookie } from '@/utils/theme-cookie.util';
+import { getThemeFromCookie } from '@/utils/theme';
 
 import type { Route } from '../+types/root';
 

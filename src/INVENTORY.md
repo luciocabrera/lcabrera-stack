@@ -44,13 +44,29 @@ Before creating anything new, check this inventory. If something here does the j
 
 ## Utility Functions
 
-### `src/utils/`
+### `src/utils/api/`
 
-| Function                                | Location                                  | Description                                                                   |
-| --------------------------------------- | ----------------------------------------- | ----------------------------------------------------------------------------- |
-| `createStaticFilterOptions`             | `utils/createStaticFilterOptions.util.ts` | Wraps a `string[]` into a `FilterOptionsResponse`-compatible paginated object |
-| `shallowEqual`                          | `utils/shallowEqual.util.ts`              | `{ objA, objB }` → `boolean`; one-level key+value equality check              |
-| `getThemeFromCookie` / `setThemeCookie` | `utils/theme-cookie.util.ts`              | Read/write theme mode to a cookie (SSR-safe)                                  |
+| Function        | Location                | Description                                                                      |
+| --------------- | ----------------------- | -------------------------------------------------------------------------------- |
+| `getApiBaseUrl` | `utils/api/api.util.ts` | Resolves API base URL for SSR/client via request URL, env var, or hostname logic |
+
+### `src/utils/comparison/`
+
+| Function       | Location                                | Description                                                      |
+| -------------- | --------------------------------------- | ---------------------------------------------------------------- |
+| `shallowEqual` | `utils/comparison/shallowEqual.util.ts` | `{ objA, objB }` → `boolean`; one-level key+value equality check |
+
+### `src/utils/filters/`
+
+| Function                    | Location                                          | Description                                                                   |
+| --------------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `createStaticFilterOptions` | `utils/filters/createStaticFilterOptions.util.ts` | Wraps a `string[]` into a `FilterOptionsResponse`-compatible paginated object |
+
+### `src/utils/theme/`
+
+| Function                                | Location                           | Description                                  |
+| --------------------------------------- | ---------------------------------- | -------------------------------------------- |
+| `getThemeFromCookie` / `setThemeCookie` | `utils/theme/theme-cookie.util.ts` | Read/write theme mode to a cookie (SSR-safe) |
 
 ### `src/utils/formatters/`
 
@@ -65,12 +81,13 @@ Before creating anything new, check this inventory. If something here does the j
 
 ### `src/utils/storage/`
 
-| Function              | Location                                    | Description                                                                       |
-| --------------------- | ------------------------------------------- | --------------------------------------------------------------------------------- |
-| `buildCookieString`   | `utils/storage/buildCookieString.util.ts`   | Serialises key/value to a `Set-Cookie` string (1y expiry, `SameSite=Lax`)         |
-| `readFromCookie`      | `utils/storage/readFromCookie.util.ts`      | Reads a named cookie value from `document.cookie` or a provided string (SSR-safe) |
-| `writeToCookie`       | `utils/storage/writeToCookie.util.ts`       | Writes a cookie via `document.cookie` or returns a `Set-Cookie` header (SSR-safe) |
-| `writeToLocalStorage` | `utils/storage/writeToLocalStorage.util.ts` | Writes to `localStorage` with error handling for quota/disabled scenarios         |
+| Function              | Location                                    | Description                                                                        |
+| --------------------- | ------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `buildCookieString`   | `utils/storage/buildCookieString.util.ts`   | Serialises key/value to a `Set-Cookie` string (1y expiry, `SameSite=Lax`)          |
+| `parseCookies`        | `utils/storage/parseCookies.util.ts`        | Splits a raw `Cookie:` header string into a `Record<string, string>` key/value map |
+| `readFromCookie`      | `utils/storage/readFromCookie.util.ts`      | Reads a named cookie value from `document.cookie` or a provided string (SSR-safe)  |
+| `writeToCookie`       | `utils/storage/writeToCookie.util.ts`       | Writes a cookie via `document.cookie` or returns a `Set-Cookie` header (SSR-safe)  |
+| `writeToLocalStorage` | `utils/storage/writeToLocalStorage.util.ts` | Writes to `localStorage` with error handling for quota/disabled scenarios          |
 
 ### `src/utils/urlState/`
 
