@@ -114,4 +114,57 @@ describe('useInfiniteScroll', () => {
 
     expect(fetchMoreData).not.toHaveBeenCalled();
   });
+
+  it('does not fetch when onLoadMore is undefined', () => {
+    const container = createContainer();
+    const fetchMoreData = vi.fn().mockImplementation(() => Promise.resolve());
+    const scrollContainerRef = {
+      current: container,
+    } as RefObject<HTMLElement | null>;
+
+    renderHook(() => {
+      useInfiniteScroll<Row, Response>({
+        fetchMoreData,
+        hasMore: true,
+        isLoadingMore: false,
+        scrollContainerRef,
+        threshold: 100,
+      });
+    });
+
+    act(() => {
+      container.scrollTop = 520;
+      container.dispatchEvent(new Event('scroll'));
+    });
+
+    expect(fetchMoreData).not.toHaveBeenCalled();
+  });
+
+  it('removes the scroll listener on unmount', () => {
+    const container = createContainer();
+    const fetchMoreData = vi.fn().mockImplementation(() => Promise.resolve());
+    const onLoadMore = vi.fn();
+    const removeEventListenerSpy = vi.spyOn(container, 'removeEventListener');
+    const scrollContainerRef = {
+      current: container,
+    } as RefObject<HTMLElement | null>;
+
+    const { unmount } = renderHook(() => {
+      useInfiniteScroll<Row, Response>({
+        fetchMoreData,
+        hasMore: true,
+        isLoadingMore: false,
+        onLoadMore,
+        scrollContainerRef,
+        threshold: 100,
+      });
+    });
+
+    unmount();
+
+    expect(removeEventListenerSpy).toHaveBeenCalledWith(
+      'scroll',
+      expect.any(Function),
+    );
+  });
 });

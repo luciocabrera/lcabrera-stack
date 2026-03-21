@@ -7,6 +7,7 @@ Styled `<tr>` wrapper that applies striped and header row variants via StyleX.
 ```
 TableRow/
 ├── TableRow.component.tsx    → <tr> with conditional styles
+├── TableRow.test.tsx         → Unit tests for rendered row and forwarded attributes
 ├── TableRow.types.ts         → TableRowProps extends <div> (isHeader, isStriped)
 ├── TableRow.stylex.ts        → Base, striped, header style variants
 └── index.ts                  → Barrel export

@@ -7,8 +7,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useColumnResize } from './useColumnResize.hook';
 
-const syncColumnsSizingMock = vi.fn();
-const mockUseSyncColumnsSizing = () => syncColumnsSizingMock;
+const { mockUseSyncColumnsSizing, syncColumnsSizingMock } = vi.hoisted(() => {
+  const syncColumnsSizingMock = vi.fn();
+  const mockUseSyncColumnsSizing = () => syncColumnsSizingMock;
+
+  return { mockUseSyncColumnsSizing, syncColumnsSizingMock };
+});
 
 vi.mock('../contexts/TableConfig/columns/actions', () => ({
   useSyncColumnsSizing: mockUseSyncColumnsSizing,
@@ -96,5 +100,37 @@ describe('useColumnResize', () => {
     });
 
     expect(onResize).toHaveBeenCalledWith({ columnKey: 'name', width: 60 });
+  });
+
+  it('cleans up listeners and body styles on unmount while resizing', () => {
+    const onResize = vi.fn();
+    const removeEventListenerSpy = vi.spyOn(document, 'removeEventListener');
+    const { result, unmount } = renderHook(() =>
+      useColumnResize({
+        columnKey: 'name',
+        currentWidth: 200,
+        onResize,
+      }),
+    );
+
+    act(() => {
+      result.current.onMouseDown(createMouseDownEvent({ clientX: 100 }));
+    });
+
+    expect(document.body.style.cursor).toBe('col-resize');
+    expect(document.body.style.userSelect).toBe('none');
+
+    unmount();
+
+    expect(removeEventListenerSpy).toHaveBeenCalledWith(
+      'mousemove',
+      expect.any(Function),
+    );
+    expect(removeEventListenerSpy).toHaveBeenCalledWith(
+      'mouseup',
+      expect.any(Function),
+    );
+    expect(document.body.style.cursor).toBe('');
+    expect(document.body.style.userSelect).toBe('');
   });
 });

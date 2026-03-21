@@ -11,11 +11,13 @@ const { serializeStateSliceMock, submitMock } = vi.hoisted(() => ({
   serializeStateSliceMock: vi.fn(),
   submitMock: vi.fn(),
 }));
-const mockUseFetcher = () => ({ submit: submitMock });
-const mockUseLocation = () => ({
-  pathname: '/enterprise-orders',
-  search: '?page=2',
-});
+const { mockUseFetcher, mockUseLocation } = vi.hoisted(() => ({
+  mockUseFetcher: () => ({ submit: submitMock }),
+  mockUseLocation: () => ({
+    pathname: '/enterprise-orders',
+    search: '?page=2',
+  }),
+}));
 
 vi.mock('react-router', () => ({
   useFetcher: mockUseFetcher,

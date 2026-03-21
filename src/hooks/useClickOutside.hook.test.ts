@@ -48,4 +48,26 @@ describe('useClickOutside', () => {
 
     expect(onClickOutside).toHaveBeenCalledTimes(1);
   });
+
+  it('removes the mousedown listener on unmount', () => {
+    const guardedElement = document.createElement('div');
+    const onClickOutside = vi.fn();
+    const removeEventListenerSpy = vi.spyOn(document, 'removeEventListener');
+    const ref = {
+      current: guardedElement,
+    } as RefObject<HTMLElement | null>;
+
+    document.body.append(guardedElement);
+
+    const { unmount } = renderHook(() => {
+      useClickOutside({ onClickOutside, ref });
+    });
+
+    unmount();
+
+    expect(removeEventListenerSpy).toHaveBeenCalledWith(
+      'mousedown',
+      expect.any(Function),
+    );
+  });
 });
