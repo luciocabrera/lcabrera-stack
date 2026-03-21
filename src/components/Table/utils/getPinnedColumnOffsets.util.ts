@@ -52,7 +52,12 @@ export const getPinnedColumnOffsets = <TData = Record<string, unknown>>({
   const lastLeftKey = leftPinned.at(-1);
   if (lastLeftKey) {
     const entry = result.get(lastLeftKey);
-    if (entry) entry.isLastPinnedLeft = true;
+    if (entry) {
+      result.set(lastLeftKey, {
+        ...entry,
+        isLastPinnedLeft: true,
+      });
+    }
   }
 
   // Compute right offsets (cumulative from right)
@@ -75,7 +80,12 @@ export const getPinnedColumnOffsets = <TData = Record<string, unknown>>({
   const firstRightKey = rightPinned.at(0);
   if (firstRightKey) {
     const entry = result.get(firstRightKey);
-    if (entry) entry.isFirstPinnedRight = true;
+    if (entry) {
+      result.set(firstRightKey, {
+        ...entry,
+        isFirstPinnedRight: true,
+      });
+    }
   }
 
   return Object.fromEntries(result) as Record<DataKey<TData>, PinnedColumnInfo>;
