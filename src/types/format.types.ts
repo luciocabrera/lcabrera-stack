@@ -1,24 +1,24 @@
 export type CurrencyFormatOptions = {
   /** Currency code (e.g., 'USD', 'EUR', 'GBP') */
-  currency?: string;
+  readonly currency?: string;
   /** Locale override (e.g., 'en-US', 'de-DE') */
-  locale?: string;
+  readonly locale?: string;
 };
 
 export type DateFormatOptions = {
   /** Locale override (e.g., 'en-US', 'de-DE') */
-  locale?: string;
+  readonly locale?: string;
   /** Date format preset */
-  preset?: DateFormatPreset;
+  readonly preset?: DateFormatPreset;
 };
 
 export type DateFormatPreset = 'full' | 'long' | 'medium' | 'short';
 
 export type NumberFormatOptions = {
   /** Locale override (e.g., 'en-US', 'de-DE') */
-  locale?: string;
+  readonly locale?: string;
   /** Maximum fraction digits */
-  maximumFractionDigits?: number;
+  readonly maximumFractionDigits?: number;
   /** Minimum fraction digits */
-  minimumFractionDigits?: number;
+  readonly minimumFractionDigits?: number;
 };

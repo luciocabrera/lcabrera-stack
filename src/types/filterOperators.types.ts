@@ -64,27 +64,27 @@ export type OperatorType =
  */
 export type SelectFilter = {
   /** Operator for select filter (defaults to 'equals' if not specified) */
-  operator?: 'equals' | 'notEquals';
-  type: 'multiSelect' | 'select';
+  readonly operator?: 'equals' | 'notEquals';
+  readonly type: 'multiSelect' | 'select';
   /** Single value for 'select' type */
-  value?: string;
+  readonly value?: string;
   /** Multiple values for 'multiSelect' type */
-  values?: string[];
+  readonly values?: string[];
 };
 
 /**
  * Text/string column filter
  */
 export type TextFilter = {
-  operator:
+  readonly operator:
     | 'contains'
     | 'endsWith'
     | 'equals'
     | 'notContains'
     | 'notEquals'
     | 'startsWith';
-  type: 'text';
-  value: string;
+  readonly type: 'text';
+  readonly value: string;
 };
 
 export type TextOperatorType = TextFilter['operator'];
