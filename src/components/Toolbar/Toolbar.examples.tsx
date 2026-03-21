@@ -60,6 +60,12 @@ export const SidePanelToolbarExample = () => {
       to: '/enterprise-orders',
       type: 'link',
     },
+    {
+      icon: <SettingsIcon size={20} />,
+      label: 'Wide All-Types 150',
+      to: '/wide-alltypes-150',
+      type: 'link',
+    },
   ];
 
   return (
