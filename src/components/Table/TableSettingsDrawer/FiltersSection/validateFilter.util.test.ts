@@ -4,7 +4,11 @@ import { validateFilter } from './validateFilter.util';
 
 describe('validateFilter', () => {
   it('returns false for undefined', () => {
-    expect(validateFilter(undefined)).toBe(false);
+    const filterValue = void 0 as unknown as Parameters<
+      typeof validateFilter
+    >[0];
+
+    expect(validateFilter(filterValue)).toBe(false);
   });
 
   it('returns true for boolean filter', () => {

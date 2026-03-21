@@ -1,6 +1,4 @@
-import type { FormatOptions } from 'oxfmt';
-
-export const fmtConfig: FormatOptions = {
+export const fmtConfig = {
   arrowParens: 'always',
   bracketSpacing: true,
   endOfLine: 'lf',
@@ -19,4 +17,4 @@ export const fmtConfig: FormatOptions = {
   sortPackageJson: false,
   tabWidth: 2,
   trailingComma: 'all',
-};
+} as const;
