@@ -15,7 +15,9 @@
     "typecheck": "react-router typegen && tsc --noEmit",
     "preview": "vp preview",
     "knip": "knip",
-    "prepare": "vp config"
+    "prepare": "vp config",
+    "test": "node node_modules/vitest/vitest.mjs run",
+    "test:watch": "node node_modules/vitest/vitest.mjs"
   },
   "dependencies": {
     "@react-router/node": "^7.13.1",
