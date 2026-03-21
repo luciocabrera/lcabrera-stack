@@ -53,20 +53,20 @@ src/
 
 **Never use pnpm/npm/yarn directly.** All operations go through `vp`:
 
-| Task                 | Command                                             |
-| -------------------- | --------------------------------------------------- |
-| Install dependencies | `vp install`                                        |
-| Dev server           | `vp dev`                                            |
-| Build for production | `vp build` (runs `react-router build`)              |
-| Lint (with fix)      | `vp lint . --fix`                                   |
-| Lint (check only)    | `vp lint .`                                         |
-| Format               | `vp fmt .`                                          |
-| Format check         | `vp fmt --check .`                                  |
-| Type check           | `react-router typegen && tsc --noEmit`              |
-| Run tests            | `node node_modules/.bin/vitest run`                 |
-| Full validation      | `vp check` then `node node_modules/.bin/vitest run` |
-| Add a package        | `vp add <package>`                                  |
-| Remove a package     | `vp remove <package>`                               |
+| Task                 | Command                                                                      |
+| -------------------- | ---------------------------------------------------------------------------- |
+| Install dependencies | `vp install`                                                                 |
+| Dev server           | `vp dev`                                                                     |
+| Build for production | `vp run build` (runs `react-router build` and emits `build/server/index.js`) |
+| Lint (with fix)      | `vp lint . --fix`                                                            |
+| Lint (check only)    | `vp lint .`                                                                  |
+| Format               | `vp fmt .`                                                                   |
+| Format check         | `vp fmt --check .`                                                           |
+| Type check           | `react-router typegen && tsc --noEmit`                                       |
+| Run tests            | `node node_modules/.bin/vitest run`                                          |
+| Full validation      | `vp check` then `node node_modules/.bin/vitest run`                          |
+| Add a package        | `vp add <package>`                                                           |
+| Remove a package     | `vp remove <package>`                                                        |
 
 **Critical:** Import Vite config from `vite-plus`, not `vite`, for tooling integration. Example: `import { defineConfig } from 'vite-plus'`. For tests, import from `vitest`, e.g. `import { expect, test, vi } from 'vitest'`.
 
@@ -579,7 +579,7 @@ These commands map to their corresponding tools. For example, `vp dev --port 300
 
 - **Using the package manager directly:** Do not use pnpm, npm, or Yarn directly. Vite+ can handle all package manager operations.
 - **Always use Vite commands to run tools:** Don't attempt to run `vp vitest` or `vp oxlint`. They do not exist. Use `vp test` and `vp lint` instead.
-- **Running scripts:** Vite+ built-in commands (`vp dev`, `vp build`, `vp test`, etc.) always run the Vite+ built-in tool, not any `package.json` script of the same name. To run a custom script that shares a name with a built-in command, use `vp run <script>`. For example, if you have a custom `dev` script that runs multiple services concurrently, run it with `vp run dev`, not `vp dev` (which always starts Vite's dev server).
+- **Running scripts:** Vite+ built-in commands (`vp dev`, `vp build`, `vp test`, etc.) always run the Vite+ built-in tool, not any `package.json` script of the same name. To run a custom script that shares a name with a built-in command, use `vp run <script>`. For example, if you have a custom `dev` script that runs multiple services concurrently, run it with `vp run dev`, not `vp dev` (which always starts Vite's dev server). In this repo, use `vp run build` for the production SSR bundle because `vp build` only emits client assets and does not create `build/server/index.js`.
 - **Do not install Vitest, Oxlint, Oxfmt, or tsdown directly:** Vite+ wraps these tools. They must not be installed directly. You cannot upgrade these tools by installing their latest versions. Always use Vite+ commands.
 - **Use Vite+ wrappers for one-off binaries:** Use `vp dlx` instead of package-manager-specific `dlx`/`npx` commands.
 - **Import JavaScript modules from `vite-plus`:** Instead of importing from `vite` or `vitest`, all modules should be imported from the project's `vite-plus` dependency. For example, `import { defineConfig } from 'vite-plus';` or `import { expect, test, vi } from 'vite-plus/test';`. You must not install `vitest` to import test utilities.

@@ -37,6 +37,17 @@ export default defineConfig({
       '@': fileURLToPath(new URL('src', import.meta.url)),
     },
   },
+  run: {
+    tasks: {
+      build: {
+        command: 'react-router build',
+      },
+      start: {
+        command:
+          'if [ ! -f ./build/server/index.js ]; then react-router build; fi && react-router-serve ./build/server/index.js',
+      },
+    },
+  },
   server: {
     proxy: {
       '/api': {
