@@ -15,6 +15,19 @@ export const streamTimeout = Number(process.env.STREAM_TIMEOUT_MS) || 15_000;
 
 const ABORT_DELAY = streamTimeout + 1000;
 
+const CSP_NONCE_HEADER_NAMES = ['x-csp-nonce', 'csp-nonce'] as const;
+
+const getRequestCspNonce = (request: Request): string | undefined => {
+  for (const headerName of CSP_NONCE_HEADER_NAMES) {
+    const value = request.headers.get(headerName);
+    if (value) {
+      return value;
+    }
+  }
+
+  return undefined;
+};
+
 /**
  * Server-side request handler for React Router 7 streaming.
  * Implements proper Suspense streaming with bot detection.
@@ -53,6 +66,8 @@ function handleBotRequest(
   responseHeaders: Headers,
   routerContext: EntryContext,
 ) {
+  const cspNonce = getRequestCspNonce(request);
+
   // eslint-disable-next-line local-rules/destructuring-for-functions -- Promise constructor signature is fixed
   return new Promise((resolve, reject) => {
     let isDidError = false;
@@ -60,6 +75,7 @@ function handleBotRequest(
     const { abort, pipe } = renderToPipeableStream(
       <ServerRouter context={routerContext} url={request.url} />,
       {
+        nonce: cspNonce,
         onAllReady() {
           const body = new PassThrough();
           // Increase max listeners to prevent warning with compression middleware
@@ -97,6 +113,8 @@ function handleBrowserRequest(
   responseHeaders: Headers,
   routerContext: EntryContext,
 ) {
+  const cspNonce = getRequestCspNonce(request);
+
   // eslint-disable-next-line local-rules/destructuring-for-functions -- Promise constructor signature is fixed
   return new Promise((resolve, reject) => {
     let isDidError = false;
@@ -104,6 +122,7 @@ function handleBrowserRequest(
     const { abort, pipe } = renderToPipeableStream(
       <ServerRouter context={routerContext} url={request.url} />,
       {
+        nonce: cspNonce,
         onError(error: unknown) {
           isDidError = true;
           console.error('Streaming error:', error);

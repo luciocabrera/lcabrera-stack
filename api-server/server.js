@@ -18,6 +18,8 @@ const distinctValuesDelayMs = Number.parseInt(
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+const SANITY_TABLES = ['car_sales', 'enterprise_orders', 'wide_alltypes_150'];
+
 // Helper to format SQL query for pgAdmin (copy-paste ready)
 function formatQueryForPgAdmin(query, params = []) {
   let formattedQuery = query;
@@ -40,12 +42,62 @@ function formatQueryForPgAdmin(query, params = []) {
   return formattedQuery;
 }
 
+async function getDbSanity() {
+  const tableCounts = {};
+  const issues = [];
+
+  for (const tableName of SANITY_TABLES) {
+    try {
+      const rowCount = await getTableRowCount(tableName);
+      tableCounts[tableName] = rowCount;
+
+      if (rowCount === 0) {
+        issues.push(`Table ${tableName} exists but has 0 rows`);
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      tableCounts[tableName] = undefined;
+      issues.push(`Failed to query ${tableName}: ${message}`);
+    }
+  }
+
+  return {
+    isHealthy: issues.length === 0,
+    issues,
+    tableCounts,
+  };
+}
+
+async function getTableRowCount(tableName) {
+  const result = await pool.query(`SELECT COUNT(*) FROM ${tableName}`);
+  return Number.parseInt(result.rows[0].count, 10);
+}
+
 // Log query in pgAdmin-ready format
 function logPgAdminQuery(label, query, params = []) {
   console.log(`\n📋 [pgAdmin] ${label}:`);
   console.log('─'.repeat(60));
   console.log(formatQueryForPgAdmin(query, params));
   console.log('─'.repeat(60) + '\n');
+}
+
+async function runStartupDbSanityCheck() {
+  try {
+    const sanity = await getDbSanity();
+
+    if (sanity.isHealthy) {
+      console.log('✅ [DB Sanity] Table counts:', sanity.tableCounts);
+      return;
+    }
+
+    console.warn('⚠️ [DB Sanity] Potential data/connection issues detected');
+    for (const issue of sanity.issues) {
+      console.warn(`   - ${issue}`);
+    }
+    console.warn('   - Run `npm run seed` in api-server to repopulate tables.');
+  } catch (error) {
+    console.error('❌ [DB Sanity] Startup sanity check failed:', error);
+  }
 }
 
 // Enable CORS for React app
@@ -593,9 +645,20 @@ app.get('/api/wide-alltypes-150/paginated', async (request, res) => {
   }
 });
 
+app.get('/api/db-sanity', async (_request, res) => {
+  try {
+    const sanity = await getDbSanity();
+    res.status(sanity.isHealthy ? 200 : 503).json(sanity);
+  } catch (error) {
+    console.error('❌ Error running db sanity endpoint:', error);
+    res.status(500).json({ error: 'Failed to run DB sanity check' });
+  }
+});
+
 app.listen(port, '0.0.0.0', () => {
   console.log(`🚀 API server running at http://localhost:${port}`);
   console.log(
     `🛠️ Delays: enterpriseOrders=${enterpriseOrdersDelayMs}ms, distinctValues=${distinctValuesDelayMs}ms`,
   );
+  void runStartupDbSanityCheck();
 });
