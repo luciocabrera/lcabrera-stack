@@ -21,7 +21,7 @@ Implement a **ref-based prefetch buffer** in `useFetchMoreData`, controlled by a
 - **Opt-in via `enablePrefetch`** (default `true`) — zero behavior change for existing consumers.
 - **Ref-based cache** (not store-based) — prefetched data is an invisible cache that should not trigger re-renders.
 - **Uses existing `onLoadMore` callback** — the prefetch calls the same callback provided by the route. This keeps the interface Worker-ready: swapping `onLoadMore` to delegate to a Worker later changes nothing in the hook.
-- **`startTransition` for data append** — wraps the `dataStore.set()` call for combined data in `startTransition()` so React treats the re-render as non-urgent, keeping scroll and loading animations smooth.
+- **Direct data append** — `dataStore.set()` is called synchronously (no `startTransition`) so new rows render immediately after fetch, minimizing visible gaps during fast scroll.
 - **Natural cache invalidation** — when sort/filter changes reset data, `currentData.length` becomes 0 and `prefetchRef.skip` won't match, automatically discarding stale cache.
 
 ### Cache States

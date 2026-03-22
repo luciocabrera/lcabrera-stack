@@ -1,4 +1,4 @@
-import { startTransition, useCallback, useRef } from 'react';
+import { useCallback, useRef } from 'react';
 
 import type { InfiniteScroll } from '@/types/ui.types';
 
@@ -86,16 +86,13 @@ export const useFetchMoreData = <TData, TResponse>() => {
           : (dataState?.totalRows ?? totalLoadedRows);
         const hasMore = totalRows > totalLoadedRows;
 
-        // Non-urgent: wrap data append in transition for smooth scroll
-        startTransition(() => {
-          dataStore.set({
-            data: combinedData,
-            hasMore,
-            isLoading: false,
-            isLoadingMore: false,
-            totalLoadedRows,
-            totalRows,
-          });
+        dataStore.set({
+          data: combinedData,
+          hasMore,
+          isLoading: false,
+          isLoadingMore: false,
+          totalLoadedRows,
+          totalRows,
         });
 
         // Fire prefetch for next page if enabled and more data exists
