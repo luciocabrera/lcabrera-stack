@@ -25,7 +25,7 @@ graph TD
   TWC["TableWrapperContext<br/><small>wrapperRef</small>"]
   TTitle["TableTitle"]
   TBase["TableBase<br/><small>density · borders · stripes</small>"]
-  TH["TableHeader<br/><small>pinned offsets</small>"]
+  TH["TableHeader<br/><small>column groups + pinned offsets</small>"]
   TBody["TableBody<br/><small>virtualized rows</small>"]
   TDS["TableDrawersSection"]
 
@@ -58,9 +58,9 @@ Table/
 ├── TableLayout/                   → Route-level entry with provider stack
 ├── TableContent/                  → Layout: title + scroll area + drawers
 ├── TableBase/                     → <table> with density/border/stripe styles
-├── TableHeader/                   → <thead> → TableRow → TableHeaderCell[] (column-virtualised)
+├── TableHeader/                   → <thead> → TableRow → TableHeaderCell[]
 ├── TableHeaderCell/               → Interactive <th>: sort, pin, resize, settings
-├── TableBody/                     → Virtualised <tbody>: row + column windowing
+├── TableBody/                     → Virtualised <tbody>: row windowing
 ├── TableBodyCell/                 → Auto-formatted <td> with type detection
 ├── TableRow/                      → Styled <tr> with stripe/header variants
 ├── SpacerRow/                     → Vertical virtual-scroll spacer <tr>

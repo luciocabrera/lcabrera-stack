@@ -56,6 +56,7 @@ graph TD
 | `getStaticColumnKeys`        | columns                    | `Set<string>`                   | Keys of locked/static columns          |
 | `getPinnedColumnOffsets`     | pinning, sizing, columns   | `Record<key, PinnedColumnInfo>` | Sticky positions for pinned columns    |
 | `getColumnPinSide`           | columnKey, pinning         | `PinSide \| undefined`          | Which side a column is pinned to       |
+| `splitColumnsByPinning`      | pinning, effectiveColumns  | `ColumnGroupsState`             | Split columns into left/center/right   |
 | `syncColumnOrderWithPinning` | order, pinning             | `string[]`                      | Reorder to keep pinned columns grouped |
 
 ## Persistence Utilities
