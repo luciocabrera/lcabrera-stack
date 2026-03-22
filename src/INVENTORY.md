@@ -6,27 +6,27 @@ Before creating anything new, check this inventory. If something here does the j
 
 ## Components
 
-| Component          | Location                       | Description                                                                            |
-| ------------------ | ------------------------------ | -------------------------------------------------------------------------------------- |
-| `Button`           | `components/Button/`           | Interactive button — 8 color variants, 5 sizes, icon, loading, tooltip                 |
-| `Card`             | `components/Card/`             | Container with elevation, color, padding, and optional interactivity                   |
-| `DevStyleXInject`  | `components/DevStyleXInject/`  | Dev-only StyleX CSS injector for HMR; must be at app root                              |
-| `DraggableList`    | `components/DraggableList/`    | Drag-and-drop reorderable list using native drag events                                |
-| `Icons`            | `components/Icons/`            | 30 SVG icon components (see `Icons/index.ts` for full list)                            |
-| `InfoBox`          | `components/InfoBox/`          | Styled container for informational messages and empty states                           |
-| `Modal`            | `components/Modal/`            | Native `<dialog>` modal with title, footer, Esc-to-close                               |
-| `NavLink`          | `components/NavLink/`          | Router-aware navigation link with color, size, icon, orientation                       |
-| `PinSideModal`     | `components/PinSideModal/`     | Modal for choosing column pin side (left / right / closest-edge)                       |
-| `RadioOptionGroup` | `components/RadioOptionGroup/` | Generic `<TValue extends string>` radio button group                                   |
-| `SidePanel`        | `components/SidePanel/`        | Off-canvas panel with 10 sub-components, pinning, portal support                       |
-| `Table`            | `components/Table/`            | Full-featured data table — sort, filter, pin, resize, row + column virtualise, persist |
-| `Tabs`             | `components/Tabs/`             | Keyboard-navigable tab bar using React 19 `<Activity>`                                 |
-| `Tag`              | `components/Tag/`              | Label chip with optional remove button                                                 |
-| `ToggleSwitch`     | `components/ToggleSwitch/`     | Accessible boolean toggle (controlled, `role="switch"`)                                |
-| `Toolbar`          | `components/Toolbar/`          | Horizontal/vertical toolbar of Button/NavLink items                                    |
-| `Tooltip`          | `components/Tooltip/`          | CSS Anchor + Popover API tooltip, 4 placements, animated                               |
-| `VirtualList`      | `components/VirtualList/`      | Virtualized list with search, select-all, checkboxes, lazy load                        |
-| `VirtualSelect`    | `components/VirtualSelect/`    | Dropdown select backed by `VirtualList`; `string[]` or `{ label, value }[]` options    |
+| Component          | Location                       | Description                                                                                          |
+| ------------------ | ------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| `Button`           | `components/Button/`           | Interactive button — 8 color variants, 5 sizes, icon, loading, tooltip                               |
+| `Card`             | `components/Card/`             | Container with elevation, color, padding, and optional interactivity                                 |
+| `DevStyleXInject`  | `components/DevStyleXInject/`  | Dev-only StyleX CSS injector for HMR; must be at app root                                            |
+| `DraggableList`    | `components/DraggableList/`    | Drag-and-drop reorderable list using native drag events                                              |
+| `Icons`            | `components/Icons/`            | 30 SVG icon components (see `Icons/index.ts` for full list)                                          |
+| `InfoBox`          | `components/InfoBox/`          | Styled container for informational messages and empty states                                         |
+| `Modal`            | `components/Modal/`            | Native `<dialog>` modal with title, footer, Esc-to-close                                             |
+| `NavLink`          | `components/NavLink/`          | Router-aware navigation link with color, size, icon, orientation                                     |
+| `PinSideModal`     | `components/PinSideModal/`     | Modal for choosing column pin side (left / right / closest-edge)                                     |
+| `RadioOptionGroup` | `components/RadioOptionGroup/` | Generic `<TValue extends string>` radio button group                                                 |
+| `SidePanel`        | `components/SidePanel/`        | Off-canvas panel with 10 sub-components, pinning, portal support                                     |
+| `Table`            | `components/Table/`            | Full-featured data table — sort, filter, pin, resize, virtualise, persist, opt-in prefetch (ADR-006) |
+| `Tabs`             | `components/Tabs/`             | Keyboard-navigable tab bar using React 19 `<Activity>`                                               |
+| `Tag`              | `components/Tag/`              | Label chip with optional remove button                                                               |
+| `ToggleSwitch`     | `components/ToggleSwitch/`     | Accessible boolean toggle (controlled, `role="switch"`)                                              |
+| `Toolbar`          | `components/Toolbar/`          | Horizontal/vertical toolbar of Button/NavLink items                                                  |
+| `Tooltip`          | `components/Tooltip/`          | CSS Anchor + Popover API tooltip, 4 placements, animated                                             |
+| `VirtualList`      | `components/VirtualList/`      | Virtualized list with search, select-all, checkboxes, lazy load                                      |
+| `VirtualSelect`    | `components/VirtualSelect/`    | Dropdown select backed by `VirtualList`; `string[]` or `{ label, value }[]` options                  |
 
 ---
 
@@ -144,6 +144,7 @@ Before creating anything new, check this inventory. If something here does the j
 | `OPERATOR_TO_SHORT`, `SHORT_TO_OPERATOR`, `TEXT_OPERATORS`, `NUMBER_OPERATORS`, `DATE_OPERATORS`, …      | `constants/filterOperators.constants.ts`   | Bidirectional operator ↔ short-code maps and operator arrays per data type |
 | `DEFAULT_CONTAINER_HEIGHT`, `DEFAULT_CONTAINER_WIDTH`, `DEFAULT_ROW_OVERSCAN`, `DEFAULT_COLUMN_OVERSCAN` | `constants/virtualization.constants.ts`    | Default dimensions and overscan values for virtualization hooks            |
 | `DEFAULT_LOCALE`, `DEFAULT_CURRENCY`, `DEFAULT_DATE_PRESET`                                              | `utils/formatters/formatters.constants.ts` | Formatting defaults (`en-US`, `USD`, `medium`)                             |
+| `INITIAL_PAGE_SIZE`, `LOAD_MORE_PAGE_SIZE`, `DEFAULT_FILTER_PAGE_SIZE`, `DEFAULT_ENABLE_PREFETCH`, …     | `components/Table/Table.constants.ts`      | Table pagination sizes, prefetch toggle, scroll threshold, column widths   |
 
 ---
 

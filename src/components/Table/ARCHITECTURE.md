@@ -141,7 +141,9 @@ graph TD
   subgraph "Interactions"
     TH -->|"sort/pin/resize"| CS
     Filters -->|"filter changes"| CS
-    TB -->|"scroll near bottom"| DS
+    TB -->|"scroll near bottom"| FetchMore["useFetchMoreData"]
+    FetchMore -->|"append rows"| DS
+    FetchMore -->|"prefetch next page (opt-in)"| FetchMore
   end
 ```
 

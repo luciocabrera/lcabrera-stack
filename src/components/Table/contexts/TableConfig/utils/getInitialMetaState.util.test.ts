@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   DEFAULT_COLUMN_OVERSCAN,
+  DEFAULT_ENABLE_PREFETCH,
   DEFAULT_OVERSCAN,
   DEFAULT_PLACEHOLDER_ROW_COUNT,
   DEFAULT_ROW_HEIGHT,
@@ -17,6 +18,7 @@ describe('getInitialMetaState', () => {
     const result = getInitialMetaState({});
     expect(result.columnOverscan).toBe(DEFAULT_COLUMN_OVERSCAN);
     expect(result.density).toBe('compact');
+    expect(result.enablePrefetch).toBe(DEFAULT_ENABLE_PREFETCH);
     expect(result.isBordered).toBe(true);
     expect(result.isStriped).toBe(true);
     expect(result.isColumnSettingsOpen).toBe(false);
@@ -34,10 +36,12 @@ describe('getInitialMetaState', () => {
     const result = getInitialMetaState({
       columnOverscan: 4,
       density: 'comfortable',
+      enablePrefetch: true,
       isBordered: false,
     });
     expect(result.columnOverscan).toBe(4);
     expect(result.density).toBe('comfortable');
+    expect(result.enablePrefetch).toBe(true);
     expect(result.isBordered).toBe(false);
   });
 

@@ -8,6 +8,7 @@ import type {
 import type { CarSale, CarSalesResponse } from '@/services';
 
 import { readPersistedStateFromCookie } from '@/components/Table/utils';
+import { INITIAL_PAGE_SIZE } from '@/components/Table/Table.constants';
 import { carSalesApi } from '@/services';
 import {
   deserializeFiltersFromURL,
@@ -69,7 +70,7 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
   // Return the promise directly (not awaited) for Suspense streaming
   const carSalesPromise: Promise<CarSalesResponse & { hasMore: boolean }> =
     carSalesApi.fetchCarSalesPaginated({
-      limit: 50,
+      limit: INITIAL_PAGE_SIZE,
       requestUrl: request.url,
       skip: 0,
       sorting: sorting.filter(

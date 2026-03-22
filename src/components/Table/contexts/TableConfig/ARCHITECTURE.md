@@ -118,6 +118,7 @@ TableColumnsState<TData> = {
 TableMetaState = {
   columnSelectedKey: string | null;  // Currently selected column key
   density: TableDensity;             // compact | normal | comfortable
+  enablePrefetch: boolean;           // Prefetch next page after load-more (ADR-006)
   error: Error | null;               // Table-level error
   initialPageSize: number;           // First page row count
   isBordered: boolean;               // Show borders
@@ -191,16 +192,18 @@ graph TD
 
 ## Meta Selectors
 
-| Hook                              | Returns          | Description                   |
-| --------------------------------- | ---------------- | ----------------------------- |
-| `useGetTableColumnSelectedKey`    | `string \| null` | Currently selected column key |
-| `useGetTableDensity`              | `TableDensity`   | Table density setting         |
-| `useGetTableIsBordered`           | `boolean`        | Whether borders are shown     |
-| `useGetTableIsColumnSettingsOpen` | `boolean`        | Column settings drawer state  |
-| `useGetTableIsStriped`            | `boolean`        | Whether rows are striped      |
-| `useGetTableIsTableSettingsOpen`  | `boolean`        | Table settings drawer state   |
-| `useGetTableOverscan`             | `number`         | Virtual scroll overscan count |
-| `useGetTablePlaceholderRowCount`  | `number`         | Skeleton row count            |
-| `useGetTableRowHeight`            | `number`         | Row height in px              |
-| `useGetTableThreshold`            | `number`         | Fetch-more scroll threshold   |
-| `useGetTableTitle`                | `string`         | Table display title           |
+| Hook                              | Returns          | Description                       |
+| --------------------------------- | ---------------- | --------------------------------- |
+| `useGetTableColumnSelectedKey`    | `string \| null` | Currently selected column key     |
+| `useGetTableDensity`              | `TableDensity`   | Table density setting             |
+| `useGetTableEnablePrefetch`       | `boolean`        | Whether prefetch buffer is active |
+| `useGetTableIsBordered`           | `boolean`        | Whether borders are shown         |
+| `useGetTableIsColumnSettingsOpen` | `boolean`        | Column settings drawer state      |
+| `useGetTableIsStriped`            | `boolean`        | Whether rows are striped          |
+| `useGetTableIsTableSettingsOpen`  | `boolean`        | Table settings drawer state       |
+| `useGetTableLoadMorePageSize`     | `number`         | Subsequent page row count         |
+| `useGetTableOverscan`             | `number`         | Virtual scroll overscan count     |
+| `useGetTablePlaceholderRowCount`  | `number`         | Skeleton row count                |
+| `useGetTableRowHeight`            | `number`         | Row height in px                  |
+| `useGetTableThreshold`            | `number`         | Fetch-more scroll threshold       |
+| `useGetTableTitle`                | `string`         | Table display title               |

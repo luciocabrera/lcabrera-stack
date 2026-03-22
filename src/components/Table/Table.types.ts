@@ -222,6 +222,8 @@ export type TableMetaState = {
   readonly columnOverscan: number;
   readonly columnSelectedKey?: string;
   readonly density: TableDensity;
+  /** Whether to prefetch the next page after each load-more completes */
+  readonly enablePrefetch: boolean;
   /** Error message if data fetch failed */
   readonly error?: string;
   /** Initial page size for first load */

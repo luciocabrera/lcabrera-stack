@@ -4,6 +4,7 @@ import type { ColumnSizingState, SortingState } from '@/components/Table';
 import type { WideAlltypes150, WideAlltypes150Response } from '@/services';
 
 import { readPersistedStateFromCookie } from '@/components/Table/utils';
+import { INITIAL_PAGE_SIZE } from '@/components/Table/Table.constants';
 import { wideAlltypes150Api } from '@/services';
 import {
   deserializeSortingFromURL,
@@ -48,7 +49,7 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
 
   const dataPromise: Promise<WideAlltypes150Response> =
     wideAlltypes150Api.fetchPaginated({
-      limit: 50,
+      limit: INITIAL_PAGE_SIZE,
       requestUrl: request.url,
       skip: 0,
       sorting: filteredSorting,

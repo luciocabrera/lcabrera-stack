@@ -36,12 +36,16 @@ export type TableLayoutProps<
   readonly defaultColumnPinning?: ColumnPinningState<TData>;
   /** Table density (optional, default: 'comfortable') */
   readonly density?: TableDensity;
+  /** Prefetch next page after each load-more completes (optional, default: false) */
+  readonly enablePrefetch?: boolean;
   /** Active filters from loader/URL state (optional) */
   readonly filters?: ColumnFiltersState<TData>;
   /** Show table borders (optional, default: true) */
   readonly isBordered?: boolean;
   /** Show striped rows (optional, default: true) */
   readonly isStriped?: boolean;
+  /** Page size for load-more requests (optional, default: LOAD_MORE_PAGE_SIZE) */
+  readonly loadMorePageSize?: number;
   // onLoadMore: (params: InfiniteScrollLoadMoreParams) => Promise<TResponse>;
   /** Key for persisting table state (required) */
   readonly persistenceKey: string;

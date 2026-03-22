@@ -8,6 +8,7 @@ import type {
 import type { EnterpriseOrder, EnterpriseOrdersResponse } from '@/services';
 
 import { readPersistedStateFromCookie } from '@/components/Table/utils';
+import { INITIAL_PAGE_SIZE } from '@/components/Table/Table.constants';
 import { enterpriseOrdersApi } from '@/services';
 import {
   deserializeFiltersFromURL,
@@ -78,7 +79,7 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
   const enterpriseOrdersPromise: Promise<EnterpriseOrdersResponse> =
     enterpriseOrdersApi.fetchEnterpriseOrdersPaginated({
       filter: filters,
-      limit: 50,
+      limit: INITIAL_PAGE_SIZE,
       requestUrl: request.url,
       skip: 0,
       sorting: sorting.filter(

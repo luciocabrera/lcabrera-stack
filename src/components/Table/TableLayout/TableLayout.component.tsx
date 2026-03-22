@@ -25,9 +25,11 @@ export const TableLayout = <
   dataTotalSelector,
   defaultColumnPinning,
   density = 'comfortable',
+  enablePrefetch,
   filters,
   isBordered = true,
   isStriped = true,
+  loadMorePageSize,
   onLoadMore,
   persistenceKey,
   sorting,
@@ -46,8 +48,10 @@ export const TableLayout = <
 
   const metaState = {
     density,
+    enablePrefetch,
     isBordered,
     isStriped,
+    loadMorePageSize,
     persistenceKey,
     title,
   };

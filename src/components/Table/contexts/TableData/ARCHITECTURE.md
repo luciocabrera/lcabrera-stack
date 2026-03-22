@@ -73,9 +73,26 @@ graph TD
 
 ## Actions
 
-| Hook               | Reads From  | Writes To   | Description                                                                  |
-| ------------------ | ----------- | ----------- | ---------------------------------------------------------------------------- |
-| `useFetchMoreData` | `dataStore` | `dataStore` | Appends next page to data, updates loading flags, prevents overlapping loads |
+| Hook               | Reads From               | Writes To   | Description                                                                                            |
+| ------------------ | ------------------------ | ----------- | ------------------------------------------------------------------------------------------------------ |
+| `useFetchMoreData` | `dataStore`, `metaStore` | `dataStore` | Appends next page; configurable page size; opt-in prefetch buffer; `startTransition` for smooth scroll |
+
+### Prefetch Buffer (ADR-006)
+
+When `enablePrefetch` is true in `metaStore`, `useFetchMoreData` silently fetches the next page
+after each load-more completes. On the next scroll trigger, cached data is consumed instantly (cache hit)
+or the in-flight request is awaited (cache in-flight). Stale cache is automatically invalidated when
+sort/filter changes reset data (skip mismatch → cache miss).
+
+```
+Scroll trigger
+  ├─ prefetchRef.skip matches? ──► YES: data exists? ──► HIT (instant)
+  │                                                   └──► IN-FLIGHT (await promise)
+  └─ NO: MISS ──► normal onLoadMore() call
+
+After fetch:
+  └─ enablePrefetch && hasMore? ──► fire background onLoadMore() ──► store in prefetchRef
+```
 
 ## Selectors
 

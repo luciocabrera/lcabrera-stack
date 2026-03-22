@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 
 import type { InfiniteScroll } from '@/types/ui.types';
 
+import { DEFAULT_FILTER_PAGE_SIZE } from '@/components/Table/Table.constants';
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 
 import { useFiltersDataContextValue } from '../../useFiltersDataContextValue.hook';
@@ -41,7 +42,7 @@ export const useFetchMoreFilterData = <TData, TResponse>(columnKey: string) => {
           },
         });
         const response = await onLoadMore({
-          limit: 50,
+          limit: DEFAULT_FILTER_PAGE_SIZE,
           skip: currentData.length,
         });
         const data = dataSelector
