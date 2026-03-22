@@ -6,4 +6,14 @@ export const styles = stylex.create({
     position: 'relative',
     height,
   }),
+  row: (height: number) => ({
+    position: 'absolute',
+    height,
+    maxHeight: height,
+    minHeight: height,
+    width: '100%',
+  }),
+  rowOffset: (offsetY: number) => ({
+    transform: `translateY(${offsetY}px)`,
+  }),
 });

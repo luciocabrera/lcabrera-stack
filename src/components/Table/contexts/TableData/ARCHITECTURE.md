@@ -73,9 +73,9 @@ graph TD
 
 ## Actions
 
-| Hook               | Reads From  | Writes To   | Description                                      |
-| ------------------ | ----------- | ----------- | ------------------------------------------------ |
-| `useFetchMoreData` | `dataStore` | `dataStore` | Appends next page to data, updates loading flags |
+| Hook               | Reads From  | Writes To   | Description                                                                  |
+| ------------------ | ----------- | ----------- | ---------------------------------------------------------------------------- |
+| `useFetchMoreData` | `dataStore` | `dataStore` | Appends next page to data, updates loading flags, prevents overlapping loads |
 
 ## Selectors
 

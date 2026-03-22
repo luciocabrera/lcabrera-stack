@@ -3,6 +3,8 @@
 Main layout component that assembles the table UI: title bar, scrollable
 table container with header/body, infinite scroll, and settings drawers.
 Also provides the `TableWrapperContext` with a ref to the wrapper element.
+The scroll container can be scroll-locked during the initial loading state,
+while header/body cells keep rendering the per-cell shimmer overlay.
 
 ## File Structure
 
@@ -39,6 +41,7 @@ graph TD
 graph LR
   subgraph "Reads"
     TC["TableContent"] --> threshold["useGetTableThreshold()"]
+    TC --> isLoading["useGetTableIsLoading()"]
     TC --> isLoadingMore["useGetTableIsLoadingMore()"]
     TC --> hasMore["useGetTableHasMore()"]
   end
@@ -70,3 +73,9 @@ The `useInfiniteScroll` hook monitors `containerRef` scroll position.
 When the user scrolls within `threshold` pixels of the bottom and
 `hasMore` is true, it calls `fetchMoreData()` which appends the next
 page to `dataStore`.
+
+## Scroll Lock
+
+`TableContent` disables scrolling only during the initial `isLoading` state so
+the user keeps the previous data + skeleton presentation without being able to
+scroll through an empty loading surface.

@@ -33,8 +33,6 @@ export const useInfiniteScroll = <
   scrollContainerRef,
   threshold,
 }: UseInfiniteScrollArgs<TData, TResponse>) => {
-  // const fetchMoreData = useFetchMoreData<TData, TResponse>();
-
   useEffect(() => {
     const scrollContainer = scrollContainerRef.current;
     if (!scrollContainer) return;

@@ -1,10 +1,11 @@
 # TableBody Architecture
 
 Virtualised `<tbody>` that renders only the visible row window using
-`useVirtualization`. Column groups and pinned offsets are read from
-the columns store as pre-computed derived state. Each visible row maps
-all column groups (left-pinned, center, right-pinned) to `TableBodyCell`
-instances.
+`useVirtualization`. The body reserves the full virtual height, then places
+only the visible rows at their virtual `translateY(...)` offsets. Column groups
+and pinned offsets are read from the columns store as pre-computed derived
+state. Each visible row maps all column groups (left-pinned, center,
+right-pinned) to `TableBodyCell` instances.
 
 ## File Structure
 
@@ -13,7 +14,7 @@ TableBody/
 ├── TableBody.component.tsx   → <tbody> with row virtualisation
 ├── TableBody.test.tsx        → Unit tests for virtualisation window and custom cell rendering
 ├── TableBody.types.ts        → TableBodyProps (tableContainerRef)
-├── TableBody.stylex.ts       → Body height for scroll area
+├── TableBody.stylex.ts       → Tbody total-height reservation + absolute row positioning helper
 ├── index.ts                  → Barrel export
 │
 └── utils/
@@ -51,13 +52,10 @@ graph TD
   os --> virt
   ref --> virt
 
-  virt --> range["{ startIndex, endIndex, offsetY, bottomSpacerHeight, totalHeight }"]
-
-  range --> topSpacer["SpacerRow (offsetY)"]
+  virt --> range["{ startIndex, endIndex, offsetY, totalHeight }"]
+  range --> bodyHeight["tbody height = totalHeight"]
   range --> rows["visibleRows = data.slice(start, end)"]
-  range --> bottomSpacer["SpacerRow (bottomSpacerHeight)"]
-
-  rows --> map["rows.map → TableRow → cells"]
+  rows --> map["rows.map → TableRow(transform: translateY(...)) → cells"]
 ```
 
 ## Column Rendering Flow
@@ -98,3 +96,7 @@ directly:
 - **Default render**: Passes `value`, `dataType`, `format`, `label` as props
 - Each cell receives `pinInfo` from the store's `pinnedColumnOffsets` slice
 - Width is resolved from `columnSizing[col.key]` or `col.minWidth`
+- The `<tbody>` reserves the virtual list height with `totalHeight`
+- Each rendered body row is absolutely positioned at its virtual `offsetY`
+- Each rendered body row is given the configured `rowHeight` so DOM height
+  matches the virtualization geometry used for scroll range

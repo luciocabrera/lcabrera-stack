@@ -40,8 +40,6 @@ graph LR
   subgraph "Reads (selectors)"
     S1["useGetColumnSizing"] --> THC
     S2["useGetNormalizedColumn(key)"] --> THC
-    S3["useGetTableIsLoading"] --> THC
-    S4["useGetTableIsLoadingMore"] --> THC
   end
 
   THC["TableHeaderCell"]
@@ -95,5 +93,5 @@ and toggling `isColumnSettingsOpen` in meta state.
 
 ## Loading State
 
-When `isLoading` or `isLoadingMore` is true, an overlay with a
-shimmer wave animation is rendered on top of the header cell content.
+Header cells receive `isLoadingState` from `TableHeader` and render their local
+shimmer overlay without subscribing to loading state individually.

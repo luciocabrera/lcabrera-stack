@@ -1,8 +1,8 @@
 import type { RefObject } from 'react';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-export type UseVirtualizationArgs = {
+export type UseVirtualizationResizeObserverArgs = {
   containerRef: RefObject<HTMLElement | null>;
   defaultContainerHeight?: number;
   itemHeight: number;
@@ -10,17 +10,18 @@ export type UseVirtualizationArgs = {
   totalItems: number;
 };
 
-export const useVirtualization = ({
+export const useVirtualizationResizeObserver = ({
   containerRef,
   defaultContainerHeight = 400,
   itemHeight,
-  overscan = 10,
+  overscan = 3,
   totalItems,
-}: UseVirtualizationArgs) => {
+}: UseVirtualizationResizeObserverArgs) => {
   const [scrollTop, setScrollTop] = useState(0);
   const [containerHeight, setContainerHeight] = useState(
     defaultContainerHeight,
   );
+  const rafIdRef = useRef(-1);
 
   const visibleCount = Math.ceil(containerHeight / itemHeight);
   const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
@@ -48,18 +49,49 @@ export const useVirtualization = ({
     };
 
     const handleScroll = () => {
+      if (rafIdRef.current >= 0) {
+        return;
+      }
+
+      rafIdRef.current = globalThis.requestAnimationFrame(() => {
+        rafIdRef.current = -1;
+        // eslint-disable-next-line react-x/set-state-in-effect -- Scroll position must be read from the DOM event; it cannot be derived during render
+        setScrollTop(container?.scrollTop ?? 0);
+      });
+    };
+
+    const syncScrollPosition = () => {
+      if (rafIdRef.current >= 0) {
+        globalThis.cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = -1;
+      }
+
+      // eslint-disable-next-line react-x/set-state-in-effect -- Scroll position must be read from the DOM; it cannot be derived during render
       setScrollTop(container?.scrollTop ?? 0);
     };
 
     updateHeight();
+
+    const resizeObserver = new ResizeObserver(() => {
+      updateHeight();
+    });
+
+    if (container) {
+      resizeObserver.observe(container);
+    }
+
+    syncScrollPosition();
     container?.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('resize', updateHeight);
 
     return () => {
+      if (rafIdRef.current >= 0) {
+        globalThis.cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = -1;
+      }
       container?.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', updateHeight);
+      resizeObserver.disconnect();
     };
-  }, [containerRef, defaultContainerHeight]);
+  }, [containerRef]);
 
   return {
     bottomSpacerHeight,

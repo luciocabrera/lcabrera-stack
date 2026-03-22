@@ -18,6 +18,8 @@ const {
   useGetColumnSizingMock,
   useGetPinnedColumnOffsetsMock,
   useGetTableDataMock,
+  useGetTableIsLoadingMock,
+  useGetTableIsLoadingMoreMock,
   useGetTableOverscanMock,
   useGetTableRowHeightMock,
   useRenderTrackerMock,
@@ -27,26 +29,26 @@ const {
   useGetColumnSizingMock: vi.fn(),
   useGetPinnedColumnOffsetsMock: vi.fn(),
   useGetTableDataMock: vi.fn(),
+  useGetTableIsLoadingMock: vi.fn(),
+  useGetTableIsLoadingMoreMock: vi.fn(),
   useGetTableOverscanMock: vi.fn(),
   useGetTableRowHeightMock: vi.fn(),
   useRenderTrackerMock: vi.fn(),
   useVirtualizationMock: vi.fn(),
 }));
 
-function MockSpacerRow({ height }: { readonly height: number }) {
-  return (
-    <tr>
-      <td>Spacer:{height}</td>
-    </tr>
-  );
-}
-
 function MockTableBodyCell({ children, label, value }: MockTableBodyCellProps) {
   return <td>{children ?? `${String(label)}:${String(value)}`}</td>;
 }
 
-function MockTableRow({ children }: { readonly children: ReactNode }) {
-  return <tr>{children}</tr>;
+function MockTableRow({
+  children,
+  customStylex,
+}: {
+  readonly children: ReactNode;
+  readonly customStylex?: unknown;
+}) {
+  return <tr data-stylex={JSON.stringify(customStylex)}>{children}</tr>;
 }
 
 vi.mock('@/components/Table/contexts/TableConfig/columns/selectors', () => ({
@@ -58,10 +60,6 @@ vi.mock('@/components/Table/contexts/TableConfig/columns/selectors', () => ({
 vi.mock('@/components/Table/contexts/TableConfig/meta/selectors', () => ({
   useGetTableOverscan: useGetTableOverscanMock,
   useGetTableRowHeight: useGetTableRowHeightMock,
-}));
-
-vi.mock('@/components/Table/SpacerRow', () => ({
-  SpacerRow: MockSpacerRow,
 }));
 
 vi.mock('@/components/Table/TableBodyCell', () => ({
@@ -82,10 +80,14 @@ vi.mock('@/utils/performance', () => ({
 
 vi.mock('../contexts/TableData/data/selectors', () => ({
   useGetTableData: useGetTableDataMock,
+  useGetTableIsLoading: useGetTableIsLoadingMock,
+  useGetTableIsLoadingMore: useGetTableIsLoadingMoreMock,
 }));
 
 describe('TableBody', () => {
-  it('renders visible rows and spacer rows from virtualization output', () => {
+  it('renders the visible rows from virtualization output', () => {
+    useGetTableIsLoadingMock.mockReturnValue(false);
+    useGetTableIsLoadingMoreMock.mockReturnValue(false);
     const columns = [
       { key: 'name', label: 'Name' },
       { key: 'amount', label: 'Amount' },
@@ -126,11 +128,12 @@ describe('TableBody', () => {
     expect(screen.getByText('Name:A').textContent).toBe('Name:A');
     expect(screen.getByText('Amount:10').textContent).toBe('Amount:10');
     expect(screen.getByText('Name:B').textContent).toBe('Name:B');
-    expect(screen.getByText('Spacer:30').textContent).toBe('Spacer:30');
-    expect(screen.getByText('Spacer:50').textContent).toBe('Spacer:50');
+    expect(screen.queryByText(/Spacer:/)).toBeNull();
   });
 
   it('uses custom column render when provided', () => {
+    useGetTableIsLoadingMock.mockReturnValue(false);
+    useGetTableIsLoadingMoreMock.mockReturnValue(false);
     const columns = [
       {
         key: 'name',
@@ -167,5 +170,58 @@ describe('TableBody', () => {
     );
 
     expect(screen.getByText('custom:Z').textContent).toBe('custom:Z');
+  });
+
+  it('positions visible rows using their virtual offset', () => {
+    useGetTableIsLoadingMock.mockReturnValue(false);
+    useGetTableIsLoadingMoreMock.mockReturnValue(false);
+    useGetColumnGroupsMock.mockReturnValue({
+      centerCols: [{ key: 'name', label: 'Name' }],
+      leftPinnedCols: [],
+      rightPinnedCols: [],
+    });
+    useGetColumnSizingMock.mockReturnValue({});
+    useGetPinnedColumnOffsetsMock.mockReturnValue({});
+    useGetTableDataMock.mockReturnValue([
+      { name: 'A' },
+      { name: 'B' },
+      { name: 'C' },
+      { name: 'D' },
+    ]);
+    useGetTableOverscanMock.mockReturnValue(2);
+    useGetTableRowHeightMock.mockReturnValue(40);
+    useVirtualizationMock.mockReturnValue({
+      bottomSpacerHeight: 400,
+      containerHeight: 400,
+      endIndex: 4,
+      offsetY: 80,
+      startIndex: 2,
+      totalHeight: 800,
+      visibleCount: 10,
+    });
+
+    const tableContainerRef = {
+      current: document.createElement('div'),
+    } as RefObject<HTMLDivElement | null>;
+
+    render(
+      <table>
+        <TableBody tableContainerRef={tableContainerRef} />
+      </table>,
+    );
+
+    const firstRow = screen.getByText('Name:C').closest('tr');
+    const secondRow = screen.getByText('Name:D').closest('tr');
+    expect(firstRow).toBeInstanceOf(HTMLElement);
+    expect(secondRow).toBeInstanceOf(HTMLElement);
+    if (
+      !(firstRow instanceof HTMLElement) ||
+      !(secondRow instanceof HTMLElement)
+    ) {
+      throw new TypeError('Expected virtualized rows to be HTMLElements');
+    }
+
+    expect(firstRow.dataset.stylex).toContain('translateY(80px)');
+    expect(secondRow.dataset.stylex).toContain('translateY(120px)');
   });
 });

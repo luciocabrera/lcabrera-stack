@@ -4,6 +4,10 @@ import {
   useGetColumnGroups,
   useGetPinnedColumnOffsets,
 } from '@/components/Table/contexts/TableConfig/columns/selectors';
+import {
+  useGetTableIsLoading,
+  useGetTableIsLoadingMore,
+} from '@/components/Table/contexts/TableData/data/selectors';
 
 import { useRenderTracker } from '@/utils/performance';
 
@@ -21,6 +25,9 @@ export const TableHeader = <TData extends Record<string, unknown>, TResponse>({
 
   const pinnedOffsets = useGetPinnedColumnOffsets();
   const { centerCols, leftPinnedCols, rightPinnedCols } = useGetColumnGroups();
+  const isLoading = useGetTableIsLoading();
+  const isLoadingMore = useGetTableIsLoadingMore();
+  const isLoadingState = isLoading || isLoadingMore;
 
   return (
     <thead
@@ -33,6 +40,7 @@ export const TableHeader = <TData extends Record<string, unknown>, TResponse>({
           <TableHeaderCell
             columnKey={col.key}
             hasSettings={!col.isHeaderHidden}
+            isLoadingState={isLoadingState}
             key={col.key}
             pinInfo={pinnedOffsets[col.key]}
           />
@@ -41,6 +49,7 @@ export const TableHeader = <TData extends Record<string, unknown>, TResponse>({
           <TableHeaderCell
             columnKey={col.key}
             hasSettings={!col.isHeaderHidden}
+            isLoadingState={isLoadingState}
             key={col.key}
             pinInfo={pinnedOffsets[col.key]}
           />
@@ -49,6 +58,7 @@ export const TableHeader = <TData extends Record<string, unknown>, TResponse>({
           <TableHeaderCell
             columnKey={col.key}
             hasSettings={!col.isHeaderHidden}
+            isLoadingState={isLoadingState}
             key={col.key}
             pinInfo={pinnedOffsets[col.key]}
           />

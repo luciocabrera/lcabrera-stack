@@ -10,15 +10,19 @@ import {
   useGetTableOverscan,
   useGetTableRowHeight,
 } from '@/components/Table/contexts/TableConfig/meta/selectors';
-import { SpacerRow } from '@/components/Table/SpacerRow';
 import { TableBodyCell } from '@/components/Table/TableBodyCell';
 import { TableRow } from '@/components/Table/TableRow';
 import { useVirtualization } from '@/hooks';
+import { logger } from '@/utils/logger';
 import { useRenderTracker } from '@/utils/performance';
 
 import type { TableBodyProps } from './TableBody.types';
 
-import { useGetTableData } from '../contexts/TableData/data/selectors';
+import {
+  useGetTableData,
+  useGetTableIsLoading,
+  useGetTableIsLoadingMore,
+} from '../contexts/TableData/data/selectors';
 import { styles } from './TableBody.stylex';
 
 export const TableBody = ({ tableContainerRef }: TableBodyProps) => {
@@ -28,30 +32,35 @@ export const TableBody = ({ tableContainerRef }: TableBodyProps) => {
   const { centerCols, leftPinnedCols, rightPinnedCols } = useGetColumnGroups();
   const pinnedOffsets = useGetPinnedColumnOffsets();
   const data = useGetTableData();
+  const isLoading = useGetTableIsLoading();
+  const isLoadingMore = useGetTableIsLoadingMore();
   const rowHeight = useGetTableRowHeight();
   const overscan = useGetTableOverscan();
+  const isLoadingState = isLoading || isLoadingMore;
 
-  const { bottomSpacerHeight, endIndex, offsetY, startIndex, totalHeight } =
-    useVirtualization({
-      containerRef: tableContainerRef,
-      itemHeight: rowHeight,
-      overscan,
-      totalItems: data.length,
-    });
+  const { endIndex, offsetY, startIndex, totalHeight } = useVirtualization({
+    containerRef: tableContainerRef,
+    itemHeight: rowHeight,
+    overscan,
+    totalItems: data.length,
+  });
+
+  logger.debug('Virtualization output:', {
+    endIndex,
+    offsetY,
+    startIndex,
+    totalHeight,
+    totalRows: data.length,
+  });
 
   const visibleRows = data.slice(startIndex, endIndex);
-  const totalRows = data.length;
-  const totalVisibleColCount =
-    leftPinnedCols.length + centerCols.length + rightPinnedCols.length;
 
   return (
     <tbody data-testid='table-body' {...stylex.props(styles.body(totalHeight))}>
-      {offsetY > 0 && (
-        <SpacerRow colSpan={totalVisibleColCount} height={offsetY} />
-      )}
       {visibleRows.map((row, index) => {
         const rowIndex = startIndex + index;
         const rowData = row as Record<string, unknown>;
+        const rowOffset = offsetY + index * rowHeight;
 
         const renderBodyCell = (col: (typeof centerCols)[number]) => {
           const minWidth = col.minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
@@ -61,6 +70,7 @@ export const TableBody = ({ tableContainerRef }: TableBodyProps) => {
           if (col.render) {
             return (
               <TableBodyCell
+                isLoadingState={isLoadingState}
                 key={col.key}
                 label=''
                 minWidth={minWidth}
@@ -76,6 +86,7 @@ export const TableBody = ({ tableContainerRef }: TableBodyProps) => {
             <TableBodyCell
               dataType={col.dataType}
               format={col.format}
+              isLoadingState={isLoadingState}
               key={col.key}
               label={col.label}
               minWidth={minWidth}
@@ -87,16 +98,16 @@ export const TableBody = ({ tableContainerRef }: TableBodyProps) => {
         };
 
         return (
-          <TableRow key={rowIndex}>
+          <TableRow
+            customStylex={[styles.row(rowHeight), styles.rowOffset(rowOffset)]}
+            key={rowIndex}
+          >
             {leftPinnedCols.map((col) => renderBodyCell(col))}
             {centerCols.map((col) => renderBodyCell(col))}
             {rightPinnedCols.map((col) => renderBodyCell(col))}
           </TableRow>
         );
       })}
-      {totalRows > 0 && bottomSpacerHeight > 0 && (
-        <SpacerRow colSpan={totalVisibleColCount} height={bottomSpacerHeight} />
-      )}
     </tbody>
   );
 };

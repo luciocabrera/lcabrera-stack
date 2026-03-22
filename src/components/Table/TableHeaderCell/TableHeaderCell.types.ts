@@ -7,5 +7,6 @@ export type TableHeaderCellProps<TData> = ComponentPropsWithoutRef<'th'> & {
   readonly columnKey: DataKey<TData>;
   readonly customStylex?: StyleXStyles;
   readonly hasSettings?: boolean;
+  readonly isLoadingState?: boolean;
   readonly pinInfo?: PinnedColumnInfo;
 };

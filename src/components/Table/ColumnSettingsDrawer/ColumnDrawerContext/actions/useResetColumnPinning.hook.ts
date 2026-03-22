@@ -1,6 +1,7 @@
 import { useColumnDrawerContextValue } from '@/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/useColumnDrawerContextValue.hook';
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { getColumnPinSide } from '@/components/Table/utils';
+import { logger } from '@/utils/logger';
 
 /**
  * Resets the column pinning in the drawer to match the current table state.
@@ -13,7 +14,7 @@ export const useResetColumnPinning = () => {
     const columnKey = columnStore.get()?.columnKey;
 
     if (!columnKey) {
-      console.warn(
+      logger.warn(
         '[useResetColumnPinning] No columnKey found in column drawer store.',
       );
       return;

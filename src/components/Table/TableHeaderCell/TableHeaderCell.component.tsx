@@ -14,10 +14,6 @@ import {
   useSetColumnSizing,
   useSetColumnSorting,
 } from '@/components/Table/contexts/TableConfig/columns/actions';
-import {
-  useGetTableIsLoading,
-  useGetTableIsLoadingMore,
-} from '@/components/Table/contexts/TableData/data/selectors';
 import { useColumnResize } from '@/components/Table/hooks';
 import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
 import { PinConflictModal } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/PinConflictModal';
@@ -44,6 +40,7 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
   columnKey,
   customStylex,
   hasSettings = false,
+  isLoadingState = false,
   pinInfo,
   ...rest
 }: TableHeaderCellProps<TData>) => {
@@ -51,8 +48,6 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
 
   const columnSizing = useGetColumnSizing<TData>();
   const column = useGetNormalizedColumn<TData>(columnKey);
-  const isLoading = useGetTableIsLoading();
-  const isLoadingMore = useGetTableIsLoadingMore();
 
   const setColumnSizing = useSetColumnSizing<TData>();
   const setColumnPinning = useSetColumnPinning<TData>();
@@ -75,7 +70,6 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
   const isSortable = column.isSortable !== false;
   const isResizable = column.isResizable !== false && !column.isStatic;
   const isStatic = column.isStatic === true;
-  const isLoadingState = isLoading || isLoadingMore;
 
   const { isResizing, onMouseDown } = useColumnResize({
     columnKey,
@@ -143,7 +137,6 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
         customStylex,
       )}
     >
-      {/* Loading overlay with shimmer */}
       {isLoadingState && (
         <div {...stylex.props(skeletonStyles.loadingOverlay)}>
           <div {...stylex.props(skeletonStyles.shimmerWave)} />

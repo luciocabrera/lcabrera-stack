@@ -5,6 +5,7 @@ import {
   SettingsIcon,
   UserIcon,
 } from '@/components/Icons';
+import { logger } from '@/utils/logger';
 
 import type { ToolbarItemConfig } from './Toolbar.types';
 
@@ -86,7 +87,7 @@ export const HorizontalToolbarExample = () => {
       icon: <FileTextIcon size={20} />,
       label: 'Save',
       onClick: () => {
-        console.warn('Save clicked');
+        logger.info('Save clicked');
       },
       type: 'button',
     },
@@ -94,7 +95,7 @@ export const HorizontalToolbarExample = () => {
       icon: <BarChartIcon size={20} />,
       label: 'Export',
       onClick: () => {
-        console.warn('Export clicked');
+        logger.info('Export clicked');
       },
       type: 'button',
     },
@@ -103,7 +104,7 @@ export const HorizontalToolbarExample = () => {
       icon: <SettingsIcon size={20} />,
       label: 'Publish',
       onClick: () => {
-        console.warn('Publish clicked');
+        logger.info('Publish clicked');
       },
       type: 'button',
     },
@@ -119,7 +120,7 @@ export const HorizontalToolbarExample = () => {
       icon: <SettingsIcon size={20} />,
       label: 'Logout',
       onClick: () => {
-        console.warn('Logout clicked');
+        logger.info('Logout clicked');
       },
       type: 'button',
     },
@@ -142,7 +143,7 @@ export const HorizontalToolbarExampleShort = () => {
       icon: <SettingsIcon size={20} />,
       label: 'Publish',
       onClick: () => {
-        console.warn('Publish clicked');
+        logger.info('Publish clicked');
       },
       type: 'button',
     },
@@ -158,7 +159,7 @@ export const HorizontalToolbarExampleShort = () => {
       icon: <SettingsIcon size={20} />,
       label: 'Logout',
       onClick: () => {
-        console.warn('Logout clicked');
+        logger.info('Logout clicked');
       },
       type: 'button',
     },

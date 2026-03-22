@@ -32,13 +32,14 @@ Before creating anything new, check this inventory. If something here does the j
 
 ## Hooks
 
-| Hook                      | Location                                | Description                                                                                                   |
-| ------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `useClickOutside`         | `hooks/useClickOutside.hook.ts`         | Fires callback when a `mousedown` occurs outside a given ref                                                  |
-| `useStore`                | `hooks/useStore.hook.ts`                | Ref-based external store with shallow-equality guard, subscribe, reset, SSR snapshot                          |
-| `useTheme`                | `hooks/useTheme.hook.ts`                | Returns `{ theme, setTheme }` from `ThemeContext` via React 19 `use()`                                        |
-| `useColumnVirtualization` | `hooks/useColumnVirtualization.hook.ts` | Computes `startIndex`, `endIndex`, `leftSpacerWidth`, `rightSpacerWidth` for horizontal column virtualisation |
-| `useVirtualization`       | `hooks/useVirtualization.hook.ts`       | Computes `startIndex`, `endIndex`, `totalHeight`, `offsetY` for a scrollable virtual list                     |
+| Hook                              | Location                                        | Description                                                                                                   |
+| --------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `useClickOutside`                 | `hooks/useClickOutside.hook.ts`                 | Fires callback when a `mousedown` occurs outside a given ref                                                  |
+| `useStore`                        | `hooks/useStore.hook.ts`                        | Ref-based external store with shallow-equality guard, subscribe, reset, SSR snapshot                          |
+| `useTheme`                        | `hooks/useTheme.hook.ts`                        | Returns `{ theme, setTheme }` from `ThemeContext` via React 19 `use()`                                        |
+| `useColumnVirtualization`         | `hooks/useColumnVirtualization.hook.ts`         | Computes `startIndex`, `endIndex`, `leftSpacerWidth`, `rightSpacerWidth` for horizontal column virtualisation |
+| `useVirtualization`               | `hooks/useVirtualization.hook.ts`               | Computes `startIndex`, `endIndex`, `totalHeight`, `offsetY` for a scrollable virtual list                     |
+| `useVirtualizationResizeObserver` | `hooks/useVirtualizationResizeObserver.hook.ts` | Preserves the ResizeObserver + RAF-based vertical virtualization experiment for side-by-side retesting        |
 
 ---
 
@@ -84,6 +85,13 @@ Before creating anything new, check this inventory. If something here does the j
 | Function                                | Location                           | Description                                  |
 | --------------------------------------- | ---------------------------------- | -------------------------------------------- |
 | `getThemeFromCookie` / `setThemeCookie` | `utils/theme/theme-cookie.util.ts` | Read/write theme mode to a cookie (SSR-safe) |
+
+### `src/utils/logger/`
+
+| Function       | Location                      | Description                                                                            |
+| -------------- | ----------------------------- | -------------------------------------------------------------------------------------- |
+| `logger`       | `utils/logger/logger.util.ts` | Default singleton logger reading `VITE_LOG_LEVEL` env var                              |
+| `createLogger` | `utils/logger/logger.util.ts` | Factory: `createLogger({ level?, prefix? })` → level-filtered, tree-shakeable `Logger` |
 
 ### `src/utils/security/`
 

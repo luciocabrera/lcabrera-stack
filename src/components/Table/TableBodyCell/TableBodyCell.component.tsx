@@ -1,10 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
 
-import {
-  useGetTableIsLoading,
-  useGetTableIsLoadingMore,
-} from '@/components/Table/contexts/TableData/data/selectors';
-
 import type { TableBodyCellProps } from './TableBodyCell.types';
 
 import { skeletonStyles, tableBodyCellStyles } from './TableBodyCell.stylex';
@@ -15,6 +10,7 @@ export const TableBodyCell = <TData extends Record<string, unknown>>({
   customStylex,
   dataType: dataTypeProp,
   format,
+  isLoadingState = false,
   label,
   locale,
   minWidth,
@@ -23,12 +19,9 @@ export const TableBodyCell = <TData extends Record<string, unknown>>({
   width,
   ...rest
 }: TableBodyCellProps<TData>) => {
-  const isLoading = useGetTableIsLoading();
-  const isLoadingMore = useGetTableIsLoadingMore();
   const hasCustomContent = children !== undefined;
   const dataType = dataTypeProp ?? detectDataType(value);
 
-  const isLoadingState = isLoading || isLoadingMore;
   const isRightAligned =
     !hasCustomContent && (dataType === 'number' || dataType === 'currency');
   const isCentered =
@@ -61,6 +54,11 @@ export const TableBodyCell = <TData extends Record<string, unknown>>({
         customStylex,
       )}
     >
+      {isLoadingState && (
+        <div {...stylex.props(skeletonStyles.loadingOverlay)}>
+          <div {...stylex.props(skeletonStyles.shimmerWave)} />
+        </div>
+      )}
       {hasCustomContent ? (
         content
       ) : (
@@ -73,11 +71,6 @@ export const TableBodyCell = <TData extends Record<string, unknown>>({
         >
           {content}
         </span>
-      )}
-      {isLoadingState && (
-        <div {...stylex.props(skeletonStyles.loadingOverlay)}>
-          <div {...stylex.props(skeletonStyles.shimmerWave)} />
-        </div>
       )}
     </td>
   );

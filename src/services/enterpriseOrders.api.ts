@@ -1,6 +1,9 @@
 import type { ColumnFiltersState, SortingState } from '@/components/Table';
 
 import { getApiBaseUrl } from '@/utils/api';
+import { createLogger } from '@/utils/logger';
+
+const log = createLogger({ prefix: '[orders]' });
 
 /**
  * Enterprise Orders API Service
@@ -121,8 +124,8 @@ export const enterpriseOrdersApi = {
     requestUrl?: string;
   }): Promise<{ hasMore: boolean; values: string[] }> => {
     const url = `${getApiBaseUrl(requestUrl)}/enterprise-orders/distinct/${columnName}?limit=${limit}&offset=${offset}`;
-    console.warn(
-      '🎯 [Orders] Fetching distinct values for:',
+    log.debug(
+      '🎯 Fetching distinct values for:',
       columnName,
       'offset:',
       offset,
@@ -150,7 +153,7 @@ export const enterpriseOrdersApi = {
     requestUrl?: string;
   }): Promise<EnterpriseOrderDetailResponse> => {
     const url = `${getApiBaseUrl(requestUrl)}/enterprise-orders/${orderId}`;
-    console.warn('🎯 [Orders] Fetching order by ID:', orderId);
+    log.debug('🎯 Fetching order by ID:', orderId);
 
     const response = await fetch(url);
 
@@ -191,17 +194,13 @@ export const enterpriseOrdersApi = {
     }
 
     const url = `${getApiBaseUrl(requestUrl)}/enterprise-orders/paginated?${params.toString()}`;
-    console.warn('🌐 [Orders] Fetching from URL:', url);
-    console.warn('🌐 [Orders] Filter object:', filter);
-    console.warn('🌐 [Orders] Sorting:', sorting);
+    log.debug('🌐 Fetching from URL:', url);
+    log.debug('🌐 Filter object:', filter);
+    log.debug('🌐 Sorting:', sorting);
 
     const fetchData = () =>
       fetch(url).then((response) => {
-        console.warn(
-          '📡 [Orders] Response status:',
-          response.status,
-          response.statusText,
-        );
+        log.debug('📡 Response status:', response.status, response.statusText);
 
         if (!response.ok) {
           throw new Error(
@@ -216,7 +215,7 @@ export const enterpriseOrdersApi = {
 
     // Add artificial delay if configured (for testing loading states)
     if (FAKE_API_DELAY_MS > 0) {
-      console.warn(`⏱️  [Orders] Delaying response by ${FAKE_API_DELAY_MS}ms`);
+      log.debug(`⏳ Delaying response by ${FAKE_API_DELAY_MS}ms`);
       return delay(FAKE_API_DELAY_MS).then(fetchData);
     }
 

@@ -16,6 +16,8 @@ utils/
 │   └── ARCHITECTURE.md      -> Table filter-options adapters
 ├── formatters/
 │   └── ARCHITECTURE.md      -> Locale-aware date/number/currency formatters
+├── logger/
+│   └── ARCHITECTURE.md      -> Level-aware, tree-shakeable application logger
 ├── performance/
 │   └── ARCHITECTURE.md      -> Render tracking utilities
 ├── security/
@@ -36,6 +38,7 @@ graph TD
   Comparison[comparison/]
   Filters[filters/]
   Formatters[formatters/]
+  Logger[logger/]
   Performance[performance/]
   Security[security/]
   Storage[storage/]
@@ -44,6 +47,7 @@ graph TD
 
   API --> Constants[API constants]
   Filters --> TableTypes[Table types]
+  Logger --> EnvVars[import.meta.env.VITE_LOG_LEVEL]
   URLState --> TableTypes
   URLState --> FilterTypes[Filter operator types]
   Theme --> ThemeTypes[Theme types]
@@ -57,6 +61,7 @@ graph TD
 | `comparison/`  | `shallowEqual` — one-level object comparison for store diffing           |
 | `filters/`     | `createStaticFilterOptions` — static array → Table filter contract       |
 | `formatters/`  | `formatDate`, `formatCurrency`, `formatNumber`, `parseDate`, etc.        |
+| `logger/`      | `createLogger`, `logger` — level-filtered, tree-shakeable app logging    |
 | `performance/` | `renderTracker`, `useRenderTracker` — dev-time render inspection         |
 | `security/`    | `getRequestCspNonce` — standardized `x-csp-nonce` request header parser  |
 | `storage/`     | `parseCookies`, `readFromCookie`, `writeToCookie`, `writeToLocalStorage` |

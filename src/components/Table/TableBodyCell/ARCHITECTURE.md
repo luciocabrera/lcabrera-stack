@@ -75,4 +75,5 @@ graph TD
 
 ## Loading State
 
-Shimmer overlay when `useGetTableIsLoading()` or `useGetTableIsLoadingMore()` is true.
+Body cells receive `isLoadingState` from `TableBody` and render their local
+shimmer overlay without subscribing to loading state individually.

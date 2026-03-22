@@ -12,6 +12,7 @@ export type TableBodyCellProps<TData extends Record<string, unknown>> =
       /** Custom content that overrides the default cell rendering */
       readonly children?: ReactNode;
       readonly customStylex?: StyleXStyles;
+      readonly isLoadingState?: boolean;
       /** Locale for formatting */
       readonly locale?: string;
       readonly pinInfo?: PinnedColumnInfo;

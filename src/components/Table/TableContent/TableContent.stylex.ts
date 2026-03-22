@@ -4,15 +4,17 @@ import { borderRadius, shadows } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const styles = stylex.create({
-  wrapper: {
-    gap: 0,
-    overflow: 'hidden',
-    containerName: 'table-wrapper',
-    containerType: 'size',
-    display: 'flex',
+  container: {
+    flex: '1',
+    overflow: 'auto',
+    // contain: 'layout style',
     position: 'relative',
-    height: '100%',
-    width: '100%',
+    scrollbarColor: `${colors.borderSecondary} transparent`,
+    scrollbarWidth: 'thin',
+    minHeight: 0,
+  },
+  containerLocked: {
+    overflow: 'hidden',
   },
   outerContainer: {
     borderColor: colors.borderPrimary,
@@ -28,13 +30,14 @@ export const styles = stylex.create({
     height: '100%',
     minWidth: 0,
   },
-  container: {
-    flex: '1',
-    overflow: 'auto',
-    contain: 'layout style',
+  wrapper: {
+    gap: 0,
+    overflow: 'hidden',
+    containerName: 'table-wrapper',
+    containerType: 'size',
+    display: 'flex',
     position: 'relative',
-    scrollbarColor: `${colors.borderSecondary} transparent`,
-    scrollbarWidth: 'thin',
-    minHeight: 0,
+    height: '100%',
+    width: '100%',
   },
 });

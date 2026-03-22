@@ -1,27 +1,14 @@
 // @vitest-environment jsdom
 
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
-
-const { useGetTableIsLoadingMock, useGetTableIsLoadingMoreMock } = vi.hoisted(
-  () => ({
-    useGetTableIsLoadingMock: vi.fn(),
-    useGetTableIsLoadingMoreMock: vi.fn(),
-  }),
-);
-
-vi.mock('@/components/Table/contexts/TableData/data/selectors', () => ({
-  useGetTableIsLoading: useGetTableIsLoadingMock,
-  useGetTableIsLoadingMore: useGetTableIsLoadingMoreMock,
-}));
+import { cleanup, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import { TableBodyCell } from './TableBodyCell.component';
 
+afterEach(cleanup);
+
 describe('TableBodyCell', () => {
   it('renders text value in a td element', () => {
-    useGetTableIsLoadingMock.mockReturnValue(false);
-    useGetTableIsLoadingMoreMock.mockReturnValue(false);
-
     render(
       <table>
         <tbody>
@@ -36,9 +23,6 @@ describe('TableBodyCell', () => {
   });
 
   it('renders custom children when provided', () => {
-    useGetTableIsLoadingMock.mockReturnValue(false);
-    useGetTableIsLoadingMoreMock.mockReturnValue(false);
-
     render(
       <table>
         <tbody>
@@ -57,9 +41,6 @@ describe('TableBodyCell', () => {
   });
 
   it('renders a td element', () => {
-    useGetTableIsLoadingMock.mockReturnValue(false);
-    useGetTableIsLoadingMoreMock.mockReturnValue(false);
-
     render(
       <table>
         <tbody>
@@ -72,5 +53,20 @@ describe('TableBodyCell', () => {
 
     const cell = screen.getByText('42').closest('td');
     expect(cell?.tagName).toBe('TD');
+  });
+
+  it('renders the shimmer overlay when loading state is passed in', () => {
+    render(
+      <table>
+        <tbody>
+          <tr>
+            <TableBodyCell isLoadingState label='Amount' value={42} />
+          </tr>
+        </tbody>
+      </table>,
+    );
+
+    const cell = screen.getByText('42').closest('td');
+    expect(cell?.querySelector('div')).toBeTruthy();
   });
 });

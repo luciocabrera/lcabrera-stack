@@ -12,6 +12,7 @@ import { useGetTableThreshold } from '../contexts/TableConfig/meta/selectors';
 import { useFetchMoreData } from '../contexts/TableData/data/actions';
 import {
   useGetTableHasMore,
+  useGetTableIsLoading,
   useGetTableIsLoadingMore,
 } from '../contexts/TableData/data/selectors';
 // import { TableWrapperContext } from '../contexts/TableWrapper/TableWrapperContext.context';
@@ -33,6 +34,7 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   useRenderTracker({ componentName: 'TableContent' });
 
   const threshold = useGetTableThreshold();
+  const isLoading = useGetTableIsLoading();
   const isLoadingMore = useGetTableIsLoadingMore();
   const hasMore = useGetTableHasMore();
 
@@ -43,7 +45,7 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   const containerRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  // const wrapperContextValue = { containerRef, wrapperRef };
+  const isLoaadingState = isLoading || isLoadingMore;
 
   useInfiniteScroll({
     dataSelector,
@@ -75,7 +77,14 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
           }
           icon={icon}
         />
-        <div ref={containerRef} {...stylex.props(styles.container)}>
+        <div
+          data-scroll-locked={String(isLoaadingState)}
+          ref={containerRef}
+          {...stylex.props(
+            styles.container,
+            isLoaadingState && styles.containerLocked,
+          )}
+        >
           <TableBase>
             <TableHeader />
             <TableBody tableContainerRef={containerRef} />

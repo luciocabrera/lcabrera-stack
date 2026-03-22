@@ -1,4 +1,7 @@
 import { getApiBaseUrl } from '@/utils/api';
+import { createLogger } from '@/utils/logger';
+
+const log = createLogger({ prefix: '[carSales]' });
 
 /**
  * Car Sales API Service
@@ -105,15 +108,11 @@ export const carSalesApi = {
     }
 
     const url = `${getApiBaseUrl(requestUrl)}/car-sales/paginated?${params.toString()}`;
-    console.warn('🌐 Fetching from URL:', url);
+    log.debug('🌐 Fetching from URL:', url);
 
     const fetchData = () =>
       fetch(url).then((response) => {
-        console.warn(
-          '📡 Response status:',
-          response.status,
-          response.statusText,
-        );
+        log.debug('📡 Response status:', response.status, response.statusText);
         if (!response.ok) {
           throw new Error(`Failed to fetch car sales: ${response.statusText}`);
         }

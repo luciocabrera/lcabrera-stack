@@ -10,6 +10,8 @@ const {
   MockTableRow,
   useGetColumnGroupsMock,
   useGetPinnedColumnOffsetsMock,
+  useGetTableIsLoadingMock,
+  useGetTableIsLoadingMoreMock,
   useRenderTrackerMock,
 } = vi.hoisted(() => ({
   MockTableHeaderCell: vi.fn(
@@ -20,12 +22,19 @@ const {
   )),
   useGetColumnGroupsMock: vi.fn(),
   useGetPinnedColumnOffsetsMock: vi.fn(),
+  useGetTableIsLoadingMock: vi.fn(),
+  useGetTableIsLoadingMoreMock: vi.fn(),
   useRenderTrackerMock: vi.fn(),
 }));
 
 vi.mock('@/components/Table/contexts/TableConfig/columns/selectors', () => ({
   useGetColumnGroups: useGetColumnGroupsMock,
   useGetPinnedColumnOffsets: useGetPinnedColumnOffsetsMock,
+}));
+
+vi.mock('@/components/Table/contexts/TableData/data/selectors', () => ({
+  useGetTableIsLoading: useGetTableIsLoadingMock,
+  useGetTableIsLoadingMore: useGetTableIsLoadingMoreMock,
 }));
 
 vi.mock('@/utils/performance', () => ({
@@ -46,6 +55,8 @@ afterEach(cleanup);
 
 describe('TableHeader', () => {
   it('renders a thead element with data-testid', () => {
+    useGetTableIsLoadingMock.mockReturnValue(false);
+    useGetTableIsLoadingMoreMock.mockReturnValue(false);
     const columns = [
       { key: 'name', label: 'Name' },
       { key: 'age', label: 'Age' },
@@ -69,6 +80,8 @@ describe('TableHeader', () => {
   });
 
   it('renders all center columns', () => {
+    useGetTableIsLoadingMock.mockReturnValue(false);
+    useGetTableIsLoadingMoreMock.mockReturnValue(false);
     const columns = [{ key: 'name', label: 'Name' }];
     useGetColumnGroupsMock.mockReturnValue({
       centerCols: columns,
@@ -87,6 +100,8 @@ describe('TableHeader', () => {
   });
 
   it('renders pinned columns', () => {
+    useGetTableIsLoadingMock.mockReturnValue(false);
+    useGetTableIsLoadingMoreMock.mockReturnValue(false);
     const leftCol = { key: 'id', label: 'ID' };
     const centerCols = [{ key: 'name', label: 'Name' }];
     useGetColumnGroupsMock.mockReturnValue({
