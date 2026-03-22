@@ -6,7 +6,6 @@ import {
   useGetEffectiveColumns,
 } from '@/components/Table/contexts/TableConfig/columns/selectors';
 import {
-  // useGetTableColumnOverscan,
   useGetTableOverscan,
   useGetTableRowHeight,
 } from '@/components/Table/contexts/TableConfig/meta/selectors';
