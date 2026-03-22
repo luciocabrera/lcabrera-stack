@@ -1,5 +1,3 @@
-import * as stylex from '@stylexjs/stylex';
-
 import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
 import {
   useGetColumnGroups,
@@ -10,6 +8,7 @@ import {
   useGetTableOverscan,
   useGetTableRowHeight,
 } from '@/components/Table/contexts/TableConfig/meta/selectors';
+import { SpacerRow } from '@/components/Table/SpacerRow';
 import { TableBodyCell } from '@/components/Table/TableBodyCell';
 import { TableRow } from '@/components/Table/TableRow';
 import { useVirtualization } from '@/hooks';
@@ -23,7 +22,6 @@ import {
   useGetTableIsLoading,
   useGetTableIsLoadingMore,
 } from '../contexts/TableData/data/selectors';
-import { styles } from './TableBody.stylex';
 
 export const TableBody = ({ tableContainerRef }: TableBodyProps) => {
   useRenderTracker({ componentName: 'TableBody' });
@@ -38,12 +36,13 @@ export const TableBody = ({ tableContainerRef }: TableBodyProps) => {
   const overscan = useGetTableOverscan();
   const isLoadingState = isLoading || isLoadingMore;
 
-  const { endIndex, offsetY, startIndex, totalHeight } = useVirtualization({
-    containerRef: tableContainerRef,
-    itemHeight: rowHeight,
-    overscan,
-    totalItems: data.length,
-  });
+  const { bottomSpacerHeight, endIndex, offsetY, startIndex, totalHeight } =
+    useVirtualization({
+      containerRef: tableContainerRef,
+      itemHeight: rowHeight,
+      overscan,
+      totalItems: data.length,
+    });
 
   logger.debug('Virtualization output:', {
     endIndex,
@@ -54,13 +53,15 @@ export const TableBody = ({ tableContainerRef }: TableBodyProps) => {
   });
 
   const visibleRows = data.slice(startIndex, endIndex);
+  const totalColSpan =
+    leftPinnedCols.length + centerCols.length + rightPinnedCols.length;
 
   return (
-    <tbody data-testid='table-body' {...stylex.props(styles.body(totalHeight))}>
+    <tbody data-testid='table-body'>
+      {offsetY > 0 && <SpacerRow colSpan={totalColSpan} height={offsetY} />}
       {visibleRows.map((row, index) => {
         const rowIndex = startIndex + index;
         const rowData = row as Record<string, unknown>;
-        const rowOffset = offsetY + index * rowHeight;
 
         const renderBodyCell = (col: (typeof centerCols)[number]) => {
           const minWidth = col.minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
@@ -98,16 +99,16 @@ export const TableBody = ({ tableContainerRef }: TableBodyProps) => {
         };
 
         return (
-          <TableRow
-            customStylex={[styles.row(rowHeight), styles.rowOffset(rowOffset)]}
-            key={rowIndex}
-          >
+          <TableRow key={rowIndex}>
             {leftPinnedCols.map((col) => renderBodyCell(col))}
             {centerCols.map((col) => renderBodyCell(col))}
             {rightPinnedCols.map((col) => renderBodyCell(col))}
           </TableRow>
         );
       })}
+      {bottomSpacerHeight > 0 && (
+        <SpacerRow colSpan={totalColSpan} height={bottomSpacerHeight} />
+      )}
     </tbody>
   );
 };

@@ -37,18 +37,25 @@ const {
   useVirtualizationMock: vi.fn(),
 }));
 
+type MockSpacerRowProps = {
+  readonly colSpan: number;
+  readonly height: number;
+};
+
+function MockSpacerRow({ colSpan, height }: MockSpacerRowProps) {
+  return (
+    <tr data-height={height} data-testid='spacer-row'>
+      <td colSpan={colSpan} />
+    </tr>
+  );
+}
+
 function MockTableBodyCell({ children, label, value }: MockTableBodyCellProps) {
   return <td>{children ?? `${String(label)}:${String(value)}`}</td>;
 }
 
-function MockTableRow({
-  children,
-  customStylex,
-}: {
-  readonly children: ReactNode;
-  readonly customStylex?: unknown;
-}) {
-  return <tr data-stylex={JSON.stringify(customStylex)}>{children}</tr>;
+function MockTableRow({ children }: { readonly children: ReactNode }) {
+  return <tr>{children}</tr>;
 }
 
 vi.mock('@/components/Table/contexts/TableConfig/columns/selectors', () => ({
@@ -60,6 +67,10 @@ vi.mock('@/components/Table/contexts/TableConfig/columns/selectors', () => ({
 vi.mock('@/components/Table/contexts/TableConfig/meta/selectors', () => ({
   useGetTableOverscan: useGetTableOverscanMock,
   useGetTableRowHeight: useGetTableRowHeightMock,
+}));
+
+vi.mock('@/components/Table/SpacerRow', () => ({
+  SpacerRow: MockSpacerRow,
 }));
 
 vi.mock('@/components/Table/TableBodyCell', () => ({
@@ -172,7 +183,7 @@ describe('TableBody', () => {
     expect(screen.getByText('custom:Z').textContent).toBe('custom:Z');
   });
 
-  it('positions visible rows using their virtual offset', () => {
+  it('renders spacer rows for virtual offset positioning', () => {
     useGetTableIsLoadingMock.mockReturnValue(false);
     useGetTableIsLoadingMoreMock.mockReturnValue(false);
     useGetColumnGroupsMock.mockReturnValue({
@@ -210,18 +221,9 @@ describe('TableBody', () => {
       </table>,
     );
 
-    const firstRow = screen.getByText('Name:C').closest('tr');
-    const secondRow = screen.getByText('Name:D').closest('tr');
-    expect(firstRow).toBeInstanceOf(HTMLElement);
-    expect(secondRow).toBeInstanceOf(HTMLElement);
-    if (
-      !(firstRow instanceof HTMLElement) ||
-      !(secondRow instanceof HTMLElement)
-    ) {
-      throw new TypeError('Expected virtualized rows to be HTMLElements');
-    }
-
-    expect(firstRow.dataset.stylex).toContain('translateY(80px)');
-    expect(secondRow.dataset.stylex).toContain('translateY(120px)');
+    const spacers = screen.getAllByTestId('spacer-row');
+    expect(spacers).toHaveLength(2);
+    expect(spacers[0]?.dataset.height).toBe('80');
+    expect(spacers[1]?.dataset.height).toBe('400');
   });
 });
