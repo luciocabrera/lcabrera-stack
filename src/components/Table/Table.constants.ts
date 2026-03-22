@@ -17,7 +17,7 @@ export const LOAD_MORE_PAGE_SIZE = 150;
 export const DEFAULT_FILTER_PAGE_SIZE = 50;
 export const INFINITE_SCROLL_THRESHOLD = 200;
 
-export const DEFAULT_OVERSCAN = 6;
+export const DEFAULT_OVERSCAN = 20;
 
 export const DEFAULT_COLUMN_OVERSCAN = 2;
 
