@@ -11,7 +11,7 @@ export const NavLink = ({
   color = 'ghost',
   icon,
   orientation = 'vertical',
-  prefetch = 'none',
+  prefetch = 'intent',
   size = 'md',
   width = 'full',
   ...props
