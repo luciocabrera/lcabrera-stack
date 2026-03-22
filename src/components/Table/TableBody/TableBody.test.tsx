@@ -2,8 +2,8 @@
 
 import type { ReactNode, RefObject } from 'react';
 
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { cleanup, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { TableBody } from './TableBody.component';
 
@@ -96,6 +96,8 @@ vi.mock('../contexts/TableData/data/selectors', () => ({
 }));
 
 describe('TableBody', () => {
+  afterEach(cleanup);
+
   it('renders the visible rows from virtualization output', () => {
     useGetTableIsLoadingMock.mockReturnValue(false);
     useGetTableIsLoadingMoreMock.mockReturnValue(false);

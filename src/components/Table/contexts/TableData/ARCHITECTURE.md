@@ -73,9 +73,9 @@ graph TD
 
 ## Actions
 
-| Hook               | Reads From               | Writes To   | Description                                                                                            |
-| ------------------ | ------------------------ | ----------- | ------------------------------------------------------------------------------------------------------ |
-| `useFetchMoreData` | `dataStore`, `metaStore` | `dataStore` | Appends next page; configurable page size; opt-in prefetch buffer; `startTransition` for smooth scroll |
+| Hook               | Reads From               | Writes To   | Description                                                                                       |
+| ------------------ | ------------------------ | ----------- | ------------------------------------------------------------------------------------------------- |
+| `useFetchMoreData` | `dataStore`, `metaStore` | `dataStore` | Appends next page; configurable page size; opt-in prefetch buffer; direct `dataStore.set()` calls |
 
 ### Prefetch Buffer (ADR-006)
 

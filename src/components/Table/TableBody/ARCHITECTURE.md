@@ -1,20 +1,31 @@
 # TableBody Architecture
 
 Virtualised `<tbody>` that renders only the visible row window using
-`useVirtualization`. The body reserves the full virtual height, then places
-only the visible rows at their virtual `translateY(...)` offsets. Column groups
-and pinned offsets are read from the columns store as pre-computed derived
-state. Each visible row maps all column groups (left-pinned, center,
-right-pinned) to `TableBodyCell` instances.
+`useVirtualization`. The body uses **SpacerRow** components above and below
+the visible rows to maintain correct scroll height in normal document flow.
+Column groups and pinned offsets are read from the columns store as
+pre-computed derived state. Each visible row maps all column groups
+(left-pinned, center, right-pinned) to `TableBodyCell` instances.
+
+## Design Decision — SpacerRow vs Absolute Positioning
+
+An earlier implementation used `position: absolute` + `transform: translateY()`
+per row in a grid-layout `<tbody>`. This caused **visible black gaps during
+fast scrolling** because row position updates lagged behind scroll events.
+
+The current SpacerRow approach places rows in normal document flow with
+invisible spacer `<tr>` elements above (for `offsetY`) and below (for
+`bottomSpacerHeight`). The browser layout engine keeps content contiguous,
+eliminating visual gaps regardless of scroll speed.
 
 ## File Structure
 
 ```
 TableBody/
-├── TableBody.component.tsx   → <tbody> with row virtualisation
-├── TableBody.test.tsx        → Unit tests for virtualisation window and custom cell rendering
+├── TableBody.component.tsx   → <tbody> with SpacerRow-based row virtualisation
+├── TableBody.test.tsx        → Unit tests for virtualisation window, cell rendering, spacers
 ├── TableBody.types.ts        → TableBodyProps (tableContainerRef)
-├── TableBody.stylex.ts       → Tbody total-height reservation + absolute row positioning helper
+├── TableBody.stylex.ts       → Placeholder (no active styles; spacers handle positioning)
 ├── index.ts                  → Barrel export
 │
 └── utils/
@@ -37,6 +48,8 @@ TableBody/
 | `useGetTableRowHeight`      | Row height for row virtualisation              |
 | `useGetTableOverscan`       | Extra rows above/below viewport                |
 | `useGetTableData`           | Full data array                                |
+| `useGetTableIsLoading`      | Initial loading state                          |
+| `useGetTableIsLoadingMore`  | Pagination loading state                       |
 
 ## Row Virtualisation Flow
 
@@ -52,10 +65,24 @@ graph TD
   os --> virt
   ref --> virt
 
-  virt --> range["{ startIndex, endIndex, offsetY, totalHeight }"]
-  range --> bodyHeight["tbody height = totalHeight"]
+  virt --> range["{ startIndex, endIndex, offsetY, bottomSpacerHeight, totalHeight }"]
+  range --> topSpacer["SpacerRow (height = offsetY)"]
   range --> rows["visibleRows = data.slice(start, end)"]
-  rows --> map["rows.map → TableRow(transform: translateY(...)) → cells"]
+  range --> bottomSpacer["SpacerRow (height = bottomSpacerHeight)"]
+  rows --> map["rows.map → TableRow → cells"]
+```
+
+## Render Structure
+
+```
+<tbody>
+  ├── SpacerRow (offsetY > 0)          ← top padding
+  ├── TableRow[startIndex]             ← normal document flow
+  ├── TableRow[startIndex + 1]
+  ├── ...
+  ├── TableRow[endIndex - 1]
+  └── SpacerRow (bottomSpacerHeight > 0) ← bottom padding
+</tbody>
 ```
 
 ## Column Rendering Flow
@@ -96,7 +123,4 @@ directly:
 - **Default render**: Passes `value`, `dataType`, `format`, `label` as props
 - Each cell receives `pinInfo` from the store's `pinnedColumnOffsets` slice
 - Width is resolved from `columnSizing[col.key]` or `col.minWidth`
-- The `<tbody>` reserves the virtual list height with `totalHeight`
-- Each rendered body row is absolutely positioned at its virtual `offsetY`
-- Each rendered body row is given the configured `rowHeight` so DOM height
-  matches the virtualization geometry used for scroll range
+- **SpacerRow** `colSpan` = `leftPinnedCols.length + centerCols.length + rightPinnedCols.length`
