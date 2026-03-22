@@ -4,12 +4,8 @@ import type {
   TableColumn,
 } from '@/components/Table/Table.types';
 
-import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
-
 /** Column groups produced by splitColumnsByPinning. */
 export type SplitColumnsByPinningResult<TData> = {
-  /** Widths (px) for each center column, matching the centerCols order. */
-  readonly centerColumnWidths: readonly number[];
   /** Non-pinned columns in their display order. */
   readonly centerCols: readonly TableColumn<TData>[];
   /** Left-pinned columns in their display order. */
@@ -20,7 +16,6 @@ export type SplitColumnsByPinningResult<TData> = {
 
 type SplitColumnsByPinningArgs<TData> = {
   readonly columnPinning: ColumnPinningState<TData>;
-  readonly columnSizing: ColumnSizingState<TData>;
   readonly effectiveColumns: readonly TableColumn<TData>[];
 };
 
@@ -33,7 +28,6 @@ type SplitColumnsByPinningArgs<TData> = {
  */
 export const splitColumnsByPinning = <TData = Record<string, unknown>>({
   columnPinning,
-  columnSizing,
   effectiveColumns,
 }: SplitColumnsByPinningArgs<TData>): SplitColumnsByPinningResult<TData> => {
   // Use a Set<string> for O(1) lookup; DataKey<unknown> narrows to 'actions'
@@ -52,9 +46,5 @@ export const splitColumnsByPinning = <TData = Record<string, unknown>>({
     (col) => !leftPinnedSet.has(col.key) && !rightPinnedSet.has(col.key),
   );
 
-  const centerColumnWidths = centerCols.map(
-    (col) => columnSizing[col.key] ?? col.minWidth ?? DEFAULT_MIN_COLUMN_WIDTH,
-  );
-
-  return { centerColumnWidths, centerCols, leftPinnedCols, rightPinnedCols };
+  return { centerCols, leftPinnedCols, rightPinnedCols };
 };

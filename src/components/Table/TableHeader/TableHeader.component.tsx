@@ -40,7 +40,7 @@ export const TableHeader = <TData extends Record<string, unknown>, TResponse>({
   });
 
   const { centerCols, leftPinnedCols, rightPinnedCols } = splitColumnsByPinning(
-    { columnPinning, columnSizing, effectiveColumns },
+    { columnPinning, effectiveColumns },
   );
 
   // const { endIndex, leftSpacerWidth, rightSpacerWidth, startIndex } =

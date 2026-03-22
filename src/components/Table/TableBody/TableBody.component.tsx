@@ -59,7 +59,7 @@ export const TableBody = ({ tableContainerRef }: TableBodyProps) => {
     });
 
   const { centerCols, leftPinnedCols, rightPinnedCols } = splitColumnsByPinning(
-    { columnPinning, columnSizing, effectiveColumns },
+    { columnPinning, effectiveColumns },
   );
 
   // const {
