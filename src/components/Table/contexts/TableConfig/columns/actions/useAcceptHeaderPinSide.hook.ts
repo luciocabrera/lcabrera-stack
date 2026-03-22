@@ -1,6 +1,7 @@
 import type {
   ColumnOrderState,
   ColumnPinningState,
+  ColumnSizingState,
   DataKey,
 } from '@/components/Table/Table.types';
 import type { PinConflictState, PinSide } from '@/types/ui.types';
@@ -13,7 +14,11 @@ import {
   getIsContiguousPin,
   resolveClosestEdgeSide,
 } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
-import { getEffectiveColumns } from '@/components/Table/utils';
+import {
+  getEffectiveColumns,
+  getPinnedColumnOffsets,
+  splitColumnsByPinning,
+} from '@/components/Table/utils';
 
 type AcceptHeaderPinSideArgs<TData> = {
   readonly columnKey: DataKey<TData>;
@@ -72,6 +77,19 @@ export const useAcceptHeaderPinSide = <TData>() => {
       columnVisibility: columnsState?.columnVisibility,
     });
 
+    const columnGroups = splitColumnsByPinning({
+      columnPinning: newPinning as ColumnPinningState<TData>,
+      effectiveColumns,
+    });
+
+    const columnSizing =
+      columnsState?.columnSizing ?? ({} as ColumnSizingState<TData>);
+    const pinnedColumnOffsets = getPinnedColumnOffsets({
+      columnPinning: newPinning as ColumnPinningState<TData>,
+      columnSizing,
+      effectiveColumns,
+    });
+
     persistTableState({
       persistenceKey,
       slice: 'columnPinning',
@@ -79,8 +97,10 @@ export const useAcceptHeaderPinSide = <TData>() => {
     });
 
     columnsStore.set({
+      columnGroups,
       columnPinning: newPinning as ColumnPinningState<TData>,
       effectiveColumns,
+      pinnedColumnOffsets,
     });
   };
 };

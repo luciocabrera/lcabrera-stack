@@ -1,7 +1,5 @@
 import { describe, expect, it } from 'vitest';
 
-import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
-
 import { splitColumnsByPinning } from './splitColumnsByPinning.util';
 
 describe('splitColumnsByPinning', () => {
@@ -13,18 +11,12 @@ describe('splitColumnsByPinning', () => {
     ];
     const result = splitColumnsByPinning({
       columnPinning: { left: [], right: [] },
-      columnSizing: {},
       effectiveColumns: columns,
     });
 
     expect(result.leftPinnedCols).toHaveLength(0);
     expect(result.rightPinnedCols).toHaveLength(0);
     expect(result.centerCols).toHaveLength(3);
-    expect(result.centerColumnWidths).toEqual([
-      DEFAULT_MIN_COLUMN_WIDTH,
-      DEFAULT_MIN_COLUMN_WIDTH,
-      DEFAULT_MIN_COLUMN_WIDTH,
-    ]);
   });
 
   it('separates left-pinned, center, and right-pinned columns', () => {
@@ -36,27 +28,25 @@ describe('splitColumnsByPinning', () => {
     ];
     const result = splitColumnsByPinning({
       columnPinning: { left: ['left1'], right: ['right1'] },
-      columnSizing: {},
       effectiveColumns: columns,
     });
 
     expect(result.leftPinnedCols.map((c) => c.key)).toEqual(['left1']);
     expect(result.rightPinnedCols.map((c) => c.key)).toEqual(['right1']);
     expect(result.centerCols.map((c) => c.key)).toEqual(['center1', 'center2']);
-    expect(result.centerColumnWidths).toEqual([100, 120]);
   });
 
-  it('uses columnSizing over minWidth for center column widths', () => {
+  it('handles columns that exist in pinning but not in effectiveColumns', () => {
     const columns = [
-      { key: 'a' as const, label: 'A', minWidth: 80 },
-      { key: 'b' as const, label: 'B', minWidth: 100 },
+      { key: 'a' as const, label: 'A' },
+      { key: 'b' as const, label: 'B' },
     ];
     const result = splitColumnsByPinning({
-      columnPinning: { left: [], right: [] },
-      columnSizing: { a: 200 },
+      columnPinning: { left: ['missing' as 'a'], right: [] },
       effectiveColumns: columns,
     });
 
-    expect(result.centerColumnWidths).toEqual([200, 100]);
+    expect(result.leftPinnedCols).toHaveLength(0);
+    expect(result.centerCols).toHaveLength(2);
   });
 });

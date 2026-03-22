@@ -6,6 +6,7 @@ import type {
 } from '@/components/Table/Table.types';
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { getPinnedColumnOffsets } from '@/components/Table/utils';
 
 type SetColumnSizingArgs<TData> = {
   readonly columnKey: DataKey<TData>;
@@ -20,7 +21,8 @@ export const useSetColumnSizing = <TData>() => {
 
   return useCallback(
     ({ columnKey, width }: SetColumnSizingArgs<TData>) => {
-      const current = (columnsStore.get()?.columnSizing ??
+      const columnsState = columnsStore.get();
+      const current = (columnsState?.columnSizing ??
         {}) as ColumnSizingState<TData>;
 
       let columnSizing: ColumnSizingState<TData>;
@@ -33,7 +35,13 @@ export const useSetColumnSizing = <TData>() => {
         columnSizing = { ...current, [columnKey]: width };
       }
 
-      columnsStore.set({ columnSizing });
+      const pinnedColumnOffsets = getPinnedColumnOffsets({
+        columnPinning: columnsState?.columnPinning ?? { left: [], right: [] },
+        columnSizing,
+        effectiveColumns: columnsState?.effectiveColumns ?? [],
+      });
+
+      columnsStore.set({ columnSizing, pinnedColumnOffsets });
     },
     [columnsStore],
   );

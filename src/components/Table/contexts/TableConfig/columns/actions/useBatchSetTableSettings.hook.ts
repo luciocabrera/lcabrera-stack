@@ -13,6 +13,8 @@ import { usePersistTableStateAction } from '@/components/Table/hooks';
 import {
   getEffectiveColumns,
   getNormalizedColumns,
+  getPinnedColumnOffsets,
+  splitColumnsByPinning,
 } from '@/components/Table/utils';
 import { serializeFiltersToURL, serializeSortingToURL } from '@/utils/urlState';
 
@@ -47,6 +49,17 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
     const normalizedColumns = getNormalizedColumns({
       columns: columnsState?.columns ?? [],
       sorting: settings.sorting,
+    });
+
+    const columnGroups = splitColumnsByPinning({
+      columnPinning: settings.columnPinning,
+      effectiveColumns,
+    });
+
+    const pinnedColumnOffsets = getPinnedColumnOffsets({
+      columnPinning: settings.columnPinning,
+      columnSizing: settings.columnSizing,
+      effectiveColumns,
     });
 
     persistTableState([
@@ -88,7 +101,13 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
       },
     ]);
 
-    columnsStore.set({ ...settings, effectiveColumns, normalizedColumns });
+    columnsStore.set({
+      ...settings,
+      columnGroups,
+      effectiveColumns,
+      normalizedColumns,
+      pinnedColumnOffsets,
+    });
     metaStore.set({ isTableSettingsOpen: false });
     dataStore.set({
       isLoadingMore: false,

@@ -14,6 +14,7 @@ utils/
 ├── getStorageKey.util.ts                → Build namespaced storage key
 ├── readPersistedStateFromCookie.util.ts  → SSR-safe cookie state read
 ├── serializeStateSlice.util.ts          → JSON serialize a state slice
+├── splitColumnsByPinning.util.ts        → Split columns into left/center/right groups
 ├── syncColumnOrderWithPinning.util.ts    → Pin-aware column reordering
 ├── writeStateSlice.util.ts              → Write to cookie/localStorage
 ├── persistence.constants.ts             → Storage key constants

@@ -20,6 +20,15 @@ export type ColumnFiltersState<TData = Record<string, unknown>> = Record<
 >;
 
 /**
+ * Pre-computed column groups split by pinning side, stored in columnsStore.
+ */
+export type ColumnGroupsState<TData = Record<string, unknown>> = {
+  readonly centerCols: readonly TableColumn<TData>[];
+  readonly leftPinnedCols: readonly TableColumn<TData>[];
+  readonly rightPinnedCols: readonly TableColumn<TData>[];
+};
+
+/**
  * Column order state - array of column keys in display order
  */
 export type ColumnOrderState<TData = Record<string, unknown>> =
@@ -88,6 +97,14 @@ export type PinnedColumnInfo = {
   readonly offset: number;
   readonly side: 'left' | 'right';
 };
+
+/**
+ * Pre-computed pinned column offset map stored in columnsStore.
+ */
+export type PinnedColumnOffsetsState<TData = Record<string, unknown>> = Record<
+  DataKey<TData>,
+  PinnedColumnInfo
+>;
 
 /**
  * Sorting state for a single column
@@ -163,6 +180,8 @@ export type TableColumnFormat = {
 export type TableColumnsState<TData = Record<string, unknown>> = {
   /** Column filters state */
   readonly columnFilters: ColumnFiltersState<TData>;
+  /** Pre-computed column groups split by pinning side */
+  readonly columnGroups: ColumnGroupsState<TData>;
   /** Column order state */
   readonly columnOrder: ColumnOrderState<TData>;
   /** Column pinning state */
@@ -174,6 +193,8 @@ export type TableColumnsState<TData = Record<string, unknown>> = {
   readonly columnVisibility: ColumnVisibilityState<TData>;
   readonly effectiveColumns: TableColumn<TData>[];
   readonly normalizedColumns: NormalizedColumnsState<TData>;
+  /** Pre-computed pinned column offset map */
+  readonly pinnedColumnOffsets: PinnedColumnOffsetsState<TData>;
   /** Sorting state */
   readonly sorting: SortingState<TData>;
   /** Keys of columns marked as static (computed once from columns) */

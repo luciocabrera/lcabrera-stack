@@ -12,6 +12,8 @@ import { applyPin } from '@/components/Table/TableSettingsDrawer/ColumnOrderSect
 import {
   getEffectiveColumns,
   getNormalizedColumns,
+  getPinnedColumnOffsets,
+  splitColumnsByPinning,
   syncColumnOrderWithPinning,
 } from '@/components/Table/utils';
 import { serializeFiltersToURL, serializeSortingToURL } from '@/utils/urlState';
@@ -120,6 +122,17 @@ export const useBatchSetColumnSettings = () => {
       columnVisibility: columnsState?.columnVisibility,
     });
 
+    const columnGroups = splitColumnsByPinning({
+      columnPinning: newPinning,
+      effectiveColumns,
+    });
+
+    const pinnedColumnOffsets = getPinnedColumnOffsets({
+      columnPinning: newPinning,
+      columnSizing: newColumnSizing,
+      effectiveColumns,
+    });
+
     persistTableState([
       {
         persistenceKey,
@@ -154,11 +167,13 @@ export const useBatchSetColumnSettings = () => {
 
     columnsStore.set({
       columnFilters: newColumnFilters,
+      columnGroups,
       columnOrder: newColumnOrder,
       columnPinning: newPinning,
       columnSizing: newColumnSizing,
       effectiveColumns,
       normalizedColumns,
+      pinnedColumnOffsets,
       sorting: newSorting,
     });
     metaStore.set({ isColumnSettingsOpen: false });

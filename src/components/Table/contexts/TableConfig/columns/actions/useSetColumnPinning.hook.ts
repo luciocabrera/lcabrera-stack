@@ -1,11 +1,16 @@
 import type {
   ColumnPinningState,
+  ColumnSizingState,
   DataKey,
 } from '@/components/Table/Table.types';
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { usePersistTableStateAction } from '@/components/Table/hooks';
-import { getEffectiveColumns } from '@/components/Table/utils';
+import {
+  getEffectiveColumns,
+  getPinnedColumnOffsets,
+  splitColumnsByPinning,
+} from '@/components/Table/utils';
 
 type SetColumnPinningArgs<TData> = {
   readonly columnKey: DataKey<TData>;
@@ -43,12 +48,30 @@ export const useSetColumnPinning = <TData>() => {
       columnVisibility: columnsState?.columnVisibility,
     });
 
+    const columnGroups = splitColumnsByPinning({
+      columnPinning: newPinning,
+      effectiveColumns,
+    });
+
+    const columnSizing =
+      columnsState?.columnSizing ?? ({} as ColumnSizingState<TData>);
+    const pinnedColumnOffsets = getPinnedColumnOffsets<TData>({
+      columnPinning: newPinning,
+      columnSizing,
+      effectiveColumns,
+    });
+
     persistTableState({
       persistenceKey,
       slice: 'columnPinning',
       valueSlice: newPinning,
     });
 
-    columnsStore.set({ columnPinning: newPinning, effectiveColumns });
+    columnsStore.set({
+      columnGroups,
+      columnPinning: newPinning,
+      effectiveColumns,
+      pinnedColumnOffsets,
+    });
   };
 };

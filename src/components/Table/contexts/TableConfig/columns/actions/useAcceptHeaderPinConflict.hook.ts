@@ -1,6 +1,7 @@
 import type {
   ColumnOrderState,
   ColumnPinningState,
+  ColumnSizingState,
   DataKey,
 } from '@/components/Table/Table.types';
 import type { PinConflictResolution } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
@@ -12,7 +13,11 @@ import {
   buildAllOrderedColumns,
   insertAdjacentToPinnedGroup,
 } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
-import { getEffectiveColumns } from '@/components/Table/utils';
+import {
+  getEffectiveColumns,
+  getPinnedColumnOffsets,
+  splitColumnsByPinning,
+} from '@/components/Table/utils';
 
 type AcceptHeaderPinConflictArgs<TData> = {
   readonly columnKey: DataKey<TData>;
@@ -118,9 +123,24 @@ export const useAcceptHeaderPinConflict = <TData>() => {
       columnVisibility: columnsState?.columnVisibility,
     });
 
-    const updates: Record<string, unknown> = {
+    const columnGroups = splitColumnsByPinning({
       columnPinning: newPinning,
       effectiveColumns,
+    });
+
+    const columnSizing =
+      columnsState?.columnSizing ?? ({} as ColumnSizingState<TData>);
+    const pinnedColumnOffsets = getPinnedColumnOffsets({
+      columnPinning: newPinning,
+      columnSizing,
+      effectiveColumns,
+    });
+
+    const updates: Record<string, unknown> = {
+      columnGroups,
+      columnPinning: newPinning,
+      effectiveColumns,
+      pinnedColumnOffsets,
     };
 
     if (newOrder) {

@@ -1,15 +1,13 @@
 # TableHeader Architecture
 
-Renders `<thead>` with a single header row. Maps effective columns to
-`TableHeaderCell` instances with computed pinned offsets. Applies column
-virtualisation so only the visible center columns are rendered, with
-`SpacerCell` spacers for hidden columns.
+Renders `<thead>` with a single header row. Uses pre-computed column groups
+and pinned-column offsets from the columns store via dedicated selectors.
 
 ## File Structure
 
 ```
 TableHeader/
-├── TableHeader.component.tsx   → <thead> → TableRow → TableHeaderCell[] (column-virtualised)
+├── TableHeader.component.tsx   → <thead> → TableRow → TableHeaderCell[]
 ├── TableHeader.types.ts        → TableHeaderProps extends <thead>
 ├── TableHeader.stylex.ts       → Sticky header positioning
 └── index.ts                    → Barrel export
@@ -17,41 +15,31 @@ TableHeader/
 
 ## Context Dependencies
 
-| Selector                    | Purpose                              |
-| --------------------------- | ------------------------------------ |
-| `useGetEffectiveColumns`    | Ordered/filtered column list         |
-| `useGetColumnPinning`       | Pinning state for offset calc        |
-| `useGetColumnSizing`        | Column widths for offset calc        |
-| `useGetTableColumnOverscan` | Extra columns left/right of viewport |
-| `useTableContainerRef`      | Shared scroll container ref          |
+| Selector                    | Purpose                                        |
+| --------------------------- | ---------------------------------------------- |
+| `useGetColumnGroups`        | Pre-split column groups (left, center, right)  |
+| `useGetPinnedColumnOffsets` | Pre-computed sticky offsets for pinned columns |
 
 ## Render Flow
 
 ```mermaid
 graph TD
-  TH["TableHeader"] --> EC["useGetEffectiveColumns()"]
-  TH --> CP["useGetColumnPinning()"]
-  TH --> CS["useGetColumnSizing()"]
-  TH --> CO["useGetTableColumnOverscan()"]
-  TH --> CR["useTableContainerRef()"]
-  CP --> Offsets["getPinnedColumnOffsets(pinning, sizing, columns)"]
-  CS --> Offsets
-  EC --> Offsets
+  TH["TableHeader"] --> CG["useGetColumnGroups()"]
+  TH --> PO["useGetPinnedColumnOffsets()"]
+  CG --> groups["{ leftPinnedCols, centerCols, rightPinnedCols }"]
+  PO --> offsets["Record‹key, PinnedColumnInfo›"]
 
-  EC --> split["split into leftPinned / center / rightPinned"]
-  split --> widths["centerColumnWidths[]"]
-  widths --> cvirt["useColumnVirtualization({ columnWidths, containerRef, overscan })"]
-  CO --> cvirt
-  CR --> cvirt
-
-  cvirt --> colRange["{ startIndex, endIndex, leftSpacerWidth, rightSpacerWidth }"]
-
-  colRange --> leftSpacer["SpacerCell (leftSpacerWidth)?"]
-  colRange --> center["centerCols.slice(start, end) → TableHeaderCell[]"]
-  colRange --> rightSpacer["SpacerCell (rightSpacerWidth)?"]
+  groups --> left["leftPinnedCols.map → TableHeaderCell[]"]
+  groups --> center["centerCols.map → TableHeaderCell[]"]
+  groups --> right["rightPinnedCols.map → TableHeaderCell[]"]
 
   TH --> Row["TableRow (isHeader)"]
-  Row --> cells["[leftPinned] | [SpacerCell?] | [center] | [SpacerCell?] | [rightPinned]"]
+  Row --> cells["[leftPinned] | [center] | [rightPinned]"]
 ```
+
+Column groups and pinned offsets are derived state stored in `columnsStore`.
+They are recomputed by store actions whenever `effectiveColumns`,
+`columnPinning`, or `columnSizing` change, so the component reads them
+directly without any per-render calculation.
 
 Each `TableHeaderCell` receives `columnKey`, `hasSettings`, and `pinInfo`.

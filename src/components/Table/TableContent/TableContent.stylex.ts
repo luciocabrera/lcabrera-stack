@@ -22,6 +22,7 @@ export const styles = stylex.create({
     flex: '1',
     overflow: 'hidden',
     boxShadow: shadows.sm,
+    contain: 'content',
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
@@ -30,6 +31,7 @@ export const styles = stylex.create({
   container: {
     flex: '1',
     overflow: 'auto',
+    contain: 'layout style',
     position: 'relative',
     scrollbarColor: `${colors.borderSecondary} transparent`,
     scrollbarWidth: 'thin',

@@ -1,9 +1,9 @@
 import * as stylex from '@stylexjs/stylex';
 
 import {
-  useGetColumnPinning,
+  useGetColumnGroups,
   useGetColumnSizing,
-  useGetEffectiveColumns,
+  useGetPinnedColumnOffsets,
 } from '@/components/Table/contexts/TableConfig/columns/selectors';
 import {
   useGetTableOverscan,
@@ -11,10 +11,6 @@ import {
 } from '@/components/Table/contexts/TableConfig/meta/selectors';
 import { SpacerRow } from '@/components/Table/SpacerRow';
 import { TableRow } from '@/components/Table/TableRow';
-import {
-  getPinnedColumnOffsets,
-  splitColumnsByPinning,
-} from '@/components/Table/utils';
 import { useVirtualization } from '@/hooks';
 import { useRenderTracker } from '@/utils/performance';
 
@@ -27,21 +23,12 @@ import { createRenderTableBodyCell, renderTableBodyColumnGroup } from './utils';
 export const TableBody = ({ tableContainerRef }: TableBodyProps) => {
   useRenderTracker({ componentName: 'TableBody' });
 
-  const columnPinning = useGetColumnPinning();
   const columnSizing = useGetColumnSizing();
-  const effectiveColumns = useGetEffectiveColumns();
+  const { centerCols, leftPinnedCols, rightPinnedCols } = useGetColumnGroups();
+  const pinnedOffsets = useGetPinnedColumnOffsets();
   const data = useGetTableData();
   const rowHeight = useGetTableRowHeight();
   const overscan = useGetTableOverscan();
-
-  const pinnedOffsets = getPinnedColumnOffsets({
-    columnPinning,
-    columnSizing,
-    effectiveColumns,
-  });
-  const { centerCols, leftPinnedCols, rightPinnedCols } = splitColumnsByPinning(
-    { columnPinning, effectiveColumns },
-  );
 
   const { bottomSpacerHeight, endIndex, offsetY, startIndex, totalHeight } =
     useVirtualization({

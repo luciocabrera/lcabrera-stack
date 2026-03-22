@@ -8,7 +8,9 @@ import type {
 import {
   getEffectiveColumns,
   getNormalizedColumns,
+  getPinnedColumnOffsets,
   getStaticColumnKeys,
+  splitColumnsByPinning,
 } from '@/components/Table/utils';
 
 type GetInitialTableStateArgs<TData> = Partial<TableColumnsState<TData>>;
@@ -36,8 +38,20 @@ export const getInitialColumnsState = <TData>({
 
   const staticKeys = getStaticColumnKeys<TData>(columns);
 
+  const columnGroups = splitColumnsByPinning<TData>({
+    columnPinning,
+    effectiveColumns,
+  });
+
+  const pinnedColumnOffsets = getPinnedColumnOffsets<TData>({
+    columnPinning,
+    columnSizing,
+    effectiveColumns,
+  });
+
   return {
     columnFilters,
+    columnGroups,
     columnOrder,
     columnPinning,
     columns,
@@ -45,6 +59,7 @@ export const getInitialColumnsState = <TData>({
     columnVisibility,
     effectiveColumns,
     normalizedColumns,
+    pinnedColumnOffsets,
     sorting,
     staticKeys,
   };

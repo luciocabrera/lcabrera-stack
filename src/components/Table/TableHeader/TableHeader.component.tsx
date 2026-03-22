@@ -1,15 +1,9 @@
 import * as stylex from '@stylexjs/stylex';
 
 import {
-  useGetColumnPinning,
-  useGetColumnSizing,
-  useGetEffectiveColumns,
+  useGetColumnGroups,
+  useGetPinnedColumnOffsets,
 } from '@/components/Table/contexts/TableConfig/columns/selectors';
-
-import {
-  getPinnedColumnOffsets,
-  splitColumnsByPinning,
-} from '@/components/Table/utils';
 
 import { useRenderTracker } from '@/utils/performance';
 
@@ -25,19 +19,8 @@ export const TableHeader = <TData extends Record<string, unknown>, TResponse>({
 }: TableHeaderProps<TData, TResponse>) => {
   useRenderTracker({ componentName: 'TableHeader' });
 
-  const effectiveColumns = useGetEffectiveColumns();
-  const columnPinning = useGetColumnPinning();
-  const columnSizing = useGetColumnSizing();
-
-  const pinnedOffsets = getPinnedColumnOffsets({
-    columnPinning,
-    columnSizing,
-    effectiveColumns,
-  });
-
-  const { centerCols, leftPinnedCols, rightPinnedCols } = splitColumnsByPinning(
-    { columnPinning, effectiveColumns },
-  );
+  const pinnedOffsets = useGetPinnedColumnOffsets();
+  const { centerCols, leftPinnedCols, rightPinnedCols } = useGetColumnGroups();
 
   return (
     <thead

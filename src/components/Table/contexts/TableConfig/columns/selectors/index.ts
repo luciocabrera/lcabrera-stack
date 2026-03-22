@@ -1,4 +1,5 @@
 export { useGetColumnFilters } from './useGetColumnFilters.hook';
+export { useGetColumnGroups } from './useGetColumnGroups.hook';
 export { useGetColumnOrder } from './useGetColumnOrder.hook';
 export { useGetColumnPinning } from './useGetColumnPinning.hook';
 export { useGetColumns } from './useGetColumns.hook';
@@ -7,4 +8,5 @@ export { useGetColumnVisibility } from './useGetColumnVisibility.hook';
 export { useGetEffectiveColumns } from './useGetEffectiveColumns.hook';
 export { useGetNormalizedColumn } from './useGetNormalizedColumn.hook';
 export { useGetNormalizedColumns } from './useGetNormalizedColumns.hook';
+export { useGetPinnedColumnOffsets } from './useGetPinnedColumnOffsets.hook';
 export { useGetStaticColumnKeys } from './useGetStaticColumnKeys.hook';
