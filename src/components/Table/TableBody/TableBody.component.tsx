@@ -6,7 +6,7 @@ import {
   useGetEffectiveColumns,
 } from '@/components/Table/contexts/TableConfig/columns/selectors';
 import {
-  useGetTableColumnOverscan,
+  // useGetTableColumnOverscan,
   useGetTableOverscan,
   useGetTableRowHeight,
 } from '@/components/Table/contexts/TableConfig/meta/selectors';
@@ -16,18 +16,19 @@ import {
   getPinnedColumnOffsets,
   splitColumnsByPinning,
 } from '@/components/Table/utils';
-import { useColumnVirtualization, useVirtualization } from '@/hooks';
+// import { useColumnVirtualization } from '@/hooks';
+import { useVirtualization } from '@/hooks';
 import { useRenderTracker } from '@/utils/performance';
 
 import type { TableBodyProps } from './TableBody.types';
 
 import { useGetTableData } from '../contexts/TableData/data/selectors';
-import { useTableContainerRef } from '../contexts/TableWrapper';
-import { SpacerCell } from '../SpacerCell';
+// import { useTableContainerRef } from '../contexts/TableWrapper';
+// import { SpacerCell } from '../SpacerCell';
 import { styles } from './TableBody.stylex';
 import {
   createRenderTableBodyCell,
-  getTotalVisibleColumnCount,
+  // getTotalVisibleColumnCount,
   renderTableBodyColumnGroup,
 } from './utils/index';
 
@@ -46,8 +47,8 @@ export const TableBody = ({ tableContainerRef }: TableBodyProps) => {
   });
   const rowHeight = useGetTableRowHeight();
   const overscan = useGetTableOverscan();
-  const columnOverscan = useGetTableColumnOverscan();
-  const containerRef = useTableContainerRef();
+  // const columnOverscan = useGetTableColumnOverscan();
+  // const containerRef = useTableContainerRef();
 
   const { bottomSpacerHeight, endIndex, offsetY, startIndex, totalHeight } =
     useVirtualization({
@@ -57,30 +58,26 @@ export const TableBody = ({ tableContainerRef }: TableBodyProps) => {
       totalItems: data.length,
     });
 
-  const { centerCols, centerColumnWidths, leftPinnedCols, rightPinnedCols } =
-    splitColumnsByPinning({ columnPinning, columnSizing, effectiveColumns });
+  const { centerCols, leftPinnedCols, rightPinnedCols } = splitColumnsByPinning(
+    { columnPinning, columnSizing, effectiveColumns },
+  );
 
-  const {
-    endIndex: colEndIndex,
-    leftSpacerWidth,
-    rightSpacerWidth,
-    startIndex: colStartIndex,
-  } = useColumnVirtualization({
-    columnWidths: centerColumnWidths,
-    containerRef,
-    overscan: columnOverscan,
-  });
+  // const {
+  //   endIndex: colEndIndex,
+  //   leftSpacerWidth,
+  //   rightSpacerWidth,
+  //   startIndex: colStartIndex,
+  // } = useColumnVirtualization({
+  //   columnWidths: centerColumnWidths,
+  //   containerRef,
+  //   overscan: columnOverscan,
+  // });
 
-  const visibleCenterCols = centerCols.slice(colStartIndex, colEndIndex);
+  // const visibleCenterCols = centerCols.slice(colStartIndex, colEndIndex);
   const visibleRows = data.slice(startIndex, endIndex);
   const totalRows = data.length;
-  const totalVisibleColCount = getTotalVisibleColumnCount({
-    leftPinnedCount: leftPinnedCols.length,
-    leftSpacerWidth,
-    rightPinnedCount: rightPinnedCols.length,
-    rightSpacerWidth,
-    visibleCenterCount: visibleCenterCols.length,
-  });
+  const totalVisibleColCount =
+    leftPinnedCols.length + centerCols.length + rightPinnedCols.length;
 
   const renderBodyCell = createRenderTableBodyCell({
     columnSizing,
@@ -102,13 +99,11 @@ export const TableBody = ({ tableContainerRef }: TableBodyProps) => {
               renderCell: renderBodyCell,
               rowData,
             })}
-            {leftSpacerWidth > 0 && <SpacerCell width={leftSpacerWidth} />}
             {renderTableBodyColumnGroup({
-              columns: visibleCenterCols,
+              columns: centerCols,
               renderCell: renderBodyCell,
               rowData,
             })}
-            {rightSpacerWidth > 0 && <SpacerCell width={rightSpacerWidth} />}
             {renderTableBodyColumnGroup({
               columns: rightPinnedCols,
               renderCell: renderBodyCell,
