@@ -69,12 +69,12 @@ graph TD
   TB --> PO["useGetPinnedColumnOffsets()"]
 
   CG --> groups["{ leftPinnedCols, centerCols, rightPinnedCols }"]
-  CS --> renderer["createRenderTableBodyCell({ columnSizing, pinnedOffsets })"]
-  PO --> renderer
+  CS --> cell["renderBodyCell(col) → ‹TableBodyCell›"]
+  PO --> cell
 
-  renderer --> left["renderTableBodyColumnGroup(leftPinnedCols)"]
-  renderer --> center["renderTableBodyColumnGroup(centerCols)"]
-  renderer --> right["renderTableBodyColumnGroup(rightPinnedCols)"]
+  groups --> left["leftPinnedCols.map(col ⇒ renderBodyCell(col))"]
+  groups --> center["centerCols.map(col ⇒ renderBodyCell(col))"]
+  groups --> right["rightPinnedCols.map(col ⇒ renderBodyCell(col))"]
 ```
 
 Column groups and pinned offsets are derived state stored in `columnsStore`.
@@ -90,14 +90,11 @@ directly without any per-render calculation.
 
 ## Cell Rendering
 
-For each visible row, every rendered column produces a `TableBodyCell`:
+The body renders cells using the same declarative `.map()` → JSX pattern
+as the header. A `renderBodyCell` helper per row returns `<TableBodyCell>`
+directly:
 
-- **Custom render**: If `column.render` is defined, call it with row data
-- **Default render**: Pass `value`, `dataType`, `format`, `label` to auto-format
-- Pure cell descriptor data is derived in `utils/buildTableBodyCellDescriptor.util.ts`
-- Cell rendering callback creation is extracted to `utils/createRenderTableBodyCell.util.ts`
-- Column-group mapping is handled by `utils/renderTableBodyColumnGroup.util.ts`
-- A shared internal renderer maps left-pinned, center, and right-pinned
-  groups to `TableBodyCell` to keep JSX props consistent across groups.
-
-Each cell receives computed `pinInfo` from the store's `pinnedColumnOffsets` slice.
+- **Custom render**: If `column.render` is defined, passes children to `<TableBodyCell>`
+- **Default render**: Passes `value`, `dataType`, `format`, `label` as props
+- Each cell receives `pinInfo` from the store's `pinnedColumnOffsets` slice
+- Width is resolved from `columnSizing[col.key]` or `col.minWidth`
