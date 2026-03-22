@@ -5,18 +5,16 @@ import {
   useGetColumnSizing,
   useGetEffectiveColumns,
 } from '@/components/Table/contexts/TableConfig/columns/selectors';
-// import { useGetTableColumnOverscan } from '@/components/Table/contexts/TableConfig/meta/selectors';
-// import { useTableContainerRef } from '@/components/Table/contexts/TableWrapper';
+
 import {
   getPinnedColumnOffsets,
   splitColumnsByPinning,
 } from '@/components/Table/utils';
-// import { useColumnVirtualization } from '@/hooks';
+
 import { useRenderTracker } from '@/utils/performance';
 
 import type { TableHeaderProps } from './TableHeader.types';
 
-// import { SpacerCell } from '../SpacerCell';
 import { TableHeaderCell } from '../TableHeaderCell';
 import { TableRow } from '../TableRow';
 import { tableHeaderStyles } from './TableHeader.stylex';
@@ -30,8 +28,6 @@ export const TableHeader = <TData extends Record<string, unknown>, TResponse>({
   const effectiveColumns = useGetEffectiveColumns();
   const columnPinning = useGetColumnPinning();
   const columnSizing = useGetColumnSizing();
-  // const columnOverscan = useGetTableColumnOverscan();
-  // const containerRef = useTableContainerRef();
 
   const pinnedOffsets = getPinnedColumnOffsets({
     columnPinning,
@@ -42,15 +38,6 @@ export const TableHeader = <TData extends Record<string, unknown>, TResponse>({
   const { centerCols, leftPinnedCols, rightPinnedCols } = splitColumnsByPinning(
     { columnPinning, effectiveColumns },
   );
-
-  // const { endIndex, leftSpacerWidth, rightSpacerWidth, startIndex } =
-  //   useColumnVirtualization({
-  //     columnWidths: centerColumnWidths,
-  //     containerRef,
-  //     overscan: columnOverscan,
-  //   });
-
-  // const visibleCenterCols = centerCols.slice(startIndex, endIndex);
 
   return (
     <thead
