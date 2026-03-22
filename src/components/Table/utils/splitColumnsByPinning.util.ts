@@ -1,6 +1,5 @@
 import type {
   ColumnPinningState,
-  ColumnSizingState,
   TableColumn,
 } from '@/components/Table/Table.types';
 
