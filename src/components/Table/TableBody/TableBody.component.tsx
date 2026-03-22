@@ -14,8 +14,11 @@ import { TableRow } from '@/components/Table/TableRow';
 import { useVirtualization } from '@/hooks';
 import { logger } from '@/utils/logger';
 import { useRenderTracker } from '@/utils/performance';
+import * as stylex from '@stylexjs/stylex';
 
 import type { TableBodyProps } from './TableBody.types';
+
+import { styles } from './TableBody.stylex';
 
 import {
   useGetTableData,
@@ -57,7 +60,7 @@ export const TableBody = ({ tableContainerRef }: TableBodyProps) => {
     leftPinnedCols.length + centerCols.length + rightPinnedCols.length;
 
   return (
-    <tbody data-testid='table-body'>
+    <tbody data-testid='table-body' {...stylex.props(styles.body(totalHeight))}>
       {offsetY > 0 && <SpacerRow colSpan={totalColSpan} height={offsetY} />}
       {visibleRows.map((row, index) => {
         const rowIndex = startIndex + index;
