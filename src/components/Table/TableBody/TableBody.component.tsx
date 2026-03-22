@@ -23,11 +23,7 @@ import type { TableBodyProps } from './TableBody.types';
 
 import { useGetTableData } from '../contexts/TableData/data/selectors';
 import { styles } from './TableBody.stylex';
-import {
-  createRenderTableBodyCell,
-  // getTotalVisibleColumnCount,
-  renderTableBodyColumnGroup,
-} from './utils/index';
+import { createRenderTableBodyCell, renderTableBodyColumnGroup } from './utils';
 
 export const TableBody = ({ tableContainerRef }: TableBodyProps) => {
   useRenderTracker({ componentName: 'TableBody' });
@@ -36,14 +32,17 @@ export const TableBody = ({ tableContainerRef }: TableBodyProps) => {
   const columnSizing = useGetColumnSizing();
   const effectiveColumns = useGetEffectiveColumns();
   const data = useGetTableData();
+  const rowHeight = useGetTableRowHeight();
+  const overscan = useGetTableOverscan();
 
   const pinnedOffsets = getPinnedColumnOffsets({
     columnPinning,
     columnSizing,
     effectiveColumns,
   });
-  const rowHeight = useGetTableRowHeight();
-  const overscan = useGetTableOverscan();
+  const { centerCols, leftPinnedCols, rightPinnedCols } = splitColumnsByPinning(
+    { columnPinning, effectiveColumns },
+  );
 
   const { bottomSpacerHeight, endIndex, offsetY, startIndex, totalHeight } =
     useVirtualization({
@@ -52,10 +51,6 @@ export const TableBody = ({ tableContainerRef }: TableBodyProps) => {
       overscan,
       totalItems: data.length,
     });
-
-  const { centerCols, leftPinnedCols, rightPinnedCols } = splitColumnsByPinning(
-    { columnPinning, effectiveColumns },
-  );
 
   const visibleRows = data.slice(startIndex, endIndex);
   const totalRows = data.length;
