@@ -13,10 +13,9 @@ export const useResetColumnFilter = () => {
   const { dataStore } = useTableDataContextValue();
   const persistTableState = usePersistTableStateAction();
 
-  const columnsState = columnsStore.get();
-  const persistenceKey = metaStore.get()?.persistenceKey ?? '';
-
   return (columnKey: string) => {
+    const columnsState = columnsStore.get();
+    const persistenceKey = metaStore.get()?.persistenceKey ?? '';
     const current = columnsState?.columnFilters ?? {};
     const { [columnKey]: unusedFilter, ...rest } = current;
     void unusedFilter; // Explicitly mark as intentionally unused

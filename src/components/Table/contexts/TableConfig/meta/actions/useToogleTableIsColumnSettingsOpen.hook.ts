@@ -2,9 +2,10 @@ import { useTableConfigContextValue } from '../../useTableConfigContextValue.hoo
 
 export const useToogleTableIsColumnSettingsOpen = () => {
   const { metaStore } = useTableConfigContextValue();
-  const metaState = metaStore.get();
 
   return () => {
+    const metaState = metaStore.get();
+
     metaStore.set({
       isColumnSettingsOpen: !metaState?.isColumnSettingsOpen,
     });

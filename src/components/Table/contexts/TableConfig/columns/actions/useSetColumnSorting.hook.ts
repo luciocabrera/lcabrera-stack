@@ -13,12 +13,11 @@ export const useSetColumnSorting = <TData>() => {
   const { dataStore } = useTableDataContextValue();
   const persistTableState = usePersistTableStateAction();
 
-  const persistenceKey = metaStore.get()?.persistenceKey ?? '';
-
   return ({ columnKey, direction }: Sorting<TData>) => {
     if (columnKey === 'actions') return;
 
     const columnsState = columnsStore.get();
+    const persistenceKey = metaStore.get()?.persistenceKey ?? '';
     const sorting = columnsState?.sorting ?? [];
     const currentSort = sorting.find((s) => s.columnKey === columnKey);
     const hasCurrentSort = currentSort !== undefined;

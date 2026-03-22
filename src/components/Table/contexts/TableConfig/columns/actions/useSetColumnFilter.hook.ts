@@ -25,10 +25,9 @@ export const useSetColumnFilter = <TData>() => {
   const { dataStore } = useTableDataContextValue();
   const persistTableState = usePersistTableStateAction();
 
-  const columnsState = columnsStore.get();
-  const persistenceKey = metaStore.get()?.persistenceKey ?? '';
-
   return ({ columnKey, filter }: SetColumnFilterArgs<TData>) => {
+    const columnsState = columnsStore.get();
+    const persistenceKey = metaStore.get()?.persistenceKey ?? '';
     const current = (columnsState?.columnFilters ??
       {}) as ColumnFiltersState<TData>;
     let columnFilters: ColumnFiltersState<TData>;
