@@ -16,15 +16,12 @@ import {
   getPinnedColumnOffsets,
   splitColumnsByPinning,
 } from '@/components/Table/utils';
-// import { useColumnVirtualization } from '@/hooks';
 import { useVirtualization } from '@/hooks';
 import { useRenderTracker } from '@/utils/performance';
 
 import type { TableBodyProps } from './TableBody.types';
 
 import { useGetTableData } from '../contexts/TableData/data/selectors';
-// import { useTableContainerRef } from '../contexts/TableWrapper';
-// import { SpacerCell } from '../SpacerCell';
 import { styles } from './TableBody.stylex';
 import {
   createRenderTableBodyCell,
@@ -47,8 +44,6 @@ export const TableBody = ({ tableContainerRef }: TableBodyProps) => {
   });
   const rowHeight = useGetTableRowHeight();
   const overscan = useGetTableOverscan();
-  // const columnOverscan = useGetTableColumnOverscan();
-  // const containerRef = useTableContainerRef();
 
   const { bottomSpacerHeight, endIndex, offsetY, startIndex, totalHeight } =
     useVirtualization({
@@ -62,18 +57,6 @@ export const TableBody = ({ tableContainerRef }: TableBodyProps) => {
     { columnPinning, effectiveColumns },
   );
 
-  // const {
-  //   endIndex: colEndIndex,
-  //   leftSpacerWidth,
-  //   rightSpacerWidth,
-  //   startIndex: colStartIndex,
-  // } = useColumnVirtualization({
-  //   columnWidths: centerColumnWidths,
-  //   containerRef,
-  //   overscan: columnOverscan,
-  // });
-
-  // const visibleCenterCols = centerCols.slice(colStartIndex, colEndIndex);
   const visibleRows = data.slice(startIndex, endIndex);
   const totalRows = data.length;
   const totalVisibleColCount =
