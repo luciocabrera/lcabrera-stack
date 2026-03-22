@@ -18,7 +18,7 @@ Implement a **ref-based prefetch buffer** in `useFetchMoreData`, controlled by a
 
 ### Key Design Choices
 
-- **Opt-in via `enablePrefetch`** (default `false`) — zero behavior change for existing consumers.
+- **Opt-in via `enablePrefetch`** (default `true`) — zero behavior change for existing consumers.
 - **Ref-based cache** (not store-based) — prefetched data is an invisible cache that should not trigger re-renders.
 - **Uses existing `onLoadMore` callback** — the prefetch calls the same callback provided by the route. This keeps the interface Worker-ready: swapping `onLoadMore` to delegate to a Worker later changes nothing in the hook.
 - **`startTransition` for data append** — wraps the `dataStore.set()` call for combined data in `startTransition()` so React treats the re-render as non-urgent, keeping scroll and loading animations smooth.
