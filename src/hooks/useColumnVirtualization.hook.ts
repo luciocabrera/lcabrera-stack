@@ -2,6 +2,11 @@ import type { RefObject } from 'react';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 
+import {
+  DEFAULT_COLUMN_OVERSCAN,
+  DEFAULT_CONTAINER_WIDTH,
+} from '@/constants/virtualization.constants';
+
 import { findFirstOutOfViewIndex, findFirstVisibleIndex } from './utils';
 
 /** Arguments for the useColumnVirtualization hook. */
@@ -43,8 +48,8 @@ export type UseColumnVirtualizationReturn = {
 export const useColumnVirtualization = ({
   columnWidths,
   containerRef,
-  defaultContainerWidth = 1920,
-  overscan = 12,
+  defaultContainerWidth = DEFAULT_CONTAINER_WIDTH,
+  overscan = DEFAULT_COLUMN_OVERSCAN,
 }: UseColumnVirtualizationArgs): UseColumnVirtualizationReturn => {
   const [scrollLeft, setScrollLeft] = useState(0);
   const [containerWidth, setContainerWidth] = useState(() => {

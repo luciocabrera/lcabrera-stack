@@ -1,4 +1,4 @@
-import { CONFIG } from '@/constants/api.constants';
+import { API_SERVER_PORT, CONFIG } from '@/constants/api.constants';
 
 /**
  * Check if hostname is a local/private IP address
@@ -72,8 +72,8 @@ export const getApiBaseUrl = (requestUrl?: string): string => {
       return CONFIG.localhost.apiHost;
     }
 
-    // For private IPs, use the same IP but with API port 3001
-    return `${protocol}//${hostname}:3001/api`;
+    // For private IPs, use the same IP but with API server port
+    return `${protocol}//${hostname}:${API_SERVER_PORT}/api`;
   }
 
   // Use appropriate config based on environment

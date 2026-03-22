@@ -2,6 +2,11 @@ import type { RefObject } from 'react';
 
 import { useEffect, useState } from 'react';
 
+import {
+  DEFAULT_CONTAINER_HEIGHT,
+  DEFAULT_ROW_OVERSCAN,
+} from '@/constants/virtualization.constants';
+
 export type UseVirtualizationArgs = {
   containerRef: RefObject<HTMLElement | null>;
   defaultContainerHeight?: number;
@@ -12,9 +17,9 @@ export type UseVirtualizationArgs = {
 
 export const useVirtualization = ({
   containerRef,
-  defaultContainerHeight = 400,
+  defaultContainerHeight = DEFAULT_CONTAINER_HEIGHT,
   itemHeight,
-  overscan = 10,
+  overscan = DEFAULT_ROW_OVERSCAN,
   totalItems,
 }: UseVirtualizationArgs) => {
   const [scrollTop, setScrollTop] = useState(0);

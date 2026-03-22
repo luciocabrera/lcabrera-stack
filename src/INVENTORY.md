@@ -138,11 +138,12 @@ Before creating anything new, check this inventory. If something here does the j
 
 ## Constants
 
-| Export(s)                                                                                           | Location                                   | Description                                                                |
-| --------------------------------------------------------------------------------------------------- | ------------------------------------------ | -------------------------------------------------------------------------- |
-| `CONFIG`                                                                                            | `constants/api.constants.ts`               | API host per environment (dev / localhost / prod)                          |
-| `OPERATOR_TO_SHORT`, `SHORT_TO_OPERATOR`, `TEXT_OPERATORS`, `NUMBER_OPERATORS`, `DATE_OPERATORS`, … | `constants/filterOperators.constants.ts`   | Bidirectional operator ↔ short-code maps and operator arrays per data type |
-| `DEFAULT_LOCALE`, `DEFAULT_CURRENCY`, `DEFAULT_DATE_PRESET`                                         | `utils/formatters/formatters.constants.ts` | Formatting defaults (`en-US`, `USD`, `medium`)                             |
+| Export(s)                                                                                                | Location                                   | Description                                                                |
+| -------------------------------------------------------------------------------------------------------- | ------------------------------------------ | -------------------------------------------------------------------------- |
+| `API_SERVER_PORT`, `CONFIG`                                                                              | `constants/api.constants.ts`               | API server port and host config per environment (dev / localhost / prod)   |
+| `OPERATOR_TO_SHORT`, `SHORT_TO_OPERATOR`, `TEXT_OPERATORS`, `NUMBER_OPERATORS`, `DATE_OPERATORS`, …      | `constants/filterOperators.constants.ts`   | Bidirectional operator ↔ short-code maps and operator arrays per data type |
+| `DEFAULT_CONTAINER_HEIGHT`, `DEFAULT_CONTAINER_WIDTH`, `DEFAULT_ROW_OVERSCAN`, `DEFAULT_COLUMN_OVERSCAN` | `constants/virtualization.constants.ts`    | Default dimensions and overscan values for virtualization hooks            |
+| `DEFAULT_LOCALE`, `DEFAULT_CURRENCY`, `DEFAULT_DATE_PRESET`                                              | `utils/formatters/formatters.constants.ts` | Formatting defaults (`en-US`, `USD`, `medium`)                             |
 
 ---
 

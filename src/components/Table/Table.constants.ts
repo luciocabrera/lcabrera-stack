@@ -14,6 +14,7 @@ export const DEFAULT_ROW_HEIGHT = 32;
 
 export const INITIAL_PAGE_SIZE = 50;
 export const LOAD_MORE_PAGE_SIZE = 50;
+export const DEFAULT_FILTER_PAGE_SIZE = 50;
 export const INFINITE_SCROLL_THRESHOLD = 200;
 
 export const DEFAULT_OVERSCAN = 6;
