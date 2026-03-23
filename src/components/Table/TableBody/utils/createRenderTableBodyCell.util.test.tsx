@@ -49,6 +49,7 @@ describe('createRenderTableBodyCell', () => {
     };
     const renderBodyCell = createRenderTableBodyCell<Row>({
       columnSizing: {} as ColumnSizingState<Row>,
+      isLoadingState: false,
       pinnedOffsets: {} as Record<RowKey, PinnedColumnInfo>,
     });
 
@@ -71,6 +72,7 @@ describe('createRenderTableBodyCell', () => {
     };
     const renderBodyCell = createRenderTableBodyCell<Row>({
       columnSizing: {} as ColumnSizingState<Row>,
+      isLoadingState: false,
       pinnedOffsets: {} as Record<RowKey, PinnedColumnInfo>,
     });
 
@@ -93,6 +95,7 @@ describe('createRenderTableBodyCell', () => {
     };
     const renderBodyCell = createRenderTableBodyCell<Row>({
       columnSizing: { name: 160 } as ColumnSizingState<Row>,
+      isLoadingState: false,
       pinnedOffsets: {
         name: {
           isFirstPinnedRight: false,

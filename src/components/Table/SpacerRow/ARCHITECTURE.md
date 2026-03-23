@@ -2,23 +2,29 @@
 
 Invisible `<tr>` used by virtualization to pad above/below visible rows,
 maintaining correct scroll height without rendering off-screen rows.
+The component reads column groups from the store to compute its own `colSpan`.
 
 ## File Structure
 
 ```
 SpacerRow/
 ├── SpacerRow.component.tsx   → <tr> with dynamic height via StyleX
-├── SpacerRow.types.ts        → SpacerRowProps (colSpan, height)
+├── SpacerRow.types.ts        → SpacerRowProps (height)
 ├── SpacerRow.stylex.ts       → Dynamic row/cell height styles
 └── index.ts                  → Barrel export
 ```
 
 ## Props
 
-| Prop      | Type     | Description                            |
-| --------- | -------- | -------------------------------------- |
-| `colSpan` | `number` | Number of columns to span              |
-| `height`  | `number` | Spacer height in px (from virtualizer) |
+| Prop     | Type     | Description                            |
+| -------- | -------- | -------------------------------------- |
+| `height` | `number` | Spacer height in px (from virtualizer) |
+
+## Context Dependencies
+
+| Selector             | Purpose                                              |
+| -------------------- | ---------------------------------------------------- |
+| `useGetColumnGroups` | Computes `colSpan` from left + center + right counts |
 
 ## Usage
 

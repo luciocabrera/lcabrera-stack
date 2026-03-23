@@ -3,9 +3,8 @@
 Virtualised `<tbody>` that renders only the visible row window using
 `useVirtualization`. The body uses **SpacerRow** components above and below
 the visible rows to maintain correct scroll height in normal document flow.
-Column groups and pinned offsets are read from the columns store as
-pre-computed derived state. Each visible row maps all column groups
-(left-pinned, center, right-pinned) to `TableBodyCell` instances.
+Row rendering is delegated to `TableBodyRows`, which owns the
+`visibleRows.map()` loop and cell creation.
 
 ## Design Decision — SpacerRow vs Absolute Positioning
 
@@ -17,6 +16,18 @@ The current SpacerRow approach places rows in normal document flow with
 invisible spacer `<tr>` elements above (for `offsetY`) and below (for
 `bottomSpacerHeight`). The browser layout engine keeps content contiguous,
 eliminating visual gaps regardless of scroll speed.
+
+## Design Decision — Delegation to TableBodyRows
+
+`TableBody` previously subscribed to the full `data` array via
+`useGetTableData()` to pass `data.length` to `useVirtualization` and to
+slice visible rows. This caused `TableBody` to re-render on every data
+change (fetch, load-more).
+
+Now `TableBody` subscribes only to `useGetTableTotalLoadedRows()` (a number)
+for virtualisation, and delegates row rendering to `TableBodyRows` via props
+`{ startIndex, endIndex, isLoadingState }`. Data-dependent re-renders are
+scoped to `TableBodyRows`.
 
 ## File Structure
 
@@ -30,8 +41,8 @@ TableBody/
 │
 └── utils/
   ├── ARCHITECTURE.md                 → TableBody utility architecture
-  ├── buildTableBodyCellDescriptor.util.ts → Derives pure cell descriptor data
-  ├── createRenderTableBodyCell.util.ts    → Creates stable cell renderer bound to sizing/offsets
+  ├── buildTableBodyCellDescriptor.util.ts → Derives pure cell descriptor data (with isLoadingState)
+  ├── createRenderTableBodyCell.util.ts    → Creates stable cell renderer bound to sizing/offsets/loading
   ├── generatePlaceholderData.util.ts → Creates skeleton row objects
   ├── getTotalVisibleColumnCount.util.ts → Computes spacer-row colSpan
   ├── renderTableBodyColumnGroup.util.ts → Maps a column group to rendered cells
@@ -40,36 +51,32 @@ TableBody/
 
 ## Context Dependencies
 
-| Selector                    | Purpose                                        |
-| --------------------------- | ---------------------------------------------- |
-| `useGetColumnGroups`        | Pre-split column groups (left, center, right)  |
-| `useGetColumnSizing`        | Column widths for cell rendering               |
-| `useGetPinnedColumnOffsets` | Pre-computed sticky offsets for pinned columns |
-| `useGetTableRowHeight`      | Row height for row virtualisation              |
-| `useGetTableOverscan`       | Extra rows above/below viewport                |
-| `useGetTableData`           | Full data array                                |
-| `useGetTableIsLoading`      | Initial loading state                          |
-| `useGetTableIsLoadingMore`  | Pagination loading state                       |
+| Selector                     | Purpose                                   |
+| ---------------------------- | ----------------------------------------- |
+| `useGetTableRowHeight`       | Row height for row virtualisation         |
+| `useGetTableOverscan`        | Extra rows above/below viewport           |
+| `useGetTableTotalLoadedRows` | Row count for virtualisation `totalItems` |
+| `useGetTableIsLoading`       | Initial loading state                     |
+| `useGetTableIsLoadingMore`   | Pagination loading state                  |
 
 ## Row Virtualisation Flow
 
 ```mermaid
 graph TD
-  TB["TableBody"] --> data["useGetTableData()"]
+  TB["TableBody"] --> count["useGetTableTotalLoadedRows()"]
   TB --> rh["useGetTableRowHeight()"]
   TB --> os["useGetTableOverscan()"]
   TB --> ref["tableContainerRef (prop)"]
 
-  data --> virt["useVirtualization({ totalItems, itemHeight, overscan, containerRef })"]
+  count --> virt["useVirtualization({ totalItems, itemHeight, overscan, containerRef })"]
   rh --> virt
   os --> virt
   ref --> virt
 
   virt --> range["{ startIndex, endIndex, offsetY, bottomSpacerHeight, totalHeight }"]
   range --> topSpacer["SpacerRow (height = offsetY)"]
-  range --> rows["visibleRows = data.slice(start, end)"]
+  range --> rows["TableBodyRows (startIndex, endIndex, isLoadingState)"]
   range --> bottomSpacer["SpacerRow (height = bottomSpacerHeight)"]
-  rows --> map["rows.map → TableRow → cells"]
 ```
 
 ## Render Structure
@@ -77,34 +84,23 @@ graph TD
 ```
 <tbody>
   ├── SpacerRow (offsetY > 0)          ← top padding
-  ├── TableRow[startIndex]             ← normal document flow
-  ├── TableRow[startIndex + 1]
-  ├── ...
-  ├── TableRow[endIndex - 1]
+  ├── <TableBodyRows>                  ← row rendering delegate
+  │   ├── TableRow[startIndex]         ← normal document flow
+  │   ├── TableRow[startIndex + 1]
+  │   ├── ...
+  │   └── TableRow[endIndex - 1]
   └── SpacerRow (bottomSpacerHeight > 0) ← bottom padding
 </tbody>
 ```
 
 ## Column Rendering Flow
 
-```mermaid
-graph TD
-  TB["TableBody"] --> CG["useGetColumnGroups()"]
-  TB --> CS["useGetColumnSizing()"]
-  TB --> PO["useGetPinnedColumnOffsets()"]
-
-  CG --> groups["{ leftPinnedCols, centerCols, rightPinnedCols }"]
-  CS --> cell["renderBodyCell(col) → ‹TableBodyCell›"]
-  PO --> cell
-
-  groups --> left["leftPinnedCols.map(col ⇒ renderBodyCell(col))"]
-  groups --> center["centerCols.map(col ⇒ renderBodyCell(col))"]
-  groups --> right["rightPinnedCols.map(col ⇒ renderBodyCell(col))"]
-```
+Column rendering is now owned by `TableBodyRows`. See
+`TableBodyRows/ARCHITECTURE.md` for the column rendering flow diagram.
 
 Column groups and pinned offsets are derived state stored in `columnsStore`.
 They are recomputed by store actions whenever `effectiveColumns`,
-`columnPinning`, or `columnSizing` change, so the component reads them
+`columnPinning`, or `columnSizing` change, so `TableBodyRows` reads them
 directly without any per-render calculation.
 
 ## Per-Row Cell Order
@@ -115,12 +111,12 @@ directly without any per-render calculation.
 
 ## Cell Rendering
 
-The body renders cells using the same declarative `.map()` → JSX pattern
-as the header. A `renderBodyCell` helper per row returns `<TableBodyCell>`
-directly:
+Cell rendering is delegated to `TableBodyRows` using the
+`createRenderTableBodyCell` and `renderTableBodyColumnGroup` utilities:
 
 - **Custom render**: If `column.render` is defined, passes children to `<TableBodyCell>`
 - **Default render**: Passes `value`, `dataType`, `format`, `label` as props
 - Each cell receives `pinInfo` from the store's `pinnedColumnOffsets` slice
 - Width is resolved from `columnSizing[col.key]` or `col.minWidth`
-- **SpacerRow** `colSpan` = `leftPinnedCols.length + centerCols.length + rightPinnedCols.length`
+- `isLoadingState` is forwarded through the cell descriptor to each `<TableBodyCell>`
+- **SpacerRow** computes its own `colSpan` from `useGetColumnGroups()`

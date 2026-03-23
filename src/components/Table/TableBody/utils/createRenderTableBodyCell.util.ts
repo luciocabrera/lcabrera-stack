@@ -16,6 +16,7 @@ import {
 
 type CreateRenderTableBodyCellArgs<TData extends Record<string, unknown>> = {
   readonly columnSizing: ColumnSizingState<TData>;
+  readonly isLoadingState: boolean;
   readonly pinnedOffsets: Partial<Record<DataKey<TData>, PinnedColumnInfo>>;
 };
 
@@ -33,6 +34,7 @@ const renderFromDescriptor = <TData extends Record<string, unknown>>({
     return createElement(
       TableBodyCell,
       {
+        isLoadingState: descriptor.isLoadingState,
         key: descriptor.key,
         label: descriptor.label,
         minWidth: descriptor.minWidth,
@@ -46,6 +48,7 @@ const renderFromDescriptor = <TData extends Record<string, unknown>>({
   return createElement(TableBodyCell, {
     dataType: descriptor.dataType,
     format: descriptor.format,
+    isLoadingState: descriptor.isLoadingState,
     key: descriptor.key,
     label: descriptor.label,
     minWidth: descriptor.minWidth,
@@ -61,12 +64,14 @@ const renderFromDescriptor = <TData extends Record<string, unknown>>({
 export const createRenderTableBodyCell =
   <TData extends Record<string, unknown>>({
     columnSizing,
+    isLoadingState,
     pinnedOffsets,
   }: CreateRenderTableBodyCellArgs<TData>) =>
   ({ col, rowData }: RenderBodyCellArgs<TData>) => {
     const descriptor = buildTableBodyCellDescriptor({
       col,
       columnSizing,
+      isLoadingState,
       pinnedOffsets,
       rowData,
     });

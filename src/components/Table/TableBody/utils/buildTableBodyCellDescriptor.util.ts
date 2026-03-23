@@ -12,6 +12,7 @@ import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
 type BuildTableBodyCellDescriptorArgs<TData extends Record<string, unknown>> = {
   readonly col: TableColumn<TData>;
   readonly columnSizing: ColumnSizingState<TData>;
+  readonly isLoadingState: boolean;
   readonly pinnedOffsets: Partial<Record<DataKey<TData>, PinnedColumnInfo>>;
   readonly rowData: Record<string, unknown>;
 };
@@ -19,6 +20,7 @@ type BuildTableBodyCellDescriptorArgs<TData extends Record<string, unknown>> = {
 export type TableBodyCellDescriptor<TData extends Record<string, unknown>> =
   | {
       readonly children: ReactNode;
+      readonly isLoadingState: boolean;
       readonly key: DataKey<TData>;
       readonly kind: 'custom';
       readonly label: '';
@@ -29,6 +31,7 @@ export type TableBodyCellDescriptor<TData extends Record<string, unknown>> =
   | {
       readonly dataType: TableColumn<TData>['dataType'];
       readonly format: TableColumn<TData>['format'];
+      readonly isLoadingState: boolean;
       readonly key: DataKey<TData>;
       readonly kind: 'default';
       readonly label: string;
@@ -46,6 +49,7 @@ export const buildTableBodyCellDescriptor = <
 >({
   col,
   columnSizing,
+  isLoadingState,
   pinnedOffsets,
   rowData,
 }: BuildTableBodyCellDescriptorArgs<TData>): TableBodyCellDescriptor<TData> => {
@@ -56,6 +60,7 @@ export const buildTableBodyCellDescriptor = <
   if (col.render) {
     return {
       children: col.render(rowData as TData),
+      isLoadingState,
       key: col.key,
       kind: 'custom',
       label: '',
@@ -68,6 +73,7 @@ export const buildTableBodyCellDescriptor = <
   return {
     dataType: col.dataType,
     format: col.format,
+    isLoadingState,
     key: col.key,
     kind: 'default',
     label: col.label,
