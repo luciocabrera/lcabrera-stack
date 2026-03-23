@@ -16,7 +16,7 @@ import {
 
 type CreateRenderTableBodyCellArgs<TData extends Record<string, unknown>> = {
   readonly columnSizing: ColumnSizingState<TData>;
-  readonly pinnedOffsets: Record<DataKey<TData>, PinnedColumnInfo>;
+  readonly pinnedOffsets: Partial<Record<DataKey<TData>, PinnedColumnInfo>>;
 };
 
 type RenderBodyCellArgs<TData extends Record<string, unknown>> = {

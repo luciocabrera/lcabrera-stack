@@ -12,7 +12,7 @@ import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
 type BuildTableBodyCellDescriptorArgs<TData extends Record<string, unknown>> = {
   readonly col: TableColumn<TData>;
   readonly columnSizing: ColumnSizingState<TData>;
-  readonly pinnedOffsets: Record<DataKey<TData>, PinnedColumnInfo>;
+  readonly pinnedOffsets: Partial<Record<DataKey<TData>, PinnedColumnInfo>>;
   readonly rowData: Record<string, unknown>;
 };
 

@@ -101,9 +101,8 @@ export type PinnedColumnInfo = {
 /**
  * Pre-computed pinned column offset map stored in columnsStore.
  */
-export type PinnedColumnOffsetsState<TData = Record<string, unknown>> = Record<
-  DataKey<TData>,
-  PinnedColumnInfo
+export type PinnedColumnOffsetsState<TData = Record<string, unknown>> = Partial<
+  Record<DataKey<TData>, PinnedColumnInfo>
 >;
 
 /**
