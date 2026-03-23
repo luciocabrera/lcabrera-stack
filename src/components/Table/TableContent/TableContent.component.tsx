@@ -15,7 +15,7 @@ import {
   useGetTableIsLoading,
   useGetTableIsLoadingMore,
 } from '../contexts/TableData/data/selectors';
-// import { TableWrapperContext } from '../contexts/TableWrapper/TableWrapperContext.context';
+import { TableWrapperContext } from '../contexts/TableWrapper/TableWrapperContext.context';
 import { useInfiniteScroll } from '../hooks';
 import { TableBase } from '../TableBase';
 import { TableBody } from '../TableBody';
@@ -44,8 +44,9 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
 
   const containerRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const wrapperContextValue = { containerRef, wrapperRef };
 
-  const isLoaadingState = isLoading || isLoadingMore;
+  const isLoadingState = isLoading || isLoadingMore;
 
   useInfiniteScroll({
     dataSelector,
@@ -59,40 +60,40 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   });
 
   return (
-    // <TableWrapperContext value={wrapperContextValue}>
-    <div ref={wrapperRef} {...stylex.props(styles.wrapper)}>
-      <div {...stylex.props(styles.outerContainer)}>
-        <TableTitle
-          actions={
-            <>
-              {actions}
-              <Button
-                aria-label='Table settings'
-                color='ghost'
-                icon={<SettingsIcon size={16} />}
-                onClick={toogleTableIsTableSettingsOpen}
-                size='mini'
-              />
-            </>
-          }
-          icon={icon}
-        />
-        <div
-          data-scroll-locked={String(isLoaadingState)}
-          ref={containerRef}
-          {...stylex.props(
-            styles.container,
-            isLoaadingState && styles.containerLocked,
-          )}
-        >
-          <TableBase>
-            <TableHeader />
-            <TableBody tableContainerRef={containerRef} />
-          </TableBase>
+    <TableWrapperContext value={wrapperContextValue}>
+      <div ref={wrapperRef} {...stylex.props(styles.wrapper)}>
+        <div {...stylex.props(styles.outerContainer)}>
+          <TableTitle
+            actions={
+              <>
+                {actions}
+                <Button
+                  aria-label='Table settings'
+                  color='ghost'
+                  icon={<SettingsIcon size={16} />}
+                  onClick={toogleTableIsTableSettingsOpen}
+                  size='mini'
+                />
+              </>
+            }
+            icon={icon}
+          />
+          <div
+            data-scroll-locked={String(isLoadingState)}
+            ref={containerRef}
+            {...stylex.props(
+              styles.container,
+              isLoadingState && styles.containerLocked,
+            )}
+          >
+            <TableBase>
+              <TableHeader />
+              <TableBody tableContainerRef={containerRef} />
+            </TableBase>
+          </div>
         </div>
+        <TableDrawersSection />
       </div>
-      <TableDrawersSection />
-    </div>
-    // </TableWrapperContext>
+    </TableWrapperContext>
   );
 };

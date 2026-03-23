@@ -95,7 +95,6 @@ export const SidePanel = ({
         aria-label='Settings panel'
         aria-modal='false'
         data-testid='side-panel'
-        role='complementary'
         {...props}
         {...panelStyles}
       >

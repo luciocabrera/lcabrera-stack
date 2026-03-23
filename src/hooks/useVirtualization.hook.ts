@@ -8,11 +8,11 @@ import {
 } from '@/constants/virtualization.constants';
 
 export type UseVirtualizationArgs = {
-  containerRef: RefObject<HTMLElement | null>;
-  defaultContainerHeight?: number;
-  itemHeight: number;
-  overscan?: number;
-  totalItems: number;
+  readonly containerRef: RefObject<HTMLElement | null>;
+  readonly defaultContainerHeight?: number;
+  readonly itemHeight: number;
+  readonly overscan?: number;
+  readonly totalItems: number;
 };
 
 export const useVirtualization = ({
@@ -57,7 +57,7 @@ export const useVirtualization = ({
     };
 
     updateHeight();
-    container?.addEventListener('scroll', handleScroll, { passive: true });
+    container?.addEventListener('scroll', handleScroll);
     window.addEventListener('resize', updateHeight);
 
     return () => {
