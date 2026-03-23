@@ -12,7 +12,6 @@ import { SpacerRow } from '@/components/Table/SpacerRow';
 import { TableBodyCell } from '@/components/Table/TableBodyCell';
 import { TableRow } from '@/components/Table/TableRow';
 import { useVirtualization } from '@/hooks';
-import { logger } from '@/utils/logger';
 import { useRenderTracker } from '@/utils/performance';
 import * as stylex from '@stylexjs/stylex';
 
@@ -46,14 +45,6 @@ export const TableBody = ({ tableContainerRef }: TableBodyProps) => {
       overscan,
       totalItems: data.length,
     });
-
-  logger.debug('Virtualization output:', {
-    endIndex,
-    offsetY,
-    startIndex,
-    totalHeight,
-    totalRows: data.length,
-  });
 
   const visibleRows = data.slice(startIndex, endIndex);
   const totalColSpan =
