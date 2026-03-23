@@ -20,15 +20,16 @@ export const SidePanel = ({
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   const shouldShowBackdrop = shouldShowOverlay && !isPinned;
+  const isVisible = isOpen || isPinned;
+  const openStyle =
+    position === 'left' ? ('leftOpen' as const) : ('rightOpen' as const);
+  const closedStyle =
+    position === 'left' ? ('leftClosed' as const) : ('rightClosed' as const);
   const panelStyles = stylex.props(
     sidePanelStyles.base,
     sidePanelStyles.size[size],
     sidePanelStyles.position[position],
-    isOpen || isPinned
-      ? sidePanelStyles.position[position === 'left' ? 'leftOpen' : 'rightOpen']
-      : sidePanelStyles.position[
-          position === 'left' ? 'leftClosed' : 'rightClosed'
-        ],
+    sidePanelStyles.position[isVisible ? openStyle : closedStyle],
     shouldShowBackdrop
       ? sidePanelStyles.withBackdrop
       : sidePanelStyles.withoutBackdrop,
@@ -58,10 +59,8 @@ export const SidePanel = ({
       } else {
         dialog.show();
       }
-    } else {
-      if (dialog.open) {
-        dialog.close();
-      }
+    } else if (dialog.open) {
+      dialog.close();
     }
   }, [isOpen, isPinned, shouldShowBackdrop]);
 
@@ -93,7 +92,6 @@ export const SidePanel = ({
     const aside = (
       <aside
         aria-label='Settings panel'
-        aria-modal='false'
         data-testid='side-panel'
         {...props}
         {...panelStyles}

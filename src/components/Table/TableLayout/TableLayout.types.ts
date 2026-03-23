@@ -36,7 +36,7 @@ export type TableLayoutProps<
   readonly defaultColumnPinning?: ColumnPinningState<TData>;
   /** Table density (optional, default: 'comfortable') */
   readonly density?: TableDensity;
-  /** Prefetch next page after each load-more completes (optional, default: false) */
+  /** Prefetch next page after each load-more completes (optional, default: true) */
   readonly enablePrefetch?: boolean;
   /** Active filters from loader/URL state (optional) */
   readonly filters?: ColumnFiltersState<TData>;
