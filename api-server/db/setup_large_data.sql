@@ -7,7 +7,7 @@ SET synchronous_commit = off;
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 DROP TABLE IF EXISTS car_sales;
-CREATE UNLOGGED TABLE car_sales (
+CREATE TABLE car_sales (
   car_id integer PRIMARY KEY,
   date_of_ingress date NOT NULL,
   date_of_sale date NOT NULL,
@@ -118,7 +118,7 @@ DECLARE
   i integer;
   typ text;
 BEGIN
-  sql := 'CREATE UNLOGGED TABLE wide_alltypes_150 (id bigint PRIMARY KEY';
+  sql := 'CREATE TABLE wide_alltypes_150 (id bigint PRIMARY KEY';
 
   FOR i IN 1..149 LOOP
     typ := CASE (i % 20)

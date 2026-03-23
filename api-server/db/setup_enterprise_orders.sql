@@ -6,7 +6,7 @@ SET synchronous_commit = off;
 
 DROP TABLE IF EXISTS enterprise_orders;
 
-CREATE UNLOGGED TABLE enterprise_orders (
+CREATE TABLE enterprise_orders (
   order_id                 integer          PRIMARY KEY,
   order_number             varchar(50)      NOT NULL,
   order_date               date             NOT NULL,
