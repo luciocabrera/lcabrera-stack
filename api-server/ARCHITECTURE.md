@@ -4,10 +4,11 @@ Express + PostgreSQL backend used by the frontend via `/api` routes.
 
 ## Runtime
 
-- Entry point: `server.js`
+- Source entry point: `src/server.ts`
+- Build output: `dist/server.js`
 - HTTP server: Express
 - Database client: `pg` (`Pool`)
-- Env loading: `node --env-file-if-exists=.env server.js`
+- Env loading: `node --env-file-if-exists=.env dist/server.js`
 
 ## Data Source
 
@@ -35,6 +36,21 @@ The frontend expects this API on `http://localhost:3001` and proxies `/api`.
 - Startup should warn when key tables are empty or missing.
 - A DB sanity endpoint should expose row-count health for key tables.
 - Seeding must be available as a single command from `package.json`.
+- Dynamic SQL identifiers must be allowlisted before interpolation.
+- Route wiring, request parsing, and database access should live in separate modules.
+
+## Source Layout
+
+TypeScript source lives in `api-server/src/`:
+
+- `app/app.ts` → Express bootstrap and router mounting
+- `config/*.schema.ts` and `config/*.util.ts` → env parsing
+- `features/*/*.route.ts` → route wiring
+- `features/*/*.controller.ts` → HTTP orchestration
+- `features/*/*.repository.ts` → PostgreSQL access
+- `features/*/*.types.ts` → feature contracts
+- `utils/*.util.ts` → shared pure helpers
+- `middleware/*.middleware.ts` → shared Express middleware
 
 ## Seeding
 
@@ -46,4 +62,4 @@ SQL assets:
 Programmatic entrypoint:
 
 - `scripts/seed-db.js`
-- `npm run seed` (or equivalent via `vp run seed`)
+- `vp run seed`
