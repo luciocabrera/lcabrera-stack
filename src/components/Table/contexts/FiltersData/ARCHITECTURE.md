@@ -17,6 +17,7 @@ FiltersData/
     ├── useFiltersStore.hook.ts              → useSyncExternalStore + selector
     │
     ├── actions/
+    │   ├── prefetchNextPage.util.ts         → Shared prefetch-next-page logic
     │   ├── useFetchFilterData.hook.ts       → Fetch initial filter data for a column
     │   └── useFetchMoreFilterData.hook.ts   → Fetch next page of filter data
     │
