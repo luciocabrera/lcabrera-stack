@@ -5,9 +5,9 @@ import { DEFAULT_FILTER_PAGE_SIZE } from '@/components/Table/Table.constants';
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { logger } from '@/utils/logger';
 
+import { firePrefetch, resolveFromCacheOrFetch } from '@/utils/prefetch';
+
 import { useFiltersDataContextValue } from '../../useFiltersDataContextValue.hook';
-import { firePrefetch } from './firePrefetch.util';
-import { resolveFromCacheOrFetch } from './resolveFromCacheOrFetch.util';
 import type { DataKey } from '@/components/Table/Table.types';
 
 type FetchFilterDataCallbackArgs<TResponse> = Omit<
@@ -104,7 +104,12 @@ export const useFetchFilterData = <TData, TResponse>({
       const enablePrefetch = metaState?.enablePrefetch ?? false;
 
       if (enablePrefetch && hasMore && prefetchRef) {
-        firePrefetch({ nextSkip: data.length, onLoadMore, prefetchRef });
+        firePrefetch({
+          limit: DEFAULT_FILTER_PAGE_SIZE,
+          nextSkip: data.length,
+          onLoadMore,
+          prefetchRef,
+        });
       }
     } catch (error) {
       logger.error('[useFetchFilterData] Error fetching filter data:', error);
@@ -181,7 +186,12 @@ export const useFetchFilterData = <TData, TResponse>({
       const enablePrefetch = metaState?.enablePrefetch ?? false;
 
       if (enablePrefetch && hasMore && prefetchRef) {
-        firePrefetch({ nextSkip: totalLoadedRows, onLoadMore, prefetchRef });
+        firePrefetch({
+          limit: DEFAULT_FILTER_PAGE_SIZE,
+          nextSkip: totalLoadedRows,
+          onLoadMore,
+          prefetchRef,
+        });
       }
     } catch (error) {
       const message =

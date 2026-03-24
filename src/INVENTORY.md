@@ -94,6 +94,14 @@ Before creating anything new, check this inventory. If something here does the j
 | `logger`       | `utils/logger/logger.util.ts` | Default singleton logger reading `VITE_LOG_LEVEL` env var                              |
 | `createLogger` | `utils/logger/logger.util.ts` | Factory: `createLogger({ level?, prefix? })` → level-filtered, tree-shakeable `Logger` |
 
+### `src/utils/prefetch/`
+
+| Function                  | Location                                         | Description                                                                   |
+| ------------------------- | ------------------------------------------------ | ----------------------------------------------------------------------------- |
+| `resolveFromCacheOrFetch` | `utils/prefetch/resolveFromCacheOrFetch.util.ts` | Resolves from prefetch cache (hit/in-flight) or falls back to a fresh fetch   |
+| `prefetchNextPage`        | `utils/prefetch/prefetchNextPage.util.ts`        | Creates a prefetch request returning initial cache state + resolution promise |
+| `firePrefetch`            | `utils/prefetch/firePrefetch.util.ts`            | Fires prefetch and applies result to a ref with staleness check               |
+
 ### `src/utils/security/`
 
 | Function             | Location                          | Description                                            |
@@ -157,7 +165,7 @@ Before creating anything new, check this inventory. If something here does the j
 | `BooleanFilter`, `DateFilter`, `NumberFilter`, `SelectFilter`, `TextFilter`, `ColumnFilter`                  | `types/filterOperators.types.ts` | Discriminated union for all column filter states  |
 | `DateFormatPreset`, `DateFormatOptions`, `CurrencyFormatOptions`, `NumberFormatOptions`                      | `types/format.types.ts`          | Options for the formatter utilities               |
 | `ThemeMode`, `ThemeContextValue`                                                                             | `types/theme.types.ts`           | Light/dark mode enum and context shape            |
-| `InfiniteScroll`, `Pagination`, `PinSide`, `SortDirection`, `Sorting`, `PinConflictState`                    | `types/ui.types.ts`              | Shared UI primitive types                         |
+| `InfiniteScroll`, `Pagination`, `PinSide`, `SortDirection`, `Sorting`, `PinConflictState`, `PrefetchCache`   | `types/ui.types.ts`              | Shared UI primitive types                         |
 | `ApiConfig`                                                                                                  | `types/api.types.ts`             | API config shape keyed by environment             |
 | `DbSanityPayload`                                                                                            | `root/Root.types.ts`             | Dev preflight response shape for `/api/db-sanity` |
 

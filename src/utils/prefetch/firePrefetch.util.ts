@@ -4,6 +4,7 @@ import type { Pagination, PrefetchCache } from '@/types/ui.types';
 import { prefetchNextPage } from './prefetchNextPage.util';
 
 type FirePrefetchArgs<TResponse> = {
+  readonly limit: number;
   readonly nextSkip: number;
   readonly onLoadMore: (params: Pagination) => Promise<TResponse>;
   readonly prefetchRef: RefObject<PrefetchCache<TResponse>>;
@@ -15,11 +16,13 @@ type FirePrefetchArgs<TResponse> = {
  * changed by the time the prefetch resolves, the result is discarded.
  */
 export const firePrefetch = <TResponse>({
+  limit,
   nextSkip,
   onLoadMore,
   prefetchRef,
 }: FirePrefetchArgs<TResponse>): void => {
   const { initialCache, resolution } = prefetchNextPage({
+    limit,
     nextSkip,
     onLoadMore,
   });

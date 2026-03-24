@@ -20,6 +20,8 @@ utils/
 │   └── ARCHITECTURE.md      -> Level-aware, tree-shakeable application logger
 ├── performance/
 │   └── ARCHITECTURE.md      -> Render tracking utilities
+├── prefetch/
+│   └── index.ts             -> Barrel: firePrefetch, prefetchNextPage, resolveFromCacheOrFetch
 ├── security/
 │   └── ARCHITECTURE.md      -> Security helpers (CSP nonce parsing)
 ├── storage/
@@ -40,6 +42,7 @@ graph TD
   Formatters[formatters/]
   Logger[logger/]
   Performance[performance/]
+  Prefetch[prefetch/]
   Security[security/]
   Storage[storage/]
   Theme[theme/]
@@ -48,6 +51,7 @@ graph TD
   API --> Constants[API constants]
   Filters --> TableTypes[Table types]
   Logger --> EnvVars[import.meta.env.VITE_LOG_LEVEL]
+  Prefetch --> UITypes[PrefetchCache, Pagination types]
   URLState --> TableTypes
   URLState --> FilterTypes[Filter operator types]
   Theme --> ThemeTypes[Theme types]
@@ -55,15 +59,16 @@ graph TD
 
 ## Subfolder Documentation
 
-| Folder         | Description                                                              |
-| -------------- | ------------------------------------------------------------------------ |
-| `api/`         | `getApiBaseUrl` — SSR/client-aware API base URL resolver                 |
-| `comparison/`  | `shallowEqual` — one-level object comparison for store diffing           |
-| `filters/`     | `createStaticFilterOptions` — static array → Table filter contract       |
-| `formatters/`  | `formatDate`, `formatCurrency`, `formatNumber`, `parseDate`, etc.        |
-| `logger/`      | `createLogger`, `logger` — level-filtered, tree-shakeable app logging    |
-| `performance/` | `renderTracker`, `useRenderTracker` — dev-time render inspection         |
-| `security/`    | `getRequestCspNonce` — standardized `x-csp-nonce` request header parser  |
-| `storage/`     | `parseCookies`, `readFromCookie`, `writeToCookie`, `writeToLocalStorage` |
-| `theme/`       | `getThemeFromCookie`, `setThemeCookie`                                   |
-| `urlState/`    | `encodeStateToURL`, `decodeStateFromURL`, `readTableStateFromURL`        |
+| Folder         | Description                                                                                                                                                |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `api/`         | `getApiBaseUrl` — SSR/client-aware API base URL resolver                                                                                                   |
+| `comparison/`  | `shallowEqual` — one-level object comparison for store diffing                                                                                             |
+| `filters/`     | `createStaticFilterOptions` — static array → Table filter contract                                                                                         |
+| `formatters/`  | `formatDate`, `formatCurrency`, `formatNumber`, `parseDate`, etc.                                                                                          |
+| `logger/`      | `createLogger`, `logger` — level-filtered, tree-shakeable app logging                                                                                      |
+| `performance/` | `renderTracker`, `useRenderTracker` — dev-time render inspection                                                                                           |
+| `prefetch/`    | `resolveFromCacheOrFetch`, `prefetchNextPage`, `firePrefetch` — generic prefetch cache resolution, page prefetch creation, and ref-applied prefetch firing |
+| `security/`    | `getRequestCspNonce` — standardized `x-csp-nonce` request header parser                                                                                    |
+| `storage/`     | `parseCookies`, `readFromCookie`, `writeToCookie`, `writeToLocalStorage`                                                                                   |
+| `theme/`       | `getThemeFromCookie`, `setThemeCookie`                                                                                                                     |
+| `urlState/`    | `encodeStateToURL`, `decodeStateFromURL`, `readTableStateFromURL`                                                                                          |

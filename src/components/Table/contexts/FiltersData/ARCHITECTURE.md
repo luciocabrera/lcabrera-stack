@@ -17,9 +17,6 @@ FiltersData/
     ├── useFiltersStore.hook.ts              → useSyncExternalStore + selector
     │
     ├── actions/
-    │   ├── firePrefetch.util.ts             → Fire prefetch + apply to ref with staleness check
-    │   ├── prefetchNextPage.util.ts         → Pure prefetch request creation (returns cache + promise)
-    │   ├── resolveFromCacheOrFetch.util.ts  → Resolve from cache hit/in-flight or fallback fetch
     │   └── useFetchFilterData.hook.ts       → Fetch initial + paginated filter data for a column
     │
     ├── selectors/
@@ -73,10 +70,9 @@ graph TD
 
 ## Actions
 
-| Hook                     | Reads From         | Writes To          | Description                                 |
-| ------------------------ | ------------------ | ------------------ | ------------------------------------------- |
-| `useFetchFilterData`     | `filtersDataStore` | `filtersDataStore` | Fetches initial filter options for a column |
-| `useFetchMoreFilterData` | `filtersDataStore` | `filtersDataStore` | Appends next page of options for a column   |
+| Hook                 | Reads From         | Writes To          | Description                                                                       |
+| -------------------- | ------------------ | ------------------ | --------------------------------------------------------------------------------- |
+| `useFetchFilterData` | `filtersDataStore` | `filtersDataStore` | Fetches initial + paginated filter options for a column (uses `@/utils/prefetch`) |
 
 ## Selectors
 

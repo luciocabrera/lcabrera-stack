@@ -1,9 +1,10 @@
 import { useCallback, useRef } from 'react';
 
-import type { InfiniteScroll } from '@/types/ui.types';
+import type { InfiniteScroll, PrefetchCache } from '@/types/ui.types';
 
 import { LOAD_MORE_PAGE_SIZE } from '@/components/Table/Table.constants';
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { firePrefetch, resolveFromCacheOrFetch } from '@/utils/prefetch';
 
 import { useTableDataContextValue } from '../useTableDataContextValue.hook';
 
@@ -11,12 +12,6 @@ type FetchMoreDataArgs<TData, TResponse> = Omit<
   InfiniteScroll<TData, TResponse>,
   'hasMore' | 'isLoadingMore'
 >;
-
-type PrefetchCache<TResponse> = {
-  readonly data: TResponse | undefined;
-  readonly promise: Promise<TResponse> | undefined;
-  readonly skip: number;
-};
 
 export const useFetchMoreData = <TData, TResponse>() => {
   const { dataStore } = useTableDataContextValue<TData>();
@@ -56,24 +51,17 @@ export const useFetchMoreData = <TData, TResponse>() => {
         });
 
         const expectedSkip = currentData.length;
-        let response: TResponse;
-        const cache = prefetchRef.current;
 
-        if (cache.skip === expectedSkip && cache.data) {
-          // Cache HIT — use prefetched data directly
-          response = cache.data;
-        } else if (cache.skip === expectedSkip && cache.promise) {
-          // Cache IN-FLIGHT — await the already-started prefetch
-          response = await cache.promise;
-        } else {
-          // Cache MISS — normal fetch
-          response = await onLoadMore({
-            limit: pageSize,
-            skip: expectedSkip,
-          });
-        }
+        const response = await resolveFromCacheOrFetch({
+          cache: prefetchRef.current,
+          expectedSkip,
+          fetchFn: () =>
+            onLoadMore({
+              limit: pageSize,
+              skip: expectedSkip,
+            }),
+        });
 
-        // Reset cache after consumption
         prefetchRef.current = { data: undefined, promise: undefined, skip: -1 };
 
         const data = dataSelector
@@ -95,42 +83,13 @@ export const useFetchMoreData = <TData, TResponse>() => {
           totalRows,
         });
 
-        // Fire prefetch for next page if enabled and more data exists
         if (enablePrefetch && hasMore) {
-          const nextSkip = combinedData.length;
-          const prefetchPromise = onLoadMore({
+          firePrefetch({
             limit: pageSize,
-            skip: nextSkip,
+            nextSkip: combinedData.length,
+            onLoadMore,
+            prefetchRef,
           });
-
-          prefetchRef.current = {
-            data: undefined,
-            promise: prefetchPromise,
-            skip: nextSkip,
-          };
-
-          // Resolve in background — store result for next scroll trigger
-          prefetchPromise
-            .then((prefetchedResponse) => {
-              // Only store if the cache hasn't been invalidated
-              if (prefetchRef.current.skip === nextSkip) {
-                prefetchRef.current = {
-                  data: prefetchedResponse,
-                  promise: undefined,
-                  skip: nextSkip,
-                };
-              }
-            })
-            .catch(() => {
-              // Silently discard failed prefetch — next scroll will fetch normally
-              if (prefetchRef.current.skip === nextSkip) {
-                prefetchRef.current = {
-                  data: undefined,
-                  promise: undefined,
-                  skip: -1,
-                };
-              }
-            });
         }
       } catch (error) {
         const message =

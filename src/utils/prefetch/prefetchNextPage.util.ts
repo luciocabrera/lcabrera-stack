@@ -1,8 +1,7 @@
 import type { Pagination, PrefetchCache } from '@/types/ui.types';
 
-import { DEFAULT_FILTER_PAGE_SIZE } from '@/components/Table/Table.constants';
-
 type PrefetchNextPageArgs<TResponse> = {
+  readonly limit: number;
   readonly nextSkip: number;
   readonly onLoadMore: (params: Pagination) => Promise<TResponse>;
 };
@@ -13,17 +12,18 @@ type PrefetchNextPageResult<TResponse> = {
 };
 
 /**
- * Creates a prefetch request for the next page of filter data.
+ * Creates a prefetch request for the next page of data.
  * Returns the initial cache state and a promise that resolves to the
  * final cache state (success or failure). The consumer is responsible
  * for applying these values to the ref with a staleness check.
  */
 export const prefetchNextPage = <TResponse>({
+  limit,
   nextSkip,
   onLoadMore,
 }: PrefetchNextPageArgs<TResponse>): PrefetchNextPageResult<TResponse> => {
   const prefetchPromise = onLoadMore({
-    limit: DEFAULT_FILTER_PAGE_SIZE,
+    limit,
     skip: nextSkip,
   });
 

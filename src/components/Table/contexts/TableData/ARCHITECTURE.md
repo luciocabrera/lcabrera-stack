@@ -80,8 +80,9 @@ graph TD
 ### Prefetch Buffer (ADR-006)
 
 When `enablePrefetch` is true in `metaStore`, `useFetchMoreData` silently fetches the next page
-after each load-more completes. On the next scroll trigger, cached data is consumed instantly (cache hit)
-or the in-flight request is awaited (cache in-flight). Stale cache is automatically invalidated when
+after each load-more completes using the shared `firePrefetch` utility from `@/utils/prefetch`.
+On the next scroll trigger, cached data is consumed via `resolveFromCacheOrFetch` — instantly (cache hit)
+or by awaiting the in-flight request (cache in-flight). Stale cache is automatically invalidated when
 sort/filter changes reset data (skip mismatch → cache miss).
 
 ```
