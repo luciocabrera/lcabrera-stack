@@ -6,10 +6,11 @@ import { useTableConfigContextValue } from '@/components/Table/contexts/TableCon
 import { logger } from '@/utils/logger';
 
 import { useFiltersDataContextValue } from '../../useFiltersDataContextValue.hook';
-import { prefetchNextPage as prefetchNextPageUtil } from './prefetchNextPage.util';
+import { firePrefetch } from './firePrefetch.util';
+import { resolveFromCacheOrFetch } from './resolveFromCacheOrFetch.util';
 import type { DataKey } from '@/components/Table/Table.types';
 
-type FetchFilterDataArgs<TResponse> = Omit<
+type FetchFilterDataCallbackArgs<TResponse> = Omit<
   InfiniteScroll<string, TResponse>,
   'hasMore' | 'isLoadingMore'
 >;
@@ -19,27 +20,37 @@ type UseFetchFilterDataArgs<TData, TResponse> = {
   readonly prefetchRef?: RefObject<PrefetchCache<TResponse>>;
 };
 
+type UseFetchFilterDataReturn<TResponse> = {
+  readonly fetchInitial: (
+    args: FetchFilterDataCallbackArgs<TResponse>,
+  ) => Promise<void>;
+  readonly fetchMore: (
+    args: FetchFilterDataCallbackArgs<TResponse>,
+  ) => Promise<void>;
+};
+
 /**
- * Hook to fetch initial filter data for a column.
- * When `prefetchRef` is provided, automatically prefetches the next page
- * after a successful initial load (if `enablePrefetch` is on).
+ * Hook that provides both initial and paginated filter data fetching
+ * for a column. When `prefetchRef` is provided, automatically prefetches
+ * the next page after each successful load (if `enablePrefetch` is on).
  */
 export const useFetchFilterData = <TData, TResponse>({
   columnKey,
   prefetchRef,
-}: UseFetchFilterDataArgs<TData, TResponse>) => {
+}: UseFetchFilterDataArgs<
+  TData,
+  TResponse
+>): UseFetchFilterDataReturn<TResponse> => {
   const { filtersDataStore } = useFiltersDataContextValue();
   const { metaStore } = useTableConfigContextValue<TData>();
 
-  return async ({
+  const fetchInitial = async ({
     dataSelector,
     dataTotalSelector,
     onLoadMore,
-  }: FetchFilterDataArgs<TResponse>) => {
+  }: FetchFilterDataCallbackArgs<TResponse>) => {
     const filtersDataState = filtersDataStore.get();
     const currentFilter = filtersDataState?.[columnKey];
-    const currentData = currentFilter?.data ?? [];
-    const currentDataLength = currentData.length;
 
     if (!currentFilter) {
       logger.error(
@@ -50,7 +61,7 @@ export const useFetchFilterData = <TData, TResponse>({
     }
 
     // Skip if already loaded or currently loading
-    if (currentDataLength > 0 || currentFilter.isLoading) {
+    if (currentFilter.data.length > 0 || currentFilter.isLoading) {
       return;
     }
 
@@ -89,38 +100,99 @@ export const useFetchFilterData = <TData, TResponse>({
         },
       });
 
-      // Prefetch next page if enabled and more data exists
       const metaState = metaStore.get();
       const enablePrefetch = metaState?.enablePrefetch ?? false;
 
       if (enablePrefetch && hasMore && prefetchRef) {
-        const { initialCache, resolution } = prefetchNextPageUtil({
-          nextSkip: data.length,
-          onLoadMore,
-        });
-
-        prefetchRef.current = initialCache;
-
-        void resolution.then((resolvedCache) => {
-          if (prefetchRef.current.skip === initialCache.skip) {
-            prefetchRef.current = resolvedCache;
-          }
-        });
+        firePrefetch({ nextSkip: data.length, onLoadMore, prefetchRef });
       }
     } catch (error) {
       logger.error('[useFetchFilterData] Error fetching filter data:', error);
       const message =
         error instanceof Error ? error.message : 'Failed to load filter data';
-      metaStore.set({
-        error: message,
+      metaStore.set({ error: message });
+
+      filtersDataStore.set({
+        [columnKey]: { ...currentFilter, isLoading: false },
       });
+    }
+  };
+
+  const fetchMore = async ({
+    dataSelector,
+    dataTotalSelector,
+    onLoadMore,
+  }: FetchFilterDataCallbackArgs<TResponse>) => {
+    const filtersDataState = filtersDataStore.get();
+    const currentFilter = filtersDataState?.[columnKey];
+    const currentData = currentFilter?.data ?? [];
+
+    if (!onLoadMore) {
+      throw new Error('onLoadMore callback is required');
+    }
+
+    if (!currentFilter) {
+      throw new Error(`Filter data not initialized for column: ${columnKey}`);
+    }
+
+    try {
+      filtersDataStore.set({
+        [columnKey]: {
+          ...currentFilter,
+          isLoadingMore: true,
+        },
+      });
+
+      const response = await resolveFromCacheOrFetch({
+        cache: prefetchRef?.current,
+        expectedSkip: currentData.length,
+        fetchFn: () =>
+          onLoadMore({
+            limit: DEFAULT_FILTER_PAGE_SIZE,
+            skip: currentData.length,
+          }),
+      });
+
+      if (prefetchRef) {
+        prefetchRef.current = { data: undefined, promise: undefined, skip: -1 };
+      }
+
+      const data = dataSelector ? dataSelector(response) : [];
+      const combinedData = [...currentData, ...data];
+      const totalLoadedRows = combinedData.length;
+      const totalRows = dataTotalSelector
+        ? dataTotalSelector(response)
+        : currentFilter.totalRows || totalLoadedRows;
+      const hasMore = totalRows > totalLoadedRows;
 
       filtersDataStore.set({
         [columnKey]: {
           ...currentFilter,
+          data: combinedData,
+          hasMore,
           isLoading: false,
+          isLoadingMore: false,
+          totalLoadedRows,
+          totalRows,
         },
+      });
+
+      const metaState = metaStore.get();
+      const enablePrefetch = metaState?.enablePrefetch ?? false;
+
+      if (enablePrefetch && hasMore && prefetchRef) {
+        firePrefetch({ nextSkip: totalLoadedRows, onLoadMore, prefetchRef });
+      }
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Failed to load more data';
+      metaStore.set({ error: message });
+
+      filtersDataStore.set({
+        [columnKey]: { ...currentFilter, isLoadingMore: false },
       });
     }
   };
+
+  return { fetchInitial, fetchMore };
 };

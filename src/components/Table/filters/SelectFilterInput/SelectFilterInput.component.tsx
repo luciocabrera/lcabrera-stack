@@ -3,10 +3,7 @@ import { useRef } from 'react';
 import type { FilterOptionsResponse } from '@/components/Table/Table.types';
 import type { PrefetchCache } from '@/types/ui.types';
 
-import {
-  useFetchFilterData,
-  useFetchMoreFilterData,
-} from '@/components/Table/contexts/FiltersData/filters/actions';
+import { useFetchFilterData } from '@/components/Table/contexts/FiltersData/filters/actions';
 import { useGetFilterData } from '@/components/Table/contexts/FiltersData/filters/selectors';
 import { useGetNormalizedColumn } from '@/components/Table/contexts/TableConfig/columns/selectors';
 import { VirtualSelect } from '@/components/VirtualSelect';
@@ -30,19 +27,14 @@ export const SelectFilterInput = <TData,>({
     skip: -1,
   });
 
-  const fetchMoreFilterData = useFetchMoreFilterData<
+  const { fetchInitial, fetchMore } = useFetchFilterData<
     TData,
     FilterOptionsResponse
   >({ columnKey, prefetchRef });
 
-  const fetchFilterData = useFetchFilterData<TData, FilterOptionsResponse>({
-    columnKey,
-    prefetchRef,
-  });
-
   const handleFetchInitial = async () => {
     if (!column.fetchFilterOptions) return;
-    await fetchFilterData({
+    await fetchInitial({
       dataSelector: column.filterOptionsDataSelector,
       dataTotalSelector: column.filterOptionsDataTotalSelector,
       onLoadMore: column.fetchFilterOptions,
@@ -51,7 +43,7 @@ export const SelectFilterInput = <TData,>({
 
   const handleFetchMore = async () => {
     if (!column.fetchFilterOptions) return;
-    await fetchMoreFilterData({
+    await fetchMore({
       dataSelector: column.filterOptionsDataSelector,
       dataTotalSelector: column.filterOptionsDataTotalSelector,
       onLoadMore: column.fetchFilterOptions,

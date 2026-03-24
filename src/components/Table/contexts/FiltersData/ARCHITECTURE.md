@@ -17,9 +17,10 @@ FiltersData/
     ├── useFiltersStore.hook.ts              → useSyncExternalStore + selector
     │
     ├── actions/
-    │   ├── prefetchNextPage.util.ts         → Shared prefetch-next-page logic
-    │   ├── useFetchFilterData.hook.ts       → Fetch initial filter data for a column
-    │   └── useFetchMoreFilterData.hook.ts   → Fetch next page of filter data
+    │   ├── firePrefetch.util.ts             → Fire prefetch + apply to ref with staleness check
+    │   ├── prefetchNextPage.util.ts         → Pure prefetch request creation (returns cache + promise)
+    │   ├── resolveFromCacheOrFetch.util.ts  → Resolve from cache hit/in-flight or fallback fetch
+    │   └── useFetchFilterData.hook.ts       → Fetch initial + paginated filter data for a column
     │
     ├── selectors/
     │   └── useGetFilterData.hook.ts         → Read filter data for a column
