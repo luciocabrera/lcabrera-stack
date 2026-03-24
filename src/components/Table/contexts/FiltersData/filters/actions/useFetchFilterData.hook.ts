@@ -37,9 +37,11 @@ export const useFetchFilterData = <TData, TResponse>({
     onLoadMore,
   }: FetchFilterDataArgs<TResponse>) => {
     const filtersDataState = filtersDataStore.get();
-    const currentFilterData = filtersDataState?.[columnKey];
+    const currentFilter = filtersDataState?.[columnKey];
+    const currentData = currentFilter?.data ?? [];
+    const currentDataLength = currentData.length;
 
-    if (!currentFilterData) {
+    if (!currentFilter) {
       logger.error(
         '[useFetchFilterData] Filter data not initialized for column:',
         columnKey,
@@ -48,7 +50,7 @@ export const useFetchFilterData = <TData, TResponse>({
     }
 
     // Skip if already loaded or currently loading
-    if (currentFilterData.data.length > 0 || currentFilterData.isLoading) {
+    if (currentDataLength > 0 || currentFilter.isLoading) {
       return;
     }
 
@@ -60,7 +62,7 @@ export const useFetchFilterData = <TData, TResponse>({
     try {
       filtersDataStore.set({
         [columnKey]: {
-          ...currentFilterData,
+          ...currentFilter,
           isLoading: true,
         },
       });
@@ -78,7 +80,7 @@ export const useFetchFilterData = <TData, TResponse>({
 
       filtersDataStore.set({
         [columnKey]: {
-          ...currentFilterData,
+          ...currentFilter,
           data,
           hasMore,
           isLoading: false,
@@ -115,7 +117,7 @@ export const useFetchFilterData = <TData, TResponse>({
 
       filtersDataStore.set({
         [columnKey]: {
-          ...currentFilterData,
+          ...currentFilter,
           isLoading: false,
         },
       });

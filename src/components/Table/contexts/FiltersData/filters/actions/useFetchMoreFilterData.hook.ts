@@ -31,37 +31,37 @@ export const useFetchMoreFilterData = <TData, TResponse>({
     onLoadMore,
   }: FetchMoreFilterDataArgs<TResponse>) => {
     const filtersDataState = filtersDataStore.get();
-    const currentFilterData = filtersDataState?.[columnKey];
-    const currentData = currentFilterData?.data ?? [];
+    const currentFilter = filtersDataState?.[columnKey];
+    const currentData = currentFilter?.data ?? [];
+    const currentDataLength = currentData.length;
 
     if (!onLoadMore) {
       throw new Error('onLoadMore callback is required');
     }
 
-    if (!currentFilterData) {
+    if (!currentFilter) {
       throw new Error(`Filter data not initialized for column: ${columnKey}`);
     }
 
     try {
       filtersDataStore.set({
         [columnKey]: {
-          ...currentFilterData,
+          ...currentFilter,
           isLoadingMore: true,
         },
       });
 
-      const expectedSkip = currentData.length;
       let response: TResponse;
       const cache = prefetchRef?.current;
 
-      if (cache?.skip === expectedSkip && cache.data) {
+      if (cache?.skip === currentDataLength && cache.data) {
         response = cache.data;
-      } else if (cache?.skip === expectedSkip && cache.promise) {
+      } else if (cache?.skip === currentDataLength && cache.promise) {
         response = await cache.promise;
       } else {
         response = await onLoadMore({
           limit: DEFAULT_FILTER_PAGE_SIZE,
-          skip: currentData.length,
+          skip: currentDataLength,
         });
       }
 
@@ -78,12 +78,12 @@ export const useFetchMoreFilterData = <TData, TResponse>({
       const totalLoadedRows = combinedData.length;
       const totalRows = dataTotalSelector
         ? dataTotalSelector(response)
-        : currentFilterData.totalRows || totalLoadedRows;
+        : currentFilter.totalRows || totalLoadedRows;
       const hasMore = totalRows > totalLoadedRows;
 
       filtersDataStore.set({
         [columnKey]: {
-          ...currentFilterData,
+          ...currentFilter,
           data: combinedData,
           hasMore,
           isLoading: false,
@@ -99,7 +99,7 @@ export const useFetchMoreFilterData = <TData, TResponse>({
 
       if (enablePrefetch && hasMore && prefetchRef) {
         const { initialCache, resolution } = prefetchNextPageUtil({
-          nextSkip: combinedData.length,
+          nextSkip: totalLoadedRows,
           onLoadMore,
         });
 
@@ -120,7 +120,7 @@ export const useFetchMoreFilterData = <TData, TResponse>({
 
       filtersDataStore.set({
         [columnKey]: {
-          ...currentFilterData,
+          ...currentFilter,
           isLoadingMore: false,
         },
       });
