@@ -39,5 +39,5 @@
     "**/.client/**/*",
     ".react-router/types/**/*"
   ],
-  "exclude": ["miscelanious", "utils"]
+  "exclude": ["api-server", "miscelanious", "utils"]
 }

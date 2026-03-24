@@ -45,7 +45,12 @@ describe('useVirtualization', () => {
     } as RefObject<HTMLElement | null>;
 
     const { result } = renderHook(() =>
-      useVirtualization({ containerRef, itemHeight: 50, totalItems: 100 }),
+      useVirtualization({
+        containerRef,
+        itemHeight: 50,
+        overscan: 3,
+        totalItems: 100,
+      }),
     );
 
     expect(result.current.containerHeight).toBe(400);
@@ -62,7 +67,12 @@ describe('useVirtualization', () => {
     } as RefObject<HTMLElement | null>;
 
     const { result } = renderHook(() =>
-      useVirtualization({ containerRef, itemHeight: 50, totalItems: 100 }),
+      useVirtualization({
+        containerRef,
+        itemHeight: 50,
+        overscan: 3,
+        totalItems: 100,
+      }),
     );
 
     act(() => {
@@ -82,7 +92,12 @@ describe('useVirtualization', () => {
     } as RefObject<HTMLElement | null>;
 
     const { result } = renderHook(() =>
-      useVirtualization({ containerRef, itemHeight: 50, totalItems: 100 }),
+      useVirtualization({
+        containerRef,
+        itemHeight: 50,
+        overscan: 3,
+        totalItems: 100,
+      }),
     );
 
     Object.defineProperty(container, 'offsetHeight', {

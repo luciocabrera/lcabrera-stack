@@ -158,6 +158,13 @@ describe('useColumnVirtualization', () => {
   });
 
   it('keeps the previous width when a resize measures zero', () => {
+    // Stub innerWidth to 0 so the hook's viewport-width fallback is also skipped,
+    // exercising the zero-guard that preserves the previous containerWidth.
+    Object.defineProperty(globalThis.window, 'innerWidth', {
+      configurable: true,
+      value: 0,
+    });
+
     const container = createContainer({ offsetWidth: 400 });
     const containerRef = {
       current: container,

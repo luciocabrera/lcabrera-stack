@@ -1,7 +1,15 @@
 // @vitest-environment jsdom
 
 import { render } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+vi.mock('../contexts/TableConfig/columns/selectors', () => ({
+  useGetColumnGroups: vi.fn(() => ({
+    centerCols: [{}, {}, {}],
+    leftPinnedCols: [{}],
+    rightPinnedCols: [{}],
+  })),
+}));
 
 import { SpacerRow } from './SpacerRow.component';
 

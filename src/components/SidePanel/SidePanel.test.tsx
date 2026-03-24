@@ -5,15 +5,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { SidePanel } from './SidePanel.component';
 
-const savedClose = HTMLDialogElement.prototype.close.bind(
-  HTMLDialogElement.prototype,
-);
-const savedShow = HTMLDialogElement.prototype.show.bind(
-  HTMLDialogElement.prototype,
-);
-const savedShowModal = HTMLDialogElement.prototype.showModal.bind(
-  HTMLDialogElement.prototype,
-);
+// eslint-disable-next-line typescript-eslint/unbound-method -- Saving prototype methods for test teardown restoration
+const savedClose = HTMLDialogElement.prototype.close;
+// eslint-disable-next-line typescript-eslint/unbound-method -- Saving prototype methods for test teardown restoration
+const savedShow = HTMLDialogElement.prototype.show;
+// eslint-disable-next-line typescript-eslint/unbound-method -- Saving prototype methods for test teardown restoration
+const savedShowModal = HTMLDialogElement.prototype.showModal;
 
 afterEach(() => {
   HTMLDialogElement.prototype.close = savedClose;
@@ -46,7 +43,7 @@ describe('SidePanel', () => {
     );
     const panel = screen.getByTestId('side-panel');
     expect(panel.tagName).toBe('ASIDE');
-    expect(panel.getAttribute('role')).toBe('complementary');
+    expect(panel.getAttribute('aria-label')).toBe('Settings panel');
   });
 
   it('renders as dialog element when not pinned', () => {

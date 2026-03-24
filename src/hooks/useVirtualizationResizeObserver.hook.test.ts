@@ -95,6 +95,7 @@ describe('useVirtualizationResizeObserver', () => {
       useVirtualizationResizeObserver({
         containerRef,
         itemHeight: 50,
+        overscan: 3,
         totalItems: 100,
       }),
     );
@@ -116,6 +117,7 @@ describe('useVirtualizationResizeObserver', () => {
       useVirtualizationResizeObserver({
         containerRef,
         itemHeight: 50,
+        overscan: 3,
         totalItems: 100,
       }),
     );
