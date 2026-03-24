@@ -14,7 +14,9 @@ export const styles = stylex.create({
     minHeight: 0,
   },
   containerLocked: {
-    overflow: 'hidden',
+    pointerEvents: 'none',
+    touchAction: 'none',
+    overflowY: 'scroll',
   },
   outerContainer: {
     borderColor: colors.borderPrimary,

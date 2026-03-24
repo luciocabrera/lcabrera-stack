@@ -46,8 +46,6 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   const wrapperRef = useRef<HTMLDivElement>(null);
   const wrapperContextValue = { containerRef, wrapperRef };
 
-  const isLoadingState = isLoading || isLoadingMore;
-
   useInfiniteScroll({
     dataSelector,
     dataTotalSelector,
@@ -79,11 +77,11 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
             icon={icon}
           />
           <div
-            data-scroll-locked={String(isLoadingState)}
+            data-scroll-locked={String(isLoading)}
             ref={containerRef}
             {...stylex.props(
               styles.container,
-              isLoadingState && styles.containerLocked,
+              isLoading && styles.containerLocked,
             )}
           >
             <TableBase>
