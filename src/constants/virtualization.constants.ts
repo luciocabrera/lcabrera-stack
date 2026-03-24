@@ -15,7 +15,7 @@ export const DEFAULT_CONTAINER_WIDTH = 1920;
  * Default number of extra **rows** rendered beyond each visible edge
  * to prevent flicker during fast scrolling.
  */
-export const DEFAULT_ROW_OVERSCAN = 20;
+export const DEFAULT_ROW_OVERSCAN = 10;
 
 /**
  * Default number of extra **columns** rendered beyond each visible edge

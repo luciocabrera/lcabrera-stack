@@ -14,7 +14,7 @@ const resolveLogLevel = (override?: LogLevel): LogLevel => {
 
   const envLevel = import.meta.env.VITE_LOG_LEVEL as LogLevel | undefined;
 
-  if (envLevel && envLevel in LOG_LEVEL_PRIORITY) return envLevel;
+  if (envLevel && Object.hasOwn(LOG_LEVEL_PRIORITY, envLevel)) return envLevel;
 
   return DEFAULT_LOG_LEVEL;
 };
