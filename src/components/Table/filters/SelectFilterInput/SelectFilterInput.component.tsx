@@ -1,4 +1,7 @@
+import { useRef } from 'react';
+
 import type { FilterOptionsResponse } from '@/components/Table/Table.types';
+import type { PrefetchCache } from '@/types/ui.types';
 
 import {
   useFetchFilterData,
@@ -21,13 +24,21 @@ export const SelectFilterInput = <TData,>({
   const column = useGetNormalizedColumn<TData>(columnKey);
   const filterData = useGetFilterData<TData>(columnKey);
 
-  const fetchFilterData = useFetchFilterData<string, FilterOptionsResponse>(
-    columnKey,
-  );
+  const prefetchRef = useRef<PrefetchCache<FilterOptionsResponse>>({
+    data: undefined,
+    promise: undefined,
+    skip: -1,
+  });
+
   const fetchMoreFilterData = useFetchMoreFilterData<
-    string,
+    TData,
     FilterOptionsResponse
-  >(columnKey);
+  >({ columnKey, prefetchRef });
+
+  const fetchFilterData = useFetchFilterData<TData, FilterOptionsResponse>({
+    columnKey,
+    prefetchRef,
+  });
 
   const handleFetchInitial = async () => {
     if (!column.fetchFilterOptions) return;

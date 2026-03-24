@@ -26,6 +26,12 @@ export type PinConflictState = {
 
 export type PinSide = 'closest-edge' | 'left' | 'right';
 
+export type PrefetchCache<TResponse> = {
+  readonly data?: TResponse;
+  readonly promise?: Promise<TResponse>;
+  readonly skip: number;
+};
+
 export type SortDirection = 'asc' | 'desc' | undefined;
 
 export type Sorting<TData = Record<string, unknown>> = {
