@@ -1,0 +1,20 @@
+export const fmtConfig = {
+  arrowParens: "always" as const,
+  bracketSpacing: true,
+  endOfLine: "lf" as const,
+  ignorePatterns: [
+    ".react-router/",
+    "build/",
+    "dist/",
+    "miscelanious/",
+    "node_modules/",
+    "eslint-local-rules/",
+  ],
+  jsxSingleQuote: true,
+  printWidth: 80,
+  semi: true,
+  singleQuote: true,
+  sortPackageJson: false,
+  tabWidth: 2,
+  trailingComma: "all" as const,
+};

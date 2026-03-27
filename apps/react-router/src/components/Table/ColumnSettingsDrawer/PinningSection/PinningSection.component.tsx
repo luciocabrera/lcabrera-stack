@@ -1,0 +1,58 @@
+import * as stylex from "@stylexjs/stylex";
+
+import { Button } from "@/components/Button";
+import { PinLeftIcon, PinRightIcon } from "@/components/Icons";
+import {
+  SidePanelSection,
+  SidePanelSectionHeader,
+  SidePanelSectionMain,
+} from "@/components/SidePanel";
+import { ICON_SIZE_MD } from "@/design-system/constants";
+
+import type { PinningSectionProps } from "./PinningSection.types.ts";
+
+import { useSetColumnPinning } from "../ColumnDrawerContext/actions/index.ts";
+import { useGetColumnPinning } from "../ColumnDrawerContext/selectors/index.ts";
+import { styles } from "./PinningSection.stylex.ts";
+import { PinningSectionToolbar } from "./PinningSectionToolbar/index.ts";
+
+export const PinningSection = <TData,>({ columnKey: _columnKey }: PinningSectionProps<TData>) => {
+  const columnPinning = useGetColumnPinning();
+  const setColumnPinning = useSetColumnPinning();
+
+  return (
+    <SidePanelSectionMain>
+      <SidePanelSection>
+        <SidePanelSectionHeader
+          title="Column Pinning"
+          toolbar={<PinningSectionToolbar variant="toolbar" />}
+        />
+        <div {...stylex.props(styles.buttonGroup)}>
+          <Button
+            color={columnPinning === "left" ? "primary" : "outline"}
+            icon={<PinLeftIcon size={ICON_SIZE_MD} />}
+            onClick={() => {
+              setColumnPinning(columnPinning === "left" ? undefined : "left");
+            }}
+            size="sm"
+            width="full"
+          >
+            Pin Left
+          </Button>
+          <Button
+            color={columnPinning === "right" ? "primary" : "outline"}
+            icon={<PinRightIcon size={ICON_SIZE_MD} />}
+            onClick={() => {
+              setColumnPinning(columnPinning === "right" ? undefined : "right");
+            }}
+            size="sm"
+            width="full"
+          >
+            Pin Right
+          </Button>
+        </div>
+      </SidePanelSection>
+      <PinningSectionToolbar />
+    </SidePanelSectionMain>
+  );
+};

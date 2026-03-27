@@ -1,0 +1,125 @@
+import { useState } from "react";
+
+import type { TabItem } from "@/components/Tabs";
+
+import { Button } from "@/components/Button";
+import { SettingsIcon } from "@/components/Icons";
+import {
+  SidePanel,
+  SidePanelBody,
+  SidePanelFooter,
+  SidePanelHeader,
+  SidePanelHeaderToolbar,
+  SidePanelTitle,
+} from "@/components/SidePanel";
+import { Tabs } from "@/components/Tabs";
+import { ICON_SIZE_LG } from "@/design-system/constants";
+
+import { useToogleTableIsTableSettingsOpen } from "../contexts/TableConfig/meta/actions/index.ts";
+import { ColumnOrderSection } from "./ColumnOrderSection/index.ts";
+import { ColumnOrderSectionProvider } from "./ColumnOrderSection/ColumnOrderSectionContext/ColumnOrderSectionContext.provider.tsx";
+import { FiltersSection } from "./FiltersSection/index.ts";
+import { GeneralSettingsSection } from "./GeneralSettingsSection/index.ts";
+import { SortingSection } from "./SortingSection/index.ts";
+import {
+  useBatchSetTableDrawerSettings,
+  useResetTableSettings,
+} from "./TableDrawerContext/actions/index.ts";
+
+export const TableSettingsDrawer = () => {
+  const batchSetTableDrawerSettings = useBatchSetTableDrawerSettings();
+  const resetTableDrawerSettings = useResetTableSettings();
+  const toogleTableIsTableSettingsOpen = useToogleTableIsTableSettingsOpen();
+
+  const [isPinned, setIsPinned] = useState(false);
+
+  const areFiltersValid = true; // TODO: implement filter validation
+  const acceptButtonTitle = "Please fix invalid filters before accepting";
+
+  const handleAccept = () => {
+    // if (!areFiltersValid) {
+    //   // Don't allow accept if filters are invalid
+    //   return;
+    // }
+
+    batchSetTableDrawerSettings();
+
+    // Unpin if pinned, then close
+    if (isPinned) {
+      setIsPinned(false);
+    }
+  };
+
+  const handleCancel = () => {
+    resetTableDrawerSettings();
+    // Unpin if pinned, then close
+    if (isPinned) setIsPinned(false);
+
+    toogleTableIsTableSettingsOpen();
+  };
+
+  const handleTogglePin = () => {
+    setIsPinned(!isPinned);
+  };
+
+  const tabs: TabItem[] = [
+    {
+      children: <GeneralSettingsSection />,
+      header: "General",
+      key: "general",
+    },
+    {
+      children: <FiltersSection />,
+      header: "Filters",
+      key: "filters",
+    },
+    {
+      children: <SortingSection />,
+      header: " Sorting",
+      key: "sorting",
+    },
+
+    {
+      children: (
+        <ColumnOrderSectionProvider>
+          <ColumnOrderSection />
+        </ColumnOrderSectionProvider>
+      ),
+      header: "Columns",
+      key: "columns",
+    },
+  ];
+
+  return (
+    <SidePanel isOpen={true} isPinned={isPinned} onClose={handleCancel} position="right" size="md">
+      <SidePanelHeader
+        actions={
+          <SidePanelHeaderToolbar
+            isPinned={isPinned}
+            onClose={handleCancel}
+            onTogglePin={handleTogglePin}
+          />
+        }
+      >
+        <SidePanelTitle icon={<SettingsIcon size={ICON_SIZE_LG} />}>Table Settings</SidePanelTitle>
+      </SidePanelHeader>
+      <SidePanelBody>
+        <Tabs tabs={tabs} />
+      </SidePanelBody>
+      <SidePanelFooter>
+        <Button
+          color="primary"
+          isDisabled={!areFiltersValid}
+          onClick={handleAccept}
+          size="sm"
+          title={acceptButtonTitle}
+        >
+          Accept
+        </Button>
+        <Button color="outline" onClick={handleCancel} size="sm">
+          Cancel
+        </Button>
+      </SidePanelFooter>
+    </SidePanel>
+  );
+};

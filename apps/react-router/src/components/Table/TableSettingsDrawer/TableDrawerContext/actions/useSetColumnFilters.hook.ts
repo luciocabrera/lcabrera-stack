@@ -1,0 +1,14 @@
+import type { ColumnFiltersState } from "@/components/Table/Table.types";
+
+import { useTableDrawerContextValue } from "../useTableDrawerContextValue.hook.ts";
+
+/**
+ * Hook to update column filters
+ */
+export const useSetColumnFilters = () => {
+  const { columnsStore } = useTableDrawerContextValue();
+
+  return (columnFilters: ColumnFiltersState) => {
+    columnsStore.set({ columnFilters });
+  };
+};
