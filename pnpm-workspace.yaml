@@ -50,6 +50,7 @@ catalog:
   react-dom: ^19.2.5
   react-router: ^7.14.0
   typescript: ^6.0.2
+
   typescript-eslint: ^8.58.1
   unplugin: ^3.0.0
   vite: npm:@voidzero-dev/vite-plus-core@^0.1.16
@@ -62,14 +63,14 @@ catalogMode: prefer
 minimumReleaseAge: 1440
 minimumReleaseAgeExclude:
   - "@types/*" # type-only packages have zero runtime attack surface
-overrides:
-  vite: "catalog:"
-  vitest: "catalog:"
-peerDependencyRules:
-  allowAny:
-    - vite
-    - vitest
-  allowedVersions:
-    vite: "*"
-    vitest: "*"
+# overrides:
+#   vite: "catalog:"
+#   vitest: "catalog:"
+# peerDependencyRules:
+#   allowAny:
+#     - vite
+#     - vitest
+#   allowedVersions:
+#     vite: "*"
+#     vitest: "*"
 trustPolicy: no-downgrade
