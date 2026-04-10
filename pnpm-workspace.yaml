@@ -1,5 +1,9 @@
 packages:
   - apps/*
+allowBuilds: {}
+
+# Supply chain security (https://pnpm.io/supply-chain-security)
+blockExoticSubdeps: true
 
 catalog:
   "@babel/preset-typescript": ^7.28.5
@@ -55,6 +59,9 @@ catalog:
   zod: ^4.3.6
 
 catalogMode: prefer
+minimumReleaseAge: 1440
+minimumReleaseAgeExclude:
+  - "@types/*" # type-only packages have zero runtime attack surface
 overrides:
   vite: "catalog:"
   vitest: "catalog:"
@@ -65,11 +72,4 @@ peerDependencyRules:
   allowedVersions:
     vite: "*"
     vitest: "*"
-
-# Supply chain security (https://pnpm.io/supply-chain-security)
-blockExoticSubdeps: true
-minimumReleaseAge: 1440
-minimumReleaseAgeExclude:
-  - "@types/*" # type-only packages have zero runtime attack surface
 trustPolicy: no-downgrade
-allowBuilds: []
