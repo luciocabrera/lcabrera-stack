@@ -10,17 +10,17 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "cors": "^2.8.6",
-    "express": "^5.2.1",
-    "pg": "^8.20.0",
-    "zod": "^4.3.6"
+    "cors": "catalog:",
+    "express": "catalog:",
+    "pg": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@types/cors": "catalog:",
     "@types/express": "catalog:",
     "@types/node": "catalog:",
     "@types/pg": "catalog:",
-    "nodemon": "^3.1.14",
+    "nodemon": "catalog:",
     "typescript": "catalog:"
   }
 }

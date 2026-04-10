@@ -10,14 +10,14 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@fastify/cors": "^11.2.0",
-    "fastify": "^5.8.4",
-    "pg": "^8.20.0"
+    "@fastify/cors": "catalog:",
+    "fastify": "catalog:",
+    "pg": "catalog:"
   },
   "devDependencies": {
     "@types/node": "catalog:",
     "@types/pg": "catalog:",
-    "nodemon": "^3.1.14",
+    "nodemon": "catalog:",
     "typescript": "catalog:"
   }
 }
