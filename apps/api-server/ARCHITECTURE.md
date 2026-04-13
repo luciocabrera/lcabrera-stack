@@ -14,6 +14,7 @@ Express + PostgreSQL backend used by the frontend via `/api` routes.
 
 Configured by `.env`:
 
+- `CORS_ALLOWED_ORIGINS`
 - `DB_HOST`
 - `DB_PORT`
 - `DB_USER`

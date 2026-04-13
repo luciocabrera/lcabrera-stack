@@ -59,6 +59,7 @@ src/
 
 ## Guardrails
 
+- CORS origin checks are allowlist-driven through `CORS_ALLOWED_ORIGINS`.
 - Repositories never accept raw query-string JSON.
 - Dynamic SQL identifiers are always allowlisted before interpolation.
 - Query/value parsing happens before repository calls.

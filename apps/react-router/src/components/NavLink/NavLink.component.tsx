@@ -18,7 +18,7 @@ export const NavLink = ({
 }: NavLinkProps) => {
   return (
     <RouterNavLink
-      className={({ isActive }) => {
+      className={({ isActive }: { readonly isActive: boolean }) => {
         const classNameValue = getClassName({
           color,
           isActive,
