@@ -130,13 +130,7 @@ function handleBrowserRequest(
           console.error('Streaming error:', error);
         },
         onShellError(error: unknown) {
-          reject(
-            error instanceof Error
-              ? error
-              : new Error(
-                  typeof error === 'string' ? error : JSON.stringify(error),
-                ),
-          );
+          reject(error instanceof Error ? error : new Error(String(error)));
         },
         onShellReady() {
           const body = new PassThrough();

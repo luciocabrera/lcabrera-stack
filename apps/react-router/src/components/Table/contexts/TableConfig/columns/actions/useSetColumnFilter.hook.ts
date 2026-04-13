@@ -32,10 +32,10 @@ export const useSetColumnFilter = <TData>() => {
       {}) as ColumnFiltersState<TData>;
     let columnFilters: ColumnFiltersState<TData>;
     if (filter === null || filter === undefined) {
-      // TODO: Improve later, i don't like this pattern
-      // Remove the filter by creating new object without it
-      const { [columnKey]: _unusedFilter, ...rest } = current;
-      columnFilters = rest as ColumnFiltersState<TData>;
+      // Remove the filter by building a new object without the target key
+      columnFilters = Object.fromEntries(
+        Object.entries(current).filter(([key]) => key !== columnKey),
+      ) as ColumnFiltersState<TData>;
     } else {
       columnFilters = { ...current, [columnKey]: filter };
     }
