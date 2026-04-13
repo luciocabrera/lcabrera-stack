@@ -7,11 +7,11 @@ import { TableCheckDisplay } from '@/components/Table/TableCheckDisplay';
 import { formatCurrency, formatDate, formatNumber } from '@/utils/formatters';
 
 type RenderCellContentArgs = {
-  dataType: TableColumnDataType;
-  format?: TableColumnFormat;
-  label?: string;
-  locale?: string;
-  value: unknown;
+  readonly dataType: TableColumnDataType;
+  readonly format?: TableColumnFormat;
+  readonly label?: string;
+  readonly locale?: string;
+  readonly value: unknown;
 };
 
 export const renderCellContent = ({
@@ -37,7 +37,7 @@ export const renderCellContent = ({
         });
       }
       // If it's already a string with currency symbol or non-numeric, return as-is
-      return String(value);
+      return typeof value === 'string' ? value : JSON.stringify(value);
     }
     case 'date': {
       return formatDate({

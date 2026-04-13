@@ -34,8 +34,7 @@ export const useSetColumnFilter = <TData>() => {
     if (filter === null || filter === undefined) {
       // TODO: Improve later, i don't like this pattern
       // Remove the filter by creating new object without it
-      const { [columnKey]: unusedFilter, ...rest } = current;
-      void unusedFilter; // Explicitly mark as intentionally unused
+      const { [columnKey]: _unusedFilter, ...rest } = current;
       columnFilters = rest as ColumnFiltersState<TData>;
     } else {
       columnFilters = { ...current, [columnKey]: filter };

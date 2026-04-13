@@ -36,7 +36,7 @@ export const formatPgAdminQuery = (
       continue;
     }
 
-    const placeholder = new RegExp(`\\$${index + 1}(?!\\d)`, 'g');
+    const placeholder = new RegExp(String.raw`\$${index + 1}(?!\d)`, 'g');
     formattedQuery = formattedQuery.replace(
       placeholder,
       formatQueryValue(parameterValue),

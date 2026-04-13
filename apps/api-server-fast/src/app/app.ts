@@ -42,16 +42,16 @@ export const createApp = ({
 
     if (statusCode < 500) {
       const message = error instanceof Error ? error.message : 'Bad request';
-      void reply.status(statusCode).send({ error: message });
+      reply.status(statusCode).send({ error: message });
       return;
     }
 
     console.error('❌ Unhandled API error:', error);
-    void reply.status(500).send({ error: 'Internal server error' });
+    reply.status(500).send({ error: 'Internal server error' });
   });
 
   app.setNotFoundHandler((_request, reply) => {
-    void reply.status(404).send({ error: 'Route not found' });
+    reply.status(404).send({ error: 'Route not found' });
   });
 
   // --- Route plugins ----------------------------------------------------

@@ -11,7 +11,6 @@ describe('serializeFiltersToURL', () => {
     const result = serializeFiltersToURL({
       active: { type: 'boolean', value: true },
     });
-    expect(result).toBeDefined();
     const parsed = JSON.parse(result!) as Record<string, unknown>;
     expect(parsed['active']).toBe(true);
   });

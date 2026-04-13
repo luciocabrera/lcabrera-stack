@@ -212,6 +212,6 @@ export const orderByIdParamsSchema = {
   type: 'object',
   required: ['orderId'],
   properties: {
-    orderId: { type: 'string', pattern: '^\\d+$' },
+    orderId: { type: 'string', pattern: String.raw`^\d+$` },
   },
 };

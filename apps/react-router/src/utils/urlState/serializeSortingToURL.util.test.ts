@@ -11,7 +11,6 @@ describe('serializeSortingToURL', () => {
     const result = serializeSortingToURL([
       { columnKey: 'name', direction: 'asc' },
     ]);
-    expect(result).toBeDefined();
     const parsed = JSON.parse(result!) as Record<string, unknown>;
     expect(parsed['name']).toBe('asc');
   });

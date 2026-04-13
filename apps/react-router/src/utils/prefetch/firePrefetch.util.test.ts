@@ -79,11 +79,6 @@ describe('firePrefetch', () => {
     resolvePromise!('stale-data');
     await promise;
 
-    // Allow microtask to run
-    await new Promise((resolve) => {
-      setTimeout(resolve, 0);
-    });
-
     // The stale result should be discarded — skip should still be 200
     expect(prefetchRef.current.skip).toBe(200);
     expect(prefetchRef.current.data).toBeUndefined();

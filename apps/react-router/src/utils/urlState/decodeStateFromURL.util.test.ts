@@ -30,7 +30,6 @@ describe('decodeStateFromURL', () => {
       convertArraysToSets: ['columnVisibility'],
       encoded,
     });
-    expect(result?.['columnVisibility']).toBeInstanceOf(Set);
     expect((result!['columnVisibility'] as Set<string>).has('id')).toBe(true);
   });
 

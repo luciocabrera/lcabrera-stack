@@ -10,6 +10,13 @@ type BuildWhereClauseResult = {
   readonly whereClause: string;
 };
 
+type FilterContext = {
+  readonly columnName: string;
+  readonly nextParameterIndex: number;
+  readonly queryParams: QueryValue[];
+  readonly whereConditions: string[];
+};
+
 const appendTextFilter = ({
   columnName,
   filter,
@@ -67,6 +74,101 @@ const appendTextFilter = ({
   };
 };
 
+const handleNumberFilter = (
+  context: FilterContext,
+  filter: Extract<EnterpriseOrdersFilter, { readonly type: 'number' }>,
+): boolean => {
+  const { columnName, nextParameterIndex, queryParams, whereConditions } =
+    context;
+
+  if (filter.operator === 'between' && filter.value2 !== undefined) {
+    whereConditions.push(
+      `${columnName} BETWEEN $${nextParameterIndex} AND $${nextParameterIndex + 1}`,
+    );
+    queryParams.push(filter.value, filter.value2);
+    return true;
+  }
+
+  switch (filter.operator) {
+    case 'equals':
+      whereConditions.push(`${columnName} = $${nextParameterIndex}`);
+      break;
+    case 'greaterThan':
+      whereConditions.push(`${columnName} > $${nextParameterIndex}`);
+      break;
+    case 'greaterThanOrEqual':
+      whereConditions.push(`${columnName} >= $${nextParameterIndex}`);
+      break;
+    case 'lessThan':
+      whereConditions.push(`${columnName} < $${nextParameterIndex}`);
+      break;
+    case 'lessThanOrEqual':
+      whereConditions.push(`${columnName} <= $${nextParameterIndex}`);
+      break;
+    case 'notEquals':
+      whereConditions.push(`${columnName} != $${nextParameterIndex}`);
+      break;
+  }
+
+  queryParams.push(filter.value);
+  return true;
+};
+
+const handleDateFilter = (
+  context: FilterContext,
+  filter: Extract<EnterpriseOrdersFilter, { readonly type: 'date' }>,
+): boolean => {
+  const { columnName, nextParameterIndex, queryParams, whereConditions } =
+    context;
+
+  if (filter.operator === 'after') {
+    whereConditions.push(`${columnName} > $${nextParameterIndex}::date`);
+    queryParams.push(filter.value);
+    return true;
+  }
+
+  if (filter.operator === 'before') {
+    whereConditions.push(`${columnName} < $${nextParameterIndex}::date`);
+    queryParams.push(filter.value);
+    return true;
+  }
+
+  if (filter.operator === 'between' && filter.value2) {
+    whereConditions.push(
+      `${columnName} BETWEEN $${nextParameterIndex}::date AND $${nextParameterIndex + 1}::date`,
+    );
+    queryParams.push(filter.value, filter.value2);
+    return true;
+  }
+
+  whereConditions.push(`${columnName} = $${nextParameterIndex}::date`);
+  queryParams.push(filter.value);
+  return true;
+};
+
+const handleSelectFilter = (
+  context: FilterContext,
+  filter: Extract<
+    EnterpriseOrdersFilter,
+    { readonly values?: readonly unknown[] }
+  >,
+): boolean => {
+  const { columnName, nextParameterIndex, queryParams, whereConditions } =
+    context;
+
+  if (!filter.values || filter.values.length === 0) {
+    return false;
+  }
+
+  const placeholders = filter.values
+    .map((_value, index) => `$${nextParameterIndex + index}`)
+    .join(', ');
+  const operator = filter.operator === 'notEquals' ? 'NOT IN' : 'IN';
+  whereConditions.push(`${columnName} ${operator} (${placeholders})`);
+  queryParams.push(...filter.values);
+  return true;
+};
+
 /**
  * Build a WHERE clause for enterprise-order filters.
  */
@@ -78,6 +180,12 @@ export const buildEnterpriseOrdersWhereClause = (
 
   for (const [columnName, filter] of Object.entries(filters)) {
     const nextParameterIndex = queryParams.length + 1;
+    const context = {
+      columnName,
+      nextParameterIndex,
+      queryParams,
+      whereConditions,
+    };
 
     if (filter.type === 'text') {
       const textFilter = appendTextFilter({
@@ -90,93 +198,66 @@ export const buildEnterpriseOrdersWhereClause = (
         whereConditions.push(textFilter.condition);
         queryParams.push(textFilter.value);
       }
-
       continue;
     }
 
-    if (filter.type === 'number') {
-      if (filter.operator === 'between' && filter.value2 !== undefined) {
-        whereConditions.push(
-          `${columnName} BETWEEN $${nextParameterIndex} AND $${nextParameterIndex + 1}`,
-        );
-        queryParams.push(filter.value, filter.value2);
-        continue;
-      }
-
-      if (filter.operator === 'equals') {
-        whereConditions.push(`${columnName} = $${nextParameterIndex}`);
-      }
-
-      if (filter.operator === 'greaterThan') {
-        whereConditions.push(`${columnName} > $${nextParameterIndex}`);
-      }
-
-      if (filter.operator === 'greaterThanOrEqual') {
-        whereConditions.push(`${columnName} >= $${nextParameterIndex}`);
-      }
-
-      if (filter.operator === 'lessThan') {
-        whereConditions.push(`${columnName} < $${nextParameterIndex}`);
-      }
-
-      if (filter.operator === 'lessThanOrEqual') {
-        whereConditions.push(`${columnName} <= $${nextParameterIndex}`);
-      }
-
-      if (filter.operator === 'notEquals') {
-        whereConditions.push(`${columnName} != $${nextParameterIndex}`);
-      }
-
-      queryParams.push(filter.value);
+    if (
+      filter.type === 'number' &&
+      handleNumberFilter(
+        context,
+        filter as Extract<EnterpriseOrdersFilter, { readonly type: 'number' }>,
+      )
+    ) {
       continue;
     }
 
-    if (filter.type === 'date') {
-      if (filter.operator === 'after') {
-        whereConditions.push(`${columnName} > $${nextParameterIndex}::date`);
-        queryParams.push(filter.value);
-        continue;
-      }
-
-      if (filter.operator === 'before') {
-        whereConditions.push(`${columnName} < $${nextParameterIndex}::date`);
-        queryParams.push(filter.value);
-        continue;
-      }
-
-      if (filter.operator === 'between' && filter.value2) {
-        whereConditions.push(
-          `${columnName} BETWEEN $${nextParameterIndex}::date AND $${nextParameterIndex + 1}::date`,
-        );
-        queryParams.push(filter.value, filter.value2);
-        continue;
-      }
-
-      whereConditions.push(`${columnName} = $${nextParameterIndex}::date`);
-      queryParams.push(filter.value);
+    if (
+      filter.type === 'date' &&
+      handleDateFilter(
+        context,
+        filter as Extract<EnterpriseOrdersFilter, { readonly type: 'date' }>,
+      )
+    ) {
       continue;
     }
 
     if (filter.type === 'boolean') {
       whereConditions.push(`${columnName} = $${nextParameterIndex}`);
-      queryParams.push(filter.value);
+      queryParams.push(
+        (
+          filter as Extract<
+            EnterpriseOrdersFilter,
+            { readonly type: 'boolean' }
+          >
+        ).value,
+      );
       continue;
     }
 
-    if (filter.values && filter.values.length > 0) {
-      const placeholders = filter.values
-        .map((_value, index) => `$${nextParameterIndex + index}`)
-        .join(', ');
-      const operator = filter.operator === 'notEquals' ? 'NOT IN' : 'IN';
-      whereConditions.push(`${columnName} ${operator} (${placeholders})`);
-      queryParams.push(...filter.values);
+    if (
+      handleSelectFilter(
+        context,
+        filter as Extract<
+          EnterpriseOrdersFilter,
+          { readonly values?: readonly unknown[] }
+        >,
+      )
+    ) {
       continue;
     }
 
-    if (filter.value) {
-      const operator = filter.operator === 'notEquals' ? '!=' : '=';
-      whereConditions.push(`${columnName} ${operator} $${nextParameterIndex}`);
-      queryParams.push(filter.value);
+    const hasOperator =
+      'operator' in filter && typeof filter.operator === 'string';
+    const hasValue = 'value' in filter && filter.value !== undefined;
+
+    if (hasValue) {
+      const op =
+        hasOperator &&
+        (filter as { readonly operator: string }).operator === 'notEquals'
+          ? '!='
+          : '=';
+      whereConditions.push(`${columnName} ${op} $${nextParameterIndex}`);
+      queryParams.push((filter as { readonly value: QueryValue }).value);
     }
   }
 
