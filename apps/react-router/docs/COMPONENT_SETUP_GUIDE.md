@@ -27,19 +27,19 @@ ComponentName/
 **Template:**
 
 ```typescript
-import type { ComponentPropsWithoutRef } from "react";
+import type { ComponentPropsWithoutRef } from 'react';
 
 // For HTML elements without ref forwarding
-export type ComponentNameProps = ComponentPropsWithoutRef<"div">;
+export type ComponentNameProps = ComponentPropsWithoutRef<'div'>;
 
 // OR for HTML elements with ref forwarding
-import type { ComponentPropsWithRef } from "react";
-export type ComponentNameProps = ComponentPropsWithRef<"div">;
+import type { ComponentPropsWithRef } from 'react';
+export type ComponentNameProps = ComponentPropsWithRef<'div'>;
 
 // For custom props, extend the base props
-export type ComponentNameProps = ComponentPropsWithoutRef<"div"> & {
-  variant?: "primary" | "secondary";
-  size?: "sm" | "md" | "lg";
+export type ComponentNameProps = ComponentPropsWithoutRef<'div'> & {
+  variant?: 'primary' | 'secondary';
+  size?: 'sm' | 'md' | 'lg';
 };
 ```
 
@@ -59,11 +59,15 @@ export type ComponentNameProps = ComponentPropsWithoutRef<"div"> & {
 **Template:**
 
 ```typescript
-import * as stylex from "@stylexjs/stylex";
+import * as stylex from '@stylexjs/stylex';
 
 // Import design tokens
-import { spacing, typography, borderRadius } from "@/design-system/tokens/base.stylex";
-import { colors } from "@/design-system/tokens/colors.stylex";
+import {
+  spacing,
+  typography,
+  borderRadius,
+} from '@/design-system/tokens/base.stylex';
+import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const componentNameStyles = stylex.create({
   base: {
@@ -145,8 +149,8 @@ export const ComponentName = ({
 **Template:**
 
 ```typescript
-export { ComponentName } from "./ComponentName";
-export type { ComponentNameProps } from "./ComponentName.types";
+export { ComponentName } from './ComponentName';
+export type { ComponentNameProps } from './ComponentName.types';
 ```
 
 **Guidelines:**
@@ -163,10 +167,10 @@ When you have multiple related components in a parent directory, create an `inde
 **Template:**
 
 ```typescript
-export { ComponentOne } from "./ComponentOne";
-export type { ComponentOneProps } from "./ComponentOne";
-export { ComponentTwo } from "./ComponentTwo";
-export type { ComponentTwoProps } from "./ComponentTwo";
+export { ComponentOne } from './ComponentOne';
+export type { ComponentOneProps } from './ComponentOne';
+export { ComponentTwo } from './ComponentTwo';
+export type { ComponentTwoProps } from './ComponentTwo';
 ```
 
 ## Step-by-Step Implementation Process
@@ -410,17 +414,17 @@ Follow this import order for consistency:
 
 ```typescript
 // 1. External dependencies
-import * as stylex from "@stylexjs/stylex";
+import * as stylex from '@stylexjs/stylex';
 
 // 2. Types (relative imports)
-import type { ComponentNameProps } from "./ComponentName.types";
+import type { ComponentNameProps } from './ComponentName.types';
 
 // 3. Internal dependencies (relative imports)
-import { componentNameStyles } from "./ComponentName.stylex";
+import { componentNameStyles } from './ComponentName.stylex';
 
 // 4. Design system tokens (absolute imports with alias)
-import { spacing } from "@/design-system/tokens/base.stylex";
-import { colors } from "@/design-system/tokens/colors.stylex";
+import { spacing } from '@/design-system/tokens/base.stylex';
+import { colors } from '@/design-system/tokens/colors.stylex';
 ```
 
 ## Design System Integration
@@ -431,8 +435,8 @@ Always use design tokens from the design system:
 
 ```typescript
 // ✅ Good
-import { spacing, typography } from "@/design-system/tokens/base.stylex";
-import { colors } from "@/design-system/tokens/colors.stylex";
+import { spacing, typography } from '@/design-system/tokens/base.stylex';
+import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const styles = stylex.create({
   component: {
@@ -445,9 +449,9 @@ export const styles = stylex.create({
 // ❌ Bad - hardcoded values
 export const styles = stylex.create({
   component: {
-    padding: "16px",
-    fontSize: "14px",
-    color: "#333333",
+    padding: '16px',
+    fontSize: '14px',
+    color: '#333333',
   },
 });
 ```
@@ -482,25 +486,25 @@ Here's a complete example of the CardHeader component:
 ### CardHeader.types.ts
 
 ```typescript
-import type { ComponentPropsWithoutRef } from "react";
+import type { ComponentPropsWithoutRef } from 'react';
 
-export type CardHeaderProps = ComponentPropsWithoutRef<"div">;
+export type CardHeaderProps = ComponentPropsWithoutRef<'div'>;
 ```
 
 ### CardHeader.stylex.ts
 
 ```typescript
-import * as stylex from "@stylexjs/stylex";
+import * as stylex from '@stylexjs/stylex';
 
-import { spacing } from "@/design-system/tokens/base.stylex";
-import { colors } from "@/design-system/tokens/colors.stylex";
+import { spacing } from '@/design-system/tokens/base.stylex';
+import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const cardHeaderStyles = stylex.create({
   header: {
     padding: spacing.lg,
     borderBottomColor: colors.borderPrimary,
-    borderBottomStyle: "solid",
-    borderBottomWidth: "1px",
+    borderBottomStyle: 'solid',
+    borderBottomWidth: '1px',
   },
 });
 ```
@@ -526,7 +530,7 @@ export const CardHeader = ({ children, ...props }: CardHeaderProps) => {
 ### index.ts
 
 ```typescript
-export { CardHeader } from "./CardHeader";
+export { CardHeader } from './CardHeader';
 ```
 
 ## Checklist for New Components

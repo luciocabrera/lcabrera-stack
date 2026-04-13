@@ -1,8 +1,8 @@
-import { Router } from "express";
-import type { Pool } from "pg";
+import { Router } from 'express';
+import type { Pool } from 'pg';
 
-import { createCarSalesController } from "./carSales.controller";
-import { createCarSalesRepository } from "./carSales.repository";
+import { createCarSalesController } from './carSales.controller';
+import { createCarSalesRepository } from './carSales.repository';
 
 type CreateCarSalesRouteArgs = {
   readonly pool: Pool;
@@ -11,13 +11,15 @@ type CreateCarSalesRouteArgs = {
 /**
  * Build the car sales router.
  */
-export const createCarSalesRoute = ({ pool }: CreateCarSalesRouteArgs): Router => {
+export const createCarSalesRoute = ({
+  pool,
+}: CreateCarSalesRouteArgs): Router => {
   const router = Router();
   const repository = createCarSalesRepository({ pool });
   const controller = createCarSalesController({ repository });
 
-  router.get("/", controller.getAll);
-  router.get("/paginated", controller.getPaginated);
+  router.get('/', controller.getAll);
+  router.get('/paginated', controller.getPaginated);
 
   return router;
 };

@@ -1,1 +1,1 @@
-export { createStaticFilterOptions } from "./createStaticFilterOptions.util.ts";
+export { createStaticFilterOptions } from './createStaticFilterOptions.util.ts';

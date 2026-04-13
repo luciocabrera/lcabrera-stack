@@ -1,1 +1,1 @@
-export { SidePanelFooter } from "./SidePanelFooter.component.tsx";
+export { SidePanelFooter } from './SidePanelFooter.component.tsx';

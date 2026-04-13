@@ -1,11 +1,13 @@
-import { createContext } from "react";
+import { createContext } from 'react';
 
-import type { ThemeContextValue } from "@/types/theme.types";
+import type { ThemeContextValue } from '@/types/theme.types';
 
 /**
  * Theme context for managing application theme state
  * Use the useTheme hook to access this context instead of useContext
  */
-export const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
+export const ThemeContext = createContext<ThemeContextValue | undefined>(
+  undefined,
+);
 
-ThemeContext.displayName = "ThemeContext";
+ThemeContext.displayName = 'ThemeContext';

@@ -1,1 +1,1 @@
-export { CardHeader } from "./CardHeader.component.tsx";
+export { CardHeader } from './CardHeader.component.tsx';

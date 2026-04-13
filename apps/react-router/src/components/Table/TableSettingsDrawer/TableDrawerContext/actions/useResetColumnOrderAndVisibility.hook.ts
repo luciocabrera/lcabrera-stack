@@ -2,11 +2,11 @@ import type {
   ColumnOrderState,
   ColumnPinningState,
   ColumnVisibilityState,
-} from "@/components/Table/Table.types";
+} from '@/components/Table/Table.types';
 
-import { useTableConfigContextValue } from "@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook";
+import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 
-import { useTableDrawerContextValue } from "../useTableDrawerContextValue.hook.ts";
+import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook.ts';
 
 /**
  * Hook to reset column order, visibility, and pinning to the original table configuration state
@@ -20,8 +20,11 @@ export const useResetColumnOrderAndVisibility = () => {
 
     columnsDrawerStore.set({
       columnOrder: columnsState?.columnOrder ?? ([] as ColumnOrderState),
-      columnPinning: columnsState?.columnPinning ?? ({ left: [], right: [] } as ColumnPinningState),
-      columnVisibility: columnsState?.columnVisibility ?? ({} as ColumnVisibilityState),
+      columnPinning:
+        columnsState?.columnPinning ??
+        ({ left: [], right: [] } as ColumnPinningState),
+      columnVisibility:
+        columnsState?.columnVisibility ?? ({} as ColumnVisibilityState),
     });
   };
 };

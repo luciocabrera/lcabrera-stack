@@ -1,12 +1,15 @@
-import type { RequestHandler } from "express";
+import type { RequestHandler } from 'express';
 
-import { DEFAULT_PAGE_LIMIT, MAX_WIDE_ALLTYPES_LIMIT } from "../../constants/server.constants";
-import { createRequestHandler } from "../../utils/createRequestHandler.util";
-import { readQueryInteger } from "../../utils/readQueryInteger.util";
+import {
+  DEFAULT_PAGE_LIMIT,
+  MAX_WIDE_ALLTYPES_LIMIT,
+} from '../../constants/server.constants';
+import { createRequestHandler } from '../../utils/createRequestHandler.util';
+import { readQueryInteger } from '../../utils/readQueryInteger.util';
 
-import { WIDE_ALLTYPES_SORTABLE_COLUMNS } from "./wideAlltypes150.constants";
-import type { WideAlltypes150Repository } from "./wideAlltypes150.repository";
-import { parseWideAlltypesSorting } from "./wideAlltypes150.schema";
+import { WIDE_ALLTYPES_SORTABLE_COLUMNS } from './wideAlltypes150.constants';
+import type { WideAlltypes150Repository } from './wideAlltypes150.repository';
+import { parseWideAlltypesSorting } from './wideAlltypes150.schema';
 
 export type WideAlltypes150Controller = {
   readonly getPaginated: RequestHandler;

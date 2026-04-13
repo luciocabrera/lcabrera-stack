@@ -1,13 +1,16 @@
-import type { LoaderFunctionArgs } from "react-router";
+import type { LoaderFunctionArgs } from 'react-router';
 
-import type { ColumnSizingState, SortingState } from "@/components/Table";
-import type { CarSale, CarSalesResponse } from "@/services";
+import type { ColumnSizingState, SortingState } from '@/components/Table';
+import type { CarSale, CarSalesResponse } from '@/services';
 
-import { readPersistedStateFromCookie } from "@/components/Table/utils";
-import { carSalesApi } from "@/services";
-import { deserializeSortingFromURL, readTableStateFromURL } from "@/utils/urlState";
+import { readPersistedStateFromCookie } from '@/components/Table/utils';
+import { carSalesApi } from '@/services';
+import {
+  deserializeSortingFromURL,
+  readTableStateFromURL,
+} from '@/utils/urlState';
 
-import { PERSISTENCE_KEY } from "./CarSales.constants.tsx";
+import { PERSISTENCE_KEY } from './CarSales.constants.tsx';
 
 /**
  * Loader for car sales route
@@ -25,20 +28,22 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
   });
 
   // Read persisted state from cookies (fallback)
-  const cookieHeader = request.headers.get("Cookie");
+  const cookieHeader = request.headers.get('Cookie');
   const cookieState = readPersistedStateFromCookie({
     cookieString: cookieHeader ?? undefined,
     persistenceKey: PERSISTENCE_KEY,
   });
 
   // Merge URL state (priority) with cookie state (fallback)
-  const columnOrder = (urlState?.columnOrder ?? cookieState.columnOrder ?? []) as (keyof CarSale)[];
+  const columnOrder = (urlState?.columnOrder ??
+    cookieState.columnOrder ??
+    []) as (keyof CarSale)[];
   const columnVisibility = (urlState?.columnVisibility ??
     cookieState.columnVisibility ??
     new Set()) as Set<keyof CarSale>;
 
   // Read sorting from standalone param only
-  const standaloneSortParam = url.searchParams.get("sort");
+  const standaloneSortParam = url.searchParams.get('sort');
 
   let sorting: SortingState<CarSale> = [];
   if (standaloneSortParam) {
@@ -49,7 +54,9 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
     {}) as ColumnSizingState<CarSale>;
 
   // Return the promise directly (not awaited) for Suspense streaming
-  const carSalesPromise: Promise<CarSalesResponse> = carSalesApi.fetchCarSales(request.url);
+  const carSalesPromise: Promise<CarSalesResponse> = carSalesApi.fetchCarSales(
+    request.url,
+  );
 
   return {
     carSalesPromise,
@@ -57,7 +64,7 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
     columnSizing,
     columnVisibility,
     sorting: sorting.filter(
-      (s): s is { columnKey: keyof CarSale; direction: "asc" | "desc" } =>
+      (s): s is { columnKey: keyof CarSale; direction: 'asc' | 'desc' } =>
         s.direction !== undefined,
     ),
   };

@@ -1,22 +1,23 @@
-import * as stylex from "@stylexjs/stylex";
+import * as stylex from '@stylexjs/stylex';
 
-import type { CardProps } from "./Card.types.ts";
+import type { CardProps } from './Card.types.ts';
 
-import { cardStyles } from "./Card.stylex.ts";
+import { cardStyles } from './Card.stylex.ts';
 
 export const Card = ({
   children,
-  color = "default",
-  elevation = "sm",
-  interactive = "static",
+  color = 'default',
+  elevation = 'sm',
+  interactive = 'static',
   padding,
   ...props
 }: CardProps) => {
-  const isInteractive = interactive === "clickable" || interactive === "hoverable";
+  const isInteractive =
+    interactive === 'clickable' || interactive === 'hoverable';
 
   return (
     <div
-      data-testid="card"
+      data-testid='card'
       {...props}
       {...stylex.props(
         cardStyles.base,

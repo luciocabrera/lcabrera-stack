@@ -1,26 +1,30 @@
-import * as stylex from "@stylexjs/stylex";
+import * as stylex from '@stylexjs/stylex';
 
-import { borderRadius, spacing, typography } from "@/design-system/tokens/base.stylex";
-import { colors } from "@/design-system/tokens/colors.stylex";
+import {
+  borderRadius,
+  spacing,
+  typography,
+} from '@/design-system/tokens/base.stylex';
+import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const styles = stylex.create({
   container: {
     padding: spacing.xl,
-    marginInline: "auto",
-    maxWidth: "1200px",
+    marginInline: 'auto',
+    maxWidth: '1200px',
   },
   header: {
     gap: spacing.md,
-    alignItems: "center",
-    display: "flex",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
+    alignItems: 'center',
+    display: 'flex',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
     marginBottom: spacing.xl,
   },
   headerLeft: {
     gap: spacing.md,
-    alignItems: "center",
-    display: "flex",
+    alignItems: 'center',
+    display: 'flex',
   },
   orderNumber: {
     margin: 0,
@@ -31,12 +35,12 @@ export const styles = stylex.create({
   badge: {
     padding: `${spacing.xxs} ${spacing.sm}`,
     borderRadius: borderRadius.full,
-    alignItems: "center",
-    display: "inline-flex",
+    alignItems: 'center',
+    display: 'inline-flex',
     fontSize: typography.fontSizeXs,
     fontWeight: typography.fontWeightSemibold,
-    letterSpacing: "0.05em",
-    textTransform: "uppercase",
+    letterSpacing: '0.05em',
+    textTransform: 'uppercase',
   },
   badgeDelivered: {
     backgroundColor: colors.successBackground,
@@ -47,8 +51,8 @@ export const styles = stylex.create({
     color: colors.infoText,
   },
   badgePending: {
-    backgroundColor: "rgb(255 243 205)",
-    color: "rgb(133 100 4)",
+    backgroundColor: 'rgb(255 243 205)',
+    color: 'rgb(133 100 4)',
   },
   badgeCancelled: {
     backgroundColor: colors.errorBackground,
@@ -60,28 +64,28 @@ export const styles = stylex.create({
   },
   grid: {
     gap: spacing.lg,
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))",
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
   },
   fullWidth: {
-    gridColumn: "1 / -1",
+    gridColumn: '1 / -1',
   },
   fieldGroup: {
     gap: spacing.md,
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
   },
   field: {
     gap: spacing.xxs,
-    display: "flex",
-    flexDirection: "column",
+    display: 'flex',
+    flexDirection: 'column',
   },
   fieldLabel: {
     color: colors.textTertiary,
     fontSize: typography.fontSizeXs,
     fontWeight: typography.fontWeightMedium,
-    letterSpacing: "0.05em",
-    textTransform: "uppercase",
+    letterSpacing: '0.05em',
+    textTransform: 'uppercase',
   },
   fieldValue: {
     color: colors.textPrimary,
@@ -93,14 +97,14 @@ export const styles = stylex.create({
     color: colors.textPrimary,
     fontSize: typography.fontSizeSm,
     lineHeight: typography.lineHeightRelaxed,
-    whiteSpace: "pre-wrap",
+    whiteSpace: 'pre-wrap',
   },
   emptyValue: {
     color: colors.textTertiary,
-    fontStyle: "italic",
+    fontStyle: 'italic',
   },
   backLink: {
-    textDecoration: "none",
-    color: "inherit",
+    textDecoration: 'none',
+    color: 'inherit',
   },
 });

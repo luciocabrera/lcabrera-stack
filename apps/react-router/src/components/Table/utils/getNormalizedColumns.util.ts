@@ -1,4 +1,4 @@
-import type { SortingState, TableColumn } from "../Table.types.ts";
+import type { SortingState, TableColumn } from '../Table.types.ts';
 
 type GetNormalizedColumnsArgs<TData> = {
   readonly columns: readonly TableColumn<TData>[];
@@ -12,7 +12,7 @@ export const getNormalizedColumns = <TData>({
   const cols = {} as Record<
     keyof TData | string,
     TableColumn<TData> & {
-      sortDirection?: "asc" | "desc";
+      sortDirection?: 'asc' | 'desc';
       sortIndex?: number;
     }
   >;

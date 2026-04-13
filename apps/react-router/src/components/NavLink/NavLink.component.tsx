@@ -1,19 +1,19 @@
-import * as stylex from "@stylexjs/stylex";
-import { NavLink as RouterNavLink } from "react-router";
+import * as stylex from '@stylexjs/stylex';
+import { NavLink as RouterNavLink } from 'react-router';
 
-import type { NavLinkProps } from "./NavLink.types.ts";
+import type { NavLinkProps } from './NavLink.types.ts';
 
-import { linkItemStyles } from "./NavLink.stylex.ts";
-import { getClassName } from "./utils/index.ts";
+import { linkItemStyles } from './NavLink.stylex.ts';
+import { getClassName } from './utils/index.ts';
 
 export const NavLink = ({
   children,
-  color = "ghost",
+  color = 'ghost',
   icon,
-  orientation = "vertical",
-  prefetch = "intent",
-  size = "md",
-  width = "full",
+  orientation = 'vertical',
+  prefetch = 'intent',
+  size = 'md',
+  width = 'full',
   ...props
 }: NavLinkProps) => {
   return (

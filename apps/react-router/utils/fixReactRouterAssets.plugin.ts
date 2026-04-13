@@ -1,7 +1,7 @@
-import type { Plugin } from "vite-plus";
+import type { Plugin } from 'vite-plus';
 
-import fs from "node:fs";
-import path from "node:path";
+import fs from 'node:fs';
+import path from 'node:path';
 
 /**
  * Vite 8 (Rolldown) does not emit CSS assets during SSR builds, but the
@@ -16,32 +16,34 @@ import path from "node:path";
  */
 export const fixReactRouterAssets = (): Plugin => {
   return {
-    name: "fix-react-router-assets",
+    name: 'fix-react-router-assets',
     writeBundle() {
-      const serverManifestPath = path.join(process.cwd(), "build/server/.vite/manifest.json");
+      const serverManifestPath = path.join(
+        process.cwd(),
+        'build/server/.vite/manifest.json',
+      );
 
       if (!fs.existsSync(serverManifestPath)) return;
 
-      const manifest = JSON.parse(fs.readFileSync(serverManifestPath, "utf8")) as Record<
-        string,
-        { assets?: string[]; file: string }
-      >;
+      const manifest = JSON.parse(
+        fs.readFileSync(serverManifestPath, 'utf8'),
+      ) as Record<string, { assets?: string[]; file: string }>;
 
       // Collect every CSS path referenced in the manifest
       // (both direct .css chunk files and assets[] entries)
       const cssPaths = new Set<string>();
 
       for (const chunk of Object.values(manifest)) {
-        if (chunk.file.endsWith(".css")) cssPaths.add(chunk.file);
+        if (chunk.file.endsWith('.css')) cssPaths.add(chunk.file);
         if (chunk.assets) {
           for (const asset of chunk.assets) {
-            if (asset.endsWith(".css")) cssPaths.add(asset);
+            if (asset.endsWith('.css')) cssPaths.add(asset);
           }
         }
       }
 
-      const serverBuildDir = path.join(process.cwd(), "build/server");
-      const clientAssetsDir = path.join(process.cwd(), "build/client/assets");
+      const serverBuildDir = path.join(process.cwd(), 'build/server');
+      const clientAssetsDir = path.join(process.cwd(), 'build/client/assets');
 
       for (const cssPath of cssPaths) {
         const serverFile = path.join(serverBuildDir, cssPath);
@@ -52,14 +54,14 @@ export const fixReactRouterAssets = (): Plugin => {
 
         // Try to copy content from the matching client CSS (any stylex-*.css)
         const clientCssFiles = fs.existsSync(clientAssetsDir)
-          ? fs.readdirSync(clientAssetsDir).filter((f) => f.endsWith(".css"))
+          ? fs.readdirSync(clientAssetsDir).filter((f) => f.endsWith('.css'))
           : [];
 
         if (clientCssFiles.length > 0) {
           const clientSource = path.join(clientAssetsDir, clientCssFiles[0]);
           fs.copyFileSync(clientSource, serverFile);
         } else {
-          fs.writeFileSync(serverFile, "");
+          fs.writeFileSync(serverFile, '');
         }
       }
     },

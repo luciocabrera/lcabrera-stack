@@ -1,3 +1,3 @@
-import type { ComponentPropsWithoutRef } from "react";
+import type { ComponentPropsWithoutRef } from 'react';
 
-export type InfoBoxProps = ComponentPropsWithoutRef<"div">;
+export type InfoBoxProps = ComponentPropsWithoutRef<'div'>;

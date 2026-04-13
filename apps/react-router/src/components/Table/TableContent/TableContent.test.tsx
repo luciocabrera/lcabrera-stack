@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
 
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react';
 
-import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { cleanup, render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { TableContent } from "./TableContent.component.tsx";
+import { TableContent } from './TableContent.component.tsx';
 
 const {
   useFetchMoreDataMock,
@@ -32,68 +32,68 @@ function MockTableBase({ children }: { readonly children: ReactNode }) {
 }
 
 function MockTableBody() {
-  return <tbody data-testid="table-body" />;
+  return <tbody data-testid='table-body' />;
 }
 
 function MockTableDrawersSection() {
-  return <div data-testid="table-drawers" />;
+  return <div data-testid='table-drawers' />;
 }
 
 function MockTableHeader() {
-  return <thead data-testid="table-header" />;
+  return <thead data-testid='table-header' />;
 }
 
 function MockTableTitle({ actions }: { readonly actions?: ReactNode }) {
-  return <div data-testid="table-title">{actions}</div>;
+  return <div data-testid='table-title'>{actions}</div>;
 }
 
-vi.mock("@/utils/performance", () => ({
+vi.mock('@/utils/performance', () => ({
   useRenderTracker: useRenderTrackerMock,
 }));
 
-vi.mock("../contexts/TableConfig/meta/actions", () => ({
+vi.mock('../contexts/TableConfig/meta/actions', () => ({
   useToogleTableIsTableSettingsOpen: useToogleTableIsTableSettingsOpenMock,
 }));
 
-vi.mock("../contexts/TableConfig/meta/selectors", () => ({
+vi.mock('../contexts/TableConfig/meta/selectors', () => ({
   useGetTableThreshold: useGetTableThresholdMock,
 }));
 
-vi.mock("../contexts/TableData/data/actions", () => ({
+vi.mock('../contexts/TableData/data/actions', () => ({
   useFetchMoreData: useFetchMoreDataMock,
 }));
 
-vi.mock("../contexts/TableData/data/selectors", () => ({
+vi.mock('../contexts/TableData/data/selectors', () => ({
   useGetTableHasMore: useGetTableHasMoreMock,
   useGetTableIsLoading: useGetTableIsLoadingMock,
   useGetTableIsLoadingMore: useGetTableIsLoadingMoreMock,
 }));
 
-vi.mock("../hooks", () => ({
+vi.mock('../hooks', () => ({
   useInfiniteScroll: useInfiniteScrollMock,
 }));
 
-vi.mock("../TableBase", () => ({
+vi.mock('../TableBase', () => ({
   TableBase: MockTableBase,
 }));
 
-vi.mock("../TableBody", () => ({
+vi.mock('../TableBody', () => ({
   TableBody: MockTableBody,
 }));
 
-vi.mock("../TableDrawersSection", () => ({
+vi.mock('../TableDrawersSection', () => ({
   TableDrawersSection: MockTableDrawersSection,
 }));
 
-vi.mock("../TableHeader", () => ({
+vi.mock('../TableHeader', () => ({
   TableHeader: MockTableHeader,
 }));
 
-vi.mock("../TableTitle", () => ({
+vi.mock('../TableTitle', () => ({
   TableTitle: MockTableTitle,
 }));
 
-describe("TableContent", () => {
+describe('TableContent', () => {
   beforeEach(() => {
     useGetTableThresholdMock.mockReturnValue(200);
     useGetTableHasMoreMock.mockReturnValue(true);
@@ -103,33 +103,33 @@ describe("TableContent", () => {
 
   afterEach(cleanup);
 
-  it("locks scrolling during the initial loading state", () => {
+  it('locks scrolling during the initial loading state', () => {
     useGetTableIsLoadingMock.mockReturnValue(true);
 
     render(<TableContent />);
 
-    const tableBody = screen.getByTestId("table-body");
-    const scrollContainer = tableBody.closest("[data-scroll-locked]");
+    const tableBody = screen.getByTestId('table-body');
+    const scrollContainer = tableBody.closest('[data-scroll-locked]');
     expect(scrollContainer).toBeInstanceOf(HTMLElement);
     if (!(scrollContainer instanceof HTMLElement)) {
-      throw new TypeError("Expected scroll container to be an HTMLElement");
+      throw new TypeError('Expected scroll container to be an HTMLElement');
     }
 
-    expect(scrollContainer.dataset.scrollLocked).toBe("true");
-    expect(screen.getByTestId("table-header")).toBeTruthy();
-    expect(screen.getByTestId("table-body")).toBeTruthy();
+    expect(scrollContainer.dataset.scrollLocked).toBe('true');
+    expect(screen.getByTestId('table-header')).toBeTruthy();
+    expect(screen.getByTestId('table-body')).toBeTruthy();
   });
 
-  it("keeps scrolling enabled when idle", () => {
+  it('keeps scrolling enabled when idle', () => {
     render(<TableContent />);
 
-    const tableBody = screen.getByTestId("table-body");
-    const scrollContainer = tableBody.closest("[data-scroll-locked]");
+    const tableBody = screen.getByTestId('table-body');
+    const scrollContainer = tableBody.closest('[data-scroll-locked]');
     expect(scrollContainer).toBeInstanceOf(HTMLElement);
     if (!(scrollContainer instanceof HTMLElement)) {
-      throw new TypeError("Expected scroll container to be an HTMLElement");
+      throw new TypeError('Expected scroll container to be an HTMLElement');
     }
 
-    expect(scrollContainer.dataset.scrollLocked).toBe("false");
+    expect(scrollContainer.dataset.scrollLocked).toBe('false');
   });
 });

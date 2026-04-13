@@ -81,7 +81,7 @@ className={({ isActive }) => isActive ? 'active' : 'inactive'}
 padding: spacing.md;
 
 // ❌
-padding: "16px";
+padding: '16px';
 ```
 
 ---
@@ -98,7 +98,7 @@ import {
   rippleBase,
   sizeVariants,
   widthVariants,
-} from "@/design-system/tokens/commons.stylex";
+} from '@/design-system/tokens/commons.stylex';
 
 export const componentStyles = {
   base: {
@@ -134,7 +134,7 @@ All Table settings drawer sections follow the same structural hierarchy using `S
 // Every drawer section looks like this
 <SidePanelSection>
   <SidePanelSectionHeader
-    title="Section Title"
+    title='Section Title'
     toolbar={<ActionButtons />} // mini ghost buttons
   />
   <SidePanelSectionMain>{/* section content */}</SidePanelSectionMain>
@@ -145,7 +145,7 @@ And the section's own stylex file delegates to `drawerSectionStyles`:
 
 ```ts
 // SomeSection.stylex.ts
-import { drawerSectionStyles } from "@/design-system/tokens/drawerSection.stylex";
+import { drawerSectionStyles } from '@/design-system/tokens/drawerSection.stylex';
 
 export const styles = {
   container: drawerSectionStyles.container,
@@ -158,7 +158,7 @@ export const styles = {
 
 ```tsx
 type SomeSectionToolbarProps = {
-  variant?: "toolbar" | "footer";
+  variant?: 'toolbar' | 'footer';
 };
 ```
 
@@ -184,7 +184,7 @@ type FilterProps = {
 Filter UI inputs use `filterBaseStyles` from `filters.stylex.ts`:
 
 ```ts
-import { filterBaseStyles } from "@/design-system/tokens/filters.stylex";
+import { filterBaseStyles } from '@/design-system/tokens/filters.stylex';
 
 export const styles = {
   container: filterBaseStyles.container,
@@ -207,7 +207,9 @@ const useMyStore = () =>
   });
 
 // 2. Create the context
-const MyContext = createContext<ReturnType<typeof useMyStore> | undefined>(undefined);
+const MyContext = createContext<ReturnType<typeof useMyStore> | undefined>(
+  undefined,
+);
 
 // 3. Create the provider
 export const MyProvider = ({ children }: { children: ReactNode }) => {
@@ -270,7 +272,7 @@ Components that wrap a native HTML element extend `ComponentPropsWithoutRef<'ele
 
 ```tsx
 // Types
-type MyProps = ComponentPropsWithoutRef<"div"> & {
+type MyProps = ComponentPropsWithoutRef<'div'> & {
   myProp: string;
 };
 

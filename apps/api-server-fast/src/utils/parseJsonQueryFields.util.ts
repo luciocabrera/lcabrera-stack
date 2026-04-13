@@ -1,4 +1,4 @@
-import type { FastifyRequest } from "fastify";
+import type { FastifyRequest } from 'fastify';
 
 /**
  * Create a preValidation hook that JSON-parses specified querystring fields.
@@ -14,7 +14,7 @@ export const createJsonFieldsParser =
     for (const field of fields) {
       const value = query[field];
 
-      if (typeof value === "string") {
+      if (typeof value === 'string') {
         try {
           query[field] = JSON.parse(value);
         } catch {

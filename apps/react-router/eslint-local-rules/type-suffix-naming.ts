@@ -2,16 +2,16 @@
 // - Function parameter types must end with 'Args' (not 'Arguments')
 // - React component prop types must end with 'Props'
 
-import type { Rule } from "eslint";
+import type { Rule } from 'eslint';
 
 const rule: Rule.RuleModule = {
   meta: {
     docs: {
       description:
-        "Enforce proper type suffix naming: Args for function parameters, Props for React components",
+        'Enforce proper type suffix naming: Args for function parameters, Props for React components',
       recommended: true,
     },
-    fixable: "code",
+    fixable: 'code',
     messages: {
       useArgsSuffix:
         "Function parameter type '{{typeName}}' should use 'Args' suffix, not 'Arguments'. Rename to '{{suggestedName}}'.",
@@ -19,7 +19,7 @@ const rule: Rule.RuleModule = {
         "React component prop type '{{typeName}}' should use 'Props' suffix, not 'Properties'. Rename to '{{suggestedName}}'.",
     },
     schema: [],
-    type: "suggestion",
+    type: 'suggestion',
   },
   create(context) {
     return {
@@ -27,11 +27,11 @@ const rule: Rule.RuleModule = {
         const typeName = node.id.name;
 
         // Check for incorrect 'Arguments' suffix (should be 'Args')
-        if (typeName.endsWith("Arguments")) {
-          const suggestedName = typeName.replace(/Arguments$/, "Args");
+        if (typeName.endsWith('Arguments')) {
+          const suggestedName = typeName.replace(/Arguments$/, 'Args');
 
           context.report({
-            messageId: "useArgsSuffix",
+            messageId: 'useArgsSuffix',
             node: node.id,
             data: {
               suggestedName,
@@ -50,11 +50,11 @@ const rule: Rule.RuleModule = {
         }
 
         // Check for incorrect 'Properties' suffix (should be 'Props')
-        if (typeName.endsWith("Properties")) {
-          const suggestedName = typeName.replace(/Properties$/, "Props");
+        if (typeName.endsWith('Properties')) {
+          const suggestedName = typeName.replace(/Properties$/, 'Props');
 
           context.report({
-            messageId: "usePropsSuffix",
+            messageId: 'usePropsSuffix',
             node: node.id,
             data: {
               suggestedName,

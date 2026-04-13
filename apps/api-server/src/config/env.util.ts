@@ -1,6 +1,6 @@
-import { HttpError } from "../errors/httpError";
+import { HttpError } from '../errors/httpError';
 
-import { type EnvConfig, envSchema } from "./env.schema";
+import { type EnvConfig, envSchema } from './env.schema';
 
 type ReadEnvConfigArgs = {
   readonly env: NodeJS.ProcessEnv;

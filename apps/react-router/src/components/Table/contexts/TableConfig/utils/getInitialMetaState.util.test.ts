@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
 import {
   DEFAULT_COLUMN_OVERSCAN,
@@ -9,15 +9,15 @@ import {
   INFINITE_SCROLL_THRESHOLD,
   INITIAL_PAGE_SIZE,
   LOAD_MORE_PAGE_SIZE,
-} from "@/components/Table/Table.constants";
+} from '@/components/Table/Table.constants';
 
-import { getInitialMetaState } from "./getInitialMetaState.util.ts";
+import { getInitialMetaState } from './getInitialMetaState.util.ts';
 
-describe("getInitialMetaState", () => {
-  it("returns default values when no args provided", () => {
+describe('getInitialMetaState', () => {
+  it('returns default values when no args provided', () => {
     const result = getInitialMetaState({});
     expect(result.columnOverscan).toBe(DEFAULT_COLUMN_OVERSCAN);
-    expect(result.density).toBe("compact");
+    expect(result.density).toBe('compact');
     expect(result.enablePrefetch).toBe(DEFAULT_ENABLE_PREFETCH);
     expect(result.isBordered).toBe(true);
     expect(result.isStriped).toBe(true);
@@ -29,24 +29,24 @@ describe("getInitialMetaState", () => {
     expect(result.placeholderRowCount).toBe(DEFAULT_PLACEHOLDER_ROW_COUNT);
     expect(result.rowHeight).toBe(DEFAULT_ROW_HEIGHT);
     expect(result.threshold).toBe(INFINITE_SCROLL_THRESHOLD);
-    expect(result.persistenceKey).toBe("");
+    expect(result.persistenceKey).toBe('');
   });
 
-  it("allows overriding individual fields", () => {
+  it('allows overriding individual fields', () => {
     const result = getInitialMetaState({
       columnOverscan: 4,
-      density: "comfortable",
+      density: 'comfortable',
       enablePrefetch: true,
       isBordered: false,
     });
     expect(result.columnOverscan).toBe(4);
-    expect(result.density).toBe("comfortable");
+    expect(result.density).toBe('comfortable');
     expect(result.enablePrefetch).toBe(true);
     expect(result.isBordered).toBe(false);
   });
 
-  it("passes through extra fields", () => {
-    const result = getInitialMetaState({ persistenceKey: "myTable" });
-    expect(result.persistenceKey).toBe("myTable");
+  it('passes through extra fields', () => {
+    const result = getInitialMetaState({ persistenceKey: 'myTable' });
+    expect(result.persistenceKey).toBe('myTable');
   });
 });

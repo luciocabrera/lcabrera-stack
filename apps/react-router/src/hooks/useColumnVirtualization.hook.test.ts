@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
 
-import type { RefObject } from "react";
+import type { RefObject } from 'react';
 
-import { act, renderHook } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { act, renderHook } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useColumnVirtualization } from "./useColumnVirtualization.hook.ts";
+import { useColumnVirtualization } from './useColumnVirtualization.hook.ts';
 
 // Captured ResizeObserver callback so tests can trigger it directly.
 let capturedResizeCallback: (() => void) | undefined;
@@ -15,14 +15,17 @@ type CreateContainerArgs = {
   readonly scrollLeft?: number;
 };
 
-const createContainer = ({ offsetWidth, scrollLeft = 0 }: CreateContainerArgs): HTMLElement => {
-  const container = document.createElement("div");
+const createContainer = ({
+  offsetWidth,
+  scrollLeft = 0,
+}: CreateContainerArgs): HTMLElement => {
+  const container = document.createElement('div');
 
-  Object.defineProperty(container, "offsetWidth", {
+  Object.defineProperty(container, 'offsetWidth', {
     configurable: true,
     value: offsetWidth,
   });
-  Object.defineProperty(container, "scrollLeft", {
+  Object.defineProperty(container, 'scrollLeft', {
     configurable: true,
     value: scrollLeft,
     writable: true,
@@ -35,7 +38,7 @@ beforeEach(() => {
   capturedResizeCallback = undefined;
 
   vi.stubGlobal(
-    "ResizeObserver",
+    'ResizeObserver',
     class {
       public disconnect = vi.fn();
       public observe = vi.fn();
@@ -46,11 +49,15 @@ beforeEach(() => {
     },
   );
 
-  vi.spyOn(globalThis, "requestAnimationFrame").mockImplementation((callback) => {
-    callback(0);
-    return 1;
-  });
-  vi.spyOn(globalThis, "cancelAnimationFrame").mockImplementation((_id) => void 0);
+  vi.spyOn(globalThis, 'requestAnimationFrame').mockImplementation(
+    (callback) => {
+      callback(0);
+      return 1;
+    },
+  );
+  vi.spyOn(globalThis, 'cancelAnimationFrame').mockImplementation(
+    (_id) => void 0,
+  );
 });
 
 afterEach(() => {
@@ -58,8 +65,8 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe("useColumnVirtualization", () => {
-  it("prefers measured container width over default fallback on initial render", () => {
+describe('useColumnVirtualization', () => {
+  it('prefers measured container width over default fallback on initial render', () => {
     const container = createContainer({ offsetWidth: 1200 });
     const containerRef = {
       current: container,
@@ -77,7 +84,7 @@ describe("useColumnVirtualization", () => {
     expect(result.current.endIndex).toBe(6);
   });
 
-  it("returns the full range when all columns fit in the viewport", () => {
+  it('returns the full range when all columns fit in the viewport', () => {
     const container = createContainer({ offsetWidth: 800 });
     const containerRef = {
       current: container,
@@ -98,7 +105,7 @@ describe("useColumnVirtualization", () => {
     expect(result.current.totalWidth).toBe(750);
   });
 
-  it("computes the visible window when scrolled horizontally", () => {
+  it('computes the visible window when scrolled horizontally', () => {
     const container = createContainer({ offsetWidth: 200 });
     const containerRef = {
       current: container,
@@ -116,7 +123,7 @@ describe("useColumnVirtualization", () => {
 
     act(() => {
       container.scrollLeft = 300;
-      container.dispatchEvent(new Event("scroll"));
+      container.dispatchEvent(new Event('scroll'));
     });
 
     // viewStart=300, viewEnd=500
@@ -130,7 +137,7 @@ describe("useColumnVirtualization", () => {
     expect(result.current.rightSpacerWidth).toBe(400); // (10-6) * 100
   });
 
-  it("returns zeros when no columns are provided", () => {
+  it('returns zeros when no columns are provided', () => {
     const container = createContainer({ offsetWidth: 500 });
     const containerRef = {
       current: container,
@@ -150,10 +157,10 @@ describe("useColumnVirtualization", () => {
     expect(result.current.totalWidth).toBe(0);
   });
 
-  it("keeps the previous width when a resize measures zero", () => {
+  it('keeps the previous width when a resize measures zero', () => {
     // Stub innerWidth to 0 so the hook's viewport-width fallback is also skipped,
     // exercising the zero-guard that preserves the previous containerWidth.
-    Object.defineProperty(globalThis.window, "innerWidth", {
+    Object.defineProperty(globalThis.window, 'innerWidth', {
       configurable: true,
       value: 0,
     });
@@ -176,7 +183,7 @@ describe("useColumnVirtualization", () => {
     expect(result.current.endIndex).toBe(4);
 
     // Simulate the ResizeObserver reporting a zero-width measurement (e.g. display:none)
-    Object.defineProperty(container, "offsetWidth", {
+    Object.defineProperty(container, 'offsetWidth', {
       configurable: true,
       value: 0,
     });

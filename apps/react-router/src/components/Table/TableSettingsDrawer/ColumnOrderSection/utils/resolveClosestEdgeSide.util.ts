@@ -1,6 +1,6 @@
-import type { TableColumn } from "@/components/Table/Table.types";
+import type { TableColumn } from '@/components/Table/Table.types';
 
-import type { PinSide } from "../ColumnOrderSection.types.ts";
+import type { PinSide } from '../ColumnOrderSection.types.ts';
 
 type ResolveClosestEdgeSideArgs<TData> = {
   readonly allOrderedColumns: readonly TableColumn<TData>[];
@@ -16,9 +16,9 @@ export const resolveClosestEdgeSide = <TData>({
   allOrderedColumns,
   columnKey,
   pinSide,
-}: ResolveClosestEdgeSideArgs<TData>): "left" | "right" => {
-  if (pinSide !== "closest-edge") return pinSide;
+}: ResolveClosestEdgeSideArgs<TData>): 'left' | 'right' => {
+  if (pinSide !== 'closest-edge') return pinSide;
   const index = allOrderedColumns.findIndex((col) => col.key === columnKey);
   const midpoint = Math.floor(allOrderedColumns.length / 2);
-  return index < midpoint ? "left" : "right";
+  return index < midpoint ? 'left' : 'right';
 };

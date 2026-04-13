@@ -1,3 +1,4 @@
-import { useDataStore } from "../useDataStore.hook.ts";
+import { useDataStore } from '../useDataStore.hook.ts';
 
-export const useGetTableData = <TData>() => useDataStore<TData[], TData>((state) => state.data);
+export const useGetTableData = <TData>() =>
+  useDataStore<TData[], TData>((state) => state.data);

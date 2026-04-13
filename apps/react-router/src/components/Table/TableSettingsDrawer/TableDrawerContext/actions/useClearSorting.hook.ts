@@ -1,4 +1,4 @@
-import { useTableDrawerContextValue } from "../useTableDrawerContextValue.hook.ts";
+import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook.ts';
 
 /**
  * Hook to clear all sorting (set to empty).

@@ -1,10 +1,10 @@
-import * as stylex from "@stylexjs/stylex";
+import * as stylex from '@stylexjs/stylex';
 
-import { Tag } from "@/components/Tag";
+import { Tag } from '@/components/Tag';
 
-import type { VirtualSelectTriggerProps } from "./VirtualSelectTrigger.types.ts";
+import type { VirtualSelectTriggerProps } from './VirtualSelectTrigger.types.ts';
 
-import { styles } from "./VirtualSelectTrigger.stylex.ts";
+import { styles } from './VirtualSelectTrigger.stylex.ts';
 
 export const VirtualSelectTrigger = ({
   isAlwaysOpen,
@@ -23,20 +23,20 @@ export const VirtualSelectTrigger = ({
   return (
     <div
       aria-expanded={isOpen}
-      aria-haspopup="listbox"
+      aria-haspopup='listbox'
       onClick={isAlwaysOpen ? undefined : onToggle}
       ref={triggerRef}
-      role="combobox"
+      role='combobox'
       tabIndex={isAlwaysOpen ? undefined : 0}
       {...stylex.props(
         styles.trigger,
         isOpen && styles.triggerOpen,
-        mode === "multi" && styles.triggerClamped,
+        mode === 'multi' && styles.triggerClamped,
         isAlwaysOpen && styles.triggerStatic,
       )}
     >
       {hasSelection ? (
-        mode === "single" ? (
+        mode === 'single' ? (
           <span {...stylex.props(styles.triggerLabel)}>{selected[0]}</span>
         ) : (
           <>
@@ -59,7 +59,9 @@ export const VirtualSelectTrigger = ({
       ) : (
         <span {...stylex.props(styles.triggerPlaceholder)}>{placeholder}</span>
       )}
-      {!isAlwaysOpen && <span data-chevron {...stylex.props(styles.chevron(isOpen))} />}
+      {!isAlwaysOpen && (
+        <span data-chevron {...stylex.props(styles.chevron(isOpen))} />
+      )}
     </div>
   );
 };

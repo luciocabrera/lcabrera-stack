@@ -1,13 +1,13 @@
-import type { ColumnOrderState } from "@/components/Table/Table.types";
+import type { ColumnOrderState } from '@/components/Table/Table.types';
 
-import { useTableConfigContextValue } from "@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook";
+import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import {
   buildAllOrderedColumns,
   detectPinOrderConflict,
-} from "@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils";
-import { useTableDrawerContextValue } from "@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook";
+} from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
+import { useTableDrawerContextValue } from '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
 
-import { useColumnOrderSectionContextValue } from "../useColumnOrderSectionContextValue.hook.ts";
+import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook.ts';
 
 type UseToggleColumnPinArgs = {
   readonly columnKey: string;
@@ -45,7 +45,9 @@ export const useToggleColumnPin = () => {
         right: columnPinning.right.filter((k) => k !== columnKey),
       };
 
-      const currentOrder = allOrderedColumns.map((col) => col.key) as ColumnOrderState;
+      const currentOrder = allOrderedColumns.map(
+        (col) => col.key,
+      ) as ColumnOrderState;
 
       if (
         !detectPinOrderConflict({
@@ -58,7 +60,7 @@ export const useToggleColumnPin = () => {
         return;
       }
 
-      const side = columnPinning.left.includes(columnKey) ? "left" : "right";
+      const side = columnPinning.left.includes(columnKey) ? 'left' : 'right';
       const col = allOrderedColumns.find((c) => c.key === columnKey);
       modalsStore.set({
         unpinConflictModal: {

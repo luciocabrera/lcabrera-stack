@@ -1,1 +1,1 @@
-export { CardFooter } from "./CardFooter.component.tsx";
+export { CardFooter } from './CardFooter.component.tsx';

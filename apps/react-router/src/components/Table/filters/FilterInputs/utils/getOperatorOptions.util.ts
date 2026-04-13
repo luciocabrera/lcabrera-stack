@@ -1,10 +1,10 @@
-import type { TableColumnDataType } from "@/components/Table/Table.types";
+import type { TableColumnDataType } from '@/components/Table/Table.types';
 
 import {
   DATE_OPERATORS,
   NUMBER_OPERATORS,
   TEXT_OPERATORS,
-} from "@/constants/filterOperators.constants";
+} from '@/constants/filterOperators.constants';
 
 export type GetOperatorOptionsParams = {
   readonly dataType?: TableColumnDataType;
@@ -15,11 +15,11 @@ export type GetOperatorOptionsParams = {
  */
 export const getOperatorOptions = ({ dataType }: GetOperatorOptionsParams) => {
   switch (dataType) {
-    case "currency":
-    case "number": {
+    case 'currency':
+    case 'number': {
       return NUMBER_OPERATORS;
     }
-    case "date": {
+    case 'date': {
       return DATE_OPERATORS;
     }
     default: {

@@ -1,7 +1,7 @@
-import type { DataKey } from "@/components/Table/Table.types";
-import type { TStore } from "@/hooks/useStore.hook";
-import type { ColumnFilter } from "@/types/filterOperators.types";
-import type { SortDirection } from "@/types/ui.types";
+import type { DataKey } from '@/components/Table/Table.types';
+import type { TStore } from '@/hooks/useStore.hook';
+import type { ColumnFilter } from '@/types/filterOperators.types';
+import type { SortDirection } from '@/types/ui.types';
 
 export type ColumnDrawerContextValue = {
   /** Store managing column-related state */
@@ -19,7 +19,7 @@ export type ColumnDrawerState<TData> = {
   /** The column key this drawer is managing */
   readonly columnKey: DataKey<TData>;
   /** Pin side for this specific column */
-  readonly columnPinning?: "left" | "right";
+  readonly columnPinning?: 'left' | 'right';
   /** Width for this specific column */
   readonly columnSizing?: number;
   /** Sort direction for this specific column */

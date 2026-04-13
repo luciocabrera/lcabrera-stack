@@ -1,28 +1,28 @@
-import * as stylex from "@stylexjs/stylex";
-import { useRef } from "react";
+import * as stylex from '@stylexjs/stylex';
+import { useRef } from 'react';
 
-import { Button } from "@/components/Button";
-import { SettingsIcon } from "@/components/Icons";
-import { useRenderTracker } from "@/utils/performance";
+import { Button } from '@/components/Button';
+import { SettingsIcon } from '@/components/Icons';
+import { useRenderTracker } from '@/utils/performance';
 
-import type { TableContentProps } from "./TableContent.types.ts";
+import type { TableContentProps } from './TableContent.types.ts';
 
-import { useToogleTableIsTableSettingsOpen } from "../contexts/TableConfig/meta/actions/index.ts";
-import { useGetTableThreshold } from "../contexts/TableConfig/meta/selectors/index.ts";
-import { useFetchMoreData } from "../contexts/TableData/data/actions/index.ts";
+import { useToogleTableIsTableSettingsOpen } from '../contexts/TableConfig/meta/actions/index.ts';
+import { useGetTableThreshold } from '../contexts/TableConfig/meta/selectors/index.ts';
+import { useFetchMoreData } from '../contexts/TableData/data/actions/index.ts';
 import {
   useGetTableHasMore,
   useGetTableIsLoading,
   useGetTableIsLoadingMore,
-} from "../contexts/TableData/data/selectors/index.ts";
-import { TableWrapperContext } from "../contexts/TableWrapper/TableWrapperContext.context.ts";
-import { useInfiniteScroll } from "../hooks/index.ts";
-import { TableBase } from "../TableBase/index.ts";
-import { TableBody } from "../TableBody/index.ts";
-import { TableDrawersSection } from "../TableDrawersSection/index.ts";
-import { TableHeader } from "../TableHeader/index.ts";
-import { TableTitle } from "../TableTitle/index.ts";
-import { styles } from "./TableContent.stylex.ts";
+} from '../contexts/TableData/data/selectors/index.ts';
+import { TableWrapperContext } from '../contexts/TableWrapper/TableWrapperContext.context.ts';
+import { useInfiniteScroll } from '../hooks/index.ts';
+import { TableBase } from '../TableBase/index.ts';
+import { TableBody } from '../TableBody/index.ts';
+import { TableDrawersSection } from '../TableDrawersSection/index.ts';
+import { TableHeader } from '../TableHeader/index.ts';
+import { TableTitle } from '../TableTitle/index.ts';
+import { styles } from './TableContent.stylex.ts';
 
 export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   actions,
@@ -31,7 +31,7 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   icon,
   onLoadMore,
 }: TableContentProps<TData, TResponse>) => {
-  useRenderTracker({ componentName: "TableContent" });
+  useRenderTracker({ componentName: 'TableContent' });
 
   const threshold = useGetTableThreshold();
   const isLoading = useGetTableIsLoading();
@@ -66,11 +66,11 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
               <>
                 {actions}
                 <Button
-                  aria-label="Table settings"
-                  color="ghost"
+                  aria-label='Table settings'
+                  color='ghost'
                   icon={<SettingsIcon size={16} />}
                   onClick={toogleTableIsTableSettingsOpen}
-                  size="mini"
+                  size='mini'
                 />
               </>
             }
@@ -79,7 +79,10 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
           <div
             data-scroll-locked={String(isLoading)}
             ref={containerRef}
-            {...stylex.props(styles.container, isLoading && styles.containerLocked)}
+            {...stylex.props(
+              styles.container,
+              isLoading && styles.containerLocked,
+            )}
           >
             <TableBase>
               <TableHeader />

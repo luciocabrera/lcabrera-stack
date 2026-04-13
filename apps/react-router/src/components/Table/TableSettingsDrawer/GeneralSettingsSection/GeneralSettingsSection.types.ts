@@ -1,10 +1,10 @@
-import type { ComponentPropsWithoutRef } from "react";
+import type { ComponentPropsWithoutRef } from 'react';
 
 /**
  * GeneralSettingsSection component props
  */
-export type GeneralSettingsSectionProps = ComponentPropsWithoutRef<"div">;
+export type GeneralSettingsSectionProps = ComponentPropsWithoutRef<'div'>;
 /**
  * Width preset options for column sizing
  */
-export type WidthPreset = "default" | "max" | "min" | undefined;
+export type WidthPreset = 'default' | 'max' | 'min' | undefined;

@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
 
-import type { RefObject } from "react";
+import type { RefObject } from 'react';
 
-import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { cleanup, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { TableBody } from "./TableBody.component.tsx";
+import { TableBody } from './TableBody.component.tsx';
 
 const {
   useGetColumnGroupsMock,
@@ -40,51 +40,55 @@ type MockTableBodyRowsProps = {
 
 function MockSpacerRow({ colSpan, height }: MockSpacerRowProps) {
   return (
-    <tr data-height={height} data-testid="spacer-row">
+    <tr data-height={height} data-testid='spacer-row'>
       <td colSpan={colSpan} />
     </tr>
   );
 }
 
-function MockTableBodyRows({ endIndex, isLoadingState, startIndex }: MockTableBodyRowsProps) {
+function MockTableBodyRows({
+  endIndex,
+  isLoadingState,
+  startIndex,
+}: MockTableBodyRowsProps) {
   return (
     <tr
       data-end-index={endIndex}
       data-is-loading={isLoadingState}
       data-start-index={startIndex}
-      data-testid="table-body-rows"
+      data-testid='table-body-rows'
     >
       <td>rows</td>
     </tr>
   );
 }
 
-vi.mock("@/components/Table/contexts/TableConfig/columns/selectors", () => ({
+vi.mock('@/components/Table/contexts/TableConfig/columns/selectors', () => ({
   useGetColumnGroups: useGetColumnGroupsMock,
 }));
 
-vi.mock("@/components/Table/contexts/TableConfig/meta/selectors", () => ({
+vi.mock('@/components/Table/contexts/TableConfig/meta/selectors', () => ({
   useGetTableOverscan: useGetTableOverscanMock,
   useGetTableRowHeight: useGetTableRowHeightMock,
 }));
 
-vi.mock("@/components/Table/SpacerRow", () => ({
+vi.mock('@/components/Table/SpacerRow', () => ({
   SpacerRow: MockSpacerRow,
 }));
 
-vi.mock("@/components/Table/TableBodyRows", () => ({
+vi.mock('@/components/Table/TableBodyRows', () => ({
   TableBodyRows: MockTableBodyRows,
 }));
 
-vi.mock("@/hooks", () => ({
+vi.mock('@/hooks', () => ({
   useVirtualization: useVirtualizationMock,
 }));
 
-vi.mock("@/utils/performance", () => ({
+vi.mock('@/utils/performance', () => ({
   useRenderTracker: useRenderTrackerMock,
 }));
 
-vi.mock("../contexts/TableData/data/selectors", () => ({
+vi.mock('../contexts/TableData/data/selectors', () => ({
   useGetTableIsLoading: useGetTableIsLoadingMock,
   useGetTableIsLoadingMore: useGetTableIsLoadingMoreMock,
   useGetTableTotalLoadedRows: useGetTableTotalLoadedRowsMock,
@@ -96,8 +100,8 @@ const setupDefaultMocks = () => {
   useGetTableTotalLoadedRowsMock.mockReturnValue(3);
   useGetColumnGroupsMock.mockReturnValue({
     centerCols: [
-      { key: "name", label: "Name" },
-      { key: "amount", label: "Amount" },
+      { key: 'name', label: 'Name' },
+      { key: 'amount', label: 'Amount' },
     ],
     leftPinnedCols: [],
     rightPinnedCols: [],
@@ -106,10 +110,10 @@ const setupDefaultMocks = () => {
   useGetTableRowHeightMock.mockReturnValue(44);
 };
 
-describe("TableBody", () => {
+describe('TableBody', () => {
   afterEach(cleanup);
 
-  it("delegates row rendering to TableBodyRows with correct props", () => {
+  it('delegates row rendering to TableBodyRows with correct props', () => {
     setupDefaultMocks();
     useVirtualizationMock.mockReturnValue({
       bottomSpacerHeight: 50,
@@ -120,7 +124,7 @@ describe("TableBody", () => {
     });
 
     const tableContainerRef = {
-      current: document.createElement("div"),
+      current: document.createElement('div'),
     } as RefObject<HTMLDivElement | null>;
 
     render(
@@ -129,13 +133,13 @@ describe("TableBody", () => {
       </table>,
     );
 
-    const bodyRows = screen.getByTestId("table-body-rows");
-    expect(bodyRows.dataset.startIndex).toBe("0");
-    expect(bodyRows.dataset.endIndex).toBe("2");
-    expect(bodyRows.dataset.isLoading).toBe("false");
+    const bodyRows = screen.getByTestId('table-body-rows');
+    expect(bodyRows.dataset.startIndex).toBe('0');
+    expect(bodyRows.dataset.endIndex).toBe('2');
+    expect(bodyRows.dataset.isLoading).toBe('false');
   });
 
-  it("passes isLoadingState as true when loading or loading more", () => {
+  it('passes isLoadingState as true when loading or loading more', () => {
     setupDefaultMocks();
     useGetTableIsLoadingMoreMock.mockReturnValue(true);
     useVirtualizationMock.mockReturnValue({
@@ -147,7 +151,7 @@ describe("TableBody", () => {
     });
 
     const tableContainerRef = {
-      current: document.createElement("div"),
+      current: document.createElement('div'),
     } as RefObject<HTMLDivElement | null>;
 
     render(
@@ -156,11 +160,11 @@ describe("TableBody", () => {
       </table>,
     );
 
-    const bodyRows = screen.getByTestId("table-body-rows");
-    expect(bodyRows.dataset.isLoading).toBe("true");
+    const bodyRows = screen.getByTestId('table-body-rows');
+    expect(bodyRows.dataset.isLoading).toBe('true');
   });
 
-  it("renders spacer rows for virtual offset positioning", () => {
+  it('renders spacer rows for virtual offset positioning', () => {
     setupDefaultMocks();
     useGetTableTotalLoadedRowsMock.mockReturnValue(4);
     useVirtualizationMock.mockReturnValue({
@@ -172,7 +176,7 @@ describe("TableBody", () => {
     });
 
     const tableContainerRef = {
-      current: document.createElement("div"),
+      current: document.createElement('div'),
     } as RefObject<HTMLDivElement | null>;
 
     render(
@@ -181,13 +185,13 @@ describe("TableBody", () => {
       </table>,
     );
 
-    const spacers = screen.getAllByTestId("spacer-row");
+    const spacers = screen.getAllByTestId('spacer-row');
     expect(spacers).toHaveLength(2);
-    expect(spacers[0]?.dataset.height).toBe("80");
-    expect(spacers[1]?.dataset.height).toBe("400");
+    expect(spacers[0]?.dataset.height).toBe('80');
+    expect(spacers[1]?.dataset.height).toBe('400');
   });
 
-  it("passes totalLoadedRows to useVirtualization as totalItems", () => {
+  it('passes totalLoadedRows to useVirtualization as totalItems', () => {
     setupDefaultMocks();
     useGetTableTotalLoadedRowsMock.mockReturnValue(42);
     useVirtualizationMock.mockReturnValue({
@@ -199,7 +203,7 @@ describe("TableBody", () => {
     });
 
     const tableContainerRef = {
-      current: document.createElement("div"),
+      current: document.createElement('div'),
     } as RefObject<HTMLDivElement | null>;
 
     render(
@@ -208,6 +212,8 @@ describe("TableBody", () => {
       </table>,
     );
 
-    expect(useVirtualizationMock).toHaveBeenCalledWith(expect.objectContaining({ totalItems: 42 }));
+    expect(useVirtualizationMock).toHaveBeenCalledWith(
+      expect.objectContaining({ totalItems: 42 }),
+    );
   });
 });

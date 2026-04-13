@@ -1,7 +1,7 @@
-import type { TablePersistenceConfig } from "../Table.types.ts";
+import type { TablePersistenceConfig } from '../Table.types.ts';
 
-import { getStorageKey } from "./getStorageKey.util.ts";
-import { PERSISTENCE_VERSION } from "./persistence.constants.ts";
+import { getStorageKey } from './getStorageKey.util.ts';
+import { PERSISTENCE_VERSION } from './persistence.constants.ts';
 
 type SerializedStateSlice = {
   readonly key: string;
@@ -29,7 +29,7 @@ export const serializeStateSlice = ({
 
   // Convert Set to Array for columnVisibility
   const serializableValue =
-    slice === "columnVisibility" && value instanceof Set ? [...value] : value;
+    slice === 'columnVisibility' && value instanceof Set ? [...value] : value;
 
   const serializedValue = JSON.stringify({
     value: serializableValue,

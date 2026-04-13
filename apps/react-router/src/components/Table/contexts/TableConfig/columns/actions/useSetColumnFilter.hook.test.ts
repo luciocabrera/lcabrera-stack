@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 
-import { act, renderHook } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { act, renderHook } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useSetColumnFilter } from "./useSetColumnFilter.hook.ts";
+import { useSetColumnFilter } from './useSetColumnFilter.hook.ts';
 
 const {
   mockPersistTableState,
@@ -25,7 +25,7 @@ const {
   };
 
   const mockMetaStore = {
-    get: vi.fn(() => ({ persistenceKey: "orders-table" })),
+    get: vi.fn(() => ({ persistenceKey: 'orders-table' })),
   };
 
   const mockDataStore = {
@@ -50,23 +50,29 @@ const {
   };
 });
 
-vi.mock("@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook", () => ({
-  useTableConfigContextValue: mockUseTableConfigContextValue,
-}));
+vi.mock(
+  '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
+  () => ({
+    useTableConfigContextValue: mockUseTableConfigContextValue,
+  }),
+);
 
-vi.mock("@/components/Table/contexts/TableData/data/useTableDataContextValue.hook", () => ({
-  useTableDataContextValue: mockUseTableDataContextValue,
-}));
+vi.mock(
+  '@/components/Table/contexts/TableData/data/useTableDataContextValue.hook',
+  () => ({
+    useTableDataContextValue: mockUseTableDataContextValue,
+  }),
+);
 
-vi.mock("@/components/Table/hooks", () => ({
+vi.mock('@/components/Table/hooks', () => ({
   usePersistTableStateAction: mockUsePersistTableStateAction,
 }));
 
-vi.mock("@/utils/urlState", () => ({
+vi.mock('@/utils/urlState', () => ({
   serializeFiltersToURL: mockSerializeFiltersToURL,
 }));
 
-describe("useSetColumnFilter", () => {
+describe('useSetColumnFilter', () => {
   beforeEach(() => {
     setColumnsState({
       columnFilters: {},
@@ -75,7 +81,7 @@ describe("useSetColumnFilter", () => {
     mockSerializeFiltersToURL.mockClear();
   });
 
-  it("reads the latest column filters on every invocation", () => {
+  it('reads the latest column filters on every invocation', () => {
     const { result } = renderHook(() =>
       useSetColumnFilter<{
         readonly priority: string;
@@ -85,36 +91,36 @@ describe("useSetColumnFilter", () => {
 
     act(() => {
       result.current({
-        columnKey: "status",
+        columnKey: 'status',
         filter: {
-          operator: "equals",
-          type: "text",
-          value: "active",
+          operator: 'equals',
+          type: 'text',
+          value: 'active',
         },
       });
     });
 
     act(() => {
       result.current({
-        columnKey: "priority",
+        columnKey: 'priority',
         filter: {
-          operator: "equals",
-          type: "text",
-          value: "high",
+          operator: 'equals',
+          type: 'text',
+          value: 'high',
         },
       });
     });
 
     const valueSlice = {
       priority: {
-        operator: "equals",
-        type: "text",
-        value: "high",
+        operator: 'equals',
+        type: 'text',
+        value: 'high',
       },
       status: {
-        operator: "equals",
-        type: "text",
-        value: "active",
+        operator: 'equals',
+        type: 'text',
+        value: 'active',
       },
     };
 
@@ -128,10 +134,10 @@ describe("useSetColumnFilter", () => {
           readonly valueSlice: typeof valueSlice;
         };
 
-    expect(lastCall?.persistenceKey).toBe("orders-table");
-    expect(lastCall?.searchParamKey).toBe("filters");
-    expect(lastCall?.slice).toBe("columnFilters");
+    expect(lastCall?.persistenceKey).toBe('orders-table');
+    expect(lastCall?.searchParamKey).toBe('filters');
+    expect(lastCall?.slice).toBe('columnFilters');
     expect(lastCall?.valueSlice).toEqual(valueSlice);
-    expect(JSON.parse(lastCall?.searchParamValue ?? "{}")).toEqual(valueSlice);
+    expect(JSON.parse(lastCall?.searchParamValue ?? '{}')).toEqual(valueSlice);
   });
 });

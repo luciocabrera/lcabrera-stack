@@ -1,6 +1,6 @@
-import { useColumnDrawerContextValue } from "@/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/useColumnDrawerContextValue.hook";
-import { useTableConfigContextValue } from "@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook";
-import { logger } from "@/utils/logger";
+import { useColumnDrawerContextValue } from '@/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/useColumnDrawerContextValue.hook';
+import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { logger } from '@/utils/logger';
 
 /**
  * Resets the column sorting in the drawer to match the current table state.
@@ -14,7 +14,9 @@ export const useResetColumnSorting = () => {
     const columnKey = columnState?.columnKey;
 
     if (!columnKey) {
-      logger.warn("[useResetColumnSorting] No columnKey found in column drawer store.");
+      logger.warn(
+        '[useResetColumnSorting] No columnKey found in column drawer store.',
+      );
       return;
     }
 

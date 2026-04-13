@@ -1,4 +1,4 @@
-import type { ColumnFiltersState } from "@/components/Table";
+import type { ColumnFiltersState } from '@/components/Table';
 
 export type ActiveFiltersListProps = {
   readonly expandedFilters: Set<string>;

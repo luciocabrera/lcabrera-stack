@@ -7,7 +7,7 @@ export const parseDate = (value: unknown): Date | undefined => {
     return value;
   }
 
-  if (typeof value === "string" || typeof value === "number") {
+  if (typeof value === 'string' || typeof value === 'number') {
     const date = new Date(value);
     // Check if date is valid
     if (!Number.isNaN(date.getTime())) {

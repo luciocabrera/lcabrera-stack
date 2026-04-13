@@ -63,5 +63,5 @@ Should be rendered **once** near the root of the app (e.g. inside the root layou
 
 ```tsx
 // app/root.tsx or equivalent
-<DevStyleXInject cssHref="/assets/stylex.css" />
+<DevStyleXInject cssHref='/assets/stylex.css' />
 ```

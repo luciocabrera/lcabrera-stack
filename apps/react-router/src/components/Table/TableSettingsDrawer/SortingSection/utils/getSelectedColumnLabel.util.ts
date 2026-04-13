@@ -1,4 +1,4 @@
-import type { TableColumn } from "@/components/Table/Table.types";
+import type { TableColumn } from '@/components/Table/Table.types';
 
 type GetSelectedColumnLabelArgs = {
   readonly selectedColumn: string;

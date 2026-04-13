@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import {
   DEFAULT_MAX_COLUMN_WIDTH,
   DEFAULT_MIN_COLUMN_WIDTH,
-} from "@/components/Table/Table.constants";
+} from '@/components/Table/Table.constants';
 
-import { useSyncColumnsSizing } from "../contexts/TableConfig/columns/actions/index.ts";
+import { useSyncColumnsSizing } from '../contexts/TableConfig/columns/actions/index.ts';
 
 export type OnResizeParams = {
   columnKey: string;
@@ -75,7 +75,10 @@ export const useColumnResize = ({
       // Use RAF to throttle updates for smooth performance
       const newAnimationFrameId = requestAnimationFrame(() => {
         const delta = event.clientX - initialX;
-        const newWidth = Math.max(minWidth, Math.min(maxWidth, initialWidth + delta));
+        const newWidth = Math.max(
+          minWidth,
+          Math.min(maxWidth, initialWidth + delta),
+        );
 
         onResize({ columnKey, width: newWidth });
       });
@@ -96,8 +99,8 @@ export const useColumnResize = ({
     syncColumnsSizing();
 
     // Re-enable text selection
-    document.body.style.userSelect = "";
-    document.body.style.cursor = "";
+    document.body.style.userSelect = '';
+    document.body.style.cursor = '';
   }, [syncColumnsSizing]);
 
   const onMouseDown = useCallback(
@@ -120,12 +123,12 @@ export const useColumnResize = ({
       setIsResizing(true);
 
       // Prevent text selection during drag
-      document.body.style.userSelect = "none";
-      document.body.style.cursor = "col-resize";
+      document.body.style.userSelect = 'none';
+      document.body.style.cursor = 'col-resize';
 
       // Add document-level event listeners
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("mouseup", handleMouseUp);
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
     },
     [currentWidth, handleMouseMove, handleMouseUp, maxWidth, minWidth],
   );
@@ -137,10 +140,10 @@ export const useColumnResize = ({
       if (animationFrameId !== undefined) {
         cancelAnimationFrame(animationFrameId);
       }
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-      document.body.style.userSelect = "";
-      document.body.style.cursor = "";
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.userSelect = '';
+      document.body.style.cursor = '';
     };
   }, [handleMouseMove, handleMouseUp]);
 

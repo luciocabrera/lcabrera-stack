@@ -1,7 +1,7 @@
-import type { VirtualizedOptionProps } from "./VirtualizedOption.types.ts";
+import type { VirtualizedOptionProps } from './VirtualizedOption.types.ts';
 
-import { SelectAllOption } from "../SelectAllOption/index.ts";
-import { SelectOption } from "../SelectOption/index.ts";
+import { SelectAllOption } from '../SelectAllOption/index.ts';
+import { SelectOption } from '../SelectOption/index.ts';
 
 export const VirtualizedOption = ({
   filteredOptions,

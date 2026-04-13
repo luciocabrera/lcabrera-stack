@@ -1,31 +1,38 @@
-import * as stylex from "@stylexjs/stylex";
+import * as stylex from '@stylexjs/stylex';
 import {
   type InfiniteData,
   keepPreviousData,
   QueryClient,
   QueryClientProvider,
   useInfiniteQuery,
-} from "@tanstack/react-query";
+} from '@tanstack/react-query';
 import {
   flexRender,
   getCoreRowModel,
   type OnChangeFn,
   type SortingState,
   useReactTable,
-} from "@tanstack/react-table";
-import { useVirtualizer } from "@tanstack/react-virtual";
-import { startTransition, type UIEvent, useEffect, useEffectEvent, useRef, useState } from "react";
-import { useLoaderData, useSearchParams } from "react-router";
+} from '@tanstack/react-table';
+import { useVirtualizer } from '@tanstack/react-virtual';
+import {
+  startTransition,
+  type UIEvent,
+  useEffect,
+  useEffectEvent,
+  useRef,
+  useState,
+} from 'react';
+import { useLoaderData, useSearchParams } from 'react-router';
 
-import type { WideAlltypes150Response } from "@/services";
+import type { WideAlltypes150Response } from '@/services';
 
-import { wideAlltypes150Api } from "@/services";
+import { wideAlltypes150Api } from '@/services';
 
-import type { loader } from "./wide-alltypes-150-tanstack.loader.ts";
+import type { loader } from './wide-alltypes-150-tanstack.loader.ts';
 import type {
   ResolveNextPageParamArgs,
   WideAlltypes150TanStackTableContentProps,
-} from "./WideAlltypes150TanStack.types.ts";
+} from './WideAlltypes150TanStack.types.ts';
 
 import {
   COLUMN_DEFINITIONS,
@@ -33,13 +40,13 @@ import {
   FETCH_SIZE,
   ROW_OVERSCAN,
   SCROLL_FETCH_THRESHOLD,
-} from "./WideAlltypes150TanStack.constants.ts";
+} from './WideAlltypes150TanStack.constants.ts';
 import {
   toTanStackSortingState,
   toWideAlltypes150ApiSorting,
   toWideAlltypes150SortSearchParam,
-} from "./wide-alltypes-150-tanstack.sorting.util.ts";
-import { styles } from "./wide-alltypes-150-tanstack.stylex.ts";
+} from './wide-alltypes-150-tanstack.sorting.util.ts';
+import { styles } from './wide-alltypes-150-tanstack.stylex.ts';
 
 const createQueryClient = (): QueryClient =>
   new QueryClient({
@@ -50,23 +57,26 @@ const createQueryClient = (): QueryClient =>
     },
   });
 
-const getSortIndicator = (direction: "asc" | "desc" | false) => {
-  if (direction === "asc") {
-    return "▲";
+const getSortIndicator = (direction: 'asc' | 'desc' | false) => {
+  if (direction === 'asc') {
+    return '▲';
   }
 
-  if (direction === "desc") {
-    return "▼";
+  if (direction === 'desc') {
+    return '▼';
   }
 
-  return "↕";
+  return '↕';
 };
 
 const resolveNextPageParam = ({
   allPages,
   lastPage,
 }: ResolveNextPageParamArgs): number | undefined => {
-  const loadedRowCount = allPages.reduce((accumulator, page) => accumulator + page.data.length, 0);
+  const loadedRowCount = allPages.reduce(
+    (accumulator, page) => accumulator + page.data.length,
+    0,
+  );
 
   if (loadedRowCount >= lastPage.total) {
     return undefined;
@@ -84,16 +94,17 @@ const WideAlltypes150TanStackTableContent = ({
   const [sorting, setSorting] = useState<SortingState>(() => initialSorting);
   const tableContainerReference = useRef<HTMLDivElement | null>(null);
   const apiSorting = toWideAlltypes150ApiSorting(sorting);
-  const sortParam = toWideAlltypes150SortSearchParam(sorting) ?? "";
+  const sortParam = toWideAlltypes150SortSearchParam(sorting) ?? '';
   const { data, error, fetchNextPage, isError, isFetching } = useInfiniteQuery<
     WideAlltypes150Response,
     Error,
     InfiniteData<WideAlltypes150Response, number>,
-    readonly ["wide-alltypes-150-tanstack", string],
+    readonly ['wide-alltypes-150-tanstack', string],
     number
   >({
     // eslint-disable-next-line local-rules/destructuring-for-functions
-    getNextPageParam: (lastPage, allPages) => resolveNextPageParam({ allPages, lastPage }),
+    getNextPageParam: (lastPage, allPages) =>
+      resolveNextPageParam({ allPages, lastPage }),
     initialData:
       sortParam === initialSortParam
         ? {
@@ -109,7 +120,7 @@ const WideAlltypes150TanStackTableContent = ({
         skip: pageParam,
         sorting: apiSorting,
       }),
-    queryKey: ["wide-alltypes-150-tanstack", sortParam],
+    queryKey: ['wide-alltypes-150-tanstack', sortParam],
     refetchOnWindowFocus: false,
   });
 
@@ -130,21 +141,23 @@ const WideAlltypes150TanStackTableContent = ({
     estimateSize: () => ESTIMATED_ROW_HEIGHT,
     getScrollElement: () => tableContainerReference.current,
     measureElement:
-      typeof globalThis !== "undefined" && !globalThis.navigator.userAgent.includes("Firefox")
+      typeof globalThis !== 'undefined' &&
+      !globalThis.navigator.userAgent.includes('Firefox')
         ? (element) => element.getBoundingClientRect().height
         : undefined,
     overscan: ROW_OVERSCAN,
   });
 
   const handleSortingChange: OnChangeFn<SortingState> = (updater) => {
-    const nextSorting = typeof updater === "function" ? updater(sorting) : updater;
+    const nextSorting =
+      typeof updater === 'function' ? updater(sorting) : updater;
     const nextSearchParams = new URLSearchParams(searchParams);
     const nextSortParam = toWideAlltypes150SortSearchParam(nextSorting);
 
     if (nextSortParam) {
-      nextSearchParams.set("sort", nextSortParam);
+      nextSearchParams.set('sort', nextSortParam);
     } else {
-      nextSearchParams.delete("sort");
+      nextSearchParams.delete('sort');
     }
 
     startTransition(() => {
@@ -160,7 +173,9 @@ const WideAlltypes150TanStackTableContent = ({
     onSortingChange: handleSortingChange,
   }));
 
-  const fetchMoreOnBottomReached = (containerElement: HTMLDivElement | null): void => {
+  const fetchMoreOnBottomReached = (
+    containerElement: HTMLDivElement | null,
+  ): void => {
     if (!containerElement || isFetching || flatData.length >= totalRowCount) {
       return;
     }
@@ -194,10 +209,12 @@ const WideAlltypes150TanStackTableContent = ({
     <div {...stylex.props(styles.container)}>
       <div {...stylex.props(styles.header)}>
         <div {...stylex.props(styles.headerCopy)}>
-          <h1 {...stylex.props(styles.title)}>Wide All-Types 150 with TanStack Table</h1>
+          <h1 {...stylex.props(styles.title)}>
+            Wide All-Types 150 with TanStack Table
+          </h1>
           <p {...stylex.props(styles.description)}>
-            A sibling TanStack experiment for 150 PostgreSQL-backed columns, server-side sorting,
-            infinite loading, and virtualized rows.
+            A sibling TanStack experiment for 150 PostgreSQL-backed columns,
+            server-side sorting, infinite loading, and virtualized rows.
           </p>
         </div>
         <div {...stylex.props(styles.statusPill)}>
@@ -206,8 +223,8 @@ const WideAlltypes150TanStackTableContent = ({
       </div>
       {import.meta.env.DEV ? (
         <p {...stylex.props(styles.devNotice)}>
-          Virtualized table performance is reduced in development mode. The production build is the
-          real benchmark.
+          Virtualized table performance is reduced in development mode. The
+          production build is the real benchmark.
         </p>
       ) : undefined}
       <div {...stylex.props(styles.tableSurface)}>
@@ -237,10 +254,13 @@ const WideAlltypes150TanStackTableContent = ({
                             sortedState && styles.headerButtonSorted,
                           )}
                           onClick={header.column.getToggleSortingHandler()}
-                          type="button"
+                          type='button'
                         >
                           <span {...stylex.props(styles.headerLabel)}>
-                            {flexRender(header.column.columnDef.header, header.getContext())}
+                            {flexRender(
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )}
                           </span>
                           <span {...stylex.props(styles.sortIndicator)}>
                             {getSortIndicator(sortedState)}
@@ -278,11 +298,15 @@ const WideAlltypes150TanStackTableContent = ({
                         key={cell.id}
                         {...stylex.props(
                           styles.bodyCell,
-                          cellIndex === visibleCells.length - 1 && styles.bodyCellLast,
+                          cellIndex === visibleCells.length - 1 &&
+                            styles.bodyCellLast,
                         )}
                         style={{ width: `${cell.column.getSize()}px` }}
                       >
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
                       </td>
                     ))}
                   </tr>
@@ -292,9 +316,11 @@ const WideAlltypes150TanStackTableContent = ({
           </table>
         </div>
         <div {...stylex.props(styles.footer)}>
-          <span>Server-side sorting with route-local TanStack Query cache.</span>
+          <span>
+            Server-side sorting with route-local TanStack Query cache.
+          </span>
           <span {...stylex.props(isFetching && styles.footerFetching)}>
-            {isFetching ? "Fetching more rows…" : "Scroll to load more"}
+            {isFetching ? 'Fetching more rows…' : 'Scroll to load more'}
           </span>
         </div>
       </div>
@@ -306,7 +332,8 @@ const WideAlltypes150TanStackTableContent = ({
  * Route component for the TanStack-based wide-alltypes table page.
  */
 export const WideAlltypes150TanStackPage = () => {
-  const { initialPage, initialSortParam, sorting } = useLoaderData<typeof loader>();
+  const { initialPage, initialSortParam, sorting } =
+    useLoaderData<typeof loader>();
   const [queryClient] = useState(createQueryClient);
 
   return (

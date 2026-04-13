@@ -1,4 +1,4 @@
-import { decodeStateFromURL } from "./decodeStateFromURL.util.ts";
+import { decodeStateFromURL } from './decodeStateFromURL.util.ts';
 
 type ReadStateFromURLArgs = {
   readonly convertArraysToSets?: readonly string[];

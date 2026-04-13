@@ -3,7 +3,7 @@ import type {
   ColumnPinningState,
   ColumnVisibilityState,
   TableColumn,
-} from "@/components/Table/Table.types";
+} from '@/components/Table/Table.types';
 
 type GetEffectiveColumnsArgs<TData> = {
   readonly columnOrder?: ColumnOrderState<TData>;
@@ -19,7 +19,9 @@ export const getEffectiveColumns = <TData>({
   columnVisibility,
 }: GetEffectiveColumnsArgs<TData>) => {
   // Filter visible columns
-  const visibleColumns = columns.filter((col) => !(columnVisibility?.has(col.key) ?? false));
+  const visibleColumns = columns.filter(
+    (col) => !(columnVisibility?.has(col.key) ?? false),
+  );
 
   // Apply column order
   const orderedColumns =
@@ -38,7 +40,8 @@ export const getEffectiveColumns = <TData>({
   const leftPinned = columnPinning.left;
   const rightPinned = columnPinning.right;
 
-  if (leftPinned.length === 0 && rightPinned.length === 0) return orderedColumns;
+  if (leftPinned.length === 0 && rightPinned.length === 0)
+    return orderedColumns;
 
   const pinnedLeftCols = leftPinned
     .map((key) => orderedColumns.find((col) => col.key === key))

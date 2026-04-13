@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
 
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react';
 
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 
-import { TableDrawersSection } from "./TableDrawersSection.component.tsx";
+import { TableDrawersSection } from './TableDrawersSection.component.tsx';
 
 type ColumnDrawerProviderProps = {
   readonly children: ReactNode;
@@ -28,85 +28,97 @@ const {
   useRenderTrackerMock: vi.fn(),
 }));
 
-function MockColumnDrawerProvider({ children, columnKey }: ColumnDrawerProviderProps) {
+function MockColumnDrawerProvider({
+  children,
+  columnKey,
+}: ColumnDrawerProviderProps) {
   return (
-    <div data-column-key={columnKey} data-testid="column-drawer-provider">
+    <div data-column-key={columnKey} data-testid='column-drawer-provider'>
       {children}
     </div>
   );
 }
 
-function MockColumnSettingsDrawer({ columnKey }: { readonly columnKey: string }) {
+function MockColumnSettingsDrawer({
+  columnKey,
+}: {
+  readonly columnKey: string;
+}) {
   return <div>Column Settings Drawer: {columnKey}</div>;
 }
 
 function MockTableDrawerProvider({ children }: TableDrawerProviderProps) {
-  return <div data-testid="table-drawer-provider">{children}</div>;
+  return <div data-testid='table-drawer-provider'>{children}</div>;
 }
 
 function MockTableSettingsDrawer() {
   return <div>Table Settings Drawer</div>;
 }
 
-vi.mock("@/components/Table/TableSettingsDrawer", () => ({
+vi.mock('@/components/Table/TableSettingsDrawer', () => ({
   TableSettingsDrawer: MockTableSettingsDrawer,
 }));
 
 vi.mock(
-  "@/components/Table/TableSettingsDrawer/TableDrawerContext/TableDrawerContext.provider",
+  '@/components/Table/TableSettingsDrawer/TableDrawerContext/TableDrawerContext.provider',
   () => ({
     TableDrawerProvider: MockTableDrawerProvider,
   }),
 );
 
-vi.mock("../ColumnSettingsDrawer", () => ({
+vi.mock('../ColumnSettingsDrawer', () => ({
   ColumnSettingsDrawer: MockColumnSettingsDrawer,
 }));
 
-vi.mock("../ColumnSettingsDrawer/ColumnDrawerContext/ColumnDrawerContext.provider", () => ({
-  ColumnDrawerProvider: MockColumnDrawerProvider,
-}));
+vi.mock(
+  '../ColumnSettingsDrawer/ColumnDrawerContext/ColumnDrawerContext.provider',
+  () => ({
+    ColumnDrawerProvider: MockColumnDrawerProvider,
+  }),
+);
 
-vi.mock("../contexts/TableConfig/meta/selectors", () => ({
+vi.mock('../contexts/TableConfig/meta/selectors', () => ({
   useGetTableColumnSelectedKey: useGetTableColumnSelectedKeyMock,
   useGetTableIsColumnSettingsOpen: useGetTableIsColumnSettingsOpenMock,
   useGetTableIsTableSettingsOpen: useGetTableIsTableSettingsOpenMock,
 }));
 
-vi.mock("@/utils/performance", () => ({
+vi.mock('@/utils/performance', () => ({
   useRenderTracker: useRenderTrackerMock,
 }));
 
-describe("TableDrawersSection", () => {
-  it("renders table settings drawer when table drawer is open", () => {
+describe('TableDrawersSection', () => {
+  it('renders table settings drawer when table drawer is open', () => {
     useGetTableIsTableSettingsOpenMock.mockReturnValue(true);
     useGetTableIsColumnSettingsOpenMock.mockReturnValue(false);
-    useGetTableColumnSelectedKeyMock.mockReturnValue("");
+    useGetTableColumnSelectedKeyMock.mockReturnValue('');
 
     render(<TableDrawersSection />);
 
-    expect(screen.getByTestId("table-drawer-provider").textContent).toContain(
-      "Table Settings Drawer",
+    expect(screen.getByTestId('table-drawer-provider').textContent).toContain(
+      'Table Settings Drawer',
     );
   });
 
-  it("renders column settings drawer when column drawer is open with selected key", () => {
+  it('renders column settings drawer when column drawer is open with selected key', () => {
     useGetTableIsTableSettingsOpenMock.mockReturnValue(false);
     useGetTableIsColumnSettingsOpenMock.mockReturnValue(true);
-    useGetTableColumnSelectedKeyMock.mockReturnValue("revenue");
+    useGetTableColumnSelectedKeyMock.mockReturnValue('revenue');
 
     render(<TableDrawersSection />);
 
-    expect(screen.getByTestId("column-drawer-provider").dataset.columnKey).toBe("revenue");
-    expect(screen.getByText("Column Settings Drawer: revenue").textContent).toBe(
-      "Column Settings Drawer: revenue",
+    expect(screen.getByTestId('column-drawer-provider').dataset.columnKey).toBe(
+      'revenue',
     );
+    expect(
+      screen.getByText('Column Settings Drawer: revenue').textContent,
+    ).toBe('Column Settings Drawer: revenue');
   });
 
-  it("renders nothing when no drawer is open", () => {
+  it('renders nothing when no drawer is open', () => {
     useGetTableIsTableSettingsOpenMock.mockReturnValue(false);
     useGetTableIsColumnSettingsOpenMock.mockReturnValue(false);
-    useGetTableColumnSelectedKeyMock.mockReturnValue("");
+    useGetTableColumnSelectedKeyMock.mockReturnValue('');
 
     const { container } = render(<TableDrawersSection />);
     expect(container.firstChild).toBeNull();

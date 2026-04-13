@@ -1,17 +1,22 @@
-import type { TableDataState } from "@/components/Table/Table.types";
+import type { TableDataState } from '@/components/Table/Table.types';
 
-import { useStore } from "@/hooks";
+import { useStore } from '@/hooks';
 
-import type { TableDataContextValue, TableDataProviderProps } from "./TableDataContext.types.ts";
+import type {
+  TableDataContextValue,
+  TableDataProviderProps,
+} from './TableDataContext.types.ts';
 
-import { TableDataContext } from "./TableDataContext.context.ts";
-import { getInitialDataState } from "./utils/index.ts";
+import { TableDataContext } from './TableDataContext.context.ts';
+import { getInitialDataState } from './utils/index.ts';
 
 export const TableDataProvider = <TData extends Record<string, unknown>>({
   children,
   dataState,
 }: TableDataProviderProps<TData>) => {
-  const dataStore = useStore<TableDataState<TData>>(getInitialDataState<TData>({ ...dataState }));
+  const dataStore = useStore<TableDataState<TData>>(
+    getInitialDataState<TData>({ ...dataState }),
+  );
 
   const value = {
     dataStore,

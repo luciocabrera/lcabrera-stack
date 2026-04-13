@@ -1,4 +1,4 @@
-import type { DataKey } from "@/components/Table/Table.types";
+import type { DataKey } from '@/components/Table/Table.types';
 
 export type DetailItem = {
   readonly isBadge?: boolean;

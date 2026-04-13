@@ -1,10 +1,13 @@
-import type { ColumnFiltersState, DataKey } from "@/components/Table/Table.types";
-import type { ColumnFilter } from "@/types/filterOperators.types";
+import type {
+  ColumnFiltersState,
+  DataKey,
+} from '@/components/Table/Table.types';
+import type { ColumnFilter } from '@/types/filterOperators.types';
 
-import { useTableConfigContextValue } from "@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook";
-import { useTableDataContextValue } from "@/components/Table/contexts/TableData/data/useTableDataContextValue.hook";
-import { usePersistTableStateAction } from "@/components/Table/hooks";
-import { serializeFiltersToURL } from "@/utils/urlState";
+import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { useTableDataContextValue } from '@/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
+import { usePersistTableStateAction } from '@/components/Table/hooks';
+import { serializeFiltersToURL } from '@/utils/urlState';
 
 type SetColumnFilterArgs<TData> = {
   readonly columnKey: DataKey<TData>;
@@ -24,8 +27,9 @@ export const useSetColumnFilter = <TData>() => {
 
   return ({ columnKey, filter }: SetColumnFilterArgs<TData>) => {
     const columnsState = columnsStore.get();
-    const persistenceKey = metaStore.get()?.persistenceKey ?? "";
-    const current = (columnsState?.columnFilters ?? {}) as ColumnFiltersState<TData>;
+    const persistenceKey = metaStore.get()?.persistenceKey ?? '';
+    const current = (columnsState?.columnFilters ??
+      {}) as ColumnFiltersState<TData>;
     let columnFilters: ColumnFiltersState<TData>;
     if (filter === null || filter === undefined) {
       // TODO: Improve later, i don't like this pattern
@@ -43,9 +47,9 @@ export const useSetColumnFilter = <TData>() => {
     // Persist to cookie and sync URL params in one action
     persistTableState<ColumnFiltersState<TData>>({
       persistenceKey,
-      searchParamKey: "filters",
+      searchParamKey: 'filters',
       searchParamValue: serializeFiltersToURL(columnFilters),
-      slice: "columnFilters",
+      slice: 'columnFilters',
       valueSlice: columnFilters,
     });
 

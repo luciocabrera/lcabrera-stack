@@ -1,4 +1,4 @@
-import { useTableDrawerContextValue } from "../useTableDrawerContextValue.hook.ts";
+import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook.ts';
 
 /**
  * Hook to clear all column filters (set to empty).

@@ -1,54 +1,54 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { getFilteredOptions } from "./getFilteredOptions.util.ts";
+import { getFilteredOptions } from './getFilteredOptions.util.ts';
 
-describe("getFilteredOptions", () => {
-  const options = ["Apple", "Banana", "Cherry", "Apricot"];
+describe('getFilteredOptions', () => {
+  const options = ['Apple', 'Banana', 'Cherry', 'Apricot'];
 
-  describe("search filtering", () => {
-    it("returns all options when searchTerm is empty", () => {
+  describe('search filtering', () => {
+    it('returns all options when searchTerm is empty', () => {
       expect(
         getFilteredOptions({
-          listFilterMode: "all",
+          listFilterMode: 'all',
           options,
-          searchTerm: "",
+          searchTerm: '',
           selectedValues: [],
         }),
       ).toEqual(options);
     });
 
-    it("filters by searchTerm case-insensitively", () => {
+    it('filters by searchTerm case-insensitively', () => {
       expect(
         getFilteredOptions({
-          listFilterMode: "all",
+          listFilterMode: 'all',
           options,
-          searchTerm: "ap",
+          searchTerm: 'ap',
           selectedValues: [],
         }),
-      ).toEqual(["Apple", "Apricot"]);
+      ).toEqual(['Apple', 'Apricot']);
     });
 
-    it("returns empty array when no options match", () => {
+    it('returns empty array when no options match', () => {
       expect(
         getFilteredOptions({
-          listFilterMode: "all",
+          listFilterMode: 'all',
           options,
-          searchTerm: "zzz",
+          searchTerm: 'zzz',
           selectedValues: [],
         }),
       ).toEqual([]);
     });
   });
 
-  describe("listFilterMode", () => {
-    const selected = ["Apple", "Cherry"];
+  describe('listFilterMode', () => {
+    const selected = ['Apple', 'Cherry'];
 
     it('returns all options in "all" mode', () => {
       expect(
         getFilteredOptions({
-          listFilterMode: "all",
+          listFilterMode: 'all',
           options,
-          searchTerm: "",
+          searchTerm: '',
           selectedValues: selected,
         }),
       ).toEqual(options);
@@ -57,36 +57,36 @@ describe("getFilteredOptions", () => {
     it('returns only selected options in "selected" mode', () => {
       expect(
         getFilteredOptions({
-          listFilterMode: "selected",
+          listFilterMode: 'selected',
           options,
-          searchTerm: "",
+          searchTerm: '',
           selectedValues: selected,
         }),
-      ).toEqual(["Apple", "Cherry"]);
+      ).toEqual(['Apple', 'Cherry']);
     });
 
     it('returns only unselected options in "unselected" mode', () => {
       expect(
         getFilteredOptions({
-          listFilterMode: "unselected",
+          listFilterMode: 'unselected',
           options,
-          searchTerm: "",
+          searchTerm: '',
           selectedValues: selected,
         }),
-      ).toEqual(["Banana", "Apricot"]);
+      ).toEqual(['Banana', 'Apricot']);
     });
   });
 
-  describe("combined search + mode", () => {
-    it("applies search then mode filter", () => {
+  describe('combined search + mode', () => {
+    it('applies search then mode filter', () => {
       expect(
         getFilteredOptions({
-          listFilterMode: "unselected",
+          listFilterMode: 'unselected',
           options,
-          searchTerm: "a",
-          selectedValues: ["Apple"],
+          searchTerm: 'a',
+          selectedValues: ['Apple'],
         }),
-      ).toEqual(["Banana", "Apricot"]);
+      ).toEqual(['Banana', 'Apricot']);
     });
   });
 });

@@ -1,1 +1,1 @@
-export { getInitialDataState } from "./getInitialDataState.util.ts";
+export { getInitialDataState } from './getInitialDataState.util.ts';

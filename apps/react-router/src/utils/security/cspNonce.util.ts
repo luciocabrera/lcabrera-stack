@@ -1,4 +1,4 @@
-export const CSP_NONCE_HEADER_NAME = "x-csp-nonce";
+export const CSP_NONCE_HEADER_NAME = 'x-csp-nonce';
 
 /**
  * Reads the CSP nonce from the inbound request headers.

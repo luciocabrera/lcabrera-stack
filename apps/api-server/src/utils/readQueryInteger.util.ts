@@ -1,4 +1,4 @@
-import { readQueryValue } from "./readQueryValue.util";
+import { readQueryValue } from './readQueryValue.util';
 
 type ReadQueryIntegerArgs = {
   readonly fallback: number;

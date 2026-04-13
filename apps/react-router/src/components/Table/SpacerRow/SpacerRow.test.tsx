@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 
-import { render } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { render } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 
-vi.mock("../contexts/TableConfig/columns/selectors", () => ({
+vi.mock('../contexts/TableConfig/columns/selectors', () => ({
   useGetColumnGroups: vi.fn(() => ({
     centerCols: [{}, {}, {}],
     leftPinnedCols: [{}],
@@ -11,10 +11,10 @@ vi.mock("../contexts/TableConfig/columns/selectors", () => ({
   })),
 }));
 
-import { SpacerRow } from "./SpacerRow.component.tsx";
+import { SpacerRow } from './SpacerRow.component.tsx';
 
-describe("SpacerRow", () => {
-  it("renders an aria-hidden tr element", () => {
+describe('SpacerRow', () => {
+  it('renders an aria-hidden tr element', () => {
     const { container } = render(
       <table>
         <tbody>
@@ -23,12 +23,12 @@ describe("SpacerRow", () => {
       </table>,
     );
 
-    const row = container.querySelector("tr");
+    const row = container.querySelector('tr');
     expect(row).not.toBeNull();
-    expect(row?.getAttribute("aria-hidden")).toBe("true");
+    expect(row?.getAttribute('aria-hidden')).toBe('true');
   });
 
-  it("colSpan is applied to the inner td when provided", () => {
+  it('colSpan is applied to the inner td when provided', () => {
     const { container } = render(
       <table>
         <tbody>
@@ -37,7 +37,7 @@ describe("SpacerRow", () => {
       </table>,
     );
 
-    const cell = container.querySelector("td");
-    expect(cell?.getAttribute("colspan")).toBe("5");
+    const cell = container.querySelector('td');
+    expect(cell?.getAttribute('colspan')).toBe('5');
   });
 });

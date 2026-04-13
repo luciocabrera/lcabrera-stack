@@ -1,16 +1,16 @@
 // @vitest-environment jsdom
 
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react';
 
-import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { cleanup, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type {
   ColumnSizingState,
   DataKey,
   PinnedColumnInfo,
   TableColumn,
-} from "@/components/Table/Table.types";
+} from '@/components/Table/Table.types';
 
 type MockTableBodyCellProps = {
   readonly children?: ReactNode;
@@ -19,17 +19,18 @@ type MockTableBodyCellProps = {
 
 const { MockTableBodyCell } = vi.hoisted(() => ({
   MockTableBodyCell: ({ children, value }: MockTableBodyCellProps) => (
-    <td data-testid="mock-table-body-cell">
-      {children ?? (typeof value === "number" ? value : ((value as ReactNode) ?? ""))}
+    <td data-testid='mock-table-body-cell'>
+      {children ??
+        (typeof value === 'number' ? value : ((value as ReactNode) ?? ''))}
     </td>
   ),
 }));
 
-vi.mock("@/components/Table/TableBodyCell", () => ({
+vi.mock('@/components/Table/TableBodyCell', () => ({
   TableBodyCell: MockTableBodyCell,
 }));
 
-import { createRenderTableBodyCell } from "./createRenderTableBodyCell.util.ts";
+import { createRenderTableBodyCell } from './createRenderTableBodyCell.util.ts';
 
 type Row = {
   readonly amount?: number;
@@ -40,11 +41,11 @@ type RowKey = DataKey<Row>;
 
 afterEach(cleanup);
 
-describe("createRenderTableBodyCell", () => {
-  it("renders default TableBodyCell output", () => {
+describe('createRenderTableBodyCell', () => {
+  it('renders default TableBodyCell output', () => {
     const col: TableColumn<Row> = {
-      key: "amount",
-      label: "Amount",
+      key: 'amount',
+      label: 'Amount',
       minWidth: 100,
     };
     const renderBodyCell = createRenderTableBodyCell<Row>({
@@ -61,13 +62,13 @@ describe("createRenderTableBodyCell", () => {
       </table>,
     );
 
-    expect(screen.getByText("12").textContent).toBe("12");
+    expect(screen.getByText('12').textContent).toBe('12');
   });
 
-  it("renders custom TableBodyCell output", () => {
+  it('renders custom TableBodyCell output', () => {
     const col: TableColumn<Row> = {
-      key: "name",
-      label: "Name",
+      key: 'name',
+      label: 'Name',
       render: (row) => `custom:${String(row.name)}`,
     };
     const renderBodyCell = createRenderTableBodyCell<Row>({
@@ -79,18 +80,18 @@ describe("createRenderTableBodyCell", () => {
     render(
       <table>
         <tbody>
-          <tr>{renderBodyCell({ col, rowData: { name: "Z" } })}</tr>
+          <tr>{renderBodyCell({ col, rowData: { name: 'Z' } })}</tr>
         </tbody>
       </table>,
     );
 
-    expect(screen.getByText("custom:Z").textContent).toBe("custom:Z");
+    expect(screen.getByText('custom:Z').textContent).toBe('custom:Z');
   });
 
-  it("applies sizing and pin metadata", () => {
+  it('applies sizing and pin metadata', () => {
     const col: TableColumn<Row> = {
-      key: "name",
-      label: "Name",
+      key: 'name',
+      label: 'Name',
       minWidth: 90,
     };
     const renderBodyCell = createRenderTableBodyCell<Row>({
@@ -101,7 +102,7 @@ describe("createRenderTableBodyCell", () => {
           isFirstPinnedRight: false,
           isLastPinnedLeft: true,
           offset: 16,
-          side: "left",
+          side: 'left',
         },
       } as Record<RowKey, PinnedColumnInfo>,
     });
@@ -109,11 +110,11 @@ describe("createRenderTableBodyCell", () => {
     render(
       <table>
         <tbody>
-          <tr>{renderBodyCell({ col, rowData: { name: "A" } })}</tr>
+          <tr>{renderBodyCell({ col, rowData: { name: 'A' } })}</tr>
         </tbody>
       </table>,
     );
 
-    expect(screen.getByTestId("mock-table-body-cell").tagName).toBe("TD");
+    expect(screen.getByTestId('mock-table-body-cell').tagName).toBe('TD');
   });
 });

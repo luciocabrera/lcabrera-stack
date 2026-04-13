@@ -1,6 +1,6 @@
-import { useRef } from "react";
+import { useRef } from 'react';
 
-import { shallowEqual } from "@/utils";
+import { shallowEqual } from '@/utils';
 
 /**
  * Store type with get, set, subscribe, reset, and getServerSnapshot methods

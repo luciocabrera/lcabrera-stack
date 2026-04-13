@@ -1,12 +1,12 @@
-import type { RequestHandler } from "express";
+import type { RequestHandler } from 'express';
 
-import { DEFAULT_PAGE_LIMIT } from "../../constants/server.constants";
-import { createRequestHandler } from "../../utils/createRequestHandler.util";
-import { readQueryInteger } from "../../utils/readQueryInteger.util";
+import { DEFAULT_PAGE_LIMIT } from '../../constants/server.constants';
+import { createRequestHandler } from '../../utils/createRequestHandler.util';
+import { readQueryInteger } from '../../utils/readQueryInteger.util';
 
-import { CAR_SALES_SORTABLE_COLUMNS } from "./carSales.constants";
-import type { CarSalesRepository } from "./carSales.repository";
-import { parseCarSalesSorting } from "./carSales.schema";
+import { CAR_SALES_SORTABLE_COLUMNS } from './carSales.constants';
+import type { CarSalesRepository } from './carSales.repository';
+import { parseCarSalesSorting } from './carSales.schema';
 
 export type CarSalesController = {
   readonly getAll: RequestHandler;
@@ -25,7 +25,7 @@ export const createCarSalesController = ({
 }: CreateCarSalesControllerArgs): CarSalesController => ({
   getAll: createRequestHandler({
     handler: async ({ response }) => {
-      console.warn("📊 [All] Fetching all car sales");
+      console.warn('📊 [All] Fetching all car sales');
       const result = await repository.getAll();
       response.json(result);
     },
@@ -46,7 +46,7 @@ export const createCarSalesController = ({
         value: request.query.sort,
       });
 
-      console.warn("📊 [Paginated] Fetching car sales", {
+      console.warn('📊 [Paginated] Fetching car sales', {
         limit,
         skip,
         sorting,

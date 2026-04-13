@@ -1,1 +1,1 @@
-export { TableRow } from "./TableRow.component.tsx";
+export { TableRow } from './TableRow.component.tsx';

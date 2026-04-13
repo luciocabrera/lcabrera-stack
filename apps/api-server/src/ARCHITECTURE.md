@@ -44,7 +44,7 @@ src/
 │   ├── parseJsonQueryParam.util.ts
 │   ├── readQueryInteger.util.ts
 │   ├── readQueryValue.util.ts
-│   └── serializeDatabaseValue.util.ts
+│   └── (serializeDatabaseValue imported from `api-shared`)
 └── server.ts
 ```
 
@@ -64,3 +64,11 @@ src/
 - Dynamic SQL identifiers are always allowlisted before interpolation.
 - Query/value parsing happens before repository calls.
 - Errors are normalized through `HttpError` + `error.middleware.ts`.
+
+## Shared Utilities
+
+Common utilities shared across both API server implementations live in `apps/shared`. Currently:
+
+- `serializeDatabaseValue` — Converts PostgreSQL row values (Buffers, nested objects) to JSON-safe response values.
+
+Imports use the `api-shared` package alias for monorepo resolution.

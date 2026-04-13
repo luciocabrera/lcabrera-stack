@@ -1,8 +1,8 @@
-import * as stylex from "@stylexjs/stylex";
+import * as stylex from '@stylexjs/stylex';
 
-import type { TableRowProps } from "./TableRow.types.ts";
+import type { TableRowProps } from './TableRow.types.ts';
 
-import { tableRowStyles } from "./TableRow.stylex.ts";
+import { tableRowStyles } from './TableRow.stylex.ts';
 
 export const TableRow = ({
   children,

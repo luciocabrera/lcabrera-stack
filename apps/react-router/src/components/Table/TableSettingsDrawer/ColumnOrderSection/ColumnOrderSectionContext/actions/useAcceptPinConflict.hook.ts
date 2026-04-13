@@ -1,15 +1,15 @@
-import type { ColumnOrderState } from "@/components/Table/Table.types";
-import type { PinConflictResolution } from "@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types";
+import type { ColumnOrderState } from '@/components/Table/Table.types';
+import type { PinConflictResolution } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
 
-import { useTableConfigContextValue } from "@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook";
+import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import {
   applyPin,
   buildAllOrderedColumns,
   insertAdjacentToPinnedGroup,
-} from "@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils";
-import { useTableDrawerContextValue } from "@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook";
+} from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
+import { useTableDrawerContextValue } from '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
 
-import { useColumnOrderSectionContextValue } from "../useColumnOrderSectionContextValue.hook.ts";
+import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook.ts';
 
 /**
  * Hook to handle accepting a pin conflict resolution.
@@ -38,7 +38,7 @@ export const useAcceptPinConflict = () => {
     const index = allOrderedColumns.findIndex((col) => col.key === columnKey);
 
     switch (resolution) {
-      case "move-column": {
+      case 'move-column': {
         let newOrder = allOrderedColumns
           .filter((col) => col.key !== columnKey)
           .map((col) => col.key);
@@ -64,15 +64,15 @@ export const useAcceptPinConflict = () => {
         break;
       }
 
-      case "pin-all-between": {
+      case 'pin-all-between': {
         const newPinning = {
           left: [...columnPinning.left],
           right: [...columnPinning.right],
         };
 
-        if (side === "left") {
+        if (side === 'left') {
           for (let i = 0; i <= index; i++) {
-            const key = allOrderedColumns[i]?.key ?? "";
+            const key = allOrderedColumns[i]?.key ?? '';
             if (!newPinning.left.includes(key)) {
               newPinning.right = newPinning.right.filter((k) => k !== key);
               newPinning.left.push(key);
@@ -80,7 +80,7 @@ export const useAcceptPinConflict = () => {
           }
         } else {
           for (let i = index; i < allOrderedColumns.length; i++) {
-            const key = allOrderedColumns[i]?.key ?? "";
+            const key = allOrderedColumns[i]?.key ?? '';
             if (!newPinning.right.includes(key)) {
               newPinning.left = newPinning.left.filter((k) => k !== key);
               newPinning.right.push(key);
@@ -92,7 +92,7 @@ export const useAcceptPinConflict = () => {
         break;
       }
 
-      case "pin-only": {
+      case 'pin-only': {
         drawerColumnsStore.set({
           columnPinning: applyPin({
             columnKey,

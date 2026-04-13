@@ -1,21 +1,23 @@
-import type { DateFormatPreset } from "../../types/format.types.ts";
+import type { DateFormatPreset } from '../../types/format.types.ts';
 
 /**
  * Map preset names to Intl.DateTimeFormat options
  */
-export const getDateTimeFormatOptions = (preset: DateFormatPreset): Intl.DateTimeFormatOptions => {
+export const getDateTimeFormatOptions = (
+  preset: DateFormatPreset,
+): Intl.DateTimeFormatOptions => {
   switch (preset) {
-    case "full": {
-      return { dateStyle: "full" };
+    case 'full': {
+      return { dateStyle: 'full' };
     }
-    case "long": {
-      return { dateStyle: "long" };
+    case 'long': {
+      return { dateStyle: 'long' };
     }
-    case "medium": {
-      return { dateStyle: "medium" };
+    case 'medium': {
+      return { dateStyle: 'medium' };
     }
-    case "short": {
-      return { dateStyle: "short" };
+    case 'short': {
+      return { dateStyle: 'short' };
     }
   }
 };

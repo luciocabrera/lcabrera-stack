@@ -1,10 +1,10 @@
-import * as stylex from "@stylexjs/stylex";
-import { useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
+import * as stylex from '@stylexjs/stylex';
+import { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 
-import type { SidePanelProps } from "./SidePanel.types.ts";
+import type { SidePanelProps } from './SidePanel.types.ts';
 
-import { sidePanelStyles } from "./SidePanel.stylex.ts";
+import { sidePanelStyles } from './SidePanel.stylex.ts';
 
 export const SidePanel = ({
   children,
@@ -12,23 +12,27 @@ export const SidePanel = ({
   isPinned,
   onClose,
   portalContainer,
-  position = "right",
+  position = 'right',
   shouldShowOverlay = true,
-  size = "md",
+  size = 'md',
   ...props
 }: SidePanelProps) => {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   const shouldShowBackdrop = shouldShowOverlay && !isPinned;
   const isVisible = isOpen || isPinned;
-  const openStyle = position === "left" ? ("leftOpen" as const) : ("rightOpen" as const);
-  const closedStyle = position === "left" ? ("leftClosed" as const) : ("rightClosed" as const);
+  const openStyle =
+    position === 'left' ? ('leftOpen' as const) : ('rightOpen' as const);
+  const closedStyle =
+    position === 'left' ? ('leftClosed' as const) : ('rightClosed' as const);
   const panelStyles = stylex.props(
     sidePanelStyles.base,
     sidePanelStyles.size[size],
     sidePanelStyles.position[position],
     sidePanelStyles.position[isVisible ? openStyle : closedStyle],
-    shouldShowBackdrop ? sidePanelStyles.withBackdrop : sidePanelStyles.withoutBackdrop,
+    shouldShowBackdrop
+      ? sidePanelStyles.withBackdrop
+      : sidePanelStyles.withoutBackdrop,
     isPinned && sidePanelStyles.pinned,
   );
 
@@ -73,18 +77,25 @@ export const SidePanel = ({
       }
     };
 
-    dialog.addEventListener("close", handleClose);
+    dialog.addEventListener('close', handleClose);
     return () => {
-      dialog.removeEventListener("close", handleClose);
+      dialog.removeEventListener('close', handleClose);
     };
   }, [onClose, isPinned]);
 
-  const content = <div {...stylex.props(sidePanelStyles.content)}>{children}</div>;
+  const content = (
+    <div {...stylex.props(sidePanelStyles.content)}>{children}</div>
+  );
 
   // When pinned, render as an aside instead of dialog
   if (isPinned) {
     const aside = (
-      <aside aria-label="Settings panel" data-testid="side-panel" {...props} {...panelStyles}>
+      <aside
+        aria-label='Settings panel'
+        data-testid='side-panel'
+        {...props}
+        {...panelStyles}
+      >
         {content}
       </aside>
     );
@@ -99,7 +110,12 @@ export const SidePanel = ({
 
   // When not pinned, use dialog element
   return (
-    <dialog data-testid="side-panel" ref={dialogRef} {...props} {...panelStyles}>
+    <dialog
+      data-testid='side-panel'
+      ref={dialogRef}
+      {...props}
+      {...panelStyles}
+    >
       {content}
     </dialog>
   );

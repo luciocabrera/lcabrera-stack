@@ -1,7 +1,7 @@
-import * as stylex from "@stylexjs/stylex";
+import * as stylex from '@stylexjs/stylex';
 
-import { spacing, typography } from "@/design-system/tokens/base.stylex";
-import { colors } from "@/design-system/tokens/colors.stylex";
+import { spacing, typography } from '@/design-system/tokens/base.stylex';
+import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const sidePanelTitleStyles = stylex.create({
   icon: {
@@ -12,9 +12,9 @@ export const sidePanelTitleStyles = stylex.create({
   title: {
     margin: 0,
     gap: spacing.xs,
-    alignItems: "center",
+    alignItems: 'center',
     color: colors.textPrimary,
-    display: "flex",
+    display: 'flex',
     fontSize: typography.fontSizeXl,
     fontWeight: typography.fontWeightSemibold,
   },

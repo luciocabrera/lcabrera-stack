@@ -1,13 +1,13 @@
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react';
 
 import type {
   ColumnSizingState,
   DataKey,
   PinnedColumnInfo,
   TableColumn,
-} from "@/components/Table/Table.types";
+} from '@/components/Table/Table.types';
 
-import { DEFAULT_MIN_COLUMN_WIDTH } from "@/components/Table/Table.constants";
+import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
 
 type BuildTableBodyCellDescriptorArgs<TData extends Record<string, unknown>> = {
   readonly col: TableColumn<TData>;
@@ -22,18 +22,18 @@ export type TableBodyCellDescriptor<TData extends Record<string, unknown>> =
       readonly children: ReactNode;
       readonly isLoadingState: boolean;
       readonly key: DataKey<TData>;
-      readonly kind: "custom";
-      readonly label: "";
+      readonly kind: 'custom';
+      readonly label: '';
       readonly minWidth: number;
       readonly pinInfo: PinnedColumnInfo | undefined;
       readonly width: number;
     }
   | {
-      readonly dataType: TableColumn<TData>["dataType"];
-      readonly format: TableColumn<TData>["format"];
+      readonly dataType: TableColumn<TData>['dataType'];
+      readonly format: TableColumn<TData>['format'];
       readonly isLoadingState: boolean;
       readonly key: DataKey<TData>;
-      readonly kind: "default";
+      readonly kind: 'default';
       readonly label: string;
       readonly minWidth: number;
       readonly pinInfo: PinnedColumnInfo | undefined;
@@ -44,7 +44,9 @@ export type TableBodyCellDescriptor<TData extends Record<string, unknown>> =
 /**
  * Builds the props-derived descriptor needed to render a TableBodyCell.
  */
-export const buildTableBodyCellDescriptor = <TData extends Record<string, unknown>>({
+export const buildTableBodyCellDescriptor = <
+  TData extends Record<string, unknown>,
+>({
   col,
   columnSizing,
   isLoadingState,
@@ -60,8 +62,8 @@ export const buildTableBodyCellDescriptor = <TData extends Record<string, unknow
       children: col.render(rowData as TData),
       isLoadingState,
       key: col.key,
-      kind: "custom",
-      label: "",
+      kind: 'custom',
+      label: '',
       minWidth,
       pinInfo,
       width,
@@ -73,11 +75,11 @@ export const buildTableBodyCellDescriptor = <TData extends Record<string, unknow
     format: col.format,
     isLoadingState,
     key: col.key,
-    kind: "default",
+    kind: 'default',
     label: col.label,
     minWidth,
     pinInfo,
-    value: col.key in rowData ? rowData[col.key] : "",
+    value: col.key in rowData ? rowData[col.key] : '',
     width,
   };
 };

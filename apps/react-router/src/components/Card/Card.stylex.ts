@@ -1,4 +1,4 @@
-import * as stylex from "@stylexjs/stylex";
+import * as stylex from '@stylexjs/stylex';
 
 import {
   borderRadius,
@@ -6,22 +6,22 @@ import {
   shadows,
   spacing,
   transitions,
-} from "@/design-system/tokens/base.stylex";
-import { colors } from "@/design-system/tokens/colors.stylex";
-import { rippleBase } from "@/design-system/tokens/commons.stylex";
+} from '@/design-system/tokens/base.stylex';
+import { colors } from '@/design-system/tokens/colors.stylex';
+import { rippleBase } from '@/design-system/tokens/commons.stylex';
 
 const baseStyles = stylex.create({
   card: {
     borderColor: colors.borderPrimary,
     borderRadius: borderRadius.lg,
-    borderStyle: "solid",
-    borderWidth: "1px",
-    overflow: "hidden",
+    borderStyle: 'solid',
+    borderWidth: '1px',
+    overflow: 'hidden',
     transition: `all ${transitions.normal} ${easing.easeInOut}`,
     backgroundColor: colors.surfacePrimary,
-    containerName: "card",
-    containerType: "inline-size",
-    position: "relative",
+    containerName: 'card',
+    containerType: 'inline-size',
+    position: 'relative',
   },
 });
 
@@ -66,20 +66,20 @@ const paddingVariants = stylex.create({
 // Interactive variants
 const interactiveVariants = stylex.create({
   clickable: {
-    backgroundPosition: "center",
+    backgroundPosition: 'center',
     backgroundImage: {
-      ":hover": `radial-gradient(circle, transparent 1%, ${colors.hover} 1%)`,
+      ':hover': `radial-gradient(circle, transparent 1%, ${colors.hover} 1%)`,
     },
     boxShadow: {
-      ":hover": colors.shadowHover,
+      ':hover': colors.shadowHover,
     },
-    cursor: "pointer",
+    cursor: 'pointer',
   },
   hoverable: {
     boxShadow: {
-      ":hover": colors.shadowHover,
+      ':hover': colors.shadowHover,
     },
-    cursor: "pointer",
+    cursor: 'pointer',
   },
   static: {},
 });

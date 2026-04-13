@@ -1,1 +1,1 @@
-export { SkeletonOptions } from "./SkeletonOptions.component.tsx";
+export { SkeletonOptions } from './SkeletonOptions.component.tsx';

@@ -56,8 +56,8 @@ TableMetaContext       → Loading states, pagination meta
 
 ```tsx
 // TableDataContext.context.ts
-import { createContext } from "react";
-import type { TStore } from "@/hooks";
+import { createContext } from 'react';
+import type { TStore } from '@/hooks';
 
 export type TableDataState<TData> = {
   data: TData[];
@@ -67,16 +67,17 @@ export type TableDataContextValue<TData> = {
   dataStore: TStore<TableDataState<TData>>;
 };
 
-export const TableDataContext = createContext<TableDataContextValue<unknown> | null>(null);
+export const TableDataContext =
+  createContext<TableDataContextValue<unknown> | null>(null);
 ```
 
 #### 1.2 TableFiltersContext
 
 ```tsx
 // TableFiltersContext.context.ts
-import { createContext } from "react";
-import type { TStore } from "@/hooks";
-import type { ColumnFiltersState } from "../Table.types";
+import { createContext } from 'react';
+import type { TStore } from '@/hooks';
+import type { ColumnFiltersState } from '../Table.types';
 
 export type TableFiltersState = {
   columnFilters: ColumnFiltersState;
@@ -93,16 +94,17 @@ export type TableFiltersContextValue = {
   filtersStore: TStore<TableFiltersState>;
 };
 
-export const TableFiltersContext = createContext<TableFiltersContextValue | null>(null);
+export const TableFiltersContext =
+  createContext<TableFiltersContextValue | null>(null);
 ```
 
 #### 1.3 TableSortingContext
 
 ```tsx
 // TableSortingContext.context.ts
-import { createContext } from "react";
-import type { TStore } from "@/hooks";
-import type { SortingState } from "../Table.types";
+import { createContext } from 'react';
+import type { TStore } from '@/hooks';
+import type { SortingState } from '../Table.types';
 
 export type TableSortingState = {
   sorting: SortingState;
@@ -118,21 +120,22 @@ export type TableSortingContextValue = {
   sortingStore: TStore<TableSortingState>;
 };
 
-export const TableSortingContext = createContext<TableSortingContextValue | null>(null);
+export const TableSortingContext =
+  createContext<TableSortingContextValue | null>(null);
 ```
 
 #### 1.4 TableColumnsContext
 
 ```tsx
 // TableColumnsContext.context.ts
-import { createContext } from "react";
-import type { TStore } from "@/hooks";
+import { createContext } from 'react';
+import type { TStore } from '@/hooks';
 import type {
   ColumnOrderState,
   ColumnSizingState,
   ColumnVisibilityState,
   ColumnPinningState,
-} from "../Table.types";
+} from '../Table.types';
 
 export type TableColumnsState = {
   columnOrder: ColumnOrderState;
@@ -153,22 +156,25 @@ export type TableColumnsContextValue = {
   columnsStore: TStore<TableColumnsState>;
 };
 
-export const TableColumnsContext = createContext<TableColumnsContextValue | null>(null);
+export const TableColumnsContext =
+  createContext<TableColumnsContextValue | null>(null);
 ```
 
 #### 1.5 TableMetaContext (keep existing, rename)
 
 ```tsx
 // TableMetaContext.context.ts
-import { createContext } from "react";
-import type { TStore } from "@/hooks";
-import type { TableMeta } from "../Table.types";
+import { createContext } from 'react';
+import type { TStore } from '@/hooks';
+import type { TableMeta } from '../Table.types';
 
 export type TableMetaContextValue = {
   metaStore: TStore<TableMeta>;
 };
 
-export const TableMetaContext = createContext<TableMetaContextValue | null>(null);
+export const TableMetaContext = createContext<TableMetaContextValue | null>(
+  null,
+);
 ```
 
 ### Phase 2: Create Combined Provider
@@ -187,7 +193,9 @@ export const TableProvider = <TData extends Record<string, unknown>>({
   persistenceKey,
 }: TableProviderProps<TData>) => {
   // Read persisted state from cookies
-  const persistedState = persistenceKey ? readPersistedStateFromCookie({ persistenceKey }) : {};
+  const persistedState = persistenceKey
+    ? readPersistedStateFromCookie({ persistenceKey })
+    : {};
 
   // Create individual stores
   const dataStore = useStore<TableDataState<TData>>({
@@ -206,7 +214,8 @@ export const TableProvider = <TData extends Record<string, unknown>>({
     columnOrder: initialColumnOrder ?? persistedState.columnOrder ?? [],
     columnPinning: { left: [], right: [] },
     columnSizing: initialColumnSizing ?? persistedState.columnSizing ?? {},
-    columnVisibility: initialColumnVisibility ?? persistedState.columnVisibility ?? new Set(),
+    columnVisibility:
+      initialColumnVisibility ?? persistedState.columnVisibility ?? new Set(),
   });
 
   const metaStore = useStore<TableMeta>({
@@ -256,9 +265,11 @@ export const TableProvider = <TData extends Record<string, unknown>>({
   const columnsActions = useMemo<TableColumnsActions>(
     () => ({
       setColumnOrder: (order) => columnsStore.set({ columnOrder: order }),
-      setColumnPinning: (pinning) => columnsStore.set({ columnPinning: pinning }),
+      setColumnPinning: (pinning) =>
+        columnsStore.set({ columnPinning: pinning }),
       setColumnSizing: (sizing) => columnsStore.set({ columnSizing: sizing }),
-      setColumnVisibility: (visibility) => columnsStore.set({ columnVisibility: visibility }),
+      setColumnVisibility: (visibility) =>
+        columnsStore.set({ columnVisibility: visibility }),
     }),
     [columnsStore],
   );
@@ -267,8 +278,12 @@ export const TableProvider = <TData extends Record<string, unknown>>({
     <TableDataContext value={{ dataStore }}>
       <TableFiltersContext value={{ actions: filtersActions, filtersStore }}>
         <TableSortingContext value={{ actions: sortingActions, sortingStore }}>
-          <TableColumnsContext value={{ actions: columnsActions, columnsStore }}>
-            <TableMetaContext value={{ metaStore }}>{children}</TableMetaContext>
+          <TableColumnsContext
+            value={{ actions: columnsActions, columnsStore }}
+          >
+            <TableMetaContext value={{ metaStore }}>
+              {children}
+            </TableMetaContext>
           </TableColumnsContext>
         </TableSortingContext>
       </TableFiltersContext>
@@ -283,7 +298,8 @@ export const TableProvider = <TData extends Record<string, unknown>>({
 // hooks/useFilters.hook.ts
 export const useColumnFilters = () => {
   const ctx = use(TableFiltersContext);
-  if (!ctx) throw new Error("useColumnFilters must be used within TableProvider");
+  if (!ctx)
+    throw new Error('useColumnFilters must be used within TableProvider');
 
   return useSyncExternalStore(
     ctx.filtersStore.subscribe,
@@ -294,14 +310,15 @@ export const useColumnFilters = () => {
 
 export const useSetColumnFilter = () => {
   const ctx = use(TableFiltersContext);
-  if (!ctx) throw new Error("useSetColumnFilter must be used within TableProvider");
+  if (!ctx)
+    throw new Error('useSetColumnFilter must be used within TableProvider');
   return ctx.actions.setColumnFilter;
 };
 
 // hooks/useSorting.hook.ts
 export const useSorting = () => {
   const ctx = use(TableSortingContext);
-  if (!ctx) throw new Error("useSorting must be used within TableProvider");
+  if (!ctx) throw new Error('useSorting must be used within TableProvider');
 
   return useSyncExternalStore(
     ctx.sortingStore.subscribe,

@@ -5,11 +5,11 @@ import type {
   ColumnSizingState,
   ColumnVisibilityState,
   SortingState,
-} from "@/components/Table/Table.types";
+} from '@/components/Table/Table.types';
 
-import { useTableConfigContextValue } from "@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook";
+import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 
-import { useTableDrawerContextValue } from "../useTableDrawerContextValue.hook.ts";
+import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook.ts';
 
 export const useResetTableSettings = () => {
   const { columnsStore } = useTableConfigContextValue();
@@ -21,9 +21,12 @@ export const useResetTableSettings = () => {
     columnsDrawerStore.set({
       columnFilters: columnsState?.columnFilters ?? ({} as ColumnFiltersState),
       columnOrder: columnsState?.columnOrder ?? ([] as ColumnOrderState),
-      columnPinning: columnsState?.columnPinning ?? ({ left: [], right: [] } as ColumnPinningState),
+      columnPinning:
+        columnsState?.columnPinning ??
+        ({ left: [], right: [] } as ColumnPinningState),
       columnSizing: columnsState?.columnSizing ?? ({} as ColumnSizingState),
-      columnVisibility: columnsState?.columnVisibility ?? ({} as ColumnVisibilityState),
+      columnVisibility:
+        columnsState?.columnVisibility ?? ({} as ColumnVisibilityState),
       sorting: columnsState?.sorting ?? ([] as SortingState),
     });
   };

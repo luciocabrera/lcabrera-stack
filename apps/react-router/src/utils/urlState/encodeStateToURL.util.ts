@@ -14,11 +14,17 @@
 export const encodeStateToURL = (state: Record<string, unknown>): string => {
   // Convert Sets to Arrays for JSON serialization
   const serializable = Object.fromEntries(
-    Object.entries(state).map(([key, value]) => [key, value instanceof Set ? [...value] : value]),
+    Object.entries(state).map(([key, value]) => [
+      key,
+      value instanceof Set ? [...value] : value,
+    ]),
   );
 
   const json = JSON.stringify(serializable);
   // Use btoa for Base64 encoding (browser native)
   // Make URL-safe by replacing special characters
-  return btoa(json).replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
+  return btoa(json)
+    .replaceAll('+', '-')
+    .replaceAll('/', '_')
+    .replaceAll('=', '');
 };

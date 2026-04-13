@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
 
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react';
 
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 
-import { Table } from "./Table.component.tsx";
+import { Table } from './Table.component.tsx';
 
 type MockTableContentProps = {
   readonly onLoadMore?: unknown;
@@ -25,31 +25,39 @@ const { useRenderTrackerMock } = vi.hoisted(() => ({
 }));
 
 function MockTableContent({ onLoadMore }: MockTableContentProps) {
-  return <div data-has-load-more={String(Boolean(onLoadMore))} data-testid="content" />;
+  return (
+    <div
+      data-has-load-more={String(Boolean(onLoadMore))}
+      data-testid='content'
+    />
+  );
 }
 
-function MockTableDataProvider({ children, dataState }: MockTableDataProviderProps) {
+function MockTableDataProvider({
+  children,
+  dataState,
+}: MockTableDataProviderProps) {
   return (
-    <div data-state={JSON.stringify(dataState)} data-testid="provider">
+    <div data-state={JSON.stringify(dataState)} data-testid='provider'>
       {children}
     </div>
   );
 }
 
-vi.mock("@/utils/performance", () => ({
+vi.mock('@/utils/performance', () => ({
   useRenderTracker: useRenderTrackerMock,
 }));
 
-vi.mock("./contexts", () => ({
+vi.mock('./contexts', () => ({
   TableDataProvider: MockTableDataProvider,
 }));
 
-vi.mock("./TableContent", () => ({
+vi.mock('./TableContent', () => ({
   TableContent: MockTableContent,
 }));
 
-describe("Table", () => {
-  it("maps response into provider state using selectors", () => {
+describe('Table', () => {
+  it('maps response into provider state using selectors', () => {
     type Response = {
       readonly rows: { readonly id: number }[];
       readonly total: number;
@@ -64,8 +72,8 @@ describe("Table", () => {
       />,
     );
 
-    const provider = screen.getByTestId("provider");
-    const state = JSON.parse(provider.dataset.state ?? "{}") as {
+    const provider = screen.getByTestId('provider');
+    const state = JSON.parse(provider.dataset.state ?? '{}') as {
       data: readonly { id: number }[];
       isLoading: boolean;
       totalRows: number;
@@ -74,10 +82,10 @@ describe("Table", () => {
     expect(state.data).toEqual([{ id: 1 }]);
     expect(state.isLoading).toBe(true);
     expect(state.totalRows).toBe(999);
-    expect(screen.getByTestId("content").dataset.hasLoadMore).toBe("false");
+    expect(screen.getByTestId('content').dataset.hasLoadMore).toBe('false');
   });
 
-  it("renders without wrapper when flex wrapper is disabled", () => {
+  it('renders without wrapper when flex wrapper is disabled', () => {
     type Response = {
       readonly rows: { readonly id: number }[];
     };
@@ -92,6 +100,6 @@ describe("Table", () => {
 
     const root = container.firstElementChild as HTMLElement | null;
     expect(root).not.toBeNull();
-    expect(root?.dataset.testid).toBe("provider");
+    expect(root?.dataset.testid).toBe('provider');
   });
 });

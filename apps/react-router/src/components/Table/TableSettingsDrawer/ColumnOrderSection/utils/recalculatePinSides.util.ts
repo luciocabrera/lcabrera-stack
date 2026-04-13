@@ -1,4 +1,7 @@
-import type { ColumnOrderState, ColumnPinningState } from "@/components/Table/Table.types";
+import type {
+  ColumnOrderState,
+  ColumnPinningState,
+} from '@/components/Table/Table.types';
 
 type RecalculatePinSidesArgs = {
   readonly columnPinning: ColumnPinningState;
@@ -33,11 +36,11 @@ export const recalculatePinSides = ({
   const allPinned = [
     ...columnPinning.left.map((key) => ({
       key,
-      originalSide: "left" as const,
+      originalSide: 'left' as const,
     })),
     ...columnPinning.right.map((key) => ({
       key,
-      originalSide: "right" as const,
+      originalSide: 'right' as const,
     })),
   ];
 
@@ -56,7 +59,7 @@ export const recalculatePinSides = ({
       newRight.push(key);
     } else {
       // Equidistant — keep original side
-      if (originalSide === "left") {
+      if (originalSide === 'left') {
         newLeft.push(key);
       } else {
         newRight.push(key);

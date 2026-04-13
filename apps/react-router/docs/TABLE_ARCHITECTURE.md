@@ -179,7 +179,8 @@ export const useColumnsStore = <TSelected, TData = unknown>(
   const state = useSyncExternalStore(
     columnsStore.subscribe,
     () => selector(columnsStore.get() as TableColumnsState<TData>),
-    () => selector(columnsStore.getServerSnapshot() as TableColumnsState<TData>),
+    () =>
+      selector(columnsStore.getServerSnapshot() as TableColumnsState<TData>),
   );
 
   return state;
@@ -212,11 +213,15 @@ export const useGetColumns = <TData>() =>
 
 // Computed selector - derived state
 export const useGetColumnFilters = <TData>() =>
-  useColumnsStore<ColumnFiltersState<TData>, TData>((state) => state.columnFilters);
+  useColumnsStore<ColumnFiltersState<TData>, TData>(
+    (state) => state.columnFilters,
+  );
 
 // Single item selector
 export const useGetFilterData = <TData>(columnKey: DataKey<TData>) =>
-  useFiltersStore<FiltersDataState<TData>[DataKey<TData>], TData>((state) => state[columnKey]);
+  useFiltersStore<FiltersDataState<TData>[DataKey<TData>], TData>(
+    (state) => state[columnKey],
+  );
 ```
 
 ### Actions (Write Operations)
@@ -248,8 +253,8 @@ export const useSetColumnSorting = <TData>() => {
       // Persist to storage
       writeStateSlice({
         persistenceKey,
-        slice: "sorting",
-        storageType: "cookie",
+        slice: 'sorting',
+        storageType: 'cookie',
         value: newSorting,
       });
 
@@ -298,7 +303,7 @@ export const useFetchMoreData = <TData, TResponse>() => {
     } catch (error) {
       // Handle error in meta store
       metaStore.set({
-        error: error instanceof Error ? error.message : "Failed to load data",
+        error: error instanceof Error ? error.message : 'Failed to load data',
       });
       dataStore.set({ isLoadingMore: false });
     }
@@ -453,12 +458,13 @@ export const TableHeaderCell = <TData,>({ columnKey }: Props<TData>) => {
 **Usage in TableBody**:
 
 ```tsx
-const { bottomSpacerHeight, endIndex, offsetY, startIndex, totalHeight } = useVirtualization({
-  containerRef: tableContainerRef,
-  itemHeight: rowHeight,
-  overscan: 3,
-  totalItems: data.length,
-});
+const { bottomSpacerHeight, endIndex, offsetY, startIndex, totalHeight } =
+  useVirtualization({
+    containerRef: tableContainerRef,
+    itemHeight: rowHeight,
+    overscan: 3,
+    totalItems: data.length,
+  });
 
 const visibleRows = data.slice(startIndex, endIndex);
 
@@ -579,15 +585,15 @@ useInfiniteScroll({
 ```typescript
 // Save to cookie
 writeStateSlice({
-  persistenceKey: "users-table",
-  slice: "columnFilters",
-  storageType: "cookie",
+  persistenceKey: 'users-table',
+  slice: 'columnFilters',
+  storageType: 'cookie',
   value: newFilters,
 });
 
 // Update URL
 setSearchParams((params) => {
-  params.set("filters", JSON.stringify(newFilters));
+  params.set('filters', JSON.stringify(newFilters));
   return params;
 });
 ```
@@ -737,7 +743,9 @@ export const useMyContextValue = () => {
 
 ```typescript
 // useMyStore.hook.ts
-export const useMyStore = <TSelected>(selector: (state: MyState) => TSelected) => {
+export const useMyStore = <TSelected>(
+  selector: (state: MyState) => TSelected,
+) => {
   const { store } = useMyContextValue();
 
   return useSyncExternalStore(
@@ -827,11 +835,13 @@ export const MyComponent = () => {
 #### 7. Add Virtualization (if needed)
 
 ```typescript
-const { startIndex, endIndex, offsetY, bottomSpacerHeight } = useVirtualization({
-  containerRef,
-  itemHeight: 50,
-  totalItems: items.length,
-});
+const { startIndex, endIndex, offsetY, bottomSpacerHeight } = useVirtualization(
+  {
+    containerRef,
+    itemHeight: 50,
+    totalItems: items.length,
+  },
+);
 
 const visibleItems = items.slice(startIndex, endIndex);
 ```
@@ -946,7 +956,7 @@ export const useToggleSorting = () => {
       const currentSorting = state?.sorting ?? [];
       const existing = currentSorting.find((s) => s.key === columnKey);
 
-      const newDirection = existing?.direction === "asc" ? "desc" : "asc";
+      const newDirection = existing?.direction === 'asc' ? 'desc' : 'asc';
       // ... update logic
     },
     [columnsStore],
@@ -981,7 +991,8 @@ const normalizedColumns = getNormalizedColumns({ columns, sorting });
 columnsStore.set({ normalizedColumns });
 
 // Then use a simple selector
-export const useGetNormalizedColumns = () => useColumnsStore((state) => state.normalizedColumns);
+export const useGetNormalizedColumns = () =>
+  useColumnsStore((state) => state.normalizedColumns);
 ```
 
 ---

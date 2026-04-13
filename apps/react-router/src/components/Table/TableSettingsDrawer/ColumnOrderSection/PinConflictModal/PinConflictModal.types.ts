@@ -1,9 +1,9 @@
-import type { PinConflictResolution } from "../ColumnOrderSection.types.ts";
+import type { PinConflictResolution } from '../ColumnOrderSection.types.ts';
 
 export type PinConflictModalProps = {
   readonly columnLabel: string;
   readonly isOpen: boolean;
   readonly onAccept: (resolution: PinConflictResolution) => void;
   readonly onCancel: () => void;
-  readonly side: "left" | "right";
+  readonly side: 'left' | 'right';
 };

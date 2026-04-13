@@ -1,9 +1,9 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { getTotalVisibleColumnCount } from "./getTotalVisibleColumnCount.util.ts";
+import { getTotalVisibleColumnCount } from './getTotalVisibleColumnCount.util.ts';
 
-describe("getTotalVisibleColumnCount", () => {
-  it("counts pinned columns, center columns, and both spacer cells", () => {
+describe('getTotalVisibleColumnCount', () => {
+  it('counts pinned columns, center columns, and both spacer cells', () => {
     const result = getTotalVisibleColumnCount({
       leftPinnedCount: 2,
       leftSpacerWidth: 40,
@@ -15,7 +15,7 @@ describe("getTotalVisibleColumnCount", () => {
     expect(result).toBe(8);
   });
 
-  it("does not count spacer cells when widths are zero", () => {
+  it('does not count spacer cells when widths are zero', () => {
     const result = getTotalVisibleColumnCount({
       leftPinnedCount: 1,
       leftSpacerWidth: 0,
@@ -27,7 +27,7 @@ describe("getTotalVisibleColumnCount", () => {
     expect(result).toBe(4);
   });
 
-  it("returns zero when nothing is rendered", () => {
+  it('returns zero when nothing is rendered', () => {
     const result = getTotalVisibleColumnCount({
       leftPinnedCount: 0,
       leftSpacerWidth: 0,

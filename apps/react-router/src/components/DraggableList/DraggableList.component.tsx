@@ -1,23 +1,28 @@
-import * as stylex from "@stylexjs/stylex";
+import * as stylex from '@stylexjs/stylex';
 
-import type { DraggableListProps } from "./DraggableList.types.ts";
+import type { DraggableListProps } from './DraggableList.types.ts';
 
-import { styles } from "./DraggableList.stylex.ts";
-import { useDraggableList } from "./hooks/index.ts";
-import { handleDragOver } from "./utils/index.ts";
+import { styles } from './DraggableList.stylex.ts';
+import { useDraggableList } from './hooks/index.ts';
+import { handleDragOver } from './utils/index.ts';
 
-export const DraggableList = ({ items: initialItems, onOrderChange }: DraggableListProps) => {
-  const { dragItemId, handleDragEnd, handleDragEnter, handleDragStart, items } = useDraggableList({
-    initialItems,
-    onOrderChange,
-  });
+export const DraggableList = ({
+  items: initialItems,
+  onOrderChange,
+}: DraggableListProps) => {
+  const { dragItemId, handleDragEnd, handleDragEnter, handleDragStart, items } =
+    useDraggableList({
+      initialItems,
+      onOrderChange,
+    });
 
   return (
-    <ul {...stylex.props(styles.list)} role="list">
+    <ul {...stylex.props(styles.list)} role='list'>
       {items.map((item) => {
         const isDragging = dragItemId.current === item.id;
 
-        const isDragOver = dragItemId.current !== undefined && dragItemId.current !== item.id;
+        const isDragOver =
+          dragItemId.current !== undefined && dragItemId.current !== item.id;
 
         const canDrag = item.isDraggable !== false;
 
@@ -43,11 +48,14 @@ export const DraggableList = ({ items: initialItems, onOrderChange }: DraggableL
                   }
                 : undefined
             }
-            role="option"
+            role='option'
             tabIndex={0}
           >
             {canDrag && (
-              <span {...stylex.props(styles.dragHandle)} aria-label="Drag handle">
+              <span
+                {...stylex.props(styles.dragHandle)}
+                aria-label='Drag handle'
+              >
                 ≡
               </span>
             )}

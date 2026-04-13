@@ -1,11 +1,11 @@
-import * as stylex from "@stylexjs/stylex";
-import { useCallback, useRef, useState } from "react";
+import * as stylex from '@stylexjs/stylex';
+import { useCallback, useRef, useState } from 'react';
 
-import type { TableColumn } from "./components/Table/Table.types.ts";
-import type { VirtualListDataState } from "./components/VirtualList/index.ts";
+import type { TableColumn } from './components/Table/Table.types.ts';
+import type { VirtualListDataState } from './components/VirtualList/index.ts';
 
-import { styles } from "./App.stylex.ts";
-import { Button } from "./components/Button/index.ts";
+import { styles } from './App.stylex.ts';
+import { Button } from './components/Button/index.ts';
 import {
   Card,
   CardBody,
@@ -13,7 +13,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "./components/Card/index.ts";
+} from './components/Card/index.ts';
 import {
   ErrorIcon,
   InfoIcon,
@@ -22,21 +22,21 @@ import {
   SettingsIcon,
   SuccessIcon,
   WarningIcon,
-} from "./components/Icons/index.ts";
+} from './components/Icons/index.ts';
 import {
   SidePanel,
   SidePanelBody,
   SidePanelFooter,
   SidePanelHeader,
   SidePanelTitle,
-} from "./components/SidePanel/index.ts";
-import { TableLayout } from "./components/Table/TableLayout/index.ts";
+} from './components/SidePanel/index.ts';
+import { TableLayout } from './components/Table/TableLayout/index.ts';
 import {
   HorizontalToolbarExample,
   HorizontalToolbarExampleShort,
-} from "./components/Toolbar/Toolbar.examples.tsx";
-import { VirtualSelect } from "./components/VirtualSelect/index.ts";
-import { useTheme } from "./hooks/useTheme.hook.ts";
+} from './components/Toolbar/Toolbar.examples.tsx';
+import { VirtualSelect } from './components/VirtualSelect/index.ts';
+import { useTheme } from './hooks/useTheme.hook.ts';
 
 function mulberry32(seed: number) {
   let value = seed;
@@ -60,8 +60,12 @@ type MockResponse = {
 type MockRow = Record<string, boolean | number | string>;
 
 // Generate mock data for the table
-const COLUMNS: TableColumn<MockRow>[] = [...Array.from({ length: 20 }).keys()].map((i) => ({
-  dataType: (["number", "string", "boolean", "date", "currency"] as const)[i % 5],
+const COLUMNS: TableColumn<MockRow>[] = [
+  ...Array.from({ length: 20 }).keys(),
+].map((i) => ({
+  dataType: (['number', 'string', 'boolean', 'date', 'currency'] as const)[
+    i % 5
+  ],
   key: `col${i + 1}`,
   label: `Column ${i + 1}`,
   minWidth: 120,
@@ -78,46 +82,48 @@ function randomDate() {
 }
 
 function randomString(length: number) {
-  const chars = "abcdefghijklmnopqrstuvwxyz";
+  const chars = 'abcdefghijklmnopqrstuvwxyz';
   return Array.from(
     {
       length,
     },
     () => chars[Math.floor(rng() * chars.length)],
-  ).join("");
+  ).join('');
 }
 
-const tableData: MockRow[] = [...Array.from({ length: 10_000 }).keys()].map((rowIdx) => {
-  const row: MockRow = {};
-  for (const [colIdx, col] of COLUMNS.entries()) {
-    switch (col.dataType) {
-      case "boolean": {
-        row[col.key] = rng() > 0.5;
-        break;
-      }
-      case "currency": {
-        row[col.key] = `$${randomCurrency()}`;
-        break;
-      }
-      case "date": {
-        row[col.key] = randomDate().toISOString().slice(0, 10);
-        break;
-      }
-      case "number": {
-        row[col.key] = rowIdx * colIdx;
-        break;
-      }
-      case "string": {
-        row[col.key] = randomString(8);
-        break;
-      }
-      default: {
-        row[col.key] = "";
+const tableData: MockRow[] = [...Array.from({ length: 10_000 }).keys()].map(
+  (rowIdx) => {
+    const row: MockRow = {};
+    for (const [colIdx, col] of COLUMNS.entries()) {
+      switch (col.dataType) {
+        case 'boolean': {
+          row[col.key] = rng() > 0.5;
+          break;
+        }
+        case 'currency': {
+          row[col.key] = `$${randomCurrency()}`;
+          break;
+        }
+        case 'date': {
+          row[col.key] = randomDate().toISOString().slice(0, 10);
+          break;
+        }
+        case 'number': {
+          row[col.key] = rowIdx * colIdx;
+          break;
+        }
+        case 'string': {
+          row[col.key] = randomString(8);
+          break;
+        }
+        default: {
+          row[col.key] = '';
+        }
       }
     }
-  }
-  return row;
-});
+    return row;
+  },
+);
 
 /**
  * Simulated API delay in milliseconds
@@ -125,34 +131,34 @@ const tableData: MockRow[] = [...Array.from({ length: 10_000 }).keys()].map((row
  */
 const FAKE_API_DELAY_MS = 2000;
 
-const PERSISTENCE_KEY = "app-showcase-table";
+const PERSISTENCE_KEY = 'app-showcase-table';
 
 // --- VirtualSelect showcase data ---
 const STATIC_FRUITS = [
-  "Apple",
-  "Banana",
-  "Cherry",
-  "Date",
-  "Elderberry",
-  "Fig",
-  "Grape",
-  "Honeydew",
-  "Kiwi",
-  "Lemon",
-  "Mango",
-  "Nectarine",
-  "Orange",
-  "Papaya",
-  "Quince",
-  "Raspberry",
-  "Strawberry",
-  "Tangerine",
-  "Watermelon",
+  'Apple',
+  'Banana',
+  'Cherry',
+  'Date',
+  'Elderberry',
+  'Fig',
+  'Grape',
+  'Honeydew',
+  'Kiwi',
+  'Lemon',
+  'Mango',
+  'Nectarine',
+  'Orange',
+  'Papaya',
+  'Quince',
+  'Raspberry',
+  'Strawberry',
+  'Tangerine',
+  'Watermelon',
 ];
 
 // Large dataset for fetch simulation (5000 cities)
 const LARGE_DATASET = [...Array.from({ length: 5000 }).keys()].map(
-  (i) => `City_${String(i + 1).padStart(5, "0")}`,
+  (i) => `City_${String(i + 1).padStart(5, '0')}`,
 );
 const FETCH_PAGE_SIZE = 50;
 const FETCH_DELAY_MS = 800;
@@ -248,8 +254,8 @@ const App = () => {
       <div {...stylex.props(styles.container)}>
         <header {...stylex.props(styles.header)}>
           <h1 {...stylex.props(styles.title)}>Design System Showcase</h1>
-          <Button color="ghost" onClick={toggleTheme}>
-            {isDarkMode ? "☀️ Light Mode" : "🌙 Dark Mode"}
+          <Button color='ghost' onClick={toggleTheme}>
+            {isDarkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
           </Button>
         </header>
         {/* Button Section */}
@@ -259,31 +265,31 @@ const App = () => {
           <div {...stylex.props(styles.subsection)}>
             <h3 {...stylex.props(styles.subsectionTitle)}>Colors</h3>
             <div {...stylex.props(styles.buttonGrid)}>
-              <Button color="primary">Primary</Button>
-              <Button color="secondary">Secondary</Button>
-              <Button color="success">Success</Button>
-              <Button color="warning">Warning</Button>
-              <Button color="error">Error</Button>
-              <Button color="ghost">Ghost</Button>
-              <Button color="outline">Outline</Button>
+              <Button color='primary'>Primary</Button>
+              <Button color='secondary'>Secondary</Button>
+              <Button color='success'>Success</Button>
+              <Button color='warning'>Warning</Button>
+              <Button color='error'>Error</Button>
+              <Button color='ghost'>Ghost</Button>
+              <Button color='outline'>Outline</Button>
             </div>
           </div>
 
           <div {...stylex.props(styles.subsection)}>
             <h3 {...stylex.props(styles.subsectionTitle)}>Sizes</h3>
             <div {...stylex.props(styles.buttonGrid)}>
-              <Button size="sm">Small</Button>
-              <Button size="md">Medium</Button>
-              <Button size="lg">Large</Button>
+              <Button size='sm'>Small</Button>
+              <Button size='md'>Medium</Button>
+              <Button size='lg'>Large</Button>
             </div>
           </div>
 
           <div {...stylex.props(styles.subsection)}>
             <h3 {...stylex.props(styles.subsectionTitle)}>Variants</h3>
             <div {...stylex.props(styles.buttonGrid)}>
-              <Button variant="solid">Solid</Button>
-              <Button variant="flat">Flat</Button>
-              <Button variant="elevated">Elevated</Button>
+              <Button variant='solid'>Solid</Button>
+              <Button variant='flat'>Flat</Button>
+              <Button variant='elevated'>Elevated</Button>
             </div>
           </div>
 
@@ -292,7 +298,7 @@ const App = () => {
             <div {...stylex.props(styles.buttonGrid)}>
               <Button>Normal</Button>
               <Button isDisabled>Disabled</Button>
-              <Button width="full">Full Width</Button>
+              <Button width='full'>Full Width</Button>
             </div>
           </div>
         </section>
@@ -304,17 +310,21 @@ const App = () => {
           <div {...stylex.props(styles.subsection)}>
             <h3 {...stylex.props(styles.subsectionTitle)}>Basic Cards</h3>
             <div {...stylex.props(styles.cardGrid)}>
-              <Card elevation="sm">
+              <Card elevation='sm'>
                 <CardHeader>
                   <CardTitle>Card Title</CardTitle>
-                  <CardDescription>This is a simple card with header and body</CardDescription>
+                  <CardDescription>
+                    This is a simple card with header and body
+                  </CardDescription>
                 </CardHeader>
                 <CardBody>
-                  <p>Card content goes here. You can add any content you want.</p>
+                  <p>
+                    Card content goes here. You can add any content you want.
+                  </p>
                 </CardBody>
               </Card>
 
-              <Card elevation="md">
+              <Card elevation='md'>
                 <CardHeader>
                   <CardTitle>With Footer</CardTitle>
                 </CardHeader>
@@ -322,15 +332,17 @@ const App = () => {
                   <p>This card includes a footer section.</p>
                 </CardBody>
                 <CardFooter>
-                  <Button size="sm" width="full">
+                  <Button size='sm' width='full'>
                     Action
                   </Button>
                 </CardFooter>
               </Card>
 
-              <Card elevation="lg" padding="lg">
+              <Card elevation='lg' padding='lg'>
                 <CardTitle>Custom Padding</CardTitle>
-                <CardDescription>This card has custom padding applied.</CardDescription>
+                <CardDescription>
+                  This card has custom padding applied.
+                </CardDescription>
               </Card>
             </div>
           </div>
@@ -338,23 +350,27 @@ const App = () => {
           <div {...stylex.props(styles.subsection)}>
             <h3 {...stylex.props(styles.subsectionTitle)}>Interactive Cards</h3>
             <div {...stylex.props(styles.cardGrid)}>
-              <Card elevation="sm" interactive="hoverable">
+              <Card elevation='sm' interactive='hoverable'>
                 <CardBody>
                   <CardTitle>Hoverable Card</CardTitle>
-                  <CardDescription>Hover over this card to see the effect.</CardDescription>
+                  <CardDescription>
+                    Hover over this card to see the effect.
+                  </CardDescription>
                 </CardBody>
               </Card>
 
               <Card
-                elevation="sm"
-                interactive="clickable"
+                elevation='sm'
+                interactive='clickable'
                 onClick={() => {
-                  alert("Card clicked!");
+                  alert('Card clicked!');
                 }}
               >
                 <CardBody>
                   <CardTitle>Clickable Card</CardTitle>
-                  <CardDescription>Click this card to trigger an action.</CardDescription>
+                  <CardDescription>
+                    Click this card to trigger an action.
+                  </CardDescription>
                 </CardBody>
               </Card>
             </div>
@@ -365,34 +381,42 @@ const App = () => {
             <h2 {...stylex.props(styles.sectionTitle)}>VirtualSelect</h2>
 
             <div {...stylex.props(styles.subsection)}>
-              <h3 {...stylex.props(styles.subsectionTitle)}>Single Select (static options)</h3>
-              <div style={{ maxWidth: "20rem" }}>
+              <h3 {...stylex.props(styles.subsectionTitle)}>
+                Single Select (static options)
+              </h3>
+              <div style={{ maxWidth: '20rem' }}>
                 <VirtualSelect
-                  mode="single"
+                  mode='single'
                   onChange={setSingleSelected}
                   options={STATIC_FRUITS}
-                  placeholder="Pick a fruit..."
+                  placeholder='Pick a fruit...'
                   selected={singleSelected}
                 />
               </div>
-              <p style={{ color: "#6b7280", fontSize: 13, marginTop: 8 }}>
-                Selected: {singleSelected.length > 0 ? singleSelected.join(", ") : "(none)"}
+              <p style={{ color: '#6b7280', fontSize: 13, marginTop: 8 }}>
+                Selected:{' '}
+                {singleSelected.length > 0
+                  ? singleSelected.join(', ')
+                  : '(none)'}
               </p>
             </div>
 
             <div {...stylex.props(styles.subsection)}>
-              <h3 {...stylex.props(styles.subsectionTitle)}>Multi Select (static options)</h3>
-              <div style={{ maxWidth: "20rem" }}>
+              <h3 {...stylex.props(styles.subsectionTitle)}>
+                Multi Select (static options)
+              </h3>
+              <div style={{ maxWidth: '20rem' }}>
                 <VirtualSelect
-                  mode="multi"
+                  mode='multi'
                   onChange={setMultiSelected}
                   options={STATIC_FRUITS}
-                  placeholder="Pick fruits..."
+                  placeholder='Pick fruits...'
                   selected={multiSelected}
                 />
               </div>
-              <p style={{ color: "#6b7280", fontSize: 13, marginTop: 8 }}>
-                Selected: {multiSelected.length > 0 ? multiSelected.join(", ") : "(none)"}
+              <p style={{ color: '#6b7280', fontSize: 13, marginTop: 8 }}>
+                Selected:{' '}
+                {multiSelected.length > 0 ? multiSelected.join(', ') : '(none)'}
               </p>
             </div>
 
@@ -400,37 +424,43 @@ const App = () => {
               <h3 {...stylex.props(styles.subsectionTitle)}>
                 Fetch Mode (5,000 items, paginated {FETCH_PAGE_SIZE} at a time)
               </h3>
-              <div style={{ maxWidth: "20rem" }}>
+              <div style={{ maxWidth: '20rem' }}>
                 <VirtualSelect
                   dataState={fetchDataState}
-                  mode="multi"
+                  mode='multi'
                   onChange={setFetchSelected}
                   onFetchInitial={handleFetchInitial}
                   onFetchMore={handleFetchMore}
-                  placeholder="Search cities..."
+                  placeholder='Search cities...'
                   selected={fetchSelected}
                   shouldShowLoadedCount
                 />
               </div>
-              <p style={{ color: "#6b7280", fontSize: 13, marginTop: 4 }}>
-                Selected: {fetchSelected.length > 0 ? fetchSelected.join(", ") : "(none)"}
+              <p style={{ color: '#6b7280', fontSize: 13, marginTop: 4 }}>
+                Selected:{' '}
+                {fetchSelected.length > 0 ? fetchSelected.join(', ') : '(none)'}
               </p>
             </div>
 
             <div {...stylex.props(styles.subsection)}>
-              <h3 {...stylex.props(styles.subsectionTitle)}>Always Open (isAlwaysOpen)</h3>
-              <div style={{ maxWidth: "20rem" }}>
+              <h3 {...stylex.props(styles.subsectionTitle)}>
+                Always Open (isAlwaysOpen)
+              </h3>
+              <div style={{ maxWidth: '20rem' }}>
                 <VirtualSelect
                   isAlwaysOpen
-                  mode="multi"
+                  mode='multi'
                   onChange={setAlwaysOpenSelected}
                   options={STATIC_FRUITS}
-                  placeholder="Pick fruits..."
+                  placeholder='Pick fruits...'
                   selected={alwaysOpenSelected}
                 />
               </div>
-              <p style={{ color: "#6b7280", fontSize: 13, marginTop: 8 }}>
-                Selected: {alwaysOpenSelected.length > 0 ? alwaysOpenSelected.join(", ") : "(none)"}
+              <p style={{ color: '#6b7280', fontSize: 13, marginTop: 8 }}>
+                Selected:{' '}
+                {alwaysOpenSelected.length > 0
+                  ? alwaysOpenSelected.join(', ')
+                  : '(none)'}
               </p>
             </div>
           </section>
@@ -438,21 +468,23 @@ const App = () => {
           {/* Table Showcase Section */}
           <section {...stylex.props(styles.section)}>
             <h2 {...stylex.props(styles.sectionTitle)}>Table</h2>
-            <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-              <Button color="secondary" onClick={reloadTableData}>
+            <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+              <Button color='secondary' onClick={reloadTableData}>
                 🔄 Reload Table Data (Test Loading)
               </Button>
-              <span style={{ alignSelf: "center", color: "#6b7280", fontSize: 14 }}>
+              <span
+                style={{ alignSelf: 'center', color: '#6b7280', fontSize: 14 }}
+              >
                 Simulated delay: {FAKE_API_DELAY_MS}ms
               </span>
             </div>
             <div
               style={{
                 borderRadius: 8,
-                boxSizing: "border-box",
-                display: "flex",
-                height: "400px",
-                maxWidth: "100%",
+                boxSizing: 'border-box',
+                display: 'flex',
+                height: '400px',
+                maxWidth: '100%',
               }}
             >
               <TableLayout<MockRow, MockResponse>
@@ -462,7 +494,7 @@ const App = () => {
                 dataTotalSelector={(response) => response.total}
                 persistenceKey={PERSISTENCE_KEY}
                 suspenseKey={String(tableKey)}
-                title="Data Table"
+                title='Data Table'
               />
             </div>
           </section>
@@ -470,31 +502,37 @@ const App = () => {
           <div {...stylex.props(styles.subsection)}>
             <h3 {...stylex.props(styles.subsectionTitle)}>Colored Cards</h3>
             <div {...stylex.props(styles.cardGrid)}>
-              <Card color="primary" elevation="sm">
+              <Card color='primary' elevation='sm'>
                 <CardBody>
                   <CardTitle icon={<InfoIcon />}>Primary Card</CardTitle>
-                  <CardDescription>This card uses the primary brand color.</CardDescription>
+                  <CardDescription>
+                    This card uses the primary brand color.
+                  </CardDescription>
                 </CardBody>
               </Card>
 
-              <Card color="success" elevation="sm">
+              <Card color='success' elevation='sm'>
                 <CardBody>
                   <CardTitle icon={<SuccessIcon />}>Success Card</CardTitle>
-                  <CardDescription>Perfect for success messages.</CardDescription>
+                  <CardDescription>
+                    Perfect for success messages.
+                  </CardDescription>
                 </CardBody>
               </Card>
 
-              <Card color="warning" elevation="sm">
+              <Card color='warning' elevation='sm'>
                 <CardBody>
                   <CardTitle icon={<WarningIcon />}>Warning Card</CardTitle>
                   <CardDescription>Use this for warnings.</CardDescription>
                 </CardBody>
               </Card>
 
-              <Card color="error" elevation="sm">
+              <Card color='error' elevation='sm'>
                 <CardBody>
                   <CardTitle icon={<ErrorIcon />}>Error Card</CardTitle>
-                  <CardDescription>Display error messages here.</CardDescription>
+                  <CardDescription>
+                    Display error messages here.
+                  </CardDescription>
                 </CardBody>
               </Card>
             </div>
@@ -515,9 +553,9 @@ const App = () => {
               >
                 <MenuIcon
                   style={{
-                    height: "1rem",
-                    marginRight: "0.5rem",
-                    width: "1rem",
+                    height: '1rem',
+                    marginRight: '0.5rem',
+                    width: '1rem',
                   }}
                 />
                 Open Left Panel
@@ -530,9 +568,9 @@ const App = () => {
                 Open Right Panel
                 <MenuIcon
                   style={{
-                    height: "1rem",
-                    marginLeft: "0.5rem",
-                    width: "1rem",
+                    height: '1rem',
+                    marginLeft: '0.5rem',
+                    width: '1rem',
                   }}
                 />
               </Button>
@@ -547,15 +585,18 @@ const App = () => {
         onClose={() => {
           setIsLeftPanelOpen(false);
         }}
-        position="left"
-        size="md"
+        position='left'
+        size='md'
       >
         <SidePanelHeader>
           <SidePanelTitle icon={<SettingsIcon />}>Settings</SidePanelTitle>
         </SidePanelHeader>
         <SidePanelBody>
           <p>This is a left-positioned side panel with medium size.</p>
-          <p>It includes a header with an icon, a scrollable body, and a footer with actions.</p>
+          <p>
+            It includes a header with an icon, a scrollable body, and a footer
+            with actions.
+          </p>
           <p>Press Escape or click the overlay to close.</p>
         </SidePanelBody>
         <SidePanelFooter>
@@ -563,14 +604,14 @@ const App = () => {
             onClick={() => {
               setIsLeftPanelOpen(false);
             }}
-            size="sm"
-            width="full"
+            size='sm'
+            width='full'
           >
             <MenuCloseIcon
               style={{
-                height: "1rem",
-                marginRight: "0.5rem",
-                width: "1rem",
+                height: '1rem',
+                marginRight: '0.5rem',
+                width: '1rem',
               }}
             />
             Close
@@ -583,14 +624,14 @@ const App = () => {
         onClose={() => {
           setIsRightPanelOpen(false);
         }}
-        position="right"
-        size="lg"
+        position='right'
+        size='lg'
       >
         <SidePanelHeader>
           <SidePanelTitle icon={<InfoIcon />}>Information</SidePanelTitle>
         </SidePanelHeader>
         <SidePanelBody>
-          <Card elevation="sm">
+          <Card elevation='sm'>
             <CardBody>
               <CardTitle icon={<SuccessIcon />}>Composable Design</CardTitle>
               <CardDescription>
@@ -600,7 +641,7 @@ const App = () => {
           </Card>
           <div
             style={{
-              marginTop: "1rem",
+              marginTop: '1rem',
             }}
           >
             <p>This right panel is larger (lg size).</p>
@@ -613,17 +654,17 @@ const App = () => {
         <SidePanelFooter>
           <div
             style={{
-              display: "flex",
-              gap: "0.5rem",
+              display: 'flex',
+              gap: '0.5rem',
             }}
           >
             <Button
-              color="ghost"
+              color='ghost'
               onClick={() => {
                 setIsRightPanelOpen(false);
               }}
-              size="sm"
-              width="full"
+              size='sm'
+              width='full'
             >
               Cancel
             </Button>
@@ -631,8 +672,8 @@ const App = () => {
               onClick={() => {
                 setIsRightPanelOpen(false);
               }}
-              size="sm"
-              width="full"
+              size='sm'
+              width='full'
             >
               Confirm
             </Button>

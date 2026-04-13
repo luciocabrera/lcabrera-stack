@@ -1,10 +1,13 @@
-import { useTableConfigContextValue } from "@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook";
-import { getColumnPinSide } from "@/components/Table/utils";
-import { useStore } from "@/hooks";
+import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { getColumnPinSide } from '@/components/Table/utils';
+import { useStore } from '@/hooks';
 
-import type { ColumnDrawerProviderProps, ColumnDrawerState } from "./ColumnDrawerContext.types.ts";
+import type {
+  ColumnDrawerProviderProps,
+  ColumnDrawerState,
+} from './ColumnDrawerContext.types.ts';
 
-import { ColumnDrawerContext } from "./ColumnDrawerContext.context.ts";
+import { ColumnDrawerContext } from './ColumnDrawerContext.context.ts';
 
 export const ColumnDrawerProvider = ({
   children,
@@ -25,9 +28,14 @@ export const ColumnDrawerProvider = ({
       ? allColumnSizing[columnKey]
       : undefined;
 
-  const sorting = columnsState?.sorting.find((sort) => sort.columnKey === columnKey)?.direction;
+  const sorting = columnsState?.sorting.find(
+    (sort) => sort.columnKey === columnKey,
+  )?.direction;
 
-  const columnPinning = getColumnPinSide(columnsState?.columnPinning, columnKey);
+  const columnPinning = getColumnPinSide(
+    columnsState?.columnPinning,
+    columnKey,
+  );
 
   const initialState: ColumnDrawerState<Record<string, unknown>> = {
     columnFilter,
@@ -37,7 +45,12 @@ export const ColumnDrawerProvider = ({
     sorting,
   };
 
-  const columnStore = useStore<ColumnDrawerState<Record<string, unknown>>>(initialState);
+  const columnStore =
+    useStore<ColumnDrawerState<Record<string, unknown>>>(initialState);
 
-  return <ColumnDrawerContext value={{ columnStore }}>{children}</ColumnDrawerContext>;
+  return (
+    <ColumnDrawerContext value={{ columnStore }}>
+      {children}
+    </ColumnDrawerContext>
+  );
 };

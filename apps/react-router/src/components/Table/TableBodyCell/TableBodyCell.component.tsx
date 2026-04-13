@@ -1,9 +1,9 @@
-import * as stylex from "@stylexjs/stylex";
+import * as stylex from '@stylexjs/stylex';
 
-import type { TableBodyCellProps } from "./TableBodyCell.types.ts";
+import type { TableBodyCellProps } from './TableBodyCell.types.ts';
 
-import { skeletonStyles, tableBodyCellStyles } from "./TableBodyCell.stylex.ts";
-import { detectDataType, renderCellContent } from "./utils/index.ts";
+import { skeletonStyles, tableBodyCellStyles } from './TableBodyCell.stylex.ts';
+import { detectDataType, renderCellContent } from './utils/index.ts';
 
 export const TableBodyCell = <TData extends Record<string, unknown>>({
   children,
@@ -22,9 +22,11 @@ export const TableBodyCell = <TData extends Record<string, unknown>>({
   const hasCustomContent = children !== undefined;
   const dataType = dataTypeProp ?? detectDataType(value);
 
-  const isRightAligned = !hasCustomContent && (dataType === "number" || dataType === "currency");
-  const isCentered = !hasCustomContent && (dataType === "boolean" || dataType === "date");
-  const isBoolean = dataType === "boolean";
+  const isRightAligned =
+    !hasCustomContent && (dataType === 'number' || dataType === 'currency');
+  const isCentered =
+    !hasCustomContent && (dataType === 'boolean' || dataType === 'date');
+  const isBoolean = dataType === 'boolean';
 
   const content = hasCustomContent
     ? children
@@ -43,8 +45,10 @@ export const TableBodyCell = <TData extends Record<string, unknown>>({
         tableBodyCellStyles.base(minWidth, width),
         isRightAligned && tableBodyCellStyles.alignRight,
         isCentered && tableBodyCellStyles.alignCenter,
-        pinInfo?.side === "left" && tableBodyCellStyles.pinnedLeft(pinInfo.offset),
-        pinInfo?.side === "right" && tableBodyCellStyles.pinnedRight(pinInfo.offset),
+        pinInfo?.side === 'left' &&
+          tableBodyCellStyles.pinnedLeft(pinInfo.offset),
+        pinInfo?.side === 'right' &&
+          tableBodyCellStyles.pinnedRight(pinInfo.offset),
         pinInfo?.isLastPinnedLeft && tableBodyCellStyles.pinnedShadowLeft,
         pinInfo?.isFirstPinnedRight && tableBodyCellStyles.pinnedShadowRight,
         customStylex,
@@ -59,7 +63,7 @@ export const TableBodyCell = <TData extends Record<string, unknown>>({
         content
       ) : (
         <span
-          title={typeof content === "string" ? content : undefined}
+          title={typeof content === 'string' ? content : undefined}
           {...stylex.props(
             tableBodyCellStyles.textContent,
             isBoolean && tableBodyCellStyles.booleanContent,

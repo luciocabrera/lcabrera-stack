@@ -1,9 +1,9 @@
-import type { SkeletonResponse } from "./TableSkeleton.types.ts";
+import type { SkeletonResponse } from './TableSkeleton.types.ts';
 
-import { useGetColumns } from "../contexts/TableConfig/columns/selectors/index.ts";
-import { useGetTablePlaceholderRowCount } from "../contexts/TableConfig/meta/selectors/index.ts";
-import { Table } from "../Table.component.tsx";
-import { generatePlaceholderData } from "../TableBody/utils/index.ts";
+import { useGetColumns } from '../contexts/TableConfig/columns/selectors/index.ts';
+import { useGetTablePlaceholderRowCount } from '../contexts/TableConfig/meta/selectors/index.ts';
+import { Table } from '../Table.component.tsx';
+import { generatePlaceholderData } from '../TableBody/utils/index.ts';
 
 export const TableSkeleton = () => {
   const columns = useGetColumns();

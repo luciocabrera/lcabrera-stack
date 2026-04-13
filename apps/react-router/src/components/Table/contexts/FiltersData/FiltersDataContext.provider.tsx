@@ -1,14 +1,14 @@
-import type { FiltersDataState } from "@/components/Table/Table.types";
+import type { FiltersDataState } from '@/components/Table/Table.types';
 
-import { useStore } from "@/hooks";
+import { useStore } from '@/hooks';
 
 import type {
   FiltersDataContextValue,
   FiltersDataProviderProps,
-} from "./FiltersDataContext.types.ts";
+} from './FiltersDataContext.types.ts';
 
-import { getInitialFiltersDataState } from "./filters/utils/index.ts";
-import { FiltersDataContext } from "./FiltersDataContext.context.ts";
+import { getInitialFiltersDataState } from './filters/utils/index.ts';
+import { FiltersDataContext } from './FiltersDataContext.context.ts';
 
 /**
  * Provider for filter lookup data (distinct values).
@@ -29,6 +29,8 @@ export const FiltersDataProvider = <TData extends Record<string, unknown>>({
   } as FiltersDataContextValue<TData>;
 
   return (
-    <FiltersDataContext value={value as FiltersDataContextValue}>{children}</FiltersDataContext>
+    <FiltersDataContext value={value as FiltersDataContextValue}>
+      {children}
+    </FiltersDataContext>
   );
 };

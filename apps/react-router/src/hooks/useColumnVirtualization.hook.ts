@@ -1,13 +1,16 @@
-import type { RefObject } from "react";
+import type { RefObject } from 'react';
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   DEFAULT_COLUMN_OVERSCAN,
   DEFAULT_CONTAINER_WIDTH,
-} from "@/constants/virtualization.constants";
+} from '@/constants/virtualization.constants';
 
-import { findFirstOutOfViewIndex, findFirstVisibleIndex } from "./utils/index.ts";
+import {
+  findFirstOutOfViewIndex,
+  findFirstVisibleIndex,
+} from './utils/index.ts';
 
 /** Arguments for the useColumnVirtualization hook. */
 export type UseColumnVirtualizationArgs = {
@@ -131,14 +134,14 @@ export const useColumnVirtualization = ({
     }
 
     syncScrollPosition();
-    container?.addEventListener("scroll", handleScroll, { passive: true });
+    container?.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
       if (rafIdRef.current >= 0) {
         globalThis.cancelAnimationFrame(rafIdRef.current);
         rafIdRef.current = -1;
       }
-      container?.removeEventListener("scroll", handleScroll);
+      container?.removeEventListener('scroll', handleScroll);
       resizeObserver.disconnect();
     };
   }, [containerRef]);
@@ -166,7 +169,9 @@ export const useColumnVirtualization = ({
     widths: columnWidths,
   });
   const startIndex =
-    firstVisibleIdx >= totalColumns ? totalColumns : Math.max(0, firstVisibleIdx - overscan);
+    firstVisibleIdx >= totalColumns
+      ? totalColumns
+      : Math.max(0, firstVisibleIdx - overscan);
 
   const firstOutOfViewIdx = findFirstOutOfViewIndex({
     starts: cumulative,

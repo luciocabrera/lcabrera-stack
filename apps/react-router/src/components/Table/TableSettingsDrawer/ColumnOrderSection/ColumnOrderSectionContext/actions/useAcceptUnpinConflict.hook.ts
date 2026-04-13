@@ -1,14 +1,14 @@
-import type { ColumnOrderState } from "@/components/Table/Table.types";
-import type { UnpinConflictResolution } from "@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types";
+import type { ColumnOrderState } from '@/components/Table/Table.types';
+import type { UnpinConflictResolution } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
 
-import { useTableConfigContextValue } from "@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook";
+import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import {
   buildAllOrderedColumns,
   insertAdjacentToPinnedGroup,
-} from "@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils";
-import { useTableDrawerContextValue } from "@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook";
+} from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
+import { useTableDrawerContextValue } from '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
 
-import { useColumnOrderSectionContextValue } from "../useColumnOrderSectionContextValue.hook.ts";
+import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook.ts';
 
 /**
  * Hook to handle accepting an unpin conflict resolution.
@@ -34,13 +34,13 @@ export const useAcceptUnpinConflict = () => {
     });
     const index = allOrderedColumns.findIndex((col) => col.key === columnKey);
 
-    if (resolution === "unpin-beyond") {
+    if (resolution === 'unpin-beyond') {
       const newPinning = {
         left: [...columnPinning.left],
         right: [...columnPinning.right],
       };
 
-      if (side === "left") {
+      if (side === 'left') {
         const keysToUnpin = new Set(
           allOrderedColumns
             .slice(index)

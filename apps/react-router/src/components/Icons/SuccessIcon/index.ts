@@ -1,1 +1,1 @@
-export { SuccessIcon } from "./SuccessIcon.component.tsx";
+export { SuccessIcon } from './SuccessIcon.component.tsx';

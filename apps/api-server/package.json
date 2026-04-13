@@ -10,6 +10,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "api-shared": "workspace:*",
     "cors": "catalog:",
     "express": "catalog:",
     "pg": "catalog:",

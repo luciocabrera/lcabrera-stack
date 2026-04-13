@@ -1,4 +1,7 @@
-import type { FiltersDataState, TableColumn } from "@/components/Table/Table.types";
+import type {
+  FiltersDataState,
+  TableColumn,
+} from '@/components/Table/Table.types';
 
 type GetInitialFiltersDataStateArgs<TData> = {
   readonly columns: readonly TableColumn<TData>[];

@@ -1,1 +1,1 @@
-export { CardDescription } from "./CardDescription.component.tsx";
+export { CardDescription } from './CardDescription.component.tsx';

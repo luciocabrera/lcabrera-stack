@@ -1,25 +1,25 @@
-import type { ColumnOrderState } from "@/components/Table/Table.types";
+import type { ColumnOrderState } from '@/components/Table/Table.types';
 
-import type { ColumnOrderSectionModalsState } from "./ColumnOrderSectionContext.types.ts";
+import type { ColumnOrderSectionModalsState } from './ColumnOrderSectionContext.types.ts';
 
 export const INITIAL_MODALS_STATE: ColumnOrderSectionModalsState = {
   conflictModal: {
-    columnKey: "",
-    columnLabel: "",
+    columnKey: '',
+    columnLabel: '',
     isOpen: false,
-    side: "left",
+    side: 'left',
   },
   orderConflict: {
-    description: "",
+    description: '',
     isOpen: false,
     pendingOrder: [] as unknown as ColumnOrderState,
     pendingPinning: { left: [], right: [] },
   },
-  pinSideModal: { columnKey: "", columnLabel: "", isOpen: false },
+  pinSideModal: { columnKey: '', columnLabel: '', isOpen: false },
   unpinConflictModal: {
-    columnKey: "",
-    columnLabel: "",
+    columnKey: '',
+    columnLabel: '',
     isOpen: false,
-    side: "left",
+    side: 'left',
   },
 };

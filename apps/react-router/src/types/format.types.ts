@@ -12,7 +12,7 @@ export type DateFormatOptions = {
   readonly preset?: DateFormatPreset;
 };
 
-export type DateFormatPreset = "full" | "long" | "medium" | "short";
+export type DateFormatPreset = 'full' | 'long' | 'medium' | 'short';
 
 export type NumberFormatOptions = {
   /** Locale override (e.g., 'en-US', 'de-DE') */

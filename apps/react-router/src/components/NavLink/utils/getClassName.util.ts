@@ -1,13 +1,13 @@
-import * as stylex from "@stylexjs/stylex";
+import * as stylex from '@stylexjs/stylex';
 
 import type {
   DesignSystemColor,
   DesignSystemOrientation,
   DesignSystemSize,
   DesignSystemWidth,
-} from "@/types/design-system.types";
+} from '@/types/design-system.types';
 
-import type { linkItemStyles } from "../NavLink.stylex.ts";
+import type { linkItemStyles } from '../NavLink.stylex.ts';
 
 type GetClassNameArgs = {
   readonly color: DesignSystemColor;
@@ -24,7 +24,7 @@ export const getClassName = ({
   orientation,
   size,
   styles,
-  width = "auto",
+  width = 'auto',
 }: GetClassNameArgs) =>
   stylex.props(
     styles.base,
@@ -33,4 +33,4 @@ export const getClassName = ({
     styles.color[color],
     styles.width[width],
     isActive && styles.active,
-  ).className ?? "";
+  ).className ?? '';

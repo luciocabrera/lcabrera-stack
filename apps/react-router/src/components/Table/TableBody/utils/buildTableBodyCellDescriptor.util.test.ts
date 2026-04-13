@@ -1,15 +1,15 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
 import type {
   ColumnSizingState,
   DataKey,
   PinnedColumnInfo,
   TableColumn,
-} from "@/components/Table/Table.types";
+} from '@/components/Table/Table.types';
 
-import { DEFAULT_MIN_COLUMN_WIDTH } from "@/components/Table/Table.constants";
+import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
 
-import { buildTableBodyCellDescriptor } from "./buildTableBodyCellDescriptor.util.ts";
+import { buildTableBodyCellDescriptor } from './buildTableBodyCellDescriptor.util.ts';
 
 type Row = {
   readonly amount?: number;
@@ -18,12 +18,12 @@ type Row = {
 
 type RowKey = DataKey<Row>;
 
-describe("buildTableBodyCellDescriptor", () => {
-  it("builds a default descriptor with column value", () => {
+describe('buildTableBodyCellDescriptor', () => {
+  it('builds a default descriptor with column value', () => {
     const col: TableColumn<Row> = {
-      dataType: "number",
-      key: "amount",
-      label: "Amount",
+      dataType: 'number',
+      key: 'amount',
+      label: 'Amount',
       minWidth: 120,
     };
     const descriptor = buildTableBodyCellDescriptor({
@@ -35,11 +35,11 @@ describe("buildTableBodyCellDescriptor", () => {
     });
 
     expect(descriptor).toEqual({
-      dataType: "number",
+      dataType: 'number',
       format: undefined,
-      key: "amount",
-      kind: "default",
-      label: "Amount",
+      key: 'amount',
+      kind: 'default',
+      label: 'Amount',
       minWidth: 120,
       pinInfo: undefined,
       value: 42,
@@ -47,42 +47,42 @@ describe("buildTableBodyCellDescriptor", () => {
     });
   });
 
-  it("builds a custom descriptor with empty label", () => {
+  it('builds a custom descriptor with empty label', () => {
     const col: TableColumn<Row> = {
-      key: "name",
-      label: "Name",
-      render: () => "custom",
+      key: 'name',
+      label: 'Name',
+      render: () => 'custom',
     };
     const descriptor = buildTableBodyCellDescriptor({
       col,
       columnSizing: { name: 180 } as ColumnSizingState<Row>,
       isLoadingState: false,
       pinnedOffsets: {} as Record<RowKey, PinnedColumnInfo>,
-      rowData: { name: "A" },
+      rowData: { name: 'A' },
     });
 
     expect(descriptor).toEqual({
-      children: "custom",
-      key: "name",
-      kind: "custom",
-      label: "",
+      children: 'custom',
+      key: 'name',
+      kind: 'custom',
+      label: '',
       minWidth: DEFAULT_MIN_COLUMN_WIDTH,
       pinInfo: undefined,
       width: 180,
     });
   });
 
-  it("uses pinned offsets and empty string when row value is missing", () => {
+  it('uses pinned offsets and empty string when row value is missing', () => {
     const col: TableColumn<Row> = {
-      key: "name",
-      label: "Name",
+      key: 'name',
+      label: 'Name',
       minWidth: 90,
     };
     const pinInfo: PinnedColumnInfo = {
       isFirstPinnedRight: false,
       isLastPinnedLeft: true,
       offset: 24,
-      side: "left",
+      side: 'left',
     };
     const descriptor = buildTableBodyCellDescriptor({
       col,
@@ -97,12 +97,12 @@ describe("buildTableBodyCellDescriptor", () => {
     expect(descriptor).toEqual({
       dataType: undefined,
       format: undefined,
-      key: "name",
-      kind: "default",
-      label: "Name",
+      key: 'name',
+      kind: 'default',
+      label: 'Name',
       minWidth: 90,
       pinInfo,
-      value: "",
+      value: '',
       width: 90,
     });
   });

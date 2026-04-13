@@ -1,22 +1,25 @@
-import * as stylex from "@stylexjs/stylex";
+import * as stylex from '@stylexjs/stylex';
 
-import { CheckIcon } from "@/components/Icons";
+import { CheckIcon } from '@/components/Icons';
 
-import type { TableCheckDisplayProps } from "./TableCheckDisplay.types.ts";
+import type { TableCheckDisplayProps } from './TableCheckDisplay.types.ts';
 
-import { tableCheckDisplayStyles } from "./TableCheckDisplay.stylex.ts";
+import { tableCheckDisplayStyles } from './TableCheckDisplay.stylex.ts';
 
-export const TableCheckDisplay = ({ label: columnLabel, value }: TableCheckDisplayProps) => {
+export const TableCheckDisplay = ({
+  label: columnLabel,
+  value,
+}: TableCheckDisplayProps) => {
   const isChecked = Boolean(value);
-  let label = isChecked ? "Checked" : "Unchecked";
+  let label = isChecked ? 'Checked' : 'Unchecked';
   if (columnLabel) {
-    label = `${columnLabel}: ${isChecked ? "Yes" : "No"}`;
+    label = `${columnLabel}: ${isChecked ? 'Yes' : 'No'}`;
   }
   return (
     <div
       aria-checked={isChecked}
       aria-label={label}
-      role="checkbox"
+      role='checkbox'
       {...stylex.props(
         tableCheckDisplayStyles.checkbox,
         isChecked && tableCheckDisplayStyles.checkboxChecked,

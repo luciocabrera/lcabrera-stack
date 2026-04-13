@@ -1,6 +1,6 @@
-import type { ColumnOrderSectionModalsState } from "../ColumnOrderSectionContext.types.ts";
+import type { ColumnOrderSectionModalsState } from '../ColumnOrderSectionContext.types.ts';
 
-import { INITIAL_MODALS_STATE } from "../ColumnOrderSectionContext.constants.ts";
+import { INITIAL_MODALS_STATE } from '../ColumnOrderSectionContext.constants.ts';
 
 type GetInitialModalsStateArgs = Partial<ColumnOrderSectionModalsState>;
 

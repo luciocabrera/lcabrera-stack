@@ -1,4 +1,4 @@
-import * as stylex from "@stylexjs/stylex";
+import * as stylex from '@stylexjs/stylex';
 
 import {
   borderRadius,
@@ -8,12 +8,12 @@ import {
   transitions,
   typography,
   zIndex,
-} from "@/design-system/tokens/base.stylex";
-import { colors } from "@/design-system/tokens/colors.stylex";
+} from '@/design-system/tokens/base.stylex';
+import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const modalStyles = stylex.create({
   backdrop: {
-    "::backdrop": {
+    '::backdrop': {
       transition: `opacity ${transitions.normal} ${easing.easeInOut}`,
       backgroundColor: colors.overlay,
     },
@@ -21,42 +21,42 @@ export const modalStyles = stylex.create({
   body: {
     padding: spacing.lg,
     gap: spacing.md,
-    display: "flex",
-    flexDirection: "column",
-    overflowY: "auto",
+    display: 'flex',
+    flexDirection: 'column',
+    overflowY: 'auto',
   },
   dialog: {
     padding: 0,
     borderRadius: borderRadius.lg,
-    borderStyle: "none",
+    borderStyle: 'none',
     backgroundColor: colors.surfacePrimary,
     boxShadow: shadows.xl,
     color: colors.textPrimary,
-    textAlign: "left",
+    textAlign: 'left',
     zIndex: zIndex.modal,
-    maxHeight: "85vh",
-    maxWidth: "480px",
-    width: "90vw",
+    maxHeight: '85vh',
+    maxWidth: '480px',
+    width: '90vw',
   },
   footer: {
     padding: spacing.lg,
     gap: spacing.sm,
-    display: "flex",
-    justifyContent: "flex-end",
+    display: 'flex',
+    justifyContent: 'flex-end',
     borderTopColor: colors.borderSecondary,
-    borderTopStyle: "solid",
-    borderTopWidth: "1px",
+    borderTopStyle: 'solid',
+    borderTopWidth: '1px',
   },
   header: {
     padding: spacing.lg,
     gap: spacing.sm,
-    alignItems: "flex-start",
-    display: "flex",
+    alignItems: 'flex-start',
+    display: 'flex',
     flexShrink: 0,
-    justifyContent: "space-between",
+    justifyContent: 'space-between',
     borderBottomColor: colors.borderSecondary,
-    borderBottomStyle: "solid",
-    borderBottomWidth: "1px",
+    borderBottomStyle: 'solid',
+    borderBottomWidth: '1px',
   },
   title: {
     margin: 0,

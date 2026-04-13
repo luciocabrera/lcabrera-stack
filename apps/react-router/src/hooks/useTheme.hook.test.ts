@@ -1,24 +1,24 @@
 // @vitest-environment jsdom
 
-import { createElement } from "react";
-import type { ReactNode } from "react";
+import { createElement } from 'react';
+import type { ReactNode } from 'react';
 
-import { renderHook } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { renderHook } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 
-import type { ThemeContextValue } from "@/types/theme.types";
+import type { ThemeContextValue } from '@/types/theme.types';
 
-vi.mock("@/contexts/ThemeContext", async () => {
-  const { createContext } = await import("react");
+vi.mock('@/contexts/ThemeContext', async () => {
+  const { createContext } = await import('react');
 
   return {
     ThemeContext: createContext<ThemeContextValue | undefined>(undefined),
   };
 });
 
-import { ThemeContext } from "@/contexts/ThemeContext";
+import { ThemeContext } from '@/contexts/ThemeContext';
 
-import { useTheme } from "./useTheme.hook.ts";
+import { useTheme } from './useTheme.hook.ts';
 
 type WrapperProps = {
   readonly children: ReactNode;
@@ -35,12 +35,12 @@ const createWrapper = (value: ThemeContextValue) => {
   return ThemeContextWrapper;
 };
 
-describe("useTheme", () => {
-  it("returns the current ThemeContext value", () => {
+describe('useTheme', () => {
+  it('returns the current ThemeContext value', () => {
     const contextValue: ThemeContextValue = {
       isDarkMode: true,
       setTheme: vi.fn(),
-      theme: "dark",
+      theme: 'dark',
       toggleTheme: vi.fn(),
     };
 
@@ -51,9 +51,9 @@ describe("useTheme", () => {
     expect(result.current).toBe(contextValue);
   });
 
-  it("throws when used outside ThemeProvider", () => {
+  it('throws when used outside ThemeProvider', () => {
     expect(() => renderHook(() => useTheme())).toThrow(
-      "useTheme must be used within a ThemeProvider",
+      'useTheme must be used within a ThemeProvider',
     );
   });
 });

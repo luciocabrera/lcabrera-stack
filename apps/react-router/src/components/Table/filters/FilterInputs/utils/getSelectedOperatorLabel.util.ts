@@ -1,4 +1,8 @@
-import type { ColumnFilter, OperatorOption, OperatorType } from "@/types/filterOperators.types";
+import type {
+  ColumnFilter,
+  OperatorOption,
+  OperatorType,
+} from '@/types/filterOperators.types';
 
 type GetSelectedOperatorLabelArgs = {
   readonly filter?: ColumnFilter;

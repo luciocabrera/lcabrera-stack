@@ -1,9 +1,12 @@
 // @vitest-environment jsdom
 
-import type { NavLinkRenderProps, NavLinkProps as RouterNavLinkProps } from "react-router";
+import type {
+  NavLinkRenderProps,
+  NavLinkProps as RouterNavLinkProps,
+} from 'react-router';
 
-import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { cleanup, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const { mockRouterNavLink } = vi.hoisted(() => {
   const mockRenderProps: NavLinkRenderProps = {
@@ -14,11 +17,14 @@ const { mockRouterNavLink } = vi.hoisted(() => {
 
   const mockRouterNavLink = ({ children, className }: RouterNavLinkProps) => {
     const resolvedClassName =
-      typeof className === "function" ? className(mockRenderProps) : (className ?? "");
-    const resolvedChildren = typeof children === "function" ? children(mockRenderProps) : children;
+      typeof className === 'function'
+        ? className(mockRenderProps)
+        : (className ?? '');
+    const resolvedChildren =
+      typeof children === 'function' ? children(mockRenderProps) : children;
 
     return (
-      <a className={resolvedClassName} href="#">
+      <a className={resolvedClassName} href='#'>
         {resolvedChildren}
       </a>
     );
@@ -27,27 +33,27 @@ const { mockRouterNavLink } = vi.hoisted(() => {
   return { mockRouterNavLink };
 });
 
-vi.mock("react-router", () => ({
+vi.mock('react-router', () => ({
   NavLink: mockRouterNavLink,
 }));
 
-import { NavLink } from "./NavLink.component.tsx";
+import { NavLink } from './NavLink.component.tsx';
 
 afterEach(cleanup);
 
-describe("NavLink", () => {
-  it("renders children text", () => {
-    render(<NavLink to="/home">Home</NavLink>);
-    expect(screen.getByText("Home").textContent).toBe("Home");
+describe('NavLink', () => {
+  it('renders children text', () => {
+    render(<NavLink to='/home'>Home</NavLink>);
+    expect(screen.getByText('Home').textContent).toBe('Home');
   });
 
-  it("renders icon slot when icon prop is provided", () => {
+  it('renders icon slot when icon prop is provided', () => {
     render(
-      <NavLink icon={<span>icon-element</span>} to="/settings">
+      <NavLink icon={<span>icon-element</span>} to='/settings'>
         Settings
       </NavLink>,
     );
-    expect(screen.getByText("icon-element").textContent).toBe("icon-element");
-    expect(screen.getByText("Settings").textContent).toBe("Settings");
+    expect(screen.getByText('icon-element').textContent).toBe('icon-element');
+    expect(screen.getByText('Settings').textContent).toBe('Settings');
   });
 });

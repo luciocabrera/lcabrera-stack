@@ -1,1 +1,1 @@
-export { ListUncheckedIcon } from "./ListUncheckedIcon.component.tsx";
+export { ListUncheckedIcon } from './ListUncheckedIcon.component.tsx';

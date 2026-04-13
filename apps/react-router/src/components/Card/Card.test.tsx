@@ -1,13 +1,13 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { cleanup, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it } from 'vitest';
 
-import { Card } from "./Card.component.tsx";
+import { Card } from './Card.component.tsx';
 
 afterEach(cleanup);
 
-describe("Card", () => {
+describe('Card', () => {
   it("renders children inside a div with data-testid='card'", () => {
     render(
       <Card>
@@ -15,18 +15,18 @@ describe("Card", () => {
       </Card>,
     );
 
-    expect(screen.getByTestId("card").textContent).toContain("Card content");
+    expect(screen.getByTestId('card').textContent).toContain('Card content');
   });
 
-  it("forwards native div attributes", () => {
+  it('forwards native div attributes', () => {
     render(
-      <Card aria-label="My card" id="test-card">
+      <Card aria-label='My card' id='test-card'>
         Content
       </Card>,
     );
 
-    const card = screen.getByTestId("card");
-    expect(card.getAttribute("id")).toBe("test-card");
-    expect(card.getAttribute("aria-label")).toBe("My card");
+    const card = screen.getByTestId('card');
+    expect(card.getAttribute('id')).toBe('test-card');
+    expect(card.getAttribute('aria-label')).toBe('My card');
   });
 });

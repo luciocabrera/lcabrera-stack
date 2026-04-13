@@ -1,4 +1,4 @@
-import type { ColumnOrderState } from "@/components/Table/Table.types";
+import type { ColumnOrderState } from '@/components/Table/Table.types';
 
 type RestoreStaticColumnOrderArgs = {
   readonly currentOrder: ColumnOrderState;

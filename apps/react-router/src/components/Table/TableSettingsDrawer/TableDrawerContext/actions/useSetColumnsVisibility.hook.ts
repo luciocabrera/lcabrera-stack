@@ -1,6 +1,6 @@
-import type { ColumnVisibilityState } from "@/components/Table/Table.types";
+import type { ColumnVisibilityState } from '@/components/Table/Table.types';
 
-import { useTableDrawerContextValue } from "../useTableDrawerContextValue.hook.ts";
+import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook.ts';
 
 export const useSetColumnsVisibility = <TData>() => {
   const { columnsStore } = useTableDrawerContextValue();

@@ -2,21 +2,21 @@ import type {
   ColumnFiltersState,
   ColumnPinningState,
   ColumnSizingState,
-} from "@/components/Table/Table.types";
-import type { ColumnFilter } from "@/types/filterOperators.types";
-import type { SortDirection } from "@/types/ui.types";
+} from '@/components/Table/Table.types';
+import type { ColumnFilter } from '@/types/filterOperators.types';
+import type { SortDirection } from '@/types/ui.types';
 
-import { useTableConfigContextValue } from "@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook";
-import { usePersistTableStateAction } from "@/components/Table/hooks";
-import { applyPin } from "@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils";
+import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { usePersistTableStateAction } from '@/components/Table/hooks';
+import { applyPin } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 import {
   getEffectiveColumns,
   getNormalizedColumns,
   getPinnedColumnOffsets,
   splitColumnsByPinning,
   syncColumnOrderWithPinning,
-} from "@/components/Table/utils";
-import { serializeFiltersToURL, serializeSortingToURL } from "@/utils/urlState";
+} from '@/components/Table/utils';
+import { serializeFiltersToURL, serializeSortingToURL } from '@/utils/urlState';
 
 export type BatchColumnSettingsUpdate = {
   /** Single column filter value */
@@ -24,7 +24,7 @@ export type BatchColumnSettingsUpdate = {
   /** Column key being updated */
   columnKey: string;
   /** Pin side for this column */
-  columnPinning?: "left" | "right" | undefined;
+  columnPinning?: 'left' | 'right' | undefined;
   /** Single column width value */
   columnSizing?: number;
   /** Sort direction for this column */
@@ -37,12 +37,15 @@ export const useBatchSetColumnSettings = () => {
 
   return (settings: BatchColumnSettingsUpdate) => {
     const columnsState = columnsStore.get();
-    const persistenceKey = metaStore.get()?.persistenceKey ?? "";
-    const { columnFilter, columnKey, columnPinning, columnSizing, sorting } = settings;
+    const persistenceKey = metaStore.get()?.persistenceKey ?? '';
+    const { columnFilter, columnKey, columnPinning, columnSizing, sorting } =
+      settings;
 
     // Sorting: update in-place to preserve order, or remove if undefined
     const existingSorting = columnsState?.sorting ?? [];
-    const existingIndex = existingSorting.findIndex((s) => s.columnKey === columnKey);
+    const existingIndex = existingSorting.findIndex(
+      (s) => s.columnKey === columnKey,
+    );
 
     const hasExistingSort = existingIndex !== -1;
 
@@ -59,9 +62,9 @@ export const useBatchSetColumnSettings = () => {
 
     // Filters: remove this column entry, then re-add if filter exists
     const baseFilters = Object.fromEntries(
-      Object.entries((columnsState?.columnFilters ?? {}) as ColumnFiltersState).filter(
-        ([key]) => key !== columnKey,
-      ),
+      Object.entries(
+        (columnsState?.columnFilters ?? {}) as ColumnFiltersState,
+      ).filter(([key]) => key !== columnKey),
     );
     const newColumnFilters = columnFilter
       ? { ...baseFilters, [columnKey]: columnFilter }
@@ -69,12 +72,14 @@ export const useBatchSetColumnSettings = () => {
 
     // Sizing: remove this column entry, then re-add if size exists
     const baseSizing = Object.fromEntries(
-      Object.entries((columnsState?.columnSizing ?? {}) as ColumnSizingState).filter(
-        ([key]) => key !== columnKey,
-      ),
+      Object.entries(
+        (columnsState?.columnSizing ?? {}) as ColumnSizingState,
+      ).filter(([key]) => key !== columnKey),
     );
     const newColumnSizing =
-      columnSizing === undefined ? baseSizing : { ...baseSizing, [columnKey]: columnSizing };
+      columnSizing === undefined
+        ? baseSizing
+        : { ...baseSizing, [columnKey]: columnSizing };
 
     // Pinning: remove from both sides, then re-add respecting static column positions
     const currentPinning = columnsState?.columnPinning ?? {
@@ -131,31 +136,31 @@ export const useBatchSetColumnSettings = () => {
     persistTableState([
       {
         persistenceKey,
-        searchParamKey: "filters",
+        searchParamKey: 'filters',
         searchParamValue: serializeFiltersToURL(newColumnFilters),
-        slice: "columnFilters",
+        slice: 'columnFilters',
         valueSlice: newColumnFilters,
       },
       {
         persistenceKey,
-        searchParamKey: "sort",
+        searchParamKey: 'sort',
         searchParamValue: serializeSortingToURL(newSorting),
-        slice: "sorting",
+        slice: 'sorting',
         valueSlice: newSorting,
       },
       {
         persistenceKey,
-        slice: "columnSizing",
+        slice: 'columnSizing',
         valueSlice: newColumnSizing,
       },
       {
         persistenceKey,
-        slice: "columnPinning",
+        slice: 'columnPinning',
         valueSlice: newPinning,
       },
       {
         persistenceKey,
-        slice: "columnOrder",
+        slice: 'columnOrder',
         valueSlice: newColumnOrder,
       },
     ]);

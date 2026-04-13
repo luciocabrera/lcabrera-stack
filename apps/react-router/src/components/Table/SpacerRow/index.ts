@@ -1,2 +1,2 @@
-export { SpacerRow } from "./SpacerRow.component.tsx";
-export type { SpacerRowProps } from "./SpacerRow.types.ts";
+export { SpacerRow } from './SpacerRow.component.tsx';
+export type { SpacerRowProps } from './SpacerRow.types.ts';

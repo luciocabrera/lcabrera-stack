@@ -1,24 +1,33 @@
-import type { Pool } from "pg";
+import type { Pool } from 'pg';
 
-import { buildOrderByClause } from "../../utils/buildOrderByClause.util";
-import { formatPgAdminQuery } from "../../utils/formatPgAdminQuery.util";
-import type { CountRow, DbRow, QueryValue, SortRule } from "../../types/api.types";
+import { buildOrderByClause } from '../../utils/buildOrderByClause.util';
+import { formatPgAdminQuery } from '../../utils/formatPgAdminQuery.util';
+import type {
+  CountRow,
+  DbRow,
+  QueryValue,
+  SortRule,
+} from '../../types/api.types';
 
-import { buildEnterpriseOrdersWhereClause } from "./buildEnterpriseOrdersWhereClause.util";
-import { DEFAULT_ENTERPRISE_ORDER_SORTING } from "./enterpriseOrders.constants";
+import { buildEnterpriseOrdersWhereClause } from './buildEnterpriseOrdersWhereClause.util';
+import { DEFAULT_ENTERPRISE_ORDER_SORTING } from './enterpriseOrders.constants';
 import type {
   EnterpriseOrderDetailResponse,
   EnterpriseOrdersDistinctResponse,
   EnterpriseOrdersFilters,
   EnterpriseOrdersResponse,
-} from "./enterpriseOrders.types";
+} from './enterpriseOrders.types';
 
 export type EnterpriseOrdersRepository = {
   readonly getDistinctValues: (
     args: GetDistinctValuesArgs,
   ) => Promise<EnterpriseOrdersDistinctResponse>;
-  readonly getOrderById: (orderId: number) => Promise<EnterpriseOrderDetailResponse | undefined>;
-  readonly getPaginated: (args: GetEnterpriseOrdersArgs) => Promise<EnterpriseOrdersResponse>;
+  readonly getOrderById: (
+    orderId: number,
+  ) => Promise<EnterpriseOrderDetailResponse | undefined>;
+  readonly getPaginated: (
+    args: GetEnterpriseOrdersArgs,
+  ) => Promise<EnterpriseOrdersResponse>;
 };
 
 type CreateEnterpriseOrdersRepositoryArgs = {
@@ -54,7 +63,7 @@ export const createEnterpriseOrdersRepository = ({
     `;
     const params: QueryValue[] = [limit, offset];
 
-    console.warn("🎯 [Distinct] Query:", formatPgAdminQuery(query, params));
+    console.warn('🎯 [Distinct] Query:', formatPgAdminQuery(query, params));
 
     const result = await pool.query<{ readonly value: string }>(query, params);
     const values = result.rows.map(({ value }) => value);
@@ -66,10 +75,10 @@ export const createEnterpriseOrdersRepository = ({
   },
 
   getOrderById: async (orderId) => {
-    const query = "SELECT * FROM enterprise_orders WHERE order_id = $1";
+    const query = 'SELECT * FROM enterprise_orders WHERE order_id = $1';
     const params: QueryValue[] = [orderId];
 
-    console.warn("📦 [Order Detail] Query:", formatPgAdminQuery(query, params));
+    console.warn('📦 [Order Detail] Query:', formatPgAdminQuery(query, params));
 
     const result = await pool.query<DbRow>(query, params);
     const [row] = result.rows;
@@ -91,17 +100,26 @@ export const createEnterpriseOrdersRepository = ({
     const whereClauseResult = buildEnterpriseOrdersWhereClause(filters);
     const dataQuery = `SELECT * FROM enterprise_orders ${whereClauseResult.whereClause} ${orderByClause} LIMIT $${whereClauseResult.queryParams.length + 1} OFFSET $${whereClauseResult.queryParams.length + 2}`;
     const countQuery = `SELECT COUNT(*) FROM enterprise_orders ${whereClauseResult.whereClause}`;
-    const dataParams: QueryValue[] = [...whereClauseResult.queryParams, limit, skip];
+    const dataParams: QueryValue[] = [
+      ...whereClauseResult.queryParams,
+      limit,
+      skip,
+    ];
 
-    console.warn("📦 [Orders] Data Query:", formatPgAdminQuery(dataQuery, dataParams));
     console.warn(
-      "📦 [Orders] Count Query:",
+      '📦 [Orders] Data Query:',
+      formatPgAdminQuery(dataQuery, dataParams),
+    );
+    console.warn(
+      '📦 [Orders] Count Query:',
       formatPgAdminQuery(countQuery, whereClauseResult.queryParams),
     );
 
     const dataResult = await pool.query<DbRow>(dataQuery, dataParams);
-    const countResult = await pool.query<CountRow>(countQuery, [...whereClauseResult.queryParams]);
-    const total = Number.parseInt(countResult.rows[0]?.count ?? "0", 10);
+    const countResult = await pool.query<CountRow>(countQuery, [
+      ...whereClauseResult.queryParams,
+    ]);
+    const total = Number.parseInt(countResult.rows[0]?.count ?? '0', 10);
 
     return {
       data: dataResult.rows,

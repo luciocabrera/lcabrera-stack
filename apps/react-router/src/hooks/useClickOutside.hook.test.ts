@@ -1,19 +1,19 @@
 // @vitest-environment jsdom
 
-import type { RefObject } from "react";
+import type { RefObject } from 'react';
 
-import { fireEvent, renderHook } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { fireEvent, renderHook } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { useClickOutside } from "./useClickOutside.hook.ts";
+import { useClickOutside } from './useClickOutside.hook.ts';
 
-describe("useClickOutside", () => {
+describe('useClickOutside', () => {
   afterEach(() => {
-    document.body.innerHTML = "";
+    document.body.innerHTML = '';
   });
 
-  it("does not call the callback for clicks inside the guarded element", () => {
-    const guardedElement = document.createElement("div");
+  it('does not call the callback for clicks inside the guarded element', () => {
+    const guardedElement = document.createElement('div');
     const onClickOutside = vi.fn();
     const ref = {
       current: guardedElement,
@@ -30,9 +30,9 @@ describe("useClickOutside", () => {
     expect(onClickOutside).not.toHaveBeenCalled();
   });
 
-  it("calls the callback for clicks outside the guarded element", () => {
-    const guardedElement = document.createElement("div");
-    const outsideElement = document.createElement("button");
+  it('calls the callback for clicks outside the guarded element', () => {
+    const guardedElement = document.createElement('div');
+    const outsideElement = document.createElement('button');
     const onClickOutside = vi.fn();
     const ref = {
       current: guardedElement,
@@ -49,10 +49,10 @@ describe("useClickOutside", () => {
     expect(onClickOutside).toHaveBeenCalledTimes(1);
   });
 
-  it("removes the mousedown listener on unmount", () => {
-    const guardedElement = document.createElement("div");
+  it('removes the mousedown listener on unmount', () => {
+    const guardedElement = document.createElement('div');
     const onClickOutside = vi.fn();
-    const removeEventListenerSpy = vi.spyOn(document, "removeEventListener");
+    const removeEventListenerSpy = vi.spyOn(document, 'removeEventListener');
     const ref = {
       current: guardedElement,
     } as RefObject<HTMLElement | null>;
@@ -65,6 +65,9 @@ describe("useClickOutside", () => {
 
     unmount();
 
-    expect(removeEventListenerSpy).toHaveBeenCalledWith("mousedown", expect.any(Function));
+    expect(removeEventListenerSpy).toHaveBeenCalledWith(
+      'mousedown',
+      expect.any(Function),
+    );
   });
 });

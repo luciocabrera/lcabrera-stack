@@ -1,12 +1,12 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState } from 'react';
 
-import type { ThemeMode } from "@/types/theme.types";
+import type { ThemeMode } from '@/types/theme.types';
 
-import { setThemeCookie } from "@/utils/theme";
+import { setThemeCookie } from '@/utils/theme';
 
-import type { ThemeProviderProps } from "./ThemeContext.types.ts";
+import type { ThemeProviderProps } from './ThemeContext.types.ts';
 
-import { ThemeContext } from "./ThemeContext.context.ts";
+import { ThemeContext } from './ThemeContext.context.ts';
 
 /**
  * ThemeProvider component that manages theme state and persistence
@@ -15,11 +15,13 @@ import { ThemeContext } from "./ThemeContext.context.ts";
  */
 export const ThemeProvider = ({
   children,
-  defaultTheme = "light",
+  defaultTheme = 'light',
   initialTheme,
 }: ThemeProviderProps) => {
   // Use initialTheme from loader (cookie) if available, otherwise fall back to defaultTheme
-  const [themeState, setThemeState] = useState<ThemeMode>(() => initialTheme ?? defaultTheme);
+  const [themeState, setThemeState] = useState<ThemeMode>(
+    () => initialTheme ?? defaultTheme,
+  );
 
   const setTheme = useCallback((newTheme: ThemeMode) => {
     setThemeState(newTheme);
@@ -28,11 +30,11 @@ export const ThemeProvider = ({
   }, []);
 
   const toggleTheme = useCallback(() => {
-    setTheme(themeState === "dark" ? "light" : "dark");
+    setTheme(themeState === 'dark' ? 'light' : 'dark');
   }, [themeState, setTheme]);
 
   const value = {
-    isDarkMode: themeState === "dark",
+    isDarkMode: themeState === 'dark',
     setTheme,
     theme: themeState,
     toggleTheme,

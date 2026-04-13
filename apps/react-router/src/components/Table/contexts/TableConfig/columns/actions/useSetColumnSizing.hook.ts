@@ -1,9 +1,12 @@
-import { useCallback } from "react";
+import { useCallback } from 'react';
 
-import type { ColumnSizingState, DataKey } from "@/components/Table/Table.types";
+import type {
+  ColumnSizingState,
+  DataKey,
+} from '@/components/Table/Table.types';
 
-import { useTableConfigContextValue } from "@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook";
-import { getPinnedColumnOffsets } from "@/components/Table/utils";
+import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { getPinnedColumnOffsets } from '@/components/Table/utils';
 
 type SetColumnSizingArgs<TData> = {
   readonly columnKey: DataKey<TData>;
@@ -19,7 +22,8 @@ export const useSetColumnSizing = <TData>() => {
   return useCallback(
     ({ columnKey, width }: SetColumnSizingArgs<TData>) => {
       const columnsState = columnsStore.get();
-      const current = (columnsState?.columnSizing ?? {}) as ColumnSizingState<TData>;
+      const current = (columnsState?.columnSizing ??
+        {}) as ColumnSizingState<TData>;
 
       let columnSizing: ColumnSizingState<TData>;
       if (width === undefined) {

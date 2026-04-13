@@ -1,4 +1,4 @@
-import type { ColumnDrawerState } from "../ColumnDrawerContext.types.ts";
+import type { ColumnDrawerState } from '../ColumnDrawerContext.types.ts';
 
 type GetInitialTableStateArgs<TData> = Partial<ColumnDrawerState<TData>>;
 

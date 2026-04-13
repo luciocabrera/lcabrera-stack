@@ -1,8 +1,8 @@
-import { useSyncExternalStore } from "react";
+import { useSyncExternalStore } from 'react';
 
-import type { TableColumnsState } from "@/components/Table/Table.types";
+import type { TableColumnsState } from '@/components/Table/Table.types';
 
-import { useTableConfigContextValue } from "@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook";
+import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 
 export const useColumnsStore = <TSelected, TData = Record<string, unknown>>(
   selector: (state: TableColumnsState<TData>) => TSelected,
@@ -12,7 +12,8 @@ export const useColumnsStore = <TSelected, TData = Record<string, unknown>>(
   const state = useSyncExternalStore(
     columnsStore.subscribe,
     () => selector(columnsStore.get() as TableColumnsState<TData>),
-    () => selector(columnsStore.getServerSnapshot() as TableColumnsState<TData>),
+    () =>
+      selector(columnsStore.getServerSnapshot() as TableColumnsState<TData>),
   );
 
   return state;

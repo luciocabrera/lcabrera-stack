@@ -1,18 +1,21 @@
-import * as stylex from "@stylexjs/stylex";
+import * as stylex from '@stylexjs/stylex';
 
-import { Button } from "@/components/Button";
-import { EraserIcon, RefreshIcon } from "@/components/Icons";
-import { ICON_SIZE_MD, ICON_SIZE_SM } from "@/design-system/constants";
+import { Button } from '@/components/Button';
+import { EraserIcon, RefreshIcon } from '@/components/Icons';
+import { ICON_SIZE_MD, ICON_SIZE_SM } from '@/design-system/constants';
 
-import type { FiltersSectionToolbarProps } from "./FiltersSectionToolbar.types.ts";
+import type { FiltersSectionToolbarProps } from './FiltersSectionToolbar.types.ts';
 
-import { useClearFilters, useResetFilters } from "../../TableDrawerContext/actions/index.ts";
-import { useGetColumnFilters } from "../../TableDrawerContext/selectors/index.ts";
-import { styles } from "./FiltersSectionToolbar.stylex.ts";
+import {
+  useClearFilters,
+  useResetFilters,
+} from '../../TableDrawerContext/actions/index.ts';
+import { useGetColumnFilters } from '../../TableDrawerContext/selectors/index.ts';
+import { styles } from './FiltersSectionToolbar.stylex.ts';
 
 export const FiltersSectionToolbar = ({
   onClearAll,
-  variant = "footer",
+  variant = 'footer',
 }: FiltersSectionToolbarProps) => {
   const filters = useGetColumnFilters();
 
@@ -20,10 +23,10 @@ export const FiltersSectionToolbar = ({
   const resetFilters = useResetFilters();
 
   const hasFilters = Object.keys(filters).length > 0;
-  const isToolbar = variant === "toolbar";
-  const buttonColor = isToolbar ? "ghost" : "outline";
-  const buttonSize = isToolbar ? "mini" : "sm";
-  const buttonWidth = isToolbar ? "auto" : "full";
+  const isToolbar = variant === 'toolbar';
+  const buttonColor = isToolbar ? 'ghost' : 'outline';
+  const buttonSize = isToolbar ? 'mini' : 'sm';
+  const buttonWidth = isToolbar ? 'auto' : 'full';
   const iconSize = isToolbar ? ICON_SIZE_SM : ICON_SIZE_MD;
 
   const handleClear = () => {
@@ -34,7 +37,7 @@ export const FiltersSectionToolbar = ({
   return (
     <div {...stylex.props(isToolbar ? styles.toolbar : styles.container)}>
       <Button
-        aria-label="Clear Filters"
+        aria-label='Clear Filters'
         color={buttonColor}
         icon={<EraserIcon size={iconSize} />}
         isDisabled={!hasFilters}
@@ -42,20 +45,20 @@ export const FiltersSectionToolbar = ({
         size={buttonSize}
         width={buttonWidth}
       >
-        {!isToolbar && "Clear Filters"}
+        {!isToolbar && 'Clear Filters'}
       </Button>
       <Button
-        aria-label="Reset Filters"
+        aria-label='Reset Filters'
         color={buttonColor}
         icon={<RefreshIcon size={iconSize} />}
         onClick={resetFilters}
         size={buttonSize}
         width={buttonWidth}
       >
-        {!isToolbar && "Reset Filters"}
+        {!isToolbar && 'Reset Filters'}
       </Button>
     </div>
   );
 };
 
-FiltersSectionToolbar.displayName = "FiltersSectionToolbar";
+FiltersSectionToolbar.displayName = 'FiltersSectionToolbar';

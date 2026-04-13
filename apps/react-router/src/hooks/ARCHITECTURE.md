@@ -135,11 +135,12 @@ useColumnVirtualization(args: UseColumnVirtualizationArgs): UseColumnVirtualizat
 ### Usage in `TableHeader` / `TableBody`
 
 ```tsx
-const { startIndex, endIndex, leftSpacerWidth, rightSpacerWidth } = useColumnVirtualization({
-  columnWidths,
-  containerRef,
-  overscan,
-});
+const { startIndex, endIndex, leftSpacerWidth, rightSpacerWidth } =
+  useColumnVirtualization({
+    columnWidths,
+    containerRef,
+    overscan,
+  });
 
 // Per row:
 [

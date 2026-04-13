@@ -1,4 +1,4 @@
-import type { ComponentPropsWithoutRef, ReactNode } from "react";
+import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 
 /**
  * Individual tab item configuration
@@ -15,7 +15,7 @@ export type TabItem = {
 /**
  * Tabs component props
  */
-export type TabsProps = ComponentPropsWithoutRef<"div"> & {
+export type TabsProps = ComponentPropsWithoutRef<'div'> & {
   /** Initially selected tab key (defaults to first tab) */
   readonly defaultSelectedTab?: string;
   /** Array of tab configurations */

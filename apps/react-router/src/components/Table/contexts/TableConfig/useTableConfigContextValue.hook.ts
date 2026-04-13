@@ -1,10 +1,12 @@
-import { use } from "react";
+import { use } from 'react';
 
-import type { TableConfigContextValue } from "./TableConfigContext.types.ts";
+import type { TableConfigContextValue } from './TableConfigContext.types.ts';
 
-import { TableConfigContext } from "./TableConfigContext.context.ts";
+import { TableConfigContext } from './TableConfigContext.context.ts';
 
-export const useTableConfigContextValue = <TData = Record<string, unknown>>() => {
+export const useTableConfigContextValue = <
+  TData = Record<string, unknown>,
+>() => {
   const context = use(TableConfigContext);
 
   return context as TableConfigContextValue<TData>;

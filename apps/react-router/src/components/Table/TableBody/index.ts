@@ -1,1 +1,1 @@
-export { TableBody } from "./TableBody.component.tsx";
+export { TableBody } from './TableBody.component.tsx';

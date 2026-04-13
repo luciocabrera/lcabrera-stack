@@ -1,10 +1,10 @@
-import * as stylex from "@stylexjs/stylex";
+import * as stylex from '@stylexjs/stylex';
 
-import { filterBaseStyles } from "@/design-system/tokens/filters.stylex";
+import { filterBaseStyles } from '@/design-system/tokens/filters.stylex';
 
 const localStyles = stylex.create({
   input: {
-    flex: "1",
+    flex: '1',
     minWidth: 0,
   },
 });

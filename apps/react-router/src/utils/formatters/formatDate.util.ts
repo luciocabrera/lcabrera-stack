@@ -1,9 +1,9 @@
-import type { DateFormatOptions } from "../../types/format.types.ts";
+import type { DateFormatOptions } from '../../types/format.types.ts';
 
-import { DEFAULT_DATE_PRESET } from "./formatters.constants.ts";
-import { getDateTimeFormatOptions } from "./getDateTimeFormatOptions.util.ts";
-import { getDefaultLocale } from "./getDefaultLocale.util.ts";
-import { parseDate } from "./parseDate.util.ts";
+import { DEFAULT_DATE_PRESET } from './formatters.constants.ts';
+import { getDateTimeFormatOptions } from './getDateTimeFormatOptions.util.ts';
+import { getDefaultLocale } from './getDefaultLocale.util.ts';
+import { parseDate } from './parseDate.util.ts';
 
 type FormatDateArgs = DateFormatOptions & {
   readonly value: unknown;
@@ -14,11 +14,15 @@ type FormatDateArgs = DateFormatOptions & {
  * @param args - The value and formatting options
  * @returns Formatted date string
  */
-export const formatDate = ({ locale, preset: presetOption, value }: FormatDateArgs): string => {
+export const formatDate = ({
+  locale,
+  preset: presetOption,
+  value,
+}: FormatDateArgs): string => {
   const date = parseDate(value);
 
   if (!date) {
-    return typeof value === "string" ? value : "";
+    return typeof value === 'string' ? value : '';
   }
 
   const resolvedLocale = locale ?? getDefaultLocale();

@@ -1,14 +1,14 @@
-import type { ChangeEvent, FocusEvent } from "react";
+import type { ChangeEvent, FocusEvent } from 'react';
 
-import * as stylex from "@stylexjs/stylex";
-import { useId, useState } from "react";
+import * as stylex from '@stylexjs/stylex';
+import { useId, useState } from 'react';
 
-import { CheckIcon } from "@/components/Icons";
-import { ICON_SIZE_XXS } from "@/design-system/constants";
+import { CheckIcon } from '@/components/Icons';
+import { ICON_SIZE_XXS } from '@/design-system/constants';
 
-import type { ToggleSwitchProps } from "./ToggleSwitch.types.ts";
+import type { ToggleSwitchProps } from './ToggleSwitch.types.ts';
 
-import { styles } from "./ToggleSwitch.stylex.ts";
+import { styles } from './ToggleSwitch.stylex.ts';
 
 export const ToggleSwitch = ({
   isChecked,
@@ -57,15 +57,21 @@ export const ToggleSwitch = ({
           onBlur={handleBlur}
           onChange={handleChange}
           onFocus={handleFocus}
-          role="switch"
-          type="checkbox"
+          role='switch'
+          type='checkbox'
         />
-        <span {...stylex.props(styles.thumb, isChecked && styles.thumbChecked)} aria-hidden="true">
+        <span
+          {...stylex.props(styles.thumb, isChecked && styles.thumbChecked)}
+          aria-hidden='true'
+        >
           {isChecked && <CheckIcon size={ICON_SIZE_XXS} />}
         </span>
       </label>
       {label && (
-        <label {...stylex.props(styles.label, isDisabled && styles.labelDisabled)} htmlFor={id}>
+        <label
+          {...stylex.props(styles.label, isDisabled && styles.labelDisabled)}
+          htmlFor={id}
+        >
           {label}
         </label>
       )}

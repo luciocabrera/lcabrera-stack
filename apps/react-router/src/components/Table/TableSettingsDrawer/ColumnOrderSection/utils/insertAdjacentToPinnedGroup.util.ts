@@ -1,10 +1,10 @@
-import type { ColumnPinningState } from "@/components/Table/Table.types";
+import type { ColumnPinningState } from '@/components/Table/Table.types';
 
 type InsertAdjacentToPinnedGroupArgs = {
   readonly columnKey: string;
   readonly columnPinning: ColumnPinningState;
   readonly order: readonly string[];
-  readonly side: "left" | "right";
+  readonly side: 'left' | 'right';
 };
 
 /**
@@ -21,7 +21,7 @@ export const insertAdjacentToPinnedGroup = ({
 }: InsertAdjacentToPinnedGroupArgs): string[] => {
   const nextOrder = [...order];
 
-  if (side === "left") {
+  if (side === 'left') {
     let lastLeftPinnedIndex = -1;
     for (const [i, key] of nextOrder.entries()) {
       if (columnPinning.left.includes(key)) {
@@ -30,8 +30,11 @@ export const insertAdjacentToPinnedGroup = ({
     }
     nextOrder.splice(lastLeftPinnedIndex + 1, 0, columnKey);
   } else {
-    const firstRightPinnedIndex = nextOrder.findIndex((key) => columnPinning.right.includes(key));
-    const insertAt = firstRightPinnedIndex === -1 ? nextOrder.length : firstRightPinnedIndex;
+    const firstRightPinnedIndex = nextOrder.findIndex((key) =>
+      columnPinning.right.includes(key),
+    );
+    const insertAt =
+      firstRightPinnedIndex === -1 ? nextOrder.length : firstRightPinnedIndex;
     nextOrder.splice(insertAt, 0, columnKey);
   }
 

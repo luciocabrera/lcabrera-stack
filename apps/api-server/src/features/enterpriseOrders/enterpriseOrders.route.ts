@@ -1,10 +1,10 @@
-import { Router } from "express";
-import type { Pool } from "pg";
+import { Router } from 'express';
+import type { Pool } from 'pg';
 
-import type { EnvConfig } from "../../config/env.schema";
+import type { EnvConfig } from '../../config/env.schema';
 
-import { createEnterpriseOrdersController } from "./enterpriseOrders.controller";
-import { createEnterpriseOrdersRepository } from "./enterpriseOrders.repository";
+import { createEnterpriseOrdersController } from './enterpriseOrders.controller';
+import { createEnterpriseOrdersRepository } from './enterpriseOrders.repository';
 
 type CreateEnterpriseOrdersRouteArgs = {
   readonly envConfig: EnvConfig;
@@ -26,9 +26,9 @@ export const createEnterpriseOrdersRoute = ({
     repository,
   });
 
-  router.get("/paginated", controller.getPaginated);
-  router.get("/distinct/:columnName", controller.getDistinctValues);
-  router.get("/:orderId", controller.getOrderById);
+  router.get('/paginated', controller.getPaginated);
+  router.get('/distinct/:columnName', controller.getDistinctValues);
+  router.get('/:orderId', controller.getOrderById);
 
   return router;
 };

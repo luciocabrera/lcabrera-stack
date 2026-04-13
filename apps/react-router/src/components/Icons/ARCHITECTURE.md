@@ -220,7 +220,7 @@ Each icon folder exposes exactly one component through its local `index.ts`.
 Example structure:
 
 ```ts
-export { InfoIcon } from "./InfoIcon.component";
+export { InfoIcon } from './InfoIcon.component';
 ```
 
 ### Root barrel
@@ -230,7 +230,7 @@ The root `index.ts` aggregates all icon folders into one public import surface.
 Example usage:
 
 ```tsx
-import { HomeIcon, SettingsIcon } from "@/components/Icons";
+import { HomeIcon, SettingsIcon } from '@/components/Icons';
 ```
 
 This keeps consumer imports stable and avoids long per-icon file paths.

@@ -1,3 +1,4 @@
-import { useDataStore } from "../useDataStore.hook.ts";
+import { useDataStore } from '../useDataStore.hook.ts';
 
-export const useGetTableIsLoadingMore = () => useDataStore<boolean>((state) => state.isLoadingMore);
+export const useGetTableIsLoadingMore = () =>
+  useDataStore<boolean>((state) => state.isLoadingMore);

@@ -1,6 +1,6 @@
-import type { RefObject } from "react";
+import type { RefObject } from 'react';
 
-import { useEffect } from "react";
+import { useEffect } from 'react';
 
 type UseClickOutsideArgs = {
   readonly onClickOutside: () => void;
@@ -10,7 +10,10 @@ type UseClickOutsideArgs = {
 /**
  * Calls `onClickOutside` when a mousedown occurs outside the referenced element.
  */
-export const useClickOutside = ({ onClickOutside, ref }: UseClickOutsideArgs): void => {
+export const useClickOutside = ({
+  onClickOutside,
+  ref,
+}: UseClickOutsideArgs): void => {
   useEffect(() => {
     const handleMouseDown = (event: MouseEvent) => {
       if (ref.current && !ref.current.contains(event.target as Node)) {
@@ -18,10 +21,10 @@ export const useClickOutside = ({ onClickOutside, ref }: UseClickOutsideArgs): v
       }
     };
 
-    document.addEventListener("mousedown", handleMouseDown);
+    document.addEventListener('mousedown', handleMouseDown);
 
     return () => {
-      document.removeEventListener("mousedown", handleMouseDown);
+      document.removeEventListener('mousedown', handleMouseDown);
     };
   }, [onClickOutside, ref]);
 };

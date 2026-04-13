@@ -1,8 +1,13 @@
-import type { FilterOptionsResponse, TableColumn } from "@/components/Table/Table.types";
+import type {
+  FilterOptionsResponse,
+  TableColumn,
+} from '@/components/Table/Table.types';
 
 type StaticFilterOptions<TData> = Pick<
   TableColumn<TData>,
-  "fetchFilterOptions" | "filterOptionsDataSelector" | "filterOptionsDataTotalSelector"
+  | 'fetchFilterOptions'
+  | 'filterOptionsDataSelector'
+  | 'filterOptionsDataTotalSelector'
 >;
 
 /**
@@ -22,7 +27,9 @@ type StaticFilterOptions<TData> = Pick<
  * }
  * ```
  */
-export const createStaticFilterOptions = <TData>(values: string[]): StaticFilterOptions<TData> => ({
+export const createStaticFilterOptions = <TData>(
+  values: string[],
+): StaticFilterOptions<TData> => ({
   fetchFilterOptions: ({
     limit,
     skip,
@@ -36,7 +43,8 @@ export const createStaticFilterOptions = <TData>(values: string[]): StaticFilter
       values: sliced,
     });
   },
-  filterOptionsDataSelector: (response: FilterOptionsResponse) => response.values,
+  filterOptionsDataSelector: (response: FilterOptionsResponse) =>
+    response.values,
   filterOptionsDataTotalSelector: (response: FilterOptionsResponse) =>
     response.hasMore ? Infinity : response.values.length,
 });

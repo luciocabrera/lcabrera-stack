@@ -1,6 +1,6 @@
-import * as stylex from "@stylexjs/stylex";
+import * as stylex from '@stylexjs/stylex';
 
-import { shadows } from "@/design-system/tokens/base.stylex";
+import { shadows } from '@/design-system/tokens/base.stylex';
 import {
   baseInteractiveStyles,
   colorVariants,
@@ -8,17 +8,17 @@ import {
   rippleBase,
   sizeVariants,
   widthVariants,
-} from "@/design-system/tokens/commons.stylex";
+} from '@/design-system/tokens/commons.stylex';
 
 const buttonSpecificStyles = stylex.create({
   button: {
-    containerName: "button",
+    containerName: 'button',
     cursor: {
-      default: "pointer",
-      ":disabled": "not-allowed",
+      default: 'pointer',
+      ':disabled': 'not-allowed',
     },
     opacity: {
-      ":disabled": 0.6,
+      ':disabled': 0.6,
     },
   },
 });

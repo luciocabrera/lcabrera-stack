@@ -1,14 +1,18 @@
-import * as stylex from "@stylexjs/stylex";
+import * as stylex from '@stylexjs/stylex';
 
-import { borderRadius, spacing, typography } from "@/design-system/tokens/base.stylex";
-import { colors } from "@/design-system/tokens/colors.stylex";
+import {
+  borderRadius,
+  spacing,
+  typography,
+} from '@/design-system/tokens/base.stylex';
+import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const styles = stylex.create({
   badge: {
     borderRadius: borderRadius.sm,
     paddingBlock: spacing.xxs,
     paddingInline: spacing.xs,
-    display: "inline-block",
+    display: 'inline-block',
     fontSize: typography.fontSizeXs,
     fontWeight: typography.fontWeightMedium,
     lineHeight: 1,
@@ -27,17 +31,17 @@ export const styles = stylex.create({
   },
   container: {
     gap: 0,
-    display: "flex",
-    flexDirection: "column",
+    display: 'flex',
+    flexDirection: 'column',
   },
   item: {
     paddingBlock: spacing.sm,
     paddingInline: spacing.xs,
-    alignItems: "center",
-    display: "flex",
-    justifyContent: "space-between",
+    alignItems: 'center',
+    display: 'flex',
+    justifyContent: 'space-between',
     borderBottomColor: colors.borderPrimary,
-    borderBottomStyle: "solid",
+    borderBottomStyle: 'solid',
     borderBottomWidth: 1,
   },
   itemLast: {
@@ -47,8 +51,8 @@ export const styles = stylex.create({
     color: colors.textSecondary,
     fontSize: typography.fontSizeXs,
     fontWeight: typography.fontWeightMedium,
-    letterSpacing: "0.03em",
-    textTransform: "uppercase",
+    letterSpacing: '0.03em',
+    textTransform: 'uppercase',
   },
   mono: {
     fontFamily: typography.fontFamilyMono,
@@ -58,6 +62,6 @@ export const styles = stylex.create({
     color: colors.textPrimary,
     fontSize: typography.fontSizeSm,
     fontWeight: typography.fontWeightMedium,
-    textAlign: "right",
+    textAlign: 'right',
   },
 });

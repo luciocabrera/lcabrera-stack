@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
 
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react';
 
-import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { cleanup, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { TableBodyRows } from "./TableBodyRows.component.tsx";
+import { TableBodyRows } from './TableBodyRows.component.tsx';
 
 type MockTableBodyCellProps = {
   readonly children?: ReactNode;
@@ -41,33 +41,33 @@ function MockTableRow({ children }: { readonly children: ReactNode }) {
   return <tr>{children}</tr>;
 }
 
-vi.mock("@/components/Table/contexts/TableConfig/columns/selectors", () => ({
+vi.mock('@/components/Table/contexts/TableConfig/columns/selectors', () => ({
   useGetColumnGroups: useGetColumnGroupsMock,
   useGetColumnSizing: useGetColumnSizingMock,
   useGetPinnedColumnOffsets: useGetPinnedColumnOffsetsMock,
 }));
 
-vi.mock("@/components/Table/TableBodyCell", () => ({
+vi.mock('@/components/Table/TableBodyCell', () => ({
   TableBodyCell: MockTableBodyCell,
 }));
 
-vi.mock("@/components/Table/TableRow", () => ({
+vi.mock('@/components/Table/TableRow', () => ({
   TableRow: MockTableRow,
 }));
 
-vi.mock("@/utils/performance", () => ({
+vi.mock('@/utils/performance', () => ({
   useRenderTracker: useRenderTrackerMock,
 }));
 
-vi.mock("../contexts/TableData/data/selectors", () => ({
+vi.mock('../contexts/TableData/data/selectors', () => ({
   useGetTableData: useGetTableDataMock,
 }));
 
 const setupDefaultMocks = () => {
   useGetColumnGroupsMock.mockReturnValue({
     centerCols: [
-      { key: "name", label: "Name" },
-      { key: "amount", label: "Amount" },
+      { key: 'name', label: 'Name' },
+      { key: 'amount', label: 'Amount' },
     ],
     leftPinnedCols: [],
     rightPinnedCols: [],
@@ -75,16 +75,16 @@ const setupDefaultMocks = () => {
   useGetColumnSizingMock.mockReturnValue({});
   useGetPinnedColumnOffsetsMock.mockReturnValue({});
   useGetTableDataMock.mockReturnValue([
-    { amount: 10, name: "A" },
-    { amount: 20, name: "B" },
-    { amount: 30, name: "C" },
+    { amount: 10, name: 'A' },
+    { amount: 20, name: 'B' },
+    { amount: 30, name: 'C' },
   ]);
 };
 
-describe("TableBodyRows", () => {
+describe('TableBodyRows', () => {
   afterEach(cleanup);
 
-  it("renders visible rows from startIndex to endIndex", () => {
+  it('renders visible rows from startIndex to endIndex', () => {
     setupDefaultMocks();
 
     render(
@@ -95,19 +95,20 @@ describe("TableBodyRows", () => {
       </table>,
     );
 
-    expect(screen.getByText("Name:A").textContent).toBe("Name:A");
-    expect(screen.getByText("Amount:10").textContent).toBe("Amount:10");
-    expect(screen.getByText("Name:B").textContent).toBe("Name:B");
-    expect(screen.queryByText("Name:C")).toBeNull();
+    expect(screen.getByText('Name:A').textContent).toBe('Name:A');
+    expect(screen.getByText('Amount:10').textContent).toBe('Amount:10');
+    expect(screen.getByText('Name:B').textContent).toBe('Name:B');
+    expect(screen.queryByText('Name:C')).toBeNull();
   });
 
-  it("uses custom column render when provided", () => {
+  it('uses custom column render when provided', () => {
     useGetColumnGroupsMock.mockReturnValue({
       centerCols: [
         {
-          key: "name",
-          label: "Name",
-          render: (row: Record<string, unknown>) => `custom:${String(row.name)}`,
+          key: 'name',
+          label: 'Name',
+          render: (row: Record<string, unknown>) =>
+            `custom:${String(row.name)}`,
         },
       ],
       leftPinnedCols: [],
@@ -115,7 +116,7 @@ describe("TableBodyRows", () => {
     });
     useGetColumnSizingMock.mockReturnValue({});
     useGetPinnedColumnOffsetsMock.mockReturnValue({});
-    useGetTableDataMock.mockReturnValue([{ name: "Z" }]);
+    useGetTableDataMock.mockReturnValue([{ name: 'Z' }]);
 
     render(
       <table>
@@ -125,18 +126,20 @@ describe("TableBodyRows", () => {
       </table>,
     );
 
-    expect(screen.getByText("custom:Z").textContent).toBe("custom:Z");
+    expect(screen.getByText('custom:Z').textContent).toBe('custom:Z');
   });
 
-  it("renders cells for pinned and center column groups", () => {
+  it('renders cells for pinned and center column groups', () => {
     useGetColumnGroupsMock.mockReturnValue({
-      centerCols: [{ key: "name", label: "Name" }],
-      leftPinnedCols: [{ key: "id", label: "ID" }],
-      rightPinnedCols: [{ key: "status", label: "Status" }],
+      centerCols: [{ key: 'name', label: 'Name' }],
+      leftPinnedCols: [{ key: 'id', label: 'ID' }],
+      rightPinnedCols: [{ key: 'status', label: 'Status' }],
     });
     useGetColumnSizingMock.mockReturnValue({});
     useGetPinnedColumnOffsetsMock.mockReturnValue({});
-    useGetTableDataMock.mockReturnValue([{ id: 1, name: "A", status: "active" }]);
+    useGetTableDataMock.mockReturnValue([
+      { id: 1, name: 'A', status: 'active' },
+    ]);
 
     render(
       <table>
@@ -146,8 +149,8 @@ describe("TableBodyRows", () => {
       </table>,
     );
 
-    expect(screen.getByText("ID:1")).toBeTruthy();
-    expect(screen.getByText("Name:A")).toBeTruthy();
-    expect(screen.getByText("Status:active")).toBeTruthy();
+    expect(screen.getByText('ID:1')).toBeTruthy();
+    expect(screen.getByText('Name:A')).toBeTruthy();
+    expect(screen.getByText('Status:active')).toBeTruthy();
   });
 });

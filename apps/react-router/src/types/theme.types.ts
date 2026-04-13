@@ -11,4 +11,4 @@ export type ThemeContextValue = {
 /**
  * Theme mode type
  */
-export type ThemeMode = "dark" | "light";
+export type ThemeMode = 'dark' | 'light';

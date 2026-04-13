@@ -170,6 +170,9 @@ importers:
 
   apps/api-server:
     dependencies:
+      api-shared:
+        specifier: workspace:*
+        version: link:../shared
       cors:
         specifier: 'catalog:'
         version: 2.8.6
@@ -207,6 +210,9 @@ importers:
       '@fastify/cors':
         specifier: 'catalog:'
         version: 11.2.0
+      api-shared:
+        specifier: workspace:*
+        version: link:../shared
       fastify:
         specifier: 'catalog:'
         version: 5.8.4
@@ -353,6 +359,8 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: '@voidzero-dev/vite-plus-test@0.1.16(@types/node@25.6.0)(@voidzero-dev/vite-plus-core@0.1.16(@types/node@25.6.0)(jiti@2.6.1)(typescript@6.0.2)(yaml@2.8.3))(jiti@2.6.1)(jsdom@29.0.2)(typescript@6.0.2)(yaml@2.8.3)'
+
+  apps/shared: {}
 
 packages:
 

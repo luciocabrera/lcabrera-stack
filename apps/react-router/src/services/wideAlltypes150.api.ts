@@ -1,4 +1,4 @@
-import { getApiBaseUrl } from "@/utils/api";
+import { getApiBaseUrl } from '@/utils/api';
 
 /**
  * Wide All-Types 150 API Service
@@ -182,7 +182,7 @@ type FetchWideAlltypes150Params = {
   readonly skip: number;
   readonly sorting?: readonly {
     readonly columnKey: keyof WideAlltypes150;
-    readonly direction: "asc" | "desc";
+    readonly direction: 'asc' | 'desc';
   }[];
 };
 
@@ -209,7 +209,7 @@ export const wideAlltypes150Api = {
     });
 
     if (sorting && sorting.length > 0) {
-      params.append("sort", JSON.stringify(sorting));
+      params.append('sort', JSON.stringify(sorting));
     }
 
     const url = `${getApiBaseUrl(requestUrl)}/wide-alltypes-150/paginated?${params.toString()}`;
@@ -217,7 +217,9 @@ export const wideAlltypes150Api = {
     const response = await fetch(url);
 
     if (!response.ok) {
-      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `API request failed: ${response.status} ${response.statusText}`,
+      );
     }
 
     return response.json() as Promise<WideAlltypes150Response>;

@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@fastify/cors": "catalog:",
+    "api-shared": "workspace:*",
     "fastify": "catalog:",
     "pg": "catalog:"
   },

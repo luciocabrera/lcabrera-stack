@@ -1,6 +1,9 @@
-import type { QueryValue } from "../../types/api.types";
+import type { QueryValue } from '../../types/api.types';
 
-import type { EnterpriseOrdersFilter, EnterpriseOrdersFilters } from "./enterpriseOrders.types";
+import type {
+  EnterpriseOrdersFilter,
+  EnterpriseOrdersFilters,
+} from './enterpriseOrders.types';
 
 type BuildWhereClauseResult = {
   readonly queryParams: readonly QueryValue[];
@@ -13,7 +16,7 @@ const appendTextFilter = ({
   nextParameterIndex,
 }: {
   readonly columnName: string;
-  readonly filter: Extract<EnterpriseOrdersFilter, { readonly type: "text" }>;
+  readonly filter: Extract<EnterpriseOrdersFilter, { readonly type: 'text' }>;
   readonly nextParameterIndex: number;
 }): {
   readonly condition?: string;
@@ -23,35 +26,35 @@ const appendTextFilter = ({
     return {};
   }
 
-  if (filter.operator === "contains") {
+  if (filter.operator === 'contains') {
     return {
       condition: `${columnName} ILIKE $${nextParameterIndex}`,
       value: `%${filter.value}%`,
     };
   }
 
-  if (filter.operator === "endsWith") {
+  if (filter.operator === 'endsWith') {
     return {
       condition: `${columnName} ILIKE $${nextParameterIndex}`,
       value: `%${filter.value}`,
     };
   }
 
-  if (filter.operator === "equals") {
+  if (filter.operator === 'equals') {
     return {
       condition: `${columnName} = $${nextParameterIndex}`,
       value: filter.value,
     };
   }
 
-  if (filter.operator === "notContains") {
+  if (filter.operator === 'notContains') {
     return {
       condition: `${columnName} NOT ILIKE $${nextParameterIndex}`,
       value: `%${filter.value}%`,
     };
   }
 
-  if (filter.operator === "notEquals") {
+  if (filter.operator === 'notEquals') {
     return {
       condition: `${columnName} != $${nextParameterIndex}`,
       value: filter.value,
@@ -76,7 +79,7 @@ export const buildEnterpriseOrdersWhereClause = (
   for (const [columnName, filter] of Object.entries(filters)) {
     const nextParameterIndex = queryParams.length + 1;
 
-    if (filter.type === "text") {
+    if (filter.type === 'text') {
       const textFilter = appendTextFilter({
         columnName,
         filter,
@@ -91,8 +94,8 @@ export const buildEnterpriseOrdersWhereClause = (
       continue;
     }
 
-    if (filter.type === "number") {
-      if (filter.operator === "between" && filter.value2 !== undefined) {
+    if (filter.type === 'number') {
+      if (filter.operator === 'between' && filter.value2 !== undefined) {
         whereConditions.push(
           `${columnName} BETWEEN $${nextParameterIndex} AND $${nextParameterIndex + 1}`,
         );
@@ -100,27 +103,27 @@ export const buildEnterpriseOrdersWhereClause = (
         continue;
       }
 
-      if (filter.operator === "equals") {
+      if (filter.operator === 'equals') {
         whereConditions.push(`${columnName} = $${nextParameterIndex}`);
       }
 
-      if (filter.operator === "greaterThan") {
+      if (filter.operator === 'greaterThan') {
         whereConditions.push(`${columnName} > $${nextParameterIndex}`);
       }
 
-      if (filter.operator === "greaterThanOrEqual") {
+      if (filter.operator === 'greaterThanOrEqual') {
         whereConditions.push(`${columnName} >= $${nextParameterIndex}`);
       }
 
-      if (filter.operator === "lessThan") {
+      if (filter.operator === 'lessThan') {
         whereConditions.push(`${columnName} < $${nextParameterIndex}`);
       }
 
-      if (filter.operator === "lessThanOrEqual") {
+      if (filter.operator === 'lessThanOrEqual') {
         whereConditions.push(`${columnName} <= $${nextParameterIndex}`);
       }
 
-      if (filter.operator === "notEquals") {
+      if (filter.operator === 'notEquals') {
         whereConditions.push(`${columnName} != $${nextParameterIndex}`);
       }
 
@@ -128,20 +131,20 @@ export const buildEnterpriseOrdersWhereClause = (
       continue;
     }
 
-    if (filter.type === "date") {
-      if (filter.operator === "after") {
+    if (filter.type === 'date') {
+      if (filter.operator === 'after') {
         whereConditions.push(`${columnName} > $${nextParameterIndex}::date`);
         queryParams.push(filter.value);
         continue;
       }
 
-      if (filter.operator === "before") {
+      if (filter.operator === 'before') {
         whereConditions.push(`${columnName} < $${nextParameterIndex}::date`);
         queryParams.push(filter.value);
         continue;
       }
 
-      if (filter.operator === "between" && filter.value2) {
+      if (filter.operator === 'between' && filter.value2) {
         whereConditions.push(
           `${columnName} BETWEEN $${nextParameterIndex}::date AND $${nextParameterIndex + 1}::date`,
         );
@@ -154,7 +157,7 @@ export const buildEnterpriseOrdersWhereClause = (
       continue;
     }
 
-    if (filter.type === "boolean") {
+    if (filter.type === 'boolean') {
       whereConditions.push(`${columnName} = $${nextParameterIndex}`);
       queryParams.push(filter.value);
       continue;
@@ -163,15 +166,15 @@ export const buildEnterpriseOrdersWhereClause = (
     if (filter.values && filter.values.length > 0) {
       const placeholders = filter.values
         .map((_value, index) => `$${nextParameterIndex + index}`)
-        .join(", ");
-      const operator = filter.operator === "notEquals" ? "NOT IN" : "IN";
+        .join(', ');
+      const operator = filter.operator === 'notEquals' ? 'NOT IN' : 'IN';
       whereConditions.push(`${columnName} ${operator} (${placeholders})`);
       queryParams.push(...filter.values);
       continue;
     }
 
     if (filter.value) {
-      const operator = filter.operator === "notEquals" ? "!=" : "=";
+      const operator = filter.operator === 'notEquals' ? '!=' : '=';
       whereConditions.push(`${columnName} ${operator} $${nextParameterIndex}`);
       queryParams.push(filter.value);
     }
@@ -180,12 +183,12 @@ export const buildEnterpriseOrdersWhereClause = (
   if (whereConditions.length === 0) {
     return {
       queryParams,
-      whereClause: "",
+      whereClause: '',
     };
   }
 
   return {
     queryParams,
-    whereClause: `WHERE ${whereConditions.join(" AND ")}`,
+    whereClause: `WHERE ${whereConditions.join(' AND ')}`,
   };
 };

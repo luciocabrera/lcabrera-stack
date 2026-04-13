@@ -1,7 +1,7 @@
 /* oxlint-disable @typescript-eslint/no-unsafe-assignment */
 
 /* eslint-disable @stylexjs/valid-styles */
-import * as stylex from "@stylexjs/stylex";
+import * as stylex from '@stylexjs/stylex';
 
 import {
   borderRadius,
@@ -11,69 +11,69 @@ import {
   tooltip,
   transitions,
   typography,
-} from "@/design-system/tokens/base.stylex";
-import { colors } from "@/design-system/tokens/colors.stylex";
+} from '@/design-system/tokens/base.stylex';
+import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const styles = stylex.create({
   trigger: (anchorName: string) => ({
     anchorName,
-    display: "inline-flex",
+    display: 'inline-flex',
   }),
   tooltip: (positionAnchor: string) => ({
     positionAnchor,
-    inset: "unset",
+    inset: 'unset',
     margin: 0,
-    borderColor: "transparent",
+    borderColor: 'transparent',
     borderRadius: borderRadius.sm,
-    borderStyle: "none",
+    borderStyle: 'none',
     borderWidth: 0,
-    overflow: "visible",
+    overflow: 'visible',
     paddingBlock: spacing.sm,
     paddingInline: spacing.sm,
     transition: `opacity ${transitions.fast} ${easing.easeInOut}, transform ${transitions.fast} ${easing.easeInOut}`,
-    backdropFilter: "blur(8px)",
+    backdropFilter: 'blur(8px)',
     backgroundColor: colors.surfaceElevated,
     boxShadow: shadows.md,
     color: colors.textPrimary,
     fontSize: typography.fontSizeXs,
-    justifySelf: "anchor-center",
+    justifySelf: 'anchor-center',
     lineHeight: typography.lineHeightTight,
     opacity: 0,
-    pointerEvents: "none",
-    whiteSpace: "pre-line",
-    wordWrap: "break-word",
-    maxWidth: "16rem",
+    pointerEvents: 'none',
+    whiteSpace: 'pre-line',
+    wordWrap: 'break-word',
+    maxWidth: '16rem',
   }),
   tooltipVisible: {
     opacity: 1,
-    transform: "translate(0, 0)",
+    transform: 'translate(0, 0)',
   },
   arrow: {
     backgroundColor: colors.surfaceElevated,
-    position: "absolute",
-    transform: "rotate(45deg)",
+    position: 'absolute',
+    transform: 'rotate(45deg)',
     height: tooltip.arrowSize,
     width: tooltip.arrowSize,
   },
   arrowTop: {
     bottom: tooltip.arrowOffset,
-    left: "50%",
+    left: '50%',
     marginLeft: tooltip.arrowOffset,
   },
   arrowBottom: {
-    left: "50%",
+    left: '50%',
     marginLeft: tooltip.arrowOffset,
     top: tooltip.arrowOffset,
   },
   arrowLeft: {
     marginTop: tooltip.arrowOffset,
     right: tooltip.arrowOffset,
-    top: "50%",
+    top: '50%',
   },
   arrowRight: {
     left: tooltip.arrowOffset,
     marginTop: tooltip.arrowOffset,
-    top: "50%",
+    top: '50%',
   },
   arrowPositionHorizontal: (offset: number) => ({
     left: `${offset}px`,
@@ -84,22 +84,22 @@ export const styles = stylex.create({
     top: `${offset}px`,
   }),
   top: {
-    positionArea: "top",
+    positionArea: 'top',
     transform: `translateY(${tooltip.slideDistance})`,
     marginBottom: spacing.xs,
   },
   bottom: {
-    positionArea: "bottom",
+    positionArea: 'bottom',
     transform: `translateY(calc(-1 * ${tooltip.slideDistance}))`,
     marginTop: spacing.xs,
   },
   left: {
-    positionArea: "left",
+    positionArea: 'left',
     transform: `translateX(${tooltip.slideDistance})`,
     marginRight: spacing.xs,
   },
   right: {
-    positionArea: "right",
+    positionArea: 'right',
     transform: `translateX(calc(-1 * ${tooltip.slideDistance}))`,
     marginLeft: spacing.xs,
   },

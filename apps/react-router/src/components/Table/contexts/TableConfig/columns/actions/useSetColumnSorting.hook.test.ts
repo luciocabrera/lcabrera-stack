@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 
-import { act, renderHook } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { act, renderHook } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useSetColumnSorting } from "./useSetColumnSorting.hook.ts";
+import { useSetColumnSorting } from './useSetColumnSorting.hook.ts';
 
 const {
   mockGetNormalizedColumns,
@@ -15,7 +15,7 @@ const {
   setColumnsState,
 } = vi.hoisted(() => {
   let columnsState = {
-    columns: [{ key: "status", label: "Status" }],
+    columns: [{ key: 'status', label: 'Status' }],
     sorting: [],
   };
 
@@ -27,7 +27,7 @@ const {
   };
 
   const mockMetaStore = {
-    get: vi.fn(() => ({ persistenceKey: "orders-table" })),
+    get: vi.fn(() => ({ persistenceKey: 'orders-table' })),
   };
 
   const mockDataStore = {
@@ -54,32 +54,38 @@ const {
   };
 });
 
-vi.mock("@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook", () => ({
-  useTableConfigContextValue: mockUseTableConfigContextValue,
-}));
+vi.mock(
+  '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
+  () => ({
+    useTableConfigContextValue: mockUseTableConfigContextValue,
+  }),
+);
 
-vi.mock("@/components/Table/contexts/TableData/data/useTableDataContextValue.hook", () => ({
-  useTableDataContextValue: mockUseTableDataContextValue,
-}));
+vi.mock(
+  '@/components/Table/contexts/TableData/data/useTableDataContextValue.hook',
+  () => ({
+    useTableDataContextValue: mockUseTableDataContextValue,
+  }),
+);
 
-vi.mock("@/components/Table/hooks", () => ({
+vi.mock('@/components/Table/hooks', () => ({
   usePersistTableStateAction: mockUsePersistTableStateAction,
 }));
 
-vi.mock("@/components/Table/utils", () => ({
+vi.mock('@/components/Table/utils', () => ({
   getNormalizedColumns: mockGetNormalizedColumns,
 }));
 
-vi.mock("@/utils/urlState", () => ({
+vi.mock('@/utils/urlState', () => ({
   serializeSortingToURL: mockSerializeSortingToURL,
 }));
 
-describe("useSetColumnSorting", () => {
+describe('useSetColumnSorting', () => {
   beforeEach(() => {
     setColumnsState({
       columns: [
-        { key: "priority", label: "Priority" },
-        { key: "status", label: "Status" },
+        { key: 'priority', label: 'Priority' },
+        { key: 'status', label: 'Status' },
       ],
       sorting: [],
     });
@@ -88,7 +94,7 @@ describe("useSetColumnSorting", () => {
     mockGetNormalizedColumns.mockClear();
   });
 
-  it("reads the latest sorting state on every invocation", () => {
+  it('reads the latest sorting state on every invocation', () => {
     const { result } = renderHook(() =>
       useSetColumnSorting<{
         readonly priority: string;
@@ -98,29 +104,29 @@ describe("useSetColumnSorting", () => {
 
     act(() => {
       result.current({
-        columnKey: "status",
-        direction: "asc",
+        columnKey: 'status',
+        direction: 'asc',
       });
     });
 
     act(() => {
       result.current({
-        columnKey: "priority",
-        direction: "desc",
+        columnKey: 'priority',
+        direction: 'desc',
       });
     });
 
     expect(mockPersistTableState).toHaveBeenLastCalledWith({
-      persistenceKey: "orders-table",
-      searchParamKey: "sort",
+      persistenceKey: 'orders-table',
+      searchParamKey: 'sort',
       searchParamValue: JSON.stringify([
-        { columnKey: "status", direction: "asc" },
-        { columnKey: "priority", direction: "desc" },
+        { columnKey: 'status', direction: 'asc' },
+        { columnKey: 'priority', direction: 'desc' },
       ]),
-      slice: "sorting",
+      slice: 'sorting',
       valueSlice: [
-        { columnKey: "status", direction: "asc" },
-        { columnKey: "priority", direction: "desc" },
+        { columnKey: 'status', direction: 'asc' },
+        { columnKey: 'priority', direction: 'desc' },
       ],
     });
   });

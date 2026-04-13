@@ -1,10 +1,12 @@
-import type { SortDirection } from "@/types/ui.types";
+import type { SortDirection } from '@/types/ui.types';
 
-export const getNextSortDirection = (currentDirection: SortDirection): SortDirection => {
+export const getNextSortDirection = (
+  currentDirection: SortDirection,
+): SortDirection => {
   // Cycle through: undefined -> asc -> desc -> undefined
-  if (currentDirection === undefined) return "asc";
+  if (currentDirection === undefined) return 'asc';
 
-  if (currentDirection === "asc") return "desc";
+  if (currentDirection === 'asc') return 'desc';
 
   return undefined;
 };

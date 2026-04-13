@@ -1,25 +1,28 @@
-import type { ComponentPropsWithoutRef, ReactNode } from "react";
+import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 
-import type { ButtonProps } from "@/components/Button/Button.types";
-import type { NavLinkProps } from "@/components/NavLink/NavLink.types";
-import type { DesignSystemOrientation, DesignSystemSize } from "@/types/design-system.types";
+import type { ButtonProps } from '@/components/Button/Button.types';
+import type { NavLinkProps } from '@/components/NavLink/NavLink.types';
+import type {
+  DesignSystemOrientation,
+  DesignSystemSize,
+} from '@/types/design-system.types';
 
-export type ToolbarButtonConfig = Omit<ButtonProps, "children" | "width"> & {
+export type ToolbarButtonConfig = Omit<ButtonProps, 'children' | 'width'> & {
   readonly icon?: ReactNode;
   readonly label: string;
-  readonly type: "button";
+  readonly type: 'button';
 };
 
 export type ToolbarItemConfig = ToolbarButtonConfig | ToolbarLinkConfig;
 
-export type ToolbarLinkConfig = Omit<NavLinkProps, "children" | "className"> & {
-  readonly color?: Pick<ButtonProps, "color">["color"];
+export type ToolbarLinkConfig = Omit<NavLinkProps, 'children' | 'className'> & {
+  readonly color?: Pick<ButtonProps, 'color'>['color'];
   readonly icon?: ReactNode;
   readonly label: string;
-  readonly type: "link";
+  readonly type: 'link';
 };
 
-export type ToolbarProps = ComponentPropsWithoutRef<"nav"> & {
+export type ToolbarProps = ComponentPropsWithoutRef<'nav'> & {
   readonly items: readonly ToolbarItemConfig[];
   readonly orientation?: DesignSystemOrientation;
   readonly size?: DesignSystemSize;

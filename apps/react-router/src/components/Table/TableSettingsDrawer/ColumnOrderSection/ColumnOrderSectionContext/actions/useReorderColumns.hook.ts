@@ -1,15 +1,15 @@
-import type { DraggableItem } from "@/components/DraggableList";
-import type { ColumnOrderState } from "@/components/Table/Table.types";
+import type { DraggableItem } from '@/components/DraggableList';
+import type { ColumnOrderState } from '@/components/Table/Table.types';
 
-import { useTableConfigContextValue } from "@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook";
+import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import {
   detectPinOrderConflict,
   recalculatePinSides,
   restoreStaticColumnOrder,
-} from "@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils";
-import { useTableDrawerContextValue } from "@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook";
+} from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
+import { useTableDrawerContextValue } from '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
 
-import { useColumnOrderSectionContextValue } from "../useColumnOrderSectionContextValue.hook.ts";
+import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook.ts';
 
 /**
  * Hook to handle column reordering via drag and drop.
@@ -23,7 +23,8 @@ export const useReorderColumns = () => {
 
   return (reorderedItems: DraggableItem[]) => {
     const drawerColumnsState = drawerColumnsStore.get();
-    const currentOrder = drawerColumnsState?.columnOrder ?? ([] as ColumnOrderState);
+    const currentOrder =
+      drawerColumnsState?.columnOrder ?? ([] as ColumnOrderState);
     const staticKeys = tableColumnsStore.get()?.staticKeys ?? new Set<string>();
 
     const finalOrder = restoreStaticColumnOrder({
@@ -60,7 +61,7 @@ export const useReorderColumns = () => {
     modalsStore.set({
       orderConflict: {
         description:
-          "Dragging this column broke the pinning layout. Pinned columns must stay at the edges. Choose how to proceed:",
+          'Dragging this column broke the pinning layout. Pinned columns must stay at the edges. Choose how to proceed:',
         isOpen: true,
         pendingOrder: finalOrder,
         pendingPinning: recalculatedPinning,

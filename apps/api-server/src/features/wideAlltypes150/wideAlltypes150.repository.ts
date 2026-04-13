@@ -1,10 +1,15 @@
-import type { Pool } from "pg";
+import type { Pool } from 'pg';
 
-import { buildOrderByClause } from "../../utils/buildOrderByClause.util";
-import { serializeDatabaseValue } from "../../utils/serializeDatabaseValue.util";
-import type { CountRow, DbRow, PaginatedResponse, SortRule } from "../../types/api.types";
+import { buildOrderByClause } from '../../utils/buildOrderByClause.util';
+import { serializeDatabaseValue } from 'api-shared/utils/serializeDatabaseValue.util';
+import type {
+  CountRow,
+  DbRow,
+  PaginatedResponse,
+  SortRule,
+} from '../../types/api.types';
 
-import { DEFAULT_WIDE_ALLTYPES_SORTING } from "./wideAlltypes150.constants";
+import { DEFAULT_WIDE_ALLTYPES_SORTING } from './wideAlltypes150.constants';
 
 export type WideAlltypes150Repository = {
   readonly getPaginated: (
@@ -39,11 +44,16 @@ export const createWideAlltypes150Repository = ({
     );
     const rows = dataResult.rows.map((row) =>
       Object.fromEntries(
-        Object.entries(row).map(([key, value]) => [key, serializeDatabaseValue(value)]),
+        Object.entries(row).map(([key, value]) => [
+          key,
+          serializeDatabaseValue(value),
+        ]),
       ),
     );
-    const countResult = await pool.query<CountRow>("SELECT COUNT(*) FROM wide_alltypes_150");
-    const total = Number.parseInt(countResult.rows[0]?.count ?? "0", 10);
+    const countResult = await pool.query<CountRow>(
+      'SELECT COUNT(*) FROM wide_alltypes_150',
+    );
+    const total = Number.parseInt(countResult.rows[0]?.count ?? '0', 10);
 
     return {
       data: rows,

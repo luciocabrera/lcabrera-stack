@@ -1,4 +1,4 @@
-import type { PinSide } from "@/types/ui.types";
+import type { PinSide } from '@/types/ui.types';
 
 export type PinSideModalProps = {
   readonly columnLabel: string;

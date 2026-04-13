@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
 
-import { act, renderHook } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { act, renderHook } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { LOAD_MORE_PAGE_SIZE } from "@/components/Table/Table.constants";
+import { LOAD_MORE_PAGE_SIZE } from '@/components/Table/Table.constants';
 
-import { useFetchMoreData } from "./useFetchMoreData.hook.ts";
+import { useFetchMoreData } from './useFetchMoreData.hook.ts';
 
 const {
   mockMetaStore,
@@ -53,11 +53,14 @@ const {
   };
 });
 
-vi.mock("@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook", () => ({
-  useTableConfigContextValue: mockUseTableConfigContextValue,
-}));
+vi.mock(
+  '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
+  () => ({
+    useTableConfigContextValue: mockUseTableConfigContextValue,
+  }),
+);
 
-vi.mock("../useTableDataContextValue.hook", () => ({
+vi.mock('../useTableDataContextValue.hook', () => ({
   useTableDataContextValue: mockUseTableDataContextValue,
 }));
 
@@ -72,7 +75,7 @@ const defaultSelectors = {
   dataTotalSelector: (response: TestResponse) => response.total,
 };
 
-describe("useFetchMoreData", () => {
+describe('useFetchMoreData', () => {
   beforeEach(() => {
     setDataStoreState({
       data: [{ id: 1 }],
@@ -89,7 +92,7 @@ describe("useFetchMoreData", () => {
     mockMetaStore.set.mockReset();
   });
 
-  it("uses the latest loaded row count and prevents overlapping fetches", async () => {
+  it('uses the latest loaded row count and prevents overlapping fetches', async () => {
     let resolveLoadMore: ((value: TestResponse) => void) | undefined;
 
     const onLoadMore = vi.fn(
@@ -99,7 +102,9 @@ describe("useFetchMoreData", () => {
         }),
     );
 
-    const { result } = renderHook(() => useFetchMoreData<TestRow, TestResponse>());
+    const { result } = renderHook(() =>
+      useFetchMoreData<TestRow, TestResponse>(),
+    );
 
     let firstPromise: Promise<void> | undefined;
     let secondPromise: Promise<void> | undefined;
@@ -142,12 +147,16 @@ describe("useFetchMoreData", () => {
     expect(onLoadMore).toHaveBeenCalledTimes(1);
   });
 
-  it("uses configurable page size from metaStore", async () => {
+  it('uses configurable page size from metaStore', async () => {
     setMetaStoreState({ enablePrefetch: false, loadMorePageSize: 25 });
 
-    const onLoadMore = vi.fn(() => Promise.resolve({ rows: [{ id: 2 }], total: 3 }));
+    const onLoadMore = vi.fn(() =>
+      Promise.resolve({ rows: [{ id: 2 }], total: 3 }),
+    );
 
-    const { result } = renderHook(() => useFetchMoreData<TestRow, TestResponse>());
+    const { result } = renderHook(() =>
+      useFetchMoreData<TestRow, TestResponse>(),
+    );
 
     await act(async () => {
       await result.current({ ...defaultSelectors, onLoadMore });
@@ -156,11 +165,15 @@ describe("useFetchMoreData", () => {
     expect(onLoadMore).toHaveBeenCalledWith({ limit: 25, skip: 1 });
   });
 
-  describe("prefetch", () => {
-    it("does not prefetch when enablePrefetch is false", async () => {
-      const onLoadMore = vi.fn(() => Promise.resolve({ rows: [{ id: 2 }], total: 3 }));
+  describe('prefetch', () => {
+    it('does not prefetch when enablePrefetch is false', async () => {
+      const onLoadMore = vi.fn(() =>
+        Promise.resolve({ rows: [{ id: 2 }], total: 3 }),
+      );
 
-      const { result } = renderHook(() => useFetchMoreData<TestRow, TestResponse>());
+      const { result } = renderHook(() =>
+        useFetchMoreData<TestRow, TestResponse>(),
+      );
 
       await act(async () => {
         await result.current({ ...defaultSelectors, onLoadMore });
@@ -170,12 +183,16 @@ describe("useFetchMoreData", () => {
       expect(onLoadMore).toHaveBeenCalledTimes(1);
     });
 
-    it("fires a prefetch request after fetch completes when enabled and hasMore", async () => {
+    it('fires a prefetch request after fetch completes when enabled and hasMore', async () => {
       setMetaStoreState({ enablePrefetch: true, loadMorePageSize: 50 });
 
-      const onLoadMore = vi.fn(() => Promise.resolve({ rows: [{ id: 2 }], total: 5 }));
+      const onLoadMore = vi.fn(() =>
+        Promise.resolve({ rows: [{ id: 2 }], total: 5 }),
+      );
 
-      const { result } = renderHook(() => useFetchMoreData<TestRow, TestResponse>());
+      const { result } = renderHook(() =>
+        useFetchMoreData<TestRow, TestResponse>(),
+      );
 
       await act(async () => {
         await result.current({ ...defaultSelectors, onLoadMore });
@@ -187,12 +204,16 @@ describe("useFetchMoreData", () => {
       expect(onLoadMore).toHaveBeenNthCalledWith(2, { limit: 50, skip: 2 });
     });
 
-    it("does not prefetch when hasMore becomes false", async () => {
+    it('does not prefetch when hasMore becomes false', async () => {
       setMetaStoreState({ enablePrefetch: true, loadMorePageSize: 50 });
 
-      const onLoadMore = vi.fn(() => Promise.resolve({ rows: [{ id: 2 }, { id: 3 }], total: 3 }));
+      const onLoadMore = vi.fn(() =>
+        Promise.resolve({ rows: [{ id: 2 }, { id: 3 }], total: 3 }),
+      );
 
-      const { result } = renderHook(() => useFetchMoreData<TestRow, TestResponse>());
+      const { result } = renderHook(() =>
+        useFetchMoreData<TestRow, TestResponse>(),
+      );
 
       await act(async () => {
         await result.current({ ...defaultSelectors, onLoadMore });
@@ -202,16 +223,20 @@ describe("useFetchMoreData", () => {
       expect(onLoadMore).toHaveBeenCalledTimes(1);
     });
 
-    it("uses cached prefetch data on next scroll (cache hit)", async () => {
+    it('uses cached prefetch data on next scroll (cache hit)', async () => {
       setMetaStoreState({ enablePrefetch: true, loadMorePageSize: 50 });
 
       const prefetchResponse: TestResponse = { rows: [{ id: 3 }], total: 5 };
       const onLoadMore = vi
-        .fn<(params: { limit: number; skip: number }) => Promise<TestResponse>>()
+        .fn<
+          (params: { limit: number; skip: number }) => Promise<TestResponse>
+        >()
         .mockResolvedValueOnce({ rows: [{ id: 2 }], total: 5 })
         .mockResolvedValueOnce(prefetchResponse);
 
-      const { result } = renderHook(() => useFetchMoreData<TestRow, TestResponse>());
+      const { result } = renderHook(() =>
+        useFetchMoreData<TestRow, TestResponse>(),
+      );
 
       // First fetch triggers prefetch
       await act(async () => {
@@ -241,16 +266,20 @@ describe("useFetchMoreData", () => {
       expect(onLoadMore).toHaveBeenCalledTimes(3);
     });
 
-    it("silently discards failed prefetch and falls back to normal fetch", async () => {
+    it('silently discards failed prefetch and falls back to normal fetch', async () => {
       setMetaStoreState({ enablePrefetch: true, loadMorePageSize: 50 });
 
       const onLoadMore = vi
-        .fn<(params: { limit: number; skip: number }) => Promise<TestResponse>>()
+        .fn<
+          (params: { limit: number; skip: number }) => Promise<TestResponse>
+        >()
         .mockResolvedValueOnce({ rows: [{ id: 2 }], total: 5 })
-        .mockRejectedValueOnce(new Error("prefetch failed"))
+        .mockRejectedValueOnce(new Error('prefetch failed'))
         .mockResolvedValueOnce({ rows: [{ id: 3 }], total: 5 });
 
-      const { result } = renderHook(() => useFetchMoreData<TestRow, TestResponse>());
+      const { result } = renderHook(() =>
+        useFetchMoreData<TestRow, TestResponse>(),
+      );
 
       // First fetch triggers prefetch (which will fail)
       await act(async () => {

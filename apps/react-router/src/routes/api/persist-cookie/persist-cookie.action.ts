@@ -1,8 +1,8 @@
-import type { ActionFunctionArgs } from "react-router";
+import type { ActionFunctionArgs } from 'react-router';
 
-import { redirect } from "react-router";
+import { redirect } from 'react-router';
 
-import { buildCookieString } from "@/utils/storage/buildCookieString.util";
+import { buildCookieString } from '@/utils/storage/buildCookieString.util';
 
 type CookieEntry = {
   key: string;
@@ -21,11 +21,11 @@ type CookieEntry = {
  */
 export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
-  const currentUrl = formData.get("currentUrl");
-  const entriesRaw = formData.get("entries");
+  const currentUrl = formData.get('currentUrl');
+  const entriesRaw = formData.get('entries');
 
-  if (typeof entriesRaw !== "string" || typeof currentUrl !== "string") {
-    return new Response("Missing entries or currentUrl", { status: 400 });
+  if (typeof entriesRaw !== 'string' || typeof currentUrl !== 'string') {
+    return new Response('Missing entries or currentUrl', { status: 400 });
   }
 
   const entries = JSON.parse(entriesRaw) as CookieEntry[];
@@ -33,7 +33,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const headers = new Headers();
 
   for (const { key, searchParamKey, searchParamValue, value } of entries) {
-    headers.append("Set-Cookie", buildCookieString({ key, value }));
+    headers.append('Set-Cookie', buildCookieString({ key, value }));
 
     if (searchParamKey) {
       if (searchParamValue) {

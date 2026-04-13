@@ -1,3 +1,4 @@
-import { useColumnsStore } from "../useColumnsStore.hook.ts";
+import { useColumnsStore } from '../useColumnsStore.hook.ts';
 
-export const useGetNormalizedColumns = () => useColumnsStore((state) => state.normalizedColumns);
+export const useGetNormalizedColumns = () =>
+  useColumnsStore((state) => state.normalizedColumns);

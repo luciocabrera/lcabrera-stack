@@ -1,7 +1,7 @@
-import type { ColumnVisibilityState } from "@/components/Table/Table.types";
+import type { ColumnVisibilityState } from '@/components/Table/Table.types';
 
-import { useTableConfigContextValue } from "@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook";
-import { useTableDrawerContextValue } from "@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook";
+import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { useTableDrawerContextValue } from '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
 
 type UseToggleColumnVisibilityArgs = {
   readonly columnKey: string;
@@ -22,7 +22,8 @@ export const useToggleColumnVisibility = () => {
     if (column?.isStatic) return;
 
     const columnVisibility =
-      drawerColumnsStore.get()?.columnVisibility ?? (new Set() as ColumnVisibilityState);
+      drawerColumnsStore.get()?.columnVisibility ??
+      (new Set() as ColumnVisibilityState);
     const newVisibility = new Set(columnVisibility);
     if (isVisible) {
       newVisibility.delete(columnKey);

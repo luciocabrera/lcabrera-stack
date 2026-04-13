@@ -1,18 +1,18 @@
-import { createElement } from "react";
+import { createElement } from 'react';
 
-import { TableBodyCell } from "@/components/Table/TableBodyCell";
+import { TableBodyCell } from '@/components/Table/TableBodyCell';
 
 import type {
   ColumnSizingState,
   DataKey,
   PinnedColumnInfo,
   TableColumn,
-} from "@/components/Table/Table.types";
+} from '@/components/Table/Table.types';
 
 import {
   buildTableBodyCellDescriptor,
   type TableBodyCellDescriptor,
-} from "./buildTableBodyCellDescriptor.util.ts";
+} from './buildTableBodyCellDescriptor.util.ts';
 
 type CreateRenderTableBodyCellArgs<TData extends Record<string, unknown>> = {
   readonly columnSizing: ColumnSizingState<TData>;
@@ -30,7 +30,7 @@ const renderFromDescriptor = <TData extends Record<string, unknown>>({
 }: {
   readonly descriptor: TableBodyCellDescriptor<TData>;
 }) => {
-  if (descriptor.kind === "custom") {
+  if (descriptor.kind === 'custom') {
     return createElement(
       TableBodyCell,
       {

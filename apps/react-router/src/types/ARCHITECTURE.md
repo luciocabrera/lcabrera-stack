@@ -22,7 +22,12 @@ Defines the `ColumnFilter` discriminated union and all operator enums. Consumed 
 ### `ColumnFilter` union
 
 ```ts
-type ColumnFilter = BooleanFilter | DateFilter | NumberFilter | SelectFilter | TextFilter;
+type ColumnFilter =
+  | BooleanFilter
+  | DateFilter
+  | NumberFilter
+  | SelectFilter
+  | TextFilter;
 ```
 
 Discriminated on the `type` field:
@@ -77,7 +82,7 @@ type Sorting<TData = Record<string, unknown>> = {
 ### `SortDirection`
 
 ```ts
-type SortDirection = "asc" | "desc" | undefined;
+type SortDirection = 'asc' | 'desc' | undefined;
 ```
 
 `undefined` represents the cleared/neutral state — not just an optional field.
@@ -85,7 +90,7 @@ type SortDirection = "asc" | "desc" | undefined;
 ### `PinSide`
 
 ```ts
-type PinSide = "left" | "right" | "closest-edge";
+type PinSide = 'left' | 'right' | 'closest-edge';
 ```
 
 | Value            | Meaning                                                  |
@@ -97,7 +102,7 @@ type PinSide = "left" | "right" | "closest-edge";
 ### `PinConflictState`
 
 ```ts
-type PinConflictState = { isOpen: boolean; side: "left" | "right" };
+type PinConflictState = { isOpen: boolean; side: 'left' | 'right' };
 ```
 
 Drives the pin-conflict confirmation dialog in `TableSettingsDrawer`.

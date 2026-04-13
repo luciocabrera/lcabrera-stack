@@ -1,6 +1,6 @@
-import * as stylex from "@stylexjs/stylex";
+import * as stylex from '@stylexjs/stylex';
 
-import { colors } from "@/design-system/tokens/colors.stylex";
+import { colors } from '@/design-system/tokens/colors.stylex';
 import {
   baseInteractiveStyles,
   colorVariants,
@@ -8,11 +8,11 @@ import {
   rippleBase,
   sizeVariants,
   widthVariants,
-} from "@/design-system/tokens/commons.stylex";
+} from '@/design-system/tokens/commons.stylex';
 
 const styles = stylex.create({
   item: {
-    containerName: "toolbarLink",
+    containerName: 'toolbarLink',
   },
   itemActive: {
     backgroundColor: colors.brandPrimary,

@@ -1,28 +1,28 @@
-import * as stylex from "@stylexjs/stylex";
+import * as stylex from '@stylexjs/stylex';
 
-import type { ButtonProps } from "./Button.types.ts";
+import type { ButtonProps } from './Button.types.ts';
 
-import { Tooltip } from "../Tooltip/index.ts";
-import { buttonStyles } from "./Button.stylex.ts";
+import { Tooltip } from '../Tooltip/index.ts';
+import { buttonStyles } from './Button.stylex.ts';
 
 export const Button = ({
   children,
-  color = "primary",
+  color = 'primary',
   customStylex,
   icon,
   isDisabled = false,
-  orientation = "vertical",
-  size = "md",
+  orientation = 'vertical',
+  size = 'md',
   tooltipContent,
-  tooltipPlacement = "top",
-  type = "button",
-  variant = "solid",
-  width = "full",
+  tooltipPlacement = 'top',
+  type = 'button',
+  variant = 'solid',
+  width = 'full',
   ...rest
 }: ButtonProps) => {
   const button = (
     <button
-      data-testid="button"
+      data-testid='button'
       disabled={isDisabled}
       {...rest}
       type={type}

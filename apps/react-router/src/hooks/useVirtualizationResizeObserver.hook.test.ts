@@ -1,19 +1,23 @@
 // @vitest-environment jsdom
 
-import type { RefObject } from "react";
+import type { RefObject } from 'react';
 
-import { act, renderHook } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { act, renderHook } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useVirtualizationResizeObserver } from "./useVirtualizationResizeObserver.hook.ts";
+import { useVirtualizationResizeObserver } from './useVirtualizationResizeObserver.hook.ts';
 
-const { cancelAnimationFrameMock, requestAnimationFrameMock } = vi.hoisted(() => ({
-  cancelAnimationFrameMock: vi.fn(),
-  requestAnimationFrameMock: vi.fn<(callback: FrameRequestCallback) => number>((callback) => {
-    callback(0);
-    return 1;
+const { cancelAnimationFrameMock, requestAnimationFrameMock } = vi.hoisted(
+  () => ({
+    cancelAnimationFrameMock: vi.fn(),
+    requestAnimationFrameMock: vi.fn<
+      (callback: FrameRequestCallback) => number
+    >((callback) => {
+      callback(0);
+      return 1;
+    }),
   }),
-}));
+);
 
 let resizeObserverCallback: ResizeObserverCallback | undefined;
 
@@ -28,17 +32,17 @@ const createContainer = ({
   scrollHeight = 1000,
   scrollTop = 0,
 }: CreateContainerArgs): HTMLElement => {
-  const container = document.createElement("div");
+  const container = document.createElement('div');
 
-  Object.defineProperty(container, "offsetHeight", {
+  Object.defineProperty(container, 'offsetHeight', {
     configurable: true,
     value: offsetHeight,
   });
-  Object.defineProperty(container, "scrollHeight", {
+  Object.defineProperty(container, 'scrollHeight', {
     configurable: true,
     value: scrollHeight,
   });
-  Object.defineProperty(container, "scrollTop", {
+  Object.defineProperty(container, 'scrollTop', {
     configurable: true,
     value: scrollTop,
     writable: true,
@@ -47,16 +51,16 @@ const createContainer = ({
   return container;
 };
 
-describe("useVirtualizationResizeObserver", () => {
+describe('useVirtualizationResizeObserver', () => {
   beforeEach(() => {
     resizeObserverCallback = undefined;
     requestAnimationFrameMock.mockClear();
     cancelAnimationFrameMock.mockClear();
 
-    vi.stubGlobal("requestAnimationFrame", requestAnimationFrameMock);
-    vi.stubGlobal("cancelAnimationFrame", cancelAnimationFrameMock);
+    vi.stubGlobal('requestAnimationFrame', requestAnimationFrameMock);
+    vi.stubGlobal('cancelAnimationFrame', cancelAnimationFrameMock);
     vi.stubGlobal(
-      "ResizeObserver",
+      'ResizeObserver',
       class {
         public constructor(callback: ResizeObserverCallback) {
           resizeObserverCallback = callback;
@@ -81,7 +85,7 @@ describe("useVirtualizationResizeObserver", () => {
     vi.unstubAllGlobals();
   });
 
-  it("computes the initial visible range from container height", () => {
+  it('computes the initial visible range from container height', () => {
     const container = createContainer({ offsetHeight: 400 });
     const containerRef = {
       current: container,
@@ -103,7 +107,7 @@ describe("useVirtualizationResizeObserver", () => {
     expect(result.current.totalHeight).toBe(5000);
   });
 
-  it("updates the visible range when the container scrolls through requestAnimationFrame", () => {
+  it('updates the visible range when the container scrolls through requestAnimationFrame', () => {
     const container = createContainer({ offsetHeight: 400 });
     const containerRef = {
       current: container,
@@ -120,7 +124,7 @@ describe("useVirtualizationResizeObserver", () => {
 
     act(() => {
       container.scrollTop = 250;
-      container.dispatchEvent(new Event("scroll"));
+      container.dispatchEvent(new Event('scroll'));
     });
 
     expect(result.current.startIndex).toBe(2);
@@ -129,7 +133,7 @@ describe("useVirtualizationResizeObserver", () => {
     expect(requestAnimationFrameMock).toHaveBeenCalledTimes(1);
   });
 
-  it("updates the height through ResizeObserver measurements", () => {
+  it('updates the height through ResizeObserver measurements', () => {
     const container = createContainer({ offsetHeight: 400 });
     const containerRef = {
       current: container,
@@ -143,7 +147,7 @@ describe("useVirtualizationResizeObserver", () => {
       }),
     );
 
-    Object.defineProperty(container, "offsetHeight", {
+    Object.defineProperty(container, 'offsetHeight', {
       configurable: true,
       value: 520,
     });
@@ -156,7 +160,7 @@ describe("useVirtualizationResizeObserver", () => {
     expect(result.current.visibleCount).toBe(11);
   });
 
-  it("keeps the previous height when ResizeObserver measures zero", () => {
+  it('keeps the previous height when ResizeObserver measures zero', () => {
     const container = createContainer({ offsetHeight: 400 });
     const containerRef = {
       current: container,
@@ -170,7 +174,7 @@ describe("useVirtualizationResizeObserver", () => {
       }),
     );
 
-    Object.defineProperty(container, "offsetHeight", {
+    Object.defineProperty(container, 'offsetHeight', {
       configurable: true,
       value: 0,
     });
@@ -182,7 +186,7 @@ describe("useVirtualizationResizeObserver", () => {
     expect(result.current.containerHeight).toBe(400);
   });
 
-  it("can temporarily report an empty window when scrollTop outlives the data", () => {
+  it('can temporarily report an empty window when scrollTop outlives the data', () => {
     const container = createContainer({ offsetHeight: 100, scrollTop: 600 });
     const containerRef = {
       current: container,

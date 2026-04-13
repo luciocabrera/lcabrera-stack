@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react';
 
 export type TableDataResolverProps<TResponse> = {
   readonly children: (response: TResponse) => ReactNode;

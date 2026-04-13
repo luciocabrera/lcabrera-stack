@@ -304,28 +304,32 @@ There is no root `index.ts` barrel for `design-system`. All imports use direct s
 
 ```ts
 // Structural tokens
-import { spacing, typography, borderRadius } from "@/design-system/tokens/base.stylex";
+import {
+  spacing,
+  typography,
+  borderRadius,
+} from '@/design-system/tokens/base.stylex';
 
 // Color tokens
-import { colors } from "@/design-system/tokens/colors.stylex";
+import { colors } from '@/design-system/tokens/colors.stylex';
 
 // Shared recipes
 import {
   baseInteractiveStyles,
   colorVariants,
   sizeVariants,
-} from "@/design-system/tokens/commons.stylex";
+} from '@/design-system/tokens/commons.stylex';
 
 // Domain styles
-import { drawerSectionStyles } from "@/design-system/tokens/drawerSection.stylex";
-import { filterBaseStyles } from "@/design-system/tokens/filters.stylex";
+import { drawerSectionStyles } from '@/design-system/tokens/drawerSection.stylex';
+import { filterBaseStyles } from '@/design-system/tokens/filters.stylex';
 
 // Theme objects (Root only)
-import { lightTheme } from "@/design-system/themes/light.stylex";
-import { darkTheme } from "@/design-system/themes/dark.stylex";
+import { lightTheme } from '@/design-system/themes/light.stylex';
+import { darkTheme } from '@/design-system/themes/dark.stylex';
 
 // Icon size constants
-import { ICON_SIZE_MD } from "@/design-system/constants";
+import { ICON_SIZE_MD } from '@/design-system/constants';
 ```
 
 ---

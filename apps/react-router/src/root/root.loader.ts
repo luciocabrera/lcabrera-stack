@@ -1,7 +1,7 @@
-import { getThemeFromCookie } from "@/utils/theme";
-import { getRequestCspNonce } from "@/utils/security";
+import { getThemeFromCookie } from '@/utils/theme';
+import { getRequestCspNonce } from '@/utils/security';
 
-import type { Route } from "../+types/root.ts";
+import type { Route } from '../+types/root.ts';
 
 /**
  * Loader to get theme from cookies for SSR hydration
@@ -9,7 +9,7 @@ import type { Route } from "../+types/root.ts";
  */
 export const loader = ({ request }: Route.LoaderArgs) => {
   const cspNonce = getRequestCspNonce(request);
-  const cookieHeader = request.headers.get("Cookie");
+  const cookieHeader = request.headers.get('Cookie');
   const theme = getThemeFromCookie(cookieHeader);
 
   return { cspNonce, theme };

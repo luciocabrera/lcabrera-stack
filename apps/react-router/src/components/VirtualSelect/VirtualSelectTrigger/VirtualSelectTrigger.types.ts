@@ -1,6 +1,6 @@
-import type { RefObject } from "react";
+import type { RefObject } from 'react';
 
-import type { VirtualSelectMode } from "../VirtualSelect.types.ts";
+import type { VirtualSelectMode } from '../VirtualSelect.types.ts';
 
 export type VirtualSelectTriggerProps = {
   readonly isAlwaysOpen: boolean;

@@ -1,8 +1,8 @@
-import type { StyleXStyles } from "@stylexjs/stylex";
+import type { StyleXStyles } from '@stylexjs/stylex';
 
-import type { VirtualListDataState } from "@/components/VirtualList";
+import type { VirtualListDataState } from '@/components/VirtualList';
 
-export type VirtualSelectMode = "multi" | "single";
+export type VirtualSelectMode = 'multi' | 'single';
 
 export type VirtualSelectOption = {
   readonly label: string;

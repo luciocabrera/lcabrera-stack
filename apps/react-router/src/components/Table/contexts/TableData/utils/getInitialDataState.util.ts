@@ -1,4 +1,4 @@
-import type { TableDataState } from "@/components/Table/Table.types";
+import type { TableDataState } from '@/components/Table/Table.types';
 
 type GetInitialDataStateArgs<TData> = Partial<TableDataState<TData>>;
 

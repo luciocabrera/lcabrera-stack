@@ -1,9 +1,12 @@
-import * as stylex from "@stylexjs/stylex";
+import * as stylex from '@stylexjs/stylex';
 
-import type { SkeletonOptionsProps } from "./SkeletonOptions.types.ts";
+import type { SkeletonOptionsProps } from './SkeletonOptions.types.ts';
 
-import { DEFAULT_SKELETON_ROW_COUNT, ITEM_HEIGHT } from "../VirtualList.constants.ts";
-import { skeletonStyles, styles } from "./SkeletonOptions.stylex.ts";
+import {
+  DEFAULT_SKELETON_ROW_COUNT,
+  ITEM_HEIGHT,
+} from '../VirtualList.constants.ts';
+import { skeletonStyles, styles } from './SkeletonOptions.stylex.ts';
 
 export const SkeletonOptions = ({ containerHeight }: SkeletonOptionsProps) => {
   const count =
@@ -21,7 +24,10 @@ export const SkeletonOptions = ({ containerHeight }: SkeletonOptionsProps) => {
   return (
     <>
       {placeholders.map((item) => (
-        <div key={item.key} {...stylex.props(styles.option, styles.optionDisabled)}>
+        <div
+          key={item.key}
+          {...stylex.props(styles.option, styles.optionDisabled)}
+        >
           <div {...stylex.props(skeletonStyles.placeholderBar)}>
             <div {...stylex.props(skeletonStyles.shimmerWave)} />
           </div>

@@ -1,1 +1,1 @@
-export { ListCheckedIcon } from "./ListCheckedIcon.component.tsx";
+export { ListCheckedIcon } from './ListCheckedIcon.component.tsx';

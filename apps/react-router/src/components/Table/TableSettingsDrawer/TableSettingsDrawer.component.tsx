@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState } from 'react';
 
-import type { TabItem } from "@/components/Tabs";
+import type { TabItem } from '@/components/Tabs';
 
-import { Button } from "@/components/Button";
-import { SettingsIcon } from "@/components/Icons";
+import { Button } from '@/components/Button';
+import { SettingsIcon } from '@/components/Icons';
 import {
   SidePanel,
   SidePanelBody,
@@ -11,20 +11,20 @@ import {
   SidePanelHeader,
   SidePanelHeaderToolbar,
   SidePanelTitle,
-} from "@/components/SidePanel";
-import { Tabs } from "@/components/Tabs";
-import { ICON_SIZE_LG } from "@/design-system/constants";
+} from '@/components/SidePanel';
+import { Tabs } from '@/components/Tabs';
+import { ICON_SIZE_LG } from '@/design-system/constants';
 
-import { useToogleTableIsTableSettingsOpen } from "../contexts/TableConfig/meta/actions/index.ts";
-import { ColumnOrderSection } from "./ColumnOrderSection/index.ts";
-import { ColumnOrderSectionProvider } from "./ColumnOrderSection/ColumnOrderSectionContext/ColumnOrderSectionContext.provider.tsx";
-import { FiltersSection } from "./FiltersSection/index.ts";
-import { GeneralSettingsSection } from "./GeneralSettingsSection/index.ts";
-import { SortingSection } from "./SortingSection/index.ts";
+import { useToogleTableIsTableSettingsOpen } from '../contexts/TableConfig/meta/actions/index.ts';
+import { ColumnOrderSection } from './ColumnOrderSection/index.ts';
+import { ColumnOrderSectionProvider } from './ColumnOrderSection/ColumnOrderSectionContext/ColumnOrderSectionContext.provider.tsx';
+import { FiltersSection } from './FiltersSection/index.ts';
+import { GeneralSettingsSection } from './GeneralSettingsSection/index.ts';
+import { SortingSection } from './SortingSection/index.ts';
 import {
   useBatchSetTableDrawerSettings,
   useResetTableSettings,
-} from "./TableDrawerContext/actions/index.ts";
+} from './TableDrawerContext/actions/index.ts';
 
 export const TableSettingsDrawer = () => {
   const batchSetTableDrawerSettings = useBatchSetTableDrawerSettings();
@@ -34,7 +34,7 @@ export const TableSettingsDrawer = () => {
   const [isPinned, setIsPinned] = useState(false);
 
   const areFiltersValid = true; // TODO: implement filter validation
-  const acceptButtonTitle = "Please fix invalid filters before accepting";
+  const acceptButtonTitle = 'Please fix invalid filters before accepting';
 
   const handleAccept = () => {
     // if (!areFiltersValid) {
@@ -65,18 +65,18 @@ export const TableSettingsDrawer = () => {
   const tabs: TabItem[] = [
     {
       children: <GeneralSettingsSection />,
-      header: "General",
-      key: "general",
+      header: 'General',
+      key: 'general',
     },
     {
       children: <FiltersSection />,
-      header: "Filters",
-      key: "filters",
+      header: 'Filters',
+      key: 'filters',
     },
     {
       children: <SortingSection />,
-      header: " Sorting",
-      key: "sorting",
+      header: ' Sorting',
+      key: 'sorting',
     },
 
     {
@@ -85,13 +85,19 @@ export const TableSettingsDrawer = () => {
           <ColumnOrderSection />
         </ColumnOrderSectionProvider>
       ),
-      header: "Columns",
-      key: "columns",
+      header: 'Columns',
+      key: 'columns',
     },
   ];
 
   return (
-    <SidePanel isOpen={true} isPinned={isPinned} onClose={handleCancel} position="right" size="md">
+    <SidePanel
+      isOpen={true}
+      isPinned={isPinned}
+      onClose={handleCancel}
+      position='right'
+      size='md'
+    >
       <SidePanelHeader
         actions={
           <SidePanelHeaderToolbar
@@ -101,22 +107,24 @@ export const TableSettingsDrawer = () => {
           />
         }
       >
-        <SidePanelTitle icon={<SettingsIcon size={ICON_SIZE_LG} />}>Table Settings</SidePanelTitle>
+        <SidePanelTitle icon={<SettingsIcon size={ICON_SIZE_LG} />}>
+          Table Settings
+        </SidePanelTitle>
       </SidePanelHeader>
       <SidePanelBody>
         <Tabs tabs={tabs} />
       </SidePanelBody>
       <SidePanelFooter>
         <Button
-          color="primary"
+          color='primary'
           isDisabled={!areFiltersValid}
           onClick={handleAccept}
-          size="sm"
+          size='sm'
           title={acceptButtonTitle}
         >
           Accept
         </Button>
-        <Button color="outline" onClick={handleCancel} size="sm">
+        <Button color='outline' onClick={handleCancel} size='sm'>
           Cancel
         </Button>
       </SidePanelFooter>

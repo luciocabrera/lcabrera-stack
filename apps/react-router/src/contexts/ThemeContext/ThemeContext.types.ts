@@ -1,6 +1,6 @@
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react';
 
-import type { ThemeMode } from "@/types/theme.types";
+import type { ThemeMode } from '@/types/theme.types';
 
 /**
  * Props for ThemeProvider component

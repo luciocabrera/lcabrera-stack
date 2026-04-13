@@ -1,6 +1,6 @@
-import { useColumnDrawerContextValue } from "@/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/useColumnDrawerContextValue.hook";
-import { useTableConfigContextValue } from "@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook";
-import { getColumnPinSide } from "@/components/Table/utils";
+import { useColumnDrawerContextValue } from '@/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/useColumnDrawerContextValue.hook';
+import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { getColumnPinSide } from '@/components/Table/utils';
 
 /**
  * Resets all column drawer settings from the current table state.
@@ -29,9 +29,14 @@ export const useResetAllColumnDrawerSettings = () => {
         ? allColumnSizing[columnKey]
         : undefined;
 
-    const sorting = columnsState?.sorting.find((sort) => sort.columnKey === columnKey)?.direction;
+    const sorting = columnsState?.sorting.find(
+      (sort) => sort.columnKey === columnKey,
+    )?.direction;
 
-    const columnPinning = getColumnPinSide(columnsState?.columnPinning, columnKey);
+    const columnPinning = getColumnPinSide(
+      columnsState?.columnPinning,
+      columnKey,
+    );
 
     columnStore.set({
       columnFilter,

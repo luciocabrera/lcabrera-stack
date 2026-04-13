@@ -1,22 +1,25 @@
-import type { RequestHandler } from "express";
+import type { RequestHandler } from 'express';
 
-import { DEFAULT_PAGE_LIMIT, DISTINCT_DEFAULT_LIMIT } from "../../constants/server.constants";
-import { HttpError } from "../../errors/httpError";
-import { createRequestHandler } from "../../utils/createRequestHandler.util";
-import { delay } from "../../utils/delay.util";
-import { readQueryInteger } from "../../utils/readQueryInteger.util";
-import { readQueryValue } from "../../utils/readQueryValue.util";
+import {
+  DEFAULT_PAGE_LIMIT,
+  DISTINCT_DEFAULT_LIMIT,
+} from '../../constants/server.constants';
+import { HttpError } from '../../errors/httpError';
+import { createRequestHandler } from '../../utils/createRequestHandler.util';
+import { delay } from '../../utils/delay.util';
+import { readQueryInteger } from '../../utils/readQueryInteger.util';
+import { readQueryValue } from '../../utils/readQueryValue.util';
 
 import {
   ENTERPRISE_ORDER_ALLOWED_COLUMNS,
   ENTERPRISE_ORDER_DISTINCT_COLUMNS,
-} from "./enterpriseOrders.constants";
-import type { EnterpriseOrdersRepository } from "./enterpriseOrders.repository";
+} from './enterpriseOrders.constants';
+import type { EnterpriseOrdersRepository } from './enterpriseOrders.repository';
 import {
   parseDistinctColumnName,
   parseEnterpriseOrdersFilters,
   parseEnterpriseOrdersSorting,
-} from "./enterpriseOrders.schema";
+} from './enterpriseOrders.schema';
 
 export type EnterpriseOrdersController = {
   readonly getDistinctValues: RequestHandler;
@@ -48,7 +51,7 @@ export const createEnterpriseOrdersController = ({
 
       if (!columnNameParam) {
         throw new HttpError({
-          message: "Missing distinct column name",
+          message: 'Missing distinct column name',
           statusCode: 400,
         });
       }
@@ -81,19 +84,19 @@ export const createEnterpriseOrdersController = ({
       const orderIdParam = readQueryValue(request.params.orderId);
 
       if (!orderIdParam) {
-        throw new HttpError({ message: "Missing order ID", statusCode: 400 });
+        throw new HttpError({ message: 'Missing order ID', statusCode: 400 });
       }
 
       const orderId = Number.parseInt(orderIdParam, 10);
 
       if (Number.isNaN(orderId)) {
-        throw new HttpError({ message: "Invalid order ID", statusCode: 400 });
+        throw new HttpError({ message: 'Invalid order ID', statusCode: 400 });
       }
 
       const result = await repository.getOrderById(orderId);
 
       if (!result) {
-        throw new HttpError({ message: "Order not found", statusCode: 404 });
+        throw new HttpError({ message: 'Order not found', statusCode: 404 });
       }
 
       response.json(result);

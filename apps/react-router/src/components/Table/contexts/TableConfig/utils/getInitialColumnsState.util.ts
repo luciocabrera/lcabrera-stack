@@ -3,7 +3,7 @@ import type {
   ColumnSizingState,
   DataKey,
   TableColumnsState,
-} from "@/components/Table/Table.types";
+} from '@/components/Table/Table.types';
 
 import {
   getEffectiveColumns,
@@ -11,7 +11,7 @@ import {
   getPinnedColumnOffsets,
   getStaticColumnKeys,
   splitColumnsByPinning,
-} from "@/components/Table/utils";
+} from '@/components/Table/utils';
 
 type GetInitialTableStateArgs<TData> = Partial<TableColumnsState<TData>>;
 

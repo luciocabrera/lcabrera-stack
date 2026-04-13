@@ -1,18 +1,18 @@
-import * as stylex from "@stylexjs/stylex";
+import * as stylex from '@stylexjs/stylex';
 
-import { spacing } from "@/design-system/tokens/base.stylex";
-import { colors } from "@/design-system/tokens/colors.stylex";
+import { spacing } from '@/design-system/tokens/base.stylex';
+import { colors } from '@/design-system/tokens/colors.stylex';
 
 const baseStyles = stylex.create({
   table: {
-    overflow: "visible",
+    overflow: 'visible',
     backgroundColor: colors.surfacePrimary,
-    borderCollapse: "separate",
+    borderCollapse: 'separate',
     borderSpacing: 0,
-    display: "table",
-    flexDirection: "column",
+    display: 'table',
+    flexDirection: 'column',
     minWidth: 0,
-    width: "100%",
+    width: '100%',
   },
 });
 
@@ -24,12 +24,12 @@ const tableVariants = stylex.create({
 
 const densityVariants = stylex.create({
   compact: {
-    "--table-padding-block": spacing.xs,
-    "--table-padding-inline": spacing.sm,
+    '--table-padding-block': spacing.xs,
+    '--table-padding-inline': spacing.sm,
   },
   comfortable: {
-    "--table-padding-block": spacing.sm,
-    "--table-padding-inline": spacing.md,
+    '--table-padding-block': spacing.sm,
+    '--table-padding-inline': spacing.md,
   },
 });
 

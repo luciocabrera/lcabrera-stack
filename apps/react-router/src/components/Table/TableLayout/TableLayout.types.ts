@@ -8,11 +8,14 @@ import type {
   TableColumn,
   TableDensity,
   TableProps,
-} from "@/components/Table";
+} from '@/components/Table';
 
-export type TableLayoutProps<TData extends Record<string, unknown>, TResponse> = Pick<
+export type TableLayoutProps<
+  TData extends Record<string, unknown>,
+  TResponse,
+> = Pick<
   TableProps<TData, TResponse>,
-  "dataSelector" | "dataTotalSelector" | "onLoadMore"
+  'dataSelector' | 'dataTotalSelector' | 'onLoadMore'
 > & {
   /** Column order from loader/URL state (optional) */
   readonly columnOrder?: ColumnOrderState<TData>;

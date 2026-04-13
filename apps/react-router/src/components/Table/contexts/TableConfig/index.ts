@@ -1,1 +1,1 @@
-export { TableConfigProvider } from "./TableConfigContext.provider.tsx";
+export { TableConfigProvider } from './TableConfigContext.provider.tsx';

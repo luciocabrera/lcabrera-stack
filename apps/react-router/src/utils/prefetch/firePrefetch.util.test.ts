@@ -1,16 +1,16 @@
-import type { RefObject } from "react";
-import type { PrefetchCache } from "@/types/ui.types";
+import type { RefObject } from 'react';
+import type { PrefetchCache } from '@/types/ui.types';
 
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from 'vitest';
 
-import { firePrefetch } from "./firePrefetch.util.ts";
+import { firePrefetch } from './firePrefetch.util.ts';
 
 const createPrefetchRef = <TResponse>(
   initial: PrefetchCache<TResponse>,
 ): RefObject<PrefetchCache<TResponse>> => ({ current: initial });
 
-describe("firePrefetch", () => {
-  it("writes initialCache to prefetchRef.current immediately", () => {
+describe('firePrefetch', () => {
+  it('writes initialCache to prefetchRef.current immediately', () => {
     const prefetchRef = createPrefetchRef<string>({
       data: undefined,
       promise: undefined,
@@ -25,7 +25,7 @@ describe("firePrefetch", () => {
     expect(prefetchRef.current.promise).toBeInstanceOf(Promise);
   });
 
-  it("calls onLoadMore with the correct limit and skip", () => {
+  it('calls onLoadMore with the correct limit and skip', () => {
     const prefetchRef = createPrefetchRef<string>({
       data: undefined,
       promise: undefined,
@@ -38,26 +38,26 @@ describe("firePrefetch", () => {
     expect(onLoadMore).toHaveBeenCalledWith({ limit: 25, skip: 75 });
   });
 
-  it("updates prefetchRef with resolved data when skip still matches", async () => {
+  it('updates prefetchRef with resolved data when skip still matches', async () => {
     const prefetchRef = createPrefetchRef<string>({
       data: undefined,
       promise: undefined,
       skip: -1,
     });
-    const onLoadMore = vi.fn().mockResolvedValue("prefetched-data");
+    const onLoadMore = vi.fn().mockResolvedValue('prefetched-data');
 
     firePrefetch({ limit: 50, nextSkip: 100, onLoadMore, prefetchRef });
 
     // Wait for the resolution to complete
     await vi.waitFor(() => {
-      expect(prefetchRef.current.data).toBe("prefetched-data");
+      expect(prefetchRef.current.data).toBe('prefetched-data');
     });
 
     expect(prefetchRef.current.promise).toBeUndefined();
     expect(prefetchRef.current.skip).toBe(100);
   });
 
-  it("discards resolved data when skip has changed (stale)", async () => {
+  it('discards resolved data when skip has changed (stale)', async () => {
     const prefetchRef = createPrefetchRef<string>({
       data: undefined,
       promise: undefined,
@@ -76,7 +76,7 @@ describe("firePrefetch", () => {
     prefetchRef.current = { data: undefined, promise: undefined, skip: 200 };
 
     // Now resolve the original prefetch
-    resolvePromise!("stale-data");
+    resolvePromise!('stale-data');
     await promise;
 
     // Allow microtask to run
@@ -89,13 +89,13 @@ describe("firePrefetch", () => {
     expect(prefetchRef.current.data).toBeUndefined();
   });
 
-  it("resets cache to skip=-1 on prefetch failure when skip still matches", async () => {
+  it('resets cache to skip=-1 on prefetch failure when skip still matches', async () => {
     const prefetchRef = createPrefetchRef<string>({
       data: undefined,
       promise: undefined,
       skip: -1,
     });
-    const onLoadMore = vi.fn().mockRejectedValue(new Error("fail"));
+    const onLoadMore = vi.fn().mockRejectedValue(new Error('fail'));
 
     firePrefetch({ limit: 50, nextSkip: 100, onLoadMore, prefetchRef });
 

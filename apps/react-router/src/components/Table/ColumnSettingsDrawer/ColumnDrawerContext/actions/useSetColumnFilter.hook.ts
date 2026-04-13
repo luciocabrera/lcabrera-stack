@@ -1,6 +1,6 @@
-import type { ColumnFilter } from "@/types/filterOperators.types";
+import type { ColumnFilter } from '@/types/filterOperators.types';
 
-import { useColumnDrawerContextValue } from "@/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/useColumnDrawerContextValue.hook";
+import { useColumnDrawerContextValue } from '@/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/useColumnDrawerContextValue.hook';
 
 /**
  * Hook to update the column filter

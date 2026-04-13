@@ -1,25 +1,25 @@
-import * as stylex from "@stylexjs/stylex";
-import { useCallback, useEffect, useRef, useState } from "react";
+import * as stylex from '@stylexjs/stylex';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { Button } from "@/components/Button";
-import { MenuCloseIcon } from "@/components/Icons";
-import { InfoBox } from "@/components/InfoBox";
-import { ICON_SIZE_MD } from "@/design-system/constants";
-import { useVirtualization } from "@/hooks";
+import { Button } from '@/components/Button';
+import { MenuCloseIcon } from '@/components/Icons';
+import { InfoBox } from '@/components/InfoBox';
+import { ICON_SIZE_MD } from '@/design-system/constants';
+import { useVirtualization } from '@/hooks';
 
-import type { ListFilterMode, VirtualListProps } from "./VirtualList.types.ts";
+import type { ListFilterMode, VirtualListProps } from './VirtualList.types.ts';
 
-import { SkeletonOptions } from "./SkeletonOptions/index.ts";
-import { getFilteredOptions } from "./utils/index.ts";
-import { VirtualizedOption } from "./VirtualizedOption/index.ts";
+import { SkeletonOptions } from './SkeletonOptions/index.ts';
+import { getFilteredOptions } from './utils/index.ts';
+import { VirtualizedOption } from './VirtualizedOption/index.ts';
 import {
   DEFAULT_CONTAINER_HEIGHT,
   ITEM_HEIGHT,
   LIST_MAX_HEIGHT,
   SCROLL_THRESHOLD,
-} from "./VirtualList.constants.ts";
-import { styles } from "./VirtualList.stylex.ts";
-import { VirtualListFooter } from "./VirtualListFooter/index.ts";
+} from './VirtualList.constants.ts';
+import { styles } from './VirtualList.stylex.ts';
+import { VirtualListFooter } from './VirtualListFooter/index.ts';
 
 export const VirtualList = ({
   dataState,
@@ -33,8 +33,8 @@ export const VirtualList = ({
   onFetchMore,
   shouldFillHeight = false,
 }: VirtualListProps) => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [listFilterMode, setListFilterMode] = useState<ListFilterMode>("all");
+  const [searchTerm, setSearchTerm] = useState('');
+  const [listFilterMode, setListFilterMode] = useState<ListFilterMode>('all');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const { hasMore, isLoading, isLoadingMore } = dataState;
@@ -54,19 +54,22 @@ export const VirtualList = ({
 
   const shouldShowSelectAll = hasSelectAll && filteredOptions.length > 1;
 
-  const totalItems = shouldShowSelectAll ? filteredOptions.length + 1 : filteredOptions.length;
+  const totalItems = shouldShowSelectAll
+    ? filteredOptions.length + 1
+    : filteredOptions.length;
 
   const isAllSelected =
     filteredOptions.length > 0 &&
     filteredOptions.every((option) => selectedValues.includes(option));
 
-  const { containerHeight, endIndex, offsetY, startIndex, totalHeight } = useVirtualization({
-    containerRef: scrollContainerRef,
-    defaultContainerHeight: DEFAULT_CONTAINER_HEIGHT,
-    itemHeight: ITEM_HEIGHT,
-    overscan: 5,
-    totalItems,
-  });
+  const { containerHeight, endIndex, offsetY, startIndex, totalHeight } =
+    useVirtualization({
+      containerRef: scrollContainerRef,
+      defaultContainerHeight: DEFAULT_CONTAINER_HEIGHT,
+      itemHeight: ITEM_HEIGHT,
+      overscan: 5,
+      totalItems,
+    });
 
   const handleToggle = (option: string) => {
     const newSelectedValues = selectedValues.includes(option)
@@ -74,7 +77,7 @@ export const VirtualList = ({
       : [...selectedValues, option];
 
     onChange({
-      type: "select",
+      type: 'select',
       values: newSelectedValues,
     });
   };
@@ -85,7 +88,7 @@ export const VirtualList = ({
       : [...new Set([...selectedValues, ...filteredOptions])];
 
     onChange({
-      type: "select",
+      type: 'select',
       values: newSelectedValues,
     });
   };
@@ -95,7 +98,7 @@ export const VirtualList = ({
   };
 
   const handleClearSearch = () => {
-    setSearchTerm("");
+    setSearchTerm('');
   };
 
   const handleLoadMore = useCallback(() => {
@@ -126,27 +129,32 @@ export const VirtualList = ({
     const container = scrollContainerRef.current;
     if (!container) return;
 
-    container.addEventListener("scroll", handleScroll);
+    container.addEventListener('scroll', handleScroll);
     return () => {
-      container.removeEventListener("scroll", handleScroll);
+      container.removeEventListener('scroll', handleScroll);
     };
   }, [handleScroll]);
 
   return (
-    <div {...stylex.props(styles.container, shouldFillHeight ? styles.containerFill : undefined)}>
+    <div
+      {...stylex.props(
+        styles.container,
+        shouldFillHeight ? styles.containerFill : undefined,
+      )}
+    >
       <div {...stylex.props(styles.searchInputWrapper)}>
         <input
-          autoComplete="off"
-          data-1p-ignore="true"
-          data-bwignore="true"
-          data-form-type="other"
-          data-lpignore="true"
-          data-np-checked="1"
-          data-np-ignore="1"
+          autoComplete='off'
+          data-1p-ignore='true'
+          data-bwignore='true'
+          data-form-type='other'
+          data-lpignore='true'
+          data-np-checked='1'
+          data-np-ignore='1'
           name={name}
           onChange={handleSearchChange}
-          placeholder="Search options..."
-          type="text"
+          placeholder='Search options...'
+          type='text'
           value={searchTerm}
           {...stylex.props(
             styles.searchInput,
@@ -155,27 +163,34 @@ export const VirtualList = ({
         />
         {searchTerm && (
           <Button
-            aria-label="Clear search"
-            color="ghost"
+            aria-label='Clear search'
+            color='ghost'
             customStylex={styles.clearButton}
             icon={<MenuCloseIcon size={ICON_SIZE_MD} />}
             onClick={handleClearSearch}
-            size="embedded"
-            variant="flat"
-            width="auto"
+            size='embedded'
+            variant='flat'
+            width='auto'
           />
         )}
       </div>
       <div
-        {...stylex.props(styles.optionsList, shouldFillHeight ? styles.optionsListFill : undefined)}
+        {...stylex.props(
+          styles.optionsList,
+          shouldFillHeight ? styles.optionsListFill : undefined,
+        )}
       >
         <div
           ref={scrollContainerRef}
           {...stylex.props(
-            shouldFillHeight ? styles.virtualContainerFill : styles.virtualContainer(listMaxHeight),
+            shouldFillHeight
+              ? styles.virtualContainerFill
+              : styles.virtualContainer(listMaxHeight),
           )}
         >
-          {isInitialLoading && <SkeletonOptions containerHeight={containerHeight} />}
+          {isInitialLoading && (
+            <SkeletonOptions containerHeight={containerHeight} />
+          )}
           {!isInitialLoading && filteredOptions.length === 0 && (
             <div {...stylex.props(styles.noResults)}>
               <InfoBox>No options found</InfoBox>
@@ -188,9 +203,10 @@ export const VirtualList = ({
                   const index = startIndex + i;
                   const key =
                     index === 0 && shouldShowSelectAll
-                      ? "select-all"
-                      : (filteredOptions[shouldShowSelectAll ? index - 1 : index] ??
-                        `option-${index}`);
+                      ? 'select-all'
+                      : (filteredOptions[
+                          shouldShowSelectAll ? index - 1 : index
+                        ] ?? `option-${index}`);
 
                   return (
                     <VirtualizedOption

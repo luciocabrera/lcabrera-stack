@@ -1,8 +1,8 @@
-import type { ColumnOrderState } from "@/components/Table/Table.types";
+import type { ColumnOrderState } from '@/components/Table/Table.types';
 
-import { useTableConfigContextValue } from "@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook";
+import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 
-import { useTableDrawerContextValue } from "../useTableDrawerContextValue.hook.ts";
+import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook.ts';
 
 /**
  * Hook to reorder columns based on current sorting.
@@ -26,7 +26,9 @@ export const useOrderColumnsBySorting = () => {
 
     const sortedKeys = sorting.map((s) => s.columnKey);
 
-    const remainingKeys = defaultOrder.filter((key) => !sortedKeys.includes(key));
+    const remainingKeys = defaultOrder.filter(
+      (key) => !sortedKeys.includes(key),
+    );
 
     const columnOrder = [...sortedKeys, ...remainingKeys] as ColumnOrderState;
 

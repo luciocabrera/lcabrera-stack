@@ -4,20 +4,22 @@
  * Disallows: import { A } from './module'; import { B } from './module'
  */
 
-import type { Rule } from "eslint";
+import type { Rule } from 'eslint';
 
 const rule: Rule.RuleModule = {
   meta: {
     docs: {
-      description: "Merge duplicate imports from the same source into a single import statement",
+      description:
+        'Merge duplicate imports from the same source into a single import statement',
       recommended: false,
     },
-    fixable: "code",
+    fixable: 'code',
     messages: {
-      duplicateImport: 'Multiple imports from "{{source}}". Merge into a single import statement.',
+      duplicateImport:
+        'Multiple imports from "{{source}}". Merge into a single import statement.',
     },
     schema: [],
-    type: "suggestion",
+    type: 'suggestion',
   },
 
   create(context) {
@@ -26,7 +28,9 @@ const rule: Rule.RuleModule = {
     return {
       Program(node: any) {
         // Collect all import declarations
-        const imports = node.body.filter((stmt: any) => stmt.type === "ImportDeclaration");
+        const imports = node.body.filter(
+          (stmt: any) => stmt.type === 'ImportDeclaration',
+        );
 
         // Group by source
         imports.forEach((importNode: any) => {
@@ -60,17 +64,25 @@ const rule: Rule.RuleModule = {
 
                     importNodes.forEach((node: any) => {
                       node.specifiers.forEach((specifier: any) => {
-                        if (specifier.type === "ImportSpecifier") {
-                          if (specifier.imported.name === specifier.local.name) {
+                        if (specifier.type === 'ImportSpecifier') {
+                          if (
+                            specifier.imported.name === specifier.local.name
+                          ) {
                             allSpecifiers.push(specifier.imported.name);
                           } else {
                             allSpecifiers.push(
                               `${specifier.imported.name} as ${specifier.local.name}`,
                             );
                           }
-                        } else if (specifier.type === "ImportDefaultSpecifier") {
-                          allSpecifiers.push(`default as ${specifier.local.name}`);
-                        } else if (specifier.type === "ImportNamespaceSpecifier") {
+                        } else if (
+                          specifier.type === 'ImportDefaultSpecifier'
+                        ) {
+                          allSpecifiers.push(
+                            `default as ${specifier.local.name}`,
+                          );
+                        } else if (
+                          specifier.type === 'ImportNamespaceSpecifier'
+                        ) {
                           allSpecifiers.push(`* as ${specifier.local.name}`);
                         }
                       });
@@ -80,9 +92,12 @@ const rule: Rule.RuleModule = {
                     const uniqueSpecifiers = [...new Set(allSpecifiers)];
 
                     // Build the merged import
-                    const importKeyword = importKind === "type" ? "import type" : "import";
-                    const fromClause = sourceCode.getText(importNodes[0]!.source);
-                    const mergedImport = `${importKeyword} { ${uniqueSpecifiers.join(", ")} } from ${fromClause};`;
+                    const importKeyword =
+                      importKind === 'type' ? 'import type' : 'import';
+                    const fromClause = sourceCode.getText(
+                      importNodes[0]!.source,
+                    );
+                    const mergedImport = `${importKeyword} { ${uniqueSpecifiers.join(', ')} } from ${fromClause};`;
 
                     // Replace the first import with the merged version
                     fixes.push(fixer.replaceText(importNodes[0], mergedImport));
@@ -94,7 +109,7 @@ const rule: Rule.RuleModule = {
 
                     return fixes;
                   },
-                  messageId: "duplicateImport",
+                  messageId: 'duplicateImport',
                   node: importNode,
                 });
               });

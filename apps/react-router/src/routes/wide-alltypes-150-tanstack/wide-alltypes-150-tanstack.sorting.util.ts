@@ -1,19 +1,21 @@
-import type { SortingState as TanStackSortingState } from "@tanstack/react-table";
+import type { SortingState as TanStackSortingState } from '@tanstack/react-table';
 
-import type { SortingState as AppSortingState } from "@/components/Table";
-import type { WideAlltypes150 } from "@/services";
+import type { SortingState as AppSortingState } from '@/components/Table';
+import type { WideAlltypes150 } from '@/services';
 
-import { serializeSortingToURL } from "@/utils/urlState";
+import { serializeSortingToURL } from '@/utils/urlState';
 
 type WideAlltypes150ApiSortingRule = {
   readonly columnKey: keyof WideAlltypes150;
-  readonly direction: "asc" | "desc";
+  readonly direction: 'asc' | 'desc';
 };
 
-const toAppSortingState = (sorting: TanStackSortingState): AppSortingState<WideAlltypes150> =>
+const toAppSortingState = (
+  sorting: TanStackSortingState,
+): AppSortingState<WideAlltypes150> =>
   sorting.map(({ desc, id }) => ({
     columnKey: id as keyof WideAlltypes150,
-    direction: desc ? "desc" : "asc",
+    direction: desc ? 'desc' : 'asc',
   }));
 
 /**
@@ -23,7 +25,7 @@ export const toTanStackSortingState = (
   sorting: AppSortingState<WideAlltypes150>,
 ): TanStackSortingState =>
   sorting.map(({ columnKey, direction }) => ({
-    desc: direction === "desc",
+    desc: direction === 'desc',
     id: columnKey,
   }));
 
@@ -35,7 +37,7 @@ export const toWideAlltypes150ApiSorting = (
 ): readonly WideAlltypes150ApiSortingRule[] =>
   sorting.map(({ desc, id }) => ({
     columnKey: id as keyof WideAlltypes150,
-    direction: desc ? "desc" : "asc",
+    direction: desc ? 'desc' : 'asc',
   }));
 
 /**
@@ -43,4 +45,5 @@ export const toWideAlltypes150ApiSorting = (
  */
 export const toWideAlltypes150SortSearchParam = (
   sorting: TanStackSortingState,
-): string | undefined => serializeSortingToURL(toAppSortingState(sorting) as AppSortingState);
+): string | undefined =>
+  serializeSortingToURL(toAppSortingState(sorting) as AppSortingState);

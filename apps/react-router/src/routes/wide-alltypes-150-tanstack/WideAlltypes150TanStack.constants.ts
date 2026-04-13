@@ -1,8 +1,8 @@
-import type { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from '@tanstack/react-table';
 
-import type { WideAlltypes150 } from "@/services";
+import type { WideAlltypes150 } from '@/services';
 
-import { COLUMNS } from "../wide-alltypes-150/WideAlltypes150.constants.ts";
+import { COLUMNS } from '../wide-alltypes-150/WideAlltypes150.constants.ts';
 
 export const ESTIMATED_ROW_HEIGHT = 38;
 export const FETCH_SIZE = 50;
@@ -11,26 +11,26 @@ export const SCROLL_FETCH_THRESHOLD = 500;
 
 const formatCellValue = (value: unknown): string => {
   if (Array.isArray(value)) {
-    return value.join(", ");
+    return value.join(', ');
   }
 
-  if (typeof value === "boolean") {
-    return value ? "true" : "false";
+  if (typeof value === 'boolean') {
+    return value ? 'true' : 'false';
   }
 
-  if (value === null || value === undefined || value === "") {
-    return "—";
+  if (value === null || value === undefined || value === '') {
+    return '—';
   }
 
-  if (typeof value === "object") {
+  if (typeof value === 'object') {
     return JSON.stringify(value);
   }
 
-  if (typeof value === "number" || typeof value === "string") {
+  if (typeof value === 'number' || typeof value === 'string') {
     return String(value);
   }
 
-  return "—";
+  return '—';
 };
 
 const buildColumnDefinition = ({
@@ -46,6 +46,5 @@ const buildColumnDefinition = ({
   size: minWidth,
 });
 
-export const COLUMN_DEFINITIONS: readonly ColumnDef<WideAlltypes150>[] = COLUMNS.map(
-  (columnDefinition) => buildColumnDefinition(columnDefinition),
-);
+export const COLUMN_DEFINITIONS: readonly ColumnDef<WideAlltypes150>[] =
+  COLUMNS.map((columnDefinition) => buildColumnDefinition(columnDefinition));

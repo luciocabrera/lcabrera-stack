@@ -99,13 +99,13 @@ Two separate `useEffect`s are used:
 <Modal
   isOpen={isOpen}
   onClose={() => setIsOpen(false)}
-  title="Confirm Action"
+  title='Confirm Action'
   footer={
     <>
-      <Button color="outline" onClick={() => setIsOpen(false)}>
+      <Button color='outline' onClick={() => setIsOpen(false)}>
         Cancel
       </Button>
-      <Button color="primary" onClick={handleConfirm}>
+      <Button color='primary' onClick={handleConfirm}>
         Confirm
       </Button>
     </>

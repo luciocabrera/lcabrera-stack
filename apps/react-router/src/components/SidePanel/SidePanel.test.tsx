@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { cleanup, render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { SidePanel } from "./SidePanel.component.tsx";
+import { SidePanel } from './SidePanel.component.tsx';
 
 // eslint-disable-next-line typescript-eslint/unbound-method -- Saving prototype methods for test teardown restoration
 const savedClose = HTMLDialogElement.prototype.close;
@@ -25,34 +25,34 @@ beforeEach(() => {
   HTMLDialogElement.prototype.showModal = vi.fn();
 });
 
-describe("SidePanel", () => {
-  it("renders children content", () => {
+describe('SidePanel', () => {
+  it('renders children content', () => {
     render(
       <SidePanel isOpen={false}>
         <span>Panel content</span>
       </SidePanel>,
     );
-    expect(screen.getByText("Panel content").textContent).toBe("Panel content");
+    expect(screen.getByText('Panel content').textContent).toBe('Panel content');
   });
 
-  it("renders as aside element when isPinned is true", () => {
+  it('renders as aside element when isPinned is true', () => {
     render(
       <SidePanel isOpen isPinned>
         <span>Pinned content</span>
       </SidePanel>,
     );
-    const panel = screen.getByTestId("side-panel");
-    expect(panel.tagName).toBe("ASIDE");
-    expect(panel.getAttribute("aria-label")).toBe("Settings panel");
+    const panel = screen.getByTestId('side-panel');
+    expect(panel.tagName).toBe('ASIDE');
+    expect(panel.getAttribute('aria-label')).toBe('Settings panel');
   });
 
-  it("renders as dialog element when not pinned", () => {
+  it('renders as dialog element when not pinned', () => {
     render(
       <SidePanel isOpen={false}>
         <span>Dialog content</span>
       </SidePanel>,
     );
-    const panel = screen.getByTestId("side-panel");
-    expect(panel.tagName).toBe("DIALOG");
+    const panel = screen.getByTestId('side-panel');
+    expect(panel.tagName).toBe('DIALOG');
   });
 });

@@ -1,1 +1,1 @@
-export { getSelectedColumnLabel } from "./getSelectedColumnLabel.util.ts";
+export { getSelectedColumnLabel } from './getSelectedColumnLabel.util.ts';

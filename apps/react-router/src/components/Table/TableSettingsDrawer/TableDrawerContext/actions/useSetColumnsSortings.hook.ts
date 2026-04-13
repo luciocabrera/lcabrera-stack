@@ -1,6 +1,6 @@
-import type { SortingState } from "@/components/Table/Table.types";
+import type { SortingState } from '@/components/Table/Table.types';
 
-import { useTableDrawerContextValue } from "../useTableDrawerContextValue.hook.ts";
+import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook.ts';
 
 /**
  * Hook to update sorting state
@@ -10,7 +10,7 @@ export const useSetColumnsSortings = () => {
 
   return (sorting: SortingState) => {
     columnsStore.set({
-      sorting: sorting.filter((s) => s.columnKey !== "actions"),
+      sorting: sorting.filter((s) => s.columnKey !== 'actions'),
     });
   };
 };

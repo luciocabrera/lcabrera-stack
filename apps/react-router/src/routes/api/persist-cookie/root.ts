@@ -1,1 +1,1 @@
-export { action } from "./persist-cookie.action.ts";
+export { action } from './persist-cookie.action.ts';

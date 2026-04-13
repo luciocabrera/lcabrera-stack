@@ -1,18 +1,18 @@
-import type { RefObject } from "react";
-import type { InfiniteScroll, PrefetchCache } from "@/types/ui.types";
+import type { RefObject } from 'react';
+import type { InfiniteScroll, PrefetchCache } from '@/types/ui.types';
 
-import { DEFAULT_FILTER_PAGE_SIZE } from "@/components/Table/Table.constants";
-import { useTableConfigContextValue } from "@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook";
-import { logger } from "@/utils/logger";
+import { DEFAULT_FILTER_PAGE_SIZE } from '@/components/Table/Table.constants';
+import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { logger } from '@/utils/logger';
 
-import { firePrefetch, resolveFromCacheOrFetch } from "@/utils/prefetch";
+import { firePrefetch, resolveFromCacheOrFetch } from '@/utils/prefetch';
 
-import { useFiltersDataContextValue } from "../../useFiltersDataContextValue.hook.ts";
-import type { DataKey } from "@/components/Table/Table.types";
+import { useFiltersDataContextValue } from '../../useFiltersDataContextValue.hook.ts';
+import type { DataKey } from '@/components/Table/Table.types';
 
 type FetchFilterDataCallbackArgs<TResponse> = Omit<
   InfiniteScroll<string, TResponse>,
-  "hasMore" | "isLoadingMore"
+  'hasMore' | 'isLoadingMore'
 >;
 
 type UseFetchFilterDataArgs<TData, TResponse> = {
@@ -21,8 +21,12 @@ type UseFetchFilterDataArgs<TData, TResponse> = {
 };
 
 type UseFetchFilterDataReturn<TResponse> = {
-  readonly fetchInitial: (args: FetchFilterDataCallbackArgs<TResponse>) => Promise<void>;
-  readonly fetchMore: (args: FetchFilterDataCallbackArgs<TResponse>) => Promise<void>;
+  readonly fetchInitial: (
+    args: FetchFilterDataCallbackArgs<TResponse>,
+  ) => Promise<void>;
+  readonly fetchMore: (
+    args: FetchFilterDataCallbackArgs<TResponse>,
+  ) => Promise<void>;
 };
 
 /**
@@ -33,7 +37,10 @@ type UseFetchFilterDataReturn<TResponse> = {
 export const useFetchFilterData = <TData, TResponse>({
   columnKey,
   prefetchRef,
-}: UseFetchFilterDataArgs<TData, TResponse>): UseFetchFilterDataReturn<TResponse> => {
+}: UseFetchFilterDataArgs<
+  TData,
+  TResponse
+>): UseFetchFilterDataReturn<TResponse> => {
   const { filtersDataStore } = useFiltersDataContextValue();
   const { metaStore } = useTableConfigContextValue<TData>();
 
@@ -46,7 +53,10 @@ export const useFetchFilterData = <TData, TResponse>({
     const currentFilter = filtersDataState?.[columnKey];
 
     if (!currentFilter) {
-      logger.error("[useFetchFilterData] Filter data not initialized for column:", columnKey);
+      logger.error(
+        '[useFetchFilterData] Filter data not initialized for column:',
+        columnKey,
+      );
       throw new Error(`Filter data not initialized for column: ${columnKey}`);
     }
 
@@ -56,8 +66,8 @@ export const useFetchFilterData = <TData, TResponse>({
     }
 
     if (!onLoadMore) {
-      logger.error("[useFetchFilterData] onLoadMore callback is required");
-      throw new Error("onLoadMore callback is required");
+      logger.error('[useFetchFilterData] onLoadMore callback is required');
+      throw new Error('onLoadMore callback is required');
     }
 
     try {
@@ -74,7 +84,9 @@ export const useFetchFilterData = <TData, TResponse>({
       });
 
       const data = dataSelector ? dataSelector(response) : [];
-      const totalRows = dataTotalSelector ? dataTotalSelector(response) : data.length;
+      const totalRows = dataTotalSelector
+        ? dataTotalSelector(response)
+        : data.length;
       const hasMore = totalRows > data.length;
 
       filtersDataStore.set({
@@ -100,8 +112,9 @@ export const useFetchFilterData = <TData, TResponse>({
         });
       }
     } catch (error) {
-      logger.error("[useFetchFilterData] Error fetching filter data:", error);
-      const message = error instanceof Error ? error.message : "Failed to load filter data";
+      logger.error('[useFetchFilterData] Error fetching filter data:', error);
+      const message =
+        error instanceof Error ? error.message : 'Failed to load filter data';
       metaStore.set({ error: message });
 
       filtersDataStore.set({
@@ -120,7 +133,7 @@ export const useFetchFilterData = <TData, TResponse>({
     const currentData = currentFilter?.data ?? [];
 
     if (!onLoadMore) {
-      throw new Error("onLoadMore callback is required");
+      throw new Error('onLoadMore callback is required');
     }
 
     if (!currentFilter) {
@@ -181,7 +194,8 @@ export const useFetchFilterData = <TData, TResponse>({
         });
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Failed to load more data";
+      const message =
+        error instanceof Error ? error.message : 'Failed to load more data';
       metaStore.set({ error: message });
 
       filtersDataStore.set({

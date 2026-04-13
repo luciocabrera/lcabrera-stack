@@ -1,9 +1,9 @@
-import { useSyncExternalStore } from "react";
+import { useSyncExternalStore } from 'react';
 
-import type { ColumnOrderSectionModalsState } from "./ColumnOrderSectionContext.types.ts";
+import type { ColumnOrderSectionModalsState } from './ColumnOrderSectionContext.types.ts';
 
-import { INITIAL_MODALS_STATE } from "./ColumnOrderSectionContext.constants.ts";
-import { useColumnOrderSectionContextValue } from "./useColumnOrderSectionContextValue.hook.ts";
+import { INITIAL_MODALS_STATE } from './ColumnOrderSectionContext.constants.ts';
+import { useColumnOrderSectionContextValue } from './useColumnOrderSectionContextValue.hook.ts';
 
 export const useModalsStore = <TSelected>(
   selector: (state: ColumnOrderSectionModalsState) => TSelected,
@@ -11,7 +11,8 @@ export const useModalsStore = <TSelected>(
   const { modalsStore } = useColumnOrderSectionContextValue();
 
   const getSnapshot = () => modalsStore.get() ?? INITIAL_MODALS_STATE;
-  const getServerSnapshot = () => modalsStore.getServerSnapshot() ?? INITIAL_MODALS_STATE;
+  const getServerSnapshot = () =>
+    modalsStore.getServerSnapshot() ?? INITIAL_MODALS_STATE;
 
   const state = useSyncExternalStore(
     modalsStore.subscribe,

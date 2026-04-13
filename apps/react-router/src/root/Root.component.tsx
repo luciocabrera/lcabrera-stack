@@ -1,18 +1,18 @@
-import * as stylex from "@stylexjs/stylex";
-import { useEffect, useState } from "react";
-import { Outlet, useLoaderData } from "react-router";
+import * as stylex from '@stylexjs/stylex';
+import { useEffect, useState } from 'react';
+import { Outlet, useLoaderData } from 'react-router';
 
-import { Button } from "@/components/Button";
-import { SidePanelToolbarExample } from "@/components/Toolbar/Toolbar.examples";
-import { ThemeProvider } from "@/contexts/ThemeContext";
-import { darkTheme } from "@/design-system/themes/dark.stylex";
-import { lightTheme } from "@/design-system/themes/light.stylex";
-import { useTheme } from "@/hooks/useTheme.hook";
+import { Button } from '@/components/Button';
+import { SidePanelToolbarExample } from '@/components/Toolbar/Toolbar.examples';
+import { ThemeProvider } from '@/contexts/ThemeContext';
+import { darkTheme } from '@/design-system/themes/dark.stylex';
+import { lightTheme } from '@/design-system/themes/light.stylex';
+import { useTheme } from '@/hooks/useTheme.hook';
 
-import { styles } from "./Root.stylex.ts";
+import { styles } from './Root.stylex.ts';
 
-import type { DbSanityPayload } from "./Root.types.ts";
-import type { loader as rootLoader } from "./root.loader.ts";
+import type { DbSanityPayload } from './Root.types.ts';
+import type { loader as rootLoader } from './root.loader.ts';
 
 const RootContent = () => {
   const { isDarkMode, toggleTheme } = useTheme();
@@ -27,18 +27,20 @@ const RootContent = () => {
 
     const runPreflight = async () => {
       try {
-        const response = await fetch("/api/db-sanity");
+        const response = await fetch('/api/db-sanity');
 
         if (!response.ok) {
           if (isMounted) {
-            setDbSanityWarning(`DB sanity endpoint returned status ${response.status}.`);
+            setDbSanityWarning(
+              `DB sanity endpoint returned status ${response.status}.`,
+            );
           }
           return;
         }
 
         const payload = (await response.json()) as DbSanityPayload;
         if (!payload.isHealthy && isMounted) {
-          const issues = payload.issues?.join(" | ") ?? "Unknown DB issue.";
+          const issues = payload.issues?.join(' | ') ?? 'Unknown DB issue.';
           setDbSanityWarning(issues);
         }
       } catch (error) {
@@ -46,7 +48,10 @@ const RootContent = () => {
           return;
         }
 
-        const message = error instanceof Error ? error.message : "Failed to reach /api/db-sanity.";
+        const message =
+          error instanceof Error
+            ? error.message
+            : 'Failed to reach /api/db-sanity.';
         setDbSanityWarning(message);
       }
     };
@@ -66,8 +71,8 @@ const RootContent = () => {
           Dev DB warning: {dbSanityWarning} Run `vp run seed` in `api-server`.
         </div>
       ) : undefined}
-      <Button color="ghost" onClick={toggleTheme}>
-        {isDarkMode ? "☀️ Light Mode" : "🌙 Dark Mode"}
+      <Button color='ghost' onClick={toggleTheme}>
+        {isDarkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
       </Button>
       <main {...stylex.props(styles.outletWrapper)}>
         <Outlet />
@@ -80,7 +85,7 @@ export const Root = () => {
   const { theme } = useLoaderData<typeof rootLoader>();
 
   return (
-    <ThemeProvider defaultTheme="light" initialTheme={theme}>
+    <ThemeProvider defaultTheme='light' initialTheme={theme}>
       <RootContent />
     </ThemeProvider>
   );

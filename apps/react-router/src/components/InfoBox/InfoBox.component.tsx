@@ -1,8 +1,8 @@
-import * as stylex from "@stylexjs/stylex";
+import * as stylex from '@stylexjs/stylex';
 
-import type { InfoBoxProps } from "./InfoBox.types.ts";
+import type { InfoBoxProps } from './InfoBox.types.ts';
 
-import { styles } from "./InfoBox.stylex.ts";
+import { styles } from './InfoBox.stylex.ts';
 
 /**
  * A styled container for informational messages.

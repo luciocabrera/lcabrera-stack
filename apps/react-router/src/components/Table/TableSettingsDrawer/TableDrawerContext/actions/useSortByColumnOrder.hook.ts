@@ -1,6 +1,6 @@
-import { useTableConfigContextValue } from "@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook";
+import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 
-import { useTableDrawerContextValue } from "../useTableDrawerContextValue.hook.ts";
+import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook.ts';
 
 /**
  * Hook to sort all sortable columns by their current column order.
@@ -17,19 +17,22 @@ export const useSortByColumnOrder = () => {
     const columnOrder = drawerState?.columnOrder ?? [];
 
     const sortableColumns =
-      columnsState?.columns.filter((col) => col.isSortable !== false && col.key !== "actions") ??
-      [];
+      columnsState?.columns.filter(
+        (col) => col.isSortable !== false && col.key !== 'actions',
+      ) ?? [];
 
     const orderedSortable =
       columnOrder.length > 0
         ? columnOrder
             .map((key) => sortableColumns.find((col) => col.key === key))
-            .filter((col): col is (typeof sortableColumns)[0] => col !== undefined)
+            .filter(
+              (col): col is (typeof sortableColumns)[0] => col !== undefined,
+            )
         : sortableColumns;
 
     const sorting = orderedSortable.map((col) => ({
       columnKey: col.key,
-      direction: "asc" as const,
+      direction: 'asc' as const,
     }));
 
     columnsDrawerStore.set({

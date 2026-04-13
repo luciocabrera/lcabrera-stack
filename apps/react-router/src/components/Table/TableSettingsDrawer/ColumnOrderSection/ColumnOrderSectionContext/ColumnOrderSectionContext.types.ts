@@ -1,5 +1,8 @@
-import type { ColumnOrderState, ColumnPinningState } from "@/components/Table/Table.types";
-import type { TStore } from "@/hooks/useStore.hook";
+import type {
+  ColumnOrderState,
+  ColumnPinningState,
+} from '@/components/Table/Table.types';
+import type { TStore } from '@/hooks/useStore.hook';
 
 export type ColumnOrderSectionContextValue = {
   /** Store managing column order section modal state */
@@ -21,7 +24,7 @@ export type ConflictModalState = {
   readonly columnKey: string;
   readonly columnLabel: string;
   readonly isOpen: boolean;
-  readonly side: "left" | "right";
+  readonly side: 'left' | 'right';
 };
 
 export type OrderConflictModalState = {

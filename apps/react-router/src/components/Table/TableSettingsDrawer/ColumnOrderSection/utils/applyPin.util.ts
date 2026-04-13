@@ -1,9 +1,9 @@
-import type { ColumnPinningState } from "@/components/Table/Table.types";
+import type { ColumnPinningState } from '@/components/Table/Table.types';
 
 type ApplyPinArgs = {
   readonly columnKey: string;
   readonly columnPinning: ColumnPinningState;
-  readonly side: "left" | "right";
+  readonly side: 'left' | 'right';
   readonly staticKeys?: Set<string>;
 };
 
@@ -24,10 +24,12 @@ export const applyPin = ({
     right: columnPinning.right.filter((k) => k !== columnKey),
   };
 
-  if (side === "left") {
+  if (side === 'left') {
     if (staticKeys) {
       // Insert after static columns on left
-      const lastStaticIndex = newPinning.left.findLastIndex((k) => staticKeys.has(k));
+      const lastStaticIndex = newPinning.left.findLastIndex((k) =>
+        staticKeys.has(k),
+      );
       newPinning.left.splice(lastStaticIndex + 1, 0, columnKey);
     } else {
       newPinning.left = [...newPinning.left, columnKey];
@@ -35,7 +37,9 @@ export const applyPin = ({
   } else {
     if (staticKeys) {
       // Insert before static columns on right
-      const firstStaticIndex = newPinning.right.findIndex((k) => staticKeys.has(k));
+      const firstStaticIndex = newPinning.right.findIndex((k) =>
+        staticKeys.has(k),
+      );
       if (firstStaticIndex === -1) {
         newPinning.right = [...newPinning.right, columnKey];
       } else {

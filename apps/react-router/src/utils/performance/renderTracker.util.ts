@@ -67,7 +67,10 @@ export const trackRender = (componentName: string): void => {
 /**
  * Mark the end of a render (for timing)
  */
-export const trackRenderComplete = (componentName: string, startTime: number): void => {
+export const trackRenderComplete = (
+  componentName: string,
+  startTime: number,
+): void => {
   if (import.meta.env.PROD) return;
 
   const duration = performance.now() - startTime;
@@ -91,9 +94,9 @@ export const renderStats = {
     const json = renderStats.toJSON();
     try {
       await navigator.clipboard.writeText(json);
-      console.log("✅ Stats copied to clipboard!");
+      console.log('✅ Stats copied to clipboard!');
     } catch {
-      console.log("📋 Copy manually:", json);
+      console.log('📋 Copy manually:', json);
     }
     return json;
   },
@@ -127,9 +130,12 @@ export const renderStats = {
     const totalRenders = all.reduce((sum, r) => sum + r.count, 0);
 
     return {
-      avgRendersPerComponent: all.length > 0 ? Math.round(totalRenders / all.length) : 0,
+      avgRendersPerComponent:
+        all.length > 0 ? Math.round(totalRenders / all.length) : 0,
       componentCount: all.length,
-      mostRendered: all.slice(0, 10).map((r) => ({ count: r.count, name: r.name })),
+      mostRendered: all
+        .slice(0, 10)
+        .map((r) => ({ count: r.count, name: r.name })),
       totalRenders,
     };
   },
@@ -143,26 +149,26 @@ export const renderStats = {
     const all = renderStats.getAll();
     const summary = renderStats.getSummary();
 
-    console.group("📊 Render Statistics");
+    console.group('📊 Render Statistics');
     console.log(`Total components tracked: ${summary.componentCount}`);
     console.log(`Total renders: ${summary.totalRenders}`);
     console.log(`Avg renders per component: ${summary.avgRendersPerComponent}`);
-    console.log("");
-    console.log("Top 10 most rendered:");
+    console.log('');
+    console.log('Top 10 most rendered:');
     console.table(
       summary.mostRendered.map((r) => ({
         Component: r.name,
-        "Render Count": r.count,
+        'Render Count': r.count,
       })),
     );
-    console.log("");
-    console.log("All components:");
+    console.log('');
+    console.log('All components:');
     console.table(
       all.map((r) => ({
-        "Avg Time (ms)": r.count > 0 ? (r.totalTime / r.count).toFixed(2) : 0,
+        'Avg Time (ms)': r.count > 0 ? (r.totalTime / r.count).toFixed(2) : 0,
         Component: r.name,
-        "Render Count": r.count,
-        "Total Time (ms)": r.totalTime.toFixed(2),
+        'Render Count': r.count,
+        'Total Time (ms)': r.totalTime.toFixed(2),
       })),
     );
     console.groupEnd();

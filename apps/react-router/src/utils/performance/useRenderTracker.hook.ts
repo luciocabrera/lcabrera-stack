@@ -1,6 +1,6 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef } from 'react';
 
-import { trackRender, trackRenderComplete } from "./renderTracker.util.ts";
+import { trackRender, trackRenderComplete } from './renderTracker.util.ts';
 
 type UseRenderTrackerOptions = {
   /** Only track if condition is true */
@@ -52,7 +52,10 @@ export const useRenderTracker = ({
 
       if (changedProps.length > 0) {
         // eslint-disable-next-line no-console, react-x/purity -- Console logging is intentional for performance tracking
-        console.log(`[${componentName}] Props changed:`, changedProps.join(", "));
+        console.log(
+          `[${componentName}] Props changed:`,
+          changedProps.join(', '),
+        );
       }
     }
 

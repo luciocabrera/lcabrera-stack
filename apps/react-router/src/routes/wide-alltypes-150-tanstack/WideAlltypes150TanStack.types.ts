@@ -1,6 +1,6 @@
-import type { SortingState } from "@tanstack/react-table";
+import type { SortingState } from '@tanstack/react-table';
 
-import type { WideAlltypes150Response } from "@/services";
+import type { WideAlltypes150Response } from '@/services';
 
 export type ResolveNextPageParamArgs = {
   readonly allPages: readonly WideAlltypes150Response[];

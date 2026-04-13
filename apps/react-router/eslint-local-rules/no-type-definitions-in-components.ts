@@ -1,15 +1,17 @@
-import type { TSESTree } from "@typescript-eslint/utils";
-import { ESLintUtils } from "@typescript-eslint/utils";
+import type { TSESTree } from '@typescript-eslint/utils';
+import { ESLintUtils } from '@typescript-eslint/utils';
 
-const createRule = ESLintUtils.RuleCreator((name) => `https://example.com/rule/${name}`);
+const createRule = ESLintUtils.RuleCreator(
+  (name) => `https://example.com/rule/${name}`,
+);
 
 export default createRule({
-  name: "no-type-definitions-in-components",
+  name: 'no-type-definitions-in-components',
   meta: {
-    type: "problem",
+    type: 'problem',
     docs: {
       description:
-        "Enforce that type definitions should be in separate .types.ts files, not in component files",
+        'Enforce that type definitions should be in separate .types.ts files, not in component files',
     },
     messages: {
       noTypeInComponent:
@@ -22,9 +24,9 @@ export default createRule({
     // Only apply to .component.tsx, .layout.tsx, .errorBoundary.tsx etc - component files
     const filename = context.filename;
     const isComponentFile =
-      filename.endsWith(".component.tsx") ||
-      filename.endsWith(".layout.tsx") ||
-      filename.endsWith(".errorBoundary.tsx");
+      filename.endsWith('.component.tsx') ||
+      filename.endsWith('.layout.tsx') ||
+      filename.endsWith('.errorBoundary.tsx');
 
     if (!isComponentFile) {
       return {};
@@ -33,7 +35,7 @@ export default createRule({
     return {
       TSTypeAliasDeclaration(node: TSESTree.TSTypeAliasDeclaration) {
         context.report({
-          messageId: "noTypeInComponent",
+          messageId: 'noTypeInComponent',
           node,
           data: {
             typeName: node.id.name,
@@ -42,7 +44,7 @@ export default createRule({
       },
       TSInterfaceDeclaration(node: TSESTree.TSInterfaceDeclaration) {
         context.report({
-          messageId: "noTypeInComponent",
+          messageId: 'noTypeInComponent',
           node,
           data: {
             typeName: node.id.name,

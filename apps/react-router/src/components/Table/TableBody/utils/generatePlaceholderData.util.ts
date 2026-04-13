@@ -11,5 +11,5 @@ export const generatePlaceholderData = <TData extends Record<string, unknown>>({
   rowCount,
 }: GeneratePlaceholderDataParams): TData[] =>
   Array.from({ length: rowCount }, () =>
-    Object.fromEntries(columns.map((col) => [col.key, ""])),
+    Object.fromEntries(columns.map((col) => [col.key, ''])),
   ) as TData[];

@@ -1,1 +1,1 @@
-export { CheckIcon } from "./CheckIcon.component.tsx";
+export { CheckIcon } from './CheckIcon.component.tsx';

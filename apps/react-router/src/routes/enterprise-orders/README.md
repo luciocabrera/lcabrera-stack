@@ -77,7 +77,7 @@ src/routes/enterprise-orders/
 enterpriseOrdersApi.fetchEnterpriseOrdersPaginated({
   skip: 0,
   limit: 50,
-  sorting: [{ columnKey: "order_date", direction: "desc" }],
+  sorting: [{ columnKey: 'order_date', direction: 'desc' }],
   filter: {
     /* optional filters */
   },

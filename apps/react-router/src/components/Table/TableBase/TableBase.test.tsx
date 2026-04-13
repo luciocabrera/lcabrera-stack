@@ -1,19 +1,21 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { cleanup, render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { TableBase } from "./TableBase.component.tsx";
+import { TableBase } from './TableBase.component.tsx';
 
-const { useGetTableDensityMock, useGetTableIsBorderedMock, useGetTableIsStripedMock } = vi.hoisted(
-  () => ({
-    useGetTableDensityMock: vi.fn(),
-    useGetTableIsBorderedMock: vi.fn(),
-    useGetTableIsStripedMock: vi.fn(),
-  }),
-);
+const {
+  useGetTableDensityMock,
+  useGetTableIsBorderedMock,
+  useGetTableIsStripedMock,
+} = vi.hoisted(() => ({
+  useGetTableDensityMock: vi.fn(),
+  useGetTableIsBorderedMock: vi.fn(),
+  useGetTableIsStripedMock: vi.fn(),
+}));
 
-vi.mock("../contexts/TableConfig/meta/selectors", () => ({
+vi.mock('../contexts/TableConfig/meta/selectors', () => ({
   useGetTableDensity: useGetTableDensityMock,
   useGetTableIsBordered: useGetTableIsBorderedMock,
   useGetTableIsStriped: useGetTableIsStripedMock,
@@ -23,14 +25,14 @@ afterEach(() => {
   cleanup();
 });
 
-describe("TableBase", () => {
+describe('TableBase', () => {
   beforeEach(() => {
-    useGetTableDensityMock.mockReturnValue("comfortable");
+    useGetTableDensityMock.mockReturnValue('comfortable');
     useGetTableIsBorderedMock.mockReturnValue(true);
     useGetTableIsStripedMock.mockReturnValue(false);
   });
 
-  it("renders children inside a table element", () => {
+  it('renders children inside a table element', () => {
     render(
       <TableBase>
         <tbody>
@@ -41,12 +43,12 @@ describe("TableBase", () => {
       </TableBase>,
     );
 
-    const table = screen.getByTestId("table");
-    expect(table.tagName).toBe("TABLE");
-    expect(screen.getByText("Orders").textContent).toBe("Orders");
+    const table = screen.getByTestId('table');
+    expect(table.tagName).toBe('TABLE');
+    expect(screen.getByText('Orders').textContent).toBe('Orders');
   });
 
-  it("reflects striped state via data attribute", () => {
+  it('reflects striped state via data attribute', () => {
     useGetTableIsStripedMock.mockReturnValue(true);
 
     render(
@@ -59,13 +61,13 @@ describe("TableBase", () => {
       </TableBase>,
     );
 
-    const table = screen.getByTestId("table");
-    expect(table.dataset.striped).toBe("true");
+    const table = screen.getByTestId('table');
+    expect(table.dataset.striped).toBe('true');
   });
 
-  it("forwards native table attributes", () => {
+  it('forwards native table attributes', () => {
     render(
-      <TableBase title="orders-table">
+      <TableBase title='orders-table'>
         <tbody>
           <tr>
             <td>Summary</td>
@@ -74,7 +76,7 @@ describe("TableBase", () => {
       </TableBase>,
     );
 
-    const table = screen.getByTitle("orders-table");
-    expect(table.tagName).toBe("TABLE");
+    const table = screen.getByTitle('orders-table');
+    expect(table.tagName).toBe('TABLE');
   });
 });

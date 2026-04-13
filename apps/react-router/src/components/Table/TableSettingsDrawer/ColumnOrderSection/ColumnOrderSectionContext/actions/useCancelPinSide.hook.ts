@@ -1,4 +1,4 @@
-import { useColumnOrderSectionContextValue } from "../useColumnOrderSectionContextValue.hook.ts";
+import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook.ts';
 
 /**
  * Hook to cancel the pin side selection modal.

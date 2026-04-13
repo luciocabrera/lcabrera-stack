@@ -1,12 +1,15 @@
-import * as stylex from "@stylexjs/stylex";
+import * as stylex from '@stylexjs/stylex';
 
-import { Table } from "@/components/Table";
-import { FiltersDataProvider, TableConfigProvider } from "@/components/Table/contexts";
-import { TableSuspenseBoundary } from "@/components/Table/TableSuspenseBoundary";
+import { Table } from '@/components/Table';
+import {
+  FiltersDataProvider,
+  TableConfigProvider,
+} from '@/components/Table/contexts';
+import { TableSuspenseBoundary } from '@/components/Table/TableSuspenseBoundary';
 
-import type { TableLayoutProps } from "./TableLayout.types.ts";
+import type { TableLayoutProps } from './TableLayout.types.ts';
 
-import { styles } from "./TableLayout.stylex.ts";
+import { styles } from './TableLayout.stylex.ts';
 
 export const TableLayout = <
   TData extends Record<string, unknown>,
@@ -21,7 +24,7 @@ export const TableLayout = <
   dataSelector,
   dataTotalSelector,
   defaultColumnPinning,
-  density = "comfortable",
+  density = 'comfortable',
   enablePrefetch,
   filters,
   isBordered = true,
@@ -55,9 +58,15 @@ export const TableLayout = <
 
   return (
     <div {...stylex.props(styles.container)}>
-      <TableConfigProvider<TData> columnsState={columnsState} metaState={metaState}>
+      <TableConfigProvider<TData>
+        columnsState={columnsState}
+        metaState={metaState}
+      >
         <FiltersDataProvider<TData> columns={columns}>
-          <TableSuspenseBoundary<TData, TResponse> dataPromise={dataPromise} key={suspenseKey}>
+          <TableSuspenseBoundary<TData, TResponse>
+            dataPromise={dataPromise}
+            key={suspenseKey}
+          >
             {(response) => (
               <Table<TData, TResponse>
                 dataSelector={dataSelector}

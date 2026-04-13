@@ -1,22 +1,25 @@
-import * as stylex from "@stylexjs/stylex";
+import * as stylex from '@stylexjs/stylex';
 
-import type { DraggableItem } from "@/components/DraggableList";
+import type { DraggableItem } from '@/components/DraggableList';
 
-import { DraggableList } from "@/components/DraggableList";
-import { LockIcon } from "@/components/Icons";
-import { PinSideModal } from "@/components/PinSideModal";
-import { SidePanelSectionHeader, SidePanelSectionMain } from "@/components/SidePanel";
-import { useGetColumns } from "@/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook";
+import { DraggableList } from '@/components/DraggableList';
+import { LockIcon } from '@/components/Icons';
+import { PinSideModal } from '@/components/PinSideModal';
+import {
+  SidePanelSectionHeader,
+  SidePanelSectionMain,
+} from '@/components/SidePanel';
+import { useGetColumns } from '@/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
 import {
   useGetColumnOrder,
   useGetColumnPinning,
   useGetColumnVisibility,
-} from "@/components/Table/TableSettingsDrawer/TableDrawerContext/selectors";
-import { ToggleSwitch } from "@/components/ToggleSwitch";
+} from '@/components/Table/TableSettingsDrawer/TableDrawerContext/selectors';
+import { ToggleSwitch } from '@/components/ToggleSwitch';
 
-import type { ColumnOrderSectionProps } from "./ColumnOrderSection.types.ts";
+import type { ColumnOrderSectionProps } from './ColumnOrderSection.types.ts';
 
-import { styles } from "./ColumnOrderSection.stylex.ts";
+import { styles } from './ColumnOrderSection.stylex.ts';
 import {
   useAcceptPinConflict,
   useAcceptPinSide,
@@ -25,18 +28,18 @@ import {
   useReorderColumns,
   useToggleColumnPin,
   useToggleColumnVisibility,
-} from "./ColumnOrderSectionContext/actions/index.ts";
+} from './ColumnOrderSectionContext/actions/index.ts';
 import {
   useGetConflictModal,
   useGetOrderConflict,
   useGetPinSideModal,
   useGetUnpinConflictModal,
-} from "./ColumnOrderSectionContext/selectors/index.ts";
-import { ColumnOrderSectionToolbar } from "./ColumnOrderSectionToolbar/index.ts";
-import { OrderConflictModal } from "./OrderConflictModal/index.ts";
-import { PinConflictModal } from "./PinConflictModal/index.ts";
-import { UnpinConflictModal } from "./UnpinConflictModal/index.ts";
-import { buildAllOrderedColumns } from "./utils/index.ts";
+} from './ColumnOrderSectionContext/selectors/index.ts';
+import { ColumnOrderSectionToolbar } from './ColumnOrderSectionToolbar/index.ts';
+import { OrderConflictModal } from './OrderConflictModal/index.ts';
+import { PinConflictModal } from './PinConflictModal/index.ts';
+import { UnpinConflictModal } from './UnpinConflictModal/index.ts';
+import { buildAllOrderedColumns } from './utils/index.ts';
 
 export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
   const columns = useGetColumns();
@@ -64,7 +67,9 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
 
   // Convert columns to draggable items
   const draggableItems: DraggableItem[] = allOrderedColumns.map((col) => {
-    const isPinned = columnPinning.left.includes(col.key) || columnPinning.right.includes(col.key);
+    const isPinned =
+      columnPinning.left.includes(col.key) ||
+      columnPinning.right.includes(col.key);
     const isStatic = col.isStatic === true;
 
     return {
@@ -75,7 +80,7 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
           <ToggleSwitch
             isChecked={isPinned}
             isDisabled={isStatic}
-            label="Pin"
+            label='Pin'
             onChange={(isChecked) => {
               toggleColumnPin({ columnKey: col.key, isPinning: isChecked });
             }}
@@ -83,7 +88,7 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
           <ToggleSwitch
             isChecked={!columnVisibility.has(col.key)}
             isDisabled={isStatic}
-            label="Show"
+            label='Show'
             onChange={(isChecked) => {
               toggleColumnVisibility({
                 columnKey: col.key,
@@ -102,7 +107,7 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
     <SidePanelSectionMain {...props}>
       <SidePanelSectionHeader
         title={`Column Order & Visibility (${allOrderedColumns.length - columnVisibility.size}/${allOrderedColumns.length})`}
-        toolbar={<ColumnOrderSectionToolbar variant="toolbar" />}
+        toolbar={<ColumnOrderSectionToolbar variant='toolbar' />}
       />
       <DraggableList items={draggableItems} onOrderChange={reorderColumns} />
 
@@ -125,7 +130,10 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
         isOpen={unpinConflictModal.isOpen}
         side={unpinConflictModal.side}
       />
-      <OrderConflictModal description={orderConflict.description} isOpen={orderConflict.isOpen} />
+      <OrderConflictModal
+        description={orderConflict.description}
+        isOpen={orderConflict.isOpen}
+      />
     </SidePanelSectionMain>
   );
 };

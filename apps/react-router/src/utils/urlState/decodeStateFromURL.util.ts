@@ -25,9 +25,9 @@ export const decodeStateFromURL = ({
   try {
     // Restore Base64 padding and standard characters
     const base64 = encoded
-      .replaceAll("-", "+")
-      .replaceAll("_", "/")
-      .padEnd(encoded.length + ((4 - (encoded.length % 4)) % 4), "=");
+      .replaceAll('-', '+')
+      .replaceAll('_', '/')
+      .padEnd(encoded.length + ((4 - (encoded.length % 4)) % 4), '=');
 
     const json = atob(base64);
     const parsed = JSON.parse(json) as Record<string, unknown>;

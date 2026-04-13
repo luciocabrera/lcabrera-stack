@@ -1,20 +1,29 @@
-import { useEffect } from "react";
+import { useEffect } from 'react';
 
-import type { InfiniteScroll } from "@/types/ui.types";
+import type { InfiniteScroll } from '@/types/ui.types';
 
-type UseInfiniteScrollArgs<TData, TResponse> = InfiniteScroll<TData, TResponse> & {
+type UseInfiniteScrollArgs<TData, TResponse> = InfiniteScroll<
+  TData,
+  TResponse
+> & {
   fetchMoreData: ({
     dataSelector,
     dataTotalSelector,
     onLoadMore,
-  }: Omit<InfiniteScroll<TData, TResponse>, "hasMore" | "isLoadingMore">) => Promise<void>;
+  }: Omit<
+    InfiniteScroll<TData, TResponse>,
+    'hasMore' | 'isLoadingMore'
+  >) => Promise<void>;
   /** Reference to the scrollable container */
   scrollContainerRef: React.RefObject<HTMLElement | null>;
   /** Pixels from bottom to trigger  */
   threshold: number;
 };
 
-export const useInfiniteScroll = <TData extends Record<string, unknown>, TResponse>({
+export const useInfiniteScroll = <
+  TData extends Record<string, unknown>,
+  TResponse,
+>({
   dataSelector,
   dataTotalSelector,
   fetchMoreData,
@@ -40,10 +49,10 @@ export const useInfiniteScroll = <TData extends Record<string, unknown>, TRespon
     };
 
     // eslint-disable-next-line @typescript-eslint/naming-convention -- DOM API property
-    scrollContainer.addEventListener("scroll", handleScroll, { passive: true });
+    scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
-      scrollContainer.removeEventListener("scroll", handleScroll);
+      scrollContainer.removeEventListener('scroll', handleScroll);
     };
   }, [
     scrollContainerRef,

@@ -1,4 +1,4 @@
-import { useTableConfigContextValue } from "../../useTableConfigContextValue.hook.ts";
+import { useTableConfigContextValue } from '../../useTableConfigContextValue.hook.ts';
 
 export const useSetTableColumnSelectedKey = () => {
   const { metaStore } = useTableConfigContextValue();

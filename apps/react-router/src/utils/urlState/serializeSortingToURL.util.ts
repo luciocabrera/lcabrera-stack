@@ -1,6 +1,6 @@
-import type { SortingState } from "@/components/Table";
+import type { SortingState } from '@/components/Table';
 
-type CompactSorting = Record<string, "asc" | "desc">;
+type CompactSorting = Record<string, 'asc' | 'desc'>;
 
 /**
  * Serialize SortingState to a compact URL-friendly string.
@@ -8,7 +8,9 @@ type CompactSorting = Record<string, "asc" | "desc">;
  * Converts `[{ columnKey: "name", direction: "asc" }]`
  * into `{"name":"asc"}` — much shorter than the verbose array format.
  */
-export const serializeSortingToURL = (sorting: SortingState): string | undefined => {
+export const serializeSortingToURL = (
+  sorting: SortingState,
+): string | undefined => {
   if (sorting.length === 0) return undefined;
 
   const entries = sorting

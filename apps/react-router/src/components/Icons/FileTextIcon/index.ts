@@ -1,1 +1,1 @@
-export { FileTextIcon } from "./FileTextIcon.component.tsx";
+export { FileTextIcon } from './FileTextIcon.component.tsx';

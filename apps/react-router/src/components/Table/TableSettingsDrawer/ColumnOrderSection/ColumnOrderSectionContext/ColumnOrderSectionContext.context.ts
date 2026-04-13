@@ -1,11 +1,12 @@
-import { createContext } from "react";
+import { createContext } from 'react';
 
-import type { ColumnOrderSectionContextValue } from "./ColumnOrderSectionContext.types.ts";
+import type { ColumnOrderSectionContextValue } from './ColumnOrderSectionContext.types.ts';
 
-import { getInitialModalsState } from "./utils/index.ts";
+import { getInitialModalsState } from './utils/index.ts';
 
-export const ColumnOrderSectionContext = createContext<ColumnOrderSectionContextValue>({
-  modalsStore: getInitialModalsState(),
-} as unknown as ColumnOrderSectionContextValue);
+export const ColumnOrderSectionContext =
+  createContext<ColumnOrderSectionContextValue>({
+    modalsStore: getInitialModalsState(),
+  } as unknown as ColumnOrderSectionContextValue);
 
-ColumnOrderSectionContext.displayName = "ColumnOrderSectionContext";
+ColumnOrderSectionContext.displayName = 'ColumnOrderSectionContext';

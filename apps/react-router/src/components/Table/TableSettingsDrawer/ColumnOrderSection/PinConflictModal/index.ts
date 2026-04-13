@@ -1,2 +1,2 @@
-export { PinConflictModal } from "./PinConflictModal.component.tsx";
-export type { PinConflictModalProps } from "./PinConflictModal.types.ts";
+export { PinConflictModal } from './PinConflictModal.component.tsx';
+export type { PinConflictModalProps } from './PinConflictModal.types.ts';

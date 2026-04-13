@@ -1,30 +1,40 @@
-import * as stylex from "@stylexjs/stylex";
-import { useState } from "react";
+import * as stylex from '@stylexjs/stylex';
+import { useState } from 'react';
 
-import { Button } from "@/components/Button";
-import { EraserIcon, MaximizeIcon, MinimizeIcon, RefreshIcon } from "@/components/Icons";
-import { InfoBox } from "@/components/InfoBox";
+import { Button } from '@/components/Button';
+import {
+  EraserIcon,
+  MaximizeIcon,
+  MinimizeIcon,
+  RefreshIcon,
+} from '@/components/Icons';
+import { InfoBox } from '@/components/InfoBox';
 import {
   SidePanelSection,
   SidePanelSectionHeader,
   SidePanelSectionMain,
-} from "@/components/SidePanel";
-import { useGetColumns } from "@/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook";
-import { ICON_SIZE_MD } from "@/design-system/constants";
+} from '@/components/SidePanel';
+import { useGetColumns } from '@/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
+import { ICON_SIZE_MD } from '@/design-system/constants';
 
-import type { GeneralSettingsSectionProps, WidthPreset } from "./GeneralSettingsSection.types.ts";
+import type {
+  GeneralSettingsSectionProps,
+  WidthPreset,
+} from './GeneralSettingsSection.types.ts';
 
-import { ColumnOrderSectionToolbar } from "../ColumnOrderSection/ColumnOrderSectionToolbar/index.ts";
-import { FiltersSectionToolbar } from "../FiltersSection/FiltersSectionToolbar/index.ts";
-import { SortingSectionToolbar } from "../SortingSection/SortingSectionToolbar/index.ts";
+import { ColumnOrderSectionToolbar } from '../ColumnOrderSection/ColumnOrderSectionToolbar/index.ts';
+import { FiltersSectionToolbar } from '../FiltersSection/FiltersSectionToolbar/index.ts';
+import { SortingSectionToolbar } from '../SortingSection/SortingSectionToolbar/index.ts';
 import {
   useClearAllSettings,
   useResetTableSettings,
   useSetColumnsSizing,
-} from "../TableDrawerContext/actions/index.ts";
-import { styles } from "./GeneralSettingsSection.stylex.ts";
+} from '../TableDrawerContext/actions/index.ts';
+import { styles } from './GeneralSettingsSection.stylex.ts';
 
-export const GeneralSettingsSection = ({ ...props }: GeneralSettingsSectionProps) => {
+export const GeneralSettingsSection = ({
+  ...props
+}: GeneralSettingsSectionProps) => {
   const columns = useGetColumns();
 
   const clearAllSettings = useClearAllSettings();
@@ -36,7 +46,7 @@ export const GeneralSettingsSection = ({ ...props }: GeneralSettingsSectionProps
   const hasMinWidthsConfigured = columns.some((col) => col.minWidth);
   const hasMaxWidthsConfigured = columns.some((col) => col.maxWidth);
 
-  const handleToggle = (preset: "default" | "max" | "min") => {
+  const handleToggle = (preset: 'default' | 'max' | 'min') => {
     const newPreset = selectedPreset === preset ? undefined : preset;
     setSelectedPreset(newPreset);
 
@@ -46,12 +56,12 @@ export const GeneralSettingsSection = ({ ...props }: GeneralSettingsSectionProps
     }
 
     switch (newPreset) {
-      case "default": {
+      case 'default': {
         setColumnsSizing({});
 
         break;
       }
-      case "max": {
+      case 'max': {
         const newSizing: Record<string, number> = {};
         for (const col of columns) {
           if (col.maxWidth) {
@@ -62,7 +72,7 @@ export const GeneralSettingsSection = ({ ...props }: GeneralSettingsSectionProps
 
         break;
       }
-      case "min": {
+      case 'min': {
         const newSizing: Record<string, number> = {};
         for (const col of columns) {
           if (col.minWidth) {
@@ -80,40 +90,40 @@ export const GeneralSettingsSection = ({ ...props }: GeneralSettingsSectionProps
   return (
     <SidePanelSectionMain {...props}>
       <SidePanelSection>
-        <SidePanelSectionHeader title="Column Widths" />
+        <SidePanelSectionHeader title='Column Widths' />
         <div {...stylex.props(styles.buttonGroup)}>
           <Button
-            color={selectedPreset === "min" ? "primary" : "outline"}
+            color={selectedPreset === 'min' ? 'primary' : 'outline'}
             disabled={!hasMinWidthsConfigured}
             icon={<MinimizeIcon size={ICON_SIZE_MD} />}
             onClick={() => {
-              handleToggle("min");
+              handleToggle('min');
             }}
-            size="sm"
-            width="full"
+            size='sm'
+            width='full'
           >
             Set All to Min Width
           </Button>
           <Button
-            color={selectedPreset === "max" ? "primary" : "outline"}
+            color={selectedPreset === 'max' ? 'primary' : 'outline'}
             disabled={!hasMaxWidthsConfigured}
             icon={<MaximizeIcon size={ICON_SIZE_MD} />}
             onClick={() => {
-              handleToggle("max");
+              handleToggle('max');
             }}
-            size="sm"
-            width="full"
+            size='sm'
+            width='full'
           >
             Set All to Max Width
           </Button>
           <Button
-            color={selectedPreset === "default" ? "primary" : "outline"}
+            color={selectedPreset === 'default' ? 'primary' : 'outline'}
             icon={<RefreshIcon size={ICON_SIZE_MD} />}
             onClick={() => {
-              handleToggle("default");
+              handleToggle('default');
             }}
-            size="sm"
-            width="full"
+            size='sm'
+            width='full'
           >
             Reset to Default Widths
           </Button>
@@ -121,43 +131,43 @@ export const GeneralSettingsSection = ({ ...props }: GeneralSettingsSectionProps
       </SidePanelSection>
 
       <InfoBox>
-        Select a preset to adjust all column widths at once. Changes will be reflected after
-        clicking Accept.
+        Select a preset to adjust all column widths at once. Changes will be
+        reflected after clicking Accept.
       </InfoBox>
 
       <SidePanelSection>
-        <SidePanelSectionHeader title="Filters" />
+        <SidePanelSectionHeader title='Filters' />
         <FiltersSectionToolbar />
       </SidePanelSection>
 
       <SidePanelSection>
-        <SidePanelSectionHeader title="Sorting" />
+        <SidePanelSectionHeader title='Sorting' />
         <SortingSectionToolbar />
       </SidePanelSection>
 
       <SidePanelSection>
-        <SidePanelSectionHeader title="Columns" />
+        <SidePanelSectionHeader title='Columns' />
         <ColumnOrderSectionToolbar />
       </SidePanelSection>
 
       <SidePanelSection>
-        <SidePanelSectionHeader title="All Settings" />
+        <SidePanelSectionHeader title='All Settings' />
         <div {...stylex.props(styles.buttonGroup, styles.generalSection)}>
           <Button
-            color="outline"
+            color='outline'
             icon={<EraserIcon size={ICON_SIZE_MD} />}
             onClick={clearAllSettings}
-            size="sm"
-            width="full"
+            size='sm'
+            width='full'
           >
             Clear All Settings
           </Button>
           <Button
-            color="outline"
+            color='outline'
             icon={<RefreshIcon size={ICON_SIZE_MD} />}
             onClick={resetTableSettings}
-            size="sm"
-            width="full"
+            size='sm'
+            width='full'
           >
             Reset All Settings
           </Button>

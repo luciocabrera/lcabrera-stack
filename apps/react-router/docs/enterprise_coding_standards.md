@@ -82,12 +82,12 @@ Each directory must expose a controlled public API via `index.ts`. Internal impl
 ```typescript
 // ✅ Good: Explicit, controlled exports
 // src/features/authentication/index.ts
-export { LoginButton } from "./components/LoginButton";
-export { useAuthStatus } from "./hooks/useAuthStatus.hook";
-export type { AuthUser, AuthState } from "./types/auth.types";
+export { LoginButton } from './components/LoginButton';
+export { useAuthStatus } from './hooks/useAuthStatus.hook';
+export type { AuthUser, AuthState } from './types/auth.types';
 
 // ❌ Bad: Re-exporting everything
-export * from "./components/LoginButton";
+export * from './components/LoginButton';
 ```
 
 **Benefits:**
@@ -127,7 +127,7 @@ export * from "./components/LoginButton";
 export type User = {
   readonly id: string;
   readonly email: string;
-  readonly role: "admin" | "user";
+  readonly role: 'admin' | 'user';
 };
 
 // ✅ Correct: Union types
@@ -187,18 +187,18 @@ const processData = (data: unknown) => {
 ```typescript
 // ✅ Correct: Type-safe state machine
 export type FetchState<T> =
-  | { readonly status: "idle" }
-  | { readonly status: "loading" }
-  | { readonly status: "success"; readonly data: T }
-  | { readonly status: "error"; readonly error: Error };
+  | { readonly status: 'idle' }
+  | { readonly status: 'loading' }
+  | { readonly status: 'success'; readonly data: T }
+  | { readonly status: 'error'; readonly error: Error };
 ```
 
 #### Branded Types for Safety
 
 ```typescript
 // ✅ Prevent mixing up IDs
-export type UserId = string & { readonly __brand: "UserId" };
-export type ProductId = string & { readonly __brand: "ProductId" };
+export type UserId = string & { readonly __brand: 'UserId' };
+export type ProductId = string & { readonly __brand: 'ProductId' };
 ```
 
 ### 2.5 Function Parameter Standards
@@ -214,9 +214,12 @@ type FormatCurrencyArgs = {
   readonly currency: string;
 };
 
-export const formatCurrency = ({ amount, currency }: FormatCurrencyArgs): string => {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
+export const formatCurrency = ({
+  amount,
+  currency,
+}: FormatCurrencyArgs): string => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
     currency,
   }).format(amount);
 };
@@ -228,9 +231,13 @@ type CreateUserArgs = {
   readonly role?: string;
 };
 
-export const createUser = ({ email, name, role = "user" }: CreateUserArgs): User => {
+export const createUser = ({
+  email,
+  name,
+  role = 'user',
+}: CreateUserArgs): User => {
   // Easy to add parameters later without breaking changes
-  return { email, name: name ?? email.split("@")[0], role };
+  return { email, name: name ?? email.split('@')[0], role };
 };
 
 // ✅ Single primitive parameter: Direct typing acceptable
@@ -254,12 +261,12 @@ export const processUser = (user: User): ProcessedUser => {
 
 ```typescript
 // ❌ Positional parameters: Error-prone, unclear
-calculatePrice(100, 0.08, true, "USD", null, false);
+calculatePrice(100, 0.08, true, 'USD', null, false);
 
 // ✅ Object parameters: Self-documenting, maintainable
 calculatePrice({
   amount: 100,
-  currency: "USD",
+  currency: 'USD',
   includeShipping: false,
   isPremium: true,
   taxRate: 0.08,
@@ -396,7 +403,12 @@ type TableProps = {
   readonly renderEmpty?: () => React.ReactNode;
 };
 
-export const Table = ({ data, isLoading, onRowClick, renderEmpty }: TableProps) => {
+export const Table = ({
+  data,
+  isLoading,
+  onRowClick,
+  renderEmpty,
+}: TableProps) => {
   const handleRowClick = (user: User) => {
     // Internal logic
     onRowClick(user);
@@ -412,12 +424,24 @@ Always alphabetize destructured props for consistency.
 
 ```typescript
 // ✅ Correct: Alphabetical
-const Button = ({ className, disabled, label, onClick, variant }: ButtonProps) => {
+const Button = ({
+  className,
+  disabled,
+  label,
+  onClick,
+  variant,
+}: ButtonProps) => {
   // ...
 };
 
 // ❌ Incorrect: Random order
-const Button = ({ onClick, label, disabled, variant, className }: ButtonProps) => {
+const Button = ({
+  onClick,
+  label,
+  disabled,
+  variant,
+  className,
+}: ButtonProps) => {
   // ...
 };
 ```
@@ -493,18 +517,18 @@ export const Button = ({ disabled, variant }: ButtonProps) => (
 export const styles = stylex.create({
   // Base styles
   base: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "16px",
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '16px',
   },
 
   // State variants
   disabled: { opacity: 0.5 },
-  focused: { outline: "2px solid blue" },
+  focused: { outline: '2px solid blue' },
 
   // Size variants
-  large: { fontSize: "18px", padding: "16px" },
-  small: { fontSize: "14px", padding: "8px" },
+  large: { fontSize: '18px', padding: '16px' },
+  small: { fontSize: '14px', padding: '8px' },
 });
 ```
 
@@ -523,15 +547,18 @@ type FormatCurrencyArgs = {
   readonly currency: string;
 };
 
-export const formatCurrency = ({ amount, currency }: FormatCurrencyArgs): string => {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
+export const formatCurrency = ({
+  amount,
+  currency,
+}: FormatCurrencyArgs): string => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
     currency,
   }).format(amount);
 };
 
 // Usage
-const price = formatCurrency({ amount: 1234.56, currency: "USD" });
+const price = formatCurrency({ amount: 1234.56, currency: 'USD' });
 
 // ❌ Impure: Relies on external state
 let globalTax = 0.08;
@@ -543,8 +570,8 @@ export const calculateTotal = ({ price }: CalculateTotalArgs): number => {
 // ❌ Impure: Has side effects
 type SaveUserArgs = { readonly user: User };
 export const saveUser = ({ user }: SaveUserArgs): User => {
-  console.log("Saving user"); // Side effect: logging
-  localStorage.setItem("user", JSON.stringify(user)); // Side effect: storage
+  console.log('Saving user'); // Side effect: logging
+  localStorage.setItem('user', JSON.stringify(user)); // Side effect: storage
   return user;
 };
 ```
@@ -674,7 +701,7 @@ const UserProfile = () => {
 // userLoader.ts
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
   const userId = params.userId;
-  if (!userId) throw new Response("Not Found", { status: 404 });
+  if (!userId) throw new Response('Not Found', { status: 404 });
 
   const user = await userApi.fetchUser(userId);
   return json({ user });
@@ -754,20 +781,20 @@ The `use()` hook replaces `useContext` and enables new patterns for consuming Pr
 
 ```typescript
 // ✅ React 19: use() for Context
-import { use } from "react";
+import { use } from 'react';
 
 const ThemeContext = createContext<Theme | undefined>(undefined);
 
 export const useTheme = () => {
   const theme = use(ThemeContext);
   if (!theme) {
-    throw new Error("useTheme must be used within ThemeProvider");
+    throw new Error('useTheme must be used within ThemeProvider');
   }
   return theme;
 };
 
 // ❌ Deprecated: useContext
-import { useContext } from "react";
+import { useContext } from 'react';
 const theme = useContext(ThemeContext); // Use use() instead
 ```
 
@@ -1140,12 +1167,12 @@ Use schema validation libraries (Zod, Yup) for runtime type safety.
 
 ```typescript
 // user.schema.ts
-import { z } from "zod";
+import { z } from 'zod';
 
 export const userSchema = z.object({
   email: z.string().email(),
   age: z.number().min(18).max(120),
-  role: z.enum(["admin", "user"]),
+  role: z.enum(['admin', 'user']),
 });
 
 export type UserInput = z.infer<typeof userSchema>;
@@ -1161,7 +1188,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   }
 
   await saveUser({ user: result.data });
-  return redirect("/success");
+  return redirect('/success');
 };
 ```
 
@@ -1174,7 +1201,12 @@ type IsUserArgs = {
 };
 
 export const isUser = ({ value }: IsUserArgs): value is User => {
-  return typeof value === "object" && value !== null && "id" in value && "email" in value;
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'id' in value &&
+    'email' in value
+  );
 };
 
 // Usage
@@ -1184,7 +1216,7 @@ type ProcessDataArgs = {
 
 const processData = ({ data }: ProcessDataArgs) => {
   if (!isUser({ value: data })) {
-    throw new Error("Invalid user data");
+    throw new Error('Invalid user data');
   }
 
   // data is now typed as User
@@ -1351,19 +1383,19 @@ ESLint must enforce this order with `eslint-plugin-import`:
 
 ```typescript
 // ✅ Correct order
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router';
 
-import * as stylex from "@stylexjs/stylex";
-import { z } from "zod";
+import * as stylex from '@stylexjs/stylex';
+import { z } from 'zod';
 
-import { Button } from "@/shared/components/Button";
-import { useAuth } from "@/features/auth/hooks/useAuth.hook";
+import { Button } from '@/shared/components/Button';
+import { useAuth } from '@/features/auth/hooks/useAuth.hook';
 
-import { styles } from "./Card.styles";
-import { formatDate } from "./utils";
+import { styles } from './Card.styles';
+import { formatDate } from './utils';
 
-import type { User } from "@/shared/types/user.types";
+import type { User } from '@/shared/types/user.types';
 ```
 
 ### 10.3 Alphabetical Sorting
@@ -1422,9 +1454,12 @@ type FormatCurrencyArgs = {
   readonly currency: string;
 };
 
-export const formatCurrency = ({ amount, currency }: FormatCurrencyArgs): string => {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
+export const formatCurrency = ({
+  amount,
+  currency,
+}: FormatCurrencyArgs): string => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
     currency,
   }).format(amount);
 };
@@ -1511,12 +1546,12 @@ Never commit secrets. Use environment variables with validation.
 
 ```typescript
 // config/env.ts
-import { z } from "zod";
+import { z } from 'zod';
 
 const envSchema = z.object({
   API_URL: z.string().url(),
   API_KEY: z.string().min(20),
-  NODE_ENV: z.enum(["development", "production", "test"]),
+  NODE_ENV: z.enum(['development', 'production', 'test']),
 });
 
 export const env = envSchema.parse({

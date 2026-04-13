@@ -1,1 +1,1 @@
-export { TableBase } from "./TableBase.component.tsx";
+export { TableBase } from './TableBase.component.tsx';

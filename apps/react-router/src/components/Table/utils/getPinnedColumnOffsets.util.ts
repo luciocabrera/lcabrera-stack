@@ -4,9 +4,9 @@ import type {
   DataKey,
   PinnedColumnInfo,
   TableColumn,
-} from "@/components/Table/Table.types";
+} from '@/components/Table/Table.types';
 
-import { DEFAULT_MIN_COLUMN_WIDTH } from "@/components/Table/Table.constants";
+import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
 
 type GetPinnedColumnOffsetsArgs<TData> = {
   readonly columnPinning: ColumnPinningState<TData>;
@@ -18,12 +18,16 @@ export const getPinnedColumnOffsets = <TData = Record<string, unknown>>({
   columnPinning,
   columnSizing,
   effectiveColumns,
-}: GetPinnedColumnOffsetsArgs<TData>): Partial<Record<DataKey<TData>, PinnedColumnInfo>> => {
+}: GetPinnedColumnOffsetsArgs<TData>): Partial<
+  Record<DataKey<TData>, PinnedColumnInfo>
+> => {
   const result = new Map<DataKey<TData>, PinnedColumnInfo>();
   const { left: leftPinned, right: rightPinned } = columnPinning;
 
   if (leftPinned.length === 0 && rightPinned.length === 0) {
-    return Object.fromEntries(result) as Partial<Record<DataKey<TData>, PinnedColumnInfo>>;
+    return Object.fromEntries(result) as Partial<
+      Record<DataKey<TData>, PinnedColumnInfo>
+    >;
   }
 
   // Compute left offsets (cumulative from left)
@@ -37,7 +41,7 @@ export const getPinnedColumnOffsets = <TData = Record<string, unknown>>({
       isFirstPinnedRight: false,
       isLastPinnedLeft: false,
       offset: leftOffset,
-      side: "left",
+      side: 'left',
     });
     leftOffset += width;
   }
@@ -65,7 +69,7 @@ export const getPinnedColumnOffsets = <TData = Record<string, unknown>>({
       isFirstPinnedRight: false,
       isLastPinnedLeft: false,
       offset: rightOffset,
-      side: "right",
+      side: 'right',
     });
     rightOffset += width;
   }
@@ -82,5 +86,7 @@ export const getPinnedColumnOffsets = <TData = Record<string, unknown>>({
     }
   }
 
-  return Object.fromEntries(result) as Partial<Record<DataKey<TData>, PinnedColumnInfo>>;
+  return Object.fromEntries(result) as Partial<
+    Record<DataKey<TData>, PinnedColumnInfo>
+  >;
 };

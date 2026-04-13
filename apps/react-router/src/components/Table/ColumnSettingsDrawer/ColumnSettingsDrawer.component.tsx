@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState } from 'react';
 
-import type { TabItem } from "@/components/Tabs";
+import type { TabItem } from '@/components/Tabs';
 
-import { Button } from "@/components/Button";
-import { SettingsIcon } from "@/components/Icons";
+import { Button } from '@/components/Button';
+import { SettingsIcon } from '@/components/Icons';
 import {
   SidePanel,
   SidePanelBody,
@@ -11,24 +11,24 @@ import {
   SidePanelHeader,
   SidePanelHeaderToolbar,
   SidePanelTitle,
-} from "@/components/SidePanel";
-import { useGetNormalizedColumn } from "@/components/Table/contexts/TableConfig/columns/selectors";
-import { useTableWrapperRef } from "@/components/Table/contexts/TableWrapper";
-import { Tabs } from "@/components/Tabs";
-import { ICON_SIZE_LG } from "@/design-system/constants";
-import { useRenderTracker } from "@/utils/performance";
+} from '@/components/SidePanel';
+import { useGetNormalizedColumn } from '@/components/Table/contexts/TableConfig/columns/selectors';
+import { useTableWrapperRef } from '@/components/Table/contexts/TableWrapper';
+import { Tabs } from '@/components/Tabs';
+import { ICON_SIZE_LG } from '@/design-system/constants';
+import { useRenderTracker } from '@/utils/performance';
 
-import type { ColumnSettingsDrawerProps } from "./ColumnSettingsDrawer.types.ts";
+import type { ColumnSettingsDrawerProps } from './ColumnSettingsDrawer.types.ts';
 
 import {
   useBatchSetColumnDrawerSettings,
   useResetAllColumnDrawerSettings,
-} from "./ColumnDrawerContext/actions/index.ts";
-import { DetailsSection } from "./DetailsSection/index.ts";
-import { FilterSection } from "./FilterSection/index.ts";
-import { GeneralSection } from "./GeneralSection/index.ts";
-import { PinningSection } from "./PinningSection/index.ts";
-import { SortingSection } from "./SortingSection/index.ts";
+} from './ColumnDrawerContext/actions/index.ts';
+import { DetailsSection } from './DetailsSection/index.ts';
+import { FilterSection } from './FilterSection/index.ts';
+import { GeneralSection } from './GeneralSection/index.ts';
+import { PinningSection } from './PinningSection/index.ts';
+import { SortingSection } from './SortingSection/index.ts';
 
 export const ColumnSettingsDrawer = <TData extends Record<string, unknown>>({
   columnKey,
@@ -50,15 +50,15 @@ export const ColumnSettingsDrawer = <TData extends Record<string, unknown>>({
   const tabs: TabItem[] = [
     {
       children: <GeneralSection columnKey={columnKey} />,
-      header: "General",
-      key: "general",
+      header: 'General',
+      key: 'general',
     },
     ...(isFilterable && column.dataType
       ? [
           {
             children: <FilterSection columnKey={columnKey} />,
-            header: "Filter",
-            key: "filter",
+            header: 'Filter',
+            key: 'filter',
           },
         ]
       : []),
@@ -66,8 +66,8 @@ export const ColumnSettingsDrawer = <TData extends Record<string, unknown>>({
       ? [
           {
             children: <SortingSection />,
-            header: "Sorting",
-            key: "sorting",
+            header: 'Sorting',
+            key: 'sorting',
           },
         ]
       : []),
@@ -76,14 +76,14 @@ export const ColumnSettingsDrawer = <TData extends Record<string, unknown>>({
       : [
           {
             children: <PinningSection columnKey={columnKey} />,
-            header: "Pinning",
-            key: "pinning",
+            header: 'Pinning',
+            key: 'pinning',
           },
         ]),
     {
       children: <DetailsSection columnKey={columnKey} />,
-      header: "Details",
-      key: "details",
+      header: 'Details',
+      key: 'details',
     },
   ];
 
@@ -109,8 +109,8 @@ export const ColumnSettingsDrawer = <TData extends Record<string, unknown>>({
       isPinned={isPinned}
       onClose={handleCancel}
       portalContainer={wrapperRef}
-      position="right"
-      size="md"
+      position='right'
+      size='md'
     >
       <SidePanelHeader
         actions={
@@ -121,16 +121,18 @@ export const ColumnSettingsDrawer = <TData extends Record<string, unknown>>({
           />
         }
       >
-        <SidePanelTitle icon={<SettingsIcon size={ICON_SIZE_LG} />}>{column.label}</SidePanelTitle>
+        <SidePanelTitle icon={<SettingsIcon size={ICON_SIZE_LG} />}>
+          {column.label}
+        </SidePanelTitle>
       </SidePanelHeader>
       <SidePanelBody>
         <Tabs tabs={tabs} />
       </SidePanelBody>
       <SidePanelFooter>
-        <Button color="primary" onClick={handleAccept} size="sm">
+        <Button color='primary' onClick={handleAccept} size='sm'>
           Accept
         </Button>
-        <Button color="outline" onClick={handleCancel} size="sm">
+        <Button color='outline' onClick={handleCancel} size='sm'>
           Cancel
         </Button>
       </SidePanelFooter>

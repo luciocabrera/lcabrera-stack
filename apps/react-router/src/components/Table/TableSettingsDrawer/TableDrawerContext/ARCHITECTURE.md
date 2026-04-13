@@ -70,12 +70,12 @@ The `useStore` hook (from `@/hooks`) creates a store with `get`, `set`, `subscri
 ```typescript
 TableDrawerColumnsState<TData> = Pick<
   TableColumnsState<TData>,
-  | "columnFilters" // Record<string, ColumnFilter>
-  | "columnOrder" // string[]
-  | "columnPinning" // { left: string[], right: string[] }
-  | "columnSizing" // Record<string, number>
-  | "columnVisibility" // Set<string> (hidden columns)
-  | "sorting" // SortingState[]
+  | 'columnFilters' // Record<string, ColumnFilter>
+  | 'columnOrder' // string[]
+  | 'columnPinning' // { left: string[], right: string[] }
+  | 'columnSizing' // Record<string, number>
+  | 'columnVisibility' // Set<string> (hidden columns)
+  | 'sorting' // SortingState[]
 >;
 ```
 

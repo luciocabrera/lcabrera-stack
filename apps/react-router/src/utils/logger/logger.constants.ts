@@ -1,4 +1,4 @@
-import type { LogLevel, LogLevelPriority } from "./logger.types.ts";
+import type { LogLevel, LogLevelPriority } from './logger.types.ts';
 
 /**
  * Numeric priority map for log levels.
@@ -25,4 +25,6 @@ export const LOG_LEVEL_PRIORITY: LogLevelPriority = {
  * - Development: `'info'` — shows errors, warnings, and informational messages.
  * - Production: `'error'` — shows only errors (debug/info/warn are tree-shaken).
  */
-export const DEFAULT_LOG_LEVEL: LogLevel = import.meta.env.DEV ? "info" : "error";
+export const DEFAULT_LOG_LEVEL: LogLevel = import.meta.env.DEV
+  ? 'info'
+  : 'error';

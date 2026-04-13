@@ -6,8 +6,11 @@ type WriteToLocalStorageArgs = {
 /**
  * Write to localStorage safely
  */
-export const writeToLocalStorage = ({ key, value }: WriteToLocalStorageArgs): void => {
-  if (typeof localStorage === "undefined") return;
+export const writeToLocalStorage = ({
+  key,
+  value,
+}: WriteToLocalStorageArgs): void => {
+  if (typeof localStorage === 'undefined') return;
 
   try {
     localStorage.setItem(key, value);

@@ -1,33 +1,33 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { getPinnedStyle } from "./getPinnedStyle.util.ts";
+import { getPinnedStyle } from './getPinnedStyle.util.ts';
 
-describe("getPinnedStyle", () => {
-  it("returns undefined when pinInfo is undefined", () => {
+describe('getPinnedStyle', () => {
+  it('returns undefined when pinInfo is undefined', () => {
     expect(getPinnedStyle(undefined)).toBeUndefined();
   });
 
-  it("returns a style for left-pinned column", () => {
+  it('returns a style for left-pinned column', () => {
     const result = getPinnedStyle({
       isFirstPinnedRight: false,
       isLastPinnedLeft: false,
       offset: 100,
-      side: "left",
+      side: 'left',
     });
     expect(result).toBeDefined();
   });
 
-  it("returns a style for right-pinned column", () => {
+  it('returns a style for right-pinned column', () => {
     const result = getPinnedStyle({
       isFirstPinnedRight: false,
       isLastPinnedLeft: false,
       offset: 50,
-      side: "right",
+      side: 'right',
     });
     expect(result).toBeDefined();
   });
 
-  it("returns undefined for unpinned column (no side)", () => {
+  it('returns undefined for unpinned column (no side)', () => {
     // @ts-expect-error testing no side
     const result = getPinnedStyle({
       isFirstPinnedRight: false,

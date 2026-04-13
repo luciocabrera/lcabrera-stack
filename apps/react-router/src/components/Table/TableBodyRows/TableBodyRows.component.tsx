@@ -2,18 +2,22 @@ import {
   useGetColumnGroups,
   useGetColumnSizing,
   useGetPinnedColumnOffsets,
-} from "@/components/Table/contexts/TableConfig/columns/selectors";
-import { createRenderTableBodyCell } from "@/components/Table/TableBody/utils/createRenderTableBodyCell.util";
-import { renderTableBodyColumnGroup } from "@/components/Table/TableBody/utils/renderTableBodyColumnGroup.util";
-import { TableRow } from "@/components/Table/TableRow";
-import { useRenderTracker } from "@/utils/performance";
+} from '@/components/Table/contexts/TableConfig/columns/selectors';
+import { createRenderTableBodyCell } from '@/components/Table/TableBody/utils/createRenderTableBodyCell.util';
+import { renderTableBodyColumnGroup } from '@/components/Table/TableBody/utils/renderTableBodyColumnGroup.util';
+import { TableRow } from '@/components/Table/TableRow';
+import { useRenderTracker } from '@/utils/performance';
 
-import type { TableBodyRowsProps } from "./TableBodyRows.types.ts";
+import type { TableBodyRowsProps } from './TableBodyRows.types.ts';
 
-import { useGetTableData } from "../contexts/TableData/data/selectors/index.ts";
+import { useGetTableData } from '../contexts/TableData/data/selectors/index.ts';
 
-export const TableBodyRows = ({ endIndex, isLoadingState, startIndex }: TableBodyRowsProps) => {
-  useRenderTracker({ componentName: "TableBodyRows" });
+export const TableBodyRows = ({
+  endIndex,
+  isLoadingState,
+  startIndex,
+}: TableBodyRowsProps) => {
+  useRenderTracker({ componentName: 'TableBodyRows' });
 
   const data = useGetTableData();
   const { centerCols, leftPinnedCols, rightPinnedCols } = useGetColumnGroups();

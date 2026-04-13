@@ -1,9 +1,9 @@
-import { useColumnDrawerContextValue } from "@/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/useColumnDrawerContextValue.hook";
+import { useColumnDrawerContextValue } from '@/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/useColumnDrawerContextValue.hook';
 
 export const useSetColumnPinning = () => {
   const { columnStore } = useColumnDrawerContextValue();
 
-  return (columnPinning: "left" | "right" | undefined) => {
+  return (columnPinning: 'left' | 'right' | undefined) => {
     columnStore.set({ columnPinning });
   };
 };

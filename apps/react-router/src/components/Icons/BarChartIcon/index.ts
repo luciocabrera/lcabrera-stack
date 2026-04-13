@@ -1,1 +1,1 @@
-export { BarChartIcon } from "./BarChartIcon.component.tsx";
+export { BarChartIcon } from './BarChartIcon.component.tsx';

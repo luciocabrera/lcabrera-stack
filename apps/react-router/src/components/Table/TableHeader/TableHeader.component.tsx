@@ -1,27 +1,27 @@
-import * as stylex from "@stylexjs/stylex";
+import * as stylex from '@stylexjs/stylex';
 
 import {
   useGetColumnGroups,
   useGetPinnedColumnOffsets,
-} from "@/components/Table/contexts/TableConfig/columns/selectors";
+} from '@/components/Table/contexts/TableConfig/columns/selectors';
 import {
   useGetTableIsLoading,
   useGetTableIsLoadingMore,
-} from "@/components/Table/contexts/TableData/data/selectors";
+} from '@/components/Table/contexts/TableData/data/selectors';
 
-import { useRenderTracker } from "@/utils/performance";
+import { useRenderTracker } from '@/utils/performance';
 
-import type { TableHeaderProps } from "./TableHeader.types.ts";
+import type { TableHeaderProps } from './TableHeader.types.ts';
 
-import { TableHeaderCell } from "../TableHeaderCell/index.ts";
-import { TableRow } from "../TableRow/index.ts";
-import { tableHeaderStyles } from "./TableHeader.stylex.ts";
+import { TableHeaderCell } from '../TableHeaderCell/index.ts';
+import { TableRow } from '../TableRow/index.ts';
+import { tableHeaderStyles } from './TableHeader.stylex.ts';
 
 export const TableHeader = <TData extends Record<string, unknown>, TResponse>({
   customStylex,
   ...rest
 }: TableHeaderProps<TData, TResponse>) => {
-  useRenderTracker({ componentName: "TableHeader" });
+  useRenderTracker({ componentName: 'TableHeader' });
 
   const pinnedOffsets = useGetPinnedColumnOffsets();
   const { centerCols, leftPinnedCols, rightPinnedCols } = useGetColumnGroups();
@@ -31,7 +31,7 @@ export const TableHeader = <TData extends Record<string, unknown>, TResponse>({
 
   return (
     <thead
-      data-testid="table-header"
+      data-testid='table-header'
       {...rest}
       {...stylex.props(tableHeaderStyles.container, customStylex)}
     >

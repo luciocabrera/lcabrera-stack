@@ -1,14 +1,16 @@
-import type { ThemeMode } from "@/types/theme.types";
+import type { ThemeMode } from '@/types/theme.types';
 
-import { parseCookies } from "../storage/parseCookies.util.ts";
+import { parseCookies } from '../storage/parseCookies.util.ts';
 
-const THEME_COOKIE_NAME = "theme";
+const THEME_COOKIE_NAME = 'theme';
 const COOKIE_MAX_AGE_DAYS = 365; // 1 year
 
 /**
  * Get theme from cookie header (for server-side use)
  */
-export const getThemeFromCookie = (cookieHeader: null | string): ThemeMode | undefined => {
+export const getThemeFromCookie = (
+  cookieHeader: null | string,
+): ThemeMode | undefined => {
   if (!cookieHeader) {
     return undefined;
   }
@@ -16,7 +18,7 @@ export const getThemeFromCookie = (cookieHeader: null | string): ThemeMode | und
   const cookies = parseCookies(cookieHeader);
   const theme = cookies[THEME_COOKIE_NAME];
 
-  if (theme === "dark" || theme === "light") {
+  if (theme === 'dark' || theme === 'light') {
     return theme;
   }
 

@@ -1,6 +1,6 @@
-import { HttpError } from "../errors/httpError";
+import { HttpError } from '../errors/httpError';
 
-import type { SortRule } from "../types/api.types";
+import type { SortRule } from '../types/api.types';
 
 type BuildOrderByClauseArgs = {
   readonly fallbackSorting: readonly SortRule[];
@@ -18,12 +18,15 @@ export const buildOrderByClause = ({
 
   if (activeSorting.length === 0) {
     throw new HttpError({
-      message: "A fallback sorting strategy is required.",
+      message: 'A fallback sorting strategy is required.',
       statusCode: 500,
     });
   }
 
   return `ORDER BY ${activeSorting
-    .map(({ columnKey, direction }) => `${columnKey} ${direction === "desc" ? "DESC" : "ASC"}`)
-    .join(", ")}`;
+    .map(
+      ({ columnKey, direction }) =>
+        `${columnKey} ${direction === 'desc' ? 'DESC' : 'ASC'}`,
+    )
+    .join(', ')}`;
 };

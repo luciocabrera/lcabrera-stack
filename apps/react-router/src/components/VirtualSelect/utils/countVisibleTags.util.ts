@@ -1,4 +1,4 @@
-import { TRIGGER_MAX_HEIGHT } from "../VirtualSelectTrigger/index.ts";
+import { TRIGGER_MAX_HEIGHT } from '../VirtualSelectTrigger/index.ts';
 
 export type CountVisibleTagsArgs = {
   readonly totalCount: number;
@@ -9,9 +9,14 @@ export type CountVisibleTagsArgs = {
  * Reserves 1 slot for the overflow indicator when not all tags fit.
  * Always shows at least 1 tag when items are selected.
  */
-export const countVisibleTags = ({ totalCount, trigger }: CountVisibleTagsArgs) => {
+export const countVisibleTags = ({
+  totalCount,
+  trigger,
+}: CountVisibleTagsArgs) => {
   const children = [...trigger.children] as HTMLElement[];
-  const tagElements = children.filter((child) => !child.dataset.chevron && !child.dataset.overflow);
+  const tagElements = children.filter(
+    (child) => !child.dataset.chevron && !child.dataset.overflow,
+  );
 
   let fittingCount = 0;
   for (const tag of tagElements) {

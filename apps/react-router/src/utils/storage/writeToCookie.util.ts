@@ -1,4 +1,4 @@
-import { buildCookieString } from "./buildCookieString.util.ts";
+import { buildCookieString } from './buildCookieString.util.ts';
 
 type WriteToCookieArgs = {
   /**
@@ -29,17 +29,21 @@ type WriteToCookieArgs = {
  *   return json({ ok: true }, { headers });
  * };
  */
-export const writeToCookie = ({ headers, key, value }: WriteToCookieArgs): void => {
+export const writeToCookie = ({
+  headers,
+  key,
+  value,
+}: WriteToCookieArgs): void => {
   const cookieValue = buildCookieString({ key, value });
 
   // SSR: append Set-Cookie header
   if (headers) {
-    headers.append("Set-Cookie", cookieValue);
+    headers.append('Set-Cookie', cookieValue);
     return;
   }
 
   // Client: use document.cookie
-  if (typeof document === "undefined") return;
+  if (typeof document === 'undefined') return;
 
   // oxlint-disable-next-line unicorn/no-document-cookie -- Assignment is the only way to set cookies
   document.cookie = cookieValue;

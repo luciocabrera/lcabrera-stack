@@ -1,14 +1,14 @@
-import type { AppLoadContext, EntryContext } from "react-router";
+import type { AppLoadContext, EntryContext } from 'react-router';
 
-import { createReadableStreamFromReadable } from "@react-router/node";
-import { isbot } from "isbot";
-import { PassThrough } from "node:stream";
-import { renderToPipeableStream } from "react-dom/server";
-import { ServerRouter } from "react-router";
+import { createReadableStreamFromReadable } from '@react-router/node';
+import { isbot } from 'isbot';
+import { PassThrough } from 'node:stream';
+import { renderToPipeableStream } from 'react-dom/server';
+import { ServerRouter } from 'react-router';
 
-import { getRequestCspNonce } from "@/utils/security";
+import { getRequestCspNonce } from '@/utils/security';
 
-import stylexCssHref from "./stylex.css?url";
+import stylexCssHref from './stylex.css?url';
 
 /**
  * Adds HTTP Link headers for critical CSS preloading.
@@ -16,7 +16,7 @@ import stylexCssHref from "./stylex.css?url";
  * eliminating the critical request chain for CSS resources.
  */
 const addPreloadHeaders = (headers: Headers) => {
-  headers.append("Link", `<${stylexCssHref}>; rel=preload; as=style`);
+  headers.append('Link', `<${stylexCssHref}>; rel=preload; as=style`);
 };
 
 /**
@@ -42,11 +42,21 @@ export default function handleRequest(
   routerContext: EntryContext,
   _loadContext: AppLoadContext,
 ) {
-  const userAgent = request.headers.get("user-agent");
+  const userAgent = request.headers.get('user-agent');
 
   return userAgent && isbot(userAgent)
-    ? handleBotRequest(request, responseStatusCode, responseHeaders, routerContext)
-    : handleBrowserRequest(request, responseStatusCode, responseHeaders, routerContext);
+    ? handleBotRequest(
+        request,
+        responseStatusCode,
+        responseHeaders,
+        routerContext,
+      )
+    : handleBrowserRequest(
+        request,
+        responseStatusCode,
+        responseHeaders,
+        routerContext,
+      );
 }
 
 // eslint-disable-next-line local-rules/destructuring-for-functions -- Internal helper matching main handler signature
@@ -72,7 +82,7 @@ function handleBotRequest(
           // Increase max listeners to prevent warning with compression middleware
           body.setMaxListeners(20);
 
-          responseHeaders.set("Content-Type", "text/html");
+          responseHeaders.set('Content-Type', 'text/html');
 
           resolve(
             new Response(createReadableStreamFromReadable(body), {
@@ -85,7 +95,7 @@ function handleBotRequest(
         },
         onError(error: unknown) {
           isDidError = true;
-          console.error("Bot request error:", error);
+          console.error('Bot request error:', error);
         },
         onShellError(error: unknown) {
           reject(error instanceof Error ? error : new Error(String(error)));
@@ -117,7 +127,7 @@ function handleBrowserRequest(
         nonce: cspNonce,
         onError(error: unknown) {
           isDidError = true;
-          console.error("Streaming error:", error);
+          console.error('Streaming error:', error);
         },
         onShellError(error: unknown) {
           reject(error instanceof Error ? error : new Error(String(error)));
@@ -127,7 +137,7 @@ function handleBrowserRequest(
           // Increase max listeners to prevent warning with compression middleware
           body.setMaxListeners(20);
 
-          responseHeaders.set("Content-Type", "text/html");
+          responseHeaders.set('Content-Type', 'text/html');
 
           resolve(
             new Response(createReadableStreamFromReadable(body), {

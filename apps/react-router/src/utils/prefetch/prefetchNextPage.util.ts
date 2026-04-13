@@ -1,4 +1,4 @@
-import type { Pagination, PrefetchCache } from "@/types/ui.types";
+import type { Pagination, PrefetchCache } from '@/types/ui.types';
 
 type PrefetchNextPageArgs<TResponse> = {
   readonly limit: number;

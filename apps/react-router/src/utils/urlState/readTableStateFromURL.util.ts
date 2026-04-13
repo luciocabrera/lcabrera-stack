@@ -3,9 +3,9 @@ import type {
   ColumnOrderState,
   ColumnVisibilityState,
   SortingState,
-} from "@/components/Table";
+} from '@/components/Table';
 
-import { readStateFromURL } from "./readStateFromURL.util.ts";
+import { readStateFromURL } from './readStateFromURL.util.ts';
 
 type ReadTableStateFromURLArgs = {
   readonly persistenceKey: string;
@@ -19,7 +19,7 @@ type TableSearchParamsState = {
   readonly sorting?: SortingState;
 };
 
-const PARAM_KEY = "tableState";
+const PARAM_KEY = 'tableState';
 
 /**
  * Read table state from URL search params (for SSR)
@@ -48,7 +48,7 @@ export const readTableStateFromURL = ({
   searchParams,
 }: ReadTableStateFromURLArgs): Partial<TableSearchParamsState> | undefined => {
   return readStateFromURL({
-    convertArraysToSets: ["columnVisibility"],
+    convertArraysToSets: ['columnVisibility'],
     key: `${persistenceKey}-${PARAM_KEY}`,
     searchParams,
   }) as Partial<TableSearchParamsState> | undefined;

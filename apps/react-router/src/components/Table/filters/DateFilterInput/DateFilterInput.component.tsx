@@ -1,12 +1,19 @@
-import * as stylex from "@stylexjs/stylex";
-import { useState } from "react";
+import * as stylex from '@stylexjs/stylex';
+import { useState } from 'react';
 
-import type { DateFilterInputProps, UpdateDateFilterArgs } from "./DateFilterInput.types.ts";
+import type {
+  DateFilterInputProps,
+  UpdateDateFilterArgs,
+} from './DateFilterInput.types.ts';
 
-import { styles } from "./DateFilterInput.stylex.ts";
-import { computeInitialEndDate, computeInitialValue } from "./utils/index.ts";
+import { styles } from './DateFilterInput.stylex.ts';
+import { computeInitialEndDate, computeInitialValue } from './utils/index.ts';
 
-export const DateFilterInput = ({ filter, onChange, operator }: DateFilterInputProps) => {
+export const DateFilterInput = ({
+  filter,
+  onChange,
+  operator,
+}: DateFilterInputProps) => {
   const initialValue = computeInitialValue(filter);
   const initialEndDate = computeInitialEndDate(filter);
 
@@ -14,10 +21,10 @@ export const DateFilterInput = ({ filter, onChange, operator }: DateFilterInputP
   const [endDate, setEndDate] = useState(initialEndDate);
 
   const updateFilter = ({ end, op, val }: UpdateDateFilterArgs) => {
-    if (op === "between") {
+    if (op === 'between') {
       onChange({
-        operator: "between",
-        type: "date",
+        operator: 'between',
+        type: 'date',
         value: val,
         value2: end || undefined,
       });
@@ -25,7 +32,7 @@ export const DateFilterInput = ({ filter, onChange, operator }: DateFilterInputP
     }
     onChange({
       operator: op,
-      type: "date",
+      type: 'date',
       value: val,
     });
   };
@@ -44,41 +51,41 @@ export const DateFilterInput = ({ filter, onChange, operator }: DateFilterInputP
 
   return (
     <div {...stylex.props(styles.container)}>
-      {operator === "between" ? (
+      {operator === 'between' ? (
         <div {...stylex.props(styles.inputGroup)}>
           <input
-            autoComplete="one-time-code"
-            data-1p-ignore="true"
-            data-bwignore="true"
-            data-form-type="other"
-            data-lpignore="true"
+            autoComplete='one-time-code'
+            data-1p-ignore='true'
+            data-bwignore='true'
+            data-form-type='other'
+            data-lpignore='true'
             onChange={handleValueChange}
-            type="date"
+            type='date'
             value={value}
             {...stylex.props(styles.input)}
           />
           <span {...stylex.props(styles.separator)}>to</span>
           <input
-            autoComplete="one-time-code"
-            data-1p-ignore="true"
-            data-bwignore="true"
-            data-form-type="other"
-            data-lpignore="true"
+            autoComplete='one-time-code'
+            data-1p-ignore='true'
+            data-bwignore='true'
+            data-form-type='other'
+            data-lpignore='true'
             onChange={handleEndDateChange}
-            type="date"
+            type='date'
             value={endDate}
             {...stylex.props(styles.input)}
           />
         </div>
       ) : (
         <input
-          autoComplete="one-time-code"
-          data-1p-ignore="true"
-          data-bwignore="true"
-          data-form-type="other"
-          data-lpignore="true"
+          autoComplete='one-time-code'
+          data-1p-ignore='true'
+          data-bwignore='true'
+          data-form-type='other'
+          data-lpignore='true'
           onChange={handleValueChange}
-          type="date"
+          type='date'
           value={value}
           {...stylex.props(styles.input)}
         />

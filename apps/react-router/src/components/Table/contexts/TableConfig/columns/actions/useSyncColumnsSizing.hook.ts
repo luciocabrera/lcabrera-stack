@@ -1,5 +1,5 @@
-import { useTableConfigContextValue } from "@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook";
-import { writeStateSlice } from "@/components/Table/utils";
+import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { writeStateSlice } from '@/components/Table/utils';
 
 export const useSyncColumnsSizing = () => {
   const { columnsStore, metaStore } = useTableConfigContextValue();
@@ -10,8 +10,8 @@ export const useSyncColumnsSizing = () => {
     if (columnsSizing && persistenceKey) {
       writeStateSlice({
         persistenceKey,
-        slice: "columnSizing",
-        storageType: "cookie",
+        slice: 'columnSizing',
+        storageType: 'cookie',
         value: columnsSizing,
       });
     }

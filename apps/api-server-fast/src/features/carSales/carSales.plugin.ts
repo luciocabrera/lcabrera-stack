@@ -1,10 +1,13 @@
-import type { FastifyPluginAsync } from "fastify";
-import type { Pool } from "pg";
+import type { FastifyPluginAsync } from 'fastify';
+import type { Pool } from 'pg';
 
-import { createJsonFieldsParser } from "../../utils/parseJsonQueryFields.util";
+import { createJsonFieldsParser } from '../../utils/parseJsonQueryFields.util';
 
-import { createCarSalesRepository } from "./carSales.repository";
-import { type PaginatedCarSalesQuery, paginatedCarSalesQuerySchema } from "./carSales.schema";
+import { createCarSalesRepository } from './carSales.repository';
+import {
+  type PaginatedCarSalesQuery,
+  paginatedCarSalesQuerySchema,
+} from './carSales.schema';
 
 type CreateCarSalesPluginArgs = {
   readonly pool: Pool;
@@ -18,20 +21,20 @@ export const createCarSalesPlugin =
   async (fastify) => {
     const repository = createCarSalesRepository({ pool });
 
-    fastify.addHook("preValidation", createJsonFieldsParser(["sort"]));
+    fastify.addHook('preValidation', createJsonFieldsParser(['sort']));
 
-    fastify.get("/", async () => {
-      console.warn("📊 [All] Fetching all car sales");
+    fastify.get('/', async () => {
+      console.warn('📊 [All] Fetching all car sales');
       return repository.getAll();
     });
 
     fastify.get<{ Querystring: PaginatedCarSalesQuery }>(
-      "/paginated",
+      '/paginated',
       { schema: { querystring: paginatedCarSalesQuerySchema } },
       async (request) => {
         const { limit, skip, sort } = request.query;
 
-        console.warn("📊 [Paginated] Fetching car sales", {
+        console.warn('📊 [Paginated] Fetching car sales', {
           limit,
           skip,
           sorting: sort,

@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
 
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { render, screen } from '@testing-library/react';
+import { describe, expect, it } from 'vitest';
 
-import { CardFooter } from "./CardFooter.component.tsx";
+import { CardFooter } from './CardFooter.component.tsx';
 
-describe("CardFooter", () => {
+describe('CardFooter', () => {
   it("renders children inside a div with data-testid='card-footer'", () => {
     render(
       <CardFooter>
@@ -13,6 +13,8 @@ describe("CardFooter", () => {
       </CardFooter>,
     );
 
-    expect(screen.getByTestId("card-footer").textContent).toContain("Footer content");
+    expect(screen.getByTestId('card-footer').textContent).toContain(
+      'Footer content',
+    );
   });
 });

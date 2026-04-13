@@ -1,8 +1,8 @@
-import * as stylex from "@stylexjs/stylex";
+import * as stylex from '@stylexjs/stylex';
 
-import type { SelectOptionProps } from "./SelectOption.types.ts";
+import type { SelectOptionProps } from './SelectOption.types.ts';
 
-import { skeletonStyles, styles } from "../VirtualList.stylex.ts";
+import { skeletonStyles, styles } from '../VirtualList.stylex.ts';
 
 export const SelectOption = ({
   hasCheckbox = true,
@@ -20,7 +20,7 @@ export const SelectOption = ({
         checked={isSelected}
         disabled={isLoading}
         onChange={onToggle}
-        type="checkbox"
+        type='checkbox'
         {...stylex.props(styles.checkbox)}
       />
     )}

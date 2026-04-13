@@ -1,30 +1,33 @@
-import * as stylex from "@stylexjs/stylex";
-import { useEffect, useRef, useState } from "react";
+import * as stylex from '@stylexjs/stylex';
+import { useEffect, useRef, useState } from 'react';
 
-import type { VirtualListDataState } from "@/components/VirtualList";
-import type { SelectFilter } from "@/types/filterOperators.types";
+import type { VirtualListDataState } from '@/components/VirtualList';
+import type { SelectFilter } from '@/types/filterOperators.types';
 
-import { VirtualList } from "@/components/VirtualList";
-import { useClickOutside } from "@/hooks";
+import { VirtualList } from '@/components/VirtualList';
+import { useClickOutside } from '@/hooks';
 
-import type { VirtualSelectOption, VirtualSelectProps } from "./VirtualSelect.types.ts";
+import type {
+  VirtualSelectOption,
+  VirtualSelectProps,
+} from './VirtualSelect.types.ts';
 
-import { countVisibleTags, getDropdownStyle } from "./utils/index.ts";
-import { styles } from "./VirtualSelect.stylex.ts";
-import { VirtualSelectTrigger } from "./VirtualSelectTrigger/index.ts";
+import { countVisibleTags, getDropdownStyle } from './utils/index.ts';
+import { styles } from './VirtualSelect.stylex.ts';
+import { VirtualSelectTrigger } from './VirtualSelectTrigger/index.ts';
 
 export const VirtualSelect = ({
   customStylex,
   dataState,
   isAlwaysOpen = false,
-  listMaxHeight = "18.75rem",
+  listMaxHeight = '18.75rem',
   mode,
   onChange,
   onFetchInitial,
   onFetchMore,
   onOpenChange,
   options = [],
-  placeholder = "Select...",
+  placeholder = 'Select...',
   selected,
   shouldFillHeight = false,
 }: VirtualSelectProps) => {
@@ -35,15 +38,18 @@ export const VirtualSelect = ({
 
   // Normalize to { label, value } pairs — plain strings become { label: x, value: x }
   const optionEntries: VirtualSelectOption[] = options.map((o) =>
-    typeof o === "string" ? { label: o, value: o } : o,
+    typeof o === 'string' ? { label: o, value: o } : o,
   );
 
   // Map selected values → display labels for VirtualList and Trigger
-  const selectedLabels = selected.map((v) => optionEntries.find((o) => o.value === v)?.label ?? v);
+  const selectedLabels = selected.map(
+    (v) => optionEntries.find((o) => o.value === v)?.label ?? v,
+  );
 
   const hasSelection = selected.length > 0;
   const isListVisible = isAlwaysOpen ? true : isOpen;
-  const computedVisibleCount = mode === "multi" && hasSelection ? visibleTagCount : selected.length;
+  const computedVisibleCount =
+    mode === 'multi' && hasSelection ? visibleTagCount : selected.length;
   const overflowCount = selected.length - computedVisibleCount;
   const visibleTags = selectedLabels.slice(0, computedVisibleCount);
 
@@ -63,15 +69,19 @@ export const VirtualSelect = ({
   // is recalculated whenever the container resizes (e.g. tags added/removed).
   useEffect(() => {
     const trigger = triggerRef.current;
-    if (mode !== "multi" || !trigger) return;
+    if (mode !== 'multi' || !trigger) return;
 
     const observer = new ResizeObserver(() => {
-      setVisibleTagCount(countVisibleTags({ totalCount: selected.length, trigger }));
+      setVisibleTagCount(
+        countVisibleTags({ totalCount: selected.length, trigger }),
+      );
     });
     observer.observe(trigger);
 
     // Also run immediately for the initial measurement
-    setVisibleTagCount(countVisibleTags({ totalCount: selected.length, trigger }));
+    setVisibleTagCount(
+      countVisibleTags({ totalCount: selected.length, trigger }),
+    );
 
     return () => {
       observer.disconnect();
@@ -99,7 +109,7 @@ export const VirtualSelect = ({
       (label) => optionEntries.find((o) => o.label === label)?.value ?? label,
     );
 
-    if (mode === "single") {
+    if (mode === 'single') {
       // Find the newly added value (not in current selected)
       const newValue = selectedValues.find((v) => !selected.includes(v));
       onChange(newValue ? [newValue] : []);
@@ -118,7 +128,10 @@ export const VirtualSelect = ({
   return (
     <div
       ref={containerRef}
-      {...stylex.props(styles.container, shouldFillHeight ? styles.containerFill : undefined)}
+      {...stylex.props(
+        styles.container,
+        shouldFillHeight ? styles.containerFill : undefined,
+      )}
     >
       <VirtualSelectTrigger
         isAlwaysOpen={isAlwaysOpen}
@@ -135,7 +148,7 @@ export const VirtualSelect = ({
       {/* Dropdown */}
       {isListVisible && (
         <div
-          role="listbox"
+          role='listbox'
           {...stylex.props(
             styles.dropdownBase,
             getDropdownStyle(isAlwaysOpen, shouldFillHeight),
@@ -144,9 +157,9 @@ export const VirtualSelect = ({
         >
           <VirtualList
             dataState={effectiveDataState}
-            filter={{ type: "select", values: selectedLabels }}
-            hasCheckboxes={mode === "multi"}
-            hasSelectAll={mode === "multi"}
+            filter={{ type: 'select', values: selectedLabels }}
+            hasCheckboxes={mode === 'multi'}
+            hasSelectAll={mode === 'multi'}
             listMaxHeight={listMaxHeight}
             onChange={handleVirtualListChange}
             onFetchInitial={onFetchInitial}

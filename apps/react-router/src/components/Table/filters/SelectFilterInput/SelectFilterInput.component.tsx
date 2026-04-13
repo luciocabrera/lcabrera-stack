@@ -1,16 +1,16 @@
-import { useRef } from "react";
+import { useRef } from 'react';
 
-import type { FilterOptionsResponse } from "@/components/Table/Table.types";
-import type { PrefetchCache } from "@/types/ui.types";
+import type { FilterOptionsResponse } from '@/components/Table/Table.types';
+import type { PrefetchCache } from '@/types/ui.types';
 
-import { useFetchFilterData } from "@/components/Table/contexts/FiltersData/filters/actions";
-import { useGetFilterData } from "@/components/Table/contexts/FiltersData/filters/selectors";
-import { useGetNormalizedColumn } from "@/components/Table/contexts/TableConfig/columns/selectors";
-import { VirtualSelect } from "@/components/VirtualSelect";
+import { useFetchFilterData } from '@/components/Table/contexts/FiltersData/filters/actions';
+import { useGetFilterData } from '@/components/Table/contexts/FiltersData/filters/selectors';
+import { useGetNormalizedColumn } from '@/components/Table/contexts/TableConfig/columns/selectors';
+import { VirtualSelect } from '@/components/VirtualSelect';
 
-import type { SelectFilterInputProps } from "./SelectFilterInput.types.ts";
+import type { SelectFilterInputProps } from './SelectFilterInput.types.ts';
 
-import { styles } from "./SelectFilterInput.stylex.ts";
+import { styles } from './SelectFilterInput.stylex.ts';
 export const SelectFilterInput = <TData,>({
   columnKey,
   filter,
@@ -27,7 +27,10 @@ export const SelectFilterInput = <TData,>({
     skip: -1,
   });
 
-  const { fetchInitial, fetchMore } = useFetchFilterData<TData, FilterOptionsResponse>({
+  const { fetchInitial, fetchMore } = useFetchFilterData<
+    TData,
+    FilterOptionsResponse
+  >({
     columnKey,
     prefetchRef,
   });
@@ -62,7 +65,7 @@ export const SelectFilterInput = <TData,>({
   };
 
   const handleChange = (selected: string[]) => {
-    onChange({ type: "select", values: selected });
+    onChange({ type: 'select', values: selected });
   };
 
   return (
@@ -71,7 +74,7 @@ export const SelectFilterInput = <TData,>({
       dataState={dataState}
       isAlwaysOpen
       listMaxHeight={listMaxHeight}
-      mode="multi"
+      mode='multi'
       onChange={handleChange}
       onFetchInitial={handleFetchInitial}
       onFetchMore={handleFetchMore}

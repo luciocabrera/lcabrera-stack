@@ -15,9 +15,9 @@ Application-wide constant values: API host configuration and filter operator def
 
 ```ts
 export const CONFIG: ApiConfig = {
-  localhost: { apiHost: "http://localhost:3001/api" },
-  dev: { apiHost: "/api" }, // Proxied by Vite dev server
-  prod: { apiHost: "/api" }, // Same-origin in production
+  localhost: { apiHost: 'http://localhost:3001/api' },
+  dev: { apiHost: '/api' }, // Proxied by Vite dev server
+  prod: { apiHost: '/api' }, // Same-origin in production
 };
 ```
 

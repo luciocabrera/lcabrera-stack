@@ -1,5 +1,5 @@
-import type { DataKey } from "@/components/Table/Table.types";
-import type { SelectFilter } from "@/types/filterOperators.types";
+import type { DataKey } from '@/components/Table/Table.types';
+import type { SelectFilter } from '@/types/filterOperators.types';
 
 export type SelectFilterInputProps<TData> = {
   readonly columnKey: DataKey<TData>;

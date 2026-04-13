@@ -1,11 +1,15 @@
-import * as stylex from "@stylexjs/stylex";
+import * as stylex from '@stylexjs/stylex';
 
-import type { TableTitleProps } from "./TableTitle.types.ts";
+import type { TableTitleProps } from './TableTitle.types.ts';
 
-import { useGetTableTitle } from "../contexts/TableConfig/meta/selectors/index.ts";
-import { styles } from "./TableTitle.stylex.ts";
+import { useGetTableTitle } from '../contexts/TableConfig/meta/selectors/index.ts';
+import { styles } from './TableTitle.stylex.ts';
 
-export const TableTitle = ({ actions, customStylex, icon }: TableTitleProps) => {
+export const TableTitle = ({
+  actions,
+  customStylex,
+  icon,
+}: TableTitleProps) => {
   const title = useGetTableTitle();
   if (!title && !icon && !actions) {
     return;

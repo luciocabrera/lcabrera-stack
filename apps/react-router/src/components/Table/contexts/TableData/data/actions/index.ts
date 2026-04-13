@@ -1,1 +1,1 @@
-export { useFetchMoreData } from "./useFetchMoreData.hook.ts";
+export { useFetchMoreData } from './useFetchMoreData.hook.ts';

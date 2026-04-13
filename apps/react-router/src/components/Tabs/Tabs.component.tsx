@@ -1,14 +1,16 @@
-import type { KeyboardEvent } from "react";
+import type { KeyboardEvent } from 'react';
 
-import * as stylex from "@stylexjs/stylex";
-import { Activity, useRef, useState } from "react";
+import * as stylex from '@stylexjs/stylex';
+import { Activity, useRef, useState } from 'react';
 
-import type { TabsProps } from "./Tabs.types.ts";
+import type { TabsProps } from './Tabs.types.ts';
 
-import { styles } from "./Tabs.stylex.ts";
+import { styles } from './Tabs.stylex.ts';
 
 export const Tabs = ({ defaultSelectedTab, tabs, ...props }: TabsProps) => {
-  const [activeTab, setActiveTab] = useState(defaultSelectedTab ?? tabs[0]?.key ?? "");
+  const [activeTab, setActiveTab] = useState(
+    defaultSelectedTab ?? tabs[0]?.key ?? '',
+  );
   const tabRefs = useRef<Map<string, HTMLButtonElement | null>>(new Map());
   const activeIndex = tabs.findIndex((tab) => tab.key === activeTab);
 
@@ -18,19 +20,19 @@ export const Tabs = ({ defaultSelectedTab, tabs, ...props }: TabsProps) => {
     let newIndex: number;
 
     switch (event.key) {
-      case "ArrowLeft": {
+      case 'ArrowLeft': {
         newIndex = (activeIndex - 1 + tabs.length) % tabs.length;
         break;
       }
-      case "ArrowRight": {
+      case 'ArrowRight': {
         newIndex = (activeIndex + 1) % tabs.length;
         break;
       }
-      case "End": {
+      case 'End': {
         newIndex = tabs.length - 1;
         break;
       }
-      case "Home": {
+      case 'Home': {
         newIndex = 0;
         break;
       }
@@ -50,7 +52,7 @@ export const Tabs = ({ defaultSelectedTab, tabs, ...props }: TabsProps) => {
 
   return (
     <div {...stylex.props(styles.container)} {...props}>
-      <div aria-label="Settings tabs" onKeyDown={handleKeyDown} role="tablist">
+      <div aria-label='Settings tabs' onKeyDown={handleKeyDown} role='tablist'>
         <div {...stylex.props(styles.tabList)}>
           {tabs.map((tab) => (
             <button
@@ -58,16 +60,19 @@ export const Tabs = ({ defaultSelectedTab, tabs, ...props }: TabsProps) => {
               ref={(el) => {
                 tabRefs.current.set(tab.key, el);
               }}
-              {...stylex.props(styles.tabButton, activeTab === tab.key && styles.tabButtonActive)}
+              {...stylex.props(
+                styles.tabButton,
+                activeTab === tab.key && styles.tabButtonActive,
+              )}
               aria-controls={`tabpanel-${tab.key}`}
               aria-selected={activeTab === tab.key}
               id={`tab-${tab.key}`}
               onClick={() => {
                 setActiveTab(tab.key);
               }}
-              role="tab"
+              role='tab'
               tabIndex={activeTab === tab.key ? 0 : -1}
-              type="button"
+              type='button'
             >
               {tab.header}
             </button>
@@ -76,12 +81,15 @@ export const Tabs = ({ defaultSelectedTab, tabs, ...props }: TabsProps) => {
       </div>
       <div {...stylex.props(styles.tabContent)}>
         {tabs.map((tab) => (
-          <Activity key={tab.key} mode={activeTab === tab.key ? "visible" : "hidden"}>
+          <Activity
+            key={tab.key}
+            mode={activeTab === tab.key ? 'visible' : 'hidden'}
+          >
             <div
               {...stylex.props(styles.tabPanel)}
               aria-labelledby={`tab-${tab.key}`}
               id={`tabpanel-${tab.key}`}
-              role="tabpanel"
+              role='tabpanel'
               tabIndex={0}
             >
               {tab.children}

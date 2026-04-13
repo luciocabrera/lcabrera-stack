@@ -1,7 +1,7 @@
-import * as stylex from "@stylexjs/stylex";
+import * as stylex from '@stylexjs/stylex';
 
-import { spacing, typography } from "@/design-system/tokens/base.stylex";
-import { colors } from "@/design-system/tokens/colors.stylex";
+import { spacing, typography } from '@/design-system/tokens/base.stylex';
+import { colors } from '@/design-system/tokens/colors.stylex';
 
 /**
  * Shared filter styles reused across filter input components.
@@ -12,56 +12,56 @@ import { colors } from "@/design-system/tokens/colors.stylex";
 export const filterBaseStyles = stylex.create({
   container: {
     gap: spacing.sm,
-    display: "flex",
-    flexDirection: "column",
+    display: 'flex',
+    flexDirection: 'column',
   },
   input: {
     padding: `${spacing.xs} ${spacing.sm}`,
     borderColor: {
       default: colors.borderPrimary,
-      ":focus-visible": colors.borderFocus,
-      ":focus": colors.borderFocus,
+      ':focus-visible': colors.borderFocus,
+      ':focus': colors.borderFocus,
     },
-    borderRadius: "0.25rem",
-    borderStyle: "solid",
-    borderWidth: "1px",
-    outline: "none !important",
-    transition: "border-color 0.15s ease",
-    appearance: "none",
+    borderRadius: '0.25rem',
+    borderStyle: 'solid',
+    borderWidth: '1px',
+    outline: 'none !important',
+    transition: 'border-color 0.15s ease',
+    appearance: 'none',
     backgroundColor: colors.surfacePrimary,
-    boxShadow: "none !important",
+    boxShadow: 'none !important',
     color: colors.textPrimary,
     fontSize: typography.fontSizeSm,
     outlineOffset: null,
-    height: "2.25rem",
-    width: "100%",
+    height: '2.25rem',
+    width: '100%',
   },
   inputWrapper: {
-    overflow: "hidden",
-    position: "relative",
-    height: "2.25rem",
+    overflow: 'hidden',
+    position: 'relative',
+    height: '2.25rem',
   },
   inputGroup: {
     gap: spacing.sm,
-    alignItems: "center",
-    display: "flex",
+    alignItems: 'center',
+    display: 'flex',
   },
   select: {
     padding: `${spacing.xs} ${spacing.sm}`,
     borderColor: {
       default: colors.borderPrimary,
-      ":focus": colors.borderFocus,
+      ':focus': colors.borderFocus,
     },
-    borderRadius: "0.25rem",
-    borderStyle: "solid",
-    borderWidth: "1px",
+    borderRadius: '0.25rem',
+    borderStyle: 'solid',
+    borderWidth: '1px',
     outline: {
-      default: "revert",
-      ":focus": "none",
+      default: 'revert',
+      ':focus': 'none',
     },
     backgroundColor: colors.surfacePrimary,
     color: colors.textPrimary,
-    cursor: "pointer",
+    cursor: 'pointer',
     fontSize: typography.fontSizeSm,
   },
   separator: {

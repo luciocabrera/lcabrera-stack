@@ -1,13 +1,16 @@
-import type { ColumnOrderState, SortingState } from "@/components/Table/Table.types";
+import type {
+  ColumnOrderState,
+  SortingState,
+} from '@/components/Table/Table.types';
 
-import { useTableConfigContextValue } from "@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook";
+import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import {
   detectPinOrderConflict,
   restoreStaticColumnOrder,
-} from "@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils";
-import { useTableDrawerContextValue } from "@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook";
+} from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
+import { useTableDrawerContextValue } from '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
 
-import { useColumnOrderSectionContextValue } from "../useColumnOrderSectionContextValue.hook.ts";
+import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook.ts';
 
 /**
  * Hook to order columns by current sorting state.
@@ -27,7 +30,9 @@ export const useOrderBySorting = () => {
     const staticKeys = tableColumnsStore.get()?.staticKeys ?? new Set<string>();
 
     const sortedKeys = sorting.map((s) => s.columnKey);
-    const remainingKeys = columnsOrder.filter((key) => !sortedKeys.includes(key));
+    const remainingKeys = columnsOrder.filter(
+      (key) => !sortedKeys.includes(key),
+    );
 
     const newOrder = restoreStaticColumnOrder({
       currentOrder: columnsOrder,
@@ -43,7 +48,7 @@ export const useOrderBySorting = () => {
     modalsStore.set({
       orderConflict: {
         description:
-          "Reordering columns by sorting will move pinned columns out of their pinned positions. Choose how to proceed:",
+          'Reordering columns by sorting will move pinned columns out of their pinned positions. Choose how to proceed:',
         isOpen: true,
         pendingOrder: newOrder,
         pendingPinning: columnPinning,

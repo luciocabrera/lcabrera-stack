@@ -1,4 +1,7 @@
-import type { ColumnPinningState, TableColumn } from "@/components/Table/Table.types";
+import type {
+  ColumnPinningState,
+  TableColumn,
+} from '@/components/Table/Table.types';
 
 /** Column groups produced by splitColumnsByPinning. */
 export type SplitColumnsByPinningResult<TData> = {
@@ -32,8 +35,12 @@ export const splitColumnsByPinning = <TData = Record<string, unknown>>({
   const leftPinnedSet = new Set<string>(columnPinning.left);
   const rightPinnedSet = new Set<string>(columnPinning.right);
 
-  const leftPinnedCols = effectiveColumns.filter((col) => leftPinnedSet.has(col.key));
-  const rightPinnedCols = effectiveColumns.filter((col) => rightPinnedSet.has(col.key));
+  const leftPinnedCols = effectiveColumns.filter((col) =>
+    leftPinnedSet.has(col.key),
+  );
+  const rightPinnedCols = effectiveColumns.filter((col) =>
+    rightPinnedSet.has(col.key),
+  );
   const centerCols = effectiveColumns.filter(
     (col) => !leftPinnedSet.has(col.key) && !rightPinnedSet.has(col.key),
   );

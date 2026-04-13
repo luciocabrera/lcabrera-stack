@@ -1,12 +1,12 @@
-import type { FastifyPluginAsync } from "fastify";
-import type { Pool } from "pg";
+import type { FastifyPluginAsync } from 'fastify';
+import type { Pool } from 'pg';
 
-import type { EnvConfig } from "../../config/env.schema";
-import { HttpError } from "../../errors/httpError";
-import { delay } from "../../utils/delay.util";
-import { createJsonFieldsParser } from "../../utils/parseJsonQueryFields.util";
+import type { EnvConfig } from '../../config/env.schema';
+import { HttpError } from '../../errors/httpError';
+import { delay } from '../../utils/delay.util';
+import { createJsonFieldsParser } from '../../utils/parseJsonQueryFields.util';
 
-import { createEnterpriseOrdersRepository } from "./enterpriseOrders.repository";
+import { createEnterpriseOrdersRepository } from './enterpriseOrders.repository';
 import {
   type DistinctColumnParams,
   type DistinctValuesQuery,
@@ -16,7 +16,7 @@ import {
   distinctValuesQuerySchema,
   orderByIdParamsSchema,
   paginatedEnterpriseOrdersQuerySchema,
-} from "./enterpriseOrders.schema";
+} from './enterpriseOrders.schema';
 
 type CreateEnterpriseOrdersPluginArgs = {
   readonly envConfig: EnvConfig;
@@ -31,10 +31,13 @@ export const createEnterpriseOrdersPlugin =
   async (fastify) => {
     const repository = createEnterpriseOrdersRepository({ pool });
 
-    fastify.addHook("preValidation", createJsonFieldsParser(["sort", "filter"]));
+    fastify.addHook(
+      'preValidation',
+      createJsonFieldsParser(['sort', 'filter']),
+    );
 
     fastify.get<{ Querystring: PaginatedEnterpriseOrdersQuery }>(
-      "/paginated",
+      '/paginated',
       { schema: { querystring: paginatedEnterpriseOrdersQuerySchema } },
       async (request) => {
         if (envConfig.ENTERPRISE_ORDERS_DELAY_MS > 0) {
@@ -58,7 +61,7 @@ export const createEnterpriseOrdersPlugin =
       Params: DistinctColumnParams;
       Querystring: DistinctValuesQuery;
     }>(
-      "/distinct/:columnName",
+      '/distinct/:columnName',
       {
         schema: {
           params: distinctColumnParamsSchema,
@@ -80,7 +83,7 @@ export const createEnterpriseOrdersPlugin =
     );
 
     fastify.get<{ Params: OrderByIdParams }>(
-      "/:orderId",
+      '/:orderId',
       { schema: { params: orderByIdParamsSchema } },
       async (request) => {
         const orderId = Number.parseInt(request.params.orderId, 10);
@@ -89,7 +92,7 @@ export const createEnterpriseOrdersPlugin =
 
         if (!result) {
           throw new HttpError({
-            message: "Order not found",
+            message: 'Order not found',
             statusCode: 404,
           });
         }

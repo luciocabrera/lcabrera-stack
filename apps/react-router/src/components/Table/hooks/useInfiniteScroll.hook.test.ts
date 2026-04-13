@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
 
-import type { RefObject } from "react";
+import type { RefObject } from 'react';
 
-import { act, renderHook } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { act, renderHook } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 
-import { useInfiniteScroll } from "./useInfiniteScroll.hook.ts";
+import { useInfiniteScroll } from './useInfiniteScroll.hook.ts';
 
 type Response = {
   readonly rows: readonly Row[];
@@ -20,17 +20,17 @@ const dataSelector = (response: Response): Row[] => [...response.rows];
 const dataTotalSelector = (response: Response): number => response.total;
 
 const createContainer = (): HTMLElement => {
-  const container = document.createElement("div");
+  const container = document.createElement('div');
 
-  Object.defineProperty(container, "clientHeight", {
+  Object.defineProperty(container, 'clientHeight', {
     configurable: true,
     value: 400,
   });
-  Object.defineProperty(container, "scrollHeight", {
+  Object.defineProperty(container, 'scrollHeight', {
     configurable: true,
     value: 1000,
   });
-  Object.defineProperty(container, "scrollTop", {
+  Object.defineProperty(container, 'scrollTop', {
     configurable: true,
     value: 0,
     writable: true,
@@ -39,8 +39,8 @@ const createContainer = (): HTMLElement => {
   return container;
 };
 
-describe("useInfiniteScroll", () => {
-  it("fetches more data when the user scrolls within the threshold", () => {
+describe('useInfiniteScroll', () => {
+  it('fetches more data when the user scrolls within the threshold', () => {
     const container = createContainer();
     const fetchMoreData = vi
       .fn<
@@ -51,7 +51,10 @@ describe("useInfiniteScroll", () => {
         }: {
           readonly dataSelector?: (response: Response) => Row[];
           readonly dataTotalSelector?: (response: Response) => number;
-          readonly onLoadMore?: (params: { limit: number; skip: number }) => Promise<Response>;
+          readonly onLoadMore?: (params: {
+            limit: number;
+            skip: number;
+          }) => Promise<Response>;
         }) => Promise<void>
       >()
       .mockResolvedValue();
@@ -75,7 +78,7 @@ describe("useInfiniteScroll", () => {
 
     act(() => {
       container.scrollTop = 520;
-      container.dispatchEvent(new Event("scroll"));
+      container.dispatchEvent(new Event('scroll'));
     });
 
     expect(fetchMoreData).toHaveBeenCalledWith({
@@ -85,7 +88,7 @@ describe("useInfiniteScroll", () => {
     });
   });
 
-  it("does not fetch when already loading or when no more rows exist", () => {
+  it('does not fetch when already loading or when no more rows exist', () => {
     const container = createContainer();
     const fetchMoreData = vi.fn().mockImplementation(() => Promise.resolve());
     const onLoadMore = vi.fn();
@@ -106,13 +109,13 @@ describe("useInfiniteScroll", () => {
 
     act(() => {
       container.scrollTop = 520;
-      container.dispatchEvent(new Event("scroll"));
+      container.dispatchEvent(new Event('scroll'));
     });
 
     expect(fetchMoreData).not.toHaveBeenCalled();
   });
 
-  it("does not fetch when onLoadMore is undefined", () => {
+  it('does not fetch when onLoadMore is undefined', () => {
     const container = createContainer();
     const fetchMoreData = vi.fn().mockImplementation(() => Promise.resolve());
     const scrollContainerRef = {
@@ -131,17 +134,17 @@ describe("useInfiniteScroll", () => {
 
     act(() => {
       container.scrollTop = 520;
-      container.dispatchEvent(new Event("scroll"));
+      container.dispatchEvent(new Event('scroll'));
     });
 
     expect(fetchMoreData).not.toHaveBeenCalled();
   });
 
-  it("removes the scroll listener on unmount", () => {
+  it('removes the scroll listener on unmount', () => {
     const container = createContainer();
     const fetchMoreData = vi.fn().mockImplementation(() => Promise.resolve());
     const onLoadMore = vi.fn();
-    const removeEventListenerSpy = vi.spyOn(container, "removeEventListener");
+    const removeEventListenerSpy = vi.spyOn(container, 'removeEventListener');
     const scrollContainerRef = {
       current: container,
     } as RefObject<HTMLElement | null>;
@@ -159,6 +162,9 @@ describe("useInfiniteScroll", () => {
 
     unmount();
 
-    expect(removeEventListenerSpy).toHaveBeenCalledWith("scroll", expect.any(Function));
+    expect(removeEventListenerSpy).toHaveBeenCalledWith(
+      'scroll',
+      expect.any(Function),
+    );
   });
 });

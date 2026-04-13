@@ -1,37 +1,44 @@
-import * as stylex from "@stylexjs/stylex";
-import { useState } from "react";
+import * as stylex from '@stylexjs/stylex';
+import { useState } from 'react';
 
-import type { PinConflictResolution } from "@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types";
-import type { PinConflictState, PinSide } from "@/types/ui.types";
+import type { PinConflictResolution } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
+import type { PinConflictState, PinSide } from '@/types/ui.types';
 
-import { Button } from "@/components/Button";
-import { MoreVerticalIcon, PinIcon, PinOffIcon } from "@/components/Icons";
-import { PinSideModal } from "@/components/PinSideModal";
+import { Button } from '@/components/Button';
+import { MoreVerticalIcon, PinIcon, PinOffIcon } from '@/components/Icons';
+import { PinSideModal } from '@/components/PinSideModal';
 import {
   useAcceptHeaderPinConflict,
   useAcceptHeaderPinSide,
   useSetColumnPinning,
   useSetColumnSizing,
   useSetColumnSorting,
-} from "@/components/Table/contexts/TableConfig/columns/actions";
-import { useColumnResize } from "@/components/Table/hooks";
-import { DEFAULT_MIN_COLUMN_WIDTH } from "@/components/Table/Table.constants";
-import { PinConflictModal } from "@/components/Table/TableSettingsDrawer/ColumnOrderSection/PinConflictModal";
-import { useRenderTracker } from "@/utils/performance";
+} from '@/components/Table/contexts/TableConfig/columns/actions';
+import { useColumnResize } from '@/components/Table/hooks';
+import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
+import { PinConflictModal } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/PinConflictModal';
+import { useRenderTracker } from '@/utils/performance';
 
-import type { TableHeaderCellProps } from "./TableHeaderCell.types.ts";
+import type { TableHeaderCellProps } from './TableHeaderCell.types.ts';
 
 import {
   useGetColumnSizing,
   useGetNormalizedColumn,
-} from "../contexts/TableConfig/columns/selectors/index.ts";
+} from '../contexts/TableConfig/columns/selectors/index.ts';
 import {
   useSetTableColumnSelectedKey,
   useToogleTableIsColumnSettingsOpen,
-} from "../contexts/TableConfig/meta/actions/index.ts";
-import { SortIcon } from "./SortIcon/index.ts";
-import { skeletonStyles, tableHeaderCellStyles } from "./TableHeaderCell.stylex.ts";
-import { getNextSortDirection, getPinnedStyle, getShadowStyle } from "./utils/index.ts";
+} from '../contexts/TableConfig/meta/actions/index.ts';
+import { SortIcon } from './SortIcon/index.ts';
+import {
+  skeletonStyles,
+  tableHeaderCellStyles,
+} from './TableHeaderCell.stylex.ts';
+import {
+  getNextSortDirection,
+  getPinnedStyle,
+  getShadowStyle,
+} from './utils/index.ts';
 
 export const TableHeaderCell = <TData extends Record<string, unknown>>({
   columnKey,
@@ -57,7 +64,7 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
   const [isPinSideModalOpen, setIsPinSideModalOpen] = useState(false);
   const [pinConflict, setPinConflict] = useState<PinConflictState>({
     isOpen: false,
-    side: "left",
+    side: 'left',
   });
 
   const { isHeaderHidden, label, maxWidth, minWidth } = column;
@@ -113,11 +120,11 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
 
   const handlePinConflictAccept = (resolution: PinConflictResolution) => {
     acceptHeaderPinConflict({ columnKey, resolution, side: pinConflict.side });
-    setPinConflict({ isOpen: false, side: "left" });
+    setPinConflict({ isOpen: false, side: 'left' });
   };
 
   const handlePinConflictCancel = () => {
-    setPinConflict({ isOpen: false, side: "left" });
+    setPinConflict({ isOpen: false, side: 'left' });
   };
 
   const pinnedStylex = getPinnedStyle(pinInfo);
@@ -146,31 +153,37 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
             {!isStatic && (
               <Button
                 aria-label={pinInfo?.side ? `Unpin ${label}` : `Pin ${label}`}
-                color="ghost"
+                color='ghost'
                 customStylex={tableHeaderCellStyles.settingsButton}
-                icon={pinInfo?.side ? <PinIcon size={14} /> : <PinOffIcon size={14} />}
+                icon={
+                  pinInfo?.side ? (
+                    <PinIcon size={14} />
+                  ) : (
+                    <PinOffIcon size={14} />
+                  )
+                }
                 onClick={handlePinClick}
-                size="embedded"
+                size='embedded'
               />
             )}
             {isSortable && (
               <Button
                 aria-label={`Sort by ${label}`}
-                color="ghost"
+                color='ghost'
                 customStylex={tableHeaderCellStyles.settingsButton}
                 icon={<SortIcon direction={sortDirection} />}
                 onClick={handleSort}
-                size="embedded"
+                size='embedded'
               />
             )}
             {hasSettings && (
               <Button
                 aria-label={`Settings for ${label}`}
-                color="ghost"
+                color='ghost'
                 customStylex={tableHeaderCellStyles.settingsButton}
                 icon={<MoreVerticalIcon size={14} />}
                 onClick={handleOpenSettings}
-                size="embedded"
+                size='embedded'
               />
             )}
           </div>
@@ -197,7 +210,7 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
               aria-label={`Resize ${label} column`}
               onDoubleClick={handleResizeDoubleClick}
               onMouseDown={onMouseDown}
-              role="separator"
+              role='separator'
               {...stylex.props(tableHeaderCellStyles.resizeHandle)}
             >
               <div

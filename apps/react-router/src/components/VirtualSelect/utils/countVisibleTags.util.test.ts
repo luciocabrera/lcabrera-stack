@@ -1,8 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { countVisibleTags } from "./countVisibleTags.util.ts";
+import { countVisibleTags } from './countVisibleTags.util.ts';
 
-const makeTag = (offsetTop: number, offsetHeight: number, extra: Record<string, string> = {}) => ({
+const makeTag = (
+  offsetTop: number,
+  offsetHeight: number,
+  extra: Record<string, string> = {},
+) => ({
   dataset: extra,
   offsetHeight,
   offsetTop,
@@ -11,15 +15,15 @@ const makeTag = (offsetTop: number, offsetHeight: number, extra: Record<string, 
 const makeTrigger = (children: ReturnType<typeof makeTag>[]): HTMLDivElement =>
   ({ children }) as unknown as HTMLDivElement;
 
-describe("countVisibleTags", () => {
-  it("returns fittingCount when all tags fit", () => {
+describe('countVisibleTags', () => {
+  it('returns fittingCount when all tags fit', () => {
     // TRIGGER_MAX_HEIGHT = 88
     const trigger = makeTrigger([makeTag(0, 20), makeTag(24, 20)]);
     const result = countVisibleTags({ totalCount: 2, trigger });
     expect(result).toBe(2);
   });
 
-  it("reserves 1 slot for overflow indicator when some tags do not fit", () => {
+  it('reserves 1 slot for overflow indicator when some tags do not fit', () => {
     const trigger = makeTrigger([
       makeTag(0, 20), // fits: 0+20=20 <= 88
       makeTag(24, 20), // fits: 24+20=44 <= 88
@@ -30,7 +34,7 @@ describe("countVisibleTags", () => {
     expect(result).toBe(1);
   });
 
-  it("returns at least 1 when fitting is 1 and overflow exists", () => {
+  it('returns at least 1 when fitting is 1 and overflow exists', () => {
     const trigger = makeTrigger([
       makeTag(0, 20), // fits
       makeTag(80, 20), // does not fit
@@ -40,9 +44,9 @@ describe("countVisibleTags", () => {
     expect(result).toBe(1);
   });
 
-  it("ignores chevron and overflow children", () => {
-    const chevron = makeTag(0, 20, { chevron: "true" });
-    const overflow = makeTag(0, 20, { overflow: "true" });
+  it('ignores chevron and overflow children', () => {
+    const chevron = makeTag(0, 20, { chevron: 'true' });
+    const overflow = makeTag(0, 20, { overflow: 'true' });
     const tag = makeTag(0, 20);
     const trigger = makeTrigger([chevron, overflow, tag]);
     const result = countVisibleTags({ totalCount: 1, trigger });

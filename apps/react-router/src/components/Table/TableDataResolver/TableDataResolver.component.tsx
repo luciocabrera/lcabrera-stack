@@ -1,6 +1,6 @@
-import { use } from "react";
+import { use } from 'react';
 
-import type { TableDataResolverProps } from "./TableDataResolver.types.ts";
+import type { TableDataResolverProps } from './TableDataResolver.types.ts';
 
 export const TableDataResolver = <TResponse,>({
   children,

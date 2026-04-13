@@ -8,7 +8,7 @@ export class HttpError extends Error {
 
   public constructor({ message, statusCode = 500 }: HttpErrorArgs) {
     super(message);
-    this.name = "HttpError";
+    this.name = 'HttpError';
     this.statusCode = statusCode;
   }
 }

@@ -1,18 +1,18 @@
-import * as stylex from "@stylexjs/stylex";
+import * as stylex from '@stylexjs/stylex';
 
-import { borderRadius } from "@/design-system/tokens/base.stylex";
-import { colors } from "@/design-system/tokens/colors.stylex";
+import { borderRadius } from '@/design-system/tokens/base.stylex';
+import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const tableRowStyles = stylex.create({
   base: {
-    alignItems: "center",
+    alignItems: 'center',
     backgroundColor: colors.surfacePrimary,
-    display: "flex",
+    display: 'flex',
     borderBottomColor: colors.borderSecondary,
-    borderBottomStyle: "solid",
-    borderBottomWidth: "1px",
+    borderBottomStyle: 'solid',
+    borderBottomWidth: '1px',
     minHeight: 0,
-    width: "100%",
+    width: '100%',
   },
   header: {
     padding: 0,
@@ -21,6 +21,6 @@ export const tableRowStyles = stylex.create({
     height: 40,
   },
   striped: {
-    backgroundColor: { ":nth-child(even)": colors.backgroundSecondary },
+    backgroundColor: { ':nth-child(even)': colors.backgroundSecondary },
   },
 });

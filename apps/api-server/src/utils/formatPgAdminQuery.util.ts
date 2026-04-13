@@ -1,15 +1,15 @@
-import type { QueryValue } from "../types/api.types";
+import type { QueryValue } from '../types/api.types';
 
 const formatQueryValue = (value: QueryValue): string => {
   if (value === null) {
-    return "NULL";
+    return 'NULL';
   }
 
-  if (typeof value === "boolean") {
-    return value ? "TRUE" : "FALSE";
+  if (typeof value === 'boolean') {
+    return value ? 'TRUE' : 'FALSE';
   }
 
-  if (typeof value === "number") {
+  if (typeof value === 'number') {
     return String(value);
   }
 
@@ -23,7 +23,10 @@ const formatQueryValue = (value: QueryValue): string => {
 /**
  * Replace `$n` placeholders with formatted values for pgAdmin-friendly logging.
  */
-export const formatPgAdminQuery = (query: string, params: readonly QueryValue[] = []): string => {
+export const formatPgAdminQuery = (
+  query: string,
+  params: readonly QueryValue[] = [],
+): string => {
   let formattedQuery = query;
 
   for (let index = params.length - 1; index >= 0; index -= 1) {
@@ -33,8 +36,11 @@ export const formatPgAdminQuery = (query: string, params: readonly QueryValue[] 
       continue;
     }
 
-    const placeholder = new RegExp(`\\$${index + 1}(?!\\d)`, "g");
-    formattedQuery = formattedQuery.replace(placeholder, formatQueryValue(parameterValue));
+    const placeholder = new RegExp(`\\$${index + 1}(?!\\d)`, 'g');
+    formattedQuery = formattedQuery.replace(
+      placeholder,
+      formatQueryValue(parameterValue),
+    );
   }
 
   return formattedQuery;

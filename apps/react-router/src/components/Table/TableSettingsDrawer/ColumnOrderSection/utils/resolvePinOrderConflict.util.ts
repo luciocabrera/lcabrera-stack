@@ -1,6 +1,9 @@
-import type { ColumnOrderState, ColumnPinningState } from "@/components/Table/Table.types";
+import type {
+  ColumnOrderState,
+  ColumnPinningState,
+} from '@/components/Table/Table.types';
 
-import type { OrderConflictResolution } from "../ColumnOrderSection.types.ts";
+import type { OrderConflictResolution } from '../ColumnOrderSection.types.ts';
 
 type ResolvePinOrderConflictArgs = {
   readonly columnPinning: ColumnPinningState;
@@ -22,13 +25,13 @@ export const resolvePinOrderConflict = ({
   resolution,
 }: ResolvePinOrderConflictArgs): ResolvePinOrderConflictResult => {
   switch (resolution) {
-    case "pin-to-match-order": {
+    case 'pin-to-match-order': {
       return pinToMatchOrder({ columnPinning, newOrder });
     }
-    case "remove-conflicting-pins": {
+    case 'remove-conflicting-pins': {
       return removeConflictingPins({ columnPinning, newOrder });
     }
-    case "reset-all-pins": {
+    case 'reset-all-pins': {
       return {
         columnOrder: newOrder,
         columnPinning: { left: [], right: [] },
@@ -43,7 +46,10 @@ export const resolvePinOrderConflict = ({
 const removeConflictingPins = ({
   columnPinning,
   newOrder,
-}: Omit<ResolvePinOrderConflictArgs, "resolution">): ResolvePinOrderConflictResult => {
+}: Omit<
+  ResolvePinOrderConflictArgs,
+  'resolution'
+>): ResolvePinOrderConflictResult => {
   const validLeft: string[] = [];
   for (const key of newOrder) {
     if (columnPinning.left.includes(key)) {
@@ -75,11 +81,17 @@ const removeConflictingPins = ({
 const pinToMatchOrder = ({
   columnPinning,
   newOrder,
-}: Omit<ResolvePinOrderConflictArgs, "resolution">): ResolvePinOrderConflictResult => {
+}: Omit<
+  ResolvePinOrderConflictArgs,
+  'resolution'
+>): ResolvePinOrderConflictResult => {
   const leftPinned = newOrder.filter((key) => columnPinning.left.includes(key));
-  const rightPinned = newOrder.filter((key) => columnPinning.right.includes(key));
+  const rightPinned = newOrder.filter((key) =>
+    columnPinning.right.includes(key),
+  );
   const middle = newOrder.filter(
-    (key) => !columnPinning.left.includes(key) && !columnPinning.right.includes(key),
+    (key) =>
+      !columnPinning.left.includes(key) && !columnPinning.right.includes(key),
   );
 
   return {

@@ -1,9 +1,12 @@
-import type { ComponentPropsWithoutRef } from "react";
+import type { ComponentPropsWithoutRef } from 'react';
 
 /**
  * ToggleSwitch component props
  */
-export type ToggleSwitchProps = Omit<ComponentPropsWithoutRef<"input">, "onChange" | "type"> & {
+export type ToggleSwitchProps = Omit<
+  ComponentPropsWithoutRef<'input'>,
+  'onChange' | 'type'
+> & {
   /** Whether the toggle is checked */
   readonly isChecked: boolean;
   /** Whether the toggle is disabled */

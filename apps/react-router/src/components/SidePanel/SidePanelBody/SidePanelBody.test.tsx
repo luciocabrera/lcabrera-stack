@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
 
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { render, screen } from '@testing-library/react';
+import { describe, expect, it } from 'vitest';
 
-import { SidePanelBody } from "./SidePanelBody.component.tsx";
+import { SidePanelBody } from './SidePanelBody.component.tsx';
 
-describe("SidePanelBody", () => {
+describe('SidePanelBody', () => {
   it("renders children inside a div with data-testid='side-panel-body'", () => {
     render(
       <SidePanelBody>
@@ -13,6 +13,8 @@ describe("SidePanelBody", () => {
       </SidePanelBody>,
     );
 
-    expect(screen.getByTestId("side-panel-body").textContent).toContain("Panel body content");
+    expect(screen.getByTestId('side-panel-body').textContent).toContain(
+      'Panel body content',
+    );
   });
 });

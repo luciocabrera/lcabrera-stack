@@ -1,11 +1,11 @@
-import type { DataKey, TableColumn } from "@/components/Table/Table.types";
-import type { ColumnFilter, OperatorType } from "@/types/filterOperators.types";
+import type { DataKey, TableColumn } from '@/components/Table/Table.types';
+import type { ColumnFilter, OperatorType } from '@/types/filterOperators.types';
 
 export type InputContentProps<TData> = {
   /** Column key (for stable input names) */
   readonly columnKey: DataKey<TData>;
   /** Column configuration */
-  readonly dataType: TableColumn<TData>["dataType"];
+  readonly dataType: TableColumn<TData>['dataType'];
   /** Current filter value */
   readonly filter?: ColumnFilter;
   /** Whether the column has an async fetcher for filter options */

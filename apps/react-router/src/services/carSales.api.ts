@@ -1,7 +1,7 @@
-import { getApiBaseUrl } from "@/utils/api";
-import { createLogger } from "@/utils/logger";
+import { getApiBaseUrl } from '@/utils/api';
+import { createLogger } from '@/utils/logger';
 
-const log = createLogger({ prefix: "[carSales]" });
+const log = createLogger({ prefix: '[carSales]' });
 
 /**
  * Car Sales API Service
@@ -95,7 +95,7 @@ export const carSalesApi = {
     limit: number;
     requestUrl?: string;
     skip: number;
-    sorting?: { columnKey: string; direction: "asc" | "desc" }[];
+    sorting?: { columnKey: string; direction: 'asc' | 'desc' }[];
   }): Promise<CarSalesResponse & { hasMore: boolean }> => {
     const params = new URLSearchParams({
       limit: limit.toString(),
@@ -104,19 +104,21 @@ export const carSalesApi = {
 
     // Add sorting parameters if provided
     if (sorting && sorting.length > 0) {
-      params.append("sort", JSON.stringify(sorting));
+      params.append('sort', JSON.stringify(sorting));
     }
 
     const url = `${getApiBaseUrl(requestUrl)}/car-sales/paginated?${params.toString()}`;
-    log.debug("🌐 Fetching from URL:", url);
+    log.debug('🌐 Fetching from URL:', url);
 
     const fetchData = () =>
       fetch(url).then((response) => {
-        log.debug("📡 Response status:", response.status, response.statusText);
+        log.debug('📡 Response status:', response.status, response.statusText);
         if (!response.ok) {
           throw new Error(`Failed to fetch car sales: ${response.statusText}`);
         }
-        return response.json() as Promise<CarSalesResponse & { hasMore: boolean }>;
+        return response.json() as Promise<
+          CarSalesResponse & { hasMore: boolean }
+        >;
       });
 
     // Add fake delay for testing skeleton/loading states

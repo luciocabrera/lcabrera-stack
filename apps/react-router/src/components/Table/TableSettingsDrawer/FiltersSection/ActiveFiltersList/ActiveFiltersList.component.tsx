@@ -1,25 +1,25 @@
-import * as stylex from "@stylexjs/stylex";
+import * as stylex from '@stylexjs/stylex';
 
-import { Button } from "@/components/Button";
-import { MenuCloseIcon } from "@/components/Icons";
-import { InfoBox } from "@/components/InfoBox";
-import { SidePanelSectionHeader } from "@/components/SidePanel";
-import { useGetNormalizedColumns } from "@/components/Table/contexts/TableConfig/columns/selectors";
-import { FilterInputs } from "@/components/Table/filters/FilterInputs";
-import { LIST_MAX_HEIGHT } from "@/components/VirtualList/VirtualList.constants";
-import { ICON_SIZE_MD } from "@/design-system/constants";
+import { Button } from '@/components/Button';
+import { MenuCloseIcon } from '@/components/Icons';
+import { InfoBox } from '@/components/InfoBox';
+import { SidePanelSectionHeader } from '@/components/SidePanel';
+import { useGetNormalizedColumns } from '@/components/Table/contexts/TableConfig/columns/selectors';
+import { FilterInputs } from '@/components/Table/filters/FilterInputs';
+import { LIST_MAX_HEIGHT } from '@/components/VirtualList/VirtualList.constants';
+import { ICON_SIZE_MD } from '@/design-system/constants';
 
 import type {
   ActiveFiltersListProps,
   HandleFilterChangeArgs,
   HandleToggleArgs,
-} from "./ActiveFiltersList.types.ts";
+} from './ActiveFiltersList.types.ts';
 
-import { useSetColumnFilters } from "../../TableDrawerContext/actions/index.ts";
-import { useGetColumnFilters } from "../../TableDrawerContext/selectors/index.ts";
-import { FiltersSectionToolbar } from "../FiltersSectionToolbar/index.ts";
-import { validateFilter } from "../validateFilter.util.ts";
-import { styles } from "./ActiveFiltersList.stylex.ts";
+import { useSetColumnFilters } from '../../TableDrawerContext/actions/index.ts';
+import { useGetColumnFilters } from '../../TableDrawerContext/selectors/index.ts';
+import { FiltersSectionToolbar } from '../FiltersSectionToolbar/index.ts';
+import { validateFilter } from '../validateFilter.util.ts';
+import { styles } from './ActiveFiltersList.stylex.ts';
 
 export const ActiveFiltersList = ({
   expandedFilters,
@@ -57,7 +57,10 @@ export const ActiveFiltersList = ({
     onExpandedFiltersChange(newExpanded);
   };
 
-  const handleFilterChange = ({ columnKey, filter }: HandleFilterChangeArgs) => {
+  const handleFilterChange = ({
+    columnKey,
+    filter,
+  }: HandleFilterChangeArgs) => {
     const newFilters = { ...filters, [columnKey]: filter };
     onFiltersChange(newFilters);
   };
@@ -77,7 +80,7 @@ export const ActiveFiltersList = ({
     <div {...stylex.props(styles.container)}>
       <SidePanelSectionHeader
         title={`Active Filters (${filterEntries.length})`}
-        toolbar={<FiltersSectionToolbar variant="toolbar" />}
+        toolbar={<FiltersSectionToolbar variant='toolbar' />}
       />
       {hasFilters ? (
         <div {...stylex.props(styles.filtersList)}>
@@ -100,23 +103,30 @@ export const ActiveFiltersList = ({
                     onClick={() => {
                       toggleFilterExpanded(columnKey);
                     }}
-                    type="button"
+                    type='button'
                   >
-                    <span {...stylex.props(styles.filterToggleIcon)}>{isExpanded ? "▼" : "▶"}</span>
+                    <span {...stylex.props(styles.filterToggleIcon)}>
+                      {isExpanded ? '▼' : '▶'}
+                    </span>
                     <span {...stylex.props(styles.filterItemLabel)}>
                       {column.label}
-                      {!isValid && <span {...stylex.props(styles.invalidBadge)}> ⚠️ Invalid</span>}
+                      {!isValid && (
+                        <span {...stylex.props(styles.invalidBadge)}>
+                          {' '}
+                          ⚠️ Invalid
+                        </span>
+                      )}
                     </span>
                   </button>
                   <Button
                     aria-label={`Remove ${column.label} filter`}
-                    color="ghost"
+                    color='ghost'
                     icon={<MenuCloseIcon size={ICON_SIZE_MD} />}
                     onClick={() => {
                       handleRemoveFilter(columnKey);
                     }}
-                    size="mini"
-                    width="auto"
+                    size='mini'
+                    width='auto'
                   />
                 </div>
                 {isExpanded && (
@@ -136,7 +146,9 @@ export const ActiveFiltersList = ({
           })}
         </div>
       ) : (
-        <InfoBox>No filters applied. Add a filter above to start filtering.</InfoBox>
+        <InfoBox>
+          No filters applied. Add a filter above to start filtering.
+        </InfoBox>
       )}
     </div>
   );

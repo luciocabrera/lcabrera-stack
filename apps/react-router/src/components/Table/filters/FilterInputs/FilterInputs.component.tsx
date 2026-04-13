@@ -1,26 +1,26 @@
-import * as stylex from "@stylexjs/stylex";
-import { Activity, useState } from "react";
+import * as stylex from '@stylexjs/stylex';
+import { Activity, useState } from 'react';
 
 import type {
   ColumnFilter,
   DateOperatorType,
   NumberOperatorType,
   TextOperatorType,
-} from "@/types/filterOperators.types";
+} from '@/types/filterOperators.types';
 
-import { useGetNormalizedColumn } from "@/components/Table/contexts/TableConfig/columns/selectors/useGetNormalizedColumn.hook";
-import { VirtualSelect } from "@/components/VirtualSelect";
+import { useGetNormalizedColumn } from '@/components/Table/contexts/TableConfig/columns/selectors/useGetNormalizedColumn.hook';
+import { VirtualSelect } from '@/components/VirtualSelect';
 
-import type { FilterInputsProps } from "./FilterInputs.types.ts";
+import type { FilterInputsProps } from './FilterInputs.types.ts';
 
-import { BooleanFilterInput } from "../BooleanFilterInput/index.ts";
-import { styles } from "./FilterInputs.stylex.ts";
-import { InputContent } from "./InputContent/index.ts";
+import { BooleanFilterInput } from '../BooleanFilterInput/index.ts';
+import { styles } from './FilterInputs.stylex.ts';
+import { InputContent } from './InputContent/index.ts';
 import {
   getOperatorFromFilter,
   getOperatorOptions,
   getSelectedOperatorLabel,
-} from "./utils/index.ts";
+} from './utils/index.ts';
 
 /**
  * Shared component for rendering filter inputs based on column data type.
@@ -60,7 +60,7 @@ export const FilterInputs = <TData = Record<string, unknown>>({
     const newOperator = matchingOp.value;
 
     // Boolean filters don't have operators
-    if (filter?.type === "boolean") return;
+    if (filter?.type === 'boolean') return;
 
     // If filter exists, update it with new operator
     if (filter) {
@@ -69,34 +69,34 @@ export const FilterInputs = <TData = Record<string, unknown>>({
     }
 
     // No filter yet - create initial filter based on column data type
-    if (column.dataType === "number") {
+    if (column.dataType === 'number') {
       onChange({
         operator: newOperator as NumberOperatorType,
-        type: "number",
+        type: 'number',
         value: undefined as unknown as number,
       });
-    } else if (column.dataType === "date") {
+    } else if (column.dataType === 'date') {
       onChange({
         operator: newOperator as DateOperatorType,
-        type: "date",
-        value: "",
+        type: 'date',
+        value: '',
       });
     } else {
       // String type (text filter)
       onChange({
         operator: newOperator as TextOperatorType,
-        type: "text",
-        value: "",
+        type: 'text',
+        value: '',
       });
     }
   };
 
   // Render based on data type
   // Boolean has no operator dropdown - render directly
-  if (column.dataType === "boolean") {
+  if (column.dataType === 'boolean') {
     return (
       <BooleanFilterInput
-        filter={filter?.type === "boolean" ? filter : undefined}
+        filter={filter?.type === 'boolean' ? filter : undefined}
         onChange={onChange}
       />
     );
@@ -116,23 +116,30 @@ export const FilterInputs = <TData = Record<string, unknown>>({
   );
 
   return (
-    <div {...stylex.props(styles.container, shouldFillHeight ? styles.containerFill : undefined)}>
+    <div
+      {...stylex.props(
+        styles.container,
+        shouldFillHeight ? styles.containerFill : undefined,
+      )}
+    >
       <VirtualSelect
         customStylex={shouldFillHeight ? styles.operatorOverride : undefined}
-        mode="single"
+        mode='single'
         onChange={handleOperatorChange}
         onOpenChange={setIsOperatorOpen}
         options={operatorLabels}
-        placeholder="Select operator..."
+        placeholder='Select operator...'
         selected={selectedOperatorLabel}
       />
       {shouldFillHeight ? (
-        <Activity mode={isOperatorOpen || !filter ? "hidden" : "visible"}>
+        <Activity mode={isOperatorOpen || !filter ? 'hidden' : 'visible'}>
           {inputComponent}
         </Activity>
       ) : (
         filter && (
-          <div {...stylex.props(isOperatorOpen && styles.contentHidden)}>{inputComponent}</div>
+          <div {...stylex.props(isOperatorOpen && styles.contentHidden)}>
+            {inputComponent}
+          </div>
         )
       )}
     </div>

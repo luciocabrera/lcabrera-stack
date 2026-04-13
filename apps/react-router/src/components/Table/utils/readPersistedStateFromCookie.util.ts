@@ -1,9 +1,9 @@
-import { readFromCookie } from "@/utils/storage";
+import { readFromCookie } from '@/utils/storage';
 
-import type { PersistedState } from "./persistence.types.ts";
+import type { PersistedState } from './persistence.types.ts';
 
-import { getStorageKey } from "./getStorageKey.util.ts";
-import { PERSISTENCE_VERSION } from "./persistence.constants.ts";
+import { getStorageKey } from './getStorageKey.util.ts';
+import { PERSISTENCE_VERSION } from './persistence.constants.ts';
 
 type ReadPersistedStateFromCookieArgs = {
   readonly cookieString?: string;
@@ -36,16 +36,17 @@ export const readPersistedStateFromCookie = ({
   cookieString,
   persistenceKey,
 }: ReadPersistedStateFromCookieArgs): Partial<PersistedState> => {
-  const result: { -readonly [K in keyof PersistedState]?: PersistedState[K] } = {};
+  const result: { -readonly [K in keyof PersistedState]?: PersistedState[K] } =
+    {};
   const storageKey = getStorageKey({ persistenceKey });
 
-  const slices: (keyof Omit<PersistedState, "version">)[] = [
-    "sorting",
-    "columnFilters",
-    "columnOrder",
-    "columnPinning",
-    "columnSizing",
-    "columnVisibility",
+  const slices: (keyof Omit<PersistedState, 'version'>)[] = [
+    'sorting',
+    'columnFilters',
+    'columnOrder',
+    'columnPinning',
+    'columnSizing',
+    'columnVisibility',
   ];
 
   for (const slice of slices) {
@@ -61,7 +62,7 @@ export const readPersistedStateFromCookie = ({
         if (parsed.version === PERSISTENCE_VERSION) {
           // Convert array to Set for columnVisibility
           result[slice] = (
-            slice === "columnVisibility" && Array.isArray(parsed.value)
+            slice === 'columnVisibility' && Array.isArray(parsed.value)
               ? new Set(parsed.value as string[])
               : parsed.value
           ) as never;

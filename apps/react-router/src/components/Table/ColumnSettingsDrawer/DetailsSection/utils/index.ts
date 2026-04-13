@@ -1,1 +1,1 @@
-export { getBadgeStyle } from "./getBadgeStyle.util.ts";
+export { getBadgeStyle } from './getBadgeStyle.util.ts';

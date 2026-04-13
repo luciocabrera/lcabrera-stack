@@ -1,34 +1,34 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { getOperatorFromFilter } from "./getOperatorFromFilter.util.ts";
+import { getOperatorFromFilter } from './getOperatorFromFilter.util.ts';
 
-describe("getOperatorFromFilter", () => {
-  it("returns equals when filter is undefined", () => {
-    expect(getOperatorFromFilter({ filter: undefined })).toBe("equals");
+describe('getOperatorFromFilter', () => {
+  it('returns equals when filter is undefined', () => {
+    expect(getOperatorFromFilter({ filter: undefined })).toBe('equals');
   });
 
-  it("returns equals for boolean dataType regardless of filter", () => {
+  it('returns equals for boolean dataType regardless of filter', () => {
     expect(
       getOperatorFromFilter({
-        dataType: "boolean",
-        filter: { operator: "contains", type: "text", value: "x" },
+        dataType: 'boolean',
+        filter: { operator: 'contains', type: 'text', value: 'x' },
       }),
-    ).toBe("equals");
+    ).toBe('equals');
   });
 
-  it("returns operator from filter when present", () => {
+  it('returns operator from filter when present', () => {
     expect(
       getOperatorFromFilter({
-        filter: { operator: "contains", type: "text", value: "hello" },
+        filter: { operator: 'contains', type: 'text', value: 'hello' },
       }),
-    ).toBe("contains");
+    ).toBe('contains');
   });
 
-  it("returns equals when filter has no operator field", () => {
+  it('returns equals when filter has no operator field', () => {
     expect(
       getOperatorFromFilter({
-        filter: { type: "boolean", value: true },
+        filter: { type: 'boolean', value: true },
       }),
-    ).toBe("equals");
+    ).toBe('equals');
   });
 });

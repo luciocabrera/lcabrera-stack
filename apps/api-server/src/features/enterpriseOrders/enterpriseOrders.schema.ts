@@ -1,57 +1,67 @@
-import { z } from "zod";
+import { z } from 'zod';
 
-import { HttpError } from "../../errors/httpError";
-import type { SortRule } from "../../types/api.types";
-import { parseJsonQueryParam } from "../../utils/parseJsonQueryParam.util";
+import { HttpError } from '../../errors/httpError';
+import type { SortRule } from '../../types/api.types';
+import { parseJsonQueryParam } from '../../utils/parseJsonQueryParam.util';
 
-import type { EnterpriseOrdersFilter, EnterpriseOrdersFilters } from "./enterpriseOrders.types";
+import type {
+  EnterpriseOrdersFilter,
+  EnterpriseOrdersFilters,
+} from './enterpriseOrders.types';
 
 const sortRuleSchema = z.object({
   columnKey: z.string().min(1),
-  direction: z.enum(["asc", "desc"]),
+  direction: z.enum(['asc', 'desc']),
 });
 
 const booleanFilterSchema = z.object({
-  type: z.literal("boolean"),
+  type: z.literal('boolean'),
   value: z.boolean(),
 });
 
 const dateFilterSchema = z.object({
-  operator: z.enum(["after", "before", "between", "equals"]),
-  type: z.literal("date"),
+  operator: z.enum(['after', 'before', 'between', 'equals']),
+  type: z.literal('date'),
   value: z.string().min(1),
   value2: z.string().min(1).optional(),
 });
 
 const numberFilterSchema = z.object({
   operator: z.enum([
-    "between",
-    "equals",
-    "greaterThan",
-    "greaterThanOrEqual",
-    "lessThan",
-    "lessThanOrEqual",
-    "notEquals",
+    'between',
+    'equals',
+    'greaterThan',
+    'greaterThanOrEqual',
+    'lessThan',
+    'lessThanOrEqual',
+    'notEquals',
   ]),
-  type: z.literal("number"),
+  type: z.literal('number'),
   value: z.coerce.number(),
   value2: z.coerce.number().optional(),
 });
 
 const selectFilterSchema = z.object({
-  operator: z.enum(["equals", "notEquals"]).optional(),
-  type: z.enum(["multiSelect", "select"]),
+  operator: z.enum(['equals', 'notEquals']).optional(),
+  type: z.enum(['multiSelect', 'select']),
   value: z.string().min(1).optional(),
   values: z.array(z.string().min(1)).optional(),
 });
 
 const textFilterSchema = z.object({
-  operator: z.enum(["contains", "endsWith", "equals", "notContains", "notEquals", "startsWith"]),
-  type: z.literal("text"),
+  operator: z.enum([
+    'contains',
+    'endsWith',
+    'equals',
+    'notContains',
+    'notEquals',
+    'startsWith',
+  ]),
+  type: z.literal('text'),
   value: z.string().min(1),
 });
 
-const filterSchema = z.discriminatedUnion("type", [
+const filterSchema = z.discriminatedUnion('type', [
   booleanFilterSchema,
   dateFilterSchema,
   numberFilterSchema,
@@ -108,7 +118,7 @@ export const parseEnterpriseOrdersFilters = ({
 
   if (!result.success) {
     throw new HttpError({
-      message: "Invalid enterprise order filter parameter.",
+      message: 'Invalid enterprise order filter parameter.',
       statusCode: 400,
     });
   }
@@ -146,7 +156,7 @@ export const parseEnterpriseOrdersSorting = ({
 
   if (!result.success) {
     throw new HttpError({
-      message: "Invalid enterprise order sorting parameter.",
+      message: 'Invalid enterprise order sorting parameter.',
       statusCode: 400,
     });
   }

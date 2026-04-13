@@ -45,21 +45,21 @@ Override per-session: `VITE_LOG_LEVEL=silent vp dev`
 ### Default singleton logger
 
 ```ts
-import { logger } from "@/utils/logger";
+import { logger } from '@/utils/logger';
 
-logger.debug("Verbose trace"); // only when level >= debug
-logger.info("General info"); // only when level >= info
-logger.warn("Warning"); // only when level >= warn
-logger.error("Error", err); // only when level >= error
+logger.debug('Verbose trace'); // only when level >= debug
+logger.info('General info'); // only when level >= info
+logger.warn('Warning'); // only when level >= warn
+logger.error('Error', err); // only when level >= error
 ```
 
 ### Domain-specific logger with prefix
 
 ```ts
-import { createLogger } from "@/utils/logger";
+import { createLogger } from '@/utils/logger';
 
-const log = createLogger({ prefix: "[carSales]" });
-log.debug("Fetching from URL:", url);
+const log = createLogger({ prefix: '[carSales]' });
+log.debug('Fetching from URL:', url);
 // console output: [carSales] Fetching from URL: http://...
 ```
 

@@ -1,44 +1,62 @@
 // @vitest-environment jsdom
 
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { SidePanelHeaderToolbar } from "./SidePanelHeaderToolbar.component.tsx";
+import { SidePanelHeaderToolbar } from './SidePanelHeaderToolbar.component.tsx';
 
 afterEach(() => {
   cleanup();
 });
 
-describe("SidePanelHeaderToolbar", () => {
+describe('SidePanelHeaderToolbar', () => {
   it('shows "Pin drawer" button when not pinned', () => {
     render(
-      <SidePanelHeaderToolbar isPinned={false} onClose={() => void 0} onTogglePin={() => void 0} />,
+      <SidePanelHeaderToolbar
+        isPinned={false}
+        onClose={() => void 0}
+        onTogglePin={() => void 0}
+      />,
     );
-    expect(screen.getByRole("button", { name: "Pin drawer" })).not.toBeNull();
-    expect(screen.getByRole("button", { name: "Close drawer" })).not.toBeNull();
+    expect(screen.getByRole('button', { name: 'Pin drawer' })).not.toBeNull();
+    expect(screen.getByRole('button', { name: 'Close drawer' })).not.toBeNull();
   });
 
   it('shows "Unpin drawer" button when pinned', () => {
-    render(<SidePanelHeaderToolbar isPinned onClose={() => void 0} onTogglePin={() => void 0} />);
-    expect(screen.getByRole("button", { name: "Unpin drawer" })).not.toBeNull();
-    expect(screen.getByRole("button", { name: "Close drawer" })).not.toBeNull();
+    render(
+      <SidePanelHeaderToolbar
+        isPinned
+        onClose={() => void 0}
+        onTogglePin={() => void 0}
+      />,
+    );
+    expect(screen.getByRole('button', { name: 'Unpin drawer' })).not.toBeNull();
+    expect(screen.getByRole('button', { name: 'Close drawer' })).not.toBeNull();
   });
 
-  it("calls onTogglePin when pin button is clicked", () => {
+  it('calls onTogglePin when pin button is clicked', () => {
     const onTogglePin = vi.fn();
     render(
-      <SidePanelHeaderToolbar isPinned={false} onClose={() => void 0} onTogglePin={onTogglePin} />,
+      <SidePanelHeaderToolbar
+        isPinned={false}
+        onClose={() => void 0}
+        onTogglePin={onTogglePin}
+      />,
     );
-    fireEvent.click(screen.getByRole("button", { name: "Pin drawer" }));
+    fireEvent.click(screen.getByRole('button', { name: 'Pin drawer' }));
     expect(onTogglePin).toHaveBeenCalledTimes(1);
   });
 
-  it("calls onClose when close button is clicked", () => {
+  it('calls onClose when close button is clicked', () => {
     const onClose = vi.fn();
     render(
-      <SidePanelHeaderToolbar isPinned={false} onClose={onClose} onTogglePin={() => void 0} />,
+      <SidePanelHeaderToolbar
+        isPinned={false}
+        onClose={onClose}
+        onTogglePin={() => void 0}
+      />,
     );
-    fireEvent.click(screen.getByRole("button", { name: "Close drawer" }));
+    fireEvent.click(screen.getByRole('button', { name: 'Close drawer' }));
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 });

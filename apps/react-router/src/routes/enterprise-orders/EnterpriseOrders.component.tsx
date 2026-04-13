@@ -1,13 +1,17 @@
-import { useLoaderData } from "react-router";
+import { useLoaderData } from 'react-router';
 
-import type { EnterpriseOrder, EnterpriseOrdersResponse } from "@/services";
+import type { EnterpriseOrder, EnterpriseOrdersResponse } from '@/services';
 
-import { TableLayout } from "@/components/Table/TableLayout";
-import { enterpriseOrdersApi } from "@/services";
+import { TableLayout } from '@/components/Table/TableLayout';
+import { enterpriseOrdersApi } from '@/services';
 
-import type { loader } from "./enterprise-orders.loader.ts";
+import type { loader } from './enterprise-orders.loader.ts';
 
-import { COLUMNS, DEFAULT_COLUMN_PINNING, PERSISTENCE_KEY } from "./EnterpriseOrders.constants.tsx";
+import {
+  COLUMNS,
+  DEFAULT_COLUMN_PINNING,
+  PERSISTENCE_KEY,
+} from './EnterpriseOrders.constants.tsx';
 
 export const EnterpriseOrders = () => {
   const {
@@ -42,7 +46,7 @@ export const EnterpriseOrders = () => {
       persistenceKey={PERSISTENCE_KEY}
       sorting={sorting}
       suspenseKey={key}
-      title="Enterprise Orders - Infinite Scroll"
+      title='Enterprise Orders - Infinite Scroll'
     />
   );
 };

@@ -1,13 +1,17 @@
-import * as stylex from "@stylexjs/stylex";
-import { useId, useRef, useState } from "react";
+import * as stylex from '@stylexjs/stylex';
+import { useId, useRef, useState } from 'react';
 
-import type { TooltipProps } from "./Tooltip.types.ts";
+import type { TooltipProps } from './Tooltip.types.ts';
 
-import { ARROW_STYLES, TRANSITION_DURATION_MS } from "./Tooltip.constants.ts";
-import { styles } from "./Tooltip.stylex.ts";
-import { getArrowOffset, getArrowStyle } from "./utils/index.ts";
+import { ARROW_STYLES, TRANSITION_DURATION_MS } from './Tooltip.constants.ts';
+import { styles } from './Tooltip.stylex.ts';
+import { getArrowOffset, getArrowStyle } from './utils/index.ts';
 
-export const Tooltip = ({ children, content, placement = "top" }: TooltipProps) => {
+export const Tooltip = ({
+  children,
+  content,
+  placement = 'top',
+}: TooltipProps) => {
   const id = useId();
   const triggerRef = useRef<HTMLSpanElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
@@ -16,7 +20,7 @@ export const Tooltip = ({ children, content, placement = "top" }: TooltipProps) 
   const [isVisible, setIsVisible] = useState(false);
   const [arrowOffset, setArrowOffset] = useState<number | undefined>();
 
-  const anchorName = `--tooltip-${id.replaceAll(":", "")}`;
+  const anchorName = `--tooltip-${id.replaceAll(':', '')}`;
 
   const handleShow = () => {
     clearTimeout(hideTimeoutRef.current);
@@ -26,7 +30,7 @@ export const Tooltip = ({ children, content, placement = "top" }: TooltipProps) 
       if (triggerRef.current && tooltipRef.current) {
         const triggerRect = triggerRef.current.getBoundingClientRect();
         const tooltipRect = tooltipRef.current.getBoundingClientRect();
-        const isVertical = placement === "top" || placement === "bottom";
+        const isVertical = placement === 'top' || placement === 'bottom';
         const offset = getArrowOffset({
           placement,
           tooltipStart: isVertical ? tooltipRect.left : tooltipRect.top,
@@ -63,9 +67,9 @@ export const Tooltip = ({ children, content, placement = "top" }: TooltipProps) 
       </span>
       <div
         id={id}
-        popover="manual"
+        popover='manual'
         ref={tooltipRef}
-        role="tooltip"
+        role='tooltip'
         {...stylex.props(
           styles.tooltip(anchorName),
           styles[placement],
@@ -85,4 +89,4 @@ export const Tooltip = ({ children, content, placement = "top" }: TooltipProps) 
   );
 };
 
-Tooltip.displayName = "Tooltip";
+Tooltip.displayName = 'Tooltip';

@@ -1,5 +1,9 @@
-import type { StyleXStyles } from "@stylexjs/stylex";
-import type { ComponentPropsWithoutRef, MouseEventHandler, ReactNode } from "react";
+import type { StyleXStyles } from '@stylexjs/stylex';
+import type {
+  ComponentPropsWithoutRef,
+  MouseEventHandler,
+  ReactNode,
+} from 'react';
 
 import type {
   DesignSystemColor,
@@ -7,9 +11,12 @@ import type {
   DesignSystemSize,
   DesignSystemStyle,
   DesignSystemWidth,
-} from "@/types/design-system.types";
+} from '@/types/design-system.types';
 
-export type ButtonProps = Omit<ComponentPropsWithoutRef<"button">, "onClick"> & {
+export type ButtonProps = Omit<
+  ComponentPropsWithoutRef<'button'>,
+  'onClick'
+> & {
   readonly color?: DesignSystemColor;
   readonly customStylex?: StyleXStyles;
   readonly icon?: ReactNode;
@@ -18,7 +25,7 @@ export type ButtonProps = Omit<ComponentPropsWithoutRef<"button">, "onClick"> & 
   readonly orientation?: DesignSystemOrientation;
   readonly size?: DesignSystemSize;
   readonly tooltipContent?: ReactNode;
-  readonly tooltipPlacement?: "bottom" | "left" | "right" | "top";
+  readonly tooltipPlacement?: 'bottom' | 'left' | 'right' | 'top';
   readonly variant?: DesignSystemStyle;
   readonly width?: DesignSystemWidth;
 };

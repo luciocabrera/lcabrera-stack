@@ -1,19 +1,19 @@
-import * as stylex from "@stylexjs/stylex";
+import * as stylex from '@stylexjs/stylex';
 
-import { borderRadius } from "@/design-system/tokens/base.stylex";
-import { colors } from "@/design-system/tokens/colors.stylex";
+import { borderRadius } from '@/design-system/tokens/base.stylex';
+import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const tableCheckDisplayStyles = stylex.create({
   checkbox: {
     borderColor: colors.borderPrimary,
     borderRadius: borderRadius.sm,
-    borderStyle: "solid",
+    borderStyle: 'solid',
     borderWidth: 1,
-    alignItems: "center",
-    backgroundColor: "transparent",
+    alignItems: 'center',
+    backgroundColor: 'transparent',
     color: colors.textPrimary,
-    display: "flex",
-    justifyContent: "center",
+    display: 'flex',
+    justifyContent: 'center',
     height: 16,
     width: 16,
   },

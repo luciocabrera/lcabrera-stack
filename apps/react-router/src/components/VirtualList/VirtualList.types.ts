@@ -1,6 +1,6 @@
-import type { SelectFilter } from "@/types/filterOperators.types";
+import type { SelectFilter } from '@/types/filterOperators.types';
 
-export type ListFilterMode = "all" | "selected" | "unselected";
+export type ListFilterMode = 'all' | 'selected' | 'unselected';
 
 export type VirtualListDataState = {
   readonly data: readonly string[];

@@ -1,6 +1,6 @@
-import { createContext } from "react";
+import { createContext } from 'react';
 
-import type { FiltersDataContextValue } from "./FiltersDataContext.types.ts";
+import type { FiltersDataContextValue } from './FiltersDataContext.types.ts';
 
 /**
  * Filters data context for sharing filter lookup state across table components.
@@ -12,4 +12,4 @@ export const FiltersDataContext = createContext<FiltersDataContextValue>(
   {} as FiltersDataContextValue,
 );
 
-FiltersDataContext.displayName = "FiltersDataContext";
+FiltersDataContext.displayName = 'FiltersDataContext';

@@ -1,14 +1,14 @@
-import type { ColumnOrderState } from "@/components/Table/Table.types";
-import type { OrderConflictResolution } from "@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types";
+import type { ColumnOrderState } from '@/components/Table/Table.types';
+import type { OrderConflictResolution } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
 
-import { useTableConfigContextValue } from "@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook";
+import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import {
   resolvePinOrderConflict,
   restoreStaticColumnOrder,
-} from "@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils";
-import { useTableDrawerContextValue } from "@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook";
+} from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
+import { useTableDrawerContextValue } from '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
 
-import { useColumnOrderSectionContextValue } from "../useColumnOrderSectionContextValue.hook.ts";
+import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook.ts';
 
 /**
  * Hook to handle accepting an order conflict resolution.
@@ -31,7 +31,8 @@ export const useAcceptOrderConflict = () => {
 
     const tableColumnsState = tableColumnsStore.get();
     const staticKeys = tableColumnsState?.staticKeys ?? new Set<string>();
-    const currentOrder = drawerColumnsStore.get()?.columnOrder ?? ([] as ColumnOrderState);
+    const currentOrder =
+      drawerColumnsStore.get()?.columnOrder ?? ([] as ColumnOrderState);
 
     const finalOrder = restoreStaticColumnOrder({
       currentOrder,
@@ -48,13 +49,19 @@ export const useAcceptOrderConflict = () => {
       };
 
       for (const key of staticKeys) {
-        if (defaultPinning.left.includes(key) && !finalPinning.left.includes(key)) {
+        if (
+          defaultPinning.left.includes(key) &&
+          !finalPinning.left.includes(key)
+        ) {
           finalPinning = {
             ...finalPinning,
             left: [...finalPinning.left, key],
           };
         }
-        if (defaultPinning.right.includes(key) && !finalPinning.right.includes(key)) {
+        if (
+          defaultPinning.right.includes(key) &&
+          !finalPinning.right.includes(key)
+        ) {
           finalPinning = {
             ...finalPinning,
             right: [...finalPinning.right, key],

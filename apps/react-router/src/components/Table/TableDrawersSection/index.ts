@@ -1,1 +1,1 @@
-export { TableDrawersSection } from "./TableDrawersSection.component.tsx";
+export { TableDrawersSection } from './TableDrawersSection.component.tsx';

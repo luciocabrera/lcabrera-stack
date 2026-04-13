@@ -1,11 +1,11 @@
-import type { RefObject } from "react";
+import type { RefObject } from 'react';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 import {
   DEFAULT_CONTAINER_HEIGHT,
   DEFAULT_ROW_OVERSCAN,
-} from "@/constants/virtualization.constants";
+} from '@/constants/virtualization.constants';
 
 export type UseVirtualizationArgs = {
   readonly containerRef: RefObject<HTMLElement | null>;
@@ -23,15 +23,21 @@ export const useVirtualization = ({
   totalItems,
 }: UseVirtualizationArgs) => {
   const [scrollTop, setScrollTop] = useState(0);
-  const [containerHeight, setContainerHeight] = useState(defaultContainerHeight);
+  const [containerHeight, setContainerHeight] = useState(
+    defaultContainerHeight,
+  );
 
   const visibleCount = Math.ceil(containerHeight / itemHeight);
   const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
-  const endIndex = Math.min(totalItems, startIndex + visibleCount + overscan * 2);
+  const endIndex = Math.min(
+    totalItems,
+    startIndex + visibleCount + overscan * 2,
+  );
   const offsetY = startIndex * itemHeight;
   const totalHeight = totalItems * itemHeight;
   const visibleItemsCount = endIndex - startIndex;
-  const bottomSpacerHeight = totalHeight - (offsetY + visibleItemsCount * itemHeight);
+  const bottomSpacerHeight =
+    totalHeight - (offsetY + visibleItemsCount * itemHeight);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -51,12 +57,12 @@ export const useVirtualization = ({
     };
 
     updateHeight();
-    container?.addEventListener("scroll", handleScroll);
-    window.addEventListener("resize", updateHeight);
+    container?.addEventListener('scroll', handleScroll);
+    window.addEventListener('resize', updateHeight);
 
     return () => {
-      container?.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", updateHeight);
+      container?.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', updateHeight);
     };
   }, [containerRef, defaultContainerHeight]);
 

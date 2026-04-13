@@ -1,11 +1,11 @@
-import type { RefObject } from "react";
+import type { RefObject } from 'react';
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from 'react';
 
 import {
   DEFAULT_CONTAINER_HEIGHT,
   DEFAULT_ROW_OVERSCAN,
-} from "@/constants/virtualization.constants";
+} from '@/constants/virtualization.constants';
 
 export type UseVirtualizationResizeObserverArgs = {
   containerRef: RefObject<HTMLElement | null>;
@@ -23,16 +23,22 @@ export const useVirtualizationResizeObserver = ({
   totalItems,
 }: UseVirtualizationResizeObserverArgs) => {
   const [scrollTop, setScrollTop] = useState(0);
-  const [containerHeight, setContainerHeight] = useState(defaultContainerHeight);
+  const [containerHeight, setContainerHeight] = useState(
+    defaultContainerHeight,
+  );
   const rafIdRef = useRef(-1);
 
   const visibleCount = Math.ceil(containerHeight / itemHeight);
   const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
-  const endIndex = Math.min(totalItems, startIndex + visibleCount + overscan * 2);
+  const endIndex = Math.min(
+    totalItems,
+    startIndex + visibleCount + overscan * 2,
+  );
   const offsetY = startIndex * itemHeight;
   const totalHeight = totalItems * itemHeight;
   const visibleItemsCount = endIndex - startIndex;
-  const bottomSpacerHeight = totalHeight - (offsetY + visibleItemsCount * itemHeight);
+  const bottomSpacerHeight =
+    totalHeight - (offsetY + visibleItemsCount * itemHeight);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -80,14 +86,14 @@ export const useVirtualizationResizeObserver = ({
     }
 
     syncScrollPosition();
-    container?.addEventListener("scroll", handleScroll, { passive: true });
+    container?.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
       if (rafIdRef.current >= 0) {
         globalThis.cancelAnimationFrame(rafIdRef.current);
         rafIdRef.current = -1;
       }
-      container?.removeEventListener("scroll", handleScroll);
+      container?.removeEventListener('scroll', handleScroll);
       resizeObserver.disconnect();
     };
   }, [containerRef]);

@@ -1,12 +1,12 @@
-import type { Sorting } from "@/types/ui.types";
+import type { Sorting } from '@/types/ui.types';
 
-import type { SortingState } from "@/components/Table/Table.types";
+import type { SortingState } from '@/components/Table/Table.types';
 
-import { useTableConfigContextValue } from "@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook";
-import { useTableDataContextValue } from "@/components/Table/contexts/TableData/data/useTableDataContextValue.hook";
-import { usePersistTableStateAction } from "@/components/Table/hooks";
-import { getNormalizedColumns } from "@/components/Table/utils";
-import { serializeSortingToURL } from "@/utils/urlState";
+import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { useTableDataContextValue } from '@/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
+import { usePersistTableStateAction } from '@/components/Table/hooks';
+import { getNormalizedColumns } from '@/components/Table/utils';
+import { serializeSortingToURL } from '@/utils/urlState';
 
 export const useSetColumnSorting = <TData>() => {
   const { columnsStore, metaStore } = useTableConfigContextValue<TData>();
@@ -14,10 +14,10 @@ export const useSetColumnSorting = <TData>() => {
   const persistTableState = usePersistTableStateAction();
 
   return ({ columnKey, direction }: Sorting<TData>) => {
-    if (columnKey === "actions") return;
+    if (columnKey === 'actions') return;
 
     const columnsState = columnsStore.get();
-    const persistenceKey = metaStore.get()?.persistenceKey ?? "";
+    const persistenceKey = metaStore.get()?.persistenceKey ?? '';
     const sorting = columnsState?.sorting ?? [];
     const currentSort = sorting.find((s) => s.columnKey === columnKey);
     const hasCurrentSort = currentSort !== undefined;
@@ -55,9 +55,9 @@ export const useSetColumnSorting = <TData>() => {
     // Persist to cookie and sync URL params in one action
     persistTableState({
       persistenceKey,
-      searchParamKey: "sort",
+      searchParamKey: 'sort',
       searchParamValue: serializeSortingToURL(newSorting as SortingState),
-      slice: "sorting",
+      slice: 'sorting',
       valueSlice: newSorting,
     });
 

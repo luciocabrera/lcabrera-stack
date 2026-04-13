@@ -3,7 +3,7 @@
  * Levels are ordered by priority: silent < error < warn < info < debug.
  * Setting a level enables that level and all levels above it (lower priority number).
  */
-export type LogLevel = "debug" | "error" | "info" | "silent" | "warn";
+export type LogLevel = 'debug' | 'error' | 'info' | 'silent' | 'warn';
 
 /**
  * Numeric priority for each log level.

@@ -1,4 +1,4 @@
-import type { ListFilterMode } from "../VirtualList.types.ts";
+import type { ListFilterMode } from '../VirtualList.types.ts';
 
 export type GetFilteredOptionsArgs = {
   readonly listFilterMode: ListFilterMode;
@@ -20,9 +20,9 @@ export const getFilteredOptions = ({
     result = result.filter((option) => option.toLowerCase().includes(term));
   }
 
-  if (listFilterMode === "selected") {
+  if (listFilterMode === 'selected') {
     result = result.filter((option) => selectedValues.includes(option));
-  } else if (listFilterMode === "unselected") {
+  } else if (listFilterMode === 'unselected') {
     result = result.filter((option) => !selectedValues.includes(option));
   }
 

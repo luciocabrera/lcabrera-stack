@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react';
 
 export type ArrowOffsetParams = {
   readonly placement: TooltipPlacement;
@@ -6,7 +6,7 @@ export type ArrowOffsetParams = {
   readonly triggerCenter: number;
 };
 
-export type TooltipPlacement = "bottom" | "left" | "right" | "top";
+export type TooltipPlacement = 'bottom' | 'left' | 'right' | 'top';
 
 export type TooltipProps = {
   /** The element that triggers the tooltip on hover/focus */

@@ -1,15 +1,15 @@
-import type { StyleXStyles } from "@stylexjs/stylex";
-import type { ComponentPropsWithRef, ReactNode } from "react";
+import type { StyleXStyles } from '@stylexjs/stylex';
+import type { ComponentPropsWithRef, ReactNode } from 'react';
 
-import type { ColumnFilter } from "@/types/filterOperators.types";
+import type { ColumnFilter } from '@/types/filterOperators.types';
 import type {
   CurrencyFormatOptions,
   DateFormatOptions,
   NumberFormatOptions,
-} from "@/types/format.types";
-import type { InfiniteScroll, Sorting } from "@/types/ui.types";
+} from '@/types/format.types';
+import type { InfiniteScroll, Sorting } from '@/types/ui.types';
 
-export type { TableTitleProps } from "./TableTitle/index.ts";
+export type { TableTitleProps } from './TableTitle/index.ts';
 
 /**
  * Column filters state - maps column key to filter configuration
@@ -31,7 +31,8 @@ export type ColumnGroupsState<TData = Record<string, unknown>> = {
 /**
  * Column order state - array of column keys in display order
  */
-export type ColumnOrderState<TData = Record<string, unknown>> = DataKey<TData>[];
+export type ColumnOrderState<TData = Record<string, unknown>> =
+  DataKey<TData>[];
 /**
  * Column pinning state
  */
@@ -45,14 +46,19 @@ export type ColumnPinningState<TData = Record<string, unknown>> = {
 /**
  * Column sizing state - maps column key to custom width
  */
-export type ColumnSizingState<TData = Record<string, unknown>> = Record<DataKey<TData>, number>;
+export type ColumnSizingState<TData = Record<string, unknown>> = Record<
+  DataKey<TData>,
+  number
+>;
 
 /**
  * Column visibility state - Set of visible column keys
  */
-export type ColumnVisibilityState<TData = Record<string, unknown>> = Set<DataKey<TData>>;
+export type ColumnVisibilityState<TData = Record<string, unknown>> = Set<
+  DataKey<TData>
+>;
 
-export type DataKey<TData> = "actions" | (keyof TData & string);
+export type DataKey<TData> = 'actions' | (keyof TData & string);
 
 export type FilterData = {
   readonly data: string[];
@@ -72,12 +78,15 @@ export type FilterOptionsResponse = {
   readonly values: string[];
 };
 
-export type FiltersDataState<TData = Record<string, unknown>> = Record<DataKey<TData>, FilterData>;
+export type FiltersDataState<TData = Record<string, unknown>> = Record<
+  DataKey<TData>,
+  FilterData
+>;
 
 export type NormalizedColumnsState<TData = Record<string, unknown>> = Record<
   DataKey<TData>,
   TableColumn<TData> & {
-    readonly sortDirection?: "asc" | "desc";
+    readonly sortDirection?: 'asc' | 'desc';
     readonly sortIndex?: number;
   }
 >;
@@ -86,7 +95,7 @@ export type PinnedColumnInfo = {
   readonly isFirstPinnedRight: boolean;
   readonly isLastPinnedLeft: boolean;
   readonly offset: number;
-  readonly side: "left" | "right";
+  readonly side: 'left' | 'right';
 };
 
 /**
@@ -104,7 +113,7 @@ export type SortingState<TData = Record<string, unknown>> = Sorting<TData>[];
 /**
  * Storage type for persistence
  */
-export type StorageType = "cookie" | "localStorage";
+export type StorageType = 'cookie' | 'localStorage';
 
 export type TableColumn<TData> = {
   readonly dataType?: TableColumnDataType;
@@ -114,9 +123,13 @@ export type TableColumn<TData> = {
     readonly skip: number;
   }) => Promise<FilterOptionsResponse>;
   /** Selector to extract options array from fetchFilterOptions response */
-  readonly filterOptionsDataSelector?: (response: FilterOptionsResponse) => string[];
+  readonly filterOptionsDataSelector?: (
+    response: FilterOptionsResponse,
+  ) => string[];
   /** Selector to extract total count from fetchFilterOptions response */
-  readonly filterOptionsDataTotalSelector?: (response: FilterOptionsResponse) => number;
+  readonly filterOptionsDataTotalSelector?: (
+    response: FilterOptionsResponse,
+  ) => number;
   /** Format options for the column based on data type */
   readonly format?: TableColumnFormat;
   /** Whether this column can be filtered (default: true) */
@@ -141,7 +154,12 @@ export type TableColumn<TData> = {
   readonly render?: (row: TData) => ReactNode;
 };
 
-export type TableColumnDataType = "boolean" | "currency" | "date" | "number" | "string";
+export type TableColumnDataType =
+  | 'boolean'
+  | 'currency'
+  | 'date'
+  | 'number'
+  | 'string';
 
 /**
  * Format options for a column based on its data type
@@ -197,7 +215,7 @@ export type TableDataState<TData> = {
   readonly totalRows: number;
 };
 
-export type TableDensity = "comfortable" | "compact";
+export type TableDensity = 'comfortable' | 'compact';
 
 export type TableMetaState = {
   readonly columnOverscan: number;
@@ -243,14 +261,17 @@ export type TablePersistenceConfig = {
   readonly sorting?: StorageType;
 };
 
-export type TableProps<TData extends Record<string, unknown>, TResponse> = BaseProps &
+export type TableProps<
+  TData extends Record<string, unknown>,
+  TResponse,
+> = BaseProps &
   InfiniteScroll<TData, TResponse> & {
     readonly isFlexWrapperEnabled?: boolean;
     readonly isLoading?: boolean;
     readonly response: TResponse;
   };
 
-type BaseProps = ComponentPropsWithRef<"table"> & {
+type BaseProps = ComponentPropsWithRef<'table'> & {
   readonly actions?: ReactNode;
   readonly customStylex?: StyleXStyles;
   readonly icon?: ReactNode;

@@ -17,31 +17,31 @@ A flexible navigation toolbar component that can render buttons or navigation li
 ### Basic Vertical Navigation (SidePanel)
 
 ```tsx
-import { Toolbar } from "@/components/Toolbar";
-import { Home, Settings, User } from "lucide-react";
+import { Toolbar } from '@/components/Toolbar';
+import { Home, Settings, User } from 'lucide-react';
 
 const items = [
   {
-    type: "link",
-    to: "/",
-    label: "Home",
+    type: 'link',
+    to: '/',
+    label: 'Home',
     icon: <Home size={20} />,
-    "data-testid": "nav-home",
+    'data-testid': 'nav-home',
   },
   {
-    type: "link",
-    to: "/settings",
-    label: "Settings",
+    type: 'link',
+    to: '/settings',
+    label: 'Settings',
     icon: <Settings size={20} />,
-    "data-testid": "nav-settings",
+    'data-testid': 'nav-settings',
   },
 ];
 
 <Toolbar
   items={items}
-  orientation="vertical"
-  aria-label="Main navigation"
-  data-testid="main-toolbar"
+  orientation='vertical'
+  aria-label='Main navigation'
+  data-testid='main-toolbar'
 />;
 ```
 
@@ -50,23 +50,27 @@ const items = [
 ```tsx
 const actions = [
   {
-    type: "button",
-    label: "Save",
+    type: 'button',
+    label: 'Save',
     icon: <Save size={20} />,
     onClick: handleSave,
-    "data-testid": "action-save",
+    'data-testid': 'action-save',
   },
   {
-    type: "button",
-    label: "Export",
+    type: 'button',
+    label: 'Export',
     icon: <Download size={20} />,
     onClick: handleExport,
-    color: "primary",
-    "data-testid": "action-export",
+    color: 'primary',
+    'data-testid': 'action-export',
   },
 ];
 
-<Toolbar items={actions} orientation="horizontal" aria-label="Document actions" />;
+<Toolbar
+  items={actions}
+  orientation='horizontal'
+  aria-label='Document actions'
+/>;
 ```
 
 ### Mixed Buttons and Links
@@ -74,20 +78,20 @@ const actions = [
 ```tsx
 const mixedItems = [
   {
-    type: "link",
-    to: "/profile",
-    label: "Profile",
+    type: 'link',
+    to: '/profile',
+    label: 'Profile',
     icon: <User size={20} />,
   },
   {
-    type: "button",
-    label: "Logout",
+    type: 'button',
+    label: 'Logout',
     onClick: handleLogout,
-    color: "error",
+    color: 'error',
   },
 ];
 
-<Toolbar items={mixedItems} aria-label="User menu" />;
+<Toolbar items={mixedItems} aria-label='User menu' />;
 ```
 
 ## Props
@@ -159,8 +163,8 @@ Each item should have a unique `data-testid`:
 
 ```tsx
 const items = [
-  { type: "link", to: "/", label: "Home", "data-testid": "nav-home" },
-  { type: "button", label: "Action", "data-testid": "action-btn" },
+  { type: 'link', to: '/', label: 'Home', 'data-testid': 'nav-home' },
+  { type: 'button', label: 'Action', 'data-testid': 'action-btn' },
 ];
 ```
 

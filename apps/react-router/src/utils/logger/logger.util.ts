@@ -1,6 +1,6 @@
-import type { CreateLoggerArgs, LogLevel, Logger } from "./logger.types.ts";
+import type { CreateLoggerArgs, LogLevel, Logger } from './logger.types.ts';
 
-import { DEFAULT_LOG_LEVEL, LOG_LEVEL_PRIORITY } from "./logger.constants.ts";
+import { DEFAULT_LOG_LEVEL, LOG_LEVEL_PRIORITY } from './logger.constants.ts';
 
 /** No-op function reused by all suppressed log methods. */
 const noop = (): void => {};
@@ -35,7 +35,10 @@ const resolveLogLevel = (override?: LogLevel): LogLevel => {
  * log.error('Fetch failed', e); // only prints when level >= error
  * ```
  */
-export const createLogger = ({ level, prefix }: CreateLoggerArgs = {}): Logger => {
+export const createLogger = ({
+  level,
+  prefix,
+}: CreateLoggerArgs = {}): Logger => {
   const activeLevel = resolveLogLevel(level);
   const priority = LOG_LEVEL_PRIORITY[activeLevel];
 

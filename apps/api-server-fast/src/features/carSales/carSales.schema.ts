@@ -1,7 +1,7 @@
-import { DEFAULT_PAGE_LIMIT } from "../../constants/server.constants";
-import type { SortRule } from "../../types/api.types";
+import { DEFAULT_PAGE_LIMIT } from '../../constants/server.constants';
+import type { SortRule } from '../../types/api.types';
 
-import { CAR_SALES_SORTABLE_COLUMNS } from "./carSales.constants";
+import { CAR_SALES_SORTABLE_COLUMNS } from './carSales.constants';
 
 /**
  * TypeScript type for the validated /paginated querystring.
@@ -19,22 +19,22 @@ export type PaginatedCarSalesQuery = {
  * replacing Zod schemas from the Express version.
  */
 export const paginatedCarSalesQuerySchema = {
-  type: "object",
+  type: 'object',
   properties: {
-    limit: { type: "integer", default: DEFAULT_PAGE_LIMIT, minimum: 1 },
-    skip: { type: "integer", default: 0, minimum: 0 },
+    limit: { type: 'integer', default: DEFAULT_PAGE_LIMIT, minimum: 1 },
+    skip: { type: 'integer', default: 0, minimum: 0 },
     sort: {
-      type: "array",
+      type: 'array',
       default: [],
       items: {
-        type: "object",
-        required: ["columnKey", "direction"],
+        type: 'object',
+        required: ['columnKey', 'direction'],
         properties: {
           columnKey: {
-            type: "string",
+            type: 'string',
             enum: [...CAR_SALES_SORTABLE_COLUMNS],
           },
-          direction: { type: "string", enum: ["asc", "desc"] },
+          direction: { type: 'string', enum: ['asc', 'desc'] },
         },
         additionalProperties: false,
       },

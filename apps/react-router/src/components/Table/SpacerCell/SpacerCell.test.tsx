@@ -1,12 +1,12 @@
 // @vitest-environment jsdom
 
-import { render } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { render } from '@testing-library/react';
+import { describe, expect, it } from 'vitest';
 
-import { SpacerCell } from "./SpacerCell.component.tsx";
+import { SpacerCell } from './SpacerCell.component.tsx';
 
-describe("SpacerCell", () => {
-  it("renders a th element when isHeader is true", () => {
+describe('SpacerCell', () => {
+  it('renders a th element when isHeader is true', () => {
     const { container } = render(
       <table>
         <thead>
@@ -17,12 +17,12 @@ describe("SpacerCell", () => {
       </table>,
     );
 
-    const cell = container.querySelector("th");
+    const cell = container.querySelector('th');
     expect(cell).not.toBeNull();
-    expect(cell?.getAttribute("aria-hidden")).toBe("true");
+    expect(cell?.getAttribute('aria-hidden')).toBe('true');
   });
 
-  it("renders a td element when isHeader is false (default)", () => {
+  it('renders a td element when isHeader is false (default)', () => {
     const { container } = render(
       <table>
         <tbody>
@@ -33,8 +33,8 @@ describe("SpacerCell", () => {
       </table>,
     );
 
-    const cell = container.querySelector("td");
+    const cell = container.querySelector('td');
     expect(cell).not.toBeNull();
-    expect(cell?.getAttribute("aria-hidden")).toBe("true");
+    expect(cell?.getAttribute('aria-hidden')).toBe('true');
   });
 });

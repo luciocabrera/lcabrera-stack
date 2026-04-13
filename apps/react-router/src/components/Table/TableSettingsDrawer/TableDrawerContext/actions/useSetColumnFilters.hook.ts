@@ -1,6 +1,6 @@
-import type { ColumnFiltersState } from "@/components/Table/Table.types";
+import type { ColumnFiltersState } from '@/components/Table/Table.types';
 
-import { useTableDrawerContextValue } from "../useTableDrawerContextValue.hook.ts";
+import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook.ts';
 
 /**
  * Hook to update column filters

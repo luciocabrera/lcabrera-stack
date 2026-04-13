@@ -1,9 +1,9 @@
-import type { ColumnFiltersState, SortingState } from "@/components/Table";
+import type { ColumnFiltersState, SortingState } from '@/components/Table';
 
-import { getApiBaseUrl } from "@/utils/api";
-import { createLogger } from "@/utils/logger";
+import { getApiBaseUrl } from '@/utils/api';
+import { createLogger } from '@/utils/logger';
 
-const log = createLogger({ prefix: "[orders]" });
+const log = createLogger({ prefix: '[orders]' });
 
 /**
  * Enterprise Orders API Service
@@ -124,12 +124,19 @@ export const enterpriseOrdersApi = {
     requestUrl?: string;
   }): Promise<{ hasMore: boolean; values: string[] }> => {
     const url = `${getApiBaseUrl(requestUrl)}/enterprise-orders/distinct/${columnName}?limit=${limit}&offset=${offset}`;
-    log.debug("🎯 Fetching distinct values for:", columnName, "offset:", offset);
+    log.debug(
+      '🎯 Fetching distinct values for:',
+      columnName,
+      'offset:',
+      offset,
+    );
 
     const response = await fetch(url);
 
     if (!response.ok) {
-      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `API request failed: ${response.status} ${response.statusText}`,
+      );
     }
 
     return response.json() as Promise<{ hasMore: boolean; values: string[] }>;
@@ -146,12 +153,14 @@ export const enterpriseOrdersApi = {
     requestUrl?: string;
   }): Promise<EnterpriseOrderDetailResponse> => {
     const url = `${getApiBaseUrl(requestUrl)}/enterprise-orders/${orderId}`;
-    log.debug("🎯 Fetching order by ID:", orderId);
+    log.debug('🎯 Fetching order by ID:', orderId);
 
     const response = await fetch(url);
 
     if (!response.ok) {
-      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `API request failed: ${response.status} ${response.statusText}`,
+      );
     }
 
     return response.json() as Promise<EnterpriseOrderDetailResponse>;
@@ -166,7 +175,9 @@ export const enterpriseOrdersApi = {
     requestUrl,
     skip,
     sorting,
-  }: FetchEnterpriseOrdersParams): Promise<EnterpriseOrdersResponse & { hasMore: boolean }> => {
+  }: FetchEnterpriseOrdersParams): Promise<
+    EnterpriseOrdersResponse & { hasMore: boolean }
+  > => {
     const params = new URLSearchParams({
       limit: limit.toString(),
       skip: skip.toString(),
@@ -174,28 +185,32 @@ export const enterpriseOrdersApi = {
 
     // Add sorting parameters if provided
     if (sorting && sorting.length > 0) {
-      params.append("sort", JSON.stringify(sorting));
+      params.append('sort', JSON.stringify(sorting));
     }
 
     // Add filter parameters if provided
     if (filter && Object.keys(filter).length > 0) {
-      params.append("filter", JSON.stringify(filter));
+      params.append('filter', JSON.stringify(filter));
     }
 
     const url = `${getApiBaseUrl(requestUrl)}/enterprise-orders/paginated?${params.toString()}`;
-    log.debug("🌐 Fetching from URL:", url);
-    log.debug("🌐 Filter object:", filter);
-    log.debug("🌐 Sorting:", sorting);
+    log.debug('🌐 Fetching from URL:', url);
+    log.debug('🌐 Filter object:', filter);
+    log.debug('🌐 Sorting:', sorting);
 
     const fetchData = () =>
       fetch(url).then((response) => {
-        log.debug("📡 Response status:", response.status, response.statusText);
+        log.debug('📡 Response status:', response.status, response.statusText);
 
         if (!response.ok) {
-          throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+          throw new Error(
+            `API request failed: ${response.status} ${response.statusText}`,
+          );
         }
 
-        return response.json() as Promise<EnterpriseOrdersResponse & { hasMore: boolean }>;
+        return response.json() as Promise<
+          EnterpriseOrdersResponse & { hasMore: boolean }
+        >;
       });
 
     // Add artificial delay if configured (for testing loading states)

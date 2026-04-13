@@ -48,8 +48,8 @@ All components, hooks, and services must be exported via an `index.ts` file with
 
 ```typescript
 // src/components/Button/index.ts
-export { Button } from "./Button";
-export type { ButtonProps } from "./Button.types";
+export { Button } from './Button';
+export type { ButtonProps } from './Button.types';
 ```
 
 ## 2\. TypeScript and Typing
@@ -123,10 +123,10 @@ Never mutate state or data structures. Use functional methods (`.map`, `.filter`
 ```typescript
 // ❌ MUTATION
 const newUser = user;
-newUser.role = "admin";
+newUser.role = 'admin';
 
 // ✅ IMMUTABILITY
-const newUser = { ...user, role: "admin" };
+const newUser = { ...user, role: 'admin' };
 ```
 
 ### 4.3 Handlers
@@ -146,10 +146,10 @@ We use `@` as the root alias for `src/`. Relative imports are strictly forbidden
 
 ```typescript
 // ✅ DO
-import { myUtil } from "@/utils/my.util";
+import { myUtil } from '@/utils/my.util';
 
 // ❌ DON'T
-import { myUtil } from "../../../../utils/my.util";
+import { myUtil } from '../../../../utils/my.util';
 ```
 
 ### 5.2 Import Order (Mandatory Grouping)

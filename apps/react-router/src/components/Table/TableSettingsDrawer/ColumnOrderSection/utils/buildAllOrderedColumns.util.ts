@@ -1,4 +1,7 @@
-import type { ColumnOrderState, TableColumn } from "@/components/Table/Table.types";
+import type {
+  ColumnOrderState,
+  TableColumn,
+} from '@/components/Table/Table.types';
 
 type BuildAllOrderedColumnsArgs<TData> = {
   readonly columns: readonly TableColumn<TData>[];

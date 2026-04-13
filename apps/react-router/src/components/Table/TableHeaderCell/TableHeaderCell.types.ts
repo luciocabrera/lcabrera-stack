@@ -1,9 +1,9 @@
-import type { StyleXStyles } from "@stylexjs/stylex";
-import type { ComponentPropsWithoutRef } from "react";
+import type { StyleXStyles } from '@stylexjs/stylex';
+import type { ComponentPropsWithoutRef } from 'react';
 
-import type { DataKey, PinnedColumnInfo } from "@/components/Table/Table.types";
+import type { DataKey, PinnedColumnInfo } from '@/components/Table/Table.types';
 
-export type TableHeaderCellProps<TData> = ComponentPropsWithoutRef<"th"> & {
+export type TableHeaderCellProps<TData> = ComponentPropsWithoutRef<'th'> & {
   readonly columnKey: DataKey<TData>;
   readonly customStylex?: StyleXStyles;
   readonly hasSettings?: boolean;

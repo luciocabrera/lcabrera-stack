@@ -3,39 +3,45 @@ import type {
   ColumnPinningState,
   ColumnSizingState,
   DataKey,
-} from "@/components/Table/Table.types";
-import type { PinConflictResolution } from "@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types";
+} from '@/components/Table/Table.types';
+import type { PinConflictResolution } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
 
-import { useTableConfigContextValue } from "@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook";
-import { usePersistTableStateAction } from "@/components/Table/hooks";
+import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { usePersistTableStateAction } from '@/components/Table/hooks';
 import {
   applyPin,
   buildAllOrderedColumns,
   insertAdjacentToPinnedGroup,
-} from "@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils";
+} from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 import {
   getEffectiveColumns,
   getPinnedColumnOffsets,
   splitColumnsByPinning,
-} from "@/components/Table/utils";
+} from '@/components/Table/utils';
 
 type AcceptHeaderPinConflictArgs<TData> = {
   readonly columnKey: DataKey<TData>;
   readonly resolution: PinConflictResolution;
-  readonly side: "left" | "right";
+  readonly side: 'left' | 'right';
 };
 
 export const useAcceptHeaderPinConflict = <TData>() => {
   const { columnsStore, metaStore } = useTableConfigContextValue<TData>();
   const persistTableState = usePersistTableStateAction();
 
-  return ({ columnKey, resolution, side }: AcceptHeaderPinConflictArgs<TData>) => {
+  return ({
+    columnKey,
+    resolution,
+    side,
+  }: AcceptHeaderPinConflictArgs<TData>) => {
     const columnsState = columnsStore.get();
     const columns = columnsState?.columns ?? [];
-    const columnsOrder = columnsState?.columnOrder ?? ([] as ColumnOrderState<TData>);
+    const columnsOrder =
+      columnsState?.columnOrder ?? ([] as ColumnOrderState<TData>);
     const currentPinning =
-      columnsState?.columnPinning ?? ({ left: [], right: [] } as ColumnPinningState<TData>);
-    const persistenceKey = metaStore.get()?.persistenceKey ?? "";
+      columnsState?.columnPinning ??
+      ({ left: [], right: [] } as ColumnPinningState<TData>);
+    const persistenceKey = metaStore.get()?.persistenceKey ?? '';
 
     const staticKeys = columnsState?.staticKeys;
 
@@ -46,7 +52,7 @@ export const useAcceptHeaderPinConflict = <TData>() => {
     let newOrder: ColumnOrderState<TData> | undefined;
 
     switch (resolution) {
-      case "move-column": {
+      case 'move-column': {
         newOrder = allOrderedColumns
           .filter((col) => col.key !== columnKey)
           .map((col) => col.key) as ColumnOrderState<TData>;
@@ -70,13 +76,13 @@ export const useAcceptHeaderPinConflict = <TData>() => {
         break;
       }
 
-      case "pin-all-between": {
+      case 'pin-all-between': {
         let nextLeft = [...currentPinning.left] as DataKey<TData>[];
         let nextRight = [...currentPinning.right] as DataKey<TData>[];
 
-        if (side === "left") {
+        if (side === 'left') {
           for (let i = 0; i <= index; i++) {
-            const colKey = allOrderedColumns[i]?.key ?? "";
+            const colKey = allOrderedColumns[i]?.key ?? '';
             if (!nextLeft.includes(colKey as DataKey<TData>)) {
               nextRight = nextRight.filter((k) => k !== colKey);
               nextLeft = [...nextLeft, colKey as DataKey<TData>];
@@ -84,7 +90,7 @@ export const useAcceptHeaderPinConflict = <TData>() => {
           }
         } else {
           for (let i = index; i < allOrderedColumns.length; i++) {
-            const colKey = allOrderedColumns[i]?.key ?? "";
+            const colKey = allOrderedColumns[i]?.key ?? '';
             if (!nextRight.includes(colKey as DataKey<TData>)) {
               nextLeft = nextLeft.filter((k) => k !== colKey);
               nextRight = [...nextRight, colKey as DataKey<TData>];
@@ -99,7 +105,7 @@ export const useAcceptHeaderPinConflict = <TData>() => {
         break;
       }
 
-      case "pin-only": {
+      case 'pin-only': {
         newPinning = applyPin({
           columnKey,
           columnPinning: currentPinning as ColumnPinningState,
@@ -122,7 +128,8 @@ export const useAcceptHeaderPinConflict = <TData>() => {
       effectiveColumns,
     });
 
-    const columnSizing = columnsState?.columnSizing ?? ({} as ColumnSizingState<TData>);
+    const columnSizing =
+      columnsState?.columnSizing ?? ({} as ColumnSizingState<TData>);
     const pinnedColumnOffsets = getPinnedColumnOffsets({
       columnPinning: newPinning,
       columnSizing,
@@ -141,15 +148,15 @@ export const useAcceptHeaderPinConflict = <TData>() => {
       persistTableState([
         {
           persistenceKey,
-          slice: "columnPinning" as const,
+          slice: 'columnPinning' as const,
           valueSlice: newPinning,
         },
-        { persistenceKey, slice: "columnOrder" as const, valueSlice: newOrder },
+        { persistenceKey, slice: 'columnOrder' as const, valueSlice: newOrder },
       ]);
     } else {
       persistTableState({
         persistenceKey,
-        slice: "columnPinning" as const,
+        slice: 'columnPinning' as const,
         valueSlice: newPinning,
       });
     }

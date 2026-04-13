@@ -1,28 +1,38 @@
-import * as stylex from "@stylexjs/stylex";
-import { useState } from "react";
+import * as stylex from '@stylexjs/stylex';
+import { useState } from 'react';
 
-import { Button } from "@/components/Button";
-import { EraserIcon, MaximizeIcon, MinimizeIcon, RefreshIcon } from "@/components/Icons";
-import { InfoBox } from "@/components/InfoBox";
+import { Button } from '@/components/Button';
+import {
+  EraserIcon,
+  MaximizeIcon,
+  MinimizeIcon,
+  RefreshIcon,
+} from '@/components/Icons';
+import { InfoBox } from '@/components/InfoBox';
 import {
   SidePanelSection,
   SidePanelSectionHeader,
   SidePanelSectionMain,
-} from "@/components/SidePanel";
-import { useGetNormalizedColumn } from "@/components/Table/contexts/TableConfig/columns/selectors";
-import { DEFAULT_MIN_COLUMN_WIDTH } from "@/components/Table/Table.constants";
-import { ICON_SIZE_MD } from "@/design-system/constants";
+} from '@/components/SidePanel';
+import { useGetNormalizedColumn } from '@/components/Table/contexts/TableConfig/columns/selectors';
+import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
+import { ICON_SIZE_MD } from '@/design-system/constants';
 
-import type { GeneralSectionProps, WidthPreset } from "./GeneralSection.types.ts";
+import type {
+  GeneralSectionProps,
+  WidthPreset,
+} from './GeneralSection.types.ts';
 
 import {
   useClearAllColumnDrawerSettings,
   useResetAllColumnDrawerSettings,
   useSetColumnSizing,
-} from "../ColumnDrawerContext/actions/index.ts";
-import { styles } from "./GeneralSection.stylex.ts";
+} from '../ColumnDrawerContext/actions/index.ts';
+import { styles } from './GeneralSection.stylex.ts';
 
-export const GeneralSection = <TData,>({ columnKey }: GeneralSectionProps<TData>) => {
+export const GeneralSection = <TData,>({
+  columnKey,
+}: GeneralSectionProps<TData>) => {
   const column = useGetNormalizedColumn<TData>(columnKey);
 
   const setColumnSizing = useSetColumnSizing();
@@ -37,7 +47,7 @@ export const GeneralSection = <TData,>({ columnKey }: GeneralSectionProps<TData>
   const hasMinWidth = column.minWidth !== undefined;
   const hasMaxWidth = column.maxWidth !== undefined;
 
-  const handleToggle = (preset: "default" | "max" | "min") => {
+  const handleToggle = (preset: 'default' | 'max' | 'min') => {
     const newPreset = selectedPreset === preset ? undefined : preset;
     setSelectedPreset(newPreset);
 
@@ -47,17 +57,17 @@ export const GeneralSection = <TData,>({ columnKey }: GeneralSectionProps<TData>
     }
 
     switch (newPreset) {
-      case "default": {
+      case 'default': {
         setColumnSizing(undefined);
 
         break;
       }
-      case "max": {
+      case 'max': {
         setColumnSizing(effectiveMaxWidth);
 
         break;
       }
-      case "min": {
+      case 'min': {
         setColumnSizing(effectiveMinWidth);
 
         break;
@@ -68,40 +78,40 @@ export const GeneralSection = <TData,>({ columnKey }: GeneralSectionProps<TData>
   return (
     <SidePanelSectionMain>
       <SidePanelSection>
-        <SidePanelSectionHeader title="Column Width" />
+        <SidePanelSectionHeader title='Column Width' />
         <div {...stylex.props(styles.buttonGroup)}>
           <Button
-            color={selectedPreset === "min" ? "primary" : "outline"}
+            color={selectedPreset === 'min' ? 'primary' : 'outline'}
             disabled={!hasMinWidth}
             icon={<MinimizeIcon size={ICON_SIZE_MD} />}
             onClick={() => {
-              handleToggle("min");
+              handleToggle('min');
             }}
-            size="sm"
-            width="full"
+            size='sm'
+            width='full'
           >
             Set to Min Width
           </Button>
           <Button
-            color={selectedPreset === "max" ? "primary" : "outline"}
+            color={selectedPreset === 'max' ? 'primary' : 'outline'}
             disabled={!hasMaxWidth}
             icon={<MaximizeIcon size={ICON_SIZE_MD} />}
             onClick={() => {
-              handleToggle("max");
+              handleToggle('max');
             }}
-            size="sm"
-            width="full"
+            size='sm'
+            width='full'
           >
             Set to Max Width
           </Button>
           <Button
-            color={selectedPreset === "default" ? "primary" : "outline"}
+            color={selectedPreset === 'default' ? 'primary' : 'outline'}
             icon={<RefreshIcon size={ICON_SIZE_MD} />}
             onClick={() => {
-              handleToggle("default");
+              handleToggle('default');
             }}
-            size="sm"
-            width="full"
+            size='sm'
+            width='full'
           >
             Reset to Default Width
           </Button>
@@ -109,28 +119,28 @@ export const GeneralSection = <TData,>({ columnKey }: GeneralSectionProps<TData>
       </SidePanelSection>
 
       <InfoBox>
-        Select a preset to adjust this column's width. Changes will be reflected after clicking
-        Accept.
+        Select a preset to adjust this column's width. Changes will be reflected
+        after clicking Accept.
       </InfoBox>
 
       <SidePanelSection>
-        <SidePanelSectionHeader title="All Settings" />
+        <SidePanelSectionHeader title='All Settings' />
         <div {...stylex.props(styles.buttonGroup)}>
           <Button
-            color="outline"
+            color='outline'
             icon={<EraserIcon size={ICON_SIZE_MD} />}
             onClick={clearAllSettings}
-            size="sm"
-            width="full"
+            size='sm'
+            width='full'
           >
             Clear All Settings
           </Button>
           <Button
-            color="outline"
+            color='outline'
             icon={<RefreshIcon size={ICON_SIZE_MD} />}
             onClick={resetAllSettings}
-            size="sm"
-            width="full"
+            size='sm'
+            width='full'
           >
             Reset All Settings
           </Button>

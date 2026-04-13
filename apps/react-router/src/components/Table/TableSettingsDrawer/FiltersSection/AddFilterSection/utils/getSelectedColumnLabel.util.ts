@@ -1,4 +1,7 @@
-import type { ColumnFiltersState, TableColumn } from "@/components/Table/Table.types";
+import type {
+  ColumnFiltersState,
+  TableColumn,
+} from '@/components/Table/Table.types';
 
 type GetSelectedColumnLabelArgs = {
   readonly filterableColumns: readonly TableColumn<Record<string, unknown>>[];

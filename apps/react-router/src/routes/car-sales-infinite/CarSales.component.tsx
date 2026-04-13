@@ -1,18 +1,25 @@
-import { useLoaderData } from "react-router";
+import { useLoaderData } from 'react-router';
 
-import type { CarSale } from "@/services";
+import type { CarSale } from '@/services';
 
-import { TableLayout } from "@/components/Table/TableLayout";
-import { carSalesApi } from "@/services";
+import { TableLayout } from '@/components/Table/TableLayout';
+import { carSalesApi } from '@/services';
 
-import type { loader } from "./car-sales.loader.ts";
-import type { CarSalesPaginatedResponse } from "./CarSales.types.ts";
+import type { loader } from './car-sales.loader.ts';
+import type { CarSalesPaginatedResponse } from './CarSales.types.ts';
 
-import { COLUMNS, PERSISTENCE_KEY } from "./CarSales.constants.tsx";
+import { COLUMNS, PERSISTENCE_KEY } from './CarSales.constants.tsx';
 
 export const CarSales = () => {
-  const { carSalesPromise, columnOrder, columnSizing, columnVisibility, filters, key, sorting } =
-    useLoaderData<typeof loader>();
+  const {
+    carSalesPromise,
+    columnOrder,
+    columnSizing,
+    columnVisibility,
+    filters,
+    key,
+    sorting,
+  } = useLoaderData<typeof loader>();
 
   return (
     <TableLayout<CarSale, CarSalesPaginatedResponse>
@@ -34,7 +41,7 @@ export const CarSales = () => {
       persistenceKey={PERSISTENCE_KEY}
       sorting={sorting}
       suspenseKey={key}
-      title="Car Sales Data - Infinite Scroll"
+      title='Car Sales Data - Infinite Scroll'
     />
   );
 };

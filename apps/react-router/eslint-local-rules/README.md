@@ -11,14 +11,14 @@ Enforces separate `import type` syntax instead of inline type imports.
 **❌ Disallowed:**
 
 ```typescript
-import { type User, type Post } from "./types";
-import type { type User } from "./types"; // Redundant
+import { type User, type Post } from './types';
+import type { type User } from './types'; // Redundant
 ```
 
 **✅ Enforced:**
 
 ```typescript
-import type { User, Post } from "./types";
+import type { User, Post } from './types';
 ```
 
 ### 2. `merge-duplicate-imports`
@@ -28,14 +28,14 @@ Merges multiple import statements from the same source into a single import.
 **❌ Disallowed:**
 
 ```typescript
-import { A } from "./module";
-import { B } from "./module";
+import { A } from './module';
+import { B } from './module';
 ```
 
 **✅ Enforced:**
 
 ```typescript
-import { A, B } from "./module";
+import { A, B } from './module';
 ```
 
 ### 3. `destructuring-for-functions`
@@ -104,21 +104,21 @@ This compiles TypeScript files to JavaScript in the `build/` directory.
 2. Export a `Rule.RuleModule` as the default export:
 
 ```typescript
-import type { Rule } from "eslint";
+import type { Rule } from 'eslint';
 
 const rule: Rule.RuleModule = {
   meta: {
     docs: {
-      category: "Best Practices",
-      description: "My custom rule description",
+      category: 'Best Practices',
+      description: 'My custom rule description',
       recommended: false,
     },
-    fixable: "code", // or undefined if no auto-fix
+    fixable: 'code', // or undefined if no auto-fix
     messages: {
-      myMessage: "Error message template {{variable}}",
+      myMessage: 'Error message template {{variable}}',
     },
     schema: [],
-    type: "suggestion",
+    type: 'suggestion',
   },
   create(context) {
     return {
@@ -133,11 +133,11 @@ export default rule;
 3. Add the rule to [index.ts](index.ts):
 
 ```typescript
-import myRule from "./my-rule.js";
+import myRule from './my-rule.js';
 
 export default {
   rules: {
-    "my-rule": myRule,
+    'my-rule': myRule,
     // ... other rules
   },
 };

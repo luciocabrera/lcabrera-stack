@@ -1,8 +1,8 @@
-import * as stylex from "@stylexjs/stylex";
+import * as stylex from '@stylexjs/stylex';
 
-import type { SelectAllOptionProps } from "./SelectAllOption.types.ts";
+import type { SelectAllOptionProps } from './SelectAllOption.types.ts';
 
-import { skeletonStyles, styles } from "../VirtualList.stylex.ts";
+import { skeletonStyles, styles } from '../VirtualList.stylex.ts';
 
 export const SelectAllOption = ({
   isAllSelected,
@@ -14,10 +14,12 @@ export const SelectAllOption = ({
       checked={isAllSelected}
       disabled={isLoading}
       onChange={onSelectAll}
-      type="checkbox"
+      type='checkbox'
       {...stylex.props(styles.checkbox)}
     />
-    <span {...stylex.props(styles.label)}>{isAllSelected ? "Deselect All" : "Select All"}</span>
+    <span {...stylex.props(styles.label)}>
+      {isAllSelected ? 'Deselect All' : 'Select All'}
+    </span>
     {isLoading && (
       <div {...stylex.props(skeletonStyles.loadingOverlay)}>
         <div {...stylex.props(skeletonStyles.shimmerWave)} />

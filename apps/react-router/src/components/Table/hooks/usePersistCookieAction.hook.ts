@@ -1,10 +1,10 @@
-import { useFetcher, useLocation } from "react-router";
+import { useFetcher, useLocation } from 'react-router';
 
-import type { TablePersistenceConfig } from "../Table.types.ts";
+import type { TablePersistenceConfig } from '../Table.types.ts';
 
-import { serializeStateSlice } from "../utils/index.ts";
+import { serializeStateSlice } from '../utils/index.ts';
 
-const PERSIST_COOKIE_ACTION = "/_action/persist-cookie";
+const PERSIST_COOKIE_ACTION = '/_action/persist-cookie';
 
 type PersistCookieEntry<TSlice = unknown> = {
   persistenceKey: string;
@@ -47,7 +47,7 @@ type PersistTableStateAction = {
 };
 
 export const usePersistTableStateAction = (): PersistTableStateAction => {
-  const fetcher = useFetcher({ key: "persist-table-state" });
+  const fetcher = useFetcher({ key: 'persist-table-state' });
   const location = useLocation();
 
   return ((args: PersistCookieEntry | PersistCookieEntry[]) => {
@@ -55,7 +55,13 @@ export const usePersistTableStateAction = (): PersistTableStateAction => {
     const currentUrl = `${location.pathname}${location.search}`;
 
     const serializedEntries = entries.map(
-      ({ persistenceKey, searchParamKey, searchParamValue, slice, valueSlice }) => {
+      ({
+        persistenceKey,
+        searchParamKey,
+        searchParamValue,
+        slice,
+        valueSlice,
+      }) => {
         const { key, value } = serializeStateSlice({
           persistenceKey,
           slice,
@@ -64,8 +70,8 @@ export const usePersistTableStateAction = (): PersistTableStateAction => {
 
         return {
           key,
-          searchParamKey: searchParamKey ?? "",
-          searchParamValue: searchParamValue ?? "",
+          searchParamKey: searchParamKey ?? '',
+          searchParamValue: searchParamValue ?? '',
           value,
         };
       },
@@ -73,7 +79,7 @@ export const usePersistTableStateAction = (): PersistTableStateAction => {
 
     void fetcher.submit(
       { currentUrl, entries: JSON.stringify(serializedEntries) },
-      { action: PERSIST_COOKIE_ACTION, method: "POST" },
+      { action: PERSIST_COOKIE_ACTION, method: 'POST' },
     );
   }) as PersistTableStateAction;
 };

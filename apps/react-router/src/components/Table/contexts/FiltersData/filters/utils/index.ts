@@ -1,1 +1,1 @@
-export { getInitialFiltersDataState } from "./getInitialFiltersDataState.util.ts";
+export { getInitialFiltersDataState } from './getInitialFiltersDataState.util.ts';

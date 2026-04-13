@@ -1,8 +1,8 @@
-import { writeToCookie, writeToLocalStorage } from "@/utils/storage";
+import { writeToCookie, writeToLocalStorage } from '@/utils/storage';
 
-import type { StorageType, TablePersistenceConfig } from "../Table.types.ts";
+import type { StorageType, TablePersistenceConfig } from '../Table.types.ts';
 
-import { serializeStateSlice } from "./serializeStateSlice.util.ts";
+import { serializeStateSlice } from './serializeStateSlice.util.ts';
 
 type WriteStateSliceArgs = {
   readonly headers?: Headers;
@@ -31,7 +31,7 @@ export const writeStateSlice = ({
     value,
   });
 
-  if (storageType === "cookie") {
+  if (storageType === 'cookie') {
     writeToCookie({ headers, key, value: serialized });
   } else {
     writeToLocalStorage({ key, value: serialized });

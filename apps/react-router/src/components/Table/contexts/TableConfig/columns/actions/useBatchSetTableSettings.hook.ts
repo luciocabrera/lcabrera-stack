@@ -5,18 +5,18 @@ import type {
   ColumnSizingState,
   ColumnVisibilityState,
   SortingState,
-} from "@/components/Table/Table.types";
+} from '@/components/Table/Table.types';
 
-import { useTableConfigContextValue } from "@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook";
-import { useTableDataContextValue } from "@/components/Table/contexts/TableData/data/useTableDataContextValue.hook";
-import { usePersistTableStateAction } from "@/components/Table/hooks";
+import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { useTableDataContextValue } from '@/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
+import { usePersistTableStateAction } from '@/components/Table/hooks';
 import {
   getEffectiveColumns,
   getNormalizedColumns,
   getPinnedColumnOffsets,
   splitColumnsByPinning,
-} from "@/components/Table/utils";
-import { serializeFiltersToURL, serializeSortingToURL } from "@/utils/urlState";
+} from '@/components/Table/utils';
+import { serializeFiltersToURL, serializeSortingToURL } from '@/utils/urlState';
 
 export type BatchTableSettingsUpdate<TData> = {
   columnFilters: ColumnFiltersState<TData>;
@@ -37,7 +37,7 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
       isLoadingMore: true,
     });
     const columnsState = columnsStore.get();
-    const persistenceKey = metaStore.get()?.persistenceKey ?? "";
+    const persistenceKey = metaStore.get()?.persistenceKey ?? '';
 
     const effectiveColumns = getEffectiveColumns({
       columnOrder: settings.columnOrder,
@@ -65,36 +65,38 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
     persistTableState([
       {
         persistenceKey,
-        searchParamKey: "filters",
+        searchParamKey: 'filters',
         searchParamValue: serializeFiltersToURL(settings.columnFilters),
-        slice: "columnFilters",
+        slice: 'columnFilters',
         valueSlice: settings.columnFilters,
       },
       {
         persistenceKey,
-        searchParamKey: "sort",
-        searchParamValue: serializeSortingToURL(settings.sorting as SortingState),
-        slice: "sorting",
+        searchParamKey: 'sort',
+        searchParamValue: serializeSortingToURL(
+          settings.sorting as SortingState,
+        ),
+        slice: 'sorting',
         valueSlice: settings.sorting,
       },
       {
         persistenceKey,
-        slice: "columnOrder",
+        slice: 'columnOrder',
         valueSlice: settings.columnOrder,
       },
       {
         persistenceKey,
-        slice: "columnSizing",
+        slice: 'columnSizing',
         valueSlice: settings.columnSizing,
       },
       {
         persistenceKey,
-        slice: "columnVisibility",
+        slice: 'columnVisibility',
         valueSlice: settings.columnVisibility,
       },
       {
         persistenceKey,
-        slice: "columnPinning",
+        slice: 'columnPinning',
         valueSlice: settings.columnPinning,
       },
     ]);

@@ -1,14 +1,17 @@
-import type { TableColumnsState, TableMetaState } from "@/components/Table/Table.types";
+import type {
+  TableColumnsState,
+  TableMetaState,
+} from '@/components/Table/Table.types';
 
-import { useStore } from "@/hooks";
+import { useStore } from '@/hooks';
 
 import type {
   TableConfigContextValue,
   TableConfigProviderProps,
-} from "./TableConfigContext.types.ts";
+} from './TableConfigContext.types.ts';
 
-import { TableConfigContext } from "./TableConfigContext.context.ts";
-import { getInitialColumnsState, getInitialMetaState } from "./utils/index.ts";
+import { TableConfigContext } from './TableConfigContext.context.ts';
+import { getInitialColumnsState, getInitialMetaState } from './utils/index.ts';
 
 export const TableConfigProvider = <TData extends Record<string, unknown>>({
   children,
@@ -18,7 +21,9 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
   const columnsStore = useStore<TableColumnsState<TData>>(
     getInitialColumnsState<TData>({ ...columnsState }),
   );
-  const metaStore = useStore<TableMetaState>(getInitialMetaState({ ...metaState }));
+  const metaStore = useStore<TableMetaState>(
+    getInitialMetaState({ ...metaState }),
+  );
 
   const value = {
     columnsStore,

@@ -1,4 +1,4 @@
-import type { PrefetchCache } from "@/types/ui.types";
+import type { PrefetchCache } from '@/types/ui.types';
 
 type ResolveFromCacheOrFetchArgs<TResponse> = {
   readonly cache: PrefetchCache<TResponse> | undefined;

@@ -1,8 +1,8 @@
-import { createContext } from "react";
+import { createContext } from 'react';
 
-import type { TableDataContextValue } from "./TableDataContext.types.ts";
+import type { TableDataContextValue } from './TableDataContext.types.ts';
 
-import { getInitialDataState } from "./utils/index.ts";
+import { getInitialDataState } from './utils/index.ts';
 
 /**
  * Data context for sharing state across table components
@@ -14,4 +14,4 @@ export const TableDataContext = createContext<TableDataContextValue>({
   dataStore: getInitialDataState<Record<string, unknown>>({}),
 } as unknown as TableDataContextValue);
 
-TableDataContext.displayName = "TableDataContext";
+TableDataContext.displayName = 'TableDataContext';

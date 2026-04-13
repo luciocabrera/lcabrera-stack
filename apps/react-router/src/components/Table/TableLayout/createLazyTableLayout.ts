@@ -1,6 +1,6 @@
-import { type ComponentType, lazy } from "react";
+import { type ComponentType, lazy } from 'react';
 
-import type { TableLayoutProps } from "./TableLayout.types.ts";
+import type { TableLayoutProps } from './TableLayout.types.ts';
 
 /**
  * Creates a lazily-loaded, type-safe TableLayout component.
@@ -23,7 +23,9 @@ export const createLazyTableLayout = <
   TResponse = Record<string, unknown>,
 >() =>
   lazy(() =>
-    import("./TableLayout.component.tsx").then((m) => ({
-      default: m.TableLayout as unknown as ComponentType<TableLayoutProps<TData, TResponse>>,
+    import('./TableLayout.component.tsx').then((m) => ({
+      default: m.TableLayout as unknown as ComponentType<
+        TableLayoutProps<TData, TResponse>
+      >,
     })),
   );

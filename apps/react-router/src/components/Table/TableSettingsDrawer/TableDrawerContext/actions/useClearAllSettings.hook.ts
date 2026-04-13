@@ -5,11 +5,11 @@ import type {
   ColumnSizingState,
   ColumnVisibilityState,
   SortingState,
-} from "@/components/Table/Table.types";
+} from '@/components/Table/Table.types';
 
-import { useTableConfigContextValue } from "@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook";
+import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 
-import { useTableDrawerContextValue } from "../useTableDrawerContextValue.hook.ts";
+import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook.ts';
 
 /**
  * Hook to clear all table settings to empty defaults
@@ -20,7 +20,8 @@ export const useClearAllSettings = () => {
 
   return () => {
     const defaultPinning =
-      tableColumnsStore.get()?.columnPinning ?? ({ left: [], right: [] } as ColumnPinningState);
+      tableColumnsStore.get()?.columnPinning ??
+      ({ left: [], right: [] } as ColumnPinningState);
 
     columnsStore.set({
       columnFilters: {} as ColumnFiltersState,

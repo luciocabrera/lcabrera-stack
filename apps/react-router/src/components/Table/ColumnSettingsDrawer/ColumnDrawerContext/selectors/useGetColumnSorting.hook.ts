@@ -1,5 +1,6 @@
-import type { SortDirection } from "@/types/ui.types";
+import type { SortDirection } from '@/types/ui.types';
 
-import { useColumnsStore } from "../useColumnsStore.hook.ts";
+import { useColumnsStore } from '../useColumnsStore.hook.ts';
 
-export const useGetColumnSorting = () => useColumnsStore<SortDirection>((state) => state.sorting);
+export const useGetColumnSorting = () =>
+  useColumnsStore<SortDirection>((state) => state.sorting);

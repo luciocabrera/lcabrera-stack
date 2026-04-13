@@ -1,8 +1,8 @@
-import { use } from "react";
+import { use } from 'react';
 
-import type { ThemeContextValue } from "@/types/theme.types";
+import type { ThemeContextValue } from '@/types/theme.types';
 
-import { ThemeContext } from "@/contexts/ThemeContext";
+import { ThemeContext } from '@/contexts/ThemeContext';
 
 /**
  * Custom hook to access theme context
@@ -14,7 +14,7 @@ export const useTheme = (): ThemeContextValue => {
   const context = use(ThemeContext);
 
   if (context === undefined) {
-    throw new Error("useTheme must be used within a ThemeProvider");
+    throw new Error('useTheme must be used within a ThemeProvider');
   }
 
   return context;

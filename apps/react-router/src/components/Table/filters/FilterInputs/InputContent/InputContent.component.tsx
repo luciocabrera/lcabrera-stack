@@ -3,14 +3,14 @@ import type {
   NumberOperatorType,
   TextFilter,
   TextOperatorType,
-} from "@/types/filterOperators.types";
+} from '@/types/filterOperators.types';
 
-import type { InputContentProps } from "./InputContent.types.ts";
+import type { InputContentProps } from './InputContent.types.ts';
 
-import { DateFilterInput } from "../../DateFilterInput/index.ts";
-import { NumberFilterInput } from "../../NumberFilterInput/index.ts";
-import { SelectFilterInput } from "../../SelectFilterInput/index.ts";
-import { TextFilterInput } from "../../TextFilterInput/index.ts";
+import { DateFilterInput } from '../../DateFilterInput/index.ts';
+import { NumberFilterInput } from '../../NumberFilterInput/index.ts';
+import { SelectFilterInput } from '../../SelectFilterInput/index.ts';
+import { TextFilterInput } from '../../TextFilterInput/index.ts';
 
 /**
  * Renders the appropriate filter input based on column data type.
@@ -26,23 +26,23 @@ export const InputContent = <TData,>({
   shouldFillHeight = false,
 }: InputContentProps<TData>) => {
   switch (dataType) {
-    case "currency":
-    case "number": {
+    case 'currency':
+    case 'number': {
       return (
         <NumberFilterInput
           columnKey={columnKey}
-          filter={filter?.type === "number" ? filter : undefined}
+          filter={filter?.type === 'number' ? filter : undefined}
           onChange={onChange}
           operator={operator as NumberOperatorType}
         />
       );
     }
 
-    case "date": {
+    case 'date': {
       return (
         <DateFilterInput
           columnKey={columnKey}
-          filter={filter?.type === "date" ? filter : undefined}
+          filter={filter?.type === 'date' ? filter : undefined}
           onChange={onChange}
           operator={operator as DateOperatorType}
         />
@@ -54,21 +54,23 @@ export const InputContent = <TData,>({
 
       // Show SelectFilterInput when column supports options AND operator is equals/notEquals
       const shouldShowSelectList =
-        hasFetchableOptions && (textOp === "equals" || textOp === "notEquals");
+        hasFetchableOptions && (textOp === 'equals' || textOp === 'notEquals');
 
       if (shouldShowSelectList) {
         return (
           <SelectFilterInput
             columnKey={columnKey}
             filter={
-              filter?.type === "select" || filter?.type === "multiSelect" ? filter : undefined
+              filter?.type === 'select' || filter?.type === 'multiSelect'
+                ? filter
+                : undefined
             }
             listMaxHeight={listMaxHeight}
             onChange={(selectFilter) => {
               if (selectFilter) {
                 onChange({
                   ...selectFilter,
-                  operator: textOp === "notEquals" ? "notEquals" : "equals",
+                  operator: textOp === 'notEquals' ? 'notEquals' : 'equals',
                 });
               } else {
                 onChange();

@@ -1,8 +1,8 @@
-import * as stylex from "@stylexjs/stylex";
+import * as stylex from '@stylexjs/stylex';
 
-import type { RadioOptionGroupProps } from "./RadioOptionGroup.types.ts";
+import type { RadioOptionGroupProps } from './RadioOptionGroup.types.ts';
 
-import { styles } from "./RadioOptionGroup.stylex.ts";
+import { styles } from './RadioOptionGroup.stylex.ts';
 
 export const RadioOptionGroup = <TValue extends string>({
   name,
@@ -14,16 +14,22 @@ export const RadioOptionGroup = <TValue extends string>({
     {options.map((option) => (
       <label
         key={option.value}
-        {...stylex.props(styles.option, value === option.value && styles.optionSelected)}
+        {...stylex.props(
+          styles.option,
+          value === option.value && styles.optionSelected,
+        )}
       >
         <input
-          {...stylex.props(styles.radio, value === option.value && styles.radioChecked)}
+          {...stylex.props(
+            styles.radio,
+            value === option.value && styles.radioChecked,
+          )}
           checked={value === option.value}
           name={name}
           onChange={() => {
             onChange(option.value);
           }}
-          type="radio"
+          type='radio'
           value={option.value}
         />
         <span>
@@ -31,7 +37,9 @@ export const RadioOptionGroup = <TValue extends string>({
           {option.description && (
             <>
               <br />
-              <span {...stylex.props(styles.description)}>{option.description}</span>
+              <span {...stylex.props(styles.description)}>
+                {option.description}
+              </span>
             </>
           )}
         </span>

@@ -3,22 +3,22 @@ import type {
   ColumnPinningState,
   ColumnSizingState,
   DataKey,
-} from "@/components/Table/Table.types";
-import type { PinConflictState, PinSide } from "@/types/ui.types";
+} from '@/components/Table/Table.types';
+import type { PinConflictState, PinSide } from '@/types/ui.types';
 
-import { useTableConfigContextValue } from "@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook";
-import { usePersistTableStateAction } from "@/components/Table/hooks";
+import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { usePersistTableStateAction } from '@/components/Table/hooks';
 import {
   applyPin,
   buildAllOrderedColumns,
   getIsContiguousPin,
   resolveClosestEdgeSide,
-} from "@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils";
+} from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 import {
   getEffectiveColumns,
   getPinnedColumnOffsets,
   splitColumnsByPinning,
-} from "@/components/Table/utils";
+} from '@/components/Table/utils';
 
 type AcceptHeaderPinSideArgs<TData> = {
   readonly columnKey: DataKey<TData>;
@@ -29,13 +29,18 @@ export const useAcceptHeaderPinSide = <TData>() => {
   const { columnsStore, metaStore } = useTableConfigContextValue<TData>();
   const persistTableState = usePersistTableStateAction();
 
-  return ({ columnKey, pinSide }: AcceptHeaderPinSideArgs<TData>): PinConflictState | undefined => {
+  return ({
+    columnKey,
+    pinSide,
+  }: AcceptHeaderPinSideArgs<TData>): PinConflictState | undefined => {
     const columnsState = columnsStore.get();
     const columns = columnsState?.columns ?? [];
-    const columnsOrder = columnsState?.columnOrder ?? ([] as ColumnOrderState<TData>);
+    const columnsOrder =
+      columnsState?.columnOrder ?? ([] as ColumnOrderState<TData>);
     const columnPinning =
-      columnsState?.columnPinning ?? ({ left: [], right: [] } as ColumnPinningState<TData>);
-    const persistenceKey = metaStore.get()?.persistenceKey ?? "";
+      columnsState?.columnPinning ??
+      ({ left: [], right: [] } as ColumnPinningState<TData>);
+    const persistenceKey = metaStore.get()?.persistenceKey ?? '';
 
     const allOrderedColumns = buildAllOrderedColumns({ columns, columnsOrder });
 
@@ -77,7 +82,8 @@ export const useAcceptHeaderPinSide = <TData>() => {
       effectiveColumns,
     });
 
-    const columnSizing = columnsState?.columnSizing ?? ({} as ColumnSizingState<TData>);
+    const columnSizing =
+      columnsState?.columnSizing ?? ({} as ColumnSizingState<TData>);
     const pinnedColumnOffsets = getPinnedColumnOffsets({
       columnPinning: newPinning as ColumnPinningState<TData>,
       columnSizing,
@@ -86,7 +92,7 @@ export const useAcceptHeaderPinSide = <TData>() => {
 
     persistTableState({
       persistenceKey,
-      slice: "columnPinning",
+      slice: 'columnPinning',
       valueSlice: newPinning,
     });
 

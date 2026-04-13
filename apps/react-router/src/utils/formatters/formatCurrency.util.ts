@@ -1,7 +1,7 @@
-import type { CurrencyFormatOptions } from "../../types/format.types.ts";
+import type { CurrencyFormatOptions } from '../../types/format.types.ts';
 
-import { DEFAULT_CURRENCY } from "./formatters.constants.ts";
-import { getDefaultLocale } from "./getDefaultLocale.util.ts";
+import { DEFAULT_CURRENCY } from './formatters.constants.ts';
+import { getDefaultLocale } from './getDefaultLocale.util.ts';
 
 type FormatCurrencyArgs = CurrencyFormatOptions & {
   readonly value: number;
@@ -23,15 +23,15 @@ export const formatCurrency = ({
   try {
     const formatted = new Intl.NumberFormat(resolvedLocale, {
       currency,
-      style: "currency",
+      style: 'currency',
     }).format(value);
 
     // Normalize format: move minus sign after currency symbol with space
     // -US$29,032.37 → US$ -29,032.37
     // US$29,032.37 → US$ 29,032.37
     const normalized = formatted
-      .replace(/^-([^\d]+)/, "$1-") // Move minus after symbol: -US$ → US$-
-      .replace(/^([^\d-]+)([-\d])/, "$1 $2"); // Add space: US$-123 → US$ -123
+      .replace(/^-([^\d]+)/, '$1-') // Move minus after symbol: -US$ → US$-
+      .replace(/^([^\d-]+)([-\d])/, '$1 $2'); // Add space: US$-123 → US$ -123
 
     return normalized;
   } catch {

@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
 
-import type { RefObject } from "react";
+import type { RefObject } from 'react';
 
-import { act, renderHook } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { act, renderHook } from '@testing-library/react';
+import { describe, expect, it } from 'vitest';
 
-import { useVirtualization } from "./useVirtualization.hook.ts";
+import { useVirtualization } from './useVirtualization.hook.ts';
 
 type CreateContainerArgs = {
   readonly offsetHeight: number;
@@ -18,17 +18,17 @@ const createContainer = ({
   scrollHeight = 1000,
   scrollTop = 0,
 }: CreateContainerArgs): HTMLElement => {
-  const container = document.createElement("div");
+  const container = document.createElement('div');
 
-  Object.defineProperty(container, "offsetHeight", {
+  Object.defineProperty(container, 'offsetHeight', {
     configurable: true,
     value: offsetHeight,
   });
-  Object.defineProperty(container, "scrollHeight", {
+  Object.defineProperty(container, 'scrollHeight', {
     configurable: true,
     value: scrollHeight,
   });
-  Object.defineProperty(container, "scrollTop", {
+  Object.defineProperty(container, 'scrollTop', {
     configurable: true,
     value: scrollTop,
     writable: true,
@@ -37,8 +37,8 @@ const createContainer = ({
   return container;
 };
 
-describe("useVirtualization", () => {
-  it("computes the initial visible range from container height", () => {
+describe('useVirtualization', () => {
+  it('computes the initial visible range from container height', () => {
     const container = createContainer({ offsetHeight: 400 });
     const containerRef = {
       current: container,
@@ -60,7 +60,7 @@ describe("useVirtualization", () => {
     expect(result.current.totalHeight).toBe(5000);
   });
 
-  it("updates the visible range when the container scrolls", () => {
+  it('updates the visible range when the container scrolls', () => {
     const container = createContainer({ offsetHeight: 400 });
     const containerRef = {
       current: container,
@@ -77,7 +77,7 @@ describe("useVirtualization", () => {
 
     act(() => {
       container.scrollTop = 250;
-      container.dispatchEvent(new Event("scroll"));
+      container.dispatchEvent(new Event('scroll'));
     });
 
     expect(result.current.startIndex).toBe(2);
@@ -85,7 +85,7 @@ describe("useVirtualization", () => {
     expect(result.current.offsetY).toBe(100);
   });
 
-  it("keeps the previous height when a resize measures zero", () => {
+  it('keeps the previous height when a resize measures zero', () => {
     const container = createContainer({ offsetHeight: 400 });
     const containerRef = {
       current: container,
@@ -100,13 +100,13 @@ describe("useVirtualization", () => {
       }),
     );
 
-    Object.defineProperty(container, "offsetHeight", {
+    Object.defineProperty(container, 'offsetHeight', {
       configurable: true,
       value: 0,
     });
 
     act(() => {
-      globalThis.dispatchEvent(new Event("resize"));
+      globalThis.dispatchEvent(new Event('resize'));
     });
 
     expect(result.current.containerHeight).toBe(400);

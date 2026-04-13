@@ -1,11 +1,17 @@
-import { useRef, useState } from "react";
+import { useRef, useState } from 'react';
 
-import type { DraggableItem, UseDraggableListProps } from "../DraggableList.types.ts";
+import type {
+  DraggableItem,
+  UseDraggableListProps,
+} from '../DraggableList.types.ts';
 
 /**
  * Hook for managing draggable list state with native HTML5 drag and drop
  */
-export const useDraggableList = ({ initialItems, onOrderChange }: UseDraggableListProps) => {
+export const useDraggableList = ({
+  initialItems,
+  onOrderChange,
+}: UseDraggableListProps) => {
   const [items, setItems] = useState<DraggableItem[]>([...initialItems]);
   const [prevInitialItems, setPrevInitialItems] = useState(initialItems);
   // eslint-disable-next-line unicorn/no-useless-undefined

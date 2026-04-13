@@ -1,7 +1,10 @@
-import type { TableColumnDataType, TableColumnFormat } from "@/components/Table/Table.types";
+import type {
+  TableColumnDataType,
+  TableColumnFormat,
+} from '@/components/Table/Table.types';
 
-import { TableCheckDisplay } from "@/components/Table/TableCheckDisplay";
-import { formatCurrency, formatDate, formatNumber } from "@/utils/formatters";
+import { TableCheckDisplay } from '@/components/Table/TableCheckDisplay';
+import { formatCurrency, formatDate, formatNumber } from '@/utils/formatters';
 
 type RenderCellContentArgs = {
   dataType: TableColumnDataType;
@@ -19,12 +22,13 @@ export const renderCellContent = ({
   value,
 }: RenderCellContentArgs) => {
   switch (dataType) {
-    case "boolean": {
+    case 'boolean': {
       return <TableCheckDisplay label={label} value={value} />;
     }
-    case "currency": {
+    case 'currency': {
       // Handle both number and numeric string values
-      const numValue = typeof value === "number" ? value : Number.parseFloat(String(value));
+      const numValue =
+        typeof value === 'number' ? value : Number.parseFloat(String(value));
       if (!Number.isNaN(numValue)) {
         return formatCurrency({
           currency: format?.currency?.currency,
@@ -35,16 +39,17 @@ export const renderCellContent = ({
       // If it's already a string with currency symbol or non-numeric, return as-is
       return String(value);
     }
-    case "date": {
+    case 'date': {
       return formatDate({
         locale: format?.date?.locale ?? locale,
         preset: format?.date?.preset,
         value,
       });
     }
-    case "number": {
+    case 'number': {
       // Handle both number and numeric string values
-      const numValue = typeof value === "number" ? value : Number.parseFloat(String(value));
+      const numValue =
+        typeof value === 'number' ? value : Number.parseFloat(String(value));
       if (!Number.isNaN(numValue)) {
         return formatNumber({
           locale: format?.number?.locale ?? locale,
@@ -56,7 +61,7 @@ export const renderCellContent = ({
       return String(value);
     }
     default: {
-      return typeof value === "string" ? value : "";
+      return typeof value === 'string' ? value : '';
     }
   }
 };

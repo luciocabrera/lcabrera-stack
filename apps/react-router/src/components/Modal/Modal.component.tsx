@@ -1,15 +1,21 @@
-import * as stylex from "@stylexjs/stylex";
-import { useEffect, useRef } from "react";
+import * as stylex from '@stylexjs/stylex';
+import { useEffect, useRef } from 'react';
 
-import { Button } from "@/components/Button";
-import { MenuCloseIcon } from "@/components/Icons";
-import { ICON_SIZE_MD } from "@/design-system/constants/iconSizes.constants";
+import { Button } from '@/components/Button';
+import { MenuCloseIcon } from '@/components/Icons';
+import { ICON_SIZE_MD } from '@/design-system/constants/iconSizes.constants';
 
-import type { ModalProps } from "./Modal.types.ts";
+import type { ModalProps } from './Modal.types.ts';
 
-import { modalStyles } from "./Modal.stylex.ts";
+import { modalStyles } from './Modal.stylex.ts';
 
-export const Modal = ({ children, footer, isOpen, onClose, title }: ModalProps) => {
+export const Modal = ({
+  children,
+  footer,
+  isOpen,
+  onClose,
+  title,
+}: ModalProps) => {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -31,24 +37,27 @@ export const Modal = ({ children, footer, isOpen, onClose, title }: ModalProps) 
       onClose();
     };
 
-    dialog.addEventListener("close", handleClose);
+    dialog.addEventListener('close', handleClose);
     return () => {
-      dialog.removeEventListener("close", handleClose);
+      dialog.removeEventListener('close', handleClose);
     };
   }, [onClose]);
 
   return (
-    <dialog ref={dialogRef} {...stylex.props(modalStyles.dialog, modalStyles.backdrop)}>
+    <dialog
+      ref={dialogRef}
+      {...stylex.props(modalStyles.dialog, modalStyles.backdrop)}
+    >
       {title && (
         <div {...stylex.props(modalStyles.header)}>
           <h2 {...stylex.props(modalStyles.title)}>{title}</h2>
           <Button
-            aria-label="Close"
-            color="ghost"
+            aria-label='Close'
+            color='ghost'
             icon={<MenuCloseIcon size={ICON_SIZE_MD} />}
             onClick={onClose}
-            size="mini"
-            width="auto"
+            size='mini'
+            width='auto'
           />
         </div>
       )}

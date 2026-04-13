@@ -1,14 +1,19 @@
-import type { Pool } from "pg";
+import type { Pool } from 'pg';
 
-import { buildOrderByClause } from "../../utils/buildOrderByClause.util";
+import { buildOrderByClause } from '../../utils/buildOrderByClause.util';
 
-import { DEFAULT_CAR_SALES_SORTING } from "./carSales.constants";
-import type { CarSalesResponse, PaginatedCarSalesResponse } from "./carSales.types";
-import type { SortRule } from "../../types/api.types";
+import { DEFAULT_CAR_SALES_SORTING } from './carSales.constants';
+import type {
+  CarSalesResponse,
+  PaginatedCarSalesResponse,
+} from './carSales.types';
+import type { SortRule } from '../../types/api.types';
 
 export type CarSalesRepository = {
   readonly getAll: () => Promise<CarSalesResponse>;
-  readonly getPaginated: (args: GetPaginatedCarSalesArgs) => Promise<PaginatedCarSalesResponse>;
+  readonly getPaginated: (
+    args: GetPaginatedCarSalesArgs,
+  ) => Promise<PaginatedCarSalesResponse>;
 };
 
 type CreateCarSalesRepositoryArgs = {
@@ -28,7 +33,7 @@ export const createCarSalesRepository = ({
   pool,
 }: CreateCarSalesRepositoryArgs): CarSalesRepository => ({
   getAll: async () => {
-    const result = await pool.query("SELECT * FROM car_sales ORDER BY car_id");
+    const result = await pool.query('SELECT * FROM car_sales ORDER BY car_id');
 
     return {
       data: result.rows,
@@ -47,9 +52,9 @@ export const createCarSalesRepository = ({
       [limit, skip],
     );
     const countResult = await pool.query<{ readonly count: string }>(
-      "SELECT COUNT(*) FROM car_sales",
+      'SELECT COUNT(*) FROM car_sales',
     );
-    const total = Number.parseInt(countResult.rows[0]?.count ?? "0", 10);
+    const total = Number.parseInt(countResult.rows[0]?.count ?? '0', 10);
 
     return {
       data: dataResult.rows,

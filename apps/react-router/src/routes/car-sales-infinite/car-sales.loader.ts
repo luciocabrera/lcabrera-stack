@@ -1,18 +1,22 @@
-import type { LoaderFunctionArgs } from "react-router";
+import type { LoaderFunctionArgs } from 'react-router';
 
-import type { ColumnFiltersState, ColumnSizingState, SortingState } from "@/components/Table";
-import type { CarSale, CarSalesResponse } from "@/services";
+import type {
+  ColumnFiltersState,
+  ColumnSizingState,
+  SortingState,
+} from '@/components/Table';
+import type { CarSale, CarSalesResponse } from '@/services';
 
-import { readPersistedStateFromCookie } from "@/components/Table/utils";
-import { INITIAL_PAGE_SIZE } from "@/components/Table/Table.constants";
-import { carSalesApi } from "@/services";
+import { readPersistedStateFromCookie } from '@/components/Table/utils';
+import { INITIAL_PAGE_SIZE } from '@/components/Table/Table.constants';
+import { carSalesApi } from '@/services';
 import {
   deserializeFiltersFromURL,
   deserializeSortingFromURL,
   readTableStateFromURL,
-} from "@/utils/urlState";
+} from '@/utils/urlState';
 
-import { PERSISTENCE_KEY } from "./CarSales.constants.tsx";
+import { PERSISTENCE_KEY } from './CarSales.constants.tsx';
 
 /**
  * Loader for car sales infinite route
@@ -30,21 +34,23 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
   });
 
   // Read persisted state from cookies (fallback)
-  const cookieHeader = request.headers.get("Cookie");
+  const cookieHeader = request.headers.get('Cookie');
   const cookieState = readPersistedStateFromCookie({
     cookieString: cookieHeader ?? undefined,
     persistenceKey: PERSISTENCE_KEY,
   });
 
   // Merge URL state (priority) with cookie state (fallback)
-  const columnOrder = (urlState?.columnOrder ?? cookieState.columnOrder ?? []) as (keyof CarSale)[];
+  const columnOrder = (urlState?.columnOrder ??
+    cookieState.columnOrder ??
+    []) as (keyof CarSale)[];
   const columnVisibility = (urlState?.columnVisibility ??
     cookieState.columnVisibility ??
     new Set()) as Set<keyof CarSale>;
 
   // Read sorting from standalone param only
   // Don't fall back to cookie - URL is the source of truth for sorting
-  const standaloneSortParam = url.searchParams.get("sort");
+  const standaloneSortParam = url.searchParams.get('sort');
 
   let sorting: SortingState<CarSale> = [];
   if (standaloneSortParam) {
@@ -52,7 +58,7 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
   }
 
   // Read filters from standalone param only
-  const standaloneFiltersParam = url.searchParams.get("filters");
+  const standaloneFiltersParam = url.searchParams.get('filters');
   let filters: ColumnFiltersState<CarSale> = {} as ColumnFiltersState<CarSale>;
   if (standaloneFiltersParam) {
     filters = deserializeFiltersFromURL<CarSale>(standaloneFiltersParam);
@@ -68,7 +74,7 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
       requestUrl: request.url,
       skip: 0,
       sorting: sorting.filter(
-        (s): s is { columnKey: keyof CarSale; direction: "asc" | "desc" } =>
+        (s): s is { columnKey: keyof CarSale; direction: 'asc' | 'desc' } =>
           s.direction !== undefined,
       ),
     });
@@ -79,9 +85,9 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
     columnSizing,
     columnVisibility,
     filters,
-    key: `${standaloneSortParam ?? ""}${standaloneFiltersParam ?? ""}`,
+    key: `${standaloneSortParam ?? ''}${standaloneFiltersParam ?? ''}`,
     sorting: sorting.filter(
-      (s): s is { columnKey: keyof CarSale; direction: "asc" | "desc" } =>
+      (s): s is { columnKey: keyof CarSale; direction: 'asc' | 'desc' } =>
         s.direction !== undefined,
     ),
   };

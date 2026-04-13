@@ -1,45 +1,49 @@
-import * as stylex from "@stylexjs/stylex";
+import * as stylex from '@stylexjs/stylex';
 
-import { borderRadius, spacing, typography } from "@/design-system/tokens/base.stylex";
-import { colors } from "@/design-system/tokens/colors.stylex";
-import { drawerSectionStyles } from "@/design-system/tokens/drawerSection.stylex";
+import {
+  borderRadius,
+  spacing,
+  typography,
+} from '@/design-system/tokens/base.stylex';
+import { colors } from '@/design-system/tokens/colors.stylex';
+import { drawerSectionStyles } from '@/design-system/tokens/drawerSection.stylex';
 
 const localStyles = stylex.create({
   container: {
-    flex: "1",
+    flex: '1',
     gap: spacing.md,
-    display: "flex",
-    flexDirection: "column",
+    display: 'flex',
+    flexDirection: 'column',
   },
   filterItem: {
     borderColor: colors.borderPrimary,
     borderRadius: borderRadius.md,
-    borderStyle: "solid",
-    borderWidth: "1px",
-    overflow: "visible",
+    borderStyle: 'solid',
+    borderWidth: '1px',
+    overflow: 'visible',
     backgroundColor: {
       default: colors.surfaceSecondary,
-      ":hover": colors.surfaceElevated,
+      ':hover': colors.surfaceElevated,
     },
   },
   filterItemHeader: {
     gap: spacing.sm,
     paddingBlock: spacing.xxs,
     paddingInline: spacing.md,
-    alignItems: "center",
-    display: "flex",
-    justifyContent: "space-between",
-    height: "34px",
+    alignItems: 'center',
+    display: 'flex',
+    justifyContent: 'space-between',
+    height: '34px',
   },
   filterToggle: {
     padding: 0,
     borderWidth: 0,
     gap: spacing.xs,
-    alignItems: "center",
-    backgroundColor: "transparent",
+    alignItems: 'center',
+    backgroundColor: 'transparent',
     color: colors.textPrimary,
-    cursor: "pointer",
-    display: "flex",
+    cursor: 'pointer',
+    display: 'flex',
     flexGrow: 1,
     fontSize: typography.fontSizeSm,
   },
@@ -53,7 +57,7 @@ const localStyles = stylex.create({
     flexGrow: 1,
     fontSize: typography.fontSizeSm,
     fontWeight: 500,
-    textAlign: "left",
+    textAlign: 'left',
   },
   invalidBadge: {
     color: colors.error,
@@ -66,8 +70,8 @@ const localStyles = stylex.create({
     borderBottomLeftRadius: borderRadius.md,
     borderBottomRightRadius: borderRadius.md,
     borderTopColor: colors.borderPrimary,
-    borderTopStyle: "solid",
-    borderTopWidth: "1px",
+    borderTopStyle: 'solid',
+    borderTopWidth: '1px',
   },
 });
 

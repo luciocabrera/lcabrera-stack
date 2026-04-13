@@ -1,17 +1,23 @@
-import { useLoaderData } from "react-router";
+import { useLoaderData } from 'react-router';
 
-import type { WideAlltypes150, WideAlltypes150Response } from "@/services";
+import type { WideAlltypes150, WideAlltypes150Response } from '@/services';
 
-import { TableLayout } from "@/components/Table/TableLayout";
-import { wideAlltypes150Api } from "@/services";
+import { TableLayout } from '@/components/Table/TableLayout';
+import { wideAlltypes150Api } from '@/services';
 
-import type { loader } from "./wide-alltypes-150.loader.ts";
+import type { loader } from './wide-alltypes-150.loader.ts';
 
-import { COLUMNS, PERSISTENCE_KEY } from "./WideAlltypes150.constants.ts";
+import { COLUMNS, PERSISTENCE_KEY } from './WideAlltypes150.constants.ts';
 
 export const WideAlltypes150Page = () => {
-  const { columnOrder, columnSizing, columnVisibility, dataPromise, key, sorting } =
-    useLoaderData<typeof loader>();
+  const {
+    columnOrder,
+    columnSizing,
+    columnVisibility,
+    dataPromise,
+    key,
+    sorting,
+  } = useLoaderData<typeof loader>();
 
   return (
     <TableLayout<WideAlltypes150, WideAlltypes150Response>
@@ -22,11 +28,13 @@ export const WideAlltypes150Page = () => {
       dataPromise={dataPromise}
       dataSelector={(response) => response.data}
       dataTotalSelector={(response) => response.total}
-      onLoadMore={({ limit, skip }) => wideAlltypes150Api.fetchPaginated({ limit, skip, sorting })}
+      onLoadMore={({ limit, skip }) =>
+        wideAlltypes150Api.fetchPaginated({ limit, skip, sorting })
+      }
       persistenceKey={PERSISTENCE_KEY}
       sorting={sorting}
       suspenseKey={key}
-      title="Wide All-Types — 150 Columns × 1M Rows"
+      title='Wide All-Types — 150 Columns × 1M Rows'
     />
   );
 };

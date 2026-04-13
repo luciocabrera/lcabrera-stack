@@ -1,6 +1,6 @@
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react';
 
-import type { DataKey } from "@/components/Table/Table.types";
+import type { DataKey } from '@/components/Table/Table.types';
 
 export type InfiniteScroll<TData, TResponse> = {
   readonly dataSelector?: (response: TResponse) => TData[];
@@ -21,10 +21,10 @@ export type Pagination = {
 
 export type PinConflictState = {
   readonly isOpen: boolean;
-  readonly side: "left" | "right";
+  readonly side: 'left' | 'right';
 };
 
-export type PinSide = "closest-edge" | "left" | "right";
+export type PinSide = 'closest-edge' | 'left' | 'right';
 
 export type PrefetchCache<TResponse> = {
   readonly data?: TResponse;
@@ -32,7 +32,7 @@ export type PrefetchCache<TResponse> = {
   readonly skip: number;
 };
 
-export type SortDirection = "asc" | "desc" | undefined;
+export type SortDirection = 'asc' | 'desc' | undefined;
 
 export type Sorting<TData = Record<string, unknown>> = {
   /** Column key being sorted */

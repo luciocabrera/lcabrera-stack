@@ -1,1 +1,1 @@
-export { getInitialModalsState } from "./getInitialModalsState.util.ts";
+export { getInitialModalsState } from './getInitialModalsState.util.ts';

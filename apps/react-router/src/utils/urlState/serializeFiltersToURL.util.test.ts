@@ -1,83 +1,83 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { serializeFiltersToURL } from "./serializeFiltersToURL.util.ts";
+import { serializeFiltersToURL } from './serializeFiltersToURL.util.ts';
 
-describe("serializeFiltersToURL", () => {
-  it("returns undefined for empty filters", () => {
+describe('serializeFiltersToURL', () => {
+  it('returns undefined for empty filters', () => {
     expect(serializeFiltersToURL({})).toBeUndefined();
   });
 
-  it("serializes a boolean filter", () => {
+  it('serializes a boolean filter', () => {
     const result = serializeFiltersToURL({
-      active: { type: "boolean", value: true },
+      active: { type: 'boolean', value: true },
     });
     expect(result).toBeDefined();
     const parsed = JSON.parse(result!) as Record<string, unknown>;
-    expect(parsed["active"]).toBe(true);
+    expect(parsed['active']).toBe(true);
   });
 
-  it("serializes a text filter", () => {
+  it('serializes a text filter', () => {
     const result = serializeFiltersToURL({
-      name: { operator: "contains", type: "text", value: "hello" },
+      name: { operator: 'contains', type: 'text', value: 'hello' },
     });
     const parsed = JSON.parse(result!) as Record<string, unknown>;
-    expect(parsed["name"]).toEqual(["ct", "hello"]);
+    expect(parsed['name']).toEqual(['ct', 'hello']);
   });
 
-  it("serializes a number filter with between operator", () => {
+  it('serializes a number filter with between operator', () => {
     const result = serializeFiltersToURL({
-      age: { operator: "between", type: "number", value: 10, value2: 20 },
+      age: { operator: 'between', type: 'number', value: 10, value2: 20 },
     });
     const parsed = JSON.parse(result!) as Record<string, unknown>;
-    expect(parsed["age"]).toEqual(["bw", 10, 20]);
+    expect(parsed['age']).toEqual(['bw', 10, 20]);
   });
 
-  it("serializes a number filter without between", () => {
+  it('serializes a number filter without between', () => {
     const result = serializeFiltersToURL({
-      age: { operator: "equals", type: "number", value: 42 },
+      age: { operator: 'equals', type: 'number', value: 42 },
     });
     const parsed = JSON.parse(result!) as Record<string, unknown>;
-    expect(parsed["age"]).toEqual(["eq", 42]);
+    expect(parsed['age']).toEqual(['eq', 42]);
   });
 
-  it("serializes a select filter with equals", () => {
+  it('serializes a select filter with equals', () => {
     const result = serializeFiltersToURL({
       status: {
-        operator: "equals",
-        type: "select",
-        values: ["Active", "Inactive"],
+        operator: 'equals',
+        type: 'select',
+        values: ['Active', 'Inactive'],
       },
     });
     const parsed = JSON.parse(result!) as Record<string, unknown>;
-    expect(parsed["status"]).toEqual(["Active", "Inactive"]);
+    expect(parsed['status']).toEqual(['Active', 'Inactive']);
   });
 
-  it("serializes a select filter with notEquals", () => {
+  it('serializes a select filter with notEquals', () => {
     const result = serializeFiltersToURL({
-      status: { operator: "notEquals", type: "select", values: ["Draft"] },
+      status: { operator: 'notEquals', type: 'select', values: ['Draft'] },
     });
     const parsed = JSON.parse(result!) as Record<string, unknown>;
-    expect(parsed["status"]).toEqual(["!", "Draft"]);
+    expect(parsed['status']).toEqual(['!', 'Draft']);
   });
 
-  it("serializes a date filter with between operator", () => {
+  it('serializes a date filter with between operator', () => {
     const result = serializeFiltersToURL({
       date: {
-        operator: "between",
-        type: "date",
-        value: "2024-01-01",
-        value2: "2024-12-31",
+        operator: 'between',
+        type: 'date',
+        value: '2024-01-01',
+        value2: '2024-12-31',
       },
     });
     const parsed = JSON.parse(result!) as Record<string, unknown>;
-    expect(parsed["date"]).toEqual(["bw", "2024-01-01", "2024-12-31"]);
+    expect(parsed['date']).toEqual(['bw', '2024-01-01', '2024-12-31']);
   });
 
-  it("serializes a date filter without between", () => {
+  it('serializes a date filter without between', () => {
     const result = serializeFiltersToURL({
-      date: { operator: "after", type: "date", value: "2024-01-01" },
+      date: { operator: 'after', type: 'date', value: '2024-01-01' },
     });
     const parsed = JSON.parse(result!) as Record<string, unknown>;
-    expect(parsed["date"]).toEqual(["af", "2024-01-01"]);
+    expect(parsed['date']).toEqual(['af', '2024-01-01']);
   });
 });

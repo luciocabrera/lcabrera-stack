@@ -1,5 +1,5 @@
-import type { TableDataState } from "@/components/Table/Table.types";
-import type { TStore } from "@/hooks/useStore.hook";
+import type { TableDataState } from '@/components/Table/Table.types';
+import type { TStore } from '@/hooks/useStore.hook';
 
 export type TableDataContextValue<TData = Record<string, unknown>> = {
   /** Store managing data-related state */

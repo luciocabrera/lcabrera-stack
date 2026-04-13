@@ -1,11 +1,11 @@
-import { API_SERVER_PORT, CONFIG } from "@/constants/api.constants";
+import { API_SERVER_PORT, CONFIG } from '@/constants/api.constants';
 
 /**
  * Check if hostname is a local/private IP address
  */
 const isLocalIp = (hostname: string): boolean => {
   // Check for localhost aliases
-  if (hostname === "localhost" || hostname === "127.0.0.1") {
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
     return true;
   }
 
@@ -62,13 +62,13 @@ export const getApiBaseUrl = (requestUrl?: string): string => {
 
   // In development, always use the Vite proxy
   if (isDev) {
-    return "/api";
+    return '/api';
   }
 
   // Check if it's localhost or a private IP
   if (isLocalIp(hostname)) {
     // For localhost aliases, use the configured localhost URL
-    if (hostname === "localhost" || hostname === "127.0.0.1") {
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
       return CONFIG.localhost.apiHost;
     }
 

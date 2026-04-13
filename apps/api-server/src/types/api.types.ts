@@ -32,7 +32,7 @@ export type PaginationArgs = {
 
 export type QueryValue = boolean | Date | null | number | string;
 
-export type SortDirection = "asc" | "desc";
+export type SortDirection = 'asc' | 'desc';
 
 export type SortRule = {
   readonly columnKey: string;

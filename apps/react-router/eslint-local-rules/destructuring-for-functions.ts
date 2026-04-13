@@ -2,20 +2,21 @@
 // ✅ Skips single-parameter functions
 // ❌ Auto-fix disabled (too aggressive for callbacks, Promise constructors, etc.)
 
-import type { Rule } from "eslint";
+import type { Rule } from 'eslint';
 
 const rule: Rule.RuleModule = {
   meta: {
     docs: {
-      description: "Enforce object parameter pattern for functions with multiple parameters",
+      description:
+        'Enforce object parameter pattern for functions with multiple parameters',
       recommended: false,
     },
     messages: {
       useObjectParam:
-        "Functions with multiple parameters should use a single object parameter with a named type.",
+        'Functions with multiple parameters should use a single object parameter with a named type.',
     },
     schema: [],
-    type: "suggestion",
+    type: 'suggestion',
   },
   create(context) {
     return {
@@ -41,7 +42,7 @@ function checkFunction(node: any, context: Rule.RuleContext) {
   }
 
   // Skip if already using object destructuring pattern
-  if (params.length === 1 && params[0].type === "ObjectPattern") {
+  if (params.length === 1 && params[0].type === 'ObjectPattern') {
     return;
   }
 
@@ -52,7 +53,7 @@ function checkFunction(node: any, context: Rule.RuleContext) {
 
   // Report violation
   context.report({
-    messageId: "useObjectParam",
+    messageId: 'useObjectParam',
     node,
   });
 }
@@ -61,26 +62,26 @@ function isArrayMethodCallback(node: any): boolean {
   const parent = node.parent;
 
   // Check if this function is a direct argument to a call expression
-  if (parent?.type === "CallExpression") {
+  if (parent?.type === 'CallExpression') {
     const callee = parent.callee;
 
     // Check for array methods (map, filter, forEach, find, findIndex, some, every, reduce, etc.)
-    if (callee?.type === "MemberExpression") {
+    if (callee?.type === 'MemberExpression') {
       const methodName = callee.property?.name;
       const arrayMethods = [
-        "map",
-        "filter",
-        "forEach",
-        "find",
-        "findIndex",
-        "some",
-        "every",
-        "reduce",
-        "reduceRight",
-        "flatMap",
-        "sort",
-        "findLast",
-        "findLastIndex",
+        'map',
+        'filter',
+        'forEach',
+        'find',
+        'findIndex',
+        'some',
+        'every',
+        'reduce',
+        'reduceRight',
+        'flatMap',
+        'sort',
+        'findLast',
+        'findLastIndex',
       ];
 
       return arrayMethods.includes(methodName);
