@@ -173,9 +173,9 @@ const WideAlltypes150TanStackTableContent = ({
     onSortingChange: handleSortingChange,
   }));
 
-  const fetchMoreOnBottomReached = (
+  const fetchMoreOnBottomReached = async (
     containerElement: HTMLDivElement | null,
-  ): void => {
+  ): Promise<void> => {
     if (!containerElement || isFetching || flatData.length >= totalRowCount) {
       return;
     }
@@ -183,18 +183,18 @@ const WideAlltypes150TanStackTableContent = ({
     const { clientHeight, scrollHeight, scrollTop } = containerElement;
 
     if (scrollHeight - scrollTop - clientHeight < SCROLL_FETCH_THRESHOLD) {
-      void fetchNextPage();
+      await fetchNextPage();
     }
   };
 
   const fetchMoreOnBottomReachedEffect = useEffectEvent(
     (containerElement: HTMLDivElement | null): void => {
-      fetchMoreOnBottomReached(containerElement);
+      void fetchMoreOnBottomReached(containerElement);
     },
   );
 
   const handleScroll = (event: UIEvent<HTMLDivElement>): void => {
-    fetchMoreOnBottomReached(event.currentTarget);
+    void fetchMoreOnBottomReached(event.currentTarget);
   };
 
   useEffect(() => {
