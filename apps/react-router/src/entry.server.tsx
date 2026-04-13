@@ -16,10 +16,7 @@ import stylexCssHref from "./stylex.css?url";
  * eliminating the critical request chain for CSS resources.
  */
 const addPreloadHeaders = (headers: Headers) => {
-  headers.append(
-    "Link",
-    `</index.css>; rel=preload; as=style, <${stylexCssHref}>; rel=preload; as=style`,
-  );
+  headers.append("Link", `<${stylexCssHref}>; rel=preload; as=style`);
 };
 
 /**
