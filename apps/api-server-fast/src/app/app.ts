@@ -29,7 +29,7 @@ export const createApp = ({
 
   app.setErrorHandler((error, _request, reply) => {
     if (error instanceof HttpError) {
-      void reply.status(error.statusCode).send({ error: error.message });
+      reply.status(error.statusCode).send({ error: error.message });
       return;
     }
 
