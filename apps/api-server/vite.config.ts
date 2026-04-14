@@ -1,36 +1,7 @@
 import { defineConfig } from 'vite-plus';
-import type { OxlintConfig } from 'vite-plus/lint';
+import { createApiLintConfig } from '../../config/vite.api-lint.shared.config.ts';
 
-const lintConfig: OxlintConfig = {
-  env: {
-    builtin: true,
-    es2026: true,
-  },
-  options: {
-    typeAware: true,
-    typeCheck: true,
-  },
-  overrides: [
-    {
-      env: {
-        node: true,
-      },
-      files: ['**/*.ts'],
-      jsPlugins: [
-        {
-          name: 'local-rules',
-          specifier: '../../packages/eslint-local-rules/index.js',
-        },
-      ],
-      rules: {
-        'local-rules/destructuring-for-functions': 'warn',
-        'local-rules/merge-duplicate-imports': 'error',
-        'local-rules/no-inline-type-imports': 'error',
-        'local-rules/type-suffix-naming': 'error',
-      },
-    },
-  ],
-};
+const lintConfig = createApiLintConfig();
 
 export default defineConfig({
   lint: lintConfig,

@@ -1,7 +1,11 @@
 import type { RequestHandler } from 'express';
 
-import { DEFAULT_PAGE_LIMIT, DISTINCT_DEFAULT_LIMIT } from 'api-shared';
-import { HttpError } from 'api-shared';
+import {
+  DEFAULT_PAGE_LIMIT,
+  DISTINCT_DEFAULT_LIMIT,
+  HttpError,
+} from 'api-shared';
+
 import { createRequestHandler } from '../../utils/createRequestHandler.util';
 import { delay } from '../../utils/delay.util';
 import { readQueryInteger } from '../../utils/readQueryInteger.util';
