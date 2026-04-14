@@ -21,14 +21,16 @@ type CreateAppArgs = {
 export const createApp = ({ envConfig, pool }: CreateAppArgs): Express => {
   const app = express();
   const apiRouter = Router();
-  const allowedCorsOrigins = envConfig.CORS_ALLOWED_ORIGINS.split(',')
-    .map((origin) => origin.trim())
-    .filter((origin) => origin.length > 0);
+  const allowedCorsOrigins = new Set(
+    envConfig.CORS_ALLOWED_ORIGINS.split(',')
+      .map((origin) => origin.trim())
+      .filter((origin) => origin.length > 0),
+  );
 
   app.use(
     cors({
       origin: (origin, callback) => {
-        callback(null, !origin || allowedCorsOrigins.includes(origin));
+        callback(null, !origin || allowedCorsOrigins.has(origin));
       },
     }),
   );
