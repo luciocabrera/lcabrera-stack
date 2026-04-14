@@ -27,3 +27,24 @@ vp run build -r
 ```bash
 vp run dev
 ```
+
+## Local DB Workflow
+
+From the repository root:
+
+```bash
+# Start local postgres
+vp run db:up
+
+# Check status
+vp run db:status
+
+# Seed data
+vp run seed
+
+# Or do both bring-up + seed
+vp run db:seed
+
+# Stop local postgres
+vp run db:down
+```

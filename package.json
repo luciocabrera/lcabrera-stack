@@ -4,9 +4,17 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "build:eslint-rules": "cd packages/eslint-local-rules && vp run build",
+    "check:safe": "vp run build:eslint-rules && vp check && cd apps/react-router && vp run test",
     "ready": "vp fmt && vp lint && vp run test -r && vp run build -r",
     "dev": "pnpm --parallel --filter car-sales-api --filter vite-react-compiler run dev",
     "dev:fast": "pnpm --parallel --filter car-sales-api-fast --filter vite-react-compiler run dev",
+    "db:up": "docker compose -f docker/local/docker-compose.yml --env-file docker/local/.env up -d postgres",
+    "db:status": "docker compose -f docker/local/docker-compose.yml --env-file docker/local/.env ps",
+    "db:down": "docker compose -f docker/local/docker-compose.yml --env-file docker/local/.env down",
+    "db:seed": "vp run db:up && vp run seed",
+    "seed": "cd apps/api-server && vp run seed",
+    "seed:fast": "cd apps/api-server-fast && vp run seed",
     "start": "vp run start -r",
     "prepare": "vp config"
   },

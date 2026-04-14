@@ -4,9 +4,9 @@
   "description": "Simple API server for car sales data",
   "main": "dist/server.js",
   "scripts": {
-    "dev": "nodemon --watch src --ext ts --exec \"vp run build && node --env-file-if-exists=.env dist/server.js\"",
-    "seed": "node --env-file-if-exists=.env scripts/seed-db.js",
-    "start": "vp run build && node --env-file-if-exists=.env dist/server.js",
+    "dev": "nodemon --watch src --ext ts --exec \"vp run build && node --env-file-if-exists=../../docker/local/.env --env-file-if-exists=.env dist/server.js\"",
+    "seed": "node --env-file-if-exists=../../docker/local/.env --env-file-if-exists=.env ../../scripts/seed-db.cjs",
+    "start": "vp run build && node --env-file-if-exists=../../docker/local/.env --env-file-if-exists=.env dist/server.js",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {

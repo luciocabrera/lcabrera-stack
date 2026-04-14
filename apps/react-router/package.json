@@ -4,10 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build:eslint-rules": "cd ../../packages/eslint-local-rules && tsc -p tsconfig.json",
+    "build:eslint-rules": "cd ../../packages/eslint-local-rules && vp run build",
     "dev": "react-router dev",
-    "lint": "vp lint . --fix",
-    "lint:check": "vp lint .",
+    "lint": "vp run build:eslint-rules && vp lint . --fix",
+    "lint:check": "vp run build:eslint-rules && vp lint .",
     "format": "vp fmt .",
     "format:check": "vp fmt --check .",
     "typecheck": "react-router typegen && tsc --noEmit",

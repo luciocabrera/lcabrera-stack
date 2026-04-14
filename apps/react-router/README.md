@@ -67,6 +67,18 @@ vp run start
 
 ### DB Recovery And Backup
 
+Start local PostgreSQL from the monorepo root:
+
+```bash
+vp run db:up
+```
+
+Check database container status:
+
+```bash
+vp run db:status
+```
+
 If API responses suddenly return `total: 0`, first check DB sanity:
 
 ```bash
@@ -76,8 +88,9 @@ curl http://localhost:3001/api/db-sanity
 Seed all API tables in one command:
 
 ```bash
-cd api-server
 vp run seed
+# or one-shot bring-up + seed
+vp run db:seed
 ```
 
 Create a backup dump:
@@ -96,6 +109,7 @@ Important:
 
 - Avoid `docker compose down -v` unless you intentionally want to delete DB data.
 - Keep one stable compose project path/name so Docker reuses the same volume.
+- Stop local DB with `vp run db:down`.
 
 ## Routes
 

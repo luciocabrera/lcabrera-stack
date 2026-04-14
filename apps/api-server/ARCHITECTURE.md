@@ -21,6 +21,9 @@ Configured by `.env`:
 - `DB_PASSWORD`
 - `DB_NAME`
 
+Canonical shared env values are loaded from `../../docker/local/.env`.
+Package-local `.env` files are optional and used only as app-specific overrides.
+
 The frontend expects this API on `http://localhost:3001` and proxies `/api`.
 
 ## Main Route Groups
@@ -62,5 +65,5 @@ SQL assets:
 
 Programmatic entrypoint:
 
-- `scripts/seed-db.js`
+- `../../scripts/seed-db.cjs`
 - `vp run seed`

@@ -20,12 +20,15 @@ Configured by `.env`:
 - `DB_PASSWORD`
 - `DB_NAME`
 
+Canonical shared env values are loaded from `../../docker/local/.env`.
+Package-local `.env` files are optional and used only as app-specific overrides.
+
 ## Seeding
 
 Programmatic entrypoint:
 
-- `scripts/seed-db.js`
-- `scripts/seed-db.js` resolves `psql` from fixed system directories and executes it with a fixed safe `PATH`
+- `../../scripts/seed-db.cjs`
+- `../../scripts/seed-db.cjs` resolves `psql` from fixed system directories and executes it with a fixed safe `PATH`
 
 SQL assets are reused from `apps/api-server/db/`.
 

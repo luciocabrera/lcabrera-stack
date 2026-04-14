@@ -1,0 +1,22 @@
+name: Check Safe
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  check-safe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Vite+
+        uses: voidzero-dev/setup-vp@v1
+        with:
+          cache: true
+
+      - name: Run safe quality gate
+        run: vp run check:safe
