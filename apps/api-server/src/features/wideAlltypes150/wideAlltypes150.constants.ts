@@ -1,16 +1,4 @@
-import type { SortRule } from 'api-shared';
-
-const wideColumnNumbers = Array.from(
-  { length: 149 },
-  // eslint-disable-next-line local-rules/destructuring-for-functions
-  (_value, index) => `c_${String(index + 1).padStart(3, '0')}`,
-);
-
-export const WIDE_ALLTYPES_SORTABLE_COLUMNS = new Set([
-  'id',
-  ...wideColumnNumbers,
-]);
-
-export const DEFAULT_WIDE_ALLTYPES_SORTING = [
-  { columnKey: 'id', direction: 'asc' },
-] as const satisfies readonly SortRule[];
+export {
+  DEFAULT_WIDE_ALLTYPES_SORTING,
+  WIDE_ALLTYPES_SORTABLE_COLUMNS,
+} from 'api-shared';

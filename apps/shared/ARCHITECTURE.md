@@ -8,18 +8,26 @@ Eliminate code duplication between `apps/api-server` and `apps/api-server-fast` 
 
 ## Current Shared Modules
 
-| Artifact                 | File                                       | Description                                                          |
-| ------------------------ | ------------------------------------------ | -------------------------------------------------------------------- |
-| `server.constants`       | `src/constants/server.constants.ts`        | Shared pagination and sanity-check constants used by both APIs       |
-| `HttpError`              | `src/errors/httpError.ts`                  | Shared HTTP-aware error type for request validation and handlers     |
-| `api.types`              | `src/types/api.types.ts`                   | Shared API response/query/pagination types                           |
-| `serializeDatabaseValue` | `src/utils/serializeDatabaseValue.util.ts` | Convert PostgreSQL row values (Buffers, objects) to JSON-safe format |
+| Artifact                               | File                                                                     | Description                                                          |
+| -------------------------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------------- |
+| `server.constants`                     | `src/constants/server.constants.ts`                                      | Shared pagination and sanity-check constants used by both APIs       |
+| `HttpError`                            | `src/errors/httpError.ts`                                                | Shared HTTP-aware error type for request validation and handlers     |
+| `api.types`                            | `src/types/api.types.ts`                                                 | Shared API response/query/pagination types and query client contract |
+| `buildOrderByClause`                   | `src/utils/buildOrderByClause.util.ts`                                   | Shared safe SQL ORDER BY construction utility                        |
+| `formatPgAdminQuery`                   | `src/utils/formatPgAdminQuery.util.ts`                                   | Shared SQL logging formatter utility                                 |
+| `serializeDatabaseValue`               | `src/utils/serializeDatabaseValue.util.ts`                               | Convert PostgreSQL row values (Buffers, objects) to JSON-safe format |
+| `carSales.constants/types/repository`  | `src/features/carSales/*`                                                | Shared car-sales sorting contracts and repository implementation     |
+| `dbSanity.repository`                  | `src/features/dbSanity/dbSanity.repository.ts`                           | Shared database sanity checks implementation                         |
+| `enterpriseOrders.constants/types`     | `src/features/enterpriseOrders/enterpriseOrders.{constants,types}.ts`    | Shared enterprise order filter/sort contracts                        |
+| `buildEnterpriseOrdersWhereClause`     | `src/features/enterpriseOrders/buildEnterpriseOrdersWhereClause.util.ts` | Shared enterprise-order filter SQL builder                           |
+| `enterpriseOrders.repository`          | `src/features/enterpriseOrders/enterpriseOrders.repository.ts`           | Shared enterprise-order repository implementation                    |
+| `wideAlltypes150.constants/repository` | `src/features/wideAlltypes150/*`                                         | Shared wide table sorting contracts and repository implementation    |
 
 ## Usage Across Apps
 
-- **api-server**: imports `HttpError`, `server.constants`, and `api.types` from `api-shared`
-- **api-server-fast**: imports `HttpError`, `server.constants`, and `api.types` from `api-shared`
-- **Both apps**: `wideAlltypes150.repository.ts` uses `serializeDatabaseValue` from shared utils
+- **api-server**: imports shared constants, types, repositories, and SQL utilities from `api-shared`
+- **api-server-fast**: imports shared constants, types, repositories, and SQL utilities from `api-shared`
+- **Both apps**: local feature files now act as thin compatibility wrappers around shared modules
 
 ## Package Configuration
 
@@ -30,8 +38,7 @@ Eliminate code duplication between `apps/api-server` and `apps/api-server-fast` 
 ## Future Consolidation Opportunities
 
 - `parseJsonQueryParam.util.ts` (Express) vs `parseJsonQueryFields.util.ts` (Fastify) — different APIs but similar intent
-- PostgreSQL type mappings if repeated
-- Error handling utilities
+- Route/controller/plugin orchestration (still framework-specific and intentionally app-local)
 
 ## Maintenance Notes
 
