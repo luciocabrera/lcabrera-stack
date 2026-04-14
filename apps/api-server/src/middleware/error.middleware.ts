@@ -1,6 +1,6 @@
 import type { ErrorRequestHandler } from 'express';
 
-import { HttpError } from '../errors/httpError';
+import { HttpError } from 'api-shared';
 
 // eslint-disable-next-line local-rules/destructuring-for-functions
 export const errorMiddleware: ErrorRequestHandler = (

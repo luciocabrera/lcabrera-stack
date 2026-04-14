@@ -1,13 +1,29 @@
 const { spawnSync } = require('node:child_process');
+const { existsSync } = require('node:fs');
 
 const SAFE_PATH =
   '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin';
 
+const FIXED_PSQL_PATHS = ['/usr/local/bin/psql', '/usr/bin/psql', '/bin/psql'];
+
+const resolvePsqlBinary = () => {
+  const matchedPath = FIXED_PSQL_PATHS.find((path) => existsSync(path));
+
+  if (!matchedPath) {
+    throw new Error(
+      `psql binary was not found in fixed directories: ${FIXED_PSQL_PATHS.join(', ')}`,
+    );
+  }
+
+  return matchedPath;
+};
+
 const env = {
-  ...process.env,
   PATH: SAFE_PATH,
   PGPASSWORD: process.env.DB_PASSWORD ?? 'root',
 };
+
+const psqlBinary = resolvePsqlBinary();
 
 const host = process.env.DB_HOST ?? 'localhost';
 const port = process.env.DB_PORT ?? '5434';
@@ -16,7 +32,7 @@ const database = process.env.DB_NAME ?? 'car_sales_db';
 
 const runSqlFile = (sqlFilePath) => {
   const result = spawnSync(
-    'psql',
+    psqlBinary,
     ['-h', host, '-p', port, '-U', user, '-d', database, '-f', sqlFilePath],
     {
       env,

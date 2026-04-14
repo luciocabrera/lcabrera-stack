@@ -2,7 +2,7 @@ import type {
   DbRow,
   DistinctValuesResponse,
   PaginatedResponse,
-} from '../../types/api.types';
+} from 'api-shared';
 
 export type BooleanFilter = {
   readonly type: 'boolean';

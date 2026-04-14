@@ -2,12 +2,7 @@ import type { Pool } from 'pg';
 
 import { buildOrderByClause } from '../../utils/buildOrderByClause.util';
 import { formatPgAdminQuery } from '../../utils/formatPgAdminQuery.util';
-import type {
-  CountRow,
-  DbRow,
-  QueryValue,
-  SortRule,
-} from '../../types/api.types';
+import type { CountRow, DbRow, QueryValue, SortRule } from 'api-shared';
 
 import { buildEnterpriseOrdersWhereClause } from './buildEnterpriseOrdersWhereClause.util';
 import { DEFAULT_ENTERPRISE_ORDER_SORTING } from './enterpriseOrders.constants';

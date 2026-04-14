@@ -1,4 +1,4 @@
-import type { SortRule } from '../../types/api.types';
+import type { SortRule } from 'api-shared';
 
 const ENTERPRISE_ORDER_COLUMNS = [
   'balance_due',

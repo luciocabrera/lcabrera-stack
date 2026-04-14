@@ -7,7 +7,7 @@ import { createCarSalesRoute } from '../features/carSales/carSales.route';
 import { createDbSanityRoute } from '../features/dbSanity/dbSanity.route';
 import { createEnterpriseOrdersRoute } from '../features/enterpriseOrders/enterpriseOrders.route';
 import { createWideAlltypes150Route } from '../features/wideAlltypes150/wideAlltypes150.route';
-import { HttpError } from '../errors/httpError';
+import { HttpError } from 'api-shared';
 import { errorMiddleware } from '../middleware/error.middleware';
 
 type CreateAppArgs = {

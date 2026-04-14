@@ -2,7 +2,7 @@ import type { FastifyPluginAsync } from 'fastify';
 import type { Pool } from 'pg';
 
 import type { EnvConfig } from '../../config/env.schema';
-import { HttpError } from '../../errors/httpError';
+import { HttpError } from 'api-shared';
 import { delay } from '../../utils/delay.util';
 import { createJsonFieldsParser } from '../../utils/parseJsonQueryFields.util';
 

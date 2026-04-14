@@ -1,4 +1,4 @@
-import type { QueryValue } from '../types/api.types';
+import type { QueryValue } from 'api-shared';
 
 const formatQueryValue = (value: QueryValue): string => {
   if (value === null) {

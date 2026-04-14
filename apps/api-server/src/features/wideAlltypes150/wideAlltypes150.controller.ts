@@ -1,9 +1,6 @@
 import type { RequestHandler } from 'express';
 
-import {
-  DEFAULT_PAGE_LIMIT,
-  MAX_WIDE_ALLTYPES_LIMIT,
-} from '../../constants/server.constants';
+import { DEFAULT_PAGE_LIMIT, MAX_WIDE_ALLTYPES_LIMIT } from 'api-shared';
 import { createRequestHandler } from '../../utils/createRequestHandler.util';
 import { readQueryInteger } from '../../utils/readQueryInteger.util';
 

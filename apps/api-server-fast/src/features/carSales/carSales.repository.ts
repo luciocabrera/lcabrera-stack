@@ -7,7 +7,7 @@ import type {
   CarSalesResponse,
   PaginatedCarSalesResponse,
 } from './carSales.types';
-import type { SortRule } from '../../types/api.types';
+import type { SortRule } from 'api-shared';
 
 export type CarSalesRepository = {
   readonly getAll: () => Promise<CarSalesResponse>;

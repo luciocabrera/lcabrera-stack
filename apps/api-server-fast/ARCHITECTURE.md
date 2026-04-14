@@ -25,6 +25,7 @@ Configured by `.env`:
 Programmatic entrypoint:
 
 - `scripts/seed-db.js`
+- `scripts/seed-db.js` resolves `psql` from fixed system directories and executes it with a fixed safe `PATH`
 
 SQL assets are reused from `apps/api-server/db/`.
 
@@ -37,6 +38,9 @@ SQL assets are reused from `apps/api-server/db/`.
 
 Common utilities shared across both API server implementations live in `apps/shared`. Currently:
 
+- `HttpError` — Shared HTTP-aware error class used by schema, plugin, and app layers.
+- `api.types` — Shared response/pagination/query type contracts.
+- `server.constants` — Shared pagination/sanity constants.
 - `serializeDatabaseValue` — Converts PostgreSQL row values (Buffers, nested objects) to JSON-safe response values.
 
 Imports use the `api-shared` package alias for monorepo resolution.

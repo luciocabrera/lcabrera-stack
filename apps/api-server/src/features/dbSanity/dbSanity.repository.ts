@@ -1,7 +1,7 @@
 import type { Pool } from 'pg';
 
-import { SANITY_TABLES } from '../../constants/server.constants';
-import type { CountRow, DbSanityResult } from '../../types/api.types';
+import { SANITY_TABLES } from 'api-shared';
+import type { CountRow, DbSanityResult } from 'api-shared';
 
 export type DbSanityRepository = {
   readonly getDbSanity: () => Promise<DbSanityResult>;

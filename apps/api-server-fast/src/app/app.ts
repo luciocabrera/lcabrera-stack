@@ -3,7 +3,7 @@ import Fastify, { type FastifyInstance } from 'fastify';
 import type { Pool } from 'pg';
 
 import type { EnvConfig } from '../config/env.schema';
-import { HttpError } from '../errors/httpError';
+import { HttpError } from 'api-shared';
 import { createCarSalesPlugin } from '../features/carSales/carSales.plugin';
 import { createDbSanityPlugin } from '../features/dbSanity/dbSanity.plugin';
 import { createEnterpriseOrdersPlugin } from '../features/enterpriseOrders/enterpriseOrders.plugin';

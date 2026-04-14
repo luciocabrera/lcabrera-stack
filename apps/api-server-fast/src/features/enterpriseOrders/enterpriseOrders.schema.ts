@@ -1,8 +1,5 @@
-import {
-  DEFAULT_PAGE_LIMIT,
-  DISTINCT_DEFAULT_LIMIT,
-} from '../../constants/server.constants';
-import type { SortRule } from '../../types/api.types';
+import { DEFAULT_PAGE_LIMIT, DISTINCT_DEFAULT_LIMIT } from 'api-shared';
+import type { SortRule } from 'api-shared';
 
 import {
   ENTERPRISE_ORDER_ALLOWED_COLUMNS,

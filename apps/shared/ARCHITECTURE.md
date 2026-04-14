@@ -6,16 +6,20 @@ Shared utilities across API server implementations (Express and Fastify variants
 
 Eliminate code duplication between `apps/api-server` and `apps/api-server-fast` by extracting common utilities to a single source.
 
-## Current Shared Utilities
+## Current Shared Modules
 
-| Function                 | File                                       | Description                                                          |
+| Artifact                 | File                                       | Description                                                          |
 | ------------------------ | ------------------------------------------ | -------------------------------------------------------------------- |
+| `server.constants`       | `src/constants/server.constants.ts`        | Shared pagination and sanity-check constants used by both APIs       |
+| `HttpError`              | `src/errors/httpError.ts`                  | Shared HTTP-aware error type for request validation and handlers     |
+| `api.types`              | `src/types/api.types.ts`                   | Shared API response/query/pagination types                           |
 | `serializeDatabaseValue` | `src/utils/serializeDatabaseValue.util.ts` | Convert PostgreSQL row values (Buffers, objects) to JSON-safe format |
 
 ## Usage Across Apps
 
-- **api-server**: `wideAlltypes150.repository.ts` — serializes row data before JSON response
-- **api-server-fast**: `wideAlltypes150.repository.ts` — serializes row data before JSON response
+- **api-server**: imports `HttpError`, `server.constants`, and `api.types` from `api-shared`
+- **api-server-fast**: imports `HttpError`, `server.constants`, and `api.types` from `api-shared`
+- **Both apps**: `wideAlltypes150.repository.ts` uses `serializeDatabaseValue` from shared utils
 
 ## Package Configuration
 

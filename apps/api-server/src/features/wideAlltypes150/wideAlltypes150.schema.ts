@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
-import { HttpError } from '../../errors/httpError';
-import type { SortRule } from '../../types/api.types';
+import { HttpError } from 'api-shared';
+import type { SortRule } from 'api-shared';
 import { parseJsonQueryParam } from '../../utils/parseJsonQueryParam.util';
 
 const sortRuleSchema = z.object({

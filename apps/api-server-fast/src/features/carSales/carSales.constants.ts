@@ -1,4 +1,4 @@
-import type { SortRule } from '../../types/api.types';
+import type { SortRule } from 'api-shared';
 
 export const CAR_SALES_SORTABLE_COLUMNS = new Set([
   'buyer_address',

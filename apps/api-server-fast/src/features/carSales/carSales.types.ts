@@ -1,4 +1,4 @@
-import type { DbRow, PaginatedResponse } from '../../types/api.types';
+import type { DbRow, PaginatedResponse } from 'api-shared';
 
 export type CarSalesResponse = {
   readonly data: readonly DbRow[];

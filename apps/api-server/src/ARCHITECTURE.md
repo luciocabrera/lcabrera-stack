@@ -69,6 +69,9 @@ src/
 
 Common utilities shared across both API server implementations live in `apps/shared`. Currently:
 
+- `HttpError` — Shared HTTP-aware error class used by config, schema, middleware, and route layers.
+- `api.types` — Shared response/pagination/query type contracts.
+- `server.constants` — Shared pagination/sanity constants.
 - `serializeDatabaseValue` — Converts PostgreSQL row values (Buffers, nested objects) to JSON-safe response values.
 
 Imports use the `api-shared` package alias for monorepo resolution.

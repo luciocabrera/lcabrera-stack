@@ -1,8 +1,5 @@
-import {
-  DEFAULT_PAGE_LIMIT,
-  MAX_WIDE_ALLTYPES_LIMIT,
-} from '../../constants/server.constants';
-import type { SortRule } from '../../types/api.types';
+import { DEFAULT_PAGE_LIMIT, MAX_WIDE_ALLTYPES_LIMIT } from 'api-shared';
+import type { SortRule } from 'api-shared';
 
 import { WIDE_ALLTYPES_SORTABLE_COLUMNS } from './wideAlltypes150.constants';
 

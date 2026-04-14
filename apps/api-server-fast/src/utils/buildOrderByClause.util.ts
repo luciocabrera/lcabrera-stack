@@ -1,6 +1,6 @@
-import { HttpError } from '../errors/httpError';
+import { HttpError } from 'api-shared';
 
-import type { SortRule } from '../types/api.types';
+import type { SortRule } from 'api-shared';
 
 type BuildOrderByClauseArgs = {
   readonly fallbackSorting: readonly SortRule[];

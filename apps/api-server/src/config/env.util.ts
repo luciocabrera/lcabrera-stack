@@ -1,4 +1,4 @@
-import { HttpError } from '../errors/httpError';
+import { HttpError } from 'api-shared';
 
 import { type EnvConfig, envSchema } from './env.schema';
 

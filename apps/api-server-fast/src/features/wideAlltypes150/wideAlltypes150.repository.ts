@@ -2,12 +2,7 @@ import type { Pool } from 'pg';
 
 import { buildOrderByClause } from '../../utils/buildOrderByClause.util';
 import { serializeDatabaseValue } from 'api-shared/utils/serializeDatabaseValue.util';
-import type {
-  CountRow,
-  DbRow,
-  PaginatedResponse,
-  SortRule,
-} from '../../types/api.types';
+import type { CountRow, DbRow, PaginatedResponse, SortRule } from 'api-shared';
 
 import { DEFAULT_WIDE_ALLTYPES_SORTING } from './wideAlltypes150.constants';
 

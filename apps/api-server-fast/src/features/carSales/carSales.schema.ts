@@ -1,5 +1,5 @@
-import { DEFAULT_PAGE_LIMIT } from '../../constants/server.constants';
-import type { SortRule } from '../../types/api.types';
+import { DEFAULT_PAGE_LIMIT } from 'api-shared';
+import type { SortRule } from 'api-shared';
 
 import { CAR_SALES_SORTABLE_COLUMNS } from './carSales.constants';
 

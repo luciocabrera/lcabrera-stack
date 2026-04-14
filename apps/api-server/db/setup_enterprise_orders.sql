@@ -88,11 +88,21 @@ INSERT INTO enterprise_orders (
 )
 WITH constants AS (
   SELECT
+    'Automotive'::text AS category_automotive,
+    'Books'::text AS category_books,
+    'Clothing'::text AS category_clothing,
+    'Electronics'::text AS category_electronics,
     'Pending'::text AS status_pending,
+    'Food'::text AS category_food,
+    'Garden'::text AS category_garden,
+    'Health'::text AS category_health,
     'Shipped'::text AS status_shipped,
+    'Sports'::text AS category_sports,
+    'Toys'::text AS category_toys,
     'Delivered'::text AS status_delivered,
     'Returned'::text AS status_returned,
     'Refunded'::text AS status_refunded,
+    'Lighting'::text AS subcategory_lighting,
     'Partially Paid'::text AS payment_status_partially_paid,
     'Individual'::text AS customer_type_individual,
     'Business'::text AS customer_type_business,
@@ -100,16 +110,64 @@ WITH constants AS (
     TIMESTAMPTZ '2021-01-01 00:00:00 UTC' AS base_timestamptz,
     TIMESTAMP '2021-01-01 00:00:00' AS base_timestamp
 ),
-base AS (
+constants_with_arrays AS (
   SELECT
-    gs,
+    c.category_automotive,
+    c.category_books,
+    c.category_clothing,
+    c.category_electronics,
+    c.category_food,
+    c.category_furniture,
+    c.category_garden,
+    c.category_health,
+    c.category_sports,
+    c.category_toys,
     c.status_pending,
     c.status_shipped,
     c.status_delivered,
     c.status_returned,
     c.status_refunded,
+    c.subcategory_lighting,
+    c.payment_status_partially_paid,
+    c.customer_type_individual,
+    c.customer_type_business,
+    c.base_timestamptz,
+    c.base_timestamp,
+    ARRAY[
+      c.category_electronics,
+      c.category_clothing,
+      c.category_food,
+      c.category_books,
+      c.category_furniture,
+      c.category_sports,
+      c.category_toys,
+      c.category_health,
+      c.category_automotive,
+      c.category_garden
+    ] AS category_values
+  FROM constants AS c
+),
+base AS (
+  SELECT
+    c.category_automotive,
+    c.category_books,
+    c.category_clothing,
+    c.category_electronics,
+    c.category_food,
+    gs,
+    c.category_garden,
+    c.category_health,
+    c.category_sports,
+    c.category_toys,
+    c.status_pending,
+    c.status_shipped,
+    c.status_delivered,
+    c.status_returned,
+    c.status_refunded,
+    c.subcategory_lighting,
     c.payment_status_partially_paid,
     c.category_furniture,
+    c.category_values,
     c.base_timestamptz,
     c.base_timestamp,
     -- Status distribution: Delivered ~31%, Shipped ~19%, Pending/Processing ~12.5% each, rest 6%
@@ -149,7 +207,7 @@ base AS (
     END AS pay_status,
     (gs % 100000) + 1 AS cust_id,
     (ARRAY[c.customer_type_individual,c.customer_type_individual,c.customer_type_business,c.customer_type_business,'Corporate','Government','Non-Profit'])[1 + (gs % 7)] AS cust_type,
-    (ARRAY['Electronics','Clothing','Food','Books',c.category_furniture,'Sports','Toys','Health','Automotive','Garden'])[1 + (gs % 10)] AS category,
+    c.category_values[1 + (gs % 10)] AS category,
     (gs % 8) + 1 AS sub_idx,
     (ARRAY['FedEx','UPS','DHL','USPS','Amazon Logistics'])[1 + (gs % 5)] AS carrier_val,
     (ARRAY['Warehouse A','Warehouse B','Warehouse C','Warehouse D','Warehouse E'])[1 + (gs % 5)] AS wh_loc,
@@ -168,9 +226,10 @@ base AS (
          ELSE 0
     END AS disc_pct,
     -- Date: 4 years range starting 2021-01-01
-    DATE '2021-01-01' + (gs % 1460) AS ord_date
+    DATE '2021-01-01' + (gs % 1460) AS ord_date,
+    (gs % 1460) * INTERVAL '1 day' + (gs % 86400) * INTERVAL '1 second' AS timestamp_offset_interval
   FROM generate_series(1, 500000) AS gs
-  CROSS JOIN constants AS c
+  CROSS JOIN constants_with_arrays AS c
 ),
 computed AS (
   SELECT
@@ -240,16 +299,16 @@ SELECT
   END AS payment_reference,
   category AS product_category,
   CASE category
-    WHEN 'Electronics' THEN (ARRAY['Smartphones','Laptops','Tablets','Cameras','Audio','TVs','Wearables','Gaming'])[sub_idx]
-    WHEN 'Clothing'    THEN (ARRAY['Shirts','Pants','Shoes','Jackets','Dresses','Accessories','Sportswear','Underwear'])[sub_idx]
-    WHEN 'Food'        THEN (ARRAY['Beverages','Snacks','Dairy','Produce','Meat','Bakery','Canned Goods','Frozen'])[sub_idx]
-    WHEN 'Books'       THEN (ARRAY['Fiction','Non-Fiction','Science','History','Art','Technology','Business','Children'])[sub_idx]
-    WHEN category_furniture THEN (ARRAY['Sofas','Tables','Chairs','Beds','Storage','Desks','Lighting','Rugs'])[sub_idx]
-    WHEN 'Sports'      THEN (ARRAY['Fitness','Outdoor','Team Sports','Water Sports','Cycling','Running','Combat Sports','Winter Sports'])[sub_idx]
-    WHEN 'Toys'        THEN (ARRAY['Action Figures','Board Games','Dolls','Educational','Electronic Toys','Outdoor Play','Puzzles','Remote Control'])[sub_idx]
-    WHEN 'Health'      THEN (ARRAY['Vitamins','Personal Care','Medical','Fitness Equipment','Nutrition','Skincare','Dental','Vision'])[sub_idx]
-    WHEN 'Automotive'  THEN (ARRAY['Accessories','Tools','Electronics','Interior','Exterior','Tires','Lighting','Performance'])[sub_idx]
-    WHEN 'Garden'      THEN (ARRAY['Plants','Tools','Furniture','Lighting','Irrigation','Pots','Seeds','Decor'])[sub_idx]
+    WHEN category_electronics THEN (ARRAY['Smartphones','Laptops','Tablets','Cameras','Audio','TVs','Wearables','Gaming'])[sub_idx]
+    WHEN category_clothing    THEN (ARRAY['Shirts','Pants','Shoes','Jackets','Dresses','Accessories','Sportswear','Underwear'])[sub_idx]
+    WHEN category_food        THEN (ARRAY['Beverages','Snacks','Dairy','Produce','Meat','Bakery','Canned Goods','Frozen'])[sub_idx]
+    WHEN category_books       THEN (ARRAY['Fiction','Non-Fiction','Science','History','Art','Technology','Business','Children'])[sub_idx]
+    WHEN category_furniture THEN (ARRAY['Sofas','Tables','Chairs','Beds','Storage','Desks',subcategory_lighting,'Rugs'])[sub_idx]
+    WHEN category_sports      THEN (ARRAY['Fitness','Outdoor','Team Sports','Water Sports','Cycling','Running','Combat Sports','Winter Sports'])[sub_idx]
+    WHEN category_toys        THEN (ARRAY['Action Figures','Board Games','Dolls','Educational','Electronic Toys','Outdoor Play','Puzzles','Remote Control'])[sub_idx]
+    WHEN category_health      THEN (ARRAY['Vitamins','Personal Care','Medical','Fitness Equipment','Nutrition','Skincare','Dental','Vision'])[sub_idx]
+    WHEN category_automotive  THEN (ARRAY['Accessories','Tools','Electronics','Interior','Exterior','Tires',subcategory_lighting,'Performance'])[sub_idx]
+    WHEN category_garden      THEN (ARRAY['Plants','Tools',category_furniture,subcategory_lighting,'Irrigation','Pots','Seeds','Decor'])[sub_idx]
     ELSE 'General'
   END AS product_subcategory,
   (gs::text || ' Commerce Street') AS shipping_address_line1,
@@ -284,12 +343,12 @@ SELECT
   ship_st AS billing_state,
   ship_cty AS billing_country,
   lpad((gs % 99999)::text, 5, '0') AS billing_postal_code,
-  (base_timestamptz + (gs % 1460) * INTERVAL '1 day' + (gs % 86400) * INTERVAL '1 second') AS order_timestamp,
+  (base_timestamptz + timestamp_offset_interval) AS order_timestamp,
   CASE WHEN gs % 15 = 0 THEN 'Order note for #' || gs ELSE NULL END AS order_notes,
   CASE WHEN gs % 20 = 0 THEN 'Internal note #' || gs ELSE NULL END AS internal_notes,
   (ARRAY['admin','ops_team','billing_dept','cs_rep','manager'])[1 + (gs % 5)] AS last_modified_by,
-  (base_timestamp + (gs % 1460) * INTERVAL '1 day' + (gs % 86400) * INTERVAL '1 second') AS created_at,
-  (base_timestamp + (gs % 1460) * INTERVAL '1 day' + (gs % 86400) * INTERVAL '1 second' + INTERVAL '1 hour') AS updated_at
+  (base_timestamp + timestamp_offset_interval) AS created_at,
+  (base_timestamp + timestamp_offset_interval + INTERVAL '1 hour') AS updated_at
 FROM payment_derived;
 
 CREATE INDEX idx_enterprise_orders_order_date   ON enterprise_orders(order_date);
