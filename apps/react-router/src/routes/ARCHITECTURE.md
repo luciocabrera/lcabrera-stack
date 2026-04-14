@@ -14,6 +14,12 @@ loader, metadata, error boundary, and page component.
   `*.component.tsx`, `*.constants.ts`, `*.types.ts`, `*.util.ts`,
   `*.stylex.ts`.
 
+## Shared Loader Utilities
+
+- `utils/readTableLoaderStateFromRequest.util.ts` centralizes table loader
+  bootstrap state (URL + cookie merge, standalone sort/filter params) used by
+  table-backed routes.
+
 ## Wide All-Types Variants
 
 - `/wide-alltypes-150` remains the baseline stress-test page backed by the

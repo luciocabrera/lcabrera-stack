@@ -1,20 +1,10 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
-import type {
-  ColumnFiltersState,
-  ColumnSizingState,
-  SortingState,
-} from '@/components/Table';
 import type { CarSale, CarSalesResponse } from '@/services';
 
-import { readPersistedStateFromCookie } from '@/components/Table/utils';
 import { INITIAL_PAGE_SIZE } from '@/components/Table/Table.constants';
 import { carSalesApi } from '@/services';
-import {
-  deserializeFiltersFromURL,
-  deserializeSortingFromURL,
-  readTableStateFromURL,
-} from '@/utils/urlState';
+import { readTableLoaderStateFromRequest } from '../utils/readTableLoaderStateFromRequest.util';
 
 import { PERSISTENCE_KEY } from './CarSales.constants.tsx';
 
@@ -25,47 +15,19 @@ import { PERSISTENCE_KEY } from './CarSales.constants.tsx';
  * The route will render immediately with the skeleton while data loads.
  */
 export const loader = ({ request }: LoaderFunctionArgs) => {
-  const url = new URL(request.url);
-
-  // Read table state from URL params (priority)
-  const urlState = readTableStateFromURL({
+  const {
+    columnOrder,
+    columnSizing,
+    columnVisibility,
+    filters,
+    standaloneFiltersParam,
+    standaloneSortParam,
+    sorting,
+  } = readTableLoaderStateFromRequest<CarSale>({
+    includeFilters: true,
     persistenceKey: PERSISTENCE_KEY,
-    searchParams: url.searchParams,
+    request,
   });
-
-  // Read persisted state from cookies (fallback)
-  const cookieHeader = request.headers.get('Cookie');
-  const cookieState = readPersistedStateFromCookie({
-    cookieString: cookieHeader ?? undefined,
-    persistenceKey: PERSISTENCE_KEY,
-  });
-
-  // Merge URL state (priority) with cookie state (fallback)
-  const columnOrder = (urlState?.columnOrder ??
-    cookieState.columnOrder ??
-    []) as (keyof CarSale)[];
-  const columnVisibility = (urlState?.columnVisibility ??
-    cookieState.columnVisibility ??
-    new Set()) as Set<keyof CarSale>;
-
-  // Read sorting from standalone param only
-  // Don't fall back to cookie - URL is the source of truth for sorting
-  const standaloneSortParam = url.searchParams.get('sort');
-
-  let sorting: SortingState<CarSale> = [];
-  if (standaloneSortParam) {
-    sorting = deserializeSortingFromURL<CarSale>(standaloneSortParam);
-  }
-
-  // Read filters from standalone param only
-  const standaloneFiltersParam = url.searchParams.get('filters');
-  let filters: ColumnFiltersState<CarSale> = {} as ColumnFiltersState<CarSale>;
-  if (standaloneFiltersParam) {
-    filters = deserializeFiltersFromURL<CarSale>(standaloneFiltersParam);
-  }
-
-  const columnSizing: ColumnSizingState<CarSale> = (cookieState.columnSizing ??
-    {}) as ColumnSizingState<CarSale>;
 
   // Return the promise directly (not awaited) for Suspense streaming
   const carSalesPromise: Promise<CarSalesResponse & { hasMore: boolean }> =

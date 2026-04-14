@@ -144,6 +144,12 @@ Before creating anything new, check this inventory. If something here does the j
 | `serializeSortingToURL`     | `utils/urlState/serializeSortingToURL.util.ts`     | `SortingState[]` → compact `{ [key]: 'asc'                                            | 'desc' }` object |
 | `deserializeSortingFromURL` | `utils/urlState/deserializeSortingFromURL.util.ts` | Compact sorting URL param → `SortingState[]`                                          |
 
+### `src/routes/utils/`
+
+| Function                          | Location                                               | Description                                                             |
+| --------------------------------- | ------------------------------------------------------ | ----------------------------------------------------------------------- |
+| `readTableLoaderStateFromRequest` | `routes/utils/readTableLoaderStateFromRequest.util.ts` | Shared loader bootstrap from URL + cookie state for table-backed routes |
+
 ---
 
 ## Constants
