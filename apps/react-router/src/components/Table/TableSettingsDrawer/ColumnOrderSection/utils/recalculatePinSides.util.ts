@@ -3,62 +3,14 @@ import type {
   ColumnPinningState,
 } from '@/components/Table/Table.types';
 
+import { getPinnedEntries } from './getPinnedEntries.util';
+import { resolveClosestSide } from './resolveClosestSide.util';
+import { sortPinnedKeysByOrder } from './sortPinnedKeysByOrder.util';
+
 type RecalculatePinSidesArgs = {
   readonly columnPinning: ColumnPinningState;
   readonly newOrder: ColumnOrderState;
   readonly staticKeys?: Set<string>;
-};
-
-type PinSide = 'left' | 'right';
-
-type PinnedEntry = {
-  readonly key: string;
-  readonly originalSide: PinSide;
-};
-
-const getPinnedEntries = ({
-  columnPinning,
-}: {
-  readonly columnPinning: ColumnPinningState;
-}): readonly PinnedEntry[] => [
-  ...columnPinning.left.map((key) => ({ key, originalSide: 'left' as const })),
-  ...columnPinning.right.map((key) => ({
-    key,
-    originalSide: 'right' as const,
-  })),
-];
-
-const resolveClosestSide = ({
-  distanceFromLeft,
-  distanceFromRight,
-  originalSide,
-}: {
-  readonly distanceFromLeft: number;
-  readonly distanceFromRight: number;
-  readonly originalSide: PinSide;
-}): PinSide => {
-  if (distanceFromLeft < distanceFromRight) {
-    return 'left';
-  } else if (distanceFromRight < distanceFromLeft) {
-    return 'right';
-  }
-
-  return originalSide;
-};
-
-const sortPinnedKeysByOrder = ({
-  keys,
-  newOrder,
-}: {
-  readonly keys: readonly string[];
-  readonly newOrder: ColumnOrderState;
-}): string[] => {
-  const orderIndex = new Map(newOrder.map((key, i) => [key, i]));
-
-  return [...keys].toSorted(
-    // eslint-disable-next-line local-rules/destructuring-for-functions
-    (a, b) => (orderIndex.get(a) ?? 0) - (orderIndex.get(b) ?? 0),
-  );
 };
 
 /**
