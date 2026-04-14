@@ -13,7 +13,7 @@ export default defineConfig({
       },
       checkSafe: {
         command:
-          'cd ../../apps/react-router && vp exec react-router typegen && cd ../../packages/eslint-local-rules && vp exec tsc -p tsconfig.json && cd ../.. && vp check && cd apps/react-router && REACT_ROUTER_TEST_TASK=true node /home/lucio/workspaces/vite-react-compiler/apps/react-router/node_modules/vitest/vitest.mjs run',
+          'cd ../../apps/react-router && vp exec react-router typegen && cd ../../packages/eslint-local-rules && vp exec tsc -p tsconfig.json && cd ../.. && vp check && REACT_ROUTER_TEST_TASK=true node /home/lucio/workspaces/vite-react-compiler/apps/react-router/node_modules/vitest/vitest.mjs run --root /home/lucio/workspaces/vite-react-compiler/apps/react-router',
       },
     },
   },
