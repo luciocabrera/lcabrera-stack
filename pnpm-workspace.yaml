@@ -1,6 +1,8 @@
 packages:
   - apps/*
   - packages/*
+allowBuilds:
+  esbuild: true
 
 # Supply chain security (https://pnpm.io/supply-chain-security)
 blockExoticSubdeps: true
