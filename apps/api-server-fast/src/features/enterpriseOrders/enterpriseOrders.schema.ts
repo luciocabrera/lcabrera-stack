@@ -1,10 +1,11 @@
-import { DEFAULT_PAGE_LIMIT, DISTINCT_DEFAULT_LIMIT } from 'api-shared';
-import type { SortRule } from 'api-shared';
-
 import {
+  DEFAULT_PAGE_LIMIT,
+  DISTINCT_DEFAULT_LIMIT,
   ENTERPRISE_ORDER_ALLOWED_COLUMNS,
   ENTERPRISE_ORDER_DISTINCT_COLUMNS,
-} from './enterpriseOrders.constants';
+} from 'api-shared';
+import type { SortRule } from 'api-shared';
+
 import type { EnterpriseOrdersFilters } from './enterpriseOrders.types';
 
 // ---------------------------------------------------------------------------

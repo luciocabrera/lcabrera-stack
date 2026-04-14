@@ -3,6 +3,8 @@ import type { RequestHandler } from 'express';
 import {
   DEFAULT_PAGE_LIMIT,
   DISTINCT_DEFAULT_LIMIT,
+  ENTERPRISE_ORDER_ALLOWED_COLUMNS,
+  ENTERPRISE_ORDER_DISTINCT_COLUMNS,
   HttpError,
 } from 'api-shared';
 
@@ -11,10 +13,6 @@ import { delay } from '../../utils/delay.util';
 import { readQueryInteger } from '../../utils/readQueryInteger.util';
 import { readQueryValue } from '../../utils/readQueryValue.util';
 
-import {
-  ENTERPRISE_ORDER_ALLOWED_COLUMNS,
-  ENTERPRISE_ORDER_DISTINCT_COLUMNS,
-} from './enterpriseOrders.constants';
 import type { EnterpriseOrdersRepository } from './enterpriseOrders.repository';
 import {
   parseDistinctColumnName,
