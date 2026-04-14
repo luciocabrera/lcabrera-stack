@@ -12,6 +12,6 @@ export type VirtualSelectTriggerProps = {
   readonly overflowCount: number;
   readonly placeholder: string;
   readonly selected: readonly string[];
-  readonly triggerRef: RefObject<HTMLDivElement | null>;
+  readonly triggerRef: RefObject<HTMLButtonElement | HTMLDivElement | null>;
   readonly visibleTags: readonly string[];
 };

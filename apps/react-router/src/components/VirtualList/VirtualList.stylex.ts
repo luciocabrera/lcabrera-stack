@@ -64,6 +64,14 @@ const localStyles = stylex.create({
     position: 'relative', // Anchor for shimmer overlay
     minWidth: 0, // Allow flex children to shrink below content size
   },
+  optionButtonReset: {
+    appearance: 'none',
+    border: 'none',
+    fontFamily: 'inherit',
+    fontSize: 'inherit',
+    margin: 0,
+    width: '100%',
+  },
   optionDisabled: {
     cursor: 'default',
     pointerEvents: 'none',
@@ -139,6 +147,7 @@ export const styles = {
   loadingMore: localStyles.loadingMore,
   noResults: localStyles.noResults,
   option: localStyles.option,
+  optionButtonReset: localStyles.optionButtonReset,
   optionDisabled: localStyles.optionDisabled,
   optionsList: localStyles.optionsList,
   optionsListFill: localStyles.optionsListFill,

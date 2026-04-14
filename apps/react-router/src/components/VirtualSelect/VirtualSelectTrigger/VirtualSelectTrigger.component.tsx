@@ -1,4 +1,4 @@
-import type { KeyboardEvent } from 'react';
+import type { KeyboardEvent, RefObject } from 'react';
 
 import * as stylex from '@stylexjs/stylex';
 
@@ -22,60 +22,101 @@ export const VirtualSelectTrigger = ({
   visibleTags,
 }: VirtualSelectTriggerProps) => {
   const hasSelection = selected.length > 0;
+  const usesTagButtons = mode === 'multi' && hasSelection;
+  const shouldUseNativeButton = !isAlwaysOpen && !usesTagButtons;
 
-  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (isAlwaysOpen) return;
+  const content = hasSelection ? (
+    mode === 'single' ? (
+      <span {...stylex.props(styles.triggerLabel)}>{selected[0]}</span>
+    ) : (
+      <>
+        {visibleTags.map((value) => (
+          <Tag
+            key={value}
+            label={value}
+            onRemove={() => {
+              onRemoveTag(value);
+            }}
+          />
+        ))}
+        {overflowCount > 0 && (
+          <span data-overflow {...stylex.props(styles.overflowTag)}>
+            +{overflowCount} more
+          </span>
+        )}
+      </>
+    )
+  ) : (
+    <span {...stylex.props(styles.triggerPlaceholder)}>{placeholder}</span>
+  );
 
+  const chevron = !isAlwaysOpen ? (
+    <span data-chevron {...stylex.props(styles.chevron(isOpen))} />
+  ) : undefined;
+
+  if (isAlwaysOpen) {
+    return (
+      <div
+        ref={triggerRef as RefObject<HTMLDivElement | null>}
+        {...stylex.props(
+          styles.trigger,
+          isOpen && styles.triggerOpen,
+          mode === 'multi' && styles.triggerClamped,
+          styles.triggerStatic,
+        )}
+      >
+        {content}
+        {chevron}
+      </div>
+    );
+  }
+
+  const handleDivKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       onToggle();
     }
   };
 
+  if (!shouldUseNativeButton) {
+    return (
+      <div
+        aria-controls={listboxId}
+        aria-expanded={isOpen}
+        aria-haspopup='listbox'
+        onClick={onToggle}
+        onKeyDown={handleDivKeyDown}
+        ref={triggerRef as RefObject<HTMLDivElement | null>}
+        role='button'
+        tabIndex={0}
+        {...stylex.props(
+          styles.trigger,
+          isOpen && styles.triggerOpen,
+          mode === 'multi' && styles.triggerClamped,
+        )}
+      >
+        {content}
+        {chevron}
+      </div>
+    );
+  }
+
   return (
-    <div
-      aria-controls={!isAlwaysOpen ? listboxId : undefined}
-      aria-expanded={!isAlwaysOpen ? isOpen : undefined}
-      aria-haspopup={!isAlwaysOpen ? 'listbox' : undefined}
-      onClick={isAlwaysOpen ? undefined : onToggle}
-      onKeyDown={handleKeyDown}
-      ref={triggerRef}
-      role={!isAlwaysOpen ? 'button' : undefined}
-      tabIndex={!isAlwaysOpen ? 0 : undefined}
+    <button
+      aria-controls={listboxId}
+      aria-expanded={isOpen}
+      aria-haspopup='listbox'
+      onClick={onToggle}
+      ref={triggerRef as RefObject<HTMLButtonElement | null>}
+      type='button'
       {...stylex.props(
         styles.trigger,
         isOpen && styles.triggerOpen,
         mode === 'multi' && styles.triggerClamped,
-        isAlwaysOpen && styles.triggerStatic,
       )}
     >
-      {hasSelection ? (
-        mode === 'single' ? (
-          <span {...stylex.props(styles.triggerLabel)}>{selected[0]}</span>
-        ) : (
-          <>
-            {visibleTags.map((value) => (
-              <Tag
-                key={value}
-                label={value}
-                onRemove={() => {
-                  onRemoveTag(value);
-                }}
-              />
-            ))}
-            {overflowCount > 0 && (
-              <span data-overflow {...stylex.props(styles.overflowTag)}>
-                +{overflowCount} more
-              </span>
-            )}
-          </>
-        )
-      ) : (
-        <span {...stylex.props(styles.triggerPlaceholder)}>{placeholder}</span>
-      )}
-      {!isAlwaysOpen && (
-        <span data-chevron {...stylex.props(styles.chevron(isOpen))} />
-      )}
-    </div>
+      {content}
+      {chevron}
+    </button>
   );
 };

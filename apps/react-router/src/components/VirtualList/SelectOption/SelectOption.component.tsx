@@ -11,25 +11,31 @@ export const SelectOption = ({
   onToggle,
   option,
 }: SelectOptionProps) => {
-  const isClickableLabel = !hasCheckbox;
+  if (!hasCheckbox) {
+    return (
+      <button
+        aria-pressed={isSelected}
+        disabled={isLoading}
+        onClick={onToggle}
+        type='button'
+        {...stylex.props(
+          styles.option,
+          styles.optionButtonReset,
+          isLoading && styles.optionDisabled,
+        )}
+      >
+        <span {...stylex.props(styles.label)}>{option}</span>
+        {isLoading && (
+          <div {...stylex.props(skeletonStyles.loadingOverlay)}>
+            <div {...stylex.props(skeletonStyles.shimmerWave)} />
+          </div>
+        )}
+      </button>
+    );
+  }
 
   return (
-    <label
-      onClick={isClickableLabel ? onToggle : undefined}
-      onKeyDown={
-        isClickableLabel
-          ? (event) => {
-              if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault();
-                onToggle();
-              }
-            }
-          : undefined
-      }
-      role={isClickableLabel ? 'button' : undefined}
-      tabIndex={isClickableLabel ? 0 : undefined}
-      {...stylex.props(styles.option, isLoading && styles.optionDisabled)}
-    >
+    <label {...stylex.props(styles.option, isLoading && styles.optionDisabled)}>
       {hasCheckbox && (
         <input
           checked={isSelected}
