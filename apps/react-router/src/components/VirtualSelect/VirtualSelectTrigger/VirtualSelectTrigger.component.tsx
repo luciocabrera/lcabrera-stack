@@ -1,4 +1,4 @@
-import type { KeyboardEvent, RefObject } from 'react';
+import type { KeyboardEvent, ReactNode } from 'react';
 
 import * as stylex from '@stylexjs/stylex';
 
@@ -23,12 +23,26 @@ export const VirtualSelectTrigger = ({
 }: VirtualSelectTriggerProps) => {
   const hasSelection = selected.length > 0;
   const usesTagButtons = mode === 'multi' && hasSelection;
-  const shouldUseNativeButton = !isAlwaysOpen && !usesTagButtons;
+  const shouldUseDivTrigger = isAlwaysOpen || usesTagButtons;
 
-  const content = hasSelection ? (
-    mode === 'single' ? (
-      <span {...stylex.props(styles.triggerLabel)}>{selected[0]}</span>
-    ) : (
+  const setDivRef = (node: HTMLDivElement | null) => {
+    triggerRef.current = node;
+  };
+
+  const setButtonRef = (node: HTMLButtonElement | null) => {
+    triggerRef.current = node;
+  };
+
+  let content: ReactNode;
+
+  if (!hasSelection) {
+    content = (
+      <span {...stylex.props(styles.triggerPlaceholder)}>{placeholder}</span>
+    );
+  } else if (mode === 'single') {
+    content = <span {...stylex.props(styles.triggerLabel)}>{selected[0]}</span>;
+  } else {
+    content = (
       <>
         {visibleTags.map((value) => (
           <Tag
@@ -45,19 +59,17 @@ export const VirtualSelectTrigger = ({
           </span>
         )}
       </>
-    )
-  ) : (
-    <span {...stylex.props(styles.triggerPlaceholder)}>{placeholder}</span>
-  );
+    );
+  }
 
-  const chevron = !isAlwaysOpen ? (
+  const chevron = isAlwaysOpen ? undefined : (
     <span data-chevron {...stylex.props(styles.chevron(isOpen))} />
-  ) : undefined;
+  );
 
   if (isAlwaysOpen) {
     return (
       <div
-        ref={triggerRef as RefObject<HTMLDivElement | null>}
+        ref={setDivRef}
         {...stylex.props(
           styles.trigger,
           isOpen && styles.triggerOpen,
@@ -78,7 +90,7 @@ export const VirtualSelectTrigger = ({
     }
   };
 
-  if (!shouldUseNativeButton) {
+  if (shouldUseDivTrigger) {
     return (
       <div
         aria-controls={listboxId}
@@ -86,7 +98,7 @@ export const VirtualSelectTrigger = ({
         aria-haspopup='listbox'
         onClick={onToggle}
         onKeyDown={handleDivKeyDown}
-        ref={triggerRef as RefObject<HTMLDivElement | null>}
+        ref={setDivRef}
         role='button'
         tabIndex={0}
         {...stylex.props(
@@ -107,7 +119,7 @@ export const VirtualSelectTrigger = ({
       aria-expanded={isOpen}
       aria-haspopup='listbox'
       onClick={onToggle}
-      ref={triggerRef as RefObject<HTMLButtonElement | null>}
+      ref={setButtonRef}
       type='button'
       {...stylex.props(
         styles.trigger,
