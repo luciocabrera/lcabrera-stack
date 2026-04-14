@@ -1,5 +1,6 @@
 packages:
   - apps/*
+  - packages/*
 allowBuilds: {}
 
 # Supply chain security (https://pnpm.io/supply-chain-security)

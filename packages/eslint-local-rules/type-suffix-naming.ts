@@ -22,6 +22,9 @@ const rule: Rule.RuleModule = {
     type: 'suggestion',
   },
   create(context) {
+    const filename = context.filename;
+    const isReactFile = filename.endsWith('.tsx') || filename.endsWith('.jsx');
+
     return {
       TSTypeAliasDeclaration(node: any) {
         const typeName = node.id.name;
@@ -50,7 +53,7 @@ const rule: Rule.RuleModule = {
         }
 
         // Check for incorrect 'Properties' suffix (should be 'Props')
-        if (typeName.endsWith('Properties')) {
+        if (isReactFile && typeName.endsWith('Properties')) {
           const suggestedName = typeName.replace(/Properties$/, 'Props');
 
           context.report({

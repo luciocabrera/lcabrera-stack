@@ -8,7 +8,7 @@ export const fmtConfig = {
     'dist/',
     'miscelanious/',
     'node_modules/',
-    'eslint-local-rules/',
+    '../../packages/eslint-local-rules/',
   ],
   jsxSingleQuote: true,
   printWidth: 80,

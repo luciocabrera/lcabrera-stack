@@ -10,61 +10,298 @@ type BuildWhereClauseResult = {
   readonly whereClause: string;
 };
 
+type FilterConditionResult = {
+  readonly condition?: string;
+  readonly queryParams: readonly QueryValue[];
+};
+
+type AppendBooleanFilterArgs = {
+  readonly columnName: string;
+  readonly filter: Extract<
+    EnterpriseOrdersFilter,
+    { readonly type: 'boolean' }
+  >;
+  readonly nextParameterIndex: number;
+};
+
+type AppendDateFilterArgs = {
+  readonly columnName: string;
+  readonly filter: Extract<EnterpriseOrdersFilter, { readonly type: 'date' }>;
+  readonly nextParameterIndex: number;
+};
+
+type AppendNumberFilterArgs = {
+  readonly columnName: string;
+  readonly filter: Extract<EnterpriseOrdersFilter, { readonly type: 'number' }>;
+  readonly nextParameterIndex: number;
+};
+
+type AppendSelectFilterArgs = {
+  readonly columnName: string;
+  readonly filter: Extract<
+    EnterpriseOrdersFilter,
+    { readonly type: 'multiSelect' | 'select' }
+  >;
+  readonly nextParameterIndex: number;
+};
+
+type AppendTextFilterArgs = {
+  readonly columnName: string;
+  readonly filter: Extract<EnterpriseOrdersFilter, { readonly type: 'text' }>;
+  readonly nextParameterIndex: number;
+};
+
 const appendTextFilter = ({
+  columnName,
+  filter,
+  nextParameterIndex,
+}: AppendTextFilterArgs): FilterConditionResult => {
+  if (!filter.value) {
+    return { queryParams: [] };
+  }
+
+  switch (filter.operator) {
+    case 'contains': {
+      return {
+        condition: `${columnName} ILIKE $${nextParameterIndex}`,
+        queryParams: [`%${filter.value}%`],
+      };
+    }
+    case 'endsWith': {
+      return {
+        condition: `${columnName} ILIKE $${nextParameterIndex}`,
+        queryParams: [`%${filter.value}`],
+      };
+    }
+    case 'equals': {
+      return {
+        condition: `${columnName} = $${nextParameterIndex}`,
+        queryParams: [filter.value],
+      };
+    }
+    case 'notContains': {
+      return {
+        condition: `${columnName} NOT ILIKE $${nextParameterIndex}`,
+        queryParams: [`%${filter.value}%`],
+      };
+    }
+    case 'notEquals': {
+      return {
+        condition: `${columnName} != $${nextParameterIndex}`,
+        queryParams: [filter.value],
+      };
+    }
+    default: {
+      return {
+        condition: `${columnName} ILIKE $${nextParameterIndex}`,
+        queryParams: [`${filter.value}%`],
+      };
+    }
+  }
+};
+
+const appendNumberFilter = ({
+  columnName,
+  filter,
+  nextParameterIndex,
+}: AppendNumberFilterArgs): FilterConditionResult => {
+  if (filter.operator === 'between' && filter.value2 !== undefined) {
+    return {
+      condition: `${columnName} BETWEEN $${nextParameterIndex} AND $${nextParameterIndex + 1}`,
+      queryParams: [filter.value, filter.value2],
+    };
+  }
+
+  switch (filter.operator) {
+    case 'equals': {
+      return {
+        condition: `${columnName} = $${nextParameterIndex}`,
+        queryParams: [filter.value],
+      };
+    }
+    case 'greaterThan': {
+      return {
+        condition: `${columnName} > $${nextParameterIndex}`,
+        queryParams: [filter.value],
+      };
+    }
+    case 'greaterThanOrEqual': {
+      return {
+        condition: `${columnName} >= $${nextParameterIndex}`,
+        queryParams: [filter.value],
+      };
+    }
+    case 'lessThan': {
+      return {
+        condition: `${columnName} < $${nextParameterIndex}`,
+        queryParams: [filter.value],
+      };
+    }
+    case 'lessThanOrEqual': {
+      return {
+        condition: `${columnName} <= $${nextParameterIndex}`,
+        queryParams: [filter.value],
+      };
+    }
+    case 'notEquals': {
+      return {
+        condition: `${columnName} != $${nextParameterIndex}`,
+        queryParams: [filter.value],
+      };
+    }
+    default: {
+      return {
+        queryParams: [filter.value],
+      };
+    }
+  }
+};
+
+const appendDateFilter = ({
+  columnName,
+  filter,
+  nextParameterIndex,
+}: AppendDateFilterArgs): FilterConditionResult => {
+  switch (filter.operator) {
+    case 'after': {
+      return {
+        condition: `${columnName} > $${nextParameterIndex}::date`,
+        queryParams: [filter.value],
+      };
+    }
+    case 'before': {
+      return {
+        condition: `${columnName} < $${nextParameterIndex}::date`,
+        queryParams: [filter.value],
+      };
+    }
+    case 'between': {
+      if (filter.value2) {
+        return {
+          condition: `${columnName} BETWEEN $${nextParameterIndex}::date AND $${nextParameterIndex + 1}::date`,
+          queryParams: [filter.value, filter.value2],
+        };
+      }
+
+      return {
+        condition: `${columnName} = $${nextParameterIndex}::date`,
+        queryParams: [filter.value],
+      };
+    }
+    default: {
+      return {
+        condition: `${columnName} = $${nextParameterIndex}::date`,
+        queryParams: [filter.value],
+      };
+    }
+  }
+};
+
+const appendBooleanFilter = ({
+  columnName,
+  filter,
+  nextParameterIndex,
+}: AppendBooleanFilterArgs): FilterConditionResult => {
+  return {
+    condition: `${columnName} = $${nextParameterIndex}`,
+    queryParams: [filter.value],
+  };
+};
+
+const appendSelectFilter = ({
+  columnName,
+  filter,
+  nextParameterIndex,
+}: AppendSelectFilterArgs): FilterConditionResult => {
+  if (filter.values && filter.values.length > 0) {
+    const placeholders = filter.values
+      .map((_value, index) => `$${nextParameterIndex + index}`)
+      .join(', ');
+    const operator = filter.operator === 'notEquals' ? 'NOT IN' : 'IN';
+
+    return {
+      condition: `${columnName} ${operator} (${placeholders})`,
+      queryParams: [...filter.values],
+    };
+  }
+
+  if (filter.value) {
+    const operator = filter.operator === 'notEquals' ? '!=' : '=';
+
+    return {
+      condition: `${columnName} ${operator} $${nextParameterIndex}`,
+      queryParams: [filter.value],
+    };
+  }
+
+  return {
+    queryParams: [],
+  };
+};
+
+const applyFilterConditionResult = ({
+  filterResult,
+  queryParams,
+  whereConditions,
+}: {
+  readonly filterResult: FilterConditionResult;
+  readonly queryParams: QueryValue[];
+  readonly whereConditions: string[];
+}): void => {
+  if (filterResult.condition) {
+    whereConditions.push(filterResult.condition);
+  }
+
+  queryParams.push(...filterResult.queryParams);
+};
+
+const buildFilterCondition = ({
   columnName,
   filter,
   nextParameterIndex,
 }: {
   readonly columnName: string;
-  readonly filter: Extract<EnterpriseOrdersFilter, { readonly type: 'text' }>;
+  readonly filter: EnterpriseOrdersFilter;
   readonly nextParameterIndex: number;
-}): {
-  readonly condition?: string;
-  readonly value?: QueryValue;
-} => {
-  if (!filter.value) {
-    return {};
+}): FilterConditionResult => {
+  switch (filter.type) {
+    case 'boolean': {
+      return appendBooleanFilter({
+        columnName,
+        filter,
+        nextParameterIndex,
+      });
+    }
+    case 'date': {
+      return appendDateFilter({
+        columnName,
+        filter,
+        nextParameterIndex,
+      });
+    }
+    case 'number': {
+      return appendNumberFilter({
+        columnName,
+        filter,
+        nextParameterIndex,
+      });
+    }
+    case 'multiSelect':
+    case 'select': {
+      return appendSelectFilter({
+        columnName,
+        filter,
+        nextParameterIndex,
+      });
+    }
+    case 'text': {
+      return appendTextFilter({
+        columnName,
+        filter,
+        nextParameterIndex,
+      });
+    }
   }
-
-  if (filter.operator === 'contains') {
-    return {
-      condition: `${columnName} ILIKE $${nextParameterIndex}`,
-      value: `%${filter.value}%`,
-    };
-  }
-
-  if (filter.operator === 'endsWith') {
-    return {
-      condition: `${columnName} ILIKE $${nextParameterIndex}`,
-      value: `%${filter.value}`,
-    };
-  }
-
-  if (filter.operator === 'equals') {
-    return {
-      condition: `${columnName} = $${nextParameterIndex}`,
-      value: filter.value,
-    };
-  }
-
-  if (filter.operator === 'notContains') {
-    return {
-      condition: `${columnName} NOT ILIKE $${nextParameterIndex}`,
-      value: `%${filter.value}%`,
-    };
-  }
-
-  if (filter.operator === 'notEquals') {
-    return {
-      condition: `${columnName} != $${nextParameterIndex}`,
-      value: filter.value,
-    };
-  }
-
-  return {
-    condition: `${columnName} ILIKE $${nextParameterIndex}`,
-    value: `${filter.value}%`,
-  };
 };
 
 /**
@@ -78,106 +315,17 @@ export const buildEnterpriseOrdersWhereClause = (
 
   for (const [columnName, filter] of Object.entries(filters)) {
     const nextParameterIndex = queryParams.length + 1;
+    const filterResult = buildFilterCondition({
+      columnName,
+      filter,
+      nextParameterIndex,
+    });
 
-    if (filter.type === 'text') {
-      const textFilter = appendTextFilter({
-        columnName,
-        filter,
-        nextParameterIndex,
-      });
-
-      if (textFilter.condition && textFilter.value !== undefined) {
-        whereConditions.push(textFilter.condition);
-        queryParams.push(textFilter.value);
-      }
-
-      continue;
-    }
-
-    if (filter.type === 'number') {
-      if (filter.operator === 'between' && filter.value2 !== undefined) {
-        whereConditions.push(
-          `${columnName} BETWEEN $${nextParameterIndex} AND $${nextParameterIndex + 1}`,
-        );
-        queryParams.push(filter.value, filter.value2);
-        continue;
-      }
-
-      if (filter.operator === 'equals') {
-        whereConditions.push(`${columnName} = $${nextParameterIndex}`);
-      }
-
-      if (filter.operator === 'greaterThan') {
-        whereConditions.push(`${columnName} > $${nextParameterIndex}`);
-      }
-
-      if (filter.operator === 'greaterThanOrEqual') {
-        whereConditions.push(`${columnName} >= $${nextParameterIndex}`);
-      }
-
-      if (filter.operator === 'lessThan') {
-        whereConditions.push(`${columnName} < $${nextParameterIndex}`);
-      }
-
-      if (filter.operator === 'lessThanOrEqual') {
-        whereConditions.push(`${columnName} <= $${nextParameterIndex}`);
-      }
-
-      if (filter.operator === 'notEquals') {
-        whereConditions.push(`${columnName} != $${nextParameterIndex}`);
-      }
-
-      queryParams.push(filter.value);
-      continue;
-    }
-
-    if (filter.type === 'date') {
-      if (filter.operator === 'after') {
-        whereConditions.push(`${columnName} > $${nextParameterIndex}::date`);
-        queryParams.push(filter.value);
-        continue;
-      }
-
-      if (filter.operator === 'before') {
-        whereConditions.push(`${columnName} < $${nextParameterIndex}::date`);
-        queryParams.push(filter.value);
-        continue;
-      }
-
-      if (filter.operator === 'between' && filter.value2) {
-        whereConditions.push(
-          `${columnName} BETWEEN $${nextParameterIndex}::date AND $${nextParameterIndex + 1}::date`,
-        );
-        queryParams.push(filter.value, filter.value2);
-        continue;
-      }
-
-      whereConditions.push(`${columnName} = $${nextParameterIndex}::date`);
-      queryParams.push(filter.value);
-      continue;
-    }
-
-    if (filter.type === 'boolean') {
-      whereConditions.push(`${columnName} = $${nextParameterIndex}`);
-      queryParams.push(filter.value);
-      continue;
-    }
-
-    if (filter.values && filter.values.length > 0) {
-      const placeholders = filter.values
-        .map((_value, index) => `$${nextParameterIndex + index}`)
-        .join(', ');
-      const operator = filter.operator === 'notEquals' ? 'NOT IN' : 'IN';
-      whereConditions.push(`${columnName} ${operator} (${placeholders})`);
-      queryParams.push(...filter.values);
-      continue;
-    }
-
-    if (filter.value) {
-      const operator = filter.operator === 'notEquals' ? '!=' : '=';
-      whereConditions.push(`${columnName} ${operator} $${nextParameterIndex}`);
-      queryParams.push(filter.value);
-    }
+    applyFilterConditionResult({
+      filterResult,
+      queryParams,
+      whereConditions,
+    });
   }
 
   if (whereConditions.length === 0) {

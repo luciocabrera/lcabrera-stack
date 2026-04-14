@@ -82,7 +82,7 @@ type ProcessDataArgs = { data: string };
 type ButtonProps = { label: string };
 ```
 
-**Auto-fix:** Renames type declarations from `Arguments` → `Args` and `Properties` → `Props`.
+**Auto-fix:** Renames type declarations from `Arguments` -> `Args` globally. Renames `Properties` -> `Props` in React files (`.tsx`/`.jsx`).
 
 ## Development
 
@@ -93,7 +93,7 @@ All rules are written in TypeScript and compiled to JavaScript before being load
 Build the rules:
 
 ```bash
-npm run build:eslint-rules
+vp run build
 ```
 
 This compiles TypeScript files to JavaScript in the `build/` directory.
@@ -143,7 +143,7 @@ export default {
 };
 ```
 
-4. Build the rules: `npm run build:eslint-rules`
+4. Build the rules: `vp run build`
 
 5. Use in `eslint.config.mjs`:
 

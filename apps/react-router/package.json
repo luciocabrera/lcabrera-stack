@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build:eslint-rules": "tsc -p eslint-local-rules/tsconfig.json",
+    "build:eslint-rules": "cd ../../packages/eslint-local-rules && tsc -p tsconfig.json",
     "dev": "react-router dev",
     "lint": "vp lint . --fix",
     "lint:check": "vp lint .",

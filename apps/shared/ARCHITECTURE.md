@@ -46,3 +46,4 @@ Eliminate code duplication between `apps/api-server` and `apps/api-server-fast` 
 - Add JSDoc to all exported utilities
 - Test shared utilities independently in `shared`
 - Update both api-server and api-server-fast imports when adding new shared utilities
+- `buildEnterpriseOrdersWhereClause` uses typed per-filter helpers with a single dispatch path; preserve SQL/parameter output parity when refactoring internals

@@ -15,7 +15,7 @@ export const lintConfig: OxlintConfig = {
     'dist/',
     'miscelanious/',
     'node_modules/',
-    'eslint-local-rules/',
+    '../../packages/eslint-local-rules/',
     'guidelines/playwright_config.ts',
     'scripts/',
     'utils/',
@@ -51,7 +51,7 @@ export const lintConfig: OxlintConfig = {
         '@stylexjs/eslint-plugin',
         {
           name: 'local-rules',
-          specifier: './eslint-local-rules/build/index.js',
+          specifier: '../../packages/eslint-local-rules/index.js',
         },
       ],
       rules: {
@@ -233,7 +233,7 @@ export const lintConfig: OxlintConfig = {
         'eslint-plugin-perfectionist',
         {
           name: 'local-rules',
-          specifier: './eslint-local-rules/build/index.js',
+          specifier: '../../packages/eslint-local-rules/index.js',
         },
       ],
       rules: {

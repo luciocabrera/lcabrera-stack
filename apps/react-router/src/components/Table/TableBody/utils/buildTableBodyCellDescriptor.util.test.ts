@@ -37,6 +37,7 @@ describe('buildTableBodyCellDescriptor', () => {
     expect(descriptor).toEqual({
       dataType: 'number',
       format: undefined,
+      isLoadingState: false,
       key: 'amount',
       kind: 'default',
       label: 'Amount',
@@ -63,6 +64,7 @@ describe('buildTableBodyCellDescriptor', () => {
 
     expect(descriptor).toEqual({
       children: 'custom',
+      isLoadingState: false,
       key: 'name',
       kind: 'custom',
       label: '',
@@ -97,6 +99,7 @@ describe('buildTableBodyCellDescriptor', () => {
     expect(descriptor).toEqual({
       dataType: undefined,
       format: undefined,
+      isLoadingState: false,
       key: 'name',
       kind: 'default',
       label: 'Name',
