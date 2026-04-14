@@ -14,6 +14,44 @@ type RenderCellContentArgs = {
   readonly value: unknown;
 };
 
+const parseNumberValue = (value: unknown): number | undefined => {
+  if (typeof value === 'number') {
+    return Number.isNaN(value) ? undefined : value;
+  }
+
+  if (typeof value !== 'string') {
+    return undefined;
+  }
+
+  const parsed = Number.parseFloat(value);
+
+  return Number.isNaN(parsed) ? undefined : parsed;
+};
+
+const stringifyCellValue = (value: unknown): string => {
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  if (
+    typeof value === 'boolean' ||
+    typeof value === 'number' ||
+    typeof value === 'bigint'
+  ) {
+    return String(value);
+  }
+
+  if (value === null || value === undefined) {
+    return '';
+  }
+
+  if (typeof value === 'object') {
+    return JSON.stringify(value);
+  }
+
+  return '';
+};
+
 export const renderCellContent = ({
   dataType,
   format,
@@ -26,18 +64,17 @@ export const renderCellContent = ({
       return <TableCheckDisplay label={label} value={value} />;
     }
     case 'currency': {
-      // Handle both number and numeric string values
-      const numValue =
-        typeof value === 'number' ? value : Number.parseFloat(String(value));
-      if (!Number.isNaN(numValue)) {
+      const numValue = parseNumberValue(value);
+
+      if (numValue !== undefined) {
         return formatCurrency({
           currency: format?.currency?.currency,
           locale: format?.currency?.locale ?? locale,
           value: numValue,
         });
       }
-      // If it's already a string with currency symbol or non-numeric, return as-is
-      return typeof value === 'string' ? value : JSON.stringify(value);
+
+      return stringifyCellValue(value);
     }
     case 'date': {
       return formatDate({
@@ -47,10 +84,9 @@ export const renderCellContent = ({
       });
     }
     case 'number': {
-      // Handle both number and numeric string values
-      const numValue =
-        typeof value === 'number' ? value : Number.parseFloat(String(value));
-      if (!Number.isNaN(numValue)) {
+      const numValue = parseNumberValue(value);
+
+      if (numValue !== undefined) {
         return formatNumber({
           locale: format?.number?.locale ?? locale,
           maximumFractionDigits: format?.number?.maximumFractionDigits,
@@ -58,7 +94,8 @@ export const renderCellContent = ({
           value: numValue,
         });
       }
-      return String(value);
+
+      return stringifyCellValue(value);
     }
     default: {
       return typeof value === 'string' ? value : '';

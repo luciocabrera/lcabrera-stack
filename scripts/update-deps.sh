@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-if [ -z "${BASH_VERSION:-}" ]; then
+if [[ -z "${BASH_VERSION:-}" ]]; then
   echo "Error: this script must be run with bash, not sh." >&2
   exit 1
 fi

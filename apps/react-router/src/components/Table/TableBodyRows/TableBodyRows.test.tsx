@@ -14,6 +14,26 @@ type MockTableBodyCellProps = {
   readonly value?: unknown;
 };
 
+const formatMockCellValue = (value: unknown): string => {
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  if (typeof value === 'number' || typeof value === 'boolean') {
+    return String(value);
+  }
+
+  if (value === null || value === undefined) {
+    return '';
+  }
+
+  if (typeof value === 'object') {
+    return JSON.stringify(value);
+  }
+
+  return '';
+};
+
 const {
   useGetColumnGroupsMock,
   useGetColumnSizingMock,
@@ -34,7 +54,12 @@ function MockTableBodyCell({
   label,
   value,
 }: MockTableBodyCellProps) {
-  return <td>{children ?? `${String(label)}:${String(value)}`}</td>;
+  return (
+    <td>
+      {children ??
+        `${formatMockCellValue(label)}:${formatMockCellValue(value)}`}
+    </td>
+  );
 }
 
 function MockTableRow({ children }: { readonly children: ReactNode }) {
@@ -108,7 +133,7 @@ describe('TableBodyRows', () => {
           key: 'name',
           label: 'Name',
           render: (row: Record<string, unknown>) =>
-            `custom:${String(row.name)}`,
+            `custom:${formatMockCellValue(row.name)}`,
         },
       ],
       leftPinnedCols: [],
