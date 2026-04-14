@@ -199,9 +199,8 @@ const ensureDatabaseExists = () => {
 const main = () => {
   console.log('Seeding database...');
   console.log(`   host=${host} port=${port} db=${database} user=${user}`);
-  console.log(
-    `   mode=${psqlBinary ? 'host-psql' : `docker-exec(${dockerContainer})`}`,
-  );
+  const mode = psqlBinary ? 'host-psql' : `docker-exec(${dockerContainer})`;
+  console.log(`   mode=${mode}`);
 
   ensureDatabaseExists();
 
