@@ -8,7 +8,7 @@ export default defineConfig({
   run: {
     tasks: {
       build: {
-        command: 'tsc -p tsconfig.json',
+        command: 'tsc -p ../shared/tsconfig.json && tsc -p tsconfig.json',
         cache: true,
       },
     },

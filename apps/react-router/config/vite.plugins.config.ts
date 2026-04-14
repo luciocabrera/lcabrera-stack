@@ -4,8 +4,21 @@ import { fileURLToPath, URL } from 'node:url';
 import { fixReactRouterAssets } from '../utils/fixReactRouterAssets.plugin.ts';
 import babel from 'vite-plugin-babel';
 
-const isVitestRun = process.env.VITEST === 'true';
-const reactRouterPlugin = isVitestRun ? [] : [reactRouter()];
+const isTestTaskRun =
+  process.env.VITEST === 'true' ||
+  process.env.REACT_ROUTER_TEST_TASK === 'true';
+const reactRouterPlugin = isTestTaskRun ? [] : [reactRouter()];
+const babelPlugin = isTestTaskRun
+  ? []
+  : [
+      babel({
+        babelConfig: {
+          plugins: [['babel-plugin-react-compiler']],
+          presets: ['@babel/preset-typescript'],
+        },
+        filter: /(?<!\.test)\.[jt]sx?$/,
+      }),
+    ];
 
 export const pluginsConfig = [
   stylex.vite({
@@ -17,11 +30,5 @@ export const pluginsConfig = [
   }),
   fixReactRouterAssets(),
   ...reactRouterPlugin,
-  babel({
-    babelConfig: {
-      plugins: [['babel-plugin-react-compiler']],
-      presets: ['@babel/preset-typescript'],
-    },
-    filter: /(?<!\.test)\.[jt]sx?$/,
-  }),
+  ...babelPlugin,
 ];
