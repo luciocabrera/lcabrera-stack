@@ -6,52 +6,11 @@ import {
   applyPin,
   buildAllOrderedColumns,
   insertAdjacentToPinnedGroup,
+  pinAllBetween,
 } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 import { useTableDrawerContextValue } from '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
 
 import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
-
-type PinSide = 'left' | 'right';
-
-const pinAllBetween = ({
-  allOrderedKeys,
-  columnPinning,
-  index,
-  side,
-}: {
-  readonly allOrderedKeys: readonly string[];
-  readonly columnPinning: {
-    readonly left: readonly string[];
-    readonly right: readonly string[];
-  };
-  readonly index: number;
-  readonly side: PinSide;
-}) => {
-  const next = {
-    left: [...columnPinning.left],
-    right: [...columnPinning.right],
-  };
-
-  if (side === 'left') {
-    for (const key of allOrderedKeys.slice(0, index + 1)) {
-      if (!next.left.includes(key)) {
-        next.right = next.right.filter((pinnedKey) => pinnedKey !== key);
-        next.left.push(key);
-      }
-    }
-
-    return next;
-  }
-
-  for (const key of allOrderedKeys.slice(index)) {
-    if (!next.right.includes(key)) {
-      next.left = next.left.filter((pinnedKey) => pinnedKey !== key);
-      next.right.push(key);
-    }
-  }
-
-  return next;
-};
 
 /**
  * Hook to handle accepting a pin conflict resolution.
@@ -109,7 +68,7 @@ export const useAcceptPinConflict = () => {
           allOrderedKeys: allOrderedColumns.map((column) => column.key),
           columnPinning,
           index,
-          side: side as PinSide,
+          side,
         }),
       });
     } else {

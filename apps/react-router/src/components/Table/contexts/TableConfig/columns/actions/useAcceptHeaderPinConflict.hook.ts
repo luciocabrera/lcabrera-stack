@@ -12,53 +12,13 @@ import {
   applyPin,
   buildAllOrderedColumns,
   insertAdjacentToPinnedGroup,
+  pinAllBetween,
 } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 import {
   getEffectiveColumns,
   getPinnedColumnOffsets,
   splitColumnsByPinning,
 } from '@/components/Table/utils';
-
-type PinSide = 'left' | 'right';
-
-type PinAllBetweenArgs<TData> = {
-  readonly allOrderedKeys: readonly DataKey<TData>[];
-  readonly columnPinning: ColumnPinningState<TData>;
-  readonly index: number;
-  readonly side: PinSide;
-};
-
-const pinAllBetween = <TData>({
-  allOrderedKeys,
-  columnPinning,
-  index,
-  side,
-}: PinAllBetweenArgs<TData>): ColumnPinningState<TData> => {
-  const next = {
-    left: [...columnPinning.left] as DataKey<TData>[],
-    right: [...columnPinning.right] as DataKey<TData>[],
-  };
-
-  if (side === 'left') {
-    for (const key of allOrderedKeys.slice(0, index + 1)) {
-      if (!next.left.includes(key)) {
-        next.right = next.right.filter((pinnedKey) => pinnedKey !== key);
-        next.left.push(key);
-      }
-    }
-
-    return next;
-  }
-
-  for (const key of allOrderedKeys.slice(index)) {
-    if (!next.right.includes(key)) {
-      next.left = next.left.filter((pinnedKey) => pinnedKey !== key);
-      next.right.push(key);
-    }
-  }
-
-  return next;
-};
 
 type AcceptHeaderPinConflictArgs<TData> = {
   readonly columnKey: DataKey<TData>;
@@ -117,12 +77,12 @@ export const useAcceptHeaderPinConflict = <TData>() => {
         staticKeys,
       }) as ColumnPinningState<TData>;
     } else if (resolution === 'pin-all-between') {
-      newPinning = pinAllBetween({
+      newPinning = pinAllBetween<DataKey<TData>>({
         allOrderedKeys,
-        columnPinning: currentPinning,
+        columnPinning: currentPinning as ColumnPinningState<TData>,
         index,
         side,
-      });
+      }) as ColumnPinningState<TData>;
     } else {
       newPinning = applyPin({
         columnKey,

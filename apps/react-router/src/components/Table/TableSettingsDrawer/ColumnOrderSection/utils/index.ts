@@ -4,6 +4,7 @@ export { detectPinOrderConflict } from './detectPinOrderConflict.util';
 export { getIsContiguousPin } from './getIsContiguousPin.util';
 export { getPinnedEntries } from './getPinnedEntries.util';
 export { insertAdjacentToPinnedGroup } from './insertAdjacentToPinnedGroup.util';
+export { pinAllBetween } from './pinAllBetween.util';
 export { recalculatePinSides } from './recalculatePinSides.util';
 export { resolveClosestEdgeSide } from './resolveClosestEdgeSide.util';
 export { resolveClosestSide } from './resolveClosestSide.util';
