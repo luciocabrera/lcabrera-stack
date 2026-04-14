@@ -1,6 +1,6 @@
 import type { ComponentPropsWithoutRef } from 'react';
 
-import type { TableProps } from '../Table.types.ts';
+import type { TableProps } from '../Table.types';
 
 export type TableHeaderProps<
   TData extends Record<string, unknown>,

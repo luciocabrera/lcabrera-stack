@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { getInitialModalsState } from './getInitialModalsState.util.ts';
+import { getInitialModalsState } from './getInitialModalsState.util';
 
 describe('getInitialModalsState', () => {
   it('returns default state when called with no args', () => {

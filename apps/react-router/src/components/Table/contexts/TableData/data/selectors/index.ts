@@ -1,5 +1,5 @@
-export { useGetTableData } from './useGetTableData.hook.ts';
-export { useGetTableHasMore } from './useGetTableHasMore.hook.ts';
-export { useGetTableIsLoading } from './useGetTableIsLoading.hook.ts';
-export { useGetTableIsLoadingMore } from './useGetTableIsLoadingMore.hook.ts';
-export { useGetTableTotalLoadedRows } from './useGetTableTotalLoadedRows.hook.ts';
+export { useGetTableData } from './useGetTableData.hook';
+export { useGetTableHasMore } from './useGetTableHasMore.hook';
+export { useGetTableIsLoading } from './useGetTableIsLoading.hook';
+export { useGetTableIsLoadingMore } from './useGetTableIsLoadingMore.hook';
+export { useGetTableTotalLoadedRows } from './useGetTableTotalLoadedRows.hook';

@@ -4,10 +4,10 @@ import { useState } from 'react';
 import type {
   NumberFilterInputProps,
   UpdateFilterArgs,
-} from './NumberFilterInput.types.ts';
+} from './NumberFilterInput.types';
 
-import { styles } from './NumberFilterInput.stylex.ts';
-import { computeInitialMaxValue, computeInitialValue } from './utils/index.ts';
+import { styles } from './NumberFilterInput.stylex';
+import { computeInitialMaxValue, computeInitialValue } from './utils';
 
 export const NumberFilterInput = <TData,>({
   filter,

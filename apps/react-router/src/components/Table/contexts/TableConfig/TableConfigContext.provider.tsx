@@ -8,10 +8,10 @@ import { useStore } from '@/hooks';
 import type {
   TableConfigContextValue,
   TableConfigProviderProps,
-} from './TableConfigContext.types.ts';
+} from './TableConfigContext.types';
 
-import { TableConfigContext } from './TableConfigContext.context.ts';
-import { getInitialColumnsState, getInitialMetaState } from './utils/index.ts';
+import { TableConfigContext } from './TableConfigContext.context';
+import { getInitialColumnsState, getInitialMetaState } from './utils';
 
 export const TableConfigProvider = <TData extends Record<string, unknown>>({
   children,

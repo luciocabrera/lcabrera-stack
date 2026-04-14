@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { computeInitialValue } from './computeInitialValue.util.ts';
+import { computeInitialValue } from './computeInitialValue.util';
 
 describe('computeInitialValue (date)', () => {
   it('returns empty string when filter is undefined', () => {

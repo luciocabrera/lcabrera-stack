@@ -7,7 +7,7 @@ import type {
   DesignSystemWidth,
 } from '@/types/design-system.types';
 
-import type { linkItemStyles } from '../NavLink.stylex.ts';
+import type { linkItemStyles } from '../NavLink.stylex';
 
 type GetClassNameArgs = {
   readonly color: DesignSystemColor;

@@ -1,1 +1,1 @@
-export { ListAllIcon } from './ListAllIcon.component.tsx';
+export { ListAllIcon } from './ListAllIcon.component';

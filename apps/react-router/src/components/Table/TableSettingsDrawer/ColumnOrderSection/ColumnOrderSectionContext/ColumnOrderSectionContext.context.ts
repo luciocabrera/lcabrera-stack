@@ -1,8 +1,8 @@
 import { createContext } from 'react';
 
-import type { ColumnOrderSectionContextValue } from './ColumnOrderSectionContext.types.ts';
+import type { ColumnOrderSectionContextValue } from './ColumnOrderSectionContext.types';
 
-import { getInitialModalsState } from './utils/index.ts';
+import { getInitialModalsState } from './utils';
 
 export const ColumnOrderSectionContext =
   createContext<ColumnOrderSectionContextValue>({

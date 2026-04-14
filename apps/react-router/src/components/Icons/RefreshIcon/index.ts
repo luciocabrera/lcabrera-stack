@@ -1,1 +1,1 @@
-export { RefreshIcon } from './RefreshIcon.component.tsx';
+export { RefreshIcon } from './RefreshIcon.component';

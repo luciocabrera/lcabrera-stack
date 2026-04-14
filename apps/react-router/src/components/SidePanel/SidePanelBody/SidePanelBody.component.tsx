@@ -1,8 +1,8 @@
 import * as stylex from '@stylexjs/stylex';
 
-import type { SidePanelBodyProps } from './SidePanelBody.types.ts';
+import type { SidePanelBodyProps } from './SidePanelBody.types';
 
-import { sidePanelBodyStyles } from './SidePanelBody.stylex.ts';
+import { sidePanelBodyStyles } from './SidePanelBody.stylex';
 
 export const SidePanelBody = ({ children, ...props }: SidePanelBodyProps) => {
   return (

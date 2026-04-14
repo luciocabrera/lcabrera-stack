@@ -3,7 +3,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { TableDataResolver } from './TableDataResolver.component.tsx';
+import { TableDataResolver } from './TableDataResolver.component';
 
 const { useMock } = vi.hoisted(() => ({
   useMock: vi.fn(),

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { getPinnedStyle } from './getPinnedStyle.util.ts';
+import { getPinnedStyle } from './getPinnedStyle.util';
 
 describe('getPinnedStyle', () => {
   it('returns undefined when pinInfo is undefined', () => {

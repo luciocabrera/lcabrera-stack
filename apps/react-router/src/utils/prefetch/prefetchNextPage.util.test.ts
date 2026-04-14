@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { prefetchNextPage } from './prefetchNextPage.util.ts';
+import { prefetchNextPage } from './prefetchNextPage.util';
 
 describe('prefetchNextPage', () => {
   it('returns initialCache with the promise and skip, and data undefined', () => {

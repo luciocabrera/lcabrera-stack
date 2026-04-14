@@ -1,1 +1,1 @@
-export { MenuIcon } from './MenuIcon.component.tsx';
+export { MenuIcon } from './MenuIcon.component';

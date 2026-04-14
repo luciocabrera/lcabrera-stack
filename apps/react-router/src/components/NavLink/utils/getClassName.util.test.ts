@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { linkItemStyles } from '../NavLink.stylex.ts';
-import { getClassName } from './getClassName.util.ts';
+import { linkItemStyles } from '../NavLink.stylex';
+import { getClassName } from './getClassName.util';
 
 describe('getClassName', () => {
   it('returns a string', () => {

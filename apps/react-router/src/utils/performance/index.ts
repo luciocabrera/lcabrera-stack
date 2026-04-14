@@ -1,1 +1,1 @@
-export { useRenderTracker } from './useRenderTracker.hook.ts';
+export { useRenderTracker } from './useRenderTracker.hook';

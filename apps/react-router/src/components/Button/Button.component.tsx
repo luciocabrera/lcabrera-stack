@@ -1,9 +1,9 @@
 import * as stylex from '@stylexjs/stylex';
 
-import type { ButtonProps } from './Button.types.ts';
+import type { ButtonProps } from './Button.types';
 
-import { Tooltip } from '../Tooltip/index.ts';
-import { buttonStyles } from './Button.stylex.ts';
+import { Tooltip } from '../Tooltip';
+import { buttonStyles } from './Button.stylex';
 
 export const Button = ({
   children,

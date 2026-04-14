@@ -1,14 +1,14 @@
-export { carSalesApi } from './carSales.api.ts';
-export type { CarSale, CarSalesResponse } from './carSales.api.ts';
-export { enterpriseOrdersApi } from './enterpriseOrders.api.ts';
+export { carSalesApi } from './carSales.api';
+export type { CarSale, CarSalesResponse } from './carSales.api';
+export { enterpriseOrdersApi } from './enterpriseOrders.api';
 export type {
   EnterpriseOrder,
   EnterpriseOrderDetailResponse,
   EnterpriseOrdersResponse,
   FetchEnterpriseOrdersParams,
-} from './enterpriseOrders.api.ts';
-export { wideAlltypes150Api } from './wideAlltypes150.api.ts';
+} from './enterpriseOrders.api';
+export { wideAlltypes150Api } from './wideAlltypes150.api';
 export type {
   WideAlltypes150,
   WideAlltypes150Response,
-} from './wideAlltypes150.api.ts';
+} from './wideAlltypes150.api';

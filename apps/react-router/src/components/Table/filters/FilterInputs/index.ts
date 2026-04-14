@@ -1,2 +1,2 @@
-export { FilterInputs } from './FilterInputs.component.tsx';
-export type { FilterInputsProps } from './FilterInputs.types.ts';
+export { FilterInputs } from './FilterInputs.component';
+export type { FilterInputsProps } from './FilterInputs.types';

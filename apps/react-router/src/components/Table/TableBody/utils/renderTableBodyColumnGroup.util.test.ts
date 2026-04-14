@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { renderTableBodyColumnGroup } from './renderTableBodyColumnGroup.util.ts';
+import { renderTableBodyColumnGroup } from './renderTableBodyColumnGroup.util';
 
 describe('renderTableBodyColumnGroup', () => {
   it('maps each column in order using shared row data', () => {

@@ -10,11 +10,11 @@ import { useClickOutside } from '@/hooks';
 import type {
   VirtualSelectOption,
   VirtualSelectProps,
-} from './VirtualSelect.types.ts';
+} from './VirtualSelect.types';
 
-import { countVisibleTags, getDropdownStyle } from './utils/index.ts';
-import { styles } from './VirtualSelect.stylex.ts';
-import { VirtualSelectTrigger } from './VirtualSelectTrigger/index.ts';
+import { countVisibleTags, getDropdownStyle } from './utils';
+import { styles } from './VirtualSelect.stylex';
+import { VirtualSelectTrigger } from './VirtualSelectTrigger';
 
 export const VirtualSelect = ({
   customStylex,

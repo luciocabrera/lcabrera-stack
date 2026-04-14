@@ -13,12 +13,12 @@ import {
 import { useGetColumns } from '@/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
 import { ICON_SIZE_MD } from '@/design-system/constants';
 
-import type { SortItem } from '../SortingSection.types.ts';
+import type { SortItem } from '../SortingSection.types';
 
-import { useSetColumnsSortings } from '../../TableDrawerContext/actions/index.ts';
-import { useGetColumnsSorting } from '../../TableDrawerContext/selectors/index.ts';
-import { styles } from './ActiveSortList.stylex.ts';
-import { SortingSectionToolbar } from '../SortingSectionToolbar/index.ts';
+import { useSetColumnsSortings } from '../../TableDrawerContext/actions';
+import { useGetColumnsSorting } from '../../TableDrawerContext/selectors';
+import { styles } from './ActiveSortList.stylex';
+import { SortingSectionToolbar } from '../SortingSectionToolbar';
 
 export const ActiveSortList = () => {
   const columns = useGetColumns();

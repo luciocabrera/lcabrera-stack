@@ -2,7 +2,7 @@ import type { ColumnDef } from '@tanstack/react-table';
 
 import type { WideAlltypes150 } from '@/services';
 
-import { COLUMNS } from '../wide-alltypes-150/WideAlltypes150.constants.ts';
+import { COLUMNS } from '../wide-alltypes-150/WideAlltypes150.constants';
 
 export const ESTIMATED_ROW_HEIGHT = 38;
 export const FETCH_SIZE = 50;

@@ -3,7 +3,7 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { SidePanel } from './SidePanel.component.tsx';
+import { SidePanel } from './SidePanel.component';
 
 // eslint-disable-next-line typescript-eslint/unbound-method -- Saving prototype methods for test teardown restoration
 const savedClose = HTMLDialogElement.prototype.close;

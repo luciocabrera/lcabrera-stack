@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { getFilteredOptions } from './getFilteredOptions.util.ts';
+import { getFilteredOptions } from './getFilteredOptions.util';
 
 describe('getFilteredOptions', () => {
   const options = ['Apple', 'Banana', 'Cherry', 'Apricot'];

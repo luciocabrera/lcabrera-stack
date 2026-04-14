@@ -9,7 +9,7 @@ import type {
 
 import { useBatchSetTableSettings } from '@/components/Table/contexts/TableConfig/columns/actions';
 
-import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook.ts';
+import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook';
 
 // type BatchTableSettingsUpdate<TData> = {
 //   columnFilters: ColumnFiltersState;

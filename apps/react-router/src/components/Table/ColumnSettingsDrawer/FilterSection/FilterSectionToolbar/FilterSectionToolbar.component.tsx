@@ -4,14 +4,14 @@ import { Button } from '@/components/Button';
 import { EraserIcon, RefreshIcon } from '@/components/Icons';
 import { ICON_SIZE_MD, ICON_SIZE_SM } from '@/design-system/constants';
 
-import type { FilterSectionToolbarProps } from './FilterSectionToolbar.types.ts';
+import type { FilterSectionToolbarProps } from './FilterSectionToolbar.types';
 
 import {
   useResetColumnFilter,
   useSetColumnFilter,
-} from '../../ColumnDrawerContext/actions/index.ts';
-import { useGetColumnFilter } from '../../ColumnDrawerContext/selectors/index.ts';
-import { styles } from './FilterSectionToolbar.stylex.ts';
+} from '../../ColumnDrawerContext/actions';
+import { useGetColumnFilter } from '../../ColumnDrawerContext/selectors';
+import { styles } from './FilterSectionToolbar.stylex';
 
 export const FilterSectionToolbar = ({
   variant = 'footer',

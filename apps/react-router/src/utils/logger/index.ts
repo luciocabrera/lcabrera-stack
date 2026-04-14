@@ -1,2 +1,2 @@
-export { createLogger, logger } from './logger.util.ts';
-export type { CreateLoggerArgs, LogLevel, Logger } from './logger.types.ts';
+export { createLogger, logger } from './logger.util';
+export type { CreateLoggerArgs, LogLevel, Logger } from './logger.types';

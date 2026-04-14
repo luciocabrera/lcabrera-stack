@@ -1,4 +1,4 @@
-export { parseCookies } from './parseCookies.util.ts';
-export { readFromCookie } from './readFromCookie.util.ts';
-export { writeToCookie } from './writeToCookie.util.ts';
-export { writeToLocalStorage } from './writeToLocalStorage.util.ts';
+export { parseCookies } from './parseCookies.util';
+export { readFromCookie } from './readFromCookie.util';
+export { writeToCookie } from './writeToCookie.util';
+export { writeToLocalStorage } from './writeToLocalStorage.util';

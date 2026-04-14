@@ -1,8 +1,8 @@
 import { createContext } from 'react';
 
-import type { TableConfigContextValue } from './TableConfigContext.types.ts';
+import type { TableConfigContextValue } from './TableConfigContext.types';
 
-import { getInitialColumnsState, getInitialMetaState } from './utils/index.ts';
+import { getInitialColumnsState, getInitialMetaState } from './utils';
 
 export const TableConfigContext = createContext<TableConfigContextValue>({
   columnsStore: getInitialColumnsState({}),

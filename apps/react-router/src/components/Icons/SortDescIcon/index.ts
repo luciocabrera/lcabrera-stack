@@ -1,1 +1,1 @@
-export { SortDescIcon } from './SortDescIcon.component.tsx';
+export { SortDescIcon } from './SortDescIcon.component';

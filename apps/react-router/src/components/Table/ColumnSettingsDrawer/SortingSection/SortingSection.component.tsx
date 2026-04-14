@@ -9,12 +9,12 @@ import {
 } from '@/components/SidePanel';
 import { ICON_SIZE_MD } from '@/design-system/constants';
 
-import type { SortingSectionProps } from './SortingSection.types.ts';
+import type { SortingSectionProps } from './SortingSection.types';
 
-import { useSetColumnSorting } from '../ColumnDrawerContext/actions/index.ts';
-import { useGetColumnSorting } from '../ColumnDrawerContext/selectors/index.ts';
-import { styles } from './SortingSection.stylex.ts';
-import { SortingSectionToolbar } from './SortingSectionToolbar/index.ts';
+import { useSetColumnSorting } from '../ColumnDrawerContext/actions';
+import { useGetColumnSorting } from '../ColumnDrawerContext/selectors';
+import { styles } from './SortingSection.stylex';
+import { SortingSectionToolbar } from './SortingSectionToolbar';
 
 export const SortingSection = (_props: SortingSectionProps) => {
   const sortDirection = useGetColumnSorting();

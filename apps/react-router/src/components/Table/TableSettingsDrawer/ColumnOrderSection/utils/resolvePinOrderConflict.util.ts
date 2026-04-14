@@ -3,7 +3,7 @@ import type {
   ColumnPinningState,
 } from '@/components/Table/Table.types';
 
-import type { OrderConflictResolution } from '../ColumnOrderSection.types.ts';
+import type { OrderConflictResolution } from '../ColumnOrderSection.types';
 
 type ResolvePinOrderConflictArgs = {
   readonly columnPinning: ColumnPinningState;

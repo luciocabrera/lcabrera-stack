@@ -5,7 +5,7 @@ import type { RefObject } from 'react';
 import { fireEvent, renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { useClickOutside } from './useClickOutside.hook.ts';
+import { useClickOutside } from './useClickOutside.hook';
 
 describe('useClickOutside', () => {
   afterEach(() => {

@@ -1,1 +1,1 @@
-export { CardTitle } from './CardTitle.component.tsx';
+export { CardTitle } from './CardTitle.component';

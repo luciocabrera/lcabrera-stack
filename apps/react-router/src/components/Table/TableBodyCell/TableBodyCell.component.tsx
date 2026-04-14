@@ -1,9 +1,9 @@
 import * as stylex from '@stylexjs/stylex';
 
-import type { TableBodyCellProps } from './TableBodyCell.types.ts';
+import type { TableBodyCellProps } from './TableBodyCell.types';
 
-import { skeletonStyles, tableBodyCellStyles } from './TableBodyCell.stylex.ts';
-import { detectDataType, renderCellContent } from './utils/index.ts';
+import { skeletonStyles, tableBodyCellStyles } from './TableBodyCell.stylex';
+import { detectDataType, renderCellContent } from './utils';
 
 export const TableBodyCell = <TData extends Record<string, unknown>>({
   children,

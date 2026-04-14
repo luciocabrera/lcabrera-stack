@@ -3,7 +3,7 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { DetailsSection } from './DetailsSection.component.tsx';
+import { DetailsSection } from './DetailsSection.component';
 
 const { useGetNormalizedColumnMock } = vi.hoisted(() => ({
   useGetNormalizedColumnMock: vi.fn(),

@@ -1,1 +1,1 @@
-export { MinimizeIcon } from './MinimizeIcon.component.tsx';
+export { MinimizeIcon } from './MinimizeIcon.component';

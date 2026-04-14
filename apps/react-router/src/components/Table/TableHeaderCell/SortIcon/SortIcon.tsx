@@ -1,6 +1,6 @@
 import { SortAscIcon, SortDescIcon, SortNeutralIcon } from '@/components/Icons';
 
-import type { SortIconProps } from './SortIcon.types.ts';
+import type { SortIconProps } from './SortIcon.types';
 
 export const SortIcon = ({ direction }: SortIconProps) => {
   if (direction === 'asc') {

@@ -22,7 +22,7 @@ vi.mock('../Table.component', () => ({
   Table: MockTable,
 }));
 
-import { TableSkeleton } from './TableSkeleton.component.tsx';
+import { TableSkeleton } from './TableSkeleton.component';
 
 describe('TableSkeleton', () => {
   it('renders the Table component with loading state', () => {

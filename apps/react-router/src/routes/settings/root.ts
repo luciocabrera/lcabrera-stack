@@ -1,2 +1,2 @@
-export { Settings as default } from './Settings.component.tsx';
-export { meta } from './settings.meta.ts';
+export { Settings as default } from './Settings.component';
+export { meta } from './settings.meta';

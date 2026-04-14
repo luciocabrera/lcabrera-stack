@@ -1,4 +1,4 @@
-import { useMetaStore } from '../useMetaStore.hook.ts';
+import { useMetaStore } from '../useMetaStore.hook';
 
 export const useGetTableTitle = () =>
   useMetaStore<string | undefined>((state) => state.title);

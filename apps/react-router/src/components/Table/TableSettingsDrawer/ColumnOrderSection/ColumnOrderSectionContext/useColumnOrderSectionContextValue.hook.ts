@@ -1,6 +1,6 @@
 import { use } from 'react';
 
-import { ColumnOrderSectionContext } from './ColumnOrderSectionContext.context.ts';
+import { ColumnOrderSectionContext } from './ColumnOrderSectionContext.context';
 
 export const useColumnOrderSectionContextValue = () => {
   const context = use(ColumnOrderSectionContext);

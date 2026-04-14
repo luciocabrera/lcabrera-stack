@@ -1,8 +1,8 @@
 import { writeToCookie, writeToLocalStorage } from '@/utils/storage';
 
-import type { StorageType, TablePersistenceConfig } from '../Table.types.ts';
+import type { StorageType, TablePersistenceConfig } from '../Table.types';
 
-import { serializeStateSlice } from './serializeStateSlice.util.ts';
+import { serializeStateSlice } from './serializeStateSlice.util';
 
 type WriteStateSliceArgs = {
   readonly headers?: Headers;

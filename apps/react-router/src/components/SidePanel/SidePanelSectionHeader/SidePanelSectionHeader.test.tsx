@@ -3,7 +3,7 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { SidePanelSectionHeader } from './SidePanelSectionHeader.component.tsx';
+import { SidePanelSectionHeader } from './SidePanelSectionHeader.component';
 
 afterEach(cleanup);
 

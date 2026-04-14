@@ -11,7 +11,7 @@ vi.mock('../contexts/TableConfig/columns/selectors', () => ({
   })),
 }));
 
-import { SpacerRow } from './SpacerRow.component.tsx';
+import { SpacerRow } from './SpacerRow.component';
 
 describe('SpacerRow', () => {
   it('renders an aria-hidden tr element', () => {

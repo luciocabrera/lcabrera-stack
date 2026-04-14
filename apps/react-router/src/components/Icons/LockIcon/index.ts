@@ -1,1 +1,1 @@
-export { LockIcon } from './LockIcon.component.tsx';
+export { LockIcon } from './LockIcon.component';

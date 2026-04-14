@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { findFirstVisibleIndex } from './findFirstVisibleIndex.util.ts';
+import { findFirstVisibleIndex } from './findFirstVisibleIndex.util';
 
 describe('findFirstVisibleIndex', () => {
   it('returns first partially visible column index', () => {

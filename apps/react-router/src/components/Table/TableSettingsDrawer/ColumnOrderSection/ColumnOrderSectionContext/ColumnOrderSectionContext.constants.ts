@@ -1,6 +1,6 @@
 import type { ColumnOrderState } from '@/components/Table/Table.types';
 
-import type { ColumnOrderSectionModalsState } from './ColumnOrderSectionContext.types.ts';
+import type { ColumnOrderSectionModalsState } from './ColumnOrderSectionContext.types';
 
 export const INITIAL_MODALS_STATE: ColumnOrderSectionModalsState = {
   conflictModal: {

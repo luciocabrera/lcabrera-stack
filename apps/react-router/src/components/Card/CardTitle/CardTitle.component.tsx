@@ -1,8 +1,8 @@
 import * as stylex from '@stylexjs/stylex';
 
-import type { CardTitleProps } from './CardTitle.types.ts';
+import type { CardTitleProps } from './CardTitle.types';
 
-import { cardTitleStyles } from './CardTitle.stylex.ts';
+import { cardTitleStyles } from './CardTitle.stylex';
 
 export const CardTitle = ({ children, icon, ...props }: CardTitleProps) => {
   return (

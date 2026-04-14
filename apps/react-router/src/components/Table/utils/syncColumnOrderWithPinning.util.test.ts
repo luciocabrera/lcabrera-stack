@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import type { TableColumn } from '../Table.types.ts';
+import type { TableColumn } from '../Table.types';
 
-import { syncColumnOrderWithPinning } from './syncColumnOrderWithPinning.util.ts';
+import { syncColumnOrderWithPinning } from './syncColumnOrderWithPinning.util';
 
 type Row = Record<string, unknown>;
 

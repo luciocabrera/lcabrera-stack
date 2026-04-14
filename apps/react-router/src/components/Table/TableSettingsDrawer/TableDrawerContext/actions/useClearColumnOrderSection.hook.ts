@@ -2,7 +2,7 @@ import type { ColumnPinningState } from '@/components/Table/Table.types';
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 
-import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook.ts';
+import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook';
 
 export const useClearColumnOrderSection = () => {
   const { columnsStore: tableColumnsStore } = useTableConfigContextValue();

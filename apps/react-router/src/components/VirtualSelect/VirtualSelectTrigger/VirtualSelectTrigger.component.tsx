@@ -2,9 +2,9 @@ import * as stylex from '@stylexjs/stylex';
 
 import { Tag } from '@/components/Tag';
 
-import type { VirtualSelectTriggerProps } from './VirtualSelectTrigger.types.ts';
+import type { VirtualSelectTriggerProps } from './VirtualSelectTrigger.types';
 
-import { styles } from './VirtualSelectTrigger.stylex.ts';
+import { styles } from './VirtualSelectTrigger.stylex';
 
 export const VirtualSelectTrigger = ({
   isAlwaysOpen,

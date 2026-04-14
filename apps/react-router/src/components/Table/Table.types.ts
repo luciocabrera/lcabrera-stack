@@ -9,7 +9,7 @@ import type {
 } from '@/types/format.types';
 import type { InfiniteScroll, Sorting } from '@/types/ui.types';
 
-export type { TableTitleProps } from './TableTitle/index.ts';
+export type { TableTitleProps } from './TableTitle';
 
 /**
  * Column filters state - maps column key to filter configuration

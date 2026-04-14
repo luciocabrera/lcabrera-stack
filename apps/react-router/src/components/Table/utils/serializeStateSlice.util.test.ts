@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { serializeStateSlice } from './serializeStateSlice.util.ts';
+import { serializeStateSlice } from './serializeStateSlice.util';
 
 describe('serializeStateSlice', () => {
   it('returns key with storage prefix', () => {

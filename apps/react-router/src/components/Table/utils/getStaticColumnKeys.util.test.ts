@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import type { TableColumn } from '../Table.types.ts';
+import type { TableColumn } from '../Table.types';
 
-import { getStaticColumnKeys } from './getStaticColumnKeys.util.ts';
+import { getStaticColumnKeys } from './getStaticColumnKeys.util';
 
 type Row = { id: string; name: string };
 

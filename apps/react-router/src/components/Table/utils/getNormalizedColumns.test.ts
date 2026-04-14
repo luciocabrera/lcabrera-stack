@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { TableColumn } from '@/components/Table/Table.types';
 
-import { getNormalizedColumns } from './getNormalizedColumns.util.ts';
+import { getNormalizedColumns } from './getNormalizedColumns.util';
 
 type Row = { name: string; age: number; active: boolean };
 

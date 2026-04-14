@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { getInitialDataState } from './getInitialDataState.util.ts';
+import { getInitialDataState } from './getInitialDataState.util';
 
 describe('getInitialDataState', () => {
   it('returns default values', () => {

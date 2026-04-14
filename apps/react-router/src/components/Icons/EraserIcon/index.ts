@@ -1,1 +1,1 @@
-export { EraserIcon } from './EraserIcon.component.tsx';
+export { EraserIcon } from './EraserIcon.component';

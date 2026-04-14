@@ -1,2 +1,2 @@
-export { SortingSection } from './SortingSection.component.tsx';
-export type { SortingSectionProps, SortItem } from './SortingSection.types.ts';
+export { SortingSection } from './SortingSection.component';
+export type { SortingSectionProps, SortItem } from './SortingSection.types';

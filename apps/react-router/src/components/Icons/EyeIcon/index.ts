@@ -1,1 +1,1 @@
-export { EyeIcon } from './EyeIcon.component.tsx';
+export { EyeIcon } from './EyeIcon.component';

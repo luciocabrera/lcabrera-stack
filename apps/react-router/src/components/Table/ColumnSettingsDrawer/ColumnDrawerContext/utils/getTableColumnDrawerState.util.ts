@@ -4,7 +4,7 @@ import type {
   DataKey,
   TableColumnsState,
 } from '@/components/Table/Table.types';
-import type { ColumnDrawerState } from '../ColumnDrawerContext.types.ts';
+import type { ColumnDrawerState } from '../ColumnDrawerContext.types';
 
 type GetTableColumnDrawerStateArgs<TData> = {
   readonly columnKey: DataKey<TData>;

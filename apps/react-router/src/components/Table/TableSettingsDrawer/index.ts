@@ -1,1 +1,1 @@
-export { TableSettingsDrawer } from './TableSettingsDrawer.component.tsx';
+export { TableSettingsDrawer } from './TableSettingsDrawer.component';

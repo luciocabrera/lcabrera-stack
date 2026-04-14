@@ -1,4 +1,4 @@
-import type { IconProps } from '../Icons.types.ts';
+import type { IconProps } from '../Icons.types';
 
 export const SortClearIcon = ({ size = 12, ...props }: IconProps) => (
   <svg

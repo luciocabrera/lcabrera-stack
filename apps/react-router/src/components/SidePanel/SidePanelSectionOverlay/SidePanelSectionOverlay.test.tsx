@@ -3,7 +3,7 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { SidePanelSectionOverlay } from './SidePanelSectionOverlay.component.tsx';
+import { SidePanelSectionOverlay } from './SidePanelSectionOverlay.component';
 
 afterEach(cleanup);
 

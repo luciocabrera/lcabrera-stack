@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { getTotalVisibleColumnCount } from './getTotalVisibleColumnCount.util.ts';
+import { getTotalVisibleColumnCount } from './getTotalVisibleColumnCount.util';
 
 describe('getTotalVisibleColumnCount', () => {
   it('counts pinned columns, center columns, and both spacer cells', () => {

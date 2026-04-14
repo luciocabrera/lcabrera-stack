@@ -1,6 +1,6 @@
-import type { CreateLoggerArgs, LogLevel, Logger } from './logger.types.ts';
+import type { CreateLoggerArgs, LogLevel, Logger } from './logger.types';
 
-import { DEFAULT_LOG_LEVEL, LOG_LEVEL_PRIORITY } from './logger.constants.ts';
+import { DEFAULT_LOG_LEVEL, LOG_LEVEL_PRIORITY } from './logger.constants';
 
 /** No-op function reused by all suppressed log methods. */
 const noop = (): void => {};

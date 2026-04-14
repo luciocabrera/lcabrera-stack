@@ -3,9 +3,9 @@ import type { KeyboardEvent } from 'react';
 import * as stylex from '@stylexjs/stylex';
 import { Activity, useRef, useState } from 'react';
 
-import type { TabsProps } from './Tabs.types.ts';
+import type { TabsProps } from './Tabs.types';
 
-import { styles } from './Tabs.stylex.ts';
+import { styles } from './Tabs.stylex';
 
 export const Tabs = ({ defaultSelectedTab, tabs, ...props }: TabsProps) => {
   const [activeTab, setActiveTab] = useState(

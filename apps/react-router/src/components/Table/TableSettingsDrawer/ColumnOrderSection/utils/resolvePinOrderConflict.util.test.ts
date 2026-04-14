@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { resolvePinOrderConflict } from './resolvePinOrderConflict.util.ts';
+import { resolvePinOrderConflict } from './resolvePinOrderConflict.util';
 
 describe('resolvePinOrderConflict', () => {
   const columnPinning = { left: ['id', 'name'], right: ['actions'] };

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { readFromCookie } from './readFromCookie.util.ts';
+import { readFromCookie } from './readFromCookie.util';
 
 describe('readFromCookie', () => {
   afterEach(() => {

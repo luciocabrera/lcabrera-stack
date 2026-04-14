@@ -1,6 +1,6 @@
-import type { PinSideModalState } from '../ColumnOrderSectionContext.types.ts';
+import type { PinSideModalState } from '../ColumnOrderSectionContext.types';
 
-import { useModalsStore } from '../useModalsStore.hook.ts';
+import { useModalsStore } from '../useModalsStore.hook';
 
 export const useGetPinSideModal = () =>
   useModalsStore<PinSideModalState>((state) => state.pinSideModal);

@@ -1,6 +1,6 @@
-import type { OrderConflictModalState } from '../ColumnOrderSectionContext.types.ts';
+import type { OrderConflictModalState } from '../ColumnOrderSectionContext.types';
 
-import { useModalsStore } from '../useModalsStore.hook.ts';
+import { useModalsStore } from '../useModalsStore.hook';
 
 export const useGetOrderConflict = () =>
   useModalsStore<OrderConflictModalState>((state) => state.orderConflict);

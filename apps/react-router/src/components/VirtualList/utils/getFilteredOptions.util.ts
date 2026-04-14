@@ -1,4 +1,4 @@
-import type { ListFilterMode } from '../VirtualList.types.ts';
+import type { ListFilterMode } from '../VirtualList.types';
 
 export type GetFilteredOptionsArgs = {
   readonly listFilterMode: ListFilterMode;

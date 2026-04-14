@@ -7,9 +7,9 @@ import {
 } from '@/components/Table/contexts';
 import { TableSuspenseBoundary } from '@/components/Table/TableSuspenseBoundary';
 
-import type { TableLayoutProps } from './TableLayout.types.ts';
+import type { TableLayoutProps } from './TableLayout.types';
 
-import { styles } from './TableLayout.stylex.ts';
+import { styles } from './TableLayout.stylex';
 
 export const TableLayout = <
   TData extends Record<string, unknown>,

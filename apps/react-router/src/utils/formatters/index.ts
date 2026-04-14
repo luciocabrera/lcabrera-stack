@@ -1,3 +1,3 @@
-export { formatCurrency } from './formatCurrency.util.ts';
-export { formatDate } from './formatDate.util.ts';
-export { formatNumber } from './formatNumber.util.ts';
+export { formatCurrency } from './formatCurrency.util';
+export { formatDate } from './formatDate.util';
+export { formatNumber } from './formatNumber.util';

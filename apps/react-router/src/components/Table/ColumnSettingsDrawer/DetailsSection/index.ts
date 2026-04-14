@@ -1,2 +1,2 @@
-export { DetailsSection } from './DetailsSection.component.tsx';
-export type { DetailsSectionProps } from './DetailsSection.types.ts';
+export { DetailsSection } from './DetailsSection.component';
+export type { DetailsSectionProps } from './DetailsSection.types';

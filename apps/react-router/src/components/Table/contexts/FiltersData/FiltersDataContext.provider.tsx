@@ -5,10 +5,10 @@ import { useStore } from '@/hooks';
 import type {
   FiltersDataContextValue,
   FiltersDataProviderProps,
-} from './FiltersDataContext.types.ts';
+} from './FiltersDataContext.types';
 
-import { getInitialFiltersDataState } from './filters/utils/index.ts';
-import { FiltersDataContext } from './FiltersDataContext.context.ts';
+import { getInitialFiltersDataState } from './filters/utils';
+import { FiltersDataContext } from './FiltersDataContext.context';
 
 /**
  * Provider for filter lookup data (distinct values).

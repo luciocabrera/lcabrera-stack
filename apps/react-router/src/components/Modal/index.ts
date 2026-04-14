@@ -1,2 +1,2 @@
-export { Modal } from './Modal.component.tsx';
-export type { ModalProps } from './Modal.types.ts';
+export { Modal } from './Modal.component';
+export type { ModalProps } from './Modal.types';

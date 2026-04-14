@@ -6,7 +6,7 @@ import { LOAD_MORE_PAGE_SIZE } from '@/components/Table/Table.constants';
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { firePrefetch, resolveFromCacheOrFetch } from '@/utils/prefetch';
 
-import { useTableDataContextValue } from '../useTableDataContextValue.hook.ts';
+import { useTableDataContextValue } from '../useTableDataContextValue.hook';
 
 type FetchMoreDataArgs<TData, TResponse> = Omit<
   InfiniteScroll<TData, TResponse>,

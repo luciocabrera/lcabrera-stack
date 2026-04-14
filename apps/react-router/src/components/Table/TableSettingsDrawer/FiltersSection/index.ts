@@ -1,1 +1,1 @@
-export { FiltersSection } from './FiltersSection.component.tsx';
+export { FiltersSection } from './FiltersSection.component';

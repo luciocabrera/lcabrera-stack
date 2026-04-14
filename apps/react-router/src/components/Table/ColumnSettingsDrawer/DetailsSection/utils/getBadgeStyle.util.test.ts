@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { getBadgeStyle } from './getBadgeStyle.util.ts';
+import { getBadgeStyle } from './getBadgeStyle.util';
 
 describe('getBadgeStyle', () => {
   it('returns badgeYes style for "Yes"', () => {

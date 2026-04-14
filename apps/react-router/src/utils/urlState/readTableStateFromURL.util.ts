@@ -5,7 +5,7 @@ import type {
   SortingState,
 } from '@/components/Table';
 
-import { readStateFromURL } from './readStateFromURL.util.ts';
+import { readStateFromURL } from './readStateFromURL.util';
 
 type ReadTableStateFromURLArgs = {
   readonly persistenceKey: string;

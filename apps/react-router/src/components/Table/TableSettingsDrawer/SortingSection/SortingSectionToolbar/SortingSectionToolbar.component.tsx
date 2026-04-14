@@ -4,15 +4,15 @@ import { Button } from '@/components/Button';
 import { EraserIcon, ListOrderedIcon, RefreshIcon } from '@/components/Icons';
 import { ICON_SIZE_MD, ICON_SIZE_SM } from '@/design-system/constants';
 
-import type { SortingSectionToolbarProps } from './SortingSectionToolbar.types.ts';
+import type { SortingSectionToolbarProps } from './SortingSectionToolbar.types';
 
 import {
   useClearSorting,
   useResetSorting,
   useSortByColumnOrder,
-} from '../../TableDrawerContext/actions/index.ts';
-import { useGetColumnsSorting } from '../../TableDrawerContext/selectors/index.ts';
-import { styles } from './SortingSectionToolbar.stylex.ts';
+} from '../../TableDrawerContext/actions';
+import { useGetColumnsSorting } from '../../TableDrawerContext/selectors';
+import { styles } from './SortingSectionToolbar.stylex';
 
 export const SortingSectionToolbar = ({
   variant = 'footer',

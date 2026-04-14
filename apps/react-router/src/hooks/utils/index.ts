@@ -1,3 +1,3 @@
-export { findFirstOutOfViewIndex } from './findFirstOutOfViewIndex.util.ts';
-export { findFirstVisibleIndex } from './findFirstVisibleIndex.util.ts';
-export { getVerticalVirtualizationWindow } from './getVerticalVirtualizationWindow.util.ts';
+export { findFirstOutOfViewIndex } from './findFirstOutOfViewIndex.util';
+export { findFirstVisibleIndex } from './findFirstVisibleIndex.util';
+export { getVerticalVirtualizationWindow } from './getVerticalVirtualizationWindow.util';

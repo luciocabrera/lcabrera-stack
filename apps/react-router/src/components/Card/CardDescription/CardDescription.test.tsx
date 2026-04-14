@@ -3,7 +3,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { CardDescription } from './CardDescription.component.tsx';
+import { CardDescription } from './CardDescription.component';
 
 describe('CardDescription', () => {
   it("renders children inside a p element with data-testid='card-description'", () => {

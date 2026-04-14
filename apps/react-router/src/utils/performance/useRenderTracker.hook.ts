@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 
-import { trackRender, trackRenderComplete } from './renderTracker.util.ts';
+import { trackRender, trackRenderComplete } from './renderTracker.util';
 
 type UseRenderTrackerOptions = {
   /** Only track if condition is true */

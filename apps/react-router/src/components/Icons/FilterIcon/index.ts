@@ -1,1 +1,1 @@
-export { FilterIcon } from './FilterIcon.component.tsx';
+export { FilterIcon } from './FilterIcon.component';

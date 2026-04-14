@@ -1,1 +1,1 @@
-export { SidePanelSectionHeader } from './SidePanelSectionHeader.component.tsx';
+export { SidePanelSectionHeader } from './SidePanelSectionHeader.component';

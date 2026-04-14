@@ -1,1 +1,1 @@
-export { WarningIcon } from './WarningIcon.component.tsx';
+export { WarningIcon } from './WarningIcon.component';

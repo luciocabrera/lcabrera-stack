@@ -1,9 +1,9 @@
-import type { DateFormatOptions } from '../../types/format.types.ts';
+import type { DateFormatOptions } from '../../types/format.types';
 
-import { DEFAULT_DATE_PRESET } from './formatters.constants.ts';
-import { getDateTimeFormatOptions } from './getDateTimeFormatOptions.util.ts';
-import { getDefaultLocale } from './getDefaultLocale.util.ts';
-import { parseDate } from './parseDate.util.ts';
+import { DEFAULT_DATE_PRESET } from './formatters.constants';
+import { getDateTimeFormatOptions } from './getDateTimeFormatOptions.util';
+import { getDefaultLocale } from './getDefaultLocale.util';
+import { parseDate } from './parseDate.util';
 
 type FormatDateArgs = DateFormatOptions & {
   readonly value: unknown;

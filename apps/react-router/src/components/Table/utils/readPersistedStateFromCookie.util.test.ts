@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { readPersistedStateFromCookie } from './readPersistedStateFromCookie.util.ts';
+import { readPersistedStateFromCookie } from './readPersistedStateFromCookie.util';
 
 vi.mock('@/utils/storage', () => ({
   readFromCookie: vi.fn(),

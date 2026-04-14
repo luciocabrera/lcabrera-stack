@@ -3,7 +3,7 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { VirtualListFooter } from './VirtualListFooter.component.tsx';
+import { VirtualListFooter } from './VirtualListFooter.component';
 
 afterEach(() => {
   cleanup();

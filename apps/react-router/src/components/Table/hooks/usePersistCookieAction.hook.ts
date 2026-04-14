@@ -1,8 +1,8 @@
 import { useFetcher, useLocation } from 'react-router';
 
-import type { TablePersistenceConfig } from '../Table.types.ts';
+import type { TablePersistenceConfig } from '../Table.types';
 
-import { serializeStateSlice } from '../utils/index.ts';
+import { serializeStateSlice } from '../utils';
 
 const PERSIST_COOKIE_ACTION = '/_action/persist-cookie';
 

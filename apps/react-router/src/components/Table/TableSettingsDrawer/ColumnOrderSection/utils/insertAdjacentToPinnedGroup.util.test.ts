@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { insertAdjacentToPinnedGroup } from './insertAdjacentToPinnedGroup.util.ts';
+import { insertAdjacentToPinnedGroup } from './insertAdjacentToPinnedGroup.util';
 
 describe('insertAdjacentToPinnedGroup', () => {
   it('inserts after last left-pinned column', () => {

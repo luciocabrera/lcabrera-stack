@@ -1,10 +1,10 @@
 import * as stylex from '@stylexjs/stylex';
 
-import type { DraggableListProps } from './DraggableList.types.ts';
+import type { DraggableListProps } from './DraggableList.types';
 
-import { styles } from './DraggableList.stylex.ts';
-import { useDraggableList } from './hooks/index.ts';
-import { handleDragOver } from './utils/index.ts';
+import { styles } from './DraggableList.stylex';
+import { useDraggableList } from './hooks';
+import { handleDragOver } from './utils';
 
 export const DraggableList = ({
   items: initialItems,

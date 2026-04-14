@@ -1,1 +1,1 @@
-export { InfoIcon } from './InfoIcon.component.tsx';
+export { InfoIcon } from './InfoIcon.component';

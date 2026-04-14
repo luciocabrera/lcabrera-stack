@@ -9,7 +9,7 @@ import type {
 
 import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
 
-import { buildTableBodyCellDescriptor } from './buildTableBodyCellDescriptor.util.ts';
+import { buildTableBodyCellDescriptor } from './buildTableBodyCellDescriptor.util';
 
 type Row = {
   readonly amount?: number;

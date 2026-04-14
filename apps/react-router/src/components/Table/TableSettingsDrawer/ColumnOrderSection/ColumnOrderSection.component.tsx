@@ -17,9 +17,9 @@ import {
 } from '@/components/Table/TableSettingsDrawer/TableDrawerContext/selectors';
 import { ToggleSwitch } from '@/components/ToggleSwitch';
 
-import type { ColumnOrderSectionProps } from './ColumnOrderSection.types.ts';
+import type { ColumnOrderSectionProps } from './ColumnOrderSection.types';
 
-import { styles } from './ColumnOrderSection.stylex.ts';
+import { styles } from './ColumnOrderSection.stylex';
 import {
   useAcceptPinConflict,
   useAcceptPinSide,
@@ -28,18 +28,18 @@ import {
   useReorderColumns,
   useToggleColumnPin,
   useToggleColumnVisibility,
-} from './ColumnOrderSectionContext/actions/index.ts';
+} from './ColumnOrderSectionContext/actions';
 import {
   useGetConflictModal,
   useGetOrderConflict,
   useGetPinSideModal,
   useGetUnpinConflictModal,
-} from './ColumnOrderSectionContext/selectors/index.ts';
-import { ColumnOrderSectionToolbar } from './ColumnOrderSectionToolbar/index.ts';
-import { OrderConflictModal } from './OrderConflictModal/index.ts';
-import { PinConflictModal } from './PinConflictModal/index.ts';
-import { UnpinConflictModal } from './UnpinConflictModal/index.ts';
-import { buildAllOrderedColumns } from './utils/index.ts';
+} from './ColumnOrderSectionContext/selectors';
+import { ColumnOrderSectionToolbar } from './ColumnOrderSectionToolbar';
+import { OrderConflictModal } from './OrderConflictModal';
+import { PinConflictModal } from './PinConflictModal';
+import { UnpinConflictModal } from './UnpinConflictModal';
+import { buildAllOrderedColumns } from './utils';
 
 export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
   const columns = useGetColumns();

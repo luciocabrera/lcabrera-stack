@@ -1,4 +1,4 @@
-import type { IconProps } from '../Icons.types.ts';
+import type { IconProps } from '../Icons.types';
 
 export const HomeIcon = ({ size = 24, ...props }: IconProps) => (
   <svg

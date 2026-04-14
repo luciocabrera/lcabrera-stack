@@ -1,8 +1,8 @@
 import { use } from 'react';
 
-import type { TableWrapperContextValue } from './TableWrapperContext.types.ts';
+import type { TableWrapperContextValue } from './TableWrapperContext.types';
 
-import { TableWrapperContext } from './TableWrapperContext.context.ts';
+import { TableWrapperContext } from './TableWrapperContext.context';
 
 export const useTableContainerRef =
   (): TableWrapperContextValue['containerRef'] => {

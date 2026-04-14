@@ -1,1 +1,1 @@
-export { useDraggableList } from './useDraggableList.hook.ts';
+export { useDraggableList } from './useDraggableList.hook';

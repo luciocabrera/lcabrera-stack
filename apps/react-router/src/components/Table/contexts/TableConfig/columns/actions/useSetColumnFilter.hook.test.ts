@@ -3,7 +3,7 @@
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useSetColumnFilter } from './useSetColumnFilter.hook.ts';
+import { useSetColumnFilter } from './useSetColumnFilter.hook';
 
 const {
   mockPersistTableState,

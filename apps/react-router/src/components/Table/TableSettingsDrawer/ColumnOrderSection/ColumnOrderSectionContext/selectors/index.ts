@@ -1,4 +1,4 @@
-export { useGetConflictModal } from './useGetConflictModal.hook.ts';
-export { useGetOrderConflict } from './useGetOrderConflict.hook.ts';
-export { useGetPinSideModal } from './useGetPinSideModal.hook.ts';
-export { useGetUnpinConflictModal } from './useGetUnpinConflictModal.hook.ts';
+export { useGetConflictModal } from './useGetConflictModal.hook';
+export { useGetOrderConflict } from './useGetOrderConflict.hook';
+export { useGetPinSideModal } from './useGetPinSideModal.hook';
+export { useGetUnpinConflictModal } from './useGetUnpinConflictModal.hook';

@@ -3,7 +3,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { InfoBox } from './InfoBox.component.tsx';
+import { InfoBox } from './InfoBox.component';
 
 describe('InfoBox', () => {
   it('renders children content', () => {

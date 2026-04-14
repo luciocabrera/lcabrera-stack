@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { getShadowStyle } from './getShadowStyle.util.ts';
+import { getShadowStyle } from './getShadowStyle.util';
 
 describe('getShadowStyle', () => {
   it('returns undefined when pinInfo is undefined', () => {

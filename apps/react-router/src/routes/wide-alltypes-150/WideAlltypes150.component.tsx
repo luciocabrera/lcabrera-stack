@@ -5,9 +5,9 @@ import type { WideAlltypes150, WideAlltypes150Response } from '@/services';
 import { TableLayout } from '@/components/Table/TableLayout';
 import { wideAlltypes150Api } from '@/services';
 
-import type { loader } from './wide-alltypes-150.loader.ts';
+import type { loader } from './wide-alltypes-150.loader';
 
-import { COLUMNS, PERSISTENCE_KEY } from './WideAlltypes150.constants.ts';
+import { COLUMNS, PERSISTENCE_KEY } from './WideAlltypes150.constants';
 
 export const WideAlltypes150Page = () => {
   const {

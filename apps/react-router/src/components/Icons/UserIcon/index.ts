@@ -1,1 +1,1 @@
-export { UserIcon } from './UserIcon.component.tsx';
+export { UserIcon } from './UserIcon.component';

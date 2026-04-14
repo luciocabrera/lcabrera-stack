@@ -3,7 +3,7 @@ import type { PrefetchCache } from '@/types/ui.types';
 
 import { describe, expect, it, vi } from 'vitest';
 
-import { firePrefetch } from './firePrefetch.util.ts';
+import { firePrefetch } from './firePrefetch.util';
 
 const createPrefetchRef = <TResponse>(
   initial: PrefetchCache<TResponse>,

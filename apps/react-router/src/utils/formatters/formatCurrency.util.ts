@@ -1,7 +1,7 @@
-import type { CurrencyFormatOptions } from '../../types/format.types.ts';
+import type { CurrencyFormatOptions } from '../../types/format.types';
 
-import { DEFAULT_CURRENCY } from './formatters.constants.ts';
-import { getDefaultLocale } from './getDefaultLocale.util.ts';
+import { DEFAULT_CURRENCY } from './formatters.constants';
+import { getDefaultLocale } from './getDefaultLocale.util';
 
 type FormatCurrencyArgs = CurrencyFormatOptions & {
   readonly value: number;

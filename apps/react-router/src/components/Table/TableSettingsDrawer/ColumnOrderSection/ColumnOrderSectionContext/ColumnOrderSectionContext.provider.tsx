@@ -3,10 +3,10 @@ import { useStore } from '@/hooks';
 import type {
   ColumnOrderSectionModalsState,
   ColumnOrderSectionProviderProps,
-} from './ColumnOrderSectionContext.types.ts';
+} from './ColumnOrderSectionContext.types';
 
-import { ColumnOrderSectionContext } from './ColumnOrderSectionContext.context.ts';
-import { getInitialModalsState } from './utils/index.ts';
+import { ColumnOrderSectionContext } from './ColumnOrderSectionContext.context';
+import { getInitialModalsState } from './utils';
 
 export const ColumnOrderSectionProvider = ({
   children,

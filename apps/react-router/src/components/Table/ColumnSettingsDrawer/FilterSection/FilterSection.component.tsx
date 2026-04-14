@@ -5,13 +5,13 @@ import {
   SidePanelSectionMain,
 } from '@/components/SidePanel';
 
-import type { FilterSectionProps } from './FilterSection.types.ts';
+import type { FilterSectionProps } from './FilterSection.types';
 
-import { FilterInputs } from '../../filters/FilterInputs/index.ts';
-import { useSetColumnFilter } from '../ColumnDrawerContext/actions/index.ts';
-import { useGetColumnFilter } from '../ColumnDrawerContext/selectors/index.ts';
-import { styles } from './FilterSection.stylex.ts';
-import { FilterSectionToolbar } from './FilterSectionToolbar/index.ts';
+import { FilterInputs } from '../../filters/FilterInputs';
+import { useSetColumnFilter } from '../ColumnDrawerContext/actions';
+import { useGetColumnFilter } from '../ColumnDrawerContext/selectors';
+import { styles } from './FilterSection.stylex';
+import { FilterSectionToolbar } from './FilterSectionToolbar';
 
 export const FilterSection = <TData,>({
   columnKey,

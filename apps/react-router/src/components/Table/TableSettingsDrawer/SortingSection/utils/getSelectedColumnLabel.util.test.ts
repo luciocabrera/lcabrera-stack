@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { TableColumn } from '@/components/Table/Table.types';
 
-import { getSelectedColumnLabel } from './getSelectedColumnLabel.util.ts';
+import { getSelectedColumnLabel } from './getSelectedColumnLabel.util';
 
 type Row = Record<string, unknown>;
 

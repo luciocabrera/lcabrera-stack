@@ -1,1 +1,1 @@
-export { SidePanelBody } from './SidePanelBody.component.tsx';
+export { SidePanelBody } from './SidePanelBody.component';

@@ -1,1 +1,1 @@
-export { getApiBaseUrl } from './api.util.ts';
+export { getApiBaseUrl } from './api.util';

@@ -5,24 +5,24 @@ import { Button } from '@/components/Button';
 import { SettingsIcon } from '@/components/Icons';
 import { useRenderTracker } from '@/utils/performance';
 
-import type { TableContentProps } from './TableContent.types.ts';
+import type { TableContentProps } from './TableContent.types';
 
-import { useToogleTableIsTableSettingsOpen } from '../contexts/TableConfig/meta/actions/index.ts';
-import { useGetTableThreshold } from '../contexts/TableConfig/meta/selectors/index.ts';
-import { useFetchMoreData } from '../contexts/TableData/data/actions/index.ts';
+import { useToogleTableIsTableSettingsOpen } from '../contexts/TableConfig/meta/actions';
+import { useGetTableThreshold } from '../contexts/TableConfig/meta/selectors';
+import { useFetchMoreData } from '../contexts/TableData/data/actions';
 import {
   useGetTableHasMore,
   useGetTableIsLoading,
   useGetTableIsLoadingMore,
-} from '../contexts/TableData/data/selectors/index.ts';
-import { TableWrapperContext } from '../contexts/TableWrapper/TableWrapperContext.context.ts';
-import { useInfiniteScroll } from '../hooks/index.ts';
-import { TableBase } from '../TableBase/index.ts';
-import { TableBody } from '../TableBody/index.ts';
-import { TableDrawersSection } from '../TableDrawersSection/index.ts';
-import { TableHeader } from '../TableHeader/index.ts';
-import { TableTitle } from '../TableTitle/index.ts';
-import { styles } from './TableContent.stylex.ts';
+} from '../contexts/TableData/data/selectors';
+import { TableWrapperContext } from '../contexts/TableWrapper/TableWrapperContext.context';
+import { useInfiniteScroll } from '../hooks';
+import { TableBase } from '../TableBase';
+import { TableBody } from '../TableBody';
+import { TableDrawersSection } from '../TableDrawersSection';
+import { TableHeader } from '../TableHeader';
+import { TableTitle } from '../TableTitle';
+import { styles } from './TableContent.stylex';
 
 export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   actions,

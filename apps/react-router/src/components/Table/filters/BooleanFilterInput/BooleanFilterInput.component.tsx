@@ -2,9 +2,9 @@ import * as stylex from '@stylexjs/stylex';
 
 import { Button } from '@/components/Button';
 
-import type { BooleanFilterInputProps } from './BooleanFilterInput.types.ts';
+import type { BooleanFilterInputProps } from './BooleanFilterInput.types';
 
-import { styles } from './BooleanFilterInput.stylex.ts';
+import { styles } from './BooleanFilterInput.stylex';
 
 export const BooleanFilterInput = ({
   filter,

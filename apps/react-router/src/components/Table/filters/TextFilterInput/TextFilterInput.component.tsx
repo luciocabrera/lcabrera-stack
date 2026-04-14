@@ -1,9 +1,9 @@
 import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 
-import type { TextFilterInputProps } from './TextFilterInput.types.ts';
+import type { TextFilterInputProps } from './TextFilterInput.types';
 
-import { styles } from './TextFilterInput.stylex.ts';
+import { styles } from './TextFilterInput.stylex';
 
 export const TextFilterInput = <TData,>({
   filter,

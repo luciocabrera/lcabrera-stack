@@ -1,6 +1,6 @@
 import type { ColumnSizingState } from '@/components/Table/Table.types';
 
-import { useColumnsStore } from '../useColumnsStore.hook.ts';
+import { useColumnsStore } from '../useColumnsStore.hook';
 
 export const useGetColumnSizing = <TData = Record<string, unknown>>() =>
   useColumnsStore<ColumnSizingState<TData>>(

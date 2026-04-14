@@ -18,17 +18,14 @@ import { useGetNormalizedColumn } from '@/components/Table/contexts/TableConfig/
 import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
 import { ICON_SIZE_MD } from '@/design-system/constants';
 
-import type {
-  GeneralSectionProps,
-  WidthPreset,
-} from './GeneralSection.types.ts';
+import type { GeneralSectionProps, WidthPreset } from './GeneralSection.types';
 
 import {
   useClearAllColumnDrawerSettings,
   useResetAllColumnDrawerSettings,
   useSetColumnSizing,
-} from '../ColumnDrawerContext/actions/index.ts';
-import { styles } from './GeneralSection.stylex.ts';
+} from '../ColumnDrawerContext/actions';
+import { styles } from './GeneralSection.stylex';
 
 export const GeneralSection = <TData,>({
   columnKey,

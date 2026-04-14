@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { getArrowOffset } from './getArrowOffset.util.ts';
+import { getArrowOffset } from './getArrowOffset.util';
 
 describe('getArrowOffset', () => {
   it('computes the arrow offset correctly', () => {

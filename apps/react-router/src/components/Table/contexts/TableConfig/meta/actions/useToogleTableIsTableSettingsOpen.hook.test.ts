@@ -3,8 +3,8 @@
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useToogleTableIsColumnSettingsOpen } from './useToogleTableIsColumnSettingsOpen.hook.ts';
-import { useToogleTableIsTableSettingsOpen } from './useToogleTableIsTableSettingsOpen.hook.ts';
+import { useToogleTableIsColumnSettingsOpen } from './useToogleTableIsColumnSettingsOpen.hook';
+import { useToogleTableIsTableSettingsOpen } from './useToogleTableIsTableSettingsOpen.hook';
 
 const { getMetaState, mockUseTableConfigContextValue, setMetaState } =
   vi.hoisted(() => {

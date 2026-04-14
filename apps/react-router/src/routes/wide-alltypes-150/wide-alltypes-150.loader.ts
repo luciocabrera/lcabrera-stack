@@ -11,7 +11,7 @@ import {
   readTableStateFromURL,
 } from '@/utils/urlState';
 
-import { PERSISTENCE_KEY } from './WideAlltypes150.constants.ts';
+import { PERSISTENCE_KEY } from './WideAlltypes150.constants';
 
 export const loader = ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);

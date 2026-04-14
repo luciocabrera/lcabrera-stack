@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { findFirstOutOfViewIndex } from './findFirstOutOfViewIndex.util.ts';
+import { findFirstOutOfViewIndex } from './findFirstOutOfViewIndex.util';
 
 describe('findFirstOutOfViewIndex', () => {
   it('returns first column that starts at or past viewport end', () => {

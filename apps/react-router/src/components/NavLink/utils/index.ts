@@ -1,1 +1,1 @@
-export { getClassName } from './getClassName.util.ts';
+export { getClassName } from './getClassName.util';

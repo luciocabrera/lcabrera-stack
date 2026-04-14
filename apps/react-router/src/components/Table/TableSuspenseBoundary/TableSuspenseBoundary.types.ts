@@ -1,4 +1,4 @@
-import type { TableProps } from '../Table.types.ts';
+import type { TableProps } from '../Table.types';
 
 export type TableSuspenseBoundaryProps<
   TData extends Record<string, unknown>,

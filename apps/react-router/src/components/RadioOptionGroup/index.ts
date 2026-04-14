@@ -1,5 +1,5 @@
-export { RadioOptionGroup } from './RadioOptionGroup.component.tsx';
+export { RadioOptionGroup } from './RadioOptionGroup.component';
 export type {
   RadioOption,
   RadioOptionGroupProps,
-} from './RadioOptionGroup.types.ts';
+} from './RadioOptionGroup.types';

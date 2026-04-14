@@ -1,1 +1,1 @@
-export { SidePanelSectionOverlay } from './SidePanelSectionOverlay.component.tsx';
+export { SidePanelSectionOverlay } from './SidePanelSectionOverlay.component';

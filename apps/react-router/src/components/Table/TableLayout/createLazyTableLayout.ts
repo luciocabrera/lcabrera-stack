@@ -1,6 +1,6 @@
 import { type ComponentType, lazy } from 'react';
 
-import type { TableLayoutProps } from './TableLayout.types.ts';
+import type { TableLayoutProps } from './TableLayout.types';
 
 /**
  * Creates a lazily-loaded, type-safe TableLayout component.

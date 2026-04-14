@@ -1,4 +1,4 @@
-import { styles } from '../DetailsSection.stylex.ts';
+import { styles } from '../DetailsSection.stylex';
 
 export const getBadgeStyle = (value: string) => {
   if (value === 'Yes') return styles.badgeYes;

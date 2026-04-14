@@ -5,13 +5,13 @@ import type { EnterpriseOrder, EnterpriseOrdersResponse } from '@/services';
 import { TableLayout } from '@/components/Table/TableLayout';
 import { enterpriseOrdersApi } from '@/services';
 
-import type { loader } from './enterprise-orders.loader.ts';
+import type { loader } from './enterprise-orders.loader';
 
 import {
   COLUMNS,
   DEFAULT_COLUMN_PINNING,
   PERSISTENCE_KEY,
-} from './EnterpriseOrders.constants.tsx';
+} from './EnterpriseOrders.constants';
 
 export const EnterpriseOrders = () => {
   const {

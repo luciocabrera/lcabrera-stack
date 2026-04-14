@@ -1,10 +1,10 @@
 import * as stylex from '@stylexjs/stylex';
 import { NavLink as RouterNavLink } from 'react-router';
 
-import type { NavLinkProps } from './NavLink.types.ts';
+import type { NavLinkProps } from './NavLink.types';
 
-import { linkItemStyles } from './NavLink.stylex.ts';
-import { getClassName } from './utils/index.ts';
+import { linkItemStyles } from './NavLink.stylex';
+import { getClassName } from './utils';
 
 export const NavLink = ({
   children,

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { getArrowStyle } from './getArrowStyle.util.ts';
+import { getArrowStyle } from './getArrowStyle.util';
 
 describe('getArrowStyle', () => {
   it('returns horizontal arrow style for top placement', () => {

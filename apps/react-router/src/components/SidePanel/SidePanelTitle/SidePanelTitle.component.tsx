@@ -1,8 +1,8 @@
 import * as stylex from '@stylexjs/stylex';
 
-import type { SidePanelTitleProps } from './SidePanelTitle.types.ts';
+import type { SidePanelTitleProps } from './SidePanelTitle.types';
 
-import { sidePanelTitleStyles } from './SidePanelTitle.stylex.ts';
+import { sidePanelTitleStyles } from './SidePanelTitle.stylex';
 
 export const SidePanelTitle = ({
   children,

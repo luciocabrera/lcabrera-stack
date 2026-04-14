@@ -1,4 +1,4 @@
-import type { SidePanelHeaderToolbarProps } from './SidePanelHeaderToolbar.types.ts';
+import type { SidePanelHeaderToolbarProps } from './SidePanelHeaderToolbar.types';
 
 import { Button } from '@/components/Button';
 import { MenuCloseIcon, PinIcon, PinOffIcon } from '@/components/Icons';

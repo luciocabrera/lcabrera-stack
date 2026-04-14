@@ -6,8 +6,8 @@ import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_SKELETON_ROW_COUNT,
   ITEM_HEIGHT,
-} from '../VirtualList.constants.ts';
-import { SkeletonOptions } from './SkeletonOptions.component.tsx';
+} from '../VirtualList.constants';
+import { SkeletonOptions } from './SkeletonOptions.component';
 
 describe('SkeletonOptions', () => {
   it('renders DEFAULT_SKELETON_ROW_COUNT placeholders when no containerHeight provided', () => {

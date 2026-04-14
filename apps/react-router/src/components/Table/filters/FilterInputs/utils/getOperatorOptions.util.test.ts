@@ -6,7 +6,7 @@ import {
   TEXT_OPERATORS,
 } from '@/constants/filterOperators.constants';
 
-import { getOperatorOptions } from './getOperatorOptions.util.ts';
+import { getOperatorOptions } from './getOperatorOptions.util';
 
 describe('getOperatorOptions', () => {
   it('returns NUMBER_OPERATORS for number dataType', () => {

@@ -1,1 +1,1 @@
-export { TableBodyRows } from './TableBodyRows.component.tsx';
+export { TableBodyRows } from './TableBodyRows.component';

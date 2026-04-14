@@ -1,3 +1,3 @@
-export { createLazyTableLayout } from './createLazyTableLayout.ts';
-export { TableLayout } from './TableLayout.component.tsx';
-export type { TableLayoutProps } from './TableLayout.types.ts';
+export { createLazyTableLayout } from './createLazyTableLayout';
+export { TableLayout } from './TableLayout.component';
+export type { TableLayoutProps } from './TableLayout.types';

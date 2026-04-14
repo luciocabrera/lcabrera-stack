@@ -12,7 +12,7 @@ import type {
 import {
   buildTableBodyCellDescriptor,
   type TableBodyCellDescriptor,
-} from './buildTableBodyCellDescriptor.util.ts';
+} from './buildTableBodyCellDescriptor.util';
 
 type CreateRenderTableBodyCellArgs<TData extends Record<string, unknown>> = {
   readonly columnSizing: ColumnSizingState<TData>;

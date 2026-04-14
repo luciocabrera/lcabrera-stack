@@ -3,7 +3,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { CardFooter } from './CardFooter.component.tsx';
+import { CardFooter } from './CardFooter.component';
 
 describe('CardFooter', () => {
   it("renders children inside a div with data-testid='card-footer'", () => {

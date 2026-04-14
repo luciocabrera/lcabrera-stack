@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { getNextSortDirection } from './getNextSortDirection.util.ts';
+import { getNextSortDirection } from './getNextSortDirection.util';
 
 describe('getNextSortDirection', () => {
   it('returns asc when current is undefined', () => {

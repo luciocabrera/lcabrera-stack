@@ -3,7 +3,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { TableCheckDisplay } from './TableCheckDisplay.component.tsx';
+import { TableCheckDisplay } from './TableCheckDisplay.component';
 
 describe('TableCheckDisplay', () => {
   it('renders unchecked state when value is falsy', () => {

@@ -1,1 +1,1 @@
-export { shallowEqual } from './shallowEqual.util.ts';
+export { shallowEqual } from './shallowEqual.util';

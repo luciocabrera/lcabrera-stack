@@ -1,8 +1,8 @@
 import { useSyncExternalStore } from 'react';
 
-import type { ColumnDrawerState } from './ColumnDrawerContext.types.ts';
+import type { ColumnDrawerState } from './ColumnDrawerContext.types';
 
-import { useColumnDrawerContextValue } from './useColumnDrawerContextValue.hook.ts';
+import { useColumnDrawerContextValue } from './useColumnDrawerContextValue.hook';
 
 export const useColumnsStore = <TSelected, TData = Record<string, unknown>>(
   selector: (state: ColumnDrawerState<TData>) => TSelected,

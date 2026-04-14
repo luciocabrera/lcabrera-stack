@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { deserializeSortingFromURL } from './deserializeSortingFromURL.util.ts';
+import { deserializeSortingFromURL } from './deserializeSortingFromURL.util';
 
 describe('deserializeSortingFromURL', () => {
   it('deserializes a compact sorting object', () => {

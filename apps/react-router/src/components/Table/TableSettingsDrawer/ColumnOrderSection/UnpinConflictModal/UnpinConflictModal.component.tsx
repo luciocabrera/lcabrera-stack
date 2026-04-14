@@ -5,14 +5,14 @@ import { Button } from '@/components/Button';
 import { Modal } from '@/components/Modal';
 import { RadioOptionGroup } from '@/components/RadioOptionGroup';
 
-import type { UnpinConflictResolution } from '../ColumnOrderSection.types.ts';
-import type { UnpinConflictModalProps } from './UnpinConflictModal.types.ts';
+import type { UnpinConflictResolution } from '../ColumnOrderSection.types';
+import type { UnpinConflictModalProps } from './UnpinConflictModal.types';
 
 import {
   useAcceptUnpinConflict,
   useCancelUnpinConflict,
-} from '../ColumnOrderSectionContext/actions/index.ts';
-import { styles } from './UnpinConflictModal.stylex.ts';
+} from '../ColumnOrderSectionContext/actions';
+import { styles } from './UnpinConflictModal.stylex';
 
 export const UnpinConflictModal = ({
   columnLabel,

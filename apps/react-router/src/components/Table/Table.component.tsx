@@ -2,11 +2,11 @@ import * as stylex from '@stylexjs/stylex';
 
 import { useRenderTracker } from '@/utils/performance';
 
-import type { TableProps } from './Table.types.ts';
+import type { TableProps } from './Table.types';
 
-import { TableDataProvider } from './contexts/index.ts';
-import { styles } from './Table.stylex.ts';
-import { TableContent } from './TableContent/index.ts';
+import { TableDataProvider } from './contexts';
+import { styles } from './Table.stylex';
+import { TableContent } from './TableContent';
 
 export const Table = <TData extends Record<string, unknown>, TResponse>({
   actions,

@@ -6,10 +6,10 @@ import type { EnterpriseOrder } from '@/services';
 import { Button } from '@/components/Button';
 import { Card, CardBody, CardHeader, CardTitle } from '@/components/Card';
 
-import type { loader } from './order-detail.loader.ts';
-import type { FieldConfig, FormatValueArgs } from './OrderDetail.types.ts';
+import type { loader } from './order-detail.loader';
+import type { FieldConfig, FormatValueArgs } from './OrderDetail.types';
 
-import { styles } from './OrderDetail.stylex.ts';
+import { styles } from './OrderDetail.stylex';
 
 const ORDER_INFO_FIELDS: FieldConfig[] = [
   { key: 'order_id', label: 'Order ID' },

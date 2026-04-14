@@ -1,2 +1,2 @@
-export { TableBodyCell } from './TableBodyCell.component.tsx';
-export type { TableBodyCellProps } from './TableBodyCell.types.ts';
+export { TableBodyCell } from './TableBodyCell.component';
+export type { TableBodyCellProps } from './TableBodyCell.types';

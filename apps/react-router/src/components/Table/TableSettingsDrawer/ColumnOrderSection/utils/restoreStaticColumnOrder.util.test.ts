@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { restoreStaticColumnOrder } from './restoreStaticColumnOrder.util.ts';
+import { restoreStaticColumnOrder } from './restoreStaticColumnOrder.util';
 
 describe('restoreStaticColumnOrder', () => {
   it('returns newOrder unchanged when staticKeys is empty', () => {

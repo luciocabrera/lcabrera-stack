@@ -6,9 +6,9 @@ import { useId, useState } from 'react';
 import { CheckIcon } from '@/components/Icons';
 import { ICON_SIZE_XXS } from '@/design-system/constants';
 
-import type { ToggleSwitchProps } from './ToggleSwitch.types.ts';
+import type { ToggleSwitchProps } from './ToggleSwitch.types';
 
-import { styles } from './ToggleSwitch.stylex.ts';
+import { styles } from './ToggleSwitch.stylex';
 
 export const ToggleSwitch = ({
   isChecked,

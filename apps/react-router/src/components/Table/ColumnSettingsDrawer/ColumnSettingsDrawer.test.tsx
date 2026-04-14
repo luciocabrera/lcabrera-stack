@@ -5,7 +5,7 @@ import type { ReactNode } from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { ColumnSettingsDrawer } from './ColumnSettingsDrawer.component.tsx';
+import { ColumnSettingsDrawer } from './ColumnSettingsDrawer.component';
 
 type MockButtonProps = {
   readonly children: ReactNode;

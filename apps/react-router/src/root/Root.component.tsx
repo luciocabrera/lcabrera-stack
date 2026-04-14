@@ -9,10 +9,10 @@ import { darkTheme } from '@/design-system/themes/dark.stylex';
 import { lightTheme } from '@/design-system/themes/light.stylex';
 import { useTheme } from '@/hooks/useTheme.hook';
 
-import { styles } from './Root.stylex.ts';
+import { styles } from './Root.stylex';
 
-import type { DbSanityPayload } from './Root.types.ts';
-import type { loader as rootLoader } from './root.loader.ts';
+import type { DbSanityPayload } from './Root.types';
+import type { loader as rootLoader } from './root.loader';
 
 const RootContent = () => {
   const { isDarkMode, toggleTheme } = useTheme();

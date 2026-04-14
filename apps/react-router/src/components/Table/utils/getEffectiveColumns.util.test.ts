@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import type { ColumnPinningState, TableColumn } from '../Table.types.ts';
+import type { ColumnPinningState, TableColumn } from '../Table.types';
 
-import { getEffectiveColumns } from './getEffectiveColumns.util.ts';
+import { getEffectiveColumns } from './getEffectiveColumns.util';
 
 type Row = { id: string; name: string; age: number };
 

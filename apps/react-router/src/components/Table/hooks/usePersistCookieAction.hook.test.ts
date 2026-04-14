@@ -3,9 +3,9 @@
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { TablePersistenceConfig } from '../Table.types.ts';
+import type { TablePersistenceConfig } from '../Table.types';
 
-import { usePersistTableStateAction } from './usePersistCookieAction.hook.ts';
+import { usePersistTableStateAction } from './usePersistCookieAction.hook';
 
 const { serializeStateSliceMock, submitMock } = vi.hoisted(() => ({
   serializeStateSliceMock: vi.fn(),

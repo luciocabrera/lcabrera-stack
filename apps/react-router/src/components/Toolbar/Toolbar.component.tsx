@@ -3,9 +3,9 @@ import * as stylex from '@stylexjs/stylex';
 import { Button } from '@/components/Button';
 import { NavLink } from '@/components/NavLink';
 
-import type { ToolbarProps } from './Toolbar.types.ts';
+import type { ToolbarProps } from './Toolbar.types';
 
-import { styles } from './Toolbar.stylex.ts';
+import { styles } from './Toolbar.stylex';
 
 export const Toolbar = ({
   items,

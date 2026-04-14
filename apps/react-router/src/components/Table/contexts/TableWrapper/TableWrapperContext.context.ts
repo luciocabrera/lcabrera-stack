@@ -1,6 +1,6 @@
 import { createContext } from 'react';
 
-import type { TableWrapperContextValue } from './TableWrapperContext.types.ts';
+import type { TableWrapperContextValue } from './TableWrapperContext.types';
 
 export const TableWrapperContext = createContext<
   TableWrapperContextValue | undefined

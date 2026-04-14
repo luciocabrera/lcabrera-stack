@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { encodeStateToURL } from './encodeStateToURL.util.ts';
-import { readTableStateFromURL } from './readTableStateFromURL.util.ts';
+import { encodeStateToURL } from './encodeStateToURL.util';
+import { readTableStateFromURL } from './readTableStateFromURL.util';
 
 describe('readTableStateFromURL', () => {
   it('returns decoded table state', () => {

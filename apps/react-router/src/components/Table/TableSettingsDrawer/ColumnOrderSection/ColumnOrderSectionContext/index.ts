@@ -1,5 +1,5 @@
-export { ColumnOrderSectionContext } from './ColumnOrderSectionContext.context.ts';
-export { ColumnOrderSectionProvider } from './ColumnOrderSectionContext.provider.tsx';
+export { ColumnOrderSectionContext } from './ColumnOrderSectionContext.context';
+export { ColumnOrderSectionProvider } from './ColumnOrderSectionContext.provider';
 export type {
   ColumnOrderSectionContextValue,
   ColumnOrderSectionModalsState,
@@ -7,6 +7,6 @@ export type {
   ConflictModalState,
   OrderConflictModalState,
   PinSideModalState,
-} from './ColumnOrderSectionContext.types.ts';
-export { useColumnOrderSectionContextValue } from './useColumnOrderSectionContextValue.hook.ts';
-export { useModalsStore } from './useModalsStore.hook.ts';
+} from './ColumnOrderSectionContext.types';
+export { useColumnOrderSectionContextValue } from './useColumnOrderSectionContextValue.hook';
+export { useModalsStore } from './useModalsStore.hook';

@@ -6,11 +6,11 @@ import { SidePanelSectionHeader } from '@/components/SidePanel';
 import { useGetColumns } from '@/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
 import { VirtualSelect } from '@/components/VirtualSelect';
 
-import type { AddSortSectionProps } from './AddSortSection.types.ts';
+import type { AddSortSectionProps } from './AddSortSection.types';
 
-import { useSetColumnsSortings } from '../../TableDrawerContext/actions/index.ts';
-import { useGetColumnsSorting } from '../../TableDrawerContext/selectors/index.ts';
-import { styles } from './AddSortSection.stylex.ts';
+import { useSetColumnsSortings } from '../../TableDrawerContext/actions';
+import { useGetColumnsSorting } from '../../TableDrawerContext/selectors';
+import { styles } from './AddSortSection.stylex';
 
 export const AddSortSection = ({
   onDropdownOpenChange,

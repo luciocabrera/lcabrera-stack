@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-import type { DevStyleXInjectProps } from './DevStyleXInject.types.ts';
+import type { DevStyleXInjectProps } from './DevStyleXInject.types';
 
 export const DevStyleXInject = ({ cssHref }: DevStyleXInjectProps) => {
   useEffect(() => {

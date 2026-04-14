@@ -5,10 +5,10 @@ import { Button } from '@/components/Button';
 import { Modal } from '@/components/Modal';
 import { RadioOptionGroup } from '@/components/RadioOptionGroup';
 
-import type { PinConflictResolution } from '../ColumnOrderSection.types.ts';
-import type { PinConflictModalProps } from './PinConflictModal.types.ts';
+import type { PinConflictResolution } from '../ColumnOrderSection.types';
+import type { PinConflictModalProps } from './PinConflictModal.types';
 
-import { styles } from './PinConflictModal.stylex.ts';
+import { styles } from './PinConflictModal.stylex';
 
 export const PinConflictModal = ({
   columnLabel,

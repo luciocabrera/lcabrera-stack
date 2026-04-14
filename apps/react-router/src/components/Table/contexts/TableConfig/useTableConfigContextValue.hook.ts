@@ -1,8 +1,8 @@
 import { use } from 'react';
 
-import type { TableConfigContextValue } from './TableConfigContext.types.ts';
+import type { TableConfigContextValue } from './TableConfigContext.types';
 
-import { TableConfigContext } from './TableConfigContext.context.ts';
+import { TableConfigContext } from './TableConfigContext.context';
 
 export const useTableConfigContextValue = <
   TData = Record<string, unknown>,

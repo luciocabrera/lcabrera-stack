@@ -1,7 +1,7 @@
 import type { ColumnFiltersState } from '@/components/Table';
 import type { ColumnFilter } from '@/types/filterOperators.types';
 
-import { deserializeFilter } from './deserializeFilter.util.ts';
+import { deserializeFilter } from './deserializeFilter.util';
 
 /**
  * Deserialize a compact filters URL param back to ColumnFiltersState.

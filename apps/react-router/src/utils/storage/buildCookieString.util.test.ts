@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildCookieString } from './buildCookieString.util.ts';
+import { buildCookieString } from './buildCookieString.util';
 
 describe('buildCookieString', () => {
   it('builds a cookie string with the key and encoded value', () => {

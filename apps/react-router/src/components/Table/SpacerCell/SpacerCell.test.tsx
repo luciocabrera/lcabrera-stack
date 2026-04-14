@@ -3,7 +3,7 @@
 import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { SpacerCell } from './SpacerCell.component.tsx';
+import { SpacerCell } from './SpacerCell.component';
 
 describe('SpacerCell', () => {
   it('renders a th element when isHeader is true', () => {

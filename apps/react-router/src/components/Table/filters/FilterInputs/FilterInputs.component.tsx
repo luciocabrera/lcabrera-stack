@@ -11,16 +11,16 @@ import type {
 import { useGetNormalizedColumn } from '@/components/Table/contexts/TableConfig/columns/selectors/useGetNormalizedColumn.hook';
 import { VirtualSelect } from '@/components/VirtualSelect';
 
-import type { FilterInputsProps } from './FilterInputs.types.ts';
+import type { FilterInputsProps } from './FilterInputs.types';
 
-import { BooleanFilterInput } from '../BooleanFilterInput/index.ts';
-import { styles } from './FilterInputs.stylex.ts';
-import { InputContent } from './InputContent/index.ts';
+import { BooleanFilterInput } from '../BooleanFilterInput';
+import { styles } from './FilterInputs.stylex';
+import { InputContent } from './InputContent';
 import {
   getOperatorFromFilter,
   getOperatorOptions,
   getSelectedOperatorLabel,
-} from './utils/index.ts';
+} from './utils';
 
 /**
  * Shared component for rendering filter inputs based on column data type.

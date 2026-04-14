@@ -9,12 +9,12 @@ import {
 } from '@/components/SidePanel';
 import { ICON_SIZE_MD } from '@/design-system/constants';
 
-import type { PinningSectionProps } from './PinningSection.types.ts';
+import type { PinningSectionProps } from './PinningSection.types';
 
-import { useSetColumnPinning } from '../ColumnDrawerContext/actions/index.ts';
-import { useGetColumnPinning } from '../ColumnDrawerContext/selectors/index.ts';
-import { styles } from './PinningSection.stylex.ts';
-import { PinningSectionToolbar } from './PinningSectionToolbar/index.ts';
+import { useSetColumnPinning } from '../ColumnDrawerContext/actions';
+import { useGetColumnPinning } from '../ColumnDrawerContext/selectors';
+import { styles } from './PinningSection.stylex';
+import { PinningSectionToolbar } from './PinningSectionToolbar';
 
 export const PinningSection = <TData,>({
   columnKey: _columnKey,

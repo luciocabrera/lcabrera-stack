@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { TableColumn } from '@/components/Table/Table.types';
 
-import { getInitialFiltersDataState } from './getInitialFiltersDataState.util.ts';
+import { getInitialFiltersDataState } from './getInitialFiltersDataState.util';
 
 type Row = { id: string; name: string };
 

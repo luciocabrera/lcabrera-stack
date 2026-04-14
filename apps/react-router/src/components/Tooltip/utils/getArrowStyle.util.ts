@@ -1,6 +1,6 @@
-import type { TooltipPlacement } from '../Tooltip.types.ts';
+import type { TooltipPlacement } from '../Tooltip.types';
 
-import { styles } from '../Tooltip.stylex.ts';
+import { styles } from '../Tooltip.stylex';
 
 export const getArrowStyle = (
   placement: TooltipPlacement,

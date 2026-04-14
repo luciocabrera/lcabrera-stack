@@ -5,15 +5,15 @@ import { Button } from '@/components/Button';
 import { Modal } from '@/components/Modal';
 import { RadioOptionGroup } from '@/components/RadioOptionGroup';
 
-import type { OrderConflictResolution } from '../ColumnOrderSection.types.ts';
-import type { OrderConflictModalProps } from './OrderConflictModal.types.ts';
+import type { OrderConflictResolution } from '../ColumnOrderSection.types';
+import type { OrderConflictModalProps } from './OrderConflictModal.types';
 
 import {
   useAcceptOrderConflict,
   useCancelOrderConflict,
-} from '../ColumnOrderSectionContext/actions/index.ts';
-import { RESOLUTIONS } from './OrderConflictModal.constants.ts';
-import { styles } from './OrderConflictModal.stylex.ts';
+} from '../ColumnOrderSectionContext/actions';
+import { RESOLUTIONS } from './OrderConflictModal.constants';
+import { styles } from './OrderConflictModal.stylex';
 
 export const OrderConflictModal = ({
   description,

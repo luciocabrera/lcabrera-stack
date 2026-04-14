@@ -4,9 +4,9 @@ import type { ThemeMode } from '@/types/theme.types';
 
 import { setThemeCookie } from '@/utils/theme';
 
-import type { ThemeProviderProps } from './ThemeContext.types.ts';
+import type { ThemeProviderProps } from './ThemeContext.types';
 
-import { ThemeContext } from './ThemeContext.context.ts';
+import { ThemeContext } from './ThemeContext.context';
 
 /**
  * ThemeProvider component that manages theme state and persistence

@@ -2,9 +2,9 @@ import * as stylex from '@stylexjs/stylex';
 
 import { CheckIcon } from '@/components/Icons';
 
-import type { TableCheckDisplayProps } from './TableCheckDisplay.types.ts';
+import type { TableCheckDisplayProps } from './TableCheckDisplay.types';
 
-import { tableCheckDisplayStyles } from './TableCheckDisplay.stylex.ts';
+import { tableCheckDisplayStyles } from './TableCheckDisplay.stylex';
 
 export const TableCheckDisplay = ({
   label: columnLabel,

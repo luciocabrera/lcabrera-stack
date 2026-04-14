@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { deserializeFilter } from './deserializeFilter.util.ts';
+import { deserializeFilter } from './deserializeFilter.util';
 
 describe('deserializeFilter', () => {
   it('returns boolean filter for true', () => {

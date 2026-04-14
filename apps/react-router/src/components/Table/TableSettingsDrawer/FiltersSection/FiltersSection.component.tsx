@@ -5,10 +5,10 @@ import {
   SidePanelSectionOverlay,
 } from '@/components/SidePanel';
 
-import { useSetColumnFilters } from '../TableDrawerContext/actions/index.ts';
-import { ActiveFiltersList } from './ActiveFiltersList/index.ts';
-import { AddFilterSection } from './AddFilterSection/index.ts';
-import { FiltersSectionToolbar } from './FiltersSectionToolbar/index.ts';
+import { useSetColumnFilters } from '../TableDrawerContext/actions';
+import { ActiveFiltersList } from './ActiveFiltersList';
+import { AddFilterSection } from './AddFilterSection';
+import { FiltersSectionToolbar } from './FiltersSectionToolbar';
 
 /**
  * Orchestrator component for the filters section.

@@ -1,4 +1,4 @@
-import { parseCookies } from './parseCookies.util.ts';
+import { parseCookies } from './parseCookies.util';
 
 type ReadFromCookieArgs = {
   readonly cookieString?: string;

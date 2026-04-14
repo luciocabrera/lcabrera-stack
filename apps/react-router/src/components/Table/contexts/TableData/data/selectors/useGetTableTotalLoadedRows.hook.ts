@@ -1,4 +1,4 @@
-import { useDataStore } from '../useDataStore.hook.ts';
+import { useDataStore } from '../useDataStore.hook';
 
 export const useGetTableTotalLoadedRows = () =>
   useDataStore<number>((state) => state.totalLoadedRows);

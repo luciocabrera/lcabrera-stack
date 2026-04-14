@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { shallowEqual } from './shallowEqual.util.ts';
+import { shallowEqual } from './shallowEqual.util';
 
 describe('shallowEqual', () => {
   it('returns true for identical object references', () => {

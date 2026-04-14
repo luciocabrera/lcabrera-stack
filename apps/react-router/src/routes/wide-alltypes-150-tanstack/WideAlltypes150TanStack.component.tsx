@@ -28,11 +28,11 @@ import type { WideAlltypes150Response } from '@/services';
 
 import { wideAlltypes150Api } from '@/services';
 
-import type { loader } from './wide-alltypes-150-tanstack.loader.ts';
+import type { loader } from './wide-alltypes-150-tanstack.loader';
 import type {
   ResolveNextPageParamArgs,
   WideAlltypes150TanStackTableContentProps,
-} from './WideAlltypes150TanStack.types.ts';
+} from './WideAlltypes150TanStack.types';
 
 import {
   COLUMN_DEFINITIONS,
@@ -40,13 +40,13 @@ import {
   FETCH_SIZE,
   ROW_OVERSCAN,
   SCROLL_FETCH_THRESHOLD,
-} from './WideAlltypes150TanStack.constants.ts';
+} from './WideAlltypes150TanStack.constants';
 import {
   toTanStackSortingState,
   toWideAlltypes150ApiSorting,
   toWideAlltypes150SortSearchParam,
-} from './wide-alltypes-150-tanstack.sorting.util.ts';
-import { styles } from './wide-alltypes-150-tanstack.stylex.ts';
+} from './wide-alltypes-150-tanstack.sorting.util';
+import { styles } from './wide-alltypes-150-tanstack.stylex';
 
 const createQueryClient = (): QueryClient =>
   new QueryClient({

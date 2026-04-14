@@ -1,8 +1,8 @@
-export { shallowEqual } from './comparison/index.ts';
-export { createLogger, logger } from './logger/index.ts';
-export type { CreateLoggerArgs, LogLevel, Logger } from './logger/index.ts';
+export { shallowEqual } from './comparison';
+export { createLogger, logger } from './logger';
+export type { CreateLoggerArgs, LogLevel, Logger } from './logger';
 export {
   firePrefetch,
   prefetchNextPage,
   resolveFromCacheOrFetch,
-} from './prefetch/index.ts';
+} from './prefetch';

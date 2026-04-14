@@ -1,3 +1,3 @@
-export { computeInitialMaxValue } from './computeInitialMaxValue.util.ts';
+export { computeInitialMaxValue } from './computeInitialMaxValue.util';
 
-export { computeInitialValue } from './computeInitialValue.util.ts';
+export { computeInitialValue } from './computeInitialValue.util';

@@ -1,11 +1,11 @@
 import * as stylex from '@stylexjs/stylex';
 import { useCallback, useRef, useState } from 'react';
 
-import type { TableColumn } from './components/Table/Table.types.ts';
-import type { VirtualListDataState } from './components/VirtualList/index.ts';
+import type { TableColumn } from './components/Table/Table.types';
+import type { VirtualListDataState } from './components/VirtualList';
 
-import { styles } from './App.stylex.ts';
-import { Button } from './components/Button/index.ts';
+import { styles } from './App.stylex';
+import { Button } from './components/Button';
 import {
   Card,
   CardBody,
@@ -13,7 +13,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from './components/Card/index.ts';
+} from './components/Card';
 import {
   ErrorIcon,
   InfoIcon,
@@ -22,21 +22,21 @@ import {
   SettingsIcon,
   SuccessIcon,
   WarningIcon,
-} from './components/Icons/index.ts';
+} from './components/Icons';
 import {
   SidePanel,
   SidePanelBody,
   SidePanelFooter,
   SidePanelHeader,
   SidePanelTitle,
-} from './components/SidePanel/index.ts';
-import { TableLayout } from './components/Table/TableLayout/index.ts';
+} from './components/SidePanel';
+import { TableLayout } from './components/Table/TableLayout';
 import {
   HorizontalToolbarExample,
   HorizontalToolbarExampleShort,
-} from './components/Toolbar/Toolbar.examples.tsx';
-import { VirtualSelect } from './components/VirtualSelect/index.ts';
-import { useTheme } from './hooks/useTheme.hook.ts';
+} from './components/Toolbar/Toolbar.examples';
+import { VirtualSelect } from './components/VirtualSelect';
+import { useTheme } from './hooks/useTheme.hook';
 
 function mulberry32(seed: number) {
   let value = seed;

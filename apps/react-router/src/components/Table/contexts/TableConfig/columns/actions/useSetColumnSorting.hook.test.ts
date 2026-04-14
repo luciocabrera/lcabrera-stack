@@ -3,7 +3,7 @@
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useSetColumnSorting } from './useSetColumnSorting.hook.ts';
+import { useSetColumnSorting } from './useSetColumnSorting.hook';
 
 const {
   mockGetNormalizedColumns,

@@ -7,9 +7,9 @@ import {
 } from '@/components/Icons';
 import { logger } from '@/utils/logger';
 
-import type { ToolbarItemConfig } from './Toolbar.types.ts';
+import type { ToolbarItemConfig } from './Toolbar.types';
 
-import { Toolbar } from './Toolbar.component.tsx';
+import { Toolbar } from './Toolbar.component';
 
 // Example usage with SidePanel
 export const SidePanelToolbarExample = () => {

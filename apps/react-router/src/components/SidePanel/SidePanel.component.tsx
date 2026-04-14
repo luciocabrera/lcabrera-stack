@@ -2,9 +2,9 @@ import * as stylex from '@stylexjs/stylex';
 import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 
-import type { SidePanelProps } from './SidePanel.types.ts';
+import type { SidePanelProps } from './SidePanel.types';
 
-import { sidePanelStyles } from './SidePanel.stylex.ts';
+import { sidePanelStyles } from './SidePanel.stylex';
 
 export const SidePanel = ({
   children,

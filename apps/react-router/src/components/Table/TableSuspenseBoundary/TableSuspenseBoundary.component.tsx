@@ -2,9 +2,9 @@ import { Suspense } from 'react';
 
 import { TableDataResolver } from '@/components/Table/TableDataResolver';
 
-import type { TableSuspenseBoundaryProps } from './TableSuspenseBoundary.types.ts';
+import type { TableSuspenseBoundaryProps } from './TableSuspenseBoundary.types';
 
-import { TableSkeleton } from '../TableSkeleton/index.ts';
+import { TableSkeleton } from '../TableSkeleton';
 
 export const TableSuspenseBoundary = <
   TData extends Record<string, unknown>,

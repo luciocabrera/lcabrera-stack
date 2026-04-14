@@ -1,13 +1,13 @@
-export { Card } from './Card.component.tsx';
+export { Card } from './Card.component';
 export type {
   CardColor,
   CardElevation,
   CardInteractive,
   CardPadding,
   CardProps,
-} from './Card.types.ts';
-export { CardBody } from './CardBody/index.ts';
-export { CardDescription } from './CardDescription/index.ts';
-export { CardFooter } from './CardFooter/index.ts';
-export { CardHeader } from './CardHeader/index.ts';
-export { CardTitle } from './CardTitle/index.ts';
+} from './Card.types';
+export { CardBody } from './CardBody';
+export { CardDescription } from './CardDescription';
+export { CardFooter } from './CardFooter';
+export { CardHeader } from './CardHeader';
+export { CardTitle } from './CardTitle';

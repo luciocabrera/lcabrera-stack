@@ -1,6 +1,6 @@
 import type { ThemeMode } from '@/types/theme.types';
 
-import { parseCookies } from '../storage/parseCookies.util.ts';
+import { parseCookies } from '../storage/parseCookies.util';
 
 const THEME_COOKIE_NAME = 'theme';
 const COOKIE_MAX_AGE_DAYS = 365; // 1 year

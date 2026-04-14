@@ -1,4 +1,4 @@
-import { buildCookieString } from './buildCookieString.util.ts';
+import { buildCookieString } from './buildCookieString.util';
 
 type WriteToCookieArgs = {
   /**

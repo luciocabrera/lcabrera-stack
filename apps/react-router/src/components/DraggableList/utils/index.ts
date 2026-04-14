@@ -1,1 +1,1 @@
-export { handleDragOver } from './handleDragOver.util.ts';
+export { handleDragOver } from './handleDragOver.util';

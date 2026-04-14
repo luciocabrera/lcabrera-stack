@@ -1,4 +1,4 @@
-import { useColumnsStore } from '../useColumnsStore.hook.ts';
+import { useColumnsStore } from '../useColumnsStore.hook';
 
 export const useGetEffectiveColumns = () =>
   useColumnsStore((state) => state.effectiveColumns);

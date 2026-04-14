@@ -3,7 +3,7 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { TableSuspenseBoundary } from './TableSuspenseBoundary.component.tsx';
+import { TableSuspenseBoundary } from './TableSuspenseBoundary.component';
 
 function MockTableSkeleton() {
   return <div>Loading table skeleton</div>;

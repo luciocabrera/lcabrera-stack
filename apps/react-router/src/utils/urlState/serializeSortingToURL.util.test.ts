@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { serializeSortingToURL } from './serializeSortingToURL.util.ts';
+import { serializeSortingToURL } from './serializeSortingToURL.util';
 
 describe('serializeSortingToURL', () => {
   it('returns undefined for empty sorting', () => {

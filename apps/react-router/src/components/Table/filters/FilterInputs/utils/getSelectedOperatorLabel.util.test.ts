@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { getSelectedOperatorLabel } from './getSelectedOperatorLabel.util.ts';
+import { getSelectedOperatorLabel } from './getSelectedOperatorLabel.util';
 
 const operatorOptions = [
   { label: 'Contains', value: 'contains' },

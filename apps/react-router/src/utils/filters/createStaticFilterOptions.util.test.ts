@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { createStaticFilterOptions } from './createStaticFilterOptions.util.ts';
+import { createStaticFilterOptions } from './createStaticFilterOptions.util';
 
 describe('createStaticFilterOptions', () => {
   const values = ['Pending', 'Shipped', 'Delivered'];

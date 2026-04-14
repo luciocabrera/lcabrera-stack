@@ -15,16 +15,16 @@ import {
 import { Tabs } from '@/components/Tabs';
 import { ICON_SIZE_LG } from '@/design-system/constants';
 
-import { useToogleTableIsTableSettingsOpen } from '../contexts/TableConfig/meta/actions/index.ts';
-import { ColumnOrderSection } from './ColumnOrderSection/index.ts';
-import { ColumnOrderSectionProvider } from './ColumnOrderSection/ColumnOrderSectionContext/ColumnOrderSectionContext.provider.tsx';
-import { FiltersSection } from './FiltersSection/index.ts';
-import { GeneralSettingsSection } from './GeneralSettingsSection/index.ts';
-import { SortingSection } from './SortingSection/index.ts';
+import { useToogleTableIsTableSettingsOpen } from '../contexts/TableConfig/meta/actions';
+import { ColumnOrderSection } from './ColumnOrderSection';
+import { ColumnOrderSectionProvider } from './ColumnOrderSection/ColumnOrderSectionContext/ColumnOrderSectionContext.provider';
+import { FiltersSection } from './FiltersSection';
+import { GeneralSettingsSection } from './GeneralSettingsSection';
+import { SortingSection } from './SortingSection';
 import {
   useBatchSetTableDrawerSettings,
   useResetTableSettings,
-} from './TableDrawerContext/actions/index.ts';
+} from './TableDrawerContext/actions';
 
 export const TableSettingsDrawer = () => {
   const batchSetTableDrawerSettings = useBatchSetTableDrawerSettings();

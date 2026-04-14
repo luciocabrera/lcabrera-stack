@@ -5,7 +5,7 @@ import type React from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useColumnResize } from './useColumnResize.hook.ts';
+import { useColumnResize } from './useColumnResize.hook';
 
 const { mockUseSyncColumnsSizing, syncColumnsSizingMock } = vi.hoisted(() => {
   const syncColumnsSizingMock = vi.fn();

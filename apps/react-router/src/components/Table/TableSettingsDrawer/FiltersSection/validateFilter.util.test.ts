@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { validateFilter } from './validateFilter.util.ts';
+import { validateFilter } from './validateFilter.util';
 
 describe('validateFilter', () => {
   it('returns false for undefined', () => {

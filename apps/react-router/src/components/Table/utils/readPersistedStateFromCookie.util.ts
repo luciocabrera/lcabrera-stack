@@ -1,9 +1,9 @@
 import { readFromCookie } from '@/utils/storage';
 
-import type { PersistedState } from './persistence.types.ts';
+import type { PersistedState } from './persistence.types';
 
-import { getStorageKey } from './getStorageKey.util.ts';
-import { PERSISTENCE_VERSION } from './persistence.constants.ts';
+import { getStorageKey } from './getStorageKey.util';
+import { PERSISTENCE_VERSION } from './persistence.constants';
 
 type ReadPersistedStateFromCookieArgs = {
   readonly cookieString?: string;

@@ -1,2 +1,2 @@
-export { ToggleSwitch } from './ToggleSwitch.component.tsx';
-export type { ToggleSwitchProps } from './ToggleSwitch.types.ts';
+export { ToggleSwitch } from './ToggleSwitch.component';
+export type { ToggleSwitchProps } from './ToggleSwitch.types';

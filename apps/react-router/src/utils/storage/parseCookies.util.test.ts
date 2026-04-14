@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { parseCookies } from './parseCookies.util.ts';
+import { parseCookies } from './parseCookies.util';
 
 describe('parseCookies', () => {
   it('parses a simple cookie', () => {

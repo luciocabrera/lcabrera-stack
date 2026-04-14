@@ -3,7 +3,7 @@
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { useStore } from './useStore.hook.ts';
+import { useStore } from './useStore.hook';
 
 type TestState = {
   readonly count: number;

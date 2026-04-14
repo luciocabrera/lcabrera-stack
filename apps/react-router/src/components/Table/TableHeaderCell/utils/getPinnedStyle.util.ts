@@ -1,6 +1,6 @@
 import type { PinnedColumnInfo } from '@/components/Table/Table.types';
 
-import { tableHeaderCellStyles } from '../TableHeaderCell.stylex.ts';
+import { tableHeaderCellStyles } from '../TableHeaderCell.stylex';
 
 export const getPinnedStyle = (pinInfo?: PinnedColumnInfo) => {
   if (pinInfo?.side === 'left')

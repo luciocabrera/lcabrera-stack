@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { recalculatePinSides } from './recalculatePinSides.util.ts';
+import { recalculatePinSides } from './recalculatePinSides.util';
 
 describe('recalculatePinSides', () => {
   it('assigns columns closer to left as left-pinned', () => {

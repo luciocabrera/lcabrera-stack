@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { computeInitialMaxValue } from './computeInitialMaxValue.util.ts';
+import { computeInitialMaxValue } from './computeInitialMaxValue.util';
 
 describe('computeInitialMaxValue', () => {
   it('returns empty string when filter is undefined', () => {

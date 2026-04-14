@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import type { ColumnSizingState, TableColumn } from '../Table.types.ts';
+import type { ColumnSizingState, TableColumn } from '../Table.types';
 
-import { getPinnedColumnOffsets } from './getPinnedColumnOffsets.util.ts';
+import { getPinnedColumnOffsets } from './getPinnedColumnOffsets.util';
 
 type Row = { id: string; name: string; age: number; actions: string };
 

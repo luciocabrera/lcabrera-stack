@@ -7,9 +7,9 @@ import { Button } from '@/components/Button';
 import { Modal } from '@/components/Modal';
 import { RadioOptionGroup } from '@/components/RadioOptionGroup';
 
-import type { PinSideModalProps } from './PinSideModal.types.ts';
+import type { PinSideModalProps } from './PinSideModal.types';
 
-import { styles } from './PinSideModal.stylex.ts';
+import { styles } from './PinSideModal.stylex';
 
 export const PinSideModal = ({
   columnLabel,

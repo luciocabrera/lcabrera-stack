@@ -6,7 +6,7 @@ import type { WideAlltypes150, WideAlltypes150Response } from '@/services';
 import { wideAlltypes150Api } from '@/services';
 import { deserializeSortingFromURL } from '@/utils/urlState';
 
-import { FETCH_SIZE } from './WideAlltypes150TanStack.constants.ts';
+import { FETCH_SIZE } from './WideAlltypes150TanStack.constants';
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);

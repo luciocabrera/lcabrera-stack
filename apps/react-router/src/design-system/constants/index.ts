@@ -4,4 +4,4 @@ export {
   ICON_SIZE_SM,
   ICON_SIZE_XS,
   ICON_SIZE_XXS,
-} from './iconSizes.constants.ts';
+} from './iconSizes.constants';

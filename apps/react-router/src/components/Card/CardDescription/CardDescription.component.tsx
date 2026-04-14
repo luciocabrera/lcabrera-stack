@@ -1,8 +1,8 @@
 import * as stylex from '@stylexjs/stylex';
 
-import type { CardDescriptionProps } from './CardDescription.types.ts';
+import type { CardDescriptionProps } from './CardDescription.types';
 
-import { cardDescriptionStyles } from './CardDescription.stylex.ts';
+import { cardDescriptionStyles } from './CardDescription.stylex';
 
 export const CardDescription = ({
   children,

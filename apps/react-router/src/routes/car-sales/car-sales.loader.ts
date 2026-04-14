@@ -5,7 +5,7 @@ import type { CarSale, CarSalesResponse } from '@/services';
 import { carSalesApi } from '@/services';
 import { readTableLoaderStateFromRequest } from '../utils/readTableLoaderStateFromRequest.util';
 
-import { PERSISTENCE_KEY } from './CarSales.constants.tsx';
+import { PERSISTENCE_KEY } from './CarSales.constants';
 
 /**
  * Loader for car sales route

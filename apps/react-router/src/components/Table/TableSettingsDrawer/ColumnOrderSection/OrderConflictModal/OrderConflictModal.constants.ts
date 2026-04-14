@@ -1,6 +1,6 @@
 import type { RadioOption } from '@/components/RadioOptionGroup/RadioOptionGroup.types';
 
-import type { OrderConflictResolution } from '../ColumnOrderSection.types.ts';
+import type { OrderConflictResolution } from '../ColumnOrderSection.types';
 
 export const RESOLUTIONS: RadioOption<OrderConflictResolution>[] = [
   {

@@ -1,4 +1,4 @@
-import { DEFAULT_LOCALE } from './formatters.constants.ts';
+import { DEFAULT_LOCALE } from './formatters.constants';
 
 /**
  * Get the default locale for formatting.

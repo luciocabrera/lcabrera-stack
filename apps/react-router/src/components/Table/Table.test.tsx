@@ -5,7 +5,7 @@ import type { ReactNode } from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { Table } from './Table.component.tsx';
+import { Table } from './Table.component';
 
 type MockTableContentProps = {
   readonly onLoadMore?: unknown;

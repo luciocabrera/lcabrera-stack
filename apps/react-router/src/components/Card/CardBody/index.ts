@@ -1,1 +1,1 @@
-export { CardBody } from './CardBody.component.tsx';
+export { CardBody } from './CardBody.component';

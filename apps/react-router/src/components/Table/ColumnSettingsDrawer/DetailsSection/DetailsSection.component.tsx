@@ -2,13 +2,10 @@ import * as stylex from '@stylexjs/stylex';
 
 import { useGetNormalizedColumn } from '@/components/Table/contexts/TableConfig/columns/selectors';
 
-import type {
-  DetailItem,
-  DetailsSectionProps,
-} from './DetailsSection.types.ts';
+import type { DetailItem, DetailsSectionProps } from './DetailsSection.types';
 
-import { styles } from './DetailsSection.stylex.ts';
-import { getBadgeStyle } from './utils/index.ts';
+import { styles } from './DetailsSection.stylex';
+import { getBadgeStyle } from './utils';
 
 export const DetailsSection = <TData,>({
   columnKey,

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { countVisibleTags } from './countVisibleTags.util.ts';
+import { countVisibleTags } from './countVisibleTags.util';
 
 const makeTag = (
   offsetTop: number,

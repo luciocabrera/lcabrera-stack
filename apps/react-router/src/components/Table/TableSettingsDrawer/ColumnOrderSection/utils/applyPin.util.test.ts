@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { applyPin } from './applyPin.util.ts';
+import { applyPin } from './applyPin.util';
 
 describe('applyPin', () => {
   it('adds column to left side', () => {

@@ -1,4 +1,4 @@
-import { styles } from './Tooltip.stylex.ts';
+import { styles } from './Tooltip.stylex';
 
 export const TRANSITION_DURATION_MS = 150;
 

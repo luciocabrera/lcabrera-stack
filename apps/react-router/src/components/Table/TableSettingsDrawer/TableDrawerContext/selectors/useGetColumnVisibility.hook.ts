@@ -1,6 +1,6 @@
 import type { ColumnVisibilityState } from '@/components/Table/Table.types';
 
-import { useColumnsStore } from '../useColumnsStore.hook.ts';
+import { useColumnsStore } from '../useColumnsStore.hook';
 
 export const useGetColumnVisibility = <TData = Record<string, unknown>>() =>
   useColumnsStore<ColumnVisibilityState<TData>>(

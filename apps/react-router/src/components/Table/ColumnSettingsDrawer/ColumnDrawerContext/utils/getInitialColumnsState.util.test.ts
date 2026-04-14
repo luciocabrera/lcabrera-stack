@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { getInitialColumnsState } from './getInitialColumnsState.util.ts';
+import { getInitialColumnsState } from './getInitialColumnsState.util';
 
 describe('getInitialColumnsState (ColumnDrawerContext)', () => {
   it('returns all provided fields', () => {

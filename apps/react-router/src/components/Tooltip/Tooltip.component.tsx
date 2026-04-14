@@ -1,11 +1,11 @@
 import * as stylex from '@stylexjs/stylex';
 import { useId, useRef, useState } from 'react';
 
-import type { TooltipProps } from './Tooltip.types.ts';
+import type { TooltipProps } from './Tooltip.types';
 
-import { ARROW_STYLES, TRANSITION_DURATION_MS } from './Tooltip.constants.ts';
-import { styles } from './Tooltip.stylex.ts';
-import { getArrowOffset, getArrowStyle } from './utils/index.ts';
+import { ARROW_STYLES, TRANSITION_DURATION_MS } from './Tooltip.constants';
+import { styles } from './Tooltip.stylex';
+import { getArrowOffset, getArrowStyle } from './utils';
 
 export const Tooltip = ({
   children,

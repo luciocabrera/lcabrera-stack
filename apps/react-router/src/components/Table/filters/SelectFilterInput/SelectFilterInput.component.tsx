@@ -8,9 +8,9 @@ import { useGetFilterData } from '@/components/Table/contexts/FiltersData/filter
 import { useGetNormalizedColumn } from '@/components/Table/contexts/TableConfig/columns/selectors';
 import { VirtualSelect } from '@/components/VirtualSelect';
 
-import type { SelectFilterInputProps } from './SelectFilterInput.types.ts';
+import type { SelectFilterInputProps } from './SelectFilterInput.types';
 
-import { styles } from './SelectFilterInput.stylex.ts';
+import { styles } from './SelectFilterInput.stylex';
 export const SelectFilterInput = <TData,>({
   columnKey,
   filter,

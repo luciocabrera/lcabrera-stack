@@ -1,4 +1,4 @@
-import type { DateFormatPreset } from '../../types/format.types.ts';
+import type { DateFormatPreset } from '../../types/format.types';
 
 /**
  * Map preset names to Intl.DateTimeFormat options

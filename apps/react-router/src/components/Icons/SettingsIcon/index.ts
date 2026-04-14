@@ -1,1 +1,1 @@
-export { SettingsIcon } from './SettingsIcon.component.tsx';
+export { SettingsIcon } from './SettingsIcon.component';

@@ -1,4 +1,4 @@
-import type { TableProps } from '../Table.types.ts';
+import type { TableProps } from '../Table.types';
 
 export type TableTitleProps = Pick<
   TableProps<Record<string, unknown>, unknown>,

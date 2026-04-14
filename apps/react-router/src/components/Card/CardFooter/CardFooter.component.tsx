@@ -1,8 +1,8 @@
 import * as stylex from '@stylexjs/stylex';
 
-import type { CardFooterProps } from './CardFooter.types.ts';
+import type { CardFooterProps } from './CardFooter.types';
 
-import { cardFooterStyles } from './CardFooter.stylex.ts';
+import { cardFooterStyles } from './CardFooter.stylex';
 
 export const CardFooter = ({ children, ...props }: CardFooterProps) => {
   return (

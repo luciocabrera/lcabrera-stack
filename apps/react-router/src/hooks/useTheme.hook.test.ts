@@ -18,7 +18,7 @@ vi.mock('@/contexts/ThemeContext', async () => {
 
 import { ThemeContext } from '@/contexts/ThemeContext';
 
-import { useTheme } from './useTheme.hook.ts';
+import { useTheme } from './useTheme.hook';
 
 type WrapperProps = {
   readonly children: ReactNode;

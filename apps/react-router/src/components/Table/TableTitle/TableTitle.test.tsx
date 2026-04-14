@@ -3,7 +3,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { TableTitle } from './TableTitle.component.tsx';
+import { TableTitle } from './TableTitle.component';
 
 const { useGetTableTitleMock } = vi.hoisted(() => ({
   useGetTableTitleMock: vi.fn(),

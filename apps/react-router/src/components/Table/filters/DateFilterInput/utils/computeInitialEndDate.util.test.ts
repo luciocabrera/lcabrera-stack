@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { computeInitialEndDate } from './computeInitialEndDate.util.ts';
+import { computeInitialEndDate } from './computeInitialEndDate.util';
 
 describe('computeInitialEndDate', () => {
   it('returns empty string when filter is undefined', () => {

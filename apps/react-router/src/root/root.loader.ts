@@ -1,7 +1,7 @@
 import { getThemeFromCookie } from '@/utils/theme';
 import { getRequestCspNonce } from '@/utils/security';
 
-import type { Route } from '../+types/root.ts';
+import type { Route } from '../+types/root';
 
 /**
  * Loader to get theme from cookies for SSR hydration

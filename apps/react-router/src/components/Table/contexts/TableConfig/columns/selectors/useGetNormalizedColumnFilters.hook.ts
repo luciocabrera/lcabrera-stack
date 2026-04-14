@@ -3,7 +3,7 @@ import type {
   DataKey,
 } from '@/components/Table/Table.types';
 
-import { useColumnsStore } from '../useColumnsStore.hook.ts';
+import { useColumnsStore } from '../useColumnsStore.hook';
 
 export const useGetNormalizedColumnFilters = <TData>(
   columnKey: DataKey<TData>,

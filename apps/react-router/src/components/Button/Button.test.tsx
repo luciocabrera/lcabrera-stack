@@ -20,7 +20,7 @@ vi.mock('../Tooltip', () => ({
   Tooltip: MockTooltip,
 }));
 
-import { Button } from './Button.component.tsx';
+import { Button } from './Button.component';
 
 afterEach(cleanup);
 

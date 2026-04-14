@@ -1,2 +1,2 @@
-export { VirtualListFooter } from './VirtualListFooter.component.tsx';
-export type { VirtualListFooterProps } from './VirtualListFooter.types.ts';
+export { VirtualListFooter } from './VirtualListFooter.component';
+export type { VirtualListFooterProps } from './VirtualListFooter.types';

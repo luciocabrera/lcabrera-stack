@@ -16,7 +16,7 @@ import {
   readTableStateFromURL,
 } from '@/utils/urlState';
 
-import { PERSISTENCE_KEY } from './EnterpriseOrders.constants.tsx';
+import { PERSISTENCE_KEY } from './EnterpriseOrders.constants';
 
 /**
  * Loader for enterprise orders route

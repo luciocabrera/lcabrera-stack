@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { getStorageKey } from './getStorageKey.util.ts';
+import { getStorageKey } from './getStorageKey.util';
 
 describe('getStorageKey', () => {
   it('returns prefixed key', () => {

@@ -30,7 +30,7 @@ vi.mock('@/components/Table/TableBodyCell', () => ({
   TableBodyCell: MockTableBodyCell,
 }));
 
-import { createRenderTableBodyCell } from './createRenderTableBodyCell.util.ts';
+import { createRenderTableBodyCell } from './createRenderTableBodyCell.util';
 
 type Row = {
   readonly amount?: number;

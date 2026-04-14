@@ -6,9 +6,9 @@ import { useStore } from '@/hooks';
 import type {
   TableDrawerColumnsState,
   TableDrawerProviderProps,
-} from './TableDrawerContext.types.ts';
+} from './TableDrawerContext.types';
 
-import { TableDrawerContext } from './TableDrawerContext.context.ts';
+import { TableDrawerContext } from './TableDrawerContext.context';
 
 export const TableDrawerProvider = ({ children }: TableDrawerProviderProps) => {
   const { columnsStore: tableColumnsStore } = useTableConfigContextValue();

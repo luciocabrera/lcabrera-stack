@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { LOAD_MORE_PAGE_SIZE } from '@/components/Table/Table.constants';
 
-import { useFetchMoreData } from './useFetchMoreData.hook.ts';
+import { useFetchMoreData } from './useFetchMoreData.hook';
 
 const {
   mockMetaStore,

@@ -19,26 +19,22 @@ import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
 import { PinConflictModal } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/PinConflictModal';
 import { useRenderTracker } from '@/utils/performance';
 
-import type { TableHeaderCellProps } from './TableHeaderCell.types.ts';
+import type { TableHeaderCellProps } from './TableHeaderCell.types';
 
 import {
   useGetColumnSizing,
   useGetNormalizedColumn,
-} from '../contexts/TableConfig/columns/selectors/index.ts';
+} from '../contexts/TableConfig/columns/selectors';
 import {
   useSetTableColumnSelectedKey,
   useToogleTableIsColumnSettingsOpen,
-} from '../contexts/TableConfig/meta/actions/index.ts';
-import { SortIcon } from './SortIcon/index.ts';
+} from '../contexts/TableConfig/meta/actions';
+import { SortIcon } from './SortIcon';
 import {
   skeletonStyles,
   tableHeaderCellStyles,
-} from './TableHeaderCell.stylex.ts';
-import {
-  getNextSortDirection,
-  getPinnedStyle,
-  getShadowStyle,
-} from './utils/index.ts';
+} from './TableHeaderCell.stylex';
+import { getNextSortDirection, getPinnedStyle, getShadowStyle } from './utils';
 
 export const TableHeaderCell = <TData extends Record<string, unknown>>({
   columnKey,

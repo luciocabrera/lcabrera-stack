@@ -1,8 +1,8 @@
 import * as stylex from '@stylexjs/stylex';
 
-import type { SidePanelFooterProps } from './SidePanelFooter.types.ts';
+import type { SidePanelFooterProps } from './SidePanelFooter.types';
 
-import { sidePanelFooterStyles } from './SidePanelFooter.stylex.ts';
+import { sidePanelFooterStyles } from './SidePanelFooter.stylex';
 
 export const SidePanelFooter = ({
   children,

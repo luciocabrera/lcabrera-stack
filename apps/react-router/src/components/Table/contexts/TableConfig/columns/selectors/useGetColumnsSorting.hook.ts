@@ -1,6 +1,6 @@
 import type { SortingState } from '@/components/Table/Table.types';
 
-import { useColumnsStore } from '../useColumnsStore.hook.ts';
+import { useColumnsStore } from '../useColumnsStore.hook';
 
 export const useGetColumnsSorting = <TData = Record<string, unknown>>() =>
   useColumnsStore<SortingState<TData>>(

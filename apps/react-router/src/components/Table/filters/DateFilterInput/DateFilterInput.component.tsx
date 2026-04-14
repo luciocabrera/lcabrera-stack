@@ -4,10 +4,10 @@ import { useState } from 'react';
 import type {
   DateFilterInputProps,
   UpdateDateFilterArgs,
-} from './DateFilterInput.types.ts';
+} from './DateFilterInput.types';
 
-import { styles } from './DateFilterInput.stylex.ts';
-import { computeInitialEndDate, computeInitialValue } from './utils/index.ts';
+import { styles } from './DateFilterInput.stylex';
+import { computeInitialEndDate, computeInitialValue } from './utils';
 
 export const DateFilterInput = ({
   filter,

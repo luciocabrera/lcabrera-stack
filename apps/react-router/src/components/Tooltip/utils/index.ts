@@ -1,2 +1,2 @@
-export { getArrowOffset } from './getArrowOffset.util.ts';
-export { getArrowStyle } from './getArrowStyle.util.ts';
+export { getArrowOffset } from './getArrowOffset.util';
+export { getArrowStyle } from './getArrowStyle.util';

@@ -5,7 +5,7 @@ import type {
   ColumnSizingState,
   ColumnVisibilityState,
   SortingState,
-} from '../Table.types.ts';
+} from '../Table.types';
 
 export type PersistedState = {
   readonly columnFilters?: ColumnFiltersState;

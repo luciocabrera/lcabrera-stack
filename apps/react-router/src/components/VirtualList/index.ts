@@ -1,5 +1,5 @@
-export { VirtualList } from './VirtualList.component.tsx';
+export { VirtualList } from './VirtualList.component';
 export type {
   VirtualListDataState,
   VirtualListProps,
-} from './VirtualList.types.ts';
+} from './VirtualList.types';

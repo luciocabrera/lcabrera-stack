@@ -1,1 +1,1 @@
-export { PinIcon } from './PinIcon.component.tsx';
+export { PinIcon } from './PinIcon.component';

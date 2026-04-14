@@ -1,6 +1,6 @@
-import type { ArrowOffsetParams } from '../Tooltip.types.ts';
+import type { ArrowOffsetParams } from '../Tooltip.types';
 
-import { HALF_ARROW } from '../Tooltip.constants.ts';
+import { HALF_ARROW } from '../Tooltip.constants';
 
 export const getArrowOffset = ({
   tooltipStart,

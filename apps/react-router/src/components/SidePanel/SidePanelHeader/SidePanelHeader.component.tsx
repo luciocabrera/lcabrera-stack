@@ -1,8 +1,8 @@
 import * as stylex from '@stylexjs/stylex';
 
-import type { SidePanelHeaderProps } from './SidePanelHeader.types.ts';
+import type { SidePanelHeaderProps } from './SidePanelHeader.types';
 
-import { sidePanelHeaderStyles } from './SidePanelHeader.stylex.ts';
+import { sidePanelHeaderStyles } from './SidePanelHeader.stylex';
 
 export const SidePanelHeader = ({
   actions,

@@ -1,5 +1,5 @@
-export { buildTableBodyCellDescriptor } from './buildTableBodyCellDescriptor.util.ts';
-export { createRenderTableBodyCell } from './createRenderTableBodyCell.util.ts';
-export { generatePlaceholderData } from './generatePlaceholderData.util.ts';
-export { getTotalVisibleColumnCount } from './getTotalVisibleColumnCount.util.ts';
-export { renderTableBodyColumnGroup } from './renderTableBodyColumnGroup.util.ts';
+export { buildTableBodyCellDescriptor } from './buildTableBodyCellDescriptor.util';
+export { createRenderTableBodyCell } from './createRenderTableBodyCell.util';
+export { generatePlaceholderData } from './generatePlaceholderData.util';
+export { getTotalVisibleColumnCount } from './getTotalVisibleColumnCount.util';
+export { renderTableBodyColumnGroup } from './renderTableBodyColumnGroup.util';

@@ -4,14 +4,14 @@ import { Button } from '@/components/Button';
 import { EraserIcon, RefreshIcon } from '@/components/Icons';
 import { ICON_SIZE_MD, ICON_SIZE_SM } from '@/design-system/constants';
 
-import type { FiltersSectionToolbarProps } from './FiltersSectionToolbar.types.ts';
+import type { FiltersSectionToolbarProps } from './FiltersSectionToolbar.types';
 
 import {
   useClearFilters,
   useResetFilters,
-} from '../../TableDrawerContext/actions/index.ts';
-import { useGetColumnFilters } from '../../TableDrawerContext/selectors/index.ts';
-import { styles } from './FiltersSectionToolbar.stylex.ts';
+} from '../../TableDrawerContext/actions';
+import { useGetColumnFilters } from '../../TableDrawerContext/selectors';
+import { styles } from './FiltersSectionToolbar.stylex';
 
 export const FiltersSectionToolbar = ({
   onClearAll,

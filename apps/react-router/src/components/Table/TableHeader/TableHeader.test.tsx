@@ -49,7 +49,7 @@ vi.mock('../TableRow', () => ({
   TableRow: MockTableRow,
 }));
 
-import { TableHeader } from './TableHeader.component.tsx';
+import { TableHeader } from './TableHeader.component';
 
 afterEach(cleanup);
 

@@ -5,9 +5,9 @@ import { Button } from '@/components/Button';
 import { MenuCloseIcon } from '@/components/Icons';
 import { ICON_SIZE_MD } from '@/design-system/constants/iconSizes.constants';
 
-import type { ModalProps } from './Modal.types.ts';
+import type { ModalProps } from './Modal.types';
 
-import { modalStyles } from './Modal.stylex.ts';
+import { modalStyles } from './Modal.stylex';
 
 export const Modal = ({
   children,

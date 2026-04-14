@@ -1,9 +1,9 @@
 import * as stylex from '@stylexjs/stylex';
 
-import type { TableTitleProps } from './TableTitle.types.ts';
+import type { TableTitleProps } from './TableTitle.types';
 
-import { useGetTableTitle } from '../contexts/TableConfig/meta/selectors/index.ts';
-import { styles } from './TableTitle.stylex.ts';
+import { useGetTableTitle } from '../contexts/TableConfig/meta/selectors';
+import { styles } from './TableTitle.stylex';
 
 export const TableTitle = ({
   actions,

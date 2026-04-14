@@ -1,13 +1,13 @@
 import * as stylex from '@stylexjs/stylex';
 
-import type { TableBaseProps } from './TableBase.types.ts';
+import type { TableBaseProps } from './TableBase.types';
 
 import {
   useGetTableDensity,
   useGetTableIsBordered,
   useGetTableIsStriped,
-} from '../contexts/TableConfig/meta/selectors/index.ts';
-import { tableStyles } from './TableBase.stylex.ts';
+} from '../contexts/TableConfig/meta/selectors';
+import { tableStyles } from './TableBase.stylex';
 
 export const TableBase = <TData extends Record<string, unknown>, TResponse>({
   children,

@@ -13,10 +13,10 @@ import {
 } from '@/components/Table/TableSettingsDrawer/TableDrawerContext/selectors';
 import { ICON_SIZE_MD, ICON_SIZE_SM } from '@/design-system/constants';
 
-import type { ColumnOrderSectionToolbarProps } from './ColumnOrderSectionToolbar.types.ts';
+import type { ColumnOrderSectionToolbarProps } from './ColumnOrderSectionToolbar.types';
 
-import { useOrderBySorting } from '../ColumnOrderSectionContext/actions/index.ts';
-import { styles } from './ColumnOrderSectionToolbar.stylex.ts';
+import { useOrderBySorting } from '../ColumnOrderSectionContext/actions';
+import { styles } from './ColumnOrderSectionToolbar.stylex';
 
 export const ColumnOrderSectionToolbar = ({
   variant = 'footer',

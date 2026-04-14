@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { decodeStateFromURL } from './decodeStateFromURL.util.ts';
-import { encodeStateToURL } from './encodeStateToURL.util.ts';
+import { decodeStateFromURL } from './decodeStateFromURL.util';
+import { encodeStateToURL } from './encodeStateToURL.util';
 
 describe('decodeStateFromURL', () => {
   it('decodes an encoded state object', () => {

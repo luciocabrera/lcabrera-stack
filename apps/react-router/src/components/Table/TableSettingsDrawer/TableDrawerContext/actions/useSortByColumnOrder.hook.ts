@@ -1,6 +1,6 @@
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 
-import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook.ts';
+import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook';
 
 /**
  * Hook to sort all sortable columns by their current column order.

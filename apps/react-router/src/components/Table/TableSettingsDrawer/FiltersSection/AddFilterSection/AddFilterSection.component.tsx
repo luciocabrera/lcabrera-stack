@@ -9,11 +9,11 @@ import {
 } from '@/components/Table/contexts/TableConfig/columns/selectors';
 import { VirtualSelect } from '@/components/VirtualSelect';
 
-import type { AddFilterSectionProps } from './AddFilterSection.types.ts';
+import type { AddFilterSectionProps } from './AddFilterSection.types';
 
-import { useSetColumnFilters } from '../../TableDrawerContext/actions/index.ts';
-import { useGetColumnFilters } from '../../TableDrawerContext/selectors/index.ts';
-import { styles } from './AddFilterSection.stylex.ts';
+import { useSetColumnFilters } from '../../TableDrawerContext/actions';
+import { useGetColumnFilters } from '../../TableDrawerContext/selectors';
+import { styles } from './AddFilterSection.stylex';
 
 export const AddFilterSection = ({
   expandedFilters,

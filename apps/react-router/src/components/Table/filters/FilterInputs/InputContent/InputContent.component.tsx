@@ -5,12 +5,12 @@ import type {
   TextOperatorType,
 } from '@/types/filterOperators.types';
 
-import type { InputContentProps } from './InputContent.types.ts';
+import type { InputContentProps } from './InputContent.types';
 
-import { DateFilterInput } from '../../DateFilterInput/index.ts';
-import { NumberFilterInput } from '../../NumberFilterInput/index.ts';
-import { SelectFilterInput } from '../../SelectFilterInput/index.ts';
-import { TextFilterInput } from '../../TextFilterInput/index.ts';
+import { DateFilterInput } from '../../DateFilterInput';
+import { NumberFilterInput } from '../../NumberFilterInput';
+import { SelectFilterInput } from '../../SelectFilterInput';
+import { TextFilterInput } from '../../TextFilterInput';
 
 /**
  * Renders the appropriate filter input based on column data type.

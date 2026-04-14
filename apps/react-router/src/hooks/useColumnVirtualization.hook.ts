@@ -7,10 +7,7 @@ import {
   DEFAULT_CONTAINER_WIDTH,
 } from '@/constants/virtualization.constants';
 
-import {
-  findFirstOutOfViewIndex,
-  findFirstVisibleIndex,
-} from './utils/index.ts';
+import { findFirstOutOfViewIndex, findFirstVisibleIndex } from './utils';
 
 /** Arguments for the useColumnVirtualization hook. */
 export type UseColumnVirtualizationArgs = {

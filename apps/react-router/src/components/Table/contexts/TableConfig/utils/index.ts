@@ -1,2 +1,2 @@
-export { getInitialColumnsState } from './getInitialColumnsState.util.ts';
-export { getInitialMetaState } from './getInitialMetaState.util.ts';
+export { getInitialColumnsState } from './getInitialColumnsState.util';
+export { getInitialMetaState } from './getInitialMetaState.util';

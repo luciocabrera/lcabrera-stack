@@ -11,7 +11,7 @@ import {
   LOAD_MORE_PAGE_SIZE,
 } from '@/components/Table/Table.constants';
 
-import { getInitialMetaState } from './getInitialMetaState.util.ts';
+import { getInitialMetaState } from './getInitialMetaState.util';
 
 describe('getInitialMetaState', () => {
   it('returns default values when no args provided', () => {

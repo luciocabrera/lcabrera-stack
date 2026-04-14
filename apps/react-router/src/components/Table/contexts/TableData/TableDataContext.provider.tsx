@@ -5,10 +5,10 @@ import { useStore } from '@/hooks';
 import type {
   TableDataContextValue,
   TableDataProviderProps,
-} from './TableDataContext.types.ts';
+} from './TableDataContext.types';
 
-import { TableDataContext } from './TableDataContext.context.ts';
-import { getInitialDataState } from './utils/index.ts';
+import { TableDataContext } from './TableDataContext.context';
+import { getInitialDataState } from './utils';
 
 export const TableDataProvider = <TData extends Record<string, unknown>>({
   children,

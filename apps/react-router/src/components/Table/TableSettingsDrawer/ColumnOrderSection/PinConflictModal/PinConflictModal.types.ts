@@ -1,4 +1,4 @@
-import type { PinConflictResolution } from '../ColumnOrderSection.types.ts';
+import type { PinConflictResolution } from '../ColumnOrderSection.types';
 
 export type PinConflictModalProps = {
   readonly columnLabel: string;

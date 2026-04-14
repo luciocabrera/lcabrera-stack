@@ -20,17 +20,17 @@ import { ICON_SIZE_MD } from '@/design-system/constants';
 import type {
   GeneralSettingsSectionProps,
   WidthPreset,
-} from './GeneralSettingsSection.types.ts';
+} from './GeneralSettingsSection.types';
 
-import { ColumnOrderSectionToolbar } from '../ColumnOrderSection/ColumnOrderSectionToolbar/index.ts';
-import { FiltersSectionToolbar } from '../FiltersSection/FiltersSectionToolbar/index.ts';
-import { SortingSectionToolbar } from '../SortingSection/SortingSectionToolbar/index.ts';
+import { ColumnOrderSectionToolbar } from '../ColumnOrderSection/ColumnOrderSectionToolbar';
+import { FiltersSectionToolbar } from '../FiltersSection/FiltersSectionToolbar';
+import { SortingSectionToolbar } from '../SortingSection/SortingSectionToolbar';
 import {
   useClearAllSettings,
   useResetTableSettings,
   useSetColumnsSizing,
-} from '../TableDrawerContext/actions/index.ts';
-import { styles } from './GeneralSettingsSection.stylex.ts';
+} from '../TableDrawerContext/actions';
+import { styles } from './GeneralSettingsSection.stylex';
 
 export const GeneralSettingsSection = ({
   ...props

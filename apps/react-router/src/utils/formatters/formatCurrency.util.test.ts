@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatCurrency } from './formatCurrency.util.ts';
+import { formatCurrency } from './formatCurrency.util';
 
 describe('formatCurrency', () => {
   it('formats USD by default', () => {

@@ -4,9 +4,9 @@ import type { CarSale, CarSalesResponse } from '@/services';
 
 import { TableLayout } from '@/components/Table/TableLayout';
 
-import type { loader } from './car-sales.loader.ts';
+import type { loader } from './car-sales.loader';
 
-import { COLUMNS, PERSISTENCE_KEY } from './CarSales.constants.tsx';
+import { COLUMNS, PERSISTENCE_KEY } from './CarSales.constants';
 
 export const CarSales = () => {
   const {

@@ -1,4 +1,4 @@
-import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook.ts';
+import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
 
 /**
  * Hook to cancel the unpin conflict modal.

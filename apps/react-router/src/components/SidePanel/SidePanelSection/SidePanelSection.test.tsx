@@ -3,7 +3,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { SidePanelSection } from './SidePanelSection.component.tsx';
+import { SidePanelSection } from './SidePanelSection.component';
 
 describe('SidePanelSection', () => {
   it("renders children inside a div with data-testid='side-panel-section'", () => {

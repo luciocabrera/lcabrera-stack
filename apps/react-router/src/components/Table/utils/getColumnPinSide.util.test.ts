@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { getColumnPinSide } from './getColumnPinSide.util.ts';
+import { getColumnPinSide } from './getColumnPinSide.util';
 
 describe('getColumnPinSide', () => {
   it('returns left when column is in left pinning', () => {

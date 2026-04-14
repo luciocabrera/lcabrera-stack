@@ -1,2 +1,2 @@
-export { SidePanelHeaderToolbar } from './SidePanelHeaderToolbar.component.tsx';
-export type { SidePanelHeaderToolbarProps } from './SidePanelHeaderToolbar.types.ts';
+export { SidePanelHeaderToolbar } from './SidePanelHeaderToolbar.component';
+export type { SidePanelHeaderToolbarProps } from './SidePanelHeaderToolbar.types';

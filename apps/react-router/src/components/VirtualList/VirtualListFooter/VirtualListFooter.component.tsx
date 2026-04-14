@@ -8,9 +8,9 @@ import {
 } from '@/components/Icons';
 import { ICON_SIZE_MD } from '@/design-system/constants';
 
-import type { VirtualListFooterProps } from './VirtualListFooter.types.ts';
+import type { VirtualListFooterProps } from './VirtualListFooter.types';
 
-import { styles } from './VirtualListFooter.stylex.ts';
+import { styles } from './VirtualListFooter.stylex';
 
 export const VirtualListFooter = ({
   dataState,

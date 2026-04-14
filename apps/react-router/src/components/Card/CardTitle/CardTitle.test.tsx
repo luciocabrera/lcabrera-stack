@@ -3,7 +3,7 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { CardTitle } from './CardTitle.component.tsx';
+import { CardTitle } from './CardTitle.component';
 
 afterEach(cleanup);
 

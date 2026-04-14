@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { colors } from '../tokens/colors.stylex.ts';
+import { colors } from '../tokens/colors.stylex';
 
 export const darkTheme = stylex.createTheme(colors, {
   /* --- Brand Base Colors --- */

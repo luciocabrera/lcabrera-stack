@@ -1,6 +1,6 @@
 import type { TableColumn } from '@/components/Table/Table.types';
 
-import type { PinSide } from '../ColumnOrderSection.types.ts';
+import type { PinSide } from '../ColumnOrderSection.types';
 
 type ResolveClosestEdgeSideArgs<TData> = {
   readonly allOrderedColumns: readonly TableColumn<TData>[];

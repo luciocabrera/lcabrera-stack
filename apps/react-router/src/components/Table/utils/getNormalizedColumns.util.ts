@@ -1,4 +1,4 @@
-import type { SortingState, TableColumn } from '../Table.types.ts';
+import type { SortingState, TableColumn } from '../Table.types';
 
 type GetNormalizedColumnsArgs<TData> = {
   readonly columns: readonly TableColumn<TData>[];

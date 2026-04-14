@@ -5,7 +5,7 @@ import type { RefObject } from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useColumnVirtualization } from './useColumnVirtualization.hook.ts';
+import { useColumnVirtualization } from './useColumnVirtualization.hook';
 
 // Captured ResizeObserver callback so tests can trigger it directly.
 let capturedResizeCallback: (() => void) | undefined;

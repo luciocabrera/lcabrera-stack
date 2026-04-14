@@ -3,7 +3,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { SidePanelFooter } from './SidePanelFooter.component.tsx';
+import { SidePanelFooter } from './SidePanelFooter.component';
 
 describe('SidePanelFooter', () => {
   it("renders children inside a div with data-testid='side-panel-footer'", () => {

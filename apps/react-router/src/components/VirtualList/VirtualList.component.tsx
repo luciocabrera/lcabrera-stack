@@ -7,19 +7,19 @@ import { InfoBox } from '@/components/InfoBox';
 import { ICON_SIZE_MD } from '@/design-system/constants';
 import { useVirtualization } from '@/hooks';
 
-import type { ListFilterMode, VirtualListProps } from './VirtualList.types.ts';
+import type { ListFilterMode, VirtualListProps } from './VirtualList.types';
 
-import { SkeletonOptions } from './SkeletonOptions/index.ts';
-import { getFilteredOptions } from './utils/index.ts';
-import { VirtualizedOption } from './VirtualizedOption/index.ts';
+import { SkeletonOptions } from './SkeletonOptions';
+import { getFilteredOptions } from './utils';
+import { VirtualizedOption } from './VirtualizedOption';
 import {
   DEFAULT_CONTAINER_HEIGHT,
   ITEM_HEIGHT,
   LIST_MAX_HEIGHT,
   SCROLL_THRESHOLD,
-} from './VirtualList.constants.ts';
-import { styles } from './VirtualList.stylex.ts';
-import { VirtualListFooter } from './VirtualListFooter/index.ts';
+} from './VirtualList.constants';
+import { styles } from './VirtualList.stylex';
+import { VirtualListFooter } from './VirtualListFooter';
 
 export const VirtualList = ({
   dataState,

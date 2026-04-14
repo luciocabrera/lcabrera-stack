@@ -7,8 +7,8 @@ import {
   spacing,
   transitions,
   typography,
-} from './base.stylex.ts';
-import { colors } from './colors.stylex.ts';
+} from './base.stylex';
+import { colors } from './colors.stylex';
 
 const shimmerAnimation = stylex.keyframes({
   '0%': { transform: 'translateX(-100%)' },

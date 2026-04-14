@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { TableColumn } from '@/components/Table/Table.types';
 
-import { buildAllOrderedColumns } from './buildAllOrderedColumns.util.ts';
+import { buildAllOrderedColumns } from './buildAllOrderedColumns.util';
 
 type Row = { id: string; name: string; age: number };
 

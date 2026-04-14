@@ -5,7 +5,7 @@ import type { ReactNode } from 'react';
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { TableBodyRows } from './TableBodyRows.component.tsx';
+import { TableBodyRows } from './TableBodyRows.component';
 
 type MockTableBodyCellProps = {
   readonly children?: ReactNode;

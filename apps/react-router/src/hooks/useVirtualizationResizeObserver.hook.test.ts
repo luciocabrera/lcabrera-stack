@@ -5,7 +5,7 @@ import type { RefObject } from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useVirtualizationResizeObserver } from './useVirtualizationResizeObserver.hook.ts';
+import { useVirtualizationResizeObserver } from './useVirtualizationResizeObserver.hook';
 
 const { cancelAnimationFrameMock, requestAnimationFrameMock } = vi.hoisted(
   () => ({

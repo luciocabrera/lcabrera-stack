@@ -1,2 +1,2 @@
-export { Tooltip } from './Tooltip.component.tsx';
-export type { TooltipPlacement, TooltipProps } from './Tooltip.types.ts';
+export { Tooltip } from './Tooltip.component';
+export type { TooltipPlacement, TooltipProps } from './Tooltip.types';

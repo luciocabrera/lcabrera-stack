@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { detectPinOrderConflict } from './detectPinOrderConflict.util.ts';
+import { detectPinOrderConflict } from './detectPinOrderConflict.util';
 
 describe('detectPinOrderConflict', () => {
   it('returns false when there are no pinned columns', () => {

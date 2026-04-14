@@ -7,7 +7,7 @@ import { logger } from '@/utils/logger';
 
 import { firePrefetch, resolveFromCacheOrFetch } from '@/utils/prefetch';
 
-import { useFiltersDataContextValue } from '../../useFiltersDataContextValue.hook.ts';
+import { useFiltersDataContextValue } from '../../useFiltersDataContextValue.hook';
 import type { DataKey } from '@/components/Table/Table.types';
 
 type FetchFilterDataCallbackArgs<TResponse> = Omit<

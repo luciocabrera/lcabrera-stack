@@ -1,4 +1,4 @@
 // Main Table component
-export { Table } from './Table.component.tsx';
+export { Table } from './Table.component';
 
-export type * from './Table.types.ts';
+export type * from './Table.types';

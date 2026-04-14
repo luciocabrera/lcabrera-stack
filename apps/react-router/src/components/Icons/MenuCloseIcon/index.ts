@@ -1,1 +1,1 @@
-export { MenuCloseIcon } from './MenuCloseIcon.component.tsx';
+export { MenuCloseIcon } from './MenuCloseIcon.component';

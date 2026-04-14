@@ -1,2 +1,2 @@
-export { countVisibleTags } from './countVisibleTags.util.ts';
-export { getDropdownStyle } from './getDropdownStyle.util.ts';
+export { countVisibleTags } from './countVisibleTags.util';
+export { getDropdownStyle } from './getDropdownStyle.util';

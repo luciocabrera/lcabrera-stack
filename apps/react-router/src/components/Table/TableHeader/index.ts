@@ -1,1 +1,1 @@
-export { TableHeader } from './TableHeader.component.tsx';
+export { TableHeader } from './TableHeader.component';

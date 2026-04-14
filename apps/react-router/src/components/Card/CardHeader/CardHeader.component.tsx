@@ -1,8 +1,8 @@
 import * as stylex from '@stylexjs/stylex';
 
-import type { CardHeaderProps } from './CardHeader.types.ts';
+import type { CardHeaderProps } from './CardHeader.types';
 
-import { cardHeaderStyles } from './CardHeader.stylex.ts';
+import { cardHeaderStyles } from './CardHeader.stylex';
 
 export const CardHeader = ({ children, ...props }: CardHeaderProps) => {
   return (

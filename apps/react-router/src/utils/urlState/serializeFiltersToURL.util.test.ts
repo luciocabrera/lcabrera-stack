@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { serializeFiltersToURL } from './serializeFiltersToURL.util.ts';
+import { serializeFiltersToURL } from './serializeFiltersToURL.util';
 
 describe('serializeFiltersToURL', () => {
   it('returns undefined for empty filters', () => {

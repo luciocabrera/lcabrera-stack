@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { resolveFromCacheOrFetch } from './resolveFromCacheOrFetch.util.ts';
+import { resolveFromCacheOrFetch } from './resolveFromCacheOrFetch.util';
 
 describe('resolveFromCacheOrFetch', () => {
   it('returns cache.data when skip matches and data exists (cache HIT)', async () => {

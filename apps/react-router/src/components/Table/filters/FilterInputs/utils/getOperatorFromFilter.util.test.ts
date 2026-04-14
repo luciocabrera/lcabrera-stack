@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { getOperatorFromFilter } from './getOperatorFromFilter.util.ts';
+import { getOperatorFromFilter } from './getOperatorFromFilter.util';
 
 describe('getOperatorFromFilter', () => {
   it('returns equals when filter is undefined', () => {

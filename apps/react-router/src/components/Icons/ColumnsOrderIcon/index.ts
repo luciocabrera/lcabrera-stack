@@ -1,1 +1,1 @@
-export { ColumnsOrderIcon } from './ColumnsOrderIcon.component.tsx';
+export { ColumnsOrderIcon } from './ColumnsOrderIcon.component';

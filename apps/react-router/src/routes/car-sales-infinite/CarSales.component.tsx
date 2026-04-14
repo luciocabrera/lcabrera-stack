@@ -5,10 +5,10 @@ import type { CarSale } from '@/services';
 import { TableLayout } from '@/components/Table/TableLayout';
 import { carSalesApi } from '@/services';
 
-import type { loader } from './car-sales.loader.ts';
-import type { CarSalesPaginatedResponse } from './CarSales.types.ts';
+import type { loader } from './car-sales.loader';
+import type { CarSalesPaginatedResponse } from './CarSales.types';
 
-import { COLUMNS, PERSISTENCE_KEY } from './CarSales.constants.tsx';
+import { COLUMNS, PERSISTENCE_KEY } from './CarSales.constants';
 
 export const CarSales = () => {
   const {

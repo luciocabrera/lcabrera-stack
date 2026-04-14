@@ -5,7 +5,7 @@ import type { RefObject } from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { useVirtualization } from './useVirtualization.hook.ts';
+import { useVirtualization } from './useVirtualization.hook';
 
 type CreateContainerArgs = {
   readonly offsetHeight: number;

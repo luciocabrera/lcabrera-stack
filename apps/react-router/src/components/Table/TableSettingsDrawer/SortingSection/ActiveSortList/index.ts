@@ -1,1 +1,1 @@
-export { ActiveSortList } from './ActiveSortList.component.tsx';
+export { ActiveSortList } from './ActiveSortList.component';

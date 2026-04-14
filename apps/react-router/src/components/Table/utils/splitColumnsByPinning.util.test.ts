@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { splitColumnsByPinning } from './splitColumnsByPinning.util.ts';
+import { splitColumnsByPinning } from './splitColumnsByPinning.util';
 
 describe('splitColumnsByPinning', () => {
   it('groups all columns as center when nothing is pinned', () => {

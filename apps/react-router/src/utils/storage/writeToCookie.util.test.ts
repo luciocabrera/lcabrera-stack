@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { writeToCookie } from './writeToCookie.util.ts';
+import { writeToCookie } from './writeToCookie.util';
 
 describe('writeToCookie', () => {
   afterEach(() => {

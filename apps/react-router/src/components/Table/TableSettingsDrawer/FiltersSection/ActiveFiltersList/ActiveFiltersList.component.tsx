@@ -13,13 +13,13 @@ import type {
   ActiveFiltersListProps,
   HandleFilterChangeArgs,
   HandleToggleArgs,
-} from './ActiveFiltersList.types.ts';
+} from './ActiveFiltersList.types';
 
-import { useSetColumnFilters } from '../../TableDrawerContext/actions/index.ts';
-import { useGetColumnFilters } from '../../TableDrawerContext/selectors/index.ts';
-import { FiltersSectionToolbar } from '../FiltersSectionToolbar/index.ts';
-import { validateFilter } from '../validateFilter.util.ts';
-import { styles } from './ActiveFiltersList.stylex.ts';
+import { useSetColumnFilters } from '../../TableDrawerContext/actions';
+import { useGetColumnFilters } from '../../TableDrawerContext/selectors';
+import { FiltersSectionToolbar } from '../FiltersSectionToolbar';
+import { validateFilter } from '../validateFilter.util';
+import { styles } from './ActiveFiltersList.stylex';
 
 export const ActiveFiltersList = ({
   expandedFilters,

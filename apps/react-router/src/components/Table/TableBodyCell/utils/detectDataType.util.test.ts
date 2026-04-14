@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { detectDataType } from './detectDataType.util.ts';
+import { detectDataType } from './detectDataType.util';
 
 describe('detectDataType', () => {
   it('returns boolean for boolean values', () => {

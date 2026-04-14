@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { TableColumnsState } from '@/components/Table/Table.types';
 
-import { getTableColumnDrawerState } from './getTableColumnDrawerState.util.ts';
+import { getTableColumnDrawerState } from './getTableColumnDrawerState.util';
 
 describe('getTableColumnDrawerState (ColumnDrawerContext)', () => {
   it('maps filter, sizing, sorting, and pinning for a column', () => {

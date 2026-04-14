@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { getDropdownStyle } from './getDropdownStyle.util.ts';
+import { getDropdownStyle } from './getDropdownStyle.util';
 
 describe('getDropdownStyle', () => {
   it('returns dropdownAbsolute when isAlwaysOpen is false', () => {

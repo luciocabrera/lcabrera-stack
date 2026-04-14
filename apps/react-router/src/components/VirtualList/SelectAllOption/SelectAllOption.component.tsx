@@ -1,8 +1,8 @@
 import * as stylex from '@stylexjs/stylex';
 
-import type { SelectAllOptionProps } from './SelectAllOption.types.ts';
+import type { SelectAllOptionProps } from './SelectAllOption.types';
 
-import { skeletonStyles, styles } from '../VirtualList.stylex.ts';
+import { skeletonStyles, styles } from '../VirtualList.stylex';
 
 export const SelectAllOption = ({
   isAllSelected,

@@ -1,1 +1,1 @@
-export { TableCheckDisplay } from './TableCheckDisplay.component.tsx';
+export { TableCheckDisplay } from './TableCheckDisplay.component';

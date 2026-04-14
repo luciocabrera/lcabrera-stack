@@ -37,7 +37,7 @@ vi.mock('react-router', () => ({
   NavLink: mockRouterNavLink,
 }));
 
-import { NavLink } from './NavLink.component.tsx';
+import { NavLink } from './NavLink.component';
 
 afterEach(cleanup);
 

@@ -11,11 +11,11 @@ import {
 
 import { useRenderTracker } from '@/utils/performance';
 
-import type { TableHeaderProps } from './TableHeader.types.ts';
+import type { TableHeaderProps } from './TableHeader.types';
 
-import { TableHeaderCell } from '../TableHeaderCell/index.ts';
-import { TableRow } from '../TableRow/index.ts';
-import { tableHeaderStyles } from './TableHeader.stylex.ts';
+import { TableHeaderCell } from '../TableHeaderCell';
+import { TableRow } from '../TableRow';
+import { tableHeaderStyles } from './TableHeader.stylex';
 
 export const TableHeader = <TData extends Record<string, unknown>, TResponse>({
   customStylex,

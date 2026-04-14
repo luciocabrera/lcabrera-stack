@@ -1,8 +1,8 @@
 import * as stylex from '@stylexjs/stylex';
 
-import type { RadioOptionGroupProps } from './RadioOptionGroup.types.ts';
+import type { RadioOptionGroupProps } from './RadioOptionGroup.types';
 
-import { styles } from './RadioOptionGroup.stylex.ts';
+import { styles } from './RadioOptionGroup.stylex';
 
 export const RadioOptionGroup = <TValue extends string>({
   name,

@@ -19,7 +19,7 @@ vi.mock('@/components/Button', () => ({
   Button: MockButton,
 }));
 
-import { Tag } from './Tag.component.tsx';
+import { Tag } from './Tag.component';
 
 afterEach(cleanup);
 

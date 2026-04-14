@@ -5,7 +5,7 @@ import {
   ScrollRestoration,
   useRouteLoaderData,
 } from 'react-router';
-import type { loader as rootLoader } from './root.loader.ts';
+import type { loader as rootLoader } from './root.loader';
 
 import type { LayoutProps } from '@/types/ui.types';
 

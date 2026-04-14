@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { ColumnFiltersState } from '@/components/Table';
 
-import { deserializeFiltersFromURL } from './deserializeFiltersFromURL.util.ts';
+import { deserializeFiltersFromURL } from './deserializeFiltersFromURL.util';
 
 type AnyFilters = ColumnFiltersState<Record<string, unknown>>;
 

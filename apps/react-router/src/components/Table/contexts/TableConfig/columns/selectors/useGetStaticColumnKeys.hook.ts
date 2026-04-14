@@ -1,4 +1,4 @@
-import { useColumnsStore } from '../useColumnsStore.hook.ts';
+import { useColumnsStore } from '../useColumnsStore.hook';
 
 export const useGetStaticColumnKeys = () =>
   useColumnsStore((state) => state.staticKeys);

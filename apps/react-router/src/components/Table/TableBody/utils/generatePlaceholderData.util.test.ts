@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { generatePlaceholderData } from './generatePlaceholderData.util.ts';
+import { generatePlaceholderData } from './generatePlaceholderData.util';
 
 describe('generatePlaceholderData', () => {
   it('generates correct number of rows', () => {

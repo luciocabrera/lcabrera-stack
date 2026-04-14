@@ -4,9 +4,9 @@ import { useStore } from '@/hooks';
 import type {
   ColumnDrawerProviderProps,
   ColumnDrawerState,
-} from './ColumnDrawerContext.types.ts';
+} from './ColumnDrawerContext.types';
 
-import { ColumnDrawerContext } from './ColumnDrawerContext.context.ts';
+import { ColumnDrawerContext } from './ColumnDrawerContext.context';
 import { getTableColumnDrawerState } from './utils';
 
 export const ColumnDrawerProvider = ({

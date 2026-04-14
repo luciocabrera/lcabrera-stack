@@ -1,4 +1,4 @@
-import type { LogLevel, LogLevelPriority } from './logger.types.ts';
+import type { LogLevel, LogLevelPriority } from './logger.types';
 
 /**
  * Numeric priority map for log levels.

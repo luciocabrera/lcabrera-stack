@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { TableColumn } from '@/components/Table/Table.types';
 
-import { getIsContiguousPin } from './getIsContiguousPin.util.ts';
+import { getIsContiguousPin } from './getIsContiguousPin.util';
 
 type Row = { id: string; name: string; age: number; actions: string };
 

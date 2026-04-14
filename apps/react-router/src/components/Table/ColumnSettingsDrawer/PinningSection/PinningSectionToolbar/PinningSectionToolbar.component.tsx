@@ -4,14 +4,14 @@ import { Button } from '@/components/Button';
 import { EraserIcon, RefreshIcon } from '@/components/Icons';
 import { ICON_SIZE_MD, ICON_SIZE_SM } from '@/design-system/constants';
 
-import type { PinningSectionToolbarProps } from './PinningSectionToolbar.types.ts';
+import type { PinningSectionToolbarProps } from './PinningSectionToolbar.types';
 
 import {
   useResetColumnPinning,
   useSetColumnPinning,
-} from '../../ColumnDrawerContext/actions/index.ts';
-import { useGetColumnPinning } from '../../ColumnDrawerContext/selectors/index.ts';
-import { styles } from './PinningSectionToolbar.stylex.ts';
+} from '../../ColumnDrawerContext/actions';
+import { useGetColumnPinning } from '../../ColumnDrawerContext/selectors';
+import { styles } from './PinningSectionToolbar.stylex';
 
 export const PinningSectionToolbar = ({
   variant = 'footer',

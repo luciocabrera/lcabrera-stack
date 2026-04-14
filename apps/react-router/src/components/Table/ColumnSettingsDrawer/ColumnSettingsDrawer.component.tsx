@@ -18,17 +18,17 @@ import { Tabs } from '@/components/Tabs';
 import { ICON_SIZE_LG } from '@/design-system/constants';
 import { useRenderTracker } from '@/utils/performance';
 
-import type { ColumnSettingsDrawerProps } from './ColumnSettingsDrawer.types.ts';
+import type { ColumnSettingsDrawerProps } from './ColumnSettingsDrawer.types';
 
 import {
   useBatchSetColumnDrawerSettings,
   useResetAllColumnDrawerSettings,
-} from './ColumnDrawerContext/actions/index.ts';
-import { DetailsSection } from './DetailsSection/index.ts';
-import { FilterSection } from './FilterSection/index.ts';
-import { GeneralSection } from './GeneralSection/index.ts';
-import { PinningSection } from './PinningSection/index.ts';
-import { SortingSection } from './SortingSection/index.ts';
+} from './ColumnDrawerContext/actions';
+import { DetailsSection } from './DetailsSection';
+import { FilterSection } from './FilterSection';
+import { GeneralSection } from './GeneralSection';
+import { PinningSection } from './PinningSection';
+import { SortingSection } from './SortingSection';
 
 export const ColumnSettingsDrawer = <TData extends Record<string, unknown>>({
   columnKey,

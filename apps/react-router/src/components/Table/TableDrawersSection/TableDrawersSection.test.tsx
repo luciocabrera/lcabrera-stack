@@ -5,7 +5,7 @@ import type { ReactNode } from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { TableDrawersSection } from './TableDrawersSection.component.tsx';
+import { TableDrawersSection } from './TableDrawersSection.component';
 
 type ColumnDrawerProviderProps = {
   readonly children: ReactNode;

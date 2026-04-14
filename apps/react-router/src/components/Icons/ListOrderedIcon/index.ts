@@ -1,1 +1,1 @@
-export { ListOrderedIcon } from './ListOrderedIcon.component.tsx';
+export { ListOrderedIcon } from './ListOrderedIcon.component';

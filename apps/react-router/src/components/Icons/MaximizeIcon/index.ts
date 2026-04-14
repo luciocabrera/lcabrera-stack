@@ -1,1 +1,1 @@
-export { MaximizeIcon } from './MaximizeIcon.component.tsx';
+export { MaximizeIcon } from './MaximizeIcon.component';

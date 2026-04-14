@@ -1,4 +1,4 @@
-import type { Route } from '../+types/root.ts';
+import type { Route } from '../+types/root';
 
 export const ErrorBoundary = ({ error }: Route.ErrorBoundaryProps) => {
   const message = 'Oops!';

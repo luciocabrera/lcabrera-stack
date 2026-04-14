@@ -3,7 +3,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { Tooltip } from './Tooltip.component.tsx';
+import { Tooltip } from './Tooltip.component';
 
 // eslint-disable-next-line typescript-eslint/unbound-method -- Saving prototype method for teardown restore; binding would create a new function and break restoration
 const savedShowPopover = HTMLElement.prototype.showPopover;

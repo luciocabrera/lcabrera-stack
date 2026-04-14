@@ -1,7 +1,7 @@
-import type { TablePersistenceConfig } from '../Table.types.ts';
+import type { TablePersistenceConfig } from '../Table.types';
 
-import { getStorageKey } from './getStorageKey.util.ts';
-import { PERSISTENCE_VERSION } from './persistence.constants.ts';
+import { getStorageKey } from './getStorageKey.util';
+import { PERSISTENCE_VERSION } from './persistence.constants';
 
 type SerializedStateSlice = {
   readonly key: string;

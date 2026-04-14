@@ -1,7 +1,7 @@
 import type { RefObject } from 'react';
 import type { Pagination, PrefetchCache } from '@/types/ui.types';
 
-import { prefetchNextPage } from './prefetchNextPage.util.ts';
+import { prefetchNextPage } from './prefetchNextPage.util';
 
 type FirePrefetchArgs<TResponse> = {
   readonly limit: number;

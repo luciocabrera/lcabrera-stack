@@ -3,7 +3,7 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { TableBase } from './TableBase.component.tsx';
+import { TableBase } from './TableBase.component';
 
 const {
   useGetTableDensityMock,

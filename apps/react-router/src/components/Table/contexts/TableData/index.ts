@@ -1,1 +1,1 @@
-export { TableDataProvider } from './TableDataContext.provider.tsx';
+export { TableDataProvider } from './TableDataContext.provider';

@@ -1,8 +1,8 @@
 import { createContext } from 'react';
 
-import type { TableDataContextValue } from './TableDataContext.types.ts';
+import type { TableDataContextValue } from './TableDataContext.types';
 
-import { getInitialDataState } from './utils/index.ts';
+import { getInitialDataState } from './utils';
 
 /**
  * Data context for sharing state across table components

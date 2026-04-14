@@ -5,7 +5,7 @@ import type { ReactNode } from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { TableRow } from './TableRow.component.tsx';
+import { TableRow } from './TableRow.component';
 
 type RenderInTableArgs = {
   readonly children: ReactNode;

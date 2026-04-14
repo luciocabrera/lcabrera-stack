@@ -8,9 +8,9 @@ import { renderTableBodyColumnGroup } from '@/components/Table/TableBody/utils/r
 import { TableRow } from '@/components/Table/TableRow';
 import { useRenderTracker } from '@/utils/performance';
 
-import type { TableBodyRowsProps } from './TableBodyRows.types.ts';
+import type { TableBodyRowsProps } from './TableBodyRows.types';
 
-import { useGetTableData } from '../contexts/TableData/data/selectors/index.ts';
+import { useGetTableData } from '../contexts/TableData/data/selectors';
 
 export const TableBodyRows = ({
   endIndex,

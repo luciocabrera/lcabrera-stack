@@ -10,7 +10,7 @@ import {
 } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 import { useTableDrawerContextValue } from '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
 
-import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook.ts';
+import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
 
 /**
  * Hook to order columns by current sorting state.

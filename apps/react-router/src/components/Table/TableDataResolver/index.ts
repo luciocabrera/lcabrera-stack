@@ -1,1 +1,1 @@
-export { TableDataResolver } from './TableDataResolver.component.tsx';
+export { TableDataResolver } from './TableDataResolver.component';

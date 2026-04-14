@@ -1,2 +1,2 @@
-export { AddFilterSection } from './AddFilterSection.component.tsx';
-export type { AddFilterSectionProps } from './AddFilterSection.types.ts';
+export { AddFilterSection } from './AddFilterSection.component';
+export type { AddFilterSectionProps } from './AddFilterSection.types';
