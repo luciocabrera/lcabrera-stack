@@ -35,9 +35,9 @@ export const toTanStackSortingState = (
 export const toWideAlltypes150ApiSorting = (
   sorting: TanStackSortingState,
 ): readonly WideAlltypes150ApiSortingRule[] =>
-  sorting.map(({ desc, id }) => ({
-    columnKey: id as keyof WideAlltypes150,
-    direction: desc ? 'desc' : 'asc',
+  toAppSortingState(sorting).map(({ columnKey, direction }) => ({
+    columnKey: columnKey as keyof WideAlltypes150,
+    direction: direction ?? 'asc',
   }));
 
 /**

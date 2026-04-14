@@ -3,6 +3,66 @@
  * Enforces: import { A, B } from './module'
  * Disallows: import { A } from './module'; import { B } from './module'
  */
+const createSourceMap = (programNode) => {
+    const sourceMap = new Map();
+    const imports = programNode.body.filter((statement) => statement.type === 'ImportDeclaration');
+    for (const importNode of imports) {
+        const source = importNode.source.value;
+        const existingImports = sourceMap.get(source) ?? [];
+        existingImports.push(importNode);
+        sourceMap.set(source, existingImports);
+    }
+    return sourceMap;
+};
+const hasSameImportKind = (importNodes) => {
+    if (importNodes.length === 0) {
+        return false;
+    }
+    const firstImportKind = importNodes[0].importKind;
+    return importNodes.every((importNode) => importNode.importKind === firstImportKind);
+};
+const getSpecifierText = (specifier) => {
+    if (specifier.type === 'ImportSpecifier') {
+        if (specifier.imported.name === specifier.local.name) {
+            return specifier.imported.name;
+        }
+        return `${specifier.imported.name} as ${specifier.local.name}`;
+    }
+    if (specifier.type === 'ImportDefaultSpecifier') {
+        return `default as ${specifier.local.name}`;
+    }
+    if (specifier.type === 'ImportNamespaceSpecifier') {
+        return `* as ${specifier.local.name}`;
+    }
+    return undefined;
+};
+const getUniqueSpecifiers = (importNodes) => {
+    const allSpecifiers = [];
+    for (const importNode of importNodes) {
+        for (const specifier of importNode.specifiers) {
+            const specifierText = getSpecifierText(specifier);
+            if (specifierText) {
+                allSpecifiers.push(specifierText);
+            }
+        }
+    }
+    return [...new Set(allSpecifiers)];
+};
+const createMergeDuplicateImportsFix = ({ context, importNodes, }) => {
+    return (fixer) => {
+        const sourceCode = context.sourceCode;
+        const importKind = importNodes[0].importKind;
+        const importKeyword = importKind === 'type' ? 'import type' : 'import';
+        const fromClause = sourceCode.getText(importNodes[0].source);
+        const uniqueSpecifiers = getUniqueSpecifiers(importNodes);
+        const mergedImport = `${importKeyword} { ${uniqueSpecifiers.join(', ')} } from ${fromClause};`;
+        const fixes = [fixer.replaceText(importNodes[0], mergedImport)];
+        for (const duplicateImportNode of importNodes.slice(1)) {
+            fixes.push(fixer.remove(duplicateImportNode));
+        }
+        return fixes;
+    };
+};
 const rule = {
     meta: {
         docs: {
@@ -17,72 +77,24 @@ const rule = {
         type: 'suggestion',
     },
     create(context) {
-        const sourceMap = new Map();
         return {
             Program(node) {
-                // Collect all import declarations
-                const imports = node.body.filter((stmt) => stmt.type === 'ImportDeclaration');
-                // Group by source
-                imports.forEach((importNode) => {
-                    const source = importNode.source.value;
-                    if (!sourceMap.has(source)) {
-                        sourceMap.set(source, []);
-                    }
-                    sourceMap.get(source).push(importNode);
-                });
-                // Check for duplicates and report
+                const sourceMap = createSourceMap(node);
                 sourceMap.forEach((importNodes, source) => {
-                    if (importNodes.length > 1) {
-                        // Check if they're all the same kind (all value imports or all type imports)
-                        const allSameKind = importNodes.every((node) => node.importKind === importNodes[0].importKind);
-                        if (allSameKind) {
-                            // Report on all but the first import
-                            importNodes.slice(1).forEach((importNode) => {
-                                context.report({
-                                    data: { source },
-                                    fix(fixer) {
-                                        const sourceCode = context.sourceCode;
-                                        const fixes = [];
-                                        // Collect all specifiers from all imports of this source
-                                        const allSpecifiers = [];
-                                        const importKind = importNodes[0].importKind;
-                                        importNodes.forEach((node) => {
-                                            node.specifiers.forEach((specifier) => {
-                                                if (specifier.type === 'ImportSpecifier') {
-                                                    if (specifier.imported.name === specifier.local.name) {
-                                                        allSpecifiers.push(specifier.imported.name);
-                                                    }
-                                                    else {
-                                                        allSpecifiers.push(`${specifier.imported.name} as ${specifier.local.name}`);
-                                                    }
-                                                }
-                                                else if (specifier.type === 'ImportDefaultSpecifier') {
-                                                    allSpecifiers.push(`default as ${specifier.local.name}`);
-                                                }
-                                                else if (specifier.type === 'ImportNamespaceSpecifier') {
-                                                    allSpecifiers.push(`* as ${specifier.local.name}`);
-                                                }
-                                            });
-                                        });
-                                        // Remove duplicates
-                                        const uniqueSpecifiers = [...new Set(allSpecifiers)];
-                                        // Build the merged import
-                                        const importKeyword = importKind === 'type' ? 'import type' : 'import';
-                                        const fromClause = sourceCode.getText(importNodes[0].source);
-                                        const mergedImport = `${importKeyword} { ${uniqueSpecifiers.join(', ')} } from ${fromClause};`;
-                                        // Replace the first import with the merged version
-                                        fixes.push(fixer.replaceText(importNodes[0], mergedImport));
-                                        // Remove the duplicate imports
-                                        importNodes.slice(1).forEach((dupNode) => {
-                                            fixes.push(fixer.remove(dupNode));
-                                        });
-                                        return fixes;
-                                    },
-                                    messageId: 'duplicateImport',
-                                    node: importNode,
-                                });
-                            });
-                        }
+                    if (importNodes.length <= 1 || !hasSameImportKind(importNodes)) {
+                        return;
+                    }
+                    const fix = createMergeDuplicateImportsFix({
+                        context,
+                        importNodes,
+                    });
+                    for (const importNode of importNodes.slice(1)) {
+                        context.report({
+                            data: { source },
+                            fix,
+                            messageId: 'duplicateImport',
+                            node: importNode,
+                        });
                     }
                 });
             },
