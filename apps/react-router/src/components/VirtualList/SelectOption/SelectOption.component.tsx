@@ -10,25 +10,41 @@ export const SelectOption = ({
   isSelected,
   onToggle,
   option,
-}: SelectOptionProps) => (
-  <label
-    onClick={hasCheckbox ? undefined : onToggle}
-    {...stylex.props(styles.option, isLoading && styles.optionDisabled)}
-  >
-    {hasCheckbox && (
-      <input
-        checked={isSelected}
-        disabled={isLoading}
-        onChange={onToggle}
-        type='checkbox'
-        {...stylex.props(styles.checkbox)}
-      />
-    )}
-    <span {...stylex.props(styles.label)}>{option}</span>
-    {isLoading && (
-      <div {...stylex.props(skeletonStyles.loadingOverlay)}>
-        <div {...stylex.props(skeletonStyles.shimmerWave)} />
-      </div>
-    )}
-  </label>
-);
+}: SelectOptionProps) => {
+  const isClickableLabel = !hasCheckbox;
+
+  return (
+    <label
+      onClick={isClickableLabel ? onToggle : undefined}
+      onKeyDown={
+        isClickableLabel
+          ? (event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                onToggle();
+              }
+            }
+          : undefined
+      }
+      role={isClickableLabel ? 'button' : undefined}
+      tabIndex={isClickableLabel ? 0 : undefined}
+      {...stylex.props(styles.option, isLoading && styles.optionDisabled)}
+    >
+      {hasCheckbox && (
+        <input
+          checked={isSelected}
+          disabled={isLoading}
+          onChange={onToggle}
+          type='checkbox'
+          {...stylex.props(styles.checkbox)}
+        />
+      )}
+      <span {...stylex.props(styles.label)}>{option}</span>
+      {isLoading && (
+        <div {...stylex.props(skeletonStyles.loadingOverlay)}>
+          <div {...stylex.props(skeletonStyles.shimmerWave)} />
+        </div>
+      )}
+    </label>
+  );
+};
