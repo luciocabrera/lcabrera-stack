@@ -1,5 +1,7 @@
+import type { KeyboardEvent } from 'react';
+
 import * as stylex from '@stylexjs/stylex';
-import { useId, useRef, useState } from 'react';
+import { isValidElement, useId, useRef, useState } from 'react';
 
 import type { TooltipProps } from './Tooltip.types';
 
@@ -19,6 +21,14 @@ export const Tooltip = ({
 
   const [isVisible, setIsVisible] = useState(false);
   const [arrowOffset, setArrowOffset] = useState<number | undefined>();
+
+  const hasNativeInteractiveChild =
+    isValidElement(children) &&
+    typeof children.type === 'string' &&
+    ['a', 'button', 'input', 'select', 'summary', 'textarea'].includes(
+      children.type,
+    );
+  const shouldUseInteractiveTrigger = !hasNativeInteractiveChild;
 
   const anchorName = `--tooltip-${id.replaceAll(':', '')}`;
 
@@ -51,16 +61,33 @@ export const Tooltip = ({
     hideTimeoutRef.current = timeoutId as unknown as number;
   };
 
+  const handleKeyDown = (event: KeyboardEvent<HTMLSpanElement>) => {
+    if (event.key === 'Escape') {
+      handleHide();
+      return;
+    }
+
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleShow();
+    }
+  };
+
   return (
     <>
       <span
         aria-describedby={id}
         onBlur={handleHide}
         onFocus={handleShow}
+        onKeyDown={shouldUseInteractiveTrigger ? handleKeyDown : undefined}
         onMouseEnter={handleShow}
         onMouseLeave={handleHide}
+        onTouchEnd={handleHide}
+        onTouchStart={handleShow}
         popoverTarget={id}
         ref={triggerRef}
+        role={shouldUseInteractiveTrigger ? 'button' : undefined}
+        tabIndex={shouldUseInteractiveTrigger ? 0 : undefined}
         {...stylex.props(styles.trigger(anchorName))}
       >
         {children}
