@@ -145,7 +145,7 @@ catalogs:
       specifier: ^3.0.0
       version: 3.0.0
     vite:
-      specifier: npm:@voidzero-dev/vite-plus-core@^0.1.16
+      specifier: npm:@voidzero-dev/vite-plus-core@latest
       version: 0.1.16
     vite-plugin-babel:
       specifier: ^1.6.0
@@ -154,7 +154,7 @@ catalogs:
       specifier: ^0.1.16
       version: 0.1.16
     vitest:
-      specifier: npm:@voidzero-dev/vite-plus-test@^0.1.16
+      specifier: npm:@voidzero-dev/vite-plus-test@latest
       version: 0.1.16
     zod:
       specifier: ^4.3.6

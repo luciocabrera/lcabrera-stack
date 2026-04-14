@@ -1,7 +1,6 @@
 packages:
   - apps/*
   - packages/*
-allowBuilds: {}
 
 # Supply chain security (https://pnpm.io/supply-chain-security)
 blockExoticSubdeps: true
@@ -54,10 +53,11 @@ catalog:
 
   typescript-eslint: ^8.58.1
   unplugin: ^3.0.0
-  vite: npm:@voidzero-dev/vite-plus-core@^0.1.16
+  vite: npm:@voidzero-dev/vite-plus-core@latest
   vite-plugin-babel: ^1.6.0
   vite-plus: ^0.1.16
-  vitest: npm:@voidzero-dev/vite-plus-test@^0.1.16
+  vitest: npm:@voidzero-dev/vite-plus-test@latest
+
   zod: ^4.3.6
 
 catalogMode: prefer
