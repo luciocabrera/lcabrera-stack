@@ -13,6 +13,8 @@ export const sortPinnedKeysByOrder = ({
 
   return [...keys].toSorted(
     // eslint-disable-next-line local-rules/destructuring-for-functions
-    (a, b) => (orderIndex.get(a) ?? 0) - (orderIndex.get(b) ?? 0),
+    (a, b) =>
+      (orderIndex.get(a) ?? Number.POSITIVE_INFINITY) -
+      (orderIndex.get(b) ?? Number.POSITIVE_INFINITY),
   );
 };

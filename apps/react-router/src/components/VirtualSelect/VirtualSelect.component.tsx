@@ -154,6 +154,7 @@ export const VirtualSelect = ({
       {isListVisible && (
         <div
           id={resolvedListboxId}
+          role='listbox'
           {...stylex.props(
             styles.dropdownBase,
             getDropdownStyle(isAlwaysOpen, shouldFillHeight),

@@ -21,6 +21,13 @@ describe('sortPinnedKeysByOrder', () => {
         keys: ['custom', 'status'],
         newOrder: ['status'],
       }),
-    ).toEqual(['custom', 'status']);
+    ).toEqual(['status', 'custom']);
+
+    expect(
+      sortPinnedKeysByOrder({
+        keys: ['custom-a', 'status', 'custom-b'],
+        newOrder: ['status'],
+      }),
+    ).toEqual(['status', 'custom-a', 'custom-b']);
   });
 });

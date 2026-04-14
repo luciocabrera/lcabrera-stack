@@ -1,8 +1,12 @@
-import type { ColumnFilter } from '@/types/filterOperators.types';
+import type {
+  ColumnFilter,
+  NumberOperatorType,
+} from '@/types/filterOperators.types';
 
 import {
   DATE_OPERATOR_SHORT_CODES,
   KNOWN_OPERATOR_SHORT_CODES,
+  NUMBER_OPERATOR_SHORT_CODES,
   SHORT_TO_OPERATOR,
   TEXT_OPERATOR_SHORT_CODES,
 } from '@/constants/filterOperators.constants';
@@ -12,6 +16,16 @@ const expandOperator = (short: string): string =>
 
 const isDateValue = (v: unknown): v is string =>
   typeof v === 'string' && /^\d{4}-\d{2}-\d{2}/.test(v);
+
+const isNumberOperatorType = (
+  operator: string,
+): operator is NumberOperatorType =>
+  operator === 'equals' ||
+  operator === 'greaterThan' ||
+  operator === 'greaterThanOrEqual' ||
+  operator === 'lessThan' ||
+  operator === 'lessThanOrEqual' ||
+  operator === 'notEquals';
 
 const parseBooleanFilter = (value: unknown): ColumnFilter | undefined => {
   if (typeof value !== 'boolean') {
@@ -43,7 +57,10 @@ const parseNumberFilter = ({
   readonly arr: readonly unknown[];
   readonly operator: string;
 }): ColumnFilter | undefined => {
-  if (typeof arr[1] !== 'number') {
+  if (
+    !NUMBER_OPERATOR_SHORT_CODES.has(operator) ||
+    typeof arr[1] !== 'number'
+  ) {
     return undefined;
   }
 
@@ -56,8 +73,13 @@ const parseNumberFilter = ({
     };
   }
 
+  const expandedOperator = expandOperator(operator);
+  if (!isNumberOperatorType(expandedOperator)) {
+    return undefined;
+  }
+
   return {
-    operator: expandOperator(operator) as 'equals',
+    operator: expandedOperator,
     type: 'number',
     value: arr[1],
   };

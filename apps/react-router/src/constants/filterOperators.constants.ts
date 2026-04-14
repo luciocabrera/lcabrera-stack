@@ -41,6 +41,15 @@ export const SHORT_TO_OPERATOR = new Map([
 
 export const KNOWN_OPERATOR_SHORT_CODES = new Set(SHORT_TO_OPERATOR.keys());
 export const DATE_OPERATOR_SHORT_CODES = new Set(['af', 'bf', 'bw', 'eq']);
+export const NUMBER_OPERATOR_SHORT_CODES = new Set([
+  'bw',
+  'eq',
+  'gt',
+  'gte',
+  'lt',
+  'lte',
+  'neq',
+]);
 export const TEXT_OPERATOR_SHORT_CODES = new Set([
   'ct',
   'eq',

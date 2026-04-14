@@ -16,7 +16,6 @@ export const TableCheckDisplay = ({
 
   return (
     <input
-      aria-checked={isChecked}
       aria-label={label}
       checked={isChecked}
       disabled
