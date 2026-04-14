@@ -22,15 +22,16 @@ export const useSetColumnSizing = <TData>() => {
   return useCallback(
     ({ columnKey, width }: SetColumnSizingArgs<TData>) => {
       const columnsState = columnsStore.get();
-      const current = (columnsState?.columnSizing ??
-        {}) as ColumnSizingState<TData>;
+      const current =
+        columnsState?.columnSizing ?? ({} as ColumnSizingState<TData>);
 
       let columnSizing: ColumnSizingState<TData>;
       if (width === undefined) {
-        // Remove the key by creating new object without it
-        const { [columnKey]: unusedColumn, ...rest } = current;
-        void unusedColumn; // Explicitly mark as intentionally unused
-        columnSizing = rest as ColumnSizingState<TData>;
+        // Remove the key from a copied state object.
+        const nextColumnSizing = { ...current };
+
+        delete nextColumnSizing[columnKey];
+        columnSizing = nextColumnSizing;
       } else {
         columnSizing = { ...current, [columnKey]: width };
       }

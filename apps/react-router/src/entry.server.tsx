@@ -28,6 +28,22 @@ export const streamTimeout = Number(process.env.STREAM_TIMEOUT_MS) || 15_000;
 
 const ABORT_DELAY = streamTimeout + 1000;
 
+const toError = (error: unknown): Error => {
+  if (error instanceof Error) {
+    return error;
+  }
+
+  if (typeof error === 'string') {
+    return new Error(error);
+  }
+
+  if (error && typeof error === 'object') {
+    return new Error(JSON.stringify(error));
+  }
+
+  return new Error('Unknown server-side streaming error');
+};
+
 /**
  * Server-side request handler for React Router 7 streaming.
  * Implements proper Suspense streaming with bot detection.
@@ -98,7 +114,7 @@ function handleBotRequest(
           console.error('Bot request error:', error);
         },
         onShellError(error: unknown) {
-          reject(error instanceof Error ? error : new Error(String(error)));
+          reject(toError(error));
         },
       },
     );
@@ -130,7 +146,7 @@ function handleBrowserRequest(
           console.error('Streaming error:', error);
         },
         onShellError(error: unknown) {
-          reject(error instanceof Error ? error : new Error(String(error)));
+          reject(toError(error));
         },
         onShellReady() {
           const body = new PassThrough();
