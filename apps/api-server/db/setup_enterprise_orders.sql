@@ -86,47 +86,70 @@ INSERT INTO enterprise_orders (
   order_timestamp, order_notes, internal_notes,
   last_modified_by, created_at, updated_at
 )
-WITH base AS (
+WITH constants AS (
+  SELECT
+    'Pending'::text AS status_pending,
+    'Shipped'::text AS status_shipped,
+    'Delivered'::text AS status_delivered,
+    'Returned'::text AS status_returned,
+    'Refunded'::text AS status_refunded,
+    'Partially Paid'::text AS payment_status_partially_paid,
+    'Individual'::text AS customer_type_individual,
+    'Business'::text AS customer_type_business,
+    'Furniture'::text AS category_furniture,
+    TIMESTAMPTZ '2021-01-01 00:00:00 UTC' AS base_timestamptz,
+    TIMESTAMP '2021-01-01 00:00:00' AS base_timestamp
+),
+base AS (
   SELECT
     gs,
+    c.status_pending,
+    c.status_shipped,
+    c.status_delivered,
+    c.status_returned,
+    c.status_refunded,
+    c.payment_status_partially_paid,
+    c.category_furniture,
+    c.base_timestamptz,
+    c.base_timestamp,
     -- Status distribution: Delivered ~31%, Shipped ~19%, Pending/Processing ~12.5% each, rest 6%
     CASE (gs % 16)
-      WHEN 0  THEN 'Pending'
-      WHEN 1  THEN 'Pending'
+      WHEN 0  THEN c.status_pending
+      WHEN 1  THEN c.status_pending
       WHEN 2  THEN 'Processing'
       WHEN 3  THEN 'Processing'
-      WHEN 4  THEN 'Shipped'
-      WHEN 5  THEN 'Shipped'
-      WHEN 6  THEN 'Shipped'
-      WHEN 7  THEN 'Delivered'
-      WHEN 8  THEN 'Delivered'
-      WHEN 9  THEN 'Delivered'
-      WHEN 10 THEN 'Delivered'
+      WHEN 4  THEN c.status_shipped
+      WHEN 5  THEN c.status_shipped
+      WHEN 6  THEN c.status_shipped
+      WHEN 7  THEN c.status_delivered
+      WHEN 8  THEN c.status_delivered
+      WHEN 9  THEN c.status_delivered
+      WHEN 10 THEN c.status_delivered
       WHEN 11 THEN 'Cancelled'
-      WHEN 12 THEN 'Returned'
-      WHEN 13 THEN 'Refunded'
+      WHEN 12 THEN c.status_returned
+      WHEN 13 THEN c.status_refunded
       WHEN 14 THEN 'On Hold'
-      ELSE         'Delivered'
+      ELSE         c.status_delivered
     END AS status,
     (ARRAY['Low','Normal','Normal','High','High','Urgent','Critical'])[1 + (gs % 7)] AS prio,
     (ARRAY['Credit Card','Debit Card','PayPal','Bank Transfer','Cash','Check','Cryptocurrency'])[1 + (gs % 7)] AS pay_method,
     CASE (gs % 12)
-      WHEN 0 THEN 'Pending'
-      WHEN 1 THEN 'Pending'
+      WHEN 0 THEN c.status_pending
+      WHEN 1 THEN c.status_pending
       WHEN 2 THEN 'Paid'
       WHEN 3 THEN 'Paid'
       WHEN 4 THEN 'Paid'
       WHEN 5 THEN 'Paid'
       WHEN 6 THEN 'Paid'
       WHEN 7 THEN 'Paid'
-      WHEN 8 THEN 'Partially Paid'
+      WHEN 8 THEN c.payment_status_partially_paid
       WHEN 9 THEN 'Failed'
-      WHEN 10 THEN 'Refunded'
+      WHEN 10 THEN c.status_refunded
       ELSE        'Cancelled'
     END AS pay_status,
     (gs % 100000) + 1 AS cust_id,
-    (ARRAY['Individual','Individual','Business','Business','Corporate','Government','Non-Profit'])[1 + (gs % 7)] AS cust_type,
-    (ARRAY['Electronics','Clothing','Food','Books','Furniture','Sports','Toys','Health','Automotive','Garden'])[1 + (gs % 10)] AS category,
+    (ARRAY[c.customer_type_individual,c.customer_type_individual,c.customer_type_business,c.customer_type_business,'Corporate','Government','Non-Profit'])[1 + (gs % 7)] AS cust_type,
+    (ARRAY['Electronics','Clothing','Food','Books',c.category_furniture,'Sports','Toys','Health','Automotive','Garden'])[1 + (gs % 10)] AS category,
     (gs % 8) + 1 AS sub_idx,
     (ARRAY['FedEx','UPS','DHL','USPS','Amazon Logistics'])[1 + (gs % 5)] AS carrier_val,
     (ARRAY['Warehouse A','Warehouse B','Warehouse C','Warehouse D','Warehouse E'])[1 + (gs % 5)] AS wh_loc,
@@ -147,6 +170,7 @@ WITH base AS (
     -- Date: 4 years range starting 2021-01-01
     DATE '2021-01-01' + (gs % 1460) AS ord_date
   FROM generate_series(1, 500000) AS gs
+  CROSS JOIN constants AS c
 ),
 computed AS (
   SELECT
@@ -167,7 +191,7 @@ payment_derived AS (
     *,
     CASE pay_status
       WHEN 'Paid'         THEN total_v
-      WHEN 'Partially Paid' THEN ROUND(total_v * 0.5, 2)
+      WHEN payment_status_partially_paid THEN ROUND(total_v * 0.5, 2)
       ELSE 0::numeric(12,2)
     END AS paid_v
   FROM financial
@@ -208,7 +232,7 @@ SELECT
   pay_method AS payment_method,
   CASE pay_status
     WHEN 'Paid'           THEN ord_date + (gs % 5) + 1
-    WHEN 'Partially Paid' THEN ord_date + (gs % 3) + 1
+    WHEN payment_status_partially_paid THEN ord_date + (gs % 3) + 1
     ELSE NULL
   END AS payment_date,
   CASE WHEN gs % 8 = 0 THEN NULL
@@ -220,7 +244,7 @@ SELECT
     WHEN 'Clothing'    THEN (ARRAY['Shirts','Pants','Shoes','Jackets','Dresses','Accessories','Sportswear','Underwear'])[sub_idx]
     WHEN 'Food'        THEN (ARRAY['Beverages','Snacks','Dairy','Produce','Meat','Bakery','Canned Goods','Frozen'])[sub_idx]
     WHEN 'Books'       THEN (ARRAY['Fiction','Non-Fiction','Science','History','Art','Technology','Business','Children'])[sub_idx]
-    WHEN 'Furniture'   THEN (ARRAY['Sofas','Tables','Chairs','Beds','Storage','Desks','Lighting','Rugs'])[sub_idx]
+    WHEN category_furniture THEN (ARRAY['Sofas','Tables','Chairs','Beds','Storage','Desks','Lighting','Rugs'])[sub_idx]
     WHEN 'Sports'      THEN (ARRAY['Fitness','Outdoor','Team Sports','Water Sports','Cycling','Running','Combat Sports','Winter Sports'])[sub_idx]
     WHEN 'Toys'        THEN (ARRAY['Action Figures','Board Games','Dolls','Educational','Electronic Toys','Outdoor Play','Puzzles','Remote Control'])[sub_idx]
     WHEN 'Health'      THEN (ARRAY['Vitamins','Personal Care','Medical','Fitness Equipment','Nutrition','Skincare','Dental','Vision'])[sub_idx]
@@ -235,7 +259,7 @@ SELECT
   ship_cty AS shipping_country,
   lpad((gs % 99999)::text, 5, '0') AS shipping_postal_code,
   carrier_val AS carrier,
-  CASE WHEN status IN ('Shipped','Delivered','Returned','Refunded')
+    CASE WHEN status IN (status_shipped, status_delivered, status_returned, status_refunded)
        THEN 'TRK' || lpad(gs::text, 12, '0')
        ELSE NULL
   END AS tracking_number,
@@ -244,11 +268,11 @@ SELECT
   (gs % 9 = 0) AS is_gift,
   (gs % 11 = 0) AS is_fragile,
   (gs % 6 = 0) AS requires_signature,
-  CASE WHEN status IN ('Shipped','Delivered','Returned','Refunded')
+    CASE WHEN status IN (status_shipped, status_delivered, status_returned, status_refunded)
        THEN ord_date + (gs % 7) + 1
        ELSE NULL
   END AS shipped_date,
-  CASE WHEN status = 'Delivered'
+    CASE WHEN status = status_delivered
        THEN ord_date + (gs % 14) + 3
        ELSE NULL
   END AS delivery_date,
@@ -260,12 +284,12 @@ SELECT
   ship_st AS billing_state,
   ship_cty AS billing_country,
   lpad((gs % 99999)::text, 5, '0') AS billing_postal_code,
-  (TIMESTAMPTZ '2021-01-01 00:00:00 UTC' + (gs % 1460) * INTERVAL '1 day' + (gs % 86400) * INTERVAL '1 second') AS order_timestamp,
+  (base_timestamptz + (gs % 1460) * INTERVAL '1 day' + (gs % 86400) * INTERVAL '1 second') AS order_timestamp,
   CASE WHEN gs % 15 = 0 THEN 'Order note for #' || gs ELSE NULL END AS order_notes,
   CASE WHEN gs % 20 = 0 THEN 'Internal note #' || gs ELSE NULL END AS internal_notes,
   (ARRAY['admin','ops_team','billing_dept','cs_rep','manager'])[1 + (gs % 5)] AS last_modified_by,
-  (TIMESTAMP '2021-01-01 00:00:00' + (gs % 1460) * INTERVAL '1 day' + (gs % 86400) * INTERVAL '1 second') AS created_at,
-  (TIMESTAMP '2021-01-01 00:00:00' + (gs % 1460) * INTERVAL '1 day' + (gs % 86400) * INTERVAL '1 second' + INTERVAL '1 hour') AS updated_at
+  (base_timestamp + (gs % 1460) * INTERVAL '1 day' + (gs % 86400) * INTERVAL '1 second') AS created_at,
+  (base_timestamp + (gs % 1460) * INTERVAL '1 day' + (gs % 86400) * INTERVAL '1 second' + INTERVAL '1 hour') AS updated_at
 FROM payment_derived;
 
 CREATE INDEX idx_enterprise_orders_order_date   ON enterprise_orders(order_date);
