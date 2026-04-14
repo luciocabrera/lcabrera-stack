@@ -1,0 +1,55 @@
+services:
+  postgres:
+    container_name: postgres_container
+    image: postgres:latest
+    # pull_policy: always
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}']
+      start_period: 20s
+      interval: 30s
+      retries: 5
+      timeout: 5s
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-root}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-root}
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+    ports:
+      - '5434:5432'
+  pgadmin:
+    container_name: pgadmin4_container
+    image: dpage/pgadmin4:latest
+    pull_policy: always
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -f http://localhost/']
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    entrypoint: >
+      /bin/sh -c "
+      printf '{\"Servers\":{\"1\":{\"Group\":\"Servers\",\"Host\":\"postgres\",\"MaintenanceDB\":\"postgres\",\"Name\":\"PostgreSQL Local\",\"PassFile\":\"/tmp/pgpass\",\"Port\":5432,\"SSLMode\":\"prefer\",\"Username\":\"%s\"}}}' \"$${POSTGRES_USER:-root}\" > /tmp/servers.json &&
+      printf 'postgres:5432:*:%s:%s\n' \"$${POSTGRES_USER:-root}\" \"$${POSTGRES_PASSWORD:-root}\" > /tmp/pgpass &&
+      chmod 600 /tmp/pgpass &&
+      /entrypoint.sh"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@admin.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-root}
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+      PGADMIN_SERVER_JSON_FILE: '/tmp/servers.json'
+      GUNICORN_CMD_ARGS: '--limit-request-line 8190 --limit-request-field_size 16384'
+    ports:
+      - '5051:80'
+volumes:
+  postgres_data:
+    driver: local
+  pgadmin_data:
+    driver: local
