@@ -1,4 +1,5 @@
 import { Pool } from 'pg';
+import { runStartupDbSanityCheck } from 'api-shared';
 
 import { createApp } from './app/app';
 import { readEnvConfig } from './config/env.util';
@@ -18,27 +19,6 @@ const app = createApp({ envConfig, pool });
 
 const dbSanityRepository = createDbSanityRepository({ pool });
 
-const runStartupDbSanityCheck = async (): Promise<void> => {
-  try {
-    const sanity = await dbSanityRepository.getDbSanity();
-
-    if (sanity.isHealthy) {
-      console.warn('✅ [DB Sanity] Table counts:', sanity.tableCounts);
-      return;
-    }
-
-    console.warn('⚠️ [DB Sanity] Potential data/connection issues detected');
-
-    for (const issue of sanity.issues) {
-      console.warn(`   - ${issue}`);
-    }
-
-    console.warn('   - Run `vp run seed` in api-server to repopulate tables.');
-  } catch (error: unknown) {
-    console.error('❌ [DB Sanity] Startup sanity check failed:', error);
-  }
-};
-
 const start = async (): Promise<void> => {
   try {
     await app.listen({ host: '0.0.0.0', port: envConfig.API_PORT });
@@ -55,7 +35,10 @@ const start = async (): Promise<void> => {
 };
 
 void start();
-void runStartupDbSanityCheck();
+void runStartupDbSanityCheck({
+  dbSanityRepository,
+  repopulateCommand: '`vp run seed` in api-server',
+});
 
 const shutdown = async (): Promise<void> => {
   console.warn('🛑 Shutting down API server');

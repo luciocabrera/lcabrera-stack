@@ -49,10 +49,11 @@ Before creating anything new, check this inventory. If something here does the j
 
 ### `src/hooks/utils/`
 
-| Function                  | Location                                      | Description                                                          |
-| ------------------------- | --------------------------------------------- | -------------------------------------------------------------------- |
-| `findFirstVisibleIndex`   | `hooks/utils/findFirstVisibleIndex.util.ts`   | Binary search: first index where `starts[i] + widths[i] > viewStart` |
-| `findFirstOutOfViewIndex` | `hooks/utils/findFirstOutOfViewIndex.util.ts` | Binary search: first index where `starts[i] >= viewEnd`              |
+| Function                          | Location                                              | Description                                                                |
+| --------------------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------- |
+| `findFirstVisibleIndex`           | `hooks/utils/findFirstVisibleIndex.util.ts`           | Binary search: first index where `starts[i] + widths[i] > viewStart`       |
+| `findFirstOutOfViewIndex`         | `hooks/utils/findFirstOutOfViewIndex.util.ts`         | Binary search: first index where `starts[i] >= viewEnd`                    |
+| `getVerticalVirtualizationWindow` | `hooks/utils/getVerticalVirtualizationWindow.util.ts` | Computes fixed-row virtualization window geometry shared by vertical hooks |
 
 ### `src/components/Table/TableBody/utils/`
 
@@ -63,6 +64,13 @@ Before creating anything new, check this inventory. If something here does the j
 | `generatePlaceholderData`      | `components/Table/TableBody/utils/generatePlaceholderData.util.ts`      | Builds empty placeholder rows keyed by visible columns                |
 | `getTotalVisibleColumnCount`   | `components/Table/TableBody/utils/getTotalVisibleColumnCount.util.ts`   | Counts pinned, center, and spacer cells for spacer-row `colSpan`      |
 | `renderTableBodyColumnGroup`   | `components/Table/TableBody/utils/renderTableBodyColumnGroup.util.ts`   | Maps a column group through the shared body-cell renderer             |
+
+### `src/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/utils/`
+
+| Function                    | Location                                                                                            | Description                                               |
+| --------------------------- | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| `getInitialColumnsState`    | `components/Table/ColumnSettingsDrawer/ColumnDrawerContext/utils/getInitialColumnsState.util.ts`    | Builds initial column drawer state shape                  |
+| `getTableColumnDrawerState` | `components/Table/ColumnSettingsDrawer/ColumnDrawerContext/utils/getTableColumnDrawerState.util.ts` | Maps a table columns snapshot to drawer state for one key |
 
 ### `src/utils/api/`
 
@@ -78,9 +86,10 @@ Before creating anything new, check this inventory. If something here does the j
 
 ### `src/utils/filters/`
 
-| Function                    | Location                                          | Description                                                                   |
-| --------------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------- |
-| `createStaticFilterOptions` | `utils/filters/createStaticFilterOptions.util.ts` | Wraps a `string[]` into a `FilterOptionsResponse`-compatible paginated object |
+| Function                      | Location                                            | Description                                                                                 |
+| ----------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `createDistinctFilterOptions` | `utils/filters/createDistinctFilterOptions.util.ts` | Adapts a distinct-values API to table async filter options (`skip/limit` to `offset/limit`) |
+| `createStaticFilterOptions`   | `utils/filters/createStaticFilterOptions.util.ts`   | Wraps a `string[]` into a `FilterOptionsResponse`-compatible paginated object               |
 
 ### `src/utils/theme/`
 

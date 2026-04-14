@@ -34,7 +34,8 @@ ColumnSettingsDrawer/
 │   │   └── useGetColumnSorting
 │   │
 │   └── utils/
-│       └── getInitialColumnsState.util.ts → Build initial state shape
+│       ├── getInitialColumnsState.util.ts → Build initial state shape
+│       └── getTableColumnDrawerState.util.ts → Map table snapshot to drawer state
 │
 ├── GeneralSection/                        → Column width presets + clear/reset all
 │   ├── GeneralSection.component.tsx

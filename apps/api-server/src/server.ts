@@ -1,4 +1,5 @@
 import { Pool } from 'pg';
+import { runStartupDbSanityCheck } from 'api-shared';
 
 import { createApp } from './app/app';
 import { readEnvConfig } from './config/env.util';
@@ -27,27 +28,6 @@ const server = app.listen(envConfig.API_PORT, '0.0.0.0', () => {
 
 const dbSanityRepository = createDbSanityRepository({ pool });
 
-const runStartupDbSanityCheck = async (): Promise<void> => {
-  try {
-    const sanity = await dbSanityRepository.getDbSanity();
-
-    if (sanity.isHealthy) {
-      console.warn('✅ [DB Sanity] Table counts:', sanity.tableCounts);
-      return;
-    }
-
-    console.warn('⚠️ [DB Sanity] Potential data/connection issues detected');
-
-    for (const issue of sanity.issues) {
-      console.warn(`   - ${issue}`);
-    }
-
-    console.warn('   - Run `vp run seed` in api-server to repopulate tables.');
-  } catch (error: unknown) {
-    console.error('❌ [DB Sanity] Startup sanity check failed:', error);
-  }
-};
-
 const closeServer = (): Promise<void> =>
   new Promise(
     // eslint-disable-next-line local-rules/destructuring-for-functions
@@ -70,7 +50,10 @@ const shutdown = async (): Promise<void> => {
 };
 
 // eslint-disable-next-line unicorn/prefer-top-level-await
-void runStartupDbSanityCheck();
+void runStartupDbSanityCheck({
+  dbSanityRepository,
+  repopulateCommand: '`vp run seed` in api-server',
+});
 
 process.on('SIGINT', () => {
   void shutdown().catch((error: unknown) => {

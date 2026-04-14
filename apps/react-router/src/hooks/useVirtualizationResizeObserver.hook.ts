@@ -6,6 +6,7 @@ import {
   DEFAULT_CONTAINER_HEIGHT,
   DEFAULT_ROW_OVERSCAN,
 } from '@/constants/virtualization.constants';
+import { getVerticalVirtualizationWindow } from '@/hooks/utils';
 
 export type UseVirtualizationResizeObserverArgs = {
   containerRef: RefObject<HTMLElement | null>;
@@ -28,17 +29,20 @@ export const useVirtualizationResizeObserver = ({
   );
   const rafIdRef = useRef(-1);
 
-  const visibleCount = Math.ceil(containerHeight / itemHeight);
-  const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
-  const endIndex = Math.min(
+  const {
+    bottomSpacerHeight,
+    endIndex,
+    offsetY,
+    startIndex,
+    totalHeight,
+    visibleCount,
+  } = getVerticalVirtualizationWindow({
+    containerHeight,
+    itemHeight,
+    overscan,
+    scrollTop,
     totalItems,
-    startIndex + visibleCount + overscan * 2,
-  );
-  const offsetY = startIndex * itemHeight;
-  const totalHeight = totalItems * itemHeight;
-  const visibleItemsCount = endIndex - startIndex;
-  const bottomSpacerHeight =
-    totalHeight - (offsetY + visibleItemsCount * itemHeight);
+  });
 
   useEffect(() => {
     const container = containerRef.current;

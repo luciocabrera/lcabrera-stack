@@ -2,7 +2,6 @@ import { Link } from 'react-router';
 
 import type {
   ColumnPinningState,
-  FilterOptionsResponse,
   TableColumn,
 } from '@/components/Table/Table.types';
 
@@ -10,7 +9,10 @@ import { Button } from '@/components/Button';
 import { EyeIcon } from '@/components/Icons';
 import { ICON_SIZE_XS } from '@/design-system/constants/iconSizes.constants';
 import { type EnterpriseOrder, enterpriseOrdersApi } from '@/services';
-import { createStaticFilterOptions } from '@/utils/filters';
+import {
+  createDistinctFilterOptions,
+  createStaticFilterOptions,
+} from '@/utils/filters';
 
 export const PERSISTENCE_KEY = 'enterprise-orders-table';
 
@@ -29,18 +31,10 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   },
   {
     dataType: 'string',
-    fetchFilterOptions: async ({ limit, skip }) => {
-      const result = await enterpriseOrdersApi.fetchDistinctValues({
-        columnName: 'order_number',
-        limit,
-        offset: skip,
-      });
-      return { hasMore: result.hasMore, values: result.values };
-    },
-    filterOptionsDataSelector: (response: FilterOptionsResponse) =>
-      response.values,
-    filterOptionsDataTotalSelector: (response: FilterOptionsResponse) =>
-      response.hasMore ? Infinity : response.values.length,
+    ...createDistinctFilterOptions<EnterpriseOrder>({
+      columnName: 'order_number',
+      fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
+    }),
     key: 'order_number',
     label: 'Order #',
     maxWidth: 180,
@@ -93,18 +87,10 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   },
   {
     dataType: 'string',
-    fetchFilterOptions: async ({ limit, skip }) => {
-      const result = await enterpriseOrdersApi.fetchDistinctValues({
-        columnName: 'customer_email',
-        limit,
-        offset: skip,
-      });
-      return { hasMore: result.hasMore, values: result.values };
-    },
-    filterOptionsDataSelector: (response: FilterOptionsResponse) =>
-      response.values,
-    filterOptionsDataTotalSelector: (response: FilterOptionsResponse) =>
-      response.hasMore ? Infinity : response.values.length,
+    ...createDistinctFilterOptions<EnterpriseOrder>({
+      columnName: 'customer_email',
+      fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
+    }),
     key: 'customer_email',
     label: 'Email',
     maxWidth: 280,
@@ -112,18 +98,10 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   },
   {
     dataType: 'string',
-    fetchFilterOptions: async ({ limit, skip }) => {
-      const result = await enterpriseOrdersApi.fetchDistinctValues({
-        columnName: 'customer_type',
-        limit,
-        offset: skip,
-      });
-      return { hasMore: result.hasMore, values: result.values };
-    },
-    filterOptionsDataSelector: (response: FilterOptionsResponse) =>
-      response.values,
-    filterOptionsDataTotalSelector: (response: FilterOptionsResponse) =>
-      response.hasMore ? Infinity : response.values.length,
+    ...createDistinctFilterOptions<EnterpriseOrder>({
+      columnName: 'customer_type',
+      fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
+    }),
     key: 'customer_type',
     label: 'Customer Type',
     maxWidth: 180,
@@ -239,18 +217,10 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   },
   {
     dataType: 'string',
-    fetchFilterOptions: async ({ limit, skip }) => {
-      const result = await enterpriseOrdersApi.fetchDistinctValues({
-        columnName: 'shipping_city',
-        limit,
-        offset: skip,
-      });
-      return { hasMore: result.hasMore, values: result.values };
-    },
-    filterOptionsDataSelector: (response: FilterOptionsResponse) =>
-      response.values,
-    filterOptionsDataTotalSelector: (response: FilterOptionsResponse) =>
-      response.hasMore ? Infinity : response.values.length,
+    ...createDistinctFilterOptions<EnterpriseOrder>({
+      columnName: 'shipping_city',
+      fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
+    }),
     key: 'shipping_city',
     label: 'Ship City',
     maxWidth: 180,
@@ -258,18 +228,10 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   },
   {
     dataType: 'string',
-    fetchFilterOptions: async ({ limit, skip }) => {
-      const result = await enterpriseOrdersApi.fetchDistinctValues({
-        columnName: 'shipping_state',
-        limit,
-        offset: skip,
-      });
-      return { hasMore: result.hasMore, values: result.values };
-    },
-    filterOptionsDataSelector: (response: FilterOptionsResponse) =>
-      response.values,
-    filterOptionsDataTotalSelector: (response: FilterOptionsResponse) =>
-      response.hasMore ? Infinity : response.values.length,
+    ...createDistinctFilterOptions<EnterpriseOrder>({
+      columnName: 'shipping_state',
+      fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
+    }),
     key: 'shipping_state',
     label: 'Ship State',
     maxWidth: 150,
@@ -277,18 +239,10 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   },
   {
     dataType: 'string',
-    fetchFilterOptions: async ({ limit, skip }) => {
-      const result = await enterpriseOrdersApi.fetchDistinctValues({
-        columnName: 'shipping_country',
-        limit,
-        offset: skip,
-      });
-      return { hasMore: result.hasMore, values: result.values };
-    },
-    filterOptionsDataSelector: (response: FilterOptionsResponse) =>
-      response.values,
-    filterOptionsDataTotalSelector: (response: FilterOptionsResponse) =>
-      response.hasMore ? Infinity : response.values.length,
+    ...createDistinctFilterOptions<EnterpriseOrder>({
+      columnName: 'shipping_country',
+      fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
+    }),
     key: 'shipping_country',
     label: 'Ship Country',
     maxWidth: 180,
@@ -296,18 +250,10 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   },
   {
     dataType: 'string',
-    fetchFilterOptions: async ({ limit, skip }) => {
-      const result = await enterpriseOrdersApi.fetchDistinctValues({
-        columnName: 'carrier',
-        limit,
-        offset: skip,
-      });
-      return { hasMore: result.hasMore, values: result.values };
-    },
-    filterOptionsDataSelector: (response: FilterOptionsResponse) =>
-      response.values,
-    filterOptionsDataTotalSelector: (response: FilterOptionsResponse) =>
-      response.hasMore ? Infinity : response.values.length,
+    ...createDistinctFilterOptions<EnterpriseOrder>({
+      columnName: 'carrier',
+      fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
+    }),
     key: 'carrier',
     label: 'Carrier',
     maxWidth: 150,
@@ -315,18 +261,10 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   },
   {
     dataType: 'string',
-    fetchFilterOptions: async ({ limit, skip }) => {
-      const result = await enterpriseOrdersApi.fetchDistinctValues({
-        columnName: 'warehouse_location',
-        limit,
-        offset: skip,
-      });
-      return { hasMore: result.hasMore, values: result.values };
-    },
-    filterOptionsDataSelector: (response: FilterOptionsResponse) =>
-      response.values,
-    filterOptionsDataTotalSelector: (response: FilterOptionsResponse) =>
-      response.hasMore ? Infinity : response.values.length,
+    ...createDistinctFilterOptions<EnterpriseOrder>({
+      columnName: 'warehouse_location',
+      fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
+    }),
     key: 'warehouse_location',
     label: 'Warehouse',
     maxWidth: 180,

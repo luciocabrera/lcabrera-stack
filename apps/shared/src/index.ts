@@ -57,4 +57,5 @@ export type {
 } from './types/api.types.js';
 export { buildOrderByClause } from './utils/buildOrderByClause.util.js';
 export { formatPgAdminQuery } from './utils/formatPgAdminQuery.util.js';
+export { runStartupDbSanityCheck } from './utils/runStartupDbSanityCheck.util.js';
 export { serializeDatabaseValue } from './utils/serializeDatabaseValue.util.js';

@@ -4,9 +4,10 @@ Table filter-specific adapter utilities that bridge static data to the Table com
 
 ## Files
 
-| File                                | Description                                                                                                                          |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `createStaticFilterOptions.util.ts` | Wraps a `string[]` into `fetchFilterOptions` + selector functions compatible with the Table's `FilterOptionsResponse` async contract |
+| File                                  | Description                                                                                                                          |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `createDistinctFilterOptions.util.ts` | Adapts a distinct-values API (`columnName`, `limit`, `offset`) to the table async filter options contract                            |
+| `createStaticFilterOptions.util.ts`   | Wraps a `string[]` into `fetchFilterOptions` + selector functions compatible with the Table's `FilterOptionsResponse` async contract |
 
 ## Usage Pattern
 

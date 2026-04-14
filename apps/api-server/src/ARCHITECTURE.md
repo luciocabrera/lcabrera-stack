@@ -73,5 +73,6 @@ Common utilities shared across both API server implementations live in `apps/sha
 - `api.types` — Shared response/pagination/query type contracts.
 - `server.constants` — Shared pagination/sanity constants.
 - `serializeDatabaseValue` — Converts PostgreSQL row values (Buffers, nested objects) to JSON-safe response values.
+- `runStartupDbSanityCheck` — Shared startup logging flow for DB sanity diagnostics.
 
 Imports use the `api-shared` package alias for monorepo resolution.

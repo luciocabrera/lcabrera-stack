@@ -15,6 +15,7 @@ Eliminate code duplication between `apps/api-server` and `apps/api-server-fast` 
 | `api.types`                            | `src/types/api.types.ts`                                                 | Shared API response/query/pagination types and query client contract |
 | `buildOrderByClause`                   | `src/utils/buildOrderByClause.util.ts`                                   | Shared safe SQL ORDER BY construction utility                        |
 | `formatPgAdminQuery`                   | `src/utils/formatPgAdminQuery.util.ts`                                   | Shared SQL logging formatter utility                                 |
+| `runStartupDbSanityCheck`              | `src/utils/runStartupDbSanityCheck.util.ts`                              | Shared startup sanity logging flow used by both API server variants  |
 | `serializeDatabaseValue`               | `src/utils/serializeDatabaseValue.util.ts`                               | Convert PostgreSQL row values (Buffers, objects) to JSON-safe format |
 | `carSales.constants/types/repository`  | `src/features/carSales/*`                                                | Shared car-sales sorting contracts and repository implementation     |
 | `dbSanity.repository`                  | `src/features/dbSanity/dbSanity.repository.ts`                           | Shared database sanity checks implementation                         |

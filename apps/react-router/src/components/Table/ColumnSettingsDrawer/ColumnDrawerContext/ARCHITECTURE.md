@@ -31,7 +31,8 @@ ColumnDrawerContext/
 │   └── useGetColumnSorting
 │
 └── utils/
-    └── getInitialColumnsState.util.ts     → Build initial state shape
+  ├── getInitialColumnsState.util.ts     → Build initial state shape
+  └── getTableColumnDrawerState.util.ts  → Map table snapshot to drawer state for one column
 ```
 
 ## Store Pattern
