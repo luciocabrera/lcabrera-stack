@@ -1,12 +1,12 @@
 # API Server Fast Architecture
 
-Express + PostgreSQL backend optimized for fast local iteration and benchmark scenarios.
+Fastify + PostgreSQL backend optimized for fast local iteration and benchmark scenarios.
 
 ## Runtime
 
 - Source entry point: `src/server.ts`
 - Build output: `dist/server.js`
-- HTTP server: Express
+- HTTP server: Fastify
 - Database client: `pg` (`Pool`)
 - Env loading: `node --env-file-if-exists=.env dist/server.js`
 

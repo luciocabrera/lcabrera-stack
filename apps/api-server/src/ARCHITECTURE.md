@@ -26,8 +26,6 @@ src/
 │   └── env.util.ts
 ├── constants/
 │   └── server.constants.ts
-├── errors/
-│   └── httpError.ts
 ├── features/
 │   ├── carSales/
 │   ├── dbSanity/

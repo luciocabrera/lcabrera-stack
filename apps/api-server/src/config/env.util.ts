@@ -1,6 +1,6 @@
 import { HttpError } from 'api-shared';
 
-import { type EnvConfig, envSchema } from './env.schema';
+import { createEnvSchema, type EnvConfig } from './env.schema';
 
 type ReadEnvConfigArgs = {
   readonly env: NodeJS.ProcessEnv;
@@ -10,6 +10,8 @@ type ReadEnvConfigArgs = {
  * Parse and validate environment configuration for the API server.
  */
 export const readEnvConfig = ({ env }: ReadEnvConfigArgs): EnvConfig => {
+  const corsAllowedOriginsDefault = env.CORS_ALLOWED_ORIGINS_DEFAULT ?? '';
+  const envSchema = createEnvSchema({ corsAllowedOriginsDefault });
   const result = envSchema.safeParse(env);
 
   if (!result.success) {
