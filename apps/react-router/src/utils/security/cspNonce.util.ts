@@ -1,4 +1,4 @@
-export const CSP_NONCE_HEADER_NAME = 'x-csp-nonce';
+import { CSP_NONCE_HEADER_NAME } from './cspNonceHeaderName.constants';
 
 /**
  * Reads the CSP nonce from the inbound request headers.

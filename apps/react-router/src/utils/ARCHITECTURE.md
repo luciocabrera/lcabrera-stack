@@ -70,5 +70,5 @@ graph TD
 | `prefetch/`    | `resolveFromCacheOrFetch`, `prefetchNextPage`, `firePrefetch` — generic prefetch cache resolution, page prefetch creation, and ref-applied prefetch firing |
 | `security/`    | `getRequestCspNonce` — standardized `x-csp-nonce` request header parser                                                                                    |
 | `storage/`     | `parseCookies`, `readFromCookie`, `writeToCookie`, `writeToLocalStorage`                                                                                   |
-| `theme/`       | `getThemeFromCookie`, `setThemeCookie`                                                                                                                     |
+| `theme/`       | `getThemeFromCookie` (`getThemeFromCookie.util.ts`), `setThemeCookie` (`setThemeCookie.util.ts`)                                                           |
 | `urlState/`    | `encodeStateToURL`, `decodeStateFromURL`, `readTableStateFromURL`                                                                                          |

@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { getThemeFromCookie, setThemeCookie } from './theme-cookie.util';
+import { getThemeFromCookie } from './getThemeFromCookie.util';
+import { setThemeCookie } from './setThemeCookie.util';
 
 describe('getThemeFromCookie', () => {
   it('returns undefined for null cookieHeader', () => {

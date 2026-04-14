@@ -1,1 +1,2 @@
-export { getThemeFromCookie, setThemeCookie } from './theme-cookie.util';
+export { getThemeFromCookie } from './getThemeFromCookie.util';
+export { setThemeCookie } from './setThemeCookie.util';

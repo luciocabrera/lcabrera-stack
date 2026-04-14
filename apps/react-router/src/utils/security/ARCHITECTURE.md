@@ -4,9 +4,10 @@ Security-related shared utilities.
 
 ## Files
 
-| File               | Description                                                        |
-| ------------------ | ------------------------------------------------------------------ |
-| `cspNonce.util.ts` | Provides standardized CSP nonce header contract and request parser |
+| File                              | Description                                                 |
+| --------------------------------- | ----------------------------------------------------------- |
+| `cspNonceHeaderName.constants.ts` | Standardized CSP nonce header name constant (`x-csp-nonce`) |
+| `cspNonce.util.ts`                | Request parser for standardized CSP nonce header            |
 
 ## CSP Nonce Contract
 

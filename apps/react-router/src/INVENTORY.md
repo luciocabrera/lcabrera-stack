@@ -93,9 +93,10 @@ Before creating anything new, check this inventory. If something here does the j
 
 ### `src/utils/theme/`
 
-| Function                                | Location                           | Description                                  |
-| --------------------------------------- | ---------------------------------- | -------------------------------------------- |
-| `getThemeFromCookie` / `setThemeCookie` | `utils/theme/theme-cookie.util.ts` | Read/write theme mode to a cookie (SSR-safe) |
+| Function             | Location                                 | Description                                      |
+| -------------------- | ---------------------------------------- | ------------------------------------------------ |
+| `getThemeFromCookie` | `utils/theme/getThemeFromCookie.util.ts` | Read theme mode from a cookie header (SSR-safe)  |
+| `setThemeCookie`     | `utils/theme/setThemeCookie.util.ts`     | Write theme mode to browser cookie (client-safe) |
 
 ### `src/utils/logger/`
 
