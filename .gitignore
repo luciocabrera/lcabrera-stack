@@ -27,3 +27,5 @@ docker/.env
 docker/pgpass
 docker/local/.env
 docker/local/pgpass
+
+packages/eslint-local-rules/build/
