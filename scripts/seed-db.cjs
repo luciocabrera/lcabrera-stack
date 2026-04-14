@@ -101,7 +101,7 @@ const runSqlFile = (sqlFilePath) => {
 };
 
 const assertSafeDatabaseName = (name) => {
-  const isSafeName = /^[A-Za-z_][A-Za-z0-9_]*$/.test(name);
+  const isSafeName = /^[A-Za-z_]\w*$/.test(name);
 
   if (!isSafeName) {
     throw new Error(
