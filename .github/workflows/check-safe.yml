@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Vite+
         uses: voidzero-dev/setup-vp@8ecb39174989ce55af90f45cf55b02738599831d
