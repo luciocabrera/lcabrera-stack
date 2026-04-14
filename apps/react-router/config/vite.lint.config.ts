@@ -178,6 +178,7 @@ export const lintConfig: OxlintConfig = {
         '@typescript-eslint/use-unknown-in-catch-callback-variable': 'error',
         'constructor-super': 'off',
         'getter-return': 'off',
+        'local-rules/clean-import-paths': 'error',
         'local-rules/destructuring-for-functions': 'warn',
         'local-rules/merge-duplicate-imports': 'error',
         'local-rules/no-inline-type-imports': 'error',

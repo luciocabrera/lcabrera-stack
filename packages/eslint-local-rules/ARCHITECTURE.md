@@ -19,6 +19,7 @@ Centralized custom ESLint rules used across monorepo apps.
 ## Rule Scope Model
 
 - Global-eligible rules:
+  - `clean-import-paths`
   - `destructuring-for-functions`
   - `merge-duplicate-imports`
   - `no-inline-type-imports`

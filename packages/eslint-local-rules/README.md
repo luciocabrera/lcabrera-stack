@@ -84,6 +84,28 @@ type ButtonProps = { label: string };
 
 **Auto-fix:** Renames type declarations from `Arguments` -> `Args` globally. Renames `Properties` -> `Props` in React files (`.tsx`/`.jsx`).
 
+### 5. `clean-import-paths`
+
+Enforces clean internal import/export paths by disallowing file extensions and trailing `/index` segments.
+
+**❌ Disallowed:**
+
+```typescript
+import { Button } from './components/Button/index.ts';
+import type { Props } from './Thing.types.ts';
+export { utils } from '@/utils/index';
+```
+
+**✅ Enforced:**
+
+```typescript
+import { Button } from './components/Button';
+import type { Props } from './Thing.types';
+export { utils } from '@/utils';
+```
+
+**Auto-fix:** Removes `.ts`/`.tsx` suffixes and trailing `/index` from internal `./`, `../`, and `@/` import/export specifiers.
+
 ## Development
 
 All rules are written in TypeScript and compiled to JavaScript before being loaded by ESLint.
