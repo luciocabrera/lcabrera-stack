@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build:eslint-rules": "cd packages/eslint-local-rules && vp run build",
-    "check:safe": "vp run build:eslint-rules && vp check && cd apps/react-router && REACT_ROUTER_TEST_TASK=true vp run test",
+    "check:safe": "vp run typegen:router && vp run build:eslint-rules && vp check && cd apps/react-router && REACT_ROUTER_TEST_TASK=true vp run test",
     "ready": "vp run check:safe && vp run build -r",
     "dev": "pnpm --parallel --filter car-sales-api --filter vite-react-compiler run dev",
     "dev:fast": "pnpm --parallel --filter car-sales-api-fast --filter vite-react-compiler run dev",
@@ -17,6 +17,7 @@
     "seed:fast": "cd apps/api-server-fast && vp run seed",
     "start": "vp run start -r",
     "test": "cd apps/react-router && REACT_ROUTER_TEST_TASK=true vp run test",
+    "typegen:router": "cd apps/react-router && vp run typegen",
     "prepare": "vp config"
   },
   "devDependencies": {

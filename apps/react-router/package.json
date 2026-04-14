@@ -10,6 +10,7 @@
     "lint:check": "vp run build:eslint-rules && vp lint .",
     "format": "vp fmt .",
     "format:check": "vp fmt --check .",
+    "typegen": "react-router typegen",
     "typecheck": "react-router typegen && tsc --noEmit",
     "preview": "vp preview",
     "knip": "knip",
