@@ -16,6 +16,7 @@
     "seed": "cd apps/api-server && vp run seed",
     "seed:fast": "cd apps/api-server-fast && vp run seed",
     "start": "vp run start -r",
+    "test": "cd apps/react-router && vp run test",
     "prepare": "vp config"
   },
   "devDependencies": {
