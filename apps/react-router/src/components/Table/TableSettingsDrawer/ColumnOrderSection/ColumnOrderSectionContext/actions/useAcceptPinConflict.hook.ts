@@ -6,6 +6,7 @@ import {
   applyPin,
   buildAllOrderedColumns,
   insertAdjacentToPinnedGroup,
+  pinAllBetween,
 } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 import { useTableDrawerContextValue } from '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
 
@@ -37,72 +38,48 @@ export const useAcceptPinConflict = () => {
     });
     const index = allOrderedColumns.findIndex((col) => col.key === columnKey);
 
-    switch (resolution) {
-      case 'move-column': {
-        let newOrder = allOrderedColumns
-          .filter((col) => col.key !== columnKey)
-          .map((col) => col.key);
-        const column = allOrderedColumns[index];
-        if (column?.key) {
-          newOrder = insertAdjacentToPinnedGroup({
-            columnKey: column.key,
-            columnPinning,
-            order: newOrder,
-            side,
-          });
-        }
+    if (resolution === 'move-column') {
+      let newOrder = allOrderedColumns
+        .filter((col) => col.key !== columnKey)
+        .map((col) => col.key);
+      const column = allOrderedColumns[index];
 
-        drawerColumnsStore.set({
-          columnOrder: newOrder as ColumnOrderState,
-          columnPinning: applyPin({
-            columnKey,
-            columnPinning,
-            side,
-            staticKeys,
-          }),
+      if (column?.key) {
+        newOrder = insertAdjacentToPinnedGroup({
+          columnKey: column.key,
+          columnPinning,
+          order: newOrder,
+          side,
         });
-        break;
       }
 
-      case 'pin-all-between': {
-        const newPinning = {
-          left: [...columnPinning.left],
-          right: [...columnPinning.right],
-        };
-
-        if (side === 'left') {
-          for (let i = 0; i <= index; i++) {
-            const key = allOrderedColumns[i]?.key ?? '';
-            if (!newPinning.left.includes(key)) {
-              newPinning.right = newPinning.right.filter((k) => k !== key);
-              newPinning.left.push(key);
-            }
-          }
-        } else {
-          for (let i = index; i < allOrderedColumns.length; i++) {
-            const key = allOrderedColumns[i]?.key ?? '';
-            if (!newPinning.right.includes(key)) {
-              newPinning.left = newPinning.left.filter((k) => k !== key);
-              newPinning.right.push(key);
-            }
-          }
-        }
-
-        drawerColumnsStore.set({ columnPinning: newPinning });
-        break;
-      }
-
-      case 'pin-only': {
-        drawerColumnsStore.set({
-          columnPinning: applyPin({
-            columnKey,
-            columnPinning,
-            side,
-            staticKeys,
-          }),
-        });
-        break;
-      }
+      drawerColumnsStore.set({
+        columnOrder: newOrder as ColumnOrderState,
+        columnPinning: applyPin({
+          columnKey,
+          columnPinning,
+          side,
+          staticKeys,
+        }),
+      });
+    } else if (resolution === 'pin-all-between') {
+      drawerColumnsStore.set({
+        columnPinning: pinAllBetween({
+          allOrderedKeys: allOrderedColumns.map((column) => column.key),
+          columnPinning,
+          index,
+          side,
+        }),
+      });
+    } else {
+      drawerColumnsStore.set({
+        columnPinning: applyPin({
+          columnKey,
+          columnPinning,
+          side,
+          staticKeys,
+        }),
+      });
     }
 
     modalsStore.set({

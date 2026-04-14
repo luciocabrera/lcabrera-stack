@@ -40,10 +40,10 @@ graph TD
 
 ### Args
 
-| Field        | Type             | Description                                      |
-| ------------ | ---------------- | ------------------------------------------------ |
-| `totalCount` | `number`         | Total selected items (full `selected.length`)    |
-| `trigger`    | `HTMLDivElement` | The trigger DOM node (from `triggerRef.current`) |
+| Field        | Type          | Description                                      |
+| ------------ | ------------- | ------------------------------------------------ |
+| `totalCount` | `number`      | Total selected items (full `selected.length`)    |
+| `trigger`    | `HTMLElement` | The trigger DOM node (from `triggerRef.current`) |
 
 ### Overflow Slot Rule
 

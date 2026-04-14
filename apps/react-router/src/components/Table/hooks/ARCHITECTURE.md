@@ -6,6 +6,7 @@ Table-specific hooks for column resizing, infinite scroll, and state persistence
 
 ```
 hooks/
+├── persistCookieAction.constants.ts   → Cookie persistence action route constant
 ├── useColumnResize.hook.ts          → RAF-throttled drag resize
 ├── useInfiniteScroll.hook.ts        → Scroll threshold detection
 ├── usePersistCookieAction.hook.ts   → Server action cookie persistence

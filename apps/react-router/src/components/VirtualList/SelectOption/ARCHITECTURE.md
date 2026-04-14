@@ -43,5 +43,5 @@ graph TD
 
 ## Notes
 
-- When `hasCheckbox=false` the `onClick` is placed on the `<label>` wrapper instead of `onChange` on a hidden checkbox.
+- When `hasCheckbox=false` the `onClick` is placed on the `<label>` wrapper and keyboard activation is supported via `Enter`/`Space`.
 - Uses shared `styles` and `skeletonStyles` from `VirtualList.stylex` — no own stylex file.

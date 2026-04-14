@@ -2,7 +2,7 @@ import { TRIGGER_MAX_HEIGHT } from '../VirtualSelectTrigger';
 
 export type CountVisibleTagsArgs = {
   readonly totalCount: number;
-  readonly trigger: HTMLDivElement;
+  readonly trigger: HTMLElement;
 };
 /**
  * Counts how many tag children fit within height limit.

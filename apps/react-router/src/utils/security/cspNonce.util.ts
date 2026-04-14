@@ -1,4 +1,4 @@
-export const CSP_NONCE_HEADER_NAME = 'x-csp-nonce';
+import { CSP_NONCE_HEADER_NAME } from './cspNonceHeaderName.constants';
 
 /**
  * Reads the CSP nonce from the inbound request headers.
@@ -7,6 +7,5 @@ export const CSP_NONCE_HEADER_NAME = 'x-csp-nonce';
  * SSR entrypoints consume the same contract.
  */
 export const getRequestCspNonce = (request: Request): string | undefined => {
-  const value = request.headers.get(CSP_NONCE_HEADER_NAME);
-  return value === null ? undefined : value;
+  return request.headers.get(CSP_NONCE_HEADER_NAME) ?? undefined;
 };

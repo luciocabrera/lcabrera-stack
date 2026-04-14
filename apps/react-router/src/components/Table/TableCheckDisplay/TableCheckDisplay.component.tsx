@@ -1,7 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { CheckIcon } from '@/components/Icons';
-
 import type { TableCheckDisplayProps } from './TableCheckDisplay.types';
 
 import { tableCheckDisplayStyles } from './TableCheckDisplay.stylex';
@@ -15,17 +13,19 @@ export const TableCheckDisplay = ({
   if (columnLabel) {
     label = `${columnLabel}: ${isChecked ? 'Yes' : 'No'}`;
   }
+
   return (
-    <div
-      aria-checked={isChecked}
+    <input
       aria-label={label}
-      role='checkbox'
+      checked={isChecked}
+      disabled
+      readOnly
+      tabIndex={-1}
+      type='checkbox'
       {...stylex.props(
         tableCheckDisplayStyles.checkbox,
         isChecked && tableCheckDisplayStyles.checkboxChecked,
       )}
-    >
-      {isChecked && <CheckIcon />}
-    </div>
+    />
   );
 };

@@ -11,15 +11,6 @@ import { useBatchSetTableSettings } from '@/components/Table/contexts/TableConfi
 
 import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook';
 
-// type BatchTableSettingsUpdate<TData> = {
-//   columnFilters: ColumnFiltersState;
-//   columnOrder: ColumnOrderState;
-//   columnPinning: ColumnPinningState;
-//   columnSizing: ColumnSizingState;
-//   columnVisibility: ColumnVisibilityState;
-//   sorting: SortingState;
-// };
-
 /**
  * Hook to batch update all table settings at once
  * This prevents intermediate state updates that could trigger effects

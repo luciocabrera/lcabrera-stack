@@ -1,13 +1,13 @@
 # VirtualSelectTrigger Architecture
 
-Combobox trigger button: shows placeholder, single-value label, or multi-select tag chips with overflow counter and a chevron indicator.
+Combobox trigger: shows placeholder, single-value label, or multi-select tag chips with overflow counter and a chevron indicator.
 
 ## File Structure
 
 ```
 VirtualSelectTrigger/
 ├── index.ts                              → Barrel export
-├── VirtualSelectTrigger.component.tsx   → Trigger button (combobox role)
+├── VirtualSelectTrigger.component.tsx   → Trigger element (button when safe, div for tag mode)
 ├── VirtualSelectTrigger.stylex.ts       → Styles + TRIGGER_MAX_HEIGHT constant
 └── VirtualSelectTrigger.types.ts        → Props
 ```
@@ -41,18 +41,18 @@ graph TD
 
 ## Props
 
-| Prop            | Type                                | Description                                                |
-| --------------- | ----------------------------------- | ---------------------------------------------------------- |
-| `isAlwaysOpen`  | `boolean`                           | Hides chevron and disables click/focus interaction         |
-| `isOpen`        | `boolean`                           | Controls chevron direction and `aria-expanded`             |
-| `mode`          | `'single' \| 'multi'`               | Single shows label; multi shows Tag chips                  |
-| `onRemoveTag`   | `(option: string) => void`          | Called when a Tag's remove button is clicked               |
-| `onToggle`      | `() => void`                        | Opens/closes the dropdown                                  |
-| `overflowCount` | `number`                            | Number of tags hidden behind "+N more"                     |
-| `placeholder`   | `string`                            | Shown when `selected` is empty                             |
-| `selected`      | `string[]`                          | Full selection (used to detect `hasSelection`)             |
-| `triggerRef`    | `RefObject<HTMLDivElement \| null>` | Measured by ResizeObserver in `VirtualSelect`              |
-| `visibleTags`   | `string[]`                          | Subset of `selected` that fits within `TRIGGER_MAX_HEIGHT` |
+| Prop            | Type                                                     | Description                                                |
+| --------------- | -------------------------------------------------------- | ---------------------------------------------------------- |
+| `isAlwaysOpen`  | `boolean`                                                | Hides chevron and disables click/focus interaction         |
+| `isOpen`        | `boolean`                                                | Controls chevron direction and `aria-expanded`             |
+| `mode`          | `'single' \| 'multi'`                                    | Single shows label; multi shows Tag chips                  |
+| `onRemoveTag`   | `(option: string) => void`                               | Called when a Tag's remove button is clicked               |
+| `onToggle`      | `() => void`                                             | Opens/closes the dropdown                                  |
+| `overflowCount` | `number`                                                 | Number of tags hidden behind "+N more"                     |
+| `placeholder`   | `string`                                                 | Shown when `selected` is empty                             |
+| `selected`      | `string[]`                                               | Full selection (used to detect `hasSelection`)             |
+| `triggerRef`    | `RefObject<HTMLButtonElement \| HTMLDivElement \| null>` | Measured by ResizeObserver in `VirtualSelect`              |
+| `visibleTags`   | `string[]`                                               | Subset of `selected` that fits within `TRIGGER_MAX_HEIGHT` |
 
 ## Tag Overflow Behaviour
 
@@ -64,9 +64,9 @@ When `mode === 'multi'` the parent `VirtualSelect` attaches a `ResizeObserver` t
 
 ## Accessibility
 
-| Attribute       | Value / Logic                            |
-| --------------- | ---------------------------------------- |
-| `role`          | `combobox`                               |
-| `aria-expanded` | `isOpen`                                 |
-| `aria-haspopup` | `listbox`                                |
-| `tabIndex`      | `0` (normal) / `undefined` (always-open) |
+| Attribute       | Value / Logic                                                              |
+| --------------- | -------------------------------------------------------------------------- |
+| Native element  | `button` for single/placeholder trigger; `div` for multi-selected tag mode |
+| `aria-expanded` | `isOpen` on interactive branches                                           |
+| `aria-haspopup` | `listbox` on interactive branches                                          |
+| Keyboard        | Native button keyboard handling; `Enter`/`Space` handled on div tag branch |

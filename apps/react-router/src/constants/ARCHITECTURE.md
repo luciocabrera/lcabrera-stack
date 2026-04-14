@@ -2,6 +2,17 @@
 
 Application-wide constant values: API host configuration and filter operator definitions (display labels, URL serialization codes, and per-type allowed sets).
 
+## Placement Rule
+
+Use this folder for app-wide, cross-domain constants that are imported by multiple features or layers.
+
+Keep constants colocated with their domain when they are implementation details of a specific utility/feature (for example utils/security or utils/theme internals).
+
+Quick decision guide:
+
+- Add to `src/constants` when the constant is shared across domains.
+- Keep local when the constant is only meaningful inside one domain module.
+
 ## File Index
 
 | File                           | Contents                                             |

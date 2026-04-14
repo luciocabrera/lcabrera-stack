@@ -17,8 +17,8 @@ export const useResetColumnFilter = () => {
     const columnsState = columnsStore.get();
     const persistenceKey = metaStore.get()?.persistenceKey ?? '';
     const current = columnsState?.columnFilters ?? {};
-    const { [columnKey]: unusedFilter, ...rest } = current;
-    void unusedFilter; // Explicitly mark as intentionally unused
+    const rest = { ...current };
+    delete rest[columnKey];
 
     // Show loading feedback immediately
     dataStore.set({ isLoading: true });

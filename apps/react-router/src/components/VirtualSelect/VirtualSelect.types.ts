@@ -18,6 +18,8 @@ export type VirtualSelectProps = {
   readonly isAlwaysOpen?: boolean;
   /** Height for the virtual dropdown list (CSS value, e.g. '18.75rem') */
   readonly listMaxHeight?: string;
+  /** Optional id used to wire trigger/listbox ARIA relationships */
+  readonly listboxId?: string;
   /** Selection mode: 'single' closes on select, 'multi' shows checkboxes + select all */
   readonly mode: VirtualSelectMode;
   /** Called when the selection changes */

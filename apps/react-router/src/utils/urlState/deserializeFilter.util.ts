@@ -1,8 +1,12 @@
-import type { ColumnFilter } from '@/types/filterOperators.types';
+import type {
+  ColumnFilter,
+  NumberOperatorType,
+} from '@/types/filterOperators.types';
 
 import {
   DATE_OPERATOR_SHORT_CODES,
   KNOWN_OPERATOR_SHORT_CODES,
+  NUMBER_OPERATOR_SHORT_CODES,
   SHORT_TO_OPERATOR,
   TEXT_OPERATOR_SHORT_CODES,
 } from '@/constants/filterOperators.constants';
@@ -10,8 +14,147 @@ import {
 const expandOperator = (short: string): string =>
   SHORT_TO_OPERATOR.get(short) ?? short;
 
-const isDateValue = (v: unknown): boolean =>
+const isDateValue = (v: unknown): v is string =>
   typeof v === 'string' && /^\d{4}-\d{2}-\d{2}/.test(v);
+
+const isNumberOperatorType = (
+  operator: string,
+): operator is NumberOperatorType =>
+  operator === 'equals' ||
+  operator === 'greaterThan' ||
+  operator === 'greaterThanOrEqual' ||
+  operator === 'lessThan' ||
+  operator === 'lessThanOrEqual' ||
+  operator === 'notEquals';
+
+const parseBooleanFilter = (value: unknown): ColumnFilter | undefined => {
+  if (typeof value !== 'boolean') {
+    return undefined;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  return { type: 'boolean', value };
+};
+
+const parseNotEqualsSelectFilter = (
+  arr: readonly unknown[],
+): ColumnFilter | undefined => {
+  if (arr[0] !== '!') {
+    return undefined;
+  }
+
+  const values = arr
+    .slice(1)
+    .filter((item): item is string => typeof item === 'string');
+
+  return { operator: 'notEquals', type: 'select', values };
+};
+
+const parseNumberFilter = ({
+  arr,
+  operator,
+}: {
+  readonly arr: readonly unknown[];
+  readonly operator: string;
+}): ColumnFilter | undefined => {
+  if (
+    !NUMBER_OPERATOR_SHORT_CODES.has(operator) ||
+    typeof arr[1] !== 'number'
+  ) {
+    return undefined;
+  }
+
+  if (operator === 'bw' && typeof arr[2] === 'number') {
+    return {
+      operator: 'between',
+      type: 'number',
+      value: arr[1],
+      value2: arr[2],
+    };
+  }
+
+  const expandedOperator = expandOperator(operator);
+  if (!isNumberOperatorType(expandedOperator)) {
+    return undefined;
+  }
+
+  return {
+    operator: expandedOperator,
+    type: 'number',
+    value: arr[1],
+  };
+};
+
+const parseDateFilter = ({
+  arr,
+  operator,
+}: {
+  readonly arr: readonly unknown[];
+  readonly operator: string;
+}): ColumnFilter | undefined => {
+  if (!DATE_OPERATOR_SHORT_CODES.has(operator) || !isDateValue(arr[1])) {
+    return undefined;
+  }
+
+  if (operator === 'bw' && typeof arr[2] === 'string') {
+    return {
+      operator: 'between',
+      type: 'date',
+      value: arr[1],
+      value2: arr[2],
+    };
+  }
+
+  return {
+    operator: expandOperator(operator) as 'after',
+    type: 'date',
+    value: arr[1],
+  };
+};
+
+const parseTextFilter = ({
+  arr,
+  operator,
+}: {
+  readonly arr: readonly unknown[];
+  readonly operator: string;
+}): ColumnFilter | undefined => {
+  if (!TEXT_OPERATOR_SHORT_CODES.has(operator) || typeof arr[1] !== 'string') {
+    return undefined;
+  }
+
+  return {
+    operator: expandOperator(operator) as 'contains',
+    type: 'text',
+    value: arr[1],
+  };
+};
+
+const parseKnownOperatorFilter = (
+  arr: readonly unknown[],
+): ColumnFilter | undefined => {
+  const first = arr[0];
+
+  if (typeof first !== 'string' || !KNOWN_OPERATOR_SHORT_CODES.has(first)) {
+    return undefined;
+  }
+
+  return (
+    parseNumberFilter({ arr, operator: first }) ??
+    parseDateFilter({ arr, operator: first }) ??
+    parseTextFilter({ arr, operator: first })
+  );
+};
+
+const parseEqualsSelectFilter = (
+  arr: readonly unknown[],
+): ColumnFilter | undefined => {
+  if (!arr.every((item) => typeof item === 'string')) {
+    return undefined;
+  }
+
+  return { operator: 'equals', type: 'select', values: [...arr] };
+};
 
 /**
  * Deserialize a single compact filter value back to a ColumnFilter.
@@ -20,10 +163,9 @@ const isDateValue = (v: unknown): boolean =>
  * Returns undefined if the value cannot be parsed.
  */
 export const deserializeFilter = (value: unknown): ColumnFilter | undefined => {
-  // Boolean: bare true/false
-  if (typeof value === 'boolean') {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    return { type: 'boolean', value };
+  const booleanFilter = parseBooleanFilter(value);
+  if (booleanFilter) {
+    return booleanFilter;
   }
 
   if (!Array.isArray(value)) return undefined;
@@ -33,64 +175,9 @@ export const deserializeFilter = (value: unknown): ColumnFilter | undefined => {
   // Empty array — skip
   if (arr.length === 0) return undefined;
 
-  const first = arr[0];
-
-  // Select notEquals: ["!", "Low", ...]
-  if (first === '!') {
-    const values = arr.slice(1) as string[];
-    return { operator: 'notEquals', type: 'select', values };
-  }
-
-  // If first element is a known operator code → typed filter
-  if (typeof first === 'string' && KNOWN_OPERATOR_SHORT_CODES.has(first)) {
-    const op = expandOperator(first);
-
-    // Number filter: operator + numeric value(s)
-    if (typeof arr[1] === 'number') {
-      return first === 'bw'
-        ? {
-            operator: op as 'between',
-            type: 'number',
-            value: arr[1],
-            value2: arr[2] as number,
-          }
-        : {
-            operator: op as 'equals',
-            type: 'number',
-            value: arr[1],
-          };
-    }
-
-    // Date filter: date operators + date-like string
-    if (DATE_OPERATOR_SHORT_CODES.has(first) && isDateValue(arr[1])) {
-      return first === 'bw'
-        ? {
-            operator: 'between',
-            type: 'date',
-            value: arr[1] as string,
-            value2: arr[2] as string,
-          }
-        : {
-            operator: op as 'after',
-            type: 'date',
-            value: arr[1] as string,
-          };
-    }
-
-    // Text filter: text operators + string value
-    if (TEXT_OPERATOR_SHORT_CODES.has(first) && typeof arr[1] === 'string') {
-      return {
-        operator: op as 'contains',
-        type: 'text',
-        value: arr[1],
-      };
-    }
-  }
-
-  // Plain string array → select equals
-  if (arr.every((item) => typeof item === 'string')) {
-    return { operator: 'equals', type: 'select', values: arr };
-  }
-
-  return undefined;
+  return (
+    parseNotEqualsSelectFilter(arr) ??
+    parseKnownOperatorFilter(arr) ??
+    parseEqualsSelectFilter(arr)
+  );
 };

@@ -3,6 +3,10 @@ import type {
   ColumnPinningState,
 } from '@/components/Table/Table.types';
 
+import { getPinnedEntries } from './getPinnedEntries.util';
+import { resolveClosestSide } from './resolveClosestSide.util';
+import { sortPinnedKeysByOrder } from './sortPinnedKeysByOrder.util';
+
 type RecalculatePinSidesArgs = {
   readonly columnPinning: ColumnPinningState;
   readonly newOrder: ColumnOrderState;
@@ -20,63 +24,50 @@ export const recalculatePinSides = ({
   newOrder,
   staticKeys,
 }: RecalculatePinSidesArgs): ColumnPinningState => {
-  const newLeft: string[] = [];
-  const newRight: string[] = [];
+  const pinnedEntries = getPinnedEntries({ columnPinning });
 
-  // Preserve static columns in their original pin side
-  if (staticKeys) {
-    for (const key of columnPinning.left) {
-      if (staticKeys.has(key)) newLeft.push(key);
-    }
-    for (const key of columnPinning.right) {
-      if (staticKeys.has(key)) newRight.push(key);
-    }
-  }
+  const staticLeft = columnPinning.left.filter((key) => staticKeys?.has(key));
+  const staticRight = columnPinning.right.filter((key) => staticKeys?.has(key));
+  const dynamicEntries = pinnedEntries.filter(
+    ({ key }) => !staticKeys?.has(key),
+  );
 
-  const allPinned = [
-    ...columnPinning.left.map((key) => ({
-      key,
-      originalSide: 'left' as const,
-    })),
-    ...columnPinning.right.map((key) => ({
-      key,
-      originalSide: 'right' as const,
-    })),
-  ];
+  const dynamicPinning = dynamicEntries.reduce(
+    (acc, { key, originalSide }) => {
+      const index = newOrder.indexOf(key);
 
-  for (const { key, originalSide } of allPinned) {
-    if (staticKeys?.has(key)) continue;
-
-    const index = newOrder.indexOf(key);
-    if (index === -1) continue;
-
-    const distanceFromLeft = index;
-    const distanceFromRight = newOrder.length - 1 - index;
-
-    if (distanceFromLeft < distanceFromRight) {
-      newLeft.push(key);
-    } else if (distanceFromRight < distanceFromLeft) {
-      newRight.push(key);
-    } else {
-      // Equidistant — keep original side
-      if (originalSide === 'left') {
-        newLeft.push(key);
-      } else {
-        newRight.push(key);
+      if (index === -1) {
+        return acc;
       }
-    }
-  }
 
-  // Preserve order: sort by position in newOrder
-  const orderIndex = new Map(newOrder.map((key, i) => [key, i]));
-  const sortByOrder = (keys: string[]) =>
-    keys.toSorted(
-      // eslint-disable-next-line local-rules/destructuring-for-functions
-      (a, b) => (orderIndex.get(a) ?? 0) - (orderIndex.get(b) ?? 0),
-    );
+      const side = resolveClosestSide({
+        distanceFromLeft: index,
+        distanceFromRight: newOrder.length - 1 - index,
+        originalSide,
+      });
+
+      if (side === 'left') {
+        acc.left.push(key);
+      } else {
+        acc.right.push(key);
+      }
+
+      return acc;
+    },
+    { left: [] as string[], right: [] as string[] },
+  );
+
+  const left = sortPinnedKeysByOrder({
+    keys: [...staticLeft, ...dynamicPinning.left],
+    newOrder,
+  });
+  const right = sortPinnedKeysByOrder({
+    keys: [...staticRight, ...dynamicPinning.right],
+    newOrder,
+  });
 
   return {
-    left: sortByOrder(newLeft),
-    right: sortByOrder(newRight),
+    left,
+    right,
   };
 };

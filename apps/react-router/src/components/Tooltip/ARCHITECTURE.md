@@ -93,7 +93,10 @@ graph TD
 The trigger is a `span` with:
 
 - `aria-describedby={id}` for accessibility linkage.
+- Conditional interactive semantics (`role='button'`, `tabIndex={0}`) when the child is not already a native interactive element.
 - Mouse/focus handlers (`onMouseEnter`, `onMouseLeave`, `onFocus`, `onBlur`).
+- Keyboard handlers (`Enter`/`Space` show, `Escape` hides) when trigger semantics are applied.
+- Touch handlers (`onTouchStart` show, `onTouchEnd` hide).
 - `popoverTarget={id}` and anchor style data for placement support.
 
 ### Tooltip Element
@@ -171,7 +174,8 @@ Current accessibility support includes:
 
 - `role='tooltip'` on the content node.
 - `aria-describedby` from trigger to tooltip id.
-- Keyboard parity via `onFocus` and `onBlur`.
+- Keyboard parity via focus/blur plus `Enter`/`Space` and `Escape` handling.
+- Touch parity via `onTouchStart` and `onTouchEnd`.
 
 ## Usage Notes
 

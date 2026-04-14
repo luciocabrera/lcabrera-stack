@@ -166,8 +166,12 @@ Actions in ColumnOrderSectionContext read/write to both stores.
 | `buildAllOrderedColumns`      | Merge columnOrder with remaining columns               |
 | `detectPinOrderConflict`      | Check if new order breaks pin contiguity               |
 | `getIsContiguousPin`          | Check if pin side maintains contiguity                 |
+| `getPinnedEntries`            | Flatten left/right pinning into keyed entries          |
 | `insertAdjacentToPinnedGroup` | Place column next to its pin group                     |
+| `pinAllBetween`               | Pin all columns between edge and target column         |
 | `recalculatePinSides`         | Reassign left/right based on position after reorder    |
+| `resolveClosestSide`          | Pick nearest pin side from edge distances              |
 | `resolveClosestEdgeSide`      | Convert 'closest-edge' to actual 'left' or 'right'     |
 | `resolvePinOrderConflict`     | Apply one of three order/pin conflict resolutions      |
 | `restoreStaticColumnOrder`    | Ensure static columns stay in their original positions |
+| `sortPinnedKeysByOrder`       | Sort pinned keys by latest column order                |

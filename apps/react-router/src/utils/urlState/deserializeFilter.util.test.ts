@@ -37,6 +37,10 @@ describe('deserializeFilter', () => {
     });
   });
 
+  it('returns undefined for non-number operators with numeric payload', () => {
+    expect(deserializeFilter(['ct', 5])).toBeUndefined();
+  });
+
   it('returns number between filter for bw operator', () => {
     expect(deserializeFilter(['bw', 10, 20])).toEqual({
       operator: 'between',

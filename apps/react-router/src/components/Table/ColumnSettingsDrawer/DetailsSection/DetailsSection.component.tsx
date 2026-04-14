@@ -48,31 +48,33 @@ export const DetailsSection = <TData,>({
 
   return (
     <div {...stylex.props(styles.container)}>
-      {details.map((detail, index) => (
-        <div
-          key={detail.label}
-          {...stylex.props(
-            styles.item,
-            index === details.length - 1 ? styles.itemLast : undefined,
-          )}
-        >
-          <span {...stylex.props(styles.label)}>{detail.label}</span>
-          {detail.isBadge ? (
-            <span {...stylex.props(styles.badge, getBadgeStyle(detail.value))}>
-              {detail.value}
-            </span>
-          ) : (
-            <span
-              {...stylex.props(
-                styles.value,
-                detail.isMono ? styles.mono : undefined,
-              )}
-            >
-              {detail.value}
-            </span>
-          )}
-        </div>
-      ))}
+      {details.map((detail, index) => {
+        const isLast = index === details.length - 1;
+        const valueElement = detail.isBadge ? (
+          <span {...stylex.props(styles.badge, getBadgeStyle(detail.value))}>
+            {detail.value}
+          </span>
+        ) : (
+          <span
+            {...stylex.props(
+              styles.value,
+              detail.isMono ? styles.mono : undefined,
+            )}
+          >
+            {detail.value}
+          </span>
+        );
+
+        return (
+          <div
+            key={detail.label}
+            {...stylex.props(styles.item, isLast ? styles.itemLast : undefined)}
+          >
+            <span {...stylex.props(styles.label)}>{detail.label}</span>
+            {valueElement}
+          </div>
+        );
+      })}
     </div>
   );
 };

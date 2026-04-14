@@ -1,6 +1,3 @@
-/* eslint-disable */
-// @ts-nocheck
-
 /**
  * Performance Render Tracker
  *
@@ -31,6 +28,10 @@ type RenderRecord = {
 };
 
 type RenderStats = Map<string, RenderRecord>;
+
+type WindowWithRenderStats = Window & {
+  __renderStats?: typeof renderStats;
+};
 
 // Global render stats store
 const stats: RenderStats = new Map();
@@ -94,8 +95,10 @@ export const renderStats = {
     const json = renderStats.toJSON();
     try {
       await navigator.clipboard.writeText(json);
+      // eslint-disable-next-line no-console -- Debug utility output for local profiling.
       console.log('✅ Stats copied to clipboard!');
     } catch {
+      // eslint-disable-next-line no-console -- Debug utility output for local profiling.
       console.log('📋 Copy manually:', json);
     }
     return json;
@@ -149,20 +152,30 @@ export const renderStats = {
     const all = renderStats.getAll();
     const summary = renderStats.getSummary();
 
+    // eslint-disable-next-line no-console -- Debug utility output for local profiling.
     console.group('📊 Render Statistics');
+    // eslint-disable-next-line no-console -- Debug utility output for local profiling.
     console.log(`Total components tracked: ${summary.componentCount}`);
+    // eslint-disable-next-line no-console -- Debug utility output for local profiling.
     console.log(`Total renders: ${summary.totalRenders}`);
+    // eslint-disable-next-line no-console -- Debug utility output for local profiling.
     console.log(`Avg renders per component: ${summary.avgRendersPerComponent}`);
+    // eslint-disable-next-line no-console -- Debug utility output for local profiling.
     console.log('');
+    // eslint-disable-next-line no-console -- Debug utility output for local profiling.
     console.log('Top 10 most rendered:');
+    // eslint-disable-next-line no-console -- Debug utility output for local profiling.
     console.table(
       summary.mostRendered.map((r) => ({
         Component: r.name,
         'Render Count': r.count,
       })),
     );
+    // eslint-disable-next-line no-console -- Debug utility output for local profiling.
     console.log('');
+    // eslint-disable-next-line no-console -- Debug utility output for local profiling.
     console.log('All components:');
+    // eslint-disable-next-line no-console -- Debug utility output for local profiling.
     console.table(
       all.map((r) => ({
         'Avg Time (ms)': r.count > 0 ? (r.totalTime / r.count).toFixed(2) : 0,
@@ -171,6 +184,7 @@ export const renderStats = {
         'Total Time (ms)': r.totalTime.toFixed(2),
       })),
     );
+    // eslint-disable-next-line no-console -- Debug utility output for local profiling.
     console.groupEnd();
   },
 
@@ -210,5 +224,6 @@ export const renderStats = {
 
 // Expose to window for easy console access
 if (import.meta.env.DEV && globalThis.window !== undefined) {
-  (globalThis as any).__renderStats = renderStats;
+  const windowWithRenderStats = globalThis.window as WindowWithRenderStats;
+  windowWithRenderStats.__renderStats = renderStats;
 }
