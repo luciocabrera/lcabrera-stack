@@ -23,7 +23,7 @@ export const createApp = ({
 }: CreateAppArgs): FastifyInstance => {
   const app = Fastify({ logger: false });
 
-  void app.register(cors);
+  app.register(cors);
 
   // --- Error handling ---------------------------------------------------
 
@@ -56,16 +56,16 @@ export const createApp = ({
 
   // --- Route plugins ----------------------------------------------------
 
-  void app.register(createCarSalesPlugin({ pool }), {
+  app.register(createCarSalesPlugin({ pool }), {
     prefix: '/api/car-sales',
   });
-  void app.register(createEnterpriseOrdersPlugin({ envConfig, pool }), {
+  app.register(createEnterpriseOrdersPlugin({ envConfig, pool }), {
     prefix: '/api/enterprise-orders',
   });
-  void app.register(createWideAlltypes150Plugin({ pool }), {
+  app.register(createWideAlltypes150Plugin({ pool }), {
     prefix: '/api/wide-alltypes-150',
   });
-  void app.register(createDbSanityPlugin({ pool }), {
+  app.register(createDbSanityPlugin({ pool }), {
     prefix: '/api/db-sanity',
   });
 
