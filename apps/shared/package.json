@@ -1,0 +1,21 @@
+{
+  "name": "api-shared",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "types": "./src/index.ts",
+  "scripts": {
+    "lint": "vp lint . --fix",
+    "lint:check": "vp lint ."
+  },
+  "main": "./dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "devDependencies": {
+    "@types/node": "catalog:"
+  }
+}

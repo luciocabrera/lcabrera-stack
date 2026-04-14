@@ -1,0 +1,4 @@
+export {
+  CAR_SALES_SORTABLE_COLUMNS,
+  DEFAULT_CAR_SALES_SORTING,
+} from 'api-shared';

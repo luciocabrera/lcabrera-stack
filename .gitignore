@@ -9,7 +9,6 @@ lerna-debug.log*
 
 node_modules
 dist
-build
 dist-ssr
 *.local
 
@@ -23,8 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-eslint-local-rules/build/
-.react-router/
+node_modules/
+docker/.env
+docker/pgpass
+docker/local/.env
+docker/local/pgpass
 
-.env
-react-router-0.cpuprofile
+packages/eslint-local-rules/build/

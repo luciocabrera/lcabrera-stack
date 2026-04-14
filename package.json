@@ -1,68 +1,30 @@
 {
-  "name": "vite-react-compiler",
-  "private": true,
+  "name": "vite-monorepo",
   "version": "0.0.0",
+  "private": true,
   "type": "module",
   "scripts": {
-    "build:eslint-rules": "tsc -p eslint-local-rules/tsconfig.json",
-    "dev": "react-router dev",
-    "lint": "vp lint . --fix",
-    "lint:check": "vp lint .",
-    "format": "vp fmt .",
-    "format:check": "vp fmt --check .",
-    "typecheck": "react-router typegen && tsc --noEmit",
-    "preview": "vp preview",
-    "knip": "knip",
-    "prepare": "vp config",
-    "test:watch": "node node_modules/vitest/vitest.mjs"
-  },
-  "dependencies": {
-    "@react-router/node": "^7.13.1",
-    "@react-router/serve": "^7.13.1",
-    "@stylexjs/stylex": "^0.18.1",
-    "isbot": "^5.1.36",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "react-router": "^7.13.1"
+    "build:eslint-rules": "cd packages/eslint-local-rules && vp run build",
+    "check:safe": "vp run typegen:router && vp run build:eslint-rules && vp check && cd apps/react-router && REACT_ROUTER_TEST_TASK=true vp run test",
+    "ready": "vp run check:safe && vp run build -r",
+    "dev": "pnpm --parallel --filter car-sales-api --filter vite-react-compiler run dev",
+    "dev:fast": "pnpm --parallel --filter car-sales-api-fast --filter vite-react-compiler run dev",
+    "db:up": "docker compose -f docker/local/docker-compose.yml --env-file docker/local/.env up -d postgres pgadmin",
+    "db:status": "docker compose -f docker/local/docker-compose.yml --env-file docker/local/.env ps",
+    "db:down": "docker compose -f docker/local/docker-compose.yml --env-file docker/local/.env down",
+    "db:seed": "vp run db:up && vp run seed",
+    "seed": "cd apps/api-server && vp run seed",
+    "seed:fast": "cd apps/api-server-fast && vp run seed",
+    "start": "vp run start -r",
+    "test": "cd apps/react-router && REACT_ROUTER_TEST_TASK=true vp run test",
+    "typegen:router": "cd apps/react-router && vp run typegen",
+    "prepare": "vp config"
   },
   "devDependencies": {
-    "@babel/preset-typescript": "^7.28.5",
-    "@eslint/js": "^10.0.1",
-    "@react-router/dev": "^7.13.1",
-    "@stylexjs/eslint-plugin": "^0.18.1",
-    "@stylexjs/unplugin": "^0.18.1",
-    "@testing-library/react": "^16.3.2",
-    "@types/node": "^25.5.0",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
-    "@typescript-eslint/utils": "^8.57.1",
-    "babel-plugin-react-compiler": "^1.0.0",
-    "eslint": "^10.1.0",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-local-rules": "^3.0.2",
-    "eslint-plugin-perfectionist": "^5.7.0",
-    "eslint-plugin-react-dom": "^3.0.0",
-    "eslint-plugin-react-hooks": "^7.0.1",
-    "eslint-plugin-react-refresh": "^0.5.2",
-    "eslint-plugin-react-x": "^3.0.0",
-    "eslint-plugin-security": "^4.0.0",
-    "eslint-plugin-unicorn": "^63.0.0",
-    "globals": "^17.4.0",
-    "jsdom": "^29.0.1",
-    "knip": "^6.0.1",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.57.1",
-    "unplugin": "^3.0.0",
-    "vite": "npm:@voidzero-dev/vite-plus-core@^0.1.13",
-    "vite-plugin-babel": "^1.6.0",
-    "vite-plus": "latest",
-    "vitest": "npm:@voidzero-dev/vite-plus-test@^0.1.13"
+    "vite-plus": "catalog:"
   },
-  "packageManager": "pnpm@10.32.1",
-  "pnpm": {
-    "overrides": {
-      "vite": "npm:@voidzero-dev/vite-plus-core@^0.1.13",
-      "vitest": "npm:@voidzero-dev/vite-plus-test@^0.1.13"
-    }
-  }
+  "engines": {
+    "node": ">=24.14.1"
+  },
+  "packageManager": "pnpm@10.33.0"
 }

@@ -1,0 +1,4 @@
+export {
+  DEFAULT_WIDE_ALLTYPES_SORTING,
+  WIDE_ALLTYPES_SORTABLE_COLUMNS,
+} from 'api-shared';
