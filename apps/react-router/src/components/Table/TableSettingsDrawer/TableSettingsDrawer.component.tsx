@@ -37,11 +37,6 @@ export const TableSettingsDrawer = () => {
   const acceptButtonTitle = 'Please fix invalid filters before accepting';
 
   const handleAccept = () => {
-    // if (!areFiltersValid) {
-    //   // Don't allow accept if filters are invalid
-    //   return;
-    // }
-
     batchSetTableDrawerSettings();
 
     // Unpin if pinned, then close

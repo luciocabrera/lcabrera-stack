@@ -52,7 +52,12 @@ export const Tabs = ({ defaultSelectedTab, tabs, ...props }: TabsProps) => {
 
   return (
     <div {...stylex.props(styles.container)} {...props}>
-      <div aria-label='Settings tabs' onKeyDown={handleKeyDown} role='tablist'>
+      <div
+        aria-label='Settings tabs'
+        onKeyDown={handleKeyDown}
+        role='tablist'
+        tabIndex={0}
+      >
         <div {...stylex.props(styles.tabList)}>
           {tabs.map((tab) => (
             <button

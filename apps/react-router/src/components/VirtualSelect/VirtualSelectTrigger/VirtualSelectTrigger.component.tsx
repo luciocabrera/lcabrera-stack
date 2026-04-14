@@ -1,3 +1,5 @@
+import type { KeyboardEvent } from 'react';
+
 import * as stylex from '@stylexjs/stylex';
 
 import { Tag } from '@/components/Tag';
@@ -9,6 +11,7 @@ import { styles } from './VirtualSelectTrigger.stylex';
 export const VirtualSelectTrigger = ({
   isAlwaysOpen,
   isOpen,
+  listboxId,
   mode,
   onRemoveTag,
   onToggle,
@@ -20,14 +23,25 @@ export const VirtualSelectTrigger = ({
 }: VirtualSelectTriggerProps) => {
   const hasSelection = selected.length > 0;
 
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (isAlwaysOpen) return;
+
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onToggle();
+    }
+  };
+
   return (
     <div
-      aria-expanded={isOpen}
-      aria-haspopup='listbox'
+      aria-controls={!isAlwaysOpen ? listboxId : undefined}
+      aria-expanded={!isAlwaysOpen ? isOpen : undefined}
+      aria-haspopup={!isAlwaysOpen ? 'listbox' : undefined}
       onClick={isAlwaysOpen ? undefined : onToggle}
+      onKeyDown={handleKeyDown}
       ref={triggerRef}
-      role='combobox'
-      tabIndex={isAlwaysOpen ? undefined : 0}
+      role={!isAlwaysOpen ? 'button' : undefined}
+      tabIndex={!isAlwaysOpen ? 0 : undefined}
       {...stylex.props(
         styles.trigger,
         isOpen && styles.triggerOpen,

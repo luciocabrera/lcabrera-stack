@@ -5,6 +5,7 @@ import type { VirtualSelectMode } from '../VirtualSelect.types';
 export type VirtualSelectTriggerProps = {
   readonly isAlwaysOpen: boolean;
   readonly isOpen: boolean;
+  readonly listboxId: string;
   readonly mode: VirtualSelectMode;
   readonly onRemoveTag: (option: string) => void;
   readonly onToggle: () => void;

@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 
 import type { VirtualListDataState } from '@/components/VirtualList';
 import type { SelectFilter } from '@/types/filterOperators.types';
@@ -21,6 +21,7 @@ export const VirtualSelect = ({
   dataState,
   isAlwaysOpen = false,
   listMaxHeight = '18.75rem',
+  listboxId,
   mode,
   onChange,
   onFetchInitial,
@@ -33,8 +34,11 @@ export const VirtualSelect = ({
 }: VirtualSelectProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
+  const generatedListboxId = useId();
   const [visibleTagCount, setVisibleTagCount] = useState(selected.length);
   const [isOpen, setIsOpen] = useState(false);
+  const resolvedListboxId =
+    listboxId ?? `virtual-select-listbox-${generatedListboxId}`;
 
   // Normalize to { label, value } pairs — plain strings become { label: x, value: x }
   const optionEntries: VirtualSelectOption[] = options.map((o) =>
@@ -136,6 +140,7 @@ export const VirtualSelect = ({
       <VirtualSelectTrigger
         isAlwaysOpen={isAlwaysOpen}
         isOpen={isOpen}
+        listboxId={resolvedListboxId}
         mode={mode}
         onRemoveTag={handleRemoveTag}
         onToggle={handleToggleDropdown}
@@ -148,7 +153,7 @@ export const VirtualSelect = ({
       {/* Dropdown */}
       {isListVisible && (
         <div
-          role='listbox'
+          id={resolvedListboxId}
           {...stylex.props(
             styles.dropdownBase,
             getDropdownStyle(isAlwaysOpen, shouldFillHeight),

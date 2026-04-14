@@ -34,20 +34,21 @@ export const applyPin = ({
     } else {
       newPinning.left = [...newPinning.left, columnKey];
     }
-  } else {
-    if (staticKeys) {
-      // Insert before static columns on right
-      const firstStaticIndex = newPinning.right.findIndex((k) =>
-        staticKeys.has(k),
-      );
-      if (firstStaticIndex === -1) {
-        newPinning.right = [...newPinning.right, columnKey];
-      } else {
-        newPinning.right.splice(firstStaticIndex, 0, columnKey);
-      }
-    } else {
+    return newPinning;
+  }
+
+  if (staticKeys) {
+    // Insert before static columns on right
+    const firstStaticIndex = newPinning.right.findIndex((k) =>
+      staticKeys.has(k),
+    );
+    if (firstStaticIndex === -1) {
       newPinning.right = [...newPinning.right, columnKey];
+    } else {
+      newPinning.right.splice(firstStaticIndex, 0, columnKey);
     }
+  } else {
+    newPinning.right = [...newPinning.right, columnKey];
   }
 
   return newPinning;

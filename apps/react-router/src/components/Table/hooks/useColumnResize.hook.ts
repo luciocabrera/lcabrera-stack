@@ -104,7 +104,7 @@ export const useColumnResize = ({
   }, [syncColumnsSizing]);
 
   const onMouseDown = useCallback(
-    (event: React.MouseEvent<HTMLDivElement>) => {
+    (event: React.MouseEvent<HTMLElement>) => {
       event.preventDefault();
       event.stopPropagation();
 

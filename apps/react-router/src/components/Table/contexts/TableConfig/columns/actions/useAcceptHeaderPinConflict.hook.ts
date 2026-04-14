@@ -19,6 +19,47 @@ import {
   splitColumnsByPinning,
 } from '@/components/Table/utils';
 
+type PinSide = 'left' | 'right';
+
+type PinAllBetweenArgs<TData> = {
+  readonly allOrderedKeys: readonly DataKey<TData>[];
+  readonly columnPinning: ColumnPinningState<TData>;
+  readonly index: number;
+  readonly side: PinSide;
+};
+
+const pinAllBetween = <TData>({
+  allOrderedKeys,
+  columnPinning,
+  index,
+  side,
+}: PinAllBetweenArgs<TData>): ColumnPinningState<TData> => {
+  const next = {
+    left: [...columnPinning.left] as DataKey<TData>[],
+    right: [...columnPinning.right] as DataKey<TData>[],
+  };
+
+  if (side === 'left') {
+    for (const key of allOrderedKeys.slice(0, index + 1)) {
+      if (!next.left.includes(key)) {
+        next.right = next.right.filter((pinnedKey) => pinnedKey !== key);
+        next.left.push(key);
+      }
+    }
+
+    return next;
+  }
+
+  for (const key of allOrderedKeys.slice(index)) {
+    if (!next.right.includes(key)) {
+      next.left = next.left.filter((pinnedKey) => pinnedKey !== key);
+      next.right.push(key);
+    }
+  }
+
+  return next;
+};
+
 type AcceptHeaderPinConflictArgs<TData> = {
   readonly columnKey: DataKey<TData>;
   readonly resolution: PinConflictResolution;
@@ -47,73 +88,48 @@ export const useAcceptHeaderPinConflict = <TData>() => {
 
     const allOrderedColumns = buildAllOrderedColumns({ columns, columnsOrder });
     const index = allOrderedColumns.findIndex((col) => col.key === columnKey);
+    const allOrderedKeys = allOrderedColumns.map(
+      (column) => column.key,
+    ) as DataKey<TData>[];
 
     let newPinning: ColumnPinningState<TData>;
     let newOrder: ColumnOrderState<TData> | undefined;
 
-    switch (resolution) {
-      case 'move-column': {
-        newOrder = allOrderedColumns
-          .filter((col) => col.key !== columnKey)
-          .map((col) => col.key) as ColumnOrderState<TData>;
+    if (resolution === 'move-column') {
+      newOrder = allOrderedColumns
+        .filter((col) => col.key !== columnKey)
+        .map((col) => col.key) as ColumnOrderState<TData>;
 
-        const column = allOrderedColumns[index];
-        if (column?.key) {
-          newOrder = insertAdjacentToPinnedGroup({
-            columnKey: column.key,
-            columnPinning: currentPinning as ColumnPinningState,
-            order: newOrder,
-            side,
-          }) as ColumnOrderState<TData>;
-        }
-
-        newPinning = applyPin({
-          columnKey,
+      const column = allOrderedColumns[index];
+      if (column?.key) {
+        newOrder = insertAdjacentToPinnedGroup({
+          columnKey: column.key,
           columnPinning: currentPinning as ColumnPinningState,
+          order: newOrder,
           side,
-          staticKeys,
-        }) as ColumnPinningState<TData>;
-        break;
+        }) as ColumnOrderState<TData>;
       }
 
-      case 'pin-all-between': {
-        let nextLeft = [...currentPinning.left] as DataKey<TData>[];
-        let nextRight = [...currentPinning.right] as DataKey<TData>[];
-
-        if (side === 'left') {
-          for (let i = 0; i <= index; i++) {
-            const colKey = allOrderedColumns[i]?.key ?? '';
-            if (!nextLeft.includes(colKey as DataKey<TData>)) {
-              nextRight = nextRight.filter((k) => k !== colKey);
-              nextLeft = [...nextLeft, colKey as DataKey<TData>];
-            }
-          }
-        } else {
-          for (let i = index; i < allOrderedColumns.length; i++) {
-            const colKey = allOrderedColumns[i]?.key ?? '';
-            if (!nextRight.includes(colKey as DataKey<TData>)) {
-              nextLeft = nextLeft.filter((k) => k !== colKey);
-              nextRight = [...nextRight, colKey as DataKey<TData>];
-            }
-          }
-        }
-
-        newPinning = {
-          left: nextLeft,
-          right: nextRight,
-        };
-        break;
-      }
-
-      case 'pin-only': {
-        newPinning = applyPin({
-          columnKey,
-          columnPinning: currentPinning as ColumnPinningState,
-          side,
-          staticKeys,
-        }) as ColumnPinningState<TData>;
-        break;
-      }
+      newPinning = applyPin({
+        columnKey,
+        columnPinning: currentPinning as ColumnPinningState,
+        side,
+        staticKeys,
+      }) as ColumnPinningState<TData>;
+    } else if (resolution === 'pin-all-between') {
+      newPinning = pinAllBetween({
+        allOrderedKeys,
+        columnPinning: currentPinning,
+        index,
+        side,
+      });
+    } else {
+      newPinning = applyPin({
+        columnKey,
+        columnPinning: currentPinning as ColumnPinningState,
+        side,
+        staticKeys,
+      }) as ColumnPinningState<TData>;
     }
 
     const effectiveColumns = getEffectiveColumns({

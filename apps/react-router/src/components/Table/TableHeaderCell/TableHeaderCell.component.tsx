@@ -90,7 +90,9 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
     toogleTableIsColumnSettingsOpen();
   };
 
-  const handleResizeDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+  const handleResizeDoubleClick = (
+    event: React.MouseEvent<HTMLButtonElement>,
+  ) => {
     event.preventDefault();
     event.stopPropagation();
     setColumnSizing({ columnKey, width: undefined });
@@ -202,11 +204,11 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
           )}
           {/* Resize handle */}
           {isResizable && (
-            <div
+            <button
               aria-label={`Resize ${label} column`}
               onDoubleClick={handleResizeDoubleClick}
               onMouseDown={onMouseDown}
-              role='separator'
+              type='button'
               {...stylex.props(tableHeaderCellStyles.resizeHandle)}
             >
               <div
@@ -215,7 +217,7 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
                   isResizing && tableHeaderCellStyles.resizeHandleActive,
                 )}
               />
-            </div>
+            </button>
           )}
         </>
       )}

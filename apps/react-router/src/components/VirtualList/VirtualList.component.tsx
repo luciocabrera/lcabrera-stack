@@ -201,12 +201,13 @@ export const VirtualList = ({
               <div {...stylex.props(styles.virtualOffset(offsetY))}>
                 {Array.from({ length: endIndex - startIndex }).map((_, i) => {
                   const index = startIndex + i;
-                  const key =
-                    index === 0 && shouldShowSelectAll
-                      ? 'select-all'
-                      : (filteredOptions[
-                          shouldShowSelectAll ? index - 1 : index
-                        ] ?? `option-${index}`);
+                  let key = `option-${index}`;
+                  if (index === 0 && shouldShowSelectAll) {
+                    key = 'select-all';
+                  } else {
+                    const optionIndex = shouldShowSelectAll ? index - 1 : index;
+                    key = filteredOptions[optionIndex] ?? key;
+                  }
 
                   return (
                     <VirtualizedOption

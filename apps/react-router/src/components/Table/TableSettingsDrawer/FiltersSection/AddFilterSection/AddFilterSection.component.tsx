@@ -76,13 +76,11 @@ export const AddFilterSection = ({
         break;
       }
       default: {
-        // Check if column has fetchable filter options
-        // Use text filter with 'equals' operator for columns with options
-        // so the select list shows up immediately
-        const hasOptions = Boolean(column.fetchFilterOptions);
-        initialFilter = hasOptions
-          ? { operator: 'equals' as const, type: 'text' as const, value: '' }
-          : { operator: 'equals' as const, type: 'text' as const, value: '' };
+        initialFilter = {
+          operator: 'equals' as const,
+          type: 'text' as const,
+          value: '',
+        };
         break;
       }
     }

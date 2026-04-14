@@ -24,7 +24,7 @@ export type BatchColumnSettingsUpdate = {
   /** Column key being updated */
   columnKey: string;
   /** Pin side for this column */
-  columnPinning?: 'left' | 'right' | undefined;
+  columnPinning?: 'left' | 'right';
   /** Single column width value */
   columnSizing?: number;
   /** Sort direction for this column */

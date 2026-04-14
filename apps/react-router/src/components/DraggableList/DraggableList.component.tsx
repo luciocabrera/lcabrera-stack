@@ -17,7 +17,7 @@ export const DraggableList = ({
     });
 
   return (
-    <ul {...stylex.props(styles.list)} role='list'>
+    <ul {...stylex.props(styles.list)}>
       {items.map((item) => {
         const isDragging = dragItemId.current === item.id;
 
@@ -48,8 +48,6 @@ export const DraggableList = ({
                   }
                 : undefined
             }
-            role='option'
-            tabIndex={0}
           >
             {canDrag && (
               <span
