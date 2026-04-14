@@ -3,16 +3,12 @@ import { z } from 'zod';
 import { HttpError } from 'api-shared';
 import type { SortRule } from 'api-shared';
 import { parseJsonQueryParam } from '../../utils/parseJsonQueryParam.util';
+import { parseSortingRules } from '../../utils/parseSortingRules.util';
 
 import type {
   EnterpriseOrdersFilter,
   EnterpriseOrdersFilters,
 } from './enterpriseOrders.types';
-
-const sortRuleSchema = z.object({
-  columnKey: z.string().min(1),
-  direction: z.enum(['asc', 'desc']),
-});
 
 const booleanFilterSchema = z.object({
   type: z.literal('boolean'),
@@ -146,29 +142,11 @@ export const parseEnterpriseOrdersSorting = ({
   allowedColumns,
   value,
 }: ParseSortingArgs): readonly SortRule[] => {
-  const parsedValue = parseJsonQueryParam(value);
-
-  if (parsedValue === undefined) {
-    return [];
-  }
-
-  const result = z.array(sortRuleSchema).safeParse(parsedValue);
-
-  if (!result.success) {
-    throw new HttpError({
-      message: 'Invalid enterprise order sorting parameter.',
-      statusCode: 400,
-    });
-  }
-
-  for (const sortRule of result.data) {
-    if (!allowedColumns.has(sortRule.columnKey)) {
-      throw new HttpError({
-        message: `Unsupported enterprise order sort column: ${sortRule.columnKey}`,
-        statusCode: 400,
-      });
-    }
-  }
-
-  return result.data;
+  return parseSortingRules({
+    allowedColumns,
+    invalidSortMessage: 'Invalid enterprise order sorting parameter.',
+    unsupportedSortColumnMessage: (columnKey) =>
+      `Unsupported enterprise order sort column: ${columnKey}`,
+    value,
+  });
 };
