@@ -124,16 +124,16 @@ export const formatDate = (date: Date): string => { ... };
 
 ```typescript
 type FetchState<T> =
-  | { readonly status: 'idle' }
-  | { readonly status: 'loading' }
-  | { readonly status: 'success'; readonly data: T }
-  | { readonly status: 'error'; readonly error: Error };
+  | { readonly status: "idle" }
+  | { readonly status: "loading" }
+  | { readonly status: "success"; readonly data: T }
+  | { readonly status: "error"; readonly error: Error };
 ```
 
 ### Branded Types for IDs
 
 ```typescript
-type UserId = string & { readonly __brand: 'UserId' };
+type UserId = string & { readonly __brand: "UserId" };
 ```
 
 ---
@@ -186,8 +186,8 @@ export const Button = ({ disabled = false, label, onClick }: ButtonProps) => {
 Each directory exposes a controlled public API via `index.ts`. Use explicit named exports, never `export *`.
 
 ```typescript
-export { Button } from './Button';
-export type { ButtonProps } from './Button.types';
+export { Button } from "./Button";
+export type { ButtonProps } from "./Button.types";
 ```
 
 ### Props Naming
@@ -301,13 +301,13 @@ const MyPage = () => {
 ### Context Pattern
 
 ```typescript
-import { use } from 'react';
+import { use } from "react";
 
 const ThemeContext = createContext<Theme | undefined>(undefined);
 
 export const useTheme = () => {
   const theme = use(ThemeContext);
-  if (!theme) throw new Error('useTheme must be used within ThemeProvider');
+  if (!theme) throw new Error("useTheme must be used within ThemeProvider");
   return theme;
 };
 ```
@@ -361,16 +361,13 @@ store/{domain}/
 // ✅ Correct — single snapshot, multiple reads
 const columnsState = columnsStore.get();
 const columns = columnsState?.columns ?? [];
-const columnsOrder =
-  columnsState?.columnOrder ?? ([] as ColumnOrderState<TData>);
+const columnsOrder = columnsState?.columnOrder ?? ([] as ColumnOrderState<TData>);
 const currentPinning =
-  columnsState?.columnPinning ??
-  ({ left: [], right: [] } as ColumnPinningState<TData>);
+  columnsState?.columnPinning ?? ({ left: [], right: [] } as ColumnPinningState<TData>);
 
 // ❌ Forbidden — calling .get() multiple times
 const columns = columnsStore.get()?.columns ?? [];
-const columnsOrder =
-  columnsStore.get()?.columnOrder ?? ([] as ColumnOrderState<TData>);
+const columnsOrder = columnsStore.get()?.columnOrder ?? ([] as ColumnOrderState<TData>);
 const currentPinning = columnsStore.get()?.columnPinning ?? {
   left: [],
   right: [],
@@ -396,11 +393,11 @@ Use `@/` as the root alias for `src/`. Relative imports only within the same dir
 
 ```typescript
 // ✅
-import { Button } from '@/components/Button';
-import { styles } from './Card.stylex';
+import { Button } from "@/components/Button";
+import { styles } from "./Card.stylex";
 
 // ❌
-import { Button } from '../../../../components/Button';
+import { Button } from "../../../../components/Button";
 ```
 
 ### Import Order (enforced by ESLint)
@@ -579,6 +576,7 @@ These commands map to their corresponding tools. For example, `vp dev --port 300
 
 - **Using the package manager directly:** Do not use pnpm, npm, or Yarn directly. Vite+ can handle all package manager operations.
 - **Always use Vite commands to run tools:** Don't attempt to run `vp vitest` or `vp oxlint`. They do not exist. Use `vp test` and `vp lint` instead.
+- **Monorepo build command confusion:** In this repository, `vp build` runs the built-in Vite+ build for the current project context, while the full workspace build should be run with `vp run build:all` (which maps to `vp run -r build`).
 - **Running scripts:** Vite+ built-in commands (`vp dev`, `vp build`, `vp test`, etc.) always run the Vite+ built-in tool, not any `package.json` script of the same name. To run a custom script that shares a name with a built-in command, use `vp run <script>`. For example, if you have a custom `dev` script that runs multiple services concurrently, run it with `vp run dev`, not `vp dev` (which always starts Vite's dev server).
 - **Do not install Vitest, Oxlint, Oxfmt, or tsdown directly:** Vite+ wraps these tools. They must not be installed directly. You cannot upgrade these tools by installing their latest versions. Always use Vite+ commands.
 - **Use Vite+ wrappers for one-off binaries:** Use `vp dlx` instead of package-manager-specific `dlx`/`npx` commands.
