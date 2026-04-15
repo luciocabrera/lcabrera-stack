@@ -19,7 +19,7 @@ vp run test -r
 - Build the monorepo:
 
 ```bash
-vp run build -r
+vp run build:all
 ```
 
 - Run the development server:
