@@ -1,20 +1,8 @@
-export const fmtConfig = {
-  arrowParens: 'always' as const,
-  bracketSpacing: true,
-  endOfLine: 'lf' as const,
-  ignorePatterns: [
-    '.react-router/',
-    'build/',
-    'dist/',
-    'miscelanious/',
-    'node_modules/',
-    '../../packages/eslint-local-rules/',
-  ],
-  jsxSingleQuote: true,
-  printWidth: 80,
-  semi: true,
-  singleQuote: true,
-  sortPackageJson: false,
-  tabWidth: 2,
-  trailingComma: 'all' as const,
-};
+import { createFmtConfig } from '../../../config/vite.fmt.shared.config.ts';
+
+export const fmtConfig = createFmtConfig([
+  '.react-router/',
+  'build/',
+  'miscelanious/',
+  '../../packages/eslint-local-rules/',
+]);

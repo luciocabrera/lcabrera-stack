@@ -102,7 +102,10 @@ describe('TableDrawerContext hooks', () => {
     expect(
       renderHook(() => useGetColumnPinning(), { wrapper: Wrapper }).result
         .current,
-    ).toEqual({ left: ['id'], right: [] });
+    ).toEqual({
+      left: ['id'],
+      right: [],
+    });
     expect(
       renderHook(() => useGetColumnVisibility(), { wrapper: Wrapper }).result
         .current,

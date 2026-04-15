@@ -124,16 +124,16 @@ export const formatDate = (date: Date): string => { ... };
 
 ```typescript
 type FetchState<T> =
-  | { readonly status: "idle" }
-  | { readonly status: "loading" }
-  | { readonly status: "success"; readonly data: T }
-  | { readonly status: "error"; readonly error: Error };
+  | { readonly status: 'idle' }
+  | { readonly status: 'loading' }
+  | { readonly status: 'success'; readonly data: T }
+  | { readonly status: 'error'; readonly error: Error };
 ```
 
 ### Branded Types for IDs
 
 ```typescript
-type UserId = string & { readonly __brand: "UserId" };
+type UserId = string & { readonly __brand: 'UserId' };
 ```
 
 ---
@@ -186,8 +186,8 @@ export const Button = ({ disabled = false, label, onClick }: ButtonProps) => {
 Each directory exposes a controlled public API via `index.ts`. Use explicit named exports, never `export *`.
 
 ```typescript
-export { Button } from "./Button";
-export type { ButtonProps } from "./Button.types";
+export { Button } from './Button';
+export type { ButtonProps } from './Button.types';
 ```
 
 ### Props Naming
@@ -301,13 +301,13 @@ const MyPage = () => {
 ### Context Pattern
 
 ```typescript
-import { use } from "react";
+import { use } from 'react';
 
 const ThemeContext = createContext<Theme | undefined>(undefined);
 
 export const useTheme = () => {
   const theme = use(ThemeContext);
-  if (!theme) throw new Error("useTheme must be used within ThemeProvider");
+  if (!theme) throw new Error('useTheme must be used within ThemeProvider');
   return theme;
 };
 ```
@@ -361,13 +361,16 @@ store/{domain}/
 // ✅ Correct — single snapshot, multiple reads
 const columnsState = columnsStore.get();
 const columns = columnsState?.columns ?? [];
-const columnsOrder = columnsState?.columnOrder ?? ([] as ColumnOrderState<TData>);
+const columnsOrder =
+  columnsState?.columnOrder ?? ([] as ColumnOrderState<TData>);
 const currentPinning =
-  columnsState?.columnPinning ?? ({ left: [], right: [] } as ColumnPinningState<TData>);
+  columnsState?.columnPinning ??
+  ({ left: [], right: [] } as ColumnPinningState<TData>);
 
 // ❌ Forbidden — calling .get() multiple times
 const columns = columnsStore.get()?.columns ?? [];
-const columnsOrder = columnsStore.get()?.columnOrder ?? ([] as ColumnOrderState<TData>);
+const columnsOrder =
+  columnsStore.get()?.columnOrder ?? ([] as ColumnOrderState<TData>);
 const currentPinning = columnsStore.get()?.columnPinning ?? {
   left: [],
   right: [],
@@ -393,11 +396,11 @@ Use `@/` as the root alias for `src/`. Relative imports only within the same dir
 
 ```typescript
 // ✅
-import { Button } from "@/components/Button";
-import { styles } from "./Card.stylex";
+import { Button } from '@/components/Button';
+import { styles } from './Card.stylex';
 
 // ❌
-import { Button } from "../../../../components/Button";
+import { Button } from '../../../../components/Button';
 ```
 
 ### Import Order (enforced by ESLint)

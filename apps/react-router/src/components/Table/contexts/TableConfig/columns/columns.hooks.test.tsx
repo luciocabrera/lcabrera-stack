@@ -198,7 +198,10 @@ describe('TableConfig column hooks', () => {
     });
     expect(
       renderHook(() => useGetNormalizedColumn('status')).result.current,
-    ).toEqual({ key: 'status', label: 'Status' });
+    ).toEqual({
+      key: 'status',
+      label: 'Status',
+    });
     expect(
       renderHook(() => useGetNormalizedColumnFilters('status')).result.current,
     ).toEqual({

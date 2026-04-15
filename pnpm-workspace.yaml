@@ -8,26 +8,26 @@ allowBuilds:
 blockExoticSubdeps: true
 
 catalog:
-  "@babel/preset-typescript": ^7.28.5
-  "@eslint/js": ^10.0.1
-  "@fastify/cors": ^11.2.0
-  "@react-router/dev": ^7.14.0
-  "@react-router/node": ^7.14.0
-  "@react-router/serve": ^7.14.0
-  "@stylexjs/eslint-plugin": ^0.18.2
-  "@stylexjs/stylex": ^0.18.2
-  "@stylexjs/unplugin": ^0.18.2
-  "@tanstack/react-query": ^5.97.0
-  "@tanstack/react-table": ^8.21.3
-  "@tanstack/react-virtual": ^3.13.23
-  "@testing-library/react": ^16.3.2
-  "@types/cors": ^2.8.19
-  "@types/express": ^5.0.6
-  "@types/node": ^25.6.0
-  "@types/pg": ^8.20.0
-  "@types/react": ^19.2.14
-  "@types/react-dom": ^19.2.3
-  "@typescript-eslint/utils": ^8.58.1
+  '@babel/preset-typescript': ^7.28.5
+  '@eslint/js': ^10.0.1
+  '@fastify/cors': ^11.2.0
+  '@react-router/dev': ^7.14.0
+  '@react-router/node': ^7.14.0
+  '@react-router/serve': ^7.14.0
+  '@stylexjs/eslint-plugin': ^0.18.2
+  '@stylexjs/stylex': ^0.18.2
+  '@stylexjs/unplugin': ^0.18.2
+  '@tanstack/react-query': ^5.97.0
+  '@tanstack/react-table': ^8.21.3
+  '@tanstack/react-virtual': ^3.13.23
+  '@testing-library/react': ^16.3.2
+  '@types/cors': ^2.8.19
+  '@types/express': ^5.0.6
+  '@types/node': ^25.6.0
+  '@types/pg': ^8.20.0
+  '@types/react': ^19.2.14
+  '@types/react-dom': ^19.2.3
+  '@typescript-eslint/utils': ^8.58.1
   babel-plugin-react-compiler: ^1.0.0
   cors: ^2.8.6
   eslint: ^10.2.0
@@ -65,7 +65,7 @@ catalog:
 catalogMode: prefer
 minimumReleaseAge: 1440
 minimumReleaseAgeExclude:
-  - "@types/*" # type-only packages have zero runtime attack surface
+  - '@types/*' # type-only packages have zero runtime attack surface
 # overrides:
 #   vite: "catalog:"
 #   vitest: "catalog:"
