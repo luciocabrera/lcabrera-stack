@@ -7,6 +7,7 @@ const fmtConfig = createFmtConfig([
   'build/',
   'miscelanious/',
 ]);
+
 export default defineConfig({
   fmt: fmtConfig,
   lint: { options: { typeAware: true, typeCheck: true } },
