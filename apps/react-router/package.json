@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "build:eslint-rules": "cd ../../packages/eslint-local-rules && vp run build",
+    "audit:lighthouse": "node scripts/lighthouse-audit.mjs",
+    "audit:lighthouse:check": "node scripts/check-lighthouse-scores.mjs",
     "dev": "react-router dev",
     "lint": "vp run build:eslint-rules && vp lint . --fix",
     "lint:check": "vp run build:eslint-rules && vp lint .",
@@ -55,6 +57,8 @@
     "globals": "catalog:",
     "jsdom": "catalog:",
     "knip": "catalog:",
+    "lighthouse": "catalog:",
+    "playwright": "catalog:",
     "typescript": "catalog:",
     "typescript-eslint": "catalog:",
     "unplugin": "catalog:",

@@ -1,0 +1,168 @@
+name: Lighthouse Performance Audit
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/react-router/src/**'
+      - 'apps/react-router/public/**'
+      - 'apps/react-router/package.json'
+      - 'apps/react-router/lighthouse.config.js'
+      - 'apps/react-router/scripts/**'
+      - '.github/workflows/lighthouse.yml'
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  lighthouse-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 1
+
+      - name: Setup Vite+
+        uses: voidzero-dev/setup-vp@8ecb39174989ce55af90f45cf55b02738599831d
+        with:
+          cache: true
+
+      - name: Install dependencies
+        run: vp install --frozen-lockfile --ignore-scripts
+
+      - name: Install Playwright browsers
+        run: cd apps/react-router && vp exec playwright install chromium --with-deps
+
+      - name: Build production
+        run: cd apps/react-router && vp run build
+
+      - name: Start production server
+        run: |
+          cd apps/react-router
+
+          vp exec react-router-serve build/server/index.js &
+          SERVER_PID=$!
+          echo "SERVER_PID=$SERVER_PID" >> "$GITHUB_ENV"
+
+          # Wait for server to be ready
+          for i in $(seq 1 30); do
+            if curl --fail --silent --show-error http://localhost:3000 > /dev/null; then
+              echo "✅ Server ready"
+              exit 0
+            fi
+            echo "⏳ Waiting for server... ($i/30)"
+            sleep 2
+          done
+
+          echo "❌ Server failed to start"
+          kill $SERVER_PID || true
+          exit 1
+
+      - name: Run Lighthouse audit
+        run: cd apps/react-router && vp run audit:lighthouse
+        continue-on-error: true
+
+      - name: Find latest Lighthouse report
+        id: find_report
+        run: |
+          LATEST_REPORT=$(ls -t apps/react-router/lighthouse-reports/lighthouse-*.json 2>/dev/null | head -1 || true)
+
+          if [ -z "$LATEST_REPORT" ]; then
+            echo "report_found=false" >> "$GITHUB_OUTPUT"
+            echo "report_path=" >> "$GITHUB_OUTPUT"
+            echo "⚠️ No Lighthouse JSON report found"
+          else
+            echo "report_found=true" >> "$GITHUB_OUTPUT"
+            echo "report_path=$LATEST_REPORT" >> "$GITHUB_OUTPUT"
+            echo "✅ Found Lighthouse report: $LATEST_REPORT"
+          fi
+
+      - name: Check scores against thresholds
+        id: check_scores
+        if: steps.find_report.outputs.report_found == 'true'
+        run: |
+          cd apps/react-router
+          node scripts/check-lighthouse-scores.mjs "${{ github.workspace }}/${{ steps.find_report.outputs.report_path }}"
+        continue-on-error: true
+
+      - name: Parse Lighthouse report
+        id: parse_report
+        if: steps.find_report.outputs.report_found == 'true'
+        run: |
+          node -e "
+            const report = require('./${{ steps.find_report.outputs.report_path }}');
+            const { categories } = report;
+            let output = '## 📊 Lighthouse Audit Results\n\n';
+            output += '| Metric | Score | Status |\n';
+            output += '|--------|-------|--------|\n';
+            Object.entries(categories).forEach(([name, data]) => {
+              const score = Math.round(data.score * 100);
+              const status = score >= 90 ? '✅ Good' : score >= 50 ? '⚠️ Needs Work' : '❌ Poor';
+              output += '| ' + name.charAt(0).toUpperCase() + name.slice(1) + ' | ' + score + '/100 | ' + status + ' |\n';
+            });
+            console.log(output);
+          " > apps/react-router/lighthouse-comment.md
+
+      - name: Prepare fallback comment
+        if: steps.find_report.outputs.report_found != 'true'
+        run: |
+          cat > apps/react-router/lighthouse-comment.md << 'EOF'
+          ## 📊 Lighthouse Audit Results
+
+          Lighthouse report was not generated in this run, so scores could not be parsed.
+
+          Please check the workflow logs in the "Run Lighthouse audit" step.
+          EOF
+
+      - name: Comment on PR with results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
+        with:
+          script: |
+            const fs = require('fs');
+            const comment = fs.readFileSync('apps/react-router/lighthouse-comment.md', 'utf-8') + '\n\n' +
+              '**Detailed Report:** [View Full Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})\n\n' +
+              '📁 Audit created at: ' + new Date().toISOString();
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      - name: Upload report as artifact
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: lighthouse-report
+          path: |
+            apps/react-router/lighthouse-reports/*.json
+            apps/react-router/lighthouse-reports/*.html
+            apps/react-router/lighthouse-comment.md
+          retention-days: 30
+
+      - name: Warn if scores are below thresholds on PR
+        if: github.event_name == 'pull_request' && steps.check_scores.outcome == 'failure'
+        run: |
+          echo "⚠️ Lighthouse audit results are below thresholds for this PR."
+          echo "Review the PR comment and artifact report for details."
+
+      - name: Fail if scores are below thresholds
+        if: steps.find_report.outputs.report_found != 'true' || (github.event_name == 'workflow_dispatch' && steps.check_scores.outcome == 'failure')
+        run: |
+          if [ "${{ steps.find_report.outputs.report_found }}" != 'true' ]; then
+            echo "❌ Lighthouse report was not generated"
+          else
+            echo "❌ Lighthouse audit results are below required thresholds"
+          fi
+          echo "See workflow logs and PR comment for details"
+          exit 1

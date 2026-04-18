@@ -6,17 +6,149 @@ on:
     branches:
       - main
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
 jobs:
-  check-safe:
+  quality-gate:
+    name: Quality Gate (Format · Lint · Types)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Setup Vite+
         uses: voidzero-dev/setup-vp@8ecb39174989ce55af90f45cf55b02738599831d
         with:
           cache: true
 
-      - name: Run safe quality gate
-        run: vp run check:safe
+      - name: Install dependencies
+        run: vp install --frozen-lockfile --ignore-scripts
+
+      - name: Generate route types & build ESLint rules
+        id: preflight
+        run: vp run typegen:router && vp run build:eslint-rules
+
+      - name: Format · Lint · Type-check
+        id: quality_gate
+        run: vp check
+
+      - name: Write quality summary
+        if: always()
+        run: |
+          if [[ "${{ steps.quality_gate.outcome }}" == "success" ]]; then
+            CHECK_STATUS="✅ Passed"
+          else
+            CHECK_STATUS="❌ Failed"
+          fi
+
+          if [[ "${{ steps.preflight.outcome }}" == "success" ]]; then
+            PREFLIGHT_STATUS="✅ Passed"
+          else
+            PREFLIGHT_STATUS="❌ Failed"
+          fi
+
+          echo "## 🔍 Quality Gate" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Check | Status |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-------|--------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Typegen + ESLint Rules Build | $PREFLIGHT_STATUS |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Format | $CHECK_STATUS |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Lint | $CHECK_STATUS |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| TypeScript | $CHECK_STATUS |" >> "$GITHUB_STEP_SUMMARY"
+
+  unit-tests:
+    name: Unit Tests & Coverage
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Vite+
+        uses: voidzero-dev/setup-vp@8ecb39174989ce55af90f45cf55b02738599831d
+        with:
+          cache: true
+
+      - name: Install dependencies
+        run: vp install --frozen-lockfile --ignore-scripts
+
+      - name: Run tests with coverage
+        run: vp run test:ci
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: coverage-report
+          path: |
+            ./apps/react-router/coverage/**
+            ./coverage/**
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Post coverage summary to PR
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const fs = require('fs');
+            const candidateSummaryPaths = [
+              './apps/react-router/coverage/coverage-summary.json',
+              './coverage/coverage-summary.json',
+            ];
+            const summaryPath = candidateSummaryPaths.find(path => fs.existsSync(path));
+
+            if (!summaryPath) {
+              console.log('No coverage-summary.json found, skipping comment');
+              return;
+            }
+
+            const summary = JSON.parse(fs.readFileSync(summaryPath, 'utf-8'));
+            const total = summary.total;
+
+            const fmt = (v) => `${v.pct.toFixed(1)}% (${v.covered}/${v.total})`;
+            const badge = (pct) => pct >= 80 ? '✅' : pct >= 60 ? '⚠️' : '❌';
+
+            const body = [
+              '## 📊 Coverage Report',
+              '',
+              '| Metric | Coverage | Status |',
+              '|--------|----------|--------|',
+              `| Lines | ${fmt(total.lines)} | ${badge(total.lines.pct)} |`,
+              `| Statements | ${fmt(total.statements)} | ${badge(total.statements.pct)} |`,
+              `| Functions | ${fmt(total.functions)} | ${badge(total.functions.pct)} |`,
+              `| Branches | ${fmt(total.branches)} | ${badge(total.branches.pct)} |`,
+              '',
+              `> 📁 Full HTML report available as a workflow artifact: [coverage-report](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`,
+            ].join('\n');
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existing = comments.find(c =>
+              c.user.login === 'github-actions[bot]' && c.body.includes('## 📊 Coverage Report')
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
