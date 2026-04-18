@@ -4,11 +4,14 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Tooltip } from './Tooltip.component';
+import { TRANSITION_DURATION_MS } from './Tooltip.constants';
 
 // eslint-disable-next-line typescript-eslint/unbound-method -- Saving prototype method for teardown restore; binding would create a new function and break restoration
 const savedShowPopover = HTMLElement.prototype.showPopover;
 // eslint-disable-next-line typescript-eslint/unbound-method -- Saving prototype method for teardown restore; binding would create a new function and break restoration
 const savedHidePopover = HTMLElement.prototype.hidePopover;
+let hidePopoverMock: ReturnType<typeof vi.fn>;
+let showPopoverMock: ReturnType<typeof vi.fn>;
 
 afterEach(() => {
   HTMLElement.prototype.showPopover = savedShowPopover;
@@ -17,11 +20,26 @@ afterEach(() => {
 });
 
 beforeEach(() => {
-  HTMLElement.prototype.showPopover = vi.fn();
-  HTMLElement.prototype.hidePopover = vi.fn();
+  vi.useFakeTimers();
+  hidePopoverMock = vi.fn();
+  showPopoverMock = vi.fn();
+  HTMLElement.prototype.showPopover =
+    showPopoverMock as HTMLElement['showPopover'];
+  HTMLElement.prototype.hidePopover =
+    hidePopoverMock as HTMLElement['hidePopover'];
+  vi.spyOn(globalThis, 'requestAnimationFrame').mockImplementation(
+    (callback: FrameRequestCallback) => {
+      callback(0);
+      return 1;
+    },
+  );
 });
 
 describe('Tooltip', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('renders children', () => {
     render(
       <Tooltip content='Helpful tooltip'>
@@ -58,5 +76,38 @@ describe('Tooltip', () => {
 
     fireEvent.focus(triggerSpan);
     expect(showPopoverSpy).toHaveBeenCalled();
+  });
+
+  it('adds keyboard semantics for non-interactive children and hides on Escape', () => {
+    const hidePopoverSpy = vi.fn();
+    HTMLElement.prototype.hidePopover = hidePopoverSpy;
+
+    render(
+      <Tooltip content='Keyboard tooltip'>
+        <span>Open tooltip</span>
+      </Tooltip>,
+    );
+
+    const trigger = screen.getByRole('button', { name: 'Open tooltip' });
+
+    fireEvent.keyDown(trigger, { key: 'Enter' });
+    expect(showPopoverMock).toHaveBeenCalledTimes(1);
+
+    fireEvent.keyDown(trigger, { key: 'Escape' });
+    vi.advanceTimersByTime(TRANSITION_DURATION_MS);
+
+    expect(hidePopoverSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not add button semantics when the child is already interactive', () => {
+    render(
+      <Tooltip content='Native tooltip'>
+        <button type='button'>Native action</button>
+      </Tooltip>,
+    );
+
+    const triggerSpan = document.querySelector('[aria-describedby]');
+    expect(triggerSpan?.getAttribute('role')).toBeNull();
+    expect(triggerSpan?.getAttribute('tabindex')).toBeNull();
   });
 });

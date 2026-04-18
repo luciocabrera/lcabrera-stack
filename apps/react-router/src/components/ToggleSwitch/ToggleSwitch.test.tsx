@@ -64,4 +64,29 @@ describe('ToggleSwitch', () => {
 
     expect(screen.getByRole<HTMLInputElement>('switch').disabled).toBe(true);
   });
+
+  it('forwards focus and blur events and respects a custom id', () => {
+    const handleBlur = vi.fn();
+    const handleFocus = vi.fn();
+
+    render(
+      <ToggleSwitch
+        id='notifications-toggle'
+        isChecked={false}
+        label='Notifications'
+        onBlur={handleBlur}
+        onChange={vi.fn()}
+        onFocus={handleFocus}
+      />,
+    );
+
+    const toggle = screen.getByLabelText('Notifications');
+
+    fireEvent.focus(toggle);
+    fireEvent.blur(toggle);
+
+    expect(toggle.getAttribute('id')).toBe('notifications-toggle');
+    expect(handleFocus).toHaveBeenCalledTimes(1);
+    expect(handleBlur).toHaveBeenCalledTimes(1);
+  });
 });

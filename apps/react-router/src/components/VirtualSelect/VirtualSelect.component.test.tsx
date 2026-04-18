@@ -10,7 +10,7 @@ import {
   screen,
   waitFor,
 } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { VirtualListDataState } from '@/components/VirtualList';
 import type { SelectFilter } from '@/types/filterOperators.types';
@@ -83,7 +83,30 @@ vi.mock('./utils', async () => {
 
 import { VirtualSelect } from './VirtualSelect.component';
 
+let resizeObserverCallback: ResizeObserverCallback | undefined;
+
+beforeEach(() => {
+  resizeObserverCallback = undefined;
+  vi.stubGlobal(
+    'ResizeObserver',
+    class {
+      public constructor(callback: ResizeObserverCallback) {
+        resizeObserverCallback = callback;
+      }
+
+      public disconnect() {
+        // noop
+      }
+
+      public observe() {
+        // noop
+      }
+    },
+  );
+});
+
 afterEach(() => {
+  vi.unstubAllGlobals();
   cleanup();
 });
 
@@ -153,5 +176,67 @@ describe('VirtualSelect', () => {
       expect(screen.queryByTestId('virtual-list')).toBeNull();
     });
     expect(onOpenChange).toHaveBeenLastCalledWith(false);
+  });
+
+  it('removes a selected tag in multi mode and recalculates visible tags', () => {
+    const onChange = vi.fn();
+    countVisibleTagsMock.mockReturnValue(1);
+
+    render(
+      <VirtualSelect
+        mode='multi'
+        onChange={onChange}
+        options={[
+          { label: 'Alpha', value: 'alpha-id' },
+          { label: 'Bravo', value: 'bravo-id' },
+        ]}
+        selected={['alpha-id', 'bravo-id']}
+      />,
+    );
+
+    act(() => {
+      resizeObserverCallback?.([], {} as ResizeObserver);
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Remove Alpha' }));
+
+    expect(countVisibleTagsMock).toHaveBeenCalled();
+    expect(onChange).toHaveBeenCalledWith(['bravo-id']);
+  });
+
+  it('keeps multi-select open and forwards the full selected value list', async () => {
+    const onChange = vi.fn();
+    const onOpenChange = vi.fn();
+
+    render(
+      <VirtualSelect
+        mode='multi'
+        onChange={onChange}
+        onOpenChange={onOpenChange}
+        options={[
+          { label: 'Alpha', value: 'alpha-id' },
+          { label: 'Bravo', value: 'bravo-id' },
+        ]}
+        selected={['alpha-id']}
+      />,
+    );
+
+    const trigger = document.querySelector('[aria-haspopup="listbox"]');
+
+    if (trigger === null) {
+      throw new Error('Expected virtual select trigger to exist');
+    }
+
+    fireEvent.click(trigger);
+
+    await act(async () => {
+      getLatestVirtualListProps()?.onChange({
+        type: 'select',
+        values: ['Alpha', 'Bravo'],
+      });
+    });
+
+    expect(onChange).toHaveBeenCalledWith(['alpha-id', 'bravo-id']);
+    expect(onOpenChange).not.toHaveBeenLastCalledWith(false);
   });
 });

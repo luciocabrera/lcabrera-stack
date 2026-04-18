@@ -11,6 +11,9 @@ const savedClose = HTMLDialogElement.prototype.close;
 const savedShow = HTMLDialogElement.prototype.show;
 // eslint-disable-next-line typescript-eslint/unbound-method -- Saving prototype methods for test teardown restoration
 const savedShowModal = HTMLDialogElement.prototype.showModal;
+let closeMock: ReturnType<typeof vi.fn>;
+let showMock: ReturnType<typeof vi.fn>;
+let showModalMock: ReturnType<typeof vi.fn>;
 
 afterEach(() => {
   HTMLDialogElement.prototype.close = savedClose;
@@ -20,9 +23,25 @@ afterEach(() => {
 });
 
 beforeEach(() => {
-  HTMLDialogElement.prototype.close = vi.fn();
-  HTMLDialogElement.prototype.show = vi.fn();
-  HTMLDialogElement.prototype.showModal = vi.fn();
+  closeMock = vi.fn(function (this: HTMLDialogElement) {
+    Object.defineProperty(this, 'open', {
+      configurable: true,
+      value: false,
+      writable: true,
+    });
+  });
+  showMock = vi.fn();
+  showModalMock = vi.fn(function (this: HTMLDialogElement) {
+    Object.defineProperty(this, 'open', {
+      configurable: true,
+      value: true,
+      writable: true,
+    });
+  });
+  HTMLDialogElement.prototype.close = closeMock as HTMLDialogElement['close'];
+  HTMLDialogElement.prototype.show = showMock as HTMLDialogElement['show'];
+  HTMLDialogElement.prototype.showModal =
+    showModalMock as HTMLDialogElement['showModal'];
 });
 
 describe('Modal', () => {
@@ -90,5 +109,40 @@ describe('Modal', () => {
     expect(
       screen.queryByRole('button', { hidden: true, name: 'Close' }),
     ).toBeNull();
+  });
+
+  it('opens and closes the native dialog when isOpen changes', () => {
+    const { rerender } = render(
+      <Modal isOpen onClose={() => void 0}>
+        <span>content</span>
+      </Modal>,
+    );
+
+    expect(showModalMock).toHaveBeenCalledTimes(1);
+
+    rerender(
+      <Modal isOpen={false} onClose={() => void 0}>
+        <span>content</span>
+      </Modal>,
+    );
+
+    expect(closeMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls onClose when the native dialog close event fires', () => {
+    const onClose = vi.fn();
+
+    render(
+      <Modal isOpen onClose={onClose}>
+        <span>content</span>
+      </Modal>,
+    );
+
+    fireEvent(
+      screen.getByText('content').closest('dialog') as HTMLDialogElement,
+      new Event('close'),
+    );
+
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 });

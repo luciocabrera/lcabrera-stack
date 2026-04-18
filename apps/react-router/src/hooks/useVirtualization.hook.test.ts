@@ -111,4 +111,23 @@ describe('useVirtualization', () => {
 
     expect(result.current.containerHeight).toBe(400);
   });
+
+  it('falls back to the provided default height when no container is mounted', () => {
+    const containerRef = {
+      current: null,
+    } as RefObject<HTMLElement | null>;
+
+    const { result } = renderHook(() =>
+      useVirtualization({
+        containerRef,
+        defaultContainerHeight: 250,
+        itemHeight: 50,
+        totalItems: 25,
+      }),
+    );
+
+    expect(result.current.containerHeight).toBe(250);
+    expect(result.current.visibleCount).toBe(5);
+    expect(result.current.totalHeight).toBe(1250);
+  });
 });

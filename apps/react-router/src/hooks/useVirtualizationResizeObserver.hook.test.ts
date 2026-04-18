@@ -213,4 +213,48 @@ describe('useVirtualizationResizeObserver', () => {
     expect(result.current.endIndex).toBe(5);
     expect(result.current.bottomSpacerHeight).toBe(0);
   });
+
+  it('cancels a pending animation frame when the hook unmounts', () => {
+    requestAnimationFrameMock.mockImplementationOnce(() => 7);
+
+    const container = createContainer({ offsetHeight: 400 });
+    const containerRef = {
+      current: container,
+    } as RefObject<HTMLElement | null>;
+
+    const { unmount } = renderHook(() =>
+      useVirtualizationResizeObserver({
+        containerRef,
+        itemHeight: 50,
+        totalItems: 100,
+      }),
+    );
+
+    act(() => {
+      container.scrollTop = 250;
+      container.dispatchEvent(new Event('scroll'));
+    });
+
+    unmount();
+
+    expect(cancelAnimationFrameMock).toHaveBeenCalledWith(7);
+  });
+
+  it('uses the provided default height when the container ref is null', () => {
+    const containerRef = {
+      current: null,
+    } as RefObject<HTMLElement | null>;
+
+    const { result } = renderHook(() =>
+      useVirtualizationResizeObserver({
+        containerRef,
+        defaultContainerHeight: 280,
+        itemHeight: 40,
+        totalItems: 20,
+      }),
+    );
+
+    expect(result.current.containerHeight).toBe(280);
+    expect(result.current.visibleCount).toBe(7);
+  });
 });

@@ -78,6 +78,43 @@ describe('renderTracker.util', () => {
     expect(logSpy).toHaveBeenCalled();
   });
 
+  it('falls back to console output when clipboard copy fails', async () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: {
+        writeText: vi.fn().mockRejectedValue(new Error('Clipboard blocked')),
+      },
+    });
+
+    trackRender('OrdersTable');
+
+    const json = await renderStats.copy();
+
+    expect(logSpy).toHaveBeenCalledWith('📋 Copy manually:', json);
+  });
+
+  it('prints a formatted summary to the console', () => {
+    const groupSpy = vi.spyOn(console, 'group').mockImplementation(() => {});
+    const groupEndSpy = vi
+      .spyOn(console, 'groupEnd')
+      .mockImplementation(() => {});
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const tableSpy = vi.spyOn(console, 'table').mockImplementation(() => {});
+
+    trackRender('OrdersTable');
+    trackRenderComplete('OrdersTable', performance.now() - 10);
+    trackRender('FiltersPanel');
+
+    renderStats.print();
+
+    expect(groupSpy).toHaveBeenCalled();
+    expect(logSpy).toHaveBeenCalled();
+    expect(tableSpy).toHaveBeenCalledTimes(2);
+    expect(groupEndSpy).toHaveBeenCalled();
+  });
+
   it('exposes renderStats on window in development', () => {
     expect((window as WindowWithRenderStats).__renderStats).toBe(renderStats);
   });

@@ -86,4 +86,24 @@ describe('useDraggableList', () => {
 
     expect(result.current.items).toEqual(nextItems);
   });
+
+  it('does nothing when the drag ids do not match list items', () => {
+    const onOrderChange = vi.fn();
+    const { result } = renderHook(() =>
+      useDraggableList({
+        initialItems: items,
+        onOrderChange,
+      }),
+    );
+
+    act(() => {
+      result.current.handleDragStart('missing-source');
+      result.current.handleDragEnter('missing-target');
+      result.current.handleDragEnd();
+    });
+
+    expect(result.current.items).toEqual(items);
+    expect(onOrderChange).not.toHaveBeenCalled();
+    expect(result.current.dragItemId.current).toBeUndefined();
+  });
 });
