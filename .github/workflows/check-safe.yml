@@ -82,7 +82,10 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: coverage-report
-          path: ./apps/react-router/coverage
+          path: |
+            ./apps/react-router/coverage/**
+            ./coverage/**
+          if-no-files-found: ignore
           retention-days: 30
 
       - name: Post coverage summary to PR
@@ -91,9 +94,13 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const summaryPath = './apps/react-router/coverage/coverage-summary.json';
+            const candidateSummaryPaths = [
+              './apps/react-router/coverage/coverage-summary.json',
+              './coverage/coverage-summary.json',
+            ];
+            const summaryPath = candidateSummaryPaths.find(path => fs.existsSync(path));
 
-            if (!fs.existsSync(summaryPath)) {
+            if (!summaryPath) {
               console.log('No coverage-summary.json found, skipping comment');
               return;
             }
