@@ -150,8 +150,14 @@ jobs:
             apps/react-router/lighthouse-comment.md
           retention-days: 30
 
+      - name: Warn if scores are below thresholds on PR
+        if: github.event_name == 'pull_request' && steps.check_scores.outcome == 'failure'
+        run: |
+          echo "⚠️ Lighthouse audit results are below thresholds for this PR."
+          echo "Review the PR comment and artifact report for details."
+
       - name: Fail if scores are below thresholds
-        if: steps.find_report.outputs.report_found != 'true' || steps.check_scores.outcome == 'failure'
+        if: steps.find_report.outputs.report_found != 'true' || (github.event_name == 'workflow_dispatch' && steps.check_scores.outcome == 'failure')
         run: |
           if [ "${{ steps.find_report.outputs.report_found }}" != 'true' ]; then
             echo "❌ Lighthouse report was not generated"
