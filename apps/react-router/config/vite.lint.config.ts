@@ -1,3 +1,1 @@
-import { reactRouterLintSharedConfig } from '../../../config/vite.react-router-lint.shared.config';
-
-export const lintConfig = reactRouterLintSharedConfig;
+export { reactRouterLintSharedConfig as lintConfig } from '../../../config/vite.react-router-lint.shared.config';
