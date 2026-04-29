@@ -4,6 +4,7 @@ import type { TabItem } from '@/components/Tabs';
 
 import { Button } from '@/components/Button';
 import { SettingsIcon } from '@/components/Icons';
+import { NotificationCenter } from '@/components/NotificationCenter';
 import {
   SidePanel,
   SidePanelBody,
@@ -14,11 +15,13 @@ import {
 } from '@/components/SidePanel';
 import { Tabs } from '@/components/Tabs';
 import { ICON_SIZE_LG } from '@/design-system/constants';
+import { useNotifications } from '@/hooks/useNotifications.hook';
 
 import { useToogleTableIsTableSettingsOpen } from '../contexts/TableConfig/meta/actions';
 import { ColumnOrderSection } from './ColumnOrderSection';
 import { ColumnOrderSectionProvider } from './ColumnOrderSection/ColumnOrderSectionContext/ColumnOrderSectionContext.provider';
 import { FiltersSection } from './FiltersSection';
+import { validateFilter } from './FiltersSection/validateFilter.util';
 import { GeneralSettingsSection } from './GeneralSettingsSection';
 import { SortingSection } from './SortingSection';
 import {
@@ -26,10 +29,10 @@ import {
   useResetTableSettings,
 } from './TableDrawerContext/actions';
 import { useGetColumnFilters } from './TableDrawerContext/selectors';
-import { validateFilter } from './FiltersSection/validateFilter.util';
 
 export const TableSettingsDrawer = () => {
   const batchSetTableDrawerSettings = useBatchSetTableDrawerSettings();
+  const { notify } = useNotifications();
   const resetTableDrawerSettings = useResetTableSettings();
   const toogleTableIsTableSettingsOpen = useToogleTableIsTableSettingsOpen();
 
@@ -39,11 +42,17 @@ export const TableSettingsDrawer = () => {
   const areFiltersValid = Object.values(filters).every((f) =>
     validateFilter(f),
   );
-  const acceptButtonTitle = areFiltersValid
-    ? undefined
-    : 'Please fix invalid filters before accepting';
-
   const handleAccept = () => {
+    if (!areFiltersValid) {
+      notify({
+        message: 'Fix invalid filters before accepting table settings.',
+        placement: 'bottom-right',
+        title: 'Invalid filters',
+        variant: 'warning',
+      });
+      return;
+    }
+
     batchSetTableDrawerSettings();
 
     // Unpin if pinned, then close
@@ -100,6 +109,7 @@ export const TableSettingsDrawer = () => {
       position='right'
       size='md'
     >
+      <NotificationCenter />
       <SidePanelHeader
         actions={
           <SidePanelHeaderToolbar
@@ -117,13 +127,7 @@ export const TableSettingsDrawer = () => {
         <Tabs tabs={tabs} />
       </SidePanelBody>
       <SidePanelFooter>
-        <Button
-          color='primary'
-          isDisabled={!areFiltersValid}
-          onClick={handleAccept}
-          size='sm'
-          title={acceptButtonTitle}
-        >
+        <Button color='primary' onClick={handleAccept} size='sm'>
           Accept
         </Button>
         <Button color='outline' onClick={handleCancel} size='sm'>

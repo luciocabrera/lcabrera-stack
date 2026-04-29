@@ -25,6 +25,7 @@ hooks/
 | Hook                              | Category      | Returns                                        | Key dependency                                |
 | --------------------------------- | ------------- | ---------------------------------------------- | --------------------------------------------- |
 | `useClickOutside`                 | DOM event     | `void`                                         | `document` mousedown                          |
+| `useNotifications`                | Context       | `NotificationContextValue`                     | `NotificationContext`, `use()`                |
 | `useColumnVirtualization`         | Layout/scroll | `{ startIndex, endIndex, leftSpacerWidth, … }` | `ResizeObserver` + scroll events on container |
 | `useStore`                        | State mgmt    | `TStore<TData>`                                | `useRef`, `shallowEqual`                      |
 | `useTheme`                        | Context       | `ThemeContextValue`                            | `ThemeContext`, `use()`                       |

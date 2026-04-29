@@ -144,8 +144,9 @@ graph TD
   N --> Q["Footer: Accept + Cancel buttons"]
 
   Q --> R{"Accept?"}
-  R -->|Yes| S["batchSetTableDrawerSettings()"]
-  S --> T["Unpin + close"]
+  R -->|Yes + invalid filters| S["notify('Invalid filters') + keep drawer open"]
+  R -->|Yes + valid filters| T["batchSetTableDrawerSettings()"]
+  T --> U["Unpin + close"]
   Q --> U{"Cancel?"}
   U -->|Yes| V["resetTableSettings()"]
   V --> W["Unpin + close"]

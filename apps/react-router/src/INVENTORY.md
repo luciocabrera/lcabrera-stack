@@ -16,6 +16,7 @@ Before creating anything new, check this inventory. If something here does the j
 | `InfoBox`            | `components/InfoBox/`             | Styled container for informational messages and empty states                                         |
 | `Modal`              | `components/Modal/`               | Native `<dialog>` modal with title, footer, Esc-to-close                                             |
 | `NavLink`            | `components/NavLink/`             | Router-aware navigation link with color, size, icon, orientation                                     |
+| `NotificationCenter` | `components/NotificationCenter/`  | Global corner-based notification viewport with dismiss + auto-hide using NotificationContext         |
 | `PinSideModal`       | `components/PinSideModal/`        | Modal for choosing column pin side (left / right / closest-edge)                                     |
 | `RadioOptionGroup`   | `components/RadioOptionGroup/`    | Generic `<TValue extends string>` radio button group                                                 |
 | `RouteErrorBoundary` | `components/RouteErrorBoundary/`  | Shared route error boundary display with retry button; accepts `defaultMessage` and `error` props    |
@@ -38,6 +39,7 @@ Before creating anything new, check this inventory. If something here does the j
 | --------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
 | `useClickOutside`                 | `hooks/useClickOutside.hook.ts`                 | Fires callback when a `mousedown` occurs outside a given ref                                                  |
 | `useStore`                        | `hooks/useStore.hook.ts`                        | Ref-based external store with shallow-equality guard, subscribe, reset, SSR snapshot                          |
+| `useNotifications`                | `hooks/useNotifications.hook.ts`                | Accesses NotificationContext actions/state (`notify`, `dismissNotification`, `dismissNotifications`)          |
 | `useTheme`                        | `hooks/useTheme.hook.ts`                        | Returns `{ theme, setTheme }` from `ThemeContext` via React 19 `use()`                                        |
 | `useColumnVirtualization`         | `hooks/useColumnVirtualization.hook.ts`         | Computes `startIndex`, `endIndex`, `leftSpacerWidth`, `rightSpacerWidth` for horizontal column virtualisation |
 | `useVirtualization`               | `hooks/useVirtualization.hook.ts`               | Computes `startIndex`, `endIndex`, `totalHeight`, `offsetY` for a scrollable virtual list                     |

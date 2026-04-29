@@ -7,10 +7,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const {
   batchSetTableDrawerSettingsMock,
+  notifyMock,
+  tableColumnFiltersMock,
   resetTableDrawerSettingsMock,
   toogleTableIsTableSettingsOpenMock,
 } = vi.hoisted(() => ({
   batchSetTableDrawerSettingsMock: vi.fn(),
+  notifyMock: vi.fn(),
+  tableColumnFiltersMock: {} as Record<string, unknown>,
   resetTableDrawerSettingsMock: vi.fn(),
   toogleTableIsTableSettingsOpenMock: vi.fn(),
 }));
@@ -21,6 +25,10 @@ afterEach(() => {
 
 beforeEach(() => {
   batchSetTableDrawerSettingsMock.mockReset();
+  notifyMock.mockReset();
+  Object.keys(tableColumnFiltersMock).forEach((key) => {
+    delete tableColumnFiltersMock[key];
+  });
   resetTableDrawerSettingsMock.mockReset();
   toogleTableIsTableSettingsOpenMock.mockReset();
 });
@@ -67,6 +75,10 @@ vi.mock('@/components/Button', () => ({
 
 vi.mock('@/components/Icons', () => ({
   SettingsIcon: () => <span>Settings icon</span>,
+}));
+
+vi.mock('@/components/NotificationCenter', () => ({
+  NotificationCenter: () => <div>Notification center</div>,
 }));
 
 vi.mock('@/components/SidePanel', () => ({
@@ -159,7 +171,13 @@ vi.mock('./TableDrawerContext/actions', () => ({
 }));
 
 vi.mock('./TableDrawerContext/selectors', () => ({
-  useGetColumnFilters: () => ({}),
+  useGetColumnFilters: () => tableColumnFiltersMock,
+}));
+
+vi.mock('@/hooks/useNotifications.hook', () => ({
+  useNotifications: () => ({
+    notify: notifyMock,
+  }),
 }));
 
 import { TableSettingsDrawer } from './TableSettingsDrawer.component';
@@ -197,5 +215,20 @@ describe('TableSettingsDrawer', () => {
     expect(resetTableDrawerSettingsMock).toHaveBeenCalledTimes(1);
     expect(toogleTableIsTableSettingsOpenMock).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId('side-panel').dataset.pinned).toBe('false');
+  });
+
+  it('shows a notification and blocks accept when filters are invalid', () => {
+    tableColumnFiltersMock.order_date = {
+      operator: 'equals',
+      type: 'date',
+      value: '',
+    };
+
+    render(<TableSettingsDrawer />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Accept' }));
+
+    expect(batchSetTableDrawerSettingsMock).not.toHaveBeenCalled();
+    expect(notifyMock).toHaveBeenCalledTimes(1);
   });
 });

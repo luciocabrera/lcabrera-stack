@@ -157,7 +157,7 @@ $$
 Tooltip styling is fully StyleX-driven and tokenized:
 
 - Trigger styles use `anchorName` to bind tooltip anchoring.
-- Tooltip surface uses elevated tokens (blur, shadow, radius, typography).
+- Tooltip surface uses elevated tokens (blur, shadow, border, radius, typography).
 - Visibility transition uses opacity + transform.
 - Placement styles provide `positionArea` and axis-specific slide transforms.
 - Arrow is a rotated square (`45deg`) with per-placement base offsets.

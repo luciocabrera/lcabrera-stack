@@ -18,6 +18,10 @@ type MockThemeProviderProps = {
   readonly initialTheme: ThemeMode;
 };
 
+type MockNotificationProviderProps = {
+  readonly children: ReactNode;
+};
+
 type MockButtonProps = {
   readonly children: ReactNode;
   readonly onClick?: () => void;
@@ -42,6 +46,12 @@ vi.mock('@/components/Button', () => ({
   ),
 }));
 
+vi.mock('@/components/NotificationCenter', () => ({
+  NotificationCenter: () => (
+    <div data-testid='notification-center'>Notifications</div>
+  ),
+}));
+
 vi.mock('@/components/Toolbar/Toolbar.examples', () => ({
   SidePanelToolbarExample: () => <div>Toolbar example</div>,
 }));
@@ -51,6 +61,12 @@ vi.mock('@/contexts/ThemeContext', () => ({
     <div data-initial-theme={initialTheme} data-testid='theme-provider'>
       {children}
     </div>
+  ),
+}));
+
+vi.mock('@/contexts/NotificationContext', () => ({
+  NotificationProvider: ({ children }: MockNotificationProviderProps) => (
+    <div data-testid='notification-provider'>{children}</div>
   ),
 }));
 
@@ -85,6 +101,10 @@ describe('Root', () => {
 
     expect(screen.getByTestId('theme-provider').dataset.initialTheme).toBe(
       'dark',
+    );
+    expect(screen.getByTestId('notification-provider')).toBeDefined();
+    expect(screen.getByTestId('notification-center').textContent).toBe(
+      'Notifications',
     );
     expect(screen.getByTestId('outlet').textContent).toBe('Outlet');
     expect(toggleThemeMock).toHaveBeenCalledTimes(1);
