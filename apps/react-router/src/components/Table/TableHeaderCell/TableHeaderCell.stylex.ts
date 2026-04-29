@@ -10,10 +10,9 @@ import { skeleton } from '@/design-system/tokens/commons.stylex';
 
 export const tableHeaderCellStyles = stylex.create({
   base: (minWidth?: number | string, width?: number | string) => ({
-    borderColor: 'red',
-    borderStyle: 'solid',
     paddingInline: '6px', // 'var(--table-padding-inline)',
     alignItems: 'center',
+    boxSizing: 'border-box',
     color: colors.textSecondary,
     display: 'flex',
     fontSize: typography.fontSizeSm,

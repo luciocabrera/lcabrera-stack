@@ -14,10 +14,9 @@ export const tableBodyCellStyles = stylex.create({
     textAlign: 'right',
   },
   base: (minWidth?: number | string, width?: number | string) => ({
-    borderColor: 'green',
-    borderStyle: 'solid',
     paddingInline: '6px',
     alignItems: 'center',
+    boxSizing: 'border-box',
     color: colors.textPrimary,
     display: 'flex',
     fontSize: typography.fontSizeSm,
@@ -27,16 +26,19 @@ export const tableBodyCellStyles = stylex.create({
     maxHeight: '100%',
     maxWidth: width ?? minWidth ?? null,
     minWidth: minWidth ?? width ?? null,
+    borderRightColor: colors.borderSecondary,
+    borderRightStyle: 'solid',
+    borderRightWidth: 1,
     width: width ?? minWidth ?? null,
   }),
   pinnedLeft: (offset: number) => ({
-    backgroundColor: 'blue', //find proper color token
+    backgroundColor: colors.surfaceSecondary,
     position: 'sticky',
     zIndex: `calc(${zIndex.sticky} - 1)`,
     left: offset,
   }),
   pinnedRight: (offset: number) => ({
-    backgroundColor: 'red', //find proper color token
+    backgroundColor: colors.surfaceSecondary,
     position: 'sticky',
     zIndex: `calc(${zIndex.sticky} - 1)`,
     right: offset,

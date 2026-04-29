@@ -66,10 +66,14 @@ const localStyles = stylex.create({
   },
   optionButtonReset: {
     appearance: 'none',
-    border: 'none',
+    borderColor: 'transparent',
+    borderStyle: 'none',
+    borderWidth: 0,
     fontFamily: 'inherit',
     fontSize: 'inherit',
     margin: 0,
+    outline: 'none',
+    textAlign: 'left',
     width: '100%',
   },
   optionDisabled: {

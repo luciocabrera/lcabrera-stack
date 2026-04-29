@@ -29,6 +29,7 @@ export const filterBaseStyles = stylex.create({
     transition: 'border-color 0.15s ease',
     appearance: 'none',
     backgroundColor: colors.surfacePrimary,
+    boxSizing: 'border-box',
     boxShadow: 'none !important',
     color: colors.textPrimary,
     fontSize: typography.fontSizeSm,
