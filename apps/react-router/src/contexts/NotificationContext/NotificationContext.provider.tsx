@@ -11,13 +11,15 @@ import { NotificationContext } from './NotificationContext.context';
 
 const DEFAULT_DURATION_MS = 3000;
 const DEFAULT_PLACEMENT: NotificationPlacement = 'bottom-right';
+let fallbackIdCounter = 0;
 
 const createNotificationId = (): string => {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
     return crypto.randomUUID();
   }
 
-  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  fallbackIdCounter += 1;
+  return `notification-${Date.now()}-${fallbackIdCounter}`;
 };
 
 export const NotificationProvider = ({
