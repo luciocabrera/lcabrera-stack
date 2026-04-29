@@ -18,6 +18,11 @@ Provide a reusable notification system with:
 - `useNotificationContextValue`
 - types from `NotificationContext.types.ts`
 
+## Internal Files
+
+- `NotificationContext.constants.ts` stores provider defaults
+- `createNotificationId.util.ts` stores notification ID generation
+
 ## State Shape
 
 `notifications` is a readonly list of `AppNotification` objects.

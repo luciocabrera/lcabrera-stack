@@ -1,26 +1,17 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import type {
   AppNotification,
-  NotificationPlacement,
   NotificationProviderProps,
   NotifyArgs,
 } from './NotificationContext.types';
 
+import {
+  DEFAULT_DURATION_MS,
+  DEFAULT_PLACEMENT,
+} from './NotificationContext.constants';
 import { NotificationContext } from './NotificationContext.context';
-
-const DEFAULT_DURATION_MS = 3000;
-const DEFAULT_PLACEMENT: NotificationPlacement = 'bottom-right';
-let fallbackIdCounter = 0;
-
-const createNotificationId = (): string => {
-  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
-    return crypto.randomUUID();
-  }
-
-  fallbackIdCounter += 1;
-  return `notification-${Date.now()}-${fallbackIdCounter}`;
-};
+import { createNotificationId } from './utils';
 
 export const NotificationProvider = ({
   children,
@@ -34,7 +25,7 @@ export const NotificationProvider = ({
     new Map(),
   );
 
-  const clearNotificationTimeout = useCallback((id: string) => {
+  const clearNotificationTimeout = (id: string) => {
     const timeoutId = timeoutMapRef.current.get(id);
 
     if (!timeoutId) {
@@ -43,62 +34,56 @@ export const NotificationProvider = ({
 
     clearTimeout(timeoutId);
     timeoutMapRef.current.delete(id);
-  }, []);
+  };
 
-  const dismissNotification = useCallback(
-    (id: string) => {
-      clearNotificationTimeout(id);
-      setNotifications((currentNotifications) =>
-        currentNotifications.filter((notification) => notification.id !== id),
-      );
-    },
-    [clearNotificationTimeout],
-  );
+  const dismissNotification = (id: string) => {
+    clearNotificationTimeout(id);
+    setNotifications((currentNotifications) =>
+      currentNotifications.filter((notification) => notification.id !== id),
+    );
+  };
 
-  const dismissNotifications = useCallback(() => {
+  const dismissNotifications = () => {
     for (const timeoutId of timeoutMapRef.current.values()) {
       clearTimeout(timeoutId);
     }
 
     timeoutMapRef.current.clear();
     setNotifications([]);
-  }, []);
+  };
 
-  const notify = useCallback(
-    ({
-      durationMs = defaultDurationMs,
+  const notify = ({
+    durationMs = defaultDurationMs,
+    message,
+    placement = defaultPlacement,
+    title,
+    variant = 'info',
+  }: NotifyArgs): string => {
+    const id = createNotificationId();
+    const notification: AppNotification = {
+      durationMs,
+      id,
       message,
-      placement = defaultPlacement,
+      placement,
       title,
-      variant = 'info',
-    }: NotifyArgs): string => {
-      const id = createNotificationId();
-      const notification: AppNotification = {
-        durationMs,
-        id,
-        message,
-        placement,
-        title,
-        variant,
-      };
+      variant,
+    };
 
-      setNotifications((currentNotifications) => [
-        ...currentNotifications,
-        notification,
-      ]);
+    setNotifications((currentNotifications) => [
+      ...currentNotifications,
+      notification,
+    ]);
 
-      if (durationMs > 0) {
-        const timeoutId = setTimeout(() => {
-          dismissNotification(id);
-        }, durationMs);
+    if (durationMs > 0) {
+      const timeoutId = setTimeout(() => {
+        dismissNotification(id);
+      }, durationMs);
 
-        timeoutMapRef.current.set(id, timeoutId);
-      }
+      timeoutMapRef.current.set(id, timeoutId);
+    }
 
-      return id;
-    },
-    [defaultDurationMs, defaultPlacement, dismissNotification],
-  );
+    return id;
+  };
 
   useEffect(() => {
     return () => {
@@ -110,15 +95,12 @@ export const NotificationProvider = ({
     };
   }, []);
 
-  const value = useMemo(
-    () => ({
-      dismissNotification,
-      dismissNotifications,
-      notifications,
-      notify,
-    }),
-    [dismissNotification, dismissNotifications, notifications, notify],
-  );
+  const value = {
+    dismissNotification,
+    dismissNotifications,
+    notifications,
+    notify,
+  };
 
   return <NotificationContext value={value}>{children}</NotificationContext>;
 };
