@@ -109,16 +109,16 @@ describe('validateFilter', () => {
     ).toBe(true);
   });
 
-  it('returns true for text equals without value', () => {
+  it('returns false for text equals without value', () => {
     expect(
       validateFilter({ operator: 'equals', type: 'text', value: '' }),
-    ).toBe(true);
+    ).toBe(false);
   });
 
-  it('returns true for text notEquals without value', () => {
+  it('returns false for text notEquals without value', () => {
     expect(
       validateFilter({ operator: 'notEquals', type: 'text', value: '' }),
-    ).toBe(true);
+    ).toBe(false);
   });
 
   it('returns false for text contains with empty value', () => {

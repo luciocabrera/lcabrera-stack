@@ -36,9 +36,6 @@ const validateSelectFilter = (
 const validateTextFilter = (
   filter: Extract<ColumnFilter, { type: 'text' }>,
 ) => {
-  if (filter.operator === 'equals' || filter.operator === 'notEquals') {
-    return true;
-  }
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   return Boolean(filter.value?.trim());
 };

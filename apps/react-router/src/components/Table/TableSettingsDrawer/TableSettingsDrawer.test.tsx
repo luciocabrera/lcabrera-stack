@@ -158,6 +158,10 @@ vi.mock('./TableDrawerContext/actions', () => ({
   useResetTableSettings: () => resetTableDrawerSettingsMock,
 }));
 
+vi.mock('./TableDrawerContext/selectors', () => ({
+  useGetColumnFilters: () => ({}),
+}));
+
 import { TableSettingsDrawer } from './TableSettingsDrawer.component';
 
 describe('TableSettingsDrawer', () => {

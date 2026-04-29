@@ -25,6 +25,8 @@ import {
   useBatchSetTableDrawerSettings,
   useResetTableSettings,
 } from './TableDrawerContext/actions';
+import { useGetColumnFilters } from './TableDrawerContext/selectors';
+import { validateFilter } from './FiltersSection/validateFilter.util';
 
 export const TableSettingsDrawer = () => {
   const batchSetTableDrawerSettings = useBatchSetTableDrawerSettings();
@@ -33,8 +35,13 @@ export const TableSettingsDrawer = () => {
 
   const [isPinned, setIsPinned] = useState(false);
 
-  const areFiltersValid = true; // TODO: implement filter validation
-  const acceptButtonTitle = 'Please fix invalid filters before accepting';
+  const filters = useGetColumnFilters();
+  const areFiltersValid = Object.values(filters).every((f) =>
+    validateFilter(f),
+  );
+  const acceptButtonTitle = areFiltersValid
+    ? undefined
+    : 'Please fix invalid filters before accepting';
 
   const handleAccept = () => {
     batchSetTableDrawerSettings();
