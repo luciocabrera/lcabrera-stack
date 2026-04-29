@@ -1,0 +1,16 @@
+{
+  "name": "@repo/vite-configs",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./fmt": "./vite.fmt.shared.config.ts",
+    "./base-lint": "./vite.base-lint.shared.config.ts",
+    "./frontend-lint": "./vite.frontend-lint.shared.config.ts",
+    "./api-lint": "./vite.api-lint.shared.config.ts",
+    "./react-router-lint": "./vite.react-router-lint.shared.config.ts"
+  },
+  "devDependencies": {
+    "vite-plus": "catalog:"
+  }
+}

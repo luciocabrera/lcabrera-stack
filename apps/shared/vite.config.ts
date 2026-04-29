@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite-plus';
-import { createApiLintConfig } from '../../config/vite.api-lint.shared.config.ts';
+import { createApiLintConfig } from '@repo/vite-configs/api-lint';
 
 const lintConfig = createApiLintConfig();
 

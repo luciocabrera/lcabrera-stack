@@ -16,7 +16,6 @@
     "typecheck": "react-router typegen && tsc --noEmit",
     "preview": "vp preview",
     "knip": "knip",
-    "prepare": "vp config",
     "test:watch": "node node_modules/vitest/vitest.mjs"
   },
   "dependencies": {
@@ -35,6 +34,7 @@
     "@babel/preset-typescript": "catalog:",
     "@eslint/js": "catalog:",
     "@react-router/dev": "catalog:",
+    "@repo/vite-configs": "workspace:*",
     "@stylexjs/eslint-plugin": "catalog:",
     "@stylexjs/unplugin": "catalog:",
     "@testing-library/react": "catalog:",
