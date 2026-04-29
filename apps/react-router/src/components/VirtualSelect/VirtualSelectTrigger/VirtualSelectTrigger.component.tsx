@@ -40,7 +40,11 @@ export const VirtualSelectTrigger = ({
       <span {...stylex.props(styles.triggerPlaceholder)}>{placeholder}</span>
     );
   } else if (mode === 'single') {
-    content = <span {...stylex.props(styles.triggerLabel)}>{selected[0]}</span>;
+    content = (
+      <span {...stylex.props(styles.triggerLabel)}>
+        {visibleTags[0] ?? selected[0]}
+      </span>
+    );
   } else {
     content = (
       <>
