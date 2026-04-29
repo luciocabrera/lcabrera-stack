@@ -23,10 +23,11 @@
     "prepare": "vp config"
   },
   "devDependencies": {
+    "@repo/vite-configs": "workspace:*",
     "vite-plus": "catalog:"
   },
   "engines": {
     "node": ">=24.14.1"
   },
-  "packageManager": "pnpm@11.0.0-rc.0"
+  "packageManager": "pnpm@11.0.0-rc.5"
 }

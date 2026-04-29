@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite-plus';
 
-import { createFmtConfig } from './config/vite.fmt.shared.config.ts';
+import { createFmtConfig } from '@repo/vite-configs/fmt';
 
 const fmtConfig = createFmtConfig([
   '.react-router/',

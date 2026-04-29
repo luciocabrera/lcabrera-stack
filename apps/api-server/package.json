@@ -17,6 +17,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@repo/vite-configs": "workspace:*",
     "@types/cors": "catalog:",
     "@types/express": "catalog:",
     "@types/node": "catalog:",

@@ -16,6 +16,7 @@
     "lint:check": "vp lint ."
   },
   "devDependencies": {
+    "@repo/vite-configs": "workspace:*",
     "@types/node": "catalog:",
     "vitest": "catalog:"
   }
