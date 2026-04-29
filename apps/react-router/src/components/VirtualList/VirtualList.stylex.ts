@@ -88,9 +88,13 @@ const localStyles = stylex.create({
     gap: spacing.xs,
     overflow: 'hidden',
     backgroundColor: colors.surfacePrimary,
+    boxSizing: 'border-box',
     display: 'flex',
     flexDirection: 'column',
+    maxWidth: '100%',
+    minWidth: 0,
     position: 'relative',
+    width: '100%',
   },
   optionsListFill: {
     flex: '1',

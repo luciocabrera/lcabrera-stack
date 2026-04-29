@@ -27,8 +27,8 @@ Before creating anything new, check this inventory. If something here does the j
 | `ToggleSwitch`       | `components/ToggleSwitch/`        | Accessible boolean toggle (controlled, `role="switch"`)                                              |
 | `Toolbar`            | `components/Toolbar/`             | Horizontal/vertical toolbar of Button/NavLink items                                                  |
 | `Tooltip`            | `components/Tooltip/`             | CSS Anchor + Popover API tooltip, 4 placements, animated                                             |
-| `VirtualList`        | `components/VirtualList/`         | Virtualized list with search, select-all, checkboxes, lazy load                                      |
-| `VirtualSelect`      | `components/VirtualSelect/`       | Dropdown select backed by `VirtualList`; `string[]` or `{ label, value }[]` options                  |
+| `VirtualList`        | `components/VirtualList/`         | Virtualized list with search, select-all, checkboxes, lazy load, parent-contained sizing             |
+| `VirtualSelect`      | `components/VirtualSelect/`       | Parent-contained dropdown select backed by `VirtualList`; `string[]` or `{ label, value }[]` options |
 
 ---
 

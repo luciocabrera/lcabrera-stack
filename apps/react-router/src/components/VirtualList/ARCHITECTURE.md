@@ -107,6 +107,10 @@ graph TD
 
 `useVirtualization` measures the scroll container and computes which rows are inside the visible window. `VirtualList` renders only `endIndex - startIndex` `VirtualizedOption` elements and translates them via a CSS `translateY` to the correct scroll position.
 
+The outer options list is explicitly sized with `border-box`, `width: 100%`,
+`max-width: 100%`, and `min-width: 0` so embedded lists stay inside constrained
+parents such as drawer filter cards.
+
 | Constant                   | Value       | Role                                             |
 | -------------------------- | ----------- | ------------------------------------------------ |
 | `ITEM_HEIGHT`              | `32 px`     | Fixed row height (enables O(1) offset math)      |

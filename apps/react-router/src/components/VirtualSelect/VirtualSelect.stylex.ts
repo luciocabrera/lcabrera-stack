@@ -10,6 +10,9 @@ import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const styles = stylex.create({
   container: {
+    boxSizing: 'border-box',
+    maxWidth: '100%',
+    minWidth: 0,
     position: 'relative',
     width: '100%',
   },
@@ -18,17 +21,19 @@ export const styles = stylex.create({
     display: 'flex',
     flexDirection: 'column',
     minHeight: 0,
-  }, //isOperatorOpen
+  },
   dropdownBase: {
     borderColor: colors.borderPrimary,
     borderRadius: borderRadius.md,
     borderStyle: 'none',
     borderWidth: '1px',
-    // backgroundColor: colors.surfacePrimary,
-    // backgroundColor: colors.surfaceSecondary,
     display: 'flex',
     flexDirection: 'column',
     marginTop: spacing.sm,
+    boxSizing: 'border-box',
+    maxWidth: '100%',
+    minWidth: 0,
+    width: '100%',
   },
   dropdownAbsolute: {
     boxShadow: shadows.lg,

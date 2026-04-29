@@ -84,6 +84,10 @@ Controlled by `getDropdownStyle(isAlwaysOpen, shouldFillHeight)`:
 | `true`         | `false`            | `dropdownStatic`     | Inline block (e.g. filter panel)    |
 | `true`         | `true`             | `dropdownStaticFill` | Flex-fill (e.g. full-height drawer) |
 
+The container and dropdown use explicit `border-box`, `min-width: 0`, and
+`max-width: 100%` sizing so both floating and always-open variants remain
+contained by drawer/card parents.
+
 ## Static vs. Async Data
 
 ```mermaid

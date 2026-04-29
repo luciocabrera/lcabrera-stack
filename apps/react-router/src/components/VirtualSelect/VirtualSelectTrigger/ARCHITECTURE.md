@@ -62,6 +62,9 @@ graph TD
 
 When `mode === 'multi'` the parent `VirtualSelect` attaches a `ResizeObserver` to `triggerRef` and calls `countVisibleTags` to compute `visibleTags` and `overflowCount` on every resize.
 
+The trigger uses explicit `border-box`, `min-width: 0`, and `max-width: 100%`
+sizing so padding and borders do not push the select beyond its parent.
+
 ## Accessibility
 
 | Attribute       | Value / Logic                                                              |
