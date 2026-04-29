@@ -87,6 +87,8 @@ export const Tooltip = ({
         popoverTarget={id}
         ref={triggerRef}
         role={shouldUseInteractiveTrigger ? 'button' : undefined}
+        // For non-native triggers we intentionally provide keyboard focus + role.
+        // NOSONAR
         tabIndex={shouldUseInteractiveTrigger ? 0 : undefined}
         {...stylex.props(styles.trigger(anchorName))}
       >

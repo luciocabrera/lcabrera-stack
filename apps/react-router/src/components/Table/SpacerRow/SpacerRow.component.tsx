@@ -11,6 +11,8 @@ export const SpacerRow = ({ height }: SpacerRowProps) => {
     leftPinnedCols.length + centerCols.length + rightPinnedCols.length;
 
   return (
+    // Decorative spacer row: no interactive descendants are rendered here.
+    // NOSONAR
     <tr aria-hidden='true' {...stylex.props(styles.row(height))}>
       <td colSpan={colSpan} {...stylex.props(styles.cell(height))} />
     </tr>
