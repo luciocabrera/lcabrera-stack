@@ -1,9 +1,5 @@
 import type { ColumnOrderState } from '@/components/Table/Table.types';
-import type {
-  PinSide,
-  PinSidePreferenceOption,
-} from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
-import { useSetGlobalPinSidePreference } from '@/contexts/GlobalSettingsContext/actions';
+import type { PinSide } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
 import { useGetGlobalPinConflictResolutionPreference } from '@/contexts/GlobalSettingsContext/selectors';
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
@@ -27,10 +23,9 @@ export const useAcceptPinSide = () => {
   const { modalsStore } = useColumnOrderSectionContextValue();
   const pinConflictResolutionPreference =
     useGetGlobalPinConflictResolutionPreference();
-  const setGlobalPinSidePreference = useSetGlobalPinSidePreference();
   const acceptPinConflict = useAcceptPinConflict();
 
-  return (pinSide: PinSidePreferenceOption) => {
+  return (pinSide: PinSide) => {
     const pinSideModal = modalsStore.get()?.pinSideModal;
     if (!pinSideModal) return;
 
@@ -41,15 +36,6 @@ export const useAcceptPinSide = () => {
     const columnsOrder = drawerState?.columnOrder ?? ([] as ColumnOrderState);
     const columnPinning = drawerState?.columnPinning ?? { left: [], right: [] };
 
-    let resolvedPinSide: PinSide = 'closest-edge';
-
-    if (pinSide === 'always-ask') {
-      setGlobalPinSidePreference(undefined);
-    } else {
-      resolvedPinSide = pinSide;
-      setGlobalPinSidePreference(pinSide);
-    }
-
     const { columnKey } = pinSideModal;
     const allOrderedColumns = buildAllOrderedColumns({
       columns,
@@ -58,7 +44,7 @@ export const useAcceptPinSide = () => {
     const side = resolveClosestEdgeSide({
       allOrderedColumns,
       columnKey,
-      pinSide: resolvedPinSide,
+      pinSide,
     });
 
     const isContiguousPin = getIsContiguousPin({

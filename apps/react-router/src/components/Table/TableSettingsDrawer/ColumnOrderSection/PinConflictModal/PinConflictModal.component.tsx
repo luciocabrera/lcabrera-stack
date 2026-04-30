@@ -1,13 +1,13 @@
 import * as stylex from '@stylexjs/stylex';
 import { useMemo, useState } from 'react';
 
-import { PIN_CONFLICT_PREFERENCE_OPTIONS } from '@/constants/pinningPreferences.constants';
+import { PIN_CONFLICT_OPTIONS } from '@/constants/pinningPreferences.constants';
 
 import { Button } from '@/components/Button';
 import { Modal } from '@/components/Modal';
 import { RadioOptionGroup } from '@/components/RadioOptionGroup';
 
-import type { PinConflictResolutionPreferenceOption } from '../ColumnOrderSection.types';
+import type { PinConflictResolution } from '../ColumnOrderSection.types';
 import type { PinConflictModalProps } from './PinConflictModal.types';
 
 import { styles } from './PinConflictModal.stylex';
@@ -20,10 +20,10 @@ export const PinConflictModal = ({
   side,
 }: PinConflictModalProps) => {
   const [selectedResolution, setSelectedResolution] =
-    useState<PinConflictResolutionPreferenceOption>('move-column');
+    useState<PinConflictResolution>('move-column');
 
   const options = useMemo(() => {
-    return PIN_CONFLICT_PREFERENCE_OPTIONS.map((option) => {
+    return PIN_CONFLICT_OPTIONS.map((option) => {
       if (option.value === 'move-column') {
         return {
           ...option,

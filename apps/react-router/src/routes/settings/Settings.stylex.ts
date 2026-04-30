@@ -4,6 +4,11 @@ import { spacing, typography } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const styles = stylex.create({
+  actions: {
+    display: 'flex',
+    gap: spacing.sm,
+    justifyContent: 'flex-end',
+  },
   container: {
     display: 'flex',
     flexDirection: 'column',

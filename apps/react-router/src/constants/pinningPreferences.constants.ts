@@ -15,10 +15,12 @@ export const PIN_SIDE_OPTIONS: readonly RadioOption<PinSide>[] = [
     value: 'closest-edge',
   },
   {
+    description: 'Pin this column to the left side of the table',
     label: 'Pin to the left',
     value: 'left',
   },
   {
+    description: 'Pin this column to the right side of the table',
     label: 'Pin to the right',
     value: 'right',
   },
@@ -37,14 +39,20 @@ export const PIN_SIDE_PREFERENCE_OPTIONS: readonly RadioOption<PinSidePreference
 export const PIN_CONFLICT_OPTIONS: readonly RadioOption<PinConflictResolution>[] =
   [
     {
+      description:
+        'Reorder the column to sit adjacent to the current pinned group',
       label: 'Move column next to pinned columns',
       value: 'move-column',
     },
     {
+      description:
+        'Extend the pinned zone by also pinning all columns in between',
       label: 'Pin all columns between edge and this column',
       value: 'pin-all-between',
     },
     {
+      description:
+        'Pin this column in place without reordering any other columns',
       label: 'Pin without changing column order',
       value: 'pin-only',
     },

@@ -1,10 +1,5 @@
 import type { ColumnOrderState } from '@/components/Table/Table.types';
-import type {
-  PinConflictResolution,
-  PinConflictResolutionPreferenceOption,
-} from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
-
-import { useSetGlobalPinConflictResolutionPreference } from '@/contexts/GlobalSettingsContext/actions';
+import type { PinConflictResolution } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import {
@@ -24,10 +19,8 @@ export const useAcceptPinConflict = () => {
   const { columnsStore: tableColumnsStore } = useTableConfigContextValue();
   const { columnsStore: drawerColumnsStore } = useTableDrawerContextValue();
   const { modalsStore } = useColumnOrderSectionContextValue();
-  const setGlobalPinConflictResolutionPreference =
-    useSetGlobalPinConflictResolutionPreference();
 
-  return (resolution: PinConflictResolutionPreferenceOption) => {
+  return (resolution: PinConflictResolution) => {
     const conflictModal = modalsStore.get()?.conflictModal;
     if (!conflictModal) return;
 
@@ -45,16 +38,7 @@ export const useAcceptPinConflict = () => {
     });
     const index = allOrderedColumns.findIndex((col) => col.key === columnKey);
 
-    let resolvedResolution: PinConflictResolution = 'move-column';
-
-    if (resolution === 'always-ask') {
-      setGlobalPinConflictResolutionPreference(undefined);
-    } else {
-      resolvedResolution = resolution;
-      setGlobalPinConflictResolutionPreference(resolution);
-    }
-
-    if (resolvedResolution === 'move-column') {
+    if (resolution === 'move-column') {
       let newOrder = allOrderedColumns
         .filter((col) => col.key !== columnKey)
         .map((col) => col.key);
@@ -78,7 +62,7 @@ export const useAcceptPinConflict = () => {
           staticKeys,
         }),
       });
-    } else if (resolvedResolution === 'pin-all-between') {
+    } else if (resolution === 'pin-all-between') {
       drawerColumnsStore.set({
         columnPinning: pinAllBetween({
           allOrderedKeys: allOrderedColumns.map((column) => column.key),

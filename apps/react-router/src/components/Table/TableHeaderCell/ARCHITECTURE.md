@@ -52,8 +52,6 @@ graph LR
     THC --> A5["useToogleTableIsColumnSettingsOpen"]
     THC --> A6["useAcceptHeaderPinSide"]
     THC --> A7["useAcceptHeaderPinConflict"]
-    THC --> A8["useSetGlobalPinSidePreference"]
-    THC --> A9["useSetGlobalPinConflictResolutionPreference"]
   end
 ```
 
@@ -78,22 +76,20 @@ graph TD
   Check -->|No| PrefCheck{"Global pin-side pref saved?"}
   PrefCheck -->|Yes| AutoPin["handlePinAccept(savedPref) — skip modal"]
   PrefCheck -->|No| Modal["Open PinSideModal"]
-  Modal --> Accept["handlePinAccept(pinSideOption)"]
+  Modal --> Accept["handlePinAccept(pinSide)"]
   AutoPin --> Accept
-  Accept --> SavePref{"option = always-ask?"}
-  SavePref -->|Yes| ClearPref["setGlobalPinSidePreference(undefined)"]
-  SavePref -->|No| StorePref["setGlobalPinSidePreference(option)"]
-  ClearPref --> PinAction["acceptHeaderPinSide({ columnKey, pinSide })"]
-  StorePref --> PinAction
+  Accept --> PinAction["acceptHeaderPinSide({ columnKey, pinSide })"]
   PinAction --> Conflict{"Pin conflict?"}
   Conflict -->|No| Done["Column pinned"]
   Conflict -->|Yes| ConflictPrefCheck{"Global conflict pref saved?"}
   ConflictPrefCheck -->|Yes| AutoConflict["handlePinConflictAccept(savedPref) — skip modal"]
   ConflictPrefCheck -->|No| ConflictModal["Open PinConflictModal"]
-  ConflictModal --> Resolve["handlePinConflictAccept(resolutionOption)"]
+  ConflictModal --> Resolve["handlePinConflictAccept(resolution)"]
   AutoConflict --> Resolve
   Resolve --> acceptHeaderPinConflict["acceptHeaderPinConflict({ resolution })"]
 ```
+
+Runtime prompt selections in this component resolve the current pinning action only and do not persist global preferences.
 
 ### Resize
 

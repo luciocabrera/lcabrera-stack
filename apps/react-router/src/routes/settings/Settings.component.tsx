@@ -1,18 +1,16 @@
 import * as stylex from '@stylexjs/stylex';
+import { useState } from 'react';
 
 import {
   PIN_CONFLICT_PREFERENCE_OPTIONS,
   PIN_SIDE_PREFERENCE_OPTIONS,
   UNPIN_CONFLICT_PREFERENCE_OPTIONS,
 } from '@/constants/pinningPreferences.constants';
-import {
-  useSetGlobalPinConflictResolutionPreference,
-  useSetGlobalPinSidePreference,
-  useSetGlobalUnpinConflictResolutionPreference,
-} from '@/contexts/GlobalSettingsContext/actions';
+import { useSetGlobalPinningPreferences } from '@/contexts/GlobalSettingsContext/actions';
 import { useGetGlobalPinningPreferences } from '@/contexts/GlobalSettingsContext/selectors';
 
 import { Card } from '@/components/Card';
+import { Button } from '@/components/Button';
 import { RadioOptionGroup } from '@/components/RadioOptionGroup';
 
 import type {
@@ -23,32 +21,90 @@ import type {
 
 import { styles } from './Settings.stylex';
 
+type PinningPreferencesDraft = {
+  readonly pinConflictResolution: PinConflictResolutionPreferenceOption;
+  readonly pinSide: PinSidePreferenceOption;
+  readonly unpinConflictResolution: UnpinConflictResolutionPreferenceOption;
+};
+
+const toDraft = (
+  pinningPreferences: ReturnType<typeof useGetGlobalPinningPreferences>,
+): PinningPreferencesDraft => {
+  return {
+    pinConflictResolution:
+      pinningPreferences.pinConflictResolution ?? 'always-ask',
+    pinSide: pinningPreferences.pinSide ?? 'always-ask',
+    unpinConflictResolution:
+      pinningPreferences.unpinConflictResolution ?? 'always-ask',
+  };
+};
+
 export const Settings = () => {
   const pinningPreferences = useGetGlobalPinningPreferences();
-  const setGlobalPinConflictResolutionPreference =
-    useSetGlobalPinConflictResolutionPreference();
-  const setGlobalPinSidePreference = useSetGlobalPinSidePreference();
-  const setGlobalUnpinConflictResolutionPreference =
-    useSetGlobalUnpinConflictResolutionPreference();
+  const setGlobalPinningPreferences = useSetGlobalPinningPreferences();
+
+  const [draft, setDraft] = useState<PinningPreferencesDraft>(() => {
+    return toDraft(pinningPreferences);
+  });
+
+  const hasChanges =
+    draft.pinSide !== (pinningPreferences.pinSide ?? 'always-ask') ||
+    draft.pinConflictResolution !==
+      (pinningPreferences.pinConflictResolution ?? 'always-ask') ||
+    draft.unpinConflictResolution !==
+      (pinningPreferences.unpinConflictResolution ?? 'always-ask');
+
+  const handleAccept = (): void => {
+    if (!hasChanges) {
+      return;
+    }
+
+    setGlobalPinningPreferences({
+      pinConflictResolution:
+        draft.pinConflictResolution === 'always-ask'
+          ? undefined
+          : draft.pinConflictResolution,
+      pinSide: draft.pinSide === 'always-ask' ? undefined : draft.pinSide,
+      unpinConflictResolution:
+        draft.unpinConflictResolution === 'always-ask'
+          ? undefined
+          : draft.unpinConflictResolution,
+    });
+  };
+
+  const handleCancel = (): void => {
+    setDraft(toDraft(pinningPreferences));
+  };
 
   const handlePinSideChange = (value: PinSidePreferenceOption): void => {
-    setGlobalPinSidePreference(value === 'always-ask' ? undefined : value);
+    setDraft((currentDraft) => {
+      return {
+        ...currentDraft,
+        pinSide: value,
+      };
+    });
   };
 
   const handlePinConflictChange = (
     value: PinConflictResolutionPreferenceOption,
   ): void => {
-    setGlobalPinConflictResolutionPreference(
-      value === 'always-ask' ? undefined : value,
-    );
+    setDraft((currentDraft) => {
+      return {
+        ...currentDraft,
+        pinConflictResolution: value,
+      };
+    });
   };
 
   const handleUnpinConflictChange = (
     value: UnpinConflictResolutionPreferenceOption,
   ): void => {
-    setGlobalUnpinConflictResolutionPreference(
-      value === 'always-ask' ? undefined : value,
-    );
+    setDraft((currentDraft) => {
+      return {
+        ...currentDraft,
+        unpinConflictResolution: value,
+      };
+    });
   };
 
   return (
@@ -69,7 +125,7 @@ export const Settings = () => {
             name='settings-pin-side-preference'
             onChange={handlePinSideChange}
             options={PIN_SIDE_PREFERENCE_OPTIONS}
-            value={pinningPreferences.pinSide ?? 'always-ask'}
+            value={draft.pinSide}
           />
         </section>
       </Card>
@@ -86,7 +142,7 @@ export const Settings = () => {
             name='settings-pin-conflict-preference'
             onChange={handlePinConflictChange}
             options={PIN_CONFLICT_PREFERENCE_OPTIONS}
-            value={pinningPreferences.pinConflictResolution ?? 'always-ask'}
+            value={draft.pinConflictResolution}
           />
         </section>
       </Card>
@@ -103,10 +159,24 @@ export const Settings = () => {
             name='settings-unpin-conflict-preference'
             onChange={handleUnpinConflictChange}
             options={UNPIN_CONFLICT_PREFERENCE_OPTIONS}
-            value={pinningPreferences.unpinConflictResolution ?? 'always-ask'}
+            value={draft.unpinConflictResolution}
           />
         </section>
       </Card>
+
+      <div {...stylex.props(styles.actions)}>
+        <Button color='outline' onClick={handleCancel} size='sm'>
+          Cancel
+        </Button>
+        <Button
+          color='primary'
+          isDisabled={!hasChanges}
+          onClick={handleAccept}
+          size='sm'
+        >
+          Accept
+        </Button>
+      </div>
     </div>
   );
 };

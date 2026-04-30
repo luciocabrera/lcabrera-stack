@@ -1,13 +1,13 @@
 import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 
-import { UNPIN_CONFLICT_PREFERENCE_OPTIONS } from '@/constants/pinningPreferences.constants';
+import { UNPIN_CONFLICT_OPTIONS } from '@/constants/pinningPreferences.constants';
 
 import { Button } from '@/components/Button';
 import { Modal } from '@/components/Modal';
 import { RadioOptionGroup } from '@/components/RadioOptionGroup';
 
-import type { UnpinConflictResolutionPreferenceOption } from '../ColumnOrderSection.types';
+import type { UnpinConflictResolution } from '../ColumnOrderSection.types';
 import type { UnpinConflictModalProps } from './UnpinConflictModal.types';
 
 import {
@@ -22,7 +22,7 @@ export const UnpinConflictModal = ({
   side,
 }: UnpinConflictModalProps) => {
   const [selectedResolution, setSelectedResolution] =
-    useState<UnpinConflictResolutionPreferenceOption>('unpin-beyond');
+    useState<UnpinConflictResolution>('unpin-beyond');
   const acceptUnpinConflict = useAcceptUnpinConflict();
   const cancelUnpinConflict = useCancelUnpinConflict();
 
@@ -61,7 +61,7 @@ export const UnpinConflictModal = ({
         onChange={(value) => {
           setSelectedResolution(value);
         }}
-        options={UNPIN_CONFLICT_PREFERENCE_OPTIONS}
+        options={UNPIN_CONFLICT_OPTIONS}
         value={selectedResolution}
       />
     </Modal>

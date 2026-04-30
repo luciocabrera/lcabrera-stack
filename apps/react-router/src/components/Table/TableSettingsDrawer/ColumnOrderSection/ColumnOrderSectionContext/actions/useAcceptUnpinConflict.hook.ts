@@ -1,9 +1,5 @@
 import type { ColumnOrderState } from '@/components/Table/Table.types';
-import type {
-  UnpinConflictResolution,
-  UnpinConflictResolutionPreferenceOption,
-} from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
-import { useSetGlobalUnpinConflictResolutionPreference } from '@/contexts/GlobalSettingsContext/actions';
+import type { UnpinConflictResolution } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import {
@@ -21,10 +17,8 @@ export const useAcceptUnpinConflict = () => {
   const { columnsStore: tableColumnsStore } = useTableConfigContextValue();
   const { columnsStore: drawerColumnsStore } = useTableDrawerContextValue();
   const { modalsStore } = useColumnOrderSectionContextValue();
-  const setGlobalUnpinConflictResolutionPreference =
-    useSetGlobalUnpinConflictResolutionPreference();
 
-  return (resolution: UnpinConflictResolutionPreferenceOption) => {
+  return (resolution: UnpinConflictResolution) => {
     const unpinConflictModal = modalsStore.get()?.unpinConflictModal;
     if (!unpinConflictModal) return;
 
@@ -40,16 +34,7 @@ export const useAcceptUnpinConflict = () => {
     });
     const index = allOrderedColumns.findIndex((col) => col.key === columnKey);
 
-    let resolvedResolution: UnpinConflictResolution = 'unpin-beyond';
-
-    if (resolution === 'always-ask') {
-      setGlobalUnpinConflictResolutionPreference(undefined);
-    } else {
-      resolvedResolution = resolution;
-      setGlobalUnpinConflictResolutionPreference(resolution);
-    }
-
-    if (resolvedResolution === 'unpin-beyond') {
+    if (resolution === 'unpin-beyond') {
       const newPinning = {
         left: [...columnPinning.left],
         right: [...columnPinning.right],

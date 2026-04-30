@@ -1,16 +1,8 @@
 import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 
-import type {
-  PinConflictResolution,
-  PinConflictResolutionPreferenceOption,
-  PinSidePreferenceOption,
-} from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
+import type { PinConflictResolution } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
 
-import {
-  useSetGlobalPinConflictResolutionPreference,
-  useSetGlobalPinSidePreference,
-} from '@/contexts/GlobalSettingsContext/actions';
 import {
   useGetGlobalPinConflictResolutionPreference,
   useGetGlobalPinSidePreference,
@@ -72,9 +64,6 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
   const globalPinConflictResolutionPreference =
     useGetGlobalPinConflictResolutionPreference();
   const globalPinSidePreference = useGetGlobalPinSidePreference();
-  const setGlobalPinConflictResolutionPreference =
-    useSetGlobalPinConflictResolutionPreference();
-  const setGlobalPinSidePreference = useSetGlobalPinSidePreference();
 
   const [isPinSideModalOpen, setIsPinSideModalOpen] = useState(false);
   const [pinConflict, setPinConflict] = useState<PinConflictState>({
@@ -131,16 +120,7 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
     setIsPinSideModalOpen(true);
   };
 
-  const handlePinAccept = (pinSideOption: PinSidePreferenceOption) => {
-    let pinSide: PinSide = 'closest-edge';
-
-    if (pinSideOption === 'always-ask') {
-      setGlobalPinSidePreference(undefined);
-    } else {
-      pinSide = pinSideOption;
-      setGlobalPinSidePreference(pinSideOption);
-    }
-
+  const handlePinAccept = (pinSide: PinSide) => {
     const conflict = acceptHeaderPinSide({ columnKey, pinSide });
 
     if (conflict) {
@@ -162,18 +142,9 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
   };
 
   const handlePinConflictAccept = (
-    resolutionOption: PinConflictResolutionPreferenceOption,
+    resolution: PinConflictResolution,
     sideOverride?: 'left' | 'right',
   ) => {
-    let resolution: PinConflictResolution = 'move-column';
-
-    if (resolutionOption === 'always-ask') {
-      setGlobalPinConflictResolutionPreference(undefined);
-    } else {
-      resolution = resolutionOption;
-      setGlobalPinConflictResolutionPreference(resolutionOption);
-    }
-
     acceptHeaderPinConflict({
       columnKey,
       resolution,
