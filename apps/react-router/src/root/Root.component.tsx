@@ -5,6 +5,7 @@ import { Outlet, useLoaderData } from 'react-router';
 import { Button } from '@/components/Button';
 import { NotificationCenter } from '@/components/NotificationCenter';
 import { SidePanelToolbarExample } from '@/components/Toolbar/Toolbar.examples';
+import { GlobalSettingsProvider } from '@/contexts/GlobalSettingsContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { darkTheme } from '@/design-system/themes/dark.stylex';
@@ -85,13 +86,15 @@ const RootContent = () => {
 };
 
 export const Root = () => {
-  const { theme } = useLoaderData<typeof rootLoader>();
+  const { globalSettings, theme } = useLoaderData<typeof rootLoader>();
 
   return (
     <ThemeProvider defaultTheme='light' initialTheme={theme}>
-      <NotificationProvider>
-        <RootContent />
-      </NotificationProvider>
+      <GlobalSettingsProvider initialSettings={globalSettings}>
+        <NotificationProvider>
+          <RootContent />
+        </NotificationProvider>
+      </GlobalSettingsProvider>
     </ThemeProvider>
   );
 };

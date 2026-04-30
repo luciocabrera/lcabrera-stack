@@ -1,11 +1,13 @@
 import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 
+import { UNPIN_CONFLICT_PREFERENCE_OPTIONS } from '@/constants/pinningPreferences.constants';
+
 import { Button } from '@/components/Button';
 import { Modal } from '@/components/Modal';
 import { RadioOptionGroup } from '@/components/RadioOptionGroup';
 
-import type { UnpinConflictResolution } from '../ColumnOrderSection.types';
+import type { UnpinConflictResolutionPreferenceOption } from '../ColumnOrderSection.types';
 import type { UnpinConflictModalProps } from './UnpinConflictModal.types';
 
 import {
@@ -20,7 +22,7 @@ export const UnpinConflictModal = ({
   side,
 }: UnpinConflictModalProps) => {
   const [selectedResolution, setSelectedResolution] =
-    useState<UnpinConflictResolution>('unpin-beyond');
+    useState<UnpinConflictResolutionPreferenceOption>('unpin-beyond');
   const acceptUnpinConflict = useAcceptUnpinConflict();
   const cancelUnpinConflict = useCancelUnpinConflict();
 
@@ -59,20 +61,7 @@ export const UnpinConflictModal = ({
         onChange={(value) => {
           setSelectedResolution(value);
         }}
-        options={[
-          {
-            description:
-              'Also unpin columns between this one and the center of the table',
-            label: 'Unpin this and columns beyond',
-            value: 'unpin-beyond',
-          },
-          {
-            description:
-              'Move remaining pinned columns together to keep them contiguous',
-            label: 'Reorder to fill the gap',
-            value: 'reorder-to-fill',
-          },
-        ]}
+        options={UNPIN_CONFLICT_PREFERENCE_OPTIONS}
         value={selectedResolution}
       />
     </Modal>

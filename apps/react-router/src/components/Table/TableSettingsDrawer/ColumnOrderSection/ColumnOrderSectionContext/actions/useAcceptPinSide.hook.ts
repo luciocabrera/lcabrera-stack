@@ -1,5 +1,10 @@
 import type { ColumnOrderState } from '@/components/Table/Table.types';
-import type { PinSide } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
+import type {
+  PinSide,
+  PinSidePreferenceOption,
+} from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
+import { useSetGlobalPinSidePreference } from '@/contexts/GlobalSettingsContext/actions';
+import { useGetGlobalPinConflictResolutionPreference } from '@/contexts/GlobalSettingsContext/selectors';
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import {
@@ -10,6 +15,7 @@ import {
 } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 import { useTableDrawerContextValue } from '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
 
+import { useAcceptPinConflict } from './useAcceptPinConflict.hook';
 import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
 
 /**
@@ -19,8 +25,12 @@ export const useAcceptPinSide = () => {
   const { columnsStore: tableColumnsStore } = useTableConfigContextValue();
   const { columnsStore: drawerColumnsStore } = useTableDrawerContextValue();
   const { modalsStore } = useColumnOrderSectionContextValue();
+  const pinConflictResolutionPreference =
+    useGetGlobalPinConflictResolutionPreference();
+  const setGlobalPinSidePreference = useSetGlobalPinSidePreference();
+  const acceptPinConflict = useAcceptPinConflict();
 
-  return (pinSide: PinSide) => {
+  return (pinSide: PinSidePreferenceOption) => {
     const pinSideModal = modalsStore.get()?.pinSideModal;
     if (!pinSideModal) return;
 
@@ -31,6 +41,15 @@ export const useAcceptPinSide = () => {
     const columnsOrder = drawerState?.columnOrder ?? ([] as ColumnOrderState);
     const columnPinning = drawerState?.columnPinning ?? { left: [], right: [] };
 
+    let resolvedPinSide: PinSide = 'closest-edge';
+
+    if (pinSide === 'always-ask') {
+      setGlobalPinSidePreference(undefined);
+    } else {
+      resolvedPinSide = pinSide;
+      setGlobalPinSidePreference(pinSide);
+    }
+
     const { columnKey } = pinSideModal;
     const allOrderedColumns = buildAllOrderedColumns({
       columns,
@@ -39,7 +58,7 @@ export const useAcceptPinSide = () => {
     const side = resolveClosestEdgeSide({
       allOrderedColumns,
       columnKey,
-      pinSide,
+      pinSide: resolvedPinSide,
     });
 
     const isContiguousPin = getIsContiguousPin({
@@ -55,14 +74,27 @@ export const useAcceptPinSide = () => {
       });
     } else {
       const col = allOrderedColumns.find((c) => c.key === columnKey);
-      modalsStore.set({
-        conflictModal: {
-          columnKey,
-          columnLabel: col?.label ?? columnKey,
-          isOpen: true,
-          side,
-        },
-      });
+
+      if (pinConflictResolutionPreference) {
+        modalsStore.set({
+          conflictModal: {
+            columnKey,
+            columnLabel: col?.label ?? columnKey,
+            isOpen: false,
+            side,
+          },
+        });
+        acceptPinConflict(pinConflictResolutionPreference);
+      } else {
+        modalsStore.set({
+          conflictModal: {
+            columnKey,
+            columnLabel: col?.label ?? columnKey,
+            isOpen: true,
+            side,
+          },
+        });
+      }
     }
 
     modalsStore.set({

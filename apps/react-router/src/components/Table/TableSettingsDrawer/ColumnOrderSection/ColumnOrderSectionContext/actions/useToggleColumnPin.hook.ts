@@ -1,5 +1,7 @@
 import type { ColumnOrderState } from '@/components/Table/Table.types';
 
+import { useGetGlobalPinSidePreference } from '@/contexts/GlobalSettingsContext/selectors/useGetGlobalPinSidePreference.hook';
+import { useGetGlobalUnpinConflictResolutionPreference } from '@/contexts/GlobalSettingsContext/selectors/useGetGlobalUnpinConflictResolutionPreference.hook';
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import {
   buildAllOrderedColumns,
@@ -7,6 +9,8 @@ import {
 } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 import { useTableDrawerContextValue } from '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
 
+import { useAcceptPinSide } from './useAcceptPinSide.hook';
+import { useAcceptUnpinConflict } from './useAcceptUnpinConflict.hook';
 import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
 
 type UseToggleColumnPinArgs = {
@@ -21,6 +25,11 @@ export const useToggleColumnPin = () => {
   const { columnsStore: tableColumnsStore } = useTableConfigContextValue();
   const { columnsStore: drawerColumnsStore } = useTableDrawerContextValue();
   const { modalsStore } = useColumnOrderSectionContextValue();
+  const globalPinSidePreference = useGetGlobalPinSidePreference();
+  const globalUnpinConflictResolutionPreference =
+    useGetGlobalUnpinConflictResolutionPreference();
+  const acceptPinSide = useAcceptPinSide();
+  const acceptUnpinConflict = useAcceptUnpinConflict();
 
   return ({ columnKey, isPinning }: UseToggleColumnPinArgs) => {
     const tableColumnsState = tableColumnsStore.get();
@@ -62,18 +71,44 @@ export const useToggleColumnPin = () => {
 
       const side = columnPinning.left.includes(columnKey) ? 'left' : 'right';
       const col = allOrderedColumns.find((c) => c.key === columnKey);
-      modalsStore.set({
-        unpinConflictModal: {
-          columnKey,
-          columnLabel: col?.label ?? columnKey,
-          isOpen: true,
-          side,
-        },
-      });
+
+      if (globalUnpinConflictResolutionPreference) {
+        modalsStore.set({
+          unpinConflictModal: {
+            columnKey,
+            columnLabel: col?.label ?? columnKey,
+            isOpen: false,
+            side,
+          },
+        });
+        acceptUnpinConflict(globalUnpinConflictResolutionPreference);
+      } else {
+        modalsStore.set({
+          unpinConflictModal: {
+            columnKey,
+            columnLabel: col?.label ?? columnKey,
+            isOpen: true,
+            side,
+          },
+        });
+      }
       return;
     }
 
     const col = allOrderedColumns.find((c) => c.key === columnKey);
+
+    if (globalPinSidePreference) {
+      modalsStore.set({
+        pinSideModal: {
+          columnKey,
+          columnLabel: col?.label ?? columnKey,
+          isOpen: false,
+        },
+      });
+      acceptPinSide(globalPinSidePreference);
+      return;
+    }
+
     modalsStore.set({
       pinSideModal: {
         columnKey,

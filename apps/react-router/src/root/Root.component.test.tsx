@@ -18,6 +18,10 @@ type MockThemeProviderProps = {
   readonly initialTheme: ThemeMode;
 };
 
+type MockGlobalSettingsProviderProps = {
+  readonly children: ReactNode;
+};
+
 type MockNotificationProviderProps = {
   readonly children: ReactNode;
 };
@@ -64,6 +68,12 @@ vi.mock('@/contexts/ThemeContext', () => ({
   ),
 }));
 
+vi.mock('@/contexts/GlobalSettingsContext', () => ({
+  GlobalSettingsProvider: ({ children }: MockGlobalSettingsProviderProps) => (
+    <div data-testid='global-settings-provider'>{children}</div>
+  ),
+}));
+
 vi.mock('@/contexts/NotificationContext', () => ({
   NotificationProvider: ({ children }: MockNotificationProviderProps) => (
     <div data-testid='notification-provider'>{children}</div>
@@ -78,7 +88,10 @@ import { Root } from './Root.component';
 
 describe('Root', () => {
   beforeEach(() => {
-    useLoaderDataMock.mockReturnValue({ theme: 'dark' });
+    useLoaderDataMock.mockReturnValue({
+      globalSettings: { pinning: {} },
+      theme: 'dark',
+    });
     useThemeMock.mockReturnValue({
       isDarkMode: false,
       setTheme: vi.fn(),
@@ -102,6 +115,7 @@ describe('Root', () => {
     expect(screen.getByTestId('theme-provider').dataset.initialTheme).toBe(
       'dark',
     );
+    expect(screen.getByTestId('global-settings-provider')).toBeDefined();
     expect(screen.getByTestId('notification-provider')).toBeDefined();
     expect(screen.getByTestId('notification-center').textContent).toBe(
       'Notifications',

@@ -7,11 +7,11 @@ export type OrderConflictResolution =
   | 'remove-conflicting-pins'
   | 'reset-all-pins';
 
-export type PinConflictResolution =
-  | 'move-column'
-  | 'pin-all-between'
-  | 'pin-only';
-
+export type {
+  PinConflictResolution,
+  PinConflictResolutionPreferenceOption,
+  PinSidePreferenceOption,
+  UnpinConflictResolution,
+  UnpinConflictResolutionPreferenceOption,
+} from '@/types/pinningPreferences.types';
 export type { PinSide } from '@/types/ui.types';
-
-export type UnpinConflictResolution = 'reorder-to-fill' | 'unpin-beyond';

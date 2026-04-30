@@ -1,7 +1,20 @@
 import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 
-import type { PinConflictResolution } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
+import type {
+  PinConflictResolution,
+  PinConflictResolutionPreferenceOption,
+  PinSidePreferenceOption,
+} from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
+
+import {
+  useSetGlobalPinConflictResolutionPreference,
+  useSetGlobalPinSidePreference,
+} from '@/contexts/GlobalSettingsContext/actions';
+import {
+  useGetGlobalPinConflictResolutionPreference,
+  useGetGlobalPinSidePreference,
+} from '@/contexts/GlobalSettingsContext/selectors';
 import type { PinConflictState, PinSide } from '@/types/ui.types';
 
 import { Button } from '@/components/Button';
@@ -56,6 +69,12 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
   const toogleTableIsColumnSettingsOpen = useToogleTableIsColumnSettingsOpen();
   const acceptHeaderPinSide = useAcceptHeaderPinSide<TData>();
   const acceptHeaderPinConflict = useAcceptHeaderPinConflict<TData>();
+  const globalPinConflictResolutionPreference =
+    useGetGlobalPinConflictResolutionPreference();
+  const globalPinSidePreference = useGetGlobalPinSidePreference();
+  const setGlobalPinConflictResolutionPreference =
+    useSetGlobalPinConflictResolutionPreference();
+  const setGlobalPinSidePreference = useSetGlobalPinSidePreference();
 
   const [isPinSideModalOpen, setIsPinSideModalOpen] = useState(false);
   const [pinConflict, setPinConflict] = useState<PinConflictState>({
@@ -101,14 +120,40 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
   const handlePinClick = () => {
     if (pinInfo?.side) {
       setColumnPinning({ columnKey, side: undefined });
-    } else {
-      setIsPinSideModalOpen(true);
+      return;
     }
+
+    if (globalPinSidePreference) {
+      handlePinAccept(globalPinSidePreference);
+      return;
+    }
+
+    setIsPinSideModalOpen(true);
   };
 
-  const handlePinAccept = (pinSide: PinSide) => {
+  const handlePinAccept = (pinSideOption: PinSidePreferenceOption) => {
+    let pinSide: PinSide = 'closest-edge';
+
+    if (pinSideOption === 'always-ask') {
+      setGlobalPinSidePreference(undefined);
+    } else {
+      pinSide = pinSideOption;
+      setGlobalPinSidePreference(pinSideOption);
+    }
+
     const conflict = acceptHeaderPinSide({ columnKey, pinSide });
-    if (conflict) setPinConflict(conflict);
+
+    if (conflict) {
+      if (globalPinConflictResolutionPreference) {
+        handlePinConflictAccept(
+          globalPinConflictResolutionPreference,
+          conflict.side,
+        );
+      } else {
+        setPinConflict(conflict);
+      }
+    }
+
     setIsPinSideModalOpen(false);
   };
 
@@ -116,8 +161,24 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
     setIsPinSideModalOpen(false);
   };
 
-  const handlePinConflictAccept = (resolution: PinConflictResolution) => {
-    acceptHeaderPinConflict({ columnKey, resolution, side: pinConflict.side });
+  const handlePinConflictAccept = (
+    resolutionOption: PinConflictResolutionPreferenceOption,
+    sideOverride?: 'left' | 'right',
+  ) => {
+    let resolution: PinConflictResolution = 'move-column';
+
+    if (resolutionOption === 'always-ask') {
+      setGlobalPinConflictResolutionPreference(undefined);
+    } else {
+      resolution = resolutionOption;
+      setGlobalPinConflictResolutionPreference(resolutionOption);
+    }
+
+    acceptHeaderPinConflict({
+      columnKey,
+      resolution,
+      side: sideOverride ?? pinConflict.side,
+    });
     setPinConflict({ isOpen: false, side: 'left' });
   };
 

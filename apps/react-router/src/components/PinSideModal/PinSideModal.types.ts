@@ -1,8 +1,8 @@
-import type { PinSide } from '@/types/ui.types';
+import type { PinSidePreferenceOption } from '@/types/pinningPreferences.types';
 
 export type PinSideModalProps = {
   readonly columnLabel: string;
   readonly isOpen: boolean;
-  readonly onAccept: (side: PinSide) => void;
+  readonly onAccept: (side: PinSidePreferenceOption) => void;
   readonly onCancel: () => void;
 };

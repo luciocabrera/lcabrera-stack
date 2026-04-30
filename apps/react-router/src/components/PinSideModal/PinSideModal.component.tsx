@@ -1,7 +1,9 @@
 import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 
-import type { PinSide } from '@/types/ui.types';
+import { PIN_SIDE_PREFERENCE_OPTIONS } from '@/constants/pinningPreferences.constants';
+
+import type { PinSidePreferenceOption } from '@/types/pinningPreferences.types';
 
 import { Button } from '@/components/Button';
 import { Modal } from '@/components/Modal';
@@ -17,7 +19,8 @@ export const PinSideModal = ({
   onAccept,
   onCancel,
 }: PinSideModalProps) => {
-  const [selectedSide, setSelectedSide] = useState<PinSide>('closest-edge');
+  const [selectedSide, setSelectedSide] =
+    useState<PinSidePreferenceOption>('closest-edge');
 
   const handleAccept = () => {
     onAccept(selectedSide);
@@ -53,21 +56,7 @@ export const PinSideModal = ({
         onChange={(value) => {
           setSelectedSide(value);
         }}
-        options={[
-          {
-            description: 'Pin to the nearest edge based on column position',
-            label: 'Closest edge',
-            value: 'closest-edge',
-          },
-          {
-            label: 'Pin to the left',
-            value: 'left',
-          },
-          {
-            label: 'Pin to the right',
-            value: 'right',
-          },
-        ]}
+        options={PIN_SIDE_PREFERENCE_OPTIONS}
         value={selectedSide}
       />
     </Modal>
