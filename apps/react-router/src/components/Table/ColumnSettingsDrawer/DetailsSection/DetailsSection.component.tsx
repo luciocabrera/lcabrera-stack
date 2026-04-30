@@ -50,19 +50,13 @@ export const DetailsSection = <TData,>({
     <div {...stylex.props(styles.container)}>
       {details.map((detail, index) => {
         const isLast = index === details.length - 1;
+        const monoStyle = detail.isMono ? styles.mono : undefined;
         const valueElement = detail.isBadge ? (
           <span {...stylex.props(styles.badge, getBadgeStyle(detail.value))}>
             {detail.value}
           </span>
         ) : (
-          <span
-            {...stylex.props(
-              styles.value,
-              detail.isMono ? styles.mono : undefined,
-            )}
-          >
-            {detail.value}
-          </span>
+          <span {...stylex.props(styles.value, monoStyle)}>{detail.value}</span>
         );
 
         return (

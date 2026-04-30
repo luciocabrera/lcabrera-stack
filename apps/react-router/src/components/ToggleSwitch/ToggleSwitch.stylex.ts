@@ -38,7 +38,7 @@ export const styles = stylex.create({
     cursor: 'pointer',
     display: 'inline-flex',
     position: 'relative',
-    height: spacing.lg,
+    // height: spacing.lg,
     width: '36px',
   },
   trackChecked: {
@@ -67,7 +67,7 @@ export const styles = stylex.create({
     width: '18px',
   },
   thumbChecked: {
-    transform: `translateX(${spacing.sm})`,
+    transform: `translateX(${spacing.md})`,
   },
   label: {
     color: colors.textPrimary,
