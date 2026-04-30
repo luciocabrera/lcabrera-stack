@@ -22,4 +22,6 @@ Reusable viewport-based notification UI with:
 - reads notifications through `useNotifications`
 - groups by placement
 - renders one fixed viewport per placement with active items
+- uses a high fixed stacking layer so notifications render above drawers/popovers
+- wraps each notification card in an elevated opaque surface for better readability when semantic card colors are translucent
 - dismiss button calls `dismissNotification(id)`

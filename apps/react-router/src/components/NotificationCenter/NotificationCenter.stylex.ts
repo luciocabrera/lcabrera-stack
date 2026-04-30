@@ -3,10 +3,10 @@ import * as stylex from '@stylexjs/stylex';
 import {
   borderRadius,
   easing,
+  shadows,
   spacing,
   transitions,
   typography,
-  zIndex,
 } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 
@@ -58,6 +58,12 @@ export const styles = stylex.create({
     gap: spacing.sm,
     alignItems: 'flex-start',
   },
+  itemSurface: {
+    backgroundColor: colors.surfaceElevated,
+    borderRadius: borderRadius.lg,
+    boxShadow: shadows.lg,
+    overflow: 'hidden',
+  },
   itemContent: {
     display: 'flex',
     flex: '1 1 auto',
@@ -90,7 +96,7 @@ export const styles = stylex.create({
   viewport: {
     pointerEvents: 'none',
     position: 'fixed',
-    zIndex: zIndex.tooltip,
+    zIndex: 2000,
   },
   viewportBottomLeft: {
     bottom: spacing.md,

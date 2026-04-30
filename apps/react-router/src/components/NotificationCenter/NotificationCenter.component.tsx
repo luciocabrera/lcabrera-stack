@@ -96,33 +96,35 @@ export const NotificationCenter = () => {
             >
               {placementNotifications.map((notification) => (
                 <div key={notification.id} {...stylex.props(styles.item)}>
-                  <Card
-                    color={notification.variant}
-                    elevation='md'
-                    padding='md'
-                  >
-                    <div {...stylex.props(styles.itemBody)}>
-                      <div {...stylex.props(styles.itemContent)}>
-                        {notification.title ? (
-                          <p {...stylex.props(styles.title)}>
-                            {notification.title}
+                  <div {...stylex.props(styles.itemSurface)}>
+                    <Card
+                      color={notification.variant}
+                      elevation='md'
+                      padding='md'
+                    >
+                      <div {...stylex.props(styles.itemBody)}>
+                        <div {...stylex.props(styles.itemContent)}>
+                          {notification.title ? (
+                            <p {...stylex.props(styles.title)}>
+                              {notification.title}
+                            </p>
+                          ) : undefined}
+                          <p {...stylex.props(styles.message)}>
+                            {notification.message}
                           </p>
-                        ) : undefined}
-                        <p {...stylex.props(styles.message)}>
-                          {notification.message}
-                        </p>
+                        </div>
+                        <button
+                          aria-label='Dismiss notification'
+                          data-notification-id={notification.id}
+                          onClick={handleDismissClick}
+                          type='button'
+                          {...stylex.props(styles.dismissButton)}
+                        >
+                          <MenuCloseIcon size={14} />
+                        </button>
                       </div>
-                      <button
-                        aria-label='Dismiss notification'
-                        data-notification-id={notification.id}
-                        onClick={handleDismissClick}
-                        type='button'
-                        {...stylex.props(styles.dismissButton)}
-                      >
-                        <MenuCloseIcon size={14} />
-                      </button>
-                    </div>
-                  </Card>
+                    </Card>
+                  </div>
                 </div>
               ))}
             </div>
