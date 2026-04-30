@@ -10,6 +10,7 @@ Reusable viewport-based notification UI with:
 - Card-based variants
 - bottom-to-top entry motion
 - manual dismiss button per notification
+- top-layer rendering via the Popover API so notifications remain visible above modal dialogs
 
 ## Composition
 
@@ -26,6 +27,6 @@ Reusable viewport-based notification UI with:
 - reads notifications through `useNotifications`
 - groups by placement via a dedicated utility that creates fresh arrays per placement bucket
 - renders one fixed viewport per placement with active items
-- uses a high fixed stacking layer so notifications render above drawers/popovers
+- opens each active viewport as a manual popover so the host enters the browser top layer
 - renders notifications as opaque default cards with a left accent rail derived from the notification variant
 - dismiss button calls `dismissNotification(id)`

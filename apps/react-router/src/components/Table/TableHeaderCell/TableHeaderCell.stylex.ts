@@ -74,6 +74,7 @@ export const tableHeaderCellStyles = stylex.create({
     cursor: 'col-resize',
     display: 'flex',
     justifyContent: 'center',
+    padding: 0,
     position: 'absolute',
     touchAction: 'none',
     userSelect: 'none',
@@ -81,7 +82,7 @@ export const tableHeaderCellStyles = stylex.create({
     bottom: 0,
     right: 0,
     top: 0,
-    width: 8,
+    width: 1,
   },
   resizeHandleLine: {
     transition: 'background-color 0.15s ease',

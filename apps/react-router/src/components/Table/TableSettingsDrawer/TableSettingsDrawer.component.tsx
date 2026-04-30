@@ -4,7 +4,6 @@ import type { TabItem } from '@/components/Tabs';
 
 import { Button } from '@/components/Button';
 import { SettingsIcon } from '@/components/Icons';
-import { NotificationCenter } from '@/components/NotificationCenter';
 import {
   SidePanel,
   SidePanelBody,
@@ -109,7 +108,6 @@ export const TableSettingsDrawer = () => {
       position='right'
       size='md'
     >
-      <NotificationCenter />
       <SidePanelHeader
         actions={
           <SidePanelHeaderToolbar

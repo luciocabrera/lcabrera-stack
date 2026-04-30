@@ -1,8 +1,10 @@
 import * as stylex from '@stylexjs/stylex';
 import type { MouseEvent } from 'react';
+import { useEffect, useRef } from 'react';
 
 import { Card } from '@/components/Card';
 import { MenuCloseIcon } from '@/components/Icons';
+import type { NotificationPlacement } from '@/contexts/NotificationContext';
 import { useNotifications } from '@/hooks/useNotifications.hook';
 
 import { NOTIFICATION_CENTER_PLACEMENTS } from './NotificationCenter.constants';
@@ -15,8 +17,23 @@ import {
 
 export const NotificationCenter = () => {
   const { dismissNotification, notifications } = useNotifications();
+  const openPlacementsRef = useRef(new Set<NotificationPlacement>());
+  const viewportRefs = useRef(new Map<NotificationPlacement, HTMLDivElement>());
 
   const notificationsByPlacement = groupNotificationsByPlacement(notifications);
+
+  useEffect(() => {
+    for (const placement of NOTIFICATION_CENTER_PLACEMENTS) {
+      const viewport = viewportRefs.current.get(placement);
+
+      if (!viewport || openPlacementsRef.current.has(placement)) {
+        continue;
+      }
+
+      viewport.showPopover?.();
+      openPlacementsRef.current.add(placement);
+    }
+  }, [notifications]);
 
   const handleDismissClick = (event: MouseEvent<HTMLButtonElement>): void => {
     const notificationId = event.currentTarget.dataset.notificationId;
@@ -47,7 +64,19 @@ export const NotificationCenter = () => {
 
         return (
           <div
+            aria-atomic='false'
+            aria-live='polite'
             key={placement}
+            popover='manual'
+            ref={(element) => {
+              if (element) {
+                viewportRefs.current.set(placement, element);
+                return;
+              }
+
+              openPlacementsRef.current.delete(placement);
+              viewportRefs.current.delete(placement);
+            }}
             {...stylex.props(
               styles.viewport,
               placement === 'top-left' && styles.viewportTopLeft,
