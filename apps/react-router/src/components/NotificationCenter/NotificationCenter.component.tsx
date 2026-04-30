@@ -34,6 +34,34 @@ const sortNotificationsByNewest = (
   return [...notifications].reverse();
 };
 
+const getAccentStyle = (variant: AppNotification['variant']) => {
+  if (variant === 'error') {
+    return styles.itemSurfaceError;
+  }
+
+  if (variant === 'info') {
+    return styles.itemSurfaceInfo;
+  }
+
+  if (variant === 'primary') {
+    return styles.itemSurfacePrimary;
+  }
+
+  if (variant === 'secondary') {
+    return styles.itemSurfaceSecondary;
+  }
+
+  if (variant === 'success') {
+    return styles.itemSurfaceSuccess;
+  }
+
+  if (variant === 'warning') {
+    return styles.itemSurfaceWarning;
+  }
+
+  return styles.itemSurfaceDefault;
+};
+
 export const NotificationCenter = () => {
   const { dismissNotification, notifications } = useNotifications();
 
@@ -96,12 +124,13 @@ export const NotificationCenter = () => {
             >
               {placementNotifications.map((notification) => (
                 <div key={notification.id} {...stylex.props(styles.item)}>
-                  <div {...stylex.props(styles.itemSurface)}>
-                    <Card
-                      color={notification.variant}
-                      elevation='md'
-                      padding='md'
-                    >
+                  <div
+                    {...stylex.props(
+                      styles.itemSurface,
+                      getAccentStyle(notification.variant),
+                    )}
+                  >
+                    <Card color='default' elevation='md' padding='md'>
                       <div {...stylex.props(styles.itemBody)}>
                         <div {...stylex.props(styles.itemContent)}>
                           {notification.title ? (

@@ -60,9 +60,34 @@ export const styles = stylex.create({
   },
   itemSurface: {
     backgroundColor: colors.surfaceElevated,
+    borderLeftColor: colors.borderPrimary,
+    borderLeftStyle: 'solid',
+    borderLeftWidth: '4px',
     borderRadius: borderRadius.lg,
     boxShadow: shadows.lg,
     overflow: 'hidden',
+    width: '100%',
+  },
+  itemSurfaceDefault: {
+    borderLeftColor: colors.borderPrimary,
+  },
+  itemSurfaceError: {
+    borderLeftColor: colors.error,
+  },
+  itemSurfaceInfo: {
+    borderLeftColor: colors.info,
+  },
+  itemSurfacePrimary: {
+    borderLeftColor: colors.brandPrimary,
+  },
+  itemSurfaceSecondary: {
+    borderLeftColor: colors.brandSecondary,
+  },
+  itemSurfaceSuccess: {
+    borderLeftColor: colors.success,
+  },
+  itemSurfaceWarning: {
+    borderLeftColor: colors.warning,
   },
   itemContent: {
     display: 'flex',
