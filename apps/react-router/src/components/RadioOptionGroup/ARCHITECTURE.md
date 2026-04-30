@@ -79,4 +79,5 @@ The component is **fully controlled** — `value` is always the source of truth.
 
 - The custom radio dot uses `appearance: none` + `box-shadow: inset 0 0 0 3px white` to create the inner circle — no SVG or pseudo-elements needed.
 - Each `<label>` wraps the `<input>` so the entire card is clickable without `htmlFor`.
+- The radio's accessible name comes from the label text only; optional description text is attached separately via `aria-describedby`.
 - Transition (`background-color 0.15s, border-color 0.15s`) is applied directly in StyleX for smooth selection feedback.

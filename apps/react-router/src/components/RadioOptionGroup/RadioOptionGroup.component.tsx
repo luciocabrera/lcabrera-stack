@@ -1,4 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
+import { useId } from 'react';
 
 import type { RadioOptionGroupProps } from './RadioOptionGroup.types';
 
@@ -9,41 +10,58 @@ export const RadioOptionGroup = <TValue extends string>({
   onChange,
   options,
   value,
-}: RadioOptionGroupProps<TValue>) => (
-  <div {...stylex.props(styles.container)}>
-    {options.map((option) => (
-      <label
-        key={option.value}
-        {...stylex.props(
-          styles.option,
-          value === option.value && styles.optionSelected,
-        )}
-      >
-        <input
-          {...stylex.props(
-            styles.radio,
-            value === option.value && styles.radioChecked,
-          )}
-          checked={value === option.value}
-          name={name}
-          onChange={() => {
-            onChange(option.value);
-          }}
-          type='radio'
-          value={option.value}
-        />
-        <span>
-          <span {...stylex.props(styles.label)}>{option.label}</span>
-          {option.description && (
-            <>
-              <br />
-              <span {...stylex.props(styles.description)}>
-                {option.description}
+}: RadioOptionGroupProps<TValue>) => {
+  const groupId = useId();
+
+  return (
+    <div {...stylex.props(styles.container)}>
+      {options.map((option) => {
+        const optionId = `${groupId}-${option.value}`;
+        const descriptionId = `${optionId}-description`;
+        const labelId = `${optionId}-label`;
+
+        return (
+          <label
+            key={option.value}
+            {...stylex.props(
+              styles.option,
+              value === option.value && styles.optionSelected,
+            )}
+          >
+            <input
+              {...stylex.props(
+                styles.radio,
+                value === option.value && styles.radioChecked,
+              )}
+              aria-describedby={option.description ? descriptionId : undefined}
+              aria-labelledby={labelId}
+              checked={value === option.value}
+              name={name}
+              onChange={() => {
+                onChange(option.value);
+              }}
+              type='radio'
+              value={option.value}
+            />
+            <span>
+              <span id={labelId} {...stylex.props(styles.label)}>
+                {option.label}
               </span>
-            </>
-          )}
-        </span>
-      </label>
-    ))}
-  </div>
-);
+              {option.description && (
+                <>
+                  <br />
+                  <span
+                    id={descriptionId}
+                    {...stylex.props(styles.description)}
+                  >
+                    {option.description}
+                  </span>
+                </>
+              )}
+            </span>
+          </label>
+        );
+      })}
+    </div>
+  );
+};

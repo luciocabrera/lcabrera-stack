@@ -4,6 +4,10 @@ import type { RouteErrorBoundaryProps } from './RouteErrorBoundary.types';
 
 import { styles } from './RouteErrorBoundary.stylex';
 
+const handleRetryClick = (): void => {
+  globalThis.location.reload();
+};
+
 export const RouteErrorBoundary = ({
   defaultMessage,
   error,
@@ -19,9 +23,7 @@ export const RouteErrorBoundary = ({
       <h2 {...stylex.props(styles.title)}>Error Loading Data</h2>
       <p>{details}</p>
       <button
-        onClick={() => {
-          globalThis.location.reload();
-        }}
+        onClick={handleRetryClick}
         type='button'
         {...stylex.props(styles.retryButton)}
       >

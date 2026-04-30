@@ -1,82 +1,22 @@
 import * as stylex from '@stylexjs/stylex';
 import type { MouseEvent } from 'react';
-import { useMemo } from 'react';
 
 import { Card } from '@/components/Card';
 import { MenuCloseIcon } from '@/components/Icons';
-import {
-  type AppNotification,
-  type NotificationPlacement,
-} from '@/contexts/NotificationContext';
 import { useNotifications } from '@/hooks/useNotifications.hook';
 
-import type { NotificationsByPlacement } from './NotificationCenter.types';
-
+import { NOTIFICATION_CENTER_PLACEMENTS } from './NotificationCenter.constants';
 import { styles } from './NotificationCenter.stylex';
-
-const placements: readonly NotificationPlacement[] = [
-  'top-left',
-  'top-right',
-  'bottom-left',
-  'bottom-right',
-];
-
-const createEmptyPlacementMap = (): NotificationsByPlacement => ({
-  'bottom-left': [],
-  'bottom-right': [],
-  'top-left': [],
-  'top-right': [],
-});
-
-const sortNotificationsByNewest = (
-  notifications: readonly AppNotification[],
-): readonly AppNotification[] => {
-  return [...notifications].reverse();
-};
-
-const getAccentStyle = (variant: AppNotification['variant']) => {
-  if (variant === 'error') {
-    return styles.itemSurfaceError;
-  }
-
-  if (variant === 'info') {
-    return styles.itemSurfaceInfo;
-  }
-
-  if (variant === 'primary') {
-    return styles.itemSurfacePrimary;
-  }
-
-  if (variant === 'secondary') {
-    return styles.itemSurfaceSecondary;
-  }
-
-  if (variant === 'success') {
-    return styles.itemSurfaceSuccess;
-  }
-
-  if (variant === 'warning') {
-    return styles.itemSurfaceWarning;
-  }
-
-  return styles.itemSurfaceDefault;
-};
+import {
+  getAccentStyle,
+  groupNotificationsByPlacement,
+  sortNotificationsByNewest,
+} from './utils';
 
 export const NotificationCenter = () => {
   const { dismissNotification, notifications } = useNotifications();
 
-  const notificationsByPlacement = useMemo(() => {
-    const groupedNotifications = createEmptyPlacementMap();
-
-    for (const notification of notifications) {
-      groupedNotifications[notification.placement] = [
-        ...groupedNotifications[notification.placement],
-        notification,
-      ];
-    }
-
-    return groupedNotifications;
-  }, [notifications]);
+  const notificationsByPlacement = groupNotificationsByPlacement(notifications);
 
   const handleDismissClick = (event: MouseEvent<HTMLButtonElement>): void => {
     const notificationId = event.currentTarget.dataset.notificationId;
@@ -94,7 +34,7 @@ export const NotificationCenter = () => {
 
   return (
     <>
-      {placements.map((placement) => {
+      {NOTIFICATION_CENTER_PLACEMENTS.map((placement) => {
         const placementNotifications = sortNotificationsByNewest(
           notificationsByPlacement[placement],
         );

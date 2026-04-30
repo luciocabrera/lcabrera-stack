@@ -6,30 +6,30 @@ Before creating anything new, check this inventory. If something here does the j
 
 ## Components
 
-| Component            | Location                          | Description                                                                                          |
-| -------------------- | --------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `Button`             | `components/Button/`              | Interactive button — 8 color variants, 5 sizes, icon, loading, tooltip                               |
-| `Card`               | `components/Card/`                | Container with elevation, color, padding, and optional interactivity                                 |
-| `DevStyleXInject`    | `components/DevStyleXInject/`     | Dev-only StyleX CSS injector for HMR; must be at app root                                            |
-| `DraggableList`      | `components/DraggableList/`       | Drag-and-drop reorderable list using native drag events                                              |
-| `Icons`              | `components/Icons/`               | 30 SVG icon components (see `Icons/index.ts` for full list)                                          |
-| `InfoBox`            | `components/InfoBox/`             | Styled container for informational messages and empty states                                         |
-| `Modal`              | `components/Modal/`               | Native `<dialog>` modal with title, footer, Esc-to-close                                             |
-| `NavLink`            | `components/NavLink/`             | Router-aware navigation link with color, size, icon, orientation                                     |
-| `NotificationCenter` | `components/NotificationCenter/`  | Global corner-based notification viewport with dismiss + auto-hide using NotificationContext         |
-| `PinSideModal`       | `components/PinSideModal/`        | Modal for choosing column pin side (left / right / closest-edge)                                     |
-| `RadioOptionGroup`   | `components/RadioOptionGroup/`    | Generic `<TValue extends string>` radio button group                                                 |
-| `RouteErrorBoundary` | `components/RouteErrorBoundary/`  | Shared route error boundary display with retry button; accepts `defaultMessage` and `error` props    |
-| `SidePanel`          | `components/SidePanel/`           | Off-canvas panel with 10 sub-components, pinning, portal support                                     |
-| `Table`              | `components/Table/`               | Full-featured data table — sort, filter, pin, resize, virtualise, persist, opt-in prefetch (ADR-006) |
-| `TableBodyRows`      | `components/Table/TableBodyRows/` | Row-rendering delegate for TableBody — owns the visible-row loop and cell creation via utility reuse |
-| `Tabs`               | `components/Tabs/`                | Keyboard-navigable tab bar using React 19 `<Activity>`                                               |
-| `Tag`                | `components/Tag/`                 | Label chip with optional remove button                                                               |
-| `ToggleSwitch`       | `components/ToggleSwitch/`        | Accessible boolean toggle (controlled, `role="switch"`)                                              |
-| `Toolbar`            | `components/Toolbar/`             | Horizontal/vertical toolbar of Button/NavLink items                                                  |
-| `Tooltip`            | `components/Tooltip/`             | CSS Anchor + Popover API tooltip, 4 placements, animated                                             |
-| `VirtualList`        | `components/VirtualList/`         | Virtualized list with search, select-all, checkboxes, lazy load, parent-contained sizing             |
-| `VirtualSelect`      | `components/VirtualSelect/`       | Parent-contained dropdown select backed by `VirtualList`; `string[]` or `{ label, value }[]` options |
+| Component            | Location                          | Description                                                                                                                       |
+| -------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `Button`             | `components/Button/`              | Interactive button — 8 color variants, 5 sizes, icon, loading, tooltip                                                            |
+| `Card`               | `components/Card/`                | Container with elevation, color, padding, and optional interactivity                                                              |
+| `DevStyleXInject`    | `components/DevStyleXInject/`     | Dev-only StyleX CSS injector for HMR; must be at app root                                                                         |
+| `DraggableList`      | `components/DraggableList/`       | Drag-and-drop reorderable list using native drag events                                                                           |
+| `Icons`              | `components/Icons/`               | 30 SVG icon components (see `Icons/index.ts` for full list)                                                                       |
+| `InfoBox`            | `components/InfoBox/`             | Styled container for informational messages and empty states                                                                      |
+| `Modal`              | `components/Modal/`               | Native `<dialog>` modal with title, footer, Esc-to-close                                                                          |
+| `NavLink`            | `components/NavLink/`             | Router-aware navigation link with color, size, icon, orientation                                                                  |
+| `NotificationCenter` | `components/NotificationCenter/`  | Global corner-based notification viewport with dismiss + auto-hide using NotificationContext, local constants, and view utilities |
+| `PinSideModal`       | `components/PinSideModal/`        | Modal for choosing column pin side (left / right / closest-edge)                                                                  |
+| `RadioOptionGroup`   | `components/RadioOptionGroup/`    | Generic `<TValue extends string>` radio button group                                                                              |
+| `RouteErrorBoundary` | `components/RouteErrorBoundary/`  | Shared route error boundary display with retry button; accepts `defaultMessage` and `error` props                                 |
+| `SidePanel`          | `components/SidePanel/`           | Off-canvas panel with 10 sub-components, pinning, portal support                                                                  |
+| `Table`              | `components/Table/`               | Full-featured data table — sort, filter, pin, resize, virtualise, persist, opt-in prefetch (ADR-006)                              |
+| `TableBodyRows`      | `components/Table/TableBodyRows/` | Row-rendering delegate for TableBody — owns the visible-row loop and cell creation via utility reuse                              |
+| `Tabs`               | `components/Tabs/`                | Keyboard-navigable tab bar using React 19 `<Activity>`                                                                            |
+| `Tag`                | `components/Tag/`                 | Label chip with optional remove button                                                                                            |
+| `ToggleSwitch`       | `components/ToggleSwitch/`        | Accessible boolean toggle (controlled, `role="switch"`)                                                                           |
+| `Toolbar`            | `components/Toolbar/`             | Horizontal/vertical toolbar of Button/NavLink items                                                                               |
+| `Tooltip`            | `components/Tooltip/`             | CSS Anchor + Popover API tooltip, 4 placements, animated                                                                          |
+| `VirtualList`        | `components/VirtualList/`         | Virtualized list with search, select-all, checkboxes, lazy load, parent-contained sizing                                          |
+| `VirtualSelect`      | `components/VirtualSelect/`       | Parent-contained dropdown select backed by `VirtualList`; `string[]` or `{ label, value }[]` options                              |
 
 ---
 
