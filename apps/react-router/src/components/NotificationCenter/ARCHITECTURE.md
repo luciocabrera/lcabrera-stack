@@ -25,7 +25,7 @@ Reusable viewport-based notification UI with:
 ## Behavior
 
 - reads notifications through `useNotifications`
-- groups by placement via a dedicated utility that creates fresh arrays per placement bucket
+- groups by placement via a dedicated utility that appends into fresh per-placement arrays from a local map
 - renders one fixed viewport per placement with active items
 - opens each active viewport as a manual popover so the host enters the browser top layer
 - renders notifications as opaque default cards with a left accent rail derived from the notification variant

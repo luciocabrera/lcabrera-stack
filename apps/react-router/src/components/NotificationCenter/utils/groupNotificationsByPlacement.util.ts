@@ -2,7 +2,11 @@ import type { AppNotification } from '@/contexts/NotificationContext';
 
 import type { NotificationsByPlacement } from '../NotificationCenter.types';
 
-const createEmptyPlacementMap = (): NotificationsByPlacement => ({
+type MutableNotificationsByPlacement = {
+  [K in keyof NotificationsByPlacement]: AppNotification[];
+};
+
+const createEmptyPlacementMap = (): MutableNotificationsByPlacement => ({
   'bottom-left': [],
   'bottom-right': [],
   'top-left': [],
@@ -16,10 +20,7 @@ export const groupNotificationsByPlacement = (
   const groupedNotifications = createEmptyPlacementMap();
 
   for (const notification of notifications) {
-    groupedNotifications[notification.placement] = [
-      ...groupedNotifications[notification.placement],
-      notification,
-    ];
+    groupedNotifications[notification.placement].push(notification);
   }
 
   return groupedNotifications;

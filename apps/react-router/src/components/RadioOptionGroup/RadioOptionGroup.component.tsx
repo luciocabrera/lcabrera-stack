@@ -15,8 +15,8 @@ export const RadioOptionGroup = <TValue extends string>({
 
   return (
     <div {...stylex.props(styles.container)}>
-      {options.map((option) => {
-        const optionId = `${groupId}-${option.value}`;
+      {options.map((option, index) => {
+        const optionId = `${groupId}-option-${index}`;
         const descriptionId = `${optionId}-description`;
         const labelId = `${optionId}-label`;
 

@@ -19,9 +19,16 @@ const { dismissNotificationMock, notificationsMock, showPopoverMock } =
     showPopoverMock: vi.fn(),
   }));
 
+let originalShowPopoverDescriptor: PropertyDescriptor | undefined;
+
 beforeEach(() => {
   dismissNotificationMock.mockReset();
   showPopoverMock.mockReset();
+
+  originalShowPopoverDescriptor = Object.getOwnPropertyDescriptor(
+    HTMLDivElement.prototype,
+    'showPopover',
+  );
 
   Object.defineProperty(HTMLDivElement.prototype, 'showPopover', {
     configurable: true,
@@ -31,6 +38,17 @@ beforeEach(() => {
 
 afterEach(() => {
   cleanup();
+
+  if (originalShowPopoverDescriptor) {
+    Object.defineProperty(
+      HTMLDivElement.prototype,
+      'showPopover',
+      originalShowPopoverDescriptor,
+    );
+    return;
+  }
+
+  Reflect.deleteProperty(HTMLDivElement.prototype, 'showPopover');
 });
 
 vi.mock('@/hooks/useNotifications.hook', () => ({

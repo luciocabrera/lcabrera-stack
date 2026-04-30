@@ -13,6 +13,7 @@ export const useSetGlobalPinningPreferences = () => {
     const settingsState = settingsStore.get() ?? INITIAL_GLOBAL_SETTINGS;
 
     const nextSettings = {
+      ...settingsState,
       pinning: {
         ...settingsState.pinning,
         ...pinning,

@@ -182,7 +182,7 @@ Before creating anything new, check this inventory. If something here does the j
 | `DEFAULT_CONTAINER_HEIGHT`, `DEFAULT_CONTAINER_WIDTH`, `DEFAULT_ROW_OVERSCAN`, `DEFAULT_COLUMN_OVERSCAN` | `constants/virtualization.constants.ts`     | Default dimensions and overscan values for virtualization hooks            |
 | `DEFAULT_LOCALE`, `DEFAULT_CURRENCY`, `DEFAULT_DATE_PRESET`                                              | `utils/formatters/formatters.constants.ts`  | Formatting defaults (`en-US`, `USD`, `medium`)                             |
 | `INITIAL_PAGE_SIZE`, `LOAD_MORE_PAGE_SIZE`, `DEFAULT_FILTER_PAGE_SIZE`, `DEFAULT_ENABLE_PREFETCH`, …     | `components/Table/Table.constants.ts`       | Table pagination sizes, prefetch toggle, scroll threshold, column widths   |
-| `PIN_SIDE_PREFERENCE_OPTIONS`, `PIN_CONFLICT_RESOLUTION_OPTIONS`, `UNPIN_CONFLICT_RESOLUTION_OPTIONS`    | `constants/pinningPreferences.constants.ts` | Labelled option arrays for pinning preference radio groups                 |
+| `PIN_SIDE_PREFERENCE_OPTIONS`, `PIN_CONFLICT_PREFERENCE_OPTIONS`, `UNPIN_CONFLICT_PREFERENCE_OPTIONS`    | `constants/pinningPreferences.constants.ts` | Labelled option arrays for pinning preference radio groups                 |
 
 ---
 
