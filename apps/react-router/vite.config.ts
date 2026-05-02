@@ -7,6 +7,12 @@ import { runConfig } from './config/vite.run.config.ts';
 import { pluginsConfig } from './config/vite.plugins.config.ts';
 
 export default defineConfig({
+  build: {
+    // Never expose source maps in production — server code would be publicly
+    // visible in the browser. The dev server has its own source map pipeline
+    // that this setting does not affect.
+    sourcemap: false,
+  },
   fmt: fmtConfig,
   lint: lintConfig,
   plugins: pluginsConfig,
