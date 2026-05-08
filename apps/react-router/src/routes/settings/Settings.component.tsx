@@ -1,7 +1,11 @@
 import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 
-import { NAVIGATION_SIZE_PREFERENCE_OPTIONS } from '@/constants/globalSettings.constants';
+import {
+  NAVIGATION_COLLAPSED_PREFERENCE_OPTIONS,
+  NAVIGATION_PINNED_PREFERENCE_OPTIONS,
+  NAVIGATION_SIZE_PREFERENCE_OPTIONS,
+} from '@/constants/globalSettings.constants';
 import {
   PIN_CONFLICT_PREFERENCE_OPTIONS,
   PIN_SIDE_PREFERENCE_OPTIONS,
@@ -21,7 +25,12 @@ import { Button } from '@/components/Button';
 import { RadioOptionGroup } from '@/components/RadioOptionGroup';
 import { Tabs } from '@/components/Tabs';
 
-import type { GlobalNavigationSizePreference } from '@/types/globalSettings.types';
+import type {
+  GlobalNavigationCollapsedPreference,
+  GlobalNavigationPinnedPreference,
+  GlobalNavigationPreferences,
+  GlobalNavigationSizePreference,
+} from '@/types/globalSettings.types';
 import type {
   PinConflictResolutionPreferenceOption,
   PinSidePreferenceOption,
@@ -32,6 +41,8 @@ import type { TabItem } from '@/components/Tabs';
 import { styles } from './Settings.stylex';
 
 type SettingsDraft = {
+  readonly navigationCollapsed: GlobalNavigationCollapsedPreference;
+  readonly navigationPinned: GlobalNavigationPinnedPreference;
   readonly navigationSize: GlobalNavigationSizePreference;
   readonly pinConflictResolution: PinConflictResolutionPreferenceOption;
   readonly pinSide: PinSidePreferenceOption;
@@ -43,6 +54,8 @@ const toDraft = (
   pinningPreferences: ReturnType<typeof useGetGlobalPinningPreferences>,
 ): SettingsDraft => {
   return {
+    navigationCollapsed: navigationPreferences.collapsed ?? 'expanded',
+    navigationPinned: navigationPreferences.pinned ?? 'pinned',
     navigationSize: navigationPreferences.size ?? 'medium',
     pinConflictResolution:
       pinningPreferences.pinConflictResolution ?? 'always-ask',
@@ -63,6 +76,9 @@ export const Settings = () => {
   });
 
   const hasNavigationChanges =
+    draft.navigationCollapsed !==
+      (navigationPreferences.collapsed ?? 'expanded') ||
+    draft.navigationPinned !== (navigationPreferences.pinned ?? 'pinned') ||
     draft.navigationSize !== (navigationPreferences.size ?? 'medium');
 
   const hasPinningChanges =
@@ -80,9 +96,37 @@ export const Settings = () => {
     }
 
     if (hasNavigationChanges) {
-      setGlobalNavigationPreferences({
-        size: draft.navigationSize,
-      });
+      const navigationUpdate: Record<string, unknown> = {};
+
+      if (
+        draft.navigationCollapsed !==
+        (navigationPreferences.collapsed ?? 'expanded')
+      ) {
+        navigationUpdate.collapsed =
+          draft.navigationCollapsed === 'expanded'
+            ? undefined
+            : draft.navigationCollapsed;
+      }
+
+      if (
+        draft.navigationPinned !== (navigationPreferences.pinned ?? 'pinned')
+      ) {
+        navigationUpdate.pinned =
+          draft.navigationPinned === 'pinned'
+            ? undefined
+            : draft.navigationPinned;
+      }
+
+      if (draft.navigationSize !== (navigationPreferences.size ?? 'medium')) {
+        navigationUpdate.size =
+          draft.navigationSize === 'medium' ? undefined : draft.navigationSize;
+      }
+
+      if (Object.keys(navigationUpdate).length > 0) {
+        setGlobalNavigationPreferences(
+          navigationUpdate as GlobalNavigationPreferences,
+        );
+      }
     }
 
     if (hasPinningChanges) {
@@ -102,6 +146,28 @@ export const Settings = () => {
 
   const handleCancel = (): void => {
     setDraft(toDraft(navigationPreferences, pinningPreferences));
+  };
+
+  const handleNavigationCollapsedChange = (
+    value: GlobalNavigationCollapsedPreference,
+  ): void => {
+    setDraft((currentDraft) => {
+      return {
+        ...currentDraft,
+        navigationCollapsed: value,
+      };
+    });
+  };
+
+  const handleNavigationPinnedChange = (
+    value: GlobalNavigationPinnedPreference,
+  ): void => {
+    setDraft((currentDraft) => {
+      return {
+        ...currentDraft,
+        navigationPinned: value,
+      };
+    });
   };
 
   const handleNavigationSizeChange = (
@@ -149,20 +215,54 @@ export const Settings = () => {
   const tabs: readonly TabItem[] = [
     {
       children: (
-        <Card color='default' elevation='sm' padding='lg'>
-          <section {...stylex.props(styles.section)}>
-            <h2 {...stylex.props(styles.sectionTitle)}>Navbar Size</h2>
-            <p {...stylex.props(styles.description)}>
-              Controls the global navigation width and density across the app.
-            </p>
-            <RadioOptionGroup
-              name='settings-navigation-size-preference'
-              onChange={handleNavigationSizeChange}
-              options={NAVIGATION_SIZE_PREFERENCE_OPTIONS}
-              value={draft.navigationSize}
-            />
-          </section>
-        </Card>
+        <div {...stylex.props(styles.tabSections)}>
+          <Card color='default' elevation='sm' padding='lg'>
+            <section {...stylex.props(styles.section)}>
+              <h2 {...stylex.props(styles.sectionTitle)}>Navbar Size</h2>
+              <p {...stylex.props(styles.description)}>
+                Controls the global navigation width and density across the app.
+              </p>
+              <RadioOptionGroup
+                name='settings-navigation-size-preference'
+                onChange={handleNavigationSizeChange}
+                options={NAVIGATION_SIZE_PREFERENCE_OPTIONS}
+                value={draft.navigationSize}
+              />
+            </section>
+          </Card>
+
+          <Card color='default' elevation='sm' padding='lg'>
+            <section {...stylex.props(styles.section)}>
+              <h2 {...stylex.props(styles.sectionTitle)}>Collapsed/Expanded</h2>
+              <p {...stylex.props(styles.description)}>
+                Determines the initial state of the navigation bar when the page
+                loads.
+              </p>
+              <RadioOptionGroup
+                name='settings-navigation-collapsed-preference'
+                onChange={handleNavigationCollapsedChange}
+                options={NAVIGATION_COLLAPSED_PREFERENCE_OPTIONS}
+                value={draft.navigationCollapsed}
+              />
+            </section>
+          </Card>
+
+          <Card color='default' elevation='sm' padding='lg'>
+            <section {...stylex.props(styles.section)}>
+              <h2 {...stylex.props(styles.sectionTitle)}>Pinned/Unpinned</h2>
+              <p {...stylex.props(styles.description)}>
+                Determines if the navigation bar is fixed to the left or floats
+                on scroll.
+              </p>
+              <RadioOptionGroup
+                name='settings-navigation-pinned-preference'
+                onChange={handleNavigationPinnedChange}
+                options={NAVIGATION_PINNED_PREFERENCE_OPTIONS}
+                value={draft.navigationPinned}
+              />
+            </section>
+          </Card>
+        </div>
       ),
       header: 'Navigation',
       key: 'navigation',

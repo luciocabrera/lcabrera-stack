@@ -6,6 +6,8 @@ import {
 } from './globalSettings.constants';
 
 import type {
+  GlobalNavigationCollapsedPreference,
+  GlobalNavigationPinnedPreference,
   GlobalNavigationPreferences,
   GlobalPinningPreferences,
   GlobalSettingsState,
@@ -18,6 +20,8 @@ import type { PinSide } from '@/types/ui.types';
 
 const PIN_SIDE_VALUES = ['closest-edge', 'left', 'right'] as const;
 const NAVIGATION_SIZE_VALUES = ['compact', 'large', 'medium', 'small'] as const;
+const NAVIGATION_COLLAPSED_VALUES = ['collapsed', 'expanded'] as const;
+const NAVIGATION_PINNED_VALUES = ['pinned', 'unpinned'] as const;
 const PIN_CONFLICT_VALUES = [
   'move-column',
   'pin-all-between',
@@ -46,6 +50,28 @@ const isNavigationSizePreference = (
     typeof value === 'string' &&
     NAVIGATION_SIZE_VALUES.includes(
       value as (typeof NAVIGATION_SIZE_VALUES)[number],
+    )
+  );
+};
+
+const isNavigationCollapsedPreference = (
+  value: unknown,
+): value is GlobalNavigationCollapsedPreference => {
+  return (
+    typeof value === 'string' &&
+    NAVIGATION_COLLAPSED_VALUES.includes(
+      value as (typeof NAVIGATION_COLLAPSED_VALUES)[number],
+    )
+  );
+};
+
+const isNavigationPinnedPreference = (
+  value: unknown,
+): value is GlobalNavigationPinnedPreference => {
+  return (
+    typeof value === 'string' &&
+    NAVIGATION_PINNED_VALUES.includes(
+      value as (typeof NAVIGATION_PINNED_VALUES)[number],
     )
   );
 };
@@ -110,11 +136,17 @@ const toGlobalNavigationPreferences = (
     return undefined;
   }
 
+  const collapsed = isNavigationCollapsedPreference(value['collapsed'])
+    ? value['collapsed']
+    : undefined;
+  const pinned = isNavigationPinnedPreference(value['pinned'])
+    ? value['pinned']
+    : undefined;
   const size = isNavigationSizePreference(value['size'])
     ? value['size']
     : undefined;
 
-  return { size };
+  return { collapsed, pinned, size };
 };
 
 export const getGlobalSettingsFromCookie = ({

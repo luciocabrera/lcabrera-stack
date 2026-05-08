@@ -36,6 +36,8 @@ graph TD
   B -->|no| D[Render compact launcher rail with open button]
   D --> E{isOpen}
   E -->|yes| F[Render SidePanel as left dialog]
+  A --> P[Read global collapsed and pinned preferences from GlobalSettingsContext]
+  P --> Q[Initialize and sync local isExpanded and isPinned state]
   A --> M[Read global navigation size preference from GlobalSettingsContext]
   M --> N[Map preference to SidePanel size: compact→rail, small→xs, medium→sm, large→md]
   M --> O[Resolve compact visuals when preference is compact]
@@ -65,3 +67,15 @@ through the existing `Toolbar` and `NavLink` contracts.
 Compact mode is controlled by the global navigation size preference. When set to
 `compact`, `AppNavigation` uses `SidePanel` rail width, passes `isCompact` to
 `Toolbar`, and renders icon-only controls with tooltips.
+
+## Initial Pin and Expansion State
+
+`AppNavigation` derives initial and hydrated runtime state from global
+navigation preferences:
+
+- `collapsed: 'collapsed'` starts the panel collapsed (`isExpanded = false`).
+- `pinned: 'unpinned'` starts the panel as unpinned (`isPinned = false`).
+- Missing values fall back to defaults (`expanded`, and `defaultIsPinned`).
+
+The component also synchronizes `isExpanded` and `isPinned` when global
+preferences change (for example, after accepting changes in Settings).

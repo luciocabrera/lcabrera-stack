@@ -10,7 +10,13 @@ export type GlobalNavigationSizePreference =
   | 'medium'
   | 'small';
 
+export type GlobalNavigationCollapsedPreference = 'collapsed' | 'expanded';
+
+export type GlobalNavigationPinnedPreference = 'pinned' | 'unpinned';
+
 export type GlobalNavigationPreferences = {
+  readonly collapsed?: GlobalNavigationCollapsedPreference;
+  readonly pinned?: GlobalNavigationPinnedPreference;
   readonly size?: GlobalNavigationSizePreference;
 };
 

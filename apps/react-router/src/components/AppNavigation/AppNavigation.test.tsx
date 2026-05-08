@@ -92,6 +92,42 @@ describe('AppNavigation', () => {
     expect(screen.getByRole('link', { name: /Home/i })).toBeDefined();
   });
 
+  it('starts collapsed when global collapsed preference is selected', () => {
+    renderWithGlobalSettings(
+      {
+        navigation: {
+          collapsed: 'collapsed',
+          size: 'medium',
+        },
+        pinning: {},
+      },
+      vi.fn(),
+      false,
+    );
+
+    expect(
+      screen.getByRole('button', { name: /Expand navigation/i }),
+    ).toBeDefined();
+  });
+
+  it('starts unpinned when global pinned preference is unpinned', () => {
+    renderWithGlobalSettings(
+      {
+        navigation: {
+          pinned: 'unpinned',
+          size: 'medium',
+        },
+        pinning: {},
+      },
+      vi.fn(),
+      false,
+    );
+
+    expect(
+      screen.getByRole('button', { name: /Open navigation/i }),
+    ).toBeDefined();
+  });
+
   it('collapses and expands the navigation panel independently of pinning', () => {
     renderWithGlobalSettings(
       { navigation: { size: 'medium' }, pinning: {} },

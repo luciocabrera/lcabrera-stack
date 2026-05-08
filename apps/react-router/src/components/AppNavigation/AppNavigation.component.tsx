@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { Button } from '@/components/Button';
 import {
@@ -15,7 +15,11 @@ import {
   SidePanelBody,
   SidePanelFooter,
 } from '@/components/SidePanel';
-import { useGetGlobalNavigationSizePreference } from '@/contexts/GlobalSettingsContext/selectors';
+import {
+  useGetGlobalNavigationCollapsedPreference,
+  useGetGlobalNavigationPinnedPreference,
+  useGetGlobalNavigationSizePreference,
+} from '@/contexts/GlobalSettingsContext/selectors';
 import { Toolbar } from '@/components/Toolbar';
 import { ICON_SIZE_LG } from '@/design-system/constants';
 
@@ -32,10 +36,43 @@ export const AppNavigation = ({
   isDarkMode,
   onToggleTheme,
 }: AppNavigationProps) => {
+  const navigationCollapsedPreference =
+    useGetGlobalNavigationCollapsedPreference();
+  const navigationPinnedPreference = useGetGlobalNavigationPinnedPreference();
   const navigationSizePreference = useGetGlobalNavigationSizePreference();
   const [isOpen, setIsOpen] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(true);
-  const [isPinned, setIsPinned] = useState(defaultIsPinned);
+  const [isExpanded, setIsExpanded] = useState(() => {
+    return navigationCollapsedPreference !== 'collapsed';
+  });
+  const [isPinned, setIsPinned] = useState(() => {
+    if (navigationPinnedPreference === 'pinned') {
+      return true;
+    }
+
+    if (navigationPinnedPreference === 'unpinned') {
+      return false;
+    }
+
+    return defaultIsPinned;
+  });
+
+  useEffect(() => {
+    setIsExpanded(navigationCollapsedPreference !== 'collapsed');
+  }, [navigationCollapsedPreference]);
+
+  useEffect(() => {
+    if (navigationPinnedPreference === 'pinned') {
+      setIsPinned(true);
+      return;
+    }
+
+    if (navigationPinnedPreference === 'unpinned') {
+      setIsPinned(false);
+      return;
+    }
+
+    setIsPinned(defaultIsPinned);
+  }, [defaultIsPinned, navigationPinnedPreference]);
 
   const density = NAV_DENSITY[navigationSizePreference ?? 'medium'];
   const pinButtonLabel = isPinned ? 'Unpin navigation' : 'Pin navigation';
