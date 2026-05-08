@@ -86,10 +86,11 @@ jobs:
         with:
           name: coverage-report
           path: |
-            ./apps/react-router/coverage/**
-            ./coverage/**
+            ./apps/react-router/coverage/coverage-summary.json
+            ./coverage/coverage-summary.json
           if-no-files-found: ignore
-          retention-days: 30
+          compression-level: 9
+          retention-days: 3
 
       - name: Post coverage summary to PR
         if: github.event_name == 'pull_request' && always()
@@ -124,7 +125,7 @@ jobs:
               `| Functions | ${fmt(total.functions)} | ${badge(total.functions.pct)} |`,
               `| Branches | ${fmt(total.branches)} | ${badge(total.branches.pct)} |`,
               '',
-              `> 📁 Full HTML report available as a workflow artifact: [coverage-report](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`,
+              `> 📁 Coverage summary JSON available as a workflow artifact: [coverage-report](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`,
             ].join('\n');
 
             const { data: comments } = await github.rest.issues.listComments({
