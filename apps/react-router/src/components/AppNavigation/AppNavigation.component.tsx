@@ -40,7 +40,9 @@ export const AppNavigation = ({
     useGetGlobalNavigationCollapsedPreference();
   const navigationPinnedPreference = useGetGlobalNavigationPinnedPreference();
   const navigationSizePreference = useGetGlobalNavigationSizePreference();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(() => {
+    return navigationPinnedPreference === 'unpinned';
+  });
   const [isExpanded, setIsExpanded] = useState(() => {
     return navigationCollapsedPreference !== 'collapsed';
   });
@@ -63,15 +65,18 @@ export const AppNavigation = ({
   useEffect(() => {
     if (navigationPinnedPreference === 'pinned') {
       setIsPinned(true);
+      setIsOpen(false);
       return;
     }
 
     if (navigationPinnedPreference === 'unpinned') {
       setIsPinned(false);
+      setIsOpen(true);
       return;
     }
 
     setIsPinned(defaultIsPinned);
+    setIsOpen(false);
   }, [defaultIsPinned, navigationPinnedPreference]);
 
   const density = NAV_DENSITY[navigationSizePreference ?? 'medium'];

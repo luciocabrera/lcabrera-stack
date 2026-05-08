@@ -74,7 +74,7 @@ Compact mode is controlled by the global navigation size preference. When set to
 navigation preferences:
 
 - `collapsed: 'collapsed'` starts the panel collapsed (`isExpanded = false`).
-- `pinned: 'unpinned'` starts the panel as unpinned (`isPinned = false`).
+- `pinned: 'unpinned'` starts the panel as unpinned (`isPinned = false`) and open (`isOpen = true`).
 - Missing values fall back to defaults (`expanded`, and `defaultIsPinned`).
 
 The component also synchronizes `isExpanded` and `isPinned` when global
