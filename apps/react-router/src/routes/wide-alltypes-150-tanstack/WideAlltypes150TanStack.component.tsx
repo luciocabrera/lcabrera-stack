@@ -124,8 +124,8 @@ const WideAlltypes150TanStackTableContent = ({
     refetchOnWindowFocus: false,
   });
 
-  const flatData = data.pages.flatMap((page) => page.data);
-  const totalRowCount = data.pages[0]?.total ?? 0;
+  const flatData = (data?.pages ?? []).flatMap((page) => page.data);
+  const totalRowCount = data?.pages[0]?.total ?? 0;
   const table = useReactTable({
     columns: [...COLUMN_DEFINITIONS],
     data: flatData,
@@ -335,6 +335,13 @@ export const WideAlltypes150TanStackPage = () => {
   const { initialPage, initialSortParam, sorting } =
     useLoaderData<typeof loader>();
   const [queryClient] = useState(createQueryClient);
+
+  useEffect(() => {
+    return () => {
+      void queryClient.cancelQueries();
+      queryClient.clear();
+    };
+  }, [queryClient]);
 
   return (
     <QueryClientProvider client={queryClient}>
