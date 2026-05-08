@@ -35,6 +35,7 @@ Eliminate code duplication between `apps/api-server` and `apps/api-server-fast` 
 - Package name: `api-shared`
 - Exports via `src/index.ts` barrel file
 - Imported as `api-shared/utils/*` in sibling packages
+- Build task: `tsc -p tsconfig.json` in `vite.config.ts`, with `typescript` declared in local `devDependencies`
 
 ## Future Consolidation Opportunities
 
