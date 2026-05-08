@@ -6,6 +6,7 @@ import {
 } from './globalSettings.constants';
 
 import type {
+  GlobalNavigationPreferences,
   GlobalPinningPreferences,
   GlobalSettingsState,
 } from '@/types/globalSettings.types';
@@ -16,6 +17,7 @@ import type {
 import type { PinSide } from '@/types/ui.types';
 
 const PIN_SIDE_VALUES = ['closest-edge', 'left', 'right'] as const;
+const NAVIGATION_SIZE_VALUES = ['compact', 'large', 'medium', 'small'] as const;
 const PIN_CONFLICT_VALUES = [
   'move-column',
   'pin-all-between',
@@ -35,6 +37,17 @@ type GetGlobalSettingsFromCookieArgs = {
 
 const isObject = (value: unknown): value is Record<string, unknown> => {
   return typeof value === 'object' && value !== null;
+};
+
+const isNavigationSizePreference = (
+  value: unknown,
+): value is GlobalNavigationPreferences['size'] => {
+  return (
+    typeof value === 'string' &&
+    NAVIGATION_SIZE_VALUES.includes(
+      value as (typeof NAVIGATION_SIZE_VALUES)[number],
+    )
+  );
 };
 
 const isPinSide = (value: unknown): value is PinSide => {
@@ -90,6 +103,20 @@ const toGlobalPinningPreferences = (
   };
 };
 
+const toGlobalNavigationPreferences = (
+  value: unknown,
+): GlobalNavigationPreferences | undefined => {
+  if (!isObject(value)) {
+    return undefined;
+  }
+
+  const size = isNavigationSizePreference(value['size'])
+    ? value['size']
+    : undefined;
+
+  return { size };
+};
+
 export const getGlobalSettingsFromCookie = ({
   cookieString,
   fallback,
@@ -117,8 +144,12 @@ export const getGlobalSettingsFromCookie = ({
     }
 
     const parsedPinning = toGlobalPinningPreferences(payload.value['pinning']);
+    const parsedNavigation = toGlobalNavigationPreferences(
+      payload.value['navigation'],
+    );
 
     return {
+      navigation: parsedNavigation ?? fallback.navigation,
       pinning: parsedPinning ?? fallback.pinning,
     };
   } catch {

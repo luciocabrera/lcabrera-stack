@@ -3,9 +3,50 @@ import * as stylex from '@stylexjs/stylex';
 import { Button } from '@/components/Button';
 import { NavLink } from '@/components/NavLink';
 
+import { styles } from './Toolbar.stylex';
+
+import type { DesignSystemSize } from '@/types/design-system.types';
 import type { ToolbarProps } from './Toolbar.types';
 
-import { styles } from './Toolbar.stylex';
+const getCompactControlStyle = (size: DesignSystemSize) => {
+  switch (size) {
+    case 'embedded': {
+      return styles.compactControlEmbedded;
+    }
+    case 'lg': {
+      return styles.compactControlLg;
+    }
+    case 'mini': {
+      return styles.compactControlMini;
+    }
+    case 'sm': {
+      return styles.compactControlSm;
+    }
+    default: {
+      return styles.compactControlMd;
+    }
+  }
+};
+
+const getCompactItemStyle = (size: DesignSystemSize) => {
+  switch (size) {
+    case 'embedded': {
+      return styles.toolbarItemCompactEmbedded;
+    }
+    case 'lg': {
+      return styles.toolbarItemCompactLg;
+    }
+    case 'mini': {
+      return styles.toolbarItemCompactMini;
+    }
+    case 'sm': {
+      return styles.toolbarItemCompactSm;
+    }
+    default: {
+      return styles.toolbarItemCompactMd;
+    }
+  }
+};
 
 export const Toolbar = ({
   isCompact = false,
@@ -37,6 +78,13 @@ export const Toolbar = ({
       >
         {items.map((item) => {
           const itemKey = `toolbar-item-${item.label}`;
+          const resolvedSize = item.size ?? size;
+          const compactControlStyle = isCompact
+            ? getCompactControlStyle(resolvedSize)
+            : undefined;
+          const compactItemStyle = isCompact
+            ? getCompactItemStyle(resolvedSize)
+            : undefined;
 
           return (
             <li
@@ -45,19 +93,20 @@ export const Toolbar = ({
                 styles.toolbarItem,
                 orientation === 'horizontal' && styles.toolbarItemResponsive,
                 isCompact && styles.toolbarItemCompact,
+                compactItemStyle,
               )}
             >
               {item.type === 'button' ? (
                 <Button
                   aria-label={isCompact ? item.label : undefined}
                   color={item.color}
-                  customStylex={isCompact ? styles.compactControl : undefined}
+                  customStylex={compactControlStyle}
                   icon={item.icon}
                   isIconOnly={isCompact}
                   isDisabled={item.isDisabled}
                   onClick={item.onClick}
                   orientation={orientation}
-                  size={item.size ?? size}
+                  size={resolvedSize}
                   tooltipContent={isCompact ? item.label : undefined}
                   tooltipPlacement='right'
                   type={item.type}
@@ -69,12 +118,12 @@ export const Toolbar = ({
                 <NavLink
                   aria-label={isCompact ? item.label : undefined}
                   color={item.color}
-                  customStylex={isCompact ? styles.compactControl : undefined}
+                  customStylex={compactControlStyle}
                   end={item.end}
                   icon={item.icon}
                   isIconOnly={isCompact}
                   orientation={orientation}
-                  size={item.size ?? size}
+                  size={resolvedSize}
                   tooltipContent={isCompact ? item.label : undefined}
                   tooltipPlacement='right'
                   to={item.to}

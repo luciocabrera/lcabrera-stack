@@ -96,12 +96,12 @@ Before creating anything new, check this inventory. If something here does the j
 
 ### `src/utils/globalSettings/`
 
-| Function                           | Location                                                        | Description                                                                 |
-| ---------------------------------- | --------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| `getGlobalSettingsFromCookie`      | `utils/globalSettings/getGlobalSettingsFromCookie.util.ts`      | Reads global settings (pinning preferences) from cookie string (SSR-safe)   |
-| `serializeGlobalSettingsForCookie` | `utils/globalSettings/serializeGlobalSettingsForCookie.util.ts` | Serialises `GlobalSettingsState` to versioned JSON payload for cookie write |
-| `GLOBAL_SETTINGS_COOKIE_KEY`       | `utils/globalSettings/globalSettings.constants.ts`              | Cookie key constant (`global-settings`)                                     |
-| `GLOBAL_SETTINGS_COOKIE_VERSION`   | `utils/globalSettings/globalSettings.constants.ts`              | Current payload version; incremented on breaking schema changes             |
+| Function                           | Location                                                        | Description                                                                            |
+| ---------------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `getGlobalSettingsFromCookie`      | `utils/globalSettings/getGlobalSettingsFromCookie.util.ts`      | Reads global settings (pinning + navigation preferences) from cookie string (SSR-safe) |
+| `serializeGlobalSettingsForCookie` | `utils/globalSettings/serializeGlobalSettingsForCookie.util.ts` | Serialises `GlobalSettingsState` to versioned JSON payload for cookie write            |
+| `GLOBAL_SETTINGS_COOKIE_KEY`       | `utils/globalSettings/globalSettings.constants.ts`              | Cookie key constant (`global-settings`)                                                |
+| `GLOBAL_SETTINGS_COOKIE_VERSION`   | `utils/globalSettings/globalSettings.constants.ts`              | Current payload version; incremented on breaking schema changes                        |
 
 ### `src/utils/theme/`
 
@@ -176,30 +176,31 @@ Before creating anything new, check this inventory. If something here does the j
 
 ## Constants
 
-| Export(s)                                                                                                | Location                                    | Description                                                                |
-| -------------------------------------------------------------------------------------------------------- | ------------------------------------------- | -------------------------------------------------------------------------- |
-| `API_SERVER_PORT`, `CONFIG`                                                                              | `constants/api.constants.ts`                | API server port and host config per environment (dev / localhost / prod)   |
-| `OPERATOR_TO_SHORT`, `SHORT_TO_OPERATOR`, `TEXT_OPERATORS`, `NUMBER_OPERATORS`, `DATE_OPERATORS`, …      | `constants/filterOperators.constants.ts`    | Bidirectional operator ↔ short-code maps and operator arrays per data type |
-| `DEFAULT_CONTAINER_HEIGHT`, `DEFAULT_CONTAINER_WIDTH`, `DEFAULT_ROW_OVERSCAN`, `DEFAULT_COLUMN_OVERSCAN` | `constants/virtualization.constants.ts`     | Default dimensions and overscan values for virtualization hooks            |
-| `DEFAULT_LOCALE`, `DEFAULT_CURRENCY`, `DEFAULT_DATE_PRESET`                                              | `utils/formatters/formatters.constants.ts`  | Formatting defaults (`en-US`, `USD`, `medium`)                             |
-| `INITIAL_PAGE_SIZE`, `LOAD_MORE_PAGE_SIZE`, `DEFAULT_FILTER_PAGE_SIZE`, `DEFAULT_ENABLE_PREFETCH`, …     | `components/Table/Table.constants.ts`       | Table pagination sizes, prefetch toggle, scroll threshold, column widths   |
-| `PIN_SIDE_PREFERENCE_OPTIONS`, `PIN_CONFLICT_PREFERENCE_OPTIONS`, `UNPIN_CONFLICT_PREFERENCE_OPTIONS`    | `constants/pinningPreferences.constants.ts` | Labelled option arrays for pinning preference radio groups                 |
+| Export(s)                                                                                                | Location                                    | Description                                                                       |
+| -------------------------------------------------------------------------------------------------------- | ------------------------------------------- | --------------------------------------------------------------------------------- |
+| `API_SERVER_PORT`, `CONFIG`                                                                              | `constants/api.constants.ts`                | API server port and host config per environment (dev / localhost / prod)          |
+| `OPERATOR_TO_SHORT`, `SHORT_TO_OPERATOR`, `TEXT_OPERATORS`, `NUMBER_OPERATORS`, `DATE_OPERATORS`, …      | `constants/filterOperators.constants.ts`    | Bidirectional operator ↔ short-code maps and operator arrays per data type        |
+| `DEFAULT_CONTAINER_HEIGHT`, `DEFAULT_CONTAINER_WIDTH`, `DEFAULT_ROW_OVERSCAN`, `DEFAULT_COLUMN_OVERSCAN` | `constants/virtualization.constants.ts`     | Default dimensions and overscan values for virtualization hooks                   |
+| `DEFAULT_LOCALE`, `DEFAULT_CURRENCY`, `DEFAULT_DATE_PRESET`                                              | `utils/formatters/formatters.constants.ts`  | Formatting defaults (`en-US`, `USD`, `medium`)                                    |
+| `INITIAL_PAGE_SIZE`, `LOAD_MORE_PAGE_SIZE`, `DEFAULT_FILTER_PAGE_SIZE`, `DEFAULT_ENABLE_PREFETCH`, …     | `components/Table/Table.constants.ts`       | Table pagination sizes, prefetch toggle, scroll threshold, column widths          |
+| `NAVIGATION_SIZE_PREFERENCE_OPTIONS`                                                                     | `constants/globalSettings.constants.ts`     | Labelled option array for global navigation sizing (`compact/small/medium/large`) |
+| `PIN_SIDE_PREFERENCE_OPTIONS`, `PIN_CONFLICT_PREFERENCE_OPTIONS`, `UNPIN_CONFLICT_PREFERENCE_OPTIONS`    | `constants/pinningPreferences.constants.ts` | Labelled option arrays for pinning preference radio groups                        |
 
 ---
 
 ## Types
 
-| Key Exports                                                                                                                                                       | Location                            | Description                                                       |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- | ----------------------------------------------------------------- |
-| `DesignSystemColor`, `DesignSystemSize`, `DesignSystemOrientation`, `DesignSystemStyle`, `DesignSystemWidth`                                                      | `types/design-system.types.ts`      | Union types for all design-system prop values                     |
-| `BooleanFilter`, `DateFilter`, `NumberFilter`, `SelectFilter`, `TextFilter`, `ColumnFilter`                                                                       | `types/filterOperators.types.ts`    | Discriminated union for all column filter states                  |
-| `DateFormatPreset`, `DateFormatOptions`, `CurrencyFormatOptions`, `NumberFormatOptions`                                                                           | `types/format.types.ts`             | Options for the formatter utilities                               |
-| `ThemeMode`, `ThemeContextValue`                                                                                                                                  | `types/theme.types.ts`              | Light/dark mode enum and context shape                            |
-| `InfiniteScroll`, `Pagination`, `PinSide`, `SortDirection`, `Sorting`, `PinConflictState`, `PrefetchCache`                                                        | `types/ui.types.ts`                 | Shared UI primitive types                                         |
-| `ApiConfig`                                                                                                                                                       | `types/api.types.ts`                | API config shape keyed by environment                             |
-| `DbSanityPayload`                                                                                                                                                 | `root/Root.types.ts`                | Dev preflight response shape for `/api/db-sanity`                 |
-| `PinConflictResolution`, `PinSidePreferenceOption`, `PinConflictResolutionPreferenceOption`, `UnpinConflictResolution`, `UnpinConflictResolutionPreferenceOption` | `types/pinningPreferences.types.ts` | Preference option unions including `always-ask` sentinel          |
-| `GlobalPinningPreferences`, `GlobalSettingsState`                                                                                                                 | `types/globalSettings.types.ts`     | Global settings state shape persisted in `global-settings` cookie |
+| Key Exports                                                                                                                                                       | Location                            | Description                                                                              |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- | ---------------------------------------------------------------------------------------- |
+| `DesignSystemColor`, `DesignSystemSize`, `DesignSystemOrientation`, `DesignSystemStyle`, `DesignSystemWidth`                                                      | `types/design-system.types.ts`      | Union types for all design-system prop values                                            |
+| `BooleanFilter`, `DateFilter`, `NumberFilter`, `SelectFilter`, `TextFilter`, `ColumnFilter`                                                                       | `types/filterOperators.types.ts`    | Discriminated union for all column filter states                                         |
+| `DateFormatPreset`, `DateFormatOptions`, `CurrencyFormatOptions`, `NumberFormatOptions`                                                                           | `types/format.types.ts`             | Options for the formatter utilities                                                      |
+| `ThemeMode`, `ThemeContextValue`                                                                                                                                  | `types/theme.types.ts`              | Light/dark mode enum and context shape                                                   |
+| `InfiniteScroll`, `Pagination`, `PinSide`, `SortDirection`, `Sorting`, `PinConflictState`, `PrefetchCache`                                                        | `types/ui.types.ts`                 | Shared UI primitive types                                                                |
+| `ApiConfig`                                                                                                                                                       | `types/api.types.ts`                | API config shape keyed by environment                                                    |
+| `DbSanityPayload`                                                                                                                                                 | `root/Root.types.ts`                | Dev preflight response shape for `/api/db-sanity`                                        |
+| `PinConflictResolution`, `PinSidePreferenceOption`, `PinConflictResolutionPreferenceOption`, `UnpinConflictResolution`, `UnpinConflictResolutionPreferenceOption` | `types/pinningPreferences.types.ts` | Preference option unions including `always-ask` sentinel                                 |
+| `GlobalNavigationPreferences`, `GlobalNavigationSizePreference`, `GlobalPinningPreferences`, `GlobalSettingsState`                                                | `types/globalSettings.types.ts`     | Global settings state shape (navigation + pinning) persisted in `global-settings` cookie |
 
 ## Routes
 

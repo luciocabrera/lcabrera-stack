@@ -18,7 +18,7 @@ export const styles = stylex.create({
     alignItems: 'center',
     display: 'flex',
   },
-  brandCompact: {
+  brandCollapsed: {
     justifyContent: 'center',
     width: '100%',
   },
@@ -35,6 +35,19 @@ export const styles = stylex.create({
     height: '2.25rem',
     width: '2.25rem',
   },
+  // Matches button height for each density so brand icon is visually consistent
+  brandIconSizeMini: {
+    height: '1.75rem',
+    width: '1.75rem',
+  },
+  brandIconSizeSm: {
+    height: '2rem',
+    width: '2rem',
+  },
+  brandIconSizeMd: {
+    height: '2.5rem',
+    width: '2.5rem',
+  },
   brandText: {
     minWidth: 0,
     overflow: 'hidden',
@@ -46,6 +59,12 @@ export const styles = stylex.create({
   },
   brandTextHidden: {
     display: 'none',
+  },
+  bodyDensityCompact: {
+    padding: spacing.xs,
+  },
+  bodyDensityLarge: {
+    padding: spacing.md,
   },
   footer: {
     alignItems: 'center',
@@ -68,9 +87,22 @@ export const styles = stylex.create({
     display: 'flex',
     justifyContent: 'flex-end',
   },
-  headerActionsCompact: {
+  headerActionsCollapsed: {
     alignItems: 'center',
     flexDirection: 'column',
+    justifyContent: 'center',
+  },
+  headerDensityCompact: {
+    gap: spacing.xs,
+    padding: spacing.xs,
+  },
+  headerDensityLarge: {
+    gap: spacing.lg,
+    padding: spacing.lg,
+  },
+  headerDensitySmall: {
+    gap: spacing.sm,
+    padding: spacing.sm,
   },
   headerRow: {
     gap: spacing.sm,

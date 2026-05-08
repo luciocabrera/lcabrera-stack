@@ -96,7 +96,7 @@ graph TD
   I --> K[Pass shared orientation and resolved size]
   J --> K
   K --> L{isCompact?}
-L -- yes --> M[Apply square control override and right-side tooltip]
+L -- yes --> M[Apply size-matched square control override and right-side tooltip]
   L -- no --> N[Force full width item content]
 ```
 
@@ -135,7 +135,7 @@ For button items, Toolbar forwards:
 - `orientation`
 - `size`
 - `width='full'`
-- `customStylex=compactControl` when `isCompact`
+- `customStylex=size-matched compact control override` when `isCompact`
 - `tooltipContent=label` when `isCompact`
 - `tooltipPlacement='right'` when `isCompact`
 - button label as `children`
@@ -152,7 +152,7 @@ For link items, Toolbar forwards:
 - `size`
 - `to`
 - `width='full'`
-- `customStylex=compactControl` when `isCompact`
+- `customStylex=size-matched compact control override` when `isCompact`
 - `tooltipContent=label` when `isCompact`
 - `tooltipPlacement='right'` when `isCompact`
 - link label as `children`
@@ -195,7 +195,8 @@ Shared base style defines:
 - `vertical`: always column, no wrapping
 - `horizontal`: row by default, wrap enabled, switches to column below the
   container query threshold
-- `isCompact`: centers items and constrains each control to a 2.5rem square;
+- `isCompact`: centers items and constrains each control to the resolved item
+  size as a square;
   Button/NavLink render as true icon-only controls while `aria-label` and a
   right-side tooltip keep the item name discoverable.
 

@@ -15,48 +15,58 @@ import {
   SidePanelBody,
   SidePanelFooter,
 } from '@/components/SidePanel';
+import { useGetGlobalNavigationSizePreference } from '@/contexts/GlobalSettingsContext/selectors';
 import { Toolbar } from '@/components/Toolbar';
-import { ICON_SIZE_LG, ICON_SIZE_MD } from '@/design-system/constants';
+import { ICON_SIZE_LG } from '@/design-system/constants';
 
-import { NAVIGATION_ITEMS } from './AppNavigation.constants';
+import { getNavigationItems, NAV_DENSITY } from './AppNavigation.constants';
 import { styles } from './AppNavigation.stylex';
 
-import type {
-  AppNavigationMode,
-  AppNavigationProps,
-} from './AppNavigation.types';
-import type { SidePanelSize } from '@/components/SidePanel';
-
-const getPanelSize = (mode: AppNavigationMode): SidePanelSize => {
-  if (mode === 'compact') {
-    return 'rail';
-  }
-
-  return 'sm';
-};
+import type { AppNavigationProps } from './AppNavigation.types';
 
 /**
  * Pinned or off-canvas application navigation sidebar.
  */
 export const AppNavigation = ({
   defaultIsPinned = true,
-  defaultMode = 'full',
   isDarkMode,
   onToggleTheme,
 }: AppNavigationProps) => {
+  const navigationSizePreference = useGetGlobalNavigationSizePreference();
   const [isOpen, setIsOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   const [isPinned, setIsPinned] = useState(defaultIsPinned);
-  const [mode, setMode] = useState<AppNavigationMode>(defaultMode);
 
-  const isCompact = mode === 'compact';
-  const modeButtonLabel = isCompact
-    ? 'Show navigation labels'
-    : 'Show icon-only navigation';
-  const panelSize = getPanelSize(mode);
+  const density = NAV_DENSITY[navigationSizePreference ?? 'medium'];
   const pinButtonLabel = isPinned ? 'Unpin navigation' : 'Pin navigation';
-  const railButtonStyle = isCompact ? styles.railControl : undefined;
-  const railButtonSize = isCompact ? ('md' as const) : ('mini' as const);
+  const expandButtonLabel = isExpanded
+    ? 'Collapse navigation'
+    : 'Expand navigation';
   const themeLabel = isDarkMode ? 'Light Mode' : 'Dark Mode';
+
+  // Brand icon box matches button height per density for visual consistency
+  const brandIconSizeStyle =
+    density.brandIconBoxSize === 'mini'
+      ? styles.brandIconSizeMini
+      : density.brandIconBoxSize === 'md'
+        ? styles.brandIconSizeMd
+        : styles.brandIconSizeSm;
+
+  let headerDensityStyle;
+  if (navigationSizePreference === 'compact') {
+    headerDensityStyle = styles.headerDensityCompact;
+  } else if (navigationSizePreference === 'small') {
+    headerDensityStyle = styles.headerDensitySmall;
+  } else if (navigationSizePreference === 'large') {
+    headerDensityStyle = styles.headerDensityLarge;
+  }
+
+  let bodyDensityStyle;
+  if (navigationSizePreference === 'compact') {
+    bodyDensityStyle = styles.bodyDensityCompact;
+  } else if (navigationSizePreference === 'large') {
+    bodyDensityStyle = styles.bodyDensityLarge;
+  }
 
   const handleClose = useCallback(() => {
     setIsOpen(false);
@@ -66,8 +76,8 @@ export const AppNavigation = ({
     setIsOpen(true);
   }, []);
 
-  const handleToggleMode = useCallback(() => {
-    setMode((currentMode) => (currentMode === 'compact' ? 'full' : 'compact'));
+  const handleToggleExpanded = useCallback(() => {
+    setIsExpanded((current) => !current);
   }, []);
 
   const handleTogglePinned = useCallback(() => {
@@ -79,59 +89,59 @@ export const AppNavigation = ({
     <div
       {...stylex.props(
         styles.headerActions,
-        isCompact && styles.headerActionsCompact,
+        !isExpanded && styles.headerActionsCollapsed,
       )}
     >
       <Button
-        aria-label={pinButtonLabel}
+        aria-label={expandButtonLabel}
         color='ghost'
-        customStylex={railButtonStyle}
         icon={
-          isPinned ? (
-            <PinIcon size={ICON_SIZE_MD} />
+          isExpanded ? (
+            <MinimizeIcon size={density.controlIconSize} />
           ) : (
-            <PinOffIcon size={ICON_SIZE_MD} />
+            <MaximizeIcon size={density.controlIconSize} />
           )
         }
-        isIconOnly={isCompact}
-        onClick={handleTogglePinned}
-        size={railButtonSize}
-        title={pinButtonLabel}
-        tooltipContent={pinButtonLabel}
+        isIconOnly
+        onClick={handleToggleExpanded}
+        size={density.controlButtonSize}
+        title={expandButtonLabel}
+        tooltipContent={expandButtonLabel}
+        tooltipPlacement={isExpanded ? undefined : 'right'}
         width='auto'
       />
       <Button
-        aria-label={modeButtonLabel}
+        aria-label={pinButtonLabel}
         color='ghost'
-        customStylex={railButtonStyle}
         icon={
-          isCompact ? (
-            <MaximizeIcon size={ICON_SIZE_MD} />
+          isPinned ? (
+            <PinIcon size={density.controlIconSize} />
           ) : (
-            <MinimizeIcon size={ICON_SIZE_MD} />
+            <PinOffIcon size={density.controlIconSize} />
           )
         }
-        isIconOnly={isCompact}
-        onClick={handleToggleMode}
-        size={railButtonSize}
-        title={modeButtonLabel}
-        tooltipContent={modeButtonLabel}
+        isIconOnly
+        onClick={handleTogglePinned}
+        size={density.controlButtonSize}
+        title={pinButtonLabel}
+        tooltipContent={pinButtonLabel}
+        tooltipPlacement={isExpanded ? undefined : 'right'}
         width='auto'
       />
-      {!isPinned ? (
+      {isPinned ? undefined : (
         <Button
           aria-label='Close navigation'
           color='ghost'
-          customStylex={railButtonStyle}
-          icon={<MenuCloseIcon size={ICON_SIZE_MD} />}
-          isIconOnly={isCompact}
+          icon={<MenuCloseIcon size={density.controlIconSize} />}
+          isIconOnly
           onClick={handleClose}
-          size={railButtonSize}
+          size={density.controlButtonSize}
           title='Close navigation'
           tooltipContent='Close navigation'
+          tooltipPlacement={isExpanded ? undefined : 'right'}
           width='auto'
         />
-      ) : undefined}
+      )}
     </div>
   );
 
@@ -143,37 +153,41 @@ export const AppNavigation = ({
       onClose={handleClose}
       position='left'
       shouldShowOverlay
-      size={panelSize}
+      size={isExpanded ? density.expandedSize : density.collapsedSize}
     >
-      <header {...stylex.props(styles.header)}>
+      <header {...stylex.props(styles.header, headerDensityStyle)}>
         <div {...stylex.props(styles.headerRow)}>
           <div
-            {...stylex.props(styles.brand, isCompact && styles.brandCompact)}
+            {...stylex.props(
+              styles.brand,
+              !isExpanded && styles.brandCollapsed,
+            )}
           >
-            <span {...stylex.props(styles.brandIcon)}>
-              <MenuIcon size={ICON_SIZE_LG} />
+            <span {...stylex.props(styles.brandIcon, brandIconSizeStyle)}>
+              <MenuIcon size={density.brandIconSize} />
             </span>
             <span
               {...stylex.props(
                 styles.brandText,
-                isCompact && styles.brandTextHidden,
+                !isExpanded && styles.brandTextHidden,
               )}
             >
               Navigation
             </span>
           </div>
-          {!isCompact ? headerActions : undefined}
+          {isExpanded ? headerActions : undefined}
         </div>
-        {isCompact ? headerActions : undefined}
+        {isExpanded ? undefined : headerActions}
       </header>
       <SidePanelBody>
-        <div {...stylex.props(styles.bodyContent)}>
+        <div {...stylex.props(styles.bodyContent, bodyDensityStyle)}>
           <Toolbar
             aria-label='Main navigation links'
             data-testid='main-navigation'
-            isCompact={isCompact}
-            items={NAVIGATION_ITEMS}
+            isCompact={!isExpanded}
+            items={getNavigationItems(density.navIconSize)}
             orientation='vertical'
+            size={density.controlButtonSize}
           />
         </div>
       </SidePanelBody>
@@ -182,12 +196,11 @@ export const AppNavigation = ({
           <Button
             aria-label={themeLabel}
             color='ghost'
-            customStylex={railButtonStyle}
             icon={isDarkMode ? '☀️' : '🌙'}
-            isIconOnly={isCompact}
+            isIconOnly={!isExpanded}
             onClick={onToggleTheme}
-            size={isCompact ? 'md' : 'sm'}
-            tooltipContent={isCompact ? themeLabel : undefined}
+            size={density.controlButtonSize}
+            tooltipContent={!isExpanded ? themeLabel : undefined}
             tooltipPlacement='right'
             width='full'
           >

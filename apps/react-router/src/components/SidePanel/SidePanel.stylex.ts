@@ -111,6 +111,12 @@ const sizeVariants = stylex.create({
   sm: {
     width: '20rem', // 320px
   },
+  xs: {
+    width: '16rem', // 256px
+  },
+  xxs: {
+    width: '2.5rem', // 40px
+  },
 });
 
 export const sidePanelStyles = {

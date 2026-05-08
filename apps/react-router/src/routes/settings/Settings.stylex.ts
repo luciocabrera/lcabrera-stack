@@ -28,6 +28,11 @@ export const styles = stylex.create({
     flexDirection: 'column',
     gap: spacing.sm,
   },
+  tabSections: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: spacing.lg,
+  },
   title: {
     color: colors.textPrimary,
     fontSize: typography.fontSize3xl,

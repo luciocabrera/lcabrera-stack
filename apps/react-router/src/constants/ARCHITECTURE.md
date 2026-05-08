@@ -1,6 +1,6 @@
 # constants/ Architecture
 
-Application-wide constant values: API host configuration and filter operator definitions (display labels, URL serialization codes, and per-type allowed sets).
+Application-wide constant values: API host configuration, filter operator definitions (display labels, URL serialization codes, and per-type allowed sets), and global settings option groups.
 
 ## Placement Rule
 
@@ -19,6 +19,7 @@ Quick decision guide:
 | ------------------------------ | ---------------------------------------------------- |
 | `api.constants.ts`             | `CONFIG` — API host URLs per environment             |
 | `filterOperators.constants.ts` | Operator label arrays, serialization maps, code sets |
+| `globalSettings.constants.ts`  | Navigation size preference radio options             |
 
 ---
 
@@ -105,3 +106,15 @@ graph LR
   Valid -->|"yes"| Full["SHORT_TO_OPERATOR.get() → full operator"]
   Valid -->|"no"| Reject["discard / fallback"]
 ```
+
+---
+
+## `globalSettings.constants.ts`
+
+Defines the option list for global navigation sizing on the Settings route.
+
+| Constant                             | Type                                            | Values                                |
+| ------------------------------------ | ----------------------------------------------- | ------------------------------------- |
+| `NAVIGATION_SIZE_PREFERENCE_OPTIONS` | `RadioOption<GlobalNavigationSizePreference>[]` | `compact`, `small`, `medium`, `large` |
+
+Used by `routes/settings/Settings.component.tsx` to render the Navigation tab radio group.

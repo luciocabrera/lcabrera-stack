@@ -146,10 +146,10 @@ graph TD
 
 ### Variant Enums
 
-| Type                | Values                                                  |
-| ------------------- | ------------------------------------------------------- |
-| `SidePanelPosition` | `left`, `right`                                         |
-| `SidePanelSize`     | `rail` (72px), `sm` (320px), `md` (416px), `lg` (512px) |
+| Type                | Values                                                                |
+| ------------------- | --------------------------------------------------------------------- |
+| `SidePanelPosition` | `left`, `right`                                                       |
+| `SidePanelSize`     | `rail` (72px), `xs` (256px), `sm` (320px), `md` (416px), `lg` (512px) |
 
 ## Style Composition
 

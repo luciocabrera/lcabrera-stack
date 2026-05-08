@@ -4,6 +4,16 @@ import type {
 } from './pinningPreferences.types';
 import type { PinSide } from './ui.types';
 
+export type GlobalNavigationSizePreference =
+  | 'compact'
+  | 'large'
+  | 'medium'
+  | 'small';
+
+export type GlobalNavigationPreferences = {
+  readonly size?: GlobalNavigationSizePreference;
+};
+
 export type GlobalPinningPreferences = {
   readonly pinConflictResolution?: PinConflictResolution;
   readonly pinSide?: PinSide;
@@ -11,5 +21,6 @@ export type GlobalPinningPreferences = {
 };
 
 export type GlobalSettingsState = {
+  readonly navigation: GlobalNavigationPreferences;
   readonly pinning: GlobalPinningPreferences;
 };

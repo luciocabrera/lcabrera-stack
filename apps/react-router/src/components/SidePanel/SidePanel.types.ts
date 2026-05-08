@@ -13,4 +13,4 @@ export type SidePanelProps = ComponentPropsWithoutRef<'dialog'> & {
   readonly size?: SidePanelSize;
 };
 
-export type SidePanelSize = 'lg' | 'md' | 'rail' | 'sm';
+export type SidePanelSize = 'lg' | 'md' | 'rail' | 'sm' | 'xs' | 'xxs';

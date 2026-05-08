@@ -6,6 +6,7 @@ Shared TypeScript types used across components, hooks, and utilities.
 
 | File                       | Contents                                                 | Complexity      |
 | -------------------------- | -------------------------------------------------------- | --------------- |
+| `globalSettings.types.ts`  | Global settings contracts for persisted app preferences  | ★ shared        |
 | `filterOperators.types.ts` | `ColumnFilter` union + per-type operator enums           | ★★★ core domain |
 | `ui.types.ts`              | Cross-cutting UI contracts: pagination, sorting, pinning | ★★ shared       |
 | `design-system.types.ts`   | Design token string unions (color, size, style, width)   | ★ trivial       |
@@ -180,6 +181,19 @@ Option bags for formatter utilities. All fields are optional locale/preset overr
 | `ThemeContextValue` | `theme`, `isDarkMode`, `setTheme(mode)`, `toggleTheme()` |
 
 Consumed exclusively via `useTheme()`. See `hooks/ARCHITECTURE.md`.
+
+---
+
+## `globalSettings.types.ts`
+
+Contracts for global preferences persisted in the `global-settings` cookie.
+
+| Type                             | Fields / Values                                                                |
+| -------------------------------- | ------------------------------------------------------------------------------ |
+| `GlobalNavigationSizePreference` | `'compact' \| 'small' \| 'medium' \| 'large'`                                  |
+| `GlobalNavigationPreferences`    | `size?: GlobalNavigationSizePreference`                                        |
+| `GlobalPinningPreferences`       | `pinSide?`, `pinConflictResolution?`, `unpinConflictResolution?`               |
+| `GlobalSettingsState`            | `navigation: GlobalNavigationPreferences`, `pinning: GlobalPinningPreferences` |
 
 ---
 

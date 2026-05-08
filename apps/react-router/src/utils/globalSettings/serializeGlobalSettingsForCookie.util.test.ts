@@ -7,6 +7,9 @@ describe('serializeGlobalSettingsForCookie', () => {
   it('serializes settings into versioned payload', () => {
     const serialized = serializeGlobalSettingsForCookie({
       settings: {
+        navigation: {
+          size: 'small',
+        },
         pinning: {
           pinConflictResolution: 'pin-only',
           pinSide: 'right',
@@ -17,6 +20,9 @@ describe('serializeGlobalSettingsForCookie', () => {
 
     expect(JSON.parse(serialized)).toEqual({
       value: {
+        navigation: {
+          size: 'small',
+        },
         pinning: {
           pinConflictResolution: 'pin-only',
           pinSide: 'right',

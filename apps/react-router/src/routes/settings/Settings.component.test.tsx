@@ -3,19 +3,27 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { setGlobalPinningPreferencesMock, useGetGlobalPinningPreferencesMock } =
-  vi.hoisted(() => {
-    return {
-      setGlobalPinningPreferencesMock: vi.fn(),
-      useGetGlobalPinningPreferencesMock: vi.fn(),
-    };
-  });
+const {
+  setGlobalNavigationPreferencesMock,
+  setGlobalPinningPreferencesMock,
+  useGetGlobalNavigationPreferencesMock,
+  useGetGlobalPinningPreferencesMock,
+} = vi.hoisted(() => {
+  return {
+    setGlobalNavigationPreferencesMock: vi.fn(),
+    setGlobalPinningPreferencesMock: vi.fn(),
+    useGetGlobalNavigationPreferencesMock: vi.fn(),
+    useGetGlobalPinningPreferencesMock: vi.fn(),
+  };
+});
 
 vi.mock('@/contexts/GlobalSettingsContext/actions', () => ({
+  useSetGlobalNavigationPreferences: () => setGlobalNavigationPreferencesMock,
   useSetGlobalPinningPreferences: () => setGlobalPinningPreferencesMock,
 }));
 
 vi.mock('@/contexts/GlobalSettingsContext/selectors', () => ({
+  useGetGlobalNavigationPreferences: useGetGlobalNavigationPreferencesMock,
   useGetGlobalPinningPreferences: useGetGlobalPinningPreferencesMock,
 }));
 
@@ -25,8 +33,14 @@ afterEach(cleanup);
 
 describe('Settings', () => {
   beforeEach(() => {
+    setGlobalNavigationPreferencesMock.mockReset();
     setGlobalPinningPreferencesMock.mockReset();
+    useGetGlobalNavigationPreferencesMock.mockReset();
     useGetGlobalPinningPreferencesMock.mockReset();
+
+    useGetGlobalNavigationPreferencesMock.mockReturnValue({
+      size: undefined,
+    });
   });
 
   it('stages changes locally and persists only after clicking Accept', () => {
@@ -61,6 +75,7 @@ describe('Settings', () => {
       pinSide: 'right',
       unpinConflictResolution: undefined,
     });
+    expect(setGlobalNavigationPreferencesMock).not.toHaveBeenCalled();
   });
 
   it('resets staged values to persisted preferences on Cancel', () => {
@@ -86,5 +101,25 @@ describe('Settings', () => {
         .checked,
     ).toBe(true);
     expect(setGlobalPinningPreferencesMock).not.toHaveBeenCalled();
+    expect(setGlobalNavigationPreferencesMock).not.toHaveBeenCalled();
+  });
+
+  it('persists navbar size from Navigation tab after clicking Accept', () => {
+    useGetGlobalPinningPreferencesMock.mockReturnValue({
+      pinConflictResolution: undefined,
+      pinSide: undefined,
+      unpinConflictResolution: undefined,
+    });
+
+    render(<Settings />);
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Navigation' }));
+    fireEvent.click(screen.getByRole('radio', { name: 'Large' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Accept' }));
+
+    expect(setGlobalNavigationPreferencesMock).toHaveBeenCalledTimes(1);
+    expect(setGlobalNavigationPreferencesMock).toHaveBeenCalledWith({
+      size: 'large',
+    });
   });
 });

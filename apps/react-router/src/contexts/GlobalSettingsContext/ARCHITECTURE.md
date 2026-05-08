@@ -14,6 +14,8 @@ App-level store-backed context for global user preferences persisted in cookies 
   - preferred pin side
   - preferred pin-conflict resolution
   - preferred unpin-conflict resolution
+- Global navigation preferences:
+  - preferred navigation size (`compact`, `small`, `medium`, `large`)
 
 ## Design
 

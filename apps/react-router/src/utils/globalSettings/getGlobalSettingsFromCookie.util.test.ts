@@ -9,6 +9,7 @@ import {
 import type { GlobalSettingsState } from '@/types/globalSettings.types';
 
 const fallbackSettings: GlobalSettingsState = {
+  navigation: {},
   pinning: {},
 };
 
@@ -29,6 +30,9 @@ describe('getGlobalSettingsFromCookie', () => {
   it('returns parsed pinning preferences for valid payload', () => {
     const cookieString = buildCookieString({
       value: {
+        navigation: {
+          size: 'large',
+        },
         pinning: {
           pinConflictResolution: 'pin-only',
           pinSide: 'right',
@@ -41,6 +45,9 @@ describe('getGlobalSettingsFromCookie', () => {
     expect(
       getGlobalSettingsFromCookie({ cookieString, fallback: fallbackSettings }),
     ).toEqual({
+      navigation: {
+        size: 'large',
+      },
       pinning: {
         pinConflictResolution: 'pin-only',
         pinSide: 'right',
@@ -63,6 +70,9 @@ describe('getGlobalSettingsFromCookie', () => {
   it('filters invalid pinning preference values', () => {
     const cookieString = buildCookieString({
       value: {
+        navigation: {
+          size: 'huge',
+        },
         pinning: {
           pinConflictResolution: 'invalid',
           pinSide: 'center',
@@ -75,6 +85,9 @@ describe('getGlobalSettingsFromCookie', () => {
     expect(
       getGlobalSettingsFromCookie({ cookieString, fallback: fallbackSettings }),
     ).toEqual({
+      navigation: {
+        size: undefined,
+      },
       pinning: {
         pinConflictResolution: undefined,
         pinSide: undefined,
