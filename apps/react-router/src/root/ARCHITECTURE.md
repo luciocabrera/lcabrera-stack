@@ -7,6 +7,7 @@ Root route composition for app-wide document layout, SSR hydration scripts, and 
 | File                 | Responsibility                                                                                |
 | -------------------- | --------------------------------------------------------------------------------------------- |
 | `Root.layout.tsx`    | Defines `<html>` shell and appends `Links`, `Meta`, `ScrollRestoration`, and `Scripts`        |
+| `root.links.ts`      | Registers favicon and global reset stylesheet links                                           |
 | `root.loader.ts`     | Reads request cookies and CSP nonce for SSR                                                   |
 | `Root.component.tsx` | Mounts app providers, `AppNavigation`, route outlet, notifications, and dev DB warning banner |
 | `Root.types.ts`      | Root-local types such as `DbSanityPayload` for dev preflight checks                           |

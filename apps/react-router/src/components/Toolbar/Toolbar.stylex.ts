@@ -27,9 +27,25 @@ export const styles = stylex.create({
     flexWrap: 'nowrap',
   },
 
+  toolbarCompact: {
+    alignItems: 'center',
+  },
+
+  compactControl: {
+    paddingInline: 0,
+    justifyContent: 'center',
+    minWidth: '2.5rem',
+    width: '2.5rem',
+  },
+
   toolbarItem: {
     flex: '0 0 auto',
     display: 'flex',
+  },
+
+  toolbarItemCompact: {
+    justifyContent: 'center',
+    width: '2.5rem',
   },
 
   toolbarItemResponsive: {

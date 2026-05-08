@@ -1,5 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 
+import type { StyleXStyles } from '@stylexjs/stylex';
 import type {
   DesignSystemColor,
   DesignSystemOrientation,
@@ -11,7 +12,9 @@ import type { linkItemStyles } from '../NavLink.stylex';
 
 type GetClassNameArgs = {
   readonly color: DesignSystemColor;
+  readonly customStylex?: StyleXStyles;
   readonly isActive: boolean;
+  readonly isIconOnly?: boolean;
   readonly orientation: DesignSystemOrientation;
   readonly size: DesignSystemSize;
   readonly styles: typeof linkItemStyles;
@@ -20,7 +23,9 @@ type GetClassNameArgs = {
 
 export const getClassName = ({
   color,
+  customStylex,
   isActive,
+  isIconOnly = false,
   orientation,
   size,
   styles,
@@ -33,4 +38,6 @@ export const getClassName = ({
     styles.color[color],
     styles.width[width],
     isActive && styles.active,
+    isIconOnly && styles.iconOnly,
+    customStylex,
   ).className ?? '';

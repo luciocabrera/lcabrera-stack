@@ -24,6 +24,8 @@ import {
 } from 'react';
 import { useLoaderData, useSearchParams } from 'react-router';
 
+import { SpacerCell } from '@/components/Table/SpacerCell';
+import { useColumnVirtualization } from '@/hooks';
 import type { WideAlltypes150Response } from '@/services';
 
 import { wideAlltypes150Api } from '@/services';
@@ -128,6 +130,16 @@ const WideAlltypes150TanStackTableContent = ({
   const hasRows = flatData.length > 0;
   const totalRowCount = data?.pages[0]?.total ?? 0;
 
+  // Refs to break the fetch-loop: changes to isFetching / flatData.length / totalRowCount
+  // must not cause fetchMoreOnBottomReached to get a new reference (which would re-trigger
+  // the useEffect below and start another fetch while a navigation transition is in flight).
+  const isFetchingRef = useRef(isFetching);
+  isFetchingRef.current = isFetching;
+  const loadedRowCountRef = useRef(flatData.length);
+  loadedRowCountRef.current = flatData.length;
+  const totalRowCountRef = useRef(totalRowCount);
+  totalRowCountRef.current = totalRowCount;
+
   const handleSortingChange: OnChangeFn<SortingState> = (updater) => {
     const nextSorting =
       typeof updater === 'function' ? updater(sorting) : updater;
@@ -158,22 +170,29 @@ const WideAlltypes150TanStackTableContent = ({
       sorting,
     },
   });
+  const visibleColumns = table.getVisibleLeafColumns();
+  const columnWidths = visibleColumns.map((column) => column.getSize());
   const { rows } = table.getRowModel();
+  const { endIndex, leftSpacerWidth, rightSpacerWidth, startIndex } =
+    useColumnVirtualization({
+      columnWidths,
+      containerRef: tableContainerReference,
+      overscan: 2,
+    });
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
     estimateSize: () => ESTIMATED_ROW_HEIGHT,
     getScrollElement: () => tableContainerReference.current,
-    measureElement:
-      typeof globalThis !== 'undefined' &&
-      !globalThis.navigator.userAgent.includes('Firefox')
-        ? (element) => element.getBoundingClientRect().height
-        : undefined,
     overscan: ROW_OVERSCAN,
   });
 
   const fetchMoreOnBottomReached = useCallback(
     async (containerElement: HTMLDivElement | null): Promise<void> => {
-      if (!containerElement || isFetching || flatData.length >= totalRowCount) {
+      if (
+        !containerElement ||
+        isFetchingRef.current ||
+        loadedRowCountRef.current >= totalRowCountRef.current
+      ) {
         return;
       }
 
@@ -183,7 +202,7 @@ const WideAlltypes150TanStackTableContent = ({
         await fetchNextPage();
       }
     },
-    [fetchNextPage, flatData.length, isFetching, totalRowCount],
+    [fetchNextPage],
   );
 
   const handleScroll = (event: UIEvent<HTMLDivElement>): void => {
@@ -238,38 +257,46 @@ const WideAlltypes150TanStackTableContent = ({
             <thead {...stylex.props(styles.tableHead)}>
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id} {...stylex.props(styles.headerRow)}>
-                  {headerGroup.headers.map((header) => {
-                    const isSortable = header.column.getCanSort();
-                    const sortedState = header.column.getIsSorted();
+                  {leftSpacerWidth > 0 ? (
+                    <SpacerCell isHeader width={leftSpacerWidth} />
+                  ) : undefined}
+                  {headerGroup.headers
+                    .slice(startIndex, endIndex)
+                    .map((header) => {
+                      const isSortable = header.column.getCanSort();
+                      const sortedState = header.column.getIsSorted();
 
-                    return (
-                      <th
-                        key={header.id}
-                        {...stylex.props(styles.headerCell)}
-                        style={{ width: `${header.getSize()}px` }}
-                      >
-                        <button
-                          {...stylex.props(
-                            styles.headerButton,
-                            isSortable && styles.headerButtonSortable,
-                            sortedState && styles.headerButtonSorted,
-                          )}
-                          onClick={header.column.getToggleSortingHandler()}
-                          type='button'
+                      return (
+                        <th
+                          key={header.id}
+                          {...stylex.props(styles.headerCell)}
+                          style={{ width: `${header.getSize()}px` }}
                         >
-                          <span {...stylex.props(styles.headerLabel)}>
-                            {flexRender(
-                              header.column.columnDef.header,
-                              header.getContext(),
+                          <button
+                            {...stylex.props(
+                              styles.headerButton,
+                              isSortable && styles.headerButtonSortable,
+                              sortedState && styles.headerButtonSorted,
                             )}
-                          </span>
-                          <span {...stylex.props(styles.sortIndicator)}>
-                            {getSortIndicator(sortedState)}
-                          </span>
-                        </button>
-                      </th>
-                    );
-                  })}
+                            onClick={header.column.getToggleSortingHandler()}
+                            type='button'
+                          >
+                            <span {...stylex.props(styles.headerLabel)}>
+                              {flexRender(
+                                header.column.columnDef.header,
+                                header.getContext(),
+                              )}
+                            </span>
+                            <span {...stylex.props(styles.sortIndicator)}>
+                              {getSortIndicator(sortedState)}
+                            </span>
+                          </button>
+                        </th>
+                      );
+                    })}
+                  {rightSpacerWidth > 0 ? (
+                    <SpacerCell isHeader width={rightSpacerWidth} />
+                  ) : undefined}
                 </tr>
               ))}
             </thead>
@@ -285,21 +312,27 @@ const WideAlltypes150TanStackTableContent = ({
                 }
 
                 const visibleCells = row.getVisibleCells();
+                const visibleWindowCells = visibleCells.slice(
+                  startIndex,
+                  endIndex,
+                );
 
                 return (
                   <tr
                     data-index={virtualRow.index}
                     key={row.id}
-                    ref={rowVirtualizer.measureElement}
                     {...stylex.props(styles.bodyRow)}
                     style={{ transform: `translateY(${virtualRow.start}px)` }}
                   >
-                    {visibleCells.map((cell, cellIndex) => (
+                    {leftSpacerWidth > 0 ? (
+                      <SpacerCell width={leftSpacerWidth} />
+                    ) : undefined}
+                    {visibleWindowCells.map((cell, cellIndex) => (
                       <td
                         key={cell.id}
                         {...stylex.props(
                           styles.bodyCell,
-                          cellIndex === visibleCells.length - 1 &&
+                          cellIndex === visibleWindowCells.length - 1 &&
                             styles.bodyCellLast,
                         )}
                         style={{ width: `${cell.column.getSize()}px` }}
@@ -310,6 +343,9 @@ const WideAlltypes150TanStackTableContent = ({
                         )}
                       </td>
                     ))}
+                    {rightSpacerWidth > 0 ? (
+                      <SpacerCell width={rightSpacerWidth} />
+                    ) : undefined}
                   </tr>
                 );
               })}

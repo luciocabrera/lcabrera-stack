@@ -48,7 +48,10 @@ export const styles = stylex.create({
     display: 'none',
   },
   footer: {
-    padding: spacing.sm,
+    alignItems: 'center',
+    display: 'flex',
+    justifyContent: 'center',
+    width: '100%',
   },
   header: {
     padding: spacing.md,
@@ -66,6 +69,7 @@ export const styles = stylex.create({
     justifyContent: 'flex-end',
   },
   headerActionsCompact: {
+    alignItems: 'center',
     flexDirection: 'column',
   },
   headerRow: {
@@ -76,12 +80,22 @@ export const styles = stylex.create({
   },
   launcher: {
     padding: spacing.sm,
+    alignItems: 'flex-start',
     borderRightColor: colors.borderPrimary,
     borderRightStyle: 'solid',
     borderRightWidth: 1,
     backgroundColor: colors.surfacePrimary,
+    boxSizing: 'border-box',
     boxShadow: shadows.md,
+    display: 'flex',
     flexShrink: 0,
+    justifyContent: 'center',
     width: '4.5rem',
+  },
+  railControl: {
+    paddingInline: 0,
+    justifyContent: 'center',
+    minWidth: '2.5rem',
+    width: '2.5rem',
   },
 });

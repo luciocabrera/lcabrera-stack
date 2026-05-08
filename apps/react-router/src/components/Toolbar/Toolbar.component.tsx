@@ -8,6 +8,7 @@ import type { ToolbarProps } from './Toolbar.types';
 import { styles } from './Toolbar.stylex';
 
 export const Toolbar = ({
+  isCompact = false,
   items,
   orientation = 'vertical',
   size = 'md',
@@ -22,6 +23,7 @@ export const Toolbar = ({
         orientation === 'horizontal'
           ? styles.toolbarHorizontal
           : styles.toolbarVertical,
+        isCompact && styles.toolbarCompact,
       )}
     >
       <ul
@@ -30,6 +32,7 @@ export const Toolbar = ({
           orientation === 'horizontal'
             ? styles.toolbarHorizontal
             : styles.toolbarVertical,
+          isCompact && styles.toolbarCompact,
         )}
       >
         {items.map((item) => {
@@ -41,16 +44,22 @@ export const Toolbar = ({
               {...stylex.props(
                 styles.toolbarItem,
                 orientation === 'horizontal' && styles.toolbarItemResponsive,
+                isCompact && styles.toolbarItemCompact,
               )}
             >
               {item.type === 'button' ? (
                 <Button
+                  aria-label={isCompact ? item.label : undefined}
                   color={item.color}
+                  customStylex={isCompact ? styles.compactControl : undefined}
                   icon={item.icon}
+                  isIconOnly={isCompact}
                   isDisabled={item.isDisabled}
                   onClick={item.onClick}
                   orientation={orientation}
                   size={item.size ?? size}
+                  tooltipContent={isCompact ? item.label : undefined}
+                  tooltipPlacement='right'
                   type={item.type}
                   width='full'
                 >
@@ -58,11 +67,16 @@ export const Toolbar = ({
                 </Button>
               ) : (
                 <NavLink
+                  aria-label={isCompact ? item.label : undefined}
                   color={item.color}
+                  customStylex={isCompact ? styles.compactControl : undefined}
                   end={item.end}
                   icon={item.icon}
+                  isIconOnly={isCompact}
                   orientation={orientation}
                   size={item.size ?? size}
+                  tooltipContent={isCompact ? item.label : undefined}
+                  tooltipPlacement='right'
                   to={item.to}
                   width='full'
                 >

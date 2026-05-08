@@ -54,6 +54,8 @@ export const AppNavigation = ({
     : 'Show icon-only navigation';
   const panelSize = getPanelSize(mode);
   const pinButtonLabel = isPinned ? 'Unpin navigation' : 'Pin navigation';
+  const railButtonStyle = isCompact ? styles.railControl : undefined;
+  const railButtonSize = isCompact ? ('md' as const) : ('mini' as const);
   const themeLabel = isDarkMode ? 'Light Mode' : 'Dark Mode';
 
   const handleClose = useCallback(() => {
@@ -83,6 +85,7 @@ export const AppNavigation = ({
       <Button
         aria-label={pinButtonLabel}
         color='ghost'
+        customStylex={railButtonStyle}
         icon={
           isPinned ? (
             <PinIcon size={ICON_SIZE_MD} />
@@ -90,8 +93,9 @@ export const AppNavigation = ({
             <PinOffIcon size={ICON_SIZE_MD} />
           )
         }
+        isIconOnly={isCompact}
         onClick={handleTogglePinned}
-        size='mini'
+        size={railButtonSize}
         title={pinButtonLabel}
         tooltipContent={pinButtonLabel}
         width='auto'
@@ -99,6 +103,7 @@ export const AppNavigation = ({
       <Button
         aria-label={modeButtonLabel}
         color='ghost'
+        customStylex={railButtonStyle}
         icon={
           isCompact ? (
             <MaximizeIcon size={ICON_SIZE_MD} />
@@ -106,8 +111,9 @@ export const AppNavigation = ({
             <MinimizeIcon size={ICON_SIZE_MD} />
           )
         }
+        isIconOnly={isCompact}
         onClick={handleToggleMode}
-        size='mini'
+        size={railButtonSize}
         title={modeButtonLabel}
         tooltipContent={modeButtonLabel}
         width='auto'
@@ -116,9 +122,11 @@ export const AppNavigation = ({
         <Button
           aria-label='Close navigation'
           color='ghost'
+          customStylex={railButtonStyle}
           icon={<MenuCloseIcon size={ICON_SIZE_MD} />}
+          isIconOnly={isCompact}
           onClick={handleClose}
-          size='mini'
+          size={railButtonSize}
           title='Close navigation'
           tooltipContent='Close navigation'
           width='auto'
@@ -163,6 +171,7 @@ export const AppNavigation = ({
           <Toolbar
             aria-label='Main navigation links'
             data-testid='main-navigation'
+            isCompact={isCompact}
             items={NAVIGATION_ITEMS}
             orientation='vertical'
           />
@@ -171,11 +180,15 @@ export const AppNavigation = ({
       <SidePanelFooter>
         <div {...stylex.props(styles.footer)}>
           <Button
+            aria-label={themeLabel}
             color='ghost'
+            customStylex={railButtonStyle}
             icon={isDarkMode ? '☀️' : '🌙'}
+            isIconOnly={isCompact}
             onClick={onToggleTheme}
-            size='sm'
-            tooltipContent={themeLabel}
+            size={isCompact ? 'md' : 'sm'}
+            tooltipContent={isCompact ? themeLabel : undefined}
+            tooltipPlacement='right'
             width='full'
           >
             {themeLabel}
@@ -198,11 +211,14 @@ export const AppNavigation = ({
         <Button
           aria-label='Open navigation'
           color='primary'
+          customStylex={styles.railControl}
           icon={<MenuIcon size={ICON_SIZE_LG} />}
+          isIconOnly
           onClick={handleOpen}
           size='md'
           tooltipContent='Open navigation'
-          width='full'
+          tooltipPlacement='right'
+          width='auto'
         >
           Open navigation
         </Button>

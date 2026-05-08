@@ -1,6 +1,6 @@
 # NavLink Architecture
 
-Design-system–styled wrapper around React Router's `NavLink` that applies active/inactive styles, design token variants (color, size, orientation, width), and an optional leading icon.
+Design-system–styled wrapper around React Router's `NavLink` that applies active/inactive styles, design token variants (color, size, orientation, width), optional leading icon, optional icon-only layout, optional StyleX override, and optional tooltip.
 
 ## File Structure
 
@@ -21,6 +21,7 @@ NavLink/
 graph LR
   NavLink --> RouterNavLink["NavLink (react-router)"]
   NavLink --> NavLink_stylex["NavLink.stylex (linkItemStyles)"]
+  NavLink --> Tooltip
   NavLink --> getClassName["utils/getClassName"]
 
   NavLink_stylex --> baseInteractiveStyles["design-system/tokens/commons.stylex (baseInteractiveStyles)"]
@@ -40,12 +41,15 @@ graph LR
 ```mermaid
 graph TD
   NavLink --> RouterNavLink2["RouterNavLink (prefetch, ...props)"]
-  RouterNavLink2 -->|"className callback"| getClassNameCall["getClassName({ color, isActive, orientation, size, styles, width })"]
+  RouterNavLink2 -->|"className callback"| getClassNameCall["getClassName({ color, customStylex, isActive, isIconOnly, orientation, size, styles, width })"]
   getClassNameCall --> classString["CSS class string"]
   RouterNavLink2 --> IconSlot{"icon prop?"}
   IconSlot -->|yes| IconSpan["span.icon → icon"]
   IconSlot -->|no| skip["(omitted)"]
   RouterNavLink2 --> LabelSpan["span.label → children"]
+  LabelSpan --> TooltipSlot{"tooltipContent?"}
+  TooltipSlot -->|yes| TooltipWrap["Tooltip wraps link"]
+  TooltipSlot -->|no| ReturnLink["Return link"]
 ```
 
 ## `getClassName` Utility
@@ -53,7 +57,7 @@ graph TD
 React Router's `NavLink` accepts a `className` function `({ isActive }) => string`. `getClassName` calls `stylex.props(...)` and returns the resulting `.className` string, applying variant tokens in order:
 
 ```
-base → orientation[x] → size[x] → color[x] → width[x] → [active]
+base → orientation[x] → size[x] → color[x] → width[x] → [active] → [iconOnly] → customStylex
 ```
 
 The `active` style (`backgroundColor: brandPrimary, color: brandPrimaryText, fontWeight: 600`) is conditionally appended when `isActive === true`.
@@ -71,15 +75,19 @@ The `active` style (`backgroundColor: brandPrimary, color: brandPrimaryText, fon
 
 Extends `RouterNavLinkProps` (all React Router `NavLink` props forwarded), with `children` overridden to `ReactNode`.
 
-| Prop          | Type                                           | Default      | Description                               |
-| ------------- | ---------------------------------------------- | ------------ | ----------------------------------------- |
-| `children`    | `ReactNode`                                    | —            | Link label text or element                |
-| `color`       | `DesignSystemColor`                            | `'ghost'`    | Visual color variant                      |
-| `icon`        | `ReactNode`                                    | —            | Optional leading icon                     |
-| `orientation` | `DesignSystemOrientation`                      | `'vertical'` | Layout axis (`'horizontal'` for toolbars) |
-| `prefetch`    | `'none' \| 'intent' \| 'render' \| 'viewport'` | `'none'`     | React Router prefetch strategy            |
-| `size`        | `DesignSystemSize`                             | `'md'`       | Height / padding variant                  |
-| `width`       | `DesignSystemWidth`                            | `'full'`     | `'full'` stretches to container width     |
+| Prop               | Type                                           | Default      | Description                                  |
+| ------------------ | ---------------------------------------------- | ------------ | -------------------------------------------- |
+| `children`         | `ReactNode`                                    | —            | Link label text or element                   |
+| `color`            | `DesignSystemColor`                            | `'ghost'`    | Visual color variant                         |
+| `customStylex`     | `StyleXStyles`                                 | —            | Consumer override applied last               |
+| `icon`             | `ReactNode`                                    | —            | Optional leading icon                        |
+| `isIconOnly`       | `boolean`                                      | `false`      | Centers icon and removes visual label layout |
+| `orientation`      | `DesignSystemOrientation`                      | `'vertical'` | Layout axis (`'horizontal'` for toolbars)    |
+| `prefetch`         | `'none' \| 'intent' \| 'render' \| 'viewport'` | `'none'`     | React Router prefetch strategy               |
+| `size`             | `DesignSystemSize`                             | `'md'`       | Height / padding variant                     |
+| `tooltipContent`   | `ReactNode`                                    | —            | Optional tooltip content                     |
+| `tooltipPlacement` | `'bottom' \| 'left' \| 'right' \| 'top'`       | `'top'`      | Tooltip placement                            |
+| `width`            | `DesignSystemWidth`                            | `'full'`     | `'full'` stretches to container width        |
 
 ## Active State
 

@@ -41,4 +41,22 @@ describe('AppNavigation', () => {
       screen.getByRole('button', { name: /Open navigation/i }),
     ).toBeDefined();
   });
+
+  it('keeps compact navigation links accessible with label tooltips', () => {
+    render(
+      <MemoryRouter>
+        <AppNavigation isDarkMode={false} onToggleTheme={vi.fn()} />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(
+      screen.getByRole('button', { name: /Show icon-only navigation/i }),
+    );
+
+    expect(
+      screen.getByRole('button', { name: /Show navigation labels/i }),
+    ).toBeDefined();
+    expect(screen.getByRole('link', { name: /Home/i })).toBeDefined();
+    expect(screen.getAllByText('Home').length).toBeGreaterThan(1);
+  });
 });

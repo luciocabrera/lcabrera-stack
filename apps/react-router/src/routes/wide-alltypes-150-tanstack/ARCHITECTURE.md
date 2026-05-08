@@ -41,7 +41,11 @@ wide-alltypes-150-tanstack/
 3. The route uses `useInfiniteQuery` for additional pages keyed by sorting
    state.
 4. `useReactTable` renders the server-backed rows.
-5. `useVirtualizer` only renders the visible rows inside the scroll container.
+5. `useColumnVirtualization` slices the visible horizontal window and uses
+   spacer cells to preserve the full scroll width without rendering all 150
+   columns at once.
+6. `useVirtualizer` only renders the visible rows inside the scroll container
+   using the fixed row-height estimate.
 
 ## Guardrails
 

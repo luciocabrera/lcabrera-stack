@@ -32,13 +32,16 @@ graph LR
 graph TD
   A[AppNavigation] --> B{isPinned}
   B -->|yes| C[Render SidePanel as pinned aside]
-  B -->|no| D[Render open button]
+  B -->|no| D[Render compact launcher rail with open button]
   D --> E{isOpen}
   E -->|yes| F[Render SidePanel as left dialog]
   C --> G[Header controls: pin and compact toggle]
   F --> H[Header controls: pin, compact toggle, close]
   G --> I[Toolbar renders route links]
   H --> I
+  I --> J{compact mode?}
+  J -->|yes| K[Square centered icon controls with right-side tooltips]
+  J -->|no| L[Full-width labelled controls]
 ```
 
 ## Props
@@ -53,3 +56,10 @@ graph TD
 Add, remove, or reorder sidebar links in `AppNavigation.constants.tsx`. The
 constant is typed as `readonly ToolbarItemConfig[]`, so every item is rendered
 through the existing `Toolbar` and `NavLink` contracts.
+
+## Compact Mode
+
+Compact mode uses `SidePanel`'s `rail` size and passes `isCompact` to
+`Toolbar`. The launcher button, header controls, route links, and theme toggle
+all use the same 2.5rem square control width and expose their labels through
+tooltips.

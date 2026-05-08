@@ -23,6 +23,7 @@ export type ToolbarLinkConfig = Omit<NavLinkProps, 'children' | 'className'> & {
 };
 
 export type ToolbarProps = ComponentPropsWithoutRef<'nav'> & {
+  readonly isCompact?: boolean;
   readonly items: readonly ToolbarItemConfig[];
   readonly orientation?: DesignSystemOrientation;
   readonly size?: DesignSystemSize;
