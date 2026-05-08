@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router';
+import { createMemoryRouter, RouterProvider } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { GlobalSettingsProvider } from '@/contexts/GlobalSettingsContext';
@@ -61,16 +61,32 @@ describe('AppNavigation', () => {
     onToggleTheme: () => void,
     isDarkMode: boolean,
   ) => {
-    return render(
-      <GlobalSettingsProvider initialSettings={initialSettings}>
-        <MemoryRouter>
-          <AppNavigation
-            isDarkMode={isDarkMode}
-            onToggleTheme={onToggleTheme}
-          />
-        </MemoryRouter>
-      </GlobalSettingsProvider>,
+    const router = createMemoryRouter(
+      [
+        {
+          element: (
+            <GlobalSettingsProvider initialSettings={initialSettings}>
+              <AppNavigation
+                isDarkMode={isDarkMode}
+                onToggleTheme={onToggleTheme}
+              />
+            </GlobalSettingsProvider>
+          ),
+          path: '/',
+        },
+        {
+          action: async () => {
+            return null;
+          },
+          path: '/_action/persist-cookie',
+        },
+      ],
+      {
+        initialEntries: ['/'],
+      },
     );
+
+    return render(<RouterProvider router={router} />);
   };
 
   it('renders the configured route links and theme toggle', () => {

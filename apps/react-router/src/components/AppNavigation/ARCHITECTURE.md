@@ -79,3 +79,8 @@ navigation preferences:
 
 The component also synchronizes `isExpanded` and `isPinned` when global
 preferences change (for example, after accepting changes in Settings).
+
+Header actions are also write-through:
+
+- Expand/collapse persists `navigation.collapsed` immediately.
+- Pin/unpin persists `navigation.pinned` immediately.

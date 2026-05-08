@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/Button';
 import {
@@ -15,6 +15,7 @@ import {
   SidePanelBody,
   SidePanelFooter,
 } from '@/components/SidePanel';
+import { useSetGlobalNavigationPreferences } from '@/contexts/GlobalSettingsContext/actions';
 import {
   useGetGlobalNavigationCollapsedPreference,
   useGetGlobalNavigationPinnedPreference,
@@ -40,6 +41,7 @@ export const AppNavigation = ({
     useGetGlobalNavigationCollapsedPreference();
   const navigationPinnedPreference = useGetGlobalNavigationPinnedPreference();
   const navigationSizePreference = useGetGlobalNavigationSizePreference();
+  const setGlobalNavigationPreferences = useSetGlobalNavigationPreferences();
   const [isOpen, setIsOpen] = useState(() => {
     return navigationPinnedPreference === 'unpinned';
   });
@@ -110,22 +112,38 @@ export const AppNavigation = ({
     bodyDensityStyle = styles.bodyDensityLarge;
   }
 
-  const handleClose = useCallback(() => {
+  const handleClose = () => {
     setIsOpen(false);
-  }, []);
+  };
 
-  const handleOpen = useCallback(() => {
+  const handleOpen = () => {
     setIsOpen(true);
-  }, []);
+  };
 
-  const handleToggleExpanded = useCallback(() => {
-    setIsExpanded((current) => !current);
-  }, []);
+  const handleToggleExpanded = () => {
+    setIsExpanded((currentIsExpanded) => {
+      const nextIsExpanded = !currentIsExpanded;
 
-  const handleTogglePinned = useCallback(() => {
-    setIsPinned((currentIsPinned) => !currentIsPinned);
-    setIsOpen(false);
-  }, []);
+      setGlobalNavigationPreferences({
+        collapsed: nextIsExpanded ? 'expanded' : 'collapsed',
+      });
+
+      return nextIsExpanded;
+    });
+  };
+
+  const handleTogglePinned = () => {
+    setIsPinned((currentIsPinned) => {
+      const nextIsPinned = !currentIsPinned;
+
+      setGlobalNavigationPreferences({
+        pinned: nextIsPinned ? 'pinned' : 'unpinned',
+      });
+      setIsOpen(!nextIsPinned);
+
+      return nextIsPinned;
+    });
+  };
 
   const headerActions = (
     <div
