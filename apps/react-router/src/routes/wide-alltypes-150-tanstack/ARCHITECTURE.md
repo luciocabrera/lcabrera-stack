@@ -50,3 +50,11 @@ wide-alltypes-150-tanstack/
 - Search-param sync is limited to sorting for sharable URLs.
 - The TanStack stack is intentionally route-local so the rest of the app can
   continue using the custom table architecture unchanged.
+- `useInfiniteQuery` results are treated as nullable during key transitions and
+  initial loads; table rows derive from an empty pages fallback until query data
+  is available.
+- The route-local `QueryClient` is cleared on unmount to prevent stale
+  background work after navigating away from the route.
+- Table sorting handlers are wired through `useReactTable` options instead of
+  mutating `table.setOptions` during render, keeping behavior safe under
+  concurrent transitions.

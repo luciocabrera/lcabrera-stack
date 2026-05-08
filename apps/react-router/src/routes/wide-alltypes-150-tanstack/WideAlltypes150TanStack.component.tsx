@@ -17,8 +17,8 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import {
   startTransition,
   type UIEvent,
+  useCallback,
   useEffect,
-  useEffectEvent,
   useRef,
   useState,
 } from 'react';
@@ -126,27 +126,6 @@ const WideAlltypes150TanStackTableContent = ({
 
   const flatData = (data?.pages ?? []).flatMap((page) => page.data);
   const totalRowCount = data?.pages[0]?.total ?? 0;
-  const table = useReactTable({
-    columns: [...COLUMN_DEFINITIONS],
-    data: flatData,
-    getCoreRowModel: getCoreRowModel(),
-    manualSorting: true,
-    state: {
-      sorting,
-    },
-  });
-  const { rows } = table.getRowModel();
-  const rowVirtualizer = useVirtualizer({
-    count: rows.length,
-    estimateSize: () => ESTIMATED_ROW_HEIGHT,
-    getScrollElement: () => tableContainerReference.current,
-    measureElement:
-      typeof globalThis !== 'undefined' &&
-      !globalThis.navigator.userAgent.includes('Firefox')
-        ? (element) => element.getBoundingClientRect().height
-        : undefined,
-    overscan: ROW_OVERSCAN,
-  });
 
   const handleSortingChange: OnChangeFn<SortingState> = (updater) => {
     const nextSorting =
@@ -165,41 +144,56 @@ const WideAlltypes150TanStackTableContent = ({
       setSearchParams(nextSearchParams, { replace: true });
     });
 
-    rowVirtualizer.scrollToIndex(0);
+    tableContainerReference.current?.scrollTo({ top: 0 });
   };
 
-  table.setOptions((previousOptions) => ({
-    ...previousOptions,
+  const table = useReactTable({
+    columns: [...COLUMN_DEFINITIONS],
+    data: flatData,
+    getCoreRowModel: getCoreRowModel(),
+    manualSorting: true,
     onSortingChange: handleSortingChange,
-  }));
-
-  const fetchMoreOnBottomReached = async (
-    containerElement: HTMLDivElement | null,
-  ): Promise<void> => {
-    if (!containerElement || isFetching || flatData.length >= totalRowCount) {
-      return;
-    }
-
-    const { clientHeight, scrollHeight, scrollTop } = containerElement;
-
-    if (scrollHeight - scrollTop - clientHeight < SCROLL_FETCH_THRESHOLD) {
-      await fetchNextPage();
-    }
-  };
-
-  const fetchMoreOnBottomReachedEffect = useEffectEvent(
-    (containerElement: HTMLDivElement | null): void => {
-      void fetchMoreOnBottomReached(containerElement);
+    state: {
+      sorting,
     },
+  });
+  const { rows } = table.getRowModel();
+  const rowVirtualizer = useVirtualizer({
+    count: rows.length,
+    estimateSize: () => ESTIMATED_ROW_HEIGHT,
+    getScrollElement: () => tableContainerReference.current,
+    measureElement:
+      typeof globalThis !== 'undefined' &&
+      !globalThis.navigator.userAgent.includes('Firefox')
+        ? (element) => element.getBoundingClientRect().height
+        : undefined,
+    overscan: ROW_OVERSCAN,
+  });
+
+  const fetchMoreOnBottomReached = useCallback(
+    async (containerElement: HTMLDivElement | null): Promise<void> => {
+      if (!containerElement || isFetching || flatData.length >= totalRowCount) {
+        return;
+      }
+
+      const { clientHeight, scrollHeight, scrollTop } = containerElement;
+
+      if (scrollHeight - scrollTop - clientHeight < SCROLL_FETCH_THRESHOLD) {
+        await fetchNextPage();
+      }
+    },
+    [fetchNextPage, flatData.length, isFetching, totalRowCount],
   );
 
   const handleScroll = (event: UIEvent<HTMLDivElement>): void => {
-    void fetchMoreOnBottomReached(event.currentTarget);
+    void fetchMoreOnBottomReached(event.currentTarget).catch(() => undefined);
   };
 
   useEffect(() => {
-    fetchMoreOnBottomReachedEffect(tableContainerReference.current);
-  }, [flatData.length, isFetching, totalRowCount]);
+    void fetchMoreOnBottomReached(tableContainerReference.current).catch(
+      () => undefined,
+    );
+  }, [fetchMoreOnBottomReached]);
 
   if (isError) {
     throw error;
