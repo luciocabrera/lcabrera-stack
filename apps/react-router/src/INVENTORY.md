@@ -8,6 +8,7 @@ Before creating anything new, check this inventory. If something here does the j
 
 | Component            | Location                          | Description                                                                                                                       |
 | -------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `AppNavigation`      | `components/AppNavigation/`       | App-owned left sidebar navigation using `SidePanel`, `Toolbar`, route item constants, compact/full modes, and pin/unpin controls  |
 | `Button`             | `components/Button/`              | Interactive button — 8 color variants, 5 sizes, icon, loading, tooltip                                                            |
 | `Card`               | `components/Card/`                | Container with elevation, color, padding, and optional interactivity                                                              |
 | `DevStyleXInject`    | `components/DevStyleXInject/`     | Dev-only StyleX CSS injector for HMR; must be at app root                                                                         |

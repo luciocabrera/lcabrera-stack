@@ -58,3 +58,6 @@ wide-alltypes-150-tanstack/
 - Table sorting handlers are wired through `useReactTable` options instead of
   mutating `table.setOptions` during render, keeping behavior safe under
   concurrent transitions.
+- Query errors are handled in-route: initial-load failures render an inline
+  error state, and background pagination failures are surfaced in the footer
+  without crashing navigation.

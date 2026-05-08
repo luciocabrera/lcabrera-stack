@@ -125,6 +125,7 @@ const WideAlltypes150TanStackTableContent = ({
   });
 
   const flatData = (data?.pages ?? []).flatMap((page) => page.data);
+  const hasRows = flatData.length > 0;
   const totalRowCount = data?.pages[0]?.total ?? 0;
 
   const handleSortingChange: OnChangeFn<SortingState> = (updater) => {
@@ -195,8 +196,14 @@ const WideAlltypes150TanStackTableContent = ({
     );
   }, [fetchMoreOnBottomReached]);
 
-  if (isError) {
-    throw error;
+  if (isError && !hasRows) {
+    return (
+      <div {...stylex.props(styles.container)}>
+        <div {...stylex.props(styles.errorState)}>
+          Failed to load the TanStack dataset. Try again in a moment.
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -313,8 +320,17 @@ const WideAlltypes150TanStackTableContent = ({
           <span>
             Server-side sorting with route-local TanStack Query cache.
           </span>
-          <span {...stylex.props(isFetching && styles.footerFetching)}>
-            {isFetching ? 'Fetching more rows…' : 'Scroll to load more'}
+          <span
+            {...stylex.props(
+              isError && styles.footerError,
+              isFetching && styles.footerFetching,
+            )}
+          >
+            {isError
+              ? error.message
+              : isFetching
+                ? 'Fetching more rows…'
+                : 'Scroll to load more'}
           </span>
         </div>
       </div>

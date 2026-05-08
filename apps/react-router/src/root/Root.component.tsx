@@ -2,9 +2,8 @@ import * as stylex from '@stylexjs/stylex';
 import { useEffect, useState } from 'react';
 import { Outlet, useLoaderData } from 'react-router';
 
-import { Button } from '@/components/Button';
+import { AppNavigation } from '@/components/AppNavigation';
 import { NotificationCenter } from '@/components/NotificationCenter';
-import { SidePanelToolbarExample } from '@/components/Toolbar/Toolbar.examples';
 import { GlobalSettingsProvider } from '@/contexts/GlobalSettingsContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
@@ -68,19 +67,18 @@ const RootContent = () => {
 
   return (
     <div {...stylex.props(styles.base, isDarkMode ? darkTheme : lightTheme)}>
-      <SidePanelToolbarExample />
       {dbSanityWarning ? (
         <div {...stylex.props(styles.devWarningBanner)}>
           Dev DB warning: {dbSanityWarning} Run `vp run seed` in `api-server`.
         </div>
       ) : undefined}
-      <Button color='ghost' onClick={toggleTheme}>
-        {isDarkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
-      </Button>
+      <div {...stylex.props(styles.appShell)}>
+        <AppNavigation isDarkMode={isDarkMode} onToggleTheme={toggleTheme} />
+        <main {...stylex.props(styles.outletWrapper)}>
+          <Outlet />
+        </main>
+      </div>
       <NotificationCenter />
-      <main {...stylex.props(styles.outletWrapper)}>
-        <Outlet />
-      </main>
     </div>
   );
 };

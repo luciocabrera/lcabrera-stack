@@ -26,8 +26,13 @@ type MockNotificationProviderProps = {
   readonly children: ReactNode;
 };
 
+type MockAppNavigationProps = {
+  readonly isDarkMode: boolean;
+  readonly onToggleTheme: () => void;
+};
+
 type MockButtonProps = {
-  readonly children: ReactNode;
+  readonly children?: ReactNode;
   readonly onClick?: () => void;
 };
 
@@ -50,14 +55,18 @@ vi.mock('@/components/Button', () => ({
   ),
 }));
 
+vi.mock('@/components/AppNavigation', () => ({
+  AppNavigation: ({ isDarkMode, onToggleTheme }: MockAppNavigationProps) => (
+    <button onClick={onToggleTheme} type='button'>
+      {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+    </button>
+  ),
+}));
+
 vi.mock('@/components/NotificationCenter', () => ({
   NotificationCenter: () => (
     <div data-testid='notification-center'>Notifications</div>
   ),
-}));
-
-vi.mock('@/components/Toolbar/Toolbar.examples', () => ({
-  SidePanelToolbarExample: () => <div>Toolbar example</div>,
 }));
 
 vi.mock('@/contexts/ThemeContext', () => ({

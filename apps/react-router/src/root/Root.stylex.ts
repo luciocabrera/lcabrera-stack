@@ -8,6 +8,11 @@ import {
 import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const styles = stylex.create({
+  appShell: {
+    display: 'flex',
+    flex: '1 1 auto',
+    minHeight: 0,
+  },
   base: {
     overflow: 'hidden',
     transition: 'background-color 0.3s ease, color 0.3s ease',

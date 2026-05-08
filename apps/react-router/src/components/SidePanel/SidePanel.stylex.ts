@@ -105,6 +105,9 @@ const sizeVariants = stylex.create({
   md: {
     width: '26rem', // 416px
   },
+  rail: {
+    width: '4.5rem', // 72px
+  },
   sm: {
     width: '20rem', // 320px
   },
