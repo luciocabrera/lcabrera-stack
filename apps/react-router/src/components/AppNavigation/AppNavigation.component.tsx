@@ -28,6 +28,118 @@ import { getNavigationItems, NAV_DENSITY } from './AppNavigation.constants';
 import { styles } from './AppNavigation.stylex';
 
 import type { AppNavigationProps } from './AppNavigation.types';
+import type {
+  GlobalNavigationPinnedPreference,
+  GlobalNavigationSizePreference,
+} from '@/types/globalSettings.types';
+
+type ResolvePinnedStateArgs = {
+  readonly defaultIsPinned: boolean;
+  readonly navigationPinnedPreference:
+    | GlobalNavigationPinnedPreference
+    | undefined;
+};
+
+const resolvePinnedState = ({
+  defaultIsPinned,
+  navigationPinnedPreference,
+}: ResolvePinnedStateArgs): boolean => {
+  if (navigationPinnedPreference === 'pinned') {
+    return true;
+  }
+
+  if (navigationPinnedPreference === 'unpinned') {
+    return false;
+  }
+
+  return defaultIsPinned;
+};
+
+const resolvePinnedAndOpenState = ({
+  defaultIsPinned,
+  navigationPinnedPreference,
+}: ResolvePinnedStateArgs): {
+  readonly isOpen: boolean;
+  readonly isPinned: boolean;
+} => {
+  if (navigationPinnedPreference === 'pinned') {
+    return { isOpen: false, isPinned: true };
+  }
+
+  if (navigationPinnedPreference === 'unpinned') {
+    return { isOpen: true, isPinned: false };
+  }
+
+  return { isOpen: false, isPinned: defaultIsPinned };
+};
+
+const getBrandIconSizeStyle = (brandIconBoxSize: 'md' | 'mini' | 'sm') => {
+  if (brandIconBoxSize === 'mini') {
+    return styles.brandIconSizeMini;
+  }
+
+  if (brandIconBoxSize === 'md') {
+    return styles.brandIconSizeMd;
+  }
+
+  return styles.brandIconSizeSm;
+};
+
+const getHeaderDensityStyle = (
+  navigationSizePreference: GlobalNavigationSizePreference | undefined,
+) => {
+  if (navigationSizePreference === 'compact') {
+    return styles.headerDensityCompact;
+  }
+
+  if (navigationSizePreference === 'small') {
+    return styles.headerDensitySmall;
+  }
+
+  if (navigationSizePreference === 'large') {
+    return styles.headerDensityLarge;
+  }
+
+  return undefined;
+};
+
+const getBodyDensityStyle = (
+  navigationSizePreference: GlobalNavigationSizePreference | undefined,
+) => {
+  if (navigationSizePreference === 'compact') {
+    return styles.bodyDensityCompact;
+  }
+
+  if (navigationSizePreference === 'large') {
+    return styles.bodyDensityLarge;
+  }
+
+  return undefined;
+};
+
+const resolveExpandButtonLabel = (isExpanded: boolean): string => {
+  if (isExpanded) {
+    return 'Collapse navigation';
+  }
+
+  return 'Expand navigation';
+};
+
+const resolvePinButtonLabel = (isPinned: boolean): string => {
+  if (isPinned) {
+    return 'Unpin navigation';
+  }
+
+  return 'Pin navigation';
+};
+
+const resolveThemeLabel = (isDarkMode: boolean): string => {
+  if (isDarkMode) {
+    return 'Light Mode';
+  }
+
+  return 'Dark Mode';
+};
 
 /**
  * Pinned or off-canvas application navigation sidebar.
@@ -49,15 +161,10 @@ export const AppNavigation = ({
     return navigationCollapsedPreference !== 'collapsed';
   });
   const [isPinned, setIsPinned] = useState(() => {
-    if (navigationPinnedPreference === 'pinned') {
-      return true;
-    }
-
-    if (navigationPinnedPreference === 'unpinned') {
-      return false;
-    }
-
-    return defaultIsPinned;
+    return resolvePinnedState({
+      defaultIsPinned,
+      navigationPinnedPreference,
+    });
   });
 
   useEffect(() => {
@@ -65,52 +172,27 @@ export const AppNavigation = ({
   }, [navigationCollapsedPreference]);
 
   useEffect(() => {
-    if (navigationPinnedPreference === 'pinned') {
-      setIsPinned(true);
-      setIsOpen(false);
-      return;
-    }
+    const nextState = resolvePinnedAndOpenState({
+      defaultIsPinned,
+      navigationPinnedPreference,
+    });
 
-    if (navigationPinnedPreference === 'unpinned') {
-      setIsPinned(false);
-      setIsOpen(true);
-      return;
-    }
-
-    setIsPinned(defaultIsPinned);
-    setIsOpen(false);
+    setIsPinned(nextState.isPinned);
+    setIsOpen(nextState.isOpen);
   }, [defaultIsPinned, navigationPinnedPreference]);
 
   const density = NAV_DENSITY[navigationSizePreference ?? 'medium'];
-  const pinButtonLabel = isPinned ? 'Unpin navigation' : 'Pin navigation';
-  const expandButtonLabel = isExpanded
-    ? 'Collapse navigation'
-    : 'Expand navigation';
-  const themeLabel = isDarkMode ? 'Light Mode' : 'Dark Mode';
+  const pinButtonLabel = resolvePinButtonLabel(isPinned);
+  const expandButtonLabel = resolveExpandButtonLabel(isExpanded);
+  const themeLabel = resolveThemeLabel(isDarkMode);
+  const isCollapsed = !isExpanded;
+  const controlTooltipPlacement = isCollapsed ? 'right' : undefined;
+  const themeTooltipContent = isCollapsed ? themeLabel : undefined;
 
   // Brand icon box matches button height per density for visual consistency
-  const brandIconSizeStyle =
-    density.brandIconBoxSize === 'mini'
-      ? styles.brandIconSizeMini
-      : density.brandIconBoxSize === 'md'
-        ? styles.brandIconSizeMd
-        : styles.brandIconSizeSm;
-
-  let headerDensityStyle;
-  if (navigationSizePreference === 'compact') {
-    headerDensityStyle = styles.headerDensityCompact;
-  } else if (navigationSizePreference === 'small') {
-    headerDensityStyle = styles.headerDensitySmall;
-  } else if (navigationSizePreference === 'large') {
-    headerDensityStyle = styles.headerDensityLarge;
-  }
-
-  let bodyDensityStyle;
-  if (navigationSizePreference === 'compact') {
-    bodyDensityStyle = styles.bodyDensityCompact;
-  } else if (navigationSizePreference === 'large') {
-    bodyDensityStyle = styles.bodyDensityLarge;
-  }
+  const brandIconSizeStyle = getBrandIconSizeStyle(density.brandIconBoxSize);
+  const headerDensityStyle = getHeaderDensityStyle(navigationSizePreference);
+  const bodyDensityStyle = getBodyDensityStyle(navigationSizePreference);
 
   const handleClose = () => {
     setIsOpen(false);
@@ -149,7 +231,7 @@ export const AppNavigation = ({
     <div
       {...stylex.props(
         styles.headerActions,
-        !isExpanded && styles.headerActionsCollapsed,
+        isCollapsed && styles.headerActionsCollapsed,
       )}
     >
       <Button
@@ -167,7 +249,7 @@ export const AppNavigation = ({
         size={density.controlButtonSize}
         title={expandButtonLabel}
         tooltipContent={expandButtonLabel}
-        tooltipPlacement={isExpanded ? undefined : 'right'}
+        tooltipPlacement={controlTooltipPlacement}
         width='auto'
       />
       <Button
@@ -185,7 +267,7 @@ export const AppNavigation = ({
         size={density.controlButtonSize}
         title={pinButtonLabel}
         tooltipContent={pinButtonLabel}
-        tooltipPlacement={isExpanded ? undefined : 'right'}
+        tooltipPlacement={controlTooltipPlacement}
         width='auto'
       />
       {isPinned ? undefined : (
@@ -198,7 +280,7 @@ export const AppNavigation = ({
           size={density.controlButtonSize}
           title='Close navigation'
           tooltipContent='Close navigation'
-          tooltipPlacement={isExpanded ? undefined : 'right'}
+          tooltipPlacement={controlTooltipPlacement}
           width='auto'
         />
       )}
@@ -220,7 +302,7 @@ export const AppNavigation = ({
           <div
             {...stylex.props(
               styles.brand,
-              !isExpanded && styles.brandCollapsed,
+              isCollapsed && styles.brandCollapsed,
             )}
           >
             <span {...stylex.props(styles.brandIcon, brandIconSizeStyle)}>
@@ -229,7 +311,7 @@ export const AppNavigation = ({
             <span
               {...stylex.props(
                 styles.brandText,
-                !isExpanded && styles.brandTextHidden,
+                isCollapsed && styles.brandTextHidden,
               )}
             >
               Navigation
@@ -260,7 +342,7 @@ export const AppNavigation = ({
             isIconOnly={!isExpanded}
             onClick={onToggleTheme}
             size={density.controlButtonSize}
-            tooltipContent={!isExpanded ? themeLabel : undefined}
+            tooltipContent={themeTooltipContent}
             tooltipPlacement='right'
             width='full'
           >

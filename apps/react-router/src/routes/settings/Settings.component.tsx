@@ -49,19 +49,86 @@ type SettingsDraft = {
   readonly unpinConflictResolution: UnpinConflictResolutionPreferenceOption;
 };
 
+type BuildNavigationUpdateArgs = {
+  readonly draft: SettingsDraft;
+  readonly navigationPreferences: ReturnType<
+    typeof useGetGlobalNavigationPreferences
+  >;
+};
+
+const DEFAULT_NAVIGATION_COLLAPSED_PREFERENCE: GlobalNavigationCollapsedPreference =
+  'expanded';
+const DEFAULT_NAVIGATION_PINNED_PREFERENCE: GlobalNavigationPinnedPreference =
+  'pinned';
+const DEFAULT_NAVIGATION_SIZE_PREFERENCE: GlobalNavigationSizePreference =
+  'medium';
+const DEFAULT_PINNING_PREFERENCE: PinSidePreferenceOption = 'always-ask';
+
 const toDraft = (
   navigationPreferences: ReturnType<typeof useGetGlobalNavigationPreferences>,
   pinningPreferences: ReturnType<typeof useGetGlobalPinningPreferences>,
 ): SettingsDraft => {
   return {
-    navigationCollapsed: navigationPreferences.collapsed ?? 'expanded',
-    navigationPinned: navigationPreferences.pinned ?? 'pinned',
-    navigationSize: navigationPreferences.size ?? 'medium',
+    navigationCollapsed:
+      navigationPreferences.collapsed ??
+      DEFAULT_NAVIGATION_COLLAPSED_PREFERENCE,
+    navigationPinned:
+      navigationPreferences.pinned ?? DEFAULT_NAVIGATION_PINNED_PREFERENCE,
+    navigationSize:
+      navigationPreferences.size ?? DEFAULT_NAVIGATION_SIZE_PREFERENCE,
     pinConflictResolution:
-      pinningPreferences.pinConflictResolution ?? 'always-ask',
-    pinSide: pinningPreferences.pinSide ?? 'always-ask',
+      pinningPreferences.pinConflictResolution ?? DEFAULT_PINNING_PREFERENCE,
+    pinSide: pinningPreferences.pinSide ?? DEFAULT_PINNING_PREFERENCE,
     unpinConflictResolution:
-      pinningPreferences.unpinConflictResolution ?? 'always-ask',
+      pinningPreferences.unpinConflictResolution ?? DEFAULT_PINNING_PREFERENCE,
+  };
+};
+
+const toGlobalNavigationPreferencesUpdate = ({
+  draft,
+  navigationPreferences,
+}: BuildNavigationUpdateArgs): GlobalNavigationPreferences | undefined => {
+  const isCollapsedChanged =
+    draft.navigationCollapsed !==
+    (navigationPreferences.collapsed ??
+      DEFAULT_NAVIGATION_COLLAPSED_PREFERENCE);
+  const isPinnedChanged =
+    draft.navigationPinned !==
+    (navigationPreferences.pinned ?? DEFAULT_NAVIGATION_PINNED_PREFERENCE);
+  const isSizeChanged =
+    draft.navigationSize !==
+    (navigationPreferences.size ?? DEFAULT_NAVIGATION_SIZE_PREFERENCE);
+
+  if (!isCollapsedChanged && !isPinnedChanged && !isSizeChanged) {
+    return undefined;
+  }
+
+  return {
+    ...(isCollapsedChanged
+      ? {
+          collapsed:
+            draft.navigationCollapsed ===
+            DEFAULT_NAVIGATION_COLLAPSED_PREFERENCE
+              ? undefined
+              : draft.navigationCollapsed,
+        }
+      : {}),
+    ...(isPinnedChanged
+      ? {
+          pinned:
+            draft.navigationPinned === DEFAULT_NAVIGATION_PINNED_PREFERENCE
+              ? undefined
+              : draft.navigationPinned,
+        }
+      : {}),
+    ...(isSizeChanged
+      ? {
+          size:
+            draft.navigationSize === DEFAULT_NAVIGATION_SIZE_PREFERENCE
+              ? undefined
+              : draft.navigationSize,
+        }
+      : {}),
   };
 };
 
@@ -77,16 +144,22 @@ export const Settings = () => {
 
   const hasNavigationChanges =
     draft.navigationCollapsed !==
-      (navigationPreferences.collapsed ?? 'expanded') ||
-    draft.navigationPinned !== (navigationPreferences.pinned ?? 'pinned') ||
-    draft.navigationSize !== (navigationPreferences.size ?? 'medium');
+      (navigationPreferences.collapsed ??
+        DEFAULT_NAVIGATION_COLLAPSED_PREFERENCE) ||
+    draft.navigationPinned !==
+      (navigationPreferences.pinned ?? DEFAULT_NAVIGATION_PINNED_PREFERENCE) ||
+    draft.navigationSize !==
+      (navigationPreferences.size ?? DEFAULT_NAVIGATION_SIZE_PREFERENCE);
 
   const hasPinningChanges =
-    draft.pinSide !== (pinningPreferences.pinSide ?? 'always-ask') ||
+    draft.pinSide !==
+      (pinningPreferences.pinSide ?? DEFAULT_PINNING_PREFERENCE) ||
     draft.pinConflictResolution !==
-      (pinningPreferences.pinConflictResolution ?? 'always-ask') ||
+      (pinningPreferences.pinConflictResolution ??
+        DEFAULT_PINNING_PREFERENCE) ||
     draft.unpinConflictResolution !==
-      (pinningPreferences.unpinConflictResolution ?? 'always-ask');
+      (pinningPreferences.unpinConflictResolution ??
+        DEFAULT_PINNING_PREFERENCE);
 
   const hasChanges = hasNavigationChanges || hasPinningChanges;
 
@@ -96,48 +169,28 @@ export const Settings = () => {
     }
 
     if (hasNavigationChanges) {
-      const navigationUpdate: Record<string, unknown> = {};
+      const navigationUpdate = toGlobalNavigationPreferencesUpdate({
+        draft,
+        navigationPreferences,
+      });
 
-      if (
-        draft.navigationCollapsed !==
-        (navigationPreferences.collapsed ?? 'expanded')
-      ) {
-        navigationUpdate.collapsed =
-          draft.navigationCollapsed === 'expanded'
-            ? undefined
-            : draft.navigationCollapsed;
-      }
-
-      if (
-        draft.navigationPinned !== (navigationPreferences.pinned ?? 'pinned')
-      ) {
-        navigationUpdate.pinned =
-          draft.navigationPinned === 'pinned'
-            ? undefined
-            : draft.navigationPinned;
-      }
-
-      if (draft.navigationSize !== (navigationPreferences.size ?? 'medium')) {
-        navigationUpdate.size =
-          draft.navigationSize === 'medium' ? undefined : draft.navigationSize;
-      }
-
-      if (Object.keys(navigationUpdate).length > 0) {
-        setGlobalNavigationPreferences(
-          navigationUpdate as GlobalNavigationPreferences,
-        );
+      if (navigationUpdate) {
+        setGlobalNavigationPreferences(navigationUpdate);
       }
     }
 
     if (hasPinningChanges) {
       setGlobalPinningPreferences({
         pinConflictResolution:
-          draft.pinConflictResolution === 'always-ask'
+          draft.pinConflictResolution === DEFAULT_PINNING_PREFERENCE
             ? undefined
             : draft.pinConflictResolution,
-        pinSide: draft.pinSide === 'always-ask' ? undefined : draft.pinSide,
+        pinSide:
+          draft.pinSide === DEFAULT_PINNING_PREFERENCE
+            ? undefined
+            : draft.pinSide,
         unpinConflictResolution:
-          draft.unpinConflictResolution === 'always-ask'
+          draft.unpinConflictResolution === DEFAULT_PINNING_PREFERENCE
             ? undefined
             : draft.unpinConflictResolution,
       });

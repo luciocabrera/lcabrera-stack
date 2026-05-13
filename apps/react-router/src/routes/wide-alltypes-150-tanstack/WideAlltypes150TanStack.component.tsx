@@ -87,6 +87,28 @@ const resolveNextPageParam = ({
   return loadedRowCount;
 };
 
+type ResolveFooterStatusTextArgs = {
+  readonly errorMessage: string;
+  readonly isError: boolean;
+  readonly isFetching: boolean;
+};
+
+const resolveFooterStatusText = ({
+  errorMessage,
+  isError,
+  isFetching,
+}: ResolveFooterStatusTextArgs): string => {
+  if (isError) {
+    return errorMessage;
+  }
+
+  if (isFetching) {
+    return 'Fetching more rows…';
+  }
+
+  return 'Scroll to load more';
+};
+
 const WideAlltypes150TanStackTableContent = ({
   initialPage,
   initialSorting,
@@ -129,6 +151,11 @@ const WideAlltypes150TanStackTableContent = ({
   const flatData = (data?.pages ?? []).flatMap((page) => page.data);
   const hasRows = flatData.length > 0;
   const totalRowCount = data?.pages[0]?.total ?? 0;
+  const footerStatusText = resolveFooterStatusText({
+    errorMessage: error?.message ?? 'Failed to load rows.',
+    isError,
+    isFetching,
+  });
 
   // Refs to break the fetch-loop: changes to isFetching / flatData.length / totalRowCount
   // must not cause fetchMoreOnBottomReached to get a new reference (which would re-trigger
@@ -362,11 +389,7 @@ const WideAlltypes150TanStackTableContent = ({
               isFetching && styles.footerFetching,
             )}
           >
-            {isError
-              ? error.message
-              : isFetching
-                ? 'Fetching more rows…'
-                : 'Scroll to load more'}
+            {footerStatusText}
           </span>
         </div>
       </div>
