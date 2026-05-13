@@ -1,5 +1,7 @@
 import type { RadioOption } from '@/components/RadioOptionGroup';
 import type {
+  OrderConflictResolution,
+  OrderConflictResolutionPreferenceOption,
   PinConflictResolution,
   PinConflictResolutionPreferenceOption,
   PinSidePreferenceOption,
@@ -7,6 +9,37 @@ import type {
   UnpinConflictResolutionPreferenceOption,
 } from '@/types/pinningPreferences.types';
 import type { PinSide } from '@/types/ui.types';
+
+export const ORDER_CONFLICT_OPTIONS: readonly RadioOption<OrderConflictResolution>[] =
+  [
+    {
+      description:
+        'Apply the new column order and remove any pinning that no longer matches.',
+      label: 'Apply order & remove conflicting pins',
+      value: 'remove-conflicting-pins',
+    },
+    {
+      description: 'Apply the new column order and clear all column pinning.',
+      label: 'Apply order & reset all pins',
+      value: 'reset-all-pins',
+    },
+    {
+      description:
+        'Move pinned columns to the edges so both the new order and all existing pins are preserved.',
+      label: 'Apply order & keep all pins',
+      value: 'pin-to-match-order',
+    },
+  ];
+
+export const ORDER_CONFLICT_PREFERENCE_OPTIONS: readonly RadioOption<OrderConflictResolutionPreferenceOption>[] =
+  [
+    ...ORDER_CONFLICT_OPTIONS,
+    {
+      description: 'Keep prompting every time column order breaks pinning',
+      label: 'Always ask',
+      value: 'always-ask',
+    },
+  ];
 
 export const PIN_SIDE_OPTIONS: readonly RadioOption<PinSide>[] = [
   {

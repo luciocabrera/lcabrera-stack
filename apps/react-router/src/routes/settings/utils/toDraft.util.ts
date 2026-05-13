@@ -1,0 +1,33 @@
+import type {
+  useGetGlobalNavigationPreferences,
+  useGetGlobalPinningPreferences,
+} from '@/contexts/GlobalSettingsContext/selectors';
+import {
+  DEFAULT_NAVIGATION_COLLAPSED_PREFERENCE,
+  DEFAULT_NAVIGATION_PINNED_PREFERENCE,
+  DEFAULT_NAVIGATION_SIZE_PREFERENCE,
+  DEFAULT_PINNING_PREFERENCE,
+} from '../Settings.constants';
+import type { SettingsDraft } from '../Settings.types';
+
+export const toDraft = (
+  navigationPreferences: ReturnType<typeof useGetGlobalNavigationPreferences>,
+  pinningPreferences: ReturnType<typeof useGetGlobalPinningPreferences>,
+): SettingsDraft => {
+  return {
+    navigationCollapsed:
+      navigationPreferences.collapsed ??
+      DEFAULT_NAVIGATION_COLLAPSED_PREFERENCE,
+    navigationPinned:
+      navigationPreferences.pinned ?? DEFAULT_NAVIGATION_PINNED_PREFERENCE,
+    navigationSize:
+      navigationPreferences.size ?? DEFAULT_NAVIGATION_SIZE_PREFERENCE,
+    orderConflictResolution:
+      pinningPreferences.orderConflictResolution ?? DEFAULT_PINNING_PREFERENCE,
+    pinConflictResolution:
+      pinningPreferences.pinConflictResolution ?? DEFAULT_PINNING_PREFERENCE,
+    pinSide: pinningPreferences.pinSide ?? DEFAULT_PINNING_PREFERENCE,
+    unpinConflictResolution:
+      pinningPreferences.unpinConflictResolution ?? DEFAULT_PINNING_PREFERENCE,
+  };
+};

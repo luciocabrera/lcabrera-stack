@@ -1,4 +1,5 @@
 import type {
+  OrderConflictResolution,
   PinConflictResolution,
   UnpinConflictResolution,
 } from './pinningPreferences.types';
@@ -21,6 +22,7 @@ export type GlobalNavigationPreferences = {
 };
 
 export type GlobalPinningPreferences = {
+  readonly orderConflictResolution?: OrderConflictResolution;
   readonly pinConflictResolution?: PinConflictResolution;
   readonly pinSide?: PinSide;
   readonly unpinConflictResolution?: UnpinConflictResolution;

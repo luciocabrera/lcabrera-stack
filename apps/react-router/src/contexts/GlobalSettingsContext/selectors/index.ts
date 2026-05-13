@@ -1,3 +1,4 @@
+export { useGetGlobalOrderConflictResolutionPreference } from './useGetGlobalOrderConflictResolutionPreference.hook';
 export { useGetGlobalNavigationCollapsedPreference } from './useGetGlobalNavigationCollapsedPreference.hook';
 export { useGetGlobalNavigationPinnedPreference } from './useGetGlobalNavigationPinnedPreference.hook';
 export { useGetGlobalNavigationPreferences } from './useGetGlobalNavigationPreferences.hook';

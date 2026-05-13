@@ -188,14 +188,14 @@ Consumed exclusively via `useTheme()`. See `hooks/ARCHITECTURE.md`.
 
 Contracts for global preferences persisted in the `global-settings` cookie.
 
-| Type                                  | Fields / Values                                                                |
-| ------------------------------------- | ------------------------------------------------------------------------------ |
-| `GlobalNavigationCollapsedPreference` | `'collapsed' \| 'expanded'`                                                    |
-| `GlobalNavigationPinnedPreference`    | `'pinned' \| 'unpinned'`                                                       |
-| `GlobalNavigationSizePreference`      | `'compact' \| 'small' \| 'medium' \| 'large'`                                  |
-| `GlobalNavigationPreferences`         | `collapsed?`, `pinned?`, `size?`                                               |
-| `GlobalPinningPreferences`            | `pinSide?`, `pinConflictResolution?`, `unpinConflictResolution?`               |
-| `GlobalSettingsState`                 | `navigation: GlobalNavigationPreferences`, `pinning: GlobalPinningPreferences` |
+| Type                                  | Fields / Values                                                                              |
+| ------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `GlobalNavigationCollapsedPreference` | `'collapsed' \| 'expanded'`                                                                  |
+| `GlobalNavigationPinnedPreference`    | `'pinned' \| 'unpinned'`                                                                     |
+| `GlobalNavigationSizePreference`      | `'compact' \| 'small' \| 'medium' \| 'large'`                                                |
+| `GlobalNavigationPreferences`         | `collapsed?`, `pinned?`, `size?`                                                             |
+| `GlobalPinningPreferences`            | `pinSide?`, `pinConflictResolution?`, `orderConflictResolution?`, `unpinConflictResolution?` |
+| `GlobalSettingsState`                 | `navigation: GlobalNavigationPreferences`, `pinning: GlobalPinningPreferences`               |
 
 ---
 

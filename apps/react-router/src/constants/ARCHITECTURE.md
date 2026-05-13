@@ -15,11 +15,12 @@ Quick decision guide:
 
 ## File Index
 
-| File                           | Contents                                             |
-| ------------------------------ | ---------------------------------------------------- |
-| `api.constants.ts`             | `CONFIG` — API host URLs per environment             |
-| `filterOperators.constants.ts` | Operator label arrays, serialization maps, code sets |
-| `globalSettings.constants.ts`  | Navigation size preference radio options             |
+| File                              | Contents                                              |
+| --------------------------------- | ----------------------------------------------------- |
+| `api.constants.ts`                | `CONFIG` — API host URLs per environment              |
+| `filterOperators.constants.ts`    | Operator label arrays, serialization maps, code sets  |
+| `globalSettings.constants.ts`     | Navigation preference radio options                   |
+| `pinningPreferences.constants.ts` | Pinning preference and modal resolution radio options |
 
 ---
 
@@ -118,3 +119,21 @@ Defines the option list for global navigation sizing on the Settings route.
 | `NAVIGATION_SIZE_PREFERENCE_OPTIONS` | `RadioOption<GlobalNavigationSizePreference>[]` | `compact`, `small`, `medium`, `large` |
 
 Used by `routes/settings/Settings.component.tsx` to render the Navigation tab radio group.
+
+---
+
+## `pinningPreferences.constants.ts`
+
+Defines reusable radio options for pinning prompts and global pinning
+preferences.
+
+| Constant                            | Type                                                     | Values                                                            |
+| ----------------------------------- | -------------------------------------------------------- | ----------------------------------------------------------------- |
+| `ORDER_CONFLICT_OPTIONS`            | `RadioOption<OrderConflictResolution>[]`                 | `remove-conflicting-pins`, `reset-all-pins`, `pin-to-match-order` |
+| `ORDER_CONFLICT_PREFERENCE_OPTIONS` | `RadioOption<OrderConflictResolutionPreferenceOption>[]` | Order conflict options plus `always-ask`                          |
+| `PIN_SIDE_PREFERENCE_OPTIONS`       | `RadioOption<PinSidePreferenceOption>[]`                 | `closest-edge`, `left`, `right`, `always-ask`                     |
+| `PIN_CONFLICT_PREFERENCE_OPTIONS`   | `RadioOption<PinConflictResolutionPreferenceOption>[]`   | Pin conflict options plus `always-ask`                            |
+| `UNPIN_CONFLICT_PREFERENCE_OPTIONS` | `RadioOption<UnpinConflictResolutionPreferenceOption>[]` | Unpin conflict options plus `always-ask`                          |
+
+Runtime modals use the non-preference option arrays. The Settings route uses
+the `*_PREFERENCE_OPTIONS` arrays so users can choose `always-ask`.

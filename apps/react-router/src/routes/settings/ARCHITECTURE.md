@@ -10,6 +10,8 @@ Provides a central place to configure app-level preferences that apply to every 
 
 - Render tabbed global preference controls (Pinning + Navigation).
 - Manage global navigation size preference (`compact`, `small`, `medium`, `large`).
+- Manage global pinning prompt defaults, including pin side, pin conflict,
+  order/pinning conflict, and unpin conflict behavior.
 - Keep `medium` as the default when no persisted navigation size exists.
 - Stage local draft changes until explicit user confirmation.
 - Persist changes through GlobalSettingsContext actions only on `Accept`.
@@ -21,4 +23,5 @@ Provides a central place to configure app-level preferences that apply to every 
 - Table-specific state (filters, order, pinning slices) remains in table persistence.
 - Global navigation sizing is persisted here and consumed by `AppNavigation`.
 - Runtime pin/unpin prompt answers do not persist global preferences.
+- Runtime drag/order conflict prompt answers do not persist global preferences.
 - `Always ask` remains a settings-only preference value and is not shown in runtime prompt modals.

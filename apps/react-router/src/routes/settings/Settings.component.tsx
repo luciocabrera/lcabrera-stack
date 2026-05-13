@@ -7,6 +7,7 @@ import {
   NAVIGATION_SIZE_PREFERENCE_OPTIONS,
 } from '@/constants/globalSettings.constants';
 import {
+  ORDER_CONFLICT_PREFERENCE_OPTIONS,
   PIN_CONFLICT_PREFERENCE_OPTIONS,
   PIN_SIDE_PREFERENCE_OPTIONS,
   UNPIN_CONFLICT_PREFERENCE_OPTIONS,
@@ -28,10 +29,10 @@ import { Tabs } from '@/components/Tabs';
 import type {
   GlobalNavigationCollapsedPreference,
   GlobalNavigationPinnedPreference,
-  GlobalNavigationPreferences,
   GlobalNavigationSizePreference,
 } from '@/types/globalSettings.types';
 import type {
+  OrderConflictResolutionPreferenceOption,
   PinConflictResolutionPreferenceOption,
   PinSidePreferenceOption,
   UnpinConflictResolutionPreferenceOption,
@@ -39,98 +40,14 @@ import type {
 import type { TabItem } from '@/components/Tabs';
 
 import { styles } from './Settings.stylex';
-
-type SettingsDraft = {
-  readonly navigationCollapsed: GlobalNavigationCollapsedPreference;
-  readonly navigationPinned: GlobalNavigationPinnedPreference;
-  readonly navigationSize: GlobalNavigationSizePreference;
-  readonly pinConflictResolution: PinConflictResolutionPreferenceOption;
-  readonly pinSide: PinSidePreferenceOption;
-  readonly unpinConflictResolution: UnpinConflictResolutionPreferenceOption;
-};
-
-type BuildNavigationUpdateArgs = {
-  readonly draft: SettingsDraft;
-  readonly navigationPreferences: ReturnType<
-    typeof useGetGlobalNavigationPreferences
-  >;
-};
-
-const DEFAULT_NAVIGATION_COLLAPSED_PREFERENCE: GlobalNavigationCollapsedPreference =
-  'expanded';
-const DEFAULT_NAVIGATION_PINNED_PREFERENCE: GlobalNavigationPinnedPreference =
-  'pinned';
-const DEFAULT_NAVIGATION_SIZE_PREFERENCE: GlobalNavigationSizePreference =
-  'medium';
-const DEFAULT_PINNING_PREFERENCE: PinSidePreferenceOption = 'always-ask';
-
-const toDraft = (
-  navigationPreferences: ReturnType<typeof useGetGlobalNavigationPreferences>,
-  pinningPreferences: ReturnType<typeof useGetGlobalPinningPreferences>,
-): SettingsDraft => {
-  return {
-    navigationCollapsed:
-      navigationPreferences.collapsed ??
-      DEFAULT_NAVIGATION_COLLAPSED_PREFERENCE,
-    navigationPinned:
-      navigationPreferences.pinned ?? DEFAULT_NAVIGATION_PINNED_PREFERENCE,
-    navigationSize:
-      navigationPreferences.size ?? DEFAULT_NAVIGATION_SIZE_PREFERENCE,
-    pinConflictResolution:
-      pinningPreferences.pinConflictResolution ?? DEFAULT_PINNING_PREFERENCE,
-    pinSide: pinningPreferences.pinSide ?? DEFAULT_PINNING_PREFERENCE,
-    unpinConflictResolution:
-      pinningPreferences.unpinConflictResolution ?? DEFAULT_PINNING_PREFERENCE,
-  };
-};
-
-const toGlobalNavigationPreferencesUpdate = ({
-  draft,
-  navigationPreferences,
-}: BuildNavigationUpdateArgs): GlobalNavigationPreferences | undefined => {
-  const isCollapsedChanged =
-    draft.navigationCollapsed !==
-    (navigationPreferences.collapsed ??
-      DEFAULT_NAVIGATION_COLLAPSED_PREFERENCE);
-  const isPinnedChanged =
-    draft.navigationPinned !==
-    (navigationPreferences.pinned ?? DEFAULT_NAVIGATION_PINNED_PREFERENCE);
-  const isSizeChanged =
-    draft.navigationSize !==
-    (navigationPreferences.size ?? DEFAULT_NAVIGATION_SIZE_PREFERENCE);
-
-  if (!isCollapsedChanged && !isPinnedChanged && !isSizeChanged) {
-    return undefined;
-  }
-
-  return {
-    ...(isCollapsedChanged
-      ? {
-          collapsed:
-            draft.navigationCollapsed ===
-            DEFAULT_NAVIGATION_COLLAPSED_PREFERENCE
-              ? undefined
-              : draft.navigationCollapsed,
-        }
-      : {}),
-    ...(isPinnedChanged
-      ? {
-          pinned:
-            draft.navigationPinned === DEFAULT_NAVIGATION_PINNED_PREFERENCE
-              ? undefined
-              : draft.navigationPinned,
-        }
-      : {}),
-    ...(isSizeChanged
-      ? {
-          size:
-            draft.navigationSize === DEFAULT_NAVIGATION_SIZE_PREFERENCE
-              ? undefined
-              : draft.navigationSize,
-        }
-      : {}),
-  };
-};
+import {
+  DEFAULT_NAVIGATION_COLLAPSED_PREFERENCE,
+  DEFAULT_NAVIGATION_PINNED_PREFERENCE,
+  DEFAULT_NAVIGATION_SIZE_PREFERENCE,
+  DEFAULT_PINNING_PREFERENCE,
+} from './Settings.constants';
+import type { SettingsDraft } from './Settings.types';
+import { toDraft, toGlobalNavigationPreferencesUpdate } from './utils';
 
 export const Settings = () => {
   const navigationPreferences = useGetGlobalNavigationPreferences();
@@ -152,6 +69,9 @@ export const Settings = () => {
       (navigationPreferences.size ?? DEFAULT_NAVIGATION_SIZE_PREFERENCE);
 
   const hasPinningChanges =
+    draft.orderConflictResolution !==
+      (pinningPreferences.orderConflictResolution ??
+        DEFAULT_PINNING_PREFERENCE) ||
     draft.pinSide !==
       (pinningPreferences.pinSide ?? DEFAULT_PINNING_PREFERENCE) ||
     draft.pinConflictResolution !==
@@ -181,6 +101,10 @@ export const Settings = () => {
 
     if (hasPinningChanges) {
       setGlobalPinningPreferences({
+        orderConflictResolution:
+          draft.orderConflictResolution === DEFAULT_PINNING_PREFERENCE
+            ? undefined
+            : draft.orderConflictResolution,
         pinConflictResolution:
           draft.pinConflictResolution === DEFAULT_PINNING_PREFERENCE
             ? undefined
@@ -230,6 +154,17 @@ export const Settings = () => {
       return {
         ...currentDraft,
         navigationSize: value,
+      };
+    });
+  };
+
+  const handleOrderConflictChange = (
+    value: OrderConflictResolutionPreferenceOption,
+  ): void => {
+    setDraft((currentDraft) => {
+      return {
+        ...currentDraft,
+        orderConflictResolution: value,
       };
     });
   };
@@ -337,6 +272,24 @@ export const Settings = () => {
                 onChange={handlePinSideChange}
                 options={PIN_SIDE_PREFERENCE_OPTIONS}
                 value={draft.pinSide}
+              />
+            </section>
+          </Card>
+
+          <Card color='default' elevation='sm' padding='lg'>
+            <section {...stylex.props(styles.section)}>
+              <h2 {...stylex.props(styles.sectionTitle)}>
+                Order Conflict Preference
+              </h2>
+              <p {...stylex.props(styles.description)}>
+                Used when dragging a column creates an order and pinning
+                conflict.
+              </p>
+              <RadioOptionGroup
+                name='settings-order-conflict-preference'
+                onChange={handleOrderConflictChange}
+                options={ORDER_CONFLICT_PREFERENCE_OPTIONS}
+                value={draft.orderConflictResolution}
               />
             </section>
           </Card>

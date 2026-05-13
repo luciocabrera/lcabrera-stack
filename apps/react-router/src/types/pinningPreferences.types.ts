@@ -1,5 +1,14 @@
 import type { PinSide } from './ui.types';
 
+export type OrderConflictResolution =
+  | 'pin-to-match-order'
+  | 'remove-conflicting-pins'
+  | 'reset-all-pins';
+
+export type OrderConflictResolutionPreferenceOption =
+  | OrderConflictResolution
+  | 'always-ask';
+
 export type PinConflictResolution =
   | 'move-column'
   | 'pin-all-between'

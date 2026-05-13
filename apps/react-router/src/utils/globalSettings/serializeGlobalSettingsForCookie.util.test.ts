@@ -11,6 +11,7 @@ describe('serializeGlobalSettingsForCookie', () => {
           size: 'small',
         },
         pinning: {
+          orderConflictResolution: 'remove-conflicting-pins',
           pinConflictResolution: 'pin-only',
           pinSide: 'right',
           unpinConflictResolution: 'unpin-beyond',
@@ -24,6 +25,7 @@ describe('serializeGlobalSettingsForCookie', () => {
           size: 'small',
         },
         pinning: {
+          orderConflictResolution: 'remove-conflicting-pins',
           pinConflictResolution: 'pin-only',
           pinSide: 'right',
           unpinConflictResolution: 'unpin-beyond',

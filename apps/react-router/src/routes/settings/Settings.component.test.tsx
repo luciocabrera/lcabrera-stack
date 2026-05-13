@@ -45,6 +45,7 @@ describe('Settings', () => {
 
   it('stages changes locally and persists only after clicking Accept', () => {
     useGetGlobalPinningPreferencesMock.mockReturnValue({
+      orderConflictResolution: undefined,
       pinConflictResolution: undefined,
       pinSide: undefined,
       unpinConflictResolution: undefined,
@@ -71,6 +72,7 @@ describe('Settings', () => {
 
     expect(setGlobalPinningPreferencesMock).toHaveBeenCalledTimes(1);
     expect(setGlobalPinningPreferencesMock).toHaveBeenCalledWith({
+      orderConflictResolution: undefined,
       pinConflictResolution: undefined,
       pinSide: 'right',
       unpinConflictResolution: undefined,
@@ -80,6 +82,7 @@ describe('Settings', () => {
 
   it('resets staged values to persisted preferences on Cancel', () => {
     useGetGlobalPinningPreferencesMock.mockReturnValue({
+      orderConflictResolution: 'reset-all-pins',
       pinConflictResolution: 'pin-only',
       pinSide: 'left',
       unpinConflictResolution: 'reorder-to-fill',
@@ -106,6 +109,7 @@ describe('Settings', () => {
 
   it('persists navbar size from Navigation tab after clicking Accept', () => {
     useGetGlobalPinningPreferencesMock.mockReturnValue({
+      orderConflictResolution: undefined,
       pinConflictResolution: undefined,
       pinSide: undefined,
       unpinConflictResolution: undefined,
@@ -120,6 +124,30 @@ describe('Settings', () => {
     expect(setGlobalNavigationPreferencesMock).toHaveBeenCalledTimes(1);
     expect(setGlobalNavigationPreferencesMock).toHaveBeenCalledWith({
       size: 'large',
+    });
+  });
+
+  it('persists order conflict preference from the Pinning tab', () => {
+    useGetGlobalPinningPreferencesMock.mockReturnValue({
+      orderConflictResolution: undefined,
+      pinConflictResolution: undefined,
+      pinSide: undefined,
+      unpinConflictResolution: undefined,
+    });
+
+    render(<Settings />);
+
+    fireEvent.click(
+      screen.getByRole('radio', { name: 'Apply order & keep all pins' }),
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Accept' }));
+
+    expect(setGlobalPinningPreferencesMock).toHaveBeenCalledTimes(1);
+    expect(setGlobalPinningPreferencesMock).toHaveBeenCalledWith({
+      orderConflictResolution: 'pin-to-match-order',
+      pinConflictResolution: undefined,
+      pinSide: undefined,
+      unpinConflictResolution: undefined,
     });
   });
 });

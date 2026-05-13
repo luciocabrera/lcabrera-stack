@@ -1,3 +1,4 @@
+export { useSetGlobalOrderConflictResolutionPreference } from './useSetGlobalOrderConflictResolutionPreference.hook';
 export { usePersistGlobalSettingsAction } from './usePersistGlobalSettingsAction.hook';
 export { useSetGlobalNavigationPreferences } from './useSetGlobalNavigationPreferences.hook';
 export { useSetGlobalNavigationSizePreference } from './useSetGlobalNavigationSizePreference.hook';

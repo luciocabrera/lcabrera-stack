@@ -13,6 +13,7 @@ App-level store-backed context for global user preferences persisted in cookies 
 - Global pinning preferences:
   - preferred pin side
   - preferred pin-conflict resolution
+  - preferred order/pinning-conflict resolution
   - preferred unpin-conflict resolution
 - Global navigation preferences:
   - preferred initial expansion (`expanded`, `collapsed`)

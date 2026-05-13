@@ -13,6 +13,7 @@ import type {
   GlobalSettingsState,
 } from '@/types/globalSettings.types';
 import type {
+  OrderConflictResolution,
   PinConflictResolution,
   UnpinConflictResolution,
 } from '@/types/pinningPreferences.types';
@@ -26,6 +27,11 @@ const PIN_CONFLICT_VALUES = [
   'move-column',
   'pin-all-between',
   'pin-only',
+] as const;
+const ORDER_CONFLICT_VALUES = [
+  'pin-to-match-order',
+  'remove-conflicting-pins',
+  'reset-all-pins',
 ] as const;
 const UNPIN_CONFLICT_VALUES = ['reorder-to-fill', 'unpin-beyond'] as const;
 
@@ -92,6 +98,17 @@ const isPinConflictResolution = (
   );
 };
 
+const isOrderConflictResolution = (
+  value: unknown,
+): value is OrderConflictResolution => {
+  return (
+    typeof value === 'string' &&
+    ORDER_CONFLICT_VALUES.includes(
+      value as (typeof ORDER_CONFLICT_VALUES)[number],
+    )
+  );
+};
+
 const isUnpinConflictResolution = (
   value: unknown,
 ): value is UnpinConflictResolution => {
@@ -111,6 +128,11 @@ const toGlobalPinningPreferences = (
   }
 
   const pinSide = isPinSide(value['pinSide']) ? value['pinSide'] : undefined;
+  const orderConflictResolution = isOrderConflictResolution(
+    value['orderConflictResolution'],
+  )
+    ? value['orderConflictResolution']
+    : undefined;
   const pinConflictResolution = isPinConflictResolution(
     value['pinConflictResolution'],
   )
@@ -123,6 +145,7 @@ const toGlobalPinningPreferences = (
     : undefined;
 
   return {
+    orderConflictResolution,
     pinConflictResolution,
     pinSide,
     unpinConflictResolution,

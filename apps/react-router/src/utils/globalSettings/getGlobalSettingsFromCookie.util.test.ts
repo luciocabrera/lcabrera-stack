@@ -34,6 +34,7 @@ describe('getGlobalSettingsFromCookie', () => {
           size: 'large',
         },
         pinning: {
+          orderConflictResolution: 'pin-to-match-order',
           pinConflictResolution: 'pin-only',
           pinSide: 'right',
           unpinConflictResolution: 'reorder-to-fill',
@@ -49,6 +50,7 @@ describe('getGlobalSettingsFromCookie', () => {
         size: 'large',
       },
       pinning: {
+        orderConflictResolution: 'pin-to-match-order',
         pinConflictResolution: 'pin-only',
         pinSide: 'right',
         unpinConflictResolution: 'reorder-to-fill',
@@ -74,6 +76,7 @@ describe('getGlobalSettingsFromCookie', () => {
           size: 'huge',
         },
         pinning: {
+          orderConflictResolution: 'not-real',
           pinConflictResolution: 'invalid',
           pinSide: 'center',
           unpinConflictResolution: 'also-invalid',
@@ -89,6 +92,7 @@ describe('getGlobalSettingsFromCookie', () => {
         size: undefined,
       },
       pinning: {
+        orderConflictResolution: undefined,
         pinConflictResolution: undefined,
         pinSide: undefined,
         unpinConflictResolution: undefined,
