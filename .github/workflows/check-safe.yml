@@ -81,7 +81,7 @@ jobs:
         run: vp run test:ci
 
       - name: Upload coverage report
-        if: always()
+        if: always() && vars.ENABLE_ARTIFACT_UPLOADS == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: coverage-report
@@ -125,7 +125,7 @@ jobs:
               `| Functions | ${fmt(total.functions)} | ${badge(total.functions.pct)} |`,
               `| Branches | ${fmt(total.branches)} | ${badge(total.branches.pct)} |`,
               '',
-              `> 📁 Coverage summary JSON available as a workflow artifact: [coverage-report](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`,
+              `> 📁 Coverage summary JSON generated in this run: [workflow logs](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`,
             ].join('\n');
 
             const { data: comments } = await github.rest.issues.listComments({
