@@ -146,10 +146,10 @@ graph TD
 
 ### Variant Enums
 
-| Type                | Values                                   |
-| ------------------- | ---------------------------------------- |
-| `SidePanelPosition` | `left`, `right`                          |
-| `SidePanelSize`     | `sm` (320px), `md` (416px), `lg` (512px) |
+| Type                | Values                                                                |
+| ------------------- | --------------------------------------------------------------------- |
+| `SidePanelPosition` | `left`, `right`                                                       |
+| `SidePanelSize`     | `rail` (72px), `xs` (256px), `sm` (320px), `md` (416px), `lg` (512px) |
 
 ## Style Composition
 
@@ -192,6 +192,8 @@ graph LR
 - **Pinned mode** switches to `position: relative` with `flexShrink: 0`
 - **Native `::backdrop`** styled with overlay color or transparent
 - **Container query** enabled: `containerName: 'side-panel'`
+- **Rail size** provides a compact pinned navigation panel for consumers that
+  rely on icon-only interactive controls.
 
 ## Sub-Components
 
@@ -229,5 +231,7 @@ graph TD
 Used heavily in Table settings drawers:
 
 - `App.tsx` — demo usage with Header/Body/Footer/Title
+- `AppNavigation` — left sidebar navigation with compact/full and pin/unpin
+  states
 - `ColumnSettingsDrawer` — FilterSection, PinningSection, GeneralSection, SortingSection
 - `TableSettingsDrawer` — SortingSection, GeneralSettingsSection, AddSortSection, ActiveSortList, ColumnOrderSection

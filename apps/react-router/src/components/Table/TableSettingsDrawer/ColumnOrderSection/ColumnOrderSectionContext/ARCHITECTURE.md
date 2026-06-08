@@ -125,14 +125,17 @@ graph TD
   B --> C["Recalculate pin sides"]
   C --> D{"Conflicts with pinning?"}
   D -->|No| E["Apply new order + pinning"]
-  D -->|Yes| F["Open OrderConflictModal"]
+  D -->|Yes| F{"Global order conflict pref saved?"}
+  F -->|No| G["Open OrderConflictModal"]
+  F -->|Yes| H["Apply saved resolution"]
 
-  F --> G["User selects resolution"]
-  G --> H["useAcceptOrderConflict"]
-  H --> I{"Resolution?"}
-  I -->|remove-conflicting-pins| J["Keep only contiguous pins"]
-  I -->|reset-all-pins| K["Clear all pinning"]
-  I -->|pin-to-match-order| L["Move pinned columns to edges"]
+  G --> I["User selects resolution"]
+  I --> J["useAcceptOrderConflict"]
+  H --> J
+  J --> K{"Resolution?"}
+  K -->|remove-conflicting-pins| L["Keep only contiguous pins"]
+  K -->|reset-all-pins| M["Clear all pinning"]
+  K -->|pin-to-match-order| N["Move pinned columns to edges"]
 ```
 
 ## Conflict Resolution Types

@@ -21,6 +21,13 @@ const buttonSpecificStyles = stylex.create({
       ':disabled': 0.6,
     },
   },
+  iconOnly: {
+    gap: 0,
+    justifyContent: 'center',
+  },
+  labelHidden: {
+    display: 'none',
+  },
 });
 
 const styleVariants = stylex.create({
@@ -43,7 +50,9 @@ export const buttonStyles = {
   },
   color: colorVariants,
   icon: baseInteractiveStyles.icon,
+  iconOnly: buttonSpecificStyles.iconOnly,
   label: baseInteractiveStyles.label,
+  labelHidden: buttonSpecificStyles.labelHidden,
   orientation: orientationVariants,
   size: sizeVariants,
   style: styleVariants,

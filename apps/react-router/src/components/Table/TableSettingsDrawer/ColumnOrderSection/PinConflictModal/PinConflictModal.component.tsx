@@ -1,5 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+
+import { PIN_CONFLICT_OPTIONS } from '@/constants/pinningPreferences.constants';
 
 import { Button } from '@/components/Button';
 import { Modal } from '@/components/Modal';
@@ -19,6 +21,19 @@ export const PinConflictModal = ({
 }: PinConflictModalProps) => {
   const [selectedResolution, setSelectedResolution] =
     useState<PinConflictResolution>('move-column');
+
+  const options = useMemo(() => {
+    return PIN_CONFLICT_OPTIONS.map((option) => {
+      if (option.value === 'move-column') {
+        return {
+          ...option,
+          label: `Move column next to ${side}-pinned columns`,
+        };
+      }
+
+      return option;
+    });
+  }, [side]);
 
   const handleAccept = () => {
     onAccept(selectedResolution);
@@ -55,20 +70,7 @@ export const PinConflictModal = ({
         onChange={(value) => {
           setSelectedResolution(value);
         }}
-        options={[
-          {
-            label: `Move column next to ${side}-pinned columns`,
-            value: 'move-column',
-          },
-          {
-            label: 'Pin all columns between edge and this column',
-            value: 'pin-all-between',
-          },
-          {
-            label: 'Pin without changing column order',
-            value: 'pin-only',
-          },
-        ]}
+        options={options}
         value={selectedResolution}
       />
     </Modal>

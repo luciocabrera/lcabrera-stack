@@ -41,7 +41,11 @@ wide-alltypes-150-tanstack/
 3. The route uses `useInfiniteQuery` for additional pages keyed by sorting
    state.
 4. `useReactTable` renders the server-backed rows.
-5. `useVirtualizer` only renders the visible rows inside the scroll container.
+5. `useColumnVirtualization` slices the visible horizontal window and uses
+   spacer cells to preserve the full scroll width without rendering all 150
+   columns at once.
+6. `useVirtualizer` only renders the visible rows inside the scroll container
+   using the fixed row-height estimate.
 
 ## Guardrails
 
@@ -50,3 +54,14 @@ wide-alltypes-150-tanstack/
 - Search-param sync is limited to sorting for sharable URLs.
 - The TanStack stack is intentionally route-local so the rest of the app can
   continue using the custom table architecture unchanged.
+- `useInfiniteQuery` results are treated as nullable during key transitions and
+  initial loads; table rows derive from an empty pages fallback until query data
+  is available.
+- The route-local `QueryClient` is cleared on unmount to prevent stale
+  background work after navigating away from the route.
+- Table sorting handlers are wired through `useReactTable` options instead of
+  mutating `table.setOptions` during render, keeping behavior safe under
+  concurrent transitions.
+- Query errors are handled in-route: initial-load failures render an inline
+  error state, and background pagination failures are surfaced in the footer
+  without crashing navigation.

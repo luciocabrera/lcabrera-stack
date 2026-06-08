@@ -19,6 +19,13 @@ const styles = stylex.create({
     color: colors.brandPrimaryText,
     fontWeight: 600,
   },
+  itemIconOnly: {
+    gap: 0,
+    justifyContent: 'center',
+  },
+  labelHidden: {
+    display: 'none',
+  },
 });
 
 export const linkItemStyles = {
@@ -30,7 +37,9 @@ export const linkItemStyles = {
   },
   color: colorVariants,
   icon: baseInteractiveStyles.icon,
+  iconOnly: styles.itemIconOnly,
   label: baseInteractiveStyles.label,
+  labelHidden: styles.labelHidden,
   orientation: orientationVariants,
   size: sizeVariants,
   width: widthVariants,

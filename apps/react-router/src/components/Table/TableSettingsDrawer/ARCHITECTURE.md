@@ -163,6 +163,7 @@ See [TableDrawerContext/ARCHITECTURE.md](TableDrawerContext/ARCHITECTURE.md) for
 
 - **Accept**: `useBatchSetTableDrawerSettings` reads all drawer state and pushes it to
   `TableConfigContext`
+- **Invalid accept**: `notify(...)` sends a warning through the app-level `NotificationProvider`; the viewport is rendered once at the root, not inside the drawer
 - **Cancel**: `useResetTableSettings()` reads current table state back into
   the drawer store, then closes via `useToogleTableIsTableSettingsOpen()`
 

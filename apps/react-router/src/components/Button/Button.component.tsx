@@ -10,6 +10,7 @@ export const Button = ({
   color = 'primary',
   customStylex,
   icon,
+  isIconOnly = false,
   isDisabled = false,
   orientation = 'vertical',
   size = 'md',
@@ -33,11 +34,19 @@ export const Button = ({
         buttonStyles.color[color],
         buttonStyles.style[variant],
         buttonStyles.width[width],
+        isIconOnly && buttonStyles.iconOnly,
         customStylex,
       )}
     >
       {icon && <span {...stylex.props(buttonStyles.icon)}>{icon}</span>}
-      <span {...stylex.props(buttonStyles.label)}>{children}</span>
+      <span
+        {...stylex.props(
+          buttonStyles.label,
+          isIconOnly && buttonStyles.labelHidden,
+        )}
+      >
+        {children}
+      </span>
     </button>
   );
 

@@ -6,30 +6,31 @@ Before creating anything new, check this inventory. If something here does the j
 
 ## Components
 
-| Component            | Location                          | Description                                                                                          |
-| -------------------- | --------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `Button`             | `components/Button/`              | Interactive button — 8 color variants, 5 sizes, icon, loading, tooltip                               |
-| `Card`               | `components/Card/`                | Container with elevation, color, padding, and optional interactivity                                 |
-| `DevStyleXInject`    | `components/DevStyleXInject/`     | Dev-only StyleX CSS injector for HMR; must be at app root                                            |
-| `DraggableList`      | `components/DraggableList/`       | Drag-and-drop reorderable list using native drag events                                              |
-| `Icons`              | `components/Icons/`               | 30 SVG icon components (see `Icons/index.ts` for full list)                                          |
-| `InfoBox`            | `components/InfoBox/`             | Styled container for informational messages and empty states                                         |
-| `Modal`              | `components/Modal/`               | Native `<dialog>` modal with title, footer, Esc-to-close                                             |
-| `NavLink`            | `components/NavLink/`             | Router-aware navigation link with color, size, icon, orientation                                     |
-| `NotificationCenter` | `components/NotificationCenter/`  | Global corner-based notification viewport with dismiss + auto-hide using NotificationContext         |
-| `PinSideModal`       | `components/PinSideModal/`        | Modal for choosing column pin side (left / right / closest-edge)                                     |
-| `RadioOptionGroup`   | `components/RadioOptionGroup/`    | Generic `<TValue extends string>` radio button group                                                 |
-| `RouteErrorBoundary` | `components/RouteErrorBoundary/`  | Shared route error boundary display with retry button; accepts `defaultMessage` and `error` props    |
-| `SidePanel`          | `components/SidePanel/`           | Off-canvas panel with 10 sub-components, pinning, portal support                                     |
-| `Table`              | `components/Table/`               | Full-featured data table — sort, filter, pin, resize, virtualise, persist, opt-in prefetch (ADR-006) |
-| `TableBodyRows`      | `components/Table/TableBodyRows/` | Row-rendering delegate for TableBody — owns the visible-row loop and cell creation via utility reuse |
-| `Tabs`               | `components/Tabs/`                | Keyboard-navigable tab bar using React 19 `<Activity>`                                               |
-| `Tag`                | `components/Tag/`                 | Label chip with optional remove button                                                               |
-| `ToggleSwitch`       | `components/ToggleSwitch/`        | Accessible boolean toggle (controlled, `role="switch"`)                                              |
-| `Toolbar`            | `components/Toolbar/`             | Horizontal/vertical toolbar of Button/NavLink items                                                  |
-| `Tooltip`            | `components/Tooltip/`             | CSS Anchor + Popover API tooltip, 4 placements, animated                                             |
-| `VirtualList`        | `components/VirtualList/`         | Virtualized list with search, select-all, checkboxes, lazy load, parent-contained sizing             |
-| `VirtualSelect`      | `components/VirtualSelect/`       | Parent-contained dropdown select backed by `VirtualList`; `string[]` or `{ label, value }[]` options |
+| Component            | Location                          | Description                                                                                                                       |
+| -------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `AppNavigation`      | `components/AppNavigation/`       | App-owned left sidebar navigation using `SidePanel`, `Toolbar`, route item constants, compact/full modes, and pin/unpin controls  |
+| `Button`             | `components/Button/`              | Interactive button — 8 color variants, 5 sizes, icon, loading, tooltip                                                            |
+| `Card`               | `components/Card/`                | Container with elevation, color, padding, and optional interactivity                                                              |
+| `DevStyleXInject`    | `components/DevStyleXInject/`     | Dev-only StyleX CSS injector for HMR; must be at app root                                                                         |
+| `DraggableList`      | `components/DraggableList/`       | Drag-and-drop reorderable list using native drag events                                                                           |
+| `Icons`              | `components/Icons/`               | 30 SVG icon components (see `Icons/index.ts` for full list)                                                                       |
+| `InfoBox`            | `components/InfoBox/`             | Styled container for informational messages and empty states                                                                      |
+| `Modal`              | `components/Modal/`               | Native `<dialog>` modal with title, footer, Esc-to-close                                                                          |
+| `NavLink`            | `components/NavLink/`             | Router-aware navigation link with color, size, icon, orientation                                                                  |
+| `NotificationCenter` | `components/NotificationCenter/`  | Global corner-based notification viewport with dismiss + auto-hide using NotificationContext, local constants, and view utilities |
+| `PinSideModal`       | `components/PinSideModal/`        | Modal for choosing column pin side (left / right / closest-edge)                                                                  |
+| `RadioOptionGroup`   | `components/RadioOptionGroup/`    | Generic `<TValue extends string>` radio button group                                                                              |
+| `RouteErrorBoundary` | `components/RouteErrorBoundary/`  | Shared route error boundary display with retry button; accepts `defaultMessage` and `error` props                                 |
+| `SidePanel`          | `components/SidePanel/`           | Off-canvas panel with 10 sub-components, pinning, portal support                                                                  |
+| `Table`              | `components/Table/`               | Full-featured data table — sort, filter, pin, resize, virtualise, persist, opt-in prefetch (ADR-006)                              |
+| `TableBodyRows`      | `components/Table/TableBodyRows/` | Row-rendering delegate for TableBody — owns the visible-row loop and cell creation via utility reuse                              |
+| `Tabs`               | `components/Tabs/`                | Keyboard-navigable tab bar using React 19 `<Activity>`                                                                            |
+| `Tag`                | `components/Tag/`                 | Label chip with optional remove button                                                                                            |
+| `ToggleSwitch`       | `components/ToggleSwitch/`        | Accessible boolean toggle (controlled, `role="switch"`)                                                                           |
+| `Toolbar`            | `components/Toolbar/`             | Horizontal/vertical toolbar of Button/NavLink items                                                                               |
+| `Tooltip`            | `components/Tooltip/`             | CSS Anchor + Popover API tooltip, 4 placements, animated                                                                          |
+| `VirtualList`        | `components/VirtualList/`         | Virtualized list with search, select-all, checkboxes, lazy load, parent-contained sizing                                          |
+| `VirtualSelect`      | `components/VirtualSelect/`       | Parent-contained dropdown select backed by `VirtualList`; `string[]` or `{ label, value }[]` options                              |
 
 ---
 
@@ -92,6 +93,15 @@ Before creating anything new, check this inventory. If something here does the j
 | ----------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------- |
 | `createDistinctFilterOptions` | `utils/filters/createDistinctFilterOptions.util.ts` | Adapts a distinct-values API to table async filter options (`skip/limit` to `offset/limit`) |
 | `createStaticFilterOptions`   | `utils/filters/createStaticFilterOptions.util.ts`   | Wraps a `string[]` into a `FilterOptionsResponse`-compatible paginated object               |
+
+### `src/utils/globalSettings/`
+
+| Function                           | Location                                                        | Description                                                                            |
+| ---------------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `getGlobalSettingsFromCookie`      | `utils/globalSettings/getGlobalSettingsFromCookie.util.ts`      | Reads global settings (pinning + navigation preferences) from cookie string (SSR-safe) |
+| `serializeGlobalSettingsForCookie` | `utils/globalSettings/serializeGlobalSettingsForCookie.util.ts` | Serialises `GlobalSettingsState` to versioned JSON payload for cookie write            |
+| `GLOBAL_SETTINGS_COOKIE_KEY`       | `utils/globalSettings/globalSettings.constants.ts`              | Cookie key constant (`global-settings`)                                                |
+| `GLOBAL_SETTINGS_COOKIE_VERSION`   | `utils/globalSettings/globalSettings.constants.ts`              | Current payload version; incremented on breaking schema changes                        |
 
 ### `src/utils/theme/`
 
@@ -166,27 +176,31 @@ Before creating anything new, check this inventory. If something here does the j
 
 ## Constants
 
-| Export(s)                                                                                                | Location                                   | Description                                                                |
-| -------------------------------------------------------------------------------------------------------- | ------------------------------------------ | -------------------------------------------------------------------------- |
-| `API_SERVER_PORT`, `CONFIG`                                                                              | `constants/api.constants.ts`               | API server port and host config per environment (dev / localhost / prod)   |
-| `OPERATOR_TO_SHORT`, `SHORT_TO_OPERATOR`, `TEXT_OPERATORS`, `NUMBER_OPERATORS`, `DATE_OPERATORS`, …      | `constants/filterOperators.constants.ts`   | Bidirectional operator ↔ short-code maps and operator arrays per data type |
-| `DEFAULT_CONTAINER_HEIGHT`, `DEFAULT_CONTAINER_WIDTH`, `DEFAULT_ROW_OVERSCAN`, `DEFAULT_COLUMN_OVERSCAN` | `constants/virtualization.constants.ts`    | Default dimensions and overscan values for virtualization hooks            |
-| `DEFAULT_LOCALE`, `DEFAULT_CURRENCY`, `DEFAULT_DATE_PRESET`                                              | `utils/formatters/formatters.constants.ts` | Formatting defaults (`en-US`, `USD`, `medium`)                             |
-| `INITIAL_PAGE_SIZE`, `LOAD_MORE_PAGE_SIZE`, `DEFAULT_FILTER_PAGE_SIZE`, `DEFAULT_ENABLE_PREFETCH`, …     | `components/Table/Table.constants.ts`      | Table pagination sizes, prefetch toggle, scroll threshold, column widths   |
+| Export(s)                                                                                                                                                            | Location                                    | Description                                                                       |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- | --------------------------------------------------------------------------------- |
+| `API_SERVER_PORT`, `CONFIG`                                                                                                                                          | `constants/api.constants.ts`                | API server port and host config per environment (dev / localhost / prod)          |
+| `OPERATOR_TO_SHORT`, `SHORT_TO_OPERATOR`, `TEXT_OPERATORS`, `NUMBER_OPERATORS`, `DATE_OPERATORS`, …                                                                  | `constants/filterOperators.constants.ts`    | Bidirectional operator ↔ short-code maps and operator arrays per data type        |
+| `DEFAULT_CONTAINER_HEIGHT`, `DEFAULT_CONTAINER_WIDTH`, `DEFAULT_ROW_OVERSCAN`, `DEFAULT_COLUMN_OVERSCAN`                                                             | `constants/virtualization.constants.ts`     | Default dimensions and overscan values for virtualization hooks                   |
+| `DEFAULT_LOCALE`, `DEFAULT_CURRENCY`, `DEFAULT_DATE_PRESET`                                                                                                          | `utils/formatters/formatters.constants.ts`  | Formatting defaults (`en-US`, `USD`, `medium`)                                    |
+| `INITIAL_PAGE_SIZE`, `LOAD_MORE_PAGE_SIZE`, `DEFAULT_FILTER_PAGE_SIZE`, `DEFAULT_ENABLE_PREFETCH`, …                                                                 | `components/Table/Table.constants.ts`       | Table pagination sizes, prefetch toggle, scroll threshold, column widths          |
+| `NAVIGATION_SIZE_PREFERENCE_OPTIONS`                                                                                                                                 | `constants/globalSettings.constants.ts`     | Labelled option array for global navigation sizing (`compact/small/medium/large`) |
+| `ORDER_CONFLICT_OPTIONS`, `ORDER_CONFLICT_PREFERENCE_OPTIONS`, `PIN_SIDE_PREFERENCE_OPTIONS`, `PIN_CONFLICT_PREFERENCE_OPTIONS`, `UNPIN_CONFLICT_PREFERENCE_OPTIONS` | `constants/pinningPreferences.constants.ts` | Labelled option arrays for pinning runtime modals and preference radio groups     |
 
 ---
 
 ## Types
 
-| Key Exports                                                                                                  | Location                         | Description                                       |
-| ------------------------------------------------------------------------------------------------------------ | -------------------------------- | ------------------------------------------------- |
-| `DesignSystemColor`, `DesignSystemSize`, `DesignSystemOrientation`, `DesignSystemStyle`, `DesignSystemWidth` | `types/design-system.types.ts`   | Union types for all design-system prop values     |
-| `BooleanFilter`, `DateFilter`, `NumberFilter`, `SelectFilter`, `TextFilter`, `ColumnFilter`                  | `types/filterOperators.types.ts` | Discriminated union for all column filter states  |
-| `DateFormatPreset`, `DateFormatOptions`, `CurrencyFormatOptions`, `NumberFormatOptions`                      | `types/format.types.ts`          | Options for the formatter utilities               |
-| `ThemeMode`, `ThemeContextValue`                                                                             | `types/theme.types.ts`           | Light/dark mode enum and context shape            |
-| `InfiniteScroll`, `Pagination`, `PinSide`, `SortDirection`, `Sorting`, `PinConflictState`, `PrefetchCache`   | `types/ui.types.ts`              | Shared UI primitive types                         |
-| `ApiConfig`                                                                                                  | `types/api.types.ts`             | API config shape keyed by environment             |
-| `DbSanityPayload`                                                                                            | `root/Root.types.ts`             | Dev preflight response shape for `/api/db-sanity` |
+| Key Exports                                                                                                                                                                                                                             | Location                            | Description                                                                                   |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- | --------------------------------------------------------------------------------------------- |
+| `DesignSystemColor`, `DesignSystemSize`, `DesignSystemOrientation`, `DesignSystemStyle`, `DesignSystemWidth`                                                                                                                            | `types/design-system.types.ts`      | Union types for all design-system prop values                                                 |
+| `BooleanFilter`, `DateFilter`, `NumberFilter`, `SelectFilter`, `TextFilter`, `ColumnFilter`                                                                                                                                             | `types/filterOperators.types.ts`    | Discriminated union for all column filter states                                              |
+| `DateFormatPreset`, `DateFormatOptions`, `CurrencyFormatOptions`, `NumberFormatOptions`                                                                                                                                                 | `types/format.types.ts`             | Options for the formatter utilities                                                           |
+| `ThemeMode`, `ThemeContextValue`                                                                                                                                                                                                        | `types/theme.types.ts`              | Light/dark mode enum and context shape                                                        |
+| `InfiniteScroll`, `Pagination`, `PinSide`, `SortDirection`, `Sorting`, `PinConflictState`, `PrefetchCache`                                                                                                                              | `types/ui.types.ts`                 | Shared UI primitive types                                                                     |
+| `ApiConfig`                                                                                                                                                                                                                             | `types/api.types.ts`                | API config shape keyed by environment                                                         |
+| `DbSanityPayload`                                                                                                                                                                                                                       | `root/Root.types.ts`                | Dev preflight response shape for `/api/db-sanity`                                             |
+| `OrderConflictResolution`, `OrderConflictResolutionPreferenceOption`, `PinConflictResolution`, `PinSidePreferenceOption`, `PinConflictResolutionPreferenceOption`, `UnpinConflictResolution`, `UnpinConflictResolutionPreferenceOption` | `types/pinningPreferences.types.ts` | Pinning prompt resolution unions and preference option unions including `always-ask` sentinel |
+| `GlobalNavigationPreferences`, `GlobalNavigationSizePreference`, `GlobalPinningPreferences`, `GlobalSettingsState`                                                                                                                      | `types/globalSettings.types.ts`     | Global settings state shape (navigation + pinning) persisted in `global-settings` cookie      |
 
 ## Routes
 

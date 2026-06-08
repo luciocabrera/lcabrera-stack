@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/Button';
 import { Modal } from '@/components/Modal';
 import { RadioOptionGroup } from '@/components/RadioOptionGroup';
+import { ORDER_CONFLICT_OPTIONS } from '@/constants/pinningPreferences.constants';
 
 import type { OrderConflictResolution } from '../ColumnOrderSection.types';
 import type { OrderConflictModalProps } from './OrderConflictModal.types';
@@ -12,7 +13,6 @@ import {
   useAcceptOrderConflict,
   useCancelOrderConflict,
 } from '../ColumnOrderSectionContext/actions';
-import { RESOLUTIONS } from './OrderConflictModal.constants';
 import { styles } from './OrderConflictModal.stylex';
 
 export const OrderConflictModal = ({
@@ -56,7 +56,7 @@ export const OrderConflictModal = ({
         onChange={(value) => {
           setSelectedResolution(value);
         }}
-        options={RESOLUTIONS}
+        options={ORDER_CONFLICT_OPTIONS}
         value={selectedResolution}
       />
     </Modal>

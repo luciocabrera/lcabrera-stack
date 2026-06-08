@@ -1,6 +1,6 @@
 # constants/ Architecture
 
-Application-wide constant values: API host configuration and filter operator definitions (display labels, URL serialization codes, and per-type allowed sets).
+Application-wide constant values: API host configuration, filter operator definitions (display labels, URL serialization codes, and per-type allowed sets), and global settings option groups.
 
 ## Placement Rule
 
@@ -15,10 +15,12 @@ Quick decision guide:
 
 ## File Index
 
-| File                           | Contents                                             |
-| ------------------------------ | ---------------------------------------------------- |
-| `api.constants.ts`             | `CONFIG` — API host URLs per environment             |
-| `filterOperators.constants.ts` | Operator label arrays, serialization maps, code sets |
+| File                              | Contents                                              |
+| --------------------------------- | ----------------------------------------------------- |
+| `api.constants.ts`                | `CONFIG` — API host URLs per environment              |
+| `filterOperators.constants.ts`    | Operator label arrays, serialization maps, code sets  |
+| `globalSettings.constants.ts`     | Navigation preference radio options                   |
+| `pinningPreferences.constants.ts` | Pinning preference and modal resolution radio options |
 
 ---
 
@@ -105,3 +107,33 @@ graph LR
   Valid -->|"yes"| Full["SHORT_TO_OPERATOR.get() → full operator"]
   Valid -->|"no"| Reject["discard / fallback"]
 ```
+
+---
+
+## `globalSettings.constants.ts`
+
+Defines the option list for global navigation sizing on the Settings route.
+
+| Constant                             | Type                                            | Values                                |
+| ------------------------------------ | ----------------------------------------------- | ------------------------------------- |
+| `NAVIGATION_SIZE_PREFERENCE_OPTIONS` | `RadioOption<GlobalNavigationSizePreference>[]` | `compact`, `small`, `medium`, `large` |
+
+Used by `routes/settings/Settings.component.tsx` to render the Navigation tab radio group.
+
+---
+
+## `pinningPreferences.constants.ts`
+
+Defines reusable radio options for pinning prompts and global pinning
+preferences.
+
+| Constant                            | Type                                                     | Values                                                            |
+| ----------------------------------- | -------------------------------------------------------- | ----------------------------------------------------------------- |
+| `ORDER_CONFLICT_OPTIONS`            | `RadioOption<OrderConflictResolution>[]`                 | `remove-conflicting-pins`, `reset-all-pins`, `pin-to-match-order` |
+| `ORDER_CONFLICT_PREFERENCE_OPTIONS` | `RadioOption<OrderConflictResolutionPreferenceOption>[]` | Order conflict options plus `always-ask`                          |
+| `PIN_SIDE_PREFERENCE_OPTIONS`       | `RadioOption<PinSidePreferenceOption>[]`                 | `closest-edge`, `left`, `right`, `always-ask`                     |
+| `PIN_CONFLICT_PREFERENCE_OPTIONS`   | `RadioOption<PinConflictResolutionPreferenceOption>[]`   | Pin conflict options plus `always-ask`                            |
+| `UNPIN_CONFLICT_PREFERENCE_OPTIONS` | `RadioOption<UnpinConflictResolutionPreferenceOption>[]` | Unpin conflict options plus `always-ask`                          |
+
+Runtime modals use the non-preference option arrays. The Settings route uses
+the `*_PREFERENCE_OPTIONS` arrays so users can choose `always-ask`.

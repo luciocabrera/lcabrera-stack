@@ -1,8 +1,8 @@
 # Toolbar Component Architecture
 
 Composable navigation and action container that renders a typed list of items as
-Buttons or NavLinks, with responsive layout behavior driven by orientation and
-container queries.
+Buttons or NavLinks, with responsive layout behavior driven by orientation,
+container queries, and an optional compact icon-only mode.
 
 ## File Structure
 
@@ -37,11 +37,12 @@ graph LR
 
 `ToolbarProps` extends native `nav` props plus:
 
-| Prop          | Type                     | Default    | Description                                   |
-| ------------- | ------------------------ | ---------- | --------------------------------------------- |
-| `items`       | `ToolbarItemConfig[]`    | -          | Ordered list of toolbar items                 |
-| `orientation` | `horizontal \| vertical` | `vertical` | Layout direction                              |
-| `size`        | design-system size       | `md`       | Fallback size for items without explicit size |
+| Prop          | Type                     | Default    | Description                                           |
+| ------------- | ------------------------ | ---------- | ----------------------------------------------------- |
+| `isCompact`   | `boolean`                | `false`    | Centers square icon-only controls with label tooltips |
+| `items`       | `ToolbarItemConfig[]`    | -          | Ordered list of toolbar items                         |
+| `orientation` | `horizontal \| vertical` | `vertical` | Layout direction                                      |
+| `size`        | design-system size       | `md`       | Fallback size for items without explicit size         |
 
 ### Item Types
 
@@ -94,7 +95,9 @@ graph TD
   H -- no --> J[Render NavLink]
   I --> K[Pass shared orientation and resolved size]
   J --> K
-  K --> L[Force full width item content]
+  K --> L{isCompact?}
+L -- yes --> M[Apply size-matched square control override and right-side tooltip]
+  L -- no --> N[Force full width item content]
 ```
 
 ## Item Rendering Strategy
@@ -126,11 +129,15 @@ For button items, Toolbar forwards:
 
 - `color`
 - `icon`
+- `isIconOnly=isCompact`
 - `isDisabled`
 - `onClick`
 - `orientation`
 - `size`
 - `width='full'`
+- `customStylex=size-matched compact control override` when `isCompact`
+- `tooltipContent=label` when `isCompact`
+- `tooltipPlacement='right'` when `isCompact`
 - button label as `children`
 
 ### Link branch
@@ -140,10 +147,14 @@ For link items, Toolbar forwards:
 - `color`
 - `end`
 - `icon`
+- `isIconOnly=isCompact`
 - `orientation`
 - `size`
 - `to`
 - `width='full'`
+- `customStylex=size-matched compact control override` when `isCompact`
+- `tooltipContent=label` when `isCompact`
+- `tooltipPlacement='right'` when `isCompact`
 - link label as `children`
 
 ## Layout Model
@@ -184,6 +195,10 @@ Shared base style defines:
 - `vertical`: always column, no wrapping
 - `horizontal`: row by default, wrap enabled, switches to column below the
   container query threshold
+- `isCompact`: centers items and constrains each control to the resolved item
+  size as a square;
+  Button/NavLink render as true icon-only controls while `aria-label` and a
+  right-side tooltip keep the item name discoverable.
 
 ### Item behavior
 

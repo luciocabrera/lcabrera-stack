@@ -66,6 +66,18 @@ export const styles = stylex.create({
     lineHeight: typography.lineHeightRelaxed,
     padding: spacing.md,
   },
+  errorState: {
+    borderColor: colors.error,
+    borderRadius: borderRadius.lg,
+    borderStyle: 'solid',
+    borderWidth: '1px',
+    backgroundColor: colors.errorBackground,
+    color: colors.error,
+    fontSize: typography.fontSizeSm,
+    margin: 0,
+    lineHeight: typography.lineHeightRelaxed,
+    padding: spacing.md,
+  },
   footer: {
     alignItems: 'center',
     backgroundColor: colors.backgroundSecondary,
@@ -77,6 +89,10 @@ export const styles = stylex.create({
     borderTopStyle: 'solid',
     justifyContent: 'space-between',
     borderTopWidth: '1px',
+  },
+  footerError: {
+    color: colors.error,
+    fontWeight: typography.fontWeightSemibold,
   },
   footerFetching: {
     color: colors.brandPrimary,

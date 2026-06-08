@@ -17,13 +17,15 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import {
   startTransition,
   type UIEvent,
+  useCallback,
   useEffect,
-  useEffectEvent,
   useRef,
   useState,
 } from 'react';
 import { useLoaderData, useSearchParams } from 'react-router';
 
+import { SpacerCell } from '@/components/Table/SpacerCell';
+import { useColumnVirtualization } from '@/hooks';
 import type { WideAlltypes150Response } from '@/services';
 
 import { wideAlltypes150Api } from '@/services';
@@ -85,6 +87,28 @@ const resolveNextPageParam = ({
   return loadedRowCount;
 };
 
+type ResolveFooterStatusTextArgs = {
+  readonly errorMessage: string;
+  readonly isError: boolean;
+  readonly isFetching: boolean;
+};
+
+const resolveFooterStatusText = ({
+  errorMessage,
+  isError,
+  isFetching,
+}: ResolveFooterStatusTextArgs): string => {
+  if (isError) {
+    return errorMessage;
+  }
+
+  if (isFetching) {
+    return 'Fetching more rows…';
+  }
+
+  return 'Scroll to load more';
+};
+
 const WideAlltypes150TanStackTableContent = ({
   initialPage,
   initialSorting,
@@ -124,29 +148,24 @@ const WideAlltypes150TanStackTableContent = ({
     refetchOnWindowFocus: false,
   });
 
-  const flatData = data.pages.flatMap((page) => page.data);
-  const totalRowCount = data.pages[0]?.total ?? 0;
-  const table = useReactTable({
-    columns: [...COLUMN_DEFINITIONS],
-    data: flatData,
-    getCoreRowModel: getCoreRowModel(),
-    manualSorting: true,
-    state: {
-      sorting,
-    },
+  const flatData = (data?.pages ?? []).flatMap((page) => page.data);
+  const hasRows = flatData.length > 0;
+  const totalRowCount = data?.pages[0]?.total ?? 0;
+  const footerStatusText = resolveFooterStatusText({
+    errorMessage: error?.message ?? 'Failed to load rows.',
+    isError,
+    isFetching,
   });
-  const { rows } = table.getRowModel();
-  const rowVirtualizer = useVirtualizer({
-    count: rows.length,
-    estimateSize: () => ESTIMATED_ROW_HEIGHT,
-    getScrollElement: () => tableContainerReference.current,
-    measureElement:
-      typeof globalThis !== 'undefined' &&
-      !globalThis.navigator.userAgent.includes('Firefox')
-        ? (element) => element.getBoundingClientRect().height
-        : undefined,
-    overscan: ROW_OVERSCAN,
-  });
+
+  // Refs to break the fetch-loop: changes to isFetching / flatData.length / totalRowCount
+  // must not cause fetchMoreOnBottomReached to get a new reference (which would re-trigger
+  // the useEffect below and start another fetch while a navigation transition is in flight).
+  const isFetchingRef = useRef(isFetching);
+  isFetchingRef.current = isFetching;
+  const loadedRowCountRef = useRef(flatData.length);
+  loadedRowCountRef.current = flatData.length;
+  const totalRowCountRef = useRef(totalRowCount);
+  totalRowCountRef.current = totalRowCount;
 
   const handleSortingChange: OnChangeFn<SortingState> = (updater) => {
     const nextSorting =
@@ -165,44 +184,72 @@ const WideAlltypes150TanStackTableContent = ({
       setSearchParams(nextSearchParams, { replace: true });
     });
 
-    rowVirtualizer.scrollToIndex(0);
+    tableContainerReference.current?.scrollTo({ top: 0 });
   };
 
-  table.setOptions((previousOptions) => ({
-    ...previousOptions,
+  const table = useReactTable({
+    columns: [...COLUMN_DEFINITIONS],
+    data: flatData,
+    getCoreRowModel: getCoreRowModel(),
+    manualSorting: true,
     onSortingChange: handleSortingChange,
-  }));
-
-  const fetchMoreOnBottomReached = async (
-    containerElement: HTMLDivElement | null,
-  ): Promise<void> => {
-    if (!containerElement || isFetching || flatData.length >= totalRowCount) {
-      return;
-    }
-
-    const { clientHeight, scrollHeight, scrollTop } = containerElement;
-
-    if (scrollHeight - scrollTop - clientHeight < SCROLL_FETCH_THRESHOLD) {
-      await fetchNextPage();
-    }
-  };
-
-  const fetchMoreOnBottomReachedEffect = useEffectEvent(
-    (containerElement: HTMLDivElement | null): void => {
-      void fetchMoreOnBottomReached(containerElement);
+    state: {
+      sorting,
     },
+  });
+  const visibleColumns = table.getVisibleLeafColumns();
+  const columnWidths = visibleColumns.map((column) => column.getSize());
+  const { rows } = table.getRowModel();
+  const { endIndex, leftSpacerWidth, rightSpacerWidth, startIndex } =
+    useColumnVirtualization({
+      columnWidths,
+      containerRef: tableContainerReference,
+      overscan: 2,
+    });
+  const rowVirtualizer = useVirtualizer({
+    count: rows.length,
+    estimateSize: () => ESTIMATED_ROW_HEIGHT,
+    getScrollElement: () => tableContainerReference.current,
+    overscan: ROW_OVERSCAN,
+  });
+
+  const fetchMoreOnBottomReached = useCallback(
+    async (containerElement: HTMLDivElement | null): Promise<void> => {
+      if (
+        !containerElement ||
+        isFetchingRef.current ||
+        loadedRowCountRef.current >= totalRowCountRef.current
+      ) {
+        return;
+      }
+
+      const { clientHeight, scrollHeight, scrollTop } = containerElement;
+
+      if (scrollHeight - scrollTop - clientHeight < SCROLL_FETCH_THRESHOLD) {
+        await fetchNextPage();
+      }
+    },
+    [fetchNextPage],
   );
 
   const handleScroll = (event: UIEvent<HTMLDivElement>): void => {
-    void fetchMoreOnBottomReached(event.currentTarget);
+    void fetchMoreOnBottomReached(event.currentTarget).catch(() => undefined);
   };
 
   useEffect(() => {
-    fetchMoreOnBottomReachedEffect(tableContainerReference.current);
-  }, [flatData.length, isFetching, totalRowCount]);
+    void fetchMoreOnBottomReached(tableContainerReference.current).catch(
+      () => undefined,
+    );
+  }, [fetchMoreOnBottomReached]);
 
-  if (isError) {
-    throw error;
+  if (isError && !hasRows) {
+    return (
+      <div {...stylex.props(styles.container)}>
+        <div {...stylex.props(styles.errorState)}>
+          Failed to load the TanStack dataset. Try again in a moment.
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -237,38 +284,46 @@ const WideAlltypes150TanStackTableContent = ({
             <thead {...stylex.props(styles.tableHead)}>
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id} {...stylex.props(styles.headerRow)}>
-                  {headerGroup.headers.map((header) => {
-                    const isSortable = header.column.getCanSort();
-                    const sortedState = header.column.getIsSorted();
+                  {leftSpacerWidth > 0 ? (
+                    <SpacerCell isHeader width={leftSpacerWidth} />
+                  ) : undefined}
+                  {headerGroup.headers
+                    .slice(startIndex, endIndex)
+                    .map((header) => {
+                      const isSortable = header.column.getCanSort();
+                      const sortedState = header.column.getIsSorted();
 
-                    return (
-                      <th
-                        key={header.id}
-                        {...stylex.props(styles.headerCell)}
-                        style={{ width: `${header.getSize()}px` }}
-                      >
-                        <button
-                          {...stylex.props(
-                            styles.headerButton,
-                            isSortable && styles.headerButtonSortable,
-                            sortedState && styles.headerButtonSorted,
-                          )}
-                          onClick={header.column.getToggleSortingHandler()}
-                          type='button'
+                      return (
+                        <th
+                          key={header.id}
+                          {...stylex.props(styles.headerCell)}
+                          style={{ width: `${header.getSize()}px` }}
                         >
-                          <span {...stylex.props(styles.headerLabel)}>
-                            {flexRender(
-                              header.column.columnDef.header,
-                              header.getContext(),
+                          <button
+                            {...stylex.props(
+                              styles.headerButton,
+                              isSortable && styles.headerButtonSortable,
+                              sortedState && styles.headerButtonSorted,
                             )}
-                          </span>
-                          <span {...stylex.props(styles.sortIndicator)}>
-                            {getSortIndicator(sortedState)}
-                          </span>
-                        </button>
-                      </th>
-                    );
-                  })}
+                            onClick={header.column.getToggleSortingHandler()}
+                            type='button'
+                          >
+                            <span {...stylex.props(styles.headerLabel)}>
+                              {flexRender(
+                                header.column.columnDef.header,
+                                header.getContext(),
+                              )}
+                            </span>
+                            <span {...stylex.props(styles.sortIndicator)}>
+                              {getSortIndicator(sortedState)}
+                            </span>
+                          </button>
+                        </th>
+                      );
+                    })}
+                  {rightSpacerWidth > 0 ? (
+                    <SpacerCell isHeader width={rightSpacerWidth} />
+                  ) : undefined}
                 </tr>
               ))}
             </thead>
@@ -284,21 +339,27 @@ const WideAlltypes150TanStackTableContent = ({
                 }
 
                 const visibleCells = row.getVisibleCells();
+                const visibleWindowCells = visibleCells.slice(
+                  startIndex,
+                  endIndex,
+                );
 
                 return (
                   <tr
                     data-index={virtualRow.index}
                     key={row.id}
-                    ref={rowVirtualizer.measureElement}
                     {...stylex.props(styles.bodyRow)}
                     style={{ transform: `translateY(${virtualRow.start}px)` }}
                   >
-                    {visibleCells.map((cell, cellIndex) => (
+                    {leftSpacerWidth > 0 ? (
+                      <SpacerCell width={leftSpacerWidth} />
+                    ) : undefined}
+                    {visibleWindowCells.map((cell, cellIndex) => (
                       <td
                         key={cell.id}
                         {...stylex.props(
                           styles.bodyCell,
-                          cellIndex === visibleCells.length - 1 &&
+                          cellIndex === visibleWindowCells.length - 1 &&
                             styles.bodyCellLast,
                         )}
                         style={{ width: `${cell.column.getSize()}px` }}
@@ -309,6 +370,9 @@ const WideAlltypes150TanStackTableContent = ({
                         )}
                       </td>
                     ))}
+                    {rightSpacerWidth > 0 ? (
+                      <SpacerCell width={rightSpacerWidth} />
+                    ) : undefined}
                   </tr>
                 );
               })}
@@ -319,8 +383,13 @@ const WideAlltypes150TanStackTableContent = ({
           <span>
             Server-side sorting with route-local TanStack Query cache.
           </span>
-          <span {...stylex.props(isFetching && styles.footerFetching)}>
-            {isFetching ? 'Fetching more rows…' : 'Scroll to load more'}
+          <span
+            {...stylex.props(
+              isError && styles.footerError,
+              isFetching && styles.footerFetching,
+            )}
+          >
+            {footerStatusText}
           </span>
         </div>
       </div>
@@ -335,6 +404,13 @@ export const WideAlltypes150TanStackPage = () => {
   const { initialPage, initialSortParam, sorting } =
     useLoaderData<typeof loader>();
   const [queryClient] = useState(createQueryClient);
+
+  useEffect(() => {
+    return () => {
+      void queryClient.cancelQueries();
+      queryClient.clear();
+    };
+  }, [queryClient]);
 
   return (
     <QueryClientProvider client={queryClient}>

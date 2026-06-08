@@ -15,7 +15,11 @@ export const baseLintSharedConfig: OxlintConfig = {
     builtin: true,
     es2026: true,
   },
-  jsPlugins: ['eslint-plugin-security', 'eslint-plugin-perfectionist'],
+  jsPlugins: [
+    { name: 'vite-plus', specifier: 'vite-plus/oxlint-plugin' },
+    'eslint-plugin-security',
+    'eslint-plugin-perfectionist',
+  ],
   options: {
     typeAware: true,
     typeCheck: true,

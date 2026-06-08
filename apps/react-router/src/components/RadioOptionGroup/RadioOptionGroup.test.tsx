@@ -74,4 +74,25 @@ describe('RadioOptionGroup', () => {
       'With description',
     );
   });
+
+  it('uses the label as the accessible radio name when a description is present', () => {
+    render(
+      <RadioOptionGroup
+        name='group'
+        onChange={vi.fn()}
+        options={[...options]}
+        value='a'
+      />,
+    );
+
+    const radio = screen.getByRole<HTMLInputElement>('radio', {
+      name: 'Option C',
+    });
+    const descriptionId = radio.getAttribute('aria-describedby');
+
+    expect(descriptionId).toBeTruthy();
+    expect(document.getElementById(descriptionId ?? '')?.textContent).toBe(
+      'With description',
+    );
+  });
 });

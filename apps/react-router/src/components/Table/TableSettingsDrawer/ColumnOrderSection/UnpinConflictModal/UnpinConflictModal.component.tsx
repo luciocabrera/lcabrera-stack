@@ -1,6 +1,8 @@
 import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 
+import { UNPIN_CONFLICT_OPTIONS } from '@/constants/pinningPreferences.constants';
+
 import { Button } from '@/components/Button';
 import { Modal } from '@/components/Modal';
 import { RadioOptionGroup } from '@/components/RadioOptionGroup';
@@ -59,20 +61,7 @@ export const UnpinConflictModal = ({
         onChange={(value) => {
           setSelectedResolution(value);
         }}
-        options={[
-          {
-            description:
-              'Also unpin columns between this one and the center of the table',
-            label: 'Unpin this and columns beyond',
-            value: 'unpin-beyond',
-          },
-          {
-            description:
-              'Move remaining pinned columns together to keep them contiguous',
-            label: 'Reorder to fill the gap',
-            value: 'reorder-to-fill',
-          },
-        ]}
+        options={UNPIN_CONFLICT_OPTIONS}
         value={selectedResolution}
       />
     </Modal>

@@ -24,7 +24,6 @@ ColumnOrderSection/
 ├── OrderConflictModal/                   → Order/pin conflict resolution
 │   ├── index.ts
 │   ├── OrderConflictModal.component.tsx   → Radio options for resolution
-│   ├── OrderConflictModal.constants.ts    → Resolution label/value pairs
 │   ├── OrderConflictModal.types.ts
 │   └── OrderConflictModal.stylex.ts
 │
@@ -72,6 +71,7 @@ graph LR
   COS --> useReorderColumns["useReorderColumns (context action)"]
   COS --> useToggleColumnPin["useToggleColumnPin (context action)"]
   COS --> useToggleColumnVisibility["useToggleColumnVisibility (context action)"]
+  useReorderColumns --> GlobalSettings["GlobalSettingsContext order-conflict preference"]
 
   COS --> useGetConflictModal["useGetConflictModal (context selector)"]
   COS --> useGetOrderConflict["useGetOrderConflict (context selector)"]

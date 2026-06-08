@@ -32,7 +32,7 @@ graph TD
   B --> C{icon prop?}
   C -- Yes --> D[Add icon span]
   C -- No --> E[Skip icon]
-  D --> F[Add children label span]
+  D --> F[Add children label span; hide from layout when icon-only]
   E --> F
   F --> G[Apply StyleX styles]
   G --> H{tooltipContent?}
@@ -50,6 +50,7 @@ graph TD
 | `color`            | `DesignSystemColor`              | `'primary'`  |
 | `customStylex`     | `StyleXStyles`                   | —            |
 | `icon`             | `ReactNode`                      | —            |
+| `isIconOnly`       | `boolean`                        | `false`      |
 | `isDisabled`       | `boolean`                        | `false`      |
 | `orientation`      | `DesignSystemOrientation`        | `'vertical'` |
 | `size`             | `DesignSystemSize`               | `'md'`       |
@@ -115,6 +116,8 @@ graph LR
 **Local-only styles** (`buttonSpecificStyles`):
 
 - `cursor: pointer` (default) / `not-allowed` (disabled)
+- `iconOnly`: removes the gap and centers icon content
+- `labelHidden`: removes label text from visual layout for icon-only controls
 - `opacity: 0.6` (disabled)
 - `containerName: 'button'`
 

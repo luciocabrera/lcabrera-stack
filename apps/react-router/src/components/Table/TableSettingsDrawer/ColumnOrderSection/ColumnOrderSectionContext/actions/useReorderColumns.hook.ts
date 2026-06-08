@@ -1,6 +1,7 @@
 import type { DraggableItem } from '@/components/DraggableList';
 import type { ColumnOrderState } from '@/components/Table/Table.types';
 
+import { useGetGlobalOrderConflictResolutionPreference } from '@/contexts/GlobalSettingsContext/selectors';
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import {
   detectPinOrderConflict,
@@ -11,6 +12,8 @@ import { useTableDrawerContextValue } from '@/components/Table/TableSettingsDraw
 
 import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
 
+import { useAcceptOrderConflict } from './useAcceptOrderConflict.hook';
+
 /**
  * Hook to handle column reordering via drag and drop.
  * Recalculates pin sides and detects conflicts.
@@ -20,6 +23,9 @@ export const useReorderColumns = () => {
   const { columnsStore: tableColumnsStore } = useTableConfigContextValue();
   const { columnsStore: drawerColumnsStore } = useTableDrawerContextValue();
   const { modalsStore } = useColumnOrderSectionContextValue();
+  const orderConflictResolutionPreference =
+    useGetGlobalOrderConflictResolutionPreference();
+  const acceptOrderConflict = useAcceptOrderConflict();
 
   return (reorderedItems: DraggableItem[]) => {
     const drawerColumnsState = drawerColumnsStore.get();
@@ -58,14 +64,20 @@ export const useReorderColumns = () => {
       return;
     }
 
+    const orderConflict = {
+      description:
+        'Dragging this column broke the pinning layout. Pinned columns must stay at the edges. Choose how to proceed:',
+      isOpen: !orderConflictResolutionPreference,
+      pendingOrder: finalOrder,
+      pendingPinning: recalculatedPinning,
+    };
+
     modalsStore.set({
-      orderConflict: {
-        description:
-          'Dragging this column broke the pinning layout. Pinned columns must stay at the edges. Choose how to proceed:',
-        isOpen: true,
-        pendingOrder: finalOrder,
-        pendingPinning: recalculatedPinning,
-      },
+      orderConflict,
     });
+
+    if (orderConflictResolutionPreference) {
+      acceptOrderConflict(orderConflictResolutionPreference);
+    }
   };
 };

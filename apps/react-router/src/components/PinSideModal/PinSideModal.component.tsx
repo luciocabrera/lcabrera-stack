@@ -1,6 +1,8 @@
 import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 
+import { PIN_SIDE_OPTIONS } from '@/constants/pinningPreferences.constants';
+
 import type { PinSide } from '@/types/ui.types';
 
 import { Button } from '@/components/Button';
@@ -53,21 +55,7 @@ export const PinSideModal = ({
         onChange={(value) => {
           setSelectedSide(value);
         }}
-        options={[
-          {
-            description: 'Pin to the nearest edge based on column position',
-            label: 'Closest edge',
-            value: 'closest-edge',
-          },
-          {
-            label: 'Pin to the left',
-            value: 'left',
-          },
-          {
-            label: 'Pin to the right',
-            value: 'right',
-          },
-        ]}
+        options={PIN_SIDE_OPTIONS}
         value={selectedSide}
       />
     </Modal>

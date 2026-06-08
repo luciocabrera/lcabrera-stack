@@ -1,5 +1,6 @@
 import type { ColumnOrderState } from '@/components/Table/Table.types';
 import type { PinSide } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
+import { useGetGlobalPinConflictResolutionPreference } from '@/contexts/GlobalSettingsContext/selectors';
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import {
@@ -10,6 +11,7 @@ import {
 } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 import { useTableDrawerContextValue } from '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
 
+import { useAcceptPinConflict } from './useAcceptPinConflict.hook';
 import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
 
 /**
@@ -19,6 +21,9 @@ export const useAcceptPinSide = () => {
   const { columnsStore: tableColumnsStore } = useTableConfigContextValue();
   const { columnsStore: drawerColumnsStore } = useTableDrawerContextValue();
   const { modalsStore } = useColumnOrderSectionContextValue();
+  const pinConflictResolutionPreference =
+    useGetGlobalPinConflictResolutionPreference();
+  const acceptPinConflict = useAcceptPinConflict();
 
   return (pinSide: PinSide) => {
     const pinSideModal = modalsStore.get()?.pinSideModal;
@@ -55,14 +60,27 @@ export const useAcceptPinSide = () => {
       });
     } else {
       const col = allOrderedColumns.find((c) => c.key === columnKey);
-      modalsStore.set({
-        conflictModal: {
-          columnKey,
-          columnLabel: col?.label ?? columnKey,
-          isOpen: true,
-          side,
-        },
-      });
+
+      if (pinConflictResolutionPreference) {
+        modalsStore.set({
+          conflictModal: {
+            columnKey,
+            columnLabel: col?.label ?? columnKey,
+            isOpen: false,
+            side,
+          },
+        });
+        acceptPinConflict(pinConflictResolutionPreference);
+      } else {
+        modalsStore.set({
+          conflictModal: {
+            columnKey,
+            columnLabel: col?.label ?? columnKey,
+            isOpen: true,
+            side,
+          },
+        });
+      }
     }
 
     modalsStore.set({

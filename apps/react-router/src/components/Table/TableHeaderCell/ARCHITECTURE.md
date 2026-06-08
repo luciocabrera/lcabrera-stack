@@ -73,13 +73,23 @@ Cycles through `undefined → asc → desc → undefined`.
 graph TD
   Click["Click pin button"] --> Check{"Already pinned?"}
   Check -->|Yes| Unpin["setColumnPinning({ columnKey, side: undefined })"]
-  Check -->|No| Modal["Open PinSideModal"]
-  Modal --> Accept["handlePinAccept(side)"]
-  Accept --> Conflict{"Pin conflict?"}
-  Conflict -->|Yes| ConflictModal["Open PinConflictModal"]
+  Check -->|No| PrefCheck{"Global pin-side pref saved?"}
+  PrefCheck -->|Yes| AutoPin["handlePinAccept(savedPref) — skip modal"]
+  PrefCheck -->|No| Modal["Open PinSideModal"]
+  Modal --> Accept["handlePinAccept(pinSide)"]
+  AutoPin --> Accept
+  Accept --> PinAction["acceptHeaderPinSide({ columnKey, pinSide })"]
+  PinAction --> Conflict{"Pin conflict?"}
   Conflict -->|No| Done["Column pinned"]
-  ConflictModal --> Resolve["acceptHeaderPinConflict({ resolution })"]
+  Conflict -->|Yes| ConflictPrefCheck{"Global conflict pref saved?"}
+  ConflictPrefCheck -->|Yes| AutoConflict["handlePinConflictAccept(savedPref) — skip modal"]
+  ConflictPrefCheck -->|No| ConflictModal["Open PinConflictModal"]
+  ConflictModal --> Resolve["handlePinConflictAccept(resolution)"]
+  AutoConflict --> Resolve
+  Resolve --> acceptHeaderPinConflict["acceptHeaderPinConflict({ resolution })"]
 ```
+
+Runtime prompt selections in this component resolve the current pinning action only and do not persist global preferences.
 
 ### Resize
 
