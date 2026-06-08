@@ -20,6 +20,7 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('src', import.meta.url)),
     },
+    tsconfigPaths: true,
   },
   run: runConfig,
   server: {
