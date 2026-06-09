@@ -11,8 +11,16 @@ TableLayout/
 ├── TableLayout.component.tsx   → Provider stack + Suspense + Table
 ├── TableLayout.types.ts        → TableLayoutProps (columns, dataPromise, config, ...)
 ├── TableLayout.stylex.ts       → Container styles
+├── createLazyTableLayout.ts    → Optional lazy loader factory (direct import only)
 └── index.ts                    → Barrel export
 ```
+
+## Public API
+
+- `index.ts` exports only `TableLayout` and `TableLayoutProps`.
+- `createLazyTableLayout` must be imported directly from
+  `./createLazyTableLayout` to avoid mixing static and dynamic imports of
+  `TableLayout.component.tsx` in the same barrel path.
 
 ## Provider Stack
 

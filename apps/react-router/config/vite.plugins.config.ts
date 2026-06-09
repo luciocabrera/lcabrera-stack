@@ -76,7 +76,7 @@ const babelPlugin = isTestTaskRun
             plugins: [['babel-plugin-react-compiler']],
             presets: ['@babel/preset-typescript'],
           },
-          filter: /(?<!\.test)\.[jt]sx?$/,
+          include: /(?<!\.test)\.[jt]sx?$/,
         }),
       ),
     ];
