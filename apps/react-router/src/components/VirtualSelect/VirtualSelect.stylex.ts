@@ -23,6 +23,7 @@ export const styles = stylex.create({
     minHeight: 0,
   },
   dropdownBase: {
+    backgroundColor: 'transparent',
     borderColor: colors.borderPrimary,
     borderRadius: borderRadius.md,
     borderStyle: 'none',
@@ -34,6 +35,7 @@ export const styles = stylex.create({
     maxWidth: '100%',
     minWidth: 0,
     width: '100%',
+    backdropFilter: 'blur(25px)',
   },
   dropdownAbsolute: {
     boxShadow: shadows.lg,
