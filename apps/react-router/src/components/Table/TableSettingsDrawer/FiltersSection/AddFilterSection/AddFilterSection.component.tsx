@@ -98,7 +98,7 @@ export const AddFilterSection = ({
       <SidePanelSectionHeader title='Add Filter' />
       <VirtualSelect
         mode='single'
-        onChange={(values) => {
+        onChange={(values: string[]) => {
           setSelectedColumn(values[0] ?? '');
         }}
         onOpenChange={handleOpenChange}

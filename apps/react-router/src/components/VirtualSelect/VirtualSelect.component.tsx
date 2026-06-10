@@ -34,9 +34,12 @@ export const VirtualSelect = ({
 }: VirtualSelectProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement | HTMLDivElement>(null);
+
   const generatedListboxId = useId();
+
   const [visibleTagCount, setVisibleTagCount] = useState(selected.length);
   const [isOpen, setIsOpen] = useState(false);
+
   const resolvedListboxId =
     listboxId ?? `virtual-select-listbox-${generatedListboxId}`;
 
@@ -56,6 +59,7 @@ export const VirtualSelect = ({
     mode === 'multi' && hasSelection ? visibleTagCount : selected.length;
   const overflowCount = selected.length - computedVisibleCount;
   const visibleTags = selectedLabels.slice(0, computedVisibleCount);
+  const isMulti = mode === 'multi';
 
   // Static mode: wrap option labels in a VirtualListDataState
   const effectiveDataState: VirtualListDataState = dataState ?? {
@@ -165,8 +169,8 @@ export const VirtualSelect = ({
           <VirtualList
             dataState={effectiveDataState}
             filter={{ type: 'select', values: selectedLabels }}
-            hasCheckboxes={mode === 'multi'}
-            hasSelectAll={mode === 'multi'}
+            hasCheckboxes={isMulti}
+            hasSelectAll={isMulti}
             listMaxHeight={listMaxHeight}
             onChange={handleVirtualListChange}
             onFetchInitial={onFetchInitial}

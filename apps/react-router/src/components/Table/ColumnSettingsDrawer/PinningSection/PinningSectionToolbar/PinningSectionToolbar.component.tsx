@@ -13,6 +13,11 @@ import {
 import { useGetColumnPinning } from '../../ColumnDrawerContext/selectors';
 import { styles } from './PinningSectionToolbar.stylex';
 
+const PINNING_TOOLBAR = {
+  clear: { label: 'Clear Pinning' },
+  reset: { label: 'Reset Pinning' },
+} as const;
+
 export const PinningSectionToolbar = ({
   variant = 'footer',
 }: PinningSectionToolbarProps) => {
@@ -34,25 +39,27 @@ export const PinningSectionToolbar = ({
   return (
     <div {...stylex.props(isToolbar ? styles.toolbar : styles.container)}>
       <Button
-        aria-label='Clear Pinning'
+        aria-label={PINNING_TOOLBAR.clear.label}
         color={buttonColor}
         icon={<EraserIcon size={iconSize} />}
         isDisabled={!hasPinning}
         onClick={handleClear}
         size={buttonSize}
         width={buttonWidth}
+        tooltipContent={isToolbar ? PINNING_TOOLBAR.clear.label : undefined}
       >
-        {!isToolbar && 'Clear Pinning'}
+        {!isToolbar && PINNING_TOOLBAR.clear.label}
       </Button>
       <Button
-        aria-label='Reset Pinning'
+        aria-label={PINNING_TOOLBAR.reset.label}
         color={buttonColor}
         icon={<RefreshIcon size={iconSize} />}
         onClick={resetColumnPinning}
         size={buttonSize}
         width={buttonWidth}
+        tooltipContent={isToolbar ? PINNING_TOOLBAR.reset.label : undefined}
       >
-        {!isToolbar && 'Reset Pinning'}
+        {!isToolbar && PINNING_TOOLBAR.reset.label}
       </Button>
     </div>
   );

@@ -13,6 +13,11 @@ import {
 import { useGetColumnFilters } from '../../TableDrawerContext/selectors';
 import { styles } from './FiltersSectionToolbar.stylex';
 
+const FILTERS_TOOLBAR = {
+  clear: { label: 'Clear Filters' },
+  reset: { label: 'Reset Filters' },
+} as const;
+
 export const FiltersSectionToolbar = ({
   onClearAll,
   variant = 'footer',
@@ -37,25 +42,27 @@ export const FiltersSectionToolbar = ({
   return (
     <div {...stylex.props(isToolbar ? styles.toolbar : styles.container)}>
       <Button
-        aria-label='Clear Filters'
+        aria-label={FILTERS_TOOLBAR.clear.label}
         color={buttonColor}
         icon={<EraserIcon size={iconSize} />}
         isDisabled={!hasFilters}
         onClick={handleClear}
         size={buttonSize}
         width={buttonWidth}
+        tooltipContent={isToolbar ? FILTERS_TOOLBAR.clear.label : undefined}
       >
-        {!isToolbar && 'Clear Filters'}
+        {!isToolbar && FILTERS_TOOLBAR.clear.label}
       </Button>
       <Button
-        aria-label='Reset Filters'
+        aria-label={FILTERS_TOOLBAR.reset.label}
         color={buttonColor}
         icon={<RefreshIcon size={iconSize} />}
         onClick={resetFilters}
         size={buttonSize}
         width={buttonWidth}
+        tooltipContent={isToolbar ? FILTERS_TOOLBAR.reset.label : undefined}
       >
-        {!isToolbar && 'Reset Filters'}
+        {!isToolbar && FILTERS_TOOLBAR.reset.label}
       </Button>
     </div>
   );
