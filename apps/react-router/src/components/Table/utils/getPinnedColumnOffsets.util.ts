@@ -32,12 +32,12 @@ export const getPinnedColumnOffsets = <TData = Record<string, unknown>>({
 
   // Compute left offsets (cumulative from left)
   let leftOffset = 0;
-  for (const key of leftPinned) {
-    const col = effectiveColumns.find((c) => c.key === key);
-    if (!col) continue;
+  for (const col of effectiveColumns.filter((c) =>
+    leftPinned.includes(c.key),
+  )) {
     const sized = columnSizing[col.key] as number | undefined;
     const width = sized ?? col.minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
-    result.set(key, {
+    result.set(col.key, {
       isFirstPinnedRight: false,
       isLastPinnedLeft: false,
       offset: leftOffset,
@@ -60,12 +60,12 @@ export const getPinnedColumnOffsets = <TData = Record<string, unknown>>({
 
   // Compute right offsets (cumulative from right)
   let rightOffset = 0;
-  for (const key of [...rightPinned].toReversed()) {
-    const col = effectiveColumns.find((c) => c.key === key);
-    if (!col) continue;
+  for (const col of [...effectiveColumns]
+    .toReversed()
+    .filter((c) => rightPinned.includes(c.key))) {
     const sized = columnSizing[col.key] as number | undefined;
     const width = sized ?? col.minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
-    result.set(key, {
+    result.set(col.key, {
       isFirstPinnedRight: false,
       isLastPinnedLeft: false,
       offset: rightOffset,

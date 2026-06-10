@@ -160,6 +160,7 @@ export const VirtualSelect = ({
             getDropdownStyle(isAlwaysOpen, shouldFillHeight),
             customStylex,
           )}
+          popover='auto'
         >
           <VirtualList
             dataState={effectiveDataState}

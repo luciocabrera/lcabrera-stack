@@ -1,9 +1,13 @@
-import type { ColumnPinningState } from '@/components/Table/Table.types';
+import type {
+  ColumnOrderState,
+  ColumnPinningState,
+  DataKey,
+} from '@/components/Table/Table.types';
 
-type InsertAdjacentToPinnedGroupArgs = {
-  readonly columnKey: string;
-  readonly columnPinning: ColumnPinningState;
-  readonly order: readonly string[];
+type InsertAdjacentToPinnedGroupArgs<TData> = {
+  readonly columnKey: DataKey<TData>;
+  readonly columnPinning: ColumnPinningState<TData>;
+  readonly order: readonly DataKey<TData>[];
   readonly side: 'left' | 'right';
 };
 
@@ -13,12 +17,12 @@ type InsertAdjacentToPinnedGroupArgs = {
  * - For 'right': inserts before the first right-pinned column.
  * Returns a new order array without mutating the input.
  */
-export const insertAdjacentToPinnedGroup = ({
+export const insertAdjacentToPinnedGroup = <TData>({
   columnKey,
   columnPinning,
   order,
   side,
-}: InsertAdjacentToPinnedGroupArgs): string[] => {
+}: InsertAdjacentToPinnedGroupArgs<TData>): ColumnOrderState<TData> => {
   const nextOrder = [...order];
 
   if (side === 'left') {

@@ -18,6 +18,7 @@ import {
   getEffectiveColumns,
   getPinnedColumnOffsets,
   splitColumnsByPinning,
+  syncColumnOrderWithPinning,
 } from '@/components/Table/utils';
 
 type AcceptHeaderPinConflictArgs<TData> = {
@@ -25,6 +26,8 @@ type AcceptHeaderPinConflictArgs<TData> = {
   readonly resolution: PinConflictResolution;
   readonly side: 'left' | 'right';
 };
+
+// TODO: Check all types casting here, I think they could be improved
 
 export const useAcceptHeaderPinConflict = <TData>() => {
   const { columnsStore, metaStore } = useTableConfigContextValue<TData>();
@@ -45,6 +48,8 @@ export const useAcceptHeaderPinConflict = <TData>() => {
     const persistenceKey = metaStore.get()?.persistenceKey ?? '';
 
     const staticKeys = columnsState?.staticKeys;
+    const currentOrder =
+      columnsState?.columnOrder ?? ([] as ColumnOrderState<TData>);
 
     const allOrderedColumns = buildAllOrderedColumns({ columns, columnsOrder });
     const index = allOrderedColumns.findIndex((col) => col.key === columnKey);
@@ -62,38 +67,48 @@ export const useAcceptHeaderPinConflict = <TData>() => {
 
       const column = allOrderedColumns[index];
       if (column?.key) {
-        newOrder = insertAdjacentToPinnedGroup({
+        newOrder = insertAdjacentToPinnedGroup<TData>({
           columnKey: column.key,
-          columnPinning: currentPinning as ColumnPinningState,
+          columnPinning: currentPinning,
           order: newOrder,
           side,
-        }) as ColumnOrderState<TData>;
+        });
       }
 
       newPinning = applyPin({
         columnKey,
-        columnPinning: currentPinning as ColumnPinningState,
+        columnPinning: currentPinning,
         side,
         staticKeys,
-      }) as ColumnPinningState<TData>;
+      });
     } else if (resolution === 'pin-all-between') {
       newPinning = pinAllBetween<DataKey<TData>>({
         allOrderedKeys,
-        columnPinning: currentPinning as ColumnPinningState<TData>,
+        columnPinning: currentPinning,
         index,
         side,
-      }) as ColumnPinningState<TData>;
+      });
     } else {
       newPinning = applyPin({
         columnKey,
-        columnPinning: currentPinning as ColumnPinningState,
+        columnPinning: currentPinning,
         side,
         staticKeys,
-      }) as ColumnPinningState<TData>;
+      });
+    }
+
+    if (!newOrder) {
+      newOrder = syncColumnOrderWithPinning<TData>({
+        columnKey,
+        columnPinning: side,
+        columns,
+        currentOrder,
+        newPinning,
+      });
     }
 
     const effectiveColumns = getEffectiveColumns({
-      columnOrder: newOrder ?? columnsState?.columnOrder,
+      columnOrder: newOrder,
       columnPinning: newPinning,
       columns,
       columnVisibility: columnsState?.columnVisibility,

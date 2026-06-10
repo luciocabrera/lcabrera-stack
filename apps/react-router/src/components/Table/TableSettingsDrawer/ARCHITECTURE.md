@@ -26,7 +26,7 @@ TableSettingsDrawer/
 │   │   ├── useResetSorting                → Reset sorting from table
 │   │   ├── useResetTableSettings          → Reset all from table
 │   │   ├── useSetColumnFilters            → Set filters object
-│   │   ├── useSetColumnPinning            → Set pinning state
+│   │   ├── useSetColumnPinning            → Set pinning state + sync draft order
 │   │   ├── useSetColumnsOrder             → Set column order array
 │   │   ├── useSetColumnsSizing            → Set column widths
 │   │   ├── useSetColumnsSortings          → Set sorting array

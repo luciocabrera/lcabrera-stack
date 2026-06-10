@@ -49,15 +49,15 @@ graph TD
   end
 ```
 
-| Function                     | Input                      | Output                          | Purpose                                |
-| ---------------------------- | -------------------------- | ------------------------------- | -------------------------------------- |
-| `getEffectiveColumns`        | columns, order, visibility | `TableColumn[]`                 | Visible columns in display order       |
-| `getNormalizedColummns`      | columns, sorting           | `NormalizedColumnsState`        | Columns enriched with sort metadata    |
-| `getStaticColumnKeys`        | columns                    | `Set<string>`                   | Keys of locked/static columns          |
-| `getPinnedColumnOffsets`     | pinning, sizing, columns   | `Record<key, PinnedColumnInfo>` | Sticky positions for pinned columns    |
-| `getColumnPinSide`           | columnKey, pinning         | `PinSide \| undefined`          | Which side a column is pinned to       |
-| `splitColumnsByPinning`      | pinning, effectiveColumns  | `ColumnGroupsState`             | Split columns into left/center/right   |
-| `syncColumnOrderWithPinning` | order, pinning             | `string[]`                      | Reorder to keep pinned columns grouped |
+| Function                     | Input                      | Output                          | Purpose                                                                              |
+| ---------------------------- | -------------------------- | ------------------------------- | ------------------------------------------------------------------------------------ |
+| `getEffectiveColumns`        | columns, order, visibility | `TableColumn[]`                 | Visible columns in display order; pinned columns follow the reconciled display order |
+| `getNormalizedColummns`      | columns, sorting           | `NormalizedColumnsState`        | Columns enriched with sort metadata                                                  |
+| `getStaticColumnKeys`        | columns                    | `Set<string>`                   | Keys of locked/static columns                                                        |
+| `getPinnedColumnOffsets`     | pinning, sizing, columns   | `Record<key, PinnedColumnInfo>` | Sticky positions for pinned columns                                                  |
+| `getColumnPinSide`           | columnKey, pinning         | `PinSide \| undefined`          | Which side a column is pinned to                                                     |
+| `splitColumnsByPinning`      | pinning, effectiveColumns  | `ColumnGroupsState`             | Split columns into left/center/right                                                 |
+| `syncColumnOrderWithPinning` | order, pinning             | `string[]`                      | Reorder to keep pinned columns grouped and keep the order slice in sync              |
 
 ## Persistence Utilities
 

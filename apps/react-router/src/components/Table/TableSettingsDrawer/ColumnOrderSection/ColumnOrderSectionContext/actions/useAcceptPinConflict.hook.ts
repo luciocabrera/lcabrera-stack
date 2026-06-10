@@ -9,9 +9,10 @@ import {
   pinAllBetween,
 } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 import { useTableDrawerContextValue } from '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
+import { syncColumnOrderWithPinning } from '@/components/Table/utils';
 
 import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
-
+// TODO: Check all types casting here, I think they could be improved
 /**
  * Hook to handle accepting a pin conflict resolution.
  */
@@ -64,6 +65,18 @@ export const useAcceptPinConflict = () => {
       });
     } else if (resolution === 'pin-all-between') {
       drawerColumnsStore.set({
+        columnOrder: syncColumnOrderWithPinning({
+          columnKey,
+          columnPinning: side,
+          columns,
+          currentOrder: columnsOrder,
+          newPinning: pinAllBetween({
+            allOrderedKeys: allOrderedColumns.map((column) => column.key),
+            columnPinning,
+            index,
+            side,
+          }),
+        }),
         columnPinning: pinAllBetween({
           allOrderedKeys: allOrderedColumns.map((column) => column.key),
           columnPinning,
@@ -72,13 +85,22 @@ export const useAcceptPinConflict = () => {
         }),
       });
     } else {
+      const newPinning = applyPin({
+        columnKey,
+        columnPinning,
+        side,
+        staticKeys,
+      });
+
       drawerColumnsStore.set({
-        columnPinning: applyPin({
+        columnOrder: syncColumnOrderWithPinning({
           columnKey,
-          columnPinning,
-          side,
-          staticKeys,
+          columnPinning: side,
+          columns,
+          currentOrder: columnsOrder,
+          newPinning,
         }),
+        columnPinning: newPinning,
       });
     }
 

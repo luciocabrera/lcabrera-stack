@@ -1,4 +1,5 @@
 import type {
+  ColumnOrderState,
   ColumnPinningState,
   ColumnSizingState,
   DataKey,
@@ -10,13 +11,14 @@ import {
   getEffectiveColumns,
   getPinnedColumnOffsets,
   splitColumnsByPinning,
+  syncColumnOrderWithPinning,
 } from '@/components/Table/utils';
 
 type SetColumnPinningArgs<TData> = {
   readonly columnKey: DataKey<TData>;
-  readonly side: 'left' | 'right' | undefined;
+  readonly side?: 'left' | 'right';
 };
-
+// TODO: Check all types casting here, I think they could be improved
 export const useSetColumnPinning = <TData>() => {
   const { columnsStore, metaStore } = useTableConfigContextValue<TData>();
   const persistTableState = usePersistTableStateAction();
@@ -27,6 +29,9 @@ export const useSetColumnPinning = <TData>() => {
       left: [],
       right: [],
     };
+    const columns = columnsState?.columns ?? [];
+    const currentOrder =
+      columnsState?.columnOrder ?? ([] as ColumnOrderState<TData>);
     const persistenceKey = metaStore.get()?.persistenceKey ?? '';
 
     const left = currentPinning.left.filter((k) => k !== columnKey);
@@ -41,10 +46,18 @@ export const useSetColumnPinning = <TData>() => {
       newPinning = { left, right };
     }
 
+    const newColumnOrder = syncColumnOrderWithPinning<TData>({
+      columnKey,
+      columnPinning: side,
+      columns,
+      currentOrder,
+      newPinning,
+    });
+
     const effectiveColumns = getEffectiveColumns({
-      columnOrder: columnsState?.columnOrder,
+      columnOrder: newColumnOrder,
       columnPinning: newPinning,
-      columns: columnsState?.columns ?? [],
+      columns,
       columnVisibility: columnsState?.columnVisibility,
     });
 
@@ -66,9 +79,15 @@ export const useSetColumnPinning = <TData>() => {
       slice: 'columnPinning',
       valueSlice: newPinning,
     });
+    persistTableState({
+      persistenceKey,
+      slice: 'columnOrder',
+      valueSlice: newColumnOrder,
+    });
 
     columnsStore.set({
       columnGroups,
+      columnOrder: newColumnOrder,
       columnPinning: newPinning,
       effectiveColumns,
       pinnedColumnOffsets,

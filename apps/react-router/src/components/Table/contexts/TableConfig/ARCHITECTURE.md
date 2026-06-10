@@ -150,18 +150,18 @@ graph TD
 
 ## Columns Actions
 
-| Hook                         | Reads From     | Writes To      | Description                                 |
-| ---------------------------- | -------------- | -------------- | ------------------------------------------- |
-| `useBatchSetColumnSettings`  | —              | `columnsStore` | Bulk-set multiple column fields at once     |
-| `useBatchSetTableSettings`   | —              | `columnsStore` | Push all settings from TableSettingsDrawer  |
-| `useResetColumnFilter`       | —              | `columnsStore` | Remove filter for a single column           |
-| `useSetColumnFilter`         | —              | `columnsStore` | Set filter value for a single column        |
-| `useSetColumnPinning`        | `columnsStore` | `columnsStore` | Update pinning with conflict resolution     |
-| `useSetColumnSizing`         | —              | `columnsStore` | Set column width map                        |
-| `useSetColumnSorting`        | `columnsStore` | `columnsStore` | Toggle/set sort for a column                |
-| `useSyncColumnsSizing`       | `columnsStore` | `columnsStore` | Recalculate sizing after layout shift       |
-| `useAcceptHeaderPinConflict` | `columnsStore` | `columnsStore` | Resolve pin contiguity conflict from header |
-| `useAcceptHeaderPinSide`     | `columnsStore` | `columnsStore` | Accept pin side choice from header          |
+| Hook                         | Reads From     | Writes To      | Description                                                       |
+| ---------------------------- | -------------- | -------------- | ----------------------------------------------------------------- |
+| `useBatchSetColumnSettings`  | —              | `columnsStore` | Bulk-set multiple column fields at once                           |
+| `useBatchSetTableSettings`   | —              | `columnsStore` | Push all settings from TableSettingsDrawer                        |
+| `useResetColumnFilter`       | —              | `columnsStore` | Remove filter for a single column                                 |
+| `useSetColumnFilter`         | —              | `columnsStore` | Set filter value for a single column                              |
+| `useSetColumnPinning`        | `columnsStore` | `columnsStore` | Update pinning and keep column order synced                       |
+| `useSetColumnSizing`         | —              | `columnsStore` | Set column width map                                              |
+| `useSetColumnSorting`        | `columnsStore` | `columnsStore` | Toggle/set sort for a column                                      |
+| `useSyncColumnsSizing`       | `columnsStore` | `columnsStore` | Recalculate sizing after layout shift                             |
+| `useAcceptHeaderPinConflict` | `columnsStore` | `columnsStore` | Resolve pin contiguity conflict from header and keep order synced |
+| `useAcceptHeaderPinSide`     | `columnsStore` | `columnsStore` | Accept pin side choice from header and keep order synced          |
 
 ## Columns Selectors
 

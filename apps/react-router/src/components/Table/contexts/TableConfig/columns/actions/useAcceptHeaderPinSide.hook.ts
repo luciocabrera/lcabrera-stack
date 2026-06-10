@@ -18,13 +18,14 @@ import {
   getEffectiveColumns,
   getPinnedColumnOffsets,
   splitColumnsByPinning,
+  syncColumnOrderWithPinning,
 } from '@/components/Table/utils';
 
 type AcceptHeaderPinSideArgs<TData> = {
   readonly columnKey: DataKey<TData>;
   readonly pinSide: PinSide;
 };
-
+// TODO: Check all types casting here, I think they could be improved
 export const useAcceptHeaderPinSide = <TData>() => {
   const { columnsStore, metaStore } = useTableConfigContextValue<TData>();
   const persistTableState = usePersistTableStateAction();
@@ -50,10 +51,10 @@ export const useAcceptHeaderPinSide = <TData>() => {
       pinSide,
     });
 
-    const isContiguous = getIsContiguousPin({
+    const isContiguous = getIsContiguousPin<TData>({
       allOrderedColumns,
       columnKey,
-      columnPinning: columnPinning as ColumnPinningState,
+      columnPinning,
       side,
     });
 
@@ -62,30 +63,40 @@ export const useAcceptHeaderPinSide = <TData>() => {
     }
 
     const staticKeys = columnsState?.staticKeys;
+    const currentOrder =
+      columnsState?.columnOrder ?? ([] as ColumnOrderState<TData>);
 
-    const newPinning = applyPin({
+    const newPinning = applyPin<TData>({
       columnKey,
-      columnPinning: columnPinning as ColumnPinningState,
+      columnPinning,
       side,
       staticKeys,
     });
 
+    const newColumnOrder = syncColumnOrderWithPinning<TData>({
+      columnKey,
+      columnPinning: side,
+      columns,
+      currentOrder,
+      newPinning,
+    });
+
     const effectiveColumns = getEffectiveColumns({
-      columnOrder: columnsState?.columnOrder,
-      columnPinning: newPinning as ColumnPinningState<TData>,
+      columnOrder: newColumnOrder,
+      columnPinning: newPinning,
       columns,
       columnVisibility: columnsState?.columnVisibility,
     });
 
     const columnGroups = splitColumnsByPinning({
-      columnPinning: newPinning as ColumnPinningState<TData>,
+      columnPinning: newPinning,
       effectiveColumns,
     });
 
     const columnSizing =
       columnsState?.columnSizing ?? ({} as ColumnSizingState<TData>);
     const pinnedColumnOffsets = getPinnedColumnOffsets({
-      columnPinning: newPinning as ColumnPinningState<TData>,
+      columnPinning: newPinning,
       columnSizing,
       effectiveColumns,
     });
@@ -95,10 +106,16 @@ export const useAcceptHeaderPinSide = <TData>() => {
       slice: 'columnPinning',
       valueSlice: newPinning,
     });
+    persistTableState({
+      persistenceKey,
+      slice: 'columnOrder',
+      valueSlice: newColumnOrder,
+    });
 
     columnsStore.set({
       columnGroups,
-      columnPinning: newPinning as ColumnPinningState<TData>,
+      columnOrder: newColumnOrder,
+      columnPinning: newPinning,
       effectiveColumns,
       pinnedColumnOffsets,
     });
