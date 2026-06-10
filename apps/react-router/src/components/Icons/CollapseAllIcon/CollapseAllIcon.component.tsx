@@ -16,8 +16,8 @@ export const CollapseAllIcon = ({ size = 16, ...props }: IconProps) => (
     <path d='M11 6h10' />
     <path d='M11 12h10' />
     <path d='M11 18h10' />
-    <path d='M4 4l3 2-3 2' />
-    <path d='M4 10l3 2-3 2' />
-    <path d='M4 16l3 2-3 2' />
+    <path d='M3 5l3 3 3-3' />
+    <path d='M3 12h6' />
+    <path d='M3 19l3-3 3 3' />
   </svg>
 );
