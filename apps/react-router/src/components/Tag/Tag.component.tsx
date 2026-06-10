@@ -21,6 +21,7 @@ export const Tag = ({ label, onRemove }: TagProps) => (
       }}
       size='embedded'
       width='auto'
+      tooltipContent={`Remove ${label}`}
     />
   </span>
 );

@@ -14,6 +14,12 @@ import {
 import { useGetColumnsSorting } from '../../TableDrawerContext/selectors';
 import { styles } from './SortingSectionToolbar.stylex';
 
+const SORTING_SECTION_TOOLBAR = {
+  clear: { label: 'Clear Sorting' },
+  reset: { label: 'Reset Sorting' },
+  orderByColumnOrder: { label: 'Sort by Column Order' },
+} as const;
+
 export const SortingSectionToolbar = ({
   variant = 'footer',
 }: SortingSectionToolbarProps) => {
@@ -34,35 +40,46 @@ export const SortingSectionToolbar = ({
   return (
     <div {...stylex.props(isToolbar ? styles.toolbar : styles.container)}>
       <Button
-        aria-label='Sort by Column Order'
+        aria-label={SORTING_SECTION_TOOLBAR.orderByColumnOrder.label}
         color={buttonColor}
         icon={<ListOrderedIcon size={iconSize} />}
         onClick={sortByColumnOrder}
         size={buttonSize}
         width={buttonWidth}
+        tooltipContent={
+          isToolbar
+            ? SORTING_SECTION_TOOLBAR.orderByColumnOrder.label
+            : undefined
+        }
       >
-        {!isToolbar && 'Sort by Column Order'}
+        {!isToolbar && SORTING_SECTION_TOOLBAR.orderByColumnOrder.label}
       </Button>
       <Button
-        aria-label='Clear Sorting'
+        aria-label={SORTING_SECTION_TOOLBAR.clear.label}
         color={buttonColor}
         icon={<EraserIcon size={iconSize} />}
         isDisabled={!hasSorting}
         onClick={clearSorting}
         size={buttonSize}
         width={buttonWidth}
+        tooltipContent={
+          isToolbar ? SORTING_SECTION_TOOLBAR.clear.label : undefined
+        }
       >
-        {!isToolbar && 'Clear Sorting'}
+        {!isToolbar && SORTING_SECTION_TOOLBAR.clear.label}
       </Button>
       <Button
-        aria-label='Reset Sorting'
+        aria-label={SORTING_SECTION_TOOLBAR.reset.label}
         color={buttonColor}
         icon={<RefreshIcon size={iconSize} />}
         onClick={resetSorting}
         size={buttonSize}
         width={buttonWidth}
+        tooltipContent={
+          isToolbar ? SORTING_SECTION_TOOLBAR.reset.label : undefined
+        }
       >
-        {!isToolbar && 'Reset Sorting'}
+        {!isToolbar && SORTING_SECTION_TOOLBAR.reset.label}
       </Button>
     </div>
   );

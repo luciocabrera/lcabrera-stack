@@ -69,7 +69,7 @@ export const ActiveSortList = () => {
         <span {...stylex.props(styles.sortItemLabel)}>{item.label}</span>
         <div {...stylex.props(styles.sortItemControls)}>
           <Button
-            aria-label={`Sort ${item.direction === 'asc' ? 'ascending' : 'descending'}`}
+            aria-label={`Sort ${item.label} ${item.direction === 'asc' ? 'ascending' : 'descending'}`}
             color='ghost'
             icon={
               item.direction === 'asc' ? (
@@ -82,15 +82,17 @@ export const ActiveSortList = () => {
               handleToggleDirection(item.columnKey);
             }}
             size='mini'
+            tooltipContent={`Sort ${item.label} ${item.direction === 'asc' ? 'ascending' : 'descending'}`}
           />
           <Button
-            aria-label='Remove sort'
+            aria-label={`Remove ${item.label} sort`}
             color='ghost'
             icon={<MenuCloseIcon size={ICON_SIZE_MD} />}
             onClick={() => {
               handleRemoveSort(item.columnKey);
             }}
             size='mini'
+            tooltipContent={`Remove ${item.label} sort`}
           />
         </div>
       </div>
