@@ -35,10 +35,10 @@ catalog:
   eslint-config-prettier: ^10.1.8
   eslint-plugin-local-rules: ^3.0.2
   eslint-plugin-perfectionist: ^5.9.0
-  eslint-plugin-react-dom: ^5.8.16
+  eslint-plugin-react-dom: ^5.8.17
   eslint-plugin-react-hooks: ^7.1.1
   eslint-plugin-react-refresh: ^0.5.2
-  eslint-plugin-react-x: ^5.8.16
+  eslint-plugin-react-x: ^5.8.17
   eslint-plugin-security: ^4.0.0
   eslint-plugin-unicorn: ^65.0.1
   express: ^5.2.1
@@ -47,7 +47,7 @@ catalog:
   isbot: ^5.1.42
   jsdom: ^29.1.1
   knip: ^6.16.1
-  lighthouse: ^13.3.0
+  lighthouse: ^13.4.0
   nodemon: ^3.1.14
   pg: ^8.21.0
   playwright: ^1.60.0
@@ -93,6 +93,15 @@ minimumReleaseAgeExclude:
   - eslint-plugin-unicorn@65.0.1
   - isbot@5.1.42
   - typescript-eslint@8.61.0
+  - '@eslint-react/ast@5.8.17'
+  - '@eslint-react/core@5.8.17'
+  - '@eslint-react/eslint@5.8.17'
+  - '@eslint-react/jsx@5.8.17'
+  - '@eslint-react/shared@5.8.17'
+  - '@eslint-react/var@5.8.17'
+  - eslint-plugin-react-dom@5.8.17
+  - eslint-plugin-react-x@5.8.17
+  - lighthouse@13.4.0
 
 # overrides:
 #   vite: "catalog:"
