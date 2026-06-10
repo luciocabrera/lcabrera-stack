@@ -39,8 +39,10 @@ export const CarSales = () => {
         })
       }
       persistenceKey={PERSISTENCE_KEY}
+      schemaName='public'
       sorting={sorting}
       suspenseKey={key}
+      tableName='car_sales'
       title='Car Sales Data - Infinite Scroll'
     />
   );

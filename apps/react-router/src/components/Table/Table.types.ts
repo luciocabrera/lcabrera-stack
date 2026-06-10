@@ -217,7 +217,12 @@ export type TableDataState<TData> = {
 
 export type TableDensity = 'comfortable' | 'compact';
 
+export type TableMetadataValue = boolean | number | string;
+
 export type TableMetaState = {
+  readonly additionalMetadata?: Readonly<
+    Record<string, TableMetadataValue | null | undefined>
+  >;
   readonly columnOverscan: number;
   readonly columnSelectedKey?: string;
   readonly density: TableDensity;
@@ -239,6 +244,8 @@ export type TableMetaState = {
   readonly persistenceKey: string;
   readonly placeholderRowCount: number;
   readonly rowHeight: number;
+  readonly schemaName?: string;
+  readonly tableName?: string;
   readonly threshold: number;
   readonly title?: string;
 };

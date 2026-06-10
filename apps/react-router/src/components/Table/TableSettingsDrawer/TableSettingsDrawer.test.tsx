@@ -142,6 +142,10 @@ vi.mock('./ColumnOrderSection', () => ({
   ColumnOrderSection: () => <div>Column order section</div>,
 }));
 
+vi.mock('./DetailsSection', () => ({
+  DetailsSection: () => <div>Details section</div>,
+}));
+
 vi.mock(
   './ColumnOrderSection/ColumnOrderSectionContext/ColumnOrderSectionContext.provider',
   () => ({
@@ -186,10 +190,11 @@ describe('TableSettingsDrawer', () => {
   it('renders the expected section tabs', () => {
     render(<TableSettingsDrawer />);
 
+    expect(screen.getByText('Details').textContent).toBe('Details');
     expect(screen.getByText('General').textContent).toBe('General');
     expect(screen.getByText('Filters').textContent).toBe('Filters');
     expect(screen.getByRole('heading', { name: 'Sorting' }).textContent).toBe(
-      ' Sorting',
+      'Sorting',
     );
     expect(screen.getByText('Columns').textContent).toBe('Columns');
   });

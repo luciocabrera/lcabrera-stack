@@ -46,6 +46,12 @@ TableSettingsDrawer/
 │   ├── GeneralSettingsSection.stylex.ts
 │   └── index.ts
 │
+├── DetailsSection/                        → Read-only table metadata and metrics
+│   ├── DetailsSection.component.tsx
+│   ├── DetailsSection.types.ts
+│   ├── DetailsSection.stylex.ts
+│   └── index.ts
+│
 ├── FiltersSection/                        → Multi-filter add/remove/expand/validate
 │   ├── FiltersSection.component.tsx        → Orchestrator
 │   ├── index.ts
@@ -100,6 +106,9 @@ graph LR
   GeneralSettingsSection --> SortingSectionToolbar
   GeneralSettingsSection --> ColumnOrderSectionToolbar
 
+  DetailsSection --> TableConfigContext
+  DetailsSection --> TableDataContext
+
   FiltersSection --> TableDrawerContext
   FiltersSection --> TableConfigContext
   FiltersSection --> FilterInputs["Table/filters/FilterInputs"]
@@ -127,6 +136,9 @@ graph TD
 
   D --> E["Tab: General"]
   E --> F["GeneralSettingsSection"]
+
+  D --> E2["Tab: Details"]
+  E2 --> F2["DetailsSection"]
 
   D --> G["Tab: Filters"]
   G --> H["FiltersSection"]
@@ -176,6 +188,7 @@ a toolbar in dual-variant mode.
 | Section                  | Tab     | Features                                                           | Details                                                   |
 | ------------------------ | ------- | ------------------------------------------------------------------ | --------------------------------------------------------- |
 | `GeneralSettingsSection` | General | Width presets, cross-section clear/reset, all settings clear/reset | [ARCHITECTURE.md](GeneralSettingsSection/ARCHITECTURE.md) |
+| `DetailsSection`         | Details | Required row counts, optional table/schema, technical metadata     | [ARCHITECTURE.md](DetailsSection/ARCHITECTURE.md)         |
 | `FiltersSection`         | Filters | Add/remove/expand filters, FilterInputs, validation                | [ARCHITECTURE.md](FiltersSection/ARCHITECTURE.md)         |
 | `SortingSection`         | Sorting | Add/remove/reorder sorts, direction toggle                         | [ARCHITECTURE.md](SortingSection/ARCHITECTURE.md)         |
 | `ColumnOrderSection`     | Columns | Drag-drop reorder, pin toggle, visibility toggle, conflict modals  | [ARCHITECTURE.md](ColumnOrderSection/ARCHITECTURE.md)     |

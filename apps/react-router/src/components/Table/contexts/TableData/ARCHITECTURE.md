@@ -23,7 +23,9 @@ TableData/
 │       ├── useGetTableData.hook.ts          → Full data array
 │       ├── useGetTableHasMore.hook.ts       → Whether more pages exist
 │       ├── useGetTableIsLoading.hook.ts     → Initial loading state
-│       └── useGetTableIsLoadingMore.hook.ts → Pagination loading state
+│       ├── useGetTableIsLoadingMore.hook.ts → Pagination loading state
+│       ├── useGetTableTotalLoadedRows.hook.ts → Loaded row count
+│       └── useGetTableTotalRows.hook.ts     → Total records count
 │
 └── utils/
     ├── getInitialDataState.util.ts          → Build initial state with derived fields
@@ -97,9 +99,11 @@ After fetch:
 
 ## Selectors
 
-| Hook                       | Returns   | Description                       |
-| -------------------------- | --------- | --------------------------------- |
-| `useGetTableData`          | `TData[]` | Full array of loaded rows         |
-| `useGetTableHasMore`       | `boolean` | Whether more pages can be fetched |
-| `useGetTableIsLoading`     | `boolean` | Initial loading state             |
-| `useGetTableIsLoadingMore` | `boolean` | Pagination loading state          |
+| Hook                         | Returns   | Description                         |
+| ---------------------------- | --------- | ----------------------------------- |
+| `useGetTableData`            | `TData[]` | Full array of loaded rows           |
+| `useGetTableHasMore`         | `boolean` | Whether more pages can be fetched   |
+| `useGetTableIsLoading`       | `boolean` | Initial loading state               |
+| `useGetTableIsLoadingMore`   | `boolean` | Pagination loading state            |
+| `useGetTableTotalLoadedRows` | `number`  | Number of currently loaded rows     |
+| `useGetTableTotalRows`       | `number`  | Total record count from data source |
