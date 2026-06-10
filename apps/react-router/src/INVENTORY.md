@@ -13,7 +13,7 @@ Before creating anything new, check this inventory. If something here does the j
 | `Card`               | `components/Card/`                | Container with elevation, color, padding, and optional interactivity                                                              |
 | `DevStyleXInject`    | `components/DevStyleXInject/`     | Dev-only StyleX CSS injector for HMR; must be at app root                                                                         |
 | `DraggableList`      | `components/DraggableList/`       | Drag-and-drop reorderable list using native drag events                                                                           |
-| `Icons`              | `components/Icons/`               | 30 SVG icon components (see `Icons/index.ts` for full list)                                                                       |
+| `Icons`              | `components/Icons/`               | 32 SVG icon components (see `Icons/index.ts` for full list)                                                                       |
 | `InfoBox`            | `components/InfoBox/`             | Styled container for informational messages and empty states                                                                      |
 | `Modal`              | `components/Modal/`               | Native `<dialog>` modal with title, footer, Esc-to-close                                                                          |
 | `NavLink`            | `components/NavLink/`             | Router-aware navigation link with color, size, icon, orientation                                                                  |

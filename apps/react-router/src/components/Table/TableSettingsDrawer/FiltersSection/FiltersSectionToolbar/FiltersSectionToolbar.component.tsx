@@ -2,9 +2,9 @@ import * as stylex from '@stylexjs/stylex';
 
 import { Button } from '@/components/Button';
 import {
+  CollapseAllIcon,
   EraserIcon,
-  ListAllIcon,
-  ListUncheckedIcon,
+  ExpandAllIcon,
   RefreshIcon,
 } from '@/components/Icons';
 import { ICON_SIZE_MD, ICON_SIZE_SM } from '@/design-system/constants';
@@ -78,7 +78,7 @@ export const FiltersSectionToolbar = ({
       <Button
         aria-label={FILTERS_TOOLBAR.expandAll.label}
         color={buttonColor}
-        icon={<ListAllIcon size={iconSize} />}
+        icon={<ExpandAllIcon size={iconSize} />}
         isDisabled={isExpandAllDisabled}
         onClick={onExpandAll}
         size={buttonSize}
@@ -90,7 +90,7 @@ export const FiltersSectionToolbar = ({
       <Button
         aria-label={FILTERS_TOOLBAR.collapseAll.label}
         color={buttonColor}
-        icon={<ListUncheckedIcon size={iconSize} />}
+        icon={<CollapseAllIcon size={iconSize} />}
         isDisabled={isCollapseAllDisabled}
         onClick={onCollapseAll}
         size={buttonSize}

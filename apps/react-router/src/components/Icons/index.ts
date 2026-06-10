@@ -1,8 +1,10 @@
 export { BarChartIcon } from './BarChartIcon';
 export { CheckIcon } from './CheckIcon';
+export { CollapseAllIcon } from './CollapseAllIcon';
 export { ColumnsOrderIcon } from './ColumnsOrderIcon';
 export { EraserIcon } from './EraserIcon';
 export { ErrorIcon } from './ErrorIcon';
+export { ExpandAllIcon } from './ExpandAllIcon';
 export { EyeIcon } from './EyeIcon';
 export { FileTextIcon } from './FileTextIcon';
 export { FilterIcon } from './FilterIcon';

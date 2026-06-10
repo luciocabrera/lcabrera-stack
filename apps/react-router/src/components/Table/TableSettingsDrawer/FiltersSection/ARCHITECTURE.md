@@ -63,7 +63,7 @@ graph LR
   ActiveFilters --> validateFilter["validateFilter util"]
 
   FSToolbar --> Button2["Button"]
-  FSToolbar --> Icons["EraserIcon, ListAllIcon, ListUncheckedIcon, RefreshIcon"]
+  FSToolbar --> Icons["CollapseAllIcon, EraserIcon, ExpandAllIcon, RefreshIcon"]
   FSToolbar --> useClearFilters["useClearFilters (action)"]
   FSToolbar --> useResetFilters["useResetFilters (action)"]
   FSToolbar --> useGetColumnFilters3["useGetColumnFilters (selector)"]

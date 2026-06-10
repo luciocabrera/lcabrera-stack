@@ -35,6 +35,9 @@ Icons/
 ├── CheckIcon/
 │   ├── CheckIcon.component.tsx
 │   └── index.ts
+├── CollapseAllIcon/
+│   ├── CollapseAllIcon.component.tsx
+│   └── index.ts
 ├── ColumnsOrderIcon/
 │   ├── ColumnsOrderIcon.component.tsx
 │   └── index.ts
@@ -43,6 +46,9 @@ Icons/
 │   └── index.ts
 ├── ErrorIcon/
 │   ├── ErrorIcon.component.tsx
+│   └── index.ts
+├── ExpandAllIcon/
+│   ├── ExpandAllIcon.component.tsx
 │   └── index.ts
 ├── EyeIcon/
 │   ├── EyeIcon.component.tsx
@@ -239,13 +245,13 @@ This keeps consumer imports stable and avoids long per-icon file paths.
 
 The set naturally groups into a few functional families:
 
-| Family              | Icons                                                                                                                                                                         |
-| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Navigation          | `HomeIcon`, `UserIcon`, `MenuIcon`, `MoreVerticalIcon`, `SettingsIcon`                                                                                                        |
-| Status and Feedback | `InfoIcon`, `SuccessIcon`, `WarningIcon`, `ErrorIcon`, `CheckIcon`                                                                                                            |
-| Table and Data      | `ColumnsOrderIcon`, `FilterIcon`, `SortAscIcon`, `SortDescIcon`, `SortNeutralIcon`, `SortClearIcon`, `ListAllIcon`, `ListCheckedIcon`, `ListUncheckedIcon`, `ListOrderedIcon` |
-| Pinning and Layout  | `PinIcon`, `PinLeftIcon`, `PinRightIcon`, `PinOffIcon`, `MaximizeIcon`, `MinimizeIcon`                                                                                        |
-| Actions             | `RefreshIcon`, `EraserIcon`, `LockIcon`, `EyeIcon`, `MenuCloseIcon`, `FileTextIcon`, `BarChartIcon`                                                                           |
+| Family              | Icons                                                                                                                                                                                                             |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Navigation          | `HomeIcon`, `UserIcon`, `MenuIcon`, `MoreVerticalIcon`, `SettingsIcon`                                                                                                                                            |
+| Status and Feedback | `InfoIcon`, `SuccessIcon`, `WarningIcon`, `ErrorIcon`, `CheckIcon`                                                                                                                                                |
+| Table and Data      | `ColumnsOrderIcon`, `FilterIcon`, `SortAscIcon`, `SortDescIcon`, `SortNeutralIcon`, `SortClearIcon`, `ListAllIcon`, `ListCheckedIcon`, `ListUncheckedIcon`, `ListOrderedIcon`, `ExpandAllIcon`, `CollapseAllIcon` |
+| Pinning and Layout  | `PinIcon`, `PinLeftIcon`, `PinRightIcon`, `PinOffIcon`, `MaximizeIcon`, `MinimizeIcon`                                                                                                                            |
+| Actions             | `RefreshIcon`, `EraserIcon`, `LockIcon`, `EyeIcon`, `MenuCloseIcon`, `FileTextIcon`, `BarChartIcon`                                                                                                               |
 
 ## Representative Examples
 
