@@ -1,7 +1,12 @@
 import * as stylex from '@stylexjs/stylex';
 
 import { Button } from '@/components/Button';
-import { EraserIcon, RefreshIcon } from '@/components/Icons';
+import {
+  EraserIcon,
+  ListAllIcon,
+  ListUncheckedIcon,
+  RefreshIcon,
+} from '@/components/Icons';
 import { ICON_SIZE_MD, ICON_SIZE_SM } from '@/design-system/constants';
 
 import type { FiltersSectionToolbarProps } from './FiltersSectionToolbar.types';
@@ -15,11 +20,17 @@ import { styles } from './FiltersSectionToolbar.stylex';
 
 const FILTERS_TOOLBAR = {
   clear: { label: 'Clear Filters' },
+  collapseAll: { label: 'Collapse All Filters' },
+  expandAll: { label: 'Expand All Filters' },
   reset: { label: 'Reset Filters' },
 } as const;
 
 export const FiltersSectionToolbar = ({
+  isCollapseAllDisabled = false,
+  isExpandAllDisabled = false,
   onClearAll,
+  onCollapseAll,
+  onExpandAll,
   variant = 'footer',
 }: FiltersSectionToolbarProps) => {
   const filters = useGetColumnFilters();
@@ -63,6 +74,32 @@ export const FiltersSectionToolbar = ({
         tooltipContent={isToolbar ? FILTERS_TOOLBAR.reset.label : undefined}
       >
         {!isToolbar && FILTERS_TOOLBAR.reset.label}
+      </Button>
+      <Button
+        aria-label={FILTERS_TOOLBAR.expandAll.label}
+        color={buttonColor}
+        icon={<ListAllIcon size={iconSize} />}
+        isDisabled={isExpandAllDisabled}
+        onClick={onExpandAll}
+        size={buttonSize}
+        width={buttonWidth}
+        tooltipContent={isToolbar ? FILTERS_TOOLBAR.expandAll.label : undefined}
+      >
+        {!isToolbar && FILTERS_TOOLBAR.expandAll.label}
+      </Button>
+      <Button
+        aria-label={FILTERS_TOOLBAR.collapseAll.label}
+        color={buttonColor}
+        icon={<ListUncheckedIcon size={iconSize} />}
+        isDisabled={isCollapseAllDisabled}
+        onClick={onCollapseAll}
+        size={buttonSize}
+        width={buttonWidth}
+        tooltipContent={
+          isToolbar ? FILTERS_TOOLBAR.collapseAll.label : undefined
+        }
+      >
+        {!isToolbar && FILTERS_TOOLBAR.collapseAll.label}
       </Button>
     </div>
   );

@@ -52,7 +52,7 @@ TableSettingsDrawer/
 │   ├── validateFilter.util.ts
 │   ├── AddFilterSection/                  → VirtualSelect for adding filters
 │   ├── ActiveFiltersList/                 → Expandable filter items with FilterInputs
-│   └── FiltersSectionToolbar/             → Clear/reset filter (toolbar + footer)
+│   └── FiltersSectionToolbar/             → Expand/collapse/clear/reset filter (toolbar + footer)
 │
 ├── SortingSection/                        → Multi-sort add/remove/reorder
 │   ├── SortingSection.component.tsx        → Orchestrator

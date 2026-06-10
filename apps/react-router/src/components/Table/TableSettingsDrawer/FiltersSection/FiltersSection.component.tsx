@@ -6,6 +6,7 @@ import {
 } from '@/components/SidePanel';
 
 import { useSetColumnFilters } from '../TableDrawerContext/actions';
+import { useGetColumnFilters } from '../TableDrawerContext/selectors';
 import { ActiveFiltersList } from './ActiveFiltersList';
 import { AddFilterSection } from './AddFilterSection';
 import { FiltersSectionToolbar } from './FiltersSectionToolbar';
@@ -17,6 +18,7 @@ import { FiltersSectionToolbar } from './FiltersSectionToolbar';
  */
 
 export const FiltersSection = () => {
+  const filters = useGetColumnFilters();
   const onFiltersChange = useSetColumnFilters();
 
   const [expandedFilters, setExpandedFilters] = useState<Set<string>>(
@@ -29,6 +31,23 @@ export const FiltersSection = () => {
     setExpandedFilters(new Set());
   };
 
+  const filterKeys = Object.keys(filters);
+  const hasFilters = filterKeys.length > 0;
+  const hasExpandedFilters = expandedFilters.size > 0;
+  const areAllFiltersExpanded =
+    hasFilters &&
+    filterKeys.every((filterKey) => {
+      return expandedFilters.has(filterKey);
+    });
+
+  const handleCollapseAll = () => {
+    setExpandedFilters(new Set());
+  };
+
+  const handleExpandAll = () => {
+    setExpandedFilters(new Set(filterKeys));
+  };
+
   return (
     <SidePanelSectionMain>
       <AddFilterSection
@@ -39,9 +58,19 @@ export const FiltersSection = () => {
       <SidePanelSectionOverlay isOpen={isAddFilterOpen}>
         <ActiveFiltersList
           expandedFilters={expandedFilters}
+          isCollapseAllDisabled={!hasExpandedFilters}
+          isExpandAllDisabled={!hasFilters || areAllFiltersExpanded}
+          onCollapseAll={handleCollapseAll}
+          onExpandAll={handleExpandAll}
           onExpandedFiltersChange={setExpandedFilters}
         />
-        <FiltersSectionToolbar onClearAll={handleClearLocalState} />
+        <FiltersSectionToolbar
+          isCollapseAllDisabled={!hasExpandedFilters}
+          isExpandAllDisabled={!hasFilters || areAllFiltersExpanded}
+          onCollapseAll={handleCollapseAll}
+          onClearAll={handleClearLocalState}
+          onExpandAll={handleExpandAll}
+        />
       </SidePanelSectionOverlay>
     </SidePanelSectionMain>
   );

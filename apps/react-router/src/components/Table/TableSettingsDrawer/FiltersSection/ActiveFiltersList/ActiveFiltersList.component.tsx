@@ -23,6 +23,10 @@ import { styles } from './ActiveFiltersList.stylex';
 
 export const ActiveFiltersList = ({
   expandedFilters,
+  isCollapseAllDisabled,
+  isExpandAllDisabled,
+  onCollapseAll,
+  onExpandAll,
   onExpandedFiltersChange,
 }: ActiveFiltersListProps) => {
   const filters = useGetColumnFilters();
@@ -80,7 +84,15 @@ export const ActiveFiltersList = ({
     <div {...stylex.props(styles.container)}>
       <SidePanelSectionHeader
         title={`Active Filters (${filterEntries.length})`}
-        toolbar={<FiltersSectionToolbar variant='toolbar' />}
+        toolbar={
+          <FiltersSectionToolbar
+            isCollapseAllDisabled={isCollapseAllDisabled}
+            isExpandAllDisabled={isExpandAllDisabled}
+            onCollapseAll={onCollapseAll}
+            onExpandAll={onExpandAll}
+            variant='toolbar'
+          />
+        }
       />
       {hasFilters ? (
         <div {...stylex.props(styles.filtersList)}>
