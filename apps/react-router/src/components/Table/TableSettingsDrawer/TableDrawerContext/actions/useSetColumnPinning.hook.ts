@@ -36,11 +36,14 @@ export const useSetColumnPinning = <TData>() => {
         !currentPinning.right.includes(key),
     );
     const changedColumnKey = changedLeftColumn ?? changedRightColumn;
-    const changedSide = changedLeftColumn
-      ? 'left'
-      : changedRightColumn
-        ? 'right'
-        : undefined;
+    let changedSide: 'left' | 'right' | undefined;
+    if (changedLeftColumn) {
+      changedSide = 'left';
+    } else if (changedRightColumn) {
+      changedSide = 'right';
+    } else {
+      changedSide = undefined;
+    }
 
     const newColumnOrder = syncColumnOrderWithPinning<TData>({
       columnKey: changedColumnKey ?? ('' as DataKey<TData>),
