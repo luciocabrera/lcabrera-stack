@@ -80,7 +80,7 @@ export const DetailsSection = () => {
 
   const resolvedLocale =
     locale ??
-    (typeof navigator !== 'undefined' ? navigator.language : undefined);
+    (typeof navigator === 'undefined' ? undefined : navigator.language);
 
   const formatInteger = (value: number): string =>
     formatNumber({ locale: resolvedLocale, maximumFractionDigits: 0, value });
