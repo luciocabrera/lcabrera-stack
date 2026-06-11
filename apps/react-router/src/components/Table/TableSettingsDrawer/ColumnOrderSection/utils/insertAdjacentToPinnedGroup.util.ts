@@ -4,7 +4,7 @@ import type {
   DataKey,
 } from '@/components/Table/Table.types';
 
-type InsertAdjacentToPinnedGroupArgs<TData> = {
+type InsertAdjacentToPinnedGroupArgs<TData = Record<string, unknown>> = {
   readonly columnKey: DataKey<TData>;
   readonly columnPinning: ColumnPinningState<TData>;
   readonly order: readonly DataKey<TData>[];
@@ -17,7 +17,7 @@ type InsertAdjacentToPinnedGroupArgs<TData> = {
  * - For 'right': inserts before the first right-pinned column.
  * Returns a new order array without mutating the input.
  */
-export const insertAdjacentToPinnedGroup = <TData>({
+export const insertAdjacentToPinnedGroup = <TData = Record<string, unknown>>({
   columnKey,
   columnPinning,
   order,
