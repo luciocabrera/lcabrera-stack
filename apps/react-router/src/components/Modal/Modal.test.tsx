@@ -3,45 +3,24 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { mockDialogElement } from '@/components/test-utils/mockDialogElement.util';
+
 import { Modal } from './Modal.component';
 
-// eslint-disable-next-line typescript-eslint/unbound-method -- Saving prototype methods for test teardown restoration
-const savedClose = HTMLDialogElement.prototype.close;
-// eslint-disable-next-line typescript-eslint/unbound-method -- Saving prototype methods for test teardown restoration
-const savedShow = HTMLDialogElement.prototype.show;
-// eslint-disable-next-line typescript-eslint/unbound-method -- Saving prototype methods for test teardown restoration
-const savedShowModal = HTMLDialogElement.prototype.showModal;
 let closeMock: ReturnType<typeof vi.fn>;
-let showMock: ReturnType<typeof vi.fn>;
+let restoreMockDialog: () => void;
 let showModalMock: ReturnType<typeof vi.fn>;
 
 afterEach(() => {
-  HTMLDialogElement.prototype.close = savedClose;
-  HTMLDialogElement.prototype.show = savedShow;
-  HTMLDialogElement.prototype.showModal = savedShowModal;
+  restoreMockDialog();
   cleanup();
 });
 
 beforeEach(() => {
-  closeMock = vi.fn(function (this: HTMLDialogElement) {
-    Object.defineProperty(this, 'open', {
-      configurable: true,
-      value: false,
-      writable: true,
-    });
-  });
-  showMock = vi.fn();
-  showModalMock = vi.fn(function (this: HTMLDialogElement) {
-    Object.defineProperty(this, 'open', {
-      configurable: true,
-      value: true,
-      writable: true,
-    });
-  });
-  HTMLDialogElement.prototype.close = closeMock as HTMLDialogElement['close'];
-  HTMLDialogElement.prototype.show = showMock as HTMLDialogElement['show'];
-  HTMLDialogElement.prototype.showModal =
-    showModalMock as HTMLDialogElement['showModal'];
+  const setup = mockDialogElement({ shouldSetOpenOnShow: false });
+  closeMock = setup.closeMock;
+  restoreMockDialog = setup.restore;
+  showModalMock = setup.showModalMock;
 });
 
 describe('Modal', () => {
