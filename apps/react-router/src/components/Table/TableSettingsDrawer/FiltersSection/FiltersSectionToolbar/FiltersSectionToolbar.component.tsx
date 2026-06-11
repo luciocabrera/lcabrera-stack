@@ -44,6 +44,8 @@ export const FiltersSectionToolbar = ({
   const buttonSize = isToolbar ? 'mini' : 'sm';
   const buttonWidth = isToolbar ? 'auto' : 'full';
   const iconSize = isToolbar ? ICON_SIZE_SM : ICON_SIZE_MD;
+  const isExpandDisabled = isExpandAllDisabled || !onExpandAll;
+  const isCollapseDisabled = isCollapseAllDisabled || !onCollapseAll;
 
   const handleClear = () => {
     clearFilters();
@@ -79,7 +81,7 @@ export const FiltersSectionToolbar = ({
         aria-label={FILTERS_TOOLBAR.expandAll.label}
         color={buttonColor}
         icon={<ExpandAllIcon size={iconSize} />}
-        isDisabled={isExpandAllDisabled}
+        isDisabled={isExpandDisabled}
         onClick={onExpandAll}
         size={buttonSize}
         width={buttonWidth}
@@ -91,7 +93,7 @@ export const FiltersSectionToolbar = ({
         aria-label={FILTERS_TOOLBAR.collapseAll.label}
         color={buttonColor}
         icon={<CollapseAllIcon size={iconSize} />}
-        isDisabled={isCollapseAllDisabled}
+        isDisabled={isCollapseDisabled}
         onClick={onCollapseAll}
         size={buttonSize}
         width={buttonWidth}

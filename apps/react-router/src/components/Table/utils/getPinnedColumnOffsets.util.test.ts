@@ -77,4 +77,26 @@ describe('getPinnedColumnOffsets', () => {
     });
     expect(result['name']?.offset).toBe(200); // uses columnSizing for id
   });
+
+  it('marks last left pinned by effective order when pinning order diverges', () => {
+    const result = getPinnedColumnOffsets({
+      columnPinning: { left: ['name', 'id'], right: [] },
+      columnSizing: emptySizing,
+      effectiveColumns: columns,
+    });
+
+    expect(result['id']?.isLastPinnedLeft).toBe(false);
+    expect(result['name']?.isLastPinnedLeft).toBe(true);
+  });
+
+  it('marks first right pinned by effective order when pinning order diverges', () => {
+    const result = getPinnedColumnOffsets({
+      columnPinning: { left: [], right: ['actions', 'age'] },
+      columnSizing: emptySizing,
+      effectiveColumns: columns,
+    });
+
+    expect(result['age']?.isFirstPinnedRight).toBe(true);
+    expect(result['actions']?.isFirstPinnedRight).toBe(false);
+  });
 });

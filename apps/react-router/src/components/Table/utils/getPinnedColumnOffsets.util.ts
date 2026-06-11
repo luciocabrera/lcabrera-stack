@@ -32,9 +32,10 @@ export const getPinnedColumnOffsets = <TData = Record<string, unknown>>({
 
   // Compute left offsets (cumulative from left)
   let leftOffset = 0;
-  for (const col of effectiveColumns.filter((c) =>
+  const leftPinnedInEffectiveOrder = effectiveColumns.filter((c) =>
     leftPinned.includes(c.key),
-  )) {
+  );
+  for (const col of leftPinnedInEffectiveOrder) {
     const sized = columnSizing[col.key] as number | undefined;
     const width = sized ?? col.minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
     result.set(col.key, {
@@ -47,7 +48,7 @@ export const getPinnedColumnOffsets = <TData = Record<string, unknown>>({
   }
 
   // Mark last left-pinned column (for shadow separator)
-  const lastLeftKey = leftPinned.at(-1);
+  const lastLeftKey = leftPinnedInEffectiveOrder.at(-1)?.key;
   if (lastLeftKey) {
     const entry = result.get(lastLeftKey);
     if (entry) {
@@ -60,9 +61,10 @@ export const getPinnedColumnOffsets = <TData = Record<string, unknown>>({
 
   // Compute right offsets (cumulative from right)
   let rightOffset = 0;
-  for (const col of [...effectiveColumns]
+  const rightPinnedInReverseEffectiveOrder = [...effectiveColumns]
     .toReversed()
-    .filter((c) => rightPinned.includes(c.key))) {
+    .filter((c) => rightPinned.includes(c.key));
+  for (const col of rightPinnedInReverseEffectiveOrder) {
     const sized = columnSizing[col.key] as number | undefined;
     const width = sized ?? col.minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
     result.set(col.key, {
@@ -75,7 +77,7 @@ export const getPinnedColumnOffsets = <TData = Record<string, unknown>>({
   }
 
   // Mark first right-pinned column (for shadow separator)
-  const firstRightKey = rightPinned.at(0);
+  const firstRightKey = rightPinnedInReverseEffectiveOrder.at(-1)?.key;
   if (firstRightKey) {
     const entry = result.get(firstRightKey);
     if (entry) {

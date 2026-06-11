@@ -59,6 +59,8 @@ graph TD
 | `splitColumnsByPinning`      | pinning, effectiveColumns  | `ColumnGroupsState`             | Split columns into left/center/right                                                 |
 | `syncColumnOrderWithPinning` | order, pinning             | `string[]`                      | Reorder to keep pinned columns grouped and keep the order slice in sync              |
 
+`getPinnedColumnOffsets` computes offsets and boundary markers (`isLastPinnedLeft`, `isFirstPinnedRight`) from effective column order so shadow boundaries stay aligned with rendered sticky positions even if pinning arrays are out of order.
+
 ## Persistence Utilities
 
 ```mermaid

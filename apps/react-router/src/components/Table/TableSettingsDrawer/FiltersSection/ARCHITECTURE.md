@@ -119,9 +119,9 @@ graph TD
 | `'toolbar'` | ActiveFiltersList header | `ghost`, `mini`, `auto` | No (icon only) |
 | `'footer'`  | Below filter list        | `outline`, `sm`, `full` | Yes            |
 
-| Button        | Action                          | Disabled When                          |
-| ------------- | ------------------------------- | -------------------------------------- |
-| Expand All    | `onExpandAll?.()`               | No filters or all are already expanded |
-| Collapse All  | `onCollapseAll?.()`             | No expanded filters                    |
-| Clear Filters | `clearFilters()` + `onClearAll` | No filters exist                       |
-| Reset Filters | `resetFilters()` (from table)   | Never                                  |
+| Button        | Action                          | Disabled When                                       |
+| ------------- | ------------------------------- | --------------------------------------------------- |
+| Expand All    | `onExpandAll?.()`               | No handler, no filters, or all are already expanded |
+| Collapse All  | `onCollapseAll?.()`             | No handler or no expanded filters                   |
+| Clear Filters | `clearFilters()` + `onClearAll` | No filters exist                                    |
+| Reset Filters | `resetFilters()` (from table)   | Never                                               |

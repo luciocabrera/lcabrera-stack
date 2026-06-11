@@ -74,16 +74,18 @@ export const useSetColumnPinning = <TData>() => {
       effectiveColumns,
     });
 
-    persistTableState({
-      persistenceKey,
-      slice: 'columnPinning',
-      valueSlice: newPinning,
-    });
-    persistTableState({
-      persistenceKey,
-      slice: 'columnOrder',
-      valueSlice: newColumnOrder,
-    });
+    persistTableState([
+      {
+        persistenceKey,
+        slice: 'columnPinning',
+        valueSlice: newPinning,
+      },
+      {
+        persistenceKey,
+        slice: 'columnOrder',
+        valueSlice: newColumnOrder,
+      },
+    ]);
 
     columnsStore.set({
       columnGroups,
