@@ -6,8 +6,14 @@ import { TableConfigContext } from './TableConfigContext.context';
 
 export const useTableConfigContextValue = <
   TData = Record<string, unknown>,
->() => {
+>(): TableConfigContextValue<TData> => {
   const context = use(TableConfigContext);
+
+  if (context === null) {
+    throw new Error(
+      'useTableConfigContextValue must be used within TableConfigProvider',
+    );
+  }
 
   return context as TableConfigContextValue<TData>;
 };
