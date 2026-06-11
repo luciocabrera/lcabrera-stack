@@ -75,6 +75,12 @@ Before creating anything new, check this inventory. If something here does the j
 | ------------------------------ | ------------------------------------------------------------- | ------------------------------------------------------------------------- |
 | `getPinnedDerivedColumnsState` | `components/Table/utils/getPinnedDerivedColumnsState.util.ts` | Computes effective columns, pin-based groups, and pinned offsets together |
 
+### `src/components/Table/contexts/TableConfig/columns/actions/`
+
+| Function                      | Location                                                                                    | Description                                                                  |
+| ----------------------------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `commitPinningAndOrderUpdate` | `components/Table/contexts/TableConfig/columns/actions/commitPinningAndOrderUpdate.util.ts` | Commits pinning/order persistence and applies synced derived slices to store |
+
 ### `src/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/utils/`
 
 | Function                    | Location                                                                                            | Description                                               |

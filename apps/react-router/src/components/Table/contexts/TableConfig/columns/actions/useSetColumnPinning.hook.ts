@@ -11,6 +11,8 @@ import {
   syncColumnOrderWithPinning,
 } from '@/components/Table/utils';
 
+import { commitPinningAndOrderUpdate } from './commitPinningAndOrderUpdate.util';
+
 type SetColumnPinningArgs<TData> = {
   readonly columnKey: DataKey<TData>;
   readonly side?: 'left' | 'right';
@@ -60,24 +62,14 @@ export const useSetColumnPinning = <TData>() => {
         columnVisibility: columnsState?.columnVisibility,
       });
 
-    persistTableState([
-      {
-        persistenceKey,
-        slice: 'columnPinning',
-        valueSlice: newPinning,
-      },
-      {
-        persistenceKey,
-        slice: 'columnOrder',
-        valueSlice: newColumnOrder,
-      },
-    ]);
-
-    columnsStore.set({
+    commitPinningAndOrderUpdate<TData>({
       columnGroups,
-      columnOrder: newColumnOrder,
-      columnPinning: newPinning,
+      columnsStore,
       effectiveColumns,
+      newColumnOrder,
+      newPinning,
+      persistenceKey,
+      persistTableState,
       pinnedColumnOffsets,
     });
   };
