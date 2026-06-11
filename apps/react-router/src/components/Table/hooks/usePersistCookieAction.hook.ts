@@ -49,7 +49,7 @@ export const usePersistTableStateAction = (): PersistTableStateAction => {
   const fetcher = useFetcher({ key: 'persist-table-state' });
   const location = useLocation();
 
-  return ((args: PersistCookieEntry | PersistCookieEntry[]) => {
+  return (args: PersistCookieEntry | PersistCookieEntry[]) => {
     const entries = Array.isArray(args) ? args : [args];
     const currentUrl = `${location.pathname}${location.search}`;
 
@@ -80,5 +80,5 @@ export const usePersistTableStateAction = (): PersistTableStateAction => {
       { currentUrl, entries: JSON.stringify(serializedEntries) },
       { action: PERSIST_COOKIE_ACTION, method: 'POST' },
     );
-  }) as PersistTableStateAction;
+  };
 };

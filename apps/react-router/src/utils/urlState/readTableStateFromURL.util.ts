@@ -51,5 +51,5 @@ export const readTableStateFromURL = ({
     convertArraysToSets: ['columnVisibility'],
     key: `${persistenceKey}-${PARAM_KEY}`,
     searchParams,
-  }) as Partial<TableSearchParamsState> | undefined;
+  });
 };

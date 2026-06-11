@@ -73,5 +73,5 @@ export const readPersistedStateFromCookie = ({
     }
   }
 
-  return result as Partial<PersistedState>;
+  return result;
 };
