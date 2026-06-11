@@ -165,13 +165,13 @@ Before creating anything new, check this inventory. If something here does the j
 
 ### `src/utils/storage/`
 
-| Function              | Location                                    | Description                                                                        |
-| --------------------- | ------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `buildCookieString`   | `utils/storage/buildCookieString.util.ts`   | Serialises key/value to a `Set-Cookie` string (1y expiry, `SameSite=Lax`)          |
-| `parseCookies`        | `utils/storage/parseCookies.util.ts`        | Splits a raw `Cookie:` header string into a `Record<string, string>` key/value map |
-| `readFromCookie`      | `utils/storage/readFromCookie.util.ts`      | Reads a named cookie value from `document.cookie` or a provided string (SSR-safe)  |
-| `writeToCookie`       | `utils/storage/writeToCookie.util.ts`       | Writes a cookie via `document.cookie` or returns a `Set-Cookie` header (SSR-safe)  |
-| `writeToLocalStorage` | `utils/storage/writeToLocalStorage.util.ts` | Writes to `localStorage` with error handling for quota/disabled scenarios          |
+| Function              | Location                                    | Description                                                                       |
+| --------------------- | ------------------------------------------- | --------------------------------------------------------------------------------- |
+| `buildCookieString`   | `utils/storage/buildCookieString.util.ts`   | Serialises key/value to a `Set-Cookie` string (1y expiry, `SameSite=Lax`)         |
+| `parseCookies`        | `utils/storage/parseCookies.util.ts`        | _Internal_: Used by `readFromCookie` and `writeToCookie`                          |
+| `readFromCookie`      | `utils/storage/readFromCookie.util.ts`      | Reads a named cookie value from `document.cookie` or a provided string (SSR-safe) |
+| `writeToCookie`       | `utils/storage/writeToCookie.util.ts`       | Writes a cookie via `document.cookie` or returns a `Set-Cookie` header (SSR-safe) |
+| `writeToLocalStorage` | `utils/storage/writeToLocalStorage.util.ts` | Writes to `localStorage` with error handling for quota/disabled scenarios         |
 
 ### `src/utils/urlState/`
 
