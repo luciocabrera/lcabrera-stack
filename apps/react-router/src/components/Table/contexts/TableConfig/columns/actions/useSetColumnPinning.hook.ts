@@ -18,7 +18,7 @@ type SetColumnPinningArgs<TData> = {
   readonly columnKey: DataKey<TData>;
   readonly side?: 'left' | 'right';
 };
-// TODO: Check all types casting here, I think they could be improved
+
 export const useSetColumnPinning = <TData>() => {
   const { columnsStore, metaStore } = useTableConfigContextValue<TData>();
   const persistTableState = usePersistTableStateAction();
@@ -54,14 +54,14 @@ export const useSetColumnPinning = <TData>() => {
       newPinning,
     });
 
-    const effectiveColumns = getEffectiveColumns({
+    const effectiveColumns = getEffectiveColumns<TData>({
       columnOrder: newColumnOrder,
       columnPinning: newPinning,
       columns,
       columnVisibility: columnsState?.columnVisibility,
     });
 
-    const columnGroups = splitColumnsByPinning({
+    const columnGroups = splitColumnsByPinning<TData>({
       columnPinning: newPinning,
       effectiveColumns,
     });

@@ -25,7 +25,7 @@ type AcceptHeaderPinSideArgs<TData> = {
   readonly columnKey: DataKey<TData>;
   readonly pinSide: PinSide;
 };
-// TODO: Check all types casting here, I think they could be improved
+
 export const useAcceptHeaderPinSide = <TData>() => {
   const { columnsStore, metaStore } = useTableConfigContextValue<TData>();
   const persistTableState = usePersistTableStateAction();
@@ -81,7 +81,7 @@ export const useAcceptHeaderPinSide = <TData>() => {
       newPinning,
     });
 
-    const effectiveColumns = getEffectiveColumns({
+    const effectiveColumns = getEffectiveColumns<TData>({
       columnOrder: newColumnOrder,
       columnPinning: newPinning,
       columns,
@@ -95,7 +95,7 @@ export const useAcceptHeaderPinSide = <TData>() => {
 
     const columnSizing =
       columnsState?.columnSizing ?? ({} as ColumnSizingState<TData>);
-    const pinnedColumnOffsets = getPinnedColumnOffsets({
+    const pinnedColumnOffsets = getPinnedColumnOffsets<TData>({
       columnPinning: newPinning,
       columnSizing,
       effectiveColumns,

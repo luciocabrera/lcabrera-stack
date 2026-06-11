@@ -27,8 +27,6 @@ type AcceptHeaderPinConflictArgs<TData> = {
   readonly side: 'left' | 'right';
 };
 
-// TODO: Check all types casting here, I think they could be improved
-
 export const useAcceptHeaderPinConflict = <TData>() => {
   const { columnsStore, metaStore } = useTableConfigContextValue<TData>();
   const persistTableState = usePersistTableStateAction();
@@ -53,9 +51,7 @@ export const useAcceptHeaderPinConflict = <TData>() => {
 
     const allOrderedColumns = buildAllOrderedColumns({ columns, columnsOrder });
     const index = allOrderedColumns.findIndex((col) => col.key === columnKey);
-    const allOrderedKeys = allOrderedColumns.map(
-      (column) => column.key,
-    ) as DataKey<TData>[];
+    const allOrderedKeys = allOrderedColumns.map((column) => column.key);
 
     let newPinning: ColumnPinningState<TData>;
     let newOrder: ColumnOrderState<TData> | undefined;
@@ -63,7 +59,7 @@ export const useAcceptHeaderPinConflict = <TData>() => {
     if (resolution === 'move-column') {
       newOrder = allOrderedColumns
         .filter((col) => col.key !== columnKey)
-        .map((col) => col.key) as ColumnOrderState<TData>;
+        .map((col) => col.key);
 
       const column = allOrderedColumns[index];
       if (column?.key) {
