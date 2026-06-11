@@ -1,4 +1,3 @@
-export { NotificationContext } from './NotificationContext.context';
 export { NotificationProvider } from './NotificationContext.provider';
 export type {
   AppNotification,

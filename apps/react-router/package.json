@@ -16,6 +16,8 @@
     "typecheck": "react-router typegen && tsc --noEmit",
     "preview": "vp preview",
     "knip": "knip",
+    "fallow": "npx fallow dead-code",
+    "fallow:full": "npx fallow",
     "test:watch": "node node_modules/vitest/vitest.mjs"
   },
   "dependencies": {

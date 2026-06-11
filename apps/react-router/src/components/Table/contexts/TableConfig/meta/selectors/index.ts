@@ -1,5 +1,4 @@
 export { useGetTableAdditionalMetadata } from './useGetTableAdditionalMetadata.hook';
-export { useGetTableColumnOverscan } from './useGetTableColumnOverscan.hook';
 export { useGetTableColumnSelectedKey } from './useGetTableColumnSelectedKey.hook';
 export { useGetTableDensity } from './useGetTableDensity.hook';
 export { useGetTableEnablePrefetch } from './useGetTableEnablePrefetch.hook';

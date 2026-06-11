@@ -44,10 +44,16 @@ Every file's purpose must be immediately clear from its name.
 
 ### 1.3 Barrel Files (`index.ts`)
 
-All components, hooks, and services must be exported via an `index.ts` file within their respective directories. This controls the public API and simplifies imports.
+Use a hybrid boundary model:
+
+- Inside a feature/module, prefer direct-file imports.
+- Across feature/module boundaries, use a curated `index.ts` barrel as the public API.
+- Avoid deep internal barrels that re-export all internals.
+
+See decision record: `docs/decisions/ADR-007-barrel-export-boundaries.md`.
 
 ```typescript
-// src/components/Button/index.ts
+// src/components/Button/index.ts (public boundary)
 export { Button } from './Button';
 export type { ButtonProps } from './Button.types';
 ```
