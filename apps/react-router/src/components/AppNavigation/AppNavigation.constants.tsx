@@ -22,7 +22,7 @@ import type { GlobalNavigationSizePreference } from '@/types/globalSettings.type
  * - 'sm'   → 2rem    (matches sm button)
  * - 'md'   → 2.5rem  (matches md button)
  */
-export type BrandIconBoxSize = 'md' | 'mini' | 'sm';
+type BrandIconBoxSize = 'md' | 'mini' | 'sm';
 
 type NavDensityConfig = {
   readonly brandIconBoxSize: BrandIconBoxSize;

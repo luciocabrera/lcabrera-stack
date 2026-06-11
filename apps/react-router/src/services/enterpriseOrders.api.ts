@@ -87,7 +87,7 @@ export type EnterpriseOrder = {
   weight_kg: string;
 };
 
-export type EnterpriseOrderDetailResponse = {
+type EnterpriseOrderDetailResponse = {
   data: EnterpriseOrder;
 };
 
@@ -97,7 +97,7 @@ export type EnterpriseOrdersResponse = {
   total: number;
 };
 
-export type FetchEnterpriseOrdersParams = {
+type FetchEnterpriseOrdersParams = {
   filter?: ColumnFiltersState<EnterpriseOrder>;
   limit: number;
   requestUrl?: string;
