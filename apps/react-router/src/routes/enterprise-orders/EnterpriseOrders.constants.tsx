@@ -332,8 +332,8 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
     isStatic: true,
     key: 'actions',
     label: 'Actions',
-    maxWidth: 60,
-    minWidth: 60,
+    maxWidth: 24,
+    minWidth: 24,
     render: (row) => (
       <Link to={`/enterprise-orders/${String(row.order_id)}`}>
         <Button
