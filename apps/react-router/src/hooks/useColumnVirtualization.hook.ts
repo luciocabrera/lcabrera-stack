@@ -1,13 +1,17 @@
 import type { RefObject } from 'react';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import {
   DEFAULT_COLUMN_OVERSCAN,
   DEFAULT_CONTAINER_WIDTH,
 } from '@/constants/virtualization.constants';
 
-import { findFirstOutOfViewIndex, findFirstVisibleIndex } from './utils';
+import {
+  findFirstOutOfViewIndex,
+  findFirstVisibleIndex,
+  setupObservedContainer,
+} from './utils';
 
 /** Arguments for the useColumnVirtualization hook. */
 export type UseColumnVirtualizationArgs = {
@@ -56,7 +60,6 @@ export const useColumnVirtualization = ({
     const measured = containerRef.current?.offsetWidth ?? 0;
     return measured > 0 ? measured : defaultContainerWidth;
   });
-  const rafIdRef = useRef(-1);
 
   const cumulativeWidths = useMemo(() => {
     const cumulative: number[] = [];
@@ -90,57 +93,16 @@ export const useColumnVirtualization = ({
       }
     };
 
-    const handleScroll = () => {
-      if (rafIdRef.current >= 0) {
-        return;
-      }
-
-      rafIdRef.current = globalThis.requestAnimationFrame(() => {
-        rafIdRef.current = -1;
-        // eslint-disable-next-line react-x/set-state-in-effect -- Scroll position must be read from DOM event; cannot be derived during render
-        setScrollLeft(container?.scrollLeft ?? 0);
-      });
-    };
-
-    const syncScrollPosition = () => {
-      if (rafIdRef.current >= 0) {
-        globalThis.cancelAnimationFrame(rafIdRef.current);
-        rafIdRef.current = -1;
-      }
-
-      // eslint-disable-next-line react-x/set-state-in-effect -- Scroll position must be read from DOM event; cannot be derived during render
-      setScrollLeft(container?.scrollLeft ?? 0);
-    };
-
     // Attempt an immediate measurement — succeeds when layout is already
     // resolved at effect time (e.g. unit tests with a pre-populated ref or
     // fast-path re-renders).
-    updateWidth();
-
-    // ResizeObserver fires after the browser finishes layout, including the
-    // extra passes required by CSS containment / container-type:size on
-    // ancestor elements. It covers both:
-    //   • the initial mount when the immediate measurement returned 0, and
-    //   • future container size changes (sidebar toggle, panel resize, etc.).
-    const resizeObserver = new ResizeObserver(() => {
-      updateWidth();
+    return setupObservedContainer({
+      container,
+      onMeasure: updateWidth,
+      readScroll: () => container?.scrollLeft ?? 0,
+      // eslint-disable-next-line react-x/set-state-in-effect -- Scroll position must be read from DOM events; cannot be derived during render
+      setScroll: setScrollLeft,
     });
-
-    if (container) {
-      resizeObserver.observe(container);
-    }
-
-    syncScrollPosition();
-    container?.addEventListener('scroll', handleScroll, { passive: true });
-
-    return () => {
-      if (rafIdRef.current >= 0) {
-        globalThis.cancelAnimationFrame(rafIdRef.current);
-        rafIdRef.current = -1;
-      }
-      container?.removeEventListener('scroll', handleScroll);
-      resizeObserver.disconnect();
-    };
   }, [containerRef]);
 
   const totalColumns = columnWidths.length;
