@@ -1,6 +1,6 @@
 # hooks/utils Architecture
 
-Pure helper utilities used by hook implementations.
+Helper utilities used by hook implementations. Includes pure functions (search, calculations) and side-effect utilities (ResizeObserver wiring).
 
 ## File Structure
 
