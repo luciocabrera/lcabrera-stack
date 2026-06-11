@@ -1,11 +1,5 @@
 export { Card } from './Card.component';
-export type {
-  CardColor,
-  CardElevation,
-  CardInteractive,
-  CardPadding,
-  CardProps,
-} from './Card.types';
+export type { CardColor } from './Card.types';
 export { CardBody } from './CardBody';
 export { CardDescription } from './CardDescription';
 export { CardFooter } from './CardFooter';

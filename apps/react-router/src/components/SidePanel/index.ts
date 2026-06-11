@@ -1,9 +1,5 @@
 export { SidePanel } from './SidePanel.component';
-export type {
-  SidePanelPosition,
-  SidePanelProps,
-  SidePanelSize,
-} from './SidePanel.types';
+export type { SidePanelSize } from './SidePanel.types';
 export { SidePanelBody } from './SidePanelBody';
 export { SidePanelFooter } from './SidePanelFooter';
 export { SidePanelHeader } from './SidePanelHeader';
