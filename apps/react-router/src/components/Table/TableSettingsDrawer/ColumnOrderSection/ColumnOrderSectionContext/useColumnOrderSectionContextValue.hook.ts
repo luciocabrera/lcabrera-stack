@@ -2,8 +2,17 @@ import { use } from 'react';
 
 import { ColumnOrderSectionContext } from './ColumnOrderSectionContext.context';
 
-export const useColumnOrderSectionContextValue = () => {
-  const context = use(ColumnOrderSectionContext);
+import type { ColumnOrderSectionContextValue } from './ColumnOrderSectionContext.types';
 
-  return context;
-};
+export const useColumnOrderSectionContextValue =
+  (): ColumnOrderSectionContextValue => {
+    const context = use(ColumnOrderSectionContext);
+
+    if (context === null) {
+      throw new Error(
+        'useColumnOrderSectionContextValue must be used within ColumnOrderSectionProvider',
+      );
+    }
+
+    return context;
+  };
