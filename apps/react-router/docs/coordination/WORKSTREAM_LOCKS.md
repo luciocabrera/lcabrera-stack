@@ -4,10 +4,9 @@ Use this file to claim and release ownership when multiple agents run in paralle
 
 ## Active Locks
 
-| Workstream | Agent   | Files                                                                                                                                                                                                                                                                                                                                                               | Started At           | Validation Plan                                    | Status      |
-| ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | -------------------------------------------------- | ----------- |
-| WS-001     | Copilot | src/components/Table/contexts/TableConfig/columns/actions/useAcceptHeaderPinConflict.hook.test.ts, src/components/Table/contexts/TableConfig/columns/actions/useAcceptHeaderPinSide.hook.test.ts, src/components/Table/contexts/TableConfig/columns/actions/useSetColumnPinning.hook.test.ts, src/components/test-utils/createTableConfigColumnsActionMocks.util.ts | 2026-06-11T13:30:00Z | focused action-hook tests + `vp check` + dupes run | In Progress |
-| WS-004     | Copilot | src/routes/enterprise-orders/EnterpriseOrders.constants.tsx                                                                                                                                                                                                                                                                                                         | 2026-06-11T13:30:00Z | focused route/constants checks + `vp check`        | In Progress |
+| Workstream | Agent | Files | Started At | Validation Plan | Status |
+| ---------- | ----- | ----- | ---------- | --------------- | ------ |
+| None       | -     | -     | -          | -               | Open   |
 
 ## Lock Template
 
@@ -17,6 +16,8 @@ Copy this row into Active Locks when claiming:
 
 ## Completed Locks
 
-| Workstream | Agent   | Completed At         | Result                          |
-| ---------- | ------- | -------------------- | ------------------------------- |
-| WS-000     | Copilot | 2026-06-11T00:00:00Z | Coordination system initialized |
+| Workstream | Agent   | Completed At         | Result                                                                  |
+| ---------- | ------- | -------------------- | ----------------------------------------------------------------------- |
+| WS-000     | Copilot | 2026-06-11T00:00:00Z | Coordination system initialized                                         |
+| WS-001     | Copilot | 2026-06-11T13:42:00Z | Shared TableConfig action test scaffold adopted in top duplicate tests  |
+| WS-004     | Copilot | 2026-06-11T13:42:00Z | EnterpriseOrders constants normalized with helper-based column builders |

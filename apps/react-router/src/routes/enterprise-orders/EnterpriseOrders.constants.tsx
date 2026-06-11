@@ -22,6 +22,14 @@ type DistinctStringColumnArgs = {
   readonly minWidth: number;
 };
 
+type BasicColumnArgs = {
+  readonly dataType: 'boolean' | 'currency' | 'date' | 'number' | 'string';
+  readonly key: keyof EnterpriseOrder;
+  readonly label: string;
+  readonly maxWidth: number;
+  readonly minWidth: number;
+};
+
 const createDistinctStringColumn = ({
   columnName,
   key,
@@ -42,6 +50,22 @@ const createDistinctStringColumn = ({
   };
 };
 
+const createBasicColumn = ({
+  dataType,
+  key,
+  label,
+  maxWidth,
+  minWidth,
+}: BasicColumnArgs): TableColumn<EnterpriseOrder> => {
+  return {
+    dataType,
+    key,
+    label,
+    maxWidth,
+    minWidth,
+  };
+};
+
 export const PERSISTENCE_KEY = 'enterprise-orders-table';
 
 export const DEFAULT_COLUMN_PINNING: ColumnPinningState<EnterpriseOrder> = {
@@ -50,13 +74,13 @@ export const DEFAULT_COLUMN_PINNING: ColumnPinningState<EnterpriseOrder> = {
 };
 
 export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
-  {
+  createBasicColumn({
     dataType: 'number',
     key: 'order_id',
     label: 'Order ID',
     maxWidth: 120,
     minWidth: 90,
-  },
+  }),
   createDistinctStringColumn({
     columnName: 'order_number',
     key: 'order_number',
@@ -64,13 +88,13 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
     maxWidth: 180,
     minWidth: 130,
   }),
-  {
+  createBasicColumn({
     dataType: 'date',
     key: 'order_date',
     label: 'Order Date',
     maxWidth: 150,
     minWidth: 120,
-  },
+  }),
   {
     dataType: 'string',
     ...createStaticFilterOptions<EnterpriseOrder>([
@@ -102,13 +126,13 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
     maxWidth: 130,
     minWidth: 100,
   },
-  {
+  createBasicColumn({
     dataType: 'string',
     key: 'customer_name',
     label: 'Customer',
     maxWidth: 250,
     minWidth: 150,
-  },
+  }),
   createDistinctStringColumn({
     columnName: 'customer_email',
     key: 'customer_email',
@@ -123,55 +147,55 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
     maxWidth: 180,
     minWidth: 130,
   }),
-  {
+  createBasicColumn({
     dataType: 'boolean',
     key: 'is_vip_customer',
     label: 'VIP',
     maxWidth: 100,
     minWidth: 70,
-  },
-  {
+  }),
+  createBasicColumn({
     dataType: 'number',
     key: 'loyalty_points',
     label: 'Loyalty Points',
     maxWidth: 150,
     minWidth: 120,
-  },
-  {
+  }),
+  createBasicColumn({
     dataType: 'currency',
     key: 'total_amount',
     label: 'Total Amount',
     maxWidth: 180,
     minWidth: 130,
-  },
-  {
+  }),
+  createBasicColumn({
     dataType: 'currency',
     key: 'subtotal',
     label: 'Subtotal',
     maxWidth: 150,
     minWidth: 110,
-  },
-  {
+  }),
+  createBasicColumn({
     dataType: 'currency',
     key: 'tax_amount',
     label: 'Tax',
     maxWidth: 130,
     minWidth: 100,
-  },
-  {
+  }),
+  createBasicColumn({
     dataType: 'currency',
     key: 'shipping_cost',
     label: 'Shipping',
     maxWidth: 130,
     minWidth: 100,
-  },
-  {
+  }),
+  createBasicColumn({
     dataType: 'currency',
     key: 'discount_amount',
     label: 'Discount',
     maxWidth: 130,
     minWidth: 100,
-  },
+  }),
   {
     dataType: 'string',
     ...createStaticFilterOptions<EnterpriseOrder>([
@@ -203,34 +227,34 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
     maxWidth: 180,
     minWidth: 140,
   },
-  {
+  createBasicColumn({
     dataType: 'string',
     key: 'product_category',
     label: 'Category',
     maxWidth: 220,
     minWidth: 140,
-  },
-  {
+  }),
+  createBasicColumn({
     dataType: 'string',
     key: 'product_subcategory',
     label: 'Subcategory',
     maxWidth: 180,
     minWidth: 130,
-  },
-  {
+  }),
+  createBasicColumn({
     dataType: 'number',
     key: 'quantity',
     label: 'Quantity',
     maxWidth: 120,
     minWidth: 90,
-  },
-  {
+  }),
+  createBasicColumn({
     dataType: 'currency',
     key: 'unit_price',
     label: 'Unit Price',
     maxWidth: 150,
     minWidth: 110,
-  },
+  }),
   createDistinctStringColumn({
     columnName: 'shipping_city',
     key: 'shipping_city',
@@ -266,41 +290,41 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
     maxWidth: 180,
     minWidth: 130,
   }),
-  {
+  createBasicColumn({
     dataType: 'boolean',
     key: 'is_rush_order',
     label: 'Rush',
     maxWidth: 90,
     minWidth: 70,
-  },
-  {
+  }),
+  createBasicColumn({
     dataType: 'boolean',
     key: 'is_gift',
     label: 'Gift',
     maxWidth: 90,
     minWidth: 70,
-  },
-  {
+  }),
+  createBasicColumn({
     dataType: 'number',
     key: 'customer_rating',
     label: 'Rating',
     maxWidth: 110,
     minWidth: 80,
-  },
-  {
+  }),
+  createBasicColumn({
     dataType: 'date',
     key: 'delivery_date',
     label: 'Delivery Date',
     maxWidth: 150,
     minWidth: 130,
-  },
-  {
+  }),
+  createBasicColumn({
     dataType: 'date',
     key: 'shipped_date',
     label: 'Shipped Date',
     maxWidth: 150,
     minWidth: 130,
-  },
+  }),
   {
     isFilterable: false,
     isHeaderHidden: true,

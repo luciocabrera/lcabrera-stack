@@ -83,10 +83,11 @@ Before creating anything new, check this inventory. If something here does the j
 
 ### `src/components/test-utils/`
 
-| Function            | Location                                          | Description                                                                                  |
-| ------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| `createMockStore`   | `components/test-utils/createMockStore.util.ts`   | Generic external-store-like test scaffold (`get`, `set`, `reset`, `subscribe`, SSR snapshot) |
-| `mockDialogElement` | `components/test-utils/mockDialogElement.util.ts` | Mocks HTMLDialogElement prototype behavior with restore handles for test teardown            |
+| Function                              | Location                                                            | Description                                                                                  |
+| ------------------------------------- | ------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `createMockStore`                     | `components/test-utils/createMockStore.util.ts`                     | Generic external-store-like test scaffold (`get`, `set`, `reset`, `subscribe`, SSR snapshot) |
+| `createTableConfigColumnsActionMocks` | `components/test-utils/createTableConfigColumnsActionMocks.util.ts` | Shared TableConfig columns-action test scaffold with mocked stores + persistence wiring      |
+| `mockDialogElement`                   | `components/test-utils/mockDialogElement.util.ts`                   | Mocks HTMLDialogElement prototype behavior with restore handles for test teardown            |
 
 ### `src/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/utils/`
 

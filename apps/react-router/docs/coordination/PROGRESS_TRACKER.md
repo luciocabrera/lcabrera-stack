@@ -27,10 +27,11 @@ Project: apps/react-router
 
 ## Batch Log
 
-| Date       | Batch | Changes                                                                                 | Validation                                | Result    |
-| ---------- | ----- | --------------------------------------------------------------------------------------- | ----------------------------------------- | --------- |
-| 2026-06-11 | B-001 | Introduced shared test store utility + deduped EnterpriseOrders distinct string columns | Focused tests + `vp check` + fallow dupes | Completed |
-| 2026-06-11 | B-002 | Added coordination docs for parallel agent execution                                    | `vp check` baseline captured              | Completed |
+| Date       | Batch | Changes                                                                                                                 | Validation                                             | Result    |
+| ---------- | ----- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ | --------- |
+| 2026-06-11 | B-001 | Introduced shared test store utility + deduped EnterpriseOrders distinct string columns                                 | Focused tests + `vp check` + fallow dupes              | Completed |
+| 2026-06-11 | B-002 | Added coordination docs for parallel agent execution                                                                    | `vp check` baseline captured                           | Completed |
+| 2026-06-11 | B-003 | Claimed WS-001/WS-004; extracted TableConfig action test scaffold + expanded EnterpriseOrders basic-column helper usage | Focused action tests + `vp check` + fallow dupes check | Completed |
 
 ## Validation Checklist Per Batch
 
