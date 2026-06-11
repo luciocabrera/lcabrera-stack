@@ -140,11 +140,11 @@ Before creating anything new, check this inventory. If something here does the j
 
 ### `src/utils/prefetch/`
 
-| Function                  | Location                                         | Description                                                                   |
-| ------------------------- | ------------------------------------------------ | ----------------------------------------------------------------------------- |
-| `resolveFromCacheOrFetch` | `utils/prefetch/resolveFromCacheOrFetch.util.ts` | Resolves from prefetch cache (hit/in-flight) or falls back to a fresh fetch   |
-| `prefetchNextPage`        | `utils/prefetch/prefetchNextPage.util.ts`        | Creates a prefetch request returning initial cache state + resolution promise |
-| `firePrefetch`            | `utils/prefetch/firePrefetch.util.ts`            | Fires prefetch and applies result to a ref with staleness check               |
+| Function                  | Location                                         | Description                                                                 |
+| ------------------------- | ------------------------------------------------ | --------------------------------------------------------------------------- |
+| `resolveFromCacheOrFetch` | `utils/prefetch/resolveFromCacheOrFetch.util.ts` | Resolves from prefetch cache (hit/in-flight) or falls back to a fresh fetch |
+| `prefetchNextPage`        | `utils/prefetch/prefetchNextPage.util.ts`        | _Internal_: Creates prefetch request (used by `firePrefetch`)               |
+| `firePrefetch`            | `utils/prefetch/firePrefetch.util.ts`            | Fires prefetch and applies result to a ref with staleness check             |
 
 ### `src/utils/security/`
 
