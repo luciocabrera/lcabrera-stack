@@ -21,9 +21,7 @@ import {
   useGetGlobalPinningPreferences,
 } from '@/contexts/GlobalSettingsContext/selectors';
 
-import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
-import { RadioOptionGroup } from '@/components/RadioOptionGroup';
 import { Tabs } from '@/components/Tabs';
 
 import type {
@@ -46,6 +44,7 @@ import {
   DEFAULT_NAVIGATION_SIZE_PREFERENCE,
   DEFAULT_PINNING_PREFERENCE,
 } from './Settings.constants';
+import { SettingsOptionSection } from './SettingsOptionSection.component';
 import type { SettingsDraft } from './Settings.types';
 import { toDraft, toGlobalNavigationPreferencesUpdate } from './utils';
 
@@ -204,52 +203,32 @@ export const Settings = () => {
     {
       children: (
         <div {...stylex.props(styles.tabSections)}>
-          <Card color='default' elevation='sm' padding='lg'>
-            <section {...stylex.props(styles.section)}>
-              <h2 {...stylex.props(styles.sectionTitle)}>Navbar Size</h2>
-              <p {...stylex.props(styles.description)}>
-                Controls the global navigation width and density across the app.
-              </p>
-              <RadioOptionGroup
-                name='settings-navigation-size-preference'
-                onChange={handleNavigationSizeChange}
-                options={NAVIGATION_SIZE_PREFERENCE_OPTIONS}
-                value={draft.navigationSize}
-              />
-            </section>
-          </Card>
+          <SettingsOptionSection
+            description='Controls the global navigation width and density across the app.'
+            name='settings-navigation-size-preference'
+            onChange={handleNavigationSizeChange}
+            options={NAVIGATION_SIZE_PREFERENCE_OPTIONS}
+            title='Navbar Size'
+            value={draft.navigationSize}
+          />
 
-          <Card color='default' elevation='sm' padding='lg'>
-            <section {...stylex.props(styles.section)}>
-              <h2 {...stylex.props(styles.sectionTitle)}>Collapsed/Expanded</h2>
-              <p {...stylex.props(styles.description)}>
-                Determines the initial state of the navigation bar when the page
-                loads.
-              </p>
-              <RadioOptionGroup
-                name='settings-navigation-collapsed-preference'
-                onChange={handleNavigationCollapsedChange}
-                options={NAVIGATION_COLLAPSED_PREFERENCE_OPTIONS}
-                value={draft.navigationCollapsed}
-              />
-            </section>
-          </Card>
+          <SettingsOptionSection
+            description='Determines the initial state of the navigation bar when the page loads.'
+            name='settings-navigation-collapsed-preference'
+            onChange={handleNavigationCollapsedChange}
+            options={NAVIGATION_COLLAPSED_PREFERENCE_OPTIONS}
+            title='Collapsed/Expanded'
+            value={draft.navigationCollapsed}
+          />
 
-          <Card color='default' elevation='sm' padding='lg'>
-            <section {...stylex.props(styles.section)}>
-              <h2 {...stylex.props(styles.sectionTitle)}>Pinned/Unpinned</h2>
-              <p {...stylex.props(styles.description)}>
-                Determines if the navigation bar is fixed to the left or floats
-                on scroll.
-              </p>
-              <RadioOptionGroup
-                name='settings-navigation-pinned-preference'
-                onChange={handleNavigationPinnedChange}
-                options={NAVIGATION_PINNED_PREFERENCE_OPTIONS}
-                value={draft.navigationPinned}
-              />
-            </section>
-          </Card>
+          <SettingsOptionSection
+            description='Determines if the navigation bar is fixed to the left or floats on scroll.'
+            name='settings-navigation-pinned-preference'
+            onChange={handleNavigationPinnedChange}
+            options={NAVIGATION_PINNED_PREFERENCE_OPTIONS}
+            title='Pinned/Unpinned'
+            value={draft.navigationPinned}
+          />
         </div>
       ),
       header: 'Navigation',
@@ -258,76 +237,41 @@ export const Settings = () => {
     {
       children: (
         <div {...stylex.props(styles.tabSections)}>
-          <Card color='default' elevation='sm' padding='lg'>
-            <section {...stylex.props(styles.section)}>
-              <h2 {...stylex.props(styles.sectionTitle)}>
-                Pin Side Preference
-              </h2>
-              <p {...stylex.props(styles.description)}>
-                Used when pinning a column. If set to Always ask, the pin side
-                modal will be shown every time.
-              </p>
-              <RadioOptionGroup
-                name='settings-pin-side-preference'
-                onChange={handlePinSideChange}
-                options={PIN_SIDE_PREFERENCE_OPTIONS}
-                value={draft.pinSide}
-              />
-            </section>
-          </Card>
+          <SettingsOptionSection
+            description='Used when pinning a column. If set to Always ask, the pin side modal will be shown every time.'
+            name='settings-pin-side-preference'
+            onChange={handlePinSideChange}
+            options={PIN_SIDE_PREFERENCE_OPTIONS}
+            title='Pin Side Preference'
+            value={draft.pinSide}
+          />
 
-          <Card color='default' elevation='sm' padding='lg'>
-            <section {...stylex.props(styles.section)}>
-              <h2 {...stylex.props(styles.sectionTitle)}>
-                Order Conflict Preference
-              </h2>
-              <p {...stylex.props(styles.description)}>
-                Used when dragging a column creates an order and pinning
-                conflict.
-              </p>
-              <RadioOptionGroup
-                name='settings-order-conflict-preference'
-                onChange={handleOrderConflictChange}
-                options={ORDER_CONFLICT_PREFERENCE_OPTIONS}
-                value={draft.orderConflictResolution}
-              />
-            </section>
-          </Card>
+          <SettingsOptionSection
+            description='Used when dragging a column creates an order and pinning conflict.'
+            name='settings-order-conflict-preference'
+            onChange={handleOrderConflictChange}
+            options={ORDER_CONFLICT_PREFERENCE_OPTIONS}
+            title='Order Conflict Preference'
+            value={draft.orderConflictResolution}
+          />
 
-          <Card color='default' elevation='sm' padding='lg'>
-            <section {...stylex.props(styles.section)}>
-              <h2 {...stylex.props(styles.sectionTitle)}>
-                Pin Conflict Preference
-              </h2>
-              <p {...stylex.props(styles.description)}>
-                Used when a pin action creates a contiguity conflict.
-              </p>
-              <RadioOptionGroup
-                name='settings-pin-conflict-preference'
-                onChange={handlePinConflictChange}
-                options={PIN_CONFLICT_PREFERENCE_OPTIONS}
-                value={draft.pinConflictResolution}
-              />
-            </section>
-          </Card>
+          <SettingsOptionSection
+            description='Used when a pin action creates a contiguity conflict.'
+            name='settings-pin-conflict-preference'
+            onChange={handlePinConflictChange}
+            options={PIN_CONFLICT_PREFERENCE_OPTIONS}
+            title='Pin Conflict Preference'
+            value={draft.pinConflictResolution}
+          />
 
-          <Card color='default' elevation='sm' padding='lg'>
-            <section {...stylex.props(styles.section)}>
-              <h2 {...stylex.props(styles.sectionTitle)}>
-                Unpin Conflict Preference
-              </h2>
-              <p {...stylex.props(styles.description)}>
-                Used when unpinning a column would leave a gap in a pinned
-                block.
-              </p>
-              <RadioOptionGroup
-                name='settings-unpin-conflict-preference'
-                onChange={handleUnpinConflictChange}
-                options={UNPIN_CONFLICT_PREFERENCE_OPTIONS}
-                value={draft.unpinConflictResolution}
-              />
-            </section>
-          </Card>
+          <SettingsOptionSection
+            description='Used when unpinning a column would leave a gap in a pinned block.'
+            name='settings-unpin-conflict-preference'
+            onChange={handleUnpinConflictChange}
+            options={UNPIN_CONFLICT_PREFERENCE_OPTIONS}
+            title='Unpin Conflict Preference'
+            value={draft.unpinConflictResolution}
+          />
         </div>
       ),
       header: 'Pinning',

@@ -7,6 +7,12 @@ export type ResolveNextPageParamArgs = {
   readonly lastPage: WideAlltypes150Response;
 };
 
+export type ResolveFooterStatusTextArgs = {
+  readonly errorMessage: string;
+  readonly isError: boolean;
+  readonly isFetching: boolean;
+};
+
 export type WideAlltypes150TanStackTableContentProps = {
   readonly initialPage: WideAlltypes150Response;
   readonly initialSorting: SortingState;

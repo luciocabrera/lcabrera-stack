@@ -2,14 +2,7 @@ import { Button } from '@/components/Button';
 import { EraserIcon, RefreshIcon } from '@/components/Icons';
 import { ICON_SIZE_MD, ICON_SIZE_SM } from '@/design-system/constants';
 
-export type ClearResetToolbarButtonsProps = {
-  readonly clearLabel: string;
-  readonly hasValue: boolean;
-  readonly onClear: () => void;
-  readonly onReset: () => void;
-  readonly resetLabel: string;
-  readonly variant: 'footer' | 'toolbar';
-};
+import type { ClearResetToolbarButtonsProps } from './ClearResetToolbarButtons.types';
 
 export const ClearResetToolbarButtons = ({
   clearLabel,

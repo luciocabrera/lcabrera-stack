@@ -44,6 +44,9 @@ vp run test:watch
 # Full validation
 vp check
 vp run test
+
+# Custom architectural lint rules (ESLint pass)
+vp run lint:custom-rules
 ```
 
 ## Important Command Notes

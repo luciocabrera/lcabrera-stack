@@ -14,6 +14,34 @@ import {
   createStaticFilterOptions,
 } from '@/utils/filters';
 
+type DistinctStringColumnArgs = {
+  readonly columnName: keyof EnterpriseOrder;
+  readonly key: keyof EnterpriseOrder;
+  readonly label: string;
+  readonly maxWidth: number;
+  readonly minWidth: number;
+};
+
+const createDistinctStringColumn = ({
+  columnName,
+  key,
+  label,
+  maxWidth,
+  minWidth,
+}: DistinctStringColumnArgs): TableColumn<EnterpriseOrder> => {
+  return {
+    dataType: 'string',
+    ...createDistinctFilterOptions<EnterpriseOrder>({
+      columnName,
+      fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
+    }),
+    key,
+    label,
+    maxWidth,
+    minWidth,
+  };
+};
+
 export const PERSISTENCE_KEY = 'enterprise-orders-table';
 
 export const DEFAULT_COLUMN_PINNING: ColumnPinningState<EnterpriseOrder> = {
@@ -29,17 +57,13 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
     maxWidth: 120,
     minWidth: 90,
   },
-  {
-    dataType: 'string',
-    ...createDistinctFilterOptions<EnterpriseOrder>({
-      columnName: 'order_number',
-      fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
-    }),
+  createDistinctStringColumn({
+    columnName: 'order_number',
     key: 'order_number',
     label: 'Order #',
     maxWidth: 180,
     minWidth: 130,
-  },
+  }),
   {
     dataType: 'date',
     key: 'order_date',
@@ -85,28 +109,20 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
     maxWidth: 250,
     minWidth: 150,
   },
-  {
-    dataType: 'string',
-    ...createDistinctFilterOptions<EnterpriseOrder>({
-      columnName: 'customer_email',
-      fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
-    }),
+  createDistinctStringColumn({
+    columnName: 'customer_email',
     key: 'customer_email',
     label: 'Email',
     maxWidth: 280,
     minWidth: 180,
-  },
-  {
-    dataType: 'string',
-    ...createDistinctFilterOptions<EnterpriseOrder>({
-      columnName: 'customer_type',
-      fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
-    }),
+  }),
+  createDistinctStringColumn({
+    columnName: 'customer_type',
     key: 'customer_type',
     label: 'Customer Type',
     maxWidth: 180,
     minWidth: 130,
-  },
+  }),
   {
     dataType: 'boolean',
     key: 'is_vip_customer',
@@ -215,61 +231,41 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
     maxWidth: 150,
     minWidth: 110,
   },
-  {
-    dataType: 'string',
-    ...createDistinctFilterOptions<EnterpriseOrder>({
-      columnName: 'shipping_city',
-      fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
-    }),
+  createDistinctStringColumn({
+    columnName: 'shipping_city',
     key: 'shipping_city',
     label: 'Ship City',
     maxWidth: 180,
     minWidth: 120,
-  },
-  {
-    dataType: 'string',
-    ...createDistinctFilterOptions<EnterpriseOrder>({
-      columnName: 'shipping_state',
-      fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
-    }),
+  }),
+  createDistinctStringColumn({
+    columnName: 'shipping_state',
     key: 'shipping_state',
     label: 'Ship State',
     maxWidth: 150,
     minWidth: 110,
-  },
-  {
-    dataType: 'string',
-    ...createDistinctFilterOptions<EnterpriseOrder>({
-      columnName: 'shipping_country',
-      fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
-    }),
+  }),
+  createDistinctStringColumn({
+    columnName: 'shipping_country',
     key: 'shipping_country',
     label: 'Ship Country',
     maxWidth: 180,
     minWidth: 130,
-  },
-  {
-    dataType: 'string',
-    ...createDistinctFilterOptions<EnterpriseOrder>({
-      columnName: 'carrier',
-      fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
-    }),
+  }),
+  createDistinctStringColumn({
+    columnName: 'carrier',
     key: 'carrier',
     label: 'Carrier',
     maxWidth: 150,
     minWidth: 100,
-  },
-  {
-    dataType: 'string',
-    ...createDistinctFilterOptions<EnterpriseOrder>({
-      columnName: 'warehouse_location',
-      fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
-    }),
+  }),
+  createDistinctStringColumn({
+    columnName: 'warehouse_location',
     key: 'warehouse_location',
     label: 'Warehouse',
     maxWidth: 180,
     minWidth: 130,
-  },
+  }),
   {
     dataType: 'boolean',
     key: 'is_rush_order',

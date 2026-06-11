@@ -32,6 +32,7 @@ import { wideAlltypes150Api } from '@/services';
 
 import type { loader } from './wide-alltypes-150-tanstack.loader';
 import type {
+  ResolveFooterStatusTextArgs,
   ResolveNextPageParamArgs,
   WideAlltypes150TanStackTableContentProps,
 } from './WideAlltypes150TanStack.types';
@@ -85,12 +86,6 @@ const resolveNextPageParam = ({
   }
 
   return loadedRowCount;
-};
-
-type ResolveFooterStatusTextArgs = {
-  readonly errorMessage: string;
-  readonly isError: boolean;
-  readonly isFetching: boolean;
 };
 
 const resolveFooterStatusText = ({

@@ -4,69 +4,39 @@ import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { TableMetaState } from '@/components/Table/Table.types';
+import {
+  createMockStore,
+  type MockStore,
+} from '@/components/test-utils/createMockStore.util';
 
-type MockStore<TState> = {
-  readonly get: () => TState;
-  readonly getServerSnapshot: () => TState;
-  readonly reset: (nextState: TState) => void;
-  readonly set: (partial: Partial<TState>) => void;
-  readonly subscribe: (listener: () => void) => () => void;
+const createInitialMetaState = (): TableMetaState => {
+  return {
+    columnOverscan: 2,
+    columnSelectedKey: 'id',
+    density: 'compact',
+    enablePrefetch: true,
+    error: undefined,
+    initialPageSize: 20,
+    isBordered: true,
+    isColumnSettingsOpen: false,
+    isStriped: true,
+    isTableSettingsOpen: false,
+    loadMorePageSize: 50,
+    overscan: 4,
+    persistenceKey: 'orders',
+    placeholderRowCount: 8,
+    rowHeight: 44,
+    threshold: 200,
+    title: 'Orders',
+  };
 };
 
-const { columnsStore, metaStore } = vi.hoisted(() => {
-  const createMockStore = <TState,>(
-    initialState: TState,
-  ): MockStore<TState> => {
-    let state = initialState;
-    const listeners = new Set<() => void>();
+type MetaStoreState = ReturnType<typeof createInitialMetaState>;
 
-    return {
-      get: () => state,
-      getServerSnapshot: () => state,
-      reset: (nextState) => {
-        state = nextState;
-        for (const listener of listeners) {
-          listener();
-        }
-      },
-      set: (partial) => {
-        state = { ...state, ...partial };
-        for (const listener of listeners) {
-          listener();
-        }
-      },
-      subscribe: (listener) => {
-        listeners.add(listener);
-        return () => {
-          listeners.delete(listener);
-        };
-      },
-    };
-  };
-
-  return {
-    columnsStore: createMockStore({}),
-    metaStore: createMockStore<TableMetaState>({
-      columnOverscan: 2,
-      columnSelectedKey: 'id',
-      density: 'compact',
-      enablePrefetch: true,
-      error: undefined,
-      initialPageSize: 20,
-      isBordered: true,
-      isColumnSettingsOpen: false,
-      isStriped: true,
-      isTableSettingsOpen: false,
-      loadMorePageSize: 50,
-      overscan: 4,
-      persistenceKey: 'orders',
-      placeholderRowCount: 8,
-      rowHeight: 44,
-      threshold: 200,
-      title: 'Orders',
-    }),
-  };
-});
+let columnsStore: MockStore<Record<string, never>> = createMockStore({});
+let metaStore: MockStore<MetaStoreState> = createMockStore(
+  createInitialMetaState(),
+);
 
 vi.mock(
   '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
@@ -99,25 +69,8 @@ import { useGetTableTitle } from './selectors/useGetTableTitle.hook';
 
 describe('TableConfig meta hooks', () => {
   beforeEach(() => {
-    metaStore.reset({
-      columnOverscan: 2,
-      columnSelectedKey: 'id',
-      density: 'compact',
-      enablePrefetch: true,
-      error: undefined,
-      initialPageSize: 20,
-      isBordered: true,
-      isColumnSettingsOpen: false,
-      isStriped: true,
-      isTableSettingsOpen: false,
-      loadMorePageSize: 50,
-      overscan: 4,
-      persistenceKey: 'orders',
-      placeholderRowCount: 8,
-      rowHeight: 44,
-      threshold: 200,
-      title: 'Orders',
-    });
+    columnsStore = createMockStore({});
+    metaStore = createMockStore(createInitialMetaState());
   });
 
   it('subscribes to the meta store and updates selected state', () => {

@@ -27,18 +27,11 @@ import { ICON_SIZE_LG } from '@/design-system/constants';
 import { getNavigationItems, NAV_DENSITY } from './AppNavigation.constants';
 import { styles } from './AppNavigation.stylex';
 
-import type { AppNavigationProps } from './AppNavigation.types';
 import type {
-  GlobalNavigationPinnedPreference,
-  GlobalNavigationSizePreference,
-} from '@/types/globalSettings.types';
-
-type ResolvePinnedStateArgs = {
-  readonly defaultIsPinned: boolean;
-  readonly navigationPinnedPreference:
-    | GlobalNavigationPinnedPreference
-    | undefined;
-};
+  AppNavigationProps,
+  ResolvePinnedStateArgs,
+} from './AppNavigation.types';
+import type { GlobalNavigationSizePreference } from '@/types/globalSettings.types';
 
 const resolvePinnedState = ({
   defaultIsPinned,

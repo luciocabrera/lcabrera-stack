@@ -81,6 +81,13 @@ Before creating anything new, check this inventory. If something here does the j
 | ----------------------------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
 | `commitPinningAndOrderUpdate` | `components/Table/contexts/TableConfig/columns/actions/commitPinningAndOrderUpdate.util.ts` | Commits pinning/order persistence and applies synced derived slices to store |
 
+### `src/components/test-utils/`
+
+| Function            | Location                                          | Description                                                                                  |
+| ------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `createMockStore`   | `components/test-utils/createMockStore.util.ts`   | Generic external-store-like test scaffold (`get`, `set`, `reset`, `subscribe`, SSR snapshot) |
+| `mockDialogElement` | `components/test-utils/mockDialogElement.util.ts` | Mocks HTMLDialogElement prototype behavior with restore handles for test teardown            |
+
 ### `src/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/utils/`
 
 | Function                    | Location                                                                                            | Description                                               |

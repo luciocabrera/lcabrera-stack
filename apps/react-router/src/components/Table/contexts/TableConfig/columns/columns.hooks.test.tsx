@@ -3,79 +3,50 @@
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-type MockStore<TState> = {
-  readonly get: () => TState;
-  readonly getServerSnapshot: () => TState;
-  readonly reset: (nextState: TState) => void;
-  readonly set: (partial: Partial<TState>) => void;
-  readonly subscribe: (listener: () => void) => () => void;
+import {
+  createMockStore,
+  type MockStore,
+} from '@/components/test-utils/createMockStore.util';
+
+const createInitialColumnsState = () => {
+  return {
+    columnFilters: {
+      status: {
+        operator: 'equals',
+        type: 'select',
+        value: 'paid',
+      },
+    },
+    columnGroups: {
+      center: [{ key: 'status' }],
+      left: [{ key: 'id' }],
+      right: [{ key: 'actions' }],
+    },
+    columnOrder: ['id', 'status', 'actions'],
+    columnPinning: { left: ['id'], right: ['actions'] },
+    columnSizing: { id: 120, status: 180 },
+    columnVisibility: new Set(['status']),
+    columns: [{ key: 'id' }, { key: 'status' }, { key: 'actions' }],
+    effectiveColumns: [{ key: 'id' }, { key: 'status' }],
+    normalizedColumns: {
+      actions: { key: 'actions', label: 'Actions' },
+      status: { key: 'status', label: 'Status' },
+    },
+    pinnedColumnOffsets: {
+      left: { id: 0 },
+      right: { actions: 0 },
+    },
+    sorting: [{ columnKey: 'status', direction: 'desc' }],
+    staticKeys: new Set(['id']),
+  };
 };
 
-const { columnsStore, metaStore } = vi.hoisted(() => {
-  const createMockStore = <TState,>(
-    initialState: TState,
-  ): MockStore<TState> => {
-    let state = initialState;
-    const listeners = new Set<() => void>();
+type ColumnsStoreState = ReturnType<typeof createInitialColumnsState>;
 
-    return {
-      get: () => state,
-      getServerSnapshot: () => state,
-      reset: (nextState) => {
-        state = nextState;
-        for (const listener of listeners) {
-          listener();
-        }
-      },
-      set: (partial) => {
-        state = { ...state, ...partial };
-        for (const listener of listeners) {
-          listener();
-        }
-      },
-      subscribe: (listener) => {
-        listeners.add(listener);
-        return () => {
-          listeners.delete(listener);
-        };
-      },
-    };
-  };
-
-  return {
-    columnsStore: createMockStore({
-      columnFilters: {
-        status: {
-          operator: 'equals',
-          type: 'select',
-          value: 'paid',
-        },
-      },
-      columnGroups: {
-        center: [{ key: 'status' }],
-        left: [{ key: 'id' }],
-        right: [{ key: 'actions' }],
-      },
-      columnOrder: ['id', 'status', 'actions'],
-      columnPinning: { left: ['id'], right: ['actions'] },
-      columnSizing: { id: 120, status: 180 },
-      columnVisibility: new Set(['status']),
-      columns: [{ key: 'id' }, { key: 'status' }, { key: 'actions' }],
-      effectiveColumns: [{ key: 'id' }, { key: 'status' }],
-      normalizedColumns: {
-        actions: { key: 'actions', label: 'Actions' },
-        status: { key: 'status', label: 'Status' },
-      },
-      pinnedColumnOffsets: {
-        left: { id: 0 },
-        right: { actions: 0 },
-      },
-      sorting: [{ columnKey: 'status', direction: 'desc' }],
-      staticKeys: new Set(['id']),
-    }),
-    metaStore: createMockStore({}),
-  };
-});
+let columnsStore: MockStore<ColumnsStoreState> = createMockStore(
+  createInitialColumnsState(),
+);
+let metaStore: MockStore<Record<string, never>> = createMockStore({});
 
 vi.mock(
   '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
@@ -105,36 +76,8 @@ import { useGetStaticColumnKeys } from './selectors/useGetStaticColumnKeys.hook'
 
 describe('TableConfig column hooks', () => {
   beforeEach(() => {
-    columnsStore.reset({
-      columnFilters: {
-        status: {
-          operator: 'equals',
-          type: 'select',
-          value: 'paid',
-        },
-      },
-      columnGroups: {
-        center: [{ key: 'status' }],
-        left: [{ key: 'id' }],
-        right: [{ key: 'actions' }],
-      },
-      columnOrder: ['id', 'status', 'actions'],
-      columnPinning: { left: ['id'], right: ['actions'] },
-      columnSizing: { id: 120, status: 180 },
-      columnVisibility: new Set(['status']),
-      columns: [{ key: 'id' }, { key: 'status' }, { key: 'actions' }],
-      effectiveColumns: [{ key: 'id' }, { key: 'status' }],
-      normalizedColumns: {
-        actions: { key: 'actions', label: 'Actions' },
-        status: { key: 'status', label: 'Status' },
-      },
-      pinnedColumnOffsets: {
-        left: { id: 0 },
-        right: { actions: 0 },
-      },
-      sorting: [{ columnKey: 'status', direction: 'desc' }],
-      staticKeys: new Set(['id']),
-    });
+    columnsStore = createMockStore(createInitialColumnsState());
+    metaStore = createMockStore({});
   });
 
   it('subscribes to the columns store and updates derived selections', () => {

@@ -154,6 +154,11 @@ graph TD
   E --> F
 ```
 
+## Testing Pattern
+
+- `columns.hooks.test.tsx` and `meta.hooks.test.tsx` share a common store scaffold through [src/components/test-utils/createMockStore.util.ts](src/components/test-utils/createMockStore.util.ts).
+- Tests keep `vi.mock(...)` stable while reassigning local store instances in `beforeEach`, which avoids `vi.hoisted` initialization-order pitfalls.
+
 ## Columns Actions
 
 | Hook                         | Reads From     | Writes To      | Description                                                                                       |
