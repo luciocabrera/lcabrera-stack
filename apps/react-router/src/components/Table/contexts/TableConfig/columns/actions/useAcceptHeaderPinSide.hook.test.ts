@@ -99,16 +99,18 @@ describe('useAcceptHeaderPinSide', () => {
       result.current({ columnKey: 'name', pinSide: 'left' });
     });
 
-    expect(mockPersistTableState).toHaveBeenCalledWith({
-      persistenceKey: 'orders-table',
-      slice: 'columnPinning',
-      valueSlice: { left: ['id', 'name'], right: [] },
-    });
-    expect(mockPersistTableState).toHaveBeenCalledWith({
-      persistenceKey: 'orders-table',
-      slice: 'columnOrder',
-      valueSlice: ['id', 'name', 'age'],
-    });
+    expect(mockPersistTableState).toHaveBeenCalledWith([
+      {
+        persistenceKey: 'orders-table',
+        slice: 'columnPinning',
+        valueSlice: { left: ['id', 'name'], right: [] },
+      },
+      {
+        persistenceKey: 'orders-table',
+        slice: 'columnOrder',
+        valueSlice: ['id', 'name', 'age'],
+      },
+    ]);
     expect(mockColumnsStore.set).toHaveBeenCalledWith(
       expect.objectContaining({
         columnOrder: ['id', 'name', 'age'],
