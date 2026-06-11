@@ -7,6 +7,7 @@ Pure utility functions for column processing and state persistence.
 ```
 utils/
 ├── getColumnPinSide.util.ts             → Detect which side a column is pinned to
+├── getPinnedDerivedColumnsState.util.ts  → Build effective columns, groups, and pinned offsets
 ├── getEffectiveColumns.util.ts          → Apply visibility + order + pinning
 ├── getNormalizedColummns.util.ts         → Enrich columns with sort metadata
 ├── getPinnedColumnOffsets.util.ts        → Compute sticky offsets for pinned columns
@@ -49,15 +50,16 @@ graph TD
   end
 ```
 
-| Function                     | Input                      | Output                          | Purpose                                                                              |
-| ---------------------------- | -------------------------- | ------------------------------- | ------------------------------------------------------------------------------------ |
-| `getEffectiveColumns`        | columns, order, visibility | `TableColumn[]`                 | Visible columns in display order; pinned columns follow the reconciled display order |
-| `getNormalizedColummns`      | columns, sorting           | `NormalizedColumnsState`        | Columns enriched with sort metadata                                                  |
-| `getStaticColumnKeys`        | columns                    | `Set<string>`                   | Keys of locked/static columns                                                        |
-| `getPinnedColumnOffsets`     | pinning, sizing, columns   | `Record<key, PinnedColumnInfo>` | Sticky positions for pinned columns                                                  |
-| `getColumnPinSide`           | columnKey, pinning         | `PinSide \| undefined`          | Which side a column is pinned to                                                     |
-| `splitColumnsByPinning`      | pinning, effectiveColumns  | `ColumnGroupsState`             | Split columns into left/center/right                                                 |
-| `syncColumnOrderWithPinning` | order, pinning             | `string[]`                      | Reorder to keep pinned columns grouped and keep the order slice in sync              |
+| Function                       | Input                                       | Output                                                    | Purpose                                                                              |
+| ------------------------------ | ------------------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `getEffectiveColumns`          | columns, order, visibility                  | `TableColumn[]`                                           | Visible columns in display order; pinned columns follow the reconciled display order |
+| `getPinnedDerivedColumnsState` | columns, order, pinning, sizing, visibility | `{ effectiveColumns, columnGroups, pinnedColumnOffsets }` | Shared helper to recompute all pinning-dependent derived slices in one call          |
+| `getNormalizedColummns`        | columns, sorting                            | `NormalizedColumnsState`                                  | Columns enriched with sort metadata                                                  |
+| `getStaticColumnKeys`          | columns                                     | `Set<string>`                                             | Keys of locked/static columns                                                        |
+| `getPinnedColumnOffsets`       | pinning, sizing, columns                    | `Record<key, PinnedColumnInfo>`                           | Sticky positions for pinned columns                                                  |
+| `getColumnPinSide`             | columnKey, pinning                          | `PinSide \| undefined`                                    | Which side a column is pinned to                                                     |
+| `splitColumnsByPinning`        | pinning, effectiveColumns                   | `ColumnGroupsState`                                       | Split columns into left/center/right                                                 |
+| `syncColumnOrderWithPinning`   | order, pinning                              | `string[]`                                                | Reorder to keep pinned columns grouped and keep the order slice in sync              |
 
 `getPinnedColumnOffsets` computes offsets and boundary markers (`isLastPinnedLeft`, `isFirstPinnedRight`) from effective column order so shadow boundaries stay aligned with rendered sticky positions even if pinning arrays are out of order.
 

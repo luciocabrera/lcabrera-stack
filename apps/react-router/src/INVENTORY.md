@@ -69,6 +69,12 @@ Before creating anything new, check this inventory. If something here does the j
 | `getTotalVisibleColumnCount`   | `components/Table/TableBody/utils/getTotalVisibleColumnCount.util.ts`   | Counts pinned, center, and spacer cells for spacer-row `colSpan`      |
 | `renderTableBodyColumnGroup`   | `components/Table/TableBody/utils/renderTableBodyColumnGroup.util.ts`   | Maps a column group through the shared body-cell renderer             |
 
+### `src/components/Table/utils/`
+
+| Function                       | Location                                                      | Description                                                               |
+| ------------------------------ | ------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `getPinnedDerivedColumnsState` | `components/Table/utils/getPinnedDerivedColumnsState.util.ts` | Computes effective columns, pin-based groups, and pinned offsets together |
+
 ### `src/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/utils/`
 
 | Function                    | Location                                                                                            | Description                                               |

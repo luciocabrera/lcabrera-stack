@@ -1,7 +1,6 @@
 import type {
   ColumnOrderState,
   ColumnPinningState,
-  ColumnSizingState,
   DataKey,
 } from '@/components/Table/Table.types';
 import type { PinConflictState, PinSide } from '@/types/ui.types';
@@ -15,9 +14,7 @@ import {
   resolveClosestEdgeSide,
 } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 import {
-  getEffectiveColumns,
-  getPinnedColumnOffsets,
-  splitColumnsByPinning,
+  getPinnedDerivedColumnsState,
   syncColumnOrderWithPinning,
 } from '@/components/Table/utils';
 
@@ -81,25 +78,14 @@ export const useAcceptHeaderPinSide = <TData>() => {
       newPinning,
     });
 
-    const effectiveColumns = getEffectiveColumns<TData>({
-      columnOrder: newColumnOrder,
-      columnPinning: newPinning,
-      columns,
-      columnVisibility: columnsState?.columnVisibility,
-    });
-
-    const columnGroups = splitColumnsByPinning({
-      columnPinning: newPinning,
-      effectiveColumns,
-    });
-
-    const columnSizing =
-      columnsState?.columnSizing ?? ({} as ColumnSizingState<TData>);
-    const pinnedColumnOffsets = getPinnedColumnOffsets<TData>({
-      columnPinning: newPinning,
-      columnSizing,
-      effectiveColumns,
-    });
+    const { columnGroups, effectiveColumns, pinnedColumnOffsets } =
+      getPinnedDerivedColumnsState<TData>({
+        columnOrder: newColumnOrder,
+        columnPinning: newPinning,
+        columnSizing: columnsState?.columnSizing,
+        columns,
+        columnVisibility: columnsState?.columnVisibility,
+      });
 
     persistTableState([
       {
