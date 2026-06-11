@@ -158,7 +158,7 @@ export const colorVariants = stylex.create({
       default: 'none',
       ':hover': `radial-gradient(circle, oklch(100% 0 0 / 0.2) 1%, transparent 1%)`,
     },
-    color: colors.brandPrimaryText,
+    color: colors.brandSecondaryText,
   },
 
   secondary: {

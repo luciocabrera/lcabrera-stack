@@ -16,7 +16,7 @@ export const lightTheme = stylex.createTheme(colors, {
   /* Derivatives using OKLCH math */
   brandPrimaryHover: 'oklch(from brandPrimary l-0.05 c+0.01 h)',
   brandPrimaryActive: 'oklch(from brandPrimary l-0.10 c+0.02 h)',
-  brandPrimaryText: 'oklch(100% 0 0)',
+  brandPrimaryText: 'oklch(from brandPrimary l+0.10 c+0.05 h)',
 
   brandSecondaryHover: 'oklch(from brandSecondary l-0.05 c+0.01 h)',
   brandSecondaryActive: 'oklch(from brandSecondary l-0.10 c+0.02 h)',

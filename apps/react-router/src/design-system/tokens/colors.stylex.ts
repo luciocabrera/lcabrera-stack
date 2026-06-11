@@ -25,6 +25,7 @@ export const colors = stylex.defineVars({
   brandPrimaryHover: 'var(--brand-primary-hover)',
 
   brandPrimaryText: 'var(--brand-primary-text)',
+  brandPrimaryTextActive: 'var(--brand-primary-text-active)',
   brandSecondary: 'var(--brand-secondary)',
   brandSecondaryActive: 'var(--brand-secondary-active)',
 

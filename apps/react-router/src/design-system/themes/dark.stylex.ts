@@ -12,13 +12,13 @@ export const darkTheme = stylex.createTheme(colors, {
   // info: 'oklch(78% 0.19 220)',
   // brandPrimary: 'oklch(48% 0.05 266)',
   // brandSecondary: 'oklch(49% 0.06 300)',
-  brandPrimary: 'oklch(0.36 0.15 261.66)',
+  brandPrimary: 'lab(34 -14.67 46.32 / 0.6)', //,lab(11 13.52 -40.39)', //'oklch(0.36 0.15 261.66)',
   brandSecondary: 'oklch(48% 0.05 266)',
   success: 'oklch(52% 0.06 160)',
   warning: 'oklch(44% 0.08 80)',
   error: 'oklch(0.48095 0.14876 27.27312)',
   info: 'oklch(66% 0.19 220)',
-
+  //lab(73 -27.69 88 / 0.75)
   /* Derivatives (reverse logic vs light theme) */
   brandPrimaryHover: 'oklch(from brandPrimary l+0.06 c+0.01)',
   brandPrimaryActive: 'oklch(from brandPrimary l-0.08 c+0.01)',
@@ -26,6 +26,7 @@ export const darkTheme = stylex.createTheme(colors, {
   brandPrimaryBackground: 'oklch(28% 0.05 266)',
   brandPrimaryCardText: 'oklch(85% 0.08 266)',
   brandPrimaryText: 'oklch(100% 0 0)',
+  brandPrimaryTextActive: 'lab(74 -29.14 91.81)',
 
   brandSecondaryHover: 'oklch(from brandSecondary l+0.06 c+0.02)',
   brandSecondaryActive: 'oklch(from brandSecondary l-0.08 c+0.02)',
