@@ -15,6 +15,7 @@ export const TableLayout = <
   TData extends Record<string, unknown>,
   TResponse = Record<string, unknown>,
 >({
+  additionalMetadata,
   columnOrder,
   columnPinning,
   columns,
@@ -32,8 +33,10 @@ export const TableLayout = <
   loadMorePageSize,
   onLoadMore,
   persistenceKey,
+  schemaName,
   sorting,
   suspenseKey,
+  tableName,
   title,
 }: TableLayoutProps<TData, TResponse>) => {
   const columnsState = {
@@ -47,12 +50,15 @@ export const TableLayout = <
   };
 
   const metaState = {
+    additionalMetadata,
     density,
     enablePrefetch,
     isBordered,
     isStriped,
     loadMorePageSize,
     persistenceKey,
+    schemaName,
+    tableName,
     title,
   };
 

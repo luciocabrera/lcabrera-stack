@@ -11,11 +11,9 @@ export type TableDrawerColumnsState<TData> = Pick<
   | 'sorting'
 >;
 
-export type TableDrawerContextValue = {
+export type TableDrawerContextValue<TData = Record<string, unknown>> = {
   /** Store managing column-related state */
-  readonly columnsStore: TStore<
-    TableDrawerColumnsState<Record<string, unknown>>
-  >;
+  readonly columnsStore: TStore<TableDrawerColumnsState<TData>>;
 };
 
 export type TableDrawerProviderProps = {

@@ -1,14 +1,16 @@
 import type {
+  ColumnOrderState,
   ColumnPinningState,
+  DataKey,
   TableColumn,
 } from '@/components/Table/Table.types';
 
-type SyncColumnOrderWithPinningArgs = {
-  readonly columnKey: string;
+type SyncColumnOrderWithPinningArgs<TData> = {
+  readonly columnKey: DataKey<TData>;
   readonly columnPinning: 'left' | 'right' | undefined;
-  readonly columns: readonly TableColumn<Record<string, unknown>>[];
-  readonly currentOrder: readonly string[];
-  readonly newPinning: ColumnPinningState<Record<string, unknown>>;
+  readonly columns: readonly TableColumn<TData>[];
+  readonly currentOrder: readonly DataKey<TData>[];
+  readonly newPinning: ColumnPinningState<TData>;
 };
 
 /**
@@ -18,15 +20,16 @@ type SyncColumnOrderWithPinningArgs = {
  * - Right-pinned columns are placed at the end (before existing right-pinned)
  * - Unpinned columns keep their current position
  */
-export const syncColumnOrderWithPinning = ({
+export const syncColumnOrderWithPinning = <TData>({
   columnKey,
   columnPinning,
   columns,
   currentOrder,
   newPinning,
-}: SyncColumnOrderWithPinningArgs): string[] => {
+}: SyncColumnOrderWithPinningArgs<TData>): ColumnOrderState<TData> => {
   // If not pinning/unpinning, no order change needed
-  if (columnPinning === undefined) return [...currentOrder];
+  if (columnPinning === undefined)
+    return [...currentOrder] as ColumnOrderState<TData>;
 
   // Build base order: use currentOrder if populated, otherwise derive from columns
   const baseOrder =
@@ -45,7 +48,7 @@ export const syncColumnOrderWithPinning = ({
       ...orderWithoutColumn.slice(0, otherLeftPinnedCount),
       columnKey,
       ...orderWithoutColumn.slice(otherLeftPinnedCount),
-    ];
+    ] as ColumnOrderState<TData>;
   }
 
   // columnPinning === 'right'
@@ -59,5 +62,5 @@ export const syncColumnOrderWithPinning = ({
     ...orderWithoutColumn.slice(0, insertAt),
     columnKey,
     ...orderWithoutColumn.slice(insertAt),
-  ];
+  ] as ColumnOrderState<TData>;
 };

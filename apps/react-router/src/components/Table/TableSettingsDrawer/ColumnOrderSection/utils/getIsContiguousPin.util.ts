@@ -1,12 +1,13 @@
 import type {
   ColumnPinningState,
+  DataKey,
   TableColumn,
 } from '@/components/Table/Table.types';
 
 type GetIsContiguousPinArgs<TData> = {
   readonly allOrderedColumns: readonly TableColumn<TData>[];
-  readonly columnKey: string;
-  readonly columnPinning: ColumnPinningState;
+  readonly columnKey: DataKey<TData>;
+  readonly columnPinning: ColumnPinningState<TData>;
   readonly side: 'left' | 'right';
 };
 
@@ -20,18 +21,26 @@ export const getIsContiguousPin = <TData>({
   columnKey,
   columnPinning,
   side,
-}: GetIsContiguousPinArgs<TData>): boolean => {
+}: GetIsContiguousPinArgs<TData>) => {
   const index = allOrderedColumns.findIndex((col) => col.key === columnKey);
 
   if (side === 'left') {
     for (let i = 0; i < index; i++) {
-      if (!columnPinning.left.includes(allOrderedColumns[i]?.key ?? '')) {
+      if (
+        !columnPinning.left.includes(
+          allOrderedColumns[i]?.key ?? ('' as DataKey<TData>),
+        )
+      ) {
         return false;
       }
     }
   } else {
     for (let i = index + 1; i < allOrderedColumns.length; i++) {
-      if (!columnPinning.right.includes(allOrderedColumns[i]?.key ?? '')) {
+      if (
+        !columnPinning.right.includes(
+          allOrderedColumns[i]?.key ?? ('' as DataKey<TData>),
+        )
+      ) {
         return false;
       }
     }

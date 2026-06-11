@@ -44,8 +44,10 @@ export const EnterpriseOrders = () => {
         })
       }
       persistenceKey={PERSISTENCE_KEY}
+      schemaName='public'
       sorting={sorting}
       suspenseKey={key}
+      tableName='enterprise_orders'
       title='Enterprise Orders - Infinite Scroll'
     />
   );

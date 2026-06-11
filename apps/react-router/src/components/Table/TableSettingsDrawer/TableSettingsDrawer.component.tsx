@@ -19,6 +19,7 @@ import { useNotifications } from '@/hooks/useNotifications.hook';
 import { useToogleTableIsTableSettingsOpen } from '../contexts/TableConfig/meta/actions';
 import { ColumnOrderSection } from './ColumnOrderSection';
 import { ColumnOrderSectionProvider } from './ColumnOrderSection/ColumnOrderSectionContext/ColumnOrderSectionContext.provider';
+import { DetailsSection } from './DetailsSection';
 import { FiltersSection } from './FiltersSection';
 import { validateFilter } from './FiltersSection/validateFilter.util';
 import { GeneralSettingsSection } from './GeneralSettingsSection';
@@ -78,6 +79,7 @@ export const TableSettingsDrawer = () => {
       header: 'General',
       key: 'general',
     },
+
     {
       children: <FiltersSection />,
       header: 'Filters',
@@ -85,7 +87,7 @@ export const TableSettingsDrawer = () => {
     },
     {
       children: <SortingSection />,
-      header: ' Sorting',
+      header: 'Sorting',
       key: 'sorting',
     },
 
@@ -97,6 +99,11 @@ export const TableSettingsDrawer = () => {
       ),
       header: 'Columns',
       key: 'columns',
+    },
+    {
+      children: <DetailsSection />,
+      header: 'Details',
+      key: 'details',
     },
   ];
 

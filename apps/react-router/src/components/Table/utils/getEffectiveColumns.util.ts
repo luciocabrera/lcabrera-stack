@@ -43,13 +43,13 @@ export const getEffectiveColumns = <TData>({
   if (leftPinned.length === 0 && rightPinned.length === 0)
     return orderedColumns;
 
-  const pinnedLeftCols = leftPinned
-    .map((key) => orderedColumns.find((col) => col.key === key))
-    .filter((col): col is NonNullable<typeof col> => col !== undefined);
+  const pinnedLeftCols = orderedColumns.filter((col) =>
+    leftPinned.includes(col.key),
+  );
 
-  const pinnedRightCols = rightPinned
-    .map((key) => orderedColumns.find((col) => col.key === key))
-    .filter((col): col is NonNullable<typeof col> => col !== undefined);
+  const pinnedRightCols = orderedColumns.filter((col) =>
+    rightPinned.includes(col.key),
+  );
 
   const unpinnedCols = orderedColumns.filter(
     (col) => !leftPinned.includes(col.key) && !rightPinned.includes(col.key),

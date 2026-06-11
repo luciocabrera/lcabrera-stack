@@ -60,8 +60,8 @@ export const styles = stylex.create({
     marginBottom: '-1px',
   },
   tabButtonActive: {
-    color: colors.brandPrimary,
-    borderBottomColor: colors.brandPrimary,
+    color: colors.brandPrimaryText,
+    borderBottomColor: colors.brandPrimaryText,
   },
   tabContent: {
     // Reserve space for scrollbar on both edges to keep content visually centered

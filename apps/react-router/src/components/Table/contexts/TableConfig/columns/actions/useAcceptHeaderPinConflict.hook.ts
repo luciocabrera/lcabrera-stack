@@ -18,6 +18,7 @@ import {
   getEffectiveColumns,
   getPinnedColumnOffsets,
   splitColumnsByPinning,
+  syncColumnOrderWithPinning,
 } from '@/components/Table/utils';
 
 type AcceptHeaderPinConflictArgs<TData> = {
@@ -45,12 +46,12 @@ export const useAcceptHeaderPinConflict = <TData>() => {
     const persistenceKey = metaStore.get()?.persistenceKey ?? '';
 
     const staticKeys = columnsState?.staticKeys;
+    const currentOrder =
+      columnsState?.columnOrder ?? ([] as ColumnOrderState<TData>);
 
     const allOrderedColumns = buildAllOrderedColumns({ columns, columnsOrder });
     const index = allOrderedColumns.findIndex((col) => col.key === columnKey);
-    const allOrderedKeys = allOrderedColumns.map(
-      (column) => column.key,
-    ) as DataKey<TData>[];
+    const allOrderedKeys = allOrderedColumns.map((column) => column.key);
 
     let newPinning: ColumnPinningState<TData>;
     let newOrder: ColumnOrderState<TData> | undefined;
@@ -58,42 +59,52 @@ export const useAcceptHeaderPinConflict = <TData>() => {
     if (resolution === 'move-column') {
       newOrder = allOrderedColumns
         .filter((col) => col.key !== columnKey)
-        .map((col) => col.key) as ColumnOrderState<TData>;
+        .map((col) => col.key);
 
       const column = allOrderedColumns[index];
       if (column?.key) {
-        newOrder = insertAdjacentToPinnedGroup({
+        newOrder = insertAdjacentToPinnedGroup<TData>({
           columnKey: column.key,
-          columnPinning: currentPinning as ColumnPinningState,
+          columnPinning: currentPinning,
           order: newOrder,
           side,
-        }) as ColumnOrderState<TData>;
+        });
       }
 
       newPinning = applyPin({
         columnKey,
-        columnPinning: currentPinning as ColumnPinningState,
+        columnPinning: currentPinning,
         side,
         staticKeys,
-      }) as ColumnPinningState<TData>;
+      });
     } else if (resolution === 'pin-all-between') {
       newPinning = pinAllBetween<DataKey<TData>>({
         allOrderedKeys,
-        columnPinning: currentPinning as ColumnPinningState<TData>,
+        columnPinning: currentPinning,
         index,
         side,
-      }) as ColumnPinningState<TData>;
+      });
     } else {
       newPinning = applyPin({
         columnKey,
-        columnPinning: currentPinning as ColumnPinningState,
+        columnPinning: currentPinning,
         side,
         staticKeys,
-      }) as ColumnPinningState<TData>;
+      });
+    }
+
+    if (!newOrder) {
+      newOrder = syncColumnOrderWithPinning<TData>({
+        columnKey,
+        columnPinning: side,
+        columns,
+        currentOrder,
+        newPinning,
+      });
     }
 
     const effectiveColumns = getEffectiveColumns({
-      columnOrder: newOrder ?? columnsState?.columnOrder,
+      columnOrder: newOrder,
       columnPinning: newPinning,
       columns,
       columnVisibility: columnsState?.columnVisibility,

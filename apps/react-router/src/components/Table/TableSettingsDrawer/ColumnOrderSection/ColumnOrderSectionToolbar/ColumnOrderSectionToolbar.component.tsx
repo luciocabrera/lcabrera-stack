@@ -18,6 +18,12 @@ import type { ColumnOrderSectionToolbarProps } from './ColumnOrderSectionToolbar
 import { useOrderBySorting } from '../ColumnOrderSectionContext/actions';
 import { styles } from './ColumnOrderSectionToolbar.stylex';
 
+const COLUMN_ORDER_TOOLBAR = {
+  clear: { label: 'Clear Visibility & Pinning' },
+  reset: { label: 'Reset Order & Visibility' },
+  orderBySorting: { label: 'Order by Sorting' },
+} as const;
+
 export const ColumnOrderSectionToolbar = ({
   variant = 'footer',
 }: ColumnOrderSectionToolbarProps) => {
@@ -43,36 +49,45 @@ export const ColumnOrderSectionToolbar = ({
   return (
     <div {...stylex.props(isToolbar ? styles.toolbar : styles.container)}>
       <Button
-        aria-label='Order by Sorting'
+        aria-label={COLUMN_ORDER_TOOLBAR.orderBySorting.label}
         color={buttonColor}
         icon={<ColumnsOrderIcon size={iconSize} />}
         isDisabled={!hasSorting}
         onClick={orderBySorting}
         size={buttonSize}
         width={buttonWidth}
+        tooltipContent={
+          isToolbar ? COLUMN_ORDER_TOOLBAR.orderBySorting.label : undefined
+        }
       >
-        {!isToolbar && 'Order by Sorting'}
+        {!isToolbar && COLUMN_ORDER_TOOLBAR.orderBySorting.label}
       </Button>
       <Button
-        aria-label='Clear Visibility & Pinning'
+        aria-label={COLUMN_ORDER_TOOLBAR.clear.label}
         color={buttonColor}
         icon={<EraserIcon size={iconSize} />}
         isDisabled={!hasClearableState}
         onClick={clearColumnOrderSection}
         size={buttonSize}
         width={buttonWidth}
+        tooltipContent={
+          isToolbar ? COLUMN_ORDER_TOOLBAR.clear.label : undefined
+        }
       >
-        {!isToolbar && 'Clear Visibility & Pinning'}
+        {!isToolbar && COLUMN_ORDER_TOOLBAR.clear.label}
       </Button>
       <Button
-        aria-label='Reset Order & Visibility'
+        aria-label={COLUMN_ORDER_TOOLBAR.reset.label}
         color={buttonColor}
         icon={<RefreshIcon size={iconSize} />}
         onClick={resetColumnOrderAndVisibility}
         size={buttonSize}
         width={buttonWidth}
+        tooltipContent={
+          isToolbar ? COLUMN_ORDER_TOOLBAR.reset.label : undefined
+        }
       >
-        {!isToolbar && 'Reset Order & Visibility'}
+        {!isToolbar && COLUMN_ORDER_TOOLBAR.reset.label}
       </Button>
     </div>
   );

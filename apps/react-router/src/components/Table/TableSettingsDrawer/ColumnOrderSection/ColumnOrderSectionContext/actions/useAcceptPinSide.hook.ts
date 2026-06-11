@@ -10,13 +10,11 @@ import {
   resolveClosestEdgeSide,
 } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 import { useTableDrawerContextValue } from '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
+import { syncColumnOrderWithPinning } from '@/components/Table/utils';
 
 import { useAcceptPinConflict } from './useAcceptPinConflict.hook';
 import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
 
-/**
- * Hook to handle accepting a pin side selection from the PinSideModal.
- */
 export const useAcceptPinSide = () => {
   const { columnsStore: tableColumnsStore } = useTableConfigContextValue();
   const { columnsStore: drawerColumnsStore } = useTableDrawerContextValue();
@@ -55,8 +53,23 @@ export const useAcceptPinSide = () => {
     });
 
     if (isContiguousPin) {
+      const newPinning = applyPin({
+        columnKey,
+        columnPinning,
+        side,
+        staticKeys,
+      });
+      const newColumnOrder = syncColumnOrderWithPinning({
+        columnKey,
+        columnPinning: side,
+        columns,
+        currentOrder: columnsOrder,
+        newPinning,
+      });
+
       drawerColumnsStore.set({
-        columnPinning: applyPin({ columnKey, columnPinning, side, staticKeys }),
+        columnOrder: newColumnOrder,
+        columnPinning: newPinning,
       });
     } else {
       const col = allOrderedColumns.find((c) => c.key === columnKey);

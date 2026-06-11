@@ -32,8 +32,10 @@ export const WideAlltypes150Page = () => {
         wideAlltypes150Api.fetchPaginated({ limit, skip, sorting })
       }
       persistenceKey={PERSISTENCE_KEY}
+      schemaName='public'
       sorting={sorting}
       suspenseKey={key}
+      tableName='wide_alltypes_150'
       title='Wide All-Types — 150 Columns × 1M Rows'
     />
   );

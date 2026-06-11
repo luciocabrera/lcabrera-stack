@@ -27,7 +27,9 @@ export const CarSales = () => {
       dataSelector={(response) => response.data}
       dataTotalSelector={(response) => response.total}
       persistenceKey={PERSISTENCE_KEY}
+      schemaName='public'
       sorting={sorting}
+      tableName='car_sales'
       title='Car Sales Data'
     />
   );

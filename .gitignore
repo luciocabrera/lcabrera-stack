@@ -30,3 +30,4 @@ docker/local/.env
 docker/local/pgpass
 
 packages/eslint-local-rules/build/
+apps/api-server/.env

@@ -1,6 +1,7 @@
 import type {
   ColumnOrderState,
   ColumnPinningState,
+  DataKey,
 } from '@/components/Table/Table.types';
 import type { TStore } from '@/hooks/useStore.hook';
 
@@ -21,7 +22,7 @@ export type ColumnOrderSectionProviderProps = {
 };
 
 export type ConflictModalState = {
-  readonly columnKey: string;
+  readonly columnKey: DataKey<Record<string, unknown>>;
   readonly columnLabel: string;
   readonly isOpen: boolean;
   readonly side: 'left' | 'right';
@@ -35,7 +36,7 @@ export type OrderConflictModalState = {
 };
 
 export type PinSideModalState = {
-  readonly columnKey: string;
+  readonly columnKey: DataKey<Record<string, unknown>>;
   readonly columnLabel: string;
   readonly isOpen: boolean;
 };

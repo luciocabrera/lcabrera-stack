@@ -1,11 +1,15 @@
 import { describe, expect, it } from 'vitest';
 
 import { insertAdjacentToPinnedGroup } from './insertAdjacentToPinnedGroup.util';
+import type { DataKey } from '@/components/Table/Table.types';
+
+type TestRow = Record<string, unknown>;
+type TestDataKey = DataKey<TestRow>;
 
 describe('insertAdjacentToPinnedGroup', () => {
   it('inserts after last left-pinned column', () => {
-    const order = ['id', 'name', 'age'];
-    const result = insertAdjacentToPinnedGroup({
+    const order: readonly TestDataKey[] = ['id', 'name', 'age'];
+    const result = insertAdjacentToPinnedGroup<TestRow>({
       columnKey: 'status',
       columnPinning: { left: ['id'], right: [] },
       order,
@@ -15,8 +19,8 @@ describe('insertAdjacentToPinnedGroup', () => {
   });
 
   it('inserts at start when no left-pinned columns', () => {
-    const order = ['name', 'age'];
-    const result = insertAdjacentToPinnedGroup({
+    const order: readonly TestDataKey[] = ['name', 'age'];
+    const result = insertAdjacentToPinnedGroup<TestRow>({
       columnKey: 'status',
       columnPinning: { left: [], right: [] },
       order,
@@ -26,8 +30,8 @@ describe('insertAdjacentToPinnedGroup', () => {
   });
 
   it('inserts before first right-pinned column', () => {
-    const order = ['id', 'name', 'actions'];
-    const result = insertAdjacentToPinnedGroup({
+    const order: readonly TestDataKey[] = ['id', 'name', 'actions'];
+    const result = insertAdjacentToPinnedGroup<TestRow>({
       columnKey: 'status',
       columnPinning: { left: [], right: ['actions'] },
       order,
@@ -37,8 +41,8 @@ describe('insertAdjacentToPinnedGroup', () => {
   });
 
   it('inserts at end when no right-pinned columns', () => {
-    const order = ['id', 'name'];
-    const result = insertAdjacentToPinnedGroup({
+    const order: readonly TestDataKey[] = ['id', 'name'];
+    const result = insertAdjacentToPinnedGroup<TestRow>({
       columnKey: 'status',
       columnPinning: { left: [], right: [] },
       order,
@@ -48,9 +52,9 @@ describe('insertAdjacentToPinnedGroup', () => {
   });
 
   it('does not mutate input order', () => {
-    const order = ['id', 'name', 'age'];
+    const order: readonly TestDataKey[] = ['id', 'name', 'age'];
 
-    const result = insertAdjacentToPinnedGroup({
+    const result = insertAdjacentToPinnedGroup<TestRow>({
       columnKey: 'status',
       columnPinning: { left: ['id'], right: [] },
       order,

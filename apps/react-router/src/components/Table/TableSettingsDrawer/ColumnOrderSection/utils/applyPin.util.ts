@@ -1,8 +1,11 @@
-import type { ColumnPinningState } from '@/components/Table/Table.types';
+import type {
+  ColumnPinningState,
+  DataKey,
+} from '@/components/Table/Table.types';
 
-type ApplyPinArgs = {
-  readonly columnKey: string;
-  readonly columnPinning: ColumnPinningState;
+type ApplyPinArgs<TData> = {
+  readonly columnKey: DataKey<TData>;
+  readonly columnPinning: ColumnPinningState<TData>;
   readonly side: 'left' | 'right';
   readonly staticKeys?: Set<string>;
 };
@@ -13,12 +16,12 @@ type ApplyPinArgs = {
  * When pinning right, new columns are inserted before static columns.
  * When pinning left, new columns are inserted after static columns.
  */
-export const applyPin = ({
+export const applyPin = <TData>({
   columnKey,
   columnPinning,
   side,
   staticKeys,
-}: ApplyPinArgs): ColumnPinningState => {
+}: ApplyPinArgs<TData>): ColumnPinningState<TData> => {
   const newPinning = {
     left: columnPinning.left.filter((k) => k !== columnKey),
     right: columnPinning.right.filter((k) => k !== columnKey),

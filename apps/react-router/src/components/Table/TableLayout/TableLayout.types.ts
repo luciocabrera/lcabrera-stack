@@ -17,6 +17,10 @@ export type TableLayoutProps<
   TableProps<TData, TResponse>,
   'dataSelector' | 'dataTotalSelector' | 'onLoadMore'
 > & {
+  /** Additional optional metadata shown in the Details tab */
+  readonly additionalMetadata?: Readonly<
+    Record<string, boolean | number | string | null | undefined>
+  >;
   /** Column order from loader/URL state (optional) */
   readonly columnOrder?: ColumnOrderState<TData>;
   /** Column pinning from loader/URL state (optional) */
@@ -49,6 +53,8 @@ export type TableLayoutProps<
   // onLoadMore: (params: InfiniteScrollLoadMoreParams) => Promise<TResponse>;
   /** Key for persisting table state (required) */
   readonly persistenceKey: string;
+  /** Schema name (optional) for Details tab metadata */
+  readonly schemaName?: string;
   /** Active sorting from loader/URL state (optional) */
   readonly sorting?: SortingState<TData>;
   /**
@@ -57,6 +63,8 @@ export type TableLayoutProps<
    * the data-fetching boundary without destroying the table config store.
    */
   readonly suspenseKey?: string;
+  /** Table name (optional) for Details tab metadata */
+  readonly tableName?: string;
   /** Table title (required) */
   readonly title: string;
 };

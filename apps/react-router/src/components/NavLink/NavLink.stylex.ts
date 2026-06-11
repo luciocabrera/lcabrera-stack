@@ -16,7 +16,7 @@ const styles = stylex.create({
   },
   itemActive: {
     backgroundColor: colors.brandPrimary,
-    color: colors.brandPrimaryText,
+    color: colors.brandSecondaryText,
     fontWeight: 600,
   },
   itemIconOnly: {

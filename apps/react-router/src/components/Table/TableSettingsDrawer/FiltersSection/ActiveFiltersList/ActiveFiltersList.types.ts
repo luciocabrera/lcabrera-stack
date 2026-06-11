@@ -2,6 +2,10 @@ import type { ColumnFiltersState } from '@/components/Table';
 
 export type ActiveFiltersListProps = {
   readonly expandedFilters: Set<string>;
+  readonly isCollapseAllDisabled: boolean;
+  readonly isExpandAllDisabled: boolean;
+  readonly onCollapseAll: () => void;
+  readonly onExpandAll: () => void;
   readonly onExpandedFiltersChange: (expandedFilters: Set<string>) => void;
 };
 

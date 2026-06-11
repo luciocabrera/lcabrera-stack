@@ -18,6 +18,7 @@ TableConfig/
 │   ├── useColumnsStore.hook.ts              → useSyncExternalStore + selector
 │   │
 │   ├── actions/
+│   │   ├── commitPinningAndOrderUpdate.util.ts → Shared persist+store commit helper for pinning actions
 │   │   ├── useAcceptHeaderPinConflict.hook.ts   → Resolve pin conflict from header
 │   │   ├── useAcceptHeaderPinSide.hook.ts       → Accept pin side from header
 │   │   ├── useBatchSetColumnSettings.hook.ts    → Bulk-update multiple column fields
@@ -55,14 +56,19 @@ TableConfig/
 │   │
 │   └── selectors/
 │       ├── useGetTableColumnSelectedKey.hook.ts          → Selected column key
+│       ├── useGetTableAdditionalMetadata.hook.ts         → Optional custom metadata map
 │       ├── useGetTableDensity.hook.ts                    → Table density setting
+│       ├── useGetTableInitialPageSize.hook.ts            → Initial page size value
 │       ├── useGetTableIsBordered.hook.ts                 → Border toggle
 │       ├── useGetTableIsColumnSettingsOpen.hook.ts       → Column settings open state
 │       ├── useGetTableIsStriped.hook.ts                  → Striped rows toggle
 │       ├── useGetTableIsTableSettingsOpen.hook.ts        → Table settings open state
 │       ├── useGetTableOverscan.hook.ts                   → Virtual scroll overscan
+│       ├── useGetTablePersistenceKey.hook.ts             → Persistence key
 │       ├── useGetTablePlaceholderRowCount.hook.ts        → Placeholder row count
 │       ├── useGetTableRowHeight.hook.ts                  → Row height value
+│       ├── useGetTableSchemaName.hook.ts                 → Optional schema name
+│       ├── useGetTableTableName.hook.ts                  → Optional table name
 │       ├── useGetTableThreshold.hook.ts                  → Fetch-more threshold
 │       └── useGetTableTitle.hook.ts                      → Table title string
 │
@@ -150,18 +156,18 @@ graph TD
 
 ## Columns Actions
 
-| Hook                         | Reads From     | Writes To      | Description                                 |
-| ---------------------------- | -------------- | -------------- | ------------------------------------------- |
-| `useBatchSetColumnSettings`  | —              | `columnsStore` | Bulk-set multiple column fields at once     |
-| `useBatchSetTableSettings`   | —              | `columnsStore` | Push all settings from TableSettingsDrawer  |
-| `useResetColumnFilter`       | —              | `columnsStore` | Remove filter for a single column           |
-| `useSetColumnFilter`         | —              | `columnsStore` | Set filter value for a single column        |
-| `useSetColumnPinning`        | `columnsStore` | `columnsStore` | Update pinning with conflict resolution     |
-| `useSetColumnSizing`         | —              | `columnsStore` | Set column width map                        |
-| `useSetColumnSorting`        | `columnsStore` | `columnsStore` | Toggle/set sort for a column                |
-| `useSyncColumnsSizing`       | `columnsStore` | `columnsStore` | Recalculate sizing after layout shift       |
-| `useAcceptHeaderPinConflict` | `columnsStore` | `columnsStore` | Resolve pin contiguity conflict from header |
-| `useAcceptHeaderPinSide`     | `columnsStore` | `columnsStore` | Accept pin side choice from header          |
+| Hook                         | Reads From     | Writes To      | Description                                                                                       |
+| ---------------------------- | -------------- | -------------- | ------------------------------------------------------------------------------------------------- |
+| `useBatchSetColumnSettings`  | —              | `columnsStore` | Bulk-set multiple column fields at once                                                           |
+| `useBatchSetTableSettings`   | —              | `columnsStore` | Push all settings from TableSettingsDrawer                                                        |
+| `useResetColumnFilter`       | —              | `columnsStore` | Remove filter for a single column                                                                 |
+| `useSetColumnFilter`         | —              | `columnsStore` | Set filter value for a single column                                                              |
+| `useSetColumnPinning`        | `columnsStore` | `columnsStore` | Update pinning, keep column order synced, and commit pinning/order via shared helper              |
+| `useSetColumnSizing`         | —              | `columnsStore` | Set column width map                                                                              |
+| `useSetColumnSorting`        | `columnsStore` | `columnsStore` | Toggle/set sort for a column                                                                      |
+| `useSyncColumnsSizing`       | `columnsStore` | `columnsStore` | Recalculate sizing after layout shift                                                             |
+| `useAcceptHeaderPinConflict` | `columnsStore` | `columnsStore` | Resolve pin contiguity conflict from header and keep order synced                                 |
+| `useAcceptHeaderPinSide`     | `columnsStore` | `columnsStore` | Accept pin side choice from header, keep order synced, and commit pinning/order via shared helper |
 
 ## Columns Selectors
 
@@ -192,18 +198,23 @@ graph TD
 
 ## Meta Selectors
 
-| Hook                              | Returns          | Description                       |
-| --------------------------------- | ---------------- | --------------------------------- |
-| `useGetTableColumnSelectedKey`    | `string \| null` | Currently selected column key     |
-| `useGetTableDensity`              | `TableDensity`   | Table density setting             |
-| `useGetTableEnablePrefetch`       | `boolean`        | Whether prefetch buffer is active |
-| `useGetTableIsBordered`           | `boolean`        | Whether borders are shown         |
-| `useGetTableIsColumnSettingsOpen` | `boolean`        | Column settings drawer state      |
-| `useGetTableIsStriped`            | `boolean`        | Whether rows are striped          |
-| `useGetTableIsTableSettingsOpen`  | `boolean`        | Table settings drawer state       |
-| `useGetTableLoadMorePageSize`     | `number`         | Subsequent page row count         |
-| `useGetTableOverscan`             | `number`         | Virtual scroll overscan count     |
-| `useGetTablePlaceholderRowCount`  | `number`         | Skeleton row count                |
-| `useGetTableRowHeight`            | `number`         | Row height in px                  |
-| `useGetTableThreshold`            | `number`         | Fetch-more scroll threshold       |
-| `useGetTableTitle`                | `string`         | Table display title               |
+| Hook                              | Returns                                                                | Description                         |
+| --------------------------------- | ---------------------------------------------------------------------- | ----------------------------------- |
+| `useGetTableAdditionalMetadata`   | `Record<string, TableMetadataValue \| null \| undefined> \| undefined` | Optional custom metadata map        |
+| `useGetTableColumnSelectedKey`    | `string \| null`                                                       | Currently selected column key       |
+| `useGetTableDensity`              | `TableDensity`                                                         | Table density setting               |
+| `useGetTableEnablePrefetch`       | `boolean`                                                              | Whether prefetch buffer is active   |
+| `useGetTableInitialPageSize`      | `number`                                                               | Initial page row count              |
+| `useGetTableIsBordered`           | `boolean`                                                              | Whether borders are shown           |
+| `useGetTableIsColumnSettingsOpen` | `boolean`                                                              | Column settings drawer state        |
+| `useGetTableIsStriped`            | `boolean`                                                              | Whether rows are striped            |
+| `useGetTableIsTableSettingsOpen`  | `boolean`                                                              | Table settings drawer state         |
+| `useGetTableLoadMorePageSize`     | `number`                                                               | Subsequent page row count           |
+| `useGetTableOverscan`             | `number`                                                               | Virtual scroll overscan count       |
+| `useGetTablePersistenceKey`       | `string`                                                               | Persistence key for URL/cookie sync |
+| `useGetTablePlaceholderRowCount`  | `number`                                                               | Skeleton row count                  |
+| `useGetTableRowHeight`            | `number`                                                               | Row height in px                    |
+| `useGetTableSchemaName`           | `string \| undefined`                                                  | Optional schema name                |
+| `useGetTableTableName`            | `string \| undefined`                                                  | Optional table name                 |
+| `useGetTableThreshold`            | `number`                                                               | Fetch-more scroll threshold         |
+| `useGetTableTitle`                | `string`                                                               | Table display title                 |

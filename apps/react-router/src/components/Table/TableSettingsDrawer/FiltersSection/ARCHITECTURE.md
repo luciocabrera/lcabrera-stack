@@ -26,10 +26,10 @@ FiltersSection/
 │   ├── ActiveFiltersList.types.ts       → Props: expandedFilters + callbacks
 │   └── ActiveFiltersList.stylex.ts
 │
-└── FiltersSectionToolbar/              → Clear/reset filter buttons
+└── FiltersSectionToolbar/              → Expand/collapse/clear/reset filter buttons
     ├── index.ts
-    ├── FiltersSectionToolbar.component.tsx  → Dual-variant clear/reset buttons
-    ├── FiltersSectionToolbar.types.ts      → { onClearAll?, variant? }
+  ├── FiltersSectionToolbar.component.tsx  → Dual-variant expand/collapse/clear/reset buttons
+  ├── FiltersSectionToolbar.types.ts      → { onClearAll?, onExpandAll?, onCollapseAll?, variant? }
     └── FiltersSectionToolbar.stylex.ts
 ```
 
@@ -63,7 +63,7 @@ graph LR
   ActiveFilters --> validateFilter["validateFilter util"]
 
   FSToolbar --> Button2["Button"]
-  FSToolbar --> Icons["EraserIcon, RefreshIcon"]
+  FSToolbar --> Icons["CollapseAllIcon, EraserIcon, ExpandAllIcon, RefreshIcon"]
   FSToolbar --> useClearFilters["useClearFilters (action)"]
   FSToolbar --> useResetFilters["useResetFilters (action)"]
   FSToolbar --> useGetColumnFilters3["useGetColumnFilters (selector)"]
@@ -99,7 +99,7 @@ graph TD
 | `FiltersSection`        | `expandedFilters`, `isOpen` | `useSetColumnFilters`                        |
 | `AddFilterSection`      | Column selection dropdown   | `useGetColumnFilters`, `useSetColumnFilters` |
 | `ActiveFiltersList`     | Expand/collapse, remove     | `useGetColumnFilters`, `useSetColumnFilters` |
-| `FiltersSectionToolbar` | Clear/reset actions         | `useClearFilters`, `useResetFilters`         |
+| `FiltersSectionToolbar` | Expand/collapse/clear/reset | `useClearFilters`, `useResetFilters`         |
 
 ## Filter Validation (validateFilter.util.ts)
 
@@ -119,7 +119,9 @@ graph TD
 | `'toolbar'` | ActiveFiltersList header | `ghost`, `mini`, `auto` | No (icon only) |
 | `'footer'`  | Below filter list        | `outline`, `sm`, `full` | Yes            |
 
-| Button        | Action                          | Disabled When    |
-| ------------- | ------------------------------- | ---------------- |
-| Clear Filters | `clearFilters()` + `onClearAll` | No filters exist |
-| Reset Filters | `resetFilters()` (from table)   | Never            |
+| Button        | Action                          | Disabled When                                       |
+| ------------- | ------------------------------- | --------------------------------------------------- |
+| Expand All    | `onExpandAll?.()`               | No handler, no filters, or all are already expanded |
+| Collapse All  | `onCollapseAll?.()`             | No handler or no expanded filters                   |
+| Clear Filters | `clearFilters()` + `onClearAll` | No filters exist                                    |
+| Reset Filters | `resetFilters()` (from table)   | Never                                               |

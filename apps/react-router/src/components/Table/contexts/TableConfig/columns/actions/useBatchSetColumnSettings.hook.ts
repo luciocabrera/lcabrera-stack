@@ -90,7 +90,7 @@ export const useBatchSetColumnSettings = () => {
     const newPinning: ColumnPinningState = columnPinning
       ? applyPin({
           columnKey,
-          columnPinning: currentPinning as ColumnPinningState,
+          columnPinning: currentPinning,
           side: columnPinning,
           staticKeys,
         })

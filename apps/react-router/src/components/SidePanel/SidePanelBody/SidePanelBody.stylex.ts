@@ -9,5 +9,8 @@ export const sidePanelBodyStyles = stylex.create({
     scrollbarColor: `${colors.borderSecondary} transparent`,
     scrollbarWidth: 'thin',
     overflowY: 'auto',
+    overflowX: 'hidden',
+    containerType: 'inline-size',
+    containerName: 'SidePanelBody',
   },
 });
