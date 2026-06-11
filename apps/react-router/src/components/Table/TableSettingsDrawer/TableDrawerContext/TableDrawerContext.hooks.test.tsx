@@ -6,6 +6,7 @@ import type { ReactNode } from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
+import { createMockStore } from '@/components/test-utils/createMockStore.util';
 import { useSetColumnsOrder } from './actions/useSetColumnsOrder.hook';
 import { TableDrawerContext } from './TableDrawerContext.context';
 import type { TableDrawerContextValue } from './TableDrawerContext.types';
@@ -17,37 +18,8 @@ import { useGetColumnsSorting } from './selectors/useGetColumnsSorting.hook';
 import { useTableDrawerContextValue } from './useTableDrawerContextValue.hook';
 import { useColumnsStore } from './useColumnsStore.hook';
 
-type MockStore<TState> = {
-  readonly get: () => TState;
-  readonly getServerSnapshot: () => TState;
-  readonly set: (partial: Partial<TState>) => void;
-  readonly subscribe: (listener: () => void) => () => void;
-};
-
 type WrapperProps = {
   readonly children: ReactNode;
-};
-
-const createMockStore = <TState,>(initialState: TState): MockStore<TState> => {
-  let state = initialState;
-  const listeners = new Set<() => void>();
-
-  return {
-    get: () => state,
-    getServerSnapshot: () => state,
-    set: (partial) => {
-      state = { ...state, ...partial };
-      for (const listener of listeners) {
-        listener();
-      }
-    },
-    subscribe: (listener) => {
-      listeners.add(listener);
-      return () => {
-        listeners.delete(listener);
-      };
-    },
-  };
 };
 
 const columnsStore = createMockStore({

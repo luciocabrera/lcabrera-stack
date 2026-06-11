@@ -5,7 +5,7 @@ Project: apps/react-router
 
 ## Current Baseline
 
-- Fallow semantic duplicates: 418 clone groups
+- Fallow semantic duplicates: 414 clone groups (was 418 at start)
 - Quality gate: `vp check` passes (format + lint + type)
 - Worktree status: clean (no uncommitted changes)
 
@@ -32,6 +32,7 @@ Project: apps/react-router
 | 2026-06-11 | B-001 | Introduced shared test store utility + deduped EnterpriseOrders distinct string columns                                 | Focused tests + `vp check` + fallow dupes              | Completed |
 | 2026-06-11 | B-002 | Added coordination docs for parallel agent execution                                                                    | `vp check` baseline captured                           | Completed |
 | 2026-06-11 | B-003 | Claimed WS-001/WS-004; extracted TableConfig action test scaffold + expanded EnterpriseOrders basic-column helper usage | Focused action tests + `vp check` + fallow dupes check | Completed |
+| 2026-06-11 | B-004 | Claimed WS-005; migrated drawer/context tests to shared createMockStore utility                                         | Focused drawer/data tests + `vp check` + fallow dupes  | Completed |
 
 ## Validation Checklist Per Batch
 
