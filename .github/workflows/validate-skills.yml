@@ -1,0 +1,54 @@
+name: Validate Skills
+
+on:
+  pull_request:
+    paths:
+      - '.github/skills/**'
+      - 'scripts/validate-skills.cjs'
+      - 'scripts/generate-skills-compliance-report.cjs'
+      - '.github/workflows/validate-skills.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/skills/**'
+      - 'scripts/validate-skills.cjs'
+      - 'scripts/generate-skills-compliance-report.cjs'
+      - '.github/workflows/validate-skills.yml'
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+jobs:
+  skills-contract:
+    name: Skills Contract and Report
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Node
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v5
+        with:
+          node-version: 26
+
+      - name: Validate skill contracts
+        run: node scripts/validate-skills.cjs
+
+      - name: Generate markdown compliance report
+        run: node scripts/generate-skills-compliance-report.cjs
+
+      - name: Upload skill compliance artifacts
+        if: always() && vars.ENABLE_ARTIFACT_UPLOADS == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: skills-compliance-report
+          path: |
+            reports/skills/code-smell-compliance-report.md
+            reports/skills/agenting-plan-progress.md
+          if-no-files-found: ignore
+          compression-level: 9
+          retention-days: 3

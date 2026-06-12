@@ -13,6 +13,26 @@ This is a **React 19 + TypeScript + StyleX + React Router 7** application with S
 - **Language:** TypeScript (strict mode)
 - **Package Manager:** pnpm (managed through `vp`)
 
+## Quick Skill Index
+
+Use these skills as the first stop for implementation patterns and workflows:
+
+| Skill                         | Use For                                                                                           | Location                                      |
+| ----------------------------- | ------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| `store-pattern`               | Table-style split-context external store architecture with selector/action boundaries             | `skills/store-pattern/SKILL.md`               |
+| `quality-gate-workflow`       | Mandatory post-change validation workflow (`vp fmt .` → `vp lint .` → `vp check` → `vp run test`) | `skills/quality-gate-workflow/SKILL.md`       |
+| `react-19`                    | React 19 component and compiler-safe patterns                                                     | `skills/react-19/SKILL.md`                    |
+| `react-router-framework-mode` | React Router framework mode data, actions, forms, navigation, error handling                      | `skills/react-router-framework-mode/SKILL.md` |
+| `code-smell-checker`          | Baseline maintainability audits and tech-debt triage                                              | `skills/code-smell-checker/SKILL.md`          |
+| `code-smell-zen`              | Diff-based smell review against target branch                                                     | `skills/code-smell-zen/SKILL.md`              |
+
+Selection guideline:
+
+- **Working in complex UI state?** Start with `store-pattern`.
+- **Finishing any code change?** Run `quality-gate-workflow`.
+- **Routing/data mutations?** Use `react-router-framework-mode`.
+- **React component implementation?** Use `react-19`.
+
 ---
 
 ## 2. Source Structure
@@ -252,7 +272,7 @@ export const styles = stylex.create({
 - **All `*.util.ts` functions must be pure** — same input → same output, no side effects.
 - **Never mutate data.** Use spread syntax, `.map()`, `.filter()`, `.reduce()`.
 - **Use functional array operations exclusively.** No imperative `for` loops for data transformations.
-- **Never mutate props.** Use `[...array].sort()` or `useMemo` instead of `array.sort()`.
+- **Never mutate props.** Use `[...array].sort()` instead of `array.sort()`.
 - **`as const` for literal objects/arrays** where applicable.
 
 ---
@@ -300,17 +320,7 @@ const MyPage = () => {
 
 ### Context Pattern
 
-```typescript
-import { use } from 'react';
-
-const ThemeContext = createContext<Theme | undefined>(undefined);
-
-export const useTheme = () => {
-  const theme = use(ThemeContext);
-  if (!theme) throw new Error('useTheme must be used within ThemeProvider');
-  return theme;
-};
-```
+// TODO add context pattern used in our Table component with split contexts for config, data, and filters, and the rule about only calling `.get()` once per action execution to avoid inconsistent snapshots.
 
 ---
 
@@ -442,6 +452,8 @@ import { Button } from '../../../../components/Button';
 
 - Protect routes with authentication guards.
 - Never commit secrets — use validated environment variables.
+- Never commits sensitive data in logs or error messages.
+- Never commits .env files or credentials.
 
 ---
 
