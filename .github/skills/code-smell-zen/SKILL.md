@@ -2,7 +2,7 @@
 name: code-smell-zen
 description: Scan git diff vs target branch for code smells (Clean Code + GoF + TypeScript/React catalog)
 argument-hint: '[target-branch]'
-allowed-tools: Bash(git:*), Read, Grep, Glob
+allowed-tools: Bash, Read, Grep, Glob
 license: MIT
 metadata:
   version: '1.0.0'
@@ -25,6 +25,7 @@ if [ -z "$BASE" ]; then
   BASE=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed "s@^refs/remotes/@@")
   [ -z "$BASE" ] && BASE="origin/main"
   git rev-parse "$BASE" >/dev/null 2>&1 || BASE="main"
+  git rev-parse "$BASE" >/dev/null 2>&1 || BASE="HEAD"
 fi
 if ! git rev-parse "$BASE" >/dev/null 2>&1; then
   echo "ERROR: base $BASE not found. Pass an explicit branch: /smell <branch>"
@@ -32,17 +33,27 @@ if ! git rev-parse "$BASE" >/dev/null 2>&1; then
 fi
 echo "===== BASE: $BASE ====="
 echo
-echo "----- Stat (committed vs $BASE) -----"
-git diff --stat "$BASE"...HEAD || true
-echo
-echo "----- Stat (working tree, staged+unstaged) -----"
-git diff --stat HEAD || true
-echo
-echo "===== Committed diff (vs $BASE, -U10) ====="
-git diff -U10 "$BASE"...HEAD || true
-echo
-echo "===== Working-tree diff (staged + unstaged, -U10) ====="
-git diff -U10 HEAD || true
+if [ "$BASE" = "HEAD" ]; then
+  echo "(No remote or base branch found — showing full working-tree diff against HEAD)"
+  echo
+  echo "----- Stat (staged + unstaged) -----"
+  git diff --stat HEAD || true
+  echo
+  echo "===== Working-tree diff (staged + unstaged, -U10) ====="
+  git diff -U10 HEAD || true
+else
+  echo "----- Stat (committed vs $BASE) -----"
+  git diff --stat "$BASE"...HEAD || true
+  echo
+  echo "----- Stat (working tree, staged+unstaged) -----"
+  git diff --stat HEAD || true
+  echo
+  echo "===== Committed diff (vs $BASE, -U10) ====="
+  git diff -U10 "$BASE"...HEAD || true
+  echo
+  echo "===== Working-tree diff (staged + unstaged, -U10) ====="
+  git diff -U10 HEAD || true
+fi
 ' -- "$ARGUMENTS"`
 
 > **VS Code Copilot:** The `!bash` prefix does not auto-execute in this environment. Run the command above manually via `run_in_terminal` from the repository root (`/home/lucio/workspaces/vite-react-compiler`) before proceeding to Step 2.
@@ -250,5 +261,25 @@ For cross-skill consistency, align the final response with:
 - `../code-smell-shared/RULE_FIX_QUICK_REFERENCE.md`
 
 Keep catalog IDs unchanged and normalize only structural fields required by the shared schema.
+
+## Saving the Report
+
+After producing the final report, **always** save it to disk without prompting the user:
+
+1. Capture the current timestamp: `date +%Y%m%dT%H%M%S`
+2. Create the output directory: `.tmp/code-smell-zen/<timestamp>/`
+3. Write the full report as `report.md` inside that directory, using the same markdown structure emitted in Step 5.
+4. Tell the user the path to the saved file.
+
+The directory layout groups all runs of this skill together, with each run in its own timestamped subfolder:
+
+```
+.tmp/
+└── code-smell-zen/
+    ├── 20260612T184056/
+    │   └── report.md
+    └── 20260615T093012/
+        └── report.md
+```
 
 Begin now with Step 2.

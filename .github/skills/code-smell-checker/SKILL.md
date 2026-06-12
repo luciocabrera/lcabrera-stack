@@ -118,6 +118,26 @@ Use the shared output contract and template:
 
 When severity is `critical`, normalize it to `BLOCKER` in the final report to keep cross-skill outputs consistent.
 
+## Saving the Report
+
+After producing the final report, **always** save it to disk without prompting the user:
+
+1. Capture the current timestamp: `date +%Y%m%dT%H%M%S`
+2. Create the output directory: `.tmp/code-smell-checker/<timestamp>/`
+3. Write the full report as `report.md` inside that directory, following the shared `REPORT_TEMPLATE.md` structure exactly.
+4. Tell the user the path to the saved file.
+
+The directory layout groups all runs of this skill together, with each run in its own timestamped subfolder:
+
+```
+.tmp/
+└── code-smell-checker/
+    ├── 20260612T184056/
+    │   └── report.md
+    └── 20260615T093012/
+        └── report.md
+```
+
 ## Quality Checks
 
 Before finalizing the report:
