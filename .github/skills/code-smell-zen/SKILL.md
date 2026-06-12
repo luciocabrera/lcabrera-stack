@@ -2,7 +2,7 @@
 name: code-smell-zen
 description: Scan git diff vs target branch for code smells (Clean Code + GoF + TypeScript/React catalog)
 argument-hint: '[target-branch]'
-allowed-tools: Bash, Read, Grep, Glob
+allowed-tools: Bash(cat:*,date:*,git:*,mkdir:*,tee:*), Read, Grep, Glob
 license: MIT
 metadata:
   version: '1.0.0'
@@ -237,18 +237,16 @@ Sort findings by severity (desc), then by file path. Emit **exactly this structu
 
 ```tsx
 <smallest meaningful excerpt>
-```
 
 **Why:** <one sentence>
 **Fix:** <one sentence>
-
-### [HIGH] `GOF.STRATEGY-MISSING` — `path/pricing.ts:55-90`
 
 ...
 
 ## Synthesis
 
 <one paragraph: dominant theme of the diff and the top 3 actions to take before merge>
+```
 ````
 
 If the diff has no findings, emit the same structure with an empty Findings section and an explicit "No catalog findings on this diff." line, plus the Synthesis paragraph.
