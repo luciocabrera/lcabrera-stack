@@ -489,8 +489,8 @@ import { Button } from '../../../../components/Button';
 
 - Protect routes with authentication guards.
 - Never commit secrets — use validated environment variables.
-- Never commits sensitive data in logs or error messages.
-- Never commits .env files or credentials.
+- Never commit sensitive data in logs or error messages.
+- Never commit .env files or credentials.
 
 ---
 
