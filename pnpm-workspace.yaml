@@ -69,16 +69,11 @@ catalogMode: prefer
 # minimumReleaseAge: 1440
 minimumReleaseAgeExclude:
   - '@types/*' # type-only packages have zero runtime attack surface
+  - '@eslint-react/*' # lint-only packages with frequent coordinated releases
+  - eslint-plugin-react-dom # lint-only package
+  - eslint-plugin-react-x # lint-only package
   - isbot@5.1.41
   - knip@6.16.0
-  - '@eslint-react/ast@5.8.16'
-  - '@eslint-react/core@5.8.16'
-  - '@eslint-react/eslint@5.8.16'
-  - '@eslint-react/jsx@5.8.16'
-  - '@eslint-react/shared@5.8.16'
-  - '@eslint-react/var@5.8.16'
-  - eslint-plugin-react-dom@5.8.16
-  - eslint-plugin-react-x@5.8.16
   - eslint-plugin-unicorn@65.0.0
   - '@typescript-eslint/eslint-plugin@8.61.0'
   - '@typescript-eslint/parser@8.61.0'
@@ -93,23 +88,7 @@ minimumReleaseAgeExclude:
   - eslint-plugin-unicorn@65.0.1
   - isbot@5.1.42
   - typescript-eslint@8.61.0
-  - '@eslint-react/ast@5.8.17'
-  - '@eslint-react/core@5.8.17'
-  - '@eslint-react/eslint@5.8.17'
-  - '@eslint-react/jsx@5.8.17'
-  - '@eslint-react/shared@5.8.17'
-  - '@eslint-react/var@5.8.17'
-  - eslint-plugin-react-dom@5.8.17
-  - eslint-plugin-react-x@5.8.17
   - lighthouse@13.4.0
-  - '@eslint-react/ast@5.8.19'
-  - '@eslint-react/core@5.8.19'
-  - '@eslint-react/eslint@5.8.19'
-  - '@eslint-react/jsx@5.8.19'
-  - '@eslint-react/shared@5.8.19'
-  - '@eslint-react/var@5.8.19'
-  - eslint-plugin-react-dom@5.8.19
-  - eslint-plugin-react-x@5.8.19
   - eslint-plugin-security@4.0.1
 
 # overrides:
