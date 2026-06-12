@@ -21,7 +21,8 @@ const getDirectories = (dir) => {
   return fs
     .readdirSync(dir, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
-    .map((entry) => path.join(dir, entry.name));
+    .map((entry) => path.join(dir, entry.name))
+    .sort((a, b) => a.localeCompare(b));
 };
 
 /**
