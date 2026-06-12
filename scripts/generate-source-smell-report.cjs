@@ -21,7 +21,7 @@ const progressPath = path.join(
 const now = new Date();
 const generatedAt = now.toISOString();
 
-const INCLUDE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx']);
+const INCLUDE_EXTENSIONS = new Set(['.ts', '.tsx']);
 const EXCLUDED_SEGMENTS = new Set([
   '.git',
   'node_modules',
