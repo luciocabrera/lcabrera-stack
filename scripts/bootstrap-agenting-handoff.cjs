@@ -63,6 +63,21 @@ const readReport = () => {
 };
 
 /**
+ * @param {string} content
+ * @param {RegExp} pattern
+ * @param {string} fallback
+ * @returns {string}
+ */
+const readFirstCapture = (content, pattern, fallback) => {
+  const match = pattern.exec(content);
+  if (match?.[1] === undefined) {
+    return fallback;
+  }
+
+  return match[1].trim();
+};
+
+/**
  * @param {string} report
  * @returns {readonly { id: string; ruleId: string; summary: string }[]}
  */
@@ -73,16 +88,16 @@ const extractFindings = (report) => {
     .map((block) => `### Finding ${block}`);
 
   return findingBlocks.map((block, index) => {
-    const idMatch = block.match(/finding_id:\s*([^\n]+)/);
-    const ruleMatch = block.match(/rule_id:\s*([^\n]+)/);
-    const whyMatch = block.match(/- why:\s*([^\n]+)/);
+    const fallbackId = `F-${String(index + 1).padStart(3, '0')}`;
 
     return {
-      id: (idMatch?.[1] ?? `F-${String(index + 1).padStart(3, '0')}`).trim(),
-      ruleId: (ruleMatch?.[1] ?? 'CHK.UNKNOWN').trim(),
-      summary: (
-        whyMatch?.[1] ?? 'Fix the reported issue and re-validate.'
-      ).trim(),
+      id: readFirstCapture(block, /finding_id:\s*([^\n]+)/, fallbackId),
+      ruleId: readFirstCapture(block, /rule_id:\s*([^\n]+)/, 'CHK.UNKNOWN'),
+      summary: readFirstCapture(
+        block,
+        /- why:\s*([^\n]+)/,
+        'Fix the reported issue and re-validate.',
+      ),
     };
   });
 };

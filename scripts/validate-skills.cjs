@@ -76,31 +76,148 @@ const parseFrontmatter = (filePath) => {
  * @returns {string[]}
  */
 const extractRelativeLinks = (markdown) => {
+  /** @type {string[]} */
   const links = [];
-  const markdownLinkRegex = /\[[^\]]+\]\(([^)]+)\)/g;
+  let cursor = 0;
 
-  let match = markdownLinkRegex.exec(markdown);
-  while (match !== null) {
-    const rawLink = match[1].trim();
-    if (
-      rawLink.startsWith('http://') ||
-      rawLink.startsWith('https://') ||
-      rawLink.startsWith('mailto:') ||
-      rawLink.startsWith('#')
-    ) {
-      match = markdownLinkRegex.exec(markdown);
+  while (cursor < markdown.length) {
+    const openLabel = markdown.indexOf('[', cursor);
+    if (openLabel === -1) {
+      break;
+    }
+
+    const closeLabel = markdown.indexOf(']', openLabel + 1);
+    if (closeLabel === -1) {
+      break;
+    }
+
+    if (markdown[closeLabel + 1] !== '(') {
+      cursor = closeLabel + 1;
       continue;
     }
 
-    const sanitized = rawLink.split('#')[0].split('?')[0].trim();
-    if (sanitized.length > 0) {
-      links.push(sanitized);
+    const closeTarget = markdown.indexOf(')', closeLabel + 2);
+    if (closeTarget === -1) {
+      break;
     }
 
-    match = markdownLinkRegex.exec(markdown);
+    const rawLink = markdown.slice(closeLabel + 2, closeTarget).trim();
+    if (
+      rawLink.startsWith('./') ||
+      rawLink.startsWith('../') ||
+      !rawLink.includes('://')
+    ) {
+      links.push(rawLink);
+    }
+
+    cursor = closeTarget + 1;
   }
 
   return links;
+};
+
+/**
+ * @param {{ [key: string]: string }} frontmatter
+ * @param {string} skillNameFromFolder
+ * @returns {readonly string[]}
+ */
+const validateRequiredFields = (frontmatter, skillNameFromFolder) => {
+  /** @type {string[]} */
+  const errors = [];
+
+  for (const field of REQUIRED_FRONTMATTER_FIELDS) {
+    const value = frontmatter[field];
+    if (typeof value !== 'string' || value.trim().length === 0) {
+      errors.push(
+        `Missing required frontmatter field "${field}" in .github/skills/${skillNameFromFolder}/SKILL.md`,
+      );
+    }
+  }
+
+  return errors;
+};
+
+/**
+ * @param {{ [key: string]: string }} frontmatter
+ * @param {string} skillNameFromFolder
+ * @returns {readonly string[]}
+ */
+const validateNameMatch = (frontmatter, skillNameFromFolder) => {
+  const frontmatterName = frontmatter.name;
+  if (
+    typeof frontmatterName === 'string' &&
+    frontmatterName !== skillNameFromFolder
+  ) {
+    return [
+      `Frontmatter name mismatch in .github/skills/${skillNameFromFolder}/SKILL.md: expected "${skillNameFromFolder}", got "${frontmatterName}"`,
+    ];
+  }
+
+  return [];
+};
+
+/**
+ * @param {{ body: string }} parsed
+ * @param {string} skillFilePath
+ * @param {string} skillNameFromFolder
+ * @returns {readonly string[]}
+ */
+const validateSkillLinks = (parsed, skillFilePath, skillNameFromFolder) => {
+  /** @type {string[]} */
+  const errors = [];
+
+  for (const link of extractRelativeLinks(parsed.body)) {
+    const targetPath = path.resolve(path.dirname(skillFilePath), link);
+    if (!fs.existsSync(targetPath)) {
+      errors.push(
+        `Broken relative link in .github/skills/${skillNameFromFolder}/SKILL.md: "${link}"`,
+      );
+    }
+  }
+
+  return errors;
+};
+
+/**
+ * @param {string} skillDir
+ * @returns {{
+ *   checkedSkillName: string | null;
+ *   errors: readonly string[];
+ *   skippedSkillName: string | null;
+ * }}
+ */
+const validateSkillDirectory = (skillDir) => {
+  const skillNameFromFolder = path.basename(skillDir);
+  const skillFilePath = path.join(skillDir, 'SKILL.md');
+
+  if (!fs.existsSync(skillFilePath)) {
+    return {
+      checkedSkillName: null,
+      errors: [],
+      skippedSkillName: skillNameFromFolder,
+    };
+  }
+
+  const parsed = parseFrontmatter(skillFilePath);
+  if (parsed === null) {
+    return {
+      checkedSkillName: skillNameFromFolder,
+      errors: [
+        `Invalid or missing frontmatter in .github/skills/${skillNameFromFolder}/SKILL.md`,
+      ],
+      skippedSkillName: null,
+    };
+  }
+
+  return {
+    checkedSkillName: skillNameFromFolder,
+    errors: [
+      ...validateRequiredFields(parsed.frontmatter, skillNameFromFolder),
+      ...validateNameMatch(parsed.frontmatter, skillNameFromFolder),
+      ...validateSkillLinks(parsed, skillFilePath, skillNameFromFolder),
+    ],
+    skippedSkillName: null,
+  };
 };
 
 /**
@@ -137,51 +254,18 @@ const validateSkills = (args = {}) => {
   const skippedDirectories = [];
 
   for (const skillDir of skillDirectories) {
-    const skillNameFromFolder = path.basename(skillDir);
-    const skillFilePath = path.join(skillDir, 'SKILL.md');
-
-    if (!fs.existsSync(skillFilePath)) {
-      skippedDirectories.push(skillNameFromFolder);
+    const validation = validateSkillDirectory(skillDir);
+    if (validation.skippedSkillName !== null) {
+      skippedDirectories.push(validation.skippedSkillName);
       continue;
     }
 
-    checkedSkills.push(skillNameFromFolder);
-
-    const parsed = parseFrontmatter(skillFilePath);
-    if (parsed === null) {
-      errors.push(
-        `Invalid or missing frontmatter in .github/skills/${skillNameFromFolder}/SKILL.md`,
-      );
-      continue;
+    if (validation.checkedSkillName !== null) {
+      checkedSkills.push(validation.checkedSkillName);
     }
 
-    for (const field of REQUIRED_FRONTMATTER_FIELDS) {
-      const value = parsed.frontmatter[field];
-      if (typeof value !== 'string' || value.trim().length === 0) {
-        errors.push(
-          `Missing required frontmatter field "${field}" in .github/skills/${skillNameFromFolder}/SKILL.md`,
-        );
-      }
-    }
-
-    const frontmatterName = parsed.frontmatter.name;
-    if (
-      typeof frontmatterName === 'string' &&
-      frontmatterName !== skillNameFromFolder
-    ) {
-      errors.push(
-        `Frontmatter name mismatch in .github/skills/${skillNameFromFolder}/SKILL.md: expected "${skillNameFromFolder}", got "${frontmatterName}"`,
-      );
-    }
-
-    const links = extractRelativeLinks(parsed.body);
-    for (const link of links) {
-      const targetPath = path.resolve(path.dirname(skillFilePath), link);
-      if (!fs.existsSync(targetPath)) {
-        errors.push(
-          `Broken relative link in .github/skills/${skillNameFromFolder}/SKILL.md: "${link}"`,
-        );
-      }
+    for (const error of validation.errors) {
+      errors.push(error);
     }
   }
 

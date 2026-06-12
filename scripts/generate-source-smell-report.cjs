@@ -110,6 +110,178 @@ const findLineMatches = (lines, pattern) => {
 };
 
 /**
+ * @param {Finding[]} findings
+ * @param {readonly string[]} lines
+ * @param {RegExp} pattern
+ * @param {(match: { lineNumber: number; line: string }) => Finding} toFinding
+ * @returns {void}
+ */
+const addLinePatternFindings = (findings, lines, pattern, toFinding) => {
+  for (const match of findLineMatches(lines, pattern)) {
+    findings.push(toFinding(match));
+  }
+};
+
+/**
+ * @param {{
+ *   findings: Finding[];
+ *   lines: readonly string[];
+ *   relativePath: string;
+ * }} args
+ * @returns {void}
+ */
+const addTypeSafetyFindings = ({ findings, lines, relativePath }) => {
+  addLinePatternFindings(findings, lines, /as\s+unknown\s+as/, (match) => ({
+    confidence: 'high',
+    deferRisk: 'Type safety can silently degrade and hide runtime defects.',
+    effort: 'small',
+    evidence: match.line,
+    findingId: '',
+    fix: 'Replace double assertions with explicit union types and narrowing guards.',
+    locationHint: `line:${match.lineNumber}`,
+    locationPath: relativePath,
+    ruleId: 'TS.DOUBLE-ASSERTION',
+    severity: 'MEDIUM',
+    why: 'Double assertion bypasses structural checks and weakens TypeScript guarantees.',
+  }));
+
+  addLinePatternFindings(findings, lines, /@ts-ignore/, (match) => ({
+    confidence: 'high',
+    deferRisk:
+      'Compiler diagnostics are suppressed, allowing unsafe changes to pass unnoticed.',
+    effort: 'small',
+    evidence: match.line,
+    findingId: '',
+    fix: 'Replace ts-ignore with a typed refactor or a narrow ts-expect-error with rationale.',
+    locationHint: `line:${match.lineNumber}`,
+    locationPath: relativePath,
+    ruleId: 'TS.TS-IGNORE',
+    severity: 'HIGH',
+    why: 'Ignoring TypeScript errors removes a key correctness guardrail.',
+  }));
+
+  for (const match of findLineMatches(lines, /\bany\b/)) {
+    if (match.line.includes('no-explicit-any') || match.line.startsWith('//')) {
+      continue;
+    }
+
+    findings.push({
+      confidence: 'medium',
+      deferRisk:
+        'Any leaks can propagate unsafe values across module boundaries.',
+      effort: 'small',
+      evidence: match.line,
+      findingId: '',
+      fix: 'Replace any with unknown plus type guards or a concrete type.',
+      locationHint: `line:${match.lineNumber}`,
+      locationPath: relativePath,
+      ruleId: 'TS.ANY-LEAK',
+      severity: 'MEDIUM',
+      why: 'The any type weakens static guarantees and can hide invalid assumptions.',
+    });
+  }
+};
+
+/**
+ * @param {{
+ *   content: string;
+ *   findings: Finding[];
+ *   lines: readonly string[];
+ *   relativePath: string;
+ *   filePath: string;
+ * }} args
+ * @returns {void}
+ */
+const addStyleAndDataFlowFindings = ({
+  content,
+  findings,
+  lines,
+  relativePath,
+  filePath,
+}) => {
+  const hasUseEffect = /useEffect\s*\(/.test(content);
+  const hasInlineFetch = /\bfetch\s*\(|axios\./.test(content);
+  if (hasUseEffect && hasInlineFetch) {
+    findings.push({
+      confidence: 'medium',
+      deferRisk:
+        'Effect-based fetching can cause race conditions and stale updates when not carefully canceled.',
+      effort: 'medium',
+      evidence:
+        'Detected both useEffect(...) and fetch/axios patterns in same module.',
+      findingId: '',
+      fix: 'Move data fetching to React Router loaders/actions or add robust abort/cancellation handling.',
+      locationHint: 'module-pattern',
+      locationPath: relativePath,
+      ruleId: 'REACT.EFFECT-FETCH-WITHOUT-CANCEL',
+      severity: 'HIGH',
+      why: 'Fetching in effects is a known source of lifecycle and cancellation bugs in React apps.',
+    });
+  }
+
+  if (path.extname(filePath) !== '.tsx') {
+    return;
+  }
+
+  addLinePatternFindings(findings, lines, /style=\{\{/, (match) => ({
+    confidence: 'high',
+    deferRisk:
+      'Inline styles can drift from project styling rules and reduce consistency.',
+    effort: 'small',
+    evidence: match.line,
+    findingId: '',
+    fix: 'Migrate to StyleX tokens/rules or document this as an explicit architecture exception.',
+    locationHint: `line:${match.lineNumber}`,
+    locationPath: relativePath,
+    ruleId: 'CHK.REACT.INLINE-STYLE',
+    severity: 'MEDIUM',
+    why: 'Inline styling often conflicts with centralized styling standards in large codebases.',
+  }));
+};
+
+/**
+ * @param {{
+ *   content: string;
+ *   filePath: string;
+ *   lines: readonly string[];
+ *   relativePath: string;
+ * }} args
+ * @returns {readonly Finding[]}
+ */
+const collectFindingsForFile = ({ content, filePath, lines, relativePath }) => {
+  /** @type {Finding[]} */
+  const findings = [];
+
+  if (lines.length > 500) {
+    findings.push({
+      confidence: 'high',
+      deferRisk:
+        'Large files increase regression risk during edits and reviews.',
+      effort: 'medium',
+      evidence: `${relativePath} has ${lines.length} lines.`,
+      findingId: '',
+      fix: 'Split this module into focused submodules by concern and keep behavior equivalent.',
+      locationHint: `file-length:${lines.length}`,
+      locationPath: relativePath,
+      ruleId: 'CHK.FILE.LONG',
+      severity: 'HIGH',
+      why: 'Very large source files usually combine multiple responsibilities and are harder to maintain.',
+    });
+  }
+
+  addTypeSafetyFindings({ findings, lines, relativePath });
+  addStyleAndDataFlowFindings({
+    content,
+    findings,
+    lines,
+    relativePath,
+    filePath,
+  });
+
+  return findings;
+};
+
+/**
  * @param {readonly string[]} files
  * @returns {readonly Finding[]}
  */
@@ -122,118 +294,9 @@ const collectFindings = (files) => {
     const content = fs.readFileSync(filePath, 'utf8');
     const lines = content.split(/\r?\n/);
 
-    if (lines.length > 500) {
-      findings.push({
-        confidence: 'high',
-        deferRisk:
-          'Large files increase regression risk during edits and reviews.',
-        effort: 'medium',
-        evidence: `${relativePath} has ${lines.length} lines.`,
-        findingId: '',
-        fix: 'Split this module into focused submodules by concern and keep behavior equivalent.',
-        locationHint: `file-length:${lines.length}`,
-        locationPath: relativePath,
-        ruleId: 'CHK.FILE.LONG',
-        severity: 'HIGH',
-        why: 'Very large source files usually combine multiple responsibilities and are harder to maintain.',
-      });
-    }
-
-    for (const match of findLineMatches(lines, /as\s+unknown\s+as/)) {
-      findings.push({
-        confidence: 'high',
-        deferRisk: 'Type safety can silently degrade and hide runtime defects.',
-        effort: 'small',
-        evidence: match.line,
-        findingId: '',
-        fix: 'Replace double assertions with explicit union types and narrowing guards.',
-        locationHint: `line:${match.lineNumber}`,
-        locationPath: relativePath,
-        ruleId: 'TS.DOUBLE-ASSERTION',
-        severity: 'MEDIUM',
-        why: 'Double assertion bypasses structural checks and weakens TypeScript guarantees.',
-      });
-    }
-
-    for (const match of findLineMatches(lines, /@ts-ignore/)) {
-      findings.push({
-        confidence: 'high',
-        deferRisk:
-          'Compiler diagnostics are suppressed, allowing unsafe changes to pass unnoticed.',
-        effort: 'small',
-        evidence: match.line,
-        findingId: '',
-        fix: 'Replace ts-ignore with a typed refactor or a narrow ts-expect-error with rationale.',
-        locationHint: `line:${match.lineNumber}`,
-        locationPath: relativePath,
-        ruleId: 'TS.TS-IGNORE',
-        severity: 'HIGH',
-        why: 'Ignoring TypeScript errors removes a key correctness guardrail.',
-      });
-    }
-
-    for (const match of findLineMatches(lines, /\bany\b/)) {
-      if (
-        match.line.includes('no-explicit-any') ||
-        match.line.startsWith('//')
-      ) {
-        continue;
-      }
-
-      findings.push({
-        confidence: 'medium',
-        deferRisk:
-          'Any leaks can propagate unsafe values across module boundaries.',
-        effort: 'small',
-        evidence: match.line,
-        findingId: '',
-        fix: 'Replace any with unknown plus type guards or a concrete type.',
-        locationHint: `line:${match.lineNumber}`,
-        locationPath: relativePath,
-        ruleId: 'TS.ANY-LEAK',
-        severity: 'MEDIUM',
-        why: 'The any type weakens static guarantees and can hide invalid assumptions.',
-      });
-    }
-
-    const hasUseEffect = /useEffect\s*\(/.test(content);
-    const hasInlineFetch = /\bfetch\s*\(|axios\./.test(content);
-    if (hasUseEffect && hasInlineFetch) {
-      findings.push({
-        confidence: 'medium',
-        deferRisk:
-          'Effect-based fetching can cause race conditions and stale updates when not carefully canceled.',
-        effort: 'medium',
-        evidence:
-          'Detected both useEffect(...) and fetch/axios patterns in same module.',
-        findingId: '',
-        fix: 'Move data fetching to React Router loaders/actions or add robust abort/cancellation handling.',
-        locationHint: 'module-pattern',
-        locationPath: relativePath,
-        ruleId: 'REACT.EFFECT-FETCH-WITHOUT-CANCEL',
-        severity: 'HIGH',
-        why: 'Fetching in effects is a known source of lifecycle and cancellation bugs in React apps.',
-      });
-    }
-
-    if (path.extname(filePath) === '.tsx') {
-      for (const match of findLineMatches(lines, /style=\{\{/)) {
-        findings.push({
-          confidence: 'high',
-          deferRisk:
-            'Inline styles can drift from project styling rules and reduce consistency.',
-          effort: 'small',
-          evidence: match.line,
-          findingId: '',
-          fix: 'Migrate to StyleX tokens/rules or document this as an explicit architecture exception.',
-          locationHint: `line:${match.lineNumber}`,
-          locationPath: relativePath,
-          ruleId: 'CHK.REACT.INLINE-STYLE',
-          severity: 'MEDIUM',
-          why: 'Inline styling often conflicts with centralized styling standards in large codebases.',
-        });
-      }
-    }
+    findings.push(
+      ...collectFindingsForFile({ content, filePath, lines, relativePath }),
+    );
   }
 
   const severityRank = { BLOCKER: 5, HIGH: 4, MEDIUM: 3, LOW: 2, NIT: 1 };
@@ -330,16 +393,19 @@ const renderQueue = (findings) => {
   const top = findings.slice(0, 3);
   const queueLines = [];
   for (let index = 0; index < 3; index += 1) {
-    const finding = top[index] ?? top[top.length - 1];
-    queueLines.push(`${index + 1}. queue_rank: ${index + 1}`);
-    queueLines.push(`- target_finding_ids: ${finding.findingId}`);
+    const fallback = top.at(-1);
+    const finding = top[index] ?? fallback;
+    if (finding === undefined) {
+      continue;
+    }
+
     queueLines.push(
+      `${index + 1}. queue_rank: ${index + 1}`,
+      `- target_finding_ids: ${finding.findingId}`,
       '- reason_for_order: Higher-severity and higher-confidence findings should be addressed first.',
-    );
-    queueLines.push(
       '- expected_outcome: Reduce immediate maintainability and correctness risk in the audited area.',
+      '',
     );
-    queueLines.push('');
   }
 
   return queueLines.join('\n').trimEnd();
