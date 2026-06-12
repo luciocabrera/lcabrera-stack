@@ -1,3 +1,5 @@
+<!-- Audience: Claude, Gemini, and other non-GitHub agents — for GitHub Copilot see .github/copilot-instructions.md -->
+
 # Project Instructions — vite-react-compiler
 
 ## 1. Project Overview
@@ -320,7 +322,42 @@ const MyPage = () => {
 
 ### Context Pattern
 
-// TODO add context pattern used in our Table component with split contexts for config, data, and filters, and the rule about only calling `.get()` once per action execution to avoid inconsistent snapshots.
+This project uses **split contexts** grouped by state volatility, not by feature. The Table component is the canonical reference; apply the same shape to any domain with complex state.
+
+**Three context tiers (Table as reference):**
+
+| Context               | Stores                           | Change frequency              | Why split                                                |
+| --------------------- | -------------------------------- | ----------------------------- | -------------------------------------------------------- |
+| `TableConfigProvider` | `columnsStore`, `metaStore`      | Low (user config changes)     | Prevents config re-renders cascading into data consumers |
+| `TableDataProvider`   | `dataStore`, `filtersDataStore`  | High (every page/filter load) | Data changes must not re-render config-only components   |
+| Domain-specific       | e.g. `ColumnOrderSectionContext` | Medium (UI interaction)       | Drawer/panel UI isolated from the table core             |
+
+**Consuming context — always `use()`, never `useContext()`:**
+
+```tsx
+// ✅ React 19: use() can be called conditionally
+const { columnsStore } = use(TableConfigContext);
+
+// ❌ Forbidden
+const { columnsStore } = useContext(TableConfigContext);
+```
+
+**Store snapshot rule — capture once per action execution:**
+
+```typescript
+// ✅ Single snapshot — all reads are consistent
+const columnsState = columnsStore.get();
+const columns = columnsState?.columns ?? [];
+const columnOrder = columnsState?.columnOrder ?? [];
+
+// ❌ Multiple .get() calls — may return different snapshots under concurrency
+const columns = columnsStore.get()?.columns ?? [];
+const columnOrder = columnsStore.get()?.columnOrder ?? [];
+```
+
+This rule applies to every store: `columnsStore`, `dataStore`, `filtersDataStore`, `metaStore`.
+
+> For full architecture detail, read `.github/skills/store-pattern/SKILL.md`.
 
 ---
 

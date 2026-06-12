@@ -2,6 +2,11 @@
 name: store-pattern
 description: External-store + split-context architecture for complex React state. Use when building or modifying stateful UI domains that need granular subscriptions and stable performance (especially Table-like components).
 license: MIT
+metadata:
+  version: '1.0.0'
+  scope: [root]
+  auto_invoke: 'Building or modifying Table/store/context code'
+allowed-tools: Read
 ---
 
 # Store Pattern
@@ -21,13 +26,17 @@ This skill documents the project store architecture used in the Table domain:
 - Adding new table state (filters, sorting, pinning, pagination, drawer state)
 - Reviewing PRs for direct store/context misuse in components
 
-## References
+## ⚠️ MANDATORY References
+
+**This SKILL.md provides OVERVIEW only. For exact patterns and constraints, read the reference files BEFORE implementing.**
 
 | Reference                                                            | Use When                                                         |
 | -------------------------------------------------------------------- | ---------------------------------------------------------------- |
 | `references/table-contexts-action-selector.md`                       | Implementing or extending the Table store/context architecture   |
 | `references/architecture-templates/table-contexts/*.ARCHITECTURE.md` | Reusing the proven Table context architecture in other codebases |
 | `../quality-gate-workflow/SKILL.md`                                  | Running post-change validation after store/context updates       |
+
+**⚠️ DO NOT implement store/context changes without reading `references/table-contexts-action-selector.md` FIRST.**
 
 ## Core Rules
 

@@ -4,6 +4,9 @@ description: Scan git diff vs target branch for code smells (Clean Code + GoF + 
 argument-hint: '[target-branch]'
 allowed-tools: Bash(git:*), Read, Grep, Glob
 license: MIT
+metadata:
+  version: '1.0.0'
+  scope: [root]
 ---
 
 # /smell — Code smell review
@@ -41,6 +44,8 @@ echo
 echo "===== Working-tree diff (staged + unstaged, -U10) ====="
 git diff -U10 HEAD || true
 ' -- "$ARGUMENTS"`
+
+> **VS Code Copilot:** The `!bash` prefix does not auto-execute in this environment. Run the command above manually via `run_in_terminal` from the repository root (`/home/lucio/workspaces/vite-react-compiler`) before proceeding to Step 2.
 
 ---
 
