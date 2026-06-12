@@ -6,7 +6,7 @@ export { getPinnedColumnOffsets } from './getPinnedColumnOffsets.util';
 export { getStaticColumnKeys } from './getStaticColumnKeys.util';
 export { readPersistedStateFromCookie } from './readPersistedStateFromCookie.util';
 export { serializeStateSlice } from './serializeStateSlice.util';
-export type { SplitColumnsByPinningResult } from './splitColumnsByPinning.util';
+
 export { splitColumnsByPinning } from './splitColumnsByPinning.util';
 export { syncColumnOrderWithPinning } from './syncColumnOrderWithPinning.util';
 export { writeStateSlice } from './writeStateSlice.util';

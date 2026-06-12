@@ -92,11 +92,7 @@ export const TableSettingsDrawer = () => {
     },
 
     {
-      children: (
-        <ColumnOrderSectionProvider>
-          <ColumnOrderSection />
-        </ColumnOrderSectionProvider>
-      ),
+      children: <ColumnOrderSection />,
       header: 'Columns',
       key: 'columns',
     },
@@ -129,7 +125,9 @@ export const TableSettingsDrawer = () => {
         </SidePanelTitle>
       </SidePanelHeader>
       <SidePanelBody>
-        <Tabs tabs={tabs} />
+        <ColumnOrderSectionProvider>
+          <Tabs tabs={tabs} />
+        </ColumnOrderSectionProvider>
       </SidePanelBody>
       <SidePanelFooter>
         <Button color='primary' onClick={handleAccept} size='sm'>

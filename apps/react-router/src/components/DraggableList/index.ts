@@ -1,2 +1,2 @@
 export { DraggableList } from './DraggableList.component';
-export type { DraggableItem, DraggableListProps } from './DraggableList.types';
+export type { DraggableItem } from './DraggableList.types';

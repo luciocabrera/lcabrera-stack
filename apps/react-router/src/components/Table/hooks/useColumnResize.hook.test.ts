@@ -14,9 +14,12 @@ const { mockUseSyncColumnsSizing, syncColumnsSizingMock } = vi.hoisted(() => {
   return { mockUseSyncColumnsSizing, syncColumnsSizingMock };
 });
 
-vi.mock('../contexts/TableConfig/columns/actions', () => ({
-  useSyncColumnsSizing: mockUseSyncColumnsSizing,
-}));
+vi.mock(
+  '../contexts/TableConfig/columns/actions/useSyncColumnsSizing.hook',
+  () => ({
+    useSyncColumnsSizing: mockUseSyncColumnsSizing,
+  }),
+);
 
 type CreateMouseDownEventArgs = {
   readonly clientX: number;

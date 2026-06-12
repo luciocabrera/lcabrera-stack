@@ -18,7 +18,7 @@ import {
 } from '@/components/Table/utils';
 import { serializeFiltersToURL, serializeSortingToURL } from '@/utils/urlState';
 
-export type BatchTableSettingsUpdate<TData> = {
+type BatchTableSettingsUpdate<TData> = {
   columnFilters: ColumnFiltersState<TData>;
   columnOrder: ColumnOrderState<TData>;
   columnPinning: ColumnPinningState<TData>;

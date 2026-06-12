@@ -2,11 +2,8 @@ import { createContext } from 'react';
 
 import type { TableConfigContextValue } from './TableConfigContext.types';
 
-import { getInitialColumnsState, getInitialMetaState } from './utils';
-
-export const TableConfigContext = createContext<TableConfigContextValue>({
-  columnsStore: getInitialColumnsState({}),
-  metaStore: getInitialMetaState({}),
-} as unknown as TableConfigContextValue);
+export const TableConfigContext = createContext<TableConfigContextValue | null>(
+  null,
+);
 
 TableConfigContext.displayName = 'TableConfigContext';

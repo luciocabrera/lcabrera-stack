@@ -3,16 +3,12 @@
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { createTableConfigColumnsActionMocks } from '@/components/test-utils/createTableConfigColumnsActionMocks.util';
+
 import { useAcceptHeaderPinSide } from './useAcceptHeaderPinSide.hook';
 
-const {
-  mockColumnsStore,
-  mockPersistTableState,
-  mockUsePersistTableStateAction,
-  mockUseTableConfigContextValue,
-  setColumnsState,
-} = vi.hoisted(() => {
-  let columnsState = {
+const createInitialColumnsState = () => {
+  return {
     columnOrder: ['name', 'id', 'age'],
     columnPinning: { left: ['id'], right: [] },
     columnSizing: {},
@@ -23,43 +19,29 @@ const {
       { key: 'age', label: 'Age' },
     ],
   };
+};
 
-  const mockColumnsStore = {
-    get: vi.fn(() => columnsState),
-    set: vi.fn((value: Record<string, unknown>) => {
-      columnsState = { ...columnsState, ...value };
-    }),
-  };
-
-  const mockMetaStore = {
-    get: vi.fn(() => ({ persistenceKey: 'orders-table' })),
-  };
-
-  const mockPersistTableState = vi.fn();
-
-  return {
-    mockColumnsStore,
-    mockPersistTableState,
-    mockUsePersistTableStateAction: () => mockPersistTableState,
-    mockUseTableConfigContextValue: () => ({
-      columnsStore: mockColumnsStore,
-      metaStore: mockMetaStore,
-    }),
-    setColumnsState: (nextState: typeof columnsState) => {
-      columnsState = nextState;
-    },
-  };
+const {
+  mockColumnsStore,
+  mockPersistTableState,
+  mockUsePersistTableStateAction,
+  mockUseTableConfigContextValue,
+  resetMocks,
+  setColumnsState,
+} = createTableConfigColumnsActionMocks({
+  initialColumnsState: createInitialColumnsState(),
+  persistenceKey: 'orders-table',
 });
 
 vi.mock(
   '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
   () => ({
-    useTableConfigContextValue: mockUseTableConfigContextValue,
+    useTableConfigContextValue: () => mockUseTableConfigContextValue(),
   }),
 );
 
 vi.mock('@/components/Table/hooks', () => ({
-  usePersistTableStateAction: mockUsePersistTableStateAction,
+  usePersistTableStateAction: () => mockUsePersistTableStateAction(),
 }));
 
 vi.mock(
@@ -71,19 +53,8 @@ vi.mock(
 
 describe('useAcceptHeaderPinSide', () => {
   beforeEach(() => {
-    setColumnsState({
-      columnOrder: ['name', 'id', 'age'],
-      columnPinning: { left: ['id'], right: [] },
-      columnSizing: {},
-      columnVisibility: new Set<string>(),
-      columns: [
-        { key: 'id', label: 'ID' },
-        { key: 'name', label: 'Name' },
-        { key: 'age', label: 'Age' },
-      ],
-    });
-    mockColumnsStore.set.mockClear();
-    mockPersistTableState.mockClear();
+    setColumnsState(createInitialColumnsState());
+    resetMocks();
   });
 
   it('syncs column order when pinning a column through the header flow', () => {

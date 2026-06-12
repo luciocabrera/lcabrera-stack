@@ -3,9 +3,7 @@ export type { CarSale, CarSalesResponse } from './carSales.api';
 export { enterpriseOrdersApi } from './enterpriseOrders.api';
 export type {
   EnterpriseOrder,
-  EnterpriseOrderDetailResponse,
   EnterpriseOrdersResponse,
-  FetchEnterpriseOrdersParams,
 } from './enterpriseOrders.api';
 export { wideAlltypes150Api } from './wideAlltypes150.api';
 export type {

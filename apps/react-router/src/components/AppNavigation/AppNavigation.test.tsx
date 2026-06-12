@@ -4,55 +4,22 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { mockDialogElement } from '@/components/test-utils/mockDialogElement.util';
 import { GlobalSettingsProvider } from '@/contexts/GlobalSettingsContext';
 
 import { AppNavigation } from './AppNavigation.component';
 
 import type { GlobalSettingsState } from '@/types/globalSettings.types';
 
-// eslint-disable-next-line typescript-eslint/unbound-method -- Saving prototype methods for test teardown restoration
-const savedClose = HTMLDialogElement.prototype.close;
-// eslint-disable-next-line typescript-eslint/unbound-method -- Saving prototype methods for test teardown restoration
-const savedShow = HTMLDialogElement.prototype.show;
-// eslint-disable-next-line typescript-eslint/unbound-method -- Saving prototype methods for test teardown restoration
-const savedShowModal = HTMLDialogElement.prototype.showModal;
-let closeMock: ReturnType<typeof vi.fn>;
-let showMock: ReturnType<typeof vi.fn>;
-let showModalMock: ReturnType<typeof vi.fn>;
+let restoreMockDialog: () => void;
 
 afterEach(() => {
-  HTMLDialogElement.prototype.close = savedClose;
-  HTMLDialogElement.prototype.show = savedShow;
-  HTMLDialogElement.prototype.showModal = savedShowModal;
+  restoreMockDialog();
   cleanup();
 });
 
 beforeEach(() => {
-  closeMock = vi.fn(function (this: HTMLDialogElement) {
-    Object.defineProperty(this, 'open', {
-      configurable: true,
-      value: false,
-      writable: true,
-    });
-  });
-  showMock = vi.fn(function (this: HTMLDialogElement) {
-    Object.defineProperty(this, 'open', {
-      configurable: true,
-      value: true,
-      writable: true,
-    });
-  });
-  showModalMock = vi.fn(function (this: HTMLDialogElement) {
-    Object.defineProperty(this, 'open', {
-      configurable: true,
-      value: true,
-      writable: true,
-    });
-  });
-  HTMLDialogElement.prototype.close = closeMock as HTMLDialogElement['close'];
-  HTMLDialogElement.prototype.show = showMock as HTMLDialogElement['show'];
-  HTMLDialogElement.prototype.showModal =
-    showModalMock as HTMLDialogElement['showModal'];
+  restoreMockDialog = mockDialogElement().restore;
 });
 
 describe('AppNavigation', () => {

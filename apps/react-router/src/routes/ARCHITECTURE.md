@@ -28,6 +28,13 @@ loader, metadata, error boundary, and page component.
   the same API contract with TanStack Table, TanStack Query, and TanStack
   Virtual.
 
+## Enterprise Orders Route
+
+- `/enterprise-orders` uses a route-local constants map for column definitions,
+  pinning defaults, and cell actions.
+- See [enterprise-orders/ARCHITECTURE.md](enterprise-orders/ARCHITECTURE.md)
+  for details.
+
 ## Routing Guardrails
 
 - Keep route-specific experiments isolated in their own folders instead of

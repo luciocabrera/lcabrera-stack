@@ -1,0 +1,34 @@
+{
+  "$schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schema.json",
+  "entry": [
+    "lighthouse.config.js",
+    "config/**/*.ts",
+    "utils/**/*.ts",
+    "scripts/**/*.{ts,js,mjs}"
+  ],
+  "ignoreDependencies": [
+    "@babel/preset-typescript",
+    "@eslint/js",
+    "@stylexjs/eslint-plugin",
+    "@typescript-eslint/utils",
+    "babel-plugin-react-compiler",
+    "eslint-config-prettier",
+    "eslint-plugin-local-rules",
+    "eslint-plugin-perfectionist",
+    "eslint-plugin-react-dom",
+    "eslint-plugin-react-hooks",
+    "eslint-plugin-react-refresh",
+    "eslint-plugin-react-x",
+    "eslint-plugin-security",
+    "eslint-plugin-unicorn",
+    "globals",
+    "typescript-eslint"
+  ],
+  "rules": {
+    "circular-dependencies": "error",
+    "unused-files": "error",
+    "unused-exports": "warn",
+    "unused-types": "warn",
+    "unused-dependencies": "warn"
+  }
+}

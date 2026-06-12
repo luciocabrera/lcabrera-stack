@@ -93,6 +93,8 @@ Implementation details:
 - Uses a passive scroll listener to avoid blocking native scrolling.
 - Batches scroll-driven `scrollLeft` updates with `requestAnimationFrame` to
   reduce re-render pressure during rapid horizontal scrolling.
+- Reuses `setupObservedContainer()` from `hooks/utils` for shared
+  ResizeObserver + scroll subscription wiring.
 - Memoizes cumulative column start offsets and resolves visible boundaries via
   binary search.
 - Binary-search logic is extracted to `hooks/utils/` as reusable pure utils.
@@ -222,6 +224,8 @@ Implementation details:
   `window.resize`, so container-only size changes are tracked correctly.
 - Uses a passive scroll listener and batches `scrollTop` updates with
   `requestAnimationFrame` to reduce re-render pressure during rapid scrolling.
+- Reuses `setupObservedContainer()` from `hooks/utils` for shared
+  ResizeObserver + scroll subscription wiring.
 - Preserves the previous non-zero height when a resize temporarily reports `0`
   (for example hidden/inactive layouts).
 

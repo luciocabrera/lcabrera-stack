@@ -14,6 +14,58 @@ import {
   createStaticFilterOptions,
 } from '@/utils/filters';
 
+type DistinctStringColumnArgs = {
+  readonly columnName: keyof EnterpriseOrder;
+  readonly key: keyof EnterpriseOrder;
+  readonly label: string;
+  readonly maxWidth: number;
+  readonly minWidth: number;
+};
+
+type BasicColumnArgs = {
+  readonly dataType: 'boolean' | 'currency' | 'date' | 'number' | 'string';
+  readonly key: keyof EnterpriseOrder;
+  readonly label: string;
+  readonly maxWidth: number;
+  readonly minWidth: number;
+};
+
+const createDistinctStringColumn = ({
+  columnName,
+  key,
+  label,
+  maxWidth,
+  minWidth,
+}: DistinctStringColumnArgs): TableColumn<EnterpriseOrder> => {
+  return {
+    dataType: 'string',
+    ...createDistinctFilterOptions<EnterpriseOrder>({
+      columnName,
+      fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
+    }),
+    key,
+    label,
+    maxWidth,
+    minWidth,
+  };
+};
+
+const createBasicColumn = ({
+  dataType,
+  key,
+  label,
+  maxWidth,
+  minWidth,
+}: BasicColumnArgs): TableColumn<EnterpriseOrder> => {
+  return {
+    dataType,
+    key,
+    label,
+    maxWidth,
+    minWidth,
+  };
+};
+
 export const PERSISTENCE_KEY = 'enterprise-orders-table';
 
 export const DEFAULT_COLUMN_PINNING: ColumnPinningState<EnterpriseOrder> = {
@@ -22,31 +74,27 @@ export const DEFAULT_COLUMN_PINNING: ColumnPinningState<EnterpriseOrder> = {
 };
 
 export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
-  {
+  createBasicColumn({
     dataType: 'number',
     key: 'order_id',
     label: 'Order ID',
     maxWidth: 120,
     minWidth: 90,
-  },
-  {
-    dataType: 'string',
-    ...createDistinctFilterOptions<EnterpriseOrder>({
-      columnName: 'order_number',
-      fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
-    }),
+  }),
+  createDistinctStringColumn({
+    columnName: 'order_number',
     key: 'order_number',
     label: 'Order #',
     maxWidth: 180,
     minWidth: 130,
-  },
-  {
+  }),
+  createBasicColumn({
     dataType: 'date',
     key: 'order_date',
     label: 'Order Date',
     maxWidth: 150,
     minWidth: 120,
-  },
+  }),
   {
     dataType: 'string',
     ...createStaticFilterOptions<EnterpriseOrder>([
@@ -78,84 +126,76 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
     maxWidth: 130,
     minWidth: 100,
   },
-  {
+  createBasicColumn({
     dataType: 'string',
     key: 'customer_name',
     label: 'Customer',
     maxWidth: 250,
     minWidth: 150,
-  },
-  {
-    dataType: 'string',
-    ...createDistinctFilterOptions<EnterpriseOrder>({
-      columnName: 'customer_email',
-      fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
-    }),
+  }),
+  createDistinctStringColumn({
+    columnName: 'customer_email',
     key: 'customer_email',
     label: 'Email',
     maxWidth: 280,
     minWidth: 180,
-  },
-  {
-    dataType: 'string',
-    ...createDistinctFilterOptions<EnterpriseOrder>({
-      columnName: 'customer_type',
-      fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
-    }),
+  }),
+  createDistinctStringColumn({
+    columnName: 'customer_type',
     key: 'customer_type',
     label: 'Customer Type',
     maxWidth: 180,
     minWidth: 130,
-  },
-  {
+  }),
+  createBasicColumn({
     dataType: 'boolean',
     key: 'is_vip_customer',
     label: 'VIP',
     maxWidth: 100,
     minWidth: 70,
-  },
-  {
+  }),
+  createBasicColumn({
     dataType: 'number',
     key: 'loyalty_points',
     label: 'Loyalty Points',
     maxWidth: 150,
     minWidth: 120,
-  },
-  {
+  }),
+  createBasicColumn({
     dataType: 'currency',
     key: 'total_amount',
     label: 'Total Amount',
     maxWidth: 180,
     minWidth: 130,
-  },
-  {
+  }),
+  createBasicColumn({
     dataType: 'currency',
     key: 'subtotal',
     label: 'Subtotal',
     maxWidth: 150,
     minWidth: 110,
-  },
-  {
+  }),
+  createBasicColumn({
     dataType: 'currency',
     key: 'tax_amount',
     label: 'Tax',
     maxWidth: 130,
     minWidth: 100,
-  },
-  {
+  }),
+  createBasicColumn({
     dataType: 'currency',
     key: 'shipping_cost',
     label: 'Shipping',
     maxWidth: 130,
     minWidth: 100,
-  },
-  {
+  }),
+  createBasicColumn({
     dataType: 'currency',
     key: 'discount_amount',
     label: 'Discount',
     maxWidth: 130,
     minWidth: 100,
-  },
+  }),
   {
     dataType: 'string',
     ...createStaticFilterOptions<EnterpriseOrder>([
@@ -187,124 +227,104 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
     maxWidth: 180,
     minWidth: 140,
   },
-  {
+  createBasicColumn({
     dataType: 'string',
     key: 'product_category',
     label: 'Category',
     maxWidth: 220,
     minWidth: 140,
-  },
-  {
+  }),
+  createBasicColumn({
     dataType: 'string',
     key: 'product_subcategory',
     label: 'Subcategory',
     maxWidth: 180,
     minWidth: 130,
-  },
-  {
+  }),
+  createBasicColumn({
     dataType: 'number',
     key: 'quantity',
     label: 'Quantity',
     maxWidth: 120,
     minWidth: 90,
-  },
-  {
+  }),
+  createBasicColumn({
     dataType: 'currency',
     key: 'unit_price',
     label: 'Unit Price',
     maxWidth: 150,
     minWidth: 110,
-  },
-  {
-    dataType: 'string',
-    ...createDistinctFilterOptions<EnterpriseOrder>({
-      columnName: 'shipping_city',
-      fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
-    }),
+  }),
+  createDistinctStringColumn({
+    columnName: 'shipping_city',
     key: 'shipping_city',
     label: 'Ship City',
     maxWidth: 180,
     minWidth: 120,
-  },
-  {
-    dataType: 'string',
-    ...createDistinctFilterOptions<EnterpriseOrder>({
-      columnName: 'shipping_state',
-      fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
-    }),
+  }),
+  createDistinctStringColumn({
+    columnName: 'shipping_state',
     key: 'shipping_state',
     label: 'Ship State',
     maxWidth: 150,
     minWidth: 110,
-  },
-  {
-    dataType: 'string',
-    ...createDistinctFilterOptions<EnterpriseOrder>({
-      columnName: 'shipping_country',
-      fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
-    }),
+  }),
+  createDistinctStringColumn({
+    columnName: 'shipping_country',
     key: 'shipping_country',
     label: 'Ship Country',
     maxWidth: 180,
     minWidth: 130,
-  },
-  {
-    dataType: 'string',
-    ...createDistinctFilterOptions<EnterpriseOrder>({
-      columnName: 'carrier',
-      fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
-    }),
+  }),
+  createDistinctStringColumn({
+    columnName: 'carrier',
     key: 'carrier',
     label: 'Carrier',
     maxWidth: 150,
     minWidth: 100,
-  },
-  {
-    dataType: 'string',
-    ...createDistinctFilterOptions<EnterpriseOrder>({
-      columnName: 'warehouse_location',
-      fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
-    }),
+  }),
+  createDistinctStringColumn({
+    columnName: 'warehouse_location',
     key: 'warehouse_location',
     label: 'Warehouse',
     maxWidth: 180,
     minWidth: 130,
-  },
-  {
+  }),
+  createBasicColumn({
     dataType: 'boolean',
     key: 'is_rush_order',
     label: 'Rush',
     maxWidth: 90,
     minWidth: 70,
-  },
-  {
+  }),
+  createBasicColumn({
     dataType: 'boolean',
     key: 'is_gift',
     label: 'Gift',
     maxWidth: 90,
     minWidth: 70,
-  },
-  {
+  }),
+  createBasicColumn({
     dataType: 'number',
     key: 'customer_rating',
     label: 'Rating',
     maxWidth: 110,
     minWidth: 80,
-  },
-  {
+  }),
+  createBasicColumn({
     dataType: 'date',
     key: 'delivery_date',
     label: 'Delivery Date',
     maxWidth: 150,
     minWidth: 130,
-  },
-  {
+  }),
+  createBasicColumn({
     dataType: 'date',
     key: 'shipped_date',
     label: 'Shipped Date',
     maxWidth: 150,
     minWidth: 130,
-  },
+  }),
   {
     isFilterable: false,
     isHeaderHidden: true,
@@ -312,8 +332,8 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
     isStatic: true,
     key: 'actions',
     label: 'Actions',
-    maxWidth: 60,
-    minWidth: 60,
+    maxWidth: 32,
+    minWidth: 32,
     render: (row) => (
       <Link to={`/enterprise-orders/${String(row.order_id)}`}>
         <Button

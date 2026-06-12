@@ -25,3 +25,8 @@ Provides a central place to configure app-level preferences that apply to every 
 - Runtime pin/unpin prompt answers do not persist global preferences.
 - Runtime drag/order conflict prompt answers do not persist global preferences.
 - `Always ask` remains a settings-only preference value and is not shown in runtime prompt modals.
+
+## Implementation Notes
+
+- Repeated option-card markup is centralized in [src/routes/settings/SettingsOptionSection.component.tsx](src/routes/settings/SettingsOptionSection.component.tsx) with its props in [src/routes/settings/SettingsOptionSection.types.ts](src/routes/settings/SettingsOptionSection.types.ts).
+- `Settings.component.tsx` now contains only the route component and composes `SettingsOptionSection` instances for each option group.

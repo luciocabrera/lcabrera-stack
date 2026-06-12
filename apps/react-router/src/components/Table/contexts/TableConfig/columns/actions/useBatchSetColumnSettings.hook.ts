@@ -18,7 +18,7 @@ import {
 } from '@/components/Table/utils';
 import { serializeFiltersToURL, serializeSortingToURL } from '@/utils/urlState';
 
-export type BatchColumnSettingsUpdate = {
+type BatchColumnSettingsUpdate = {
   /** Single column filter value */
   columnFilter?: ColumnFilter;
   /** Column key being updated */

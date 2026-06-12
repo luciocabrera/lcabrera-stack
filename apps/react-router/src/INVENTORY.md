@@ -81,6 +81,14 @@ Before creating anything new, check this inventory. If something here does the j
 | ----------------------------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
 | `commitPinningAndOrderUpdate` | `components/Table/contexts/TableConfig/columns/actions/commitPinningAndOrderUpdate.util.ts` | Commits pinning/order persistence and applies synced derived slices to store |
 
+### `src/components/test-utils/`
+
+| Function                              | Location                                                            | Description                                                                                  |
+| ------------------------------------- | ------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `createMockStore`                     | `components/test-utils/createMockStore.util.ts`                     | Generic external-store-like test scaffold (`get`, `set`, `reset`, `subscribe`, SSR snapshot) |
+| `createTableConfigColumnsActionMocks` | `components/test-utils/createTableConfigColumnsActionMocks.util.ts` | Shared TableConfig columns-action test scaffold with mocked stores + persistence wiring      |
+| `mockDialogElement`                   | `components/test-utils/mockDialogElement.util.ts`                   | Mocks HTMLDialogElement prototype behavior with restore handles for test teardown            |
+
 ### `src/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/utils/`
 
 | Function                    | Location                                                                                            | Description                                               |
@@ -132,11 +140,11 @@ Before creating anything new, check this inventory. If something here does the j
 
 ### `src/utils/prefetch/`
 
-| Function                  | Location                                         | Description                                                                   |
-| ------------------------- | ------------------------------------------------ | ----------------------------------------------------------------------------- |
-| `resolveFromCacheOrFetch` | `utils/prefetch/resolveFromCacheOrFetch.util.ts` | Resolves from prefetch cache (hit/in-flight) or falls back to a fresh fetch   |
-| `prefetchNextPage`        | `utils/prefetch/prefetchNextPage.util.ts`        | Creates a prefetch request returning initial cache state + resolution promise |
-| `firePrefetch`            | `utils/prefetch/firePrefetch.util.ts`            | Fires prefetch and applies result to a ref with staleness check               |
+| Function                  | Location                                         | Description                                                                 |
+| ------------------------- | ------------------------------------------------ | --------------------------------------------------------------------------- |
+| `resolveFromCacheOrFetch` | `utils/prefetch/resolveFromCacheOrFetch.util.ts` | Resolves from prefetch cache (hit/in-flight) or falls back to a fresh fetch |
+| `prefetchNextPage`        | `utils/prefetch/prefetchNextPage.util.ts`        | _Internal_: Creates prefetch request (used by `firePrefetch`)               |
+| `firePrefetch`            | `utils/prefetch/firePrefetch.util.ts`            | Fires prefetch and applies result to a ref with staleness check             |
 
 ### `src/utils/security/`
 
@@ -157,13 +165,13 @@ Before creating anything new, check this inventory. If something here does the j
 
 ### `src/utils/storage/`
 
-| Function              | Location                                    | Description                                                                        |
-| --------------------- | ------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `buildCookieString`   | `utils/storage/buildCookieString.util.ts`   | Serialises key/value to a `Set-Cookie` string (1y expiry, `SameSite=Lax`)          |
-| `parseCookies`        | `utils/storage/parseCookies.util.ts`        | Splits a raw `Cookie:` header string into a `Record<string, string>` key/value map |
-| `readFromCookie`      | `utils/storage/readFromCookie.util.ts`      | Reads a named cookie value from `document.cookie` or a provided string (SSR-safe)  |
-| `writeToCookie`       | `utils/storage/writeToCookie.util.ts`       | Writes a cookie via `document.cookie` or returns a `Set-Cookie` header (SSR-safe)  |
-| `writeToLocalStorage` | `utils/storage/writeToLocalStorage.util.ts` | Writes to `localStorage` with error handling for quota/disabled scenarios          |
+| Function              | Location                                    | Description                                                                       |
+| --------------------- | ------------------------------------------- | --------------------------------------------------------------------------------- |
+| `buildCookieString`   | `utils/storage/buildCookieString.util.ts`   | Serialises key/value to a `Set-Cookie` string (1y expiry, `SameSite=Lax`)         |
+| `parseCookies`        | `utils/storage/parseCookies.util.ts`        | _Internal_: Used by `readFromCookie` and `writeToCookie`                          |
+| `readFromCookie`      | `utils/storage/readFromCookie.util.ts`      | Reads a named cookie value from `document.cookie` or a provided string (SSR-safe) |
+| `writeToCookie`       | `utils/storage/writeToCookie.util.ts`       | Writes a cookie via `document.cookie` or returns a `Set-Cookie` header (SSR-safe) |
+| `writeToLocalStorage` | `utils/storage/writeToLocalStorage.util.ts` | Writes to `localStorage` with error handling for quota/disabled scenarios         |
 
 ### `src/utils/urlState/`
 

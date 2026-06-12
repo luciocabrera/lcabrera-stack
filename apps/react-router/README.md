@@ -44,6 +44,9 @@ vp run test:watch
 # Full validation
 vp check
 vp run test
+
+# Custom architectural lint rules (ESLint pass)
+vp run lint:custom-rules
 ```
 
 ## Important Command Notes
@@ -159,4 +162,5 @@ vp run test
 - `AGENTS.md`
 - `CLAUDE.md`
 - `GEMINI.md`
+- `docs/decisions/ADR-007-barrel-export-boundaries.md`
 - `src/routes/enterprise-orders/README.md`
