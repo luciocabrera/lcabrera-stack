@@ -225,10 +225,9 @@ Before creating anything new, check this inventory. If something here does the j
 
 ## Routes
 
-| Route                         | Location                             | Description                                                                                        |
-| ----------------------------- | ------------------------------------ | -------------------------------------------------------------------------------------------------- |
-| `/wide-alltypes-150`          | `routes/wide-alltypes-150/`          | Stress-test page for the `wide_alltypes_150` dataset using the shared `TableLayout` implementation |
-| `/wide-alltypes-150-tanstack` | `routes/wide-alltypes-150-tanstack/` | Sibling experiment for the same dataset using TanStack Table, TanStack Query, and TanStack Virtual |
+| Route                | Location                    | Description                                                                                        |
+| -------------------- | --------------------------- | -------------------------------------------------------------------------------------------------- |
+| `/wide-alltypes-150` | `routes/wide-alltypes-150/` | Stress-test page for the `wide_alltypes_150` dataset using the shared `TableLayout` implementation |
 
 ---
 

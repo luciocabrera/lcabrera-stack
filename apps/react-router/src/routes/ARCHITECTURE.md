@@ -24,9 +24,6 @@ loader, metadata, error boundary, and page component.
 
 - `/wide-alltypes-150` remains the baseline stress-test page backed by the
   shared `TableLayout`.
-- `/wide-alltypes-150-tanstack` is an isolated sibling experiment that reuses
-  the same API contract with TanStack Table, TanStack Query, and TanStack
-  Virtual.
 
 ## Enterprise Orders Route
 

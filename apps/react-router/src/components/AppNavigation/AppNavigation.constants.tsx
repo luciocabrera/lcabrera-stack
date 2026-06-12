@@ -124,10 +124,4 @@ export const getNavigationItems = (
     to: '/wide-alltypes-150',
     type: 'link',
   },
-  {
-    icon: <FileTextIcon size={iconSize} />,
-    label: 'Wide All-Types 150 TanStack',
-    to: '/wide-alltypes-150-tanstack',
-    type: 'link',
-  },
 ];
