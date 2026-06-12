@@ -30,7 +30,8 @@ const getDirectories = (dir) => {
  * @returns {{ frontmatter: Record<string, string>, body: string } | null}
  */
 const parseFrontmatter = (filePath) => {
-  const content = fs.readFileSync(filePath, 'utf8');
+  const rawContent = fs.readFileSync(filePath, 'utf8');
+  const content = rawContent.replace(/\r\n?/g, '\n');
 
   if (!content.startsWith('---\n')) {
     return null;
