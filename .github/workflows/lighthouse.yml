@@ -34,9 +34,10 @@ jobs:
         uses: voidzero-dev/setup-vp@8ecb39174989ce55af90f45cf55b02738599831d
         with:
           cache: true
+          run-install: false
 
       - name: Install dependencies
-        run: vp install --frozen-lockfile --ignore-scripts
+        run: vp install --frozen-lockfile --ignore-scripts && vp config
 
       - name: Install Playwright browsers
         run: cd apps/react-router && vp exec playwright install chromium --with-deps
