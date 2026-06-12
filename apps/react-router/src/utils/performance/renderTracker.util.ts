@@ -84,7 +84,6 @@ export const trackRenderComplete = (
 
 /**
  * Get render statistics
- * @lintignore Exported for browser console usage (window.__renderStats)
  */
 export const renderStats = {
   /**

@@ -1,10 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 
-import {
-  borderRadius,
-  spacing,
-  typography,
-} from '@/design-system/tokens/base.stylex';
+import { typography } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const styles = stylex.create({
@@ -23,17 +19,6 @@ export const styles = stylex.create({
     fontFamily: typography.fontFamily,
     height: '100vh',
     maxWidth: '100dvw',
-  },
-  devWarningBanner: {
-    margin: spacing.sm,
-    padding: spacing.sm,
-    borderColor: colors.warning,
-    borderRadius: borderRadius.md,
-    borderStyle: 'solid',
-    borderWidth: 1,
-    backgroundColor: colors.warningBackground,
-    color: colors.warningText,
-    fontSize: typography.fontSizeSm,
   },
   outletWrapper: {
     flex: '1 1 auto',

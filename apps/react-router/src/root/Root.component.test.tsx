@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { ThemeMode } from '@/types/theme.types';
@@ -108,12 +108,6 @@ describe('Root', () => {
       toggleTheme: toggleThemeMock,
     });
     toggleThemeMock.mockReset();
-    globalThis.fetch = vi.fn(() =>
-      Promise.resolve({
-        json: () => Promise.resolve({ isHealthy: true, issues: [] }),
-        ok: true,
-      }),
-    ) as unknown as typeof fetch;
   });
 
   it('wraps the app with ThemeProvider and wires the theme toggle button', () => {
@@ -131,41 +125,5 @@ describe('Root', () => {
     );
     expect(screen.getByTestId('outlet').textContent).toBe('Outlet');
     expect(toggleThemeMock).toHaveBeenCalledTimes(1);
-  });
-
-  it('shows a dev warning banner when the db sanity endpoint reports issues', async () => {
-    globalThis.fetch = vi.fn(() =>
-      Promise.resolve({
-        json: () =>
-          Promise.resolve({
-            isHealthy: false,
-            issues: ['Missing seed data'],
-          }),
-        ok: true,
-      }),
-    ) as unknown as typeof fetch;
-
-    render(<Root />);
-
-    await waitFor(() => {
-      expect(
-        screen.getByText(/Dev DB warning: Missing seed data/i).textContent,
-      ).toContain('Missing seed data');
-    });
-  });
-
-  it('shows a dev warning banner when the db sanity request fails', async () => {
-    globalThis.fetch = vi.fn(() =>
-      Promise.reject(new Error('DB sanity request failed')),
-    ) as unknown as typeof fetch;
-
-    render(<Root />);
-
-    await waitFor(() => {
-      expect(
-        screen.getByText(/Dev DB warning: DB sanity request failed/i)
-          .textContent,
-      ).toContain('DB sanity request failed');
-    });
   });
 });
