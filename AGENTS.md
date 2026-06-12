@@ -1,3 +1,5 @@
+<!-- Audience: Claude, Gemini, and other non-GitHub agents — for GitHub Copilot see .github/copilot-instructions.md -->
+
 # Project Instructions — vite-react-compiler
 
 ## 1. Project Overview
@@ -12,6 +14,26 @@ This is a **React 19 + TypeScript + StyleX + React Router 7** application with S
 - **Toolchain:** Vite+ (`vp` CLI) wrapping Vite, Rolldown, Vitest, Oxlint, Oxfmt
 - **Language:** TypeScript (strict mode)
 - **Package Manager:** pnpm (managed through `vp`)
+
+## Quick Skill Index
+
+Use these skills as the first stop for implementation patterns and workflows:
+
+| Skill                         | Use For                                                                                           | Location                                      |
+| ----------------------------- | ------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| `store-pattern`               | Table-style split-context external store architecture with selector/action boundaries             | `skills/store-pattern/SKILL.md`               |
+| `quality-gate-workflow`       | Mandatory post-change validation workflow (`vp fmt .` → `vp lint .` → `vp check` → `vp run test`) | `skills/quality-gate-workflow/SKILL.md`       |
+| `react-19`                    | React 19 component and compiler-safe patterns                                                     | `skills/react-19/SKILL.md`                    |
+| `react-router-framework-mode` | React Router framework mode data, actions, forms, navigation, error handling                      | `skills/react-router-framework-mode/SKILL.md` |
+| `code-smell-checker`          | Baseline maintainability audits and tech-debt triage                                              | `skills/code-smell-checker/SKILL.md`          |
+| `code-smell-zen`              | Diff-based smell review against target branch                                                     | `skills/code-smell-zen/SKILL.md`              |
+
+Selection guideline:
+
+- **Working in complex UI state?** Start with `store-pattern`.
+- **Finishing any code change?** Run `quality-gate-workflow`.
+- **Routing/data mutations?** Use `react-router-framework-mode`.
+- **React component implementation?** Use `react-19`.
 
 ---
 
@@ -252,7 +274,7 @@ export const styles = stylex.create({
 - **All `*.util.ts` functions must be pure** — same input → same output, no side effects.
 - **Never mutate data.** Use spread syntax, `.map()`, `.filter()`, `.reduce()`.
 - **Use functional array operations exclusively.** No imperative `for` loops for data transformations.
-- **Never mutate props.** Use `[...array].sort()` or `useMemo` instead of `array.sort()`.
+- **Never mutate props.** Use `[...array].sort()` instead of `array.sort()`.
 - **`as const` for literal objects/arrays** where applicable.
 
 ---
@@ -300,17 +322,42 @@ const MyPage = () => {
 
 ### Context Pattern
 
-```typescript
-import { use } from 'react';
+This project uses **split contexts** grouped by state volatility, not by feature. The Table component is the canonical reference; apply the same shape to any domain with complex state.
 
-const ThemeContext = createContext<Theme | undefined>(undefined);
+**Three context tiers (Table as reference):**
 
-export const useTheme = () => {
-  const theme = use(ThemeContext);
-  if (!theme) throw new Error('useTheme must be used within ThemeProvider');
-  return theme;
-};
+| Context               | Stores                           | Change frequency              | Why split                                                |
+| --------------------- | -------------------------------- | ----------------------------- | -------------------------------------------------------- |
+| `TableConfigProvider` | `columnsStore`, `metaStore`      | Low (user config changes)     | Prevents config re-renders cascading into data consumers |
+| `TableDataProvider`   | `dataStore`, `filtersDataStore`  | High (every page/filter load) | Data changes must not re-render config-only components   |
+| Domain-specific       | e.g. `ColumnOrderSectionContext` | Medium (UI interaction)       | Drawer/panel UI isolated from the table core             |
+
+**Consuming context — always `use()`, never `useContext()`:**
+
+```tsx
+// ✅ React 19: use() can be called conditionally
+const { columnsStore } = use(TableConfigContext);
+
+// ❌ Forbidden
+const { columnsStore } = useContext(TableConfigContext);
 ```
+
+**Store snapshot rule — capture once per action execution:**
+
+```typescript
+// ✅ Single snapshot — all reads are consistent
+const columnsState = columnsStore.get();
+const columns = columnsState?.columns ?? [];
+const columnOrder = columnsState?.columnOrder ?? [];
+
+// ❌ Multiple .get() calls — may return different snapshots under concurrency
+const columns = columnsStore.get()?.columns ?? [];
+const columnOrder = columnsStore.get()?.columnOrder ?? [];
+```
+
+This rule applies to every store: `columnsStore`, `dataStore`, `filtersDataStore`, `metaStore`.
+
+> For full architecture detail, read `.github/skills/store-pattern/SKILL.md`.
 
 ---
 
@@ -442,6 +489,8 @@ import { Button } from '../../../../components/Button';
 
 - Protect routes with authentication guards.
 - Never commit secrets — use validated environment variables.
+- Never commit sensitive data in logs or error messages.
+- Never commit .env files or credentials.
 
 ---
 

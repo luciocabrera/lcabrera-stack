@@ -19,6 +19,10 @@
     "seed:fast": "cd apps/api-server-fast && vp run seed",
     "start": "vp run start -r",
     "test": "cd apps/react-router && REACT_ROUTER_TEST_TASK=true vp run test",
+    "skills:validate": "node scripts/validate-skills.cjs",
+    "skills:report": "node scripts/generate-skills-compliance-report.cjs",
+    "skills:source-audit": "node scripts/generate-source-smell-report.cjs && node scripts/bootstrap-agenting-handoff.cjs",
+    "skills:handoff": "node scripts/bootstrap-agenting-handoff.cjs",
     "typegen:router": "cd apps/react-router && vp run typegen",
     "prepare": "vp config"
   },
@@ -29,5 +33,5 @@
   "engines": {
     "node": ">=25"
   },
-  "packageManager": "pnpm@11.5.2"
+  "packageManager": "pnpm@11.5.3"
 }
