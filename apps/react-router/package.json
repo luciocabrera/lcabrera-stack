@@ -61,7 +61,6 @@
     "playwright": "catalog:",
     "typescript": "catalog:",
     "typescript-eslint": "catalog:",
-    "unplugin": "catalog:",
     "vite": "catalog:",
     "vite-plugin-babel": "catalog:",
     "vite-plus": "catalog:",

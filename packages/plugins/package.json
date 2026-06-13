@@ -5,8 +5,5 @@
   "type": "module",
   "exports": {
     "./fixReactRouterAssets": "./fixReactRouterAssets.plugin.ts"
-  },
-  "devDependencies": {
-    "vite-plus": "catalog:"
   }
 }

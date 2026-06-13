@@ -84,7 +84,53 @@ type ButtonProps = { label: string };
 
 **Auto-fix:** Renames type declarations from `Arguments` -> `Args` globally. Renames `Properties` -> `Props` in React files (`.tsx`/`.jsx`).
 
-### 5. `clean-import-paths`
+### 5. `no-type-definitions-in-components`
+
+Enforces that type definitions live in separate `*.types.ts` files rather than inside component files.
+
+**❌ Disallowed:**
+
+```typescript
+// Button.component.tsx
+type ButtonProps = { label: string }; // move this to Button.types.ts
+
+export const Button = ({ label }: ButtonProps) => <button>{label}</button>;
+```
+
+**✅ Enforced:**
+
+```typescript
+// Button.types.ts
+export type ButtonProps = { label: string };
+
+// Button.component.tsx
+import type { ButtonProps } from './Button.types';
+export const Button = ({ label }: ButtonProps) => <button>{label}</button>;
+```
+
+### 6. `single-component-export`
+
+Enforces that `*.component.tsx` files export exactly one component — no multi-component files.
+
+**❌ Disallowed:**
+
+```typescript
+// Forms.component.tsx
+export const LoginForm = () => { ... };
+export const RegisterForm = () => { ... }; // second export not allowed
+```
+
+**✅ Enforced:**
+
+```typescript
+// LoginForm.component.tsx
+export const LoginForm = () => { ... };
+
+// RegisterForm.component.tsx
+export const RegisterForm = () => { ... };
+```
+
+### 7. `clean-import-paths`
 
 Enforces clean internal import/export paths by disallowing file extensions and trailing `/index` segments.
 
@@ -105,6 +151,17 @@ export { utils } from '@/utils';
 ```
 
 **Auto-fix:** Removes `.ts`/`.tsx` suffixes and trailing `/index` from internal `./`, `../`, and `@/` import/export specifiers.
+
+## Monorepo integration
+
+The rules are compiled to JavaScript in the `build/` directory. ESLint loads them via the `eslint-local-rules-shared` package from `eslint.config.mjs` at the workspace root:
+
+```js
+import localRules from 'eslint-local-rules-shared';
+// rules are registered under the 'local-rules/' namespace
+```
+
+**Important:** run `vp run build` after any change to the TypeScript source — ESLint loads the compiled `.js` files, not the TypeScript source directly.
 
 ## Development
 
