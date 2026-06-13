@@ -1,5 +1,7 @@
 import type { OxlintConfig } from 'vite-plus/lint';
 
+import { mergeArrays, mergeObjects } from '@repo/utils/merge';
+
 type MergeableKey =
   | 'categories'
   | 'env'
@@ -13,47 +15,46 @@ type MergeableKey =
 
 type OxlintConfigOverrides = Partial<Pick<OxlintConfig, MergeableKey>>;
 
-const mergeArrays = <T>(
-  baseValue: readonly T[] | null | undefined,
-  overrideValue: readonly T[] | null | undefined,
-): T[] | undefined => {
-  if (baseValue == null && overrideValue == null) {
-    return undefined;
-  }
-
-  return [...(baseValue ?? []), ...(overrideValue ?? [])];
-};
-
-const mergeObjects = <T extends object>(
-  baseValue: T | undefined,
-  overrideValue: Partial<T> | undefined,
-): T | undefined => {
-  if (baseValue === undefined && overrideValue === undefined) {
-    return undefined;
-  }
-
-  return {
-    ...baseValue,
-    ...overrideValue,
-  } as T;
-};
-
 export const mergeOxlintConfig = (
   baseConfig: OxlintConfig,
   overrideConfig: OxlintConfigOverrides = {},
 ): OxlintConfig => ({
   ...baseConfig,
   ...overrideConfig,
-  categories: mergeObjects(baseConfig.categories, overrideConfig.categories),
-  env: mergeObjects(baseConfig.env, overrideConfig.env),
-  ignorePatterns: mergeArrays(
-    baseConfig.ignorePatterns,
-    overrideConfig.ignorePatterns,
-  ),
-  jsPlugins: mergeArrays(baseConfig.jsPlugins, overrideConfig.jsPlugins),
-  options: mergeObjects(baseConfig.options, overrideConfig.options),
-  overrides: mergeArrays(baseConfig.overrides, overrideConfig.overrides),
-  plugins: mergeArrays(baseConfig.plugins, overrideConfig.plugins),
-  rules: mergeObjects(baseConfig.rules, overrideConfig.rules),
-  settings: mergeObjects(baseConfig.settings, overrideConfig.settings),
+  categories: mergeObjects({
+    baseValue: baseConfig.categories,
+    overrideValue: overrideConfig.categories,
+  }),
+  env: mergeObjects({
+    baseValue: baseConfig.env,
+    overrideValue: overrideConfig.env,
+  }),
+  ignorePatterns: mergeArrays({
+    baseValue: baseConfig.ignorePatterns,
+    overrideValue: overrideConfig.ignorePatterns,
+  }),
+  jsPlugins: mergeArrays({
+    baseValue: baseConfig.jsPlugins,
+    overrideValue: overrideConfig.jsPlugins,
+  }),
+  options: mergeObjects({
+    baseValue: baseConfig.options,
+    overrideValue: overrideConfig.options,
+  }),
+  overrides: mergeArrays({
+    baseValue: baseConfig.overrides,
+    overrideValue: overrideConfig.overrides,
+  }),
+  plugins: mergeArrays({
+    baseValue: baseConfig.plugins,
+    overrideValue: overrideConfig.plugins,
+  }),
+  rules: mergeObjects({
+    baseValue: baseConfig.rules,
+    overrideValue: overrideConfig.rules,
+  }),
+  settings: mergeObjects({
+    baseValue: baseConfig.settings,
+    overrideValue: overrideConfig.settings,
+  }),
 });

@@ -473,11 +473,7 @@ importers:
 
   packages/ts-configs: {}
 
-  packages/utils:
-    devDependencies:
-      vite-plus:
-        specifier: 'catalog:'
-        version: 0.1.24(@opentelemetry/api@1.9.1)(@types/node@25.9.3)(@vitest/coverage-v8@4.1.8)(esbuild@0.27.7)(jiti@2.7.0)(jsdom@29.1.1)(typescript@6.0.3)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.27.7)(jiti@2.7.0)(yaml@2.9.0))(yaml@2.9.0)
+  packages/utils: {}
 
   packages/vite-configs:
     devDependencies:
@@ -490,6 +486,9 @@ importers:
       '@repo/plugins':
         specifier: workspace:*
         version: link:../plugins
+      '@repo/utils':
+        specifier: workspace:*
+        version: link:../utils
       '@stylexjs/unplugin':
         specifier: 'catalog:'
         version: 0.18.3(unplugin@3.0.0)

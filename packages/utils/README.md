@@ -2,7 +2,7 @@
 
 > **Work in progress.** This package is a placeholder for future shared runtime utilities.
 
-Shared TypeScript utilities for apps in this monorepo — things like formatters, type guards, and helpers that are pure functions with no framework dependencies.
+Shared TypeScript utilities for apps in this monorepo — things like merge helpers, type guards, and pure helpers with no framework dependencies.
 
 ## Install in a consumer app/package
 
@@ -23,6 +23,14 @@ vp install
 ```
 
 ## Adding utilities
+
+## Current exports
+
+```ts
+import { mergeArrays, mergeObjects } from '@repo/utils/merge';
+```
+
+`mergeArrays` and `mergeObjects` are shared shallow-merge helpers used by workspace config packages.
 
 Create a new `.ts` file in this directory, export what you need, and add an entry to the `exports` map in `package.json`:
 

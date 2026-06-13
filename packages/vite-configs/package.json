@@ -15,6 +15,7 @@
     "@babel/preset-typescript": "catalog:",
     "@react-router/dev": "catalog:",
     "@repo/plugins": "workspace:*",
+    "@repo/utils": "workspace:*",
     "@stylexjs/unplugin": "catalog:",
     "babel-plugin-react-compiler": "catalog:",
     "vite-plugin-babel": "catalog:",
