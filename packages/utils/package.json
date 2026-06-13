@@ -3,7 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "sideEffects": false,
   "exports": {
-    "./merge": "./merge.util.ts"
+    "./merge": "./merge.util.ts",
+    "./merge-arrays": "./merge-arrays.util.ts",
+    "./merge-objects": "./merge-objects.util.ts"
   }
 }

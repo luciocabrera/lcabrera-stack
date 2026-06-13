@@ -32,6 +32,15 @@ import { mergeArrays, mergeObjects } from '@repo/utils/merge';
 
 `mergeArrays` and `mergeObjects` are shared shallow-merge helpers used by workspace config packages.
 
+For more granular imports as the package grows:
+
+```ts
+import { mergeArrays } from '@repo/utils/merge-arrays';
+import { mergeObjects } from '@repo/utils/merge-objects';
+```
+
+`@repo/utils` is published as side-effect free (`"sideEffects": false`) to keep tree shaking effective.
+
 Create a new `.ts` file in this directory, export what you need, and add an entry to the `exports` map in `package.json`:
 
 ```json
