@@ -1,7 +1,11 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
   "entry": ["../../packages/eslint-local-rules/index.ts", "config/**/*.ts"],
-  "project": ["config/**/*.ts", "src/**/*.{ts,tsx}"],
+  "project": [
+    "config/**/*.ts",
+    "eslint.custom-rules.config.mjs",
+    "src/**/*.{ts,tsx}"
+  ],
   "ignoreBinaries": ["fallow"],
   "ignoreDependencies": [
     "@babel/preset-typescript",

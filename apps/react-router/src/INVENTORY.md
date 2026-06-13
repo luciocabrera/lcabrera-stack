@@ -37,15 +37,14 @@ Before creating anything new, check this inventory. If something here does the j
 
 ## Hooks
 
-| Hook                              | Location                                        | Description                                                                                                   |
-| --------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `useClickOutside`                 | `hooks/useClickOutside.hook.ts`                 | Fires callback when a `mousedown` occurs outside a given ref                                                  |
-| `useStore`                        | `hooks/useStore.hook.ts`                        | Ref-based external store with shallow-equality guard, subscribe, reset, SSR snapshot                          |
-| `useNotifications`                | `hooks/useNotifications.hook.ts`                | Accesses NotificationContext actions/state (`notify`, `dismissNotification`, `dismissNotifications`)          |
-| `useTheme`                        | `hooks/useTheme.hook.ts`                        | Returns `{ theme, setTheme }` from `ThemeContext` via React 19 `use()`                                        |
-| `useColumnVirtualization`         | `hooks/useColumnVirtualization.hook.ts`         | Computes `startIndex`, `endIndex`, `leftSpacerWidth`, `rightSpacerWidth` for horizontal column virtualisation |
-| `useVirtualization`               | `hooks/useVirtualization.hook.ts`               | Computes `startIndex`, `endIndex`, `totalHeight`, `offsetY` for a scrollable virtual list                     |
-| `useVirtualizationResizeObserver` | `hooks/useVirtualizationResizeObserver.hook.ts` | Preserves the ResizeObserver + RAF-based vertical virtualization experiment for side-by-side retesting        |
+| Hook                              | Location                                        | Description                                                                                            |
+| --------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `useClickOutside`                 | `hooks/useClickOutside.hook.ts`                 | Fires callback when a `mousedown` occurs outside a given ref                                           |
+| `useStore`                        | `hooks/useStore.hook.ts`                        | Ref-based external store with shallow-equality guard, subscribe, reset, SSR snapshot                   |
+| `useNotifications`                | `hooks/useNotifications.hook.ts`                | Accesses NotificationContext actions/state (`notify`, `dismissNotification`, `dismissNotifications`)   |
+| `useTheme`                        | `hooks/useTheme.hook.ts`                        | Returns `{ theme, setTheme }` from `ThemeContext` via React 19 `use()`                                 |
+| `useVirtualization`               | `hooks/useVirtualization.hook.ts`               | Computes `startIndex`, `endIndex`, `totalHeight`, `offsetY` for a scrollable virtual list              |
+| `useVirtualizationResizeObserver` | `hooks/useVirtualizationResizeObserver.hook.ts` | Preserves the ResizeObserver + RAF-based vertical virtualization experiment for side-by-side retesting |
 
 ---
 
@@ -55,8 +54,6 @@ Before creating anything new, check this inventory. If something here does the j
 
 | Function                          | Location                                              | Description                                                                |
 | --------------------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------- |
-| `findFirstVisibleIndex`           | `hooks/utils/findFirstVisibleIndex.util.ts`           | Binary search: first index where `starts[i] + widths[i] > viewStart`       |
-| `findFirstOutOfViewIndex`         | `hooks/utils/findFirstOutOfViewIndex.util.ts`         | Binary search: first index where `starts[i] >= viewEnd`                    |
 | `getVerticalVirtualizationWindow` | `hooks/utils/getVerticalVirtualizationWindow.util.ts` | Computes fixed-row virtualization window geometry shared by vertical hooks |
 
 ### `src/components/Table/TableBody/utils/`
@@ -201,7 +198,7 @@ Before creating anything new, check this inventory. If something here does the j
 | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- | --------------------------------------------------------------------------------- |
 | `API_SERVER_PORT`, `CONFIG`                                                                                                                                          | `constants/api.constants.ts`                | API server port and host config per environment (dev / localhost / prod)          |
 | `OPERATOR_TO_SHORT`, `SHORT_TO_OPERATOR`, `TEXT_OPERATORS`, `NUMBER_OPERATORS`, `DATE_OPERATORS`, …                                                                  | `constants/filterOperators.constants.ts`    | Bidirectional operator ↔ short-code maps and operator arrays per data type        |
-| `DEFAULT_CONTAINER_HEIGHT`, `DEFAULT_CONTAINER_WIDTH`, `DEFAULT_ROW_OVERSCAN`, `DEFAULT_COLUMN_OVERSCAN`                                                             | `constants/virtualization.constants.ts`     | Default dimensions and overscan values for virtualization hooks                   |
+| `DEFAULT_CONTAINER_HEIGHT`, `DEFAULT_ROW_OVERSCAN`                                                                                                                   | `constants/virtualization.constants.ts`     | Default dimensions and row overscan values for virtualization hooks               |
 | `DEFAULT_LOCALE`, `DEFAULT_CURRENCY`, `DEFAULT_DATE_PRESET`                                                                                                          | `utils/formatters/formatters.constants.ts`  | Formatting defaults (`en-US`, `USD`, `medium`)                                    |
 | `INITIAL_PAGE_SIZE`, `LOAD_MORE_PAGE_SIZE`, `DEFAULT_FILTER_PAGE_SIZE`, `DEFAULT_ENABLE_PREFETCH`, …                                                                 | `components/Table/Table.constants.ts`       | Table pagination sizes, prefetch toggle, scroll threshold, column widths          |
 | `NAVIGATION_SIZE_PREFERENCE_OPTIONS`                                                                                                                                 | `constants/globalSettings.constants.ts`     | Labelled option array for global navigation sizing (`compact/small/medium/large`) |
