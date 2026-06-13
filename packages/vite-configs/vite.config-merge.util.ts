@@ -1,6 +1,7 @@
 import type { OxlintConfig } from 'vite-plus/lint';
 
-import { mergeArrays, mergeObjects } from '@repo/utils/merge';
+import { mergeArrays } from '@repo/utils/merge-arrays';
+import { mergeObjects } from '@repo/utils/merge-objects';
 
 type MergeableKey =
   | 'categories'

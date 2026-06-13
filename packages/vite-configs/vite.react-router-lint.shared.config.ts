@@ -1,7 +1,7 @@
 import type { OxlintConfig } from 'vite-plus/lint';
 
 import { frontendLintSharedConfig } from './vite.frontend-lint.shared.config.ts';
-import { mergeOxlintConfig } from './vite.config-merge.ts';
+import { mergeOxlintConfig } from './vite.config-merge.util.ts';
 
 export const reactRouterLintSharedConfig: OxlintConfig = {
   ...frontendLintSharedConfig,
