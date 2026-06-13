@@ -1,0 +1,12 @@
+{
+  "name": "@repo/plugins",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./fixReactRouterAssets": "./fixReactRouterAssets.plugin.ts"
+  },
+  "devDependencies": {
+    "vite-plus": "catalog:"
+  }
+}
