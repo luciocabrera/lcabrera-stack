@@ -1,6 +1,7 @@
 import type { OxlintConfig } from 'vite-plus/lint';
 
 import { frontendLintSharedConfig } from './vite.frontend-lint.shared.config.ts';
+import { mergeOxlintConfig } from './vite.config-merge.ts';
 
 export const reactRouterLintSharedConfig: OxlintConfig = {
   ...frontendLintSharedConfig,
@@ -31,3 +32,22 @@ export const reactRouterLintSharedConfig: OxlintConfig = {
     },
   ],
 };
+
+type CreateReactRouterLintConfigArgs = Partial<
+  Pick<
+    OxlintConfig,
+    | 'categories'
+    | 'env'
+    | 'ignorePatterns'
+    | 'jsPlugins'
+    | 'options'
+    | 'overrides'
+    | 'plugins'
+    | 'rules'
+    | 'settings'
+  >
+>;
+
+export const createReactRouterLintConfig = (
+  overrides: CreateReactRouterLintConfigArgs = {},
+): OxlintConfig => mergeOxlintConfig(reactRouterLintSharedConfig, overrides);

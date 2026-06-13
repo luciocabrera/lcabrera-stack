@@ -1,43 +1,39 @@
 {
   "compilerOptions": {
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
-    "target": "ES2025",
-    "useDefineForClassFields": true,
-    "lib": ["ES2025", "DOM", "DOM.Iterable"],
-    "rootDirs": [".", "./.react-router/types"],
-    "module": "ESNext",
-    "types": ["vite/client"],
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
     "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "react-jsx",
+    "lib": ["ES2025", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleDetection": "force",
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noUncheckedSideEffectImports": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "paths": {
       "@/*": ["./src/*"]
     },
-
-    /* Bundler mode */
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
-    "moduleDetection": "force",
-    "noEmit": true,
-    "jsx": "react-jsx",
-
-    /* Linting */
+    "resolveJsonModule": true,
+    "rootDirs": [".", "./.react-router/types"],
+    "skipLibCheck": true,
     "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "erasableSyntaxOnly": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true,
-    "noUncheckedIndexedAccess": true,
-    "forceConsistentCasingInFileNames": true
+    "target": "ES2025",
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "types": ["vite/client"],
+    "useDefineForClassFields": true,
+    "verbatimModuleSyntax": true
   },
+  "exclude": ["vite-monorepo/apps/api-server", "miscelanious", "utils"],
   "include": [
     "src",
     "**/*",
     "**/.server/**/*",
     "**/.client/**/*",
     ".react-router/types/**/*"
-  ],
-  "exclude": ["vite-monorepo/apps/api-server", "miscelanious", "utils"]
+  ]
 }

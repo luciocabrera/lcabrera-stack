@@ -1,18 +1,21 @@
 import type { OxlintConfig } from 'vite-plus/lint';
 
-import { baseLintSharedConfig } from './vite.base-lint.shared.config.ts';
+import { createBaseLintConfig } from './vite.base-lint.shared.config.ts';
+import { mergeOxlintConfig } from './vite.config-merge.ts';
 
 const LOCAL_RULES_SPECIFIER = '../../packages/eslint-local-rules/index.js';
 
+const BASE_LINT_CONFIG = createBaseLintConfig();
+
 export const frontendLintSharedConfig: OxlintConfig = {
-  ...baseLintSharedConfig,
+  ...BASE_LINT_CONFIG,
   jsPlugins: [
-    ...(baseLintSharedConfig.jsPlugins ?? []),
+    ...(BASE_LINT_CONFIG.jsPlugins ?? []),
     'eslint-plugin-react-x',
     'eslint-plugin-react-dom',
   ],
   overrides: [
-    ...(baseLintSharedConfig.overrides ?? []),
+    ...(BASE_LINT_CONFIG.overrides ?? []),
     {
       env: {
         browser: true,
@@ -50,13 +53,13 @@ export const frontendLintSharedConfig: OxlintConfig = {
     },
   ],
   plugins: [
-    ...(baseLintSharedConfig.plugins ?? []),
+    ...(BASE_LINT_CONFIG.plugins ?? []),
     'react',
     'jsx-a11y',
     'react-perf',
   ],
   rules: {
-    ...baseLintSharedConfig.rules,
+    ...BASE_LINT_CONFIG.rules,
     'react-dom/no-dangerously-set-innerhtml': 'warn',
     'react-dom/no-dangerously-set-innerhtml-with-children': 'error',
     'react-dom/no-find-dom-node': 'error',
@@ -120,3 +123,22 @@ export const frontendLintSharedConfig: OxlintConfig = {
     },
   },
 };
+
+type CreateFrontendLintConfigArgs = Partial<
+  Pick<
+    OxlintConfig,
+    | 'categories'
+    | 'env'
+    | 'ignorePatterns'
+    | 'jsPlugins'
+    | 'options'
+    | 'overrides'
+    | 'plugins'
+    | 'rules'
+    | 'settings'
+  >
+>;
+
+export const createFrontendLintConfig = (
+  overrides: CreateFrontendLintConfigArgs = {},
+): OxlintConfig => mergeOxlintConfig(frontendLintSharedConfig, overrides);

@@ -1,5 +1,7 @@
 import type { OxlintConfig } from 'vite-plus/lint';
 
+import { mergeOxlintConfig } from './vite.config-merge.ts';
+
 const LOCAL_RULES_SPECIFIER = '../../packages/eslint-local-rules/index.js';
 
 const NATURAL_ASC_SORT_OPTIONS = {
@@ -399,3 +401,22 @@ export const baseLintSharedConfig: OxlintConfig = {
     'unicorn/throw-new-error': 'error',
   },
 };
+
+type CreateBaseLintConfigArgs = Partial<
+  Pick<
+    OxlintConfig,
+    | 'categories'
+    | 'env'
+    | 'ignorePatterns'
+    | 'jsPlugins'
+    | 'options'
+    | 'overrides'
+    | 'plugins'
+    | 'rules'
+    | 'settings'
+  >
+>;
+
+export const createBaseLintConfig = (
+  overrides: CreateBaseLintConfigArgs = {},
+): OxlintConfig => mergeOxlintConfig(baseLintSharedConfig, overrides);
