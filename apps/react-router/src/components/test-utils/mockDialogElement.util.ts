@@ -11,7 +11,13 @@ type MockDialogElementResult = {
   readonly showModalMock: ReturnType<typeof vi.fn>;
 };
 
-const setDialogOpen = (dialog: HTMLDialogElement, isOpen: boolean) => {
+const setDialogOpen = ({
+  dialog,
+  isOpen,
+}: {
+  readonly dialog: HTMLDialogElement;
+  readonly isOpen: boolean;
+}) => {
   Object.defineProperty(dialog, 'open', {
     configurable: true,
     value: isOpen,
@@ -30,15 +36,15 @@ export const mockDialogElement = ({
   const savedShowModal = HTMLDialogElement.prototype.showModal;
 
   const closeMock = vi.fn(function (this: HTMLDialogElement) {
-    setDialogOpen(this, false);
+    setDialogOpen({ dialog: this, isOpen: false });
   });
   const showMock = vi.fn(function (this: HTMLDialogElement) {
     if (shouldSetOpenOnShow) {
-      setDialogOpen(this, true);
+      setDialogOpen({ dialog: this, isOpen: true });
     }
   });
   const showModalMock = vi.fn(function (this: HTMLDialogElement) {
-    setDialogOpen(this, true);
+    setDialogOpen({ dialog: this, isOpen: true });
   });
 
   HTMLDialogElement.prototype.close = closeMock as HTMLDialogElement['close'];

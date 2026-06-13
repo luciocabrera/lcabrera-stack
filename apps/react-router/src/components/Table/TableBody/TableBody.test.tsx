@@ -38,19 +38,19 @@ type MockTableBodyRowsProps = {
   readonly startIndex: number;
 };
 
-function MockSpacerRow({ colSpan, height }: MockSpacerRowProps) {
+const MockSpacerRow = ({ colSpan, height }: MockSpacerRowProps) => {
   return (
     <tr data-height={height} data-testid='spacer-row'>
       <td colSpan={colSpan} />
     </tr>
   );
-}
+};
 
-function MockTableBodyRows({
+const MockTableBodyRows = ({
   endIndex,
   isLoadingState,
   startIndex,
-}: MockTableBodyRowsProps) {
+}: MockTableBodyRowsProps) => {
   return (
     <tr
       data-end-index={endIndex}
@@ -61,7 +61,7 @@ function MockTableBodyRows({
       <td>rows</td>
     </tr>
   );
-}
+};
 
 vi.mock('@/components/Table/contexts/TableConfig/columns/selectors', () => ({
   useGetColumnGroups: useGetColumnGroupsMock,

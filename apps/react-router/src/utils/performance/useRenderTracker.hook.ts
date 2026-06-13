@@ -67,7 +67,10 @@ export const useRenderTracker = ({
   // Track render completion (after commit)
   useEffect(() => {
     if (import.meta.env.DEV && isEnabled) {
-      trackRenderComplete(componentName, renderStartTime.current);
+      trackRenderComplete({
+        componentName,
+        startTime: renderStartTime.current,
+      });
     }
   });
 };

@@ -46,6 +46,12 @@ export default [
     },
   },
   {
+    files: ['src/**/*.stylex.ts'],
+    rules: {
+      'local-rules/destructuring-for-functions': 'off',
+    },
+  },
+  {
     files: [
       'src/**/*.component.tsx',
       'src/**/*.errorBoundary.tsx',

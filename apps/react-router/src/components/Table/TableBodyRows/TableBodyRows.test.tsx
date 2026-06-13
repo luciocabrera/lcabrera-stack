@@ -48,23 +48,23 @@ const {
   useRenderTrackerMock: vi.fn(),
 }));
 
-function MockTableBodyCell({
+const MockTableBodyCell = ({
   children,
   isLoadingState: _isLoadingState,
   label,
   value,
-}: MockTableBodyCellProps) {
+}: MockTableBodyCellProps) => {
   return (
     <td>
       {children ??
         `${formatMockCellValue(label)}:${formatMockCellValue(value)}`}
     </td>
   );
-}
+};
 
-function MockTableRow({ children }: { readonly children: ReactNode }) {
+const MockTableRow = ({ children }: { readonly children: ReactNode }) => {
   return <tr>{children}</tr>;
-}
+};
 
 vi.mock('@/components/Table/contexts/TableConfig/columns/selectors', () => ({
   useGetColumnGroups: useGetColumnGroupsMock,

@@ -20,10 +20,10 @@ export const useResetColumnPinning = () => {
       return;
     }
 
-    const columnPinning = getColumnPinSide(
-      columnsStore.get()?.columnPinning,
+    const columnPinning = getColumnPinSide({
       columnKey,
-    );
+      pinning: columnsStore.get()?.columnPinning,
+    });
 
     columnStore.set({ columnPinning });
   };

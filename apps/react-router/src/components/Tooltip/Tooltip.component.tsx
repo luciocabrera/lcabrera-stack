@@ -109,7 +109,8 @@ export const Tooltip = ({
           {...stylex.props(
             styles.arrow,
             ARROW_STYLES[placement],
-            arrowOffset !== undefined && getArrowStyle(placement, arrowOffset),
+            arrowOffset !== undefined &&
+              getArrowStyle({ arrowOffset, placement }),
           )}
         />
         {content}

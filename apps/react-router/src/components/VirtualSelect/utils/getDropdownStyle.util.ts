@@ -1,9 +1,14 @@
 import { styles } from '../VirtualSelect.stylex';
 
-export const getDropdownStyle = (
-  isAlwaysOpen: boolean | undefined,
-  shouldFillHeight: boolean,
-) => {
+type GetDropdownStyleArgs = {
+  readonly isAlwaysOpen: boolean | undefined;
+  readonly shouldFillHeight: boolean;
+};
+
+export const getDropdownStyle = ({
+  isAlwaysOpen,
+  shouldFillHeight,
+}: GetDropdownStyleArgs) => {
   if (!isAlwaysOpen) return styles.dropdownAbsolute;
   return shouldFillHeight ? styles.dropdownStaticFill : styles.dropdownStatic;
 };

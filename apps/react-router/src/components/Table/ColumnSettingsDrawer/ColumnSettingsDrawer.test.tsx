@@ -44,85 +44,88 @@ const {
   useTableWrapperRefMock: vi.fn(),
 }));
 
-function MockButton({ children, onClick }: MockButtonProps) {
+const MockButton = ({ children, onClick }: MockButtonProps) => {
   return (
     <button onClick={onClick} type='button'>
       {children}
     </button>
   );
-}
+};
 
-function MockDetailsSection() {
+const MockDetailsSection = () => {
   return <div>Details</div>;
-}
+};
 
-function MockFilterSection() {
+const MockFilterSection = () => {
   return <div>Filter</div>;
-}
+};
 
-function MockGeneralSection() {
+const MockGeneralSection = () => {
   return <div>General</div>;
-}
+};
 
-function MockPinningSection() {
+const MockPinningSection = () => {
   return <div>Pinning</div>;
-}
+};
 
-function MockSettingsIcon() {
+const MockSettingsIcon = () => {
   return <span>settings-icon</span>;
-}
+};
 
-function MockSidePanel({ children }: MockSidePanelProps) {
+const MockSidePanel = ({ children }: MockSidePanelProps) => {
   return <div data-testid='side-panel'>{children}</div>;
-}
+};
 
-function MockSidePanelBody({ children }: MockSidePanelProps) {
+const MockSidePanelBody = ({ children }: MockSidePanelProps) => {
   return <div>{children}</div>;
-}
+};
 
-function MockSidePanelFooter({ children }: MockSidePanelProps) {
+const MockSidePanelFooter = ({ children }: MockSidePanelProps) => {
   return <div>{children}</div>;
-}
+};
 
-function MockSidePanelHeader({ actions, children }: MockSidePanelHeaderProps) {
+const MockSidePanelHeader = ({
+  actions,
+  children,
+}: MockSidePanelHeaderProps) => {
   return (
     <div>
       {actions}
       {children}
     </div>
   );
-}
+};
 
-function MockSidePanelHeaderToolbar() {
+const MockSidePanelHeaderToolbar = () => {
   return <div>toolbar</div>;
-}
+};
 
-function MockSidePanelTitle({ children, icon }: MockTitleProps) {
+const MockSidePanelTitle = ({ children, icon }: MockTitleProps) => {
   return (
     <h2>
       {icon}
       {children}
     </h2>
   );
-}
+};
 
-function MockSortingSection() {
+const MockSortingSection = () => {
   return <div>Sorting</div>;
-}
+};
 
-function MockTabs({ tabs }: MockTabsProps) {
+const MockTabs = ({ tabs }: MockTabsProps) => {
   return (
     <div data-testid='tabs'>{tabs.map((tab) => tab.header).join('|')}</div>
   );
-}
+};
 
-function MockUseBatchSetColumnDrawerSettings() {
+const MockUseBatchSetColumnDrawerSettings = () => {
   return batchSetColumnDrawerSettingsMock;
-}
+};
 
-function MockUseResetAllColumnDrawerSettings() {
+const MockUseResetAllColumnDrawerSettings = () => {
   return resetAllColumnDrawerSettingsMock;
-}
+};
 
 vi.mock('@/components/Button', () => ({
   Button: MockButton,

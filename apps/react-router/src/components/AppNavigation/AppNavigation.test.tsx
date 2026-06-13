@@ -23,11 +23,15 @@ beforeEach(() => {
 });
 
 describe('AppNavigation', () => {
-  const renderWithGlobalSettings = (
-    initialSettings: GlobalSettingsState,
-    onToggleTheme: () => void,
-    isDarkMode: boolean,
-  ) => {
+  const renderWithGlobalSettings = ({
+    initialSettings,
+    isDarkMode,
+    onToggleTheme,
+  }: {
+    readonly initialSettings: GlobalSettingsState;
+    readonly isDarkMode: boolean;
+    readonly onToggleTheme: () => void;
+  }) => {
     const router = createMemoryRouter(
       [
         {
@@ -59,16 +63,16 @@ describe('AppNavigation', () => {
   it('renders the configured route links and theme toggle', () => {
     const handleToggleTheme = vi.fn();
 
-    renderWithGlobalSettings(
-      {
+    renderWithGlobalSettings({
+      initialSettings: {
         navigation: {
           size: 'medium',
         },
         pinning: {},
       },
-      handleToggleTheme,
-      false,
-    );
+      isDarkMode: false,
+      onToggleTheme: handleToggleTheme,
+    });
 
     fireEvent.click(screen.getByRole('button', { name: /Dark Mode/i }));
 
@@ -81,16 +85,16 @@ describe('AppNavigation', () => {
   });
 
   it('shows the launcher after unpinning the sidebar', () => {
-    renderWithGlobalSettings(
-      {
+    renderWithGlobalSettings({
+      initialSettings: {
         navigation: {
           size: 'medium',
         },
         pinning: {},
       },
-      vi.fn(),
-      true,
-    );
+      isDarkMode: true,
+      onToggleTheme: vi.fn(),
+    });
 
     fireEvent.click(screen.getByRole('button', { name: /Unpin navigation/i }));
 
@@ -100,16 +104,16 @@ describe('AppNavigation', () => {
   });
 
   it('uses compact density from global settings preference', () => {
-    renderWithGlobalSettings(
-      {
+    renderWithGlobalSettings({
+      initialSettings: {
         navigation: {
           size: 'compact',
         },
         pinning: {},
       },
-      vi.fn(),
-      false,
-    );
+      isDarkMode: false,
+      onToggleTheme: vi.fn(),
+    });
 
     expect(
       screen.getByRole('button', { name: /Unpin navigation/i }),
@@ -119,17 +123,17 @@ describe('AppNavigation', () => {
   });
 
   it('starts collapsed when global collapsed preference is selected', () => {
-    renderWithGlobalSettings(
-      {
+    renderWithGlobalSettings({
+      initialSettings: {
         navigation: {
           collapsed: 'collapsed',
           size: 'medium',
         },
         pinning: {},
       },
-      vi.fn(),
-      false,
-    );
+      isDarkMode: false,
+      onToggleTheme: vi.fn(),
+    });
 
     expect(
       screen.getByRole('button', { name: /Expand navigation/i }),
@@ -137,17 +141,17 @@ describe('AppNavigation', () => {
   });
 
   it('starts unpinned with the panel open when global pinned preference is unpinned', () => {
-    renderWithGlobalSettings(
-      {
+    renderWithGlobalSettings({
+      initialSettings: {
         navigation: {
           pinned: 'unpinned',
           size: 'medium',
         },
         pinning: {},
       },
-      vi.fn(),
-      false,
-    );
+      isDarkMode: false,
+      onToggleTheme: vi.fn(),
+    });
 
     const panel = screen.getByTestId('side-panel') as HTMLDialogElement;
 
@@ -156,8 +160,8 @@ describe('AppNavigation', () => {
   });
 
   it('starts unpinned and collapsed when both global preferences are selected', () => {
-    renderWithGlobalSettings(
-      {
+    renderWithGlobalSettings({
+      initialSettings: {
         navigation: {
           collapsed: 'collapsed',
           pinned: 'unpinned',
@@ -165,9 +169,9 @@ describe('AppNavigation', () => {
         },
         pinning: {},
       },
-      vi.fn(),
-      false,
-    );
+      isDarkMode: false,
+      onToggleTheme: vi.fn(),
+    });
 
     const panel = screen.getByTestId('side-panel') as HTMLDialogElement;
 
@@ -177,11 +181,11 @@ describe('AppNavigation', () => {
   });
 
   it('collapses and expands the navigation panel independently of pinning', () => {
-    renderWithGlobalSettings(
-      { navigation: { size: 'medium' }, pinning: {} },
-      vi.fn(),
-      false,
-    );
+    renderWithGlobalSettings({
+      initialSettings: { navigation: { size: 'medium' }, pinning: {} },
+      isDarkMode: false,
+      onToggleTheme: vi.fn(),
+    });
 
     // Initially expanded — nav links are visible
     expect(screen.getByRole('link', { name: /Home/i })).toBeDefined();

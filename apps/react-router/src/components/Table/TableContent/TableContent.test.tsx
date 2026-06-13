@@ -27,25 +27,25 @@ const {
   useToogleTableIsTableSettingsOpenMock: vi.fn(() => vi.fn()),
 }));
 
-function MockTableBase({ children }: { readonly children: ReactNode }) {
+const MockTableBase = ({ children }: { readonly children: ReactNode }) => {
   return <table>{children}</table>;
-}
+};
 
-function MockTableBody() {
+const MockTableBody = () => {
   return <tbody data-testid='table-body' />;
-}
+};
 
-function MockTableDrawersSection() {
+const MockTableDrawersSection = () => {
   return <div data-testid='table-drawers' />;
-}
+};
 
-function MockTableHeader() {
+const MockTableHeader = () => {
   return <thead data-testid='table-header' />;
-}
+};
 
-function MockTableTitle({ actions }: { readonly actions?: ReactNode }) {
+const MockTableTitle = ({ actions }: { readonly actions?: ReactNode }) => {
   return <div data-testid='table-title'>{actions}</div>;
-}
+};
 
 vi.mock('@/utils/performance', () => ({
   useRenderTracker: useRenderTrackerMock,

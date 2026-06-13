@@ -125,10 +125,10 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
 
     if (conflict) {
       if (globalPinConflictResolutionPreference) {
-        handlePinConflictAccept(
-          globalPinConflictResolutionPreference,
-          conflict.side,
-        );
+        handlePinConflictAccept({
+          resolution: globalPinConflictResolutionPreference,
+          sideOverride: conflict.side,
+        });
       } else {
         setPinConflict(conflict);
       }
@@ -141,10 +141,13 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
     setIsPinSideModalOpen(false);
   };
 
-  const handlePinConflictAccept = (
-    resolution: PinConflictResolution,
-    sideOverride?: 'left' | 'right',
-  ) => {
+  const handlePinConflictAccept = ({
+    resolution,
+    sideOverride,
+  }: {
+    readonly resolution: PinConflictResolution;
+    readonly sideOverride?: 'left' | 'right';
+  }) => {
     acceptHeaderPinConflict({
       columnKey,
       resolution,
@@ -228,7 +231,12 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
               <PinConflictModal
                 columnLabel={label}
                 isOpen={pinConflict.isOpen}
-                onAccept={handlePinConflictAccept}
+                onAccept={(resolution) =>
+                  handlePinConflictAccept({
+                    resolution,
+                    sideOverride: pinConflict.side,
+                  })
+                }
                 onCancel={handlePinConflictCancel}
                 side={pinConflict.side}
               />

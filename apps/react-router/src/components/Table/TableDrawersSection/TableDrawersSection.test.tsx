@@ -28,32 +28,32 @@ const {
   useRenderTrackerMock: vi.fn(),
 }));
 
-function MockColumnDrawerProvider({
+const MockColumnDrawerProvider = ({
   children,
   columnKey,
-}: ColumnDrawerProviderProps) {
+}: ColumnDrawerProviderProps) => {
   return (
     <div data-column-key={columnKey} data-testid='column-drawer-provider'>
       {children}
     </div>
   );
-}
+};
 
-function MockColumnSettingsDrawer({
+const MockColumnSettingsDrawer = ({
   columnKey,
 }: {
   readonly columnKey: string;
-}) {
+}) => {
   return <div>Column Settings Drawer: {columnKey}</div>;
-}
+};
 
-function MockTableDrawerProvider({ children }: TableDrawerProviderProps) {
+const MockTableDrawerProvider = ({ children }: TableDrawerProviderProps) => {
   return <div data-testid='table-drawer-provider'>{children}</div>;
-}
+};
 
-function MockTableSettingsDrawer() {
+const MockTableSettingsDrawer = () => {
   return <div>Table Settings Drawer</div>;
-}
+};
 
 vi.mock('@/components/Table/TableSettingsDrawer', () => ({
   TableSettingsDrawer: MockTableSettingsDrawer,

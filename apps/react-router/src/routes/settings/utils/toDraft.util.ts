@@ -10,10 +10,19 @@ import {
 } from '../Settings.constants';
 import type { SettingsDraft } from '../Settings.types';
 
-export const toDraft = (
-  navigationPreferences: ReturnType<typeof useGetGlobalNavigationPreferences>,
-  pinningPreferences: ReturnType<typeof useGetGlobalPinningPreferences>,
-): SettingsDraft => {
+type ToDraftArgs = {
+  readonly navigationPreferences: ReturnType<
+    typeof useGetGlobalNavigationPreferences
+  >;
+  readonly pinningPreferences: ReturnType<
+    typeof useGetGlobalPinningPreferences
+  >;
+};
+
+export const toDraft = ({
+  navigationPreferences,
+  pinningPreferences,
+}: ToDraftArgs): SettingsDraft => {
   return {
     navigationCollapsed:
       navigationPreferences.collapsed ??
