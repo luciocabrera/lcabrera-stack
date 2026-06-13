@@ -39,6 +39,19 @@ export default [
     },
   },
   {
+    files: ['src/entry.server.tsx'],
+    rules: {
+      'func-style': 'off',
+      'local-rules/destructuring-for-functions': 'off',
+    },
+  },
+  {
+    files: ['src/**/*.stylex.ts'],
+    rules: {
+      'local-rules/destructuring-for-functions': 'off',
+    },
+  },
+  {
     files: [
       'src/**/*.component.tsx',
       'src/**/*.errorBoundary.tsx',
