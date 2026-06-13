@@ -1,6 +1,35 @@
 import logoDark from './logo-dark.svg';
 import logoLight from './logo-light.svg';
 
+interface SomeComponentProps {
+  title: string;
+  description: string;
+}
+
+export function someUtilityFunction(arg1: string, arg2: number) {
+  // This function does something useful with arg1 and arg2
+  console.log(`Argument 1: ${arg1}, Argument 2: ${arg2}`);
+}
+
+const SomeComponent = ({ title, description }: SomeComponentProps) => {
+  return (
+    <div className='p-4 rounded border border-gray-200 dark:border-gray-700'>
+      <h2 className='text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2'>
+        {title}
+      </h2>
+      <p className='text-gray-600 dark:text-gray-400'>{description}</p>
+    </div>
+  );
+};
+
+export const MyButton = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <button className='rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600'>
+      {children}
+    </button>
+  );
+};
+
 export function Welcome() {
   return (
     <main className='flex items-center justify-center pt-16 pb-4'>
@@ -24,6 +53,10 @@ export function Welcome() {
             <p className='leading-6 text-gray-700 dark:text-gray-200 text-center'>
               What&apos;s next?
             </p>
+            <SomeComponent
+              title='Next Steps'
+              description='Here are some things you can do next.'
+            />
             <ul>
               {resources.map(({ href, text, icon }) => (
                 <li key={href}>
