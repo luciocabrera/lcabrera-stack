@@ -30,6 +30,13 @@ export const reactRouterLintSharedConfig: OxlintConfig = {
         'react/only-export-components': 'off',
       },
     },
+    {
+      files: ['src/entry.server.tsx'],
+      rules: {
+        'func-style': 'off',
+        'local-rules/destructuring-for-functions': 'off',
+      },
+    },
   ],
 };
 
