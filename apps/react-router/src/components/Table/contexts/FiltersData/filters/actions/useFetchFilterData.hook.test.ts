@@ -68,7 +68,7 @@ function mockUseTableConfigContextValue() {
   return { metaStore: getHarness().metaStore };
 }
 
-const loggerErrorMock = vi.hoisted(() => vi.fn());
+const loggerErrorMock = vi.fn();
 
 vi.mock(
   '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
@@ -261,7 +261,7 @@ describe('useFetchFilterData', () => {
       });
     });
 
-    expect(getHarness().metaStore.set).toHaveBeenCalledWith({
+    expect(getHarness().metaStore.get()).toMatchObject({
       error: 'Broken filter API',
     });
     expect(loggerErrorMock).toHaveBeenCalled();
