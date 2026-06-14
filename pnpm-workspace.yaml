@@ -67,6 +67,7 @@ catalogMode: prefer
 minimumReleaseAgeExclude:
   - '@types/*' # type-only packages have zero runtime attack surface
   - '@eslint-react/*' # lint-only packages with frequent coordinated releases
+  - eslint-plugin-unicorn # lint-only package; package-level safeguard for CI policy resolution
   - eslint-plugin-react-dom # lint-only package
   - eslint-plugin-react-x # lint-only package
   - isbot@5.1.41
