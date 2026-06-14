@@ -21,13 +21,17 @@ import { getTriggerStyleProps } from './getTriggerStyleProps.util';
 
 describe('getTriggerStyleProps', () => {
   it('includes open and multi-mode styles', () => {
-    expect(getTriggerStyleProps(true, 'multi')).toEqual({
+    expect(
+      getTriggerStyleProps({ isOpen: true, mode: 'multi', isStatic: false }),
+    ).toEqual({
       args: ['trigger', 'triggerOpen', 'triggerClamped', false],
     });
   });
 
   it('includes static styling when requested', () => {
-    expect(getTriggerStyleProps(false, 'single', true)).toEqual({
+    expect(
+      getTriggerStyleProps({ isOpen: false, mode: 'single', isStatic: true }),
+    ).toEqual({
       args: ['trigger', false, false, 'triggerStatic'],
     });
   });

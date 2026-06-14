@@ -1,6 +1,5 @@
 export { buildPersistencePayload } from './buildPersistencePayload.util';
 export { commitResolvedPinningState } from './commitResolvedPinningState.util';
-export { commitPinningAndOrderUpdate } from './commitPinningAndOrderUpdate.util';
 export { getPinningActionContext } from './getPinningActionContext.util';
 export { resolveBatchColumnSettingsUpdate } from './resolveBatchColumnSettingsUpdate.util';
 export { resolveBatchTableSettingsUpdate } from './resolveBatchTableSettingsUpdate.util';

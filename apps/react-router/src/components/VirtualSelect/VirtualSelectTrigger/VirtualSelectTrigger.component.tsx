@@ -39,9 +39,9 @@ export const VirtualSelectTrigger = ({
     return (
       <div
         ref={(node) => {
-          assignTriggerRef(triggerRef, node);
+          assignTriggerRef({ triggerRef, node });
         }}
-        {...getTriggerStyleProps(isOpen, mode, true)}
+        {...getTriggerStyleProps({ isOpen, mode, isStatic: true })}
       >
         {content}
         {chevron}
@@ -60,11 +60,11 @@ export const VirtualSelectTrigger = ({
           handleDivTriggerKeyDown(event, onToggle);
         }}
         ref={(node) => {
-          assignTriggerRef(triggerRef, node);
+          assignTriggerRef({ triggerRef, node });
         }}
         role='button'
         tabIndex={0}
-        {...getTriggerStyleProps(isOpen, mode)}
+        {...getTriggerStyleProps({ isOpen, mode })}
       >
         {content}
         {chevron}
@@ -79,10 +79,10 @@ export const VirtualSelectTrigger = ({
       aria-haspopup='listbox'
       onClick={onToggle}
       ref={(node) => {
-        assignTriggerRef(triggerRef, node);
+        assignTriggerRef({ triggerRef, node });
       }}
       type='button'
-      {...getTriggerStyleProps(isOpen, mode)}
+      {...getTriggerStyleProps({ isOpen, mode })}
     >
       {content}
       {chevron}

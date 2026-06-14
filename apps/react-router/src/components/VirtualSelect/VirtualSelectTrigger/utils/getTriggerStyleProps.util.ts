@@ -4,11 +4,17 @@ import type { VirtualSelectTriggerProps } from '../VirtualSelectTrigger.types';
 
 import { styles } from '../VirtualSelectTrigger.stylex';
 
-export const getTriggerStyleProps = (
-  isOpen: boolean,
-  mode: VirtualSelectTriggerProps['mode'],
+type GetTriggerStylePropsArgs = {
+  isOpen: boolean;
+  mode: VirtualSelectTriggerProps['mode'];
+  isStatic?: boolean;
+};
+
+export const getTriggerStyleProps = ({
+  isOpen,
+  mode,
   isStatic = false,
-) =>
+}: GetTriggerStylePropsArgs) =>
   stylex.props(
     styles.trigger,
     isOpen && styles.triggerOpen,
