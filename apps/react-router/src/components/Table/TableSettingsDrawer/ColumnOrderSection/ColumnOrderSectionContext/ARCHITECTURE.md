@@ -17,6 +17,8 @@ ColumnOrderSectionContext/
 │
 ├── actions/                                    → 12 hooks that write to the store
 │   ├── actions/utils/resolveOrderConflictUpdate.util.ts → Shared apply-vs-modal decision for reorder and order-by-sorting flows
+│   ├── actions/utils/resolveToggleColumnPinUpdate.util.ts → Shared static-aware pin-toggle intent resolver for toggle pin flow
+│   ├── actions/utils/resolveAcceptedOrderConflictState.util.ts → Shared final order/pinning resolver for accepted order conflicts
 │   ├── useAcceptPinSide                        → Accept pin side selection
 │   ├── useAcceptPinConflict                    → Resolve pin contiguity conflict
 │   ├── useAcceptUnpinConflict                  → Resolve unpin gap conflict
@@ -153,3 +155,9 @@ graph TD
 `useReorderColumns` and `useOrderBySorting` now share a pure action utility,
 `resolveOrderConflictUpdate`, to decide whether a proposed order can be applied
 directly or must open/auto-accept the order conflict flow.
+
+`useToggleColumnPin` now delegates static-column short-circuit and pin-toggle
+intent resolution to `resolveToggleColumnPinUpdate`.
+
+`useAcceptOrderConflict` now delegates the final static-order/static-pinning
+composition step to `resolveAcceptedOrderConflictState`.

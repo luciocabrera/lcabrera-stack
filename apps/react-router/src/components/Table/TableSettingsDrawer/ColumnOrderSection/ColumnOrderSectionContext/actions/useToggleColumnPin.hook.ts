@@ -3,14 +3,11 @@ import type { DataKey } from '@/components/Table/Table.types';
 import { useGetGlobalPinSidePreference } from '@/contexts/GlobalSettingsContext/selectors/useGetGlobalPinSidePreference.hook';
 import { useGetGlobalUnpinConflictResolutionPreference } from '@/contexts/GlobalSettingsContext/selectors/useGetGlobalUnpinConflictResolutionPreference.hook';
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
-import {
-  buildAllOrderedColumns,
-  resolveToggleColumnPinIntent,
-} from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 import { useTableDrawerContextValue } from '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
 
 import { useAcceptPinSide } from './useAcceptPinSide.hook';
 import { useAcceptUnpinConflict } from './useAcceptUnpinConflict.hook';
+import { resolveToggleColumnPinUpdate } from './utils/resolveToggleColumnPinUpdate.util';
 import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
 
 type UseToggleColumnPinArgs = {
@@ -35,27 +32,28 @@ export const useToggleColumnPin = () => {
     const tableColumnsState = tableColumnsStore.get();
     const columns = tableColumnsState?.columns ?? [];
     const column = tableColumnsState?.normalizedColumns[columnKey];
-    if (column?.isStatic) return;
-
-    const staticKeys = tableColumnsState?.staticKeys ?? new Set<string>();
+    const isColumnStatic = column?.isStatic ?? false;
+    const staticKeys = tableColumnsState?.staticKeys;
 
     const drawerState = drawerColumnsStore.get();
     const columnPinning = drawerState?.columnPinning ?? { left: [], right: [] };
     const columnsOrder = drawerState?.columnOrder ?? [];
 
-    const allOrderedColumns = buildAllOrderedColumns({
-      columns,
-      columnsOrder,
-    });
-    const resolution = resolveToggleColumnPinIntent({
-      allOrderedColumns,
+    const resolution = resolveToggleColumnPinUpdate({
       columnKey,
       columnPinning,
+      columns,
+      columnsOrder,
       globalPinSidePreference,
       globalUnpinConflictResolutionPreference,
+      isColumnStatic,
       isPinning,
       staticKeys,
     });
+
+    if (resolution.kind === 'ignored-static') {
+      return;
+    }
 
     if (resolution.kind === 'apply-pinning-direct') {
       drawerColumnsStore.set({ columnPinning: resolution.nextPinning });
