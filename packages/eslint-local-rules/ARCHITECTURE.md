@@ -31,8 +31,10 @@ Centralized custom ESLint rules used across monorepo apps.
 ## Build and Consumption
 
 - Build with: `tsc -p tsconfig.json`
-- Consumed by app lint config as plugin specifier path:
-  - `../../packages/eslint-local-rules/index.js` from app roots.
+- Consumed by the shared ESLint flat-config helper:
+  - `packages/vite-configs/eslint.custom-rules.shared.config.mjs`
+- App roots consume that helper via:
+  - `@repo/vite-configs/eslint-custom-rules`
 
 ## Guardrails
 

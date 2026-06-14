@@ -154,11 +154,12 @@ export { utils } from '@/utils';
 
 ## Monorepo integration
 
-The rules are compiled to JavaScript in the `build/` directory. ESLint loads them via the `eslint-local-rules-shared` package from `eslint.config.mjs` at the workspace root:
+The rules are compiled to JavaScript in the `build/` directory. ESLint loads them through the shared custom-rules flat config exported by `@repo/vite-configs/eslint-custom-rules`:
 
 ```js
-import localRules from 'eslint-local-rules-shared';
-// rules are registered under the 'local-rules/' namespace
+import { createCustomRulesLintConfig } from '@repo/vite-configs/eslint-custom-rules';
+
+export default createCustomRulesLintConfig();
 ```
 
 **Important:** run `vp run build` after any change to the TypeScript source — ESLint loads the compiled `.js` files, not the TypeScript source directly.

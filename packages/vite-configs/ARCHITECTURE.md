@@ -11,7 +11,7 @@ Shared Vite+ configuration builders consumed by workspace apps.
 ## Layers
 
 1. Base builders: shared defaults (`fmt`, `base-lint`).
-2. Specializations: mode/app-type builders (`api-lint`, `frontend-lint`, `react-router-lint`, plugins).
+2. Specializations: mode/app-type builders (`api-lint`, `frontend-lint`, `react-router-lint`, `eslint-custom-rules`, plugins).
 3. Merge helpers: reusable merge utilities for override behavior.
 
 ## Design Rules
@@ -20,3 +20,4 @@ Shared Vite+ configuration builders consumed by workspace apps.
 - Safe defaults should work for most apps out of the box.
 - Keep types permissive enough for Vite/Oxlint plugin options while avoiding `any`.
 - Add new exports only when reuse across at least two apps is clear.
+- Runtime-consumed ESLint config helpers may resolve app-owned dependencies from the consumer workspace when direct package resolution would be too narrow.

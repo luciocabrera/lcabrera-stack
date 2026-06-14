@@ -4,14 +4,15 @@ Shared Vite+ configuration builders for formatting (`oxfmt`) and linting (`oxlin
 
 ## Exports
 
-| Import path                            | Factory                          | Used by                                                     |
-| -------------------------------------- | -------------------------------- | ----------------------------------------------------------- |
-| `@repo/vite-configs/fmt`               | `createFmtConfig`                | All apps                                                    |
-| `@repo/vite-configs/base-lint`         | `createBaseLintConfig`           | Internal — extended by other configs                        |
-| `@repo/vite-configs/api-lint`          | `createApiLintConfig`            | Node.js / server apps (`api-server`, `api-server-fast`)     |
-| `@repo/vite-configs/frontend-lint`     | `createFrontendLintConfig`       | Browser apps without React Router                           |
-| `@repo/vite-configs/react-router-lint` | `createReactRouterLintConfig`    | React Router apps                                           |
-| `@repo/vite-configs/plugins`           | `createReactRouterPluginsConfig` | React Router-style apps using StyleX + React Router + Babel |
+| Import path                              | Factory                          | Used by                                                        |
+| ---------------------------------------- | -------------------------------- | -------------------------------------------------------------- |
+| `@repo/vite-configs/fmt`                 | `createFmtConfig`                | All apps                                                       |
+| `@repo/vite-configs/base-lint`           | `createBaseLintConfig`           | Internal — extended by other configs                           |
+| `@repo/vite-configs/api-lint`            | `createApiLintConfig`            | Node.js / server apps (`api-server`, `api-server-fast`)        |
+| `@repo/vite-configs/eslint-custom-rules` | `createCustomRulesLintConfig`    | Shared ESLint flat-config for custom local rules in React apps |
+| `@repo/vite-configs/frontend-lint`       | `createFrontendLintConfig`       | Browser apps without React Router                              |
+| `@repo/vite-configs/react-router-lint`   | `createReactRouterLintConfig`    | React Router apps                                              |
+| `@repo/vite-configs/plugins`             | `createReactRouterPluginsConfig` | React Router-style apps using StyleX + React Router + Babel    |
 
 ## How configs relate
 
@@ -23,6 +24,8 @@ base-lint          ← shared rules, plugins, categories
     └── frontend-lint     ← base + react-x / react-dom plugins
             │
             └── react-router-lint   ← frontend + .react-router/ ignores
+
+eslint-custom-rules ← shared ESLint flat config for custom local-rules enforcement
 ```
 
 ## Usage in a `vite.config.ts`
@@ -74,6 +77,14 @@ const lintConfig = createApiLintConfig({
 });
 ```
 
+### Sharing the custom local-rules ESLint config
+
+```js
+import { createCustomRulesLintConfig } from '@repo/vite-configs/eslint-custom-rules';
+
+export default createCustomRulesLintConfig();
+```
+
 ### Shared plugins config with optional overrides
 
 ```ts
@@ -105,6 +116,7 @@ It merges arrays (rules, plugins, ignorePatterns) by concatenation and merges ob
 | `vite.fmt.shared.config.ts`               | Formatter config factory (`createFmtConfig`)                                 |
 | `vite.base-lint.shared.config.ts`         | Base lint config factory (`createBaseLintConfig`)                            |
 | `vite.api-lint.shared.config.ts`          | Server/Node lint config factory (`createApiLintConfig`)                      |
+| `eslint.custom-rules.shared.config.mjs`   | Shared ESLint flat-config factory for local custom rules                     |
 | `vite.frontend-lint.shared.config.ts`     | Frontend lint config (`createFrontendLintConfig`)                            |
 | `vite.plugins.shared.config.ts`           | React Router-style plugins config factory (`createReactRouterPluginsConfig`) |
 | `vite.react-router-lint.shared.config.ts` | React Router lint config (`createReactRouterLintConfig`)                     |

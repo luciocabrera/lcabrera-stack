@@ -127,6 +127,12 @@ Before creating anything new, check this inventory. If something here does the j
 | `getInitialColumnsState`    | `components/Table/ColumnSettingsDrawer/ColumnDrawerContext/utils/getInitialColumnsState.util.ts`    | Builds initial column drawer state shape                  |
 | `getTableColumnDrawerState` | `components/Table/ColumnSettingsDrawer/ColumnDrawerContext/utils/getTableColumnDrawerState.util.ts` | Maps a table columns snapshot to drawer state for one key |
 
+### `src/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/actions/`
+
+| Artifact                          | Location                                                                                                    | Description                                                                         |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `useBatchSetColumnDrawerSettings` | `components/Table/ColumnSettingsDrawer/ColumnDrawerContext/actions/useBatchSetColumnDrawerSettings.hook.ts` | Reads drawer-local column state and commits it through the table-level batch action |
+
 ### `src/components/Table/TableSettingsDrawer/ColumnOrderSection/utils/`
 
 | Function | Location | Description |
