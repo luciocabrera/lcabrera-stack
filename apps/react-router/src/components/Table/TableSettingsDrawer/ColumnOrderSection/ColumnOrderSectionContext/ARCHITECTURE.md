@@ -19,6 +19,8 @@ ColumnOrderSectionContext/
 │   ├── actions/utils/resolveOrderConflictUpdate.util.ts → Shared apply-vs-modal decision for reorder and order-by-sorting flows
 │   ├── actions/utils/resolveToggleColumnPinUpdate.util.ts → Shared static-aware pin-toggle intent resolver for toggle pin flow
 │   ├── actions/utils/resolveAcceptedOrderConflictState.util.ts → Shared final order/pinning resolver for accepted order conflicts
+│   ├── actions/utils/resolveAcceptedPinSideUpdate.util.ts → Shared pin-side acceptance resolver for resolved-vs-conflict outcomes
+│   ├── actions/utils/resolveAcceptedUnpinConflictState.util.ts → Shared unpin-conflict resolution for pinning-only vs reorder outcomes
 │   ├── useAcceptPinSide                        → Accept pin side selection
 │   ├── useAcceptPinConflict                    → Resolve pin contiguity conflict
 │   ├── useAcceptUnpinConflict                  → Resolve unpin gap conflict
@@ -161,3 +163,9 @@ intent resolution to `resolveToggleColumnPinUpdate`.
 
 `useAcceptOrderConflict` now delegates the final static-order/static-pinning
 composition step to `resolveAcceptedOrderConflictState`.
+
+`useAcceptPinSide` now delegates pin-side acceptance branching to
+`resolveAcceptedPinSideUpdate`.
+
+`useAcceptUnpinConflict` now delegates unpin-conflict state transitions to
+`resolveAcceptedUnpinConflictState`.

@@ -6,12 +6,9 @@ import type {
 import type { UnpinConflictResolution } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
-import {
-  buildAllOrderedColumns,
-  insertAdjacentToPinnedGroup,
-} from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 import { useTableDrawerContextValue } from '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
 
+import { resolveAcceptedUnpinConflictState } from './utils/resolveAcceptedUnpinConflictState.util';
 import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
 
 /**
@@ -40,63 +37,22 @@ export const useAcceptUnpinConflict = <
 
     const { columnKey, side } = unpinConflictModal;
     const conflictColumnKey = columnKey as DataKey<TData>;
-    const allOrderedColumns = buildAllOrderedColumns({
+
+    const resolvedState = resolveAcceptedUnpinConflictState<TData>({
+      columnKey: conflictColumnKey,
+      columnPinning,
       columns,
       columnsOrder,
+      resolution,
+      side,
     });
-    const index = allOrderedColumns.findIndex(
-      (col) => col.key === conflictColumnKey,
-    );
 
-    if (resolution === 'unpin-beyond') {
-      let left = [...columnPinning.left];
-      let right = [...columnPinning.right];
-
-      if (side === 'left') {
-        const keysToUnpin = new Set(
-          allOrderedColumns
-            .slice(index)
-            .map((col) => col.key)
-            .filter((key) => left.includes(key)),
-        );
-        left = left.filter((k) => !keysToUnpin.has(k));
-      } else {
-        const keysToUnpin = new Set(
-          allOrderedColumns
-            .slice(0, index + 1)
-            .map((col) => col.key)
-            .filter((key) => right.includes(key)),
-        );
-        right = right.filter((k) => !keysToUnpin.has(k));
-      }
-
-      const newPinning: ColumnPinningState<TData> = {
-        left,
-        right,
-      };
-
-      drawerColumnsStore.set({ columnPinning: newPinning });
+    if (resolvedState.kind === 'update-pinning') {
+      drawerColumnsStore.set({ columnPinning: resolvedState.columnPinning });
     } else {
-      // reorder-to-fill: remove pin and move remaining pinned columns together
-      const newPinning: ColumnPinningState<TData> = {
-        left: columnPinning.left.filter((k) => k !== conflictColumnKey),
-        right: columnPinning.right.filter((k) => k !== conflictColumnKey),
-      };
-
-      const newOrder = allOrderedColumns
-        .filter((col) => col.key !== conflictColumnKey)
-        .map((col) => col.key) as readonly DataKey<TData>[];
-
-      const reorderedOrder = insertAdjacentToPinnedGroup<TData>({
-        columnKey: conflictColumnKey,
-        columnPinning: newPinning,
-        order: newOrder,
-        side,
-      });
-
       drawerColumnsStore.set({
-        columnOrder: reorderedOrder,
-        columnPinning: newPinning,
+        columnOrder: resolvedState.columnOrder,
+        columnPinning: resolvedState.columnPinning,
       });
     }
 
