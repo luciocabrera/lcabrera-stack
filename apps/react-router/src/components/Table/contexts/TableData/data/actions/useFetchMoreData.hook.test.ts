@@ -55,23 +55,15 @@ const getHarness = (): Harness => {
   return harness;
 };
 
-const mockUseTableConfigContextValue = () => {
-  return { metaStore: getHarness().metaStore };
-};
-
-const mockUseTableDataContextValue = () => {
-  return { dataStore: getHarness().dataStore };
-};
-
 vi.mock(
   '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
   () => ({
-    useTableConfigContextValue: mockUseTableConfigContextValue,
+    useTableConfigContextValue: () => ({ metaStore: getHarness().metaStore }),
   }),
 );
 
 vi.mock('../useTableDataContextValue.hook', () => ({
-  useTableDataContextValue: mockUseTableDataContextValue,
+  useTableDataContextValue: () => ({ dataStore: getHarness().dataStore }),
 }));
 
 vi.mock('@/utils/prefetch/firePrefetch.util', () => ({
