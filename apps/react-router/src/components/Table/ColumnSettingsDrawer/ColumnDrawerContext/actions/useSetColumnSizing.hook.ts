@@ -6,7 +6,7 @@ import { useColumnDrawerContextValue } from '@/components/Table/ColumnSettingsDr
 export const useSetColumnSizing = () => {
   const { columnStore } = useColumnDrawerContextValue();
 
-  return (columnSizing: number | undefined) => {
+  return (columnSizing?: number) => {
     columnStore.set({ columnSizing });
   };
 };

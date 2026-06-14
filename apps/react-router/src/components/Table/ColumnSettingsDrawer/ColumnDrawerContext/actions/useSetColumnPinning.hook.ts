@@ -3,7 +3,7 @@ import { useColumnDrawerContextValue } from '@/components/Table/ColumnSettingsDr
 export const useSetColumnPinning = () => {
   const { columnStore } = useColumnDrawerContextValue();
 
-  return (columnPinning: 'left' | 'right' | undefined) => {
+  return (columnPinning?: 'left' | 'right') => {
     columnStore.set({ columnPinning });
   };
 };

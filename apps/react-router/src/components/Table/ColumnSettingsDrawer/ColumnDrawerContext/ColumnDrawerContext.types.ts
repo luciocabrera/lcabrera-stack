@@ -3,12 +3,12 @@ import type { TStore } from '@/hooks/useStore.hook';
 import type { ColumnFilter } from '@/types/filterOperators.types';
 import type { SortDirection } from '@/types/ui.types';
 
-export type ColumnDrawerContextValue = {
+export type ColumnDrawerContextValue<TData = Record<string, unknown>> = {
   /** Store managing column-related state */
-  readonly columnStore: TStore<ColumnDrawerState<Record<string, unknown>>>;
+  readonly columnStore: TStore<ColumnDrawerState<TData>>;
 };
 
-export type ColumnDrawerProviderProps<TData> = {
+export type ColumnDrawerProviderProps<TData = Record<string, unknown>> = {
   readonly children: React.ReactNode;
   readonly columnKey: DataKey<TData>;
 };

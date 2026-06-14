@@ -52,9 +52,10 @@ Before creating anything new, check this inventory. If something here does the j
 
 ### `src/hooks/utils/`
 
-| Function                          | Location                                              | Description                                                                |
-| --------------------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------- |
-| `getVerticalVirtualizationWindow` | `hooks/utils/getVerticalVirtualizationWindow.util.ts` | Computes fixed-row virtualization window geometry shared by vertical hooks |
+| Function                          | Location                                              | Description                                                                                             |
+| --------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `getVerticalVirtualizationWindow` | `hooks/utils/getVerticalVirtualizationWindow.util.ts` | Computes fixed-row virtualization window geometry shared by vertical hooks                              |
+| `setupObservedContainer`          | `hooks/utils/setupObservedContainer.util.ts`          | Attaches a ResizeObserver + scroll listener to a container element; preserves scroll position on resize |
 
 ### `src/components/Table/TableBody/utils/`
 
@@ -68,15 +69,39 @@ Before creating anything new, check this inventory. If something here does the j
 
 ### `src/components/Table/utils/`
 
-| Function                       | Location                                                      | Description                                                               |
-| ------------------------------ | ------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| `getPinnedDerivedColumnsState` | `components/Table/utils/getPinnedDerivedColumnsState.util.ts` | Computes effective columns, pin-based groups, and pinned offsets together |
+| Function                              | Location                                                             | Description                                                                                              |
+| ------------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `getColumnPinSide`                    | `components/Table/utils/getColumnPinSide.util.ts`                    | Returns `'left'`, `'right'`, or `undefined` for a column key given current pinning state                 |
+| `getEffectiveColumns`                 | `components/Table/utils/getEffectiveColumns.util.ts`                 | Returns visible columns in display order applying visibility, order, and pinning                         |
+| `getNewColumnFiltersBasedOnColumnKey` | `components/Table/utils/getNewColumnFiltersBasedOnColumnKey.util.ts` | Builds next `ColumnFiltersState` by replacing/removing the entry for one column key                      |
+| `getNewColumnSizingBasedOnColumnKey`  | `components/Table/utils/getNewColumnSizingBasedOnColumnKey.util.ts`  | Builds next `ColumnSizingState` by replacing/removing the width entry for one column key                 |
+| `getNewPinningBasedOnColumnKey`       | `components/Table/utils/getNewPinningBasedOnColumnKey.util.ts`       | Builds next `ColumnPinningState` by pinning or unpinning one column, honoring static key constraints     |
+| `getNewSortingBasedOnColumnKey`       | `components/Table/utils/getNewSortingBasedOnColumnKey.util.ts`       | Builds next `SortingState` by adding, updating (in-place), or removing the sort entry for one column key |
+| `getNormalizedColumns`                | `components/Table/utils/getNormalizedColumns.util.ts`                | Enriches columns with sort direction and sort index metadata                                             |
+| `getPinnedColumnOffsets`              | `components/Table/utils/getPinnedColumnOffsets.util.ts`              | Computes sticky `left`/`right` pixel offsets and pin-boundary markers for pinned columns                 |
+| `getPinnedDerivedColumnsState`        | `components/Table/utils/getPinnedDerivedColumnsState.util.ts`        | Computes effective columns, pin-based groups, and pinned offsets together in one call                    |
+| `getStaticColumnKeys`                 | `components/Table/utils/getStaticColumnKeys.util.ts`                 | Returns a `Set` of keys for columns marked as non-reorderable                                            |
+| `getStorageKey`                       | `components/Table/utils/getStorageKey.util.ts`                       | Builds a namespaced `persistenceKey:slice` storage key                                                   |
+| `readPersistedStateFromCookie`        | `components/Table/utils/readPersistedStateFromCookie.util.ts`        | Parses table persisted state from cookies; SSR-safe                                                      |
+| `serializeStateSlice`                 | `components/Table/utils/serializeStateSlice.util.ts`                 | Converts a state slice to a `{ key, value }` payload for cookie/localStorage write                       |
+| `splitColumnsByPinning`               | `components/Table/utils/splitColumnsByPinning.util.ts`               | Splits effective columns into left, center, and right pin groups                                         |
+| `syncColumnOrderWithPinning`          | `components/Table/utils/syncColumnOrderWithPinning.util.ts`          | Reorders column order array to keep pinned columns grouped; tolerates missing current order              |
+| `writeStateSlice`                     | `components/Table/utils/writeStateSlice.util.ts`                     | Writes a serialized state slice to cookie or localStorage                                                |
 
 ### `src/components/Table/contexts/TableConfig/columns/actions/`
 
-| Function                      | Location                                                                                    | Description                                                                  |
-| ----------------------------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| `commitPinningAndOrderUpdate` | `components/Table/contexts/TableConfig/columns/actions/commitPinningAndOrderUpdate.util.ts` | Commits pinning/order persistence and applies synced derived slices to store |
+| Artifact                      | Location                                                                                    | Description                                                                                         |
+| ----------------------------- | ------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `commitPinningAndOrderUpdate` | `components/Table/contexts/TableConfig/columns/actions/commitPinningAndOrderUpdate.util.ts` | Commits pinning/order persistence and applies synced derived slices to store                        |
+| `useAcceptHeaderPinConflict`  | `components/Table/contexts/TableConfig/columns/actions/useAcceptHeaderPinConflict.hook.ts`  | Resolves a pin conflict triggered from a column header interaction                                  |
+| `useAcceptHeaderPinSide`      | `components/Table/contexts/TableConfig/columns/actions/useAcceptHeaderPinSide.hook.ts`      | Accepts a pin-side selection from a header, resolving conflict state via `PinConflictState`         |
+| `useBatchSetColumnSettings`   | `components/Table/contexts/TableConfig/columns/actions/useBatchSetColumnSettings.hook.ts`   | Orchestrates all per-column setting changes (sort/filter/size/pin/order) and persists in one action |
+| `useBatchSetTableSettings`    | `components/Table/contexts/TableConfig/columns/actions/useBatchSetTableSettings.hook.ts`    | Batch-applies full table settings (filters, sorting, sizing, visibility, order) in one action       |
+| `useSetColumnFilter`          | `components/Table/contexts/TableConfig/columns/actions/useSetColumnFilter.hook.ts`          | Sets or removes a filter for one column; updates URL and resets pagination                          |
+| `useSetColumnPinning`         | `components/Table/contexts/TableConfig/columns/actions/useSetColumnPinning.hook.ts`         | Pins or unpins one column, reconciling derived column order and offsets                             |
+| `useSetColumnSizing`          | `components/Table/contexts/TableConfig/columns/actions/useSetColumnSizing.hook.ts`          | Sets the pixel width for one column and recomputes pinned offsets                                   |
+| `useSetColumnSorting`         | `components/Table/contexts/TableConfig/columns/actions/useSetColumnSorting.hook.ts`         | Sets the sort direction for one column; updates URL and resets pagination                           |
+| `useSyncColumnsSizing`        | `components/Table/contexts/TableConfig/columns/actions/useSyncColumnsSizing.hook.ts`        | Persists current column sizing state from store to cookie/localStorage                              |
 
 ### `src/components/test-utils/`
 
@@ -134,6 +159,14 @@ Before creating anything new, check this inventory. If something here does the j
 | -------------- | ----------------------------- | -------------------------------------------------------------------------------------- |
 | `logger`       | `utils/logger/logger.util.ts` | Default singleton logger reading `VITE_LOG_LEVEL` env var                              |
 | `createLogger` | `utils/logger/logger.util.ts` | Factory: `createLogger({ level?, prefix? })` → level-filtered, tree-shakeable `Logger` |
+
+### `src/utils/performance/`
+
+| Function              | Location                                  | Description                                                                      |
+| --------------------- | ----------------------------------------- | -------------------------------------------------------------------------------- |
+| `trackRender`         | `utils/performance/renderTracker.util.ts` | Records a render event for a named component (dev-only)                          |
+| `trackRenderComplete` | `utils/performance/renderTracker.util.ts` | Marks a render complete with timing; pairs with `trackRender`                    |
+| `renderStats`         | `utils/performance/renderTracker.util.ts` | Object of methods to query/reset accumulated render counts and timing (dev-only) |
 
 ### `src/utils/prefetch/`
 

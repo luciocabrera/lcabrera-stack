@@ -8,7 +8,7 @@ import { useColumnDrawerContextValue } from '@/components/Table/ColumnSettingsDr
 export const useSetColumnFilter = () => {
   const { columnStore } = useColumnDrawerContextValue();
 
-  return (columnFilter: ColumnFilter | undefined) => {
+  return (columnFilter?: ColumnFilter) => {
     columnStore.set({ columnFilter });
   };
 };

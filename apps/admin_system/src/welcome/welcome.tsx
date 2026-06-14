@@ -1,10 +1,10 @@
 import logoDark from './logo-dark.svg';
 import logoLight from './logo-light.svg';
 
-interface SomeComponentProps {
+type SomeComponentProps = {
   title: string;
   description: string;
-}
+};
 
 export function someUtilityFunction(arg1: string, arg2: number) {
   // This function does something useful with arg1 and arg2

@@ -1,14 +1,9 @@
-import type {
-  ColumnFiltersState,
-  ColumnPinningState,
-  ColumnSizingState,
-} from '@/components/Table/Table.types';
+import type { DataKey } from '@/components/Table/Table.types';
 import type { ColumnFilter } from '@/types/filterOperators.types';
 import type { SortDirection } from '@/types/ui.types';
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { usePersistTableStateAction } from '@/components/Table/hooks';
-import { applyPin } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 import {
   getEffectiveColumns,
   getNormalizedColumns,
@@ -17,12 +12,16 @@ import {
   syncColumnOrderWithPinning,
 } from '@/components/Table/utils';
 import { serializeFiltersToURL, serializeSortingToURL } from '@/utils/urlState';
+import { getNewSortingBasedOnColumnKey } from '@/components/Table/utils/getNewSortingBasedOnColumnKey.util';
+import { getNewColumnFiltersBasedOnColumnKey } from '@/components/Table/utils/getNewColumnFiltersBasedOnColumnKey.util';
+import { getNewColumnSizingBasedOnColumnKey } from '@/components/Table/utils/getNewColumnSizingBasedOnColumnKey.util';
+import { getNewPinningBasedOnColumnKey } from '@/components/Table/utils/getNewPinningBasedOnColumnKey.util';
 
-type BatchColumnSettingsUpdate = {
+type BatchColumnSettingsUpdate<TData> = {
   /** Single column filter value */
   columnFilter?: ColumnFilter;
   /** Column key being updated */
-  columnKey: string;
+  columnKey: DataKey<TData>;
   /** Pin side for this column */
   columnPinning?: 'left' | 'right';
   /** Single column width value */
@@ -31,82 +30,47 @@ type BatchColumnSettingsUpdate = {
   sorting?: SortDirection;
 };
 
-export const useBatchSetColumnSettings = () => {
-  const { columnsStore, metaStore } = useTableConfigContextValue();
+export const useBatchSetColumnSettings = <TData>() => {
+  const { columnsStore, metaStore } = useTableConfigContextValue<TData>();
   const persistTableState = usePersistTableStateAction();
 
-  return (settings: BatchColumnSettingsUpdate) => {
+  return (settings: BatchColumnSettingsUpdate<TData>) => {
     const columnsState = columnsStore.get();
     const persistenceKey = metaStore.get()?.persistenceKey ?? '';
     const { columnFilter, columnKey, columnPinning, columnSizing, sorting } =
       settings;
-
-    // Sorting: update in-place to preserve order, or remove if undefined
-    const existingSorting = columnsState?.sorting ?? [];
-    const existingIndex = existingSorting.findIndex(
-      (s) => s.columnKey === columnKey,
-    );
-
-    const hasExistingSort = existingIndex !== -1;
-
-    let newSorting;
-    if (!sorting) {
-      newSorting = existingSorting.filter((s) => s.columnKey !== columnKey);
-    } else if (hasExistingSort) {
-      newSorting = existingSorting.map((s) =>
-        s.columnKey === columnKey ? { columnKey, direction: sorting } : s,
-      );
-    } else {
-      newSorting = [...existingSorting, { columnKey, direction: sorting }];
-    }
-
-    // Filters: remove this column entry, then re-add if filter exists
-    const baseFilters = Object.fromEntries(
-      Object.entries(
-        (columnsState?.columnFilters ?? {}) as ColumnFiltersState,
-      ).filter(([key]) => key !== columnKey),
-    );
-    const newColumnFilters = columnFilter
-      ? { ...baseFilters, [columnKey]: columnFilter }
-      : baseFilters;
-
-    // Sizing: remove this column entry, then re-add if size exists
-    const baseSizing = Object.fromEntries(
-      Object.entries(
-        (columnsState?.columnSizing ?? {}) as ColumnSizingState,
-      ).filter(([key]) => key !== columnKey),
-    );
-    const newColumnSizing =
-      columnSizing === undefined
-        ? baseSizing
-        : { ...baseSizing, [columnKey]: columnSizing };
-
-    // Pinning: remove from both sides, then re-add respecting static column positions
-    const currentPinning = columnsState?.columnPinning ?? {
-      left: [],
-      right: [],
-    };
-    const staticKeys = columnsState?.staticKeys;
-    const newPinning: ColumnPinningState = columnPinning
-      ? applyPin({
-          columnKey,
-          columnPinning: currentPinning,
-          side: columnPinning,
-          staticKeys,
-        })
-      : {
-          left: currentPinning.left.filter((k) => k !== columnKey),
-          right: currentPinning.right.filter((k) => k !== columnKey),
-        };
-
-    // Column Order: sync order to reflect pinning position
-    const currentOrder = columnsState?.columnOrder ?? [];
     const columns = columnsState?.columns ?? [];
-    const newColumnOrder = syncColumnOrderWithPinning({
+
+    const newSorting = getNewSortingBasedOnColumnKey<TData>({
+      columnKey,
+      sorting,
+      existingSorting: columnsState?.sorting,
+    });
+
+    const newColumnFilters = getNewColumnFiltersBasedOnColumnKey<TData>({
+      columnFiltersState: columnsState?.columnFilters,
+      columnKey,
+      columnFilter,
+    });
+
+    const newColumnSizing = getNewColumnSizingBasedOnColumnKey<TData>({
+      columnKey,
+      columnSizing,
+      columnSizesState: columnsState?.columnSizing,
+    });
+
+    const newPinning = getNewPinningBasedOnColumnKey<TData>({
+      columnKey,
+      columnPinning,
+      existingPinning: columnsState?.columnPinning,
+      staticKeys: columnsState?.staticKeys,
+    });
+
+    const newColumnOrder = syncColumnOrderWithPinning<TData>({
       columnKey,
       columnPinning,
       columns,
-      currentOrder,
+      currentOrder: columnsState?.columnOrder,
       newPinning,
     });
 
@@ -127,7 +91,7 @@ export const useBatchSetColumnSettings = () => {
       effectiveColumns,
     });
 
-    const pinnedColumnOffsets = getPinnedColumnOffsets({
+    const pinnedColumnOffsets = getPinnedColumnOffsets<TData>({
       columnPinning: newPinning,
       columnSizing: newColumnSizing,
       effectiveColumns,
@@ -144,7 +108,7 @@ export const useBatchSetColumnSettings = () => {
       {
         persistenceKey,
         searchParamKey: 'sort',
-        searchParamValue: serializeSortingToURL(newSorting),
+        searchParamValue: serializeSortingToURL<TData>(newSorting),
         slice: 'sorting',
         valueSlice: newSorting,
       },

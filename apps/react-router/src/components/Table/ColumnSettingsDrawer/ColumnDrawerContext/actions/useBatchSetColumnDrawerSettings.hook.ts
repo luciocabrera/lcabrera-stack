@@ -6,9 +6,9 @@ import { useBatchSetColumnSettings } from '@/components/Table/contexts/TableConf
  * Passes the flat drawer values to the table-level batch setter,
  * which handles merging them into the full table state.
  */
-export const useBatchSetColumnDrawerSettings = () => {
-  const { columnStore } = useColumnDrawerContextValue();
-  const batchSetColumnSettings = useBatchSetColumnSettings();
+export const useBatchSetColumnDrawerSettings = <TData>() => {
+  const { columnStore } = useColumnDrawerContextValue<TData>();
+  const batchSetColumnSettings = useBatchSetColumnSettings<TData>();
 
   return () => {
     const columnState = columnStore.get();
