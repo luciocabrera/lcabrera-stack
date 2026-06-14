@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { ClearResetToolbarButtons } from '@/components/Table/ColumnSettingsDrawer/shared/ClearResetToolbarButtons.component';
+import { ClearResetToolbarButtons } from '@/components/Table/ColumnSettingsDrawer/ClearResetToolbarButtons/ClearResetToolbarButtons.component';
 
 import type { FilterSectionToolbarProps } from './FilterSectionToolbar.types';
 
@@ -27,7 +27,7 @@ export const FilterSectionToolbar = ({
   const hasFilter = columnFilter !== undefined;
 
   const handleClear = () => {
-    setColumnFilter(undefined);
+    setColumnFilter();
   };
 
   return (

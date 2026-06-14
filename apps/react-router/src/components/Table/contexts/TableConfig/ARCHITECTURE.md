@@ -18,7 +18,12 @@ TableConfig/
 │   ├── useColumnsStore.hook.ts              → useSyncExternalStore + selector
 │   │
 │   ├── actions/
-│   │   ├── commitPinningAndOrderUpdate.util.ts → Shared persist+store commit helper for pinning actions
+│   │   ├── utils/buildPersistencePayload.util.ts       → Shared persistence-entry builder for batch settings hooks
+│   │   ├── utils/resolveBatchColumnSettingsUpdate.util.ts → Build next derived column config slices for one batch column update
+│   │   ├── utils/resolveBatchTableSettingsUpdate.util.ts → Build next derived column config slices for one table-wide settings update
+│   │   ├── utils/commitPinningAndOrderUpdate.util.ts → Shared persist+store commit helper for pinning actions
+│   │   ├── utils/resolveColumnPinningUpdate.util.ts  → Build next pinning state + synced order for one pinning change
+│   │   ├── utils/resolveColumnSizingUpdate.util.ts   → Build next sizing map + pinned offsets for one column resize
 │   │   ├── useAcceptHeaderPinConflict.hook.ts   → Resolve pin conflict from header
 │   │   ├── useAcceptHeaderPinSide.hook.ts       → Accept pin side from header
 │   │   ├── useBatchSetColumnSettings.hook.ts    → Bulk-update multiple column fields
@@ -169,11 +174,22 @@ graph TD
 | `useResetColumnFilter`       | —              | `columnsStore` | Remove filter for a single column                                                                 |
 | `useSetColumnFilter`         | —              | `columnsStore` | Set filter value for a single column                                                              |
 | `useSetColumnPinning`        | `columnsStore` | `columnsStore` | Update pinning, keep column order synced, and commit pinning/order via shared helper              |
-| `useSetColumnSizing`         | —              | `columnsStore` | Set column width map                                                                              |
+| `useSetColumnSizing`         | `columnsStore` | `columnsStore` | Set column width map and recompute pinned offsets via shared sizing resolver                      |
 | `useSetColumnSorting`        | `columnsStore` | `columnsStore` | Toggle/set sort for a column                                                                      |
 | `useSyncColumnsSizing`       | `columnsStore` | `columnsStore` | Recalculate sizing after layout shift                                                             |
 | `useAcceptHeaderPinConflict` | `columnsStore` | `columnsStore` | Resolve pin contiguity conflict from header and keep order synced                                 |
 | `useAcceptHeaderPinSide`     | `columnsStore` | `columnsStore` | Accept pin side choice from header, keep order synced, and commit pinning/order via shared helper |
+
+## Shared Batch Utilities
+
+The two batch settings hooks now share two focused pure helpers instead of each inlining their derived-view and persistence-array construction.
+
+| Utility                            | Location                  | Purpose                                                                                |
+| ---------------------------------- | ------------------------- | -------------------------------------------------------------------------------------- |
+| `deriveColumnViewState`            | `components/Table/utils/` | Compose `normalizedColumns` with `getPinnedDerivedColumnsState()` output               |
+| `buildPersistencePayload`          | `columns/actions/utils/`  | Build the persistence entry array for batch settings updates                           |
+| `resolveBatchColumnSettingsUpdate` | `columns/actions/utils/`  | Compose the next per-column batch update from shared sort/filter/size/pin resolvers    |
+| `resolveBatchTableSettingsUpdate`  | `columns/actions/utils/`  | Compose the next table-wide settings update from incoming settings plus derived slices |
 
 ## Columns Selectors
 

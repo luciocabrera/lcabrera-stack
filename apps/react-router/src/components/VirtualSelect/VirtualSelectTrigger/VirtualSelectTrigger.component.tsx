@@ -1,12 +1,12 @@
-import type { KeyboardEvent, ReactNode } from 'react';
-
-import * as stylex from '@stylexjs/stylex';
-
-import { Tag } from '@/components/Tag';
-
 import type { VirtualSelectTriggerProps } from './VirtualSelectTrigger.types';
 
-import { styles } from './VirtualSelectTrigger.stylex';
+import {
+  assignTriggerRef,
+  getTriggerStyleProps,
+  handleDivTriggerKeyDown,
+  renderChevron,
+  renderTriggerContent,
+} from './utils';
 
 export const VirtualSelectTrigger = ({
   isAlwaysOpen,
@@ -24,75 +24,30 @@ export const VirtualSelectTrigger = ({
   const hasSelection = selected.length > 0;
   const usesTagButtons = mode === 'multi' && hasSelection;
   const shouldUseDivTrigger = isAlwaysOpen || usesTagButtons;
-
-  const setDivRef = (node: HTMLDivElement | null) => {
-    triggerRef.current = node;
-  };
-
-  const setButtonRef = (node: HTMLButtonElement | null) => {
-    triggerRef.current = node;
-  };
-
-  let content: ReactNode;
-
-  if (!hasSelection) {
-    content = (
-      <span {...stylex.props(styles.triggerPlaceholder)}>{placeholder}</span>
-    );
-  } else if (mode === 'single') {
-    content = (
-      <span {...stylex.props(styles.triggerLabel)}>
-        {visibleTags[0] ?? selected[0]}
-      </span>
-    );
-  } else {
-    content = (
-      <>
-        {visibleTags.map((value) => (
-          <Tag
-            key={value}
-            label={value}
-            onRemove={() => {
-              onRemoveTag(value);
-            }}
-          />
-        ))}
-        {overflowCount > 0 && (
-          <span data-overflow {...stylex.props(styles.overflowTag)}>
-            +{overflowCount} more
-          </span>
-        )}
-      </>
-    );
-  }
-
-  const chevron = isAlwaysOpen ? undefined : (
-    <span data-chevron {...stylex.props(styles.chevron(isOpen))} />
-  );
+  const content = renderTriggerContent({
+    hasSelection,
+    mode,
+    onRemoveTag,
+    overflowCount,
+    placeholder,
+    selected,
+    visibleTags,
+  });
+  const chevron = renderChevron({ isAlwaysOpen, isOpen });
 
   if (isAlwaysOpen) {
     return (
       <div
-        ref={setDivRef}
-        {...stylex.props(
-          styles.trigger,
-          isOpen && styles.triggerOpen,
-          mode === 'multi' && styles.triggerClamped,
-          styles.triggerStatic,
-        )}
+        ref={(node) => {
+          assignTriggerRef({ triggerRef, node });
+        }}
+        {...getTriggerStyleProps({ isOpen, mode, isStatic: true })}
       >
         {content}
         {chevron}
       </div>
     );
   }
-
-  const handleDivKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      onToggle();
-    }
-  };
 
   if (shouldUseDivTrigger) {
     return (
@@ -101,15 +56,15 @@ export const VirtualSelectTrigger = ({
         aria-expanded={isOpen}
         aria-haspopup='listbox'
         onClick={onToggle}
-        onKeyDown={handleDivKeyDown}
-        ref={setDivRef}
+        onKeyDown={(event) => {
+          handleDivTriggerKeyDown({ event, onToggle });
+        }}
+        ref={(node) => {
+          assignTriggerRef({ triggerRef, node });
+        }}
         role='button'
         tabIndex={0}
-        {...stylex.props(
-          styles.trigger,
-          isOpen && styles.triggerOpen,
-          mode === 'multi' && styles.triggerClamped,
-        )}
+        {...getTriggerStyleProps({ isOpen, mode })}
       >
         {content}
         {chevron}
@@ -123,13 +78,11 @@ export const VirtualSelectTrigger = ({
       aria-expanded={isOpen}
       aria-haspopup='listbox'
       onClick={onToggle}
-      ref={setButtonRef}
+      ref={(node) => {
+        assignTriggerRef({ triggerRef, node });
+      }}
       type='button'
-      {...stylex.props(
-        styles.trigger,
-        isOpen && styles.triggerOpen,
-        mode === 'multi' && styles.triggerClamped,
-      )}
+      {...getTriggerStyleProps({ isOpen, mode })}
     >
       {content}
       {chevron}

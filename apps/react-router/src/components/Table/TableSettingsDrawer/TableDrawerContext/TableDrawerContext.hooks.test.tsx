@@ -6,7 +6,7 @@ import type { ReactNode } from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { createMockStore } from '@/components/test-utils/createMockStore.util';
+import { createMockStore } from '@/utils/tests/createMockStore.util';
 import { useSetColumnsOrder } from './actions/useSetColumnsOrder.hook';
 import { TableDrawerContext } from './TableDrawerContext.context';
 import type { TableDrawerContextValue } from './TableDrawerContext.types';

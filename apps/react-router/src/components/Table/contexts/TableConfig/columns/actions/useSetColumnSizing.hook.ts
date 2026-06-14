@@ -1,12 +1,10 @@
 import { useCallback } from 'react';
 
-import type {
-  ColumnSizingState,
-  DataKey,
-} from '@/components/Table/Table.types';
+import type { DataKey } from '@/components/Table/Table.types';
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
-import { getPinnedColumnOffsets } from '@/components/Table/utils';
+
+import { resolveColumnSizingUpdate } from './utils';
 
 type SetColumnSizingArgs<TData> = {
   readonly columnKey: DataKey<TData>;
@@ -22,25 +20,14 @@ export const useSetColumnSizing = <TData>() => {
   return useCallback(
     ({ columnKey, width }: SetColumnSizingArgs<TData>) => {
       const columnsState = columnsStore.get();
-      const current =
-        columnsState?.columnSizing ?? ({} as ColumnSizingState<TData>);
-
-      let columnSizing: ColumnSizingState<TData>;
-      if (width === undefined) {
-        // Remove the key from a copied state object.
-        const nextColumnSizing = { ...current };
-
-        delete nextColumnSizing[columnKey];
-        columnSizing = nextColumnSizing;
-      } else {
-        columnSizing = { ...current, [columnKey]: width };
-      }
-
-      const pinnedColumnOffsets = getPinnedColumnOffsets({
-        columnPinning: columnsState?.columnPinning ?? { left: [], right: [] },
-        columnSizing,
-        effectiveColumns: columnsState?.effectiveColumns ?? [],
-      });
+      const { columnSizing, pinnedColumnOffsets } =
+        resolveColumnSizingUpdate<TData>({
+          columnKey,
+          columnPinning: columnsState?.columnPinning,
+          columnSizingState: columnsState?.columnSizing,
+          effectiveColumns: columnsState?.effectiveColumns ?? [],
+          width,
+        });
 
       columnsStore.set({ columnSizing, pinnedColumnOffsets });
     },

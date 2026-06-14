@@ -24,25 +24,28 @@ const { useRenderTrackerMock } = vi.hoisted(() => ({
   useRenderTrackerMock: vi.fn(),
 }));
 
-function MockTableContent({ onLoadMore }: MockTableContentProps) {
-  return (
-    <div
-      data-has-load-more={String(Boolean(onLoadMore))}
-      data-testid='content'
-    />
-  );
-}
+const MockTableContent = vi.hoisted(
+  () =>
+    ({ onLoadMore }: MockTableContentProps) => {
+      return (
+        <div
+          data-has-load-more={String(Boolean(onLoadMore))}
+          data-testid='content'
+        />
+      );
+    },
+);
 
-function MockTableDataProvider({
-  children,
-  dataState,
-}: MockTableDataProviderProps) {
-  return (
-    <div data-state={JSON.stringify(dataState)} data-testid='provider'>
-      {children}
-    </div>
-  );
-}
+const MockTableDataProvider = vi.hoisted(
+  () =>
+    ({ children, dataState }: MockTableDataProviderProps) => {
+      return (
+        <div data-state={JSON.stringify(dataState)} data-testid='provider'>
+          {children}
+        </div>
+      );
+    },
+);
 
 vi.mock('@/utils/performance', () => ({
   useRenderTracker: useRenderTrackerMock,

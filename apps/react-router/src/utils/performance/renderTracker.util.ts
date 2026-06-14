@@ -68,10 +68,15 @@ export const trackRender = (componentName: string): void => {
 /**
  * Mark the end of a render (for timing)
  */
-export const trackRenderComplete = (
-  componentName: string,
-  startTime: number,
-): void => {
+type TrackRenderCompleteArgs = {
+  readonly componentName: string;
+  readonly startTime: number;
+};
+
+export const trackRenderComplete = ({
+  componentName,
+  startTime,
+}: TrackRenderCompleteArgs): void => {
   if (import.meta.env.PROD) return;
 
   const duration = performance.now() - startTime;
@@ -84,7 +89,6 @@ export const trackRenderComplete = (
 
 /**
  * Get render statistics
- * @lintignore Exported for browser console usage (window.__renderStats)
  */
 export const renderStats = {
   /**

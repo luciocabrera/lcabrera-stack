@@ -44,85 +44,100 @@ const {
   useTableWrapperRefMock: vi.fn(),
 }));
 
-function MockButton({ children, onClick }: MockButtonProps) {
-  return (
-    <button onClick={onClick} type='button'>
-      {children}
-    </button>
-  );
-}
+const MockButton = vi.hoisted(
+  () =>
+    ({ children, onClick }: MockButtonProps) => {
+      return (
+        <button onClick={onClick} type='button'>
+          {children}
+        </button>
+      );
+    },
+);
 
-function MockDetailsSection() {
+const MockDetailsSection = vi.hoisted(() => () => {
   return <div>Details</div>;
-}
+});
 
-function MockFilterSection() {
+const MockFilterSection = vi.hoisted(() => () => {
   return <div>Filter</div>;
-}
+});
 
-function MockGeneralSection() {
+const MockGeneralSection = vi.hoisted(() => () => {
   return <div>General</div>;
-}
+});
 
-function MockPinningSection() {
+const MockPinningSection = vi.hoisted(() => () => {
   return <div>Pinning</div>;
-}
+});
 
-function MockSettingsIcon() {
+const MockSettingsIcon = vi.hoisted(() => () => {
   return <span>settings-icon</span>;
-}
+});
 
-function MockSidePanel({ children }: MockSidePanelProps) {
+const MockSidePanel = vi.hoisted(() => ({ children }: MockSidePanelProps) => {
   return <div data-testid='side-panel'>{children}</div>;
-}
+});
 
-function MockSidePanelBody({ children }: MockSidePanelProps) {
-  return <div>{children}</div>;
-}
+const MockSidePanelBody = vi.hoisted(
+  () =>
+    ({ children }: MockSidePanelProps) => {
+      return <div>{children}</div>;
+    },
+);
 
-function MockSidePanelFooter({ children }: MockSidePanelProps) {
-  return <div>{children}</div>;
-}
+const MockSidePanelFooter = vi.hoisted(
+  () =>
+    ({ children }: MockSidePanelProps) => {
+      return <div>{children}</div>;
+    },
+);
 
-function MockSidePanelHeader({ actions, children }: MockSidePanelHeaderProps) {
-  return (
-    <div>
-      {actions}
-      {children}
-    </div>
-  );
-}
+const MockSidePanelHeader = vi.hoisted(
+  () =>
+    ({ actions, children }: MockSidePanelHeaderProps) => {
+      return (
+        <div>
+          {actions}
+          {children}
+        </div>
+      );
+    },
+);
 
-function MockSidePanelHeaderToolbar() {
+const MockSidePanelHeaderToolbar = vi.hoisted(() => () => {
   return <div>toolbar</div>;
-}
+});
 
-function MockSidePanelTitle({ children, icon }: MockTitleProps) {
-  return (
-    <h2>
-      {icon}
-      {children}
-    </h2>
-  );
-}
+const MockSidePanelTitle = vi.hoisted(
+  () =>
+    ({ children, icon }: MockTitleProps) => {
+      return (
+        <h2>
+          {icon}
+          {children}
+        </h2>
+      );
+    },
+);
 
-function MockSortingSection() {
+const MockSortingSection = vi.hoisted(() => () => {
   return <div>Sorting</div>;
-}
+});
 
-function MockTabs({ tabs }: MockTabsProps) {
+const MockTabs = vi.hoisted(() => ({ tabs }: MockTabsProps) => {
   return (
     <div data-testid='tabs'>{tabs.map((tab) => tab.header).join('|')}</div>
   );
-}
+});
 
-function MockUseBatchSetColumnDrawerSettings() {
+const MockUseBatchSetColumnDrawerSettings = vi.hoisted(() => () => {
   return batchSetColumnDrawerSettingsMock;
-}
+});
 
-function MockUseResetAllColumnDrawerSettings() {
+const MockUseResetAllColumnDrawerSettings = vi.hoisted(() => () => {
   return resetAllColumnDrawerSettingsMock;
-}
+});
 
 vi.mock('@/components/Button', () => ({
   Button: MockButton,

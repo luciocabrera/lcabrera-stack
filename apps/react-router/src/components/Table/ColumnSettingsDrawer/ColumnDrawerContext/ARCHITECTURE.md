@@ -94,18 +94,18 @@ graph TD
 Actions are hooks that return a callback. Each callback reads the store, validates
 `columnKey`, and calls `columnStore.set(partial)`.
 
-| Hook                              | Reads From             | Writes To     | Side Effect                                                   |
-| --------------------------------- | ---------------------- | ------------- | ------------------------------------------------------------- |
-| `useSetColumnFilter`              | —                      | `columnStore` | —                                                             |
-| `useSetColumnSizing`              | —                      | `columnStore` | —                                                             |
-| `useSetColumnSorting`             | —                      | `columnStore` | —                                                             |
-| `useSetColumnPinning`             | —                      | `columnStore` | —                                                             |
-| `useClearAllColumnDrawerSettings` | `columnStore`          | `columnStore` | Sets all to `undefined`; closes drawer if `shouldCloseDrawer` |
-| `useResetColumnFilter`            | `columnsStore` (table) | `columnStore` | —                                                             |
-| `useResetColumnPinning`           | `columnsStore` (table) | `columnStore` | —                                                             |
-| `useResetColumnSorting`           | `columnsStore` (table) | `columnStore` | —                                                             |
-| `useResetAllColumnDrawerSettings` | `columnsStore` (table) | `columnStore` | Resets all fields; closes drawer if `shouldCloseDrawer`       |
-| `useBatchSetColumnDrawerSettings` | `columnStore`          | —             | Pushes to table via `useBatchSetColumnSettings`               |
+| Hook                              | Reads From             | Writes To     | Side Effect                                                                     |
+| --------------------------------- | ---------------------- | ------------- | ------------------------------------------------------------------------------- |
+| `useSetColumnFilter`              | —                      | `columnStore` | —                                                                               |
+| `useSetColumnSizing`              | —                      | `columnStore` | —                                                                               |
+| `useSetColumnSorting`             | —                      | `columnStore` | —                                                                               |
+| `useSetColumnPinning`             | —                      | `columnStore` | —                                                                               |
+| `useClearAllColumnDrawerSettings` | `columnStore`          | `columnStore` | Sets all to `undefined`; closes drawer if `shouldCloseDrawer`                   |
+| `useResetColumnFilter`            | `columnsStore` (table) | `columnStore` | —                                                                               |
+| `useResetColumnPinning`           | `columnsStore` (table) | `columnStore` | —                                                                               |
+| `useResetColumnSorting`           | `columnsStore` (table) | `columnStore` | —                                                                               |
+| `useResetAllColumnDrawerSettings` | `columnsStore` (table) | `columnStore` | Resets all fields; closes drawer if `shouldCloseDrawer`                         |
+| `useBatchSetColumnDrawerSettings` | `columnStore`          | —             | Pushes the current drawer snapshot to the table via `useBatchSetColumnSettings` |
 
 ### Action Categories
 

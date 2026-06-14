@@ -4,7 +4,11 @@ import type { InfiniteScroll, PrefetchCache } from '@/types/ui.types';
 
 import { LOAD_MORE_PAGE_SIZE } from '@/components/Table/Table.constants';
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
-import { firePrefetch, resolveFromCacheOrFetch } from '@/utils/prefetch';
+import { getErrorMessage } from '@/components/Table/utils/getErrorMessage.util';
+import { getRequiredOnLoadMore } from '@/components/Table/utils/getRequiredOnLoadMore.util';
+import { clearPrefetchCache } from '@/utils/prefetch/clearPrefetchCache.util';
+import { firePrefetch } from '@/utils/prefetch/firePrefetch.util';
+import { resolveFromCacheOrFetch } from '@/utils/prefetch/resolveFromCacheOrFetch.util';
 
 import { useTableDataContextValue } from '../useTableDataContextValue.hook';
 
@@ -35,9 +39,7 @@ export const useFetchMoreData = <TData, TResponse>() => {
       const pageSize = metaState?.loadMorePageSize ?? LOAD_MORE_PAGE_SIZE;
       const enablePrefetch = metaState?.enablePrefetch ?? false;
 
-      if (!onLoadMore) {
-        throw new Error('onLoadMore callback is required');
-      }
+      const requiredOnLoadMore = getRequiredOnLoadMore(onLoadMore);
 
       if (isFetchingRef.current || dataState?.hasMore === false) {
         return;
@@ -56,17 +58,15 @@ export const useFetchMoreData = <TData, TResponse>() => {
           cache: prefetchRef.current,
           expectedSkip,
           fetchFn: () =>
-            onLoadMore({
+            requiredOnLoadMore({
               limit: pageSize,
               skip: expectedSkip,
             }),
         });
 
-        prefetchRef.current = { data: undefined, promise: undefined, skip: -1 };
+        clearPrefetchCache({ prefetchRef });
 
-        const data = dataSelector
-          ? dataSelector(response)
-          : ([] as unknown as TData[]);
+        const data = dataSelector ? dataSelector(response) : [];
         const combinedData = [...currentData, ...data];
         const totalLoadedRows = combinedData.length;
         const totalRows = dataTotalSelector
@@ -87,13 +87,15 @@ export const useFetchMoreData = <TData, TResponse>() => {
           firePrefetch({
             limit: pageSize,
             nextSkip: combinedData.length,
-            onLoadMore,
+            onLoadMore: requiredOnLoadMore,
             prefetchRef,
           });
         }
       } catch (error) {
-        const message =
-          error instanceof Error ? error.message : 'Failed to load more data';
+        const message = getErrorMessage({
+          error,
+          fallback: 'Failed to load more data',
+        });
         metaStore.set({
           error: message,
         });

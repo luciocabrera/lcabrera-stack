@@ -5,9 +5,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { TableSuspenseBoundary } from './TableSuspenseBoundary.component';
 
-function MockTableSkeleton() {
+const MockTableSkeleton = vi.hoisted(() => () => {
   return <div>Loading table skeleton</div>;
-}
+});
 
 vi.mock('../TableSkeleton', () => ({
   TableSkeleton: MockTableSkeleton,

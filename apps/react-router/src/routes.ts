@@ -13,9 +13,4 @@ export default [
   route('wide-alltypes-150', 'routes/wide-alltypes-150/layout.ts', [
     index('routes/wide-alltypes-150/root.ts'),
   ]),
-  route(
-    'wide-alltypes-150-tanstack',
-    'routes/wide-alltypes-150-tanstack/layout.ts',
-    [index('routes/wide-alltypes-150-tanstack/root.ts')],
-  ),
 ] satisfies RouteConfig;

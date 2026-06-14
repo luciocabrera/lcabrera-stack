@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 
-import { trackRender, trackRenderComplete } from './renderTracker.util';
+import { trackRenderComplete } from './renderTracker.util';
+import { trackCurrentRender } from './utils';
 
 type UseRenderTrackerOptions = {
   /** Only track if condition is true */
@@ -33,41 +34,27 @@ export const useRenderTracker = ({
   const prevPropsRef = useRef<Record<string, unknown>>(undefined);
 
   const isEnabled = options.isEnabled ?? true;
+  const shouldTrack = import.meta.env.DEV && isEnabled;
 
   // Track render on every call (component render)
-  if (import.meta.env.DEV && isEnabled) {
-    trackRender(componentName);
-
-    // Log which props changed
-    if (options.logProps && prevPropsRef.current) {
-      const changedProps: string[] = [];
-      const currentProps = options.logProps;
-      const prevProps = prevPropsRef.current;
-
-      for (const key of Object.keys(currentProps)) {
-        if (currentProps[key] !== prevProps[key]) {
-          changedProps.push(key);
-        }
-      }
-
-      if (changedProps.length > 0) {
-        // eslint-disable-next-line no-console, react-x/purity -- Console logging is intentional for performance tracking
-        console.log(
-          `[${componentName}] Props changed:`,
-          changedProps.join(', '),
-        );
-      }
-    }
-
-    prevPropsRef.current = options.logProps;
-    // eslint-disable-next-line react-hooks/purity, react-x/purity -- Performance tracking is intentionally side-effectful
-    renderStartTime.current = performance.now();
+  if (shouldTrack) {
+    trackCurrentRender({
+      componentName,
+      logProps: options.logProps,
+      prevProps: prevPropsRef,
+      renderStartTime,
+    });
   }
 
   // Track render completion (after commit)
   useEffect(() => {
-    if (import.meta.env.DEV && isEnabled) {
-      trackRenderComplete(componentName, renderStartTime.current);
+    if (!shouldTrack) {
+      return;
     }
+
+    trackRenderComplete({
+      componentName,
+      startTime: renderStartTime.current,
+    });
   });
 };

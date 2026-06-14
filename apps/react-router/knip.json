@@ -1,14 +1,18 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
-  "entry": ["../../packages/eslint-local-rules/index.ts"],
-  "project": ["src/**/*.{ts,tsx}"],
+  "entry": ["../../packages/eslint-local-rules/index.ts", "config/**/*.ts"],
+  "project": [
+    "config/**/*.ts",
+    "eslint.custom-rules.config.mjs",
+    "src/**/*.{ts,tsx}"
+  ],
+  "ignoreBinaries": ["fallow"],
   "ignoreDependencies": [
     "@babel/preset-typescript",
     "@eslint/js",
     "@stylexjs/eslint-plugin",
     "@typescript-eslint/utils",
     "babel-plugin-react-compiler",
-    "eslint",
     "eslint-config-prettier",
     "eslint-plugin-local-rules",
     "eslint-plugin-perfectionist",
@@ -18,8 +22,7 @@
     "eslint-plugin-react-x",
     "eslint-plugin-security",
     "eslint-plugin-unicorn",
-    "globals",
-    "typescript-eslint"
+    "globals"
   ],
   "ignoreExportsUsedInFile": {
     "interface": true,

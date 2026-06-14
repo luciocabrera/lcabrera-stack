@@ -38,7 +38,7 @@ import {
 import { VirtualSelect } from './components/VirtualSelect';
 import { useTheme } from './hooks/useTheme.hook';
 
-function mulberry32(seed: number) {
+const mulberry32 = (seed: number) => {
   let value = seed;
   return () => {
     value = Math.trunc(value);
@@ -48,7 +48,7 @@ function mulberry32(seed: number) {
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
     return Math.trunc(t ^ (t >>> 14)) / 4_294_967_296;
   };
-}
+};
 
 const rng = mulberry32(123_456_789);
 
@@ -71,17 +71,17 @@ const COLUMNS: TableColumn<MockRow>[] = [
   minWidth: 120,
 }));
 
-function randomCurrency() {
+const randomCurrency = () => {
   return (rng() * 10_000).toFixed(2);
-}
+};
 
-function randomDate() {
+const randomDate = () => {
   const start = new Date(2010, 0, 1).getTime();
   const end = new Date(2030, 0, 1).getTime();
   return new Date(start + rng() * (end - start));
-}
+};
 
-function randomString(length: number) {
+const randomString = (length: number) => {
   const chars = 'abcdefghijklmnopqrstuvwxyz';
   return Array.from(
     {
@@ -89,7 +89,7 @@ function randomString(length: number) {
     },
     () => chars[Math.floor(rng() * chars.length)],
   ).join('');
-}
+};
 
 const tableData: MockRow[] = [...Array.from({ length: 10_000 }).keys()].map(
   (rowIdx) => {

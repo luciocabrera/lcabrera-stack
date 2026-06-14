@@ -21,17 +21,20 @@ type MockNavLinkProps = {
   readonly to?: string;
 };
 
-function MockButton({ children, onClick }: MockButtonProps) {
-  return (
-    <button onClick={onClick} type='button'>
-      {children}
-    </button>
-  );
-}
+const MockButton = vi.hoisted(
+  () =>
+    ({ children, onClick }: MockButtonProps) => {
+      return (
+        <button onClick={onClick} type='button'>
+          {children}
+        </button>
+      );
+    },
+);
 
-function MockNavLink({ children, to }: MockNavLinkProps) {
+const MockNavLink = vi.hoisted(() => ({ children, to }: MockNavLinkProps) => {
   return <a href={to}>{children}</a>;
-}
+});
 
 vi.mock('@/components/Button', () => ({
   Button: MockButton,

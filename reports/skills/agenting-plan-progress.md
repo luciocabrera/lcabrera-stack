@@ -25,3 +25,10 @@
   - reports/skills/handoff-prompts.md
   - reports/skills/handoff-runbook.md
   - reports/skills/handoff-runbook-source-audit.md
+
+### 2026-06-14T14:45:15.674Z - SOURCE-AUDIT-FINDINGS
+
+- Action: Generated full source-code smell report.
+- Files analyzed: 1283
+- Findings: 53
+- Output: reports/skills/code-smell-full-audit.md

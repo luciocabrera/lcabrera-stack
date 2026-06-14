@@ -1,17 +1,13 @@
-import type {
-  ColumnOrderState,
-  ColumnPinningState,
-  DataKey,
-} from '@/components/Table/Table.types';
+import type { DataKey } from '@/components/Table/Table.types';
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { usePersistTableStateAction } from '@/components/Table/hooks';
-import {
-  getPinnedDerivedColumnsState,
-  syncColumnOrderWithPinning,
-} from '@/components/Table/utils';
 
-import { commitPinningAndOrderUpdate } from './commitPinningAndOrderUpdate.util';
+import {
+  commitResolvedPinningState,
+  getPinningActionContext,
+  resolveColumnPinningUpdate,
+} from './utils';
 
 type SetColumnPinningArgs<TData> = {
   readonly columnKey: DataKey<TData>;
@@ -23,54 +19,34 @@ export const useSetColumnPinning = <TData>() => {
   const persistTableState = usePersistTableStateAction();
 
   return ({ columnKey, side }: SetColumnPinningArgs<TData>) => {
-    const columnsState = columnsStore.get();
-    const currentPinning = columnsState?.columnPinning ?? {
-      left: [],
-      right: [],
-    };
-    const columns = columnsState?.columns ?? [];
-    const currentOrder =
-      columnsState?.columnOrder ?? ([] as ColumnOrderState<TData>);
-    const persistenceKey = metaStore.get()?.persistenceKey ?? '';
-
-    const left = currentPinning.left.filter((k) => k !== columnKey);
-    const right = currentPinning.right.filter((k) => k !== columnKey);
-
-    let newPinning: ColumnPinningState<TData>;
-    if (side === 'left') {
-      newPinning = { left: [...left, columnKey], right };
-    } else if (side === 'right') {
-      newPinning = { left, right: [...right, columnKey] };
-    } else {
-      newPinning = { left, right };
-    }
-
-    const newColumnOrder = syncColumnOrderWithPinning<TData>({
-      columnKey,
-      columnPinning: side,
+    const {
+      columnOrder,
+      columnPinning,
+      columnSizing,
+      columnVisibility,
       columns,
-      currentOrder,
-      newPinning,
+      persistenceKey,
+      staticKeys,
+    } = getPinningActionContext<TData>({ columnsStore, metaStore });
+
+    const { newColumnOrder, newPinning } = resolveColumnPinningUpdate<TData>({
+      columnKey,
+      columns,
+      currentOrder: columnOrder,
+      currentPinning: columnPinning,
+      side,
+      staticKeys,
     });
 
-    const { columnGroups, effectiveColumns, pinnedColumnOffsets } =
-      getPinnedDerivedColumnsState<TData>({
-        columnOrder: newColumnOrder,
-        columnPinning: newPinning,
-        columnSizing: columnsState?.columnSizing,
-        columns,
-        columnVisibility: columnsState?.columnVisibility,
-      });
-
-    commitPinningAndOrderUpdate<TData>({
-      columnGroups,
+    commitResolvedPinningState<TData>({
+      columnOrder: newColumnOrder,
+      columnPinning: newPinning,
+      columnSizing,
+      columnVisibility,
+      columns,
       columnsStore,
-      effectiveColumns,
-      newColumnOrder,
-      newPinning,
       persistenceKey,
       persistTableState,
-      pinnedColumnOffsets,
     });
   };
 };

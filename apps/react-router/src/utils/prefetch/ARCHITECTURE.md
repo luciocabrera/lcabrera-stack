@@ -13,7 +13,6 @@ implement optimistic next-page prefetching with `useSyncExternalStore`-based sto
 ```
 prefetch/
 ├── ARCHITECTURE.md                    → This file
-├── index.ts                           → Barrel (exports all 3 utils)
 ├── firePrefetch.util.ts               → Fire prefetch + apply to ref with staleness check
 ├── prefetchNextPage.util.ts           → Pure prefetch request creation (returns cache + promise)
 └── resolveFromCacheOrFetch.util.ts    → Resolve from cache hit/in-flight or fallback fetch

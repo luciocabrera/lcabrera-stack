@@ -1,0 +1,13 @@
+{
+  "name": "@repo/ts-configs",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./shared": "./tsconfig.shared.ts",
+    "./generate": "./generate.ts"
+  },
+  "scripts": {
+    "generate": "node --experimental-strip-types ./generate.ts"
+  }
+}

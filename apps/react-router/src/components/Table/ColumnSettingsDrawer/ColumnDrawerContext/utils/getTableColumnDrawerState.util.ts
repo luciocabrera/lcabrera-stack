@@ -34,10 +34,10 @@ export const getTableColumnDrawerState = <TData>({
     (sort) => sort.columnKey === columnKey,
   )?.direction;
 
-  const columnPinning = getColumnPinSide(
-    columnsState?.columnPinning,
+  const columnPinning = getColumnPinSide({
     columnKey,
-  );
+    pinning: columnsState?.columnPinning,
+  });
 
   return {
     columnFilter,

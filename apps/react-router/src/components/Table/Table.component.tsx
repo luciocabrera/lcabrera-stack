@@ -19,9 +19,7 @@ export const Table = <TData extends Record<string, unknown>, TResponse>({
   response,
 }: TableProps<TData, TResponse>) => {
   useRenderTracker({ componentName: 'Table' });
-  const data = dataSelector
-    ? dataSelector(response)
-    : ([] as unknown as TData[]);
+  const data = dataSelector ? dataSelector(response) : [];
   const totalRows = dataTotalSelector
     ? dataTotalSelector(response)
     : data.length;

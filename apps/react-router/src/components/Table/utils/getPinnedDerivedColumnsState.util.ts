@@ -4,6 +4,7 @@ import type {
   ColumnPinningState,
   ColumnSizingState,
   ColumnVisibilityState,
+  DataKey,
   PinnedColumnOffsetsState,
   TableColumn,
 } from '@/components/Table/Table.types';
@@ -31,7 +32,7 @@ export const getPinnedDerivedColumnsState = <TData>({
   columnPinning,
   columnSizing,
   columns,
-  columnVisibility,
+  columnVisibility = new Set<DataKey<TData>>(),
 }: GetPinnedDerivedColumnsStateArgs<TData>): GetPinnedDerivedColumnsStateResult<TData> => {
   const effectiveColumns = getEffectiveColumns<TData>({
     columnOrder,

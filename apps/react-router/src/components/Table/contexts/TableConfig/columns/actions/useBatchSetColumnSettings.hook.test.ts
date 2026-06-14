@@ -1,0 +1,197 @@
+// @vitest-environment jsdom
+
+import { act, renderHook } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { useBatchSetColumnSettings } from './useBatchSetColumnSettings.hook';
+
+const {
+  mockBuildPersistencePayload,
+  mockColumnsStore,
+  mockMetaStore,
+  mockPersistTableState,
+  mockResolveBatchColumnSettingsUpdate,
+  setColumnsState,
+} = vi.hoisted(() => {
+  let columnsState = {
+    columnFilters: {},
+    columnOrder: ['id', 'name', 'age'],
+    columnPinning: { left: ['id'], right: [] },
+    columnSizing: { actions: 0, age: 80, id: 100, name: 140 },
+    columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(['age']),
+    columns: [
+      { key: 'id', label: 'ID' },
+      { key: 'name', label: 'Name' },
+      { key: 'age', label: 'Age' },
+    ],
+    sorting: [],
+    staticKeys: new Set<string>(['id']),
+  };
+
+  return {
+    mockBuildPersistencePayload: vi.fn(() => [
+      { persistenceKey: 'orders-table', slice: 'sorting', valueSlice: [] },
+    ]),
+    mockColumnsStore: {
+      get: vi.fn(() => columnsState),
+      set: vi.fn(),
+    },
+    mockResolveBatchColumnSettingsUpdate: vi.fn(() => ({
+      columnFilters: {
+        name: { operator: 'contains', type: 'text', value: 'ali' },
+      },
+      columnGroups: {
+        centerCols: [{ key: 'age', label: 'Age' }],
+        leftPinnedCols: [{ key: 'id', label: 'ID' }],
+        rightPinnedCols: [{ key: 'name', label: 'Name' }],
+      },
+      columnOrder: ['id', 'age', 'name'],
+      columnPinning: { left: ['id'], right: ['name'] },
+      columnSizing: { actions: 0, age: 80, id: 100, name: 220 },
+      effectiveColumns: [
+        { key: 'id', label: 'ID' },
+        { key: 'age', label: 'Age' },
+        { key: 'name', label: 'Name' },
+      ],
+      normalizedColumns: {
+        age: { key: 'age', label: 'Age' },
+        id: { key: 'id', label: 'ID' },
+        name: {
+          key: 'name',
+          label: 'Name',
+          sortDirection: 'desc',
+          sortIndex: 0,
+        },
+      },
+      pinnedColumnOffsets: {
+        name: {
+          isFirstPinnedRight: true,
+          isLastPinnedLeft: false,
+          offset: 0,
+          side: 'right',
+        },
+      },
+      sorting: [{ columnKey: 'name', direction: 'desc' }],
+    })),
+    mockMetaStore: {
+      get: vi.fn(() => ({ persistenceKey: 'orders-table' })),
+      set: vi.fn(),
+    },
+    mockPersistTableState: vi.fn(),
+    setColumnsState: (nextState: typeof columnsState) => {
+      columnsState = nextState;
+    },
+  };
+});
+
+vi.mock(
+  '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
+  () => ({
+    useTableConfigContextValue: () => ({
+      columnsStore: mockColumnsStore,
+      metaStore: mockMetaStore,
+    }),
+  }),
+);
+
+vi.mock('@/components/Table/hooks', () => ({
+  usePersistTableStateAction: () => mockPersistTableState,
+}));
+
+vi.mock('./utils/buildPersistencePayload.util', () => ({
+  buildPersistencePayload: mockBuildPersistencePayload,
+}));
+
+vi.mock('./utils/resolveBatchColumnSettingsUpdate.util', () => ({
+  resolveBatchColumnSettingsUpdate: mockResolveBatchColumnSettingsUpdate,
+}));
+
+describe('useBatchSetColumnSettings', () => {
+  beforeEach(() => {
+    setColumnsState({
+      columnFilters: {},
+      columnOrder: ['id', 'name', 'age'],
+      columnPinning: { left: ['id'], right: [] },
+      columnSizing: { actions: 0, age: 80, id: 100, name: 140 },
+      columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(['age']),
+      columns: [
+        { key: 'id', label: 'ID' },
+        { key: 'name', label: 'Name' },
+        { key: 'age', label: 'Age' },
+      ],
+      sorting: [],
+      staticKeys: new Set<string>(['id']),
+    });
+    mockBuildPersistencePayload.mockClear();
+    mockColumnsStore.get.mockClear();
+    mockColumnsStore.set.mockClear();
+    mockMetaStore.get.mockClear();
+    mockMetaStore.set.mockClear();
+    mockPersistTableState.mockClear();
+    mockResolveBatchColumnSettingsUpdate.mockClear();
+  });
+
+  it('orchestrates the extracted utilities and commits the merged state', () => {
+    const { result } = renderHook(() =>
+      useBatchSetColumnSettings<{
+        readonly age: number;
+        readonly id: string;
+        readonly name: string;
+      }>(),
+    );
+
+    act(() => {
+      result.current({
+        columnFilter: { operator: 'contains', type: 'text', value: 'ali' },
+        columnKey: 'name',
+        columnPinning: 'right',
+        columnSizing: 220,
+        sorting: 'desc',
+      });
+    });
+
+    expect(mockColumnsStore.get).toHaveBeenCalledTimes(1);
+    expect(mockResolveBatchColumnSettingsUpdate).toHaveBeenCalledWith({
+      columnsState: {
+        columnFilters: {},
+        columnOrder: ['id', 'name', 'age'],
+        columnPinning: { left: ['id'], right: [] },
+        columnSizing: { actions: 0, age: 80, id: 100, name: 140 },
+        columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(['age']),
+        columns: [
+          { key: 'id', label: 'ID' },
+          { key: 'name', label: 'Name' },
+          { key: 'age', label: 'Age' },
+        ],
+        sorting: [],
+        staticKeys: new Set<string>(['id']),
+      },
+      settings: {
+        columnFilter: { operator: 'contains', type: 'text', value: 'ali' },
+        columnKey: 'name',
+        columnPinning: 'right',
+        columnSizing: 220,
+        sorting: 'desc',
+      },
+    });
+    expect(mockBuildPersistencePayload).toHaveBeenCalledWith({
+      columnFilters: {
+        name: { operator: 'contains', type: 'text', value: 'ali' },
+      },
+      columnOrder: ['id', 'age', 'name'],
+      columnPinning: { left: ['id'], right: ['name'] },
+      columnSizing: { actions: 0, age: 80, id: 100, name: 220 },
+      persistenceKey: 'orders-table',
+      sorting: [{ columnKey: 'name', direction: 'desc' }],
+    });
+    expect(mockPersistTableState).toHaveBeenCalledWith([
+      { persistenceKey: 'orders-table', slice: 'sorting', valueSlice: [] },
+    ]);
+    expect(mockColumnsStore.set).toHaveBeenCalledWith(
+      mockResolveBatchColumnSettingsUpdate.mock.results[0]?.value,
+    );
+    expect(mockMetaStore.set).toHaveBeenCalledWith({
+      isColumnSettingsOpen: false,
+    });
+  });
+});

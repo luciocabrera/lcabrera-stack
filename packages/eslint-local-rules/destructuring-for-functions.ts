@@ -68,6 +68,8 @@ function isArrayMethodCallback(node: any): boolean {
     // Check for array methods (map, filter, forEach, find, findIndex, some, every, reduce, etc.)
     if (callee?.type === 'MemberExpression') {
       const methodName = callee.property?.name;
+      const objectName =
+        callee.object?.type === 'Identifier' ? callee.object.name : undefined;
       const arrayMethods = [
         'map',
         'filter',
@@ -80,11 +82,15 @@ function isArrayMethodCallback(node: any): boolean {
         'reduceRight',
         'flatMap',
         'sort',
+        'toSorted',
         'findLast',
         'findLastIndex',
       ];
 
-      return arrayMethods.includes(methodName);
+      return (
+        arrayMethods.includes(methodName) ||
+        (objectName === 'Array' && methodName === 'from')
+      );
     }
   }
 

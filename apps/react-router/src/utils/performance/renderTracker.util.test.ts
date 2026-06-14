@@ -26,7 +26,7 @@ describe('renderTracker.util', () => {
 
     trackRender('OrdersTable');
     trackRender('OrdersTable');
-    trackRenderComplete('OrdersTable', 50);
+    trackRenderComplete({ componentName: 'OrdersTable', startTime: 50 });
 
     expect(renderStats.getComponent('OrdersTable')).toMatchObject({
       count: 2,
@@ -104,7 +104,10 @@ describe('renderTracker.util', () => {
     const tableSpy = vi.spyOn(console, 'table').mockImplementation(() => {});
 
     trackRender('OrdersTable');
-    trackRenderComplete('OrdersTable', performance.now() - 10);
+    trackRenderComplete({
+      componentName: 'OrdersTable',
+      startTime: performance.now() - 10,
+    });
     trackRender('FiltersPanel');
 
     renderStats.print();

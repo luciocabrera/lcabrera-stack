@@ -1,0 +1,41 @@
+{
+  "name": "admin-system",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:eslint-rules": "cd ../../packages/eslint-local-rules && vp run build",
+    "lint": "vp run build:eslint-rules && vp lint . --fix && vp run lint:custom-rules",
+    "lint:check": "vp run build:eslint-rules && vp lint . && vp run lint:custom-rules",
+    "lint:custom-rules": "eslint . --config eslint.custom-rules.config.mjs --max-warnings 0",
+    "dev": "react-router dev",
+    "typegen": "react-router typegen",
+    "typecheck": "react-router typegen && tsc"
+  },
+  "dependencies": {
+    "@react-router/node": "catalog:",
+    "@react-router/serve": "catalog:",
+    "@stylexjs/stylex": "catalog:",
+    "isbot": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "react-router": "catalog:"
+  },
+  "devDependencies": {
+    "@react-router/dev": "catalog:",
+    "@repo/vite-configs": "workspace:*",
+    "@stylexjs/eslint-plugin": "catalog:",
+    "@stylexjs/unplugin": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@typescript-eslint/utils": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "babel-plugin-react-compiler": "catalog:",
+    "typescript": "catalog:",
+    "typescript-eslint": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-babel": "catalog:",
+    "vite-plus": "catalog:",
+    "vitest": "catalog:"
+  }
+}

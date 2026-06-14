@@ -1,0 +1,11 @@
+{
+  "name": "@repo/utils",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    "./merge-arrays": "./merge-arrays.util.ts",
+    "./merge-objects": "./merge-objects.util.ts"
+  }
+}

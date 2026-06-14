@@ -55,7 +55,7 @@ export const Settings = () => {
   const setGlobalPinningPreferences = useSetGlobalPinningPreferences();
 
   const [draft, setDraft] = useState<SettingsDraft>(() => {
-    return toDraft(navigationPreferences, pinningPreferences);
+    return toDraft({ navigationPreferences, pinningPreferences });
   });
 
   const hasNavigationChanges =
@@ -121,7 +121,7 @@ export const Settings = () => {
   };
 
   const handleCancel = (): void => {
-    setDraft(toDraft(navigationPreferences, pinningPreferences));
+    setDraft(toDraft({ navigationPreferences, pinningPreferences }));
   };
 
   const handleNavigationCollapsedChange = (

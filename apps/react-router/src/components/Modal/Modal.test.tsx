@@ -3,7 +3,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { mockDialogElement } from '@/components/test-utils/mockDialogElement.util';
+import { mockDialogElement } from '@/utils/tests/mockDialogElement.util';
 
 import { Modal } from './Modal.component';
 

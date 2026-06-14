@@ -4,7 +4,6 @@ import type { ColumnOrderState } from '@/components/Table/Table.types';
 import { useGetGlobalOrderConflictResolutionPreference } from '@/contexts/GlobalSettingsContext/selectors';
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import {
-  detectPinOrderConflict,
   recalculatePinSides,
   restoreStaticColumnOrder,
 } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
@@ -13,6 +12,7 @@ import { useTableDrawerContextValue } from '@/components/Table/TableSettingsDraw
 import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
 
 import { useAcceptOrderConflict } from './useAcceptOrderConflict.hook';
+import { resolveOrderConflictUpdate } from './utils/resolveOrderConflictUpdate.util';
 
 /**
  * Hook to handle column reordering via drag and drop.
@@ -50,34 +50,29 @@ export const useReorderColumns = () => {
       staticKeys,
     });
 
-    if (
-      !detectPinOrderConflict({
-        columnPinning: recalculatedPinning,
-        newOrder: finalOrder,
-        staticKeys,
-      })
-    ) {
+    const resolvedUpdate = resolveOrderConflictUpdate({
+      columnPinning: recalculatedPinning,
+      conflictDescription:
+        'Dragging this column broke the pinning layout. Pinned columns must stay at the edges. Choose how to proceed:',
+      newOrder: finalOrder,
+      orderConflictResolutionPreference,
+      staticKeys,
+    });
+
+    if (resolvedUpdate.kind === 'apply-order') {
       drawerColumnsStore.set({
-        columnOrder: finalOrder,
-        columnPinning: recalculatedPinning,
+        columnOrder: resolvedUpdate.newOrder,
+        columnPinning: resolvedUpdate.pendingPinning,
       });
       return;
     }
 
-    const orderConflict = {
-      description:
-        'Dragging this column broke the pinning layout. Pinned columns must stay at the edges. Choose how to proceed:',
-      isOpen: !orderConflictResolutionPreference,
-      pendingOrder: finalOrder,
-      pendingPinning: recalculatedPinning,
-    };
-
     modalsStore.set({
-      orderConflict,
+      orderConflict: resolvedUpdate.orderConflict,
     });
 
-    if (orderConflictResolutionPreference) {
-      acceptOrderConflict(orderConflictResolutionPreference);
+    if (resolvedUpdate.kind === 'auto-accept-conflict') {
+      acceptOrderConflict(resolvedUpdate.resolution);
     }
   };
 };

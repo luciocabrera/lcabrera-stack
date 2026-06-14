@@ -6,11 +6,20 @@
   "exports": {
     "./fmt": "./vite.fmt.shared.config.ts",
     "./base-lint": "./vite.base-lint.shared.config.ts",
+    "./eslint-custom-rules": "./eslint.custom-rules.shared.config.mjs",
     "./frontend-lint": "./vite.frontend-lint.shared.config.ts",
     "./api-lint": "./vite.api-lint.shared.config.ts",
-    "./react-router-lint": "./vite.react-router-lint.shared.config.ts"
+    "./react-router-lint": "./vite.react-router-lint.shared.config.ts",
+    "./plugins": "./vite.plugins.shared.config.ts"
   },
   "devDependencies": {
+    "@babel/preset-typescript": "catalog:",
+    "@react-router/dev": "catalog:",
+    "@repo/plugins": "workspace:*",
+    "@repo/utils": "workspace:*",
+    "@stylexjs/unplugin": "catalog:",
+    "babel-plugin-react-compiler": "catalog:",
+    "vite-plugin-babel": "catalog:",
     "vite-plus": "catalog:"
   }
 }

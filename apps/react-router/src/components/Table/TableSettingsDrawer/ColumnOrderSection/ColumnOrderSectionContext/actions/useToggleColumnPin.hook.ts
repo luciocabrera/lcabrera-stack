@@ -1,20 +1,17 @@
-import type { ColumnOrderState } from '@/components/Table/Table.types';
+import type { DataKey } from '@/components/Table/Table.types';
 
 import { useGetGlobalPinSidePreference } from '@/contexts/GlobalSettingsContext/selectors/useGetGlobalPinSidePreference.hook';
 import { useGetGlobalUnpinConflictResolutionPreference } from '@/contexts/GlobalSettingsContext/selectors/useGetGlobalUnpinConflictResolutionPreference.hook';
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
-import {
-  buildAllOrderedColumns,
-  detectPinOrderConflict,
-} from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 import { useTableDrawerContextValue } from '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
 
 import { useAcceptPinSide } from './useAcceptPinSide.hook';
 import { useAcceptUnpinConflict } from './useAcceptUnpinConflict.hook';
+import { resolveToggleColumnPinUpdate } from './utils/resolveToggleColumnPinUpdate.util';
 import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
 
 type UseToggleColumnPinArgs = {
-  readonly columnKey: string;
+  readonly columnKey: DataKey<Record<string, unknown>>;
   readonly isPinning: boolean;
 };
 /**
@@ -35,86 +32,51 @@ export const useToggleColumnPin = () => {
     const tableColumnsState = tableColumnsStore.get();
     const columns = tableColumnsState?.columns ?? [];
     const column = tableColumnsState?.normalizedColumns[columnKey];
-    if (column?.isStatic) return;
-
-    const staticKeys = tableColumnsState?.staticKeys ?? new Set<string>();
+    const isColumnStatic = column?.isStatic ?? false;
+    const staticKeys = tableColumnsState?.staticKeys;
 
     const drawerState = drawerColumnsStore.get();
-    const columnsOrder = drawerState?.columnOrder ?? ([] as ColumnOrderState);
     const columnPinning = drawerState?.columnPinning ?? { left: [], right: [] };
+    const columnsOrder = drawerState?.columnOrder ?? [];
 
-    const allOrderedColumns = buildAllOrderedColumns({
+    const resolution = resolveToggleColumnPinUpdate({
+      columnKey,
+      columnPinning,
       columns,
       columnsOrder,
+      globalPinSidePreference,
+      globalUnpinConflictResolutionPreference,
+      isColumnStatic,
+      isPinning,
+      staticKeys,
     });
 
-    if (!isPinning) {
-      const newPinning = {
-        left: columnPinning.left.filter((k) => k !== columnKey),
-        right: columnPinning.right.filter((k) => k !== columnKey),
-      };
-
-      const currentOrder = allOrderedColumns.map(
-        (col) => col.key,
-      ) as ColumnOrderState;
-
-      if (
-        !detectPinOrderConflict({
-          columnPinning: newPinning,
-          newOrder: currentOrder,
-          staticKeys,
-        })
-      ) {
-        drawerColumnsStore.set({ columnPinning: newPinning });
-        return;
-      }
-
-      const side = columnPinning.left.includes(columnKey) ? 'left' : 'right';
-      const col = allOrderedColumns.find((c) => c.key === columnKey);
-
-      if (globalUnpinConflictResolutionPreference) {
-        modalsStore.set({
-          unpinConflictModal: {
-            columnKey,
-            columnLabel: col?.label ?? columnKey,
-            isOpen: false,
-            side,
-          },
-        });
-        acceptUnpinConflict(globalUnpinConflictResolutionPreference);
-      } else {
-        modalsStore.set({
-          unpinConflictModal: {
-            columnKey,
-            columnLabel: col?.label ?? columnKey,
-            isOpen: true,
-            side,
-          },
-        });
-      }
+    if (resolution.kind === 'ignored-static') {
       return;
     }
 
-    const col = allOrderedColumns.find((c) => c.key === columnKey);
-
-    if (globalPinSidePreference) {
-      modalsStore.set({
-        pinSideModal: {
-          columnKey,
-          columnLabel: col?.label ?? columnKey,
-          isOpen: false,
-        },
-      });
-      acceptPinSide(globalPinSidePreference);
+    if (resolution.kind === 'apply-pinning-direct') {
+      drawerColumnsStore.set({ columnPinning: resolution.nextPinning });
       return;
     }
 
-    modalsStore.set({
-      pinSideModal: {
-        columnKey,
-        columnLabel: col?.label ?? columnKey,
-        isOpen: true,
-      },
-    });
+    if (resolution.kind === 'open-pin-side-modal') {
+      modalsStore.set({ pinSideModal: resolution.modal });
+      return;
+    }
+
+    if (resolution.kind === 'auto-accept-pin-side') {
+      modalsStore.set({ pinSideModal: resolution.modal });
+      acceptPinSide(resolution.pinSide);
+      return;
+    }
+
+    if (resolution.kind === 'open-unpin-conflict-modal') {
+      modalsStore.set({ unpinConflictModal: resolution.modal });
+      return;
+    }
+
+    modalsStore.set({ unpinConflictModal: resolution.modal });
+    acceptUnpinConflict(resolution.resolution);
   };
 };

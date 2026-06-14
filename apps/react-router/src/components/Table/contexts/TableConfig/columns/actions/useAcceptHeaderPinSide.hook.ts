@@ -1,24 +1,14 @@
-import type {
-  ColumnOrderState,
-  ColumnPinningState,
-  DataKey,
-} from '@/components/Table/Table.types';
+import type { DataKey } from '@/components/Table/Table.types';
 import type { PinConflictState, PinSide } from '@/types/ui.types';
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { usePersistTableStateAction } from '@/components/Table/hooks';
-import {
-  applyPin,
-  buildAllOrderedColumns,
-  getIsContiguousPin,
-  resolveClosestEdgeSide,
-} from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
-import {
-  getPinnedDerivedColumnsState,
-  syncColumnOrderWithPinning,
-} from '@/components/Table/utils';
 
-import { commitPinningAndOrderUpdate } from './commitPinningAndOrderUpdate.util';
+import {
+  commitResolvedPinningState,
+  getPinningActionContext,
+  resolveAcceptedHeaderPinSideState,
+} from './utils';
 
 type AcceptHeaderPinSideArgs<TData> = {
   readonly columnKey: DataKey<TData>;
@@ -33,71 +23,38 @@ export const useAcceptHeaderPinSide = <TData>() => {
     columnKey,
     pinSide,
   }: AcceptHeaderPinSideArgs<TData>): PinConflictState | undefined => {
-    const columnsState = columnsStore.get();
-    const columns = columnsState?.columns ?? [];
-    const columnsOrder =
-      columnsState?.columnOrder ?? ([] as ColumnOrderState<TData>);
-    const columnPinning =
-      columnsState?.columnPinning ??
-      ({ left: [], right: [] } as ColumnPinningState<TData>);
-    const persistenceKey = metaStore.get()?.persistenceKey ?? '';
+    const {
+      columnOrder,
+      columnPinning,
+      columnSizing,
+      columnVisibility,
+      columns,
+      persistenceKey,
+      staticKeys,
+    } = getPinningActionContext<TData>({ columnsStore, metaStore });
 
-    const allOrderedColumns = buildAllOrderedColumns({ columns, columnsOrder });
-
-    const side = resolveClosestEdgeSide({
-      allOrderedColumns,
+    const resolution = resolveAcceptedHeaderPinSideState<TData>({
       columnKey,
+      columnPinning,
+      columnOrder,
+      columns,
       pinSide,
-    });
-
-    const isContiguous = getIsContiguousPin<TData>({
-      allOrderedColumns,
-      columnKey,
-      columnPinning,
-      side,
-    });
-
-    if (!isContiguous) {
-      return { isOpen: true, side };
-    }
-
-    const staticKeys = columnsState?.staticKeys;
-    const currentOrder =
-      columnsState?.columnOrder ?? ([] as ColumnOrderState<TData>);
-
-    const newPinning = applyPin<TData>({
-      columnKey,
-      columnPinning,
-      side,
       staticKeys,
     });
 
-    const newColumnOrder = syncColumnOrderWithPinning<TData>({
-      columnKey,
-      columnPinning: side,
+    if (resolution.kind === 'conflict') {
+      return resolution.conflict;
+    }
+
+    commitResolvedPinningState<TData>({
+      columnOrder: resolution.columnOrder,
+      columnPinning: resolution.columnPinning,
+      columnSizing,
+      columnVisibility,
       columns,
-      currentOrder,
-      newPinning,
-    });
-
-    const { columnGroups, effectiveColumns, pinnedColumnOffsets } =
-      getPinnedDerivedColumnsState<TData>({
-        columnOrder: newColumnOrder,
-        columnPinning: newPinning,
-        columnSizing: columnsState?.columnSizing,
-        columns,
-        columnVisibility: columnsState?.columnVisibility,
-      });
-
-    commitPinningAndOrderUpdate<TData>({
-      columnGroups,
       columnsStore,
-      effectiveColumns,
-      newColumnOrder,
-      newPinning,
       persistenceKey,
       persistTableState,
-      pinnedColumnOffsets,
     });
   };
 };

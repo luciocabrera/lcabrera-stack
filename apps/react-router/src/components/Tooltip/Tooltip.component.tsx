@@ -17,7 +17,9 @@ export const Tooltip = ({
   const id = useId();
   const triggerRef = useRef<HTMLSpanElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
-  const hideTimeoutRef = useRef<number>(0);
+  const hideTimeoutRef = useRef<
+    ReturnType<typeof globalThis.setTimeout> | undefined
+  >(undefined);
 
   const [isVisible, setIsVisible] = useState(false);
   const [arrowOffset, setArrowOffset] = useState<number | undefined>();
@@ -58,7 +60,7 @@ export const Tooltip = ({
     const timeoutId = globalThis.setTimeout(() => {
       tooltipRef.current?.hidePopover();
     }, TRANSITION_DURATION_MS);
-    hideTimeoutRef.current = timeoutId as unknown as number;
+    hideTimeoutRef.current = timeoutId;
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLSpanElement>) => {
@@ -109,7 +111,8 @@ export const Tooltip = ({
           {...stylex.props(
             styles.arrow,
             ARROW_STYLES[placement],
-            arrowOffset !== undefined && getArrowStyle(placement, arrowOffset),
+            arrowOffset !== undefined &&
+              getArrowStyle({ arrowOffset, placement }),
           )}
         />
         {content}

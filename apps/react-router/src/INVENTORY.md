@@ -37,15 +37,14 @@ Before creating anything new, check this inventory. If something here does the j
 
 ## Hooks
 
-| Hook                              | Location                                        | Description                                                                                                   |
-| --------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `useClickOutside`                 | `hooks/useClickOutside.hook.ts`                 | Fires callback when a `mousedown` occurs outside a given ref                                                  |
-| `useStore`                        | `hooks/useStore.hook.ts`                        | Ref-based external store with shallow-equality guard, subscribe, reset, SSR snapshot                          |
-| `useNotifications`                | `hooks/useNotifications.hook.ts`                | Accesses NotificationContext actions/state (`notify`, `dismissNotification`, `dismissNotifications`)          |
-| `useTheme`                        | `hooks/useTheme.hook.ts`                        | Returns `{ theme, setTheme }` from `ThemeContext` via React 19 `use()`                                        |
-| `useColumnVirtualization`         | `hooks/useColumnVirtualization.hook.ts`         | Computes `startIndex`, `endIndex`, `leftSpacerWidth`, `rightSpacerWidth` for horizontal column virtualisation |
-| `useVirtualization`               | `hooks/useVirtualization.hook.ts`               | Computes `startIndex`, `endIndex`, `totalHeight`, `offsetY` for a scrollable virtual list                     |
-| `useVirtualizationResizeObserver` | `hooks/useVirtualizationResizeObserver.hook.ts` | Preserves the ResizeObserver + RAF-based vertical virtualization experiment for side-by-side retesting        |
+| Hook                              | Location                                        | Description                                                                                            |
+| --------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `useClickOutside`                 | `hooks/useClickOutside.hook.ts`                 | Fires callback when a `mousedown` occurs outside a given ref                                           |
+| `useStore`                        | `hooks/useStore.hook.ts`                        | Ref-based external store with shallow-equality guard, subscribe, reset, SSR snapshot                   |
+| `useNotifications`                | `hooks/useNotifications.hook.ts`                | Accesses NotificationContext actions/state (`notify`, `dismissNotification`, `dismissNotifications`)   |
+| `useTheme`                        | `hooks/useTheme.hook.ts`                        | Returns `{ theme, setTheme }` from `ThemeContext` via React 19 `use()`                                 |
+| `useVirtualization`               | `hooks/useVirtualization.hook.ts`               | Computes `startIndex`, `endIndex`, `totalHeight`, `offsetY` for a scrollable virtual list              |
+| `useVirtualizationResizeObserver` | `hooks/useVirtualizationResizeObserver.hook.ts` | Preserves the ResizeObserver + RAF-based vertical virtualization experiment for side-by-side retesting |
 
 ---
 
@@ -53,11 +52,10 @@ Before creating anything new, check this inventory. If something here does the j
 
 ### `src/hooks/utils/`
 
-| Function                          | Location                                              | Description                                                                |
-| --------------------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------- |
-| `findFirstVisibleIndex`           | `hooks/utils/findFirstVisibleIndex.util.ts`           | Binary search: first index where `starts[i] + widths[i] > viewStart`       |
-| `findFirstOutOfViewIndex`         | `hooks/utils/findFirstOutOfViewIndex.util.ts`         | Binary search: first index where `starts[i] >= viewEnd`                    |
-| `getVerticalVirtualizationWindow` | `hooks/utils/getVerticalVirtualizationWindow.util.ts` | Computes fixed-row virtualization window geometry shared by vertical hooks |
+| Function                          | Location                                              | Description                                                                                             |
+| --------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `getVerticalVirtualizationWindow` | `hooks/utils/getVerticalVirtualizationWindow.util.ts` | Computes fixed-row virtualization window geometry shared by vertical hooks                              |
+| `setupObservedContainer`          | `hooks/utils/setupObservedContainer.util.ts`          | Attaches a ResizeObserver + scroll listener to a container element; preserves scroll position on resize |
 
 ### `src/components/Table/TableBody/utils/`
 
@@ -71,21 +69,57 @@ Before creating anything new, check this inventory. If something here does the j
 
 ### `src/components/Table/utils/`
 
-| Function                       | Location                                                      | Description                                                               |
-| ------------------------------ | ------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| `getPinnedDerivedColumnsState` | `components/Table/utils/getPinnedDerivedColumnsState.util.ts` | Computes effective columns, pin-based groups, and pinned offsets together |
+| Function                              | Location                                                             | Description                                                                                              |
+| ------------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `deriveColumnViewState`               | `components/Table/utils/deriveColumnViewState.util.ts`               | Composes normalized columns with effective columns, grouped pinning state, and pinned offsets            |
+| `getColumnPinSide`                    | `components/Table/utils/getColumnPinSide.util.ts`                    | Returns `'left'`, `'right'`, or `undefined` for a column key given current pinning state                 |
+| `getEffectiveColumns`                 | `components/Table/utils/getEffectiveColumns.util.ts`                 | Returns visible columns in display order applying visibility, order, and pinning                         |
+| `getNewColumnFiltersBasedOnColumnKey` | `components/Table/utils/getNewColumnFiltersBasedOnColumnKey.util.ts` | Builds next `ColumnFiltersState` by replacing/removing the entry for one column key                      |
+| `getNewColumnSizingBasedOnColumnKey`  | `components/Table/utils/getNewColumnSizingBasedOnColumnKey.util.ts`  | Builds next `ColumnSizingState` by replacing/removing the width entry for one column key                 |
+| `getNewPinningBasedOnColumnKey`       | `components/Table/utils/getNewPinningBasedOnColumnKey.util.ts`       | Builds next `ColumnPinningState` by pinning or unpinning one column, honoring static key constraints     |
+| `getNewSortingBasedOnColumnKey`       | `components/Table/utils/getNewSortingBasedOnColumnKey.util.ts`       | Builds next `SortingState` by adding, updating (in-place), or removing the sort entry for one column key |
+| `getNormalizedColumns`                | `components/Table/utils/getNormalizedColumns.util.ts`                | Enriches columns with sort direction and sort index metadata                                             |
+| `getPinnedColumnOffsets`              | `components/Table/utils/getPinnedColumnOffsets.util.ts`              | Computes sticky `left`/`right` pixel offsets and pin-boundary markers for pinned columns                 |
+| `getPinnedDerivedColumnsState`        | `components/Table/utils/getPinnedDerivedColumnsState.util.ts`        | Computes effective columns, pin-based groups, and pinned offsets together in one call                    |
+| `getStaticColumnKeys`                 | `components/Table/utils/getStaticColumnKeys.util.ts`                 | Returns a `Set` of keys for columns marked as non-reorderable                                            |
+| `getStorageKey`                       | `components/Table/utils/getStorageKey.util.ts`                       | Builds a namespaced `persistenceKey:slice` storage key                                                   |
+| `readPersistedStateFromCookie`        | `components/Table/utils/readPersistedStateFromCookie.util.ts`        | Parses table persisted state from cookies; SSR-safe                                                      |
+| `serializeStateSlice`                 | `components/Table/utils/serializeStateSlice.util.ts`                 | Converts a state slice to a `{ key, value }` payload for cookie/localStorage write                       |
+| `splitColumnsByPinning`               | `components/Table/utils/splitColumnsByPinning.util.ts`               | Splits effective columns into left, center, and right pin groups                                         |
+| `syncColumnOrderWithPinning`          | `components/Table/utils/syncColumnOrderWithPinning.util.ts`          | Reorders column order array to keep pinned columns grouped; tolerates missing current order              |
+| `writeStateSlice`                     | `components/Table/utils/writeStateSlice.util.ts`                     | Writes a serialized state slice to cookie or localStorage                                                |
 
 ### `src/components/Table/contexts/TableConfig/columns/actions/`
 
-| Function                      | Location                                                                                    | Description                                                                  |
-| ----------------------------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| `commitPinningAndOrderUpdate` | `components/Table/contexts/TableConfig/columns/actions/commitPinningAndOrderUpdate.util.ts` | Commits pinning/order persistence and applies synced derived slices to store |
+| Artifact                           | Location                                                                                               | Description                                                                                                        |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| `buildPersistencePayload`          | `components/Table/contexts/TableConfig/columns/actions/buildPersistencePayload.util.ts`                | Builds the persistence entry array shared by batch column and batch table settings actions                         |
+| `commitPinningAndOrderUpdate`      | `components/Table/contexts/TableConfig/columns/actions/commitPinningAndOrderUpdate.util.ts`            | Commits pinning/order persistence and applies synced derived slices to store                                       |
+| `resolveBatchColumnSettingsUpdate` | `components/Table/contexts/TableConfig/columns/actions/utils/resolveBatchColumnSettingsUpdate.util.ts` | Resolves a per-column batch settings change into next filters, sorting, sizing, pinning, order, and derived slices |
+| `resolveBatchTableSettingsUpdate`  | `components/Table/contexts/TableConfig/columns/actions/utils/resolveBatchTableSettingsUpdate.util.ts`  | Resolves a table-wide settings change into next filters, sorting, sizing, visibility, and derived slices           |
+| `useAcceptHeaderPinConflict`       | `components/Table/contexts/TableConfig/columns/actions/useAcceptHeaderPinConflict.hook.ts`             | Resolves a pin conflict triggered from a column header interaction                                                 |
+| `useAcceptHeaderPinSide`           | `components/Table/contexts/TableConfig/columns/actions/useAcceptHeaderPinSide.hook.ts`                 | Accepts a pin-side selection from a header, resolving conflict state via `PinConflictState`                        |
+| `useBatchSetColumnSettings`        | `components/Table/contexts/TableConfig/columns/actions/useBatchSetColumnSettings.hook.ts`              | Orchestrates all per-column setting changes (sort/filter/size/pin/order) and persists in one action                |
+| `useBatchSetTableSettings`         | `components/Table/contexts/TableConfig/columns/actions/useBatchSetTableSettings.hook.ts`               | Batch-applies full table settings (filters, sorting, sizing, visibility, order) in one action                      |
+| `useSetColumnFilter`               | `components/Table/contexts/TableConfig/columns/actions/useSetColumnFilter.hook.ts`                     | Sets or removes a filter for one column; updates URL and resets pagination                                         |
+| `useSetColumnPinning`              | `components/Table/contexts/TableConfig/columns/actions/useSetColumnPinning.hook.ts`                    | Pins or unpins one column, reconciling derived column order and offsets                                            |
+| `useSetColumnSizing`               | `components/Table/contexts/TableConfig/columns/actions/useSetColumnSizing.hook.ts`                     | Sets the pixel width for one column and recomputes pinned offsets                                                  |
+| `useSetColumnSorting`              | `components/Table/contexts/TableConfig/columns/actions/useSetColumnSorting.hook.ts`                    | Sets the sort direction for one column; updates URL and resets pagination                                          |
+| `useSyncColumnsSizing`             | `components/Table/contexts/TableConfig/columns/actions/useSyncColumnsSizing.hook.ts`                   | Persists current column sizing state from store to cookie/localStorage                                             |
+
+### `src/components/Table/TableSettingsDrawer/TableDrawerContext/actions/`
+
+| Artifact                         | Location                                                                                                 | Description                                                                                     |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `buildBatchTableSettingsUpdate`  | `components/Table/TableSettingsDrawer/TableDrawerContext/actions/buildBatchTableSettingsUpdate.util.ts`  | Normalizes a table-drawer snapshot into the full payload expected by `useBatchSetTableSettings` |
+| `useBatchSetTableDrawerSettings` | `components/Table/TableSettingsDrawer/TableDrawerContext/actions/useBatchSetTableDrawerSettings.hook.ts` | Reads drawer-local table state and commits it through the table-level batch action              |
 
 ### `src/components/test-utils/`
 
 | Function                              | Location                                                            | Description                                                                                  |
 | ------------------------------------- | ------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
 | `createMockStore`                     | `components/test-utils/createMockStore.util.ts`                     | Generic external-store-like test scaffold (`get`, `set`, `reset`, `subscribe`, SSR snapshot) |
+| `createPaginatedFetchActionMocks`     | `components/test-utils/createPaginatedFetchActionMocks.util.ts`     | Shared harness for paginated Table fetch-hook tests with stores + prefetch mocks             |
 | `createTableConfigColumnsActionMocks` | `components/test-utils/createTableConfigColumnsActionMocks.util.ts` | Shared TableConfig columns-action test scaffold with mocked stores + persistence wiring      |
 | `mockDialogElement`                   | `components/test-utils/mockDialogElement.util.ts`                   | Mocks HTMLDialogElement prototype behavior with restore handles for test teardown            |
 
@@ -95,6 +129,29 @@ Before creating anything new, check this inventory. If something here does the j
 | --------------------------- | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
 | `getInitialColumnsState`    | `components/Table/ColumnSettingsDrawer/ColumnDrawerContext/utils/getInitialColumnsState.util.ts`    | Builds initial column drawer state shape                  |
 | `getTableColumnDrawerState` | `components/Table/ColumnSettingsDrawer/ColumnDrawerContext/utils/getTableColumnDrawerState.util.ts` | Maps a table columns snapshot to drawer state for one key |
+
+### `src/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/actions/`
+
+| Artifact                          | Location                                                                                                    | Description                                                                         |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `useBatchSetColumnDrawerSettings` | `components/Table/ColumnSettingsDrawer/ColumnDrawerContext/actions/useBatchSetColumnDrawerSettings.hook.ts` | Reads drawer-local column state and commits it through the table-level batch action |
+
+### `src/components/Table/TableSettingsDrawer/ColumnOrderSection/utils/`
+
+| Function | Location | Description |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- || `derivePinSideResolutionState` | `components/Table/TableSettingsDrawer/ColumnOrderSection/utils/derivePinSideResolutionState.util.ts` | Resolves pin-side choice (left/right/closest-edge) to next state or conflict flag, shared by drawer and header flows || `resolvePinConflictState` | `components/Table/TableSettingsDrawer/ColumnOrderSection/utils/resolvePinConflictState.util.ts` | Resolves pin-conflict resolution (`move-column`, `pin-all-between`, `pin-only`) into next `columnOrder` + `columnPinning` |
+| `resolveToggleColumnPinIntent` | `components/Table/TableSettingsDrawer/ColumnOrderSection/utils/resolveToggleColumnPinIntent.util.ts` | Resolves toggle pin/unpin intent into direct updates or modal/auto-accept decisions |
+| `restoreStaticPinnedColumns` | `components/Table/TableSettingsDrawer/ColumnOrderSection/utils/restoreStaticPinnedColumns.util.ts` | Restores static-column pin membership to default left/right pin groups after conflict resolution |
+
+### `src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/`
+
+| Function                            | Location                                                                                                                                    | Description                                                                                                        |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `resolveOrderConflictUpdate`        | `components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/resolveOrderConflictUpdate.util.ts`        | Decides whether a reordered column layout can be applied directly or must open/auto-accept the order-conflict flow |
+| `resolveToggleColumnPinUpdate`      | `components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/resolveToggleColumnPinUpdate.util.ts`      | Resolves static short-circuit plus pin-toggle intent into direct update or modal/auto-accept outcomes              |
+| `resolveAcceptedOrderConflictState` | `components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/resolveAcceptedOrderConflictState.util.ts` | Resolves accepted order-conflict state into final order/pinning with static restoration                            |
+| `resolveAcceptedPinSideUpdate`      | `components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/resolveAcceptedPinSideUpdate.util.ts`      | Resolves accepted pin-side actions into direct updates or conflict-modal/auto-accept outcomes                      |
+| `resolveAcceptedUnpinConflictState` | `components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/resolveAcceptedUnpinConflictState.util.ts` | Resolves unpin-conflict choices into pinning-only updates or reorder+pinning updates                               |
 
 ### `src/utils/api/`
 
@@ -137,6 +194,14 @@ Before creating anything new, check this inventory. If something here does the j
 | -------------- | ----------------------------- | -------------------------------------------------------------------------------------- |
 | `logger`       | `utils/logger/logger.util.ts` | Default singleton logger reading `VITE_LOG_LEVEL` env var                              |
 | `createLogger` | `utils/logger/logger.util.ts` | Factory: `createLogger({ level?, prefix? })` → level-filtered, tree-shakeable `Logger` |
+
+### `src/utils/performance/`
+
+| Function              | Location                                  | Description                                                                      |
+| --------------------- | ----------------------------------------- | -------------------------------------------------------------------------------- |
+| `trackRender`         | `utils/performance/renderTracker.util.ts` | Records a render event for a named component (dev-only)                          |
+| `trackRenderComplete` | `utils/performance/renderTracker.util.ts` | Marks a render complete with timing; pairs with `trackRender`                    |
+| `renderStats`         | `utils/performance/renderTracker.util.ts` | Object of methods to query/reset accumulated render counts and timing (dev-only) |
 
 ### `src/utils/prefetch/`
 
@@ -182,6 +247,13 @@ Before creating anything new, check this inventory. If something here does the j
 | `readStateFromURL`          | `utils/urlState/readStateFromURL.util.ts`          | Reads + decodes a single key from `URLSearchParams`                                   |
 | `readTableStateFromURL`     | `utils/urlState/readTableStateFromURL.util.ts`     | Convenience wrapper: reads sorting, filters, and column-visibility state from the URL |
 | `serializeFiltersToURL`     | `utils/urlState/serializeFiltersToURL.util.ts`     | `ColumnFiltersState` → compact JSON using operator short-codes                        |
+| `serializeFilter`           | `utils/urlState/serializeFilter.util.ts`           | Dispatches a single `ColumnFilter` to the matching leaf serializer                    |
+| `serializeBooleanFilter`    | `utils/urlState/serializeBooleanFilter.util.ts`    | Serializes boolean filters as bare booleans                                           |
+| `serializeDateFilter`       | `utils/urlState/serializeDateFilter.util.ts`       | Serializes date filters using compact operator codes and optional range values        |
+| `serializeSelectFilter`     | `utils/urlState/serializeSelectFilter.util.ts`     | Serializes select and multi-select filters to compact arrays                          |
+| `serializeNumberFilter`     | `utils/urlState/serializeNumberFilter.util.ts`     | Serializes number filters using compact operator codes and optional range values      |
+| `serializeTextFilter`       | `utils/urlState/serializeTextFilter.util.ts`       | Serializes text filters to compact operator/value arrays                              |
+| `getSerializedOperator`     | `utils/urlState/getSerializedOperator.util.ts`     | Maps long operator names to short codes via `OPERATOR_TO_SHORT`                       |
 | `deserializeFiltersFromURL` | `utils/urlState/deserializeFiltersFromURL.util.ts` | Compact URL param → full `ColumnFiltersState`                                         |
 | `deserializeFilter`         | `utils/urlState/deserializeFilter.util.ts`         | Deserialises a single compact filter value with type inference                        |
 | `serializeSortingToURL`     | `utils/urlState/serializeSortingToURL.util.ts`     | `SortingState[]` → compact `{ [key]: 'asc'                                            | 'desc' }` object |
@@ -201,7 +273,7 @@ Before creating anything new, check this inventory. If something here does the j
 | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- | --------------------------------------------------------------------------------- |
 | `API_SERVER_PORT`, `CONFIG`                                                                                                                                          | `constants/api.constants.ts`                | API server port and host config per environment (dev / localhost / prod)          |
 | `OPERATOR_TO_SHORT`, `SHORT_TO_OPERATOR`, `TEXT_OPERATORS`, `NUMBER_OPERATORS`, `DATE_OPERATORS`, …                                                                  | `constants/filterOperators.constants.ts`    | Bidirectional operator ↔ short-code maps and operator arrays per data type        |
-| `DEFAULT_CONTAINER_HEIGHT`, `DEFAULT_CONTAINER_WIDTH`, `DEFAULT_ROW_OVERSCAN`, `DEFAULT_COLUMN_OVERSCAN`                                                             | `constants/virtualization.constants.ts`     | Default dimensions and overscan values for virtualization hooks                   |
+| `DEFAULT_CONTAINER_HEIGHT`, `DEFAULT_ROW_OVERSCAN`                                                                                                                   | `constants/virtualization.constants.ts`     | Default dimensions and row overscan values for virtualization hooks               |
 | `DEFAULT_LOCALE`, `DEFAULT_CURRENCY`, `DEFAULT_DATE_PRESET`                                                                                                          | `utils/formatters/formatters.constants.ts`  | Formatting defaults (`en-US`, `USD`, `medium`)                                    |
 | `INITIAL_PAGE_SIZE`, `LOAD_MORE_PAGE_SIZE`, `DEFAULT_FILTER_PAGE_SIZE`, `DEFAULT_ENABLE_PREFETCH`, …                                                                 | `components/Table/Table.constants.ts`       | Table pagination sizes, prefetch toggle, scroll threshold, column widths          |
 | `NAVIGATION_SIZE_PREFERENCE_OPTIONS`                                                                                                                                 | `constants/globalSettings.constants.ts`     | Labelled option array for global navigation sizing (`compact/small/medium/large`) |
@@ -219,16 +291,14 @@ Before creating anything new, check this inventory. If something here does the j
 | `ThemeMode`, `ThemeContextValue`                                                                                                                                                                                                        | `types/theme.types.ts`              | Light/dark mode enum and context shape                                                        |
 | `InfiniteScroll`, `Pagination`, `PinSide`, `SortDirection`, `Sorting`, `PinConflictState`, `PrefetchCache`                                                                                                                              | `types/ui.types.ts`                 | Shared UI primitive types                                                                     |
 | `ApiConfig`                                                                                                                                                                                                                             | `types/api.types.ts`                | API config shape keyed by environment                                                         |
-| `DbSanityPayload`                                                                                                                                                                                                                       | `root/Root.types.ts`                | Dev preflight response shape for `/api/db-sanity`                                             |
 | `OrderConflictResolution`, `OrderConflictResolutionPreferenceOption`, `PinConflictResolution`, `PinSidePreferenceOption`, `PinConflictResolutionPreferenceOption`, `UnpinConflictResolution`, `UnpinConflictResolutionPreferenceOption` | `types/pinningPreferences.types.ts` | Pinning prompt resolution unions and preference option unions including `always-ask` sentinel |
 | `GlobalNavigationPreferences`, `GlobalNavigationSizePreference`, `GlobalPinningPreferences`, `GlobalSettingsState`                                                                                                                      | `types/globalSettings.types.ts`     | Global settings state shape (navigation + pinning) persisted in `global-settings` cookie      |
 
 ## Routes
 
-| Route                         | Location                             | Description                                                                                        |
-| ----------------------------- | ------------------------------------ | -------------------------------------------------------------------------------------------------- |
-| `/wide-alltypes-150`          | `routes/wide-alltypes-150/`          | Stress-test page for the `wide_alltypes_150` dataset using the shared `TableLayout` implementation |
-| `/wide-alltypes-150-tanstack` | `routes/wide-alltypes-150-tanstack/` | Sibling experiment for the same dataset using TanStack Table, TanStack Query, and TanStack Virtual |
+| Route                | Location                    | Description                                                                                        |
+| -------------------- | --------------------------- | -------------------------------------------------------------------------------------------------- |
+| `/wide-alltypes-150` | `routes/wide-alltypes-150/` | Stress-test page for the `wide_alltypes_150` dataset using the shared `TableLayout` implementation |
 
 ---
 

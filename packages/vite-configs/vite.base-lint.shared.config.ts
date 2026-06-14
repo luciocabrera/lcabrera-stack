@@ -1,5 +1,7 @@
 import type { OxlintConfig } from 'vite-plus/lint';
 
+import { mergeOxlintConfig } from './vite.config-merge.util.ts';
+
 const LOCAL_RULES_SPECIFIER = '../../packages/eslint-local-rules/index.js';
 
 const NATURAL_ASC_SORT_OPTIONS = {
@@ -167,9 +169,10 @@ export const baseLintSharedConfig: OxlintConfig = {
         '@typescript-eslint/unified-signatures': 'error',
         '@typescript-eslint/use-unknown-in-catch-callback-variable': 'error',
         'constructor-super': 'off',
+        'func-style': ['error', 'expression'],
         'getter-return': 'off',
         'local-rules/clean-import-paths': 'error',
-        'local-rules/destructuring-for-functions': 'warn',
+        'local-rules/destructuring-for-functions': 'error',
         'local-rules/merge-duplicate-imports': 'error',
         'local-rules/no-inline-type-imports': 'error',
         'local-rules/type-suffix-naming': 'error',
@@ -399,3 +402,22 @@ export const baseLintSharedConfig: OxlintConfig = {
     'unicorn/throw-new-error': 'error',
   },
 };
+
+type CreateBaseLintConfigArgs = Partial<
+  Pick<
+    OxlintConfig,
+    | 'categories'
+    | 'env'
+    | 'ignorePatterns'
+    | 'jsPlugins'
+    | 'options'
+    | 'overrides'
+    | 'plugins'
+    | 'rules'
+    | 'settings'
+  >
+>;
+
+export const createBaseLintConfig = (
+  overrides: CreateBaseLintConfigArgs = {},
+): OxlintConfig => mergeOxlintConfig(baseLintSharedConfig, overrides);

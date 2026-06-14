@@ -1,21 +1,50 @@
+import type { OxfmtConfig } from 'vite-plus/fmt';
+
 const BASE_IGNORE_PATTERNS = ['dist/', 'node_modules/'] as const;
 
-/**
- * Creates an Oxfmt formatter configuration for all packages in this monorepo.
- * Accepts additional `ignorePatterns` on top of the shared base patterns.
- */
-export const createFmtConfig = (
-  extraIgnorePatterns: readonly string[] = [],
-) => ({
-  arrowParens: 'always' as const,
+type FmtConfig = OxfmtConfig & {
+  readonly arrowParens: 'always';
+  readonly bracketSpacing: true;
+  readonly endOfLine: 'lf';
+  readonly ignorePatterns: string[];
+  readonly jsxSingleQuote: true;
+  readonly printWidth: 80;
+  readonly semi: true;
+  readonly singleQuote: true;
+  readonly sortPackageJson: true;
+  readonly tabWidth: 2;
+  readonly trailingComma: 'all';
+};
+
+type CreateFmtConfigArgs = {
+  readonly ignorePatterns?: readonly string[];
+  readonly overrides?: Partial<Omit<FmtConfig, 'ignorePatterns'>>;
+};
+
+const BASE_FMT_CONFIG: FmtConfig = {
+  arrowParens: 'always',
   bracketSpacing: true,
-  endOfLine: 'lf' as const,
-  ignorePatterns: [...BASE_IGNORE_PATTERNS, ...extraIgnorePatterns],
+  endOfLine: 'lf',
+  ignorePatterns: [...BASE_IGNORE_PATTERNS] as string[],
   jsxSingleQuote: true,
   printWidth: 80,
   semi: true,
   singleQuote: true,
   sortPackageJson: true,
   tabWidth: 2,
-  trailingComma: 'all' as const,
+  trailingComma: 'all',
+};
+
+/**
+ * Creates an Oxfmt formatter configuration for all packages in this monorepo.
+ * Accepts project-level overrides and additional `ignorePatterns` on top of
+ * the shared base patterns.
+ */
+export const createFmtConfig = ({
+  ignorePatterns = [],
+  overrides = {},
+}: CreateFmtConfigArgs = {}): FmtConfig => ({
+  ...BASE_FMT_CONFIG,
+  ...overrides,
+  ignorePatterns: [...BASE_IGNORE_PATTERNS, ...ignorePatterns] as string[],
 });

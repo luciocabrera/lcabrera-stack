@@ -1,0 +1,50 @@
+import type {
+  ColumnOrderState,
+  ColumnPinningState,
+  ColumnSizingState,
+  ColumnVisibilityState,
+  TableColumn,
+  TableColumnsState,
+} from '@/components/Table/Table.types';
+
+type GetPinningActionContextArgs<TData> = {
+  readonly columnsStore: {
+    readonly get: () => TableColumnsState<TData> | undefined;
+  };
+  readonly metaStore: {
+    readonly get: () =>
+      | {
+          readonly persistenceKey?: string;
+        }
+      | undefined;
+  };
+};
+
+type GetPinningActionContextResult<TData> = {
+  readonly columnOrder: ColumnOrderState<TData>;
+  readonly columnPinning: ColumnPinningState<TData>;
+  readonly columnSizing?: ColumnSizingState<TData>;
+  readonly columnVisibility?: ColumnVisibilityState<TData>;
+  readonly columns: readonly TableColumn<TData>[];
+  readonly persistenceKey: string;
+  readonly staticKeys?: Set<string>;
+};
+
+export const getPinningActionContext = <TData>({
+  columnsStore,
+  metaStore,
+}: GetPinningActionContextArgs<TData>): GetPinningActionContextResult<TData> => {
+  const columnsState = columnsStore.get();
+
+  return {
+    columnOrder: columnsState?.columnOrder ?? ([] as ColumnOrderState<TData>),
+    columnPinning:
+      columnsState?.columnPinning ??
+      ({ left: [], right: [] } as ColumnPinningState<TData>),
+    columnSizing: columnsState?.columnSizing,
+    columnVisibility: columnsState?.columnVisibility,
+    columns: columnsState?.columns ?? [],
+    persistenceKey: metaStore.get()?.persistenceKey ?? '',
+    staticKeys: columnsState?.staticKeys,
+  };
+};

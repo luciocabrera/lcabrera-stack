@@ -3,9 +3,9 @@ import type {
   ColumnPinningState,
 } from '@/components/Table/Table.types';
 
-type DetectPinOrderConflictArgs = {
-  readonly columnPinning: ColumnPinningState;
-  readonly newOrder: ColumnOrderState;
+type DetectPinOrderConflictArgs<TData> = {
+  readonly columnPinning: ColumnPinningState<TData>;
+  readonly newOrder: ColumnOrderState<TData>;
   readonly staticKeys?: Set<string>;
 };
 
@@ -15,11 +15,11 @@ type DetectPinOrderConflictArgs = {
  * and right-pinned columns must appear at the end (contiguous).
  * Static columns are excluded from conflict detection.
  */
-export const detectPinOrderConflict = ({
+export const detectPinOrderConflict = <TData>({
   columnPinning,
   newOrder,
   staticKeys,
-}: DetectPinOrderConflictArgs): boolean => {
+}: DetectPinOrderConflictArgs<TData>): boolean => {
   const left = staticKeys
     ? columnPinning.left.filter((key) => !staticKeys.has(key))
     : columnPinning.left;
@@ -27,7 +27,9 @@ export const detectPinOrderConflict = ({
     ? columnPinning.right.filter((key) => !staticKeys.has(key))
     : columnPinning.right;
   const filteredOrder = staticKeys
-    ? (newOrder.filter((key) => !staticKeys.has(key)) as ColumnOrderState)
+    ? (newOrder.filter(
+        (key) => !staticKeys.has(key),
+      ) as ColumnOrderState<TData>)
     : newOrder;
 
   if (left.length === 0 && right.length === 0) return false;

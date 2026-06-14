@@ -3,16 +3,10 @@ import type { PinSide } from '@/components/Table/TableSettingsDrawer/ColumnOrder
 import { useGetGlobalPinConflictResolutionPreference } from '@/contexts/GlobalSettingsContext/selectors';
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
-import {
-  applyPin,
-  buildAllOrderedColumns,
-  getIsContiguousPin,
-  resolveClosestEdgeSide,
-} from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 import { useTableDrawerContextValue } from '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
-import { syncColumnOrderWithPinning } from '@/components/Table/utils';
 
 import { useAcceptPinConflict } from './useAcceptPinConflict.hook';
+import { resolveAcceptedPinSideUpdate } from './utils/resolveAcceptedPinSideUpdate.util';
 import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
 
 export const useAcceptPinSide = () => {
@@ -35,64 +29,28 @@ export const useAcceptPinSide = () => {
     const columnPinning = drawerState?.columnPinning ?? { left: [], right: [] };
 
     const { columnKey } = pinSideModal;
-    const allOrderedColumns = buildAllOrderedColumns({
-      columns,
-      columnsOrder,
-    });
-    const side = resolveClosestEdgeSide({
-      allOrderedColumns,
-      columnKey,
-      pinSide,
-    });
-
-    const isContiguousPin = getIsContiguousPin({
-      allOrderedColumns,
+    const resolvedUpdate = resolveAcceptedPinSideUpdate({
       columnKey,
       columnPinning,
-      side,
+      columns,
+      columnsOrder,
+      pinConflictResolutionPreference,
+      pinSide,
+      staticKeys,
     });
 
-    if (isContiguousPin) {
-      const newPinning = applyPin({
-        columnKey,
-        columnPinning,
-        side,
-        staticKeys,
-      });
-      const newColumnOrder = syncColumnOrderWithPinning({
-        columnKey,
-        columnPinning: side,
-        columns,
-        currentOrder: columnsOrder,
-        newPinning,
-      });
-
+    if (resolvedUpdate.kind === 'apply-resolved') {
       drawerColumnsStore.set({
-        columnOrder: newColumnOrder,
-        columnPinning: newPinning,
+        columnOrder: resolvedUpdate.columnOrder,
+        columnPinning: resolvedUpdate.columnPinning,
       });
     } else {
-      const col = allOrderedColumns.find((c) => c.key === columnKey);
+      modalsStore.set({
+        conflictModal: resolvedUpdate.conflictModal,
+      });
 
-      if (pinConflictResolutionPreference) {
-        modalsStore.set({
-          conflictModal: {
-            columnKey,
-            columnLabel: col?.label ?? columnKey,
-            isOpen: false,
-            side,
-          },
-        });
-        acceptPinConflict(pinConflictResolutionPreference);
-      } else {
-        modalsStore.set({
-          conflictModal: {
-            columnKey,
-            columnLabel: col?.label ?? columnKey,
-            isOpen: true,
-            side,
-          },
-        });
+      if (resolvedUpdate.kind === 'auto-accept-conflict') {
+        acceptPinConflict(resolvedUpdate.resolution);
       }
     }
 
