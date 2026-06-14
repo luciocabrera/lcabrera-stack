@@ -142,6 +142,12 @@ Before creating anything new, check this inventory. If something here does the j
 | `resolveToggleColumnPinIntent` | `components/Table/TableSettingsDrawer/ColumnOrderSection/utils/resolveToggleColumnPinIntent.util.ts` | Resolves toggle pin/unpin intent into direct updates or modal/auto-accept decisions |
 | `restoreStaticPinnedColumns` | `components/Table/TableSettingsDrawer/ColumnOrderSection/utils/restoreStaticPinnedColumns.util.ts` | Restores static-column pin membership to default left/right pin groups after conflict resolution |
 
+### `src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/`
+
+| Function                     | Location                                                                                                                             | Description                                                                                                        |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| `resolveOrderConflictUpdate` | `components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/resolveOrderConflictUpdate.util.ts` | Decides whether a reordered column layout can be applied directly or must open/auto-accept the order-conflict flow |
+
 ### `src/utils/api/`
 
 | Function        | Location                | Description                                                                      |

@@ -16,6 +16,7 @@ ColumnOrderSectionContext/
 ├── useModalsStore.hook.ts                      → useSyncExternalStore + selector
 │
 ├── actions/                                    → 12 hooks that write to the store
+│   ├── actions/utils/resolveOrderConflictUpdate.util.ts → Shared apply-vs-modal decision for reorder and order-by-sorting flows
 │   ├── useAcceptPinSide                        → Accept pin side selection
 │   ├── useAcceptPinConflict                    → Resolve pin contiguity conflict
 │   ├── useAcceptUnpinConflict                  → Resolve unpin gap conflict
@@ -146,3 +147,9 @@ graph TD
 | Pin contiguity     | `PinConflictModal`   | `move-column`, `pin-all-between`, `pin-only`                      |
 | Unpin gap          | `UnpinConflictModal` | `unpin-beyond`, `reorder-to-fill`                                 |
 | Order/pin conflict | `OrderConflictModal` | `remove-conflicting-pins`, `reset-all-pins`, `pin-to-match-order` |
+
+## Shared Action Utility
+
+`useReorderColumns` and `useOrderBySorting` now share a pure action utility,
+`resolveOrderConflictUpdate`, to decide whether a proposed order can be applied
+directly or must open/auto-accept the order conflict flow.

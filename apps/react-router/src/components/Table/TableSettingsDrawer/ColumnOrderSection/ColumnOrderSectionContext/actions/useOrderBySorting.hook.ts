@@ -4,13 +4,11 @@ import type {
 } from '@/components/Table/Table.types';
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
-import {
-  detectPinOrderConflict,
-  restoreStaticColumnOrder,
-} from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
+import { restoreStaticColumnOrder } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 import { useTableDrawerContextValue } from '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
 
 import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
+import { resolveOrderConflictUpdate } from './utils/resolveOrderConflictUpdate.util';
 
 /**
  * Hook to order columns by current sorting state.
@@ -40,19 +38,21 @@ export const useOrderBySorting = () => {
       staticKeys,
     });
 
-    if (!detectPinOrderConflict({ columnPinning, newOrder, staticKeys })) {
+    const resolvedUpdate = resolveOrderConflictUpdate({
+      columnPinning,
+      conflictDescription:
+        'Reordering columns by sorting will move pinned columns out of their pinned positions. Choose how to proceed:',
+      newOrder,
+      staticKeys,
+    });
+
+    if (resolvedUpdate.kind === 'apply-order') {
       drawerColumnsStore.set({ columnOrder: newOrder });
       return;
     }
 
     modalsStore.set({
-      orderConflict: {
-        description:
-          'Reordering columns by sorting will move pinned columns out of their pinned positions. Choose how to proceed:',
-        isOpen: true,
-        pendingOrder: newOrder,
-        pendingPinning: columnPinning,
-      },
+      orderConflict: resolvedUpdate.orderConflict,
     });
   };
 };
