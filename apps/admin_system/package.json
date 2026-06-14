@@ -4,8 +4,8 @@
   "type": "module",
   "scripts": {
     "build:eslint-rules": "cd ../../packages/eslint-local-rules && vp run build",
-    "lint": "vp lint . --fix && vp run lint:custom-rules",
-    "lint:check": "vp lint . && vp run lint:custom-rules",
+    "lint": "vp run build:eslint-rules && vp lint . --fix && vp run lint:custom-rules",
+    "lint:check": "vp run build:eslint-rules && vp lint . && vp run lint:custom-rules",
     "lint:custom-rules": "eslint . --config eslint.custom-rules.config.mjs --max-warnings 0",
     "dev": "react-router dev",
     "typecheck": "react-router typegen && tsc"

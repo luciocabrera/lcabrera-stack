@@ -19,6 +19,7 @@ TableConfig/
 │   │
 │   ├── actions/
 │   │   ├── utils/buildPersistencePayload.util.ts       → Shared persistence-entry builder for batch settings hooks
+│   │   ├── utils/resolveBatchColumnSettingsUpdate.util.ts → Build next derived column config slices for one batch column update
 │   │   ├── utils/commitPinningAndOrderUpdate.util.ts → Shared persist+store commit helper for pinning actions
 │   │   ├── utils/resolveColumnPinningUpdate.util.ts  → Build next pinning state + synced order for one pinning change
 │   │   ├── utils/resolveColumnSizingUpdate.util.ts   → Build next sizing map + pinned offsets for one column resize
@@ -182,10 +183,11 @@ graph TD
 
 The two batch settings hooks now share two focused pure helpers instead of each inlining their derived-view and persistence-array construction.
 
-| Utility                   | Location                  | Purpose                                                                  |
-| ------------------------- | ------------------------- | ------------------------------------------------------------------------ |
-| `deriveColumnViewState`   | `components/Table/utils/` | Compose `normalizedColumns` with `getPinnedDerivedColumnsState()` output |
-| `buildPersistencePayload` | `columns/actions/utils/`  | Build the persistence entry array for batch settings updates             |
+| Utility                            | Location                  | Purpose                                                                             |
+| ---------------------------------- | ------------------------- | ----------------------------------------------------------------------------------- |
+| `deriveColumnViewState`            | `components/Table/utils/` | Compose `normalizedColumns` with `getPinnedDerivedColumnsState()` output            |
+| `buildPersistencePayload`          | `columns/actions/utils/`  | Build the persistence entry array for batch settings updates                        |
+| `resolveBatchColumnSettingsUpdate` | `columns/actions/utils/`  | Compose the next per-column batch update from shared sort/filter/size/pin resolvers |
 
 ## Columns Selectors
 
