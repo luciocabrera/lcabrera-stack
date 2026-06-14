@@ -5,8 +5,8 @@ Project: apps/react-router
 
 ## Current Baseline
 
-- Fallow full (`vp run fallow:full`): 28 above threshold · maintainability 93 (good) · 3078 analyzed
-- Fallow full failures: dead-code (6 issues), dupes (67 clone groups), health (28 above threshold)
+- Fallow full (`vp run fallow:full`): 25 above threshold · maintainability 93.1 (good) · 3093 analyzed
+- Fallow dead-code: 0 unused exports, 0 unused types, 0 unused dependencies
 - Canonical machine-readable source: `reports/fallow/fallow-full-latest.json`
 - Analysis source doc: `reports/fallow-complexity-threshold-analysis.md`
 - Quality gate: `vp check` passes (format + lint + type)
@@ -15,7 +15,6 @@ Project: apps/react-router
 ## Goals
 
 - Continue safe duplicate reduction in small batches
-- Reduce health threshold count from 28 by targeting highest-impact complexity hotspots first
 - Keep runtime behavior stable after each batch
 - Keep `vp check` green after every merge
 
@@ -34,15 +33,16 @@ Project: apps/react-router
 
 ## Batch Log
 
-| Date       | Batch | Changes                                                                                                                 | Validation                                             | Result    |
-| ---------- | ----- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ | --------- |
-| 2026-06-11 | B-001 | Introduced shared test store utility + deduped EnterpriseOrders distinct string columns                                 | Focused tests + `vp check` + fallow dupes              | Completed |
-| 2026-06-11 | B-002 | Added coordination docs for parallel agent execution                                                                    | `vp check` baseline captured                           | Completed |
-| 2026-06-11 | B-003 | Claimed WS-001/WS-004; extracted TableConfig action test scaffold + expanded EnterpriseOrders basic-column helper usage | Focused action tests + `vp check` + fallow dupes check | Completed |
-| 2026-06-11 | B-004 | Claimed WS-005; migrated drawer/context tests to shared createMockStore utility                                         | Focused drawer/data tests + `vp check` + fallow dupes  | Completed |
-| 2026-06-11 | B-005 | Attempted WS-002 theme token extraction; reverted when factory approach increased duplication (414 → 416)               | `vp check` + fallow dupes analysis                     | Rejected  |
-| 2026-06-11 | B-004 | Claimed WS-005; migrated drawer/context tests to shared createMockStore utility                                         | Focused drawer/data tests + `vp check` + fallow dupes  | Completed |
-| 2026-06-14 | B-006 | Revalidated complexity baseline with project command and reconciled reported mismatch                                   | `vp run fallow:full`                                   | Completed |
+| Date       | Batch | Changes                                                                                                                                                                                            | Validation                                             | Result    |
+| ---------- | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ | --------- |
+| 2026-06-11 | B-001 | Introduced shared test store utility + deduped EnterpriseOrders distinct string columns                                                                                                            | Focused tests + `vp check` + fallow dupes              | Completed |
+| 2026-06-11 | B-002 | Added coordination docs for parallel agent execution                                                                                                                                               | `vp check` baseline captured                           | Completed |
+| 2026-06-11 | B-003 | Claimed WS-001/WS-004; extracted TableConfig action test scaffold + expanded EnterpriseOrders basic-column helper usage                                                                            | Focused action tests + `vp check` + fallow dupes check | Completed |
+| 2026-06-11 | B-004 | Claimed WS-005; migrated drawer/context tests to shared createMockStore utility                                                                                                                    | Focused drawer/data tests + `vp check` + fallow dupes  | Completed |
+| 2026-06-11 | B-005 | Attempted WS-002 theme token extraction; reverted when factory approach increased duplication (414 → 416)                                                                                          | `vp check` + fallow dupes analysis                     | Rejected  |
+| 2026-06-11 | B-004 | Claimed WS-005; migrated drawer/context tests to shared createMockStore utility                                                                                                                    | Focused drawer/data tests + `vp check` + fallow dupes  | Completed |
+| 2026-06-14 | B-006 | Revalidated complexity baseline with project command and reconciled reported mismatch                                                                                                              | `vp run fallow:full`                                   | Completed |
+| 2026-06-14 | B-007 | Fixed TS2739/TS2740 lint error in `getPinningActionContext.util.test.ts`; removed 4 dead barrel re-exports (`getIsContiguousPin`, `pinAllBetween`, `resolveClosestEdgeSide`, `getChangedPropKeys`) | `vp check` + `fallow dead-code` → 0 issues             | Completed |
 
 ## Next Execution Plan
 
