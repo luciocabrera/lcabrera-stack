@@ -120,10 +120,11 @@ Before creating anything new, check this inventory. If something here does the j
 
 ### `src/components/Table/TableSettingsDrawer/ColumnOrderSection/utils/`
 
-| Function                     | Location                                                                                           | Description                                                                                                               |
-| ---------------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `resolvePinConflictState`    | `components/Table/TableSettingsDrawer/ColumnOrderSection/utils/resolvePinConflictState.util.ts`    | Resolves pin-conflict resolution (`move-column`, `pin-all-between`, `pin-only`) into next `columnOrder` + `columnPinning` |
-| `restoreStaticPinnedColumns` | `components/Table/TableSettingsDrawer/ColumnOrderSection/utils/restoreStaticPinnedColumns.util.ts` | Restores static-column pin membership to default left/right pin groups after conflict resolution                          |
+| Function                       | Location                                                                                             | Description                                                                                                               |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `resolvePinConflictState`      | `components/Table/TableSettingsDrawer/ColumnOrderSection/utils/resolvePinConflictState.util.ts`      | Resolves pin-conflict resolution (`move-column`, `pin-all-between`, `pin-only`) into next `columnOrder` + `columnPinning` |
+| `resolveToggleColumnPinIntent` | `components/Table/TableSettingsDrawer/ColumnOrderSection/utils/resolveToggleColumnPinIntent.util.ts` | Resolves toggle pin/unpin intent into direct updates or modal/auto-accept decisions                                       |
+| `restoreStaticPinnedColumns`   | `components/Table/TableSettingsDrawer/ColumnOrderSection/utils/restoreStaticPinnedColumns.util.ts`   | Restores static-column pin membership to default left/right pin groups after conflict resolution                          |
 
 ### `src/utils/api/`
 
