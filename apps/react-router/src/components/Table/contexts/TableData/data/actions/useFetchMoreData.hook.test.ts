@@ -4,80 +4,64 @@ import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { LOAD_MORE_PAGE_SIZE } from '@/components/Table/Table.constants';
+import { createPaginatedFetchActionMocks } from '@/components/test-utils/createPaginatedFetchActionMocks.util';
 
 import { useFetchMoreData } from './useFetchMoreData.hook';
 
-const {
-  firePrefetchMock,
-  mockMetaStore,
-  mockUseTableConfigContextValue,
-  mockUseTableDataContextValue,
-  resolveFromCacheOrFetchMock,
-  setDataStoreState,
-  setMetaStoreState,
-} = vi.hoisted(() => {
-  let dataStoreState = {
-    data: [{ id: 1 }],
-    hasMore: true,
-    isLoading: false,
-    isLoadingMore: false,
-    totalLoadedRows: 1,
-    totalRows: 3,
-  };
+type TestRow = {
+  readonly id: number;
+};
 
-  let metaStoreState: Record<string, unknown> = {
-    enablePrefetch: false,
-    loadMorePageSize: 50,
-  };
+type TestDataState = {
+  readonly data: readonly TestRow[];
+  readonly hasMore: boolean;
+  readonly isLoading: boolean;
+  readonly isLoadingMore: boolean;
+  readonly totalLoadedRows: number;
+  readonly totalRows: number;
+};
 
-  const mockDataStore = {
-    get: vi.fn(() => dataStoreState),
-    set: vi.fn((value: Record<string, unknown>) => {
-      dataStoreState = { ...dataStoreState, ...value };
-    }),
-  };
+type TestResponse = {
+  readonly rows: readonly TestRow[];
+  readonly total: number;
+};
 
-  const mockMetaStore = {
-    get: vi.fn(() => metaStoreState),
-    set: vi.fn(),
-  };
-
-  return {
-    firePrefetchMock: vi.fn(({ limit, nextSkip, onLoadMore, prefetchRef }) => {
-      void onLoadMore({ limit, skip: nextSkip })
-        .then((response: TestResponse) => {
-          prefetchRef.current = {
-            data: response,
-            promise: undefined,
-            skip: nextSkip,
-          };
-        })
-        .catch(() => undefined);
-    }),
-    mockMetaStore,
-    mockUseTableConfigContextValue: () => ({ metaStore: mockMetaStore }),
-    mockUseTableDataContextValue: () => ({ dataStore: mockDataStore }),
-    resolveFromCacheOrFetchMock: vi.fn(
-      async ({ cache, expectedSkip, fetchFn }) => {
-        if (cache?.skip === expectedSkip && cache.data) {
-          return cache.data;
-        }
-
-        if (cache?.skip === expectedSkip && cache.promise) {
-          return cache.promise;
-        }
-
-        return fetchFn();
-      },
-    ),
-    setDataStoreState: (nextState: typeof dataStoreState) => {
-      dataStoreState = nextState;
+function createHarness() {
+  return createPaginatedFetchActionMocks<TestDataState, TestResponse>({
+    initialDataState: {
+      data: [{ id: 1 }],
+      hasMore: true,
+      isLoading: false,
+      isLoadingMore: false,
+      totalLoadedRows: 1,
+      totalRows: 3,
     },
-    setMetaStoreState: (nextState: Record<string, unknown>) => {
-      metaStoreState = nextState;
+    initialMetaState: {
+      enablePrefetch: false,
+      loadMorePageSize: 50,
     },
-  };
-});
+  });
+}
+
+type Harness = ReturnType<typeof createHarness>;
+
+let harness: Harness | undefined;
+
+function getHarness(): Harness {
+  if (!harness) {
+    harness = createHarness();
+  }
+
+  return harness;
+}
+
+function mockUseTableConfigContextValue() {
+  return { metaStore: getHarness().metaStore };
+}
+
+function mockUseTableDataContextValue() {
+  return { dataStore: getHarness().dataStore };
+}
 
 vi.mock(
   '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
@@ -91,18 +75,15 @@ vi.mock('../useTableDataContextValue.hook', () => ({
 }));
 
 vi.mock('@/utils/prefetch/firePrefetch.util', () => ({
-  firePrefetch: firePrefetchMock,
+  firePrefetch: (...args: Parameters<Harness['firePrefetchMock']>) =>
+    getHarness().firePrefetchMock(...args),
 }));
 
 vi.mock('@/utils/prefetch/resolveFromCacheOrFetch.util', () => ({
-  resolveFromCacheOrFetch: resolveFromCacheOrFetchMock,
+  resolveFromCacheOrFetch: (
+    ...args: Parameters<Harness['resolveFromCacheOrFetchMock']>
+  ) => getHarness().resolveFromCacheOrFetchMock(...args),
 }));
-
-type TestResponse = {
-  readonly rows: readonly TestRow[];
-  readonly total: number;
-};
-type TestRow = { readonly id: number };
 
 const defaultSelectors = {
   dataSelector: (response: TestResponse) => [...response.rows],
@@ -111,7 +92,10 @@ const defaultSelectors = {
 
 describe('useFetchMoreData', () => {
   beforeEach(() => {
-    setDataStoreState({
+    const currentHarness = getHarness();
+
+    currentHarness.resetMocks();
+    currentHarness.setDataState({
       data: [{ id: 1 }],
       hasMore: true,
       isLoading: false,
@@ -119,11 +103,10 @@ describe('useFetchMoreData', () => {
       totalLoadedRows: 1,
       totalRows: 3,
     });
-    setMetaStoreState({
+    currentHarness.setMetaState({
       enablePrefetch: false,
       loadMorePageSize: LOAD_MORE_PAGE_SIZE,
     });
-    mockMetaStore.set.mockReset();
   });
 
   it('uses the latest loaded row count and prevents overlapping fetches', async () => {
@@ -182,7 +165,7 @@ describe('useFetchMoreData', () => {
   });
 
   it('uses configurable page size from metaStore', async () => {
-    setMetaStoreState({ enablePrefetch: false, loadMorePageSize: 25 });
+    getHarness().setMetaState({ enablePrefetch: false, loadMorePageSize: 25 });
 
     const onLoadMore = vi.fn(() =>
       Promise.resolve({ rows: [{ id: 2 }], total: 3 }),
@@ -213,12 +196,11 @@ describe('useFetchMoreData', () => {
         await result.current({ ...defaultSelectors, onLoadMore });
       });
 
-      // Only one call — no prefetch
       expect(onLoadMore).toHaveBeenCalledTimes(1);
     });
 
     it('fires a prefetch request after fetch completes when enabled and hasMore', async () => {
-      setMetaStoreState({ enablePrefetch: true, loadMorePageSize: 50 });
+      getHarness().setMetaState({ enablePrefetch: true, loadMorePageSize: 50 });
 
       const onLoadMore = vi.fn(() =>
         Promise.resolve({ rows: [{ id: 2 }], total: 5 }),
@@ -232,14 +214,13 @@ describe('useFetchMoreData', () => {
         await result.current({ ...defaultSelectors, onLoadMore });
       });
 
-      // First call: normal fetch; second call: prefetch
       expect(onLoadMore).toHaveBeenCalledTimes(2);
       expect(onLoadMore).toHaveBeenNthCalledWith(1, { limit: 50, skip: 1 });
       expect(onLoadMore).toHaveBeenNthCalledWith(2, { limit: 50, skip: 2 });
     });
 
     it('does not prefetch when hasMore becomes false', async () => {
-      setMetaStoreState({ enablePrefetch: true, loadMorePageSize: 50 });
+      getHarness().setMetaState({ enablePrefetch: true, loadMorePageSize: 50 });
 
       const onLoadMore = vi.fn(() =>
         Promise.resolve({ rows: [{ id: 2 }, { id: 3 }], total: 3 }),
@@ -253,12 +234,11 @@ describe('useFetchMoreData', () => {
         await result.current({ ...defaultSelectors, onLoadMore });
       });
 
-      // totalLoadedRows (3) === totalRows (3) → hasMore false → no prefetch
       expect(onLoadMore).toHaveBeenCalledTimes(1);
     });
 
     it('uses cached prefetch data on next scroll (cache hit)', async () => {
-      setMetaStoreState({ enablePrefetch: true, loadMorePageSize: 50 });
+      getHarness().setMetaState({ enablePrefetch: true, loadMorePageSize: 50 });
 
       const prefetchResponse: TestResponse = { rows: [{ id: 3 }], total: 5 };
       const onLoadMore = vi
@@ -272,17 +252,14 @@ describe('useFetchMoreData', () => {
         useFetchMoreData<TestRow, TestResponse>(),
       );
 
-      // First fetch triggers prefetch
       await act(async () => {
         await result.current({ ...defaultSelectors, onLoadMore });
-        // Allow prefetch promise to resolve
-        await new Promise((r) => setTimeout(r, 0));
+        await new Promise((resolve) => setTimeout(resolve, 0));
       });
 
       expect(onLoadMore).toHaveBeenCalledTimes(2);
 
-      // Reset data store to reflect updated state after first fetch
-      setDataStoreState({
+      getHarness().setDataState({
         data: [{ id: 1 }, { id: 2 }],
         hasMore: true,
         isLoading: false,
@@ -291,17 +268,15 @@ describe('useFetchMoreData', () => {
         totalRows: 5,
       });
 
-      // Second fetch should use cached data — no new network call
       await act(async () => {
         await result.current({ ...defaultSelectors, onLoadMore });
       });
 
-      // Calls: 1 (normal) + 1 (prefetch) + 0 (cache hit) + 1 (new prefetch after hit) = 3
       expect(onLoadMore).toHaveBeenCalledTimes(3);
     });
 
     it('silently discards failed prefetch and falls back to normal fetch', async () => {
-      setMetaStoreState({ enablePrefetch: true, loadMorePageSize: 50 });
+      getHarness().setMetaState({ enablePrefetch: true, loadMorePageSize: 50 });
 
       const onLoadMore = vi
         .fn<
@@ -315,13 +290,12 @@ describe('useFetchMoreData', () => {
         useFetchMoreData<TestRow, TestResponse>(),
       );
 
-      // First fetch triggers prefetch (which will fail)
       await act(async () => {
         await result.current({ ...defaultSelectors, onLoadMore });
-        await new Promise((r) => setTimeout(r, 0));
+        await new Promise((resolve) => setTimeout(resolve, 0));
       });
 
-      setDataStoreState({
+      getHarness().setDataState({
         data: [{ id: 1 }, { id: 2 }],
         hasMore: true,
         isLoading: false,
@@ -330,12 +304,10 @@ describe('useFetchMoreData', () => {
         totalRows: 5,
       });
 
-      // Second fetch: prefetch failed → cache miss → normal fetch
       await act(async () => {
         await result.current({ ...defaultSelectors, onLoadMore });
       });
 
-      // 1 (normal) + 1 (prefetch, failed) + 1 (cache miss, normal) + 1 (new prefetch) = 4
       expect(onLoadMore).toHaveBeenCalledTimes(4);
       expect(onLoadMore).toHaveBeenNthCalledWith(3, { limit: 50, skip: 2 });
     });

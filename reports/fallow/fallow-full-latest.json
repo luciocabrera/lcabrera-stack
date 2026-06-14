@@ -2,16 +2,16 @@
   "kind": "combined",
   "schema_version": 7,
   "version": "2.96.0",
-  "elapsed_ms": 148,
+  "elapsed_ms": 167,
   "_meta": {
     "telemetry": {
-      "analysis_run_id": "run_69a86ca61d3c8377"
+      "analysis_run_id": "run_badb72cb5f820d7a"
     }
   },
   "check": {
     "schema_version": 7,
     "version": "2.96.0",
-    "elapsed_ms": 104,
+    "elapsed_ms": 111,
     "total_issues": 5,
     "entry_points": {
       "total": 299,

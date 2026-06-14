@@ -119,6 +119,7 @@ Before creating anything new, check this inventory. If something here does the j
 | Function                              | Location                                                            | Description                                                                                  |
 | ------------------------------------- | ------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
 | `createMockStore`                     | `components/test-utils/createMockStore.util.ts`                     | Generic external-store-like test scaffold (`get`, `set`, `reset`, `subscribe`, SSR snapshot) |
+| `createPaginatedFetchActionMocks`     | `components/test-utils/createPaginatedFetchActionMocks.util.ts`     | Shared harness for paginated Table fetch-hook tests with stores + prefetch mocks             |
 | `createTableConfigColumnsActionMocks` | `components/test-utils/createTableConfigColumnsActionMocks.util.ts` | Shared TableConfig columns-action test scaffold with mocked stores + persistence wiring      |
 | `mockDialogElement`                   | `components/test-utils/mockDialogElement.util.ts`                   | Mocks HTMLDialogElement prototype behavior with restore handles for test teardown            |
 

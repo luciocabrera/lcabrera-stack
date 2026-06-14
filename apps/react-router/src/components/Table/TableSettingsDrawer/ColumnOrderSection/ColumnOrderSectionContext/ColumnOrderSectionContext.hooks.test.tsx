@@ -6,6 +6,8 @@ import type { ReactNode } from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
+import { createMockStore } from '@/components/test-utils/createMockStore.util';
+
 import { useCancelPinSide } from './actions/useCancelPinSide.hook';
 import { ColumnOrderSectionContext } from './ColumnOrderSectionContext.context';
 import type { ColumnOrderSectionContextValue } from './ColumnOrderSectionContext.types';
@@ -16,37 +18,8 @@ import { useGetUnpinConflictModal } from './selectors/useGetUnpinConflictModal.h
 import { useColumnOrderSectionContextValue } from './useColumnOrderSectionContextValue.hook';
 import { useModalsStore } from './useModalsStore.hook';
 
-type MockStore<TState> = {
-  readonly get: () => TState;
-  readonly getServerSnapshot: () => TState;
-  readonly set: (partial: Partial<TState>) => void;
-  readonly subscribe: (listener: () => void) => () => void;
-};
-
 type WrapperProps = {
   readonly children: ReactNode;
-};
-
-const createMockStore = <TState,>(initialState: TState): MockStore<TState> => {
-  let state = initialState;
-  const listeners = new Set<() => void>();
-
-  return {
-    get: () => state,
-    getServerSnapshot: () => state,
-    set: (partial) => {
-      state = { ...state, ...partial };
-      for (const listener of listeners) {
-        listener();
-      }
-    },
-    subscribe: (listener) => {
-      listeners.add(listener);
-      return () => {
-        listeners.delete(listener);
-      };
-    },
-  };
 };
 
 const modalsStore = createMockStore({

@@ -4,6 +4,7 @@ import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { DEFAULT_FILTER_PAGE_SIZE } from '@/components/Table/Table.constants';
+import { createPaginatedFetchActionMocks } from '@/components/test-utils/createPaginatedFetchActionMocks.util';
 
 import { useFetchFilterData } from './useFetchFilterData.hook';
 
@@ -16,85 +17,58 @@ type TestResponse = {
   readonly total: number;
 };
 
-const {
-  firePrefetchMock,
-  loggerErrorMock,
-  mockFiltersDataStore,
-  mockMetaStore,
-  mockUseFiltersDataContextValue,
-  mockUseTableConfigContextValue,
-  resolveFromCacheOrFetchMock,
-  setFiltersDataState,
-  setMetaStoreState,
-} = vi.hoisted(() => {
-  let filtersDataState = {
-    status: {
-      data: [] as string[],
-      hasMore: false,
-      isLoading: false,
-      isLoadingMore: false,
-      totalLoadedRows: 0,
-      totalRows: 0,
-    },
+type TestFiltersState = {
+  readonly status: {
+    readonly data: readonly string[];
+    readonly hasMore: boolean;
+    readonly isLoading: boolean;
+    readonly isLoadingMore: boolean;
+    readonly totalLoadedRows: number;
+    readonly totalRows: number;
   };
-  let metaStoreState: Record<string, unknown> = {
-    enablePrefetch: false,
-  };
+};
 
-  const mockFiltersDataStore = {
-    get: vi.fn(() => filtersDataState),
-    set: vi.fn((value: Record<string, unknown>) => {
-      filtersDataState = { ...filtersDataState, ...value };
-    }),
-  };
-
-  const mockMetaStore = {
-    get: vi.fn(() => metaStoreState),
-    set: vi.fn(),
-  };
-
-  return {
-    firePrefetchMock: vi.fn(({ limit, nextSkip, onLoadMore, prefetchRef }) => {
-      void onLoadMore({ limit, skip: nextSkip })
-        .then((response: TestResponse) => {
-          prefetchRef.current = {
-            data: response,
-            promise: undefined,
-            skip: nextSkip,
-          };
-        })
-        .catch(() => undefined);
-    }),
-    loggerErrorMock: vi.fn(),
-    mockFiltersDataStore,
-    mockMetaStore,
-    mockUseFiltersDataContextValue: () => ({
-      filtersDataStore: mockFiltersDataStore,
-    }),
-    mockUseTableConfigContextValue: () => ({ metaStore: mockMetaStore }),
-    resolveFromCacheOrFetchMock: vi.fn(
-      async ({ cache, expectedSkip, fetchFn }) => {
-        if (cache?.skip === expectedSkip && cache.data) {
-          return cache.data;
-        }
-
-        if (cache?.skip === expectedSkip && cache.promise) {
-          return cache.promise;
-        }
-
-        return fetchFn();
+function createHarness() {
+  return createPaginatedFetchActionMocks<TestFiltersState, TestResponse>({
+    initialDataState: {
+      status: {
+        data: [],
+        hasMore: false,
+        isLoading: false,
+        isLoadingMore: false,
+        totalLoadedRows: 0,
+        totalRows: 0,
       },
-    ),
-    setFiltersDataState: (nextState: typeof filtersDataState) => {
-      filtersDataState = nextState;
-      mockFiltersDataStore.set.mockClear();
     },
-    setMetaStoreState: (nextState: Record<string, unknown>) => {
-      metaStoreState = nextState;
-      mockMetaStore.set.mockClear();
+    initialMetaState: {
+      enablePrefetch: false,
     },
+  });
+}
+
+type Harness = ReturnType<typeof createHarness>;
+
+let harness: Harness | undefined;
+
+function getHarness(): Harness {
+  if (!harness) {
+    harness = createHarness();
+  }
+
+  return harness;
+}
+
+function mockUseFiltersDataContextValue() {
+  return {
+    filtersDataStore: getHarness().dataStore,
   };
-});
+}
+
+function mockUseTableConfigContextValue() {
+  return { metaStore: getHarness().metaStore };
+}
+
+const loggerErrorMock = vi.fn();
 
 vi.mock(
   '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
@@ -114,11 +88,14 @@ vi.mock('@/utils/logger', () => ({
 }));
 
 vi.mock('@/utils/prefetch/firePrefetch.util', () => ({
-  firePrefetch: firePrefetchMock,
+  firePrefetch: (...args: Parameters<Harness['firePrefetchMock']>) =>
+    getHarness().firePrefetchMock(...args),
 }));
 
 vi.mock('@/utils/prefetch/resolveFromCacheOrFetch.util', () => ({
-  resolveFromCacheOrFetch: resolveFromCacheOrFetchMock,
+  resolveFromCacheOrFetch: (
+    ...args: Parameters<Harness['resolveFromCacheOrFetchMock']>
+  ) => getHarness().resolveFromCacheOrFetchMock(...args),
 }));
 
 const defaultSelectors = {
@@ -128,7 +105,10 @@ const defaultSelectors = {
 
 describe('useFetchFilterData', () => {
   beforeEach(() => {
-    setFiltersDataState({
+    const currentHarness = getHarness();
+
+    currentHarness.resetMocks();
+    currentHarness.setDataState({
       status: {
         data: [],
         hasMore: false,
@@ -138,16 +118,14 @@ describe('useFetchFilterData', () => {
         totalRows: 0,
       },
     });
-    setMetaStoreState({ enablePrefetch: false });
-    firePrefetchMock.mockReset();
+    currentHarness.setMetaState({ enablePrefetch: false });
+    currentHarness.firePrefetchMock.mockReset();
     loggerErrorMock.mockReset();
-    mockFiltersDataStore.get.mockClear();
-    mockFiltersDataStore.set.mockClear();
-    resolveFromCacheOrFetchMock.mockReset();
+    currentHarness.resolveFromCacheOrFetchMock.mockReset();
   });
 
   it('fetches the initial page and starts prefetching when enabled', async () => {
-    setMetaStoreState({ enablePrefetch: true });
+    getHarness().setMetaState({ enablePrefetch: true });
 
     const onLoadMore = vi.fn(() =>
       Promise.resolve({
@@ -177,7 +155,7 @@ describe('useFetchFilterData', () => {
       limit: DEFAULT_FILTER_PAGE_SIZE,
       skip: 0,
     });
-    expect(firePrefetchMock).toHaveBeenCalledWith({
+    expect(getHarness().firePrefetchMock).toHaveBeenCalledWith({
       limit: DEFAULT_FILTER_PAGE_SIZE,
       nextSkip: 2,
       onLoadMore,
@@ -186,7 +164,7 @@ describe('useFetchFilterData', () => {
   });
 
   it('skips the initial fetch when data is already loaded', async () => {
-    setFiltersDataState({
+    getHarness().setDataState({
       status: {
         data: ['Existing'],
         hasMore: false,
@@ -215,11 +193,11 @@ describe('useFetchFilterData', () => {
   });
 
   it('appends more filter data from the cache resolver and clears the consumed prefetch entry', async () => {
-    resolveFromCacheOrFetchMock.mockResolvedValue({
+    getHarness().resolveFromCacheOrFetchMock.mockResolvedValue({
       rows: ['Bravo'],
       total: 3,
     });
-    setFiltersDataState({
+    getHarness().setDataState({
       status: {
         data: ['Alpha'],
         hasMore: true,
@@ -253,7 +231,7 @@ describe('useFetchFilterData', () => {
       });
     });
 
-    expect(resolveFromCacheOrFetchMock).toHaveBeenCalledWith({
+    expect(getHarness().resolveFromCacheOrFetchMock).toHaveBeenCalledWith({
       cache: initialCache,
       expectedSkip: 1,
       fetchFn: expect.any(Function),
@@ -283,7 +261,7 @@ describe('useFetchFilterData', () => {
       });
     });
 
-    expect(mockMetaStore.set).toHaveBeenCalledWith({
+    expect(getHarness().metaStore.set).toHaveBeenCalledWith({
       error: 'Broken filter API',
     });
     expect(loggerErrorMock).toHaveBeenCalled();
