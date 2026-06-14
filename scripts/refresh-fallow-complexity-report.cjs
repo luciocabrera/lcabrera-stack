@@ -8,6 +8,30 @@ const repoRoot = path.resolve(__dirname, '..');
 const appDir = path.join(repoRoot, 'apps', 'react-router');
 const jsonDir = path.join(repoRoot, 'reports', 'fallow');
 const jsonPath = path.join(jsonDir, 'fallow-full-latest.json');
+const fallowPackageJsonPath = require.resolve('fallow/package.json', {
+  paths: [appDir],
+});
+const fallowPackageJson = JSON.parse(
+  fs.readFileSync(fallowPackageJsonPath, 'utf8'),
+);
+const fallowBinRelativePath =
+  typeof fallowPackageJson.bin === 'string'
+    ? fallowPackageJson.bin
+    : fallowPackageJson.bin?.fallow;
+
+if (typeof fallowBinRelativePath !== 'string') {
+  throw new Error('Unable to resolve fallow CLI bin path from package.json.');
+}
+
+const fallowBinPath = path.resolve(
+  path.dirname(fallowPackageJsonPath),
+  fallowBinRelativePath,
+);
+const nodeBinDir = path.dirname(process.execPath);
+const fixedPathEnv =
+  process.platform === 'win32'
+    ? `${nodeBinDir};C:\\Windows\\System32`
+    : `${nodeBinDir}:/usr/bin:/bin`;
 const analysisPath = path.join(
   repoRoot,
   'reports',
@@ -29,21 +53,19 @@ const ensureDir = (dirPath) => {
 };
 
 const runFallowJson = () => {
+  if (!fs.existsSync(fallowBinPath)) {
+    throw new Error(
+      `fallow executable not found at expected path: ${fallowBinPath}`,
+    );
+  }
+
   const result = spawnSync(
-    'npx',
-    [
-      '--yes',
-      'fallow',
-      '--format',
-      'json',
-      '--output-file',
-      jsonPath,
-      '--quiet',
-    ],
+    process.execPath,
+    [fallowBinPath, '--format', 'json', '--output-file', jsonPath, '--quiet'],
     {
       cwd: appDir,
       stdio: 'inherit',
-      env: process.env,
+      env: { ...process.env, PATH: fixedPathEnv },
     },
   );
 
@@ -102,7 +124,7 @@ const refreshAnalysisDoc = (jsonData) => {
 Source of truth for this report:
 
 - Command scope: apps/react-router
-- Command: npx --yes fallow --format json --output-file ${jsonPath} --quiet
+- Command: node node_modules/fallow/bin/fallow --format json --output-file ${jsonPath} --quiet
 - JSON artifact: reports/fallow/fallow-full-latest.json
 
 Current metrics from JSON:

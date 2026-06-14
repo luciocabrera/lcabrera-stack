@@ -2,22 +2,22 @@
   "kind": "combined",
   "schema_version": 7,
   "version": "2.96.0",
-  "elapsed_ms": 167,
+  "elapsed_ms": 171,
   "_meta": {
     "telemetry": {
-      "analysis_run_id": "run_badb72cb5f820d7a"
+      "analysis_run_id": "run_7329375d4589fb15"
     }
   },
   "check": {
     "schema_version": 7,
     "version": "2.96.0",
-    "elapsed_ms": 111,
+    "elapsed_ms": 128,
     "total_issues": 5,
     "entry_points": {
-      "total": 299,
+      "total": 300,
       "sources": {
         "manual_entry": 7,
-        "plugin": 292
+        "plugin": 293
       }
     },
     "summary": {
@@ -143,7 +143,7 @@
         "package_name": "vite-plugin-babel",
         "location": "devDependencies",
         "path": "package.json",
-        "line": 65,
+        "line": 66,
         "actions": [
           {
             "type": "remove-dependency",
@@ -580,89 +580,8 @@
         "instances": [
           {
             "file": "src/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/ColumnDrawerContext.hooks.test.tsx",
-            "start_line": 21,
-            "end_line": 64,
-            "start_col": 0,
-            "end_col": 3,
-            "fragment": "type MockStore<TState> = {\n  readonly get: () => TState;\n  readonly getServerSnapshot: () => TState;\n  readonly set: (partial: Partial<TState>) => void;\n  readonly subscribe: (listener: () => void) => () => void;\n};\n\ntype WrapperProps = {\n  readonly children: ReactNode;\n};\n\nconst createMockStore = <TState,>(initialState: TState): MockStore<TState> => {\n  let state = initialState;\n  const listeners = new Set<() => void>();\n\n  return {\n    get: () => state,\n    getServerSnapshot: () => state,\n    set: (partial) => {\n      state = { ...state, ...partial };\n      for (const listener of listeners) {\n        listener();\n      }\n    },\n    subscribe: (listener) => {\n      listeners.add(listener);\n      return () => {\n        listeners.delete(listener);\n      };\n    },\n  };\n};\n\nconst columnStore = createMockStore({\n  columnFilter: {\n    operator: 'equals',\n    type: 'select',\n    value: 'paid',\n  },\n  columnKey: 'status',\n  columnPinning: 'left' as const,\n  columnSizing: 180,\n  sorting: 'asc' as const,\n});"
-          },
-          {
-            "file": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/ColumnOrderSectionContext.hooks.test.tsx",
-            "start_line": 19,
-            "end_line": 76,
-            "start_col": 0,
-            "end_col": 3,
-            "fragment": "type MockStore<TState> = {\n  readonly get: () => TState;\n  readonly getServerSnapshot: () => TState;\n  readonly set: (partial: Partial<TState>) => void;\n  readonly subscribe: (listener: () => void) => () => void;\n};\n\ntype WrapperProps = {\n  readonly children: ReactNode;\n};\n\nconst createMockStore = <TState,>(initialState: TState): MockStore<TState> => {\n  let state = initialState;\n  const listeners = new Set<() => void>();\n\n  return {\n    get: () => state,\n    getServerSnapshot: () => state,\n    set: (partial) => {\n      state = { ...state, ...partial };\n      for (const listener of listeners) {\n        listener();\n      }\n    },\n    subscribe: (listener) => {\n      listeners.add(listener);\n      return () => {\n        listeners.delete(listener);\n      };\n    },\n  };\n};\n\nconst modalsStore = createMockStore({\n  conflictModal: {\n    columnKey: 'status',\n    columnLabel: 'Status',\n    isOpen: false,\n    side: 'left' as const,\n  },\n  orderConflict: {\n    description: 'Pending reorder',\n    isOpen: true,\n    pendingOrder: ['id', 'status'],\n    pendingPinning: { left: ['id'], right: [] },\n  },\n  pinSideModal: {\n    columnKey: 'status',\n    columnLabel: 'Status',\n    isOpen: true,\n  },\n  unpinConflictModal: {\n    columnKey: 'status',\n    columnLabel: 'Status',\n    isOpen: false,\n    side: 'right' as const,\n  },\n});"
-          }
-        ],
-        "token_count": 140,
-        "line_count": 58,
-        "fingerprint": "dup:d6d3e3c4",
-        "actions": [
-          {
-            "type": "extract-shared",
-            "auto_fixable": false,
-            "description": "Extract duplicated code (58 lines, 2 instances) into a shared function"
-          },
-          {
-            "type": "suppress-line",
-            "auto_fixable": false,
-            "description": "Suppress with an inline comment above the duplicated code",
-            "comment": "// fallow-ignore-next-line code-duplication"
-          }
-        ]
-      },
-      {
-        "instances": [
-          {
-            "file": "src/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/ColumnDrawerContext.hooks.test.tsx",
-            "start_line": 39,
-            "end_line": 52,
-            "start_col": 4,
-            "end_col": 1,
-            "fragment": "set: (partial) => {\n      state = { ...state, ...partial };\n      for (const listener of listeners) {\n        listener();\n      }\n    },\n    subscribe: (listener) => {\n      listeners.add(listener);\n      return () => {\n        listeners.delete(listener);\n      };\n    },\n  };\n}"
-          },
-          {
-            "file": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/ColumnOrderSectionContext.hooks.test.tsx",
-            "start_line": 37,
-            "end_line": 50,
-            "start_col": 4,
-            "end_col": 1,
-            "fragment": "set: (partial) => {\n      state = { ...state, ...partial };\n      for (const listener of listeners) {\n        listener();\n      }\n    },\n    subscribe: (listener) => {\n      listeners.add(listener);\n      return () => {\n        listeners.delete(listener);\n      };\n    },\n  };\n}"
-          },
-          {
-            "file": "src/components/test-utils/createMockStore.util.ts",
-            "start_line": 24,
-            "end_line": 37,
-            "start_col": 4,
-            "end_col": 1,
-            "fragment": "set: (partial) => {\n      state = { ...state, ...partial };\n      for (const listener of listeners) {\n        listener();\n      }\n    },\n    subscribe: (listener) => {\n      listeners.add(listener);\n      return () => {\n        listeners.delete(listener);\n      };\n    },\n  };\n}"
-          }
-        ],
-        "token_count": 59,
-        "line_count": 14,
-        "fingerprint": "dup:3c4509e2",
-        "suggested_name": "listener",
-        "actions": [
-          {
-            "type": "extract-shared",
-            "auto_fixable": false,
-            "description": "Extract duplicated code (14 lines, 3 instances) into a shared function"
-          },
-          {
-            "type": "suppress-line",
-            "auto_fixable": false,
-            "description": "Suppress with an inline comment above the duplicated code",
-            "comment": "// fallow-ignore-next-line code-duplication"
-          }
-        ]
-      },
-      {
-        "instances": [
-          {
-            "file": "src/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/ColumnDrawerContext.hooks.test.tsx",
-            "start_line": 76,
-            "end_line": 83,
+            "start_line": 49,
+            "end_line": 56,
             "start_col": 50,
             "end_col": 56,
             "fragment": "(), { wrapper: Wrapper })\n        .result.current,\n    ).toBe(contextValue);\n  });\n\n  it('subscribes to the drawer store and exposes selector hooks', () => {\n    expect(\n      renderHook(() => useColumnsStore((state) => state."
@@ -1320,30 +1239,30 @@
         "instances": [
           {
             "file": "src/components/Table/contexts/FiltersData/filters/actions/useFetchFilterData.hook.test.ts",
-            "start_line": 47,
-            "end_line": 67,
-            "start_col": 48,
-            "end_col": 6,
-            "fragment": "...value };\n    }),\n  };\n\n  const mockMetaStore = {\n    get: vi.fn(() => metaStoreState),\n    set: vi.fn(),\n  };\n\n  return {\n    firePrefetchMock: vi.fn(({ limit, nextSkip, onLoadMore, prefetchRef }) => {\n      void onLoadMore({ limit, skip: nextSkip })\n        .then((response: TestResponse) => {\n          prefetchRef.current = {\n            data: response,\n            promise: undefined,\n            skip: nextSkip,\n          };\n        })\n        .catch(() => undefined);\n    })"
+            "start_line": 84,
+            "end_line": 106,
+            "start_col": 33,
+            "end_col": 9,
+            "fragment": "{\n  logger: {\n    error: loggerMock.error,\n  },\n}));\n\nvi.mock('@/utils/prefetch/firePrefetch.util', () => ({\n  firePrefetch: (...args: Parameters<Harness['firePrefetchMock']>) =>\n    getHarness().firePrefetchMock(...args),\n}));\n\nvi.mock('@/utils/prefetch/resolveFromCacheOrFetch.util', () => ({\n  resolveFromCacheOrFetch: (\n    ...args: Parameters<Harness['resolveFromCacheOrFetchMock']>\n  ) => getHarness().resolveFromCacheOrFetchMock(...args),\n}));\n\nconst defaultSelectors = {\n  dataSelector: (response: TestResponse) => [...response.rows],\n  dataTotalSelector: (response: TestResponse) => response.total,\n};\n\ndescribe("
           },
           {
             "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
-            "start_line": 36,
-            "end_line": 56,
-            "start_col": 44,
-            "end_col": 6,
-            "fragment": "...value };\n    }),\n  };\n\n  const mockMetaStore = {\n    get: vi.fn(() => metaStoreState),\n    set: vi.fn(),\n  };\n\n  return {\n    firePrefetchMock: vi.fn(({ limit, nextSkip, onLoadMore, prefetchRef }) => {\n      void onLoadMore({ limit, skip: nextSkip })\n        .then((response: TestResponse) => {\n          prefetchRef.current = {\n            data: response,\n            promise: undefined,\n            skip: nextSkip,\n          };\n        })\n        .catch(() => undefined);\n    })"
+            "start_line": 73,
+            "end_line": 93,
+            "start_col": 51,
+            "end_col": 9,
+            "fragment": "{\n  useTableDataContextValue: mockUseTableDataContextValue,\n}));\n\nvi.mock('@/utils/prefetch/firePrefetch.util', () => ({\n  firePrefetch: (...args: Parameters<Harness['firePrefetchMock']>) =>\n    getHarness().firePrefetchMock(...args),\n}));\n\nvi.mock('@/utils/prefetch/resolveFromCacheOrFetch.util', () => ({\n  resolveFromCacheOrFetch: (\n    ...args: Parameters<Harness['resolveFromCacheOrFetchMock']>\n  ) => getHarness().resolveFromCacheOrFetchMock(...args),\n}));\n\nconst defaultSelectors = {\n  dataSelector: (response: TestResponse) => [...response.rows],\n  dataTotalSelector: (response: TestResponse) => response.total,\n};\n\ndescribe("
           }
         ],
-        "token_count": 109,
-        "line_count": 21,
-        "fingerprint": "dup:d067f7c9",
-        "suggested_name": "nextSkip",
+        "token_count": 112,
+        "line_count": 23,
+        "fingerprint": "dup:f5df1843",
+        "suggested_name": "response",
         "actions": [
           {
             "type": "extract-shared",
             "auto_fixable": false,
-            "description": "Extract duplicated code (21 lines, 2 instances) into a shared function"
+            "description": "Extract duplicated code (23 lines, 2 instances) into a shared function"
           },
           {
             "type": "suppress-line",
@@ -1357,53 +1276,16 @@
         "instances": [
           {
             "file": "src/components/Table/contexts/FiltersData/filters/actions/useFetchFilterData.hook.test.ts",
-            "start_line": 74,
-            "end_line": 87,
-            "start_col": 43,
-            "end_col": 5,
-            "fragment": "{ metaStore: mockMetaStore }),\n    resolveFromCacheOrFetchMock: vi.fn(\n      async ({ cache, expectedSkip, fetchFn }) => {\n        if (cache?.skip === expectedSkip && cache.data) {\n          return cache.data;\n        }\n\n        if (cache?.skip === expectedSkip && cache.promise) {\n          return cache.promise;\n        }\n\n        return fetchFn();\n      },\n    )"
-          },
-          {
-            "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
-            "start_line": 59,
-            "end_line": 72,
-            "start_col": 41,
-            "end_col": 5,
-            "fragment": "{ dataStore: mockDataStore }),\n    resolveFromCacheOrFetchMock: vi.fn(\n      async ({ cache, expectedSkip, fetchFn }) => {\n        if (cache?.skip === expectedSkip && cache.data) {\n          return cache.data;\n        }\n\n        if (cache?.skip === expectedSkip && cache.promise) {\n          return cache.promise;\n        }\n\n        return fetchFn();\n      },\n    )"
-          }
-        ],
-        "token_count": 66,
-        "line_count": 14,
-        "fingerprint": "dup:8f218843",
-        "suggested_name": "cache",
-        "actions": [
-          {
-            "type": "extract-shared",
-            "auto_fixable": false,
-            "description": "Extract duplicated code (14 lines, 2 instances) into a shared function"
-          },
-          {
-            "type": "suppress-line",
-            "auto_fixable": false,
-            "description": "Suppress with an inline comment above the duplicated code",
-            "comment": "// fallow-ignore-next-line code-duplication"
-          }
-        ]
-      },
-      {
-        "instances": [
-          {
-            "file": "src/components/Table/contexts/FiltersData/filters/actions/useFetchFilterData.hook.test.ts",
-            "start_line": 199,
-            "end_line": 214,
+            "start_line": 177,
+            "end_line": 192,
             "start_col": 29,
             "end_col": 11,
             "fragment": ");\n\n    const { result } = renderHook(() =>\n      useFetchFilterData<TestData, TestResponse>({\n        columnKey: 'status',\n      }),\n    );\n\n    await act(async () => {\n      await result.current.fetchInitial({\n        ...defaultSelectors,\n        onLoadMore,\n      });\n    });\n\n    expect("
           },
           {
             "file": "src/components/Table/contexts/FiltersData/filters/actions/useFetchFilterData.hook.test.ts",
-            "start_line": 271,
-            "end_line": 286,
+            "start_line": 249,
+            "end_line": 264,
             "start_col": 4,
             "end_col": 11,
             "fragment": ");\n\n    const { result } = renderHook(() =>\n      useFetchFilterData<TestData, TestResponse>({\n        columnKey: 'status',\n      }),\n    );\n\n    await act(async () => {\n      await result.current.fetchInitial({\n        ...defaultSelectors,\n        onLoadMore,\n      });\n    });\n\n    expect("
@@ -2084,30 +1966,30 @@
         "instances": [
           {
             "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
-            "start_line": 187,
-            "end_line": 199,
+            "start_line": 170,
+            "end_line": 182,
             "start_col": 4,
             "end_col": 23,
             "fragment": "const onLoadMore = vi.fn(() =>\n      Promise.resolve({ rows: [{ id: 2 }], total: 3 }),\n    );\n\n    const { result } = renderHook(() =>\n      useFetchMoreData<TestRow, TestResponse>(),\n    );\n\n    await act(async () => {\n      await result.current({ ...defaultSelectors, onLoadMore });\n    });\n\n    expect(onLoadMore)."
           },
           {
             "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
-            "start_line": 204,
-            "end_line": 217,
+            "start_line": 187,
+            "end_line": 199,
             "start_col": 6,
             "end_col": 25,
-            "fragment": "const onLoadMore = vi.fn(() =>\n        Promise.resolve({ rows: [{ id: 2 }], total: 3 }),\n      );\n\n      const { result } = renderHook(() =>\n        useFetchMoreData<TestRow, TestResponse>(),\n      );\n\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n      });\n\n      // Only one call — no prefetch\n      expect(onLoadMore)."
+            "fragment": "const onLoadMore = vi.fn(() =>\n        Promise.resolve({ rows: [{ id: 2 }], total: 3 }),\n      );\n\n      const { result } = renderHook(() =>\n        useFetchMoreData<TestRow, TestResponse>(),\n      );\n\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n      });\n\n      expect(onLoadMore)."
           }
         ],
         "token_count": 77,
-        "line_count": 14,
+        "line_count": 13,
         "fingerprint": "dup:d9db0d25",
         "suggested_name": "onLoadMore",
         "actions": [
           {
             "type": "extract-shared",
             "auto_fixable": false,
-            "description": "Extract duplicated code (14 lines, 2 instances) into a shared function"
+            "description": "Extract duplicated code (13 lines, 2 instances) into a shared function"
           },
           {
             "type": "suppress-line",
@@ -2121,149 +2003,148 @@
         "instances": [
           {
             "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
-            "start_line": 205,
-            "end_line": 220,
+            "start_line": 188,
+            "end_line": 202,
             "start_col": 33,
             "end_col": 7,
-            "fragment": "{ id: 2 }], total: 3 }),\n      );\n\n      const { result } = renderHook(() =>\n        useFetchMoreData<TestRow, TestResponse>(),\n      );\n\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n      });\n\n      // Only one call — no prefetch\n      expect(onLoadMore).toHaveBeenCalledTimes(1);\n    });\n\n    it("
+            "fragment": "{ id: 2 }], total: 3 }),\n      );\n\n      const { result } = renderHook(() =>\n        useFetchMoreData<TestRow, TestResponse>(),\n      );\n\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n      });\n\n      expect(onLoadMore).toHaveBeenCalledTimes(1);\n    });\n\n    it("
           },
           {
             "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
-            "start_line": 245,
-            "end_line": 260,
+            "start_line": 226,
+            "end_line": 240,
             "start_col": 44,
             "end_col": 7,
-            "fragment": "{ id: 3 }], total: 3 }),\n      );\n\n      const { result } = renderHook(() =>\n        useFetchMoreData<TestRow, TestResponse>(),\n      );\n\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n      });\n\n      // totalLoadedRows (3) === totalRows (3) → hasMore false → no prefetch\n      expect(onLoadMore).toHaveBeenCalledTimes(1);\n    });\n\n    it("
+            "fragment": "{ id: 3 }], total: 3 }),\n      );\n\n      const { result } = renderHook(() =>\n        useFetchMoreData<TestRow, TestResponse>(),\n      );\n\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n      });\n\n      expect(onLoadMore).toHaveBeenCalledTimes(1);\n    });\n\n    it("
           }
         ],
         "token_count": 68,
+        "line_count": 15,
+        "fingerprint": "dup:2d393594",
+        "suggested_name": "onLoadMore",
+        "actions": [
+          {
+            "type": "extract-shared",
+            "auto_fixable": false,
+            "description": "Extract duplicated code (15 lines, 2 instances) into a shared function"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the duplicated code",
+            "comment": "// fallow-ignore-next-line code-duplication"
+          }
+        ]
+      },
+      {
+        "instances": [
+          {
+            "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
+            "start_line": 188,
+            "end_line": 199,
+            "start_col": 24,
+            "end_col": 47,
+            "fragment": "{ rows: [{ id: 2 }], total: 3 }),\n      );\n\n      const { result } = renderHook(() =>\n        useFetchMoreData<TestRow, TestResponse>(),\n      );\n\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n      });\n\n      expect(onLoadMore).toHaveBeenCalledTimes("
+          },
+          {
+            "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
+            "start_line": 206,
+            "end_line": 217,
+            "start_col": 24,
+            "end_col": 47,
+            "fragment": "{ rows: [{ id: 2 }], total: 5 }),\n      );\n\n      const { result } = renderHook(() =>\n        useFetchMoreData<TestRow, TestResponse>(),\n      );\n\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n      });\n\n      expect(onLoadMore).toHaveBeenCalledTimes("
+          },
+          {
+            "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
+            "start_line": 226,
+            "end_line": 237,
+            "start_col": 24,
+            "end_col": 47,
+            "fragment": "{ rows: [{ id: 2 }, { id: 3 }], total: 3 }),\n      );\n\n      const { result } = renderHook(() =>\n        useFetchMoreData<TestRow, TestResponse>(),\n      );\n\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n      });\n\n      expect(onLoadMore).toHaveBeenCalledTimes("
+          }
+        ],
+        "token_count": 55,
+        "line_count": 12,
+        "fingerprint": "dup:2431f5d3",
+        "suggested_name": "onLoadMore",
+        "actions": [
+          {
+            "type": "extract-shared",
+            "auto_fixable": false,
+            "description": "Extract duplicated code (12 lines, 3 instances) into a shared function"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the duplicated code",
+            "comment": "// fallow-ignore-next-line code-duplication"
+          }
+        ]
+      },
+      {
+        "instances": [
+          {
+            "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
+            "start_line": 249,
+            "end_line": 258,
+            "start_col": 47,
+            "end_col": 9,
+            "fragment": ");\n\n      const { result } = renderHook(() =>\n        useFetchMoreData<TestRow, TestResponse>(),\n      );\n\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n        await new Promise((resolve) => setTimeout(resolve, 0));\n      });"
+          },
+          {
+            "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
+            "start_line": 287,
+            "end_line": 296,
+            "start_col": 62,
+            "end_col": 9,
+            "fragment": ");\n\n      const { result } = renderHook(() =>\n        useFetchMoreData<TestRow, TestResponse>(),\n      );\n\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n        await new Promise((resolve) => setTimeout(resolve, 0));\n      });"
+          }
+        ],
+        "token_count": 64,
+        "line_count": 10,
+        "fingerprint": "dup:404c9254",
+        "actions": [
+          {
+            "type": "extract-shared",
+            "auto_fixable": false,
+            "description": "Extract duplicated code (10 lines, 2 instances) into a shared function"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the duplicated code",
+            "comment": "// fallow-ignore-next-line code-duplication"
+          }
+        ]
+      },
+      {
+        "instances": [
+          {
+            "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
+            "start_line": 260,
+            "end_line": 275,
+            "start_col": 48,
+            "end_col": 47,
+            "fragment": ");\n\n      getHarness().setDataState({\n        data: [{ id: 1 }, { id: 2 }],\n        hasMore: true,\n        isLoading: false,\n        isLoadingMore: false,\n        totalLoadedRows: 2,\n        totalRows: 5,\n      });\n\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n      });\n\n      expect(onLoadMore).toHaveBeenCalledTimes("
+          },
+          {
+            "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
+            "start_line": 296,
+            "end_line": 311,
+            "start_col": 7,
+            "end_col": 47,
+            "fragment": ");\n\n      getHarness().setDataState({\n        data: [{ id: 1 }, { id: 2 }],\n        hasMore: true,\n        isLoading: false,\n        isLoadingMore: false,\n        totalLoadedRows: 2,\n        totalRows: 5,\n      });\n\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n      });\n\n      expect(onLoadMore).toHaveBeenCalledTimes("
+          }
+        ],
+        "token_count": 67,
         "line_count": 16,
-        "fingerprint": "dup:281cd1a8",
+        "fingerprint": "dup:bc00a62d",
         "suggested_name": "onLoadMore",
         "actions": [
           {
             "type": "extract-shared",
             "auto_fixable": false,
             "description": "Extract duplicated code (16 lines, 2 instances) into a shared function"
-          },
-          {
-            "type": "suppress-line",
-            "auto_fixable": false,
-            "description": "Suppress with an inline comment above the duplicated code",
-            "comment": "// fallow-ignore-next-line code-duplication"
-          }
-        ]
-      },
-      {
-        "instances": [
-          {
-            "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
-            "start_line": 205,
-            "end_line": 217,
-            "start_col": 24,
-            "end_col": 47,
-            "fragment": "{ rows: [{ id: 2 }], total: 3 }),\n      );\n\n      const { result } = renderHook(() =>\n        useFetchMoreData<TestRow, TestResponse>(),\n      );\n\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n      });\n\n      // Only one call — no prefetch\n      expect(onLoadMore).toHaveBeenCalledTimes("
-          },
-          {
-            "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
-            "start_line": 224,
-            "end_line": 236,
-            "start_col": 24,
-            "end_col": 47,
-            "fragment": "{ rows: [{ id: 2 }], total: 5 }),\n      );\n\n      const { result } = renderHook(() =>\n        useFetchMoreData<TestRow, TestResponse>(),\n      );\n\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n      });\n\n      // First call: normal fetch; second call: prefetch\n      expect(onLoadMore).toHaveBeenCalledTimes("
-          },
-          {
-            "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
-            "start_line": 245,
-            "end_line": 257,
-            "start_col": 24,
-            "end_col": 47,
-            "fragment": "{ rows: [{ id: 2 }, { id: 3 }], total: 3 }),\n      );\n\n      const { result } = renderHook(() =>\n        useFetchMoreData<TestRow, TestResponse>(),\n      );\n\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n      });\n\n      // totalLoadedRows (3) === totalRows (3) → hasMore false → no prefetch\n      expect(onLoadMore).toHaveBeenCalledTimes("
-          }
-        ],
-        "token_count": 55,
-        "line_count": 13,
-        "fingerprint": "dup:3d7a5a48",
-        "suggested_name": "onLoadMore",
-        "actions": [
-          {
-            "type": "extract-shared",
-            "auto_fixable": false,
-            "description": "Extract duplicated code (13 lines, 3 instances) into a shared function"
-          },
-          {
-            "type": "suppress-line",
-            "auto_fixable": false,
-            "description": "Suppress with an inline comment above the duplicated code",
-            "comment": "// fallow-ignore-next-line code-duplication"
-          }
-        ]
-      },
-      {
-        "instances": [
-          {
-            "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
-            "start_line": 269,
-            "end_line": 280,
-            "start_col": 47,
-            "end_col": 9,
-            "fragment": ");\n\n      const { result } = renderHook(() =>\n        useFetchMoreData<TestRow, TestResponse>(),\n      );\n\n      // First fetch triggers prefetch\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n        // Allow prefetch promise to resolve\n        await new Promise((r) => setTimeout(r, 0));\n      });"
-          },
-          {
-            "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
-            "start_line": 312,
-            "end_line": 322,
-            "start_col": 62,
-            "end_col": 9,
-            "fragment": ");\n\n      const { result } = renderHook(() =>\n        useFetchMoreData<TestRow, TestResponse>(),\n      );\n\n      // First fetch triggers prefetch (which will fail)\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n        await new Promise((r) => setTimeout(r, 0));\n      });"
-          }
-        ],
-        "token_count": 64,
-        "line_count": 12,
-        "fingerprint": "dup:44bdc19a",
-        "suggested_name": "prefetch",
-        "actions": [
-          {
-            "type": "extract-shared",
-            "auto_fixable": false,
-            "description": "Extract duplicated code (12 lines, 2 instances) into a shared function"
-          },
-          {
-            "type": "suppress-line",
-            "auto_fixable": false,
-            "description": "Suppress with an inline comment above the duplicated code",
-            "comment": "// fallow-ignore-next-line code-duplication"
-          }
-        ]
-      },
-      {
-        "instances": [
-          {
-            "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
-            "start_line": 282,
-            "end_line": 300,
-            "start_col": 48,
-            "end_col": 47,
-            "fragment": ");\n\n      // Reset data store to reflect updated state after first fetch\n      setDataStoreState({\n        data: [{ id: 1 }, { id: 2 }],\n        hasMore: true,\n        isLoading: false,\n        isLoadingMore: false,\n        totalLoadedRows: 2,\n        totalRows: 5,\n      });\n\n      // Second fetch should use cached data — no new network call\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n      });\n\n      // Calls: 1 (normal) + 1 (prefetch) + 0 (cache hit) + 1 (new prefetch after hit) = 3\n      expect(onLoadMore).toHaveBeenCalledTimes("
-          },
-          {
-            "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
-            "start_line": 322,
-            "end_line": 339,
-            "start_col": 7,
-            "end_col": 47,
-            "fragment": ");\n\n      setDataStoreState({\n        data: [{ id: 1 }, { id: 2 }],\n        hasMore: true,\n        isLoading: false,\n        isLoadingMore: false,\n        totalLoadedRows: 2,\n        totalRows: 5,\n      });\n\n      // Second fetch: prefetch failed → cache miss → normal fetch\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n      });\n\n      // 1 (normal) + 1 (prefetch, failed) + 1 (cache miss, normal) + 1 (new prefetch) = 4\n      expect(onLoadMore).toHaveBeenCalledTimes("
-          }
-        ],
-        "token_count": 63,
-        "line_count": 19,
-        "fingerprint": "dup:7b75c2c5",
-        "suggested_name": "onLoadMore",
-        "actions": [
-          {
-            "type": "extract-shared",
-            "auto_fixable": false,
-            "description": "Extract duplicated code (19 lines, 2 instances) into a shared function"
           },
           {
             "type": "suppress-line",
@@ -3656,160 +3537,6 @@
       {
         "files": [
           "src/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/ColumnDrawerContext.hooks.test.tsx",
-          "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/ColumnOrderSectionContext.hooks.test.tsx"
-        ],
-        "groups": [
-          {
-            "instances": [
-              {
-                "file": "src/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/ColumnDrawerContext.hooks.test.tsx",
-                "start_line": 21,
-                "end_line": 64,
-                "start_col": 0,
-                "end_col": 3,
-                "fragment": "type MockStore<TState> = {\n  readonly get: () => TState;\n  readonly getServerSnapshot: () => TState;\n  readonly set: (partial: Partial<TState>) => void;\n  readonly subscribe: (listener: () => void) => () => void;\n};\n\ntype WrapperProps = {\n  readonly children: ReactNode;\n};\n\nconst createMockStore = <TState,>(initialState: TState): MockStore<TState> => {\n  let state = initialState;\n  const listeners = new Set<() => void>();\n\n  return {\n    get: () => state,\n    getServerSnapshot: () => state,\n    set: (partial) => {\n      state = { ...state, ...partial };\n      for (const listener of listeners) {\n        listener();\n      }\n    },\n    subscribe: (listener) => {\n      listeners.add(listener);\n      return () => {\n        listeners.delete(listener);\n      };\n    },\n  };\n};\n\nconst columnStore = createMockStore({\n  columnFilter: {\n    operator: 'equals',\n    type: 'select',\n    value: 'paid',\n  },\n  columnKey: 'status',\n  columnPinning: 'left' as const,\n  columnSizing: 180,\n  sorting: 'asc' as const,\n});"
-              },
-              {
-                "file": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/ColumnOrderSectionContext.hooks.test.tsx",
-                "start_line": 19,
-                "end_line": 76,
-                "start_col": 0,
-                "end_col": 3,
-                "fragment": "type MockStore<TState> = {\n  readonly get: () => TState;\n  readonly getServerSnapshot: () => TState;\n  readonly set: (partial: Partial<TState>) => void;\n  readonly subscribe: (listener: () => void) => () => void;\n};\n\ntype WrapperProps = {\n  readonly children: ReactNode;\n};\n\nconst createMockStore = <TState,>(initialState: TState): MockStore<TState> => {\n  let state = initialState;\n  const listeners = new Set<() => void>();\n\n  return {\n    get: () => state,\n    getServerSnapshot: () => state,\n    set: (partial) => {\n      state = { ...state, ...partial };\n      for (const listener of listeners) {\n        listener();\n      }\n    },\n    subscribe: (listener) => {\n      listeners.add(listener);\n      return () => {\n        listeners.delete(listener);\n      };\n    },\n  };\n};\n\nconst modalsStore = createMockStore({\n  conflictModal: {\n    columnKey: 'status',\n    columnLabel: 'Status',\n    isOpen: false,\n    side: 'left' as const,\n  },\n  orderConflict: {\n    description: 'Pending reorder',\n    isOpen: true,\n    pendingOrder: ['id', 'status'],\n    pendingPinning: { left: ['id'], right: [] },\n  },\n  pinSideModal: {\n    columnKey: 'status',\n    columnLabel: 'Status',\n    isOpen: true,\n  },\n  unpinConflictModal: {\n    columnKey: 'status',\n    columnLabel: 'Status',\n    isOpen: false,\n    side: 'right' as const,\n  },\n});"
-              }
-            ],
-            "token_count": 140,
-            "line_count": 58,
-            "fingerprint": "dup:d6d3e3c4",
-            "actions": [
-              {
-                "type": "extract-shared",
-                "auto_fixable": false,
-                "description": "Extract duplicated code (58 lines, 2 instances) into a shared function"
-              },
-              {
-                "type": "suppress-line",
-                "auto_fixable": false,
-                "description": "Suppress with an inline comment above the duplicated code",
-                "comment": "// fallow-ignore-next-line code-duplication"
-              }
-            ]
-          }
-        ],
-        "total_duplicated_lines": 58,
-        "total_duplicated_tokens": 140,
-        "suggestions": [
-          {
-            "kind": "ExtractModule",
-            "description": "Extract 1 shared clone group (58 lines) from ColumnDrawerContext.hooks.test.tsx, ColumnOrderSectionContext.hooks.test.tsx into a shared directory",
-            "estimated_savings": 58
-          }
-        ],
-        "actions": [
-          {
-            "type": "extract-shared",
-            "auto_fixable": false,
-            "description": "Extract 1 duplicated code block (58 lines) into a shared module",
-            "note": "These clone groups share the same files, indicating a structural relationship; refactor together"
-          },
-          {
-            "type": "apply-suggestion",
-            "auto_fixable": false,
-            "description": "Extract 1 shared clone group (58 lines) from ColumnDrawerContext.hooks.test.tsx, ColumnOrderSectionContext.hooks.test.tsx into a shared directory"
-          },
-          {
-            "type": "suppress-line",
-            "auto_fixable": false,
-            "description": "Suppress with an inline comment above the duplicated code",
-            "comment": "// fallow-ignore-next-line code-duplication"
-          }
-        ]
-      },
-      {
-        "files": [
-          "src/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/ColumnDrawerContext.hooks.test.tsx",
-          "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/ColumnOrderSectionContext.hooks.test.tsx",
-          "src/components/test-utils/createMockStore.util.ts"
-        ],
-        "groups": [
-          {
-            "instances": [
-              {
-                "file": "src/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/ColumnDrawerContext.hooks.test.tsx",
-                "start_line": 39,
-                "end_line": 52,
-                "start_col": 4,
-                "end_col": 1,
-                "fragment": "set: (partial) => {\n      state = { ...state, ...partial };\n      for (const listener of listeners) {\n        listener();\n      }\n    },\n    subscribe: (listener) => {\n      listeners.add(listener);\n      return () => {\n        listeners.delete(listener);\n      };\n    },\n  };\n}"
-              },
-              {
-                "file": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/ColumnOrderSectionContext.hooks.test.tsx",
-                "start_line": 37,
-                "end_line": 50,
-                "start_col": 4,
-                "end_col": 1,
-                "fragment": "set: (partial) => {\n      state = { ...state, ...partial };\n      for (const listener of listeners) {\n        listener();\n      }\n    },\n    subscribe: (listener) => {\n      listeners.add(listener);\n      return () => {\n        listeners.delete(listener);\n      };\n    },\n  };\n}"
-              },
-              {
-                "file": "src/components/test-utils/createMockStore.util.ts",
-                "start_line": 24,
-                "end_line": 37,
-                "start_col": 4,
-                "end_col": 1,
-                "fragment": "set: (partial) => {\n      state = { ...state, ...partial };\n      for (const listener of listeners) {\n        listener();\n      }\n    },\n    subscribe: (listener) => {\n      listeners.add(listener);\n      return () => {\n        listeners.delete(listener);\n      };\n    },\n  };\n}"
-              }
-            ],
-            "token_count": 59,
-            "line_count": 14,
-            "fingerprint": "dup:3c4509e2",
-            "suggested_name": "listener",
-            "actions": [
-              {
-                "type": "extract-shared",
-                "auto_fixable": false,
-                "description": "Extract duplicated code (14 lines, 3 instances) into a shared function"
-              },
-              {
-                "type": "suppress-line",
-                "auto_fixable": false,
-                "description": "Suppress with an inline comment above the duplicated code",
-                "comment": "// fallow-ignore-next-line code-duplication"
-              }
-            ]
-          }
-        ],
-        "total_duplicated_lines": 14,
-        "total_duplicated_tokens": 59,
-        "suggestions": [
-          {
-            "kind": "ExtractFunction",
-            "description": "Extract shared function (14 lines) from ColumnDrawerContext.hooks.test.tsx, ColumnOrderSectionContext.hooks.test.tsx, createMockStore.util.ts",
-            "estimated_savings": 28
-          }
-        ],
-        "actions": [
-          {
-            "type": "extract-shared",
-            "auto_fixable": false,
-            "description": "Extract 1 duplicated code block (14 lines) into a shared module",
-            "note": "These clone groups share the same files, indicating a structural relationship; refactor together"
-          },
-          {
-            "type": "apply-suggestion",
-            "auto_fixable": false,
-            "description": "Extract shared function (14 lines) from ColumnDrawerContext.hooks.test.tsx, ColumnOrderSectionContext.hooks.test.tsx, createMockStore.util.ts"
-          },
-          {
-            "type": "suppress-line",
-            "auto_fixable": false,
-            "description": "Suppress with an inline comment above the duplicated code",
-            "comment": "// fallow-ignore-next-line code-duplication"
-          }
-        ]
-      },
-      {
-        "files": [
-          "src/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/ColumnDrawerContext.hooks.test.tsx",
           "src/components/Table/TableSettingsDrawer/TableDrawerContext/TableDrawerContext.hooks.test.tsx"
         ],
         "groups": [
@@ -3817,8 +3544,8 @@
             "instances": [
               {
                 "file": "src/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/ColumnDrawerContext.hooks.test.tsx",
-                "start_line": 76,
-                "end_line": 83,
+                "start_line": 49,
+                "end_line": 56,
                 "start_col": 50,
                 "end_col": 56,
                 "fragment": "(), { wrapper: Wrapper })\n        .result.current,\n    ).toBe(contextValue);\n  });\n\n  it('subscribes to the drawer store and exposes selector hooks', () => {\n    expect(\n      renderHook(() => useColumnsStore((state) => state."
@@ -5061,16 +4788,16 @@
             "instances": [
               {
                 "file": "src/components/Table/contexts/FiltersData/filters/actions/useFetchFilterData.hook.test.ts",
-                "start_line": 199,
-                "end_line": 214,
+                "start_line": 177,
+                "end_line": 192,
                 "start_col": 29,
                 "end_col": 11,
                 "fragment": ");\n\n    const { result } = renderHook(() =>\n      useFetchFilterData<TestData, TestResponse>({\n        columnKey: 'status',\n      }),\n    );\n\n    await act(async () => {\n      await result.current.fetchInitial({\n        ...defaultSelectors,\n        onLoadMore,\n      });\n    });\n\n    expect("
               },
               {
                 "file": "src/components/Table/contexts/FiltersData/filters/actions/useFetchFilterData.hook.test.ts",
-                "start_line": 271,
-                "end_line": 286,
+                "start_line": 249,
+                "end_line": 264,
                 "start_col": 4,
                 "end_col": 11,
                 "fragment": ");\n\n    const { result } = renderHook(() =>\n      useFetchFilterData<TestData, TestResponse>({\n        columnKey: 'status',\n      }),\n    );\n\n    await act(async () => {\n      await result.current.fetchInitial({\n        ...defaultSelectors,\n        onLoadMore,\n      });\n    });\n\n    expect("
@@ -5133,67 +4860,30 @@
             "instances": [
               {
                 "file": "src/components/Table/contexts/FiltersData/filters/actions/useFetchFilterData.hook.test.ts",
-                "start_line": 47,
-                "end_line": 67,
-                "start_col": 48,
-                "end_col": 6,
-                "fragment": "...value };\n    }),\n  };\n\n  const mockMetaStore = {\n    get: vi.fn(() => metaStoreState),\n    set: vi.fn(),\n  };\n\n  return {\n    firePrefetchMock: vi.fn(({ limit, nextSkip, onLoadMore, prefetchRef }) => {\n      void onLoadMore({ limit, skip: nextSkip })\n        .then((response: TestResponse) => {\n          prefetchRef.current = {\n            data: response,\n            promise: undefined,\n            skip: nextSkip,\n          };\n        })\n        .catch(() => undefined);\n    })"
+                "start_line": 84,
+                "end_line": 106,
+                "start_col": 33,
+                "end_col": 9,
+                "fragment": "{\n  logger: {\n    error: loggerMock.error,\n  },\n}));\n\nvi.mock('@/utils/prefetch/firePrefetch.util', () => ({\n  firePrefetch: (...args: Parameters<Harness['firePrefetchMock']>) =>\n    getHarness().firePrefetchMock(...args),\n}));\n\nvi.mock('@/utils/prefetch/resolveFromCacheOrFetch.util', () => ({\n  resolveFromCacheOrFetch: (\n    ...args: Parameters<Harness['resolveFromCacheOrFetchMock']>\n  ) => getHarness().resolveFromCacheOrFetchMock(...args),\n}));\n\nconst defaultSelectors = {\n  dataSelector: (response: TestResponse) => [...response.rows],\n  dataTotalSelector: (response: TestResponse) => response.total,\n};\n\ndescribe("
               },
               {
                 "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
-                "start_line": 36,
-                "end_line": 56,
-                "start_col": 44,
-                "end_col": 6,
-                "fragment": "...value };\n    }),\n  };\n\n  const mockMetaStore = {\n    get: vi.fn(() => metaStoreState),\n    set: vi.fn(),\n  };\n\n  return {\n    firePrefetchMock: vi.fn(({ limit, nextSkip, onLoadMore, prefetchRef }) => {\n      void onLoadMore({ limit, skip: nextSkip })\n        .then((response: TestResponse) => {\n          prefetchRef.current = {\n            data: response,\n            promise: undefined,\n            skip: nextSkip,\n          };\n        })\n        .catch(() => undefined);\n    })"
+                "start_line": 73,
+                "end_line": 93,
+                "start_col": 51,
+                "end_col": 9,
+                "fragment": "{\n  useTableDataContextValue: mockUseTableDataContextValue,\n}));\n\nvi.mock('@/utils/prefetch/firePrefetch.util', () => ({\n  firePrefetch: (...args: Parameters<Harness['firePrefetchMock']>) =>\n    getHarness().firePrefetchMock(...args),\n}));\n\nvi.mock('@/utils/prefetch/resolveFromCacheOrFetch.util', () => ({\n  resolveFromCacheOrFetch: (\n    ...args: Parameters<Harness['resolveFromCacheOrFetchMock']>\n  ) => getHarness().resolveFromCacheOrFetchMock(...args),\n}));\n\nconst defaultSelectors = {\n  dataSelector: (response: TestResponse) => [...response.rows],\n  dataTotalSelector: (response: TestResponse) => response.total,\n};\n\ndescribe("
               }
             ],
-            "token_count": 109,
-            "line_count": 21,
-            "fingerprint": "dup:d067f7c9",
-            "suggested_name": "nextSkip",
+            "token_count": 112,
+            "line_count": 23,
+            "fingerprint": "dup:f5df1843",
+            "suggested_name": "response",
             "actions": [
               {
                 "type": "extract-shared",
                 "auto_fixable": false,
-                "description": "Extract duplicated code (21 lines, 2 instances) into a shared function"
-              },
-              {
-                "type": "suppress-line",
-                "auto_fixable": false,
-                "description": "Suppress with an inline comment above the duplicated code",
-                "comment": "// fallow-ignore-next-line code-duplication"
-              }
-            ]
-          },
-          {
-            "instances": [
-              {
-                "file": "src/components/Table/contexts/FiltersData/filters/actions/useFetchFilterData.hook.test.ts",
-                "start_line": 74,
-                "end_line": 87,
-                "start_col": 43,
-                "end_col": 5,
-                "fragment": "{ metaStore: mockMetaStore }),\n    resolveFromCacheOrFetchMock: vi.fn(\n      async ({ cache, expectedSkip, fetchFn }) => {\n        if (cache?.skip === expectedSkip && cache.data) {\n          return cache.data;\n        }\n\n        if (cache?.skip === expectedSkip && cache.promise) {\n          return cache.promise;\n        }\n\n        return fetchFn();\n      },\n    )"
-              },
-              {
-                "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
-                "start_line": 59,
-                "end_line": 72,
-                "start_col": 41,
-                "end_col": 5,
-                "fragment": "{ dataStore: mockDataStore }),\n    resolveFromCacheOrFetchMock: vi.fn(\n      async ({ cache, expectedSkip, fetchFn }) => {\n        if (cache?.skip === expectedSkip && cache.data) {\n          return cache.data;\n        }\n\n        if (cache?.skip === expectedSkip && cache.promise) {\n          return cache.promise;\n        }\n\n        return fetchFn();\n      },\n    )"
-              }
-            ],
-            "token_count": 66,
-            "line_count": 14,
-            "fingerprint": "dup:8f218843",
-            "suggested_name": "cache",
-            "actions": [
-              {
-                "type": "extract-shared",
-                "auto_fixable": false,
-                "description": "Extract duplicated code (14 lines, 2 instances) into a shared function"
+                "description": "Extract duplicated code (23 lines, 2 instances) into a shared function"
               },
               {
                 "type": "suppress-line",
@@ -5204,36 +4894,26 @@
             ]
           }
         ],
-        "total_duplicated_lines": 35,
-        "total_duplicated_tokens": 175,
+        "total_duplicated_lines": 23,
+        "total_duplicated_tokens": 112,
         "suggestions": [
           {
             "kind": "ExtractFunction",
-            "description": "Extract shared function (21 lines) from useFetchFilterData.hook.test.ts, useFetchMoreData.hook.test.ts",
-            "estimated_savings": 21
-          },
-          {
-            "kind": "ExtractFunction",
-            "description": "Extract shared function (14 lines) from useFetchFilterData.hook.test.ts, useFetchMoreData.hook.test.ts",
-            "estimated_savings": 14
+            "description": "Extract shared function (23 lines) from useFetchFilterData.hook.test.ts, useFetchMoreData.hook.test.ts",
+            "estimated_savings": 23
           }
         ],
         "actions": [
           {
             "type": "extract-shared",
             "auto_fixable": false,
-            "description": "Extract 2 duplicated code blocks (35 lines) into a shared module",
+            "description": "Extract 1 duplicated code block (23 lines) into a shared module",
             "note": "These clone groups share the same files, indicating a structural relationship; refactor together"
           },
           {
             "type": "apply-suggestion",
             "auto_fixable": false,
-            "description": "Extract shared function (21 lines) from useFetchFilterData.hook.test.ts, useFetchMoreData.hook.test.ts"
-          },
-          {
-            "type": "apply-suggestion",
-            "auto_fixable": false,
-            "description": "Extract shared function (14 lines) from useFetchFilterData.hook.test.ts, useFetchMoreData.hook.test.ts"
+            "description": "Extract shared function (23 lines) from useFetchFilterData.hook.test.ts, useFetchMoreData.hook.test.ts"
           },
           {
             "type": "suppress-line",
@@ -6330,30 +6010,30 @@
             "instances": [
               {
                 "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
-                "start_line": 187,
-                "end_line": 199,
+                "start_line": 170,
+                "end_line": 182,
                 "start_col": 4,
                 "end_col": 23,
                 "fragment": "const onLoadMore = vi.fn(() =>\n      Promise.resolve({ rows: [{ id: 2 }], total: 3 }),\n    );\n\n    const { result } = renderHook(() =>\n      useFetchMoreData<TestRow, TestResponse>(),\n    );\n\n    await act(async () => {\n      await result.current({ ...defaultSelectors, onLoadMore });\n    });\n\n    expect(onLoadMore)."
               },
               {
                 "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
-                "start_line": 204,
-                "end_line": 217,
+                "start_line": 187,
+                "end_line": 199,
                 "start_col": 6,
                 "end_col": 25,
-                "fragment": "const onLoadMore = vi.fn(() =>\n        Promise.resolve({ rows: [{ id: 2 }], total: 3 }),\n      );\n\n      const { result } = renderHook(() =>\n        useFetchMoreData<TestRow, TestResponse>(),\n      );\n\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n      });\n\n      // Only one call — no prefetch\n      expect(onLoadMore)."
+                "fragment": "const onLoadMore = vi.fn(() =>\n        Promise.resolve({ rows: [{ id: 2 }], total: 3 }),\n      );\n\n      const { result } = renderHook(() =>\n        useFetchMoreData<TestRow, TestResponse>(),\n      );\n\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n      });\n\n      expect(onLoadMore)."
               }
             ],
             "token_count": 77,
-            "line_count": 14,
+            "line_count": 13,
             "fingerprint": "dup:d9db0d25",
             "suggested_name": "onLoadMore",
             "actions": [
               {
                 "type": "extract-shared",
                 "auto_fixable": false,
-                "description": "Extract duplicated code (14 lines, 2 instances) into a shared function"
+                "description": "Extract duplicated code (13 lines, 2 instances) into a shared function"
               },
               {
                 "type": "suppress-line",
@@ -6367,24 +6047,142 @@
             "instances": [
               {
                 "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
-                "start_line": 205,
-                "end_line": 220,
+                "start_line": 188,
+                "end_line": 202,
                 "start_col": 33,
                 "end_col": 7,
-                "fragment": "{ id: 2 }], total: 3 }),\n      );\n\n      const { result } = renderHook(() =>\n        useFetchMoreData<TestRow, TestResponse>(),\n      );\n\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n      });\n\n      // Only one call — no prefetch\n      expect(onLoadMore).toHaveBeenCalledTimes(1);\n    });\n\n    it("
+                "fragment": "{ id: 2 }], total: 3 }),\n      );\n\n      const { result } = renderHook(() =>\n        useFetchMoreData<TestRow, TestResponse>(),\n      );\n\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n      });\n\n      expect(onLoadMore).toHaveBeenCalledTimes(1);\n    });\n\n    it("
               },
               {
                 "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
-                "start_line": 245,
-                "end_line": 260,
+                "start_line": 226,
+                "end_line": 240,
                 "start_col": 44,
                 "end_col": 7,
-                "fragment": "{ id: 3 }], total: 3 }),\n      );\n\n      const { result } = renderHook(() =>\n        useFetchMoreData<TestRow, TestResponse>(),\n      );\n\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n      });\n\n      // totalLoadedRows (3) === totalRows (3) → hasMore false → no prefetch\n      expect(onLoadMore).toHaveBeenCalledTimes(1);\n    });\n\n    it("
+                "fragment": "{ id: 3 }], total: 3 }),\n      );\n\n      const { result } = renderHook(() =>\n        useFetchMoreData<TestRow, TestResponse>(),\n      );\n\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n      });\n\n      expect(onLoadMore).toHaveBeenCalledTimes(1);\n    });\n\n    it("
               }
             ],
             "token_count": 68,
+            "line_count": 15,
+            "fingerprint": "dup:2d393594",
+            "suggested_name": "onLoadMore",
+            "actions": [
+              {
+                "type": "extract-shared",
+                "auto_fixable": false,
+                "description": "Extract duplicated code (15 lines, 2 instances) into a shared function"
+              },
+              {
+                "type": "suppress-line",
+                "auto_fixable": false,
+                "description": "Suppress with an inline comment above the duplicated code",
+                "comment": "// fallow-ignore-next-line code-duplication"
+              }
+            ]
+          },
+          {
+            "instances": [
+              {
+                "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
+                "start_line": 188,
+                "end_line": 199,
+                "start_col": 24,
+                "end_col": 47,
+                "fragment": "{ rows: [{ id: 2 }], total: 3 }),\n      );\n\n      const { result } = renderHook(() =>\n        useFetchMoreData<TestRow, TestResponse>(),\n      );\n\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n      });\n\n      expect(onLoadMore).toHaveBeenCalledTimes("
+              },
+              {
+                "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
+                "start_line": 206,
+                "end_line": 217,
+                "start_col": 24,
+                "end_col": 47,
+                "fragment": "{ rows: [{ id: 2 }], total: 5 }),\n      );\n\n      const { result } = renderHook(() =>\n        useFetchMoreData<TestRow, TestResponse>(),\n      );\n\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n      });\n\n      expect(onLoadMore).toHaveBeenCalledTimes("
+              },
+              {
+                "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
+                "start_line": 226,
+                "end_line": 237,
+                "start_col": 24,
+                "end_col": 47,
+                "fragment": "{ rows: [{ id: 2 }, { id: 3 }], total: 3 }),\n      );\n\n      const { result } = renderHook(() =>\n        useFetchMoreData<TestRow, TestResponse>(),\n      );\n\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n      });\n\n      expect(onLoadMore).toHaveBeenCalledTimes("
+              }
+            ],
+            "token_count": 55,
+            "line_count": 12,
+            "fingerprint": "dup:2431f5d3",
+            "suggested_name": "onLoadMore",
+            "actions": [
+              {
+                "type": "extract-shared",
+                "auto_fixable": false,
+                "description": "Extract duplicated code (12 lines, 3 instances) into a shared function"
+              },
+              {
+                "type": "suppress-line",
+                "auto_fixable": false,
+                "description": "Suppress with an inline comment above the duplicated code",
+                "comment": "// fallow-ignore-next-line code-duplication"
+              }
+            ]
+          },
+          {
+            "instances": [
+              {
+                "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
+                "start_line": 249,
+                "end_line": 258,
+                "start_col": 47,
+                "end_col": 9,
+                "fragment": ");\n\n      const { result } = renderHook(() =>\n        useFetchMoreData<TestRow, TestResponse>(),\n      );\n\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n        await new Promise((resolve) => setTimeout(resolve, 0));\n      });"
+              },
+              {
+                "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
+                "start_line": 287,
+                "end_line": 296,
+                "start_col": 62,
+                "end_col": 9,
+                "fragment": ");\n\n      const { result } = renderHook(() =>\n        useFetchMoreData<TestRow, TestResponse>(),\n      );\n\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n        await new Promise((resolve) => setTimeout(resolve, 0));\n      });"
+              }
+            ],
+            "token_count": 64,
+            "line_count": 10,
+            "fingerprint": "dup:404c9254",
+            "actions": [
+              {
+                "type": "extract-shared",
+                "auto_fixable": false,
+                "description": "Extract duplicated code (10 lines, 2 instances) into a shared function"
+              },
+              {
+                "type": "suppress-line",
+                "auto_fixable": false,
+                "description": "Suppress with an inline comment above the duplicated code",
+                "comment": "// fallow-ignore-next-line code-duplication"
+              }
+            ]
+          },
+          {
+            "instances": [
+              {
+                "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
+                "start_line": 260,
+                "end_line": 275,
+                "start_col": 48,
+                "end_col": 47,
+                "fragment": ");\n\n      getHarness().setDataState({\n        data: [{ id: 1 }, { id: 2 }],\n        hasMore: true,\n        isLoading: false,\n        isLoadingMore: false,\n        totalLoadedRows: 2,\n        totalRows: 5,\n      });\n\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n      });\n\n      expect(onLoadMore).toHaveBeenCalledTimes("
+              },
+              {
+                "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
+                "start_line": 296,
+                "end_line": 311,
+                "start_col": 7,
+                "end_col": 47,
+                "fragment": ");\n\n      getHarness().setDataState({\n        data: [{ id: 1 }, { id: 2 }],\n        hasMore: true,\n        isLoading: false,\n        isLoadingMore: false,\n        totalLoadedRows: 2,\n        totalRows: 5,\n      });\n\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n      });\n\n      expect(onLoadMore).toHaveBeenCalledTimes("
+              }
+            ],
+            "token_count": 67,
             "line_count": 16,
-            "fingerprint": "dup:281cd1a8",
+            "fingerprint": "dup:bc00a62d",
             "suggested_name": "onLoadMore",
             "actions": [
               {
@@ -6399,147 +6197,28 @@
                 "comment": "// fallow-ignore-next-line code-duplication"
               }
             ]
-          },
-          {
-            "instances": [
-              {
-                "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
-                "start_line": 205,
-                "end_line": 217,
-                "start_col": 24,
-                "end_col": 47,
-                "fragment": "{ rows: [{ id: 2 }], total: 3 }),\n      );\n\n      const { result } = renderHook(() =>\n        useFetchMoreData<TestRow, TestResponse>(),\n      );\n\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n      });\n\n      // Only one call — no prefetch\n      expect(onLoadMore).toHaveBeenCalledTimes("
-              },
-              {
-                "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
-                "start_line": 224,
-                "end_line": 236,
-                "start_col": 24,
-                "end_col": 47,
-                "fragment": "{ rows: [{ id: 2 }], total: 5 }),\n      );\n\n      const { result } = renderHook(() =>\n        useFetchMoreData<TestRow, TestResponse>(),\n      );\n\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n      });\n\n      // First call: normal fetch; second call: prefetch\n      expect(onLoadMore).toHaveBeenCalledTimes("
-              },
-              {
-                "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
-                "start_line": 245,
-                "end_line": 257,
-                "start_col": 24,
-                "end_col": 47,
-                "fragment": "{ rows: [{ id: 2 }, { id: 3 }], total: 3 }),\n      );\n\n      const { result } = renderHook(() =>\n        useFetchMoreData<TestRow, TestResponse>(),\n      );\n\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n      });\n\n      // totalLoadedRows (3) === totalRows (3) → hasMore false → no prefetch\n      expect(onLoadMore).toHaveBeenCalledTimes("
-              }
-            ],
-            "token_count": 55,
-            "line_count": 13,
-            "fingerprint": "dup:3d7a5a48",
-            "suggested_name": "onLoadMore",
-            "actions": [
-              {
-                "type": "extract-shared",
-                "auto_fixable": false,
-                "description": "Extract duplicated code (13 lines, 3 instances) into a shared function"
-              },
-              {
-                "type": "suppress-line",
-                "auto_fixable": false,
-                "description": "Suppress with an inline comment above the duplicated code",
-                "comment": "// fallow-ignore-next-line code-duplication"
-              }
-            ]
-          },
-          {
-            "instances": [
-              {
-                "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
-                "start_line": 269,
-                "end_line": 280,
-                "start_col": 47,
-                "end_col": 9,
-                "fragment": ");\n\n      const { result } = renderHook(() =>\n        useFetchMoreData<TestRow, TestResponse>(),\n      );\n\n      // First fetch triggers prefetch\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n        // Allow prefetch promise to resolve\n        await new Promise((r) => setTimeout(r, 0));\n      });"
-              },
-              {
-                "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
-                "start_line": 312,
-                "end_line": 322,
-                "start_col": 62,
-                "end_col": 9,
-                "fragment": ");\n\n      const { result } = renderHook(() =>\n        useFetchMoreData<TestRow, TestResponse>(),\n      );\n\n      // First fetch triggers prefetch (which will fail)\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n        await new Promise((r) => setTimeout(r, 0));\n      });"
-              }
-            ],
-            "token_count": 64,
-            "line_count": 12,
-            "fingerprint": "dup:44bdc19a",
-            "suggested_name": "prefetch",
-            "actions": [
-              {
-                "type": "extract-shared",
-                "auto_fixable": false,
-                "description": "Extract duplicated code (12 lines, 2 instances) into a shared function"
-              },
-              {
-                "type": "suppress-line",
-                "auto_fixable": false,
-                "description": "Suppress with an inline comment above the duplicated code",
-                "comment": "// fallow-ignore-next-line code-duplication"
-              }
-            ]
-          },
-          {
-            "instances": [
-              {
-                "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
-                "start_line": 282,
-                "end_line": 300,
-                "start_col": 48,
-                "end_col": 47,
-                "fragment": ");\n\n      // Reset data store to reflect updated state after first fetch\n      setDataStoreState({\n        data: [{ id: 1 }, { id: 2 }],\n        hasMore: true,\n        isLoading: false,\n        isLoadingMore: false,\n        totalLoadedRows: 2,\n        totalRows: 5,\n      });\n\n      // Second fetch should use cached data — no new network call\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n      });\n\n      // Calls: 1 (normal) + 1 (prefetch) + 0 (cache hit) + 1 (new prefetch after hit) = 3\n      expect(onLoadMore).toHaveBeenCalledTimes("
-              },
-              {
-                "file": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
-                "start_line": 322,
-                "end_line": 339,
-                "start_col": 7,
-                "end_col": 47,
-                "fragment": ");\n\n      setDataStoreState({\n        data: [{ id: 1 }, { id: 2 }],\n        hasMore: true,\n        isLoading: false,\n        isLoadingMore: false,\n        totalLoadedRows: 2,\n        totalRows: 5,\n      });\n\n      // Second fetch: prefetch failed → cache miss → normal fetch\n      await act(async () => {\n        await result.current({ ...defaultSelectors, onLoadMore });\n      });\n\n      // 1 (normal) + 1 (prefetch, failed) + 1 (cache miss, normal) + 1 (new prefetch) = 4\n      expect(onLoadMore).toHaveBeenCalledTimes("
-              }
-            ],
-            "token_count": 63,
-            "line_count": 19,
-            "fingerprint": "dup:7b75c2c5",
-            "suggested_name": "onLoadMore",
-            "actions": [
-              {
-                "type": "extract-shared",
-                "auto_fixable": false,
-                "description": "Extract duplicated code (19 lines, 2 instances) into a shared function"
-              },
-              {
-                "type": "suppress-line",
-                "auto_fixable": false,
-                "description": "Suppress with an inline comment above the duplicated code",
-                "comment": "// fallow-ignore-next-line code-duplication"
-              }
-            ]
           }
         ],
-        "total_duplicated_lines": 74,
-        "total_duplicated_tokens": 327,
+        "total_duplicated_lines": 66,
+        "total_duplicated_tokens": 331,
         "suggestions": [
           {
             "kind": "ExtractModule",
-            "description": "Extract 5 shared clone groups (74 lines) from useFetchMoreData.hook.test.ts into src/components/Table/contexts/TableData/data/actions",
-            "estimated_savings": 87
+            "description": "Extract 5 shared clone groups (66 lines) from useFetchMoreData.hook.test.ts into src/components/Table/contexts/TableData/data/actions",
+            "estimated_savings": 78
           }
         ],
         "actions": [
           {
             "type": "extract-shared",
             "auto_fixable": false,
-            "description": "Extract 5 duplicated code blocks (74 lines) into a shared module",
+            "description": "Extract 5 duplicated code blocks (66 lines) into a shared module",
             "note": "These clone groups share the same files, indicating a structural relationship; refactor together"
           },
           {
             "type": "apply-suggestion",
             "auto_fixable": false,
-            "description": "Extract 5 shared clone groups (74 lines) from useFetchMoreData.hook.test.ts into src/components/Table/contexts/TableData/data/actions"
+            "description": "Extract 5 shared clone groups (66 lines) from useFetchMoreData.hook.test.ts into src/components/Table/contexts/TableData/data/actions"
           },
           {
             "type": "suppress-line",
@@ -7891,15 +7570,15 @@
       }
     ],
     "stats": {
-      "total_files": 638,
-      "files_with_clones": 66,
-      "total_lines": 42793,
-      "duplicated_lines": 2611,
-      "total_tokens": 157000,
-      "duplicated_tokens": 6333,
-      "clone_groups": 76,
-      "clone_instances": 163,
-      "duplication_percentage": 6.101465192905382
+      "total_files": 640,
+      "files_with_clones": 64,
+      "total_lines": 42873,
+      "duplicated_lines": 2458,
+      "total_tokens": 157211,
+      "duplicated_tokens": 6016,
+      "clone_groups": 73,
+      "clone_instances": 156,
+      "duplication_percentage": 5.733212044876729
     }
   },
   "health": {
@@ -7943,11 +7622,11 @@
       {
         "path": "src/components/Table/contexts/FiltersData/filters/actions/useFetchFilterData.hook.ts",
         "name": "fetchMore",
-        "line": 132,
+        "line": 129,
         "col": 20,
         "cyclomatic": 16,
         "cognitive": 10,
-        "line_count": 82,
+        "line_count": 80,
         "param_count": 1,
         "exceeded": "crap",
         "severity": "high",
@@ -8075,11 +7754,11 @@
       {
         "path": "src/components/Table/contexts/FiltersData/filters/actions/useFetchFilterData.hook.ts",
         "name": "fetchInitial",
-        "line": 54,
+        "line": 53,
         "col": 23,
         "cyclomatic": 11,
         "cognitive": 7,
-        "line_count": 77,
+        "line_count": 75,
         "param_count": 1,
         "exceeded": "crap",
         "severity": "moderate",
@@ -8554,13 +8233,13 @@
       }
     ],
     "summary": {
-      "files_analyzed": 1157,
-      "functions_analyzed": 3289,
+      "files_analyzed": 1159,
+      "functions_analyzed": 3281,
       "functions_above_threshold": 21,
       "max_cyclomatic_threshold": 20,
       "max_cognitive_threshold": 15,
       "max_crap_threshold": 30.0,
-      "files_scored": 715,
+      "files_scored": 717,
       "average_maintainability": 93.1,
       "coverage_model": "static_estimated",
       "coverage_source_consistency": "uniform",
@@ -8583,21 +8262,21 @@
       "circular_dep_count": 0,
       "circular_deps_per_k_files": 0.0,
       "counts": {
-        "total_files": 1157,
-        "total_exports": 1387,
+        "total_files": 1159,
+        "total_exports": 1388,
         "dead_files": 1,
         "dead_exports": 2,
-        "total_lines": 47438,
-        "files_scored": 715,
+        "total_lines": 47520,
+        "files_scored": 717,
         "total_deps": 0
       },
       "unit_size_profile": {
-        "low_risk": 74.4,
-        "medium_risk": 13.3,
-        "high_risk": 7.9,
+        "low_risk": 74.2,
+        "medium_risk": 13.5,
+        "high_risk": 8.0,
         "very_high_risk": 4.3
       },
-      "functions_over_60_loc_per_k": 43.5,
+      "functions_over_60_loc_per_k": 43.3,
       "unit_interfacing_profile": {
         "low_risk": 99.9,
         "medium_risk": 0.1,
@@ -8606,7 +8285,7 @@
       },
       "p95_fan_in": 4,
       "coupling_high_pct": 0.8,
-      "total_loc": 47438
+      "total_loc": 47520
     },
     "file_scores": [
       {
@@ -8628,12 +8307,12 @@
         "fan_in": 2,
         "fan_out": 13,
         "dead_code_ratio": 0.0,
-        "complexity_density": 0.13,
-        "maintainability_index": 85.5,
+        "complexity_density": 0.14,
+        "maintainability_index": 85.2,
         "total_cyclomatic": 29,
         "total_cognitive": 17,
         "function_count": 4,
-        "lines": 217,
+        "lines": 212,
         "crap_max": 71.3,
         "crap_above_threshold": 2
       },
@@ -9058,20 +8737,6 @@
         "crap_above_threshold": 0
       },
       {
-        "path": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
-        "fan_in": 0,
-        "fan_out": 6,
-        "dead_code_ratio": 0.0,
-        "complexity_density": 0.18,
-        "maintainability_index": 86.8,
-        "total_cyclomatic": 61,
-        "total_cognitive": 4,
-        "function_count": 54,
-        "lines": 344,
-        "crap_max": 17.6,
-        "crap_above_threshold": 0
-      },
-      {
         "path": "src/components/Table/TableSettingsDrawer/FiltersSection/AddFilterSection/AddFilterSection.component.tsx",
         "fan_in": 1,
         "fan_out": 8,
@@ -9096,20 +8761,6 @@
         "total_cognitive": 14,
         "function_count": 6,
         "lines": 135,
-        "crap_max": 17.6,
-        "crap_above_threshold": 0
-      },
-      {
-        "path": "src/components/Table/contexts/FiltersData/filters/actions/useFetchFilterData.hook.test.ts",
-        "fan_in": 0,
-        "fan_out": 7,
-        "dead_code_ratio": 0.0,
-        "complexity_density": 0.14,
-        "maintainability_index": 87.5,
-        "total_cyclomatic": 41,
-        "total_cognitive": 4,
-        "function_count": 35,
-        "lines": 292,
         "crap_max": 17.6,
         "crap_above_threshold": 0
       },
@@ -9180,6 +8831,20 @@
         "total_cognitive": 3,
         "function_count": 3,
         "lines": 71,
+        "crap_max": 17.6,
+        "crap_above_threshold": 0
+      },
+      {
+        "path": "src/components/test-utils/createPaginatedFetchActionMocks.util.ts",
+        "fan_in": 3,
+        "fan_out": 2,
+        "dead_code_ratio": 0.0,
+        "complexity_density": 0.12,
+        "maintainability_index": 92.0,
+        "total_cyclomatic": 15,
+        "total_cognitive": 4,
+        "function_count": 9,
+        "lines": 130,
         "crap_max": 17.6,
         "crap_above_threshold": 0
       },
@@ -11004,20 +10669,6 @@
         "crap_above_threshold": 0
       },
       {
-        "path": "src/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/ColumnDrawerContext.hooks.test.tsx",
-        "fan_in": 0,
-        "fan_out": 11,
-        "dead_code_ratio": 0.0,
-        "complexity_density": 0.16,
-        "maintainability_index": 85.3,
-        "total_cyclomatic": 23,
-        "total_cognitive": 1,
-        "function_count": 22,
-        "lines": 142,
-        "crap_max": 2.9,
-        "crap_above_threshold": 0
-      },
-      {
         "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useToggleColumnPin.hook.test.ts",
         "fan_in": 0,
         "fan_out": 10,
@@ -11028,6 +10679,20 @@
         "total_cognitive": 0,
         "function_count": 34,
         "lines": 201,
+        "crap_max": 1.2,
+        "crap_above_threshold": 0
+      },
+      {
+        "path": "src/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/ColumnDrawerContext.hooks.test.tsx",
+        "fan_in": 0,
+        "fan_out": 12,
+        "dead_code_ratio": 0.0,
+        "complexity_density": 0.14,
+        "maintainability_index": 85.5,
+        "total_cyclomatic": 16,
+        "total_cognitive": 0,
+        "function_count": 16,
+        "lines": 115,
         "crap_max": 1.2,
         "crap_above_threshold": 0
       },
@@ -11060,20 +10725,6 @@
         "crap_above_threshold": 0
       },
       {
-        "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/ColumnOrderSectionContext.hooks.test.tsx",
-        "fan_in": 0,
-        "fan_out": 9,
-        "dead_code_ratio": 0.0,
-        "complexity_density": 0.14,
-        "maintainability_index": 86.6,
-        "total_cyclomatic": 21,
-        "total_cognitive": 1,
-        "function_count": 20,
-        "lines": 149,
-        "crap_max": 2.9,
-        "crap_above_threshold": 0
-      },
-      {
         "path": "src/components/Table/TableSettingsDrawer/DetailsSection/DetailsSection.test.tsx",
         "fan_in": 0,
         "fan_out": 5,
@@ -11084,6 +10735,34 @@
         "total_cognitive": 0,
         "function_count": 32,
         "lines": 163,
+        "crap_max": 1.2,
+        "crap_above_threshold": 0
+      },
+      {
+        "path": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
+        "fan_in": 0,
+        "fan_out": 7,
+        "dead_code_ratio": 0.0,
+        "complexity_density": 0.16,
+        "maintainability_index": 86.9,
+        "total_cyclomatic": 50,
+        "total_cognitive": 1,
+        "function_count": 48,
+        "lines": 316,
+        "crap_max": 2.9,
+        "crap_above_threshold": 0
+      },
+      {
+        "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/ColumnOrderSectionContext.hooks.test.tsx",
+        "fan_in": 0,
+        "fan_out": 10,
+        "dead_code_ratio": 0.0,
+        "complexity_density": 0.11,
+        "maintainability_index": 87.1,
+        "total_cyclomatic": 14,
+        "total_cognitive": 0,
+        "function_count": 14,
+        "lines": 122,
         "crap_max": 1.2,
         "crap_above_threshold": 0
       },
@@ -11547,6 +11226,20 @@
         "function_count": 16,
         "lines": 234,
         "crap_max": 4.1,
+        "crap_above_threshold": 0
+      },
+      {
+        "path": "src/components/Table/contexts/FiltersData/filters/actions/useFetchFilterData.hook.test.ts",
+        "fan_in": 0,
+        "fan_out": 8,
+        "dead_code_ratio": 0.0,
+        "complexity_density": 0.11,
+        "maintainability_index": 87.9,
+        "total_cyclomatic": 31,
+        "total_cognitive": 1,
+        "function_count": 30,
+        "lines": 270,
+        "crap_max": 2.9,
         "crap_above_threshold": 0
       },
       {
@@ -12881,7 +12574,7 @@
       },
       {
         "path": "src/components/test-utils/createMockStore.util.ts",
-        "fan_in": 4,
+        "fan_in": 7,
         "fan_out": 0,
         "dead_code_ratio": 0.0,
         "complexity_density": 0.24,
@@ -15522,6 +15215,20 @@
         "total_cognitive": 0,
         "function_count": 7,
         "lines": 71,
+        "crap_max": 1.2,
+        "crap_above_threshold": 0
+      },
+      {
+        "path": "src/components/test-utils/createPaginatedFetchActionMocks.util.test.ts",
+        "fan_in": 0,
+        "fan_out": 1,
+        "dead_code_ratio": 0.0,
+        "complexity_density": 0.1,
+        "maintainability_index": 94.2,
+        "total_cyclomatic": 6,
+        "total_cognitive": 0,
+        "function_count": 6,
+        "lines": 61,
         "crap_max": 1.2,
         "crap_above_threshold": 0
       },
@@ -18700,7 +18407,7 @@
         "path": "src/components/Table/TableBody/TableBody.component.tsx",
         "score": 15.3,
         "commits": 38,
-        "weighted_commits": 15.72,
+        "weighted_commits": 15.71,
         "lines_added": 515,
         "lines_deleted": 515,
         "complexity_density": 0.08,
@@ -19122,31 +18829,6 @@
         ]
       },
       {
-        "path": "src/App.tsx",
-        "score": 8.9,
-        "commits": 38,
-        "weighted_commits": 12.09,
-        "lines_added": 1168,
-        "lines_deleted": 1168,
-        "complexity_density": 0.06,
-        "fan_in": 1,
-        "trend": "cooling",
-        "actions": [
-          {
-            "type": "refactor-file",
-            "auto_fixable": false,
-            "description": "Refactor `src/App.tsx`, high complexity combined with frequent changes makes this a maintenance risk",
-            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
-          },
-          {
-            "type": "add-tests",
-            "auto_fixable": false,
-            "description": "Add test coverage for `src/App.tsx` to reduce change risk",
-            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
-          }
-        ]
-      },
-      {
         "path": "src/components/Table/filters/SelectFilterInput/SelectFilterInput.component.tsx",
         "score": 8.9,
         "commits": 18,
@@ -19167,6 +18849,31 @@
             "type": "add-tests",
             "auto_fixable": false,
             "description": "Add test coverage for `src/components/Table/filters/SelectFilterInput/SelectFilterInput.component.tsx` to reduce change risk",
+            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
+          }
+        ]
+      },
+      {
+        "path": "src/App.tsx",
+        "score": 8.8,
+        "commits": 38,
+        "weighted_commits": 12.08,
+        "lines_added": 1168,
+        "lines_deleted": 1168,
+        "complexity_density": 0.06,
+        "fan_in": 1,
+        "trend": "cooling",
+        "actions": [
+          {
+            "type": "refactor-file",
+            "auto_fixable": false,
+            "description": "Refactor `src/App.tsx`, high complexity combined with frequent changes makes this a maintenance risk",
+            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
+          },
+          {
+            "type": "add-tests",
+            "auto_fixable": false,
+            "description": "Add test coverage for `src/App.tsx` to reduce change risk",
             "note": "Frequently changed complex files benefit most from comprehensive test coverage"
           }
         ]
@@ -19325,7 +19032,7 @@
         "path": "src/routes/enterprise-orders/enterprise-orders.loader.ts",
         "score": 7.4,
         "commits": 17,
-        "weighted_commits": 6.77,
+        "weighted_commits": 6.76,
         "lines_added": 217,
         "lines_deleted": 217,
         "complexity_density": 0.09,
@@ -19392,6 +19099,31 @@
             "type": "add-tests",
             "auto_fixable": false,
             "description": "Add test coverage for `src/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/selectors/useGetColumnPinning.hook.ts` to reduce change risk",
+            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
+          }
+        ]
+      },
+      {
+        "path": "src/components/Table/contexts/FiltersData/filters/actions/useFetchFilterData.hook.ts",
+        "score": 7.1,
+        "commits": 8,
+        "weighted_commits": 4.14,
+        "lines_added": 326,
+        "lines_deleted": 326,
+        "complexity_density": 0.14,
+        "fan_in": 2,
+        "trend": "accelerating",
+        "actions": [
+          {
+            "type": "refactor-file",
+            "auto_fixable": false,
+            "description": "Refactor `src/components/Table/contexts/FiltersData/filters/actions/useFetchFilterData.hook.ts`, high complexity combined with frequent changes makes this a maintenance risk",
+            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
+          },
+          {
+            "type": "add-tests",
+            "auto_fixable": false,
+            "description": "Add test coverage for `src/components/Table/contexts/FiltersData/filters/actions/useFetchFilterData.hook.ts` to reduce change risk",
             "note": "Frequently changed complex files benefit most from comprehensive test coverage"
           }
         ]
@@ -19572,31 +19304,6 @@
         ]
       },
       {
-        "path": "src/components/Table/contexts/FiltersData/filters/actions/useFetchFilterData.hook.ts",
-        "score": 6.6,
-        "commits": 8,
-        "weighted_commits": 4.14,
-        "lines_added": 326,
-        "lines_deleted": 326,
-        "complexity_density": 0.13,
-        "fan_in": 2,
-        "trend": "accelerating",
-        "actions": [
-          {
-            "type": "refactor-file",
-            "auto_fixable": false,
-            "description": "Refactor `src/components/Table/contexts/FiltersData/filters/actions/useFetchFilterData.hook.ts`, high complexity combined with frequent changes makes this a maintenance risk",
-            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
-          },
-          {
-            "type": "add-tests",
-            "auto_fixable": false,
-            "description": "Add test coverage for `src/components/Table/contexts/FiltersData/filters/actions/useFetchFilterData.hook.ts` to reduce change risk",
-            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
-          }
-        ]
-      },
-      {
         "path": "src/services/carSales.api.ts",
         "score": 6.5,
         "commits": 15,
@@ -19650,7 +19357,7 @@
         "path": "src/components/Table/ColumnSettingsDrawer/SortingSection/SortingSection.component.tsx",
         "score": 6.5,
         "commits": 10,
-        "weighted_commits": 4.84,
+        "weighted_commits": 4.83,
         "lines_added": 155,
         "lines_deleted": 155,
         "complexity_density": 0.11,
@@ -20527,7 +20234,7 @@
         "path": "src/components/Table/TableSettingsDrawer/SortingSection/AddSortSection/AddSortSection.component.tsx",
         "score": 4.8,
         "commits": 4,
-        "weighted_commits": 2.09,
+        "weighted_commits": 2.08,
         "lines_added": 114,
         "lines_deleted": 114,
         "complexity_density": 0.19,
@@ -20677,7 +20384,7 @@
         "path": "src/components/Table/ColumnSettingsDrawer/ColumnSettingsDrawer.component.tsx",
         "score": 4.6,
         "commits": 11,
-        "weighted_commits": 5.39,
+        "weighted_commits": 5.38,
         "lines_added": 226,
         "lines_deleted": 226,
         "complexity_density": 0.07,
@@ -20702,7 +20409,7 @@
         "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/utils/restoreStaticColumnOrder.util.ts",
         "score": 4.6,
         "commits": 3,
-        "weighted_commits": 1.57,
+        "weighted_commits": 1.56,
         "lines_added": 35,
         "lines_deleted": 35,
         "complexity_density": 0.24,
@@ -21631,57 +21338,6 @@
         ]
       },
       {
-        "path": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
-        "score": 3.5,
-        "commits": 3,
-        "weighted_commits": 1.59,
-        "lines_added": 333,
-        "lines_deleted": 333,
-        "complexity_density": 0.18,
-        "fan_in": 0,
-        "trend": "cooling",
-        "is_test_path": true,
-        "actions": [
-          {
-            "type": "refactor-file",
-            "auto_fixable": false,
-            "description": "Refactor `src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts`, high complexity combined with frequent changes makes this a maintenance risk",
-            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
-          },
-          {
-            "type": "add-tests",
-            "auto_fixable": false,
-            "description": "Add test coverage for `src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts` to reduce change risk",
-            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
-          }
-        ]
-      },
-      {
-        "path": "src/utils/storage/readFromCookie.util.ts",
-        "score": 3.5,
-        "commits": 5,
-        "weighted_commits": 2.18,
-        "lines_added": 35,
-        "lines_deleted": 35,
-        "complexity_density": 0.13,
-        "fan_in": 4,
-        "trend": "stable",
-        "actions": [
-          {
-            "type": "refactor-file",
-            "auto_fixable": false,
-            "description": "Refactor `src/utils/storage/readFromCookie.util.ts`, high complexity combined with frequent changes makes this a maintenance risk",
-            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
-          },
-          {
-            "type": "add-tests",
-            "auto_fixable": false,
-            "description": "Add test coverage for `src/utils/storage/readFromCookie.util.ts` to reduce change risk",
-            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
-          }
-        ]
-      },
-      {
         "path": "src/components/Toolbar/Toolbar.examples.tsx",
         "score": 3.5,
         "commits": 12,
@@ -21802,6 +21458,31 @@
             "type": "add-tests",
             "auto_fixable": false,
             "description": "Add test coverage for `src/components/Table/hooks/usePersistCookieAction.hook.ts` to reduce change risk",
+            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
+          }
+        ]
+      },
+      {
+        "path": "src/utils/storage/readFromCookie.util.ts",
+        "score": 3.4,
+        "commits": 5,
+        "weighted_commits": 2.17,
+        "lines_added": 35,
+        "lines_deleted": 35,
+        "complexity_density": 0.13,
+        "fan_in": 4,
+        "trend": "stable",
+        "actions": [
+          {
+            "type": "refactor-file",
+            "auto_fixable": false,
+            "description": "Refactor `src/utils/storage/readFromCookie.util.ts`, high complexity combined with frequent changes makes this a maintenance risk",
+            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
+          },
+          {
+            "type": "add-tests",
+            "auto_fixable": false,
+            "description": "Add test coverage for `src/utils/storage/readFromCookie.util.ts` to reduce change risk",
             "note": "Frequently changed complex files benefit most from comprehensive test coverage"
           }
         ]
@@ -22079,6 +21760,32 @@
             "type": "add-tests",
             "auto_fixable": false,
             "description": "Add test coverage for `src/utils/formatters/getDateTimeFormatOptions.util.ts` to reduce change risk",
+            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
+          }
+        ]
+      },
+      {
+        "path": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
+        "score": 3.1,
+        "commits": 3,
+        "weighted_commits": 1.59,
+        "lines_added": 333,
+        "lines_deleted": 333,
+        "complexity_density": 0.16,
+        "fan_in": 0,
+        "trend": "cooling",
+        "is_test_path": true,
+        "actions": [
+          {
+            "type": "refactor-file",
+            "auto_fixable": false,
+            "description": "Refactor `src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts`, high complexity combined with frequent changes makes this a maintenance risk",
+            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
+          },
+          {
+            "type": "add-tests",
+            "auto_fixable": false,
+            "description": "Add test coverage for `src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts` to reduce change risk",
             "note": "Frequently changed complex files benefit most from comprehensive test coverage"
           }
         ]
@@ -25597,15 +25304,15 @@
         "line_count": 238
       },
       {
-        "path": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
-        "name": "<arrow>",
-        "line": 112,
-        "line_count": 232
-      },
-      {
         "path": "src/components/Table/TableHeaderCell/TableHeaderCell.component.tsx",
         "name": "TableHeaderCell",
         "line": 44,
+        "line_count": 223
+      },
+      {
+        "path": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
+        "name": "<arrow>",
+        "line": 93,
         "line_count": 223
       },
       {
@@ -25629,8 +25336,8 @@
       {
         "path": "src/components/Table/contexts/FiltersData/filters/actions/useFetchFilterData.hook.ts",
         "name": "useFetchFilterData",
-        "line": 44,
-        "line_count": 173
+        "line": 43,
+        "line_count": 169
       },
       {
         "path": "src/components/VirtualSelect/VirtualSelect.component.tsx",
@@ -25641,8 +25348,8 @@
       {
         "path": "src/components/Table/contexts/FiltersData/filters/actions/useFetchFilterData.hook.test.ts",
         "name": "<arrow>",
-        "line": 129,
-        "line_count": 163
+        "line": 106,
+        "line_count": 164
       },
       {
         "path": "src/components/Table/TableSettingsDrawer/DetailsSection/DetailsSection.component.tsx",
@@ -25671,8 +25378,8 @@
       {
         "path": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
         "name": "<arrow>",
-        "line": 202,
-        "line_count": 141
+        "line": 185,
+        "line_count": 130
       },
       {
         "path": "src/components/VirtualSelect/VirtualSelect.component.test.tsx",
@@ -25963,12 +25670,6 @@
         "line_count": 83
       },
       {
-        "path": "src/components/Table/contexts/FiltersData/filters/actions/useFetchFilterData.hook.ts",
-        "name": "fetchMore",
-        "line": 132,
-        "line_count": 82
-      },
-      {
         "path": "src/routes/utils/readTableLoaderStateFromRequest.util.test.ts",
         "name": "<arrow>",
         "line": 14,
@@ -26002,6 +25703,12 @@
         "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/resolveToggleColumnPinUpdate.util.test.ts",
         "name": "<arrow>",
         "line": 19,
+        "line_count": 80
+      },
+      {
+        "path": "src/components/Table/contexts/FiltersData/filters/actions/useFetchFilterData.hook.ts",
+        "name": "fetchMore",
+        "line": 129,
         "line_count": 80
       },
       {
@@ -26041,12 +25748,6 @@
         "line_count": 77
       },
       {
-        "path": "src/components/Table/contexts/FiltersData/filters/actions/useFetchFilterData.hook.ts",
-        "name": "fetchInitial",
-        "line": 54,
-        "line_count": 77
-      },
-      {
         "path": "src/components/Table/filters/FilterInputs/InputContent/InputContent.component.tsx",
         "name": "InputContent",
         "line": 18,
@@ -26074,6 +25775,12 @@
         "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/utils/resolveToggleColumnPinIntent.util.ts",
         "name": "resolveToggleColumnPinIntent",
         "line": 58,
+        "line_count": 75
+      },
+      {
+        "path": "src/components/Table/contexts/FiltersData/filters/actions/useFetchFilterData.hook.ts",
+        "name": "fetchInitial",
+        "line": 53,
         "line_count": 75
       },
       {
@@ -26116,6 +25823,12 @@
         "path": "src/components/VirtualList/SelectOption/SelectOption.test.tsx",
         "name": "<arrow>",
         "line": 12,
+        "line_count": 72
+      },
+      {
+        "path": "src/components/test-utils/createPaginatedFetchActionMocks.util.ts",
+        "name": "createPaginatedFetchActionMocks",
+        "line": 58,
         "line_count": 72
       },
       {
@@ -26169,13 +25882,7 @@
       {
         "path": "src/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/ColumnDrawerContext.hooks.test.tsx",
         "name": "<arrow>",
-        "line": 73,
-        "line_count": 69
-      },
-      {
-        "path": "src/components/Table/contexts/FiltersData/filters/actions/useFetchFilterData.hook.test.ts",
-        "name": "<arrow>",
-        "line": 29,
+        "line": 46,
         "line_count": 69
       },
       {
@@ -26295,7 +26002,7 @@
       {
         "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/ColumnOrderSectionContext.hooks.test.tsx",
         "name": "<arrow>",
-        "line": 85,
+        "line": 58,
         "line_count": 64
       },
       {
@@ -26344,12 +26051,6 @@
         "path": "src/components/Table/contexts/TableConfig/columns/actions/useBatchSetColumnSettings.hook.test.ts",
         "name": "<arrow>",
         "line": 134,
-        "line_count": 63
-      },
-      {
-        "path": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
-        "name": "<arrow>",
-        "line": 18,
         "line_count": 63
       },
       {

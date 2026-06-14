@@ -5,17 +5,17 @@
 Source of truth for this report:
 
 - Command scope: apps/react-router
-- Command: npx --yes fallow --format json --output-file /home/lucio/workspaces/vite-react-compiler/reports/fallow/fallow-full-latest.json --quiet
+- Command: node node_modules/fallow/bin/fallow --format json --output-file /home/lucio/workspaces/vite-react-compiler/reports/fallow/fallow-full-latest.json --quiet
 - JSON artifact: reports/fallow/fallow-full-latest.json
 
 Current metrics from JSON:
 
 - Functions above threshold: 21
-- Functions analyzed: 3289
-- Files analyzed: 1157
+- Functions analyzed: 3281
+- Files analyzed: 1159
 - Average maintainability: 93.1 (good)
 - Dead-code issues: 5 (check.total_issues)
-- Duplicate clone groups: 76 (dupes.stats.clone_groups)
+- Duplicate clone groups: 73 (dupes.stats.clone_groups)
 - Severity split: 0 critical, 6 high, 15 moderate
 - Thresholds: cyclomatic 20, cognitive 15, CRAP 30
 
@@ -26,7 +26,7 @@ Use this report as triage guidance grounded on the current JSON snapshot. For pl
 ## Representative High-Severity Findings
 
 - src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.ts:31 (<anonymous>) - HIGH crap
-- src/components/Table/contexts/FiltersData/filters/actions/useFetchFilterData.hook.ts:132 (<anonymous>) - HIGH crap
+- src/components/Table/contexts/FiltersData/filters/actions/useFetchFilterData.hook.ts:129 (<anonymous>) - HIGH crap
 - src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useToggleColumnPin.hook.ts:31 (<anonymous>) - HIGH crap
 - src/routes/enterprise-orders/order-detail/OrderDetail.component.tsx:211 (<anonymous>) - HIGH crap
 - src/App.tsx:95 (<anonymous>) - HIGH crap

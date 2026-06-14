@@ -17,8 +17,8 @@
     "typecheck": "react-router typegen && tsc --noEmit",
     "preview": "vp preview",
     "knip": "knip",
-    "fallow": "npx fallow dead-code",
-    "fallow:full": "npx fallow",
+    "fallow": "fallow dead-code",
+    "fallow:full": "fallow",
     "test:watch": "node node_modules/vitest/vitest.mjs"
   },
   "dependencies": {
@@ -54,6 +54,7 @@
     "eslint-plugin-react-x": "catalog:",
     "eslint-plugin-security": "catalog:",
     "eslint-plugin-unicorn": "catalog:",
+    "fallow": "catalog:",
     "globals": "catalog:",
     "jsdom": "catalog:",
     "knip": "catalog:",
