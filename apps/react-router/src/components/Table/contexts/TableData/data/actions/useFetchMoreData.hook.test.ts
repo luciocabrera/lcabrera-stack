@@ -26,7 +26,7 @@ type TestResponse = {
   readonly total: number;
 };
 
-function createHarness() {
+const createHarness = () => {
   return createPaginatedFetchActionMocks<TestDataState, TestResponse>({
     initialDataState: {
       data: [{ id: 1 }],
@@ -41,27 +41,27 @@ function createHarness() {
       loadMorePageSize: 50,
     },
   });
-}
+};
 
 type Harness = ReturnType<typeof createHarness>;
 
 let harness: Harness | undefined;
 
-function getHarness(): Harness {
+const getHarness = (): Harness => {
   if (!harness) {
     harness = createHarness();
   }
 
   return harness;
-}
+};
 
-function mockUseTableConfigContextValue() {
+const mockUseTableConfigContextValue = () => {
   return { metaStore: getHarness().metaStore };
-}
+};
 
-function mockUseTableDataContextValue() {
+const mockUseTableDataContextValue = () => {
   return { dataStore: getHarness().dataStore };
-}
+};
 
 vi.mock(
   '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',

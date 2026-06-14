@@ -28,7 +28,7 @@ type TestFiltersState = {
   };
 };
 
-function createHarness() {
+const createHarness = () => {
   return createPaginatedFetchActionMocks<TestFiltersState, TestResponse>({
     initialDataState: {
       status: {
@@ -44,29 +44,29 @@ function createHarness() {
       enablePrefetch: false,
     },
   });
-}
+};
 
 type Harness = ReturnType<typeof createHarness>;
 
 let harness: Harness | undefined;
 
-function getHarness(): Harness {
+const getHarness = (): Harness => {
   if (!harness) {
     harness = createHarness();
   }
 
   return harness;
-}
+};
 
-function mockUseFiltersDataContextValue() {
+const mockUseFiltersDataContextValue = () => {
   return {
     filtersDataStore: getHarness().dataStore,
   };
-}
+};
 
-function mockUseTableConfigContextValue() {
+const mockUseTableConfigContextValue = () => {
   return { metaStore: getHarness().metaStore };
-}
+};
 
 const loggerMock = vi.hoisted(() => ({ error: vi.fn() }));
 

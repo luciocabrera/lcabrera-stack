@@ -5,14 +5,14 @@
   "elapsed_ms": 150,
   "_meta": {
     "telemetry": {
-      "analysis_run_id": "run_724bc616dcb4297a"
+      "analysis_run_id": "run_8c727de751bebd43"
     }
   },
   "check": {
     "schema_version": 7,
     "version": "2.96.0",
-    "elapsed_ms": 96,
-    "total_issues": 5,
+    "elapsed_ms": 107,
+    "total_issues": 2,
     "entry_points": {
       "total": 300,
       "sources": {
@@ -21,9 +21,9 @@
       }
     },
     "summary": {
-      "total_issues": 5,
-      "unused_files": 1,
-      "unused_exports": 2,
+      "total_issues": 2,
+      "unused_files": 0,
+      "unused_exports": 0,
       "unused_types": 0,
       "private_type_leaks": 0,
       "unused_dependencies": 2,
@@ -47,73 +47,8 @@
       "unused_dependency_overrides": 0,
       "misconfigured_dependency_overrides": 0
     },
-    "unused_files": [
-      {
-        "path": "src/utils/prefetch/index.ts",
-        "actions": [
-          {
-            "type": "delete-file",
-            "auto_fixable": false,
-            "description": "Delete this file",
-            "note": "File deletion may remove runtime functionality not visible to static analysis"
-          },
-          {
-            "type": "suppress-file",
-            "auto_fixable": false,
-            "description": "Suppress with a file-level comment at the top of the file",
-            "comment": "// fallow-ignore-file unused-file"
-          }
-        ]
-      }
-    ],
-    "unused_exports": [
-      {
-        "path": "src/components/Table/utils/index.ts",
-        "export_name": "getErrorMessage",
-        "is_type_only": false,
-        "line": 2,
-        "col": 9,
-        "span_start": 69,
-        "is_re_export": true,
-        "actions": [
-          {
-            "type": "remove-export",
-            "auto_fixable": true,
-            "description": "Remove the unused export from the public API",
-            "note": "This finding originates from a re-export; verify it is not part of your public API before removing"
-          },
-          {
-            "type": "suppress-line",
-            "auto_fixable": false,
-            "description": "Suppress with an inline comment above the line",
-            "comment": "// fallow-ignore-next-line unused-export"
-          }
-        ]
-      },
-      {
-        "path": "src/components/Table/utils/index.ts",
-        "export_name": "getRequiredOnLoadMore",
-        "is_type_only": false,
-        "line": 5,
-        "col": 9,
-        "span_start": 263,
-        "is_re_export": true,
-        "actions": [
-          {
-            "type": "remove-export",
-            "auto_fixable": true,
-            "description": "Remove the unused export from the public API",
-            "note": "This finding originates from a re-export; verify it is not part of your public API before removing"
-          },
-          {
-            "type": "suppress-line",
-            "auto_fixable": false,
-            "description": "Suppress with an inline comment above the line",
-            "comment": "// fallow-ignore-next-line unused-export"
-          }
-        ]
-      }
-    ],
+    "unused_files": [],
+    "unused_exports": [],
     "unused_types": [],
     "private_type_leaks": [],
     "unused_dependencies": [],
@@ -7570,15 +7505,15 @@
       }
     ],
     "stats": {
-      "total_files": 640,
+      "total_files": 639,
       "files_with_clones": 64,
-      "total_lines": 42873,
+      "total_lines": 42856,
       "duplicated_lines": 2458,
-      "total_tokens": 157211,
+      "total_tokens": 157143,
       "duplicated_tokens": 6016,
       "clone_groups": 73,
       "clone_instances": 156,
-      "duplication_percentage": 5.733212044876729
+      "duplication_percentage": 5.735486279634124
     }
   },
   "health": {
@@ -7590,7 +7525,7 @@
         "col": 4,
         "cyclomatic": 17,
         "cognitive": 11,
-        "line_count": 81,
+        "line_count": 79,
         "param_count": 1,
         "exceeded": "crap",
         "severity": "high",
@@ -8233,7 +8168,7 @@
       }
     ],
     "summary": {
-      "files_analyzed": 1159,
+      "files_analyzed": 1158,
       "functions_analyzed": 3281,
       "functions_above_threshold": 21,
       "max_cyclomatic_threshold": 20,
@@ -8248,8 +8183,8 @@
       "severity_moderate_count": 15
     },
     "vital_signs": {
-      "dead_file_pct": 0.1,
-      "dead_export_pct": 0.1,
+      "dead_file_pct": 0.0,
+      "dead_export_pct": 0.0,
       "avg_cyclomatic": 1.5,
       "critical_complexity_pct": 0.0,
       "p90_cyclomatic": 2,
@@ -8262,11 +8197,11 @@
       "circular_dep_count": 0,
       "circular_deps_per_k_files": 0.0,
       "counts": {
-        "total_files": 1159,
-        "total_exports": 1388,
-        "dead_files": 1,
-        "dead_exports": 2,
-        "total_lines": 47520,
+        "total_files": 1158,
+        "total_exports": 1383,
+        "dead_files": 0,
+        "dead_exports": 0,
+        "total_lines": 47512,
         "files_scored": 717,
         "total_deps": 0
       },
@@ -8285,7 +8220,7 @@
       },
       "p95_fan_in": 4,
       "coupling_high_pct": 0.8,
-      "total_loc": 47520
+      "total_loc": 47512
     },
     "file_scores": [
       {
@@ -8298,7 +8233,7 @@
         "total_cyclomatic": 19,
         "total_cognitive": 11,
         "function_count": 3,
-        "lines": 115,
+        "lines": 113,
         "crap_max": 79.4,
         "crap_above_threshold": 1
       },
@@ -8970,7 +8905,7 @@
         "total_cyclomatic": 21,
         "total_cognitive": 16,
         "function_count": 6,
-        "lines": 123,
+        "lines": 125,
         "crap_max": 13.8,
         "crap_above_threshold": 0
       },
@@ -9872,7 +9807,7 @@
       },
       {
         "path": "src/utils/prefetch/resolveFromCacheOrFetch.util.ts",
-        "fan_in": 6,
+        "fan_in": 5,
         "fan_out": 1,
         "dead_code_ratio": 0.0,
         "complexity_density": 0.24,
@@ -10902,7 +10837,7 @@
         "total_cyclomatic": 4,
         "total_cognitive": 3,
         "function_count": 1,
-        "lines": 52,
+        "lines": 50,
         "crap_max": 4.1,
         "crap_above_threshold": 0
       },
@@ -12490,7 +12425,7 @@
       },
       {
         "path": "src/utils/prefetch/firePrefetch.util.ts",
-        "fan_in": 6,
+        "fan_in": 5,
         "fan_out": 2,
         "dead_code_ratio": 0.0,
         "complexity_density": 0.08,
@@ -14660,7 +14595,7 @@
       },
       {
         "path": "src/components/Table/utils/getRequiredOnLoadMore.util.ts",
-        "fan_in": 4,
+        "fan_in": 3,
         "fan_out": 1,
         "dead_code_ratio": 0.0,
         "complexity_density": 0.11,
@@ -14842,7 +14777,7 @@
       },
       {
         "path": "src/components/Table/utils/getErrorMessage.util.ts",
-        "fan_in": 4,
+        "fan_in": 3,
         "fan_out": 0,
         "dead_code_ratio": 0.0,
         "complexity_density": 0.12,
@@ -18146,7 +18081,7 @@
       },
       {
         "path": "src/utils/prefetch/clearPrefetchCache.util.ts",
-        "fan_in": 4,
+        "fan_in": 3,
         "fan_out": 1,
         "dead_code_ratio": 0.0,
         "complexity_density": 0.04,
@@ -18330,9 +18265,9 @@
     "hotspots": [
       {
         "path": "src/components/VirtualSelect/VirtualSelect.component.tsx",
-        "score": 26.1,
+        "score": 26.0,
         "commits": 21,
-        "weighted_commits": 9.71,
+        "weighted_commits": 9.7,
         "lines_added": 406,
         "lines_deleted": 406,
         "complexity_density": 0.22,
@@ -18382,7 +18317,7 @@
         "path": "src/components/VirtualList/VirtualList.component.tsx",
         "score": 23.6,
         "commits": 22,
-        "weighted_commits": 10.17,
+        "weighted_commits": 10.16,
         "lines_added": 437,
         "lines_deleted": 437,
         "complexity_density": 0.19,
@@ -18457,7 +18392,7 @@
         "path": "src/components/Table/filters/FilterInputs/FilterInputs.component.tsx",
         "score": 11.9,
         "commits": 15,
-        "weighted_commits": 6.96,
+        "weighted_commits": 6.95,
         "lines_added": 302,
         "lines_deleted": 302,
         "complexity_density": 0.14,
@@ -18632,7 +18567,7 @@
         "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.component.tsx",
         "score": 10.1,
         "commits": 29,
-        "weighted_commits": 13.75,
+        "weighted_commits": 13.74,
         "lines_added": 748,
         "lines_deleted": 748,
         "complexity_density": 0.06,
@@ -18832,7 +18767,7 @@
         "path": "src/components/Table/filters/SelectFilterInput/SelectFilterInput.component.tsx",
         "score": 8.9,
         "commits": 18,
-        "weighted_commits": 8.09,
+        "weighted_commits": 8.08,
         "lines_added": 352,
         "lines_deleted": 352,
         "complexity_density": 0.09,
@@ -19909,7 +19844,7 @@
         "path": "src/components/VirtualList/SkeletonOptions/SkeletonOptions.component.tsx",
         "score": 5.1,
         "commits": 7,
-        "weighted_commits": 3.24,
+        "weighted_commits": 3.23,
         "lines_added": 53,
         "lines_deleted": 53,
         "complexity_density": 0.13,
@@ -20334,7 +20269,7 @@
         "path": "src/components/Table/TableHeaderCell/TableHeaderCell.stylex.ts",
         "score": 4.7,
         "commits": 16,
-        "weighted_commits": 5.54,
+        "weighted_commits": 5.53,
         "lines_added": 216,
         "lines_deleted": 216,
         "complexity_density": 0.07,
@@ -20434,7 +20369,7 @@
         "path": "src/components/Table/TableBody/TableBody.test.tsx",
         "score": 4.6,
         "commits": 9,
-        "weighted_commits": 4.73,
+        "weighted_commits": 4.72,
         "lines_added": 456,
         "lines_deleted": 456,
         "complexity_density": 0.08,
@@ -21012,7 +20947,7 @@
         "path": "src/components/Table/filters/NumberFilterInput/NumberFilterInput.component.tsx",
         "score": 3.8,
         "commits": 6,
-        "weighted_commits": 2.82,
+        "weighted_commits": 2.81,
         "lines_added": 150,
         "lines_deleted": 150,
         "complexity_density": 0.11,
@@ -22654,7 +22589,7 @@
         "path": "src/components/Table/filters/DateFilterInput/DateFilterInput.component.tsx",
         "score": 2.4,
         "commits": 6,
-        "weighted_commits": 2.82,
+        "weighted_commits": 2.81,
         "lines_added": 143,
         "lines_deleted": 143,
         "complexity_density": 0.07,
@@ -23842,31 +23777,6 @@
         ]
       },
       {
-        "path": "src/components/Table/contexts/TableConfig/columns/actions/useSetColumnPinning.hook.ts",
-        "score": 1.8,
-        "commits": 7,
-        "weighted_commits": 3.59,
-        "lines_added": 97,
-        "lines_deleted": 97,
-        "complexity_density": 0.04,
-        "fan_in": 2,
-        "trend": "accelerating",
-        "actions": [
-          {
-            "type": "refactor-file",
-            "auto_fixable": false,
-            "description": "Refactor `src/components/Table/contexts/TableConfig/columns/actions/useSetColumnPinning.hook.ts`, high complexity combined with frequent changes makes this a maintenance risk",
-            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
-          },
-          {
-            "type": "add-tests",
-            "auto_fixable": false,
-            "description": "Add test coverage for `src/components/Table/contexts/TableConfig/columns/actions/useSetColumnPinning.hook.ts` to reduce change risk",
-            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
-          }
-        ]
-      },
-      {
         "path": "src/components/Table/contexts/TableConfig/useTableConfigContextValue.hook.ts",
         "score": 1.8,
         "commits": 3,
@@ -24039,6 +23949,31 @@
             "type": "add-tests",
             "auto_fixable": false,
             "description": "Add test coverage for `src/components/Table/TableSettingsDrawer/TableDrawerContext/TableDrawerContext.provider.tsx` to reduce change risk",
+            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
+          }
+        ]
+      },
+      {
+        "path": "src/components/Table/contexts/TableConfig/columns/actions/useSetColumnPinning.hook.ts",
+        "score": 1.7,
+        "commits": 7,
+        "weighted_commits": 3.58,
+        "lines_added": 97,
+        "lines_deleted": 97,
+        "complexity_density": 0.04,
+        "fan_in": 2,
+        "trend": "accelerating",
+        "actions": [
+          {
+            "type": "refactor-file",
+            "auto_fixable": false,
+            "description": "Refactor `src/components/Table/contexts/TableConfig/columns/actions/useSetColumnPinning.hook.ts`, high complexity combined with frequent changes makes this a maintenance risk",
+            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
+          },
+          {
+            "type": "add-tests",
+            "auto_fixable": false,
+            "description": "Add test coverage for `src/components/Table/contexts/TableConfig/columns/actions/useSetColumnPinning.hook.ts` to reduce change risk",
             "note": "Frequently changed complex files benefit most from comprehensive test coverage"
           }
         ]
@@ -25448,6 +25383,12 @@
         "line_count": 114
       },
       {
+        "path": "src/components/Tooltip/Tooltip.component.tsx",
+        "name": "Tooltip",
+        "line": 12,
+        "line_count": 111
+      },
+      {
         "path": "src/components/Table/TableSettingsDrawer/TableSettingsDrawer.component.tsx",
         "name": "TableSettingsDrawer",
         "line": 33,
@@ -25469,12 +25410,6 @@
         "path": "src/components/Table/hooks/useColumnResize.hook.ts",
         "name": "useColumnResize",
         "line": 43,
-        "line_count": 109
-      },
-      {
-        "path": "src/components/Tooltip/Tooltip.component.tsx",
-        "name": "Tooltip",
-        "line": 12,
         "line_count": 109
       },
       {
@@ -25550,12 +25485,6 @@
         "line_count": 96
       },
       {
-        "path": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.ts",
-        "name": "useFetchMoreData",
-        "line": 20,
-        "line_count": 95
-      },
-      {
         "path": "src/components/DraggableList/hooks/useDraggableList.hook.test.tsx",
         "name": "<arrow>",
         "line": 16,
@@ -25566,6 +25495,12 @@
         "name": "<arrow>",
         "line": 40,
         "line_count": 94
+      },
+      {
+        "path": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.ts",
+        "name": "useFetchMoreData",
+        "line": 20,
+        "line_count": 93
       },
       {
         "path": "src/components/Tabs/Tabs.component.tsx",
@@ -25682,12 +25617,6 @@
         "line_count": 81
       },
       {
-        "path": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.ts",
-        "name": "<arrow>",
-        "line": 31,
-        "line_count": 81
-      },
-      {
         "path": "src/components/VirtualSelect/VirtualSelectTrigger/VirtualSelectTrigger.component.tsx",
         "name": "VirtualSelectTrigger",
         "line": 11,
@@ -25721,6 +25650,12 @@
         "path": "scripts/check-lighthouse-scores.mjs",
         "name": "checkLighthouseScores",
         "line": 58,
+        "line_count": 79
+      },
+      {
+        "path": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.ts",
+        "name": "<arrow>",
+        "line": 31,
         "line_count": 79
       },
       {
@@ -26147,11 +26082,6 @@
   },
   "next_steps": [
     {
-      "id": "trace-unused-export",
-      "command": "fallow dead-code --trace src/components/Table/utils/index.ts:getErrorMessage",
-      "reason": "verify an export is truly unused before deleting"
-    },
-    {
       "id": "trace-clone",
       "command": "fallow dupes --trace dup:03958e8a",
       "reason": "see sibling locations and an extract-function suggestion"
@@ -26160,6 +26090,11 @@
       "id": "complexity-breakdown",
       "command": "fallow health --complexity-breakdown",
       "reason": "see per-decision-point contributions for a hotspot"
+    },
+    {
+      "id": "audit-changed",
+      "command": "fallow audit",
+      "reason": "gate only the files your branch changed (auto-detects the base)"
     }
   ]
 }

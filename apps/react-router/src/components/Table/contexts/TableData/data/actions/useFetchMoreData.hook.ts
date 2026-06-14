@@ -66,9 +66,7 @@ export const useFetchMoreData = <TData, TResponse>() => {
 
         clearPrefetchCache({ prefetchRef });
 
-        const data = dataSelector
-          ? dataSelector(response)
-          : ([] as unknown as TData[]);
+        const data = dataSelector ? dataSelector(response) : [];
         const combinedData = [...currentData, ...data];
         const totalLoadedRows = combinedData.length;
         const totalRows = dataTotalSelector

@@ -1,8 +1,6 @@
 export { getColumnPinSide } from './getColumnPinSide.util';
-export { getErrorMessage } from './getErrorMessage.util';
 export { deriveColumnViewState } from './deriveColumnViewState.util';
 export { getEffectiveColumns } from './getEffectiveColumns.util';
-export { getRequiredOnLoadMore } from './getRequiredOnLoadMore.util';
 export { getNormalizedColumns } from './getNormalizedColumns.util';
 export { getPinnedDerivedColumnsState } from './getPinnedDerivedColumnsState.util';
 export { getPinnedColumnOffsets } from './getPinnedColumnOffsets.util';
