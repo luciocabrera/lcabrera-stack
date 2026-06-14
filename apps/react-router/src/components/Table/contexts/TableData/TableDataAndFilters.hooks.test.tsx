@@ -6,7 +6,7 @@ import type { ReactNode } from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { createMockStore } from '@/components/test-utils/createMockStore.util';
+import { createMockStore } from '@/utils/tests/createMockStore.util';
 import { FiltersDataContext } from '../FiltersData/FiltersDataContext.context';
 import type { FiltersDataContextValue } from '../FiltersData/FiltersDataContext.types';
 import { useFiltersDataContextValue } from '../FiltersData/useFiltersDataContextValue.hook';

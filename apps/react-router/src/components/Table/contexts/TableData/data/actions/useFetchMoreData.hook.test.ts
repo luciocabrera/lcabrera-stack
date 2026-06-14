@@ -4,7 +4,7 @@ import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { LOAD_MORE_PAGE_SIZE } from '@/components/Table/Table.constants';
-import { createPaginatedFetchActionMocks } from '@/components/test-utils/createPaginatedFetchActionMocks.util';
+import { createPaginatedFetchActionMocks } from '@/utils/tests/createPaginatedFetchActionMocks.util';
 
 import { useFetchMoreData } from './useFetchMoreData.hook';
 

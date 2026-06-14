@@ -4,7 +4,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { mockDialogElement } from '@/components/test-utils/mockDialogElement.util';
+import { mockDialogElement } from '@/utils/tests/mockDialogElement.util';
 import { GlobalSettingsProvider } from '@/contexts/GlobalSettingsContext';
 
 import { AppNavigation } from './AppNavigation.component';

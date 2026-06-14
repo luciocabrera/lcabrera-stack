@@ -6,7 +6,7 @@ import type { ReactNode } from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { createMockStore } from '@/components/test-utils/createMockStore.util';
+import { createMockStore } from '@/utils/tests/createMockStore.util';
 
 import { useCancelPinSide } from './actions/useCancelPinSide.hook';
 import { ColumnOrderSectionContext } from './ColumnOrderSectionContext.context';

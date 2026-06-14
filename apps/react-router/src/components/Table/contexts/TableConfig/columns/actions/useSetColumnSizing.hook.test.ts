@@ -3,7 +3,7 @@
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { createTableConfigColumnsActionMocks } from '@/components/test-utils/createTableConfigColumnsActionMocks.util';
+import { createTableConfigColumnsActionMocks } from '@/utils/tests/createTableConfigColumnsActionMocks.util';
 
 import { useSetColumnSizing } from './useSetColumnSizing.hook';
 

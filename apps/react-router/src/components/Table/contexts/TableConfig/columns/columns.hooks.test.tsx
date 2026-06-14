@@ -6,7 +6,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   createMockStore,
   type MockStore,
-} from '@/components/test-utils/createMockStore.util';
+} from '@/utils/tests/createMockStore.util';
 
 const createInitialColumnsState = () => {
   return {

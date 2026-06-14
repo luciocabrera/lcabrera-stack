@@ -7,7 +7,7 @@ import type { TableMetaState } from '@/components/Table/Table.types';
 import {
   createMockStore,
   type MockStore,
-} from '@/components/test-utils/createMockStore.util';
+} from '@/utils/tests/createMockStore.util';
 
 const createInitialMetaState = (): TableMetaState => {
   return {

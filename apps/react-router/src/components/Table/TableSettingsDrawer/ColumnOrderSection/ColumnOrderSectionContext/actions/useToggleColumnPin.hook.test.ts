@@ -5,7 +5,7 @@
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { createColumnOrderSectionActionMocks } from '@/components/test-utils/createColumnOrderSectionActionMocks.util';
+import { createColumnOrderSectionActionMocks } from '@/utils/tests/createColumnOrderSectionActionMocks.util';
 
 import { useToggleColumnPin } from './useToggleColumnPin.hook';
 
