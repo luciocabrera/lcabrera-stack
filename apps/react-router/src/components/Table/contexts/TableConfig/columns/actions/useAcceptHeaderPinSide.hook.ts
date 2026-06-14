@@ -7,13 +7,12 @@ import type { PinConflictState, PinSide } from '@/types/ui.types';
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { usePersistTableStateAction } from '@/components/Table/hooks';
-import {
-  buildAllOrderedColumns,
-  derivePinSideResolutionState,
-} from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 import { getPinnedDerivedColumnsState } from '@/components/Table/utils';
 
-import { commitPinningAndOrderUpdate } from './utils';
+import {
+  commitPinningAndOrderUpdate,
+  resolveAcceptedHeaderPinSideState,
+} from './utils';
 
 type AcceptHeaderPinSideArgs<TData> = {
   readonly columnKey: DataKey<TData>;
@@ -37,21 +36,19 @@ export const useAcceptHeaderPinSide = <TData>() => {
       ({ left: [], right: [] } as ColumnPinningState<TData>);
     const persistenceKey = metaStore.get()?.persistenceKey ?? '';
 
-    const allOrderedColumns = buildAllOrderedColumns({ columns, columnsOrder });
     const staticKeys = columnsState?.staticKeys;
 
-    const resolution = derivePinSideResolutionState<TData>({
-      allOrderedColumns,
+    const resolution = resolveAcceptedHeaderPinSideState<TData>({
       columnKey,
       columnPinning,
+      columnOrder: columnsOrder,
       columns,
-      currentOrder: columnsOrder,
       pinSide,
       staticKeys,
     });
 
     if (resolution.kind === 'conflict') {
-      return { isOpen: true, side: resolution.side };
+      return resolution.conflict;
     }
 
     const { columnGroups, effectiveColumns, pinnedColumnOffsets } =

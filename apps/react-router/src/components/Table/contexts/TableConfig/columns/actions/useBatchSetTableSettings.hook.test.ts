@@ -112,7 +112,7 @@ vi.mock('@/components/Table/utils', () => ({
   deriveColumnViewState: mockDeriveColumnViewState,
 }));
 
-vi.mock('./buildPersistencePayload.util', () => ({
+vi.mock('./utils/buildPersistencePayload.util', () => ({
   buildPersistencePayload: mockBuildPersistencePayload,
 }));
 

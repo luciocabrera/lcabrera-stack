@@ -13,7 +13,7 @@ import { getNewColumnFiltersBasedOnColumnKey } from '@/components/Table/utils/ge
 import { getNewColumnSizingBasedOnColumnKey } from '@/components/Table/utils/getNewColumnSizingBasedOnColumnKey.util';
 import { getNewPinningBasedOnColumnKey } from '@/components/Table/utils/getNewPinningBasedOnColumnKey.util';
 
-import { buildPersistencePayload } from './buildPersistencePayload.util';
+import { buildPersistencePayload } from './utils';
 
 type BatchColumnSettingsUpdate<TData> = {
   /** Single column filter value */

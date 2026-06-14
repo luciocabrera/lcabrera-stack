@@ -18,7 +18,7 @@ TableConfig/
 │   ├── useColumnsStore.hook.ts              → useSyncExternalStore + selector
 │   │
 │   ├── actions/
-│   │   ├── buildPersistencePayload.util.ts             → Shared persistence-entry builder for batch settings hooks
+│   │   ├── utils/buildPersistencePayload.util.ts       → Shared persistence-entry builder for batch settings hooks
 │   │   ├── utils/commitPinningAndOrderUpdate.util.ts → Shared persist+store commit helper for pinning actions
 │   │   ├── useAcceptHeaderPinConflict.hook.ts   → Resolve pin conflict from header
 │   │   ├── useAcceptHeaderPinSide.hook.ts       → Accept pin side from header
@@ -183,7 +183,7 @@ The two batch settings hooks now share two focused pure helpers instead of each 
 | Utility                   | Location                  | Purpose                                                                  |
 | ------------------------- | ------------------------- | ------------------------------------------------------------------------ |
 | `deriveColumnViewState`   | `components/Table/utils/` | Compose `normalizedColumns` with `getPinnedDerivedColumnsState()` output |
-| `buildPersistencePayload` | `columns/actions/`        | Build the persistence entry array for batch settings updates             |
+| `buildPersistencePayload` | `columns/actions/utils/`  | Build the persistence entry array for batch settings updates             |
 
 ## Columns Selectors
 

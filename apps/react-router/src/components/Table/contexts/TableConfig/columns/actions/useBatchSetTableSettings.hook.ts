@@ -12,7 +12,7 @@ import { useTableDataContextValue } from '@/components/Table/contexts/TableData/
 import { usePersistTableStateAction } from '@/components/Table/hooks';
 import { deriveColumnViewState } from '@/components/Table/utils';
 
-import { buildPersistencePayload } from './buildPersistencePayload.util';
+import { buildPersistencePayload } from './utils';
 
 type BatchTableSettingsUpdate<TData> = {
   columnFilters: ColumnFiltersState<TData>;

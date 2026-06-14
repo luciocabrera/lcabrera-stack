@@ -141,7 +141,7 @@ vi.mock('@/components/Table/utils/getNewPinningBasedOnColumnKey.util', () => ({
   getNewPinningBasedOnColumnKey: mockGetNewPinningBasedOnColumnKey,
 }));
 
-vi.mock('./buildPersistencePayload.util', () => ({
+vi.mock('./utils/buildPersistencePayload.util', () => ({
   buildPersistencePayload: mockBuildPersistencePayload,
 }));
 
