@@ -29,6 +29,65 @@ type UseFetchFilterDataReturn<TResponse> = {
   ) => Promise<void>;
 };
 
+type FilterDataSnapshot = {
+  readonly data: readonly unknown[];
+  readonly hasMore: boolean;
+  readonly isLoading: boolean;
+  readonly isLoadingMore: boolean;
+  readonly totalLoadedRows: number;
+  readonly totalRows: number;
+};
+
+const getErrorMessage = ({
+  error,
+  fallback,
+}: {
+  readonly error: unknown;
+  readonly fallback: string;
+}): string => (error instanceof Error ? error.message : fallback);
+
+const getTotalRows = <TResponse>({
+  data,
+  dataTotalSelector,
+  response,
+}: {
+  readonly data: readonly string[];
+  readonly dataTotalSelector?: (response: TResponse) => number;
+  readonly response: TResponse;
+}): number => {
+  if (dataTotalSelector) {
+    return dataTotalSelector(response);
+  }
+
+  return data.length;
+};
+
+const getRequiredOnLoadMore = <TResponse>(
+  onLoadMore: FetchFilterDataCallbackArgs<TResponse>['onLoadMore'],
+): NonNullable<FetchFilterDataCallbackArgs<TResponse>['onLoadMore']> => {
+  if (!onLoadMore) {
+    throw new Error('onLoadMore callback is required');
+  }
+
+  return onLoadMore;
+};
+
+const shouldSkipInitialFetch = ({
+  currentFilter,
+}: {
+  readonly currentFilter: FilterDataSnapshot;
+}): boolean => currentFilter.data.length > 0 || currentFilter.isLoading;
+
+const clearPrefetchRef = <TResponse>({
+  prefetchRef,
+}: {
+  readonly prefetchRef?: RefObject<PrefetchCache<TResponse>>;
+}) => {
+  if (prefetchRef) {
+    prefetchRef.current = { data: undefined, promise: undefined, skip: -1 };
+  }
+};
+
 /**
  * Hook that provides both initial and paginated filter data fetching
  * for a column. When `prefetchRef` is provided, automatically prefetches
@@ -61,14 +120,11 @@ export const useFetchFilterData = <TData, TResponse>({
     }
 
     // Skip if already loaded or currently loading
-    if (currentFilter.data.length > 0 || currentFilter.isLoading) {
+    if (shouldSkipInitialFetch({ currentFilter })) {
       return;
     }
 
-    if (!onLoadMore) {
-      logger.error('[useFetchFilterData] onLoadMore callback is required');
-      throw new Error('onLoadMore callback is required');
-    }
+    const requiredOnLoadMore = getRequiredOnLoadMore(onLoadMore);
 
     try {
       filtersDataStore.set({
@@ -78,15 +134,13 @@ export const useFetchFilterData = <TData, TResponse>({
         },
       });
 
-      const response = await onLoadMore({
+      const response = await requiredOnLoadMore({
         limit: DEFAULT_FILTER_PAGE_SIZE,
         skip: 0,
       });
 
       const data = dataSelector ? dataSelector(response) : [];
-      const totalRows = dataTotalSelector
-        ? dataTotalSelector(response)
-        : data.length;
+      const totalRows = getTotalRows({ data, dataTotalSelector, response });
       const hasMore = totalRows > data.length;
 
       filtersDataStore.set({
@@ -107,14 +161,16 @@ export const useFetchFilterData = <TData, TResponse>({
         firePrefetch({
           limit: DEFAULT_FILTER_PAGE_SIZE,
           nextSkip: data.length,
-          onLoadMore,
+          onLoadMore: requiredOnLoadMore,
           prefetchRef,
         });
       }
     } catch (error) {
       logger.error('[useFetchFilterData] Error fetching filter data:', error);
-      const message =
-        error instanceof Error ? error.message : 'Failed to load filter data';
+      const message = getErrorMessage({
+        error,
+        fallback: 'Failed to load filter data',
+      });
       metaStore.set({ error: message });
 
       filtersDataStore.set({
@@ -132,9 +188,7 @@ export const useFetchFilterData = <TData, TResponse>({
     const currentFilter = filtersDataState?.[columnKey];
     const currentData = currentFilter?.data ?? [];
 
-    if (!onLoadMore) {
-      throw new Error('onLoadMore callback is required');
-    }
+    const requiredOnLoadMore = getRequiredOnLoadMore(onLoadMore);
 
     if (!currentFilter) {
       throw new Error(`Filter data not initialized for column: ${columnKey}`);
@@ -152,15 +206,13 @@ export const useFetchFilterData = <TData, TResponse>({
         cache: prefetchRef?.current,
         expectedSkip: currentData.length,
         fetchFn: () =>
-          onLoadMore({
+          requiredOnLoadMore({
             limit: DEFAULT_FILTER_PAGE_SIZE,
             skip: currentData.length,
           }),
       });
 
-      if (prefetchRef) {
-        prefetchRef.current = { data: undefined, promise: undefined, skip: -1 };
-      }
+      clearPrefetchRef({ prefetchRef });
 
       const data = dataSelector ? dataSelector(response) : [];
       const combinedData = [...currentData, ...data];
@@ -189,13 +241,15 @@ export const useFetchFilterData = <TData, TResponse>({
         firePrefetch({
           limit: DEFAULT_FILTER_PAGE_SIZE,
           nextSkip: totalLoadedRows,
-          onLoadMore,
+          onLoadMore: requiredOnLoadMore,
           prefetchRef,
         });
       }
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : 'Failed to load more data';
+      const message = getErrorMessage({
+        error,
+        fallback: 'Failed to load more data',
+      });
       metaStore.set({ error: message });
 
       filtersDataStore.set({

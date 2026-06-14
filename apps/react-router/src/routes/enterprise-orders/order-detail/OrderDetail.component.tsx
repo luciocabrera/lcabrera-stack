@@ -86,28 +86,64 @@ const FULFILLMENT_FIELDS: FieldConfig[] = [
   { format: 'boolean', key: 'is_fragile', label: 'Fragile' },
 ];
 
+const STATUS_BADGE_STYLES: Record<string, typeof styles.badgeDefault> = {
+  cancelled: styles.badgeCancelled,
+  delivered: styles.badgeDelivered,
+  pending: styles.badgePending,
+  processing: styles.badgeShipped,
+  refunded: styles.badgeCancelled,
+  returned: styles.badgeCancelled,
+  shipped: styles.badgeShipped,
+  'on hold': styles.badgePending,
+};
+
 const getStatusBadgeStyle = (status: string) => {
-  switch (status.toLowerCase()) {
-    case 'cancelled':
-    case 'refunded':
-    case 'returned': {
-      return styles.badgeCancelled;
-    }
-    case 'delivered': {
-      return styles.badgeDelivered;
-    }
-    case 'on hold':
-    case 'pending': {
-      return styles.badgePending;
-    }
-    case 'processing':
-    case 'shipped': {
-      return styles.badgeShipped;
-    }
-    default: {
-      return styles.badgeDefault;
-    }
+  const normalizedStatus = status.toLowerCase();
+
+  return STATUS_BADGE_STYLES[normalizedStatus] ?? styles.badgeDefault;
+};
+
+const formatBooleanValue = ({
+  value,
+}: Pick<FormatValueArgs, 'value'>): string =>
+  value === true || value === 'true' ? 'Yes' : 'No';
+
+const formatCurrencyValue = ({
+  value,
+}: Pick<FormatValueArgs, 'value'>): string => {
+  const num = Number(value);
+
+  if (Number.isNaN(num)) {
+    return String(value);
   }
+
+  return new Intl.NumberFormat('en-US', {
+    currency: 'USD',
+    style: 'currency',
+  }).format(num);
+};
+
+const formatDateValue = ({ value }: Pick<FormatValueArgs, 'value'>): string => {
+  const date = new Date(String(value));
+
+  if (Number.isNaN(date.getTime())) {
+    return String(value);
+  }
+
+  return date.toLocaleDateString('en-US', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+};
+
+const FORMAT_VALUE_BY_TYPE: Record<
+  NonNullable<FormatValueArgs['format']>,
+  (args: Pick<FormatValueArgs, 'value'>) => string
+> = {
+  boolean: formatBooleanValue,
+  currency: formatCurrencyValue,
+  date: formatDateValue,
 };
 
 const formatValue = ({ format, value }: FormatValueArgs): string => {
@@ -115,33 +151,11 @@ const formatValue = ({ format, value }: FormatValueArgs): string => {
     return '—';
   }
 
-  switch (format) {
-    case 'boolean': {
-      return value === true || value === 'true' ? 'Yes' : 'No';
-    }
-    case 'currency': {
-      const num = Number(value);
-      return Number.isNaN(num)
-        ? String(value)
-        : new Intl.NumberFormat('en-US', {
-            currency: 'USD',
-            style: 'currency',
-          }).format(num);
-    }
-    case 'date': {
-      const date = new Date(String(value));
-      return Number.isNaN(date.getTime())
-        ? String(value)
-        : date.toLocaleDateString('en-US', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric',
-          });
-    }
-    default: {
-      return String(value);
-    }
+  if (!format) {
+    return String(value);
   }
+
+  return FORMAT_VALUE_BY_TYPE[format]({ value });
 };
 
 const Field = ({

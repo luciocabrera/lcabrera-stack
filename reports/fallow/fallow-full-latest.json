@@ -2,16 +2,16 @@
   "kind": "combined",
   "schema_version": 7,
   "version": "2.96.0",
-  "elapsed_ms": 175,
+  "elapsed_ms": 157,
   "_meta": {
     "telemetry": {
-      "analysis_run_id": "run_b600a5a710713ec0"
+      "analysis_run_id": "run_7c73fd18f5610bec"
     }
   },
   "check": {
     "schema_version": 7,
     "version": "2.96.0",
-    "elapsed_ms": 117,
+    "elapsed_ms": 115,
     "total_issues": 2,
     "entry_points": {
       "total": 287,
@@ -7633,15 +7633,15 @@
       }
     ],
     "stats": {
-      "total_files": 617,
+      "total_files": 619,
       "files_with_clones": 67,
-      "total_lines": 42160,
+      "total_lines": 42209,
       "duplicated_lines": 2482,
-      "total_tokens": 154470,
+      "total_tokens": 154645,
       "duplicated_tokens": 6002,
       "clone_groups": 74,
       "clone_instances": 159,
-      "duplication_percentage": 5.887096774193548
+      "duplication_percentage": 5.880262503257598
     }
   },
   "health": {
@@ -8461,14 +8461,14 @@
         "total_exports": 1371,
         "dead_files": 0,
         "dead_exports": 0,
-        "total_lines": 46738,
+        "total_lines": 46763,
         "files_scored": 691,
         "total_deps": 0
       },
       "unit_size_profile": {
-        "low_risk": 74.0,
+        "low_risk": 73.9,
         "medium_risk": 13.6,
-        "high_risk": 8.0,
+        "high_risk": 8.1,
         "very_high_risk": 4.4
       },
       "functions_over_60_loc_per_k": 44.3,
@@ -8480,7 +8480,7 @@
       },
       "p95_fan_in": 4,
       "coupling_high_pct": 0.9,
-      "total_loc": 46738
+      "total_loc": 46763
     },
     "file_scores": [
       {
@@ -12296,12 +12296,12 @@
         "fan_in": 2,
         "fan_out": 0,
         "dead_code_ratio": 0.0,
-        "complexity_density": 0.21,
+        "complexity_density": 0.16,
         "maintainability_index": 98.2,
         "total_cyclomatic": 3,
         "total_cognitive": 2,
         "function_count": 1,
-        "lines": 14,
+        "lines": 19,
         "crap_max": 3.0,
         "crap_above_threshold": 0
       },
@@ -14760,12 +14760,12 @@
         "fan_in": 2,
         "fan_out": 1,
         "dead_code_ratio": 0.0,
-        "complexity_density": 0.17,
+        "complexity_density": 0.12,
         "maintainability_index": 96.0,
         "total_cyclomatic": 2,
         "total_cognitive": 1,
         "function_count": 1,
-        "lines": 12,
+        "lines": 17,
         "crap_max": 2.0,
         "crap_above_threshold": 0
       },
@@ -15894,12 +15894,12 @@
         "fan_in": 0,
         "fan_out": 1,
         "dead_code_ratio": 0.0,
-        "complexity_density": 0.09,
+        "complexity_density": 0.08,
         "maintainability_index": 94.8,
         "total_cyclomatic": 4,
         "total_cognitive": 0,
         "function_count": 4,
-        "lines": 45,
+        "lines": 53,
         "crap_max": 1.2,
         "crap_above_threshold": 0
       },
@@ -16380,6 +16380,20 @@
         "crap_above_threshold": 0
       },
       {
+        "path": "src/components/VirtualSelect/VirtualSelectTrigger/utils/renderChevron.util.test.tsx",
+        "fan_in": 0,
+        "fan_out": 1,
+        "dead_code_ratio": 0.0,
+        "complexity_density": 0.13,
+        "maintainability_index": 95.4,
+        "total_cyclomatic": 3,
+        "total_cognitive": 0,
+        "function_count": 3,
+        "lines": 23,
+        "crap_max": 1.2,
+        "crap_above_threshold": 0
+      },
+      {
         "path": "src/components/VirtualSelect/VirtualSelectTrigger/utils/renderTriggerContent.util.test.tsx",
         "fan_in": 0,
         "fan_out": 1,
@@ -16522,20 +16536,6 @@
       {
         "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/utils/getPinnedEntries.util.ts",
         "fan_in": 3,
-        "fan_out": 1,
-        "dead_code_ratio": 0.0,
-        "complexity_density": 0.14,
-        "maintainability_index": 95.5,
-        "total_cyclomatic": 3,
-        "total_cognitive": 0,
-        "function_count": 3,
-        "lines": 21,
-        "crap_max": 1.2,
-        "crap_above_threshold": 0
-      },
-      {
-        "path": "src/components/VirtualSelect/VirtualSelectTrigger/utils/renderChevron.util.test.tsx",
-        "fan_in": 0,
         "fan_out": 1,
         "dead_code_ratio": 0.0,
         "complexity_density": 0.14,
@@ -17462,12 +17462,12 @@
         "fan_in": 2,
         "fan_out": 0,
         "dead_code_ratio": 0.0,
-        "complexity_density": 0.25,
+        "complexity_density": 0.15,
         "maintainability_index": 98.8,
         "total_cyclomatic": 2,
         "total_cognitive": 0,
         "function_count": 2,
-        "lines": 8,
+        "lines": 13,
         "crap_max": 1.2,
         "crap_above_threshold": 0
       },

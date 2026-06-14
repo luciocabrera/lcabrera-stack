@@ -13,6 +13,29 @@ type FetchMoreDataArgs<TData, TResponse> = Omit<
   'hasMore' | 'isLoadingMore'
 >;
 
+const getRequiredOnLoadMore = <TData, TResponse>(
+  onLoadMore: FetchMoreDataArgs<TData, TResponse>['onLoadMore'],
+): NonNullable<FetchMoreDataArgs<TData, TResponse>['onLoadMore']> => {
+  if (!onLoadMore) {
+    throw new Error('onLoadMore callback is required');
+  }
+
+  return onLoadMore;
+};
+
+const clearPrefetchCache = <TResponse>({
+  prefetchRef,
+}: {
+  readonly prefetchRef: {
+    current: PrefetchCache<TResponse>;
+  };
+}) => {
+  prefetchRef.current = { data: undefined, promise: undefined, skip: -1 };
+};
+
+const getErrorMessage = ({ error }: { readonly error: unknown }): string =>
+  error instanceof Error ? error.message : 'Failed to load more data';
+
 export const useFetchMoreData = <TData, TResponse>() => {
   const { dataStore } = useTableDataContextValue<TData>();
   const { metaStore } = useTableConfigContextValue<TData>();
@@ -35,9 +58,7 @@ export const useFetchMoreData = <TData, TResponse>() => {
       const pageSize = metaState?.loadMorePageSize ?? LOAD_MORE_PAGE_SIZE;
       const enablePrefetch = metaState?.enablePrefetch ?? false;
 
-      if (!onLoadMore) {
-        throw new Error('onLoadMore callback is required');
-      }
+      const requiredOnLoadMore = getRequiredOnLoadMore(onLoadMore);
 
       if (isFetchingRef.current || dataState?.hasMore === false) {
         return;
@@ -56,13 +77,13 @@ export const useFetchMoreData = <TData, TResponse>() => {
           cache: prefetchRef.current,
           expectedSkip,
           fetchFn: () =>
-            onLoadMore({
+            requiredOnLoadMore({
               limit: pageSize,
               skip: expectedSkip,
             }),
         });
 
-        prefetchRef.current = { data: undefined, promise: undefined, skip: -1 };
+        clearPrefetchCache({ prefetchRef });
 
         const data = dataSelector
           ? dataSelector(response)
@@ -87,13 +108,12 @@ export const useFetchMoreData = <TData, TResponse>() => {
           firePrefetch({
             limit: pageSize,
             nextSkip: combinedData.length,
-            onLoadMore,
+            onLoadMore: requiredOnLoadMore,
             prefetchRef,
           });
         }
       } catch (error) {
-        const message =
-          error instanceof Error ? error.message : 'Failed to load more data';
+        const message = getErrorMessage({ error });
         metaStore.set({
           error: message,
         });

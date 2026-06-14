@@ -5,31 +5,91 @@ import { OPERATOR_TO_SHORT } from '@/constants/filterOperators.constants';
 
 type CompactFilterValue = boolean | unknown[];
 
-const serializeFilter = (filter: ColumnFilter): CompactFilterValue => {
+const getSerializedOperator = (operator: string): string =>
+  OPERATOR_TO_SHORT[operator] ?? operator;
+
+const serializeBooleanFilter = ({
+  filter,
+}: {
+  readonly filter: Extract<ColumnFilter, { readonly type: 'boolean' }>;
+}): CompactFilterValue => filter.value;
+
+const serializeDateFilter = ({
+  filter,
+}: {
+  readonly filter: Extract<ColumnFilter, { readonly type: 'date' }>;
+}): CompactFilterValue => {
+  const op = getSerializedOperator(filter.operator);
+
+  if (filter.operator === 'between' && filter.value2) {
+    return [op, filter.value, filter.value2];
+  }
+
+  return [op, filter.value];
+};
+
+const serializeSelectFilter = ({
+  filter,
+}: {
+  readonly filter: Extract<
+    ColumnFilter,
+    { readonly type: 'multiSelect' | 'select' }
+  >;
+}): CompactFilterValue => {
+  const values = filter.values ?? (filter.value ? [filter.value] : []);
+
+  if (filter.operator === 'notEquals') {
+    return ['!', ...values];
+  }
+
+  return values;
+};
+
+const serializeNumberFilter = ({
+  filter,
+}: {
+  readonly filter: Extract<ColumnFilter, { readonly type: 'number' }>;
+}): CompactFilterValue => {
+  const op = getSerializedOperator(filter.operator);
+
+  if (filter.operator === 'between' && filter.value2 !== undefined) {
+    return [op, filter.value, filter.value2];
+  }
+
+  return [op, filter.value];
+};
+
+const serializeTextFilter = ({
+  filter,
+}: {
+  readonly filter: Extract<ColumnFilter, { readonly type: 'text' }>;
+}): CompactFilterValue => {
+  const op = getSerializedOperator(filter.operator);
+
+  return [op, filter.value];
+};
+
+const serializeFilter = ({
+  filter,
+}: {
+  readonly filter: ColumnFilter;
+}): CompactFilterValue => {
   switch (filter.type) {
     case 'boolean': {
-      return filter.value;
+      return serializeBooleanFilter({ filter });
     }
     case 'date': {
-      const op = OPERATOR_TO_SHORT[filter.operator] ?? filter.operator;
-      return filter.operator === 'between' && filter.value2
-        ? [op, filter.value, filter.value2]
-        : [op, filter.value];
+      return serializeDateFilter({ filter });
     }
     case 'multiSelect':
     case 'select': {
-      const values = filter.values ?? (filter.value ? [filter.value] : []);
-      return filter.operator === 'notEquals' ? ['!', ...values] : values;
+      return serializeSelectFilter({ filter });
     }
     case 'number': {
-      const op = OPERATOR_TO_SHORT[filter.operator] ?? filter.operator;
-      return filter.operator === 'between' && filter.value2 !== undefined
-        ? [op, filter.value, filter.value2]
-        : [op, filter.value];
+      return serializeNumberFilter({ filter });
     }
     case 'text': {
-      const op = OPERATOR_TO_SHORT[filter.operator] ?? filter.operator;
-      return [op, filter.value];
+      return serializeTextFilter({ filter });
     }
   }
 };
@@ -47,7 +107,10 @@ export const serializeFiltersToURL = (
   if (entries.length === 0) return undefined;
 
   const compact = Object.fromEntries(
-    entries.map(([columnKey, filter]) => [columnKey, serializeFilter(filter)]),
+    entries.map(([columnKey, filter]) => [
+      columnKey,
+      serializeFilter({ filter }),
+    ]),
   );
 
   return JSON.stringify(compact);

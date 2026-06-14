@@ -79,4 +79,31 @@ describe('serializeFiltersToURL', () => {
     const parsed = JSON.parse(result!) as Record<string, unknown>;
     expect(parsed['date']).toEqual(['af', '2024-01-01']);
   });
+
+  it('falls back to single select value when values array is not provided', () => {
+    const result = serializeFiltersToURL({
+      status: { operator: 'equals', type: 'select', value: 'Active' },
+    });
+    const parsed = JSON.parse(result!) as Record<string, unknown>;
+
+    expect(parsed['status']).toEqual(['Active']);
+  });
+
+  it('serializes a number between filter without value2 as a single-value tuple', () => {
+    const result = serializeFiltersToURL({
+      amount: { operator: 'between', type: 'number', value: 100 },
+    });
+    const parsed = JSON.parse(result!) as Record<string, unknown>;
+
+    expect(parsed['amount']).toEqual(['bw', 100]);
+  });
+
+  it('serializes a date between filter without value2 as a single-value tuple', () => {
+    const result = serializeFiltersToURL({
+      date: { operator: 'between', type: 'date', value: '2024-01-01' },
+    });
+    const parsed = JSON.parse(result!) as Record<string, unknown>;
+
+    expect(parsed['date']).toEqual(['bw', '2024-01-01']);
+  });
 });
