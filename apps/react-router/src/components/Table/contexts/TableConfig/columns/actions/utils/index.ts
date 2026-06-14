@@ -1,6 +1,7 @@
 export { buildPersistencePayload } from './buildPersistencePayload.util';
 export { commitPinningAndOrderUpdate } from './commitPinningAndOrderUpdate.util';
 export { resolveBatchColumnSettingsUpdate } from './resolveBatchColumnSettingsUpdate.util';
+export { resolveBatchTableSettingsUpdate } from './resolveBatchTableSettingsUpdate.util';
 export { resolveColumnFilterUpdate } from './resolveColumnFilterUpdate.util';
 export { resolveColumnPinningUpdate } from './resolveColumnPinningUpdate.util';
 export { resolveColumnSizingUpdate } from './resolveColumnSizingUpdate.util';

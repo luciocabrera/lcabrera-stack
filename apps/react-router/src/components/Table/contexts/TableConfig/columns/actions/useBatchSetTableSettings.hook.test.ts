@@ -24,9 +24,9 @@ const {
   mockBuildPersistencePayload,
   mockColumnsStore,
   mockDataStore,
-  mockDeriveColumnViewState,
   mockMetaStore,
   mockPersistTableState,
+  mockResolveBatchTableSettingsUpdate,
 } = vi.hoisted(() => {
   return {
     mockBuildPersistencePayload: vi.fn(() => [
@@ -49,12 +49,24 @@ const {
     mockDataStore: {
       set: vi.fn(),
     },
-    mockDeriveColumnViewState: vi.fn(() => ({
+    mockResolveBatchTableSettingsUpdate: vi.fn(() => ({
+      columnFilters: {
+        name: { operator: 'contains', type: 'text', value: 'ali' },
+      },
       columnGroups: {
         centerCols: [{ key: 'age', label: 'Age' }],
         leftPinnedCols: [{ key: 'id', label: 'ID' }],
         rightPinnedCols: [{ key: 'name', label: 'Name' }],
       },
+      columnOrder: ['id', 'age', 'name'],
+      columnPinning: { left: ['id'], right: ['name'] },
+      columnSizing: {
+        actions: 0,
+        age: 80,
+        id: 100,
+        name: 220,
+      },
+      columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(['age']),
       effectiveColumns: [
         { key: 'id', label: 'ID' },
         { key: 'age', label: 'Age' },
@@ -78,6 +90,7 @@ const {
           side: 'left',
         },
       },
+      sorting: [{ columnKey: 'name', direction: 'asc' }],
     })),
     mockMetaStore: {
       get: vi.fn(() => ({ persistenceKey: 'orders-table' })),
@@ -108,12 +121,12 @@ vi.mock('@/components/Table/hooks', () => ({
   usePersistTableStateAction: () => mockPersistTableState,
 }));
 
-vi.mock('@/components/Table/utils', () => ({
-  deriveColumnViewState: mockDeriveColumnViewState,
-}));
-
 vi.mock('./utils/buildPersistencePayload.util', () => ({
   buildPersistencePayload: mockBuildPersistencePayload,
+}));
+
+vi.mock('./utils/resolveBatchTableSettingsUpdate.util', () => ({
+  resolveBatchTableSettingsUpdate: mockResolveBatchTableSettingsUpdate,
 }));
 
 describe('useBatchSetTableSettings', () => {
@@ -122,10 +135,10 @@ describe('useBatchSetTableSettings', () => {
     mockColumnsStore.get.mockClear();
     mockColumnsStore.set.mockClear();
     mockDataStore.set.mockClear();
-    mockDeriveColumnViewState.mockClear();
     mockMetaStore.get.mockClear();
     mockMetaStore.set.mockClear();
     mockPersistTableState.mockClear();
+    mockResolveBatchTableSettingsUpdate.mockClear();
   });
 
   it('orchestrates derived state, persistence, and loading around a table-wide update', () => {
@@ -162,17 +175,13 @@ describe('useBatchSetTableSettings', () => {
       isLoadingMore: true,
     });
     expect(mockColumnsStore.get).toHaveBeenCalledTimes(1);
-    expect(mockDeriveColumnViewState).toHaveBeenCalledWith({
-      columnOrder: ['id', 'age', 'name'],
-      columnPinning: { left: ['id'], right: ['name'] },
-      columnSizing: { actions: 0, age: 80, id: 100, name: 220 },
+    expect(mockResolveBatchTableSettingsUpdate).toHaveBeenCalledWith({
       columns: [
         { key: 'id', label: 'ID' },
         { key: 'name', label: 'Name' },
         { key: 'age', label: 'Age' },
       ],
-      columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(['age']),
-      sorting: [{ columnKey: 'name', direction: 'asc' }],
+      settings,
     });
     expect(mockBuildPersistencePayload).toHaveBeenCalledWith({
       columnFilters: {
@@ -192,37 +201,9 @@ describe('useBatchSetTableSettings', () => {
         valueSlice: ['id', 'age', 'name'],
       },
     ]);
-    expect(mockColumnsStore.set).toHaveBeenCalledWith({
-      ...settings,
-      columnGroups: {
-        centerCols: [{ key: 'age', label: 'Age' }],
-        leftPinnedCols: [{ key: 'id', label: 'ID' }],
-        rightPinnedCols: [{ key: 'name', label: 'Name' }],
-      },
-      effectiveColumns: [
-        { key: 'id', label: 'ID' },
-        { key: 'age', label: 'Age' },
-        { key: 'name', label: 'Name' },
-      ],
-      normalizedColumns: {
-        age: { key: 'age', label: 'Age' },
-        id: { key: 'id', label: 'ID' },
-        name: {
-          key: 'name',
-          label: 'Name',
-          sortDirection: 'asc',
-          sortIndex: 0,
-        },
-      },
-      pinnedColumnOffsets: {
-        id: {
-          isFirstPinnedRight: false,
-          isLastPinnedLeft: true,
-          offset: 0,
-          side: 'left',
-        },
-      },
-    });
+    expect(mockColumnsStore.set).toHaveBeenCalledWith(
+      mockResolveBatchTableSettingsUpdate.mock.results[0]?.value,
+    );
     expect(mockMetaStore.set).toHaveBeenCalledWith({
       isTableSettingsOpen: false,
     });

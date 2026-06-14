@@ -1,27 +1,12 @@
-import type {
-  ColumnFiltersState,
-  ColumnOrderState,
-  ColumnPinningState,
-  ColumnSizingState,
-  ColumnVisibilityState,
-  SortingState,
-} from '@/components/Table/Table.types';
-
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { useTableDataContextValue } from '@/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
 import { usePersistTableStateAction } from '@/components/Table/hooks';
-import { deriveColumnViewState } from '@/components/Table/utils';
 
-import { buildPersistencePayload } from './utils';
-
-type BatchTableSettingsUpdate<TData> = {
-  columnFilters: ColumnFiltersState<TData>;
-  columnOrder: ColumnOrderState<TData>;
-  columnPinning: ColumnPinningState<TData>;
-  columnSizing: ColumnSizingState<TData>;
-  columnVisibility: ColumnVisibilityState<TData>;
-  sorting: SortingState<TData>;
-};
+import {
+  buildPersistencePayload,
+  resolveBatchTableSettingsUpdate,
+} from './utils';
+import type { BatchTableSettingsUpdate } from './utils/resolveBatchTableSettingsUpdate.util';
 
 export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
   const { columnsStore, metaStore } = useTableConfigContextValue<TData>();
@@ -34,19 +19,9 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
     });
     const columnsState = columnsStore.get();
     const persistenceKey = metaStore.get()?.persistenceKey ?? '';
-
-    const {
-      columnGroups,
-      effectiveColumns,
-      normalizedColumns,
-      pinnedColumnOffsets,
-    } = deriveColumnViewState<TData>({
-      columnOrder: settings.columnOrder,
-      columnPinning: settings.columnPinning,
-      columnSizing: settings.columnSizing,
+    const resolvedUpdate = resolveBatchTableSettingsUpdate<TData>({
       columns: columnsState?.columns ?? [],
-      columnVisibility: settings.columnVisibility,
-      sorting: settings.sorting,
+      settings,
     });
 
     persistTableState(
@@ -61,13 +36,7 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
       }),
     );
 
-    columnsStore.set({
-      ...settings,
-      columnGroups,
-      effectiveColumns,
-      normalizedColumns,
-      pinnedColumnOffsets,
-    });
+    columnsStore.set(resolvedUpdate);
     metaStore.set({ isTableSettingsOpen: false });
     dataStore.set({
       isLoadingMore: false,
