@@ -39,9 +39,24 @@ Minimum per agent:
 
 - Targeted tests for changed area
 - `vp check`
+- `vp run fallow:refresh-report` before and after a batch when reporting complexity progress
 - Optional: `npx -y fallow dupes --mode semantic | head -40` to verify reduction trend
 
-## 5) Merge Order
+## 5) Canonical Baseline Refresh
+
+Before making planning or threshold claims, regenerate the canonical artifact from repo root:
+
+- `vp run fallow:refresh-report`
+
+This command refreshes all source-of-truth artifacts together:
+
+- `reports/fallow/fallow-full-latest.json`
+- `reports/fallow-complexity-threshold-analysis.md`
+- `apps/react-router/docs/coordination/PROGRESS_TRACKER.md`
+
+Do not report threshold counts from ad-hoc terminal output when these files are stale.
+
+## 6) Merge Order
 
 Merge low-risk foundational changes first:
 
@@ -51,7 +66,7 @@ Merge low-risk foundational changes first:
 4. Runtime logic dedupe
 5. Styling/theme dedupe
 
-## 6) Conflict Rules
+## 7) Conflict Rules
 
 If lock overlap occurs:
 
@@ -59,7 +74,7 @@ If lock overlap occurs:
 - Second agent must switch workstream.
 - No force pushes to resolve overlap.
 
-## 7) Safety Stop Conditions
+## 8) Safety Stop Conditions
 
 Stop and escalate if:
 
