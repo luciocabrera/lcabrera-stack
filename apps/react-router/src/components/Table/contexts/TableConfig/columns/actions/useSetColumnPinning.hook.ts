@@ -11,7 +11,7 @@ import {
   syncColumnOrderWithPinning,
 } from '@/components/Table/utils';
 
-import { commitPinningAndOrderUpdate } from './commitPinningAndOrderUpdate.util';
+import { commitPinningAndOrderUpdate } from './utils';
 
 type SetColumnPinningArgs<TData> = {
   readonly columnKey: DataKey<TData>;

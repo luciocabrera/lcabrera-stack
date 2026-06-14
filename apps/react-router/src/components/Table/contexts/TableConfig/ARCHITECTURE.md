@@ -19,7 +19,7 @@ TableConfig/
 │   │
 │   ├── actions/
 │   │   ├── buildPersistencePayload.util.ts             → Shared persistence-entry builder for batch settings hooks
-│   │   ├── commitPinningAndOrderUpdate.util.ts → Shared persist+store commit helper for pinning actions
+│   │   ├── utils/commitPinningAndOrderUpdate.util.ts → Shared persist+store commit helper for pinning actions
 │   │   ├── useAcceptHeaderPinConflict.hook.ts   → Resolve pin conflict from header
 │   │   ├── useAcceptHeaderPinSide.hook.ts       → Accept pin side from header
 │   │   ├── useBatchSetColumnSettings.hook.ts    → Bulk-update multiple column fields

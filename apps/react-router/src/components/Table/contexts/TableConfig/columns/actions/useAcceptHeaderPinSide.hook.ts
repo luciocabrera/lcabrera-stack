@@ -13,7 +13,7 @@ import {
 } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 import { getPinnedDerivedColumnsState } from '@/components/Table/utils';
 
-import { commitPinningAndOrderUpdate } from './commitPinningAndOrderUpdate.util';
+import { commitPinningAndOrderUpdate } from './utils';
 
 type AcceptHeaderPinSideArgs<TData> = {
   readonly columnKey: DataKey<TData>;
