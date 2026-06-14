@@ -10,13 +10,13 @@ Source of truth for this report:
 
 Current metrics from JSON:
 
-- Functions above threshold: 25
-- Functions analyzed: 3204
-- Files analyzed: 1132
-- Average maintainability: 93 (good)
-- Dead-code issues: 2 (check.total_issues)
-- Duplicate clone groups: 74 (dupes.stats.clone_groups)
-- Severity split: 3 critical, 9 high, 13 moderate
+- Functions above threshold: 21
+- Functions analyzed: 3289
+- Files analyzed: 1157
+- Average maintainability: 93.1 (good)
+- Dead-code issues: 5 (check.total_issues)
+- Duplicate clone groups: 76 (dupes.stats.clone_groups)
+- Severity split: 0 critical, 6 high, 15 moderate
 - Thresholds: cyclomatic 20, cognitive 15, CRAP 30
 
 ## Interpretation
@@ -25,14 +25,12 @@ Use this report as triage guidance grounded on the current JSON snapshot. For pl
 
 ## Representative High-Severity Findings
 
-- src/routes/enterprise-orders/enterprise-orders.loader.ts:27 (<anonymous>) - CRITICAL crap
-- src/routes/enterprise-orders/order-detail/OrderDetail.component.tsx:113 (<anonymous>) - CRITICAL crap
-- src/routes/wide-alltypes-150/wide-alltypes-150.loader.ts:16 (<anonymous>) - CRITICAL crap
-- src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.ts:27 (<anonymous>) - HIGH crap
-- src/routes/enterprise-orders/order-detail/OrderDetail.component.tsx:89 (<anonymous>) - HIGH crap
-- src/components/Table/contexts/FiltersData/filters/actions/useFetchFilterData.hook.ts:126 (<anonymous>) - HIGH crap
-- src/utils/urlState/serializeFiltersToURL.util.ts:8 (<anonymous>) - HIGH crap
-- src/components/Table/contexts/FiltersData/filters/actions/useFetchFilterData.hook.ts:47 (<anonymous>) - HIGH crap
+- src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.ts:31 (<anonymous>) - HIGH crap
+- src/components/Table/contexts/FiltersData/filters/actions/useFetchFilterData.hook.ts:132 (<anonymous>) - HIGH crap
+- src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useToggleColumnPin.hook.ts:31 (<anonymous>) - HIGH crap
+- src/routes/enterprise-orders/order-detail/OrderDetail.component.tsx:211 (<anonymous>) - HIGH crap
+- src/App.tsx:95 (<anonymous>) - HIGH crap
+- src/routes/wide-alltypes-150/WideAlltypes150.constants.ts:16 (<anonymous>) - HIGH crap
 
 ## Drift Control
 

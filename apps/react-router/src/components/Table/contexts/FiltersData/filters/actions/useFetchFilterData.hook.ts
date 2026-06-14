@@ -3,12 +3,19 @@ import type { InfiniteScroll, PrefetchCache } from '@/types/ui.types';
 
 import { DEFAULT_FILTER_PAGE_SIZE } from '@/components/Table/Table.constants';
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { getErrorMessage } from '@/components/Table/utils/getErrorMessage.util';
+import { getRequiredOnLoadMore } from '@/components/Table/utils/getRequiredOnLoadMore.util';
+import type { DataKey } from '@/components/Table/Table.types';
 import { logger } from '@/utils/logger';
-
-import { firePrefetch, resolveFromCacheOrFetch } from '@/utils/prefetch';
+import { clearPrefetchCache } from '@/utils/prefetch/clearPrefetchCache.util';
+import { firePrefetch } from '@/utils/prefetch/firePrefetch.util';
+import { resolveFromCacheOrFetch } from '@/utils/prefetch/resolveFromCacheOrFetch.util';
 
 import { useFiltersDataContextValue } from '../../useFiltersDataContextValue.hook';
-import type { DataKey } from '@/components/Table/Table.types';
+
+import { getTotalRows } from './getTotalRows.util';
+import { shouldSkipInitialFetch } from './shouldSkipInitialFetch.util';
+import type { FilterData } from '@/components/Table/Table.types';
 
 type FetchFilterDataCallbackArgs<TResponse> = Omit<
   InfiniteScroll<string, TResponse>,
@@ -27,65 +34,6 @@ type UseFetchFilterDataReturn<TResponse> = {
   readonly fetchMore: (
     args: FetchFilterDataCallbackArgs<TResponse>,
   ) => Promise<void>;
-};
-
-type FilterDataSnapshot = {
-  readonly data: readonly unknown[];
-  readonly hasMore: boolean;
-  readonly isLoading: boolean;
-  readonly isLoadingMore: boolean;
-  readonly totalLoadedRows: number;
-  readonly totalRows: number;
-};
-
-const getErrorMessage = ({
-  error,
-  fallback,
-}: {
-  readonly error: unknown;
-  readonly fallback: string;
-}): string => (error instanceof Error ? error.message : fallback);
-
-const getTotalRows = <TResponse>({
-  data,
-  dataTotalSelector,
-  response,
-}: {
-  readonly data: readonly string[];
-  readonly dataTotalSelector?: (response: TResponse) => number;
-  readonly response: TResponse;
-}): number => {
-  if (dataTotalSelector) {
-    return dataTotalSelector(response);
-  }
-
-  return data.length;
-};
-
-const getRequiredOnLoadMore = <TResponse>(
-  onLoadMore: FetchFilterDataCallbackArgs<TResponse>['onLoadMore'],
-): NonNullable<FetchFilterDataCallbackArgs<TResponse>['onLoadMore']> => {
-  if (!onLoadMore) {
-    throw new Error('onLoadMore callback is required');
-  }
-
-  return onLoadMore;
-};
-
-const shouldSkipInitialFetch = ({
-  currentFilter,
-}: {
-  readonly currentFilter: FilterDataSnapshot;
-}): boolean => currentFilter.data.length > 0 || currentFilter.isLoading;
-
-const clearPrefetchRef = <TResponse>({
-  prefetchRef,
-}: {
-  readonly prefetchRef?: RefObject<PrefetchCache<TResponse>>;
-}) => {
-  if (prefetchRef) {
-    prefetchRef.current = { data: undefined, promise: undefined, skip: -1 };
-  }
 };
 
 /**
@@ -109,7 +57,9 @@ export const useFetchFilterData = <TData, TResponse>({
     onLoadMore,
   }: FetchFilterDataCallbackArgs<TResponse>) => {
     const filtersDataState = filtersDataStore.get();
-    const currentFilter = filtersDataState?.[columnKey];
+    const currentFilter = filtersDataState?.[columnKey] as
+      | FilterData
+      | undefined;
 
     if (!currentFilter) {
       logger.error(
@@ -185,7 +135,9 @@ export const useFetchFilterData = <TData, TResponse>({
     onLoadMore,
   }: FetchFilterDataCallbackArgs<TResponse>) => {
     const filtersDataState = filtersDataStore.get();
-    const currentFilter = filtersDataState?.[columnKey];
+    const currentFilter = filtersDataState?.[columnKey] as
+      | FilterData
+      | undefined;
     const currentData = currentFilter?.data ?? [];
 
     const requiredOnLoadMore = getRequiredOnLoadMore(onLoadMore);
@@ -212,7 +164,9 @@ export const useFetchFilterData = <TData, TResponse>({
           }),
       });
 
-      clearPrefetchRef({ prefetchRef });
+      if (prefetchRef) {
+        clearPrefetchCache({ prefetchRef });
+      }
 
       const data = dataSelector ? dataSelector(response) : [];
       const combinedData = [...currentData, ...data];

@@ -8,9 +8,11 @@ import { LOAD_MORE_PAGE_SIZE } from '@/components/Table/Table.constants';
 import { useFetchMoreData } from './useFetchMoreData.hook';
 
 const {
+  firePrefetchMock,
   mockMetaStore,
   mockUseTableConfigContextValue,
   mockUseTableDataContextValue,
+  resolveFromCacheOrFetchMock,
   setDataStoreState,
   setMetaStoreState,
 } = vi.hoisted(() => {
@@ -41,9 +43,33 @@ const {
   };
 
   return {
+    firePrefetchMock: vi.fn(({ limit, nextSkip, onLoadMore, prefetchRef }) => {
+      void onLoadMore({ limit, skip: nextSkip })
+        .then((response: TestResponse) => {
+          prefetchRef.current = {
+            data: response,
+            promise: undefined,
+            skip: nextSkip,
+          };
+        })
+        .catch(() => undefined);
+    }),
     mockMetaStore,
     mockUseTableConfigContextValue: () => ({ metaStore: mockMetaStore }),
     mockUseTableDataContextValue: () => ({ dataStore: mockDataStore }),
+    resolveFromCacheOrFetchMock: vi.fn(
+      async ({ cache, expectedSkip, fetchFn }) => {
+        if (cache?.skip === expectedSkip && cache.data) {
+          return cache.data;
+        }
+
+        if (cache?.skip === expectedSkip && cache.promise) {
+          return cache.promise;
+        }
+
+        return fetchFn();
+      },
+    ),
     setDataStoreState: (nextState: typeof dataStoreState) => {
       dataStoreState = nextState;
     },
@@ -62,6 +88,14 @@ vi.mock(
 
 vi.mock('../useTableDataContextValue.hook', () => ({
   useTableDataContextValue: mockUseTableDataContextValue,
+}));
+
+vi.mock('@/utils/prefetch/firePrefetch.util', () => ({
+  firePrefetch: firePrefetchMock,
+}));
+
+vi.mock('@/utils/prefetch/resolveFromCacheOrFetch.util', () => ({
+  resolveFromCacheOrFetch: resolveFromCacheOrFetchMock,
 }));
 
 type TestResponse = {

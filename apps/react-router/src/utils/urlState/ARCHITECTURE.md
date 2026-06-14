@@ -16,6 +16,14 @@ urlState/
 ├── serializeSortingToURL.util.ts
 ├── deserializeSortingFromURL.util.ts
 ├── serializeFiltersToURL.util.ts
+├── serializeFilter.util.ts
+├── serializeBooleanFilter.util.ts
+├── serializeDateFilter.util.ts
+├── serializeSelectFilter.util.ts
+├── serializeNumberFilter.util.ts
+├── serializeTextFilter.util.ts
+├── getSerializedOperator.util.ts
+├── serializeFilter.types.ts
 ├── deserializeFilter.util.ts
 └── deserializeFiltersFromURL.util.ts
 ```
@@ -36,6 +44,15 @@ graph TD
   DSF --> DF[Deserialize single filter utility]
   SFU --> FilterConstants[Filter operator constants]
   DF --> FilterConstants
+  SFU --> SF[serializeFilter dispatcher]
+  SF --> SBF[serializeBooleanFilter]
+  SF --> SDF[serializeDateFilter]
+  SF --> SSF[serializeSelectFilter]
+  SF --> SNF[serializeNumberFilter]
+  SF --> STF[serializeTextFilter]
+  SDF --> GSO[getSerializedOperator]
+  SNF --> GSO
+  STF --> GSO
 ```
 
 ## Utilities
@@ -158,6 +175,34 @@ flowchart TD
 - `boolean` -> bare boolean
 - `text/number/date` -> `[shortOp, value]` or `[shortOp, value, value2]`
 - `select/multiSelect` -> values array or `['!', ...values]` for `notEquals`
+
+### serializeFilter.util.ts
+
+Dispatches a single `ColumnFilter` to the matching leaf serializer.
+
+### getSerializedOperator.util.ts
+
+Maps long operator names to their short codes using `OPERATOR_TO_SHORT`.
+
+### serializeBooleanFilter.util.ts
+
+Serializes boolean filters as bare booleans.
+
+### serializeDateFilter.util.ts
+
+Serializes date filters using short operator codes and optional `value2` for between filters.
+
+### serializeSelectFilter.util.ts
+
+Serializes select and multi-select filters as arrays, including `['!', ...values]` for `notEquals`.
+
+### serializeNumberFilter.util.ts
+
+Serializes number filters using short operator codes and optional `value2` for between filters.
+
+### serializeTextFilter.util.ts
+
+Serializes text filters as `[shortOp, value]`.
 
 ### deserializeFilter.util.ts
 

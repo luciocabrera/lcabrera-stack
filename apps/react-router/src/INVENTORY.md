@@ -246,6 +246,13 @@ Before creating anything new, check this inventory. If something here does the j
 | `readStateFromURL`          | `utils/urlState/readStateFromURL.util.ts`          | Reads + decodes a single key from `URLSearchParams`                                   |
 | `readTableStateFromURL`     | `utils/urlState/readTableStateFromURL.util.ts`     | Convenience wrapper: reads sorting, filters, and column-visibility state from the URL |
 | `serializeFiltersToURL`     | `utils/urlState/serializeFiltersToURL.util.ts`     | `ColumnFiltersState` → compact JSON using operator short-codes                        |
+| `serializeFilter`           | `utils/urlState/serializeFilter.util.ts`           | Dispatches a single `ColumnFilter` to the matching leaf serializer                    |
+| `serializeBooleanFilter`    | `utils/urlState/serializeBooleanFilter.util.ts`    | Serializes boolean filters as bare booleans                                           |
+| `serializeDateFilter`       | `utils/urlState/serializeDateFilter.util.ts`       | Serializes date filters using compact operator codes and optional range values        |
+| `serializeSelectFilter`     | `utils/urlState/serializeSelectFilter.util.ts`     | Serializes select and multi-select filters to compact arrays                          |
+| `serializeNumberFilter`     | `utils/urlState/serializeNumberFilter.util.ts`     | Serializes number filters using compact operator codes and optional range values      |
+| `serializeTextFilter`       | `utils/urlState/serializeTextFilter.util.ts`       | Serializes text filters to compact operator/value arrays                              |
+| `getSerializedOperator`     | `utils/urlState/getSerializedOperator.util.ts`     | Maps long operator names to short codes via `OPERATOR_TO_SHORT`                       |
 | `deserializeFiltersFromURL` | `utils/urlState/deserializeFiltersFromURL.util.ts` | Compact URL param → full `ColumnFiltersState`                                         |
 | `deserializeFilter`         | `utils/urlState/deserializeFilter.util.ts`         | Deserialises a single compact filter value with type inference                        |
 | `serializeSortingToURL`     | `utils/urlState/serializeSortingToURL.util.ts`     | `SortingState[]` → compact `{ [key]: 'asc'                                            | 'desc' }` object |

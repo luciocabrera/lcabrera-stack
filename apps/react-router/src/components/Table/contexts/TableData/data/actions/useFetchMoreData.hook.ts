@@ -4,7 +4,11 @@ import type { InfiniteScroll, PrefetchCache } from '@/types/ui.types';
 
 import { LOAD_MORE_PAGE_SIZE } from '@/components/Table/Table.constants';
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
-import { firePrefetch, resolveFromCacheOrFetch } from '@/utils/prefetch';
+import { getErrorMessage } from '@/components/Table/utils/getErrorMessage.util';
+import { getRequiredOnLoadMore } from '@/components/Table/utils/getRequiredOnLoadMore.util';
+import { clearPrefetchCache } from '@/utils/prefetch/clearPrefetchCache.util';
+import { firePrefetch } from '@/utils/prefetch/firePrefetch.util';
+import { resolveFromCacheOrFetch } from '@/utils/prefetch/resolveFromCacheOrFetch.util';
 
 import { useTableDataContextValue } from '../useTableDataContextValue.hook';
 
@@ -12,29 +16,6 @@ type FetchMoreDataArgs<TData, TResponse> = Omit<
   InfiniteScroll<TData, TResponse>,
   'hasMore' | 'isLoadingMore'
 >;
-
-const getRequiredOnLoadMore = <TData, TResponse>(
-  onLoadMore: FetchMoreDataArgs<TData, TResponse>['onLoadMore'],
-): NonNullable<FetchMoreDataArgs<TData, TResponse>['onLoadMore']> => {
-  if (!onLoadMore) {
-    throw new Error('onLoadMore callback is required');
-  }
-
-  return onLoadMore;
-};
-
-const clearPrefetchCache = <TResponse>({
-  prefetchRef,
-}: {
-  readonly prefetchRef: {
-    current: PrefetchCache<TResponse>;
-  };
-}) => {
-  prefetchRef.current = { data: undefined, promise: undefined, skip: -1 };
-};
-
-const getErrorMessage = ({ error }: { readonly error: unknown }): string =>
-  error instanceof Error ? error.message : 'Failed to load more data';
 
 export const useFetchMoreData = <TData, TResponse>() => {
   const { dataStore } = useTableDataContextValue<TData>();
@@ -113,7 +94,10 @@ export const useFetchMoreData = <TData, TResponse>() => {
           });
         }
       } catch (error) {
-        const message = getErrorMessage({ error });
+        const message = getErrorMessage({
+          error,
+          fallback: 'Failed to load more data',
+        });
         metaStore.set({
           error: message,
         });

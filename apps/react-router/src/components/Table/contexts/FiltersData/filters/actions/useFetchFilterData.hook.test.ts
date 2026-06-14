@@ -54,7 +54,17 @@ const {
   };
 
   return {
-    firePrefetchMock: vi.fn(),
+    firePrefetchMock: vi.fn(({ limit, nextSkip, onLoadMore, prefetchRef }) => {
+      void onLoadMore({ limit, skip: nextSkip })
+        .then((response: TestResponse) => {
+          prefetchRef.current = {
+            data: response,
+            promise: undefined,
+            skip: nextSkip,
+          };
+        })
+        .catch(() => undefined);
+    }),
     loggerErrorMock: vi.fn(),
     mockFiltersDataStore,
     mockMetaStore,
@@ -62,7 +72,19 @@ const {
       filtersDataStore: mockFiltersDataStore,
     }),
     mockUseTableConfigContextValue: () => ({ metaStore: mockMetaStore }),
-    resolveFromCacheOrFetchMock: vi.fn(),
+    resolveFromCacheOrFetchMock: vi.fn(
+      async ({ cache, expectedSkip, fetchFn }) => {
+        if (cache?.skip === expectedSkip && cache.data) {
+          return cache.data;
+        }
+
+        if (cache?.skip === expectedSkip && cache.promise) {
+          return cache.promise;
+        }
+
+        return fetchFn();
+      },
+    ),
     setFiltersDataState: (nextState: typeof filtersDataState) => {
       filtersDataState = nextState;
       mockFiltersDataStore.set.mockClear();
@@ -91,8 +113,11 @@ vi.mock('@/utils/logger', () => ({
   },
 }));
 
-vi.mock('@/utils/prefetch', () => ({
+vi.mock('@/utils/prefetch/firePrefetch.util', () => ({
   firePrefetch: firePrefetchMock,
+}));
+
+vi.mock('@/utils/prefetch/resolveFromCacheOrFetch.util', () => ({
   resolveFromCacheOrFetch: resolveFromCacheOrFetchMock,
 }));
 
