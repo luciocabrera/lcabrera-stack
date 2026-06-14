@@ -68,7 +68,7 @@ function mockUseTableConfigContextValue() {
   return { metaStore: getHarness().metaStore };
 }
 
-const loggerErrorMock = vi.fn();
+const loggerErrorMock = vi.hoisted(() => vi.fn());
 
 vi.mock(
   '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
