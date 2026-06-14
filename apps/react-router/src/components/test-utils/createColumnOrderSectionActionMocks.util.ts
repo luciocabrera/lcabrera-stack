@@ -64,9 +64,9 @@ export const createColumnOrderSectionActionMocks = ({
     tableColumnsStore._state = initialTableState;
     drawerColumnsStore._state = initialDrawerState;
     modalsStore._state = initialModalsState;
-    (tableColumnsStore.set as ReturnType<typeof vi.fn>).mockClear();
-    (drawerColumnsStore.set as ReturnType<typeof vi.fn>).mockClear();
-    (modalsStore.set as ReturnType<typeof vi.fn>).mockClear();
+    tableColumnsStore.set.mockClear();
+    drawerColumnsStore.set.mockClear();
+    modalsStore.set.mockClear();
   };
 
   return {

@@ -15,7 +15,6 @@ import { useFiltersDataContextValue } from '../../useFiltersDataContextValue.hoo
 
 import { getTotalRows } from './getTotalRows.util';
 import { shouldSkipInitialFetch } from './shouldSkipInitialFetch.util';
-import type { FilterData } from '@/components/Table/Table.types';
 
 type FetchFilterDataCallbackArgs<TResponse> = Omit<
   InfiniteScroll<string, TResponse>,
@@ -57,9 +56,7 @@ export const useFetchFilterData = <TData, TResponse>({
     onLoadMore,
   }: FetchFilterDataCallbackArgs<TResponse>) => {
     const filtersDataState = filtersDataStore.get();
-    const currentFilter = filtersDataState?.[columnKey] as
-      | FilterData
-      | undefined;
+    const currentFilter = filtersDataState?.[columnKey];
 
     if (!currentFilter) {
       logger.error(
@@ -135,9 +132,7 @@ export const useFetchFilterData = <TData, TResponse>({
     onLoadMore,
   }: FetchFilterDataCallbackArgs<TResponse>) => {
     const filtersDataState = filtersDataStore.get();
-    const currentFilter = filtersDataState?.[columnKey] as
-      | FilterData
-      | undefined;
+    const currentFilter = filtersDataState?.[columnKey];
     const currentData = currentFilter?.data ?? [];
 
     const requiredOnLoadMore = getRequiredOnLoadMore(onLoadMore);
