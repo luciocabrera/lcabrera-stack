@@ -21,15 +21,20 @@ graph TD
   TDS --> isCol["useGetTableIsColumnSettingsOpen()"]
   TDS --> colKey["useGetTableColumnSelectedKey()"]
 
-  isTable -->|true| TDP["TableDrawerProvider"]
-  TDP --> TSD["TableSettingsDrawer"]
-
   isCol -->|"true + columnKey"| CDP["ColumnDrawerProvider"]
   CDP --> CSD["ColumnSettingsDrawer"]
 
-  isTable -->|false| check2{"isColumnSettingsOpen && columnKey?"}
+  isCol -->|false| check2{"isTableSettingsOpen?"}
+  check2 -->|true| TDP["TableDrawerProvider"]
+  TDP --> TSD["TableSettingsDrawer"]
   check2 -->|false| empty["<> (empty fragment)"]
 ```
+
+## Precedence Rule
+
+When both drawers are requested at the same time, **column settings wins**.
+This allows per-column settings to temporarily override table settings,
+including when table settings is pinned.
 
 ## Context Providers
 

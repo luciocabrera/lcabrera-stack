@@ -158,10 +158,14 @@ graph TD
   Q --> R{"Accept?"}
   R -->|Yes + invalid filters| S["notify('Invalid filters') + keep drawer open"]
   R -->|Yes + valid filters| T["batchSetTableDrawerSettings()"]
-  T --> U["Unpin + close"]
-  Q --> U{"Cancel?"}
-  U -->|Yes| V["resetTableSettings()"]
-  V --> W["Unpin + close"]
+  T --> U{"Pinned?"}
+  U -->|Yes| K1["Keep drawer open"]
+  U -->|No| K2["set isTableSettingsOpen=false"]
+  Q --> C{"Cancel?"}
+  C -->|Yes| V["resetTableSettings()"]
+  V --> P{"Pinned?"}
+  P -->|Yes| K3["Keep drawer open"]
+  P -->|No| K4["set isTableSettingsOpen=false"]
 ```
 
 ## State Management: TableDrawerContext
@@ -176,8 +180,9 @@ See [TableDrawerContext/ARCHITECTURE.md](TableDrawerContext/ARCHITECTURE.md) for
 - **Accept**: `useBatchSetTableDrawerSettings` reads all drawer state and pushes it to
   `TableConfigContext`
 - **Invalid accept**: `notify(...)` sends a warning through the app-level `NotificationProvider`; the viewport is rendered once at the root, not inside the drawer
+- **Pin state**: `isTableSettingsPinned` is owned by `TableConfig.metaStore`, not local component state
 - **Cancel**: `useResetTableSettings()` reads current table state back into
-  the drawer store, then closes via `useToogleTableIsTableSettingsOpen()`
+  the drawer store; it closes only when unpinned
 
 ## Tab Sections
 

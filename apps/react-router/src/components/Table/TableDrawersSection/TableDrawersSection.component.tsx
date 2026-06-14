@@ -17,17 +17,17 @@ export const TableDrawersSection = () => {
   const isTableSettingsOpen = useGetTableIsTableSettingsOpen();
   const columnKey = useGetTableColumnSelectedKey();
 
-  if (isTableSettingsOpen)
-    return (
-      <TableDrawerProvider>
-        <TableSettingsDrawer />
-      </TableDrawerProvider>
-    );
   if (isColumnSettingsOpen && columnKey)
     return (
       <ColumnDrawerProvider columnKey={columnKey}>
         <ColumnSettingsDrawer columnKey={columnKey} />
       </ColumnDrawerProvider>
+    );
+  if (isTableSettingsOpen)
+    return (
+      <TableDrawerProvider>
+        <TableSettingsDrawer />
+      </TableDrawerProvider>
     );
   return <></>;
 };

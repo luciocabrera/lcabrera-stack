@@ -135,6 +135,7 @@ TableMetaState = {
   isBordered: boolean;               // Show borders
   isColumnSettingsOpen: boolean;     // Column settings drawer open
   isStriped: boolean;                // Striped rows
+  isTableSettingsPinned: boolean;    // Table settings pinned as side panel
   isTableSettingsOpen: boolean;      // Table settings drawer open
   loadMorePageSize: number;          // Subsequent page row count
   overscan: number;                  // Virtual scroll overscan count
@@ -212,31 +213,35 @@ The two batch settings hooks now share two focused pure helpers instead of each 
 
 ## Meta Actions
 
-| Hook                                 | Writes To   | Description                   |
-| ------------------------------------ | ----------- | ----------------------------- |
-| `useSetTableColumnSelectedKey`       | `metaStore` | Set which column is selected  |
-| `useToogleTableIsColumnSettingsOpen` | `metaStore` | Toggle column settings drawer |
-| `useToogleTableIsTableSettingsOpen`  | `metaStore` | Toggle table settings drawer  |
+| Hook                                 | Writes To   | Description                                 |
+| ------------------------------------ | ----------- | ------------------------------------------- |
+| `useSetTableColumnSelectedKey`       | `metaStore` | Set which column is selected                |
+| `useSetTableDrawersOpenState`        | `metaStore` | Set both drawer open states in one mutation |
+| `useSetTableIsTableSettingsOpen`     | `metaStore` | Set table settings open state               |
+| `useSetTableIsTableSettingsPinned`   | `metaStore` | Set table settings pinned state             |
+| `useToogleTableIsColumnSettingsOpen` | `metaStore` | Toggle column settings drawer               |
+| `useToogleTableIsTableSettingsOpen`  | `metaStore` | Toggle table settings drawer                |
 
 ## Meta Selectors
 
-| Hook                              | Returns                                                                | Description                         |
-| --------------------------------- | ---------------------------------------------------------------------- | ----------------------------------- |
-| `useGetTableAdditionalMetadata`   | `Record<string, TableMetadataValue \| null \| undefined> \| undefined` | Optional custom metadata map        |
-| `useGetTableColumnSelectedKey`    | `string \| null`                                                       | Currently selected column key       |
-| `useGetTableDensity`              | `TableDensity`                                                         | Table density setting               |
-| `useGetTableEnablePrefetch`       | `boolean`                                                              | Whether prefetch buffer is active   |
-| `useGetTableInitialPageSize`      | `number`                                                               | Initial page row count              |
-| `useGetTableIsBordered`           | `boolean`                                                              | Whether borders are shown           |
-| `useGetTableIsColumnSettingsOpen` | `boolean`                                                              | Column settings drawer state        |
-| `useGetTableIsStriped`            | `boolean`                                                              | Whether rows are striped            |
-| `useGetTableIsTableSettingsOpen`  | `boolean`                                                              | Table settings drawer state         |
-| `useGetTableLoadMorePageSize`     | `number`                                                               | Subsequent page row count           |
-| `useGetTableOverscan`             | `number`                                                               | Virtual scroll overscan count       |
-| `useGetTablePersistenceKey`       | `string`                                                               | Persistence key for URL/cookie sync |
-| `useGetTablePlaceholderRowCount`  | `number`                                                               | Skeleton row count                  |
-| `useGetTableRowHeight`            | `number`                                                               | Row height in px                    |
-| `useGetTableSchemaName`           | `string \| undefined`                                                  | Optional schema name                |
-| `useGetTableTableName`            | `string \| undefined`                                                  | Optional table name                 |
-| `useGetTableThreshold`            | `number`                                                               | Fetch-more scroll threshold         |
-| `useGetTableTitle`                | `string`                                                               | Table display title                 |
+| Hook                               | Returns                                                                | Description                         |
+| ---------------------------------- | ---------------------------------------------------------------------- | ----------------------------------- |
+| `useGetTableAdditionalMetadata`    | `Record<string, TableMetadataValue \| null \| undefined> \| undefined` | Optional custom metadata map        |
+| `useGetTableColumnSelectedKey`     | `string \| null`                                                       | Currently selected column key       |
+| `useGetTableDensity`               | `TableDensity`                                                         | Table density setting               |
+| `useGetTableEnablePrefetch`        | `boolean`                                                              | Whether prefetch buffer is active   |
+| `useGetTableInitialPageSize`       | `number`                                                               | Initial page row count              |
+| `useGetTableIsBordered`            | `boolean`                                                              | Whether borders are shown           |
+| `useGetTableIsColumnSettingsOpen`  | `boolean`                                                              | Column settings drawer state        |
+| `useGetTableIsTableSettingsPinned` | `boolean`                                                              | Table settings pinned state         |
+| `useGetTableIsStriped`             | `boolean`                                                              | Whether rows are striped            |
+| `useGetTableIsTableSettingsOpen`   | `boolean`                                                              | Table settings drawer state         |
+| `useGetTableLoadMorePageSize`      | `number`                                                               | Subsequent page row count           |
+| `useGetTableOverscan`              | `number`                                                               | Virtual scroll overscan count       |
+| `useGetTablePersistenceKey`        | `string`                                                               | Persistence key for URL/cookie sync |
+| `useGetTablePlaceholderRowCount`   | `number`                                                               | Skeleton row count                  |
+| `useGetTableRowHeight`             | `number`                                                               | Row height in px                    |
+| `useGetTableSchemaName`            | `string \| undefined`                                                  | Optional schema name                |
+| `useGetTableTableName`             | `string \| undefined`                                                  | Optional table name                 |
+| `useGetTableThreshold`             | `number`                                                               | Fetch-more scroll threshold         |
+| `useGetTableTitle`                 | `string`                                                               | Table display title                 |

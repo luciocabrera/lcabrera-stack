@@ -20,6 +20,7 @@ const createInitialMetaState = (): TableMetaState => {
     isBordered: true,
     isColumnSettingsOpen: false,
     isStriped: true,
+    isTableSettingsPinned: false,
     isTableSettingsOpen: false,
     loadMorePageSize: 50,
     overscan: 4,
@@ -49,6 +50,9 @@ vi.mock(
 );
 
 import { useSetTableColumnSelectedKey } from './actions/useSetTableColumnSelectedKey.hook';
+import { useSetTableDrawersOpenState } from './actions/useSetTableDrawersOpenState.hook';
+import { useSetTableIsTableSettingsOpen } from './actions/useSetTableIsTableSettingsOpen.hook';
+import { useSetTableIsTableSettingsPinned } from './actions/useSetTableIsTableSettingsPinned.hook';
 import { useToogleTableIsColumnSettingsOpen } from './actions/useToogleTableIsColumnSettingsOpen.hook';
 import { useToogleTableIsTableSettingsOpen } from './actions/useToogleTableIsTableSettingsOpen.hook';
 import { useMetaStore } from './useMetaStore.hook';
@@ -58,6 +62,7 @@ import { useGetTableDensity } from './selectors/useGetTableDensity.hook';
 import { useGetTableEnablePrefetch } from './selectors/useGetTableEnablePrefetch.hook';
 import { useGetTableIsBordered } from './selectors/useGetTableIsBordered.hook';
 import { useGetTableIsColumnSettingsOpen } from './selectors/useGetTableIsColumnSettingsOpen.hook';
+import { useGetTableIsTableSettingsPinned } from './selectors/useGetTableIsTableSettingsPinned.hook';
 import { useGetTableIsStriped } from './selectors/useGetTableIsStriped.hook';
 import { useGetTableIsTableSettingsOpen } from './selectors/useGetTableIsTableSettingsOpen.hook';
 import { useGetTableLoadMorePageSize } from './selectors/useGetTableLoadMorePageSize.hook';
@@ -102,6 +107,9 @@ describe('TableConfig meta hooks', () => {
     expect(
       renderHook(() => useGetTableIsColumnSettingsOpen()).result.current,
     ).toBe(false);
+    expect(
+      renderHook(() => useGetTableIsTableSettingsPinned()).result.current,
+    ).toBe(false);
     expect(renderHook(() => useGetTableIsStriped()).result.current).toBe(true);
     expect(
       renderHook(() => useGetTableIsTableSettingsOpen()).result.current,
@@ -126,15 +134,29 @@ describe('TableConfig meta hooks', () => {
     const toggleTableSettings = renderHook(() =>
       useToogleTableIsTableSettingsOpen(),
     );
+    const setDrawersOpenState = renderHook(() => useSetTableDrawersOpenState());
+    const setTableSettingsOpen = renderHook(() =>
+      useSetTableIsTableSettingsOpen(),
+    );
+    const setTableSettingsPinned = renderHook(() =>
+      useSetTableIsTableSettingsPinned(),
+    );
 
     act(() => {
       setSelectedKey.result.current('status');
       toggleColumnSettings.result.current();
       toggleTableSettings.result.current();
+      setDrawersOpenState.result.current({
+        isColumnSettingsOpen: true,
+        isTableSettingsOpen: false,
+      });
+      setTableSettingsOpen.result.current(true);
+      setTableSettingsPinned.result.current(true);
     });
 
     expect(metaStore.get().columnSelectedKey).toBe('status');
     expect(metaStore.get().isColumnSettingsOpen).toBe(true);
+    expect(metaStore.get().isTableSettingsPinned).toBe(true);
     expect(metaStore.get().isTableSettingsOpen).toBe(true);
   });
 });

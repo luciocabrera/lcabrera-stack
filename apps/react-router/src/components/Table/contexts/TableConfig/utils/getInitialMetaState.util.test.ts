@@ -22,6 +22,7 @@ describe('getInitialMetaState', () => {
     expect(result.isBordered).toBe(true);
     expect(result.isStriped).toBe(true);
     expect(result.isColumnSettingsOpen).toBe(false);
+    expect(result.isTableSettingsPinned).toBe(false);
     expect(result.isTableSettingsOpen).toBe(false);
     expect(result.initialPageSize).toBe(INITIAL_PAGE_SIZE);
     expect(result.loadMorePageSize).toBe(LOAD_MORE_PAGE_SIZE);

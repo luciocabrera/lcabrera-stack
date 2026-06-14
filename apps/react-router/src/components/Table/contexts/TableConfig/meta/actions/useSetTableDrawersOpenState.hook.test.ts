@@ -3,8 +3,7 @@
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useToogleTableIsColumnSettingsOpen } from './useToogleTableIsColumnSettingsOpen.hook';
-import { useToogleTableIsTableSettingsOpen } from './useToogleTableIsTableSettingsOpen.hook';
+import { useSetTableDrawersOpenState } from './useSetTableDrawersOpenState.hook';
 
 const { getMetaState, mockUseTableConfigContextValue, setMetaState } =
   vi.hoisted(() => {
@@ -14,7 +13,6 @@ const { getMetaState, mockUseTableConfigContextValue, setMetaState } =
     };
 
     const mockMetaStore = {
-      get: vi.fn(() => metaState),
       set: vi.fn((value: Record<string, unknown>) => {
         metaState = { ...metaState, ...value };
       }),
@@ -35,7 +33,7 @@ vi.mock('../../useTableConfigContextValue.hook', () => ({
   useTableConfigContextValue: mockUseTableConfigContextValue,
 }));
 
-describe('table settings toggle hooks', () => {
+describe('useSetTableDrawersOpenState', () => {
   beforeEach(() => {
     setMetaState({
       isColumnSettingsOpen: false,
@@ -43,29 +41,17 @@ describe('table settings toggle hooks', () => {
     });
   });
 
-  it('toggles table settings using the latest store snapshot', () => {
-    const { result } = renderHook(() => useToogleTableIsTableSettingsOpen());
+  it('sets both drawer open flags in a single mutation', () => {
+    const { result } = renderHook(() => useSetTableDrawersOpenState());
 
     act(() => {
-      result.current();
-      expect(getMetaState().isTableSettingsOpen).toBe(true);
-      expect(getMetaState().isColumnSettingsOpen).toBe(false);
-      result.current();
+      result.current({
+        isColumnSettingsOpen: true,
+        isTableSettingsOpen: false,
+      });
     });
 
+    expect(getMetaState().isColumnSettingsOpen).toBe(true);
     expect(getMetaState().isTableSettingsOpen).toBe(false);
-  });
-
-  it('toggles column settings using the latest store snapshot', () => {
-    const { result } = renderHook(() => useToogleTableIsColumnSettingsOpen());
-
-    act(() => {
-      result.current();
-      expect(getMetaState().isColumnSettingsOpen).toBe(true);
-      expect(getMetaState().isTableSettingsOpen).toBe(false);
-      result.current();
-    });
-
-    expect(getMetaState().isColumnSettingsOpen).toBe(false);
   });
 });

@@ -107,6 +107,12 @@ Before creating anything new, check this inventory. If something here does the j
 | `useSetColumnSorting`              | `components/Table/contexts/TableConfig/columns/actions/useSetColumnSorting.hook.ts`                    | Sets the sort direction for one column; updates URL and resets pagination                                          |
 | `useSyncColumnsSizing`             | `components/Table/contexts/TableConfig/columns/actions/useSyncColumnsSizing.hook.ts`                   | Persists current column sizing state from store to cookie/localStorage                                             |
 
+### `src/components/Table/contexts/TableConfig/meta/actions/`
+
+| Artifact                      | Location                                                                                 | Description                                                            |
+| ----------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `useSetTableDrawersOpenState` | `components/Table/contexts/TableConfig/meta/actions/useSetTableDrawersOpenState.hook.ts` | Atomically sets table and column drawer open flags in one store update |
+
 ### `src/components/Table/TableSettingsDrawer/TableDrawerContext/actions/`
 
 | Artifact                         | Location                                                                                                 | Description                                                                                     |

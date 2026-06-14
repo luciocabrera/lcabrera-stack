@@ -99,7 +99,9 @@ Double-click on resize handle resets column to auto width.
 ### Settings
 
 Opens `ColumnSettingsDrawer` by setting the selected column key
-and toggling `isColumnSettingsOpen` in meta state.
+and setting `isColumnSettingsOpen = true` while forcing
+`isTableSettingsOpen = false` in meta state, so per-column
+settings takes precedence over table settings.
 
 ## Loading State
 

@@ -2,8 +2,8 @@
 
 import type { ReactNode } from 'react';
 
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { cleanup, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { TableDrawersSection } from './TableDrawersSection.component';
 
@@ -89,6 +89,10 @@ vi.mock('@/utils/performance', () => ({
   useRenderTracker: useRenderTrackerMock,
 }));
 
+afterEach(() => {
+  cleanup();
+});
+
 describe('TableDrawersSection', () => {
   it('renders table settings drawer when table drawer is open', () => {
     useGetTableIsTableSettingsOpenMock.mockReturnValue(true);
@@ -100,6 +104,19 @@ describe('TableDrawersSection', () => {
     expect(screen.getByTestId('table-drawer-provider').textContent).toContain(
       'Table Settings Drawer',
     );
+  });
+
+  it('renders column settings drawer when both drawers are open', () => {
+    useGetTableIsTableSettingsOpenMock.mockReturnValue(true);
+    useGetTableIsColumnSettingsOpenMock.mockReturnValue(true);
+    useGetTableColumnSelectedKeyMock.mockReturnValue('customer');
+
+    render(<TableDrawersSection />);
+
+    expect(screen.getByTestId('column-drawer-provider').dataset.columnKey).toBe(
+      'customer',
+    );
+    expect(screen.queryByTestId('table-drawer-provider')).toBeNull();
   });
 
   it('renders column settings drawer when column drawer is open with selected key', () => {
