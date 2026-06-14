@@ -1,9 +1,14 @@
 import type { KeyboardEvent } from 'react';
 
-export const handleDivTriggerKeyDown = (
-  event: KeyboardEvent<HTMLDivElement>,
-  onToggle: () => void,
-) => {
+type HandleDivTriggerKeyDownArgs = {
+  readonly event: KeyboardEvent<HTMLDivElement>;
+  readonly onToggle: () => void;
+};
+
+export const handleDivTriggerKeyDown = ({
+  event,
+  onToggle,
+}: HandleDivTriggerKeyDownArgs) => {
   if (event.key !== 'Enter' && event.key !== ' ') {
     return;
   }

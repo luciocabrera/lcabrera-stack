@@ -2,28 +2,28 @@
   "kind": "combined",
   "schema_version": 7,
   "version": "2.96.0",
-  "elapsed_ms": 154,
+  "elapsed_ms": 175,
   "_meta": {
     "telemetry": {
-      "analysis_run_id": "run_d31d0b53266154be"
+      "analysis_run_id": "run_b600a5a710713ec0"
     }
   },
   "check": {
     "schema_version": 7,
     "version": "2.96.0",
-    "elapsed_ms": 104,
-    "total_issues": 3,
+    "elapsed_ms": 117,
+    "total_issues": 2,
     "entry_points": {
-      "total": 282,
+      "total": 287,
       "sources": {
         "manual_entry": 7,
-        "plugin": 275
+        "plugin": 280
       }
     },
     "summary": {
-      "total_issues": 3,
+      "total_issues": 2,
       "unused_files": 0,
-      "unused_exports": 1,
+      "unused_exports": 0,
       "unused_types": 0,
       "private_type_leaks": 0,
       "unused_dependencies": 2,
@@ -48,31 +48,7 @@
       "misconfigured_dependency_overrides": 0
     },
     "unused_files": [],
-    "unused_exports": [
-      {
-        "path": "src/components/Table/contexts/TableConfig/columns/actions/utils/index.ts",
-        "export_name": "commitPinningAndOrderUpdate",
-        "is_type_only": false,
-        "line": 3,
-        "col": 9,
-        "span_start": 163,
-        "is_re_export": true,
-        "actions": [
-          {
-            "type": "remove-export",
-            "auto_fixable": true,
-            "description": "Remove the unused export from the public API",
-            "note": "This finding originates from a re-export; verify it is not part of your public API before removing"
-          },
-          {
-            "type": "suppress-line",
-            "auto_fixable": false,
-            "description": "Suppress with an inline comment above the line",
-            "comment": "// fallow-ignore-next-line unused-export"
-          }
-        ]
-      }
-    ],
+    "unused_exports": [],
     "unused_types": [],
     "private_type_leaks": [],
     "unused_dependencies": [],
@@ -765,6 +741,78 @@
       {
         "instances": [
           {
+            "file": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useAcceptPinConflict.hook.test.ts",
+            "start_line": 29,
+            "end_line": 70,
+            "start_col": 24,
+            "end_col": 8,
+            "fragment": "{\n      conflictModal: CONFLICT_MODAL,\n      orderConflict: {\n        description: '',\n        isOpen: false,\n        pendingOrder: [],\n        pendingPinning: { left: [], right: [] },\n      },\n      pinSideModal: { columnKey: 'id', columnLabel: '', isOpen: false },\n      unpinConflictModal: {\n        columnKey: 'id',\n        columnLabel: '',\n        isOpen: false,\n        side: 'left',\n      },\n    },\n    initialTableState: {\n      columns: [\n        { key: 'id', label: 'ID' },\n        { key: 'name', label: 'Name' },\n      ],\n      normalizedColumns: {},\n      staticKeys: new Set<string>(),\n    },\n  });\n\nvi.mock(\n  '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',\n  () => ({\n    useTableConfigContextValue: () => ({ columnsStore: tableColumnsStore }),\n  }),\n);\nvi.mock(\n  '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook',\n  () => ({\n    useTableDrawerContextValue: () => ({ columnsStore: drawerColumnsStore }),\n  }),\n);\nvi.mock('../useColumnOrderSectionContextValue.hook', () => ({\n  useColumnOrderSectionContextValue: () => ({ modalsStore }),\n}));\nvi.mock("
+          },
+          {
+            "file": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useAcceptUnpinConflict.hook.test.ts",
+            "start_line": 29,
+            "end_line": 70,
+            "start_col": 24,
+            "end_col": 8,
+            "fragment": "{\n      conflictModal: {\n        columnKey: 'id',\n        columnLabel: '',\n        isOpen: false,\n        side: 'left',\n      },\n      orderConflict: {\n        description: '',\n        isOpen: false,\n        pendingOrder: [],\n        pendingPinning: { left: [], right: [] },\n      },\n      pinSideModal: { columnKey: 'id', columnLabel: '', isOpen: false },\n      unpinConflictModal: UNPIN_CONFLICT_MODAL,\n    },\n    initialTableState: {\n      columns: [\n        { key: 'id', label: 'ID' },\n        { key: 'name', label: 'Name' },\n      ],\n      normalizedColumns: {},\n      staticKeys: new Set<string>(),\n    },\n  });\n\nvi.mock(\n  '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',\n  () => ({\n    useTableConfigContextValue: () => ({ columnsStore: tableColumnsStore }),\n  }),\n);\nvi.mock(\n  '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook',\n  () => ({\n    useTableDrawerContextValue: () => ({ columnsStore: drawerColumnsStore }),\n  }),\n);\nvi.mock('../useColumnOrderSectionContextValue.hook', () => ({\n  useColumnOrderSectionContextValue: () => ({ modalsStore }),\n}));\nvi.mock("
+          }
+        ],
+        "token_count": 107,
+        "line_count": 42,
+        "fingerprint": "dup:7b348560",
+        "actions": [
+          {
+            "type": "extract-shared",
+            "auto_fixable": false,
+            "description": "Extract duplicated code (42 lines, 2 instances) into a shared function"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the duplicated code",
+            "comment": "// fallow-ignore-next-line code-duplication"
+          }
+        ]
+      },
+      {
+        "instances": [
+          {
+            "file": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useAcceptPinConflict.hook.test.ts",
+            "start_line": 48,
+            "end_line": 70,
+            "start_col": 8,
+            "end_col": 75,
+            "fragment": "{ key: 'name', label: 'Name' },\n      ],\n      normalizedColumns: {},\n      staticKeys: new Set<string>(),\n    },\n  });\n\nvi.mock(\n  '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',\n  () => ({\n    useTableConfigContextValue: () => ({ columnsStore: tableColumnsStore }),\n  }),\n);\nvi.mock(\n  '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook',\n  () => ({\n    useTableDrawerContextValue: () => ({ columnsStore: drawerColumnsStore }),\n  }),\n);\nvi.mock('../useColumnOrderSectionContextValue.hook', () => ({\n  useColumnOrderSectionContextValue: () => ({ modalsStore }),\n}));\nvi.mock('@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils');"
+          },
+          {
+            "file": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useOrderBySorting.hook.test.ts",
+            "start_line": 47,
+            "end_line": 69,
+            "start_col": 8,
+            "end_col": 75,
+            "fragment": "{ key: 'age', label: 'Age' },\n      ],\n      normalizedColumns: {},\n      staticKeys: new Set<string>(),\n    },\n  });\n\nvi.mock(\n  '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',\n  () => ({\n    useTableConfigContextValue: () => ({ columnsStore: tableColumnsStore }),\n  }),\n);\nvi.mock(\n  '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook',\n  () => ({\n    useTableDrawerContextValue: () => ({ columnsStore: drawerColumnsStore }),\n  }),\n);\nvi.mock('../useColumnOrderSectionContextValue.hook', () => ({\n  useColumnOrderSectionContextValue: () => ({ modalsStore }),\n}));\nvi.mock('@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils');"
+          }
+        ],
+        "token_count": 95,
+        "line_count": 23,
+        "fingerprint": "dup:e9147e12",
+        "actions": [
+          {
+            "type": "extract-shared",
+            "auto_fixable": false,
+            "description": "Extract duplicated code (23 lines, 2 instances) into a shared function"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the duplicated code",
+            "comment": "// fallow-ignore-next-line code-duplication"
+          }
+        ]
+      },
+      {
+        "instances": [
+          {
             "file": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useAcceptPinConflict.hook.ts",
             "start_line": 20,
             "end_line": 29,
@@ -789,6 +837,189 @@
             "type": "extract-shared",
             "auto_fixable": false,
             "description": "Extract duplicated code (10 lines, 2 instances) into a shared function"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the duplicated code",
+            "comment": "// fallow-ignore-next-line code-duplication"
+          }
+        ]
+      },
+      {
+        "instances": [
+          {
+            "file": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useAcceptPinSide.hook.test.ts",
+            "start_line": 18,
+            "end_line": 41,
+            "start_col": 0,
+            "end_col": 18,
+            "fragment": "const { drawerColumnsStore, modalsStore, resetMocks, tableColumnsStore } =\n  createColumnOrderSectionActionMocks({\n    initialDrawerState: {\n      columnFilters: {},\n      columnOrder: ['id', 'name'],\n      columnPinning: { left: [], right: [] },\n      columnSizing: {},\n      columnVisibility: new Set<string>(),\n      sorting: [],\n    },\n    initialModalsState: {\n      conflictModal: {\n        columnKey: 'id',\n        columnLabel: '',\n        isOpen: false,\n        side: 'left',\n      },\n      orderConflict: {\n        description: '',\n        isOpen: false,\n        pendingOrder: [],\n        pendingPinning: { left: [], right: [] },\n      },\n      pinSideModal"
+          },
+          {
+            "file": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useToggleColumnPin.hook.test.ts",
+            "start_line": 12,
+            "end_line": 35,
+            "start_col": 0,
+            "end_col": 18,
+            "fragment": "const { drawerColumnsStore, modalsStore, resetMocks, tableColumnsStore } =\n  createColumnOrderSectionActionMocks({\n    initialDrawerState: {\n      columnFilters: {},\n      columnOrder: ['id', 'name'],\n      columnPinning: { left: [], right: [] },\n      columnSizing: {},\n      columnVisibility: new Set<string>(),\n      sorting: [],\n    },\n    initialModalsState: {\n      conflictModal: {\n        columnKey: 'id',\n        columnLabel: '',\n        isOpen: false,\n        side: 'left',\n      },\n      orderConflict: {\n        description: '',\n        isOpen: false,\n        pendingOrder: [],\n        pendingPinning: { left: [], right: [] },\n      },\n      pinSideModal"
+          }
+        ],
+        "token_count": 77,
+        "line_count": 24,
+        "fingerprint": "dup:03958e8a",
+        "actions": [
+          {
+            "type": "extract-shared",
+            "auto_fixable": false,
+            "description": "Extract duplicated code (24 lines, 2 instances) into a shared function"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the duplicated code",
+            "comment": "// fallow-ignore-next-line code-duplication"
+          }
+        ]
+      },
+      {
+        "instances": [
+          {
+            "file": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useAcceptPinSide.hook.test.ts",
+            "start_line": 59,
+            "end_line": 76,
+            "start_col": 6,
+            "end_col": 8,
+            "fragment": "mockAcceptPinConflict = vi.fn();\n\nvi.mock(\n  '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',\n  () => ({\n    useTableConfigContextValue: () => ({ columnsStore: tableColumnsStore }),\n  }),\n);\nvi.mock(\n  '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook',\n  () => ({\n    useTableDrawerContextValue: () => ({ columnsStore: drawerColumnsStore }),\n  }),\n);\nvi.mock('../useColumnOrderSectionContextValue.hook', () => ({\n  useColumnOrderSectionContextValue: () => ({ modalsStore }),\n}));\nvi.mock("
+          },
+          {
+            "file": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useToggleColumnPin.hook.test.ts",
+            "start_line": 54,
+            "end_line": 71,
+            "start_col": 6,
+            "end_col": 8,
+            "fragment": "mockAcceptUnpinConflict = vi.fn();\n\nvi.mock(\n  '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',\n  () => ({\n    useTableConfigContextValue: () => ({ columnsStore: tableColumnsStore }),\n  }),\n);\nvi.mock(\n  '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook',\n  () => ({\n    useTableDrawerContextValue: () => ({ columnsStore: drawerColumnsStore }),\n  }),\n);\nvi.mock('../useColumnOrderSectionContextValue.hook', () => ({\n  useColumnOrderSectionContextValue: () => ({ modalsStore }),\n}));\nvi.mock("
+          }
+        ],
+        "token_count": 83,
+        "line_count": 18,
+        "fingerprint": "dup:eeb626ce",
+        "actions": [
+          {
+            "type": "extract-shared",
+            "auto_fixable": false,
+            "description": "Extract duplicated code (18 lines, 2 instances) into a shared function"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the duplicated code",
+            "comment": "// fallow-ignore-next-line code-duplication"
+          }
+        ]
+      },
+      {
+        "instances": [
+          {
+            "file": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useAcceptPinSide.hook.test.ts",
+            "start_line": 151,
+            "end_line": 160,
+            "start_col": 32,
+            "end_col": 11,
+            "fragment": "{ kind: 'open-conflict-modal', conflictModal });\n\n    const { result } = renderHook(() => useAcceptPinSide());\n\n    act(() => {\n      result.current('left');\n    });\n\n    expect(modalsStore.set).toHaveBeenCalledWith({ conflictModal });\n    expect("
+          },
+          {
+            "file": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useAcceptPinSide.hook.test.ts",
+            "start_line": 173,
+            "end_line": 186,
+            "start_col": 32,
+            "end_col": 11,
+            "fragment": "{\n      kind: 'auto-accept-conflict',\n      conflictModal,\n      resolution: 'move-column',\n    });\n\n    const { result } = renderHook(() => useAcceptPinSide());\n\n    act(() => {\n      result.current('left');\n    });\n\n    expect(modalsStore.set).toHaveBeenCalledWith({ conflictModal });\n    expect("
+          }
+        ],
+        "token_count": 55,
+        "line_count": 14,
+        "fingerprint": "dup:d9cba6c2",
+        "suggested_name": "conflictModal",
+        "actions": [
+          {
+            "type": "extract-shared",
+            "auto_fixable": false,
+            "description": "Extract duplicated code (14 lines, 2 instances) into a shared function"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the duplicated code",
+            "comment": "// fallow-ignore-next-line code-duplication"
+          }
+        ]
+      },
+      {
+        "instances": [
+          {
+            "file": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useToggleColumnPin.hook.test.ts",
+            "start_line": 132,
+            "end_line": 145,
+            "start_col": 32,
+            "end_col": 30,
+            "fragment": "{\n      kind: 'open-pin-side-modal',\n      modal: MODAL_RESULT,\n    });\n    const { result } = renderHook(() => useToggleColumnPin());\n\n    act(() => {\n      result.current({ columnKey: 'id', isPinning: true });\n    });\n\n    expect(modalsStore.set).toHaveBeenCalledWith({\n      pinSideModal: MODAL_RESULT,\n    });\n    expect(mockAcceptPinSide)."
+          },
+          {
+            "file": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useToggleColumnPin.hook.test.ts",
+            "start_line": 149,
+            "end_line": 163,
+            "start_col": 32,
+            "end_col": 30,
+            "fragment": "{\n      kind: 'auto-accept-pin-side',\n      modal: MODAL_RESULT,\n      pinSide: 'left',\n    });\n    const { result } = renderHook(() => useToggleColumnPin());\n\n    act(() => {\n      result.current({ columnKey: 'id', isPinning: true });\n    });\n\n    expect(modalsStore.set).toHaveBeenCalledWith({\n      pinSideModal: MODAL_RESULT,\n    });\n    expect(mockAcceptPinSide)."
+          }
+        ],
+        "token_count": 64,
+        "line_count": 15,
+        "fingerprint": "dup:aacc7a2a",
+        "suggested_name": "MODAL_RESULT",
+        "actions": [
+          {
+            "type": "extract-shared",
+            "auto_fixable": false,
+            "description": "Extract duplicated code (15 lines, 2 instances) into a shared function"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the duplicated code",
+            "comment": "// fallow-ignore-next-line code-duplication"
+          }
+        ]
+      },
+      {
+        "instances": [
+          {
+            "file": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useToggleColumnPin.hook.test.ts",
+            "start_line": 167,
+            "end_line": 180,
+            "start_col": 32,
+            "end_col": 36,
+            "fragment": "{\n      kind: 'open-unpin-conflict-modal',\n      modal: UNPIN_MODAL_RESULT,\n    });\n    const { result } = renderHook(() => useToggleColumnPin());\n\n    act(() => {\n      result.current({ columnKey: 'id', isPinning: false });\n    });\n\n    expect(modalsStore.set).toHaveBeenCalledWith({\n      unpinConflictModal: UNPIN_MODAL_RESULT,\n    });\n    expect(mockAcceptUnpinConflict)."
+          },
+          {
+            "file": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useToggleColumnPin.hook.test.ts",
+            "start_line": 184,
+            "end_line": 198,
+            "start_col": 32,
+            "end_col": 36,
+            "fragment": "{\n      kind: 'auto-accept-unpin-conflict',\n      modal: UNPIN_MODAL_RESULT,\n      resolution: 'reorder-to-fill',\n    });\n    const { result } = renderHook(() => useToggleColumnPin());\n\n    act(() => {\n      result.current({ columnKey: 'id', isPinning: false });\n    });\n\n    expect(modalsStore.set).toHaveBeenCalledWith({\n      unpinConflictModal: UNPIN_MODAL_RESULT,\n    });\n    expect(mockAcceptUnpinConflict)."
+          }
+        ],
+        "token_count": 64,
+        "line_count": 15,
+        "fingerprint": "dup:cfff4c6e",
+        "suggested_name": "UNPIN_MODAL_RESULT",
+        "actions": [
+          {
+            "type": "extract-shared",
+            "auto_fixable": false,
+            "description": "Extract duplicated code (15 lines, 2 instances) into a shared function"
           },
           {
             "type": "suppress-line",
@@ -3722,6 +3953,150 @@
       },
       {
         "files": [
+          "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useAcceptPinConflict.hook.test.ts",
+          "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useAcceptUnpinConflict.hook.test.ts"
+        ],
+        "groups": [
+          {
+            "instances": [
+              {
+                "file": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useAcceptPinConflict.hook.test.ts",
+                "start_line": 29,
+                "end_line": 70,
+                "start_col": 24,
+                "end_col": 8,
+                "fragment": "{\n      conflictModal: CONFLICT_MODAL,\n      orderConflict: {\n        description: '',\n        isOpen: false,\n        pendingOrder: [],\n        pendingPinning: { left: [], right: [] },\n      },\n      pinSideModal: { columnKey: 'id', columnLabel: '', isOpen: false },\n      unpinConflictModal: {\n        columnKey: 'id',\n        columnLabel: '',\n        isOpen: false,\n        side: 'left',\n      },\n    },\n    initialTableState: {\n      columns: [\n        { key: 'id', label: 'ID' },\n        { key: 'name', label: 'Name' },\n      ],\n      normalizedColumns: {},\n      staticKeys: new Set<string>(),\n    },\n  });\n\nvi.mock(\n  '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',\n  () => ({\n    useTableConfigContextValue: () => ({ columnsStore: tableColumnsStore }),\n  }),\n);\nvi.mock(\n  '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook',\n  () => ({\n    useTableDrawerContextValue: () => ({ columnsStore: drawerColumnsStore }),\n  }),\n);\nvi.mock('../useColumnOrderSectionContextValue.hook', () => ({\n  useColumnOrderSectionContextValue: () => ({ modalsStore }),\n}));\nvi.mock("
+              },
+              {
+                "file": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useAcceptUnpinConflict.hook.test.ts",
+                "start_line": 29,
+                "end_line": 70,
+                "start_col": 24,
+                "end_col": 8,
+                "fragment": "{\n      conflictModal: {\n        columnKey: 'id',\n        columnLabel: '',\n        isOpen: false,\n        side: 'left',\n      },\n      orderConflict: {\n        description: '',\n        isOpen: false,\n        pendingOrder: [],\n        pendingPinning: { left: [], right: [] },\n      },\n      pinSideModal: { columnKey: 'id', columnLabel: '', isOpen: false },\n      unpinConflictModal: UNPIN_CONFLICT_MODAL,\n    },\n    initialTableState: {\n      columns: [\n        { key: 'id', label: 'ID' },\n        { key: 'name', label: 'Name' },\n      ],\n      normalizedColumns: {},\n      staticKeys: new Set<string>(),\n    },\n  });\n\nvi.mock(\n  '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',\n  () => ({\n    useTableConfigContextValue: () => ({ columnsStore: tableColumnsStore }),\n  }),\n);\nvi.mock(\n  '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook',\n  () => ({\n    useTableDrawerContextValue: () => ({ columnsStore: drawerColumnsStore }),\n  }),\n);\nvi.mock('../useColumnOrderSectionContextValue.hook', () => ({\n  useColumnOrderSectionContextValue: () => ({ modalsStore }),\n}));\nvi.mock("
+              }
+            ],
+            "token_count": 107,
+            "line_count": 42,
+            "fingerprint": "dup:7b348560",
+            "actions": [
+              {
+                "type": "extract-shared",
+                "auto_fixable": false,
+                "description": "Extract duplicated code (42 lines, 2 instances) into a shared function"
+              },
+              {
+                "type": "suppress-line",
+                "auto_fixable": false,
+                "description": "Suppress with an inline comment above the duplicated code",
+                "comment": "// fallow-ignore-next-line code-duplication"
+              }
+            ]
+          }
+        ],
+        "total_duplicated_lines": 42,
+        "total_duplicated_tokens": 107,
+        "suggestions": [
+          {
+            "kind": "ExtractFunction",
+            "description": "Extract shared function (42 lines) from useAcceptPinConflict.hook.test.ts, useAcceptUnpinConflict.hook.test.ts",
+            "estimated_savings": 42
+          }
+        ],
+        "actions": [
+          {
+            "type": "extract-shared",
+            "auto_fixable": false,
+            "description": "Extract 1 duplicated code block (42 lines) into a shared module",
+            "note": "These clone groups share the same files, indicating a structural relationship; refactor together"
+          },
+          {
+            "type": "apply-suggestion",
+            "auto_fixable": false,
+            "description": "Extract shared function (42 lines) from useAcceptPinConflict.hook.test.ts, useAcceptUnpinConflict.hook.test.ts"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the duplicated code",
+            "comment": "// fallow-ignore-next-line code-duplication"
+          }
+        ]
+      },
+      {
+        "files": [
+          "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useAcceptPinConflict.hook.test.ts",
+          "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useOrderBySorting.hook.test.ts"
+        ],
+        "groups": [
+          {
+            "instances": [
+              {
+                "file": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useAcceptPinConflict.hook.test.ts",
+                "start_line": 48,
+                "end_line": 70,
+                "start_col": 8,
+                "end_col": 75,
+                "fragment": "{ key: 'name', label: 'Name' },\n      ],\n      normalizedColumns: {},\n      staticKeys: new Set<string>(),\n    },\n  });\n\nvi.mock(\n  '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',\n  () => ({\n    useTableConfigContextValue: () => ({ columnsStore: tableColumnsStore }),\n  }),\n);\nvi.mock(\n  '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook',\n  () => ({\n    useTableDrawerContextValue: () => ({ columnsStore: drawerColumnsStore }),\n  }),\n);\nvi.mock('../useColumnOrderSectionContextValue.hook', () => ({\n  useColumnOrderSectionContextValue: () => ({ modalsStore }),\n}));\nvi.mock('@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils');"
+              },
+              {
+                "file": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useOrderBySorting.hook.test.ts",
+                "start_line": 47,
+                "end_line": 69,
+                "start_col": 8,
+                "end_col": 75,
+                "fragment": "{ key: 'age', label: 'Age' },\n      ],\n      normalizedColumns: {},\n      staticKeys: new Set<string>(),\n    },\n  });\n\nvi.mock(\n  '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',\n  () => ({\n    useTableConfigContextValue: () => ({ columnsStore: tableColumnsStore }),\n  }),\n);\nvi.mock(\n  '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook',\n  () => ({\n    useTableDrawerContextValue: () => ({ columnsStore: drawerColumnsStore }),\n  }),\n);\nvi.mock('../useColumnOrderSectionContextValue.hook', () => ({\n  useColumnOrderSectionContextValue: () => ({ modalsStore }),\n}));\nvi.mock('@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils');"
+              }
+            ],
+            "token_count": 95,
+            "line_count": 23,
+            "fingerprint": "dup:e9147e12",
+            "actions": [
+              {
+                "type": "extract-shared",
+                "auto_fixable": false,
+                "description": "Extract duplicated code (23 lines, 2 instances) into a shared function"
+              },
+              {
+                "type": "suppress-line",
+                "auto_fixable": false,
+                "description": "Suppress with an inline comment above the duplicated code",
+                "comment": "// fallow-ignore-next-line code-duplication"
+              }
+            ]
+          }
+        ],
+        "total_duplicated_lines": 23,
+        "total_duplicated_tokens": 95,
+        "suggestions": [
+          {
+            "kind": "ExtractFunction",
+            "description": "Extract shared function (23 lines) from useAcceptPinConflict.hook.test.ts, useOrderBySorting.hook.test.ts",
+            "estimated_savings": 23
+          }
+        ],
+        "actions": [
+          {
+            "type": "extract-shared",
+            "auto_fixable": false,
+            "description": "Extract 1 duplicated code block (23 lines) into a shared module",
+            "note": "These clone groups share the same files, indicating a structural relationship; refactor together"
+          },
+          {
+            "type": "apply-suggestion",
+            "auto_fixable": false,
+            "description": "Extract shared function (23 lines) from useAcceptPinConflict.hook.test.ts, useOrderBySorting.hook.test.ts"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the duplicated code",
+            "comment": "// fallow-ignore-next-line code-duplication"
+          }
+        ]
+      },
+      {
+        "files": [
           "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useAcceptPinConflict.hook.ts",
           "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useAcceptPinSide.hook.ts"
         ],
@@ -3783,6 +4158,315 @@
             "type": "apply-suggestion",
             "auto_fixable": false,
             "description": "Extract shared function (10 lines) from useAcceptPinConflict.hook.ts, useAcceptPinSide.hook.ts"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the duplicated code",
+            "comment": "// fallow-ignore-next-line code-duplication"
+          }
+        ]
+      },
+      {
+        "files": [
+          "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useAcceptPinSide.hook.test.ts"
+        ],
+        "groups": [
+          {
+            "instances": [
+              {
+                "file": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useAcceptPinSide.hook.test.ts",
+                "start_line": 151,
+                "end_line": 160,
+                "start_col": 32,
+                "end_col": 11,
+                "fragment": "{ kind: 'open-conflict-modal', conflictModal });\n\n    const { result } = renderHook(() => useAcceptPinSide());\n\n    act(() => {\n      result.current('left');\n    });\n\n    expect(modalsStore.set).toHaveBeenCalledWith({ conflictModal });\n    expect("
+              },
+              {
+                "file": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useAcceptPinSide.hook.test.ts",
+                "start_line": 173,
+                "end_line": 186,
+                "start_col": 32,
+                "end_col": 11,
+                "fragment": "{\n      kind: 'auto-accept-conflict',\n      conflictModal,\n      resolution: 'move-column',\n    });\n\n    const { result } = renderHook(() => useAcceptPinSide());\n\n    act(() => {\n      result.current('left');\n    });\n\n    expect(modalsStore.set).toHaveBeenCalledWith({ conflictModal });\n    expect("
+              }
+            ],
+            "token_count": 55,
+            "line_count": 14,
+            "fingerprint": "dup:d9cba6c2",
+            "suggested_name": "conflictModal",
+            "actions": [
+              {
+                "type": "extract-shared",
+                "auto_fixable": false,
+                "description": "Extract duplicated code (14 lines, 2 instances) into a shared function"
+              },
+              {
+                "type": "suppress-line",
+                "auto_fixable": false,
+                "description": "Suppress with an inline comment above the duplicated code",
+                "comment": "// fallow-ignore-next-line code-duplication"
+              }
+            ]
+          }
+        ],
+        "total_duplicated_lines": 14,
+        "total_duplicated_tokens": 55,
+        "suggestions": [
+          {
+            "kind": "ExtractFunction",
+            "description": "Extract shared function (14 lines) from useAcceptPinSide.hook.test.ts, useAcceptPinSide.hook.test.ts",
+            "estimated_savings": 14
+          }
+        ],
+        "actions": [
+          {
+            "type": "extract-shared",
+            "auto_fixable": false,
+            "description": "Extract 1 duplicated code block (14 lines) into a shared module",
+            "note": "These clone groups share the same files, indicating a structural relationship; refactor together"
+          },
+          {
+            "type": "apply-suggestion",
+            "auto_fixable": false,
+            "description": "Extract shared function (14 lines) from useAcceptPinSide.hook.test.ts, useAcceptPinSide.hook.test.ts"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the duplicated code",
+            "comment": "// fallow-ignore-next-line code-duplication"
+          }
+        ]
+      },
+      {
+        "files": [
+          "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useAcceptPinSide.hook.test.ts",
+          "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useToggleColumnPin.hook.test.ts"
+        ],
+        "groups": [
+          {
+            "instances": [
+              {
+                "file": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useAcceptPinSide.hook.test.ts",
+                "start_line": 18,
+                "end_line": 41,
+                "start_col": 0,
+                "end_col": 18,
+                "fragment": "const { drawerColumnsStore, modalsStore, resetMocks, tableColumnsStore } =\n  createColumnOrderSectionActionMocks({\n    initialDrawerState: {\n      columnFilters: {},\n      columnOrder: ['id', 'name'],\n      columnPinning: { left: [], right: [] },\n      columnSizing: {},\n      columnVisibility: new Set<string>(),\n      sorting: [],\n    },\n    initialModalsState: {\n      conflictModal: {\n        columnKey: 'id',\n        columnLabel: '',\n        isOpen: false,\n        side: 'left',\n      },\n      orderConflict: {\n        description: '',\n        isOpen: false,\n        pendingOrder: [],\n        pendingPinning: { left: [], right: [] },\n      },\n      pinSideModal"
+              },
+              {
+                "file": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useToggleColumnPin.hook.test.ts",
+                "start_line": 12,
+                "end_line": 35,
+                "start_col": 0,
+                "end_col": 18,
+                "fragment": "const { drawerColumnsStore, modalsStore, resetMocks, tableColumnsStore } =\n  createColumnOrderSectionActionMocks({\n    initialDrawerState: {\n      columnFilters: {},\n      columnOrder: ['id', 'name'],\n      columnPinning: { left: [], right: [] },\n      columnSizing: {},\n      columnVisibility: new Set<string>(),\n      sorting: [],\n    },\n    initialModalsState: {\n      conflictModal: {\n        columnKey: 'id',\n        columnLabel: '',\n        isOpen: false,\n        side: 'left',\n      },\n      orderConflict: {\n        description: '',\n        isOpen: false,\n        pendingOrder: [],\n        pendingPinning: { left: [], right: [] },\n      },\n      pinSideModal"
+              }
+            ],
+            "token_count": 77,
+            "line_count": 24,
+            "fingerprint": "dup:03958e8a",
+            "actions": [
+              {
+                "type": "extract-shared",
+                "auto_fixable": false,
+                "description": "Extract duplicated code (24 lines, 2 instances) into a shared function"
+              },
+              {
+                "type": "suppress-line",
+                "auto_fixable": false,
+                "description": "Suppress with an inline comment above the duplicated code",
+                "comment": "// fallow-ignore-next-line code-duplication"
+              }
+            ]
+          },
+          {
+            "instances": [
+              {
+                "file": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useAcceptPinSide.hook.test.ts",
+                "start_line": 59,
+                "end_line": 76,
+                "start_col": 6,
+                "end_col": 8,
+                "fragment": "mockAcceptPinConflict = vi.fn();\n\nvi.mock(\n  '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',\n  () => ({\n    useTableConfigContextValue: () => ({ columnsStore: tableColumnsStore }),\n  }),\n);\nvi.mock(\n  '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook',\n  () => ({\n    useTableDrawerContextValue: () => ({ columnsStore: drawerColumnsStore }),\n  }),\n);\nvi.mock('../useColumnOrderSectionContextValue.hook', () => ({\n  useColumnOrderSectionContextValue: () => ({ modalsStore }),\n}));\nvi.mock("
+              },
+              {
+                "file": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useToggleColumnPin.hook.test.ts",
+                "start_line": 54,
+                "end_line": 71,
+                "start_col": 6,
+                "end_col": 8,
+                "fragment": "mockAcceptUnpinConflict = vi.fn();\n\nvi.mock(\n  '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',\n  () => ({\n    useTableConfigContextValue: () => ({ columnsStore: tableColumnsStore }),\n  }),\n);\nvi.mock(\n  '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook',\n  () => ({\n    useTableDrawerContextValue: () => ({ columnsStore: drawerColumnsStore }),\n  }),\n);\nvi.mock('../useColumnOrderSectionContextValue.hook', () => ({\n  useColumnOrderSectionContextValue: () => ({ modalsStore }),\n}));\nvi.mock("
+              }
+            ],
+            "token_count": 83,
+            "line_count": 18,
+            "fingerprint": "dup:eeb626ce",
+            "actions": [
+              {
+                "type": "extract-shared",
+                "auto_fixable": false,
+                "description": "Extract duplicated code (18 lines, 2 instances) into a shared function"
+              },
+              {
+                "type": "suppress-line",
+                "auto_fixable": false,
+                "description": "Suppress with an inline comment above the duplicated code",
+                "comment": "// fallow-ignore-next-line code-duplication"
+              }
+            ]
+          }
+        ],
+        "total_duplicated_lines": 42,
+        "total_duplicated_tokens": 160,
+        "suggestions": [
+          {
+            "kind": "ExtractFunction",
+            "description": "Extract shared function (18 lines) from useAcceptPinSide.hook.test.ts, useToggleColumnPin.hook.test.ts",
+            "estimated_savings": 18
+          },
+          {
+            "kind": "ExtractFunction",
+            "description": "Extract shared function (24 lines) from useAcceptPinSide.hook.test.ts, useToggleColumnPin.hook.test.ts",
+            "estimated_savings": 24
+          }
+        ],
+        "actions": [
+          {
+            "type": "extract-shared",
+            "auto_fixable": false,
+            "description": "Extract 2 duplicated code blocks (42 lines) into a shared module",
+            "note": "These clone groups share the same files, indicating a structural relationship; refactor together"
+          },
+          {
+            "type": "apply-suggestion",
+            "auto_fixable": false,
+            "description": "Extract shared function (18 lines) from useAcceptPinSide.hook.test.ts, useToggleColumnPin.hook.test.ts"
+          },
+          {
+            "type": "apply-suggestion",
+            "auto_fixable": false,
+            "description": "Extract shared function (24 lines) from useAcceptPinSide.hook.test.ts, useToggleColumnPin.hook.test.ts"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the duplicated code",
+            "comment": "// fallow-ignore-next-line code-duplication"
+          }
+        ]
+      },
+      {
+        "files": [
+          "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useToggleColumnPin.hook.test.ts"
+        ],
+        "groups": [
+          {
+            "instances": [
+              {
+                "file": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useToggleColumnPin.hook.test.ts",
+                "start_line": 132,
+                "end_line": 145,
+                "start_col": 32,
+                "end_col": 30,
+                "fragment": "{\n      kind: 'open-pin-side-modal',\n      modal: MODAL_RESULT,\n    });\n    const { result } = renderHook(() => useToggleColumnPin());\n\n    act(() => {\n      result.current({ columnKey: 'id', isPinning: true });\n    });\n\n    expect(modalsStore.set).toHaveBeenCalledWith({\n      pinSideModal: MODAL_RESULT,\n    });\n    expect(mockAcceptPinSide)."
+              },
+              {
+                "file": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useToggleColumnPin.hook.test.ts",
+                "start_line": 149,
+                "end_line": 163,
+                "start_col": 32,
+                "end_col": 30,
+                "fragment": "{\n      kind: 'auto-accept-pin-side',\n      modal: MODAL_RESULT,\n      pinSide: 'left',\n    });\n    const { result } = renderHook(() => useToggleColumnPin());\n\n    act(() => {\n      result.current({ columnKey: 'id', isPinning: true });\n    });\n\n    expect(modalsStore.set).toHaveBeenCalledWith({\n      pinSideModal: MODAL_RESULT,\n    });\n    expect(mockAcceptPinSide)."
+              }
+            ],
+            "token_count": 64,
+            "line_count": 15,
+            "fingerprint": "dup:aacc7a2a",
+            "suggested_name": "MODAL_RESULT",
+            "actions": [
+              {
+                "type": "extract-shared",
+                "auto_fixable": false,
+                "description": "Extract duplicated code (15 lines, 2 instances) into a shared function"
+              },
+              {
+                "type": "suppress-line",
+                "auto_fixable": false,
+                "description": "Suppress with an inline comment above the duplicated code",
+                "comment": "// fallow-ignore-next-line code-duplication"
+              }
+            ]
+          },
+          {
+            "instances": [
+              {
+                "file": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useToggleColumnPin.hook.test.ts",
+                "start_line": 167,
+                "end_line": 180,
+                "start_col": 32,
+                "end_col": 36,
+                "fragment": "{\n      kind: 'open-unpin-conflict-modal',\n      modal: UNPIN_MODAL_RESULT,\n    });\n    const { result } = renderHook(() => useToggleColumnPin());\n\n    act(() => {\n      result.current({ columnKey: 'id', isPinning: false });\n    });\n\n    expect(modalsStore.set).toHaveBeenCalledWith({\n      unpinConflictModal: UNPIN_MODAL_RESULT,\n    });\n    expect(mockAcceptUnpinConflict)."
+              },
+              {
+                "file": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useToggleColumnPin.hook.test.ts",
+                "start_line": 184,
+                "end_line": 198,
+                "start_col": 32,
+                "end_col": 36,
+                "fragment": "{\n      kind: 'auto-accept-unpin-conflict',\n      modal: UNPIN_MODAL_RESULT,\n      resolution: 'reorder-to-fill',\n    });\n    const { result } = renderHook(() => useToggleColumnPin());\n\n    act(() => {\n      result.current({ columnKey: 'id', isPinning: false });\n    });\n\n    expect(modalsStore.set).toHaveBeenCalledWith({\n      unpinConflictModal: UNPIN_MODAL_RESULT,\n    });\n    expect(mockAcceptUnpinConflict)."
+              }
+            ],
+            "token_count": 64,
+            "line_count": 15,
+            "fingerprint": "dup:cfff4c6e",
+            "suggested_name": "UNPIN_MODAL_RESULT",
+            "actions": [
+              {
+                "type": "extract-shared",
+                "auto_fixable": false,
+                "description": "Extract duplicated code (15 lines, 2 instances) into a shared function"
+              },
+              {
+                "type": "suppress-line",
+                "auto_fixable": false,
+                "description": "Suppress with an inline comment above the duplicated code",
+                "comment": "// fallow-ignore-next-line code-duplication"
+              }
+            ]
+          }
+        ],
+        "total_duplicated_lines": 30,
+        "total_duplicated_tokens": 128,
+        "suggestions": [
+          {
+            "kind": "ExtractFunction",
+            "description": "Extract shared function (15 lines) from useToggleColumnPin.hook.test.ts, useToggleColumnPin.hook.test.ts",
+            "estimated_savings": 15
+          },
+          {
+            "kind": "ExtractFunction",
+            "description": "Extract shared function (15 lines) from useToggleColumnPin.hook.test.ts, useToggleColumnPin.hook.test.ts",
+            "estimated_savings": 15
+          }
+        ],
+        "actions": [
+          {
+            "type": "extract-shared",
+            "auto_fixable": false,
+            "description": "Extract 2 duplicated code blocks (30 lines) into a shared module",
+            "note": "These clone groups share the same files, indicating a structural relationship; refactor together"
+          },
+          {
+            "type": "apply-suggestion",
+            "auto_fixable": false,
+            "description": "Extract shared function (15 lines) from useToggleColumnPin.hook.test.ts, useToggleColumnPin.hook.test.ts"
+          },
+          {
+            "type": "apply-suggestion",
+            "auto_fixable": false,
+            "description": "Extract shared function (15 lines) from useToggleColumnPin.hook.test.ts, useToggleColumnPin.hook.test.ts"
           },
           {
             "type": "suppress-line",
@@ -6949,15 +7633,15 @@
       }
     ],
     "stats": {
-      "total_files": 611,
-      "files_with_clones": 62,
-      "total_lines": 41278,
-      "duplicated_lines": 2209,
-      "total_tokens": 150768,
-      "duplicated_tokens": 5457,
-      "clone_groups": 67,
-      "clone_instances": 145,
-      "duplication_percentage": 5.351518968942294
+      "total_files": 617,
+      "files_with_clones": 67,
+      "total_lines": 42160,
+      "duplicated_lines": 2482,
+      "total_tokens": 154470,
+      "duplicated_tokens": 6002,
+      "clone_groups": 74,
+      "clone_instances": 159,
+      "duplication_percentage": 5.887096774193548
     }
   },
   "health": {
@@ -7744,14 +8428,14 @@
       }
     ],
     "summary": {
-      "files_analyzed": 1126,
-      "functions_analyzed": 3093,
+      "files_analyzed": 1132,
+      "functions_analyzed": 3204,
       "functions_above_threshold": 25,
       "max_cyclomatic_threshold": 20,
       "max_cognitive_threshold": 15,
       "max_crap_threshold": 30.0,
-      "files_scored": 685,
-      "average_maintainability": 93.1,
+      "files_scored": 691,
+      "average_maintainability": 93.0,
       "coverage_model": "static_estimated",
       "coverage_source_consistency": "uniform",
       "severity_critical_count": 3,
@@ -7760,43 +8444,43 @@
     },
     "vital_signs": {
       "dead_file_pct": 0.0,
-      "dead_export_pct": 0.1,
+      "dead_export_pct": 0.0,
       "avg_cyclomatic": 1.5,
       "critical_complexity_pct": 0.0,
       "p90_cyclomatic": 2,
       "hotspot_count": 0,
       "hotspot_top_pct_count": 12,
-      "maintainability_avg": 93.1,
+      "maintainability_avg": 93.0,
       "maintainability_low_pct": 0.0,
       "unused_dep_count": 2,
       "unused_deps_per_k_files": 1.8,
       "circular_dep_count": 0,
       "circular_deps_per_k_files": 0.0,
       "counts": {
-        "total_files": 1126,
+        "total_files": 1132,
         "total_exports": 1371,
         "dead_files": 0,
-        "dead_exports": 1,
-        "total_lines": 45846,
-        "files_scored": 685,
+        "dead_exports": 0,
+        "total_lines": 46738,
+        "files_scored": 691,
         "total_deps": 0
       },
       "unit_size_profile": {
-        "low_risk": 73.7,
+        "low_risk": 74.0,
         "medium_risk": 13.6,
-        "high_risk": 8.2,
-        "very_high_risk": 4.5
+        "high_risk": 8.0,
+        "very_high_risk": 4.4
       },
-      "functions_over_60_loc_per_k": 44.9,
+      "functions_over_60_loc_per_k": 44.3,
       "unit_interfacing_profile": {
-        "low_risk": 99.8,
+        "low_risk": 99.9,
         "medium_risk": 0.1,
         "high_risk": 0.0,
         "very_high_risk": 0.0
       },
       "p95_fan_in": 4,
       "coupling_high_pct": 0.9,
-      "total_loc": 45846
+      "total_loc": 46738
     },
     "file_scores": [
       {
@@ -7885,7 +8569,7 @@
       },
       {
         "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useToggleColumnPin.hook.ts",
-        "fan_in": 1,
+        "fan_in": 2,
         "fan_out": 9,
         "dead_code_ratio": 0.0,
         "complexity_density": 0.19,
@@ -7941,7 +8625,7 @@
       },
       {
         "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useAcceptPinSide.hook.ts",
-        "fan_in": 2,
+        "fan_in": 4,
         "fan_out": 8,
         "dead_code_ratio": 0.0,
         "complexity_density": 0.21,
@@ -8011,7 +8695,7 @@
       },
       {
         "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useOrderBySorting.hook.ts",
-        "fan_in": 1,
+        "fan_in": 2,
         "fan_out": 6,
         "dead_code_ratio": 0.0,
         "complexity_density": 0.22,
@@ -8025,7 +8709,7 @@
       },
       {
         "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useAcceptPinConflict.hook.ts",
-        "fan_in": 2,
+        "fan_in": 4,
         "fan_out": 6,
         "dead_code_ratio": 0.0,
         "complexity_density": 0.2,
@@ -8053,7 +8737,7 @@
       },
       {
         "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useAcceptUnpinConflict.hook.ts",
-        "fan_in": 2,
+        "fan_in": 4,
         "fan_out": 6,
         "dead_code_ratio": 0.0,
         "complexity_density": 0.17,
@@ -9719,7 +10403,7 @@
       },
       {
         "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/resolveAcceptedPinSideUpdate.util.ts",
-        "fan_in": 2,
+        "fan_in": 3,
         "fan_out": 3,
         "dead_code_ratio": 0.0,
         "complexity_density": 0.05,
@@ -10180,6 +10864,20 @@
         "crap_above_threshold": 0
       },
       {
+        "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useToggleColumnPin.hook.test.ts",
+        "fan_in": 0,
+        "fan_out": 10,
+        "dead_code_ratio": 0.0,
+        "complexity_density": 0.17,
+        "maintainability_index": 85.3,
+        "total_cyclomatic": 34,
+        "total_cognitive": 0,
+        "function_count": 34,
+        "lines": 201,
+        "crap_max": 1.2,
+        "crap_above_threshold": 0
+      },
+      {
         "path": "src/components/Table/TableSettingsDrawer/TableDrawerContext/TableDrawerContext.hooks.test.tsx",
         "fan_in": 0,
         "fan_out": 11,
@@ -10246,6 +10944,20 @@
         "total_cognitive": 0,
         "function_count": 19,
         "lines": 129,
+        "crap_max": 1.2,
+        "crap_above_threshold": 0
+      },
+      {
+        "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useAcceptPinSide.hook.test.ts",
+        "fan_in": 0,
+        "fan_out": 8,
+        "dead_code_ratio": 0.0,
+        "complexity_density": 0.13,
+        "maintainability_index": 87.3,
+        "total_cyclomatic": 24,
+        "total_cognitive": 0,
+        "function_count": 24,
+        "lines": 192,
         "crap_max": 1.2,
         "crap_above_threshold": 0
       },
@@ -10506,12 +11218,12 @@
         "fan_in": 2,
         "fan_out": 2,
         "dead_code_ratio": 0.0,
-        "complexity_density": 0.22,
+        "complexity_density": 0.17,
         "maintainability_index": 93.2,
         "total_cyclomatic": 4,
         "total_cognitive": 3,
         "function_count": 1,
-        "lines": 18,
+        "lines": 24,
         "crap_max": 4.1,
         "crap_above_threshold": 0
       },
@@ -10684,6 +11396,20 @@
         "crap_above_threshold": 0
       },
       {
+        "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useOrderBySorting.hook.test.ts",
+        "fan_in": 0,
+        "fan_out": 7,
+        "dead_code_ratio": 0.0,
+        "complexity_density": 0.12,
+        "maintainability_index": 88.1,
+        "total_cyclomatic": 15,
+        "total_cognitive": 0,
+        "function_count": 15,
+        "lines": 128,
+        "crap_max": 1.2,
+        "crap_above_threshold": 0
+      },
+      {
         "path": "src/components/Table/contexts/TableConfig/meta/actions/useToogleTableIsTableSettingsOpen.hook.test.ts",
         "fan_in": 0,
         "fan_out": 3,
@@ -10723,6 +11449,34 @@
         "function_count": 2,
         "lines": 46,
         "crap_max": 2.9,
+        "crap_above_threshold": 0
+      },
+      {
+        "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useAcceptUnpinConflict.hook.test.ts",
+        "fan_in": 0,
+        "fan_out": 6,
+        "dead_code_ratio": 0.0,
+        "complexity_density": 0.12,
+        "maintainability_index": 88.6,
+        "total_cyclomatic": 17,
+        "total_cognitive": 0,
+        "function_count": 17,
+        "lines": 144,
+        "crap_max": 1.2,
+        "crap_above_threshold": 0
+      },
+      {
+        "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useAcceptPinConflict.hook.test.ts",
+        "fan_in": 0,
+        "fan_out": 7,
+        "dead_code_ratio": 0.0,
+        "complexity_density": 0.1,
+        "maintainability_index": 88.7,
+        "total_cyclomatic": 14,
+        "total_cognitive": 0,
+        "function_count": 14,
+        "lines": 134,
+        "crap_max": 1.2,
         "crap_above_threshold": 0
       },
       {
@@ -11147,7 +11901,7 @@
       },
       {
         "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/resolveAcceptedUnpinConflictState.util.ts",
-        "fan_in": 2,
+        "fan_in": 3,
         "fan_out": 3,
         "dead_code_ratio": 0.0,
         "complexity_density": 0.13,
@@ -11329,7 +12083,7 @@
       },
       {
         "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/resolveOrderConflictUpdate.util.ts",
-        "fan_in": 3,
+        "fan_in": 4,
         "fan_out": 3,
         "dead_code_ratio": 0.0,
         "complexity_density": 0.04,
@@ -12116,12 +12870,12 @@
         "fan_in": 0,
         "fan_out": 2,
         "dead_code_ratio": 0.0,
-        "complexity_density": 0.2,
+        "complexity_density": 0.18,
         "maintainability_index": 91.4,
         "total_cyclomatic": 7,
         "total_cognitive": 0,
         "function_count": 7,
-        "lines": 35,
+        "lines": 39,
         "crap_max": 1.2,
         "crap_above_threshold": 0
       },
@@ -12883,7 +13637,7 @@
       },
       {
         "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/resolveToggleColumnPinUpdate.util.ts",
-        "fan_in": 2,
+        "fan_in": 3,
         "fan_out": 4,
         "dead_code_ratio": 0.0,
         "complexity_density": 0.02,
@@ -13807,7 +14561,7 @@
       },
       {
         "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/useColumnOrderSectionContextValue.hook.ts",
-        "fan_in": 13,
+        "fan_in": 18,
         "fan_out": 2,
         "dead_code_ratio": 0.0,
         "complexity_density": 0.11,
@@ -13821,7 +14575,7 @@
       },
       {
         "path": "src/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook.ts",
-        "fan_in": 24,
+        "fan_in": 29,
         "fan_out": 2,
         "dead_code_ratio": 0.0,
         "complexity_density": 0.11,
@@ -13835,7 +14589,7 @@
       },
       {
         "path": "src/components/Table/contexts/TableConfig/useTableConfigContextValue.hook.ts",
-        "fan_in": 51,
+        "fan_in": 56,
         "fan_out": 2,
         "dead_code_ratio": 0.0,
         "complexity_density": 0.1,
@@ -15020,6 +15774,20 @@
         "total_cognitive": 0,
         "function_count": 5,
         "lines": 55,
+        "crap_max": 1.2,
+        "crap_above_threshold": 0
+      },
+      {
+        "path": "src/components/test-utils/createColumnOrderSectionActionMocks.util.ts",
+        "fan_in": 5,
+        "fan_out": 1,
+        "dead_code_ratio": 0.0,
+        "complexity_density": 0.09,
+        "maintainability_index": 94.5,
+        "total_cyclomatic": 7,
+        "total_cognitive": 0,
+        "function_count": 7,
+        "lines": 79,
         "crap_max": 1.2,
         "crap_above_threshold": 0
       },
@@ -16495,7 +17263,7 @@
       },
       {
         "path": "src/contexts/GlobalSettingsContext/selectors/useGetGlobalPinSidePreference.hook.ts",
-        "fan_in": 2,
+        "fan_in": 3,
         "fan_out": 1,
         "dead_code_ratio": 0.0,
         "complexity_density": 0.33,
@@ -16523,7 +17291,7 @@
       },
       {
         "path": "src/contexts/GlobalSettingsContext/selectors/useGetGlobalUnpinConflictResolutionPreference.hook.ts",
-        "fan_in": 1,
+        "fan_in": 2,
         "fan_out": 1,
         "dead_code_ratio": 0.0,
         "complexity_density": 0.25,
@@ -17153,7 +17921,7 @@
       },
       {
         "path": "src/components/Table/contexts/TableConfig/columns/actions/utils/commitPinningAndOrderUpdate.util.ts",
-        "fan_in": 4,
+        "fan_in": 3,
         "fan_out": 1,
         "dead_code_ratio": 0.0,
         "complexity_density": 0.02,
@@ -17184,12 +17952,12 @@
         "fan_in": 2,
         "fan_out": 1,
         "dead_code_ratio": 0.0,
-        "complexity_density": 0.11,
+        "complexity_density": 0.07,
         "maintainability_index": 96.6,
         "total_cyclomatic": 1,
         "total_cognitive": 0,
         "function_count": 1,
-        "lines": 9,
+        "lines": 14,
         "crap_max": 1.0,
         "crap_above_threshold": 0
       },
@@ -18024,7 +18792,7 @@
         "lines_added": 158,
         "lines_deleted": 158,
         "complexity_density": 0.2,
-        "fan_in": 2,
+        "fan_in": 4,
         "trend": "cooling",
         "actions": [
           {
@@ -18070,7 +18838,7 @@
         "path": "src/components/Table/contexts/TableConfig/columns/actions/useBatchSetTableSettings.hook.ts",
         "score": 8.5,
         "commits": 11,
-        "weighted_commits": 5.35,
+        "weighted_commits": 5.34,
         "lines_added": 231,
         "lines_deleted": 231,
         "complexity_density": 0.13,
@@ -18099,7 +18867,7 @@
         "lines_added": 82,
         "lines_deleted": 82,
         "complexity_density": 0.22,
-        "fan_in": 1,
+        "fan_in": 2,
         "trend": "cooling",
         "actions": [
           {
@@ -18600,7 +19368,7 @@
         "lines_added": 95,
         "lines_deleted": 95,
         "complexity_density": 0.19,
-        "fan_in": 1,
+        "fan_in": 2,
         "trend": "cooling",
         "actions": [
           {
@@ -19047,7 +19815,7 @@
         "path": "src/components/Table/TableSettingsDrawer/SortingSection/SortingSection.component.tsx",
         "score": 5.0,
         "commits": 22,
-        "weighted_commits": 10.17,
+        "weighted_commits": 10.16,
         "lines_added": 401,
         "lines_deleted": 401,
         "complexity_density": 0.04,
@@ -19294,31 +20062,6 @@
         ]
       },
       {
-        "path": "src/components/Table/TableBodyCell/TableBodyCell.component.tsx",
-        "score": 4.8,
-        "commits": 14,
-        "weighted_commits": 5.57,
-        "lines_added": 140,
-        "lines_deleted": 140,
-        "complexity_density": 0.07,
-        "fan_in": 2,
-        "trend": "stable",
-        "actions": [
-          {
-            "type": "refactor-file",
-            "auto_fixable": false,
-            "description": "Refactor `src/components/Table/TableBodyCell/TableBodyCell.component.tsx`, high complexity combined with frequent changes makes this a maintenance risk",
-            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
-          },
-          {
-            "type": "add-tests",
-            "auto_fixable": false,
-            "description": "Add test coverage for `src/components/Table/TableBodyCell/TableBodyCell.component.tsx` to reduce change risk",
-            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
-          }
-        ]
-      },
-      {
         "path": "src/routes/wide-alltypes-150/wide-alltypes-150.layout.tsx",
         "score": 4.8,
         "commits": 3,
@@ -19439,6 +20182,31 @@
             "type": "add-tests",
             "auto_fixable": false,
             "description": "Add test coverage for `src/components/Table/TableHeaderCell/TableHeaderCell.stylex.ts` to reduce change risk",
+            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
+          }
+        ]
+      },
+      {
+        "path": "src/components/Table/TableBodyCell/TableBodyCell.component.tsx",
+        "score": 4.7,
+        "commits": 14,
+        "weighted_commits": 5.56,
+        "lines_added": 140,
+        "lines_deleted": 140,
+        "complexity_density": 0.07,
+        "fan_in": 2,
+        "trend": "stable",
+        "actions": [
+          {
+            "type": "refactor-file",
+            "auto_fixable": false,
+            "description": "Refactor `src/components/Table/TableBodyCell/TableBodyCell.component.tsx`, high complexity combined with frequent changes makes this a maintenance risk",
+            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
+          },
+          {
+            "type": "add-tests",
+            "auto_fixable": false,
+            "description": "Add test coverage for `src/components/Table/TableBodyCell/TableBodyCell.component.tsx` to reduce change risk",
             "note": "Frequently changed complex files benefit most from comprehensive test coverage"
           }
         ]
@@ -19852,7 +20620,7 @@
         "lines_added": 74,
         "lines_deleted": 74,
         "complexity_density": 0.21,
-        "fan_in": 2,
+        "fan_in": 4,
         "trend": "cooling",
         "actions": [
           {
@@ -20785,7 +21553,7 @@
         "lines_added": 92,
         "lines_deleted": 92,
         "complexity_density": 0.17,
-        "fan_in": 2,
+        "fan_in": 4,
         "trend": "accelerating",
         "actions": [
           {
@@ -21335,7 +22103,7 @@
         "path": "src/components/Table/ColumnSettingsDrawer/DetailsSection/DetailsSection.component.tsx",
         "score": 2.7,
         "commits": 3,
-        "weighted_commits": 1.46,
+        "weighted_commits": 1.45,
         "lines_added": 84,
         "lines_deleted": 84,
         "complexity_density": 0.15,
@@ -22962,7 +23730,7 @@
         "lines_added": 14,
         "lines_deleted": 14,
         "complexity_density": 0.1,
-        "fan_in": 51,
+        "fan_in": 56,
         "trend": "accelerating",
         "actions": [
           {
@@ -23818,7 +24586,7 @@
         "path": "src/routes/enterprise-orders/EnterpriseOrders.constants.tsx",
         "score": 0.8,
         "commits": 17,
-        "weighted_commits": 6.88,
+        "weighted_commits": 6.87,
         "lines_added": 464,
         "lines_deleted": 464,
         "complexity_density": 0.01,
@@ -24553,6 +25321,18 @@
         "line_count": 105
       },
       {
+        "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useAcceptPinSide.hook.test.ts",
+        "name": "<arrow>",
+        "line": 88,
+        "line_count": 104
+      },
+      {
+        "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useToggleColumnPin.hook.test.ts",
+        "name": "<arrow>",
+        "line": 97,
+        "line_count": 104
+      },
+      {
         "path": "src/components/Table/TableSettingsDrawer/FiltersSection/AddFilterSection/AddFilterSection.component.tsx",
         "name": "AddFilterSection",
         "line": 18,
@@ -24973,6 +25753,12 @@
         "line_count": 68
       },
       {
+        "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useAcceptUnpinConflict.hook.test.ts",
+        "name": "<arrow>",
+        "line": 76,
+        "line_count": 68
+      },
+      {
         "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionToolbar/ColumnOrderSectionToolbar.component.tsx",
         "name": "ColumnOrderSectionToolbar",
         "line": 27,
@@ -25192,19 +25978,19 @@
   },
   "next_steps": [
     {
-      "id": "trace-unused-export",
-      "command": "fallow dead-code --trace src/components/Table/contexts/TableConfig/columns/actions/utils/index.ts:commitPinningAndOrderUpdate",
-      "reason": "verify an export is truly unused before deleting"
-    },
-    {
       "id": "trace-clone",
-      "command": "fallow dupes --trace dup:0a5ee5b6",
+      "command": "fallow dupes --trace dup:03958e8a",
       "reason": "see sibling locations and an extract-function suggestion"
     },
     {
       "id": "complexity-breakdown",
       "command": "fallow health --complexity-breakdown",
       "reason": "see per-decision-point contributions for a hotspot"
+    },
+    {
+      "id": "audit-changed",
+      "command": "fallow audit",
+      "reason": "gate only the files your branch changed (auto-detects the base)"
     }
   ]
 }

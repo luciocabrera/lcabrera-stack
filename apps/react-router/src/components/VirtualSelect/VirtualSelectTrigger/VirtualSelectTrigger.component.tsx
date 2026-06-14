@@ -33,7 +33,7 @@ export const VirtualSelectTrigger = ({
     selected,
     visibleTags,
   });
-  const chevron = renderChevron(isAlwaysOpen, isOpen);
+  const chevron = renderChevron({ isAlwaysOpen, isOpen });
 
   if (isAlwaysOpen) {
     return (
@@ -57,7 +57,7 @@ export const VirtualSelectTrigger = ({
         aria-haspopup='listbox'
         onClick={onToggle}
         onKeyDown={(event) => {
-          handleDivTriggerKeyDown(event, onToggle);
+          handleDivTriggerKeyDown({ event, onToggle });
         }}
         ref={(node) => {
           assignTriggerRef({ triggerRef, node });

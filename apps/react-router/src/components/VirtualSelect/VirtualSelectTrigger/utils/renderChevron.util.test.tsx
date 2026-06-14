@@ -9,11 +9,13 @@ afterEach(cleanup);
 
 describe('renderChevron', () => {
   it('returns undefined when the trigger is always open', () => {
-    expect(renderChevron(true, false)).toBeUndefined();
+    expect(
+      renderChevron({ isAlwaysOpen: true, isOpen: false }),
+    ).toBeUndefined();
   });
 
   it('renders a chevron element when the trigger can toggle', () => {
-    render(<>{renderChevron(false, true)}</>);
+    render(<>{renderChevron({ isAlwaysOpen: false, isOpen: true })}</>);
 
     expect(screen.getByText('', { selector: '[data-chevron]' })).toBeTruthy();
   });

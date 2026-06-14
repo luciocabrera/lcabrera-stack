@@ -5,19 +5,19 @@ import { getChangedPropKeys } from './getChangedPropKeys.util';
 describe('getChangedPropKeys', () => {
   it('returns only keys whose values changed', () => {
     expect(
-      getChangedPropKeys(
-        { density: 'comfortable', page: 2, striped: false },
-        { density: 'compact', page: 2, striped: false },
-      ),
+      getChangedPropKeys({
+        currentProps: { density: 'comfortable', page: 2, striped: false },
+        prevProps: { density: 'compact', page: 2, striped: false },
+      }),
     ).toEqual(['density']);
   });
 
   it('returns an empty list when values are unchanged', () => {
     expect(
-      getChangedPropKeys(
-        { density: 'compact', striped: false },
-        { density: 'compact', striped: false },
-      ),
+      getChangedPropKeys({
+        currentProps: { density: 'compact', striped: false },
+        prevProps: { density: 'compact', striped: false },
+      }),
     ).toEqual([]);
   });
 });

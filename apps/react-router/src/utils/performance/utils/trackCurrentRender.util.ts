@@ -24,7 +24,7 @@ const logChangedProps = ({
     return;
   }
 
-  const changedProps = getChangedPropKeys(currentProps, prevProps);
+  const changedProps = getChangedPropKeys({ currentProps, prevProps });
 
   if (changedProps.length === 0) {
     return;

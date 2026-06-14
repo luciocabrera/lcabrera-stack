@@ -4,10 +4,10 @@ import { describe, expect, it, vi } from 'vitest';
 
 const { baseMock, pinnedLeftMock, pinnedRightMock, propsMock } = vi.hoisted(
   () => ({
-    baseMock: vi.fn((minWidth: unknown, width: unknown) => ({
-      minWidth,
+    baseMock: vi.fn((...args: readonly [unknown, unknown]) => ({
+      minWidth: args[0],
       type: 'base',
-      width,
+      width: args[1],
     })),
     pinnedLeftMock: vi.fn((offset: number) => ({ offset, type: 'left' })),
     pinnedRightMock: vi.fn((offset: number) => ({ offset, type: 'right' })),

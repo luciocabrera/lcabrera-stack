@@ -2,7 +2,12 @@ import * as stylex from '@stylexjs/stylex';
 
 import { styles } from '../VirtualSelectTrigger.stylex';
 
-export const renderChevron = (isAlwaysOpen: boolean, isOpen: boolean) => {
+type RenderChevronArgs = {
+  readonly isAlwaysOpen: boolean;
+  readonly isOpen: boolean;
+};
+
+export const renderChevron = ({ isAlwaysOpen, isOpen }: RenderChevronArgs) => {
   if (isAlwaysOpen) {
     return undefined;
   }

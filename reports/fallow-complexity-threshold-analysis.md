@@ -11,11 +11,11 @@ Source of truth for this report:
 Current metrics from JSON:
 
 - Functions above threshold: 25
-- Functions analyzed: 3093
-- Files analyzed: 1126
-- Average maintainability: 93.1 (good)
-- Dead-code issues: 3 (check.total_issues)
-- Duplicate clone groups: 67 (dupes.stats.clone_groups)
+- Functions analyzed: 3204
+- Files analyzed: 1132
+- Average maintainability: 93 (good)
+- Dead-code issues: 2 (check.total_issues)
+- Duplicate clone groups: 74 (dupes.stats.clone_groups)
 - Severity split: 3 critical, 9 high, 13 moderate
 - Thresholds: cyclomatic 20, cognitive 15, CRAP 30
 

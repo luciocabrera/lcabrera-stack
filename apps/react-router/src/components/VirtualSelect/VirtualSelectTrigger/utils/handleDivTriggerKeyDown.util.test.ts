@@ -4,10 +4,15 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { handleDivTriggerKeyDown } from './handleDivTriggerKeyDown.util';
 
-const createKeyboardEvent = (
-  key: string,
-  preventDefault: ReturnType<typeof vi.fn>,
-) =>
+type CreateKeyboardEventArgs = {
+  readonly key: string;
+  readonly preventDefault: ReturnType<typeof vi.fn>;
+};
+
+const createKeyboardEvent = ({
+  key,
+  preventDefault,
+}: CreateKeyboardEventArgs) =>
   ({
     key,
     preventDefault,
@@ -18,12 +23,15 @@ describe('handleDivTriggerKeyDown', () => {
     const onToggle = vi.fn();
     const preventDefault = vi.fn();
 
-    handleDivTriggerKeyDown(
-      createKeyboardEvent('Enter', preventDefault),
+    handleDivTriggerKeyDown({
+      event: createKeyboardEvent({ key: 'Enter', preventDefault }),
       onToggle,
-    );
+    });
 
-    handleDivTriggerKeyDown(createKeyboardEvent(' ', preventDefault), onToggle);
+    handleDivTriggerKeyDown({
+      event: createKeyboardEvent({ key: ' ', preventDefault }),
+      onToggle,
+    });
 
     expect(preventDefault).toHaveBeenCalledTimes(2);
     expect(onToggle).toHaveBeenCalledTimes(2);
@@ -33,10 +41,10 @@ describe('handleDivTriggerKeyDown', () => {
     const onToggle = vi.fn();
     const preventDefault = vi.fn();
 
-    handleDivTriggerKeyDown(
-      createKeyboardEvent('Escape', preventDefault),
+    handleDivTriggerKeyDown({
+      event: createKeyboardEvent({ key: 'Escape', preventDefault }),
       onToggle,
-    );
+    });
 
     expect(preventDefault).not.toHaveBeenCalled();
     expect(onToggle).not.toHaveBeenCalled();
