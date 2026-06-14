@@ -8,15 +8,10 @@ import type { PinConflictState, PinSide } from '@/types/ui.types';
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { usePersistTableStateAction } from '@/components/Table/hooks';
 import {
-  applyPin,
   buildAllOrderedColumns,
-  getIsContiguousPin,
-  resolveClosestEdgeSide,
+  derivePinSideResolutionState,
 } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
-import {
-  getPinnedDerivedColumnsState,
-  syncColumnOrderWithPinning,
-} from '@/components/Table/utils';
+import { getPinnedDerivedColumnsState } from '@/components/Table/utils';
 
 import { commitPinningAndOrderUpdate } from './commitPinningAndOrderUpdate.util';
 
@@ -43,47 +38,26 @@ export const useAcceptHeaderPinSide = <TData>() => {
     const persistenceKey = metaStore.get()?.persistenceKey ?? '';
 
     const allOrderedColumns = buildAllOrderedColumns({ columns, columnsOrder });
-
-    const side = resolveClosestEdgeSide({
-      allOrderedColumns,
-      columnKey,
-      pinSide,
-    });
-
-    const isContiguous = getIsContiguousPin<TData>({
-      allOrderedColumns,
-      columnKey,
-      columnPinning,
-      side,
-    });
-
-    if (!isContiguous) {
-      return { isOpen: true, side };
-    }
-
     const staticKeys = columnsState?.staticKeys;
-    const currentOrder =
-      columnsState?.columnOrder ?? ([] as ColumnOrderState<TData>);
 
-    const newPinning = applyPin<TData>({
+    const resolution = derivePinSideResolutionState<TData>({
+      allOrderedColumns,
       columnKey,
       columnPinning,
-      side,
+      columns,
+      currentOrder: columnsOrder,
+      pinSide,
       staticKeys,
     });
 
-    const newColumnOrder = syncColumnOrderWithPinning<TData>({
-      columnKey,
-      columnPinning: side,
-      columns,
-      currentOrder,
-      newPinning,
-    });
+    if (resolution.kind === 'conflict') {
+      return { isOpen: true, side: resolution.side };
+    }
 
     const { columnGroups, effectiveColumns, pinnedColumnOffsets } =
       getPinnedDerivedColumnsState<TData>({
-        columnOrder: newColumnOrder,
-        columnPinning: newPinning,
+        columnOrder: resolution.columnOrder,
+        columnPinning: resolution.columnPinning,
         columnSizing: columnsState?.columnSizing,
         columns,
         columnVisibility: columnsState?.columnVisibility,
@@ -93,8 +67,8 @@ export const useAcceptHeaderPinSide = <TData>() => {
       columnGroups,
       columnsStore,
       effectiveColumns,
-      newColumnOrder,
-      newPinning,
+      newColumnOrder: resolution.columnOrder,
+      newPinning: resolution.columnPinning,
       persistenceKey,
       persistTableState,
       pinnedColumnOffsets,

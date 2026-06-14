@@ -4,13 +4,10 @@ import { useGetGlobalPinConflictResolutionPreference } from '@/contexts/GlobalSe
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import {
-  applyPin,
   buildAllOrderedColumns,
-  getIsContiguousPin,
-  resolveClosestEdgeSide,
+  derivePinSideResolutionState,
 } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 import { useTableDrawerContextValue } from '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
-import { syncColumnOrderWithPinning } from '@/components/Table/utils';
 
 import { useAcceptPinConflict } from './useAcceptPinConflict.hook';
 import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
@@ -39,37 +36,21 @@ export const useAcceptPinSide = () => {
       columns,
       columnsOrder,
     });
-    const side = resolveClosestEdgeSide({
-      allOrderedColumns,
-      columnKey,
-      pinSide,
-    });
 
-    const isContiguousPin = getIsContiguousPin({
+    const resolution = derivePinSideResolutionState({
       allOrderedColumns,
       columnKey,
       columnPinning,
-      side,
+      columns,
+      currentOrder: columnsOrder,
+      pinSide,
+      staticKeys,
     });
 
-    if (isContiguousPin) {
-      const newPinning = applyPin({
-        columnKey,
-        columnPinning,
-        side,
-        staticKeys,
-      });
-      const newColumnOrder = syncColumnOrderWithPinning({
-        columnKey,
-        columnPinning: side,
-        columns,
-        currentOrder: columnsOrder,
-        newPinning,
-      });
-
+    if (resolution.kind === 'resolved') {
       drawerColumnsStore.set({
-        columnOrder: newColumnOrder,
-        columnPinning: newPinning,
+        columnOrder: resolution.columnOrder,
+        columnPinning: resolution.columnPinning,
       });
     } else {
       const col = allOrderedColumns.find((c) => c.key === columnKey);
@@ -80,7 +61,7 @@ export const useAcceptPinSide = () => {
             columnKey,
             columnLabel: col?.label ?? columnKey,
             isOpen: false,
-            side,
+            side: resolution.side,
           },
         });
         acceptPinConflict(pinConflictResolutionPreference);
@@ -90,7 +71,7 @@ export const useAcceptPinSide = () => {
             columnKey,
             columnLabel: col?.label ?? columnKey,
             isOpen: true,
-            side,
+            side: resolution.side,
           },
         });
       }
