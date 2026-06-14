@@ -37,11 +37,16 @@ graph TD
 
 ## State & Initialisation
 
-| State       | Type     | Initial value                               |
-| ----------- | -------- | ------------------------------------------- |
-| `activeTab` | `string` | `defaultSelectedTab` → first tab key → `''` |
+| State                   | Type     | Initial value                               |
+| ----------------------- | -------- | ------------------------------------------- |
+| `uncontrolledActiveTab` | `string` | `defaultSelectedTab` → first tab key → `''` |
 
 `tabRefs` holds a `Map<string, HTMLButtonElement>` so keyboard navigation can imperatively focus the target tab button.
+
+`activeTab` is derived as:
+
+- controlled mode: `selectedTab`
+- uncontrolled mode: `uncontrolledActiveTab`
 
 ## Keyboard Navigation
 
@@ -82,10 +87,12 @@ This avoids unmounting/remounting panel content when switching tabs.
 
 Extends `ComponentPropsWithoutRef<'div'>` (all native `div` attributes are forwarded via `...props`).
 
-| Prop                 | Type        | Default       | Description                                   |
-| -------------------- | ----------- | ------------- | --------------------------------------------- |
-| `tabs`               | `TabItem[]` | —             | Ordered list of tab configurations (required) |
-| `defaultSelectedTab` | `string`    | `tabs[0].key` | Initially active tab key                      |
+| Prop                 | Type            | Default       | Description                                   |
+| -------------------- | --------------- | ------------- | --------------------------------------------- |
+| `tabs`               | `TabItem[]`     | —             | Ordered list of tab configurations (required) |
+| `defaultSelectedTab` | `string`        | `tabs[0].key` | Initially active tab key                      |
+| `selectedTab`        | `string`        | —             | Controlled active tab key                     |
+| `onSelectTab`        | `(key) => void` | —             | Callback fired when tab selection changes     |
 
 ### `TabItem`
 

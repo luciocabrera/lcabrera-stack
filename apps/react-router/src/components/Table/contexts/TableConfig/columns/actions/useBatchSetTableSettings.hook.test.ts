@@ -93,7 +93,10 @@ const {
       sorting: [{ columnKey: 'name', direction: 'asc' }],
     })),
     mockMetaStore: {
-      get: vi.fn(() => ({ persistenceKey: 'orders-table' })),
+      get: vi.fn(() => ({
+        isTableSettingsPinned: false,
+        persistenceKey: 'orders-table',
+      })),
       set: vi.fn(),
     },
     mockPersistTableState: vi.fn(),
@@ -209,6 +212,36 @@ describe('useBatchSetTableSettings', () => {
     });
     expect(mockDataStore.set).toHaveBeenNthCalledWith(2, {
       isLoadingMore: false,
+    });
+  });
+
+  it('keeps table settings open when drawer is pinned', () => {
+    mockMetaStore.get.mockReturnValue({
+      isTableSettingsPinned: true,
+      persistenceKey: 'orders-table',
+    });
+
+    const { result } = renderHook(() => useBatchSetTableSettings<Row>());
+
+    act(() => {
+      result.current({
+        columnFilters: {} as ColumnFiltersState<Row>,
+        columnOrder: ['id', 'age', 'name'],
+        columnPinning: { left: ['id'], right: ['name'] },
+        columnSizing: {
+          actions: 0,
+          age: 80,
+          id: 100,
+          name: 220,
+        } as ColumnSizingState<Row>,
+        columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(['age']),
+        sorting: [] as SortingState<Row>,
+      });
+    });
+
+    expect(mockColumnsStore.set).toHaveBeenCalledTimes(1);
+    expect(mockMetaStore.set).not.toHaveBeenCalledWith({
+      isTableSettingsOpen: false,
     });
   });
 });

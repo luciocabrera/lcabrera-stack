@@ -15,6 +15,8 @@ export { useGetTablePersistenceKey } from './useGetTablePersistenceKey.hook';
 export { useGetTablePlaceholderRowCount } from './useGetTablePlaceholderRowCount.hook';
 export { useGetTableRowHeight } from './useGetTableRowHeight.hook';
 export { useGetTableSchemaName } from './useGetTableSchemaName.hook';
+export { useGetTableSettingsExpandedFilters } from './useGetTableSettingsExpandedFilters.hook';
+export { useGetTableSettingsSelectedTab } from './useGetTableSettingsSelectedTab.hook';
 export { useGetTableTableName } from './useGetTableTableName.hook';
 export { useGetTableThreshold } from './useGetTableThreshold.hook';
 export { useGetTableTitle } from './useGetTableTitle.hook';

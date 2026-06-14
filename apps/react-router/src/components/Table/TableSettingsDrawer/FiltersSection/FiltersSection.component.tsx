@@ -4,6 +4,8 @@ import {
   SidePanelSectionMain,
   SidePanelSectionOverlay,
 } from '@/components/SidePanel';
+import { useSetTableSettingsExpandedFilters } from '@/components/Table/contexts/TableConfig/meta/actions';
+import { useGetTableSettingsExpandedFilters } from '@/components/Table/contexts/TableConfig/meta/selectors';
 
 import { useSetColumnFilters } from '../TableDrawerContext/actions';
 import { useGetColumnFilters } from '../TableDrawerContext/selectors';
@@ -20,15 +22,22 @@ import { FiltersSectionToolbar } from './FiltersSectionToolbar';
 export const FiltersSection = () => {
   const filters = useGetColumnFilters();
   const onFiltersChange = useSetColumnFilters();
+  const persistedExpandedFilters = useGetTableSettingsExpandedFilters();
+  const setTableSettingsExpandedFilters = useSetTableSettingsExpandedFilters();
 
   const [expandedFilters, setExpandedFilters] = useState<Set<string>>(
-    () => new Set(),
+    () => new Set(persistedExpandedFilters),
   );
   const [isAddFilterOpen, setIsAddFilterOpen] = useState(false);
 
+  const handleExpandedFiltersChange = (nextExpandedFilters: Set<string>) => {
+    setExpandedFilters(nextExpandedFilters);
+    setTableSettingsExpandedFilters(Array.from(nextExpandedFilters));
+  };
+
   const handleClearLocalState = () => {
     onFiltersChange({});
-    setExpandedFilters(new Set());
+    handleExpandedFiltersChange(new Set());
   };
 
   const filterKeys = Object.keys(filters);
@@ -41,11 +50,11 @@ export const FiltersSection = () => {
     });
 
   const handleCollapseAll = () => {
-    setExpandedFilters(new Set());
+    handleExpandedFiltersChange(new Set());
   };
 
   const handleExpandAll = () => {
-    setExpandedFilters(new Set(filterKeys));
+    handleExpandedFiltersChange(new Set(filterKeys));
   };
 
   return (
@@ -53,7 +62,7 @@ export const FiltersSection = () => {
       <AddFilterSection
         expandedFilters={expandedFilters}
         onDropdownOpenChange={setIsAddFilterOpen}
-        onExpandedFiltersChange={setExpandedFilters}
+        onExpandedFiltersChange={handleExpandedFiltersChange}
       />
       <SidePanelSectionOverlay isOpen={isAddFilterOpen}>
         <ActiveFiltersList
@@ -62,7 +71,7 @@ export const FiltersSection = () => {
           isExpandAllDisabled={!hasFilters || areAllFiltersExpanded}
           onCollapseAll={handleCollapseAll}
           onExpandAll={handleExpandAll}
-          onExpandedFiltersChange={setExpandedFilters}
+          onExpandedFiltersChange={handleExpandedFiltersChange}
         />
         <FiltersSectionToolbar
           isCollapseAllDisabled={!hasExpandedFilters}

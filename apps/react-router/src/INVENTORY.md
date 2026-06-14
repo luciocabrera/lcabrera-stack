@@ -109,9 +109,11 @@ Before creating anything new, check this inventory. If something here does the j
 
 ### `src/components/Table/contexts/TableConfig/meta/actions/`
 
-| Artifact                      | Location                                                                                 | Description                                                            |
-| ----------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `useSetTableDrawersOpenState` | `components/Table/contexts/TableConfig/meta/actions/useSetTableDrawersOpenState.hook.ts` | Atomically sets table and column drawer open flags in one store update |
+| Artifact                             | Location                                                                                        | Description                                                            |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `useSetTableDrawersOpenState`        | `components/Table/contexts/TableConfig/meta/actions/useSetTableDrawersOpenState.hook.ts`        | Atomically sets table and column drawer open flags in one store update |
+| `useSetTableSettingsExpandedFilters` | `components/Table/contexts/TableConfig/meta/actions/useSetTableSettingsExpandedFilters.hook.ts` | Persists expanded filter keys for table-settings drawer                |
+| `useSetTableSettingsSelectedTab`     | `components/Table/contexts/TableConfig/meta/actions/useSetTableSettingsSelectedTab.hook.ts`     | Persists selected table-settings tab key in meta state                 |
 
 ### `src/components/Table/TableSettingsDrawer/TableDrawerContext/actions/`
 

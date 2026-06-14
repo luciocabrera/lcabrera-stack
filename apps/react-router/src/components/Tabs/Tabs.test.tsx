@@ -83,4 +83,27 @@ describe('Tabs', () => {
     const tabA = screen.getByRole('tab', { name: 'Tab A' });
     expect(tabA.getAttribute('aria-selected')).toBe('true');
   });
+
+  it('uses selectedTab when controlled', () => {
+    render(<Tabs selectedTab='c' tabs={tabs} />);
+    const tabC = screen.getByRole('tab', { name: 'Tab C' });
+    expect(tabC.getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('calls onSelectTab when selecting a tab in controlled mode', () => {
+    let lastSelectedTab = '';
+
+    render(
+      <Tabs
+        onSelectTab={(tabKey) => {
+          lastSelectedTab = tabKey;
+        }}
+        selectedTab='a'
+        tabs={tabs}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Tab B' }));
+    expect(lastSelectedTab).toBe('b');
+  });
 });

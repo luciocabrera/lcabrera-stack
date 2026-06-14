@@ -9,6 +9,8 @@ const {
   batchSetTableDrawerSettingsMock,
   isTableSettingsPinnedMock,
   notifyMock,
+  selectedTabMock,
+  setSelectedTabMock,
   setTableIsTableSettingsOpenMock,
   setTableIsTableSettingsPinnedMock,
   tableColumnFiltersMock,
@@ -17,6 +19,8 @@ const {
   batchSetTableDrawerSettingsMock: vi.fn(),
   isTableSettingsPinnedMock: vi.fn(() => false),
   notifyMock: vi.fn(),
+  selectedTabMock: vi.fn(() => 'general'),
+  setSelectedTabMock: vi.fn(),
   setTableIsTableSettingsOpenMock: vi.fn(),
   setTableIsTableSettingsPinnedMock: vi.fn(),
   tableColumnFiltersMock: {} as Record<string, unknown>,
@@ -32,6 +36,9 @@ beforeEach(() => {
   isTableSettingsPinnedMock.mockReset();
   isTableSettingsPinnedMock.mockReturnValue(false);
   notifyMock.mockReset();
+  selectedTabMock.mockReset();
+  selectedTabMock.mockReturnValue('general');
+  setSelectedTabMock.mockReset();
   Object.keys(tableColumnFiltersMock).forEach((key) => {
     delete tableColumnFiltersMock[key];
   });
@@ -65,6 +72,8 @@ type MockSidePanelHeaderToolbarProps = {
 };
 
 type MockTabsProps = {
+  readonly onSelectTab?: (tabKey: string) => void;
+  readonly selectedTab?: string;
   readonly tabs: readonly {
     readonly children: ReactNode;
     readonly header: string;
@@ -129,8 +138,16 @@ vi.mock('@/components/SidePanel', () => ({
 }));
 
 vi.mock('@/components/Tabs', () => ({
-  Tabs: ({ tabs }: MockTabsProps) => (
-    <div>
+  Tabs: ({ onSelectTab, selectedTab, tabs }: MockTabsProps) => (
+    <div data-selected-tab={selectedTab}>
+      <button
+        onClick={() => {
+          onSelectTab?.('sorting');
+        }}
+        type='button'
+      >
+        Select sorting tab
+      </button>
       {tabs.map((tab) => (
         <section key={tab.key}>
           <h2>{tab.header}</h2>
@@ -142,12 +159,14 @@ vi.mock('@/components/Tabs', () => ({
 }));
 
 vi.mock('../contexts/TableConfig/meta/actions', () => ({
+  useSetTableSettingsSelectedTab: () => setSelectedTabMock,
   useSetTableIsTableSettingsOpen: () => setTableIsTableSettingsOpenMock,
   useSetTableIsTableSettingsPinned: () => setTableIsTableSettingsPinnedMock,
 }));
 
 vi.mock('../contexts/TableConfig/meta/selectors', () => ({
   useGetTableIsTableSettingsPinned: () => isTableSettingsPinnedMock(),
+  useGetTableSettingsSelectedTab: () => selectedTabMock(),
 }));
 
 vi.mock('./ColumnOrderSection', () => ({
@@ -257,6 +276,20 @@ describe('TableSettingsDrawer', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Toggle pin' }));
 
     expect(setTableIsTableSettingsPinnedMock).toHaveBeenCalledWith(true);
+  });
+
+  it('restores and persists selected table settings tab', () => {
+    selectedTabMock.mockReturnValue('sorting');
+
+    render(<TableSettingsDrawer />);
+
+    expect(
+      screen.getByText('Select sorting tab').parentElement?.dataset.selectedTab,
+    ).toBe('sorting');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Select sorting tab' }));
+
+    expect(setSelectedTabMock).toHaveBeenCalledWith('sorting');
   });
 
   it('shows a notification and blocks accept when filters are invalid', () => {

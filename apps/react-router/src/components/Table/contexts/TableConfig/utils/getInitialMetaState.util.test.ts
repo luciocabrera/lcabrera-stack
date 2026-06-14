@@ -29,6 +29,8 @@ describe('getInitialMetaState', () => {
     expect(result.overscan).toBe(DEFAULT_OVERSCAN);
     expect(result.placeholderRowCount).toBe(DEFAULT_PLACEHOLDER_ROW_COUNT);
     expect(result.rowHeight).toBe(DEFAULT_ROW_HEIGHT);
+    expect(result.tableSettingsExpandedFilters).toEqual([]);
+    expect(result.tableSettingsSelectedTab).toBe('general');
     expect(result.threshold).toBe(INFINITE_SCROLL_THRESHOLD);
     expect(result.persistenceKey).toBe('');
   });

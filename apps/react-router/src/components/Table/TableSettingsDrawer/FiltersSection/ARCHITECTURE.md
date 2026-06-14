@@ -94,12 +94,12 @@ graph TD
 
 ## Component Responsibilities
 
-| Component               | Manages                     | Uses From Context                            |
-| ----------------------- | --------------------------- | -------------------------------------------- |
-| `FiltersSection`        | `expandedFilters`, `isOpen` | `useSetColumnFilters`                        |
-| `AddFilterSection`      | Column selection dropdown   | `useGetColumnFilters`, `useSetColumnFilters` |
-| `ActiveFiltersList`     | Expand/collapse, remove     | `useGetColumnFilters`, `useSetColumnFilters` |
-| `FiltersSectionToolbar` | Expand/collapse/clear/reset | `useClearFilters`, `useResetFilters`         |
+| Component               | Manages                     | Uses From Context                                                                                 |
+| ----------------------- | --------------------------- | ------------------------------------------------------------------------------------------------- |
+| `FiltersSection`        | `expandedFilters`, `isOpen` | `useSetColumnFilters`, `useGetTableSettingsExpandedFilters`, `useSetTableSettingsExpandedFilters` |
+| `AddFilterSection`      | Column selection dropdown   | `useGetColumnFilters`, `useSetColumnFilters`                                                      |
+| `ActiveFiltersList`     | Expand/collapse, remove     | `useGetColumnFilters`, `useSetColumnFilters`                                                      |
+| `FiltersSectionToolbar` | Expand/collapse/clear/reset | `useClearFilters`, `useResetFilters`                                                              |
 
 ## Filter Validation (validateFilter.util.ts)
 

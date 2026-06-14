@@ -181,6 +181,8 @@ See [TableDrawerContext/ARCHITECTURE.md](TableDrawerContext/ARCHITECTURE.md) for
   `TableConfigContext`
 - **Invalid accept**: `notify(...)` sends a warning through the app-level `NotificationProvider`; the viewport is rendered once at the root, not inside the drawer
 - **Pin state**: `isTableSettingsPinned` is owned by `TableConfig.metaStore`, not local component state
+- **Expanded filter children state**: `tableSettingsExpandedFilters` is owned by `TableConfig.metaStore` and restored by `FiltersSection`
+- **Selected tab state**: `tableSettingsSelectedTab` is owned by `TableConfig.metaStore` and wired through controlled `Tabs`
 - **Cancel**: `useResetTableSettings()` reads current table state back into
   the drawer store; it closes only when unpinned
 

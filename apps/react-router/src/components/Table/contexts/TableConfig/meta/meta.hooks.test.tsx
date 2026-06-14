@@ -27,6 +27,8 @@ const createInitialMetaState = (): TableMetaState => {
     persistenceKey: 'orders',
     placeholderRowCount: 8,
     rowHeight: 44,
+    tableSettingsExpandedFilters: [],
+    tableSettingsSelectedTab: 'general',
     threshold: 200,
     title: 'Orders',
   };
@@ -51,6 +53,8 @@ vi.mock(
 
 import { useSetTableColumnSelectedKey } from './actions/useSetTableColumnSelectedKey.hook';
 import { useSetTableDrawersOpenState } from './actions/useSetTableDrawersOpenState.hook';
+import { useSetTableSettingsExpandedFilters } from './actions/useSetTableSettingsExpandedFilters.hook';
+import { useSetTableSettingsSelectedTab } from './actions/useSetTableSettingsSelectedTab.hook';
 import { useSetTableIsTableSettingsOpen } from './actions/useSetTableIsTableSettingsOpen.hook';
 import { useSetTableIsTableSettingsPinned } from './actions/useSetTableIsTableSettingsPinned.hook';
 import { useToogleTableIsColumnSettingsOpen } from './actions/useToogleTableIsColumnSettingsOpen.hook';
@@ -69,6 +73,8 @@ import { useGetTableLoadMorePageSize } from './selectors/useGetTableLoadMorePage
 import { useGetTableOverscan } from './selectors/useGetTableOverscan.hook';
 import { useGetTablePlaceholderRowCount } from './selectors/useGetTablePlaceholderRowCount.hook';
 import { useGetTableRowHeight } from './selectors/useGetTableRowHeight.hook';
+import { useGetTableSettingsExpandedFilters } from './selectors/useGetTableSettingsExpandedFilters.hook';
+import { useGetTableSettingsSelectedTab } from './selectors/useGetTableSettingsSelectedTab.hook';
 import { useGetTableThreshold } from './selectors/useGetTableThreshold.hook';
 import { useGetTableTitle } from './selectors/useGetTableTitle.hook';
 
@@ -122,6 +128,12 @@ describe('TableConfig meta hooks', () => {
       renderHook(() => useGetTablePlaceholderRowCount()).result.current,
     ).toBe(8);
     expect(renderHook(() => useGetTableRowHeight()).result.current).toBe(44);
+    expect(
+      renderHook(() => useGetTableSettingsExpandedFilters()).result.current,
+    ).toEqual([]);
+    expect(
+      renderHook(() => useGetTableSettingsSelectedTab()).result.current,
+    ).toBe('general');
     expect(renderHook(() => useGetTableThreshold()).result.current).toBe(200);
     expect(renderHook(() => useGetTableTitle()).result.current).toBe('Orders');
   });
@@ -135,6 +147,12 @@ describe('TableConfig meta hooks', () => {
       useToogleTableIsTableSettingsOpen(),
     );
     const setDrawersOpenState = renderHook(() => useSetTableDrawersOpenState());
+    const setTableSettingsExpandedFilters = renderHook(() =>
+      useSetTableSettingsExpandedFilters(),
+    );
+    const setTableSettingsSelectedTab = renderHook(() =>
+      useSetTableSettingsSelectedTab(),
+    );
     const setTableSettingsOpen = renderHook(() =>
       useSetTableIsTableSettingsOpen(),
     );
@@ -150,6 +168,8 @@ describe('TableConfig meta hooks', () => {
         isColumnSettingsOpen: true,
         isTableSettingsOpen: false,
       });
+      setTableSettingsExpandedFilters.result.current(['status']);
+      setTableSettingsSelectedTab.result.current('sorting');
       setTableSettingsOpen.result.current(true);
       setTableSettingsPinned.result.current(true);
     });
@@ -158,5 +178,7 @@ describe('TableConfig meta hooks', () => {
     expect(metaStore.get().isColumnSettingsOpen).toBe(true);
     expect(metaStore.get().isTableSettingsPinned).toBe(true);
     expect(metaStore.get().isTableSettingsOpen).toBe(true);
+    expect(metaStore.get().tableSettingsExpandedFilters).toEqual(['status']);
+    expect(metaStore.get().tableSettingsSelectedTab).toBe('sorting');
   });
 });

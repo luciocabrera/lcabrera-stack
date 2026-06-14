@@ -244,6 +244,8 @@ export type TableMetaState = {
   readonly placeholderRowCount: number;
   readonly rowHeight: number;
   readonly schemaName?: string;
+  readonly tableSettingsExpandedFilters: readonly string[];
+  readonly tableSettingsSelectedTab: string;
   readonly tableName?: string;
   readonly threshold: number;
   readonly title?: string;

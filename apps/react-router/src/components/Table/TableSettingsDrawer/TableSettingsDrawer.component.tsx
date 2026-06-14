@@ -15,10 +15,14 @@ import { ICON_SIZE_LG } from '@/design-system/constants';
 import { useNotifications } from '@/hooks/useNotifications.hook';
 
 import {
+  useSetTableSettingsSelectedTab,
   useSetTableIsTableSettingsOpen,
   useSetTableIsTableSettingsPinned,
 } from '../contexts/TableConfig/meta/actions';
-import { useGetTableIsTableSettingsPinned } from '../contexts/TableConfig/meta/selectors';
+import {
+  useGetTableIsTableSettingsPinned,
+  useGetTableSettingsSelectedTab,
+} from '../contexts/TableConfig/meta/selectors';
 import { ColumnOrderSection } from './ColumnOrderSection';
 import { ColumnOrderSectionProvider } from './ColumnOrderSection/ColumnOrderSectionContext/ColumnOrderSectionContext.provider';
 import { DetailsSection } from './DetailsSection';
@@ -37,6 +41,8 @@ export const TableSettingsDrawer = () => {
   const { notify } = useNotifications();
   const resetTableDrawerSettings = useResetTableSettings();
   const isPinned = useGetTableIsTableSettingsPinned();
+  const selectedTab = useGetTableSettingsSelectedTab();
+  const setSelectedTab = useSetTableSettingsSelectedTab();
   const setTableIsTableSettingsOpen = useSetTableIsTableSettingsOpen();
   const setTableIsTableSettingsPinned = useSetTableIsTableSettingsPinned();
 
@@ -127,7 +133,11 @@ export const TableSettingsDrawer = () => {
       </SidePanelHeader>
       <SidePanelBody>
         <ColumnOrderSectionProvider>
-          <Tabs tabs={tabs} />
+          <Tabs
+            onSelectTab={setSelectedTab}
+            selectedTab={selectedTab}
+            tabs={tabs}
+          />
         </ColumnOrderSectionProvider>
       </SidePanelBody>
       <SidePanelFooter>

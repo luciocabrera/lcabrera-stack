@@ -18,6 +18,10 @@ export type TabItem = {
 export type TabsProps = ComponentPropsWithoutRef<'div'> & {
   /** Initially selected tab key (defaults to first tab) */
   readonly defaultSelectedTab?: string;
+  /** Called when a tab is selected */
+  readonly onSelectTab?: (tabKey: string) => void;
+  /** Controlled selected tab key */
+  readonly selectedTab?: string;
   /** Array of tab configurations */
   readonly tabs: readonly TabItem[];
 };

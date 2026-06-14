@@ -29,6 +29,8 @@ export const getInitialMetaState = ({
   persistenceKey = '',
   placeholderRowCount = DEFAULT_PLACEHOLDER_ROW_COUNT,
   rowHeight = DEFAULT_ROW_HEIGHT,
+  tableSettingsExpandedFilters = [],
+  tableSettingsSelectedTab = 'general',
   threshold = INFINITE_SCROLL_THRESHOLD,
   ...rest
 }: GetInitialMetaStateArgs): TableMetaState => ({
@@ -47,6 +49,8 @@ export const getInitialMetaState = ({
   persistenceKey,
   placeholderRowCount,
   rowHeight,
+  tableSettingsExpandedFilters,
+  tableSettingsSelectedTab,
   threshold,
   ...rest,
 });
