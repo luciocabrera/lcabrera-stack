@@ -5,17 +5,15 @@ import type { SortDirection } from '@/types/ui.types';
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { usePersistTableStateAction } from '@/components/Table/hooks';
 import {
-  getEffectiveColumns,
-  getNormalizedColumns,
-  getPinnedColumnOffsets,
-  splitColumnsByPinning,
+  deriveColumnViewState,
   syncColumnOrderWithPinning,
 } from '@/components/Table/utils';
-import { serializeFiltersToURL, serializeSortingToURL } from '@/utils/urlState';
 import { getNewSortingBasedOnColumnKey } from '@/components/Table/utils/getNewSortingBasedOnColumnKey.util';
 import { getNewColumnFiltersBasedOnColumnKey } from '@/components/Table/utils/getNewColumnFiltersBasedOnColumnKey.util';
 import { getNewColumnSizingBasedOnColumnKey } from '@/components/Table/utils/getNewColumnSizingBasedOnColumnKey.util';
 import { getNewPinningBasedOnColumnKey } from '@/components/Table/utils/getNewPinningBasedOnColumnKey.util';
+
+import { buildPersistencePayload } from './buildPersistencePayload.util';
 
 type BatchColumnSettingsUpdate<TData> = {
   /** Single column filter value */
@@ -74,60 +72,29 @@ export const useBatchSetColumnSettings = <TData>() => {
       newPinning,
     });
 
-    const normalizedColumns = getNormalizedColumns({
+    const {
+      columnGroups,
+      effectiveColumns,
+      normalizedColumns,
+      pinnedColumnOffsets,
+    } = deriveColumnViewState<TData>({
+      columnOrder: newColumnOrder,
+      columnPinning: newPinning,
+      columnSizing: newColumnSizing,
       columns,
       sorting: newSorting,
     });
 
-    const effectiveColumns = getEffectiveColumns({
-      columnOrder: newColumnOrder,
-      columnPinning: newPinning,
-      columns,
-      columnVisibility: columnsState?.columnVisibility,
-    });
-
-    const columnGroups = splitColumnsByPinning({
-      columnPinning: newPinning,
-      effectiveColumns,
-    });
-
-    const pinnedColumnOffsets = getPinnedColumnOffsets<TData>({
-      columnPinning: newPinning,
-      columnSizing: newColumnSizing,
-      effectiveColumns,
-    });
-
-    persistTableState([
-      {
+    persistTableState(
+      buildPersistencePayload<TData>({
+        columnFilters: newColumnFilters,
+        columnOrder: newColumnOrder,
+        columnPinning: newPinning,
+        columnSizing: newColumnSizing,
         persistenceKey,
-        searchParamKey: 'filters',
-        searchParamValue: serializeFiltersToURL(newColumnFilters),
-        slice: 'columnFilters',
-        valueSlice: newColumnFilters,
-      },
-      {
-        persistenceKey,
-        searchParamKey: 'sort',
-        searchParamValue: serializeSortingToURL<TData>(newSorting),
-        slice: 'sorting',
-        valueSlice: newSorting,
-      },
-      {
-        persistenceKey,
-        slice: 'columnSizing',
-        valueSlice: newColumnSizing,
-      },
-      {
-        persistenceKey,
-        slice: 'columnPinning',
-        valueSlice: newPinning,
-      },
-      {
-        persistenceKey,
-        slice: 'columnOrder',
-        valueSlice: newColumnOrder,
-      },
-    ]);
+        sorting: newSorting,
+      }),
+    );
 
     columnsStore.set({
       columnFilters: newColumnFilters,

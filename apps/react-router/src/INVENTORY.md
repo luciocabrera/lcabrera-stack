@@ -71,6 +71,7 @@ Before creating anything new, check this inventory. If something here does the j
 
 | Function                              | Location                                                             | Description                                                                                              |
 | ------------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `deriveColumnViewState`               | `components/Table/utils/deriveColumnViewState.util.ts`               | Composes normalized columns with effective columns, grouped pinning state, and pinned offsets            |
 | `getColumnPinSide`                    | `components/Table/utils/getColumnPinSide.util.ts`                    | Returns `'left'`, `'right'`, or `undefined` for a column key given current pinning state                 |
 | `getEffectiveColumns`                 | `components/Table/utils/getEffectiveColumns.util.ts`                 | Returns visible columns in display order applying visibility, order, and pinning                         |
 | `getNewColumnFiltersBasedOnColumnKey` | `components/Table/utils/getNewColumnFiltersBasedOnColumnKey.util.ts` | Builds next `ColumnFiltersState` by replacing/removing the entry for one column key                      |
@@ -92,6 +93,7 @@ Before creating anything new, check this inventory. If something here does the j
 
 | Artifact                      | Location                                                                                    | Description                                                                                         |
 | ----------------------------- | ------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `buildPersistencePayload`     | `components/Table/contexts/TableConfig/columns/actions/buildPersistencePayload.util.ts`     | Builds the persistence entry array shared by batch column and batch table settings actions          |
 | `commitPinningAndOrderUpdate` | `components/Table/contexts/TableConfig/columns/actions/commitPinningAndOrderUpdate.util.ts` | Commits pinning/order persistence and applies synced derived slices to store                        |
 | `useAcceptHeaderPinConflict`  | `components/Table/contexts/TableConfig/columns/actions/useAcceptHeaderPinConflict.hook.ts`  | Resolves a pin conflict triggered from a column header interaction                                  |
 | `useAcceptHeaderPinSide`      | `components/Table/contexts/TableConfig/columns/actions/useAcceptHeaderPinSide.hook.ts`      | Accepts a pin-side selection from a header, resolving conflict state via `PinConflictState`         |
