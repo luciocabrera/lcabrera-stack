@@ -118,6 +118,13 @@ Before creating anything new, check this inventory. If something here does the j
 | `getInitialColumnsState`    | `components/Table/ColumnSettingsDrawer/ColumnDrawerContext/utils/getInitialColumnsState.util.ts`    | Builds initial column drawer state shape                  |
 | `getTableColumnDrawerState` | `components/Table/ColumnSettingsDrawer/ColumnDrawerContext/utils/getTableColumnDrawerState.util.ts` | Maps a table columns snapshot to drawer state for one key |
 
+### `src/components/Table/TableSettingsDrawer/ColumnOrderSection/utils/`
+
+| Function                     | Location                                                                                           | Description                                                                                                               |
+| ---------------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `resolvePinConflictState`    | `components/Table/TableSettingsDrawer/ColumnOrderSection/utils/resolvePinConflictState.util.ts`    | Resolves pin-conflict resolution (`move-column`, `pin-all-between`, `pin-only`) into next `columnOrder` + `columnPinning` |
+| `restoreStaticPinnedColumns` | `components/Table/TableSettingsDrawer/ColumnOrderSection/utils/restoreStaticPinnedColumns.util.ts` | Restores static-column pin membership to default left/right pin groups after conflict resolution                          |
+
 ### `src/utils/api/`
 
 | Function        | Location                | Description                                                                      |

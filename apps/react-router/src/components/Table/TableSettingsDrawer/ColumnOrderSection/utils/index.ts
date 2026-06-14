@@ -6,5 +6,7 @@ export { insertAdjacentToPinnedGroup } from './insertAdjacentToPinnedGroup.util'
 export { pinAllBetween } from './pinAllBetween.util';
 export { recalculatePinSides } from './recalculatePinSides.util';
 export { resolveClosestEdgeSide } from './resolveClosestEdgeSide.util';
+export { resolvePinConflictState } from './resolvePinConflictState.util';
 export { resolvePinOrderConflict } from './resolvePinOrderConflict.util';
 export { restoreStaticColumnOrder } from './restoreStaticColumnOrder.util';
+export { restoreStaticPinnedColumns } from './restoreStaticPinnedColumns.util';

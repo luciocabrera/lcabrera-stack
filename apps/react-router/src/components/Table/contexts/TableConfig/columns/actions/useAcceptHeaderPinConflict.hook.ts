@@ -9,16 +9,13 @@ import type { PinConflictResolution } from '@/components/Table/TableSettingsDraw
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { usePersistTableStateAction } from '@/components/Table/hooks';
 import {
-  applyPin,
   buildAllOrderedColumns,
-  insertAdjacentToPinnedGroup,
-  pinAllBetween,
+  resolvePinConflictState,
 } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 import {
   getEffectiveColumns,
   getPinnedColumnOffsets,
   splitColumnsByPinning,
-  syncColumnOrderWithPinning,
 } from '@/components/Table/utils';
 
 type AcceptHeaderPinConflictArgs<TData> = {
@@ -50,58 +47,17 @@ export const useAcceptHeaderPinConflict = <TData>() => {
       columnsState?.columnOrder ?? ([] as ColumnOrderState<TData>);
 
     const allOrderedColumns = buildAllOrderedColumns({ columns, columnsOrder });
-    const index = allOrderedColumns.findIndex((col) => col.key === columnKey);
-    const allOrderedKeys = allOrderedColumns.map((column) => column.key);
-
-    let newPinning: ColumnPinningState<TData>;
-    let newOrder: ColumnOrderState<TData> | undefined;
-
-    if (resolution === 'move-column') {
-      newOrder = allOrderedColumns
-        .filter((col) => col.key !== columnKey)
-        .map((col) => col.key);
-
-      const column = allOrderedColumns[index];
-      if (column?.key) {
-        newOrder = insertAdjacentToPinnedGroup<TData>({
-          columnKey: column.key,
-          columnPinning: currentPinning,
-          order: newOrder,
-          side,
-        });
-      }
-
-      newPinning = applyPin({
+    const { columnOrder: newOrder, columnPinning: newPinning } =
+      resolvePinConflictState<TData>({
+        allOrderedColumns,
         columnKey,
-        columnPinning: currentPinning,
-        side,
-        staticKeys,
-      });
-    } else if (resolution === 'pin-all-between') {
-      newPinning = pinAllBetween<DataKey<TData>>({
-        allOrderedKeys,
-        columnPinning: currentPinning,
-        index,
-        side,
-      });
-    } else {
-      newPinning = applyPin({
-        columnKey,
-        columnPinning: currentPinning,
-        side,
-        staticKeys,
-      });
-    }
-
-    if (!newOrder) {
-      newOrder = syncColumnOrderWithPinning<TData>({
-        columnKey,
-        columnPinning: side,
         columns,
         currentOrder,
-        newPinning,
+        currentPinning,
+        resolution,
+        side,
+        staticKeys,
       });
-    }
 
     const effectiveColumns = getEffectiveColumns({
       columnOrder: newOrder,
@@ -130,23 +86,15 @@ export const useAcceptHeaderPinConflict = <TData>() => {
       pinnedColumnOffsets,
     };
 
-    if (newOrder) {
-      updates.columnOrder = newOrder;
-      persistTableState([
-        {
-          persistenceKey,
-          slice: 'columnPinning' as const,
-          valueSlice: newPinning,
-        },
-        { persistenceKey, slice: 'columnOrder' as const, valueSlice: newOrder },
-      ]);
-    } else {
-      persistTableState({
+    updates.columnOrder = newOrder;
+    persistTableState([
+      {
         persistenceKey,
         slice: 'columnPinning' as const,
         valueSlice: newPinning,
-      });
-    }
+      },
+      { persistenceKey, slice: 'columnOrder' as const, valueSlice: newOrder },
+    ]);
 
     columnsStore.set(updates);
   };

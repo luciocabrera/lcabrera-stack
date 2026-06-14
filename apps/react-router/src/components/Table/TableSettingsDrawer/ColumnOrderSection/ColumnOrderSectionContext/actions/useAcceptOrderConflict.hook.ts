@@ -5,6 +5,7 @@ import { useTableConfigContextValue } from '@/components/Table/contexts/TableCon
 import {
   resolvePinOrderConflict,
   restoreStaticColumnOrder,
+  restoreStaticPinnedColumns,
 } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 import { useTableDrawerContextValue } from '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
 
@@ -40,35 +41,16 @@ export const useAcceptOrderConflict = () => {
       staticKeys,
     });
 
-    // Restore default pinning for static columns
-    let finalPinning = result.columnPinning;
-    if (staticKeys.size > 0) {
-      const defaultPinning = tableColumnsState?.columnPinning ?? {
-        left: [],
-        right: [],
-      };
+    const defaultPinning = tableColumnsState?.columnPinning ?? {
+      left: [],
+      right: [],
+    };
 
-      for (const key of staticKeys) {
-        if (
-          defaultPinning.left.includes(key) &&
-          !finalPinning.left.includes(key)
-        ) {
-          finalPinning = {
-            ...finalPinning,
-            left: [...finalPinning.left, key],
-          };
-        }
-        if (
-          defaultPinning.right.includes(key) &&
-          !finalPinning.right.includes(key)
-        ) {
-          finalPinning = {
-            ...finalPinning,
-            right: [...finalPinning.right, key],
-          };
-        }
-      }
-    }
+    const finalPinning = restoreStaticPinnedColumns({
+      defaultPinning,
+      finalPinning: result.columnPinning,
+      staticKeys,
+    });
 
     drawerColumnsStore.set({
       columnOrder: finalOrder,
