@@ -105,6 +105,13 @@ Before creating anything new, check this inventory. If something here does the j
 | `useSetColumnSorting`         | `components/Table/contexts/TableConfig/columns/actions/useSetColumnSorting.hook.ts`         | Sets the sort direction for one column; updates URL and resets pagination                           |
 | `useSyncColumnsSizing`        | `components/Table/contexts/TableConfig/columns/actions/useSyncColumnsSizing.hook.ts`        | Persists current column sizing state from store to cookie/localStorage                              |
 
+### `src/components/Table/TableSettingsDrawer/TableDrawerContext/actions/`
+
+| Artifact                         | Location                                                                                                 | Description                                                                                     |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `buildBatchTableSettingsUpdate`  | `components/Table/TableSettingsDrawer/TableDrawerContext/actions/buildBatchTableSettingsUpdate.util.ts`  | Normalizes a table-drawer snapshot into the full payload expected by `useBatchSetTableSettings` |
+| `useBatchSetTableDrawerSettings` | `components/Table/TableSettingsDrawer/TableDrawerContext/actions/useBatchSetTableDrawerSettings.hook.ts` | Reads drawer-local table state and commits it through the table-level batch action              |
+
 ### `src/components/test-utils/`
 
 | Function                              | Location                                                            | Description                                                                                  |

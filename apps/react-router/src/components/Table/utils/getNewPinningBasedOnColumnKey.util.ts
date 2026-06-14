@@ -5,7 +5,7 @@ type GetNewPinningBasedOnColumnKeyArgs<TData> = {
   readonly columnKey: DataKey<TData>;
   readonly columnPinning?: 'left' | 'right';
   readonly existingPinning?: ColumnPinningState<TData>;
-  readonly staticKeys?: Set<string> | undefined;
+  readonly staticKeys?: Set<string>;
 };
 export const getNewPinningBasedOnColumnKey = <TData>({
   columnKey,

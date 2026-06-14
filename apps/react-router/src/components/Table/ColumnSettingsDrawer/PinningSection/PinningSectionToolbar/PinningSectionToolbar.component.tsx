@@ -26,7 +26,7 @@ export const PinningSectionToolbar = ({
   const hasPinning = columnPinning !== undefined;
 
   const handleClear = () => {
-    setColumnPinning(undefined);
+    setColumnPinning();
   };
 
   return (

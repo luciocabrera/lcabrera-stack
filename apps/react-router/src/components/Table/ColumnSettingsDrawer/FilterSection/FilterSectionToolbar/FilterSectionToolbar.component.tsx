@@ -27,7 +27,7 @@ export const FilterSectionToolbar = ({
   const hasFilter = columnFilter !== undefined;
 
   const handleClear = () => {
-    setColumnFilter(undefined);
+    setColumnFilter();
   };
 
   return (

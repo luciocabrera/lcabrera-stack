@@ -14,6 +14,7 @@ TableDrawerContext/
 ├── useColumnsStore.hook.ts                 → useSyncExternalStore + selector
 │
 ├── actions/                                → 17 hooks that write to the store
+│   ├── buildBatchTableSettingsUpdate.util.ts → Normalize drawer snapshot into the table batch-update payload
 │   ├── useBatchSetTableDrawerSettings      → Push all drawer state to table
 │   ├── useClearAllSettings                 → Clear all fields
 │   ├── useClearColumnOrderSection          → Clear visibility + pinning
@@ -105,25 +106,25 @@ graph TD
 Actions are hooks that return a callback. Each callback reads the store and
 calls `columnsStore.set(partial)`.
 
-| Hook                               | Reads From           | Writes To      | Side Effect                            |
-| ---------------------------------- | -------------------- | -------------- | -------------------------------------- |
-| `useSetColumnFilters`              | —                    | `columnsStore` | —                                      |
-| `useSetColumnsOrder`               | —                    | `columnsStore` | —                                      |
-| `useSetColumnsSortings`            | —                    | `columnsStore` | —                                      |
-| `useSetColumnPinning`              | —                    | `columnsStore` | —                                      |
-| `useSetColumnsSizing`              | —                    | `columnsStore` | —                                      |
-| `useSetColumnsVisibility`          | —                    | `columnsStore` | —                                      |
-| `useClearFilters`                  | —                    | `columnsStore` | Sets `columnFilters` to `{}`           |
-| `useClearSorting`                  | —                    | `columnsStore` | Sets `sorting` to `[]`                 |
-| `useClearColumnOrderSection`       | —                    | `columnsStore` | Clears visibility + pinning            |
-| `useClearAllSettings`              | —                    | `columnsStore` | Clears all fields                      |
-| `useResetFilters`                  | `TableConfigContext` | `columnsStore` | Restores filters from table            |
-| `useResetSorting`                  | `TableConfigContext` | `columnsStore` | Restores sorting from table            |
-| `useResetColumnOrderAndVisibility` | `TableConfigContext` | `columnsStore` | Restores order + visibility from table |
-| `useResetTableSettings`            | `TableConfigContext` | `columnsStore` | Restores all fields from table         |
-| `useOrderColumnsBySorting`         | `columnsStore`       | `columnsStore` | Reorders columns by current sorting    |
-| `useSortByColumnOrder`             | `columnsStore`       | `columnsStore` | Creates asc sorts from column order    |
-| `useBatchSetTableDrawerSettings`   | `columnsStore`       | `TableConfig`  | Pushes all drawer state to table       |
+| Hook                               | Reads From           | Writes To      | Side Effect                                                            |
+| ---------------------------------- | -------------------- | -------------- | ---------------------------------------------------------------------- |
+| `useSetColumnFilters`              | —                    | `columnsStore` | —                                                                      |
+| `useSetColumnsOrder`               | —                    | `columnsStore` | —                                                                      |
+| `useSetColumnsSortings`            | —                    | `columnsStore` | —                                                                      |
+| `useSetColumnPinning`              | —                    | `columnsStore` | —                                                                      |
+| `useSetColumnsSizing`              | —                    | `columnsStore` | —                                                                      |
+| `useSetColumnsVisibility`          | —                    | `columnsStore` | —                                                                      |
+| `useClearFilters`                  | —                    | `columnsStore` | Sets `columnFilters` to `{}`                                           |
+| `useClearSorting`                  | —                    | `columnsStore` | Sets `sorting` to `[]`                                                 |
+| `useClearColumnOrderSection`       | —                    | `columnsStore` | Clears visibility + pinning                                            |
+| `useClearAllSettings`              | —                    | `columnsStore` | Clears all fields                                                      |
+| `useResetFilters`                  | `TableConfigContext` | `columnsStore` | Restores filters from table                                            |
+| `useResetSorting`                  | `TableConfigContext` | `columnsStore` | Restores sorting from table                                            |
+| `useResetColumnOrderAndVisibility` | `TableConfigContext` | `columnsStore` | Restores order + visibility from table                                 |
+| `useResetTableSettings`            | `TableConfigContext` | `columnsStore` | Restores all fields from table                                         |
+| `useOrderColumnsBySorting`         | `columnsStore`       | `columnsStore` | Reorders columns by current sorting                                    |
+| `useSortByColumnOrder`             | `columnsStore`       | `columnsStore` | Creates asc sorts from column order                                    |
+| `useBatchSetTableDrawerSettings`   | `columnsStore`       | `TableConfig`  | Pushes all drawer state to table via `buildBatchTableSettingsUpdate()` |
 
 ## Selectors
 

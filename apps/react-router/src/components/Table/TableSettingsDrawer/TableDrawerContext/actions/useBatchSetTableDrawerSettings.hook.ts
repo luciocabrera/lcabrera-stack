@@ -1,15 +1,8 @@
-import type {
-  ColumnFiltersState,
-  ColumnOrderState,
-  ColumnPinningState,
-  ColumnSizingState,
-  ColumnVisibilityState,
-  SortingState,
-} from '@/components/Table/Table.types';
-
 import { useBatchSetTableSettings } from '@/components/Table/contexts/TableConfig/columns/actions';
 
 import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook';
+
+import { buildBatchTableSettingsUpdate } from './buildBatchTableSettingsUpdate.util';
 
 /**
  * Hook to batch update all table settings at once
@@ -23,16 +16,6 @@ export const useBatchSetTableDrawerSettings = () => {
   return () => {
     const columnsState = columnsStore.get();
 
-    batchSetTableSettings({
-      columnFilters: columnsState?.columnFilters ?? ({} as ColumnFiltersState),
-      columnOrder: columnsState?.columnOrder ?? ([] as ColumnOrderState),
-      columnPinning:
-        columnsState?.columnPinning ??
-        ({ left: [], right: [] } as ColumnPinningState),
-      columnSizing: columnsState?.columnSizing ?? ({} as ColumnSizingState),
-      columnVisibility:
-        columnsState?.columnVisibility ?? ({} as ColumnVisibilityState),
-      sorting: columnsState?.sorting ?? ([] as SortingState),
-    });
+    batchSetTableSettings(buildBatchTableSettingsUpdate(columnsState));
   };
 };
