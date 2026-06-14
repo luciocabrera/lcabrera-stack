@@ -68,7 +68,7 @@ function mockUseTableConfigContextValue() {
   return { metaStore: getHarness().metaStore };
 }
 
-const loggerErrorMock = vi.fn();
+const loggerMock = vi.hoisted(() => ({ error: vi.fn() }));
 
 vi.mock(
   '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
@@ -83,7 +83,7 @@ vi.mock('../../useFiltersDataContextValue.hook', () => ({
 
 vi.mock('@/utils/logger', () => ({
   logger: {
-    error: loggerErrorMock,
+    error: loggerMock.error,
   },
 }));
 
@@ -120,7 +120,7 @@ describe('useFetchFilterData', () => {
     });
     currentHarness.setMetaState({ enablePrefetch: false });
     currentHarness.firePrefetchMock.mockReset();
-    loggerErrorMock.mockReset();
+    loggerMock.error.mockReset();
     currentHarness.resolveFromCacheOrFetchMock.mockReset();
   });
 
@@ -264,6 +264,6 @@ describe('useFetchFilterData', () => {
     expect(getHarness().metaStore.get()).toMatchObject({
       error: 'Broken filter API',
     });
-    expect(loggerErrorMock).toHaveBeenCalled();
+    expect(loggerMock.error).toHaveBeenCalled();
   });
 });
