@@ -20,6 +20,7 @@ TableConfig/
 │   ├── actions/
 │   │   ├── utils/buildPersistencePayload.util.ts       → Shared persistence-entry builder for batch settings hooks
 │   │   ├── utils/commitPinningAndOrderUpdate.util.ts → Shared persist+store commit helper for pinning actions
+│   │   ├── utils/resolveColumnSizingUpdate.util.ts   → Build next sizing map + pinned offsets for one column resize
 │   │   ├── useAcceptHeaderPinConflict.hook.ts   → Resolve pin conflict from header
 │   │   ├── useAcceptHeaderPinSide.hook.ts       → Accept pin side from header
 │   │   ├── useBatchSetColumnSettings.hook.ts    → Bulk-update multiple column fields
@@ -170,7 +171,7 @@ graph TD
 | `useResetColumnFilter`       | —              | `columnsStore` | Remove filter for a single column                                                                 |
 | `useSetColumnFilter`         | —              | `columnsStore` | Set filter value for a single column                                                              |
 | `useSetColumnPinning`        | `columnsStore` | `columnsStore` | Update pinning, keep column order synced, and commit pinning/order via shared helper              |
-| `useSetColumnSizing`         | —              | `columnsStore` | Set column width map                                                                              |
+| `useSetColumnSizing`         | `columnsStore` | `columnsStore` | Set column width map and recompute pinned offsets via shared sizing resolver                      |
 | `useSetColumnSorting`        | `columnsStore` | `columnsStore` | Toggle/set sort for a column                                                                      |
 | `useSyncColumnsSizing`       | `columnsStore` | `columnsStore` | Recalculate sizing after layout shift                                                             |
 | `useAcceptHeaderPinConflict` | `columnsStore` | `columnsStore` | Resolve pin contiguity conflict from header and keep order synced                                 |
