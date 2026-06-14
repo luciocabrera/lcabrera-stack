@@ -1,16 +1,12 @@
-import type {
-  ColumnOrderState,
-  ColumnPinningState,
-  DataKey,
-} from '@/components/Table/Table.types';
+import type { DataKey } from '@/components/Table/Table.types';
 import type { PinConflictState, PinSide } from '@/types/ui.types';
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { usePersistTableStateAction } from '@/components/Table/hooks';
-import { getPinnedDerivedColumnsState } from '@/components/Table/utils';
 
 import {
-  commitPinningAndOrderUpdate,
+  commitResolvedPinningState,
+  getPinningActionContext,
   resolveAcceptedHeaderPinSideState,
 } from './utils';
 
@@ -27,21 +23,20 @@ export const useAcceptHeaderPinSide = <TData>() => {
     columnKey,
     pinSide,
   }: AcceptHeaderPinSideArgs<TData>): PinConflictState | undefined => {
-    const columnsState = columnsStore.get();
-    const columns = columnsState?.columns ?? [];
-    const columnsOrder =
-      columnsState?.columnOrder ?? ([] as ColumnOrderState<TData>);
-    const columnPinning =
-      columnsState?.columnPinning ??
-      ({ left: [], right: [] } as ColumnPinningState<TData>);
-    const persistenceKey = metaStore.get()?.persistenceKey ?? '';
-
-    const staticKeys = columnsState?.staticKeys;
+    const {
+      columnOrder,
+      columnPinning,
+      columnSizing,
+      columnVisibility,
+      columns,
+      persistenceKey,
+      staticKeys,
+    } = getPinningActionContext<TData>({ columnsStore, metaStore });
 
     const resolution = resolveAcceptedHeaderPinSideState<TData>({
       columnKey,
       columnPinning,
-      columnOrder: columnsOrder,
+      columnOrder,
       columns,
       pinSide,
       staticKeys,
@@ -51,24 +46,15 @@ export const useAcceptHeaderPinSide = <TData>() => {
       return resolution.conflict;
     }
 
-    const { columnGroups, effectiveColumns, pinnedColumnOffsets } =
-      getPinnedDerivedColumnsState<TData>({
-        columnOrder: resolution.columnOrder,
-        columnPinning: resolution.columnPinning,
-        columnSizing: columnsState?.columnSizing,
-        columns,
-        columnVisibility: columnsState?.columnVisibility,
-      });
-
-    commitPinningAndOrderUpdate<TData>({
-      columnGroups,
+    commitResolvedPinningState<TData>({
+      columnOrder: resolution.columnOrder,
+      columnPinning: resolution.columnPinning,
+      columnSizing,
+      columnVisibility,
+      columns,
       columnsStore,
-      effectiveColumns,
-      newColumnOrder: resolution.columnOrder,
-      newPinning: resolution.columnPinning,
       persistenceKey,
       persistTableState,
-      pinnedColumnOffsets,
     });
   };
 };

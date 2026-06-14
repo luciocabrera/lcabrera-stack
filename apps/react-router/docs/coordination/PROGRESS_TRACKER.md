@@ -21,16 +21,16 @@ Project: apps/react-router
 
 ## Workstream Board
 
-| ID     | Area                                                                           | Priority | Risk   | Owner   | Status    | Notes                                                                  |
-| ------ | ------------------------------------------------------------------------------ | -------- | ------ | ------- | --------- | ---------------------------------------------------------------------- |
-| WS-001 | TableConfig action hook tests (`dup:be74d40d`, `dup:41849296`, `dup:02c63426`) | P3       | Low    | Copilot | Completed | Shared test scaffold adopted in top duplicate tests                    |
-| WS-002 | Theme tokens (`dup:a93fd860`)                                                  | P3       | Medium | Copilot | Rejected  | Factory approach created new patterns; inherent to StyleX themes       |
-| WS-003 | Wide dataset service self-duplication (`dup:fab3a5ee`)                         | P3       | Medium | Copilot | Deferred  | 150-column repeating pattern; inherent structural duplication          |
-| WS-004 | Route constants overlap (`dup:98d61efa`)                                       | P3       | Low    | Copilot | Completed | Consolidate common column constants carefully                          |
-| WS-005 | Table drawer/context test scaffolds (`dup:d04c3ee1`)                           | P3       | Low    | Copilot | Completed | Similar test harnesses; extract shared util                            |
-| WS-006 | TableConfig pinning action cluster complexity                                  | P1       | Medium | Copilot | Planned   | Target: accept-header pin side/conflict + set pinning hooks/resolvers  |
-| WS-007 | ColumnOrderSection conflict action cluster complexity                          | P1       | Medium | Copilot | Planned   | Target: accept pin side/conflict/unpin + toggle pin + order by sorting |
-| WS-008 | URL/filter serialization complexity hotspots                                   | P2       | Medium | Copilot | Planned   | Target: serialize filters and related URL state flow hotspots          |
+| ID     | Area                                                                           | Priority | Risk   | Owner   | Status      | Notes                                                                  |
+| ------ | ------------------------------------------------------------------------------ | -------- | ------ | ------- | ----------- | ---------------------------------------------------------------------- |
+| WS-001 | TableConfig action hook tests (`dup:be74d40d`, `dup:41849296`, `dup:02c63426`) | P3       | Low    | Copilot | Completed   | Shared test scaffold adopted in top duplicate tests                    |
+| WS-002 | Theme tokens (`dup:a93fd860`)                                                  | P3       | Medium | Copilot | Rejected    | Factory approach created new patterns; inherent to StyleX themes       |
+| WS-003 | Wide dataset service self-duplication (`dup:fab3a5ee`)                         | P3       | Medium | Copilot | Deferred    | 150-column repeating pattern; inherent structural duplication          |
+| WS-004 | Route constants overlap (`dup:98d61efa`)                                       | P3       | Low    | Copilot | Completed   | Consolidate common column constants carefully                          |
+| WS-005 | Table drawer/context test scaffolds (`dup:d04c3ee1`)                           | P3       | Low    | Copilot | Completed   | Similar test harnesses; extract shared util                            |
+| WS-006 | TableConfig pinning action cluster complexity                                  | P1       | Medium | Copilot | In Progress | Target: accept-header pin side/conflict + set pinning hooks/resolvers  |
+| WS-007 | ColumnOrderSection conflict action cluster complexity                          | P1       | Medium | Copilot | Planned     | Target: accept pin side/conflict/unpin + toggle pin + order by sorting |
+| WS-008 | URL/filter serialization complexity hotspots                                   | P2       | Medium | Copilot | Planned     | Target: serialize filters and related URL state flow hotspots          |
 
 ## Batch Log
 

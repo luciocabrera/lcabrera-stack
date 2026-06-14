@@ -4,9 +4,9 @@ Use this file to claim and release ownership when multiple agents run in paralle
 
 ## Active Locks
 
-| Workstream | Agent | Files | Started At | Validation Plan | Status |
-| ---------- | ----- | ----- | ---------- | --------------- | ------ |
-| None       | -     | -     | -          | -               | Open   |
+| Workstream | Agent   | Files                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Started At           | Validation Plan                                                    | Status      |
+| ---------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ------------------------------------------------------------------ | ----------- |
+| WS-006     | Copilot | src/components/Table/contexts/TableConfig/columns/actions/useAcceptHeaderPinSide.hook.ts, src/components/Table/contexts/TableConfig/columns/actions/useSetColumnPinning.hook.ts, src/components/Table/contexts/TableConfig/columns/actions/useAcceptHeaderPinConflict.hook.ts, src/components/Table/contexts/TableConfig/columns/actions/utils/getPinningActionContext.util.ts, src/components/Table/contexts/TableConfig/columns/actions/utils/commitResolvedPinningState.util.ts | 2026-06-14T11:47:57Z | focused action tests + `vp check` + `vp run fallow:refresh-report` | In Progress |
 
 ## Lock Template
 

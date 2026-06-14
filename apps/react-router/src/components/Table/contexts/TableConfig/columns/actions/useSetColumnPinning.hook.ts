@@ -1,11 +1,11 @@
-import type { ColumnOrderState, DataKey } from '@/components/Table/Table.types';
+import type { DataKey } from '@/components/Table/Table.types';
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { usePersistTableStateAction } from '@/components/Table/hooks';
-import { getPinnedDerivedColumnsState } from '@/components/Table/utils';
 
 import {
-  commitPinningAndOrderUpdate,
+  commitResolvedPinningState,
+  getPinningActionContext,
   resolveColumnPinningUpdate,
 } from './utils';
 
@@ -19,44 +19,34 @@ export const useSetColumnPinning = <TData>() => {
   const persistTableState = usePersistTableStateAction();
 
   return ({ columnKey, side }: SetColumnPinningArgs<TData>) => {
-    const columnsState = columnsStore.get();
-    const currentPinning = columnsState?.columnPinning ?? {
-      left: [],
-      right: [],
-    };
-    const columns = columnsState?.columns ?? [];
-    const currentOrder =
-      columnsState?.columnOrder ?? ([] as ColumnOrderState<TData>);
-    const persistenceKey = metaStore.get()?.persistenceKey ?? '';
-    const staticKeys = columnsState?.staticKeys;
+    const {
+      columnOrder,
+      columnPinning,
+      columnSizing,
+      columnVisibility,
+      columns,
+      persistenceKey,
+      staticKeys,
+    } = getPinningActionContext<TData>({ columnsStore, metaStore });
 
     const { newColumnOrder, newPinning } = resolveColumnPinningUpdate<TData>({
       columnKey,
       columns,
-      currentOrder,
-      currentPinning,
+      currentOrder: columnOrder,
+      currentPinning: columnPinning,
       side,
       staticKeys,
     });
 
-    const { columnGroups, effectiveColumns, pinnedColumnOffsets } =
-      getPinnedDerivedColumnsState<TData>({
-        columnOrder: newColumnOrder,
-        columnPinning: newPinning,
-        columnSizing: columnsState?.columnSizing,
-        columns,
-        columnVisibility: columnsState?.columnVisibility,
-      });
-
-    commitPinningAndOrderUpdate<TData>({
-      columnGroups,
+    commitResolvedPinningState<TData>({
+      columnOrder: newColumnOrder,
+      columnPinning: newPinning,
+      columnSizing,
+      columnVisibility,
+      columns,
       columnsStore,
-      effectiveColumns,
-      newColumnOrder,
-      newPinning,
       persistenceKey,
       persistTableState,
-      pinnedColumnOffsets,
     });
   };
 };
