@@ -8,6 +8,7 @@
     "lint:check": "vp run build:eslint-rules && vp lint . && vp run lint:custom-rules",
     "lint:custom-rules": "eslint . --config eslint.custom-rules.config.mjs --max-warnings 0",
     "dev": "react-router dev",
+    "typegen": "react-router typegen",
     "typecheck": "react-router typegen && tsc"
   },
   "dependencies": {

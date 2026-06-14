@@ -6,7 +6,7 @@
   "scripts": {
     "build:eslint-rules": "cd packages/eslint-local-rules && vp run build",
     "build:all": "vp run -r build",
-    "check:safe": "vp run typegen:router && vp run build:eslint-rules && vp check && cd apps/react-router && REACT_ROUTER_TEST_TASK=true vp run test",
+    "check:safe": "vp run typegen:all && vp run build:eslint-rules && vp check && cd apps/react-router && REACT_ROUTER_TEST_TASK=true vp run test",
     "test:ci": "cd apps/react-router && REACT_ROUTER_TEST_TASK=true vp test --coverage --coverage.reporter=text --coverage.reporter=html --coverage.reporter=json-summary",
     "ready": "vp run check:safe && vp run build:all",
     "dev": "pnpm --parallel --filter car-sales-api --filter vite-react-compiler run dev",
@@ -23,6 +23,8 @@
     "skills:report": "node scripts/generate-skills-compliance-report.cjs",
     "skills:source-audit": "node scripts/generate-source-smell-report.cjs && node scripts/bootstrap-agenting-handoff.cjs",
     "skills:handoff": "node scripts/bootstrap-agenting-handoff.cjs",
+    "typegen:admin-system": "cd apps/admin_system && vp run typegen",
+    "typegen:all": "vp run typegen:router && vp run typegen:admin-system",
     "typegen:router": "cd apps/react-router && vp run typegen",
     "prepare": "vp config"
   },
