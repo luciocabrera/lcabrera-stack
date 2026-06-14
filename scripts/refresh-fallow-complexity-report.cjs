@@ -20,7 +20,9 @@ const fallowBinRelativePath =
     : fallowPackageJson.bin?.fallow;
 
 if (typeof fallowBinRelativePath !== 'string') {
-  throw new Error('Unable to resolve fallow CLI bin path from package.json.');
+  throw new TypeError(
+    'Unable to resolve fallow CLI bin path from package.json.',
+  );
 }
 
 const fallowBinPath = path.resolve(
@@ -30,7 +32,7 @@ const fallowBinPath = path.resolve(
 const nodeBinDir = path.dirname(process.execPath);
 const fixedPathEnv =
   process.platform === 'win32'
-    ? `${nodeBinDir};C:\\Windows\\System32`
+    ? `${nodeBinDir};${String.raw`C:\Windows\System32`}`
     : `${nodeBinDir}:/usr/bin:/bin`;
 const analysisPath = path.join(
   repoRoot,
@@ -54,7 +56,7 @@ const ensureDir = (dirPath) => {
 
 const runFallowJson = () => {
   if (!fs.existsSync(fallowBinPath)) {
-    throw new Error(
+    throw new TypeError(
       `fallow executable not found at expected path: ${fallowBinPath}`,
     );
   }
