@@ -18,7 +18,9 @@ export const Tabs = ({
     defaultSelectedTab ?? tabs[0]?.key ?? '',
   );
   const isControlled = selectedTab !== undefined;
-  const activeTab = isControlled ? selectedTab : uncontrolledActiveTab;
+  const requestedActiveTab = isControlled ? selectedTab : uncontrolledActiveTab;
+  const hasRequestedTab = tabs.some((tab) => tab.key === requestedActiveTab);
+  const activeTab = hasRequestedTab ? requestedActiveTab : (tabs[0]?.key ?? '');
   const tabRefs = useRef<Map<string, HTMLButtonElement | null>>(new Map());
   const activeIndex = tabs.findIndex((tab) => tab.key === activeTab);
 

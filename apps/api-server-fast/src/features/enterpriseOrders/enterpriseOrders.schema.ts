@@ -8,20 +8,98 @@ import type { SortRule } from 'api-shared';
 
 import type { EnterpriseOrdersFilters } from './enterpriseOrders.types';
 
-const filterValueSchema = {
+const booleanFilterSchema = {
+  type: 'object',
+  required: ['type', 'value'],
+  properties: {
+    type: { const: 'boolean' },
+    value: { type: 'boolean' },
+  },
+  additionalProperties: false,
+};
+
+const dateFilterSchema = {
+  type: 'object',
+  required: ['type', 'operator', 'value'],
+  properties: {
+    operator: {
+      type: 'string',
+      enum: ['after', 'before', 'between', 'equals'],
+    },
+    type: { const: 'date' },
+    value: { type: 'string', minLength: 1 },
+    value2: { type: 'string', minLength: 1 },
+  },
+  additionalProperties: false,
+};
+
+const numberFilterSchema = {
+  type: 'object',
+  required: ['type', 'operator', 'value'],
+  properties: {
+    operator: {
+      type: 'string',
+      enum: [
+        'between',
+        'equals',
+        'greaterThan',
+        'greaterThanOrEqual',
+        'lessThan',
+        'lessThanOrEqual',
+        'notEquals',
+      ],
+    },
+    type: { const: 'number' },
+    value: { type: 'number' },
+    value2: { type: 'number' },
+  },
+  additionalProperties: false,
+};
+
+const selectFilterSchema = {
   type: 'object',
   required: ['type'],
   properties: {
-    operator: { type: 'string' },
-    type: {
-      type: 'string',
-      enum: ['boolean', 'date', 'multiSelect', 'number', 'select', 'text'],
+    operator: { type: 'string', enum: ['equals', 'notEquals'] },
+    type: { type: 'string', enum: ['multiSelect', 'select'] },
+    value: { type: 'string', minLength: 1 },
+    values: {
+      type: 'array',
+      items: { type: 'string', minLength: 1 },
     },
-    value: {},
-    value2: {},
-    values: { type: 'array', items: { type: 'string', minLength: 1 } },
   },
   additionalProperties: false,
+};
+
+const textFilterSchema = {
+  type: 'object',
+  required: ['type', 'operator', 'value'],
+  properties: {
+    operator: {
+      type: 'string',
+      enum: [
+        'contains',
+        'endsWith',
+        'equals',
+        'notContains',
+        'notEquals',
+        'startsWith',
+      ],
+    },
+    type: { const: 'text' },
+    value: { type: 'string', minLength: 1 },
+  },
+  additionalProperties: false,
+};
+
+const filterValueSchema = {
+  oneOf: [
+    booleanFilterSchema,
+    dateFilterSchema,
+    numberFilterSchema,
+    selectFilterSchema,
+    textFilterSchema,
+  ],
 };
 
 // ---------------------------------------------------------------------------

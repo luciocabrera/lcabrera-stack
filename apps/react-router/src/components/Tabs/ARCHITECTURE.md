@@ -45,7 +45,7 @@ graph TD
 
 `activeTab` is derived as:
 
-- controlled mode: `selectedTab`
+- controlled mode: `selectedTab` when key exists in `tabs`, otherwise first tab key
 - uncontrolled mode: `uncontrolledActiveTab`
 
 ## Keyboard Navigation

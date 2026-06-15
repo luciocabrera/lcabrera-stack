@@ -90,6 +90,17 @@ describe('Tabs', () => {
     expect(tabC.getAttribute('aria-selected')).toBe('true');
   });
 
+  it('falls back to first tab when controlled selectedTab is missing', () => {
+    render(<Tabs selectedTab='missing-tab' tabs={tabs} />);
+
+    const tabA = screen.getByRole('tab', { name: 'Tab A' });
+    const tabB = screen.getByRole('tab', { name: 'Tab B' });
+
+    expect(tabA.getAttribute('aria-selected')).toBe('true');
+    expect(tabA.getAttribute('tabIndex')).toBe('0');
+    expect(tabB.getAttribute('aria-selected')).toBe('false');
+  });
+
   it('calls onSelectTab when selecting a tab in controlled mode', () => {
     let lastSelectedTab = '';
 
