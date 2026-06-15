@@ -46,7 +46,7 @@ export const useHydrateTableSessionState = ({
       const { columnVisibility, ...rest } = columnState;
       columnsStore.set({
         ...rest,
-        ...(columnVisibility !== undefined ? { columnVisibility } : {}),
+        ...(columnVisibility === undefined ? {} : { columnVisibility }),
       });
     }
 

@@ -45,12 +45,12 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
   const columnsStore = useStore<TableColumnsState<TData>>(
     getInitialColumnsState<TData>({
       ...columnsState,
-      ...(columnFilters !== undefined ? { columnFilters } : {}),
-      ...(columnOrder !== undefined ? { columnOrder } : {}),
-      ...(columnPinning !== undefined ? { columnPinning } : {}),
-      ...(columnSizing !== undefined ? { columnSizing } : {}),
-      ...(columnVisibility !== undefined ? { columnVisibility } : {}),
-      ...(sorting !== undefined ? { sorting } : {}),
+      ...(columnFilters === undefined ? {} : { columnFilters }),
+      ...(columnOrder === undefined ? {} : { columnOrder }),
+      ...(columnPinning === undefined ? {} : { columnPinning }),
+      ...(columnSizing === undefined ? {} : { columnSizing }),
+      ...(columnVisibility === undefined ? {} : { columnVisibility }),
+      ...(sorting === undefined ? {} : { sorting }),
     }),
   );
   const metaStore = useStore<TableMetaState>(

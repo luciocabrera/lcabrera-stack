@@ -1,5 +1,8 @@
+import type { StyleXStyles } from '@stylexjs/stylex';
+
 import * as stylex from '@stylexjs/stylex';
 
+import { SettingsIcon } from '@/components/Icons';
 import {
   SidePanel,
   SidePanelBody,
@@ -7,14 +10,17 @@ import {
   SidePanelHeader,
   SidePanelTitle,
 } from '@/components/SidePanel';
-import { SettingsIcon } from '@/components/Icons';
 import { ICON_SIZE_LG } from '@/design-system/constants';
 
 import { shimmer, styles } from './TableSettingsDrawerSkeleton.stylex';
 
-const Placeholder = ({ customStylex }: { readonly customStylex?: unknown }) => {
+type PlaceholderProps = {
+  readonly customStylex?: StyleXStyles;
+};
+
+const Placeholder = ({ customStylex }: PlaceholderProps) => {
   return (
-    <div {...stylex.props(shimmer.placeholderBar, customStylex as never)}>
+    <div {...stylex.props(shimmer.placeholderBar, customStylex)}>
       <div {...stylex.props(shimmer.shimmerWave)} />
     </div>
   );

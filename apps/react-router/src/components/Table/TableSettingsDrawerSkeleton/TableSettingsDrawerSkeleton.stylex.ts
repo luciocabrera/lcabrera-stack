@@ -1,8 +1,9 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { skeleton } from '@/design-system/tokens/commons.stylex';
 import { borderRadius, spacing } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
+
+export { skeleton as shimmer } from '@/design-system/tokens/commons.stylex';
 
 const baseStyles = stylex.create({
   body: {
@@ -126,5 +127,3 @@ export const styles = {
   title: baseStyles.title,
   widths: widthVariants,
 };
-
-export const shimmer = skeleton;

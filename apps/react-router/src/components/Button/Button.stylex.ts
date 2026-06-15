@@ -1,7 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { borderRadius } from '@/design-system/tokens/base.stylex';
-import { shadows } from '@/design-system/tokens/base.stylex';
+import { borderRadius, shadows } from '@/design-system/tokens/base.stylex';
 import {
   baseInteractiveStyles,
   colorVariants,

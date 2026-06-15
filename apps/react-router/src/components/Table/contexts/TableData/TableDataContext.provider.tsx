@@ -29,34 +29,36 @@ export const TableDataProvider = <TData extends Record<string, unknown>>({
   const dataStore = useStore<TableDataState<TData>>(
     getInitialDataState<TData>({
       ...dataState,
-      ...(persistedDataState !== undefined ? persistedDataState : {}),
+      ...(persistedDataState === undefined ? {} : persistedDataState),
     }),
   );
 
   useEffect(() => {
-    if (!isPersistenceEnabled || persistenceKey.length === 0) {
-      return;
+    const shouldPersist = isPersistenceEnabled && persistenceKey.length > 0;
+
+    if (shouldPersist) {
+      const write = () => {
+        const state = dataStore.get();
+
+        if (state === undefined) {
+          return;
+        }
+
+        writePersistedDataStateToSessionStorage({
+          dataState: {
+            data: state.data,
+            totalRows: state.totalRows,
+          },
+          persistenceKey,
+        });
+      };
+
+      write();
+
+      return dataStore.subscribe(write);
     }
 
-    const write = () => {
-      const state = dataStore.get();
-
-      if (state === undefined) {
-        return;
-      }
-
-      writePersistedDataStateToSessionStorage({
-        dataState: {
-          data: state.data,
-          totalRows: state.totalRows,
-        },
-        persistenceKey,
-      });
-    };
-
-    write();
-
-    return dataStore.subscribe(write);
+    return;
   }, [dataStore, isPersistenceEnabled, persistenceKey]);
 
   const value = {
