@@ -57,8 +57,6 @@ export const TableDataProvider = <TData extends Record<string, unknown>>({
 
       return dataStore.subscribe(write);
     }
-
-    return;
   }, [dataStore, isPersistenceEnabled, persistenceKey]);
 
   const value = {
