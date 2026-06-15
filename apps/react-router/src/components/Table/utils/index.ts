@@ -6,8 +6,10 @@ export { getPinnedDerivedColumnsState } from './getPinnedDerivedColumnsState.uti
 export { getPinnedColumnOffsets } from './getPinnedColumnOffsets.util';
 export { getStaticColumnKeys } from './getStaticColumnKeys.util';
 export { readPersistedStateFromCookie } from './readPersistedStateFromCookie.util';
+export { readPersistedStateFromSessionStorage } from './readPersistedStateFromSessionStorage.util';
+export { readPersistedUiStateFromSessionStorage } from './readPersistedUiStateFromSessionStorage.util';
 export { serializeStateSlice } from './serializeStateSlice.util';
-
 export { splitColumnsByPinning } from './splitColumnsByPinning.util';
 export { syncColumnOrderWithPinning } from './syncColumnOrderWithPinning.util';
+export { writePersistedUiStateToSessionStorage } from './writePersistedUiStateToSessionStorage.util';
 export { writeStateSlice } from './writeStateSlice.util';

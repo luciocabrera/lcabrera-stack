@@ -1,5 +1,7 @@
 import { useFetcher, useLocation } from 'react-router';
 
+import { writeToSessionStorage } from '@/utils/storage';
+
 import { serializeStateSlice } from '../utils';
 import { PERSIST_COOKIE_ACTION } from './persistCookieAction.constants';
 
@@ -14,31 +16,16 @@ type PersistCookieEntry<TSlice = unknown> = {
 };
 
 /**
- * Hook that persists cookies via a server action (Set-Cookie header).
+ * Hook that persists table state via two channels:
  *
- * Uses useFetcher to POST to the /api/persist-cookie resource route,
- * which sets the cookie server-side via Set-Cookie response header.
+ * 1. **sessionStorage** — written synchronously and tab-scoped. A tab refresh
+ *    restores from sessionStorage so each tab is isolated from other tabs.
+ *
+ * 2. **Cookie** — written asynchronously via a server action (Set-Cookie
+ *    header). The cookie is the SSR baseline seed: when a new tab opens it
+ *    gets the most-recently-saved cookie state as its starting point.
  *
  * Supports both a single entry and a batch of entries.
- *
- * @example
- * // Single entry
- * const persistTableState = usePersistTableStateAction();
- * persistTableState({
- *   persistenceKey: 'table-state-orders',
- *   slice: 'columnFilters',
- *   valueSlice: { status: 'active' },
- *   searchParamKey: 'filters',
- *   searchParamValue: '{"status":"active"}',
- * });
- *
- * @example
- * // Batch entries
- * persistTableState([
- *   { persistenceKey: 'table-state-orders', slice: 'columnFilters', valueSlice: filters, searchParamKey: 'filters', searchParamValue: JSON.stringify(filters) },
- *   { persistenceKey: 'table-state-orders', slice: 'sorting', valueSlice: sorting, searchParamKey: 'sort', searchParamValue: JSON.stringify(sorting) },
- *   { persistenceKey: 'table-state-orders', slice: 'columnOrder', valueSlice: columnOrder },
- * ]);
  */
 type PersistTableStateAction = {
   <TSlice>(entry: PersistCookieEntry<TSlice>): void;
@@ -67,6 +54,9 @@ export const usePersistTableStateAction = (): PersistTableStateAction => {
           value: valueSlice,
         });
 
+        // Write to sessionStorage immediately (tab-isolated, survives refresh)
+        writeToSessionStorage({ key, value });
+
         return {
           key,
           searchParamKey: searchParamKey ?? '',
@@ -76,6 +66,7 @@ export const usePersistTableStateAction = (): PersistTableStateAction => {
       },
     );
 
+    // Also write to cookie via server action (SSR baseline for new tabs)
     void fetcher.submit(
       { currentUrl, entries: JSON.stringify(serializedEntries) },
       { action: PERSIST_COOKIE_ACTION, method: 'POST' },

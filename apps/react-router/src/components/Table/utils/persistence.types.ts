@@ -16,3 +16,15 @@ export type PersistedState = {
   readonly sorting?: SortingState;
   readonly version: number;
 };
+
+/**
+ * Meta UI state persisted per-tab in sessionStorage only.
+ * These fields are not written to cookies and are never sent to the server.
+ */
+export type PersistedUiState = {
+  readonly isColumnSettingsOpen?: boolean;
+  readonly isTableSettingsPinned?: boolean;
+  readonly isTableSettingsOpen?: boolean;
+  readonly tableSettingsExpandedFilters?: readonly string[];
+  readonly tableSettingsSelectedTab?: string;
+};
