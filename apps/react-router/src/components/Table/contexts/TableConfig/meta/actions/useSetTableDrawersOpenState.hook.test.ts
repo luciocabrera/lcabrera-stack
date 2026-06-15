@@ -79,4 +79,25 @@ describe('useSetTableDrawersOpenState', () => {
     expect(getMetaState().isTableSettingsOpen).toBe(false);
     expect(getMetaState().wasTableSettingsOpenBeforeColumnSettings).toBe(true);
   });
+
+  it('keeps captured snapshot when switching between column drawers', () => {
+    setMetaState({
+      isColumnSettingsOpen: true,
+      isTableSettingsOpen: false,
+      wasTableSettingsOpenBeforeColumnSettings: true,
+    });
+
+    const { result } = renderHook(() => useSetTableDrawersOpenState());
+
+    act(() => {
+      result.current({
+        isColumnSettingsOpen: true,
+        isTableSettingsOpen: false,
+      });
+    });
+
+    expect(getMetaState().isColumnSettingsOpen).toBe(true);
+    expect(getMetaState().isTableSettingsOpen).toBe(false);
+    expect(getMetaState().wasTableSettingsOpenBeforeColumnSettings).toBe(true);
+  });
 });
