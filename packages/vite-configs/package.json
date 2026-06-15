@@ -10,7 +10,8 @@
     "./frontend-lint": "./vite.frontend-lint.shared.config.ts",
     "./api-lint": "./vite.api-lint.shared.config.ts",
     "./react-router-lint": "./vite.react-router-lint.shared.config.ts",
-    "./plugins": "./vite.plugins.shared.config.ts"
+    "./plugins": "./vite.plugins.shared.config.ts",
+    "./run": "./vite.run.shared.config.ts"
   },
   "devDependencies": {
     "@babel/preset-typescript": "catalog:",
