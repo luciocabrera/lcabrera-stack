@@ -6,17 +6,20 @@ import { colors } from '@/design-system/tokens/colors.stylex';
 export const styles = stylex.create({
   container: {
     flex: '1',
-    overflow: 'auto',
-    // contain: 'layout style',
+    overflowX: 'scroll',
+    overflowY: 'auto',
     position: 'relative',
     scrollbarColor: `${colors.borderSecondary} transparent`,
+    scrollbarGutter: 'stable',
     scrollbarWidth: 'thin',
     minHeight: 0,
   },
   containerLocked: {
-    pointerEvents: 'none',
-    touchAction: 'none',
+    overflowX: 'scroll',
     overflowY: 'scroll',
+    pointerEvents: 'none',
+    scrollbarGutter: 'stable',
+    touchAction: 'none',
   },
   outerContainer: {
     borderColor: colors.borderPrimary,
