@@ -9,11 +9,13 @@ export const useToogleTableIsColumnSettingsOpen = () => {
     const wasTableSettingsOpenBeforeColumnSettings =
       metaState?.wasTableSettingsOpenBeforeColumnSettings ?? false;
 
-    const nextIsTableSettingsOpen = isColumnSettingsOpen
-      ? false
-      : wasTableSettingsOpenBeforeColumnSettings
-        ? true
-        : (metaState?.isTableSettingsOpen ?? false);
+    let nextIsTableSettingsOpen = metaState?.isTableSettingsOpen ?? false;
+
+    if (isColumnSettingsOpen) {
+      nextIsTableSettingsOpen = false;
+    } else if (wasTableSettingsOpenBeforeColumnSettings) {
+      nextIsTableSettingsOpen = true;
+    }
 
     metaStore.set({
       isColumnSettingsOpen,
