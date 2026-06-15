@@ -28,6 +28,7 @@ TableData/
 │       └── useGetTableTotalRows.hook.ts     → Total records count
 │
 └── utils/
+
     ├── getInitialDataState.util.ts          → Build initial state with derived fields
     ├── shouldHydratePersistedDataState.util.ts → Guards session rehydration to matching query snapshots
     └── index.ts                             → Barrel: utils

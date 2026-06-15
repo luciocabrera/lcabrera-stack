@@ -185,6 +185,13 @@ Before creating anything new, check this inventory. If something here does the j
 | `resolveAcceptedPinSideUpdate`      | `components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/resolveAcceptedPinSideUpdate.util.ts`      | Resolves accepted pin-side actions into direct updates or conflict-modal/auto-accept outcomes                      |
 | `resolveAcceptedUnpinConflictState` | `components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/resolveAcceptedUnpinConflictState.util.ts` | Resolves unpin-conflict choices into pinning-only updates or reorder+pinning updates                               |
 
+### `src/components/Table/contexts/TableData/utils/`
+
+| Function                          | Location                                                                            | Description                                                                                     |
+| --------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `getInitialDataState`             | `components/Table/contexts/TableData/utils/getInitialDataState.util.ts`             | Builds initial table data state with derived `hasMore` and `totalLoadedRows`                    |
+| `shouldHydratePersistedDataState` | `components/Table/contexts/TableData/utils/shouldHydratePersistedDataState.util.ts` | Allows persisted data hydration only when totals and initial-page prefix match current snapshot |
+
 ### `src/utils/api/`
 
 | Function        | Location                | Description                                                                      |
@@ -193,9 +200,10 @@ Before creating anything new, check this inventory. If something here does the j
 
 ### `src/utils/comparison/`
 
-| Function       | Location                                | Description                                                      |
-| -------------- | --------------------------------------- | ---------------------------------------------------------------- |
-| `shallowEqual` | `utils/comparison/shallowEqual.util.ts` | `{ objA, objB }` → `boolean`; one-level key+value equality check |
+| Function         | Location                                  | Description                                                                |
+| ---------------- | ----------------------------------------- | -------------------------------------------------------------------------- |
+| `areEqualByJson` | `utils/comparison/areEqualByJson.util.ts` | `{ left, right }` → `boolean`; deep structural equality via JSON.stringify |
+| `shallowEqual`   | `utils/comparison/shallowEqual.util.ts`   | `{ objA, objB }` → `boolean`; one-level key+value equality check           |
 
 ### `src/utils/filters/`
 

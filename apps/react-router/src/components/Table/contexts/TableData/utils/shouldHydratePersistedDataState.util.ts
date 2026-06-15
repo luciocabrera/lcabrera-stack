@@ -1,15 +1,12 @@
 import type { TableDataState } from '@/components/Table/Table.types';
 import type { PersistedDataState } from '@/components/Table/utils/persistence.types';
 
+import { areEqualByJson } from '@/utils/comparison/areEqualByJson.util';
+
 type ShouldHydratePersistedDataStateArgs<TData> = {
   readonly initialDataState?: Partial<TableDataState<TData>>;
   readonly persistedDataState?: PersistedDataState<TData>;
 };
-
-const areRowsEqual = <TData>(
-  leftRow: TData | undefined,
-  rightRow: TData | undefined,
-): boolean => JSON.stringify(leftRow) === JSON.stringify(rightRow);
 
 /**
  * Rehydrates persisted rows only when they belong to the same query snapshot.
@@ -40,6 +37,9 @@ export const shouldHydratePersistedDataState = <TData>({
   }
 
   return initialData.every((row, index) =>
-    areRowsEqual(persistedDataState.data[index], row),
+    areEqualByJson({
+      left: persistedDataState.data[index],
+      right: row,
+    }),
   );
 };
