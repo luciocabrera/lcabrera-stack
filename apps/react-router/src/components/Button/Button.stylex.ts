@@ -2,6 +2,7 @@ import * as stylex from '@stylexjs/stylex';
 
 import { borderRadius } from '@/design-system/tokens/base.stylex';
 import { shadows } from '@/design-system/tokens/base.stylex';
+import { colors } from '@/design-system/tokens/colors.stylex';
 import {
   baseInteractiveStyles,
   colorVariants,
@@ -27,6 +28,11 @@ const buttonSpecificStyles = stylex.create({
     gap: 0,
     justifyContent: 'center',
   },
+  busyState: {
+    opacity: {
+      ':disabled': 1,
+    },
+  },
   labelHidden: {
     display: 'none',
   },
@@ -46,6 +52,7 @@ const styleVariants = stylex.create({
 
 const loadingStyles = stylex.create({
   overlay: {
+    backgroundColor: colors.surfaceElevated,
     borderRadius: borderRadius.md,
     insetBlock: 0,
     insetInline: 0,
@@ -61,6 +68,7 @@ export const buttonStyles = {
   color: colorVariants,
   icon: baseInteractiveStyles.icon,
   iconOnly: buttonSpecificStyles.iconOnly,
+  busyState: buttonSpecificStyles.busyState,
   label: baseInteractiveStyles.label,
   labelHidden: buttonSpecificStyles.labelHidden,
   orientation: orientationVariants,

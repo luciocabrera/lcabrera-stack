@@ -287,7 +287,9 @@ export const skeleton = stylex.create({
     animationName: shimmerAnimation,
     animationTimingFunction: 'ease-in-out',
     backgroundImage: `linear-gradient(90deg, transparent 0%, ${colors.surfacePrimary} 50%, transparent 100%)`,
+    display: 'block',
     height: '100%',
+    pointerEvents: 'none',
     width: '100%',
   },
 });

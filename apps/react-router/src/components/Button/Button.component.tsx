@@ -38,6 +38,7 @@ export const Button = ({
         buttonStyles.style[variant],
         buttonStyles.width[width],
         isIconOnly && buttonStyles.iconOnly,
+        isBusyState && buttonStyles.busyState,
         customStylex,
       )}
     >
