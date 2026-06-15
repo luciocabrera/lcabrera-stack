@@ -25,7 +25,7 @@ catalog:
   '@types/react': ^19.2.17
   '@types/react-dom': ^19.2.3
   '@typescript-eslint/utils': ^8.61.0
-  '@vitest/coverage-v8': ^4.1.8
+  '@vitest/coverage-v8': ^4.1.9
   babel-plugin-react-compiler: ^1.0.0
   cors: ^2.8.6
   eslint: ^10.5.0
@@ -42,13 +42,13 @@ catalog:
   fallow: ^2.96.0
   fastify: ^5.8.5
   globals: ^17.6.0
-  isbot: ^5.1.42
+  isbot: ^5.1.43
   jsdom: ^29.1.1
   knip: ^6.16.1
   lighthouse: ^13.4.0
   nodemon: ^3.1.14
   pg: ^8.21.0
-  playwright: ^1.60.0
+  playwright: ^1.61.0
   react: ^19.2.7
   react-dom: ^19.2.7
   react-router: ^7.17.0
@@ -58,7 +58,7 @@ catalog:
   vite: 8.0.16
   vite-plugin-babel: ^1.7.3
   vite-plus: ^0.1.24
-  vitest: 4.1.8
+  vitest: 4.1.9
 
   zod: ^4.4.3
 
@@ -91,6 +91,18 @@ minimumReleaseAgeExclude:
   - eslint@10.5.0
   - eslint-plugin-react-refresh@0.5.3
   - eslint-plugin-unicorn@66.0.0
+  - '@vitest/coverage-v8@4.1.9'
+  - '@vitest/expect@4.1.9'
+  - '@vitest/mocker@4.1.9'
+  - '@vitest/pretty-format@4.1.9'
+  - '@vitest/runner@4.1.9'
+  - '@vitest/snapshot@4.1.9'
+  - '@vitest/spy@4.1.9'
+  - '@vitest/utils@4.1.9'
+  - isbot@5.1.43
+  - playwright-core@1.61.0
+  - playwright@1.61.0
+  - vitest@4.1.9
 
 # overrides:
 #   vite: "catalog:"
