@@ -11,7 +11,7 @@ Source of truth for this report:
 Current metrics from JSON:
 
 - Functions above threshold: 18
-- Functions analyzed: 3713
+- Functions analyzed: 3716
 - Files analyzed: 1218
 - Average maintainability: 93 (good)
 - Dead-code issues: 18 (check.total_issues)

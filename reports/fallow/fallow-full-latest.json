@@ -2,16 +2,16 @@
   "kind": "combined",
   "schema_version": 7,
   "version": "2.96.0",
-  "elapsed_ms": 196,
+  "elapsed_ms": 207,
   "_meta": {
     "telemetry": {
-      "analysis_run_id": "run_389144537b5a1505"
+      "analysis_run_id": "run_f8859092cbb7925b"
     }
   },
   "check": {
     "schema_version": 7,
     "version": "2.96.0",
-    "elapsed_ms": 121,
+    "elapsed_ms": 139,
     "total_issues": 18,
     "entry_points": {
       "total": 322,
@@ -9223,13 +9223,13 @@
     "stats": {
       "total_files": 684,
       "files_with_clones": 79,
-      "total_lines": 47361,
+      "total_lines": 47391,
       "duplicated_lines": 3337,
-      "total_tokens": 174285,
+      "total_tokens": 174416,
       "duplicated_tokens": 7504,
       "clone_groups": 88,
       "clone_instances": 188,
-      "duplication_percentage": 7.04588163256688
+      "duplication_percentage": 7.041421366926209
     }
   },
   "health": {
@@ -9777,7 +9777,7 @@
     ],
     "summary": {
       "files_analyzed": 1218,
-      "functions_analyzed": 3713,
+      "functions_analyzed": 3716,
       "functions_above_threshold": 18,
       "max_cyclomatic_threshold": 20,
       "max_cognitive_threshold": 15,
@@ -9809,7 +9809,7 @@
         "total_exports": 1462,
         "dead_files": 0,
         "dead_exports": 0,
-        "total_lines": 52201,
+        "total_lines": 52231,
         "files_scored": 768,
         "total_deps": 0
       },
@@ -9828,7 +9828,7 @@
       },
       "p95_fan_in": 4,
       "coupling_high_pct": 0.9,
-      "total_loc": 52201
+      "total_loc": 52231
     },
     "file_scores": [
       {
@@ -12604,20 +12604,6 @@
         "crap_above_threshold": 0
       },
       {
-        "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useAcceptPinSide.hook.test.ts",
-        "fan_in": 0,
-        "fan_out": 8,
-        "dead_code_ratio": 0.0,
-        "complexity_density": 0.13,
-        "maintainability_index": 87.3,
-        "total_cyclomatic": 24,
-        "total_cognitive": 0,
-        "function_count": 24,
-        "lines": 192,
-        "crap_max": 1.2,
-        "crap_above_threshold": 0
-      },
-      {
         "path": "src/components/Table/contexts/TableConfig/columns/actions/useSetColumnSorting.hook.test.ts",
         "fan_in": 0,
         "fan_out": 6,
@@ -12671,6 +12657,20 @@
         "function_count": 30,
         "lines": 262,
         "crap_max": 2.9,
+        "crap_above_threshold": 0
+      },
+      {
+        "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useAcceptPinSide.hook.test.ts",
+        "fan_in": 0,
+        "fan_out": 8,
+        "dead_code_ratio": 0.0,
+        "complexity_density": 0.12,
+        "maintainability_index": 87.6,
+        "total_cyclomatic": 27,
+        "total_cognitive": 0,
+        "function_count": 27,
+        "lines": 222,
+        "crap_max": 1.2,
         "crap_above_threshold": 0
       },
       {
@@ -27676,6 +27676,12 @@
         "line_count": 135
       },
       {
+        "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useAcceptPinSide.hook.test.ts",
+        "name": "<arrow>",
+        "line": 88,
+        "line_count": 134
+      },
+      {
         "path": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
         "name": "<arrow>",
         "line": 219,
@@ -27818,12 +27824,6 @@
         "name": "<arrow>",
         "line": 5,
         "line_count": 105
-      },
-      {
-        "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useAcceptPinSide.hook.test.ts",
-        "name": "<arrow>",
-        "line": 88,
-        "line_count": 104
       },
       {
         "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useToggleColumnPin.hook.test.ts",
