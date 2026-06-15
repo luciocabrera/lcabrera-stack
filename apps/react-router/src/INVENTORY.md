@@ -121,6 +121,14 @@ Before creating anything new, check this inventory. If something here does the j
 | `useSetTableSettingsExpandedFilters` | `components/Table/contexts/TableConfig/meta/actions/useSetTableSettingsExpandedFilters.hook.ts` | Persists expanded filter keys for table-settings drawer                |
 | `useSetTableSettingsSelectedTab`     | `components/Table/contexts/TableConfig/meta/actions/useSetTableSettingsSelectedTab.hook.ts`     | Persists selected table-settings tab key in meta state                 |
 
+### `src/components/Table/contexts/FiltersData/filters/actions/`
+
+| Artifact                    | Location                                                                                  | Description                                                                                               |
+| --------------------------- | ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `useFetchFilterData`        | `components/Table/contexts/FiltersData/filters/actions/useFetchFilterData.hook.ts`        | Orchestrates filter-option fetching by composing the initial and paginated actions for one column         |
+| `useFetchInitialFilterData` | `components/Table/contexts/FiltersData/filters/actions/useFetchInitialFilterData.hook.ts` | Fetches the first page of filter options, updates totals, and optionally triggers prefetch                |
+| `useFetchMoreFilterData`    | `components/Table/contexts/FiltersData/filters/actions/useFetchMoreFilterData.hook.ts`    | Loads and appends subsequent pages of filter options using cache-or-fetch and optional post-load prefetch |
+
 ### `src/components/Table/TableSettingsDrawer/TableDrawerContext/actions/`
 
 | Artifact                         | Location                                                                                                 | Description                                                                                     |

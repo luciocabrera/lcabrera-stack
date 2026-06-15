@@ -5,7 +5,7 @@ Project: apps/react-router
 
 ## Current Baseline
 
-- Fallow full (`vp run fallow:full`): 26 above threshold · maintainability 93 (good) · 3561 analyzed
+- Fallow full (`vp run fallow:full`): 26 above threshold · maintainability 93 (good) · 3563 analyzed
 - Fallow dead-code/check: 0 issues reported by fallow (`check.total_issues`)
 - Fallow dupes: 80 clone groups
 - Canonical machine-readable source: `reports/fallow/fallow-full-latest.json`
