@@ -10,6 +10,7 @@
     "@babel/preset-typescript",
     "@eslint/js",
     "@stylexjs/eslint-plugin",
+    "@stylexjs/unplugin",
     "@typescript-eslint/utils",
     "babel-plugin-react-compiler",
     "eslint-config-prettier",
@@ -22,6 +23,7 @@
     "eslint-plugin-security",
     "eslint-plugin-unicorn",
     "globals",
+    "vite-plugin-babel",
     "typescript-eslint"
   ],
   "rules": {

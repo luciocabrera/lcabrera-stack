@@ -6,8 +6,8 @@ Project: apps/react-router
 ## Current Baseline
 
 - Fallow full (`vp run fallow:full`): 26 above threshold · maintainability 93 (good) · 3559 analyzed
-- Fallow dead-code: 2 issues reported by fallow
-- Fallow dupes: 73 clone groups
+- Fallow dead-code/check: 4 issues reported by fallow (`check.total_issues`)
+- Fallow dupes: 85 clone groups
 - Canonical machine-readable source: `reports/fallow/fallow-full-latest.json`
 - Analysis source doc: `reports/fallow-complexity-threshold-analysis.md`
 - Quality gate: `vp check` passes (format + lint + type)
@@ -57,7 +57,7 @@ Project: apps/react-router
 | ----- | ----- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------- |
 | 1     | B-012 | Remaining high-risk table-fetch hotspots (`useFetchMoreData`, `useFetchFilterData`) | Move both files below threshold while preserving pagination/prefetch semantics                  | Targeted tests + full gate + `vp run fallow:full` |
 | 2     | B-013 | Remaining threshold functions in `OrderDetail.component.tsx` and `entry.server.tsx` | Bring remaining CRAP-threshold functions to acceptable range with no UX/SSR behavior regression | Targeted tests + full gate + `vp run fallow:full` |
-| 3     | B-014 | Stabilize dead-code findings reported by fallow (2 issues)                          | Resolve reported dead code or document intentional retention with rationale                     | `fallow dead-code` + full gate                    |
+| 3     | B-014 | Stabilize dead-code/check findings reported by fallow (4 issues)                    | Resolve reported dead code/check findings or document intentional retention with rationale      | `fallow dead-code` + full gate                    |
 
 ## Validation Checklist Per Batch
 
