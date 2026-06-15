@@ -5,5 +5,5 @@ export type DetailsRow = {
 };
 
 export type DetailsSectionProps = {
-  readonly isBussy?: boolean;
+  readonly isBusy?: boolean;
 };

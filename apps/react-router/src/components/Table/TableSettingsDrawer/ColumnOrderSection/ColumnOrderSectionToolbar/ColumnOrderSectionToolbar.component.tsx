@@ -25,7 +25,7 @@ const COLUMN_ORDER_TOOLBAR = {
 } as const;
 
 export const ColumnOrderSectionToolbar = ({
-  isBussy = false,
+  isBusy = false,
   variant = 'footer',
 }: ColumnOrderSectionToolbarProps) => {
   const sorting = useGetColumnsSorting();
@@ -53,7 +53,7 @@ export const ColumnOrderSectionToolbar = ({
         aria-label={COLUMN_ORDER_TOOLBAR.orderBySorting.label}
         color={buttonColor}
         icon={<ColumnsOrderIcon size={iconSize} />}
-        isBussy={isBussy}
+        isBusy={isBusy}
         isDisabled={!hasSorting}
         onClick={orderBySorting}
         size={buttonSize}
@@ -68,7 +68,7 @@ export const ColumnOrderSectionToolbar = ({
         aria-label={COLUMN_ORDER_TOOLBAR.clear.label}
         color={buttonColor}
         icon={<EraserIcon size={iconSize} />}
-        isBussy={isBussy}
+        isBusy={isBusy}
         isDisabled={!hasClearableState}
         onClick={clearColumnOrderSection}
         size={buttonSize}
@@ -83,7 +83,7 @@ export const ColumnOrderSectionToolbar = ({
         aria-label={COLUMN_ORDER_TOOLBAR.reset.label}
         color={buttonColor}
         icon={<RefreshIcon size={iconSize} />}
-        isBussy={isBussy}
+        isBusy={isBusy}
         onClick={resetColumnOrderAndVisibility}
         size={buttonSize}
         width={buttonWidth}

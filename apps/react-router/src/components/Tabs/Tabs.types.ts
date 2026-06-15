@@ -20,8 +20,6 @@ export type TabsProps = ComponentPropsWithoutRef<'div'> & {
   readonly defaultSelectedTab?: string;
   /** Whether tab controls should render in a loading/busy state */
   readonly isBusy?: boolean;
-  /** Backward-compatible alias for isBusy */
-  readonly isBussy?: boolean;
   /** Called when a tab is selected */
   readonly onSelectTab?: (tabKey: string) => void;
   /** Controlled selected tab key */

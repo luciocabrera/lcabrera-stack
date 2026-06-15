@@ -17,7 +17,7 @@ const SORTING_TOOLBAR = {
 } as const;
 
 export const SortingSectionToolbar = ({
-  isBussy = false,
+  isBusy = false,
   variant = 'footer',
 }: SortingSectionToolbarProps) => {
   const sortDirection = useGetColumnSorting();
@@ -39,7 +39,7 @@ export const SortingSectionToolbar = ({
       <ClearResetToolbarButtons
         clearLabel={SORTING_TOOLBAR.clear.label}
         hasValue={hasSorting}
-        isBussy={isBussy}
+        isBusy={isBusy}
         onClear={handleClear}
         onReset={resetColumnSorting}
         resetLabel={SORTING_TOOLBAR.reset.label}

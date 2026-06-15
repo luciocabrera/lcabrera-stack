@@ -17,7 +17,7 @@ const PINNING_TOOLBAR = {
 } as const;
 
 export const PinningSectionToolbar = ({
-  isBussy = false,
+  isBusy = false,
   variant = 'footer',
 }: PinningSectionToolbarProps) => {
   const columnPinning = useGetColumnPinning();
@@ -39,7 +39,7 @@ export const PinningSectionToolbar = ({
       <ClearResetToolbarButtons
         clearLabel={PINNING_TOOLBAR.clear.label}
         hasValue={hasPinning}
-        isBussy={isBussy}
+        isBusy={isBusy}
         onClear={handleClear}
         onReset={resetColumnPinning}
         resetLabel={PINNING_TOOLBAR.reset.label}

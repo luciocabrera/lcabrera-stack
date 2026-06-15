@@ -12,14 +12,13 @@ import { busyStyles, styles } from './ToggleSwitch.stylex';
 
 export const ToggleSwitch = ({
   isBusy = false,
-  isBussy = false,
   isChecked,
   isDisabled,
   label,
   onChange,
   ...props
 }: ToggleSwitchProps) => {
-  const isBusyState = isBusy || isBussy;
+  const isBusyState = isBusy;
   const [isFocused, setIsFocused] = useState(false);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {

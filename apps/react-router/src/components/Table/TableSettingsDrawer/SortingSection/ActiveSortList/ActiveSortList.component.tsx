@@ -21,7 +21,7 @@ import { useGetColumnsSorting } from '../../TableDrawerContext/selectors';
 import { styles } from './ActiveSortList.stylex';
 import { SortingSectionToolbar } from '../SortingSectionToolbar';
 
-export const ActiveSortList = ({ isBussy = false }: ActiveSortListProps) => {
+export const ActiveSortList = ({ isBusy = false }: ActiveSortListProps) => {
   const columns = useGetColumns();
   const sorting = useGetColumnsSorting();
   const onSortChange = useSetColumnsSortings();
@@ -79,7 +79,7 @@ export const ActiveSortList = ({ isBussy = false }: ActiveSortListProps) => {
                 <SortDescIcon size={ICON_SIZE_MD} />
               )
             }
-            isBussy={isBussy}
+            isBusy={isBusy}
             onClick={() => {
               handleToggleDirection(item.columnKey);
             }}
@@ -90,7 +90,7 @@ export const ActiveSortList = ({ isBussy = false }: ActiveSortListProps) => {
             aria-label={`Remove ${item.label} sort`}
             color='ghost'
             icon={<MenuCloseIcon size={ICON_SIZE_MD} />}
-            isBussy={isBussy}
+            isBusy={isBusy}
             onClick={() => {
               handleRemoveSort(item.columnKey);
             }}
@@ -107,7 +107,7 @@ export const ActiveSortList = ({ isBussy = false }: ActiveSortListProps) => {
     <SidePanelSection>
       <SidePanelSectionHeader
         title={`Sort Order (${sortItems.length})`}
-        toolbar={<SortingSectionToolbar isBussy={isBussy} variant='toolbar' />}
+        toolbar={<SortingSectionToolbar isBusy={isBusy} variant='toolbar' />}
       />
       {sortItems.length === 0 ? (
         <InfoBox>
@@ -116,7 +116,7 @@ export const ActiveSortList = ({ isBussy = false }: ActiveSortListProps) => {
       ) : (
         <div {...stylex.props(styles.sortList)}>
           <DraggableList
-            isBussy={isBussy}
+            isBusy={isBusy}
             items={draggableItems}
             onOrderChange={handleReorder}
           />

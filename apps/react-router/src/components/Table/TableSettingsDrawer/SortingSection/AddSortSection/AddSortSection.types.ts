@@ -1,4 +1,4 @@
 export type AddSortSectionProps = {
-  readonly isBussy?: boolean;
+  readonly isBusy?: boolean;
   readonly onDropdownOpenChange?: (isOpen: boolean) => void;
 };

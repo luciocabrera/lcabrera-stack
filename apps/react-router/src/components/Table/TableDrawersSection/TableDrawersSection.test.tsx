@@ -52,12 +52,12 @@ const MockColumnSettingsDrawer = vi.hoisted(
   () =>
     ({
       columnKey,
-      isBussy,
+      isBusy,
     }: {
       readonly columnKey: string;
-      readonly isBussy?: boolean;
+      readonly isBusy?: boolean;
     }) => {
-      columnSettingsDrawerPropsSpy({ columnKey, isBussy });
+      columnSettingsDrawerPropsSpy({ columnKey, isBusy });
       return <div>Column Settings Drawer: {columnKey}</div>;
     },
 );
@@ -71,8 +71,8 @@ const MockTableDrawerProvider = vi.hoisted(
 
 const MockTableSettingsDrawer = vi.hoisted(
   () =>
-    ({ isBussy }: { readonly isBussy?: boolean }) => {
-      tableSettingsDrawerPropsSpy({ isBussy });
+    ({ isBusy }: { readonly isBusy?: boolean }) => {
+      tableSettingsDrawerPropsSpy({ isBusy });
       return <div>Table Settings Drawer</div>;
     },
 );
@@ -233,7 +233,7 @@ describe('TableDrawersSection', () => {
     );
     expect(screen.getByTestId('table-drawer-provider')).toBeTruthy();
     expect(tableSettingsDrawerPropsSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ isBussy: true }),
+      expect.objectContaining({ isBusy: true }),
     );
   });
 
@@ -250,7 +250,7 @@ describe('TableDrawersSection', () => {
       'Column Settings Drawer: name',
     );
     expect(columnSettingsDrawerPropsSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ columnKey: 'name', isBussy: true }),
+      expect.objectContaining({ columnKey: 'name', isBusy: true }),
     );
   });
 });

@@ -57,7 +57,7 @@ const formatMetadataValue = (value: TableMetadataValue): string => {
   return String(value);
 };
 
-export const DetailsSection = ({ isBussy = false }: DetailsSectionProps) => {
+export const DetailsSection = ({ isBusy = false }: DetailsSectionProps) => {
   const columns = useGetColumns();
   const totalLoadedRows = useGetTableTotalLoadedRows();
   const totalRows = useGetTableTotalRows();
@@ -202,7 +202,7 @@ export const DetailsSection = ({ isBussy = false }: DetailsSectionProps) => {
         <dl {...stylex.props(styles.rows)}>
           {rows.map((row) => (
             <div key={row.key} {...stylex.props(styles.row)}>
-              {isBussy && (
+              {isBusy && (
                 <div {...stylex.props(busyStyles.overlay)}>
                   <div {...stylex.props(busyStyles.wave)} />
                 </div>

@@ -33,7 +33,7 @@ import {
 import { styles } from './GeneralSettingsSection.stylex';
 
 export const GeneralSettingsSection = ({
-  isBussy = false,
+  isBusy = false,
   ...props
 }: GeneralSettingsSectionProps) => {
   const columns = useGetColumns();
@@ -97,7 +97,7 @@ export const GeneralSettingsSection = ({
             color={selectedPreset === 'min' ? 'primary' : 'outline'}
             disabled={!hasMinWidthsConfigured}
             icon={<MinimizeIcon size={ICON_SIZE_MD} />}
-            isBussy={isBussy}
+            isBusy={isBusy}
             onClick={() => {
               handleToggle('min');
             }}
@@ -110,7 +110,7 @@ export const GeneralSettingsSection = ({
             color={selectedPreset === 'max' ? 'primary' : 'outline'}
             disabled={!hasMaxWidthsConfigured}
             icon={<MaximizeIcon size={ICON_SIZE_MD} />}
-            isBussy={isBussy}
+            isBusy={isBusy}
             onClick={() => {
               handleToggle('max');
             }}
@@ -122,7 +122,7 @@ export const GeneralSettingsSection = ({
           <Button
             color={selectedPreset === 'default' ? 'primary' : 'outline'}
             icon={<RefreshIcon size={ICON_SIZE_MD} />}
-            isBussy={isBussy}
+            isBusy={isBusy}
             onClick={() => {
               handleToggle('default');
             }}
@@ -141,17 +141,17 @@ export const GeneralSettingsSection = ({
 
       <SidePanelSection>
         <SidePanelSectionHeader title='Filters' />
-        <FiltersSectionToolbar isBussy={isBussy} />
+        <FiltersSectionToolbar isBusy={isBusy} />
       </SidePanelSection>
 
       <SidePanelSection>
         <SidePanelSectionHeader title='Sorting' />
-        <SortingSectionToolbar isBussy={isBussy} />
+        <SortingSectionToolbar isBusy={isBusy} />
       </SidePanelSection>
 
       <SidePanelSection>
         <SidePanelSectionHeader title='Columns' />
-        <ColumnOrderSectionToolbar isBussy={isBussy} />
+        <ColumnOrderSectionToolbar isBusy={isBusy} />
       </SidePanelSection>
 
       <SidePanelSection>
@@ -160,7 +160,7 @@ export const GeneralSettingsSection = ({
           <Button
             color='outline'
             icon={<EraserIcon size={ICON_SIZE_MD} />}
-            isBussy={isBussy}
+            isBusy={isBusy}
             onClick={clearAllSettings}
             size='sm'
             width='full'
@@ -170,7 +170,7 @@ export const GeneralSettingsSection = ({
           <Button
             color='outline'
             icon={<RefreshIcon size={ICON_SIZE_MD} />}
-            isBussy={isBussy}
+            isBusy={isBusy}
             onClick={resetTableSettings}
             size='sm'
             width='full'

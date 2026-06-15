@@ -42,7 +42,7 @@ import { UnpinConflictModal } from './UnpinConflictModal';
 import { buildAllOrderedColumns, createDraggableItems } from './utils';
 
 export const ColumnOrderSection = ({
-  isBussy = false,
+  isBusy = false,
   ...props
 }: ColumnOrderSectionProps) => {
   const columns = useGetColumns();
@@ -84,7 +84,7 @@ export const ColumnOrderSection = ({
           {isStatic && <LockIcon size={14} />}
           <span {...stylex.props(styles.columnLabel)}>{label}</span>
           <ToggleSwitch
-            isBussy={isBussy}
+            isBusy={isBusy}
             isChecked={isPinned}
             isDisabled={isStatic}
             label='Pin'
@@ -93,7 +93,7 @@ export const ColumnOrderSection = ({
             }}
           />
           <ToggleSwitch
-            isBussy={isBussy}
+            isBusy={isBusy}
             isChecked={isVisible}
             isDisabled={isStatic}
             label='Show'
@@ -114,16 +114,16 @@ export const ColumnOrderSection = ({
       <SidePanelSectionHeader
         title={`Column Order & Visibility (${allOrderedColumns.length - columnVisibility.size}/${allOrderedColumns.length})`}
         toolbar={
-          <ColumnOrderSectionToolbar isBussy={isBussy} variant='toolbar' />
+          <ColumnOrderSectionToolbar isBusy={isBusy} variant='toolbar' />
         }
       />
       <DraggableList
-        isBussy={isBussy}
+        isBusy={isBusy}
         items={draggableItems}
         onOrderChange={reorderColumns}
       />
 
-      <ColumnOrderSectionToolbar isBussy={isBussy} />
+      <ColumnOrderSectionToolbar isBusy={isBusy} />
       <PinSideModal
         columnLabel={pinSideModal.columnLabel}
         isOpen={pinSideModal.isOpen}

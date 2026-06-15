@@ -38,7 +38,7 @@ import { SortingSection } from './SortingSection';
 
 export const ColumnSettingsDrawer = <TData extends Record<string, unknown>>({
   columnKey,
-  isBussy = false,
+  isBusy = false,
 }: ColumnSettingsDrawerProps<TData>) => {
   useRenderTracker({ componentName: `ColumnSettingsDrawer:${columnKey}` });
 
@@ -58,14 +58,14 @@ export const ColumnSettingsDrawer = <TData extends Record<string, unknown>>({
 
   const tabs: TabItem[] = [
     {
-      children: <GeneralSection columnKey={columnKey} isBussy={isBussy} />,
+      children: <GeneralSection columnKey={columnKey} isBusy={isBusy} />,
       header: 'General',
       key: 'general',
     },
     ...(isFilterable && column.dataType
       ? [
           {
-            children: <FilterSection columnKey={columnKey} isBussy={isBussy} />,
+            children: <FilterSection columnKey={columnKey} isBusy={isBusy} />,
             header: 'Filter',
             key: 'filter',
           },
@@ -74,7 +74,7 @@ export const ColumnSettingsDrawer = <TData extends Record<string, unknown>>({
     ...(isSortable
       ? [
           {
-            children: <SortingSection isBussy={isBussy} />,
+            children: <SortingSection isBusy={isBusy} />,
             header: 'Sorting',
             key: 'sorting',
           },
@@ -84,9 +84,7 @@ export const ColumnSettingsDrawer = <TData extends Record<string, unknown>>({
       ? []
       : [
           {
-            children: (
-              <PinningSection columnKey={columnKey} isBussy={isBussy} />
-            ),
+            children: <PinningSection columnKey={columnKey} isBusy={isBusy} />,
             header: 'Pinning',
             key: 'pinning',
           },
@@ -99,7 +97,7 @@ export const ColumnSettingsDrawer = <TData extends Record<string, unknown>>({
   ];
 
   const handleAccept = () => {
-    if (isBussy) {
+    if (isBusy) {
       return;
     }
 
@@ -107,7 +105,7 @@ export const ColumnSettingsDrawer = <TData extends Record<string, unknown>>({
   };
 
   const handleCancel = () => {
-    if (isBussy) {
+    if (isBusy) {
       return;
     }
 
@@ -115,7 +113,7 @@ export const ColumnSettingsDrawer = <TData extends Record<string, unknown>>({
   };
 
   const handleTogglePin = () => {
-    if (isBussy) {
+    if (isBusy) {
       return;
     }
 
@@ -134,7 +132,7 @@ export const ColumnSettingsDrawer = <TData extends Record<string, unknown>>({
       <SidePanelHeader
         actions={
           <SidePanelHeaderToolbar
-            isBussy={isBussy}
+            isBusy={isBusy}
             isPinned={isPinned}
             onClose={handleCancel}
             onTogglePin={handleTogglePin}
@@ -147,7 +145,7 @@ export const ColumnSettingsDrawer = <TData extends Record<string, unknown>>({
       </SidePanelHeader>
       <SidePanelBody>
         <Tabs
-          isBussy={isBussy}
+          isBusy={isBusy}
           onSelectTab={setSelectedTab}
           selectedTab={selectedTab}
           tabs={tabs}
@@ -156,7 +154,7 @@ export const ColumnSettingsDrawer = <TData extends Record<string, unknown>>({
       <SidePanelFooter>
         <Button
           color='primary'
-          isBussy={isBussy}
+          isBusy={isBusy}
           onClick={handleAccept}
           size='sm'
         >
@@ -164,7 +162,7 @@ export const ColumnSettingsDrawer = <TData extends Record<string, unknown>>({
         </Button>
         <Button
           color='outline'
-          isBussy={isBussy}
+          isBusy={isBusy}
           onClick={handleCancel}
           size='sm'
         >

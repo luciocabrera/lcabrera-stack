@@ -27,13 +27,13 @@ graph TD
   isCol -->|"true + columnKey"| CDP["ColumnDrawerProvider"]
   CDP --> CSD["ColumnSettingsDrawer"]
   isLoading --> CBusy{"isColPinned && isLoading"}
-  CBusy -->|Yes| CBusyProp["ColumnSettingsDrawer isBussy=true"]
+  CBusy -->|Yes| CBusyProp["ColumnSettingsDrawer isBusy=true"]
 
   isCol -->|false| check2{"isTableSettingsOpen?"}
   check2 -->|true| TDP["TableDrawerProvider"]
   TDP --> TSD["TableSettingsDrawer"]
   isLoading --> TBusy{"isTablePinned && isLoading"}
-  TBusy -->|Yes| TBusyProp["TableSettingsDrawer isBussy=true"]
+  TBusy -->|Yes| TBusyProp["TableSettingsDrawer isBusy=true"]
 
   check2 -->|false| empty["<> (empty fragment)"]
 ```

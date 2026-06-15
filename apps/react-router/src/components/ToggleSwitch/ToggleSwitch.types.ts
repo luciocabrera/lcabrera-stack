@@ -9,8 +9,6 @@ export type ToggleSwitchProps = Omit<
 > & {
   /** Whether loading shimmer should be shown */
   readonly isBusy?: boolean;
-  /** Backward-compatible alias for isBusy */
-  readonly isBussy?: boolean;
   /** Whether the toggle is checked */
   readonly isChecked: boolean;
   /** Whether the toggle is disabled */

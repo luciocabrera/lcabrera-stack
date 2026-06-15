@@ -7,7 +7,7 @@ import { useDraggableList } from './hooks';
 import { handleDragOver } from './utils';
 
 export const DraggableList = ({
-  isBussy = false,
+  isBusy = false,
   items: initialItems,
   onOrderChange,
 }: DraggableListProps) => {
@@ -26,7 +26,7 @@ export const DraggableList = ({
           dragItemId.current !== undefined && dragItemId.current !== item.id;
 
         const canDrag = item.isDraggable !== false;
-        const isDragEnabled = canDrag && !isBussy;
+        const isDragEnabled = canDrag && !isBusy;
 
         return (
           <li
@@ -55,7 +55,7 @@ export const DraggableList = ({
                 : undefined
             }
           >
-            {isBussy && (
+            {isBusy && (
               <div {...stylex.props(busyStyles.overlay)}>
                 <div {...stylex.props(busyStyles.wave)} />
               </div>

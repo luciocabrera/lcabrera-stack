@@ -23,7 +23,7 @@ import { styles } from './ActiveFiltersList.stylex';
 
 export const ActiveFiltersList = ({
   expandedFilters,
-  isBussy = false,
+  isBusy = false,
   isCollapseAllDisabled,
   isExpandAllDisabled,
   onCollapseAll,
@@ -87,7 +87,7 @@ export const ActiveFiltersList = ({
         title={`Active Filters (${filterEntries.length})`}
         toolbar={
           <FiltersSectionToolbar
-            isBussy={isBussy}
+            isBusy={isBusy}
             isCollapseAllDisabled={isCollapseAllDisabled}
             isExpandAllDisabled={isExpandAllDisabled}
             onCollapseAll={onCollapseAll}
@@ -111,7 +111,7 @@ export const ActiveFiltersList = ({
                 {...stylex.props(styles.filterItem)}
                 data-testid={`filter-item-${columnKey}`}
               >
-                {isBussy && (
+                {isBusy && (
                   <div {...stylex.props(styles.busyOverlay)}>
                     <div {...stylex.props(styles.busyWave)} />
                   </div>
@@ -119,7 +119,7 @@ export const ActiveFiltersList = ({
                 <div {...stylex.props(styles.filterItemHeader)}>
                   <button
                     {...stylex.props(styles.filterToggle)}
-                    disabled={isBussy}
+                    disabled={isBusy}
                     onClick={() => {
                       toggleFilterExpanded(columnKey);
                     }}
@@ -142,7 +142,7 @@ export const ActiveFiltersList = ({
                     aria-label={`Remove ${column.label} filter`}
                     color='ghost'
                     icon={<MenuCloseIcon size={ICON_SIZE_MD} />}
-                    isBussy={isBussy}
+                    isBusy={isBusy}
                     onClick={() => {
                       handleRemoveFilter(columnKey);
                     }}

@@ -29,7 +29,7 @@ import { styles } from './GeneralSection.stylex';
 
 export const GeneralSection = <TData,>({
   columnKey,
-  isBussy = false,
+  isBusy = false,
 }: GeneralSectionProps<TData>) => {
   const column = useGetNormalizedColumn<TData>(columnKey);
 
@@ -82,7 +82,7 @@ export const GeneralSection = <TData,>({
             color={selectedPreset === 'min' ? 'primary' : 'outline'}
             disabled={!hasMinWidth}
             icon={<MinimizeIcon size={ICON_SIZE_MD} />}
-            isBussy={isBussy}
+            isBusy={isBusy}
             onClick={() => {
               handleToggle('min');
             }}
@@ -95,7 +95,7 @@ export const GeneralSection = <TData,>({
             color={selectedPreset === 'max' ? 'primary' : 'outline'}
             disabled={!hasMaxWidth}
             icon={<MaximizeIcon size={ICON_SIZE_MD} />}
-            isBussy={isBussy}
+            isBusy={isBusy}
             onClick={() => {
               handleToggle('max');
             }}
@@ -107,7 +107,7 @@ export const GeneralSection = <TData,>({
           <Button
             color={selectedPreset === 'default' ? 'primary' : 'outline'}
             icon={<RefreshIcon size={ICON_SIZE_MD} />}
-            isBussy={isBussy}
+            isBusy={isBusy}
             onClick={() => {
               handleToggle('default');
             }}
@@ -130,7 +130,7 @@ export const GeneralSection = <TData,>({
           <Button
             color='outline'
             icon={<EraserIcon size={ICON_SIZE_MD} />}
-            isBussy={isBussy}
+            isBusy={isBusy}
             onClick={clearAllSettings}
             size='sm'
             width='full'
@@ -140,7 +140,7 @@ export const GeneralSection = <TData,>({
           <Button
             color='outline'
             icon={<RefreshIcon size={ICON_SIZE_MD} />}
-            isBussy={isBussy}
+            isBusy={isBusy}
             onClick={resetAllSettings}
             size='sm'
             width='full'

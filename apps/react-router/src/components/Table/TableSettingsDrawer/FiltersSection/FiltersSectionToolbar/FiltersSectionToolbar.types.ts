@@ -1,6 +1,6 @@
 export type FiltersSectionToolbarProps = {
   /** Whether buttons should render in busy state */
-  readonly isBussy?: boolean;
+  readonly isBusy?: boolean;
   /** Disable the collapse-all action button */
   readonly isCollapseAllDisabled?: boolean;
   /** Disable the expand-all action button */

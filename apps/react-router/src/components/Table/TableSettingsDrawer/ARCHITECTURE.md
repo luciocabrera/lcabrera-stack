@@ -246,11 +246,11 @@ Used in `TableDrawersSection` which wraps it with `TableDrawerProvider`:
 
 ```
 <TableDrawerProvider>
-  <TableSettingsDrawer isBussy={isLoading && isTableSettingsPinned} />
+  <TableSettingsDrawer isBusy={isLoading && isTableSettingsPinned} />
 </TableDrawerProvider>
 ```
 
 When the persisted drawer state is pinned+open and the table is still loading,
 `TableDrawersSection` still renders this component and passes
-`isBussy=true`. Controls remain visible but become non-interactive and
+`isBusy=true`. Controls remain visible but become non-interactive and
 render shimmer overlays to preserve layout and avoid loading shifts.

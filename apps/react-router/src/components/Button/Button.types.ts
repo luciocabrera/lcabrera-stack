@@ -21,7 +21,6 @@ export type ButtonProps = Omit<
   readonly customStylex?: StyleXStyles;
   readonly icon?: ReactNode;
   readonly isBusy?: boolean;
-  readonly isBussy?: boolean;
   readonly isIconOnly?: boolean;
   readonly isDisabled?: boolean;
   readonly onClick?: (() => void) | MouseEventHandler<HTMLButtonElement>;

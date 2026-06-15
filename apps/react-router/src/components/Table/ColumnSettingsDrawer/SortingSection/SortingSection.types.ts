@@ -1,3 +1,3 @@
 export type SortingSectionProps = {
-  readonly isBussy?: boolean;
+  readonly isBusy?: boolean;
 };

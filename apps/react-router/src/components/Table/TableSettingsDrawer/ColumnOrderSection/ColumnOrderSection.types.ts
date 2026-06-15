@@ -1,7 +1,7 @@
 import type { ComponentPropsWithoutRef } from 'react';
 
 export type ColumnOrderSectionProps = ComponentPropsWithoutRef<'div'> & {
-  readonly isBussy?: boolean;
+  readonly isBusy?: boolean;
 };
 
 export type {

@@ -37,6 +37,12 @@ describe('Button', () => {
     expect(screen.getByTestId<HTMLButtonElement>('button').disabled).toBe(true);
   });
 
+  it('renders as disabled when isBusy is true', () => {
+    render(<Button isBusy>Busy</Button>);
+
+    expect(screen.getByTestId<HTMLButtonElement>('button').disabled).toBe(true);
+  });
+
   it('renders icon slot when icon prop is provided', () => {
     render(<Button icon={<span data-testid='icon'>★</span>}>With Icon</Button>);
 

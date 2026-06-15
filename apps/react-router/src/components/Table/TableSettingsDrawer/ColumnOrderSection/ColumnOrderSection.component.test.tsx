@@ -150,7 +150,7 @@ vi.mock('@/components/ToggleSwitch', () => ({
     label,
     onChange,
   }: {
-    readonly isBussy?: boolean;
+    readonly isBusy?: boolean;
     readonly isChecked: boolean;
     readonly isDisabled?: boolean;
     readonly label: string;
@@ -190,7 +190,7 @@ vi.mock('./ColumnOrderSectionToolbar', () => ({
   ColumnOrderSectionToolbar: ({
     variant,
   }: {
-    readonly isBussy?: boolean;
+    readonly isBusy?: boolean;
     readonly variant?: 'footer' | 'toolbar';
   }) => <div>{variant ?? 'footer'}</div>,
 }));

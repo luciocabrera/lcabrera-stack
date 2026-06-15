@@ -28,14 +28,14 @@ export const TableDrawersSection = () => {
       <ColumnDrawerProvider columnKey={columnKey}>
         <ColumnSettingsDrawer
           columnKey={columnKey}
-          isBussy={isLoading && isColumnSettingsPinned}
+          isBusy={isLoading && isColumnSettingsPinned}
         />
       </ColumnDrawerProvider>
     );
   if (isTableSettingsOpen)
     return (
       <TableDrawerProvider>
-        <TableSettingsDrawer isBussy={isLoading && isTableSettingsPinned} />
+        <TableSettingsDrawer isBusy={isLoading && isTableSettingsPinned} />
       </TableDrawerProvider>
     );
   return <></>;

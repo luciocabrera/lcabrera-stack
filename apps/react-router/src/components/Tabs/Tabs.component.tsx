@@ -10,13 +10,12 @@ import { busyStyles, styles } from './Tabs.stylex';
 export const Tabs = ({
   defaultSelectedTab,
   isBusy = false,
-  isBussy = false,
   onSelectTab,
   selectedTab,
   tabs,
   ...props
 }: TabsProps) => {
-  const isBusyState = isBusy || isBussy;
+  const isBusyState = isBusy;
   const [uncontrolledActiveTab, setUncontrolledActiveTab] = useState(
     defaultSelectedTab ?? tabs[0]?.key ?? '',
   );

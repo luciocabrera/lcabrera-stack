@@ -1,3 +1,3 @@
 export type FiltersSectionProps = {
-  readonly isBussy?: boolean;
+  readonly isBusy?: boolean;
 };

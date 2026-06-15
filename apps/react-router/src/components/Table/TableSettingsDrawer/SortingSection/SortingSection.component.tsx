@@ -12,19 +12,19 @@ import { AddSortSection } from './AddSortSection';
 import { SortingSectionToolbar } from './SortingSectionToolbar';
 
 export const SortingSection = ({ ...props }: SortingSectionProps) => {
-  const isBussy = props.isBussy ?? false;
+  const isBusy = props.isBusy ?? false;
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   return (
     <SidePanelSectionMain {...props}>
       <AddSortSection
-        isBussy={isBussy}
+        isBusy={isBusy}
         onDropdownOpenChange={setIsDropdownOpen}
       />
 
       <SidePanelSectionOverlay isOpen={isDropdownOpen}>
-        <ActiveSortList isBussy={isBussy} />
-        <SortingSectionToolbar isBussy={isBussy} />
+        <ActiveSortList isBusy={isBusy} />
+        <SortingSectionToolbar isBusy={isBusy} />
       </SidePanelSectionOverlay>
     </SidePanelSectionMain>
   );
