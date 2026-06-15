@@ -11,11 +11,11 @@ Source of truth for this report:
 Current metrics from JSON:
 
 - Functions above threshold: 26
-- Functions analyzed: 3559
+- Functions analyzed: 3561
 - Files analyzed: 1200
 - Average maintainability: 93 (good)
-- Dead-code issues: 4 (check.total_issues)
-- Duplicate clone groups: 85 (dupes.stats.clone_groups)
+- Dead-code issues: 0 (check.total_issues)
+- Duplicate clone groups: 80 (dupes.stats.clone_groups)
 - Severity split: 0 critical, 7 high, 19 moderate
 - Thresholds: cyclomatic 20, cognitive 15, CRAP 30
 
@@ -30,7 +30,7 @@ Use this report as triage guidance grounded on the current JSON snapshot. For pl
 - src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useToggleColumnPin.hook.ts:31 (<anonymous>) - HIGH crap
 - src/components/Table/contexts/TableConfig/meta/actions/useSetTableDrawersOpenState.hook.ts:11 (<anonymous>) - HIGH crap
 - src/routes/enterprise-orders/order-detail/OrderDetail.component.tsx:211 (<anonymous>) - HIGH crap
-- src/App.tsx:95 (<anonymous>) - HIGH crap
+- src/App.tsx:96 (<anonymous>) - HIGH crap
 - src/routes/wide-alltypes-150/WideAlltypes150.constants.ts:16 (<anonymous>) - HIGH crap
 
 ## Drift Control

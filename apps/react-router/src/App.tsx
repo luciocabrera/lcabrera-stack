@@ -1,5 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 import { useCallback, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 
 import type { TableColumn } from './components/Table/Table.types';
 import type { VirtualListDataState } from './components/VirtualList';
@@ -182,6 +183,34 @@ const getTableDataPromise = () => {
   return tableDataPromise;
 };
 
+type ShowcaseSectionProps = {
+  readonly children: ReactNode;
+  readonly title: string;
+};
+
+const ShowcaseSection = ({ children, title }: ShowcaseSectionProps) => {
+  return (
+    <section {...stylex.props(styles.section)}>
+      <h2 {...stylex.props(styles.sectionTitle)}>{title}</h2>
+      {children}
+    </section>
+  );
+};
+
+type ShowcaseSubsectionProps = {
+  readonly children: ReactNode;
+  readonly title: ReactNode;
+};
+
+const ShowcaseSubsection = ({ children, title }: ShowcaseSubsectionProps) => {
+  return (
+    <div {...stylex.props(styles.subsection)}>
+      <h3 {...stylex.props(styles.subsectionTitle)}>{title}</h3>
+      {children}
+    </div>
+  );
+};
+
 const App = () => {
   const { isDarkMode, toggleTheme } = useTheme();
   const [isLeftPanelOpen, setIsLeftPanelOpen] = useState(false);
@@ -259,11 +288,8 @@ const App = () => {
           </Button>
         </header>
         {/* Button Section */}
-        <section {...stylex.props(styles.section)}>
-          <h2 {...stylex.props(styles.sectionTitle)}>Buttons</h2>
-
-          <div {...stylex.props(styles.subsection)}>
-            <h3 {...stylex.props(styles.subsectionTitle)}>Colors</h3>
+        <ShowcaseSection title='Buttons'>
+          <ShowcaseSubsection title='Colors'>
             <div {...stylex.props(styles.buttonGrid)}>
               <Button color='primary'>Primary</Button>
               <Button color='secondary'>Secondary</Button>
@@ -273,42 +299,36 @@ const App = () => {
               <Button color='ghost'>Ghost</Button>
               <Button color='outline'>Outline</Button>
             </div>
-          </div>
+          </ShowcaseSubsection>
 
-          <div {...stylex.props(styles.subsection)}>
-            <h3 {...stylex.props(styles.subsectionTitle)}>Sizes</h3>
+          <ShowcaseSubsection title='Sizes'>
             <div {...stylex.props(styles.buttonGrid)}>
               <Button size='sm'>Small</Button>
               <Button size='md'>Medium</Button>
               <Button size='lg'>Large</Button>
             </div>
-          </div>
+          </ShowcaseSubsection>
 
-          <div {...stylex.props(styles.subsection)}>
-            <h3 {...stylex.props(styles.subsectionTitle)}>Variants</h3>
+          <ShowcaseSubsection title='Variants'>
             <div {...stylex.props(styles.buttonGrid)}>
               <Button variant='solid'>Solid</Button>
               <Button variant='flat'>Flat</Button>
               <Button variant='elevated'>Elevated</Button>
             </div>
-          </div>
+          </ShowcaseSubsection>
 
-          <div {...stylex.props(styles.subsection)}>
-            <h3 {...stylex.props(styles.subsectionTitle)}>States</h3>
+          <ShowcaseSubsection title='States'>
             <div {...stylex.props(styles.buttonGrid)}>
               <Button>Normal</Button>
               <Button isDisabled>Disabled</Button>
               <Button width='full'>Full Width</Button>
             </div>
-          </div>
-        </section>
+          </ShowcaseSubsection>
+        </ShowcaseSection>
 
         {/* Card Section */}
-        <section {...stylex.props(styles.section)}>
-          <h2 {...stylex.props(styles.sectionTitle)}>Cards</h2>
-
-          <div {...stylex.props(styles.subsection)}>
-            <h3 {...stylex.props(styles.subsectionTitle)}>Basic Cards</h3>
+        <ShowcaseSection title='Cards'>
+          <ShowcaseSubsection title='Basic Cards'>
             <div {...stylex.props(styles.cardGrid)}>
               <Card elevation='sm'>
                 <CardHeader>
@@ -345,10 +365,9 @@ const App = () => {
                 </CardDescription>
               </Card>
             </div>
-          </div>
+          </ShowcaseSubsection>
 
-          <div {...stylex.props(styles.subsection)}>
-            <h3 {...stylex.props(styles.subsectionTitle)}>Interactive Cards</h3>
+          <ShowcaseSubsection title='Interactive Cards'>
             <div {...stylex.props(styles.cardGrid)}>
               <Card elevation='sm' interactive='hoverable'>
                 <CardBody>
@@ -374,16 +393,11 @@ const App = () => {
                 </CardBody>
               </Card>
             </div>
-          </div>
+          </ShowcaseSubsection>
 
           {/* Table Showcase Section */}
-          <section {...stylex.props(styles.section)}>
-            <h2 {...stylex.props(styles.sectionTitle)}>VirtualSelect</h2>
-
-            <div {...stylex.props(styles.subsection)}>
-              <h3 {...stylex.props(styles.subsectionTitle)}>
-                Single Select (static options)
-              </h3>
+          <ShowcaseSection title='VirtualSelect'>
+            <ShowcaseSubsection title='Single Select (static options)'>
               <div style={{ maxWidth: '20rem' }}>
                 <VirtualSelect
                   mode='single'
@@ -399,12 +413,9 @@ const App = () => {
                   ? singleSelected.join(', ')
                   : '(none)'}
               </p>
-            </div>
+            </ShowcaseSubsection>
 
-            <div {...stylex.props(styles.subsection)}>
-              <h3 {...stylex.props(styles.subsectionTitle)}>
-                Multi Select (static options)
-              </h3>
+            <ShowcaseSubsection title='Multi Select (static options)'>
               <div style={{ maxWidth: '20rem' }}>
                 <VirtualSelect
                   mode='multi'
@@ -418,12 +429,11 @@ const App = () => {
                 Selected:{' '}
                 {multiSelected.length > 0 ? multiSelected.join(', ') : '(none)'}
               </p>
-            </div>
+            </ShowcaseSubsection>
 
-            <div {...stylex.props(styles.subsection)}>
-              <h3 {...stylex.props(styles.subsectionTitle)}>
-                Fetch Mode (5,000 items, paginated {FETCH_PAGE_SIZE} at a time)
-              </h3>
+            <ShowcaseSubsection
+              title={`Fetch Mode (5,000 items, paginated ${FETCH_PAGE_SIZE} at a time)`}
+            >
               <div style={{ maxWidth: '20rem' }}>
                 <VirtualSelect
                   dataState={fetchDataState}
@@ -440,12 +450,9 @@ const App = () => {
                 Selected:{' '}
                 {fetchSelected.length > 0 ? fetchSelected.join(', ') : '(none)'}
               </p>
-            </div>
+            </ShowcaseSubsection>
 
-            <div {...stylex.props(styles.subsection)}>
-              <h3 {...stylex.props(styles.subsectionTitle)}>
-                Always Open (isAlwaysOpen)
-              </h3>
+            <ShowcaseSubsection title='Always Open (isAlwaysOpen)'>
               <div style={{ maxWidth: '20rem' }}>
                 <VirtualSelect
                   isAlwaysOpen
@@ -462,12 +469,11 @@ const App = () => {
                   ? alwaysOpenSelected.join(', ')
                   : '(none)'}
               </p>
-            </div>
-          </section>
+            </ShowcaseSubsection>
+          </ShowcaseSection>
 
           {/* Table Showcase Section */}
-          <section {...stylex.props(styles.section)}>
-            <h2 {...stylex.props(styles.sectionTitle)}>Table</h2>
+          <ShowcaseSection title='Table'>
             <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
               <Button color='secondary' onClick={reloadTableData}>
                 🔄 Reload Table Data (Test Loading)
@@ -497,10 +503,9 @@ const App = () => {
                 title='Data Table'
               />
             </div>
-          </section>
+          </ShowcaseSection>
 
-          <div {...stylex.props(styles.subsection)}>
-            <h3 {...stylex.props(styles.subsectionTitle)}>Colored Cards</h3>
+          <ShowcaseSubsection title='Colored Cards'>
             <div {...stylex.props(styles.cardGrid)}>
               <Card color='primary' elevation='sm'>
                 <CardBody>
@@ -536,15 +541,12 @@ const App = () => {
                 </CardBody>
               </Card>
             </div>
-          </div>
-        </section>
+          </ShowcaseSubsection>
+        </ShowcaseSection>
 
         {/* Side Panel Section */}
-        <section {...stylex.props(styles.section)}>
-          <h2 {...stylex.props(styles.sectionTitle)}>Side Panels</h2>
-
-          <div {...stylex.props(styles.subsection)}>
-            <h3 {...stylex.props(styles.subsectionTitle)}>Positions & Sizes</h3>
+        <ShowcaseSection title='Side Panels'>
+          <ShowcaseSubsection title='Positions & Sizes'>
             <div {...stylex.props(styles.buttonGrid)}>
               <Button
                 onClick={() => {
@@ -575,8 +577,8 @@ const App = () => {
                 />
               </Button>
             </div>
-          </div>
-        </section>
+          </ShowcaseSubsection>
+        </ShowcaseSection>
       </div>
 
       {/* Side Panels */}

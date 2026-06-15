@@ -2,17 +2,17 @@
   "kind": "combined",
   "schema_version": 7,
   "version": "2.96.0",
-  "elapsed_ms": 206,
+  "elapsed_ms": 199,
   "_meta": {
     "telemetry": {
-      "analysis_run_id": "run_b8a453fe10ccfe98"
+      "analysis_run_id": "run_95d24b6f8d35a038"
     }
   },
   "check": {
     "schema_version": 7,
     "version": "2.96.0",
-    "elapsed_ms": 142,
-    "total_issues": 4,
+    "elapsed_ms": 147,
+    "total_issues": 0,
     "entry_points": {
       "total": 314,
       "sources": {
@@ -21,12 +21,12 @@
       }
     },
     "summary": {
-      "total_issues": 4,
-      "unused_files": 1,
-      "unused_exports": 1,
+      "total_issues": 0,
+      "unused_files": 0,
+      "unused_exports": 0,
       "unused_types": 0,
       "private_type_leaks": 0,
-      "unused_dependencies": 2,
+      "unused_dependencies": 0,
       "unused_enum_members": 0,
       "unused_class_members": 0,
       "unresolved_imports": 0,
@@ -47,97 +47,12 @@
       "unused_dependency_overrides": 0,
       "misconfigured_dependency_overrides": 0
     },
-    "unused_files": [
-      {
-        "path": "src/components/Table/TableSettingsDrawerSkeleton/index.ts",
-        "actions": [
-          {
-            "type": "delete-file",
-            "auto_fixable": false,
-            "description": "Delete this file",
-            "note": "File deletion may remove runtime functionality not visible to static analysis"
-          },
-          {
-            "type": "suppress-file",
-            "auto_fixable": false,
-            "description": "Suppress with a file-level comment at the top of the file",
-            "comment": "// fallow-ignore-file unused-file"
-          }
-        ]
-      }
-    ],
-    "unused_exports": [
-      {
-        "path": "src/components/Table/contexts/TableConfig/meta/actions/index.ts",
-        "export_name": "useToogleTableIsColumnSettingsOpen",
-        "is_type_only": false,
-        "line": 9,
-        "col": 9,
-        "span_start": 733,
-        "is_re_export": true,
-        "actions": [
-          {
-            "type": "remove-export",
-            "auto_fixable": true,
-            "description": "Remove the unused export from the public API",
-            "note": "This finding originates from a re-export; verify it is not part of your public API before removing"
-          },
-          {
-            "type": "suppress-line",
-            "auto_fixable": false,
-            "description": "Suppress with an inline comment above the line",
-            "comment": "// fallow-ignore-next-line unused-export"
-          }
-        ]
-      }
-    ],
+    "unused_files": [],
+    "unused_exports": [],
     "unused_types": [],
     "private_type_leaks": [],
     "unused_dependencies": [],
-    "unused_dev_dependencies": [
-      {
-        "package_name": "@stylexjs/unplugin",
-        "location": "devDependencies",
-        "path": "package.json",
-        "line": 39,
-        "actions": [
-          {
-            "type": "remove-dependency",
-            "auto_fixable": true,
-            "description": "Remove from devDependencies in package.json"
-          },
-          {
-            "type": "add-to-config",
-            "auto_fixable": false,
-            "description": "Add \"@stylexjs/unplugin\" to ignoreDependencies in fallow config",
-            "config_key": "ignoreDependencies",
-            "value": "@stylexjs/unplugin",
-            "value_schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schema.json#/properties/ignoreDependencies/items"
-          }
-        ]
-      },
-      {
-        "package_name": "vite-plugin-babel",
-        "location": "devDependencies",
-        "path": "package.json",
-        "line": 66,
-        "actions": [
-          {
-            "type": "remove-dependency",
-            "auto_fixable": true,
-            "description": "Remove from devDependencies in package.json"
-          },
-          {
-            "type": "add-to-config",
-            "auto_fixable": false,
-            "description": "Add \"vite-plugin-babel\" to ignoreDependencies in fallow config",
-            "config_key": "ignoreDependencies",
-            "value": "vite-plugin-babel",
-            "value_schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schema.json#/properties/ignoreDependencies/items"
-          }
-        ]
-      }
-    ],
+    "unused_dev_dependencies": [],
     "unused_optional_dependencies": [],
     "unused_enum_members": [],
     "unused_class_members": [],
@@ -161,210 +76,6 @@
   },
   "dupes": {
     "clone_groups": [
-      {
-        "instances": [
-          {
-            "file": "src/App.tsx",
-            "start_line": 260,
-            "end_line": 268,
-            "start_col": 8,
-            "end_col": 21,
-            "fragment": "</header>\n        {/* Button Section */}\n        <section {...stylex.props(styles.section)}>\n          <h2 {...stylex.props(styles.sectionTitle)}>Buttons</h2>\n\n          <div {...stylex.props(styles.subsection)}>\n            <h3 {...stylex.props(styles.subsectionTitle)}>Colors</h3>\n            <div {...stylex.props(styles.buttonGrid)}>\n              <Button"
-          },
-          {
-            "file": "src/App.tsx",
-            "start_line": 540,
-            "end_line": 549,
-            "start_col": 8,
-            "end_col": 21,
-            "fragment": "</section>\n\n        {/* Side Panel Section */}\n        <section {...stylex.props(styles.section)}>\n          <h2 {...stylex.props(styles.sectionTitle)}>Side Panels</h2>\n\n          <div {...stylex.props(styles.subsection)}>\n            <h3 {...stylex.props(styles.subsectionTitle)}>Positions & Sizes</h3>\n            <div {...stylex.props(styles.buttonGrid)}>\n              <Button"
-          }
-        ],
-        "token_count": 74,
-        "line_count": 10,
-        "fingerprint": "dup:576ac5f8",
-        "actions": [
-          {
-            "type": "extract-shared",
-            "auto_fixable": false,
-            "description": "Extract duplicated code (10 lines, 2 instances) into a shared function"
-          },
-          {
-            "type": "suppress-line",
-            "auto_fixable": false,
-            "description": "Suppress with an inline comment above the duplicated code",
-            "comment": "// fallow-ignore-next-line code-duplication"
-          }
-        ]
-      },
-      {
-        "instances": [
-          {
-            "file": "src/App.tsx",
-            "start_line": 260,
-            "end_line": 267,
-            "start_col": 8,
-            "end_col": 16,
-            "fragment": "</header>\n        {/* Button Section */}\n        <section {...stylex.props(styles.section)}>\n          <h2 {...stylex.props(styles.sectionTitle)}>Buttons</h2>\n\n          <div {...stylex.props(styles.subsection)}>\n            <h3 {...stylex.props(styles.subsectionTitle)}>Colors</h3>\n            <div"
-          },
-          {
-            "file": "src/App.tsx",
-            "start_line": 304,
-            "end_line": 312,
-            "start_col": 8,
-            "end_col": 16,
-            "fragment": "</section>\n\n        {/* Card Section */}\n        <section {...stylex.props(styles.section)}>\n          <h2 {...stylex.props(styles.sectionTitle)}>Cards</h2>\n\n          <div {...stylex.props(styles.subsection)}>\n            <h3 {...stylex.props(styles.subsectionTitle)}>Basic Cards</h3>\n            <div"
-          },
-          {
-            "file": "src/App.tsx",
-            "start_line": 377,
-            "end_line": 387,
-            "start_col": 10,
-            "end_col": 18,
-            "fragment": "</div>\n\n          {/* Table Showcase Section */}\n          <section {...stylex.props(styles.section)}>\n            <h2 {...stylex.props(styles.sectionTitle)}>VirtualSelect</h2>\n\n            <div {...stylex.props(styles.subsection)}>\n              <h3 {...stylex.props(styles.subsectionTitle)}>\n                Single Select (static options)\n              </h3>\n              <div"
-          },
-          {
-            "file": "src/App.tsx",
-            "start_line": 540,
-            "end_line": 548,
-            "start_col": 8,
-            "end_col": 16,
-            "fragment": "</section>\n\n        {/* Side Panel Section */}\n        <section {...stylex.props(styles.section)}>\n          <h2 {...stylex.props(styles.sectionTitle)}>Side Panels</h2>\n\n          <div {...stylex.props(styles.subsection)}>\n            <h3 {...stylex.props(styles.subsectionTitle)}>Positions & Sizes</h3>\n            <div"
-          }
-        ],
-        "token_count": 61,
-        "line_count": 11,
-        "fingerprint": "dup:d7c83590",
-        "actions": [
-          {
-            "type": "extract-shared",
-            "auto_fixable": false,
-            "description": "Extract duplicated code (11 lines, 4 instances) into a shared function"
-          },
-          {
-            "type": "suppress-line",
-            "auto_fixable": false,
-            "description": "Suppress with an inline comment above the duplicated code",
-            "comment": "// fallow-ignore-next-line code-duplication"
-          }
-        ]
-      },
-      {
-        "instances": [
-          {
-            "file": "src/App.tsx",
-            "start_line": 274,
-            "end_line": 281,
-            "start_col": 14,
-            "end_col": 21,
-            "fragment": "<Button color='outline'>Outline</Button>\n            </div>\n          </div>\n\n          <div {...stylex.props(styles.subsection)}>\n            <h3 {...stylex.props(styles.subsectionTitle)}>Sizes</h3>\n            <div {...stylex.props(styles.buttonGrid)}>\n              <Button"
-          },
-          {
-            "file": "src/App.tsx",
-            "start_line": 283,
-            "end_line": 290,
-            "start_col": 14,
-            "end_col": 21,
-            "fragment": "<Button size='lg'>Large</Button>\n            </div>\n          </div>\n\n          <div {...stylex.props(styles.subsection)}>\n            <h3 {...stylex.props(styles.subsectionTitle)}>Variants</h3>\n            <div {...stylex.props(styles.buttonGrid)}>\n              <Button"
-          },
-          {
-            "file": "src/App.tsx",
-            "start_line": 292,
-            "end_line": 299,
-            "start_col": 14,
-            "end_col": 21,
-            "fragment": "<Button variant='elevated'>Elevated</Button>\n            </div>\n          </div>\n\n          <div {...stylex.props(styles.subsection)}>\n            <h3 {...stylex.props(styles.subsectionTitle)}>States</h3>\n            <div {...stylex.props(styles.buttonGrid)}>\n              <Button"
-          }
-        ],
-        "token_count": 54,
-        "line_count": 8,
-        "fingerprint": "dup:4853ad51",
-        "actions": [
-          {
-            "type": "extract-shared",
-            "auto_fixable": false,
-            "description": "Extract duplicated code (8 lines, 3 instances) into a shared function"
-          },
-          {
-            "type": "suppress-line",
-            "auto_fixable": false,
-            "description": "Suppress with an inline comment above the duplicated code",
-            "comment": "// fallow-ignore-next-line code-duplication"
-          }
-        ]
-      },
-      {
-        "instances": [
-          {
-            "file": "src/App.tsx",
-            "start_line": 301,
-            "end_line": 312,
-            "start_col": 45,
-            "end_col": 41,
-            "fragment": "</Button>\n            </div>\n          </div>\n        </section>\n\n        {/* Card Section */}\n        <section {...stylex.props(styles.section)}>\n          <h2 {...stylex.props(styles.sectionTitle)}>Cards</h2>\n\n          <div {...stylex.props(styles.subsection)}>\n            <h3 {...stylex.props(styles.subsectionTitle)}>Basic Cards</h3>\n            <div {...stylex.props(styles."
-          },
-          {
-            "file": "src/App.tsx",
-            "start_line": 537,
-            "end_line": 548,
-            "start_col": 14,
-            "end_col": 41,
-            "fragment": "</Card>\n            </div>\n          </div>\n        </section>\n\n        {/* Side Panel Section */}\n        <section {...stylex.props(styles.section)}>\n          <h2 {...stylex.props(styles.sectionTitle)}>Side Panels</h2>\n\n          <div {...stylex.props(styles.subsection)}>\n            <h3 {...stylex.props(styles.subsectionTitle)}>Positions & Sizes</h3>\n            <div {...stylex.props(styles."
-          }
-        ],
-        "token_count": 77,
-        "line_count": 12,
-        "fingerprint": "dup:d8249430",
-        "actions": [
-          {
-            "type": "extract-shared",
-            "auto_fixable": false,
-            "description": "Extract duplicated code (12 lines, 2 instances) into a shared function"
-          },
-          {
-            "type": "suppress-line",
-            "auto_fixable": false,
-            "description": "Suppress with an inline comment above the duplicated code",
-            "comment": "// fallow-ignore-next-line code-duplication"
-          }
-        ]
-      },
-      {
-        "instances": [
-          {
-            "file": "src/App.tsx",
-            "start_line": 399,
-            "end_line": 409,
-            "start_col": 34,
-            "end_col": 30,
-            "fragment": ".join(', ')\n                  : '(none)'}\n              </p>\n            </div>\n\n            <div {...stylex.props(styles.subsection)}>\n              <h3 {...stylex.props(styles.subsectionTitle)}>\n                Multi Select (static options)\n              </h3>\n              <div style={{ maxWidth: '20rem' }}>\n                <VirtualSelect"
-          },
-          {
-            "file": "src/App.tsx",
-            "start_line": 441,
-            "end_line": 450,
-            "start_col": 57,
-            "end_col": 30,
-            "fragment": ".join(', ') : '(none)'}\n              </p>\n            </div>\n\n            <div {...stylex.props(styles.subsection)}>\n              <h3 {...stylex.props(styles.subsectionTitle)}>\n                Always Open (isAlwaysOpen)\n              </h3>\n              <div style={{ maxWidth: '20rem' }}>\n                <VirtualSelect"
-          }
-        ],
-        "token_count": 53,
-        "line_count": 11,
-        "fingerprint": "dup:64259f5b",
-        "actions": [
-          {
-            "type": "extract-shared",
-            "auto_fixable": false,
-            "description": "Extract duplicated code (11 lines, 2 instances) into a shared function"
-          },
-          {
-            "type": "suppress-line",
-            "auto_fixable": false,
-            "description": "Suppress with an inline comment above the duplicated code",
-            "comment": "// fallow-ignore-next-line code-duplication"
-          }
-        ]
-      },
       {
         "instances": [
           {
@@ -3371,243 +3082,6 @@
       }
     ],
     "clone_families": [
-      {
-        "files": ["src/App.tsx"],
-        "groups": [
-          {
-            "instances": [
-              {
-                "file": "src/App.tsx",
-                "start_line": 260,
-                "end_line": 268,
-                "start_col": 8,
-                "end_col": 21,
-                "fragment": "</header>\n        {/* Button Section */}\n        <section {...stylex.props(styles.section)}>\n          <h2 {...stylex.props(styles.sectionTitle)}>Buttons</h2>\n\n          <div {...stylex.props(styles.subsection)}>\n            <h3 {...stylex.props(styles.subsectionTitle)}>Colors</h3>\n            <div {...stylex.props(styles.buttonGrid)}>\n              <Button"
-              },
-              {
-                "file": "src/App.tsx",
-                "start_line": 540,
-                "end_line": 549,
-                "start_col": 8,
-                "end_col": 21,
-                "fragment": "</section>\n\n        {/* Side Panel Section */}\n        <section {...stylex.props(styles.section)}>\n          <h2 {...stylex.props(styles.sectionTitle)}>Side Panels</h2>\n\n          <div {...stylex.props(styles.subsection)}>\n            <h3 {...stylex.props(styles.subsectionTitle)}>Positions & Sizes</h3>\n            <div {...stylex.props(styles.buttonGrid)}>\n              <Button"
-              }
-            ],
-            "token_count": 74,
-            "line_count": 10,
-            "fingerprint": "dup:576ac5f8",
-            "actions": [
-              {
-                "type": "extract-shared",
-                "auto_fixable": false,
-                "description": "Extract duplicated code (10 lines, 2 instances) into a shared function"
-              },
-              {
-                "type": "suppress-line",
-                "auto_fixable": false,
-                "description": "Suppress with an inline comment above the duplicated code",
-                "comment": "// fallow-ignore-next-line code-duplication"
-              }
-            ]
-          },
-          {
-            "instances": [
-              {
-                "file": "src/App.tsx",
-                "start_line": 260,
-                "end_line": 267,
-                "start_col": 8,
-                "end_col": 16,
-                "fragment": "</header>\n        {/* Button Section */}\n        <section {...stylex.props(styles.section)}>\n          <h2 {...stylex.props(styles.sectionTitle)}>Buttons</h2>\n\n          <div {...stylex.props(styles.subsection)}>\n            <h3 {...stylex.props(styles.subsectionTitle)}>Colors</h3>\n            <div"
-              },
-              {
-                "file": "src/App.tsx",
-                "start_line": 304,
-                "end_line": 312,
-                "start_col": 8,
-                "end_col": 16,
-                "fragment": "</section>\n\n        {/* Card Section */}\n        <section {...stylex.props(styles.section)}>\n          <h2 {...stylex.props(styles.sectionTitle)}>Cards</h2>\n\n          <div {...stylex.props(styles.subsection)}>\n            <h3 {...stylex.props(styles.subsectionTitle)}>Basic Cards</h3>\n            <div"
-              },
-              {
-                "file": "src/App.tsx",
-                "start_line": 377,
-                "end_line": 387,
-                "start_col": 10,
-                "end_col": 18,
-                "fragment": "</div>\n\n          {/* Table Showcase Section */}\n          <section {...stylex.props(styles.section)}>\n            <h2 {...stylex.props(styles.sectionTitle)}>VirtualSelect</h2>\n\n            <div {...stylex.props(styles.subsection)}>\n              <h3 {...stylex.props(styles.subsectionTitle)}>\n                Single Select (static options)\n              </h3>\n              <div"
-              },
-              {
-                "file": "src/App.tsx",
-                "start_line": 540,
-                "end_line": 548,
-                "start_col": 8,
-                "end_col": 16,
-                "fragment": "</section>\n\n        {/* Side Panel Section */}\n        <section {...stylex.props(styles.section)}>\n          <h2 {...stylex.props(styles.sectionTitle)}>Side Panels</h2>\n\n          <div {...stylex.props(styles.subsection)}>\n            <h3 {...stylex.props(styles.subsectionTitle)}>Positions & Sizes</h3>\n            <div"
-              }
-            ],
-            "token_count": 61,
-            "line_count": 11,
-            "fingerprint": "dup:d7c83590",
-            "actions": [
-              {
-                "type": "extract-shared",
-                "auto_fixable": false,
-                "description": "Extract duplicated code (11 lines, 4 instances) into a shared function"
-              },
-              {
-                "type": "suppress-line",
-                "auto_fixable": false,
-                "description": "Suppress with an inline comment above the duplicated code",
-                "comment": "// fallow-ignore-next-line code-duplication"
-              }
-            ]
-          },
-          {
-            "instances": [
-              {
-                "file": "src/App.tsx",
-                "start_line": 274,
-                "end_line": 281,
-                "start_col": 14,
-                "end_col": 21,
-                "fragment": "<Button color='outline'>Outline</Button>\n            </div>\n          </div>\n\n          <div {...stylex.props(styles.subsection)}>\n            <h3 {...stylex.props(styles.subsectionTitle)}>Sizes</h3>\n            <div {...stylex.props(styles.buttonGrid)}>\n              <Button"
-              },
-              {
-                "file": "src/App.tsx",
-                "start_line": 283,
-                "end_line": 290,
-                "start_col": 14,
-                "end_col": 21,
-                "fragment": "<Button size='lg'>Large</Button>\n            </div>\n          </div>\n\n          <div {...stylex.props(styles.subsection)}>\n            <h3 {...stylex.props(styles.subsectionTitle)}>Variants</h3>\n            <div {...stylex.props(styles.buttonGrid)}>\n              <Button"
-              },
-              {
-                "file": "src/App.tsx",
-                "start_line": 292,
-                "end_line": 299,
-                "start_col": 14,
-                "end_col": 21,
-                "fragment": "<Button variant='elevated'>Elevated</Button>\n            </div>\n          </div>\n\n          <div {...stylex.props(styles.subsection)}>\n            <h3 {...stylex.props(styles.subsectionTitle)}>States</h3>\n            <div {...stylex.props(styles.buttonGrid)}>\n              <Button"
-              }
-            ],
-            "token_count": 54,
-            "line_count": 8,
-            "fingerprint": "dup:4853ad51",
-            "actions": [
-              {
-                "type": "extract-shared",
-                "auto_fixable": false,
-                "description": "Extract duplicated code (8 lines, 3 instances) into a shared function"
-              },
-              {
-                "type": "suppress-line",
-                "auto_fixable": false,
-                "description": "Suppress with an inline comment above the duplicated code",
-                "comment": "// fallow-ignore-next-line code-duplication"
-              }
-            ]
-          },
-          {
-            "instances": [
-              {
-                "file": "src/App.tsx",
-                "start_line": 301,
-                "end_line": 312,
-                "start_col": 45,
-                "end_col": 41,
-                "fragment": "</Button>\n            </div>\n          </div>\n        </section>\n\n        {/* Card Section */}\n        <section {...stylex.props(styles.section)}>\n          <h2 {...stylex.props(styles.sectionTitle)}>Cards</h2>\n\n          <div {...stylex.props(styles.subsection)}>\n            <h3 {...stylex.props(styles.subsectionTitle)}>Basic Cards</h3>\n            <div {...stylex.props(styles."
-              },
-              {
-                "file": "src/App.tsx",
-                "start_line": 537,
-                "end_line": 548,
-                "start_col": 14,
-                "end_col": 41,
-                "fragment": "</Card>\n            </div>\n          </div>\n        </section>\n\n        {/* Side Panel Section */}\n        <section {...stylex.props(styles.section)}>\n          <h2 {...stylex.props(styles.sectionTitle)}>Side Panels</h2>\n\n          <div {...stylex.props(styles.subsection)}>\n            <h3 {...stylex.props(styles.subsectionTitle)}>Positions & Sizes</h3>\n            <div {...stylex.props(styles."
-              }
-            ],
-            "token_count": 77,
-            "line_count": 12,
-            "fingerprint": "dup:d8249430",
-            "actions": [
-              {
-                "type": "extract-shared",
-                "auto_fixable": false,
-                "description": "Extract duplicated code (12 lines, 2 instances) into a shared function"
-              },
-              {
-                "type": "suppress-line",
-                "auto_fixable": false,
-                "description": "Suppress with an inline comment above the duplicated code",
-                "comment": "// fallow-ignore-next-line code-duplication"
-              }
-            ]
-          },
-          {
-            "instances": [
-              {
-                "file": "src/App.tsx",
-                "start_line": 399,
-                "end_line": 409,
-                "start_col": 34,
-                "end_col": 30,
-                "fragment": ".join(', ')\n                  : '(none)'}\n              </p>\n            </div>\n\n            <div {...stylex.props(styles.subsection)}>\n              <h3 {...stylex.props(styles.subsectionTitle)}>\n                Multi Select (static options)\n              </h3>\n              <div style={{ maxWidth: '20rem' }}>\n                <VirtualSelect"
-              },
-              {
-                "file": "src/App.tsx",
-                "start_line": 441,
-                "end_line": 450,
-                "start_col": 57,
-                "end_col": 30,
-                "fragment": ".join(', ') : '(none)'}\n              </p>\n            </div>\n\n            <div {...stylex.props(styles.subsection)}>\n              <h3 {...stylex.props(styles.subsectionTitle)}>\n                Always Open (isAlwaysOpen)\n              </h3>\n              <div style={{ maxWidth: '20rem' }}>\n                <VirtualSelect"
-              }
-            ],
-            "token_count": 53,
-            "line_count": 11,
-            "fingerprint": "dup:64259f5b",
-            "actions": [
-              {
-                "type": "extract-shared",
-                "auto_fixable": false,
-                "description": "Extract duplicated code (11 lines, 2 instances) into a shared function"
-              },
-              {
-                "type": "suppress-line",
-                "auto_fixable": false,
-                "description": "Suppress with an inline comment above the duplicated code",
-                "comment": "// fallow-ignore-next-line code-duplication"
-              }
-            ]
-          }
-        ],
-        "total_duplicated_lines": 52,
-        "total_duplicated_tokens": 319,
-        "suggestions": [
-          {
-            "kind": "ExtractModule",
-            "description": "Extract 5 shared clone groups (52 lines) from App.tsx into src",
-            "estimated_savings": 82
-          }
-        ],
-        "actions": [
-          {
-            "type": "extract-shared",
-            "auto_fixable": false,
-            "description": "Extract 5 duplicated code blocks (52 lines) into a shared module",
-            "note": "These clone groups share the same files, indicating a structural relationship; refactor together"
-          },
-          {
-            "type": "apply-suggestion",
-            "auto_fixable": false,
-            "description": "Extract 5 shared clone groups (52 lines) from App.tsx into src"
-          },
-          {
-            "type": "suppress-line",
-            "auto_fixable": false,
-            "description": "Suppress with an inline comment above the duplicated code",
-            "comment": "// fallow-ignore-next-line code-duplication"
-          }
-        ]
-      },
       {
         "files": ["src/components/AppNavigation/AppNavigation.test.tsx"],
         "groups": [
@@ -8743,14 +8217,14 @@
     ],
     "stats": {
       "total_files": 669,
-      "files_with_clones": 76,
-      "total_lines": 45740,
-      "duplicated_lines": 2991,
-      "total_tokens": 168505,
-      "duplicated_tokens": 7271,
-      "clone_groups": 85,
-      "clone_instances": 183,
-      "duplication_percentage": 6.539134236991692
+      "files_with_clones": 75,
+      "total_lines": 45742,
+      "duplicated_lines": 2901,
+      "total_tokens": 168223,
+      "duplicated_tokens": 6776,
+      "clone_groups": 80,
+      "clone_instances": 170,
+      "duplication_percentage": 6.3420926063573955
     }
   },
   "health": {
@@ -9286,7 +8760,7 @@
       {
         "path": "src/App.tsx",
         "name": "<arrow>",
-        "line": 95,
+        "line": 96,
         "col": 2,
         "cyclomatic": 7,
         "cognitive": 3,
@@ -9376,11 +8850,11 @@
       {
         "path": "src/App.tsx",
         "name": "App",
-        "line": 185,
+        "line": 214,
         "col": 12,
         "cyclomatic": 6,
         "cognitive": 5,
-        "line_count": 501,
+        "line_count": 474,
         "param_count": 0,
         "exceeded": "crap",
         "severity": "moderate",
@@ -9556,7 +9030,7 @@
     ],
     "summary": {
       "files_analyzed": 1200,
-      "functions_analyzed": 3559,
+      "functions_analyzed": 3561,
       "functions_above_threshold": 26,
       "max_cyclomatic_threshold": 20,
       "max_cognitive_threshold": 15,
@@ -9570,8 +9044,8 @@
       "severity_moderate_count": 19
     },
     "vital_signs": {
-      "dead_file_pct": 0.1,
-      "dead_export_pct": 0.1,
+      "dead_file_pct": 0.0,
+      "dead_export_pct": 0.0,
       "avg_cyclomatic": 1.5,
       "critical_complexity_pct": 0.0,
       "p90_cyclomatic": 2,
@@ -9579,21 +9053,21 @@
       "hotspot_top_pct_count": 12,
       "maintainability_avg": 93.0,
       "maintainability_low_pct": 0.0,
-      "unused_dep_count": 2,
-      "unused_deps_per_k_files": 1.7,
+      "unused_dep_count": 0,
+      "unused_deps_per_k_files": 0.0,
       "circular_dep_count": 0,
       "circular_deps_per_k_files": 0.0,
       "counts": {
         "total_files": 1200,
-        "total_exports": 1442,
-        "dead_files": 1,
-        "dead_exports": 1,
-        "total_lines": 50530,
+        "total_exports": 1441,
+        "dead_files": 0,
+        "dead_exports": 0,
+        "total_lines": 50532,
         "files_scored": 753,
         "total_deps": 0
       },
       "unit_size_profile": {
-        "low_risk": 74.5,
+        "low_risk": 74.6,
         "medium_risk": 13.3,
         "high_risk": 7.8,
         "very_high_risk": 4.3
@@ -9607,7 +9081,7 @@
       },
       "p95_fan_in": 4,
       "coupling_high_pct": 0.8,
-      "total_loc": 50530
+      "total_loc": 50532
     },
     "file_scores": [
       {
@@ -9671,12 +9145,12 @@
         "fan_in": 1,
         "fan_out": 11,
         "dead_code_ratio": 0.0,
-        "complexity_density": 0.06,
-        "maintainability_index": 88.3,
-        "total_cyclomatic": 43,
+        "complexity_density": 0.07,
+        "maintainability_index": 88.0,
+        "total_cyclomatic": 45,
         "total_cognitive": 8,
-        "function_count": 31,
-        "lines": 688,
+        "function_count": 33,
+        "lines": 690,
         "crap_max": 56.0,
         "crap_above_threshold": 2
       },
@@ -9822,7 +9296,7 @@
       },
       {
         "path": "src/components/Table/contexts/TableConfig/meta/actions/useToogleTableIsColumnSettingsOpen.hook.ts",
-        "fan_in": 3,
+        "fan_in": 2,
         "fan_out": 1,
         "dead_code_ratio": 0.0,
         "complexity_density": 0.41,
@@ -20480,6 +19954,31 @@
         ]
       },
       {
+        "path": "src/App.tsx",
+        "score": 10.3,
+        "commits": 38,
+        "weighted_commits": 12.0,
+        "lines_added": 1168,
+        "lines_deleted": 1168,
+        "complexity_density": 0.07,
+        "fan_in": 1,
+        "trend": "cooling",
+        "actions": [
+          {
+            "type": "refactor-file",
+            "auto_fixable": false,
+            "description": "Refactor `src/App.tsx`, high complexity combined with frequent changes makes this a maintenance risk",
+            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
+          },
+          {
+            "type": "add-tests",
+            "auto_fixable": false,
+            "description": "Add test coverage for `src/App.tsx` to reduce change risk",
+            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
+          }
+        ]
+      },
+      {
         "path": "src/components/Table/TableBodyCell/TableBodyCell.stylex.ts",
         "score": 9.6,
         "commits": 18,
@@ -20600,31 +20099,6 @@
             "type": "add-tests",
             "auto_fixable": false,
             "description": "Add test coverage for `src/components/Tooltip/Tooltip.component.tsx` to reduce change risk",
-            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
-          }
-        ]
-      },
-      {
-        "path": "src/App.tsx",
-        "score": 8.9,
-        "commits": 38,
-        "weighted_commits": 12.0,
-        "lines_added": 1168,
-        "lines_deleted": 1168,
-        "complexity_density": 0.06,
-        "fan_in": 1,
-        "trend": "cooling",
-        "actions": [
-          {
-            "type": "refactor-file",
-            "auto_fixable": false,
-            "description": "Refactor `src/App.tsx`, high complexity combined with frequent changes makes this a maintenance risk",
-            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
-          },
-          {
-            "type": "add-tests",
-            "auto_fixable": false,
-            "description": "Add test coverage for `src/App.tsx` to reduce change risk",
             "note": "Frequently changed complex files benefit most from comprehensive test coverage"
           }
         ]
@@ -20887,7 +20361,7 @@
         "lines_added": 14,
         "lines_deleted": 14,
         "complexity_density": 0.41,
-        "fan_in": 3,
+        "fan_in": 2,
         "trend": "accelerating",
         "actions": [
           {
@@ -25743,32 +25217,6 @@
         ]
       },
       {
-        "path": "src/hooks/useVirtualization.hook.test.ts",
-        "score": 1.8,
-        "commits": 3,
-        "weighted_commits": 1.59,
-        "lines_added": 117,
-        "lines_deleted": 117,
-        "complexity_density": 0.09,
-        "fan_in": 0,
-        "trend": "cooling",
-        "is_test_path": true,
-        "actions": [
-          {
-            "type": "refactor-file",
-            "auto_fixable": false,
-            "description": "Refactor `src/hooks/useVirtualization.hook.test.ts`, high complexity combined with frequent changes makes this a maintenance risk",
-            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
-          },
-          {
-            "type": "add-tests",
-            "auto_fixable": false,
-            "description": "Add test coverage for `src/hooks/useVirtualization.hook.test.ts` to reduce change risk",
-            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
-          }
-        ]
-      },
-      {
         "path": "src/routes/settings/Settings.component.tsx",
         "score": 1.7,
         "commits": 3,
@@ -25891,6 +25339,32 @@
             "type": "add-tests",
             "auto_fixable": false,
             "description": "Add test coverage for `src/components/Table/TableSettingsDrawer/ColumnOrderSection/utils/insertAdjacentToPinnedGroup.util.test.ts` to reduce change risk",
+            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
+          }
+        ]
+      },
+      {
+        "path": "src/hooks/useVirtualization.hook.test.ts",
+        "score": 1.7,
+        "commits": 3,
+        "weighted_commits": 1.58,
+        "lines_added": 117,
+        "lines_deleted": 117,
+        "complexity_density": 0.09,
+        "fan_in": 0,
+        "trend": "cooling",
+        "is_test_path": true,
+        "actions": [
+          {
+            "type": "refactor-file",
+            "auto_fixable": false,
+            "description": "Refactor `src/hooks/useVirtualization.hook.test.ts`, high complexity combined with frequent changes makes this a maintenance risk",
+            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
+          },
+          {
+            "type": "add-tests",
+            "auto_fixable": false,
+            "description": "Add test coverage for `src/hooks/useVirtualization.hook.test.ts` to reduce change risk",
             "note": "Frequently changed complex files benefit most from comprehensive test coverage"
           }
         ]
@@ -27114,8 +26588,8 @@
       {
         "path": "src/App.tsx",
         "name": "App",
-        "line": 185,
-        "line_count": 501
+        "line": 214,
+        "line_count": 474
       },
       {
         "path": "src/routes/settings/Settings.component.tsx",
@@ -28033,11 +27507,6 @@
   },
   "next_steps": [
     {
-      "id": "trace-unused-export",
-      "command": "fallow dead-code --trace src/components/Table/contexts/TableConfig/meta/actions/index.ts:useToogleTableIsColumnSettingsOpen",
-      "reason": "verify an export is truly unused before deleting"
-    },
-    {
       "id": "trace-clone",
       "command": "fallow dupes --trace dup:03958e8a",
       "reason": "see sibling locations and an extract-function suggestion"
@@ -28046,6 +27515,11 @@
       "id": "complexity-breakdown",
       "command": "fallow health --complexity-breakdown",
       "reason": "see per-decision-point contributions for a hotspot"
+    },
+    {
+      "id": "audit-changed",
+      "command": "fallow audit",
+      "reason": "gate only the files your branch changed (auto-detects the base)"
     }
   ]
 }
