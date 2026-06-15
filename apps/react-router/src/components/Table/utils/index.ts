@@ -9,6 +9,7 @@ export { readPersistedDataStateFromSessionStorage } from './readPersistedDataSta
 export { readPersistedStateFromCookie } from './readPersistedStateFromCookie.util';
 export { readPersistedStateFromSessionStorage } from './readPersistedStateFromSessionStorage.util';
 export { readPersistedUiStateFromSessionStorage } from './readPersistedUiStateFromSessionStorage.util';
+export { resolveFetchMoreState } from './resolveFetchMoreState.util';
 export { serializeStateSlice } from './serializeStateSlice.util';
 export { splitColumnsByPinning } from './splitColumnsByPinning.util';
 export { syncColumnOrderWithPinning } from './syncColumnOrderWithPinning.util';

@@ -174,6 +174,48 @@ describe('useFetchMoreData', () => {
     expect(onLoadMore).toHaveBeenCalledWith({ limit: 25, skip: 1 });
   });
 
+  it('returns early when hasMore is false', async () => {
+    getHarness().setDataState({
+      data: [{ id: 1 }, { id: 2 }, { id: 3 }],
+      hasMore: false,
+      isLoading: false,
+      isLoadingMore: false,
+      totalLoadedRows: 3,
+      totalRows: 3,
+    });
+
+    const onLoadMore = vi.fn();
+
+    const { result } = renderHook(() =>
+      useFetchMoreData<TestRow, TestResponse>(),
+    );
+
+    await act(async () => {
+      await result.current({ ...defaultSelectors, onLoadMore });
+    });
+
+    expect(onLoadMore).not.toHaveBeenCalled();
+  });
+
+  it('stores error message and resets loading-more flag when fetch fails', async () => {
+    const onLoadMore = vi.fn(() => Promise.reject(new Error('network down')));
+
+    const { result } = renderHook(() =>
+      useFetchMoreData<TestRow, TestResponse>(),
+    );
+
+    await act(async () => {
+      await result.current({ ...defaultSelectors, onLoadMore });
+    });
+
+    expect(getHarness().metaStore.get()).toMatchObject({
+      error: 'network down',
+    });
+    expect(getHarness().dataStore.get()).toMatchObject({
+      isLoadingMore: false,
+    });
+  });
+
   describe('prefetch', () => {
     it('does not prefetch when enablePrefetch is false', async () => {
       const onLoadMore = vi.fn(() =>

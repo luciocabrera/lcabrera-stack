@@ -2,6 +2,7 @@ import { DEFAULT_FILTER_PAGE_SIZE } from '@/components/Table/Table.constants';
 import type { FiltersDataState } from '@/components/Table/Table.types';
 import { getErrorMessage } from '@/components/Table/utils/getErrorMessage.util';
 import { getRequiredOnLoadMore } from '@/components/Table/utils/getRequiredOnLoadMore.util';
+import { resolveFetchMoreState } from '@/components/Table/utils/resolveFetchMoreState.util';
 import { clearPrefetchCache } from '@/utils/prefetch/clearPrefetchCache.util';
 import { firePrefetch } from '@/utils/prefetch/firePrefetch.util';
 import { resolveFromCacheOrFetch } from '@/utils/prefetch/resolveFromCacheOrFetch.util';
@@ -10,21 +11,6 @@ import type {
   FetchFilterDataCallbackArgs,
   UseFetchFilterDataActionArgs,
 } from './useFetchFilterData.types';
-
-type ResolveFetchMoreStateArgs<TResponse> = {
-  readonly currentData: readonly string[];
-  readonly currentTotalRows: number;
-  readonly dataSelector?: (response: TResponse) => readonly string[];
-  readonly dataTotalSelector?: (response: TResponse) => number;
-  readonly response: TResponse;
-};
-
-type ResolveFetchMoreStateResult = {
-  readonly combinedData: readonly string[];
-  readonly hasMore: boolean;
-  readonly totalLoadedRows: number;
-  readonly totalRows: number;
-};
 
 type MaybePrefetchArgs<TResponse> = {
   readonly enablePrefetch: boolean;
@@ -38,28 +24,6 @@ type MaybePrefetchArgs<TResponse> = {
     unknown,
     TResponse
   >['prefetchRef'];
-};
-
-const resolveFetchMoreState = <TResponse>({
-  currentData,
-  currentTotalRows,
-  dataSelector,
-  dataTotalSelector,
-  response,
-}: ResolveFetchMoreStateArgs<TResponse>): ResolveFetchMoreStateResult => {
-  const data = dataSelector ? dataSelector(response) : [];
-  const combinedData = [...currentData, ...data];
-  const totalLoadedRows = combinedData.length;
-  const totalRows = dataTotalSelector
-    ? dataTotalSelector(response)
-    : currentTotalRows || totalLoadedRows;
-
-  return {
-    combinedData,
-    hasMore: totalRows > totalLoadedRows,
-    totalLoadedRows,
-    totalRows,
-  };
 };
 
 const clearPrefetchIfPresent = <TResponse>({

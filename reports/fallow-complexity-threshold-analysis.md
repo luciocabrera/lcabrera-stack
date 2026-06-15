@@ -10,13 +10,13 @@ Source of truth for this report:
 
 Current metrics from JSON:
 
-- Functions above threshold: 24
-- Functions analyzed: 3594
-- Files analyzed: 1205
+- Functions above threshold: 23
+- Functions analyzed: 3612
+- Files analyzed: 1207
 - Average maintainability: 93 (good)
-- Dead-code issues: 0 (check.total_issues)
+- Dead-code issues: 1 (check.total_issues)
 - Duplicate clone groups: 87 (dupes.stats.clone_groups)
-- Severity split: 0 critical, 6 high, 18 moderate
+- Severity split: 0 critical, 5 high, 18 moderate
 - Thresholds: cyclomatic 20, cognitive 15, CRAP 30
 
 ## Interpretation
@@ -25,7 +25,6 @@ Use this report as triage guidance grounded on the current JSON snapshot. For pl
 
 ## Representative High-Severity Findings
 
-- src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.ts:31 (<anonymous>) - HIGH crap
 - src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useToggleColumnPin.hook.ts:31 (<anonymous>) - HIGH crap
 - src/components/Table/contexts/TableConfig/meta/actions/useSetTableDrawersOpenState.hook.ts:11 (<anonymous>) - HIGH crap
 - src/routes/enterprise-orders/order-detail/OrderDetail.component.tsx:211 (<anonymous>) - HIGH crap

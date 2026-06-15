@@ -22,6 +22,7 @@ utils/
 ├── readPersistedStateFromCookie.util.ts          → SSR-safe cookie state read
 ├── readPersistedStateFromSessionStorage.util.ts  → Read tab-scoped persisted column slices
 ├── readPersistedUiStateFromSessionStorage.util.ts → Read tab-scoped persisted drawer UI slices
+├── resolveFetchMoreState.util.ts                 → Shared append/hasMore/total resolution for paginated fetch actions
 ├── serializeStateSlice.util.ts                   → JSON serialize a state slice
 ├── splitColumnsByPinning.util.ts                 → Split columns into left/center/right groups
 ├── syncColumnOrderWithPinning.util.ts            → Pin-aware column reordering
@@ -107,6 +108,7 @@ graph TD
 | getStaticColumnKeys          | columns                                     | Set<string>                                                                | Keys of locked/static columns                                                    |
 | getPinnedColumnOffsets       | pinning, sizing, columns                    | Record<key, PinnedColumnInfo>                                              | Sticky positions for pinned columns                                              |
 | getColumnPinSide             | columnKey, pinning                          | PinSide or undefined                                                       | Which side a column is pinned to                                                 |
+| resolveFetchMoreState        | currentData, selectors, response, totals    | { combinedData, hasMore, totalLoadedRows, totalRows }                      | Shared pagination merge logic used by table rows and filter-options load-more    |
 | splitColumnsByPinning        | pinning, effectiveColumns                   | ColumnGroupsState                                                          | Split columns into left/center/right                                             |
 | syncColumnOrderWithPinning   | order, pinning                              | string[]                                                                   | Reorder to keep pinned columns grouped and keep order slice in sync              |
 
