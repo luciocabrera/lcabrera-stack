@@ -1,11 +1,13 @@
 import * as stylex from '@stylexjs/stylex';
 
+import { borderRadius } from '@/design-system/tokens/base.stylex';
 import { shadows } from '@/design-system/tokens/base.stylex';
 import {
   baseInteractiveStyles,
   colorVariants,
   orientationVariants,
   rippleBase,
+  skeleton,
   sizeVariants,
   widthVariants,
 } from '@/design-system/tokens/commons.stylex';
@@ -42,6 +44,14 @@ const styleVariants = stylex.create({
   },
 });
 
+const loadingStyles = stylex.create({
+  overlay: {
+    borderRadius: borderRadius.md,
+    insetBlock: 0,
+    insetInline: 0,
+  },
+});
+
 export const buttonStyles = {
   base: {
     ...baseInteractiveStyles.element,
@@ -54,6 +64,8 @@ export const buttonStyles = {
   label: baseInteractiveStyles.label,
   labelHidden: buttonSpecificStyles.labelHidden,
   orientation: orientationVariants,
+  busyOverlay: [skeleton.loadingOverlay, loadingStyles.overlay],
+  busyWave: skeleton.shimmerWave,
   size: sizeVariants,
   style: styleVariants,
   width: widthVariants,

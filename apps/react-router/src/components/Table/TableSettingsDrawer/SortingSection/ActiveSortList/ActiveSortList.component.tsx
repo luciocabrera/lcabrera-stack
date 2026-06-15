@@ -20,7 +20,11 @@ import { useGetColumnsSorting } from '../../TableDrawerContext/selectors';
 import { styles } from './ActiveSortList.stylex';
 import { SortingSectionToolbar } from '../SortingSectionToolbar';
 
-export const ActiveSortList = () => {
+type ActiveSortListProps = {
+  readonly isBussy?: boolean;
+};
+
+export const ActiveSortList = ({ isBussy = false }: ActiveSortListProps) => {
   const columns = useGetColumns();
   const sorting = useGetColumnsSorting();
   const onSortChange = useSetColumnsSortings();
@@ -78,6 +82,7 @@ export const ActiveSortList = () => {
                 <SortDescIcon size={ICON_SIZE_MD} />
               )
             }
+            isBussy={isBussy}
             onClick={() => {
               handleToggleDirection(item.columnKey);
             }}
@@ -88,6 +93,7 @@ export const ActiveSortList = () => {
             aria-label={`Remove ${item.label} sort`}
             color='ghost'
             icon={<MenuCloseIcon size={ICON_SIZE_MD} />}
+            isBussy={isBussy}
             onClick={() => {
               handleRemoveSort(item.columnKey);
             }}
@@ -112,7 +118,11 @@ export const ActiveSortList = () => {
         </InfoBox>
       ) : (
         <div {...stylex.props(styles.sortList)}>
-          <DraggableList items={draggableItems} onOrderChange={handleReorder} />
+          <DraggableList
+            isBussy={isBussy}
+            items={draggableItems}
+            onOrderChange={handleReorder}
+          />
         </div>
       )}
     </SidePanelSection>

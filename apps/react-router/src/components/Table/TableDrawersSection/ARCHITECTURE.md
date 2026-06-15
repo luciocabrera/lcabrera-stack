@@ -18,6 +18,8 @@ TableDrawersSection/
 ```mermaid
 graph TD
   TDS["TableDrawersSection"] --> isTable["useGetTableIsTableSettingsOpen()"]
+  TDS --> isPinned["useGetTableIsTableSettingsPinned()"]
+  TDS --> isLoading["useGetTableIsLoading()"]
   TDS --> isCol["useGetTableIsColumnSettingsOpen()"]
   TDS --> colKey["useGetTableColumnSelectedKey()"]
 
@@ -25,7 +27,9 @@ graph TD
   CDP --> CSD["ColumnSettingsDrawer"]
 
   isCol -->|false| check2{"isTableSettingsOpen?"}
-  check2 -->|true| TDP["TableDrawerProvider"]
+  check2 -->|true| check3{"isPinned && isLoading?"}
+  check3 -->|Yes| SK["TableSettingsDrawerSkeleton"]
+  check3 -->|No| TDP["TableDrawerProvider"]
   TDP --> TSD["TableSettingsDrawer"]
   check2 -->|false| empty["<> (empty fragment)"]
 ```
@@ -43,3 +47,7 @@ created when the drawer is open:
 
 - **TableDrawerProvider** → wraps `TableSettingsDrawer`
 - **ColumnDrawerProvider** → wraps `ColumnSettingsDrawer` with `columnKey`
+
+During loading fallback, a pinned table-settings drawer skips `TableDrawerProvider`
+and renders `TableSettingsDrawerSkeleton` instead. This keeps the pinned drawer
+width and structure visible during refresh without mounting the full tabbed drawer.

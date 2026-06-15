@@ -16,6 +16,8 @@ export type DraggableItem = {
  * DraggableList component props
  */
 export type DraggableListProps = {
+  /** Whether list should render in a busy shimmer state */
+  readonly isBussy?: boolean;
   /** Array of draggable items */
   readonly items: readonly DraggableItem[];
   /** Callback when order changes */

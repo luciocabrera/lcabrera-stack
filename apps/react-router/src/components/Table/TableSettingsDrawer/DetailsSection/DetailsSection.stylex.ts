@@ -1,7 +1,12 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { spacing, typography } from '@/design-system/tokens/base.stylex';
+import {
+  borderRadius,
+  spacing,
+  typography,
+} from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
+import { skeleton } from '@/design-system/tokens/commons.stylex';
 
 export const styles = stylex.create({
   label: {
@@ -17,6 +22,7 @@ export const styles = stylex.create({
     display: 'flex',
     gap: spacing.sm,
     minWidth: 0,
+    position: 'relative',
     width: '100%',
   },
   rows: {
@@ -40,4 +46,14 @@ export const styles = stylex.create({
     textAlign: 'right',
     wordBreak: 'break-word',
   },
+  busyOverlay: {
+    borderRadius: borderRadius.sm,
+    insetBlock: 0,
+    insetInline: 0,
+  },
 });
+
+export const busyStyles = {
+  overlay: [skeleton.loadingOverlay, styles.busyOverlay],
+  wave: skeleton.shimmerWave,
+};

@@ -17,6 +17,7 @@ import { styles } from './AddFilterSection.stylex';
 
 export const AddFilterSection = ({
   expandedFilters,
+  isBussy = false,
   onDropdownOpenChange,
   onExpandedFiltersChange,
 }: AddFilterSectionProps) => {
@@ -108,6 +109,7 @@ export const AddFilterSection = ({
       />
       {!isDropdownOpen && (
         <Button
+          isBussy={isBussy}
           isDisabled={!selectedColumn}
           onClick={handleAddFilter}
           size='sm'

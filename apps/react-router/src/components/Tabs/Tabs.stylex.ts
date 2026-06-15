@@ -7,6 +7,7 @@ import {
   typography,
 } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
+import { skeleton } from '@/design-system/tokens/commons.stylex';
 
 export const styles = stylex.create({
   container: {
@@ -58,6 +59,7 @@ export const styles = stylex.create({
     borderRightStyle: 'none',
     borderTopStyle: 'none',
     marginBottom: '-1px',
+    position: 'relative',
   },
   tabButtonActive: {
     color: colors.brandPrimaryText,
@@ -78,4 +80,14 @@ export const styles = stylex.create({
     height: '100%',
     width: '100%',
   },
+  tabBusyOverlay: {
+    borderRadius: borderRadius.sm,
+    insetBlock: 0,
+    insetInline: 0,
+  },
 });
+
+export const busyStyles = {
+  overlay: [skeleton.loadingOverlay, styles.tabBusyOverlay],
+  wave: skeleton.shimmerWave,
+};

@@ -26,6 +26,7 @@ const FILTERS_TOOLBAR = {
 } as const;
 
 export const FiltersSectionToolbar = ({
+  isBussy = false,
   isCollapseAllDisabled = false,
   isExpandAllDisabled = false,
   onClearAll,
@@ -58,6 +59,7 @@ export const FiltersSectionToolbar = ({
         aria-label={FILTERS_TOOLBAR.clear.label}
         color={buttonColor}
         icon={<EraserIcon size={iconSize} />}
+        isBussy={isBussy}
         isDisabled={!hasFilters}
         onClick={handleClear}
         size={buttonSize}
@@ -70,6 +72,7 @@ export const FiltersSectionToolbar = ({
         aria-label={FILTERS_TOOLBAR.reset.label}
         color={buttonColor}
         icon={<RefreshIcon size={iconSize} />}
+        isBussy={isBussy}
         onClick={resetFilters}
         size={buttonSize}
         width={buttonWidth}
@@ -81,6 +84,7 @@ export const FiltersSectionToolbar = ({
         aria-label={FILTERS_TOOLBAR.expandAll.label}
         color={buttonColor}
         icon={<ExpandAllIcon size={iconSize} />}
+        isBussy={isBussy}
         isDisabled={isExpandDisabled}
         onClick={onExpandAll}
         size={buttonSize}
@@ -93,6 +97,7 @@ export const FiltersSectionToolbar = ({
         aria-label={FILTERS_TOOLBAR.collapseAll.label}
         color={buttonColor}
         icon={<CollapseAllIcon size={iconSize} />}
+        isBussy={isBussy}
         isDisabled={isCollapseDisabled}
         onClick={onCollapseAll}
         size={buttonSize}

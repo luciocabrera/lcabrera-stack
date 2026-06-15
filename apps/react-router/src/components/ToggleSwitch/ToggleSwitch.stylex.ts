@@ -7,12 +7,14 @@ import {
   typography,
 } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
+import { skeleton } from '@/design-system/tokens/commons.stylex';
 
 export const styles = stylex.create({
   container: {
     gap: spacing.xs,
     alignItems: 'center',
     display: 'flex',
+    position: 'relative',
   },
   input: {
     overflow: 'hidden',
@@ -79,4 +81,14 @@ export const styles = stylex.create({
     cursor: 'not-allowed',
     opacity: 0.5,
   },
+  busyOverlay: {
+    borderRadius: borderRadius.md,
+    insetBlock: 0,
+    insetInline: 0,
+  },
 });
+
+export const busyStyles = {
+  overlay: [skeleton.loadingOverlay, styles.busyOverlay],
+  wave: skeleton.shimmerWave,
+};

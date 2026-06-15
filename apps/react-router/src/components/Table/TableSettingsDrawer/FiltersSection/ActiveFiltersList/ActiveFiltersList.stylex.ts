@@ -6,6 +6,7 @@ import {
   typography,
 } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
+import { skeleton } from '@/design-system/tokens/commons.stylex';
 import { drawerSectionStyles } from '@/design-system/tokens/drawerSection.stylex';
 
 const localStyles = stylex.create({
@@ -25,6 +26,7 @@ const localStyles = stylex.create({
       default: colors.surfaceSecondary,
       ':hover': colors.surfaceElevated,
     },
+    position: 'relative',
   },
   filterItemHeader: {
     gap: spacing.sm,
@@ -73,6 +75,11 @@ const localStyles = stylex.create({
     borderTopStyle: 'solid',
     borderTopWidth: '1px',
   },
+  busyOverlay: {
+    borderRadius: borderRadius.md,
+    insetBlock: 0,
+    insetInline: 0,
+  },
 });
 
 export const styles = {
@@ -85,4 +92,6 @@ export const styles = {
   filterToggleIcon: localStyles.filterToggleIcon,
   filtersList: drawerSectionStyles.list,
   invalidBadge: localStyles.invalidBadge,
+  busyOverlay: [skeleton.loadingOverlay, localStyles.busyOverlay],
+  busyWave: skeleton.shimmerWave,
 };

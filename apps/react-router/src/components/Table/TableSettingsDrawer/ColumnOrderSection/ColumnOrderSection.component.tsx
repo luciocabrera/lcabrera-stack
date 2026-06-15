@@ -41,7 +41,10 @@ import { PinConflictModal } from './PinConflictModal';
 import { UnpinConflictModal } from './UnpinConflictModal';
 import { buildAllOrderedColumns } from './utils';
 
-export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
+export const ColumnOrderSection = ({
+  isBussy = false,
+  ...props
+}: ColumnOrderSectionProps) => {
   const columns = useGetColumns();
   const columnsOrder = useGetColumnOrder();
   const columnPinning = useGetColumnPinning();
@@ -78,6 +81,7 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
           {isStatic && <LockIcon size={14} />}
           <span {...stylex.props(styles.columnLabel)}>{col.label}</span>
           <ToggleSwitch
+            isBussy={isBussy}
             isChecked={isPinned}
             isDisabled={isStatic}
             label='Pin'
@@ -86,6 +90,7 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
             }}
           />
           <ToggleSwitch
+            isBussy={isBussy}
             isChecked={!columnVisibility.has(col.key)}
             isDisabled={isStatic}
             label='Show'
@@ -107,11 +112,17 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
     <SidePanelSectionMain {...props}>
       <SidePanelSectionHeader
         title={`Column Order & Visibility (${allOrderedColumns.length - columnVisibility.size}/${allOrderedColumns.length})`}
-        toolbar={<ColumnOrderSectionToolbar variant='toolbar' />}
+        toolbar={
+          <ColumnOrderSectionToolbar isBussy={isBussy} variant='toolbar' />
+        }
       />
-      <DraggableList items={draggableItems} onOrderChange={reorderColumns} />
+      <DraggableList
+        isBussy={isBussy}
+        items={draggableItems}
+        onOrderChange={reorderColumns}
+      />
 
-      <ColumnOrderSectionToolbar />
+      <ColumnOrderSectionToolbar isBussy={isBussy} />
       <PinSideModal
         columnLabel={pinSideModal.columnLabel}
         isOpen={pinSideModal.isOpen}

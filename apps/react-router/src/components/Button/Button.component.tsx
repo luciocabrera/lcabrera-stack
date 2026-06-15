@@ -10,6 +10,7 @@ export const Button = ({
   color = 'primary',
   customStylex,
   icon,
+  isBussy = false,
   isIconOnly = false,
   isDisabled = false,
   orientation = 'vertical',
@@ -21,10 +22,12 @@ export const Button = ({
   width = 'full',
   ...rest
 }: ButtonProps) => {
+  const isBusyState = isBussy;
+
   const button = (
     <button
       data-testid='button'
-      disabled={isDisabled}
+      disabled={isDisabled || isBusyState}
       {...rest}
       type={type}
       {...stylex.props(
@@ -38,6 +41,11 @@ export const Button = ({
         customStylex,
       )}
     >
+      {isBusyState && (
+        <span {...stylex.props(buttonStyles.busyOverlay)}>
+          <span {...stylex.props(buttonStyles.busyWave)} />
+        </span>
+      )}
       {icon && <span {...stylex.props(buttonStyles.icon)}>{icon}</span>}
       <span
         {...stylex.props(

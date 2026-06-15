@@ -23,6 +23,7 @@ import { styles } from './ActiveFiltersList.stylex';
 
 export const ActiveFiltersList = ({
   expandedFilters,
+  isBussy = false,
   isCollapseAllDisabled,
   isExpandAllDisabled,
   onCollapseAll,
@@ -109,9 +110,15 @@ export const ActiveFiltersList = ({
                 {...stylex.props(styles.filterItem)}
                 data-testid={`filter-item-${columnKey}`}
               >
+                {isBussy && (
+                  <div {...stylex.props(styles.busyOverlay)}>
+                    <div {...stylex.props(styles.busyWave)} />
+                  </div>
+                )}
                 <div {...stylex.props(styles.filterItemHeader)}>
                   <button
                     {...stylex.props(styles.filterToggle)}
+                    disabled={isBussy}
                     onClick={() => {
                       toggleFilterExpanded(columnKey);
                     }}
@@ -134,6 +141,7 @@ export const ActiveFiltersList = ({
                     aria-label={`Remove ${column.label} filter`}
                     color='ghost'
                     icon={<MenuCloseIcon size={ICON_SIZE_MD} />}
+                    isBussy={isBussy}
                     onClick={() => {
                       handleRemoveFilter(columnKey);
                     }}

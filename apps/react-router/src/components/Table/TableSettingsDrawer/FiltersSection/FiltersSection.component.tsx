@@ -19,7 +19,11 @@ import { FiltersSectionToolbar } from './FiltersSectionToolbar';
  * Child components subscribe to context data directly.
  */
 
-export const FiltersSection = () => {
+type FiltersSectionProps = {
+  readonly isBussy?: boolean;
+};
+
+export const FiltersSection = ({ isBussy = false }: FiltersSectionProps) => {
   const filters = useGetColumnFilters();
   const onFiltersChange = useSetColumnFilters();
   const persistedExpandedFilters = useGetTableSettingsExpandedFilters();
@@ -61,12 +65,14 @@ export const FiltersSection = () => {
     <SidePanelSectionMain>
       <AddFilterSection
         expandedFilters={expandedFilters}
+        isBussy={isBussy}
         onDropdownOpenChange={setIsAddFilterOpen}
         onExpandedFiltersChange={handleExpandedFiltersChange}
       />
       <SidePanelSectionOverlay isOpen={isAddFilterOpen}>
         <ActiveFiltersList
           expandedFilters={expandedFilters}
+          isBussy={isBussy}
           isCollapseAllDisabled={!hasExpandedFilters}
           isExpandAllDisabled={!hasFilters || areAllFiltersExpanded}
           onCollapseAll={handleCollapseAll}
@@ -74,6 +80,7 @@ export const FiltersSection = () => {
           onExpandedFiltersChange={handleExpandedFiltersChange}
         />
         <FiltersSectionToolbar
+          isBussy={isBussy}
           isCollapseAllDisabled={!hasExpandedFilters}
           isExpandAllDisabled={!hasFilters || areAllFiltersExpanded}
           onCollapseAll={handleCollapseAll}

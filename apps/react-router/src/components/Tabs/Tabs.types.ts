@@ -18,6 +18,8 @@ export type TabItem = {
 export type TabsProps = ComponentPropsWithoutRef<'div'> & {
   /** Initially selected tab key (defaults to first tab) */
   readonly defaultSelectedTab?: string;
+  /** Whether tab controls should render in a loading/busy state */
+  readonly isBussy?: boolean;
   /** Called when a tab is selected */
   readonly onSelectTab?: (tabKey: string) => void;
   /** Controlled selected tab key */
