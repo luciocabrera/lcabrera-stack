@@ -36,6 +36,14 @@ Before creating anything new, check this inventory. If something here does the j
 
 ---
 
+## Features
+
+| Feature    | Location             | Description                                                                                                                  |
+| ---------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `showcase` | `features/showcase/` | Home-route isolated design-system showcase composed from reusable components; keeps demo logic outside shared domain modules |
+
+---
+
 ## Hooks
 
 | Hook                              | Location                                        | Description                                                                                            |
@@ -129,6 +137,13 @@ Before creating anything new, check this inventory. If something here does the j
 | `useFetchFilterData`        | `components/Table/contexts/FiltersData/filters/actions/useFetchFilterData.hook.ts`        | Orchestrates filter-option fetching by composing the initial and paginated actions for one column         |
 | `useFetchInitialFilterData` | `components/Table/contexts/FiltersData/filters/actions/useFetchInitialFilterData.hook.ts` | Fetches the first page of filter options, updates totals, and optionally triggers prefetch                |
 | `useFetchMoreFilterData`    | `components/Table/contexts/FiltersData/filters/actions/useFetchMoreFilterData.hook.ts`    | Loads and appends subsequent pages of filter options using cache-or-fetch and optional post-load prefetch |
+
+### `src/components/Table/contexts/TableData/utils/`
+
+| Function                          | Location                                                                            | Description                                                                             |
+| --------------------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `getInitialDataState`             | `components/Table/contexts/TableData/utils/getInitialDataState.util.ts`             | Builds initial table-data state with derived `totalLoadedRows` and `hasMore`            |
+| `shouldHydratePersistedDataState` | `components/Table/contexts/TableData/utils/shouldHydratePersistedDataState.util.ts` | Rehydrates persisted rows only when current loader data matches the same query snapshot |
 
 ### `src/components/Table/TableSettingsDrawer/TableDrawerContext/actions/`
 

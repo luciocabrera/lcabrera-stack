@@ -29,6 +29,7 @@ TableData/
 │
 └── utils/
     ├── getInitialDataState.util.ts          → Build initial state with derived fields
+    ├── shouldHydratePersistedDataState.util.ts → Guards session rehydration to matching query snapshots
     └── index.ts                             → Barrel: utils
 ```
 
@@ -66,7 +67,8 @@ TableDataState<TData> = {
 graph TD
   A["TableDataProvider receives initial data + totalRows"]
   A --> P["readPersistedDataStateFromSessionStorage(persistenceKey)"]
-  P --> M["merge persisted data when enabled"]
+  P --> G["shouldHydratePersistedDataState(initial, persisted)"]
+  G --> M["merge persisted data only when totals + first-page prefix match"]
   M --> B["getInitialDataState({ data, isLoading, totalRows })"]
   B --> C["Compute totalLoadedRows = data.length"]
   B --> D["Compute hasMore = totalRows > totalLoadedRows"]

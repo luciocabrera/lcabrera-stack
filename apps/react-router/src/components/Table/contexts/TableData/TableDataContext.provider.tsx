@@ -14,7 +14,7 @@ import type {
 } from './TableDataContext.types';
 
 import { TableDataContext } from './TableDataContext.context';
-import { getInitialDataState } from './utils';
+import { getInitialDataState, shouldHydratePersistedDataState } from './utils';
 
 export const TableDataProvider = <TData extends Record<string, unknown>>({
   children,
@@ -25,11 +25,19 @@ export const TableDataProvider = <TData extends Record<string, unknown>>({
   const persistedDataState = isPersistenceEnabled
     ? readPersistedDataStateFromSessionStorage<TData>({ persistenceKey })
     : undefined;
+  const resolvedPersistedDataState = shouldHydratePersistedDataState<TData>({
+    initialDataState: dataState,
+    persistedDataState,
+  })
+    ? persistedDataState
+    : undefined;
 
   const dataStore = useStore<TableDataState<TData>>(
     getInitialDataState<TData>({
       ...dataState,
-      ...(persistedDataState === undefined ? {} : persistedDataState),
+      ...(resolvedPersistedDataState === undefined
+        ? {}
+        : resolvedPersistedDataState),
     }),
   );
 

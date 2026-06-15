@@ -2,16 +2,16 @@
   "kind": "combined",
   "schema_version": 7,
   "version": "2.96.0",
-  "elapsed_ms": 167,
+  "elapsed_ms": 196,
   "_meta": {
     "telemetry": {
-      "analysis_run_id": "run_958cef1e587da6a2"
+      "analysis_run_id": "run_922fbc831e8e4223"
     }
   },
   "check": {
     "schema_version": 7,
     "version": "2.96.0",
-    "elapsed_ms": 119,
+    "elapsed_ms": 125,
     "total_issues": 1,
     "entry_points": {
       "total": 317,
@@ -22,8 +22,8 @@
     },
     "summary": {
       "total_issues": 1,
-      "unused_files": 0,
-      "unused_exports": 1,
+      "unused_files": 1,
+      "unused_exports": 0,
       "unused_types": 0,
       "private_type_leaks": 0,
       "unused_dependencies": 0,
@@ -47,32 +47,26 @@
       "unused_dependency_overrides": 0,
       "misconfigured_dependency_overrides": 0
     },
-    "unused_files": [],
-    "unused_exports": [
+    "unused_files": [
       {
-        "path": "src/components/Table/utils/index.ts",
-        "export_name": "resolveFetchMoreState",
-        "is_type_only": false,
-        "line": 12,
-        "col": 9,
-        "span_start": 891,
-        "is_re_export": true,
+        "path": "src/components/Toolbar/Toolbar.examples.tsx",
         "actions": [
           {
-            "type": "remove-export",
-            "auto_fixable": true,
-            "description": "Remove the unused export from the public API",
-            "note": "This finding originates from a re-export; verify it is not part of your public API before removing"
+            "type": "delete-file",
+            "auto_fixable": false,
+            "description": "Delete this file",
+            "note": "File deletion may remove runtime functionality not visible to static analysis"
           },
           {
-            "type": "suppress-line",
+            "type": "suppress-file",
             "auto_fixable": false,
-            "description": "Suppress with an inline comment above the line",
-            "comment": "// fallow-ignore-next-line unused-export"
+            "description": "Suppress with a file-level comment at the top of the file",
+            "comment": "// fallow-ignore-file unused-file"
           }
         ]
       }
     ],
+    "unused_exports": [],
     "unused_types": [],
     "private_type_leaks": [],
     "unused_dependencies": [],
@@ -8966,13 +8960,13 @@
     "stats": {
       "total_files": 676,
       "files_with_clones": 79,
-      "total_lines": 46452,
+      "total_lines": 46324,
       "duplicated_lines": 3317,
-      "total_tokens": 170560,
+      "total_tokens": 170253,
       "duplicated_tokens": 7408,
       "clone_groups": 87,
       "clone_instances": 186,
-      "duplication_percentage": 7.140704383019031
+      "duplication_percentage": 7.160435195578965
     }
   },
   "health": {
@@ -9374,6 +9368,36 @@
         ]
       },
       {
+        "path": "src/features/showcase/ShowcasePage/ShowcasePage.component.tsx",
+        "name": "<arrow>",
+        "line": 83,
+        "col": 2,
+        "cyclomatic": 7,
+        "cognitive": 3,
+        "line_count": 31,
+        "param_count": 1,
+        "exceeded": "crap",
+        "severity": "high",
+        "crap": 56.0,
+        "coverage_tier": "none",
+        "coverage_source": "estimated",
+        "actions": [
+          {
+            "type": "add-tests",
+            "auto_fixable": false,
+            "description": "Add test coverage for `<arrow>` to lower its CRAP score (coverage reduces risk even without refactoring)",
+            "note": "CRAP = CC^2 * (1 - cov/100)^3 + CC; higher coverage is the fastest way to bring CRAP under threshold"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the function declaration",
+            "comment": "// fallow-ignore-next-line complexity",
+            "placement": "above-function-declaration"
+          }
+        ]
+      },
+      {
         "path": "src/routes/enterprise-orders/order-detail/OrderDetail.component.tsx",
         "name": "NotesSection",
         "line": 211,
@@ -9392,36 +9416,6 @@
             "type": "add-tests",
             "auto_fixable": false,
             "description": "Add test coverage for `NotesSection` to lower its CRAP score (coverage reduces risk even without refactoring)",
-            "note": "CRAP = CC^2 * (1 - cov/100)^3 + CC; higher coverage is the fastest way to bring CRAP under threshold"
-          },
-          {
-            "type": "suppress-line",
-            "auto_fixable": false,
-            "description": "Suppress with an inline comment above the function declaration",
-            "comment": "// fallow-ignore-next-line complexity",
-            "placement": "above-function-declaration"
-          }
-        ]
-      },
-      {
-        "path": "src/App.tsx",
-        "name": "<arrow>",
-        "line": 96,
-        "col": 2,
-        "cyclomatic": 7,
-        "cognitive": 3,
-        "line_count": 31,
-        "param_count": 1,
-        "exceeded": "crap",
-        "severity": "high",
-        "crap": 56.0,
-        "coverage_tier": "none",
-        "coverage_source": "estimated",
-        "actions": [
-          {
-            "type": "add-tests",
-            "auto_fixable": false,
-            "description": "Add test coverage for `<arrow>` to lower its CRAP score (coverage reduces risk even without refactoring)",
             "note": "CRAP = CC^2 * (1 - cov/100)^3 + CC; higher coverage is the fastest way to bring CRAP under threshold"
           },
           {
@@ -9464,6 +9458,36 @@
         ]
       },
       {
+        "path": "src/features/showcase/ShowcasePage/ShowcasePage.component.tsx",
+        "name": "ShowcasePage",
+        "line": 191,
+        "col": 28,
+        "cyclomatic": 6,
+        "cognitive": 5,
+        "line_count": 372,
+        "param_count": 0,
+        "exceeded": "crap",
+        "severity": "moderate",
+        "crap": 42.0,
+        "coverage_tier": "none",
+        "coverage_source": "estimated",
+        "actions": [
+          {
+            "type": "add-tests",
+            "auto_fixable": false,
+            "description": "Add test coverage for `ShowcasePage` to lower its CRAP score (coverage reduces risk even without refactoring)",
+            "note": "CRAP = CC^2 * (1 - cov/100)^3 + CC; higher coverage is the fastest way to bring CRAP under threshold"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the function declaration",
+            "comment": "// fallow-ignore-next-line complexity",
+            "placement": "above-function-declaration"
+          }
+        ]
+      },
+      {
         "path": "scripts/check-lighthouse-scores.mjs",
         "name": "<arrow>",
         "line": 82,
@@ -9482,36 +9506,6 @@
             "type": "add-tests",
             "auto_fixable": false,
             "description": "Add test coverage for `<arrow>` to lower its CRAP score (coverage reduces risk even without refactoring)",
-            "note": "CRAP = CC^2 * (1 - cov/100)^3 + CC; higher coverage is the fastest way to bring CRAP under threshold"
-          },
-          {
-            "type": "suppress-line",
-            "auto_fixable": false,
-            "description": "Suppress with an inline comment above the function declaration",
-            "comment": "// fallow-ignore-next-line complexity",
-            "placement": "above-function-declaration"
-          }
-        ]
-      },
-      {
-        "path": "src/App.tsx",
-        "name": "App",
-        "line": 214,
-        "col": 12,
-        "cyclomatic": 6,
-        "cognitive": 5,
-        "line_count": 474,
-        "param_count": 0,
-        "exceeded": "crap",
-        "severity": "moderate",
-        "crap": 42.0,
-        "coverage_tier": "none",
-        "coverage_source": "estimated",
-        "actions": [
-          {
-            "type": "add-tests",
-            "auto_fixable": false,
-            "description": "Add test coverage for `App` to lower its CRAP score (coverage reduces risk even without refactoring)",
             "note": "CRAP = CC^2 * (1 - cov/100)^3 + CC; higher coverage is the fastest way to bring CRAP under threshold"
           },
           {
@@ -9675,13 +9669,13 @@
       }
     ],
     "summary": {
-      "files_analyzed": 1207,
-      "functions_analyzed": 3612,
+      "files_analyzed": 1210,
+      "functions_analyzed": 3608,
       "functions_above_threshold": 23,
       "max_cyclomatic_threshold": 20,
       "max_cognitive_threshold": 15,
       "max_crap_threshold": 30.0,
-      "files_scored": 759,
+      "files_scored": 760,
       "average_maintainability": 93.0,
       "coverage_model": "static_estimated",
       "coverage_source_consistency": "uniform",
@@ -9690,8 +9684,8 @@
       "severity_moderate_count": 18
     },
     "vital_signs": {
-      "dead_file_pct": 0.0,
-      "dead_export_pct": 0.1,
+      "dead_file_pct": 0.1,
+      "dead_export_pct": 0.0,
       "avg_cyclomatic": 1.5,
       "critical_complexity_pct": 0.0,
       "p90_cyclomatic": 2,
@@ -9704,12 +9698,12 @@
       "circular_dep_count": 0,
       "circular_deps_per_k_files": 0.0,
       "counts": {
-        "total_files": 1207,
-        "total_exports": 1451,
-        "dead_files": 0,
-        "dead_exports": 1,
-        "total_lines": 51253,
-        "files_scored": 759,
+        "total_files": 1210,
+        "total_exports": 1456,
+        "dead_files": 1,
+        "dead_exports": 0,
+        "total_lines": 51154,
+        "files_scored": 760,
         "total_deps": 0
       },
       "unit_size_profile": {
@@ -9718,7 +9712,7 @@
         "high_risk": 7.9,
         "very_high_risk": 4.2
       },
-      "functions_over_60_loc_per_k": 41.8,
+      "functions_over_60_loc_per_k": 41.9,
       "unit_interfacing_profile": {
         "low_risk": 99.9,
         "medium_risk": 0.1,
@@ -9727,7 +9721,7 @@
       },
       "p95_fan_in": 4,
       "coupling_high_pct": 0.9,
-      "total_loc": 51253
+      "total_loc": 51154
     },
     "file_scores": [
       {
@@ -9759,16 +9753,16 @@
         "crap_above_threshold": 1
       },
       {
-        "path": "src/App.tsx",
+        "path": "src/features/showcase/ShowcasePage/ShowcasePage.component.tsx",
         "fan_in": 1,
-        "fan_out": 11,
+        "fan_out": 10,
         "dead_code_ratio": 0.0,
         "complexity_density": 0.07,
-        "maintainability_index": 88.0,
-        "total_cyclomatic": 45,
+        "maintainability_index": 88.3,
+        "total_cyclomatic": 40,
         "total_cognitive": 8,
-        "function_count": 33,
-        "lines": 690,
+        "function_count": 28,
+        "lines": 563,
         "crap_max": 56.0,
         "crap_above_threshold": 2
       },
@@ -11058,6 +11052,20 @@
         "function_count": 3,
         "lines": 82,
         "crap_max": 10.3,
+        "crap_above_threshold": 0
+      },
+      {
+        "path": "src/components/Toolbar/Toolbar.examples.tsx",
+        "fan_in": 0,
+        "fan_out": 4,
+        "dead_code_ratio": 1.0,
+        "complexity_density": 0.07,
+        "maintainability_index": 71.5,
+        "total_cyclomatic": 8,
+        "total_cognitive": 0,
+        "function_count": 8,
+        "lines": 108,
+        "crap_max": 2.0,
         "crap_above_threshold": 0
       },
       {
@@ -12924,7 +12932,7 @@
       },
       {
         "path": "src/components/Table/utils/resolveFetchMoreState.util.ts",
-        "fan_in": 4,
+        "fan_in": 3,
         "fan_out": 0,
         "dead_code_ratio": 0.0,
         "complexity_density": 0.1,
@@ -14572,20 +14580,6 @@
         "function_count": 11,
         "lines": 79,
         "crap_max": 1.2,
-        "crap_above_threshold": 0
-      },
-      {
-        "path": "src/components/Toolbar/Toolbar.examples.tsx",
-        "fan_in": 1,
-        "fan_out": 4,
-        "dead_code_ratio": 0.0,
-        "complexity_density": 0.07,
-        "maintainability_index": 91.5,
-        "total_cyclomatic": 8,
-        "total_cognitive": 0,
-        "function_count": 8,
-        "lines": 108,
-        "crap_max": 2.0,
         "crap_above_threshold": 0
       },
       {
@@ -16573,6 +16567,20 @@
         "total_cognitive": 1,
         "function_count": 1,
         "lines": 46,
+        "crap_max": 2.0,
+        "crap_above_threshold": 0
+      },
+      {
+        "path": "src/App.tsx",
+        "fan_in": 1,
+        "fan_out": 1,
+        "dead_code_ratio": 0.0,
+        "complexity_density": 0.13,
+        "maintainability_index": 96.6,
+        "total_cyclomatic": 1,
+        "total_cognitive": 0,
+        "function_count": 1,
+        "lines": 8,
         "crap_max": 2.0,
         "crap_above_threshold": 0
       },
@@ -20434,6 +20442,31 @@
         ]
       },
       {
+        "path": "src/App.tsx",
+        "score": 19.2,
+        "commits": 38,
+        "weighted_commits": 11.99,
+        "lines_added": 1168,
+        "lines_deleted": 1168,
+        "complexity_density": 0.13,
+        "fan_in": 1,
+        "trend": "cooling",
+        "actions": [
+          {
+            "type": "refactor-file",
+            "auto_fixable": false,
+            "description": "Refactor `src/App.tsx`, high complexity combined with frequent changes makes this a maintenance risk",
+            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
+          },
+          {
+            "type": "add-tests",
+            "auto_fixable": false,
+            "description": "Add test coverage for `src/App.tsx` to reduce change risk",
+            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
+          }
+        ]
+      },
+      {
         "path": "src/components/Table/contexts/TableConfig/columns/actions/useBatchSetColumnSettings.hook.ts",
         "score": 18.3,
         "commits": 14,
@@ -20537,7 +20570,7 @@
         "path": "src/components/Table/TableHeader/TableHeader.component.tsx",
         "score": 11.8,
         "commits": 37,
-        "weighted_commits": 13.73,
+        "weighted_commits": 13.72,
         "lines_added": 445,
         "lines_deleted": 445,
         "complexity_density": 0.07,
@@ -20612,7 +20645,7 @@
         "path": "src/components/Table/TableSettingsDrawer/FiltersSection/ActiveFiltersList/ActiveFiltersList.component.tsx",
         "score": 10.6,
         "commits": 17,
-        "weighted_commits": 7.83,
+        "weighted_commits": 7.82,
         "lines_added": 211,
         "lines_deleted": 211,
         "complexity_density": 0.11,
@@ -20684,31 +20717,6 @@
         ]
       },
       {
-        "path": "src/App.tsx",
-        "score": 10.3,
-        "commits": 38,
-        "weighted_commits": 11.99,
-        "lines_added": 1168,
-        "lines_deleted": 1168,
-        "complexity_density": 0.07,
-        "fan_in": 1,
-        "trend": "cooling",
-        "actions": [
-          {
-            "type": "refactor-file",
-            "auto_fixable": false,
-            "description": "Refactor `src/App.tsx`, high complexity combined with frequent changes makes this a maintenance risk",
-            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
-          },
-          {
-            "type": "add-tests",
-            "auto_fixable": false,
-            "description": "Add test coverage for `src/App.tsx` to reduce change risk",
-            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
-          }
-        ]
-      },
-      {
         "path": "src/components/Table/TableBodyCell/TableBodyCell.stylex.ts",
         "score": 9.6,
         "commits": 18,
@@ -20737,7 +20745,7 @@
         "path": "src/components/Table/utils/getEffectiveColumns.util.ts",
         "score": 9.2,
         "commits": 6,
-        "weighted_commits": 2.78,
+        "weighted_commits": 2.77,
         "lines_added": 72,
         "lines_deleted": 72,
         "complexity_density": 0.27,
@@ -20837,7 +20845,7 @@
         "path": "src/components/Table/filters/SelectFilterInput/SelectFilterInput.component.tsx",
         "score": 8.9,
         "commits": 18,
-        "weighted_commits": 8.03,
+        "weighted_commits": 8.02,
         "lines_added": 352,
         "lines_deleted": 352,
         "complexity_density": 0.09,
@@ -23017,7 +23025,7 @@
         "path": "src/components/Table/ColumnSettingsDrawer/ColumnSettingsDrawer.component.tsx",
         "score": 3.9,
         "commits": 11,
-        "weighted_commits": 5.35,
+        "weighted_commits": 5.34,
         "lines_added": 226,
         "lines_deleted": 226,
         "complexity_density": 0.06,
@@ -23417,6 +23425,31 @@
         ]
       },
       {
+        "path": "src/components/Toolbar/Toolbar.examples.tsx",
+        "score": 3.5,
+        "commits": 12,
+        "weighted_commits": 4.11,
+        "lines_added": 221,
+        "lines_deleted": 221,
+        "complexity_density": 0.07,
+        "fan_in": 0,
+        "trend": "cooling",
+        "actions": [
+          {
+            "type": "refactor-file",
+            "auto_fixable": false,
+            "description": "Refactor `src/components/Toolbar/Toolbar.examples.tsx`, high complexity combined with frequent changes makes this a maintenance risk",
+            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
+          },
+          {
+            "type": "add-tests",
+            "auto_fixable": false,
+            "description": "Add test coverage for `src/components/Toolbar/Toolbar.examples.tsx` to reduce change risk",
+            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
+          }
+        ]
+      },
+      {
         "path": "src/utils/storage/readFromCookie.util.ts",
         "score": 3.5,
         "commits": 5,
@@ -23437,31 +23470,6 @@
             "type": "add-tests",
             "auto_fixable": false,
             "description": "Add test coverage for `src/utils/storage/readFromCookie.util.ts` to reduce change risk",
-            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
-          }
-        ]
-      },
-      {
-        "path": "src/components/Toolbar/Toolbar.examples.tsx",
-        "score": 3.5,
-        "commits": 12,
-        "weighted_commits": 4.11,
-        "lines_added": 221,
-        "lines_deleted": 221,
-        "complexity_density": 0.07,
-        "fan_in": 1,
-        "trend": "cooling",
-        "actions": [
-          {
-            "type": "refactor-file",
-            "auto_fixable": false,
-            "description": "Refactor `src/components/Toolbar/Toolbar.examples.tsx`, high complexity combined with frequent changes makes this a maintenance risk",
-            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
-          },
-          {
-            "type": "add-tests",
-            "auto_fixable": false,
-            "description": "Add test coverage for `src/components/Toolbar/Toolbar.examples.tsx` to reduce change risk",
             "note": "Frequently changed complex files benefit most from comprehensive test coverage"
           }
         ]
@@ -27341,10 +27349,10 @@
     },
     "large_functions": [
       {
-        "path": "src/App.tsx",
-        "name": "App",
-        "line": 214,
-        "line_count": 474
+        "path": "src/features/showcase/ShowcasePage/ShowcasePage.component.tsx",
+        "name": "ShowcasePage",
+        "line": 191,
+        "line_count": 372
       },
       {
         "path": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.test.ts",
@@ -28256,11 +28264,6 @@
   },
   "next_steps": [
     {
-      "id": "trace-unused-export",
-      "command": "fallow dead-code --trace src/components/Table/utils/index.ts:resolveFetchMoreState",
-      "reason": "verify an export is truly unused before deleting"
-    },
-    {
       "id": "trace-clone",
       "command": "fallow dupes --trace dup:015ec740",
       "reason": "see sibling locations and an extract-function suggestion"
@@ -28269,6 +28272,11 @@
       "id": "complexity-breakdown",
       "command": "fallow health --complexity-breakdown",
       "reason": "see per-decision-point contributions for a hotspot"
+    },
+    {
+      "id": "audit-changed",
+      "command": "fallow audit",
+      "reason": "gate only the files your branch changed (auto-detects the base)"
     }
   ]
 }
