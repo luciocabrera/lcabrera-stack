@@ -149,18 +149,23 @@ graph TD
 
 ## Persistence
 
-Table state is persisted to cookies via server actions and synced to URL
-search params for shareable links:
+Table state uses dual-channel persistence:
+
+- Cookies + URL for SSR/shareable state (filters, sorting, pinning, sizing, visibility)
+- sessionStorage (tab-scoped) for per-tab working copies (drawer UI + data rows)
 
 ```mermaid
 graph LR
   Change["State change"] --> Action["usePersistTableStateAction()"]
+  Change --> Session["sessionStorage write"]
   Action --> Fetcher["useFetcher.submit()"]
   Fetcher --> Route["POST /_action/persist-cookie"]
   Route --> Cookie["Set-Cookie header"]
 
-  Load["Page load"] --> Read["readPersistedStateFromCookie()"]
-  Read --> Init["Provider initial state"]
+  Load["Page load"] --> CookieRead["readPersistedStateFromCookie()"]
+  CookieRead --> Init["Provider initial state"]
+  Load --> SessionRead["readPersisted*FromSessionStorage()"]
+  SessionRead --> Init
 ```
 
 See [hooks/ARCHITECTURE.md](hooks/ARCHITECTURE.md) and

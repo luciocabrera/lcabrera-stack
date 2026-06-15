@@ -14,14 +14,19 @@ type ReadPersistedStateFromSessionStorageArgs = {
  * Uses the same key format and version check as the cookie reader.
  * Returns an empty object on SSR or if no session data exists.
  */
-export const readPersistedStateFromSessionStorage = ({
+export const readPersistedStateFromSessionStorage = <
+  TData = Record<string, unknown>,
+>({
   persistenceKey,
-}: ReadPersistedStateFromSessionStorageArgs): Partial<PersistedState> => {
-  const result: { -readonly [K in keyof PersistedState]?: PersistedState[K] } =
-    {};
+}: ReadPersistedStateFromSessionStorageArgs): Partial<
+  PersistedState<TData>
+> => {
+  const result: {
+    -readonly [K in keyof PersistedState<TData>]?: PersistedState<TData>[K];
+  } = {};
   const storageKey = getStorageKey({ persistenceKey });
 
-  const slices: (keyof Omit<PersistedState, 'version'>)[] = [
+  const slices: (keyof Omit<PersistedState<TData>, 'version'>)[] = [
     'sorting',
     'columnFilters',
     'columnOrder',

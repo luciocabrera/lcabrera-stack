@@ -18,10 +18,15 @@ utils/
 ├── getPinnedDerivedColumnsState.util.ts          → Build effective columns, groups, and pinned offsets
 ├── getStaticColumnKeys.util.ts                   → Extract non-reorderable column keys
 ├── getStorageKey.util.ts                         → Build namespaced storage key
+├── readPersistedDataStateFromSessionStorage.util.ts → Read tab-scoped persisted table rows
 ├── readPersistedStateFromCookie.util.ts          → SSR-safe cookie state read
+├── readPersistedStateFromSessionStorage.util.ts  → Read tab-scoped persisted column slices
+├── readPersistedUiStateFromSessionStorage.util.ts → Read tab-scoped persisted drawer UI slices
 ├── serializeStateSlice.util.ts                   → JSON serialize a state slice
 ├── splitColumnsByPinning.util.ts                 → Split columns into left/center/right groups
 ├── syncColumnOrderWithPinning.util.ts            → Pin-aware column reordering
+├── writePersistedDataStateToSessionStorage.util.ts → Write tab-scoped persisted table rows
+├── writePersistedUiStateToSessionStorage.util.ts → Write tab-scoped persisted drawer UI slices
 ├── writeStateSlice.util.ts                       → Write to cookie/localStorage
 ├── persistence.constants.ts                      → Storage key constants
 ├── persistence.types.ts                          → Persistence config types
@@ -124,9 +129,14 @@ graph LR
   end
 ```
 
-| Function                     | Purpose                                       |
-| ---------------------------- | --------------------------------------------- |
-| readPersistedStateFromCookie | Parse persisted state from cookies (SSR-safe) |
-| serializeStateSlice          | Convert a state slice to key/value payload    |
-| writeStateSlice              | Write to cookie or localStorage               |
-| getStorageKey                | Build persistenceKey:slice key string         |
+| Function                                 | Purpose                                                        |
+| ---------------------------------------- | -------------------------------------------------------------- |
+| readPersistedDataStateFromSessionStorage | Parse persisted data rows from sessionStorage (tab-scoped)     |
+| readPersistedStateFromCookie             | Parse persisted state from cookies (SSR-safe)                  |
+| readPersistedStateFromSessionStorage     | Parse persisted column slices from sessionStorage (tab-scoped) |
+| readPersistedUiStateFromSessionStorage   | Parse persisted UI slices from sessionStorage (tab-scoped)     |
+| serializeStateSlice                      | Convert a state slice to key/value payload                     |
+| writePersistedDataStateToSessionStorage  | Write persisted data rows to sessionStorage (tab-scoped)       |
+| writePersistedUiStateToSessionStorage    | Write persisted UI slices to sessionStorage (tab-scoped)       |
+| writeStateSlice                          | Write to cookie or localStorage                                |
+| getStorageKey                            | Build persistenceKey:slice key string                          |

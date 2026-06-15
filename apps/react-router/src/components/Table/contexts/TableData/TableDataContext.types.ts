@@ -9,4 +9,6 @@ export type TableDataContextValue<TData = Record<string, unknown>> = {
 export type TableDataProviderProps<TData = Record<string, unknown>> = {
   readonly children: React.ReactNode;
   readonly dataState?: Partial<TableDataState<TData>>;
+  readonly isPersistenceEnabled?: boolean;
+  readonly persistenceKey?: string;
 };

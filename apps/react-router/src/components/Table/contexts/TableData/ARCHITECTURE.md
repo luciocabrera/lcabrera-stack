@@ -8,7 +8,7 @@ the Suspense boundary so loading/error states are handled by React transitions.
 ```
 TableData/
 ├── TableDataContext.context.ts              → createContext (undefined default)
-├── TableDataContext.provider.tsx             → Provider: creates store from initial data
+├── TableDataContext.provider.tsx             → Provider: creates store from initial data and syncs tab-scoped data cache
 ├── TableDataContext.types.ts                → TableDataState, ContextValue
 ├── index.ts                                 → Barrel: TableDataProvider, hooks
 │
@@ -65,11 +65,14 @@ TableDataState<TData> = {
 ```mermaid
 graph TD
   A["TableDataProvider receives initial data + totalRows"]
-  A --> B["getInitialDataState({ data, isLoading, totalRows })"]
+  A --> P["readPersistedDataStateFromSessionStorage(persistenceKey)"]
+  P --> M["merge persisted data when enabled"]
+  M --> B["getInitialDataState({ data, isLoading, totalRows })"]
   B --> C["Compute totalLoadedRows = data.length"]
   B --> D["Compute hasMore = totalRows > totalLoadedRows"]
   C --> E["useStore(initialState) → dataStore"]
   D --> E
+  E --> W["subscribe(dataStore) → writePersistedDataStateToSessionStorage()"]
   E --> F["Provide via TableDataContext"]
 ```
 
