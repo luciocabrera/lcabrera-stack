@@ -2,7 +2,6 @@ import * as stylex from '@stylexjs/stylex';
 
 import { borderRadius } from '@/design-system/tokens/base.stylex';
 import { shadows } from '@/design-system/tokens/base.stylex';
-import { colors } from '@/design-system/tokens/colors.stylex';
 import {
   baseInteractiveStyles,
   colorVariants,
@@ -52,7 +51,6 @@ const styleVariants = stylex.create({
 
 const loadingStyles = stylex.create({
   overlay: {
-    backgroundColor: colors.surfaceElevated,
     borderRadius: borderRadius.md,
     insetBlock: 0,
     insetInline: 0,
