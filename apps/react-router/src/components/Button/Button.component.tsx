@@ -10,6 +10,7 @@ export const Button = ({
   color = 'primary',
   customStylex,
   icon,
+  isBusy = false,
   isBussy = false,
   isIconOnly = false,
   isDisabled = false,
@@ -22,7 +23,7 @@ export const Button = ({
   width = 'full',
   ...rest
 }: ButtonProps) => {
-  const isBusyState = isBussy;
+  const isBusyState = isBusy || isBussy;
 
   const button = (
     <button

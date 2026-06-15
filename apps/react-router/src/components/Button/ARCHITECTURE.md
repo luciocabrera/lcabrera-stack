@@ -50,6 +50,7 @@ graph TD
 | `color`            | `DesignSystemColor`              | `'primary'`  |
 | `customStylex`     | `StyleXStyles`                   | —            |
 | `icon`             | `ReactNode`                      | —            |
+| `isBusy`           | `boolean`                        | `false`      |
 | `isIconOnly`       | `boolean`                        | `false`      |
 | `isDisabled`       | `boolean`                        | `false`      |
 | `orientation`      | `DesignSystemOrientation`        | `'vertical'` |

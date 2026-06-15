@@ -15,7 +15,7 @@ vi.mock('@/utils/storage', () => ({
 import { readPersistedDataStateFromSessionStorage } from './readPersistedDataStateFromSessionStorage.util';
 
 const makeSlice = (value: unknown) =>
-  encodeURIComponent(JSON.stringify({ value, version: PERSISTENCE_VERSION }));
+  JSON.stringify({ value, version: PERSISTENCE_VERSION });
 
 describe('readPersistedDataStateFromSessionStorage', () => {
   it('returns undefined when sessionStorage has nothing', () => {

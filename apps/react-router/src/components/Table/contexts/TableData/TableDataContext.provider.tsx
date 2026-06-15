@@ -22,24 +22,34 @@ export const TableDataProvider = <TData extends Record<string, unknown>>({
   isPersistenceEnabled = true,
   persistenceKey = '',
 }: TableDataProviderProps<TData>) => {
-  const persistedDataState = isPersistenceEnabled
-    ? readPersistedDataStateFromSessionStorage<TData>({ persistenceKey })
-    : undefined;
-  const resolvedPersistedDataState = shouldHydratePersistedDataState<TData>({
-    initialDataState: dataState,
-    persistedDataState,
-  })
-    ? persistedDataState
-    : undefined;
-
   const dataStore = useStore<TableDataState<TData>>(
-    getInitialDataState<TData>({
-      ...dataState,
-      ...(resolvedPersistedDataState === undefined
-        ? {}
-        : resolvedPersistedDataState),
-    }),
+    getInitialDataState<TData>(dataState ?? {}),
   );
+
+  useEffect(() => {
+    if (!isPersistenceEnabled || persistenceKey.length === 0) {
+      return;
+    }
+
+    const persistedDataState = readPersistedDataStateFromSessionStorage<TData>({
+      persistenceKey,
+    });
+
+    if (
+      !shouldHydratePersistedDataState<TData>({
+        initialDataState: dataState,
+        persistedDataState,
+      })
+    ) {
+      return;
+    }
+
+    if (persistedDataState === undefined) {
+      return;
+    }
+
+    dataStore.set(persistedDataState);
+  }, [dataState, dataStore, isPersistenceEnabled, persistenceKey]);
 
   useEffect(() => {
     const shouldPersist = isPersistenceEnabled && persistenceKey.length > 0;

@@ -67,17 +67,19 @@ TableDataState<TData> = {
 ```mermaid
 graph TD
   A["TableDataProvider receives initial data + totalRows"]
-  A --> P["readPersistedDataStateFromSessionStorage(persistenceKey)"]
-  P --> G["shouldHydratePersistedDataState(initial, persisted)"]
-  G --> M["merge persisted data only when totals + first-page prefix match"]
-  M --> B["getInitialDataState({ data, isLoading, totalRows })"]
-  B --> C["Compute totalLoadedRows = data.length"]
-  B --> D["Compute hasMore = totalRows > totalLoadedRows"]
-  C --> E["useStore(initialState) → dataStore"]
-  D --> E
-  E --> W["subscribe(dataStore) → writePersistedDataStateToSessionStorage()"]
-  E --> F["Provide via TableDataContext"]
+  A --> B["getInitialDataState(dataState)"]
+  B --> C["useStore(initialState) → dataStore"]
+  C --> D["client mount hydration effect"]
+  D --> E["readPersistedDataStateFromSessionStorage(persistenceKey)"]
+  E --> F["shouldHydratePersistedDataState(initial, persisted)"]
+  F --> G["merge persisted data only when totals + first-page prefix match"]
+  G --> H["dataStore.set(persistedDataState)"]
+  C --> I["subscribe(dataStore) → writePersistedDataStateToSessionStorage()"]
+  C --> J["Provide via TableDataContext"]
 ```
+
+Hydration now happens after mount so the server render and the first client render
+stay consistent before the per-tab data cache is applied.
 
 ## Actions
 

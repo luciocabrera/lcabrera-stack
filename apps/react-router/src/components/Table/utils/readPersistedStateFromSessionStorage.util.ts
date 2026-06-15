@@ -41,7 +41,7 @@ export const readPersistedStateFromSessionStorage = <
 
     if (rawValue) {
       try {
-        const parsed = JSON.parse(decodeURIComponent(rawValue)) as {
+        const parsed = JSON.parse(rawValue) as {
           value: unknown;
           version: number;
         };

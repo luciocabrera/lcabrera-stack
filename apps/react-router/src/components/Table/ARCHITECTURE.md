@@ -165,7 +165,8 @@ graph LR
 
   Load["Page load"] --> CookieRead["readPersistedStateFromCookie()"]
   CookieRead --> Init["Provider initial state"]
-  Load --> SessionRead["readPersisted*FromSessionStorage()"]
+  Load --> Mount["client mount"]
+  Mount --> SessionRead["TableConfigProvider / TableDataProvider hydration effects"]
   SessionRead --> Init
 ```
 

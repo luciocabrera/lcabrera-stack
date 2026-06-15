@@ -11,8 +11,8 @@ import {
   readPersistedUiStateFromSessionStorage,
 } from '../utils';
 
-type UseHydrateTableSessionStateArgs = {
-  readonly columnsStore: TStore<TableColumnsState>;
+type UseHydrateTableSessionStateArgs<TData extends Record<string, unknown>> = {
+  readonly columnsStore: TStore<TableColumnsState<TData>>;
   readonly metaStore: TStore<TableMetaState>;
   readonly persistenceKey: string;
 };
@@ -28,11 +28,13 @@ type UseHydrateTableSessionStateArgs = {
  *
  * Called once per table mount inside TableConfigProvider.
  */
-export const useHydrateTableSessionState = ({
+export const useHydrateTableSessionState = <
+  TData extends Record<string, unknown>,
+>({
   columnsStore,
   metaStore,
   persistenceKey,
-}: UseHydrateTableSessionStateArgs): void => {
+}: UseHydrateTableSessionStateArgs<TData>): void => {
   useEffect(() => {
     const columnState = readPersistedStateFromSessionStorage({
       persistenceKey,
@@ -43,11 +45,13 @@ export const useHydrateTableSessionState = ({
     const hasUiState = Object.keys(uiState).length > 0;
 
     if (hasColumnState) {
-      const { columnVisibility, ...rest } = columnState;
-      columnsStore.set({
+      const { columnVisibility, version: _version, ...rest } = columnState;
+      const nextColumnsState = {
         ...rest,
         ...(columnVisibility === undefined ? {} : { columnVisibility }),
-      });
+      } as Partial<TableColumnsState<TData>>;
+
+      columnsStore.set(nextColumnsState);
     }
 
     if (hasUiState) {

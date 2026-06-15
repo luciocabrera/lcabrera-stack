@@ -29,6 +29,16 @@ vi.mock('@/components/Table/utils', async (importOriginal) => {
 
 import { useHydrateTableSessionState } from './useHydrateTableSessionState.hook';
 
+const createStoreMock = () => ({
+  get: vi.fn(),
+  getServerSnapshot: vi.fn(),
+  reset: vi.fn(),
+  set: vi.fn(),
+  subscribe: vi.fn(),
+});
+
+type StoreMock = ReturnType<typeof createStoreMock>;
+
 describe('useHydrateTableSessionState', () => {
   it('does not call store.set when sessionStorage is empty', () => {
     readPersistedStateFromSessionStorageMock.mockReturnValue({});
@@ -36,8 +46,8 @@ describe('useHydrateTableSessionState', () => {
 
     renderHook(() =>
       useHydrateTableSessionState({
-        columnsStore: columnsStoreMock as never,
-        metaStore: metaStoreMock as never,
+        columnsStore: columnsStoreMock as StoreMock,
+        metaStore: metaStoreMock as StoreMock,
         persistenceKey: 'orders',
       }),
     );
@@ -53,8 +63,8 @@ describe('useHydrateTableSessionState', () => {
 
     renderHook(() =>
       useHydrateTableSessionState({
-        columnsStore: columnsStoreMock as never,
-        metaStore: metaStoreMock as never,
+        columnsStore: columnsStoreMock as StoreMock,
+        metaStore: metaStoreMock as StoreMock,
         persistenceKey: 'orders',
       }),
     );
@@ -73,8 +83,8 @@ describe('useHydrateTableSessionState', () => {
 
     renderHook(() =>
       useHydrateTableSessionState({
-        columnsStore: columnsStoreMock as never,
-        metaStore: metaStoreMock as never,
+        columnsStore: columnsStoreMock as StoreMock,
+        metaStore: metaStoreMock as StoreMock,
         persistenceKey: 'orders',
       }),
     );
@@ -93,8 +103,8 @@ describe('useHydrateTableSessionState', () => {
 
     const { rerender } = renderHook(() =>
       useHydrateTableSessionState({
-        columnsStore: columnsStoreMock as never,
-        metaStore: metaStoreMock as never,
+        columnsStore: columnsStoreMock as StoreMock,
+        metaStore: metaStoreMock as StoreMock,
         persistenceKey: 'orders',
       }),
     );

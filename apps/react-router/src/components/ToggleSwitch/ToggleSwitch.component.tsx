@@ -11,6 +11,7 @@ import type { ToggleSwitchProps } from './ToggleSwitch.types';
 import { busyStyles, styles } from './ToggleSwitch.stylex';
 
 export const ToggleSwitch = ({
+  isBusy = false,
   isBussy = false,
   isChecked,
   isDisabled,
@@ -18,7 +19,7 @@ export const ToggleSwitch = ({
   onChange,
   ...props
 }: ToggleSwitchProps) => {
-  const isBusyState = isBussy;
+  const isBusyState = isBusy || isBussy;
   const [isFocused, setIsFocused] = useState(false);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {

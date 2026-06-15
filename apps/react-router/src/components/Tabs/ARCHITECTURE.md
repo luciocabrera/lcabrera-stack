@@ -92,6 +92,7 @@ Extends `ComponentPropsWithoutRef<'div'>` (all native `div` attributes are forwa
 | `tabs`               | `TabItem[]`     | —             | Ordered list of tab configurations (required) |
 | `defaultSelectedTab` | `string`        | `tabs[0].key` | Initially active tab key                      |
 | `selectedTab`        | `string`        | —             | Controlled active tab key                     |
+| `isBusy`             | `boolean`       | `false`       | Renders tab controls in a loading state       |
 | `onSelectTab`        | `(key) => void` | —             | Callback fired when tab selection changes     |
 
 ### `TabItem`

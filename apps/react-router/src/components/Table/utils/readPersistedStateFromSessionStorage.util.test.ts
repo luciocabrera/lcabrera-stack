@@ -17,7 +17,7 @@ vi.mock('@/utils/storage', () => ({
 import { readPersistedStateFromSessionStorage } from './readPersistedStateFromSessionStorage.util';
 
 const makeSlice = (value: unknown) =>
-  encodeURIComponent(JSON.stringify({ value, version: PERSISTENCE_VERSION }));
+  JSON.stringify({ value, version: PERSISTENCE_VERSION });
 
 describe('readPersistedStateFromSessionStorage', () => {
   it('returns empty object when sessionStorage has nothing', () => {
@@ -52,7 +52,7 @@ describe('readPersistedStateFromSessionStorage', () => {
   it('skips slices with version mismatch', () => {
     readFromSessionStorageMock.mockImplementation(({ key }: { key: string }) =>
       key.endsWith('-sorting')
-        ? encodeURIComponent(JSON.stringify({ value: [], version: 99 }))
+        ? JSON.stringify({ value: [], version: 99 })
         : undefined,
     );
     const result = readPersistedStateFromSessionStorage({
@@ -69,5 +69,20 @@ describe('readPersistedStateFromSessionStorage', () => {
       persistenceKey: 'orders',
     });
     expect(result.sorting).toBeUndefined();
+  });
+
+  it('reads raw JSON values that include percent signs', () => {
+    const sorting = [{ columnKey: 'name%', direction: 'asc' }];
+    readFromSessionStorageMock.mockImplementation(({ key }: { key: string }) =>
+      key.endsWith('-sorting')
+        ? JSON.stringify({ value: sorting, version: PERSISTENCE_VERSION })
+        : undefined,
+    );
+
+    const result = readPersistedStateFromSessionStorage({
+      persistenceKey: 'orders',
+    });
+
+    expect(result.sorting).toEqual(sorting);
   });
 });
