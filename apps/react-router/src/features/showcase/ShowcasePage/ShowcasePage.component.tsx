@@ -93,6 +93,7 @@ const randomString = (length: number) => {
 };
 
 const tableData: MockRow[] = [...Array.from({ length: 10_000 }).keys()].map(
+  // fallow-ignore-next-line complexity -- temporary showcase-only data generator
   (rowIdx) => {
     const row: MockRow = {};
     for (const [colIdx, col] of COLUMNS.entries()) {
@@ -201,6 +202,7 @@ const ShowcaseSubsection = ({ children, title }: ShowcaseSubsectionProps) => {
   );
 };
 
+// fallow-ignore-next-line complexity -- temporary showcase testing page
 export const ShowcasePage = () => {
   const { isDarkMode, toggleTheme } = useTheme();
   const [isLeftPanelOpen, setIsLeftPanelOpen] = useState(false);

@@ -138,13 +138,6 @@ Before creating anything new, check this inventory. If something here does the j
 | `useFetchInitialFilterData` | `components/Table/contexts/FiltersData/filters/actions/useFetchInitialFilterData.hook.ts` | Fetches the first page of filter options, updates totals, and optionally triggers prefetch                |
 | `useFetchMoreFilterData`    | `components/Table/contexts/FiltersData/filters/actions/useFetchMoreFilterData.hook.ts`    | Loads and appends subsequent pages of filter options using cache-or-fetch and optional post-load prefetch |
 
-### `src/components/Table/contexts/TableData/utils/`
-
-| Function                          | Location                                                                            | Description                                                                             |
-| --------------------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `getInitialDataState`             | `components/Table/contexts/TableData/utils/getInitialDataState.util.ts`             | Builds initial table-data state with derived `totalLoadedRows` and `hasMore`            |
-| `shouldHydratePersistedDataState` | `components/Table/contexts/TableData/utils/shouldHydratePersistedDataState.util.ts` | Rehydrates persisted rows only when current loader data matches the same query snapshot |
-
 ### `src/components/Table/TableSettingsDrawer/TableDrawerContext/actions/`
 
 | Artifact                         | Location                                                                                                 | Description                                                                                     |
@@ -186,6 +179,7 @@ Before creating anything new, check this inventory. If something here does the j
 | Function                            | Location                                                                                                                                    | Description                                                                                                        |
 | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | `resolveOrderConflictUpdate`        | `components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/resolveOrderConflictUpdate.util.ts`        | Decides whether a reordered column layout can be applied directly or must open/auto-accept the order-conflict flow |
+| `applyToggleColumnPinResolution`    | `components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/applyToggleColumnPinResolution.util.ts`    | Applies resolved toggle-pin outcomes by dispatching pinning updates, modal state updates, and auto-accept actions  |
 | `resolveToggleColumnPinUpdate`      | `components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/resolveToggleColumnPinUpdate.util.ts`      | Resolves static short-circuit plus pin-toggle intent into direct update or modal/auto-accept outcomes              |
 | `resolveAcceptedOrderConflictState` | `components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/resolveAcceptedOrderConflictState.util.ts` | Resolves accepted order-conflict state into final order/pinning with static restoration                            |
 | `resolveAcceptedPinSideUpdate`      | `components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/resolveAcceptedPinSideUpdate.util.ts`      | Resolves accepted pin-side actions into direct updates or conflict-modal/auto-accept outcomes                      |

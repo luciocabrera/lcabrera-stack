@@ -161,6 +161,10 @@ directly or must open/auto-accept the order conflict flow.
 `useToggleColumnPin` now delegates static-column short-circuit and pin-toggle
 intent resolution to `resolveToggleColumnPinUpdate`.
 
+`useToggleColumnPin` now delegates resolution side effects (pinning updates,
+modal writes, and auto-accept dispatches) to
+`applyToggleColumnPinResolution`.
+
 `useAcceptOrderConflict` now delegates the final static-order/static-pinning
 composition step to `resolveAcceptedOrderConflictState`.
 

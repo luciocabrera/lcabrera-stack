@@ -7,6 +7,7 @@ import { useTableDrawerContextValue } from '@/components/Table/TableSettingsDraw
 
 import { useAcceptPinSide } from './useAcceptPinSide.hook';
 import { useAcceptUnpinConflict } from './useAcceptUnpinConflict.hook';
+import { applyToggleColumnPinResolution } from './utils/applyToggleColumnPinResolution.util';
 import { resolveToggleColumnPinUpdate } from './utils/resolveToggleColumnPinUpdate.util';
 import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
 
@@ -51,32 +52,19 @@ export const useToggleColumnPin = () => {
       staticKeys,
     });
 
-    if (resolution.kind === 'ignored-static') {
-      return;
-    }
-
-    if (resolution.kind === 'apply-pinning-direct') {
-      drawerColumnsStore.set({ columnPinning: resolution.nextPinning });
-      return;
-    }
-
-    if (resolution.kind === 'open-pin-side-modal') {
-      modalsStore.set({ pinSideModal: resolution.modal });
-      return;
-    }
-
-    if (resolution.kind === 'auto-accept-pin-side') {
-      modalsStore.set({ pinSideModal: resolution.modal });
-      acceptPinSide(resolution.pinSide);
-      return;
-    }
-
-    if (resolution.kind === 'open-unpin-conflict-modal') {
-      modalsStore.set({ unpinConflictModal: resolution.modal });
-      return;
-    }
-
-    modalsStore.set({ unpinConflictModal: resolution.modal });
-    acceptUnpinConflict(resolution.resolution);
+    applyToggleColumnPinResolution({
+      acceptPinSide,
+      acceptUnpinConflict,
+      resolution,
+      setColumnPinning: (nextPinning) => {
+        drawerColumnsStore.set({ columnPinning: nextPinning });
+      },
+      setPinSideModal: (modal) => {
+        modalsStore.set({ pinSideModal: modal });
+      },
+      setUnpinConflictModal: (modal) => {
+        modalsStore.set({ unpinConflictModal: modal });
+      },
+    });
   };
 };

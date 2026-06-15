@@ -37,7 +37,7 @@ type ResolveToggleColumnPinUpdateArgs = {
   readonly staticKeys?: Set<string>;
 };
 
-type ResolveToggleColumnPinUpdateResult =
+export type ResolveToggleColumnPinUpdateResult =
   | {
       readonly kind: 'ignored-static';
     }

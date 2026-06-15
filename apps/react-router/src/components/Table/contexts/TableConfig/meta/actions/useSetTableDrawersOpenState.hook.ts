@@ -14,13 +14,11 @@ export const useSetTableDrawersOpenState = () => {
   }: SetTableDrawersOpenStateArgs) => {
     const metaState = metaStore.get();
 
-    const isSwitchingBetweenColumnSettings =
-      isColumnSettingsOpen &&
-      !isTableSettingsOpen &&
-      (metaState?.isColumnSettingsOpen ?? false);
-
     const isOpeningColumnSettings =
       isColumnSettingsOpen && !isTableSettingsOpen;
+
+    const isSwitchingBetweenColumnSettings =
+      isOpeningColumnSettings && (metaState?.isColumnSettingsOpen ?? false);
 
     let wasTableSettingsOpenBeforeColumnSettings =
       metaState?.wasTableSettingsOpenBeforeColumnSettings ?? false;
