@@ -87,6 +87,7 @@ export const ActiveFiltersList = ({
         title={`Active Filters (${filterEntries.length})`}
         toolbar={
           <FiltersSectionToolbar
+            isBussy={isBussy}
             isCollapseAllDisabled={isCollapseAllDisabled}
             isExpandAllDisabled={isExpandAllDisabled}
             onCollapseAll={onCollapseAll}

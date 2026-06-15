@@ -110,7 +110,7 @@ export const ActiveSortList = ({ isBussy = false }: ActiveSortListProps) => {
     <SidePanelSection>
       <SidePanelSectionHeader
         title={`Sort Order (${sortItems.length})`}
-        toolbar={<SortingSectionToolbar variant='toolbar' />}
+        toolbar={<SortingSectionToolbar isBussy={isBussy} variant='toolbar' />}
       />
       {sortItems.length === 0 ? (
         <InfoBox>
