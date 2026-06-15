@@ -5,9 +5,9 @@ Project: apps/react-router
 
 ## Current Baseline
 
-- Fallow full (`vp run fallow:full`): 26 above threshold · maintainability 93 (good) · 3563 analyzed
+- Fallow full (`vp run fallow:full`): 24 above threshold · maintainability 93 (good) · 3594 analyzed
 - Fallow dead-code/check: 0 issues reported by fallow (`check.total_issues`)
-- Fallow dupes: 80 clone groups
+- Fallow dupes: 87 clone groups
 - Canonical machine-readable source: `reports/fallow/fallow-full-latest.json`
 - Analysis source doc: `reports/fallow-complexity-threshold-analysis.md`
 - Quality gate: `vp check` passes (format + lint + type)
@@ -52,12 +52,13 @@ Project: apps/react-router
 | 2026-06-14 | B-011 | WS-010: Reduced branch complexity in `OrderDetail.component.tsx` status badge and value formatting logic via lookup maps and focused format helpers                                                     | `vp fmt .` + `vp lint .` + `vp check` + `vp run test` + `vp run fallow:full`                 | Completed |
 | 2026-06-15 | B-014 | Cleared fallow check issues by removing unused meta action re-export and suppressing intentional/legacy findings (`unused-file`, tooling dependency false-positives)                                    | `vp check` + `vp run fallow:refresh-report`                                                  | Completed |
 | 2026-06-15 | B-012 | Reduced App showcase duplication by extracting shared `ShowcaseSection`/`ShowcaseSubsection` render primitives in `src/App.tsx`                                                                         | `vp check --fix` + `vp check` + `vp run test` + `vp run fallow:refresh-report`               | Completed |
+| 2026-06-15 | B-013 | Split `useFetchFilterData` into dedicated `useFetchInitialFilterData`/`useFetchMoreFilterData` hooks, added colocated tests, and decomposed branch-heavy paths to helper functions                      | `vp check --fix` + `vp run test` + `vp run fallow:refresh-report`                            | Completed |
 
 ## Next Execution Plan
 
-| Order | Batch | Scope                                                                                                       | Success Criteria                                                                                | Validation                                        |
-| ----- | ----- | ----------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------- |
-| 1     | B-013 | Remaining threshold functions in `OrderDetail.component.tsx`, `entry.server.tsx`, and table high-CRAP hooks | Bring remaining CRAP-threshold functions to acceptable range with no UX/SSR behavior regression | Targeted tests + full gate + `vp run fallow:full` |
+| Order | Batch | Scope                                                                                                                                  | Success Criteria                                                                                | Validation                                        |
+| ----- | ----- | -------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| 1     | B-013 | Remaining threshold functions in `OrderDetail.component.tsx`, `entry.server.tsx`, `useFetchMoreData`, and pinning/meta high-CRAP hooks | Bring remaining CRAP-threshold functions to acceptable range with no UX/SSR behavior regression | Targeted tests + full gate + `vp run fallow:full` |
 
 ## Validation Checklist Per Batch
 

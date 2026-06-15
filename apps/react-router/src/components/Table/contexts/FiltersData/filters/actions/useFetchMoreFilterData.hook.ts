@@ -11,6 +11,91 @@ import type {
   UseFetchFilterDataActionArgs,
 } from './useFetchFilterData.types';
 
+type ResolveFetchMoreStateArgs<TResponse> = {
+  readonly currentData: readonly string[];
+  readonly currentTotalRows: number;
+  readonly dataSelector?: (response: TResponse) => readonly string[];
+  readonly dataTotalSelector?: (response: TResponse) => number;
+  readonly response: TResponse;
+};
+
+type ResolveFetchMoreStateResult = {
+  readonly combinedData: readonly string[];
+  readonly hasMore: boolean;
+  readonly totalLoadedRows: number;
+  readonly totalRows: number;
+};
+
+type MaybePrefetchArgs<TResponse> = {
+  readonly enablePrefetch: boolean;
+  readonly hasMore: boolean;
+  readonly nextSkip: number;
+  readonly onLoadMore: (args: {
+    readonly limit: number;
+    readonly skip: number;
+  }) => Promise<TResponse>;
+  readonly prefetchRef?: UseFetchFilterDataActionArgs<
+    unknown,
+    TResponse
+  >['prefetchRef'];
+};
+
+const resolveFetchMoreState = <TResponse>({
+  currentData,
+  currentTotalRows,
+  dataSelector,
+  dataTotalSelector,
+  response,
+}: ResolveFetchMoreStateArgs<TResponse>): ResolveFetchMoreStateResult => {
+  const data = dataSelector ? dataSelector(response) : [];
+  const combinedData = [...currentData, ...data];
+  const totalLoadedRows = combinedData.length;
+  const totalRows = dataTotalSelector
+    ? dataTotalSelector(response)
+    : currentTotalRows || totalLoadedRows;
+
+  return {
+    combinedData,
+    hasMore: totalRows > totalLoadedRows,
+    totalLoadedRows,
+    totalRows,
+  };
+};
+
+const clearPrefetchIfPresent = <TResponse>({
+  prefetchRef,
+}: {
+  readonly prefetchRef?: UseFetchFilterDataActionArgs<
+    unknown,
+    TResponse
+  >['prefetchRef'];
+}) => {
+  if (!prefetchRef) {
+    return;
+  }
+
+  clearPrefetchCache({ prefetchRef });
+};
+
+const maybePrefetchNextPage = <TResponse>({
+  enablePrefetch,
+  hasMore,
+  nextSkip,
+  onLoadMore,
+  prefetchRef,
+}: MaybePrefetchArgs<TResponse>) => {
+  if (!(enablePrefetch && hasMore && prefetchRef)) {
+    return;
+  }
+
+  firePrefetch({
+    limit: DEFAULT_FILTER_PAGE_SIZE,
+    nextSkip,
+    onLoadMore,
+    prefetchRef,
+  });
+};
+
 export const useFetchMoreFilterData = <TData, TResponse>({
   columnKey,
   filtersDataStore,
@@ -50,17 +135,16 @@ export const useFetchMoreFilterData = <TData, TResponse>({
           }),
       });
 
-      if (prefetchRef) {
-        clearPrefetchCache({ prefetchRef });
-      }
+      clearPrefetchIfPresent({ prefetchRef });
 
-      const data = dataSelector ? dataSelector(response) : [];
-      const combinedData = [...currentData, ...data];
-      const totalLoadedRows = combinedData.length;
-      const totalRows = dataTotalSelector
-        ? dataTotalSelector(response)
-        : currentFilter.totalRows || totalLoadedRows;
-      const hasMore = totalRows > totalLoadedRows;
+      const { combinedData, hasMore, totalLoadedRows, totalRows } =
+        resolveFetchMoreState({
+          currentData,
+          currentTotalRows: currentFilter.totalRows,
+          dataSelector,
+          dataTotalSelector,
+          response,
+        });
 
       filtersDataStore.set({
         [columnKey]: {
@@ -77,14 +161,13 @@ export const useFetchMoreFilterData = <TData, TResponse>({
       const metaState = metaStore.get();
       const enablePrefetch = metaState?.enablePrefetch ?? false;
 
-      if (enablePrefetch && hasMore && prefetchRef) {
-        firePrefetch({
-          limit: DEFAULT_FILTER_PAGE_SIZE,
-          nextSkip: totalLoadedRows,
-          onLoadMore: requiredOnLoadMore,
-          prefetchRef,
-        });
-      }
+      maybePrefetchNextPage({
+        enablePrefetch,
+        hasMore,
+        nextSkip: totalLoadedRows,
+        onLoadMore: requiredOnLoadMore,
+        prefetchRef,
+      });
     } catch (error) {
       const message = getErrorMessage({
         error,

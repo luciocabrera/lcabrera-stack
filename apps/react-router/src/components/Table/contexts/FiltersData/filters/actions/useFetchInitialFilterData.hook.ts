@@ -12,6 +12,39 @@ import type {
   UseFetchFilterDataActionArgs,
 } from './useFetchFilterData.types';
 
+type MaybePrefetchArgs<TResponse> = {
+  readonly enablePrefetch: boolean;
+  readonly hasMore: boolean;
+  readonly nextSkip: number;
+  readonly onLoadMore: (args: {
+    readonly limit: number;
+    readonly skip: number;
+  }) => Promise<TResponse>;
+  readonly prefetchRef?: UseFetchFilterDataActionArgs<
+    unknown,
+    TResponse
+  >['prefetchRef'];
+};
+
+const maybePrefetchInitialPage = <TResponse>({
+  enablePrefetch,
+  hasMore,
+  nextSkip,
+  onLoadMore,
+  prefetchRef,
+}: MaybePrefetchArgs<TResponse>) => {
+  if (!(enablePrefetch && hasMore && prefetchRef)) {
+    return;
+  }
+
+  firePrefetch({
+    limit: DEFAULT_FILTER_PAGE_SIZE,
+    nextSkip,
+    onLoadMore,
+    prefetchRef,
+  });
+};
+
 export const useFetchInitialFilterData = <TData, TResponse>({
   columnKey,
   filtersDataStore,
@@ -72,14 +105,13 @@ export const useFetchInitialFilterData = <TData, TResponse>({
       const metaState = metaStore.get();
       const enablePrefetch = metaState?.enablePrefetch ?? false;
 
-      if (enablePrefetch && hasMore && prefetchRef) {
-        firePrefetch({
-          limit: DEFAULT_FILTER_PAGE_SIZE,
-          nextSkip: data.length,
-          onLoadMore: requiredOnLoadMore,
-          prefetchRef,
-        });
-      }
+      maybePrefetchInitialPage({
+        enablePrefetch,
+        hasMore,
+        nextSkip: data.length,
+        onLoadMore: requiredOnLoadMore,
+        prefetchRef,
+      });
     } catch (error) {
       logger.error('[useFetchFilterData] Error fetching filter data:', error);
       const message = getErrorMessage({
