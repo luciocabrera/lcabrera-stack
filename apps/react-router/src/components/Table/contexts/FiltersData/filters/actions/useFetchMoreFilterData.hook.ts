@@ -81,6 +81,10 @@ export const useFetchMoreFilterData = <TData, TResponse>({
       throw new Error(`Filter data not initialized for column: ${columnKey}`);
     }
 
+    if (currentFilter.isLoadingMore || currentFilter.hasMore === false) {
+      return;
+    }
+
     try {
       filtersDataStore.set({
         [columnKey]: {

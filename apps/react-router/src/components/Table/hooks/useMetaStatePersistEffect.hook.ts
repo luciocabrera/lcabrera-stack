@@ -38,6 +38,10 @@ export const useMetaStatePersistEffect = ({
   persistenceKey,
 }: UseMetaStatePersistEffectArgs): void => {
   useEffect(() => {
+    if (persistenceKey === '') {
+      return;
+    }
+
     const write = () => {
       const state = metaStore.get();
       writePersistedUiStateToSessionStorage({

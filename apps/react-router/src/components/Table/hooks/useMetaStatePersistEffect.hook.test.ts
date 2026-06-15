@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { renderHook } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const {
   writePersistedUiStateToSessionStorageMock,
@@ -48,6 +48,10 @@ const metaStoreMock = {
   subscribe: metaStoreSubscribeMock,
 };
 
+beforeEach(() => {
+  vi.clearAllMocks();
+});
+
 describe('useMetaStatePersistEffect', () => {
   it('writes UI state to sessionStorage immediately on mount', () => {
     renderHook(() =>
@@ -72,6 +76,18 @@ describe('useMetaStatePersistEffect', () => {
 
     // React 19 strict mode may mount twice; at minimum one subscription must exist.
     expect(metaStoreSubscribeMock).toHaveBeenCalled();
+  });
+
+  it('does nothing when the persistence key is empty', () => {
+    renderHook(() =>
+      useMetaStatePersistEffect({
+        metaStore: metaStoreMock as never,
+        persistenceKey: '',
+      }),
+    );
+
+    expect(writePersistedUiStateToSessionStorageMock).not.toHaveBeenCalled();
+    expect(metaStoreSubscribeMock).not.toHaveBeenCalled();
   });
 
   it('persists only the meta UI fields, not all meta state', () => {

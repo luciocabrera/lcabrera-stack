@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { act, renderHook } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const {
   readPersistedStateFromSessionStorageMock,
@@ -38,6 +38,10 @@ const createStoreMock = () => ({
 });
 
 type StoreMock = ReturnType<typeof createStoreMock>;
+
+beforeEach(() => {
+  vi.clearAllMocks();
+});
 
 describe('useHydrateTableSessionState', () => {
   it('does not call store.set when sessionStorage is empty', () => {
@@ -95,6 +99,21 @@ describe('useHydrateTableSessionState', () => {
         isTableSettingsPinned: true,
       }),
     );
+  });
+
+  it('does nothing when the persistence key is empty', () => {
+    renderHook(() =>
+      useHydrateTableSessionState({
+        columnsStore: columnsStoreMock as StoreMock,
+        metaStore: metaStoreMock as StoreMock,
+        persistenceKey: '',
+      }),
+    );
+
+    expect(readPersistedStateFromSessionStorageMock).not.toHaveBeenCalled();
+    expect(readPersistedUiStateFromSessionStorageMock).not.toHaveBeenCalled();
+    expect(columnsStoreMock.set).not.toHaveBeenCalled();
+    expect(metaStoreMock.set).not.toHaveBeenCalled();
   });
 
   it('runs only once regardless of re-renders', () => {

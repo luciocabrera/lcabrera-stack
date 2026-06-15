@@ -1,8 +1,12 @@
 // @vitest-environment jsdom
 
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { writeToSessionStorage } from './writeToSessionStorage.util';
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 describe('writeToSessionStorage', () => {
   it('writes a value to sessionStorage', () => {

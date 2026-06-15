@@ -36,6 +36,10 @@ export const useHydrateTableSessionState = <
   persistenceKey,
 }: UseHydrateTableSessionStateArgs<TData>): void => {
   useEffect(() => {
+    if (persistenceKey === '') {
+      return;
+    }
+
     const columnState = readPersistedStateFromSessionStorage({
       persistenceKey,
     });

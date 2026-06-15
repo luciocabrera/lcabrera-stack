@@ -44,11 +44,14 @@ export const TableDataProvider = <TData extends Record<string, unknown>>({
       return;
     }
 
-    if (persistedDataState === undefined) {
-      return;
-    }
+    const hydratedDataState = persistedDataState!;
 
-    dataStore.set(persistedDataState);
+    dataStore.set({
+      data: hydratedDataState.data,
+      hasMore: hydratedDataState.totalRows > hydratedDataState.data.length,
+      totalLoadedRows: hydratedDataState.data.length,
+      totalRows: hydratedDataState.totalRows,
+    });
   }, [dataState, dataStore, isPersistenceEnabled, persistenceKey]);
 
   useEffect(() => {

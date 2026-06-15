@@ -1,8 +1,13 @@
 // @vitest-environment jsdom
 
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { readFromSessionStorage } from './readFromSessionStorage.util';
+
+afterEach(() => {
+  vi.restoreAllMocks();
+  vi.unstubAllGlobals();
+});
 
 describe('readFromSessionStorage', () => {
   it('returns undefined when sessionStorage is not available (SSR guard)', () => {
@@ -31,6 +36,7 @@ describe('readFromSessionStorage', () => {
     vi.spyOn(Storage.prototype, 'getItem').mockImplementationOnce(() => {
       throw new Error('denied');
     });
+
     expect(readFromSessionStorage({ key: 'any' })).toBeUndefined();
   });
 });

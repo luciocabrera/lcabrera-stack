@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+
 import type { SkeletonResponse } from './TableSkeleton.types';
 
 import { useGetColumns } from '../contexts/TableConfig/columns/selectors';
@@ -13,18 +15,29 @@ export const TableSkeleton = () => {
   const columns = useGetColumns();
   const persistenceKey = useGetTablePersistenceKey();
   const placeholderRowCount = useGetTablePlaceholderRowCount();
-  const persistedDataState = readPersistedDataStateFromSessionStorage<
-    Record<string, unknown>
-  >({
-    persistenceKey,
-  });
+  const [persistedDataState, setPersistedDataState] = useState<
+    | {
+        readonly data: readonly Record<string, unknown>[];
+        readonly totalRows?: number;
+      }
+    | undefined
+  >(undefined);
+
+  useEffect(() => {
+    setPersistedDataState(
+      readPersistedDataStateFromSessionStorage<Record<string, unknown>>({
+        persistenceKey,
+      }),
+    );
+  }, [persistenceKey]);
+
   const hasPersistedRows = (persistedDataState?.data.length ?? 0) > 0;
   const placeholderData = generatePlaceholderData<Record<string, unknown>>({
     columns,
     rowCount: placeholderRowCount,
   });
-  const effectiveData = hasPersistedRows
-    ? (persistedDataState?.data ?? [])
+  const effectiveData: Record<string, unknown>[] = hasPersistedRows
+    ? [...(persistedDataState?.data ?? [])]
     : placeholderData;
   const totalRows = hasPersistedRows
     ? (persistedDataState?.totalRows ?? effectiveData.length)

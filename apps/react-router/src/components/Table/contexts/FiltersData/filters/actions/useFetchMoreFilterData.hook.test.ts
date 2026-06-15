@@ -121,4 +121,70 @@ describe('useFetchMoreFilterData', () => {
       skip: -1,
     });
   });
+
+  it('returns early when the filter already has no more data', async () => {
+    getHarness().dataStore.set({
+      status: {
+        data: ['Alpha'],
+        hasMore: false,
+        isLoading: false,
+        isLoadingMore: false,
+        totalLoadedRows: 1,
+        totalRows: 1,
+      },
+    });
+
+    const { result } = renderHook(() =>
+      useFetchMoreFilterData<TestData, TestResponse>({
+        columnKey: 'status',
+        filtersDataStore: getHarness().dataStore as unknown as TStore<
+          FiltersDataState<TestData>
+        >,
+        metaStore: getHarness().metaStore as unknown as TStore<TableMetaState>,
+      }),
+    );
+
+    await act(async () => {
+      await result.current({
+        dataSelector: (response) => [...response.rows],
+        dataTotalSelector: (response) => response.total,
+        onLoadMore: vi.fn(),
+      });
+    });
+
+    expect(getHarness().resolveFromCacheOrFetchMock).not.toHaveBeenCalled();
+  });
+
+  it('returns early when the filter is already loading more', async () => {
+    getHarness().dataStore.set({
+      status: {
+        data: ['Alpha'],
+        hasMore: true,
+        isLoading: false,
+        isLoadingMore: true,
+        totalLoadedRows: 1,
+        totalRows: 3,
+      },
+    });
+
+    const { result } = renderHook(() =>
+      useFetchMoreFilterData<TestData, TestResponse>({
+        columnKey: 'status',
+        filtersDataStore: getHarness().dataStore as unknown as TStore<
+          FiltersDataState<TestData>
+        >,
+        metaStore: getHarness().metaStore as unknown as TStore<TableMetaState>,
+      }),
+    );
+
+    await act(async () => {
+      await result.current({
+        dataSelector: (response) => [...response.rows],
+        dataTotalSelector: (response) => response.total,
+        onLoadMore: vi.fn(),
+      });
+    });
+
+    expect(getHarness().resolveFromCacheOrFetchMock).not.toHaveBeenCalled();
+  });
 });

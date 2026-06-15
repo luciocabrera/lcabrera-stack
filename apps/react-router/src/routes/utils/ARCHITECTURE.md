@@ -21,5 +21,5 @@ Shared route-level loader utilities.
 
 - URL standalone params (`sort`, `filters`) remain the source of truth for sorting/filtering.
 - URL state has priority over cookie state for merged slices.
-- Route loaders should pass their column definitions when they consume standalone filters so malformed shared links cannot apply invalid filter payloads to the backend request.
+- Route loaders can opt into column-aware sanitization by passing their column definitions when they consume standalone filters.
 - Utility must remain route-loader oriented and free of side effects.
