@@ -33,6 +33,7 @@ type MockTitleProps = {
 const {
   batchSetColumnDrawerSettingsMock,
   resetAllColumnDrawerSettingsMock,
+  setTableColumnSettingsSelectedTabMock,
   setTableIsColumnSettingsPinnedMock,
   useGetNormalizedColumnMock,
   useRenderTrackerMock,
@@ -40,6 +41,7 @@ const {
 } = vi.hoisted(() => ({
   batchSetColumnDrawerSettingsMock: vi.fn(),
   resetAllColumnDrawerSettingsMock: vi.fn(),
+  setTableColumnSettingsSelectedTabMock: vi.fn(),
   setTableIsColumnSettingsPinnedMock: vi.fn(),
   useGetNormalizedColumnMock: vi.fn(),
   useRenderTrackerMock: vi.fn(),
@@ -163,10 +165,13 @@ vi.mock('@/components/Table/contexts/TableConfig/columns/selectors', () => ({
 }));
 
 vi.mock('@/components/Table/contexts/TableConfig/meta/actions', () => ({
+  useSetTableColumnSettingsSelectedTab: () =>
+    setTableColumnSettingsSelectedTabMock,
   useSetTableIsColumnSettingsPinned: () => setTableIsColumnSettingsPinnedMock,
 }));
 
 vi.mock('@/components/Table/contexts/TableConfig/meta/selectors', () => ({
+  useGetTableColumnSettingsSelectedTab: () => 'general',
   useGetTableIsColumnSettingsPinned: () => false,
 }));
 

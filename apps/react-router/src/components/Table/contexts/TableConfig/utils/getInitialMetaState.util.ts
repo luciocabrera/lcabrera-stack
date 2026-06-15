@@ -15,6 +15,7 @@ type GetInitialMetaStateArgs = Partial<TableMetaState>;
 
 export const getInitialMetaState = ({
   columnOverscan = DEFAULT_COLUMN_OVERSCAN,
+  columnSettingsSelectedTab = 'general',
   density = 'compact',
   enablePrefetch = DEFAULT_ENABLE_PREFETCH,
   error,
@@ -37,6 +38,7 @@ export const getInitialMetaState = ({
   ...rest
 }: GetInitialMetaStateArgs): TableMetaState => ({
   columnOverscan,
+  columnSettingsSelectedTab,
   density,
   enablePrefetch,
   error,

@@ -16,7 +16,7 @@ import { useGetColumnSorting } from '../ColumnDrawerContext/selectors';
 import { styles } from './SortingSection.stylex';
 import { SortingSectionToolbar } from './SortingSectionToolbar';
 
-export const SortingSection = (_props: SortingSectionProps) => {
+export const SortingSection = ({ isBussy = false }: SortingSectionProps) => {
   const sortDirection = useGetColumnSorting();
   const setColumnSorting = useSetColumnSorting();
 
@@ -33,12 +33,15 @@ export const SortingSection = (_props: SortingSectionProps) => {
       <SidePanelSection>
         <SidePanelSectionHeader
           title='Column Sorting'
-          toolbar={<SortingSectionToolbar variant='toolbar' />}
+          toolbar={
+            <SortingSectionToolbar isBussy={isBussy} variant='toolbar' />
+          }
         />
         <div {...stylex.props(styles.list)}>
           <Button
             color={sortDirection === 'asc' ? 'primary' : 'outline'}
             icon={<SortAscIcon size={ICON_SIZE_MD} />}
+            isBussy={isBussy}
             onClick={handleAsc}
             size='sm'
             width='full'
@@ -48,6 +51,7 @@ export const SortingSection = (_props: SortingSectionProps) => {
           <Button
             color={sortDirection === 'desc' ? 'primary' : 'outline'}
             icon={<SortDescIcon size={ICON_SIZE_MD} />}
+            isBussy={isBussy}
             onClick={handleDesc}
             size='sm'
             width='full'
@@ -56,7 +60,7 @@ export const SortingSection = (_props: SortingSectionProps) => {
           </Button>
         </div>
       </SidePanelSection>
-      <SortingSectionToolbar />
+      <SortingSectionToolbar isBussy={isBussy} />
     </SidePanelSectionMain>
   );
 };

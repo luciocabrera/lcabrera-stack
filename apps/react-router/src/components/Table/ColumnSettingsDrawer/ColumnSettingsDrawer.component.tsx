@@ -11,8 +11,14 @@ import {
   SidePanelTitle,
 } from '@/components/SidePanel';
 import { useGetNormalizedColumn } from '@/components/Table/contexts/TableConfig/columns/selectors';
-import { useSetTableIsColumnSettingsPinned } from '@/components/Table/contexts/TableConfig/meta/actions';
-import { useGetTableIsColumnSettingsPinned } from '@/components/Table/contexts/TableConfig/meta/selectors';
+import {
+  useSetTableColumnSettingsSelectedTab,
+  useSetTableIsColumnSettingsPinned,
+} from '@/components/Table/contexts/TableConfig/meta/actions';
+import {
+  useGetTableColumnSettingsSelectedTab,
+  useGetTableIsColumnSettingsPinned,
+} from '@/components/Table/contexts/TableConfig/meta/selectors';
 import { useTableWrapperRef } from '@/components/Table/contexts/TableWrapper';
 import { Tabs } from '@/components/Tabs';
 import { ICON_SIZE_LG } from '@/design-system/constants';
@@ -38,7 +44,9 @@ export const ColumnSettingsDrawer = <TData extends Record<string, unknown>>({
 
   const column = useGetNormalizedColumn<TData>(columnKey);
   const isPinned = useGetTableIsColumnSettingsPinned();
+  const selectedTab = useGetTableColumnSettingsSelectedTab();
   const setIsPinned = useSetTableIsColumnSettingsPinned();
+  const setSelectedTab = useSetTableColumnSettingsSelectedTab();
   const wrapperRef = useTableWrapperRef();
 
   const batchSetColumnDrawerSettings = useBatchSetColumnDrawerSettings();
@@ -50,14 +58,14 @@ export const ColumnSettingsDrawer = <TData extends Record<string, unknown>>({
 
   const tabs: TabItem[] = [
     {
-      children: <GeneralSection columnKey={columnKey} />,
+      children: <GeneralSection columnKey={columnKey} isBussy={isBussy} />,
       header: 'General',
       key: 'general',
     },
     ...(isFilterable && column.dataType
       ? [
           {
-            children: <FilterSection columnKey={columnKey} />,
+            children: <FilterSection columnKey={columnKey} isBussy={isBussy} />,
             header: 'Filter',
             key: 'filter',
           },
@@ -66,7 +74,7 @@ export const ColumnSettingsDrawer = <TData extends Record<string, unknown>>({
     ...(isSortable
       ? [
           {
-            children: <SortingSection />,
+            children: <SortingSection isBussy={isBussy} />,
             header: 'Sorting',
             key: 'sorting',
           },
@@ -76,7 +84,9 @@ export const ColumnSettingsDrawer = <TData extends Record<string, unknown>>({
       ? []
       : [
           {
-            children: <PinningSection columnKey={columnKey} />,
+            children: (
+              <PinningSection columnKey={columnKey} isBussy={isBussy} />
+            ),
             header: 'Pinning',
             key: 'pinning',
           },
@@ -136,7 +146,12 @@ export const ColumnSettingsDrawer = <TData extends Record<string, unknown>>({
         </SidePanelTitle>
       </SidePanelHeader>
       <SidePanelBody>
-        <Tabs isBussy={isBussy} tabs={tabs} />
+        <Tabs
+          isBussy={isBussy}
+          onSelectTab={setSelectedTab}
+          selectedTab={selectedTab}
+          tabs={tabs}
+        />
       </SidePanelBody>
       <SidePanelFooter>
         <Button

@@ -7,6 +7,7 @@ import type { ClearResetToolbarButtonsProps } from './ClearResetToolbarButtons.t
 export const ClearResetToolbarButtons = ({
   clearLabel,
   hasValue,
+  isBussy = false,
   onClear,
   onReset,
   resetLabel,
@@ -24,6 +25,7 @@ export const ClearResetToolbarButtons = ({
         aria-label={clearLabel}
         color={buttonColor}
         icon={<EraserIcon size={iconSize} />}
+        isBussy={isBussy}
         isDisabled={!hasValue}
         onClick={onClear}
         size={buttonSize}
@@ -36,6 +38,7 @@ export const ClearResetToolbarButtons = ({
         aria-label={resetLabel}
         color={buttonColor}
         icon={<RefreshIcon size={iconSize} />}
+        isBussy={isBussy}
         onClick={onReset}
         size={buttonSize}
         tooltipContent={isToolbar ? resetLabel : undefined}

@@ -12,6 +12,7 @@ import {
 const createInitialMetaState = (): TableMetaState => {
   return {
     columnOverscan: 2,
+    columnSettingsSelectedTab: 'general',
     columnSelectedKey: 'id',
     density: 'compact',
     enablePrefetch: true,

@@ -15,6 +15,7 @@ import { FilterSectionToolbar } from './FilterSectionToolbar';
 
 export const FilterSection = <TData,>({
   columnKey,
+  isBussy = false,
 }: FilterSectionProps<TData>) => {
   const columnFilter = useGetColumnFilter();
   const setColumnFilter = useSetColumnFilter();
@@ -24,7 +25,7 @@ export const FilterSection = <TData,>({
       <div {...stylex.props(styles.section)}>
         <SidePanelSectionHeader
           title='Column Filter'
-          toolbar={<FilterSectionToolbar variant='toolbar' />}
+          toolbar={<FilterSectionToolbar isBussy={isBussy} variant='toolbar' />}
         />
         <FilterInputs
           columnKey={columnKey}
@@ -33,7 +34,7 @@ export const FilterSection = <TData,>({
           shouldFillHeight
         />
       </div>
-      <FilterSectionToolbar />
+      <FilterSectionToolbar isBussy={isBussy} />
     </SidePanelSectionMain>
   );
 };

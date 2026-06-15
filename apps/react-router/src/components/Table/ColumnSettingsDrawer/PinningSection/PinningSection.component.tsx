@@ -18,6 +18,7 @@ import { PinningSectionToolbar } from './PinningSectionToolbar';
 
 export const PinningSection = <TData,>({
   columnKey: _columnKey,
+  isBussy = false,
 }: PinningSectionProps<TData>) => {
   const columnPinning = useGetColumnPinning();
   const setColumnPinning = useSetColumnPinning();
@@ -27,12 +28,15 @@ export const PinningSection = <TData,>({
       <SidePanelSection>
         <SidePanelSectionHeader
           title='Column Pinning'
-          toolbar={<PinningSectionToolbar variant='toolbar' />}
+          toolbar={
+            <PinningSectionToolbar isBussy={isBussy} variant='toolbar' />
+          }
         />
         <div {...stylex.props(styles.buttonGroup)}>
           <Button
             color={columnPinning === 'left' ? 'primary' : 'outline'}
             icon={<PinLeftIcon size={ICON_SIZE_MD} />}
+            isBussy={isBussy}
             onClick={() => {
               setColumnPinning(columnPinning === 'left' ? undefined : 'left');
             }}
@@ -44,6 +48,7 @@ export const PinningSection = <TData,>({
           <Button
             color={columnPinning === 'right' ? 'primary' : 'outline'}
             icon={<PinRightIcon size={ICON_SIZE_MD} />}
+            isBussy={isBussy}
             onClick={() => {
               setColumnPinning(columnPinning === 'right' ? undefined : 'right');
             }}
@@ -54,7 +59,7 @@ export const PinningSection = <TData,>({
           </Button>
         </div>
       </SidePanelSection>
-      <PinningSectionToolbar />
+      <PinningSectionToolbar isBussy={isBussy} />
     </SidePanelSectionMain>
   );
 };

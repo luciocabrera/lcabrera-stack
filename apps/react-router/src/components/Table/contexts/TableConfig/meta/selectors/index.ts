@@ -1,5 +1,6 @@
 export { useGetTableAdditionalMetadata } from './useGetTableAdditionalMetadata.hook';
 export { useGetTableColumnSelectedKey } from './useGetTableColumnSelectedKey.hook';
+export { useGetTableColumnSettingsSelectedTab } from './useGetTableColumnSettingsSelectedTab.hook';
 export { useGetTableDensity } from './useGetTableDensity.hook';
 export { useGetTableEnablePrefetch } from './useGetTableEnablePrefetch.hook';
 export { useGetTableInitialPageSize } from './useGetTableInitialPageSize.hook';

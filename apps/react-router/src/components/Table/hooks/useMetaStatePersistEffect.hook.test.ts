@@ -88,6 +88,7 @@ describe('useMetaStatePersistEffect', () => {
     };
 
     expect(Object.keys(uiState).sort()).toEqual([
+      'columnSettingsSelectedTab',
       'isColumnSettingsOpen',
       'isColumnSettingsPinned',
       'isTableSettingsOpen',

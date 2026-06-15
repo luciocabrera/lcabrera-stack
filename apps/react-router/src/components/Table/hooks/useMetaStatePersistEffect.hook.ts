@@ -15,6 +15,7 @@ type UseMetaStatePersistEffectArgs = {
 const extractUiState = (
   state: TableMetaState | undefined,
 ): PersistedUiState => ({
+  columnSettingsSelectedTab: state?.columnSettingsSelectedTab,
   isColumnSettingsOpen: state?.isColumnSettingsOpen,
   isColumnSettingsPinned: state?.isColumnSettingsPinned,
   isTableSettingsPinned: state?.isTableSettingsPinned,

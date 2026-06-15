@@ -1,1 +1,3 @@
-export type SortingSectionProps = Record<string, never>;
+export type SortingSectionProps = {
+  readonly isBussy?: boolean;
+};
