@@ -2,22 +2,22 @@
   "kind": "combined",
   "schema_version": 7,
   "version": "2.96.0",
-  "elapsed_ms": 178,
+  "elapsed_ms": 171,
   "_meta": {
     "telemetry": {
-      "analysis_run_id": "run_5cc49e82553cd9c7"
+      "analysis_run_id": "run_7fd45e72f7f36433"
     }
   },
   "check": {
     "schema_version": 7,
     "version": "2.96.0",
-    "elapsed_ms": 132,
+    "elapsed_ms": 120,
     "total_issues": 18,
     "entry_points": {
-      "total": 319,
+      "total": 320,
       "sources": {
         "manual_entry": 7,
-        "plugin": 312
+        "plugin": 313
       }
     },
     "summary": {
@@ -9139,15 +9139,15 @@
       }
     ],
     "stats": {
-      "total_files": 680,
+      "total_files": 681,
       "files_with_clones": 79,
-      "total_lines": 46760,
+      "total_lines": 47157,
       "duplicated_lines": 3317,
-      "total_tokens": 171690,
+      "total_tokens": 173459,
       "duplicated_tokens": 7408,
       "clone_groups": 87,
       "clone_instances": 186,
-      "duplication_percentage": 7.093669803250642
+      "duplication_percentage": 7.033950420934326
     }
   },
   "health": {
@@ -9694,13 +9694,13 @@
       }
     ],
     "summary": {
-      "files_analyzed": 1214,
-      "functions_analyzed": 3634,
+      "files_analyzed": 1215,
+      "functions_analyzed": 3687,
       "functions_above_threshold": 18,
       "max_cyclomatic_threshold": 20,
       "max_cognitive_threshold": 15,
       "max_crap_threshold": 30.0,
-      "files_scored": 764,
+      "files_scored": 765,
       "average_maintainability": 93.0,
       "coverage_model": "static_estimated",
       "coverage_source_consistency": "uniform",
@@ -9723,21 +9723,21 @@
       "circular_dep_count": 0,
       "circular_deps_per_k_files": 0.0,
       "counts": {
-        "total_files": 1214,
+        "total_files": 1215,
         "total_exports": 1460,
         "dead_files": 0,
         "dead_exports": 0,
-        "total_lines": 51595,
-        "files_scored": 764,
+        "total_lines": 51993,
+        "files_scored": 765,
         "total_deps": 0
       },
       "unit_size_profile": {
         "low_risk": 74.2,
-        "medium_risk": 13.7,
+        "medium_risk": 13.8,
         "high_risk": 7.9,
-        "very_high_risk": 4.2
+        "very_high_risk": 4.1
       },
-      "functions_over_60_loc_per_k": 41.8,
+      "functions_over_60_loc_per_k": 41.5,
       "unit_interfacing_profile": {
         "low_risk": 99.9,
         "medium_risk": 0.1,
@@ -9746,7 +9746,7 @@
       },
       "p95_fan_in": 4,
       "coupling_high_pct": 0.9,
-      "total_loc": 51595
+      "total_loc": 51993
     },
     "file_scores": [
       {
@@ -12004,6 +12004,20 @@
         "crap_above_threshold": 0
       },
       {
+        "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.component.test.tsx",
+        "fan_in": 0,
+        "fan_out": 14,
+        "dead_code_ratio": 0.0,
+        "complexity_density": 0.15,
+        "maintainability_index": 84.7,
+        "total_cyclomatic": 54,
+        "total_cognitive": 2,
+        "function_count": 52,
+        "lines": 359,
+        "crap_max": 2.9,
+        "crap_above_threshold": 0
+      },
+      {
         "path": "src/components/Icons/Icons.test.tsx",
         "fan_in": 0,
         "fan_out": 33,
@@ -12061,15 +12075,15 @@
       },
       {
         "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.component.tsx",
-        "fan_in": 1,
+        "fan_in": 2,
         "fan_out": 16,
         "dead_code_ratio": 0.0,
         "complexity_density": 0.05,
         "maintainability_index": 87.2,
-        "total_cyclomatic": 8,
+        "total_cyclomatic": 9,
         "total_cognitive": 3,
-        "function_count": 5,
-        "lines": 151,
+        "function_count": 6,
+        "lines": 190,
         "crap_max": 4.9,
         "crap_above_threshold": 0
       },
@@ -17633,7 +17647,7 @@
       },
       {
         "path": "src/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook.ts",
-        "fan_in": 6,
+        "fan_in": 7,
         "fan_out": 2,
         "dead_code_ratio": 0.0,
         "complexity_density": 0.22,
@@ -20501,7 +20515,7 @@
         "path": "src/components/VirtualList/VirtualList.component.tsx",
         "score": 23.6,
         "commits": 22,
-        "weighted_commits": 10.09,
+        "weighted_commits": 10.08,
         "lines_added": 437,
         "lines_deleted": 437,
         "complexity_density": 0.19,
@@ -20601,7 +20615,7 @@
         "path": "src/components/Table/contexts/TableConfig/columns/actions/useSetColumnSorting.hook.ts",
         "score": 13.9,
         "commits": 12,
-        "weighted_commits": 5.66,
+        "weighted_commits": 5.65,
         "lines_added": 177,
         "lines_deleted": 177,
         "complexity_density": 0.2,
@@ -21051,11 +21065,11 @@
         "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.component.tsx",
         "score": 8.4,
         "commits": 29,
-        "weighted_commits": 13.64,
+        "weighted_commits": 13.63,
         "lines_added": 748,
         "lines_deleted": 748,
         "complexity_density": 0.05,
-        "fan_in": 1,
+        "fan_in": 2,
         "trend": "accelerating",
         "actions": [
           {
@@ -21476,7 +21490,7 @@
         "path": "src/services/carSales.api.ts",
         "score": 6.5,
         "commits": 15,
-        "weighted_commits": 4.8,
+        "weighted_commits": 4.79,
         "lines_added": 191,
         "lines_deleted": 191,
         "complexity_density": 0.11,
@@ -21501,7 +21515,7 @@
         "path": "src/components/Table/ColumnSettingsDrawer/GeneralSection/GeneralSection.component.tsx",
         "score": 6.5,
         "commits": 11,
-        "weighted_commits": 5.29,
+        "weighted_commits": 5.28,
         "lines_added": 217,
         "lines_deleted": 217,
         "complexity_density": 0.1,
@@ -21551,7 +21565,7 @@
         "path": "src/routes/car-sales-infinite/car-sales.loader.ts",
         "score": 6.4,
         "commits": 15,
-        "weighted_commits": 5.81,
+        "weighted_commits": 5.8,
         "lines_added": 149,
         "lines_deleted": 149,
         "complexity_density": 0.09,
@@ -22153,7 +22167,7 @@
         "path": "src/routes/car-sales/CarSales.component.tsx",
         "score": 5.1,
         "commits": 17,
-        "weighted_commits": 5.16,
+        "weighted_commits": 5.15,
         "lines_added": 229,
         "lines_deleted": 229,
         "complexity_density": 0.08,
@@ -22257,7 +22271,7 @@
         "lines_added": 13,
         "lines_deleted": 13,
         "complexity_density": 0.22,
-        "fan_in": 6,
+        "fan_in": 7,
         "trend": "stable",
         "actions": [
           {
@@ -22428,7 +22442,7 @@
         "path": "src/entry.server.tsx",
         "score": 4.7,
         "commits": 7,
-        "weighted_commits": 3.21,
+        "weighted_commits": 3.2,
         "lines_added": 178,
         "lines_deleted": 172,
         "complexity_density": 0.12,
@@ -23128,31 +23142,6 @@
         ]
       },
       {
-        "path": "src/components/Table/hooks/usePersistCookieAction.hook.ts",
-        "score": 3.9,
-        "commits": 9,
-        "weighted_commits": 3.92,
-        "lines_added": 151,
-        "lines_deleted": 151,
-        "complexity_density": 0.08,
-        "fan_in": 2,
-        "trend": "cooling",
-        "actions": [
-          {
-            "type": "refactor-file",
-            "auto_fixable": false,
-            "description": "Refactor `src/components/Table/hooks/usePersistCookieAction.hook.ts`, high complexity combined with frequent changes makes this a maintenance risk",
-            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
-          },
-          {
-            "type": "add-tests",
-            "auto_fixable": false,
-            "description": "Add test coverage for `src/components/Table/hooks/usePersistCookieAction.hook.ts` to reduce change risk",
-            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
-          }
-        ]
-      },
-      {
         "path": "src/utils/performance/renderTracker.util.ts",
         "score": 3.9,
         "commits": 7,
@@ -23254,6 +23243,31 @@
         ]
       },
       {
+        "path": "src/components/Table/hooks/usePersistCookieAction.hook.ts",
+        "score": 3.8,
+        "commits": 9,
+        "weighted_commits": 3.91,
+        "lines_added": 151,
+        "lines_deleted": 151,
+        "complexity_density": 0.08,
+        "fan_in": 2,
+        "trend": "cooling",
+        "actions": [
+          {
+            "type": "refactor-file",
+            "auto_fixable": false,
+            "description": "Refactor `src/components/Table/hooks/usePersistCookieAction.hook.ts`, high complexity combined with frequent changes makes this a maintenance risk",
+            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
+          },
+          {
+            "type": "add-tests",
+            "auto_fixable": false,
+            "description": "Add test coverage for `src/components/Table/hooks/usePersistCookieAction.hook.ts` to reduce change risk",
+            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
+          }
+        ]
+      },
+      {
         "path": "src/components/Table/utils/syncColumnOrderWithPinning.util.ts",
         "score": 3.8,
         "commits": 5,
@@ -23299,31 +23313,6 @@
             "type": "add-tests",
             "auto_fixable": false,
             "description": "Add test coverage for `src/components/Table/TableSettingsDrawer/ColumnOrderSection/PinConflictModal/PinConflictModal.component.tsx` to reduce change risk",
-            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
-          }
-        ]
-      },
-      {
-        "path": "src/components/ToggleSwitch/ToggleSwitch.component.tsx",
-        "score": 3.7,
-        "commits": 4,
-        "weighted_commits": 1.65,
-        "lines_added": 86,
-        "lines_deleted": 86,
-        "complexity_density": 0.18,
-        "fan_in": 2,
-        "trend": "stable",
-        "actions": [
-          {
-            "type": "refactor-file",
-            "auto_fixable": false,
-            "description": "Refactor `src/components/ToggleSwitch/ToggleSwitch.component.tsx`, high complexity combined with frequent changes makes this a maintenance risk",
-            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
-          },
-          {
-            "type": "add-tests",
-            "auto_fixable": false,
-            "description": "Add test coverage for `src/components/ToggleSwitch/ToggleSwitch.component.tsx` to reduce change risk",
             "note": "Frequently changed complex files benefit most from comprehensive test coverage"
           }
         ]
@@ -23429,10 +23418,35 @@
         ]
       },
       {
+        "path": "src/components/ToggleSwitch/ToggleSwitch.component.tsx",
+        "score": 3.6,
+        "commits": 4,
+        "weighted_commits": 1.64,
+        "lines_added": 86,
+        "lines_deleted": 86,
+        "complexity_density": 0.18,
+        "fan_in": 2,
+        "trend": "stable",
+        "actions": [
+          {
+            "type": "refactor-file",
+            "auto_fixable": false,
+            "description": "Refactor `src/components/ToggleSwitch/ToggleSwitch.component.tsx`, high complexity combined with frequent changes makes this a maintenance risk",
+            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
+          },
+          {
+            "type": "add-tests",
+            "auto_fixable": false,
+            "description": "Add test coverage for `src/components/ToggleSwitch/ToggleSwitch.component.tsx` to reduce change risk",
+            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
+          }
+        ]
+      },
+      {
         "path": "src/components/Table/TableSettingsDrawer/SortingSection/ActiveSortList/ActiveSortList.component.tsx",
         "score": 3.6,
         "commits": 3,
-        "weighted_commits": 1.56,
+        "weighted_commits": 1.55,
         "lines_added": 120,
         "lines_deleted": 120,
         "complexity_density": 0.19,
@@ -23606,31 +23620,6 @@
         ]
       },
       {
-        "path": "src/components/Table/TableSettingsDrawer/TableDrawerContext/actions/useClearColumnOrderSection.hook.ts",
-        "score": 3.4,
-        "commits": 3,
-        "weighted_commits": 1.52,
-        "lines_added": 22,
-        "lines_deleted": 22,
-        "complexity_density": 0.18,
-        "fan_in": 1,
-        "trend": "cooling",
-        "actions": [
-          {
-            "type": "refactor-file",
-            "auto_fixable": false,
-            "description": "Refactor `src/components/Table/TableSettingsDrawer/TableDrawerContext/actions/useClearColumnOrderSection.hook.ts`, high complexity combined with frequent changes makes this a maintenance risk",
-            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
-          },
-          {
-            "type": "add-tests",
-            "auto_fixable": false,
-            "description": "Add test coverage for `src/components/Table/TableSettingsDrawer/TableDrawerContext/actions/useClearColumnOrderSection.hook.ts` to reduce change risk",
-            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
-          }
-        ]
-      },
-      {
         "path": "src/components/Table/filters/TextFilterInput/TextFilterInput.component.tsx",
         "score": 3.4,
         "commits": 6,
@@ -23727,6 +23716,31 @@
             "type": "add-tests",
             "auto_fixable": false,
             "description": "Add test coverage for `src/components/Table/TableSettingsDrawer/TableDrawerContext/actions/useClearAllSettings.hook.ts` to reduce change risk",
+            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
+          }
+        ]
+      },
+      {
+        "path": "src/components/Table/TableSettingsDrawer/TableDrawerContext/actions/useClearColumnOrderSection.hook.ts",
+        "score": 3.3,
+        "commits": 3,
+        "weighted_commits": 1.51,
+        "lines_added": 22,
+        "lines_deleted": 22,
+        "complexity_density": 0.18,
+        "fan_in": 1,
+        "trend": "cooling",
+        "actions": [
+          {
+            "type": "refactor-file",
+            "auto_fixable": false,
+            "description": "Refactor `src/components/Table/TableSettingsDrawer/TableDrawerContext/actions/useClearColumnOrderSection.hook.ts`, high complexity combined with frequent changes makes this a maintenance risk",
+            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
+          },
+          {
+            "type": "add-tests",
+            "auto_fixable": false,
+            "description": "Add test coverage for `src/components/Table/TableSettingsDrawer/TableDrawerContext/actions/useClearColumnOrderSection.hook.ts` to reduce change risk",
             "note": "Frequently changed complex files benefit most from comprehensive test coverage"
           }
         ]
@@ -24014,7 +24028,7 @@
         "path": "src/components/Table/TableBody/utils/generatePlaceholderData.util.ts",
         "score": 3.1,
         "commits": 3,
-        "weighted_commits": 1.34,
+        "weighted_commits": 1.33,
         "lines_added": 17,
         "lines_deleted": 17,
         "complexity_density": 0.19,
@@ -24064,7 +24078,7 @@
         "path": "src/components/Table/utils/readPersistedStateFromCookie.util.ts",
         "score": 2.9,
         "commits": 6,
-        "weighted_commits": 2.66,
+        "weighted_commits": 2.65,
         "lines_added": 83,
         "lines_deleted": 83,
         "complexity_density": 0.09,
@@ -24141,7 +24155,7 @@
         "path": "src/routes/enterprise-orders/order-detail/order-detail.loader.ts",
         "score": 2.8,
         "commits": 3,
-        "weighted_commits": 1.54,
+        "weighted_commits": 1.53,
         "lines_added": 21,
         "lines_deleted": 21,
         "complexity_density": 0.15,
@@ -24216,7 +24230,7 @@
         "path": "src/utils/performance/useRenderTracker.hook.ts",
         "score": 2.8,
         "commits": 5,
-        "weighted_commits": 2.25,
+        "weighted_commits": 2.24,
         "lines_added": 95,
         "lines_deleted": 95,
         "complexity_density": 0.1,
@@ -24773,7 +24787,7 @@
         "path": "src/components/Table/contexts/FiltersData/filters/useFiltersStore.hook.ts",
         "score": 2.5,
         "commits": 3,
-        "weighted_commits": 1.47,
+        "weighted_commits": 1.46,
         "lines_added": 21,
         "lines_deleted": 21,
         "complexity_density": 0.14,
@@ -25025,7 +25039,7 @@
         "path": "src/components/Table/contexts/TableData/data/useTableDataContextValue.hook.ts",
         "score": 2.3,
         "commits": 4,
-        "weighted_commits": 1.91,
+        "weighted_commits": 1.9,
         "lines_added": 14,
         "lines_deleted": 14,
         "complexity_density": 0.1,
@@ -25176,7 +25190,7 @@
         "path": "src/routes/car-sales/car-sales.loader.ts",
         "score": 2.1,
         "commits": 8,
-        "weighted_commits": 3.44,
+        "weighted_commits": 3.43,
         "lines_added": 90,
         "lines_deleted": 90,
         "complexity_density": 0.05,
@@ -25580,7 +25594,7 @@
         "path": "src/components/Tooltip/Tooltip.stylex.ts",
         "score": 1.9,
         "commits": 8,
-        "weighted_commits": 3.87,
+        "weighted_commits": 3.86,
         "lines_added": 144,
         "lines_deleted": 144,
         "complexity_density": 0.04,
@@ -26447,7 +26461,7 @@
         "path": "src/components/Table/contexts/TableConfig/columns/actions/useAcceptHeaderPinConflict.hook.ts",
         "score": 1.5,
         "commits": 8,
-        "weighted_commits": 4.09,
+        "weighted_commits": 4.08,
         "lines_added": 190,
         "lines_deleted": 190,
         "complexity_density": 0.03,
@@ -26749,7 +26763,7 @@
         "path": "src/components/Table/ColumnSettingsDrawer/FilterSection/FilterSectionToolbar/FilterSectionToolbar.component.tsx",
         "score": 1.1,
         "commits": 3,
-        "weighted_commits": 1.53,
+        "weighted_commits": 1.52,
         "lines_added": 65,
         "lines_deleted": 65,
         "complexity_density": 0.06,
@@ -26774,7 +26788,7 @@
         "path": "src/components/Table/ColumnSettingsDrawer/PinningSection/PinningSectionToolbar/PinningSectionToolbar.component.tsx",
         "score": 1.1,
         "commits": 3,
-        "weighted_commits": 1.53,
+        "weighted_commits": 1.52,
         "lines_added": 64,
         "lines_deleted": 64,
         "complexity_density": 0.06,
@@ -26799,7 +26813,7 @@
         "path": "src/components/Table/ColumnSettingsDrawer/SortingSection/SortingSectionToolbar/SortingSectionToolbar.component.tsx",
         "score": 1.1,
         "commits": 3,
-        "weighted_commits": 1.53,
+        "weighted_commits": 1.52,
         "lines_added": 64,
         "lines_deleted": 64,
         "complexity_density": 0.06,
@@ -26974,7 +26988,7 @@
         "path": "src/utils/urlState/readTableStateFromURL.util.ts",
         "score": 0.8,
         "commits": 8,
-        "weighted_commits": 3.2,
+        "weighted_commits": 3.19,
         "lines_added": 68,
         "lines_deleted": 68,
         "complexity_density": 0.02,
@@ -27324,7 +27338,7 @@
         "path": "src/components/Table/contexts/TableConfig/utils/getInitialMetaState.util.ts",
         "score": 0.6,
         "commits": 5,
-        "weighted_commits": 2.44,
+        "weighted_commits": 2.43,
         "lines_added": 50,
         "lines_deleted": 50,
         "complexity_density": 0.02,
@@ -27658,12 +27672,6 @@
         "line_count": 107
       },
       {
-        "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.component.tsx",
-        "name": "ColumnOrderSection",
-        "line": 44,
-        "line_count": 107
-      },
-      {
         "path": "src/components/Table/TableSettingsDrawer/FiltersSection/AddFilterSection/AddFilterSection.component.tsx",
         "name": "AddFilterSection",
         "line": 18,
@@ -27850,6 +27858,12 @@
         "line_count": 83
       },
       {
+        "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.component.test.tsx",
+        "name": "<arrow>",
+        "line": 276,
+        "line_count": 83
+      },
+      {
         "path": "src/components/Table/contexts/FiltersData/filters/actions/useFetchInitialFilterData.hook.ts",
         "name": "useFetchInitialFilterData",
         "line": 48,
@@ -27943,6 +27957,12 @@
         "path": "src/components/Table/TableLayout/TableLayout.component.tsx",
         "name": "TableLayout",
         "line": 14,
+        "line_count": 76
+      },
+      {
+        "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.component.tsx",
+        "name": "ColumnOrderSection",
+        "line": 114,
         "line_count": 76
       },
       {

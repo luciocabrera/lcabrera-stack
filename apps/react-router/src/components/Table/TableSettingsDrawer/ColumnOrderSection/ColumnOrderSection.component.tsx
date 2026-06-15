@@ -39,7 +39,7 @@ import { ColumnOrderSectionToolbar } from './ColumnOrderSectionToolbar';
 import { OrderConflictModal } from './OrderConflictModal';
 import { PinConflictModal } from './PinConflictModal';
 import { UnpinConflictModal } from './UnpinConflictModal';
-import { buildAllOrderedColumns } from './utils';
+import { buildAllOrderedColumns, createDraggableItems } from './utils';
 
 export const ColumnOrderSection = ({
   isBussy = false,
@@ -68,44 +68,45 @@ export const ColumnOrderSection = ({
     columnsOrder,
   });
 
-  // Convert columns to draggable items
-  const draggableItems: DraggableItem[] = allOrderedColumns.map((col) => {
-    const isPinned =
-      columnPinning.left.includes(col.key) ||
-      columnPinning.right.includes(col.key);
-    const isStatic = col.isStatic === true;
-
-    return {
-      content: (
+  const draggableItems: readonly DraggableItem[] = createDraggableItems({
+    allOrderedColumns,
+    columnPinning,
+    columnVisibility,
+    renderItemContent: ({
+      columnKey,
+      isPinned,
+      isStatic,
+      isVisible,
+      label,
+    }) => {
+      return (
         <div {...stylex.props(styles.columnItem)}>
           {isStatic && <LockIcon size={14} />}
-          <span {...stylex.props(styles.columnLabel)}>{col.label}</span>
+          <span {...stylex.props(styles.columnLabel)}>{label}</span>
           <ToggleSwitch
             isBussy={isBussy}
             isChecked={isPinned}
             isDisabled={isStatic}
             label='Pin'
             onChange={(isChecked) => {
-              toggleColumnPin({ columnKey: col.key, isPinning: isChecked });
+              toggleColumnPin({ columnKey, isPinning: isChecked });
             }}
           />
           <ToggleSwitch
             isBussy={isBussy}
-            isChecked={!columnVisibility.has(col.key)}
+            isChecked={isVisible}
             isDisabled={isStatic}
             label='Show'
             onChange={(isChecked) => {
               toggleColumnVisibility({
-                columnKey: col.key,
+                columnKey,
                 isVisible: isChecked,
               });
             }}
           />
         </div>
-      ),
-      id: col.key,
-      isDraggable: !isStatic,
-    };
+      );
+    },
   });
 
   return (
