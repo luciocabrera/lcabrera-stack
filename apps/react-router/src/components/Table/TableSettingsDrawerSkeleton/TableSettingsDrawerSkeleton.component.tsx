@@ -1,5 +1,3 @@
-import type { StyleXStyles } from '@stylexjs/stylex';
-
 import * as stylex from '@stylexjs/stylex';
 
 import { SettingsIcon } from '@/components/Icons';
@@ -13,10 +11,7 @@ import {
 import { ICON_SIZE_LG } from '@/design-system/constants';
 
 import { shimmer, styles } from './TableSettingsDrawerSkeleton.stylex';
-
-type PlaceholderProps = {
-  readonly customStylex?: StyleXStyles;
-};
+import type { PlaceholderProps } from './TableSettingsDrawerSkeleton.types';
 
 const Placeholder = ({ customStylex }: PlaceholderProps) => {
   return (

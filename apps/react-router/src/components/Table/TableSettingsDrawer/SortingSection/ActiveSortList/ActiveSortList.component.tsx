@@ -14,15 +14,12 @@ import { useGetColumns } from '@/components/Table/contexts/TableConfig/columns/s
 import { ICON_SIZE_MD } from '@/design-system/constants';
 
 import type { SortItem } from '../SortingSection.types';
+import type { ActiveSortListProps } from './ActiveSortList.types';
 
 import { useSetColumnsSortings } from '../../TableDrawerContext/actions';
 import { useGetColumnsSorting } from '../../TableDrawerContext/selectors';
 import { styles } from './ActiveSortList.stylex';
 import { SortingSectionToolbar } from '../SortingSectionToolbar';
-
-type ActiveSortListProps = {
-  readonly isBussy?: boolean;
-};
 
 export const ActiveSortList = ({ isBussy = false }: ActiveSortListProps) => {
   const columns = useGetColumns();

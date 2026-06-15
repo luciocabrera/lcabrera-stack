@@ -12,16 +12,13 @@ import { useGetColumnFilters } from '../TableDrawerContext/selectors';
 import { ActiveFiltersList } from './ActiveFiltersList';
 import { AddFilterSection } from './AddFilterSection';
 import { FiltersSectionToolbar } from './FiltersSectionToolbar';
+import type { FiltersSectionProps } from './FiltersSection.types';
 
 /**
  * Orchestrator component for the filters section.
  * Manages only the shared expandedFilters state.
  * Child components subscribe to context data directly.
  */
-
-type FiltersSectionProps = {
-  readonly isBussy?: boolean;
-};
 
 export const FiltersSection = ({ isBussy = false }: FiltersSectionProps) => {
   const filters = useGetColumnFilters();
