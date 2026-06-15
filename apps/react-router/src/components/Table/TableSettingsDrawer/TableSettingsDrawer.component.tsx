@@ -136,6 +136,7 @@ export const TableSettingsDrawer = ({
       <SidePanelHeader
         actions={
           <SidePanelHeaderToolbar
+            isBussy={isBussy}
             isPinned={isPinned}
             onClose={handleCancel}
             onTogglePin={handleTogglePin}

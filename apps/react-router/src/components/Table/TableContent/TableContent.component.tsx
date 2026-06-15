@@ -69,6 +69,7 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
                   aria-label='Table settings'
                   color='ghost'
                   icon={<SettingsIcon size={16} />}
+                  isBussy={isLoading}
                   onClick={toogleTableIsTableSettingsOpen}
                   size='mini'
                 />
