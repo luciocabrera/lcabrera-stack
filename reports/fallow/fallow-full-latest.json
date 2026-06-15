@@ -2,22 +2,22 @@
   "kind": "combined",
   "schema_version": 7,
   "version": "2.96.0",
-  "elapsed_ms": 171,
+  "elapsed_ms": 214,
   "_meta": {
     "telemetry": {
-      "analysis_run_id": "run_7fd45e72f7f36433"
+      "analysis_run_id": "run_8d295b5de48fa727"
     }
   },
   "check": {
     "schema_version": 7,
     "version": "2.96.0",
-    "elapsed_ms": 120,
+    "elapsed_ms": 149,
     "total_issues": 18,
     "entry_points": {
-      "total": 320,
+      "total": 321,
       "sources": {
         "manual_entry": 7,
-        "plugin": 313
+        "plugin": 314
       }
     },
     "summary": {
@@ -9139,15 +9139,15 @@
       }
     ],
     "stats": {
-      "total_files": 681,
+      "total_files": 683,
       "files_with_clones": 79,
-      "total_lines": 47157,
+      "total_lines": 47221,
       "duplicated_lines": 3317,
-      "total_tokens": 173459,
+      "total_tokens": 173679,
       "duplicated_tokens": 7408,
       "clone_groups": 87,
       "clone_instances": 186,
-      "duplication_percentage": 7.033950420934326
+      "duplication_percentage": 7.024417102560301
     }
   },
   "health": {
@@ -9694,13 +9694,13 @@
       }
     ],
     "summary": {
-      "files_analyzed": 1215,
-      "functions_analyzed": 3687,
+      "files_analyzed": 1217,
+      "functions_analyzed": 3691,
       "functions_above_threshold": 18,
       "max_cyclomatic_threshold": 20,
       "max_cognitive_threshold": 15,
       "max_crap_threshold": 30.0,
-      "files_scored": 765,
+      "files_scored": 767,
       "average_maintainability": 93.0,
       "coverage_model": "static_estimated",
       "coverage_source_consistency": "uniform",
@@ -9723,16 +9723,16 @@
       "circular_dep_count": 0,
       "circular_deps_per_k_files": 0.0,
       "counts": {
-        "total_files": 1215,
-        "total_exports": 1460,
+        "total_files": 1217,
+        "total_exports": 1462,
         "dead_files": 0,
         "dead_exports": 0,
-        "total_lines": 51993,
-        "files_scored": 765,
+        "total_lines": 52060,
+        "files_scored": 767,
         "total_deps": 0
       },
       "unit_size_profile": {
-        "low_risk": 74.2,
+        "low_risk": 74.1,
         "medium_risk": 13.8,
         "high_risk": 7.9,
         "very_high_risk": 4.1
@@ -9746,7 +9746,7 @@
       },
       "p95_fan_in": 4,
       "coupling_high_pct": 0.9,
-      "total_loc": 51993
+      "total_loc": 52060
     },
     "file_scores": [
       {
@@ -12074,20 +12074,6 @@
         "crap_above_threshold": 0
       },
       {
-        "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.component.tsx",
-        "fan_in": 2,
-        "fan_out": 16,
-        "dead_code_ratio": 0.0,
-        "complexity_density": 0.05,
-        "maintainability_index": 87.2,
-        "total_cyclomatic": 9,
-        "total_cognitive": 3,
-        "function_count": 6,
-        "lines": 190,
-        "crap_max": 4.9,
-        "crap_above_threshold": 0
-      },
-      {
         "path": "src/components/Table/TableSkeleton/TableSkeleton.test.tsx",
         "fan_in": 0,
         "fan_out": 5,
@@ -12491,6 +12477,20 @@
         "function_count": 14,
         "lines": 122,
         "crap_max": 1.2,
+        "crap_above_threshold": 0
+      },
+      {
+        "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.component.tsx",
+        "fan_in": 2,
+        "fan_out": 16,
+        "dead_code_ratio": 0.0,
+        "complexity_density": 0.05,
+        "maintainability_index": 87.2,
+        "total_cyclomatic": 7,
+        "total_cognitive": 2,
+        "function_count": 5,
+        "lines": 152,
+        "crap_max": 2.9,
         "crap_above_threshold": 0
       },
       {
@@ -14562,6 +14562,20 @@
         "total_cognitive": 1,
         "function_count": 2,
         "lines": 31,
+        "crap_max": 2.9,
+        "crap_above_threshold": 0
+      },
+      {
+        "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/utils/createDraggableItems.util.ts",
+        "fan_in": 2,
+        "fan_out": 0,
+        "dead_code_ratio": 0.0,
+        "complexity_density": 0.05,
+        "maintainability_index": 98.5,
+        "total_cyclomatic": 3,
+        "total_cognitive": 1,
+        "function_count": 2,
+        "lines": 55,
         "crap_max": 2.9,
         "crap_above_threshold": 0
       },
@@ -18654,6 +18668,20 @@
         "crap_above_threshold": 0
       },
       {
+        "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/utils/createDraggableItems.util.test.ts",
+        "fan_in": 0,
+        "fan_out": 1,
+        "dead_code_ratio": 0.0,
+        "complexity_density": 0.06,
+        "maintainability_index": 95.5,
+        "total_cyclomatic": 3,
+        "total_cognitive": 0,
+        "function_count": 3,
+        "lines": 49,
+        "crap_max": 1.2,
+        "crap_above_threshold": 0
+      },
+      {
         "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/utils/getPinnedEntries.util.test.ts",
         "fan_in": 0,
         "fan_out": 1,
@@ -20540,7 +20568,7 @@
         "path": "src/App.tsx",
         "score": 19.2,
         "commits": 38,
-        "weighted_commits": 11.99,
+        "weighted_commits": 11.98,
         "lines_added": 1168,
         "lines_deleted": 1168,
         "complexity_density": 0.13,
@@ -20565,7 +20593,7 @@
         "path": "src/components/Table/contexts/TableConfig/columns/actions/useBatchSetColumnSettings.hook.ts",
         "score": 18.3,
         "commits": 14,
-        "weighted_commits": 6.77,
+        "weighted_commits": 6.76,
         "lines_added": 281,
         "lines_deleted": 281,
         "complexity_density": 0.22,
@@ -20590,7 +20618,7 @@
         "path": "src/components/Table/TableBody/TableBody.component.tsx",
         "score": 15.3,
         "commits": 38,
-        "weighted_commits": 15.59,
+        "weighted_commits": 15.58,
         "lines_added": 515,
         "lines_deleted": 515,
         "complexity_density": 0.08,
@@ -20665,7 +20693,7 @@
         "path": "src/components/Table/TableHeader/TableHeader.component.tsx",
         "score": 11.8,
         "commits": 37,
-        "weighted_commits": 13.72,
+        "weighted_commits": 13.71,
         "lines_added": 445,
         "lines_deleted": 445,
         "complexity_density": 0.07,
@@ -21040,7 +21068,7 @@
         "path": "src/components/Table/TableSettingsDrawer/FiltersSection/FiltersSection.component.tsx",
         "score": 8.6,
         "commits": 14,
-        "weighted_commits": 6.34,
+        "weighted_commits": 6.33,
         "lines_added": 455,
         "lines_deleted": 455,
         "complexity_density": 0.11,
@@ -21917,7 +21945,7 @@
         "path": "src/routes/enterprise-orders/EnterpriseOrders.component.tsx",
         "score": 5.7,
         "commits": 18,
-        "weighted_commits": 6.67,
+        "weighted_commits": 6.66,
         "lines_added": 277,
         "lines_deleted": 277,
         "complexity_density": 0.07,
@@ -23296,7 +23324,7 @@
         "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/PinConflictModal/PinConflictModal.component.tsx",
         "score": 3.8,
         "commits": 7,
-        "weighted_commits": 3.46,
+        "weighted_commits": 3.45,
         "lines_added": 140,
         "lines_deleted": 140,
         "complexity_density": 0.09,
@@ -23595,31 +23623,6 @@
         ]
       },
       {
-        "path": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.ts",
-        "score": 3.4,
-        "commits": 8,
-        "weighted_commits": 3.9,
-        "lines_added": 236,
-        "lines_deleted": 236,
-        "complexity_density": 0.07,
-        "fan_in": 2,
-        "trend": "accelerating",
-        "actions": [
-          {
-            "type": "refactor-file",
-            "auto_fixable": false,
-            "description": "Refactor `src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.ts`, high complexity combined with frequent changes makes this a maintenance risk",
-            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
-          },
-          {
-            "type": "add-tests",
-            "auto_fixable": false,
-            "description": "Add test coverage for `src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.ts` to reduce change risk",
-            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
-          }
-        ]
-      },
-      {
         "path": "src/components/Table/filters/TextFilterInput/TextFilterInput.component.tsx",
         "score": 3.4,
         "commits": 6,
@@ -23666,6 +23669,31 @@
             "type": "add-tests",
             "auto_fixable": false,
             "description": "Add test coverage for `src/components/Modal/Modal.test.tsx` to reduce change risk",
+            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
+          }
+        ]
+      },
+      {
+        "path": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.ts",
+        "score": 3.3,
+        "commits": 8,
+        "weighted_commits": 3.89,
+        "lines_added": 236,
+        "lines_deleted": 236,
+        "complexity_density": 0.07,
+        "fan_in": 2,
+        "trend": "accelerating",
+        "actions": [
+          {
+            "type": "refactor-file",
+            "auto_fixable": false,
+            "description": "Refactor `src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.ts`, high complexity combined with frequent changes makes this a maintenance risk",
+            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
+          },
+          {
+            "type": "add-tests",
+            "auto_fixable": false,
+            "description": "Add test coverage for `src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.ts` to reduce change risk",
             "note": "Frequently changed complex files benefit most from comprehensive test coverage"
           }
         ]
@@ -24557,7 +24585,7 @@
         "path": "src/components/Table/TableHeader/TableHeader.test.tsx",
         "score": 2.6,
         "commits": 4,
-        "weighted_commits": 2.1,
+        "weighted_commits": 2.09,
         "lines_added": 217,
         "lines_deleted": 217,
         "complexity_density": 0.1,
@@ -24659,7 +24687,7 @@
         "path": "src/components/RadioOptionGroup/RadioOptionGroup.component.tsx",
         "score": 2.5,
         "commits": 4,
-        "weighted_commits": 2.02,
+        "weighted_commits": 2.01,
         "lines_added": 52,
         "lines_deleted": 52,
         "complexity_density": 0.1,
@@ -26509,31 +26537,6 @@
         ]
       },
       {
-        "path": "src/components/Table/contexts/FiltersData/filters/utils/getInitialFiltersDataState.util.ts",
-        "score": 1.5,
-        "commits": 3,
-        "weighted_commits": 1.48,
-        "lines_added": 25,
-        "lines_deleted": 25,
-        "complexity_density": 0.08,
-        "fan_in": 2,
-        "trend": "accelerating",
-        "actions": [
-          {
-            "type": "refactor-file",
-            "auto_fixable": false,
-            "description": "Refactor `src/components/Table/contexts/FiltersData/filters/utils/getInitialFiltersDataState.util.ts`, high complexity combined with frequent changes makes this a maintenance risk",
-            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
-          },
-          {
-            "type": "add-tests",
-            "auto_fixable": false,
-            "description": "Add test coverage for `src/components/Table/contexts/FiltersData/filters/utils/getInitialFiltersDataState.util.ts` to reduce change risk",
-            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
-          }
-        ]
-      },
-      {
         "path": "src/components/ToggleSwitch/ToggleSwitch.test.tsx",
         "score": 1.5,
         "commits": 3,
@@ -26580,6 +26583,31 @@
             "type": "add-tests",
             "auto_fixable": false,
             "description": "Add test coverage for `src/utils/urlState/encodeStateToURL.util.ts` to reduce change risk",
+            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
+          }
+        ]
+      },
+      {
+        "path": "src/components/Table/contexts/FiltersData/filters/utils/getInitialFiltersDataState.util.ts",
+        "score": 1.4,
+        "commits": 3,
+        "weighted_commits": 1.47,
+        "lines_added": 25,
+        "lines_deleted": 25,
+        "complexity_density": 0.08,
+        "fan_in": 2,
+        "trend": "accelerating",
+        "actions": [
+          {
+            "type": "refactor-file",
+            "auto_fixable": false,
+            "description": "Refactor `src/components/Table/contexts/FiltersData/filters/utils/getInitialFiltersDataState.util.ts`, high complexity combined with frequent changes makes this a maintenance risk",
+            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
+          },
+          {
+            "type": "add-tests",
+            "auto_fixable": false,
+            "description": "Add test coverage for `src/components/Table/contexts/FiltersData/filters/utils/getInitialFiltersDataState.util.ts` to reduce change risk",
             "note": "Frequently changed complex files benefit most from comprehensive test coverage"
           }
         ]
@@ -27666,6 +27694,12 @@
         "line_count": 109
       },
       {
+        "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.component.tsx",
+        "name": "ColumnOrderSection",
+        "line": 44,
+        "line_count": 108
+      },
+      {
         "path": "src/components/Table/TableBody/TableBody.test.tsx",
         "name": "<arrow>",
         "line": 115,
@@ -27957,12 +27991,6 @@
         "path": "src/components/Table/TableLayout/TableLayout.component.tsx",
         "name": "TableLayout",
         "line": 14,
-        "line_count": 76
-      },
-      {
-        "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.component.tsx",
-        "name": "ColumnOrderSection",
-        "line": 114,
         "line_count": 76
       },
       {
