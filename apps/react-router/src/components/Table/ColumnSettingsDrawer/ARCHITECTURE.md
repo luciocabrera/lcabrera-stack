@@ -140,7 +140,8 @@ See [ColumnDrawerContext/ARCHITECTURE.md](ColumnDrawerContext/ARCHITECTURE.md) f
 - **Accept**: `useBatchSetColumnDrawerSettings` reads all drawer state and pushes it to
   `TableConfigContext` via `useBatchSetColumnSettings`
 - **Cancel**: `useResetAllColumnDrawerSettings(true)` reads current table state back into
-  the drawer store and closes the drawer via `metaStore.set({ isColumnSettingsOpen: false })`
+  the drawer store and closes the drawer while restoring table-settings visibility from
+  `wasTableSettingsOpenBeforeColumnSettings` snapshot in `metaStore`
 
 ## Tab Sections
 

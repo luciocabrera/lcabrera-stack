@@ -49,6 +49,7 @@ describe('table settings toggle hooks', () => {
     act(() => {
       result.current();
       expect(getMetaState().isTableSettingsOpen).toBe(true);
+      expect(getMetaState().isColumnSettingsOpen).toBe(false);
       result.current();
     });
 
@@ -61,6 +62,7 @@ describe('table settings toggle hooks', () => {
     act(() => {
       result.current();
       expect(getMetaState().isColumnSettingsOpen).toBe(true);
+      expect(getMetaState().isTableSettingsOpen).toBe(false);
       result.current();
     });
 

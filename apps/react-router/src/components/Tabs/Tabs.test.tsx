@@ -83,4 +83,38 @@ describe('Tabs', () => {
     const tabA = screen.getByRole('tab', { name: 'Tab A' });
     expect(tabA.getAttribute('aria-selected')).toBe('true');
   });
+
+  it('uses selectedTab when controlled', () => {
+    render(<Tabs selectedTab='c' tabs={tabs} />);
+    const tabC = screen.getByRole('tab', { name: 'Tab C' });
+    expect(tabC.getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('falls back to first tab when controlled selectedTab is missing', () => {
+    render(<Tabs selectedTab='missing-tab' tabs={tabs} />);
+
+    const tabA = screen.getByRole('tab', { name: 'Tab A' });
+    const tabB = screen.getByRole('tab', { name: 'Tab B' });
+
+    expect(tabA.getAttribute('aria-selected')).toBe('true');
+    expect(tabA.getAttribute('tabIndex')).toBe('0');
+    expect(tabB.getAttribute('aria-selected')).toBe('false');
+  });
+
+  it('calls onSelectTab when selecting a tab in controlled mode', () => {
+    let lastSelectedTab = '';
+
+    render(
+      <Tabs
+        onSelectTab={(tabKey) => {
+          lastSelectedTab = tabKey;
+        }}
+        selectedTab='a'
+        tabs={tabs}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Tab B' }));
+    expect(lastSelectedTab).toBe('b');
+  });
 });

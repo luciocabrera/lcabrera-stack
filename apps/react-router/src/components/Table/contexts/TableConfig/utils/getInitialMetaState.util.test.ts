@@ -22,13 +22,17 @@ describe('getInitialMetaState', () => {
     expect(result.isBordered).toBe(true);
     expect(result.isStriped).toBe(true);
     expect(result.isColumnSettingsOpen).toBe(false);
+    expect(result.isTableSettingsPinned).toBe(false);
     expect(result.isTableSettingsOpen).toBe(false);
     expect(result.initialPageSize).toBe(INITIAL_PAGE_SIZE);
     expect(result.loadMorePageSize).toBe(LOAD_MORE_PAGE_SIZE);
     expect(result.overscan).toBe(DEFAULT_OVERSCAN);
     expect(result.placeholderRowCount).toBe(DEFAULT_PLACEHOLDER_ROW_COUNT);
     expect(result.rowHeight).toBe(DEFAULT_ROW_HEIGHT);
+    expect(result.tableSettingsExpandedFilters).toEqual([]);
+    expect(result.tableSettingsSelectedTab).toBe('general');
     expect(result.threshold).toBe(INFINITE_SCROLL_THRESHOLD);
+    expect(result.wasTableSettingsOpenBeforeColumnSettings).toBe(false);
     expect(result.persistenceKey).toBe('');
   });
 

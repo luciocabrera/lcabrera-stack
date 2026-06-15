@@ -32,7 +32,7 @@ import {
 } from '../contexts/TableConfig/columns/selectors';
 import {
   useSetTableColumnSelectedKey,
-  useToogleTableIsColumnSettingsOpen,
+  useSetTableDrawersOpenState,
 } from '../contexts/TableConfig/meta/actions';
 import { SortIcon } from './SortIcon';
 import {
@@ -58,7 +58,7 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
   const setColumnPinning = useSetColumnPinning<TData>();
   const setSorting = useSetColumnSorting<TData>();
   const setTableColumnSelectedKey = useSetTableColumnSelectedKey();
-  const toogleTableIsColumnSettingsOpen = useToogleTableIsColumnSettingsOpen();
+  const setTableDrawersOpenState = useSetTableDrawersOpenState();
   const acceptHeaderPinSide = useAcceptHeaderPinSide<TData>();
   const acceptHeaderPinConflict = useAcceptHeaderPinConflict<TData>();
   const globalPinConflictResolutionPreference =
@@ -95,7 +95,10 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
 
   const handleOpenSettings = () => {
     setTableColumnSelectedKey(columnKey);
-    toogleTableIsColumnSettingsOpen();
+    setTableDrawersOpenState({
+      isColumnSettingsOpen: true,
+      isTableSettingsOpen: false,
+    });
   };
 
   const handleResizeDoubleClick = (

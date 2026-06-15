@@ -7,25 +7,43 @@ import type { TabsProps } from './Tabs.types';
 
 import { styles } from './Tabs.stylex';
 
-export const Tabs = ({ defaultSelectedTab, tabs, ...props }: TabsProps) => {
-  const [activeTab, setActiveTab] = useState(
+export const Tabs = ({
+  defaultSelectedTab,
+  onSelectTab,
+  selectedTab,
+  tabs,
+  ...props
+}: TabsProps) => {
+  const [uncontrolledActiveTab, setUncontrolledActiveTab] = useState(
     defaultSelectedTab ?? tabs[0]?.key ?? '',
   );
+  const isControlled = selectedTab !== undefined;
+  const requestedActiveTab = isControlled ? selectedTab : uncontrolledActiveTab;
+  const hasRequestedTab = tabs.some((tab) => tab.key === requestedActiveTab);
+  const activeTab = hasRequestedTab ? requestedActiveTab : (tabs[0]?.key ?? '');
   const tabRefs = useRef<Map<string, HTMLButtonElement | null>>(new Map());
   const activeIndex = tabs.findIndex((tab) => tab.key === activeTab);
+
+  const setActiveTab = (nextActiveTab: string) => {
+    if (!isControlled) {
+      setUncontrolledActiveTab(nextActiveTab);
+    }
+    onSelectTab?.(nextActiveTab);
+  };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (tabs.length === 0) return;
 
     let newIndex: number;
+    const currentIndex = activeIndex === -1 ? 0 : activeIndex;
 
     switch (event.key) {
       case 'ArrowLeft': {
-        newIndex = (activeIndex - 1 + tabs.length) % tabs.length;
+        newIndex = (currentIndex - 1 + tabs.length) % tabs.length;
         break;
       }
       case 'ArrowRight': {
-        newIndex = (activeIndex + 1) % tabs.length;
+        newIndex = (currentIndex + 1) % tabs.length;
         break;
       }
       case 'End': {
@@ -43,7 +61,7 @@ export const Tabs = ({ defaultSelectedTab, tabs, ...props }: TabsProps) => {
 
     const newTab = tabs[newIndex];
 
-    if (newIndex !== activeIndex && newTab) {
+    if (newIndex !== currentIndex && newTab) {
       setActiveTab(newTab.key);
       tabRefs.current.get(newTab.key)?.focus();
       event.preventDefault();

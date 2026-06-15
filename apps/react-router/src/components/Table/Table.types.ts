@@ -233,6 +233,7 @@ export type TableMetaState = {
   readonly isBordered: boolean;
   readonly isColumnSettingsOpen: boolean;
   readonly isStriped: boolean;
+  readonly isTableSettingsPinned: boolean;
   readonly isTableSettingsOpen: boolean;
   /** Page size for subsequent loads */
   readonly loadMorePageSize: number;
@@ -243,6 +244,9 @@ export type TableMetaState = {
   readonly placeholderRowCount: number;
   readonly rowHeight: number;
   readonly schemaName?: string;
+  readonly wasTableSettingsOpenBeforeColumnSettings?: boolean;
+  readonly tableSettingsExpandedFilters: readonly string[];
+  readonly tableSettingsSelectedTab: string;
   readonly tableName?: string;
   readonly threshold: number;
   readonly title?: string;

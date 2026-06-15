@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 import type { TabItem } from '@/components/Tabs';
 
 import { Button } from '@/components/Button';
@@ -16,7 +14,15 @@ import { Tabs } from '@/components/Tabs';
 import { ICON_SIZE_LG } from '@/design-system/constants';
 import { useNotifications } from '@/hooks/useNotifications.hook';
 
-import { useToogleTableIsTableSettingsOpen } from '../contexts/TableConfig/meta/actions';
+import {
+  useSetTableSettingsSelectedTab,
+  useSetTableIsTableSettingsOpen,
+  useSetTableIsTableSettingsPinned,
+} from '../contexts/TableConfig/meta/actions';
+import {
+  useGetTableIsTableSettingsPinned,
+  useGetTableSettingsSelectedTab,
+} from '../contexts/TableConfig/meta/selectors';
 import { ColumnOrderSection } from './ColumnOrderSection';
 import { ColumnOrderSectionProvider } from './ColumnOrderSection/ColumnOrderSectionContext/ColumnOrderSectionContext.provider';
 import { DetailsSection } from './DetailsSection';
@@ -34,14 +40,22 @@ export const TableSettingsDrawer = () => {
   const batchSetTableDrawerSettings = useBatchSetTableDrawerSettings();
   const { notify } = useNotifications();
   const resetTableDrawerSettings = useResetTableSettings();
-  const toogleTableIsTableSettingsOpen = useToogleTableIsTableSettingsOpen();
-
-  const [isPinned, setIsPinned] = useState(false);
+  const isPinned = useGetTableIsTableSettingsPinned();
+  const selectedTab = useGetTableSettingsSelectedTab();
+  const setSelectedTab = useSetTableSettingsSelectedTab();
+  const setTableIsTableSettingsOpen = useSetTableIsTableSettingsOpen();
+  const setTableIsTableSettingsPinned = useSetTableIsTableSettingsPinned();
 
   const filters = useGetColumnFilters();
   const areFiltersValid = Object.values(filters).every((f) =>
     validateFilter(f),
   );
+  const closeIfUnpinned = () => {
+    if (!isPinned) {
+      setTableIsTableSettingsOpen(false);
+    }
+  };
+
   const handleAccept = () => {
     if (!areFiltersValid) {
       notify({
@@ -54,23 +68,16 @@ export const TableSettingsDrawer = () => {
     }
 
     batchSetTableDrawerSettings();
-
-    // Unpin if pinned, then close
-    if (isPinned) {
-      setIsPinned(false);
-    }
+    closeIfUnpinned();
   };
 
   const handleCancel = () => {
     resetTableDrawerSettings();
-    // Unpin if pinned, then close
-    if (isPinned) setIsPinned(false);
-
-    toogleTableIsTableSettingsOpen();
+    closeIfUnpinned();
   };
 
   const handleTogglePin = () => {
-    setIsPinned(!isPinned);
+    setTableIsTableSettingsPinned(!isPinned);
   };
 
   const tabs: TabItem[] = [
@@ -126,7 +133,11 @@ export const TableSettingsDrawer = () => {
       </SidePanelHeader>
       <SidePanelBody>
         <ColumnOrderSectionProvider>
-          <Tabs tabs={tabs} />
+          <Tabs
+            onSelectTab={setSelectedTab}
+            selectedTab={selectedTab}
+            tabs={tabs}
+          />
         </ColumnOrderSectionProvider>
       </SidePanelBody>
       <SidePanelFooter>

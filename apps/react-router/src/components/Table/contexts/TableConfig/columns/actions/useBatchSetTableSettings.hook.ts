@@ -18,7 +18,8 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
       isLoadingMore: true,
     });
     const columnsState = columnsStore.get();
-    const persistenceKey = metaStore.get()?.persistenceKey ?? '';
+    const metaState = metaStore.get();
+    const persistenceKey = metaState?.persistenceKey ?? '';
     const resolvedUpdate = resolveBatchTableSettingsUpdate<TData>({
       columns: columnsState?.columns ?? [],
       settings,
@@ -37,7 +38,9 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
     );
 
     columnsStore.set(resolvedUpdate);
-    metaStore.set({ isTableSettingsOpen: false });
+    if (!metaState?.isTableSettingsPinned) {
+      metaStore.set({ isTableSettingsOpen: false });
+    }
     dataStore.set({
       isLoadingMore: false,
     });

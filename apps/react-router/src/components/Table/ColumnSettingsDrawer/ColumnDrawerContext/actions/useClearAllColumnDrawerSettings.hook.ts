@@ -23,7 +23,17 @@ export const useClearAllColumnDrawerSettings = () => {
     });
 
     if (shouldCloseDrawer) {
-      metaStore.set({ isColumnSettingsOpen: false });
+      const metaState = metaStore.get();
+      const shouldRestoreTableSettings =
+        metaState?.wasTableSettingsOpenBeforeColumnSettings ?? false;
+
+      metaStore.set({
+        isColumnSettingsOpen: false,
+        isTableSettingsOpen: shouldRestoreTableSettings
+          ? true
+          : (metaState?.isTableSettingsOpen ?? false),
+        wasTableSettingsOpenBeforeColumnSettings: false,
+      });
     }
   };
 };

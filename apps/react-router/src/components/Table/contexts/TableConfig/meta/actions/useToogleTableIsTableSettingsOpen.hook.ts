@@ -5,9 +5,13 @@ export const useToogleTableIsTableSettingsOpen = () => {
 
   return () => {
     const metaState = metaStore.get();
+    const isTableSettingsOpen = !metaState?.isTableSettingsOpen;
 
     metaStore.set({
-      isTableSettingsOpen: !metaState?.isTableSettingsOpen,
+      isColumnSettingsOpen: isTableSettingsOpen
+        ? false
+        : (metaState?.isColumnSettingsOpen ?? false),
+      isTableSettingsOpen,
     });
   };
 };

@@ -8,10 +8,6 @@ import type { SortRule } from 'api-shared';
 
 import type { EnterpriseOrdersFilters } from './enterpriseOrders.types';
 
-// ---------------------------------------------------------------------------
-// Shared sub-schemas
-// ---------------------------------------------------------------------------
-
 const booleanFilterSchema = {
   type: 'object',
   required: ['type', 'value'],
@@ -67,7 +63,10 @@ const selectFilterSchema = {
     operator: { type: 'string', enum: ['equals', 'notEquals'] },
     type: { type: 'string', enum: ['multiSelect', 'select'] },
     value: { type: 'string', minLength: 1 },
-    values: { type: 'array', items: { type: 'string', minLength: 1 } },
+    values: {
+      type: 'array',
+      items: { type: 'string', minLength: 1 },
+    },
   },
   additionalProperties: false,
 };

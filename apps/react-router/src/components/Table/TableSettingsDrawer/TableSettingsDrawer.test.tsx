@@ -7,16 +7,24 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const {
   batchSetTableDrawerSettingsMock,
+  isTableSettingsPinnedMock,
   notifyMock,
+  selectedTabMock,
+  setSelectedTabMock,
+  setTableIsTableSettingsOpenMock,
+  setTableIsTableSettingsPinnedMock,
   tableColumnFiltersMock,
   resetTableDrawerSettingsMock,
-  toogleTableIsTableSettingsOpenMock,
 } = vi.hoisted(() => ({
   batchSetTableDrawerSettingsMock: vi.fn(),
+  isTableSettingsPinnedMock: vi.fn(() => false),
   notifyMock: vi.fn(),
+  selectedTabMock: vi.fn(() => 'general'),
+  setSelectedTabMock: vi.fn(),
+  setTableIsTableSettingsOpenMock: vi.fn(),
+  setTableIsTableSettingsPinnedMock: vi.fn(),
   tableColumnFiltersMock: {} as Record<string, unknown>,
   resetTableDrawerSettingsMock: vi.fn(),
-  toogleTableIsTableSettingsOpenMock: vi.fn(),
 }));
 
 afterEach(() => {
@@ -25,12 +33,18 @@ afterEach(() => {
 
 beforeEach(() => {
   batchSetTableDrawerSettingsMock.mockReset();
+  isTableSettingsPinnedMock.mockReset();
+  isTableSettingsPinnedMock.mockReturnValue(false);
   notifyMock.mockReset();
+  selectedTabMock.mockReset();
+  selectedTabMock.mockReturnValue('general');
+  setSelectedTabMock.mockReset();
   Object.keys(tableColumnFiltersMock).forEach((key) => {
     delete tableColumnFiltersMock[key];
   });
   resetTableDrawerSettingsMock.mockReset();
-  toogleTableIsTableSettingsOpenMock.mockReset();
+  setTableIsTableSettingsOpenMock.mockReset();
+  setTableIsTableSettingsPinnedMock.mockReset();
 });
 
 type ButtonProps = {
@@ -58,6 +72,8 @@ type MockSidePanelHeaderToolbarProps = {
 };
 
 type MockTabsProps = {
+  readonly onSelectTab?: (tabKey: string) => void;
+  readonly selectedTab?: string;
   readonly tabs: readonly {
     readonly children: ReactNode;
     readonly header: string;
@@ -122,8 +138,16 @@ vi.mock('@/components/SidePanel', () => ({
 }));
 
 vi.mock('@/components/Tabs', () => ({
-  Tabs: ({ tabs }: MockTabsProps) => (
-    <div>
+  Tabs: ({ onSelectTab, selectedTab, tabs }: MockTabsProps) => (
+    <div data-selected-tab={selectedTab}>
+      <button
+        onClick={() => {
+          onSelectTab?.('sorting');
+        }}
+        type='button'
+      >
+        Select sorting tab
+      </button>
       {tabs.map((tab) => (
         <section key={tab.key}>
           <h2>{tab.header}</h2>
@@ -135,7 +159,14 @@ vi.mock('@/components/Tabs', () => ({
 }));
 
 vi.mock('../contexts/TableConfig/meta/actions', () => ({
-  useToogleTableIsTableSettingsOpen: () => toogleTableIsTableSettingsOpenMock,
+  useSetTableSettingsSelectedTab: () => setSelectedTabMock,
+  useSetTableIsTableSettingsOpen: () => setTableIsTableSettingsOpenMock,
+  useSetTableIsTableSettingsPinned: () => setTableIsTableSettingsPinnedMock,
+}));
+
+vi.mock('../contexts/TableConfig/meta/selectors', () => ({
+  useGetTableIsTableSettingsPinned: () => isTableSettingsPinnedMock(),
+  useGetTableSettingsSelectedTab: () => selectedTabMock(),
 }));
 
 vi.mock('./ColumnOrderSection', () => ({
@@ -199,27 +230,66 @@ describe('TableSettingsDrawer', () => {
     expect(screen.getByText('Columns').textContent).toBe('Columns');
   });
 
-  it('accepts changes and clears the pinned state', () => {
+  it('accepts changes and closes the drawer when unpinned', () => {
     render(<TableSettingsDrawer />);
-
-    fireEvent.click(screen.getByRole('button', { name: 'Toggle pin' }));
-    expect(screen.getByTestId('side-panel').dataset.pinned).toBe('true');
 
     fireEvent.click(screen.getByRole('button', { name: 'Accept' }));
 
     expect(batchSetTableDrawerSettingsMock).toHaveBeenCalledTimes(1);
-    expect(screen.getByTestId('side-panel').dataset.pinned).toBe('false');
+    expect(setTableIsTableSettingsOpenMock).toHaveBeenCalledWith(false);
   });
 
-  it('cancels changes, resets drawer state, and closes the drawer', () => {
+  it('accepts changes and keeps the drawer open when pinned', () => {
+    isTableSettingsPinnedMock.mockReturnValue(true);
+
     render(<TableSettingsDrawer />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Toggle pin' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Accept' }));
+
+    expect(batchSetTableDrawerSettingsMock).toHaveBeenCalledTimes(1);
+    expect(setTableIsTableSettingsOpenMock).not.toHaveBeenCalled();
+  });
+
+  it('cancels changes, resets drawer state, and closes when unpinned', () => {
+    render(<TableSettingsDrawer />);
+
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
 
     expect(resetTableDrawerSettingsMock).toHaveBeenCalledTimes(1);
-    expect(toogleTableIsTableSettingsOpenMock).toHaveBeenCalledTimes(1);
-    expect(screen.getByTestId('side-panel').dataset.pinned).toBe('false');
+    expect(setTableIsTableSettingsOpenMock).toHaveBeenCalledWith(false);
+  });
+
+  it('cancels changes, resets drawer state, and keeps open when pinned', () => {
+    isTableSettingsPinnedMock.mockReturnValue(true);
+
+    render(<TableSettingsDrawer />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+
+    expect(resetTableDrawerSettingsMock).toHaveBeenCalledTimes(1);
+    expect(setTableIsTableSettingsOpenMock).not.toHaveBeenCalled();
+  });
+
+  it('toggles pin state through meta action', () => {
+    render(<TableSettingsDrawer />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Toggle pin' }));
+
+    expect(setTableIsTableSettingsPinnedMock).toHaveBeenCalledWith(true);
+  });
+
+  it('restores and persists selected table settings tab', () => {
+    selectedTabMock.mockReturnValue('sorting');
+
+    render(<TableSettingsDrawer />);
+
+    expect(
+      screen.getByText('Select sorting tab').parentElement?.dataset.selectedTab,
+    ).toBe('sorting');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Select sorting tab' }));
+
+    expect(setSelectedTabMock).toHaveBeenCalledWith('sorting');
   });
 
   it('shows a notification and blocks accept when filters are invalid', () => {
@@ -235,5 +305,6 @@ describe('TableSettingsDrawer', () => {
 
     expect(batchSetTableDrawerSettingsMock).not.toHaveBeenCalled();
     expect(notifyMock).toHaveBeenCalledTimes(1);
+    expect(setTableIsTableSettingsOpenMock).not.toHaveBeenCalled();
   });
 });

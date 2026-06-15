@@ -5,9 +5,24 @@ export const useToogleTableIsColumnSettingsOpen = () => {
 
   return () => {
     const metaState = metaStore.get();
+    const isColumnSettingsOpen = !metaState?.isColumnSettingsOpen;
+    const wasTableSettingsOpenBeforeColumnSettings =
+      metaState?.wasTableSettingsOpenBeforeColumnSettings ?? false;
+
+    let nextIsTableSettingsOpen = metaState?.isTableSettingsOpen ?? false;
+
+    if (isColumnSettingsOpen) {
+      nextIsTableSettingsOpen = false;
+    } else if (wasTableSettingsOpenBeforeColumnSettings) {
+      nextIsTableSettingsOpen = true;
+    }
 
     metaStore.set({
-      isColumnSettingsOpen: !metaState?.isColumnSettingsOpen,
+      isColumnSettingsOpen,
+      isTableSettingsOpen: nextIsTableSettingsOpen,
+      wasTableSettingsOpenBeforeColumnSettings: isColumnSettingsOpen
+        ? (metaState?.isTableSettingsOpen ?? false)
+        : false,
     });
   };
 };
