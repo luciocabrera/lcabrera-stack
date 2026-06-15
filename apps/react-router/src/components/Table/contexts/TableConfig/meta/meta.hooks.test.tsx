@@ -31,6 +31,7 @@ const createInitialMetaState = (): TableMetaState => {
     tableSettingsSelectedTab: 'general',
     threshold: 200,
     title: 'Orders',
+    wasTableSettingsOpenBeforeColumnSettings: false,
   };
 };
 

@@ -32,6 +32,7 @@ describe('getInitialMetaState', () => {
     expect(result.tableSettingsExpandedFilters).toEqual([]);
     expect(result.tableSettingsSelectedTab).toBe('general');
     expect(result.threshold).toBe(INFINITE_SCROLL_THRESHOLD);
+    expect(result.wasTableSettingsOpenBeforeColumnSettings).toBe(false);
     expect(result.persistenceKey).toBe('');
   });
 

@@ -32,6 +32,7 @@ export const getInitialMetaState = ({
   tableSettingsExpandedFilters = [],
   tableSettingsSelectedTab = 'general',
   threshold = INFINITE_SCROLL_THRESHOLD,
+  wasTableSettingsOpenBeforeColumnSettings = false,
   ...rest
 }: GetInitialMetaStateArgs): TableMetaState => ({
   columnOverscan,
@@ -52,5 +53,6 @@ export const getInitialMetaState = ({
   tableSettingsExpandedFilters,
   tableSettingsSelectedTab,
   threshold,
+  wasTableSettingsOpenBeforeColumnSettings,
   ...rest,
 });

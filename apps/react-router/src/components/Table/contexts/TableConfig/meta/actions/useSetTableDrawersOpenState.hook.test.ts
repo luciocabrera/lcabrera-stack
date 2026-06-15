@@ -10,9 +10,11 @@ const { getMetaState, mockUseTableConfigContextValue, setMetaState } =
     let metaState = {
       isColumnSettingsOpen: false,
       isTableSettingsOpen: false,
+      wasTableSettingsOpenBeforeColumnSettings: false,
     };
 
     const mockMetaStore = {
+      get: vi.fn(() => metaState),
       set: vi.fn((value: Record<string, unknown>) => {
         metaState = { ...metaState, ...value };
       }),
@@ -38,6 +40,7 @@ describe('useSetTableDrawersOpenState', () => {
     setMetaState({
       isColumnSettingsOpen: false,
       isTableSettingsOpen: false,
+      wasTableSettingsOpenBeforeColumnSettings: false,
     });
   });
 
@@ -53,5 +56,27 @@ describe('useSetTableDrawersOpenState', () => {
 
     expect(getMetaState().isColumnSettingsOpen).toBe(true);
     expect(getMetaState().isTableSettingsOpen).toBe(false);
+    expect(getMetaState().wasTableSettingsOpenBeforeColumnSettings).toBe(false);
+  });
+
+  it('captures previous table settings open state when opening column settings', () => {
+    setMetaState({
+      isColumnSettingsOpen: false,
+      isTableSettingsOpen: true,
+      wasTableSettingsOpenBeforeColumnSettings: false,
+    });
+
+    const { result } = renderHook(() => useSetTableDrawersOpenState());
+
+    act(() => {
+      result.current({
+        isColumnSettingsOpen: true,
+        isTableSettingsOpen: false,
+      });
+    });
+
+    expect(getMetaState().isColumnSettingsOpen).toBe(true);
+    expect(getMetaState().isTableSettingsOpen).toBe(false);
+    expect(getMetaState().wasTableSettingsOpenBeforeColumnSettings).toBe(true);
   });
 });

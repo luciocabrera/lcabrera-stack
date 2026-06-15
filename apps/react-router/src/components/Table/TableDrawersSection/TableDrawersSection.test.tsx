@@ -142,4 +142,45 @@ describe('TableDrawersSection', () => {
     const { container } = render(<TableDrawersSection />);
     expect(container.firstChild).toBeNull();
   });
+
+  it('restores table settings drawer after column drawer closes when previous table state was open', () => {
+    const visibilityState = {
+      columnKey: '',
+      isColumnSettingsOpen: false,
+      isTableSettingsOpen: true,
+    };
+
+    useGetTableColumnSelectedKeyMock.mockImplementation(
+      () => visibilityState.columnKey,
+    );
+    useGetTableIsColumnSettingsOpenMock.mockImplementation(
+      () => visibilityState.isColumnSettingsOpen,
+    );
+    useGetTableIsTableSettingsOpenMock.mockImplementation(
+      () => visibilityState.isTableSettingsOpen,
+    );
+
+    const { rerender } = render(<TableDrawersSection />);
+
+    expect(screen.getByTestId('table-drawer-provider')).toBeTruthy();
+    expect(screen.queryByTestId('column-drawer-provider')).toBeNull();
+
+    visibilityState.columnKey = 'status';
+    visibilityState.isColumnSettingsOpen = true;
+    visibilityState.isTableSettingsOpen = false;
+    rerender(<TableDrawersSection />);
+
+    expect(screen.getByTestId('column-drawer-provider').dataset.columnKey).toBe(
+      'status',
+    );
+    expect(screen.queryByTestId('table-drawer-provider')).toBeNull();
+
+    visibilityState.columnKey = '';
+    visibilityState.isColumnSettingsOpen = false;
+    visibilityState.isTableSettingsOpen = true;
+    rerender(<TableDrawersSection />);
+
+    expect(screen.getByTestId('table-drawer-provider')).toBeTruthy();
+    expect(screen.queryByTestId('column-drawer-provider')).toBeNull();
+  });
 });

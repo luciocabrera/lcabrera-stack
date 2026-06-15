@@ -13,7 +13,10 @@ export const useBatchSetColumnSettings = <TData>() => {
 
   return (settings: BatchColumnSettingsUpdate<TData>) => {
     const columnsState = columnsStore.get();
-    const persistenceKey = metaStore.get()?.persistenceKey ?? '';
+    const metaState = metaStore.get();
+    const persistenceKey = metaState?.persistenceKey ?? '';
+    const shouldRestoreTableSettings =
+      metaState?.wasTableSettingsOpenBeforeColumnSettings ?? false;
     const resolvedUpdate = resolveBatchColumnSettingsUpdate<TData>({
       columnsState,
       settings,
@@ -31,6 +34,12 @@ export const useBatchSetColumnSettings = <TData>() => {
     );
 
     columnsStore.set(resolvedUpdate);
-    metaStore.set({ isColumnSettingsOpen: false });
+    metaStore.set({
+      isColumnSettingsOpen: false,
+      isTableSettingsOpen: shouldRestoreTableSettings
+        ? true
+        : (metaState?.isTableSettingsOpen ?? false),
+      wasTableSettingsOpenBeforeColumnSettings: false,
+    });
   };
 };

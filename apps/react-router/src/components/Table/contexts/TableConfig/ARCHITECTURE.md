@@ -146,6 +146,7 @@ TableMetaState = {
   tableSettingsSelectedTab: string;  // Last selected tab in table settings drawer
   threshold: number;                 // Scroll threshold for fetch-more
   title: string;                     // Table display title
+  wasTableSettingsOpenBeforeColumnSettings: boolean; // Snapshot used to restore table settings after column drawer closes
 };
 ```
 
@@ -215,16 +216,16 @@ The two batch settings hooks now share two focused pure helpers instead of each 
 
 ## Meta Actions
 
-| Hook                                 | Writes To   | Description                                     |
-| ------------------------------------ | ----------- | ----------------------------------------------- |
-| `useSetTableColumnSelectedKey`       | `metaStore` | Set which column is selected                    |
-| `useSetTableDrawersOpenState`        | `metaStore` | Set both drawer open states in one mutation     |
-| `useSetTableSettingsExpandedFilters` | `metaStore` | Persist expanded filter items in table settings |
-| `useSetTableSettingsSelectedTab`     | `metaStore` | Persist selected table settings tab             |
-| `useSetTableIsTableSettingsOpen`     | `metaStore` | Set table settings open state                   |
-| `useSetTableIsTableSettingsPinned`   | `metaStore` | Set table settings pinned state                 |
-| `useToogleTableIsColumnSettingsOpen` | `metaStore` | Toggle column settings drawer                   |
-| `useToogleTableIsTableSettingsOpen`  | `metaStore` | Toggle table settings drawer                    |
+| Hook                                 | Writes To   | Description                                              |
+| ------------------------------------ | ----------- | -------------------------------------------------------- |
+| `useSetTableColumnSelectedKey`       | `metaStore` | Set which column is selected                             |
+| `useSetTableDrawersOpenState`        | `metaStore` | Set both drawer open states and capture restore snapshot |
+| `useSetTableSettingsExpandedFilters` | `metaStore` | Persist expanded filter items in table settings          |
+| `useSetTableSettingsSelectedTab`     | `metaStore` | Persist selected table settings tab                      |
+| `useSetTableIsTableSettingsOpen`     | `metaStore` | Set table settings open state                            |
+| `useSetTableIsTableSettingsPinned`   | `metaStore` | Set table settings pinned state                          |
+| `useToogleTableIsColumnSettingsOpen` | `metaStore` | Toggle column settings drawer                            |
+| `useToogleTableIsTableSettingsOpen`  | `metaStore` | Toggle table settings drawer                             |
 
 ## Meta Selectors
 
