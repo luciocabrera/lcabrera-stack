@@ -33,12 +33,14 @@ type MockTitleProps = {
 const {
   batchSetColumnDrawerSettingsMock,
   resetAllColumnDrawerSettingsMock,
+  setTableIsColumnSettingsPinnedMock,
   useGetNormalizedColumnMock,
   useRenderTrackerMock,
   useTableWrapperRefMock,
 } = vi.hoisted(() => ({
   batchSetColumnDrawerSettingsMock: vi.fn(),
   resetAllColumnDrawerSettingsMock: vi.fn(),
+  setTableIsColumnSettingsPinnedMock: vi.fn(),
   useGetNormalizedColumnMock: vi.fn(),
   useRenderTrackerMock: vi.fn(),
   useTableWrapperRefMock: vi.fn(),
@@ -158,6 +160,14 @@ vi.mock('@/components/SidePanel', () => ({
 
 vi.mock('@/components/Table/contexts/TableConfig/columns/selectors', () => ({
   useGetNormalizedColumn: useGetNormalizedColumnMock,
+}));
+
+vi.mock('@/components/Table/contexts/TableConfig/meta/actions', () => ({
+  useSetTableIsColumnSettingsPinned: () => setTableIsColumnSettingsPinnedMock,
+}));
+
+vi.mock('@/components/Table/contexts/TableConfig/meta/selectors', () => ({
+  useGetTableIsColumnSettingsPinned: () => false,
 }));
 
 vi.mock('@/components/Table/contexts/TableWrapper', () => ({

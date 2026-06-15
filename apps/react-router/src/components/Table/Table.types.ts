@@ -232,6 +232,7 @@ export type TableMetaState = {
   readonly initialPageSize: number;
   readonly isBordered: boolean;
   readonly isColumnSettingsOpen: boolean;
+  readonly isColumnSettingsPinned: boolean;
   readonly isStriped: boolean;
   readonly isTableSettingsPinned: boolean;
   readonly isTableSettingsOpen: boolean;

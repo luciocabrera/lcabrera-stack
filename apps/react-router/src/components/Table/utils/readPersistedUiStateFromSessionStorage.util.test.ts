@@ -28,6 +28,7 @@ describe('readPersistedUiStateFromSessionStorage', () => {
   it('reads and returns the stored UI state', () => {
     const uiState = {
       isColumnSettingsOpen: false,
+      isColumnSettingsPinned: false,
       isTableSettingsPinned: true,
       isTableSettingsOpen: true,
       tableSettingsExpandedFilters: ['status'],

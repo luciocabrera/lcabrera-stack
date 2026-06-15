@@ -19,6 +19,7 @@ const createInitialMetaState = (): TableMetaState => {
     initialPageSize: 20,
     isBordered: true,
     isColumnSettingsOpen: false,
+    isColumnSettingsPinned: false,
     isStriped: true,
     isTableSettingsPinned: false,
     isTableSettingsOpen: false,

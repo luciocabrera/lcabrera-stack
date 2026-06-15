@@ -75,6 +75,7 @@ const {
     })),
     mockMetaStore: {
       get: vi.fn(() => ({
+        isColumnSettingsPinned: false,
         isTableSettingsOpen: false,
         persistenceKey: 'orders-table',
         wasTableSettingsOpenBeforeColumnSettings: false,
@@ -203,6 +204,7 @@ describe('useBatchSetColumnSettings', () => {
 
   it('restores table settings visibility when column drawer closes after hijacking it', () => {
     mockMetaStore.get.mockReturnValue({
+      isColumnSettingsPinned: false,
       isTableSettingsOpen: false,
       persistenceKey: 'orders-table',
       wasTableSettingsOpenBeforeColumnSettings: true,
@@ -230,6 +232,37 @@ describe('useBatchSetColumnSettings', () => {
       isColumnSettingsOpen: false,
       isTableSettingsOpen: true,
       wasTableSettingsOpenBeforeColumnSettings: false,
+    });
+  });
+
+  it('keeps column settings drawer open after accept when drawer is pinned', () => {
+    mockMetaStore.get.mockReturnValue({
+      isColumnSettingsPinned: true,
+      isTableSettingsOpen: false,
+      persistenceKey: 'orders-table',
+      wasTableSettingsOpenBeforeColumnSettings: true,
+    });
+
+    const { result } = renderHook(() =>
+      useBatchSetColumnSettings<{
+        readonly age: number;
+        readonly id: string;
+        readonly name: string;
+      }>(),
+    );
+
+    act(() => {
+      result.current({
+        columnFilter: { operator: 'contains', type: 'text', value: 'ali' },
+        columnKey: 'name',
+        columnPinning: 'right',
+        columnSizing: 220,
+        sorting: 'desc',
+      });
+    });
+
+    expect(mockMetaStore.set).toHaveBeenCalledWith({
+      isColumnSettingsOpen: true,
     });
   });
 });

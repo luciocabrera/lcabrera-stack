@@ -18,19 +18,23 @@ TableDrawersSection/
 ```mermaid
 graph TD
   TDS["TableDrawersSection"] --> isTable["useGetTableIsTableSettingsOpen()"]
-  TDS --> isPinned["useGetTableIsTableSettingsPinned()"]
-  TDS --> isLoading["useGetTableIsLoading()"]
+  TDS --> isTablePinned["useGetTableIsTableSettingsPinned()"]
   TDS --> isCol["useGetTableIsColumnSettingsOpen()"]
+  TDS --> isColPinned["useGetTableIsColumnSettingsPinned()"]
+  TDS --> isLoading["useGetTableIsLoading()"]
   TDS --> colKey["useGetTableColumnSelectedKey()"]
 
   isCol -->|"true + columnKey"| CDP["ColumnDrawerProvider"]
   CDP --> CSD["ColumnSettingsDrawer"]
+  isLoading --> CBusy{"isColPinned && isLoading"}
+  CBusy -->|Yes| CBusyProp["ColumnSettingsDrawer isBussy=true"]
 
   isCol -->|false| check2{"isTableSettingsOpen?"}
-  check2 -->|true| check3{"isPinned && isLoading?"}
-  check3 -->|Yes| SK["TableSettingsDrawerSkeleton"]
-  check3 -->|No| TDP["TableDrawerProvider"]
+  check2 -->|true| TDP["TableDrawerProvider"]
   TDP --> TSD["TableSettingsDrawer"]
+  isLoading --> TBusy{"isTablePinned && isLoading"}
+  TBusy -->|Yes| TBusyProp["TableSettingsDrawer isBussy=true"]
+
   check2 -->|false| empty["<> (empty fragment)"]
 ```
 
@@ -48,6 +52,8 @@ created when the drawer is open:
 - **TableDrawerProvider** → wraps `TableSettingsDrawer`
 - **ColumnDrawerProvider** → wraps `ColumnSettingsDrawer` with `columnKey`
 
-During loading fallback, a pinned table-settings drawer skips `TableDrawerProvider`
-and renders `TableSettingsDrawerSkeleton` instead. This keeps the pinned drawer
-width and structure visible during refresh without mounting the full tabbed drawer.
+## Busy Behavior
+
+Busy shimmer is only injected when the table is loading **and** the corresponding
+drawer is pinned. This keeps pinned drawers visually stable during background refreshes
+without forcing shimmer on unpinned drawers.

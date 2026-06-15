@@ -7,6 +7,7 @@ import { ColumnDrawerProvider } from '../ColumnSettingsDrawer/ColumnDrawerContex
 import {
   useGetTableColumnSelectedKey,
   useGetTableIsColumnSettingsOpen,
+  useGetTableIsColumnSettingsPinned,
   useGetTableIsTableSettingsPinned,
   useGetTableIsTableSettingsOpen,
 } from '../contexts/TableConfig/meta/selectors';
@@ -16,6 +17,7 @@ export const TableDrawersSection = () => {
   useRenderTracker({ componentName: 'TableDrawersSection' });
 
   const isColumnSettingsOpen = useGetTableIsColumnSettingsOpen();
+  const isColumnSettingsPinned = useGetTableIsColumnSettingsPinned();
   const isLoading = useGetTableIsLoading();
   const isTableSettingsPinned = useGetTableIsTableSettingsPinned();
   const isTableSettingsOpen = useGetTableIsTableSettingsOpen();
@@ -24,7 +26,10 @@ export const TableDrawersSection = () => {
   if (isColumnSettingsOpen && columnKey)
     return (
       <ColumnDrawerProvider columnKey={columnKey}>
-        <ColumnSettingsDrawer columnKey={columnKey} />
+        <ColumnSettingsDrawer
+          columnKey={columnKey}
+          isBussy={isLoading && isColumnSettingsPinned}
+        />
       </ColumnDrawerProvider>
     );
   if (isTableSettingsOpen)

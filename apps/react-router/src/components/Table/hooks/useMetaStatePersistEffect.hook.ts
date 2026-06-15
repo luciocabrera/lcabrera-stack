@@ -16,6 +16,7 @@ const extractUiState = (
   state: TableMetaState | undefined,
 ): PersistedUiState => ({
   isColumnSettingsOpen: state?.isColumnSettingsOpen,
+  isColumnSettingsPinned: state?.isColumnSettingsPinned,
   isTableSettingsPinned: state?.isTableSettingsPinned,
   isTableSettingsOpen: state?.isTableSettingsOpen,
   tableSettingsExpandedFilters: state?.tableSettingsExpandedFilters,

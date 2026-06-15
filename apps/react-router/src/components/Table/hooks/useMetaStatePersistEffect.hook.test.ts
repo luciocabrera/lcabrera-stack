@@ -15,6 +15,7 @@ const {
       isTableSettingsOpen: false,
       isTableSettingsPinned: false,
       isColumnSettingsOpen: false,
+      isColumnSettingsPinned: false,
       tableSettingsSelectedTab: 'general',
       tableSettingsExpandedFilters: [],
     })),
@@ -88,6 +89,7 @@ describe('useMetaStatePersistEffect', () => {
 
     expect(Object.keys(uiState).sort()).toEqual([
       'isColumnSettingsOpen',
+      'isColumnSettingsPinned',
       'isTableSettingsOpen',
       'isTableSettingsPinned',
       'tableSettingsExpandedFilters',
