@@ -2,22 +2,22 @@
   "kind": "combined",
   "schema_version": 7,
   "version": "2.96.0",
-  "elapsed_ms": 214,
+  "elapsed_ms": 196,
   "_meta": {
     "telemetry": {
-      "analysis_run_id": "run_8d295b5de48fa727"
+      "analysis_run_id": "run_389144537b5a1505"
     }
   },
   "check": {
     "schema_version": 7,
     "version": "2.96.0",
-    "elapsed_ms": 149,
+    "elapsed_ms": 121,
     "total_issues": 18,
     "entry_points": {
-      "total": 321,
+      "total": 322,
       "sources": {
         "manual_entry": 7,
-        "plugin": 314
+        "plugin": 315
       }
     },
     "summary": {
@@ -2280,36 +2280,28 @@
           {
             "file": "src/components/Table/contexts/TableConfig/meta/actions/useSetTableDrawersOpenState.hook.test.ts",
             "start_line": 48,
-            "end_line": 59,
+            "end_line": 60,
             "start_col": 4,
-            "end_col": 73,
-            "fragment": "const { result } = renderHook(() => useSetTableDrawersOpenState());\n\n    act(() => {\n      result.current({\n        isColumnSettingsOpen: true,\n        isTableSettingsOpen: false,\n      });\n    });\n\n    expect(getMetaState().isColumnSettingsOpen).toBe(true);\n    expect(getMetaState().isTableSettingsOpen).toBe(false);\n    expect(getMetaState().wasTableSettingsOpenBeforeColumnSettings).toBe("
+            "end_col": 5,
+            "fragment": "const { result } = renderHook(() => useSetTableDrawersOpenState());\n\n    act(() => {\n      result.current({\n        isColumnSettingsOpen: true,\n        isTableSettingsOpen: false,\n      });\n    });\n\n    expect(getMetaState().isColumnSettingsOpen).toBe(true);\n    expect(getMetaState().isTableSettingsOpen).toBe(false);\n    expect(getMetaState().wasTableSettingsOpenBeforeColumnSettings).toBe(false);\n  });"
           },
           {
             "file": "src/components/Table/contexts/TableConfig/meta/actions/useSetTableDrawersOpenState.hook.test.ts",
-            "start_line": 69,
-            "end_line": 80,
+            "start_line": 128,
+            "end_line": 140,
             "start_col": 4,
-            "end_col": 73,
-            "fragment": "const { result } = renderHook(() => useSetTableDrawersOpenState());\n\n    act(() => {\n      result.current({\n        isColumnSettingsOpen: true,\n        isTableSettingsOpen: false,\n      });\n    });\n\n    expect(getMetaState().isColumnSettingsOpen).toBe(true);\n    expect(getMetaState().isTableSettingsOpen).toBe(false);\n    expect(getMetaState().wasTableSettingsOpenBeforeColumnSettings).toBe("
-          },
-          {
-            "file": "src/components/Table/contexts/TableConfig/meta/actions/useSetTableDrawersOpenState.hook.test.ts",
-            "start_line": 90,
-            "end_line": 101,
-            "start_col": 4,
-            "end_col": 73,
-            "fragment": "const { result } = renderHook(() => useSetTableDrawersOpenState());\n\n    act(() => {\n      result.current({\n        isColumnSettingsOpen: true,\n        isTableSettingsOpen: false,\n      });\n    });\n\n    expect(getMetaState().isColumnSettingsOpen).toBe(true);\n    expect(getMetaState().isTableSettingsOpen).toBe(false);\n    expect(getMetaState().wasTableSettingsOpenBeforeColumnSettings).toBe("
+            "end_col": 5,
+            "fragment": "const { result } = renderHook(() => useSetTableDrawersOpenState());\n\n    act(() => {\n      result.current({\n        isColumnSettingsOpen: true,\n        isTableSettingsOpen: false,\n      });\n    });\n\n    expect(getMetaState().isColumnSettingsOpen).toBe(true);\n    expect(getMetaState().isTableSettingsOpen).toBe(false);\n    expect(getMetaState().wasTableSettingsOpenBeforeColumnSettings).toBe(false);\n  });"
           }
         ],
-        "token_count": 81,
-        "line_count": 12,
-        "fingerprint": "dup:9ab4d677",
+        "token_count": 88,
+        "line_count": 13,
+        "fingerprint": "dup:0a6f08aa",
         "actions": [
           {
             "type": "extract-shared",
             "auto_fixable": false,
-            "description": "Extract duplicated code (12 lines, 3 instances) into a shared function"
+            "description": "Extract duplicated code (13 lines, 2 instances) into a shared function"
           },
           {
             "type": "suppress-line",
@@ -2324,28 +2316,72 @@
           {
             "file": "src/components/Table/contexts/TableConfig/meta/actions/useSetTableDrawersOpenState.hook.test.ts",
             "start_line": 63,
-            "end_line": 81,
+            "end_line": 83,
             "start_col": 17,
             "end_col": 5,
-            "fragment": "{\n      isColumnSettingsOpen: false,\n      isTableSettingsOpen: true,\n      wasTableSettingsOpenBeforeColumnSettings: false,\n    });\n\n    const { result } = renderHook(() => useSetTableDrawersOpenState());\n\n    act(() => {\n      result.current({\n        isColumnSettingsOpen: true,\n        isTableSettingsOpen: false,\n      });\n    });\n\n    expect(getMetaState().isColumnSettingsOpen).toBe(true);\n    expect(getMetaState().isTableSettingsOpen).toBe(false);\n    expect(getMetaState().wasTableSettingsOpenBeforeColumnSettings).toBe(true);\n  });"
+            "fragment": "{\n      isColumnSettingsOpen: false,\n      isTableSettingsOpen: true,\n      wasTableSettingsOpenBeforeColumnSettings: false,\n    });\n\n    const { result } = renderHook(() => useSetTableDrawersOpenState());\n\n    act(() => {\n      result.current({\n        isColumnSettingsOpen: true,\n        isTableSettingsOpen: false,\n      });\n    });\n\n    expect(getMetaState().isColumnSettingsOpen).toBe(true);\n    expect(getMetaState().isTableSettingsOpen).toBe(false);\n    expect(getMetaState().wasTableSettingsOpenBeforeColumnSettings).toBe(true);\n  });\n\n  it("
           },
           {
             "file": "src/components/Table/contexts/TableConfig/meta/actions/useSetTableDrawersOpenState.hook.test.ts",
             "start_line": 84,
-            "end_line": 102,
+            "end_line": 104,
             "start_col": 17,
             "end_col": 5,
-            "fragment": "{\n      isColumnSettingsOpen: true,\n      isTableSettingsOpen: false,\n      wasTableSettingsOpenBeforeColumnSettings: true,\n    });\n\n    const { result } = renderHook(() => useSetTableDrawersOpenState());\n\n    act(() => {\n      result.current({\n        isColumnSettingsOpen: true,\n        isTableSettingsOpen: false,\n      });\n    });\n\n    expect(getMetaState().isColumnSettingsOpen).toBe(true);\n    expect(getMetaState().isTableSettingsOpen).toBe(false);\n    expect(getMetaState().wasTableSettingsOpenBeforeColumnSettings).toBe(true);\n  });"
+            "fragment": "{\n      isColumnSettingsOpen: true,\n      isTableSettingsOpen: false,\n      wasTableSettingsOpenBeforeColumnSettings: true,\n    });\n\n    const { result } = renderHook(() => useSetTableDrawersOpenState());\n\n    act(() => {\n      result.current({\n        isColumnSettingsOpen: true,\n        isTableSettingsOpen: false,\n      });\n    });\n\n    expect(getMetaState().isColumnSettingsOpen).toBe(true);\n    expect(getMetaState().isTableSettingsOpen).toBe(false);\n    expect(getMetaState().wasTableSettingsOpenBeforeColumnSettings).toBe(true);\n  });\n\n  it("
           }
         ],
-        "token_count": 92,
-        "line_count": 19,
-        "fingerprint": "dup:0c6da4ab",
+        "token_count": 94,
+        "line_count": 21,
+        "fingerprint": "dup:cfa9c71a",
         "actions": [
           {
             "type": "extract-shared",
             "auto_fixable": false,
-            "description": "Extract duplicated code (19 lines, 2 instances) into a shared function"
+            "description": "Extract duplicated code (21 lines, 2 instances) into a shared function"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the duplicated code",
+            "comment": "// fallow-ignore-next-line code-duplication"
+          }
+        ]
+      },
+      {
+        "instances": [
+          {
+            "file": "src/components/Table/contexts/TableConfig/meta/actions/useSetTableDrawersOpenState.hook.test.ts",
+            "start_line": 67,
+            "end_line": 80,
+            "start_col": 5,
+            "end_col": 73,
+            "fragment": ");\n\n    const { result } = renderHook(() => useSetTableDrawersOpenState());\n\n    act(() => {\n      result.current({\n        isColumnSettingsOpen: true,\n        isTableSettingsOpen: false,\n      });\n    });\n\n    expect(getMetaState().isColumnSettingsOpen).toBe(true);\n    expect(getMetaState().isTableSettingsOpen).toBe(false);\n    expect(getMetaState().wasTableSettingsOpenBeforeColumnSettings).toBe("
+          },
+          {
+            "file": "src/components/Table/contexts/TableConfig/meta/actions/useSetTableDrawersOpenState.hook.test.ts",
+            "start_line": 88,
+            "end_line": 101,
+            "start_col": 5,
+            "end_col": 73,
+            "fragment": ");\n\n    const { result } = renderHook(() => useSetTableDrawersOpenState());\n\n    act(() => {\n      result.current({\n        isColumnSettingsOpen: true,\n        isTableSettingsOpen: false,\n      });\n    });\n\n    expect(getMetaState().isColumnSettingsOpen).toBe(true);\n    expect(getMetaState().isTableSettingsOpen).toBe(false);\n    expect(getMetaState().wasTableSettingsOpenBeforeColumnSettings).toBe("
+          },
+          {
+            "file": "src/components/Table/contexts/TableConfig/meta/actions/useSetTableDrawersOpenState.hook.test.ts",
+            "start_line": 126,
+            "end_line": 139,
+            "start_col": 72,
+            "end_col": 73,
+            "fragment": ");\n\n    const { result } = renderHook(() => useSetTableDrawersOpenState());\n\n    act(() => {\n      result.current({\n        isColumnSettingsOpen: true,\n        isTableSettingsOpen: false,\n      });\n    });\n\n    expect(getMetaState().isColumnSettingsOpen).toBe(true);\n    expect(getMetaState().isTableSettingsOpen).toBe(false);\n    expect(getMetaState().wasTableSettingsOpenBeforeColumnSettings).toBe("
+          }
+        ],
+        "token_count": 84,
+        "line_count": 14,
+        "fingerprint": "dup:b6560fd2",
+        "actions": [
+          {
+            "type": "extract-shared",
+            "auto_fixable": false,
+            "description": "Extract duplicated code (14 lines, 3 instances) into a shared function"
           },
           {
             "type": "suppress-line",
@@ -7001,36 +7037,28 @@
               {
                 "file": "src/components/Table/contexts/TableConfig/meta/actions/useSetTableDrawersOpenState.hook.test.ts",
                 "start_line": 48,
-                "end_line": 59,
+                "end_line": 60,
                 "start_col": 4,
-                "end_col": 73,
-                "fragment": "const { result } = renderHook(() => useSetTableDrawersOpenState());\n\n    act(() => {\n      result.current({\n        isColumnSettingsOpen: true,\n        isTableSettingsOpen: false,\n      });\n    });\n\n    expect(getMetaState().isColumnSettingsOpen).toBe(true);\n    expect(getMetaState().isTableSettingsOpen).toBe(false);\n    expect(getMetaState().wasTableSettingsOpenBeforeColumnSettings).toBe("
+                "end_col": 5,
+                "fragment": "const { result } = renderHook(() => useSetTableDrawersOpenState());\n\n    act(() => {\n      result.current({\n        isColumnSettingsOpen: true,\n        isTableSettingsOpen: false,\n      });\n    });\n\n    expect(getMetaState().isColumnSettingsOpen).toBe(true);\n    expect(getMetaState().isTableSettingsOpen).toBe(false);\n    expect(getMetaState().wasTableSettingsOpenBeforeColumnSettings).toBe(false);\n  });"
               },
               {
                 "file": "src/components/Table/contexts/TableConfig/meta/actions/useSetTableDrawersOpenState.hook.test.ts",
-                "start_line": 69,
-                "end_line": 80,
+                "start_line": 128,
+                "end_line": 140,
                 "start_col": 4,
-                "end_col": 73,
-                "fragment": "const { result } = renderHook(() => useSetTableDrawersOpenState());\n\n    act(() => {\n      result.current({\n        isColumnSettingsOpen: true,\n        isTableSettingsOpen: false,\n      });\n    });\n\n    expect(getMetaState().isColumnSettingsOpen).toBe(true);\n    expect(getMetaState().isTableSettingsOpen).toBe(false);\n    expect(getMetaState().wasTableSettingsOpenBeforeColumnSettings).toBe("
-              },
-              {
-                "file": "src/components/Table/contexts/TableConfig/meta/actions/useSetTableDrawersOpenState.hook.test.ts",
-                "start_line": 90,
-                "end_line": 101,
-                "start_col": 4,
-                "end_col": 73,
-                "fragment": "const { result } = renderHook(() => useSetTableDrawersOpenState());\n\n    act(() => {\n      result.current({\n        isColumnSettingsOpen: true,\n        isTableSettingsOpen: false,\n      });\n    });\n\n    expect(getMetaState().isColumnSettingsOpen).toBe(true);\n    expect(getMetaState().isTableSettingsOpen).toBe(false);\n    expect(getMetaState().wasTableSettingsOpenBeforeColumnSettings).toBe("
+                "end_col": 5,
+                "fragment": "const { result } = renderHook(() => useSetTableDrawersOpenState());\n\n    act(() => {\n      result.current({\n        isColumnSettingsOpen: true,\n        isTableSettingsOpen: false,\n      });\n    });\n\n    expect(getMetaState().isColumnSettingsOpen).toBe(true);\n    expect(getMetaState().isTableSettingsOpen).toBe(false);\n    expect(getMetaState().wasTableSettingsOpenBeforeColumnSettings).toBe(false);\n  });"
               }
             ],
-            "token_count": 81,
-            "line_count": 12,
-            "fingerprint": "dup:9ab4d677",
+            "token_count": 88,
+            "line_count": 13,
+            "fingerprint": "dup:0a6f08aa",
             "actions": [
               {
                 "type": "extract-shared",
                 "auto_fixable": false,
-                "description": "Extract duplicated code (12 lines, 3 instances) into a shared function"
+                "description": "Extract duplicated code (13 lines, 2 instances) into a shared function"
               },
               {
                 "type": "suppress-line",
@@ -7045,28 +7073,72 @@
               {
                 "file": "src/components/Table/contexts/TableConfig/meta/actions/useSetTableDrawersOpenState.hook.test.ts",
                 "start_line": 63,
-                "end_line": 81,
+                "end_line": 83,
                 "start_col": 17,
                 "end_col": 5,
-                "fragment": "{\n      isColumnSettingsOpen: false,\n      isTableSettingsOpen: true,\n      wasTableSettingsOpenBeforeColumnSettings: false,\n    });\n\n    const { result } = renderHook(() => useSetTableDrawersOpenState());\n\n    act(() => {\n      result.current({\n        isColumnSettingsOpen: true,\n        isTableSettingsOpen: false,\n      });\n    });\n\n    expect(getMetaState().isColumnSettingsOpen).toBe(true);\n    expect(getMetaState().isTableSettingsOpen).toBe(false);\n    expect(getMetaState().wasTableSettingsOpenBeforeColumnSettings).toBe(true);\n  });"
+                "fragment": "{\n      isColumnSettingsOpen: false,\n      isTableSettingsOpen: true,\n      wasTableSettingsOpenBeforeColumnSettings: false,\n    });\n\n    const { result } = renderHook(() => useSetTableDrawersOpenState());\n\n    act(() => {\n      result.current({\n        isColumnSettingsOpen: true,\n        isTableSettingsOpen: false,\n      });\n    });\n\n    expect(getMetaState().isColumnSettingsOpen).toBe(true);\n    expect(getMetaState().isTableSettingsOpen).toBe(false);\n    expect(getMetaState().wasTableSettingsOpenBeforeColumnSettings).toBe(true);\n  });\n\n  it("
               },
               {
                 "file": "src/components/Table/contexts/TableConfig/meta/actions/useSetTableDrawersOpenState.hook.test.ts",
                 "start_line": 84,
-                "end_line": 102,
+                "end_line": 104,
                 "start_col": 17,
                 "end_col": 5,
-                "fragment": "{\n      isColumnSettingsOpen: true,\n      isTableSettingsOpen: false,\n      wasTableSettingsOpenBeforeColumnSettings: true,\n    });\n\n    const { result } = renderHook(() => useSetTableDrawersOpenState());\n\n    act(() => {\n      result.current({\n        isColumnSettingsOpen: true,\n        isTableSettingsOpen: false,\n      });\n    });\n\n    expect(getMetaState().isColumnSettingsOpen).toBe(true);\n    expect(getMetaState().isTableSettingsOpen).toBe(false);\n    expect(getMetaState().wasTableSettingsOpenBeforeColumnSettings).toBe(true);\n  });"
+                "fragment": "{\n      isColumnSettingsOpen: true,\n      isTableSettingsOpen: false,\n      wasTableSettingsOpenBeforeColumnSettings: true,\n    });\n\n    const { result } = renderHook(() => useSetTableDrawersOpenState());\n\n    act(() => {\n      result.current({\n        isColumnSettingsOpen: true,\n        isTableSettingsOpen: false,\n      });\n    });\n\n    expect(getMetaState().isColumnSettingsOpen).toBe(true);\n    expect(getMetaState().isTableSettingsOpen).toBe(false);\n    expect(getMetaState().wasTableSettingsOpenBeforeColumnSettings).toBe(true);\n  });\n\n  it("
               }
             ],
-            "token_count": 92,
-            "line_count": 19,
-            "fingerprint": "dup:0c6da4ab",
+            "token_count": 94,
+            "line_count": 21,
+            "fingerprint": "dup:cfa9c71a",
             "actions": [
               {
                 "type": "extract-shared",
                 "auto_fixable": false,
-                "description": "Extract duplicated code (19 lines, 2 instances) into a shared function"
+                "description": "Extract duplicated code (21 lines, 2 instances) into a shared function"
+              },
+              {
+                "type": "suppress-line",
+                "auto_fixable": false,
+                "description": "Suppress with an inline comment above the duplicated code",
+                "comment": "// fallow-ignore-next-line code-duplication"
+              }
+            ]
+          },
+          {
+            "instances": [
+              {
+                "file": "src/components/Table/contexts/TableConfig/meta/actions/useSetTableDrawersOpenState.hook.test.ts",
+                "start_line": 67,
+                "end_line": 80,
+                "start_col": 5,
+                "end_col": 73,
+                "fragment": ");\n\n    const { result } = renderHook(() => useSetTableDrawersOpenState());\n\n    act(() => {\n      result.current({\n        isColumnSettingsOpen: true,\n        isTableSettingsOpen: false,\n      });\n    });\n\n    expect(getMetaState().isColumnSettingsOpen).toBe(true);\n    expect(getMetaState().isTableSettingsOpen).toBe(false);\n    expect(getMetaState().wasTableSettingsOpenBeforeColumnSettings).toBe("
+              },
+              {
+                "file": "src/components/Table/contexts/TableConfig/meta/actions/useSetTableDrawersOpenState.hook.test.ts",
+                "start_line": 88,
+                "end_line": 101,
+                "start_col": 5,
+                "end_col": 73,
+                "fragment": ");\n\n    const { result } = renderHook(() => useSetTableDrawersOpenState());\n\n    act(() => {\n      result.current({\n        isColumnSettingsOpen: true,\n        isTableSettingsOpen: false,\n      });\n    });\n\n    expect(getMetaState().isColumnSettingsOpen).toBe(true);\n    expect(getMetaState().isTableSettingsOpen).toBe(false);\n    expect(getMetaState().wasTableSettingsOpenBeforeColumnSettings).toBe("
+              },
+              {
+                "file": "src/components/Table/contexts/TableConfig/meta/actions/useSetTableDrawersOpenState.hook.test.ts",
+                "start_line": 126,
+                "end_line": 139,
+                "start_col": 72,
+                "end_col": 73,
+                "fragment": ");\n\n    const { result } = renderHook(() => useSetTableDrawersOpenState());\n\n    act(() => {\n      result.current({\n        isColumnSettingsOpen: true,\n        isTableSettingsOpen: false,\n      });\n    });\n\n    expect(getMetaState().isColumnSettingsOpen).toBe(true);\n    expect(getMetaState().isTableSettingsOpen).toBe(false);\n    expect(getMetaState().wasTableSettingsOpenBeforeColumnSettings).toBe("
+              }
+            ],
+            "token_count": 84,
+            "line_count": 14,
+            "fingerprint": "dup:b6560fd2",
+            "actions": [
+              {
+                "type": "extract-shared",
+                "auto_fixable": false,
+                "description": "Extract duplicated code (14 lines, 3 instances) into a shared function"
               },
               {
                 "type": "suppress-line",
@@ -7077,36 +7149,46 @@
             ]
           }
         ],
-        "total_duplicated_lines": 31,
-        "total_duplicated_tokens": 173,
+        "total_duplicated_lines": 48,
+        "total_duplicated_tokens": 266,
         "suggestions": [
           {
             "kind": "ExtractFunction",
-            "description": "Extract shared function (19 lines) from useSetTableDrawersOpenState.hook.test.ts, useSetTableDrawersOpenState.hook.test.ts",
-            "estimated_savings": 19
+            "description": "Extract shared function (21 lines) from useSetTableDrawersOpenState.hook.test.ts, useSetTableDrawersOpenState.hook.test.ts",
+            "estimated_savings": 21
           },
           {
             "kind": "ExtractFunction",
-            "description": "Extract shared function (12 lines) from useSetTableDrawersOpenState.hook.test.ts, useSetTableDrawersOpenState.hook.test.ts, useSetTableDrawersOpenState.hook.test.ts",
-            "estimated_savings": 24
+            "description": "Extract shared function (13 lines) from useSetTableDrawersOpenState.hook.test.ts, useSetTableDrawersOpenState.hook.test.ts",
+            "estimated_savings": 13
+          },
+          {
+            "kind": "ExtractFunction",
+            "description": "Extract shared function (14 lines) from useSetTableDrawersOpenState.hook.test.ts, useSetTableDrawersOpenState.hook.test.ts, useSetTableDrawersOpenState.hook.test.ts",
+            "estimated_savings": 28
           }
         ],
         "actions": [
           {
             "type": "extract-shared",
             "auto_fixable": false,
-            "description": "Extract 2 duplicated code blocks (31 lines) into a shared module",
+            "description": "Extract 3 duplicated code blocks (48 lines) into a shared module",
             "note": "These clone groups share the same files, indicating a structural relationship; refactor together"
           },
           {
             "type": "apply-suggestion",
             "auto_fixable": false,
-            "description": "Extract shared function (19 lines) from useSetTableDrawersOpenState.hook.test.ts, useSetTableDrawersOpenState.hook.test.ts"
+            "description": "Extract shared function (21 lines) from useSetTableDrawersOpenState.hook.test.ts, useSetTableDrawersOpenState.hook.test.ts"
           },
           {
             "type": "apply-suggestion",
             "auto_fixable": false,
-            "description": "Extract shared function (12 lines) from useSetTableDrawersOpenState.hook.test.ts, useSetTableDrawersOpenState.hook.test.ts, useSetTableDrawersOpenState.hook.test.ts"
+            "description": "Extract shared function (13 lines) from useSetTableDrawersOpenState.hook.test.ts, useSetTableDrawersOpenState.hook.test.ts"
+          },
+          {
+            "type": "apply-suggestion",
+            "auto_fixable": false,
+            "description": "Extract shared function (14 lines) from useSetTableDrawersOpenState.hook.test.ts, useSetTableDrawersOpenState.hook.test.ts, useSetTableDrawersOpenState.hook.test.ts"
           },
           {
             "type": "suppress-line",
@@ -9139,15 +9221,15 @@
       }
     ],
     "stats": {
-      "total_files": 683,
+      "total_files": 684,
       "files_with_clones": 79,
-      "total_lines": 47221,
-      "duplicated_lines": 3317,
-      "total_tokens": 173679,
-      "duplicated_tokens": 7408,
-      "clone_groups": 87,
-      "clone_instances": 186,
-      "duplication_percentage": 7.024417102560301
+      "total_lines": 47361,
+      "duplicated_lines": 3337,
+      "total_tokens": 174285,
+      "duplicated_tokens": 7504,
+      "clone_groups": 88,
+      "clone_instances": 188,
+      "duplication_percentage": 7.04588163256688
     }
   },
   "health": {
@@ -9694,13 +9776,13 @@
       }
     ],
     "summary": {
-      "files_analyzed": 1217,
-      "functions_analyzed": 3691,
+      "files_analyzed": 1218,
+      "functions_analyzed": 3713,
       "functions_above_threshold": 18,
       "max_cyclomatic_threshold": 20,
       "max_cognitive_threshold": 15,
       "max_crap_threshold": 30.0,
-      "files_scored": 767,
+      "files_scored": 768,
       "average_maintainability": 93.0,
       "coverage_model": "static_estimated",
       "coverage_source_consistency": "uniform",
@@ -9723,21 +9805,21 @@
       "circular_dep_count": 0,
       "circular_deps_per_k_files": 0.0,
       "counts": {
-        "total_files": 1217,
+        "total_files": 1218,
         "total_exports": 1462,
         "dead_files": 0,
         "dead_exports": 0,
-        "total_lines": 52060,
-        "files_scored": 767,
+        "total_lines": 52201,
+        "files_scored": 768,
         "total_deps": 0
       },
       "unit_size_profile": {
         "low_risk": 74.1,
-        "medium_risk": 13.8,
+        "medium_risk": 13.9,
         "high_risk": 7.9,
         "very_high_risk": 4.1
       },
-      "functions_over_60_loc_per_k": 41.5,
+      "functions_over_60_loc_per_k": 41.2,
       "unit_interfacing_profile": {
         "low_risk": 99.9,
         "medium_risk": 0.1,
@@ -9746,7 +9828,7 @@
       },
       "p95_fan_in": 4,
       "coupling_high_pct": 0.9,
-      "total_loc": 52060
+      "total_loc": 52201
     },
     "file_scores": [
       {
@@ -9793,7 +9875,7 @@
       },
       {
         "path": "src/components/Table/TableSettingsDrawer/TableDrawerContext/actions/useResetTableSettings.hook.ts",
-        "fan_in": 1,
+        "fan_in": 2,
         "fan_out": 3,
         "dead_code_ratio": 0.0,
         "complexity_density": 0.41,
@@ -13376,6 +13458,20 @@
         "crap_above_threshold": 0
       },
       {
+        "path": "src/components/Table/TableSettingsDrawer/TableDrawerContext/actions/useResetTableSettings.hook.test.ts",
+        "fan_in": 0,
+        "fan_out": 3,
+        "dead_code_ratio": 0.0,
+        "complexity_density": 0.16,
+        "maintainability_index": 89.7,
+        "total_cyclomatic": 16,
+        "total_cognitive": 0,
+        "function_count": 16,
+        "lines": 103,
+        "crap_max": 1.2,
+        "crap_above_threshold": 0
+      },
+      {
         "path": "src/components/PinSideModal/PinSideModal.component.tsx",
         "fan_in": 1,
         "fan_out": 7,
@@ -13578,10 +13674,10 @@
         "dead_code_ratio": 0.0,
         "complexity_density": 0.17,
         "maintainability_index": 90.5,
-        "total_cyclomatic": 18,
+        "total_cyclomatic": 24,
         "total_cognitive": 0,
-        "function_count": 18,
-        "lines": 104,
+        "function_count": 24,
+        "lines": 142,
         "crap_max": 1.2,
         "crap_above_threshold": 0
       },
@@ -16401,7 +16497,7 @@
       },
       {
         "path": "src/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook.ts",
-        "fan_in": 29,
+        "fan_in": 30,
         "fan_out": 2,
         "dead_code_ratio": 0.0,
         "complexity_density": 0.11,
@@ -16415,7 +16511,7 @@
       },
       {
         "path": "src/components/Table/contexts/TableConfig/useTableConfigContextValue.hook.ts",
-        "fan_in": 66,
+        "fan_in": 67,
         "fan_out": 2,
         "dead_code_ratio": 0.0,
         "complexity_density": 0.1,
@@ -20491,9 +20587,9 @@
     "hotspots": [
       {
         "path": "src/components/VirtualSelect/VirtualSelect.component.tsx",
-        "score": 26.1,
+        "score": 26.0,
         "commits": 21,
-        "weighted_commits": 9.63,
+        "weighted_commits": 9.62,
         "lines_added": 406,
         "lines_deleted": 406,
         "complexity_density": 0.22,
@@ -20518,7 +20614,7 @@
         "path": "src/components/Table/TableHeaderCell/TableHeaderCell.component.tsx",
         "score": 24.0,
         "commits": 42,
-        "weighted_commits": 16.26,
+        "weighted_commits": 16.25,
         "lines_added": 683,
         "lines_deleted": 683,
         "complexity_density": 0.12,
@@ -20743,7 +20839,7 @@
         "path": "src/components/SidePanel/SidePanel.component.tsx",
         "score": 10.9,
         "commits": 10,
-        "weighted_commits": 4.03,
+        "weighted_commits": 4.02,
         "lines_added": 189,
         "lines_deleted": 189,
         "complexity_density": 0.22,
@@ -21118,7 +21214,7 @@
         "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useOrderBySorting.hook.ts",
         "score": 8.1,
         "commits": 6,
-        "weighted_commits": 3.01,
+        "weighted_commits": 3.0,
         "lines_added": 82,
         "lines_deleted": 82,
         "complexity_density": 0.22,
@@ -21222,7 +21318,7 @@
         "lines_added": 33,
         "lines_deleted": 33,
         "complexity_density": 0.41,
-        "fan_in": 1,
+        "fan_in": 2,
         "trend": "cooling",
         "actions": [
           {
@@ -21243,7 +21339,7 @@
         "path": "src/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/actions/useResetAllColumnDrawerSettings.hook.ts",
         "score": 7.4,
         "commits": 5,
-        "weighted_commits": 2.5,
+        "weighted_commits": 2.49,
         "lines_added": 66,
         "lines_deleted": 66,
         "complexity_density": 0.24,
@@ -21393,7 +21489,7 @@
         "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useReorderColumns.hook.ts",
         "score": 6.9,
         "commits": 8,
-        "weighted_commits": 4.01,
+        "weighted_commits": 4.0,
         "lines_added": 113,
         "lines_deleted": 113,
         "complexity_density": 0.14,
@@ -21416,7 +21512,7 @@
       },
       {
         "path": "src/components/Table/TableSettingsDrawer/FiltersSection/AddFilterSection/utils/getSelectedColumnLabel.util.ts",
-        "score": 6.8,
+        "score": 6.9,
         "commits": 5,
         "weighted_commits": 2.53,
         "lines_added": 27,
@@ -21791,7 +21887,7 @@
       },
       {
         "path": "src/components/Table/utils/getNormalizedColumns.test.ts",
-        "score": 5.9,
+        "score": 6.0,
         "commits": 3,
         "weighted_commits": 1.56,
         "lines_added": 67,
@@ -21811,6 +21907,31 @@
             "type": "add-tests",
             "auto_fixable": false,
             "description": "Add test coverage for `src/components/Table/utils/getNormalizedColumns.test.ts` to reduce change risk",
+            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
+          }
+        ]
+      },
+      {
+        "path": "src/contexts/ThemeContext/ThemeContext.provider.tsx",
+        "score": 6.0,
+        "commits": 10,
+        "weighted_commits": 3.72,
+        "lines_added": 75,
+        "lines_deleted": 75,
+        "complexity_density": 0.13,
+        "fan_in": 1,
+        "trend": "cooling",
+        "actions": [
+          {
+            "type": "refactor-file",
+            "auto_fixable": false,
+            "description": "Refactor `src/contexts/ThemeContext/ThemeContext.provider.tsx`, high complexity combined with frequent changes makes this a maintenance risk",
+            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
+          },
+          {
+            "type": "add-tests",
+            "auto_fixable": false,
+            "description": "Add test coverage for `src/contexts/ThemeContext/ThemeContext.provider.tsx` to reduce change risk",
             "note": "Frequently changed complex files benefit most from comprehensive test coverage"
           }
         ]
@@ -21844,7 +21965,7 @@
         "path": "src/components/Table/ColumnSettingsDrawer/SortingSection/SortingSection.component.tsx",
         "score": 5.9,
         "commits": 10,
-        "weighted_commits": 4.8,
+        "weighted_commits": 4.79,
         "lines_added": 155,
         "lines_deleted": 155,
         "complexity_density": 0.1,
@@ -21861,31 +21982,6 @@
             "type": "add-tests",
             "auto_fixable": false,
             "description": "Add test coverage for `src/components/Table/ColumnSettingsDrawer/SortingSection/SortingSection.component.tsx` to reduce change risk",
-            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
-          }
-        ]
-      },
-      {
-        "path": "src/contexts/ThemeContext/ThemeContext.provider.tsx",
-        "score": 5.9,
-        "commits": 10,
-        "weighted_commits": 3.72,
-        "lines_added": 75,
-        "lines_deleted": 75,
-        "complexity_density": 0.13,
-        "fan_in": 1,
-        "trend": "cooling",
-        "actions": [
-          {
-            "type": "refactor-file",
-            "auto_fixable": false,
-            "description": "Refactor `src/contexts/ThemeContext/ThemeContext.provider.tsx`, high complexity combined with frequent changes makes this a maintenance risk",
-            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
-          },
-          {
-            "type": "add-tests",
-            "auto_fixable": false,
-            "description": "Add test coverage for `src/contexts/ThemeContext/ThemeContext.provider.tsx` to reduce change risk",
             "note": "Frequently changed complex files benefit most from comprehensive test coverage"
           }
         ]
@@ -23399,7 +23495,7 @@
         "path": "src/components/Table/TableSettingsDrawer/TableSettingsDrawer.component.tsx",
         "score": 3.7,
         "commits": 11,
-        "weighted_commits": 5.05,
+        "weighted_commits": 5.04,
         "lines_added": 208,
         "lines_deleted": 208,
         "complexity_density": 0.06,
@@ -23623,6 +23719,31 @@
         ]
       },
       {
+        "path": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.ts",
+        "score": 3.4,
+        "commits": 8,
+        "weighted_commits": 3.89,
+        "lines_added": 236,
+        "lines_deleted": 236,
+        "complexity_density": 0.07,
+        "fan_in": 2,
+        "trend": "accelerating",
+        "actions": [
+          {
+            "type": "refactor-file",
+            "auto_fixable": false,
+            "description": "Refactor `src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.ts`, high complexity combined with frequent changes makes this a maintenance risk",
+            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
+          },
+          {
+            "type": "add-tests",
+            "auto_fixable": false,
+            "description": "Add test coverage for `src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.ts` to reduce change risk",
+            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
+          }
+        ]
+      },
+      {
         "path": "src/components/Table/filters/TextFilterInput/TextFilterInput.component.tsx",
         "score": 3.4,
         "commits": 6,
@@ -23669,31 +23790,6 @@
             "type": "add-tests",
             "auto_fixable": false,
             "description": "Add test coverage for `src/components/Modal/Modal.test.tsx` to reduce change risk",
-            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
-          }
-        ]
-      },
-      {
-        "path": "src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.ts",
-        "score": 3.3,
-        "commits": 8,
-        "weighted_commits": 3.89,
-        "lines_added": 236,
-        "lines_deleted": 236,
-        "complexity_density": 0.07,
-        "fan_in": 2,
-        "trend": "accelerating",
-        "actions": [
-          {
-            "type": "refactor-file",
-            "auto_fixable": false,
-            "description": "Refactor `src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.ts`, high complexity combined with frequent changes makes this a maintenance risk",
-            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
-          },
-          {
-            "type": "add-tests",
-            "auto_fixable": false,
-            "description": "Add test coverage for `src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.ts` to reduce change risk",
             "note": "Frequently changed complex files benefit most from comprehensive test coverage"
           }
         ]
@@ -24283,7 +24379,7 @@
         "path": "src/components/Table/TableContent/TableContent.component.tsx",
         "score": 2.8,
         "commits": 29,
-        "weighted_commits": 11.25,
+        "weighted_commits": 11.24,
         "lines_added": 554,
         "lines_deleted": 554,
         "complexity_density": 0.02,
@@ -24763,7 +24859,7 @@
         "path": "src/components/Table/utils/splitColumnsByPinning.util.test.ts",
         "score": 2.5,
         "commits": 3,
-        "weighted_commits": 1.58,
+        "weighted_commits": 1.57,
         "lines_added": 68,
         "lines_deleted": 68,
         "complexity_density": 0.13,
@@ -25292,31 +25388,6 @@
         ]
       },
       {
-        "path": "src/components/Table/TableSuspenseBoundary/TableSuspenseBoundary.component.tsx",
-        "score": 2.1,
-        "commits": 13,
-        "weighted_commits": 4.17,
-        "lines_added": 142,
-        "lines_deleted": 142,
-        "complexity_density": 0.04,
-        "fan_in": 2,
-        "trend": "cooling",
-        "actions": [
-          {
-            "type": "refactor-file",
-            "auto_fixable": false,
-            "description": "Refactor `src/components/Table/TableSuspenseBoundary/TableSuspenseBoundary.component.tsx`, high complexity combined with frequent changes makes this a maintenance risk",
-            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
-          },
-          {
-            "type": "add-tests",
-            "auto_fixable": false,
-            "description": "Add test coverage for `src/components/Table/TableSuspenseBoundary/TableSuspenseBoundary.component.tsx` to reduce change risk",
-            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
-          }
-        ]
-      },
-      {
         "path": "src/routes/enterprise-orders/order-detail/OrderDetail.component.tsx",
         "score": 2.0,
         "commits": 4,
@@ -25387,6 +25458,31 @@
             "type": "add-tests",
             "auto_fixable": false,
             "description": "Add test coverage for `src/components/Tag/Tag.component.tsx` to reduce change risk",
+            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
+          }
+        ]
+      },
+      {
+        "path": "src/components/Table/TableSuspenseBoundary/TableSuspenseBoundary.component.tsx",
+        "score": 2.0,
+        "commits": 13,
+        "weighted_commits": 4.16,
+        "lines_added": 142,
+        "lines_deleted": 142,
+        "complexity_density": 0.04,
+        "fan_in": 2,
+        "trend": "cooling",
+        "actions": [
+          {
+            "type": "refactor-file",
+            "auto_fixable": false,
+            "description": "Refactor `src/components/Table/TableSuspenseBoundary/TableSuspenseBoundary.component.tsx`, high complexity combined with frequent changes makes this a maintenance risk",
+            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
+          },
+          {
+            "type": "add-tests",
+            "auto_fixable": false,
+            "description": "Add test coverage for `src/components/Table/TableSuspenseBoundary/TableSuspenseBoundary.component.tsx` to reduce change risk",
             "note": "Frequently changed complex files benefit most from comprehensive test coverage"
           }
         ]
@@ -25522,7 +25618,7 @@
         "path": "src/components/VirtualList/VirtualList.stylex.ts",
         "score": 1.9,
         "commits": 17,
-        "weighted_commits": 7.75,
+        "weighted_commits": 7.74,
         "lines_added": 193,
         "lines_deleted": 193,
         "complexity_density": 0.02,
@@ -25877,6 +25973,57 @@
         ]
       },
       {
+        "path": "src/components/Table/TableBody/utils/createRenderTableBodyCell.util.test.tsx",
+        "score": 1.8,
+        "commits": 3,
+        "weighted_commits": 1.58,
+        "lines_added": 119,
+        "lines_deleted": 119,
+        "complexity_density": 0.09,
+        "fan_in": 0,
+        "trend": "cooling",
+        "is_test_path": true,
+        "actions": [
+          {
+            "type": "refactor-file",
+            "auto_fixable": false,
+            "description": "Refactor `src/components/Table/TableBody/utils/createRenderTableBodyCell.util.test.tsx`, high complexity combined with frequent changes makes this a maintenance risk",
+            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
+          },
+          {
+            "type": "add-tests",
+            "auto_fixable": false,
+            "description": "Add test coverage for `src/components/Table/TableBody/utils/createRenderTableBodyCell.util.test.tsx` to reduce change risk",
+            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
+          }
+        ]
+      },
+      {
+        "path": "src/routes/wide-alltypes-150/wide-alltypes-150.loader.ts",
+        "score": 1.8,
+        "commits": 3,
+        "weighted_commits": 1.58,
+        "lines_added": 67,
+        "lines_deleted": 67,
+        "complexity_density": 0.09,
+        "fan_in": 2,
+        "trend": "cooling",
+        "actions": [
+          {
+            "type": "refactor-file",
+            "auto_fixable": false,
+            "description": "Refactor `src/routes/wide-alltypes-150/wide-alltypes-150.loader.ts`, high complexity combined with frequent changes makes this a maintenance risk",
+            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
+          },
+          {
+            "type": "add-tests",
+            "auto_fixable": false,
+            "description": "Add test coverage for `src/routes/wide-alltypes-150/wide-alltypes-150.loader.ts` to reduce change risk",
+            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
+          }
+        ]
+      },
+      {
         "path": "src/components/NavLink/utils/getClassName.util.ts",
         "score": 1.8,
         "commits": 4,
@@ -26035,7 +26182,7 @@
         "lines_added": 14,
         "lines_deleted": 14,
         "complexity_density": 0.1,
-        "fan_in": 66,
+        "fan_in": 67,
         "trend": "accelerating",
         "actions": [
           {
@@ -26078,6 +26225,32 @@
         ]
       },
       {
+        "path": "src/hooks/useVirtualization.hook.test.ts",
+        "score": 1.8,
+        "commits": 3,
+        "weighted_commits": 1.58,
+        "lines_added": 117,
+        "lines_deleted": 117,
+        "complexity_density": 0.09,
+        "fan_in": 0,
+        "trend": "cooling",
+        "is_test_path": true,
+        "actions": [
+          {
+            "type": "refactor-file",
+            "auto_fixable": false,
+            "description": "Refactor `src/hooks/useVirtualization.hook.test.ts`, high complexity combined with frequent changes makes this a maintenance risk",
+            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
+          },
+          {
+            "type": "add-tests",
+            "auto_fixable": false,
+            "description": "Add test coverage for `src/hooks/useVirtualization.hook.test.ts` to reduce change risk",
+            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
+          }
+        ]
+      },
+      {
         "path": "src/routes/settings/Settings.component.tsx",
         "score": 1.7,
         "commits": 3,
@@ -26098,57 +26271,6 @@
             "type": "add-tests",
             "auto_fixable": false,
             "description": "Add test coverage for `src/routes/settings/Settings.component.tsx` to reduce change risk",
-            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
-          }
-        ]
-      },
-      {
-        "path": "src/components/Table/TableBody/utils/createRenderTableBodyCell.util.test.tsx",
-        "score": 1.7,
-        "commits": 3,
-        "weighted_commits": 1.58,
-        "lines_added": 119,
-        "lines_deleted": 119,
-        "complexity_density": 0.09,
-        "fan_in": 0,
-        "trend": "cooling",
-        "is_test_path": true,
-        "actions": [
-          {
-            "type": "refactor-file",
-            "auto_fixable": false,
-            "description": "Refactor `src/components/Table/TableBody/utils/createRenderTableBodyCell.util.test.tsx`, high complexity combined with frequent changes makes this a maintenance risk",
-            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
-          },
-          {
-            "type": "add-tests",
-            "auto_fixable": false,
-            "description": "Add test coverage for `src/components/Table/TableBody/utils/createRenderTableBodyCell.util.test.tsx` to reduce change risk",
-            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
-          }
-        ]
-      },
-      {
-        "path": "src/routes/wide-alltypes-150/wide-alltypes-150.loader.ts",
-        "score": 1.7,
-        "commits": 3,
-        "weighted_commits": 1.58,
-        "lines_added": 67,
-        "lines_deleted": 67,
-        "complexity_density": 0.09,
-        "fan_in": 2,
-        "trend": "cooling",
-        "actions": [
-          {
-            "type": "refactor-file",
-            "auto_fixable": false,
-            "description": "Refactor `src/routes/wide-alltypes-150/wide-alltypes-150.loader.ts`, high complexity combined with frequent changes makes this a maintenance risk",
-            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
-          },
-          {
-            "type": "add-tests",
-            "auto_fixable": false,
-            "description": "Add test coverage for `src/routes/wide-alltypes-150/wide-alltypes-150.loader.ts` to reduce change risk",
             "note": "Frequently changed complex files benefit most from comprehensive test coverage"
           }
         ]
@@ -26200,32 +26322,6 @@
             "type": "add-tests",
             "auto_fixable": false,
             "description": "Add test coverage for `src/components/Table/TableSettingsDrawer/ColumnOrderSection/utils/insertAdjacentToPinnedGroup.util.test.ts` to reduce change risk",
-            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
-          }
-        ]
-      },
-      {
-        "path": "src/hooks/useVirtualization.hook.test.ts",
-        "score": 1.7,
-        "commits": 3,
-        "weighted_commits": 1.58,
-        "lines_added": 117,
-        "lines_deleted": 117,
-        "complexity_density": 0.09,
-        "fan_in": 0,
-        "trend": "cooling",
-        "is_test_path": true,
-        "actions": [
-          {
-            "type": "refactor-file",
-            "auto_fixable": false,
-            "description": "Refactor `src/hooks/useVirtualization.hook.test.ts`, high complexity combined with frequent changes makes this a maintenance risk",
-            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
-          },
-          {
-            "type": "add-tests",
-            "auto_fixable": false,
-            "description": "Add test coverage for `src/hooks/useVirtualization.hook.test.ts` to reduce change risk",
             "note": "Frequently changed complex files benefit most from comprehensive test coverage"
           }
         ]
@@ -26309,6 +26405,31 @@
         ]
       },
       {
+        "path": "src/components/Table/TableBody/utils/buildTableBodyCellDescriptor.util.ts",
+        "score": 1.6,
+        "commits": 4,
+        "weighted_commits": 2.1,
+        "lines_added": 86,
+        "lines_deleted": 86,
+        "complexity_density": 0.06,
+        "fan_in": 2,
+        "trend": "cooling",
+        "actions": [
+          {
+            "type": "refactor-file",
+            "auto_fixable": false,
+            "description": "Refactor `src/components/Table/TableBody/utils/buildTableBodyCellDescriptor.util.ts`, high complexity combined with frequent changes makes this a maintenance risk",
+            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
+          },
+          {
+            "type": "add-tests",
+            "auto_fixable": false,
+            "description": "Add test coverage for `src/components/Table/TableBody/utils/buildTableBodyCellDescriptor.util.ts` to reduce change risk",
+            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
+          }
+        ]
+      },
+      {
         "path": "src/components/Table/TableBodyCell/TableBodyCell.test.tsx",
         "score": 1.6,
         "commits": 3,
@@ -26380,31 +26501,6 @@
             "type": "add-tests",
             "auto_fixable": false,
             "description": "Add test coverage for `src/components/Table/TableLayout/TableLayout.component.tsx` to reduce change risk",
-            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
-          }
-        ]
-      },
-      {
-        "path": "src/components/Table/TableBody/utils/buildTableBodyCellDescriptor.util.ts",
-        "score": 1.5,
-        "commits": 4,
-        "weighted_commits": 2.1,
-        "lines_added": 86,
-        "lines_deleted": 86,
-        "complexity_density": 0.06,
-        "fan_in": 2,
-        "trend": "cooling",
-        "actions": [
-          {
-            "type": "refactor-file",
-            "auto_fixable": false,
-            "description": "Refactor `src/components/Table/TableBody/utils/buildTableBodyCellDescriptor.util.ts`, high complexity combined with frequent changes makes this a maintenance risk",
-            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
-          },
-          {
-            "type": "add-tests",
-            "auto_fixable": false,
-            "description": "Add test coverage for `src/components/Table/TableBody/utils/buildTableBodyCellDescriptor.util.ts` to reduce change risk",
             "note": "Frequently changed complex files benefit most from comprehensive test coverage"
           }
         ]
@@ -26941,7 +27037,7 @@
         "path": "src/routes/enterprise-orders/EnterpriseOrders.constants.tsx",
         "score": 0.8,
         "commits": 17,
-        "weighted_commits": 6.82,
+        "weighted_commits": 6.81,
         "lines_added": 464,
         "lines_deleted": 464,
         "complexity_density": 0.01,
@@ -27742,6 +27838,12 @@
         "line_count": 104
       },
       {
+        "path": "src/components/Table/contexts/TableConfig/meta/actions/useSetTableDrawersOpenState.hook.test.ts",
+        "name": "<arrow>",
+        "line": 38,
+        "line_count": 104
+      },
+      {
         "path": "src/components/Table/contexts/TableConfig/meta/meta.hooks.test.tsx",
         "name": "<arrow>",
         "line": 84,
@@ -28244,12 +28346,6 @@
         "name": "<arrow>",
         "line": 13,
         "line_count": 67
-      },
-      {
-        "path": "src/components/Table/contexts/TableConfig/meta/actions/useSetTableDrawersOpenState.hook.test.ts",
-        "name": "<arrow>",
-        "line": 38,
-        "line_count": 66
       },
       {
         "path": "src/components/Table/ColumnSettingsDrawer/DetailsSection/DetailsSection.component.tsx",
