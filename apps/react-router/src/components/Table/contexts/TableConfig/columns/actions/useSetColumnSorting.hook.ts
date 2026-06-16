@@ -13,10 +13,11 @@ export const useSetColumnSorting = <TData>() => {
 
   return ({ columnKey, direction }: Sorting<TData>) => {
     const columnsState = columnsStore.get();
+    const metaState = metaStore.get();
     const result = resolveColumnSortingUpdate<TData>({
       columns: columnsState?.columns ?? [],
       existingSorting: columnsState?.sorting,
-      persistenceKey: metaStore.get()?.persistenceKey ?? '',
+      persistenceKey: metaState?.persistenceKey ?? '',
       sort: { columnKey, direction },
     });
 
@@ -35,5 +36,7 @@ export const useSetColumnSorting = <TData>() => {
       normalizedColumns: result.normalizedColumns,
       sorting: result.sorting,
     });
+
+    metaStore.set({ drawersSyncNonce: (metaState?.drawersSyncNonce ?? 0) + 1 });
   };
 };

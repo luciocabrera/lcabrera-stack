@@ -224,6 +224,7 @@ export type TableMetaState = {
   readonly columnOverscan: number;
   readonly columnSelectedKey?: string;
   readonly columnSettingsSelectedTab: string;
+  readonly drawersSyncNonce?: number;
   readonly density: TableDensity;
   /** Whether to prefetch the next page after each load-more completes */
   readonly enablePrefetch: boolean;

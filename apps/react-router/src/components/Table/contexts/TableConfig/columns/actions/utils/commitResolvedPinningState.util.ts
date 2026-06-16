@@ -5,6 +5,7 @@ import type {
   ColumnVisibilityState,
   TableColumn,
   TableColumnsState,
+  TableMetaState,
 } from '@/components/Table/Table.types';
 
 import { getPinnedDerivedColumnsState } from '@/components/Table/utils';
@@ -19,6 +20,10 @@ type CommitResolvedPinningStateArgs<TData> = {
   readonly columns: readonly TableColumn<TData>[];
   readonly columnsStore: {
     readonly set: (state: Partial<TableColumnsState<TData>>) => void;
+  };
+  readonly drawersSyncNonce: number;
+  readonly metaStore: {
+    readonly set: (state: Partial<TableMetaState>) => void;
   };
   readonly persistenceKey: string;
   readonly persistTableState: (
@@ -37,6 +42,8 @@ export const commitResolvedPinningState = <TData>({
   columnVisibility,
   columns,
   columnsStore,
+  drawersSyncNonce,
+  metaStore,
   persistenceKey,
   persistTableState,
 }: CommitResolvedPinningStateArgs<TData>) => {
@@ -59,4 +66,6 @@ export const commitResolvedPinningState = <TData>({
     persistTableState,
     pinnedColumnOffsets,
   });
+
+  metaStore.set({ drawersSyncNonce: drawersSyncNonce + 1 });
 };

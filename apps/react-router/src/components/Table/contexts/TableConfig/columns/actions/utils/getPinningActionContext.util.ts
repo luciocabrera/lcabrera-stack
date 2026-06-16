@@ -14,6 +14,7 @@ type GetPinningActionContextArgs<TData> = {
   readonly metaStore: {
     readonly get: () =>
       | {
+          readonly drawersSyncNonce?: number;
           readonly persistenceKey?: string;
         }
       | undefined;
@@ -26,6 +27,7 @@ type GetPinningActionContextResult<TData> = {
   readonly columnSizing?: ColumnSizingState<TData>;
   readonly columnVisibility?: ColumnVisibilityState<TData>;
   readonly columns: readonly TableColumn<TData>[];
+  readonly drawersSyncNonce: number;
   readonly persistenceKey: string;
   readonly staticKeys?: Set<string>;
 };
@@ -35,6 +37,7 @@ export const getPinningActionContext = <TData>({
   metaStore,
 }: GetPinningActionContextArgs<TData>): GetPinningActionContextResult<TData> => {
   const columnsState = columnsStore.get();
+  const metaState = metaStore.get();
 
   return {
     columnOrder: columnsState?.columnOrder ?? ([] as ColumnOrderState<TData>),
@@ -44,7 +47,8 @@ export const getPinningActionContext = <TData>({
     columnSizing: columnsState?.columnSizing,
     columnVisibility: columnsState?.columnVisibility,
     columns: columnsState?.columns ?? [],
-    persistenceKey: metaStore.get()?.persistenceKey ?? '',
+    drawersSyncNonce: metaState?.drawersSyncNonce ?? 0,
+    persistenceKey: metaState?.persistenceKey ?? '',
     staticKeys: columnsState?.staticKeys,
   };
 };

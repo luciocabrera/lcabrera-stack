@@ -38,6 +38,7 @@ type TData = { id: string; name: string };
 describe('commitResolvedPinningState', () => {
   it('computes pinned derived state and commits through the shared helper', () => {
     const columnsStore = { set: vi.fn() };
+    const metaStore = { set: vi.fn() };
     const persistTableState = vi.fn();
 
     commitResolvedPinningState<TData>({
@@ -54,6 +55,8 @@ describe('commitResolvedPinningState', () => {
         { key: 'name', label: 'Name' },
       ],
       columnsStore,
+      drawersSyncNonce: 7,
+      metaStore,
       persistenceKey: 'orders-table',
       persistTableState,
     });
@@ -97,5 +100,6 @@ describe('commitResolvedPinningState', () => {
         },
       },
     });
+    expect(metaStore.set).toHaveBeenCalledWith({ drawersSyncNonce: 8 });
   });
 });

@@ -23,6 +23,7 @@ const createInitialColumnsState = () => {
 
 const {
   mockColumnsStore,
+  mockMetaStore,
   mockPersistTableState,
   mockUsePersistTableStateAction,
   mockUseTableConfigContextValue,
@@ -81,5 +82,6 @@ describe('useSetColumnPinning', () => {
         columnPinning: { left: ['id', 'name'], right: [] },
       }),
     );
+    expect(mockMetaStore.set).toHaveBeenCalledWith({ drawersSyncNonce: 1 });
   });
 });

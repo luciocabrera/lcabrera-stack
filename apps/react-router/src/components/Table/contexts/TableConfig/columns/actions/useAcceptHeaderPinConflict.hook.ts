@@ -31,6 +31,7 @@ export const useAcceptHeaderPinConflict = <TData>() => {
       columnSizing,
       columnVisibility,
       columns,
+      drawersSyncNonce,
       persistenceKey,
       staticKeys,
     } = getPinningActionContext<TData>({ columnsStore, metaStore });
@@ -53,6 +54,8 @@ export const useAcceptHeaderPinConflict = <TData>() => {
       columnVisibility,
       columns,
       columnsStore,
+      drawersSyncNonce,
+      metaStore,
       persistenceKey,
       persistTableState,
     });

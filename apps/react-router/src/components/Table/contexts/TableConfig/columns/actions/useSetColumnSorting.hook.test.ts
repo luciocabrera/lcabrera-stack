@@ -7,12 +7,14 @@ import { useSetColumnSorting } from './useSetColumnSorting.hook';
 
 const {
   mockGetNormalizedColumns,
+  mockMetaStore,
   mockPersistTableState,
   mockSerializeSortingToURL,
   mockUsePersistTableStateAction,
   mockUseTableConfigContextValue,
   mockUseTableDataContextValue,
   setColumnsState,
+  setDrawersSyncNonce,
 } = vi.hoisted(() => {
   let columnsState = {
     columns: [{ key: 'status', label: 'Status' }],
@@ -26,8 +28,13 @@ const {
     }),
   };
 
+  let drawersSyncNonce = 0;
+
   const mockMetaStore = {
-    get: vi.fn(() => ({ persistenceKey: 'orders-table' })),
+    get: vi.fn(() => ({ drawersSyncNonce, persistenceKey: 'orders-table' })),
+    set: vi.fn((value: { readonly drawersSyncNonce?: number }) => {
+      drawersSyncNonce = value.drawersSyncNonce ?? drawersSyncNonce;
+    }),
   };
 
   const mockDataStore = {
@@ -40,6 +47,7 @@ const {
 
   return {
     mockGetNormalizedColumns,
+    mockMetaStore,
     mockPersistTableState,
     mockSerializeSortingToURL,
     mockUsePersistTableStateAction: () => mockPersistTableState,
@@ -50,6 +58,9 @@ const {
     mockUseTableDataContextValue: () => ({ dataStore: mockDataStore }),
     setColumnsState: (nextState: typeof columnsState) => {
       columnsState = nextState;
+    },
+    setDrawersSyncNonce: (nextNonce: number) => {
+      drawersSyncNonce = nextNonce;
     },
   };
 });
@@ -89,6 +100,8 @@ describe('useSetColumnSorting', () => {
       ],
       sorting: [],
     });
+    setDrawersSyncNonce(0);
+    mockMetaStore.set.mockClear();
     mockPersistTableState.mockReset();
     mockSerializeSortingToURL.mockClear();
     mockGetNormalizedColumns.mockClear();
@@ -129,5 +142,6 @@ describe('useSetColumnSorting', () => {
         { columnKey: 'priority', direction: 'desc' },
       ],
     });
+    expect(mockMetaStore.set).toHaveBeenCalledWith({ drawersSyncNonce: 2 });
   });
 });

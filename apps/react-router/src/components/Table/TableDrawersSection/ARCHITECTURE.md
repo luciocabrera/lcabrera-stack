@@ -24,15 +24,16 @@ graph TD
   TDS --> isLoading["useGetTableIsLoading()"]
   TDS --> isLoadingMore["useGetTableIsLoadingMore()"]
   TDS --> colKey["useGetTableColumnSelectedKey()"]
+  TDS --> syncNonce["useGetTableDrawersSyncNonce()"]
 
-  isCol -->|"true + columnKey"| CDP["ColumnDrawerProvider"]
+  isCol -->|"true + columnKey"| CDP["ColumnDrawerProvider key=columnKey+nonce"]
   CDP --> CSD["ColumnSettingsDrawer"]
   isLoadingMore --> CBusy{"isLoadingMore || (isColPinned && isLoading)"}
   isLoading --> CBusy
   CBusy -->|Yes| CBusyProp["ColumnSettingsDrawer isBusy=true"]
 
   isCol -->|false| check2{"isTableSettingsOpen?"}
-  check2 -->|true| TDP["TableDrawerProvider"]
+  check2 -->|true| TDP["TableDrawerProvider key=table+nonce"]
   TDP --> TSD["TableSettingsDrawer"]
   isLoadingMore --> TBusy{"isLoadingMore || (isTablePinned && isLoading)"}
   isLoading --> TBusy
@@ -54,6 +55,10 @@ created when the drawer is open:
 
 - **TableDrawerProvider** → wraps `TableSettingsDrawer`
 - **ColumnDrawerProvider** → wraps `ColumnSettingsDrawer` with `columnKey`
+
+Provider keys include `drawersSyncNonce` from meta state. Header-driven column
+mutations bump this nonce, forcing the active drawer provider to remount and
+re-seed its local store from `TableConfig` without background subscriptions.
 
 ## Busy Behavior
 

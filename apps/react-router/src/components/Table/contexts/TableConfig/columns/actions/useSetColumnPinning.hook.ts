@@ -25,6 +25,7 @@ export const useSetColumnPinning = <TData>() => {
       columnSizing,
       columnVisibility,
       columns,
+      drawersSyncNonce,
       persistenceKey,
       staticKeys,
     } = getPinningActionContext<TData>({ columnsStore, metaStore });
@@ -45,6 +46,8 @@ export const useSetColumnPinning = <TData>() => {
       columnVisibility,
       columns,
       columnsStore,
+      drawersSyncNonce,
+      metaStore,
       persistenceKey,
       persistTableState,
     });

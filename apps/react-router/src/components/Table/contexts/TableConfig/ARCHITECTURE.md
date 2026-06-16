@@ -129,6 +129,7 @@ TableColumnsState<TData> = {
 TableMetaState = {
   columnSelectedKey: string | null;  // Currently selected column key
   density: TableDensity;             // compact | normal | comfortable
+  drawersSyncNonce: number;          // Monotonic nonce used to force drawer provider re-seed
   enablePrefetch: boolean;           // Prefetch next page after load-more (ADR-006)
   error: Error | null;               // Table-level error
   initialPageSize: number;           // First page row count
@@ -187,6 +188,12 @@ Session hydration is deferred until after mount so SSR and the initial client re
 | `useAcceptHeaderPinConflict` | `columnsStore` | `columnsStore` | Resolve pin contiguity conflict from header and keep order synced                                 |
 | `useAcceptHeaderPinSide`     | `columnsStore` | `columnsStore` | Accept pin side choice from header, keep order synced, and commit pinning/order via shared helper |
 
+Direct header mutation actions (`useSetColumnSorting`, `useSetColumnPinning`,
+`useAcceptHeaderPinSide`, `useAcceptHeaderPinConflict`) also bump
+`metaStore.drawersSyncNonce` after successful commits. `TableDrawersSection`
+uses this nonce in provider keys to remount drawer-local stores and keep panel
+state aligned with source-of-truth column state.
+
 ## Shared Batch Utilities
 
 The two batch settings hooks now share two focused pure helpers instead of each inlining their derived-view and persistence-array construction.
@@ -237,6 +244,7 @@ The two batch settings hooks now share two focused pure helpers instead of each 
 | `useGetTableAdditionalMetadata`      | `Record<string, TableMetadataValue \| null \| undefined> \| undefined` | Optional custom metadata map        |
 | `useGetTableColumnSelectedKey`       | `string \| null`                                                       | Currently selected column key       |
 | `useGetTableDensity`                 | `TableDensity`                                                         | Table density setting               |
+| `useGetTableDrawersSyncNonce`        | `number`                                                               | Drawer remount nonce for panel sync |
 | `useGetTableEnablePrefetch`          | `boolean`                                                              | Whether prefetch buffer is active   |
 | `useGetTableInitialPageSize`         | `number`                                                               | Initial page row count              |
 | `useGetTableIsBordered`              | `boolean`                                                              | Whether borders are shown           |
