@@ -15,8 +15,6 @@ import { getInitialDataState } from './utils';
 export const TableDataProvider = <TData extends Record<string, unknown>>({
   children,
   dataState,
-  isPersistenceEnabled: _isPersistenceEnabled = true,
-  persistenceKey: _persistenceKey = '',
 }: TableDataProviderProps<TData>) => {
   const initialDataState = getInitialDataState<TData>(dataState ?? {});
   const dataStore = useStore<TableDataState<TData>>(initialDataState);
