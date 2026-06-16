@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 import { Button } from '@/components/Button';
 import { SettingsIcon } from '@/components/Icons';
@@ -43,8 +43,23 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   const toggleTableIsTableSettingsOpen = useToogleTableIsTableSettingsOpen();
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const wasLoadingRef = useRef(isLoading);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const wrapperContextValue = { containerRef, wrapperRef };
+
+  useEffect(() => {
+    const wasLoading = wasLoadingRef.current;
+
+    if (wasLoading && !isLoading && !isLoadingMore) {
+      containerRef.current?.scrollTo({
+        behavior: 'auto',
+        left: 0,
+        top: 0,
+      });
+    }
+
+    wasLoadingRef.current = isLoading;
+  }, [isLoading, isLoadingMore]);
 
   useInfiniteScroll({
     dataSelector,

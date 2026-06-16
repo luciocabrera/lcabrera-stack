@@ -207,7 +207,6 @@ export const ShowcasePage = () => {
   const { isDarkMode, toggleTheme } = useTheme();
   const [isLeftPanelOpen, setIsLeftPanelOpen] = useState(false);
   const [isRightPanelOpen, setIsRightPanelOpen] = useState(false);
-  const [tableKey, setTableKey] = useState(0);
 
   // --- VirtualSelect showcase state ---
   const [singleSelected, setSingleSelected] = useState<string[]>([]);
@@ -267,7 +266,6 @@ export const ShowcasePage = () => {
   // Function to reload the table data (for testing)
   const reloadTableData = () => {
     tableDataPromise = undefined; // Reset the promise
-    setTableKey((prev) => prev + 1); // Force re-mount
   };
 
   return (
@@ -491,7 +489,6 @@ export const ShowcasePage = () => {
                 dataSelector={(response) => response.data}
                 dataTotalSelector={(response) => response.total}
                 persistenceKey={PERSISTENCE_KEY}
-                suspenseKey={String(tableKey)}
                 title='Data Table'
               />
             </div>

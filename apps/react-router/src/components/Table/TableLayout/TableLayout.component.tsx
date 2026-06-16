@@ -35,7 +35,6 @@ export const TableLayout = <
   persistenceKey,
   schemaName,
   sorting,
-  suspenseKey,
   tableName,
   title,
 }: TableLayoutProps<TData, TResponse>) => {
@@ -69,10 +68,7 @@ export const TableLayout = <
         metaState={metaState}
       >
         <FiltersDataProvider<TData> columns={columns}>
-          <TableSuspenseBoundary<TData, TResponse>
-            dataPromise={dataPromise}
-            key={suspenseKey}
-          >
+          <TableSuspenseBoundary<TData, TResponse> dataPromise={dataPromise}>
             {(response) => (
               <Table<TData, TResponse>
                 dataSelector={dataSelector}

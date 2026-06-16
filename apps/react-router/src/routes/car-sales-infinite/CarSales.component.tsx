@@ -17,7 +17,6 @@ export const CarSales = () => {
     columnSizing,
     columnVisibility,
     filters,
-    key,
     sorting,
   } = useLoaderData<typeof loader>();
 
@@ -41,7 +40,6 @@ export const CarSales = () => {
       persistenceKey={PERSISTENCE_KEY}
       schemaName='public'
       sorting={sorting}
-      suspenseKey={key}
       tableName='car_sales'
       title='Car Sales Data - Infinite Scroll'
     />

@@ -29,7 +29,7 @@ graph TD
   TL["TableLayout"] --> container["div.container"]
   container --> TCP["TableConfigProvider (columnsState + metaState)"]
   TCP --> FDP["FiltersDataProvider (columns)"]
-  FDP --> TSB["TableSuspenseBoundary (key=suspenseKey)"]
+  FDP --> TSB["TableSuspenseBoundary"]
   TSB -->|pending| SK["TableSkeleton"]
   TSB -->|resolved| TDR["TableDataResolver"]
   TDR --> T["Table (dataSelector, dataTotalSelector, onLoadMore, response)"]
@@ -62,7 +62,10 @@ graph TD
 
 ## suspenseKey Behavior
 
-Setting `key={suspenseKey}` on `TableSuspenseBoundary` allows the data
-boundary to remount (triggering skeleton fallback) without destroying
-`TableConfigProvider` or `FiltersDataProvider` above it. This preserves
-column config and filter dropdown data across data navigations.
+`suspenseKey` is now a legacy compatibility prop and is ignored by
+`TableLayout`. Query transitions no longer force Suspense remounts,
+which allows current rows to stay mounted while in-table loading shimmer
+is shown.
+
+`TableSkeleton` remains the fallback for first load and hard pending
+states where Suspense genuinely has no resolved content yet.

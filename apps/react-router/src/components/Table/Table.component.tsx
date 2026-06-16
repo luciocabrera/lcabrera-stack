@@ -5,7 +5,6 @@ import { useRenderTracker } from '@/utils/performance';
 import type { TableProps } from './Table.types';
 
 import { TableDataProvider } from './contexts';
-import { useGetTablePersistenceKey } from './contexts/TableConfig/meta/selectors';
 import { styles } from './Table.stylex';
 import { TableContent } from './TableContent';
 
@@ -20,7 +19,7 @@ export const Table = <TData extends Record<string, unknown>, TResponse>({
   response,
 }: TableProps<TData, TResponse>) => {
   useRenderTracker({ componentName: 'Table' });
-  const persistenceKey = useGetTablePersistenceKey();
+
   const data = dataSelector ? dataSelector(response) : [];
   const totalRows = dataTotalSelector
     ? dataTotalSelector(response)
@@ -33,8 +32,6 @@ export const Table = <TData extends Record<string, unknown>, TResponse>({
         isLoading,
         totalRows,
       }}
-      isPersistenceEnabled={!isLoading}
-      persistenceKey={persistenceKey}
     >
       <TableContent
         actions={actions}

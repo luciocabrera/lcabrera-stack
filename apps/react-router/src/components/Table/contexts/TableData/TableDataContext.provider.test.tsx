@@ -3,7 +3,7 @@
 import { type ReactNode } from 'react';
 
 import { renderHook, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { TableDataProvider } from './TableDataContext.provider';
 import { useGetTableData } from './data/selectors/useGetTableData.hook';
@@ -26,18 +26,12 @@ const wrapper = ({ children }: WrapperProps) => (
       isLoadingMore: false,
       totalRows: 3,
     }}
-    isPersistenceEnabled
-    persistenceKey='orders'
   >
     {children}
   </TableDataProvider>
 );
 
 describe('TableDataProvider', () => {
-  beforeEach(() => {
-    // Clear mocks if needed in future tests
-  });
-
   it('initializes with loader data, not persisted rows', async () => {
     const { result } = renderHook(
       () => ({
@@ -72,6 +66,55 @@ describe('TableDataProvider', () => {
         data: [{ id: 1 }],
         hasMore: true,
         totalLoadedRows: 1,
+      });
+    });
+  });
+
+  it('replaces data when incoming dataState changes without remounting', async () => {
+    let currentDataState = {
+      data: [{ id: 1 }],
+      isLoading: false,
+      isLoadingMore: false,
+      totalRows: 3,
+    };
+
+    const dynamicWrapper = ({ children }: WrapperProps) => (
+      <TableDataProvider<TestRow> dataState={currentDataState}>
+        {children}
+      </TableDataProvider>
+    );
+
+    const { rerender, result } = renderHook(
+      () => ({
+        data: useGetTableData<TestRow>(),
+        hasMore: useGetTableHasMore(),
+        totalLoadedRows: useGetTableTotalLoadedRows(),
+      }),
+      { wrapper: dynamicWrapper },
+    );
+
+    await waitFor(() => {
+      expect(result.current).toEqual({
+        data: [{ id: 1 }],
+        hasMore: true,
+        totalLoadedRows: 1,
+      });
+    });
+
+    currentDataState = {
+      data: [{ id: 11 }, { id: 12 }],
+      isLoading: false,
+      isLoadingMore: false,
+      totalRows: 2,
+    };
+
+    rerender();
+
+    await waitFor(() => {
+      expect(result.current).toEqual({
+        data: [{ id: 11 }, { id: 12 }],
+        hasMore: false,
+        totalLoadedRows: 2,
       });
     });
   });

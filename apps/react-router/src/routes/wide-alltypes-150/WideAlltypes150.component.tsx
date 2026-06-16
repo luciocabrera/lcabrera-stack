@@ -10,14 +10,8 @@ import type { loader } from './wide-alltypes-150.loader';
 import { COLUMNS, PERSISTENCE_KEY } from './WideAlltypes150.constants';
 
 export const WideAlltypes150Page = () => {
-  const {
-    columnOrder,
-    columnSizing,
-    columnVisibility,
-    dataPromise,
-    key,
-    sorting,
-  } = useLoaderData<typeof loader>();
+  const { columnOrder, columnSizing, columnVisibility, dataPromise, sorting } =
+    useLoaderData<typeof loader>();
 
   return (
     <TableLayout<WideAlltypes150, WideAlltypes150Response>
@@ -34,7 +28,6 @@ export const WideAlltypes150Page = () => {
       persistenceKey={PERSISTENCE_KEY}
       schemaName='public'
       sorting={sorting}
-      suspenseKey={key}
       tableName='wide_alltypes_150'
       title='Wide All-Types — 150 Columns × 1M Rows'
     />

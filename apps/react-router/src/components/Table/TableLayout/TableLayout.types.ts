@@ -57,12 +57,6 @@ export type TableLayoutProps<
   readonly schemaName?: string;
   /** Active sorting from loader/URL state (optional) */
   readonly sorting?: SortingState<TData>;
-  /**
-   * Key to reset only the Suspense boundary when data changes.
-   * Unlike React's `key` prop on the whole component, this only remounts
-   * the data-fetching boundary without destroying the table config store.
-   */
-  readonly suspenseKey?: string;
   /** Table name (optional) for Details tab metadata */
   readonly tableName?: string;
   /** Table title (required) */
