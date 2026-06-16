@@ -1,6 +1,6 @@
 # Fallow Complexity Threshold Analysis
 
-## Canonical Snapshot (2026-06-15)
+## Canonical Snapshot (2026-06-16)
 
 Source of truth for this report:
 
@@ -10,13 +10,13 @@ Source of truth for this report:
 
 Current metrics from JSON:
 
-- Functions above threshold: 18
-- Functions analyzed: 3716
-- Files analyzed: 1218
+- Functions above threshold: 19
+- Functions analyzed: 3773
+- Files analyzed: 1219
 - Average maintainability: 93 (good)
-- Dead-code issues: 18 (check.total_issues)
-- Duplicate clone groups: 88 (dupes.stats.clone_groups)
-- Severity split: 0 critical, 0 high, 18 moderate
+- Dead-code issues: 21 (check.total_issues)
+- Duplicate clone groups: 89 (dupes.stats.clone_groups)
+- Severity split: 0 critical, 0 high, 19 moderate
 - Thresholds: cyclomatic 20, cognitive 15, CRAP 30
 
 ## Interpretation

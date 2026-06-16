@@ -164,6 +164,7 @@ describe('resolveBatchColumnSettingsUpdate', () => {
       ],
       currentOrder: ['id', 'name', 'age'],
       newPinning: { left: ['id'], right: ['name'] },
+      previousPinning: { left: ['id'], right: [] },
     });
     expect(mockDeriveColumnViewState).toHaveBeenCalledWith({
       columnOrder: ['id', 'age', 'name'],

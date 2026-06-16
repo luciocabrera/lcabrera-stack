@@ -175,18 +175,18 @@ Session hydration is deferred until after mount so SSR and the initial client re
 
 ## Columns Actions
 
-| Hook                         | Reads From     | Writes To      | Description                                                                                       |
-| ---------------------------- | -------------- | -------------- | ------------------------------------------------------------------------------------------------- |
-| `useBatchSetColumnSettings`  | —              | `columnsStore` | Bulk-set multiple column fields at once                                                           |
-| `useBatchSetTableSettings`   | —              | `columnsStore` | Push all settings from TableSettingsDrawer                                                        |
-| `useResetColumnFilter`       | —              | `columnsStore` | Remove filter for a single column                                                                 |
-| `useSetColumnFilter`         | —              | `columnsStore` | Set filter value for a single column                                                              |
-| `useSetColumnPinning`        | `columnsStore` | `columnsStore` | Update pinning, keep column order synced, and commit pinning/order via shared helper              |
-| `useSetColumnSizing`         | `columnsStore` | `columnsStore` | Set column width map and recompute pinned offsets via shared sizing resolver                      |
-| `useSetColumnSorting`        | `columnsStore` | `columnsStore` | Toggle/set sort for a column                                                                      |
-| `useSyncColumnsSizing`       | `columnsStore` | `columnsStore` | Recalculate sizing after layout shift                                                             |
-| `useAcceptHeaderPinConflict` | `columnsStore` | `columnsStore` | Resolve pin contiguity conflict from header and keep order synced                                 |
-| `useAcceptHeaderPinSide`     | `columnsStore` | `columnsStore` | Accept pin side choice from header, keep order synced, and commit pinning/order via shared helper |
+| Hook                         | Reads From     | Writes To      | Description                                                                                                                   |
+| ---------------------------- | -------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `useBatchSetColumnSettings`  | —              | `columnsStore` | Bulk-set multiple column fields at once                                                                                       |
+| `useBatchSetTableSettings`   | —              | `columnsStore` | Push all settings from TableSettingsDrawer                                                                                    |
+| `useResetColumnFilter`       | —              | `columnsStore` | Remove filter for a single column                                                                                             |
+| `useSetColumnFilter`         | —              | `columnsStore` | Set filter value for a single column                                                                                          |
+| `useSetColumnPinning`        | `columnsStore` | `columnsStore` | Update pinning, keep column order synced (including header unpin reorder-to-fill), and commit pinning/order via shared helper |
+| `useSetColumnSizing`         | `columnsStore` | `columnsStore` | Set column width map and recompute pinned offsets via shared sizing resolver                                                  |
+| `useSetColumnSorting`        | `columnsStore` | `columnsStore` | Toggle/set sort for a column                                                                                                  |
+| `useSyncColumnsSizing`       | `columnsStore` | `columnsStore` | Recalculate sizing after layout shift                                                                                         |
+| `useAcceptHeaderPinConflict` | `columnsStore` | `columnsStore` | Resolve pin contiguity conflict from header and keep order synced                                                             |
+| `useAcceptHeaderPinSide`     | `columnsStore` | `columnsStore` | Accept pin side choice from header, keep order synced, and commit pinning/order via shared helper                             |
 
 Direct header mutation actions (`useSetColumnSorting`, `useSetColumnPinning`,
 `useAcceptHeaderPinSide`, `useAcceptHeaderPinConflict`) also bump

@@ -14,16 +14,28 @@ const columns: TableColumn<Row>[] = [
 ];
 
 describe('syncColumnOrderWithPinning', () => {
-  it('returns currentOrder unchanged when columnPinning is undefined', () => {
-    const currentOrder = ['id', 'name', 'age', 'actions'];
+  it('repositions a previously left-pinned column next to remaining left-pinned columns when unpinning', () => {
+    const result = syncColumnOrderWithPinning({
+      columnKey: 'age',
+      columnPinning: undefined,
+      columns,
+      currentOrder: ['age', 'id', 'name', 'actions'],
+      previousPinning: { left: ['id', 'age'], right: [] },
+      newPinning: { left: ['id'], right: [] },
+    });
+    expect(result).toEqual(['id', 'age', 'name', 'actions']);
+  });
+
+  it('repositions a previously right-pinned column next to remaining right-pinned columns when unpinning', () => {
     const result = syncColumnOrderWithPinning({
       columnKey: 'name',
       columnPinning: undefined,
       columns,
-      currentOrder,
-      newPinning: { left: [], right: [] },
+      currentOrder: ['id', 'age', 'actions', 'name'],
+      previousPinning: { left: [], right: ['name', 'actions'] },
+      newPinning: { left: [], right: ['actions'] },
     });
-    expect(result).toEqual(currentOrder);
+    expect(result).toEqual(['id', 'age', 'name', 'actions']);
   });
 
   it('inserts column after existing left-pinned columns when pinning left', () => {

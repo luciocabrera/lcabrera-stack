@@ -40,6 +40,7 @@ export const resolveColumnPinningUpdate = <TData>({
       columnPinning: side,
       columns,
       currentOrder,
+      previousPinning: currentPinning,
       newPinning,
     }),
     newPinning,
