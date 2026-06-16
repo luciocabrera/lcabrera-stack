@@ -1,12 +1,20 @@
 import { useEffect } from 'react';
 
 import type {
+  ColumnFiltersState,
+  ColumnOrderState,
+  ColumnPinningState,
+  ColumnSizingState,
+  ColumnVisibilityState,
+  SortingState,
   TableColumnsState,
   TableMetaState,
 } from '@/components/Table/Table.types';
 import type { TStore } from '@/hooks/useStore.hook';
 
 import {
+  deriveColumnViewState,
+  getStaticColumnKeys,
   readPersistedStateFromSessionStorage,
   readPersistedUiStateFromSessionStorage,
 } from '../utils';
@@ -50,9 +58,58 @@ export const useHydrateTableSessionState = <
 
     if (hasColumnState) {
       const { columnVisibility, version: _version, ...rest } = columnState;
+      const currentColumnsState = columnsStore.get();
+
+      const columns = currentColumnsState?.columns ?? [];
+      const nextColumnFilters = (rest.columnFilters ??
+        currentColumnsState?.columnFilters ??
+        ({} as ColumnFiltersState<TData>)) as ColumnFiltersState<TData>;
+      const nextColumnOrder = (rest.columnOrder ??
+        currentColumnsState?.columnOrder ??
+        ([] as ColumnOrderState<TData>)) as ColumnOrderState<TData>;
+      const nextColumnPinning = (rest.columnPinning ??
+        currentColumnsState?.columnPinning ??
+        ({
+          left: [],
+          right: [],
+        } as ColumnPinningState<TData>)) as ColumnPinningState<TData>;
+      const nextColumnSizing = (rest.columnSizing ??
+        currentColumnsState?.columnSizing ??
+        ({} as ColumnSizingState<TData>)) as ColumnSizingState<TData>;
+      const nextColumnVisibility = (columnVisibility ??
+        currentColumnsState?.columnVisibility ??
+        (new Set() as ColumnVisibilityState<TData>)) as ColumnVisibilityState<TData>;
+      const nextSorting = (rest.sorting ??
+        currentColumnsState?.sorting ??
+        ([] as SortingState<TData>)) as SortingState<TData>;
+
+      const {
+        columnGroups,
+        effectiveColumns,
+        normalizedColumns,
+        pinnedColumnOffsets,
+      } = deriveColumnViewState<TData>({
+        columnOrder: nextColumnOrder,
+        columnPinning: nextColumnPinning,
+        columnSizing: nextColumnSizing,
+        columns,
+        columnVisibility: nextColumnVisibility,
+        sorting: nextSorting,
+      });
+
       const nextColumnsState = {
-        ...rest,
-        ...(columnVisibility === undefined ? {} : { columnVisibility }),
+        columnFilters: nextColumnFilters,
+        columnGroups,
+        columnOrder: nextColumnOrder,
+        columnPinning: nextColumnPinning,
+        columnSizing: nextColumnSizing,
+        columnVisibility: nextColumnVisibility,
+        columns,
+        effectiveColumns,
+        normalizedColumns,
+        pinnedColumnOffsets,
+        sorting: nextSorting,
+        staticKeys: getStaticColumnKeys(columns),
       } as Partial<TableColumnsState<TData>>;
 
       columnsStore.set(nextColumnsState);
