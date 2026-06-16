@@ -6,7 +6,8 @@ Pure utility functions for column processing and state persistence.
 
 ```
 utils/
-├── deriveColumnViewState.util.ts                → Compose normalized columns + pinning-derived slices
+├── arePersistedUiStatesEqual.util.ts             → Compare persisted table UI slices only
+├── deriveColumnViewState.util.ts                 → Compose normalized columns + pinning-derived slices
 ├── getColumnPinSide.util.ts                      → Detect which side a column is pinned to
 ├── getEffectiveColumns.util.ts                   → Apply visibility + order + pinning
 ├── getNewColumnFiltersBasedOnColumnKey.util.ts   → Build next filter map for one column change
@@ -137,6 +138,7 @@ graph LR
 | readPersistedStateFromCookie             | Parse persisted state from cookies (SSR-safe)                  |
 | readPersistedStateFromSessionStorage     | Parse persisted column slices from sessionStorage (tab-scoped) |
 | readPersistedUiStateFromSessionStorage   | Parse persisted UI slices from sessionStorage (tab-scoped)     |
+| arePersistedUiStatesEqual                | Compare persisted UI slices to skip redundant writes           |
 | serializeStateSlice                      | Convert a state slice to key/value payload                     |
 | writePersistedDataStateToSessionStorage  | Write persisted data rows to sessionStorage (tab-scoped)       |
 | writePersistedUiStateToSessionStorage    | Write persisted UI slices to sessionStorage (tab-scoped)       |

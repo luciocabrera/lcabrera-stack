@@ -62,7 +62,7 @@ graph TD
 | Folder         | Description                                                                                                                                   |
 | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
 | `api/`         | `getApiBaseUrl` — SSR/client-aware API base URL resolver                                                                                      |
-| `comparison/`  | `shallowEqual` — one-level object comparison for store diffing                                                                                |
+| `comparison/`  | `areArraysEqual` for ordered array equality plus `shallowEqual` for one-level object comparison                                               |
 | `filters/`     | `createStaticFilterOptions` — static array → Table filter contract                                                                            |
 | `formatters/`  | `formatDate`, `formatCurrency`, `formatNumber`, `parseDate`, etc.                                                                             |
 | `logger/`      | `createLogger`, `logger` — level-filtered, tree-shakeable app logging                                                                         |

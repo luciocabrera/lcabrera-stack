@@ -92,6 +92,7 @@ Before creating anything new, check this inventory. If something here does the j
 | `getPinnedDerivedColumnsState`             | `components/Table/utils/getPinnedDerivedColumnsState.util.ts`             | Computes effective columns, pin-based groups, and pinned offsets together in one call                     |
 | `getStaticColumnKeys`                      | `components/Table/utils/getStaticColumnKeys.util.ts`                      | Returns a `Set` of keys for columns marked as non-reorderable                                             |
 | `getStorageKey`                            | `components/Table/utils/getStorageKey.util.ts`                            | Builds a namespaced `persistenceKey:slice` storage key                                                    |
+| `arePersistedUiStatesEqual`                | `components/Table/utils/arePersistedUiStatesEqual.util.ts`                | Compares persisted table UI slices to avoid redundant sessionStorage writes                               |
 | `readPersistedDataStateFromSessionStorage` | `components/Table/utils/readPersistedDataStateFromSessionStorage.util.ts` | Reads tab-scoped persisted table rows for stale refresh rendering                                         |
 | `readPersistedStateFromCookie`             | `components/Table/utils/readPersistedStateFromCookie.util.ts`             | Parses table persisted state from cookies; SSR-safe                                                       |
 | `readPersistedStateFromSessionStorage`     | `components/Table/utils/readPersistedStateFromSessionStorage.util.ts`     | Reads tab-scoped persisted column state slices from sessionStorage                                        |
@@ -202,6 +203,7 @@ Before creating anything new, check this inventory. If something here does the j
 
 | Function         | Location                                  | Description                                                                |
 | ---------------- | ----------------------------------------- | -------------------------------------------------------------------------- |
+| `areArraysEqual` | `utils/comparison/areArraysEqual.util.ts` | `{ left, right }` → `boolean`; ordered strict equality for array values    |
 | `areEqualByJson` | `utils/comparison/areEqualByJson.util.ts` | `{ left, right }` → `boolean`; deep structural equality via JSON.stringify |
 | `shallowEqual`   | `utils/comparison/shallowEqual.util.ts`   | `{ objA, objB }` → `boolean`; one-level key+value equality check           |
 

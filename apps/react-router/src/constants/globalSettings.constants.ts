@@ -56,3 +56,5 @@ export const NAVIGATION_PINNED_PREFERENCE_OPTIONS: readonly RadioOption<GlobalNa
       value: 'unpinned',
     },
   ];
+
+export const PERSIST_COOKIE_ACTION = '/_action/persist-cookie';

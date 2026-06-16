@@ -1,4 +1,5 @@
 export { getColumnPinSide } from './getColumnPinSide.util';
+export { arePersistedUiStatesEqual } from './arePersistedUiStatesEqual.util';
 export { deriveColumnViewState } from './deriveColumnViewState.util';
 export { getEffectiveColumns } from './getEffectiveColumns.util';
 export { getNormalizedColumns } from './getNormalizedColumns.util';

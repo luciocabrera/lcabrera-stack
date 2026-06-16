@@ -6,8 +6,7 @@ import {
 } from '@/utils/globalSettings';
 
 import type { GlobalSettingsState } from '@/types/globalSettings.types';
-
-const PERSIST_COOKIE_ACTION = '/_action/persist-cookie';
+import { PERSIST_COOKIE_ACTION } from '@/constants/globalSettings.constants';
 
 export const usePersistGlobalSettingsAction = () => {
   const fetcher = useFetcher({ key: 'persist-global-settings' });
