@@ -11,13 +11,8 @@ export const getNewColumnFiltersBasedOnColumnKey = <TData>({
   columnKey,
   columnFilter,
 }: GetNewColumnFiltersBasedOnColumnKeyArgs<TData>) => {
-  // Filters: remove this column entry, then re-add if filter exists
-  const baseFilters = Object.fromEntries(
-    Object.entries(columnFiltersState).filter(([key]) => key !== columnKey),
-  );
-  const newColumnFilters = columnFilter
-    ? { ...baseFilters, [columnKey]: columnFilter }
-    : baseFilters;
-
-  return newColumnFilters as ColumnFiltersState<TData>;
+  if (columnFiltersState[columnKey] === columnFilter) {
+    return columnFiltersState;
+  }
+  return { ...columnFiltersState, [columnKey]: columnFilter };
 };
