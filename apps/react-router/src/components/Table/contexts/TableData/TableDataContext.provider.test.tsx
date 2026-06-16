@@ -26,8 +26,6 @@ const wrapper = ({ children }: WrapperProps) => (
       isLoadingMore: false,
       totalRows: 3,
     }}
-    isPersistenceEnabled
-    persistenceKey='orders'
   >
     {children}
   </TableDataProvider>
@@ -81,11 +79,7 @@ describe('TableDataProvider', () => {
     };
 
     const dynamicWrapper = ({ children }: WrapperProps) => (
-      <TableDataProvider<TestRow>
-        dataState={currentDataState}
-        isPersistenceEnabled
-        persistenceKey='orders'
-      >
+      <TableDataProvider<TestRow> dataState={currentDataState}>
         {children}
       </TableDataProvider>
     );
