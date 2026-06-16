@@ -1,5 +1,6 @@
 import type { ColumnFilter } from '@/types/filterOperators.types';
 import type { ColumnFiltersState, DataKey } from '../Table.types';
+import { shallowEqual } from '@/utils';
 
 type GetNewColumnFiltersBasedOnColumnKeyArgs<TData> = {
   readonly columnKey: DataKey<TData>;
@@ -12,14 +13,34 @@ export const getNewColumnFiltersBasedOnColumnKey = <TData>({
   columnKey,
   columnFilter,
 }: GetNewColumnFiltersBasedOnColumnKeyArgs<TData>) => {
-  const keys = Object.keys(columnFiltersState) as DataKey<TData>[];
-  const initial = (
-    columnFilter === undefined ? {} : { [columnKey]: columnFilter }
-  ) as ColumnFiltersState<TData>;
-  return keys.reduce<ColumnFiltersState<TData>>((acc, k) => {
-    if (k !== (columnKey as DataKey<TData>)) {
-      acc[k as DataKey<TData>] = columnFiltersState[k as DataKey<TData>];
-    }
-    return acc;
-  }, initial);
+  const prev = columnFiltersState[columnKey];
+
+  // No-op: removing a non-existent key
+  if (columnFilter === undefined && prev === undefined) {
+    return columnFiltersState;
+  }
+
+  // No-op: setting same filter (shallow equality)
+  if (
+    columnFilter !== undefined &&
+    prev !== undefined &&
+    shallowEqual({ objA: prev, objB: columnFilter })
+  ) {
+    return columnFiltersState;
+  }
+
+  // Need a new object (add/update/remove). Build it in one pass without mutating input.
+  const next: ColumnFiltersState<TData> = {} as ColumnFiltersState<TData>;
+
+  for (const k in columnFiltersState) {
+    if (!Object.hasOwn(columnFiltersState, k)) continue;
+    if (k === columnKey) continue; // skip the key being changed/removed
+    next[k as DataKey<TData>] = columnFiltersState[k as DataKey<TData>];
+  }
+
+  if (columnFilter !== undefined) {
+    next[columnKey] = columnFilter;
+  }
+
+  return next;
 };
