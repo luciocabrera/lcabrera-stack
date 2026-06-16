@@ -5,6 +5,10 @@ import type {
   TableColumn,
 } from '@/components/Table/Table.types';
 
+import { insertAfterLeftPinned } from './insertAfterLeftPinned.util';
+import { insertBeforeRightPinned } from './insertBeforeRightPinned.util';
+import { resolveUnpinnedOrder } from './resolveUnpinnedOrder.util';
+
 type SyncColumnOrderWithPinningArgs<TData> = {
   readonly columnKey: DataKey<TData>;
   readonly columnPinning: 'left' | 'right' | undefined;
@@ -37,66 +41,26 @@ export const syncColumnOrderWithPinning = <TData>({
   const orderWithoutColumn = baseOrder.filter((k) => k !== columnKey);
 
   if (columnPinning === undefined) {
-    const wasLeftPinned = previousPinning?.left.includes(columnKey) ?? false;
-    const wasRightPinned = previousPinning?.right.includes(columnKey) ?? false;
-
-    if (!wasLeftPinned && !wasRightPinned) {
-      return [...baseOrder] as ColumnOrderState<TData>;
-    }
-
-    if (wasLeftPinned) {
-      let lastLeftPinnedIndex = -1;
-      for (const [index, key] of orderWithoutColumn.entries()) {
-        if (newPinning.left.includes(key)) {
-          lastLeftPinnedIndex = index;
-        }
-      }
-
-      return [
-        ...orderWithoutColumn.slice(0, lastLeftPinnedIndex + 1),
-        columnKey,
-        ...orderWithoutColumn.slice(lastLeftPinnedIndex + 1),
-      ] as ColumnOrderState<TData>;
-    }
-
-    const firstRightPinnedIndex = orderWithoutColumn.findIndex((key) =>
-      newPinning.right.includes(key),
-    );
-    const insertAt =
-      firstRightPinnedIndex === -1
-        ? orderWithoutColumn.length
-        : firstRightPinnedIndex;
-
-    return [
-      ...orderWithoutColumn.slice(0, insertAt),
+    return resolveUnpinnedOrder<TData>({
+      baseOrder,
       columnKey,
-      ...orderWithoutColumn.slice(insertAt),
-    ] as ColumnOrderState<TData>;
+      newPinning,
+      orderWithoutColumn,
+      previousPinning,
+    });
   }
 
   if (columnPinning === 'left') {
-    // Insert after existing left-pinned columns
-    const otherLeftPinnedCount = newPinning.left.filter(
-      (k) => k !== columnKey,
-    ).length;
-
-    return [
-      ...orderWithoutColumn.slice(0, otherLeftPinnedCount),
+    return insertAfterLeftPinned<TData>({
       columnKey,
-      ...orderWithoutColumn.slice(otherLeftPinnedCount),
-    ] as ColumnOrderState<TData>;
+      newPinning,
+      orderWithoutColumn,
+    });
   }
 
-  // columnPinning === 'right'
-  // Insert before existing right-pinned columns
-  const otherRightPinnedCount = newPinning.right.filter(
-    (k) => k !== columnKey,
-  ).length;
-  const insertAt = orderWithoutColumn.length - otherRightPinnedCount;
-
-  return [
-    ...orderWithoutColumn.slice(0, insertAt),
+  return insertBeforeRightPinned<TData>({
     columnKey,
-    ...orderWithoutColumn.slice(insertAt),
-  ] as ColumnOrderState<TData>;
+    newPinning,
+    orderWithoutColumn,
+  });
 };

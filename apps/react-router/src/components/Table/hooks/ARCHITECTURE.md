@@ -8,6 +8,7 @@ Table-specific hooks for column resizing, infinite scroll, and state persistence
 hooks/
 ├── persistCookieAction.constants.ts   → Cookie persistence action route constant
 ├── useColumnResize.hook.ts          → RAF-throttled drag resize
+├── useHydrateTableSessionState.hook.ts → Restores tab-scoped table + UI state after mount
 ├── useInfiniteScroll.hook.ts        → Scroll threshold detection
 ├── usePersistCookieAction.hook.ts   → Server action cookie persistence
 └── index.ts                         → Barrel export
@@ -53,6 +54,28 @@ graph LR
 | `threshold`                 | Pixel distance from bottom to trigger |
 | `hasMore` / `isLoadingMore` | Guard against duplicate fetches       |
 | `fetchMoreData`             | Async function to append next page    |
+
+## useHydrateTableSessionState
+
+Restores tab-scoped session state after mount and recomputes derived column slices
+before committing to the main columns store.
+
+```mermaid
+graph TD
+  ReadColumns["readPersistedStateFromSessionStorage"] --> Merge["merge persisted slices with current columns state"]
+  Merge --> Derive["deriveColumnViewState\n(effectiveColumns, groups, offsets, normalizedColumns)"]
+  Derive --> SetColumns["columnsStore.set(full hydrated state)"]
+
+  ReadUi["readPersistedUiStateFromSessionStorage"] --> SetMeta["metaStore.set(ui state)"]
+```
+
+| Behavior          | Detail                                                                          |
+| ----------------- | ------------------------------------------------------------------------------- |
+| Scope             | Runs once after mount inside TableConfigProvider                                |
+| Restored slices   | sorting, filters, order, pinning, sizing, visibility                            |
+| Derived recompute | Rebuilds effectiveColumns, columnGroups, pinnedColumnOffsets, normalizedColumns |
+| Static keys       | Recomputes staticKeys from current columns                                      |
+| Guard             | No-op when persistenceKey is empty                                              |
 
 ## usePersistTableStateAction
 
