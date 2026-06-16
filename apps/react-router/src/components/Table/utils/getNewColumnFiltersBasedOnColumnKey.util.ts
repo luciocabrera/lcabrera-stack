@@ -6,13 +6,20 @@ type GetNewColumnFiltersBasedOnColumnKeyArgs<TData> = {
   readonly columnFilter?: ColumnFilter;
   readonly columnFiltersState?: ColumnFiltersState<TData>;
 };
+
 export const getNewColumnFiltersBasedOnColumnKey = <TData>({
   columnFiltersState = {} as ColumnFiltersState<TData>,
   columnKey,
   columnFilter,
 }: GetNewColumnFiltersBasedOnColumnKeyArgs<TData>) => {
-  if (columnFiltersState[columnKey] === columnFilter) {
-    return columnFiltersState;
-  }
-  return { ...columnFiltersState, [columnKey]: columnFilter };
+  const keys = Object.keys(columnFiltersState) as DataKey<TData>[];
+  const initial = (
+    columnFilter === undefined ? {} : { [columnKey]: columnFilter }
+  ) as ColumnFiltersState<TData>;
+  return keys.reduce<ColumnFiltersState<TData>>((acc, k) => {
+    if (k !== (columnKey as DataKey<TData>)) {
+      acc[k as DataKey<TData>] = columnFiltersState[k as DataKey<TData>];
+    }
+    return acc;
+  }, initial);
 };

@@ -67,7 +67,7 @@ graph TD
 | Function                            | Input                                                    | Output             | Purpose                                                                       |
 | ----------------------------------- | -------------------------------------------------------- | ------------------ | ----------------------------------------------------------------------------- |
 | getNewSortingBasedOnColumnKey       | columnKey, sorting, existingSorting                      | SortingState       | Update/remove one column sort while preserving order                          |
-| getNewColumnFiltersBasedOnColumnKey | columnKey, columnFilter, columnFiltersState              | ColumnFiltersState | Replace one column filter entry without mutating state                        |
+| getNewColumnFiltersBasedOnColumnKey | columnKey, columnFilter, columnFiltersState              | ColumnFiltersState | Replace or remove one column filter entry without mutating state              |
 | getNewColumnSizingBasedOnColumnKey  | columnKey, columnSizing, columnSizesState                | ColumnSizingState  | Replace/remove one width entry for a column                                   |
 | getNewPinningBasedOnColumnKey       | columnKey, columnPinning, existingPinning, staticKeys    | ColumnPinningState | Pin/unpin one column while honoring static key constraints                    |
 | syncColumnOrderWithPinning          | columnKey, columnPinning, columns, currentOrder, pinning | ColumnOrderState   | Keep order consistent with pinning groups; now tolerates missing currentOrder |
