@@ -3,28 +3,7 @@
 import { type ReactNode } from 'react';
 
 import { renderHook, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-const {
-  readPersistedDataStateFromSessionStorageMock,
-  writePersistedDataStateToSessionStorageMock,
-} = vi.hoisted(() => ({
-  readPersistedDataStateFromSessionStorageMock: vi.fn(),
-  writePersistedDataStateToSessionStorageMock: vi.fn(),
-}));
-
-vi.mock('@/components/Table/utils', async (importOriginal) => {
-  const orig =
-    await importOriginal<typeof import('@/components/Table/utils')>();
-
-  return {
-    ...orig,
-    readPersistedDataStateFromSessionStorage:
-      readPersistedDataStateFromSessionStorageMock,
-    writePersistedDataStateToSessionStorage:
-      writePersistedDataStateToSessionStorageMock,
-  };
-});
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { TableDataProvider } from './TableDataContext.provider';
 import { useGetTableData } from './data/selectors/useGetTableData.hook';
@@ -56,15 +35,10 @@ const wrapper = ({ children }: WrapperProps) => (
 
 describe('TableDataProvider', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    // Clear mocks if needed in future tests
   });
 
-  it('rehydrates persisted rows and recomputes derived pagination state', async () => {
-    readPersistedDataStateFromSessionStorageMock.mockReturnValue({
-      data: [{ id: 1 }, { id: 2 }, { id: 3 }],
-      totalRows: 3,
-    });
-
+  it('initializes with loader data, not persisted rows', async () => {
     const { result } = renderHook(
       () => ({
         data: useGetTableData<TestRow>(),
@@ -76,19 +50,14 @@ describe('TableDataProvider', () => {
 
     await waitFor(() => {
       expect(result.current).toEqual({
-        data: [{ id: 1 }, { id: 2 }, { id: 3 }],
-        hasMore: false,
-        totalLoadedRows: 3,
+        data: [{ id: 1 }],
+        hasMore: true,
+        totalLoadedRows: 1,
       });
     });
   });
 
-  it('skips hydration when persisted rows are from a different snapshot', async () => {
-    readPersistedDataStateFromSessionStorageMock.mockReturnValue({
-      data: [{ id: 9 }],
-      totalRows: 1,
-    });
-
+  it('uses initial dataState when provided', async () => {
     const { result } = renderHook(
       () => ({
         data: useGetTableData<TestRow>(),
