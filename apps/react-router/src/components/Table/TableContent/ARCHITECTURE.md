@@ -79,3 +79,8 @@ page to `dataStore`.
 `TableContent` disables scrolling only during the initial `isLoading` state so
 the user keeps the previous data + skeleton presentation without being able to
 scroll through an empty loading surface.
+
+When a query transition completes (`isLoading` goes from `true` to `false`),
+the scroll container is reset to top. This is intentionally different from
+infinite-scroll load-more transitions (`isLoadingMore`), which preserve the
+current scroll position.

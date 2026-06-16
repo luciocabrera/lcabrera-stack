@@ -15,7 +15,7 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
 
   return (settings: BatchTableSettingsUpdate<TData>) => {
     dataStore.set({
-      isLoadingMore: true,
+      isLoading: true,
     });
     const columnsState = columnsStore.get();
     const metaState = metaStore.get();
@@ -41,8 +41,5 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
     if (!metaState?.isTableSettingsPinned) {
       metaStore.set({ isTableSettingsOpen: false });
     }
-    dataStore.set({
-      isLoadingMore: false,
-    });
   };
 };

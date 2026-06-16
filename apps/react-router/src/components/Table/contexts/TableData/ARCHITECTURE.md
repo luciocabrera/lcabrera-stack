@@ -8,7 +8,7 @@ the Suspense boundary so loading/error states are handled by React transitions.
 ```
 TableData/
 ├── TableDataContext.context.ts              → createContext (undefined default)
-├── TableDataContext.provider.tsx             → Provider: creates store from initial data and syncs tab-scoped data cache
+├── TableDataContext.provider.tsx             → Provider: creates store and syncs incoming loader data into existing store
 ├── TableDataContext.types.ts                → TableDataState, ContextValue
 ├── index.ts                                 → Barrel: TableDataProvider, hooks
 │
@@ -30,7 +30,6 @@ TableData/
 └── utils/
 
     ├── getInitialDataState.util.ts          → Build initial state with derived fields
-    ├── shouldHydratePersistedDataState.util.ts → Guards session rehydration to matching query snapshots
     └── index.ts                             → Barrel: utils
 ```
 
@@ -69,17 +68,13 @@ graph TD
   A["TableDataProvider receives initial data + totalRows"]
   A --> B["getInitialDataState(dataState)"]
   B --> C["useStore(initialState) → dataStore"]
-  C --> D["client mount hydration effect"]
-  D --> E["readPersistedDataStateFromSessionStorage(persistenceKey)"]
-  E --> F["shouldHydratePersistedDataState(initial, persisted)"]
-  F --> G["merge persisted data only when totals + first-page prefix match"]
-  G --> H["dataStore.set(persistedDataState)"]
-  C --> I["subscribe(dataStore) → writePersistedDataStateToSessionStorage()"]
-  C --> J["Provide via TableDataContext"]
+  C --> D["effect on dataState change"]
+  D --> E["dataStore.set(getInitialDataState(dataState))"]
+  E --> F["Provide via TableDataContext"]
 ```
 
-Hydration now happens after mount so the server render and the first client render
-stay consistent before the per-tab data cache is applied.
+This keeps the same store instance mounted across transitions and atomically
+replaces rows when new loader data resolves.
 
 ## Actions
 

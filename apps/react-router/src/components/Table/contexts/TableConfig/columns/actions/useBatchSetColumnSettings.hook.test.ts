@@ -8,6 +8,7 @@ import { useBatchSetColumnSettings } from './useBatchSetColumnSettings.hook';
 const {
   mockBuildPersistencePayload,
   mockColumnsStore,
+  mockDataStore,
   mockMetaStore,
   mockPersistTableState,
   mockResolveBatchColumnSettingsUpdate,
@@ -34,6 +35,9 @@ const {
     ]),
     mockColumnsStore: {
       get: vi.fn(() => columnsState),
+      set: vi.fn(),
+    },
+    mockDataStore: {
       set: vi.fn(),
     },
     mockResolveBatchColumnSettingsUpdate: vi.fn(() => ({
@@ -99,6 +103,13 @@ vi.mock(
   }),
 );
 
+vi.mock(
+  '@/components/Table/contexts/TableData/data/useTableDataContextValue.hook',
+  () => ({
+    useTableDataContextValue: () => ({ dataStore: mockDataStore }),
+  }),
+);
+
 vi.mock('@/components/Table/hooks', () => ({
   usePersistTableStateAction: () => mockPersistTableState,
 }));
@@ -130,6 +141,7 @@ describe('useBatchSetColumnSettings', () => {
     mockBuildPersistencePayload.mockClear();
     mockColumnsStore.get.mockClear();
     mockColumnsStore.set.mockClear();
+    mockDataStore.set.mockClear();
     mockMetaStore.get.mockClear();
     mockMetaStore.set.mockClear();
     mockPersistTableState.mockClear();
@@ -155,6 +167,9 @@ describe('useBatchSetColumnSettings', () => {
       });
     });
 
+    expect(mockDataStore.set).toHaveBeenCalledWith({
+      isLoading: true,
+    });
     expect(mockColumnsStore.get).toHaveBeenCalledTimes(1);
     expect(mockResolveBatchColumnSettingsUpdate).toHaveBeenCalledWith({
       columnsState: {

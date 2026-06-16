@@ -138,4 +138,63 @@ describe('TableContent', () => {
 
     expect(scrollContainer.dataset.scrollLocked).toBe('false');
   });
+
+  it('scrolls to top when query loading completes', () => {
+    let isLoadingState = true;
+    useGetTableIsLoadingMock.mockImplementation(() => isLoadingState);
+
+    const { rerender } = render(<TableContent />);
+
+    const tableBody = screen.getByTestId('table-body');
+    const scrollContainer = tableBody.closest('[data-scroll-locked]');
+    expect(scrollContainer).toBeInstanceOf(HTMLElement);
+    if (!(scrollContainer instanceof HTMLElement)) {
+      throw new TypeError('Expected scroll container to be an HTMLElement');
+    }
+
+    const scrollToMock = vi.fn();
+    Object.defineProperty(scrollContainer, 'scrollTo', {
+      configurable: true,
+      value: scrollToMock,
+      writable: true,
+    });
+
+    isLoadingState = false;
+    rerender(<TableContent />);
+
+    expect(scrollToMock).toHaveBeenCalledWith({
+      behavior: 'auto',
+      left: 0,
+      top: 0,
+    });
+  });
+
+  it('does not scroll to top during load-more transitions', () => {
+    let isLoadingMoreState = false;
+    useGetTableIsLoadingMock.mockReturnValue(false);
+    useGetTableIsLoadingMoreMock.mockImplementation(() => isLoadingMoreState);
+
+    const { rerender } = render(<TableContent />);
+
+    const tableBody = screen.getByTestId('table-body');
+    const scrollContainer = tableBody.closest('[data-scroll-locked]');
+    expect(scrollContainer).toBeInstanceOf(HTMLElement);
+    if (!(scrollContainer instanceof HTMLElement)) {
+      throw new TypeError('Expected scroll container to be an HTMLElement');
+    }
+
+    const scrollToMock = vi.fn();
+    Object.defineProperty(scrollContainer, 'scrollTo', {
+      configurable: true,
+      value: scrollToMock,
+      writable: true,
+    });
+
+    isLoadingMoreState = true;
+    rerender(<TableContent />);
+    isLoadingMoreState = false;
+    rerender(<TableContent />);
+
+    expect(scrollToMock).not.toHaveBeenCalled();
+  });
 });

@@ -1,4 +1,5 @@
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { useTableDataContextValue } from '@/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
 import { usePersistTableStateAction } from '@/components/Table/hooks';
 
 import {
@@ -9,9 +10,14 @@ import type { BatchColumnSettingsUpdate } from './utils/resolveBatchColumnSettin
 
 export const useBatchSetColumnSettings = <TData>() => {
   const { columnsStore, metaStore } = useTableConfigContextValue<TData>();
+  const { dataStore } = useTableDataContextValue<TData>();
   const persistTableState = usePersistTableStateAction();
 
   return (settings: BatchColumnSettingsUpdate<TData>) => {
+    dataStore.set({
+      isLoading: true,
+    });
+
     const columnsState = columnsStore.get();
     const metaState = metaStore.get();
     const isColumnSettingsPinned = metaState?.isColumnSettingsPinned ?? false;

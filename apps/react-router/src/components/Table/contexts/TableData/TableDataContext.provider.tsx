@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+
 import type { TableDataState } from '@/components/Table/Table.types';
 
 import { useStore } from '@/hooks';
@@ -16,9 +18,12 @@ export const TableDataProvider = <TData extends Record<string, unknown>>({
   isPersistenceEnabled: _isPersistenceEnabled = true,
   persistenceKey: _persistenceKey = '',
 }: TableDataProviderProps<TData>) => {
-  const dataStore = useStore<TableDataState<TData>>(
-    getInitialDataState<TData>(dataState ?? {}),
-  );
+  const initialDataState = getInitialDataState<TData>(dataState ?? {});
+  const dataStore = useStore<TableDataState<TData>>(initialDataState);
+
+  useEffect(() => {
+    dataStore.set(getInitialDataState<TData>(dataState ?? {}));
+  }, [dataState, dataStore]);
 
   const value = {
     dataStore,

@@ -175,7 +175,7 @@ describe('useBatchSetTableSettings', () => {
     });
 
     expect(mockDataStore.set).toHaveBeenNthCalledWith(1, {
-      isLoadingMore: true,
+      isLoading: true,
     });
     expect(mockColumnsStore.get).toHaveBeenCalledTimes(1);
     expect(mockResolveBatchTableSettingsUpdate).toHaveBeenCalledWith({
@@ -210,9 +210,7 @@ describe('useBatchSetTableSettings', () => {
     expect(mockMetaStore.set).toHaveBeenCalledWith({
       isTableSettingsOpen: false,
     });
-    expect(mockDataStore.set).toHaveBeenNthCalledWith(2, {
-      isLoadingMore: false,
-    });
+    expect(mockDataStore.set).toHaveBeenCalledTimes(1);
   });
 
   it('keeps table settings open when drawer is pinned', () => {
