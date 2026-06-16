@@ -5,15 +5,17 @@ import { Activity, useRef, useState } from 'react';
 
 import type { TabsProps } from './Tabs.types';
 
-import { styles } from './Tabs.stylex';
+import { busyStyles, styles } from './Tabs.stylex';
 
 export const Tabs = ({
   defaultSelectedTab,
+  isBusy = false,
   onSelectTab,
   selectedTab,
   tabs,
   ...props
 }: TabsProps) => {
+  const isBusyState = isBusy;
   const [uncontrolledActiveTab, setUncontrolledActiveTab] = useState(
     defaultSelectedTab ?? tabs[0]?.key ?? '',
   );
@@ -25,6 +27,10 @@ export const Tabs = ({
   const activeIndex = tabs.findIndex((tab) => tab.key === activeTab);
 
   const setActiveTab = (nextActiveTab: string) => {
+    if (isBusyState) {
+      return;
+    }
+
     if (!isControlled) {
       setUncontrolledActiveTab(nextActiveTab);
     }
@@ -32,7 +38,7 @@ export const Tabs = ({
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (tabs.length === 0) return;
+    if (tabs.length === 0 || isBusyState) return;
 
     let newIndex: number;
     const currentIndex = activeIndex === -1 ? 0 : activeIndex;
@@ -84,6 +90,7 @@ export const Tabs = ({
               )}
               aria-controls={`tabpanel-${tab.key}`}
               aria-selected={activeTab === tab.key}
+              disabled={isBusyState}
               id={`tab-${tab.key}`}
               onClick={() => {
                 setActiveTab(tab.key);
@@ -93,6 +100,11 @@ export const Tabs = ({
               type='button'
             >
               {tab.header}
+              {isBusyState && (
+                <span {...stylex.props(busyStyles.overlay)}>
+                  <span {...stylex.props(busyStyles.wave)} />
+                </span>
+              )}
             </button>
           ))}
         </div>

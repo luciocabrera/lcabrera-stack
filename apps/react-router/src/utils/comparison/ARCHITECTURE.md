@@ -4,9 +4,10 @@ Generic object-comparison helpers used by the store layer.
 
 ## Files
 
-| File                   | Description                                                         |
-| ---------------------- | ------------------------------------------------------------------- |
-| `shallowEqual.util.ts` | `{ objA, objB }` → `boolean`; compares one level of keys and values |
+| File                     | Description                                                                |
+| ------------------------ | -------------------------------------------------------------------------- |
+| `areEqualByJson.util.ts` | `{ left, right }` → `boolean`; deep structural equality via JSON.stringify |
+| `shallowEqual.util.ts`   | `{ objA, objB }` → `boolean`; compares one level of keys and values        |
 
 ## Behaviour
 

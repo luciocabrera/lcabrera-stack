@@ -21,6 +21,7 @@ const SORTING_SECTION_TOOLBAR = {
 } as const;
 
 export const SortingSectionToolbar = ({
+  isBusy = false,
   variant = 'footer',
 }: SortingSectionToolbarProps) => {
   const sorting = useGetColumnsSorting();
@@ -43,6 +44,7 @@ export const SortingSectionToolbar = ({
         aria-label={SORTING_SECTION_TOOLBAR.orderByColumnOrder.label}
         color={buttonColor}
         icon={<ListOrderedIcon size={iconSize} />}
+        isBusy={isBusy}
         onClick={sortByColumnOrder}
         size={buttonSize}
         width={buttonWidth}
@@ -58,6 +60,7 @@ export const SortingSectionToolbar = ({
         aria-label={SORTING_SECTION_TOOLBAR.clear.label}
         color={buttonColor}
         icon={<EraserIcon size={iconSize} />}
+        isBusy={isBusy}
         isDisabled={!hasSorting}
         onClick={clearSorting}
         size={buttonSize}
@@ -72,6 +75,7 @@ export const SortingSectionToolbar = ({
         aria-label={SORTING_SECTION_TOOLBAR.reset.label}
         color={buttonColor}
         icon={<RefreshIcon size={iconSize} />}
+        isBusy={isBusy}
         onClick={resetSorting}
         size={buttonSize}
         width={buttonWidth}

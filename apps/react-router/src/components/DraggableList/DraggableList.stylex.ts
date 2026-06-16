@@ -6,6 +6,7 @@ import {
   transitions,
 } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
+import { skeleton } from '@/design-system/tokens/commons.stylex';
 
 export const styles = stylex.create({
   list: {
@@ -48,6 +49,7 @@ export const styles = stylex.create({
     },
     userSelect: 'none',
     height: '34px',
+    position: 'relative',
   },
   itemDragging: {
     cursor: 'grabbing',
@@ -75,4 +77,14 @@ export const styles = stylex.create({
     flexShrink: 1,
     minWidth: 0,
   },
+  busyOverlay: {
+    borderRadius: borderRadius.md,
+    insetBlock: 0,
+    insetInline: 0,
+  },
 });
+
+export const busyStyles = {
+  overlay: [skeleton.loadingOverlay, styles.busyOverlay],
+  wave: skeleton.shimmerWave,
+};

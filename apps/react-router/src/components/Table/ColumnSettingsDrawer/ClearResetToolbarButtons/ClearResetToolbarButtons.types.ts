@@ -1,6 +1,7 @@
 export type ClearResetToolbarButtonsProps = {
   readonly clearLabel: string;
   readonly hasValue: boolean;
+  readonly isBusy?: boolean;
   readonly onClear: () => void;
   readonly onReset: () => void;
   readonly resetLabel: string;

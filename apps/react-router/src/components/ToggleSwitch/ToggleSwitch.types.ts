@@ -7,6 +7,8 @@ export type ToggleSwitchProps = Omit<
   ComponentPropsWithoutRef<'input'>,
   'onChange' | 'type'
 > & {
+  /** Whether loading shimmer should be shown */
+  readonly isBusy?: boolean;
   /** Whether the toggle is checked */
   readonly isChecked: boolean;
   /** Whether the toggle is disabled */

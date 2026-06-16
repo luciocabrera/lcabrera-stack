@@ -5,9 +5,13 @@ export { getNormalizedColumns } from './getNormalizedColumns.util';
 export { getPinnedDerivedColumnsState } from './getPinnedDerivedColumnsState.util';
 export { getPinnedColumnOffsets } from './getPinnedColumnOffsets.util';
 export { getStaticColumnKeys } from './getStaticColumnKeys.util';
+export { readPersistedDataStateFromSessionStorage } from './readPersistedDataStateFromSessionStorage.util';
 export { readPersistedStateFromCookie } from './readPersistedStateFromCookie.util';
+export { readPersistedStateFromSessionStorage } from './readPersistedStateFromSessionStorage.util';
+export { readPersistedUiStateFromSessionStorage } from './readPersistedUiStateFromSessionStorage.util';
 export { serializeStateSlice } from './serializeStateSlice.util';
-
 export { splitColumnsByPinning } from './splitColumnsByPinning.util';
 export { syncColumnOrderWithPinning } from './syncColumnOrderWithPinning.util';
+export { writePersistedDataStateToSessionStorage } from './writePersistedDataStateToSessionStorage.util';
+export { writePersistedUiStateToSessionStorage } from './writePersistedUiStateToSessionStorage.util';
 export { writeStateSlice } from './writeStateSlice.util';

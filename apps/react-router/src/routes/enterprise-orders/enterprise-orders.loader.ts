@@ -7,7 +7,7 @@ import { enterpriseOrdersApi } from '@/services';
 
 import { readTableLoaderStateFromRequest } from '../utils/readTableLoaderStateFromRequest.util';
 
-import { PERSISTENCE_KEY } from './EnterpriseOrders.constants';
+import { COLUMNS, PERSISTENCE_KEY } from './EnterpriseOrders.constants';
 
 /**
  * Loader for enterprise orders route
@@ -25,6 +25,7 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
     standaloneSortParam,
     sorting,
   } = readTableLoaderStateFromRequest<EnterpriseOrder>({
+    columns: COLUMNS,
     includeFilters: true,
     persistenceKey: PERSISTENCE_KEY,
     request,

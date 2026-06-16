@@ -1,6 +1,6 @@
 # Fallow Complexity Threshold Analysis
 
-## Canonical Snapshot (2026-06-14)
+## Canonical Snapshot (2026-06-15)
 
 Source of truth for this report:
 
@@ -10,13 +10,13 @@ Source of truth for this report:
 
 Current metrics from JSON:
 
-- Functions above threshold: 21
-- Functions analyzed: 3281
-- Files analyzed: 1158
-- Average maintainability: 93.1 (good)
-- Dead-code issues: 2 (check.total_issues)
-- Duplicate clone groups: 73 (dupes.stats.clone_groups)
-- Severity split: 0 critical, 6 high, 15 moderate
+- Functions above threshold: 18
+- Functions analyzed: 3716
+- Files analyzed: 1218
+- Average maintainability: 93 (good)
+- Dead-code issues: 18 (check.total_issues)
+- Duplicate clone groups: 88 (dupes.stats.clone_groups)
+- Severity split: 0 critical, 0 high, 18 moderate
 - Thresholds: cyclomatic 20, cognitive 15, CRAP 30
 
 ## Interpretation
@@ -25,12 +25,7 @@ Use this report as triage guidance grounded on the current JSON snapshot. For pl
 
 ## Representative High-Severity Findings
 
-- src/components/Table/contexts/TableData/data/actions/useFetchMoreData.hook.ts:31 (<anonymous>) - HIGH crap
-- src/components/Table/contexts/FiltersData/filters/actions/useFetchFilterData.hook.ts:129 (<anonymous>) - HIGH crap
-- src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useToggleColumnPin.hook.ts:31 (<anonymous>) - HIGH crap
-- src/routes/enterprise-orders/order-detail/OrderDetail.component.tsx:211 (<anonymous>) - HIGH crap
-- src/App.tsx:95 (<anonymous>) - HIGH crap
-- src/routes/wide-alltypes-150/WideAlltypes150.constants.ts:16 (<anonymous>) - HIGH crap
+- No critical/high findings in current snapshot.
 
 ## Drift Control
 

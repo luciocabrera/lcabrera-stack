@@ -12,6 +12,7 @@ import {
 const createInitialMetaState = (): TableMetaState => {
   return {
     columnOverscan: 2,
+    columnSettingsSelectedTab: 'general',
     columnSelectedKey: 'id',
     density: 'compact',
     enablePrefetch: true,
@@ -19,6 +20,7 @@ const createInitialMetaState = (): TableMetaState => {
     initialPageSize: 20,
     isBordered: true,
     isColumnSettingsOpen: false,
+    isColumnSettingsPinned: false,
     isStriped: true,
     isTableSettingsPinned: false,
     isTableSettingsOpen: false,

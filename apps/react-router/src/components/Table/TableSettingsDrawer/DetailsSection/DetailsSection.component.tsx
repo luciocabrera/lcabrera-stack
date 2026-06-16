@@ -31,9 +31,9 @@ import {
 } from '@/components/Table/contexts/TableData/data/selectors';
 import { formatNumber } from '@/utils/formatters/formatNumber.util';
 
-import type { DetailsRow } from './DetailsSection.types';
+import type { DetailsRow, DetailsSectionProps } from './DetailsSection.types';
 
-import { styles } from './DetailsSection.stylex';
+import { busyStyles, styles } from './DetailsSection.stylex';
 
 const formatMetadataLabel = (rawKey: string): string => {
   const normalized = rawKey
@@ -57,7 +57,7 @@ const formatMetadataValue = (value: TableMetadataValue): string => {
   return String(value);
 };
 
-export const DetailsSection = () => {
+export const DetailsSection = ({ isBusy = false }: DetailsSectionProps) => {
   const columns = useGetColumns();
   const totalLoadedRows = useGetTableTotalLoadedRows();
   const totalRows = useGetTableTotalRows();
@@ -202,6 +202,11 @@ export const DetailsSection = () => {
         <dl {...stylex.props(styles.rows)}>
           {rows.map((row) => (
             <div key={row.key} {...stylex.props(styles.row)}>
+              {isBusy && (
+                <div {...stylex.props(busyStyles.overlay)}>
+                  <div {...stylex.props(busyStyles.wave)} />
+                </div>
+              )}
               <dt {...stylex.props(styles.label)}>{row.label}</dt>
               <dd {...stylex.props(styles.value)}>{row.value}</dd>
             </div>

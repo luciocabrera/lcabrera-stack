@@ -16,6 +16,8 @@ The file [src/routes/enterprise-orders/EnterpriseOrders.constants.tsx](src/route
 - `DEFAULT_COLUMN_PINNING` route default pinning (`actions` pinned right).
 - `COLUMNS` definitions, including filter adapters and the row-level actions button.
 
+The route loader also uses `COLUMNS` as the source of truth for standalone URL filter validation, so mismatched filter payloads are discarded before the enterprise orders API request is built.
+
 ## Duplication Guardrail
 
 - Repeated distinct-filter string columns are composed through `createDistinctStringColumn(...)` in [src/routes/enterprise-orders/EnterpriseOrders.constants.tsx](src/routes/enterprise-orders/EnterpriseOrders.constants.tsx).

@@ -1,4 +1,5 @@
 import type { TabItem } from '@/components/Tabs';
+import type { TableSettingsDrawerProps } from './TableSettingsDrawer.types';
 
 import { Button } from '@/components/Button';
 import { SettingsIcon } from '@/components/Icons';
@@ -36,7 +37,9 @@ import {
 } from './TableDrawerContext/actions';
 import { useGetColumnFilters } from './TableDrawerContext/selectors';
 
-export const TableSettingsDrawer = () => {
+export const TableSettingsDrawer = ({
+  isBusy = false,
+}: TableSettingsDrawerProps) => {
   const batchSetTableDrawerSettings = useBatchSetTableDrawerSettings();
   const { notify } = useNotifications();
   const resetTableDrawerSettings = useResetTableSettings();
@@ -57,6 +60,10 @@ export const TableSettingsDrawer = () => {
   };
 
   const handleAccept = () => {
+    if (isBusy) {
+      return;
+    }
+
     if (!areFiltersValid) {
       notify({
         message: 'Fix invalid filters before accepting table settings.',
@@ -72,39 +79,47 @@ export const TableSettingsDrawer = () => {
   };
 
   const handleCancel = () => {
+    if (isBusy) {
+      return;
+    }
+
     resetTableDrawerSettings();
     closeIfUnpinned();
   };
 
   const handleTogglePin = () => {
+    if (isBusy) {
+      return;
+    }
+
     setTableIsTableSettingsPinned(!isPinned);
   };
 
   const tabs: TabItem[] = [
     {
-      children: <GeneralSettingsSection />,
+      children: <GeneralSettingsSection isBusy={isBusy} />,
       header: 'General',
       key: 'general',
     },
 
     {
-      children: <FiltersSection />,
+      children: <FiltersSection isBusy={isBusy} />,
       header: 'Filters',
       key: 'filters',
     },
     {
-      children: <SortingSection />,
+      children: <SortingSection isBusy={isBusy} />,
       header: 'Sorting',
       key: 'sorting',
     },
 
     {
-      children: <ColumnOrderSection />,
+      children: <ColumnOrderSection isBusy={isBusy} />,
       header: 'Columns',
       key: 'columns',
     },
     {
-      children: <DetailsSection />,
+      children: <DetailsSection isBusy={isBusy} />,
       header: 'Details',
       key: 'details',
     },
@@ -121,6 +136,7 @@ export const TableSettingsDrawer = () => {
       <SidePanelHeader
         actions={
           <SidePanelHeaderToolbar
+            isBusy={isBusy}
             isPinned={isPinned}
             onClose={handleCancel}
             onTogglePin={handleTogglePin}
@@ -134,6 +150,7 @@ export const TableSettingsDrawer = () => {
       <SidePanelBody>
         <ColumnOrderSectionProvider>
           <Tabs
+            isBusy={isBusy}
             onSelectTab={setSelectedTab}
             selectedTab={selectedTab}
             tabs={tabs}
@@ -141,10 +158,20 @@ export const TableSettingsDrawer = () => {
         </ColumnOrderSectionProvider>
       </SidePanelBody>
       <SidePanelFooter>
-        <Button color='primary' onClick={handleAccept} size='sm'>
+        <Button
+          color='primary'
+          isBusy={isBusy}
+          onClick={handleAccept}
+          size='sm'
+        >
           Accept
         </Button>
-        <Button color='outline' onClick={handleCancel} size='sm'>
+        <Button
+          color='outline'
+          isBusy={isBusy}
+          onClick={handleCancel}
+          size='sm'
+        >
           Cancel
         </Button>
       </SidePanelFooter>

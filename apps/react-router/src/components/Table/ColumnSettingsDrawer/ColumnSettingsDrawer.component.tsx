@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 import type { TabItem } from '@/components/Tabs';
 
 import { Button } from '@/components/Button';
@@ -13,6 +11,14 @@ import {
   SidePanelTitle,
 } from '@/components/SidePanel';
 import { useGetNormalizedColumn } from '@/components/Table/contexts/TableConfig/columns/selectors';
+import {
+  useSetTableColumnSettingsSelectedTab,
+  useSetTableIsColumnSettingsPinned,
+} from '@/components/Table/contexts/TableConfig/meta/actions';
+import {
+  useGetTableColumnSettingsSelectedTab,
+  useGetTableIsColumnSettingsPinned,
+} from '@/components/Table/contexts/TableConfig/meta/selectors';
 import { useTableWrapperRef } from '@/components/Table/contexts/TableWrapper';
 import { Tabs } from '@/components/Tabs';
 import { ICON_SIZE_LG } from '@/design-system/constants';
@@ -32,16 +38,19 @@ import { SortingSection } from './SortingSection';
 
 export const ColumnSettingsDrawer = <TData extends Record<string, unknown>>({
   columnKey,
+  isBusy = false,
 }: ColumnSettingsDrawerProps<TData>) => {
   useRenderTracker({ componentName: `ColumnSettingsDrawer:${columnKey}` });
 
   const column = useGetNormalizedColumn<TData>(columnKey);
+  const isPinned = useGetTableIsColumnSettingsPinned();
+  const selectedTab = useGetTableColumnSettingsSelectedTab();
+  const setIsPinned = useSetTableIsColumnSettingsPinned();
+  const setSelectedTab = useSetTableColumnSettingsSelectedTab();
   const wrapperRef = useTableWrapperRef();
 
   const batchSetColumnDrawerSettings = useBatchSetColumnDrawerSettings();
   const resetAllColumnDrawerSettings = useResetAllColumnDrawerSettings();
-
-  const [isPinned, setIsPinned] = useState(false);
 
   const isFilterable = column.isFilterable !== false;
   const isSortable = column.isSortable !== false;
@@ -49,14 +58,14 @@ export const ColumnSettingsDrawer = <TData extends Record<string, unknown>>({
 
   const tabs: TabItem[] = [
     {
-      children: <GeneralSection columnKey={columnKey} />,
+      children: <GeneralSection columnKey={columnKey} isBusy={isBusy} />,
       header: 'General',
       key: 'general',
     },
     ...(isFilterable && column.dataType
       ? [
           {
-            children: <FilterSection columnKey={columnKey} />,
+            children: <FilterSection columnKey={columnKey} isBusy={isBusy} />,
             header: 'Filter',
             key: 'filter',
           },
@@ -65,7 +74,7 @@ export const ColumnSettingsDrawer = <TData extends Record<string, unknown>>({
     ...(isSortable
       ? [
           {
-            children: <SortingSection />,
+            children: <SortingSection isBusy={isBusy} />,
             header: 'Sorting',
             key: 'sorting',
           },
@@ -75,7 +84,7 @@ export const ColumnSettingsDrawer = <TData extends Record<string, unknown>>({
       ? []
       : [
           {
-            children: <PinningSection columnKey={columnKey} />,
+            children: <PinningSection columnKey={columnKey} isBusy={isBusy} />,
             header: 'Pinning',
             key: 'pinning',
           },
@@ -88,18 +97,26 @@ export const ColumnSettingsDrawer = <TData extends Record<string, unknown>>({
   ];
 
   const handleAccept = () => {
-    batchSetColumnDrawerSettings();
+    if (isBusy) {
+      return;
+    }
 
-    if (isPinned) setIsPinned(false);
+    batchSetColumnDrawerSettings();
   };
 
   const handleCancel = () => {
-    resetAllColumnDrawerSettings(true);
+    if (isBusy) {
+      return;
+    }
 
-    if (isPinned) setIsPinned(false);
+    resetAllColumnDrawerSettings(!isPinned);
   };
 
   const handleTogglePin = () => {
+    if (isBusy) {
+      return;
+    }
+
     setIsPinned(!isPinned);
   };
 
@@ -115,6 +132,7 @@ export const ColumnSettingsDrawer = <TData extends Record<string, unknown>>({
       <SidePanelHeader
         actions={
           <SidePanelHeaderToolbar
+            isBusy={isBusy}
             isPinned={isPinned}
             onClose={handleCancel}
             onTogglePin={handleTogglePin}
@@ -126,13 +144,28 @@ export const ColumnSettingsDrawer = <TData extends Record<string, unknown>>({
         </SidePanelTitle>
       </SidePanelHeader>
       <SidePanelBody>
-        <Tabs tabs={tabs} />
+        <Tabs
+          isBusy={isBusy}
+          onSelectTab={setSelectedTab}
+          selectedTab={selectedTab}
+          tabs={tabs}
+        />
       </SidePanelBody>
       <SidePanelFooter>
-        <Button color='primary' onClick={handleAccept} size='sm'>
+        <Button
+          color='primary'
+          isBusy={isBusy}
+          onClick={handleAccept}
+          size='sm'
+        >
           Accept
         </Button>
-        <Button color='outline' onClick={handleCancel} size='sm'>
+        <Button
+          color='outline'
+          isBusy={isBusy}
+          onClick={handleCancel}
+          size='sm'
+        >
           Cancel
         </Button>
       </SidePanelFooter>

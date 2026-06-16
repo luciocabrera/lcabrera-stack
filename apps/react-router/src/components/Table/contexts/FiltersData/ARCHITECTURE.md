@@ -17,7 +17,9 @@ FiltersData/
     ├── useFiltersStore.hook.ts              → useSyncExternalStore + selector
     │
     ├── actions/
-    │   └── useFetchFilterData.hook.ts       → Fetch initial + paginated filter data for a column
+    │   ├── useFetchFilterData.hook.ts        → Lightweight orchestrator that composes initial + paginated fetch actions
+    │   ├── useFetchInitialFilterData.hook.ts → Initial filter options load + optional prefetch trigger
+    │   └── useFetchMoreFilterData.hook.ts    → Paginated filter options append + cache/prefetch handling
     │
     ├── selectors/
     │   └── useGetFilterData.hook.ts         → Read filter data for a column
@@ -70,9 +72,11 @@ graph TD
 
 ## Actions
 
-| Hook                 | Reads From         | Writes To          | Description                                                                       |
-| -------------------- | ------------------ | ------------------ | --------------------------------------------------------------------------------- |
-| `useFetchFilterData` | `filtersDataStore` | `filtersDataStore` | Fetches initial + paginated filter options for a column (uses `@/utils/prefetch`) |
+| Hook                        | Reads From         | Writes To          | Description                                                                       |
+| --------------------------- | ------------------ | ------------------ | --------------------------------------------------------------------------------- |
+| `useFetchFilterData`        | `filtersDataStore` | `filtersDataStore` | Composes and returns the initial and paginated filter data actions for one column |
+| `useFetchInitialFilterData` | `filtersDataStore` | `filtersDataStore` | Loads the first page, computes `hasMore`, and optionally triggers prefetch        |
+| `useFetchMoreFilterData`    | `filtersDataStore` | `filtersDataStore` | Appends next page from cache/network, updates totals, and optionally prefetches   |
 
 ## Selectors
 

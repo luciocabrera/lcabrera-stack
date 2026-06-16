@@ -223,6 +223,7 @@ export type TableMetaState = {
   >;
   readonly columnOverscan: number;
   readonly columnSelectedKey?: string;
+  readonly columnSettingsSelectedTab: string;
   readonly density: TableDensity;
   /** Whether to prefetch the next page after each load-more completes */
   readonly enablePrefetch: boolean;
@@ -232,6 +233,7 @@ export type TableMetaState = {
   readonly initialPageSize: number;
   readonly isBordered: boolean;
   readonly isColumnSettingsOpen: boolean;
+  readonly isColumnSettingsPinned: boolean;
   readonly isStriped: boolean;
   readonly isTableSettingsPinned: boolean;
   readonly isTableSettingsOpen: boolean;

@@ -100,4 +100,42 @@ describe('useSetTableDrawersOpenState', () => {
     expect(getMetaState().isTableSettingsOpen).toBe(false);
     expect(getMetaState().wasTableSettingsOpenBeforeColumnSettings).toBe(true);
   });
+
+  it('preserves existing snapshot when not opening column settings', () => {
+    setMetaState({
+      isColumnSettingsOpen: true,
+      isTableSettingsOpen: false,
+      wasTableSettingsOpenBeforeColumnSettings: true,
+    });
+
+    const { result } = renderHook(() => useSetTableDrawersOpenState());
+
+    act(() => {
+      result.current({
+        isColumnSettingsOpen: false,
+        isTableSettingsOpen: true,
+      });
+    });
+
+    expect(getMetaState().isColumnSettingsOpen).toBe(false);
+    expect(getMetaState().isTableSettingsOpen).toBe(true);
+    expect(getMetaState().wasTableSettingsOpenBeforeColumnSettings).toBe(true);
+  });
+
+  it('defaults snapshot to false when opening column settings from undefined state', () => {
+    setMetaState(undefined as unknown as ReturnType<typeof getMetaState>);
+
+    const { result } = renderHook(() => useSetTableDrawersOpenState());
+
+    act(() => {
+      result.current({
+        isColumnSettingsOpen: true,
+        isTableSettingsOpen: false,
+      });
+    });
+
+    expect(getMetaState().isColumnSettingsOpen).toBe(true);
+    expect(getMetaState().isTableSettingsOpen).toBe(false);
+    expect(getMetaState().wasTableSettingsOpenBeforeColumnSettings).toBe(false);
+  });
 });

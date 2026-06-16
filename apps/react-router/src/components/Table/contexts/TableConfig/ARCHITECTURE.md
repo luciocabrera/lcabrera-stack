@@ -155,13 +155,16 @@ TableMetaState = {
 ```mermaid
 graph TD
   A["TableConfigProvider receives columns + config props"]
-  A --> B["getInitialColumnsState(columns, filters, order, pinning, sizing, visibility, sorting)"]
-  A --> C["getInitialMetaState(density, bordered, striped, overscan, ...)"]
+  A --> B["getInitialColumnsState(columnsState)"]
+  A --> C["getInitialMetaState(metaState)"]
   B --> D["useStore(columnsInitial) → columnsStore"]
   C --> E["useStore(metaInitial) → metaStore"]
-  D --> F["Provide { columnsStore, metaStore } via TableConfigContext"]
+  D --> F["useHydrateTableSessionState() after mount"]
   E --> F
+  F --> G["Provide { columnsStore, metaStore } via TableConfigContext"]
 ```
+
+Session hydration is deferred until after mount so SSR and the initial client render stay aligned before tab-scoped state is merged.
 
 ## Testing Pattern
 

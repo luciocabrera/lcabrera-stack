@@ -188,4 +188,34 @@ describe('useAcceptPinSide', () => {
       pinSideModal: { ...PIN_SIDE_MODAL, isOpen: false },
     });
   });
+
+  it('passes safe defaults into resolver when table and drawer states are missing', () => {
+    (tableColumnsStore.get as ReturnType<typeof vi.fn>).mockReturnValueOnce(
+      undefined,
+    );
+    (drawerColumnsStore.get as ReturnType<typeof vi.fn>).mockReturnValueOnce(
+      undefined,
+    );
+    mockResolve.mockReturnValue({
+      kind: 'apply-resolved',
+      columnOrder: [],
+      columnPinning: { left: [], right: [] },
+    });
+
+    const { result } = renderHook(() => useAcceptPinSide());
+
+    act(() => {
+      result.current('left');
+    });
+
+    expect(mockResolve).toHaveBeenCalledWith({
+      columnKey: PIN_SIDE_MODAL.columnKey,
+      columnPinning: { left: [], right: [] },
+      columns: [],
+      columnsOrder: [],
+      pinConflictResolutionPreference: undefined,
+      pinSide: 'left',
+      staticKeys: undefined,
+    });
+  });
 });

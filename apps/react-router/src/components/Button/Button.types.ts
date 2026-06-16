@@ -20,6 +20,7 @@ export type ButtonProps = Omit<
   readonly color?: DesignSystemColor;
   readonly customStylex?: StyleXStyles;
   readonly icon?: ReactNode;
+  readonly isBusy?: boolean;
   readonly isIconOnly?: boolean;
   readonly isDisabled?: boolean;
   readonly onClick?: (() => void) | MouseEventHandler<HTMLButtonElement>;

@@ -2,7 +2,9 @@ import type {
   ColumnFiltersState,
   ColumnSizingState,
   SortingState,
+  TableColumn,
 } from '@/components/Table';
+import type { ColumnFilter } from '@/types/filterOperators.types';
 
 import { readPersistedStateFromCookie } from '@/components/Table/utils';
 import {
@@ -11,7 +13,10 @@ import {
   readTableStateFromURL,
 } from '@/utils/urlState';
 
-type ReadTableLoaderStateFromRequestArgs = {
+type ReadTableLoaderStateFromRequestArgs<
+  TData extends Record<string, unknown>,
+> = {
+  readonly columns?: readonly TableColumn<TData>[];
   readonly includeFilters?: boolean;
   readonly persistenceKey: string;
   readonly request: Request;
@@ -27,16 +32,78 @@ type ReadTableLoaderStateFromRequestResult<TData> = {
   readonly sorting: SortingState<TData>;
 };
 
+const isFilterCompatibleWithColumn = <TData extends Record<string, unknown>>({
+  column,
+  filter,
+}: {
+  readonly column: TableColumn<TData>;
+  readonly filter: ColumnFilter;
+}): boolean => {
+  switch (column.dataType) {
+    case 'boolean': {
+      return filter.type === 'boolean';
+    }
+    case 'currency':
+    case 'number': {
+      return filter.type === 'number';
+    }
+    case 'date': {
+      return filter.type === 'date';
+    }
+    case 'string':
+    case undefined: {
+      return (
+        filter.type === 'multiSelect' ||
+        filter.type === 'select' ||
+        filter.type === 'text'
+      );
+    }
+    default: {
+      return false;
+    }
+  }
+};
+
+const sanitizeFiltersByColumns = <TData extends Record<string, unknown>>({
+  columns,
+  filters,
+}: {
+  readonly columns: readonly TableColumn<TData>[];
+  readonly filters: ColumnFiltersState<TData>;
+}): ColumnFiltersState<TData> => {
+  const columnsByKey = new Map(
+    columns.map((column) => [String(column.key), column] as const),
+  );
+
+  const sanitizedEntries = Object.entries(filters).filter(
+    ([columnKey, filter]) => {
+      const column = columnsByKey.get(columnKey);
+
+      if (!column || !filter) {
+        return false;
+      }
+
+      return isFilterCompatibleWithColumn({
+        column,
+        filter,
+      });
+    },
+  );
+
+  return Object.fromEntries(sanitizedEntries) as ColumnFiltersState<TData>;
+};
+
 /**
  * Read shared table loader state from URL and cookies.
  */
 export const readTableLoaderStateFromRequest = <
   TData extends Record<string, unknown>,
 >({
+  columns,
   includeFilters = false,
   persistenceKey,
   request,
-}: ReadTableLoaderStateFromRequestArgs): ReadTableLoaderStateFromRequestResult<TData> => {
+}: ReadTableLoaderStateFromRequestArgs<TData>): ReadTableLoaderStateFromRequestResult<TData> => {
   const url = new URL(request.url);
 
   const urlState = readTableStateFromURL({
@@ -70,9 +137,16 @@ export const readTableLoaderStateFromRequest = <
     ? url.searchParams.get('filters')
     : null;
 
-  const filters = standaloneFiltersParam
+  const parsedFilters = standaloneFiltersParam
     ? deserializeFiltersFromURL<TData>(standaloneFiltersParam)
     : ({} as ColumnFiltersState<TData>);
+
+  const filters = columns
+    ? sanitizeFiltersByColumns({
+        columns,
+        filters: parsedFilters,
+      })
+    : parsedFilters;
 
   return {
     columnOrder,

@@ -17,6 +17,7 @@ const FILTER_TOOLBAR = {
 } as const;
 
 export const FilterSectionToolbar = ({
+  isBusy = false,
   variant = 'footer',
 }: FilterSectionToolbarProps) => {
   const columnFilter = useGetColumnFilter();
@@ -39,6 +40,7 @@ export const FilterSectionToolbar = ({
       <ClearResetToolbarButtons
         clearLabel={FILTER_TOOLBAR.clear.label}
         hasValue={hasFilter}
+        isBusy={isBusy}
         onClear={handleClear}
         onReset={resetColumnFilter}
         resetLabel={FILTER_TOOLBAR.reset.label}

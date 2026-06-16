@@ -40,7 +40,7 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
 
   const fetchMoreData = useFetchMoreData<TData, TResponse>();
 
-  const toogleTableIsTableSettingsOpen = useToogleTableIsTableSettingsOpen();
+  const toggleTableIsTableSettingsOpen = useToogleTableIsTableSettingsOpen();
 
   const containerRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -69,7 +69,8 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
                   aria-label='Table settings'
                   color='ghost'
                   icon={<SettingsIcon size={16} />}
-                  onClick={toogleTableIsTableSettingsOpen}
+                  isBusy={isLoading}
+                  onClick={toggleTableIsTableSettingsOpen}
                   size='mini'
                 />
               </>

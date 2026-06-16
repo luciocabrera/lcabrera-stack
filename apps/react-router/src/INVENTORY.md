@@ -23,6 +23,7 @@ Before creating anything new, check this inventory. If something here does the j
 | `RouteErrorBoundary`                 | `components/RouteErrorBoundary/`                       | Shared route error boundary display with retry button; accepts `defaultMessage` and `error` props                                 |
 | `SidePanel`                          | `components/SidePanel/`                                | Off-canvas panel with 10 sub-components, pinning, portal support                                                                  |
 | `Table`                              | `components/Table/`                                    | Full-featured data table — sort, filter, pin, resize, virtualise, persist, opt-in prefetch (ADR-006)                              |
+| `TableSettingsDrawerSkeleton`        | `components/Table/TableSettingsDrawerSkeleton/`        | Legacy pinned loading shell kept as a fallback artifact; active drawer loading now uses busy overlays on real settings controls   |
 | `TableSettingsDrawer/DetailsSection` | `components/Table/TableSettingsDrawer/DetailsSection/` | Read-only details panel inside table settings showing required counts plus optional metadata                                      |
 | `TableBodyRows`                      | `components/Table/TableBodyRows/`                      | Row-rendering delegate for TableBody — owns the visible-row loop and cell creation via utility reuse                              |
 | `Tabs`                               | `components/Tabs/`                                     | Keyboard-navigable tab bar using React 19 `<Activity>`                                                                            |
@@ -32,6 +33,14 @@ Before creating anything new, check this inventory. If something here does the j
 | `Tooltip`                            | `components/Tooltip/`                                  | CSS Anchor + Popover API tooltip, 4 placements, animated                                                                          |
 | `VirtualList`                        | `components/VirtualList/`                              | Virtualized list with search, select-all, checkboxes, lazy load, parent-contained sizing                                          |
 | `VirtualSelect`                      | `components/VirtualSelect/`                            | Parent-contained dropdown select backed by `VirtualList`; `string[]` or `{ label, value }[]` options                              |
+
+---
+
+## Features
+
+| Feature    | Location             | Description                                                                                                                  |
+| ---------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `showcase` | `features/showcase/` | Home-route isolated design-system showcase composed from reusable components; keeps demo logic outside shared domain modules |
 
 ---
 
@@ -69,25 +78,31 @@ Before creating anything new, check this inventory. If something here does the j
 
 ### `src/components/Table/utils/`
 
-| Function                              | Location                                                             | Description                                                                                              |
-| ------------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `deriveColumnViewState`               | `components/Table/utils/deriveColumnViewState.util.ts`               | Composes normalized columns with effective columns, grouped pinning state, and pinned offsets            |
-| `getColumnPinSide`                    | `components/Table/utils/getColumnPinSide.util.ts`                    | Returns `'left'`, `'right'`, or `undefined` for a column key given current pinning state                 |
-| `getEffectiveColumns`                 | `components/Table/utils/getEffectiveColumns.util.ts`                 | Returns visible columns in display order applying visibility, order, and pinning                         |
-| `getNewColumnFiltersBasedOnColumnKey` | `components/Table/utils/getNewColumnFiltersBasedOnColumnKey.util.ts` | Builds next `ColumnFiltersState` by replacing/removing the entry for one column key                      |
-| `getNewColumnSizingBasedOnColumnKey`  | `components/Table/utils/getNewColumnSizingBasedOnColumnKey.util.ts`  | Builds next `ColumnSizingState` by replacing/removing the width entry for one column key                 |
-| `getNewPinningBasedOnColumnKey`       | `components/Table/utils/getNewPinningBasedOnColumnKey.util.ts`       | Builds next `ColumnPinningState` by pinning or unpinning one column, honoring static key constraints     |
-| `getNewSortingBasedOnColumnKey`       | `components/Table/utils/getNewSortingBasedOnColumnKey.util.ts`       | Builds next `SortingState` by adding, updating (in-place), or removing the sort entry for one column key |
-| `getNormalizedColumns`                | `components/Table/utils/getNormalizedColumns.util.ts`                | Enriches columns with sort direction and sort index metadata                                             |
-| `getPinnedColumnOffsets`              | `components/Table/utils/getPinnedColumnOffsets.util.ts`              | Computes sticky `left`/`right` pixel offsets and pin-boundary markers for pinned columns                 |
-| `getPinnedDerivedColumnsState`        | `components/Table/utils/getPinnedDerivedColumnsState.util.ts`        | Computes effective columns, pin-based groups, and pinned offsets together in one call                    |
-| `getStaticColumnKeys`                 | `components/Table/utils/getStaticColumnKeys.util.ts`                 | Returns a `Set` of keys for columns marked as non-reorderable                                            |
-| `getStorageKey`                       | `components/Table/utils/getStorageKey.util.ts`                       | Builds a namespaced `persistenceKey:slice` storage key                                                   |
-| `readPersistedStateFromCookie`        | `components/Table/utils/readPersistedStateFromCookie.util.ts`        | Parses table persisted state from cookies; SSR-safe                                                      |
-| `serializeStateSlice`                 | `components/Table/utils/serializeStateSlice.util.ts`                 | Converts a state slice to a `{ key, value }` payload for cookie/localStorage write                       |
-| `splitColumnsByPinning`               | `components/Table/utils/splitColumnsByPinning.util.ts`               | Splits effective columns into left, center, and right pin groups                                         |
-| `syncColumnOrderWithPinning`          | `components/Table/utils/syncColumnOrderWithPinning.util.ts`          | Reorders column order array to keep pinned columns grouped; tolerates missing current order              |
-| `writeStateSlice`                     | `components/Table/utils/writeStateSlice.util.ts`                     | Writes a serialized state slice to cookie or localStorage                                                |
+| Function                                   | Location                                                                  | Description                                                                                               |
+| ------------------------------------------ | ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `deriveColumnViewState`                    | `components/Table/utils/deriveColumnViewState.util.ts`                    | Composes normalized columns with effective columns, grouped pinning state, and pinned offsets             |
+| `getColumnPinSide`                         | `components/Table/utils/getColumnPinSide.util.ts`                         | Returns `'left'`, `'right'`, or `undefined` for a column key given current pinning state                  |
+| `getEffectiveColumns`                      | `components/Table/utils/getEffectiveColumns.util.ts`                      | Returns visible columns in display order applying visibility, order, and pinning                          |
+| `getNewColumnFiltersBasedOnColumnKey`      | `components/Table/utils/getNewColumnFiltersBasedOnColumnKey.util.ts`      | Builds next `ColumnFiltersState` by replacing/removing the entry for one column key                       |
+| `getNewColumnSizingBasedOnColumnKey`       | `components/Table/utils/getNewColumnSizingBasedOnColumnKey.util.ts`       | Builds next `ColumnSizingState` by replacing/removing the width entry for one column key                  |
+| `getNewPinningBasedOnColumnKey`            | `components/Table/utils/getNewPinningBasedOnColumnKey.util.ts`            | Builds next `ColumnPinningState` by pinning or unpinning one column, honoring static key constraints      |
+| `getNewSortingBasedOnColumnKey`            | `components/Table/utils/getNewSortingBasedOnColumnKey.util.ts`            | Builds next `SortingState` by adding, updating (in-place), or removing the sort entry for one column key  |
+| `getNormalizedColumns`                     | `components/Table/utils/getNormalizedColumns.util.ts`                     | Enriches columns with sort direction and sort index metadata                                              |
+| `getPinnedColumnOffsets`                   | `components/Table/utils/getPinnedColumnOffsets.util.ts`                   | Computes sticky `left`/`right` pixel offsets and pin-boundary markers for pinned columns                  |
+| `getPinnedDerivedColumnsState`             | `components/Table/utils/getPinnedDerivedColumnsState.util.ts`             | Computes effective columns, pin-based groups, and pinned offsets together in one call                     |
+| `getStaticColumnKeys`                      | `components/Table/utils/getStaticColumnKeys.util.ts`                      | Returns a `Set` of keys for columns marked as non-reorderable                                             |
+| `getStorageKey`                            | `components/Table/utils/getStorageKey.util.ts`                            | Builds a namespaced `persistenceKey:slice` storage key                                                    |
+| `readPersistedDataStateFromSessionStorage` | `components/Table/utils/readPersistedDataStateFromSessionStorage.util.ts` | Reads tab-scoped persisted table rows for stale refresh rendering                                         |
+| `readPersistedStateFromCookie`             | `components/Table/utils/readPersistedStateFromCookie.util.ts`             | Parses table persisted state from cookies; SSR-safe                                                       |
+| `readPersistedStateFromSessionStorage`     | `components/Table/utils/readPersistedStateFromSessionStorage.util.ts`     | Reads tab-scoped persisted column state slices from sessionStorage                                        |
+| `readPersistedUiStateFromSessionStorage`   | `components/Table/utils/readPersistedUiStateFromSessionStorage.util.ts`   | Reads tab-scoped persisted table UI slices (drawers/tab/expanded filters)                                 |
+| `resolveFetchMoreState`                    | `components/Table/utils/resolveFetchMoreState.util.ts`                    | Shared helper that merges paginated rows/options and recomputes `hasMore`, `totalLoadedRows`, `totalRows` |
+| `serializeStateSlice`                      | `components/Table/utils/serializeStateSlice.util.ts`                      | Converts a state slice to a `{ key, value }` payload for cookie/localStorage write                        |
+| `splitColumnsByPinning`                    | `components/Table/utils/splitColumnsByPinning.util.ts`                    | Splits effective columns into left, center, and right pin groups                                          |
+| `syncColumnOrderWithPinning`               | `components/Table/utils/syncColumnOrderWithPinning.util.ts`               | Reorders column order array to keep pinned columns grouped; tolerates missing current order               |
+| `writePersistedDataStateToSessionStorage`  | `components/Table/utils/writePersistedDataStateToSessionStorage.util.ts`  | Writes tab-scoped persisted table rows for refresh reuse                                                  |
+| `writePersistedUiStateToSessionStorage`    | `components/Table/utils/writePersistedUiStateToSessionStorage.util.ts`    | Writes tab-scoped persisted table UI slices                                                               |
+| `writeStateSlice`                          | `components/Table/utils/writeStateSlice.util.ts`                          | Writes a serialized state slice to cookie or localStorage                                                 |
 
 ### `src/components/Table/contexts/TableConfig/columns/actions/`
 
@@ -114,6 +129,14 @@ Before creating anything new, check this inventory. If something here does the j
 | `useSetTableDrawersOpenState`        | `components/Table/contexts/TableConfig/meta/actions/useSetTableDrawersOpenState.hook.ts`        | Atomically sets table and column drawer open flags in one store update |
 | `useSetTableSettingsExpandedFilters` | `components/Table/contexts/TableConfig/meta/actions/useSetTableSettingsExpandedFilters.hook.ts` | Persists expanded filter keys for table-settings drawer                |
 | `useSetTableSettingsSelectedTab`     | `components/Table/contexts/TableConfig/meta/actions/useSetTableSettingsSelectedTab.hook.ts`     | Persists selected table-settings tab key in meta state                 |
+
+### `src/components/Table/contexts/FiltersData/filters/actions/`
+
+| Artifact                    | Location                                                                                  | Description                                                                                               |
+| --------------------------- | ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `useFetchFilterData`        | `components/Table/contexts/FiltersData/filters/actions/useFetchFilterData.hook.ts`        | Orchestrates filter-option fetching by composing the initial and paginated actions for one column         |
+| `useFetchInitialFilterData` | `components/Table/contexts/FiltersData/filters/actions/useFetchInitialFilterData.hook.ts` | Fetches the first page of filter options, updates totals, and optionally triggers prefetch                |
+| `useFetchMoreFilterData`    | `components/Table/contexts/FiltersData/filters/actions/useFetchMoreFilterData.hook.ts`    | Loads and appends subsequent pages of filter options using cache-or-fetch and optional post-load prefetch |
 
 ### `src/components/Table/TableSettingsDrawer/TableDrawerContext/actions/`
 
@@ -156,10 +179,18 @@ Before creating anything new, check this inventory. If something here does the j
 | Function                            | Location                                                                                                                                    | Description                                                                                                        |
 | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | `resolveOrderConflictUpdate`        | `components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/resolveOrderConflictUpdate.util.ts`        | Decides whether a reordered column layout can be applied directly or must open/auto-accept the order-conflict flow |
+| `applyToggleColumnPinResolution`    | `components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/applyToggleColumnPinResolution.util.ts`    | Applies resolved toggle-pin outcomes by dispatching pinning updates, modal state updates, and auto-accept actions  |
 | `resolveToggleColumnPinUpdate`      | `components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/resolveToggleColumnPinUpdate.util.ts`      | Resolves static short-circuit plus pin-toggle intent into direct update or modal/auto-accept outcomes              |
 | `resolveAcceptedOrderConflictState` | `components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/resolveAcceptedOrderConflictState.util.ts` | Resolves accepted order-conflict state into final order/pinning with static restoration                            |
 | `resolveAcceptedPinSideUpdate`      | `components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/resolveAcceptedPinSideUpdate.util.ts`      | Resolves accepted pin-side actions into direct updates or conflict-modal/auto-accept outcomes                      |
 | `resolveAcceptedUnpinConflictState` | `components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/resolveAcceptedUnpinConflictState.util.ts` | Resolves unpin-conflict choices into pinning-only updates or reorder+pinning updates                               |
+
+### `src/components/Table/contexts/TableData/utils/`
+
+| Function                          | Location                                                                            | Description                                                                                     |
+| --------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `getInitialDataState`             | `components/Table/contexts/TableData/utils/getInitialDataState.util.ts`             | Builds initial table data state with derived `hasMore` and `totalLoadedRows`                    |
+| `shouldHydratePersistedDataState` | `components/Table/contexts/TableData/utils/shouldHydratePersistedDataState.util.ts` | Allows persisted data hydration only when totals and initial-page prefix match current snapshot |
 
 ### `src/utils/api/`
 
@@ -169,9 +200,10 @@ Before creating anything new, check this inventory. If something here does the j
 
 ### `src/utils/comparison/`
 
-| Function       | Location                                | Description                                                      |
-| -------------- | --------------------------------------- | ---------------------------------------------------------------- |
-| `shallowEqual` | `utils/comparison/shallowEqual.util.ts` | `{ objA, objB }` → `boolean`; one-level key+value equality check |
+| Function         | Location                                  | Description                                                                |
+| ---------------- | ----------------------------------------- | -------------------------------------------------------------------------- |
+| `areEqualByJson` | `utils/comparison/areEqualByJson.util.ts` | `{ left, right }` → `boolean`; deep structural equality via JSON.stringify |
+| `shallowEqual`   | `utils/comparison/shallowEqual.util.ts`   | `{ objA, objB }` → `boolean`; one-level key+value equality check           |
 
 ### `src/utils/filters/`
 

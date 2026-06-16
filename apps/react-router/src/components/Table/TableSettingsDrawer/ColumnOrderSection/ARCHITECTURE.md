@@ -164,6 +164,7 @@ Actions in ColumnOrderSectionContext read/write to both stores.
 | ------------------------------ | ------------------------------------------------------------------------------- |
 | `applyPin`                     | Add column to pin side, respecting static positions                             |
 | `buildAllOrderedColumns`       | Merge columnOrder with remaining columns                                        |
+| `createDraggableItems`         | Maps ordered columns to draggable entries and delegates row content rendering   |
 | `derivePinSideResolutionState` | Resolve pin-side choice to direct update or conflict, shared by drawer + header |
 | `detectPinOrderConflict`       | Check if new order breaks pin contiguity                                        |
 | `getIsContiguousPin`           | Check if pin side maintains contiguity                                          |

@@ -2,11 +2,12 @@ import * as stylex from '@stylexjs/stylex';
 
 import type { DraggableListProps } from './DraggableList.types';
 
-import { styles } from './DraggableList.stylex';
+import { busyStyles, styles } from './DraggableList.stylex';
 import { useDraggableList } from './hooks';
 import { handleDragOver } from './utils';
 
 export const DraggableList = ({
+  isBusy = false,
   items: initialItems,
   onOrderChange,
 }: DraggableListProps) => {
@@ -25,6 +26,7 @@ export const DraggableList = ({
           dragItemId.current !== undefined && dragItemId.current !== item.id;
 
         const canDrag = item.isDraggable !== false;
+        const isDragEnabled = canDrag && !isBusy;
 
         return (
           <li
@@ -35,20 +37,29 @@ export const DraggableList = ({
               isDragOver && styles.itemDragOver,
               !canDrag && styles.itemNotDraggable,
             )}
-            draggable={canDrag}
-            onDragEnd={canDrag ? handleDragEnd : undefined}
-            onDragEnter={() => {
-              handleDragEnter(item.id);
-            }}
-            onDragOver={handleDragOver}
+            draggable={isDragEnabled}
+            onDragEnd={isDragEnabled ? handleDragEnd : undefined}
+            onDragEnter={
+              isDragEnabled
+                ? () => {
+                    handleDragEnter(item.id);
+                  }
+                : undefined
+            }
+            onDragOver={isDragEnabled ? handleDragOver : undefined}
             onDragStart={
-              canDrag
+              isDragEnabled
                 ? () => {
                     handleDragStart(item.id);
                   }
                 : undefined
             }
           >
+            {isBusy && (
+              <div {...stylex.props(busyStyles.overlay)}>
+                <div {...stylex.props(busyStyles.wave)} />
+              </div>
+            )}
             {canDrag && (
               <span
                 {...stylex.props(styles.dragHandle)}

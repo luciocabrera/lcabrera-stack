@@ -1,11 +1,12 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { shadows } from '@/design-system/tokens/base.stylex';
+import { borderRadius, shadows } from '@/design-system/tokens/base.stylex';
 import {
   baseInteractiveStyles,
   colorVariants,
   orientationVariants,
   rippleBase,
+  skeleton,
   sizeVariants,
   widthVariants,
 } from '@/design-system/tokens/commons.stylex';
@@ -25,6 +26,11 @@ const buttonSpecificStyles = stylex.create({
     gap: 0,
     justifyContent: 'center',
   },
+  busyState: {
+    opacity: {
+      ':disabled': 1,
+    },
+  },
   labelHidden: {
     display: 'none',
   },
@@ -42,6 +48,14 @@ const styleVariants = stylex.create({
   },
 });
 
+const loadingStyles = stylex.create({
+  overlay: {
+    borderRadius: borderRadius.md,
+    insetBlock: 0,
+    insetInline: 0,
+  },
+});
+
 export const buttonStyles = {
   base: {
     ...baseInteractiveStyles.element,
@@ -51,9 +65,12 @@ export const buttonStyles = {
   color: colorVariants,
   icon: baseInteractiveStyles.icon,
   iconOnly: buttonSpecificStyles.iconOnly,
+  busyState: buttonSpecificStyles.busyState,
   label: baseInteractiveStyles.label,
   labelHidden: buttonSpecificStyles.labelHidden,
   orientation: orientationVariants,
+  busyOverlay: [skeleton.loadingOverlay, loadingStyles.overlay],
+  busyWave: skeleton.shimmerWave,
   size: sizeVariants,
   style: styleVariants,
   width: widthVariants,

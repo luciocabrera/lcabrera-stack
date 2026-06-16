@@ -14,13 +14,14 @@ import { useGetColumns } from '@/components/Table/contexts/TableConfig/columns/s
 import { ICON_SIZE_MD } from '@/design-system/constants';
 
 import type { SortItem } from '../SortingSection.types';
+import type { ActiveSortListProps } from './ActiveSortList.types';
 
 import { useSetColumnsSortings } from '../../TableDrawerContext/actions';
 import { useGetColumnsSorting } from '../../TableDrawerContext/selectors';
 import { styles } from './ActiveSortList.stylex';
 import { SortingSectionToolbar } from '../SortingSectionToolbar';
 
-export const ActiveSortList = () => {
+export const ActiveSortList = ({ isBusy = false }: ActiveSortListProps) => {
   const columns = useGetColumns();
   const sorting = useGetColumnsSorting();
   const onSortChange = useSetColumnsSortings();
@@ -78,6 +79,7 @@ export const ActiveSortList = () => {
                 <SortDescIcon size={ICON_SIZE_MD} />
               )
             }
+            isBusy={isBusy}
             onClick={() => {
               handleToggleDirection(item.columnKey);
             }}
@@ -88,6 +90,7 @@ export const ActiveSortList = () => {
             aria-label={`Remove ${item.label} sort`}
             color='ghost'
             icon={<MenuCloseIcon size={ICON_SIZE_MD} />}
+            isBusy={isBusy}
             onClick={() => {
               handleRemoveSort(item.columnKey);
             }}
@@ -104,7 +107,7 @@ export const ActiveSortList = () => {
     <SidePanelSection>
       <SidePanelSectionHeader
         title={`Sort Order (${sortItems.length})`}
-        toolbar={<SortingSectionToolbar variant='toolbar' />}
+        toolbar={<SortingSectionToolbar isBusy={isBusy} variant='toolbar' />}
       />
       {sortItems.length === 0 ? (
         <InfoBox>
@@ -112,7 +115,11 @@ export const ActiveSortList = () => {
         </InfoBox>
       ) : (
         <div {...stylex.props(styles.sortList)}>
-          <DraggableList items={draggableItems} onOrderChange={handleReorder} />
+          <DraggableList
+            isBusy={isBusy}
+            items={draggableItems}
+            onOrderChange={handleReorder}
+          />
         </div>
       )}
     </SidePanelSection>

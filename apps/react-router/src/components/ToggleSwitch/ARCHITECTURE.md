@@ -44,6 +44,7 @@ graph TD
 | ------------ | -------------------------------------------------------------- | -------- | ----------- | ------------------------------------------------------ |
 | `isChecked`  | `boolean`                                                      | ✅       | —           | Controlled checked state                               |
 | `onChange`   | `(isChecked: boolean) => void`                                 | ✅       | —           | Called with the new boolean value on change            |
+| `isBusy`     | `boolean`                                                      | ❌       | `false`     | Shows loading shimmer and disables interaction         |
 | `isDisabled` | `boolean`                                                      | ❌       | `false`     | Disables interaction; applies opacity + cursor         |
 | `label`      | `string`                                                       | ❌       | `undefined` | Optional text label rendered beside the track          |
 | `id`         | `string` (via `...props`)                                      | ❌       | `useId()`   | Associates label `htmlFor`; auto-generated if omitted  |

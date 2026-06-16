@@ -15,12 +15,14 @@ type GetInitialMetaStateArgs = Partial<TableMetaState>;
 
 export const getInitialMetaState = ({
   columnOverscan = DEFAULT_COLUMN_OVERSCAN,
+  columnSettingsSelectedTab = 'general',
   density = 'compact',
   enablePrefetch = DEFAULT_ENABLE_PREFETCH,
   error,
   initialPageSize = INITIAL_PAGE_SIZE,
   isBordered = true,
   isColumnSettingsOpen = false,
+  isColumnSettingsPinned = false,
   isStriped = true,
   isTableSettingsPinned = false,
   isTableSettingsOpen = false,
@@ -36,12 +38,14 @@ export const getInitialMetaState = ({
   ...rest
 }: GetInitialMetaStateArgs): TableMetaState => ({
   columnOverscan,
+  columnSettingsSelectedTab,
   density,
   enablePrefetch,
   error,
   initialPageSize,
   isBordered,
   isColumnSettingsOpen,
+  isColumnSettingsPinned,
   isStriped,
   isTableSettingsPinned,
   isTableSettingsOpen,

@@ -8,97 +8,132 @@ import type { SortRule } from 'api-shared';
 
 import type { EnterpriseOrdersFilters } from './enterpriseOrders.types';
 
-const booleanFilterSchema = {
-  type: 'object',
-  required: ['type', 'value'],
-  properties: {
-    type: { const: 'boolean' },
-    value: { type: 'boolean' },
-  },
-  additionalProperties: false,
-};
-
-const dateFilterSchema = {
-  type: 'object',
-  required: ['type', 'operator', 'value'],
-  properties: {
-    operator: {
-      type: 'string',
-      enum: ['after', 'before', 'between', 'equals'],
-    },
-    type: { const: 'date' },
-    value: { type: 'string', minLength: 1 },
-    value2: { type: 'string', minLength: 1 },
-  },
-  additionalProperties: false,
-};
-
-const numberFilterSchema = {
-  type: 'object',
-  required: ['type', 'operator', 'value'],
-  properties: {
-    operator: {
-      type: 'string',
-      enum: [
-        'between',
-        'equals',
-        'greaterThan',
-        'greaterThanOrEqual',
-        'lessThan',
-        'lessThanOrEqual',
-        'notEquals',
-      ],
-    },
-    type: { const: 'number' },
-    value: { type: 'number' },
-    value2: { type: 'number' },
-  },
-  additionalProperties: false,
-};
-
-const selectFilterSchema = {
+const filterValueSchema = {
   type: 'object',
   required: ['type'],
   properties: {
-    operator: { type: 'string', enum: ['equals', 'notEquals'] },
-    type: { type: 'string', enum: ['multiSelect', 'select'] },
-    value: { type: 'string', minLength: 1 },
+    operator: { type: 'string' },
+    type: {
+      type: 'string',
+      enum: ['boolean', 'date', 'multiSelect', 'number', 'select', 'text'],
+    },
+    value: {},
+    value2: {},
     values: {
       type: 'array',
       items: { type: 'string', minLength: 1 },
     },
   },
   additionalProperties: false,
-};
-
-const textFilterSchema = {
-  type: 'object',
-  required: ['type', 'operator', 'value'],
-  properties: {
-    operator: {
-      type: 'string',
-      enum: [
-        'contains',
-        'endsWith',
-        'equals',
-        'notContains',
-        'notEquals',
-        'startsWith',
-      ],
+  allOf: [
+    {
+      if: {
+        properties: {
+          type: { const: 'boolean' },
+        },
+        required: ['type'],
+      },
+      // oxlint-disable-next-line unicorn/no-thenable -- JSON Schema uses then/if conditionals
+      then: {
+        required: ['type', 'value'],
+        properties: {
+          value: { type: 'boolean' },
+        },
+      },
     },
-    type: { const: 'text' },
-    value: { type: 'string', minLength: 1 },
-  },
-  additionalProperties: false,
-};
-
-const filterValueSchema = {
-  oneOf: [
-    booleanFilterSchema,
-    dateFilterSchema,
-    numberFilterSchema,
-    selectFilterSchema,
-    textFilterSchema,
+    {
+      if: {
+        properties: {
+          type: { const: 'date' },
+        },
+        required: ['type'],
+      },
+      // oxlint-disable-next-line unicorn/no-thenable -- JSON Schema uses then/if conditionals
+      then: {
+        required: ['type', 'operator', 'value'],
+        properties: {
+          operator: {
+            type: 'string',
+            enum: ['after', 'before', 'between', 'equals'],
+          },
+          value: { type: 'string', minLength: 1 },
+          value2: { type: 'string', minLength: 1 },
+        },
+      },
+    },
+    {
+      if: {
+        properties: {
+          type: { const: 'number' },
+        },
+        required: ['type'],
+      },
+      // oxlint-disable-next-line unicorn/no-thenable -- JSON Schema uses then/if conditionals
+      then: {
+        required: ['type', 'operator', 'value'],
+        properties: {
+          operator: {
+            type: 'string',
+            enum: [
+              'between',
+              'equals',
+              'greaterThan',
+              'greaterThanOrEqual',
+              'lessThan',
+              'lessThanOrEqual',
+              'notEquals',
+            ],
+          },
+          value: { type: 'number' },
+          value2: { type: 'number' },
+        },
+      },
+    },
+    {
+      if: {
+        properties: {
+          type: { enum: ['multiSelect', 'select'] },
+        },
+        required: ['type'],
+      },
+      // oxlint-disable-next-line unicorn/no-thenable -- JSON Schema uses then/if conditionals
+      then: {
+        properties: {
+          operator: { type: 'string', enum: ['equals', 'notEquals'] },
+          value: { type: 'string', minLength: 1 },
+          values: {
+            type: 'array',
+            items: { type: 'string', minLength: 1 },
+          },
+        },
+      },
+    },
+    {
+      if: {
+        properties: {
+          type: { const: 'text' },
+        },
+        required: ['type'],
+      },
+      // oxlint-disable-next-line unicorn/no-thenable -- JSON Schema uses then/if conditionals
+      then: {
+        required: ['type', 'operator', 'value'],
+        properties: {
+          operator: {
+            type: 'string',
+            enum: [
+              'contains',
+              'endsWith',
+              'equals',
+              'notContains',
+              'notEquals',
+              'startsWith',
+            ],
+          },
+          value: { type: 'string', minLength: 1 },
+        },
+      },
+    },
   ],
 };
 

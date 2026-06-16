@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
+import type { TableColumn } from '@/components/Table';
+
 vi.mock('@/components/Table/utils', () => ({
   readPersistedStateFromCookie: vi.fn(),
 }));
@@ -10,6 +12,25 @@ import { serializeFiltersToURL } from '@/utils/urlState/serializeFiltersToURL.ut
 import { serializeSortingToURL } from '@/utils/urlState/serializeSortingToURL.util';
 
 import { readTableLoaderStateFromRequest } from './readTableLoaderStateFromRequest.util';
+
+type TestRow = {
+  readonly amount: number;
+  readonly id: string;
+  readonly status: string;
+};
+
+const testColumns: readonly TableColumn<TestRow>[] = [
+  {
+    dataType: 'number',
+    key: 'amount',
+    label: 'Amount',
+  },
+  {
+    dataType: 'string',
+    key: 'status',
+    label: 'Status',
+  },
+];
 
 describe('readTableLoaderStateFromRequest', () => {
   it('merges URL state with persisted cookie state', () => {
@@ -44,11 +65,7 @@ describe('readTableLoaderStateFromRequest', () => {
       },
     );
 
-    const result = readTableLoaderStateFromRequest<{
-      amount: number;
-      id: string;
-      status: string;
-    }>({
+    const result = readTableLoaderStateFromRequest<TestRow>({
       includeFilters: true,
       persistenceKey: 'orders',
       request,
@@ -91,5 +108,28 @@ describe('readTableLoaderStateFromRequest', () => {
 
     expect(result.filters).toEqual({});
     expect(result.standaloneFiltersParam).toBeNull();
+  });
+
+  it('drops filters that do not match the route column data type', () => {
+    vi.mocked(readPersistedStateFromCookie).mockReturnValue({});
+
+    const request = new Request(
+      'https://example.com/orders?filters=%7B%22status%22%3A%5B%22gt%22%2C100%5D%2C%22amount%22%3A%5B%22gt%22%2C100%5D%7D',
+    );
+
+    const result = readTableLoaderStateFromRequest<TestRow>({
+      columns: testColumns,
+      includeFilters: true,
+      persistenceKey: 'orders',
+      request,
+    });
+
+    expect(result.filters).toEqual({
+      amount: {
+        operator: 'greaterThan',
+        type: 'number',
+        value: 100,
+      },
+    });
   });
 });

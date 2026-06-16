@@ -13,6 +13,7 @@ import { useGetColumnsSorting } from '../../TableDrawerContext/selectors';
 import { styles } from './AddSortSection.stylex';
 
 export const AddSortSection = ({
+  isBusy = false,
   onDropdownOpenChange,
 }: AddSortSectionProps) => {
   const columns = useGetColumns();
@@ -64,6 +65,7 @@ export const AddSortSection = ({
       />
       {!isDropdownOpen && (
         <Button
+          isBusy={isBusy}
           isDisabled={!selectedColumn}
           onClick={handleAddSort}
           size='sm'

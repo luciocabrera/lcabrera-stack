@@ -39,9 +39,12 @@ import { ColumnOrderSectionToolbar } from './ColumnOrderSectionToolbar';
 import { OrderConflictModal } from './OrderConflictModal';
 import { PinConflictModal } from './PinConflictModal';
 import { UnpinConflictModal } from './UnpinConflictModal';
-import { buildAllOrderedColumns } from './utils';
+import { buildAllOrderedColumns, createDraggableItems } from './utils';
 
-export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
+export const ColumnOrderSection = ({
+  isBusy = false,
+  ...props
+}: ColumnOrderSectionProps) => {
   const columns = useGetColumns();
   const columnsOrder = useGetColumnOrder();
   const columnPinning = useGetColumnPinning();
@@ -65,53 +68,62 @@ export const ColumnOrderSection = ({ ...props }: ColumnOrderSectionProps) => {
     columnsOrder,
   });
 
-  // Convert columns to draggable items
-  const draggableItems: DraggableItem[] = allOrderedColumns.map((col) => {
-    const isPinned =
-      columnPinning.left.includes(col.key) ||
-      columnPinning.right.includes(col.key);
-    const isStatic = col.isStatic === true;
-
-    return {
-      content: (
+  const draggableItems: readonly DraggableItem[] = createDraggableItems({
+    allOrderedColumns,
+    columnPinning,
+    columnVisibility,
+    renderItemContent: ({
+      columnKey,
+      isPinned,
+      isStatic,
+      isVisible,
+      label,
+    }) => {
+      return (
         <div {...stylex.props(styles.columnItem)}>
           {isStatic && <LockIcon size={14} />}
-          <span {...stylex.props(styles.columnLabel)}>{col.label}</span>
+          <span {...stylex.props(styles.columnLabel)}>{label}</span>
           <ToggleSwitch
+            isBusy={isBusy}
             isChecked={isPinned}
             isDisabled={isStatic}
             label='Pin'
             onChange={(isChecked) => {
-              toggleColumnPin({ columnKey: col.key, isPinning: isChecked });
+              toggleColumnPin({ columnKey, isPinning: isChecked });
             }}
           />
           <ToggleSwitch
-            isChecked={!columnVisibility.has(col.key)}
+            isBusy={isBusy}
+            isChecked={isVisible}
             isDisabled={isStatic}
             label='Show'
             onChange={(isChecked) => {
               toggleColumnVisibility({
-                columnKey: col.key,
+                columnKey,
                 isVisible: isChecked,
               });
             }}
           />
         </div>
-      ),
-      id: col.key,
-      isDraggable: !isStatic,
-    };
+      );
+    },
   });
 
   return (
     <SidePanelSectionMain {...props}>
       <SidePanelSectionHeader
         title={`Column Order & Visibility (${allOrderedColumns.length - columnVisibility.size}/${allOrderedColumns.length})`}
-        toolbar={<ColumnOrderSectionToolbar variant='toolbar' />}
+        toolbar={
+          <ColumnOrderSectionToolbar isBusy={isBusy} variant='toolbar' />
+        }
       />
-      <DraggableList items={draggableItems} onOrderChange={reorderColumns} />
+      <DraggableList
+        isBusy={isBusy}
+        items={draggableItems}
+        onOrderChange={reorderColumns}
+      />
 
-      <ColumnOrderSectionToolbar />
+      <ColumnOrderSectionToolbar isBusy={isBusy} />
       <PinSideModal
         columnLabel={pinSideModal.columnLabel}
         isOpen={pinSideModal.isOpen}

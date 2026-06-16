@@ -1,22 +1,54 @@
+import { useEffect, useState } from 'react';
+
 import type { SkeletonResponse } from './TableSkeleton.types';
 
 import { useGetColumns } from '../contexts/TableConfig/columns/selectors';
-import { useGetTablePlaceholderRowCount } from '../contexts/TableConfig/meta/selectors';
+import {
+  useGetTablePersistenceKey,
+  useGetTablePlaceholderRowCount,
+} from '../contexts/TableConfig/meta/selectors';
 import { Table } from '../Table.component';
 import { generatePlaceholderData } from '../TableBody/utils';
+import { readPersistedDataStateFromSessionStorage } from '../utils';
 
 export const TableSkeleton = () => {
   const columns = useGetColumns();
+  const persistenceKey = useGetTablePersistenceKey();
   const placeholderRowCount = useGetTablePlaceholderRowCount();
-  const effectiveData = generatePlaceholderData<Record<string, unknown>>({
+  const [persistedDataState, setPersistedDataState] = useState<
+    | {
+        readonly data: readonly Record<string, unknown>[];
+        readonly totalRows?: number;
+      }
+    | undefined
+  >(undefined);
+
+  useEffect(() => {
+    setPersistedDataState(
+      readPersistedDataStateFromSessionStorage<Record<string, unknown>>({
+        persistenceKey,
+      }),
+    );
+  }, [persistenceKey]);
+
+  const hasPersistedRows = (persistedDataState?.data.length ?? 0) > 0;
+  const placeholderData = generatePlaceholderData<Record<string, unknown>>({
     columns,
     rowCount: placeholderRowCount,
   });
+  const effectiveData: Record<string, unknown>[] = hasPersistedRows
+    ? [...(persistedDataState?.data ?? [])]
+    : placeholderData;
+  const totalRows = hasPersistedRows
+    ? (persistedDataState?.totalRows ?? effectiveData.length)
+    : effectiveData.length;
+
   return (
     <Table<Record<string, unknown>, SkeletonResponse>
       dataSelector={(response) => response.data}
+      dataTotalSelector={(response) => response.totalRows}
       isLoading
-      response={{ data: effectiveData }}
+      response={{ data: effectiveData, totalRows }}
     />
   );
 };

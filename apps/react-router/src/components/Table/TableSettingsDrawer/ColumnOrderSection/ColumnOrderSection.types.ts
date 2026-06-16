@@ -1,6 +1,8 @@
 import type { ComponentPropsWithoutRef } from 'react';
 
-export type ColumnOrderSectionProps = ComponentPropsWithoutRef<'div'>;
+export type ColumnOrderSectionProps = ComponentPropsWithoutRef<'div'> & {
+  readonly isBusy?: boolean;
+};
 
 export type {
   OrderConflictResolution,

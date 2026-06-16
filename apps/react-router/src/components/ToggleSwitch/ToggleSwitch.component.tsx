@@ -8,15 +8,17 @@ import { ICON_SIZE_XXS } from '@/design-system/constants';
 
 import type { ToggleSwitchProps } from './ToggleSwitch.types';
 
-import { styles } from './ToggleSwitch.stylex';
+import { busyStyles, styles } from './ToggleSwitch.stylex';
 
 export const ToggleSwitch = ({
+  isBusy = false,
   isChecked,
   isDisabled,
   label,
   onChange,
   ...props
 }: ToggleSwitchProps) => {
+  const isBusyState = isBusy;
   const [isFocused, setIsFocused] = useState(false);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -52,7 +54,7 @@ export const ToggleSwitch = ({
           {...stylex.props(styles.input)}
           aria-checked={isChecked}
           checked={isChecked}
-          disabled={isDisabled}
+          disabled={isDisabled || isBusyState}
           id={id}
           onBlur={handleBlur}
           onChange={handleChange}
@@ -74,6 +76,11 @@ export const ToggleSwitch = ({
         >
           {label}
         </label>
+      )}
+      {isBusyState && (
+        <div {...stylex.props(busyStyles.overlay)}>
+          <div {...stylex.props(busyStyles.wave)} />
+        </div>
       )}
     </div>
   );

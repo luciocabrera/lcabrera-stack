@@ -19,14 +19,25 @@ type TableDrawerProviderProps = {
 const {
   useGetTableColumnSelectedKeyMock,
   useGetTableIsColumnSettingsOpenMock,
+  useGetTableIsColumnSettingsPinnedMock,
+  useGetTableIsLoadingMock,
+  useGetTableIsLoadingMoreMock,
+  useGetTableIsTableSettingsPinnedMock,
   useGetTableIsTableSettingsOpenMock,
   useRenderTrackerMock,
 } = vi.hoisted(() => ({
   useGetTableColumnSelectedKeyMock: vi.fn(),
   useGetTableIsColumnSettingsOpenMock: vi.fn(),
+  useGetTableIsColumnSettingsPinnedMock: vi.fn(() => false),
+  useGetTableIsLoadingMock: vi.fn(() => false),
+  useGetTableIsLoadingMoreMock: vi.fn(() => false),
+  useGetTableIsTableSettingsPinnedMock: vi.fn(() => false),
   useGetTableIsTableSettingsOpenMock: vi.fn(),
   useRenderTrackerMock: vi.fn(),
 }));
+
+const columnSettingsDrawerPropsSpy = vi.hoisted(() => vi.fn());
+const tableSettingsDrawerPropsSpy = vi.hoisted(() => vi.fn());
 
 const MockColumnDrawerProvider = vi.hoisted(
   () =>
@@ -41,7 +52,14 @@ const MockColumnDrawerProvider = vi.hoisted(
 
 const MockColumnSettingsDrawer = vi.hoisted(
   () =>
-    ({ columnKey }: { readonly columnKey: string }) => {
+    ({
+      columnKey,
+      isBusy,
+    }: {
+      readonly columnKey: string;
+      readonly isBusy?: boolean;
+    }) => {
+      columnSettingsDrawerPropsSpy({ columnKey, isBusy });
       return <div>Column Settings Drawer: {columnKey}</div>;
     },
 );
@@ -53,9 +71,13 @@ const MockTableDrawerProvider = vi.hoisted(
     },
 );
 
-const MockTableSettingsDrawer = vi.hoisted(() => () => {
-  return <div>Table Settings Drawer</div>;
-});
+const MockTableSettingsDrawer = vi.hoisted(
+  () =>
+    ({ isBusy }: { readonly isBusy?: boolean }) => {
+      tableSettingsDrawerPropsSpy({ isBusy });
+      return <div>Table Settings Drawer</div>;
+    },
+);
 
 vi.mock('@/components/Table/TableSettingsDrawer', () => ({
   TableSettingsDrawer: MockTableSettingsDrawer,
@@ -82,7 +104,14 @@ vi.mock(
 vi.mock('../contexts/TableConfig/meta/selectors', () => ({
   useGetTableColumnSelectedKey: useGetTableColumnSelectedKeyMock,
   useGetTableIsColumnSettingsOpen: useGetTableIsColumnSettingsOpenMock,
+  useGetTableIsColumnSettingsPinned: useGetTableIsColumnSettingsPinnedMock,
+  useGetTableIsTableSettingsPinned: useGetTableIsTableSettingsPinnedMock,
   useGetTableIsTableSettingsOpen: useGetTableIsTableSettingsOpenMock,
+}));
+
+vi.mock('../contexts/TableData/data/selectors', () => ({
+  useGetTableIsLoading: useGetTableIsLoadingMock,
+  useGetTableIsLoadingMore: useGetTableIsLoadingMoreMock,
 }));
 
 vi.mock('@/utils/performance', () => ({
@@ -94,9 +123,15 @@ afterEach(() => {
 });
 
 describe('TableDrawersSection', () => {
+  afterEach(() => {
+    columnSettingsDrawerPropsSpy.mockClear();
+    tableSettingsDrawerPropsSpy.mockClear();
+  });
+
   it('renders table settings drawer when table drawer is open', () => {
     useGetTableIsTableSettingsOpenMock.mockReturnValue(true);
     useGetTableIsColumnSettingsOpenMock.mockReturnValue(false);
+    useGetTableIsTableSettingsPinnedMock.mockReturnValue(false);
     useGetTableColumnSelectedKeyMock.mockReturnValue('');
 
     render(<TableDrawersSection />);
@@ -109,6 +144,7 @@ describe('TableDrawersSection', () => {
   it('renders column settings drawer when both drawers are open', () => {
     useGetTableIsTableSettingsOpenMock.mockReturnValue(true);
     useGetTableIsColumnSettingsOpenMock.mockReturnValue(true);
+    useGetTableIsTableSettingsPinnedMock.mockReturnValue(true);
     useGetTableColumnSelectedKeyMock.mockReturnValue('customer');
 
     render(<TableDrawersSection />);
@@ -122,6 +158,7 @@ describe('TableDrawersSection', () => {
   it('renders column settings drawer when column drawer is open with selected key', () => {
     useGetTableIsTableSettingsOpenMock.mockReturnValue(false);
     useGetTableIsColumnSettingsOpenMock.mockReturnValue(true);
+    useGetTableIsTableSettingsPinnedMock.mockReturnValue(false);
     useGetTableColumnSelectedKeyMock.mockReturnValue('revenue');
 
     render(<TableDrawersSection />);
@@ -137,6 +174,7 @@ describe('TableDrawersSection', () => {
   it('renders nothing when no drawer is open', () => {
     useGetTableIsTableSettingsOpenMock.mockReturnValue(false);
     useGetTableIsColumnSettingsOpenMock.mockReturnValue(false);
+    useGetTableIsTableSettingsPinnedMock.mockReturnValue(false);
     useGetTableColumnSelectedKeyMock.mockReturnValue('');
 
     const { container } = render(<TableDrawersSection />);
@@ -182,5 +220,72 @@ describe('TableDrawersSection', () => {
 
     expect(screen.getByTestId('table-drawer-provider')).toBeTruthy();
     expect(screen.queryByTestId('column-drawer-provider')).toBeNull();
+  });
+
+  it('renders table settings drawer in loading mode when pinned drawer is open during loading', () => {
+    useGetTableIsLoadingMock.mockReturnValue(true);
+    useGetTableIsLoadingMoreMock.mockReturnValue(false);
+    useGetTableIsTableSettingsOpenMock.mockReturnValue(true);
+    useGetTableIsColumnSettingsOpenMock.mockReturnValue(false);
+    useGetTableIsTableSettingsPinnedMock.mockReturnValue(true);
+    useGetTableColumnSelectedKeyMock.mockReturnValue('');
+
+    render(<TableDrawersSection />);
+
+    expect(screen.getByText('Table Settings Drawer').textContent).toBe(
+      'Table Settings Drawer',
+    );
+    expect(screen.getByTestId('table-drawer-provider')).toBeTruthy();
+    expect(tableSettingsDrawerPropsSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ isBusy: true }),
+    );
+  });
+
+  it('renders column settings drawer in loading mode when pinned drawer is open during loading', () => {
+    useGetTableIsLoadingMock.mockReturnValue(true);
+    useGetTableIsLoadingMoreMock.mockReturnValue(false);
+    useGetTableIsTableSettingsOpenMock.mockReturnValue(false);
+    useGetTableIsColumnSettingsOpenMock.mockReturnValue(true);
+    useGetTableIsColumnSettingsPinnedMock.mockReturnValue(true);
+    useGetTableColumnSelectedKeyMock.mockReturnValue('name');
+
+    render(<TableDrawersSection />);
+
+    expect(screen.getByText('Column Settings Drawer: name').textContent).toBe(
+      'Column Settings Drawer: name',
+    );
+    expect(columnSettingsDrawerPropsSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ columnKey: 'name', isBusy: true }),
+    );
+  });
+
+  it('renders table settings drawer in loading-more mode even when unpinned', () => {
+    useGetTableIsLoadingMock.mockReturnValue(false);
+    useGetTableIsLoadingMoreMock.mockReturnValue(true);
+    useGetTableIsTableSettingsOpenMock.mockReturnValue(true);
+    useGetTableIsColumnSettingsOpenMock.mockReturnValue(false);
+    useGetTableIsTableSettingsPinnedMock.mockReturnValue(false);
+    useGetTableColumnSelectedKeyMock.mockReturnValue('');
+
+    render(<TableDrawersSection />);
+
+    expect(tableSettingsDrawerPropsSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ isBusy: true }),
+    );
+  });
+
+  it('renders column settings drawer in loading-more mode even when unpinned', () => {
+    useGetTableIsLoadingMock.mockReturnValue(false);
+    useGetTableIsLoadingMoreMock.mockReturnValue(true);
+    useGetTableIsTableSettingsOpenMock.mockReturnValue(false);
+    useGetTableIsColumnSettingsOpenMock.mockReturnValue(true);
+    useGetTableIsColumnSettingsPinnedMock.mockReturnValue(false);
+    useGetTableColumnSelectedKeyMock.mockReturnValue('status');
+
+    render(<TableDrawersSection />);
+
+    expect(columnSettingsDrawerPropsSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ columnKey: 'status', isBusy: true }),
+    );
   });
 });

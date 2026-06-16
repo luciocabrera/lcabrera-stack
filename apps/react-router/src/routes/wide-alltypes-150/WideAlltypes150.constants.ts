@@ -13,6 +13,7 @@ type ColDataType = 'boolean' | 'date' | 'number' | 'string';
  *   0,1,4,5 → number  |  2,3,7,8,9,10,11,12,13,14,15,16,17,18,19 → string
  *   6 → boolean  |  9 → date
  */
+// fallow-ignore-next-line complexity -- temporary testing suppression
 const getColDataType = (index: number): ColDataType => {
   const mod = index % 20;
   if (mod === 6) return 'boolean';

@@ -1,5 +1,6 @@
 export { applyPin } from './applyPin.util';
 export { buildAllOrderedColumns } from './buildAllOrderedColumns.util';
+export { createDraggableItems } from './createDraggableItems.util';
 export { derivePinSideResolutionState } from './derivePinSideResolutionState.util';
 export { detectPinOrderConflict } from './detectPinOrderConflict.util';
 export { insertAdjacentToPinnedGroup } from './insertAdjacentToPinnedGroup.util';
