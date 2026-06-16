@@ -22,17 +22,20 @@ graph TD
   TDS --> isCol["useGetTableIsColumnSettingsOpen()"]
   TDS --> isColPinned["useGetTableIsColumnSettingsPinned()"]
   TDS --> isLoading["useGetTableIsLoading()"]
+  TDS --> isLoadingMore["useGetTableIsLoadingMore()"]
   TDS --> colKey["useGetTableColumnSelectedKey()"]
 
   isCol -->|"true + columnKey"| CDP["ColumnDrawerProvider"]
   CDP --> CSD["ColumnSettingsDrawer"]
-  isLoading --> CBusy{"isColPinned && isLoading"}
+  isLoadingMore --> CBusy{"isLoadingMore || (isColPinned && isLoading)"}
+  isLoading --> CBusy
   CBusy -->|Yes| CBusyProp["ColumnSettingsDrawer isBusy=true"]
 
   isCol -->|false| check2{"isTableSettingsOpen?"}
   check2 -->|true| TDP["TableDrawerProvider"]
   TDP --> TSD["TableSettingsDrawer"]
-  isLoading --> TBusy{"isTablePinned && isLoading"}
+  isLoadingMore --> TBusy{"isLoadingMore || (isTablePinned && isLoading)"}
+  isLoading --> TBusy
   TBusy -->|Yes| TBusyProp["TableSettingsDrawer isBusy=true"]
 
   check2 -->|false| empty["<> (empty fragment)"]
@@ -54,6 +57,10 @@ created when the drawer is open:
 
 ## Busy Behavior
 
-Busy shimmer is only injected when the table is loading **and** the corresponding
-drawer is pinned. This keeps pinned drawers visually stable during background refreshes
-without forcing shimmer on unpinned drawers.
+Busy shimmer is injected in two cases:
+
+- The table is in incremental fetch mode (`isLoadingMore=true`) and the drawer is open
+- The table is in initial loading mode and the corresponding drawer is pinned
+
+This keeps pinned drawers stable during full refreshes while also surfacing fetch-more
+activity in whichever drawer is currently visible.
