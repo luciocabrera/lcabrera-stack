@@ -99,6 +99,33 @@ describe('TableConfig meta hooks', () => {
     expect(result.current).toBe('comfortable');
   });
 
+  it('falls back to an empty snapshot when meta store returns undefined', () => {
+    const subscribe = vi.fn(() => {
+      return () => {
+        // no-op unsubscribe for the test stub
+      };
+    });
+
+    metaStore = {
+      get: () => undefined as unknown as MetaStoreState,
+      getServerSnapshot: () => undefined as unknown as MetaStoreState,
+      reset: () => {
+        // no-op in fallback test
+      },
+      set: () => {
+        // no-op in fallback test
+      },
+      subscribe,
+    };
+
+    const { result } = renderHook(() =>
+      useMetaStore((state) => state.columnSelectedKey ?? 'none'),
+    );
+
+    expect(result.current).toBe('none');
+    expect(subscribe).toHaveBeenCalledTimes(1);
+  });
+
   it('exposes the meta selector hooks', () => {
     expect(renderHook(() => useGetTableColumnOverscan()).result.current).toBe(
       2,

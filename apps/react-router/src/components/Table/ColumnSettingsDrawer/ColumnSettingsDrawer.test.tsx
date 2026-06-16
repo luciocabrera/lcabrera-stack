@@ -19,6 +19,12 @@ type MockSidePanelHeaderProps = {
 
 type MockSidePanelProps = {
   readonly children: ReactNode;
+  readonly onClose?: () => void;
+};
+
+type MockSidePanelHeaderToolbarProps = {
+  readonly onClose?: () => void;
+  readonly onTogglePin?: () => void;
 };
 
 type MockTabsProps = {
@@ -79,9 +85,19 @@ const MockSettingsIcon = vi.hoisted(() => () => {
   return <span>settings-icon</span>;
 });
 
-const MockSidePanel = vi.hoisted(() => ({ children }: MockSidePanelProps) => {
-  return <div data-testid='side-panel'>{children}</div>;
-});
+const MockSidePanel = vi.hoisted(
+  () =>
+    ({ children, onClose }: MockSidePanelProps) => {
+      return (
+        <div data-testid='side-panel'>
+          <button onClick={onClose} type='button'>
+            SidePanel Close
+          </button>
+          {children}
+        </div>
+      );
+    },
+);
 
 const MockSidePanelBody = vi.hoisted(
   () =>
@@ -109,9 +125,21 @@ const MockSidePanelHeader = vi.hoisted(
     },
 );
 
-const MockSidePanelHeaderToolbar = vi.hoisted(() => () => {
-  return <div>toolbar</div>;
-});
+const MockSidePanelHeaderToolbar = vi.hoisted(
+  () =>
+    ({ onClose, onTogglePin }: MockSidePanelHeaderToolbarProps) => {
+      return (
+        <div>
+          <button onClick={onTogglePin} type='button'>
+            Toggle pin
+          </button>
+          <button onClick={onClose} type='button'>
+            Close
+          </button>
+        </div>
+      );
+    },
+);
 
 const MockSidePanelTitle = vi.hoisted(
   () =>
@@ -213,6 +241,13 @@ vi.mock('./SortingSection', () => ({
 }));
 
 afterEach(() => {
+  batchSetColumnDrawerSettingsMock.mockReset();
+  resetAllColumnDrawerSettingsMock.mockReset();
+  setTableColumnSettingsSelectedTabMock.mockReset();
+  setTableIsColumnSettingsPinnedMock.mockReset();
+  useGetNormalizedColumnMock.mockReset();
+  useRenderTrackerMock.mockReset();
+  useTableWrapperRefMock.mockReset();
   cleanup();
 });
 
@@ -266,5 +301,45 @@ describe('ColumnSettingsDrawer', () => {
 
     expect(batchSetColumnDrawerSettingsMock).toHaveBeenCalledTimes(1);
     expect(resetAllColumnDrawerSettingsMock).toHaveBeenCalledWith(true);
+  });
+
+  it('wires header toolbar interactions to drawer handlers', () => {
+    useGetNormalizedColumnMock.mockReturnValue({
+      dataType: 'string',
+      isFilterable: true,
+      isSortable: true,
+      isStatic: false,
+      label: 'Customer',
+    });
+
+    render(<ColumnSettingsDrawer columnKey='customer' />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Toggle pin' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+
+    expect(setTableIsColumnSettingsPinnedMock).toHaveBeenCalledWith(true);
+    expect(resetAllColumnDrawerSettingsMock).toHaveBeenCalledWith(true);
+  });
+
+  it('does not run actions when drawer is busy', () => {
+    useGetNormalizedColumnMock.mockReturnValue({
+      dataType: 'string',
+      isFilterable: true,
+      isSortable: true,
+      isStatic: false,
+      label: 'Customer',
+    });
+
+    render(<ColumnSettingsDrawer columnKey='customer' isBusy />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Accept' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Toggle pin' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    fireEvent.click(screen.getByRole('button', { name: 'SidePanel Close' }));
+
+    expect(batchSetColumnDrawerSettingsMock).not.toHaveBeenCalled();
+    expect(resetAllColumnDrawerSettingsMock).not.toHaveBeenCalled();
+    expect(setTableIsColumnSettingsPinnedMock).not.toHaveBeenCalled();
   });
 });

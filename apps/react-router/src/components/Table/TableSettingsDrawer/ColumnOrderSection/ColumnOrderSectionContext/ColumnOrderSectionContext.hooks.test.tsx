@@ -10,6 +10,7 @@ import { createMockStore } from '@/utils/tests/createMockStore.util';
 
 import { useCancelPinSide } from './actions/useCancelPinSide.hook';
 import { ColumnOrderSectionContext } from './ColumnOrderSectionContext.context';
+import { INITIAL_MODALS_STATE } from './ColumnOrderSectionContext.constants';
 import type { ColumnOrderSectionContextValue } from './ColumnOrderSectionContext.types';
 import { useGetConflictModal } from './selectors/useGetConflictModal.hook';
 import { useGetOrderConflict } from './selectors/useGetOrderConflict.hook';
@@ -54,6 +55,25 @@ const contextValue: ColumnOrderSectionContextValue = {
 
 const Wrapper = ({ children }: WrapperProps) =>
   createElement(ColumnOrderSectionContext, { value: contextValue }, children);
+
+const fallbackStore = createMockStore<
+  ColumnOrderSectionContextValue['modalsStore'] extends {
+    get: () => infer TState;
+  }
+    ? TState | undefined
+    : never
+>(undefined);
+
+const fallbackContextValue: ColumnOrderSectionContextValue = {
+  modalsStore: fallbackStore as never,
+};
+
+const FallbackWrapper = ({ children }: WrapperProps) =>
+  createElement(
+    ColumnOrderSectionContext,
+    { value: fallbackContextValue },
+    children,
+  );
 
 describe('ColumnOrderSectionContext hooks', () => {
   it('returns the column-order context value', () => {
@@ -117,5 +137,13 @@ describe('ColumnOrderSectionContext hooks', () => {
     });
 
     expect(modalsStore.get().pinSideModal.isOpen).toBe(false);
+  });
+
+  it('uses initial modal state when the store snapshot is undefined', () => {
+    expect(
+      renderHook(() => useModalsStore((state) => state.pinSideModal), {
+        wrapper: FallbackWrapper,
+      }).result.current,
+    ).toEqual(INITIAL_MODALS_STATE.pinSideModal);
   });
 });

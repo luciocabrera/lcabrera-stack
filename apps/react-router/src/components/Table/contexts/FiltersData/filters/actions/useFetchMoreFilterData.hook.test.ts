@@ -3,6 +3,7 @@
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { DEFAULT_FILTER_PAGE_SIZE } from '@/components/Table/Table.constants';
 import type {
   FiltersDataState,
   TableMetaState,
@@ -72,6 +73,7 @@ vi.mock('@/utils/prefetch/resolveFromCacheOrFetch.util', () => ({
 
 describe('useFetchMoreFilterData', () => {
   beforeEach(() => {
+    harness = createHarness();
     const currentHarness = getHarness();
     currentHarness.resetMocks();
     currentHarness.setMetaState({ enablePrefetch: false });
@@ -186,5 +188,108 @@ describe('useFetchMoreFilterData', () => {
     });
 
     expect(getHarness().resolveFromCacheOrFetchMock).not.toHaveBeenCalled();
+  });
+
+  it('throws when the target column filter is not initialized', async () => {
+    getHarness().dataStore.set({
+      status: undefined,
+    } as unknown as Partial<TestFiltersState>);
+
+    const { result } = renderHook(() =>
+      useFetchMoreFilterData<TestData, TestResponse>({
+        columnKey: 'status',
+        filtersDataStore: getHarness().dataStore as unknown as TStore<
+          FiltersDataState<TestData>
+        >,
+        metaStore: getHarness().metaStore as unknown as TStore<TableMetaState>,
+      }),
+    );
+
+    await expect(
+      result.current({
+        dataSelector: (response) => [...response.rows],
+        dataTotalSelector: (response) => response.total,
+        onLoadMore: vi.fn(),
+      }),
+    ).rejects.toThrow('Filter data not initialized for column: status');
+  });
+
+  it('stores an error and resets loading-more state when the request fails', async () => {
+    const onLoadMore = vi.fn(() => {
+      return Promise.reject(new Error('Network down'));
+    });
+
+    const { result } = renderHook(() =>
+      useFetchMoreFilterData<TestData, TestResponse>({
+        columnKey: 'status',
+        filtersDataStore: getHarness().dataStore as unknown as TStore<
+          FiltersDataState<TestData>
+        >,
+        metaStore: getHarness().metaStore as unknown as TStore<TableMetaState>,
+      }),
+    );
+
+    await act(async () => {
+      await result.current({
+        dataSelector: (response) => [...response.rows],
+        dataTotalSelector: (response) => response.total,
+        onLoadMore,
+      });
+    });
+
+    expect(getHarness().metaStore.get().error).toBe('Network down');
+    expect(getHarness().dataStore.get()).toMatchObject({
+      status: {
+        isLoadingMore: false,
+      },
+    });
+  });
+
+  it('prefetches the next page when enabled and more rows remain', async () => {
+    getHarness().setMetaState({ enablePrefetch: true });
+    getHarness().resolveFromCacheOrFetchMock.mockResolvedValue({
+      rows: ['Bravo'],
+      total: 4,
+    });
+
+    const onLoadMore = vi.fn(() =>
+      Promise.resolve({
+        rows: ['Charlie'],
+        total: 4,
+      }),
+    );
+    const prefetchRef = {
+      current: {
+        data: undefined as TestResponse | undefined,
+        promise: undefined as Promise<TestResponse> | undefined,
+        skip: -1,
+      },
+    };
+
+    const { result } = renderHook(() =>
+      useFetchMoreFilterData<TestData, TestResponse>({
+        columnKey: 'status',
+        filtersDataStore: getHarness().dataStore as unknown as TStore<
+          FiltersDataState<TestData>
+        >,
+        metaStore: getHarness().metaStore as unknown as TStore<TableMetaState>,
+        prefetchRef,
+      }),
+    );
+
+    await act(async () => {
+      await result.current({
+        dataSelector: (response) => [...response.rows],
+        dataTotalSelector: (response) => response.total,
+        onLoadMore,
+      });
+    });
+
+    expect(getHarness().firePrefetchMock).toHaveBeenCalledWith({
+      limit: DEFAULT_FILTER_PAGE_SIZE,
+      nextSkip: 2,
+      onLoadMore,
+      prefetchRef,
+    });
   });
 });
