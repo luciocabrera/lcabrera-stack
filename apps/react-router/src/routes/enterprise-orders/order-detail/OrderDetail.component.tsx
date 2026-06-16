@@ -1,4 +1,3 @@
-// fallow-ignore-file complexity -- temporary testing suppression
 import * as stylex from '@stylexjs/stylex';
 import { useLoaderData } from 'react-router';
 
