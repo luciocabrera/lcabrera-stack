@@ -1,6 +1,11 @@
 import { useFetcher, useLocation } from 'react-router';
 
-import { PERSIST_COOKIE_ACTION } from '@/constants/globalSettings.constants';
+import {
+  PERSIST_COOKIE_ACTION,
+  PERSISTENCE_SIZE_WARNING,
+  MAX_COOKIE_ENTRY_VALUE_LENGTH,
+} from '@/constants/globalSettings.constants';
+import { useNotifications } from '@/hooks/useNotifications.hook';
 import { writeToSessionStorage } from '@/utils/storage';
 
 import type { TablePersistenceConfig } from '../Table.types';
@@ -28,13 +33,14 @@ type PersistCookieEntry<TSlice = unknown> = {
  * Supports both a single entry and a batch of entries.
  */
 type PersistTableStateAction = {
-  <TSlice>(entry: PersistCookieEntry<TSlice>): void;
-  (entries: PersistCookieEntry[]): void;
+  <TSlice>(entry: PersistCookieEntry<TSlice>): boolean;
+  (entries: PersistCookieEntry[]): boolean;
 };
 
 export const usePersistTableStateAction = (): PersistTableStateAction => {
   const fetcher = useFetcher({ key: 'persist-table-state' });
   const location = useLocation();
+  const { notify } = useNotifications();
 
   return (args: PersistCookieEntry | PersistCookieEntry[]) => {
     const entries = Array.isArray(args) ? args : [args];
@@ -54,9 +60,6 @@ export const usePersistTableStateAction = (): PersistTableStateAction => {
           value: valueSlice,
         });
 
-        // Write to sessionStorage immediately (tab-isolated, survives refresh)
-        writeToSessionStorage({ key, value });
-
         return {
           key,
           searchParamKey: searchParamKey ?? '',
@@ -66,10 +69,24 @@ export const usePersistTableStateAction = (): PersistTableStateAction => {
       },
     );
 
-    // Also write to cookie via server action (SSR baseline for new tabs)
+    // Check total cookie size (actual serialized payload)
+    const entriesString = JSON.stringify(serializedEntries);
+    if (entriesString.length > MAX_COOKIE_ENTRY_VALUE_LENGTH) {
+      notify(PERSISTENCE_SIZE_WARNING);
+      return false;
+    }
+
+    serializedEntries.forEach(({ key, value }) => {
+      // Write to sessionStorage immediately (tab-isolated, survives refresh)
+      writeToSessionStorage({ key, value });
+    });
+
+    // Write to cookie via server action (SSR baseline for new tabs)
     void fetcher.submit(
-      { currentUrl, entries: JSON.stringify(serializedEntries) },
+      { currentUrl, entries: entriesString },
       { action: PERSIST_COOKIE_ACTION, method: 'POST' },
     );
+
+    return true;
   };
 };

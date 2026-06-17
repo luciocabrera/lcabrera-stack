@@ -6,9 +6,17 @@ const wideColumnNumbers = Array.from(
   (_value, index) => `c_${String(index + 1).padStart(3, '0')}`,
 );
 
+const UNSORTABLE_WIDE_ALLTYPES_COLUMNS = new Set(['c_018']);
+
+const sortableWideColumnNumbers = wideColumnNumbers.filter(
+  (columnKey) => !UNSORTABLE_WIDE_ALLTYPES_COLUMNS.has(columnKey),
+);
+
+export const MAX_WIDE_ALLTYPES_SORT_RULES = 5;
+
 export const WIDE_ALLTYPES_SORTABLE_COLUMNS = new Set([
   'id',
-  ...wideColumnNumbers,
+  ...sortableWideColumnNumbers,
 ]);
 
 export const DEFAULT_WIDE_ALLTYPES_SORTING = [

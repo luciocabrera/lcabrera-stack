@@ -19,7 +19,7 @@ describe('commitPinningAndOrderUpdate', () => {
     };
 
     const columnsStore = { set: vi.fn() };
-    const persistTableState = vi.fn();
+    const persistTableState = vi.fn(() => true);
     const newPinning: ColumnPinningState<TestRow> = {
       left: ['id'],
       right: ['age'],

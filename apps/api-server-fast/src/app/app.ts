@@ -1,5 +1,9 @@
 import cors from '@fastify/cors';
-import Fastify, { type FastifyInstance } from 'fastify';
+import Fastify, {
+  type FastifyInstance,
+  type FastifyReply,
+  type FastifyRequest,
+} from 'fastify';
 import type { Pool } from 'pg';
 
 import type { EnvConfig } from '../config/env.schema';
@@ -14,6 +18,48 @@ type CreateAppArgs = {
   readonly pool: Pool;
 };
 
+type RequestWithStartNs = FastifyRequest & {
+  requestStartNs?: bigint;
+};
+
+const formatHumanTimestamp = () => {
+  const now = new Date();
+  const date = now.toLocaleDateString('sv-SE');
+  const time = now.toLocaleTimeString('sv-SE', { hour12: false });
+  const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
+
+  return `${date} ${time}.${milliseconds}`;
+};
+
+const getDurationMs = ({
+  request,
+}: {
+  readonly request: RequestWithStartNs;
+}) => {
+  if (request.requestStartNs === undefined) {
+    return 0;
+  }
+
+  const elapsedNs = process.hrtime.bigint() - request.requestStartNs;
+  return Number(elapsedNs) / 1_000_000;
+};
+
+const logApiRequest = ({
+  reply,
+  request,
+}: {
+  readonly reply: FastifyReply;
+  readonly request: RequestWithStartNs;
+}) => {
+  const timestamp = formatHumanTimestamp();
+  const durationMs = getDurationMs({ request }).toFixed(1);
+  const endpoint = request.url.split('?')[0] ?? request.url;
+
+  console.info(
+    `[API][${timestamp}] ${request.method} ${endpoint} -> ${reply.statusCode} (${durationMs}ms)`,
+  );
+};
+
 /**
  * Create the Fastify application with all API routes.
  */
@@ -22,6 +68,20 @@ export const createApp = ({
   pool,
 }: CreateAppArgs): FastifyInstance => {
   const app = Fastify({ logger: false });
+
+  app.addHook('onRequest', (request, _reply, done) => {
+    const requestWithStartNs = request as RequestWithStartNs;
+    requestWithStartNs.requestStartNs = process.hrtime.bigint();
+    done();
+  });
+
+  app.addHook('onResponse', (request, reply, done) => {
+    logApiRequest({
+      reply,
+      request: request as RequestWithStartNs,
+    });
+    done();
+  });
 
   app.register(cors);
 

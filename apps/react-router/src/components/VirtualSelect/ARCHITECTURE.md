@@ -43,6 +43,7 @@ graph LR
   VS --> countVisibleTags["utils/countVisibleTags"]
   VS --> getDropdownStyle["utils/getDropdownStyle"]
   VS --> VS_stylex["VirtualSelect.stylex"]
+  VS --> skeleton["design-system/tokens/commons.stylex\n<small>skeleton.loadingOverlay + shimmerWave</small>"]
 
   VST --> Tag["Tag component"]
   VST --> VST_stylex["VirtualSelectTrigger.stylex"]
@@ -113,12 +114,17 @@ graph TD
 
 `useClickOutside` listens on `containerRef` (wraps both trigger and dropdown). When a click lands outside the container, `handleClose()` sets `isOpen = false`.
 
+## Busy State
+
+When `isBusy` is true, VirtualSelect renders a shimmer overlay over the container and suppresses trigger toggles so the dropdown cannot be opened while the parent UI is loading.
+
 ## Props
 
 | Prop               | Type                           | Default       | Description                                        |
 | ------------------ | ------------------------------ | ------------- | -------------------------------------------------- |
 | `customStylex`     | `StyleXStyles`                 | —             | Style overrides for the dropdown container         |
 | `dataState`        | `VirtualListDataState`         | —             | Async data (mutually exclusive with `options`)     |
+| `isBusy`           | `boolean`                      | `false`       | Shows a shimmer overlay and disables trigger input |
 | `isAlwaysOpen`     | `boolean`                      | `false`       | List is always visible; trigger is non-interactive |
 | `listMaxHeight`    | `string`                       | `'18.75rem'`  | CSS max-height for the VirtualList scroll area     |
 | `mode`             | `'single' \| 'multi'`          | —             | Selection behaviour (required)                     |

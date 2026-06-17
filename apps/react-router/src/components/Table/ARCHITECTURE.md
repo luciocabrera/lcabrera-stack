@@ -154,6 +154,8 @@ Table state uses dual-channel persistence:
 
 - Cookies + URL for SSR/shareable state (filters, sorting, pinning, sizing, visibility)
 - sessionStorage (tab-scoped) for per-tab working copies (drawer UI + data rows)
+- Query revalidation is conditional: only effective filter/sort URL changes trigger
+  redirect and loader rerun.
 
 ```mermaid
 graph LR
@@ -162,6 +164,9 @@ graph LR
   Action --> Fetcher["useFetcher.submit()"]
   Fetcher --> Route["POST /_action/persist-cookie"]
   Route --> Cookie["Set-Cookie header"]
+  Route --> Decision{"search params changed?"}
+  Decision -->|Yes| Revalidate["redirect + loader revalidation"]
+  Decision -->|No| Stable["204 response, no revalidation"]
 
   Load["Page load"] --> CookieRead["readPersistedStateFromCookie()"]
   CookieRead --> Init["Provider initial state"]

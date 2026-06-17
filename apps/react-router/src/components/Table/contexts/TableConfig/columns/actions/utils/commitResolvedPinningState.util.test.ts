@@ -4,7 +4,7 @@ import { commitResolvedPinningState } from './commitResolvedPinningState.util';
 
 const { mockCommitPinningAndOrderUpdate, mockGetPinnedDerivedColumnsState } =
   vi.hoisted(() => ({
-    mockCommitPinningAndOrderUpdate: vi.fn(),
+    mockCommitPinningAndOrderUpdate: vi.fn(() => true),
     mockGetPinnedDerivedColumnsState: vi.fn(() => ({
       columnGroups: {
         centerCols: [{ key: 'name', label: 'Name' }],

@@ -34,11 +34,14 @@ export const useSetColumnFilter = <TData>() => {
         persistenceKey,
       });
 
+    // Persist to cookie and sync URL params in one action.
+    // Abort before loading/state changes when persistence would be oversized.
+    if (!persistTableState(persistenceEntry)) {
+      return;
+    }
+
     // Show loading feedback immediately
     dataStore.set({ isLoading: true });
-
-    // Persist to cookie and sync URL params in one action
-    persistTableState(persistenceEntry);
 
     // Update table context state
     columnsStore.set({ columnFilters });

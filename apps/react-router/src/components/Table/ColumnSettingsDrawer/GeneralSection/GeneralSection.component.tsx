@@ -56,7 +56,7 @@ export const GeneralSection = <TData,>({
 
     switch (newPreset) {
       case 'default': {
-        setColumnSizing(undefined);
+        setColumnSizing();
 
         break;
       }

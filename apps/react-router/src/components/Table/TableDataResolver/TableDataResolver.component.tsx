@@ -1,12 +1,19 @@
 import { use } from 'react';
 
+import { TableDataErrorFallback } from '@/components/Table/TableDataErrorFallback';
+
 import type { TableDataResolverProps } from './TableDataResolver.types';
 
 export const TableDataResolver = <TResponse,>({
   children,
-  dataPromise,
+  onRetry,
+  safeDataPromise,
 }: TableDataResolverProps<TResponse>) => {
-  const response = use(dataPromise);
+  const result = use(safeDataPromise);
 
-  return <>{children(response)}</>;
+  if (!result.ok) {
+    return <TableDataErrorFallback error={result.error} onRetry={onRetry} />;
+  }
+
+  return <>{children(result.data)}</>;
 };

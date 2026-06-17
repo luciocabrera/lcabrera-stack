@@ -145,6 +145,7 @@ describe('useBatchSetColumnSettings', () => {
     mockMetaStore.get.mockClear();
     mockMetaStore.set.mockClear();
     mockPersistTableState.mockClear();
+    mockPersistTableState.mockReturnValue(true);
     mockResolveBatchColumnSettingsUpdate.mockClear();
   });
 
@@ -278,6 +279,127 @@ describe('useBatchSetColumnSettings', () => {
 
     expect(mockMetaStore.set).toHaveBeenCalledWith({
       isColumnSettingsOpen: true,
+    });
+  });
+
+  it('does not set isLoading when only UI-only changes occur (column width, pinning)', () => {
+    // Mock resolved update with same filters/sorting (UI-only changes)
+    mockResolveBatchColumnSettingsUpdate.mockReturnValue({
+      columnFilters: {}, // Same as current state (empty)
+      columnGroups: {
+        centerCols: [{ key: 'age', label: 'Age' }],
+        leftPinnedCols: [{ key: 'id', label: 'ID' }],
+        rightPinnedCols: [{ key: 'name', label: 'Name' }],
+      },
+      columnOrder: ['id', 'age', 'name'], // Changed order
+      columnPinning: { left: ['id'], right: ['name'] }, // Changed pinning
+      columnSizing: { actions: 0, age: 80, id: 100, name: 220 }, // Changed size
+      effectiveColumns: [
+        { key: 'id', label: 'ID' },
+        { key: 'age', label: 'Age' },
+        { key: 'name', label: 'Name' },
+      ],
+      normalizedColumns: {
+        age: { key: 'age', label: 'Age' },
+        id: { key: 'id', label: 'ID' },
+        name: {
+          key: 'name',
+          label: 'Name',
+          sortDirection: 'asc',
+          sortIndex: 0,
+        },
+      },
+      pinnedColumnOffsets: {
+        name: {
+          isFirstPinnedRight: true,
+          isLastPinnedLeft: false,
+          offset: 0,
+          side: 'right',
+        },
+      },
+      sorting: [], // Same as current state (empty)
+    } as any);
+
+    const { result } = renderHook(() =>
+      useBatchSetColumnSettings<{
+        readonly age: number;
+        readonly id: string;
+        readonly name: string;
+      }>(),
+    );
+
+    act(() => {
+      result.current({
+        columnKey: 'name',
+        columnPinning: 'right',
+        columnSizing: 220,
+      });
+    });
+
+    // isLoading should NOT be set when only UI changes occur
+    expect(mockDataStore.set).not.toHaveBeenCalled();
+    expect(mockPersistTableState).toHaveBeenCalledTimes(1);
+    expect(mockColumnsStore.set).toHaveBeenCalledWith(
+      mockResolveBatchColumnSettingsUpdate.mock.results[0]?.value,
+    );
+  });
+
+  it('sets isLoading when query-affecting changes occur (filters or sorting)', () => {
+    // Mock resolved update with different sorting (query-affecting change)
+    mockResolveBatchColumnSettingsUpdate.mockReturnValue({
+      columnFilters: {}, // Same as current state
+      columnGroups: {
+        centerCols: [{ key: 'age', label: 'Age' }],
+        leftPinnedCols: [{ key: 'id', label: 'ID' }],
+        rightPinnedCols: [{ key: 'name', label: 'Name' }],
+      },
+      columnOrder: ['id', 'age', 'name'],
+      columnPinning: { left: ['id'], right: ['name'] },
+      columnSizing: { actions: 0, age: 80, id: 100, name: 220 },
+      effectiveColumns: [
+        { key: 'id', label: 'ID' },
+        { key: 'age', label: 'Age' },
+        { key: 'name', label: 'Name' },
+      ],
+      normalizedColumns: {
+        age: { key: 'age', label: 'Age' },
+        id: { key: 'id', label: 'ID' },
+        name: {
+          key: 'name',
+          label: 'Name',
+          sortDirection: 'desc',
+          sortIndex: 0,
+        },
+      },
+      pinnedColumnOffsets: {
+        name: {
+          isFirstPinnedRight: true,
+          isLastPinnedLeft: false,
+          offset: 0,
+          side: 'right',
+        },
+      },
+      sorting: [{ columnKey: 'name', direction: 'desc' }], // Different from current state (was empty)
+    } as any);
+
+    const { result } = renderHook(() =>
+      useBatchSetColumnSettings<{
+        readonly age: number;
+        readonly id: string;
+        readonly name: string;
+      }>(),
+    );
+
+    act(() => {
+      result.current({
+        columnKey: 'name',
+        sorting: 'desc',
+      });
+    });
+
+    // isLoading SHOULD be set when query-affecting changes occur
+    expect(mockDataStore.set).toHaveBeenCalledWith({
+      isLoading: true,
     });
   });
 });

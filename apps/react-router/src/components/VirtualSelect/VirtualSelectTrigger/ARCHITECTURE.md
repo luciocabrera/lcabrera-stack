@@ -1,6 +1,7 @@
 # VirtualSelectTrigger Architecture
 
 Combobox trigger: shows placeholder, single-value label, or multi-select tag chips with overflow counter and a chevron indicator.
+When busy, the trigger renders in a disabled state so it cannot open the dropdown.
 
 ## File Structure
 
@@ -20,6 +21,7 @@ graph LR
   VST --> VST_stylex["VirtualSelectTrigger.stylex (TRIGGER_MAX_HEIGHT)"]
   VST_stylex --> base_tokens["design-system/tokens/base.stylex"]
   VST_stylex --> colors["design-system/tokens/colors.stylex"]
+  VST_stylex --> busy["busy trigger styles"]
 ```
 
 ## Render Flow
@@ -44,6 +46,7 @@ graph TD
 | Prop            | Type                                                     | Description                                                |
 | --------------- | -------------------------------------------------------- | ---------------------------------------------------------- |
 | `isAlwaysOpen`  | `boolean`                                                | Hides chevron and disables click/focus interaction         |
+| `isBusy`        | `boolean`                                                | Shows busy styling and prevents opening the dropdown       |
 | `isOpen`        | `boolean`                                                | Controls chevron direction and `aria-expanded`             |
 | `mode`          | `'single' \| 'multi'`                                    | Single shows label; multi shows Tag chips                  |
 | `onRemoveTag`   | `(option: string) => void`                               | Called when a Tag's remove button is clicked               |

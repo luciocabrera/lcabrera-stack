@@ -8,7 +8,11 @@ import type {
 import { buildOrderByClause } from '../../utils/buildOrderByClause.util.js';
 import { serializeDatabaseValue } from '../../utils/serializeDatabaseValue.util.js';
 
-import { DEFAULT_WIDE_ALLTYPES_SORTING } from './wideAlltypes150.constants.js';
+import {
+  DEFAULT_WIDE_ALLTYPES_SORTING,
+  MAX_WIDE_ALLTYPES_SORT_RULES,
+  WIDE_ALLTYPES_SORTABLE_COLUMNS,
+} from './wideAlltypes150.constants.js';
 
 export type WideAlltypes150Repository = {
   readonly getPaginated: (
@@ -33,9 +37,13 @@ export const createWideAlltypes150Repository = ({
   pool,
 }: CreateWideAlltypes150RepositoryArgs): WideAlltypes150Repository => ({
   getPaginated: async ({ limit, skip, sorting }) => {
+    const safeSorting = sorting
+      .filter(({ columnKey }) => WIDE_ALLTYPES_SORTABLE_COLUMNS.has(columnKey))
+      .slice(0, MAX_WIDE_ALLTYPES_SORT_RULES);
+
     const orderByClause = buildOrderByClause({
       fallbackSorting: DEFAULT_WIDE_ALLTYPES_SORTING,
-      sorting,
+      sorting: safeSorting,
     });
     const dataResult = await pool.query<DbRow>(
       `SELECT * FROM wide_alltypes_150 ${orderByClause} LIMIT $1 OFFSET $2`,

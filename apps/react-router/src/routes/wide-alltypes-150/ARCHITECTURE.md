@@ -44,3 +44,5 @@ wide-alltypes-150/
 - Reuse the original column configuration and persistence key.
 - Add experimental table implementations as sibling routes instead of replacing
   this URL.
+- Generated columns are filterable by default except `Bytea`, `Point`, and
+  `Int[]` columns to keep filter option fetching practical.

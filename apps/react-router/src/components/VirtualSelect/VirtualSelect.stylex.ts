@@ -7,6 +7,7 @@ import {
   zIndex,
 } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
+import { skeleton } from '@/design-system/tokens/commons.stylex';
 
 export const styles = stylex.create({
   container: {
@@ -54,4 +55,14 @@ export const styles = stylex.create({
     position: 'relative',
     minHeight: 0,
   },
+  busyOverlay: {
+    insetBlock: 0,
+    insetInline: 0,
+    zIndex: zIndex.popover,
+  },
 });
+
+export const busyStyles = {
+  overlay: [skeleton.loadingOverlay, styles.busyOverlay],
+  wave: skeleton.shimmerWave,
+};

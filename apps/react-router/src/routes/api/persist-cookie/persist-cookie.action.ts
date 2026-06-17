@@ -17,7 +17,8 @@ type CookieEntry = {
  * Receives a JSON array of entries from form data. Each entry contains
  * a cookie key/value pair and optional search param updates.
  * Sets all cookies server-side via multiple Set-Cookie response headers
- * and applies search param changes in a single redirect.
+ * and redirects only when the requested search param updates effectively
+ * change the URL.
  */
 export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
@@ -31,17 +32,29 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const entries = JSON.parse(entriesRaw) as CookieEntry[];
   const url = new URL(currentUrl, request.url);
   const headers = new Headers();
+  let hasEffectiveQueryChange = false;
 
   for (const { key, searchParamKey, searchParamValue, value } of entries) {
     headers.append('Set-Cookie', buildCookieString({ key, value }));
 
     if (searchParamKey) {
-      if (searchParamValue) {
-        url.searchParams.set(searchParamKey, searchParamValue);
-      } else {
+      const currentSearchParamValue = url.searchParams.get(searchParamKey);
+      const nextSearchParamValue = searchParamValue || null;
+
+      if (currentSearchParamValue !== nextSearchParamValue) {
+        hasEffectiveQueryChange = true;
+      }
+
+      if (nextSearchParamValue === null) {
         url.searchParams.delete(searchParamKey);
+      } else {
+        url.searchParams.set(searchParamKey, nextSearchParamValue);
       }
     }
+  }
+
+  if (!hasEffectiveQueryChange) {
+    return new Response(null, { headers, status: 204 });
   }
 
   return redirect(url.href, { headers });

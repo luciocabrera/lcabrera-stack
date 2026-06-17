@@ -54,6 +54,7 @@ export const AddSortSection = ({
     <div {...stylex.props(styles.container)}>
       <SidePanelSectionHeader title='Add Sort Column' />
       <VirtualSelect
+        isBusy={isBusy}
         mode='single'
         onChange={(values) => {
           setSelectedColumn(values[0] ?? '');

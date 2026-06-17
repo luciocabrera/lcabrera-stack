@@ -62,6 +62,10 @@ export const styles = stylex.create({
     minWidth: 0,
     width: '100%',
   },
+  triggerBusy: {
+    cursor: 'not-allowed',
+    opacity: 0.75,
+  },
   triggerClamped: {
     overflow: 'hidden',
     alignContent: 'flex-start',

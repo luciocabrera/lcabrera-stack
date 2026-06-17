@@ -103,6 +103,7 @@ describe('useSetColumnSorting', () => {
     setDrawersSyncNonce(0);
     mockMetaStore.set.mockClear();
     mockPersistTableState.mockReset();
+    mockPersistTableState.mockReturnValue(true);
     mockSerializeSortingToURL.mockClear();
     mockGetNormalizedColumns.mockClear();
   });

@@ -9,6 +9,7 @@ import {
 } from './utils';
 
 export const VirtualSelectTrigger = ({
+  isBusy = false,
   isAlwaysOpen,
   isOpen,
   listboxId,
@@ -24,6 +25,7 @@ export const VirtualSelectTrigger = ({
   const hasSelection = selected.length > 0;
   const usesTagButtons = mode === 'multi' && hasSelection;
   const shouldUseDivTrigger = isAlwaysOpen || usesTagButtons;
+  const shouldDisableInteraction = isBusy || isAlwaysOpen;
   const content = renderTriggerContent({
     hasSelection,
     mode,
@@ -41,7 +43,7 @@ export const VirtualSelectTrigger = ({
         ref={(node) => {
           assignTriggerRef({ triggerRef, node });
         }}
-        {...getTriggerStyleProps({ isOpen, mode, isStatic: true })}
+        {...getTriggerStyleProps({ isBusy, isOpen, mode, isStatic: true })}
       >
         {content}
         {chevron}
@@ -53,18 +55,23 @@ export const VirtualSelectTrigger = ({
     return (
       <div
         aria-controls={listboxId}
+        aria-disabled={shouldDisableInteraction}
         aria-expanded={isOpen}
         aria-haspopup='listbox'
-        onClick={onToggle}
-        onKeyDown={(event) => {
-          handleDivTriggerKeyDown({ event, onToggle });
-        }}
         ref={(node) => {
           assignTriggerRef({ triggerRef, node });
         }}
         role='button'
-        tabIndex={0}
-        {...getTriggerStyleProps({ isOpen, mode })}
+        tabIndex={shouldDisableInteraction ? -1 : 0}
+        {...getTriggerStyleProps({ isBusy, isOpen, mode })}
+        onClick={shouldDisableInteraction ? undefined : onToggle}
+        onKeyDown={
+          shouldDisableInteraction
+            ? undefined
+            : (event) => {
+                handleDivTriggerKeyDown({ event, onToggle });
+              }
+        }
       >
         {content}
         {chevron}
@@ -75,14 +82,16 @@ export const VirtualSelectTrigger = ({
   return (
     <button
       aria-controls={listboxId}
+      aria-disabled={shouldDisableInteraction}
       aria-expanded={isOpen}
       aria-haspopup='listbox'
-      onClick={onToggle}
+      disabled={shouldDisableInteraction}
+      onClick={shouldDisableInteraction ? undefined : onToggle}
       ref={(node) => {
         assignTriggerRef({ triggerRef, node });
       }}
       type='button'
-      {...getTriggerStyleProps({ isOpen, mode })}
+      {...getTriggerStyleProps({ isBusy, isOpen, mode })}
     >
       {content}
       {chevron}
