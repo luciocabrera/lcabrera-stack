@@ -7,7 +7,7 @@ Virtualized, searchable, multi-select list with infinite scroll, skeleton loadin
 ```
 VirtualList/
 ├── index.ts                         → Barrel export (VirtualList, VirtualListDataState, VirtualListProps)
-├── VirtualList.component.tsx        → Orchestrator: state, filtering, virtualization, scroll wiring
+├── VirtualList.component.tsx        → Orchestrator: shared UI state (search, filter-mode) and child composition
 ├── VirtualList.types.ts             → VirtualListProps, VirtualListDataState, ListFilterMode
 ├── VirtualList.constants.ts         → ITEM_HEIGHT, LIST_MAX_HEIGHT, DEFAULT_CONTAINER_HEIGHT, SCROLL_THRESHOLD
 ├── VirtualList.stylex.ts            → Shared option-row/container styles used by SelectAllOption, SelectOption and root container
@@ -20,7 +20,7 @@ VirtualList/
 │   ├── VirtualListHeader.test.tsx
 │   └── VirtualListHeader.types.ts
 │
-├── VirtualListBody/                 → Loading/empty/virtualized rows container
+├── VirtualListBody/                 → List orchestration: filtering, selection callbacks, virtualization, scrolling
 │   ├── ARCHITECTURE.md
 │   ├── index.ts
 │   ├── VirtualListBody.component.tsx

@@ -1,32 +1,30 @@
 # VirtualListBody Architecture
 
-Virtualized options body extracted from `VirtualList` to isolate rendering branches from orchestration logic.
+Virtualized options body extracted from `VirtualList` to own list-specific orchestration and rendering.
 
 ## Responsibilities
 
+- Derive `filteredOptions` from `dataState.data`, `searchTerm`, `listFilterMode`, and `selectedValues`
+- Compute and handle select-all / option toggle selection changes
+- Manage virtualization (`useVirtualization`) and infinite-scroll listeners (`onFetchMore`)
+- Trigger optional initial fetch (`onFetchInitial`) on mount
 - Render loading placeholders via `SkeletonOptions` during initial load
 - Render empty-state message when filtered results are empty
-- Render virtualized rows (`VirtualizedOption`) using `startIndex`, `endIndex`, `offsetY`, and `totalHeight`
+- Render virtualized rows (`VirtualizedOption`) using derived `startIndex`, `endIndex`, `offsetY`, and `totalHeight`
 - Preserve "Select All" index/key behavior from the original inline implementation
 
 ## Props
 
-| Prop                  | Type                                | Description                                    |
-| --------------------- | ----------------------------------- | ---------------------------------------------- |
-| `filteredOptions`     | `readonly string[]`                 | Search/filter result options                   |
-| `selectedValues`      | `readonly string[]`                 | Controlled selected values                     |
-| `isInitialLoading`    | `boolean`                           | Shows skeleton rows                            |
-| `isLoadingOptions`    | `boolean`                           | Disables row interactions                      |
-| `isAllSelected`       | `boolean`                           | Controls select-all state                      |
-| `hasCheckboxes`       | `boolean`                           | Toggles per-row checkbox mode                  |
-| `shouldShowSelectAll` | `boolean`                           | Enables select-all row at index 0              |
-| `shouldFillHeight`    | `boolean`                           | Uses fill-height container variant             |
-| `listMaxHeight`       | `string`                            | Max-height for non-fill mode                   |
-| `containerHeight`     | `number`                            | Drives skeleton row count                      |
-| `startIndex`          | `number`                            | Virtual window start index                     |
-| `endIndex`            | `number`                            | Virtual window end index                       |
-| `offsetY`             | `number`                            | Pixel offset for rendered slice                |
-| `totalHeight`         | `number`                            | Full virtual scroll area height                |
-| `scrollContainerRef`  | `RefObject<HTMLDivElement \| null>` | Scroll container ref for measurement/scrolling |
-| `onSelectAll`         | `() => void`                        | Select-all handler                             |
-| `onToggle`            | `(option: string) => void`          | Single option toggle handler                   |
+| Prop               | Type                                 | Description                                        |
+| ------------------ | ------------------------------------ | -------------------------------------------------- |
+| `dataState`        | `VirtualListDataState`               | Source options and loading/hasMore state           |
+| `selectedValues`   | `readonly string[]`                  | Controlled selected values                         |
+| `listFilterMode`   | `ListFilterMode`                     | Active footer mode (`all`/`selected`/`unselected`) |
+| `searchTerm`       | `string`                             | Header-controlled search term                      |
+| `onChange`         | `VirtualListProps['onChange']`       | Selection update callback to parent                |
+| `onFetchInitial`   | `VirtualListProps['onFetchInitial']` | Optional initial fetch callback                    |
+| `onFetchMore`      | `VirtualListProps['onFetchMore']`    | Optional infinite-scroll callback                  |
+| `hasCheckboxes`    | `boolean`                            | Toggles per-row checkbox mode                      |
+| `hasSelectAll`     | `boolean`                            | Enables select-all row when filtered options > 1   |
+| `listMaxHeight`    | `string`                             | Max-height for non-fill mode                       |
+| `shouldFillHeight` | `boolean`                            | Uses fill-height container variant                 |

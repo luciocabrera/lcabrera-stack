@@ -23,6 +23,7 @@ export const styles = stylex.create({
     borderWidth: '1px',
     flex: '1 1 auto',
     gap: spacing.xxs,
+    height: spacing.lg,
     overflow: 'hidden',
     alignItems: 'center',
     backgroundColor: colors.surfaceSecondary,

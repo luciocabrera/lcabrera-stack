@@ -29,6 +29,7 @@ export const styles = stylex.create({
     borderStyle: 'solid',
     borderWidth: '1px',
     alignItems: 'center',
+    height: spacing.lg,
     backgroundColor: colors.surfaceSecondary,
     color: colors.textSecondary,
     display: 'inline-flex',

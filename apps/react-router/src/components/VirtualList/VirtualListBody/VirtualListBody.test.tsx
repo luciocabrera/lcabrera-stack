@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { VirtualListBody } from './VirtualListBody.component';
@@ -10,45 +10,52 @@ afterEach(() => {
 });
 
 const baseProps = {
-  containerHeight: 300,
-  endIndex: 2,
-  filteredOptions: ['Argentina', 'Brazil'],
+  dataState: {
+    data: ['Argentina', 'Brazil'],
+    hasMore: false,
+    isLoading: false,
+    isLoadingMore: false,
+  },
   hasCheckboxes: true,
-  isAllSelected: false,
-  isInitialLoading: false,
-  isLoadingOptions: false,
+  hasSelectAll: true,
+  listFilterMode: 'all' as const,
   listMaxHeight: '18.75rem',
-  offsetY: 0,
-  onSelectAll: vi.fn(),
-  onToggle: vi.fn(),
-  scrollContainerRef: { current: null },
+  onChange: vi.fn(),
+  searchTerm: '',
   selectedValues: [],
   shouldFillHeight: false,
-  shouldShowSelectAll: true,
-  startIndex: 0,
-  totalHeight: 96,
 };
 
 describe('VirtualListBody', () => {
-  it('renders loading skeleton during initial loading', () => {
+  it('renders loading skeleton during initial loading bootstrap', () => {
+    const onFetchInitial = vi.fn();
     const { container } = render(
       <VirtualListBody
         {...baseProps}
-        filteredOptions={[]}
-        isInitialLoading
-        shouldShowSelectAll={false}
+        dataState={{
+          data: [],
+          hasMore: false,
+          isLoading: false,
+          isLoadingMore: false,
+        }}
+        onFetchInitial={onFetchInitial}
       />,
     );
 
     expect(container.firstChild).not.toBeNull();
+    expect(onFetchInitial).toHaveBeenCalledTimes(1);
   });
 
   it('renders empty state when there are no options', () => {
     render(
       <VirtualListBody
         {...baseProps}
-        filteredOptions={[]}
-        shouldShowSelectAll={false}
+        dataState={{
+          data: [],
+          hasMore: false,
+          isLoading: false,
+          isLoadingMore: false,
+        }}
       />,
     );
 
@@ -60,5 +67,29 @@ describe('VirtualListBody', () => {
 
     expect(screen.getByText('Select All')).toBeTruthy();
     expect(screen.getByText('Argentina')).toBeTruthy();
+  });
+
+  it('triggers onChange when an option is toggled', () => {
+    const onChange = vi.fn();
+
+    render(
+      <VirtualListBody
+        {...baseProps}
+        hasSelectAll={false}
+        onChange={onChange}
+      />,
+    );
+
+    const checkboxes = screen.getAllByRole('checkbox');
+    const firstCheckbox = checkboxes[0];
+    if (!firstCheckbox) {
+      throw new Error('Expected at least one checkbox');
+    }
+    fireEvent.click(firstCheckbox);
+
+    expect(onChange).toHaveBeenCalledWith({
+      type: 'select',
+      values: ['Argentina'],
+    });
   });
 });
