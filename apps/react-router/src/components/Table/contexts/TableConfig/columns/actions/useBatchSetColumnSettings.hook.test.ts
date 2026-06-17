@@ -145,6 +145,7 @@ describe('useBatchSetColumnSettings', () => {
     mockMetaStore.get.mockClear();
     mockMetaStore.set.mockClear();
     mockPersistTableState.mockClear();
+    mockPersistTableState.mockReturnValue(true);
     mockResolveBatchColumnSettingsUpdate.mockClear();
   });
 

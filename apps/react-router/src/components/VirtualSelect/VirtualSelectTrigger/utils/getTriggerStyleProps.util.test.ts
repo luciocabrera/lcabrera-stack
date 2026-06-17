@@ -24,7 +24,7 @@ describe('getTriggerStyleProps', () => {
     expect(
       getTriggerStyleProps({ isOpen: true, mode: 'multi', isStatic: false }),
     ).toEqual({
-      args: ['trigger', 'triggerOpen', 'triggerClamped', false],
+      args: ['trigger', false, 'triggerOpen', 'triggerClamped', false],
     });
   });
 
@@ -32,7 +32,7 @@ describe('getTriggerStyleProps', () => {
     expect(
       getTriggerStyleProps({ isOpen: false, mode: 'single', isStatic: true }),
     ).toEqual({
-      args: ['trigger', false, false, 'triggerStatic'],
+      args: ['trigger', false, false, false, 'triggerStatic'],
     });
   });
 });

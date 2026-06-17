@@ -58,7 +58,7 @@ export const createTableConfigColumnsActionMocks = <
     }),
   };
 
-  const mockPersistTableState = vi.fn();
+  const mockPersistTableState = vi.fn(() => true);
 
   return {
     mockColumnsStore,
@@ -74,6 +74,7 @@ export const createTableConfigColumnsActionMocks = <
       (mockColumnsStore.set as ReturnType<typeof vi.fn>).mockClear();
       mockMetaStore.set.mockClear();
       mockPersistTableState.mockClear();
+      mockPersistTableState.mockReturnValue(true);
     },
     setColumnsState: (nextState: TState) => {
       columnsState = nextState;

@@ -3,6 +3,7 @@ import type { RefObject } from 'react';
 import type { VirtualSelectMode } from '../VirtualSelect.types';
 
 export type VirtualSelectTriggerProps = {
+  readonly isBusy?: boolean;
   readonly isAlwaysOpen: boolean;
   readonly isOpen: boolean;
   readonly listboxId: string;

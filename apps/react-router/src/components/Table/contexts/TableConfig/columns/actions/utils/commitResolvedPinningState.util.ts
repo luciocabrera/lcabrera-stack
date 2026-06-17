@@ -32,7 +32,7 @@ type CommitResolvedPinningStateArgs<TData> = {
       readonly slice: 'columnOrder' | 'columnPinning';
       readonly valueSlice: unknown;
     }[],
-  ) => void;
+  ) => boolean;
 };
 
 export const commitResolvedPinningState = <TData>({
@@ -56,16 +56,20 @@ export const commitResolvedPinningState = <TData>({
       columnVisibility,
     });
 
-  commitPinningAndOrderUpdate<TData>({
-    columnGroups,
-    columnsStore,
-    effectiveColumns,
-    newColumnOrder: columnOrder,
-    newPinning: columnPinning,
-    persistenceKey,
-    persistTableState,
-    pinnedColumnOffsets,
-  });
+  if (
+    !commitPinningAndOrderUpdate<TData>({
+      columnGroups,
+      columnsStore,
+      effectiveColumns,
+      newColumnOrder: columnOrder,
+      newPinning: columnPinning,
+      persistenceKey,
+      persistTableState,
+      pinnedColumnOffsets,
+    })
+  ) {
+    return;
+  }
 
   metaStore.set({ drawersSyncNonce: drawersSyncNonce + 1 });
 };

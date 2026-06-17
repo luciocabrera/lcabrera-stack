@@ -7,12 +7,17 @@ import type { TablePersistenceConfig } from '../Table.types';
 
 import { usePersistTableStateAction } from './usePersistCookieAction.hook';
 
-const { serializeStateSliceMock, submitMock, writeToSessionStorageMock } =
-  vi.hoisted(() => ({
-    serializeStateSliceMock: vi.fn(),
-    submitMock: vi.fn(),
-    writeToSessionStorageMock: vi.fn(),
-  }));
+const {
+  notifyMock,
+  serializeStateSliceMock,
+  submitMock,
+  writeToSessionStorageMock,
+} = vi.hoisted(() => ({
+  notifyMock: vi.fn(),
+  serializeStateSliceMock: vi.fn(),
+  submitMock: vi.fn(),
+  writeToSessionStorageMock: vi.fn(),
+}));
 const { mockUseFetcher, mockUseLocation } = vi.hoisted(() => ({
   mockUseFetcher: () => ({ submit: submitMock }),
   mockUseLocation: () => ({
@@ -30,12 +35,17 @@ vi.mock('../utils', () => ({
   serializeStateSlice: serializeStateSliceMock,
 }));
 
+vi.mock('@/hooks/useNotifications.hook', () => ({
+  useNotifications: () => ({ notify: notifyMock }),
+}));
+
 vi.mock('@/utils/storage', () => ({
   writeToSessionStorage: writeToSessionStorageMock,
 }));
 
 describe('usePersistTableStateAction', () => {
   beforeEach(() => {
+    notifyMock.mockReset();
     serializeStateSliceMock.mockReset();
     submitMock.mockReset();
     writeToSessionStorageMock.mockReset();
@@ -159,5 +169,36 @@ describe('usePersistTableStateAction', () => {
     );
 
     expect(writeToSessionStorageMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('blocks oversized entries before session storage or cookie persistence', () => {
+    serializeStateSliceMock.mockReturnValue({
+      key: 'orders:filters',
+      value: 'x'.repeat(1801),
+    });
+
+    const { result } = renderHook(() => usePersistTableStateAction());
+
+    let persistenceResult = true;
+
+    act(() => {
+      persistenceResult = result.current({
+        persistenceKey: 'orders',
+        searchParamKey: 'filters',
+        searchParamValue: '{"status":"active"}',
+        slice: 'columnFilters',
+        valueSlice: { status: 'active' },
+      });
+    });
+
+    expect(persistenceResult).toBe(false);
+    expect(notifyMock).toHaveBeenCalledWith({
+      message:
+        'This table state is too large to save safely. Remove some filters or sorting before applying the change.',
+      title: 'Table state too large',
+      variant: 'warning',
+    });
+    expect(writeToSessionStorageMock).not.toHaveBeenCalled();
+    expect(submitMock).not.toHaveBeenCalled();
   });
 });

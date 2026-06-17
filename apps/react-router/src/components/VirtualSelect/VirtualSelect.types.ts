@@ -14,6 +14,8 @@ export type VirtualSelectProps = {
   readonly customStylex?: StyleXStyles;
   /** Current state of async-loaded data (for fetch mode). Mutually exclusive with `options`. */
   readonly dataState?: VirtualListDataState;
+  /** Shows a shimmer overlay and disables trigger interaction while the parent is busy */
+  readonly isBusy?: boolean;
   /** When true, the list is always visible without a trigger button */
   readonly isAlwaysOpen?: boolean;
   /** Height for the virtual dropdown list (CSS value, e.g. '18.75rem') */

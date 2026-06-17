@@ -53,6 +53,23 @@ describe('VirtualSelectTrigger', () => {
     expect(props.onToggle).toHaveBeenCalledTimes(1);
   });
 
+  it('renders the trigger as disabled when busy', () => {
+    const props = {
+      ...createProps(),
+      isBusy: true,
+    };
+
+    render(<VirtualSelectTrigger {...props} />);
+
+    const trigger = screen.getByRole('button', { name: 'Pick one' });
+
+    expect(trigger.hasAttribute('disabled')).toBe(true);
+
+    fireEvent.click(trigger);
+
+    expect(props.onToggle).not.toHaveBeenCalled();
+  });
+
   it('renders tag buttons with overflow text in multi mode and removes a tag', () => {
     const props = {
       ...createProps(),

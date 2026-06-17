@@ -141,6 +141,7 @@ describe('useBatchSetTableSettings', () => {
     mockMetaStore.get.mockClear();
     mockMetaStore.set.mockClear();
     mockPersistTableState.mockClear();
+    mockPersistTableState.mockReturnValue(true);
     mockResolveBatchTableSettingsUpdate.mockClear();
   });
 

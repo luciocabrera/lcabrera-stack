@@ -1,6 +1,10 @@
 import { useFetcher, useLocation } from 'react-router';
 
-import { PERSIST_COOKIE_ACTION } from '@/constants/globalSettings.constants';
+import {
+  PERSIST_COOKIE_ACTION,
+  PERSISTENCE_SIZE_WARNING,
+  MAX_COOKIE_ENTRY_VALUE_LENGTH,
+} from '@/constants/globalSettings.constants';
 import { useNotifications } from '@/hooks/useNotifications.hook';
 import { writeToSessionStorage } from '@/utils/storage';
 
@@ -14,15 +18,6 @@ type PersistCookieEntry<TSlice = unknown> = {
   searchParamValue?: string;
   slice: keyof TablePersistenceConfig;
   valueSlice: TSlice;
-};
-
-const MAX_COOKIE_ENTRY_VALUE_LENGTH = 1800;
-
-const PERSISTENCE_SIZE_WARNING = {
-  message:
-    'This table state is too large to save safely. Remove some filters or sorting before applying the change.',
-  title: 'Table state too large',
-  variant: 'warning' as const,
 };
 
 /**
@@ -64,9 +59,6 @@ export const usePersistTableStateAction = (): PersistTableStateAction => {
           slice,
           value: valueSlice,
         });
-
-        // Write to sessionStorage immediately (tab-isolated, survives refresh)
-        writeToSessionStorage({ key, value });
 
         return {
           key,

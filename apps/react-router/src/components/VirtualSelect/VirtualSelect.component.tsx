@@ -13,12 +13,13 @@ import type {
 } from './VirtualSelect.types';
 
 import { countVisibleTags, getDropdownStyle } from './utils';
-import { styles } from './VirtualSelect.stylex';
+import { busyStyles, styles } from './VirtualSelect.stylex';
 import { VirtualSelectTrigger } from './VirtualSelectTrigger';
 
 export const VirtualSelect = ({
   customStylex,
   dataState,
+  isBusy = false,
   isAlwaysOpen = false,
   listMaxHeight = '18.75rem',
   listboxId,
@@ -37,6 +38,7 @@ export const VirtualSelect = ({
 
   const generatedListboxId = useId();
 
+  const isBusyState = isBusy;
   const [visibleTagCount, setVisibleTagCount] = useState(selected.length);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -106,6 +108,7 @@ export const VirtualSelect = ({
   });
 
   const handleToggleDropdown = () => {
+    if (isBusyState) return;
     setIsOpen((isCurrentlyOpen) => !isCurrentlyOpen);
   };
 
@@ -141,7 +144,13 @@ export const VirtualSelect = ({
         shouldFillHeight ? styles.containerFill : undefined,
       )}
     >
+      {isBusyState && (
+        <div {...stylex.props(busyStyles.overlay)} aria-hidden='true'>
+          <div {...stylex.props(busyStyles.wave)} />
+        </div>
+      )}
       <VirtualSelectTrigger
+        isBusy={isBusyState}
         isAlwaysOpen={isAlwaysOpen}
         isOpen={isOpen}
         listboxId={resolvedListboxId}

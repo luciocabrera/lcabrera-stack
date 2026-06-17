@@ -15,10 +15,6 @@ export const useBatchSetColumnSettings = <TData>() => {
   const persistTableState = usePersistTableStateAction();
 
   return (settings: BatchColumnSettingsUpdate<TData>) => {
-    dataStore.set({
-      isLoading: true,
-    });
-
     const columnsState = columnsStore.get();
     const metaState = metaStore.get();
     const isColumnSettingsPinned = metaState?.isColumnSettingsPinned ?? false;
@@ -30,16 +26,24 @@ export const useBatchSetColumnSettings = <TData>() => {
       settings,
     });
 
-    persistTableState(
-      buildPersistencePayload<TData>({
-        columnFilters: resolvedUpdate.columnFilters,
-        columnOrder: resolvedUpdate.columnOrder,
-        columnPinning: resolvedUpdate.columnPinning,
-        columnSizing: resolvedUpdate.columnSizing,
-        persistenceKey,
-        sorting: resolvedUpdate.sorting,
-      }),
-    );
+    if (
+      !persistTableState(
+        buildPersistencePayload<TData>({
+          columnFilters: resolvedUpdate.columnFilters,
+          columnOrder: resolvedUpdate.columnOrder,
+          columnPinning: resolvedUpdate.columnPinning,
+          columnSizing: resolvedUpdate.columnSizing,
+          persistenceKey,
+          sorting: resolvedUpdate.sorting,
+        }),
+      )
+    ) {
+      return;
+    }
+
+    dataStore.set({
+      isLoading: true,
+    });
 
     columnsStore.set(resolvedUpdate);
 

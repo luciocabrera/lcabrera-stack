@@ -83,7 +83,10 @@ Persists table state slices to cookies via a server action (React Router `useFet
 ```mermaid
 graph TD
   Action["persistTableState(entries)"] --> Serialize["serializeStateSlice per entry"]
-  Serialize --> Submit["fetcher.submit({ entries, currentUrl })"]
+  Serialize --> Check{"any entry too large?"}
+  Check -->|Yes| Warn["notify warning + abort"]
+  Check -->|No| Session["write sessionStorage"]
+  Session --> Submit["fetcher.submit({ entries, currentUrl })"]
   Submit --> Route["POST /_action/persist-cookie"]
   Route --> Cookie["Set-Cookie response header"]
 ```
@@ -94,3 +97,4 @@ Supports both single entries and batch submissions. Each entry specifies:
 - `slice` — which state slice (columnFilters, sorting, etc.)
 - `valueSlice` — the data to persist
 - `searchParamKey/Value` — optional URL search param sync
+- Oversized entries block the entire apply flow before sessionStorage, URL sync, or cookie persistence to avoid partial restored state

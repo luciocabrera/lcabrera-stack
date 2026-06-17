@@ -15,9 +15,6 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
   const persistTableState = usePersistTableStateAction();
 
   return (settings: BatchTableSettingsUpdate<TData>) => {
-    dataStore.set({
-      isLoading: true,
-    });
     const columnsState = columnsStore.get();
     const metaState = metaStore.get();
     const persistenceKey = metaState?.persistenceKey ?? '';
@@ -26,17 +23,25 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
       settings,
     });
 
-    persistTableState(
-      buildPersistencePayload<TData>({
-        columnFilters: settings.columnFilters,
-        columnOrder: settings.columnOrder,
-        columnPinning: settings.columnPinning,
-        columnSizing: settings.columnSizing,
-        columnVisibility: settings.columnVisibility,
-        persistenceKey,
-        sorting: settings.sorting,
-      }),
-    );
+    if (
+      !persistTableState(
+        buildPersistencePayload<TData>({
+          columnFilters: settings.columnFilters,
+          columnOrder: settings.columnOrder,
+          columnPinning: settings.columnPinning,
+          columnSizing: settings.columnSizing,
+          columnVisibility: settings.columnVisibility,
+          persistenceKey,
+          sorting: settings.sorting,
+        }),
+      )
+    ) {
+      return;
+    }
+
+    dataStore.set({
+      isLoading: true,
+    });
 
     columnsStore.set(resolvedUpdate);
     if (!metaState?.isTableSettingsPinned) {

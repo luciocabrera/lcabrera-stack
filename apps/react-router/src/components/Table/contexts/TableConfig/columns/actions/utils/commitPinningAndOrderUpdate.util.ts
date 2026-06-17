@@ -22,7 +22,7 @@ type CommitPinningAndOrderUpdateArgs<TData> = {
       readonly slice: 'columnOrder' | 'columnPinning';
       readonly valueSlice: unknown;
     }[],
-  ) => void;
+  ) => boolean;
   readonly pinnedColumnOffsets: PinnedColumnOffsetsState<TData>;
 };
 
@@ -36,18 +36,22 @@ export const commitPinningAndOrderUpdate = <TData>({
   persistTableState,
   pinnedColumnOffsets,
 }: CommitPinningAndOrderUpdateArgs<TData>) => {
-  persistTableState([
-    {
-      persistenceKey,
-      slice: 'columnPinning',
-      valueSlice: newPinning,
-    },
-    {
-      persistenceKey,
-      slice: 'columnOrder',
-      valueSlice: newColumnOrder,
-    },
-  ]);
+  if (
+    !persistTableState([
+      {
+        persistenceKey,
+        slice: 'columnPinning',
+        valueSlice: newPinning,
+      },
+      {
+        persistenceKey,
+        slice: 'columnOrder',
+        valueSlice: newColumnOrder,
+      },
+    ])
+  ) {
+    return false;
+  }
 
   columnsStore.set({
     columnGroups,
@@ -56,4 +60,6 @@ export const commitPinningAndOrderUpdate = <TData>({
     effectiveColumns,
     pinnedColumnOffsets,
   });
+
+  return true;
 };

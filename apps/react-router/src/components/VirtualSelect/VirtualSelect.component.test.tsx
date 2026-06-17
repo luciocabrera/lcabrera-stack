@@ -152,6 +152,26 @@ describe('VirtualSelect', () => {
     expect(onOpenChange).toHaveBeenLastCalledWith(false);
   });
 
+  it('does not open when busy and renders a disabled trigger', () => {
+    render(
+      <VirtualSelect
+        isBusy
+        mode='single'
+        onChange={() => void 0}
+        options={['Alpha', 'Bravo']}
+        selected={[]}
+      />,
+    );
+
+    const trigger = screen.getByRole('button', { name: 'Select...' });
+
+    expect(trigger.hasAttribute('disabled')).toBe(true);
+
+    fireEvent.click(trigger);
+
+    expect(screen.queryByTestId('virtual-list')).toBeNull();
+  });
+
   it('closes when the outside-click handler fires', async () => {
     const onOpenChange = vi.fn();
 
