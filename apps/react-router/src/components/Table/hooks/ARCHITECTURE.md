@@ -89,6 +89,9 @@ graph TD
   Session --> Submit["fetcher.submit({ entries, currentUrl })"]
   Submit --> Route["POST /_action/persist-cookie"]
   Route --> Cookie["Set-Cookie response header"]
+  Route --> Decision{"search params changed?"}
+  Decision -->|Yes| Redirect["redirect(url) and route revalidation"]
+  Decision -->|No| NoRedirect["204 response without revalidation"]
 ```
 
 Supports both single entries and batch submissions. Each entry specifies:
@@ -97,4 +100,7 @@ Supports both single entries and batch submissions. Each entry specifies:
 - `slice` — which state slice (columnFilters, sorting, etc.)
 - `valueSlice` — the data to persist
 - `searchParamKey/Value` — optional URL search param sync
+- Revalidation happens only when persisted `searchParamKey/Value` produce an
+  effective URL search-param change; otherwise the action returns `204` and
+  only cookie/session persistence occurs.
 - Oversized entries block the entire apply flow before sessionStorage, URL sync, or cookie persistence to avoid partial restored state

@@ -38,11 +38,15 @@ const {
     ]),
     mockColumnsStore: {
       get: vi.fn(() => ({
+        columnFilters: {
+          name: { operator: 'contains', type: 'text', value: 'ali' },
+        },
         columns: [
           { key: 'id', label: 'ID' },
           { key: 'name', label: 'Name' },
           { key: 'age', label: 'Age' },
         ],
+        sorting: [{ columnKey: 'name', direction: 'asc' }],
       })),
       set: vi.fn(),
     },
@@ -157,7 +161,7 @@ describe('useBatchSetTableSettings', () => {
       readonly sorting: SortingState<Row>;
     } = {
       columnFilters: {
-        name: { operator: 'contains', type: 'text', value: 'ali' },
+        name: { operator: 'contains', type: 'text', value: 'new-value' },
       } as ColumnFiltersState<Row>,
       columnOrder: ['id', 'age', 'name'],
       columnPinning: { left: ['id'], right: ['name'] },
@@ -168,7 +172,7 @@ describe('useBatchSetTableSettings', () => {
         name: 220,
       } as ColumnSizingState<Row>,
       columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(['age']),
-      sorting: [{ columnKey: 'name', direction: 'asc' }],
+      sorting: [{ columnKey: 'name', direction: 'desc' }],
     };
 
     act(() => {
@@ -189,14 +193,14 @@ describe('useBatchSetTableSettings', () => {
     });
     expect(mockBuildPersistencePayload).toHaveBeenCalledWith({
       columnFilters: {
-        name: { operator: 'contains', type: 'text', value: 'ali' },
+        name: { operator: 'contains', type: 'text', value: 'new-value' },
       },
       columnOrder: ['id', 'age', 'name'],
       columnPinning: { left: ['id'], right: ['name'] },
       columnSizing: { actions: 0, age: 80, id: 100, name: 220 },
       columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(['age']),
       persistenceKey: 'orders-table',
-      sorting: [{ columnKey: 'name', direction: 'asc' }],
+      sorting: [{ columnKey: 'name', direction: 'desc' }],
     });
     expect(mockPersistTableState).toHaveBeenCalledWith([
       {
@@ -212,6 +216,60 @@ describe('useBatchSetTableSettings', () => {
       isTableSettingsOpen: false,
     });
     expect(mockDataStore.set).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not set loading for UI-only table updates when filters/sorting are unchanged', () => {
+    const { result } = renderHook(() => useBatchSetTableSettings<Row>());
+
+    act(() => {
+      result.current({
+        columnFilters: {
+          name: { operator: 'contains', type: 'text', value: 'ali' },
+        } as ColumnFiltersState<Row>,
+        columnOrder: ['id', 'age', 'name'],
+        columnPinning: { left: ['id'], right: ['name'] },
+        columnSizing: {
+          actions: 0,
+          age: 80,
+          id: 100,
+          name: 220,
+        } as ColumnSizingState<Row>,
+        columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(['age']),
+        sorting: [{ columnKey: 'name', direction: 'asc' }] as SortingState<Row>,
+      });
+    });
+
+    expect(mockPersistTableState).toHaveBeenCalledTimes(1);
+    expect(mockDataStore.set).not.toHaveBeenCalled();
+    expect(mockColumnsStore.set).toHaveBeenCalledTimes(1);
+  });
+
+  it('sets loading when table filters/sorting changed', () => {
+    const { result } = renderHook(() => useBatchSetTableSettings<Row>());
+
+    act(() => {
+      result.current({
+        columnFilters: {
+          name: { operator: 'contains', type: 'text', value: 'new-value' },
+        } as ColumnFiltersState<Row>,
+        columnOrder: ['id', 'age', 'name'],
+        columnPinning: { left: ['id'], right: ['name'] },
+        columnSizing: {
+          actions: 0,
+          age: 80,
+          id: 100,
+          name: 220,
+        } as ColumnSizingState<Row>,
+        columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(['age']),
+        sorting: [
+          { columnKey: 'name', direction: 'desc' },
+        ] as SortingState<Row>,
+      });
+    });
+
+    expect(mockDataStore.set).toHaveBeenCalledWith({
+      isLoading: true,
+    });
   });
 
   it('keeps table settings open when drawer is pinned', () => {
