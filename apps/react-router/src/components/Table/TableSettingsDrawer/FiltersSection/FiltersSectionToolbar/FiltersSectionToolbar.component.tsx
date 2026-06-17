@@ -111,5 +111,3 @@ export const FiltersSectionToolbar = ({
     </div>
   );
 };
-
-FiltersSectionToolbar.displayName = 'FiltersSectionToolbar';

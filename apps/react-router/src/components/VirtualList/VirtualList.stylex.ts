@@ -38,12 +38,6 @@ const localStyles = stylex.create({
     borderTopWidth: '1px',
     bottom: '0',
   },
-  noResults: {
-    alignItems: 'center',
-    display: 'flex',
-    justifyContent: 'center',
-    height: '100%',
-  },
   option: {
     padding: `${spacing.xs} ${spacing.sm}`,
     borderRadius: {
@@ -80,55 +74,9 @@ const localStyles = stylex.create({
     cursor: 'default',
     pointerEvents: 'none',
   },
-  optionsList: {
-    borderColor: colors.borderPrimary,
-    borderRadius: borderRadius.md,
-    borderStyle: 'solid',
-    borderWidth: '1px',
-    gap: spacing.xs,
-    overflow: 'hidden',
-    backgroundColor: colors.surfacePrimary,
-    boxSizing: 'border-box',
-    display: 'flex',
-    flexDirection: 'column',
-    maxWidth: '100%',
-    minWidth: 0,
-    position: 'relative',
-    width: '100%',
-  },
-  optionsListFill: {
-    flex: '1',
-    overflow: 'hidden',
-    minHeight: 0,
-  },
   containerFill: {
     flex: '1',
     minHeight: 0,
-  },
-  virtualContainer: (height: string) => ({
-    position: 'relative',
-    height,
-    overflowX: 'hidden',
-    overflowY: 'auto',
-  }),
-  virtualContainerFill: {
-    flex: '1',
-    position: 'relative',
-    overflowX: 'hidden',
-    overflowY: 'auto',
-  },
-  virtualOffset: (offsetY: number) => ({
-    transform: `translateY(${offsetY}px)`,
-  }),
-  virtualScrollArea: (height: number) => ({
-    position: 'relative',
-    height,
-  }),
-  clearButton: {
-    position: 'absolute',
-    transform: 'translateY(-50%)',
-    right: spacing.xs,
-    top: '50%',
   },
   listFilterButton: {
     borderRadius: 0,
@@ -137,33 +85,19 @@ const localStyles = stylex.create({
     borderColor: colors.borderFocus,
     borderRadius: 0,
   },
-  searchInputWithClear: {
-    paddingRight: spacing.xl,
-  },
 });
 
 export const skeletonStyles = { ...skeleton };
 
 export const styles = {
   checkbox: localStyles.checkbox,
-  clearButton: localStyles.clearButton,
   container: filterBaseStyles.container,
   containerFill: localStyles.containerFill,
   label: localStyles.label,
   listFilterButton: localStyles.listFilterButton,
   listFilterButtonActive: localStyles.listFilterButtonActive,
   loadingMore: localStyles.loadingMore,
-  noResults: localStyles.noResults,
   option: localStyles.option,
   optionButtonReset: localStyles.optionButtonReset,
   optionDisabled: localStyles.optionDisabled,
-  optionsList: localStyles.optionsList,
-  optionsListFill: localStyles.optionsListFill,
-  searchInput: filterBaseStyles.input,
-  searchInputWithClear: localStyles.searchInputWithClear,
-  searchInputWrapper: filterBaseStyles.inputWrapper,
-  virtualContainer: localStyles.virtualContainer,
-  virtualContainerFill: localStyles.virtualContainerFill,
-  virtualOffset: localStyles.virtualOffset,
-  virtualScrollArea: localStyles.virtualScrollArea,
 };

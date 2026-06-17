@@ -1,2 +1,5 @@
 export { VirtualList } from './VirtualList.component';
-export type { VirtualListDataState } from './VirtualList.types';
+export type {
+  VirtualListDataState,
+  VirtualListProps,
+} from './VirtualList.types';
