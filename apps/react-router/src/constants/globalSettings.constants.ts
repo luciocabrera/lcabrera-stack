@@ -1,4 +1,5 @@
 import type { RadioOption } from '@/components/RadioOptionGroup';
+import type { AppNotification } from '@/contexts/NotificationContext/NotificationContext.types';
 import type {
   GlobalNavigationCollapsedPreference,
   GlobalNavigationPinnedPreference,
@@ -60,10 +61,13 @@ export const NAVIGATION_PINNED_PREFERENCE_OPTIONS: readonly RadioOption<GlobalNa
 export const PERSIST_COOKIE_ACTION = '/_action/persist-cookie';
 export const MAX_COOKIE_ENTRY_VALUE_LENGTH = 1800;
 
-export const PERSISTENCE_SIZE_WARNING = {
+export const PERSISTENCE_SIZE_WARNING: Omit<
+  AppNotification,
+  'id' | 'placement'
+> = {
   message:
     'This table state is too large to save safely. Remove some filters or sorting before applying the change.',
   title: 'Table state too large',
   variant: 'error' as const,
-  delay: 180_000,
+  durationMs: 10_000,
 };
