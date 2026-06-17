@@ -38,9 +38,9 @@ const GLOBAL_IGNORES = [
   'utils/**',
 ];
 
-export const createCustomRulesLintConfig = () => [
+export const createCustomRulesLintConfig = ({ ignorePatterns = [] } = {}) => [
   {
-    ignores: GLOBAL_IGNORES,
+    ignores: [...GLOBAL_IGNORES, ...ignorePatterns],
   },
   {
     files: ['src/**/*.ts', 'src/**/*.tsx'],
@@ -57,7 +57,11 @@ export const createCustomRulesLintConfig = () => [
       '@stylexjs/valid-styles': 'error',
       '@typescript-eslint/consistent-type-definitions': ['error', 'type'],
       'func-style': ['error', 'expression'],
+      'local-rules/clean-import-paths': 'error',
       'local-rules/destructuring-for-functions': 'error',
+      'local-rules/merge-duplicate-imports': 'error',
+      'local-rules/no-inline-type-imports': 'error',
+      'local-rules/type-suffix-naming': 'error',
       'perfectionist/sort-imports': [
         'error',
         {
