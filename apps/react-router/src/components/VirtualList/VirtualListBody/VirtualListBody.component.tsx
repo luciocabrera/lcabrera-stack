@@ -64,21 +64,18 @@ export const VirtualListBody = ({
       totalItems,
     });
 
-  const handleToggle = useCallback(
-    (option: string) => {
-      const newSelectedValues = selectedValues.includes(option)
-        ? selectedValues.filter((value) => value !== option)
-        : [...selectedValues, option];
+  const handleToggle = (option: string) => {
+    const newSelectedValues = selectedValues.includes(option)
+      ? selectedValues.filter((value) => value !== option)
+      : [...selectedValues, option];
 
-      onChange({
-        type: 'select',
-        values: newSelectedValues,
-      });
-    },
-    [onChange, selectedValues],
-  );
+    onChange({
+      type: 'select',
+      values: newSelectedValues,
+    });
+  };
 
-  const handleSelectAll = useCallback(() => {
+  const handleSelectAll = () => {
     const newSelectedValues = isAllSelected
       ? selectedValues.filter((value) => !filteredOptions.includes(value))
       : [...new Set([...selectedValues, ...filteredOptions])];
@@ -87,7 +84,7 @@ export const VirtualListBody = ({
       type: 'select',
       values: newSelectedValues,
     });
-  }, [filteredOptions, isAllSelected, onChange, selectedValues]);
+  };
 
   const handleLoadMore = useCallback(() => {
     if (!onFetchMore || !hasMore || isLoadingOptions) return;
