@@ -35,19 +35,24 @@ export const VirtualList = ({
 }: VirtualListProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [listFilterMode, setListFilterMode] = useState<ListFilterMode>('all');
+
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  const { hasMore, isLoading, isLoadingMore } = dataState;
+  const { data, hasMore, isLoading, isLoadingMore } = dataState;
+  const isBootstrappingInitialLoad =
+    Boolean(onFetchInitial) &&
+    data.length === 0 &&
+    !(isLoading || isLoadingMore);
   const isLoadingOptions = isLoading || isLoadingMore || false;
   // Derive selectedValues from filter prop - fully controlled by parent
   const selectedValues = filter?.values ?? [];
-  // Options from dataState (populated externally or passed statically)
-  const effectiveOptions = dataState.data;
-  const isInitialLoading = isLoading && effectiveOptions.length === 0;
+
+  const isInitialLoading =
+    data.length === 0 && (isLoading || isBootstrappingInitialLoad);
 
   const filteredOptions = getFilteredOptions({
     listFilterMode,
-    options: effectiveOptions,
+    options: data,
     searchTerm,
     selectedValues,
   });
@@ -231,7 +236,7 @@ export const VirtualList = ({
       </div>
       <VirtualListFooter
         dataState={dataState}
-        effectiveOptions={effectiveOptions}
+        effectiveOptions={data}
         hasCheckboxes={hasCheckboxes}
         listFilterMode={listFilterMode}
         selectedValues={selectedValues}
