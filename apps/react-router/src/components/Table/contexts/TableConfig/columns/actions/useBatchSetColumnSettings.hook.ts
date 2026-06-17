@@ -2,11 +2,12 @@ import { useTableConfigContextValue } from '@/components/Table/contexts/TableCon
 import { useTableDataContextValue } from '@/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
 import { usePersistTableStateAction } from '@/components/Table/hooks';
 
+import type { BatchColumnSettingsUpdate } from './utils/resolveBatchColumnSettingsUpdate.util';
+
 import {
   buildPersistencePayload,
   resolveBatchColumnSettingsUpdate,
 } from './utils';
-import type { BatchColumnSettingsUpdate } from './utils/resolveBatchColumnSettingsUpdate.util';
 
 export const useBatchSetColumnSettings = <TData>() => {
   const { columnsStore, metaStore } = useTableConfigContextValue<TData>();

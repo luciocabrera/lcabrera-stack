@@ -2,8 +2,8 @@ import * as stylex from '@stylexjs/stylex';
 
 import type { SpacerRowProps } from './SpacerRow.types';
 
-import { styles } from './SpacerRow.stylex';
 import { useGetColumnGroups } from '../contexts/TableConfig/columns/selectors';
+import { styles } from './SpacerRow.stylex';
 
 export const SpacerRow = ({ height }: SpacerRowProps) => {
   const { centerCols, leftPinnedCols, rightPinnedCols } = useGetColumnGroups();

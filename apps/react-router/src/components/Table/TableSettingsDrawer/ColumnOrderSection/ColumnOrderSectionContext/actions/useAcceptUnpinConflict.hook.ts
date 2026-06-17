@@ -8,8 +8,8 @@ import type { UnpinConflictResolution } from '@/components/Table/TableSettingsDr
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { useTableDrawerContextValue } from '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
 
-import { resolveAcceptedUnpinConflictState } from './utils/resolveAcceptedUnpinConflictState.util';
 import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
+import { resolveAcceptedUnpinConflictState } from './utils/resolveAcceptedUnpinConflictState.util';
 
 /**
  * Hook to handle accepting an unpin conflict resolution.

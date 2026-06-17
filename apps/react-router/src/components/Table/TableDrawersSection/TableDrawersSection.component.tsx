@@ -6,6 +6,7 @@ import { ColumnSettingsDrawer } from '../ColumnSettingsDrawer';
 import { ColumnDrawerProvider } from '../ColumnSettingsDrawer/ColumnDrawerContext/ColumnDrawerContext.provider';
 import {
   useGetTableColumnSelectedKey,
+  useGetTableDrawersSyncNonce,
   useGetTableIsColumnSettingsOpen,
   useGetTableIsTableSettingsOpen,
 } from '../contexts/TableConfig/meta/selectors';
@@ -22,17 +23,21 @@ export const TableDrawersSection = () => {
   const isLoadingMore = useGetTableIsLoadingMore();
   const isTableSettingsOpen = useGetTableIsTableSettingsOpen();
   const columnKey = useGetTableColumnSelectedKey();
+  const drawersSyncNonce = useGetTableDrawersSyncNonce();
   const isBusy = isLoading || isLoadingMore;
 
   if (isColumnSettingsOpen && columnKey)
     return (
-      <ColumnDrawerProvider columnKey={columnKey}>
+      <ColumnDrawerProvider
+        key={`${columnKey}-${drawersSyncNonce}`}
+        columnKey={columnKey}
+      >
         <ColumnSettingsDrawer columnKey={columnKey} isBusy={isBusy} />
       </ColumnDrawerProvider>
     );
   if (isTableSettingsOpen)
     return (
-      <TableDrawerProvider>
+      <TableDrawerProvider key={`table-${drawersSyncNonce}`}>
         <TableSettingsDrawer isBusy={isBusy} />
       </TableDrawerProvider>
     );

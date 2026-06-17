@@ -1,14 +1,14 @@
 // @vitest-environment jsdom
 
-import { type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 import { renderHook, waitFor } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { TableDataProvider } from './TableDataContext.provider';
 import { useGetTableData } from './data/selectors/useGetTableData.hook';
 import { useGetTableHasMore } from './data/selectors/useGetTableHasMore.hook';
 import { useGetTableTotalLoadedRows } from './data/selectors/useGetTableTotalLoadedRows.hook';
+import { TableDataProvider } from './TableDataContext.provider';
 
 type TestRow = {
   readonly id: number;

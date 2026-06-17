@@ -1,8 +1,8 @@
-import type { SidePanelHeaderToolbarProps } from './SidePanelHeaderToolbar.types';
-
 import { Button } from '@/components/Button';
 import { MenuCloseIcon, PinIcon, PinOffIcon } from '@/components/Icons';
 import { ICON_SIZE_MD } from '@/design-system/constants';
+
+import type { SidePanelHeaderToolbarProps } from './SidePanelHeaderToolbar.types';
 
 export const SidePanelHeaderToolbar = ({
   isBusy = false,

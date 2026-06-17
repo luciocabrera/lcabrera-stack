@@ -4,13 +4,6 @@ import { useCallback, useRef, useState } from 'react';
 import type { TableColumn } from '@/components/Table/Table.types';
 import type { VirtualListDataState } from '@/components/VirtualList';
 
-import type {
-  MockResponse,
-  MockRow,
-  ShowcaseSectionProps,
-  ShowcaseSubsectionProps,
-} from './ShowcasePage.types';
-
 import { Button } from '@/components/Button';
 import {
   Card,
@@ -43,6 +36,13 @@ import {
 } from '@/components/Toolbar/Toolbar.examples';
 import { VirtualSelect } from '@/components/VirtualSelect';
 import { useTheme } from '@/hooks/useTheme.hook';
+
+import type {
+  MockResponse,
+  MockRow,
+  ShowcaseSectionProps,
+  ShowcaseSubsectionProps,
+} from './ShowcasePage.types';
 
 import { styles } from './ShowcasePage.stylex';
 

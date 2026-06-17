@@ -58,21 +58,21 @@ vi.mock(
   }),
 );
 
-import { useColumnsStore } from './useColumnsStore.hook';
 import { useGetColumnFilters } from './selectors/useGetColumnFilters.hook';
 import { useGetColumnGroups } from './selectors/useGetColumnGroups.hook';
 import { useGetColumnOrder } from './selectors/useGetColumnOrder.hook';
 import { useGetColumnPinning } from './selectors/useGetColumnPinning.hook';
-import { useGetColumnSizing } from './selectors/useGetColumnSizing.hook';
-import { useGetColumnVisibility } from './selectors/useGetColumnVisibility.hook';
 import { useGetColumns } from './selectors/useGetColumns.hook';
+import { useGetColumnSizing } from './selectors/useGetColumnSizing.hook';
 import { useGetColumnsSorting } from './selectors/useGetColumnsSorting.hook';
+import { useGetColumnVisibility } from './selectors/useGetColumnVisibility.hook';
 import { useGetEffectiveColumns } from './selectors/useGetEffectiveColumns.hook';
 import { useGetNormalizedColumn } from './selectors/useGetNormalizedColumn.hook';
 import { useGetNormalizedColumnFilters } from './selectors/useGetNormalizedColumnFilters.hook';
 import { useGetNormalizedColumns } from './selectors/useGetNormalizedColumns.hook';
 import { useGetPinnedColumnOffsets } from './selectors/useGetPinnedColumnOffsets.hook';
 import { useGetStaticColumnKeys } from './selectors/useGetStaticColumnKeys.hook';
+import { useColumnsStore } from './useColumnsStore.hook';
 
 describe('TableConfig column hooks', () => {
   beforeEach(() => {

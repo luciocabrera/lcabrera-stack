@@ -3,9 +3,9 @@ import * as stylex from '@stylexjs/stylex';
 import { Card } from '@/components/Card';
 import { RadioOptionGroup } from '@/components/RadioOptionGroup';
 
-import { styles } from './Settings.stylex';
-
 import type { SettingsOptionSectionProps } from './SettingsOptionSection.types';
+
+import { styles } from './Settings.stylex';
 
 export const SettingsOptionSection = <TValue extends string>({
   description,

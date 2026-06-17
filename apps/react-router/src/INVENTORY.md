@@ -31,7 +31,7 @@ Before creating anything new, check this inventory. If something here does the j
 | `ToggleSwitch`                       | `components/ToggleSwitch/`                             | Accessible boolean toggle (controlled, `role="switch"`)                                                                           |
 | `Toolbar`                            | `components/Toolbar/`                                  | Horizontal/vertical toolbar of Button/NavLink items                                                                               |
 | `Tooltip`                            | `components/Tooltip/`                                  | CSS Anchor + Popover API tooltip, 4 placements, animated                                                                          |
-| `VirtualList`                        | `components/VirtualList/`                              | Virtualized list with search, select-all, checkboxes, lazy load, parent-contained sizing                                          |
+| `VirtualList`                        | `components/VirtualList/`                              | Virtualized list with extracted Header/Body subcomponents, search, select-all, checkboxes, lazy load, parent-contained sizing     |
 | `VirtualSelect`                      | `components/VirtualSelect/`                            | Parent-contained dropdown select backed by `VirtualList`; `string[]` or `{ label, value }[]` options                              |
 
 ---
@@ -92,6 +92,10 @@ Before creating anything new, check this inventory. If something here does the j
 | `getPinnedDerivedColumnsState`             | `components/Table/utils/getPinnedDerivedColumnsState.util.ts`             | Computes effective columns, pin-based groups, and pinned offsets together in one call                     |
 | `getStaticColumnKeys`                      | `components/Table/utils/getStaticColumnKeys.util.ts`                      | Returns a `Set` of keys for columns marked as non-reorderable                                             |
 | `getStorageKey`                            | `components/Table/utils/getStorageKey.util.ts`                            | Builds a namespaced `persistenceKey:slice` storage key                                                    |
+| `insertAfterLeftPinned`                    | `components/Table/utils/insertAfterLeftPinned.util.ts`                    | Inserts a column immediately after the remaining left-pinned group in an order array                      |
+| `insertBeforeRightPinned`                  | `components/Table/utils/insertBeforeRightPinned.util.ts`                  | Inserts a column immediately before the remaining right-pinned group in an order array                    |
+| `resolveUnpinnedOrder`                     | `components/Table/utils/resolveUnpinnedOrder.util.ts`                     | Resolves unpin placement based on previous pin side and current pinning groups                            |
+| `arePersistedUiStatesEqual`                | `components/Table/utils/arePersistedUiStatesEqual.util.ts`                | Compares persisted table UI slices to avoid redundant sessionStorage writes                               |
 | `readPersistedDataStateFromSessionStorage` | `components/Table/utils/readPersistedDataStateFromSessionStorage.util.ts` | Reads tab-scoped persisted table rows for stale refresh rendering                                         |
 | `readPersistedStateFromCookie`             | `components/Table/utils/readPersistedStateFromCookie.util.ts`             | Parses table persisted state from cookies; SSR-safe                                                       |
 | `readPersistedStateFromSessionStorage`     | `components/Table/utils/readPersistedStateFromSessionStorage.util.ts`     | Reads tab-scoped persisted column state slices from sessionStorage                                        |
@@ -202,6 +206,7 @@ Before creating anything new, check this inventory. If something here does the j
 
 | Function         | Location                                  | Description                                                                |
 | ---------------- | ----------------------------------------- | -------------------------------------------------------------------------- |
+| `areArraysEqual` | `utils/comparison/areArraysEqual.util.ts` | `{ left, right }` → `boolean`; ordered strict equality for array values    |
 | `areEqualByJson` | `utils/comparison/areEqualByJson.util.ts` | `{ left, right }` → `boolean`; deep structural equality via JSON.stringify |
 | `shallowEqual`   | `utils/comparison/shallowEqual.util.ts`   | `{ objA, objB }` → `boolean`; one-level key+value equality check           |
 

@@ -4,29 +4,42 @@ import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const {
+  resetSubscribers,
+  setMetaState,
   writePersistedUiStateToSessionStorageMock,
   metaStoreSubscribeMock,
   metaStoreGetMock,
+  triggerLatestSubscriber,
 } = vi.hoisted(() => {
+  let metaState = {
+    drawersSyncNonce: 0,
+    isColumnSettingsOpen: false,
+    isColumnSettingsPinned: false,
+    isTableSettingsOpen: false,
+    isTableSettingsPinned: false,
+    tableSettingsExpandedFilters: [] as readonly string[],
+    tableSettingsSelectedTab: 'general',
+  };
+
   const listeners = new Set<() => void>();
   return {
     writePersistedUiStateToSessionStorageMock: vi.fn(),
-    metaStoreGetMock: vi.fn(() => ({
-      isTableSettingsOpen: false,
-      isTableSettingsPinned: false,
-      isColumnSettingsOpen: false,
-      isColumnSettingsPinned: false,
-      tableSettingsSelectedTab: 'general',
-      tableSettingsExpandedFilters: [],
-    })),
+    metaStoreGetMock: vi.fn(() => metaState),
     metaStoreSubscribeMock: vi.fn((cb: () => void) => {
       listeners.add(cb);
       return () => {
         listeners.delete(cb);
       };
     }),
-    triggerSubscribers: () => {
-      for (const cb of listeners) cb();
+    resetSubscribers: () => {
+      listeners.clear();
+    },
+    setMetaState: (nextState: typeof metaState) => {
+      metaState = nextState;
+    },
+    triggerLatestSubscriber: () => {
+      const latest = Array.from(listeners).at(-1);
+      latest?.();
     },
   };
 });
@@ -50,6 +63,16 @@ const metaStoreMock = {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  resetSubscribers();
+  setMetaState({
+    drawersSyncNonce: 0,
+    isColumnSettingsOpen: false,
+    isColumnSettingsPinned: false,
+    isTableSettingsOpen: false,
+    isTableSettingsPinned: false,
+    tableSettingsExpandedFilters: [],
+    tableSettingsSelectedTab: 'general',
+  });
 });
 
 describe('useMetaStatePersistEffect', () => {
@@ -112,5 +135,53 @@ describe('useMetaStatePersistEffect', () => {
       'tableSettingsExpandedFilters',
       'tableSettingsSelectedTab',
     ]);
+  });
+
+  it('skips persistence writes when only non-persisted meta fields change', () => {
+    renderHook(() =>
+      useMetaStatePersistEffect({
+        metaStore: metaStoreMock as never,
+        persistenceKey: 'orders',
+      }),
+    );
+
+    writePersistedUiStateToSessionStorageMock.mockClear();
+
+    setMetaState({
+      drawersSyncNonce: 1,
+      isColumnSettingsOpen: false,
+      isColumnSettingsPinned: false,
+      isTableSettingsOpen: false,
+      isTableSettingsPinned: false,
+      tableSettingsExpandedFilters: [],
+      tableSettingsSelectedTab: 'general',
+    });
+    triggerLatestSubscriber();
+
+    expect(writePersistedUiStateToSessionStorageMock).not.toHaveBeenCalled();
+  });
+
+  it('writes when persisted UI fields change', () => {
+    renderHook(() =>
+      useMetaStatePersistEffect({
+        metaStore: metaStoreMock as never,
+        persistenceKey: 'orders',
+      }),
+    );
+
+    writePersistedUiStateToSessionStorageMock.mockClear();
+
+    setMetaState({
+      drawersSyncNonce: 1,
+      isColumnSettingsOpen: false,
+      isColumnSettingsPinned: false,
+      isTableSettingsOpen: true,
+      isTableSettingsPinned: false,
+      tableSettingsExpandedFilters: [],
+      tableSettingsSelectedTab: 'general',
+    });
+    triggerLatestSubscriber();
+
+    expect(writePersistedUiStateToSessionStorageMock).toHaveBeenCalledTimes(1);
   });
 });

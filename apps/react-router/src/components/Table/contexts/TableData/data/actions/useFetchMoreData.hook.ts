@@ -1,15 +1,16 @@
-import { useCallback, useRef } from 'react';
 import type { RefObject } from 'react';
 
+import { useCallback, useRef } from 'react';
+
+import type { TableMetaState } from '@/components/Table/Table.types';
+import type { TStore } from '@/hooks/useStore.hook';
 import type { InfiniteScroll, PrefetchCache } from '@/types/ui.types';
 
-import { LOAD_MORE_PAGE_SIZE } from '@/components/Table/Table.constants';
-import type { TableMetaState } from '@/components/Table/Table.types';
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { LOAD_MORE_PAGE_SIZE } from '@/components/Table/Table.constants';
 import { getErrorMessage } from '@/components/Table/utils/getErrorMessage.util';
 import { getRequiredOnLoadMore } from '@/components/Table/utils/getRequiredOnLoadMore.util';
 import { resolveFetchMoreState } from '@/components/Table/utils/resolveFetchMoreState.util';
-import type { TStore } from '@/hooks/useStore.hook';
 import { clearPrefetchCache } from '@/utils/prefetch/clearPrefetchCache.util';
 import { firePrefetch } from '@/utils/prefetch/firePrefetch.util';
 import { resolveFromCacheOrFetch } from '@/utils/prefetch/resolveFromCacheOrFetch.util';

@@ -7,6 +7,14 @@ const tseslintImport = await import(
   workspaceRequire.resolve('typescript-eslint')
 );
 const tseslint = tseslintImport.default ?? tseslintImport;
+const perfectionistImport = await import(
+  workspaceRequire.resolve('eslint-plugin-perfectionist')
+);
+const perfectionist = perfectionistImport.default ?? perfectionistImport;
+const stylexPluginImport = await import(
+  workspaceRequire.resolve('@stylexjs/eslint-plugin')
+);
+const stylexPlugin = stylexPluginImport.default ?? stylexPluginImport;
 
 const TYPESCRIPT_LANGUAGE_OPTIONS = {
   ecmaVersion: 'latest',
@@ -30,22 +38,37 @@ const GLOBAL_IGNORES = [
   'utils/**',
 ];
 
-export const createCustomRulesLintConfig = () => [
+export const createCustomRulesLintConfig = ({ ignorePatterns = [] } = {}) => [
   {
-    ignores: GLOBAL_IGNORES,
+    ignores: [...GLOBAL_IGNORES, ...ignorePatterns],
   },
   {
     files: ['src/**/*.ts', 'src/**/*.tsx'],
     languageOptions: TYPESCRIPT_LANGUAGE_OPTIONS,
     plugins: {
+      '@stylexjs': stylexPlugin,
       'typescript-eslint': tseslint.plugin,
       '@typescript-eslint': tseslint.plugin,
       'local-rules': localRules,
+      perfectionist,
     },
     rules: {
+      '@stylexjs/sort-keys': 'warn',
+      '@stylexjs/valid-styles': 'error',
       '@typescript-eslint/consistent-type-definitions': ['error', 'type'],
       'func-style': ['error', 'expression'],
+      'local-rules/clean-import-paths': 'error',
       'local-rules/destructuring-for-functions': 'error',
+      'local-rules/merge-duplicate-imports': 'error',
+      'local-rules/no-inline-type-imports': 'error',
+      'local-rules/type-suffix-naming': 'error',
+      'perfectionist/sort-imports': [
+        'error',
+        {
+          order: 'asc',
+          type: 'natural',
+        },
+      ],
     },
   },
   {
@@ -59,6 +82,8 @@ export const createCustomRulesLintConfig = () => [
     files: ['src/**/*.stylex.ts'],
     rules: {
       'local-rules/destructuring-for-functions': 'off',
+      'perfectionist/sort-object-types': 'off',
+      'perfectionist/sort-objects': 'off',
     },
   },
   {

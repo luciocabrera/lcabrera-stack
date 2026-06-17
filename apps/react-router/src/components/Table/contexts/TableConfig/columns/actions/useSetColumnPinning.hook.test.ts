@@ -23,6 +23,7 @@ const createInitialColumnsState = () => {
 
 const {
   mockColumnsStore,
+  mockMetaStore,
   mockPersistTableState,
   mockUsePersistTableStateAction,
   mockUseTableConfigContextValue,
@@ -81,5 +82,47 @@ describe('useSetColumnPinning', () => {
         columnPinning: { left: ['id', 'name'], right: [] },
       }),
     );
+    expect(mockMetaStore.set).toHaveBeenCalledWith({ drawersSyncNonce: 1 });
+  });
+
+  it('syncs column order when unpinning a left-pinned column', () => {
+    setColumnsState({
+      ...createInitialColumnsState(),
+      columnOrder: ['name', 'id', 'age'],
+      columnPinning: { left: ['name', 'id'], right: [] },
+    });
+
+    const { result } = renderHook(() =>
+      useSetColumnPinning<{
+        readonly age: string;
+        readonly id: string;
+        readonly name: string;
+      }>(),
+    );
+
+    act(() => {
+      result.current({ columnKey: 'name', side: undefined });
+    });
+
+    expect(mockPersistTableState).toHaveBeenCalledWith([
+      {
+        persistenceKey: 'orders-table',
+        slice: 'columnPinning',
+        valueSlice: { left: ['id'], right: [] },
+      },
+      {
+        persistenceKey: 'orders-table',
+        slice: 'columnOrder',
+        valueSlice: ['id', 'name', 'age'],
+      },
+    ]);
+
+    expect(mockColumnsStore.set).toHaveBeenCalledWith(
+      expect.objectContaining({
+        columnOrder: ['id', 'name', 'age'],
+        columnPinning: { left: ['id'], right: [] },
+      }),
+    );
+    expect(mockMetaStore.set).toHaveBeenCalledWith({ drawersSyncNonce: 1 });
   });
 });

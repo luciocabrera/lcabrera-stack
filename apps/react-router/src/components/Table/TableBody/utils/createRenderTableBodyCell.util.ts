@@ -1,13 +1,13 @@
 import { createElement } from 'react';
 
-import { TableBodyCell } from '@/components/Table/TableBodyCell';
-
 import type {
   ColumnSizingState,
   DataKey,
   PinnedColumnInfo,
   TableColumn,
 } from '@/components/Table/Table.types';
+
+import { TableBodyCell } from '@/components/Table/TableBodyCell';
 
 import {
   buildTableBodyCellDescriptor,

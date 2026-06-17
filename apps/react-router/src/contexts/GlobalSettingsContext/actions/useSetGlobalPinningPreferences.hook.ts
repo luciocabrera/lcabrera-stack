@@ -1,9 +1,8 @@
+import type { GlobalPinningPreferences } from '@/types/globalSettings.types';
+
 import { INITIAL_GLOBAL_SETTINGS } from '../GlobalSettingsContext.constants';
 import { useGlobalSettingsContextValue } from '../useGlobalSettingsContextValue.hook';
-
 import { usePersistGlobalSettingsAction } from './usePersistGlobalSettingsAction.hook';
-
-import type { GlobalPinningPreferences } from '@/types/globalSettings.types';
 
 export const useSetGlobalPinningPreferences = () => {
   const { settingsStore } = useGlobalSettingsContextValue();

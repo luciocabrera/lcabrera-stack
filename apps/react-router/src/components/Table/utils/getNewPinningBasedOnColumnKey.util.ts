@@ -1,4 +1,5 @@
 import type { ColumnPinningState, DataKey } from '../Table.types';
+
 import { applyPin } from '../TableSettingsDrawer/ColumnOrderSection/utils';
 
 type GetNewPinningBasedOnColumnKeyArgs<TData> = {

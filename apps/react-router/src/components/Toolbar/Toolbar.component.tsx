@@ -1,12 +1,13 @@
 import * as stylex from '@stylexjs/stylex';
 
+import type { DesignSystemSize } from '@/types/design-system.types';
+
 import { Button } from '@/components/Button';
 import { NavLink } from '@/components/NavLink';
 
-import { styles } from './Toolbar.stylex';
-
-import type { DesignSystemSize } from '@/types/design-system.types';
 import type { ToolbarProps } from './Toolbar.types';
+
+import { styles } from './Toolbar.stylex';
 
 const getCompactControlStyle = (size: DesignSystemSize) => {
   switch (size) {

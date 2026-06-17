@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { serializeGlobalSettingsForCookie } from './serializeGlobalSettingsForCookie.util';
 import { GLOBAL_SETTINGS_COOKIE_VERSION } from './globalSettings.constants';
+import { serializeGlobalSettingsForCookie } from './serializeGlobalSettingsForCookie.util';
 
 describe('serializeGlobalSettingsForCookie', () => {
   it('serializes settings into versioned payload', () => {

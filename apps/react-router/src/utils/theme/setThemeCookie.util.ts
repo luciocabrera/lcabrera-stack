@@ -1,5 +1,7 @@
 import type { ThemeMode } from '@/types/theme.types';
 
+import { PERSIST_COOKIE_ACTION } from '@/constants/globalSettings.constants';
+
 import {
   THEME_COOKIE_MAX_AGE_DAYS,
   THEME_COOKIE_NAME,
@@ -11,8 +13,6 @@ type PersistThemeCookieEntry = {
   readonly searchParamValue: string;
   readonly value: ThemeMode;
 };
-
-const PERSIST_COOKIE_ACTION = '/_action/persist-cookie';
 
 const persistThemeCookieServerSide = (theme: ThemeMode): void => {
   if (

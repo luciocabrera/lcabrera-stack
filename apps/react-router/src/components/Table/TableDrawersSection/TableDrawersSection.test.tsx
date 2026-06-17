@@ -18,6 +18,7 @@ type TableDrawerProviderProps = {
 
 const {
   useGetTableColumnSelectedKeyMock,
+  useGetTableDrawersSyncNonceMock,
   useGetTableIsColumnSettingsOpenMock,
   useGetTableIsColumnSettingsPinnedMock,
   useGetTableIsLoadingMock,
@@ -27,6 +28,7 @@ const {
   useRenderTrackerMock,
 } = vi.hoisted(() => ({
   useGetTableColumnSelectedKeyMock: vi.fn(),
+  useGetTableDrawersSyncNonceMock: vi.fn(() => 0),
   useGetTableIsColumnSettingsOpenMock: vi.fn(),
   useGetTableIsColumnSettingsPinnedMock: vi.fn(() => false),
   useGetTableIsLoadingMock: vi.fn(() => false),
@@ -103,6 +105,7 @@ vi.mock(
 
 vi.mock('../contexts/TableConfig/meta/selectors', () => ({
   useGetTableColumnSelectedKey: useGetTableColumnSelectedKeyMock,
+  useGetTableDrawersSyncNonce: useGetTableDrawersSyncNonceMock,
   useGetTableIsColumnSettingsOpen: useGetTableIsColumnSettingsOpenMock,
   useGetTableIsColumnSettingsPinned: useGetTableIsColumnSettingsPinnedMock,
   useGetTableIsTableSettingsPinned: useGetTableIsTableSettingsPinnedMock,
@@ -126,6 +129,8 @@ describe('TableDrawersSection', () => {
   afterEach(() => {
     columnSettingsDrawerPropsSpy.mockClear();
     tableSettingsDrawerPropsSpy.mockClear();
+    useGetTableDrawersSyncNonceMock.mockReset();
+    useGetTableDrawersSyncNonceMock.mockReturnValue(0);
   });
 
   it('renders table settings drawer when table drawer is open', () => {

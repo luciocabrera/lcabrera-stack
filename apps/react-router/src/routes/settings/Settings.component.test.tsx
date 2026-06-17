@@ -150,4 +150,56 @@ describe('Settings', () => {
       unpinConflictResolution: undefined,
     });
   });
+
+  it('does nothing when Accept is clicked without changes', () => {
+    useGetGlobalPinningPreferencesMock.mockReturnValue({
+      orderConflictResolution: undefined,
+      pinConflictResolution: undefined,
+      pinSide: undefined,
+      unpinConflictResolution: undefined,
+    });
+
+    render(<Settings />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Accept' }));
+
+    expect(setGlobalNavigationPreferencesMock).not.toHaveBeenCalled();
+    expect(setGlobalPinningPreferencesMock).not.toHaveBeenCalled();
+  });
+
+  it('persists both navigation and pinning updates in one Accept flow', () => {
+    useGetGlobalNavigationPreferencesMock.mockReturnValue({
+      collapsed: 'expanded',
+      pinned: 'pinned',
+      size: 'small',
+    });
+    useGetGlobalPinningPreferencesMock.mockReturnValue({
+      orderConflictResolution: undefined,
+      pinConflictResolution: undefined,
+      pinSide: undefined,
+      unpinConflictResolution: undefined,
+    });
+
+    render(<Settings />);
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Navigation' }));
+    fireEvent.click(screen.getByRole('radio', { name: 'Start Collapsed' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Pinning' }));
+    fireEvent.click(
+      screen.getByRole('radio', { name: 'Apply order & keep all pins' }),
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Accept' }));
+
+    expect(setGlobalNavigationPreferencesMock).toHaveBeenCalledTimes(1);
+    expect(setGlobalNavigationPreferencesMock).toHaveBeenCalledWith({
+      collapsed: 'collapsed',
+    });
+    expect(setGlobalPinningPreferencesMock).toHaveBeenCalledTimes(1);
+    expect(setGlobalPinningPreferencesMock).toHaveBeenCalledWith({
+      orderConflictResolution: 'pin-to-match-order',
+      pinConflictResolution: undefined,
+      pinSide: undefined,
+      unpinConflictResolution: undefined,
+    });
+  });
 });

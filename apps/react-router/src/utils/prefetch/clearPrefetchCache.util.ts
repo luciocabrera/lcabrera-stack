@@ -1,4 +1,5 @@
 import type { RefObject } from 'react';
+
 import type { PrefetchCache } from '@/types/ui.types';
 
 type ClearPrefetchCacheArgs<TResponse> = {

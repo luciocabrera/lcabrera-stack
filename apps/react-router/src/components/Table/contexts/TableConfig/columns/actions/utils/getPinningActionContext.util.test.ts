@@ -24,6 +24,7 @@ describe('getPinningActionContext', () => {
       columnSizing: undefined,
       columnVisibility: undefined,
       columns: [],
+      drawersSyncNonce: 0,
       persistenceKey: '',
       staticKeys: undefined,
     });
@@ -47,7 +48,7 @@ describe('getPinningActionContext', () => {
           }) as unknown as TableColumnsState<TData>,
       },
       metaStore: {
-        get: () => ({ persistenceKey: 'orders-table' }),
+        get: () => ({ drawersSyncNonce: 3, persistenceKey: 'orders-table' }),
       },
     });
 
@@ -60,6 +61,7 @@ describe('getPinningActionContext', () => {
       { key: 'name', label: 'Name' },
     ]);
     expect(context.staticKeys).toEqual(new Set(['id']));
+    expect(context.drawersSyncNonce).toBe(3);
     expect(context.persistenceKey).toBe('orders-table');
   });
 });

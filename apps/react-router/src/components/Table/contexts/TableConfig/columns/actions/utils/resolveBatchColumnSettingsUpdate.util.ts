@@ -92,6 +92,7 @@ export const resolveBatchColumnSettingsUpdate = <TData>({
     columnPinning,
     columns,
     currentOrder: columnsState?.columnOrder,
+    previousPinning: columnsState?.columnPinning,
     newPinning,
   });
 

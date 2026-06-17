@@ -1,5 +1,3 @@
-import { useGetGlobalNavigationPreferences } from '@/contexts/GlobalSettingsContext/selectors';
-
 import type {
   GlobalNavigationCollapsedPreference,
   GlobalNavigationPinnedPreference,
@@ -11,6 +9,8 @@ import type {
   PinSidePreferenceOption,
   UnpinConflictResolutionPreferenceOption,
 } from '@/types/pinningPreferences.types';
+
+import { useGetGlobalNavigationPreferences } from '@/contexts/GlobalSettingsContext/selectors';
 
 export type SettingsDraft = {
   readonly navigationCollapsed: GlobalNavigationCollapsedPreference;

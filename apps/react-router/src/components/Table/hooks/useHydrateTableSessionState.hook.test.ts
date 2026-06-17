@@ -11,7 +11,27 @@ const {
 } = vi.hoisted(() => ({
   readPersistedStateFromSessionStorageMock: vi.fn(() => ({})),
   readPersistedUiStateFromSessionStorageMock: vi.fn(() => ({})),
-  columnsStoreMock: { set: vi.fn() },
+  columnsStoreMock: {
+    get: vi.fn(() => ({
+      columnFilters: {},
+      columnGroups: { centerCols: [], leftPinnedCols: [], rightPinnedCols: [] },
+      columnOrder: ['id', 'name', 'age'],
+      columnPinning: { left: [], right: [] },
+      columns: [
+        { dataType: 'string', key: 'id', label: 'ID' },
+        { dataType: 'string', key: 'name', label: 'Name' },
+        { dataType: 'number', key: 'age', label: 'Age' },
+      ],
+      columnSizing: {},
+      columnVisibility: new Set<string>(),
+      effectiveColumns: [],
+      normalizedColumns: {},
+      pinnedColumnOffsets: {},
+      sorting: [],
+      staticKeys: new Set<string>(),
+    })),
+    set: vi.fn(),
+  },
   metaStoreMock: { set: vi.fn() },
 }));
 
@@ -61,7 +81,7 @@ describe('useHydrateTableSessionState', () => {
   });
 
   it('applies column state from sessionStorage on mount', () => {
-    const sorting = [{ columnKey: 'name', direction: 'asc' }];
+    const sorting = [{ columnKey: 'name', direction: 'asc' as const }];
     readPersistedStateFromSessionStorageMock.mockReturnValue({ sorting });
     readPersistedUiStateFromSessionStorageMock.mockReturnValue({});
 
@@ -74,7 +94,13 @@ describe('useHydrateTableSessionState', () => {
     );
 
     expect(columnsStoreMock.set).toHaveBeenCalledWith(
-      expect.objectContaining({ sorting }),
+      expect.objectContaining({
+        columnGroups: expect.any(Object),
+        effectiveColumns: expect.any(Array),
+        normalizedColumns: expect.any(Object),
+        pinnedColumnOffsets: expect.any(Object),
+        sorting,
+      }),
     );
   });
 

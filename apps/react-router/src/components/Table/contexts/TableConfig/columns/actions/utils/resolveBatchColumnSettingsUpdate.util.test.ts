@@ -1,9 +1,9 @@
+import { describe, expect, it, vi } from 'vitest';
+
 import type {
   ColumnFiltersState,
   TableColumnsState,
 } from '@/components/Table/Table.types';
-
-import { describe, expect, it, vi } from 'vitest';
 
 import { resolveBatchColumnSettingsUpdate } from './resolveBatchColumnSettingsUpdate.util';
 
@@ -164,6 +164,7 @@ describe('resolveBatchColumnSettingsUpdate', () => {
       ],
       currentOrder: ['id', 'name', 'age'],
       newPinning: { left: ['id'], right: ['name'] },
+      previousPinning: { left: ['id'], right: [] },
     });
     expect(mockDeriveColumnViewState).toHaveBeenCalledWith({
       columnOrder: ['id', 'age', 'name'],

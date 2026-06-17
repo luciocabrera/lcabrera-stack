@@ -1,6 +1,7 @@
 import type { ColumnFilter } from '@/types/filterOperators.types';
 
 import type { CompactFilterValue } from './serializeFilter.types';
+
 import { getSerializedOperator } from './getSerializedOperator.util';
 
 type SerializeNumberFilterArgs = {

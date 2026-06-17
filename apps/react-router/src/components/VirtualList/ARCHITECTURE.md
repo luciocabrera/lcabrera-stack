@@ -7,10 +7,26 @@ Virtualized, searchable, multi-select list with infinite scroll, skeleton loadin
 ```
 VirtualList/
 ├── index.ts                         → Barrel export (VirtualList, VirtualListDataState, VirtualListProps)
-├── VirtualList.component.tsx        → Orchestrator: search, virtualization, scroll, state
+├── VirtualList.component.tsx        → Orchestrator: shared UI state (search, filter-mode) and child composition
 ├── VirtualList.types.ts             → VirtualListProps, VirtualListDataState, ListFilterMode
 ├── VirtualList.constants.ts         → ITEM_HEIGHT, LIST_MAX_HEIGHT, DEFAULT_CONTAINER_HEIGHT, SCROLL_THRESHOLD
-├── VirtualList.stylex.ts            → Shared styles used by SelectAllOption, SelectOption and VirtualList itself
+├── VirtualList.stylex.ts            → Shared option-row/container styles used by SelectAllOption, SelectOption and root container
+│
+├── VirtualListHeader/               → Search input and clear button
+│   ├── ARCHITECTURE.md
+│   ├── index.ts
+│   ├── VirtualListHeader.component.tsx
+│   ├── VirtualListHeader.stylex.ts
+│   ├── VirtualListHeader.test.tsx
+│   └── VirtualListHeader.types.ts
+│
+├── VirtualListBody/                 → List orchestration: filtering, selection callbacks, virtualization, scrolling
+│   ├── ARCHITECTURE.md
+│   ├── index.ts
+│   ├── VirtualListBody.component.tsx
+│   ├── VirtualListBody.stylex.ts
+│   ├── VirtualListBody.test.tsx
+│   └── VirtualListBody.types.ts
 │
 ├── SelectAllOption/                 → "Select All / Deselect All" checkbox row
 │   ├── ARCHITECTURE.md
@@ -55,7 +71,10 @@ VirtualList/
 ```mermaid
 graph TD
   VL["VirtualList"] --> SKO["SkeletonOptions (initial load)"]
-  VL --> VO["VirtualizedOption × N (virtual window)"]
+  VL --> VLH["VirtualListHeader"]
+  VL --> VLB["VirtualListBody"]
+  VLB --> VO["VirtualizedOption × N (virtual window)"]
+  VLB --> SKO["SkeletonOptions (initial load)"]
   VL --> VLF["VirtualListFooter"]
   VO --> SAO["SelectAllOption (index 0)"]
   VO --> SO["SelectOption (index 1…n)"]
@@ -67,12 +86,18 @@ graph TD
 graph LR
   VL["VirtualList"] --> Button
   VL --> MenuCloseIcon
-  VL --> InfoBox
   VL --> useVirtualization["useVirtualization (hook)"]
   VL --> getFilteredOptions["utils/getFilteredOptions"]
-  VL --> SKO["SkeletonOptions"]
-  VL --> VO["VirtualizedOption"]
+  VL --> VLH["VirtualListHeader"]
+  VL --> VLB["VirtualListBody"]
   VL --> VLF["VirtualListFooter"]
+
+  VLH --> Button
+  VLH --> MenuCloseIcon
+
+  VLB --> InfoBox
+  VLB --> SKO["SkeletonOptions"]
+  VLB --> VO["VirtualizedOption"]
 
   VLF --> Button2["Button"]
   VLF --> Icons["ListAllIcon, ListCheckedIcon, ListUncheckedIcon"]
@@ -92,8 +117,13 @@ graph TD
   VL -->|"filter.values (prop)"| FO
   FO --> Visible["filteredOptions[]"]
 
+  VL --> VLH["VirtualListHeader"]
+
   Visible --> UV["useVirtualization → startIndex, endIndex, offsetY, totalHeight"]
-  UV --> VO["VirtualizedOption × (endIndex - startIndex)"]
+  UV --> VLB["VirtualListBody"]
+  Visible --> VLB
+
+  VLB --> VO["VirtualizedOption × (endIndex - startIndex)"]
 
   VO -->|"index === 0 && hasSelectAll"| SAO["SelectAllOption"]
   VO -->|"index > 0"| SO["SelectOption"]

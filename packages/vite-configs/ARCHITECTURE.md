@@ -21,3 +21,4 @@ Shared Vite+ configuration builders consumed by workspace apps.
 - Keep types permissive enough for Vite/Oxlint plugin options while avoiding `any`.
 - Add new exports only when reuse across at least two apps is clear.
 - Runtime-consumed ESLint config helpers may resolve app-owned dependencies from the consumer workspace when direct package resolution would be too narrow.
+- Shared ESLint custom-rules config must include StyleX validation and import ordering so editor/CLI ESLint runs enforce the same critical rules as `vp lint`.

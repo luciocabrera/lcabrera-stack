@@ -2,6 +2,7 @@ export { useGetTableAdditionalMetadata } from './useGetTableAdditionalMetadata.h
 export { useGetTableColumnSelectedKey } from './useGetTableColumnSelectedKey.hook';
 export { useGetTableColumnSettingsSelectedTab } from './useGetTableColumnSettingsSelectedTab.hook';
 export { useGetTableDensity } from './useGetTableDensity.hook';
+export { useGetTableDrawersSyncNonce } from './useGetTableDrawersSyncNonce.hook';
 export { useGetTableEnablePrefetch } from './useGetTableEnablePrefetch.hook';
 export { useGetTableInitialPageSize } from './useGetTableInitialPageSize.hook';
 export { useGetTableIsBordered } from './useGetTableIsBordered.hook';

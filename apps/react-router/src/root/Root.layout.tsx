@@ -5,11 +5,12 @@ import {
   ScrollRestoration,
   useRouteLoaderData,
 } from 'react-router';
-import type { loader as rootLoader } from './root.loader';
 
 import type { LayoutProps } from '@/types/ui.types';
 
 import { DevStyleXInject } from '@/components/DevStyleXInject';
+
+import type { loader as rootLoader } from './root.loader';
 
 import stylexCssHref from '../stylex.css?url';
 

@@ -1,5 +1,5 @@
-import type { UnpinConflictResolution } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
 import type { ColumnPinningState } from '@/components/Table/Table.types';
+import type { UnpinConflictResolution } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
 import type { PinSide } from '@/types/ui.types';
 
 import type { ResolveToggleColumnPinUpdateResult } from './resolveToggleColumnPinUpdate.util';

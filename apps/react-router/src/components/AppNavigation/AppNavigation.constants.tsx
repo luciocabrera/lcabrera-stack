@@ -1,3 +1,7 @@
+import type { SidePanelSize } from '@/components/SidePanel';
+import type { ToolbarItemConfig } from '@/components/Toolbar/Toolbar.types';
+import type { GlobalNavigationSizePreference } from '@/types/globalSettings.types';
+
 import {
   BarChartIcon,
   FileTextIcon,
@@ -11,10 +15,6 @@ import {
   ICON_SIZE_XS,
   ICON_SIZE_XXS,
 } from '@/design-system/constants';
-
-import type { ToolbarItemConfig } from '@/components/Toolbar/Toolbar.types';
-import type { SidePanelSize } from '@/components/SidePanel';
-import type { GlobalNavigationSizePreference } from '@/types/globalSettings.types';
 
 /**
  * Which brand icon box size style to apply (matches button height per density).

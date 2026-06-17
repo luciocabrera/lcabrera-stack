@@ -1,6 +1,6 @@
-import { GLOBAL_SETTINGS_COOKIE_VERSION } from './globalSettings.constants';
-
 import type { GlobalSettingsState } from '@/types/globalSettings.types';
+
+import { GLOBAL_SETTINGS_COOKIE_VERSION } from './globalSettings.constants';
 
 type SerializeGlobalSettingsForCookieArgs = {
   readonly settings: GlobalSettingsState;

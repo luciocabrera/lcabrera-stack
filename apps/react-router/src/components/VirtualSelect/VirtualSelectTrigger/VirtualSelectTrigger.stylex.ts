@@ -36,6 +36,7 @@ export const styles = stylex.create({
     fontSize: typography.fontSizeSm,
     lineHeight: typography.lineHeightTight,
     whiteSpace: 'nowrap',
+    height: spacing.lg,
   },
   trigger: {
     padding: `${spacing.xs} ${spacing.sm}`,
@@ -63,9 +64,9 @@ export const styles = stylex.create({
   },
   triggerClamped: {
     overflow: 'hidden',
-    maxHeight: `${TRIGGER_MAX_HEIGHT}px`,
     alignContent: 'flex-start',
     justifyContent: 'flex-start',
+    maxHeight: `${TRIGGER_MAX_HEIGHT}px`,
   },
   triggerLabel: {
     flex: '1 1 auto',

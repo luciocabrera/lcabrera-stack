@@ -70,11 +70,11 @@ export const tableHeaderCellStyles = stylex.create({
     padding: 0,
   },
   resizeHandle: {
+    padding: 0,
     alignItems: 'center',
     cursor: 'col-resize',
     display: 'flex',
     justifyContent: 'center',
-    padding: 0,
     position: 'absolute',
     touchAction: 'none',
     userSelect: 'none',

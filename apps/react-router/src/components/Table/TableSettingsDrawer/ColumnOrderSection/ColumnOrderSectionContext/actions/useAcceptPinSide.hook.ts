@@ -1,13 +1,13 @@
 import type { ColumnOrderState } from '@/components/Table/Table.types';
 import type { PinSide } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
-import { useGetGlobalPinConflictResolutionPreference } from '@/contexts/GlobalSettingsContext/selectors';
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { useTableDrawerContextValue } from '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
+import { useGetGlobalPinConflictResolutionPreference } from '@/contexts/GlobalSettingsContext/selectors';
 
+import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
 import { useAcceptPinConflict } from './useAcceptPinConflict.hook';
 import { resolveAcceptedPinSideUpdate } from './utils/resolveAcceptedPinSideUpdate.util';
-import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
 
 export const useAcceptPinSide = () => {
   const { columnsStore: tableColumnsStore } = useTableConfigContextValue();

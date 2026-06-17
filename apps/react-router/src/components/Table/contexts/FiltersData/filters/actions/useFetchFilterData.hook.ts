@@ -1,13 +1,13 @@
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 
-import { useFiltersDataContextValue } from '../../useFiltersDataContextValue.hook';
-
-import { useFetchInitialFilterData } from './useFetchInitialFilterData.hook';
-import { useFetchMoreFilterData } from './useFetchMoreFilterData.hook';
 import type {
   UseFetchFilterDataArgs,
   UseFetchFilterDataReturn,
 } from './useFetchFilterData.types';
+
+import { useFiltersDataContextValue } from '../../useFiltersDataContextValue.hook';
+import { useFetchInitialFilterData } from './useFetchInitialFilterData.hook';
+import { useFetchMoreFilterData } from './useFetchMoreFilterData.hook';
 
 /**
  * Hook that provides both initial and paginated filter data fetching

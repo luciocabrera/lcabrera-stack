@@ -6,7 +6,6 @@ import { INITIAL_PAGE_SIZE } from '@/components/Table/Table.constants';
 import { wideAlltypes150Api } from '@/services';
 
 import { readTableLoaderStateFromRequest } from '../utils/readTableLoaderStateFromRequest.util';
-
 import { PERSISTENCE_KEY } from './WideAlltypes150.constants';
 
 export const loader = ({ request }: LoaderFunctionArgs) => {

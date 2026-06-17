@@ -1,15 +1,16 @@
 // @vitest-environment jsdom
 
-import { createElement, createRef } from 'react';
 import type { ReactNode } from 'react';
 
 import { renderHook } from '@testing-library/react';
+import { createElement, createRef } from 'react';
 import { describe, expect, it } from 'vitest';
 
+import type { TableWrapperContextValue } from './TableWrapperContext.types';
+
+import { TableWrapperContext } from './TableWrapperContext.context';
 import { useTableContainerRef } from './useTableContainerRef.hook';
 import { useTableWrapperRef } from './useTableWrapperRef.hook';
-import { TableWrapperContext } from './TableWrapperContext.context';
-import type { TableWrapperContextValue } from './TableWrapperContext.types';
 
 type WrapperProps = {
   readonly children: ReactNode;

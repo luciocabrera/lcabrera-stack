@@ -1,6 +1,5 @@
-import type { Sorting } from '@/types/ui.types';
-
 import type { SortingState, TableColumn } from '@/components/Table/Table.types';
+import type { Sorting } from '@/types/ui.types';
 
 import { getNormalizedColumns } from '@/components/Table/utils';
 import { getNewSortingBasedOnColumnKey } from '@/components/Table/utils/getNewSortingBasedOnColumnKey.util';

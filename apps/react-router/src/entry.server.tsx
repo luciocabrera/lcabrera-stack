@@ -1,3 +1,4 @@
+import type { RenderToPipeableStreamOptions } from 'react-dom/server';
 import type { AppLoadContext, EntryContext } from 'react-router';
 
 import { createReadableStreamFromReadable } from '@react-router/node';
@@ -19,15 +20,6 @@ const addPreloadHeaders = (headers: Headers) => {
   headers.append('Link', `<${stylexCssHref}>; rel=preload; as=style`);
 };
 
-/**
- * Stream timeout in milliseconds.
- * Configurable via STREAM_TIMEOUT_MS environment variable.
- * Default: 15 seconds (15000ms)
- */
-export const streamTimeout = Number(process.env.STREAM_TIMEOUT_MS) || 15_000;
-
-const ABORT_DELAY = streamTimeout + 1000;
-
 const toError = (error: unknown): Error => {
   if (error instanceof Error) {
     return error;
@@ -45,128 +37,91 @@ const toError = (error: unknown): Error => {
 };
 
 /**
- * Server-side request handler for React Router 7 streaming.
- * Implements proper Suspense streaming with bot detection.
- *
- * Note: This function signature is required by React Router's server handler.
+ * Stream timeout in milliseconds.
+ * Configurable via STREAM_TIMEOUT_MS environment variable.
+ * Default: 15 seconds (15000ms)
  */
-// eslint-disable-next-line local-rules/destructuring-for-functions -- React Router requires positional parameters
+export const streamTimeout = Number(process.env.STREAM_TIMEOUT_MS) || 15_000;
+
+const ABORT_DELAY = streamTimeout + 1000;
+
 export default function handleRequest(
   request: Request,
   responseStatusCode: number,
   responseHeaders: Headers,
   routerContext: EntryContext,
   _loadContext: AppLoadContext,
+  // If you have middleware enabled:
+  // loadContext: RouterContextProvider
 ) {
-  const userAgent = request.headers.get('user-agent');
-
-  return userAgent && isbot(userAgent)
-    ? handleBotRequest(
-        request,
-        responseStatusCode,
-        responseHeaders,
-        routerContext,
-      )
-    : handleBrowserRequest(
-        request,
-        responseStatusCode,
-        responseHeaders,
-        routerContext,
-      );
-}
-
-// eslint-disable-next-line local-rules/destructuring-for-functions -- Internal helper matching main handler signature
-function handleBotRequest(
-  request: Request,
-  responseStatusCode: number,
-  responseHeaders: Headers,
-  routerContext: EntryContext,
-) {
+  // https://httpwg.org/specs/rfc9110.html#HEAD
+  if (request.method.toUpperCase() === 'HEAD') {
+    return new Response(null, {
+      status: responseStatusCode,
+      headers: responseHeaders,
+    });
+  }
   const cspNonce = getRequestCspNonce(request);
   addPreloadHeaders(responseHeaders);
 
-  // eslint-disable-next-line local-rules/destructuring-for-functions -- Promise constructor signature is fixed
   return new Promise((resolve, reject) => {
-    let isDidError = false;
+    let shellRendered = false;
+    let userAgent = request.headers.get('user-agent');
 
-    const { abort, pipe } = renderToPipeableStream(
+    // Ensure requests from bots and SPA Mode renders wait for all content to load before responding
+    // https://react.dev/reference/react-dom/server/renderToPipeableStream#waiting-for-all-content-to-load-for-crawlers-and-static-generation
+    let readyOption: keyof RenderToPipeableStreamOptions =
+      (userAgent && isbot(userAgent)) || routerContext.isSpaMode
+        ? 'onAllReady'
+        : 'onShellReady';
+
+    // Abort the rendering stream after the `streamTimeout` so it has time to
+    // flush down the rejected boundaries
+    let timeoutId: ReturnType<typeof setTimeout> | undefined = setTimeout(
+      () => abort(),
+      ABORT_DELAY,
+    );
+
+    const { pipe, abort } = renderToPipeableStream(
       <ServerRouter context={routerContext} url={request.url} />,
       {
         nonce: cspNonce,
-        onAllReady() {
-          const body = new PassThrough();
-          // Increase max listeners to prevent warning with compression middleware
-          body.setMaxListeners(20);
+        [readyOption]() {
+          shellRendered = true;
+          const body = new PassThrough({
+            final(callback) {
+              // Clear the timeout to prevent retaining the closure and memory leak
+              clearTimeout(timeoutId);
+              timeoutId = undefined;
+              callback();
+            },
+          });
+          const stream = createReadableStreamFromReadable(body);
 
           responseHeaders.set('Content-Type', 'text/html');
 
+          pipe(body);
+
           resolve(
-            new Response(createReadableStreamFromReadable(body), {
+            new Response(stream, {
               headers: responseHeaders,
-              status: isDidError ? 500 : responseStatusCode,
+              status: responseStatusCode,
             }),
           );
-
-          pipe(body);
-        },
-        onError(error: unknown) {
-          isDidError = true;
-          console.error('Bot request error:', error);
         },
         onShellError(error: unknown) {
           reject(toError(error));
         },
-      },
-    );
-
-    setTimeout(abort, ABORT_DELAY);
-  });
-}
-
-// eslint-disable-next-line local-rules/destructuring-for-functions -- Internal helper matching main handler signature
-function handleBrowserRequest(
-  request: Request,
-  responseStatusCode: number,
-  responseHeaders: Headers,
-  routerContext: EntryContext,
-) {
-  const cspNonce = getRequestCspNonce(request);
-  addPreloadHeaders(responseHeaders);
-
-  // eslint-disable-next-line local-rules/destructuring-for-functions -- Promise constructor signature is fixed
-  return new Promise((resolve, reject) => {
-    let isDidError = false;
-
-    const { abort, pipe } = renderToPipeableStream(
-      <ServerRouter context={routerContext} url={request.url} />,
-      {
-        nonce: cspNonce,
         onError(error: unknown) {
-          isDidError = true;
-          console.error('Streaming error:', error);
-        },
-        onShellError(error: unknown) {
-          reject(toError(error));
-        },
-        onShellReady() {
-          const body = new PassThrough();
-          // Increase max listeners to prevent warning with compression middleware
-          body.setMaxListeners(20);
-
-          responseHeaders.set('Content-Type', 'text/html');
-
-          resolve(
-            new Response(createReadableStreamFromReadable(body), {
-              headers: responseHeaders,
-              status: isDidError ? 500 : responseStatusCode,
-            }),
-          );
-
-          pipe(body);
+          responseStatusCode = 500;
+          // Log streaming rendering errors from inside the shell.  Don't log
+          // errors encountered during initial shell rendering since they'll
+          // reject and get logged in handleDocumentRequest.
+          if (shellRendered) {
+            console.error(toError(error));
+          }
         },
       },
     );
-
-    setTimeout(abort, ABORT_DELAY);
   });
 }

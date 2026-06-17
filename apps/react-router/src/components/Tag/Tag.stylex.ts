@@ -30,6 +30,7 @@ export const styles = stylex.create({
     fontSize: typography.fontSizeSm,
     justifyContent: 'space-between',
     lineHeight: typography.lineHeightTight,
+    height: spacing.lg,
     minWidth: '1.5rem',
   },
 });

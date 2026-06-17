@@ -3,12 +3,13 @@
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { DEFAULT_FILTER_PAGE_SIZE } from '@/components/Table/Table.constants';
 import type {
   FiltersDataState,
   TableMetaState,
 } from '@/components/Table/Table.types';
 import type { TStore } from '@/hooks/useStore.hook';
+
+import { DEFAULT_FILTER_PAGE_SIZE } from '@/components/Table/Table.constants';
 import { createPaginatedFetchActionMocks } from '@/utils/tests/createPaginatedFetchActionMocks.util';
 
 import { useFetchInitialFilterData } from './useFetchInitialFilterData.hook';

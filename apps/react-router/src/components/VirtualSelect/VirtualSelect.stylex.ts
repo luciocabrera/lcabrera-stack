@@ -11,9 +11,9 @@ import { colors } from '@/design-system/tokens/colors.stylex';
 export const styles = stylex.create({
   container: {
     boxSizing: 'border-box',
+    position: 'relative',
     maxWidth: '100%',
     minWidth: 0,
-    position: 'relative',
     width: '100%',
   },
   containerFill: {
@@ -23,19 +23,19 @@ export const styles = stylex.create({
     minHeight: 0,
   },
   dropdownBase: {
-    backgroundColor: 'transparent',
     borderColor: colors.borderPrimary,
     borderRadius: borderRadius.md,
     borderStyle: 'none',
     borderWidth: '1px',
+    backdropFilter: 'blur(25px)',
+    backgroundColor: 'transparent',
+    boxSizing: 'border-box',
     display: 'flex',
     flexDirection: 'column',
     marginTop: spacing.sm,
-    boxSizing: 'border-box',
     maxWidth: '100%',
     minWidth: 0,
     width: '100%',
-    backdropFilter: 'blur(25px)',
   },
   dropdownAbsolute: {
     boxShadow: shadows.lg,

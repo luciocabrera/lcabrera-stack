@@ -1,5 +1,7 @@
 import type { GlobalNavigationPreferences } from '@/types/globalSettings.types';
+
 import type { BuildNavigationUpdateArgs } from '../Settings.types';
+
 import {
   DEFAULT_NAVIGATION_COLLAPSED_PREFERENCE,
   DEFAULT_NAVIGATION_PINNED_PREFERENCE,

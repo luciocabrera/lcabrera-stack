@@ -29,6 +29,7 @@ export const useAcceptHeaderPinSide = <TData>() => {
       columnSizing,
       columnVisibility,
       columns,
+      drawersSyncNonce,
       persistenceKey,
       staticKeys,
     } = getPinningActionContext<TData>({ columnsStore, metaStore });
@@ -53,6 +54,8 @@ export const useAcceptHeaderPinSide = <TData>() => {
       columnVisibility,
       columns,
       columnsStore,
+      drawersSyncNonce,
+      metaStore,
       persistenceKey,
       persistTableState,
     });

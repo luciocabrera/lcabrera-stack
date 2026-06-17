@@ -1,6 +1,6 @@
 # Fallow Complexity Threshold Analysis
 
-## Canonical Snapshot (2026-06-15)
+## Canonical Snapshot (2026-06-17)
 
 Source of truth for this report:
 
@@ -10,13 +10,13 @@ Source of truth for this report:
 
 Current metrics from JSON:
 
-- Functions above threshold: 18
-- Functions analyzed: 3716
-- Files analyzed: 1218
+- Functions above threshold: 31
+- Functions analyzed: 3859
+- Files analyzed: 1230
 - Average maintainability: 93 (good)
-- Dead-code issues: 18 (check.total_issues)
-- Duplicate clone groups: 88 (dupes.stats.clone_groups)
-- Severity split: 0 critical, 0 high, 18 moderate
+- Dead-code issues: 17 (check.total_issues)
+- Duplicate clone groups: 92 (dupes.stats.clone_groups)
+- Severity split: 6 critical, 4 high, 21 moderate
 - Thresholds: cyclomatic 20, cognitive 15, CRAP 30
 
 ## Interpretation
@@ -25,7 +25,14 @@ Use this report as triage guidance grounded on the current JSON snapshot. For pl
 
 ## Representative High-Severity Findings
 
-- No critical/high findings in current snapshot.
+- src/components/VirtualList/VirtualList.component.tsx:24 (<anonymous>) - CRITICAL both
+- src/components/Table/TableHeaderCell/TableHeaderCell.component.tsx:44 (<anonymous>) - CRITICAL cognitive
+- src/components/AppNavigation/AppNavigation.component.tsx:140 (<anonymous>) - CRITICAL cognitive
+- src/components/Table/ColumnSettingsDrawer/GeneralSection/GeneralSection.component.tsx:30 (<anonymous>) - CRITICAL cognitive
+- src/components/Table/TableSettingsDrawer/GeneralSettingsSection/GeneralSettingsSection.component.tsx:35 (<anonymous>) - CRITICAL cognitive
+- src/components/Table/TableContent/TableContent.component.tsx:27 (<anonymous>) - CRITICAL cognitive
+- src/components/Table/TableSettingsDrawer/FiltersSection/FiltersSectionToolbar/FiltersSectionToolbar.component.tsx:28 (<anonymous>) - HIGH cognitive
+- src/components/VirtualSelect/VirtualSelect.component.tsx:19 (<anonymous>) - HIGH cognitive
 
 ## Drift Control
 

@@ -4,12 +4,12 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { mockDialogElement } from '@/utils/tests/mockDialogElement.util';
+import type { GlobalSettingsState } from '@/types/globalSettings.types';
+
 import { GlobalSettingsProvider } from '@/contexts/GlobalSettingsContext';
+import { mockDialogElement } from '@/utils/tests/mockDialogElement.util';
 
 import { AppNavigation } from './AppNavigation.component';
-
-import type { GlobalSettingsState } from '@/types/globalSettings.types';
 
 let restoreMockDialog: () => void;
 

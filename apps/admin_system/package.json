@@ -4,9 +4,10 @@
   "type": "module",
   "scripts": {
     "build:eslint-rules": "cd ../../packages/eslint-local-rules && vp run build",
-    "lint": "vp run build:eslint-rules && vp lint . --fix && vp run lint:custom-rules",
+    "lint": "vp run build:eslint-rules && vp lint . --fix && vp run lint:custom-rules:fix",
     "lint:check": "vp run build:eslint-rules && vp lint . && vp run lint:custom-rules",
-    "lint:custom-rules": "eslint . --config eslint.custom-rules.config.mjs --max-warnings 0",
+    "lint:custom-rules:fix": "eslint . --config eslint.config.mjs --fix --max-warnings 0",
+    "lint:custom-rules": "eslint . --config eslint.config.mjs --max-warnings 0",
     "dev": "react-router dev",
     "typegen": "react-router typegen",
     "typecheck": "react-router typegen && tsc"

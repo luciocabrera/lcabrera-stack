@@ -3,8 +3,8 @@ import type { LoaderFunctionArgs } from 'react-router';
 import type { CarSale, CarSalesResponse } from '@/services';
 
 import { carSalesApi } from '@/services';
-import { readTableLoaderStateFromRequest } from '../utils/readTableLoaderStateFromRequest.util';
 
+import { readTableLoaderStateFromRequest } from '../utils/readTableLoaderStateFromRequest.util';
 import { PERSISTENCE_KEY } from './CarSales.constants';
 
 /**

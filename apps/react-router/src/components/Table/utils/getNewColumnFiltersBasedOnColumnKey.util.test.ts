@@ -32,6 +32,18 @@ describe('getNewColumnFiltersBasedOnColumnKey', () => {
     expect(result).toStrictEqual({ name: otherFilter });
   });
 
+  it('returns the same state when the filter is unchanged', () => {
+    const columnFiltersState = { name: textFilter } as never;
+
+    const result = getNewColumnFiltersBasedOnColumnKey<Row>({
+      columnKey: 'name',
+      columnFilter: textFilter,
+      columnFiltersState,
+    });
+
+    expect(result).toBe(columnFiltersState);
+  });
+
   it('removes the filter entry when columnFilter is undefined', () => {
     const result = getNewColumnFiltersBasedOnColumnKey<Row>({
       columnKey: 'name',
@@ -70,5 +82,17 @@ describe('getNewColumnFiltersBasedOnColumnKey', () => {
     });
 
     expect(result).toStrictEqual({});
+  });
+
+  it('returns the same state when removing a missing filter key', () => {
+    const columnFiltersState = { age: otherFilter } as never;
+
+    const result = getNewColumnFiltersBasedOnColumnKey<Row>({
+      columnKey: 'name',
+      columnFilter: undefined,
+      columnFiltersState,
+    });
+
+    expect(result).toBe(columnFiltersState);
   });
 });

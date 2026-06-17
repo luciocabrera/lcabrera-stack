@@ -1,6 +1,6 @@
 type AreEqualByJsonArgs<T> = {
-  readonly left: T | undefined;
-  readonly right: T | undefined;
+  readonly left?: T;
+  readonly right?: T;
 };
 
 /**

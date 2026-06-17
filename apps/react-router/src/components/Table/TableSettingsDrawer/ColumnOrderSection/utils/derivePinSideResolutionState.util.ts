@@ -6,10 +6,11 @@ import type {
 } from '@/components/Table/Table.types';
 import type { PinSide } from '@/types/ui.types';
 
+import { syncColumnOrderWithPinning } from '@/components/Table/utils';
+
 import { applyPin } from './applyPin.util';
 import { getIsContiguousPin } from './getIsContiguousPin.util';
 import { resolveClosestEdgeSide } from './resolveClosestEdgeSide.util';
-import { syncColumnOrderWithPinning } from '@/components/Table/utils';
 
 type DerivePinSideResolutionStateArgs<TData> = {
   readonly allOrderedColumns: readonly TableColumn<TData>[];

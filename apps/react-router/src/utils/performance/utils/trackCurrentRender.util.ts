@@ -1,7 +1,6 @@
 import type { MutableRefObject } from 'react';
 
 import { trackRender } from '../renderTracker.util';
-
 import { getChangedPropKeys } from './getChangedPropKeys.util';
 
 type TrackCurrentRenderArgs = {
