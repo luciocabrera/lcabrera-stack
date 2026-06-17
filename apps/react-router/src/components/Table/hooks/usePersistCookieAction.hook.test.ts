@@ -3,9 +3,9 @@
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { TablePersistenceConfig } from '../Table.types';
-
 import { MAX_COOKIE_ENTRY_VALUE_LENGTH } from '@/constants/globalSettings.constants';
+
+import type { TablePersistenceConfig } from '../Table.types';
 
 import { usePersistTableStateAction } from './usePersistCookieAction.hook';
 
