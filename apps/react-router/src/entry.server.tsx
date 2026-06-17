@@ -88,6 +88,7 @@ export default function handleRequest(
         nonce: cspNonce,
         [readyOption]() {
           shellRendered = true;
+
           const body = new PassThrough({
             final(callback) {
               // Clear the timeout to prevent retaining the closure and memory leak
@@ -96,6 +97,8 @@ export default function handleRequest(
               callback();
             },
           });
+          // Increase max listeners to prevent warning with compression middleware
+          body.setMaxListeners(20);
           const stream = createReadableStreamFromReadable(body);
 
           responseHeaders.set('Content-Type', 'text/html');
