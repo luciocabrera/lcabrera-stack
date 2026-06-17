@@ -129,7 +129,7 @@ TableColumnsState<TData> = {
 TableMetaState = {
   columnSelectedKey: string | null;  // Currently selected column key
   density: TableDensity;             // compact | normal | comfortable
-  drawersSyncNonce: number;          // Monotonic nonce used to force drawer provider re-seed
+  drawersSyncNonce?: number;          // Monotonic nonce used to force drawer provider re-seed
   enablePrefetch: boolean;           // Prefetch next page after load-more (ADR-006)
   error: Error | null;               // Table-level error
   initialPageSize: number;           // First page row count
