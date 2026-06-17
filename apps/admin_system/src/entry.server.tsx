@@ -7,43 +7,7 @@ import { isbot } from 'isbot';
 import type { RenderToPipeableStreamOptions } from 'react-dom/server';
 import { renderToPipeableStream } from 'react-dom/server';
 
-import { getRequestCspNonce } from '@/utils/security';
-
-import stylexCssHref from './stylex.css?url';
-
-/**
- * Adds HTTP Link headers for critical CSS preloading.
- * Browsers process these headers before parsing the HTML body,
- * eliminating the critical request chain for CSS resources.
- */
-const addPreloadHeaders = (headers: Headers) => {
-  headers.append('Link', `<${stylexCssHref}>; rel=preload; as=style`);
-};
-
-const toError = (error: unknown): Error => {
-  if (error instanceof Error) {
-    return error;
-  }
-
-  if (typeof error === 'string') {
-    return new Error(error);
-  }
-
-  if (error && typeof error === 'object') {
-    return new Error(JSON.stringify(error));
-  }
-
-  return new Error('Unknown server-side streaming error');
-};
-
-/**
- * Stream timeout in milliseconds.
- * Configurable via STREAM_TIMEOUT_MS environment variable.
- * Default: 15 seconds (15000ms)
- */
-export const streamTimeout = Number(process.env.STREAM_TIMEOUT_MS) || 15_000;
-
-const ABORT_DELAY = streamTimeout + 1000;
+export const streamTimeout = 5_000;
 
 export default function handleRequest(
   request: Request,
@@ -61,8 +25,6 @@ export default function handleRequest(
       headers: responseHeaders,
     });
   }
-  const cspNonce = getRequestCspNonce(request);
-  addPreloadHeaders(responseHeaders);
 
   return new Promise((resolve, reject) => {
     let shellRendered = false;
@@ -79,13 +41,12 @@ export default function handleRequest(
     // flush down the rejected boundaries
     let timeoutId: ReturnType<typeof setTimeout> | undefined = setTimeout(
       () => abort(),
-      ABORT_DELAY,
+      streamTimeout + 1000,
     );
 
     const { pipe, abort } = renderToPipeableStream(
       <ServerRouter context={routerContext} url={request.url} />,
       {
-        nonce: cspNonce,
         [readyOption]() {
           shellRendered = true;
           const body = new PassThrough({
@@ -110,7 +71,7 @@ export default function handleRequest(
           );
         },
         onShellError(error: unknown) {
-          reject(toError(error));
+          reject(error);
         },
         onError(error: unknown) {
           responseStatusCode = 500;
@@ -118,7 +79,7 @@ export default function handleRequest(
           // errors encountered during initial shell rendering since they'll
           // reject and get logged in handleDocumentRequest.
           if (shellRendered) {
-            console.error(toError(error));
+            console.error(error);
           }
         },
       },
