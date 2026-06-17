@@ -1,22 +1,24 @@
 // @vitest-environment jsdom
 
-import { createElement } from 'react';
 import type { ReactNode } from 'react';
 
 import { act, renderHook } from '@testing-library/react';
+import { createElement } from 'react';
 import { describe, expect, it } from 'vitest';
 
 import { createMockStore } from '@/utils/tests/createMockStore.util';
-import { FiltersDataContext } from '../FiltersData/FiltersDataContext.context';
+
 import type { FiltersDataContextValue } from '../FiltersData/FiltersDataContext.types';
-import { useFiltersDataContextValue } from '../FiltersData/useFiltersDataContextValue.hook';
+import type { TableDataContextValue } from './TableDataContext.types';
+
 import { useGetFilterData } from '../FiltersData/filters/selectors/useGetFilterData.hook';
 import { useFiltersStore } from '../FiltersData/filters/useFiltersStore.hook';
-import { TableDataContext } from './TableDataContext.context';
-import type { TableDataContextValue } from './TableDataContext.types';
+import { FiltersDataContext } from '../FiltersData/FiltersDataContext.context';
+import { useFiltersDataContextValue } from '../FiltersData/useFiltersDataContextValue.hook';
 import { useGetTableData } from './data/selectors/useGetTableData.hook';
 import { useDataStore } from './data/useDataStore.hook';
 import { useTableDataContextValue } from './data/useTableDataContextValue.hook';
+import { TableDataContext } from './TableDataContext.context';
 
 type WrapperProps = {
   readonly children: ReactNode;

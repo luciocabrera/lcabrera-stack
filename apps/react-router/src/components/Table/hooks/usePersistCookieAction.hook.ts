@@ -1,11 +1,11 @@
 import { useFetcher, useLocation } from 'react-router';
 
+import { PERSIST_COOKIE_ACTION } from '@/constants/globalSettings.constants';
 import { writeToSessionStorage } from '@/utils/storage';
 
-import { serializeStateSlice } from '../utils';
-
 import type { TablePersistenceConfig } from '../Table.types';
-import { PERSIST_COOKIE_ACTION } from '@/constants/globalSettings.constants';
+
+import { serializeStateSlice } from '../utils';
 
 type PersistCookieEntry<TSlice = unknown> = {
   persistenceKey: string;

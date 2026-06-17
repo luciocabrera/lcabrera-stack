@@ -1,9 +1,8 @@
+import type { GlobalNavigationPreferences } from '@/types/globalSettings.types';
+
 import { INITIAL_GLOBAL_SETTINGS } from '../GlobalSettingsContext.constants';
 import { useGlobalSettingsContextValue } from '../useGlobalSettingsContextValue.hook';
-
 import { usePersistGlobalSettingsAction } from './usePersistGlobalSettingsAction.hook';
-
-import type { GlobalNavigationPreferences } from '@/types/globalSettings.types';
 
 export const useSetGlobalNavigationPreferences = () => {
   const { settingsStore } = useGlobalSettingsContextValue();

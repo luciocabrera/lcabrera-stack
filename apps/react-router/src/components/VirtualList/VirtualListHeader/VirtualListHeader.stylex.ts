@@ -6,9 +6,9 @@ import { filterBaseStyles } from '@/design-system/tokens/filters.stylex';
 const localStyles = stylex.create({
   clearButton: {
     position: 'absolute',
+    transform: 'translateY(-50%)',
     right: spacing.xs,
     top: '50%',
-    transform: 'translateY(-50%)',
   },
   searchInputWithClear: {
     paddingRight: spacing.xl,

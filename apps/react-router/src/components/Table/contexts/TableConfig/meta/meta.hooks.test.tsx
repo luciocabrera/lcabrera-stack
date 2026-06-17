@@ -4,6 +4,7 @@ import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { TableMetaState } from '@/components/Table/Table.types';
+
 import {
   createMockStore,
   type MockStore,
@@ -56,22 +57,21 @@ vi.mock(
 
 import { useSetTableColumnSelectedKey } from './actions/useSetTableColumnSelectedKey.hook';
 import { useSetTableDrawersOpenState } from './actions/useSetTableDrawersOpenState.hook';
-import { useSetTableSettingsExpandedFilters } from './actions/useSetTableSettingsExpandedFilters.hook';
-import { useSetTableSettingsSelectedTab } from './actions/useSetTableSettingsSelectedTab.hook';
 import { useSetTableIsTableSettingsOpen } from './actions/useSetTableIsTableSettingsOpen.hook';
 import { useSetTableIsTableSettingsPinned } from './actions/useSetTableIsTableSettingsPinned.hook';
+import { useSetTableSettingsExpandedFilters } from './actions/useSetTableSettingsExpandedFilters.hook';
+import { useSetTableSettingsSelectedTab } from './actions/useSetTableSettingsSelectedTab.hook';
 import { useToogleTableIsColumnSettingsOpen } from './actions/useToogleTableIsColumnSettingsOpen.hook';
 import { useToogleTableIsTableSettingsOpen } from './actions/useToogleTableIsTableSettingsOpen.hook';
-import { useMetaStore } from './useMetaStore.hook';
 import { useGetTableColumnOverscan } from './selectors/useGetTableColumnOverscan.hook';
 import { useGetTableColumnSelectedKey } from './selectors/useGetTableColumnSelectedKey.hook';
 import { useGetTableDensity } from './selectors/useGetTableDensity.hook';
 import { useGetTableEnablePrefetch } from './selectors/useGetTableEnablePrefetch.hook';
 import { useGetTableIsBordered } from './selectors/useGetTableIsBordered.hook';
 import { useGetTableIsColumnSettingsOpen } from './selectors/useGetTableIsColumnSettingsOpen.hook';
-import { useGetTableIsTableSettingsPinned } from './selectors/useGetTableIsTableSettingsPinned.hook';
 import { useGetTableIsStriped } from './selectors/useGetTableIsStriped.hook';
 import { useGetTableIsTableSettingsOpen } from './selectors/useGetTableIsTableSettingsOpen.hook';
+import { useGetTableIsTableSettingsPinned } from './selectors/useGetTableIsTableSettingsPinned.hook';
 import { useGetTableLoadMorePageSize } from './selectors/useGetTableLoadMorePageSize.hook';
 import { useGetTableOverscan } from './selectors/useGetTableOverscan.hook';
 import { useGetTablePlaceholderRowCount } from './selectors/useGetTablePlaceholderRowCount.hook';
@@ -80,6 +80,7 @@ import { useGetTableSettingsExpandedFilters } from './selectors/useGetTableSetti
 import { useGetTableSettingsSelectedTab } from './selectors/useGetTableSettingsSelectedTab.hook';
 import { useGetTableThreshold } from './selectors/useGetTableThreshold.hook';
 import { useGetTableTitle } from './selectors/useGetTableTitle.hook';
+import { useMetaStore } from './useMetaStore.hook';
 
 describe('TableConfig meta hooks', () => {
   beforeEach(() => {

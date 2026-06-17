@@ -1,6 +1,7 @@
+import type { StyleXStyles } from '@stylexjs/stylex';
+
 import * as stylex from '@stylexjs/stylex';
 
-import type { StyleXStyles } from '@stylexjs/stylex';
 import type {
   DesignSystemColor,
   DesignSystemOrientation,

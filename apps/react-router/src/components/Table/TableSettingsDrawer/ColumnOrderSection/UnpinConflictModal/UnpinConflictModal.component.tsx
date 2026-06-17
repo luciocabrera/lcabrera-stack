@@ -1,11 +1,10 @@
 import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 
-import { UNPIN_CONFLICT_OPTIONS } from '@/constants/pinningPreferences.constants';
-
 import { Button } from '@/components/Button';
 import { Modal } from '@/components/Modal';
 import { RadioOptionGroup } from '@/components/RadioOptionGroup';
+import { UNPIN_CONFLICT_OPTIONS } from '@/constants/pinningPreferences.constants';
 
 import type { UnpinConflictResolution } from '../ColumnOrderSection.types';
 import type { UnpinConflictModalProps } from './UnpinConflictModal.types';

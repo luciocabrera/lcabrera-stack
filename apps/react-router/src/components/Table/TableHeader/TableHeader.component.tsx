@@ -8,7 +8,6 @@ import {
   useGetTableIsLoading,
   useGetTableIsLoadingMore,
 } from '@/components/Table/contexts/TableData/data/selectors';
-
 import { useRenderTracker } from '@/utils/performance';
 
 import type { TableHeaderProps } from './TableHeader.types';

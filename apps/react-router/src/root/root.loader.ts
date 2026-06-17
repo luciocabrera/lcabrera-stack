@@ -1,7 +1,7 @@
 import { INITIAL_GLOBAL_SETTINGS } from '@/contexts/GlobalSettingsContext/GlobalSettingsContext.constants';
+import { getGlobalSettingsFromCookie } from '@/utils/globalSettings';
 import { getRequestCspNonce } from '@/utils/security';
 import { getThemeFromCookie } from '@/utils/theme';
-import { getGlobalSettingsFromCookie } from '@/utils/globalSettings';
 
 import type { Route } from '../+types/root';
 

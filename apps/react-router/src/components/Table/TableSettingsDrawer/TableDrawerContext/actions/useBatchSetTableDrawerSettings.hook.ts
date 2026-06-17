@@ -1,7 +1,6 @@
 import { useBatchSetTableSettings } from '@/components/Table/contexts/TableConfig/columns/actions';
 
 import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook';
-
 import { buildBatchTableSettingsUpdate } from './buildBatchTableSettingsUpdate.util';
 
 /**

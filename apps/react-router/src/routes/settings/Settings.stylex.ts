@@ -5,46 +5,46 @@ import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const styles = stylex.create({
   actions: {
-    display: 'flex',
     gap: spacing.sm,
+    display: 'flex',
     justifyContent: 'flex-end',
   },
   container: {
+    margin: '0 auto',
+    padding: spacing.lg,
+    gap: spacing.lg,
     display: 'flex',
     flexDirection: 'column',
-    gap: spacing.lg,
-    margin: '0 auto',
     maxWidth: '52rem',
-    padding: spacing.lg,
   },
   description: {
+    margin: 0,
     color: colors.textSecondary,
     fontSize: typography.fontSizeSm,
     lineHeight: typography.lineHeightNormal,
-    margin: 0,
   },
   section: {
+    gap: spacing.sm,
     display: 'flex',
     flexDirection: 'column',
-    gap: spacing.sm,
   },
   tabSections: {
+    gap: spacing.lg,
     display: 'flex',
     flexDirection: 'column',
-    gap: spacing.lg,
   },
   title: {
+    margin: 0,
     color: colors.textPrimary,
     fontSize: typography.fontSize3xl,
     fontWeight: typography.fontWeightSemibold,
     lineHeight: typography.lineHeightTight,
-    margin: 0,
   },
   sectionTitle: {
+    margin: 0,
     color: colors.textPrimary,
     fontSize: typography.fontSizeLg,
     fontWeight: typography.fontWeightSemibold,
     lineHeight: typography.lineHeightTight,
-    margin: 0,
   },
 });

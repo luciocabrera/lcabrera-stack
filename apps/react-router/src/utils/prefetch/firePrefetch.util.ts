@@ -1,4 +1,5 @@
 import type { RefObject } from 'react';
+
 import type { Pagination, PrefetchCache } from '@/types/ui.types';
 
 import { prefetchNextPage } from './prefetchNextPage.util';

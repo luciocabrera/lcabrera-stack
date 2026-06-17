@@ -5,8 +5,8 @@ import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const styles = stylex.create({
   appShell: {
-    display: 'flex',
     flex: '1 1 auto',
+    display: 'flex',
     minHeight: 0,
   },
   base: {

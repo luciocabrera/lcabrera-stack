@@ -1,10 +1,11 @@
 import type { ThemeMode } from '@/types/theme.types';
 
+import { PERSIST_COOKIE_ACTION } from '@/constants/globalSettings.constants';
+
 import {
   THEME_COOKIE_MAX_AGE_DAYS,
   THEME_COOKIE_NAME,
 } from './themeCookie.constants';
-import { PERSIST_COOKIE_ACTION } from '@/constants/globalSettings.constants';
 
 type PersistThemeCookieEntry = {
   readonly key: string;

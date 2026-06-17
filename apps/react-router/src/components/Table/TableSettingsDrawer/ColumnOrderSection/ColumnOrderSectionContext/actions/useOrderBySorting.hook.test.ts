@@ -69,6 +69,7 @@ vi.mock('../useColumnOrderSectionContextValue.hook', () => ({
 vi.mock('@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils');
 
 import { restoreStaticColumnOrder } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
+
 import { resolveOrderConflictUpdate } from './utils/resolveOrderConflictUpdate.util';
 
 vi.mock('./utils/resolveOrderConflictUpdate.util');

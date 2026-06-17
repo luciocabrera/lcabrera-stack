@@ -3,11 +3,12 @@
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import type { GlobalSettingsState } from '@/types/globalSettings.types';
+
 import {
   createMockStore,
   type MockStore,
 } from '@/utils/tests/createMockStore.util';
-import type { GlobalSettingsState } from '@/types/globalSettings.types';
 
 let settingsStore: MockStore<GlobalSettingsState | undefined> = createMockStore<
   GlobalSettingsState | undefined

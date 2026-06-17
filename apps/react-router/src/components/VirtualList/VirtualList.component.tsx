@@ -1,14 +1,15 @@
-import * as stylex from '@stylexjs/stylex';
 import type { ChangeEvent } from 'react';
+
+import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 
 import type { ListFilterMode, VirtualListProps } from './VirtualList.types';
 
 import { LIST_MAX_HEIGHT } from './VirtualList.constants';
-import { VirtualListBody } from './VirtualListBody';
-import { VirtualListHeader } from './VirtualListHeader';
 import { styles } from './VirtualList.stylex';
+import { VirtualListBody } from './VirtualListBody';
 import { VirtualListFooter } from './VirtualListFooter';
+import { VirtualListHeader } from './VirtualListHeader';
 
 export const VirtualList = ({
   dataState,

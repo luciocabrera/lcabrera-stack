@@ -59,14 +59,14 @@ const localStyles = stylex.create({
     minWidth: 0, // Allow flex children to shrink below content size
   },
   optionButtonReset: {
-    appearance: 'none',
+    margin: 0,
     borderColor: 'transparent',
     borderStyle: 'none',
     borderWidth: 0,
+    outline: 'none',
+    appearance: 'none',
     fontFamily: 'inherit',
     fontSize: 'inherit',
-    margin: 0,
-    outline: 'none',
     textAlign: 'left',
     width: '100%',
   },

@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
+import type { GlobalSettingsState } from '@/types/globalSettings.types';
+
 import { getGlobalSettingsFromCookie } from './getGlobalSettingsFromCookie.util';
 import {
   GLOBAL_SETTINGS_COOKIE_KEY,
   GLOBAL_SETTINGS_COOKIE_VERSION,
 } from './globalSettings.constants';
-
-import type { GlobalSettingsState } from '@/types/globalSettings.types';
 
 const fallbackSettings: GlobalSettingsState = {
   navigation: {},

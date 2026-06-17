@@ -14,20 +14,20 @@ export const styles = stylex.create({
   },
   brand: {
     gap: spacing.sm,
-    minWidth: 0,
     alignItems: 'center',
     display: 'flex',
+    minWidth: 0,
   },
   brandCollapsed: {
     justifyContent: 'center',
     width: '100%',
   },
   brandIcon: {
-    alignItems: 'center',
     borderColor: colors.borderPrimary,
     borderRadius: borderRadius.md,
     borderStyle: 'solid',
     borderWidth: 1,
+    alignItems: 'center',
     color: colors.textPrimary,
     display: 'flex',
     flexShrink: 0,
@@ -49,13 +49,13 @@ export const styles = stylex.create({
     width: '2.5rem',
   },
   brandText: {
-    minWidth: 0,
     overflow: 'hidden',
     display: 'block',
     fontSize: typography.fontSizeXl,
     fontWeight: typography.fontWeightSemibold,
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
+    minWidth: 0,
   },
   brandTextHidden: {
     display: 'none',
@@ -75,12 +75,12 @@ export const styles = stylex.create({
   header: {
     padding: spacing.md,
     gap: spacing.md,
+    display: 'flex',
+    flexDirection: 'column',
     flexShrink: 0,
     borderBottomColor: colors.borderPrimary,
     borderBottomStyle: 'solid',
     borderBottomWidth: 1,
-    display: 'flex',
-    flexDirection: 'column',
   },
   headerActions: {
     gap: spacing.xs,
@@ -93,16 +93,16 @@ export const styles = stylex.create({
     justifyContent: 'center',
   },
   headerDensityCompact: {
-    gap: spacing.xs,
     padding: spacing.xs,
+    gap: spacing.xs,
   },
   headerDensityLarge: {
-    gap: spacing.lg,
     padding: spacing.lg,
+    gap: spacing.lg,
   },
   headerDensitySmall: {
-    gap: spacing.sm,
     padding: spacing.sm,
+    gap: spacing.sm,
   },
   headerRow: {
     gap: spacing.sm,
@@ -113,15 +113,15 @@ export const styles = stylex.create({
   launcher: {
     padding: spacing.sm,
     alignItems: 'flex-start',
-    borderRightColor: colors.borderPrimary,
-    borderRightStyle: 'solid',
-    borderRightWidth: 1,
     backgroundColor: colors.surfacePrimary,
-    boxSizing: 'border-box',
     boxShadow: shadows.md,
+    boxSizing: 'border-box',
     display: 'flex',
     flexShrink: 0,
     justifyContent: 'center',
+    borderRightColor: colors.borderPrimary,
+    borderRightStyle: 'solid',
+    borderRightWidth: 1,
     width: '4.5rem',
   },
   railControl: {

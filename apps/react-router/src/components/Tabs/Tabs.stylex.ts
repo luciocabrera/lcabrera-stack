@@ -52,6 +52,7 @@ export const styles = stylex.create({
       default: '0px',
       ':focus-visible': '2px',
     },
+    position: 'relative',
     borderBottomColor: 'transparent',
     borderBottomStyle: 'solid',
     borderBottomWidth: '2px',
@@ -59,7 +60,6 @@ export const styles = stylex.create({
     borderRightStyle: 'none',
     borderTopStyle: 'none',
     marginBottom: '-1px',
-    position: 'relative',
   },
   tabButtonActive: {
     color: colors.brandPrimaryText,

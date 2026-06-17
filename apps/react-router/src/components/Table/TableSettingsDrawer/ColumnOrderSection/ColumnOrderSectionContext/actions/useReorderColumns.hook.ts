@@ -1,16 +1,15 @@
 import type { DraggableItem } from '@/components/DraggableList';
 import type { ColumnOrderState } from '@/components/Table/Table.types';
 
-import { useGetGlobalOrderConflictResolutionPreference } from '@/contexts/GlobalSettingsContext/selectors';
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import {
   recalculatePinSides,
   restoreStaticColumnOrder,
 } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 import { useTableDrawerContextValue } from '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
+import { useGetGlobalOrderConflictResolutionPreference } from '@/contexts/GlobalSettingsContext/selectors';
 
 import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
-
 import { useAcceptOrderConflict } from './useAcceptOrderConflict.hook';
 import { resolveOrderConflictUpdate } from './utils/resolveOrderConflictUpdate.util';
 

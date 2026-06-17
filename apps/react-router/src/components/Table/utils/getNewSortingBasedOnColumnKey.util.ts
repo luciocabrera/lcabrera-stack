@@ -1,4 +1,5 @@
 import type { SortDirection } from '@/types/ui.types';
+
 import type { DataKey, SortingState } from '../Table.types';
 
 type GetNewSortingBasedOnColumnKeyArgs<TData> = {

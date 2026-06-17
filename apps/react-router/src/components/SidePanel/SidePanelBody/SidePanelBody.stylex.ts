@@ -6,11 +6,11 @@ export const sidePanelBodyStyles = stylex.create({
   body: {
     flex: '1',
     color: colors.textPrimary,
+    containerName: 'SidePanelBody',
+    containerType: 'inline-size',
     scrollbarColor: `${colors.borderSecondary} transparent`,
     scrollbarWidth: 'thin',
-    overflowY: 'auto',
     overflowX: 'hidden',
-    containerType: 'inline-size',
-    containerName: 'SidePanelBody',
+    overflowY: 'auto',
   },
 });

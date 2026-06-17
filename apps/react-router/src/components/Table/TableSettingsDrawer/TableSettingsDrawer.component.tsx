@@ -1,5 +1,4 @@
 import type { TabItem } from '@/components/Tabs';
-import type { TableSettingsDrawerProps } from './TableSettingsDrawer.types';
 
 import { Button } from '@/components/Button';
 import { SettingsIcon } from '@/components/Icons';
@@ -14,6 +13,8 @@ import {
 import { Tabs } from '@/components/Tabs';
 import { ICON_SIZE_LG } from '@/design-system/constants';
 import { useNotifications } from '@/hooks/useNotifications.hook';
+
+import type { TableSettingsDrawerProps } from './TableSettingsDrawer.types';
 
 import {
   useSetTableSettingsSelectedTab,

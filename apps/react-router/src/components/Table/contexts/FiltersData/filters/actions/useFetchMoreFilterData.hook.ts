@@ -1,5 +1,6 @@
-import { DEFAULT_FILTER_PAGE_SIZE } from '@/components/Table/Table.constants';
 import type { FiltersDataState } from '@/components/Table/Table.types';
+
+import { DEFAULT_FILTER_PAGE_SIZE } from '@/components/Table/Table.constants';
 import { getErrorMessage } from '@/components/Table/utils/getErrorMessage.util';
 import { getRequiredOnLoadMore } from '@/components/Table/utils/getRequiredOnLoadMore.util';
 import { resolveFetchMoreState } from '@/components/Table/utils/resolveFetchMoreState.util';

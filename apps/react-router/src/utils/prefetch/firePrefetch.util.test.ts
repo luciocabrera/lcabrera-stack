@@ -1,7 +1,8 @@
 import type { RefObject } from 'react';
-import type { PrefetchCache } from '@/types/ui.types';
 
 import { describe, expect, it, vi } from 'vitest';
+
+import type { PrefetchCache } from '@/types/ui.types';
 
 import { firePrefetch } from './firePrefetch.util';
 

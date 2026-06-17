@@ -1,9 +1,10 @@
-import { getColumnPinSide } from '@/components/Table/utils';
-
 import type {
   DataKey,
   TableColumnsState,
 } from '@/components/Table/Table.types';
+
+import { getColumnPinSide } from '@/components/Table/utils';
+
 import type { ColumnDrawerState } from '../ColumnDrawerContext.types';
 
 type GetTableColumnDrawerStateArgs<TData> = {

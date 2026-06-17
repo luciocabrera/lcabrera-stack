@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { insertAdjacentToPinnedGroup } from './insertAdjacentToPinnedGroup.util';
 import type { DataKey } from '@/components/Table/Table.types';
+
+import { insertAdjacentToPinnedGroup } from './insertAdjacentToPinnedGroup.util';
 
 type TestRow = Record<string, unknown>;
 type TestDataKey = DataKey<TestRow>;

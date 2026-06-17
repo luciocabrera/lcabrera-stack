@@ -5,12 +5,12 @@ import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const tableCheckDisplayStyles = stylex.create({
   checkbox: {
-    appearance: 'none',
     borderColor: colors.borderPrimary,
     borderRadius: borderRadius.sm,
     borderStyle: 'solid',
     borderWidth: 1,
     alignItems: 'center',
+    appearance: 'none',
     backgroundColor: 'transparent',
     color: colors.textPrimary,
     display: 'flex',

@@ -1,6 +1,8 @@
 import * as stylex from '@stylexjs/stylex';
 import { useEffect, useState } from 'react';
 
+import type { GlobalNavigationSizePreference } from '@/types/globalSettings.types';
+
 import { Button } from '@/components/Button';
 import {
   MaximizeIcon,
@@ -15,23 +17,22 @@ import {
   SidePanelBody,
   SidePanelFooter,
 } from '@/components/SidePanel';
+import { Toolbar } from '@/components/Toolbar';
 import { useSetGlobalNavigationPreferences } from '@/contexts/GlobalSettingsContext/actions';
 import {
   useGetGlobalNavigationCollapsedPreference,
   useGetGlobalNavigationPinnedPreference,
   useGetGlobalNavigationSizePreference,
 } from '@/contexts/GlobalSettingsContext/selectors';
-import { Toolbar } from '@/components/Toolbar';
 import { ICON_SIZE_LG } from '@/design-system/constants';
-
-import { getNavigationItems, NAV_DENSITY } from './AppNavigation.constants';
-import { styles } from './AppNavigation.stylex';
 
 import type {
   AppNavigationProps,
   ResolvePinnedStateArgs,
 } from './AppNavigation.types';
-import type { GlobalNavigationSizePreference } from '@/types/globalSettings.types';
+
+import { getNavigationItems, NAV_DENSITY } from './AppNavigation.constants';
+import { styles } from './AppNavigation.stylex';
 
 const resolvePinnedState = ({
   defaultIsPinned,

@@ -10,9 +10,9 @@ import { darkTheme } from '@/design-system/themes/dark.stylex';
 import { lightTheme } from '@/design-system/themes/light.stylex';
 import { useTheme } from '@/hooks/useTheme.hook';
 
-import { styles } from './Root.stylex';
-
 import type { loader as rootLoader } from './root.loader';
+
+import { styles } from './Root.stylex';
 
 const RootContent = () => {
   const { isDarkMode, toggleTheme } = useTheme();

@@ -18,8 +18,8 @@ import type { ActiveSortListProps } from './ActiveSortList.types';
 
 import { useSetColumnsSortings } from '../../TableDrawerContext/actions';
 import { useGetColumnsSorting } from '../../TableDrawerContext/selectors';
-import { styles } from './ActiveSortList.stylex';
 import { SortingSectionToolbar } from '../SortingSectionToolbar';
+import { styles } from './ActiveSortList.stylex';
 
 export const ActiveSortList = ({ isBusy = false }: ActiveSortListProps) => {
   const columns = useGetColumns();

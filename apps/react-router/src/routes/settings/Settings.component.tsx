@@ -1,6 +1,21 @@
 import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 
+import type { TabItem } from '@/components/Tabs';
+import type {
+  GlobalNavigationCollapsedPreference,
+  GlobalNavigationPinnedPreference,
+  GlobalNavigationSizePreference,
+} from '@/types/globalSettings.types';
+import type {
+  OrderConflictResolutionPreferenceOption,
+  PinConflictResolutionPreferenceOption,
+  PinSidePreferenceOption,
+  UnpinConflictResolutionPreferenceOption,
+} from '@/types/pinningPreferences.types';
+
+import { Button } from '@/components/Button';
+import { Tabs } from '@/components/Tabs';
 import {
   NAVIGATION_COLLAPSED_PREFERENCE_OPTIONS,
   NAVIGATION_PINNED_PREFERENCE_OPTIONS,
@@ -21,31 +36,16 @@ import {
   useGetGlobalPinningPreferences,
 } from '@/contexts/GlobalSettingsContext/selectors';
 
-import { Button } from '@/components/Button';
-import { Tabs } from '@/components/Tabs';
+import type { SettingsDraft } from './Settings.types';
 
-import type {
-  GlobalNavigationCollapsedPreference,
-  GlobalNavigationPinnedPreference,
-  GlobalNavigationSizePreference,
-} from '@/types/globalSettings.types';
-import type {
-  OrderConflictResolutionPreferenceOption,
-  PinConflictResolutionPreferenceOption,
-  PinSidePreferenceOption,
-  UnpinConflictResolutionPreferenceOption,
-} from '@/types/pinningPreferences.types';
-import type { TabItem } from '@/components/Tabs';
-
-import { styles } from './Settings.stylex';
 import {
   DEFAULT_NAVIGATION_COLLAPSED_PREFERENCE,
   DEFAULT_NAVIGATION_PINNED_PREFERENCE,
   DEFAULT_NAVIGATION_SIZE_PREFERENCE,
   DEFAULT_PINNING_PREFERENCE,
 } from './Settings.constants';
+import { styles } from './Settings.stylex';
 import { SettingsOptionSection } from './SettingsOptionSection.component';
-import type { SettingsDraft } from './Settings.types';
 import { toDraft, toGlobalNavigationPreferencesUpdate } from './utils';
 
 export const Settings = () => {

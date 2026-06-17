@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 import type {
   ColumnGroupsState,
   ColumnOrderState,
@@ -5,8 +7,6 @@ import type {
   PinnedColumnOffsetsState,
   TableColumn,
 } from '@/components/Table/Table.types';
-
-import { describe, expect, it, vi } from 'vitest';
 
 import { commitPinningAndOrderUpdate } from './commitPinningAndOrderUpdate.util';
 

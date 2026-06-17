@@ -1,6 +1,6 @@
-import type { Route } from './+types/root';
-
 import { RouteErrorBoundary } from '@/components/RouteErrorBoundary';
+
+import type { Route } from './+types/root';
 
 export const ErrorBoundary = ({ error }: Route.ErrorBoundaryProps) => (
   <RouteErrorBoundary

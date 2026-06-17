@@ -1,12 +1,12 @@
 import { useFetcher, useLocation } from 'react-router';
 
+import type { GlobalSettingsState } from '@/types/globalSettings.types';
+
+import { PERSIST_COOKIE_ACTION } from '@/constants/globalSettings.constants';
 import {
   GLOBAL_SETTINGS_COOKIE_KEY,
   serializeGlobalSettingsForCookie,
 } from '@/utils/globalSettings';
-
-import type { GlobalSettingsState } from '@/types/globalSettings.types';
-import { PERSIST_COOKIE_ACTION } from '@/constants/globalSettings.constants';
 
 export const usePersistGlobalSettingsAction = () => {
   const fetcher = useFetcher({ key: 'persist-global-settings' });

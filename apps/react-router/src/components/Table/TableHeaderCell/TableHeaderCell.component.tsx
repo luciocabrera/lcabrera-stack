@@ -2,11 +2,6 @@ import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 
 import type { PinConflictResolution } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
-
-import {
-  useGetGlobalPinConflictResolutionPreference,
-  useGetGlobalPinSidePreference,
-} from '@/contexts/GlobalSettingsContext/selectors';
 import type { PinConflictState, PinSide } from '@/types/ui.types';
 
 import { Button } from '@/components/Button';
@@ -22,6 +17,10 @@ import {
 import { useColumnResize } from '@/components/Table/hooks';
 import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
 import { PinConflictModal } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/PinConflictModal';
+import {
+  useGetGlobalPinConflictResolutionPreference,
+  useGetGlobalPinSidePreference,
+} from '@/contexts/GlobalSettingsContext/selectors';
 import { useRenderTracker } from '@/utils/performance';
 
 import type { TableHeaderCellProps } from './TableHeaderCell.types';

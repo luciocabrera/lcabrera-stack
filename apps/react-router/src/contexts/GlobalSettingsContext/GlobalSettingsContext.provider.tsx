@@ -1,9 +1,9 @@
 import { useStore } from '@/hooks';
 
+import type { GlobalSettingsProviderProps } from './GlobalSettingsContext.types';
+
 import { INITIAL_GLOBAL_SETTINGS } from './GlobalSettingsContext.constants';
 import { GlobalSettingsContext } from './GlobalSettingsContext.context';
-
-import type { GlobalSettingsProviderProps } from './GlobalSettingsContext.types';
 
 export const GlobalSettingsProvider = ({
   children,

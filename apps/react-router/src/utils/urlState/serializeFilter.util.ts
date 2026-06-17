@@ -1,6 +1,7 @@
 import type { ColumnFilter } from '@/types/filterOperators.types';
 
 import type { CompactFilterValue } from './serializeFilter.types';
+
 import { serializeBooleanFilter } from './serializeBooleanFilter.util';
 import { serializeDateFilter } from './serializeDateFilter.util';
 import { serializeNumberFilter } from './serializeNumberFilter.util';

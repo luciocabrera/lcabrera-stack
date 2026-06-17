@@ -1,17 +1,18 @@
 // @vitest-environment jsdom
 
-import { createElement } from 'react';
 import type { ReactNode } from 'react';
 
 import { act, renderHook } from '@testing-library/react';
+import { createElement } from 'react';
 import { describe, expect, it } from 'vitest';
 
 import { createMockStore } from '@/utils/tests/createMockStore.util';
 
-import { useCancelPinSide } from './actions/useCancelPinSide.hook';
-import { ColumnOrderSectionContext } from './ColumnOrderSectionContext.context';
-import { INITIAL_MODALS_STATE } from './ColumnOrderSectionContext.constants';
 import type { ColumnOrderSectionContextValue } from './ColumnOrderSectionContext.types';
+
+import { useCancelPinSide } from './actions/useCancelPinSide.hook';
+import { INITIAL_MODALS_STATE } from './ColumnOrderSectionContext.constants';
+import { ColumnOrderSectionContext } from './ColumnOrderSectionContext.context';
 import { useGetConflictModal } from './selectors/useGetConflictModal.hook';
 import { useGetOrderConflict } from './selectors/useGetOrderConflict.hook';
 import { useGetPinSideModal } from './selectors/useGetPinSideModal.hook';

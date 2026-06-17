@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
 import { styles } from '../NotificationCenter.stylex';
-
 import { getAccentStyle } from './getAccentStyle.util';
 
 describe('getAccentStyle', () => {

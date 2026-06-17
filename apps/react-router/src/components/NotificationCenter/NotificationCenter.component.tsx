@@ -1,10 +1,12 @@
-import * as stylex from '@stylexjs/stylex';
 import type { MouseEvent } from 'react';
+
+import * as stylex from '@stylexjs/stylex';
 import { useEffect, useRef } from 'react';
+
+import type { NotificationPlacement } from '@/contexts/NotificationContext';
 
 import { Card } from '@/components/Card';
 import { MenuCloseIcon } from '@/components/Icons';
-import type { NotificationPlacement } from '@/contexts/NotificationContext';
 import { useNotifications } from '@/hooks/useNotifications.hook';
 
 import { NOTIFICATION_CENTER_PLACEMENTS } from './NotificationCenter.constants';

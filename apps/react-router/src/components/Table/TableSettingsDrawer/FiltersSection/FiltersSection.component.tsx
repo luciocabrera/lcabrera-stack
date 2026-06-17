@@ -7,12 +7,13 @@ import {
 import { useSetTableSettingsExpandedFilters } from '@/components/Table/contexts/TableConfig/meta/actions';
 import { useGetTableSettingsExpandedFilters } from '@/components/Table/contexts/TableConfig/meta/selectors';
 
+import type { FiltersSectionProps } from './FiltersSection.types';
+
 import { useSetColumnFilters } from '../TableDrawerContext/actions';
 import { useGetColumnFilters } from '../TableDrawerContext/selectors';
 import { ActiveFiltersList } from './ActiveFiltersList';
 import { AddFilterSection } from './AddFilterSection';
 import { FiltersSectionToolbar } from './FiltersSectionToolbar';
-import type { FiltersSectionProps } from './FiltersSection.types';
 
 /**
  * Orchestrator component for the filters section.

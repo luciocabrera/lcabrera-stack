@@ -7,13 +7,13 @@ import { useVirtualization } from '@/hooks';
 import type { VirtualListBodyProps } from './VirtualListBody.types';
 
 import { SkeletonOptions } from '../SkeletonOptions';
+import { getFilteredOptions } from '../utils';
+import { VirtualizedOption } from '../VirtualizedOption';
 import {
   DEFAULT_CONTAINER_HEIGHT,
   ITEM_HEIGHT,
   SCROLL_THRESHOLD,
 } from '../VirtualList.constants';
-import { getFilteredOptions } from '../utils';
-import { VirtualizedOption } from '../VirtualizedOption';
 import { styles } from './VirtualListBody.stylex';
 
 export const VirtualListBody = ({

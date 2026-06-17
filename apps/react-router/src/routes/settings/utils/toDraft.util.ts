@@ -2,13 +2,15 @@ import type {
   useGetGlobalNavigationPreferences,
   useGetGlobalPinningPreferences,
 } from '@/contexts/GlobalSettingsContext/selectors';
+
+import type { SettingsDraft } from '../Settings.types';
+
 import {
   DEFAULT_NAVIGATION_COLLAPSED_PREFERENCE,
   DEFAULT_NAVIGATION_PINNED_PREFERENCE,
   DEFAULT_NAVIGATION_SIZE_PREFERENCE,
   DEFAULT_PINNING_PREFERENCE,
 } from '../Settings.constants';
-import type { SettingsDraft } from '../Settings.types';
 
 type ToDraftArgs = {
   readonly navigationPreferences: ReturnType<

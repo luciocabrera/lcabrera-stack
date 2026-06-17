@@ -1,6 +1,8 @@
 import type { ColumnFilter } from '@/types/filterOperators.types';
-import type { ColumnFiltersState, DataKey } from '../Table.types';
+
 import { shallowEqual } from '@/utils';
+
+import type { ColumnFiltersState, DataKey } from '../Table.types';
 
 type GetNewColumnFiltersBasedOnColumnKeyArgs<TData> = {
   readonly columnKey: DataKey<TData>;

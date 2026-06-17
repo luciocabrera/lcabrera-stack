@@ -4,8 +4,8 @@ import type { OrderConflictResolution } from '@/components/Table/TableSettingsDr
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { useTableDrawerContextValue } from '@/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
 
-import { resolveAcceptedOrderConflictState } from './utils/resolveAcceptedOrderConflictState.util';
 import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
+import { resolveAcceptedOrderConflictState } from './utils/resolveAcceptedOrderConflictState.util';
 
 /**
  * Hook to handle accepting an order conflict resolution.

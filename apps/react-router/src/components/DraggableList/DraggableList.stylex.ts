@@ -47,9 +47,9 @@ export const styles = stylex.create({
       default: '0px',
       ':focus-visible': '2px',
     },
+    position: 'relative',
     userSelect: 'none',
     height: '34px',
-    position: 'relative',
   },
   itemDragging: {
     cursor: 'grabbing',

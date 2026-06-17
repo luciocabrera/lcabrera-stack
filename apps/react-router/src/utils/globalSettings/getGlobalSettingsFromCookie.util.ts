@@ -1,10 +1,3 @@
-import { readFromCookie } from '@/utils/storage/readFromCookie.util';
-
-import {
-  GLOBAL_SETTINGS_COOKIE_KEY,
-  GLOBAL_SETTINGS_COOKIE_VERSION,
-} from './globalSettings.constants';
-
 import type {
   GlobalNavigationCollapsedPreference,
   GlobalNavigationPinnedPreference,
@@ -18,6 +11,13 @@ import type {
   UnpinConflictResolution,
 } from '@/types/pinningPreferences.types';
 import type { PinSide } from '@/types/ui.types';
+
+import { readFromCookie } from '@/utils/storage/readFromCookie.util';
+
+import {
+  GLOBAL_SETTINGS_COOKIE_KEY,
+  GLOBAL_SETTINGS_COOKIE_VERSION,
+} from './globalSettings.constants';
 
 const PIN_SIDE_VALUES = ['closest-edge', 'left', 'right'] as const;
 const NAVIGATION_SIZE_VALUES = ['compact', 'large', 'medium', 'small'] as const;

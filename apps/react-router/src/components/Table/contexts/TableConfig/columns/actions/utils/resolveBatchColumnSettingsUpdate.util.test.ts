@@ -1,9 +1,9 @@
+import { describe, expect, it, vi } from 'vitest';
+
 import type {
   ColumnFiltersState,
   TableColumnsState,
 } from '@/components/Table/Table.types';
-
-import { describe, expect, it, vi } from 'vitest';
 
 import { resolveBatchColumnSettingsUpdate } from './resolveBatchColumnSettingsUpdate.util';
 

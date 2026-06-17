@@ -32,37 +32,37 @@ export const styles = stylex.create({
   },
 
   compactControlEmbedded: {
+    paddingInline: 0,
     justifyContent: 'center',
     minWidth: spacing.lg,
-    paddingInline: 0,
     width: spacing.lg,
   },
 
   compactControlLg: {
+    paddingInline: 0,
     justifyContent: 'center',
     minWidth: spacing.xxl,
-    paddingInline: 0,
     width: spacing.xxl,
   },
 
   compactControlMd: {
+    paddingInline: 0,
     justifyContent: 'center',
     minWidth: '2.5rem',
-    paddingInline: 0,
     width: '2.5rem',
   },
 
   compactControlMini: {
+    paddingInline: 0,
     justifyContent: 'center',
     minWidth: '1.75rem',
-    paddingInline: 0,
     width: '1.75rem',
   },
 
   compactControlSm: {
+    paddingInline: 0,
     justifyContent: 'center',
     minWidth: spacing.xl,
-    paddingInline: 0,
     width: spacing.xl,
   },
 
