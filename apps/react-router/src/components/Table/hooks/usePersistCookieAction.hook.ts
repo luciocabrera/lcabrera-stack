@@ -1,6 +1,7 @@
 import { useFetcher, useLocation } from 'react-router';
 
 import { PERSIST_COOKIE_ACTION } from '@/constants/globalSettings.constants';
+import { useNotifications } from '@/hooks/useNotifications.hook';
 import { writeToSessionStorage } from '@/utils/storage';
 
 import type { TablePersistenceConfig } from '../Table.types';
@@ -13,6 +14,15 @@ type PersistCookieEntry<TSlice = unknown> = {
   searchParamValue?: string;
   slice: keyof TablePersistenceConfig;
   valueSlice: TSlice;
+};
+
+const MAX_COOKIE_ENTRY_VALUE_LENGTH = 1800;
+
+const PERSISTENCE_SIZE_WARNING = {
+  message:
+    'This table state is too large to save safely. Remove some filters or sorting before applying the change.',
+  title: 'Table state too large',
+  variant: 'warning' as const,
 };
 
 /**
@@ -28,13 +38,14 @@ type PersistCookieEntry<TSlice = unknown> = {
  * Supports both a single entry and a batch of entries.
  */
 type PersistTableStateAction = {
-  <TSlice>(entry: PersistCookieEntry<TSlice>): void;
-  (entries: PersistCookieEntry[]): void;
+  <TSlice>(entry: PersistCookieEntry<TSlice>): boolean;
+  (entries: PersistCookieEntry[]): boolean;
 };
 
 export const usePersistTableStateAction = (): PersistTableStateAction => {
   const fetcher = useFetcher({ key: 'persist-table-state' });
   const location = useLocation();
+  const { notify } = useNotifications();
 
   return (args: PersistCookieEntry | PersistCookieEntry[]) => {
     const entries = Array.isArray(args) ? args : [args];
@@ -66,10 +77,34 @@ export const usePersistTableStateAction = (): PersistTableStateAction => {
       },
     );
 
+    const oversizedEntries = serializedEntries.filter(
+      ({ value }) => value.length > MAX_COOKIE_ENTRY_VALUE_LENGTH,
+    );
+
+    if (oversizedEntries.length > 0) {
+      notify(PERSISTENCE_SIZE_WARNING);
+      return false;
+    }
+
+    serializedEntries.forEach(({ key, value }) => {
+      // Write to sessionStorage immediately (tab-isolated, survives refresh)
+      writeToSessionStorage({ key, value });
+    });
+
+    const cookieSafeEntries = serializedEntries.filter(
+      ({ value }) => value.length <= MAX_COOKIE_ENTRY_VALUE_LENGTH,
+    );
+
+    if (cookieSafeEntries.length === 0) {
+      return false;
+    }
+
     // Also write to cookie via server action (SSR baseline for new tabs)
     void fetcher.submit(
-      { currentUrl, entries: JSON.stringify(serializedEntries) },
+      { currentUrl, entries: JSON.stringify(cookieSafeEntries) },
       { action: PERSIST_COOKIE_ACTION, method: 'POST' },
     );
+
+    return true;
   };
 };

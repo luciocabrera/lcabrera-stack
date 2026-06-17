@@ -49,3 +49,4 @@ Eliminate code duplication between `apps/api-server` and `apps/api-server-fast` 
 - Test shared utilities independently in `shared`
 - Update both api-server and api-server-fast imports when adding new shared utilities
 - `buildEnterpriseOrdersWhereClause` uses typed per-filter helpers with a single dispatch path; preserve SQL/parameter output parity when refactoring internals
+- Wide-alltypes sorting excludes non-orderable columns (currently `c_018` with PostgreSQL `point` type) and caps accepted sort rules to prevent invalid or excessive ORDER BY clauses

@@ -64,10 +64,11 @@ const buildGeneratedColumn = ({
   const mod = index % 20;
   const key = `c_${String(index).padStart(3, '0')}` as keyof WideAlltypes150;
   const typeLabel = PG_TYPE_LABELS[mod] ?? 'Col';
+  const isFilterable = mod !== 15 && mod !== 18 && mod !== 19;
 
   return {
     dataType: getColDataType(index),
-    isFilterable: false,
+    isFilterable,
     isSortable: mod !== 19, // integer[] columns are not meaningfully sortable
     key,
     label: `${typeLabel} ${index}`,

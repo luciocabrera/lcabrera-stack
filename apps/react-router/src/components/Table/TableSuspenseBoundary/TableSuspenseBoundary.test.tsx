@@ -22,7 +22,10 @@ describe('TableSuspenseBoundary', () => {
     const pendingPromise = new Promise<number>((_resolve) => void 0);
 
     render(
-      <TableSuspenseBoundary dataPromise={pendingPromise}>
+      <TableSuspenseBoundary
+        dataPromise={pendingPromise}
+        onRetry={() => void 0}
+      >
         {(response) => <span>Resolved: {response}</span>}
       </TableSuspenseBoundary>,
     );
