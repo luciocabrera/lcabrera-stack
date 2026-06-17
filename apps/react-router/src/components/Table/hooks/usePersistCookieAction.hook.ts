@@ -69,31 +69,21 @@ export const usePersistTableStateAction = (): PersistTableStateAction => {
       },
     );
 
-    const oversizedEntries = serializedEntries.filter(
-      ({ value }) => value.length > MAX_COOKIE_ENTRY_VALUE_LENGTH,
-    );
-
-    if (oversizedEntries.length > 0) {
-      notify(PERSISTENCE_SIZE_WARNING);
-      return false;
-    }
-
     serializedEntries.forEach(({ key, value }) => {
       // Write to sessionStorage immediately (tab-isolated, survives refresh)
       writeToSessionStorage({ key, value });
     });
 
-    const cookieSafeEntries = serializedEntries.filter(
-      ({ value }) => value.length <= MAX_COOKIE_ENTRY_VALUE_LENGTH,
-    );
-
-    if (cookieSafeEntries.length === 0) {
+    // Check total cookie size (actual serialized payload)
+    const entriesString = JSON.stringify(serializedEntries);
+    if (entriesString.length > MAX_COOKIE_ENTRY_VALUE_LENGTH) {
+      notify(PERSISTENCE_SIZE_WARNING);
       return false;
     }
 
-    // Also write to cookie via server action (SSR baseline for new tabs)
+    // Write to cookie via server action (SSR baseline for new tabs)
     void fetcher.submit(
-      { currentUrl, entries: JSON.stringify(cookieSafeEntries) },
+      { currentUrl, entries: entriesString },
       { action: PERSIST_COOKIE_ACTION, method: 'POST' },
     );
 

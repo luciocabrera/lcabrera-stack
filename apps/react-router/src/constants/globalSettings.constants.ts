@@ -59,7 +59,7 @@ export const NAVIGATION_PINNED_PREFERENCE_OPTIONS: readonly RadioOption<GlobalNa
   ];
 
 export const PERSIST_COOKIE_ACTION = '/_action/persist-cookie';
-export const MAX_COOKIE_ENTRY_VALUE_LENGTH = 1800;
+export const MAX_COOKIE_ENTRY_VALUE_LENGTH = 10_000;
 
 export const PERSISTENCE_SIZE_WARNING: Omit<
   AppNotification,

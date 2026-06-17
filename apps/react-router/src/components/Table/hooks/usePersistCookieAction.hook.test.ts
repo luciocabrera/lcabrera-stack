@@ -196,7 +196,7 @@ describe('usePersistTableStateAction', () => {
       message:
         'This table state is too large to save safely. Remove some filters or sorting before applying the change.',
       title: 'Table state too large',
-      variant: 'warning',
+      variant: 'error',
     });
     expect(writeToSessionStorageMock).not.toHaveBeenCalled();
     expect(submitMock).not.toHaveBeenCalled();
