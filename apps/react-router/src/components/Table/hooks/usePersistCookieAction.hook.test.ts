@@ -5,6 +5,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { TablePersistenceConfig } from '../Table.types';
 
+import { MAX_COOKIE_ENTRY_VALUE_LENGTH } from '@/constants/globalSettings.constants';
+
 import { usePersistTableStateAction } from './usePersistCookieAction.hook';
 
 const {
@@ -174,7 +176,7 @@ describe('usePersistTableStateAction', () => {
   it('blocks oversized entries before session storage or cookie persistence', () => {
     serializeStateSliceMock.mockReturnValue({
       key: 'orders:filters',
-      value: 'x'.repeat(1801),
+      value: 'x'.repeat(MAX_COOKIE_ENTRY_VALUE_LENGTH + 1),
     });
 
     const { result } = renderHook(() => usePersistTableStateAction());
@@ -193,6 +195,7 @@ describe('usePersistTableStateAction', () => {
 
     expect(persistenceResult).toBe(false);
     expect(notifyMock).toHaveBeenCalledWith({
+      durationMs: 10_000,
       message:
         'This table state is too large to save safely. Remove some filters or sorting before applying the change.',
       title: 'Table state too large',

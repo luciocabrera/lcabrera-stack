@@ -69,17 +69,17 @@ export const usePersistTableStateAction = (): PersistTableStateAction => {
       },
     );
 
-    serializedEntries.forEach(({ key, value }) => {
-      // Write to sessionStorage immediately (tab-isolated, survives refresh)
-      writeToSessionStorage({ key, value });
-    });
-
     // Check total cookie size (actual serialized payload)
     const entriesString = JSON.stringify(serializedEntries);
     if (entriesString.length > MAX_COOKIE_ENTRY_VALUE_LENGTH) {
       notify(PERSISTENCE_SIZE_WARNING);
       return false;
     }
+
+    serializedEntries.forEach(({ key, value }) => {
+      // Write to sessionStorage immediately (tab-isolated, survives refresh)
+      writeToSessionStorage({ key, value });
+    });
 
     // Write to cookie via server action (SSR baseline for new tabs)
     void fetcher.submit(
