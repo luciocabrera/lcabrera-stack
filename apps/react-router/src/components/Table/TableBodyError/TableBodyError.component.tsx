@@ -1,5 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 
+import { ErrorDescriptive } from '@/components/Icons';
+
 import type { TableBodyErrorProps } from './TableBodyError.types';
 
 import { styles } from './TableBodyError.stylex';
@@ -15,98 +17,27 @@ export const TableBodyError = ({ error, onRetry }: TableBodyErrorProps) => {
 
   return (
     <div data-testid='table-body-error' {...stylex.props(styles.panel)}>
+      <div
+        data-testid='table-body-error-overlay'
+        {...stylex.props(styles.overlay)}
+      />
       <div {...stylex.props(styles.content)}>
-        <svg
-          aria-hidden
-          viewBox='0 0 320 160'
-          {...stylex.props(styles.illustration)}
-        >
-          <defs>
-            <linearGradient id='tableErrorGradient' x1='0' x2='1' y1='0' y2='1'>
-              <stop offset='0%' stopColor='var(--error-background)' />
-              <stop offset='100%' stopColor='var(--surface-elevated)' />
-            </linearGradient>
-          </defs>
-
-          <rect
-            fill='url(#tableErrorGradient)'
-            height='120'
-            rx='16'
-            width='260'
-            x='30'
-            y='20'
-          />
-          <rect
-            fill='var(--border-primary)'
-            height='18'
-            opacity='0.5'
-            rx='5'
-            width='58'
-            x='46'
-            y='35'
-          />
-          <rect
-            fill='var(--border-primary)'
-            height='18'
-            opacity='0.5'
-            rx='5'
-            width='58'
-            x='114'
-            y='35'
-          />
-          <rect
-            fill='var(--border-primary)'
-            height='18'
-            opacity='0.5'
-            rx='5'
-            width='58'
-            x='182'
-            y='35'
-          />
-
-          <rect
-            fill='var(--surface-primary)'
-            height='22'
-            opacity='0.9'
-            rx='6'
-            width='228'
-            x='46'
-            y='66'
-          />
-          <rect
-            fill='var(--surface-primary)'
-            height='22'
-            opacity='0.7'
-            rx='6'
-            width='228'
-            x='46'
-            y='95'
-          />
-
-          <circle cx='160' cy='78' fill='var(--error)' r='22' />
-          <path
-            d='M160 66v15'
-            stroke='var(--text-inverse)'
-            strokeLinecap='round'
-            strokeWidth='4'
-          />
-          <circle cx='160' cy='87' fill='var(--text-inverse)' r='2.5' />
-        </svg>
+        <ErrorDescriptive />
 
         <p {...stylex.props(styles.eyebrow)}>Temporary Data Issue</p>
         <p {...stylex.props(styles.message)}>{DEFAULT_ERROR_MESSAGE}</p>
+        <p {...stylex.props(styles.title)}>Error Loading Data</p>
+        {details !== undefined && (
+          <p {...stylex.props(styles.details)}>{details}</p>
+        )}
+        <button
+          onClick={onRetry}
+          type='button'
+          {...stylex.props(styles.retryButton)}
+        >
+          Retry
+        </button>
       </div>
-      <p {...stylex.props(styles.title)}>Error Loading Data</p>
-      {details !== undefined && (
-        <p {...stylex.props(styles.details)}>{details}</p>
-      )}
-      <button
-        onClick={onRetry}
-        type='button'
-        {...stylex.props(styles.retryButton)}
-      >
-        Retry
-      </button>
     </div>
   );
 };

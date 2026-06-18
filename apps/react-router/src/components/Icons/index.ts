@@ -31,3 +31,4 @@ export { SortNeutralIcon } from './SortNeutralIcon';
 export { SuccessIcon } from './SuccessIcon';
 export { UserIcon } from './UserIcon';
 export { WarningIcon } from './WarningIcon';
+export { ErrorDescriptive } from './ErrorDescriptive';
