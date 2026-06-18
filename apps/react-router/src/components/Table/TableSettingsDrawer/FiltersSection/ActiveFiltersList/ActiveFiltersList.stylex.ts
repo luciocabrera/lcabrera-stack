@@ -23,7 +23,7 @@ const localStyles = stylex.create({
     borderWidth: '1px',
     overflow: 'visible',
     backgroundColor: {
-      default: colors.surfaceSecondary,
+      default: colors.glassBackgroundColorSecondary, // colors.surfaceSecondary,
       ':hover': colors.surfaceElevated,
     },
     position: 'relative',
@@ -68,7 +68,7 @@ const localStyles = stylex.create({
   },
   filterItemContent: {
     padding: spacing.md,
-    backgroundColor: colors.surfaceSecondary,
+    backgroundColor: colors.glassBackgroundColorSecondary,
     borderBottomLeftRadius: borderRadius.md,
     borderBottomRightRadius: borderRadius.md,
     borderTopColor: colors.borderPrimary,

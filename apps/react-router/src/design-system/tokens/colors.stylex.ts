@@ -13,6 +13,11 @@ export const colors = stylex.defineVars({
 
   backgroundTertiary: 'var(--background-tertiary)',
   borderFocus: 'var(--border-focus)',
+
+  glassBackgroundColorPrimary: 'var(--glass-background-color-primary)',
+  glassBackgroundColorSecondary: 'var(--glass-background-color-secondary)',
+  glassBackgroundColorTertiary: 'var(--glass-background-color-tertiary)',
+  glassBackdropFilter: 'var(--glass-backdrop-filter)',
   // Border colors
   borderPrimary: 'var(--border-primary)',
 

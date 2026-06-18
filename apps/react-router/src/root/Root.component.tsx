@@ -19,7 +19,11 @@ const RootContent = () => {
 
   return (
     <div {...stylex.props(styles.base, isDarkMode ? darkTheme : lightTheme)}>
-      <div {...stylex.props(styles.appShell)}>
+      <div {...stylex.props(styles.appShell, styles.panel)}>
+        <div
+          // data-testid='table-body-error-overlay'
+          {...stylex.props(styles.overlay)}
+        ></div>
         <AppNavigation isDarkMode={isDarkMode} onToggleTheme={toggleTheme} />
         <main {...stylex.props(styles.outletWrapper)}>
           <Outlet />

@@ -16,11 +16,11 @@ export const TableBodyError = ({ error, onRetry }: TableBodyErrorProps) => {
   }
 
   return (
-    <div data-testid='table-body-error' {...stylex.props(styles.panel)}>
-      <div
+    <div data-testid='table-body-error'>
+      {/* <div
         data-testid='table-body-error-overlay'
         {...stylex.props(styles.overlay)}
-      ></div>
+      ></div> */}
       <div {...stylex.props(styles.content)}>
         <ErrorDescriptive />
 

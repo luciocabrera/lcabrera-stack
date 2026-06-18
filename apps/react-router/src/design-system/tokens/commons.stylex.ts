@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 import * as stylex from '@stylexjs/stylex';
 
 import {
@@ -152,13 +151,21 @@ export const colorVariants = stylex.create({
   },
 
   primary: {
-    borderColor: colors.brandPrimary,
+    inset: 0,
+    // background: colors.textPrimary,
+    borderColor: colors.borderPrimary,
     backgroundColor: colors.brandPrimary,
+    // backgroundColor: '#726d672e', // colors.brandPrimary,
+    // backgroundColor: colors.backgroundPrimary, //    '#050814',
+    // backgroundImage: 'linear-gradient(45deg, #00000078, #14224575, #21183896)',
     backgroundImage: {
-      default: 'none',
+      default: 'linear-gradient(45deg, #00000078, #14224575, #21183896)',
       ':hover': `radial-gradient(circle, oklch(100% 0 0 / 0.2) 1%, transparent 1%)`,
     },
     color: colors.brandSecondaryText,
+    // backdropFilter: 'blur(72px) saturate(150%) brightness(0.5)',
+    mixBlendMode: 'screen',
+    // opacity: 0.5,
   },
 
   secondary: {

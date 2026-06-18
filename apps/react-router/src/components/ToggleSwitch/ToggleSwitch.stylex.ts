@@ -44,7 +44,7 @@ export const styles = stylex.create({
     width: '36px',
   },
   trackChecked: {
-    borderColor: colors.brandPrimary,
+    borderColor: colors.borderPrimary,
     backgroundColor: colors.brandPrimary,
   },
   trackDisabled: {

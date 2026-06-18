@@ -6,7 +6,7 @@ import { colors } from '@/design-system/tokens/colors.stylex';
 export const styles = stylex.create({
   app: {
     transition: 'background-color 0.3s ease, color 0.3s ease',
-    backgroundColor: colors.backgroundPrimary,
+    // backgroundColor: colors.backgroundPrimary,
     color: colors.textPrimary,
     fontFamily: typography.fontFamily,
     // Scrollbar styling

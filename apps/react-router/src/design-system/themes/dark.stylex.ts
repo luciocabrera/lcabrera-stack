@@ -12,12 +12,18 @@ export const darkTheme = stylex.createTheme(colors, {
   // info: 'oklch(78% 0.19 220)',
   // brandPrimary: 'oklch(48% 0.05 266)',
   // brandSecondary: 'oklch(49% 0.06 300)',
-  brandPrimary: 'lab(34 -14.67 46.32 / 0.6)', //,lab(11 13.52 -40.39)', //'oklch(0.36 0.15 261.66)',
+  brandPrimary: 'lab(9.51012% -.812642 -2.82544)', //, 'linear-gradient(45deg, #00000078, #14224575, #21183896)', //  'lab(12 7.13 20.12 / 0.42)', // 'lab(50 -18.73 58.87 / 0.17)', // 'lab(34 -14.67 46.32 / 0.6)', //,lab(11 13.52 -40.39)', //'oklch(0.36 0.15 261.66)',
   brandSecondary: 'oklch(48% 0.05 266)',
   success: 'oklch(52% 0.06 160)',
   warning: 'oklch(44% 0.08 80)',
   error: 'oklch(0.48095 0.14876 27.27312)',
   info: 'oklch(66% 0.19 220)',
+
+  glassBackgroundColorPrimary: '#1211119e', //'#0000002b',
+  glassBackgroundColorSecondary: 'lab(10 -0.81 -2.83 / 0.51)',
+  glassBackgroundColorTertiary: 'lab(0 0 0 / 0.08)', //
+  glassBackdropFilter: 'blur(42px) saturate(0.9)',
+
   //lab(73 -27.69 88 / 0.75)
   /* Derivatives (reverse logic vs light theme) */
   brandPrimaryHover: 'oklch(from brandPrimary l+0.06 c+0.01)',
@@ -63,7 +69,7 @@ export const darkTheme = stylex.createTheme(colors, {
   backgroundSecondary: 'oklch(18% 0.005 250)',
   backgroundTertiary: 'oklch(22% 0.008 250)',
 
-  surfacePrimary: 'oklch(17% 0.005 250)',
+  surfacePrimary: 'lab(4 -0.35 -1.26 / 0.48)', // 'oklch(17% 0.005 250)',
   surfaceSecondary: 'oklch(22% 0.008 250)',
   surfaceElevated: 'oklch(26% 0.008 250)',
   surfaceStripe: 'oklch(100% 0 0 / 0.02)',

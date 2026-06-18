@@ -35,7 +35,7 @@ export const styles = stylex.create({
     transition: `background-color ${transitions.fast}, border-color ${transitions.fast}`,
     alignItems: 'center',
     backgroundColor: {
-      default: colors.surfaceSecondary,
+      default: colors.glassBackgroundColorSecondary, // colors.surfaceSecondary,
       ':hover': colors.surfaceElevated,
     },
     cursor: {

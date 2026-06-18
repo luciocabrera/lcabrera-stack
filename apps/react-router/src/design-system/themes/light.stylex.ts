@@ -13,6 +13,12 @@ export const lightTheme = stylex.createTheme(colors, {
   error: 'oklch(0.48095 0.14876 27.27312)',
   info: 'oklch(66% 0.19 220)',
 
+  glassBackgroundColorPrimary: '#1211119e', //'#0000002b',
+
+  glassBackgroundColorSecondary: 'lab(10 -0.81 -2.83 / 0.51)',
+
+  glassBackgroundColorTertiary: 'lab(0 0 0 / 0.08)', //
+  glassBackdropFilter: 'blur(42px) saturate(0.9)',
   /* Derivatives using OKLCH math */
   brandPrimaryHover: 'oklch(from brandPrimary l-0.05 c+0.01 h)',
   brandPrimaryActive: 'oklch(from brandPrimary l-0.10 c+0.02 h)',
