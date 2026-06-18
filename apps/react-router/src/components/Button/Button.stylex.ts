@@ -9,6 +9,7 @@ import {
   skeleton,
   sizeVariants,
   widthVariants,
+  overlayStyles,
 } from '@/design-system/tokens/commons.stylex';
 
 const buttonSpecificStyles = stylex.create({
@@ -74,4 +75,5 @@ export const buttonStyles = {
   size: sizeVariants,
   style: styleVariants,
   width: widthVariants,
+  overlay: overlayStyles,
 };

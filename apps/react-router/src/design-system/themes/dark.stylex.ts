@@ -88,7 +88,7 @@ export const darkTheme = stylex.createTheme(colors, {
   disabledText: 'oklch(54% 0.008 250)',
 
   /* Interaction + shadows */
-  hover: 'oklch(100% 0 0 / 0.05)',
+  hover: 'oklch(100% 0 0 / 0.09)',
   active: 'oklch(100% 0 0 / 0.10)',
   overlay: 'oklch(0% 0 0 / 0.7)', // modal/dialog backdrop (darker for dark theme)
   shadowHover:

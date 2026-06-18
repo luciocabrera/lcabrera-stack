@@ -22,22 +22,17 @@ export const styles = stylex.create({
   },
   outletWrapper: {
     flex: '1 1 auto',
-    // Scrollbar styling
     scrollbarColor: `${colors.borderSecondary} transparent`,
     scrollbarWidth: 'thin',
     minHeight: 0,
     overflowY: 'auto',
   },
   panel: {
-    // overflow: 'hidden',
-    // alignContent: 'center',
-    // alignItems: 'center',
     backgroundColor: '#04070f', //  this must be for the light theme #ffffff00
     display: 'flex',
     isolation: 'isolate',
     justifyContent: 'center',
     position: 'relative',
-    // textAlign: 'center',
     height: '100%',
     width: '100%',
   },

@@ -151,21 +151,13 @@ export const colorVariants = stylex.create({
   },
 
   primary: {
-    inset: 0,
-    // background: colors.textPrimary,
     borderColor: colors.borderPrimary,
-    backgroundColor: colors.brandPrimary,
-    // backgroundColor: '#726d672e', // colors.brandPrimary,
-    // backgroundColor: colors.backgroundPrimary, //    '#050814',
-    // backgroundImage: 'linear-gradient(45deg, #00000078, #14224575, #21183896)',
+    backgroundColor: colors.brandSecondary,
     backgroundImage: {
-      default: 'linear-gradient(45deg, #00000078, #14224575, #21183896)',
-      ':hover': `radial-gradient(circle, oklch(100% 0 0 / 0.2) 1%, transparent 1%)`,
+      default: 'none',
+      ':hover': `radial-gradient(circle, ${colors.hover} 1%, transparent 1%)`,
     },
     color: colors.brandSecondaryText,
-    // backdropFilter: 'blur(72px) saturate(150%) brightness(0.5)',
-    mixBlendMode: 'screen',
-    // opacity: 0.5,
   },
 
   secondary: {
@@ -196,6 +188,41 @@ export const colorVariants = stylex.create({
       ':hover': `radial-gradient(circle, oklch(0% 0 0 / 0.1) 1%, transparent 1%)`,
     },
     color: colors.warningText,
+  },
+});
+
+export const overlayStyles = stylex.create({
+  overlay: {
+    inset: 0,
+    backgroundColor: colors.backgroundPrimary, //    '#050814',
+    // backgroundImage:
+    //   'linear-gradient(45deg, rgba(90, 144, 255, 0.95), transparent, #00000078, #14224575, #21183896,rgba(40, 228, 194, 0.86),rgba(196, 120, 255, 0.84), rgba(126, 158, 255, 0.64))',
+    // backgroundSize: 'cover',
+    // backgroundImage:
+    //   'linear-gradient(90deg, rgba(90, 144, 255, 0.95), rgba(40, 228, 194, 0.86), rgba(196, 120, 255, 0.84), rgba(126, 158, 255, 0.64))',
+
+    //  radial-gradient(44% 44% at 82% 24%, rgba(40, 228, 194, 0.86), transparent 71%),
+    //   radial-gradient(52% 56% at 84% 82%, rgba(196, 120, 255, 0.84), transparent 73%),
+    //   radial-gradient(40% 40% at 53% 62%, rgba(126, 158, 255, 0.64), transparent 74%)',
+    //filter: 'blur(72px) saturate(150%) brightness(0.5)',
+    // 'linear-gradient(90deg, rgba(90, 144, 255, 0.95), rgba(40, 228, 194, 0.86), rgba(196, 120, 255, 0.84), rgba(126, 158, 255, 0.64))',
+    //#0000, #00000078,#14224575, #28e4c144,, #7e9eff70
+    //#5a91ff57, #21183896,   #c478ff4d)
+
+    backgroundImage: 'linear-gradient(90deg,#213c71a8, #21183896, #6e00c3b0)',
+    mixBlendMode: 'screen',
+    opacity: 0.5,
+    pointerEvents: 'none',
+    position: 'absolute',
+    zIndex: -10,
+    height: '100%',
+    width: '100%',
+  },
+  overlayParent: {
+    backgroundColor: 'transparent',
+    isolation: 'isolate',
+    // justifyContent: 'center',
+    // position: 'relative',
   },
 });
 
