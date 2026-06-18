@@ -9,57 +9,47 @@ export const styles = stylex.create({
     overflow: 'hidden',
     alignContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#04070f', //  this must be for the light theme #ffffff00
     display: 'flex',
     isolation: 'isolate',
     justifyContent: 'center',
     position: 'relative',
-    // borderColor: colors.borderPrimary,
-    // borderRadius: '12px',
-    // borderStyle: 'solid',
-    // borderWidth: '1px',
-    // backgroundColor: colors.errorBackground,
     textAlign: 'center',
     height: '100%',
-    // maxWidth: '760px',
     width: '100%',
   },
   overlay: {
-    background: `
-      linear-gradient(140deg, #04070f 0%, #070d1f 42%, #0a1730 100%)
-    `,
     inset: 0,
-    transition: 'background 0.5s ease',
-    opacity: 1,
+    backgroundColor: colors.backgroundPrimary, //    '#050814',
+    backgroundImage:
+      'radial-gradient(46% 52% at 18% 25%, rgba(90, 144, 255, 0.95), transparent 71%), radial-gradient(44% 44% at 82% 24%, rgba(40, 228, 194, 0.86), transparent 71%), radial-gradient(52% 56% at 84% 82%, rgba(196, 120, 255, 0.84), transparent 73%), radial-gradient(40% 40% at 53% 62%, rgba(126, 158, 255, 0.64), transparent 74%)',
+    filter: 'blur(72px) saturate(150%) brightness(0.5)',
+    mixBlendMode: 'screen',
+    opacity: 0.5,
     pointerEvents: 'none',
     position: 'absolute',
     zIndex: 0,
     height: '100%',
     width: '100%',
-    '::after': {
-      inset: 0,
-      backgroundImage:
-        "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.05'/></svg>\")",
-      content: '',
-      mixBlendMode: 'soft-light',
-      opacity: 0.28,
-      pointerEvents: 'none',
-      position: 'absolute',
-    },
-    '::before': {
-      background: `
-        radial-gradient(42% 46% at 16% 24%, rgba(79, 136, 255, 0.9), transparent 72%),
-        radial-gradient(40% 42% at 82% 24%, rgba(28, 230, 193, 0.78), transparent 72%),
-        radial-gradient(46% 50% at 84% 80%, rgba(198, 120, 255, 0.72), transparent 74%),
-        radial-gradient(36% 38% at 52% 62%, rgba(126, 155, 255, 0.55), transparent 76%)
-      `,
-      inset: '-16% -10%',
-      content: '',
-      filter: 'blur(72px) saturate(145%)',
-      opacity: 0.92,
-      pointerEvents: 'none',
-      position: 'absolute',
-      transform: 'scale(1.08)',
-    },
+  },
+  glow: {
+    inset: '-16% -10%',
+    backgroundImage:
+      'radial-gradient(46% 52% at 18% 25%, rgba(90, 144, 255, 0.95), transparent 71%), radial-gradient(44% 44% at 82% 24%, rgba(40, 228, 194, 0.86), transparent 71%), radial-gradient(52% 56% at 84% 82%, rgba(196, 120, 255, 0.84), transparent 73%), radial-gradient(40% 40% at 53% 62%, rgba(126, 158, 255, 0.64), transparent 74%)',
+    filter: 'blur(72px) saturate(150%) brightness(0.5)',
+    mixBlendMode: 'screen',
+    opacity: 0.5,
+    pointerEvents: 'none',
+    position: 'absolute',
+  },
+  noise: {
+    inset: 0,
+    backgroundImage:
+      "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.08'/></svg>\")",
+    mixBlendMode: 'soft-light',
+    opacity: 0.3,
+    pointerEvents: 'none',
+    position: 'absolute',
   },
 
   content: {

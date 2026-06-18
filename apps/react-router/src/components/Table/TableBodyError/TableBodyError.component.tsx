@@ -20,7 +20,7 @@ export const TableBodyError = ({ error, onRetry }: TableBodyErrorProps) => {
       <div
         data-testid='table-body-error-overlay'
         {...stylex.props(styles.overlay)}
-      />
+      ></div>
       <div {...stylex.props(styles.content)}>
         <ErrorDescriptive />
 
