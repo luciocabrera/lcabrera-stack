@@ -22,7 +22,20 @@ export const darkTheme = stylex.createTheme(colors, {
   glassBackgroundColorPrimary: '#1211119e', //'#0000002b',
   glassBackgroundColorSecondary: 'lab(10 -0.81 -2.83 / 0.51)',
   glassBackgroundColorTertiary: 'lab(0 0 0 / 0.08)', //
-  glassBackdropFilter: 'blur(42px) saturate(0.9)',
+
+  glassBackdropFilterPrimary: 'blur(42px) saturate(150%) brightness(.6)',
+  glassBackdropFilterSecondary: 'blur(42px) saturate(0.9)',
+
+  gradientLinearBackground:
+    'linear-gradient(90deg, #213c71a8, #21183896, #6e00c3b0)',
+  // 'linear-gradient(45deg, rgba(90, 144, 255, 0.95), rgba(40, 228, 194, 0.86), rgba(196, 120, 255, 0.84), rgba(126, 158, 255, 0.64))',
+  gradientRadialBackground:
+    'radial-gradient(46% 52% at 18% 25%, rgba(90, 144, 255, 0.95), transparent 71%), radial-gradient(44% 44% at 82% 24%, rgba(40, 228, 194, 0.86), transparent 71%), radial-gradient(52% 56% at 84% 82%, rgba(196, 120, 255, 0.84), transparent 73%), radial-gradient(40% 40% at 53% 62%, rgba(126, 158, 255, 0.64), transparent 74%)',
+
+  gradientOpacityPrimary: '0.5',
+  gradientOpacitySecondary: '0.5',
+  // gradientRadialBackground:
+  // 'radial-gradient(circle, rgba(90, 144, 255, 0.95), rgba(40, 228, 194, 0.86), rgba(196, 120, 255, 0.84), rgba(126, 158, 255, 0.64))',
 
   //lab(73 -27.69 88 / 0.75)
   /* Derivatives (reverse logic vs light theme) */
@@ -65,7 +78,7 @@ export const darkTheme = stylex.createTheme(colors, {
   infoText: 'oklch(100% 0 0)',
 
   /* --- Neutral System for Dark UI --- */
-  backgroundPrimary: 'oklch(14% 0 0)', // base dark surface
+  backgroundPrimary: 'lab(9.51012% -.812642 -2.82544)', //'oklch(14% 0 0)', // base dark surface
   backgroundSecondary: 'oklch(18% 0.005 250)',
   backgroundTertiary: 'oklch(22% 0.008 250)',
 
@@ -74,7 +87,7 @@ export const darkTheme = stylex.createTheme(colors, {
   surfaceElevated: 'oklch(26% 0.008 250)',
   surfaceStripe: 'oklch(100% 0 0 / 0.02)',
 
-  borderPrimary: 'oklch(34% 0.008 250)',
+  borderPrimary: 'lab(46 -1.24 -4.17 / 0.85)', // 'oklch(34% 0.008 250)',
   borderSecondary: 'oklch(28% 0.005 250)',
   borderFocus: 'oklch(from brandPrimary l+0.12 c+0.05)',
 

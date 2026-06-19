@@ -4,6 +4,10 @@ import { borderRadius } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const tableCheckDisplayStyles = stylex.create({
+  container: {
+    display: 'inline-flex',
+    position: 'relative',
+  },
   checkbox: {
     borderColor: colors.borderPrimary,
     borderRadius: borderRadius.sm,
@@ -19,8 +23,16 @@ export const tableCheckDisplayStyles = stylex.create({
     width: 16,
   },
   checkboxChecked: {
-    borderColor: colors.brandPrimary,
-    backgroundColor: colors.brandPrimary,
+    backgroundColor: colors.brandSecondary,
     color: colors.brandPrimaryText,
+  },
+  checkIconContainer: {
+    alignItems: 'center',
+    color: colors.brandPrimaryText,
+    display: 'flex',
+    inset: 0,
+    justifyContent: 'center',
+    pointerEvents: 'none',
+    position: 'absolute',
   },
 });

@@ -38,7 +38,7 @@ export const Button = ({
         isIconOnly && buttonStyles.iconOnly,
         isBusy && buttonStyles.busyState,
         customStylex,
-        color === 'primary' && buttonStyles.overlay.overlayParent,
+        color === 'primary' && buttonStyles.overlayParent,
       )}
     >
       {isBusy && (
@@ -56,7 +56,13 @@ export const Button = ({
         {children}
       </span>
       {color === 'primary' && (
-        <div {...stylex.props(buttonStyles.overlay.overlay)}></div>
+        <div
+          {...stylex.props(
+            buttonStyles.overlay,
+            buttonStyles.linear,
+            buttonStyles.overlayOverwrite,
+          )}
+        ></div>
       )}
     </button>
   );

@@ -30,7 +30,7 @@ export const styles = stylex.create({
     padding: '1px',
     borderColor: {
       default: colors.borderPrimary,
-      ':hover': colors.borderSecondary,
+      // ':hover': colors.borderSecondary,
     },
     borderRadius: borderRadius.full,
     borderStyle: 'solid',
@@ -40,7 +40,6 @@ export const styles = stylex.create({
     cursor: 'pointer',
     display: 'inline-flex',
     position: 'relative',
-    // height: spacing.lg,
     width: '36px',
   },
   trackChecked: {

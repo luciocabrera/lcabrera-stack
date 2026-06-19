@@ -17,7 +17,7 @@ const baseStyles = stylex.create({
     borderWidth: 0,
     overflow: 'hidden',
     transition: `transform ${transitions.normal} ${easing.easeInOut}`,
-    backdropFilter: colors.glassBackdropFilter,
+    backdropFilter: colors.glassBackdropFilterPrimary,
     backgroundColor: colors.glassBackgroundColorPrimary, // '#0000002b', // '#00000047', // '#00000029', // colors.surfacePrimary,
     boxShadow: shadows.xl,
     containerName: 'side-panel',

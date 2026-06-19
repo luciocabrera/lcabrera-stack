@@ -5,7 +5,7 @@ import { colors } from '../tokens/colors.stylex';
 export const lightTheme = stylex.createTheme(colors, {
   /* Base brand anchors */
   // brandPrimary: 'oklch(48% 0.05 266)',
-  brandPrimary: 'oklch(0.24 0.12 259.78 / 0.88)',
+  brandPrimary: '#ffffff00', // 'oklch(0.24 0.12 259.78 / 0.88)',
   brandSecondary: 'oklch(48% 0.05 266)',
   // brandSecondary: 'oklch(49% 0.06 300)',
   success: 'oklch(52% 0.06 160)',
@@ -13,16 +13,28 @@ export const lightTheme = stylex.createTheme(colors, {
   error: 'oklch(0.48095 0.14876 27.27312)',
   info: 'oklch(66% 0.19 220)',
 
-  glassBackgroundColorPrimary: '#1211119e', //'#0000002b',
+  glassBackgroundColorPrimary: '#ffffff85', //'#0000002b',
+  glassBackgroundColorSecondary: '#ffffff4d',
+  glassBackgroundColorTertiary: '#ffffff85', //
 
-  glassBackgroundColorSecondary: 'lab(10 -0.81 -2.83 / 0.51)',
+  glassBackdropFilterPrimary: 'blur(42px) brightness(.9)',
 
-  glassBackgroundColorTertiary: 'lab(0 0 0 / 0.08)', //
-  glassBackdropFilter: 'blur(42px) saturate(0.9)',
+  glassBackdropFilterSecondary: 'blur(42px) saturate(0.9)',
+  gradientLinearBackground:
+    'linear-gradient(90deg, #213c71a8, #21183896, #6e00c3b0)',
+  // gradientLinearBackground:
+  //   'linear-gradient(45deg, rgba(90, 144, 255, 0.95), rgba(40, 228, 194, 0.86), rgba(196, 120, 255, 0.84), rgba(126, 158, 255, 0.64))',
+  gradientRadialBackground:
+    'radial-gradient(46% 52% at 18% 25%, #5a90fff2, transparent 71%), radial-gradient(44% 44% at 82% 24%, #96ffec9e, transparent 71%), radial-gradient(52% 56% at 84% 82%, #c478ff6e, transparent 73%), radial-gradient(40% 40% at 53% 62%, #7e9effa3, transparent 74%)',
+  // 'radial-gradient(46% 52% at 18% 25%, rgba(90, 144, 255, 0.95), transparent 71%), radial-gradient(44% 44% at 82% 24%, rgba(40, 228, 194, 0.86), transparent 71%), radial-gradient(52% 56% at 84% 82%, rgba(196, 120, 255, 0.84), transparent 73%), radial-gradient(40% 40% at 53% 62%, rgba(126, 158, 255, 0.64), transparent 74%)',
+
+  gradientOpacityPrimary: '0.5',
+  gradientOpacitySecondary: '0.9',
+
   /* Derivatives using OKLCH math */
   brandPrimaryHover: 'oklch(from brandPrimary l-0.05 c+0.01 h)',
   brandPrimaryActive: 'oklch(from brandPrimary l-0.10 c+0.02 h)',
-  brandPrimaryText: 'oklch(from brandPrimary l+0.10 c+0.05 h)',
+  brandPrimaryText: 'lab(12 34.23 -54.75 / 0.76)', // 'oklch(from brandPrimary l+0.10 c+0.05 h)',
 
   brandSecondaryHover: 'oklch(from brandSecondary l-0.05 c+0.01 h)',
   brandSecondaryActive: 'oklch(from brandSecondary l-0.10 c+0.02 h)',
@@ -55,20 +67,20 @@ export const lightTheme = stylex.createTheme(colors, {
   backgroundPrimary: 'oklch(99% 0 0)', // white
   backgroundSecondary: 'oklch(97.5% 0.006 250)', // #f8f9fa equivalent
   backgroundTertiary: 'oklch(95% 0.005 250)', // #f1f3f5
-  surfacePrimary: 'oklch(99% 0 0)',
+  surfacePrimary: 'lab(100 0 0 / 0.66)', // 'oklch(99% 0 0)',
   surfaceSecondary: 'oklch(97.5% 0.003 250)',
-  surfaceElevated: 'oklch(100% 0 0)',
+  surfaceElevated: '#efeded99', // 'oklch(100% 0 0)',
   surfaceStripe: 'oklch(0% 0 0 / 0.02)',
 
-  borderPrimary: 'oklch(86% 0.004 250)',
+  borderPrimary: 'lab(12 34.23 -54.75 / 0.76)', // 'oklch(86% 0.004 250)',
   borderSecondary: 'oklch(92% 0.004 250)',
   borderFocus: 'oklch(from brandPrimary l+0.10 c+0.05)',
 
   /* Text scale mapped properly to lightness */
-  textPrimary: 'oklch(25% 0.01 250)', // replaces #212529
-  textSecondary: 'oklch(40% 0.01 250)', // replaces #495057
-  textTertiary: 'oklch(53% 0.01 250)', // replaces #6c757d
-  textInverse: 'oklch(100% 0 0)',
+  textPrimary: 'lab(12 34.23 -54.75 / 0.76)', //'oklch(25% 0.01 250)', // replaces #212529
+  textSecondary: 'lab(45 20 -30 / 0.8)', // replaces #495057
+  textTertiary: 'lab(53 0.01 250)', // replaces #6c757d
+  textInverse: 'lab(100 0 0)',
 
   disabled: 'oklch(92% 0.004 250)',
   disabledText: 'oklch(69% 0.01 250)',

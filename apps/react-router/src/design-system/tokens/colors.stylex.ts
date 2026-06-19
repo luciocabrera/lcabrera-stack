@@ -17,7 +17,16 @@ export const colors = stylex.defineVars({
   glassBackgroundColorPrimary: 'var(--glass-background-color-primary)',
   glassBackgroundColorSecondary: 'var(--glass-background-color-secondary)',
   glassBackgroundColorTertiary: 'var(--glass-background-color-tertiary)',
-  glassBackdropFilter: 'var(--glass-backdrop-filter)',
+  glassBackdropFilterPrimary: 'var(--glass-backdrop-filter-primary)',
+  glassBackdropFilterSecondary: 'var(--glass-backdrop-filter-secondary)',
+  gradientLinearBackground: 'var(--gradient-linear-background)',
+  gradientRadialBackground: 'var(--gradient-radial-background)',
+  gradientOpacityPrimary: 'var(--gradient-opacity-primary)',
+  gradientOpacitySecondary: 'var(--gradient-opacity-secondary)',
+
+  // Brand colors
+  // backgroundImage: 'var(--background-image)',
+
   // Border colors
   borderPrimary: 'var(--border-primary)',
 

@@ -192,37 +192,27 @@ export const colorVariants = stylex.create({
 });
 
 export const overlayStyles = stylex.create({
+  linear: {
+    backgroundImage: colors.gradientLinearBackground,
+  },
+  radial: {
+    backgroundImage: colors.gradientRadialBackground,
+  },
   overlay: {
     inset: 0,
-    backgroundColor: colors.backgroundPrimary, //    '#050814',
-    // backgroundImage:
-    //   'linear-gradient(45deg, rgba(90, 144, 255, 0.95), transparent, #00000078, #14224575, #21183896,rgba(40, 228, 194, 0.86),rgba(196, 120, 255, 0.84), rgba(126, 158, 255, 0.64))',
-    // backgroundSize: 'cover',
-    // backgroundImage:
-    //   'linear-gradient(90deg, rgba(90, 144, 255, 0.95), rgba(40, 228, 194, 0.86), rgba(196, 120, 255, 0.84), rgba(126, 158, 255, 0.64))',
-
-    //  radial-gradient(44% 44% at 82% 24%, rgba(40, 228, 194, 0.86), transparent 71%),
-    //   radial-gradient(52% 56% at 84% 82%, rgba(196, 120, 255, 0.84), transparent 73%),
-    //   radial-gradient(40% 40% at 53% 62%, rgba(126, 158, 255, 0.64), transparent 74%)',
-    //filter: 'blur(72px) saturate(150%) brightness(0.5)',
-    // 'linear-gradient(90deg, rgba(90, 144, 255, 0.95), rgba(40, 228, 194, 0.86), rgba(196, 120, 255, 0.84), rgba(126, 158, 255, 0.64))',
-    //#0000, #00000078,#14224575, #28e4c144,, #7e9eff70
-    //#5a91ff57, #21183896,   #c478ff4d)
-
-    backgroundImage: 'linear-gradient(90deg,#213c71a8, #21183896, #6e00c3b0)',
+    backgroundColor: colors.backgroundPrimary,
+    filter: colors.glassBackdropFilterPrimary,
     mixBlendMode: 'screen',
-    opacity: 0.5,
+    opacity: colors.gradientOpacitySecondary,
     pointerEvents: 'none',
     position: 'absolute',
-    zIndex: -10,
+    // zIndex: -10,
     height: '100%',
     width: '100%',
   },
   overlayParent: {
     backgroundColor: 'transparent',
     isolation: 'isolate',
-    // justifyContent: 'center',
-    // position: 'relative',
   },
 });
 
@@ -327,3 +317,23 @@ export const skeleton = stylex.create({
     width: '100%',
   },
 });
+
+// parent
+// mix-blend-mode: screen;
+// background-size: auto;
+// padding: 0;
+// margin: 0;
+// inset: 2;
+// background-image: linear-gradient(90deg, #5991ff, #5918ff, #9000ff);
+
+// child
+//     inset: 1px;
+// background: black;
+// /* height: 100%; */
+// /* width: 100%; */
+// display: flex;
+// align-items: center;
+// justify-content: center;
+// /* border: 2px solid transparent; */
+// position: absolute;
+// border-radius: 8px;

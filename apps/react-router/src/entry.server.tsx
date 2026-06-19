@@ -1,5 +1,5 @@
 import type { RenderToPipeableStreamOptions } from 'react-dom/server';
-import type { AppLoadContext, EntryContext } from 'react-router';
+import type { EntryContext } from 'react-router';
 
 import { createReadableStreamFromReadable } from '@react-router/node';
 import { isbot } from 'isbot';
@@ -50,7 +50,6 @@ export default function handleRequest(
   responseStatusCode: number,
   responseHeaders: Headers,
   routerContext: EntryContext,
-  _loadContext: AppLoadContext,
   // If you have middleware enabled:
   // loadContext: RouterContextProvider
 ) {
