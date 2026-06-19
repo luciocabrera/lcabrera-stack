@@ -7,10 +7,9 @@ Read-only — shows a check icon overlay when the value is truthy.
 
 ```
 TableCheckDisplay/
-├── TableCheckDisplay.component.tsx   → Checkbox with ARIA attributes + checked icon overlay
+├── TableCheckDisplay.component.tsx   → Accessible label mapping + shared Checkbox composition
 ├── TableCheckDisplay.test.tsx        → Unit tests for checked and unchecked accessible states
 ├── TableCheckDisplay.types.ts        → TableCheckDisplayProps (label, value)
-├── TableCheckDisplay.stylex.ts       → Checkbox styling + checked variant
 └── index.ts                          → Barrel export
 ```
 
@@ -28,6 +27,6 @@ TableCheckDisplay/
 
 ## Render Structure
 
-- Root wrapper `<span>` with `position: relative`
-- Disabled read-only `<input type="checkbox">` as the semantic control
-- Conditional icon overlay (`CheckIcon` sized with `ICON_SIZE_XXS`) rendered only for checked state
+- `TableCheckDisplay` computes the accessible label from `value` and optional `label`
+- Renders the shared `Checkbox` component as disabled + read-only with `tabIndex={-1}`
+- Check icon overlay is provided by the shared checkbox implementation when checked

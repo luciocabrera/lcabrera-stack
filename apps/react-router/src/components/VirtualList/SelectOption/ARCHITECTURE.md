@@ -15,6 +15,7 @@ SelectOption/
 
 ```mermaid
 graph LR
+  SO["SelectOption"] --> Checkbox["Checkbox"]
   SO["SelectOption"] --> VL_stylex["VirtualList.stylex (styles, skeletonStyles)"]
 ```
 
@@ -44,4 +45,5 @@ graph TD
 ## Notes
 
 - When `hasCheckbox=false` the `onClick` is placed on the `<label>` wrapper and keyboard activation is supported via `Enter`/`Space`.
-- Uses shared `styles` and `skeletonStyles` from `VirtualList.stylex` — no own stylex file.
+- Uses shared `Checkbox` for checkbox visuals and behavior.
+- Uses shared `styles` and `skeletonStyles` from `VirtualList.stylex` for row and shimmer styles.

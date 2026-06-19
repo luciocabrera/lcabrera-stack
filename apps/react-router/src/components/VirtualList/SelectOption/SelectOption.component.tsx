@@ -1,5 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 
+import { Checkbox } from '@/components/Checkbox';
+
 import type { SelectOptionProps } from './SelectOption.types';
 
 import { skeletonStyles, styles } from '../VirtualList.stylex';
@@ -37,12 +39,10 @@ export const SelectOption = ({
   return (
     <label {...stylex.props(styles.option, isLoading && styles.optionDisabled)}>
       {hasCheckbox && (
-        <input
-          checked={isSelected}
-          disabled={isLoading}
+        <Checkbox
+          isChecked={isSelected}
+          isDisabled={isLoading}
           onChange={onToggle}
-          type='checkbox'
-          {...stylex.props(styles.checkbox)}
         />
       )}
       <span {...stylex.props(styles.label)}>{option}</span>

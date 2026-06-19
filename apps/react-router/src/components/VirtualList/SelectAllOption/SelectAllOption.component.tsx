@@ -1,5 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 
+import { Checkbox } from '@/components/Checkbox';
+
 import type { SelectAllOptionProps } from './SelectAllOption.types';
 
 import { skeletonStyles, styles } from '../VirtualList.stylex';
@@ -10,12 +12,10 @@ export const SelectAllOption = ({
   onSelectAll,
 }: SelectAllOptionProps) => (
   <label {...stylex.props(styles.option, isLoading && styles.optionDisabled)}>
-    <input
-      checked={isAllSelected}
-      disabled={isLoading}
+    <Checkbox
+      isChecked={isAllSelected}
+      isDisabled={isLoading}
       onChange={onSelectAll}
-      type='checkbox'
-      {...stylex.props(styles.checkbox)}
     />
     <span {...stylex.props(styles.label)}>
       {isAllSelected ? 'Deselect All' : 'Select All'}

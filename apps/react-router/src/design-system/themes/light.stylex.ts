@@ -13,7 +13,7 @@ export const lightTheme = stylex.createTheme(colors, {
   error: 'oklch(0.48095 0.14876 27.27312)',
   info: 'oklch(66% 0.19 220)',
 
-  glassBackgroundColorPrimary: '#ffffff85', //'#0000002b',
+  glassBackgroundColorPrimary: '#ffffffc9', // '#ffffff85', //'#0000002b',
   glassBackgroundColorSecondary: '#ffffff4d',
   glassBackgroundColorTertiary: '#ffffff85', //
 
