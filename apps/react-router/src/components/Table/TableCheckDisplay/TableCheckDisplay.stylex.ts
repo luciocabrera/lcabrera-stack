@@ -23,14 +23,14 @@ export const tableCheckDisplayStyles = stylex.create({
     width: 16,
   },
   checkboxChecked: {
-    backgroundColor: colors.brandSecondary,
+    // backgroundColor: colors.brandSecondary,
     color: colors.brandPrimaryText,
   },
   checkIconContainer: {
+    inset: 0,
     alignItems: 'center',
     color: colors.brandPrimaryText,
     display: 'flex',
-    inset: 0,
     justifyContent: 'center',
     pointerEvents: 'none',
     position: 'absolute',
