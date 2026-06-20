@@ -21,4 +21,4 @@ export const DEFAULT_OVERSCAN = 20;
 
 export const DEFAULT_COLUMN_OVERSCAN = 2;
 
-export const DEFAULT_ENABLE_PREFETCH = true;
+export const IS_PREFETCH_ENABLE = true;

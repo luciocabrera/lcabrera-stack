@@ -2,12 +2,12 @@ import type { TableMetaState } from '@/components/Table/Table.types';
 
 import {
   DEFAULT_COLUMN_OVERSCAN,
-  DEFAULT_ENABLE_PREFETCH,
   DEFAULT_OVERSCAN,
   DEFAULT_PLACEHOLDER_ROW_COUNT,
   DEFAULT_ROW_HEIGHT,
   INFINITE_SCROLL_THRESHOLD,
   INITIAL_PAGE_SIZE,
+  IS_PREFETCH_ENABLE,
   LOAD_MORE_PAGE_SIZE,
 } from '@/components/Table/Table.constants';
 
@@ -18,7 +18,7 @@ export const getInitialMetaState = ({
   columnSettingsSelectedTab = 'general',
   density = 'compact',
   drawersSyncNonce = 0,
-  enablePrefetch = DEFAULT_ENABLE_PREFETCH,
+  enablePrefetch = IS_PREFETCH_ENABLE,
   error,
   initialPageSize = INITIAL_PAGE_SIZE,
   isBordered = true,
