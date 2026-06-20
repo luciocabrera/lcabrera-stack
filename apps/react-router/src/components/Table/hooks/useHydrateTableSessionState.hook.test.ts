@@ -7,6 +7,7 @@ import type {
   TableColumnsState,
   TableMetaState,
 } from '@/components/Table/Table.types';
+import type { TStore } from '@/hooks/useStore.hook';
 
 type TestData = {
   readonly age: number;
@@ -14,19 +15,11 @@ type TestData = {
   readonly name: string;
 };
 
-type MockStore<TState extends Record<string, unknown>> = {
-  readonly get: () => TState;
-  readonly getServerSnapshot: () => TState;
-  readonly reset: () => void;
-  readonly set: (nextState: Partial<TState>) => void;
-  readonly subscribe: (callback: () => void) => () => void;
-};
+const noop = function noop(): void {};
 
-function noop(): void {}
-
-function createMockStore<TState extends Record<string, unknown>>(
-  initialState: TState,
-): MockStore<TState> {
+const createMockStore = function createMockStore<
+  TState extends Record<string, unknown>,
+>(initialState: TState): TStore<TState> {
   let state = initialState;
 
   const get = vi.fn(() => state);
@@ -46,124 +39,109 @@ function createMockStore<TState extends Record<string, unknown>>(
     set,
     subscribe,
   };
-}
+};
 
-function createInitialColumnsState(): TableColumnsState<TestData> {
-  return {
-    columnFilters: {
-      actions: {
-        operator: 'contains',
-        type: 'text',
-        value: '',
-      },
-      age: {
-        operator: 'equals',
-        type: 'number',
-        value: 0,
-      },
-      id: {
-        operator: 'contains',
-        type: 'text',
-        value: '',
-      },
-      name: {
-        operator: 'contains',
-        type: 'text',
-        value: '',
-      },
+const columnsStoreMock = createMockStore<TableColumnsState<TestData>>({
+  columnFilters: {
+    actions: {
+      operator: 'contains',
+      type: 'text',
+      value: '',
     },
-    columnGroups: {
-      centerCols: [
-        { dataType: 'string', key: 'name', label: 'Name' },
-        { dataType: 'number', key: 'age', label: 'Age' },
-      ],
-      leftPinnedCols: [{ dataType: 'string', key: 'id', label: 'ID' }],
-      rightPinnedCols: [
-        { dataType: 'string', key: 'actions', label: 'Actions' },
-      ],
+    age: {
+      operator: 'equals',
+      type: 'number',
+      value: 0,
     },
-    columnOrder: ['id', 'name', 'age', 'actions'],
-    columnPinning: { left: ['id'], right: ['actions'] },
-    columns: [
-      { dataType: 'string', key: 'id', label: 'ID' },
+    id: {
+      operator: 'contains',
+      type: 'text',
+      value: '',
+    },
+    name: {
+      operator: 'contains',
+      type: 'text',
+      value: '',
+    },
+  },
+  columnGroups: {
+    centerCols: [
       { dataType: 'string', key: 'name', label: 'Name' },
       { dataType: 'number', key: 'age', label: 'Age' },
-      { dataType: 'string', key: 'actions', label: 'Actions' },
     ],
-    columnSizing: { actions: 80, age: 120, id: 80, name: 140 },
-    columnVisibility: new Set([
-      'actions',
-      'age',
-      'id',
-      'name',
-    ]) as TableColumnsState<TestData>['columnVisibility'],
-    effectiveColumns: [
-      { dataType: 'string', key: 'id', label: 'ID' },
-      { dataType: 'string', key: 'name', label: 'Name' },
-      { dataType: 'number', key: 'age', label: 'Age' },
-      { dataType: 'string', key: 'actions', label: 'Actions' },
-    ],
-    normalizedColumns: {
-      actions: { dataType: 'string', key: 'actions', label: 'Actions' },
-      age: { dataType: 'number', key: 'age', label: 'Age' },
-      id: { dataType: 'string', key: 'id', label: 'ID' },
-      name: { dataType: 'string', key: 'name', label: 'Name' },
+    leftPinnedCols: [{ dataType: 'string', key: 'id', label: 'ID' }],
+    rightPinnedCols: [{ dataType: 'string', key: 'actions', label: 'Actions' }],
+  },
+  columnOrder: ['id', 'name', 'age', 'actions'],
+  columnPinning: { left: ['id'], right: ['actions'] },
+  columns: [
+    { dataType: 'string', key: 'id', label: 'ID' },
+    { dataType: 'string', key: 'name', label: 'Name' },
+    { dataType: 'number', key: 'age', label: 'Age' },
+    { dataType: 'string', key: 'actions', label: 'Actions' },
+  ],
+  columnSizing: { actions: 80, age: 120, id: 80, name: 140 },
+  columnVisibility: new Set(['actions', 'age', 'id', 'name']),
+  effectiveColumns: [
+    { dataType: 'string', key: 'id', label: 'ID' },
+    { dataType: 'string', key: 'name', label: 'Name' },
+    { dataType: 'number', key: 'age', label: 'Age' },
+    { dataType: 'string', key: 'actions', label: 'Actions' },
+  ],
+  normalizedColumns: {
+    actions: { dataType: 'string', key: 'actions', label: 'Actions' },
+    age: { dataType: 'number', key: 'age', label: 'Age' },
+    id: { dataType: 'string', key: 'id', label: 'ID' },
+    name: { dataType: 'string', key: 'name', label: 'Name' },
+  },
+  pinnedColumnOffsets: {
+    actions: {
+      isFirstPinnedRight: true,
+      isLastPinnedLeft: false,
+      offset: 0,
+      side: 'right',
     },
-    pinnedColumnOffsets: {
-      actions: {
-        isFirstPinnedRight: true,
-        isLastPinnedLeft: false,
-        offset: 0,
-        side: 'right',
-      },
-      id: {
-        isFirstPinnedRight: false,
-        isLastPinnedLeft: true,
-        offset: 0,
-        side: 'left',
-      },
+    id: {
+      isFirstPinnedRight: false,
+      isLastPinnedLeft: true,
+      offset: 0,
+      side: 'left',
     },
-    sorting: [],
-    staticKeys: new Set<string>(),
-  };
-}
+  },
+  sorting: [],
+  staticKeys: new Set<string>(),
+});
 
-function createInitialMetaState(): TableMetaState {
-  return {
-    columnOverscan: 2,
-    columnSelectedKey: 'id',
-    columnSettingsSelectedTab: 'general',
-    density: 'compact',
-    enablePrefetch: true,
-    initialPageSize: 20,
-    isBordered: true,
-    isColumnSettingsOpen: false,
-    isColumnSettingsPinned: false,
-    isStriped: true,
-    isTableSettingsOpen: false,
-    isTableSettingsPinned: false,
-    loadMorePageSize: 50,
-    overscan: 4,
-    persistenceKey: 'orders',
-    placeholderRowCount: 8,
-    rowHeight: 44,
-    tableSettingsExpandedFilters: [],
-    tableSettingsSelectedTab: 'general',
-    threshold: 200,
-    title: 'Orders',
-    wasTableSettingsOpenBeforeColumnSettings: false,
-  };
-}
+const metaStoreMock = createMockStore<TableMetaState>({
+  columnOverscan: 2,
+  columnSelectedKey: 'id',
+  columnSettingsSelectedTab: 'general',
+  density: 'compact',
+  enablePrefetch: true,
+  initialPageSize: 20,
+  isBordered: true,
+  isColumnSettingsOpen: false,
+  isColumnSettingsPinned: false,
+  isStriped: true,
+  isTableSettingsOpen: false,
+  isTableSettingsPinned: false,
+  loadMorePageSize: 50,
+  overscan: 4,
+  persistenceKey: 'orders',
+  placeholderRowCount: 8,
+  rowHeight: 44,
+  tableSettingsExpandedFilters: [],
+  tableSettingsSelectedTab: 'general',
+  threshold: 200,
+  title: 'Orders',
+  wasTableSettingsOpenBeforeColumnSettings: false,
+});
 
 const {
-  columnsStoreMock,
-  metaStoreMock,
   readPersistedStateFromSessionStorageMock,
   readPersistedUiStateFromSessionStorageMock,
 } = vi.hoisted(() => {
   return {
-    columnsStoreMock: createMockStore(createInitialColumnsState()),
-    metaStoreMock: createMockStore(createInitialMetaState()),
     readPersistedStateFromSessionStorageMock: vi.fn(() => ({})),
     readPersistedUiStateFromSessionStorageMock: vi.fn(() => ({})),
   };

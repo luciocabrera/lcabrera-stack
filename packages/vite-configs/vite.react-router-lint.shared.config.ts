@@ -21,6 +21,8 @@ export const reactRouterLintSharedConfig: OxlintConfig = {
     ...(frontendLintSharedConfig.overrides ?? []),
     {
       files: [
+        '**/root.ts',
+        '**/root.tsx',
         'src/root.tsx',
         'src/root/**/index.ts',
         'src/routes/**/index.tsx',

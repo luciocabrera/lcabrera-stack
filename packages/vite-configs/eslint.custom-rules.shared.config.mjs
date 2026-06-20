@@ -167,6 +167,7 @@ export const createCustomRulesLintConfig = ({ ignorePatterns = [] } = {}) => [
       'unicorn/no-array-reduce': 'off',
       'security/detect-object-injection': 'off',
       'unicorn/filename-case': 'off',
+      'unicorn/prefer-query-selector': 'off',
     },
   },
   // 5. JavaScript files configuration (for Node.js server files, etc.)
