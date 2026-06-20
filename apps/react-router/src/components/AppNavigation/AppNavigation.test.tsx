@@ -47,7 +47,7 @@ describe('AppNavigation', () => {
         },
         {
           action: async () => {
-            return undefined;
+            return;
           },
           path: '/_action/persist-cookie',
         },

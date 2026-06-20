@@ -3,7 +3,7 @@ import { createContext } from 'react';
 import type { TableConfigContextValue } from './TableConfigContext.types';
 
 export const TableConfigContext = createContext<
-  undefined | TableConfigContextValue
+  TableConfigContextValue | undefined
 >(undefined);
 
 TableConfigContext.displayName = 'TableConfigContext';
