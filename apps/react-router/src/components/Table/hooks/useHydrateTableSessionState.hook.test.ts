@@ -4,13 +4,11 @@ import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const {
-  readPersistedStateFromSessionStorageMock,
-  readPersistedUiStateFromSessionStorageMock,
   columnsStoreMock,
   metaStoreMock,
+  readPersistedStateFromSessionStorageMock,
+  readPersistedUiStateFromSessionStorageMock,
 } = vi.hoisted(() => ({
-  readPersistedStateFromSessionStorageMock: vi.fn(() => ({})),
-  readPersistedUiStateFromSessionStorageMock: vi.fn(() => ({})),
   columnsStoreMock: {
     get: vi.fn(() => ({
       columnFilters: {},
@@ -33,6 +31,8 @@ const {
     set: vi.fn(),
   },
   metaStoreMock: { set: vi.fn() },
+  readPersistedStateFromSessionStorageMock: vi.fn(() => ({})),
+  readPersistedUiStateFromSessionStorageMock: vi.fn(() => ({})),
 }));
 
 vi.mock('@/components/Table/utils', async (importOriginal) => {

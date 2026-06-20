@@ -4,12 +4,12 @@ import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const {
+  metaStoreGetMock,
+  metaStoreSubscribeMock,
   resetSubscribers,
   setMetaState,
-  writePersistedUiStateToSessionStorageMock,
-  metaStoreSubscribeMock,
-  metaStoreGetMock,
   triggerLatestSubscriber,
+  writePersistedUiStateToSessionStorageMock,
 } = vi.hoisted(() => {
   let metaState = {
     drawersSyncNonce: 0,
@@ -23,7 +23,6 @@ const {
 
   const listeners = new Set<() => void>();
   return {
-    writePersistedUiStateToSessionStorageMock: vi.fn(),
     metaStoreGetMock: vi.fn(() => metaState),
     metaStoreSubscribeMock: vi.fn((cb: () => void) => {
       listeners.add(cb);
@@ -41,6 +40,7 @@ const {
       const latest = Array.from(listeners).at(-1);
       latest?.();
     },
+    writePersistedUiStateToSessionStorageMock: vi.fn(),
   };
 });
 

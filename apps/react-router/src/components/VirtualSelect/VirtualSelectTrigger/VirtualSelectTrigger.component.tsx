@@ -9,8 +9,8 @@ import {
 } from './utils';
 
 export const VirtualSelectTrigger = ({
-  isBusy = false,
   isAlwaysOpen,
+  isBusy = false,
   isOpen,
   listboxId,
   mode,
@@ -41,9 +41,9 @@ export const VirtualSelectTrigger = ({
     return (
       <div
         ref={(node) => {
-          assignTriggerRef({ triggerRef, node });
+          assignTriggerRef({ node, triggerRef });
         }}
-        {...getTriggerStyleProps({ isBusy, isOpen, mode, isStatic: true })}
+        {...getTriggerStyleProps({ isBusy, isOpen, isStatic: true, mode })}
       >
         {content}
         {chevron}
@@ -59,7 +59,7 @@ export const VirtualSelectTrigger = ({
         aria-expanded={isOpen}
         aria-haspopup='listbox'
         ref={(node) => {
-          assignTriggerRef({ triggerRef, node });
+          assignTriggerRef({ node, triggerRef });
         }}
         role='button'
         tabIndex={shouldDisableInteraction ? -1 : 0}
@@ -88,7 +88,7 @@ export const VirtualSelectTrigger = ({
       disabled={shouldDisableInteraction}
       onClick={shouldDisableInteraction ? undefined : onToggle}
       ref={(node) => {
-        assignTriggerRef({ triggerRef, node });
+        assignTriggerRef({ node, triggerRef });
       }}
       type='button'
       {...getTriggerStyleProps({ isBusy, isOpen, mode })}

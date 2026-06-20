@@ -7,6 +7,7 @@ import type { ResolveToggleColumnPinUpdateResult } from './resolveToggleColumnPi
 type ApplyToggleColumnPinResolutionArgs = {
   readonly acceptPinSide: (side: PinSide) => void;
   readonly acceptUnpinConflict: (resolution: UnpinConflictResolution) => void;
+  readonly resolution: ResolveToggleColumnPinUpdateResult;
   readonly setColumnPinning: (
     nextPinning: ColumnPinningState<Record<string, unknown>>,
   ) => void;
@@ -21,7 +22,6 @@ type ApplyToggleColumnPinResolutionArgs = {
     readonly isOpen: boolean;
     readonly side: 'left' | 'right';
   }) => void;
-  readonly resolution: ResolveToggleColumnPinUpdateResult;
 };
 
 export const applyToggleColumnPinResolution = ({

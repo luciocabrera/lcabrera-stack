@@ -91,8 +91,8 @@ export const useHydrateTableSessionState = <
       } = deriveColumnViewState<TData>({
         columnOrder: nextColumnOrder,
         columnPinning: nextColumnPinning,
-        columnSizing: nextColumnSizing,
         columns,
+        columnSizing: nextColumnSizing,
         columnVisibility: nextColumnVisibility,
         sorting: nextSorting,
       });
@@ -102,9 +102,9 @@ export const useHydrateTableSessionState = <
         columnGroups,
         columnOrder: nextColumnOrder,
         columnPinning: nextColumnPinning,
+        columns,
         columnSizing: nextColumnSizing,
         columnVisibility: nextColumnVisibility,
-        columns,
         effectiveColumns,
         normalizedColumns,
         pinnedColumnOffsets,

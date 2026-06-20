@@ -14,8 +14,8 @@ type SyncColumnOrderWithPinningArgs<TData> = {
   readonly columnPinning: 'left' | 'right' | undefined;
   readonly columns: readonly TableColumn<TData>[];
   readonly currentOrder?: readonly DataKey<TData>[];
-  readonly previousPinning?: ColumnPinningState<TData>;
   readonly newPinning: ColumnPinningState<TData>;
+  readonly previousPinning?: ColumnPinningState<TData>;
 };
 
 /**
@@ -30,8 +30,8 @@ export const syncColumnOrderWithPinning = <TData>({
   columnPinning,
   columns,
   currentOrder = [],
-  previousPinning,
   newPinning,
+  previousPinning,
 }: SyncColumnOrderWithPinningArgs<TData>): ColumnOrderState<TData> => {
   // Build base order: use currentOrder if populated, otherwise derive from columns
   const baseOrder =

@@ -10,7 +10,7 @@ describe('createDraggableItems', () => {
 
     const result = createDraggableItems({
       allOrderedColumns: [
-        { key: 'name', label: 'Name', isStatic: true },
+        { isStatic: true, key: 'name', label: 'Name' },
         { key: 'id', label: 'ID' },
       ],
       columnPinning: { left: ['id'], right: [] },

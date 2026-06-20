@@ -63,8 +63,8 @@ export const FiltersSectionToolbar = ({
         isDisabled={!hasFilters}
         onClick={handleClear}
         size={buttonSize}
-        width={buttonWidth}
         tooltipContent={isToolbar ? FILTERS_TOOLBAR.clear.label : undefined}
+        width={buttonWidth}
       >
         {!isToolbar && FILTERS_TOOLBAR.clear.label}
       </Button>
@@ -75,8 +75,8 @@ export const FiltersSectionToolbar = ({
         isBusy={isBusy}
         onClick={resetFilters}
         size={buttonSize}
-        width={buttonWidth}
         tooltipContent={isToolbar ? FILTERS_TOOLBAR.reset.label : undefined}
+        width={buttonWidth}
       >
         {!isToolbar && FILTERS_TOOLBAR.reset.label}
       </Button>
@@ -88,8 +88,8 @@ export const FiltersSectionToolbar = ({
         isDisabled={isExpandDisabled}
         onClick={onExpandAll}
         size={buttonSize}
-        width={buttonWidth}
         tooltipContent={isToolbar ? FILTERS_TOOLBAR.expandAll.label : undefined}
+        width={buttonWidth}
       >
         {!isToolbar && FILTERS_TOOLBAR.expandAll.label}
       </Button>
@@ -101,10 +101,10 @@ export const FiltersSectionToolbar = ({
         isDisabled={isCollapseDisabled}
         onClick={onCollapseAll}
         size={buttonSize}
-        width={buttonWidth}
         tooltipContent={
           isToolbar ? FILTERS_TOOLBAR.collapseAll.label : undefined
         }
+        width={buttonWidth}
       >
         {!isToolbar && FILTERS_TOOLBAR.collapseAll.label}
       </Button>

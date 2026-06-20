@@ -16,8 +16,8 @@ import { getPinnedDerivedColumnsState } from './getPinnedDerivedColumnsState.uti
 type DeriveColumnViewStateArgs<TData> = {
   readonly columnOrder: ColumnOrderState<TData>;
   readonly columnPinning: ColumnPinningState<TData>;
-  readonly columnSizing?: ColumnSizingState<TData>;
   readonly columns: readonly TableColumn<TData>[];
+  readonly columnSizing?: ColumnSizingState<TData>;
   readonly columnVisibility?: ColumnVisibilityState<TData>;
   readonly sorting: SortingState<TData>;
 };
@@ -32,8 +32,8 @@ type DeriveColumnViewStateResult<TData> = {
 export const deriveColumnViewState = <TData>({
   columnOrder,
   columnPinning,
-  columnSizing,
   columns,
+  columnSizing,
   columnVisibility,
   sorting,
 }: DeriveColumnViewStateArgs<TData>): DeriveColumnViewStateResult<TData> => {
@@ -46,8 +46,8 @@ export const deriveColumnViewState = <TData>({
     getPinnedDerivedColumnsState<TData>({
       columnOrder,
       columnPinning,
-      columnSizing,
       columns,
+      columnSizing,
       columnVisibility,
     });
 

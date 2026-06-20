@@ -53,6 +53,14 @@ const {
     mockDataStore: {
       set: vi.fn(),
     },
+    mockMetaStore: {
+      get: vi.fn(() => ({
+        isTableSettingsPinned: false,
+        persistenceKey: 'orders-table',
+      })),
+      set: vi.fn(),
+    },
+    mockPersistTableState: vi.fn(),
     mockResolveBatchTableSettingsUpdate: vi.fn(() => ({
       columnFilters: {
         name: { operator: 'contains', type: 'text', value: 'ali' },
@@ -96,14 +104,6 @@ const {
       },
       sorting: [{ columnKey: 'name', direction: 'asc' }],
     })),
-    mockMetaStore: {
-      get: vi.fn(() => ({
-        isTableSettingsPinned: false,
-        persistenceKey: 'orders-table',
-      })),
-      set: vi.fn(),
-    },
-    mockPersistTableState: vi.fn(),
   };
 });
 

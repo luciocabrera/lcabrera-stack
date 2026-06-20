@@ -28,9 +28,9 @@ describe('resolveAcceptedPinSideUpdate', () => {
       { key: 'name', label: 'Name' },
     ]);
     mockDerivePinSideResolutionState.mockReturnValue({
-      kind: 'resolved',
       columnOrder: ['id', 'name'],
       columnPinning: { left: ['id'], right: ['name'] },
+      kind: 'resolved',
       side: 'right',
     });
 
@@ -47,9 +47,9 @@ describe('resolveAcceptedPinSideUpdate', () => {
     });
 
     expect(result).toEqual({
-      kind: 'apply-resolved',
       columnOrder: ['id', 'name'],
       columnPinning: { left: ['id'], right: ['name'] },
+      kind: 'apply-resolved',
     });
   });
 
@@ -75,13 +75,13 @@ describe('resolveAcceptedPinSideUpdate', () => {
     });
 
     expect(result).toEqual({
-      kind: 'open-conflict-modal',
       conflictModal: {
         columnKey: 'name',
         columnLabel: 'Name',
         isOpen: true,
         side: 'left',
       },
+      kind: 'open-conflict-modal',
     });
   });
 
@@ -108,13 +108,13 @@ describe('resolveAcceptedPinSideUpdate', () => {
     });
 
     expect(result).toEqual({
-      kind: 'auto-accept-conflict',
       conflictModal: {
         columnKey: 'name',
         columnLabel: 'Name',
         isOpen: false,
         side: 'right',
       },
+      kind: 'auto-accept-conflict',
       resolution: 'move-column',
     });
   });

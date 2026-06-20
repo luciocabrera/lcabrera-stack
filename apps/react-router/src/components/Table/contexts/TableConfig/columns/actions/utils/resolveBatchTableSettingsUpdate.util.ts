@@ -52,8 +52,8 @@ export const resolveBatchTableSettingsUpdate = <TData>({
   } = deriveColumnViewState<TData>({
     columnOrder: settings.columnOrder,
     columnPinning: settings.columnPinning,
-    columnSizing: settings.columnSizing,
     columns,
+    columnSizing: settings.columnSizing,
     columnVisibility: settings.columnVisibility,
     sorting: settings.sorting,
   });

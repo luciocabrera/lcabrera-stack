@@ -26,9 +26,9 @@ export const useAcceptHeaderPinSide = <TData>() => {
     const {
       columnOrder,
       columnPinning,
+      columns,
       columnSizing,
       columnVisibility,
-      columns,
       drawersSyncNonce,
       persistenceKey,
       staticKeys,
@@ -36,8 +36,8 @@ export const useAcceptHeaderPinSide = <TData>() => {
 
     const resolution = resolveAcceptedHeaderPinSideState<TData>({
       columnKey,
-      columnPinning,
       columnOrder,
+      columnPinning,
       columns,
       pinSide,
       staticKeys,
@@ -50,10 +50,10 @@ export const useAcceptHeaderPinSide = <TData>() => {
     commitResolvedPinningState<TData>({
       columnOrder: resolution.columnOrder,
       columnPinning: resolution.columnPinning,
-      columnSizing,
-      columnVisibility,
       columns,
+      columnSizing,
       columnsStore,
+      columnVisibility,
       drawersSyncNonce,
       metaStore,
       persistenceKey,

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { getNewPinningBasedOnColumnKey } from './getNewPinningBasedOnColumnKey.util';
 
-type Row = { id: string; name: string; age: number; actions: string };
+type Row = { actions: string; age: number; id: string; name: string };
 
 describe('getNewPinningBasedOnColumnKey', () => {
   describe('pinning a column', () => {

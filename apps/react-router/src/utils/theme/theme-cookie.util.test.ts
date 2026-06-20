@@ -50,10 +50,10 @@ describe('setThemeCookie', () => {
     let cookieValue = '';
     const docMock = { cookie: '' };
     Object.defineProperty(docMock, 'cookie', {
+      get: () => cookieValue,
       set: (val: string) => {
         cookieValue = val;
       },
-      get: () => cookieValue,
     });
     vi.stubGlobal('document', docMock);
 
@@ -74,10 +74,10 @@ describe('setThemeCookie', () => {
     const fetchMock = vi.fn(() => Promise.resolve(new Response(null)));
 
     Object.defineProperty(docMock, 'cookie', {
+      get: () => cookieValue,
       set: (val: string) => {
         cookieValue = val;
       },
-      get: () => cookieValue,
     });
 
     vi.stubGlobal('document', docMock);

@@ -4,7 +4,7 @@ import type { ColumnPinningState, TableColumn } from '../Table.types';
 
 import { getEffectiveColumns } from './getEffectiveColumns.util';
 
-type Row = { id: string; name: string; age: number };
+type Row = { age: number; id: string; name: string };
 
 const columns: TableColumn<Row>[] = [
   { dataType: 'string', key: 'id', label: 'ID' },

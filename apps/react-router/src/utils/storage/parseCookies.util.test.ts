@@ -9,8 +9,8 @@ describe('parseCookies', () => {
 
   it('parses multiple cookies', () => {
     expect(parseCookies('theme=dark; lang=en')).toEqual({
-      theme: 'dark',
       lang: 'en',
+      theme: 'dark',
     });
   });
 

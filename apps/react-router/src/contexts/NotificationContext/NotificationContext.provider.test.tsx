@@ -55,8 +55,8 @@ const TestHarness = () => {
       <span data-testid='count'>{notifications.length}</span>
       {notifications.map((notification) => (
         <button
-          key={notification.id}
           data-testid={`dismiss-${notification.id}`}
+          key={notification.id}
           onClick={() => {
             dismissNotification(notification.id);
           }}

@@ -23,16 +23,18 @@ import {
  */
 export const loader = ({ request }: LoaderFunctionArgs) => {
   const {
+    filters,
     columnOrder,
     columnSizing,
     columnVisibility,
-    filters,
+
+    sorting,
     standaloneFiltersParam,
     standaloneSortParam,
-    sorting,
   } = readTableLoaderStateFromRequest<EnterpriseOrder>({
-    columns: COLUMNS,
     includeFilters: true,
+    columns: COLUMNS,
+
     persistenceKey: PERSISTENCE_KEY,
     request,
   });
@@ -52,18 +54,19 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
     });
 
   return {
-    sorting: sanitizedSorting,
     columns: COLUMNS,
     columnOrder,
+
     columnSizing,
     columnVisibility,
+    defaultColumnPinning: DEFAULT_COLUMN_PINNING,
     enterpriseOrdersPromise,
     filters,
-    schemaName: SCHEMA_NAME,
-    title: TITLE,
-    tableName: TABLE_NAME,
-    persistenceKey: PERSISTENCE_KEY,
-    defaultColumnPinning: DEFAULT_COLUMN_PINNING,
     key: `${standaloneSortParam ?? ''}${standaloneFiltersParam ?? ''}`,
+    persistenceKey: PERSISTENCE_KEY,
+    schemaName: SCHEMA_NAME,
+    sorting: sanitizedSorting,
+    tableName: TABLE_NAME,
+    title: TITLE,
   };
 };

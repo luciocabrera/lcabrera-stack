@@ -21,8 +21,8 @@ export const resolveColumnFilterUpdate = <TData>({
   persistenceKey,
 }: ResolveColumnFilterUpdateArgs<TData>) => {
   const columnFilters = getNewColumnFiltersBasedOnColumnKey<TData>({
-    columnFiltersState,
     columnFilter: filter ?? undefined,
+    columnFiltersState,
     columnKey,
   });
 

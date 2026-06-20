@@ -20,8 +20,8 @@ describe('syncColumnOrderWithPinning', () => {
       columnPinning: undefined,
       columns,
       currentOrder: ['age', 'id', 'name', 'actions'],
-      previousPinning: { left: ['id', 'age'], right: [] },
       newPinning: { left: ['id'], right: [] },
+      previousPinning: { left: ['id', 'age'], right: [] },
     });
     expect(result).toEqual(['id', 'age', 'name', 'actions']);
   });
@@ -32,8 +32,8 @@ describe('syncColumnOrderWithPinning', () => {
       columnPinning: undefined,
       columns,
       currentOrder: ['id', 'age', 'actions', 'name'],
-      previousPinning: { left: [], right: ['name', 'actions'] },
       newPinning: { left: [], right: ['actions'] },
+      previousPinning: { left: [], right: ['name', 'actions'] },
     });
     expect(result).toEqual(['id', 'age', 'name', 'actions']);
   });

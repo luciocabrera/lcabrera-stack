@@ -9,22 +9,22 @@ const {
   batchSetTableDrawerSettingsMock,
   isTableSettingsPinnedMock,
   notifyMock,
+  resetTableDrawerSettingsMock,
   selectedTabMock,
   setSelectedTabMock,
   setTableIsTableSettingsOpenMock,
   setTableIsTableSettingsPinnedMock,
   tableColumnFiltersMock,
-  resetTableDrawerSettingsMock,
 } = vi.hoisted(() => ({
   batchSetTableDrawerSettingsMock: vi.fn(),
   isTableSettingsPinnedMock: vi.fn(() => false),
   notifyMock: vi.fn(),
+  resetTableDrawerSettingsMock: vi.fn(),
   selectedTabMock: vi.fn(() => 'general'),
   setSelectedTabMock: vi.fn(),
   setTableIsTableSettingsOpenMock: vi.fn(),
   setTableIsTableSettingsPinnedMock: vi.fn(),
   tableColumnFiltersMock: {} as Record<string, unknown>,
-  resetTableDrawerSettingsMock: vi.fn(),
 }));
 
 afterEach(() => {
@@ -159,9 +159,9 @@ vi.mock('@/components/Tabs', () => ({
 }));
 
 vi.mock('../contexts/TableConfig/meta/actions', () => ({
-  useSetTableSettingsSelectedTab: () => setSelectedTabMock,
   useSetTableIsTableSettingsOpen: () => setTableIsTableSettingsOpenMock,
   useSetTableIsTableSettingsPinned: () => setTableIsTableSettingsPinnedMock,
+  useSetTableSettingsSelectedTab: () => setSelectedTabMock,
 }));
 
 vi.mock('../contexts/TableConfig/meta/selectors', () => ({

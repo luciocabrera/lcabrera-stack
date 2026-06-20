@@ -3,14 +3,14 @@
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { columnStore, columnsStore, metaStore, mockGetTableColumnDrawerState } =
+const { columnsStore, columnStore, metaStore, mockGetTableColumnDrawerState } =
   vi.hoisted(() => ({
+    columnsStore: {
+      get: vi.fn(() => ({ columns: [{ key: 'status', label: 'Status' }] })),
+    },
     columnStore: {
       get: vi.fn(() => ({ columnKey: 'status' })),
       set: vi.fn(),
-    },
-    columnsStore: {
-      get: vi.fn(() => ({ columns: [{ key: 'status', label: 'Status' }] })),
     },
     metaStore: {
       get: vi.fn(() => ({

@@ -23,8 +23,8 @@ const {
   useGetTableIsColumnSettingsPinnedMock,
   useGetTableIsLoadingMock,
   useGetTableIsLoadingMoreMock,
-  useGetTableIsTableSettingsPinnedMock,
   useGetTableIsTableSettingsOpenMock,
+  useGetTableIsTableSettingsPinnedMock,
   useRenderTrackerMock,
 } = vi.hoisted(() => ({
   useGetTableColumnSelectedKeyMock: vi.fn(),
@@ -33,8 +33,8 @@ const {
   useGetTableIsColumnSettingsPinnedMock: vi.fn(() => false),
   useGetTableIsLoadingMock: vi.fn(() => false),
   useGetTableIsLoadingMoreMock: vi.fn(() => false),
-  useGetTableIsTableSettingsPinnedMock: vi.fn(() => false),
   useGetTableIsTableSettingsOpenMock: vi.fn(),
+  useGetTableIsTableSettingsPinnedMock: vi.fn(() => false),
   useRenderTrackerMock: vi.fn(),
 }));
 
@@ -108,8 +108,8 @@ vi.mock('../contexts/TableConfig/meta/selectors', () => ({
   useGetTableDrawersSyncNonce: useGetTableDrawersSyncNonceMock,
   useGetTableIsColumnSettingsOpen: useGetTableIsColumnSettingsOpenMock,
   useGetTableIsColumnSettingsPinned: useGetTableIsColumnSettingsPinnedMock,
-  useGetTableIsTableSettingsPinned: useGetTableIsTableSettingsPinnedMock,
   useGetTableIsTableSettingsOpen: useGetTableIsTableSettingsOpenMock,
+  useGetTableIsTableSettingsPinned: useGetTableIsTableSettingsPinnedMock,
 }));
 
 vi.mock('../contexts/TableData/data/selectors', () => ({

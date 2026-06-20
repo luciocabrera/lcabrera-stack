@@ -4,14 +4,14 @@ import type { DataKey, SortingState } from '../Table.types';
 
 type GetNewSortingBasedOnColumnKeyArgs<TData> = {
   readonly columnKey: DataKey<TData>;
-  readonly sorting?: SortDirection;
   readonly existingSorting?: SortingState<TData>;
+  readonly sorting?: SortDirection;
 };
 
 export const getNewSortingBasedOnColumnKey = <TData>({
   columnKey,
-  sorting,
   existingSorting = [],
+  sorting,
 }: GetNewSortingBasedOnColumnKeyArgs<TData>) => {
   // Sorting: update in-place to preserve order, or remove if undefined;
   const existingIndex = existingSorting.findIndex(

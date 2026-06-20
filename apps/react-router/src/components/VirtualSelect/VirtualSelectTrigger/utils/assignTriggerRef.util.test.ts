@@ -13,7 +13,7 @@ describe('assignTriggerRef', () => {
     } as RefObject<HTMLButtonElement | HTMLDivElement | null>;
     const node = document.createElement('button');
 
-    assignTriggerRef({ triggerRef, node });
+    assignTriggerRef({ node, triggerRef });
 
     expect(triggerRef.current).toBe(node);
   });

@@ -4,7 +4,7 @@ import type { ColumnSizingState, TableColumn } from '../Table.types';
 
 import { getPinnedColumnOffsets } from './getPinnedColumnOffsets.util';
 
-type Row = { id: string; name: string; age: number; actions: string };
+type Row = { actions: string; age: number; id: string; name: string };
 
 const columns: TableColumn<Row>[] = [
   { dataType: 'string', key: 'id', label: 'ID', minWidth: 60 },

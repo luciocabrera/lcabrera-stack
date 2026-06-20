@@ -13,8 +13,8 @@ import {
 const createInitialMetaState = (): TableMetaState => {
   return {
     columnOverscan: 2,
-    columnSettingsSelectedTab: 'general',
     columnSelectedKey: 'id',
+    columnSettingsSelectedTab: 'general',
     density: 'compact',
     enablePrefetch: true,
     error: undefined,
@@ -23,8 +23,8 @@ const createInitialMetaState = (): TableMetaState => {
     isColumnSettingsOpen: false,
     isColumnSettingsPinned: false,
     isStriped: true,
-    isTableSettingsPinned: false,
     isTableSettingsOpen: false,
+    isTableSettingsPinned: false,
     loadMorePageSize: 50,
     overscan: 4,
     persistenceKey: 'orders',

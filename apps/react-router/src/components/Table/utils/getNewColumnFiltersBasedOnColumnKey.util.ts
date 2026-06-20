@@ -5,15 +5,15 @@ import { shallowEqual } from '@/utils';
 import type { ColumnFiltersState, DataKey } from '../Table.types';
 
 type GetNewColumnFiltersBasedOnColumnKeyArgs<TData> = {
-  readonly columnKey: DataKey<TData>;
   readonly columnFilter?: ColumnFilter;
   readonly columnFiltersState?: ColumnFiltersState<TData>;
+  readonly columnKey: DataKey<TData>;
 };
 
 export const getNewColumnFiltersBasedOnColumnKey = <TData>({
+  columnFilter,
   columnFiltersState = {} as ColumnFiltersState<TData>,
   columnKey,
-  columnFilter,
 }: GetNewColumnFiltersBasedOnColumnKeyArgs<TData>) => {
   const prev = columnFiltersState[columnKey];
 

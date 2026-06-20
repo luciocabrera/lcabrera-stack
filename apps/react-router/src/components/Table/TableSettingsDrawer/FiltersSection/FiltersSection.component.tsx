@@ -81,8 +81,8 @@ export const FiltersSection = ({ isBusy = false }: FiltersSectionProps) => {
           isBusy={isBusy}
           isCollapseAllDisabled={!hasExpandedFilters}
           isExpandAllDisabled={!hasFilters || areAllFiltersExpanded}
-          onCollapseAll={handleCollapseAll}
           onClearAll={handleClearLocalState}
+          onCollapseAll={handleCollapseAll}
           onExpandAll={handleExpandAll}
         />
       </SidePanelSectionOverlay>

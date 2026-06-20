@@ -11,12 +11,12 @@ export const ErrorDescriptive = () => {
   return (
     <svg
       {...stylex.props(styles.svg)}
+      aria-labelledby='errTitle errDesc'
+      height='100%'
+      role='img'
       viewBox='0 0 360 220'
       width='100%'
-      height='100%'
       xmlns='http://www.w3.org/2000/svg'
-      aria-labelledby='errTitle errDesc'
-      role='img'
     >
       <title id='errTitle'>Data fetch error</title>
       <desc id='errDesc'>
@@ -120,79 +120,79 @@ export const ErrorDescriptive = () => {
         {/* server body (stacked panels) */}
         <rect
           className='serverFill'
+          height='18'
+          rx='6'
+          width='110'
           x='0'
           y='0'
-          width='110'
-          height='18'
-          rx='6'
         />
         <rect
           className='serverFill'
+          height='18'
+          rx='6'
+          width='110'
           x='0'
           y='24'
-          width='110'
-          height='18'
-          rx='6'
         />
         <rect
           className='serverFill'
-          x='0'
-          y='48'
-          width='110'
           height='18'
           rx='6'
+          width='110'
+          x='0'
+          y='48'
         />
         {/* front panel details */}
-        <g transform='translate(10,4)' className='serverDetail'>
+        <g className='serverDetail' transform='translate(10,4)'>
           <circle
             cx='0'
             cy='5'
-            r='2.6'
             fill='var(--accent)'
             fillOpacity='0.95'
+            r='2.6'
           />
           <circle
             cx='14'
             cy='5'
-            r='2.6'
             fill='var(--accent)'
             fillOpacity='0.6'
+            r='2.6'
           />
-          <rect x='36' y='-3' width='56' height='12' rx='3' fill='none' />
+          <rect fill='none' height='12' rx='3' width='56' x='36' y='-3' />
         </g>
-        <g transform='translate(10,28)' className='serverDetail'>
+        <g className='serverDetail' transform='translate(10,28)'>
           <circle
             cx='0'
             cy='5'
-            r='2.6'
             fill='var(--accent)'
             fillOpacity='0.95'
+            r='2.6'
           />
           <circle
             cx='14'
             cy='5'
-            r='2.6'
             fill='var(--accent)'
             fillOpacity='0.6'
+            r='2.6'
           />
-          <rect x='36' y='-3' width='56' height='12' rx='3' fill='none' />
+          <rect fill='none' height='12' rx='3' width='56' x='36' y='-3' />
         </g>
-        <g transform='translate(10,52)' className='serverDetail'>
+        <g className='serverDetail' transform='translate(10,52)'>
           <circle
             cx='0'
             cy='5'
-            r='2.6'
             fill='var(--accent)'
             fillOpacity='0.95'
+            r='2.6'
           />
           <circle
             cx='14'
             cy='5'
-            r='2.6'
             fill='var(--accent)'
             fillOpacity='0.6'
+            r='2.6'
           />
-          <rect x='36' y='-3' width='56' height='12' rx='3' fill='none' />
+          <rect fill='none' height='12' rx='3' width='56' x='36' y='-3' />
         </g>
 
         {/* subtle database cylinder hint on the left edge */}
@@ -200,27 +200,27 @@ export const ErrorDescriptive = () => {
           <ellipse
             cx='8'
             cy='3'
-            rx='8'
-            ry='3.6'
             fill='var(--accent)'
             fillOpacity='0.06'
+            rx='8'
+            ry='3.6'
           />
           <rect
-            x='0'
-            y='3'
-            width='16'
-            height='54'
-            rx='4'
             fill='var(--accent)'
             fillOpacity='0.04'
+            height='54'
+            rx='4'
+            width='16'
+            x='0'
+            y='3'
           />
           <ellipse
             cx='8'
             cy='57'
-            rx='8'
-            ry='3.6'
             fill='var(--accent)'
             fillOpacity='0.06'
+            rx='8'
+            ry='3.6'
           />
         </g>
       </g>
@@ -230,86 +230,86 @@ export const ErrorDescriptive = () => {
         {/* screen */}
         <rect
           className='laptopFill'
-          x='0'
-          y='0'
-          width='110'
           height='60'
           rx='8'
+          width='110'
+          x='0'
+          y='0'
         />
         <rect
           className='laptopDetail'
-          x='8'
-          y='8'
-          width='94'
           height='36'
           rx='4'
+          width='94'
+          x='8'
+          y='8'
         />
         {/* keyboard base */}
         <g transform='translate(0,62)'>
           <rect
             className='laptopFill'
-            x='6'
-            y='0'
-            width='98'
             height='12'
             rx='4'
+            width='98'
+            x='6'
+            y='0'
           />
-          <g transform='translate(14,4)' className='laptopDetail'>
-            <rect x='0' y='0' width='72' height='4' rx='2' fill='none' />
+          <g className='laptopDetail' transform='translate(14,4)'>
+            <rect fill='none' height='4' rx='2' width='72' x='0' y='0' />
             {/* small keys hint */}
             <rect
+              fill='var(--accent)'
+              fillOpacity='0.12'
+              height='2'
+              rx='1'
+              width='8'
               x='0'
               y='8'
-              width='8'
-              height='2'
-              rx='1'
-              fill='var(--accent)'
-              fillOpacity='0.12'
             />
             <rect
+              fill='var(--accent)'
+              fillOpacity='0.12'
+              height='2'
+              rx='1'
+              width='8'
               x='12'
               y='8'
-              width='8'
-              height='2'
-              rx='1'
-              fill='var(--accent)'
-              fillOpacity='0.12'
             />
             <rect
+              fill='var(--accent)'
+              fillOpacity='0.12'
+              height='2'
+              rx='1'
+              width='8'
               x='24'
               y='8'
-              width='8'
-              height='2'
-              rx='1'
-              fill='var(--accent)'
-              fillOpacity='0.12'
             />
             <rect
+              fill='var(--accent)'
+              fillOpacity='0.12'
+              height='2'
+              rx='1'
+              width='8'
               x='36'
               y='8'
-              width='8'
-              height='2'
-              rx='1'
-              fill='var(--accent)'
-              fillOpacity='0.12'
             />
             <rect
+              fill='var(--accent)'
+              fillOpacity='0.12'
+              height='2'
+              rx='1'
+              width='8'
               x='48'
               y='8'
-              width='8'
-              height='2'
-              rx='1'
-              fill='var(--accent)'
-              fillOpacity='0.12'
             />
             <rect
-              x='60'
-              y='8'
-              width='8'
-              height='2'
-              rx='1'
               fill='var(--accent)'
               fillOpacity='0.12'
+              height='2'
+              rx='1'
+              width='8'
+              x='60'
+              y='8'
             />
           </g>
         </g>
@@ -330,9 +330,9 @@ export const ErrorDescriptive = () => {
 
       {/* small particles to imply disruption */}
       <g fill='var(--accent)' fillOpacity='0.9'>
-        <circle cx='170' cy='78' r='2.2' opacity='0.9' />
-        <circle cx='190' cy='122' r='1.8' opacity='0.7' />
-        <circle cx='160' cy='110' r='1.6' opacity='0.6' />
+        <circle cx='170' cy='78' opacity='0.9' r='2.2' />
+        <circle cx='190' cy='122' opacity='0.7' r='1.8' />
+        <circle cx='160' cy='110' opacity='0.6' r='1.6' />
       </g>
 
       {/* warning badge */}
@@ -344,14 +344,14 @@ export const ErrorDescriptive = () => {
       <g className='badgeGroup' transform='translate(240,70)'>
         <circle className='badge' cx='0' cy='0' r='14' />
         <rect
-          x='-1.5'
-          y='-6'
-          width='3'
+          fill='var(--accent)'
           height='8'
           rx='1'
-          fill='var(--accent)'
+          width='3'
+          x='-1.5'
+          y='-6'
         />
-        <circle cx='0' cy='6' r='2.2' fill='var(--accent)' />
+        <circle cx='0' cy='6' fill='var(--accent)' r='2.2' />
       </g>
     </svg>
   );

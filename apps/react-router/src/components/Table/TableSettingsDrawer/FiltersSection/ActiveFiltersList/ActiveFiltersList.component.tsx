@@ -146,8 +146,8 @@ export const ActiveFiltersList = ({
                     onClick={() => {
                       handleRemoveFilter(columnKey);
                     }}
-                    tooltipContent={`Remove ${column.label} filter`}
                     size='mini'
+                    tooltipContent={`Remove ${column.label} filter`}
                     width='auto'
                   />
                 </div>

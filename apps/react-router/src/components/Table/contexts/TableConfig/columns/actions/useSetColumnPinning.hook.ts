@@ -22,9 +22,9 @@ export const useSetColumnPinning = <TData>() => {
     const {
       columnOrder,
       columnPinning,
+      columns,
       columnSizing,
       columnVisibility,
-      columns,
       drawersSyncNonce,
       persistenceKey,
       staticKeys,
@@ -42,10 +42,10 @@ export const useSetColumnPinning = <TData>() => {
     commitResolvedPinningState<TData>({
       columnOrder: newColumnOrder,
       columnPinning: newPinning,
-      columnSizing,
-      columnVisibility,
       columns,
+      columnSizing,
       columnsStore,
+      columnVisibility,
       drawersSyncNonce,
       metaStore,
       persistenceKey,

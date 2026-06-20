@@ -68,7 +68,7 @@ describe('useDraggableList', () => {
   });
 
   it('syncs local state when the initial items prop changes', () => {
-    const { result, rerender } = renderHook(
+    const { rerender, result } = renderHook(
       ({ initialItems }: { readonly initialItems: DraggableItem[] }) =>
         useDraggableList({
           initialItems,

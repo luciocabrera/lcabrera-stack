@@ -26,10 +26,10 @@ describe('derivePinSideResolutionState', () => {
     });
 
     expect(result).toEqual({
-      kind: 'resolved',
-      side: 'left',
       columnOrder: expect.any(Array),
       columnPinning: { left: ['id'], right: [] },
+      kind: 'resolved',
+      side: 'left',
     });
   });
 
@@ -44,10 +44,10 @@ describe('derivePinSideResolutionState', () => {
     });
 
     expect(result).toEqual({
-      kind: 'resolved',
-      side: 'left',
       columnOrder: expect.any(Array),
       columnPinning: { left: ['id'], right: [] },
+      kind: 'resolved',
+      side: 'left',
     });
   });
 
@@ -62,10 +62,10 @@ describe('derivePinSideResolutionState', () => {
     });
 
     expect(result).toEqual({
-      kind: 'resolved',
-      side: 'right',
       columnOrder: expect.any(Array),
       columnPinning: { left: [], right: ['age'] },
+      kind: 'resolved',
+      side: 'right',
     });
   });
 
@@ -97,10 +97,10 @@ describe('derivePinSideResolutionState', () => {
     });
 
     expect(result).toEqual({
-      kind: 'resolved',
-      side: 'left',
       columnOrder: expect.any(Array),
       columnPinning: { left: ['id'], right: [] },
+      kind: 'resolved',
+      side: 'left',
     });
   });
 

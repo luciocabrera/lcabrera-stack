@@ -16,17 +16,17 @@ type GetCellStylePropsArgs = Pick<
   TableBodyCellProps<Record<string, unknown>>,
   'customStylex' | 'minWidth' | 'pinInfo' | 'width'
 > & {
-  readonly hasCustomContent: boolean;
   readonly dataType: TableColumnDataType;
+  readonly hasCustomContent: boolean;
 };
 
 export const getCellStyleProps = ({
   customStylex,
+  dataType,
+  hasCustomContent,
   minWidth,
   pinInfo,
   width,
-  hasCustomContent,
-  dataType,
 }: GetCellStylePropsArgs) => {
   const isRightAligned = !hasCustomContent && isRightAlignedDataType(dataType);
   const isCentered = !hasCustomContent && isCenteredDataType(dataType);

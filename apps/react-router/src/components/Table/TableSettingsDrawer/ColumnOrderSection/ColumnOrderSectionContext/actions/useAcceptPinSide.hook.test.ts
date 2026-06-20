@@ -120,9 +120,9 @@ describe('useAcceptPinSide', () => {
     const resolvedColumnOrder = ['id', 'name'];
     const resolvedPinning = { left: ['name' as const], right: [] };
     mockResolve.mockReturnValue({
-      kind: 'apply-resolved',
       columnOrder: resolvedColumnOrder,
       columnPinning: resolvedPinning,
+      kind: 'apply-resolved',
     });
 
     const { result } = renderHook(() => useAcceptPinSide());
@@ -148,7 +148,7 @@ describe('useAcceptPinSide', () => {
       isOpen: true as const,
       side: 'left' as const,
     };
-    mockResolve.mockReturnValue({ kind: 'open-conflict-modal', conflictModal });
+    mockResolve.mockReturnValue({ conflictModal, kind: 'open-conflict-modal' });
 
     const { result } = renderHook(() => useAcceptPinSide());
 
@@ -171,8 +171,8 @@ describe('useAcceptPinSide', () => {
       side: 'left' as const,
     };
     mockResolve.mockReturnValue({
-      kind: 'auto-accept-conflict',
       conflictModal,
+      kind: 'auto-accept-conflict',
       resolution: 'move-column',
     });
 
@@ -197,9 +197,9 @@ describe('useAcceptPinSide', () => {
       undefined,
     );
     mockResolve.mockReturnValue({
-      kind: 'apply-resolved',
       columnOrder: [],
       columnPinning: { left: [], right: [] },
+      kind: 'apply-resolved',
     });
 
     const { result } = renderHook(() => useAcceptPinSide());

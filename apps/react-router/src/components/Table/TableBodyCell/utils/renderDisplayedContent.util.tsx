@@ -8,14 +8,14 @@ import { tableBodyCellStyles } from '../TableBodyCell.stylex';
 
 type RenderDisplayedContentArgs = {
   readonly content: ReactNode;
-  readonly hasCustomContent: boolean;
   readonly dataType: TableColumnDataType;
+  readonly hasCustomContent: boolean;
 };
 
 export const renderDisplayedContent = ({
   content,
-  hasCustomContent,
   dataType,
+  hasCustomContent,
 }: RenderDisplayedContentArgs) => {
   if (hasCustomContent) {
     return content;

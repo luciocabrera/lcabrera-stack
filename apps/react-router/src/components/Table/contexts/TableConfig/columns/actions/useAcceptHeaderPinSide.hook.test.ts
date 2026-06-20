@@ -11,13 +11,13 @@ const createInitialColumnsState = () => {
   return {
     columnOrder: ['name', 'id', 'age'],
     columnPinning: { left: ['id'], right: [] },
-    columnSizing: {},
-    columnVisibility: new Set<string>(),
     columns: [
       { key: 'id', label: 'ID' },
       { key: 'name', label: 'Name' },
       { key: 'age', label: 'Age' },
     ],
+    columnSizing: {},
+    columnVisibility: new Set<string>(),
   };
 };
 

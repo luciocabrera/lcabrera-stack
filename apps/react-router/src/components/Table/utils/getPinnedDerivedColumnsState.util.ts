@@ -16,8 +16,8 @@ import { splitColumnsByPinning } from './splitColumnsByPinning.util';
 type GetPinnedDerivedColumnsStateArgs<TData> = {
   readonly columnOrder: ColumnOrderState<TData>;
   readonly columnPinning: ColumnPinningState<TData>;
-  readonly columnSizing?: ColumnSizingState<TData>;
   readonly columns: readonly TableColumn<TData>[];
+  readonly columnSizing?: ColumnSizingState<TData>;
   readonly columnVisibility?: ColumnVisibilityState<TData>;
 };
 
@@ -30,8 +30,8 @@ type GetPinnedDerivedColumnsStateResult<TData> = {
 export const getPinnedDerivedColumnsState = <TData>({
   columnOrder,
   columnPinning,
-  columnSizing,
   columns,
+  columnSizing,
   columnVisibility = new Set<DataKey<TData>>(),
 }: GetPinnedDerivedColumnsStateArgs<TData>): GetPinnedDerivedColumnsStateResult<TData> => {
   const effectiveColumns = getEffectiveColumns<TData>({

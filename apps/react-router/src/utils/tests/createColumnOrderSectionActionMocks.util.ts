@@ -28,12 +28,12 @@ type CreateColumnOrderSectionActionMocksArgs = {
 };
 
 type MockStore<TState> = {
+  _state: TState;
   readonly get: ReturnType<typeof vi.fn>;
   readonly getServerSnapshot: ReturnType<typeof vi.fn>;
   readonly reset: ReturnType<typeof vi.fn>;
   readonly set: ReturnType<typeof vi.fn>;
   readonly subscribe: ReturnType<typeof vi.fn>;
-  _state: TState;
 };
 
 const createMockStore = <TState>(initial: TState): MockStore<TState> => {

@@ -20,8 +20,8 @@ import { styles } from './ColumnOrderSectionToolbar.stylex';
 
 const COLUMN_ORDER_TOOLBAR = {
   clear: { label: 'Clear Visibility & Pinning' },
-  reset: { label: 'Reset Order & Visibility' },
   orderBySorting: { label: 'Order by Sorting' },
+  reset: { label: 'Reset Order & Visibility' },
 } as const;
 
 export const ColumnOrderSectionToolbar = ({
@@ -57,10 +57,10 @@ export const ColumnOrderSectionToolbar = ({
         isDisabled={!hasSorting}
         onClick={orderBySorting}
         size={buttonSize}
-        width={buttonWidth}
         tooltipContent={
           isToolbar ? COLUMN_ORDER_TOOLBAR.orderBySorting.label : undefined
         }
+        width={buttonWidth}
       >
         {!isToolbar && COLUMN_ORDER_TOOLBAR.orderBySorting.label}
       </Button>
@@ -72,10 +72,10 @@ export const ColumnOrderSectionToolbar = ({
         isDisabled={!hasClearableState}
         onClick={clearColumnOrderSection}
         size={buttonSize}
-        width={buttonWidth}
         tooltipContent={
           isToolbar ? COLUMN_ORDER_TOOLBAR.clear.label : undefined
         }
+        width={buttonWidth}
       >
         {!isToolbar && COLUMN_ORDER_TOOLBAR.clear.label}
       </Button>
@@ -86,10 +86,10 @@ export const ColumnOrderSectionToolbar = ({
         isBusy={isBusy}
         onClick={resetColumnOrderAndVisibility}
         size={buttonSize}
-        width={buttonWidth}
         tooltipContent={
           isToolbar ? COLUMN_ORDER_TOOLBAR.reset.label : undefined
         }
+        width={buttonWidth}
       >
         {!isToolbar && COLUMN_ORDER_TOOLBAR.reset.label}
       </Button>

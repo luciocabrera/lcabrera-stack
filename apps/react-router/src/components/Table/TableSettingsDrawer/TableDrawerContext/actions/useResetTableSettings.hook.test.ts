@@ -8,8 +8,8 @@ import { useResetTableSettings } from './useResetTableSettings.hook';
 const {
   drawerColumnsStore,
   setTableColumnsState,
-  tableColumnsStore,
   tableColumnsState,
+  tableColumnsStore,
 } = vi.hoisted(() => {
   let state:
     | {

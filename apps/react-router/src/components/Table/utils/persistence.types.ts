@@ -23,11 +23,11 @@ export type PersistedState<TData = Record<string, unknown>> = {
  * These fields are not written to cookies and are never sent to the server.
  */
 export type PersistedUiState = {
-  readonly isColumnSettingsOpen?: boolean;
   readonly columnSettingsSelectedTab?: string;
+  readonly isColumnSettingsOpen?: boolean;
   readonly isColumnSettingsPinned?: boolean;
-  readonly isTableSettingsPinned?: boolean;
   readonly isTableSettingsOpen?: boolean;
+  readonly isTableSettingsPinned?: boolean;
   readonly tableSettingsExpandedFilters?: readonly string[];
   readonly tableSettingsSelectedTab?: string;
 };

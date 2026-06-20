@@ -13,8 +13,8 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
     columnOrder,
     columnSizing,
     columnVisibility,
-    standaloneSortParam,
     sorting,
+    standaloneSortParam,
   } = readTableLoaderStateFromRequest<WideAlltypes150>({
     persistenceKey: PERSISTENCE_KEY,
     request,

@@ -21,8 +21,8 @@ const extractUiState = (
   columnSettingsSelectedTab: state?.columnSettingsSelectedTab,
   isColumnSettingsOpen: state?.isColumnSettingsOpen,
   isColumnSettingsPinned: state?.isColumnSettingsPinned,
-  isTableSettingsPinned: state?.isTableSettingsPinned,
   isTableSettingsOpen: state?.isTableSettingsOpen,
+  isTableSettingsPinned: state?.isTableSettingsPinned,
   tableSettingsExpandedFilters: state?.tableSettingsExpandedFilters,
   tableSettingsSelectedTab: state?.tableSettingsSelectedTab,
 });

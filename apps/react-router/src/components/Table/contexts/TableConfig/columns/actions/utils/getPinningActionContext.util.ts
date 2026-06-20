@@ -24,9 +24,9 @@ type GetPinningActionContextArgs<TData> = {
 type GetPinningActionContextResult<TData> = {
   readonly columnOrder: ColumnOrderState<TData>;
   readonly columnPinning: ColumnPinningState<TData>;
+  readonly columns: readonly TableColumn<TData>[];
   readonly columnSizing?: ColumnSizingState<TData>;
   readonly columnVisibility?: ColumnVisibilityState<TData>;
-  readonly columns: readonly TableColumn<TData>[];
   readonly drawersSyncNonce: number;
   readonly persistenceKey: string;
   readonly staticKeys?: Set<string>;
@@ -44,9 +44,9 @@ export const getPinningActionContext = <TData>({
     columnPinning:
       columnsState?.columnPinning ??
       ({ left: [], right: [] } as ColumnPinningState<TData>),
+    columns: columnsState?.columns ?? [],
     columnSizing: columnsState?.columnSizing,
     columnVisibility: columnsState?.columnVisibility,
-    columns: columnsState?.columns ?? [],
     drawersSyncNonce: metaState?.drawersSyncNonce ?? 0,
     persistenceKey: metaState?.persistenceKey ?? '',
     staticKeys: columnsState?.staticKeys,

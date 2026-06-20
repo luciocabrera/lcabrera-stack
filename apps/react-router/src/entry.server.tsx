@@ -56,8 +56,8 @@ export default function handleRequest(
   // https://httpwg.org/specs/rfc9110.html#HEAD
   if (request.method.toUpperCase() === 'HEAD') {
     return new Response(null, {
-      status: responseStatusCode,
       headers: responseHeaders,
+      status: responseStatusCode,
     });
   }
   const cspNonce = getRequestCspNonce(request);
@@ -81,10 +81,22 @@ export default function handleRequest(
       ABORT_DELAY,
     );
 
-    const { pipe, abort } = renderToPipeableStream(
+    const { abort, pipe } = renderToPipeableStream(
       <ServerRouter context={routerContext} url={request.url} />,
       {
         nonce: cspNonce,
+        onError(error: unknown) {
+          responseStatusCode = 500;
+          // Log streaming rendering errors from inside the shell.  Don't log
+          // errors encountered during initial shell rendering since they'll
+          // reject and get logged in handleDocumentRequest.
+          if (shellRendered) {
+            console.error(toError(error));
+          }
+        },
+        onShellError(error: unknown) {
+          reject(toError(error));
+        },
         [readyOption]() {
           shellRendered = true;
 
@@ -110,18 +122,6 @@ export default function handleRequest(
               status: responseStatusCode,
             }),
           );
-        },
-        onShellError(error: unknown) {
-          reject(toError(error));
-        },
-        onError(error: unknown) {
-          responseStatusCode = 500;
-          // Log streaming rendering errors from inside the shell.  Don't log
-          // errors encountered during initial shell rendering since they'll
-          // reject and get logged in handleDocumentRequest.
-          if (shellRendered) {
-            console.error(toError(error));
-          }
         },
       },
     );

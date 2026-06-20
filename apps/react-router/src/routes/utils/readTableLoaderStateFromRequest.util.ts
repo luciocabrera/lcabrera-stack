@@ -27,9 +27,9 @@ type ReadTableLoaderStateFromRequestResult<TData> = {
   readonly columnSizing: ColumnSizingState<TData>;
   readonly columnVisibility: Set<keyof TData>;
   readonly filters: ColumnFiltersState<TData>;
+  readonly sorting: SortingState<TData>;
   readonly standaloneFiltersParam: string | null;
   readonly standaloneSortParam: string | null;
-  readonly sorting: SortingState<TData>;
 };
 
 const isFilterCompatibleWithColumn = <TData extends Record<string, unknown>>({
@@ -153,8 +153,8 @@ export const readTableLoaderStateFromRequest = <
     columnSizing,
     columnVisibility,
     filters,
+    sorting,
     standaloneFiltersParam,
     standaloneSortParam,
-    sorting,
   };
 };

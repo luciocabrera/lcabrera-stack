@@ -20,9 +20,9 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
     columnSizing,
     columnVisibility,
     filters,
+    sorting,
     standaloneFiltersParam,
     standaloneSortParam,
-    sorting,
   } = readTableLoaderStateFromRequest<CarSale>({
     includeFilters: true,
     persistenceKey: PERSISTENCE_KEY,

@@ -18,13 +18,13 @@ const {
     columnFilters: {},
     columnOrder: ['id', 'name', 'age'],
     columnPinning: { left: ['id'], right: [] },
-    columnSizing: { actions: 0, age: 80, id: 100, name: 140 },
-    columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(['age']),
     columns: [
       { key: 'id', label: 'ID' },
       { key: 'name', label: 'Name' },
       { key: 'age', label: 'Age' },
     ],
+    columnSizing: { actions: 0, age: 80, id: 100, name: 140 },
+    columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(['age']),
     sorting: [],
     staticKeys: new Set<string>(['id']),
   };
@@ -40,6 +40,16 @@ const {
     mockDataStore: {
       set: vi.fn(),
     },
+    mockMetaStore: {
+      get: vi.fn(() => ({
+        isColumnSettingsPinned: false,
+        isTableSettingsOpen: false,
+        persistenceKey: 'orders-table',
+        wasTableSettingsOpenBeforeColumnSettings: false,
+      })),
+      set: vi.fn(),
+    },
+    mockPersistTableState: vi.fn(),
     mockResolveBatchColumnSettingsUpdate: vi.fn(() => ({
       columnFilters: {
         name: { operator: 'contains', type: 'text', value: 'ali' },
@@ -77,16 +87,6 @@ const {
       },
       sorting: [{ columnKey: 'name', direction: 'desc' }],
     })),
-    mockMetaStore: {
-      get: vi.fn(() => ({
-        isColumnSettingsPinned: false,
-        isTableSettingsOpen: false,
-        persistenceKey: 'orders-table',
-        wasTableSettingsOpenBeforeColumnSettings: false,
-      })),
-      set: vi.fn(),
-    },
-    mockPersistTableState: vi.fn(),
     setColumnsState: (nextState: typeof columnsState) => {
       columnsState = nextState;
     },
@@ -128,13 +128,13 @@ describe('useBatchSetColumnSettings', () => {
       columnFilters: {},
       columnOrder: ['id', 'name', 'age'],
       columnPinning: { left: ['id'], right: [] },
-      columnSizing: { actions: 0, age: 80, id: 100, name: 140 },
-      columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(['age']),
       columns: [
         { key: 'id', label: 'ID' },
         { key: 'name', label: 'Name' },
         { key: 'age', label: 'Age' },
       ],
+      columnSizing: { actions: 0, age: 80, id: 100, name: 140 },
+      columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(['age']),
       sorting: [],
       staticKeys: new Set<string>(['id']),
     });
@@ -177,13 +177,13 @@ describe('useBatchSetColumnSettings', () => {
         columnFilters: {},
         columnOrder: ['id', 'name', 'age'],
         columnPinning: { left: ['id'], right: [] },
-        columnSizing: { actions: 0, age: 80, id: 100, name: 140 },
-        columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(['age']),
         columns: [
           { key: 'id', label: 'ID' },
           { key: 'name', label: 'Name' },
           { key: 'age', label: 'Age' },
         ],
+        columnSizing: { actions: 0, age: 80, id: 100, name: 140 },
+        columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(['age']),
         sorting: [],
         staticKeys: new Set<string>(['id']),
       },

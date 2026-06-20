@@ -108,12 +108,12 @@ describe('resolveBatchColumnSettingsUpdate', () => {
       }>,
       columnOrder: ['id', 'name', 'age'],
       columnPinning: { left: ['id'], right: [] },
-      columnSizing: { actions: 0, age: 80, id: 100, name: 140 },
       columns: [
         { key: 'id', label: 'ID' },
         { key: 'name', label: 'Name' },
         { key: 'age', label: 'Age' },
       ],
+      columnSizing: { actions: 0, age: 80, id: 100, name: 140 },
       sorting: [],
       staticKeys: new Set<string>(['id']),
     };
@@ -139,8 +139,8 @@ describe('resolveBatchColumnSettingsUpdate', () => {
       sorting: 'desc',
     });
     expect(mockGetNewColumnFiltersBasedOnColumnKey).toHaveBeenCalledWith({
-      columnFiltersState: {},
       columnFilter: { operator: 'contains', type: 'text', value: 'ali' },
+      columnFiltersState: {},
       columnKey: 'name',
     });
     expect(mockGetNewColumnSizingBasedOnColumnKey).toHaveBeenCalledWith({
@@ -169,12 +169,12 @@ describe('resolveBatchColumnSettingsUpdate', () => {
     expect(mockDeriveColumnViewState).toHaveBeenCalledWith({
       columnOrder: ['id', 'age', 'name'],
       columnPinning: { left: ['id'], right: ['name'] },
-      columnSizing: { actions: 0, age: 80, id: 100, name: 220 },
       columns: [
         { key: 'id', label: 'ID' },
         { key: 'name', label: 'Name' },
         { key: 'age', label: 'Age' },
       ],
+      columnSizing: { actions: 0, age: 80, id: 100, name: 220 },
       sorting: [{ columnKey: 'name', direction: 'desc' }],
     });
 

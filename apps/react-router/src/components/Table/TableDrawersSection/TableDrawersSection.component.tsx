@@ -29,8 +29,8 @@ export const TableDrawersSection = () => {
   if (isColumnSettingsOpen && columnKey)
     return (
       <ColumnDrawerProvider
-        key={`${columnKey}-${drawersSyncNonce}`}
         columnKey={columnKey}
+        key={`${columnKey}-${drawersSyncNonce}`}
       >
         <ColumnSettingsDrawer columnKey={columnKey} isBusy={isBusy} />
       </ColumnDrawerProvider>

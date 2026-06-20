@@ -28,9 +28,9 @@ type DerivePinSideResolutionStateConflict = {
 };
 
 type DerivePinSideResolutionStateResolved<TData> = {
-  readonly kind: 'resolved';
   readonly columnOrder: ColumnOrderState<TData>;
   readonly columnPinning: ColumnPinningState<TData>;
+  readonly kind: 'resolved';
   readonly side: 'left' | 'right';
 };
 
@@ -90,9 +90,9 @@ export const derivePinSideResolutionState = <TData>({
   });
 
   return {
-    kind: 'resolved',
     columnOrder: newColumnOrder,
     columnPinning: newPinning,
+    kind: 'resolved',
     side,
   };
 };

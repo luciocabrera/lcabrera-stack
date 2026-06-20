@@ -24,9 +24,9 @@ const createInitialColumnsState = () => {
     },
     columnOrder: ['id', 'status', 'actions'],
     columnPinning: { left: ['id'], right: ['actions'] },
+    columns: [{ key: 'id' }, { key: 'status' }, { key: 'actions' }],
     columnSizing: { id: 120, status: 180 },
     columnVisibility: new Set(['status']),
-    columns: [{ key: 'id' }, { key: 'status' }, { key: 'actions' }],
     effectiveColumns: [{ key: 'id' }, { key: 'status' }],
     normalizedColumns: {
       actions: { key: 'actions', label: 'Actions' },
