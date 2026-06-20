@@ -119,6 +119,8 @@ describe('renderTracker.util', () => {
   });
 
   it('exposes renderStats on window in development', () => {
-    expect((window as WindowWithRenderStats).__renderStats).toBe(renderStats);
+    expect((globalThis as unknown as WindowWithRenderStats).__renderStats).toBe(
+      renderStats,
+    );
   });
 });

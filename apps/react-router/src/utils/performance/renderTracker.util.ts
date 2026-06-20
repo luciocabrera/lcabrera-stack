@@ -112,7 +112,7 @@ export const renderStats = {
    * Get all stats as an array sorted by render count
    */
   getAll: (): (RenderRecord & { name: string })[] => {
-    return [...stats.entries()]
+    return [...stats]
       .map(([name, record]) => ({ name, ...record }))
       .sort((a, b) => b.count - a.count);
   },

@@ -11,15 +11,18 @@ afterEach(() => {
 
 describe('readFromSessionStorage', () => {
   it('returns undefined when sessionStorage is not available (SSR guard)', () => {
-    const original = Object.getOwnPropertyDescriptor(window, 'sessionStorage');
-    Object.defineProperty(window, 'sessionStorage', {
+    const original = Object.getOwnPropertyDescriptor(
+      globalThis,
+      'sessionStorage',
+    );
+    Object.defineProperty(globalThis, 'sessionStorage', {
       configurable: true,
       value: undefined,
     });
 
     expect(readFromSessionStorage({ key: 'test' })).toBeUndefined();
 
-    if (original) Object.defineProperty(window, 'sessionStorage', original);
+    if (original) Object.defineProperty(globalThis, 'sessionStorage', original);
   });
 
   it('returns undefined when the key does not exist', () => {
