@@ -37,19 +37,15 @@ export const NotificationCenter = () => {
     }
   }, [notifications]);
 
+  if (notifications.length === 0) return;
+
   const handleDismissClick = (event: MouseEvent<HTMLButtonElement>): void => {
     const notificationId = event.currentTarget.dataset.notificationId;
 
-    if (!notificationId) {
-      return;
+    if (notificationId) {
+      dismissNotification(notificationId);
     }
-
-    dismissNotification(notificationId);
   };
-
-  if (notifications.length === 0) {
-    return;
-  }
 
   return (
     <>

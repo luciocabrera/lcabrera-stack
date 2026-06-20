@@ -74,9 +74,6 @@ export const useFetchMoreFilterData = <TData, TResponse>({
   }: FetchFilterDataCallbackArgs<TResponse>) => {
     const filtersDataState = filtersDataStore.get();
     const currentFilter = filtersDataState?.[columnKey];
-    const currentData = currentFilter?.data ?? [];
-
-    const requiredOnLoadMore = getRequiredOnLoadMore(onLoadMore);
 
     if (!currentFilter) {
       throw new Error(`Filter data not initialized for column: ${columnKey}`);
@@ -85,6 +82,9 @@ export const useFetchMoreFilterData = <TData, TResponse>({
     if (currentFilter.isLoadingMore || currentFilter.hasMore === false) {
       return;
     }
+
+    const currentData = currentFilter.data;
+    const requiredOnLoadMore = getRequiredOnLoadMore(onLoadMore);
 
     try {
       filtersDataStore.set({

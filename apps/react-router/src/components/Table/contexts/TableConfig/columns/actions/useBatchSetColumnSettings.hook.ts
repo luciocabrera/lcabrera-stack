@@ -38,18 +38,18 @@ export const useBatchSetColumnSettings = <TData>() => {
     });
     const hasQueryChanged = hasSortingChanged || hasFiltersChanged;
 
-    if (
-      !persistTableState(
-        buildPersistencePayload<TData>({
-          columnFilters: resolvedUpdate.columnFilters,
-          columnOrder: resolvedUpdate.columnOrder,
-          columnPinning: resolvedUpdate.columnPinning,
-          columnSizing: resolvedUpdate.columnSizing,
-          persistenceKey,
-          sorting: resolvedUpdate.sorting,
-        }),
-      )
-    ) {
+    const didPersist = persistTableState(
+      buildPersistencePayload<TData>({
+        columnFilters: resolvedUpdate.columnFilters,
+        columnOrder: resolvedUpdate.columnOrder,
+        columnPinning: resolvedUpdate.columnPinning,
+        columnSizing: resolvedUpdate.columnSizing,
+        persistenceKey,
+        sorting: resolvedUpdate.sorting,
+      }),
+    );
+
+    if (!didPersist) {
       return;
     }
 
@@ -66,15 +66,14 @@ export const useBatchSetColumnSettings = <TData>() => {
       metaStore.set({
         isColumnSettingsOpen: true,
       });
-      return;
+    } else {
+      metaStore.set({
+        isColumnSettingsOpen: false,
+        isTableSettingsOpen: shouldRestoreTableSettings
+          ? true
+          : (metaState?.isTableSettingsOpen ?? false),
+        wasTableSettingsOpenBeforeColumnSettings: false,
+      });
     }
-
-    metaStore.set({
-      isColumnSettingsOpen: false,
-      isTableSettingsOpen: shouldRestoreTableSettings
-        ? true
-        : (metaState?.isTableSettingsOpen ?? false),
-      wasTableSettingsOpenBeforeColumnSettings: false,
-    });
   };
 };

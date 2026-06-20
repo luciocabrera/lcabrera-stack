@@ -32,8 +32,6 @@ export const detectPinOrderConflict = <TData>({
       ) as ColumnOrderState<TData>)
     : newOrder;
 
-  if (left.length === 0 && right.length === 0) return false;
-
   // Check left-pinned: all must be in the first N positions
   if (left.length > 0) {
     const leftPositions = left.map((key) => filteredOrder.indexOf(key));
