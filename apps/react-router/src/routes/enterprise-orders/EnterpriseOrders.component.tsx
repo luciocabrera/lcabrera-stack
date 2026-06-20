@@ -7,32 +7,32 @@ import { enterpriseOrdersApi } from '@/services';
 
 import type { loader } from './enterprise-orders.loader';
 
-import {
-  COLUMNS,
-  DEFAULT_COLUMN_PINNING,
-  PERSISTENCE_KEY,
-} from './EnterpriseOrders.constants';
-
 export const EnterpriseOrders = () => {
   const {
+    columns,
     columnOrder,
     columnSizing,
     columnVisibility,
     enterpriseOrdersPromise,
     filters,
+    persistenceKey,
+    defaultColumnPinning,
     sorting,
+    title,
+    tableName,
+    schemaName,
   } = useLoaderData<typeof loader>();
 
   return (
     <TableLayout<EnterpriseOrder, EnterpriseOrdersResponse>
       columnOrder={columnOrder}
-      columns={COLUMNS}
+      columns={columns}
       columnSizing={columnSizing}
       columnVisibility={columnVisibility}
       dataPromise={enterpriseOrdersPromise}
       dataSelector={(response) => response.data}
       dataTotalSelector={(response) => response.total}
-      defaultColumnPinning={DEFAULT_COLUMN_PINNING}
+      defaultColumnPinning={defaultColumnPinning}
       filters={filters}
       onLoadMore={async ({ limit, skip }) =>
         enterpriseOrdersApi.fetchEnterpriseOrdersPaginated({
@@ -42,11 +42,11 @@ export const EnterpriseOrders = () => {
           sorting,
         })
       }
-      persistenceKey={PERSISTENCE_KEY}
-      schemaName='public'
+      persistenceKey={persistenceKey}
+      schemaName={schemaName}
       sorting={sorting}
-      tableName='enterprise_orders'
-      title='Enterprise Orders - Infinite Scroll'
+      tableName={tableName}
+      title={title}
     />
   );
 };

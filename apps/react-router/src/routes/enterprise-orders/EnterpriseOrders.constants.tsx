@@ -66,6 +66,10 @@ const createBasicColumn = ({
   };
 };
 
+export const TITLE = 'Enterprise Orders - Infinite Scroll';
+export const TABLE_NAME = 'enterprise_orders';
+export const SCHEMA_NAME = 'public';
+
 export const PERSISTENCE_KEY = 'enterprise-orders-table';
 
 export const DEFAULT_COLUMN_PINNING: ColumnPinningState<EnterpriseOrder> = {
@@ -335,7 +339,7 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
     maxWidth: 32,
     minWidth: 32,
     render: (row) => (
-      <Link to={`/enterprise-orders/${String(row.order_id)}`}>
+      <Link prefetch='intent' to={`/enterprise-orders/${String(row.order_id)}`}>
         <Button
           aria-label={`View order ${String(row.order_id)}`}
           color='ghost'

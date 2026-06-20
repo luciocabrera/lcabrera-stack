@@ -12,18 +12,10 @@ export const TableSuspenseBoundary = <
 >({
   children,
   dataPromise,
-  onRetry,
 }: TableSuspenseBoundaryProps<TData, TResponse>) => {
-  const safeDataPromise = dataPromise
-    .then((data) => ({ data, ok: true as const }))
-    .catch((error: unknown) => ({ error, ok: false as const }));
-
   return (
     <Suspense fallback={<TableSkeleton />}>
-      <TableDataResolver<TResponse>
-        onRetry={onRetry}
-        safeDataPromise={safeDataPromise}
-      >
+      <TableDataResolver<TResponse> dataPromise={dataPromise}>
         {children}
       </TableDataResolver>
     </Suspense>

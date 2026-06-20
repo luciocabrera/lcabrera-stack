@@ -6,7 +6,14 @@ import { INITIAL_PAGE_SIZE } from '@/components/Table/Table.constants';
 import { enterpriseOrdersApi } from '@/services';
 
 import { readTableLoaderStateFromRequest } from '../utils/readTableLoaderStateFromRequest.util';
-import { COLUMNS, PERSISTENCE_KEY } from './EnterpriseOrders.constants';
+import {
+  COLUMNS,
+  DEFAULT_COLUMN_PINNING,
+  PERSISTENCE_KEY,
+  SCHEMA_NAME,
+  TABLE_NAME,
+  TITLE,
+} from './EnterpriseOrders.constants';
 
 /**
  * Loader for enterprise orders route
@@ -45,12 +52,18 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
     });
 
   return {
+    sorting: sanitizedSorting,
+    columns: COLUMNS,
     columnOrder,
     columnSizing,
     columnVisibility,
     enterpriseOrdersPromise,
     filters,
+    schemaName: SCHEMA_NAME,
+    title: TITLE,
+    tableName: TABLE_NAME,
+    persistenceKey: PERSISTENCE_KEY,
+    defaultColumnPinning: DEFAULT_COLUMN_PINNING,
     key: `${standaloneSortParam ?? ''}${standaloneFiltersParam ?? ''}`,
-    sorting: sanitizedSorting,
   };
 };

@@ -20,14 +20,11 @@ vi.mock('react', async () => {
 
 describe('TableDataResolver', () => {
   it('passes resolved response to children render function', () => {
-    useMock.mockReturnValue({ data: { total: 42 }, ok: true });
+    useMock.mockReturnValue({ total: 42 });
 
     render(
-      <TableDataResolver
-        onRetry={() => void 0}
-        safeDataPromise={Promise.resolve({ data: { total: 42 }, ok: true })}
-      >
-        {(response: { total: number }) => <span>Total: {response.total}</span>}
+      <TableDataResolver dataPromise={Promise.resolve({ total: 42 })}>
+        {(response) => <span>Total: {response.total}</span>}
       </TableDataResolver>,
     );
 

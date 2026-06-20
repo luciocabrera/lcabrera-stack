@@ -61,49 +61,6 @@ export const TableLayout = <
     title,
   };
 
-  const clearPersistedTableState = () => {
-    if (typeof document === 'undefined') {
-      return;
-    }
-
-    const storageKey = `table-state-${persistenceKey}`;
-    const stateKeys = [
-      `${storageKey}-columnFilters`,
-      `${storageKey}-columnOrder`,
-      `${storageKey}-columnPinning`,
-      `${storageKey}-columnSizing`,
-      `${storageKey}-columnVisibility`,
-      `${storageKey}-dataState`,
-      `${storageKey}-sorting`,
-      `${storageKey}-uiState`,
-    ];
-
-    for (const key of stateKeys) {
-      // oxlint-disable-next-line unicorn/no-document-cookie -- Needed to clear specific keys
-      document.cookie = `${key}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax`;
-
-      if (typeof localStorage !== 'undefined') {
-        localStorage.removeItem(key);
-      }
-
-      if (typeof sessionStorage !== 'undefined') {
-        sessionStorage.removeItem(key);
-      }
-    }
-  };
-
-  const handleRetry = () => {
-    clearPersistedTableState();
-
-    const currentUrl = new URL(globalThis.location.href);
-    currentUrl.searchParams.delete(`${persistenceKey}-tableState`);
-    currentUrl.searchParams.delete('filters');
-    currentUrl.searchParams.delete('sort');
-
-    const nextUrl = `${currentUrl.pathname}${currentUrl.search}${currentUrl.hash}`;
-    globalThis.location.assign(nextUrl);
-  };
-
   return (
     <div {...stylex.props(styles.container)}>
       <TableConfigProvider<TData>
@@ -111,10 +68,7 @@ export const TableLayout = <
         metaState={metaState}
       >
         <FiltersDataProvider<TData> columns={columns}>
-          <TableSuspenseBoundary<TData, TResponse>
-            dataPromise={dataPromise}
-            onRetry={handleRetry}
-          >
+          <TableSuspenseBoundary<TData, TResponse> dataPromise={dataPromise}>
             {(response) => (
               <Table<TData, TResponse>
                 dataSelector={dataSelector}

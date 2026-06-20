@@ -37,7 +37,7 @@ export const styles = stylex.create({
     display: 'flex',
   },
   optionSelected: {
-    borderColor: colors.brandPrimary,
+    // borderColor: colors.brandPrimary,
     backgroundColor: colors.brandPrimaryBackground,
   },
   radio: {
