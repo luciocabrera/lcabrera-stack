@@ -15,12 +15,12 @@ const {
   )),
   readPersistedDataStateFromSessionStorageMock: vi.fn<
     () =>
+      | undefined
       | {
           readonly data: readonly Record<string, unknown>[];
           readonly totalRows: number;
         }
-      | undefined
-  >(() => undefined),
+  >(() => {}),
   useGetColumnsMock: vi.fn(),
   useGetTablePersistenceKeyMock: vi.fn(() => 'orders'),
   useGetTablePlaceholderRowCountMock: vi.fn(),
@@ -76,6 +76,7 @@ describe('TableSkeleton', () => {
 
     return waitFor(() => {
       const tableProps = MockTable.mock.calls.at(-1)?.[0] as
+        | undefined
         | {
             dataTotalSelector?: (response: {
               readonly data: readonly Record<string, unknown>[];
@@ -85,8 +86,7 @@ describe('TableSkeleton', () => {
               readonly data: readonly Record<string, unknown>[];
               readonly totalRows: number;
             };
-          }
-        | undefined;
+          };
 
       expect(tableProps?.response.data).toEqual([{ name: 'Alice' }]);
       expect(tableProps?.response.totalRows).toBe(99);

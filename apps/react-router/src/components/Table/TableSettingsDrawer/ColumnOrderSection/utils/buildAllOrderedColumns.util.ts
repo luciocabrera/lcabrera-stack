@@ -24,8 +24,8 @@ export const buildAllOrderedColumns = <TData>({
           .filter((col): col is TableColumn<TData> => col !== undefined)
       : columns;
 
-  const remainingColumns = columns.filter(
-    (col) => !orderedColumns.some((orderedCol) => orderedCol.key === col.key),
+  const remainingColumns = columns.filter((col) =>
+    orderedColumns.every((orderedCol) => orderedCol.key !== col.key),
   );
 
   return [...orderedColumns, ...remainingColumns];

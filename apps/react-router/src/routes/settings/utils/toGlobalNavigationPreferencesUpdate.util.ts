@@ -28,30 +28,23 @@ export const toGlobalNavigationPreferencesUpdate = ({
   }
 
   return {
-    ...(isCollapsedChanged
-      ? {
-          collapsed:
-            draft.navigationCollapsed ===
-            DEFAULT_NAVIGATION_COLLAPSED_PREFERENCE
-              ? undefined
-              : draft.navigationCollapsed,
-        }
-      : {}),
-    ...(isPinnedChanged
-      ? {
-          pinned:
-            draft.navigationPinned === DEFAULT_NAVIGATION_PINNED_PREFERENCE
-              ? undefined
-              : draft.navigationPinned,
-        }
-      : {}),
-    ...(isSizeChanged
-      ? {
-          size:
-            draft.navigationSize === DEFAULT_NAVIGATION_SIZE_PREFERENCE
-              ? undefined
-              : draft.navigationSize,
-        }
-      : {}),
+    ...(isCollapsedChanged && {
+      collapsed:
+        draft.navigationCollapsed === DEFAULT_NAVIGATION_COLLAPSED_PREFERENCE
+          ? undefined
+          : draft.navigationCollapsed,
+    }),
+    ...(isPinnedChanged && {
+      pinned:
+        draft.navigationPinned === DEFAULT_NAVIGATION_PINNED_PREFERENCE
+          ? undefined
+          : draft.navigationPinned,
+    }),
+    ...(isSizeChanged && {
+      size:
+        draft.navigationSize === DEFAULT_NAVIGATION_SIZE_PREFERENCE
+          ? undefined
+          : draft.navigationSize,
+    }),
   };
 };

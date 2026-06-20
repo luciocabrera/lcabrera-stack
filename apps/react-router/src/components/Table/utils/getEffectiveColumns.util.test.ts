@@ -19,7 +19,7 @@ describe('getEffectiveColumns', () => {
   });
 
   it('filters out hidden columns', () => {
-    const columnVisibility = new Set<'id' | 'name' | 'age' | 'actions'>([
+    const columnVisibility = new Set<'actions' | 'age' | 'id' | 'name'>([
       'name',
     ]);
     const result = getEffectiveColumns({ columns, columnVisibility });

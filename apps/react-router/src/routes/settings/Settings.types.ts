@@ -12,6 +12,13 @@ import type {
 
 import { useGetGlobalNavigationPreferences } from '@/contexts/GlobalSettingsContext/selectors';
 
+export type BuildNavigationUpdateArgs = {
+  readonly draft: SettingsDraft;
+  readonly navigationPreferences: ReturnType<
+    typeof useGetGlobalNavigationPreferences
+  >;
+};
+
 export type SettingsDraft = {
   readonly navigationCollapsed: GlobalNavigationCollapsedPreference;
   readonly navigationPinned: GlobalNavigationPinnedPreference;
@@ -20,11 +27,4 @@ export type SettingsDraft = {
   readonly pinConflictResolution: PinConflictResolutionPreferenceOption;
   readonly pinSide: PinSidePreferenceOption;
   readonly unpinConflictResolution: UnpinConflictResolutionPreferenceOption;
-};
-
-export type BuildNavigationUpdateArgs = {
-  readonly draft: SettingsDraft;
-  readonly navigationPreferences: ReturnType<
-    typeof useGetGlobalNavigationPreferences
-  >;
 };

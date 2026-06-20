@@ -87,14 +87,14 @@ export type EnterpriseOrder = {
   weight_kg: string;
 };
 
-type EnterpriseOrderDetailResponse = {
-  data: EnterpriseOrder;
-};
-
 export type EnterpriseOrdersResponse = {
   data: EnterpriseOrder[];
   hasMore?: boolean;
   total: number;
+};
+
+type EnterpriseOrderDetailResponse = {
+  data: EnterpriseOrder;
 };
 
 type FetchEnterpriseOrdersParams = {

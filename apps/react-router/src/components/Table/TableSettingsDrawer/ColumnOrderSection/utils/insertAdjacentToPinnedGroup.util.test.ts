@@ -4,8 +4,8 @@ import type { DataKey } from '@/components/Table/Table.types';
 
 import { insertAdjacentToPinnedGroup } from './insertAdjacentToPinnedGroup.util';
 
-type TestRow = Record<string, unknown>;
 type TestDataKey = DataKey<TestRow>;
+type TestRow = Record<string, unknown>;
 
 describe('insertAdjacentToPinnedGroup', () => {
   it('inserts after last left-pinned column', () => {

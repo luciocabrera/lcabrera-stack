@@ -20,18 +20,20 @@ const createContainer = ({
 }: CreateContainerArgs): HTMLElement => {
   const container = document.createElement('div');
 
-  Object.defineProperty(container, 'offsetHeight', {
-    configurable: true,
-    value: offsetHeight,
-  });
-  Object.defineProperty(container, 'scrollHeight', {
-    configurable: true,
-    value: scrollHeight,
-  });
-  Object.defineProperty(container, 'scrollTop', {
-    configurable: true,
-    value: scrollTop,
-    writable: true,
+  Object.defineProperties(container, {
+    offsetHeight: {
+      configurable: true,
+      value: offsetHeight,
+    },
+    scrollHeight: {
+      configurable: true,
+      value: scrollHeight,
+    },
+    scrollTop: {
+      configurable: true,
+      value: scrollTop,
+      writable: true,
+    },
   });
 
   return container;

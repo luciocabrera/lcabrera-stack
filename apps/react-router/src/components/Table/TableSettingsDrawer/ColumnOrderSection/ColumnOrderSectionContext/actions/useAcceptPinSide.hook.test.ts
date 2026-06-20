@@ -74,7 +74,7 @@ vi.mock('../useColumnOrderSectionContextValue.hook', () => ({
   useColumnOrderSectionContextValue: () => ({ modalsStore }),
 }));
 vi.mock('@/contexts/GlobalSettingsContext/selectors', () => ({
-  useGetGlobalPinConflictResolutionPreference: () => undefined,
+  useGetGlobalPinConflictResolutionPreference: () => {},
 }));
 vi.mock('./useAcceptPinConflict.hook', () => ({
   useAcceptPinConflict: () => mockAcceptPinConflict,

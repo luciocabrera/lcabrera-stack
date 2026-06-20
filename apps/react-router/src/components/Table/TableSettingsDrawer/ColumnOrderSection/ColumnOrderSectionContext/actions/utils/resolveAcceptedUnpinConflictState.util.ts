@@ -26,13 +26,13 @@ type ResolveAcceptedUnpinConflictStateResult<
   TData extends Record<string, unknown>,
 > =
   | {
-      readonly columnPinning: ColumnPinningState<TData>;
-      readonly kind: 'update-pinning';
-    }
-  | {
       readonly columnOrder: ColumnOrderState<TData>;
       readonly columnPinning: ColumnPinningState<TData>;
       readonly kind: 'update-order-and-pinning';
+    }
+  | {
+      readonly columnPinning: ColumnPinningState<TData>;
+      readonly kind: 'update-pinning';
     };
 
 export const resolveAcceptedUnpinConflictState = <

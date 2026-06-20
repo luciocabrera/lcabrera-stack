@@ -4,24 +4,6 @@ import type { PrefetchCache } from '@/types/ui.types';
 
 import { createMockStore } from './createMockStore.util';
 
-type ResolveFromCacheOrFetchArgs<TResponse> = {
-  readonly cache: PrefetchCache<TResponse> | undefined;
-  readonly expectedSkip: number;
-  readonly fetchFn: () => Promise<TResponse>;
-};
-
-type FirePrefetchArgs<TResponse> = {
-  readonly limit: number;
-  readonly nextSkip: number;
-  readonly onLoadMore: (params: {
-    readonly limit: number;
-    readonly skip: number;
-  }) => Promise<TResponse>;
-  readonly prefetchRef: {
-    current: PrefetchCache<TResponse>;
-  };
-};
-
 type CallableMock<TArgs extends readonly unknown[], TReturn> = ((
   ...args: TArgs
 ) => TReturn) & {
@@ -53,6 +35,24 @@ type CreatePaginatedFetchActionMocksResult<TDataState, TResponse> = {
   >;
   readonly setDataState: (nextState: TDataState) => void;
   readonly setMetaState: (nextState: Record<string, unknown>) => void;
+};
+
+type FirePrefetchArgs<TResponse> = {
+  readonly limit: number;
+  readonly nextSkip: number;
+  readonly onLoadMore: (params: {
+    readonly limit: number;
+    readonly skip: number;
+  }) => Promise<TResponse>;
+  readonly prefetchRef: {
+    current: PrefetchCache<TResponse>;
+  };
+};
+
+type ResolveFromCacheOrFetchArgs<TResponse> = {
+  readonly cache: PrefetchCache<TResponse> | undefined;
+  readonly expectedSkip: number;
+  readonly fetchFn: () => Promise<TResponse>;
 };
 
 export const createPaginatedFetchActionMocks = <TDataState, TResponse>({
@@ -101,7 +101,7 @@ export const createPaginatedFetchActionMocks = <TDataState, TResponse>({
             skip: nextSkip,
           };
         })
-        .catch(() => undefined);
+        .catch(() => {});
     },
   ) as CallableMock<[FirePrefetchArgs<TResponse>], void>;
 

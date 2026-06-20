@@ -48,7 +48,7 @@ vi.mock('@/components/Table/hooks', () => ({
 vi.mock(
   '@/contexts/GlobalSettingsContext/selectors/useGetGlobalPinConflictResolutionPreference.hook',
   () => ({
-    useGetGlobalPinConflictResolutionPreference: () => undefined,
+    useGetGlobalPinConflictResolutionPreference: () => {},
   }),
 );
 

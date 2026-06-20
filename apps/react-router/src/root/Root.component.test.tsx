@@ -13,9 +13,14 @@ const { toggleThemeMock, useLoaderDataMock, useThemeMock } = vi.hoisted(() => ({
   useThemeMock: vi.fn(),
 }));
 
-type MockThemeProviderProps = {
-  readonly children: ReactNode;
-  readonly initialTheme: ThemeMode;
+type MockAppNavigationProps = {
+  readonly isDarkMode: boolean;
+  readonly onToggleTheme: () => void;
+};
+
+type MockButtonProps = {
+  readonly children?: ReactNode;
+  readonly onClick?: () => void;
 };
 
 type MockGlobalSettingsProviderProps = {
@@ -26,14 +31,9 @@ type MockNotificationProviderProps = {
   readonly children: ReactNode;
 };
 
-type MockAppNavigationProps = {
-  readonly isDarkMode: boolean;
-  readonly onToggleTheme: () => void;
-};
-
-type MockButtonProps = {
-  readonly children?: ReactNode;
-  readonly onClick?: () => void;
+type MockThemeProviderProps = {
+  readonly children: ReactNode;
+  readonly initialTheme: ThemeMode;
 };
 
 vi.mock('react-router', async () => {

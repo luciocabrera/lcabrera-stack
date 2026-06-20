@@ -28,8 +28,8 @@ type ReadTableLoaderStateFromRequestResult<TData> = {
   readonly columnVisibility: Set<keyof TData>;
   readonly filters: ColumnFiltersState<TData>;
   readonly sorting: SortingState<TData>;
-  readonly standaloneFiltersParam: string | null;
-  readonly standaloneSortParam: string | null;
+  readonly standaloneFiltersParam: null | string;
+  readonly standaloneSortParam: null | string;
 };
 
 const isFilterCompatibleWithColumn = <TData extends Record<string, unknown>>({

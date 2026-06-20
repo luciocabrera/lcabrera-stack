@@ -21,15 +21,6 @@ type ResolveOrderConflictUpdateResult =
       readonly pendingPinning: ColumnPinningState;
     }
   | {
-      readonly kind: 'open-conflict';
-      readonly orderConflict: {
-        readonly description: string;
-        readonly isOpen: true;
-        readonly pendingOrder: ColumnOrderState;
-        readonly pendingPinning: ColumnPinningState;
-      };
-    }
-  | {
       readonly kind: 'auto-accept-conflict';
       readonly orderConflict: {
         readonly description: string;
@@ -38,6 +29,15 @@ type ResolveOrderConflictUpdateResult =
         readonly pendingPinning: ColumnPinningState;
       };
       readonly resolution: OrderConflictResolution;
+    }
+  | {
+      readonly kind: 'open-conflict';
+      readonly orderConflict: {
+        readonly description: string;
+        readonly isOpen: true;
+        readonly pendingOrder: ColumnOrderState;
+        readonly pendingPinning: ColumnPinningState;
+      };
     };
 
 export const resolveOrderConflictUpdate = ({

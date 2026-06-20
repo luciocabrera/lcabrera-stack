@@ -23,6 +23,7 @@ const {
   triggerOutsideClick,
 } = vi.hoisted(() => {
   let latestVirtualListProps:
+    | undefined
     | {
         readonly dataState: VirtualListDataState;
         readonly filter: SelectFilter;
@@ -33,8 +34,7 @@ const {
         readonly onFetchInitial?: () => Promise<void> | void;
         readonly onFetchMore?: () => Promise<void> | void;
         readonly shouldFillHeight: boolean;
-      }
-    | undefined;
+      };
   let onClickOutside: (() => void) | undefined;
 
   return {

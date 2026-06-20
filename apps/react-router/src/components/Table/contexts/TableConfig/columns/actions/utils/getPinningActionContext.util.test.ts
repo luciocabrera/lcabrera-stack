@@ -11,10 +11,10 @@ describe('getPinningActionContext', () => {
   it('returns safe defaults when stores have no state', () => {
     const context = getPinningActionContext({
       columnsStore: {
-        get: () => undefined,
+        get: () => {},
       },
       metaStore: {
-        get: () => undefined,
+        get: () => {},
       },
     });
 
