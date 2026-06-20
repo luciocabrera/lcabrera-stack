@@ -12,11 +12,10 @@ export const RouteErrorBoundary = ({
   defaultMessage,
   error,
 }: RouteErrorBoundaryProps) => {
-  let details = defaultMessage;
-
-  if (import.meta.env.DEV && error instanceof Error) {
-    details = error.message;
-  }
+  const details =
+    import.meta.env.DEV && error instanceof Error
+      ? error.message
+      : defaultMessage;
 
   return (
     <div {...stylex.props(styles.container)}>

@@ -91,8 +91,9 @@ describe('RadioOptionGroup', () => {
     const descriptionId = radio.getAttribute('aria-describedby');
 
     expect(descriptionId).toBeTruthy();
-    expect(document.getElementById(descriptionId ?? '')?.textContent).toBe(
-      'With description',
-    );
+    const escapedId = CSS?.escape?.(descriptionId ?? '') ?? descriptionId ?? '';
+    expect(
+      document.querySelector(`[id="${CSS.escape(escapedId)}"]`)?.textContent,
+    ).toBe('With description');
   });
 });

@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+// eslint-disable-next-line @typescript-eslint/no-explicit-any, unicorn/consistent-function-scoping
 
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -8,32 +9,50 @@ const {
   metaStoreMock,
   readPersistedStateFromSessionStorageMock,
   readPersistedUiStateFromSessionStorageMock,
-} = vi.hoisted(() => ({
-  columnsStoreMock: {
-    get: vi.fn(() => ({
-      columnFilters: {},
-      columnGroups: { centerCols: [], leftPinnedCols: [], rightPinnedCols: [] },
-      columnOrder: ['id', 'name', 'age'],
-      columnPinning: { left: [], right: [] },
-      columns: [
-        { dataType: 'string', key: 'id', label: 'ID' },
-        { dataType: 'string', key: 'name', label: 'Name' },
-        { dataType: 'number', key: 'age', label: 'Age' },
-      ],
-      columnSizing: {},
-      columnVisibility: new Set<string>(),
-      effectiveColumns: [],
-      normalizedColumns: {},
-      pinnedColumnOffsets: {},
-      sorting: [],
-      staticKeys: new Set<string>(),
-    })),
-    set: vi.fn(),
-  },
-  metaStoreMock: { set: vi.fn() },
-  readPersistedStateFromSessionStorageMock: vi.fn(() => ({})),
-  readPersistedUiStateFromSessionStorageMock: vi.fn(() => ({})),
-}));
+} = vi.hoisted(() => {
+  const noop = (): void => {};
+  const subscribeNoop = () => noop;
+
+  return {
+    columnsStoreMock: {
+      get: vi.fn(() => ({
+        columnFilters: {},
+        columnGroups: {
+          centerCols: [],
+          leftPinnedCols: [],
+          rightPinnedCols: [],
+        },
+        columnOrder: ['id', 'name', 'age'],
+        columnPinning: { left: [], right: [] },
+        columns: [
+          { dataType: 'string', key: 'id', label: 'ID' },
+          { dataType: 'string', key: 'name', label: 'Name' },
+          { dataType: 'number', key: 'age', label: 'Age' },
+        ],
+        columnSizing: {},
+        columnVisibility: new Set<string>(),
+        effectiveColumns: [],
+        normalizedColumns: {},
+        pinnedColumnOffsets: {},
+        sorting: [],
+        staticKeys: new Set<string>(),
+      })),
+      getServerSnapshot: vi.fn(),
+      reset: vi.fn(),
+      set: vi.fn(),
+      subscribe: vi.fn(subscribeNoop),
+    },
+    metaStoreMock: {
+      get: vi.fn(() => ({})),
+      getServerSnapshot: vi.fn(),
+      reset: vi.fn(),
+      set: vi.fn(),
+      subscribe: vi.fn(subscribeNoop),
+    },
+    readPersistedStateFromSessionStorageMock: vi.fn(() => ({})),
+    readPersistedUiStateFromSessionStorageMock: vi.fn(() => ({})),
+  };
+});
 
 vi.mock('@/components/Table/utils', async (importOriginal) => {
   const orig =
@@ -49,29 +68,20 @@ vi.mock('@/components/Table/utils', async (importOriginal) => {
 
 import { useHydrateTableSessionState } from './useHydrateTableSessionState.hook';
 
-const createStoreMock = () => ({
-  get: vi.fn(),
-  getServerSnapshot: vi.fn(),
-  reset: vi.fn(),
-  set: vi.fn(),
-  subscribe: vi.fn(),
-});
-
-type StoreMock = ReturnType<typeof createStoreMock>;
-
 beforeEach(() => {
   vi.clearAllMocks();
 });
 
 describe('useHydrateTableSessionState', () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   it('does not call store.set when sessionStorage is empty', () => {
     readPersistedStateFromSessionStorageMock.mockReturnValue({});
     readPersistedUiStateFromSessionStorageMock.mockReturnValue({});
 
     renderHook(() =>
       useHydrateTableSessionState({
-        columnsStore: columnsStoreMock as StoreMock,
-        metaStore: metaStoreMock as StoreMock,
+        columnsStore: columnsStoreMock as any,
+        metaStore: metaStoreMock as any,
         persistenceKey: 'orders',
       }),
     );
@@ -87,8 +97,8 @@ describe('useHydrateTableSessionState', () => {
 
     renderHook(() =>
       useHydrateTableSessionState({
-        columnsStore: columnsStoreMock as StoreMock,
-        metaStore: metaStoreMock as StoreMock,
+        columnsStore: columnsStoreMock as any,
+        metaStore: metaStoreMock as any,
         persistenceKey: 'orders',
       }),
     );
@@ -113,8 +123,8 @@ describe('useHydrateTableSessionState', () => {
 
     renderHook(() =>
       useHydrateTableSessionState({
-        columnsStore: columnsStoreMock as StoreMock,
-        metaStore: metaStoreMock as StoreMock,
+        columnsStore: columnsStoreMock as any,
+        metaStore: metaStoreMock as any,
         persistenceKey: 'orders',
       }),
     );
@@ -130,8 +140,8 @@ describe('useHydrateTableSessionState', () => {
   it('does nothing when the persistence key is empty', () => {
     renderHook(() =>
       useHydrateTableSessionState({
-        columnsStore: columnsStoreMock as StoreMock,
-        metaStore: metaStoreMock as StoreMock,
+        columnsStore: columnsStoreMock as any,
+        metaStore: metaStoreMock as any,
         persistenceKey: '',
       }),
     );
@@ -148,8 +158,8 @@ describe('useHydrateTableSessionState', () => {
 
     const { rerender } = renderHook(() =>
       useHydrateTableSessionState({
-        columnsStore: columnsStoreMock as StoreMock,
-        metaStore: metaStoreMock as StoreMock,
+        columnsStore: columnsStoreMock as any,
+        metaStore: metaStoreMock as any,
         persistenceKey: 'orders',
       }),
     );

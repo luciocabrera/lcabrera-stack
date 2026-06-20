@@ -4,5 +4,5 @@ import type { AppNotification } from '@/contexts/NotificationContext';
 export const sortNotificationsByNewest = (
   notifications: readonly AppNotification[],
 ): readonly AppNotification[] => {
-  return [...notifications].reverse();
+  return notifications.toReversed();
 };

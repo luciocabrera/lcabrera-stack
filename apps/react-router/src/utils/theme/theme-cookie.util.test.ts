@@ -46,41 +46,15 @@ describe('setThemeCookie', () => {
     vi.restoreAllMocks();
   });
 
-  it('sets document.cookie with theme value', () => {
-    let cookieValue = '';
-    const docMock = { cookie: '' };
-    Object.defineProperty(docMock, 'cookie', {
-      get: () => cookieValue,
-      set: (val: string) => {
-        cookieValue = val;
-      },
-    });
-    vi.stubGlobal('document', docMock);
+  it('does nothing when fetch is unavailable', () => {
+    vi.stubGlobal('fetch', undefined);
 
-    setThemeCookie('dark');
-    expect(cookieValue).toContain('theme=dark');
-    expect(cookieValue).toContain('SameSite=Lax');
-  });
-
-  it('does nothing when document is undefined (SSR)', () => {
-    vi.stubGlobal('document', undefined);
     // Should not throw
     expect(() => setThemeCookie('light')).not.toThrow();
   });
 
   it('submits theme persistence to server action when fetch is available', async () => {
-    let cookieValue = '';
-    const docMock = { cookie: '' };
     const fetchMock = vi.fn(() => Promise.resolve(new Response(undefined)));
-
-    Object.defineProperty(docMock, 'cookie', {
-      get: () => cookieValue,
-      set: (val: string) => {
-        cookieValue = val;
-      },
-    });
-
-    vi.stubGlobal('document', docMock);
     vi.stubGlobal('fetch', fetchMock);
     vi.stubGlobal('location', {
       pathname: '/car-sales',

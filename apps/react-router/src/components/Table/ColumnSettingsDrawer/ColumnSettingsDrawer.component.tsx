@@ -81,7 +81,7 @@ export const ColumnSettingsDrawer = <TData extends Record<string, unknown>>({
       ? []
       : [
           {
-            children: <PinningSection columnKey={columnKey} isBusy={isBusy} />,
+            children: <PinningSection isBusy={isBusy} />,
             header: 'Pinning',
             key: 'pinning',
           },

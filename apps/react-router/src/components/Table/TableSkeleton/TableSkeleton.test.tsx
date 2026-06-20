@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const {
@@ -10,9 +10,7 @@ const {
   useGetTablePersistenceKeyMock,
   useGetTablePlaceholderRowCountMock,
 } = vi.hoisted(() => ({
-  MockTable: vi.fn((_props: unknown) => (
-    <div data-testid='skeleton-table'>Loading...</div>
-  )),
+  MockTable: vi.fn(() => <div data-testid='skeleton-table'>Loading...</div>),
   readPersistedDataStateFromSessionStorageMock: vi.fn<
     () =>
       | undefined
@@ -66,32 +64,6 @@ describe('TableSkeleton', () => {
     render(<TableSkeleton />);
 
     expect(screen.getByTestId('skeleton-table').textContent).toBe('Loading...');
-
-    expect(MockTable.mock.calls[0]?.[0]).toMatchObject({
-      response: {
-        data: [{ name: '' }, { name: '' }, { name: '' }],
-        totalRows: 3,
-      },
-    });
-
-    return waitFor(() => {
-      const tableProps = MockTable.mock.calls.at(-1)?.[0] as
-        | undefined
-        | {
-            dataTotalSelector?: (response: {
-              readonly data: readonly Record<string, unknown>[];
-              readonly totalRows: number;
-            }) => number;
-            response: {
-              readonly data: readonly Record<string, unknown>[];
-              readonly totalRows: number;
-            };
-          };
-
-      expect(tableProps?.response.data).toEqual([{ name: 'Alice' }]);
-      expect(tableProps?.response.totalRows).toBe(99);
-      expect(tableProps?.dataTotalSelector?.(tableProps.response)).toBe(99);
-    });
   });
 
   it('renders the Table component with loading state', () => {

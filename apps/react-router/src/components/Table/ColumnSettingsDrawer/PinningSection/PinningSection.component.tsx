@@ -16,10 +16,7 @@ import { useGetColumnPinning } from '../ColumnDrawerContext/selectors';
 import { styles } from './PinningSection.stylex';
 import { PinningSectionToolbar } from './PinningSectionToolbar';
 
-export const PinningSection = <TData,>({
-  columnKey: _columnKey,
-  isBusy = false,
-}: PinningSectionProps<TData>) => {
+export const PinningSection = ({ isBusy = false }: PinningSectionProps) => {
   const columnPinning = useGetColumnPinning();
   const setColumnPinning = useSetColumnPinning();
 

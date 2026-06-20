@@ -86,12 +86,14 @@ export const NotificationProvider = ({
   };
 
   useEffect(() => {
+    const timeoutMap = timeoutMapRef.current;
+
     return () => {
-      for (const timeoutId of timeoutMapRef.current.values()) {
+      for (const timeoutId of timeoutMap.values()) {
         clearTimeout(timeoutId);
       }
 
-      timeoutMapRef.current.clear();
+      timeoutMap.clear();
     };
   }, []);
 

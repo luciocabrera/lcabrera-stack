@@ -39,9 +39,9 @@ beforeEach(() => {
   selectedTabMock.mockReset();
   selectedTabMock.mockReturnValue('general');
   setSelectedTabMock.mockReset();
-  Object.keys(tableColumnFiltersMock).forEach((key) => {
+  for (const key of Object.keys(tableColumnFiltersMock)) {
     delete tableColumnFiltersMock[key];
-  });
+  }
   resetTableDrawerSettingsMock.mockReset();
   setTableIsTableSettingsOpenMock.mockReset();
   setTableIsTableSettingsPinnedMock.mockReset();

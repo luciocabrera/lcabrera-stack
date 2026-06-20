@@ -20,7 +20,7 @@ afterEach(() => {
 
 describe('TableSuspenseBoundary', () => {
   it('renders suspense fallback while data promise is pending', () => {
-    const pendingPromise = new Promise<number>((_resolve) => void 0);
+    const { promise: pendingPromise } = Promise.withResolvers<number>();
 
     render(
       <TableSuspenseBoundary dataPromise={pendingPromise}>

@@ -39,13 +39,13 @@ const createInitialMetaState = (): TableMetaState => {
 
 type MetaStoreState = ReturnType<typeof createInitialMetaState>;
 
-function subscribeNoop() {
-  return unsubscribeNoop;
-}
-
-function unsubscribeNoop() {
+const unsubscribeNoop = () => {
   // no-op unsubscribe for the test stub
-}
+};
+
+const subscribeNoop = () => {
+  return unsubscribeNoop;
+};
 
 const storesRef: {
   columnsStore: MockStore<Record<string, never>>;

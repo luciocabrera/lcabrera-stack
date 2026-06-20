@@ -48,7 +48,6 @@ const {
 const MockTableBodyCell = vi.hoisted(() => {
   return function MockTableBodyCell({
     children,
-    isLoadingState: _isLoadingState,
     label,
     value,
   }: MockTableBodyCellProps) {

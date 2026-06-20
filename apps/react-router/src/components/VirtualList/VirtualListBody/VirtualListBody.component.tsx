@@ -143,7 +143,7 @@ export const VirtualListBody = ({
         {!isInitialLoading && filteredOptions.length > 0 && (
           <div {...stylex.props(styles.virtualScrollArea(totalHeight))}>
             <div {...stylex.props(styles.virtualOffset(offsetY))}>
-              {Array.from({ length: endIndex - startIndex }).map((_, i) => {
+              {Array.from({ length: endIndex - startIndex }, (_, i) => {
                 const index = startIndex + i;
                 let key = `option-${index}`;
                 if (index === 0 && shouldShowSelectAll) {

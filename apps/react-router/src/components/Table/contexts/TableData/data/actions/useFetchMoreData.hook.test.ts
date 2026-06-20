@@ -104,14 +104,8 @@ describe('useFetchMoreData', () => {
   });
 
   it('uses the latest loaded row count and prevents overlapping fetches', async () => {
-    let resolveLoadMore: ((value: TestResponse) => void) | undefined;
-
-    const onLoadMore = vi.fn(
-      () =>
-        new Promise<TestResponse>((resolve) => {
-          resolveLoadMore = resolve;
-        }),
-    );
+    const { promise, resolve } = Promise.withResolvers<TestResponse>();
+    const onLoadMore = vi.fn(() => promise);
 
     const { result } = renderHook(() =>
       useFetchMoreData<TestRow, TestResponse>(),
@@ -140,7 +134,7 @@ describe('useFetchMoreData', () => {
     });
 
     await act(async () => {
-      resolveLoadMore?.({
+      resolve({
         rows: [{ id: 2 }, { id: 3 }],
         total: 3,
       });

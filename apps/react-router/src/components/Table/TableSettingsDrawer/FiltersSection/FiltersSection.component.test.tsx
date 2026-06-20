@@ -24,9 +24,9 @@ const {
 }));
 
 beforeEach(() => {
-  Object.keys(columnFiltersMock).forEach((key) => {
+  for (const key of Object.keys(columnFiltersMock)) {
     delete columnFiltersMock[key];
-  });
+  }
   columnFiltersMock.status = {
     operator: 'equals',
     type: 'text',

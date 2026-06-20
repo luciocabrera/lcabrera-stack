@@ -76,10 +76,10 @@ export const usePersistTableStateAction = (): PersistTableStateAction => {
       return false;
     }
 
-    serializedEntries.forEach(({ key, value }) => {
+    for (const { key, value } of serializedEntries) {
       // Write to sessionStorage immediately (tab-isolated, survives refresh)
       writeToSessionStorage({ key, value });
-    });
+    }
 
     // Write to cookie via server action (SSR baseline for new tabs)
     void fetcher.submit(

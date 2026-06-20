@@ -76,9 +76,10 @@ const buildGeneratedColumn = ({
   } satisfies TableColumn<WideAlltypes150>;
 };
 
-const GENERATED_COLUMNS: TableColumn<WideAlltypes150>[] = [
-  ...Array.from({ length: 149 }).keys(),
-].map((zeroBasedIndex) => buildGeneratedColumn({ index: zeroBasedIndex + 1 }));
+const GENERATED_COLUMNS: TableColumn<WideAlltypes150>[] = Array.from(
+  { length: 149 },
+  (_, zeroBasedIndex) => buildGeneratedColumn({ index: zeroBasedIndex + 1 }),
+);
 
 export const COLUMNS: TableColumn<WideAlltypes150>[] = [
   ID_COLUMN,

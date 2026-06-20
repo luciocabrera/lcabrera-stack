@@ -285,7 +285,7 @@ describe('useBatchSetColumnSettings', () => {
   it('does not set isLoading when only UI-only changes occur (column width, pinning)', () => {
     // Mock resolved update with same filters/sorting (UI-only changes)
     mockResolveBatchColumnSettingsUpdate.mockReturnValue({
-      columnFilters: {}, // Same as current state (empty)
+      columnFilters: {},
       columnGroups: {
         centerCols: [{ key: 'age', label: 'Age' }],
         leftPinnedCols: [{ key: 'id', label: 'ID' }],
@@ -318,7 +318,9 @@ describe('useBatchSetColumnSettings', () => {
         },
       },
       sorting: [], // Same as current state (empty)
-    } as any);
+    } as unknown as Parameters<
+      typeof mockResolveBatchColumnSettingsUpdate.mockReturnValue
+    >[0]);
 
     const { result } = renderHook(() =>
       useBatchSetColumnSettings<{
@@ -347,7 +349,13 @@ describe('useBatchSetColumnSettings', () => {
   it('sets isLoading when query-affecting changes occur (filters or sorting)', () => {
     // Mock resolved update with different sorting (query-affecting change)
     mockResolveBatchColumnSettingsUpdate.mockReturnValue({
-      columnFilters: {}, // Same as current state
+      columnFilters: {
+        name: {
+          operator: 'contains' as const,
+          type: 'text' as const,
+          value: 'test',
+        },
+      },
       columnGroups: {
         centerCols: [{ key: 'age', label: 'Age' }],
         leftPinnedCols: [{ key: 'id', label: 'ID' }],
@@ -380,7 +388,7 @@ describe('useBatchSetColumnSettings', () => {
         },
       },
       sorting: [{ columnKey: 'name', direction: 'desc' }], // Different from current state (was empty)
-    } as any);
+    });
 
     const { result } = renderHook(() =>
       useBatchSetColumnSettings<{

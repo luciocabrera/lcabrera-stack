@@ -63,7 +63,7 @@ vi.mock('@/components/DraggableList', () => ({
     <div>
       <button
         onClick={() => {
-          onOrderChange(items.map((item) => item.id).reverse());
+          onOrderChange(items.map((item) => item.id).toReversed());
         }}
         type='button'
       >
@@ -159,7 +159,7 @@ vi.mock('@/components/ToggleSwitch', () => ({
     readonly isChecked: boolean;
     readonly isDisabled?: boolean;
     readonly label: string;
-    readonly onChange: (checked: boolean) => void;
+    readonly onChange: (isChecked: boolean) => void;
   }) => (
     <button
       aria-label={`${label}-${isChecked ? 'on' : 'off'}`}
