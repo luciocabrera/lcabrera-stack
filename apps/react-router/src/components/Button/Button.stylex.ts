@@ -5,11 +5,11 @@ import {
   baseInteractiveStyles,
   colorVariants,
   orientationVariants,
-  rippleBase,
-  skeleton,
-  sizeVariants,
-  widthVariants,
   overlayStyles,
+  rippleBase,
+  sizeVariants,
+  skeleton,
+  widthVariants,
 } from '@/design-system/tokens/commons.stylex';
 
 const buttonSpecificStyles = stylex.create({

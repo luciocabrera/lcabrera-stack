@@ -94,7 +94,7 @@ const getHeaderDensityStyle = (
     return styles.headerDensityLarge;
   }
 
-  return undefined;
+  return;
 };
 
 const getBodyDensityStyle = (
@@ -108,7 +108,7 @@ const getBodyDensityStyle = (
     return styles.bodyDensityLarge;
   }
 
-  return undefined;
+  return;
 };
 
 const resolveExpandButtonLabel = (isExpanded: boolean): string => {
@@ -198,26 +198,26 @@ export const AppNavigation = ({
 
   const handleToggleExpanded = () => {
     setIsExpanded((currentIsExpanded) => {
-      const nextIsExpanded = !currentIsExpanded;
+      const isNextIsExpanded = !currentIsExpanded;
 
       setGlobalNavigationPreferences({
-        collapsed: nextIsExpanded ? 'expanded' : 'collapsed',
+        collapsed: isNextIsExpanded ? 'expanded' : 'collapsed',
       });
 
-      return nextIsExpanded;
+      return isNextIsExpanded;
     });
   };
 
   const handleTogglePinned = () => {
     setIsPinned((currentIsPinned) => {
-      const nextIsPinned = !currentIsPinned;
+      const isNextIsPinned = !currentIsPinned;
 
       setGlobalNavigationPreferences({
-        pinned: nextIsPinned ? 'pinned' : 'unpinned',
+        pinned: isNextIsPinned ? 'pinned' : 'unpinned',
       });
-      setIsOpen(!nextIsPinned);
+      setIsOpen(!isNextIsPinned);
 
-      return nextIsPinned;
+      return isNextIsPinned;
     });
   };
 

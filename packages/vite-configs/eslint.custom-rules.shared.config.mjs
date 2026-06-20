@@ -1,43 +1,93 @@
 import { createRequire } from 'node:module';
+import { readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 import localRules from '../eslint-local-rules/index.js';
 
 const workspaceRequire = createRequire(`${process.cwd()}/package.json`);
-const tseslint = await import(workspaceRequire.resolve('typescript-eslint'));
-// const tseslint = tseslintImport.default ?? tseslintImport;
-const perfectionist = await import(
-  workspaceRequire.resolve('eslint-plugin-perfectionist')
+const resolveWorkspaceImportSpecifier = (specifier) => {
+  try {
+    return workspaceRequire.resolve(specifier);
+  } catch (error) {
+    if (
+      !error ||
+      typeof error !== 'object' ||
+      !('code' in error) ||
+      error.code !== 'ERR_PACKAGE_PATH_NOT_EXPORTED'
+    ) {
+      throw error;
+    }
+
+    const packageJsonPath = workspaceRequire.resolve(
+      `${specifier}/package.json`,
+    );
+    const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
+    const rootExport = packageJson.exports?.['.'];
+
+    let entryPoint;
+    if (typeof rootExport === 'string') {
+      entryPoint = rootExport;
+    } else if (rootExport && typeof rootExport === 'object') {
+      entryPoint =
+        rootExport.import ?? rootExport.default ?? rootExport.require;
+    }
+
+    entryPoint ??= packageJson.module ?? packageJson.main;
+
+    if (typeof entryPoint !== 'string') {
+      throw error;
+    }
+
+    return pathToFileURL(resolve(dirname(packageJsonPath), entryPoint)).href;
+  }
+};
+
+const importFromWorkspace = async (specifier) => {
+  return await import(resolveWorkspaceImportSpecifier(specifier));
+};
+
+const tseslintImport = await importFromWorkspace('typescript-eslint');
+const tseslint = tseslintImport.default ?? tseslintImport;
+
+const perfectionistImport = await importFromWorkspace(
+  'eslint-plugin-perfectionist',
 );
-// const perfectionist = perfectionistImport.default ?? perfectionistImport;
-const stylexPlugin = await import(
-  workspaceRequire.resolve('@stylexjs/eslint-plugin')
+const perfectionist = perfectionistImport.default ?? perfectionistImport;
+
+const stylexPluginImport = await importFromWorkspace('@stylexjs/eslint-plugin');
+const stylexPlugin = stylexPluginImport.default ?? stylexPluginImport;
+
+const eslintImport = await importFromWorkspace('@eslint/js');
+const eslint = eslintImport.default ?? eslintImport;
+
+const eslintConfigPrettierImport = await importFromWorkspace(
+  'eslint-config-prettier/flat',
 );
+const eslintConfigPrettier =
+  eslintConfigPrettierImport.default ?? eslintConfigPrettierImport;
 
-const eslint = await import(workspaceRequire.resolve('@eslint/js'));
+const reactDomImport = await importFromWorkspace('eslint-plugin-react-dom');
+const reactDom = reactDomImport.default ?? reactDomImport;
 
-const eslintConfigPrettier = await import(
-  workspaceRequire.resolve('eslint-config-prettier/flat')
+const reactHooksImport = await importFromWorkspace('eslint-plugin-react-hooks');
+const reactHooks = reactHooksImport.default ?? reactHooksImport;
+
+const reactRefreshImport = await importFromWorkspace(
+  'eslint-plugin-react-refresh',
 );
+const reactRefresh = reactRefreshImport.default ?? reactRefreshImport;
 
-const reactDom = await import(
-  workspaceRequire.resolve('eslint-plugin-react-dom')
-);
+const reactXImport = await importFromWorkspace('eslint-plugin-react-x');
+const reactX = reactXImport.default ?? reactXImport;
 
-const reactHooks = await import(
-  workspaceRequire.resolve('eslint-plugin-react-hooks')
-);
+const securityImport = await importFromWorkspace('eslint-plugin-security');
+const security = securityImport.default ?? securityImport;
 
-const reactRefresh = await import(
-  workspaceRequire.resolve('eslint-plugin-react-refresh')
-);
-
-const reactX = await import(workspaceRequire.resolve('eslint-plugin-react-x'));
-
-const security = await import(
-  workspaceRequire.resolve('eslint-plugin-security')
-);
-
-const unicorn = await import(workspaceRequire.resolve('eslint-plugin-unicorn'));
+const unicornImport = await importFromWorkspace('eslint-plugin-unicorn');
+const unicorn = unicornImport.default ?? unicornImport;
+const globalsImport = await importFromWorkspace('globals');
+const globals = globalsImport.default ?? globalsImport;
 // const stylexPlugin = stylexPluginImport.default ?? stylexPluginImport;
 
 // import eslint from '@eslint/js';
@@ -98,8 +148,18 @@ export const createCustomRulesLintConfig = ({ ignorePatterns = [] } = {}) => [
   // 4. Formatting (Prettier - Must be last to disable conflicts)
   eslintConfigPrettier,
 
-  tseslint.configs.recommended,
+  ...(Array.isArray(tseslint.configs.recommended)
+    ? tseslint.configs.recommended
+    : [tseslint.configs.recommended]),
 
+  {
+    rules: {
+      'unicorn/name-replacements': 'off',
+      'unicorn/prevent-abbreviations': 'off',
+      'security/detect-object-injection': 'off',
+      'unicorn/filename-case': 'off',
+    },
+  },
   // 5. JavaScript files configuration (for Node.js server files, etc.)
   {
     files: ['**/*.js', '**/*.mjs', '**/*.cjs'],
@@ -126,7 +186,6 @@ export const createCustomRulesLintConfig = ({ ignorePatterns = [] } = {}) => [
       'typescript-eslint': tseslint.plugin,
       '@typescript-eslint': tseslint.plugin,
       'local-rules': localRules,
-      perfectionist,
     },
     rules: {
       '@stylexjs/sort-keys': 'warn',
@@ -151,7 +210,6 @@ export const createCustomRulesLintConfig = ({ ignorePatterns = [] } = {}) => [
     files: ['src/**/*.stylex.ts'],
     plugins: {
       '@stylexjs': stylexPlugin,
-      perfectionist,
     },
     rules: {
       'local-rules/destructuring-for-functions': 'off',

@@ -64,12 +64,12 @@ export default function handleRequest(
   addPreloadHeaders(responseHeaders);
 
   return new Promise((resolve, reject) => {
-    let shellRendered = false;
-    let userAgent = request.headers.get('user-agent');
+    let isShellRendered = false;
+    const userAgent = request.headers.get('user-agent');
 
     // Ensure requests from bots and SPA Mode renders wait for all content to load before responding
     // https://react.dev/reference/react-dom/server/renderToPipeableStream#waiting-for-all-content-to-load-for-crawlers-and-static-generation
-    let readyOption: keyof RenderToPipeableStreamOptions =
+    const readyOption: keyof RenderToPipeableStreamOptions =
       (userAgent && isbot(userAgent)) || routerContext.isSpaMode
         ? 'onAllReady'
         : 'onShellReady';
@@ -90,7 +90,7 @@ export default function handleRequest(
           // Log streaming rendering errors from inside the shell.  Don't log
           // errors encountered during initial shell rendering since they'll
           // reject and get logged in handleDocumentRequest.
-          if (shellRendered) {
+          if (isShellRendered) {
             console.error(toError(error));
           }
         },
@@ -98,7 +98,7 @@ export default function handleRequest(
           reject(toError(error));
         },
         [readyOption]() {
-          shellRendered = true;
+          isShellRendered = true;
 
           const body = new PassThrough({
             final(callback) {

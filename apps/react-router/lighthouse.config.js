@@ -6,6 +6,7 @@
 export default {
   extends: 'lighthouse:default',
   settings: {
+    formFactor: 'mobile',
     onlyCategories: [
       'performance',
       'accessibility',
@@ -13,14 +14,13 @@ export default {
       'seo',
       'pwa',
     ],
-    formFactor: 'mobile',
-    throttling: {
-      rttMs: 40,
-      throughputKbps: 11024,
-      cpuSlowdownMultiplier: 1,
-    },
     // Emulate slow 4G network
     skipAudits: [],
+    throttling: {
+      cpuSlowdownMultiplier: 1,
+      rttMs: 40,
+      throughputKbps: 11_024,
+    },
     // All audits enabled by default
   },
 };
