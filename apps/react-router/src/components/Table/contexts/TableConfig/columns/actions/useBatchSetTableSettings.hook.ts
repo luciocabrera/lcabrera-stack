@@ -19,15 +19,15 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
     const columnsState = columnsStore.get();
     const metaState = metaStore.get();
     const persistenceKey = metaState?.persistenceKey ?? '';
-    const sortingHasChanged = !areEqualByJson({
+    const hasSortingChanged = !areEqualByJson({
       left: columnsState?.sorting,
       right: settings.sorting,
     });
-    const filtersHasChanged = !areEqualByJson({
+    const hasFiltersChanged = !areEqualByJson({
       left: columnsState?.columnFilters,
       right: settings.columnFilters,
     });
-    const queryHasChanged = sortingHasChanged || filtersHasChanged;
+    const hasQueryChanged = hasSortingChanged || hasFiltersChanged;
     const resolvedUpdate = resolveBatchTableSettingsUpdate<TData>({
       columns: columnsState?.columns ?? [],
       settings,
@@ -49,7 +49,7 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
       return;
     }
 
-    if (queryHasChanged) {
+    if (hasQueryChanged) {
       dataStore.set({
         isLoading: true,
       });

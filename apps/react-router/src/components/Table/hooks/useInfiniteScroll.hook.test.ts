@@ -22,18 +22,20 @@ const dataTotalSelector = (response: Response): number => response.total;
 const createContainer = (): HTMLElement => {
   const container = document.createElement('div');
 
-  Object.defineProperty(container, 'clientHeight', {
-    configurable: true,
-    value: 400,
-  });
-  Object.defineProperty(container, 'scrollHeight', {
-    configurable: true,
-    value: 1000,
-  });
-  Object.defineProperty(container, 'scrollTop', {
-    configurable: true,
-    value: 0,
-    writable: true,
+  Object.defineProperties(container, {
+    clientHeight: {
+      configurable: true,
+      value: 400,
+    },
+    scrollHeight: {
+      configurable: true,
+      value: 1000,
+    },
+    scrollTop: {
+      configurable: true,
+      value: 0,
+      writable: true,
+    },
   });
 
   return container;

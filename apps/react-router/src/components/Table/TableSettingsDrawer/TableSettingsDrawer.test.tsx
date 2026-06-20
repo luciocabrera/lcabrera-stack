@@ -54,12 +54,6 @@ type ButtonProps = {
   readonly title?: string;
 };
 
-type MockSidePanelProps = {
-  readonly children: ReactNode;
-  readonly isPinned: boolean;
-  readonly onClose: () => void;
-};
-
 type MockSidePanelHeaderProps = {
   readonly actions: ReactNode;
   readonly children: ReactNode;
@@ -69,6 +63,12 @@ type MockSidePanelHeaderToolbarProps = {
   readonly isPinned: boolean;
   readonly onClose: () => void;
   readonly onTogglePin: () => void;
+};
+
+type MockSidePanelProps = {
+  readonly children: ReactNode;
+  readonly isPinned: boolean;
+  readonly onClose: () => void;
 };
 
 type MockTabsProps = {

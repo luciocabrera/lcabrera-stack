@@ -28,15 +28,15 @@ export const useBatchSetColumnSettings = <TData>() => {
     });
 
     // Check if query-affecting changes (filters/sorting) have changed
-    const sortingHasChanged = !areEqualByJson({
+    const hasSortingChanged = !areEqualByJson({
       left: columnsState?.sorting,
       right: resolvedUpdate.sorting,
     });
-    const filtersHasChanged = !areEqualByJson({
+    const hasFiltersChanged = !areEqualByJson({
       left: columnsState?.columnFilters,
       right: resolvedUpdate.columnFilters,
     });
-    const queryHasChanged = sortingHasChanged || filtersHasChanged;
+    const hasQueryChanged = hasSortingChanged || hasFiltersChanged;
 
     if (
       !persistTableState(
@@ -54,7 +54,7 @@ export const useBatchSetColumnSettings = <TData>() => {
     }
 
     // Only trigger data fetch if query-affecting changes occurred
-    if (queryHasChanged) {
+    if (hasQueryChanged) {
       dataStore.set({
         isLoading: true,
       });
