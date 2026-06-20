@@ -27,7 +27,9 @@ export const pinAllBetween = <TKey extends string>({
   };
 
   if (side === 'left') {
-    for (const key of allOrderedKeys.slice(0, index + 1)) {
+    const keysBeforeOrAtIndex = allOrderedKeys.slice(0, index + 1);
+
+    for (const key of keysBeforeOrAtIndex) {
       if (next.left.includes(key)) continue;
 
       next.right = next.right.filter((pinnedKey) => pinnedKey !== key);
@@ -37,7 +39,9 @@ export const pinAllBetween = <TKey extends string>({
     return next;
   }
 
-  for (const key of allOrderedKeys.slice(index)) {
+  const keysFromIndex = allOrderedKeys.slice(index);
+
+  for (const key of keysFromIndex) {
     if (next.right.includes(key)) continue;
 
     next.left = next.left.filter((pinnedKey) => pinnedKey !== key);

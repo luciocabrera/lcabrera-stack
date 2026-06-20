@@ -79,7 +79,7 @@ export const buildTableBodyCellDescriptor = <
     label: col.label,
     minWidth,
     pinInfo,
-    value: col.key in rowData ? rowData[col.key] : '',
+    value: Object.hasOwn(rowData, col.key) ? rowData[col.key] : '',
     width,
   };
 };

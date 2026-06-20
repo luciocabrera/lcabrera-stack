@@ -33,7 +33,7 @@ export const AddFilterSection = ({
   const filterableColumnOptions = columns
     .filter((col) => col.isFilterable !== false)
     .map((col) => {
-      const hasActiveFilter = Boolean(filters[col.key]);
+      const hasActiveFilter = Object.hasOwn(filters, col.key);
       return {
         label: hasActiveFilter ? `${col.label} ⚠️ (filtered)` : col.label,
         value: col.key,
