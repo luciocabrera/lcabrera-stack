@@ -53,7 +53,7 @@ const mulberry32 = (seed: number) => {
     // oxlint-disable-next-line unicorn/number-literal-case -- formatter lowercases hex digits
     value = Math.trunc(value + 0x6d_2b_79_f5);
     let t = Math.imul(value ^ (value >>> 15), 1 | value);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
     return Math.trunc(t ^ (t >>> 14)) / 4_294_967_296;
   };
 };
@@ -61,9 +61,7 @@ const mulberry32 = (seed: number) => {
 const rng = mulberry32(123_456_789);
 
 // Generate mock data for the table
-const COLUMNS: TableColumn<MockRow>[] = [
-  ...Array.from({ length: 20 }).keys(),
-].map((i) => ({
+const COLUMNS: TableColumn<MockRow>[] = Array.from({ length: 20 }, (_, i) => ({
   dataType: (['number', 'string', 'boolean', 'date', 'currency'] as const)[
     i % 5
   ],
@@ -92,30 +90,36 @@ const randomString = (length: number) => {
   ).join('');
 };
 
-const tableData: MockRow[] = [...Array.from({ length: 10_000 }).keys()].map(
+const tableData: MockRow[] = Array.from(
+  { length: 10_000 },
   // fallow-ignore-next-line complexity -- temporary showcase-only data generator
-  (rowIdx) => {
+  (_, rowIdx) => {
     const row: MockRow = {};
     for (const [colIdx, col] of COLUMNS.entries()) {
       switch (col.dataType) {
         case 'boolean': {
           row[col.key] = rng() > 0.5;
+
           break;
         }
         case 'currency': {
           row[col.key] = `$${randomCurrency()}`;
+
           break;
         }
         case 'date': {
           row[col.key] = randomDate().toISOString().slice(0, 10);
+
           break;
         }
         case 'number': {
           row[col.key] = rowIdx * colIdx;
+
           break;
         }
         case 'string': {
           row[col.key] = randomString(8);
+
           break;
         }
         default: {
@@ -159,8 +163,9 @@ const STATIC_FRUITS = [
 ];
 
 // Large dataset for fetch simulation (5000 cities)
-const LARGE_DATASET = [...Array.from({ length: 5000 }).keys()].map(
-  (i) => `City_${String(i + 1).padStart(5, '0')}`,
+const LARGE_DATASET = Array.from(
+  { length: 5000 },
+  (_, i) => `City_${String(i + 1).padStart(5, '0')}`,
 );
 const FETCH_PAGE_SIZE = 50;
 const FETCH_DELAY_MS = 800;
