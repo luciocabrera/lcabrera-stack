@@ -33,7 +33,7 @@ export const AddSortSection = ({
     .filter(
       (col) =>
         col.isSortable !== false &&
-        !sorting.some((s) => s.columnKey === col.key),
+        sorting.every((s) => s.columnKey !== col.key),
     )
     .map((col) => ({ label: col.label, value: col.key }));
 

@@ -38,7 +38,7 @@ describe('restoreStaticColumnOrder', () => {
     const result = restoreStaticColumnOrder({
       currentOrder: ['id', 'name', 'age', 'actions'],
       newOrder: ['age', 'name', 'id', 'actions'],
-      staticKeys: new Set(['id', 'actions']),
+      staticKeys: new Set(['actions', 'id']),
     });
     expect(result[0]).toBe('id');
     expect(result[3]).toBe('actions');

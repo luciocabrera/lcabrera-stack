@@ -14,16 +14,16 @@ import {
   createStaticFilterOptions,
 } from '@/utils/filters';
 
-type DistinctStringColumnArgs = {
-  readonly columnName: keyof EnterpriseOrder;
+type BasicColumnArgs = {
+  readonly dataType: 'boolean' | 'currency' | 'date' | 'number' | 'string';
   readonly key: keyof EnterpriseOrder;
   readonly label: string;
   readonly maxWidth: number;
   readonly minWidth: number;
 };
 
-type BasicColumnArgs = {
-  readonly dataType: 'boolean' | 'currency' | 'date' | 'number' | 'string';
+type DistinctStringColumnArgs = {
+  readonly columnName: keyof EnterpriseOrder;
   readonly key: keyof EnterpriseOrder;
   readonly label: string;
   readonly maxWidth: number;

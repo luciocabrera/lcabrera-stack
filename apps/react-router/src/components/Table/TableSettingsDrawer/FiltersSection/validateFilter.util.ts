@@ -27,16 +27,12 @@ const validateSelectFilter = (
   if ('values' in filter && filter.values) {
     return filter.values.length > 0;
   }
-  if ('value' in filter && filter.value) {
-    return true;
-  }
-  return false;
+  return Boolean('value' in filter && filter.value);
 };
 
 const validateTextFilter = (
   filter: Extract<ColumnFilter, { type: 'text' }>,
 ) => {
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   return Boolean(filter.value?.trim());
 };
 

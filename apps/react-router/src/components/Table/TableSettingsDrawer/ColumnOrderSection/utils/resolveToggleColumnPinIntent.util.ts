@@ -8,6 +8,12 @@ import type { PinSide } from '@/types/ui.types';
 
 import { detectPinOrderConflict } from './detectPinOrderConflict.util';
 
+type PinSideModalResult<TData> = {
+  readonly columnKey: DataKey<TData>;
+  readonly columnLabel: string;
+  readonly isOpen: boolean;
+};
+
 type ResolveToggleColumnPinIntentArgs<TData> = {
   readonly allOrderedColumns: readonly TableColumn<TData>[];
   readonly columnKey: DataKey<TData>;
@@ -18,27 +24,10 @@ type ResolveToggleColumnPinIntentArgs<TData> = {
   readonly staticKeys?: Set<string>;
 };
 
-type PinSideModalResult<TData> = {
-  readonly columnKey: DataKey<TData>;
-  readonly columnLabel: string;
-  readonly isOpen: boolean;
-};
-
-type UnpinConflictModalResult<TData> = {
-  readonly columnKey: DataKey<TData>;
-  readonly columnLabel: string;
-  readonly isOpen: boolean;
-  readonly side: 'left' | 'right';
-};
-
 type ResolveToggleColumnPinIntentResult<TData> =
   | {
       readonly kind: 'apply-pinning-direct';
       readonly nextPinning: ColumnPinningState<TData>;
-    }
-  | {
-      readonly kind: 'open-pin-side-modal';
-      readonly modal: PinSideModalResult<TData>;
     }
   | {
       readonly kind: 'auto-accept-pin-side';
@@ -46,14 +35,25 @@ type ResolveToggleColumnPinIntentResult<TData> =
       readonly pinSide: PinSide;
     }
   | {
-      readonly kind: 'open-unpin-conflict-modal';
-      readonly modal: UnpinConflictModalResult<TData>;
-    }
-  | {
       readonly kind: 'auto-accept-unpin-conflict';
       readonly modal: UnpinConflictModalResult<TData>;
       readonly resolution: UnpinConflictResolution;
+    }
+  | {
+      readonly kind: 'open-pin-side-modal';
+      readonly modal: PinSideModalResult<TData>;
+    }
+  | {
+      readonly kind: 'open-unpin-conflict-modal';
+      readonly modal: UnpinConflictModalResult<TData>;
     };
+
+type UnpinConflictModalResult<TData> = {
+  readonly columnKey: DataKey<TData>;
+  readonly columnLabel: string;
+  readonly isOpen: boolean;
+  readonly side: 'left' | 'right';
+};
 
 export const resolveToggleColumnPinIntent = <TData>({
   allOrderedColumns,

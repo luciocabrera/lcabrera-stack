@@ -12,6 +12,7 @@ const {
   tableColumnsStore,
 } = vi.hoisted(() => {
   let state:
+    | undefined
     | {
         readonly columnFilters?: Record<string, unknown>;
         readonly columnOrder?: readonly string[];
@@ -22,8 +23,7 @@ const {
         readonly columnSizing?: Record<string, number>;
         readonly columnVisibility?: Record<string, boolean>;
         readonly sorting?: readonly unknown[];
-      }
-    | undefined;
+      };
 
   return {
     drawerColumnsStore: {

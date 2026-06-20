@@ -114,7 +114,7 @@ import { DetailsSection } from './DetailsSection.component';
 
 describe('DetailsSection', () => {
   it('renders required table metrics', () => {
-    dataStateMock.totalRows = 375001;
+    dataStateMock.totalRows = 375_001;
 
     render(<DetailsSection />);
 

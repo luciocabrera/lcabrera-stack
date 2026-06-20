@@ -16,11 +16,11 @@ export const TableSkeleton = () => {
   const persistenceKey = useGetTablePersistenceKey();
   const placeholderRowCount = useGetTablePlaceholderRowCount();
   const [persistedDataState, setPersistedDataState] = useState<
+    | undefined
     | {
         readonly data: readonly Record<string, unknown>[];
         readonly totalRows?: number;
       }
-    | undefined
   >(undefined);
 
   useEffect(() => {

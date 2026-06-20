@@ -23,17 +23,17 @@ import {
  */
 export const loader = ({ request }: LoaderFunctionArgs) => {
   const {
-    filters,
     columnOrder,
     columnSizing,
     columnVisibility,
+    filters,
 
     sorting,
     standaloneFiltersParam,
     standaloneSortParam,
   } = readTableLoaderStateFromRequest<EnterpriseOrder>({
-    includeFilters: true,
     columns: COLUMNS,
+    includeFilters: true,
 
     persistenceKey: PERSISTENCE_KEY,
     request,
@@ -54,8 +54,8 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
     });
 
   return {
-    columns: COLUMNS,
     columnOrder,
+    columns: COLUMNS,
 
     columnSizing,
     columnVisibility,

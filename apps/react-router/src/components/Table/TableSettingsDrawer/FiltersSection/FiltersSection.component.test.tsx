@@ -42,12 +42,12 @@ afterEach(() => {
   cleanup();
 });
 
-type AddFilterSectionProps = {
+type ActiveFiltersListProps = {
+  readonly expandedFilters: Set<string>;
   readonly onExpandedFiltersChange: (expandedFilters: Set<string>) => void;
 };
 
-type ActiveFiltersListProps = {
-  readonly expandedFilters: Set<string>;
+type AddFilterSectionProps = {
   readonly onExpandedFiltersChange: (expandedFilters: Set<string>) => void;
 };
 

@@ -9,18 +9,18 @@ import type { loader } from './enterprise-orders.loader';
 
 export const EnterpriseOrders = () => {
   const {
-    columns,
     columnOrder,
+    columns,
     columnSizing,
     columnVisibility,
+    defaultColumnPinning,
     enterpriseOrdersPromise,
     filters,
     persistenceKey,
-    defaultColumnPinning,
-    sorting,
-    title,
-    tableName,
     schemaName,
+    sorting,
+    tableName,
+    title,
   } = useLoaderData<typeof loader>();
 
   return (

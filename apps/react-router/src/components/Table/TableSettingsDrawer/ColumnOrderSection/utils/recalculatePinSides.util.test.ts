@@ -34,7 +34,7 @@ describe('recalculatePinSides', () => {
     const result = recalculatePinSides({
       columnPinning: { left: ['id'], right: ['actions'] },
       newOrder: ['actions', 'name', 'id'],
-      staticKeys: new Set(['id', 'actions']),
+      staticKeys: new Set(['actions', 'id']),
     });
     expect(result.left).toContain('id');
     expect(result.right).toContain('actions');
