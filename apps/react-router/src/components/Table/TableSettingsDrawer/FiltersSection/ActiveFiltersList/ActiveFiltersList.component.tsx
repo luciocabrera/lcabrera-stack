@@ -18,7 +18,7 @@ import type {
 import { useSetColumnFilters } from '../../TableDrawerContext/actions';
 import { useGetColumnFilters } from '../../TableDrawerContext/selectors';
 import { FiltersSectionToolbar } from '../FiltersSectionToolbar';
-import { validateFilter } from '../validateFilter.util';
+import { isFilterValid } from '../isFilterValid.util';
 import { styles } from './ActiveFiltersList.stylex';
 
 export const ActiveFiltersList = ({
@@ -103,7 +103,7 @@ export const ActiveFiltersList = ({
             if (!column) return;
 
             const isExpanded = expandedFilters.has(columnKey);
-            const isValid = validateFilter(filter);
+            const isValid = isFilterValid(filter);
 
             return (
               <div

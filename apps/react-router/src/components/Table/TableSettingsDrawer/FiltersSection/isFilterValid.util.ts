@@ -1,8 +1,6 @@
 import type { ColumnFilter } from '@/types/filterOperators.types';
 
-const validateDateFilter = (
-  filter: Extract<ColumnFilter, { type: 'date' }>,
-) => {
+const isDateFilterValid = (filter: Extract<ColumnFilter, { type: 'date' }>) => {
   if (!filter.value) return false;
   if (filter.operator === 'between') {
     return Boolean(filter.value2);
@@ -10,7 +8,7 @@ const validateDateFilter = (
   return true;
 };
 
-const validateNumberFilter = (
+const isNumberFilterValid = (
   filter: Extract<ColumnFilter, { type: 'number' }>,
 ) => {
   if (!filter.value) return false;
@@ -20,7 +18,7 @@ const validateNumberFilter = (
   return true;
 };
 
-const validateSelectFilter = (
+const isSelectFilterValid = (
   filter: Extract<ColumnFilter, { type: 'multiSelect' | 'select' }>,
 ) => {
   if ('values' in filter && filter.values) {
@@ -29,16 +27,14 @@ const validateSelectFilter = (
   return Boolean('value' in filter && filter.value);
 };
 
-const validateTextFilter = (
-  filter: Extract<ColumnFilter, { type: 'text' }>,
-) => {
+const isTextFilterValid = (filter: Extract<ColumnFilter, { type: 'text' }>) => {
   return Boolean(filter.value?.trim());
 };
 
 /**
  * Validates a filter to ensure required fields are populated
  */
-export const validateFilter = (filter?: ColumnFilter | null): boolean => {
+export const isFilterValid = (filter?: ColumnFilter | null): boolean => {
   if (!filter) return false;
 
   switch (filter.type) {
@@ -46,17 +42,17 @@ export const validateFilter = (filter?: ColumnFilter | null): boolean => {
       return true;
     }
     case 'date': {
-      return validateDateFilter(filter);
+      return isDateFilterValid(filter);
     }
     case 'multiSelect':
     case 'select': {
-      return validateSelectFilter(filter);
+      return isSelectFilterValid(filter);
     }
     case 'number': {
-      return validateNumberFilter(filter);
+      return isNumberFilterValid(filter);
     }
     case 'text': {
-      return validateTextFilter(filter);
+      return isTextFilterValid(filter);
     }
     default: {
       return false;

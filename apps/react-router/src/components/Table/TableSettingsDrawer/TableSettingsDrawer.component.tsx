@@ -29,7 +29,7 @@ import { ColumnOrderSection } from './ColumnOrderSection';
 import { ColumnOrderSectionProvider } from './ColumnOrderSection/ColumnOrderSectionContext/ColumnOrderSectionContext.provider';
 import { DetailsSection } from './DetailsSection';
 import { FiltersSection } from './FiltersSection';
-import { validateFilter } from './FiltersSection/validateFilter.util';
+import { isFilterValid } from './FiltersSection/isFilterValid.util';
 import { GeneralSettingsSection } from './GeneralSettingsSection';
 import { SortingSection } from './SortingSection';
 import {
@@ -51,9 +51,7 @@ export const TableSettingsDrawer = ({
   const setTableIsTableSettingsPinned = useSetTableIsTableSettingsPinned();
 
   const filters = useGetColumnFilters();
-  const areFiltersValid = Object.values(filters).every((f) =>
-    validateFilter(f),
-  );
+  const areFiltersValid = Object.values(filters).every((f) => isFilterValid(f));
   const closeIfUnpinned = () => {
     if (!isPinned) {
       setTableIsTableSettingsOpen(false);

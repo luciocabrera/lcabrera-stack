@@ -1,8 +1,159 @@
 // @vitest-environment jsdom
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, unicorn/consistent-function-scoping
 
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import type {
+  TableColumnsState,
+  TableMetaState,
+} from '@/components/Table/Table.types';
+
+type TestData = {
+  readonly age: number;
+  readonly id: string;
+  readonly name: string;
+};
+
+type MockStore<TState extends Record<string, unknown>> = {
+  readonly get: () => TState;
+  readonly getServerSnapshot: () => TState;
+  readonly reset: () => void;
+  readonly set: (nextState: Partial<TState>) => void;
+  readonly subscribe: (callback: () => void) => () => void;
+};
+
+function noop(): void {}
+
+function createMockStore<TState extends Record<string, unknown>>(
+  initialState: TState,
+): MockStore<TState> {
+  let state = initialState;
+
+  const get = vi.fn(() => state);
+  const getServerSnapshot = vi.fn(() => state);
+  const reset = vi.fn(() => {
+    state = initialState;
+  });
+  const set = vi.fn((nextState: Partial<TState>) => {
+    state = { ...state, ...nextState };
+  });
+  const subscribe = vi.fn(() => noop);
+
+  return {
+    get,
+    getServerSnapshot,
+    reset,
+    set,
+    subscribe,
+  };
+}
+
+function createInitialColumnsState(): TableColumnsState<TestData> {
+  return {
+    columnFilters: {
+      actions: {
+        operator: 'contains',
+        type: 'text',
+        value: '',
+      },
+      age: {
+        operator: 'equals',
+        type: 'number',
+        value: 0,
+      },
+      id: {
+        operator: 'contains',
+        type: 'text',
+        value: '',
+      },
+      name: {
+        operator: 'contains',
+        type: 'text',
+        value: '',
+      },
+    },
+    columnGroups: {
+      centerCols: [
+        { dataType: 'string', key: 'name', label: 'Name' },
+        { dataType: 'number', key: 'age', label: 'Age' },
+      ],
+      leftPinnedCols: [{ dataType: 'string', key: 'id', label: 'ID' }],
+      rightPinnedCols: [
+        { dataType: 'string', key: 'actions', label: 'Actions' },
+      ],
+    },
+    columnOrder: ['id', 'name', 'age', 'actions'],
+    columnPinning: { left: ['id'], right: ['actions'] },
+    columns: [
+      { dataType: 'string', key: 'id', label: 'ID' },
+      { dataType: 'string', key: 'name', label: 'Name' },
+      { dataType: 'number', key: 'age', label: 'Age' },
+      { dataType: 'string', key: 'actions', label: 'Actions' },
+    ],
+    columnSizing: { actions: 80, age: 120, id: 80, name: 140 },
+    columnVisibility: new Set([
+      'actions',
+      'age',
+      'id',
+      'name',
+    ]) as TableColumnsState<TestData>['columnVisibility'],
+    effectiveColumns: [
+      { dataType: 'string', key: 'id', label: 'ID' },
+      { dataType: 'string', key: 'name', label: 'Name' },
+      { dataType: 'number', key: 'age', label: 'Age' },
+      { dataType: 'string', key: 'actions', label: 'Actions' },
+    ],
+    normalizedColumns: {
+      actions: { dataType: 'string', key: 'actions', label: 'Actions' },
+      age: { dataType: 'number', key: 'age', label: 'Age' },
+      id: { dataType: 'string', key: 'id', label: 'ID' },
+      name: { dataType: 'string', key: 'name', label: 'Name' },
+    },
+    pinnedColumnOffsets: {
+      actions: {
+        isFirstPinnedRight: true,
+        isLastPinnedLeft: false,
+        offset: 0,
+        side: 'right',
+      },
+      id: {
+        isFirstPinnedRight: false,
+        isLastPinnedLeft: true,
+        offset: 0,
+        side: 'left',
+      },
+    },
+    sorting: [],
+    staticKeys: new Set<string>(),
+  };
+}
+
+function createInitialMetaState(): TableMetaState {
+  return {
+    columnOverscan: 2,
+    columnSelectedKey: 'id',
+    columnSettingsSelectedTab: 'general',
+    density: 'compact',
+    enablePrefetch: true,
+    initialPageSize: 20,
+    isBordered: true,
+    isColumnSettingsOpen: false,
+    isColumnSettingsPinned: false,
+    isStriped: true,
+    isTableSettingsOpen: false,
+    isTableSettingsPinned: false,
+    loadMorePageSize: 50,
+    overscan: 4,
+    persistenceKey: 'orders',
+    placeholderRowCount: 8,
+    rowHeight: 44,
+    tableSettingsExpandedFilters: [],
+    tableSettingsSelectedTab: 'general',
+    threshold: 200,
+    title: 'Orders',
+    wasTableSettingsOpenBeforeColumnSettings: false,
+  };
+}
 
 const {
   columnsStoreMock,
@@ -10,45 +161,9 @@ const {
   readPersistedStateFromSessionStorageMock,
   readPersistedUiStateFromSessionStorageMock,
 } = vi.hoisted(() => {
-  const noop = (): void => {};
-  const subscribeNoop = () => noop;
-
   return {
-    columnsStoreMock: {
-      get: vi.fn(() => ({
-        columnFilters: {},
-        columnGroups: {
-          centerCols: [],
-          leftPinnedCols: [],
-          rightPinnedCols: [],
-        },
-        columnOrder: ['id', 'name', 'age'],
-        columnPinning: { left: [], right: [] },
-        columns: [
-          { dataType: 'string', key: 'id', label: 'ID' },
-          { dataType: 'string', key: 'name', label: 'Name' },
-          { dataType: 'number', key: 'age', label: 'Age' },
-        ],
-        columnSizing: {},
-        columnVisibility: new Set<string>(),
-        effectiveColumns: [],
-        normalizedColumns: {},
-        pinnedColumnOffsets: {},
-        sorting: [],
-        staticKeys: new Set<string>(),
-      })),
-      getServerSnapshot: vi.fn(),
-      reset: vi.fn(),
-      set: vi.fn(),
-      subscribe: vi.fn(subscribeNoop),
-    },
-    metaStoreMock: {
-      get: vi.fn(() => ({})),
-      getServerSnapshot: vi.fn(),
-      reset: vi.fn(),
-      set: vi.fn(),
-      subscribe: vi.fn(subscribeNoop),
-    },
+    columnsStoreMock: createMockStore(createInitialColumnsState()),
+    metaStoreMock: createMockStore(createInitialMetaState()),
     readPersistedStateFromSessionStorageMock: vi.fn(() => ({})),
     readPersistedUiStateFromSessionStorageMock: vi.fn(() => ({})),
   };
@@ -73,15 +188,14 @@ beforeEach(() => {
 });
 
 describe('useHydrateTableSessionState', () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   it('does not call store.set when sessionStorage is empty', () => {
     readPersistedStateFromSessionStorageMock.mockReturnValue({});
     readPersistedUiStateFromSessionStorageMock.mockReturnValue({});
 
     renderHook(() =>
       useHydrateTableSessionState({
-        columnsStore: columnsStoreMock as any,
-        metaStore: metaStoreMock as any,
+        columnsStore: columnsStoreMock,
+        metaStore: metaStoreMock,
         persistenceKey: 'orders',
       }),
     );
@@ -97,8 +211,8 @@ describe('useHydrateTableSessionState', () => {
 
     renderHook(() =>
       useHydrateTableSessionState({
-        columnsStore: columnsStoreMock as any,
-        metaStore: metaStoreMock as any,
+        columnsStore: columnsStoreMock,
+        metaStore: metaStoreMock,
         persistenceKey: 'orders',
       }),
     );
@@ -123,8 +237,8 @@ describe('useHydrateTableSessionState', () => {
 
     renderHook(() =>
       useHydrateTableSessionState({
-        columnsStore: columnsStoreMock as any,
-        metaStore: metaStoreMock as any,
+        columnsStore: columnsStoreMock,
+        metaStore: metaStoreMock,
         persistenceKey: 'orders',
       }),
     );
@@ -140,8 +254,8 @@ describe('useHydrateTableSessionState', () => {
   it('does nothing when the persistence key is empty', () => {
     renderHook(() =>
       useHydrateTableSessionState({
-        columnsStore: columnsStoreMock as any,
-        metaStore: metaStoreMock as any,
+        columnsStore: columnsStoreMock,
+        metaStore: metaStoreMock,
         persistenceKey: '',
       }),
     );
@@ -158,8 +272,8 @@ describe('useHydrateTableSessionState', () => {
 
     const { rerender } = renderHook(() =>
       useHydrateTableSessionState({
-        columnsStore: columnsStoreMock as any,
-        metaStore: metaStoreMock as any,
+        columnsStore: columnsStoreMock,
+        metaStore: metaStoreMock,
         persistenceKey: 'orders',
       }),
     );
