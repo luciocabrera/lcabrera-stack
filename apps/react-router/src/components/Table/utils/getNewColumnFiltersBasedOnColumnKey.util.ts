@@ -1,6 +1,6 @@
 import type { ColumnFilter } from '@/types/filterOperators.types';
 
-import { shallowEqual } from '@/utils';
+import { isShallowEqual } from '@/utils';
 
 import type { ColumnFiltersState, DataKey } from '../Table.types';
 
@@ -26,7 +26,7 @@ export const getNewColumnFiltersBasedOnColumnKey = <TData>({
   if (
     columnFilter !== undefined &&
     prev !== undefined &&
-    shallowEqual({ objA: prev, objB: columnFilter })
+    isShallowEqual({ objA: prev, objB: columnFilter })
   ) {
     return columnFiltersState;
   }

@@ -1,1 +1,1 @@
-export { shallowEqual } from './comparison';
+export { isShallowEqual } from './comparison';

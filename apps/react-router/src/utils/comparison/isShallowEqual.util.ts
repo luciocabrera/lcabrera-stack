@@ -1,4 +1,4 @@
-type ShallowEqualArgs<T extends Record<string, unknown>> = {
+type IsShallowEqualArgs<T extends Record<string, unknown>> = {
   readonly objA?: T;
   readonly objB?: T;
 };
@@ -11,15 +11,15 @@ type ShallowEqualArgs<T extends Record<string, unknown>> = {
  *
  * @example
  * ```ts
- * shallowEqual({ objA: { a: 1 }, objB: { a: 1 } }); // true
- * shallowEqual({ objA: { a: 1 }, objB: { a: 2 } }); // false
- * shallowEqual({ objA: { a: 1, b: 2 }, objB: { a: 1 } }); // false
+ * isShallowEqual({ objA: { a: 1 }, objB: { a: 1 } }); // true
+ * isShallowEqual({ objA: { a: 1 }, objB: { a: 2 } }); // false
+ * isShallowEqual({ objA: { a: 1, b: 2 }, objB: { a: 1 } }); // false
  * ```
  */
-export const shallowEqual = <T extends Record<string, unknown>>({
+export const isShallowEqual = <T extends Record<string, unknown>>({
   objA,
   objB,
-}: ShallowEqualArgs<T>): boolean => {
+}: IsShallowEqualArgs<T>): boolean => {
   if (objA === objB) return true;
   if (!objA || !objB) return false;
 

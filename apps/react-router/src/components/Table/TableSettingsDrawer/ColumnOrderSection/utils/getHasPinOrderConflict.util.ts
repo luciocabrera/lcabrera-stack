@@ -19,7 +19,7 @@ export const getHasPinOrderConflict = <TData>({
   columnPinning,
   newOrder,
   staticKeys,
-}: GetHasPinOrderConflictArgs<TData>): boolean => {
+}: GetHasPinOrderConflictArgs<TData>) => {
   const left = staticKeys
     ? columnPinning.left.filter((key) => !staticKeys.has(key))
     : columnPinning.left;
