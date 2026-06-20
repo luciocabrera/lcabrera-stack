@@ -37,7 +37,7 @@ const {
       metaState = nextState;
     },
     triggerLatestSubscriber: () => {
-      const latest = Array.from(listeners).at(-1);
+      const latest = [...listeners].at(-1);
       latest?.();
     },
     writePersistedUiStateToSessionStorageMock: vi.fn(),

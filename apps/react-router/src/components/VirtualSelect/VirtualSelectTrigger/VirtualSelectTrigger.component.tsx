@@ -23,8 +23,8 @@ export const VirtualSelectTrigger = ({
   visibleTags,
 }: VirtualSelectTriggerProps) => {
   const hasSelection = selected.length > 0;
-  const usesTagButtons = mode === 'multi' && hasSelection;
-  const shouldUseDivTrigger = isAlwaysOpen || usesTagButtons;
+  const shouldUseTagButtons = mode === 'multi' && hasSelection;
+  const shouldUseDivTrigger = isAlwaysOpen || shouldUseTagButtons;
   const shouldDisableInteraction = isBusy || isAlwaysOpen;
   const content = renderTriggerContent({
     hasSelection,

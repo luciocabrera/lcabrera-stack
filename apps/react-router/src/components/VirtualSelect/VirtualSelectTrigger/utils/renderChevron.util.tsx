@@ -8,9 +8,7 @@ type RenderChevronArgs = {
 };
 
 export const renderChevron = ({ isAlwaysOpen, isOpen }: RenderChevronArgs) => {
-  if (isAlwaysOpen) {
-    return undefined;
-  }
+  if (isAlwaysOpen) return;
 
   return <span data-chevron {...stylex.props(styles.chevron(isOpen))} />;
 };

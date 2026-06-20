@@ -4,7 +4,7 @@ import { formatNumber } from './formatNumber.util';
 
 describe('formatNumber', () => {
   it('formats a number with default locale', () => {
-    const result = formatNumber({ value: 1234567 });
+    const result = formatNumber({ value: 1_234_567 });
     expect(result).toBe('1,234,567');
   });
 

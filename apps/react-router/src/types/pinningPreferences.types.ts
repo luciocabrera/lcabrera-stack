@@ -6,22 +6,22 @@ export type OrderConflictResolution =
   | 'reset-all-pins';
 
 export type OrderConflictResolutionPreferenceOption =
-  | OrderConflictResolution
-  | 'always-ask';
+  | 'always-ask'
+  | OrderConflictResolution;
 
 export type PinConflictResolution =
   | 'move-column'
   | 'pin-all-between'
   | 'pin-only';
 
-export type PinSidePreferenceOption = PinSide | 'always-ask';
-
 export type PinConflictResolutionPreferenceOption =
-  | PinConflictResolution
-  | 'always-ask';
+  | 'always-ask'
+  | PinConflictResolution;
+
+export type PinSidePreferenceOption = 'always-ask' | PinSide;
 
 export type UnpinConflictResolution = 'reorder-to-fill' | 'unpin-beyond';
 
 export type UnpinConflictResolutionPreferenceOption =
-  | UnpinConflictResolution
-  | 'always-ask';
+  | 'always-ask'
+  | UnpinConflictResolution;
