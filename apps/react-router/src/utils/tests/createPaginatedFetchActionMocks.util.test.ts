@@ -7,6 +7,16 @@ type TestResponse = {
   readonly total: number;
 };
 
+const fetchRowsA = async (): Promise<TestResponse> => ({
+  rows: ['A'],
+  total: 1,
+});
+
+const fetchRowsB = async (): Promise<TestResponse> => ({
+  rows: ['B'],
+  total: 2,
+});
+
 describe('createPaginatedFetchActionMocks', () => {
   it('creates stores and prefetch mocks with cache resolution', async () => {
     const harness = createPaginatedFetchActionMocks<
@@ -20,12 +30,10 @@ describe('createPaginatedFetchActionMocks', () => {
     expect(harness.dataStore.get()).toEqual({ data: [] });
     expect(harness.metaStore.get()).toEqual({ enablePrefetch: false });
 
-    const fetchFn = async () => ({ rows: ['A'], total: 1 });
-
     const response = await harness.resolveFromCacheOrFetchMock({
       cache: { data: undefined, promise: undefined, skip: 0 },
       expectedSkip: 0,
-      fetchFn,
+      fetchFn: fetchRowsA,
     });
 
     expect(response).toEqual({ rows: ['A'], total: 1 });
@@ -40,12 +48,10 @@ describe('createPaginatedFetchActionMocks', () => {
       initialMetaState: { enablePrefetch: false },
     });
     const prefetchRef = harness.createPrefetchRef();
-    const onLoadMore = async () => ({ rows: ['B'], total: 2 });
-
     harness.firePrefetchMock({
       limit: 2,
       nextSkip: 2,
-      onLoadMore,
+      onLoadMore: fetchRowsB,
       prefetchRef,
     });
 

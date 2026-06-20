@@ -149,11 +149,13 @@ const parseKnownOperatorFilter = (
 const parseEqualsSelectFilter = (
   arr: readonly unknown[],
 ): ColumnFilter | undefined => {
-  if (!arr.every((item) => typeof item === 'string')) {
+  const values = arr.filter((item): item is string => typeof item === 'string');
+
+  if (values.length !== arr.length) {
     return undefined;
   }
 
-  return { operator: 'equals', type: 'select', values: [...arr] };
+  return { operator: 'equals', type: 'select', values };
 };
 
 /**

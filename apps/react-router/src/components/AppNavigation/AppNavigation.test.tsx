@@ -11,6 +11,45 @@ import { mockDialogElement } from '@/utils/tests/mockDialogElement.util';
 
 import { AppNavigation } from './AppNavigation.component';
 
+type RenderWithGlobalSettingsArgs = {
+  readonly initialSettings: GlobalSettingsState;
+  readonly isDarkMode: boolean;
+  readonly onToggleTheme: () => void;
+};
+
+const renderWithGlobalSettings = ({
+  initialSettings,
+  isDarkMode,
+  onToggleTheme,
+}: RenderWithGlobalSettingsArgs) => {
+  const router = createMemoryRouter(
+    [
+      {
+        element: (
+          <GlobalSettingsProvider initialSettings={initialSettings}>
+            <AppNavigation
+              isDarkMode={isDarkMode}
+              onToggleTheme={onToggleTheme}
+            />
+          </GlobalSettingsProvider>
+        ),
+        path: '/',
+      },
+      {
+        action: async () => {
+          return;
+        },
+        path: '/_action/persist-cookie',
+      },
+    ],
+    {
+      initialEntries: ['/'],
+    },
+  );
+
+  return render(<RouterProvider router={router} />);
+};
+
 let restoreMockDialog: () => void;
 
 afterEach(() => {
@@ -23,43 +62,6 @@ beforeEach(() => {
 });
 
 describe('AppNavigation', () => {
-  const renderWithGlobalSettings = ({
-    initialSettings,
-    isDarkMode,
-    onToggleTheme,
-  }: {
-    readonly initialSettings: GlobalSettingsState;
-    readonly isDarkMode: boolean;
-    readonly onToggleTheme: () => void;
-  }) => {
-    const router = createMemoryRouter(
-      [
-        {
-          element: (
-            <GlobalSettingsProvider initialSettings={initialSettings}>
-              <AppNavigation
-                isDarkMode={isDarkMode}
-                onToggleTheme={onToggleTheme}
-              />
-            </GlobalSettingsProvider>
-          ),
-          path: '/',
-        },
-        {
-          action: async () => {
-            return;
-          },
-          path: '/_action/persist-cookie',
-        },
-      ],
-      {
-        initialEntries: ['/'],
-      },
-    );
-
-    return render(<RouterProvider router={router} />);
-  };
-
   it('renders the configured route links and theme toggle', () => {
     const handleToggleTheme = vi.fn();
 
@@ -187,20 +189,16 @@ describe('AppNavigation', () => {
       onToggleTheme: vi.fn(),
     });
 
-    // Initially expanded — nav links are visible
     expect(screen.getByRole('link', { name: /Home/i })).toBeDefined();
 
-    // Collapse the panel
     fireEvent.click(
       screen.getByRole('button', { name: /Collapse navigation/i }),
     );
 
-    // Expand button label changes
     expect(
       screen.getByRole('button', { name: /Expand navigation/i }),
     ).toBeDefined();
 
-    // Expand again
     fireEvent.click(screen.getByRole('button', { name: /Expand navigation/i }));
 
     expect(

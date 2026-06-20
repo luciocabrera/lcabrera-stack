@@ -184,6 +184,10 @@ const getTableDataPromise = () => {
   return tableDataPromise;
 };
 
+const resetTableDataPromise = (): void => {
+  tableDataPromise = undefined;
+};
+
 const ShowcaseSection = ({ children, title }: ShowcaseSectionProps) => {
   return (
     <section {...stylex.props(styles.section)}>
@@ -262,11 +266,6 @@ export const ShowcasePage = () => {
       });
     }, FETCH_DELAY_MS);
   }, []);
-
-  // Function to reload the table data (for testing)
-  const reloadTableData = () => {
-    tableDataPromise = undefined; // Reset the promise
-  };
 
   return (
     <div {...stylex.props(styles.app)}>
@@ -465,7 +464,7 @@ export const ShowcasePage = () => {
           {/* Table Showcase Section */}
           <ShowcaseSection title='Table'>
             <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-              <Button color='secondary' onClick={reloadTableData}>
+              <Button color='secondary' onClick={resetTableDataPromise}>
                 🔄 Reload Table Data (Test Loading)
               </Button>
               <span

@@ -1,5 +1,4 @@
 // @vitest-environment jsdom
-
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -40,18 +39,32 @@ const createInitialMetaState = (): TableMetaState => {
 
 type MetaStoreState = ReturnType<typeof createInitialMetaState>;
 
+function unsubscribeNoop() {
+  // no-op unsubscribe for the test stub
+}
+
+function subscribeNoop() {
+  return unsubscribeNoop;
+}
+
 let columnsStore: MockStore<Record<string, never>> = createMockStore({});
 let metaStore: MockStore<MetaStoreState> = createMockStore(
   createInitialMetaState(),
 );
 
+const getTableConfigContextValue = vi.hoisted(() => {
+  return function getTableConfigContextValue() {
+    return {
+      columnsStore,
+      metaStore,
+    };
+  };
+});
+
 vi.mock(
   '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
   () => ({
-    useTableConfigContextValue: () => ({
-      columnsStore,
-      metaStore,
-    }),
+    useTableConfigContextValue: getTableConfigContextValue,
   }),
 );
 
@@ -101,11 +114,7 @@ describe('TableConfig meta hooks', () => {
   });
 
   it('falls back to an empty snapshot when meta store returns undefined', () => {
-    const subscribe = vi.fn(() => {
-      return () => {
-        // no-op unsubscribe for the test stub
-      };
-    });
+    const subscribe = vi.fn(subscribeNoop);
 
     metaStore = {
       get: () => undefined as unknown as MetaStoreState,

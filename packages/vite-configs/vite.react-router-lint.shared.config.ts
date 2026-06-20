@@ -16,7 +16,6 @@ export const reactRouterLintSharedConfig: OxlintConfig = {
     'guidelines/playwright_config.ts',
     'scripts/',
     'utils/',
-    'src/utils/performance/renderTracker.util.ts',
   ],
   overrides: [
     ...(frontendLintSharedConfig.overrides ?? []),

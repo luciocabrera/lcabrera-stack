@@ -1,5 +1,4 @@
 // @vitest-environment jsdom
-
 import type { RefObject } from 'react';
 
 import { cleanup, render, screen } from '@testing-library/react';
@@ -36,32 +35,34 @@ type MockTableBodyRowsProps = {
   readonly startIndex: number;
 };
 
-const MockSpacerRow = vi.hoisted(
-  () =>
-    ({ colSpan, height }: MockSpacerRowProps) => {
-      return (
-        <tr data-height={height} data-testid='spacer-row'>
-          <td colSpan={colSpan} />
-        </tr>
-      );
-    },
-);
+const MockSpacerRow = vi.hoisted(() => {
+  return function MockSpacerRow({ colSpan, height }: MockSpacerRowProps) {
+    return (
+      <tr data-height={height} data-testid='spacer-row'>
+        <td colSpan={colSpan} />
+      </tr>
+    );
+  };
+});
 
-const MockTableBodyRows = vi.hoisted(
-  () =>
-    ({ endIndex, isLoadingState, startIndex }: MockTableBodyRowsProps) => {
-      return (
-        <tr
-          data-end-index={endIndex}
-          data-is-loading={isLoadingState}
-          data-start-index={startIndex}
-          data-testid='table-body-rows'
-        >
-          <td>rows</td>
-        </tr>
-      );
-    },
-);
+const MockTableBodyRows = vi.hoisted(() => {
+  return function MockTableBodyRows({
+    endIndex,
+    isLoadingState,
+    startIndex,
+  }: MockTableBodyRowsProps) {
+    return (
+      <tr
+        data-end-index={endIndex}
+        data-is-loading={isLoadingState}
+        data-start-index={startIndex}
+        data-testid='table-body-rows'
+      >
+        <td>rows</td>
+      </tr>
+    );
+  };
+});
 
 vi.mock('@/components/Table/contexts/TableConfig/columns/selectors', () => ({
   useGetColumnGroups: useGetColumnGroupsMock,

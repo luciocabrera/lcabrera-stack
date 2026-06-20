@@ -126,7 +126,9 @@ describe('useMetaStatePersistEffect', () => {
       uiState: Record<string, unknown>;
     };
 
-    expect(Object.keys(uiState).sort()).toEqual([
+    expect(
+      Object.keys(uiState).toSorted((left, right) => left.localeCompare(right)),
+    ).toEqual([
       'columnSettingsSelectedTab',
       'isColumnSettingsOpen',
       'isColumnSettingsPinned',
