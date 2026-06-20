@@ -34,20 +34,20 @@ type ResolveAcceptedPinSideUpdateResult =
       readonly conflictModal: {
         readonly columnKey: DataKey<Record<string, unknown>>;
         readonly columnLabel: string;
-        readonly isOpen: true;
-        readonly side: 'left' | 'right';
-      };
-      readonly kind: 'open-conflict-modal';
-    }
-  | {
-      readonly conflictModal: {
-        readonly columnKey: DataKey<Record<string, unknown>>;
-        readonly columnLabel: string;
         readonly isOpen: false;
         readonly side: 'left' | 'right';
       };
       readonly kind: 'auto-accept-conflict';
       readonly resolution: PinConflictResolution;
+    }
+  | {
+      readonly conflictModal: {
+        readonly columnKey: DataKey<Record<string, unknown>>;
+        readonly columnLabel: string;
+        readonly isOpen: true;
+        readonly side: 'left' | 'right';
+      };
+      readonly kind: 'open-conflict-modal';
     };
 
 export const resolveAcceptedPinSideUpdate = ({

@@ -8,10 +8,6 @@ import { createPaginatedFetchActionMocks } from '@/utils/tests/createPaginatedFe
 
 import { useFetchMoreData } from './useFetchMoreData.hook';
 
-type TestRow = {
-  readonly id: number;
-};
-
 type TestDataState = {
   readonly data: readonly TestRow[];
   readonly hasMore: boolean;
@@ -24,6 +20,10 @@ type TestDataState = {
 type TestResponse = {
   readonly rows: readonly TestRow[];
   readonly total: number;
+};
+
+type TestRow = {
+  readonly id: number;
 };
 
 const createHarness = () => {

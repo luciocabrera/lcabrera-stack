@@ -219,7 +219,7 @@ export type TableMetadataValue = boolean | number | string;
 
 export type TableMetaState = {
   readonly additionalMetadata?: Readonly<
-    Record<string, TableMetadataValue | null | undefined>
+    Record<string, null | TableMetadataValue | undefined>
   >;
   readonly columnOverscan: number;
   readonly columnSelectedKey?: string;

@@ -1,9 +1,9 @@
 import { useFetcher, useLocation } from 'react-router';
 
 import {
+  MAX_COOKIE_ENTRY_VALUE_LENGTH,
   PERSIST_COOKIE_ACTION,
   PERSISTENCE_SIZE_WARNING,
-  MAX_COOKIE_ENTRY_VALUE_LENGTH,
 } from '@/constants/globalSettings.constants';
 import { useNotifications } from '@/hooks/useNotifications.hook';
 import { writeToSessionStorage } from '@/utils/storage';

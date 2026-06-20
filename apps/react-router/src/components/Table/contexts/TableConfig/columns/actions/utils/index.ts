@@ -1,11 +1,11 @@
 export { buildPersistencePayload } from './buildPersistencePayload.util';
 export { commitResolvedPinningState } from './commitResolvedPinningState.util';
 export { getPinningActionContext } from './getPinningActionContext.util';
+export { resolveAcceptedHeaderPinConflictState } from './resolveAcceptedHeaderPinConflictState.util';
+export { resolveAcceptedHeaderPinSideState } from './resolveAcceptedHeaderPinSideState.util';
 export { resolveBatchColumnSettingsUpdate } from './resolveBatchColumnSettingsUpdate.util';
 export { resolveBatchTableSettingsUpdate } from './resolveBatchTableSettingsUpdate.util';
 export { resolveColumnFilterUpdate } from './resolveColumnFilterUpdate.util';
 export { resolveColumnPinningUpdate } from './resolveColumnPinningUpdate.util';
 export { resolveColumnSizingUpdate } from './resolveColumnSizingUpdate.util';
 export { resolveColumnSortingUpdate } from './resolveColumnSortingUpdate.util';
-export { resolveAcceptedHeaderPinConflictState } from './resolveAcceptedHeaderPinConflictState.util';
-export { resolveAcceptedHeaderPinSideState } from './resolveAcceptedHeaderPinSideState.util';

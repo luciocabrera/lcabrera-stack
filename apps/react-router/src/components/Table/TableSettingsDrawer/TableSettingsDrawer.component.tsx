@@ -17,9 +17,9 @@ import { useNotifications } from '@/hooks/useNotifications.hook';
 import type { TableSettingsDrawerProps } from './TableSettingsDrawer.types';
 
 import {
-  useSetTableSettingsSelectedTab,
   useSetTableIsTableSettingsOpen,
   useSetTableIsTableSettingsPinned,
+  useSetTableSettingsSelectedTab,
 } from '../contexts/TableConfig/meta/actions';
 import {
   useGetTableIsTableSettingsPinned,

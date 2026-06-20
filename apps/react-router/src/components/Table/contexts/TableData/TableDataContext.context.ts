@@ -8,7 +8,7 @@ import type { TableDataContextValue } from './TableDataContext.types';
  * Uses external stores with useSyncExternalStore for granular updates.
  * Components can subscribe to specific slices of state via selector hooks.
  */
-export const TableDataContext = createContext<TableDataContextValue | null>(
+export const TableDataContext = createContext<null | TableDataContextValue>(
   null,
 );
 

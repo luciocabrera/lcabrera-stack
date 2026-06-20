@@ -17,14 +17,14 @@ type MockSidePanelHeaderProps = {
   readonly children: ReactNode;
 };
 
-type MockSidePanelProps = {
-  readonly children: ReactNode;
-  readonly onClose?: () => void;
-};
-
 type MockSidePanelHeaderToolbarProps = {
   readonly onClose?: () => void;
   readonly onTogglePin?: () => void;
+};
+
+type MockSidePanelProps = {
+  readonly children: ReactNode;
+  readonly onClose?: () => void;
 };
 
 type MockTabsProps = {

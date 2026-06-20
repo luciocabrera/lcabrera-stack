@@ -33,17 +33,8 @@ export const applyToggleColumnPinResolution = ({
   setUnpinConflictModal,
 }: ApplyToggleColumnPinResolutionArgs): void => {
   switch (resolution.kind) {
-    case 'ignored-static': {
-      return;
-    }
-
     case 'apply-pinning-direct': {
       setColumnPinning(resolution.nextPinning);
-      return;
-    }
-
-    case 'open-pin-side-modal': {
-      setPinSideModal(resolution.modal);
       return;
     }
 
@@ -53,14 +44,23 @@ export const applyToggleColumnPinResolution = ({
       return;
     }
 
-    case 'open-unpin-conflict-modal': {
-      setUnpinConflictModal(resolution.modal);
-      return;
-    }
-
     case 'auto-accept-unpin-conflict': {
       setUnpinConflictModal(resolution.modal);
       acceptUnpinConflict(resolution.resolution);
+      return;
+    }
+
+    case 'ignored-static': {
+      return;
+    }
+
+    case 'open-pin-side-modal': {
+      setPinSideModal(resolution.modal);
+      return;
+    }
+
+    case 'open-unpin-conflict-modal': {
+      setUnpinConflictModal(resolution.modal);
       return;
     }
   }

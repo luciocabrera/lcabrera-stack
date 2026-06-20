@@ -19,7 +19,7 @@ export type TableLayoutProps<
 > & {
   /** Additional optional metadata shown in the Details tab */
   readonly additionalMetadata?: Readonly<
-    Record<string, boolean | number | string | null | undefined>
+    Record<string, boolean | null | number | string | undefined>
   >;
   /** Column order from loader/URL state (optional) */
   readonly columnOrder?: ColumnOrderState<TData>;

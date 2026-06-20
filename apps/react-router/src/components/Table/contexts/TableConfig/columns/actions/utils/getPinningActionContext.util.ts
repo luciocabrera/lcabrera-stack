@@ -13,11 +13,11 @@ type GetPinningActionContextArgs<TData> = {
   };
   readonly metaStore: {
     readonly get: () =>
+      | undefined
       | {
           readonly drawersSyncNonce?: number;
           readonly persistenceKey?: string;
-        }
-      | undefined;
+        };
   };
 };
 

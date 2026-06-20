@@ -12,11 +12,6 @@ type TestData = {
   readonly status: string;
 };
 
-type TestResponse = {
-  readonly rows: readonly string[];
-  readonly total: number;
-};
-
 type TestFiltersState = {
   readonly status: {
     readonly data: readonly string[];
@@ -26,6 +21,11 @@ type TestFiltersState = {
     readonly totalLoadedRows: number;
     readonly totalRows: number;
   };
+};
+
+type TestResponse = {
+  readonly rows: readonly string[];
+  readonly total: number;
 };
 
 const createHarness = () => {

@@ -22,13 +22,13 @@ type ResolveAcceptedHeaderPinSideStateArgs<TData> = {
 
 type ResolveAcceptedHeaderPinSideStateResult<TData> =
   | {
-      readonly conflict: PinConflictState;
-      readonly kind: 'conflict';
-    }
-  | {
       readonly columnOrder: ColumnOrderState<TData>;
       readonly columnPinning: ColumnPinningState<TData>;
       readonly kind: 'resolved';
+    }
+  | {
+      readonly conflict: PinConflictState;
+      readonly kind: 'conflict';
     };
 
 export const resolveAcceptedHeaderPinSideState = <TData>({
