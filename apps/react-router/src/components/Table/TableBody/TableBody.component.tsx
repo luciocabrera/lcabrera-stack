@@ -7,7 +7,6 @@ import {
 import { SpacerRow } from '@/components/Table/SpacerRow';
 import { TableBodyRows } from '@/components/Table/TableBodyRows';
 import { useVirtualization } from '@/hooks';
-import { useRenderTracker } from '@/utils/performance';
 
 import type { TableBodyProps } from './TableBody.types';
 
@@ -19,8 +18,6 @@ import {
 import { styles } from './TableBody.stylex';
 
 export const TableBody = ({ tableContainerRef }: TableBodyProps) => {
-  useRenderTracker({ componentName: 'TableBody' });
-
   const totalLoadedRows = useGetTableTotalLoadedRows();
   const isLoading = useGetTableIsLoading();
   const isLoadingMore = useGetTableIsLoadingMore();

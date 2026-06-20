@@ -21,7 +21,6 @@ import {
   useGetGlobalPinConflictResolutionPreference,
   useGetGlobalPinSidePreference,
 } from '@/contexts/GlobalSettingsContext/selectors';
-import { useRenderTracker } from '@/utils/performance';
 
 import type { TableHeaderCellProps } from './TableHeaderCell.types';
 
@@ -48,8 +47,6 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
   pinInfo,
   ...rest
 }: TableHeaderCellProps<TData>) => {
-  useRenderTracker({ componentName: `TableHeaderCell:${columnKey}` });
-
   const columnSizing = useGetColumnSizing<TData>();
   const column = useGetNormalizedColumn<TData>(columnKey);
 

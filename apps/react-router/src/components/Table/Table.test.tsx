@@ -20,10 +20,6 @@ type MockTableDataProviderProps = {
   };
 };
 
-const { useRenderTrackerMock } = vi.hoisted(() => ({
-  useRenderTrackerMock: vi.fn(),
-}));
-
 const { useGetTablePersistenceKeyMock } = vi.hoisted(() => ({
   useGetTablePersistenceKeyMock: vi.fn(() => 'orders'),
 }));
@@ -50,10 +46,6 @@ const MockTableDataProvider = vi.hoisted(
       );
     },
 );
-
-vi.mock('@/utils/performance', () => ({
-  useRenderTracker: useRenderTrackerMock,
-}));
 
 vi.mock('./contexts', () => ({
   TableDataProvider: MockTableDataProvider,

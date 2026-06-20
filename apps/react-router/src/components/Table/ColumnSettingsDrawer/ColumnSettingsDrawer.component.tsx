@@ -22,7 +22,6 @@ import {
 import { useTableWrapperRef } from '@/components/Table/contexts/TableWrapper';
 import { Tabs } from '@/components/Tabs';
 import { ICON_SIZE_LG } from '@/design-system/constants';
-import { useRenderTracker } from '@/utils/performance';
 
 import type { ColumnSettingsDrawerProps } from './ColumnSettingsDrawer.types';
 
@@ -40,8 +39,6 @@ export const ColumnSettingsDrawer = <TData extends Record<string, unknown>>({
   columnKey,
   isBusy = false,
 }: ColumnSettingsDrawerProps<TData>) => {
-  useRenderTracker({ componentName: `ColumnSettingsDrawer:${columnKey}` });
-
   const column = useGetNormalizedColumn<TData>(columnKey);
   const isPinned = useGetTableIsColumnSettingsPinned();
   const selectedTab = useGetTableColumnSettingsSelectedTab();

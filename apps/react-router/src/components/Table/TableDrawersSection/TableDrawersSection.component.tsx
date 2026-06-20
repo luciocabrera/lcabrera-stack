@@ -1,6 +1,5 @@
 import { TableSettingsDrawer } from '@/components/Table/TableSettingsDrawer';
 import { TableDrawerProvider } from '@/components/Table/TableSettingsDrawer/TableDrawerContext/TableDrawerContext.provider';
-import { useRenderTracker } from '@/utils/performance';
 
 import { ColumnSettingsDrawer } from '../ColumnSettingsDrawer';
 import { ColumnDrawerProvider } from '../ColumnSettingsDrawer/ColumnDrawerContext/ColumnDrawerContext.provider';
@@ -16,8 +15,6 @@ import {
 } from '../contexts/TableData/data/selectors';
 
 export const TableDrawersSection = () => {
-  useRenderTracker({ componentName: 'TableDrawersSection' });
-
   const isColumnSettingsOpen = useGetTableIsColumnSettingsOpen();
   const isLoading = useGetTableIsLoading();
   const isLoadingMore = useGetTableIsLoadingMore();

@@ -6,7 +6,6 @@ import {
 import { createRenderTableBodyCell } from '@/components/Table/TableBody/utils/createRenderTableBodyCell.util';
 import { renderTableBodyColumnGroup } from '@/components/Table/TableBody/utils/renderTableBodyColumnGroup.util';
 import { TableRow } from '@/components/Table/TableRow';
-import { useRenderTracker } from '@/utils/performance';
 
 import type { TableBodyRowsProps } from './TableBodyRows.types';
 
@@ -17,8 +16,6 @@ export const TableBodyRows = ({
   isLoadingState,
   startIndex,
 }: TableBodyRowsProps) => {
-  useRenderTracker({ componentName: 'TableBodyRows' });
-
   const data = useGetTableData();
   const { centerCols, leftPinnedCols, rightPinnedCols } = useGetColumnGroups();
   const columnSizing = useGetColumnSizing();

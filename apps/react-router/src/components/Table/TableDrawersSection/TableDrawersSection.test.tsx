@@ -25,7 +25,6 @@ const {
   useGetTableIsLoadingMoreMock,
   useGetTableIsTableSettingsOpenMock,
   useGetTableIsTableSettingsPinnedMock,
-  useRenderTrackerMock,
 } = vi.hoisted(() => ({
   useGetTableColumnSelectedKeyMock: vi.fn(),
   useGetTableDrawersSyncNonceMock: vi.fn(() => 0),
@@ -35,7 +34,6 @@ const {
   useGetTableIsLoadingMoreMock: vi.fn(() => false),
   useGetTableIsTableSettingsOpenMock: vi.fn(),
   useGetTableIsTableSettingsPinnedMock: vi.fn(() => false),
-  useRenderTrackerMock: vi.fn(),
 }));
 
 const columnSettingsDrawerPropsSpy = vi.hoisted(() => vi.fn());
@@ -115,10 +113,6 @@ vi.mock('../contexts/TableConfig/meta/selectors', () => ({
 vi.mock('../contexts/TableData/data/selectors', () => ({
   useGetTableIsLoading: useGetTableIsLoadingMock,
   useGetTableIsLoadingMore: useGetTableIsLoadingMoreMock,
-}));
-
-vi.mock('@/utils/performance', () => ({
-  useRenderTracker: useRenderTrackerMock,
 }));
 
 afterEach(() => {

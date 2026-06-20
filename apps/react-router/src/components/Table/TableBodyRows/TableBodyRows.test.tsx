@@ -39,13 +39,11 @@ const {
   useGetColumnSizingMock,
   useGetPinnedColumnOffsetsMock,
   useGetTableDataMock,
-  useRenderTrackerMock,
 } = vi.hoisted(() => ({
   useGetColumnGroupsMock: vi.fn(),
   useGetColumnSizingMock: vi.fn(),
   useGetPinnedColumnOffsetsMock: vi.fn(),
   useGetTableDataMock: vi.fn(),
-  useRenderTrackerMock: vi.fn(),
 }));
 
 const MockTableBodyCell = vi.hoisted(
@@ -84,10 +82,6 @@ vi.mock('@/components/Table/TableBodyCell', () => ({
 
 vi.mock('@/components/Table/TableRow', () => ({
   TableRow: MockTableRow,
-}));
-
-vi.mock('@/utils/performance', () => ({
-  useRenderTracker: useRenderTrackerMock,
 }));
 
 vi.mock('../contexts/TableData/data/selectors', () => ({

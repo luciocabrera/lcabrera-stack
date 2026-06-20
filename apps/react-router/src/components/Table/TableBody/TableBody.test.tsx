@@ -14,7 +14,6 @@ const {
   useGetTableOverscanMock,
   useGetTableRowHeightMock,
   useGetTableTotalLoadedRowsMock,
-  useRenderTrackerMock,
   useVirtualizationMock,
 } = vi.hoisted(() => ({
   useGetColumnGroupsMock: vi.fn(),
@@ -23,7 +22,6 @@ const {
   useGetTableOverscanMock: vi.fn(),
   useGetTableRowHeightMock: vi.fn(),
   useGetTableTotalLoadedRowsMock: vi.fn(),
-  useRenderTrackerMock: vi.fn(),
   useVirtualizationMock: vi.fn(),
 }));
 
@@ -84,10 +82,6 @@ vi.mock('@/components/Table/TableBodyRows', () => ({
 
 vi.mock('@/hooks', () => ({
   useVirtualization: useVirtualizationMock,
-}));
-
-vi.mock('@/utils/performance', () => ({
-  useRenderTracker: useRenderTrackerMock,
 }));
 
 vi.mock('../contexts/TableData/data/selectors', () => ({

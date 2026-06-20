@@ -12,7 +12,6 @@ const {
   useGetPinnedColumnOffsetsMock,
   useGetTableIsLoadingMock,
   useGetTableIsLoadingMoreMock,
-  useRenderTrackerMock,
 } = vi.hoisted(() => ({
   MockTableHeaderCell: vi.fn(
     ({ columnKey }: { readonly columnKey: string }) => <th>Col:{columnKey}</th>,
@@ -24,7 +23,6 @@ const {
   useGetPinnedColumnOffsetsMock: vi.fn(),
   useGetTableIsLoadingMock: vi.fn(),
   useGetTableIsLoadingMoreMock: vi.fn(),
-  useRenderTrackerMock: vi.fn(),
 }));
 
 vi.mock('@/components/Table/contexts/TableConfig/columns/selectors', () => ({
@@ -35,10 +33,6 @@ vi.mock('@/components/Table/contexts/TableConfig/columns/selectors', () => ({
 vi.mock('@/components/Table/contexts/TableData/data/selectors', () => ({
   useGetTableIsLoading: useGetTableIsLoadingMock,
   useGetTableIsLoadingMore: useGetTableIsLoadingMoreMock,
-}));
-
-vi.mock('@/utils/performance', () => ({
-  useRenderTracker: useRenderTrackerMock,
 }));
 
 vi.mock('../TableHeaderCell', () => ({

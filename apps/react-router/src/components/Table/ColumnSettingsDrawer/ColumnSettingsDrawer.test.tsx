@@ -42,7 +42,6 @@ const {
   setTableColumnSettingsSelectedTabMock,
   setTableIsColumnSettingsPinnedMock,
   useGetNormalizedColumnMock,
-  useRenderTrackerMock,
   useTableWrapperRefMock,
 } = vi.hoisted(() => ({
   batchSetColumnDrawerSettingsMock: vi.fn(),
@@ -50,7 +49,6 @@ const {
   setTableColumnSettingsSelectedTabMock: vi.fn(),
   setTableIsColumnSettingsPinnedMock: vi.fn(),
   useGetNormalizedColumnMock: vi.fn(),
-  useRenderTrackerMock: vi.fn(),
   useTableWrapperRefMock: vi.fn(),
 }));
 
@@ -211,10 +209,6 @@ vi.mock('@/components/Tabs', () => ({
   Tabs: MockTabs,
 }));
 
-vi.mock('@/utils/performance', () => ({
-  useRenderTracker: useRenderTrackerMock,
-}));
-
 vi.mock('./ColumnDrawerContext/actions', () => ({
   useBatchSetColumnDrawerSettings: MockUseBatchSetColumnDrawerSettings,
   useResetAllColumnDrawerSettings: MockUseResetAllColumnDrawerSettings,
@@ -246,7 +240,6 @@ afterEach(() => {
   setTableColumnSettingsSelectedTabMock.mockReset();
   setTableIsColumnSettingsPinnedMock.mockReset();
   useGetNormalizedColumnMock.mockReset();
-  useRenderTrackerMock.mockReset();
   useTableWrapperRefMock.mockReset();
   cleanup();
 });

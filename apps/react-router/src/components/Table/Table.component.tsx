@@ -1,7 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { useRenderTracker } from '@/utils/performance';
-
 import type { TableProps } from './Table.types';
 
 import { TableDataProvider } from './contexts';
@@ -18,8 +16,6 @@ export const Table = <TData extends Record<string, unknown>, TResponse>({
   onLoadMore,
   response,
 }: TableProps<TData, TResponse>) => {
-  useRenderTracker({ componentName: 'Table' });
-
   const data = dataSelector ? dataSelector(response) : [];
   const totalRows = dataTotalSelector
     ? dataTotalSelector(response)
