@@ -52,11 +52,7 @@ const isFilterCompatibleWithColumn = <TData extends Record<string, unknown>>({
     }
     case 'string':
     case undefined: {
-      return (
-        filter.type === 'multiSelect' ||
-        filter.type === 'select' ||
-        filter.type === 'text'
-      );
+      return ['multiSelect', 'select', 'text'].includes(filter.type);
     }
     default: {
       return false;

@@ -33,17 +33,22 @@ export const prefetchNextPage = <TResponse>({
     skip: nextSkip,
   };
 
-  const resolution: Promise<PrefetchCache<TResponse>> = prefetchPromise
-    .then((prefetchedResponse) => ({
-      data: prefetchedResponse,
-      promise: undefined,
-      skip: nextSkip,
-    }))
-    .catch(() => ({
-      data: undefined,
-      promise: undefined,
-      skip: -1,
-    }));
+  const resolution: Promise<PrefetchCache<TResponse>> = (async () => {
+    try {
+      const prefetchedResponse = await prefetchPromise;
+      return {
+        data: prefetchedResponse,
+        promise: undefined,
+        skip: nextSkip,
+      };
+    } catch {
+      return {
+        data: undefined,
+        promise: undefined,
+        skip: -1,
+      };
+    }
+  })();
 
   return { initialCache, resolution };
 };

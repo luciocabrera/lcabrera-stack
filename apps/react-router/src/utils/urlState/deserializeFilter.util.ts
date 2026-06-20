@@ -20,19 +20,20 @@ const isDateValue = (v: unknown): v is string =>
 const isNumberOperatorType = (
   operator: string,
 ): operator is NumberOperatorType =>
-  operator === 'equals' ||
-  operator === 'greaterThan' ||
-  operator === 'greaterThanOrEqual' ||
-  operator === 'lessThan' ||
-  operator === 'lessThanOrEqual' ||
-  operator === 'notEquals';
+  [
+    'equals',
+    'greaterThan',
+    'greaterThanOrEqual',
+    'lessThan',
+    'lessThanOrEqual',
+    'notEquals',
+  ].includes(operator);
 
 const parseBooleanFilter = (value: unknown): ColumnFilter | undefined => {
   if (typeof value !== 'boolean') {
     return undefined;
   }
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   return { type: 'boolean', value };
 };
 

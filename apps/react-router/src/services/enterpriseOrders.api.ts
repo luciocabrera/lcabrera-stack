@@ -198,25 +198,27 @@ export const enterpriseOrdersApi = {
     log.debug('🌐 Filter object:', filter);
     log.debug('🌐 Sorting:', sorting);
 
-    const fetchData = () =>
-      fetch(url).then((response) => {
-        log.debug('📡 Response status:', response.status, response.statusText);
+    const fetchData = async (): Promise<
+      EnterpriseOrdersResponse & { hasMore: boolean }
+    > => {
+      const response = await fetch(url);
+      log.debug('📡 Response status:', response.status, response.statusText);
 
-        if (!response.ok) {
-          throw new Error(
-            `API request failed: ${response.status} ${response.statusText}`,
-          );
-        }
+      if (!response.ok) {
+        throw new Error(
+          `API request failed: ${response.status} ${response.statusText}`,
+        );
+      }
 
-        return response.json() as Promise<
-          EnterpriseOrdersResponse & { hasMore: boolean }
-        >;
-      });
+      return response.json() as Promise<
+        EnterpriseOrdersResponse & { hasMore: boolean }
+      >;
+    };
 
     // Add artificial delay if configured (for testing loading states)
     if (FAKE_API_DELAY_MS > 0) {
       log.debug(`⏳ Delaying response by ${FAKE_API_DELAY_MS}ms`);
-      return delay(FAKE_API_DELAY_MS).then(fetchData);
+      await delay(FAKE_API_DELAY_MS);
     }
 
     return fetchData();

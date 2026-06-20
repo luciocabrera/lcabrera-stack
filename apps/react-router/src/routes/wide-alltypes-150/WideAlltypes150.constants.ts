@@ -18,7 +18,7 @@ const getColDataType = (index: number): ColDataType => {
   const mod = index % 20;
   if (mod === 6) return 'boolean';
   if (mod === 9) return 'date';
-  if (mod === 0 || mod === 1 || mod === 4 || mod === 5) return 'number';
+  if ([0, 1, 4, 5].includes(mod)) return 'number';
   return 'string';
 };
 

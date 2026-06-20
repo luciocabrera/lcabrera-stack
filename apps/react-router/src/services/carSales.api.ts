@@ -66,18 +66,20 @@ export const carSalesApi = {
    * Fetch car sales data
    * Returns a promise (non-blocking) to enable React streaming with Suspense
    */
-  fetchCarSales: (requestUrl?: string): Promise<CarSalesResponse> => {
-    const fetchData = (): Promise<CarSalesResponse> =>
-      fetch(`${getApiBaseUrl(requestUrl)}/car-sales`).then((response) => {
-        if (!response.ok) {
-          throw new Error(`Failed to fetch car sales: ${response.statusText}`);
-        }
-        return response.json() as Promise<CarSalesResponse>;
-      });
+  fetchCarSales: async (requestUrl?: string): Promise<CarSalesResponse> => {
+    const fetchData = async (): Promise<CarSalesResponse> => {
+      const response = await fetch(`${getApiBaseUrl(requestUrl)}/car-sales`);
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch car sales: ${response.statusText}`);
+      }
+
+      return response.json() as Promise<CarSalesResponse>;
+    };
 
     // Add fake delay for testing skeleton/loading states
     if (FAKE_API_DELAY_MS > 0) {
-      return delay(FAKE_API_DELAY_MS).then(fetchData);
+      await delay(FAKE_API_DELAY_MS);
     }
 
     return fetchData();
@@ -86,7 +88,7 @@ export const carSalesApi = {
   /**
    * Fetch car sales data with pagination (offset-limit strategy)
    */
-  fetchCarSalesPaginated: ({
+  fetchCarSalesPaginated: async ({
     limit,
     requestUrl,
     skip,
@@ -110,20 +112,24 @@ export const carSalesApi = {
     const url = `${getApiBaseUrl(requestUrl)}/car-sales/paginated?${params.toString()}`;
     log.debug('🌐 Fetching from URL:', url);
 
-    const fetchData = () =>
-      fetch(url).then((response) => {
-        log.debug('📡 Response status:', response.status, response.statusText);
-        if (!response.ok) {
-          throw new Error(`Failed to fetch car sales: ${response.statusText}`);
-        }
-        return response.json() as Promise<
-          CarSalesResponse & { hasMore: boolean }
-        >;
-      });
+    const fetchData = async (): Promise<
+      CarSalesResponse & { hasMore: boolean }
+    > => {
+      const response = await fetch(url);
+
+      log.debug('📡 Response status:', response.status, response.statusText);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch car sales: ${response.statusText}`);
+      }
+
+      return response.json() as Promise<
+        CarSalesResponse & { hasMore: boolean }
+      >;
+    };
 
     // Add fake delay for testing skeleton/loading states
     if (FAKE_API_DELAY_MS > 0) {
-      return delay(FAKE_API_DELAY_MS).then(fetchData);
+      await delay(FAKE_API_DELAY_MS);
     }
 
     return fetchData();
