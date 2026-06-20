@@ -8,7 +8,7 @@ export const useColumnOrderSectionContextValue =
   (): ColumnOrderSectionContextValue => {
     const context = use(ColumnOrderSectionContext);
 
-    if (context === null) {
+    if (context === undefined) {
       throw new Error(
         'useColumnOrderSectionContextValue must be used within ColumnOrderSectionProvider',
       );

@@ -64,7 +64,7 @@ describe('resolveColumnFilterUpdate', () => {
         },
       } as ColumnFiltersState<Row>,
       columnKey: 'status',
-      filter: null,
+      filter: undefined,
       persistenceKey: 'orders-table',
     });
 

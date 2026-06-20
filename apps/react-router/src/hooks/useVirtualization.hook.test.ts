@@ -116,8 +116,8 @@ describe('useVirtualization', () => {
 
   it('falls back to the provided default height when no container is mounted', () => {
     const containerRef = {
-      current: null,
-    } as RefObject<HTMLElement | null>;
+      current: undefined,
+    } as RefObject<HTMLElement | null | undefined>;
 
     const { result } = renderHook(() =>
       useVirtualization({

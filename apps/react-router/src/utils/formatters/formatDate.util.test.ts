@@ -25,7 +25,7 @@ describe('formatDate', () => {
   });
 
   it('returns empty string for non-string invalid value', () => {
-    const result = formatDate({ value: null });
+    const result = formatDate({ value: undefined });
     expect(result).toBe('');
   });
 

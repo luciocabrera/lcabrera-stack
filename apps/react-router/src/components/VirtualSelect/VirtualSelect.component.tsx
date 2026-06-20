@@ -34,7 +34,9 @@ export const VirtualSelect = ({
   shouldFillHeight = false,
 }: VirtualSelectProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLButtonElement | HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement | HTMLDivElement | undefined>(
+    undefined,
+  );
 
   const generatedListboxId = useId();
 

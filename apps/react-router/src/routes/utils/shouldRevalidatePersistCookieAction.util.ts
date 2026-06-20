@@ -2,7 +2,7 @@ import type { ShouldRevalidateFunctionArgs } from 'react-router';
 
 import { PERSIST_COOKIE_ACTION } from '@/constants/globalSettings.constants';
 
-const isPersistCookieAction = (formAction: null | string) => {
+const isPersistCookieAction = (formAction: null | string | undefined) => {
   if (!formAction) {
     return false;
   }
@@ -25,7 +25,7 @@ export const shouldRevalidatePersistCookieAction = ({
   defaultShouldRevalidate,
   formAction,
 }: ShouldRevalidateFunctionArgs) => {
-  if (actionStatus === 204 && isPersistCookieAction(formAction ?? null)) {
+  if (actionStatus === 204 && isPersistCookieAction(formAction)) {
     return false;
   }
 

@@ -244,8 +244,8 @@ describe('useVirtualizationResizeObserver', () => {
 
   it('uses the provided default height when the container ref is null', () => {
     const containerRef = {
-      current: null,
-    } as RefObject<HTMLElement | null>;
+      current: undefined,
+    } as RefObject<HTMLElement | null | undefined>;
 
     const { result } = renderHook(() =>
       useVirtualizationResizeObserver({

@@ -9,5 +9,5 @@ export const assignTriggerRef = ({
   node,
   triggerRef,
 }: AssignTriggerRefArgs) => {
-  triggerRef.current = node;
+  triggerRef.current = node ?? undefined;
 };

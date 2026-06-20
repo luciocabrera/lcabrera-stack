@@ -28,7 +28,7 @@ type ReadTableLoaderStateFromRequestResult<TData> = {
   readonly columnVisibility: Set<keyof TData>;
   readonly filters: ColumnFiltersState<TData>;
   readonly sorting: SortingState<TData>;
-  readonly standaloneFiltersParam: null | string;
+  readonly standaloneFiltersParam: null | string | undefined;
   readonly standaloneSortParam: null | string;
 };
 
@@ -135,7 +135,7 @@ export const readTableLoaderStateFromRequest = <
 
   const standaloneFiltersParam = includeFilters
     ? url.searchParams.get('filters')
-    : null;
+    : undefined;
 
   const parsedFilters = standaloneFiltersParam
     ? deserializeFiltersFromURL<TData>(standaloneFiltersParam)

@@ -9,7 +9,7 @@ import {
 import { getVerticalVirtualizationWindow } from '@/hooks/utils';
 
 export type UseVirtualizationArgs = {
-  readonly containerRef: RefObject<HTMLElement | null>;
+  readonly containerRef: RefObject<HTMLElement | null | undefined>;
   readonly defaultContainerHeight?: number;
   readonly itemHeight: number;
   readonly overscan?: number;

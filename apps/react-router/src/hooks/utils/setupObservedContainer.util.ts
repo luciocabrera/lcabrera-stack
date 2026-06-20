@@ -1,5 +1,5 @@
 type SetupObservedContainerArgs = {
-  readonly container: HTMLElement | null;
+  readonly container: HTMLElement | null | undefined;
   readonly onMeasure: () => void;
   readonly readScroll: () => number;
   readonly setScroll: (value: number) => void;

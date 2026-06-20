@@ -14,7 +14,7 @@ describe('getErrorMessage', () => {
     expect(getErrorMessage({ error: 42, fallback: 'fallback' })).toBe(
       'fallback',
     );
-    expect(getErrorMessage({ error: null, fallback: 'fallback' })).toBe(
+    expect(getErrorMessage({ error: undefined, fallback: 'fallback' })).toBe(
       'fallback',
     );
   });

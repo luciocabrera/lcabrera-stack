@@ -7,7 +7,7 @@ import { THEME_COOKIE_NAME } from './themeCookie.constants';
  * Get theme from cookie (SSR and browser-safe).
  */
 export const getThemeFromCookie = (
-  cookieHeader: null | string,
+  cookieHeader: null | string | undefined,
 ): ThemeMode | undefined => {
   const theme = readFromCookie({
     cookieString: cookieHeader ?? undefined,

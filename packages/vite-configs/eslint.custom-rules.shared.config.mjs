@@ -215,6 +215,7 @@ export const createCustomRulesLintConfig = ({ ignorePatterns = [] } = {}) => [
       'local-rules/destructuring-for-functions': 'off',
       'perfectionist/sort-object-types': 'off',
       'perfectionist/sort-objects': 'off',
+      'unicorn/no-null': 'off',
     },
   },
   {

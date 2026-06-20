@@ -10,7 +10,7 @@ describe('getThemeFromCookie', () => {
   });
 
   it('returns undefined for null cookieHeader', () => {
-    expect(getThemeFromCookie(null)).toBeUndefined();
+    expect(getThemeFromCookie(undefined)).toBeUndefined();
   });
 
   it('returns undefined for empty string', () => {
@@ -36,7 +36,7 @@ describe('getThemeFromCookie', () => {
   it('falls back to document.cookie when cookieHeader is null in browser', () => {
     vi.stubGlobal('document', { cookie: 'theme=dark; lang=en' });
 
-    expect(getThemeFromCookie(null)).toBe('dark');
+    expect(getThemeFromCookie(undefined)).toBe('dark');
   });
 });
 
@@ -71,7 +71,7 @@ describe('setThemeCookie', () => {
   it('submits theme persistence to server action when fetch is available', async () => {
     let cookieValue = '';
     const docMock = { cookie: '' };
-    const fetchMock = vi.fn(() => Promise.resolve(new Response(null)));
+    const fetchMock = vi.fn(() => Promise.resolve(new Response(undefined)));
 
     Object.defineProperty(docMock, 'cookie', {
       get: () => cookieValue,

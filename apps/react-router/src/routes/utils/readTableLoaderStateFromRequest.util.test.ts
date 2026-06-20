@@ -107,7 +107,7 @@ describe('readTableLoaderStateFromRequest', () => {
     );
 
     expect(result.filters).toEqual({});
-    expect(result.standaloneFiltersParam).toBeNull();
+    expect(result.standaloneFiltersParam).toBeUndefined();
   });
 
   it('drops filters that do not match the route column data type', () => {

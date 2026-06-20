@@ -10,7 +10,7 @@ export const OrderDetail = () => {
 
   return (
     <div {...stylex.props(styles.container)}>
-      {JSON.stringify(order, null, 2)}
+      {JSON.stringify(order, undefined, 2)}
     </div>
   );
 };
