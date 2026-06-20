@@ -13,8 +13,7 @@ const validateDateFilter = (
 const validateNumberFilter = (
   filter: Extract<ColumnFilter, { type: 'number' }>,
 ) => {
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  if (filter.value === undefined) return false;
+  if (!filter.value) return false;
   if (filter.operator === 'between') {
     return filter.value2 !== undefined && filter.value2 > filter.value;
   }
@@ -39,9 +38,7 @@ const validateTextFilter = (
 /**
  * Validates a filter to ensure required fields are populated
  */
-export const validateFilter = (
-  filter: ColumnFilter | null | undefined,
-): boolean => {
+export const validateFilter = (filter?: ColumnFilter | null): boolean => {
   if (!filter) return false;
 
   switch (filter.type) {

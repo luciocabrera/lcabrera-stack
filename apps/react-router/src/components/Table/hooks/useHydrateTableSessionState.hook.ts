@@ -57,7 +57,7 @@ export const useHydrateTableSessionState = <
     const hasUiState = Object.keys(uiState).length > 0;
 
     if (hasColumnState) {
-      const { columnVisibility, version: _version, ...rest } = columnState;
+      const { columnVisibility, ...rest } = columnState;
       const currentColumnsState = columnsStore.get();
 
       const columns = currentColumnsState?.columns ?? [];
@@ -118,6 +118,6 @@ export const useHydrateTableSessionState = <
     if (hasUiState) {
       metaStore.set(uiState);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps, react-x/exhaustive-deps
   }, []);
 };
