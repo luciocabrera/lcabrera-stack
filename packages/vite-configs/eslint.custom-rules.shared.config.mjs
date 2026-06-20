@@ -136,6 +136,12 @@ export const createCustomRulesLintConfig = ({ ignorePatterns = [] } = {}) => [
   // 2. React Hooks and Refresh
   reactHooks.configs.flat.recommended,
   reactRefresh.configs.recommended,
+  {
+    files: ['**/root.ts', '**/root.tsx'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
+    },
+  },
   // Other configs...
   // Enable lint rules for React
   reactX.configs['recommended-typescript'],
