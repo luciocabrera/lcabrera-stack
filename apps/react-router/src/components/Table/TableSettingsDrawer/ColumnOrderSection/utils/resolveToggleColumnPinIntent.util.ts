@@ -6,7 +6,7 @@ import type {
 import type { UnpinConflictResolution } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
 import type { PinSide } from '@/types/ui.types';
 
-import { detectPinOrderConflict } from './detectPinOrderConflict.util';
+import { getHasPinOrderConflict } from './getHasPinOrderConflict.util';
 
 type PinSideModalResult<TData> = {
   readonly columnKey: DataKey<TData>;
@@ -96,7 +96,7 @@ export const resolveToggleColumnPinIntent = <TData>({
   };
 
   const currentOrder = allOrderedColumns.map((column) => column.key);
-  const hasPinOrderConflict = detectPinOrderConflict({
+  const hasPinOrderConflict = getHasPinOrderConflict({
     columnPinning: nextPinning,
     newOrder: currentOrder,
     staticKeys,

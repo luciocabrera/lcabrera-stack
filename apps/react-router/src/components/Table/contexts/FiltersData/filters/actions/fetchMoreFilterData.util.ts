@@ -1,4 +1,12 @@
-import type { FiltersDataState } from '@/components/Table/Table.types';
+import type { RefObject } from 'react';
+
+import type {
+  DataKey,
+  FiltersDataState,
+  TableMetaState,
+} from '@/components/Table/Table.types';
+import type { TStore } from '@/hooks/useStore.hook';
+import type { PrefetchCache } from '@/types/ui.types';
 
 import { DEFAULT_FILTER_PAGE_SIZE } from '@/components/Table/Table.constants';
 import { getErrorMessage } from '@/components/Table/utils/getErrorMessage.util';
@@ -8,10 +16,14 @@ import { clearPrefetchCache } from '@/utils/prefetch/clearPrefetchCache.util';
 import { firePrefetch } from '@/utils/prefetch/firePrefetch.util';
 import { resolveFromCacheOrFetch } from '@/utils/prefetch/resolveFromCacheOrFetch.util';
 
-import type {
-  FetchFilterDataCallbackArgs,
-  UseFetchFilterDataActionArgs,
-} from './useFetchFilterData.types';
+import type { FetchFilterDataCallbackArgs } from './useFetchFilterData.types';
+
+export type FetchFilterDataActionArgs<TData, TResponse> = {
+  readonly columnKey: DataKey<TData>;
+  readonly filtersDataStore: TStore<FiltersDataState<TData>>;
+  readonly metaStore: TStore<TableMetaState>;
+  readonly prefetchRef?: RefObject<PrefetchCache<TResponse>>;
+};
 
 type MaybePrefetchArgs<TResponse> = {
   readonly enablePrefetch: boolean;
@@ -21,7 +33,7 @@ type MaybePrefetchArgs<TResponse> = {
     readonly limit: number;
     readonly skip: number;
   }) => Promise<TResponse>;
-  readonly prefetchRef?: UseFetchFilterDataActionArgs<
+  readonly prefetchRef?: FetchFilterDataActionArgs<
     unknown,
     TResponse
   >['prefetchRef'];
@@ -30,7 +42,7 @@ type MaybePrefetchArgs<TResponse> = {
 const clearPrefetchIfPresent = <TResponse>({
   prefetchRef,
 }: {
-  readonly prefetchRef?: UseFetchFilterDataActionArgs<
+  readonly prefetchRef?: FetchFilterDataActionArgs<
     unknown,
     TResponse
   >['prefetchRef'];
@@ -61,12 +73,12 @@ const maybePrefetchNextPage = <TResponse>({
   });
 };
 
-export const useFetchMoreFilterData = <TData, TResponse>({
+export const fetchMoreFilterData = <TData, TResponse>({
   columnKey,
   filtersDataStore,
   metaStore,
   prefetchRef,
-}: UseFetchFilterDataActionArgs<TData, TResponse>) => {
+}: FetchFilterDataActionArgs<TData, TResponse>) => {
   const fetchMore = async ({
     dataSelector,
     dataTotalSelector,

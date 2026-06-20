@@ -1,4 +1,12 @@
-import type { FiltersDataState } from '@/components/Table/Table.types';
+import type { RefObject } from 'react';
+
+import type {
+  DataKey,
+  FiltersDataState,
+  TableMetaState,
+} from '@/components/Table/Table.types';
+import type { TStore } from '@/hooks/useStore.hook';
+import type { PrefetchCache } from '@/types/ui.types';
 
 import { DEFAULT_FILTER_PAGE_SIZE } from '@/components/Table/Table.constants';
 import { getErrorMessage } from '@/components/Table/utils/getErrorMessage.util';
@@ -6,13 +14,17 @@ import { getRequiredOnLoadMore } from '@/components/Table/utils/getRequiredOnLoa
 import { logger } from '@/utils/logger';
 import { firePrefetch } from '@/utils/prefetch/firePrefetch.util';
 
-import type {
-  FetchFilterDataCallbackArgs,
-  UseFetchFilterDataActionArgs,
-} from './useFetchFilterData.types';
+import type { FetchFilterDataCallbackArgs } from './useFetchFilterData.types';
 
 import { getTotalRows } from './getTotalRows.util';
 import { shouldSkipInitialFetch } from './shouldSkipInitialFetch.util';
+
+export type FetchFilterDataActionArgs<TData, TResponse> = {
+  readonly columnKey: DataKey<TData>;
+  readonly filtersDataStore: TStore<FiltersDataState<TData>>;
+  readonly metaStore: TStore<TableMetaState>;
+  readonly prefetchRef?: RefObject<PrefetchCache<TResponse>>;
+};
 
 type MaybePrefetchArgs<TResponse> = {
   readonly enablePrefetch: boolean;
@@ -22,7 +34,7 @@ type MaybePrefetchArgs<TResponse> = {
     readonly limit: number;
     readonly skip: number;
   }) => Promise<TResponse>;
-  readonly prefetchRef?: UseFetchFilterDataActionArgs<
+  readonly prefetchRef?: FetchFilterDataActionArgs<
     unknown,
     TResponse
   >['prefetchRef'];
@@ -47,12 +59,12 @@ const maybePrefetchInitialPage = <TResponse>({
   });
 };
 
-export const useFetchInitialFilterData = <TData, TResponse>({
+export const fetchInitialFilterData = <TData, TResponse>({
   columnKey,
   filtersDataStore,
   metaStore,
   prefetchRef,
-}: UseFetchFilterDataActionArgs<TData, TResponse>) => {
+}: FetchFilterDataActionArgs<TData, TResponse>) => {
   const fetchInitial = async ({
     dataSelector,
     dataTotalSelector,

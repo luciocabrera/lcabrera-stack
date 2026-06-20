@@ -4,7 +4,7 @@ import type {
 } from '@/components/Table/Table.types';
 import type { OrderConflictResolution } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
 
-import { detectPinOrderConflict } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
+import { getHasPinOrderConflict } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 
 type ResolveOrderConflictUpdateArgs = {
   readonly columnPinning: ColumnPinningState;
@@ -47,7 +47,7 @@ export const resolveOrderConflictUpdate = ({
   orderConflictResolutionPreference,
   staticKeys,
 }: ResolveOrderConflictUpdateArgs): ResolveOrderConflictUpdateResult => {
-  if (!detectPinOrderConflict({ columnPinning, newOrder, staticKeys })) {
+  if (!getHasPinOrderConflict({ columnPinning, newOrder, staticKeys })) {
     return {
       kind: 'apply-order',
       newOrder,

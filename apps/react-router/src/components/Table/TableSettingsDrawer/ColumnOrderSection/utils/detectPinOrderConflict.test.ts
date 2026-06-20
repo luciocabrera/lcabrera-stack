@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { detectPinOrderConflict } from './detectPinOrderConflict.util';
+import { getHasPinOrderConflict } from './getHasPinOrderConflict.util';
 
-describe('detectPinOrderConflict', () => {
+describe('getHasPinOrderConflict', () => {
   it('returns false when there are no pinned columns', () => {
     expect(
-      detectPinOrderConflict({
+      getHasPinOrderConflict({
         columnPinning: { left: [], right: [] },
         newOrder: ['a', 'b', 'c'],
       }),
@@ -14,7 +14,7 @@ describe('detectPinOrderConflict', () => {
 
   it('returns false when left-pinned columns are at the start', () => {
     expect(
-      detectPinOrderConflict({
+      getHasPinOrderConflict({
         columnPinning: { left: ['a', 'b'], right: [] },
         newOrder: ['a', 'b', 'c', 'd'],
       }),
@@ -23,7 +23,7 @@ describe('detectPinOrderConflict', () => {
 
   it('returns true when a left-pinned column is not at the start', () => {
     expect(
-      detectPinOrderConflict({
+      getHasPinOrderConflict({
         columnPinning: { left: ['a', 'b'], right: [] },
         newOrder: ['a', 'c', 'b', 'd'],
       }),
@@ -32,7 +32,7 @@ describe('detectPinOrderConflict', () => {
 
   it('returns false when right-pinned columns are at the end', () => {
     expect(
-      detectPinOrderConflict({
+      getHasPinOrderConflict({
         columnPinning: { left: [], right: ['c', 'd'] },
         newOrder: ['a', 'b', 'c', 'd'],
       }),
@@ -41,7 +41,7 @@ describe('detectPinOrderConflict', () => {
 
   it('returns true when a right-pinned column is not at the end', () => {
     expect(
-      detectPinOrderConflict({
+      getHasPinOrderConflict({
         columnPinning: { left: [], right: ['c', 'd'] },
         newOrder: ['a', 'c', 'b', 'd'],
       }),
@@ -50,7 +50,7 @@ describe('detectPinOrderConflict', () => {
 
   it('returns false with both left and right pinned in correct positions', () => {
     expect(
-      detectPinOrderConflict({
+      getHasPinOrderConflict({
         columnPinning: { left: ['a'], right: ['d'] },
         newOrder: ['a', 'b', 'c', 'd'],
       }),
@@ -61,7 +61,7 @@ describe('detectPinOrderConflict', () => {
     // Without static exclusion this would be a conflict (left pin 'a' not at position 0)
     // but 'static' is excluded so effective order is ['a', 'b'] with 'a' at position 0
     expect(
-      detectPinOrderConflict({
+      getHasPinOrderConflict({
         columnPinning: { left: ['a'], right: [] },
         newOrder: ['static', 'a', 'b'],
         staticKeys: new Set(['static']),

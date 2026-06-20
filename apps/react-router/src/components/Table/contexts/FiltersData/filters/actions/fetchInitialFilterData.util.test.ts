@@ -12,7 +12,7 @@ import type { TStore } from '@/hooks/useStore.hook';
 import { DEFAULT_FILTER_PAGE_SIZE } from '@/components/Table/Table.constants';
 import { createPaginatedFetchActionMocks } from '@/utils/tests/createPaginatedFetchActionMocks.util';
 
-import { useFetchInitialFilterData } from './useFetchInitialFilterData.hook';
+import { fetchInitialFilterData } from './fetchInitialFilterData.util';
 
 type TestData = {
   readonly status: string;
@@ -76,7 +76,7 @@ vi.mock('@/utils/prefetch/firePrefetch.util', () => ({
     getHarness().firePrefetchMock(...args),
 }));
 
-describe('useFetchInitialFilterData', () => {
+describe('fetchInitialFilterData', () => {
   beforeEach(() => {
     const currentHarness = getHarness();
     currentHarness.resetMocks();
@@ -105,7 +105,7 @@ describe('useFetchInitialFilterData', () => {
     };
 
     const { result } = renderHook(() =>
-      useFetchInitialFilterData<TestData, TestResponse>({
+      fetchInitialFilterData<TestData, TestResponse>({
         columnKey: 'status',
         filtersDataStore: getHarness().dataStore as unknown as TStore<
           FiltersDataState<TestData>

@@ -12,7 +12,7 @@ import type { TStore } from '@/hooks/useStore.hook';
 import { DEFAULT_FILTER_PAGE_SIZE } from '@/components/Table/Table.constants';
 import { createPaginatedFetchActionMocks } from '@/utils/tests/createPaginatedFetchActionMocks.util';
 
-import { useFetchMoreFilterData } from './useFetchMoreFilterData.hook';
+import { fetchMoreFilterData } from './fetchMoreFilterData.util';
 
 type TestData = {
   readonly status: string;
@@ -74,7 +74,7 @@ vi.mock('@/utils/prefetch/resolveFromCacheOrFetch.util', () => ({
   ) => getHarness().resolveFromCacheOrFetchMock(...args),
 }));
 
-describe('useFetchMoreFilterData', () => {
+describe('fetchMoreFilterData', () => {
   beforeEach(() => {
     harnessRef.current = createHarness();
     const currentHarness = getHarness();
@@ -96,7 +96,7 @@ describe('useFetchMoreFilterData', () => {
     };
 
     const { result } = renderHook(() =>
-      useFetchMoreFilterData<TestData, TestResponse>({
+      fetchMoreFilterData<TestData, TestResponse>({
         columnKey: 'status',
         filtersDataStore: getHarness().dataStore as unknown as TStore<
           FiltersDataState<TestData>
@@ -140,7 +140,7 @@ describe('useFetchMoreFilterData', () => {
     });
 
     const { result } = renderHook(() =>
-      useFetchMoreFilterData<TestData, TestResponse>({
+      fetchMoreFilterData<TestData, TestResponse>({
         columnKey: 'status',
         filtersDataStore: getHarness().dataStore as unknown as TStore<
           FiltersDataState<TestData>
@@ -173,7 +173,7 @@ describe('useFetchMoreFilterData', () => {
     });
 
     const { result } = renderHook(() =>
-      useFetchMoreFilterData<TestData, TestResponse>({
+      fetchMoreFilterData<TestData, TestResponse>({
         columnKey: 'status',
         filtersDataStore: getHarness().dataStore as unknown as TStore<
           FiltersDataState<TestData>
@@ -199,7 +199,7 @@ describe('useFetchMoreFilterData', () => {
     } as unknown as Partial<TestFiltersState>);
 
     const { result } = renderHook(() =>
-      useFetchMoreFilterData<TestData, TestResponse>({
+      fetchMoreFilterData<TestData, TestResponse>({
         columnKey: 'status',
         filtersDataStore: getHarness().dataStore as unknown as TStore<
           FiltersDataState<TestData>
@@ -223,7 +223,7 @@ describe('useFetchMoreFilterData', () => {
     });
 
     const { result } = renderHook(() =>
-      useFetchMoreFilterData<TestData, TestResponse>({
+      fetchMoreFilterData<TestData, TestResponse>({
         columnKey: 'status',
         filtersDataStore: getHarness().dataStore as unknown as TStore<
           FiltersDataState<TestData>
@@ -270,7 +270,7 @@ describe('useFetchMoreFilterData', () => {
     };
 
     const { result } = renderHook(() =>
-      useFetchMoreFilterData<TestData, TestResponse>({
+      fetchMoreFilterData<TestData, TestResponse>({
         columnKey: 'status',
         filtersDataStore: getHarness().dataStore as unknown as TStore<
           FiltersDataState<TestData>

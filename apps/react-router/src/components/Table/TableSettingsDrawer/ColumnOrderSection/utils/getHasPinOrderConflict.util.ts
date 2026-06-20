@@ -3,7 +3,7 @@ import type {
   ColumnPinningState,
 } from '@/components/Table/Table.types';
 
-type DetectPinOrderConflictArgs<TData> = {
+type GetHasPinOrderConflictArgs<TData> = {
   readonly columnPinning: ColumnPinningState<TData>;
   readonly newOrder: ColumnOrderState<TData>;
   readonly staticKeys?: Set<string>;
@@ -15,11 +15,11 @@ type DetectPinOrderConflictArgs<TData> = {
  * and right-pinned columns must appear at the end (contiguous).
  * Static columns are excluded from conflict detection.
  */
-export const detectPinOrderConflict = <TData>({
+export const getHasPinOrderConflict = <TData>({
   columnPinning,
   newOrder,
   staticKeys,
-}: DetectPinOrderConflictArgs<TData>): boolean => {
+}: GetHasPinOrderConflictArgs<TData>): boolean => {
   const left = staticKeys
     ? columnPinning.left.filter((key) => !staticKeys.has(key))
     : columnPinning.left;
