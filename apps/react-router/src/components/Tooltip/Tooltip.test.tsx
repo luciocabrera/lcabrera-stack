@@ -10,8 +10,17 @@ import { TRANSITION_DURATION_MS } from './Tooltip.constants';
 const savedShowPopover = HTMLElement.prototype.showPopover;
 // eslint-disable-next-line typescript-eslint/unbound-method -- Saving prototype method for teardown restore; binding would create a new function and break restoration
 const savedHidePopover = HTMLElement.prototype.hidePopover;
-let hidePopoverMock: ReturnType<typeof vi.fn>;
-let showPopoverMock: ReturnType<typeof vi.fn>;
+const popoverMocksRef: {
+  current: {
+    readonly hidePopoverMock: ReturnType<typeof vi.fn>;
+    readonly showPopoverMock: ReturnType<typeof vi.fn>;
+  };
+} = {
+  current: {
+    hidePopoverMock: vi.fn(),
+    showPopoverMock: vi.fn(),
+  },
+};
 
 afterEach(() => {
   HTMLElement.prototype.showPopover = savedShowPopover;
@@ -21,12 +30,14 @@ afterEach(() => {
 
 beforeEach(() => {
   vi.useFakeTimers();
-  hidePopoverMock = vi.fn();
-  showPopoverMock = vi.fn();
-  HTMLElement.prototype.showPopover =
-    showPopoverMock as HTMLElement['showPopover'];
-  HTMLElement.prototype.hidePopover =
-    hidePopoverMock as HTMLElement['hidePopover'];
+  popoverMocksRef.current = {
+    hidePopoverMock: vi.fn(),
+    showPopoverMock: vi.fn(),
+  };
+  HTMLElement.prototype.showPopover = popoverMocksRef.current
+    .showPopoverMock as HTMLElement['showPopover'];
+  HTMLElement.prototype.hidePopover = popoverMocksRef.current
+    .hidePopoverMock as HTMLElement['hidePopover'];
   vi.spyOn(globalThis, 'requestAnimationFrame').mockImplementation(
     (callback: FrameRequestCallback) => {
       callback(0);
@@ -91,7 +102,7 @@ describe('Tooltip', () => {
     const trigger = screen.getByRole('button', { name: 'Open tooltip' });
 
     fireEvent.keyDown(trigger, { key: 'Enter' });
-    expect(showPopoverMock).toHaveBeenCalledTimes(1);
+    expect(popoverMocksRef.current.showPopoverMock).toHaveBeenCalledTimes(1);
 
     fireEvent.keyDown(trigger, { key: 'Escape' });
     vi.advanceTimersByTime(TRANSITION_DURATION_MS);

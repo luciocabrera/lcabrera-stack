@@ -45,14 +45,16 @@ const createHarness = () => {
 
 type Harness = ReturnType<typeof createHarness>;
 
-let harness: Harness | undefined;
+const harnessRef: { current: Harness | undefined } = {
+  current: undefined,
+};
 
 const getHarness = (): Harness => {
-  if (!harness) {
-    harness = createHarness();
+  if (!harnessRef.current) {
+    harnessRef.current = createHarness();
   }
 
-  return harness;
+  return harnessRef.current;
 };
 
 vi.mock(

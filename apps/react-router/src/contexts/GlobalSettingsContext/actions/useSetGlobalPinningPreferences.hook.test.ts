@@ -10,15 +10,17 @@ import {
   type MockStore,
 } from '@/utils/tests/createMockStore.util';
 
-let settingsStore: MockStore<GlobalSettingsState | undefined> = createMockStore<
-  GlobalSettingsState | undefined
->(undefined);
+const settingsStoreRef: {
+  current: MockStore<GlobalSettingsState | undefined>;
+} = {
+  current: createMockStore<GlobalSettingsState | undefined>(undefined),
+};
 
 const persistGlobalSettingsMock = vi.hoisted(() => vi.fn());
 
 vi.mock('../useGlobalSettingsContextValue.hook', () => ({
   useGlobalSettingsContextValue: () => ({
-    settingsStore: settingsStore as never,
+    settingsStore: settingsStoreRef.current as never,
   }),
 }));
 
@@ -31,13 +33,15 @@ import { useSetGlobalPinningPreferences } from './useSetGlobalPinningPreferences
 describe('useSetGlobalPinningPreferences', () => {
   beforeEach(() => {
     persistGlobalSettingsMock.mockReset();
-    settingsStore = createMockStore<GlobalSettingsState | undefined>({
-      navigation: { size: 'small' },
-      pinning: {
-        orderConflictResolution: 'reset-all-pins',
-        pinSide: 'left',
+    settingsStoreRef.current = createMockStore<GlobalSettingsState | undefined>(
+      {
+        navigation: { size: 'small' },
+        pinning: {
+          orderConflictResolution: 'reset-all-pins',
+          pinSide: 'left',
+        },
       },
-    });
+    );
   });
 
   it('merges pinning updates and persists the next global settings snapshot', () => {
@@ -47,7 +51,7 @@ describe('useSetGlobalPinningPreferences', () => {
       result.current({ pinSide: 'right' });
     });
 
-    expect(settingsStore.get()).toEqual({
+    expect(settingsStoreRef.current.get()).toEqual({
       navigation: { size: 'small' },
       pinning: {
         orderConflictResolution: 'reset-all-pins',
@@ -65,7 +69,9 @@ describe('useSetGlobalPinningPreferences', () => {
   });
 
   it('uses initial settings when the store snapshot is undefined', () => {
-    settingsStore = createMockStore<GlobalSettingsState | undefined>(undefined);
+    settingsStoreRef.current = createMockStore<GlobalSettingsState | undefined>(
+      undefined,
+    );
 
     const { result } = renderHook(() => useSetGlobalPinningPreferences());
 
@@ -73,7 +79,7 @@ describe('useSetGlobalPinningPreferences', () => {
       result.current({ pinConflictResolution: 'pin-only' });
     });
 
-    expect(settingsStore.get()).toEqual({
+    expect(settingsStoreRef.current.get()).toEqual({
       navigation: {},
       pinning: {
         pinConflictResolution: 'pin-only',

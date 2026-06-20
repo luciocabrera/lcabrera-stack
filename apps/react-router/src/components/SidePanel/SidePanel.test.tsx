@@ -7,20 +7,34 @@ import { mockDialogElement } from '@/utils/tests/mockDialogElement.util';
 
 import { SidePanel } from './SidePanel.component';
 
-let restoreMockDialog: () => void;
-let showMock: ReturnType<typeof vi.fn>;
-let showModalMock: ReturnType<typeof vi.fn>;
+const dialogMocksRef: {
+  current: {
+    readonly restoreMockDialog: () => void;
+    readonly showMock: ReturnType<typeof vi.fn>;
+    readonly showModalMock: ReturnType<typeof vi.fn>;
+  };
+} = {
+  current: {
+    restoreMockDialog: () => {
+      // no-op default restore before setup
+    },
+    showMock: vi.fn(),
+    showModalMock: vi.fn(),
+  },
+};
 
 afterEach(() => {
-  restoreMockDialog();
+  dialogMocksRef.current.restoreMockDialog();
   cleanup();
 });
 
 beforeEach(() => {
   const setup = mockDialogElement();
-  restoreMockDialog = setup.restore;
-  showMock = setup.showMock;
-  showModalMock = setup.showModalMock;
+  dialogMocksRef.current = {
+    restoreMockDialog: setup.restore,
+    showMock: setup.showMock,
+    showModalMock: setup.showModalMock,
+  };
 });
 
 describe('SidePanel', () => {
@@ -61,7 +75,7 @@ describe('SidePanel', () => {
       </SidePanel>,
     );
 
-    expect(showModalMock).toHaveBeenCalledTimes(1);
+    expect(dialogMocksRef.current.showModalMock).toHaveBeenCalledTimes(1);
 
     rerender(
       <SidePanel isOpen onClose={() => void 0} shouldShowOverlay={false}>
@@ -69,7 +83,7 @@ describe('SidePanel', () => {
       </SidePanel>,
     );
 
-    expect(showMock).toHaveBeenCalledTimes(1);
+    expect(dialogMocksRef.current.showMock).toHaveBeenCalledTimes(1);
   });
 
   it('calls onClose when the native dialog close event fires', () => {

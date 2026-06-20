@@ -54,11 +54,13 @@ const createHarness = () => {
 
 type Harness = ReturnType<typeof createHarness>;
 
-let harness: Harness | undefined;
+const harnessRef: { current: Harness | undefined } = {
+  current: undefined,
+};
 
 const getHarness = (): Harness => {
-  harness ??= createHarness();
-  return harness;
+  harnessRef.current ??= createHarness();
+  return harnessRef.current;
 };
 
 vi.mock('@/utils/prefetch/firePrefetch.util', () => ({
@@ -74,7 +76,7 @@ vi.mock('@/utils/prefetch/resolveFromCacheOrFetch.util', () => ({
 
 describe('useFetchMoreFilterData', () => {
   beforeEach(() => {
-    harness = createHarness();
+    harnessRef.current = createHarness();
     const currentHarness = getHarness();
     currentHarness.resetMocks();
     currentHarness.setMetaState({ enablePrefetch: false });

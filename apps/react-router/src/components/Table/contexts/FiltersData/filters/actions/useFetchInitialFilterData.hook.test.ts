@@ -54,11 +54,13 @@ const createHarness = () => {
 
 type Harness = ReturnType<typeof createHarness>;
 
-let harness: Harness | undefined;
+const harnessRef: { current: Harness | undefined } = {
+  current: undefined,
+};
 
 const getHarness = (): Harness => {
-  harness ??= createHarness();
-  return harness;
+  harnessRef.current ??= createHarness();
+  return harnessRef.current;
 };
 
 const loggerMock = vi.hoisted(() => ({ error: vi.fn() }));

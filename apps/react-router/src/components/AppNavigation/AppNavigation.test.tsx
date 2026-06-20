@@ -50,15 +50,19 @@ const renderWithGlobalSettings = ({
   return render(<RouterProvider router={router} />);
 };
 
-let restoreMockDialog: () => void;
+const restoreMockDialogRef: { current: () => void } = {
+  current: () => {
+    // no-op default restore before setup
+  },
+};
 
 afterEach(() => {
-  restoreMockDialog();
+  restoreMockDialogRef.current();
   cleanup();
 });
 
 beforeEach(() => {
-  restoreMockDialog = mockDialogElement().restore;
+  restoreMockDialogRef.current = mockDialogElement().restore;
 });
 
 describe('AppNavigation', () => {

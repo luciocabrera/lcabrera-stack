@@ -47,16 +47,19 @@ function unsubscribeNoop() {
   // no-op unsubscribe for the test stub
 }
 
-let columnsStore: MockStore<Record<string, never>> = createMockStore({});
-let metaStore: MockStore<MetaStoreState> = createMockStore(
-  createInitialMetaState(),
-);
+const storesRef: {
+  columnsStore: MockStore<Record<string, never>>;
+  metaStore: MockStore<MetaStoreState>;
+} = {
+  columnsStore: createMockStore({}),
+  metaStore: createMockStore(createInitialMetaState()),
+};
 
 const getTableConfigContextValue = vi.hoisted(() => {
   return function getTableConfigContextValue() {
     return {
-      columnsStore,
-      metaStore,
+      columnsStore: storesRef.columnsStore,
+      metaStore: storesRef.metaStore,
     };
   };
 });
@@ -97,8 +100,8 @@ import { useMetaStore } from './useMetaStore.hook';
 
 describe('TableConfig meta hooks', () => {
   beforeEach(() => {
-    columnsStore = createMockStore({});
-    metaStore = createMockStore(createInitialMetaState());
+    storesRef.columnsStore = createMockStore({});
+    storesRef.metaStore = createMockStore(createInitialMetaState());
   });
 
   it('subscribes to the meta store and updates selected state', () => {
@@ -107,7 +110,7 @@ describe('TableConfig meta hooks', () => {
     expect(result.current).toBe('compact');
 
     act(() => {
-      metaStore.set({ density: 'comfortable' });
+      storesRef.metaStore.set({ density: 'comfortable' });
     });
 
     expect(result.current).toBe('comfortable');
@@ -116,7 +119,7 @@ describe('TableConfig meta hooks', () => {
   it('falls back to an empty snapshot when meta store returns undefined', () => {
     const subscribe = vi.fn(subscribeNoop);
 
-    metaStore = {
+    storesRef.metaStore = {
       get: () => undefined as unknown as MetaStoreState,
       getServerSnapshot: () => undefined as unknown as MetaStoreState,
       reset: () => {
@@ -126,7 +129,7 @@ describe('TableConfig meta hooks', () => {
         // no-op in fallback test
       },
       subscribe,
-    };
+    } as MockStore<MetaStoreState>;
 
     const { result } = renderHook(() =>
       useMetaStore((state) => state.columnSelectedKey ?? 'none'),
@@ -214,11 +217,13 @@ describe('TableConfig meta hooks', () => {
       setTableSettingsPinned.result.current(true);
     });
 
-    expect(metaStore.get().columnSelectedKey).toBe('status');
-    expect(metaStore.get().isColumnSettingsOpen).toBe(true);
-    expect(metaStore.get().isTableSettingsPinned).toBe(true);
-    expect(metaStore.get().isTableSettingsOpen).toBe(true);
-    expect(metaStore.get().tableSettingsExpandedFilters).toEqual(['status']);
-    expect(metaStore.get().tableSettingsSelectedTab).toBe('sorting');
+    expect(storesRef.metaStore.get().columnSelectedKey).toBe('status');
+    expect(storesRef.metaStore.get().isColumnSettingsOpen).toBe(true);
+    expect(storesRef.metaStore.get().isTableSettingsPinned).toBe(true);
+    expect(storesRef.metaStore.get().isTableSettingsOpen).toBe(true);
+    expect(storesRef.metaStore.get().tableSettingsExpandedFilters).toEqual([
+      'status',
+    ]);
+    expect(storesRef.metaStore.get().tableSettingsSelectedTab).toBe('sorting');
   });
 });

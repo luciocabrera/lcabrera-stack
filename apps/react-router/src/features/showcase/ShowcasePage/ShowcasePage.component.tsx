@@ -177,15 +177,19 @@ const fetchTableData = (): Promise<MockResponse> =>
 
 // Create the promise once, outside the component to avoid refetching on re-renders
 // In a real app, you'd use React Query, SWR, or similar
-let tableDataPromise: Promise<MockResponse> | undefined;
+const tableDataPromiseCache: {
+  current: Promise<MockResponse> | undefined;
+} = {
+  current: undefined,
+};
 
 const getTableDataPromise = () => {
-  tableDataPromise ??= fetchTableData();
-  return tableDataPromise;
+  tableDataPromiseCache.current ??= fetchTableData();
+  return tableDataPromiseCache.current;
 };
 
 const resetTableDataPromise = (): void => {
-  tableDataPromise = undefined;
+  tableDataPromiseCache.current = undefined;
 };
 
 const ShowcaseSection = ({ children, title }: ShowcaseSectionProps) => {

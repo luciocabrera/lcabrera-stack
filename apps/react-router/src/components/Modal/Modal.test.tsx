@@ -7,20 +7,34 @@ import { mockDialogElement } from '@/utils/tests/mockDialogElement.util';
 
 import { Modal } from './Modal.component';
 
-let closeMock: ReturnType<typeof vi.fn>;
-let restoreMockDialog: () => void;
-let showModalMock: ReturnType<typeof vi.fn>;
+const dialogMocksRef: {
+  current: {
+    readonly closeMock: ReturnType<typeof vi.fn>;
+    readonly restoreMockDialog: () => void;
+    readonly showModalMock: ReturnType<typeof vi.fn>;
+  };
+} = {
+  current: {
+    closeMock: vi.fn(),
+    restoreMockDialog: () => {
+      // no-op default restore before setup
+    },
+    showModalMock: vi.fn(),
+  },
+};
 
 afterEach(() => {
-  restoreMockDialog();
+  dialogMocksRef.current.restoreMockDialog();
   cleanup();
 });
 
 beforeEach(() => {
   const setup = mockDialogElement({ shouldSetOpenOnShow: false });
-  closeMock = setup.closeMock;
-  restoreMockDialog = setup.restore;
-  showModalMock = setup.showModalMock;
+  dialogMocksRef.current = {
+    closeMock: setup.closeMock,
+    restoreMockDialog: setup.restore,
+    showModalMock: setup.showModalMock,
+  };
 });
 
 describe('Modal', () => {
@@ -97,7 +111,7 @@ describe('Modal', () => {
       </Modal>,
     );
 
-    expect(showModalMock).toHaveBeenCalledTimes(1);
+    expect(dialogMocksRef.current.showModalMock).toHaveBeenCalledTimes(1);
 
     rerender(
       <Modal isOpen={false} onClose={() => void 0}>
@@ -105,7 +119,7 @@ describe('Modal', () => {
       </Modal>,
     );
 
-    expect(closeMock).toHaveBeenCalledTimes(1);
+    expect(dialogMocksRef.current.closeMock).toHaveBeenCalledTimes(1);
   });
 
   it('calls onClose when the native dialog close event fires', () => {

@@ -19,7 +19,11 @@ const { cancelAnimationFrameMock, requestAnimationFrameMock } = vi.hoisted(
   }),
 );
 
-let resizeObserverCallback: ResizeObserverCallback | undefined;
+const resizeObserverCallbackRef: {
+  current: ResizeObserverCallback | undefined;
+} = {
+  current: undefined,
+};
 
 type CreateContainerArgs = {
   readonly offsetHeight: number;
@@ -55,7 +59,7 @@ const createContainer = ({
 
 describe('useVirtualizationResizeObserver', () => {
   beforeEach(() => {
-    resizeObserverCallback = undefined;
+    resizeObserverCallbackRef.current = undefined;
     requestAnimationFrameMock.mockClear();
     cancelAnimationFrameMock.mockClear();
 
@@ -65,7 +69,7 @@ describe('useVirtualizationResizeObserver', () => {
       'ResizeObserver',
       class {
         public constructor(callback: ResizeObserverCallback) {
-          resizeObserverCallback = callback;
+          resizeObserverCallbackRef.current = callback;
         }
 
         public disconnect() {
@@ -155,7 +159,7 @@ describe('useVirtualizationResizeObserver', () => {
     });
 
     act(() => {
-      resizeObserverCallback?.([], {} as ResizeObserver);
+      resizeObserverCallbackRef.current?.([], {} as ResizeObserver);
     });
 
     expect(result.current.containerHeight).toBe(520);
@@ -182,7 +186,7 @@ describe('useVirtualizationResizeObserver', () => {
     });
 
     act(() => {
-      resizeObserverCallback?.([], {} as ResizeObserver);
+      resizeObserverCallbackRef.current?.([], {} as ResizeObserver);
     });
 
     expect(result.current.containerHeight).toBe(400);
