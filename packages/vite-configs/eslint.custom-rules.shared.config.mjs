@@ -154,8 +154,17 @@ export const createCustomRulesLintConfig = ({ ignorePatterns = [] } = {}) => [
 
   {
     rules: {
+      'unicorn/consistent-boolean-name': [
+        'error',
+        {
+          prefixes: {
+            are: true,
+          },
+        },
+      ],
       'unicorn/name-replacements': 'off',
       'unicorn/prevent-abbreviations': 'off',
+      'unicorn/no-array-reduce': 'off',
       'security/detect-object-injection': 'off',
       'unicorn/filename-case': 'off',
     },
