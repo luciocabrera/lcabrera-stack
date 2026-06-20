@@ -38,11 +38,11 @@ export const SidePanel = ({
 
   // Close dialog when switching to pinned mode
   useEffect(() => {
-    if (isPinned) {
-      const dialog = dialogRef.current;
-      if (dialog?.open) {
-        dialog.close();
-      }
+    if (!isPinned) return;
+
+    const dialog = dialogRef.current;
+    if (dialog?.open) {
+      dialog.close();
     }
   }, [isPinned]);
 
