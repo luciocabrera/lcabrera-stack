@@ -112,10 +112,23 @@ export const useHydrateTableSessionState = <
         staticKeys: getStaticColumnKeys(columns),
       } as Partial<TableColumnsState<TData>>;
 
+      console.log(
+        'useHydrateTableSessionState: restoring column state from sessionStorage',
+        {
+          nextColumnsState,
+        },
+      );
+
       columnsStore.set(nextColumnsState);
     }
 
     if (hasUiState) {
+      console.log(
+        'useHydrateTableSessionState: restoring UI state from sessionStorage',
+        {
+          uiState,
+        },
+      );
       metaStore.set(uiState);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps, react-x/exhaustive-deps

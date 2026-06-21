@@ -1,9 +1,22 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
+import type {
+  ColumnFiltersState,
+  ColumnOrderState,
+  ColumnPinningState,
+  ColumnSizingState,
+  ColumnVisibilityState,
+  SortingState,
+  TableColumnsState,
+} from '@/components/Table/Table.types';
 import type { EnterpriseOrder, EnterpriseOrdersResponse } from '@/services';
 
 import { INITIAL_PAGE_SIZE } from '@/components/Table/Table.constants';
-import { readPersistedUiStateFromSessionStorage } from '@/components/Table/utils';
+import {
+  deriveColumnViewState,
+  getStaticColumnKeys,
+  readPersistedUiStateFromSessionStorage,
+} from '@/components/Table/utils';
 import { readPersistedStateFromSessionStorage } from '@/components/Table/utils/readPersistedStateFromSessionStorage.util';
 import { enterpriseOrdersApi } from '@/services';
 
@@ -74,16 +87,78 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
     title: TITLE,
   };
 };
+
 export const clientLoader = async ({
   serverLoader,
 }: Route.ClientLoaderArgs) => {
   const serverData = await serverLoader();
-  const { persistenceKey } = serverData;
+  const {
+    columnOrder,
+    columns,
+    columnSizing,
+    columnVisibility,
+    defaultColumnPinning,
+    filters,
+    persistenceKey,
+    sorting,
+  } = serverData;
 
-  const columnState = readPersistedStateFromSessionStorage({
+  const columnState = readPersistedStateFromSessionStorage<EnterpriseOrder>({
     persistenceKey,
   });
   const uiState = readPersistedUiStateFromSessionStorage({ persistenceKey });
+  // const { columnVisibility, ...rest } = columnState;
+
+  const nextColumnFilters = (columnState.columnFilters ??
+    filters ??
+    ({} as ColumnFiltersState<EnterpriseOrder>)) as ColumnFiltersState<EnterpriseOrder>;
+  const nextColumnOrder = (columnState.columnOrder ??
+    columnOrder ??
+    ([] as ColumnOrderState<EnterpriseOrder>)) as ColumnOrderState<EnterpriseOrder>;
+  const nextColumnPinning = (columnState.columnPinning ??
+    defaultColumnPinning ??
+    ({
+      left: [],
+      right: [],
+    } as ColumnPinningState<EnterpriseOrder>)) as ColumnPinningState<EnterpriseOrder>;
+  const nextColumnSizing = (columnState.columnSizing ??
+    columnSizing ??
+    ({} as ColumnSizingState<EnterpriseOrder>)) as ColumnSizingState<EnterpriseOrder>;
+  const nextColumnVisibility = (columnState.columnVisibility ??
+    columnVisibility ??
+    (new Set() as ColumnVisibilityState<EnterpriseOrder>)) as ColumnVisibilityState<EnterpriseOrder>;
+  const nextSorting = (columnState.sorting ??
+    sorting ??
+    ([] as SortingState<EnterpriseOrder>)) as SortingState<EnterpriseOrder>;
+
+  const {
+    columnGroups,
+    effectiveColumns,
+    normalizedColumns,
+    pinnedColumnOffsets,
+  } = deriveColumnViewState<EnterpriseOrder>({
+    columnOrder: nextColumnOrder,
+    columnPinning: nextColumnPinning,
+    columns,
+    columnSizing: nextColumnSizing,
+    columnVisibility: nextColumnVisibility,
+    sorting: nextSorting,
+  });
+
+  const nextColumnsState = {
+    columnFilters: nextColumnFilters,
+    columnGroups,
+    columnOrder: nextColumnOrder,
+    columnPinning: nextColumnPinning,
+    columns,
+    columnSizing: nextColumnSizing,
+    columnVisibility: nextColumnVisibility,
+    effectiveColumns,
+    normalizedColumns,
+    pinnedColumnOffsets,
+    sorting: nextSorting,
+    staticKeys: getStaticColumnKeys(columns),
+  } as Partial<TableColumnsState<EnterpriseOrder>>;
 
   console.log('Client loader - read persisted state from sessionStorage', {
     columnState,
@@ -91,7 +166,7 @@ export const clientLoader = async ({
     uiState,
   });
 
-  return { ...serverData, columnState, uiState };
+  return { ...serverData, ...nextColumnsState, uiState };
 };
 
 // force the client loader to run during hydration

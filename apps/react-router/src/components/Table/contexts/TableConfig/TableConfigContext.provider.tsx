@@ -30,7 +30,7 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
     getInitialMetaState(metaState ?? {}),
   );
 
-  // On client mount: restore per-tab sessionStorage state into both stores.
+  // // On client mount: restore per-tab sessionStorage state into both stores.
   useHydrateTableSessionState({
     columnsStore,
     metaStore,
