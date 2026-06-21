@@ -3,13 +3,15 @@
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-const { metaStoreSetMock } = vi.hoisted(() => ({
+const { metaStoreGetMock, metaStoreSetMock } = vi.hoisted(() => ({
+  metaStoreGetMock: vi.fn(() => ({ persistenceKey: '' })),
   metaStoreSetMock: vi.fn(),
 }));
 
 vi.mock('../../useTableConfigContextValue.hook', () => ({
   useTableConfigContextValue: () => ({
     metaStore: {
+      get: metaStoreGetMock,
       set: metaStoreSetMock,
     },
   }),

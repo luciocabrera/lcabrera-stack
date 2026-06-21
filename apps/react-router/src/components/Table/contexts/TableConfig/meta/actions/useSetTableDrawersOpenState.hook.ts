@@ -1,3 +1,5 @@
+import { persistTableMetaUiState } from '@/components/Table/utils';
+
 import { useTableConfigContextValue } from '../../useTableConfigContextValue.hook';
 
 type SetTableDrawersOpenStateArgs = {
@@ -31,10 +33,16 @@ export const useSetTableDrawersOpenState = () => {
         metaState?.isTableSettingsOpen ?? false;
     }
 
-    metaStore.set({
+    const nextStatePatch = {
       isColumnSettingsOpen,
       isTableSettingsOpen,
       wasTableSettingsOpenBeforeColumnSettings,
+    };
+
+    persistTableMetaUiState({
+      currentState: metaState,
+      nextStatePatch,
     });
+    metaStore.set(nextStatePatch);
   };
 };

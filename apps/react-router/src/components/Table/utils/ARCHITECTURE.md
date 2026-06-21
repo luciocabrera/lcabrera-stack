@@ -17,6 +17,8 @@ utils/
 ├── getNormalizedColumns.util.ts                  → Enrich columns with sort metadata
 ├── getPinnedColumnOffsets.util.ts                → Compute sticky offsets for pinned columns
 ├── getPinnedDerivedColumnsState.util.ts          → Build effective columns, groups, and pinned offsets
+├── getPersistedUiState.util.ts                   → Extract the persisted meta UI slice from full table meta state
+├── persistTableMetaUiState.util.ts               → Persist tab-scoped meta UI patch directly from mutation actions
 ├── getStaticColumnKeys.util.ts                   → Extract non-reorderable column keys
 ├── getStorageKey.util.ts                         → Build namespaced storage key
 ├── readPersistedDataStateFromSessionStorage.util.ts → Read tab-scoped persisted table rows
@@ -138,7 +140,9 @@ graph LR
 | readPersistedStateFromCookie             | Parse persisted state from cookies (SSR-safe)                  |
 | readPersistedStateFromSessionStorage     | Parse persisted column slices from sessionStorage (tab-scoped) |
 | readPersistedUiStateFromSessionStorage   | Parse persisted UI slices from sessionStorage (tab-scoped)     |
-| arePersistedUiStatesEqual                | Compare persisted UI slices to skip redundant writes           |
+| arePersistedUiStatesEqual                | Legacy compare helper for persisted UI slices                  |
+| getPersistedUiState                      | Extract the persisted UI subset from `TableMetaState`          |
+| persistTableMetaUiState                  | Persist merged meta UI patches to sessionStorage               |
 | serializeStateSlice                      | Convert a state slice to key/value payload                     |
 | writePersistedDataStateToSessionStorage  | Write persisted data rows to sessionStorage (tab-scoped)       |
 | writePersistedUiStateToSessionStorage    | Write persisted UI slices to sessionStorage (tab-scoped)       |

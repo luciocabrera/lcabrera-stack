@@ -1,6 +1,7 @@
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { useTableDataContextValue } from '@/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
 import { usePersistTableStateAction } from '@/components/Table/hooks';
+import { persistTableMetaUiState } from '@/components/Table/utils';
 import { areEqualByJson } from '@/utils/comparison';
 
 import type { BatchColumnSettingsUpdate } from './utils/resolveBatchColumnSettingsUpdate.util';
@@ -49,9 +50,7 @@ export const useBatchSetColumnSettings = <TData>() => {
       }),
     );
 
-    if (!didPersist) {
-      return;
-    }
+    if (!didPersist) return;
 
     // Only trigger data fetch if query-affecting changes occurred
     if (hasQueryChanged) {
@@ -62,18 +61,24 @@ export const useBatchSetColumnSettings = <TData>() => {
 
     columnsStore.set(resolvedUpdate);
 
-    if (isColumnSettingsPinned) {
-      metaStore.set({
-        isColumnSettingsOpen: true,
-      });
-    } else {
-      metaStore.set({
-        isColumnSettingsOpen: false,
-        isTableSettingsOpen: shouldRestoreTableSettings
-          ? true
-          : (metaState?.isTableSettingsOpen ?? false),
-        wasTableSettingsOpenBeforeColumnSettings: false,
-      });
-    }
+    const isTableSettingsOpen = shouldRestoreTableSettings
+      ? true
+      : (metaState?.isTableSettingsOpen ?? false);
+
+    const nextStatePatch = isColumnSettingsPinned
+      ? {
+          isColumnSettingsOpen: true,
+        }
+      : {
+          isColumnSettingsOpen: false,
+          isTableSettingsOpen,
+          wasTableSettingsOpenBeforeColumnSettings: false,
+        };
+
+    persistTableMetaUiState({
+      currentState: metaState,
+      nextStatePatch,
+    });
+    metaStore.set(nextStatePatch);
   };
 };

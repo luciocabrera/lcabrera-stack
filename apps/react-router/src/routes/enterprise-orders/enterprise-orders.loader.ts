@@ -3,7 +3,11 @@ import type { LoaderFunctionArgs } from 'react-router';
 import type { EnterpriseOrder, EnterpriseOrdersResponse } from '@/services';
 
 import { INITIAL_PAGE_SIZE } from '@/components/Table/Table.constants';
+import { readPersistedUiStateFromSessionStorage } from '@/components/Table/utils';
+import { readPersistedStateFromSessionStorage } from '@/components/Table/utils/readPersistedStateFromSessionStorage.util';
 import { enterpriseOrdersApi } from '@/services';
+
+import type { Route } from './+types/root';
 
 import { readTableLoaderStateFromRequest } from '../utils/readTableLoaderStateFromRequest.util';
 import {
@@ -70,3 +74,25 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
     title: TITLE,
   };
 };
+export const clientLoader = async ({
+  serverLoader,
+}: Route.ClientLoaderArgs) => {
+  const serverData = await serverLoader();
+  const { persistenceKey } = serverData;
+
+  const columnState = readPersistedStateFromSessionStorage({
+    persistenceKey,
+  });
+  const uiState = readPersistedUiStateFromSessionStorage({ persistenceKey });
+
+  console.log('Client loader - read persisted state from sessionStorage', {
+    columnState,
+    serverData,
+    uiState,
+  });
+
+  return { ...serverData, columnState, uiState };
+};
+
+// force the client loader to run during hydration
+clientLoader.hydrate = true as const; // `as const` for type inference

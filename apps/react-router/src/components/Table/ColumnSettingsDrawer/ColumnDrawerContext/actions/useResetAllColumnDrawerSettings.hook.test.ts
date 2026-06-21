@@ -3,30 +3,47 @@
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { columnsStore, columnStore, metaStore, mockGetTableColumnDrawerState } =
-  vi.hoisted(() => ({
-    columnsStore: {
-      get: vi.fn(() => ({ columns: [{ key: 'status', label: 'Status' }] })),
-    },
-    columnStore: {
-      get: vi.fn(() => ({ columnKey: 'status' })),
-      set: vi.fn(),
-    },
-    metaStore: {
-      get: vi.fn(() => ({
-        isTableSettingsOpen: false,
-        wasTableSettingsOpenBeforeColumnSettings: false,
-      })),
-      set: vi.fn(),
-    },
-    mockGetTableColumnDrawerState: vi.fn(() => ({
-      columnFilter: undefined,
-      columnKey: 'status',
-      columnPinning: undefined,
-      columnSizing: undefined,
-      sorting: undefined,
+const {
+  columnsStore,
+  columnStore,
+  metaStore,
+  mockGetTableColumnDrawerState,
+  persistTableMetaUiStateMock,
+} = vi.hoisted(() => ({
+  columnsStore: {
+    get: vi.fn(() => ({ columns: [{ key: 'status', label: 'Status' }] })),
+  },
+  columnStore: {
+    get: vi.fn(() => ({ columnKey: 'status' })),
+    set: vi.fn(),
+  },
+  metaStore: {
+    get: vi.fn(() => ({
+      isTableSettingsOpen: false,
+      persistenceKey: 'orders',
+      wasTableSettingsOpenBeforeColumnSettings: false,
     })),
-  }));
+    set: vi.fn(),
+  },
+  mockGetTableColumnDrawerState: vi.fn(() => ({
+    columnFilter: undefined,
+    columnKey: 'status',
+    columnPinning: undefined,
+    columnSizing: undefined,
+    sorting: undefined,
+  })),
+  persistTableMetaUiStateMock: vi.fn(),
+}));
+
+vi.mock('@/components/Table/utils', async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import('@/components/Table/utils')>();
+
+  return {
+    ...actual,
+    persistTableMetaUiState: persistTableMetaUiStateMock,
+  };
+});
 
 vi.mock(
   '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
@@ -58,6 +75,7 @@ import { useResetAllColumnDrawerSettings } from './useResetAllColumnDrawerSettin
 
 describe('useResetAllColumnDrawerSettings', () => {
   beforeEach(() => {
+    persistTableMetaUiStateMock.mockReset();
     columnStore.get.mockReset();
     columnStore.get.mockReturnValue({ columnKey: 'status' });
     columnStore.set.mockReset();
@@ -68,6 +86,7 @@ describe('useResetAllColumnDrawerSettings', () => {
     metaStore.get.mockReset();
     metaStore.get.mockReturnValue({
       isTableSettingsOpen: false,
+      persistenceKey: 'orders',
       wasTableSettingsOpenBeforeColumnSettings: false,
     });
     metaStore.set.mockReset();
@@ -77,6 +96,7 @@ describe('useResetAllColumnDrawerSettings', () => {
   it('restores table settings open state when closing after column drawer takeover', () => {
     metaStore.get.mockReturnValue({
       isTableSettingsOpen: false,
+      persistenceKey: 'orders',
       wasTableSettingsOpenBeforeColumnSettings: true,
     });
 
@@ -86,6 +106,18 @@ describe('useResetAllColumnDrawerSettings', () => {
       result.current(true);
     });
 
+    expect(persistTableMetaUiStateMock).toHaveBeenCalledWith({
+      currentState: {
+        isTableSettingsOpen: false,
+        persistenceKey: 'orders',
+        wasTableSettingsOpenBeforeColumnSettings: true,
+      },
+      nextStatePatch: {
+        isColumnSettingsOpen: false,
+        isTableSettingsOpen: true,
+        wasTableSettingsOpenBeforeColumnSettings: false,
+      },
+    });
     expect(metaStore.set).toHaveBeenCalledWith({
       isColumnSettingsOpen: false,
       isTableSettingsOpen: true,

@@ -150,23 +150,27 @@ graph TD
 
 ## Persistence
 
-Table state uses dual-channel persistence:
+Table state uses two write paths with a shared hydration model:
 
-- Cookies + URL for SSR/shareable state (filters, sorting, pinning, sizing, visibility)
+- Cookies + URL for SSR/shareable column state (filters, sorting, pinning, sizing, visibility)
 - sessionStorage (tab-scoped) for per-tab working copies (drawer UI + data rows)
+- Meta UI state is written by the mutation action itself, not by a subscription effect
 - Query revalidation is conditional: only effective filter/sort URL changes trigger
   redirect and loader rerun.
 
 ```mermaid
 graph LR
-  Change["State change"] --> Action["usePersistTableStateAction()"]
-  Change --> Session["sessionStorage write"]
-  Action --> Fetcher["useFetcher.submit()"]
+  ColumnChange["column state change"] --> ColumnAction["usePersistTableStateAction()"]
+  ColumnAction --> ColumnSession["sessionStorage write"]
+  ColumnAction --> Fetcher["useFetcher.submit()"]
   Fetcher --> Route["POST /_action/persist-cookie"]
   Route --> Cookie["Set-Cookie header"]
   Route --> Decision{"search params changed?"}
   Decision -->|Yes| Revalidate["redirect + loader revalidation"]
   Decision -->|No| Stable["204 response, no revalidation"]
+
+  MetaChange["meta UI mutation"] --> MetaAction["persistTableMetaUiState()"]
+  MetaAction --> MetaSession["sessionStorage write only"]
 
   Load["Page load"] --> CookieRead["readPersistedStateFromCookie()"]
   CookieRead --> Init["Provider initial state"]

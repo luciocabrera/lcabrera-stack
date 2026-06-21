@@ -3,10 +3,7 @@ import type {
   TableMetaState,
 } from '@/components/Table/Table.types';
 
-import {
-  useHydrateTableSessionState,
-  useMetaStatePersistEffect,
-} from '@/components/Table/hooks';
+import { useHydrateTableSessionState } from '@/components/Table/hooks';
 import { useStore } from '@/hooks';
 
 import type {
@@ -39,9 +36,6 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
     metaStore,
     persistenceKey,
   });
-
-  // Subscribe to metaStore and keep sessionStorage in sync on every change.
-  useMetaStatePersistEffect({ metaStore, persistenceKey });
 
   const value = {
     columnsStore,

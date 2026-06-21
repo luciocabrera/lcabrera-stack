@@ -6,11 +6,11 @@ Table-specific hooks for column resizing, infinite scroll, and state persistence
 
 ```
 hooks/
-├── useColumnResize.hook.ts          → RAF-throttled drag resize
-├── useHydrateTableSessionState.hook.ts → Restores tab-scoped table + UI state after mount
-├── useInfiniteScroll.hook.ts        → Scroll threshold detection
-├── usePersistCookieAction.hook.ts   → Server action cookie persistence
-└── index.ts                         → Barrel export
+├── useColumnResize.hook.ts              → RAF-throttled drag resize
+├── useHydrateTableSessionState.hook.ts  → Restores tab-scoped table + UI state after mount
+├── useInfiniteScroll.hook.ts            → Scroll threshold detection
+├── usePersistCookieAction.hook.ts       → Server action cookie persistence for column state
+└── index.ts                             → Barrel export
 ```
 
 ## useColumnResize
@@ -78,7 +78,9 @@ graph TD
 
 ## usePersistTableStateAction
 
-Persists table state slices to cookies via a server action (React Router `useFetcher`).
+Persists column-oriented table state slices through the dual-channel flow: write
+sessionStorage immediately, then submit the cookie update through a React Router
+server action.
 
 ```mermaid
 graph TD

@@ -5,31 +5,48 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useSetTableDrawersOpenState } from './useSetTableDrawersOpenState.hook';
 
-const { getMetaState, mockUseTableConfigContextValue, setMetaState } =
-  vi.hoisted(() => {
-    let metaState = {
-      isColumnSettingsOpen: false,
-      isTableSettingsOpen: false,
-      wasTableSettingsOpenBeforeColumnSettings: false,
-    };
+const {
+  getMetaState,
+  mockUseTableConfigContextValue,
+  persistTableMetaUiStateMock,
+  setMetaState,
+} = vi.hoisted(() => {
+  let metaState = {
+    isColumnSettingsOpen: false,
+    isTableSettingsOpen: false,
+    persistenceKey: 'orders',
+    wasTableSettingsOpenBeforeColumnSettings: false,
+  };
 
-    const mockMetaStore = {
-      get: vi.fn(() => metaState),
-      set: vi.fn((value: Record<string, unknown>) => {
-        metaState = { ...metaState, ...value };
-      }),
-    };
+  const mockMetaStore = {
+    get: vi.fn(() => metaState),
+    set: vi.fn((value: Record<string, unknown>) => {
+      metaState = { ...metaState, ...value };
+    }),
+  };
+  const persistTableMetaUiStateMock = vi.fn();
 
-    return {
-      getMetaState: () => metaState,
-      mockUseTableConfigContextValue: () => ({
-        metaStore: mockMetaStore,
-      }),
-      setMetaState: (nextState: typeof metaState) => {
-        metaState = nextState;
-      },
-    };
-  });
+  return {
+    getMetaState: () => metaState,
+    mockUseTableConfigContextValue: () => ({
+      metaStore: mockMetaStore,
+    }),
+    persistTableMetaUiStateMock,
+    setMetaState: (nextState: typeof metaState) => {
+      metaState = nextState;
+    },
+  };
+});
+
+vi.mock('@/components/Table/utils', async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import('@/components/Table/utils')>();
+
+  return {
+    ...actual,
+    persistTableMetaUiState: persistTableMetaUiStateMock,
+  };
+});
 
 vi.mock('../../useTableConfigContextValue.hook', () => ({
   useTableConfigContextValue: mockUseTableConfigContextValue,
@@ -37,9 +54,11 @@ vi.mock('../../useTableConfigContextValue.hook', () => ({
 
 describe('useSetTableDrawersOpenState', () => {
   beforeEach(() => {
+    persistTableMetaUiStateMock.mockReset();
     setMetaState({
       isColumnSettingsOpen: false,
       isTableSettingsOpen: false,
+      persistenceKey: 'orders',
       wasTableSettingsOpenBeforeColumnSettings: false,
     });
   });
@@ -57,12 +76,26 @@ describe('useSetTableDrawersOpenState', () => {
     expect(getMetaState().isColumnSettingsOpen).toBe(true);
     expect(getMetaState().isTableSettingsOpen).toBe(false);
     expect(getMetaState().wasTableSettingsOpenBeforeColumnSettings).toBe(false);
+    expect(persistTableMetaUiStateMock).toHaveBeenCalledWith({
+      currentState: {
+        isColumnSettingsOpen: false,
+        isTableSettingsOpen: false,
+        persistenceKey: 'orders',
+        wasTableSettingsOpenBeforeColumnSettings: false,
+      },
+      nextStatePatch: {
+        isColumnSettingsOpen: true,
+        isTableSettingsOpen: false,
+        wasTableSettingsOpenBeforeColumnSettings: false,
+      },
+    });
   });
 
   it('captures previous table settings open state when opening column settings', () => {
     setMetaState({
       isColumnSettingsOpen: false,
       isTableSettingsOpen: true,
+      persistenceKey: 'orders',
       wasTableSettingsOpenBeforeColumnSettings: false,
     });
 
@@ -84,6 +117,7 @@ describe('useSetTableDrawersOpenState', () => {
     setMetaState({
       isColumnSettingsOpen: true,
       isTableSettingsOpen: false,
+      persistenceKey: 'orders',
       wasTableSettingsOpenBeforeColumnSettings: true,
     });
 
@@ -105,6 +139,7 @@ describe('useSetTableDrawersOpenState', () => {
     setMetaState({
       isColumnSettingsOpen: true,
       isTableSettingsOpen: false,
+      persistenceKey: 'orders',
       wasTableSettingsOpenBeforeColumnSettings: true,
     });
 

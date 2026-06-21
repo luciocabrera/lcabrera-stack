@@ -25,6 +25,7 @@ const {
   mockColumnsStore,
   mockDataStore,
   mockMetaStore,
+  mockPersistTableMetaUiState,
   mockPersistTableState,
   mockResolveBatchTableSettingsUpdate,
 } = vi.hoisted(() => {
@@ -60,6 +61,7 @@ const {
       })),
       set: vi.fn(),
     },
+    mockPersistTableMetaUiState: vi.fn(),
     mockPersistTableState: vi.fn(),
     mockResolveBatchTableSettingsUpdate: vi.fn(() => ({
       columnFilters: {
@@ -128,6 +130,16 @@ vi.mock('@/components/Table/hooks', () => ({
   usePersistTableStateAction: () => mockPersistTableState,
 }));
 
+vi.mock('@/components/Table/utils', async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import('@/components/Table/utils')>();
+
+  return {
+    ...actual,
+    persistTableMetaUiState: mockPersistTableMetaUiState,
+  };
+});
+
 vi.mock('./utils/buildPersistencePayload.util', () => ({
   buildPersistencePayload: mockBuildPersistencePayload,
 }));
@@ -144,6 +156,7 @@ describe('useBatchSetTableSettings', () => {
     mockDataStore.set.mockClear();
     mockMetaStore.get.mockClear();
     mockMetaStore.set.mockClear();
+    mockPersistTableMetaUiState.mockClear();
     mockPersistTableState.mockClear();
     mockPersistTableState.mockReturnValue(true);
     mockResolveBatchTableSettingsUpdate.mockClear();
@@ -212,6 +225,15 @@ describe('useBatchSetTableSettings', () => {
     expect(mockColumnsStore.set).toHaveBeenCalledWith(
       mockResolveBatchTableSettingsUpdate.mock.results[0]?.value,
     );
+    expect(mockPersistTableMetaUiState).toHaveBeenCalledWith({
+      currentState: {
+        isTableSettingsPinned: false,
+        persistenceKey: 'orders-table',
+      },
+      nextStatePatch: {
+        isTableSettingsOpen: false,
+      },
+    });
     expect(mockMetaStore.set).toHaveBeenCalledWith({
       isTableSettingsOpen: false,
     });

@@ -226,16 +226,23 @@ The two batch settings hooks now share two focused pure helpers instead of each 
 
 ## Meta Actions
 
-| Hook                                 | Writes To   | Description                                              |
-| ------------------------------------ | ----------- | -------------------------------------------------------- |
-| `useSetTableColumnSelectedKey`       | `metaStore` | Set which column is selected                             |
-| `useSetTableDrawersOpenState`        | `metaStore` | Set both drawer open states and capture restore snapshot |
-| `useSetTableSettingsExpandedFilters` | `metaStore` | Persist expanded filter items in table settings          |
-| `useSetTableSettingsSelectedTab`     | `metaStore` | Persist selected table settings tab                      |
-| `useSetTableIsTableSettingsOpen`     | `metaStore` | Set table settings open state                            |
-| `useSetTableIsTableSettingsPinned`   | `metaStore` | Set table settings pinned state                          |
-| `useToogleTableIsColumnSettingsOpen` | `metaStore` | Toggle column settings drawer                            |
-| `useToogleTableIsTableSettingsOpen`  | `metaStore` | Toggle table settings drawer                             |
+Persisted meta UI fields are mutation-owned: each action that changes drawer UI
+state calls `persistTableMetaUiState()` before committing its
+`metaStore.set(...)` patch. This keeps sessionStorage aligned without a
+subscription effect in the provider.
+
+| Hook                                   | Writes To   | Description                                                                 |
+| -------------------------------------- | ----------- | --------------------------------------------------------------------------- |
+| `useSetTableColumnSelectedKey`         | `metaStore` | Set which column is selected                                                |
+| `useSetTableDrawersOpenState`          | `metaStore` | Set both drawer open states, capture restore snapshot, and persist UI state |
+| `useSetTableSettingsExpandedFilters`   | `metaStore` | Persist expanded filter items in table settings                             |
+| `useSetTableSettingsSelectedTab`       | `metaStore` | Persist selected table settings tab                                         |
+| `useSetTableIsColumnSettingsPinned`    | `metaStore` | Persist column settings pinned state                                        |
+| `useSetTableIsTableSettingsOpen`       | `metaStore` | Persist table settings open state                                           |
+| `useSetTableIsTableSettingsPinned`     | `metaStore` | Persist table settings pinned state                                         |
+| `useSetTableColumnSettingsSelectedTab` | `metaStore` | Persist selected column-settings tab                                        |
+| `useToogleTableIsColumnSettingsOpen`   | `metaStore` | Toggle column settings drawer and persist derived open state                |
+| `useToogleTableIsTableSettingsOpen`    | `metaStore` | Toggle table settings drawer and persist derived open state                 |
 
 ## Meta Selectors
 
