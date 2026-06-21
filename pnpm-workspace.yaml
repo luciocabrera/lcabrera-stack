@@ -39,7 +39,7 @@ catalog:
   eslint-plugin-security: ^4.0.1
   eslint-plugin-unicorn: ^68.0.0
   express: ^5.2.1
-  fallow: ^2.100.0
+  fallow: ^2.101.0
   fastify: ^5.8.5
   globals: ^17.6.0
   isbot: 5.1.43
@@ -189,6 +189,15 @@ minimumReleaseAgeExclude:
   - '@fallow-cli/win32-arm64-msvc@2.100.0'
   - '@fallow-cli/win32-x64-msvc@2.100.0'
   - fallow@2.100.0
+  - '@fallow-cli/darwin-arm64@2.101.0'
+  - '@fallow-cli/darwin-x64@2.101.0'
+  - '@fallow-cli/linux-arm64-gnu@2.101.0'
+  - '@fallow-cli/linux-arm64-musl@2.101.0'
+  - '@fallow-cli/linux-x64-gnu@2.101.0'
+  - '@fallow-cli/linux-x64-musl@2.101.0'
+  - '@fallow-cli/win32-arm64-msvc@2.101.0'
+  - '@fallow-cli/win32-x64-msvc@2.101.0'
+  - fallow@2.101.0
 
 # overrides:
 #   vite: "catalog:"
