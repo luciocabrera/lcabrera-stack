@@ -12,19 +12,14 @@ export const styles = stylex.create({
     flexDirection: 'column',
     justifyContent: 'center',
     textAlign: 'center',
+    height: '-webkit-fill-available',
   },
-  retryButton: {
-    borderRadius: '4px',
-    borderStyle: 'none',
-    paddingBlock: spacing.sm,
-    paddingInline: spacing.lg,
-    backgroundColor: 'var(--brand-primary)',
-    color: 'var(--brand-primary-text)',
-    cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: 500,
-    marginTop: spacing.md,
+  actions: {
+    gap: spacing.md,
+    display: 'flex',
+    width: '100%',
   },
+
   title: {
     margin: 0,
     color: 'var(--error)',
