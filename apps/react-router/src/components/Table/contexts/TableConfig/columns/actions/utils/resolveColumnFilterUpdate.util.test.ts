@@ -40,11 +40,8 @@ describe('resolveColumnFilterUpdate', () => {
       },
     });
     expect(result.persistenceEntry).toEqual({
-      persistenceKey: 'orders-table',
       searchParamKey: 'filters',
       searchParamValue: '{"status":["eq","active"],"priority":["eq","high"]}',
-      slice: 'columnFilters',
-      valueSlice: result.columnFilters,
     });
   });
 

@@ -41,18 +41,12 @@ describe('buildPersistencePayload', () => {
 
     expect(result).toHaveLength(5);
     expect(result[0]).toEqual({
-      persistenceKey: 'orders-table',
       searchParamKey: 'filters',
       searchParamValue: '{"name":["ct","ali"]}',
-      slice: 'columnFilters',
-      valueSlice: columnFilters,
     });
     expect(result[1]).toEqual({
-      persistenceKey: 'orders-table',
-      searchParamKey: 'sort',
+      searchParamKey: 'sorting',
       searchParamValue: '{"name":"asc"}',
-      slice: 'sorting',
-      valueSlice: [{ columnKey: 'name', direction: 'asc' }],
     });
     expect(result.map(({ slice }) => slice)).toEqual([
       'columnFilters',

@@ -55,7 +55,7 @@ describe('readTableLoaderStateFromRequest', () => {
       },
     });
     const request = new Request(
-      `https://example.com/orders?orders-tableState=${encodedState}&sort=${encodeURIComponent(
+      `https://example.com/orders?orders-tableState=${encodedState}&sorting=${encodeURIComponent(
         sorting ?? '',
       )}&filters=${encodeURIComponent(filters ?? '')}`,
       {

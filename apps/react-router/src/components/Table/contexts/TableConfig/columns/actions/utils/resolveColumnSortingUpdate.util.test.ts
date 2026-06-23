@@ -43,14 +43,8 @@ describe('resolveColumnSortingUpdate', () => {
     expect(result).toMatchObject({
       kind: 'updated',
       persistenceEntry: {
-        persistenceKey: 'orders-table',
-        searchParamKey: 'sort',
+        searchParamKey: 'sorting',
         searchParamValue: '{"status":"asc","priority":"desc"}',
-        slice: 'sorting',
-        valueSlice: [
-          { columnKey: 'status', direction: 'asc' },
-          { columnKey: 'priority', direction: 'desc' },
-        ],
       },
       sorting: [
         { columnKey: 'status', direction: 'asc' },

@@ -36,7 +36,6 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   const hasMore = useGetTableHasMore();
 
   const fetchMoreData = useFetchMoreData<TData, TResponse>();
-
   const toggleTableIsTableSettingsOpen = useToogleTableIsTableSettingsOpen();
 
   const containerRef = useRef<HTMLDivElement>(null);
