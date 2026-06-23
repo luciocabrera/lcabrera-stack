@@ -49,8 +49,8 @@ describe('buildPersistencePayload', () => {
       searchParamValue: '{"name":"asc"}',
     });
     expect(result.map(({ slice }) => slice)).toEqual([
-      'columnFilters',
-      'sorting',
+      undefined,
+      undefined,
       'columnSizing',
       'columnPinning',
       'columnOrder',

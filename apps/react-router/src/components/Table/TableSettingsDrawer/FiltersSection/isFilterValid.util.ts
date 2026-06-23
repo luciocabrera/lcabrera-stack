@@ -11,10 +11,18 @@ const isDateFilterValid = (filter: Extract<ColumnFilter, { type: 'date' }>) => {
 const isNumberFilterValid = (
   filter: Extract<ColumnFilter, { type: 'number' }>,
 ) => {
-  if (!filter.value) return false;
-  if (filter.operator === 'between') {
-    return filter.value2 !== undefined && filter.value2 > filter.value;
+  const { operator, value, value2 } = filter;
+
+  if (typeof value !== 'number' || Number.isNaN(value)) {
+    return false;
   }
+
+  if (operator === 'between') {
+    return (
+      typeof value2 === 'number' && !Number.isNaN(value2) && value2 > value
+    );
+  }
+
   return true;
 };
 
