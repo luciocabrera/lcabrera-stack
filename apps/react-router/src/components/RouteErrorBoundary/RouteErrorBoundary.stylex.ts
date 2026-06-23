@@ -17,7 +17,7 @@ export const styles = stylex.create({
   actions: {
     gap: spacing.md,
     display: 'flex',
-    width: '100%',
+    width: 'min(500px, 90%)',
   },
 
   title: {

@@ -11,8 +11,8 @@ import {
   SidePanelTitle,
 } from '@/components/SidePanel';
 import { Tabs } from '@/components/Tabs';
+import { useNotifyAction } from '@/contexts/NotificationContext/actions';
 import { ICON_SIZE_LG } from '@/design-system/constants';
-import { useNotifications } from '@/hooks/useNotifications.hook';
 
 import type { TableSettingsDrawerProps } from './TableSettingsDrawer.types';
 
@@ -42,7 +42,7 @@ export const TableSettingsDrawer = ({
   isBusy = false,
 }: TableSettingsDrawerProps) => {
   const batchSetTableDrawerSettings = useBatchSetTableDrawerSettings();
-  const { notify } = useNotifications();
+  const notify = useNotifyAction();
   const resetTableDrawerSettings = useResetTableSettings();
   const isPinned = useGetTableIsTableSettingsPinned();
   const selectedTab = useGetTableSettingsSelectedTab();

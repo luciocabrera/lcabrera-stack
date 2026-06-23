@@ -4,6 +4,7 @@ import { useNavigate, useRevalidator } from 'react-router';
 import { Button } from '@/components/Button';
 import { ErrorDescriptive } from '@/components/Icons';
 import { Title } from '@/components/Title';
+import { useNotifyAction } from '@/contexts/NotificationContext/actions';
 
 import type { RouteErrorBoundaryProps } from './RouteErrorBoundary.types';
 
@@ -17,13 +18,21 @@ export const RouteErrorBoundary = ({
 }: RouteErrorBoundaryProps) => {
   const { revalidate } = useRevalidator();
   const navigate = useNavigate();
+  const notify = useNotifyAction();
+  notify({
+    durationMs: 10_000,
+    message: 'Something went wrong.',
+    title: 'Error occurred',
+    variant: 'error' as const,
+  });
+
   const details =
     import.meta.env.DEV && error instanceof Error
       ? error.message
       : defaultMessage;
 
   const handleNavigateHome = () => {
-    navigate('/');
+    void navigate('/');
   };
 
   return (

@@ -5,7 +5,7 @@ import {
   PERSIST_COOKIE_ACTION,
   PERSISTENCE_SIZE_WARNING,
 } from '@/constants/globalSettings.constants';
-import { useNotifications } from '@/hooks/useNotifications.hook';
+import { useNotifyAction } from '@/contexts/NotificationContext/actions';
 import { writeToSessionStorage } from '@/utils/storage';
 
 import type { TablePersistenceConfig } from '../Table.types';
@@ -40,7 +40,7 @@ type PersistTableStateAction = {
 export const usePersistTableStateAction = (): PersistTableStateAction => {
   const fetcher = useFetcher({ key: 'persist-table-state' });
   const location = useLocation();
-  const { notify } = useNotifications();
+  const notify = useNotifyAction();
 
   return (args: PersistCookieEntry | PersistCookieEntry[]) => {
     const entries = Array.isArray(args) ? args : [args];
@@ -78,6 +78,12 @@ export const usePersistTableStateAction = (): PersistTableStateAction => {
       notify(PERSISTENCE_SIZE_WARNING);
       return false;
     }
+    notify({
+      durationMs: 10_000,
+      message: 'This table state has been updated successfully.',
+      title: 'Table updated',
+      variant: 'success' as const,
+    });
 
     for (const { key, value } of serializedEntries) {
       // Write to sessionStorage immediately (tab-isolated, survives refresh)

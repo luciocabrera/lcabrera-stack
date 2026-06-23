@@ -55,11 +55,12 @@ afterEach(() => {
   Reflect.deleteProperty(HTMLDivElement.prototype, 'showPopover');
 });
 
-vi.mock('@/hooks/useNotifications.hook', () => ({
-  useNotifications: () => ({
-    dismissNotification: dismissNotificationMock,
-    notifications: notificationsMock,
-  }),
+vi.mock('@/contexts/NotificationContext/actions', () => ({
+  useDismissNotificationAction: () => dismissNotificationMock,
+}));
+
+vi.mock('@/contexts/NotificationContext/selectors', () => ({
+  useGetNotifications: () => notificationsMock,
 }));
 
 import { NotificationCenter } from './NotificationCenter.component';

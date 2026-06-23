@@ -209,10 +209,8 @@ vi.mock('./TableDrawerContext/selectors', () => ({
   useGetColumnFilters: () => tableColumnFiltersMock,
 }));
 
-vi.mock('@/hooks/useNotifications.hook', () => ({
-  useNotifications: () => ({
-    notify: notifyMock,
-  }),
+vi.mock('@/contexts/NotificationContext/actions', () => ({
+  useNotifyAction: () => notifyMock,
 }));
 
 import { TableSettingsDrawer } from './TableSettingsDrawer.component';

@@ -51,7 +51,6 @@ Before creating anything new, check this inventory. If something here does the j
 | --------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | `useClickOutside`                 | `hooks/useClickOutside.hook.ts`                 | Fires callback when a `mousedown` occurs outside a given ref                                           |
 | `useStore`                        | `hooks/useStore.hook.ts`                        | Ref-based external store with shallow-equality guard, subscribe, reset, SSR snapshot                   |
-| `useNotifications`                | `hooks/useNotifications.hook.ts`                | Accesses NotificationContext actions/state (`notify`, `dismissNotification`, `dismissNotifications`)   |
 | `useTheme`                        | `hooks/useTheme.hook.ts`                        | Returns `{ theme, setTheme }` from `ThemeContext` via React 19 `use()`                                 |
 | `useVirtualization`               | `hooks/useVirtualization.hook.ts`               | Computes `startIndex`, `endIndex`, `totalHeight`, `offsetY` for a scrollable virtual list              |
 | `useVirtualizationResizeObserver` | `hooks/useVirtualizationResizeObserver.hook.ts` | Preserves the ResizeObserver + RAF-based vertical virtualization experiment for side-by-side retesting |

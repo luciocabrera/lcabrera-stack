@@ -11,17 +11,23 @@ import {
 } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { useNotifications } from '@/hooks/useNotifications.hook';
-
+import {
+  useDismissNotificationAction,
+  useDismissNotificationsAction,
+  useNotifyAction,
+} from './actions';
 import { NotificationProvider } from './NotificationContext.provider';
+import { useGetNotifications } from './selectors';
 
 type WrapperProps = {
   readonly children: ReactNode;
 };
 
 const TestHarness = () => {
-  const { dismissNotification, dismissNotifications, notifications, notify } =
-    useNotifications();
+  const notify = useNotifyAction();
+  const dismissNotification = useDismissNotificationAction();
+  const dismissNotifications = useDismissNotificationsAction();
+  const notifications = useGetNotifications();
 
   return (
     <div>

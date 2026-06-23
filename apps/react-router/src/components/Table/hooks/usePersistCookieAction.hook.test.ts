@@ -37,8 +37,8 @@ vi.mock('../utils', () => ({
   serializeStateSlice: serializeStateSliceMock,
 }));
 
-vi.mock('@/hooks/useNotifications.hook', () => ({
-  useNotifications: () => ({ notify: notifyMock }),
+vi.mock('@/contexts/NotificationContext/actions', () => ({
+  useNotifyAction: () => notifyMock,
 }));
 
 vi.mock('@/utils/storage', () => ({

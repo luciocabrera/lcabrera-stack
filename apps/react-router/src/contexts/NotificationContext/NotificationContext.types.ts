@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 
 import type { CardColor } from '@/components/Card';
+import type { TStore } from '@/hooks';
 
 export type AppNotification = {
   readonly durationMs: number;
@@ -12,10 +13,8 @@ export type AppNotification = {
 };
 
 export type NotificationContextValue = {
-  readonly dismissNotification: (id: string) => void;
-  readonly dismissNotifications: () => void;
-  readonly notifications: readonly AppNotification[];
-  readonly notify: (args: NotifyArgs) => string;
+  readonly notificationsStore: TStore<NotificationState>;
+  readonly timeoutMapRef: { readonly current: NotificationTimeoutMap };
 };
 
 export type NotificationPlacement =
@@ -30,6 +29,12 @@ export type NotificationProviderProps = {
   readonly defaultPlacement?: NotificationPlacement;
 };
 
+export type NotificationState = {
+  readonly defaultDurationMs: number;
+  readonly defaultPlacement: NotificationPlacement;
+  readonly notifications: readonly AppNotification[];
+};
+
 export type NotifyArgs = {
   readonly durationMs?: number;
   readonly message: string;
@@ -37,3 +42,5 @@ export type NotifyArgs = {
   readonly title?: string;
   readonly variant?: CardColor;
 };
+
+type NotificationTimeoutMap = Map<string, ReturnType<typeof setTimeout>>;

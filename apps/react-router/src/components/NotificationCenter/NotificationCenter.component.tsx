@@ -7,7 +7,8 @@ import type { NotificationPlacement } from '@/contexts/NotificationContext';
 
 import { Card } from '@/components/Card';
 import { MenuCloseIcon } from '@/components/Icons';
-import { useNotifications } from '@/hooks/useNotifications.hook';
+import { useDismissNotificationAction } from '@/contexts/NotificationContext/actions';
+import { useGetNotifications } from '@/contexts/NotificationContext/selectors';
 
 import { NOTIFICATION_CENTER_PLACEMENTS } from './NotificationCenter.constants';
 import { styles } from './NotificationCenter.stylex';
@@ -18,7 +19,8 @@ import {
 } from './utils';
 
 export const NotificationCenter = () => {
-  const { dismissNotification, notifications } = useNotifications();
+  const dismissNotification = useDismissNotificationAction();
+  const notifications = useGetNotifications();
   const openPlacementsRef = useRef(new Set<NotificationPlacement>());
   const viewportRefs = useRef(new Map<NotificationPlacement, HTMLDivElement>());
 
