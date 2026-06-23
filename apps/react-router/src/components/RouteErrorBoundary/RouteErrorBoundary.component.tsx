@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+
 import * as stylex from '@stylexjs/stylex';
 import { useNavigate, useRevalidator } from 'react-router';
 
@@ -19,12 +21,15 @@ export const RouteErrorBoundary = ({
   const { revalidate } = useRevalidator();
   const navigate = useNavigate();
   const notify = useNotifyAction();
-  notify({
-    durationMs: 10_000,
-    message: 'Something went wrong.',
-    title: 'Error occurred',
-    variant: 'error' as const,
-  });
+
+  useEffect(() => {
+    notify({
+      durationMs: 10_000,
+      message: 'Something went wrong.',
+      title: 'Error occurred',
+      variant: 'error',
+    });
+  }, [error, notify]);
 
   const details =
     import.meta.env.DEV && error instanceof Error
