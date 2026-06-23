@@ -10,8 +10,8 @@ Virtualized options body extracted from `VirtualList` to own list-specific orche
 - Trigger optional initial fetch (`onFetchInitial`) on mount
 - Render loading placeholders via `SkeletonOptions` during initial load
 - Render empty-state message when filtered results are empty
-- Render virtualized rows (`VirtualizedOption`) using derived `startIndex`, `endIndex`, `offsetY`, and `totalHeight`
-- Preserve "Select All" index/key behavior from the original inline implementation
+- Render the virtualized scroll area via `VirtualListBodyOptions` (extracted sub-component)
+- `VirtualListBodyOptions` owns the virtual scroll area layout (`virtualScrollArea` / `virtualOffset` styles), key generation logic, and `VirtualizedOption` dispatch
 
 ## Props
 
@@ -28,3 +28,9 @@ Virtualized options body extracted from `VirtualList` to own list-specific orche
 | `hasSelectAll`     | `boolean`                            | Enables select-all row when filtered options > 1   |
 | `listMaxHeight`    | `string`                             | Max-height for non-fill mode                       |
 | `shouldFillHeight` | `boolean`                            | Uses fill-height container variant                 |
+
+## Sub-components
+
+| Component                | Location                    | Responsibility                                                                   |
+| ------------------------ | --------------------------- | -------------------------------------------------------------------------------- |
+| `VirtualListBodyOptions` | `./VirtualListBodyOptions/` | Virtual scroll area layout, key generation, and `VirtualizedOption` row dispatch |

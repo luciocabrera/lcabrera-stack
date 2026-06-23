@@ -2,29 +2,29 @@
   "kind": "combined",
   "schema_version": 7,
   "version": "2.101.0",
-  "elapsed_ms": 503,
+  "elapsed_ms": 206,
   "_meta": {
     "telemetry": {
-      "analysis_run_id": "run_f6845fce5ffad248"
+      "analysis_run_id": "run_5fbbfa7821804158"
     }
   },
   "check": {
     "schema_version": 7,
     "version": "2.101.0",
-    "elapsed_ms": 124,
-    "total_issues": 29,
+    "elapsed_ms": 129,
+    "total_issues": 30,
     "entry_points": {
-      "total": 333,
+      "total": 334,
       "sources": {
         "manual_entry": 7,
-        "plugin": 326
+        "plugin": 327
       }
     },
     "summary": {
-      "total_issues": 29,
+      "total_issues": 30,
       "unused_files": 8,
       "unused_exports": 12,
-      "unused_types": 7,
+      "unused_types": 8,
       "private_type_leaks": 0,
       "unused_dependencies": 0,
       "unused_enum_members": 0,
@@ -555,6 +555,29 @@
             "type": "remove-export",
             "auto_fixable": true,
             "description": "Remove the `export` (or `export type`) keyword from the type declaration"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-type"
+          }
+        ]
+      },
+      {
+        "path": "src/components/VirtualList/VirtualListBody/VirtualListBodyOptions/index.ts",
+        "export_name": "VirtualListBodyOptionsProps",
+        "is_type_only": true,
+        "line": 2,
+        "col": 14,
+        "span_start": 91,
+        "is_re_export": true,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the `export` (or `export type`) keyword from the type declaration",
+            "note": "This finding originates from a re-export; verify it is not part of your public API before removing"
           },
           {
             "type": "suppress-line",
@@ -3795,6 +3818,42 @@
             "type": "extract-shared",
             "auto_fixable": false,
             "description": "Extract duplicated code (18 lines, 2 instances) into a shared function"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the duplicated code",
+            "comment": "// fallow-ignore-next-line code-duplication"
+          }
+        ]
+      },
+      {
+        "instances": [
+          {
+            "file": "src/components/VirtualList/VirtualListBody/VirtualListBodyOptions/VirtualListBodyOptions.test.tsx",
+            "start_line": 78,
+            "end_line": 88,
+            "start_col": 11,
+            "end_col": 26,
+            "fragment": "<VirtualListBodyOptions {...baseProps} onChange={onChange} />);\n\n    const checkboxes = screen.getAllByRole('checkbox');\n    const firstCheckbox = checkboxes[0];\n    if (!firstCheckbox) throw new Error('Expected at least one checkbox');\n\n    fireEvent.click(firstCheckbox);\n\n    expect(onChange).toHaveBeenCalledWith({\n      type: 'select',\n      values: ['Argentina'"
+          },
+          {
+            "file": "src/components/VirtualList/VirtualListBody/VirtualListBodyOptions/VirtualListBodyOptions.test.tsx",
+            "start_line": 96,
+            "end_line": 114,
+            "start_col": 6,
+            "end_col": 26,
+            "fragment": "<VirtualListBodyOptions\n        {...baseProps}\n        endIndex={4}\n        filteredOptions={['Argentina', 'Brazil', 'Chile']}\n        onChange={onChange}\n        shouldShowSelectAll\n        totalHeight={128}\n      />,\n    );\n\n    const checkboxes = screen.getAllByRole('checkbox');\n    const firstCheckbox = checkboxes[0];\n    if (!firstCheckbox) throw new Error('Expected at least one checkbox');\n\n    fireEvent.click(firstCheckbox);\n\n    expect(onChange).toHaveBeenCalledWith({\n      type: 'select',\n      values: ['Argentina'"
+          }
+        ],
+        "token_count": 57,
+        "line_count": 19,
+        "fingerprint": "dup:ec5b2293",
+        "actions": [
+          {
+            "type": "extract-shared",
+            "auto_fixable": false,
+            "description": "Extract duplicated code (19 lines, 2 instances) into a shared function"
           },
           {
             "type": "suppress-line",
@@ -9539,6 +9598,77 @@
         ]
       },
       {
+        "files": [
+          "src/components/VirtualList/VirtualListBody/VirtualListBodyOptions/VirtualListBodyOptions.test.tsx"
+        ],
+        "groups": [
+          {
+            "instances": [
+              {
+                "file": "src/components/VirtualList/VirtualListBody/VirtualListBodyOptions/VirtualListBodyOptions.test.tsx",
+                "start_line": 78,
+                "end_line": 88,
+                "start_col": 11,
+                "end_col": 26,
+                "fragment": "<VirtualListBodyOptions {...baseProps} onChange={onChange} />);\n\n    const checkboxes = screen.getAllByRole('checkbox');\n    const firstCheckbox = checkboxes[0];\n    if (!firstCheckbox) throw new Error('Expected at least one checkbox');\n\n    fireEvent.click(firstCheckbox);\n\n    expect(onChange).toHaveBeenCalledWith({\n      type: 'select',\n      values: ['Argentina'"
+              },
+              {
+                "file": "src/components/VirtualList/VirtualListBody/VirtualListBodyOptions/VirtualListBodyOptions.test.tsx",
+                "start_line": 96,
+                "end_line": 114,
+                "start_col": 6,
+                "end_col": 26,
+                "fragment": "<VirtualListBodyOptions\n        {...baseProps}\n        endIndex={4}\n        filteredOptions={['Argentina', 'Brazil', 'Chile']}\n        onChange={onChange}\n        shouldShowSelectAll\n        totalHeight={128}\n      />,\n    );\n\n    const checkboxes = screen.getAllByRole('checkbox');\n    const firstCheckbox = checkboxes[0];\n    if (!firstCheckbox) throw new Error('Expected at least one checkbox');\n\n    fireEvent.click(firstCheckbox);\n\n    expect(onChange).toHaveBeenCalledWith({\n      type: 'select',\n      values: ['Argentina'"
+              }
+            ],
+            "token_count": 57,
+            "line_count": 19,
+            "fingerprint": "dup:ec5b2293",
+            "actions": [
+              {
+                "type": "extract-shared",
+                "auto_fixable": false,
+                "description": "Extract duplicated code (19 lines, 2 instances) into a shared function"
+              },
+              {
+                "type": "suppress-line",
+                "auto_fixable": false,
+                "description": "Suppress with an inline comment above the duplicated code",
+                "comment": "// fallow-ignore-next-line code-duplication"
+              }
+            ]
+          }
+        ],
+        "total_duplicated_lines": 19,
+        "total_duplicated_tokens": 57,
+        "suggestions": [
+          {
+            "kind": "ExtractFunction",
+            "description": "Extract shared function (19 lines) from VirtualListBodyOptions.test.tsx, VirtualListBodyOptions.test.tsx",
+            "estimated_savings": 19
+          }
+        ],
+        "actions": [
+          {
+            "type": "extract-shared",
+            "auto_fixable": false,
+            "description": "Extract 1 duplicated code block (19 lines) into a shared module",
+            "note": "These clone groups share the same files, indicating a structural relationship; refactor together"
+          },
+          {
+            "type": "apply-suggestion",
+            "auto_fixable": false,
+            "description": "Extract shared function (19 lines) from VirtualListBodyOptions.test.tsx, VirtualListBodyOptions.test.tsx"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the duplicated code",
+            "comment": "// fallow-ignore-next-line code-duplication"
+          }
+        ]
+      },
+      {
         "files": ["src/hooks/useVirtualization.hook.test.ts"],
         "groups": [
           {
@@ -10589,15 +10719,15 @@
       }
     ],
     "stats": {
-      "total_files": 709,
-      "files_with_clones": 82,
-      "total_lines": 49774,
-      "duplicated_lines": 3769,
-      "total_tokens": 180203,
-      "duplicated_tokens": 8673,
-      "clone_groups": 96,
-      "clone_instances": 212,
-      "duplication_percentage": 7.572226463615542
+      "total_files": 711,
+      "files_with_clones": 83,
+      "total_lines": 49897,
+      "duplicated_lines": 3799,
+      "total_tokens": 180678,
+      "duplicated_tokens": 8730,
+      "clone_groups": 97,
+      "clone_instances": 214,
+      "duplication_percentage": 7.613684189430227
     }
   },
   "health": {
@@ -10609,7 +10739,7 @@
         "col": 31,
         "cyclomatic": 17,
         "cognitive": 26,
-        "line_count": 159,
+        "line_count": 121,
         "param_count": 1,
         "react_hook_count": 6,
         "react_jsx_max_depth": 4,
@@ -11172,18 +11302,18 @@
       }
     ],
     "summary": {
-      "files_analyzed": 1246,
-      "functions_analyzed": 3812,
+      "files_analyzed": 1251,
+      "functions_analyzed": 3822,
       "functions_above_threshold": 17,
       "max_cyclomatic_threshold": 20,
       "max_cognitive_threshold": 15,
       "max_crap_threshold": 30.0,
-      "files_scored": 787,
+      "files_scored": 790,
       "average_maintainability": 93.0,
       "coverage_model": "istanbul",
       "coverage_source_consistency": "uniform",
       "istanbul_matched": 656,
-      "istanbul_total": 3812,
+      "istanbul_total": 3822,
       "severity_critical_count": 0,
       "severity_high_count": 3,
       "severity_moderate_count": 14
@@ -11203,21 +11333,21 @@
       "circular_dep_count": 1,
       "circular_deps_per_k_files": 0.8,
       "counts": {
-        "total_files": 1246,
-        "total_exports": 1507,
+        "total_files": 1251,
+        "total_exports": 1512,
         "dead_files": 8,
-        "dead_exports": 19,
-        "total_lines": 54690,
-        "files_scored": 787,
+        "dead_exports": 20,
+        "total_lines": 54846,
+        "files_scored": 790,
         "total_deps": 0
       },
       "unit_size_profile": {
-        "low_risk": 73.9,
-        "medium_risk": 13.8,
-        "high_risk": 7.9,
+        "low_risk": 73.8,
+        "medium_risk": 13.9,
+        "high_risk": 7.8,
         "very_high_risk": 4.4
       },
-      "functions_over_60_loc_per_k": 44.1,
+      "functions_over_60_loc_per_k": 44.5,
       "unit_interfacing_profile": {
         "low_risk": 99.9,
         "medium_risk": 0.1,
@@ -11309,7 +11439,7 @@
           "distinct_parents": 1
         }
       ],
-      "total_loc": 54690
+      "total_loc": 54846
     },
     "file_scores": [
       {
@@ -11485,12 +11615,12 @@
         "fan_in": 2,
         "fan_out": 8,
         "dead_code_ratio": 0.0,
-        "complexity_density": 0.24,
-        "maintainability_index": 84.0,
-        "total_cyclomatic": 43,
-        "total_cognitive": 41,
-        "function_count": 12,
-        "lines": 178,
+        "complexity_density": 0.23,
+        "maintainability_index": 84.3,
+        "total_cyclomatic": 32,
+        "total_cognitive": 33,
+        "function_count": 7,
+        "lines": 140,
         "crap_max": 17.0,
         "crap_above_threshold": 0
       },
@@ -12377,30 +12507,16 @@
         "crap_above_threshold": 0
       },
       {
-        "path": "src/components/Table/contexts/TableConfig/columns/actions/useSetColumnFilter.hook.test.ts",
-        "fan_in": 0,
-        "fan_out": 5,
-        "dead_code_ratio": 0.0,
-        "complexity_density": 0.18,
-        "maintainability_index": 87.4,
-        "total_cyclomatic": 26,
-        "total_cognitive": 1,
-        "function_count": 19,
-        "lines": 145,
-        "crap_max": 8.0,
-        "crap_above_threshold": 0
-      },
-      {
         "path": "src/components/Table/TableSettingsDrawer/FiltersSection/isFilterValid.util.ts",
         "fan_in": 3,
         "fan_out": 1,
         "dead_code_ratio": 0.0,
-        "complexity_density": 0.32,
-        "maintainability_index": 87.6,
-        "total_cyclomatic": 20,
-        "total_cognitive": 10,
+        "complexity_density": 0.31,
+        "maintainability_index": 87.9,
+        "total_cyclomatic": 22,
+        "total_cognitive": 11,
         "function_count": 5,
-        "lines": 62,
+        "lines": 70,
         "crap_max": 8.0,
         "crap_above_threshold": 0
       },
@@ -13147,6 +13263,20 @@
         "crap_above_threshold": 0
       },
       {
+        "path": "src/components/Table/contexts/TableConfig/columns/actions/useSetColumnFilter.hook.test.ts",
+        "fan_in": 0,
+        "fan_out": 5,
+        "dead_code_ratio": 0.0,
+        "complexity_density": 0.16,
+        "maintainability_index": 88.0,
+        "total_cyclomatic": 23,
+        "total_cognitive": 1,
+        "function_count": 19,
+        "lines": 142,
+        "crap_max": 5.0,
+        "crap_above_threshold": 0
+      },
+      {
         "path": "src/components/Table/TableSettingsDrawer/TableDrawerContext/actions/useSortByColumnOrder.hook.ts",
         "fan_in": 1,
         "fan_out": 2,
@@ -13185,6 +13315,20 @@
         "total_cognitive": 10,
         "function_count": 1,
         "lines": 43,
+        "crap_max": 5.0,
+        "crap_above_threshold": 0
+      },
+      {
+        "path": "src/components/VirtualList/VirtualListBody/VirtualListBodyOptions/VirtualListBodyOptions.component.tsx",
+        "fan_in": 2,
+        "fan_out": 3,
+        "dead_code_ratio": 0.0,
+        "complexity_density": 0.17,
+        "maintainability_index": 89.4,
+        "total_cyclomatic": 12,
+        "total_cognitive": 15,
+        "function_count": 6,
+        "lines": 69,
         "crap_max": 5.0,
         "crap_above_threshold": 0
       },
@@ -13749,6 +13893,20 @@
         "crap_above_threshold": 0
       },
       {
+        "path": "src/components/Table/contexts/TableConfig/columns/actions/useSetColumnSorting.hook.test.ts",
+        "fan_in": 0,
+        "fan_out": 6,
+        "dead_code_ratio": 0.0,
+        "complexity_density": 0.17,
+        "maintainability_index": 87.1,
+        "total_cyclomatic": 24,
+        "total_cognitive": 1,
+        "function_count": 23,
+        "lines": 143,
+        "crap_max": 2.0,
+        "crap_above_threshold": 0
+      },
+      {
         "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.component.tsx",
         "fan_in": 2,
         "fan_out": 16,
@@ -13802,20 +13960,6 @@
         "function_count": 2,
         "lines": 110,
         "crap_max": 4.0,
-        "crap_above_threshold": 0
-      },
-      {
-        "path": "src/components/Table/contexts/TableConfig/columns/actions/useSetColumnSorting.hook.test.ts",
-        "fan_in": 0,
-        "fan_out": 6,
-        "dead_code_ratio": 0.0,
-        "complexity_density": 0.16,
-        "maintainability_index": 87.4,
-        "total_cyclomatic": 24,
-        "total_cognitive": 1,
-        "function_count": 23,
-        "lines": 149,
-        "crap_max": 2.0,
         "crap_above_threshold": 0
       },
       {
@@ -15410,7 +15554,7 @@
         "total_cyclomatic": 6,
         "total_cognitive": 0,
         "function_count": 4,
-        "lines": 88,
+        "lines": 82,
         "crap_max": 3.0,
         "crap_above_threshold": 0
       },
@@ -18131,6 +18275,20 @@
         "crap_above_threshold": 0
       },
       {
+        "path": "src/components/VirtualList/VirtualListBody/VirtualListBodyOptions/VirtualListBodyOptions.test.tsx",
+        "fan_in": 0,
+        "fan_out": 1,
+        "dead_code_ratio": 0.0,
+        "complexity_density": 0.09,
+        "maintainability_index": 94.5,
+        "total_cyclomatic": 11,
+        "total_cognitive": 2,
+        "function_count": 9,
+        "lines": 127,
+        "crap_max": 2.0,
+        "crap_above_threshold": 0
+      },
+      {
         "path": "src/components/VirtualSelect/VirtualSelectTrigger/VirtualSelectTrigger.component.test.tsx",
         "fan_in": 0,
         "fan_out": 1,
@@ -18999,20 +19157,6 @@
         "crap_above_threshold": 0
       },
       {
-        "path": "src/components/VirtualList/VirtualListBody/VirtualListBody.stylex.ts",
-        "fan_in": 1,
-        "fan_out": 2,
-        "dead_code_ratio": 0.0,
-        "complexity_density": 0.05,
-        "maintainability_index": 94.1,
-        "total_cyclomatic": 3,
-        "total_cognitive": 0,
-        "function_count": 3,
-        "lines": 64,
-        "crap_max": 1.0,
-        "crap_above_threshold": 0
-      },
-      {
         "path": "src/utils/storage/buildCookieString.util.test.ts",
         "fan_in": 0,
         "fan_out": 1,
@@ -19610,7 +19754,7 @@
         "total_cyclomatic": 3,
         "total_cognitive": 0,
         "function_count": 3,
-        "lines": 78,
+        "lines": 75,
         "crap_max": 1.0,
         "crap_above_threshold": 0
       },
@@ -20329,6 +20473,20 @@
         "crap_above_threshold": 0
       },
       {
+        "path": "src/components/VirtualList/VirtualListBody/VirtualListBody.stylex.ts",
+        "fan_in": 1,
+        "fan_out": 2,
+        "dead_code_ratio": 0.0,
+        "complexity_density": 0.02,
+        "maintainability_index": 95.0,
+        "total_cyclomatic": 1,
+        "total_cognitive": 0,
+        "function_count": 1,
+        "lines": 47,
+        "crap_max": 1.0,
+        "crap_above_threshold": 0
+      },
+      {
         "path": "src/utils/globalSettings/serializeGlobalSettingsForCookie.util.ts",
         "fan_in": 2,
         "fan_out": 2,
@@ -20367,6 +20525,20 @@
         "total_cognitive": 0,
         "function_count": 1,
         "lines": 12,
+        "crap_max": 1.0,
+        "crap_above_threshold": 0
+      },
+      {
+        "path": "src/components/Table/contexts/TableConfig/columns/actions/utils/resolveColumnSortingUpdate.util.test.ts",
+        "fan_in": 0,
+        "fan_out": 1,
+        "dead_code_ratio": 0.0,
+        "complexity_density": 0.07,
+        "maintainability_index": 95.1,
+        "total_cyclomatic": 4,
+        "total_cognitive": 0,
+        "function_count": 4,
+        "lines": 56,
         "crap_max": 1.0,
         "crap_above_threshold": 0
       },
@@ -20507,20 +20679,6 @@
         "total_cognitive": 0,
         "function_count": 3,
         "lines": 34,
-        "crap_max": 1.0,
-        "crap_above_threshold": 0
-      },
-      {
-        "path": "src/components/Table/contexts/TableConfig/columns/actions/utils/resolveColumnSortingUpdate.util.test.ts",
-        "fan_in": 0,
-        "fan_out": 1,
-        "dead_code_ratio": 0.0,
-        "complexity_density": 0.06,
-        "maintainability_index": 95.4,
-        "total_cyclomatic": 4,
-        "total_cognitive": 0,
-        "function_count": 4,
-        "lines": 62,
         "crap_max": 1.0,
         "crap_above_threshold": 0
       },
@@ -22247,6 +22405,20 @@
         "crap_above_threshold": 0
       },
       {
+        "path": "src/components/VirtualList/VirtualListBody/VirtualListBodyOptions/VirtualListBodyOptions.stylex.ts",
+        "fan_in": 1,
+        "fan_out": 0,
+        "dead_code_ratio": 0.0,
+        "complexity_density": 0.17,
+        "maintainability_index": 98.8,
+        "total_cyclomatic": 2,
+        "total_cognitive": 0,
+        "function_count": 2,
+        "lines": 12,
+        "crap_max": 1.0,
+        "crap_above_threshold": 0
+      },
+      {
         "path": "src/components/DraggableList/utils/handleDragOver.util.ts",
         "fan_in": 2,
         "fan_out": 0,
@@ -22334,9 +22506,9 @@
     "hotspots": [
       {
         "path": "src/components/VirtualSelect/VirtualSelect.component.tsx",
-        "score": 26.1,
+        "score": 26.0,
         "commits": 21,
-        "weighted_commits": 9.06,
+        "weighted_commits": 9.05,
         "lines_added": 406,
         "lines_deleted": 406,
         "complexity_density": 0.22,
@@ -22361,7 +22533,7 @@
         "path": "src/App.tsx",
         "score": 25.1,
         "commits": 38,
-        "weighted_commits": 11.28,
+        "weighted_commits": 11.27,
         "lines_added": 1168,
         "lines_deleted": 1168,
         "complexity_density": 0.17,
@@ -22536,7 +22708,7 @@
         "path": "src/components/Table/contexts/TableConfig/columns/actions/useBatchSetTableSettings.hook.ts",
         "score": 11.7,
         "commits": 11,
-        "weighted_commits": 4.99,
+        "weighted_commits": 4.98,
         "lines_added": 231,
         "lines_deleted": 231,
         "complexity_density": 0.18,
@@ -22586,7 +22758,7 @@
         "path": "src/components/Table/Table.component.tsx",
         "score": 11.3,
         "commits": 32,
-        "weighted_commits": 9.57,
+        "weighted_commits": 9.56,
         "lines_added": 454,
         "lines_deleted": 454,
         "complexity_density": 0.09,
@@ -22636,7 +22808,7 @@
         "path": "src/components/Table/TableSettingsDrawer/FiltersSection/ActiveFiltersList/ActiveFiltersList.component.tsx",
         "score": 10.6,
         "commits": 17,
-        "weighted_commits": 7.36,
+        "weighted_commits": 7.35,
         "lines_added": 211,
         "lines_deleted": 211,
         "complexity_density": 0.11,
@@ -22711,7 +22883,7 @@
         "path": "src/components/VirtualList/VirtualList.component.tsx",
         "score": 9.9,
         "commits": 22,
-        "weighted_commits": 9.49,
+        "weighted_commits": 9.48,
         "lines_added": 437,
         "lines_deleted": 437,
         "complexity_density": 0.08,
@@ -22758,31 +22930,6 @@
         ]
       },
       {
-        "path": "src/components/Table/TableSettingsDrawer/GeneralSettingsSection/GeneralSettingsSection.component.tsx",
-        "score": 9.2,
-        "commits": 16,
-        "weighted_commits": 7.0,
-        "lines_added": 361,
-        "lines_deleted": 361,
-        "complexity_density": 0.1,
-        "fan_in": 1,
-        "trend": "accelerating",
-        "actions": [
-          {
-            "type": "refactor-file",
-            "auto_fixable": false,
-            "description": "Refactor `src/components/Table/TableSettingsDrawer/GeneralSettingsSection/GeneralSettingsSection.component.tsx`, high complexity combined with frequent changes makes this a maintenance risk",
-            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
-          },
-          {
-            "type": "add-tests",
-            "auto_fixable": false,
-            "description": "Add test coverage for `src/components/Table/TableSettingsDrawer/GeneralSettingsSection/GeneralSettingsSection.component.tsx` to reduce change risk",
-            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
-          }
-        ]
-      },
-      {
         "path": "src/components/Table/utils/getPinnedColumnOffsets.util.ts",
         "score": 9.1,
         "commits": 8,
@@ -22803,6 +22950,31 @@
             "type": "add-tests",
             "auto_fixable": false,
             "description": "Add test coverage for `src/components/Table/utils/getPinnedColumnOffsets.util.ts` to reduce change risk",
+            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
+          }
+        ]
+      },
+      {
+        "path": "src/components/Table/TableSettingsDrawer/GeneralSettingsSection/GeneralSettingsSection.component.tsx",
+        "score": 9.1,
+        "commits": 16,
+        "weighted_commits": 6.99,
+        "lines_added": 361,
+        "lines_deleted": 361,
+        "complexity_density": 0.1,
+        "fan_in": 1,
+        "trend": "accelerating",
+        "actions": [
+          {
+            "type": "refactor-file",
+            "auto_fixable": false,
+            "description": "Refactor `src/components/Table/TableSettingsDrawer/GeneralSettingsSection/GeneralSettingsSection.component.tsx`, high complexity combined with frequent changes makes this a maintenance risk",
+            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
+          },
+          {
+            "type": "add-tests",
+            "auto_fixable": false,
+            "description": "Add test coverage for `src/components/Table/TableSettingsDrawer/GeneralSettingsSection/GeneralSettingsSection.component.tsx` to reduce change risk",
             "note": "Frequently changed complex files benefit most from comprehensive test coverage"
           }
         ]
@@ -22936,7 +23108,7 @@
         "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.component.tsx",
         "score": 8.4,
         "commits": 29,
-        "weighted_commits": 12.83,
+        "weighted_commits": 12.82,
         "lines_added": 748,
         "lines_deleted": 748,
         "complexity_density": 0.05,
@@ -23011,7 +23183,7 @@
         "path": "src/components/DraggableList/DraggableList.component.tsx",
         "score": 8.0,
         "commits": 8,
-        "weighted_commits": 3.22,
+        "weighted_commits": 3.21,
         "lines_added": 88,
         "lines_deleted": 88,
         "complexity_density": 0.19,
@@ -23812,7 +23984,7 @@
         "path": "src/components/VirtualSelect/utils/countVisibleTags.util.ts",
         "score": 5.4,
         "commits": 6,
-        "weighted_commits": 2.76,
+        "weighted_commits": 2.75,
         "lines_added": 46,
         "lines_deleted": 46,
         "complexity_density": 0.15,
@@ -24213,7 +24385,7 @@
         "path": "src/components/Table/TableSettingsDrawer/SortingSection/AddSortSection/AddSortSection.component.tsx",
         "score": 4.8,
         "commits": 4,
-        "weighted_commits": 1.95,
+        "weighted_commits": 1.94,
         "lines_added": 114,
         "lines_deleted": 114,
         "complexity_density": 0.19,
@@ -24363,7 +24535,7 @@
         "path": "src/components/Table/contexts/TableConfig/columns/actions/useSetColumnSizing.hook.ts",
         "score": 4.7,
         "commits": 5,
-        "weighted_commits": 2.26,
+        "weighted_commits": 2.25,
         "lines_added": 53,
         "lines_deleted": 53,
         "complexity_density": 0.16,
@@ -24388,7 +24560,7 @@
         "path": "src/components/Table/TableHeaderCell/TableHeaderCell.stylex.ts",
         "score": 4.7,
         "commits": 16,
-        "weighted_commits": 5.17,
+        "weighted_commits": 5.16,
         "lines_added": 216,
         "lines_deleted": 216,
         "complexity_density": 0.07,
@@ -27365,7 +27537,7 @@
         "path": "src/components/Tooltip/Tooltip.stylex.ts",
         "score": 1.9,
         "commits": 8,
-        "weighted_commits": 3.64,
+        "weighted_commits": 3.63,
         "lines_added": 144,
         "lines_deleted": 144,
         "complexity_density": 0.04,
@@ -27746,31 +27918,6 @@
         ]
       },
       {
-        "path": "src/components/Table/contexts/TableConfig/columns/actions/useSetColumnPinning.hook.ts",
-        "score": 1.8,
-        "commits": 7,
-        "weighted_commits": 3.35,
-        "lines_added": 97,
-        "lines_deleted": 97,
-        "complexity_density": 0.04,
-        "fan_in": 2,
-        "trend": "accelerating",
-        "actions": [
-          {
-            "type": "refactor-file",
-            "auto_fixable": false,
-            "description": "Refactor `src/components/Table/contexts/TableConfig/columns/actions/useSetColumnPinning.hook.ts`, high complexity combined with frequent changes makes this a maintenance risk",
-            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
-          },
-          {
-            "type": "add-tests",
-            "auto_fixable": false,
-            "description": "Add test coverage for `src/components/Table/contexts/TableConfig/columns/actions/useSetColumnPinning.hook.ts` to reduce change risk",
-            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
-          }
-        ]
-      },
-      {
         "path": "src/components/Table/contexts/TableConfig/utils/getInitialMetaState.util.test.ts",
         "score": 1.8,
         "commits": 4,
@@ -27923,6 +28070,31 @@
         ]
       },
       {
+        "path": "src/components/Table/contexts/TableConfig/columns/actions/useSetColumnPinning.hook.ts",
+        "score": 1.7,
+        "commits": 7,
+        "weighted_commits": 3.34,
+        "lines_added": 97,
+        "lines_deleted": 97,
+        "complexity_density": 0.04,
+        "fan_in": 2,
+        "trend": "accelerating",
+        "actions": [
+          {
+            "type": "refactor-file",
+            "auto_fixable": false,
+            "description": "Refactor `src/components/Table/contexts/TableConfig/columns/actions/useSetColumnPinning.hook.ts`, high complexity combined with frequent changes makes this a maintenance risk",
+            "note": "Prioritize extracting complex functions, adding tests, or splitting the module"
+          },
+          {
+            "type": "add-tests",
+            "auto_fixable": false,
+            "description": "Add test coverage for `src/components/Table/contexts/TableConfig/columns/actions/useSetColumnPinning.hook.ts` to reduce change risk",
+            "note": "Frequently changed complex files benefit most from comprehensive test coverage"
+          }
+        ]
+      },
+      {
         "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/utils/insertAdjacentToPinnedGroup.util.test.ts",
         "score": 1.7,
         "commits": 3,
@@ -28055,7 +28227,7 @@
         "path": "src/utils/storage/buildCookieString.util.ts",
         "score": 1.6,
         "commits": 4,
-        "weighted_commits": 1.77,
+        "weighted_commits": 1.76,
         "lines_added": 18,
         "lines_deleted": 18,
         "complexity_density": 0.07,
@@ -29286,12 +29458,6 @@
         "line_count": 159
       },
       {
-        "path": "src/components/VirtualList/VirtualListBody/VirtualListBody.component.tsx",
-        "name": "VirtualListBody",
-        "line": 19,
-        "line_count": 159
-      },
-      {
         "path": "src/components/Table/TableSettingsDrawer/FiltersSection/ActiveFiltersList/ActiveFiltersList.component.tsx",
         "name": "ActiveFiltersList",
         "line": 24,
@@ -29392,6 +29558,12 @@
         "name": "<arrow>",
         "line": 55,
         "line_count": 122
+      },
+      {
+        "path": "src/components/VirtualList/VirtualListBody/VirtualListBody.component.tsx",
+        "name": "VirtualListBody",
+        "line": 19,
+        "line_count": 121
       },
       {
         "path": "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/applyToggleColumnPinResolution.util.test.ts",
@@ -29517,6 +29689,12 @@
         "path": "src/components/Table/contexts/TableConfig/utils/getInitialColumnsState.util.ts",
         "name": "getInitialColumnsState",
         "line": 25,
+        "line_count": 101
+      },
+      {
+        "path": "src/components/VirtualList/VirtualListBody/VirtualListBodyOptions/VirtualListBodyOptions.test.tsx",
+        "name": "<arrow>",
+        "line": 26,
         "line_count": 101
       },
       {
@@ -29916,12 +30094,6 @@
         "line_count": 71
       },
       {
-        "path": "src/components/Table/contexts/TableConfig/columns/actions/useSetColumnFilter.hook.test.ts",
-        "name": "<arrow>",
-        "line": 75,
-        "line_count": 70
-      },
-      {
         "path": "src/components/Table/contexts/TableConfig/columns/actions/utils/commitPinningAndOrderUpdate.util.test.ts",
         "name": "<arrow>",
         "line": 14,
@@ -30030,6 +30202,12 @@
         "line_count": 67
       },
       {
+        "path": "src/components/Table/contexts/TableConfig/columns/actions/useSetColumnFilter.hook.test.ts",
+        "name": "<arrow>",
+        "line": 75,
+        "line_count": 67
+      },
+      {
         "path": "src/components/Table/utils/readPersistedStateFromSessionStorage.util.test.ts",
         "name": "<arrow>",
         "line": 22,
@@ -30063,12 +30241,6 @@
         "path": "src/components/Table/contexts/TableConfig/columns/actions/utils/commitResolvedPinningState.util.test.ts",
         "name": "<arrow>",
         "line": 39,
-        "line_count": 66
-      },
-      {
-        "path": "src/components/Table/contexts/TableConfig/columns/actions/utils/resolveColumnFilterUpdate.util.test.ts",
-        "name": "<arrow>",
-        "line": 12,
         "line_count": 66
       },
       {
@@ -30123,6 +30295,12 @@
         "path": "src/components/Table/contexts/TableConfig/columns/actions/useBatchSetColumnSettings.hook.test.ts",
         "name": "<arrow>",
         "line": 311,
+        "line_count": 63
+      },
+      {
+        "path": "src/components/Table/contexts/TableConfig/columns/actions/utils/resolveColumnFilterUpdate.util.test.ts",
+        "name": "<arrow>",
+        "line": 12,
         "line_count": 63
       },
       {
@@ -30192,6 +30370,12 @@
         "line_count": 61
       },
       {
+        "path": "src/components/VirtualList/VirtualListBody/VirtualListBodyOptions/VirtualListBodyOptions.component.tsx",
+        "name": "VirtualListBodyOptions",
+        "line": 8,
+        "line_count": 61
+      },
+      {
         "path": "src/components/VirtualList/VirtualListHeader/VirtualListHeader.test.tsx",
         "name": "<arrow>",
         "line": 12,
@@ -30201,18 +30385,18 @@
     "targets": [
       {
         "path": "src/components/Table/TableSettingsDrawer/FiltersSection/isFilterValid.util.ts",
-        "priority": 19.9,
-        "efficiency": 10.0,
-        "recommendation": "Split high-impact file (62 LOC), 3 dependents amplify every change",
+        "priority": 19.6,
+        "efficiency": 9.8,
+        "recommendation": "Split high-impact file (70 LOC), 3 dependents amplify every change",
         "category": "split_high_impact",
         "effort": "medium",
         "confidence": "medium",
         "factors": [
           {
             "metric": "complexity_density",
-            "value": 0.32,
+            "value": 0.31,
             "threshold": 0.3,
-            "detail": "density 0.32 exceeds 0.3"
+            "detail": "density 0.31 exceeds 0.3"
           },
           {
             "metric": "fan_in",
@@ -30259,7 +30443,7 @@
           {
             "type": "apply-refactoring",
             "auto_fixable": false,
-            "description": "Split high-impact file (62 LOC), 3 dependents amplify every change",
+            "description": "Split high-impact file (70 LOC), 3 dependents amplify every change",
             "category": "split_high_impact"
           },
           {
