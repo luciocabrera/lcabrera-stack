@@ -6,21 +6,32 @@ import { INITIAL_PAGE_SIZE } from '@/components/Table/Table.constants';
 import { wideAlltypes150Api } from '@/services';
 
 import { readTableLoaderStateFromRequest } from '../utils/readTableLoaderStateFromRequest.util';
-import { PERSISTENCE_KEY } from './WideAlltypes150.constants';
+import {
+  COLUMNS,
+  PERSISTENCE_KEY,
+  SCHEMA_NAME,
+  TABLE_NAME,
+  TITLE,
+} from './WideAlltypes150.constants';
 
 export const loader = ({ request }: LoaderFunctionArgs) => {
   const {
     columnOrder,
+    columnPinning,
     columnSizing,
     columnVisibility,
+    filters,
     sorting,
+    standaloneFiltersParam,
     standaloneSortParam,
   } = readTableLoaderStateFromRequest<WideAlltypes150>({
+    columns: COLUMNS,
+    includeFilters: true,
     persistenceKey: PERSISTENCE_KEY,
     request,
   });
 
-  const filteredSorting = sorting.filter(
+  const sanitizedSorting = sorting.filter(
     (s): s is { columnKey: keyof WideAlltypes150; direction: 'asc' | 'desc' } =>
       s.direction !== undefined && s.columnKey !== 'actions',
   );
@@ -30,15 +41,67 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
       limit: INITIAL_PAGE_SIZE,
       requestUrl: request.url,
       skip: 0,
-      sorting: filteredSorting,
+      sorting: sanitizedSorting,
     });
 
   return {
-    columnOrder,
-    columnSizing,
-    columnVisibility,
+    columnsState: {
+      columnFilters: filters,
+      columnOrder,
+      columnPinning,
+      columns: COLUMNS,
+      columnSizing,
+      columnVisibility,
+      sorting: sanitizedSorting,
+    },
     dataPromise,
-    key: standaloneSortParam ?? '',
-    sorting: filteredSorting,
+    key: `${standaloneSortParam ?? ''}${standaloneFiltersParam ?? ''}`,
+    metaState: {
+      persistenceKey: PERSISTENCE_KEY,
+      schemaName: SCHEMA_NAME,
+      tableName: TABLE_NAME,
+      title: TITLE,
+    },
   };
 };
+
+// export const clientLoader = async ({
+//   serverLoader,
+// }: Route.ClientLoaderArgs) => {
+//   const serverData = await serverLoader();
+//   const { columnOrder, columnSizing, columnVisibility, sorting } = serverData;
+
+//   const columnState = readPersistedStateFromSessionStorage<WideAlltypes150>({
+//     persistenceKey: PERSISTENCE_KEY,
+//   });
+//   const uiState = readPersistedUiStateFromSessionStorage({
+//     persistenceKey: PERSISTENCE_KEY,
+//   });
+
+//   const { columnsState, metaState } =
+//     resolveHydratedTableConfigState<WideAlltypes150>({
+//       columnsState: {
+//         columnOrder,
+//         columns: COLUMNS,
+//         columnSizing,
+//         columnVisibility,
+//         sorting,
+//       },
+//       metaState: {
+//         persistenceKey: PERSISTENCE_KEY,
+//         schemaName: SCHEMA_NAME,
+//         tableName: TABLE_NAME,
+//         title: TITLE,
+//       },
+//       persistedColumnsState: columnState,
+//       persistedMetaState: uiState,
+//     });
+
+//   return {
+//     columnsState,
+//     dataPromise: serverData.dataPromise,
+//     metaState,
+//   };
+// };
+
+// clientLoader.hydrate = true as const;

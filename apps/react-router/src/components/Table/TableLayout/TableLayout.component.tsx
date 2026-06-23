@@ -15,59 +15,21 @@ export const TableLayout = <
   TData extends Record<string, unknown>,
   TResponse = Record<string, unknown>,
 >({
-  additionalMetadata,
-  columnOrder,
-  columnPinning,
-  columns,
-  columnSizing,
-  columnVisibility,
+  columnsState,
   dataPromise,
   dataSelector,
   dataTotalSelector,
-  defaultColumnPinning,
-  density = 'comfortable',
-  enablePrefetch,
-  filters,
-  isBordered = true,
-  isStriped = true,
-  loadMorePageSize,
+  metaState,
   onLoadMore,
-  persistenceKey,
-  schemaName,
-  sorting,
-  tableName,
-  title,
 }: TableLayoutProps<TData, TResponse>) => {
-  const columnsState = {
-    columnFilters: filters,
-    columnOrder,
-    columnPinning: columnPinning ?? defaultColumnPinning,
-    columns,
-    columnSizing,
-    columnVisibility,
-    sorting,
-  };
-
-  const metaState = {
-    additionalMetadata,
-    density,
-    enablePrefetch,
-    isBordered,
-    isStriped,
-    loadMorePageSize,
-    persistenceKey,
-    schemaName,
-    tableName,
-    title,
-  };
-
+  console.log('TableLayout render', { columnsState, dataPromise, metaState });
   return (
     <div {...stylex.props(styles.container)}>
       <TableConfigProvider<TData>
         columnsState={columnsState}
         metaState={metaState}
       >
-        <FiltersDataProvider<TData> columns={columns}>
+        <FiltersDataProvider<TData> columns={columnsState.columns}>
           <TableSuspenseBoundary<TData, TResponse> dataPromise={dataPromise}>
             {(response) => (
               <Table<TData, TResponse>

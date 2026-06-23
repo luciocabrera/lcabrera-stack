@@ -21,11 +21,11 @@ type BuildPersistencePayloadArgs<TData> = {
 };
 
 type PersistenceEntry<TSlice = unknown> = {
-  readonly persistenceKey: string;
+  readonly persistenceKey?: string;
   readonly searchParamKey?: string;
   readonly searchParamValue?: string;
-  readonly slice: keyof TablePersistenceConfig;
-  readonly valueSlice: TSlice;
+  readonly slice?: keyof TablePersistenceConfig;
+  readonly valueSlice?: TSlice;
 };
 
 export const buildPersistencePayload = <TData>({
@@ -39,18 +39,12 @@ export const buildPersistencePayload = <TData>({
 }: BuildPersistencePayloadArgs<TData>): PersistenceEntry[] => {
   const entries: PersistenceEntry[] = [
     {
-      persistenceKey,
       searchParamKey: 'filters',
       searchParamValue: serializeFiltersToURL(columnFilters),
-      slice: 'columnFilters',
-      valueSlice: columnFilters,
     },
     {
-      persistenceKey,
-      searchParamKey: 'sort',
+      searchParamKey: 'sorting',
       searchParamValue: serializeSortingToURL<TData>(sorting),
-      slice: 'sorting',
-      valueSlice: sorting,
     },
     {
       persistenceKey,

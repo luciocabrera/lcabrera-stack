@@ -1,5 +1,9 @@
 import type { RenderToPipeableStreamOptions } from 'react-dom/server';
-import type { EntryContext } from 'react-router';
+import type {
+  ActionFunctionArgs,
+  EntryContext,
+  LoaderFunctionArgs,
+} from 'react-router';
 
 import { createReadableStreamFromReadable } from '@react-router/node';
 import { isbot } from 'isbot';
@@ -44,6 +48,15 @@ const toError = (error: unknown): Error => {
 export const streamTimeout = Number(process.env.STREAM_TIMEOUT_MS) || 15_000;
 
 const ABORT_DELAY = streamTimeout + 1000;
+
+export function handleDataRequest(
+  response: Response,
+  { context, params, request }: ActionFunctionArgs | LoaderFunctionArgs,
+) {
+  response.headers.set('X-Custom-Header', 'value');
+  console.log('handleDataRequest', { context, params, request });
+  return response;
+}
 
 export default function handleRequest(
   request: Request,

@@ -12,6 +12,7 @@ import type {
 
 import { getNormalizedColumns } from './getNormalizedColumns.util';
 import { getPinnedDerivedColumnsState } from './getPinnedDerivedColumnsState.util';
+import { getStaticColumnKeys } from './getStaticColumnKeys.util';
 
 type DeriveColumnViewStateArgs<TData> = {
   readonly columnOrder: ColumnOrderState<TData>;
@@ -27,6 +28,7 @@ type DeriveColumnViewStateResult<TData> = {
   readonly effectiveColumns: TableColumn<TData>[];
   readonly normalizedColumns: NormalizedColumnsState<TData>;
   readonly pinnedColumnOffsets: PinnedColumnOffsetsState<TData>;
+  readonly staticKeys: Set<string>;
 };
 
 export const deriveColumnViewState = <TData>({
@@ -51,10 +53,13 @@ export const deriveColumnViewState = <TData>({
       columnVisibility,
     });
 
+  const staticKeys = getStaticColumnKeys<TData>(columns);
+
   return {
     columnGroups,
     effectiveColumns,
     normalizedColumns,
     pinnedColumnOffsets,
+    staticKeys,
   };
 };

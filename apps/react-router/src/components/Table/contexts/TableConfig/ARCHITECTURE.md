@@ -9,7 +9,7 @@ columns are displayed, filtered, sorted, pinned, and sized.
 ```
 TableConfig/
 ├── TableConfigContext.context.ts            → createContext (undefined default)
-├── TableConfigContext.provider.tsx           → Provider: creates both stores
+├── TableConfigContext.provider.tsx           → Provider: creates both stores from initial state props
 ├── TableConfigContext.types.ts              → ContextValue (columnsStore + metaStore)
 ├── useTableConfigContextValue.hook.ts       → use(TableConfigContext) with guard
 ├── index.ts                                 → Barrel: TableConfigProvider, hooks
@@ -77,10 +77,11 @@ TableConfig/
 │       ├── useGetTableThreshold.hook.ts                  → Fetch-more threshold
 │       └── useGetTableTitle.hook.ts                      → Table title string
 │
-└── utils/
-    ├── getInitialColumnsState.util.ts       → Build initial columns state from props
-    ├── getInitialMetaState.util.ts          → Build initial meta state from props
-    └── index.ts                             → Barrel: utils
+├── utils/
+  ├── getInitialColumnsState.util.ts       → Build initial columns state from props
+  ├── getInitialMetaState.util.ts          → Build initial meta state from props
+  ├── resolveHydratedTableConfigState.util.ts → Merge route defaults with persisted column/UI state
+  └── index.ts                             → Barrel: utils
 ```
 
 ## Dual-Store Pattern
@@ -160,12 +161,12 @@ graph TD
   A --> C["getInitialMetaState(metaState)"]
   B --> D["useStore(columnsInitial) → columnsStore"]
   C --> E["useStore(metaInitial) → metaStore"]
-  D --> F["useHydrateTableSessionState() after mount"]
+  D --> F["Provide { columnsStore, metaStore } via TableConfigContext"]
   E --> F
-  F --> G["Provide { columnsStore, metaStore } via TableConfigContext"]
 ```
 
-Session hydration is deferred until after mount so SSR and the initial client render stay aligned before tab-scoped state is merged.
+Session hydration now happens in route `clientLoader`s before the table mounts,
+so SSR and the initial client render already agree on the seeded state.
 
 ## Testing Pattern
 

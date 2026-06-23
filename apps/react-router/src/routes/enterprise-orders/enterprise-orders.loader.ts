@@ -1,26 +1,9 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
-import type {
-  ColumnFiltersState,
-  ColumnOrderState,
-  ColumnPinningState,
-  ColumnSizingState,
-  ColumnVisibilityState,
-  SortingState,
-  TableColumnsState,
-} from '@/components/Table/Table.types';
 import type { EnterpriseOrder, EnterpriseOrdersResponse } from '@/services';
 
 import { INITIAL_PAGE_SIZE } from '@/components/Table/Table.constants';
-import {
-  deriveColumnViewState,
-  getStaticColumnKeys,
-  readPersistedUiStateFromSessionStorage,
-} from '@/components/Table/utils';
-import { readPersistedStateFromSessionStorage } from '@/components/Table/utils/readPersistedStateFromSessionStorage.util';
 import { enterpriseOrdersApi } from '@/services';
-
-import type { Route } from './+types/root';
 
 import { readTableLoaderStateFromRequest } from '../utils/readTableLoaderStateFromRequest.util';
 import {
@@ -41,17 +24,16 @@ import {
 export const loader = ({ request }: LoaderFunctionArgs) => {
   const {
     columnOrder,
+    columnPinning,
     columnSizing,
     columnVisibility,
     filters,
-
     sorting,
     standaloneFiltersParam,
     standaloneSortParam,
   } = readTableLoaderStateFromRequest<EnterpriseOrder>({
     columns: COLUMNS,
     includeFilters: true,
-
     persistenceKey: PERSISTENCE_KEY,
     request,
   });
@@ -70,104 +52,137 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
       sorting: sanitizedSorting,
     });
 
-  return {
-    columnOrder,
-    columns: COLUMNS,
+  console.log('EnterpriseOrders loader', {
+    sorting: sanitizedSorting,
+    standaloneSortParam,
+  });
 
-    columnSizing,
-    columnVisibility,
+  return {
+    columnsState: {
+      columnFilters: filters,
+      columnOrder,
+      columnPinning,
+      columns: COLUMNS,
+      columnSizing,
+      columnVisibility,
+      sorting: sanitizedSorting,
+    },
     defaultColumnPinning: DEFAULT_COLUMN_PINNING,
     enterpriseOrdersPromise,
-    filters,
     key: `${standaloneSortParam ?? ''}${standaloneFiltersParam ?? ''}`,
-    persistenceKey: PERSISTENCE_KEY,
-    schemaName: SCHEMA_NAME,
-    sorting: sanitizedSorting,
-    tableName: TABLE_NAME,
-    title: TITLE,
+    metaState: {
+      persistenceKey: PERSISTENCE_KEY,
+      schemaName: SCHEMA_NAME,
+      tableName: TABLE_NAME,
+      title: TITLE,
+    },
   };
 };
 
-export const clientLoader = async ({
-  serverLoader,
-}: Route.ClientLoaderArgs) => {
-  const serverData = await serverLoader();
-  const {
-    columnOrder,
-    columns,
-    columnSizing,
-    columnVisibility,
-    defaultColumnPinning,
-    filters,
-    persistenceKey,
-    sorting,
-  } = serverData;
+// export const clientLoader = async ({
+//   serverLoader,
+// }: Route.ClientLoaderArgs) => {
+//   const serverData = serverLoader();
+//   // const {
+//   //   columnOrder,
+//   //   columns,
+//   //   columnSizing,
+//   //   columnVisibility,
+//   //   defaultColumnPinning,
+//   //   filters,
+//   //   persistenceKey,
+//   //   sorting,
+//   // } = serverData;
 
-  const columnState = readPersistedStateFromSessionStorage<EnterpriseOrder>({
-    persistenceKey,
-  });
-  const uiState = readPersistedUiStateFromSessionStorage({ persistenceKey });
-  // const { columnVisibility, ...rest } = columnState;
+//   const columnState = readPersistedStateFromSessionStorage<EnterpriseOrder>({
+//     persistenceKey: PERSISTENCE_KEY,
+//   });
+//   const uiState = readPersistedUiStateFromSessionStorage({
+//     persistenceKey: PERSISTENCE_KEY,
+//   });
 
-  const nextColumnFilters = (columnState.columnFilters ??
-    filters ??
-    ({} as ColumnFiltersState<EnterpriseOrder>)) as ColumnFiltersState<EnterpriseOrder>;
-  const nextColumnOrder = (columnState.columnOrder ??
-    columnOrder ??
-    ([] as ColumnOrderState<EnterpriseOrder>)) as ColumnOrderState<EnterpriseOrder>;
-  const nextColumnPinning = (columnState.columnPinning ??
-    defaultColumnPinning ??
-    ({
-      left: [],
-      right: [],
-    } as ColumnPinningState<EnterpriseOrder>)) as ColumnPinningState<EnterpriseOrder>;
-  const nextColumnSizing = (columnState.columnSizing ??
-    columnSizing ??
-    ({} as ColumnSizingState<EnterpriseOrder>)) as ColumnSizingState<EnterpriseOrder>;
-  const nextColumnVisibility = (columnState.columnVisibility ??
-    columnVisibility ??
-    (new Set() as ColumnVisibilityState<EnterpriseOrder>)) as ColumnVisibilityState<EnterpriseOrder>;
-  const nextSorting = (columnState.sorting ??
-    sorting ??
-    ([] as SortingState<EnterpriseOrder>)) as SortingState<EnterpriseOrder>;
+//   console.log('Client loader - starting', {
+//     columnState,
+//     serverData,
+//     uiState,
+//   });
+//   // const { columnVisibility, ...rest } = columnState;
 
-  const {
-    columnGroups,
-    effectiveColumns,
-    normalizedColumns,
-    pinnedColumnOffsets,
-  } = deriveColumnViewState<EnterpriseOrder>({
-    columnOrder: nextColumnOrder,
-    columnPinning: nextColumnPinning,
-    columns,
-    columnSizing: nextColumnSizing,
-    columnVisibility: nextColumnVisibility,
-    sorting: nextSorting,
-  });
+//   return { columnState, serverData, uiState };
 
-  const nextColumnsState = {
-    columnFilters: nextColumnFilters,
-    columnGroups,
-    columnOrder: nextColumnOrder,
-    columnPinning: nextColumnPinning,
-    columns,
-    columnSizing: nextColumnSizing,
-    columnVisibility: nextColumnVisibility,
-    effectiveColumns,
-    normalizedColumns,
-    pinnedColumnOffsets,
-    sorting: nextSorting,
-    staticKeys: getStaticColumnKeys(columns),
-  } as Partial<TableColumnsState<EnterpriseOrder>>;
+//   // ...rest,
+//   // columnVisibility: columnVisibility ?? new Set(),
 
-  console.log('Client loader - read persisted state from sessionStorage', {
-    columnState,
-    serverData,
-    uiState,
-  });
+//   // const nextColumnFilters = (columnState.columnFilters ??
+//   //   filters ??
+//   //   ({} as ColumnFiltersState<EnterpriseOrder>)) as ColumnFiltersState<EnterpriseOrder>;
+//   // const nextColumnOrder = (columnState.columnOrder ??
+//   //   columnOrder ??
+//   //   ([] as ColumnOrderState<EnterpriseOrder>)) as ColumnOrderState<EnterpriseOrder>;
+//   // const nextColumnPinning = (columnState.columnPinning ??
+//   //   defaultColumnPinning ??
+//   //   ({
+//   //     left: [],
+//   //     right: [],
+//   //   } as ColumnPinningState<EnterpriseOrder>)) as ColumnPinningState<EnterpriseOrder>;
+//   // const nextColumnSizing = (columnState.columnSizing ??
+//   //   columnSizing ??
+//   //   ({} as ColumnSizingState<EnterpriseOrder>)) as ColumnSizingState<EnterpriseOrder>;
+//   // const nextColumnVisibility = (columnState.columnVisibility ??
+//   //   columnVisibility ??
+//   //   (new Set() as ColumnVisibilityState<EnterpriseOrder>)) as ColumnVisibilityState<EnterpriseOrder>;
+//   // const nextSorting = (columnState.sorting ??
+//   //   sorting ??
+//   //   ([] as SortingState<EnterpriseOrder>)) as SortingState<EnterpriseOrder>;
 
-  return { ...serverData, ...nextColumnsState, uiState };
-};
+//   // const { columnsState: nextColumnsState, metaState: nextMetaState } =
+//   //   resolveHydratedTableConfigState<EnterpriseOrder>({
+//   //     columnsState: {
+//   //       columnFilters: nextColumnFilters,
+//   //       columnOrder: nextColumnOrder,
+//   //       columnPinning: nextColumnPinning,
+//   //       columns,
+//   //       columnSizing: nextColumnSizing,
+//   //       columnVisibility: nextColumnVisibility,
+//   //       sorting: nextSorting,
+//   //     },
+//   //     metaState: {
+//   //       persistenceKey,
+//   //       schemaName: SCHEMA_NAME,
+//   //       tableName: TABLE_NAME,
+//   //       title: TITLE,
+//   //     },
+//   //     persistedColumnsState: columnState,
+//   //     persistedMetaState: uiState,
+//   //   });
 
-// force the client loader to run during hydration
-clientLoader.hydrate = true as const; // `as const` for type inference
+//   // console.log('Client loader - read persisted state from sessionStorage', {
+//   //   columnState,
+//   //   nextColumnsState,
+//   //   serverData,
+//   //   uiState,
+//   // });
+
+//   // console.log('Client loader - resolved next state', {
+//   //   columnsState: nextColumnsState,
+//   //   defaultColumnPinning,
+//   //   enterpriseOrdersPromise: serverData.enterpriseOrdersPromise,
+//   //   metaState: {
+//   //     ...nextMetaState,
+//   //     ...uiState,
+//   //   },
+//   // });
+
+//   // return {
+//   //   columnsState: nextColumnsState,
+//   //   defaultColumnPinning,
+//   //   enterpriseOrdersPromise: serverData.enterpriseOrdersPromise,
+//   //   metaState: {
+//   //     ...nextMetaState,
+//   //     ...uiState,
+//   //   },
+//   // };
+// };
+
+// // force the client loader to run during hydration
+// clientLoader.hydrate = true as const; // `as const` for type inference

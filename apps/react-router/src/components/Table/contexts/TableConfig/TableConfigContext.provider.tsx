@@ -3,7 +3,6 @@ import type {
   TableMetaState,
 } from '@/components/Table/Table.types';
 
-import { useHydrateTableSessionState } from '@/components/Table/hooks';
 import { useStore } from '@/hooks';
 
 import type {
@@ -19,23 +18,18 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
   columnsState,
   metaState,
 }: TableConfigProviderProps<TData>) => {
-  const persistenceKey = metaState?.persistenceKey ?? '';
+  const normalizedColumnsState = getInitialColumnsState<TData>({
+    ...columnsState,
+    persistenceKey: metaState?.persistenceKey ?? '',
+  });
+  const normalizedMetaState = getInitialMetaState({
+    ...metaState,
+  });
 
   const columnsStore = useStore<TableColumnsState<TData>>(
-    getInitialColumnsState<TData>({
-      ...columnsState,
-    }),
+    normalizedColumnsState,
   );
-  const metaStore = useStore<TableMetaState>(
-    getInitialMetaState(metaState ?? {}),
-  );
-
-  // // On client mount: restore per-tab sessionStorage state into both stores.
-  useHydrateTableSessionState({
-    columnsStore,
-    metaStore,
-    persistenceKey,
-  });
+  const metaStore = useStore<TableMetaState>(normalizedMetaState);
 
   const value = {
     columnsStore,

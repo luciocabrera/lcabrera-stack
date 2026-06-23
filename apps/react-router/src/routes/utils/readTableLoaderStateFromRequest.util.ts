@@ -1,5 +1,6 @@
 import type {
   ColumnFiltersState,
+  ColumnPinningState,
   ColumnSizingState,
   SortingState,
   TableColumn,
@@ -24,6 +25,7 @@ type ReadTableLoaderStateFromRequestArgs<
 
 type ReadTableLoaderStateFromRequestResult<TData> = {
   readonly columnOrder: (keyof TData)[];
+  readonly columnPinning: ColumnPinningState<TData>;
   readonly columnSizing: ColumnSizingState<TData>;
   readonly columnVisibility: Set<keyof TData>;
   readonly filters: ColumnFiltersState<TData>;
@@ -89,6 +91,7 @@ const sanitizeFiltersByColumns = <TData extends Record<string, unknown>>({
   return Object.fromEntries(sanitizedEntries) as ColumnFiltersState<TData>;
 };
 
+// TODO: This function is doing a lot - reading from URL and cookies, deserializing, sanitizing. We should consider splitting responsibilities for better testability and maintainability.
 /**
  * Read shared table loader state from URL and cookies.
  */
@@ -124,7 +127,10 @@ export const readTableLoaderStateFromRequest = <
   const columnSizing = (cookieState.columnSizing ??
     {}) as ColumnSizingState<TData>;
 
-  const standaloneSortParam = url.searchParams.get('sort');
+  const columnPinning =
+    cookieState.columnPinning ?? ({} as ColumnPinningState<TData>);
+
+  const standaloneSortParam = url.searchParams.get('sorting');
   const sorting = standaloneSortParam
     ? deserializeSortingFromURL<TData>(standaloneSortParam)
     : ([] as SortingState<TData>);
@@ -146,6 +152,7 @@ export const readTableLoaderStateFromRequest = <
 
   return {
     columnOrder,
+    columnPinning,
     columnSizing,
     columnVisibility,
     filters,

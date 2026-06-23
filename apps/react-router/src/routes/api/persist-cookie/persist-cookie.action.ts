@@ -34,8 +34,14 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const headers = new Headers();
   let hasEffectiveQueryChange = false;
 
+  console.log('persist-cookie.action', {
+    currentUrl,
+    entries,
+  });
+
   for (const { key, searchParamKey, searchParamValue, value } of entries) {
-    headers.append('Set-Cookie', buildCookieString({ key, value }));
+    if (key && value)
+      headers.append('Set-Cookie', buildCookieString({ key, value }));
 
     if (searchParamKey) {
       const currentSearchParamValue =

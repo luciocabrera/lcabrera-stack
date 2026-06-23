@@ -2,6 +2,9 @@ import type { TableColumn } from '@/components/Table/Table.types';
 import type { WideAlltypes150 } from '@/services';
 
 export const PERSISTENCE_KEY = 'wide-alltypes-150-table';
+export const SCHEMA_NAME = 'public';
+export const TABLE_NAME = 'wide_alltypes_150';
+export const TITLE = 'Wide All-Types — 150 Columns × 1M Rows';
 
 // ─── Column helpers ──────────────────────────────────────────────────────────
 

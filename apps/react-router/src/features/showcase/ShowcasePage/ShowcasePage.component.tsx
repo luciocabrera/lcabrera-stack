@@ -31,6 +31,10 @@ import {
 } from '@/components/SidePanel';
 import { TableLayout } from '@/components/Table/TableLayout';
 import {
+  getInitialColumnsState,
+  getInitialMetaState,
+} from '@/components/Table/contexts/TableConfig/utils';
+import {
   HorizontalToolbarExample,
   HorizontalToolbarExampleShort,
 } from '@/components/Toolbar/Toolbar.examples';
@@ -138,6 +142,14 @@ const tableData: MockRow[] = Array.from(
 const FAKE_API_DELAY_MS = 2000;
 
 const PERSISTENCE_KEY = 'app-showcase-table';
+const SHOWCASE_COLUMNS_STATE = getInitialColumnsState({
+  columns: COLUMNS,
+  persistenceKey: PERSISTENCE_KEY,
+});
+const SHOWCASE_META_STATE = getInitialMetaState({
+  persistenceKey: PERSISTENCE_KEY,
+  title: 'Data Table',
+});
 
 // --- VirtualSelect showcase data ---
 const STATIC_FRUITS = [
@@ -492,12 +504,11 @@ export const ShowcasePage = () => {
               }}
             >
               <TableLayout<MockRow, MockResponse>
-                columns={COLUMNS}
+                columnsState={SHOWCASE_COLUMNS_STATE}
                 dataPromise={getTableDataPromise()}
                 dataSelector={(response) => response.data}
                 dataTotalSelector={(response) => response.total}
-                persistenceKey={PERSISTENCE_KEY}
-                title='Data Table'
+                metaState={SHOWCASE_META_STATE}
               />
             </div>
           </ShowcaseSection>

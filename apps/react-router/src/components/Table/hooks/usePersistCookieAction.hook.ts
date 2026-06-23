@@ -13,11 +13,11 @@ import type { TablePersistenceConfig } from '../Table.types';
 import { serializeStateSlice } from '../utils';
 
 type PersistCookieEntry<TSlice = unknown> = {
-  persistenceKey: string;
+  persistenceKey?: string;
   searchParamKey?: string;
   searchParamValue?: string;
-  slice: keyof TablePersistenceConfig;
-  valueSlice: TSlice;
+  slice?: keyof TablePersistenceConfig;
+  valueSlice?: TSlice;
 };
 
 /**
@@ -54,11 +54,14 @@ export const usePersistTableStateAction = (): PersistTableStateAction => {
         slice,
         valueSlice,
       }) => {
-        const { key, value } = serializeStateSlice({
-          persistenceKey,
-          slice,
-          value: valueSlice,
-        });
+        const { key, value } =
+          persistenceKey && slice
+            ? serializeStateSlice({
+                persistenceKey,
+                slice,
+                value: valueSlice,
+              })
+            : { key: undefined, value: undefined };
 
         return {
           key,
@@ -78,7 +81,7 @@ export const usePersistTableStateAction = (): PersistTableStateAction => {
 
     for (const { key, value } of serializedEntries) {
       // Write to sessionStorage immediately (tab-isolated, survives refresh)
-      writeToSessionStorage({ key, value });
+      if (key && value) writeToSessionStorage({ key, value });
     }
 
     // Write to cookie via server action (SSR baseline for new tabs)
