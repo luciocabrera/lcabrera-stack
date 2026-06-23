@@ -5,7 +5,7 @@ import { useTableConfigContextValue } from '@/components/Table/contexts/TableCon
 import { useTableDataContextValue } from '@/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
 import { usePersistTableStateAction } from '@/components/Table/hooks';
 
-import { resolveColumnFilterUpdate } from './utils/resolveColumnFilterUpdate.util';
+import { resolveColumnFilterUpdate } from './utils';
 
 // import { resolveColumnFilterUpdate } from './utils';
 

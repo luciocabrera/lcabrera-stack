@@ -17,7 +17,6 @@ describe('resolveColumnSortingUpdate', () => {
     const result = resolveColumnSortingUpdate<Row>({
       columns,
       existingSorting: [],
-      persistenceKey: 'orders-table',
       sort: { columnKey: 'actions', direction: 'asc' },
     });
 
@@ -28,7 +27,6 @@ describe('resolveColumnSortingUpdate', () => {
     const result = resolveColumnSortingUpdate<Row>({
       columns,
       existingSorting: [{ columnKey: 'status', direction: 'asc' }],
-      persistenceKey: 'orders-table',
       sort: { columnKey: 'status', direction: 'asc' },
     });
 
@@ -39,7 +37,6 @@ describe('resolveColumnSortingUpdate', () => {
     const result = resolveColumnSortingUpdate<Row>({
       columns,
       existingSorting: [{ columnKey: 'status', direction: 'asc' }],
-      persistenceKey: 'orders-table',
       sort: { columnKey: 'priority', direction: 'desc' },
     });
 

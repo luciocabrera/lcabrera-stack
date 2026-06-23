@@ -25,7 +25,6 @@ describe('resolveColumnFilterUpdate', () => {
         type: 'text',
         value: 'high',
       },
-      persistenceKey: 'orders-table',
     });
 
     expect(result.columnFilters).toEqual({
@@ -65,7 +64,6 @@ describe('resolveColumnFilterUpdate', () => {
       } as ColumnFiltersState<Row>,
       columnKey: 'status',
       filter: undefined,
-      persistenceKey: 'orders-table',
     });
 
     expect(result.columnFilters).toEqual({
