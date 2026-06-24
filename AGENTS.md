@@ -1,10 +1,33 @@
 <!-- Audience: Claude, Gemini, and other non-GitHub agents — for GitHub Copilot see .github/copilot-instructions.md -->
 
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 # Project Instructions — vite-react-compiler
 
 ## 1. Project Overview
 
-This is a **React 19 + TypeScript + StyleX + React Router 7** application with SSR support, built using the **Vite+** unified toolchain (`vp` CLI). It demonstrates enterprise-grade patterns including a feature-rich data Table component with custom store-based state management, virtualization, infinite scroll, and granular subscriptions via `useSyncExternalStore`.
+This is a **pnpm monorepo** built with the **Vite+** unified toolchain (`vp` CLI). The primary app is a **React 19 + TypeScript + StyleX + React Router 7** application with SSR support (`apps/react-router/`). It demonstrates enterprise-grade patterns including a feature-rich data Table component with custom store-based state management, virtualization, infinite scroll, and granular subscriptions via `useSyncExternalStore`.
+
+### Monorepo Layout
+
+```
+apps/
+├── react-router/     # Main SSR frontend app (React 19 + StyleX + React Router 7)
+├── admin_system/     # Separate React Router SSR admin app
+├── api-server/       # Express + PostgreSQL REST API (port 3001)
+├── api-server-fast/  # Fastify alternative API server
+└── shared/           # Shared code between apps
+packages/
+├── eslint-local-rules/  # Custom ESLint rules for this repo
+├── plugins/             # Shared Vite plugins
+├── ts-configs/          # Shared TypeScript configurations
+├── utils/               # Shared utilities
+└── vite-configs/        # Shared Vite config factories
+```
+
+All source paths below (e.g. `src/components/`) are relative to `apps/react-router/` unless otherwise noted.
 
 ### Tech Stack
 
@@ -27,6 +50,7 @@ Use these skills as the first stop for implementation patterns and workflows:
 | `react-router-framework-mode` | React Router framework mode data, actions, forms, navigation, error handling                      | `skills/react-router-framework-mode/SKILL.md` |
 | `code-smell-checker`          | Baseline maintainability audits and tech-debt triage                                              | `skills/code-smell-checker/SKILL.md`          |
 | `code-smell-zen`              | Diff-based smell review against target branch                                                     | `skills/code-smell-zen/SKILL.md`              |
+| `fallow-code-checker`         | Full fallow static hygiene scan with prioritized report (`vp run fallow:full`)                    | `skills/fallow-code-checker/SKILL.md`         |
 
 Selection guideline:
 
@@ -40,30 +64,37 @@ Selection guideline:
 ## 2. Source Structure
 
 ```
-src/
+apps/react-router/src/
 ├── components/          # Reusable UI components (Button, Card, Modal, Table, etc.)
-│   └── Table/           # Enterprise data table with custom store architecture
-│       ├── contexts/    # Split context providers (TableConfig, TableData, FiltersData)
-│       ├── hooks/       # Table-specific hooks (resize, infinite scroll, persistence)
-│       ├── filters/     # Filter UI components
-│       └── [SubComponents]/  # Each sub-component in its own directory
+│   ├── Table/           # Enterprise data table with custom store architecture
+│   │   ├── contexts/    # Split context providers (TableConfig, TableData, FiltersData)
+│   │   ├── hooks/       # Table-specific hooks (resize, infinite scroll, persistence)
+│   │   ├── filters/     # Filter UI components
+│   │   └── [SubComponents]/  # Each sub-component in its own directory
+│   ├── NotificationCenter/  # Global notification viewport (uses NotificationContext)
+│   └── PATTERNS.md      # Naming conventions, StyleX order, drawer-section pattern
 ├── constants/           # App-level constants (api.constants.ts, filterOperators.constants.ts)
-├── contexts/            # App-level contexts (ThemeContext/)
+├── contexts/            # App-level contexts
+│   ├── GlobalSettingsContext/  # Global user preferences (pin side, nav size) — persisted to cookie
+│   ├── NotificationContext/    # In-memory notification store with auto-dismiss timers
+│   └── ThemeContext/           # Light/dark theme preference
 ├── design-system/       # Design tokens, themes, constants
 │   ├── tokens/          # StyleX token definitions (base.stylex, colors.stylex)
 │   ├── themes/          # Theme variants
 │   └── constants/       # Design constants
-├── hooks/               # Shared hooks (useStore, useVirtualization, useTheme, useClickOutside)
+├── features/            # Route-isolated feature modules (e.g. showcase/)
+├── hooks/               # Shared hooks (useStore, useVirtualization, useColumnVirtualization, useTheme, useClickOutside)
 ├── routes/              # React Router route modules (loaders, actions, components)
 │   ├── home/
 │   ├── car-sales/
 │   ├── car-sales-infinite/
 │   ├── enterprise-orders/
 │   ├── settings/
-│   └── api/             # API resource routes
+│   └── api/             # API resource routes (/_action/persist-cookie, etc.)
 ├── services/            # External API integrations (carSales.api.ts, enterpriseOrders.api.ts)
 ├── types/               # Global type definitions
 ├── utils/               # Shared utilities (formatters, storage, URL state, performance)
+├── INVENTORY.md         # Artifact catalog — consult before creating anything new
 ├── root.tsx             # App root with providers
 ├── routes.ts            # Route configuration
 └── entry.server.tsx     # SSR entry point
@@ -90,7 +121,28 @@ src/
 | Add a package        | `vp add <package>`                                                           |
 | Remove a package     | `vp remove <package>`                                                        |
 
-**Critical:** Import Vite config from `vite-plus`, not `vite`, for tooling integration. Example: `import { defineConfig } from 'vite-plus'`. For tests, import from `vitest`, e.g. `import { expect, test, vi } from 'vitest'`.
+### Monorepo-Wide Commands (run from repo root)
+
+| Task                       | Command            |
+| -------------------------- | ------------------ |
+| Verify everything is ready | `vp run ready`     |
+| Run all tests recursively  | `vp run test -r`   |
+| Build all apps             | `vp run build:all` |
+| Start dev servers          | `vp run dev`       |
+
+### Local Database Workflow (run from repo root)
+
+| Task                     | Command            |
+| ------------------------ | ------------------ |
+| Start local PostgreSQL   | `vp run db:up`     |
+| Check DB status          | `vp run db:status` |
+| Seed data                | `vp run seed`      |
+| Start + seed in one step | `vp run db:seed`   |
+| Stop local PostgreSQL    | `vp run db:down`   |
+
+The API server (`apps/api-server/`) reads env from `docker/local/.env`. The frontend proxies `/api` to `http://localhost:3001`.
+
+**Critical:** Import Vite config from `vite-plus`, not `vite`, for tooling integration. Example: `import { defineConfig } from 'vite-plus'`. For tests, import test utilities from `vitest` directly (e.g. `import { expect, test, vi } from 'vitest'`).
 
 ### Agent Checklist
 
@@ -480,7 +532,8 @@ import { Button } from '../../../../components/Button';
 
 - Tests colocated with components (`ComponentName.test.tsx`).
 - Use `@testing-library/react` for component tests.
-- Import test utilities from `vite-plus/test` (not `vitest` directly).
+- Import test utilities from `vitest` (e.g. `import { expect, test, vi } from 'vitest'`).
+- Run a single test file: `vp run test -- --reporter=verbose <path/to/file.test.tsx>`
 - 80% minimum unit test coverage target.
 
 ---
@@ -558,7 +611,6 @@ After the quality gate passes, update every `ARCHITECTURE.md` affected by the ch
 - **New dependency added** → update the Dependencies diagram in the affected `ARCHITECTURE.md`.
 - **New naming/structural convention established** → update `src/components/PATTERNS.md`.
 - **New architectural decision made** → add a new ADR to `docs/decisions/` following the ADR-NNN naming scheme.
-- **New artifact created or existing artifact enhanced/renamed** → update the relevant row in `src/INVENTORY.md`.
 - **New artifact created or existing artifact enhanced/renamed** → update the relevant row in `src/INVENTORY.md`.
 
 Documentation updates must be part of the **same commit** as the code change.
