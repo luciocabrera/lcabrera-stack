@@ -1,9 +1,9 @@
 ---
 name: code-smell-zen
 description: Scan git diff vs target branch for code smells (Clean Code + GoF + TypeScript/React catalog)
-argument-hint: '[target-branch]'
+argument-hint: '[target-branch] — omit to auto-detect base (origin/main); pass HEAD for uncommitted changes only'
 user-invocable: true
-allowed-tools: Bash(cat:*,date:*,git:*,mkdir:*,tee:*), Read, Grep, Glob
+allowed-tools: Bash(bash:*,cat:*,date:*,git:*,mkdir:*,tee:*), Read, Grep, Glob
 license: MIT
 metadata:
   version: '1.0.0'
@@ -21,44 +21,9 @@ You are running a 5-step code-smell review. Follow the steps **in order**. Do no
 
 The diff below has already been collected. Read it carefully before proceeding. It contains both the committed changes vs the base (3-dot `base...HEAD`) **and** the working-tree changes (staged + unstaged).
 
-!`bash -c '
-BASE="$1"
-if [ -z "$BASE" ]; then
-  BASE=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed "s@^refs/remotes/@@")
-  [ -z "$BASE" ] && BASE="origin/main"
-  git rev-parse "$BASE" >/dev/null 2>&1 || BASE="main"
-  git rev-parse "$BASE" >/dev/null 2>&1 || BASE="HEAD"
-fi
-if ! git rev-parse "$BASE" >/dev/null 2>&1; then
-  echo "ERROR: base $BASE not found. Pass an explicit branch: /smell [branch]"
-  exit 1
-fi
-echo "===== BASE: $BASE ====="
-echo
-if [ "$BASE" = "HEAD" ]; then
-  echo "(No remote or base branch found — showing full working-tree diff against HEAD)"
-  echo
-  echo "----- Stat (staged + unstaged) -----"
-  git diff --stat HEAD || true
-  echo
-  echo "===== Working-tree diff (staged + unstaged, -U10) ====="
-  git diff -U10 HEAD || true
-else
-  echo "----- Stat (committed vs $BASE) -----"
-  git diff --stat "$BASE"...HEAD || true
-  echo
-  echo "----- Stat (working tree, staged+unstaged) -----"
-  git diff --stat HEAD || true
-  echo
-  echo "===== Committed diff (vs $BASE, -U10) ====="
-  git diff -U10 "$BASE"...HEAD || true
-  echo
-  echo "===== Working-tree diff (staged + unstaged, -U10) ====="
-  git diff -U10 HEAD || true
-fi
-' -- "$ARGUMENTS"`
+!`bash .github/skills/code-smell-zen/scripts/collect-diff.sh "$ARGUMENTS"`
 
-> **VS Code Copilot:** The `!bash` prefix does not auto-execute in this environment. Run the command above manually via `run_in_terminal` from the repository root (`/home/lucio/workspaces/vite-react-compiler`) before proceeding to Step 2.
+> **VS Code Copilot:** The `!bash` prefix does not auto-execute in this environment. Run `bash .github/skills/code-smell-zen/scripts/collect-diff.sh [base-branch]` manually via `run_in_terminal` from the repository root before proceeding to Step 2.
 
 ---
 
