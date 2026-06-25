@@ -19,11 +19,4 @@ export const styles = stylex.create({
     display: 'flex',
     width: 'min(500px, 90%)',
   },
-
-  title: {
-    margin: 0,
-    color: 'var(--error)',
-    fontSize: '1.5rem',
-    fontWeight: 600,
-  },
 });

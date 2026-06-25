@@ -11,6 +11,8 @@ import type { RouteErrorBoundaryProps } from './RouteErrorBoundary.types';
 
 import { styles } from './RouteErrorBoundary.stylex';
 
+const ERROR_NOTIFICATION_DURATION_MS = 10_000;
+
 export const RouteErrorBoundary = ({
   defaultMessage,
   error,
@@ -23,7 +25,7 @@ export const RouteErrorBoundary = ({
 
   useEffect(() => {
     notify({
-      durationMs: 10_000,
+      durationMs: ERROR_NOTIFICATION_DURATION_MS,
       message: 'Something went wrong.',
       title: 'Error occurred',
       variant: 'error',
@@ -43,7 +45,6 @@ export const RouteErrorBoundary = ({
     <div {...stylex.props(styles.container)}>
       <Title icon={icon}>{title}</Title>
       <ErrorDescriptive />
-      <h2 {...stylex.props(styles.title)}>Error Loading Data</h2>
       <p>{details}</p>
       <div {...stylex.props(styles.actions)}>
         <Button color='primary' onClick={handleNavigateHome}>

@@ -32,4 +32,25 @@ describe('Checkbox', () => {
     fireEvent.click(screen.getByRole('checkbox'));
     expect(onChange).toHaveBeenCalledTimes(1);
   });
+
+  it('does not call onChange when disabled', () => {
+    render(<Checkbox isChecked={false} isDisabled onChange={vi.fn()} />);
+
+    const checkbox = screen.getByRole<HTMLInputElement>('checkbox');
+    expect(checkbox.disabled).toBe(true);
+  });
+
+  it('renders without crashing when isReadOnly', () => {
+    render(<Checkbox isChecked={false} isReadOnly />);
+
+    const checkbox = screen.getByRole<HTMLInputElement>('checkbox');
+    expect(checkbox.readOnly).toBe(true);
+    expect(checkbox.disabled).toBe(false);
+  });
+
+  it('does not render a testid element when dataTestId is not provided', () => {
+    render(<Checkbox isChecked />);
+
+    expect(screen.queryByTestId(/.*/)).toBeNull();
+  });
 });
