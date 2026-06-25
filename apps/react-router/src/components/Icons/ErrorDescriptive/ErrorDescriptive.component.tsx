@@ -23,47 +23,12 @@ export const ErrorDescriptive = () => {
         Two data blocks with a breaking link and a subtle warning badge
         indicating a fetch error.
       </desc>
-      <style>{`
-            :root { --accent: currentColor; }
-            .serverFill { fill: var(--accent); fill-opacity:0.10; stroke:var(--accent); stroke-opacity:0.9; stroke-width:1.8; }
-            .serverDetail { stroke:var(--accent); stroke-opacity:0.9; stroke-width:1.4; fill:none; }
-            .laptopFill { fill: var(--accent); fill-opacity:0.10; stroke:var(--accent); stroke-opacity:0.9; stroke-width:1.8; }
-            .laptopDetail { stroke:var(--accent); stroke-opacity:0.9; stroke-width:1.4; fill:none; }
-            .link { stroke:var(--accent); stroke-width:3.5; stroke-linecap:round; stroke-linejoin:round; stroke-opacity:0.9; }
-            .crack { stroke:var(--accent); stroke-width:3.5; stroke-linecap:round; stroke-linejoin:round; stroke-opacity:0.95; }
-            .badge { fill:var(--accent); }
-            .pulse { fill:var(--accent); fill-opacity:0.08; }
-            @keyframes shake {
-              0% { transform: translateX(0); }
-              20% { transform: translateX(-3px); }
-              40% { transform: translateX(3px); }
-              60% { transform: translateX(-2px); }
-              80% { transform: translateX(2px); }
-              100% { transform: translateX(0); }
-            }
-            @keyframes pulseScale {
-              0% { transform: scale(0.9); opacity:0.18; }
-              50% { transform: scale(1.15); opacity:0.06; }
-              100% { transform: scale(0.9); opacity:0.18; }
-            }
-            @keyframes badgeBounce {
-              0% { transform: translateY(0); }
-              50% { transform: translateY(-6px); }
-              100% { transform: translateY(0); }
-            }
-            .linkGroup { transform-origin: 180px 110px; animation: shake 1.6s ease-in-out infinite; }
-            .pulseCircle { transform-origin: 180px 110px; animation: pulseScale 2.2s ease-in-out infinite; }
-            .badgeGroup { animation: badgeBounce 2s ease-in-out infinite; transform-origin: 240px 70px; }
-            @media (prefers-reduced-motion: reduce) {
-              .linkGroup, .pulseCircle, .badgeGroup { animation: none; }
-            }
-          `}</style>
 
       {/* left: stylized server / database rack */}
       <g transform='translate(28,62)'>
         {/* server body (stacked panels) */}
         <rect
-          className='serverFill'
+          {...stylex.props(styles.serverFill)}
           height='18'
           rx='6'
           width='110'
@@ -71,7 +36,7 @@ export const ErrorDescriptive = () => {
           y='0'
         />
         <rect
-          className='serverFill'
+          {...stylex.props(styles.serverFill)}
           height='18'
           rx='6'
           width='110'
@@ -79,7 +44,7 @@ export const ErrorDescriptive = () => {
           y='24'
         />
         <rect
-          className='serverFill'
+          {...stylex.props(styles.serverFill)}
           height='18'
           rx='6'
           width='110'
@@ -87,52 +52,52 @@ export const ErrorDescriptive = () => {
           y='48'
         />
         {/* front panel details */}
-        <g className='serverDetail' transform='translate(10,4)'>
+        <g {...stylex.props(styles.serverDetail)} transform='translate(10,4)'>
           <circle
             cx='0'
             cy='5'
-            fill='var(--accent)'
+            fill='currentColor'
             fillOpacity='0.95'
             r='2.6'
           />
           <circle
             cx='14'
             cy='5'
-            fill='var(--accent)'
+            fill='currentColor'
             fillOpacity='0.6'
             r='2.6'
           />
           <rect fill='none' height='12' rx='3' width='56' x='36' y='-3' />
         </g>
-        <g className='serverDetail' transform='translate(10,28)'>
+        <g {...stylex.props(styles.serverDetail)} transform='translate(10,28)'>
           <circle
             cx='0'
             cy='5'
-            fill='var(--accent)'
+            fill='currentColor'
             fillOpacity='0.95'
             r='2.6'
           />
           <circle
             cx='14'
             cy='5'
-            fill='var(--accent)'
+            fill='currentColor'
             fillOpacity='0.6'
             r='2.6'
           />
           <rect fill='none' height='12' rx='3' width='56' x='36' y='-3' />
         </g>
-        <g className='serverDetail' transform='translate(10,52)'>
+        <g {...stylex.props(styles.serverDetail)} transform='translate(10,52)'>
           <circle
             cx='0'
             cy='5'
-            fill='var(--accent)'
+            fill='currentColor'
             fillOpacity='0.95'
             r='2.6'
           />
           <circle
             cx='14'
             cy='5'
-            fill='var(--accent)'
+            fill='currentColor'
             fillOpacity='0.6'
             r='2.6'
           />
@@ -144,13 +109,13 @@ export const ErrorDescriptive = () => {
           <ellipse
             cx='8'
             cy='3'
-            fill='var(--accent)'
+            fill='currentColor'
             fillOpacity='0.06'
             rx='8'
             ry='3.6'
           />
           <rect
-            fill='var(--accent)'
+            fill='currentColor'
             fillOpacity='0.04'
             height='54'
             rx='4'
@@ -161,7 +126,7 @@ export const ErrorDescriptive = () => {
           <ellipse
             cx='8'
             cy='57'
-            fill='var(--accent)'
+            fill='currentColor'
             fillOpacity='0.06'
             rx='8'
             ry='3.6'
@@ -173,7 +138,7 @@ export const ErrorDescriptive = () => {
       <g transform='translate(210,70)'>
         {/* screen */}
         <rect
-          className='laptopFill'
+          {...stylex.props(styles.laptopFill)}
           height='60'
           rx='8'
           width='110'
@@ -181,7 +146,7 @@ export const ErrorDescriptive = () => {
           y='0'
         />
         <rect
-          className='laptopDetail'
+          {...stylex.props(styles.laptopDetail)}
           height='36'
           rx='4'
           width='94'
@@ -191,18 +156,18 @@ export const ErrorDescriptive = () => {
         {/* keyboard base */}
         <g transform='translate(0,62)'>
           <rect
-            className='laptopFill'
+            {...stylex.props(styles.laptopFill)}
             height='12'
             rx='4'
             width='98'
             x='6'
             y='0'
           />
-          <g className='laptopDetail' transform='translate(14,4)'>
+          <g {...stylex.props(styles.laptopDetail)} transform='translate(14,4)'>
             <rect fill='none' height='4' rx='2' width='72' x='0' y='0' />
             {/* small keys hint */}
             <rect
-              fill='var(--accent)'
+              fill='currentColor'
               fillOpacity='0.12'
               height='2'
               rx='1'
@@ -211,7 +176,7 @@ export const ErrorDescriptive = () => {
               y='8'
             />
             <rect
-              fill='var(--accent)'
+              fill='currentColor'
               fillOpacity='0.12'
               height='2'
               rx='1'
@@ -220,7 +185,7 @@ export const ErrorDescriptive = () => {
               y='8'
             />
             <rect
-              fill='var(--accent)'
+              fill='currentColor'
               fillOpacity='0.12'
               height='2'
               rx='1'
@@ -229,7 +194,7 @@ export const ErrorDescriptive = () => {
               y='8'
             />
             <rect
-              fill='var(--accent)'
+              fill='currentColor'
               fillOpacity='0.12'
               height='2'
               rx='1'
@@ -238,7 +203,7 @@ export const ErrorDescriptive = () => {
               y='8'
             />
             <rect
-              fill='var(--accent)'
+              fill='currentColor'
               fillOpacity='0.12'
               height='2'
               rx='1'
@@ -247,7 +212,7 @@ export const ErrorDescriptive = () => {
               y='8'
             />
             <rect
-              fill='var(--accent)'
+              fill='currentColor'
               fillOpacity='0.12'
               height='2'
               rx='1'
@@ -260,36 +225,41 @@ export const ErrorDescriptive = () => {
       </g>
 
       {/* soft pulse behind the link */}
-      <g className='pulseCircle'>
-        <circle className='pulse' cx='180' cy='100' r='36' />
+      <g {...stylex.props(styles.pulseCircle)}>
+        <circle {...stylex.props(styles.pulse)} cx='180' cy='100' r='36' />
       </g>
 
       {/* connecting link with animated crack */}
-      <g className='linkGroup' fill='none'>
-        <path className='link' d='M150 100 L210 100' opacity='0.55' />
+      <g {...stylex.props(styles.linkGroup)} fill='none'>
+        <path
+          {...stylex.props(styles.link)}
+          d='M150 100 L210 100'
+          opacity='0.55'
+        />
         {/* animated crack segments */}
-        <path className='crack' d='M178 88 L186 100 L178 112' opacity='1' />
-        <path className='crack' d='M182 92 L190 104 L182 116' opacity='0.6' />
+        <path
+          {...stylex.props(styles.crack)}
+          d='M178 88 L186 100 L178 112'
+          opacity='1'
+        />
+        <path
+          {...stylex.props(styles.crack)}
+          d='M182 92 L190 104 L182 116'
+          opacity='0.6'
+        />
       </g>
 
       {/* small particles to imply disruption */}
-      <g fill='var(--accent)' fillOpacity='0.9'>
+      <g fill='currentColor' fillOpacity='0.9'>
         <circle cx='170' cy='78' opacity='0.9' r='2.2' />
         <circle cx='190' cy='122' opacity='0.7' r='1.8' />
         <circle cx='160' cy='110' opacity='0.6' r='1.6' />
       </g>
 
-      <g className='badgeGroup' transform='translate(240,70)'>
-        <circle className='badge' cx='0' cy='0' r='14' />
-        <rect
-          fill='var(--accent)'
-          height='8'
-          rx='1'
-          width='3'
-          x='-1.5'
-          y='-6'
-        />
-        <circle cx='0' cy='6' fill='var(--accent)' r='2.2' />
+      <g {...stylex.props(styles.badgeGroup)} transform='translate(240,70)'>
+        <circle {...stylex.props(styles.badge)} cx='0' cy='0' r='14' />
+        <rect fill='currentColor' height='8' rx='1' width='3' x='-1.5' y='-6' />
+        <circle cx='0' cy='6' fill='currentColor' r='2.2' />
       </g>
     </svg>
   );
