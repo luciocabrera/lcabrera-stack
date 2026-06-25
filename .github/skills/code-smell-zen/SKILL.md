@@ -5,7 +5,7 @@ argument-hint: '[target-branch]'
 allowed-tools: Bash(cat:*,date:*,git:*,mkdir:*,tee:*), Read, Grep, Glob
 license: MIT
 metadata:
-  version: '1.0.0'
+  version: 1.0.0
   scope: [root]
 ---
 
@@ -216,49 +216,110 @@ Walk every hunk. For each issue you find, cite **exactly one** catalog ID from t
 - **LOW** — minor; in-passing fix
 - **NIT** — style preference, no real cost
 
-Sort findings by severity (desc), then by file path. Emit **exactly this structure** as your final response:
+Sort findings by severity (desc), then by file path. Emit **exactly this structure** as your final response, which satisfies the shared schema defined in `../code-smell-shared/SCHEMA_V1.md` and `../code-smell-shared/REPORT_TEMPLATE.md`:
 
 ````markdown
 # Smell Report
 
-**Base:** `<BASE>`
-**Classification:** `<feature|refactor|bugfix|test|docs|config|mixed>`
-**Primary lens:** `<Clean Code | Gang of Four | Mixed>`
+## Metadata
+
+- schema_version: 1.0
+- report_id: <short unique id, e.g. zen-<timestamp>>
+- generated_at: <YYYY-MM-DDTHH:MM:SSZ>
+- skill_name: code-smell-zen
+- repository: <repo-name-or-path>
+- scope_type: diff
+- scope_value: <BASE>..HEAD
+- severity_scale: BLOCKER, HIGH, MEDIUM, LOW, NIT
+- base_branch: <BASE>
+- head_branch: HEAD
+- classification: <feature|refactor|bugfix|test|docs|config|mixed>
+- primary_lens: <Clean Code | Gang of Four | Mixed>
 
 ## Summary
 
-- Files changed: N
-- Findings: X blocker, Y high, Z medium, W low, V nit
-- Top risk: <one sentence>
+- files_analyzed: N
+- findings_count_by_severity:
+  - blocker: X
+  - high: Y
+  - medium: Z
+  - low: W
+  - nit: V
+- top_risk: <one sentence>
+- first_3_actions:
+  1. <action>
+  2. <action>
+  3. <action>
 
 ## Findings
 
-### [BLOCKER] `REACT.MISSING-DEPS` — `path/Widget.tsx:142`
+### Finding F-001
+
+- finding_id: F-001
+- rule_id: `REACT.MISSING-DEPS`
+- severity: BLOCKER
+- confidence: <high|medium|low>
+- location_path: path/Widget.tsx
+- location_hint: line 142
+- evidence_excerpt:
 
 ```tsx
 <smallest meaningful excerpt>
+```
 
-**Why:** <one sentence>
-**Fix:** <one sentence>
+- why: <one sentence>
+- fix: <one sentence>
+- effort: <small|medium|large>
+- defer_risk: <one sentence>
+- verification_steps:
+  - <step 1>
+- status: open
 
 ...
+
+## Prioritized Execution Queue
+
+1. queue_rank: 1
+   - target_finding_ids: <F-001, ...>
+   - reason_for_order: <one sentence>
+   - expected_outcome: <one sentence>
+
+2. queue_rank: 2
+   - target_finding_ids: <F-002>
+   - reason_for_order: <one sentence>
+   - expected_outcome: <one sentence>
+
+3. queue_rank: 3
+   - target_finding_ids: <F-003>
+   - reason_for_order: <one sentence>
+   - expected_outcome: <one sentence>
+
+## Deferred Items
+
+None.
+
+## Validation Checklist
+
+- [ ] Required sections present
+- [ ] Required metadata fields present
+- [ ] Summary counts match findings
+- [ ] Each finding has evidence_excerpt, why, fix
+- [ ] Each finding has verification_steps
+- [ ] Severity values are canonical
+- [ ] Prioritized queue present when findings exist
+
+## Closure Criteria
+
+- No BLOCKER or HIGH findings remain unresolved before merge.
+- All MEDIUM findings are either fixed or tracked with owner and rationale.
+- Lint, type-check, and tests pass after any applied fixes.
 
 ## Synthesis
 
 <one paragraph: dominant theme of the diff and the top 3 actions to take before merge>
-```
 ````
 
-If the diff has no findings, emit the same structure with an empty Findings section and an explicit "No catalog findings on this diff." line, plus the Synthesis paragraph.
-
-For cross-skill consistency, align the final response with:
-
-- `../code-smell-shared/SCHEMA_V1.md`
-- `../code-smell-shared/REPORT_TEMPLATE.md`
-- `../code-smell-shared/TEST_PLAN.md`
-- `../code-smell-shared/RULE_FIX_QUICK_REFERENCE.md`
-
-Keep catalog IDs unchanged and normalize only structural fields required by the shared schema.
+If the diff has no findings, keep all sections, set all counts to 0, write "No catalog findings on this diff." in the Findings section, write "No actions required." for first_3_actions, omit the Prioritized Execution Queue, and write a Synthesis paragraph confirming the diff is clean.
 
 ## Saving the Report
 

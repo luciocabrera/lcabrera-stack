@@ -22,7 +22,6 @@ export const TableLayout = <
   metaState,
   onLoadMore,
 }: TableLayoutProps<TData, TResponse>) => {
-  console.log('TableLayout render', { columnsState, dataPromise, metaState });
   return (
     <div {...stylex.props(styles.container)}>
       <TableConfigProvider<TData>

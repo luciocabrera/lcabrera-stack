@@ -11,12 +11,7 @@ import type {
 
 import {
   deriveColumnViewState,
-  // getEffectiveColumns,
-  // getNormalizedColumns,
-  // getPinnedColumnOffsets,
-  // getStaticColumnKeys,
   readPersistedStateFromSessionStorage,
-  // splitColumnsByPinning,
 } from '@/components/Table/utils';
 
 type GetInitialTableStateArgs<TData> = Partial<TableColumnsState<TData>> &
@@ -68,45 +63,6 @@ export const getInitialColumnsState = <TData>({
     columnVisibility: nextColumnVisibility,
     sorting,
   });
-  // const effectiveColumns = getEffectiveColumns<TData>({
-  //   columnOrder,
-  //   columnPinning,
-  //   columns,
-  //   columnVisibility,
-  // });
-
-  // const normalizedColumns = getNormalizedColumns<TData>({
-  //   columns,
-  //   sorting,
-  // });
-
-  // const staticKeys = getStaticColumnKeys<TData>(columns);
-
-  // const columnGroups = splitColumnsByPinning<TData>({
-  //   columnPinning,
-  //   effectiveColumns,
-  // });
-
-  // const pinnedColumnOffsets = getPinnedColumnOffsets<TData>({
-  //   columnPinning,
-  //   columnSizing,
-  //   effectiveColumns,
-  // });
-
-  // console.log('getInitialColumnsState', {
-  //   columnFilters,
-  //   columnGroups,
-  //   columnOrder,
-  //   columnPinning,
-  //   columns,
-  //   columnSizing,
-  //   columnVisibility,
-  //   effectiveColumns,
-  //   normalizedColumns,
-  //   pinnedColumnOffsets,
-  //   sessionState,
-  //   sorting,
-  // });
 
   return {
     columnFilters,

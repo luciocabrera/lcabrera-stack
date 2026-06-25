@@ -118,4 +118,4 @@ See `references/route-modules.md` for all exports.
 
 If anything related to React Router is not covered in these references, you can search the official documentation:
 
-https://reactrouter.com/docs
+<https://reactrouter.com/docs>
