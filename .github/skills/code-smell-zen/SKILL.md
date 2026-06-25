@@ -2,11 +2,13 @@
 name: code-smell-zen
 description: Scan git diff vs target branch for code smells (Clean Code + GoF + TypeScript/React catalog)
 argument-hint: '[target-branch]'
+user-invocable: true
 allowed-tools: Bash(cat:*,date:*,git:*,mkdir:*,tee:*), Read, Grep, Glob
 license: MIT
 metadata:
-  version: 1.0.0
+  version: '1.0.0'
   scope: [root]
+  auto_invoke: 'Reviewing a PR, branch diff, or set of changed files for code quality and smell issues'
 ---
 
 # /smell — Code smell review
@@ -28,7 +30,7 @@ if [ -z "$BASE" ]; then
   git rev-parse "$BASE" >/dev/null 2>&1 || BASE="HEAD"
 fi
 if ! git rev-parse "$BASE" >/dev/null 2>&1; then
-  echo "ERROR: base $BASE not found. Pass an explicit branch: /smell <branch>"
+  echo "ERROR: base $BASE not found. Pass an explicit branch: /smell [branch]"
   exit 1
 fi
 echo "===== BASE: $BASE ====="
@@ -224,7 +226,7 @@ Sort findings by severity (desc), then by file path. Emit **exactly this structu
 ## Metadata
 
 - schema_version: 1.0
-- report_id: <short unique id, e.g. zen-<timestamp>>
+- report_id: `zen-{timestamp}` (short unique id)
 - generated_at: <YYYY-MM-DDTHH:MM:SSZ>
 - skill_name: code-smell-zen
 - repository: <repo-name-or-path>
@@ -264,7 +266,9 @@ Sort findings by severity (desc), then by file path. Emit **exactly this structu
 - evidence_excerpt:
 
 ```tsx
-<smallest meaningful excerpt>
+{
+  /* smallest meaningful excerpt */
+}
 ```
 
 - why: <one sentence>
@@ -326,7 +330,7 @@ If the diff has no findings, keep all sections, set all counts to 0, write "No c
 After producing the final report, **always** save it to disk without prompting the user:
 
 1. Capture the current timestamp: `date +%Y%m%dT%H%M%S`
-2. Create the output directory: `.tmp/code-smell-zen/<timestamp>/`
+2. Create the output directory: `.tmp/code-smell-zen/{timestamp}/`
 3. Write the full report as `report.md` inside that directory, using the same markdown structure emitted in Step 5.
 4. Tell the user the path to the saved file.
 

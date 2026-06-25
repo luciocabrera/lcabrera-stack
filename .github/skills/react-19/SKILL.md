@@ -7,7 +7,7 @@ license: MIT
 metadata:
   version: '1.1.0'
   scope: [root]
-  auto_invoke: 'Writing React components'
+  auto_invoke: 'Writing or modifying React components, hooks, context, or form actions in .tsx/.jsx files'
 allowed-tools: Read
 ---
 
@@ -287,19 +287,21 @@ export const NameForm = () => {
 };
 ```
 
+```typescript
 // ✅ Server Action with Typed Objects (for react-hook-form)
 export const updateProfile = async (data: ProfileInput) => {
-try {
-const validated = profileSchema.parse(data);
-await db.update(validated);
-return { success: true };
-} catch (error) {
-return handleErrorResponse(error);
-}
-}
+  try {
+    const validated = profileSchema.parse(data);
+    await db.update(validated);
+    return { success: true };
+  } catch (error) {
+    return handleErrorResponse(error);
+  }
+};
 
-// ❌ NEVER: Force FormData if not using native <form action>
+// ❌ NEVER: Force FormData if not using native form action
 // If using react-hook-form, pass the object directly to the action.
+```
 
 ## useOptimistic for Instant UI Updates
 
@@ -498,7 +500,7 @@ export const Form = () => {
 };
 ```
 
-**Note**: `useFormStatus` must be called inside a component that is a child of a `<form>`.
+**Note**: `useFormStatus` must be called inside a child component of a form element.
 
 ## useDeferredValue with Initial Value
 

@@ -1,10 +1,14 @@
 ---
 name: code-smell-checker
 description: Systematically detect and triage code smells across a codebase. Use for maintainability audits, refactor planning, PR hygiene checks, and tech debt reviews. Includes severity scoring, false-positive filtering, and fix-priority decisions.
-argument-hint: Target area or language, for example: src/, TypeScript services, or React frontend app
+argument-hint: 'Target area or language, for example: src/, TypeScript services, or React frontend app'
 user-invocable: true
 allowed-tools: Bash(cat:_,date:_,mkdir:_,tee:_), Read, Grep, Glob
 license: MIT
+metadata:
+  version: '1.0.0'
+  scope: [root]
+  auto_invoke: 'Running a maintainability audit, tech-debt triage, or pre-refactor code health check across the codebase'
 ---
 
 # Code Smell Checker
@@ -131,7 +135,7 @@ For each finding, include: finding_id, rule_id (catalog ID or `CHK.<DOMAIN>.<LAB
 After producing the final report, **always** save it to disk without prompting the user:
 
 1. Capture the current timestamp: `date +%Y%m%dT%H%M%S`
-2. Create the output directory: `.tmp/code-smell-checker/<timestamp>/`
+2. Create the output directory: `.tmp/code-smell-checker/{timestamp}/`
 3. Write the full report as `report.md` inside that directory, following the shared `REPORT_TEMPLATE.md` structure exactly.
 4. Tell the user the path to the saved file.
 

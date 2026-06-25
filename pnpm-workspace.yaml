@@ -20,7 +20,7 @@ catalog:
   '@testing-library/react': ^16.3.2
   '@types/cors': ^2.8.19
   '@types/express': ^5.0.6
-  '@types/node': ^26.0.0
+  '@types/node': ^26.0.1
   '@types/pg': ^8.20.0
   '@types/react': ^19.2.17
   '@types/react-dom': ^19.2.3
@@ -32,19 +32,19 @@ catalog:
   eslint-config-prettier: ^10.1.8
   eslint-plugin-local-rules: ^3.0.2
   eslint-plugin-perfectionist: ^5.9.1
-  eslint-plugin-react-dom: ^5.9.2
+  eslint-plugin-react-dom: ^5.9.3
   eslint-plugin-react-hooks: ^7.1.1
   eslint-plugin-react-refresh: ^0.5.3
-  eslint-plugin-react-x: ^5.9.2
+  eslint-plugin-react-x: ^5.9.3
   eslint-plugin-security: ^4.0.1
-  eslint-plugin-unicorn: ^68.0.0
+  eslint-plugin-unicorn: ^69.0.0
   express: ^5.2.1
   fallow: ^2.102.0
   fastify: ^5.8.5
   globals: ^17.7.0
   isbot: 5.1.44
   jsdom: ^29.1.1
-  knip: ^6.18.0
+  knip: ^6.20.0
   lighthouse: ^13.4.0
   nodemon: ^3.1.14
   pg: ^8.22.0

@@ -42,15 +42,16 @@ All source paths below (e.g. `src/components/`) are relative to `apps/react-rout
 
 Use these skills as the first stop for implementation patterns and workflows:
 
-| Skill                         | Use For                                                                                           | Location                                      |
-| ----------------------------- | ------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| `store-pattern`               | Table-style split-context external store architecture with selector/action boundaries             | `skills/store-pattern/SKILL.md`               |
-| `quality-gate-workflow`       | Mandatory post-change validation workflow (`vp fmt .` → `vp lint .` → `vp check` → `vp run test`) | `skills/quality-gate-workflow/SKILL.md`       |
-| `react-19`                    | React 19 component and compiler-safe patterns                                                     | `skills/react-19/SKILL.md`                    |
-| `react-router-framework-mode` | React Router framework mode data, actions, forms, navigation, error handling                      | `skills/react-router-framework-mode/SKILL.md` |
-| `code-smell-checker`          | Baseline maintainability audits and tech-debt triage                                              | `skills/code-smell-checker/SKILL.md`          |
-| `code-smell-zen`              | Diff-based smell review against target branch                                                     | `skills/code-smell-zen/SKILL.md`              |
-| `fallow-code-checker`         | Full fallow static hygiene scan with prioritized report (`vp run fallow:full`)                    | `skills/fallow-code-checker/SKILL.md`         |
+| Skill                         | Use For                                                                                        | Location                                              |
+| ----------------------------- | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| `store-pattern`               | Table-style split-context external store architecture with selector/action boundaries          | `.github/skills/store-pattern/SKILL.md`               |
+| `quality-gate-workflow`       | Mandatory post-change validation workflow (`vp lint --fix` → `vp check --fix` → `vp run test`) | `.github/skills/quality-gate-workflow/SKILL.md`       |
+| `react-19`                    | React 19 component and compiler-safe patterns                                                  | `.github/skills/react-19/SKILL.md`                    |
+| `react-router-framework-mode` | React Router framework mode data, actions, forms, navigation, error handling                   | `.github/skills/react-router-framework-mode/SKILL.md` |
+| `code-smell-checker`          | Baseline maintainability audits and tech-debt triage                                           | `.github/skills/code-smell-checker/SKILL.md`          |
+| `code-smell-zen`              | Diff-based smell review against target branch                                                  | `.github/skills/code-smell-zen/SKILL.md`              |
+| `fallow-code-checker`         | Full fallow static hygiene scan with prioritized report (`vp run fallow:full`)                 | `.github/skills/fallow-code-checker/SKILL.md`         |
+| `config-audit`                | Run claudelint, triage against known exceptions, produce fix plan for genuine issues           | `.github/skills/config-audit/SKILL.md`                |
 
 Selection guideline:
 
@@ -117,7 +118,7 @@ apps/react-router/src/
 | Format check         | `vp fmt --check .`                                                           |
 | Type check           | `react-router typegen && tsc --noEmit`                                       |
 | Run tests            | `vp run test`                                                                |
-| Full validation      | `vp check` then `vp run test`                                                |
+| Full validation      | `vp lint . --fix && vp check --fix && vp run test`                           |
 | Add a package        | `vp add <package>`                                                           |
 | Remove a package     | `vp remove <package>`                                                        |
 
@@ -273,14 +274,6 @@ export type { ButtonProps } from './Button.types';
 | Boolean props       | `is/has/should[State]` | `isLoading`, `hasError`       |
 | Render props        | `render[Thing]`        | `renderHeader`, `renderEmpty` |
 
-### Alphabetical Sorting (Mandatory Everywhere)
-
-- **Destructured props** — alphabetical
-- **JSX props** — alphabetical
-- **Type/object keys** — alphabetical (`id` may come first as exception)
-- **Import specifiers** — alphabetical
-- Enforced by `eslint-plugin-perfectionist`
-
 ### Composition Over Configuration
 
 Prefer composition (children, slots) over props-driven configuration to avoid prop explosion.
@@ -357,133 +350,28 @@ const MyPage = () => {
 ### Client State
 
 - **Local UI state:** `useState`, `useReducer`
-- **Shared UI state:** React Context with `use()` (React 19) — **never `useContext`**
-- **No Redux.** Use Context or Zustand if global client state is needed.
+- **Shared / complex UI state:** the store-pattern (split context + `useSyncExternalStore`) — the **only** allowed pattern; no Redux, no Zustand, no ad-hoc Context+useState trees. Invoke the `/store-pattern` skill before implementing.
 
 ---
 
 ## 9. React 19 Specific Patterns
 
-### Mandatory Migrations
+Two mandatory rules apply project-wide:
 
-- **`use()` replaces `useContext()`** — `use()` can be called conditionally, supports Promises.
-- **`useActionState`** for form actions with pending state.
-- **`useFormStatus`** for submit button pending states from child components.
-- **`useOptimistic`** for instant UI feedback during async operations.
-- **`useTransition`** for non-urgent updates (search, filtering).
+- **Always `use()`, never `useContext()`** — `use()` is conditional-safe and supports Promises; `useContext` is forbidden in this codebase.
+- **Single store snapshot per action** — call `store.get()` exactly once per execution, assign to a const, read all properties from it.
 
-### Context Pattern
-
-This project uses **split contexts** grouped by state volatility, not by feature. The Table component is the canonical reference; apply the same shape to any domain with complex state.
-
-**Three context tiers (Table as reference):**
-
-| Context               | Stores                           | Change frequency              | Why split                                                |
-| --------------------- | -------------------------------- | ----------------------------- | -------------------------------------------------------- |
-| `TableConfigProvider` | `columnsStore`, `metaStore`      | Low (user config changes)     | Prevents config re-renders cascading into data consumers |
-| `TableDataProvider`   | `dataStore`, `filtersDataStore`  | High (every page/filter load) | Data changes must not re-render config-only components   |
-| Domain-specific       | e.g. `ColumnOrderSectionContext` | Medium (UI interaction)       | Drawer/panel UI isolated from the table core             |
-
-**Consuming context — always `use()`, never `useContext()`:**
-
-```tsx
-// ✅ React 19: use() can be called conditionally
-const { columnsStore } = use(TableConfigContext);
-
-// ❌ Forbidden
-const { columnsStore } = useContext(TableConfigContext);
-```
-
-**Store snapshot rule — capture once per action execution:**
-
-```typescript
-// ✅ Single snapshot — all reads are consistent
-const columnsState = columnsStore.get();
-const columns = columnsState?.columns ?? [];
-const columnOrder = columnsState?.columnOrder ?? [];
-
-// ❌ Multiple .get() calls — may return different snapshots under concurrency
-const columns = columnsStore.get()?.columns ?? [];
-const columnOrder = columnsStore.get()?.columnOrder ?? [];
-```
-
-This rule applies to every store: `columnsStore`, `dataStore`, `filtersDataStore`, `metaStore`.
-
-> For full architecture detail, read `.github/skills/store-pattern/SKILL.md`.
+For full React 19 patterns (all hooks, compiler-safe patterns, form actions, optimistic UI), invoke the `/react-19` skill.
 
 ---
 
-## 10. Table Component Architecture
+## 10. State Management — Store Pattern (Only Allowed Approach)
 
-The Table is the project's most complex component. It uses a custom store-based state management pattern.
+The **store-pattern** is the **only** approved pattern for shared/complex UI state in this project. No Redux, Zustand, Recoil, or ad-hoc Context+useState trees are permitted.
 
-### Architecture Layers
+The Table component is the canonical implementation: a 3-tier split-context architecture (`TableConfigProvider` → `TableDataProvider` → UI layer) backed by `useSyncExternalStore`, with a strict Action/Selector boundary so components never reach into stores directly.
 
-```
-Table.component.tsx (entry point)
-├── TableConfigProvider (infrequent changes)
-│   ├── columnsStore — column definitions, sorting, filters, visibility, sizing, order, pinning
-│   └── metaStore — UI preferences (density, borders), pagination, persistence config
-├── TableDataProvider (frequent changes)
-│   ├── dataStore — table rows, loading states, pagination info
-│   └── filtersDataStore — per-column filter dropdown data with async pagination
-└── UI Components Layer
-    └── Each component uses Actions (write) + Selectors (read)
-```
-
-### Store Pattern (`useSyncExternalStore`)
-
-Foundation hook: `useStore.hook.ts` — shallow merge on `set()`, shallow equality checks, SSR-safe.
-
-### Action/Selector Pattern
-
-```
-store/{domain}/
-├── use{Domain}Store.hook.ts        # Base store hook
-├── actions/                         # State mutations (useSet*, useReset*, useFetch*)
-│   ├── useSetColumnFilter.hook.ts
-│   └── index.ts
-└── selectors/                       # State reads (useGet*)
-    ├── useGetColumnFilters.hook.ts
-    └── index.ts
-```
-
-- **Selectors:** stateless, return computed/direct values, enable granular subscriptions.
-- **Actions:** encapsulate business logic, handle side effects (persistence, URL updates, async).
-- **Component pattern:** import selectors for reads, import actions for writes, use action callbacks in event handlers.
-
-### Store State Access Rule
-
-**Never call `store.get()` more than once per action execution.** Capture the snapshot into a single variable, then read properties from it. Multiple `.get()` calls may return different snapshots if a concurrent update occurs between them, leading to inconsistent state.
-
-```typescript
-// ✅ Correct — single snapshot, multiple reads
-const columnsState = columnsStore.get();
-const columns = columnsState?.columns ?? [];
-const columnsOrder =
-  columnsState?.columnOrder ?? ([] as ColumnOrderState<TData>);
-const currentPinning =
-  columnsState?.columnPinning ??
-  ({ left: [], right: [] } as ColumnPinningState<TData>);
-
-// ❌ Forbidden — calling .get() multiple times
-const columns = columnsStore.get()?.columns ?? [];
-const columnsOrder =
-  columnsStore.get()?.columnOrder ?? ([] as ColumnOrderState<TData>);
-const currentPinning = columnsStore.get()?.columnPinning ?? {
-  left: [],
-  right: [],
-};
-```
-
-This rule applies to every store: `columnsStore`, `dataStore`, `filtersDataStore`, `metaStore`.
-
-### Key Features
-
-- **Virtualization** (`useVirtualization.hook.ts`): Renders only visible rows.
-- **Infinite Scroll** (`useInfiniteScroll.hook.ts`): Loads more data when scrolling near bottom.
-- **Filter Dropdowns with Async Data**: Each column has its own filter data store entry with pagination.
-- **State Persistence**: Actions persist to cookies/localStorage via `writeStateSlice()`.
+**Invoke the `/store-pattern` skill before touching any store, context, selector, or action.** It contains the mandatory reference files, implementation checklist, and architecture templates.
 
 ---
 
@@ -617,11 +505,11 @@ Documentation updates must be part of the **same commit** as the code change.
 
 <!--VITE PLUS START-->
 
-# Using Vite+, the Unified Toolchain for the Web
+## Using Vite+, the Unified Toolchain for the Web
 
 This project is using Vite+, a unified toolchain built on top of Vite, Rolldown, Vitest, tsdown, Oxlint, Oxfmt, and Vite Task. Vite+ wraps runtime management, package management, and frontend tooling in a single global CLI called `vp`. Vite+ is distinct from Vite, and it invokes Vite through `vp dev` and `vp build`. Run `vp help` to print a list of commands and `vp <command> --help` for information about a specific command.
 
-Docs are local at `node_modules/vite-plus/docs` or online at <https://viteplus.dev/guide/>.
+Docs are local at `node_modules/vite-plus/docs` or online at [viteplus.dev/guide](https://viteplus.dev/guide/).
 
 ## Review Checklist
 

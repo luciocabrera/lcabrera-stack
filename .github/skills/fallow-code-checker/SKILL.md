@@ -3,11 +3,12 @@ name: fallow-code-checker
 description: Run a full fallow scan with vp and produce a prioritized, evidence-based report aligned to the code-smell-checker output contract.
 argument-hint: 'Optional scope, for example: repo, apps/react-router, or changed files only'
 user-invocable: true
-allowed-tools: Bash(cat:*,date:*,mkdir:*,tee:*,vp:*), Read, Grep, Glob
+allowed-tools: Bash(cat:*,date:*,mkdir:*,npx:*,tee:*,vp:*), Read, Grep, Glob
 license: MIT
 metadata:
   version: '1.0.0'
   scope: [root]
+  auto_invoke: 'Running a full static analysis scan for dead code, unused exports, high complexity, or fallow findings'
 ---
 
 # Fallow Full Scan Checker
@@ -53,19 +54,15 @@ If inputs are missing, default to:
 - else if apps/react-router/package.json contains fallow:full, run there
 - if not found, stop and report missing script with a remediation hint
 
-2. Execute fallow.
+2. Capture timestamp, create output directory, and execute fallow.
 
-Run exactly:
+Run both passes in a single shell invocation so the timestamp is consistent:
 
-!`vp run fallow:full`
+!`TIMESTAMP=$(date +%Y%m%dT%H%M%S) && mkdir -p ".tmp/fallow-code-checker/$TIMESTAMP" && vp run fallow:full && npx fallow --format json --output-file ".tmp/fallow-code-checker/$TIMESTAMP/fallow.raw.json" --quiet && echo "Run directory: .tmp/fallow-code-checker/$TIMESTAMP/"`
 
-Capture stdout and stderr fully.
+Note the run directory path from the final echo — it is used for all subsequent saves.
 
-Then run machine-readable output for parsing:
-
-!`npx fallow --format json --output-file .tmp/fallow-code-checker/<timestamp>/fallow.raw.json --quiet`
-
-Use the JSON file as the source of truth for findings. Human output is for context only.
+Use the JSON file as the source of truth for findings. Human output from `vp run fallow:full` is for context only.
 
 3. Parse findings into normalized records.
 
@@ -136,13 +133,11 @@ When the full shared report structure is feasible, use it exactly; otherwise kee
 
 8. Save the report artifact.
 
-Always save without prompting:
+Always save without prompting. The run directory was created in step 2. Write:
 
-1. capture timestamp: date +%Y%m%dT%H%M%S
-2. create directory: .tmp/fallow-code-checker/<timestamp>/
-3. write raw output file `fallow.raw.json` in that directory
-4. write `report.md` in that directory
-5. tell the user both saved paths
+1. `fallow.raw.json` — already written by the step 2 command
+2. `report.md` — write the final report to the same directory
+3. Tell the user both saved paths
 
 ## Decision Logic
 
@@ -173,7 +168,7 @@ Before finalizing:
 - false positives explicitly labeled
 - all detected fallow categories considered (not dead code only)
 - prioritized queue provided
-- report saved to .tmp/fallow-code-checker/<timestamp>/report.md
+- report saved to `.tmp/fallow-code-checker/{run-directory}/report.md`
 - residual risk and validation steps documented
 
 ## Example Prompts

@@ -9,6 +9,16 @@
           }
         ]
       }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd apps/react-router && vp lint . --fix && vp check --fix && vp run test"
+          }
+        ]
+      }
     ]
   }
 }
