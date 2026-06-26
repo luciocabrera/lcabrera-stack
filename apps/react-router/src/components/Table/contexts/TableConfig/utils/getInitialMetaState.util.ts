@@ -31,6 +31,7 @@ export const getInitialMetaState = ({
   isTableSettingsPinned = false,
   loadMorePageSize = LOAD_MORE_PAGE_SIZE,
   overscan = DEFAULT_OVERSCAN,
+  persistedUiState = {},
   persistenceKey = '',
   placeholderRowCount = INITIAL_PAGE_SIZE,
   rowHeight = DEFAULT_ROW_HEIGHT,
@@ -38,7 +39,6 @@ export const getInitialMetaState = ({
   tableSettingsSelectedTab = 'general',
   threshold = INFINITE_SCROLL_THRESHOLD,
   wasTableSettingsOpenBeforeColumnSettings = false,
-  persistedUiState = {},
   ...rest
 }: GetInitialMetaStateArgs): TableMetaState => {
   return {
