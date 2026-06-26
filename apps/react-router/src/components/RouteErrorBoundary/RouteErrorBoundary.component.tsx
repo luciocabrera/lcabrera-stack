@@ -23,8 +23,8 @@ export const RouteErrorBoundary = ({
       ? error.message
       : defaultMessage;
 
-  const handleNavigateHome = () => {
-    void navigate('/');
+  const handleNavigateHome = async () => {
+    await navigate('/');
   };
 
   return (

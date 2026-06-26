@@ -75,8 +75,6 @@ const getHeaderDensityStyle = (
   if (navigationSizePreference === 'large') {
     return styles.headerDensityLarge;
   }
-
-  return;
 };
 
 const getBodyDensityStyle = (
@@ -89,8 +87,6 @@ const getBodyDensityStyle = (
   if (navigationSizePreference === 'large') {
     return styles.bodyDensityLarge;
   }
-
-  return;
 };
 
 const resolveExpandButtonLabel = (isExpanded: boolean): string => {

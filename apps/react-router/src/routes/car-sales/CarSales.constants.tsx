@@ -1,5 +1,3 @@
-export { CAR_SALES_COLUMNS as COLUMNS } from './CarSales.columns.constants';
-
 export const PERSISTENCE_KEY = 'car-sales-table';
 export const SCHEMA_NAME = 'public';
 export const TABLE_NAME = 'car_sales';
