@@ -35,8 +35,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   let hasEffectiveQueryChange = false;
 
   for (const { key, searchParamKey, searchParamValue, value } of entries) {
-    if (key && value)
+    if (key && value) {
       headers.append('Set-Cookie', buildCookieString({ key, value }));
+    }
 
     if (searchParamKey) {
       const currentSearchParamValue =

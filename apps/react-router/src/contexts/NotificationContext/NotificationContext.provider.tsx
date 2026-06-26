@@ -29,6 +29,13 @@ export const NotificationProvider = ({
     new Map<string, ReturnType<typeof setTimeout>>(),
   );
 
+  // Keep store defaults in sync if provider props change after mount
+  useEffect(() => {
+    notificationsStore.set({ defaultDurationMs, defaultPlacement });
+    // notificationsStore wraps stable useRef internals — omitted intentionally
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defaultDurationMs, defaultPlacement]);
+
   useEffect(() => {
     const timeoutMap = timeoutMapRef.current;
 

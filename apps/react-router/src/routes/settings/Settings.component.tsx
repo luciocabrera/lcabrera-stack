@@ -116,7 +116,7 @@ export const Settings = () => {
   const makeDraftSetter =
     <K extends keyof SettingsDraft>(key: K) =>
     (value: SettingsDraft[K]) => {
-      setDraft((d) => ({ ...d, [key]: value }));
+      setDraft((currentDraft) => ({ ...currentDraft, [key]: value }));
     };
 
   const handleNavigationCollapsedChange = makeDraftSetter(

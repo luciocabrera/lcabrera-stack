@@ -5,19 +5,14 @@ import type { ReactNode } from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-const { navigateMock, notifyMock, revalidateMock } = vi.hoisted(() => ({
+const { navigateMock, revalidateMock } = vi.hoisted(() => ({
   navigateMock: vi.fn(),
-  notifyMock: vi.fn(),
   revalidateMock: vi.fn(),
 }));
 
 vi.mock('react-router', () => ({
   useNavigate: () => navigateMock,
   useRevalidator: () => ({ revalidate: revalidateMock }),
-}));
-
-vi.mock('@/contexts/NotificationContext/actions', () => ({
-  useNotifyAction: () => notifyMock,
 }));
 
 vi.mock('@/components/Button', () => ({
@@ -48,7 +43,6 @@ import { RouteErrorBoundary } from './RouteErrorBoundary.component';
 
 afterEach(() => {
   cleanup();
-  notifyMock.mockReset();
   navigateMock.mockReset();
   revalidateMock.mockReset();
 });
@@ -106,23 +100,6 @@ describe('RouteErrorBoundary', () => {
     );
 
     expect(screen.getByText('Default fallback')).not.toBeNull();
-  });
-
-  it('calls notify with error variant on mount', () => {
-    render(
-      <RouteErrorBoundary
-        defaultMessage='Something failed'
-        error={new Error('test')}
-      />,
-    );
-
-    expect(notifyMock).toHaveBeenCalledOnce();
-    expect(notifyMock).toHaveBeenCalledWith({
-      durationMs: 10_000,
-      message: 'Something went wrong.',
-      title: 'Error occurred',
-      variant: 'error',
-    });
   });
 
   it('navigates to "/" when Home button is clicked', () => {
