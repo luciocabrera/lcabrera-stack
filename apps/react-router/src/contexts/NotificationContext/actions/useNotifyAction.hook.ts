@@ -1,3 +1,5 @@
+import { useCallback } from 'react';
+
 import type { AppNotification, NotifyArgs } from '../NotificationContext.types';
 
 import { INITIAL_NOTIFICATION_STATE } from '../NotificationContext.constants';
@@ -7,46 +9,51 @@ import { createNotificationId } from '../utils';
 export const useNotifyAction = () => {
   const { notificationsStore, timeoutMapRef } = useNotificationContextValue();
 
-  return ({
-    durationMs,
-    message,
-    placement,
-    title,
-    variant = 'info',
-  }: NotifyArgs): string => {
-    const state = notificationsStore.get() ?? INITIAL_NOTIFICATION_STATE;
-    const resolvedDurationMs = durationMs ?? state.defaultDurationMs;
-    const resolvedPlacement = placement ?? state.defaultPlacement;
-
-    const id = createNotificationId();
-    const notification: AppNotification = {
-      durationMs: resolvedDurationMs,
-      id,
+  return useCallback(
+    ({
+      durationMs,
       message,
-      placement: resolvedPlacement,
+      placement,
       title,
-      variant,
-    };
+      variant = 'info',
+    }: NotifyArgs): string => {
+      const state = notificationsStore.get() ?? INITIAL_NOTIFICATION_STATE;
+      const resolvedDurationMs = durationMs ?? state.defaultDurationMs;
+      const resolvedPlacement = placement ?? state.defaultPlacement;
 
-    notificationsStore.set({
-      notifications: [...state.notifications, notification],
-    });
+      const id = createNotificationId();
+      const notification: AppNotification = {
+        durationMs: resolvedDurationMs,
+        id,
+        message,
+        placement: resolvedPlacement,
+        title,
+        variant,
+      };
 
-    if (resolvedDurationMs > 0) {
-      const timeoutId = setTimeout(() => {
-        const currentState =
-          notificationsStore.get() ?? INITIAL_NOTIFICATION_STATE;
+      notificationsStore.set({
+        notifications: [...state.notifications, notification],
+      });
 
-        notificationsStore.set({
-          notifications: currentState.notifications.filter((n) => n.id !== id),
-        });
+      if (resolvedDurationMs > 0) {
+        const timeoutId = setTimeout(() => {
+          const currentState =
+            notificationsStore.get() ?? INITIAL_NOTIFICATION_STATE;
 
-        timeoutMapRef.current.delete(id);
-      }, resolvedDurationMs);
+          notificationsStore.set({
+            notifications: currentState.notifications.filter(
+              (n) => n.id !== id,
+            ),
+          });
 
-      timeoutMapRef.current.set(id, timeoutId);
-    }
+          timeoutMapRef.current.delete(id);
+        }, resolvedDurationMs);
 
-    return id;
-  };
+        timeoutMapRef.current.set(id, timeoutId);
+      }
+
+      return id;
+    },
+    [notificationsStore, timeoutMapRef],
+  );
 };

@@ -34,7 +34,7 @@ import type {
 import { getNavigationItems, NAV_DENSITY } from './AppNavigation.constants';
 import { styles } from './AppNavigation.stylex';
 
-const getPinnedState = ({
+const isNavigationPinned = ({
   defaultIsPinned,
   navigationPinnedPreference,
 }: ResolvePinnedStateArgs): boolean => {
@@ -131,16 +131,16 @@ export const AppNavigation = ({
   const navigationSizePreference = useGetGlobalNavigationSizePreference();
   const setGlobalNavigationPreferences = useSetGlobalNavigationPreferences();
   const [isOpen, setIsOpen] = useState(() => {
-    const isPinned = getPinnedState({
+    const isPinnedInitially = isNavigationPinned({
       defaultIsPinned,
       navigationPinnedPreference,
     });
 
-    return !isPinned;
+    return !isPinnedInitially;
   });
 
   const isExpanded = navigationCollapsedPreference !== 'collapsed';
-  const isPinned = getPinnedState({
+  const isPinned = isNavigationPinned({
     defaultIsPinned,
     navigationPinnedPreference,
   });

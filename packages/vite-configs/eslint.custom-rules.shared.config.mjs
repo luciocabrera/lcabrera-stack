@@ -88,22 +88,6 @@ const unicornImport = await importFromWorkspace('eslint-plugin-unicorn');
 const unicorn = unicornImport.default ?? unicornImport;
 const globalsImport = await importFromWorkspace('globals');
 const globals = globalsImport.default ?? globalsImport;
-// const stylexPlugin = stylexPluginImport.default ?? stylexPluginImport;
-
-// import eslint from '@eslint/js';
-// import stylex from '@stylexjs/eslint-plugin';
-// import eslintConfigPrettier from 'eslint-config-prettier/flat';
-// import perfectionist from 'eslint-plugin-perfectionist';
-// import reactDom from 'eslint-plugin-react-dom';
-// import reactHooks from 'eslint-plugin-react-hooks';
-// import reactRefresh from 'eslint-plugin-react-refresh';
-// import reactX from 'eslint-plugin-react-x';
-// import security from 'eslint-plugin-security';
-// import unicorn from 'eslint-plugin-unicorn';
-// import { defineConfig, globalIgnores } from 'eslint/config';
-// import globals from 'globals';
-// import tseslint from 'typescript-eslint';
-
 const TYPESCRIPT_LANGUAGE_OPTIONS = {
   ecmaVersion: 'latest',
   parser: tseslint.parser,

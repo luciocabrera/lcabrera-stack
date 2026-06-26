@@ -29,11 +29,11 @@ import {
   SidePanelHeader,
   SidePanelTitle,
 } from '@/components/SidePanel';
-import { TableLayout } from '@/components/Table/TableLayout';
 import {
   getInitialColumnsState,
   getInitialMetaState,
 } from '@/components/Table/contexts/TableConfig/utils';
+import { TableLayout } from '@/components/Table/TableLayout';
 import { readPersistedUiStateFromSessionStorage } from '@/components/Table/utils';
 import {
   HorizontalToolbarExample,
@@ -43,6 +43,7 @@ import { VirtualSelect } from '@/components/VirtualSelect';
 import { useTheme } from '@/hooks/useTheme.hook';
 
 import type {
+  GenerateCellValueArgs,
   MockResponse,
   MockRow,
   ShowcaseSectionProps,
@@ -95,46 +96,31 @@ const randomString = (length: number) => {
   ).join('');
 };
 
-const tableData: MockRow[] = Array.from(
-  { length: 10_000 },
-  // fallow-ignore-next-line complexity -- temporary showcase-only data generator
-  (_, rowIdx) => {
-    const row: MockRow = {};
-    for (const [colIdx, col] of COLUMNS.entries()) {
-      switch (col.dataType) {
-        case 'boolean': {
-          row[col.key] = rng() > 0.5;
+// fallow-ignore-next-line complexity -- temporary showcase-only data generator
+const generateCellValue = ({
+  colIdx,
+  dataType,
+  rowIdx,
+}: GenerateCellValueArgs): boolean | number | string => {
+  if (dataType === 'boolean') return rng() > 0.5;
+  if (dataType === 'currency') return `$${randomCurrency()}`;
+  if (dataType === 'date') return randomDate().toISOString().slice(0, 10);
+  if (dataType === 'number') return rowIdx * colIdx;
+  if (dataType === 'string') return randomString(8);
+  return '';
+};
 
-          break;
-        }
-        case 'currency': {
-          row[col.key] = `$${randomCurrency()}`;
-
-          break;
-        }
-        case 'date': {
-          row[col.key] = randomDate().toISOString().slice(0, 10);
-
-          break;
-        }
-        case 'number': {
-          row[col.key] = rowIdx * colIdx;
-
-          break;
-        }
-        case 'string': {
-          row[col.key] = randomString(8);
-
-          break;
-        }
-        default: {
-          row[col.key] = '';
-        }
-      }
-    }
-    return row;
-  },
-);
+const tableData: MockRow[] = Array.from({ length: 10_000 }, (_, rowIdx) => {
+  const row: MockRow = {};
+  for (const [colIdx, col] of COLUMNS.entries()) {
+    row[col.key] = generateCellValue({
+      colIdx,
+      dataType: col.dataType,
+      rowIdx,
+    });
+  }
+  return row;
+});
 
 /**
  * Simulated API delay in milliseconds
@@ -148,10 +134,10 @@ const SHOWCASE_COLUMNS_STATE = getInitialColumnsState({
   persistenceKey: PERSISTENCE_KEY,
 });
 const SHOWCASE_META_STATE = getInitialMetaState({
-  persistenceKey: PERSISTENCE_KEY,
   persistedUiState: readPersistedUiStateFromSessionStorage({
     persistenceKey: PERSISTENCE_KEY,
   }),
+  persistenceKey: PERSISTENCE_KEY,
   title: 'Data Table',
 });
 
