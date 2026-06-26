@@ -47,7 +47,7 @@ Load the relevant reference for detailed guidance on the specific API/concept:
 Some features require specific React Router versions. **Always verify before implementing:**
 
 ```bash
-npm list react-router
+grep '"react-router"' apps/react-router/package.json
 ```
 
 | Feature                 | Minimum Version | Notes                         |
@@ -58,6 +58,10 @@ npm list react-router
 ## Critical Patterns
 
 These are the most important patterns to follow. Load the relevant reference for full details.
+
+### React Router Actions vs React 19 Form Actions
+
+Use React Router `action` exports + `useFetcher` for **all server mutations** (API calls, data persistence, revalidation). React 19's `useActionState` and native form `action` prop are for client-only form state or progressive-enhancement scenarios — see `/react-19` for details on when each applies.
 
 ### Forms & Mutations
 

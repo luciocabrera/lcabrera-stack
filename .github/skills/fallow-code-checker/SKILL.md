@@ -23,6 +23,14 @@ Produce a full fallow findings report that:
 - provides a fix plan ordered by risk and effort
 - saves a report artifact on disk for handoff
 
+## Skill vs Agent
+
+|            | `fallow-code-checker` skill                    | `fallow-scan` agent                                       |
+| ---------- | ---------------------------------------------- | --------------------------------------------------------- |
+| Execution  | Inline — output in main context                | Background — isolated, main context untouched             |
+| Use when   | You want findings inline to act on immediately | You want the scan to run while you work on something else |
+| Invocation | `/fallow-code-checker`                         | Ask Claude to spawn the `fallow-scan` agent               |
+
 ## When to Apply
 
 Use this skill when you need to:

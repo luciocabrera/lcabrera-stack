@@ -6,7 +6,7 @@ This document describes every layer of the AI config for this project — what e
 
 ## Directory Layout
 
-```
+```text
 .claude/
 ├── README.md               ← this file
 ├── settings.local.json     ← permissions allow-list (not committed)
@@ -67,7 +67,7 @@ Skills are reusable instruction sets that Claude loads on demand. `.claude/skill
 
 **Skill anatomy:**
 
-```
+```text
 skill-name/
 ├── SKILL.md          ← loaded into context; overview + procedure
 ├── references/       ← deep-dive docs read on demand (not always loaded)
@@ -136,7 +136,7 @@ Entries use glob-style patterns: `Bash(cd apps/react-router && vp lint*)` approv
 
 ## How the Layers Interact
 
-```
+```text
 You ask Claude to do something
         │
         ▼
