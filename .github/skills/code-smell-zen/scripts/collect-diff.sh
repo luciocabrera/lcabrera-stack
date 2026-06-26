@@ -20,7 +20,7 @@ fi
 echo "===== BASE: $BASE ====="
 echo
 
-if [ "$BASE" = "HEAD" ]; then
+if [[ "$BASE" = "HEAD" ]]; then
   echo "(No remote or base branch found — showing full working-tree diff against HEAD)"
   echo
   echo "----- Stat (staged + unstaged) -----"

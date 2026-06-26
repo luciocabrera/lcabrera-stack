@@ -5,7 +5,6 @@ import type {
   SortingState,
   TableColumn,
 } from '@/components/Table';
-import type { ColumnFilter } from '@/types/filterOperators.types';
 
 import { readPersistedStateFromCookie } from '@/components/Table/utils';
 import {
@@ -13,6 +12,8 @@ import {
   deserializeSortingFromURL,
   readTableStateFromURL,
 } from '@/utils/urlState';
+
+import { sanitizeFiltersByColumns } from './sanitizeFiltersByColumns.util';
 
 type ReadTableLoaderStateFromRequestArgs<
   TData extends Record<string, unknown>,
@@ -34,64 +35,6 @@ type ReadTableLoaderStateFromRequestResult<TData> = {
   readonly standaloneSortParam: null | string;
 };
 
-const isFilterCompatibleWithColumn = <TData extends Record<string, unknown>>({
-  column,
-  filter,
-}: {
-  readonly column: TableColumn<TData>;
-  readonly filter: ColumnFilter;
-}): boolean => {
-  switch (column.dataType) {
-    case 'boolean': {
-      return filter.type === 'boolean';
-    }
-    case 'currency':
-    case 'number': {
-      return filter.type === 'number';
-    }
-    case 'date': {
-      return filter.type === 'date';
-    }
-    case 'string':
-    case undefined: {
-      return ['multiSelect', 'select', 'text'].includes(filter.type);
-    }
-    default: {
-      return false;
-    }
-  }
-};
-
-const sanitizeFiltersByColumns = <TData extends Record<string, unknown>>({
-  columns,
-  filters,
-}: {
-  readonly columns: readonly TableColumn<TData>[];
-  readonly filters: ColumnFiltersState<TData>;
-}): ColumnFiltersState<TData> => {
-  const columnsByKey = new Map(
-    columns.map((column) => [String(column.key), column] as const),
-  );
-
-  const sanitizedEntries = Object.entries(filters).filter(
-    ([columnKey, filter]) => {
-      const column = columnsByKey.get(columnKey);
-
-      if (!column || !filter) {
-        return false;
-      }
-
-      return isFilterCompatibleWithColumn({
-        column,
-        filter,
-      });
-    },
-  );
-
-  return Object.fromEntries(sanitizedEntries) as ColumnFiltersState<TData>;
-};
-
-// TODO: This function is doing a lot - reading from URL and cookies, deserializing, sanitizing. We should consider splitting responsibilities for better testability and maintainability.
 /**
  * Read shared table loader state from URL and cookies.
  */
