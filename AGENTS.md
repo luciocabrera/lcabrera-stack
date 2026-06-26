@@ -1,10 +1,8 @@
+# Project Instructions — vite-react-compiler
+
 <!-- Audience: Claude, Gemini, and other non-GitHub agents — for GitHub Copilot see .github/copilot-instructions.md -->
 
-# CLAUDE.md
-
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
-# Project Instructions — vite-react-compiler
 
 ## 1. Project Overview
 
@@ -509,7 +507,7 @@ Documentation updates must be part of the **same commit** as the code change.
 
 This project is using Vite+, a unified toolchain built on top of Vite, Rolldown, Vitest, tsdown, Oxlint, Oxfmt, and Vite Task. Vite+ wraps runtime management, package management, and frontend tooling in a single global CLI called `vp`. Vite+ is distinct from Vite, and it invokes Vite through `vp dev` and `vp build`. Run `vp help` to print a list of commands and `vp <command> --help` for information about a specific command.
 
-Docs are local at `node_modules/vite-plus/docs` or online at [viteplus.dev/guide](https://viteplus.dev/guide/).
+Docs are local at `node_modules/vite-plus/docs` or online at https://viteplus.dev/guide/.
 
 ## Review Checklist
 
@@ -517,5 +515,3 @@ Docs are local at `node_modules/vite-plus/docs` or online at [viteplus.dev/guide
 - [ ] Run `vp check` and `vp test` to format, lint, type check and test changes.
 - [ ] Check if there are `vite.config.ts` tasks or `package.json` scripts necessary for validation, run via `vp run <script>`.
 - [ ] If setup, runtime, or package-manager behavior looks wrong, run `vp env doctor` and include its output when asking for help.
-
-<!--VITE PLUS END-->

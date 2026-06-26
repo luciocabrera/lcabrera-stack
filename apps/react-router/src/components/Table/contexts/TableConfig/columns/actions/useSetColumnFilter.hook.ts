@@ -7,8 +7,6 @@ import { usePersistTableStateAction } from '@/components/Table/hooks';
 
 import { resolveColumnFilterUpdate } from './utils';
 
-// import { resolveColumnFilterUpdate } from './utils';
-
 type SetColumnFilterArgs<TData> = {
   readonly columnKey: DataKey<TData>;
   readonly filter?: ColumnFilter;
@@ -24,16 +22,10 @@ export const useSetColumnFilter = <TData>() => {
   const { columnsStore } = useTableConfigContextValue<TData>();
   const { dataStore } = useTableDataContextValue();
   const persistTableState = usePersistTableStateAction();
-  // const [, setSearchParams] = useSearchParams();
 
   return ({ columnKey, filter }: SetColumnFilterArgs<TData>) => {
     const columnsState = columnsStore.get();
 
-    // const columnFilters = getNewColumnFiltersBasedOnColumnKey<TData>({
-    //   columnFilter: filter ?? undefined,
-    //   columnFiltersState: columnsState?.columnFilters,
-    //   columnKey,
-    // });
     const { columnFilters, persistenceEntry } =
       resolveColumnFilterUpdate<TData>({
         columnFiltersState: columnsState?.columnFilters,
@@ -44,10 +36,6 @@ export const useSetColumnFilter = <TData>() => {
     // Persist to cookie and sync URL params in one action.
     // Abort before loading/state changes when persistence would be oversized.
     if (!persistTableState(persistenceEntry)) return;
-
-    // setSearchParams({
-    //   filters: serializeFiltersToURL(columnFilters),
-    // });
 
     // Show loading feedback immediately
     dataStore.set({ isLoading: true });

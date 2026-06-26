@@ -17,19 +17,12 @@ export const TableBodyError = ({ error, onRetry }: TableBodyErrorProps) => {
 
   return (
     <div data-testid='table-body-error'>
-      {/* <div
-        data-testid='table-body-error-overlay'
-        {...stylex.props(styles.overlay)}
-      ></div> */}
       <div {...stylex.props(styles.content)}>
         <ErrorDescriptive />
-
         <p {...stylex.props(styles.eyebrow)}>Temporary Data Issue</p>
         <p {...stylex.props(styles.message)}>{DEFAULT_ERROR_MESSAGE}</p>
         <p {...stylex.props(styles.title)}>Error Loading Data</p>
-        {details !== undefined && (
-          <p {...stylex.props(styles.details)}>{details}</p>
-        )}
+        {details && <p {...stylex.props(styles.details)}>{details}</p>}
         <button
           onClick={onRetry}
           type='button'
