@@ -2,16 +2,13 @@ import * as stylex from '@stylexjs/stylex';
 
 import type { DraggableItem } from '@/components/DraggableList';
 
-import { Button } from '@/components/Button';
 import { DraggableList } from '@/components/DraggableList';
-import { MenuCloseIcon, SortAscIcon, SortDescIcon } from '@/components/Icons';
 import { InfoBox } from '@/components/InfoBox';
 import {
   SidePanelSection,
   SidePanelSectionHeader,
 } from '@/components/SidePanel';
 import { useGetColumns } from '@/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
-import { ICON_SIZE_MD } from '@/design-system/constants';
 
 import type { SortItem } from '../SortingSection.types';
 import type { ActiveSortListProps } from './ActiveSortList.types';
@@ -20,6 +17,7 @@ import { useSetColumnsSortings } from '../../TableDrawerContext/actions';
 import { useGetColumnsSorting } from '../../TableDrawerContext/selectors';
 import { SortingSectionToolbar } from '../SortingSectionToolbar';
 import { styles } from './ActiveSortList.stylex';
+import { SortItemContent } from './SortItemContent';
 
 export const ActiveSortList = ({ isBusy = false }: ActiveSortListProps) => {
   const columns = useGetColumns();
@@ -66,39 +64,12 @@ export const ActiveSortList = ({ isBusy = false }: ActiveSortListProps) => {
   // Convert sort items to draggable items
   const draggableItems: DraggableItem[] = sortItems.map((item) => ({
     content: (
-      <div {...stylex.props(styles.sortItem)}>
-        <span {...stylex.props(styles.sortItemLabel)}>{item.label}</span>
-        <div {...stylex.props(styles.sortItemControls)}>
-          <Button
-            aria-label={`Sort ${item.label} ${item.direction === 'asc' ? 'ascending' : 'descending'}`}
-            color='ghost'
-            icon={
-              item.direction === 'asc' ? (
-                <SortAscIcon size={ICON_SIZE_MD} />
-              ) : (
-                <SortDescIcon size={ICON_SIZE_MD} />
-              )
-            }
-            isBusy={isBusy}
-            onClick={() => {
-              handleToggleDirection(item.columnKey);
-            }}
-            size='mini'
-            tooltipContent={`Sort ${item.label} ${item.direction === 'asc' ? 'ascending' : 'descending'}`}
-          />
-          <Button
-            aria-label={`Remove ${item.label} sort`}
-            color='ghost'
-            icon={<MenuCloseIcon size={ICON_SIZE_MD} />}
-            isBusy={isBusy}
-            onClick={() => {
-              handleRemoveSort(item.columnKey);
-            }}
-            size='mini'
-            tooltipContent={`Remove ${item.label} sort`}
-          />
-        </div>
-      </div>
+      <SortItemContent
+        isBusy={isBusy}
+        item={item}
+        onRemove={handleRemoveSort}
+        onToggleDirection={handleToggleDirection}
+      />
     ),
     id: item.columnKey,
   }));
