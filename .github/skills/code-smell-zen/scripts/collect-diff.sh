@@ -5,15 +5,15 @@ set -euo pipefail
 
 BASE="${1:-}"
 
-if [ -z "$BASE" ]; then
+if [[ -z "$BASE" ]]; then
   BASE=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed "s@^refs/remotes/@@")
-  [ -z "$BASE" ] && BASE="origin/main"
+  [[ -z "$BASE" ]] && BASE="origin/main"
   git rev-parse "$BASE" >/dev/null 2>&1 || BASE="main"
   git rev-parse "$BASE" >/dev/null 2>&1 || BASE="HEAD"
 fi
 
 if ! git rev-parse "$BASE" >/dev/null 2>&1; then
-  echo "ERROR: base $BASE not found. Pass an explicit branch: /smell [branch]"
+  echo "ERROR: base $BASE not found. Pass an explicit branch: /smell [branch]" >&2
   exit 1
 fi
 
