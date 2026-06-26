@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import type { GlobalNavigationSizePreference } from '@/types/globalSettings.types';
 
@@ -144,11 +144,6 @@ export const AppNavigation = ({
     defaultIsPinned,
     navigationPinnedPreference,
   });
-
-  // Sync isOpen when isPinned changes externally (e.g. from Settings page)
-  useEffect(() => {
-    setIsOpen(!isPinned);
-  }, [isPinned]);
 
   const density = NAV_DENSITY[navigationSizePreference ?? 'medium'];
   const pinButtonLabel = resolvePinButtonLabel(isPinned);
