@@ -18,7 +18,7 @@ describe('isPersistCookieAction', () => {
   });
 
   it('returns false for null', () => {
-    expect(isPersistCookieAction(null)).toBe(false);
+    expect(isPersistCookieAction(undefined)).toBe(false);
   });
 
   it('returns false for undefined', () => {
