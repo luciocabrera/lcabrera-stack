@@ -1,4 +1,4 @@
-import type { KeyboardEvent } from 'react';
+import type { KeyboardEvent, MouseEvent } from 'react';
 
 import * as stylex from '@stylexjs/stylex';
 import { Activity, useRef, useState } from 'react';
@@ -74,6 +74,11 @@ export const Tabs = ({
     }
   };
 
+  const handleTabSelect = (event: MouseEvent<HTMLButtonElement>) => {
+    const key = event.currentTarget.dataset['tabKey'];
+    if (key !== undefined) setActiveTab(key);
+  };
+
   return (
     <div {...stylex.props(styles.container)} {...props}>
       <div aria-label='Settings tabs' onKeyDown={handleKeyDown} role='tablist'>
@@ -90,11 +95,10 @@ export const Tabs = ({
               )}
               aria-controls={`tabpanel-${tab.key}`}
               aria-selected={activeTab === tab.key}
+              data-tab-key={tab.key}
               disabled={isBusyState}
               id={`tab-${tab.key}`}
-              onClick={() => {
-                setActiveTab(tab.key);
-              }}
+              onClick={handleTabSelect}
               role='tab'
               tabIndex={activeTab === tab.key ? 0 : -1}
               type='button'

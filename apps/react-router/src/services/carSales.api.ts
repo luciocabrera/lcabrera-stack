@@ -61,6 +61,22 @@ export type CarSalesResponse = {
   total: number;
 };
 
+const isObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const isCarSalesResponse = (value: unknown): value is CarSalesResponse =>
+  isObject(value) &&
+  Array.isArray(value['data']) &&
+  typeof value['total'] === 'number';
+
+const isCarSalesPaginatedResponse = (
+  value: unknown,
+): value is CarSalesResponse & { hasMore: boolean } =>
+  isObject(value) &&
+  Array.isArray(value['data']) &&
+  typeof value['total'] === 'number' &&
+  typeof value['hasMore'] === 'boolean';
+
 export const carSalesApi = {
   /**
    * Fetch car sales data
@@ -74,7 +90,11 @@ export const carSalesApi = {
         throw new Error(`Failed to fetch car sales: ${response.statusText}`);
       }
 
-      return response.json() as Promise<CarSalesResponse>;
+      const body = (await response.json()) as unknown;
+      if (!isCarSalesResponse(body)) {
+        throw new Error('Unexpected response shape from /car-sales');
+      }
+      return body;
     };
 
     // Add fake delay for testing skeleton/loading states
@@ -122,9 +142,11 @@ export const carSalesApi = {
         throw new Error(`Failed to fetch car sales: ${response.statusText}`);
       }
 
-      return response.json() as Promise<
-        CarSalesResponse & { hasMore: boolean }
-      >;
+      const body = (await response.json()) as unknown;
+      if (!isCarSalesPaginatedResponse(body)) {
+        throw new Error('Unexpected response shape from /car-sales/paginated');
+      }
+      return body;
     };
 
     // Add fake delay for testing skeleton/loading states

@@ -28,13 +28,15 @@ export const BooleanFilterInput = ({
     }
   };
 
+  const handleSelectAll = () => handleChange('all');
+  const handleSelectFalse = () => handleChange('false');
+  const handleSelectTrue = () => handleChange('true');
+
   return (
     <div {...stylex.props(styles.container)}>
       <Button
         color={selectedValue === 'all' ? 'primary' : 'outline'}
-        onClick={() => {
-          handleChange('all');
-        }}
+        onClick={handleSelectAll}
         size='sm'
         width='full'
       >
@@ -42,9 +44,7 @@ export const BooleanFilterInput = ({
       </Button>
       <Button
         color={selectedValue === 'true' ? 'primary' : 'outline'}
-        onClick={() => {
-          handleChange('true');
-        }}
+        onClick={handleSelectTrue}
         size='sm'
         width='full'
       >
@@ -52,9 +52,7 @@ export const BooleanFilterInput = ({
       </Button>
       <Button
         color={selectedValue === 'false' ? 'primary' : 'outline'}
-        onClick={() => {
-          handleChange('false');
-        }}
+        onClick={handleSelectFalse}
         size='sm'
         width='full'
       >

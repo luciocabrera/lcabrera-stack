@@ -20,6 +20,11 @@ export const PinningSection = ({ isBusy = false }: PinningSectionProps) => {
   const columnPinning = useGetColumnPinning();
   const setColumnPinning = useSetColumnPinning();
 
+  const handlePinLeft = () =>
+    setColumnPinning(columnPinning === 'left' ? undefined : 'left');
+  const handlePinRight = () =>
+    setColumnPinning(columnPinning === 'right' ? undefined : 'right');
+
   return (
     <SidePanelSectionMain>
       <SidePanelSection>
@@ -32,9 +37,7 @@ export const PinningSection = ({ isBusy = false }: PinningSectionProps) => {
             color={columnPinning === 'left' ? 'primary' : 'outline'}
             icon={<PinLeftIcon size={ICON_SIZE_MD} />}
             isBusy={isBusy}
-            onClick={() => {
-              setColumnPinning(columnPinning === 'left' ? undefined : 'left');
-            }}
+            onClick={handlePinLeft}
             size='sm'
             width='full'
           >
@@ -44,9 +47,7 @@ export const PinningSection = ({ isBusy = false }: PinningSectionProps) => {
             color={columnPinning === 'right' ? 'primary' : 'outline'}
             icon={<PinRightIcon size={ICON_SIZE_MD} />}
             isBusy={isBusy}
-            onClick={() => {
-              setColumnPinning(columnPinning === 'right' ? undefined : 'right');
-            }}
+            onClick={handlePinRight}
             size='sm'
             width='full'
           >

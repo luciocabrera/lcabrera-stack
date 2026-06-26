@@ -97,6 +97,29 @@ type EnterpriseOrderDetailResponse = {
   data: EnterpriseOrder;
 };
 
+const isObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const isDistinctValuesResponse = (
+  value: unknown,
+): value is { hasMore: boolean; values: string[] } =>
+  isObject(value) &&
+  typeof value['hasMore'] === 'boolean' &&
+  Array.isArray(value['values']);
+
+const isEnterpriseOrderDetailResponse = (
+  value: unknown,
+): value is EnterpriseOrderDetailResponse =>
+  isObject(value) && isObject(value['data']);
+
+const isEnterpriseOrdersResponse = (
+  value: unknown,
+): value is EnterpriseOrdersResponse & { hasMore: boolean } =>
+  isObject(value) &&
+  Array.isArray(value['data']) &&
+  typeof value['total'] === 'number' &&
+  typeof value['hasMore'] === 'boolean';
+
 type FetchEnterpriseOrdersParams = {
   filter?: ColumnFiltersState<EnterpriseOrder>;
   limit: number;
@@ -139,7 +162,13 @@ export const enterpriseOrdersApi = {
       );
     }
 
-    return response.json() as Promise<{ hasMore: boolean; values: string[] }>;
+    const body = (await response.json()) as unknown;
+    if (!isDistinctValuesResponse(body)) {
+      throw new Error(
+        `Unexpected response shape from /enterprise-orders/distinct/${columnName}`,
+      );
+    }
+    return body;
   },
 
   /**
@@ -163,7 +192,13 @@ export const enterpriseOrdersApi = {
       );
     }
 
-    return response.json() as Promise<EnterpriseOrderDetailResponse>;
+    const body = (await response.json()) as unknown;
+    if (!isEnterpriseOrderDetailResponse(body)) {
+      throw new Error(
+        `Unexpected response shape from /enterprise-orders/${orderId}`,
+      );
+    }
+    return body;
   },
 
   /**
@@ -210,9 +245,13 @@ export const enterpriseOrdersApi = {
         );
       }
 
-      return response.json() as Promise<
-        EnterpriseOrdersResponse & { hasMore: boolean }
-      >;
+      const body = (await response.json()) as unknown;
+      if (!isEnterpriseOrdersResponse(body)) {
+        throw new Error(
+          'Unexpected response shape from /enterprise-orders/paginated',
+        );
+      }
+      return body;
     };
 
     // Add artificial delay if configured (for testing loading states)
