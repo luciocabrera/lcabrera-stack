@@ -5,7 +5,6 @@ import type { CarSale } from '@/services';
 import { TableLayout } from '@/components/Table/TableLayout';
 import { carSalesApi } from '@/services';
 
-// import type { clientLoader } from './car-sales.loader';
 import type { CarSalesPaginatedResponse } from './CarSales.types';
 import type { loader } from './root';
 
@@ -22,7 +21,6 @@ export const CarSales = () => {
       metaState={metaState}
       onLoadMore={async ({ limit, skip }) =>
         carSalesApi.fetchCarSalesPaginated({
-          // filter: columnsState?.columnFilters ?? {},
           limit,
           skip,
           sorting: columnsState?.sorting ?? [],

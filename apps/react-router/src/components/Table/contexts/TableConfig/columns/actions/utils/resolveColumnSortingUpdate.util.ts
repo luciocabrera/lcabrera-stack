@@ -4,7 +4,6 @@ import type { Sorting } from '@/types/ui.types';
 import { getNormalizedColumns } from '@/components/Table/utils';
 import { getNewSortingBasedOnColumnKey } from '@/components/Table/utils/getNewSortingBasedOnColumnKey.util';
 import { serializeSortingToURL } from '@/utils/urlState';
-// import { serializeSortingToURL } from '@/utils/urlState';
 
 type ResolveColumnSortingUpdateArgs<TData> = {
   readonly columns: readonly TableColumn<TData>[];

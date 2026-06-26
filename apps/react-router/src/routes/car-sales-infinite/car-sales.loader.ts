@@ -30,10 +30,12 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
     persistenceKey: PERSISTENCE_KEY,
     request,
   });
-  const sanitizedSorting = sorting.filter(
-    (s): s is { columnKey: keyof CarSale; direction: 'asc' | 'desc' } =>
-      s.direction !== undefined && s.columnKey !== 'actions',
-  );
+  const isValidSortEntry = (
+    s: (typeof sorting)[number],
+  ): s is { columnKey: keyof CarSale; direction: 'asc' | 'desc' } =>
+    s.direction !== undefined && s.columnKey !== 'actions';
+
+  const sanitizedSorting = sorting.filter(isValidSortEntry);
 
   // Return the promise directly (not awaited) for Suspense streaming
   const carSalesPromise: Promise<CarSalesResponse & { hasMore: boolean }> =

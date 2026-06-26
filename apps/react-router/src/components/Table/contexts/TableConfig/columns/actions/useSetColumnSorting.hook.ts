@@ -9,7 +9,6 @@ import { resolveColumnSortingUpdate } from './utils';
 export const useSetColumnSorting = <TData>() => {
   const { columnsStore, metaStore } = useTableConfigContextValue<TData>();
   const { dataStore } = useTableDataContextValue();
-  // const [, setSearchParams] = useSearchParams();
   const persistTableState = usePersistTableStateAction();
 
   return ({ columnKey, direction }: Sorting<TData>) => {
@@ -18,16 +17,11 @@ export const useSetColumnSorting = <TData>() => {
     const result = resolveColumnSortingUpdate<TData>({
       columns: columnsState?.columns ?? [],
       existingSorting: columnsState?.sorting,
-      // persistenceKey: metaState?.persistenceKey ?? '',
       sort: { columnKey, direction },
     });
 
     if (result.kind !== 'updated') return;
 
-    // setSearchParams((prev) => ({
-    //   ...prev,
-    //   sorting: serializeSortingToURL(result.sorting),
-    // }));
     // Persist to cookie and sync URL params in one action.
     // Abort before loading/state changes when persistence would be oversized.
     if (!persistTableState(result.persistenceEntry)) return;
