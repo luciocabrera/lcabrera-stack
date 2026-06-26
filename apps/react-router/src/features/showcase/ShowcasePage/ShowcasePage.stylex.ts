@@ -41,28 +41,6 @@ export const styles = stylex.create({
     marginBottom: spacing.xxl,
   },
 
-  section: {
-    marginBottom: spacing.xxxl,
-  },
-
-  sectionTitle: {
-    color: colors.textPrimary,
-    fontSize: typography.fontSize2xl,
-    fontWeight: typography.fontWeightSemibold,
-    marginBottom: spacing.lg,
-  },
-
-  subsection: {
-    marginBottom: spacing.xl,
-  },
-
-  subsectionTitle: {
-    color: colors.textSecondary,
-    fontSize: typography.fontSizeLg,
-    fontWeight: typography.fontWeightMedium,
-    marginBottom: spacing.md,
-  },
-
   title: {
     margin: 0,
     fontSize: typography.fontSize3xl,
