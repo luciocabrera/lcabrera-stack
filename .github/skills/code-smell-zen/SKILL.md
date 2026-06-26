@@ -294,7 +294,7 @@ If the diff has no findings, keep all sections, set all counts to 0, write "No c
 
 After producing the final report, **always** save it to disk without prompting the user:
 
-1. Capture the current timestamp: `date +%Y%m%dT%H%M%S`
+1. Capture the current timestamp: `date +%Y-%m-%d--%H-%M-%S`
 2. Create the output directory: `.tmp/code-smell-zen/{timestamp}/`
 3. Write the full report as `report.md` inside that directory, using the same markdown structure emitted in Step 5.
 4. Tell the user the path to the saved file.
@@ -304,9 +304,9 @@ The directory layout groups all runs of this skill together, with each run in it
 ```
 .tmp/
 └── code-smell-zen/
-    ├── 20260612T184056/
+    ├── 2026-06-12--18-40-56/
     │   └── report.md
-    └── 20260615T093012/
+    └── 2026-06-15--09-30-12/
         └── report.md
 ```
 

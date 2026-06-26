@@ -1,4 +1,5 @@
 import type { TableMetaState } from '@/components/Table/Table.types';
+import type { PersistedUiState } from '@/components/Table/utils/persistence.types';
 
 import {
   DEFAULT_COLUMN_OVERSCAN,
@@ -6,19 +7,20 @@ import {
   DEFAULT_ROW_HEIGHT,
   INFINITE_SCROLL_THRESHOLD,
   INITIAL_PAGE_SIZE,
-  IS_PREFETCH_ENABLE,
+  IS_PREFETCH_ENABLED,
   LOAD_MORE_PAGE_SIZE,
 } from '@/components/Table/Table.constants';
-import { readPersistedUiStateFromSessionStorage } from '@/components/Table/utils';
 
-type GetInitialMetaStateArgs = Partial<TableMetaState>;
+type GetInitialMetaStateArgs = Partial<TableMetaState> & {
+  readonly persistedUiState?: PersistedUiState;
+};
 
 export const getInitialMetaState = ({
   columnOverscan = DEFAULT_COLUMN_OVERSCAN,
   columnSettingsSelectedTab = 'general',
   density = 'compact',
   drawersSyncNonce = 0,
-  enablePrefetch = IS_PREFETCH_ENABLE,
+  enablePrefetch = IS_PREFETCH_ENABLED,
   error,
   initialPageSize = INITIAL_PAGE_SIZE,
   isBordered = true,
@@ -36,12 +38,9 @@ export const getInitialMetaState = ({
   tableSettingsSelectedTab = 'general',
   threshold = INFINITE_SCROLL_THRESHOLD,
   wasTableSettingsOpenBeforeColumnSettings = false,
+  persistedUiState = {},
   ...rest
 }: GetInitialMetaStateArgs): TableMetaState => {
-  const uiState = readPersistedUiStateFromSessionStorage({
-    persistenceKey,
-  });
-
   return {
     columnOverscan,
     columnSettingsSelectedTab,
@@ -66,6 +65,6 @@ export const getInitialMetaState = ({
     threshold,
     wasTableSettingsOpenBeforeColumnSettings,
     ...rest,
-    ...uiState,
+    ...persistedUiState,
   };
 };

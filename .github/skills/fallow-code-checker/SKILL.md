@@ -3,7 +3,7 @@ name: fallow-code-checker
 description: Run a full fallow scan with vp and produce a prioritized, evidence-based report aligned to the code-smell-checker output contract.
 argument-hint: 'Optional scope, for example: repo, apps/react-router, or changed files only'
 user-invocable: true
-allowed-tools: Bash(cat:*,date:*,mkdir:*,npx:*,tee:*,vp:*), Read, Grep, Glob
+allowed-tools: Bash(bash:*,cat:*,date:*,mkdir:*,npx:*,tee:*,vp:*), Read, Grep, Glob
 license: MIT
 metadata:
   version: '1.0.0'
@@ -58,7 +58,7 @@ If inputs are missing, default to:
 
 Run both passes in a single shell invocation so the timestamp is consistent:
 
-!`TIMESTAMP=$(date +%Y%m%dT%H%M%S) && mkdir -p ".tmp/fallow-code-checker/$TIMESTAMP" && vp run fallow:full && npx fallow --format json --output-file ".tmp/fallow-code-checker/$TIMESTAMP/fallow.raw.json" --quiet && echo "Run directory: .tmp/fallow-code-checker/$TIMESTAMP/"`
+!`bash .github/skills/fallow-code-checker/scripts/run-fallow.sh`
 
 Note the run directory path from the final echo — it is used for all subsequent saves.
 

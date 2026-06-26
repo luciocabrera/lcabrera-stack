@@ -7,7 +7,7 @@ import {
   DEFAULT_ROW_HEIGHT,
   INFINITE_SCROLL_THRESHOLD,
   INITIAL_PAGE_SIZE,
-  IS_PREFETCH_ENABLE,
+  IS_PREFETCH_ENABLED,
   LOAD_MORE_PAGE_SIZE,
 } from '@/components/Table/Table.constants';
 
@@ -18,7 +18,7 @@ describe('getInitialMetaState', () => {
     const result = getInitialMetaState({});
     expect(result.columnOverscan).toBe(DEFAULT_COLUMN_OVERSCAN);
     expect(result.density).toBe('compact');
-    expect(result.enablePrefetch).toBe(IS_PREFETCH_ENABLE);
+    expect(result.enablePrefetch).toBe(IS_PREFETCH_ENABLED);
     expect(result.isBordered).toBe(true);
     expect(result.isStriped).toBe(true);
     expect(result.isColumnSettingsOpen).toBe(false);

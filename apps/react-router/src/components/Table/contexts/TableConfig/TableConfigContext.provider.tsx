@@ -3,6 +3,7 @@ import type {
   TableMetaState,
 } from '@/components/Table/Table.types';
 
+import { readPersistedUiStateFromSessionStorage } from '@/components/Table/utils';
 import { useStore } from '@/hooks';
 
 import type {
@@ -22,8 +23,12 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
     ...columnsState,
     persistenceKey: metaState?.persistenceKey ?? '',
   });
+  const persistedUiState = readPersistedUiStateFromSessionStorage({
+    persistenceKey: metaState?.persistenceKey ?? '',
+  });
   const normalizedMetaState = getInitialMetaState({
     ...metaState,
+    persistedUiState,
   });
 
   const columnsStore = useStore<TableColumnsState<TData>>(

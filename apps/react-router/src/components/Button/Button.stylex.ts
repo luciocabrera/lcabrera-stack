@@ -23,7 +23,6 @@ const buttonSpecificStyles = stylex.create({
       default: 0.9,
       ':disabled': 0.6,
     },
-    // '::before': { backgroundImage: colors.gradientRadialBackground },
   },
   iconOnly: {
     gap: 0,

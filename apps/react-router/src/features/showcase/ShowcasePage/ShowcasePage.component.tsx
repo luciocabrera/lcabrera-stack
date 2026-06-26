@@ -34,6 +34,7 @@ import {
   getInitialColumnsState,
   getInitialMetaState,
 } from '@/components/Table/contexts/TableConfig/utils';
+import { readPersistedUiStateFromSessionStorage } from '@/components/Table/utils';
 import {
   HorizontalToolbarExample,
   HorizontalToolbarExampleShort,
@@ -148,6 +149,9 @@ const SHOWCASE_COLUMNS_STATE = getInitialColumnsState({
 });
 const SHOWCASE_META_STATE = getInitialMetaState({
   persistenceKey: PERSISTENCE_KEY,
+  persistedUiState: readPersistedUiStateFromSessionStorage({
+    persistenceKey: PERSISTENCE_KEY,
+  }),
   title: 'Data Table',
 });
 

@@ -93,7 +93,7 @@ If there are zero genuine findings after triage, emit:
 
 After producing the fix plan, **always** save it to disk without prompting the user:
 
-1. Capture the current timestamp: `date +%Y%m%dT%H%M%S`
+1. Capture the current timestamp: `date +%Y-%m-%d--%H-%M-%S`
 2. Create the output directory: `.tmp/config-audit/{timestamp}/`
 3. Write the fix plan as `plan.md` inside that directory.
 4. Tell the user the path to the saved file.
@@ -101,9 +101,9 @@ After producing the fix plan, **always** save it to disk without prompting the u
 ```
 .tmp/
 └── config-audit/
-    ├── 20260625T143000/
+    ├── 2026-06-25--14-30-00/
     │   └── plan.md
-    └── 20260626T091500/
+    └── 2026-06-26--09-15-00/
         └── plan.md
 ```
 

@@ -231,28 +231,6 @@ export const UpdateName = () => {
 };
 ```
 
-## Server Actions Patterns
-
-### Pattern A: Native Form Actions (Progressive Enhancement)
-
-Use with `useActionState` and `FormData`. Requires `(prevState, formData)`.
-
-### Pattern B: Programmatic Actions (react-hook-form)
-
-Use when using `react-hook-form`. Pass a typed object directly to the action.
-
-```typescript
-// ✅ Action receives the object from form.handleSubmit
-export const loginAction = async (data: LoginInput) => {
-  try {
-    await authService.login(data);
-    redirect('/dashboard');
-  } catch (error) {
-    return handleErrorResponse(error);
-  }
-};
-```
-
 ## useActionState for Forms
 
 Simplifies form handling with automatic pending states and error management.
@@ -285,22 +263,6 @@ export const NameForm = () => {
     </form>
   );
 };
-```
-
-```typescript
-// ✅ Server Action with Typed Objects (for react-hook-form)
-export const updateProfile = async (data: ProfileInput) => {
-  try {
-    const validated = profileSchema.parse(data);
-    await db.update(validated);
-    return { success: true };
-  } catch (error) {
-    return handleErrorResponse(error);
-  }
-};
-
-// ❌ NEVER: Force FormData if not using native form action
-// If using react-hook-form, pass the object directly to the action.
 ```
 
 ## useOptimistic for Instant UI Updates

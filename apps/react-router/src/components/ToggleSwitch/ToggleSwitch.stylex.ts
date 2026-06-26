@@ -30,7 +30,6 @@ export const styles = stylex.create({
     padding: '1px',
     borderColor: {
       default: colors.borderPrimary,
-      // ':hover': colors.borderSecondary,
     },
     borderRadius: borderRadius.full,
     borderStyle: 'solid',
