@@ -8,11 +8,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { VirtualListDataState } from './VirtualList.types';
 
 const {
+  capturedBodyProps,
+  capturedHeaderProps,
   MockVirtualListBody,
   MockVirtualListFooter,
   MockVirtualListHeader,
-  capturedBodyProps,
-  capturedHeaderProps,
 } = vi.hoisted(() => {
   const capturedHeaderProps: { current: Record<string, unknown> } = {
     current: {},
@@ -20,10 +20,6 @@ const {
   const capturedBodyProps: { current: Record<string, unknown> } = {
     current: {},
   };
-  const capturedFooterProps: { current: Record<string, unknown> } = {
-    current: {},
-  };
-
   const MockVirtualListHeader = vi.fn(
     (props: {
       readonly name?: string;
@@ -58,18 +54,16 @@ const {
     },
   );
 
-  const MockVirtualListFooter = vi.fn((props: Record<string, unknown>) => {
-    capturedFooterProps.current = props;
-    return <div data-testid='virtual-list-footer' />;
-  });
+  const MockVirtualListFooter = vi.fn(() => (
+    <div data-testid='virtual-list-footer' />
+  ));
 
   return {
+    capturedBodyProps,
+    capturedHeaderProps,
     MockVirtualListBody,
     MockVirtualListFooter,
     MockVirtualListHeader,
-    capturedBodyProps,
-    capturedFooterProps,
-    capturedHeaderProps,
   };
 });
 
