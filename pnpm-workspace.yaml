@@ -32,10 +32,10 @@ catalog:
   eslint-config-prettier: ^10.1.8
   eslint-plugin-local-rules: ^3.0.2
   eslint-plugin-perfectionist: ^5.9.1
-  eslint-plugin-react-dom: ^5.9.3
+  eslint-plugin-react-dom: ^5.9.4
   eslint-plugin-react-hooks: ^7.1.1
   eslint-plugin-react-refresh: ^0.5.3
-  eslint-plugin-react-x: ^5.9.3
+  eslint-plugin-react-x: ^5.9.4
   eslint-plugin-security: ^4.0.1
   eslint-plugin-unicorn: ^69.0.0
   express: ^5.2.1
@@ -123,12 +123,17 @@ minimumReleaseAgeExclude:
   - '@babel/types@8.0.0'
   - '@fallow-cli/darwin-arm64@2.97.0 || 2.99.0 || 2.100.0 || 2.101.0 || 2.102.0'
   - '@fallow-cli/darwin-x64@2.97.0 || 2.99.0 || 2.100.0 || 2.101.0 || 2.102.0'
-  - '@fallow-cli/linux-arm64-gnu@2.97.0 || 2.99.0 || 2.100.0 || 2.101.0 || 2.102.0'
-  - '@fallow-cli/linux-arm64-musl@2.97.0 || 2.99.0 || 2.100.0 || 2.101.0 || 2.102.0'
+  - '@fallow-cli/linux-arm64-gnu@2.97.0 || 2.99.0 || 2.100.0 || 2.101.0 ||
+    2.102.0'
+  - '@fallow-cli/linux-arm64-musl@2.97.0 || 2.99.0 || 2.100.0 || 2.101.0 ||
+    2.102.0'
   - '@fallow-cli/linux-x64-gnu@2.97.0 || 2.99.0 || 2.100.0 || 2.101.0 || 2.102.0'
-  - '@fallow-cli/linux-x64-musl@2.97.0 || 2.99.0 || 2.100.0 || 2.101.0 || 2.102.0'
-  - '@fallow-cli/win32-arm64-msvc@2.97.0 || 2.99.0 || 2.100.0 || 2.101.0 || 2.102.0'
-  - '@fallow-cli/win32-x64-msvc@2.97.0 || 2.99.0 || 2.100.0 || 2.101.0 || 2.102.0'
+  - '@fallow-cli/linux-x64-musl@2.97.0 || 2.99.0 || 2.100.0 || 2.101.0 ||
+    2.102.0'
+  - '@fallow-cli/win32-arm64-msvc@2.97.0 || 2.99.0 || 2.100.0 || 2.101.0 ||
+    2.102.0'
+  - '@fallow-cli/win32-x64-msvc@2.97.0 || 2.99.0 || 2.100.0 || 2.101.0 ||
+    2.102.0'
   - '@react-router/dev@7.18.0 || 8.0.0 || 8.0.1'
   - '@react-router/express@7.18.0 || 8.0.0 || 8.0.1'
   - '@react-router/node@7.18.0 || 8.0.0 || 8.0.1'
