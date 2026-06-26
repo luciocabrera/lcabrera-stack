@@ -1,12 +1,4 @@
-import type { RefObject } from 'react';
-
-import type {
-  DataKey,
-  FiltersDataState,
-  TableMetaState,
-} from '@/components/Table/Table.types';
-import type { TStore } from '@/hooks/useStore.hook';
-import type { PrefetchCache } from '@/types/ui.types';
+import type { FiltersDataState } from '@/components/Table/Table.types';
 
 import { DEFAULT_FILTER_PAGE_SIZE } from '@/components/Table/Table.constants';
 import { getErrorMessage } from '@/components/Table/utils/getErrorMessage.util';
@@ -16,28 +8,13 @@ import { clearPrefetchCache } from '@/utils/prefetch/clearPrefetchCache.util';
 import { firePrefetch } from '@/utils/prefetch/firePrefetch.util';
 import { resolveFromCacheOrFetch } from '@/utils/prefetch/resolveFromCacheOrFetch.util';
 
-import type { FetchFilterDataCallbackArgs } from './useFetchFilterData.types';
+import type {
+  FetchFilterDataActionArgs,
+  FetchFilterDataCallbackArgs,
+  MaybePrefetchArgs,
+} from './useFetchFilterData.types';
 
-export type FetchFilterDataActionArgs<TData, TResponse> = {
-  readonly columnKey: DataKey<TData>;
-  readonly filtersDataStore: TStore<FiltersDataState<TData>>;
-  readonly metaStore: TStore<TableMetaState>;
-  readonly prefetchRef?: RefObject<PrefetchCache<TResponse>>;
-};
-
-type MaybePrefetchArgs<TResponse> = {
-  readonly enablePrefetch: boolean;
-  readonly hasMore: boolean;
-  readonly nextSkip: number;
-  readonly onLoadMore: (args: {
-    readonly limit: number;
-    readonly skip: number;
-  }) => Promise<TResponse>;
-  readonly prefetchRef?: FetchFilterDataActionArgs<
-    unknown,
-    TResponse
-  >['prefetchRef'];
-};
+export type { FetchFilterDataActionArgs } from './useFetchFilterData.types';
 
 const clearPrefetchIfPresent = <TResponse>({
   prefetchRef,
