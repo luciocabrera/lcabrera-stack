@@ -11,10 +11,11 @@ export const BooleanFilterInput = ({
   onChange,
 }: BooleanFilterInputProps) => {
   // Derive selected value directly from filter prop (no local state needed)
-  let selectedValue: 'all' | 'false' | 'true' = 'all';
-  if (filter) {
-    selectedValue = filter.value ? 'true' : 'false';
-  }
+  const getSelectedValue = (): 'all' | 'false' | 'true' => {
+    if (!filter) return 'all';
+    return filter.value ? 'true' : 'false';
+  };
+  const selectedValue = getSelectedValue();
 
   const handleChange = (newValue: 'all' | 'false' | 'true') => {
     if (newValue === 'all') {

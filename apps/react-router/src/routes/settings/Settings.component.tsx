@@ -2,17 +2,6 @@ import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 
 import type { TabItem } from '@/components/Tabs';
-import type {
-  GlobalNavigationCollapsedPreference,
-  GlobalNavigationPinnedPreference,
-  GlobalNavigationSizePreference,
-} from '@/types/globalSettings.types';
-import type {
-  OrderConflictResolutionPreferenceOption,
-  PinConflictResolutionPreferenceOption,
-  PinSidePreferenceOption,
-  UnpinConflictResolutionPreferenceOption,
-} from '@/types/pinningPreferences.types';
 
 import { Button } from '@/components/Button';
 import { Tabs } from '@/components/Tabs';
@@ -124,80 +113,21 @@ export const Settings = () => {
     setDraft(toDraft({ navigationPreferences, pinningPreferences }));
   };
 
-  const handleNavigationCollapsedChange = (
-    value: GlobalNavigationCollapsedPreference,
-  ): void => {
-    setDraft((currentDraft) => {
-      return {
-        ...currentDraft,
-        navigationCollapsed: value,
-      };
-    });
-  };
+  const makeDraftSetter =
+    <K extends keyof SettingsDraft>(key: K) =>
+    (value: SettingsDraft[K]) => {
+      setDraft((d) => ({ ...d, [key]: value }));
+    };
 
-  const handleNavigationPinnedChange = (
-    value: GlobalNavigationPinnedPreference,
-  ): void => {
-    setDraft((currentDraft) => {
-      return {
-        ...currentDraft,
-        navigationPinned: value,
-      };
-    });
-  };
-
-  const handleNavigationSizeChange = (
-    value: GlobalNavigationSizePreference,
-  ): void => {
-    setDraft((currentDraft) => {
-      return {
-        ...currentDraft,
-        navigationSize: value,
-      };
-    });
-  };
-
-  const handleOrderConflictChange = (
-    value: OrderConflictResolutionPreferenceOption,
-  ): void => {
-    setDraft((currentDraft) => {
-      return {
-        ...currentDraft,
-        orderConflictResolution: value,
-      };
-    });
-  };
-
-  const handlePinSideChange = (value: PinSidePreferenceOption): void => {
-    setDraft((currentDraft) => {
-      return {
-        ...currentDraft,
-        pinSide: value,
-      };
-    });
-  };
-
-  const handlePinConflictChange = (
-    value: PinConflictResolutionPreferenceOption,
-  ): void => {
-    setDraft((currentDraft) => {
-      return {
-        ...currentDraft,
-        pinConflictResolution: value,
-      };
-    });
-  };
-
-  const handleUnpinConflictChange = (
-    value: UnpinConflictResolutionPreferenceOption,
-  ): void => {
-    setDraft((currentDraft) => {
-      return {
-        ...currentDraft,
-        unpinConflictResolution: value,
-      };
-    });
-  };
+  const handleNavigationCollapsedChange = makeDraftSetter(
+    'navigationCollapsed',
+  );
+  const handleNavigationPinnedChange = makeDraftSetter('navigationPinned');
+  const handleNavigationSizeChange = makeDraftSetter('navigationSize');
+  const handleOrderConflictChange = makeDraftSetter('orderConflictResolution');
+  const handlePinConflictChange = makeDraftSetter('pinConflictResolution');
+  const handlePinSideChange = makeDraftSetter('pinSide');
+  const handleUnpinConflictChange = makeDraftSetter('unpinConflictResolution');
 
   const tabs: readonly TabItem[] = [
     {
