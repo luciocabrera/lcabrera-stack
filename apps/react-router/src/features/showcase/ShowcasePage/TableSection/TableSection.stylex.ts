@@ -9,9 +9,9 @@ import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const styles = stylex.create({
   controls: {
+    gap: spacing.xs,
     alignItems: 'center',
     display: 'flex',
-    gap: spacing.xs,
     marginBottom: spacing.md,
   },
   delayLabel: {

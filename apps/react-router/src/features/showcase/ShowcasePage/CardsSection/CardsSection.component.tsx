@@ -1,5 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 
+import { Button } from '@/components/Button';
 import {
   Card,
   CardBody,
@@ -8,7 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/Card';
-import { Button } from '@/components/Button';
 import {
   ErrorIcon,
   InfoIcon,

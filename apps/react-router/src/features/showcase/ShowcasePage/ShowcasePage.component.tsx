@@ -5,8 +5,8 @@ import { useTheme } from '@/hooks/useTheme.hook';
 
 import { ButtonsSection } from './ButtonsSection';
 import { CardsSection } from './CardsSection';
-import { SidePanelSection } from './SidePanelSection';
 import { styles } from './ShowcasePage.stylex';
+import { SidePanelSection } from './SidePanelSection';
 
 // fallow-ignore-next-line complexity -- temporary showcase testing page
 export const ShowcasePage = () => {

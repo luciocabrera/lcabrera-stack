@@ -56,7 +56,10 @@ afterEach(() => {
 describe('RouteErrorBoundary', () => {
   it('renders the default title when none is provided', () => {
     render(
-      <RouteErrorBoundary defaultMessage='Something failed' error={null} />,
+      <RouteErrorBoundary
+        defaultMessage='Something failed'
+        error={undefined}
+      />,
     );
 
     expect(screen.getByRole('heading').textContent).toBe('An error occurred');
@@ -66,7 +69,7 @@ describe('RouteErrorBoundary', () => {
     render(
       <RouteErrorBoundary
         defaultMessage='Oops'
-        error={null}
+        error={undefined}
         title='Custom Error Title'
       />,
     );

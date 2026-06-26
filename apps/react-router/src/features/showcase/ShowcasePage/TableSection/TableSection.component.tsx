@@ -4,6 +4,7 @@ import { Button } from '@/components/Button';
 import { TableLayout } from '@/components/Table/TableLayout';
 
 import type { MockResponse, MockRow } from '../ShowcasePage.types';
+
 import {
   FAKE_API_DELAY_MS,
   getTableDataPromise,

@@ -1,4 +1,5 @@
 import type { TableColumn } from '@/components/Table/Table.types';
+
 import {
   getInitialColumnsState,
   getInitialMetaState,

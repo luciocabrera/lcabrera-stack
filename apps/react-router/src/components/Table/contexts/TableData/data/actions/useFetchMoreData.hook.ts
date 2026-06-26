@@ -7,7 +7,7 @@ import { useTableConfigContextValue } from '@/components/Table/contexts/TableCon
 import type { FetchMoreDataArgs } from './fetchMoreData.types';
 
 import { useTableDataContextValue } from '../useTableDataContextValue.hook';
-import { executeFetchMore } from './fetchMoreData.util';
+import { executeFetchMore } from './executeFetchMore.util';
 
 export const useFetchMoreData = <TData, TResponse>() => {
   const { dataStore } = useTableDataContextValue<TData>();

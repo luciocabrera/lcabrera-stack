@@ -4,8 +4,8 @@ import { spacing } from '@/design-system/tokens/base.stylex';
 
 export const styles = stylex.create({
   buttonRow: {
-    display: 'flex',
     gap: spacing.xs,
+    display: 'flex',
   },
   iconLeft: {
     alignItems: 'center',
