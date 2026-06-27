@@ -28,14 +28,14 @@ catalog:
   '@vitest/coverage-v8': ^4.1.9
   babel-plugin-react-compiler: ^1.0.0
   cors: ^2.8.6
-  eslint: ^10.5.0
+  eslint: ^10.6.0
   eslint-config-prettier: ^10.1.8
   eslint-plugin-local-rules: ^3.0.2
   eslint-plugin-perfectionist: ^5.9.1
-  eslint-plugin-react-dom: ^5.9.4
+  eslint-plugin-react-dom: ^5.9.5
   eslint-plugin-react-hooks: ^7.1.1
   eslint-plugin-react-refresh: ^0.5.3
-  eslint-plugin-react-x: ^5.9.4
+  eslint-plugin-react-x: ^5.9.5
   eslint-plugin-security: ^4.0.1
   eslint-plugin-unicorn: ^69.0.0
   express: ^5.2.1
@@ -44,7 +44,7 @@ catalog:
   globals: ^17.7.0
   isbot: 5.1.44
   jsdom: ^29.1.1
-  knip: ^6.21.0
+  knip: ^6.22.0
   lighthouse: ^13.4.0
   nodemon: ^3.1.14
   pg: ^8.22.0
@@ -71,7 +71,7 @@ minimumReleaseAgeExclude:
   - eslint-plugin-react-dom # lint-only package
   - eslint-plugin-react-x # lint-only package
   - isbot@5.1.41 || 5.1.42 || 5.1.44
-  - knip@6.16.0 || 6.17.1 || 6.18.0 || 6.21.0
+  - knip@6.16.0 || 6.17.1 || 6.18.0 || 6.21.0 || 6.22.0
   - '@typescript-eslint/eslint-plugin@8.61.0 || 8.62.0'
   - '@typescript-eslint/parser@8.61.0 || 8.62.0'
   - '@typescript-eslint/project-service@8.61.0 || 8.62.0'
@@ -85,7 +85,7 @@ minimumReleaseAgeExclude:
   - typescript-eslint@8.61.0 || 8.62.0
   - lighthouse@13.4.0
   - eslint-plugin-security@4.0.1
-  - eslint@10.5.0
+  - eslint@10.5.0 || 10.6.0
   - eslint-plugin-react-refresh@0.5.3
   - '@vitest/coverage-v8@4.1.9'
   - '@vitest/expect@4.1.9'
@@ -123,17 +123,12 @@ minimumReleaseAgeExclude:
   - '@babel/types@8.0.0'
   - '@fallow-cli/darwin-arm64@2.97.0 || 2.99.0 || 2.100.0 || 2.101.0 || 2.102.0'
   - '@fallow-cli/darwin-x64@2.97.0 || 2.99.0 || 2.100.0 || 2.101.0 || 2.102.0'
-  - '@fallow-cli/linux-arm64-gnu@2.97.0 || 2.99.0 || 2.100.0 || 2.101.0 ||
-    2.102.0'
-  - '@fallow-cli/linux-arm64-musl@2.97.0 || 2.99.0 || 2.100.0 || 2.101.0 ||
-    2.102.0'
+  - '@fallow-cli/linux-arm64-gnu@2.97.0 || 2.99.0 || 2.100.0 || 2.101.0 || 2.102.0'
+  - '@fallow-cli/linux-arm64-musl@2.97.0 || 2.99.0 || 2.100.0 || 2.101.0 || 2.102.0'
   - '@fallow-cli/linux-x64-gnu@2.97.0 || 2.99.0 || 2.100.0 || 2.101.0 || 2.102.0'
-  - '@fallow-cli/linux-x64-musl@2.97.0 || 2.99.0 || 2.100.0 || 2.101.0 ||
-    2.102.0'
-  - '@fallow-cli/win32-arm64-msvc@2.97.0 || 2.99.0 || 2.100.0 || 2.101.0 ||
-    2.102.0'
-  - '@fallow-cli/win32-x64-msvc@2.97.0 || 2.99.0 || 2.100.0 || 2.101.0 ||
-    2.102.0'
+  - '@fallow-cli/linux-x64-musl@2.97.0 || 2.99.0 || 2.100.0 || 2.101.0 || 2.102.0'
+  - '@fallow-cli/win32-arm64-msvc@2.97.0 || 2.99.0 || 2.100.0 || 2.101.0 || 2.102.0'
+  - '@fallow-cli/win32-x64-msvc@2.97.0 || 2.99.0 || 2.100.0 || 2.101.0 || 2.102.0'
   - '@react-router/dev@7.18.0 || 8.0.0 || 8.0.1'
   - '@react-router/express@7.18.0 || 8.0.0 || 8.0.1'
   - '@react-router/node@7.18.0 || 8.0.0 || 8.0.1'
