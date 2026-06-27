@@ -1,4 +1,4 @@
 import { useDataStore } from '../useDataStore.hook';
 
 export const useGetTableData = <TData>() =>
-  useDataStore<TData[], TData>((state) => state.data);
+  useDataStore<readonly TData[], TData>((state) => state.data);

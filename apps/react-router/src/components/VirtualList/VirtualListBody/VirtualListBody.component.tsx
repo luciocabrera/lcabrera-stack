@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { useCallback, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 import { InfoBox } from '@/components/InfoBox';
 import { useVirtualization } from '@/hooks';
@@ -64,21 +64,6 @@ export const VirtualListBody = ({
       totalItems,
     });
 
-  const handleLoadMore = useCallback(() => {
-    if (!onFetchMore || !hasMore || isLoadingOptions) return;
-    void onFetchMore();
-  }, [hasMore, isLoadingOptions, onFetchMore]);
-
-  const handleScroll = useCallback(() => {
-    const container = scrollContainerRef.current;
-    if (!container || !hasMore || isLoadingMore) return;
-
-    const { clientHeight, scrollHeight, scrollTop } = container;
-    if (scrollHeight - scrollTop - clientHeight < SCROLL_THRESHOLD) {
-      handleLoadMore();
-    }
-  }, [handleLoadMore, hasMore, isLoadingMore]);
-
   useEffect(() => {
     if (onFetchInitial) {
       void onFetchInitial();
@@ -89,11 +74,21 @@ export const VirtualListBody = ({
     const container = scrollContainerRef.current;
     if (!container) return;
 
+    const handleScroll = () => {
+      if (!hasMore || isLoadingMore) return;
+
+      const { clientHeight, scrollHeight, scrollTop } = container;
+      if (scrollHeight - scrollTop - clientHeight < SCROLL_THRESHOLD) {
+        if (!onFetchMore || isLoadingOptions) return;
+        void onFetchMore();
+      }
+    };
+
     container.addEventListener('scroll', handleScroll);
     return () => {
       container.removeEventListener('scroll', handleScroll);
     };
-  }, [handleScroll]);
+  }, [hasMore, isLoadingMore, isLoadingOptions, onFetchMore]);
 
   return (
     <div

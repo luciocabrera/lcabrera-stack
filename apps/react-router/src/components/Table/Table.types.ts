@@ -200,7 +200,7 @@ export type TableColumnsState<TData = Record<string, unknown>> = {
 
 export type TableDataState<TData> = {
   /** Table data array */
-  readonly data: TData[] /** Pagination state */;
+  readonly data: readonly TData[] /** Pagination state */;
   /** Whether there are more rows to load (infinite scroll) */
   readonly hasMore: boolean;
   /** Initial loading state */

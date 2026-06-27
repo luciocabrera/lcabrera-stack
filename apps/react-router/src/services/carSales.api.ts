@@ -1,4 +1,4 @@
-import { getApiBaseUrl } from '@/utils/api';
+import { fakeDelay, getApiBaseUrl } from '@/utils/api';
 import { createLogger } from '@/utils/logger';
 
 const log = createLogger({ prefix: '[carSales]' });
@@ -8,57 +8,42 @@ const log = createLogger({ prefix: '[carSales]' });
  * Handles database queries for car sales data
  */
 
-/**
- * Simulated API delay in milliseconds for testing loading states.
- * Configurable via VITE_API_DELAY_MS environment variable.
- * Set to 0 for production or to disable delay.
- */
-const FAKE_API_DELAY_MS = Number(import.meta.env.VITE_API_DELAY_MS) || 0;
-
-/**
- * Helper to add artificial delay for testing loading states
- */
-const delay = (ms: number): Promise<void> =>
-  new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-
 export type CarSale = {
-  buyer_address: string;
-  buyer_email: string;
-  buyer_name: string;
-  buyer_phone: string;
-  car_id: number;
-  city: null | string;
-  color: string;
-  country: null | string;
-  date_of_ingress: string;
-  date_of_sale: string;
-  engine: string;
-  fuel_type: string;
-  insurance_expiration_date: string;
-  insurance_policy_number: string;
-  insurance_provider: string;
-  loan_amount: number;
-  loan_provider: string;
-  mileage: number;
-  model: string;
-  postal_code: null | string;
-  profit: number;
-  purchase_price: number;
-  sale_price: number;
-  seller_address: string;
-  seller_email: string;
-  seller_name: string;
-  seller_phone: string;
-  state: null | string;
-  transmission: string;
-  year: number;
+  readonly buyer_address: string;
+  readonly buyer_email: string;
+  readonly buyer_name: string;
+  readonly buyer_phone: string;
+  readonly car_id: number;
+  readonly city: null | string;
+  readonly color: string;
+  readonly country: null | string;
+  readonly date_of_ingress: string;
+  readonly date_of_sale: string;
+  readonly engine: string;
+  readonly fuel_type: string;
+  readonly insurance_expiration_date: string;
+  readonly insurance_policy_number: string;
+  readonly insurance_provider: string;
+  readonly loan_amount: number;
+  readonly loan_provider: string;
+  readonly mileage: number;
+  readonly model: string;
+  readonly postal_code: null | string;
+  readonly profit: number;
+  readonly purchase_price: number;
+  readonly sale_price: number;
+  readonly seller_address: string;
+  readonly seller_email: string;
+  readonly seller_name: string;
+  readonly seller_phone: string;
+  readonly state: null | string;
+  readonly transmission: string;
+  readonly year: number;
 };
 
 export type CarSalesResponse = {
-  data: CarSale[];
-  total: number;
+  readonly data: readonly CarSale[];
+  readonly total: number;
 };
 
 const isObject = (value: unknown): value is Record<string, unknown> =>
@@ -97,10 +82,7 @@ export const carSalesApi = {
       return body;
     };
 
-    // Add fake delay for testing skeleton/loading states
-    if (FAKE_API_DELAY_MS > 0) {
-      await delay(FAKE_API_DELAY_MS);
-    }
+    await fakeDelay();
 
     return fetchData();
   },
@@ -149,10 +131,7 @@ export const carSalesApi = {
       return body;
     };
 
-    // Add fake delay for testing skeleton/loading states
-    if (FAKE_API_DELAY_MS > 0) {
-      await delay(FAKE_API_DELAY_MS);
-    }
+    await fakeDelay();
 
     return fetchData();
   },

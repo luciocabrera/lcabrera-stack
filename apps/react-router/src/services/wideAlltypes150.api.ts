@@ -171,7 +171,7 @@ export type WideAlltypes150 = {
 };
 
 export type WideAlltypes150Response = {
-  readonly data: WideAlltypes150[];
+  readonly data: readonly WideAlltypes150[];
   readonly hasMore: boolean;
   readonly total: number;
 };

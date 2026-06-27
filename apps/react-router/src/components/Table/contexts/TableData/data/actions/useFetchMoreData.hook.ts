@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useRef } from 'react';
 
 import type { PrefetchCache } from '@/types/ui.types';
 
@@ -19,15 +19,12 @@ export const useFetchMoreData = <TData, TResponse>() => {
     skip: -1,
   });
 
-  return useCallback(
-    async (args: FetchMoreDataArgs<TData, TResponse>) =>
-      executeFetchMore({
-        args,
-        dataStore,
-        isFetchingRef,
-        metaStore,
-        prefetchRef,
-      }),
-    [dataStore, metaStore],
-  );
+  return async (args: FetchMoreDataArgs<TData, TResponse>) =>
+    executeFetchMore({
+      args,
+      dataStore,
+      isFetchingRef,
+      metaStore,
+      prefetchRef,
+    });
 };

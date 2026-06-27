@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { useCallback, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 
 import type { VirtualListDataState } from '@/components/VirtualList';
 
@@ -30,7 +30,7 @@ export const VirtualSelectSection = () => {
 
   const fetchedCountRef = useRef(0);
 
-  const handleFetchInitial = useCallback(() => {
+  const handleFetchInitial = () => {
     setFetchDataState({
       data: [],
       hasMore: true,
@@ -51,9 +51,9 @@ export const VirtualSelectSection = () => {
         totalCount: LARGE_DATASET.length,
       });
     }, FETCH_DELAY_MS);
-  }, []);
+  };
 
-  const handleFetchMore = useCallback(() => {
+  const handleFetchMore = () => {
     setFetchDataState((prev) => ({ ...prev, isLoadingMore: true }));
 
     setTimeout(() => {
@@ -68,7 +68,7 @@ export const VirtualSelectSection = () => {
         totalCount: LARGE_DATASET.length,
       });
     }, FETCH_DELAY_MS);
-  }, []);
+  };
 
   return (
     <ShowcaseSection title='VirtualSelect'>

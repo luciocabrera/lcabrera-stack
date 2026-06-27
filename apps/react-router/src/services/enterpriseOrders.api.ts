@@ -1,6 +1,6 @@
 import type { ColumnFiltersState, SortingState } from '@/components/Table';
 
-import { getApiBaseUrl } from '@/utils/api';
+import { fakeDelay, getApiBaseUrl } from '@/utils/api';
 import { createLogger } from '@/utils/logger';
 
 const log = createLogger({ prefix: '[orders]' });
@@ -10,91 +10,76 @@ const log = createLogger({ prefix: '[orders]' });
  * Handles database queries for enterprise orders data
  */
 
-/**
- * Simulated API delay in milliseconds for testing loading states.
- * Configurable via VITE_API_DELAY_MS environment variable.
- * Set to 0 for production or to disable delay.
- */
-const FAKE_API_DELAY_MS = Number(import.meta.env.VITE_API_DELAY_MS) || 0;
-
-/**
- * Helper to add artificial delay for testing loading states
- */
-const delay = (ms: number): Promise<void> =>
-  new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-
 export type EnterpriseOrder = {
-  balance_due: string;
-  billing_address_line1: string;
-  billing_city: string;
-  billing_country: string;
-  billing_postal_code: string;
-  billing_state: string;
-  carrier: string;
-  created_at: string;
-  customer_email: string;
-  customer_id: number;
-  customer_name: string;
-  customer_phone: string;
-  customer_rating: null | number;
-  customer_since: string;
-  customer_type: string;
-  delivery_date: null | string;
-  discount_amount: string;
-  discount_percentage: string;
-  estimated_delivery_days: number;
-  internal_notes: null | string;
-  is_fragile: boolean;
-  is_gift: boolean;
-  is_rush_order: boolean;
-  is_vip_customer: boolean;
-  last_modified_by: string;
-  loyalty_points: number;
-  order_date: string;
-  order_id: number;
-  order_notes: null | string;
-  order_number: string;
-  order_status: string;
-  order_timestamp: string;
-  paid_amount: string;
-  payment_date: null | string;
-  payment_method: string;
-  payment_reference: null | string;
-  payment_status: string;
-  priority: string;
-  product_category: string;
-  product_subcategory: string;
-  quantity: number;
-  requires_signature: boolean;
-  shipped_date: null | string;
-  shipping_address_line1: string;
-  shipping_address_line2: null | string;
-  shipping_city: string;
-  shipping_cost: string;
-  shipping_country: string;
-  shipping_postal_code: string;
-  shipping_state: string;
-  subtotal: string;
-  tax_amount: string;
-  total_amount: string;
-  tracking_number: null | string;
-  unit_price: string;
-  updated_at: string;
-  volume_m3: string;
-  warehouse_location: string;
-  weight_kg: string;
+  readonly balance_due: string;
+  readonly billing_address_line1: string;
+  readonly billing_city: string;
+  readonly billing_country: string;
+  readonly billing_postal_code: string;
+  readonly billing_state: string;
+  readonly carrier: string;
+  readonly created_at: string;
+  readonly customer_email: string;
+  readonly customer_id: number;
+  readonly customer_name: string;
+  readonly customer_phone: string;
+  readonly customer_rating: null | number;
+  readonly customer_since: string;
+  readonly customer_type: string;
+  readonly delivery_date: null | string;
+  readonly discount_amount: string;
+  readonly discount_percentage: string;
+  readonly estimated_delivery_days: number;
+  readonly internal_notes: null | string;
+  readonly is_fragile: boolean;
+  readonly is_gift: boolean;
+  readonly is_rush_order: boolean;
+  readonly is_vip_customer: boolean;
+  readonly last_modified_by: string;
+  readonly loyalty_points: number;
+  readonly order_date: string;
+  readonly order_id: number;
+  readonly order_notes: null | string;
+  readonly order_number: string;
+  readonly order_status: string;
+  readonly order_timestamp: string;
+  readonly paid_amount: string;
+  readonly payment_date: null | string;
+  readonly payment_method: string;
+  readonly payment_reference: null | string;
+  readonly payment_status: string;
+  readonly priority: string;
+  readonly product_category: string;
+  readonly product_subcategory: string;
+  readonly quantity: number;
+  readonly requires_signature: boolean;
+  readonly shipped_date: null | string;
+  readonly shipping_address_line1: string;
+  readonly shipping_address_line2: null | string;
+  readonly shipping_city: string;
+  readonly shipping_cost: string;
+  readonly shipping_country: string;
+  readonly shipping_postal_code: string;
+  readonly shipping_state: string;
+  readonly subtotal: string;
+  readonly tax_amount: string;
+  readonly total_amount: string;
+  readonly tracking_number: null | string;
+  readonly unit_price: string;
+  readonly updated_at: string;
+  readonly volume_m3: string;
+  readonly warehouse_location: string;
+  readonly weight_kg: string;
 };
 
 export type EnterpriseOrdersResponse = {
-  data: EnterpriseOrder[];
-  hasMore?: boolean;
-  total: number;
+  readonly data: readonly EnterpriseOrder[];
+  readonly hasMore?: boolean;
+  readonly total: number;
 };
 
 type EnterpriseOrderDetailResponse = {
-  data: EnterpriseOrder;
+  readonly data: EnterpriseOrder;
 };
 
 const isObject = (value: unknown): value is Record<string, unknown> =>
@@ -121,11 +106,11 @@ const isEnterpriseOrdersResponse = (
   typeof value['hasMore'] === 'boolean';
 
 type FetchEnterpriseOrdersParams = {
-  filter?: ColumnFiltersState<EnterpriseOrder>;
-  limit: number;
-  requestUrl?: string;
-  skip: number;
-  sorting?: SortingState<EnterpriseOrder>;
+  readonly filter?: ColumnFiltersState<EnterpriseOrder>;
+  readonly limit: number;
+  readonly requestUrl?: string;
+  readonly skip: number;
+  readonly sorting?: SortingState<EnterpriseOrder>;
 };
 
 /**
@@ -255,10 +240,7 @@ export const enterpriseOrdersApi = {
     };
 
     // Add artificial delay if configured (for testing loading states)
-    if (FAKE_API_DELAY_MS > 0) {
-      log.debug(`⏳ Delaying response by ${FAKE_API_DELAY_MS}ms`);
-      await delay(FAKE_API_DELAY_MS);
-    }
+    await fakeDelay();
 
     return fetchData();
   },
