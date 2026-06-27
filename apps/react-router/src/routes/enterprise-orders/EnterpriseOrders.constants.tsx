@@ -14,16 +14,16 @@ import {
   createStaticFilterOptions,
 } from '@/utils/filters';
 
-type DistinctStringColumnArgs = {
-  readonly columnName: keyof EnterpriseOrder;
+type BasicColumnArgs = {
+  readonly dataType: 'boolean' | 'currency' | 'date' | 'number' | 'string';
   readonly key: keyof EnterpriseOrder;
   readonly label: string;
   readonly maxWidth: number;
   readonly minWidth: number;
 };
 
-type BasicColumnArgs = {
-  readonly dataType: 'boolean' | 'currency' | 'date' | 'number' | 'string';
+type DistinctStringColumnArgs = {
+  readonly columnName: keyof EnterpriseOrder;
   readonly key: keyof EnterpriseOrder;
   readonly label: string;
   readonly maxWidth: number;
@@ -65,6 +65,10 @@ const createBasicColumn = ({
     minWidth,
   };
 };
+
+export const TITLE = 'Enterprise Orders - Infinite Scroll';
+export const TABLE_NAME = 'enterprise_orders';
+export const SCHEMA_NAME = 'public';
 
 export const PERSISTENCE_KEY = 'enterprise-orders-table';
 
@@ -335,7 +339,7 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
     maxWidth: 32,
     minWidth: 32,
     render: (row) => (
-      <Link to={`/enterprise-orders/${String(row.order_id)}`}>
+      <Link prefetch='intent' to={`/enterprise-orders/${String(row.order_id)}`}>
         <Button
           aria-label={`View order ${String(row.order_id)}`}
           color='ghost'

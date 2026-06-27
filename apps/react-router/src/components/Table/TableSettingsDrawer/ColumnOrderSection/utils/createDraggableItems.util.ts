@@ -1,9 +1,3 @@
-type OrderedColumnItem = {
-  readonly isStatic?: boolean;
-  readonly key: string;
-  readonly label: string;
-};
-
 type CreateDraggableItemsArgs<TContent> = {
   readonly allOrderedColumns: readonly OrderedColumnItem[];
   readonly columnPinning: {
@@ -24,6 +18,12 @@ type DraggableItemResult<TContent> = {
   readonly content: TContent;
   readonly id: string;
   readonly isDraggable: boolean;
+};
+
+type OrderedColumnItem = {
+  readonly isStatic?: boolean;
+  readonly key: string;
+  readonly label: string;
 };
 
 export const createDraggableItems = <TContent>({

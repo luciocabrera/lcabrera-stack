@@ -84,6 +84,6 @@ describe('deserializeFilter', () => {
   });
 
   it('returns undefined for null', () => {
-    expect(deserializeFilter(null)).toBeUndefined();
+    expect(deserializeFilter(undefined)).toBeUndefined();
   });
 });

@@ -9,6 +9,7 @@ hooks/
 ├── index.ts                              → Barrel export
 ├── useClickOutside.hook.ts               → Detect mousedown outside a DOM element
 ├── useColumnVirtualization.hook.ts       → Horizontal virtual-scroll geometry computation
+├── useNotifyOnError.hook.ts              → Fire error toast whenever error identity changes
 ├── useStore.hook.ts                      → Lightweight external store (useSyncExternalStore-compatible)
 ├── useTheme.hook.ts                      → Access ThemeContext via React 19 use()
 ├── useVirtualization.hook.ts             → Default vertical virtual-scroll geometry computation
@@ -25,8 +26,8 @@ hooks/
 | Hook                              | Category      | Returns                                        | Key dependency                                |
 | --------------------------------- | ------------- | ---------------------------------------------- | --------------------------------------------- |
 | `useClickOutside`                 | DOM event     | `void`                                         | `document` mousedown                          |
-| `useNotifications`                | Context       | `NotificationContextValue`                     | `NotificationContext`, `use()`                |
 | `useColumnVirtualization`         | Layout/scroll | `{ startIndex, endIndex, leftSpacerWidth, … }` | `ResizeObserver` + scroll events on container |
+| `useNotifyOnError`                | Notification  | `void`                                         | `useNotifyAction`, `useEffect`                |
 | `useStore`                        | State mgmt    | `TStore<TData>`                                | `useRef`, `shallowEqual`                      |
 | `useTheme`                        | Context       | `ThemeContextValue`                            | `ThemeContext`, `use()`                       |
 | `useVirtualization`               | Layout/scroll | `{ startIndex, endIndex, offsetY, … }`         | `window.resize` + scroll events on container  |

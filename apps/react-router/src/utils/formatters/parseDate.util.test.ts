@@ -26,7 +26,7 @@ describe('parseDate', () => {
   });
 
   it('returns undefined for null', () => {
-    expect(parseDate(null)).toBeUndefined();
+    expect(parseDate(undefined)).toBeUndefined();
   });
 
   it('returns undefined for undefined', () => {

@@ -10,6 +10,7 @@ const {
   mockColumnsStore,
   mockDataStore,
   mockMetaStore,
+  mockPersistTableMetaUiState,
   mockPersistTableState,
   mockResolveBatchColumnSettingsUpdate,
   setColumnsState,
@@ -18,13 +19,13 @@ const {
     columnFilters: {},
     columnOrder: ['id', 'name', 'age'],
     columnPinning: { left: ['id'], right: [] },
-    columnSizing: { actions: 0, age: 80, id: 100, name: 140 },
-    columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(['age']),
     columns: [
       { key: 'id', label: 'ID' },
       { key: 'name', label: 'Name' },
       { key: 'age', label: 'Age' },
     ],
+    columnSizing: { actions: 0, age: 80, id: 100, name: 140 },
+    columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(['age']),
     sorting: [],
     staticKeys: new Set<string>(['id']),
   };
@@ -40,6 +41,17 @@ const {
     mockDataStore: {
       set: vi.fn(),
     },
+    mockMetaStore: {
+      get: vi.fn(() => ({
+        isColumnSettingsPinned: false,
+        isTableSettingsOpen: false,
+        persistenceKey: 'orders-table',
+        wasTableSettingsOpenBeforeColumnSettings: false,
+      })),
+      set: vi.fn(),
+    },
+    mockPersistTableMetaUiState: vi.fn(),
+    mockPersistTableState: vi.fn(),
     mockResolveBatchColumnSettingsUpdate: vi.fn(() => ({
       columnFilters: {
         name: { operator: 'contains', type: 'text', value: 'ali' },
@@ -77,16 +89,6 @@ const {
       },
       sorting: [{ columnKey: 'name', direction: 'desc' }],
     })),
-    mockMetaStore: {
-      get: vi.fn(() => ({
-        isColumnSettingsPinned: false,
-        isTableSettingsOpen: false,
-        persistenceKey: 'orders-table',
-        wasTableSettingsOpenBeforeColumnSettings: false,
-      })),
-      set: vi.fn(),
-    },
-    mockPersistTableState: vi.fn(),
     setColumnsState: (nextState: typeof columnsState) => {
       columnsState = nextState;
     },
@@ -114,6 +116,16 @@ vi.mock('@/components/Table/hooks', () => ({
   usePersistTableStateAction: () => mockPersistTableState,
 }));
 
+vi.mock('@/components/Table/utils', async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import('@/components/Table/utils')>();
+
+  return {
+    ...actual,
+    persistTableMetaUiState: mockPersistTableMetaUiState,
+  };
+});
+
 vi.mock('./utils/buildPersistencePayload.util', () => ({
   buildPersistencePayload: mockBuildPersistencePayload,
 }));
@@ -128,13 +140,13 @@ describe('useBatchSetColumnSettings', () => {
       columnFilters: {},
       columnOrder: ['id', 'name', 'age'],
       columnPinning: { left: ['id'], right: [] },
-      columnSizing: { actions: 0, age: 80, id: 100, name: 140 },
-      columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(['age']),
       columns: [
         { key: 'id', label: 'ID' },
         { key: 'name', label: 'Name' },
         { key: 'age', label: 'Age' },
       ],
+      columnSizing: { actions: 0, age: 80, id: 100, name: 140 },
+      columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(['age']),
       sorting: [],
       staticKeys: new Set<string>(['id']),
     });
@@ -144,6 +156,7 @@ describe('useBatchSetColumnSettings', () => {
     mockDataStore.set.mockClear();
     mockMetaStore.get.mockClear();
     mockMetaStore.set.mockClear();
+    mockPersistTableMetaUiState.mockClear();
     mockPersistTableState.mockClear();
     mockPersistTableState.mockReturnValue(true);
     mockResolveBatchColumnSettingsUpdate.mockClear();
@@ -177,13 +190,13 @@ describe('useBatchSetColumnSettings', () => {
         columnFilters: {},
         columnOrder: ['id', 'name', 'age'],
         columnPinning: { left: ['id'], right: [] },
-        columnSizing: { actions: 0, age: 80, id: 100, name: 140 },
-        columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(['age']),
         columns: [
           { key: 'id', label: 'ID' },
           { key: 'name', label: 'Name' },
           { key: 'age', label: 'Age' },
         ],
+        columnSizing: { actions: 0, age: 80, id: 100, name: 140 },
+        columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(['age']),
         sorting: [],
         staticKeys: new Set<string>(['id']),
       },
@@ -211,6 +224,19 @@ describe('useBatchSetColumnSettings', () => {
     expect(mockColumnsStore.set).toHaveBeenCalledWith(
       mockResolveBatchColumnSettingsUpdate.mock.results[0]?.value,
     );
+    expect(mockPersistTableMetaUiState).toHaveBeenCalledWith({
+      currentState: {
+        isColumnSettingsPinned: false,
+        isTableSettingsOpen: false,
+        persistenceKey: 'orders-table',
+        wasTableSettingsOpenBeforeColumnSettings: false,
+      },
+      nextStatePatch: {
+        isColumnSettingsOpen: false,
+        isTableSettingsOpen: false,
+        wasTableSettingsOpenBeforeColumnSettings: false,
+      },
+    });
     expect(mockMetaStore.set).toHaveBeenCalledWith({
       isColumnSettingsOpen: false,
       isTableSettingsOpen: false,
@@ -285,7 +311,7 @@ describe('useBatchSetColumnSettings', () => {
   it('does not set isLoading when only UI-only changes occur (column width, pinning)', () => {
     // Mock resolved update with same filters/sorting (UI-only changes)
     mockResolveBatchColumnSettingsUpdate.mockReturnValue({
-      columnFilters: {}, // Same as current state (empty)
+      columnFilters: {},
       columnGroups: {
         centerCols: [{ key: 'age', label: 'Age' }],
         leftPinnedCols: [{ key: 'id', label: 'ID' }],
@@ -318,7 +344,9 @@ describe('useBatchSetColumnSettings', () => {
         },
       },
       sorting: [], // Same as current state (empty)
-    } as any);
+    } as unknown as Parameters<
+      typeof mockResolveBatchColumnSettingsUpdate.mockReturnValue
+    >[0]);
 
     const { result } = renderHook(() =>
       useBatchSetColumnSettings<{
@@ -347,7 +375,13 @@ describe('useBatchSetColumnSettings', () => {
   it('sets isLoading when query-affecting changes occur (filters or sorting)', () => {
     // Mock resolved update with different sorting (query-affecting change)
     mockResolveBatchColumnSettingsUpdate.mockReturnValue({
-      columnFilters: {}, // Same as current state
+      columnFilters: {
+        name: {
+          operator: 'contains' as const,
+          type: 'text' as const,
+          value: 'test',
+        },
+      },
       columnGroups: {
         centerCols: [{ key: 'age', label: 'Age' }],
         leftPinnedCols: [{ key: 'id', label: 'ID' }],
@@ -380,7 +414,7 @@ describe('useBatchSetColumnSettings', () => {
         },
       },
       sorting: [{ columnKey: 'name', direction: 'desc' }], // Different from current state (was empty)
-    } as any);
+    });
 
     const { result } = renderHook(() =>
       useBatchSetColumnSettings<{

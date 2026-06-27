@@ -18,7 +18,10 @@ The file [src/routes/enterprise-orders/EnterpriseOrders.constants.tsx](src/route
 
 The route loader also uses `COLUMNS` as the source of truth for standalone URL filter validation, so mismatched filter payloads are discarded before the enterprise orders API request is built.
 
+The route `clientLoader` also restores tab-scoped table state from sessionStorage and returns loader-seeded `columnsState` and `metaState` so `TableLayout` can initialize its stores before first render.
+
 ## Duplication Guardrail
 
 - Repeated distinct-filter string columns are composed through `createDistinctStringColumn(...)` in [src/routes/enterprise-orders/EnterpriseOrders.constants.tsx](src/routes/enterprise-orders/EnterpriseOrders.constants.tsx).
 - This keeps `columnName` + `fetchDistinctValues` wiring consistent across customer and shipping fields while preserving each column's label/width metadata.
+- The client-side hydration path now lives in the loader rather than `TableConfigProvider`, which keeps store initialization explicit and side-effect free.

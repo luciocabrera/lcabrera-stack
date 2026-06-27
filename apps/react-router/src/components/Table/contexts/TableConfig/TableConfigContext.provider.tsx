@@ -3,10 +3,7 @@ import type {
   TableMetaState,
 } from '@/components/Table/Table.types';
 
-import {
-  useHydrateTableSessionState,
-  useMetaStatePersistEffect,
-} from '@/components/Table/hooks';
+import { readPersistedUiStateFromSessionStorage } from '@/components/Table/utils';
 import { useStore } from '@/hooks';
 
 import type {
@@ -22,26 +19,22 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
   columnsState,
   metaState,
 }: TableConfigProviderProps<TData>) => {
-  const persistenceKey = metaState?.persistenceKey ?? '';
-
-  const columnsStore = useStore<TableColumnsState<TData>>(
-    getInitialColumnsState<TData>({
-      ...columnsState,
-    }),
-  );
-  const metaStore = useStore<TableMetaState>(
-    getInitialMetaState(metaState ?? {}),
-  );
-
-  // On client mount: restore per-tab sessionStorage state into both stores.
-  useHydrateTableSessionState({
-    columnsStore,
-    metaStore,
-    persistenceKey,
+  const normalizedColumnsState = getInitialColumnsState<TData>({
+    ...columnsState,
+    persistenceKey: metaState?.persistenceKey ?? '',
+  });
+  const persistedUiState = readPersistedUiStateFromSessionStorage({
+    persistenceKey: metaState?.persistenceKey ?? '',
+  });
+  const normalizedMetaState = getInitialMetaState({
+    ...metaState,
+    persistedUiState,
   });
 
-  // Subscribe to metaStore and keep sessionStorage in sync on every change.
-  useMetaStatePersistEffect({ metaStore, persistenceKey });
+  const columnsStore = useStore<TableColumnsState<TData>>(
+    normalizedColumnsState,
+  );
+  const metaStore = useStore<TableMetaState>(normalizedMetaState);
 
   const value = {
     columnsStore,

@@ -25,6 +25,17 @@ const setDialogOpen = ({
   });
 };
 
+const setAllDialogsOpen = ({ isOpen }: { readonly isOpen: boolean }) => {
+  const dialogs = document.querySelectorAll('dialog');
+
+  for (const dialog of dialogs) {
+    setDialogOpen({
+      dialog: dialog as HTMLDialogElement,
+      isOpen,
+    });
+  }
+};
+
 export const mockDialogElement = ({
   shouldSetOpenOnShow = true,
 }: MockDialogElementArgs = {}): MockDialogElementResult => {
@@ -35,16 +46,16 @@ export const mockDialogElement = ({
   // eslint-disable-next-line typescript-eslint/unbound-method -- Saving prototype methods for test teardown restoration
   const savedShowModal = HTMLDialogElement.prototype.showModal;
 
-  const closeMock = vi.fn(function (this: HTMLDialogElement) {
-    setDialogOpen({ dialog: this, isOpen: false });
+  const closeMock = vi.fn(() => {
+    setAllDialogsOpen({ isOpen: false });
   });
-  const showMock = vi.fn(function (this: HTMLDialogElement) {
+  const showMock = vi.fn(() => {
     if (shouldSetOpenOnShow) {
-      setDialogOpen({ dialog: this, isOpen: true });
+      setAllDialogsOpen({ isOpen: true });
     }
   });
-  const showModalMock = vi.fn(function (this: HTMLDialogElement) {
-    setDialogOpen({ dialog: this, isOpen: true });
+  const showModalMock = vi.fn(() => {
+    setAllDialogsOpen({ isOpen: true });
   });
 
   HTMLDialogElement.prototype.close = closeMock as HTMLDialogElement['close'];

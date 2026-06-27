@@ -1,6 +1,6 @@
 # NotificationContext Architecture
 
-Global in-memory notification state and actions.
+Global in-memory notification state managed via an external store pattern (mirrors `GlobalSettingsContext`).
 
 ## Purpose
 
@@ -11,41 +11,64 @@ Provide a reusable notification system with:
 - manual dismiss actions
 - per-notification placement and variant
 
-## Public API
+## Public API (barrel `index.ts`)
 
-- `NotificationProvider`
-- `NotificationContext`
-- `useNotificationContextValue`
-- types from `NotificationContext.types.ts`
+- `NotificationProvider` — React provider component
+- `AppNotification`, `NotificationPlacement` — shared types
 
-## Internal Files
+## Context Value
 
-- `NotificationContext.constants.ts` stores provider defaults
-- `createNotificationId.util.ts` stores notification ID generation
+```typescript
+{
+  notificationsStore: TStore<NotificationState>; // external store
+  timeoutMapRef: {
+    current: Map<string, ReturnType<typeof setTimeout>>;
+  }
+}
+```
 
-## State Shape
+`timeoutMapRef` is exposed alongside the store so action hooks can share the same timer map without re-creating it.
 
-`notifications` is a readonly list of `AppNotification` objects.
+## State Shape (`NotificationState`)
 
-Each notification includes:
+```typescript
+{
+  defaultDurationMs: number;       // seeded from provider props
+  defaultPlacement: NotificationPlacement;
+  notifications: readonly AppNotification[];
+}
+```
 
-- `id`
-- `message`
-- optional `title`
-- `variant`
-- `placement`
-- `durationMs`
+## Selectors (`selectors/`)
 
-## Actions
+| Selector              | Returns                      |
+| --------------------- | ---------------------------- |
+| `useGetNotifications` | `readonly AppNotification[]` |
 
-- `notify(args)` creates and schedules a notification
-- `dismissNotification(id)` removes one notification and clears its timer
-- `dismissNotifications()` clears all notifications and timers
+Selectors subscribe via `useSyncExternalStore` through `useNotificationStore`.
+
+## Actions (`actions/`)
+
+| Action                          | Signature                                                                             |
+| ------------------------------- | ------------------------------------------------------------------------------------- |
+| `useNotifyAction`               | `() => (args: NotifyArgs) => string` — adds notification, schedules timer, returns ID |
+| `useDismissNotificationAction`  | `() => (id: string) => void` — cancels timer, removes notification                    |
+| `useDismissNotificationsAction` | `() => () => void` — cancels all timers, clears notifications                         |
 
 ## Timer Lifecycle
 
-A `Map<id, timeout>` tracks auto-dismiss timers.
+A `Map<id, timeout>` ref (`timeoutMapRef`) is created in the provider and passed via context.
 
-- On `notify`: schedule timeout when `durationMs > 0`
-- On `dismissNotification`: clear timeout for that id
+- `useNotifyAction`: schedules `setTimeout` when `durationMs > 0`; callback filters the store and removes the timer entry
+- `useDismissNotificationAction`: calls `clearTimeout` and removes the timer entry
+- `useDismissNotificationsAction`: iterates and clears all timeouts, then clears the map
+- Provider `useEffect` cleanup: clears all timeouts on unmount
+
+## Internal Files
+
+- `NotificationContext.constants.ts` — defaults and `INITIAL_NOTIFICATION_STATE`
+- `useNotificationContextValue.hook.ts` — raw context access with provider guard
+- `useNotificationStore.hook.ts` — generic selector hook (`useSyncExternalStore` wrapper)
+- `utils/createNotificationId.util.ts` — ID generation
+
 - On `dismissNotifications` / unmount: clear all timeouts

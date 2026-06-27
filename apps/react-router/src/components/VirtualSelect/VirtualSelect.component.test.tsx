@@ -23,6 +23,7 @@ const {
   triggerOutsideClick,
 } = vi.hoisted(() => {
   let latestVirtualListProps:
+    | undefined
     | {
         readonly dataState: VirtualListDataState;
         readonly filter: SelectFilter;
@@ -33,8 +34,7 @@ const {
         readonly onFetchInitial?: () => Promise<void> | void;
         readonly onFetchMore?: () => Promise<void> | void;
         readonly shouldFillHeight: boolean;
-      }
-    | undefined;
+      };
   let onClickOutside: (() => void) | undefined;
 
   return {
@@ -83,15 +83,19 @@ vi.mock('./utils', async () => {
 
 import { VirtualSelect } from './VirtualSelect.component';
 
-let resizeObserverCallback: ResizeObserverCallback | undefined;
+const resizeObserverCallbackRef: {
+  current: ResizeObserverCallback | undefined;
+} = {
+  current: undefined,
+};
 
 beforeEach(() => {
-  resizeObserverCallback = undefined;
+  resizeObserverCallbackRef.current = undefined;
   vi.stubGlobal(
     'ResizeObserver',
     class {
       public constructor(callback: ResizeObserverCallback) {
-        resizeObserverCallback = callback;
+        resizeObserverCallbackRef.current = callback;
       }
 
       public disconnect() {
@@ -215,7 +219,7 @@ describe('VirtualSelect', () => {
     );
 
     act(() => {
-      resizeObserverCallback?.([], {} as ResizeObserver);
+      resizeObserverCallbackRef.current?.([], {} as ResizeObserver);
     });
 
     fireEvent.click(screen.getByRole('button', { name: 'Remove Alpha' }));

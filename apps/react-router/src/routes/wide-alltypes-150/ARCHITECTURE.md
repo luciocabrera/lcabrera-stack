@@ -31,10 +31,11 @@ wide-alltypes-150/
 ## Data Flow
 
 1. `wide-alltypes-150.loader.ts` restores persisted table state from URL params
-   and cookies.
+   and cookies, then the `clientLoader` combines it into loader-seeded
+   `columnsState` and `metaState`.
 2. The loader fetches the first page from `wideAlltypes150Api`.
-3. `WideAlltypes150.component.tsx` passes the dataset contract and initial
-   state into `TableLayout`.
+3. `WideAlltypes150.component.tsx` passes the dataset contract and loader-seeded
+   initial state into `TableLayout`.
 4. `TableLayout` owns rendering, persistence, sorting, and incremental loading.
 
 ## Guardrails

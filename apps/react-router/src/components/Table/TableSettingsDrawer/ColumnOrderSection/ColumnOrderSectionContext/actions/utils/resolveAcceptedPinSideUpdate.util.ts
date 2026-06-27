@@ -26,28 +26,28 @@ type ResolveAcceptedPinSideUpdateArgs = {
 
 type ResolveAcceptedPinSideUpdateResult =
   | {
-      readonly kind: 'apply-resolved';
       readonly columnOrder: ColumnOrderState<Record<string, unknown>>;
       readonly columnPinning: ColumnPinningState<Record<string, unknown>>;
+      readonly kind: 'apply-resolved';
     }
   | {
-      readonly kind: 'open-conflict-modal';
-      readonly conflictModal: {
-        readonly columnKey: DataKey<Record<string, unknown>>;
-        readonly columnLabel: string;
-        readonly isOpen: true;
-        readonly side: 'left' | 'right';
-      };
-    }
-  | {
-      readonly kind: 'auto-accept-conflict';
       readonly conflictModal: {
         readonly columnKey: DataKey<Record<string, unknown>>;
         readonly columnLabel: string;
         readonly isOpen: false;
         readonly side: 'left' | 'right';
       };
+      readonly kind: 'auto-accept-conflict';
       readonly resolution: PinConflictResolution;
+    }
+  | {
+      readonly conflictModal: {
+        readonly columnKey: DataKey<Record<string, unknown>>;
+        readonly columnLabel: string;
+        readonly isOpen: true;
+        readonly side: 'left' | 'right';
+      };
+      readonly kind: 'open-conflict-modal';
     };
 
 export const resolveAcceptedPinSideUpdate = ({
@@ -76,9 +76,9 @@ export const resolveAcceptedPinSideUpdate = ({
 
   if (resolution.kind === 'resolved') {
     return {
-      kind: 'apply-resolved',
       columnOrder: resolution.columnOrder,
       columnPinning: resolution.columnPinning,
+      kind: 'apply-resolved',
     };
   }
 
@@ -89,24 +89,24 @@ export const resolveAcceptedPinSideUpdate = ({
 
   if (pinConflictResolutionPreference) {
     return {
-      kind: 'auto-accept-conflict',
       conflictModal: {
         columnKey,
         columnLabel,
         isOpen: false,
         side: resolution.side,
       },
+      kind: 'auto-accept-conflict',
       resolution: pinConflictResolutionPreference,
     };
   }
 
   return {
-    kind: 'open-conflict-modal',
     conflictModal: {
       columnKey,
       columnLabel,
       isOpen: true,
       side: resolution.side,
     },
+    kind: 'open-conflict-modal',
   };
 };

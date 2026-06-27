@@ -11,10 +11,11 @@ export const BooleanFilterInput = ({
   onChange,
 }: BooleanFilterInputProps) => {
   // Derive selected value directly from filter prop (no local state needed)
-  let selectedValue: 'all' | 'false' | 'true' = 'all';
-  if (filter) {
-    selectedValue = filter.value ? 'true' : 'false';
-  }
+  const getSelectedValue = (): 'all' | 'false' | 'true' => {
+    if (!filter) return 'all';
+    return filter.value ? 'true' : 'false';
+  };
+  const selectedValue = getSelectedValue();
 
   const handleChange = (newValue: 'all' | 'false' | 'true') => {
     if (newValue === 'all') {
@@ -28,13 +29,15 @@ export const BooleanFilterInput = ({
     }
   };
 
+  const handleSelectAll = () => handleChange('all');
+  const handleSelectFalse = () => handleChange('false');
+  const handleSelectTrue = () => handleChange('true');
+
   return (
     <div {...stylex.props(styles.container)}>
       <Button
         color={selectedValue === 'all' ? 'primary' : 'outline'}
-        onClick={() => {
-          handleChange('all');
-        }}
+        onClick={handleSelectAll}
         size='sm'
         width='full'
       >
@@ -42,9 +45,7 @@ export const BooleanFilterInput = ({
       </Button>
       <Button
         color={selectedValue === 'true' ? 'primary' : 'outline'}
-        onClick={() => {
-          handleChange('true');
-        }}
+        onClick={handleSelectTrue}
         size='sm'
         width='full'
       >
@@ -52,9 +53,7 @@ export const BooleanFilterInput = ({
       </Button>
       <Button
         color={selectedValue === 'false' ? 'primary' : 'outline'}
-        onClick={() => {
-          handleChange('false');
-        }}
+        onClick={handleSelectFalse}
         size='sm'
         width='full'
       >

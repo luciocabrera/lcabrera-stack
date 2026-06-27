@@ -16,12 +16,13 @@ export const reactRouterLintSharedConfig: OxlintConfig = {
     'guidelines/playwright_config.ts',
     'scripts/',
     'utils/',
-    'src/utils/performance/renderTracker.util.ts',
   ],
   overrides: [
     ...(frontendLintSharedConfig.overrides ?? []),
     {
       files: [
+        '**/root.ts',
+        '**/root.tsx',
         'src/root.tsx',
         'src/root/**/index.ts',
         'src/routes/**/index.tsx',

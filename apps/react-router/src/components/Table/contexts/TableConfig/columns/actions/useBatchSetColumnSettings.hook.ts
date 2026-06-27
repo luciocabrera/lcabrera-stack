@@ -1,6 +1,7 @@
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { useTableDataContextValue } from '@/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
 import { usePersistTableStateAction } from '@/components/Table/hooks';
+import { persistTableMetaUiState } from '@/components/Table/utils';
 import { areEqualByJson } from '@/utils/comparison';
 
 import type { BatchColumnSettingsUpdate } from './utils/resolveBatchColumnSettingsUpdate.util';
@@ -28,33 +29,31 @@ export const useBatchSetColumnSettings = <TData>() => {
     });
 
     // Check if query-affecting changes (filters/sorting) have changed
-    const sortingHasChanged = !areEqualByJson({
+    const hasSortingChanged = !areEqualByJson({
       left: columnsState?.sorting,
       right: resolvedUpdate.sorting,
     });
-    const filtersHasChanged = !areEqualByJson({
+    const hasFiltersChanged = !areEqualByJson({
       left: columnsState?.columnFilters,
       right: resolvedUpdate.columnFilters,
     });
-    const queryHasChanged = sortingHasChanged || filtersHasChanged;
+    const hasQueryChanged = hasSortingChanged || hasFiltersChanged;
 
-    if (
-      !persistTableState(
-        buildPersistencePayload<TData>({
-          columnFilters: resolvedUpdate.columnFilters,
-          columnOrder: resolvedUpdate.columnOrder,
-          columnPinning: resolvedUpdate.columnPinning,
-          columnSizing: resolvedUpdate.columnSizing,
-          persistenceKey,
-          sorting: resolvedUpdate.sorting,
-        }),
-      )
-    ) {
-      return;
-    }
+    const didPersist = persistTableState(
+      buildPersistencePayload<TData>({
+        columnFilters: resolvedUpdate.columnFilters,
+        columnOrder: resolvedUpdate.columnOrder,
+        columnPinning: resolvedUpdate.columnPinning,
+        columnSizing: resolvedUpdate.columnSizing,
+        persistenceKey,
+        sorting: resolvedUpdate.sorting,
+      }),
+    );
+
+    if (!didPersist) return;
 
     // Only trigger data fetch if query-affecting changes occurred
-    if (queryHasChanged) {
+    if (hasQueryChanged) {
       dataStore.set({
         isLoading: true,
       });
@@ -62,19 +61,24 @@ export const useBatchSetColumnSettings = <TData>() => {
 
     columnsStore.set(resolvedUpdate);
 
-    if (isColumnSettingsPinned) {
-      metaStore.set({
-        isColumnSettingsOpen: true,
-      });
-      return;
-    }
+    const isTableSettingsOpen = shouldRestoreTableSettings
+      ? true
+      : (metaState?.isTableSettingsOpen ?? false);
 
-    metaStore.set({
-      isColumnSettingsOpen: false,
-      isTableSettingsOpen: shouldRestoreTableSettings
-        ? true
-        : (metaState?.isTableSettingsOpen ?? false),
-      wasTableSettingsOpenBeforeColumnSettings: false,
+    const nextStatePatch = isColumnSettingsPinned
+      ? {
+          isColumnSettingsOpen: true,
+        }
+      : {
+          isColumnSettingsOpen: false,
+          isTableSettingsOpen,
+          wasTableSettingsOpenBeforeColumnSettings: false,
+        };
+
+    persistTableMetaUiState({
+      currentState: metaState,
+      nextStatePatch,
     });
+    metaStore.set(nextStatePatch);
   };
 };

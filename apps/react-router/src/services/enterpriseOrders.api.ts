@@ -87,15 +87,38 @@ export type EnterpriseOrder = {
   weight_kg: string;
 };
 
-type EnterpriseOrderDetailResponse = {
-  data: EnterpriseOrder;
-};
-
 export type EnterpriseOrdersResponse = {
   data: EnterpriseOrder[];
   hasMore?: boolean;
   total: number;
 };
+
+type EnterpriseOrderDetailResponse = {
+  data: EnterpriseOrder;
+};
+
+const isObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const isDistinctValuesResponse = (
+  value: unknown,
+): value is { hasMore: boolean; values: string[] } =>
+  isObject(value) &&
+  typeof value['hasMore'] === 'boolean' &&
+  Array.isArray(value['values']);
+
+const isEnterpriseOrderDetailResponse = (
+  value: unknown,
+): value is EnterpriseOrderDetailResponse =>
+  isObject(value) && isObject(value['data']);
+
+const isEnterpriseOrdersResponse = (
+  value: unknown,
+): value is EnterpriseOrdersResponse & { hasMore: boolean } =>
+  isObject(value) &&
+  Array.isArray(value['data']) &&
+  typeof value['total'] === 'number' &&
+  typeof value['hasMore'] === 'boolean';
 
 type FetchEnterpriseOrdersParams = {
   filter?: ColumnFiltersState<EnterpriseOrder>;
@@ -139,7 +162,13 @@ export const enterpriseOrdersApi = {
       );
     }
 
-    return response.json() as Promise<{ hasMore: boolean; values: string[] }>;
+    const body = (await response.json()) as unknown;
+    if (!isDistinctValuesResponse(body)) {
+      throw new Error(
+        `Unexpected response shape from /enterprise-orders/distinct/${columnName}`,
+      );
+    }
+    return body;
   },
 
   /**
@@ -163,7 +192,13 @@ export const enterpriseOrdersApi = {
       );
     }
 
-    return response.json() as Promise<EnterpriseOrderDetailResponse>;
+    const body = (await response.json()) as unknown;
+    if (!isEnterpriseOrderDetailResponse(body)) {
+      throw new Error(
+        `Unexpected response shape from /enterprise-orders/${orderId}`,
+      );
+    }
+    return body;
   },
 
   /**
@@ -198,25 +233,31 @@ export const enterpriseOrdersApi = {
     log.debug('🌐 Filter object:', filter);
     log.debug('🌐 Sorting:', sorting);
 
-    const fetchData = () =>
-      fetch(url).then((response) => {
-        log.debug('📡 Response status:', response.status, response.statusText);
+    const fetchData = async (): Promise<
+      EnterpriseOrdersResponse & { hasMore: boolean }
+    > => {
+      const response = await fetch(url);
+      log.debug('📡 Response status:', response.status, response.statusText);
 
-        if (!response.ok) {
-          throw new Error(
-            `API request failed: ${response.status} ${response.statusText}`,
-          );
-        }
+      if (!response.ok) {
+        throw new Error(
+          `API request failed: ${response.status} ${response.statusText}`,
+        );
+      }
 
-        return response.json() as Promise<
-          EnterpriseOrdersResponse & { hasMore: boolean }
-        >;
-      });
+      const body = (await response.json()) as unknown;
+      if (!isEnterpriseOrdersResponse(body)) {
+        throw new Error(
+          'Unexpected response shape from /enterprise-orders/paginated',
+        );
+      }
+      return body;
+    };
 
     // Add artificial delay if configured (for testing loading states)
     if (FAKE_API_DELAY_MS > 0) {
       log.debug(`⏳ Delaying response by ${FAKE_API_DELAY_MS}ms`);
-      return delay(FAKE_API_DELAY_MS).then(fetchData);
+      await delay(FAKE_API_DELAY_MS);
     }
 
     return fetchData();

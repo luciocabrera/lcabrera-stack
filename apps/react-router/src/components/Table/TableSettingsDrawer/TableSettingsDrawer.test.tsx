@@ -9,22 +9,22 @@ const {
   batchSetTableDrawerSettingsMock,
   isTableSettingsPinnedMock,
   notifyMock,
+  resetTableDrawerSettingsMock,
   selectedTabMock,
   setSelectedTabMock,
   setTableIsTableSettingsOpenMock,
   setTableIsTableSettingsPinnedMock,
   tableColumnFiltersMock,
-  resetTableDrawerSettingsMock,
 } = vi.hoisted(() => ({
   batchSetTableDrawerSettingsMock: vi.fn(),
   isTableSettingsPinnedMock: vi.fn(() => false),
   notifyMock: vi.fn(),
+  resetTableDrawerSettingsMock: vi.fn(),
   selectedTabMock: vi.fn(() => 'general'),
   setSelectedTabMock: vi.fn(),
   setTableIsTableSettingsOpenMock: vi.fn(),
   setTableIsTableSettingsPinnedMock: vi.fn(),
   tableColumnFiltersMock: {} as Record<string, unknown>,
-  resetTableDrawerSettingsMock: vi.fn(),
 }));
 
 afterEach(() => {
@@ -39,9 +39,9 @@ beforeEach(() => {
   selectedTabMock.mockReset();
   selectedTabMock.mockReturnValue('general');
   setSelectedTabMock.mockReset();
-  Object.keys(tableColumnFiltersMock).forEach((key) => {
+  for (const key of Object.keys(tableColumnFiltersMock)) {
     delete tableColumnFiltersMock[key];
-  });
+  }
   resetTableDrawerSettingsMock.mockReset();
   setTableIsTableSettingsOpenMock.mockReset();
   setTableIsTableSettingsPinnedMock.mockReset();
@@ -54,12 +54,6 @@ type ButtonProps = {
   readonly title?: string;
 };
 
-type MockSidePanelProps = {
-  readonly children: ReactNode;
-  readonly isPinned: boolean;
-  readonly onClose: () => void;
-};
-
 type MockSidePanelHeaderProps = {
   readonly actions: ReactNode;
   readonly children: ReactNode;
@@ -69,6 +63,12 @@ type MockSidePanelHeaderToolbarProps = {
   readonly isPinned: boolean;
   readonly onClose: () => void;
   readonly onTogglePin: () => void;
+};
+
+type MockSidePanelProps = {
+  readonly children: ReactNode;
+  readonly isPinned: boolean;
+  readonly onClose: () => void;
 };
 
 type MockTabsProps = {
@@ -159,9 +159,9 @@ vi.mock('@/components/Tabs', () => ({
 }));
 
 vi.mock('../contexts/TableConfig/meta/actions', () => ({
-  useSetTableSettingsSelectedTab: () => setSelectedTabMock,
   useSetTableIsTableSettingsOpen: () => setTableIsTableSettingsOpenMock,
   useSetTableIsTableSettingsPinned: () => setTableIsTableSettingsPinnedMock,
+  useSetTableSettingsSelectedTab: () => setSelectedTabMock,
 }));
 
 vi.mock('../contexts/TableConfig/meta/selectors', () => ({
@@ -209,10 +209,8 @@ vi.mock('./TableDrawerContext/selectors', () => ({
   useGetColumnFilters: () => tableColumnFiltersMock,
 }));
 
-vi.mock('@/hooks/useNotifications.hook', () => ({
-  useNotifications: () => ({
-    notify: notifyMock,
-  }),
+vi.mock('@/contexts/NotificationContext/actions', () => ({
+  useNotifyAction: () => notifyMock,
 }));
 
 import { TableSettingsDrawer } from './TableSettingsDrawer.component';

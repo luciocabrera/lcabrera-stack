@@ -73,6 +73,10 @@ export const GeneralSection = <TData,>({
     }
   };
 
+  const handleToggleDefault = () => handleToggle('default');
+  const handleToggleMax = () => handleToggle('max');
+  const handleToggleMin = () => handleToggle('min');
+
   return (
     <SidePanelSectionMain>
       <SidePanelSection>
@@ -83,9 +87,7 @@ export const GeneralSection = <TData,>({
             disabled={!hasMinWidth}
             icon={<MinimizeIcon size={ICON_SIZE_MD} />}
             isBusy={isBusy}
-            onClick={() => {
-              handleToggle('min');
-            }}
+            onClick={handleToggleMin}
             size='sm'
             width='full'
           >
@@ -96,9 +98,7 @@ export const GeneralSection = <TData,>({
             disabled={!hasMaxWidth}
             icon={<MaximizeIcon size={ICON_SIZE_MD} />}
             isBusy={isBusy}
-            onClick={() => {
-              handleToggle('max');
-            }}
+            onClick={handleToggleMax}
             size='sm'
             width='full'
           >
@@ -108,9 +108,7 @@ export const GeneralSection = <TData,>({
             color={selectedPreset === 'default' ? 'primary' : 'outline'}
             icon={<RefreshIcon size={ICON_SIZE_MD} />}
             isBusy={isBusy}
-            onClick={() => {
-              handleToggle('default');
-            }}
+            onClick={handleToggleDefault}
             size='sm'
             width='full'
           >

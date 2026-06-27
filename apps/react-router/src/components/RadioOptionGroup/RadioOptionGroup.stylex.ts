@@ -25,7 +25,7 @@ export const styles = stylex.create({
   },
   option: {
     padding: spacing.md,
-    borderColor: colors.borderSecondary,
+    borderColor: colors.borderPrimary,
     borderRadius: borderRadius.md,
     borderStyle: 'solid',
     borderWidth: '1px',
@@ -37,7 +37,7 @@ export const styles = stylex.create({
     display: 'flex',
   },
   optionSelected: {
-    borderColor: colors.brandPrimary,
+    // borderColor: colors.brandPrimary,
     backgroundColor: colors.brandPrimaryBackground,
   },
   radio: {

@@ -1,5 +1,4 @@
 // @vitest-environment jsdom
-
 import type { ReactNode } from 'react';
 
 import { render, screen } from '@testing-library/react';
@@ -20,40 +19,33 @@ type MockTableDataProviderProps = {
   };
 };
 
-const { useRenderTrackerMock } = vi.hoisted(() => ({
-  useRenderTrackerMock: vi.fn(),
-}));
-
 const { useGetTablePersistenceKeyMock } = vi.hoisted(() => ({
   useGetTablePersistenceKeyMock: vi.fn(() => 'orders'),
 }));
 
-const MockTableContent = vi.hoisted(
-  () =>
-    ({ onLoadMore }: MockTableContentProps) => {
-      return (
-        <div
-          data-has-load-more={String(Boolean(onLoadMore))}
-          data-testid='content'
-        />
-      );
-    },
-);
+const MockTableContent = vi.hoisted(() => {
+  return function MockTableContent({ onLoadMore }: MockTableContentProps) {
+    return (
+      <div
+        data-has-load-more={String(Boolean(onLoadMore))}
+        data-testid='content'
+      />
+    );
+  };
+});
 
-const MockTableDataProvider = vi.hoisted(
-  () =>
-    ({ children, dataState }: MockTableDataProviderProps) => {
-      return (
-        <div data-state={JSON.stringify(dataState)} data-testid='provider'>
-          {children}
-        </div>
-      );
-    },
-);
-
-vi.mock('@/utils/performance', () => ({
-  useRenderTracker: useRenderTrackerMock,
-}));
+const MockTableDataProvider = vi.hoisted(() => {
+  return function MockTableDataProvider({
+    children,
+    dataState,
+  }: MockTableDataProviderProps) {
+    return (
+      <div data-state={JSON.stringify(dataState)} data-testid='provider'>
+        {children}
+      </div>
+    );
+  };
+});
 
 vi.mock('./contexts', () => ({
   TableDataProvider: MockTableDataProvider,

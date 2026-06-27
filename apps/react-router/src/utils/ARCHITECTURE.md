@@ -59,16 +59,15 @@ graph TD
 
 ## Subfolder Documentation
 
-| Folder         | Description                                                                                                                                   |
-| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `api/`         | `getApiBaseUrl` — SSR/client-aware API base URL resolver                                                                                      |
-| `comparison/`  | `areArraysEqual` for ordered array equality plus `shallowEqual` for one-level object comparison                                               |
-| `filters/`     | `createStaticFilterOptions` — static array → Table filter contract                                                                            |
-| `formatters/`  | `formatDate`, `formatCurrency`, `formatNumber`, `parseDate`, etc.                                                                             |
-| `logger/`      | `createLogger`, `logger` — level-filtered, tree-shakeable app logging                                                                         |
-| `performance/` | `renderTracker`, `useRenderTracker` — dev-time render inspection                                                                              |
-| `prefetch/`    | `resolveFromCacheOrFetch`, `firePrefetch` — generic prefetch cache resolution and ref-applied prefetch firing; _internal:_ `prefetchNextPage` |
-| `security/`    | `getRequestCspNonce` — standardized `x-csp-nonce` request header parser                                                                       |
-| `storage/`     | `readFromCookie`, `writeToCookie`, `writeToLocalStorage`; _internal:_ `parseCookies`                                                          |
-| `theme/`       | `getThemeFromCookie` (`getThemeFromCookie.util.ts`), `setThemeCookie` (`setThemeCookie.util.ts`)                                              |
-| `urlState/`    | `encodeStateToURL`, `decodeStateFromURL`, `readTableStateFromURL`                                                                             |
+| Folder        | Description                                                                                                                                   |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `api/`        | `getApiBaseUrl` — SSR/client-aware API base URL resolver                                                                                      |
+| `comparison/` | `areArraysEqual` for ordered array equality plus `shallowEqual` for one-level object comparison                                               |
+| `filters/`    | `createStaticFilterOptions` — static array → Table filter contract                                                                            |
+| `formatters/` | `formatDate`, `formatCurrency`, `formatNumber`, `parseDate`, etc.                                                                             |
+| `logger/`     | `createLogger`, `logger` — level-filtered, tree-shakeable app logging                                                                         |
+| `prefetch/`   | `resolveFromCacheOrFetch`, `firePrefetch` — generic prefetch cache resolution and ref-applied prefetch firing; _internal:_ `prefetchNextPage` |
+| `security/`   | `getRequestCspNonce` — standardized `x-csp-nonce` request header parser                                                                       |
+| `storage/`    | `readFromCookie`, `writeToCookie`, `writeToLocalStorage`; _internal:_ `parseCookies`                                                          |
+| `theme/`      | `getThemeFromCookie` (`getThemeFromCookie.util.ts`), `setThemeCookie` (`setThemeCookie.util.ts`)                                              |
+| `urlState/`   | `encodeStateToURL`, `decodeStateFromURL`, `readTableStateFromURL`                                                                             |

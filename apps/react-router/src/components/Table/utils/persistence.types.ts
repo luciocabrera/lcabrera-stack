@@ -8,6 +8,15 @@ import type {
   TableDataState,
 } from '../Table.types';
 
+/**
+ * Table data state persisted per-tab in sessionStorage only.
+ * Used to paint stale rows immediately during refresh.
+ */
+export type PersistedDataState<TData = Record<string, unknown>> = Pick<
+  TableDataState<TData>,
+  'data' | 'totalRows'
+>;
+
 export type PersistedState<TData = Record<string, unknown>> = {
   readonly columnFilters?: ColumnFiltersState<TData>;
   readonly columnOrder?: ColumnOrderState<TData>;
@@ -23,20 +32,11 @@ export type PersistedState<TData = Record<string, unknown>> = {
  * These fields are not written to cookies and are never sent to the server.
  */
 export type PersistedUiState = {
-  readonly isColumnSettingsOpen?: boolean;
   readonly columnSettingsSelectedTab?: string;
+  readonly isColumnSettingsOpen?: boolean;
   readonly isColumnSettingsPinned?: boolean;
-  readonly isTableSettingsPinned?: boolean;
   readonly isTableSettingsOpen?: boolean;
+  readonly isTableSettingsPinned?: boolean;
   readonly tableSettingsExpandedFilters?: readonly string[];
   readonly tableSettingsSelectedTab?: string;
 };
-
-/**
- * Table data state persisted per-tab in sessionStorage only.
- * Used to paint stale rows immediately during refresh.
- */
-export type PersistedDataState<TData = Record<string, unknown>> = Pick<
-  TableDataState<TData>,
-  'data' | 'totalRows'
->;

@@ -43,8 +43,8 @@ describe('resolveAcceptedUnpinConflictState', () => {
     });
 
     expect(result).toEqual({
-      kind: 'update-pinning',
       columnPinning: { left: ['id'], right: [] },
+      kind: 'update-pinning',
     });
     expect(mockInsertAdjacentToPinnedGroup).not.toHaveBeenCalled();
   });
@@ -77,9 +77,9 @@ describe('resolveAcceptedUnpinConflictState', () => {
       side: 'left',
     });
     expect(result).toEqual({
-      kind: 'update-order-and-pinning',
       columnOrder: ['id', 'age', 'name'],
       columnPinning: { left: ['id'], right: [] },
+      kind: 'update-order-and-pinning',
     });
   });
 });

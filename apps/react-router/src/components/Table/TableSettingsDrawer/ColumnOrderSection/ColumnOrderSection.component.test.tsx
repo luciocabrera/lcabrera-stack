@@ -63,7 +63,7 @@ vi.mock('@/components/DraggableList', () => ({
     <div>
       <button
         onClick={() => {
-          onOrderChange(items.map((item) => item.id).reverse());
+          onOrderChange(items.map((item) => item.id).toReversed());
         }}
         type='button'
       >
@@ -94,7 +94,7 @@ vi.mock('@/components/PinSideModal', () => ({
   }: {
     readonly columnLabel: string;
     readonly isOpen: boolean;
-    readonly onAccept: (side: 'left' | 'right' | 'closest-edge') => void;
+    readonly onAccept: (side: 'closest-edge' | 'left' | 'right') => void;
     readonly onCancel: () => void;
   }) => (
     <div data-testid='pin-side-modal'>
@@ -159,7 +159,7 @@ vi.mock('@/components/ToggleSwitch', () => ({
     readonly isChecked: boolean;
     readonly isDisabled?: boolean;
     readonly label: string;
-    readonly onChange: (checked: boolean) => void;
+    readonly onChange: (isChecked: boolean) => void;
   }) => (
     <button
       aria-label={`${label}-${isChecked ? 'on' : 'off'}`}
@@ -285,11 +285,11 @@ describe('ColumnOrderSection', () => {
     expect(screen.getByText('Column Order & Visibility (1/2)')).toBeDefined();
 
     const nameRow = screen.getByTestId('item-name');
-    expect(nameRow.getAttribute('data-draggable')).toBe('false');
+    expect(nameRow.dataset.draggable).toBe('false');
     expect(within(nameRow).getByTestId('lock-icon')).toBeDefined();
 
     const idRow = screen.getByTestId('item-id');
-    expect(idRow.getAttribute('data-draggable')).toBe('true');
+    expect(idRow.dataset.draggable).toBe('true');
   });
 
   it('dispatches toggle actions from row controls', () => {

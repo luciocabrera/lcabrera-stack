@@ -28,7 +28,7 @@ TableLayout/
 graph TD
   TL["TableLayout"] --> container["div.container"]
   container --> TCP["TableConfigProvider (columnsState + metaState)"]
-  TCP --> FDP["FiltersDataProvider (columns)"]
+  TCP --> FDP["FiltersDataProvider (columnsState.columns)"]
   FDP --> TSB["TableSuspenseBoundary"]
   TSB -->|pending| SK["TableSkeleton"]
   TSB -->|resolved| TDR["TableDataResolver"]
@@ -39,26 +39,14 @@ graph TD
 
 ## Props
 
-| Prop                   | Type                        | Required | Description                              |
-| ---------------------- | --------------------------- | -------- | ---------------------------------------- |
-| `columns`              | `TableColumn<TData>[]`      | Yes      | Column definitions                       |
-| `dataPromise`          | `Promise<TResponse>`        | Yes      | Async data source                        |
-| `dataSelector`         | `(r: TResponse) => TData[]` | Yes      | Extract rows from response               |
-| `title`                | `string`                    | Yes      | Table display title                      |
-| `persistenceKey`       | `string`                    | Yes      | Cookie/URL persistence namespace         |
-| `suspenseKey`          | `string?`                   | No       | Key to reset Suspense boundary           |
-| `columnOrder`          | `ColumnOrderState?`         | No       | Initial column order                     |
-| `columnPinning`        | `ColumnPinningState?`       | No       | Initial pinning                          |
-| `columnSizing`         | `ColumnSizingState?`        | No       | Initial column widths                    |
-| `columnVisibility`     | `ColumnVisibilityState?`    | No       | Initially hidden columns                 |
-| `filters`              | `ColumnFiltersState?`       | No       | Active filters                           |
-| `sorting`              | `SortingState?`             | No       | Active sorting                           |
-| `density`              | `TableDensity`              | No       | Default: `comfortable`                   |
-| `isBordered`           | `boolean`                   | No       | Default: `true`                          |
-| `isStriped`            | `boolean`                   | No       | Default: `true`                          |
-| `onLoadMore`           | Infinite scroll callback    | No       | Fetch next page                          |
-| `dataTotalSelector`    | `(r: TResponse) => number`  | No       | Extract total row count                  |
-| `defaultColumnPinning` | `ColumnPinningState?`       | No       | Fallback pinning when no persisted state |
+| Prop                | Type                        | Required | Description                        |
+| ------------------- | --------------------------- | -------- | ---------------------------------- |
+| `columnsState`      | `TableColumnsState<TData>`  | Yes      | Loader-seeded initial column state |
+| `dataPromise`       | `Promise<TResponse>`        | Yes      | Async data source                  |
+| `dataSelector`      | `(r: TResponse) => TData[]` | Yes      | Extract rows from response         |
+| `dataTotalSelector` | `(r: TResponse) => number`  | No       | Extract total row count            |
+| `metaState`         | `TableMetaState`            | Yes      | Loader-seeded initial meta state   |
+| `onLoadMore`        | Infinite scroll callback    | No       | Fetch next page                    |
 
 ## suspenseKey Behavior
 

@@ -219,13 +219,13 @@ export type TableMetadataValue = boolean | number | string;
 
 export type TableMetaState = {
   readonly additionalMetadata?: Readonly<
-    Record<string, TableMetadataValue | null | undefined>
+    Record<string, null | TableMetadataValue | undefined>
   >;
   readonly columnOverscan: number;
   readonly columnSelectedKey?: string;
   readonly columnSettingsSelectedTab: string;
-  readonly drawersSyncNonce?: number;
   readonly density: TableDensity;
+  readonly drawersSyncNonce?: number;
   /** Whether to prefetch the next page after each load-more completes */
   readonly enablePrefetch: boolean;
   /** Error message if data fetch failed */
@@ -236,8 +236,8 @@ export type TableMetaState = {
   readonly isColumnSettingsOpen: boolean;
   readonly isColumnSettingsPinned: boolean;
   readonly isStriped: boolean;
-  readonly isTableSettingsPinned: boolean;
   readonly isTableSettingsOpen: boolean;
+  readonly isTableSettingsPinned: boolean;
   /** Page size for subsequent loads */
   readonly loadMorePageSize: number;
   /** Locale for formatting (defaults to navigator.language) */
@@ -247,12 +247,12 @@ export type TableMetaState = {
   readonly placeholderRowCount: number;
   readonly rowHeight: number;
   readonly schemaName?: string;
-  readonly wasTableSettingsOpenBeforeColumnSettings?: boolean;
+  readonly tableName?: string;
   readonly tableSettingsExpandedFilters: readonly string[];
   readonly tableSettingsSelectedTab: string;
-  readonly tableName?: string;
   readonly threshold: number;
   readonly title?: string;
+  readonly wasTableSettingsOpenBeforeColumnSettings?: boolean;
 };
 
 /**

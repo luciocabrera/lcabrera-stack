@@ -11,19 +11,19 @@ describe('getPinningActionContext', () => {
   it('returns safe defaults when stores have no state', () => {
     const context = getPinningActionContext({
       columnsStore: {
-        get: () => undefined,
+        get: () => {},
       },
       metaStore: {
-        get: () => undefined,
+        get: () => {},
       },
     });
 
     expect(context).toEqual({
       columnOrder: [],
       columnPinning: { left: [], right: [] },
+      columns: [],
       columnSizing: undefined,
       columnVisibility: undefined,
-      columns: [],
       drawersSyncNonce: 0,
       persistenceKey: '',
       staticKeys: undefined,
@@ -38,12 +38,12 @@ describe('getPinningActionContext', () => {
           ({
             columnOrder: ['id', 'name'],
             columnPinning: { left: ['id'], right: [] },
-            columnSizing: { id: 100 } as unknown as ColumnSizingState<TData>,
-            columnVisibility: new Set(['name']),
             columns: [
               { key: 'id', label: 'ID' },
               { key: 'name', label: 'Name' },
             ],
+            columnSizing: { id: 100 } as unknown as ColumnSizingState<TData>,
+            columnVisibility: new Set(['name']),
             staticKeys: new Set(['id']),
           }) as unknown as TableColumnsState<TData>,
       },

@@ -1,5 +1,5 @@
 import type { RenderToPipeableStreamOptions } from 'react-dom/server';
-import type { AppLoadContext, EntryContext } from 'react-router';
+import type { EntryContext } from 'react-router';
 
 import { createReadableStreamFromReadable } from '@react-router/node';
 import { isbot } from 'isbot';
@@ -50,27 +50,26 @@ export default function handleRequest(
   responseStatusCode: number,
   responseHeaders: Headers,
   routerContext: EntryContext,
-  _loadContext: AppLoadContext,
   // If you have middleware enabled:
   // loadContext: RouterContextProvider
 ) {
   // https://httpwg.org/specs/rfc9110.html#HEAD
   if (request.method.toUpperCase() === 'HEAD') {
-    return new Response(null, {
-      status: responseStatusCode,
+    return new Response(undefined, {
       headers: responseHeaders,
+      status: responseStatusCode,
     });
   }
   const cspNonce = getRequestCspNonce(request);
   addPreloadHeaders(responseHeaders);
 
   return new Promise((resolve, reject) => {
-    let shellRendered = false;
-    let userAgent = request.headers.get('user-agent');
+    let isShellRendered = false;
+    const userAgent = request.headers.get('user-agent');
 
     // Ensure requests from bots and SPA Mode renders wait for all content to load before responding
     // https://react.dev/reference/react-dom/server/renderToPipeableStream#waiting-for-all-content-to-load-for-crawlers-and-static-generation
-    let readyOption: keyof RenderToPipeableStreamOptions =
+    const readyOption: keyof RenderToPipeableStreamOptions =
       (userAgent && isbot(userAgent)) || routerContext.isSpaMode
         ? 'onAllReady'
         : 'onShellReady';
@@ -82,12 +81,24 @@ export default function handleRequest(
       ABORT_DELAY,
     );
 
-    const { pipe, abort } = renderToPipeableStream(
+    const { abort, pipe } = renderToPipeableStream(
       <ServerRouter context={routerContext} url={request.url} />,
       {
         nonce: cspNonce,
+        onError(error: unknown) {
+          responseStatusCode = 500;
+          // Log streaming rendering errors from inside the shell.  Don't log
+          // errors encountered during initial shell rendering since they'll
+          // reject and get logged in handleDocumentRequest.
+          if (isShellRendered) {
+            console.error(toError(error));
+          }
+        },
+        onShellError(error: unknown) {
+          reject(toError(error));
+        },
         [readyOption]() {
-          shellRendered = true;
+          isShellRendered = true;
 
           const body = new PassThrough({
             final(callback) {
@@ -111,18 +122,6 @@ export default function handleRequest(
               status: responseStatusCode,
             }),
           );
-        },
-        onShellError(error: unknown) {
-          reject(toError(error));
-        },
-        onError(error: unknown) {
-          responseStatusCode = 500;
-          // Log streaming rendering errors from inside the shell.  Don't log
-          // errors encountered during initial shell rendering since they'll
-          // reject and get logged in handleDocumentRequest.
-          if (shellRendered) {
-            console.error(toError(error));
-          }
         },
       },
     );

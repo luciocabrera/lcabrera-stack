@@ -1,64 +1,70 @@
 import type { TableMetaState } from '@/components/Table/Table.types';
+import type { PersistedUiState } from '@/components/Table/utils/persistence.types';
 
 import {
   DEFAULT_COLUMN_OVERSCAN,
-  DEFAULT_ENABLE_PREFETCH,
   DEFAULT_OVERSCAN,
-  DEFAULT_PLACEHOLDER_ROW_COUNT,
   DEFAULT_ROW_HEIGHT,
   INFINITE_SCROLL_THRESHOLD,
   INITIAL_PAGE_SIZE,
+  IS_PREFETCH_ENABLED,
   LOAD_MORE_PAGE_SIZE,
 } from '@/components/Table/Table.constants';
 
-type GetInitialMetaStateArgs = Partial<TableMetaState>;
+type GetInitialMetaStateArgs = Partial<TableMetaState> & {
+  readonly persistedUiState?: PersistedUiState;
+};
 
 export const getInitialMetaState = ({
   columnOverscan = DEFAULT_COLUMN_OVERSCAN,
   columnSettingsSelectedTab = 'general',
-  drawersSyncNonce = 0,
   density = 'compact',
-  enablePrefetch = DEFAULT_ENABLE_PREFETCH,
+  drawersSyncNonce = 0,
+  enablePrefetch = IS_PREFETCH_ENABLED,
   error,
   initialPageSize = INITIAL_PAGE_SIZE,
   isBordered = true,
   isColumnSettingsOpen = false,
   isColumnSettingsPinned = false,
   isStriped = true,
-  isTableSettingsPinned = false,
   isTableSettingsOpen = false,
+  isTableSettingsPinned = false,
   loadMorePageSize = LOAD_MORE_PAGE_SIZE,
   overscan = DEFAULT_OVERSCAN,
+  persistedUiState = {},
   persistenceKey = '',
-  placeholderRowCount = DEFAULT_PLACEHOLDER_ROW_COUNT,
+  placeholderRowCount = INITIAL_PAGE_SIZE,
   rowHeight = DEFAULT_ROW_HEIGHT,
   tableSettingsExpandedFilters = [],
   tableSettingsSelectedTab = 'general',
   threshold = INFINITE_SCROLL_THRESHOLD,
   wasTableSettingsOpenBeforeColumnSettings = false,
   ...rest
-}: GetInitialMetaStateArgs): TableMetaState => ({
-  columnOverscan,
-  columnSettingsSelectedTab,
-  drawersSyncNonce,
-  density,
-  enablePrefetch,
-  error,
-  initialPageSize,
-  isBordered,
-  isColumnSettingsOpen,
-  isColumnSettingsPinned,
-  isStriped,
-  isTableSettingsPinned,
-  isTableSettingsOpen,
-  loadMorePageSize,
-  overscan,
-  persistenceKey,
-  placeholderRowCount,
-  rowHeight,
-  tableSettingsExpandedFilters,
-  tableSettingsSelectedTab,
-  threshold,
-  wasTableSettingsOpenBeforeColumnSettings,
-  ...rest,
-});
+}: GetInitialMetaStateArgs): TableMetaState => {
+  return {
+    columnOverscan,
+    columnSettingsSelectedTab,
+    density,
+    drawersSyncNonce,
+    enablePrefetch,
+    error,
+    initialPageSize,
+    isBordered,
+    isColumnSettingsOpen,
+    isColumnSettingsPinned,
+    isStriped,
+    isTableSettingsOpen,
+    isTableSettingsPinned,
+    loadMorePageSize,
+    overscan,
+    persistenceKey,
+    placeholderRowCount,
+    rowHeight,
+    tableSettingsExpandedFilters,
+    tableSettingsSelectedTab,
+    threshold,
+    wasTableSettingsOpenBeforeColumnSettings,
+    ...rest,
+    ...persistedUiState,
+  };
+};

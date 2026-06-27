@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
+
+import { useStore } from '@/hooks';
 
 import type {
-  AppNotification,
   NotificationProviderProps,
-  NotifyArgs,
+  NotificationState,
 } from './NotificationContext.types';
 
 import {
@@ -11,96 +12,38 @@ import {
   DEFAULT_PLACEMENT,
 } from './NotificationContext.constants';
 import { NotificationContext } from './NotificationContext.context';
-import { createNotificationId } from './utils';
 
 export const NotificationProvider = ({
   children,
   defaultDurationMs = DEFAULT_DURATION_MS,
   defaultPlacement = DEFAULT_PLACEMENT,
 }: NotificationProviderProps) => {
-  const [notifications, setNotifications] = useState<
-    readonly AppNotification[]
-  >([]);
-  const timeoutMapRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(
-    new Map(),
+  const initialState: NotificationState = {
+    defaultDurationMs,
+    defaultPlacement,
+    notifications: [],
+  };
+
+  const notificationsStore = useStore(initialState);
+  const timeoutMapRef = useRef(
+    new Map<string, ReturnType<typeof setTimeout>>(),
   );
 
-  const clearNotificationTimeout = (id: string) => {
-    const timeoutId = timeoutMapRef.current.get(id);
-
-    if (!timeoutId) {
-      return;
-    }
-
-    clearTimeout(timeoutId);
-    timeoutMapRef.current.delete(id);
-  };
-
-  const dismissNotification = (id: string) => {
-    clearNotificationTimeout(id);
-    setNotifications((currentNotifications) =>
-      currentNotifications.filter((notification) => notification.id !== id),
-    );
-  };
-
-  const dismissNotifications = () => {
-    for (const timeoutId of timeoutMapRef.current.values()) {
-      clearTimeout(timeoutId);
-    }
-
-    timeoutMapRef.current.clear();
-    setNotifications([]);
-  };
-
-  const notify = ({
-    durationMs = defaultDurationMs,
-    message,
-    placement = defaultPlacement,
-    title,
-    variant = 'info',
-  }: NotifyArgs): string => {
-    const id = createNotificationId();
-    const notification: AppNotification = {
-      durationMs,
-      id,
-      message,
-      placement,
-      title,
-      variant,
-    };
-
-    setNotifications((currentNotifications) => [
-      ...currentNotifications,
-      notification,
-    ]);
-
-    if (durationMs > 0) {
-      const timeoutId = setTimeout(() => {
-        dismissNotification(id);
-      }, durationMs);
-
-      timeoutMapRef.current.set(id, timeoutId);
-    }
-
-    return id;
-  };
-
   useEffect(() => {
+    const timeoutMap = timeoutMapRef.current;
+
     return () => {
-      for (const timeoutId of timeoutMapRef.current.values()) {
+      for (const timeoutId of timeoutMap.values()) {
         clearTimeout(timeoutId);
       }
 
-      timeoutMapRef.current.clear();
+      timeoutMap.clear();
     };
   }, []);
 
-  const value = {
-    dismissNotification,
-    dismissNotifications,
-    notifications,
-    notify,
-  };
-
-  return <NotificationContext value={value}>{children}</NotificationContext>;
+  return (
+    <NotificationContext value={{ notificationsStore, timeoutMapRef }}>
+      {children}
+    </NotificationContext>
+  );
 };

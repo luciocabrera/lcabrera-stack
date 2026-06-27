@@ -31,8 +31,8 @@ describe('deriveColumnViewState', () => {
     const result = deriveColumnViewState<Row>({
       columnOrder: ['id', 'name', 'age'],
       columnPinning: { left: ['id'], right: ['age'] },
-      columnSizing,
       columns,
+      columnSizing,
       sorting: [{ columnKey: 'name', direction: 'asc' }],
     });
 
@@ -60,8 +60,8 @@ describe('deriveColumnViewState', () => {
     const result = deriveColumnViewState<Row>({
       columnOrder: ['id', 'name', 'age'],
       columnPinning: { left: ['id'], right: ['age'] },
-      columnSizing,
       columns,
+      columnSizing,
       columnVisibility: new Set(['name']),
       sorting: [],
     });

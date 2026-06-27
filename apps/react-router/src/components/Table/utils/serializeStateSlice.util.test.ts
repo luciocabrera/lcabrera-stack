@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest';
 
 import { serializeStateSlice } from './serializeStateSlice.util';
 
+const sortStrings = (values: readonly string[]): readonly string[] =>
+  values.toSorted((left, right) => left.localeCompare(right));
+
 describe('serializeStateSlice', () => {
   it('returns key with storage prefix', () => {
     const result = serializeStateSlice({
@@ -39,7 +42,9 @@ describe('serializeStateSlice', () => {
       version: number;
     };
     expect(Array.isArray(parsed.value)).toBe(true);
-    expect((parsed.value as string[]).sort()).toEqual(['id', 'name'].sort());
+    expect(sortStrings(parsed.value as string[])).toEqual(
+      sortStrings(['id', 'name']),
+    );
   });
 
   it('does not convert non-Set value for columnVisibility', () => {

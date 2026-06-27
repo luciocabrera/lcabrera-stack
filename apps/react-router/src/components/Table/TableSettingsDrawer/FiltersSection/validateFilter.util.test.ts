@@ -1,36 +1,36 @@
 import { describe, expect, it } from 'vitest';
 
-import { validateFilter } from './validateFilter.util';
+import { isFilterValid } from './isFilterValid.util';
 
-describe('validateFilter', () => {
+describe('isFilterValid', () => {
   it('returns false for undefined', () => {
     const filterValue = void 0 as unknown as Parameters<
-      typeof validateFilter
+      typeof isFilterValid
     >[0];
 
-    expect(validateFilter(filterValue)).toBe(false);
+    expect(isFilterValid(filterValue)).toBe(false);
   });
 
   it('returns true for boolean filter', () => {
-    expect(validateFilter({ type: 'boolean', value: true })).toBe(true);
-    expect(validateFilter({ type: 'boolean', value: false })).toBe(true);
+    expect(isFilterValid({ type: 'boolean', value: true })).toBe(true);
+    expect(isFilterValid({ type: 'boolean', value: false })).toBe(true);
   });
 
   it('returns false for date filter without value', () => {
-    expect(validateFilter({ operator: 'after', type: 'date', value: '' })).toBe(
+    expect(isFilterValid({ operator: 'after', type: 'date', value: '' })).toBe(
       false,
     );
   });
 
   it('returns true for date filter with value', () => {
     expect(
-      validateFilter({ operator: 'after', type: 'date', value: '2024-01-01' }),
+      isFilterValid({ operator: 'after', type: 'date', value: '2024-01-01' }),
     ).toBe(true);
   });
 
   it('returns false for date between without value2', () => {
     expect(
-      validateFilter({
+      isFilterValid({
         operator: 'between',
         type: 'date',
         value: '2024-01-01',
@@ -40,7 +40,7 @@ describe('validateFilter', () => {
 
   it('returns true for date between with both values', () => {
     expect(
-      validateFilter({
+      isFilterValid({
         operator: 'between',
         type: 'date',
         value: '2024-01-01',
@@ -51,13 +51,13 @@ describe('validateFilter', () => {
 
   it('returns false for select filter without values', () => {
     expect(
-      validateFilter({ operator: 'equals', type: 'select', values: [] }),
+      isFilterValid({ operator: 'equals', type: 'select', values: [] }),
     ).toBe(false);
   });
 
   it('returns true for select filter with values', () => {
     expect(
-      validateFilter({
+      isFilterValid({
         operator: 'equals',
         type: 'select',
         values: ['Active'],
@@ -67,7 +67,7 @@ describe('validateFilter', () => {
 
   it('returns true for select filter with value string', () => {
     expect(
-      validateFilter({
+      isFilterValid({
         operator: 'equals',
         type: 'select',
         value: 'Active',
@@ -78,18 +78,18 @@ describe('validateFilter', () => {
 
   it('returns false for number filter without value', () => {
     // @ts-expect-error testing edge case
-    expect(validateFilter({ operator: 'equals', type: 'number' })).toBe(false);
+    expect(isFilterValid({ operator: 'equals', type: 'number' })).toBe(false);
   });
 
   it('returns true for number filter with value', () => {
     expect(
-      validateFilter({ operator: 'equals', type: 'number', value: 0 }),
+      isFilterValid({ operator: 'equals', type: 'number', value: 0 }),
     ).toBe(true);
   });
 
   it('returns false for number between where value2 <= value', () => {
     expect(
-      validateFilter({
+      isFilterValid({
         operator: 'between',
         type: 'number',
         value: 10,
@@ -100,7 +100,7 @@ describe('validateFilter', () => {
 
   it('returns true for number between where value2 > value', () => {
     expect(
-      validateFilter({
+      isFilterValid({
         operator: 'between',
         type: 'number',
         value: 5,
@@ -110,38 +110,38 @@ describe('validateFilter', () => {
   });
 
   it('returns false for text equals without value', () => {
-    expect(
-      validateFilter({ operator: 'equals', type: 'text', value: '' }),
-    ).toBe(false);
+    expect(isFilterValid({ operator: 'equals', type: 'text', value: '' })).toBe(
+      false,
+    );
   });
 
   it('returns false for text notEquals without value', () => {
     expect(
-      validateFilter({ operator: 'notEquals', type: 'text', value: '' }),
+      isFilterValid({ operator: 'notEquals', type: 'text', value: '' }),
     ).toBe(false);
   });
 
   it('returns false for text contains with empty value', () => {
     expect(
-      validateFilter({ operator: 'contains', type: 'text', value: '  ' }),
+      isFilterValid({ operator: 'contains', type: 'text', value: '  ' }),
     ).toBe(false);
   });
 
   it('returns true for text contains with value', () => {
     expect(
-      validateFilter({ operator: 'contains', type: 'text', value: 'hello' }),
+      isFilterValid({ operator: 'contains', type: 'text', value: 'hello' }),
     ).toBe(true);
   });
 
   it('returns false for multiSelect filter without values', () => {
     expect(
-      validateFilter({ operator: 'equals', type: 'multiSelect', values: [] }),
+      isFilterValid({ operator: 'equals', type: 'multiSelect', values: [] }),
     ).toBe(false);
   });
 
   it('returns true for multiSelect filter with values', () => {
     expect(
-      validateFilter({
+      isFilterValid({
         operator: 'equals',
         type: 'multiSelect',
         values: ['a'],

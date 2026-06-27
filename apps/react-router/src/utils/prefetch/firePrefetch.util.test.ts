@@ -64,10 +64,7 @@ describe('firePrefetch', () => {
       promise: undefined,
       skip: -1,
     });
-    let resolvePromise: (value: string) => void;
-    const promise = new Promise<string>((resolve) => {
-      resolvePromise = resolve;
-    });
+    const { promise, resolve } = Promise.withResolvers<string>();
     const onLoadMore = vi.fn().mockReturnValue(promise);
 
     firePrefetch({ limit: 50, nextSkip: 100, onLoadMore, prefetchRef });
@@ -77,7 +74,7 @@ describe('firePrefetch', () => {
     prefetchRef.current = { data: undefined, promise: undefined, skip: 200 };
 
     // Now resolve the original prefetch
-    resolvePromise!('stale-data');
+    resolve('stale-data');
     await promise;
 
     // The stale result should be discarded — skip should still be 200

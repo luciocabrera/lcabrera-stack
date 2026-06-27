@@ -34,7 +34,7 @@ export const FiltersSection = ({ isBusy = false }: FiltersSectionProps) => {
 
   const handleExpandedFiltersChange = (nextExpandedFilters: Set<string>) => {
     setExpandedFilters(nextExpandedFilters);
-    setTableSettingsExpandedFilters(Array.from(nextExpandedFilters));
+    setTableSettingsExpandedFilters([...nextExpandedFilters]);
   };
 
   const handleClearLocalState = () => {
@@ -81,8 +81,8 @@ export const FiltersSection = ({ isBusy = false }: FiltersSectionProps) => {
           isBusy={isBusy}
           isCollapseAllDisabled={!hasExpandedFilters}
           isExpandAllDisabled={!hasFilters || areAllFiltersExpanded}
-          onCollapseAll={handleCollapseAll}
           onClearAll={handleClearLocalState}
+          onCollapseAll={handleCollapseAll}
           onExpandAll={handleExpandAll}
         />
       </SidePanelSectionOverlay>

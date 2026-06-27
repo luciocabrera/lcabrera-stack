@@ -1,6 +1,7 @@
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { useTableDataContextValue } from '@/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
 import { usePersistTableStateAction } from '@/components/Table/hooks';
+import { persistTableMetaUiState } from '@/components/Table/utils';
 import { areEqualByJson } from '@/utils/comparison';
 
 import type { BatchTableSettingsUpdate } from './utils/resolveBatchTableSettingsUpdate.util';
@@ -19,15 +20,15 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
     const columnsState = columnsStore.get();
     const metaState = metaStore.get();
     const persistenceKey = metaState?.persistenceKey ?? '';
-    const sortingHasChanged = !areEqualByJson({
+    const hasSortingChanged = !areEqualByJson({
       left: columnsState?.sorting,
       right: settings.sorting,
     });
-    const filtersHasChanged = !areEqualByJson({
+    const hasFiltersChanged = !areEqualByJson({
       left: columnsState?.columnFilters,
       right: settings.columnFilters,
     });
-    const queryHasChanged = sortingHasChanged || filtersHasChanged;
+    const hasQueryChanged = hasSortingChanged || hasFiltersChanged;
     const resolvedUpdate = resolveBatchTableSettingsUpdate<TData>({
       columns: columnsState?.columns ?? [],
       settings,
@@ -49,7 +50,7 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
       return;
     }
 
-    if (queryHasChanged) {
+    if (hasQueryChanged) {
       dataStore.set({
         isLoading: true,
       });
@@ -57,7 +58,13 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
 
     columnsStore.set(resolvedUpdate);
     if (!metaState?.isTableSettingsPinned) {
-      metaStore.set({ isTableSettingsOpen: false });
+      const nextStatePatch = { isTableSettingsOpen: false };
+
+      persistTableMetaUiState({
+        currentState: metaState,
+        nextStatePatch,
+      });
+      metaStore.set(nextStatePatch);
     }
   };
 };

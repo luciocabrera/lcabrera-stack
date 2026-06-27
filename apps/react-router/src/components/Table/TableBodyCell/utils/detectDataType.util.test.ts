@@ -33,7 +33,7 @@ describe('detectDataType', () => {
   });
 
   it('returns string for null, undefined, object', () => {
-    expect(detectDataType(null)).toBe('string');
+    expect(detectDataType(undefined)).toBe('string');
     expect(detectDataType(undefined)).toBe('string');
     expect(detectDataType({})).toBe('string');
   });

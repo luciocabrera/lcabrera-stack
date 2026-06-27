@@ -88,6 +88,10 @@ export const GeneralSettingsSection = ({
     }
   };
 
+  const handleToggleDefault = () => handleToggle('default');
+  const handleToggleMax = () => handleToggle('max');
+  const handleToggleMin = () => handleToggle('min');
+
   return (
     <SidePanelSectionMain {...props}>
       <SidePanelSection>
@@ -98,9 +102,7 @@ export const GeneralSettingsSection = ({
             disabled={!hasMinWidthsConfigured}
             icon={<MinimizeIcon size={ICON_SIZE_MD} />}
             isBusy={isBusy}
-            onClick={() => {
-              handleToggle('min');
-            }}
+            onClick={handleToggleMin}
             size='sm'
             width='full'
           >
@@ -111,9 +113,7 @@ export const GeneralSettingsSection = ({
             disabled={!hasMaxWidthsConfigured}
             icon={<MaximizeIcon size={ICON_SIZE_MD} />}
             isBusy={isBusy}
-            onClick={() => {
-              handleToggle('max');
-            }}
+            onClick={handleToggleMax}
             size='sm'
             width='full'
           >
@@ -123,9 +123,7 @@ export const GeneralSettingsSection = ({
             color={selectedPreset === 'default' ? 'primary' : 'outline'}
             icon={<RefreshIcon size={ICON_SIZE_MD} />}
             isBusy={isBusy}
-            onClick={() => {
-              handleToggle('default');
-            }}
+            onClick={handleToggleDefault}
             size='sm'
             width='full'
           >

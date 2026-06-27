@@ -12,7 +12,7 @@ import {
 } from '@/hooks/utils';
 
 export type UseVirtualizationResizeObserverArgs = {
-  containerRef: RefObject<HTMLElement | null>;
+  containerRef: RefObject<HTMLElement | null | undefined>;
   defaultContainerHeight?: number;
   itemHeight: number;
   overscan?: number;

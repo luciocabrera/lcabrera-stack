@@ -2,6 +2,9 @@ import type { TableColumn } from '@/components/Table/Table.types';
 import type { WideAlltypes150 } from '@/services';
 
 export const PERSISTENCE_KEY = 'wide-alltypes-150-table';
+export const SCHEMA_NAME = 'public';
+export const TABLE_NAME = 'wide_alltypes_150';
+export const TITLE = 'Wide All-Types — 150 Columns × 1M Rows';
 
 // ─── Column helpers ──────────────────────────────────────────────────────────
 
@@ -18,7 +21,7 @@ const getColDataType = (index: number): ColDataType => {
   const mod = index % 20;
   if (mod === 6) return 'boolean';
   if (mod === 9) return 'date';
-  if (mod === 0 || mod === 1 || mod === 4 || mod === 5) return 'number';
+  if ([0, 1, 4, 5].includes(mod)) return 'number';
   return 'string';
 };
 
@@ -76,9 +79,10 @@ const buildGeneratedColumn = ({
   } satisfies TableColumn<WideAlltypes150>;
 };
 
-const GENERATED_COLUMNS: TableColumn<WideAlltypes150>[] = [
-  ...Array.from({ length: 149 }).keys(),
-].map((zeroBasedIndex) => buildGeneratedColumn({ index: zeroBasedIndex + 1 }));
+const GENERATED_COLUMNS: TableColumn<WideAlltypes150>[] = Array.from(
+  { length: 149 },
+  (_, zeroBasedIndex) => buildGeneratedColumn({ index: zeroBasedIndex + 1 }),
+);
 
 export const COLUMNS: TableColumn<WideAlltypes150>[] = [
   ID_COLUMN,

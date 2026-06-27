@@ -10,13 +10,15 @@ import {
   type MockStore,
 } from '@/utils/tests/createMockStore.util';
 
-let settingsStore: MockStore<GlobalSettingsState | undefined> = createMockStore<
-  GlobalSettingsState | undefined
->(undefined);
+const settingsStoreRef: {
+  current: MockStore<GlobalSettingsState | undefined>;
+} = {
+  current: createMockStore<GlobalSettingsState | undefined>(undefined),
+};
 
 vi.mock('./useGlobalSettingsContextValue.hook', () => ({
   useGlobalSettingsContextValue: () => ({
-    settingsStore: settingsStore as never,
+    settingsStore: settingsStoreRef.current as never,
   }),
 }));
 
@@ -24,15 +26,17 @@ import { useGlobalSettingsStore } from './useGlobalSettingsStore.hook';
 
 describe('useGlobalSettingsStore', () => {
   beforeEach(() => {
-    settingsStore = createMockStore<GlobalSettingsState | undefined>({
-      navigation: {
-        collapsed: 'expanded',
-        size: 'small',
+    settingsStoreRef.current = createMockStore<GlobalSettingsState | undefined>(
+      {
+        navigation: {
+          collapsed: 'expanded',
+          size: 'small',
+        },
+        pinning: {
+          pinSide: 'left',
+        },
       },
-      pinning: {
-        pinSide: 'left',
-      },
-    });
+    );
   });
 
   it('subscribes to store updates and returns the selected value', () => {
@@ -43,7 +47,7 @@ describe('useGlobalSettingsStore', () => {
     expect(result.current).toBe('small');
 
     act(() => {
-      settingsStore.set({
+      settingsStoreRef.current.set({
         navigation: {
           collapsed: 'expanded',
           size: 'large',
@@ -55,7 +59,9 @@ describe('useGlobalSettingsStore', () => {
   });
 
   it('falls back to initial global settings when snapshot is undefined', () => {
-    settingsStore = createMockStore<GlobalSettingsState | undefined>(undefined);
+    settingsStoreRef.current = createMockStore<GlobalSettingsState | undefined>(
+      undefined,
+    );
 
     const { result } = renderHook(() =>
       useGlobalSettingsStore((state) => state.navigation.size ?? 'medium'),

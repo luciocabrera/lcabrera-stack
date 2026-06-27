@@ -35,26 +35,29 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   let hasEffectiveQueryChange = false;
 
   for (const { key, searchParamKey, searchParamValue, value } of entries) {
-    headers.append('Set-Cookie', buildCookieString({ key, value }));
+    if (key && value) {
+      headers.append('Set-Cookie', buildCookieString({ key, value }));
+    }
 
     if (searchParamKey) {
-      const currentSearchParamValue = url.searchParams.get(searchParamKey);
-      const nextSearchParamValue = searchParamValue || null;
+      const currentSearchParamValue =
+        url.searchParams.get(searchParamKey) || undefined;
+      const nextSearchParamValue = searchParamValue || undefined;
 
       if (currentSearchParamValue !== nextSearchParamValue) {
         hasEffectiveQueryChange = true;
       }
 
-      if (nextSearchParamValue === null) {
-        url.searchParams.delete(searchParamKey);
-      } else {
+      if (nextSearchParamValue) {
         url.searchParams.set(searchParamKey, nextSearchParamValue);
+      } else {
+        url.searchParams.delete(searchParamKey);
       }
     }
   }
 
   if (!hasEffectiveQueryChange) {
-    return new Response(null, { headers, status: 204 });
+    return new Response(undefined, { headers, status: 204 });
   }
 
   return redirect(url.href, { headers });

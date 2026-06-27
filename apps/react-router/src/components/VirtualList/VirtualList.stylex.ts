@@ -10,11 +10,6 @@ import { skeleton } from '@/design-system/tokens/commons.stylex';
 import { filterBaseStyles } from '@/design-system/tokens/filters.stylex';
 
 const localStyles = stylex.create({
-  checkbox: {
-    cursor: 'pointer',
-    height: spacing.md,
-    width: spacing.md,
-  },
   label: {
     flex: '1', // Take remaining space after checkbox
     overflow: 'hidden',
@@ -90,7 +85,6 @@ const localStyles = stylex.create({
 export const skeletonStyles = { ...skeleton };
 
 export const styles = {
-  checkbox: localStyles.checkbox,
   container: filterBaseStyles.container,
   containerFill: localStyles.containerFill,
   label: localStyles.label,

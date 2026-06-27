@@ -15,5 +15,5 @@ export const pluginsConfig = createReactRouterPluginsConfig({
       ],
     ],
   },
-  babelIncludePattern: /\/src\/.*(?<!\.test)\.[jt]sx?(\?.*)?$/,
+  babelIncludePattern: /\/src\/(?!.*\.test\.).*\.[jt]sx?(\?.*)?$/,
 });

@@ -1,34 +1,45 @@
 import * as stylex from '@stylexjs/stylex';
+import { useNavigate, useRevalidator } from 'react-router';
+
+import { Button } from '@/components/Button';
+import { ErrorDescriptive } from '@/components/Icons';
+import { Title } from '@/components/Title';
 
 import type { RouteErrorBoundaryProps } from './RouteErrorBoundary.types';
 
 import { styles } from './RouteErrorBoundary.stylex';
 
-const handleRetryClick = (): void => {
-  globalThis.location.reload();
-};
-
 export const RouteErrorBoundary = ({
   defaultMessage,
   error,
+  icon,
+  title = 'An error occurred',
 }: RouteErrorBoundaryProps) => {
-  let details = defaultMessage;
+  const { revalidate } = useRevalidator();
+  const navigate = useNavigate();
 
-  if (import.meta.env.DEV && error instanceof Error) {
-    details = error.message;
-  }
+  const details =
+    import.meta.env.DEV && error instanceof Error
+      ? error.message
+      : defaultMessage;
+
+  const handleNavigateHome = async () => {
+    await navigate('/');
+  };
 
   return (
     <div {...stylex.props(styles.container)}>
-      <h2 {...stylex.props(styles.title)}>Error Loading Data</h2>
+      <Title icon={icon}>{title}</Title>
+      <ErrorDescriptive />
       <p>{details}</p>
-      <button
-        onClick={handleRetryClick}
-        type='button'
-        {...stylex.props(styles.retryButton)}
-      >
-        Retry
-      </button>
+      <div {...stylex.props(styles.actions)}>
+        <Button color='primary' onClick={handleNavigateHome}>
+          Home
+        </Button>
+        <Button color='outline' onClick={revalidate}>
+          Retry
+        </Button>
+      </div>
     </div>
   );
 };

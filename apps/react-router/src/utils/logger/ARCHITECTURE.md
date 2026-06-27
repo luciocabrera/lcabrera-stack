@@ -84,5 +84,4 @@ graph LR
 ## Out of Scope
 
 - **`entry.server.tsx`** — SSR crash errors stay as raw `console.error` for maximum visibility
-- **`renderTracker.util.ts` / `useRenderTracker.hook.ts`** — Self-contained dev tool with its own `import.meta.env.PROD` guards
 - **Vite `customLogger`** — Controls Vite's own CLI/HMR output, not application logs

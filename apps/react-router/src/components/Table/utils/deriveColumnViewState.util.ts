@@ -12,12 +12,13 @@ import type {
 
 import { getNormalizedColumns } from './getNormalizedColumns.util';
 import { getPinnedDerivedColumnsState } from './getPinnedDerivedColumnsState.util';
+import { getStaticColumnKeys } from './getStaticColumnKeys.util';
 
 type DeriveColumnViewStateArgs<TData> = {
   readonly columnOrder: ColumnOrderState<TData>;
   readonly columnPinning: ColumnPinningState<TData>;
-  readonly columnSizing?: ColumnSizingState<TData>;
   readonly columns: readonly TableColumn<TData>[];
+  readonly columnSizing?: ColumnSizingState<TData>;
   readonly columnVisibility?: ColumnVisibilityState<TData>;
   readonly sorting: SortingState<TData>;
 };
@@ -27,13 +28,14 @@ type DeriveColumnViewStateResult<TData> = {
   readonly effectiveColumns: TableColumn<TData>[];
   readonly normalizedColumns: NormalizedColumnsState<TData>;
   readonly pinnedColumnOffsets: PinnedColumnOffsetsState<TData>;
+  readonly staticKeys: Set<string>;
 };
 
 export const deriveColumnViewState = <TData>({
   columnOrder,
   columnPinning,
-  columnSizing,
   columns,
+  columnSizing,
   columnVisibility,
   sorting,
 }: DeriveColumnViewStateArgs<TData>): DeriveColumnViewStateResult<TData> => {
@@ -46,15 +48,18 @@ export const deriveColumnViewState = <TData>({
     getPinnedDerivedColumnsState<TData>({
       columnOrder,
       columnPinning,
-      columnSizing,
       columns,
+      columnSizing,
       columnVisibility,
     });
+
+  const staticKeys = getStaticColumnKeys<TData>(columns);
 
   return {
     columnGroups,
     effectiveColumns,
     normalizedColumns,
     pinnedColumnOffsets,
+    staticKeys,
   };
 };

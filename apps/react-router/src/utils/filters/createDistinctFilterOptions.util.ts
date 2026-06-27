@@ -1,16 +1,16 @@
 import type { FilterOptionsResponse } from '@/components/Table/Table.types';
 
-type FetchDistinctValuesArgs<TData> = {
-  readonly columnName: keyof TData;
-  readonly limit: number;
-  readonly offset: number;
-};
-
 type CreateDistinctFilterOptionsArgs<TData extends Record<string, unknown>> = {
   readonly columnName: keyof TData;
   readonly fetchDistinctValues: (
     args: FetchDistinctValuesArgs<TData>,
   ) => Promise<FilterOptionsResponse>;
+};
+
+type FetchDistinctValuesArgs<TData> = {
+  readonly columnName: keyof TData;
+  readonly limit: number;
+  readonly offset: number;
 };
 
 /**

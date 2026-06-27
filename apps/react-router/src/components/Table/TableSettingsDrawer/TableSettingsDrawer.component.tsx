@@ -11,15 +11,15 @@ import {
   SidePanelTitle,
 } from '@/components/SidePanel';
 import { Tabs } from '@/components/Tabs';
+import { useNotifyAction } from '@/contexts/NotificationContext/actions';
 import { ICON_SIZE_LG } from '@/design-system/constants';
-import { useNotifications } from '@/hooks/useNotifications.hook';
 
 import type { TableSettingsDrawerProps } from './TableSettingsDrawer.types';
 
 import {
-  useSetTableSettingsSelectedTab,
   useSetTableIsTableSettingsOpen,
   useSetTableIsTableSettingsPinned,
+  useSetTableSettingsSelectedTab,
 } from '../contexts/TableConfig/meta/actions';
 import {
   useGetTableIsTableSettingsPinned,
@@ -29,7 +29,7 @@ import { ColumnOrderSection } from './ColumnOrderSection';
 import { ColumnOrderSectionProvider } from './ColumnOrderSection/ColumnOrderSectionContext/ColumnOrderSectionContext.provider';
 import { DetailsSection } from './DetailsSection';
 import { FiltersSection } from './FiltersSection';
-import { validateFilter } from './FiltersSection/validateFilter.util';
+import { isFilterValid } from './FiltersSection/isFilterValid.util';
 import { GeneralSettingsSection } from './GeneralSettingsSection';
 import { SortingSection } from './SortingSection';
 import {
@@ -42,7 +42,7 @@ export const TableSettingsDrawer = ({
   isBusy = false,
 }: TableSettingsDrawerProps) => {
   const batchSetTableDrawerSettings = useBatchSetTableDrawerSettings();
-  const { notify } = useNotifications();
+  const notify = useNotifyAction();
   const resetTableDrawerSettings = useResetTableSettings();
   const isPinned = useGetTableIsTableSettingsPinned();
   const selectedTab = useGetTableSettingsSelectedTab();
@@ -51,9 +51,7 @@ export const TableSettingsDrawer = ({
   const setTableIsTableSettingsPinned = useSetTableIsTableSettingsPinned();
 
   const filters = useGetColumnFilters();
-  const areFiltersValid = Object.values(filters).every((f) =>
-    validateFilter(f),
-  );
+  const areFiltersValid = Object.values(filters).every((f) => isFilterValid(f));
   const closeIfUnpinned = () => {
     if (!isPinned) {
       setTableIsTableSettingsOpen(false);

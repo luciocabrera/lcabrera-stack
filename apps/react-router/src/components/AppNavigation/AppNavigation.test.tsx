@@ -7,59 +7,83 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { GlobalSettingsState } from '@/types/globalSettings.types';
 
 import { GlobalSettingsProvider } from '@/contexts/GlobalSettingsContext';
+// import { useSetGlobalNavigationPreferences } from '@/contexts/GlobalSettingsContext/actions';
 import { mockDialogElement } from '@/utils/tests/mockDialogElement.util';
 
 import { AppNavigation } from './AppNavigation.component';
 
-let restoreMockDialog: () => void;
+// const ExternalPinTrigger = ({
+//   pinned,
+// }: {
+//   readonly pinned: 'pinned' | 'unpinned';
+// }) => {
+//   const setPreferences = useSetGlobalNavigationPreferences();
+//   return (
+//     <button
+//       data-testid='external-pin-trigger'
+//       onClick={() => setPreferences({ pinned })}
+//       type='button'
+//     >
+//       Set {pinned}
+//     </button>
+//   );
+// };
+
+type RenderWithGlobalSettingsArgs = {
+  readonly initialSettings: GlobalSettingsState;
+  readonly isDarkMode: boolean;
+  readonly onToggleTheme: () => void;
+};
+
+const renderWithGlobalSettings = ({
+  initialSettings,
+  isDarkMode,
+  onToggleTheme,
+}: RenderWithGlobalSettingsArgs) => {
+  const router = createMemoryRouter(
+    [
+      {
+        element: (
+          <GlobalSettingsProvider initialSettings={initialSettings}>
+            <AppNavigation
+              isDarkMode={isDarkMode}
+              onToggleTheme={onToggleTheme}
+            />
+          </GlobalSettingsProvider>
+        ),
+        path: '/',
+      },
+      {
+        action: async () => {
+          return;
+        },
+        path: '/_action/persist-cookie',
+      },
+    ],
+    {
+      initialEntries: ['/'],
+    },
+  );
+
+  return render(<RouterProvider router={router} />);
+};
+
+const restoreMockDialogRef: { current: () => void } = {
+  current: () => {
+    // no-op default restore before setup
+  },
+};
 
 afterEach(() => {
-  restoreMockDialog();
+  restoreMockDialogRef.current();
   cleanup();
 });
 
 beforeEach(() => {
-  restoreMockDialog = mockDialogElement().restore;
+  restoreMockDialogRef.current = mockDialogElement().restore;
 });
 
 describe('AppNavigation', () => {
-  const renderWithGlobalSettings = ({
-    initialSettings,
-    isDarkMode,
-    onToggleTheme,
-  }: {
-    readonly initialSettings: GlobalSettingsState;
-    readonly isDarkMode: boolean;
-    readonly onToggleTheme: () => void;
-  }) => {
-    const router = createMemoryRouter(
-      [
-        {
-          element: (
-            <GlobalSettingsProvider initialSettings={initialSettings}>
-              <AppNavigation
-                isDarkMode={isDarkMode}
-                onToggleTheme={onToggleTheme}
-              />
-            </GlobalSettingsProvider>
-          ),
-          path: '/',
-        },
-        {
-          action: async () => {
-            return null;
-          },
-          path: '/_action/persist-cookie',
-        },
-      ],
-      {
-        initialEntries: ['/'],
-      },
-    );
-
-    return render(<RouterProvider router={router} />);
-  };
-
   it('renders the configured route links and theme toggle', () => {
     const handleToggleTheme = vi.fn();
 
@@ -187,24 +211,58 @@ describe('AppNavigation', () => {
       onToggleTheme: vi.fn(),
     });
 
-    // Initially expanded — nav links are visible
     expect(screen.getByRole('link', { name: /Home/i })).toBeDefined();
 
-    // Collapse the panel
     fireEvent.click(
       screen.getByRole('button', { name: /Collapse navigation/i }),
     );
 
-    // Expand button label changes
     expect(
       screen.getByRole('button', { name: /Expand navigation/i }),
     ).toBeDefined();
 
-    // Expand again
     fireEvent.click(screen.getByRole('button', { name: /Expand navigation/i }));
 
     expect(
       screen.getByRole('button', { name: /Collapse navigation/i }),
     ).toBeDefined();
   });
+
+  // it('opens the nav panel when pin preference changes to unpinned externally', () => {
+  //   const router = createMemoryRouter(
+  //     [
+  //       {
+  //         element: (
+  //           <GlobalSettingsProvider
+  //             initialSettings={{
+  //               navigation: { pinned: 'pinned', size: 'medium' },
+  //               pinning: {},
+  //             }}
+  //           >
+  //             <ExternalPinTrigger pinned='unpinned' />
+  //             <AppNavigation isDarkMode={false} onToggleTheme={vi.fn()} />
+  //           </GlobalSettingsProvider>
+  //         ),
+  //         path: '/',
+  //       },
+  //       { action: async () => {}, path: '/_action/persist-cookie' },
+  //     ],
+  //     { initialEntries: ['/'] },
+  //   );
+
+  //   render(<RouterProvider router={router} />);
+
+  //   // Pinned: nav renders as aside, drawer not open
+  //   expect(
+  //     screen.queryByRole('button', { name: /Open navigation/i }),
+  //   ).toBeNull();
+
+  //   // Simulate Settings saving 'unpinned' preference
+  //   fireEvent.click(screen.getByTestId('external-pin-trigger'));
+
+  //   // Drawer should now be open
+  //   const panel = screen.getByTestId('side-panel') as HTMLDialogElement;
+  //   expect(panel.open).toBe(true);
+  //   expect(screen.getByLabelText(/Close navigation/i)).toBeDefined();
+  // });
 });

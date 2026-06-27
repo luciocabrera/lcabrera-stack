@@ -65,9 +65,9 @@ export const PERSISTENCE_SIZE_WARNING: Omit<
   AppNotification,
   'id' | 'placement'
 > = {
+  durationMs: 10_000,
   message:
     'This table state is too large to save safely. Remove some filters or sorting before applying the change.',
   title: 'Table state too large',
   variant: 'error' as const,
-  durationMs: 10_000,
 };

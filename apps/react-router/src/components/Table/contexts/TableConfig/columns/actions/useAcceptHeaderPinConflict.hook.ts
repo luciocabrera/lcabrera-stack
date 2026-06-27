@@ -28,9 +28,9 @@ export const useAcceptHeaderPinConflict = <TData>() => {
     const {
       columnOrder,
       columnPinning,
+      columns,
       columnSizing,
       columnVisibility,
-      columns,
       drawersSyncNonce,
       persistenceKey,
       staticKeys,
@@ -50,10 +50,10 @@ export const useAcceptHeaderPinConflict = <TData>() => {
     commitResolvedPinningState<TData>({
       columnOrder: newOrder,
       columnPinning: newPinning,
-      columnSizing,
-      columnVisibility,
       columns,
+      columnSizing,
       columnsStore,
+      columnVisibility,
       drawersSyncNonce,
       metaStore,
       persistenceKey,

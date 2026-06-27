@@ -70,11 +70,11 @@ vi.mock('../useColumnOrderSectionContextValue.hook', () => ({
 }));
 vi.mock(
   '@/contexts/GlobalSettingsContext/selectors/useGetGlobalPinSidePreference.hook',
-  () => ({ useGetGlobalPinSidePreference: () => undefined }),
+  () => ({ useGetGlobalPinSidePreference: () => {} }),
 );
 vi.mock(
   '@/contexts/GlobalSettingsContext/selectors/useGetGlobalUnpinConflictResolutionPreference.hook',
-  () => ({ useGetGlobalUnpinConflictResolutionPreference: () => undefined }),
+  () => ({ useGetGlobalUnpinConflictResolutionPreference: () => {} }),
 );
 vi.mock('./useAcceptPinSide.hook', () => ({
   useAcceptPinSide: () => mockAcceptPinSide,

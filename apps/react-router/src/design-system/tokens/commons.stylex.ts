@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 import * as stylex from '@stylexjs/stylex';
 
 import {
@@ -152,11 +151,11 @@ export const colorVariants = stylex.create({
   },
 
   primary: {
-    borderColor: colors.brandPrimary,
-    backgroundColor: colors.brandPrimary,
+    borderColor: colors.borderPrimary,
+    backgroundColor: colors.brandSecondary,
     backgroundImage: {
       default: 'none',
-      ':hover': `radial-gradient(circle, oklch(100% 0 0 / 0.2) 1%, transparent 1%)`,
+      ':hover': `radial-gradient(circle, ${colors.hover} 1%, transparent 1%)`,
     },
     color: colors.brandSecondaryText,
   },
@@ -189,6 +188,31 @@ export const colorVariants = stylex.create({
       ':hover': `radial-gradient(circle, oklch(0% 0 0 / 0.1) 1%, transparent 1%)`,
     },
     color: colors.warningText,
+  },
+});
+
+export const overlayStyles = stylex.create({
+  linear: {
+    backgroundImage: colors.gradientLinearBackground,
+  },
+  radial: {
+    backgroundImage: colors.gradientRadialBackground,
+  },
+  overlay: {
+    inset: 0,
+    backgroundColor: colors.backgroundPrimary,
+    filter: colors.glassBackdropFilterPrimary,
+    mixBlendMode: 'screen',
+    opacity: colors.gradientOpacitySecondary,
+    pointerEvents: 'none',
+    position: 'absolute',
+    // zIndex: -10,
+    height: '100%',
+    width: '100%',
+  },
+  overlayParent: {
+    backgroundColor: 'transparent',
+    isolation: 'isolate',
   },
 });
 
@@ -293,3 +317,23 @@ export const skeleton = stylex.create({
     width: '100%',
   },
 });
+
+// parent
+// mix-blend-mode: screen;
+// background-size: auto;
+// padding: 0;
+// margin: 0;
+// inset: 2;
+// background-image: linear-gradient(90deg, #5991ff, #5918ff, #9000ff);
+
+// child
+//     inset: 1px;
+// background: black;
+// /* height: 100%; */
+// /* width: 100%; */
+// display: flex;
+// align-items: center;
+// justify-content: center;
+// /* border: 2px solid transparent; */
+// position: absolute;
+// border-radius: 8px;

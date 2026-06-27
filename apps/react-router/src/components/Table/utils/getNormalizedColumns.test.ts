@@ -4,12 +4,12 @@ import type { TableColumn } from '@/components/Table/Table.types';
 
 import { getNormalizedColumns } from './getNormalizedColumns.util';
 
-type Row = { name: string; age: number; active: boolean };
+type Row = { active: boolean; age: number; name: string };
 
 const baseColumns: TableColumn<Row>[] = [
-  { key: 'name', label: 'Name', dataType: 'string' },
-  { key: 'age', label: 'Age', dataType: 'number' },
-  { key: 'active', label: 'Active', dataType: 'boolean' },
+  { dataType: 'string', key: 'name', label: 'Name' },
+  { dataType: 'number', key: 'age', label: 'Age' },
+  { dataType: 'boolean', key: 'active', label: 'Active' },
 ];
 
 describe('getNormalizedColumns', () => {

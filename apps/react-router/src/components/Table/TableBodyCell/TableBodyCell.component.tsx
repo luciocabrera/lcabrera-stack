@@ -42,11 +42,11 @@ export const TableBodyCell = <TData extends Record<string, unknown>>({
       {...rest}
       {...getCellStyleProps({
         customStylex,
+        dataType,
+        hasCustomContent,
         minWidth,
         pinInfo,
         width,
-        hasCustomContent,
-        dataType,
       })}
     >
       {isLoadingState && (
@@ -54,7 +54,7 @@ export const TableBodyCell = <TData extends Record<string, unknown>>({
           <div {...stylex.props(skeletonStyles.shimmerWave)} />
         </div>
       )}
-      {renderDisplayedContent({ content, hasCustomContent, dataType })}
+      {renderDisplayedContent({ content, dataType, hasCustomContent })}
     </td>
   );
 };

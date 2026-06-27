@@ -9,7 +9,7 @@ import { resolveColumnFilterUpdate } from './utils';
 
 type SetColumnFilterArgs<TData> = {
   readonly columnKey: DataKey<TData>;
-  readonly filter?: ColumnFilter | null;
+  readonly filter?: ColumnFilter;
 };
 
 /**
@@ -19,26 +19,23 @@ type SetColumnFilterArgs<TData> = {
  * using useFetcher, ensuring the cookie is set server-side.
  */
 export const useSetColumnFilter = <TData>() => {
-  const { columnsStore, metaStore } = useTableConfigContextValue<TData>();
+  const { columnsStore } = useTableConfigContextValue<TData>();
   const { dataStore } = useTableDataContextValue();
   const persistTableState = usePersistTableStateAction();
 
   return ({ columnKey, filter }: SetColumnFilterArgs<TData>) => {
     const columnsState = columnsStore.get();
-    const persistenceKey = metaStore.get()?.persistenceKey ?? '';
+
     const { columnFilters, persistenceEntry } =
       resolveColumnFilterUpdate<TData>({
         columnFiltersState: columnsState?.columnFilters,
         columnKey,
         filter,
-        persistenceKey,
       });
 
     // Persist to cookie and sync URL params in one action.
     // Abort before loading/state changes when persistence would be oversized.
-    if (!persistTableState(persistenceEntry)) {
-      return;
-    }
+    if (!persistTableState(persistenceEntry)) return;
 
     // Show loading feedback immediately
     dataStore.set({ isLoading: true });

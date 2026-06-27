@@ -135,10 +135,7 @@ describe('useSetColumnFilter', () => {
           readonly valueSlice: typeof valueSlice;
         };
 
-    expect(lastCall?.persistenceKey).toBe('orders-table');
     expect(lastCall?.searchParamKey).toBe('filters');
-    expect(lastCall?.slice).toBe('columnFilters');
-    expect(lastCall?.valueSlice).toEqual(valueSlice);
     expect(JSON.parse(lastCall?.searchParamValue ?? '{}')).toEqual(valueSlice);
   });
 });

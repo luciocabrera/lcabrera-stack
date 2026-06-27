@@ -11,6 +11,7 @@ describe('TableCheckDisplay', () => {
 
     const checkbox = screen.getByRole('checkbox', { name: 'Unchecked' });
     expect((checkbox as HTMLInputElement).checked).toBe(false);
+    expect(screen.queryByTestId('table-check-display-icon')).toBeNull();
   });
 
   it('renders checked state when value is truthy', () => {
@@ -18,6 +19,7 @@ describe('TableCheckDisplay', () => {
 
     const checkbox = screen.getByRole('checkbox', { name: 'Checked' });
     expect((checkbox as HTMLInputElement).checked).toBe(true);
+    expect(screen.getByTestId('table-check-display-icon')).not.toBeNull();
   });
 
   it('uses column label in accessible name', () => {

@@ -22,7 +22,7 @@ import { getTriggerStyleProps } from './getTriggerStyleProps.util';
 describe('getTriggerStyleProps', () => {
   it('includes open and multi-mode styles', () => {
     expect(
-      getTriggerStyleProps({ isOpen: true, mode: 'multi', isStatic: false }),
+      getTriggerStyleProps({ isOpen: true, isStatic: false, mode: 'multi' }),
     ).toEqual({
       args: ['trigger', false, 'triggerOpen', 'triggerClamped', false],
     });
@@ -30,7 +30,7 @@ describe('getTriggerStyleProps', () => {
 
   it('includes static styling when requested', () => {
     expect(
-      getTriggerStyleProps({ isOpen: false, mode: 'single', isStatic: true }),
+      getTriggerStyleProps({ isOpen: false, isStatic: true, mode: 'single' }),
     ).toEqual({
       args: ['trigger', false, false, false, 'triggerStatic'],
     });

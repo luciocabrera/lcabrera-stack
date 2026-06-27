@@ -24,15 +24,10 @@ type WrapperProps = {
   readonly children: ReactNode;
 };
 
-let currentThemeContextValue: ThemeContextValue | undefined;
-
-const ThemeContextWrapper = ({ children }: WrapperProps) =>
-  createElement(ThemeContext, { value: currentThemeContextValue }, children);
-
 const createWrapper = (value: ThemeContextValue) => {
-  currentThemeContextValue = value;
-
-  return ThemeContextWrapper;
+  return function ThemeContextWrapper({ children }: WrapperProps) {
+    return createElement(ThemeContext, { value }, children);
+  };
 };
 
 describe('useTheme', () => {

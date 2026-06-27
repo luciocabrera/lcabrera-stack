@@ -12,17 +12,37 @@ import {
   resolveToggleColumnPinIntent,
 } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 
+export type ResolveToggleColumnPinUpdateResult =
+  | {
+      readonly kind: 'apply-pinning-direct';
+      readonly nextPinning: ColumnPinningState<Record<string, unknown>>;
+    }
+  | {
+      readonly kind: 'auto-accept-pin-side';
+      readonly modal: PinSideModalResult;
+      readonly pinSide: PinSide;
+    }
+  | {
+      readonly kind: 'auto-accept-unpin-conflict';
+      readonly modal: UnpinConflictModalResult;
+      readonly resolution: UnpinConflictResolution;
+    }
+  | {
+      readonly kind: 'ignored-static';
+    }
+  | {
+      readonly kind: 'open-pin-side-modal';
+      readonly modal: PinSideModalResult;
+    }
+  | {
+      readonly kind: 'open-unpin-conflict-modal';
+      readonly modal: UnpinConflictModalResult;
+    };
+
 type PinSideModalResult = {
   readonly columnKey: DataKey<Record<string, unknown>>;
   readonly columnLabel: string;
   readonly isOpen: boolean;
-};
-
-type UnpinConflictModalResult = {
-  readonly columnKey: DataKey<Record<string, unknown>>;
-  readonly columnLabel: string;
-  readonly isOpen: boolean;
-  readonly side: 'left' | 'right';
 };
 
 type ResolveToggleColumnPinUpdateArgs = {
@@ -37,32 +57,12 @@ type ResolveToggleColumnPinUpdateArgs = {
   readonly staticKeys?: Set<string>;
 };
 
-export type ResolveToggleColumnPinUpdateResult =
-  | {
-      readonly kind: 'ignored-static';
-    }
-  | {
-      readonly kind: 'apply-pinning-direct';
-      readonly nextPinning: ColumnPinningState<Record<string, unknown>>;
-    }
-  | {
-      readonly kind: 'open-pin-side-modal';
-      readonly modal: PinSideModalResult;
-    }
-  | {
-      readonly kind: 'auto-accept-pin-side';
-      readonly modal: PinSideModalResult;
-      readonly pinSide: PinSide;
-    }
-  | {
-      readonly kind: 'open-unpin-conflict-modal';
-      readonly modal: UnpinConflictModalResult;
-    }
-  | {
-      readonly kind: 'auto-accept-unpin-conflict';
-      readonly modal: UnpinConflictModalResult;
-      readonly resolution: UnpinConflictResolution;
-    };
+type UnpinConflictModalResult = {
+  readonly columnKey: DataKey<Record<string, unknown>>;
+  readonly columnLabel: string;
+  readonly isOpen: boolean;
+  readonly side: 'left' | 'right';
+};
 
 export const resolveToggleColumnPinUpdate = ({
   columnKey,

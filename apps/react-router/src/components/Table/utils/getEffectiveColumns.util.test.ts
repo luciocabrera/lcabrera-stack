@@ -4,7 +4,7 @@ import type { ColumnPinningState, TableColumn } from '../Table.types';
 
 import { getEffectiveColumns } from './getEffectiveColumns.util';
 
-type Row = { id: string; name: string; age: number };
+type Row = { age: number; id: string; name: string };
 
 const columns: TableColumn<Row>[] = [
   { dataType: 'string', key: 'id', label: 'ID' },
@@ -19,7 +19,7 @@ describe('getEffectiveColumns', () => {
   });
 
   it('filters out hidden columns', () => {
-    const columnVisibility = new Set<'id' | 'name' | 'age' | 'actions'>([
+    const columnVisibility = new Set<'actions' | 'age' | 'id' | 'name'>([
       'name',
     ]);
     const result = getEffectiveColumns({ columns, columnVisibility });

@@ -29,7 +29,11 @@ export const modalStyles = stylex.create({
     padding: 0,
     borderRadius: borderRadius.lg,
     borderStyle: 'none',
-    backgroundColor: colors.surfacePrimary,
+    // backgroundColor: colors.surfacePrimary,
+    transition: `transform ${transitions.normal} ${easing.easeInOut}`,
+    backdropFilter: colors.glassBackdropFilterPrimary,
+
+    backgroundColor: colors.glassBackgroundColorPrimary,
     boxShadow: shadows.xl,
     color: colors.textPrimary,
     textAlign: 'left',

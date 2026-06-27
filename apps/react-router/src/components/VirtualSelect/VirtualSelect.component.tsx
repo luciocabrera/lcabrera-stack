@@ -19,10 +19,10 @@ import { VirtualSelectTrigger } from './VirtualSelectTrigger';
 export const VirtualSelect = ({
   customStylex,
   dataState,
-  isBusy = false,
   isAlwaysOpen = false,
-  listMaxHeight = '18.75rem',
+  isBusy = false,
   listboxId,
+  listMaxHeight = '18.75rem',
   mode,
   onChange,
   onFetchInitial,
@@ -34,7 +34,9 @@ export const VirtualSelect = ({
   shouldFillHeight = false,
 }: VirtualSelectProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLButtonElement | HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement | HTMLDivElement | undefined>(
+    undefined,
+  );
 
   const generatedListboxId = useId();
 
@@ -150,8 +152,8 @@ export const VirtualSelect = ({
         </div>
       )}
       <VirtualSelectTrigger
-        isBusy={isBusyState}
         isAlwaysOpen={isAlwaysOpen}
+        isBusy={isBusyState}
         isOpen={isOpen}
         listboxId={resolvedListboxId}
         mode={mode}

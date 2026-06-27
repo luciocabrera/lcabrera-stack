@@ -24,9 +24,9 @@ const {
 }));
 
 beforeEach(() => {
-  Object.keys(columnFiltersMock).forEach((key) => {
+  for (const key of Object.keys(columnFiltersMock)) {
     delete columnFiltersMock[key];
-  });
+  }
   columnFiltersMock.status = {
     operator: 'equals',
     type: 'text',
@@ -42,12 +42,12 @@ afterEach(() => {
   cleanup();
 });
 
-type AddFilterSectionProps = {
+type ActiveFiltersListProps = {
+  readonly expandedFilters: Set<string>;
   readonly onExpandedFiltersChange: (expandedFilters: Set<string>) => void;
 };
 
-type ActiveFiltersListProps = {
-  readonly expandedFilters: Set<string>;
+type AddFilterSectionProps = {
   readonly onExpandedFiltersChange: (expandedFilters: Set<string>) => void;
 };
 

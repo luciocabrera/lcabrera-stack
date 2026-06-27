@@ -27,7 +27,9 @@
     "typegen:admin-system": "cd apps/admin_system && vp run typegen",
     "typegen:all": "vp run typegen:router && vp run typegen:admin-system",
     "typegen:router": "cd apps/react-router && vp run typegen",
-    "prepare": "vp config"
+    "prepare": "vp config",
+    "lint:claude": "claudelint check-all",
+    "lint:claude:fix": "claudelint format --fix"
   },
   "devDependencies": {
     "@repo/vite-configs": "workspace:*",
@@ -36,5 +38,5 @@
   "engines": {
     "node": ">=25"
   },
-  "packageManager": "pnpm@11.6.0"
+  "packageManager": "pnpm@11.9.0"
 }

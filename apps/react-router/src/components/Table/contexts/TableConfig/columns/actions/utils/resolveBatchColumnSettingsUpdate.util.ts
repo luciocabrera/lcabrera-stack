@@ -69,8 +69,8 @@ export const resolveBatchColumnSettingsUpdate = <TData>({
   });
 
   const newColumnFilters = getNewColumnFiltersBasedOnColumnKey<TData>({
-    columnFiltersState: columnsState?.columnFilters,
     columnFilter,
+    columnFiltersState: columnsState?.columnFilters,
     columnKey,
   });
 
@@ -92,8 +92,8 @@ export const resolveBatchColumnSettingsUpdate = <TData>({
     columnPinning,
     columns,
     currentOrder: columnsState?.columnOrder,
-    previousPinning: columnsState?.columnPinning,
     newPinning,
+    previousPinning: columnsState?.columnPinning,
   });
 
   const {
@@ -104,8 +104,8 @@ export const resolveBatchColumnSettingsUpdate = <TData>({
   } = deriveColumnViewState<TData>({
     columnOrder: newColumnOrder,
     columnPinning: newPinning,
-    columnSizing: newColumnSizing,
     columns,
+    columnSizing: newColumnSizing,
     sorting: newSorting,
   });
 

@@ -8,7 +8,6 @@ import {
   useGetTableIsLoading,
   useGetTableIsLoadingMore,
 } from '@/components/Table/contexts/TableData/data/selectors';
-import { useRenderTracker } from '@/utils/performance';
 
 import type { TableHeaderProps } from './TableHeader.types';
 
@@ -20,8 +19,6 @@ export const TableHeader = <TData extends Record<string, unknown>, TResponse>({
   customStylex,
   ...rest
 }: TableHeaderProps<TData, TResponse>) => {
-  useRenderTracker({ componentName: 'TableHeader' });
-
   const pinnedOffsets = useGetPinnedColumnOffsets();
   const { centerCols, leftPinnedCols, rightPinnedCols } = useGetColumnGroups();
   const isLoading = useGetTableIsLoading();

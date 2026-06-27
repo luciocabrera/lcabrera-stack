@@ -7,7 +7,7 @@ import { PERSISTENCE_VERSION } from './persistence.constants';
 const { readFromSessionStorageMock } = vi.hoisted(() => ({
   readFromSessionStorageMock: vi.fn<
     (args: { key: string }) => string | undefined
-  >(() => undefined),
+  >(() => {}),
 }));
 
 vi.mock('@/utils/storage', () => ({

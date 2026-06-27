@@ -8,6 +8,4 @@ export type TableSuspenseBoundaryProps<
   readonly children: (response: TResponse) => React.ReactNode;
   /** Promise that resolves to table data or a response containing table data */
   readonly dataPromise: Promise<TResponse>;
-  /** Callback to re-trigger the loader on retry */
-  readonly onRetry: () => void;
 };

@@ -6,7 +6,14 @@ import { INITIAL_PAGE_SIZE } from '@/components/Table/Table.constants';
 import { enterpriseOrdersApi } from '@/services';
 
 import { readTableLoaderStateFromRequest } from '../utils/readTableLoaderStateFromRequest.util';
-import { COLUMNS, PERSISTENCE_KEY } from './EnterpriseOrders.constants';
+import {
+  COLUMNS,
+  DEFAULT_COLUMN_PINNING,
+  PERSISTENCE_KEY,
+  SCHEMA_NAME,
+  TABLE_NAME,
+  TITLE,
+} from './EnterpriseOrders.constants';
 
 /**
  * Loader for enterprise orders route
@@ -17,12 +24,13 @@ import { COLUMNS, PERSISTENCE_KEY } from './EnterpriseOrders.constants';
 export const loader = ({ request }: LoaderFunctionArgs) => {
   const {
     columnOrder,
+    columnPinning,
     columnSizing,
     columnVisibility,
     filters,
+    sorting,
     standaloneFiltersParam,
     standaloneSortParam,
-    sorting,
   } = readTableLoaderStateFromRequest<EnterpriseOrder>({
     columns: COLUMNS,
     includeFilters: true,
@@ -45,12 +53,23 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
     });
 
   return {
-    columnOrder,
-    columnSizing,
-    columnVisibility,
+    columnsState: {
+      columnFilters: filters,
+      columnOrder,
+      columnPinning,
+      columns: COLUMNS,
+      columnSizing,
+      columnVisibility,
+      sorting: sanitizedSorting,
+    },
+    defaultColumnPinning: DEFAULT_COLUMN_PINNING,
     enterpriseOrdersPromise,
-    filters,
     key: `${standaloneSortParam ?? ''}${standaloneFiltersParam ?? ''}`,
-    sorting: sanitizedSorting,
+    metaState: {
+      persistenceKey: PERSISTENCE_KEY,
+      schemaName: SCHEMA_NAME,
+      tableName: TABLE_NAME,
+      title: TITLE,
+    },
   };
 };

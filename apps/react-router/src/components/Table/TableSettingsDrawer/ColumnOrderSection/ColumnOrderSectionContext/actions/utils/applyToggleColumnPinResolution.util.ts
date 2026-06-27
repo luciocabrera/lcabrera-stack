@@ -7,6 +7,7 @@ import type { ResolveToggleColumnPinUpdateResult } from './resolveToggleColumnPi
 type ApplyToggleColumnPinResolutionArgs = {
   readonly acceptPinSide: (side: PinSide) => void;
   readonly acceptUnpinConflict: (resolution: UnpinConflictResolution) => void;
+  readonly resolution: ResolveToggleColumnPinUpdateResult;
   readonly setColumnPinning: (
     nextPinning: ColumnPinningState<Record<string, unknown>>,
   ) => void;
@@ -21,7 +22,6 @@ type ApplyToggleColumnPinResolutionArgs = {
     readonly isOpen: boolean;
     readonly side: 'left' | 'right';
   }) => void;
-  readonly resolution: ResolveToggleColumnPinUpdateResult;
 };
 
 export const applyToggleColumnPinResolution = ({
@@ -33,17 +33,8 @@ export const applyToggleColumnPinResolution = ({
   setUnpinConflictModal,
 }: ApplyToggleColumnPinResolutionArgs): void => {
   switch (resolution.kind) {
-    case 'ignored-static': {
-      return;
-    }
-
     case 'apply-pinning-direct': {
       setColumnPinning(resolution.nextPinning);
-      return;
-    }
-
-    case 'open-pin-side-modal': {
-      setPinSideModal(resolution.modal);
       return;
     }
 
@@ -53,14 +44,23 @@ export const applyToggleColumnPinResolution = ({
       return;
     }
 
-    case 'open-unpin-conflict-modal': {
-      setUnpinConflictModal(resolution.modal);
-      return;
-    }
-
     case 'auto-accept-unpin-conflict': {
       setUnpinConflictModal(resolution.modal);
       acceptUnpinConflict(resolution.resolution);
+      return;
+    }
+
+    case 'ignored-static': {
+      return;
+    }
+
+    case 'open-pin-side-modal': {
+      setPinSideModal(resolution.modal);
+      return;
+    }
+
+    case 'open-unpin-conflict-modal': {
+      setUnpinConflictModal(resolution.modal);
       return;
     }
   }

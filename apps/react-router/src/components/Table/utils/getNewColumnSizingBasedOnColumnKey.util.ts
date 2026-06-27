@@ -2,14 +2,14 @@ import type { ColumnSizingState, DataKey } from '../Table.types';
 
 type GetNewColumnSizingBasedOnColumnKeyArgs<TData> = {
   readonly columnKey: DataKey<TData>;
-  readonly columnSizing?: number;
   readonly columnSizesState?: ColumnSizingState<TData>;
+  readonly columnSizing?: number;
 };
 
 export const getNewColumnSizingBasedOnColumnKey = <TData>({
   columnKey,
-  columnSizing,
   columnSizesState = {} as ColumnSizingState<TData>,
+  columnSizing,
 }: GetNewColumnSizingBasedOnColumnKeyArgs<TData>): ColumnSizingState<TData> => {
   const keys = Object.keys(
     columnSizesState,

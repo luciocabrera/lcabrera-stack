@@ -5,12 +5,6 @@ import type {
 } from './pinningPreferences.types';
 import type { PinSide } from './ui.types';
 
-export type GlobalNavigationSizePreference =
-  | 'compact'
-  | 'large'
-  | 'medium'
-  | 'small';
-
 export type GlobalNavigationCollapsedPreference = 'collapsed' | 'expanded';
 
 export type GlobalNavigationPinnedPreference = 'pinned' | 'unpinned';
@@ -20,6 +14,12 @@ export type GlobalNavigationPreferences = {
   readonly pinned?: GlobalNavigationPinnedPreference;
   readonly size?: GlobalNavigationSizePreference;
 };
+
+export type GlobalNavigationSizePreference =
+  | 'compact'
+  | 'large'
+  | 'medium'
+  | 'small';
 
 export type GlobalPinningPreferences = {
   readonly orderConflictResolution?: OrderConflictResolution;

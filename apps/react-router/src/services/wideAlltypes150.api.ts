@@ -176,6 +176,17 @@ export type WideAlltypes150Response = {
   readonly total: number;
 };
 
+const isObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const isWideAlltypes150Response = (
+  value: unknown,
+): value is WideAlltypes150Response =>
+  isObject(value) &&
+  Array.isArray(value['data']) &&
+  typeof value['hasMore'] === 'boolean' &&
+  typeof value['total'] === 'number';
+
 type FetchWideAlltypes150Params = {
   readonly limit: number;
   readonly requestUrl?: string;
@@ -222,6 +233,12 @@ export const wideAlltypes150Api = {
       );
     }
 
-    return response.json() as Promise<WideAlltypes150Response>;
+    const body = (await response.json()) as unknown;
+    if (!isWideAlltypes150Response(body)) {
+      throw new Error(
+        'Unexpected response shape from /wide-alltypes-150/paginated',
+      );
+    }
+    return body;
   },
 };

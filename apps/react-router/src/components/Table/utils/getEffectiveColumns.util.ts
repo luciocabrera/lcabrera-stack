@@ -37,8 +37,8 @@ export const getEffectiveColumns = <TData>({
   // Apply pinning order: left pinned → unpinned → right pinned
   if (!columnPinning) return orderedColumns;
 
-  const leftPinned = columnPinning.left;
-  const rightPinned = columnPinning.right;
+  const leftPinned = columnPinning.left ?? [];
+  const rightPinned = columnPinning.right ?? [];
 
   if (leftPinned.length === 0 && rightPinned.length === 0)
     return orderedColumns;

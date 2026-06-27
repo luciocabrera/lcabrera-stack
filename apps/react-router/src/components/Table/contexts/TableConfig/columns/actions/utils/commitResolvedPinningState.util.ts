@@ -15,12 +15,12 @@ import { commitPinningAndOrderUpdate } from './commitPinningAndOrderUpdate.util'
 type CommitResolvedPinningStateArgs<TData> = {
   readonly columnOrder: ColumnOrderState<TData>;
   readonly columnPinning: ColumnPinningState<TData>;
-  readonly columnSizing?: ColumnSizingState<TData>;
-  readonly columnVisibility?: ColumnVisibilityState<TData>;
   readonly columns: readonly TableColumn<TData>[];
+  readonly columnSizing?: ColumnSizingState<TData>;
   readonly columnsStore: {
     readonly set: (state: Partial<TableColumnsState<TData>>) => void;
   };
+  readonly columnVisibility?: ColumnVisibilityState<TData>;
   readonly drawersSyncNonce: number;
   readonly metaStore: {
     readonly set: (state: Partial<TableMetaState>) => void;
@@ -38,10 +38,10 @@ type CommitResolvedPinningStateArgs<TData> = {
 export const commitResolvedPinningState = <TData>({
   columnOrder,
   columnPinning,
-  columnSizing,
-  columnVisibility,
   columns,
+  columnSizing,
   columnsStore,
+  columnVisibility,
   drawersSyncNonce,
   metaStore,
   persistenceKey,
@@ -51,8 +51,8 @@ export const commitResolvedPinningState = <TData>({
     getPinnedDerivedColumnsState<TData>({
       columnOrder,
       columnPinning,
-      columnSizing,
       columns,
+      columnSizing,
       columnVisibility,
     });
 

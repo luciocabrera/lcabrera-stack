@@ -91,12 +91,12 @@ describe('resolveBatchTableSettingsUpdate', () => {
     expect(mockDeriveColumnViewState).toHaveBeenCalledWith({
       columnOrder: ['id', 'age', 'name'],
       columnPinning: { left: ['id'], right: ['name'] },
-      columnSizing: { actions: 0, age: 80, id: 100, name: 220 },
       columns: [
         { key: 'id', label: 'ID' },
         { key: 'name', label: 'Name' },
         { key: 'age', label: 'Age' },
       ],
+      columnSizing: { actions: 0, age: 80, id: 100, name: 220 },
       columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(['age']),
       sorting: [{ columnKey: 'name', direction: 'asc' }],
     });

@@ -7,29 +7,25 @@ import { wideAlltypes150Api } from '@/services';
 
 import type { loader } from './wide-alltypes-150.loader';
 
-import { COLUMNS, PERSISTENCE_KEY } from './WideAlltypes150.constants';
-
 export const WideAlltypes150Page = () => {
-  const { columnOrder, columnSizing, columnVisibility, dataPromise, sorting } =
+  const { columnsState, dataPromise, metaState } =
     useLoaderData<typeof loader>();
 
   return (
     <TableLayout<WideAlltypes150, WideAlltypes150Response>
-      columnOrder={columnOrder}
-      columns={COLUMNS}
-      columnSizing={columnSizing}
-      columnVisibility={columnVisibility}
+      columnsState={columnsState}
       dataPromise={dataPromise}
       dataSelector={(response) => response.data}
       dataTotalSelector={(response) => response.total}
-      onLoadMore={({ limit, skip }) =>
-        wideAlltypes150Api.fetchPaginated({ limit, skip, sorting })
+      metaState={metaState}
+      onLoadMore={async ({ limit, skip }) =>
+        wideAlltypes150Api.fetchPaginated({
+          // filter: columnsState?.columnFilters ?? {},
+          limit,
+          skip,
+          sorting: columnsState?.sorting ?? [],
+        })
       }
-      persistenceKey={PERSISTENCE_KEY}
-      schemaName='public'
-      sorting={sorting}
-      tableName='wide_alltypes_150'
-      title='Wide All-Types — 150 Columns × 1M Rows'
     />
   );
 };

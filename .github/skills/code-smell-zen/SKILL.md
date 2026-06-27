@@ -1,12 +1,14 @@
 ---
 name: code-smell-zen
 description: Scan git diff vs target branch for code smells (Clean Code + GoF + TypeScript/React catalog)
-argument-hint: '[target-branch]'
-allowed-tools: Bash(cat:*,date:*,git:*,mkdir:*,tee:*), Read, Grep, Glob
+argument-hint: '[target-branch] — omit to auto-detect base (origin/main); pass HEAD for uncommitted changes only'
+user-invocable: true
+allowed-tools: Bash(bash:*,cat:*,date:*,git:*,mkdir:*,tee:*), Read, Grep, Glob
 license: MIT
 metadata:
   version: '1.0.0'
   scope: [root]
+  auto_invoke: 'Reviewing a PR, branch diff, or set of changed files for code quality and smell issues'
 ---
 
 # /smell — Code smell review
@@ -19,44 +21,9 @@ You are running a 5-step code-smell review. Follow the steps **in order**. Do no
 
 The diff below has already been collected. Read it carefully before proceeding. It contains both the committed changes vs the base (3-dot `base...HEAD`) **and** the working-tree changes (staged + unstaged).
 
-!`bash -c '
-BASE="$1"
-if [ -z "$BASE" ]; then
-  BASE=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed "s@^refs/remotes/@@")
-  [ -z "$BASE" ] && BASE="origin/main"
-  git rev-parse "$BASE" >/dev/null 2>&1 || BASE="main"
-  git rev-parse "$BASE" >/dev/null 2>&1 || BASE="HEAD"
-fi
-if ! git rev-parse "$BASE" >/dev/null 2>&1; then
-  echo "ERROR: base $BASE not found. Pass an explicit branch: /smell <branch>"
-  exit 1
-fi
-echo "===== BASE: $BASE ====="
-echo
-if [ "$BASE" = "HEAD" ]; then
-  echo "(No remote or base branch found — showing full working-tree diff against HEAD)"
-  echo
-  echo "----- Stat (staged + unstaged) -----"
-  git diff --stat HEAD || true
-  echo
-  echo "===== Working-tree diff (staged + unstaged, -U10) ====="
-  git diff -U10 HEAD || true
-else
-  echo "----- Stat (committed vs $BASE) -----"
-  git diff --stat "$BASE"...HEAD || true
-  echo
-  echo "----- Stat (working tree, staged+unstaged) -----"
-  git diff --stat HEAD || true
-  echo
-  echo "===== Committed diff (vs $BASE, -U10) ====="
-  git diff -U10 "$BASE"...HEAD || true
-  echo
-  echo "===== Working-tree diff (staged + unstaged, -U10) ====="
-  git diff -U10 HEAD || true
-fi
-' -- "$ARGUMENTS"`
+!`bash .github/skills/code-smell-zen/scripts/collect-diff.sh "$ARGUMENTS"`
 
-> **VS Code Copilot:** The `!bash` prefix does not auto-execute in this environment. Run the command above manually via `run_in_terminal` from the repository root (`/home/lucio/workspaces/vite-react-compiler`) before proceeding to Step 2.
+> **VS Code Copilot:** The `!bash` prefix does not auto-execute in this environment. Run `bash .github/skills/code-smell-zen/scripts/collect-diff.sh [base-branch]` manually via `run_in_terminal` from the repository root before proceeding to Step 2.
 
 ---
 
@@ -216,56 +183,119 @@ Walk every hunk. For each issue you find, cite **exactly one** catalog ID from t
 - **LOW** — minor; in-passing fix
 - **NIT** — style preference, no real cost
 
-Sort findings by severity (desc), then by file path. Emit **exactly this structure** as your final response:
+Sort findings by severity (desc), then by file path. Emit **exactly this structure** as your final response, which satisfies the shared schema defined in `../code-smell-shared/SCHEMA_V1.md` and `../code-smell-shared/REPORT_TEMPLATE.md`:
 
 ````markdown
 # Smell Report
 
-**Base:** `<BASE>`
-**Classification:** `<feature|refactor|bugfix|test|docs|config|mixed>`
-**Primary lens:** `<Clean Code | Gang of Four | Mixed>`
+## Metadata
+
+- schema_version: 1.0
+- report_id: `zen-{timestamp}` (short unique id)
+- generated_at: <YYYY-MM-DDTHH:MM:SSZ>
+- skill_name: code-smell-zen
+- repository: <repo-name-or-path>
+- scope_type: diff
+- scope_value: <BASE>..HEAD
+- severity_scale: BLOCKER, HIGH, MEDIUM, LOW, NIT
+- base_branch: <BASE>
+- head_branch: HEAD
+- classification: <feature|refactor|bugfix|test|docs|config|mixed>
+- primary_lens: <Clean Code | Gang of Four | Mixed>
 
 ## Summary
 
-- Files changed: N
-- Findings: X blocker, Y high, Z medium, W low, V nit
-- Top risk: <one sentence>
+- files_analyzed: N
+- findings_count_by_severity:
+  - blocker: X
+  - high: Y
+  - medium: Z
+  - low: W
+  - nit: V
+- top_risk: <one sentence>
+- first_3_actions:
+  1. <action>
+  2. <action>
+  3. <action>
 
 ## Findings
 
-### [BLOCKER] `REACT.MISSING-DEPS` — `path/Widget.tsx:142`
+### Finding F-001
+
+- finding_id: F-001
+- rule_id: `REACT.MISSING-DEPS`
+- severity: BLOCKER
+- confidence: <high|medium|low>
+- location_path: path/Widget.tsx
+- location_hint: line 142
+- evidence_excerpt:
 
 ```tsx
-<smallest meaningful excerpt>
+{
+  /* smallest meaningful excerpt */
+}
+```
 
-**Why:** <one sentence>
-**Fix:** <one sentence>
+- why: <one sentence>
+- fix: <one sentence>
+- effort: <small|medium|large>
+- defer_risk: <one sentence>
+- verification_steps:
+  - <step 1>
+- status: open
 
 ...
+
+## Prioritized Execution Queue
+
+1. queue_rank: 1
+   - target_finding_ids: <F-001, ...>
+   - reason_for_order: <one sentence>
+   - expected_outcome: <one sentence>
+
+2. queue_rank: 2
+   - target_finding_ids: <F-002>
+   - reason_for_order: <one sentence>
+   - expected_outcome: <one sentence>
+
+3. queue_rank: 3
+   - target_finding_ids: <F-003>
+   - reason_for_order: <one sentence>
+   - expected_outcome: <one sentence>
+
+## Deferred Items
+
+None.
+
+## Validation Checklist
+
+- [ ] Required sections present
+- [ ] Required metadata fields present
+- [ ] Summary counts match findings
+- [ ] Each finding has evidence_excerpt, why, fix
+- [ ] Each finding has verification_steps
+- [ ] Severity values are canonical
+- [ ] Prioritized queue present when findings exist
+
+## Closure Criteria
+
+- No BLOCKER or HIGH findings remain unresolved before merge.
+- All MEDIUM findings are either fixed or tracked with owner and rationale.
+- Lint, type-check, and tests pass after any applied fixes.
 
 ## Synthesis
 
 <one paragraph: dominant theme of the diff and the top 3 actions to take before merge>
-```
 ````
 
-If the diff has no findings, emit the same structure with an empty Findings section and an explicit "No catalog findings on this diff." line, plus the Synthesis paragraph.
-
-For cross-skill consistency, align the final response with:
-
-- `../code-smell-shared/SCHEMA_V1.md`
-- `../code-smell-shared/REPORT_TEMPLATE.md`
-- `../code-smell-shared/TEST_PLAN.md`
-- `../code-smell-shared/RULE_FIX_QUICK_REFERENCE.md`
-
-Keep catalog IDs unchanged and normalize only structural fields required by the shared schema.
+If the diff has no findings, keep all sections, set all counts to 0, write "No catalog findings on this diff." in the Findings section, write "No actions required." for first_3_actions, omit the Prioritized Execution Queue, and write a Synthesis paragraph confirming the diff is clean.
 
 ## Saving the Report
 
 After producing the final report, **always** save it to disk without prompting the user:
 
-1. Capture the current timestamp: `date +%Y%m%dT%H%M%S`
-2. Create the output directory: `.tmp/code-smell-zen/<timestamp>/`
+1. Capture the current timestamp: `date +%Y-%m-%d--%H-%M-%S`
+2. Create the output directory: `.tmp/code-smell-zen/{timestamp}/`
 3. Write the full report as `report.md` inside that directory, using the same markdown structure emitted in Step 5.
 4. Tell the user the path to the saved file.
 
@@ -274,9 +304,9 @@ The directory layout groups all runs of this skill together, with each run in it
 ```
 .tmp/
 └── code-smell-zen/
-    ├── 20260612T184056/
+    ├── 2026-06-12--18-40-56/
     │   └── report.md
-    └── 20260615T093012/
+    └── 2026-06-15--09-30-12/
         └── report.md
 ```
 

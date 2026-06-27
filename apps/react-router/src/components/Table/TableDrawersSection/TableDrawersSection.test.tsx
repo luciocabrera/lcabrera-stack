@@ -1,5 +1,4 @@
 // @vitest-environment jsdom
-
 import type { ReactNode } from 'react';
 
 import { cleanup, render, screen } from '@testing-library/react';
@@ -23,9 +22,8 @@ const {
   useGetTableIsColumnSettingsPinnedMock,
   useGetTableIsLoadingMock,
   useGetTableIsLoadingMoreMock,
-  useGetTableIsTableSettingsPinnedMock,
   useGetTableIsTableSettingsOpenMock,
-  useRenderTrackerMock,
+  useGetTableIsTableSettingsPinnedMock,
 } = vi.hoisted(() => ({
   useGetTableColumnSelectedKeyMock: vi.fn(),
   useGetTableDrawersSyncNonceMock: vi.fn(() => 0),
@@ -33,53 +31,57 @@ const {
   useGetTableIsColumnSettingsPinnedMock: vi.fn(() => false),
   useGetTableIsLoadingMock: vi.fn(() => false),
   useGetTableIsLoadingMoreMock: vi.fn(() => false),
-  useGetTableIsTableSettingsPinnedMock: vi.fn(() => false),
   useGetTableIsTableSettingsOpenMock: vi.fn(),
-  useRenderTrackerMock: vi.fn(),
+  useGetTableIsTableSettingsPinnedMock: vi.fn(() => false),
 }));
 
 const columnSettingsDrawerPropsSpy = vi.hoisted(() => vi.fn());
 const tableSettingsDrawerPropsSpy = vi.hoisted(() => vi.fn());
 
-const MockColumnDrawerProvider = vi.hoisted(
-  () =>
-    ({ children, columnKey }: ColumnDrawerProviderProps) => {
-      return (
-        <div data-column-key={columnKey} data-testid='column-drawer-provider'>
-          {children}
-        </div>
-      );
-    },
-);
+const MockColumnDrawerProvider = vi.hoisted(() => {
+  return function MockColumnDrawerProvider({
+    children,
+    columnKey,
+  }: ColumnDrawerProviderProps) {
+    return (
+      <div data-column-key={columnKey} data-testid='column-drawer-provider'>
+        {children}
+      </div>
+    );
+  };
+});
 
-const MockColumnSettingsDrawer = vi.hoisted(
-  () =>
-    ({
-      columnKey,
-      isBusy,
-    }: {
-      readonly columnKey: string;
-      readonly isBusy?: boolean;
-    }) => {
-      columnSettingsDrawerPropsSpy({ columnKey, isBusy });
-      return <div>Column Settings Drawer: {columnKey}</div>;
-    },
-);
+const MockColumnSettingsDrawer = vi.hoisted(() => {
+  return function MockColumnSettingsDrawer({
+    columnKey,
+    isBusy,
+  }: {
+    readonly columnKey: string;
+    readonly isBusy?: boolean;
+  }) {
+    columnSettingsDrawerPropsSpy({ columnKey, isBusy });
+    return <div>Column Settings Drawer: {columnKey}</div>;
+  };
+});
 
-const MockTableDrawerProvider = vi.hoisted(
-  () =>
-    ({ children }: TableDrawerProviderProps) => {
-      return <div data-testid='table-drawer-provider'>{children}</div>;
-    },
-);
+const MockTableDrawerProvider = vi.hoisted(() => {
+  return function MockTableDrawerProvider({
+    children,
+  }: TableDrawerProviderProps) {
+    return <div data-testid='table-drawer-provider'>{children}</div>;
+  };
+});
 
-const MockTableSettingsDrawer = vi.hoisted(
-  () =>
-    ({ isBusy }: { readonly isBusy?: boolean }) => {
-      tableSettingsDrawerPropsSpy({ isBusy });
-      return <div>Table Settings Drawer</div>;
-    },
-);
+const MockTableSettingsDrawer = vi.hoisted(() => {
+  return function MockTableSettingsDrawer({
+    isBusy,
+  }: {
+    readonly isBusy?: boolean;
+  }) {
+    tableSettingsDrawerPropsSpy({ isBusy });
+    return <div>Table Settings Drawer</div>;
+  };
+});
 
 vi.mock('@/components/Table/TableSettingsDrawer', () => ({
   TableSettingsDrawer: MockTableSettingsDrawer,
@@ -108,17 +110,13 @@ vi.mock('../contexts/TableConfig/meta/selectors', () => ({
   useGetTableDrawersSyncNonce: useGetTableDrawersSyncNonceMock,
   useGetTableIsColumnSettingsOpen: useGetTableIsColumnSettingsOpenMock,
   useGetTableIsColumnSettingsPinned: useGetTableIsColumnSettingsPinnedMock,
-  useGetTableIsTableSettingsPinned: useGetTableIsTableSettingsPinnedMock,
   useGetTableIsTableSettingsOpen: useGetTableIsTableSettingsOpenMock,
+  useGetTableIsTableSettingsPinned: useGetTableIsTableSettingsPinnedMock,
 }));
 
 vi.mock('../contexts/TableData/data/selectors', () => ({
   useGetTableIsLoading: useGetTableIsLoadingMock,
   useGetTableIsLoadingMore: useGetTableIsLoadingMoreMock,
-}));
-
-vi.mock('@/utils/performance', () => ({
-  useRenderTracker: useRenderTrackerMock,
 }));
 
 afterEach(() => {

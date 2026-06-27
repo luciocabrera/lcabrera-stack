@@ -1,5 +1,4 @@
 // @vitest-environment jsdom
-
 import type { ReactNode } from 'react';
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
@@ -21,19 +20,20 @@ type MockNavLinkProps = {
   readonly to?: string;
 };
 
-const MockButton = vi.hoisted(
-  () =>
-    ({ children, onClick }: MockButtonProps) => {
-      return (
-        <button onClick={onClick} type='button'>
-          {children}
-        </button>
-      );
-    },
-);
+const MockButton = vi.hoisted(() => {
+  return function MockButton({ children, onClick }: MockButtonProps) {
+    return (
+      <button onClick={onClick} type='button'>
+        {children}
+      </button>
+    );
+  };
+});
 
-const MockNavLink = vi.hoisted(() => ({ children, to }: MockNavLinkProps) => {
-  return <a href={to}>{children}</a>;
+const MockNavLink = vi.hoisted(() => {
+  return function MockNavLink({ children, to }: MockNavLinkProps) {
+    return <a href={to}>{children}</a>;
+  };
 });
 
 vi.mock('@/components/Button', () => ({

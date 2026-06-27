@@ -17,7 +17,6 @@ describe('resolveColumnSortingUpdate', () => {
     const result = resolveColumnSortingUpdate<Row>({
       columns,
       existingSorting: [],
-      persistenceKey: 'orders-table',
       sort: { columnKey: 'actions', direction: 'asc' },
     });
 
@@ -28,7 +27,6 @@ describe('resolveColumnSortingUpdate', () => {
     const result = resolveColumnSortingUpdate<Row>({
       columns,
       existingSorting: [{ columnKey: 'status', direction: 'asc' }],
-      persistenceKey: 'orders-table',
       sort: { columnKey: 'status', direction: 'asc' },
     });
 
@@ -39,21 +37,14 @@ describe('resolveColumnSortingUpdate', () => {
     const result = resolveColumnSortingUpdate<Row>({
       columns,
       existingSorting: [{ columnKey: 'status', direction: 'asc' }],
-      persistenceKey: 'orders-table',
       sort: { columnKey: 'priority', direction: 'desc' },
     });
 
     expect(result).toMatchObject({
       kind: 'updated',
       persistenceEntry: {
-        persistenceKey: 'orders-table',
-        searchParamKey: 'sort',
+        searchParamKey: 'sorting',
         searchParamValue: '{"status":"asc","priority":"desc"}',
-        slice: 'sorting',
-        valueSlice: [
-          { columnKey: 'status', direction: 'asc' },
-          { columnKey: 'priority', direction: 'desc' },
-        ],
       },
       sorting: [
         { columnKey: 'status', direction: 'asc' },

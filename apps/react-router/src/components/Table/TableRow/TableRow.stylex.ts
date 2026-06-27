@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { borderRadius } from '@/design-system/tokens/base.stylex';
+import { borderRadius, spacing } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const tableRowStyles = stylex.create({
@@ -11,7 +11,9 @@ export const tableRowStyles = stylex.create({
     borderBottomColor: colors.borderSecondary,
     borderBottomStyle: 'solid',
     borderBottomWidth: '1px',
-    minHeight: 0,
+    height: spacing.xl,
+    maxHeight: spacing.xl,
+    minHeight: spacing.xl,
     width: '100%',
   },
   header: {

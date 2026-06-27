@@ -17,6 +17,6 @@ export const getSelectedColumnLabel = ({
   if (!selectedColumn) return [];
   const col = filterableColumns.find((c) => c.key === selectedColumn);
   if (!col) return [];
-  const hasActiveFilter = Boolean(filters[col.key]);
+  const hasActiveFilter = Object.hasOwn(filters, col.key);
   return [hasActiveFilter ? `${col.label} ⚠️ (filtered)` : col.label];
 };

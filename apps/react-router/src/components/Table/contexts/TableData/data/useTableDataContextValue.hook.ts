@@ -9,7 +9,7 @@ export const useTableDataContextValue = <
 >(): TableDataContextValue<TData> => {
   const context = use(TableDataContext);
 
-  if (context === null) {
+  if (context === undefined) {
     throw new Error(
       'useTableDataContextValue must be used within TableDataProvider',
     );

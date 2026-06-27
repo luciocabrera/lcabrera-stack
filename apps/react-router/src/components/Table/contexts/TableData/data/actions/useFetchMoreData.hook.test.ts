@@ -8,10 +8,6 @@ import { createPaginatedFetchActionMocks } from '@/utils/tests/createPaginatedFe
 
 import { useFetchMoreData } from './useFetchMoreData.hook';
 
-type TestRow = {
-  readonly id: number;
-};
-
 type TestDataState = {
   readonly data: readonly TestRow[];
   readonly hasMore: boolean;
@@ -24,6 +20,10 @@ type TestDataState = {
 type TestResponse = {
   readonly rows: readonly TestRow[];
   readonly total: number;
+};
+
+type TestRow = {
+  readonly id: number;
 };
 
 const createHarness = () => {
@@ -45,14 +45,16 @@ const createHarness = () => {
 
 type Harness = ReturnType<typeof createHarness>;
 
-let harness: Harness | undefined;
+const harnessRef: { current: Harness | undefined } = {
+  current: undefined,
+};
 
 const getHarness = (): Harness => {
-  if (!harness) {
-    harness = createHarness();
+  if (!harnessRef.current) {
+    harnessRef.current = createHarness();
   }
 
-  return harness;
+  return harnessRef.current;
 };
 
 vi.mock(
@@ -102,14 +104,8 @@ describe('useFetchMoreData', () => {
   });
 
   it('uses the latest loaded row count and prevents overlapping fetches', async () => {
-    let resolveLoadMore: ((value: TestResponse) => void) | undefined;
-
-    const onLoadMore = vi.fn(
-      () =>
-        new Promise<TestResponse>((resolve) => {
-          resolveLoadMore = resolve;
-        }),
-    );
+    const { promise, resolve } = Promise.withResolvers<TestResponse>();
+    const onLoadMore = vi.fn(() => promise);
 
     const { result } = renderHook(() =>
       useFetchMoreData<TestRow, TestResponse>(),
@@ -138,7 +134,7 @@ describe('useFetchMoreData', () => {
     });
 
     await act(async () => {
-      resolveLoadMore?.({
+      resolve({
         rows: [{ id: 2 }, { id: 3 }],
         total: 3,
       });

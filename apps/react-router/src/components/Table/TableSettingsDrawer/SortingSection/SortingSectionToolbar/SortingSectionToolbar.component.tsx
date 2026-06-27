@@ -16,8 +16,8 @@ import { styles } from './SortingSectionToolbar.stylex';
 
 const SORTING_SECTION_TOOLBAR = {
   clear: { label: 'Clear Sorting' },
-  reset: { label: 'Reset Sorting' },
   orderByColumnOrder: { label: 'Sort by Column Order' },
+  reset: { label: 'Reset Sorting' },
 } as const;
 
 export const SortingSectionToolbar = ({
@@ -47,12 +47,12 @@ export const SortingSectionToolbar = ({
         isBusy={isBusy}
         onClick={sortByColumnOrder}
         size={buttonSize}
-        width={buttonWidth}
         tooltipContent={
           isToolbar
             ? SORTING_SECTION_TOOLBAR.orderByColumnOrder.label
             : undefined
         }
+        width={buttonWidth}
       >
         {!isToolbar && SORTING_SECTION_TOOLBAR.orderByColumnOrder.label}
       </Button>
@@ -64,10 +64,10 @@ export const SortingSectionToolbar = ({
         isDisabled={!hasSorting}
         onClick={clearSorting}
         size={buttonSize}
-        width={buttonWidth}
         tooltipContent={
           isToolbar ? SORTING_SECTION_TOOLBAR.clear.label : undefined
         }
+        width={buttonWidth}
       >
         {!isToolbar && SORTING_SECTION_TOOLBAR.clear.label}
       </Button>
@@ -78,10 +78,10 @@ export const SortingSectionToolbar = ({
         isBusy={isBusy}
         onClick={resetSorting}
         size={buttonSize}
-        width={buttonWidth}
         tooltipContent={
           isToolbar ? SORTING_SECTION_TOOLBAR.reset.label : undefined
         }
+        width={buttonWidth}
       >
         {!isToolbar && SORTING_SECTION_TOOLBAR.reset.label}
       </Button>

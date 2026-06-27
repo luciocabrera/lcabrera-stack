@@ -1,6 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { spacing } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 
 export const styles = stylex.create({
@@ -17,7 +16,6 @@ export const styles = stylex.create({
     overflowY: 'hidden',
   },
   panelArea: {
-    padding: spacing.lg,
     flex: '1',
     alignItems: 'center',
     display: 'flex',

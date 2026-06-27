@@ -11,8 +11,8 @@ export const Button = ({
   customStylex,
   icon,
   isBusy = false,
-  isIconOnly = false,
   isDisabled = false,
+  isIconOnly = false,
   orientation = 'vertical',
   size = 'md',
   tooltipContent,
@@ -38,6 +38,7 @@ export const Button = ({
         isIconOnly && buttonStyles.iconOnly,
         isBusy && buttonStyles.busyState,
         customStylex,
+        color === 'primary' && buttonStyles.overlayParent,
       )}
     >
       {isBusy && (
@@ -54,6 +55,15 @@ export const Button = ({
       >
         {children}
       </span>
+      {color === 'primary' && (
+        <div
+          {...stylex.props(
+            buttonStyles.overlay,
+            buttonStyles.linear,
+            buttonStyles.overlayOverwrite,
+          )}
+        ></div>
+      )}
     </button>
   );
 

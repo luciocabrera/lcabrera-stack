@@ -6,8 +6,8 @@ import type {
 } from './useFetchFilterData.types';
 
 import { useFiltersDataContextValue } from '../../useFiltersDataContextValue.hook';
-import { useFetchInitialFilterData } from './useFetchInitialFilterData.hook';
-import { useFetchMoreFilterData } from './useFetchMoreFilterData.hook';
+import { fetchInitialFilterData } from './fetchInitialFilterData.util';
+import { fetchMoreFilterData } from './fetchMoreFilterData.util';
 
 /**
  * Hook that provides both initial and paginated filter data fetching
@@ -23,14 +23,14 @@ export const useFetchFilterData = <TData, TResponse>({
 >): UseFetchFilterDataReturn<TResponse> => {
   const { filtersDataStore } = useFiltersDataContextValue<TData>();
   const { metaStore } = useTableConfigContextValue<TData>();
-  const fetchInitial = useFetchInitialFilterData<TData, TResponse>({
+  const fetchInitial = fetchInitialFilterData<TData, TResponse>({
     columnKey,
     filtersDataStore,
     metaStore,
     prefetchRef,
   });
 
-  const fetchMore = useFetchMoreFilterData<TData, TResponse>({
+  const fetchMore = fetchMoreFilterData<TData, TResponse>({
     columnKey,
     filtersDataStore,
     metaStore,

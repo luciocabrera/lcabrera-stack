@@ -1,11 +1,11 @@
 import type { ColumnPinningState } from '@/components/Table/Table.types';
 
-export type PinSide = 'left' | 'right';
-
 export type PinnedEntry = {
   readonly key: string;
   readonly originalSide: PinSide;
 };
+
+export type PinSide = 'left' | 'right';
 
 export const getPinnedEntries = ({
   columnPinning,

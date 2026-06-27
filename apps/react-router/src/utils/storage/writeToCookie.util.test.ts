@@ -17,10 +17,10 @@ describe('writeToCookie', () => {
     let cookieValue = '';
     const docMock = { cookie: '' };
     Object.defineProperty(docMock, 'cookie', {
+      get: () => cookieValue,
       set: (val: string) => {
         cookieValue = val;
       },
-      get: () => cookieValue,
     });
     vi.stubGlobal('document', docMock);
 

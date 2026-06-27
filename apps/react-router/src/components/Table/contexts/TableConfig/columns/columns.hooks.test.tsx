@@ -24,9 +24,9 @@ const createInitialColumnsState = () => {
     },
     columnOrder: ['id', 'status', 'actions'],
     columnPinning: { left: ['id'], right: ['actions'] },
+    columns: [{ key: 'id' }, { key: 'status' }, { key: 'actions' }],
     columnSizing: { id: 120, status: 180 },
     columnVisibility: new Set(['status']),
-    columns: [{ key: 'id' }, { key: 'status' }, { key: 'actions' }],
     effectiveColumns: [{ key: 'id' }, { key: 'status' }],
     normalizedColumns: {
       actions: { key: 'actions', label: 'Actions' },
@@ -43,17 +43,20 @@ const createInitialColumnsState = () => {
 
 type ColumnsStoreState = ReturnType<typeof createInitialColumnsState>;
 
-let columnsStore: MockStore<ColumnsStoreState> = createMockStore(
-  createInitialColumnsState(),
-);
-let metaStore: MockStore<Record<string, never>> = createMockStore({});
+const storesRef: {
+  columnsStore: MockStore<ColumnsStoreState>;
+  metaStore: MockStore<Record<string, never>>;
+} = {
+  columnsStore: createMockStore(createInitialColumnsState()),
+  metaStore: createMockStore({}),
+};
 
 vi.mock(
   '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
   () => ({
     useTableConfigContextValue: () => ({
-      columnsStore,
-      metaStore,
+      columnsStore: storesRef.columnsStore,
+      metaStore: storesRef.metaStore,
     }),
   }),
 );
@@ -76,8 +79,8 @@ import { useColumnsStore } from './useColumnsStore.hook';
 
 describe('TableConfig column hooks', () => {
   beforeEach(() => {
-    columnsStore = createMockStore(createInitialColumnsState());
-    metaStore = createMockStore({});
+    storesRef.columnsStore = createMockStore(createInitialColumnsState());
+    storesRef.metaStore = createMockStore({});
   });
 
   it('subscribes to the columns store and updates derived selections', () => {
@@ -88,7 +91,7 @@ describe('TableConfig column hooks', () => {
     expect(result.current).toEqual(['id', 'status', 'actions']);
 
     act(() => {
-      columnsStore.set({ columnOrder: ['status', 'id', 'actions'] });
+      storesRef.columnsStore.set({ columnOrder: ['status', 'id', 'actions'] });
     });
 
     expect(result.current).toEqual(['status', 'id', 'actions']);

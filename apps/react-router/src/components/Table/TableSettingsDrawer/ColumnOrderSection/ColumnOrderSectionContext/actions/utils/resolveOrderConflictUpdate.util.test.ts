@@ -2,24 +2,24 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { resolveOrderConflictUpdate } from './resolveOrderConflictUpdate.util';
 
-const { mockDetectPinOrderConflict } = vi.hoisted(() => ({
-  mockDetectPinOrderConflict: vi.fn(),
+const { mockGetHasPinOrderConflict } = vi.hoisted(() => ({
+  mockGetHasPinOrderConflict: vi.fn(),
 }));
 
 vi.mock(
   '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils',
   () => ({
-    detectPinOrderConflict: mockDetectPinOrderConflict,
+    getHasPinOrderConflict: mockGetHasPinOrderConflict,
   }),
 );
 
 describe('resolveOrderConflictUpdate', () => {
   beforeEach(() => {
-    mockDetectPinOrderConflict.mockReset();
+    mockGetHasPinOrderConflict.mockReset();
   });
 
   it('returns a direct apply result when there is no pin-order conflict', () => {
-    mockDetectPinOrderConflict.mockReturnValue(false);
+    mockGetHasPinOrderConflict.mockReturnValue(false);
 
     const result = resolveOrderConflictUpdate({
       columnPinning: { left: ['id'], right: [] },
@@ -28,7 +28,7 @@ describe('resolveOrderConflictUpdate', () => {
       staticKeys: new Set(['id']),
     });
 
-    expect(mockDetectPinOrderConflict).toHaveBeenCalledWith({
+    expect(mockGetHasPinOrderConflict).toHaveBeenCalledWith({
       columnPinning: { left: ['id'], right: [] },
       newOrder: ['id', 'name', 'age'],
       staticKeys: new Set(['id']),
@@ -41,7 +41,7 @@ describe('resolveOrderConflictUpdate', () => {
   });
 
   it('opens the conflict modal when there is a conflict and no saved preference', () => {
-    mockDetectPinOrderConflict.mockReturnValue(true);
+    mockGetHasPinOrderConflict.mockReturnValue(true);
 
     const result = resolveOrderConflictUpdate({
       columnPinning: { left: ['id'], right: ['name'] },
@@ -62,7 +62,7 @@ describe('resolveOrderConflictUpdate', () => {
   });
 
   it('auto-accepts with the saved resolution when a preference exists', () => {
-    mockDetectPinOrderConflict.mockReturnValue(true);
+    mockGetHasPinOrderConflict.mockReturnValue(true);
 
     const result = resolveOrderConflictUpdate({
       columnPinning: { left: ['id'], right: ['name'] },

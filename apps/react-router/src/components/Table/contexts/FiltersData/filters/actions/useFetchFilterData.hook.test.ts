@@ -12,11 +12,6 @@ type TestData = {
   readonly status: string;
 };
 
-type TestResponse = {
-  readonly rows: readonly string[];
-  readonly total: number;
-};
-
 type TestFiltersState = {
   readonly status: {
     readonly data: readonly string[];
@@ -26,6 +21,11 @@ type TestFiltersState = {
     readonly totalLoadedRows: number;
     readonly totalRows: number;
   };
+};
+
+type TestResponse = {
+  readonly rows: readonly string[];
+  readonly total: number;
 };
 
 const createHarness = () => {
@@ -48,14 +48,16 @@ const createHarness = () => {
 
 type Harness = ReturnType<typeof createHarness>;
 
-let harness: Harness | undefined;
+const harnessRef: { current: Harness | undefined } = {
+  current: undefined,
+};
 
 const getHarness = (): Harness => {
-  if (!harness) {
-    harness = createHarness();
+  if (!harnessRef.current) {
+    harnessRef.current = createHarness();
   }
 
-  return harness;
+  return harnessRef.current;
 };
 
 const loggerMock = vi.hoisted(() => ({ error: vi.fn() }));

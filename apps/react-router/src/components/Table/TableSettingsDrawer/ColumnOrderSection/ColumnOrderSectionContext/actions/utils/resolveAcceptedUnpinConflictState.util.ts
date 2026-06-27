@@ -26,13 +26,13 @@ type ResolveAcceptedUnpinConflictStateResult<
   TData extends Record<string, unknown>,
 > =
   | {
-      readonly kind: 'update-pinning';
-      readonly columnPinning: ColumnPinningState<TData>;
-    }
-  | {
-      readonly kind: 'update-order-and-pinning';
       readonly columnOrder: ColumnOrderState<TData>;
       readonly columnPinning: ColumnPinningState<TData>;
+      readonly kind: 'update-order-and-pinning';
+    }
+  | {
+      readonly columnPinning: ColumnPinningState<TData>;
+      readonly kind: 'update-pinning';
     };
 
 export const resolveAcceptedUnpinConflictState = <
@@ -76,11 +76,11 @@ export const resolveAcceptedUnpinConflictState = <
     }
 
     return {
-      kind: 'update-pinning',
       columnPinning: {
         left,
         right,
       },
+      kind: 'update-pinning',
     };
   }
 
@@ -101,8 +101,8 @@ export const resolveAcceptedUnpinConflictState = <
   });
 
   return {
-    kind: 'update-order-and-pinning',
     columnOrder,
     columnPinning: nextPinning,
+    kind: 'update-order-and-pinning',
   };
 };

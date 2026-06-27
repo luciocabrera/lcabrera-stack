@@ -1,7 +1,12 @@
 ---
 name: react-router-framework-mode
 description: Build full-stack React applications using React Router's framework mode. Use when configuring routes, working with loaders and actions, handling forms, handling navigation, pending/optimistic UI, error boundaries, or working with react-router.config.ts or other react router conventions.
+user-invocable: true
 license: MIT
+metadata:
+  version: '1.0.0'
+  scope: [root]
+  auto_invoke: 'Working with routes, loaders, actions, forms, navigation, error boundaries, or any React Router framework-mode convention'
 ---
 
 # React Router Framework Mode
@@ -42,7 +47,7 @@ Load the relevant reference for detailed guidance on the specific API/concept:
 Some features require specific React Router versions. **Always verify before implementing:**
 
 ```bash
-npm list react-router
+grep '"react-router"' apps/react-router/package.json
 ```
 
 | Feature                 | Minimum Version | Notes                         |
@@ -53,6 +58,10 @@ npm list react-router
 ## Critical Patterns
 
 These are the most important patterns to follow. Load the relevant reference for full details.
+
+### React Router Actions vs React 19 Form Actions
+
+Use React Router `action` exports + `useFetcher` for **all server mutations** (API calls, data persistence, revalidation). React 19's `useActionState` and native form `action` prop are for client-only form state or progressive-enhancement scenarios — see `/react-19` for details on when each applies.
 
 ### Forms & Mutations
 
@@ -66,6 +75,8 @@ These are the most important patterns to follow. Load the relevant reference for
 
 // ❌ Wrong - don't manually handle search params
 <form onSubmit={(e) => { e.preventDefault(); setSearchParams(...) }}>
+  <input name="q" />
+</form>
 ```
 
 **Inline mutations** - use `useFetcher`, NOT `<Form>` (which causes page navigation):
@@ -118,4 +129,4 @@ See `references/route-modules.md` for all exports.
 
 If anything related to React Router is not covered in these references, you can search the official documentation:
 
-https://reactrouter.com/docs
+<https://reactrouter.com/docs>

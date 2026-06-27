@@ -103,8 +103,8 @@ export const Toolbar = ({
                   color={item.color}
                   customStylex={compactControlStyle}
                   icon={item.icon}
-                  isIconOnly={isCompact}
                   isDisabled={item.isDisabled}
+                  isIconOnly={isCompact}
                   onClick={item.onClick}
                   orientation={orientation}
                   size={resolvedSize}
@@ -125,9 +125,9 @@ export const Toolbar = ({
                   isIconOnly={isCompact}
                   orientation={orientation}
                   size={resolvedSize}
+                  to={item.to}
                   tooltipContent={isCompact ? item.label : undefined}
                   tooltipPlacement='right'
-                  to={item.to}
                   width='full'
                 >
                   {item.label}

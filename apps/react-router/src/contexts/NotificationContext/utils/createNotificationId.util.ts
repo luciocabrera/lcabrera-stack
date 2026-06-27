@@ -1,4 +1,13 @@
-let fallbackIdCounter = 0;
+const createFallbackIdGenerator = () => {
+  let fallbackIdCounter = 0;
+
+  return (): string => {
+    fallbackIdCounter += 1;
+    return `notification-${Date.now()}-${fallbackIdCounter}`;
+  };
+};
+
+const generateFallbackId = createFallbackIdGenerator();
 
 /**
  * Creates a unique ID for ephemeral notifications.
@@ -9,6 +18,5 @@ export const createNotificationId = (): string => {
     return crypto.randomUUID();
   }
 
-  fallbackIdCounter += 1;
-  return `notification-${Date.now()}-${fallbackIdCounter}`;
+  return generateFallbackId();
 };

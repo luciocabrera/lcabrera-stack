@@ -23,7 +23,7 @@ const parseNumberValue = (value: unknown): number | undefined => {
     return undefined;
   }
 
-  const parsed = Number.parseFloat(value);
+  const parsed = Number(value);
 
   return Number.isNaN(parsed) ? undefined : parsed;
 };

@@ -32,3 +32,4 @@ docker/local/pgpass
 
 packages/eslint-local-rules/build/
 apps/api-server/.env
+.claudelint-cache/

@@ -3,7 +3,6 @@ import { useEffect, useRef } from 'react';
 
 import { Button } from '@/components/Button';
 import { SettingsIcon } from '@/components/Icons';
-import { useRenderTracker } from '@/utils/performance';
 
 import type { TableContentProps } from './TableContent.types';
 
@@ -31,15 +30,12 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   icon,
   onLoadMore,
 }: TableContentProps<TData, TResponse>) => {
-  useRenderTracker({ componentName: 'TableContent' });
-
   const threshold = useGetTableThreshold();
   const isLoading = useGetTableIsLoading();
   const isLoadingMore = useGetTableIsLoadingMore();
   const hasMore = useGetTableHasMore();
 
   const fetchMoreData = useFetchMoreData<TData, TResponse>();
-
   const toggleTableIsTableSettingsOpen = useToogleTableIsTableSettingsOpen();
 
   const containerRef = useRef<HTMLDivElement>(null);

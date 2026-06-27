@@ -9,14 +9,6 @@ import type {
 
 import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
 
-type BuildTableBodyCellDescriptorArgs<TData extends Record<string, unknown>> = {
-  readonly col: TableColumn<TData>;
-  readonly columnSizing: ColumnSizingState<TData>;
-  readonly isLoadingState: boolean;
-  readonly pinnedOffsets: Partial<Record<DataKey<TData>, PinnedColumnInfo>>;
-  readonly rowData: Record<string, unknown>;
-};
-
 export type TableBodyCellDescriptor<TData extends Record<string, unknown>> =
   | {
       readonly children: ReactNode;
@@ -40,6 +32,14 @@ export type TableBodyCellDescriptor<TData extends Record<string, unknown>> =
       readonly value: unknown;
       readonly width: number;
     };
+
+type BuildTableBodyCellDescriptorArgs<TData extends Record<string, unknown>> = {
+  readonly col: TableColumn<TData>;
+  readonly columnSizing: ColumnSizingState<TData>;
+  readonly isLoadingState: boolean;
+  readonly pinnedOffsets: Partial<Record<DataKey<TData>, PinnedColumnInfo>>;
+  readonly rowData: Record<string, unknown>;
+};
 
 /**
  * Builds the props-derived descriptor needed to render a TableBodyCell.
@@ -79,7 +79,7 @@ export const buildTableBodyCellDescriptor = <
     label: col.label,
     minWidth,
     pinInfo,
-    value: col.key in rowData ? rowData[col.key] : '',
+    value: Object.hasOwn(rowData, col.key) ? rowData[col.key] : '',
     width,
   };
 };

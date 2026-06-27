@@ -5,7 +5,8 @@ license: MIT
 metadata:
   version: '1.0.0'
   scope: [root]
-  auto_invoke: 'Building or modifying Table/store/context code'
+  auto_invoke: 'Building or modifying any context, store, selector, or action hook — including Table state, filters, pagination, or any new shared UI state domain'
+user-invocable: true
 allowed-tools: Read
 ---
 
@@ -37,6 +38,17 @@ This skill documents the project store architecture used in the Table domain:
 | `../quality-gate-workflow/SKILL.md`                                  | Running post-change validation after store/context updates       |
 
 **⚠️ DO NOT implement store/context changes without reading `references/table-contexts-action-selector.md` FIRST.**
+
+## Quick Diagnostic — Which Reference to Open
+
+| Situation                                          | Reference to read                                                               |
+| -------------------------------------------------- | ------------------------------------------------------------------------------- |
+| Adding a new state field to an existing store      | `references/table-contexts-action-selector.md` → §Actions                       |
+| Building a new domain's store/context from scratch | `references/architecture-templates/table-contexts/contexts.ARCHITECTURE.md`     |
+| Debugging a stale-render or missed-update bug      | `references/table-contexts-action-selector.md` → §Selectors                     |
+| Adding filter state for a new column               | `references/architecture-templates/table-contexts/filters-data.ARCHITECTURE.md` |
+| Adding config/meta state (density, pagination)     | `references/architecture-templates/table-contexts/table-config.ARCHITECTURE.md` |
+| Reviewing a PR for store misuse                    | Use the Review Checklist at the bottom of this file                             |
 
 ## Core Rules
 

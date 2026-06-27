@@ -40,6 +40,15 @@ export const FilterInputs = <TData = Record<string, unknown>,>({
 
   const [isOperatorOpen, setIsOperatorOpen] = useState(false);
 
+  if (column.dataType === 'boolean') {
+    return (
+      <BooleanFilterInput
+        filter={filter?.type === 'boolean' ? filter : undefined}
+        onChange={onChange}
+      />
+    );
+  }
+
   const operator = getOperatorFromFilter({ dataType: column.dataType, filter });
   const operatorOptions = getOperatorOptions({ dataType: column.dataType });
   const operatorLabels = operatorOptions.map((op) => op.label);
@@ -55,21 +64,13 @@ export const FilterInputs = <TData = Record<string, unknown>,>({
     if (!selectedLabel) return;
 
     const matchingOp = operatorOptions.find((op) => op.label === selectedLabel);
-    if (!matchingOp) return;
+    if (!matchingOp || filter?.type === 'boolean') return;
 
     const newOperator = matchingOp.value;
 
-    // Boolean filters don't have operators
-    if (filter?.type === 'boolean') return;
-
-    // If filter exists, update it with new operator
     if (filter) {
       onChange({ ...filter, operator: newOperator } as ColumnFilter);
-      return;
-    }
-
-    // No filter yet - create initial filter based on column data type
-    if (column.dataType === 'number') {
+    } else if (column.dataType === 'number') {
       onChange({
         operator: newOperator as NumberOperatorType,
         type: 'number',
@@ -82,7 +83,6 @@ export const FilterInputs = <TData = Record<string, unknown>,>({
         value: '',
       });
     } else {
-      // String type (text filter)
       onChange({
         operator: newOperator as TextOperatorType,
         type: 'text',
@@ -90,17 +90,6 @@ export const FilterInputs = <TData = Record<string, unknown>,>({
       });
     }
   };
-
-  // Render based on data type
-  // Boolean has no operator dropdown - render directly
-  if (column.dataType === 'boolean') {
-    return (
-      <BooleanFilterInput
-        filter={filter?.type === 'boolean' ? filter : undefined}
-        onChange={onChange}
-      />
-    );
-  }
 
   const inputComponent = (
     <InputContent

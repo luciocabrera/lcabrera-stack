@@ -3,7 +3,7 @@ import * as stylex from '@stylexjs/stylex';
 import { borderRadius, spacing } from '@/design-system/tokens/base.stylex';
 import { colors } from '@/design-system/tokens/colors.stylex';
 
-const localStyles = stylex.create({
+export const styles = stylex.create({
   noResults: {
     alignItems: 'center',
     display: 'flex',
@@ -43,21 +43,4 @@ const localStyles = stylex.create({
     overflowX: 'hidden',
     overflowY: 'auto',
   },
-  virtualOffset: (offsetY: number) => ({
-    transform: `translateY(${offsetY}px)`,
-  }),
-  virtualScrollArea: (height: number) => ({
-    position: 'relative',
-    height,
-  }),
 });
-
-export const styles = {
-  noResults: localStyles.noResults,
-  optionsList: localStyles.optionsList,
-  optionsListFill: localStyles.optionsListFill,
-  virtualContainer: localStyles.virtualContainer,
-  virtualContainerFill: localStyles.virtualContainerFill,
-  virtualOffset: localStyles.virtualOffset,
-  virtualScrollArea: localStyles.virtualScrollArea,
-};

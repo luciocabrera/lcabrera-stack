@@ -2,6 +2,12 @@ import { vi } from 'vitest';
 
 import type { ColumnOrderSectionModalsState } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/ColumnOrderSectionContext.types';
 
+type CreateColumnOrderSectionActionMocksArgs = {
+  readonly initialDrawerState: LooseDrawerState;
+  readonly initialModalsState: ColumnOrderSectionModalsState;
+  readonly initialTableState: LooseTableState;
+};
+
 /**
  * Loose drawer state shape — avoids TData inference binding tests to specific key types.
  * ColumnFiltersState and ColumnSizingState are generic Records to prevent over-constraint.
@@ -21,19 +27,13 @@ type LooseTableState = {
   readonly staticKeys: Set<string>;
 };
 
-type CreateColumnOrderSectionActionMocksArgs = {
-  readonly initialDrawerState: LooseDrawerState;
-  readonly initialModalsState: ColumnOrderSectionModalsState;
-  readonly initialTableState: LooseTableState;
-};
-
 type MockStore<TState> = {
+  _state: TState;
   readonly get: ReturnType<typeof vi.fn>;
   readonly getServerSnapshot: ReturnType<typeof vi.fn>;
   readonly reset: ReturnType<typeof vi.fn>;
   readonly set: ReturnType<typeof vi.fn>;
   readonly subscribe: ReturnType<typeof vi.fn>;
-  _state: TState;
 };
 
 const createMockStore = <TState>(initial: TState): MockStore<TState> => {

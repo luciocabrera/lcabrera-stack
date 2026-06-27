@@ -1,9 +1,8 @@
-import * as stylex from '@stylexjs/stylex';
+import { Title } from '@/components/Title/Title.component';
 
 import type { TableTitleProps } from './TableTitle.types';
 
 import { useGetTableTitle } from '../contexts/TableConfig/meta/selectors';
-import { styles } from './TableTitle.stylex';
 
 export const TableTitle = ({
   actions,
@@ -11,17 +10,10 @@ export const TableTitle = ({
   icon,
 }: TableTitleProps) => {
   const title = useGetTableTitle();
-  if (!title && !icon && !actions) {
-    return;
-  }
 
   return (
-    <div {...stylex.props(styles.container, customStylex)}>
-      <div {...stylex.props(styles.titleSection)}>
-        {icon && <div {...stylex.props(styles.icon)}>{icon}</div>}
-        {title && <h2 {...stylex.props(styles.title)}>{title}</h2>}
-      </div>
-      {actions && <div {...stylex.props(styles.actions)}>{actions}</div>}
-    </div>
+    <Title actions={actions} customStylex={customStylex} icon={icon}>
+      {title}
+    </Title>
   );
 };

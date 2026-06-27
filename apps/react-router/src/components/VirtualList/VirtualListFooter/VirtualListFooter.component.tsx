@@ -1,6 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { Button } from '@/components/Button';
 import {
   ListAllIcon,
   ListCheckedIcon,
@@ -10,6 +9,7 @@ import { ICON_SIZE_MD } from '@/design-system/constants';
 
 import type { VirtualListFooterProps } from './VirtualListFooter.types';
 
+import { ListFilterModeButton } from './ListFilterModeButton';
 import { styles } from './VirtualListFooter.stylex';
 
 export const VirtualListFooter = ({
@@ -53,19 +53,15 @@ export const VirtualListFooter = ({
               },
             } as const;
             const { count, icon, tooltip } = modeConfig[mode];
-            const tooltipContent = `${tooltip} (${count})`;
             return (
-              <Button
-                color={listFilterMode === mode ? 'secondary' : 'ghost'}
+              <ListFilterModeButton
+                count={count}
                 icon={icon}
+                isActive={listFilterMode === mode}
                 key={mode}
-                onClick={() => {
-                  setListFilterMode(mode);
-                }}
-                size='mini'
-                tooltipContent={tooltipContent}
-                variant='flat'
-                width='auto'
+                mode={mode}
+                onSelect={setListFilterMode}
+                tooltip={tooltip}
               />
             );
           })}

@@ -1,5 +1,4 @@
 // @vitest-environment jsdom
-
 import type { ReactNode } from 'react';
 
 import { cleanup, render, screen } from '@testing-library/react';
@@ -39,38 +38,33 @@ const {
   useGetColumnSizingMock,
   useGetPinnedColumnOffsetsMock,
   useGetTableDataMock,
-  useRenderTrackerMock,
 } = vi.hoisted(() => ({
   useGetColumnGroupsMock: vi.fn(),
   useGetColumnSizingMock: vi.fn(),
   useGetPinnedColumnOffsetsMock: vi.fn(),
   useGetTableDataMock: vi.fn(),
-  useRenderTrackerMock: vi.fn(),
 }));
 
-const MockTableBodyCell = vi.hoisted(
-  () =>
-    ({
-      children,
-      isLoadingState: _isLoadingState,
-      label,
-      value,
-    }: MockTableBodyCellProps) => {
-      return (
-        <td>
-          {children ??
-            `${formatMockCellValue(label)}:${formatMockCellValue(value)}`}
-        </td>
-      );
-    },
-);
+const MockTableBodyCell = vi.hoisted(() => {
+  return function MockTableBodyCell({
+    children,
+    label,
+    value,
+  }: MockTableBodyCellProps) {
+    return (
+      <td>
+        {children ??
+          `${formatMockCellValue(label)}:${formatMockCellValue(value)}`}
+      </td>
+    );
+  };
+});
 
-const MockTableRow = vi.hoisted(
-  () =>
-    ({ children }: { readonly children: ReactNode }) => {
-      return <tr>{children}</tr>;
-    },
-);
+const MockTableRow = vi.hoisted(() => {
+  return function MockTableRow({ children }: { readonly children: ReactNode }) {
+    return <tr>{children}</tr>;
+  };
+});
 
 vi.mock('@/components/Table/contexts/TableConfig/columns/selectors', () => ({
   useGetColumnGroups: useGetColumnGroupsMock,
@@ -84,10 +78,6 @@ vi.mock('@/components/Table/TableBodyCell', () => ({
 
 vi.mock('@/components/Table/TableRow', () => ({
   TableRow: MockTableRow,
-}));
-
-vi.mock('@/utils/performance', () => ({
-  useRenderTracker: useRenderTrackerMock,
 }));
 
 vi.mock('../contexts/TableData/data/selectors', () => ({

@@ -1,17 +1,6 @@
 import type { ShouldRevalidateFunctionArgs } from 'react-router';
 
-import { PERSIST_COOKIE_ACTION } from '@/constants/globalSettings.constants';
-
-const isPersistCookieAction = (formAction: string | null) => {
-  if (!formAction) {
-    return false;
-  }
-
-  return (
-    formAction === PERSIST_COOKIE_ACTION ||
-    formAction.endsWith(PERSIST_COOKIE_ACTION)
-  );
-};
+import { isPersistCookieAction } from './isPersistCookieAction.util';
 
 /**
  * Prevents loader revalidation for cookie-only persistence responses.
@@ -25,7 +14,7 @@ export const shouldRevalidatePersistCookieAction = ({
   defaultShouldRevalidate,
   formAction,
 }: ShouldRevalidateFunctionArgs) => {
-  if (actionStatus === 204 && isPersistCookieAction(formAction ?? null)) {
+  if (actionStatus === 204 && isPersistCookieAction(formAction)) {
     return false;
   }
 

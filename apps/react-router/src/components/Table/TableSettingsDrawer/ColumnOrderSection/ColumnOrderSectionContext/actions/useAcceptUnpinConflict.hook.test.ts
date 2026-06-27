@@ -99,8 +99,8 @@ describe('useAcceptUnpinConflict', () => {
   it('sets only columnPinning for update-pinning resolution', () => {
     const newPinning = { left: [], right: [] };
     mockResolve.mockReturnValue({
-      kind: 'update-pinning',
       columnPinning: newPinning,
+      kind: 'update-pinning',
     });
 
     const { result } = renderHook(() => useAcceptUnpinConflict());
@@ -121,9 +121,9 @@ describe('useAcceptUnpinConflict', () => {
     const newPinning = { left: [], right: [] };
     const newOrder = ['name', 'id'];
     mockResolve.mockReturnValue({
-      kind: 'update-order-and-pinning',
       columnOrder: newOrder,
       columnPinning: newPinning,
+      kind: 'update-order-and-pinning',
     });
 
     const { result } = renderHook(() => useAcceptUnpinConflict());

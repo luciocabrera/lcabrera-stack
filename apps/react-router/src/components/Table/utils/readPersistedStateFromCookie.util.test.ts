@@ -26,7 +26,7 @@ describe('readPersistedStateFromCookie', () => {
     });
     vi.mocked(readFromCookie).mockImplementation(({ key }) => {
       if (key.endsWith('-sorting')) return encodeURIComponent(value);
-      return undefined;
+      return;
     });
     const result = readPersistedStateFromCookie({ persistenceKey: 'myTable' });
     expect(result.sorting).toEqual([{ columnKey: 'name', direction: 'asc' }]);
@@ -36,7 +36,7 @@ describe('readPersistedStateFromCookie', () => {
     const value = JSON.stringify({ value: ['id', 'name'], version: 1 });
     vi.mocked(readFromCookie).mockImplementation(({ key }) => {
       if (key.endsWith('-columnVisibility')) return encodeURIComponent(value);
-      return undefined;
+      return;
     });
     const result = readPersistedStateFromCookie({ persistenceKey: 'myTable' });
     expect(result.columnVisibility).toBeInstanceOf(Set);
@@ -50,7 +50,7 @@ describe('readPersistedStateFromCookie', () => {
     });
     vi.mocked(readFromCookie).mockImplementation(({ key }) => {
       if (key.endsWith('-sorting')) return encodeURIComponent(value);
-      return undefined;
+      return;
     });
     const result = readPersistedStateFromCookie({ persistenceKey: 'myTable' });
     expect(result.sorting).toBeUndefined();
@@ -59,7 +59,7 @@ describe('readPersistedStateFromCookie', () => {
   it('skips slices with invalid JSON', () => {
     vi.mocked(readFromCookie).mockImplementation(({ key }) => {
       if (key.endsWith('-sorting')) return encodeURIComponent('not-json');
-      return undefined;
+      return;
     });
     const result = readPersistedStateFromCookie({ persistenceKey: 'myTable' });
     expect(result.sorting).toBeUndefined();

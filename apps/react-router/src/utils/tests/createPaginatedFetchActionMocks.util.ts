@@ -4,10 +4,37 @@ import type { PrefetchCache } from '@/types/ui.types';
 
 import { createMockStore } from './createMockStore.util';
 
-type ResolveFromCacheOrFetchArgs<TResponse> = {
-  readonly cache: PrefetchCache<TResponse> | undefined;
-  readonly expectedSkip: number;
-  readonly fetchFn: () => Promise<TResponse>;
+type CallableMock<TArgs extends readonly unknown[], TReturn> = ((
+  ...args: TArgs
+) => TReturn) & {
+  readonly mockClear: () => void;
+  readonly mockReset: () => void;
+  readonly mockResolvedValue: (
+    value: Awaited<TReturn>,
+  ) => CallableMock<TArgs, TReturn>;
+};
+
+type CreatePaginatedFetchActionMocksArgs<TDataState> = {
+  readonly initialDataState: TDataState;
+  readonly initialMetaState: Record<string, unknown>;
+};
+
+type CreatePaginatedFetchActionMocksResult<TDataState, TResponse> = {
+  readonly createPrefetchRef: () => {
+    current: PrefetchCache<TResponse>;
+  };
+  readonly dataStore: ReturnType<typeof createMockStore<TDataState>>;
+  readonly firePrefetchMock: CallableMock<[FirePrefetchArgs<TResponse>], void>;
+  readonly metaStore: ReturnType<
+    typeof createMockStore<Record<string, unknown>>
+  >;
+  readonly resetMocks: () => void;
+  readonly resolveFromCacheOrFetchMock: CallableMock<
+    [ResolveFromCacheOrFetchArgs<TResponse>],
+    Promise<TResponse>
+  >;
+  readonly setDataState: (nextState: TDataState) => void;
+  readonly setMetaState: (nextState: Record<string, unknown>) => void;
 };
 
 type FirePrefetchArgs<TResponse> = {
@@ -22,37 +49,10 @@ type FirePrefetchArgs<TResponse> = {
   };
 };
 
-type CallableMock<TArgs extends readonly unknown[], TReturn> = ((
-  ...args: TArgs
-) => TReturn) & {
-  readonly mockClear: () => void;
-  readonly mockResolvedValue: (
-    value: Awaited<TReturn>,
-  ) => CallableMock<TArgs, TReturn>;
-  readonly mockReset: () => void;
-};
-
-type CreatePaginatedFetchActionMocksArgs<TDataState> = {
-  readonly initialDataState: TDataState;
-  readonly initialMetaState: Record<string, unknown>;
-};
-
-type CreatePaginatedFetchActionMocksResult<TDataState, TResponse> = {
-  readonly firePrefetchMock: CallableMock<[FirePrefetchArgs<TResponse>], void>;
-  readonly metaStore: ReturnType<
-    typeof createMockStore<Record<string, unknown>>
-  >;
-  readonly resolveFromCacheOrFetchMock: CallableMock<
-    [ResolveFromCacheOrFetchArgs<TResponse>],
-    Promise<TResponse>
-  >;
-  readonly setDataState: (nextState: TDataState) => void;
-  readonly setMetaState: (nextState: Record<string, unknown>) => void;
-  readonly dataStore: ReturnType<typeof createMockStore<TDataState>>;
-  readonly createPrefetchRef: () => {
-    current: PrefetchCache<TResponse>;
-  };
-  readonly resetMocks: () => void;
+type ResolveFromCacheOrFetchArgs<TResponse> = {
+  readonly cache: PrefetchCache<TResponse> | undefined;
+  readonly expectedSkip: number;
+  readonly fetchFn: () => Promise<TResponse>;
 };
 
 export const createPaginatedFetchActionMocks = <TDataState, TResponse>({
@@ -101,7 +101,7 @@ export const createPaginatedFetchActionMocks = <TDataState, TResponse>({
             skip: nextSkip,
           };
         })
-        .catch(() => undefined);
+        .catch(() => {});
     },
   ) as CallableMock<[FirePrefetchArgs<TResponse>], void>;
 

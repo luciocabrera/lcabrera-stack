@@ -14,14 +14,14 @@ export type VirtualSelectProps = {
   readonly customStylex?: StyleXStyles;
   /** Current state of async-loaded data (for fetch mode). Mutually exclusive with `options`. */
   readonly dataState?: VirtualListDataState;
-  /** Shows a shimmer overlay and disables trigger interaction while the parent is busy */
-  readonly isBusy?: boolean;
   /** When true, the list is always visible without a trigger button */
   readonly isAlwaysOpen?: boolean;
-  /** Height for the virtual dropdown list (CSS value, e.g. '18.75rem') */
-  readonly listMaxHeight?: string;
+  /** Shows a shimmer overlay and disables trigger interaction while the parent is busy */
+  readonly isBusy?: boolean;
   /** Optional id used to wire trigger/listbox ARIA relationships */
   readonly listboxId?: string;
+  /** Height for the virtual dropdown list (CSS value, e.g. '18.75rem') */
+  readonly listMaxHeight?: string;
   /** Selection mode: 'single' closes on select, 'multi' shows checkboxes + select all */
   readonly mode: VirtualSelectMode;
   /** Called when the selection changes */

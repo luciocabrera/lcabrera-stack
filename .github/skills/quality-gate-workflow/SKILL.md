@@ -1,11 +1,12 @@
 ---
 name: quality-gate-workflow
 description: Post-change validation workflow for Vite+ projects. Use after every code change to enforce formatting, linting, type safety, and test correctness before considering work done.
+user-invocable: true
 license: MIT
 metadata:
   version: '1.0.0'
   scope: [root]
-  auto_invoke: 'After any code change, before merge'
+  auto_invoke: 'After completing any code change — run before considering work done, before opening a PR, or before merge'
 allowed-tools: Bash(vp:*)
 ---
 

@@ -5,9 +5,10 @@ import {
   baseInteractiveStyles,
   colorVariants,
   orientationVariants,
+  overlayStyles,
   rippleBase,
-  skeleton,
   sizeVariants,
+  skeleton,
   widthVariants,
 } from '@/design-system/tokens/commons.stylex';
 
@@ -19,6 +20,7 @@ const buttonSpecificStyles = stylex.create({
       ':disabled': 'not-allowed',
     },
     opacity: {
+      default: 0.9,
       ':disabled': 0.6,
     },
   },
@@ -34,6 +36,7 @@ const buttonSpecificStyles = stylex.create({
   labelHidden: {
     display: 'none',
   },
+  overlayOverwrite: { filter: null },
 });
 
 const styleVariants = stylex.create({
@@ -71,7 +74,9 @@ export const buttonStyles = {
   orientation: orientationVariants,
   busyOverlay: [skeleton.loadingOverlay, loadingStyles.overlay],
   busyWave: skeleton.shimmerWave,
+  overlayOverwrite: buttonSpecificStyles.overlayOverwrite,
   size: sizeVariants,
   style: styleVariants,
   width: widthVariants,
+  ...overlayStyles,
 };

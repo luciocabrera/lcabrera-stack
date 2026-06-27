@@ -4,7 +4,7 @@ import type { TableColumn } from '@/components/Table/Table.types';
 
 import { getIsContiguousPin } from './getIsContiguousPin.util';
 
-type Row = { id: string; name: string; age: number; actions: string };
+type Row = { actions: string; age: number; id: string; name: string };
 
 const cols: TableColumn<Row>[] = [
   { dataType: 'string', key: 'id', label: 'ID' },

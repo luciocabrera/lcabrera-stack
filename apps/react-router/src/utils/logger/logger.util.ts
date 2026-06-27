@@ -1,4 +1,4 @@
-import type { CreateLoggerArgs, LogLevel, Logger } from './logger.types';
+import type { CreateLoggerArgs, Logger, LogLevel } from './logger.types';
 
 import { DEFAULT_LOG_LEVEL, LOG_LEVEL_PRIORITY } from './logger.constants';
 

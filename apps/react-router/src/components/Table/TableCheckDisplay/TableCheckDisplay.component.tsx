@@ -1,8 +1,6 @@
-import * as stylex from '@stylexjs/stylex';
+import { Checkbox } from '@/components/Checkbox';
 
 import type { TableCheckDisplayProps } from './TableCheckDisplay.types';
-
-import { tableCheckDisplayStyles } from './TableCheckDisplay.stylex';
 
 export const TableCheckDisplay = ({
   label: columnLabel,
@@ -15,17 +13,13 @@ export const TableCheckDisplay = ({
   }
 
   return (
-    <input
+    <Checkbox
       aria-label={label}
-      checked={isChecked}
-      disabled
-      readOnly
+      dataTestId='table-check-display-icon'
+      isChecked={isChecked}
+      isDisabled
+      isReadOnly
       tabIndex={-1}
-      type='checkbox'
-      {...stylex.props(
-        tableCheckDisplayStyles.checkbox,
-        isChecked && tableCheckDisplayStyles.checkboxChecked,
-      )}
     />
   );
 };

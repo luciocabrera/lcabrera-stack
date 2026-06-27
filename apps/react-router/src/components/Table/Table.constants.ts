@@ -8,7 +8,7 @@ export const DEFAULT_MIN_COLUMN_WIDTH = 60;
  */
 export const DEFAULT_MAX_COLUMN_WIDTH = 600;
 
-export const DEFAULT_PLACEHOLDER_ROW_COUNT = 30;
+export const DEFAULT_PLACEHOLDER_ROW_COUNT = 50;
 
 export const DEFAULT_ROW_HEIGHT = 32;
 
@@ -21,4 +21,4 @@ export const DEFAULT_OVERSCAN = 20;
 
 export const DEFAULT_COLUMN_OVERSCAN = 2;
 
-export const DEFAULT_ENABLE_PREFETCH = true;
+export const IS_PREFETCH_ENABLED = true;

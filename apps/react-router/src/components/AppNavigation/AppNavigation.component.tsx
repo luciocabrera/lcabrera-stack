@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import type { GlobalNavigationSizePreference } from '@/types/globalSettings.types';
 
@@ -34,7 +34,7 @@ import type {
 import { getNavigationItems, NAV_DENSITY } from './AppNavigation.constants';
 import { styles } from './AppNavigation.stylex';
 
-const resolvePinnedState = ({
+const isNavigationPinned = ({
   defaultIsPinned,
   navigationPinnedPreference,
 }: ResolvePinnedStateArgs): boolean => {
@@ -47,24 +47,6 @@ const resolvePinnedState = ({
   }
 
   return defaultIsPinned;
-};
-
-const resolvePinnedAndOpenState = ({
-  defaultIsPinned,
-  navigationPinnedPreference,
-}: ResolvePinnedStateArgs): {
-  readonly isOpen: boolean;
-  readonly isPinned: boolean;
-} => {
-  if (navigationPinnedPreference === 'pinned') {
-    return { isOpen: false, isPinned: true };
-  }
-
-  if (navigationPinnedPreference === 'unpinned') {
-    return { isOpen: true, isPinned: false };
-  }
-
-  return { isOpen: false, isPinned: defaultIsPinned };
 };
 
 const getBrandIconSizeStyle = (brandIconBoxSize: 'md' | 'mini' | 'sm') => {
@@ -93,8 +75,6 @@ const getHeaderDensityStyle = (
   if (navigationSizePreference === 'large') {
     return styles.headerDensityLarge;
   }
-
-  return undefined;
 };
 
 const getBodyDensityStyle = (
@@ -107,8 +87,6 @@ const getBodyDensityStyle = (
   if (navigationSizePreference === 'large') {
     return styles.bodyDensityLarge;
   }
-
-  return undefined;
 };
 
 const resolveExpandButtonLabel = (isExpanded: boolean): string => {
@@ -149,31 +127,19 @@ export const AppNavigation = ({
   const navigationSizePreference = useGetGlobalNavigationSizePreference();
   const setGlobalNavigationPreferences = useSetGlobalNavigationPreferences();
   const [isOpen, setIsOpen] = useState(() => {
-    return navigationPinnedPreference === 'unpinned';
-  });
-  const [isExpanded, setIsExpanded] = useState(() => {
-    return navigationCollapsedPreference !== 'collapsed';
-  });
-  const [isPinned, setIsPinned] = useState(() => {
-    return resolvePinnedState({
-      defaultIsPinned,
-      navigationPinnedPreference,
-    });
-  });
-
-  useEffect(() => {
-    setIsExpanded(navigationCollapsedPreference !== 'collapsed');
-  }, [navigationCollapsedPreference]);
-
-  useEffect(() => {
-    const nextState = resolvePinnedAndOpenState({
+    const isPinnedInitially = isNavigationPinned({
       defaultIsPinned,
       navigationPinnedPreference,
     });
 
-    setIsPinned(nextState.isPinned);
-    setIsOpen(nextState.isOpen);
-  }, [defaultIsPinned, navigationPinnedPreference]);
+    return !isPinnedInitially;
+  });
+
+  const isExpanded = navigationCollapsedPreference !== 'collapsed';
+  const isPinned = isNavigationPinned({
+    defaultIsPinned,
+    navigationPinnedPreference,
+  });
 
   const density = NAV_DENSITY[navigationSizePreference ?? 'medium'];
   const pinButtonLabel = resolvePinButtonLabel(isPinned);
@@ -197,27 +163,14 @@ export const AppNavigation = ({
   };
 
   const handleToggleExpanded = () => {
-    setIsExpanded((currentIsExpanded) => {
-      const nextIsExpanded = !currentIsExpanded;
-
-      setGlobalNavigationPreferences({
-        collapsed: nextIsExpanded ? 'expanded' : 'collapsed',
-      });
-
-      return nextIsExpanded;
+    setGlobalNavigationPreferences({
+      collapsed: isExpanded ? 'collapsed' : 'expanded',
     });
   };
 
   const handleTogglePinned = () => {
-    setIsPinned((currentIsPinned) => {
-      const nextIsPinned = !currentIsPinned;
-
-      setGlobalNavigationPreferences({
-        pinned: nextIsPinned ? 'pinned' : 'unpinned',
-      });
-      setIsOpen(!nextIsPinned);
-
-      return nextIsPinned;
+    setGlobalNavigationPreferences({
+      pinned: isPinned ? 'unpinned' : 'pinned',
     });
   };
 

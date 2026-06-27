@@ -6,31 +6,17 @@ import { TableLayout } from '@/components/Table/TableLayout';
 
 import type { loader } from './car-sales.loader';
 
-import { COLUMNS, PERSISTENCE_KEY } from './CarSales.constants';
-
 export const CarSales = () => {
-  const {
-    carSalesPromise,
-    columnOrder,
-    columnSizing,
-    columnVisibility,
-    sorting,
-  } = useLoaderData<typeof loader>();
+  const { carSalesPromise, columnsState, metaState } =
+    useLoaderData<typeof loader>();
 
   return (
     <TableLayout<CarSale, CarSalesResponse>
-      columnOrder={columnOrder}
-      columns={COLUMNS}
-      columnSizing={columnSizing}
-      columnVisibility={columnVisibility}
+      columnsState={columnsState}
       dataPromise={carSalesPromise}
       dataSelector={(response) => response.data}
       dataTotalSelector={(response) => response.total}
-      persistenceKey={PERSISTENCE_KEY}
-      schemaName='public'
-      sorting={sorting}
-      tableName='car_sales'
-      title='Car Sales Data'
+      metaState={metaState}
     />
   );
 };

@@ -1,12 +1,13 @@
 // @vitest-environment jsdom
-
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { TableSuspenseBoundary } from './TableSuspenseBoundary.component';
 
-const MockTableSkeleton = vi.hoisted(() => () => {
-  return <div>Loading table skeleton</div>;
+const MockTableSkeleton = vi.hoisted(() => {
+  return function MockTableSkeleton() {
+    return <div>Loading table skeleton</div>;
+  };
 });
 
 vi.mock('../TableSkeleton', () => ({
@@ -19,13 +20,10 @@ afterEach(() => {
 
 describe('TableSuspenseBoundary', () => {
   it('renders suspense fallback while data promise is pending', () => {
-    const pendingPromise = new Promise<number>((_resolve) => void 0);
+    const { promise: pendingPromise } = Promise.withResolvers<number>();
 
     render(
-      <TableSuspenseBoundary
-        dataPromise={pendingPromise}
-        onRetry={() => void 0}
-      >
+      <TableSuspenseBoundary dataPromise={pendingPromise}>
         {(response) => <span>Resolved: {response}</span>}
       </TableSuspenseBoundary>,
     );

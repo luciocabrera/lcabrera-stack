@@ -15,6 +15,7 @@ SelectAllOption/
 
 ```mermaid
 graph LR
+  SAO["SelectAllOption"] --> Checkbox["Checkbox"]
   SAO["SelectAllOption"] --> VL_stylex["VirtualList.stylex (styles, skeletonStyles)"]
 ```
 
@@ -42,4 +43,5 @@ graph TD
 ## Notes
 
 - Rendered by `VirtualizedOption` at `index === 0` when `hasSelectAll && filteredOptions.length > 1`.
-- Uses shared `styles` and `skeletonStyles` from `VirtualList.stylex` — no own stylex file.
+- Uses shared `Checkbox` for checkbox visuals and behavior.
+- Uses shared `styles` and `skeletonStyles` from `VirtualList.stylex` for row and shimmer styles.

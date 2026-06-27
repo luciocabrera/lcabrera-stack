@@ -8,16 +8,30 @@ import type {
 import type { TStore } from '@/hooks/useStore.hook';
 import type { InfiniteScroll, PrefetchCache } from '@/types/ui.types';
 
+export type FetchFilterDataActionArgs<TData, TResponse> = {
+  readonly columnKey: DataKey<TData>;
+  readonly filtersDataStore: TStore<FiltersDataState<TData>>;
+  readonly metaStore: TStore<TableMetaState>;
+  readonly prefetchRef?: RefObject<PrefetchCache<TResponse>>;
+};
+
 export type FetchFilterDataCallbackArgs<TResponse> = Omit<
   InfiniteScroll<string, TResponse>,
   'hasMore' | 'isLoadingMore'
 >;
 
-export type UseFetchFilterDataActionArgs<TData, TResponse> = {
-  readonly columnKey: DataKey<TData>;
-  readonly filtersDataStore: TStore<FiltersDataState<TData>>;
-  readonly metaStore: TStore<TableMetaState>;
-  readonly prefetchRef?: RefObject<PrefetchCache<TResponse>>;
+export type MaybePrefetchArgs<TResponse> = {
+  readonly enablePrefetch: boolean;
+  readonly hasMore: boolean;
+  readonly nextSkip: number;
+  readonly onLoadMore: (args: {
+    readonly limit: number;
+    readonly skip: number;
+  }) => Promise<TResponse>;
+  readonly prefetchRef?: FetchFilterDataActionArgs<
+    unknown,
+    TResponse
+  >['prefetchRef'];
 };
 
 export type UseFetchFilterDataArgs<TData, TResponse> = {

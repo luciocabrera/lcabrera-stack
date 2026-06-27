@@ -4,5 +4,5 @@ import { useMetaStore } from '@/components/Table/contexts/TableConfig/meta/useMe
 
 export const useGetTableAdditionalMetadata = () =>
   useMetaStore<
-    Readonly<Record<string, TableMetadataValue | null | undefined>> | undefined
+    Readonly<Record<string, null | TableMetadataValue | undefined>> | undefined
   >((state) => state.additionalMetadata);

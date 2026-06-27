@@ -8,7 +8,6 @@ import { serializeSortingToURL } from '@/utils/urlState';
 type ResolveColumnSortingUpdateArgs<TData> = {
   readonly columns: readonly TableColumn<TData>[];
   readonly existingSorting?: SortingState<TData>;
-  readonly persistenceKey: string;
   readonly sort: Sorting<TData>;
 };
 
@@ -25,11 +24,8 @@ type ResolveColumnSortingUpdateResult<TData> =
         typeof getNormalizedColumns<TData>
       >;
       readonly persistenceEntry: {
-        readonly persistenceKey: string;
-        readonly searchParamKey: 'sort';
+        readonly searchParamKey: 'sorting';
         readonly searchParamValue?: string;
-        readonly slice: 'sorting';
-        readonly valueSlice: SortingState<TData>;
       };
       readonly sorting: SortingState<TData>;
     };
@@ -37,7 +33,6 @@ type ResolveColumnSortingUpdateResult<TData> =
 export const resolveColumnSortingUpdate = <TData>({
   columns,
   existingSorting = [],
-  persistenceKey,
   sort,
 }: ResolveColumnSortingUpdateArgs<TData>): ResolveColumnSortingUpdateResult<TData> => {
   const { columnKey, direction } = sort;
@@ -67,11 +62,8 @@ export const resolveColumnSortingUpdate = <TData>({
       sorting,
     }),
     persistenceEntry: {
-      persistenceKey,
-      searchParamKey: 'sort',
+      searchParamKey: 'sorting',
       searchParamValue: serializeSortingToURL(sorting),
-      slice: 'sorting',
-      valueSlice: sorting,
     },
     sorting,
   };

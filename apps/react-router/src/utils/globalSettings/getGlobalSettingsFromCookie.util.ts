@@ -35,14 +35,14 @@ const ORDER_CONFLICT_VALUES = [
 ] as const;
 const UNPIN_CONFLICT_VALUES = ['reorder-to-fill', 'unpin-beyond'] as const;
 
-type GlobalSettingsCookiePayload = {
-  readonly value?: unknown;
-  readonly version?: unknown;
-};
-
 type GetGlobalSettingsFromCookieArgs = {
   readonly cookieString?: string;
   readonly fallback: GlobalSettingsState;
+};
+
+type GlobalSettingsCookiePayload = {
+  readonly value?: unknown;
+  readonly version?: unknown;
 };
 
 const isObject = (value: unknown): value is Record<string, unknown> => {

@@ -9,7 +9,7 @@ import {
 import { getVerticalVirtualizationWindow } from '@/hooks/utils';
 
 export type UseVirtualizationArgs = {
-  readonly containerRef: RefObject<HTMLElement | null>;
+  readonly containerRef: RefObject<HTMLElement | null | undefined>;
   readonly defaultContainerHeight?: number;
   readonly itemHeight: number;
   readonly overscan?: number;
@@ -51,7 +51,6 @@ export const useVirtualization = ({
       // Skip zero measurements (e.g. display:none from Activity hidden)
       // to preserve the last valid height and avoid layout shifts
       if (measured > 0) {
-        // eslint-disable-next-line react-x/set-state-in-effect -- State must be set from DOM measurement (offsetHeight); this cannot be derived during render
         setContainerHeight(measured);
       }
     };

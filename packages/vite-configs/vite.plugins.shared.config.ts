@@ -86,7 +86,7 @@ const isTestTaskRunFromEnv = (): boolean =>
 export const createReactRouterPluginsConfig = ({
   appRootUrl,
   babelConfigOverrides = {},
-  babelIncludePattern = /(?<!\.test)\.[jt]sx?$/,
+  babelIncludePattern = /^(?!.*\.test\.).*\.[jt]sx?$/,
   isTestTaskRun = isTestTaskRunFromEnv(),
   pluginsAfter = [],
   pluginsBefore = [],

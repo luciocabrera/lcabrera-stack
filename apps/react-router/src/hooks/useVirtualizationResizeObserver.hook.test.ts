@@ -19,7 +19,11 @@ const { cancelAnimationFrameMock, requestAnimationFrameMock } = vi.hoisted(
   }),
 );
 
-let resizeObserverCallback: ResizeObserverCallback | undefined;
+const resizeObserverCallbackRef: {
+  current: ResizeObserverCallback | undefined;
+} = {
+  current: undefined,
+};
 
 type CreateContainerArgs = {
   readonly offsetHeight: number;
@@ -34,18 +38,20 @@ const createContainer = ({
 }: CreateContainerArgs): HTMLElement => {
   const container = document.createElement('div');
 
-  Object.defineProperty(container, 'offsetHeight', {
-    configurable: true,
-    value: offsetHeight,
-  });
-  Object.defineProperty(container, 'scrollHeight', {
-    configurable: true,
-    value: scrollHeight,
-  });
-  Object.defineProperty(container, 'scrollTop', {
-    configurable: true,
-    value: scrollTop,
-    writable: true,
+  Object.defineProperties(container, {
+    offsetHeight: {
+      configurable: true,
+      value: offsetHeight,
+    },
+    scrollHeight: {
+      configurable: true,
+      value: scrollHeight,
+    },
+    scrollTop: {
+      configurable: true,
+      value: scrollTop,
+      writable: true,
+    },
   });
 
   return container;
@@ -53,7 +59,7 @@ const createContainer = ({
 
 describe('useVirtualizationResizeObserver', () => {
   beforeEach(() => {
-    resizeObserverCallback = undefined;
+    resizeObserverCallbackRef.current = undefined;
     requestAnimationFrameMock.mockClear();
     cancelAnimationFrameMock.mockClear();
 
@@ -63,7 +69,7 @@ describe('useVirtualizationResizeObserver', () => {
       'ResizeObserver',
       class {
         public constructor(callback: ResizeObserverCallback) {
-          resizeObserverCallback = callback;
+          resizeObserverCallbackRef.current = callback;
         }
 
         public disconnect() {
@@ -153,7 +159,7 @@ describe('useVirtualizationResizeObserver', () => {
     });
 
     act(() => {
-      resizeObserverCallback?.([], {} as ResizeObserver);
+      resizeObserverCallbackRef.current?.([], {} as ResizeObserver);
     });
 
     expect(result.current.containerHeight).toBe(520);
@@ -180,7 +186,7 @@ describe('useVirtualizationResizeObserver', () => {
     });
 
     act(() => {
-      resizeObserverCallback?.([], {} as ResizeObserver);
+      resizeObserverCallbackRef.current?.([], {} as ResizeObserver);
     });
 
     expect(result.current.containerHeight).toBe(400);
@@ -242,8 +248,8 @@ describe('useVirtualizationResizeObserver', () => {
 
   it('uses the provided default height when the container ref is null', () => {
     const containerRef = {
-      current: null,
-    } as RefObject<HTMLElement | null>;
+      current: undefined,
+    } as RefObject<HTMLElement | null | undefined>;
 
     const { result } = renderHook(() =>
       useVirtualizationResizeObserver({

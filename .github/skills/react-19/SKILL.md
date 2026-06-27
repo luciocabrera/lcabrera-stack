@@ -7,7 +7,7 @@ license: MIT
 metadata:
   version: '1.1.0'
   scope: [root]
-  auto_invoke: 'Writing React components'
+  auto_invoke: 'Writing or modifying React components, hooks, context, or form actions in .tsx/.jsx files'
 allowed-tools: Read
 ---
 
@@ -18,6 +18,8 @@ allowed-tools: Read
 - Writing or refactoring React 19 components and hooks in `.tsx`/`.jsx`
 - Migrating React 18 patterns to React 19 (`use()`, refs-as-props, actions)
 - Enforcing React Compiler-safe patterns in component code
+
+> **State & context architecture**: This skill covers React 19 APIs only. If you are building or modifying any shared state, context, or store — read `/store-pattern` first. The store-pattern is the only approved pattern for shared UI state in this project.
 
 ## 🚨 CRITICAL: Reference Files are MANDATORY
 
@@ -71,9 +73,10 @@ export const ProductList = ({ products }: ProductListProps) => { ... }
 // ❌ NEVER: default export (unless required by framework)
 export default ProductList;
 
-// ✅ EXCEPTION: Next.js pages/layouts require default export
-// app/page.tsx
-export const MyComponent = () => { ... }
+// ✅ EXCEPTION: React Router route modules require default export
+// routes/home.tsx
+export const MyRoute = () => { ... }
+export default MyRoute;
 ```
 
 ## No Manual Memoization (REQUIRED)
@@ -84,7 +87,7 @@ React Compiler handles optimization automatically. Never use `useMemo`, `useCall
 // ✅ React Compiler optimizes automatically
 export const ProductList = ({ products }: ProductListProps) => {
   const filtered = products.filter((p) => p.inStock);
-  const sorted = filtered.sort((a, b) => a.price - b.price);
+  const sorted = [...filtered].sort((a, b) => a.price - b.price);
 
   const handleAddToCart = (id: string) => {
     addToCart(id);
@@ -107,6 +110,9 @@ const handleAddToCart = useCallback((id) => addToCart(id), []);
 - **DO NOT** use function declarations for components → Use arrow functions + `ComponentWithChildren` + named export.
 - **DO NOT** create promises inside a component's render and pass them to `use()` → Always pass promises from outside or parent.
 - **DO NOT** use `forwardRef` → In React 19, `ref` is a regular prop.
+- **DO NOT** use `useContext()` → Always use `use()` instead; it supports conditional calls and `useContext` is forbidden project-wide.
+- **DO NOT** use plain `createContext` for shared or complex UI state → Use the store-pattern — see `/store-pattern`. Plain context is only for low-volatility globals (theme, locale).
+- **DO NOT** use `className`, `style={{}}`, CSS Modules, or Tailwind → All styling uses StyleX exclusively (`@stylexjs/stylex`).
 
 ---
 
@@ -180,7 +186,7 @@ export const Heading = ({ children }: HeadingProps) => {
   // ✅ Can use after early return
   const theme = use(ThemeContext);
 
-  return <h1 style={{ color: theme.color }}>{children}</h1>;
+  return <h1 data-theme={theme}>{children}</h1>;
 };
 
 // ❌ useContext doesn't work after early returns
@@ -190,11 +196,13 @@ export const HeadingWrong = ({ children }: HeadingProps) => {
   }
 
   const theme = useContext(ThemeContext); // Error: unreachable
-  return <h1 style={{ color: theme.color }}>{children}</h1>;
+  return <h1>{children}</h1>;
 };
 ```
 
 **Key difference**: `use()` can be called conditionally, `useContext()` cannot.
+
+**Project rule**: `use()` for context is only appropriate when consuming low-volatility global values (theme, locale). For shared or complex UI state, use the **store-pattern** instead — see `/store-pattern`.
 
 ## Actions with useTransition
 
@@ -231,34 +239,18 @@ export const UpdateName = () => {
 };
 ```
 
-## Server Actions Patterns
-
-### Pattern A: Native Form Actions (Progressive Enhancement)
-
-Use with `useActionState` and `FormData`. Requires `(prevState, formData)`.
-
-### Pattern B: Programmatic Actions (react-hook-form)
-
-Use when using `react-hook-form`. Pass a typed object directly to the action.
-
-```typescript
-// ✅ Action receives the object from form.handleSubmit
-export const loginAction = async (data: LoginInput) => {
-  try {
-    await authService.login(data);
-    redirect('/dashboard');
-  } catch (error) {
-    return handleErrorResponse(error);
-  }
-};
-```
-
 ## useActionState for Forms
 
 Simplifies form handling with automatic pending states and error management.
 
 ```typescript
 import { useActionState } from "react";
+import * as stylex from '@stylexjs/stylex';
+
+const styles = stylex.create({
+  error: { color: 'red' },
+  success: { color: 'green' },
+});
 
 // Action function
 const updateName = async (previousState: State | null, formData: FormData) => {
@@ -280,26 +272,14 @@ export const NameForm = () => {
     <form action={formAction}>
       <input type="text" name="name" required />
       <button disabled={isPending}>{isPending ? "Saving..." : "Save"}</button>
-      {state?.error && <p className="error">{state.error}</p>}
-      {state?.success && <p className="success">Saved!</p>}
+      {state?.error && <p {...stylex.props(styles.error)}>{state.error}</p>}
+      {state?.success && <p {...stylex.props(styles.success)}>Saved!</p>}
     </form>
   );
 };
 ```
 
-// ✅ Server Action with Typed Objects (for react-hook-form)
-export const updateProfile = async (data: ProfileInput) => {
-try {
-const validated = profileSchema.parse(data);
-await db.update(validated);
-return { success: true };
-} catch (error) {
-return handleErrorResponse(error);
-}
-}
-
-// ❌ NEVER: Force FormData if not using native <form action>
-// If using react-hook-form, pass the object directly to the action.
+**Project rule**: Use `useActionState` for client-only form state (validation UX, no server round-trip). For server mutations, use React Router `action` + `useFetcher` instead — see `/react-router-framework-mode`.
 
 ## useOptimistic for Instant UI Updates
 
@@ -307,6 +287,11 @@ Show optimistic state while async request is in progress.
 
 ```typescript
 import { useOptimistic } from "react";
+import * as stylex from '@stylexjs/stylex';
+
+const styles = stylex.create({
+  pending: { opacity: 0.5 },
+});
 
 type TodoListProps = ComponentWithChildren<{
   todos: Todo[];
@@ -338,7 +323,7 @@ export const TodoList = ({ todos, addTodo }: TodoListProps) => {
       <button>Add</button>
       <ul>
         {optimisticTodos.map((todo) => (
-          <li key={todo.id} className={todo.pending ? "opacity-50" : ""}>
+          <li key={todo.id} {...stylex.props(todo.pending && styles.pending)}>
             {todo.title}
           </li>
         ))}
@@ -408,8 +393,10 @@ export const VideoPlayer= () => {
 
 ## Context as Provider
 
+> **⚠️ Project rule**: Plain `createContext` is only for low-volatility global values (theme, locale) that update rarely and don't need granular subscriptions. For any shared or complex UI state, use the **store-pattern** instead — see `/store-pattern`. Always read context with `use()`, never `useContext()`.
+
 ```typescript
-import { createContext, use, useContext } from "react";
+import { createContext, use } from "react";
 
 const ThemeContext = createContext("light");
 
@@ -429,12 +416,10 @@ export const AppOld: React.FC<AppProps> = ({ children }) => {
   );
 };
 
-// Reading context
+// ✅ Reading context — always use(), never useContext()
 export const Button = () => {
   const theme = use(ThemeContext);
-  // or: const theme = useContext(ThemeContext);
-
-  return <button className={theme}>Click</button>;
+  return <button>{theme}</button>;
 };
 ```
 
@@ -463,6 +448,8 @@ export const ContactForm = () => {
   );
 };
 ```
+
+**Project rule**: Native form actions suit progressive-enhancement scenarios. For server data mutations in this app, prefer React Router `action` exports + `useFetcher` — see `/react-router-framework-mode`.
 
 ## useFormStatus (React DOM)
 
@@ -498,7 +485,7 @@ export const Form = () => {
 };
 ```
 
-**Note**: `useFormStatus` must be called inside a component that is a child of a `<form>`.
+**Note**: `useFormStatus` must be called inside a child component of a form element.
 
 ## useDeferredValue with Initial Value
 

@@ -1,11 +1,11 @@
 import { useFetcher, useLocation } from 'react-router';
 
 import {
+  MAX_COOKIE_ENTRY_VALUE_LENGTH,
   PERSIST_COOKIE_ACTION,
   PERSISTENCE_SIZE_WARNING,
-  MAX_COOKIE_ENTRY_VALUE_LENGTH,
 } from '@/constants/globalSettings.constants';
-import { useNotifications } from '@/hooks/useNotifications.hook';
+import { useNotifyAction } from '@/contexts/NotificationContext/actions';
 import { writeToSessionStorage } from '@/utils/storage';
 
 import type { TablePersistenceConfig } from '../Table.types';
@@ -13,11 +13,11 @@ import type { TablePersistenceConfig } from '../Table.types';
 import { serializeStateSlice } from '../utils';
 
 type PersistCookieEntry<TSlice = unknown> = {
-  persistenceKey: string;
+  persistenceKey?: string;
   searchParamKey?: string;
   searchParamValue?: string;
-  slice: keyof TablePersistenceConfig;
-  valueSlice: TSlice;
+  slice?: keyof TablePersistenceConfig;
+  valueSlice?: TSlice;
 };
 
 /**
@@ -40,7 +40,7 @@ type PersistTableStateAction = {
 export const usePersistTableStateAction = (): PersistTableStateAction => {
   const fetcher = useFetcher({ key: 'persist-table-state' });
   const location = useLocation();
-  const { notify } = useNotifications();
+  const notify = useNotifyAction();
 
   return (args: PersistCookieEntry | PersistCookieEntry[]) => {
     const entries = Array.isArray(args) ? args : [args];
@@ -54,11 +54,14 @@ export const usePersistTableStateAction = (): PersistTableStateAction => {
         slice,
         valueSlice,
       }) => {
-        const { key, value } = serializeStateSlice({
-          persistenceKey,
-          slice,
-          value: valueSlice,
-        });
+        const { key, value } =
+          persistenceKey && slice
+            ? serializeStateSlice({
+                persistenceKey,
+                slice,
+                value: valueSlice,
+              })
+            : { key: undefined, value: undefined };
 
         return {
           key,
@@ -75,11 +78,17 @@ export const usePersistTableStateAction = (): PersistTableStateAction => {
       notify(PERSISTENCE_SIZE_WARNING);
       return false;
     }
-
-    serializedEntries.forEach(({ key, value }) => {
-      // Write to sessionStorage immediately (tab-isolated, survives refresh)
-      writeToSessionStorage({ key, value });
+    notify({
+      durationMs: 10_000,
+      message: 'This table state has been updated successfully.',
+      title: 'Table updated',
+      variant: 'success' as const,
     });
+
+    for (const { key, value } of serializedEntries) {
+      // Write to sessionStorage immediately (tab-isolated, survives refresh)
+      if (key && value) writeToSessionStorage({ key, value });
+    }
 
     // Write to cookie via server action (SSR baseline for new tabs)
     void fetcher.submit(

@@ -16,14 +16,10 @@ type WrapperProps = {
   readonly children: ReactNode;
 };
 
-let currentContextValue: TableWrapperContextValue | undefined;
-
-const Wrapper = ({ children }: WrapperProps) =>
-  createElement(TableWrapperContext, { value: currentContextValue }, children);
-
 const createWrapper = (value: TableWrapperContextValue) => {
-  currentContextValue = value;
-  return Wrapper;
+  return function Wrapper({ children }: WrapperProps) {
+    return createElement(TableWrapperContext, { value }, children);
+  };
 };
 
 describe('TableWrapper hooks', () => {

@@ -9,7 +9,7 @@ import { useClickOutside } from './useClickOutside.hook';
 
 describe('useClickOutside', () => {
   afterEach(() => {
-    document.body.innerHTML = '';
+    document.body.replaceChildren();
   });
 
   it('does not call the callback for clicks inside the guarded element', () => {

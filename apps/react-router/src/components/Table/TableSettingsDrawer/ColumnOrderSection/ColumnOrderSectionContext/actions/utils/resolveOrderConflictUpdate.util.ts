@@ -4,7 +4,7 @@ import type {
 } from '@/components/Table/Table.types';
 import type { OrderConflictResolution } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
 
-import { detectPinOrderConflict } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
+import { getHasPinOrderConflict } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 
 type ResolveOrderConflictUpdateArgs = {
   readonly columnPinning: ColumnPinningState;
@@ -21,15 +21,6 @@ type ResolveOrderConflictUpdateResult =
       readonly pendingPinning: ColumnPinningState;
     }
   | {
-      readonly kind: 'open-conflict';
-      readonly orderConflict: {
-        readonly description: string;
-        readonly isOpen: true;
-        readonly pendingOrder: ColumnOrderState;
-        readonly pendingPinning: ColumnPinningState;
-      };
-    }
-  | {
       readonly kind: 'auto-accept-conflict';
       readonly orderConflict: {
         readonly description: string;
@@ -38,6 +29,15 @@ type ResolveOrderConflictUpdateResult =
         readonly pendingPinning: ColumnPinningState;
       };
       readonly resolution: OrderConflictResolution;
+    }
+  | {
+      readonly kind: 'open-conflict';
+      readonly orderConflict: {
+        readonly description: string;
+        readonly isOpen: true;
+        readonly pendingOrder: ColumnOrderState;
+        readonly pendingPinning: ColumnPinningState;
+      };
     };
 
 export const resolveOrderConflictUpdate = ({
@@ -47,7 +47,7 @@ export const resolveOrderConflictUpdate = ({
   orderConflictResolutionPreference,
   staticKeys,
 }: ResolveOrderConflictUpdateArgs): ResolveOrderConflictUpdateResult => {
-  if (!detectPinOrderConflict({ columnPinning, newOrder, staticKeys })) {
+  if (!getHasPinOrderConflict({ columnPinning, newOrder, staticKeys })) {
     return {
       kind: 'apply-order',
       newOrder,

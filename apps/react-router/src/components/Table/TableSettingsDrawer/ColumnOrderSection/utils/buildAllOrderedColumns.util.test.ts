@@ -4,7 +4,7 @@ import type { TableColumn } from '@/components/Table/Table.types';
 
 import { buildAllOrderedColumns } from './buildAllOrderedColumns.util';
 
-type Row = { id: string; name: string; age: number };
+type Row = { age: number; id: string; name: string };
 
 const columns: TableColumn<Row>[] = [
   { dataType: 'string', key: 'id', label: 'ID' },

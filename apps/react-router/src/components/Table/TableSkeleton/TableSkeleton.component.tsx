@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 
 import type { SkeletonResponse } from './TableSkeleton.types';
 
@@ -15,20 +15,16 @@ export const TableSkeleton = () => {
   const columns = useGetColumns();
   const persistenceKey = useGetTablePersistenceKey();
   const placeholderRowCount = useGetTablePlaceholderRowCount();
-  const [persistedDataState, setPersistedDataState] = useState<
+  const persistedDataState = useMemo<
+    | undefined
     | {
         readonly data: readonly Record<string, unknown>[];
         readonly totalRows?: number;
       }
-    | undefined
-  >(undefined);
-
-  useEffect(() => {
-    setPersistedDataState(
-      readPersistedDataStateFromSessionStorage<Record<string, unknown>>({
-        persistenceKey,
-      }),
-    );
+  >(() => {
+    return readPersistedDataStateFromSessionStorage<Record<string, unknown>>({
+      persistenceKey,
+    });
   }, [persistenceKey]);
 
   const hasPersistedRows = (persistedDataState?.data.length ?? 0) > 0;

@@ -29,7 +29,7 @@ describe('writePersistedUiStateToSessionStorage', () => {
 
     expect(writeToSessionStorageMock).toHaveBeenCalledTimes(1);
     const call = writeToSessionStorageMock.mock.calls[0];
-    const args = call?.[0] as { key: string; value: string } | undefined;
+    const args = call?.[0] as undefined | { key: string; value: string };
     expect(args?.key).toBe('table-state-orders-uiState');
 
     const decoded = JSON.parse(decodeURIComponent(args?.value ?? '')) as {

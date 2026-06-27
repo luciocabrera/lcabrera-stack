@@ -131,17 +131,11 @@ describe('useSetColumnSorting', () => {
     });
 
     expect(mockPersistTableState).toHaveBeenLastCalledWith({
-      persistenceKey: 'orders-table',
-      searchParamKey: 'sort',
+      searchParamKey: 'sorting',
       searchParamValue: JSON.stringify([
         { columnKey: 'status', direction: 'asc' },
         { columnKey: 'priority', direction: 'desc' },
       ]),
-      slice: 'sorting',
-      valueSlice: [
-        { columnKey: 'status', direction: 'asc' },
-        { columnKey: 'priority', direction: 'desc' },
-      ],
     });
     expect(mockMetaStore.set).toHaveBeenCalledWith({ drawersSyncNonce: 2 });
   });

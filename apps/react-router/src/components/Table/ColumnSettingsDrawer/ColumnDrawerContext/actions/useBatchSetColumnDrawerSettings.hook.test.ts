@@ -8,6 +8,7 @@ import { useBatchSetColumnDrawerSettings } from './useBatchSetColumnDrawerSettin
 const { batchSetColumnSettingsMock, columnStore, setColumnState } = vi.hoisted(
   () => {
     let columnState:
+      | undefined
       | {
           readonly columnFilter?: {
             readonly operator: 'contains';
@@ -18,8 +19,7 @@ const { batchSetColumnSettingsMock, columnStore, setColumnState } = vi.hoisted(
           readonly columnPinning?: 'right';
           readonly columnSizing?: 220;
           readonly sorting: 'desc';
-        }
-      | undefined = {
+        } = {
       columnFilter: {
         operator: 'contains',
         type: 'text',

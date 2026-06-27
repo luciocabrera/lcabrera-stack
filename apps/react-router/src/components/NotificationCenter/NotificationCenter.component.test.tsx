@@ -19,13 +19,17 @@ const { dismissNotificationMock, notificationsMock, showPopoverMock } =
     showPopoverMock: vi.fn(),
   }));
 
-let originalShowPopoverDescriptor: PropertyDescriptor | undefined;
+const originalShowPopoverDescriptorRef: {
+  current: PropertyDescriptor | undefined;
+} = {
+  current: undefined,
+};
 
 beforeEach(() => {
   dismissNotificationMock.mockReset();
   showPopoverMock.mockReset();
 
-  originalShowPopoverDescriptor = Object.getOwnPropertyDescriptor(
+  originalShowPopoverDescriptorRef.current = Object.getOwnPropertyDescriptor(
     HTMLDivElement.prototype,
     'showPopover',
   );
@@ -39,11 +43,11 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
 
-  if (originalShowPopoverDescriptor) {
+  if (originalShowPopoverDescriptorRef.current) {
     Object.defineProperty(
       HTMLDivElement.prototype,
       'showPopover',
-      originalShowPopoverDescriptor,
+      originalShowPopoverDescriptorRef.current,
     );
     return;
   }
@@ -51,11 +55,12 @@ afterEach(() => {
   Reflect.deleteProperty(HTMLDivElement.prototype, 'showPopover');
 });
 
-vi.mock('@/hooks/useNotifications.hook', () => ({
-  useNotifications: () => ({
-    dismissNotification: dismissNotificationMock,
-    notifications: notificationsMock,
-  }),
+vi.mock('@/contexts/NotificationContext/actions', () => ({
+  useDismissNotificationAction: () => dismissNotificationMock,
+}));
+
+vi.mock('@/contexts/NotificationContext/selectors', () => ({
+  useGetNotifications: () => notificationsMock,
 }));
 
 import { NotificationCenter } from './NotificationCenter.component';

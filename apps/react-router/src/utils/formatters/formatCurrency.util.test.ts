@@ -31,7 +31,7 @@ describe('formatCurrency', () => {
   });
 
   it('adds space between symbol and number', () => {
-    const result = formatCurrency({ locale: 'en-US', value: 29032.37 });
+    const result = formatCurrency({ locale: 'en-US', value: 29_032.37 });
     // The normalized result should have space: e.g. "US$ 29,032.37"
     expect(result).toMatch(/\$\s/);
   });

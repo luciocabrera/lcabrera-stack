@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 
-import { shallowEqual } from '@/utils';
+import { isShallowEqual } from '@/utils';
 
 /**
  * Store type with get, set, subscribe, reset, and getServerSnapshot methods
@@ -54,7 +54,7 @@ export const useStore = <TData extends Record<string, unknown>>(
     const next = { ...prev, ...value } as TData;
 
     // Only notify if state actually changed
-    if (!shallowEqual({ objA: prev, objB: next })) {
+    if (!isShallowEqual({ objA: prev, objB: next })) {
       store.current = next;
       for (const callback of listeners.current) callback();
     }

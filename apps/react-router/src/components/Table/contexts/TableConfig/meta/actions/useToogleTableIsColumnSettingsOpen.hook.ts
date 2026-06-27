@@ -1,3 +1,5 @@
+import { persistTableMetaUiState } from '@/components/Table/utils';
+
 import { useTableConfigContextValue } from '../../useTableConfigContextValue.hook';
 
 export const useToogleTableIsColumnSettingsOpen = () => {
@@ -17,12 +19,18 @@ export const useToogleTableIsColumnSettingsOpen = () => {
       nextIsTableSettingsOpen = true;
     }
 
-    metaStore.set({
+    const nextStatePatch = {
       isColumnSettingsOpen,
       isTableSettingsOpen: nextIsTableSettingsOpen,
       wasTableSettingsOpenBeforeColumnSettings: isColumnSettingsOpen
         ? (metaState?.isTableSettingsOpen ?? false)
         : false,
+    };
+
+    persistTableMetaUiState({
+      currentState: metaState,
+      nextStatePatch,
     });
+    metaStore.set(nextStatePatch);
   };
 };

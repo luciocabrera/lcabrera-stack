@@ -9,7 +9,7 @@ columns are displayed, filtered, sorted, pinned, and sized.
 ```
 TableConfig/
 ├── TableConfigContext.context.ts            → createContext (undefined default)
-├── TableConfigContext.provider.tsx           → Provider: creates both stores
+├── TableConfigContext.provider.tsx           → Provider: creates both stores from initial state props
 ├── TableConfigContext.types.ts              → ContextValue (columnsStore + metaStore)
 ├── useTableConfigContextValue.hook.ts       → use(TableConfigContext) with guard
 ├── index.ts                                 → Barrel: TableConfigProvider, hooks
@@ -77,10 +77,11 @@ TableConfig/
 │       ├── useGetTableThreshold.hook.ts                  → Fetch-more threshold
 │       └── useGetTableTitle.hook.ts                      → Table title string
 │
-└── utils/
-    ├── getInitialColumnsState.util.ts       → Build initial columns state from props
-    ├── getInitialMetaState.util.ts          → Build initial meta state from props
-    └── index.ts                             → Barrel: utils
+├── utils/
+  ├── getInitialColumnsState.util.ts       → Build initial columns state from props
+  ├── getInitialMetaState.util.ts          → Build initial meta state from props
+  ├── resolveHydratedTableConfigState.util.ts → Merge route defaults with persisted column/UI state
+  └── index.ts                             → Barrel: utils
 ```
 
 ## Dual-Store Pattern
@@ -160,12 +161,12 @@ graph TD
   A --> C["getInitialMetaState(metaState)"]
   B --> D["useStore(columnsInitial) → columnsStore"]
   C --> E["useStore(metaInitial) → metaStore"]
-  D --> F["useHydrateTableSessionState() after mount"]
+  D --> F["Provide { columnsStore, metaStore } via TableConfigContext"]
   E --> F
-  F --> G["Provide { columnsStore, metaStore } via TableConfigContext"]
 ```
 
-Session hydration is deferred until after mount so SSR and the initial client render stay aligned before tab-scoped state is merged.
+Session hydration now happens in route `clientLoader`s before the table mounts,
+so SSR and the initial client render already agree on the seeded state.
 
 ## Testing Pattern
 
@@ -226,16 +227,23 @@ The two batch settings hooks now share two focused pure helpers instead of each 
 
 ## Meta Actions
 
-| Hook                                 | Writes To   | Description                                              |
-| ------------------------------------ | ----------- | -------------------------------------------------------- |
-| `useSetTableColumnSelectedKey`       | `metaStore` | Set which column is selected                             |
-| `useSetTableDrawersOpenState`        | `metaStore` | Set both drawer open states and capture restore snapshot |
-| `useSetTableSettingsExpandedFilters` | `metaStore` | Persist expanded filter items in table settings          |
-| `useSetTableSettingsSelectedTab`     | `metaStore` | Persist selected table settings tab                      |
-| `useSetTableIsTableSettingsOpen`     | `metaStore` | Set table settings open state                            |
-| `useSetTableIsTableSettingsPinned`   | `metaStore` | Set table settings pinned state                          |
-| `useToogleTableIsColumnSettingsOpen` | `metaStore` | Toggle column settings drawer                            |
-| `useToogleTableIsTableSettingsOpen`  | `metaStore` | Toggle table settings drawer                             |
+Persisted meta UI fields are mutation-owned: each action that changes drawer UI
+state calls `persistTableMetaUiState()` before committing its
+`metaStore.set(...)` patch. This keeps sessionStorage aligned without a
+subscription effect in the provider.
+
+| Hook                                   | Writes To   | Description                                                                 |
+| -------------------------------------- | ----------- | --------------------------------------------------------------------------- |
+| `useSetTableColumnSelectedKey`         | `metaStore` | Set which column is selected                                                |
+| `useSetTableDrawersOpenState`          | `metaStore` | Set both drawer open states, capture restore snapshot, and persist UI state |
+| `useSetTableSettingsExpandedFilters`   | `metaStore` | Persist expanded filter items in table settings                             |
+| `useSetTableSettingsSelectedTab`       | `metaStore` | Persist selected table settings tab                                         |
+| `useSetTableIsColumnSettingsPinned`    | `metaStore` | Persist column settings pinned state                                        |
+| `useSetTableIsTableSettingsOpen`       | `metaStore` | Persist table settings open state                                           |
+| `useSetTableIsTableSettingsPinned`     | `metaStore` | Persist table settings pinned state                                         |
+| `useSetTableColumnSettingsSelectedTab` | `metaStore` | Persist selected column-settings tab                                        |
+| `useToogleTableIsColumnSettingsOpen`   | `metaStore` | Toggle column settings drawer and persist derived open state                |
+| `useToogleTableIsTableSettingsOpen`    | `metaStore` | Toggle table settings drawer and persist derived open state                 |
 
 ## Meta Selectors
 

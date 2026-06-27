@@ -5,43 +5,27 @@ import type { CarSale } from '@/services';
 import { TableLayout } from '@/components/Table/TableLayout';
 import { carSalesApi } from '@/services';
 
-import type { loader } from './car-sales.loader';
 import type { CarSalesPaginatedResponse } from './CarSales.types';
-
-import { COLUMNS, PERSISTENCE_KEY } from './CarSales.constants';
+import type { loader } from './root';
 
 export const CarSales = () => {
-  const {
-    carSalesPromise,
-    columnOrder,
-    columnSizing,
-    columnVisibility,
-    filters,
-    sorting,
-  } = useLoaderData<typeof loader>();
+  const { carSalesPromise, columnsState, metaState } =
+    useLoaderData<typeof loader>();
 
   return (
     <TableLayout<CarSale, CarSalesPaginatedResponse>
-      columnOrder={columnOrder}
-      columns={COLUMNS}
-      columnSizing={columnSizing}
-      columnVisibility={columnVisibility}
+      columnsState={columnsState}
       dataPromise={carSalesPromise}
       dataSelector={(response) => response.data}
       dataTotalSelector={(response) => response.total}
-      filters={filters}
+      metaState={metaState}
       onLoadMore={async ({ limit, skip }) =>
         carSalesApi.fetchCarSalesPaginated({
           limit,
           skip,
-          sorting,
+          sorting: columnsState?.sorting ?? [],
         })
       }
-      persistenceKey={PERSISTENCE_KEY}
-      schemaName='public'
-      sorting={sorting}
-      tableName='car_sales'
-      title='Car Sales Data - Infinite Scroll'
     />
   );
 };

@@ -7,15 +7,15 @@ import { styles } from '../VirtualSelectTrigger.stylex';
 type GetTriggerStylePropsArgs = {
   isBusy?: boolean;
   isOpen: boolean;
-  mode: VirtualSelectTriggerProps['mode'];
   isStatic?: boolean;
+  mode: VirtualSelectTriggerProps['mode'];
 };
 
 export const getTriggerStyleProps = ({
   isBusy = false,
   isOpen,
-  mode,
   isStatic = false,
+  mode,
 }: GetTriggerStylePropsArgs) =>
   stylex.props(
     styles.trigger,

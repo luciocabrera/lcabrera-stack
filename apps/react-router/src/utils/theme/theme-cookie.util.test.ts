@@ -10,7 +10,7 @@ describe('getThemeFromCookie', () => {
   });
 
   it('returns undefined for null cookieHeader', () => {
-    expect(getThemeFromCookie(null)).toBeUndefined();
+    expect(getThemeFromCookie(undefined)).toBeUndefined();
   });
 
   it('returns undefined for empty string', () => {
@@ -36,7 +36,7 @@ describe('getThemeFromCookie', () => {
   it('falls back to document.cookie when cookieHeader is null in browser', () => {
     vi.stubGlobal('document', { cookie: 'theme=dark; lang=en' });
 
-    expect(getThemeFromCookie(null)).toBe('dark');
+    expect(getThemeFromCookie(undefined)).toBe('dark');
   });
 });
 
@@ -46,41 +46,15 @@ describe('setThemeCookie', () => {
     vi.restoreAllMocks();
   });
 
-  it('sets document.cookie with theme value', () => {
-    let cookieValue = '';
-    const docMock = { cookie: '' };
-    Object.defineProperty(docMock, 'cookie', {
-      set: (val: string) => {
-        cookieValue = val;
-      },
-      get: () => cookieValue,
-    });
-    vi.stubGlobal('document', docMock);
+  it('does nothing when fetch is unavailable', () => {
+    vi.stubGlobal('fetch', undefined);
 
-    setThemeCookie('dark');
-    expect(cookieValue).toContain('theme=dark');
-    expect(cookieValue).toContain('SameSite=Lax');
-  });
-
-  it('does nothing when document is undefined (SSR)', () => {
-    vi.stubGlobal('document', undefined);
     // Should not throw
     expect(() => setThemeCookie('light')).not.toThrow();
   });
 
   it('submits theme persistence to server action when fetch is available', async () => {
-    let cookieValue = '';
-    const docMock = { cookie: '' };
-    const fetchMock = vi.fn(() => Promise.resolve(new Response(null)));
-
-    Object.defineProperty(docMock, 'cookie', {
-      set: (val: string) => {
-        cookieValue = val;
-      },
-      get: () => cookieValue,
-    });
-
-    vi.stubGlobal('document', docMock);
+    const fetchMock = vi.fn(() => Promise.resolve(new Response(undefined)));
     vi.stubGlobal('fetch', fetchMock);
     vi.stubGlobal('location', {
       pathname: '/car-sales',

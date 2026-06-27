@@ -1,13 +1,8 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { Button } from '@/components/Button';
-import { MenuCloseIcon } from '@/components/Icons';
 import { InfoBox } from '@/components/InfoBox';
 import { SidePanelSectionHeader } from '@/components/SidePanel';
 import { useGetNormalizedColumns } from '@/components/Table/contexts/TableConfig/columns/selectors';
-import { FilterInputs } from '@/components/Table/filters/FilterInputs';
-import { LIST_MAX_HEIGHT } from '@/components/VirtualList/VirtualList.constants';
-import { ICON_SIZE_MD } from '@/design-system/constants';
 
 import type {
   ActiveFiltersListProps,
@@ -18,8 +13,8 @@ import type {
 import { useSetColumnFilters } from '../../TableDrawerContext/actions';
 import { useGetColumnFilters } from '../../TableDrawerContext/selectors';
 import { FiltersSectionToolbar } from '../FiltersSectionToolbar';
-import { validateFilter } from '../validateFilter.util';
 import { styles } from './ActiveFiltersList.stylex';
+import { FilterItem } from './FilterItem';
 
 export const ActiveFiltersList = ({
   expandedFilters,
@@ -101,69 +96,18 @@ export const ActiveFiltersList = ({
           {filterEntries.map(([columnKey, filter]) => {
             const column = normalizedColumns[columnKey];
             if (!column) return;
-
-            const isExpanded = expandedFilters.has(columnKey);
-            const isValid = validateFilter(filter);
-
             return (
-              <div
+              <FilterItem
+                column={column}
+                columnKey={columnKey}
+                expandedFilters={expandedFilters}
+                filter={filter}
+                isBusy={isBusy}
                 key={columnKey}
-                {...stylex.props(styles.filterItem)}
-                data-testid={`filter-item-${columnKey}`}
-              >
-                {isBusy && (
-                  <div {...stylex.props(styles.busyOverlay)}>
-                    <div {...stylex.props(styles.busyWave)} />
-                  </div>
-                )}
-                <div {...stylex.props(styles.filterItemHeader)}>
-                  <button
-                    {...stylex.props(styles.filterToggle)}
-                    disabled={isBusy}
-                    onClick={() => {
-                      toggleFilterExpanded(columnKey);
-                    }}
-                    type='button'
-                  >
-                    <span {...stylex.props(styles.filterToggleIcon)}>
-                      {isExpanded ? '▼' : '▶'}
-                    </span>
-                    <span {...stylex.props(styles.filterItemLabel)}>
-                      {column.label}
-                      {!isValid && (
-                        <span {...stylex.props(styles.invalidBadge)}>
-                          {' '}
-                          ⚠️ Invalid
-                        </span>
-                      )}
-                    </span>
-                  </button>
-                  <Button
-                    aria-label={`Remove ${column.label} filter`}
-                    color='ghost'
-                    icon={<MenuCloseIcon size={ICON_SIZE_MD} />}
-                    isBusy={isBusy}
-                    onClick={() => {
-                      handleRemoveFilter(columnKey);
-                    }}
-                    tooltipContent={`Remove ${column.label} filter`}
-                    size='mini'
-                    width='auto'
-                  />
-                </div>
-                {isExpanded && (
-                  <div {...stylex.props(styles.filterItemContent)}>
-                    <FilterInputs
-                      columnKey={columnKey}
-                      filter={filter}
-                      listMaxHeight={LIST_MAX_HEIGHT}
-                      onChange={(newFilter) => {
-                        handleToggle({ columnKey, filter: newFilter });
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
+                onRemove={handleRemoveFilter}
+                onToggle={handleToggle}
+                onToggleExpanded={toggleFilterExpanded}
+              />
             );
           })}
         </div>

@@ -1,7 +1,5 @@
 import { ShowcasePage } from '@/features/showcase/ShowcasePage';
 
-const App = () => {
+export const App = () => {
   return <ShowcasePage />;
 };
-
-export default App;

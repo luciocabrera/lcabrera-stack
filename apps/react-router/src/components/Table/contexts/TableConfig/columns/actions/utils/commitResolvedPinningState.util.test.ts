@@ -44,17 +44,17 @@ describe('commitResolvedPinningState', () => {
     commitResolvedPinningState<TData>({
       columnOrder: ['id', 'name'],
       columnPinning: { left: ['id'], right: [] },
-      columnSizing: {
-        id: 100,
-        name: 0,
-        actions: 0,
-      },
-      columnVisibility: new Set<keyof TData>(),
       columns: [
         { key: 'id', label: 'ID' },
         { key: 'name', label: 'Name' },
       ],
+      columnSizing: {
+        actions: 0,
+        id: 100,
+        name: 0,
+      },
       columnsStore,
+      columnVisibility: new Set<keyof TData>(),
       drawersSyncNonce: 7,
       metaStore,
       persistenceKey: 'orders-table',
@@ -64,16 +64,16 @@ describe('commitResolvedPinningState', () => {
     expect(mockGetPinnedDerivedColumnsState).toHaveBeenCalledWith({
       columnOrder: ['id', 'name'],
       columnPinning: { left: ['id'], right: [] },
-      columnSizing: {
-        id: 100,
-        name: 0,
-        actions: 0,
-      },
-      columnVisibility: new Set<keyof TData>(),
       columns: [
         { key: 'id', label: 'ID' },
         { key: 'name', label: 'Name' },
       ],
+      columnSizing: {
+        actions: 0,
+        id: 100,
+        name: 0,
+      },
+      columnVisibility: new Set<keyof TData>(),
     });
 
     expect(mockCommitPinningAndOrderUpdate).toHaveBeenCalledWith({

@@ -6,11 +6,10 @@ Table-specific hooks for column resizing, infinite scroll, and state persistence
 
 ```
 hooks/
-├── useColumnResize.hook.ts          → RAF-throttled drag resize
-├── useHydrateTableSessionState.hook.ts → Restores tab-scoped table + UI state after mount
-├── useInfiniteScroll.hook.ts        → Scroll threshold detection
-├── usePersistCookieAction.hook.ts   → Server action cookie persistence
-└── index.ts                         → Barrel export
+├── useColumnResize.hook.ts              → RAF-throttled drag resize
+├── useInfiniteScroll.hook.ts            → Scroll threshold detection
+├── usePersistCookieAction.hook.ts       → Server action cookie persistence for column state
+└── index.ts                             → Barrel export
 ```
 
 ## useColumnResize
@@ -54,31 +53,16 @@ graph LR
 | `hasMore` / `isLoadingMore` | Guard against duplicate fetches       |
 | `fetchMoreData`             | Async function to append next page    |
 
-## useHydrateTableSessionState
-
-Restores tab-scoped session state after mount and recomputes derived column slices
-before committing to the main columns store.
-
-```mermaid
-graph TD
-  ReadColumns["readPersistedStateFromSessionStorage"] --> Merge["merge persisted slices with current columns state"]
-  Merge --> Derive["deriveColumnViewState\n(effectiveColumns, groups, offsets, normalizedColumns)"]
-  Derive --> SetColumns["columnsStore.set(full hydrated state)"]
-
-  ReadUi["readPersistedUiStateFromSessionStorage"] --> SetMeta["metaStore.set(ui state)"]
-```
-
-| Behavior          | Detail                                                                          |
-| ----------------- | ------------------------------------------------------------------------------- |
-| Scope             | Runs once after mount inside TableConfigProvider                                |
-| Restored slices   | sorting, filters, order, pinning, sizing, visibility                            |
-| Derived recompute | Rebuilds effectiveColumns, columnGroups, pinnedColumnOffsets, normalizedColumns |
-| Static keys       | Recomputes staticKeys from current columns                                      |
-| Guard             | No-op when persistenceKey is empty                                              |
+Table state hydration is now handled by route `clientLoader`s and passed into
+`TableLayout` as initial state. Keep new loader-seeded merge logic in the
+TableConfig utils layer rather than adding post-mount effects back into hooks.
+| Guard | No-op when persistenceKey is empty |
 
 ## usePersistTableStateAction
 
-Persists table state slices to cookies via a server action (React Router `useFetcher`).
+Persists column-oriented table state slices through the dual-channel flow: write
+sessionStorage immediately, then submit the cookie update through a React Router
+server action.
 
 ```mermaid
 graph TD

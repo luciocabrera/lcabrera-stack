@@ -5,7 +5,13 @@ import type { CarSale, CarSalesResponse } from '@/services';
 import { carSalesApi } from '@/services';
 
 import { readTableLoaderStateFromRequest } from '../utils/readTableLoaderStateFromRequest.util';
-import { PERSISTENCE_KEY } from './CarSales.constants';
+import {
+  COLUMNS,
+  PERSISTENCE_KEY,
+  SCHEMA_NAME,
+  TABLE_NAME,
+  TITLE,
+} from './CarSales.constants';
 
 /**
  * Loader for car sales route
@@ -14,11 +20,25 @@ import { PERSISTENCE_KEY } from './CarSales.constants';
  * The route will render immediately with the skeleton while data loads.
  */
 export const loader = ({ request }: LoaderFunctionArgs) => {
-  const { columnOrder, columnSizing, columnVisibility, sorting } =
-    readTableLoaderStateFromRequest<CarSale>({
-      persistenceKey: PERSISTENCE_KEY,
-      request,
-    });
+  const {
+    columnOrder,
+    columnPinning,
+    columnSizing,
+    columnVisibility,
+    filters,
+    sorting,
+    standaloneFiltersParam,
+    standaloneSortParam,
+  } = readTableLoaderStateFromRequest<CarSale>({
+    columns: COLUMNS,
+    includeFilters: true,
+    persistenceKey: PERSISTENCE_KEY,
+    request,
+  });
+  const sanitizedSorting = sorting.filter(
+    (s): s is { columnKey: keyof CarSale; direction: 'asc' | 'desc' } =>
+      s.direction !== undefined && s.columnKey !== 'actions',
+  );
 
   // Return the promise directly (not awaited) for Suspense streaming
   const carSalesPromise: Promise<CarSalesResponse> = carSalesApi.fetchCarSales(
@@ -27,12 +47,21 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
 
   return {
     carSalesPromise,
-    columnOrder,
-    columnSizing,
-    columnVisibility,
-    sorting: sorting.filter(
-      (s): s is { columnKey: keyof CarSale; direction: 'asc' | 'desc' } =>
-        s.direction !== undefined,
-    ),
+    columnsState: {
+      columnFilters: filters,
+      columnOrder,
+      columnPinning,
+      columns: COLUMNS,
+      columnSizing,
+      columnVisibility,
+      sorting: sanitizedSorting,
+    },
+    key: `${standaloneSortParam ?? ''}${standaloneFiltersParam ?? ''}`,
+    metaState: {
+      persistenceKey: PERSISTENCE_KEY,
+      schemaName: SCHEMA_NAME,
+      tableName: TABLE_NAME,
+      title: TITLE,
+    },
   };
 };

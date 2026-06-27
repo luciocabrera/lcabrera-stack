@@ -18,8 +18,8 @@ const createProps = () => ({
   placeholder: 'Pick one',
   selected: [] as readonly string[],
   triggerRef: {
-    current: null,
-  } as RefObject<HTMLButtonElement | HTMLDivElement | null>,
+    current: undefined,
+  } as RefObject<HTMLButtonElement | HTMLDivElement | undefined>,
   visibleTags: [] as readonly string[],
 });
 

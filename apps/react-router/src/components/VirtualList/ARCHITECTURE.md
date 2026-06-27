@@ -100,6 +100,8 @@ graph LR
   VLB --> VO["VirtualizedOption"]
 
   VLF --> Button2["Button"]
+  SAO --> Checkbox["Checkbox"]
+  SO --> Checkbox
   VLF --> Icons["ListAllIcon, ListCheckedIcon, ListUncheckedIcon"]
 
   SAO["SelectAllOption"] --> VL_stylex["VirtualList.stylex"]

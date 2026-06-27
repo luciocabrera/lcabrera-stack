@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { PERSISTENCE_VERSION } from './persistence.constants';
 
 const { readFromSessionStorageMock } = vi.hoisted(() => ({
-  readFromSessionStorageMock: vi.fn<() => string | undefined>(() => undefined),
+  readFromSessionStorageMock: vi.fn<() => string | undefined>(() => {}),
 }));
 
 vi.mock('@/utils/storage', () => ({

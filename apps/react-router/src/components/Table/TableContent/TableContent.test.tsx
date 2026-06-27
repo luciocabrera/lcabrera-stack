@@ -1,5 +1,4 @@
 // @vitest-environment jsdom
-
 import type { ReactNode } from 'react';
 
 import { cleanup, render, screen } from '@testing-library/react';
@@ -14,7 +13,6 @@ const {
   useGetTableIsLoadingMoreMock,
   useGetTableThresholdMock,
   useInfiniteScrollMock,
-  useRenderTrackerMock,
   useToogleTableIsTableSettingsOpenMock,
 } = vi.hoisted(() => ({
   useFetchMoreDataMock: vi.fn(() => vi.fn()),
@@ -23,39 +21,46 @@ const {
   useGetTableIsLoadingMoreMock: vi.fn(),
   useGetTableThresholdMock: vi.fn(),
   useInfiniteScrollMock: vi.fn(),
-  useRenderTrackerMock: vi.fn(),
   useToogleTableIsTableSettingsOpenMock: vi.fn(() => vi.fn()),
 }));
 
-const MockTableBase = vi.hoisted(
-  () =>
-    ({ children }: { readonly children: ReactNode }) => {
-      return <table>{children}</table>;
-    },
-);
-
-const MockTableBody = vi.hoisted(() => () => {
-  return <tbody data-testid='table-body' />;
+const MockTableBase = vi.hoisted(() => {
+  return function MockTableBase({
+    children,
+  }: {
+    readonly children: ReactNode;
+  }) {
+    return <table>{children}</table>;
+  };
 });
 
-const MockTableDrawersSection = vi.hoisted(() => () => {
-  return <div data-testid='table-drawers' />;
+const MockTableBody = vi.hoisted(() => {
+  return function MockTableBody() {
+    return <tbody data-testid='table-body' />;
+  };
 });
 
-const MockTableHeader = vi.hoisted(() => () => {
-  return <thead data-testid='table-header' />;
+const MockTableDrawersSection = vi.hoisted(() => {
+  return function MockTableDrawersSection() {
+    return <div data-testid='table-drawers' />;
+  };
 });
 
-const MockTableTitle = vi.hoisted(
-  () =>
-    ({ actions }: { readonly actions?: ReactNode }) => {
-      return <div data-testid='table-title'>{actions}</div>;
-    },
-);
+const MockTableHeader = vi.hoisted(() => {
+  return function MockTableHeader() {
+    return <thead data-testid='table-header' />;
+  };
+});
 
-vi.mock('@/utils/performance', () => ({
-  useRenderTracker: useRenderTrackerMock,
-}));
+const MockTableTitle = vi.hoisted(() => {
+  return function MockTableTitle({
+    actions,
+  }: {
+    readonly actions?: ReactNode;
+  }) {
+    return <div data-testid='table-title'>{actions}</div>;
+  };
+});
 
 vi.mock('../contexts/TableConfig/meta/actions', () => ({
   useToogleTableIsTableSettingsOpen: useToogleTableIsTableSettingsOpenMock,

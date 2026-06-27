@@ -37,8 +37,8 @@ vi.mock('../utils', () => ({
   serializeStateSlice: serializeStateSliceMock,
 }));
 
-vi.mock('@/hooks/useNotifications.hook', () => ({
-  useNotifications: () => ({ notify: notifyMock }),
+vi.mock('@/contexts/NotificationContext/actions', () => ({
+  useNotifyAction: () => notifyMock,
 }));
 
 vi.mock('@/utils/storage', () => ({
@@ -181,10 +181,10 @@ describe('usePersistTableStateAction', () => {
 
     const { result } = renderHook(() => usePersistTableStateAction());
 
-    let persistenceResult = true;
+    let isPersistenceResult = true;
 
     act(() => {
-      persistenceResult = result.current({
+      isPersistenceResult = result.current({
         persistenceKey: 'orders',
         searchParamKey: 'filters',
         searchParamValue: '{"status":"active"}',
@@ -193,7 +193,7 @@ describe('usePersistTableStateAction', () => {
       });
     });
 
-    expect(persistenceResult).toBe(false);
+    expect(isPersistenceResult).toBe(false);
     expect(notifyMock).toHaveBeenCalledWith({
       durationMs: 10_000,
       message:

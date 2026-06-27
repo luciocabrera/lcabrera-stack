@@ -7,7 +7,7 @@ export default [
   route('car-sales', 'routes/car-sales/root.ts'),
   route('car-sales-infinite', 'routes/car-sales-infinite/root.ts'),
   route('enterprise-orders', 'routes/enterprise-orders/layout.ts', [
-    index('routes/enterprise-orders/root.ts'),
+    index('routes/enterprise-orders/root.tsx'),
     route(':orderId', 'routes/enterprise-orders/order-detail/root.ts'),
   ]),
   route('wide-alltypes-150', 'routes/wide-alltypes-150/layout.ts', [
