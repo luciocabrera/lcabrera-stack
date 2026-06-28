@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 
 import type { ThemeMode } from '@/types/theme.types';
 
@@ -23,15 +23,15 @@ export const ThemeProvider = ({
     () => initialTheme ?? defaultTheme,
   );
 
-  const setTheme = useCallback((newTheme: ThemeMode) => {
+  const setTheme = (newTheme: ThemeMode) => {
     setThemeState(newTheme);
     // Sync to cookie for SSR
     setThemeCookie(newTheme);
-  }, []);
+  };
 
-  const toggleTheme = useCallback(() => {
+  const toggleTheme = () => {
     setTheme(themeState === 'dark' ? 'light' : 'dark');
-  }, [themeState, setTheme]);
+  };
 
   const value = {
     isDarkMode: themeState === 'dark',

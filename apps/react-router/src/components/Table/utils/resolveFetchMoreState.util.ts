@@ -7,7 +7,7 @@ type ResolveFetchMoreStateArgs<TData, TResponse> = {
 };
 
 type ResolveFetchMoreStateResult<TData> = {
-  readonly combinedData: TData[];
+  readonly combinedData: readonly TData[];
   readonly hasMore: boolean;
   readonly totalLoadedRows: number;
   readonly totalRows: number;

@@ -5,9 +5,9 @@ import type { TStore } from '@/hooks/useStore.hook';
 import type { InfiniteScroll, PrefetchCache } from '@/types/ui.types';
 
 export type CommitFetchMoreSuccessArgs<TData, TResponse> = {
-  readonly currentData: TData[];
+  readonly currentData: readonly TData[];
   readonly currentTotalRows?: number;
-  readonly dataSelector?: (response: TResponse) => TData[];
+  readonly dataSelector?: (response: TResponse) => readonly TData[];
   readonly dataStore: TStore<DataState<TData>>;
   readonly dataTotalSelector?: (response: TResponse) => number;
   readonly enablePrefetch: boolean;
@@ -21,7 +21,7 @@ export type CommitFetchMoreSuccessArgs<TData, TResponse> = {
 };
 
 export type DataState<TData> = {
-  readonly data: TData[];
+  readonly data: readonly TData[];
   readonly hasMore: boolean;
   readonly isLoading: boolean;
   readonly isLoadingMore: boolean;
@@ -59,7 +59,7 @@ export type FetchMoreRuntimeArgs<TData, TResponse> = {
 };
 
 export type FetchMoreRuntimeResult<TData, TResponse> = {
-  readonly currentData: TData[];
+  readonly currentData: readonly TData[];
   readonly enablePrefetch: boolean;
   readonly pageSize: number;
   readonly requiredOnLoadMore: (args: {

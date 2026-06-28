@@ -7,8 +7,15 @@
  * Default port: 3002
  */
 
-const port = process.argv[2] || '3002';
-const BASE = `http://localhost:${port}`;
+const rawPort = process.argv[2] ?? '3002';
+const portNumber = Number(rawPort);
+if (!Number.isInteger(portNumber) || portNumber < 1 || portNumber > 65535) {
+  console.error(
+    `Invalid port: "${rawPort}". Must be an integer between 1 and 65535.`,
+  );
+  process.exit(1);
+}
+const BASE = `http://localhost:${portNumber}`;
 
 async function runTests() {
   const results = [];

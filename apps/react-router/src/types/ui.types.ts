@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import type { DataKey } from '@/components/Table/Table.types';
 
 export type InfiniteScroll<TData, TResponse> = {
-  readonly dataSelector?: (response: TResponse) => TData[];
+  readonly dataSelector?: (response: TResponse) => readonly TData[];
   readonly dataTotalSelector?: (response: TResponse) => number;
   readonly hasMore?: boolean;
   readonly isLoadingMore?: boolean;

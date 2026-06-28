@@ -1,5 +1,3 @@
-import { useCallback } from 'react';
-
 import type { DataKey } from '@/components/Table/Table.types';
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
@@ -17,20 +15,17 @@ type SetColumnSizingArgs<TData> = {
 export const useSetColumnSizing = <TData>() => {
   const { columnsStore } = useTableConfigContextValue<TData>();
 
-  return useCallback(
-    ({ columnKey, width }: SetColumnSizingArgs<TData>) => {
-      const columnsState = columnsStore.get();
-      const { columnSizing, pinnedColumnOffsets } =
-        resolveColumnSizingUpdate<TData>({
-          columnKey,
-          columnPinning: columnsState?.columnPinning,
-          columnSizingState: columnsState?.columnSizing,
-          effectiveColumns: columnsState?.effectiveColumns ?? [],
-          width,
-        });
+  return ({ columnKey, width }: SetColumnSizingArgs<TData>) => {
+    const columnsState = columnsStore.get();
+    const { columnSizing, pinnedColumnOffsets } =
+      resolveColumnSizingUpdate<TData>({
+        columnKey,
+        columnPinning: columnsState?.columnPinning,
+        columnSizingState: columnsState?.columnSizing,
+        effectiveColumns: columnsState?.effectiveColumns ?? [],
+        width,
+      });
 
-      columnsStore.set({ columnSizing, pinnedColumnOffsets });
-    },
-    [columnsStore],
-  );
+    columnsStore.set({ columnSizing, pinnedColumnOffsets });
+  };
 };
