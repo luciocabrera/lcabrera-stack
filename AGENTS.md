@@ -375,6 +375,8 @@ The Table component is the canonical implementation: a 3-tier split-context arch
 
 ## 11. Import Standards
 
+> **Tooling note:** Rules marked "(enforced by ESLint)" are auto-checked and auto-fixed by `vp lint --fix`. Code reviewers and AI agents must not flag these — they are caught before merge by the quality gate.
+
 ### Alias
 
 Use `@/` as the root alias for `src/`. Relative imports only within the same directory.
@@ -389,12 +391,6 @@ import { Button } from '../../../../components/Button';
 ```
 
 ### Import Order (enforced by ESLint)
-
-1. **React & Core Libraries** (`react`, `react-router`)
-2. **External Dependencies** (`@stylexjs/stylex`, `zod`)
-3. **Internal Absolute Imports** (`@/features/...`, `@/components/...`)
-4. **Relative Imports** (`./styles`, `../hooks`)
-5. **Type Imports** (last, with `import type`)
 
 ---
 
