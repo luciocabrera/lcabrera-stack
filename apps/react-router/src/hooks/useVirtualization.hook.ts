@@ -6,7 +6,10 @@ import {
   DEFAULT_CONTAINER_HEIGHT,
   DEFAULT_ROW_OVERSCAN,
 } from '@/constants/virtualization.constants';
-import { getVerticalVirtualizationWindow } from '@/hooks/utils';
+import {
+  getVerticalVirtualizationWindow,
+  setupObservedContainer,
+} from '@/hooks/utils';
 
 export type UseVirtualizationArgs = {
   readonly containerRef: RefObject<HTMLElement | null | undefined>;
@@ -51,23 +54,19 @@ export const useVirtualization = ({
       // Skip zero measurements (e.g. display:none from Activity hidden)
       // to preserve the last valid height and avoid layout shifts
       if (measured > 0) {
+        // eslint-disable-next-line react-x/set-state-in-effect -- State must be set from DOM measurement (offsetHeight); this cannot be derived during render
         setContainerHeight(measured);
       }
     };
 
-    const handleScroll = () => {
-      setScrollTop(container?.scrollTop ?? 0);
-    };
-
-    updateHeight();
-    container?.addEventListener('scroll', handleScroll);
-    window.addEventListener('resize', updateHeight);
-
-    return () => {
-      container?.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', updateHeight);
-    };
-  }, [containerRef, defaultContainerHeight]);
+    return setupObservedContainer({
+      container,
+      onMeasure: updateHeight,
+      readScroll: () => container?.scrollTop ?? 0,
+      // eslint-disable-next-line react-x/set-state-in-effect -- Scroll position must be read from DOM events; cannot be derived during render
+      setScroll: setScrollTop,
+    });
+  }, [containerRef]);
 
   return {
     bottomSpacerHeight,

@@ -13,8 +13,7 @@ hooks/
 ├── useNotifyOnError.hook.ts              → Fire error toast whenever error identity changes
 ├── useStore.hook.ts                      → Lightweight external store (useSyncExternalStore-compatible)
 ├── useTheme.hook.ts                      → Access ThemeContext via React 19 use()
-├── useVirtualization.hook.ts             → Default vertical virtual-scroll geometry computation
-├── useVirtualizationResizeObserver.hook.ts → Preserved ResizeObserver-based vertical virtualization experiment
+├── useVirtualization.hook.ts             → Vertical virtual-scroll geometry computation (ResizeObserver-based)
 └── utils/
   ├── ARCHITECTURE.md                   → Hook-local utility architecture
   ├── findFirstOutOfViewIndex.util.ts   → Binary search for first start >= viewport end
@@ -24,16 +23,15 @@ hooks/
 
 ## Hook Summary
 
-| Hook                              | Category      | Returns                                        | Key dependency                                |
-| --------------------------------- | ------------- | ---------------------------------------------- | --------------------------------------------- |
-| `useClickOutside`                 | DOM event     | `void`                                         | `document` mousedown                          |
-| `useColumnVirtualization`         | Layout/scroll | `{ startIndex, endIndex, leftSpacerWidth, … }` | `ResizeObserver` + scroll events on container |
-| `useInfiniteScrollObserver`       | Layout/scroll | `void`                                         | `IntersectionObserver` on a sentinel element  |
-| `useNotifyOnError`                | Notification  | `void`                                         | `useNotifyAction`, `useEffect`                |
-| `useStore`                        | State mgmt    | `TStore<TData>`                                | `useRef`, `shallowEqual`                      |
-| `useTheme`                        | Context       | `ThemeContextValue`                            | `ThemeContext`, `use()`                       |
-| `useVirtualization`               | Layout/scroll | `{ startIndex, endIndex, offsetY, … }`         | `window.resize` + scroll events on container  |
-| `useVirtualizationResizeObserver` | Layout/scroll | `{ startIndex, endIndex, offsetY, … }`         | `ResizeObserver` + RAF-batched scroll events  |
+| Hook                        | Category      | Returns                                        | Key dependency                                |
+| --------------------------- | ------------- | ---------------------------------------------- | --------------------------------------------- |
+| `useClickOutside`           | DOM event     | `void`                                         | `document` mousedown                          |
+| `useColumnVirtualization`   | Layout/scroll | `{ startIndex, endIndex, leftSpacerWidth, … }` | `ResizeObserver` + scroll events on container |
+| `useInfiniteScrollObserver` | Layout/scroll | `void`                                         | `IntersectionObserver` on a sentinel element  |
+| `useNotifyOnError`          | Notification  | `void`                                         | `useNotifyAction`, `useEffect`                |
+| `useStore`                  | State mgmt    | `TStore<TData>`                                | `useRef`, `shallowEqual`                      |
+| `useTheme`                  | Context       | `ThemeContextValue`                            | `ThemeContext`, `use()`                       |
+| `useVirtualization`         | Layout/scroll | `{ startIndex, endIndex, offsetY, … }`         | `ResizeObserver` + RAF-batched scroll events  |
 
 ---
 
@@ -163,15 +161,20 @@ const { startIndex, endIndex, leftSpacerWidth, rightSpacerWidth } =
 ## `useVirtualization`
 
 Computes the vertical virtual-scroll window for fixed-height rows. This is the
-current default implementation used by the table after restoring the earlier
-behavior for side-by-side performance retesting.
+current default implementation used by the table.
 
 Implementation details:
 
-- Measures the scroll container with `offsetHeight` on mount and on
-  `window.resize`.
-- Uses a passive scroll listener on the container and updates `scrollTop`
-  directly from the scroll event.
+- Initializes `containerHeight` from `containerRef.current.offsetHeight` on
+  mount, falling back to `defaultContainerHeight` only when measurement is
+  unavailable.
+- Installs a `ResizeObserver` on the scroll container instead of listening to
+  `window.resize`, so container-only size changes are tracked correctly.
+- Uses a passive scroll listener and batches `scrollTop` updates with
+  `requestAnimationFrame` to reduce re-render pressure during rapid scrolling.
+- Reuses `setupObservedContainer()` from `hooks/utils` for shared
+  ResizeObserver + scroll subscription wiring (the observer is skipped when
+  `ResizeObserver` is unavailable, keeping SSR and tests safe).
 - Preserves the previous non-zero height when a resize temporarily reports `0`
   (for example hidden/inactive layouts).
 
@@ -211,62 +214,6 @@ scrollTop ──► startIndex / endIndex
 ```
 
 ---
-
-## `useVirtualizationResizeObserver`
-
-Computes the vertical virtual-scroll window for fixed-height rows. This hook is
-kept as a preserved experiment so the ResizeObserver + RAF approach can be
-retested later without losing the implementation.
-
-Implementation details:
-
-- Initializes `containerHeight` from `containerRef.current.offsetHeight` when
-  available, falling back to `defaultContainerHeight` only when measurement is
-  unavailable.
-- Installs a `ResizeObserver` on the scroll container instead of listening to
-  `window.resize`, so container-only size changes are tracked correctly.
-- Uses a passive scroll listener and batches `scrollTop` updates with
-  `requestAnimationFrame` to reduce re-render pressure during rapid scrolling.
-- Reuses `setupObservedContainer()` from `hooks/utils` for shared
-  ResizeObserver + scroll subscription wiring.
-- Preserves the previous non-zero height when a resize temporarily reports `0`
-  (for example hidden/inactive layouts).
-
-### Signature
-
-```ts
-useVirtualizationResizeObserver(args: UseVirtualizationResizeObserverArgs)
-```
-
-### `UseVirtualizationResizeObserverArgs`
-
-| Field                    | Type                             | Default | Description                            |
-| ------------------------ | -------------------------------- | ------- | -------------------------------------- |
-| `containerRef`           | `RefObject<HTMLElement \| null>` | —       | Scrollable container element           |
-| `defaultContainerHeight` | `number`                         | `400`   | Fallback height before DOM measurement |
-| `itemHeight`             | `number`                         | —       | Fixed row height in pixels             |
-| `overscan`               | `number`                         | `3`     | Extra rows rendered above and below    |
-| `totalItems`             | `number`                         | —       | Total number of virtualized rows       |
-
-### Return Shape
-
-`useVirtualizationResizeObserver` returns:
-
-- `startIndex` / `endIndex`: visible row window
-- `offsetY`: top virtual offset in pixels
-- `bottomSpacerHeight`: remaining virtual height below the rendered window
-- `totalHeight`: full logical height of the row list
-- `containerHeight` / `visibleCount`: current viewport geometry
-
-### Geometry
-
-```
-scrollTop ──clamp──► effectiveScrollTop
-                      │
-                      ├─► startIndex / endIndex
-                      ├─► offsetY
-                      └─► bottomSpacerHeight
-```
 
 ## `useStore`
 
