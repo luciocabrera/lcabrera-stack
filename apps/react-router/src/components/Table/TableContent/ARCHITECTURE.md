@@ -33,6 +33,7 @@ graph TD
   Scroll --> TB["TableBase"]
   TB --> TH["TableHeader"]
   TB --> TBody["TableBody"]
+  Scroll --> Sentinel["div (sentinelRef · infinite-scroll sentinel)"]
 ```
 
 ## Context & Hooks
@@ -52,7 +53,7 @@ graph LR
   end
 
   subgraph "Hooks"
-    TC --> scroll["useInfiniteScroll(containerRef, threshold, ...)"]
+    TC --> scroll["useInfiniteScroll(containerRef, sentinelRef, threshold, ...)"]
   end
 
   subgraph "Provides"

@@ -6,7 +6,7 @@ Virtualized options body extracted from `VirtualList` to own list-specific orche
 
 - Derive `filteredOptions` from `dataState.data`, `searchTerm`, `listFilterMode`, and `selectedValues`
 - Compute and handle select-all / option toggle selection changes
-- Manage virtualization (`useVirtualization`) and infinite-scroll listeners (`onFetchMore`)
+- Manage virtualization (`useVirtualization`) and infinite-scroll triggering (`useInfiniteScrollObserver` on a sentinel element, calling `onFetchMore`)
 - Trigger optional initial fetch (`onFetchInitial`) on mount
 - Render loading placeholders via `SkeletonOptions` during initial load
 - Render empty-state message when filtered results are empty

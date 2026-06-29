@@ -2,8 +2,8 @@
 
 import type { RefObject } from 'react';
 
-import { act, renderHook } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { renderHook } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useInfiniteScroll } from './useInfiniteScroll.hook';
 
@@ -19,31 +19,63 @@ type Row = {
 const dataSelector = (response: Response): Row[] => [...response.rows];
 const dataTotalSelector = (response: Response): number => response.total;
 
-const createContainer = (): HTMLElement => {
-  const container = document.createElement('div');
+type ObserverCallback = (entries: readonly IntersectionObserverEntry[]) => void;
 
-  Object.defineProperties(container, {
-    clientHeight: {
-      configurable: true,
-      value: 400,
-    },
-    scrollHeight: {
-      configurable: true,
-      value: 1000,
-    },
-    scrollTop: {
-      configurable: true,
-      value: 0,
-      writable: true,
-    },
-  });
+const observerRef: {
+  current:
+    | undefined
+    | {
+        readonly callback: ObserverCallback;
+        readonly options: IntersectionObserverInit | undefined;
+      };
+} = {
+  current: undefined,
+};
+const disconnectSpy = vi.fn();
+const observeSpy = vi.fn();
 
-  return container;
+class MockIntersectionObserver {
+  disconnect = disconnectSpy;
+
+  observe = observeSpy;
+
+  constructor(...args: readonly [ObserverCallback, IntersectionObserverInit?]) {
+    const [callback, options] = args;
+    observerRef.current = { callback, options };
+  }
+
+  takeRecords(): readonly IntersectionObserverEntry[] {
+    return [];
+  }
+
+  unobserve() {
+    // no-op
+  }
+}
+
+const triggerIntersection = (isIntersecting: boolean) => {
+  observerRef.current?.callback([
+    { isIntersecting } as IntersectionObserverEntry,
+  ]);
 };
 
+const createRef = (): RefObject<HTMLElement | null> => ({
+  current: document.createElement('div'),
+});
+
+beforeEach(() => {
+  observerRef.current = undefined;
+  disconnectSpy.mockClear();
+  observeSpy.mockClear();
+  vi.stubGlobal('IntersectionObserver', MockIntersectionObserver);
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
+
 describe('useInfiniteScroll', () => {
-  it('fetches more data when the user scrolls within the threshold', () => {
-    const container = createContainer();
+  it('fetches more data when the sentinel reaches the bottom', () => {
     const fetchMoreData = vi
       .fn<
         ({
@@ -61,9 +93,6 @@ describe('useInfiniteScroll', () => {
       >()
       .mockResolvedValue();
     const onLoadMore = vi.fn();
-    const scrollContainerRef = {
-      current: container,
-    } as RefObject<HTMLElement | null>;
 
     renderHook(() => {
       useInfiniteScroll<Row, Response>({
@@ -73,15 +102,13 @@ describe('useInfiniteScroll', () => {
         hasMore: true,
         isLoadingMore: false,
         onLoadMore,
-        scrollContainerRef,
+        scrollContainerRef: createRef(),
+        sentinelRef: createRef(),
         threshold: 100,
       });
     });
 
-    act(() => {
-      container.scrollTop = 520;
-      container.dispatchEvent(new Event('scroll'));
-    });
+    triggerIntersection(true);
 
     expect(fetchMoreData).toHaveBeenCalledWith({
       dataSelector,
@@ -90,83 +117,79 @@ describe('useInfiniteScroll', () => {
     });
   });
 
-  it('does not fetch when already loading or when no more rows exist', () => {
-    const container = createContainer();
-    const fetchMoreData = vi.fn().mockImplementation(() => Promise.resolve());
-    const onLoadMore = vi.fn();
-    const scrollContainerRef = {
-      current: container,
-    } as RefObject<HTMLElement | null>;
+  it('encodes the threshold as the observer rootMargin', () => {
+    const fetchMoreData = vi.fn().mockResolvedValue(undefined);
+
+    renderHook(() => {
+      useInfiniteScroll<Row, Response>({
+        fetchMoreData,
+        hasMore: true,
+        isLoadingMore: false,
+        onLoadMore: vi.fn(),
+        scrollContainerRef: createRef(),
+        sentinelRef: createRef(),
+        threshold: 100,
+      });
+    });
+
+    expect(observerRef.current?.options?.rootMargin).toBe('0px 0px 100px 0px');
+  });
+
+  it('does not observe when already loading or when no more rows exist', () => {
+    const fetchMoreData = vi.fn().mockResolvedValue(undefined);
 
     renderHook(() => {
       useInfiniteScroll<Row, Response>({
         fetchMoreData,
         hasMore: false,
         isLoadingMore: true,
-        onLoadMore,
-        scrollContainerRef,
+        onLoadMore: vi.fn(),
+        scrollContainerRef: createRef(),
+        sentinelRef: createRef(),
         threshold: 100,
       });
     });
 
-    act(() => {
-      container.scrollTop = 520;
-      container.dispatchEvent(new Event('scroll'));
-    });
-
+    expect(observeSpy).not.toHaveBeenCalled();
+    triggerIntersection(true);
     expect(fetchMoreData).not.toHaveBeenCalled();
   });
 
-  it('does not fetch when onLoadMore is undefined', () => {
-    const container = createContainer();
-    const fetchMoreData = vi.fn().mockImplementation(() => Promise.resolve());
-    const scrollContainerRef = {
-      current: container,
-    } as RefObject<HTMLElement | null>;
+  it('does not observe when onLoadMore is undefined', () => {
+    const fetchMoreData = vi.fn().mockResolvedValue(undefined);
 
     renderHook(() => {
       useInfiniteScroll<Row, Response>({
         fetchMoreData,
         hasMore: true,
         isLoadingMore: false,
-        scrollContainerRef,
+        scrollContainerRef: createRef(),
+        sentinelRef: createRef(),
         threshold: 100,
       });
     });
 
-    act(() => {
-      container.scrollTop = 520;
-      container.dispatchEvent(new Event('scroll'));
-    });
-
+    expect(observeSpy).not.toHaveBeenCalled();
     expect(fetchMoreData).not.toHaveBeenCalled();
   });
 
-  it('removes the scroll listener on unmount', () => {
-    const container = createContainer();
-    const fetchMoreData = vi.fn().mockImplementation(() => Promise.resolve());
-    const onLoadMore = vi.fn();
-    const removeEventListenerSpy = vi.spyOn(container, 'removeEventListener');
-    const scrollContainerRef = {
-      current: container,
-    } as RefObject<HTMLElement | null>;
+  it('disconnects the observer on unmount', () => {
+    const fetchMoreData = vi.fn().mockResolvedValue(undefined);
 
     const { unmount } = renderHook(() => {
       useInfiniteScroll<Row, Response>({
         fetchMoreData,
         hasMore: true,
         isLoadingMore: false,
-        onLoadMore,
-        scrollContainerRef,
+        onLoadMore: vi.fn(),
+        scrollContainerRef: createRef(),
+        sentinelRef: createRef(),
         threshold: 100,
       });
     });
 
     unmount();
 
-    expect(removeEventListenerSpy).toHaveBeenCalledWith(
-      'scroll',
-      expect.any(Function),
-    );
+    expect(disconnectSpy).toHaveBeenCalled();
   });
 });

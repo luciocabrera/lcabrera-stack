@@ -39,6 +39,7 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   const toggleTableIsTableSettingsOpen = useToogleTableIsTableSettingsOpen();
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
   const wasLoadingRef = useRef(isLoading);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const wrapperContextValue = { containerRef, wrapperRef };
@@ -65,6 +66,7 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
     isLoadingMore,
     onLoadMore,
     scrollContainerRef: containerRef,
+    sentinelRef,
     threshold,
   });
 
@@ -100,6 +102,7 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
               <TableHeader />
               <TableBody tableContainerRef={containerRef} />
             </TableBase>
+            <div aria-hidden ref={sentinelRef} />
           </div>
         </div>
         <TableDrawersSection />

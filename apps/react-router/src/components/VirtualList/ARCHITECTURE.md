@@ -152,13 +152,17 @@ parents such as drawer filter cards.
 
 ## Infinite Scroll
 
+A zero-height sentinel element is rendered at the end of the scroll container and
+watched with `useInfiniteScrollObserver` (`@/hooks`). `IntersectionObserver`
+replaces the previous scroll listener so proximity is computed off the layout
+pass instead of reading `scrollHeight`/`scrollTop`/`clientHeight` on every scroll
+event. `SCROLL_THRESHOLD` is passed as the bottom `rootMargin`.
+
 ```mermaid
 graph TD
-  Scroll["scroll event"] --> Check{"scrollHeight - scrollTop - clientHeight < SCROLL_THRESHOLD?"}
-  Check -->|yes| HasMore{"hasMore && !isLoadingMore?"}
+  Sentinel["sentinel intersects root + rootMargin(SCROLL_THRESHOLD)"] --> HasMore{"hasMore && !isLoadingOptions && onFetchMore?"}
   HasMore -->|yes| Fetch["onFetchMore()"]
-  HasMore -->|no| Skip["(no-op)"]
-  Check -->|no| Skip2["(no-op)"]
+  HasMore -->|no| Skip["(observer not attached)"]
 ```
 
 ## Filter Modes

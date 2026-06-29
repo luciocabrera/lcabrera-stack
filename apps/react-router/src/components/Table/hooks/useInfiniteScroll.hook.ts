@@ -1,6 +1,8 @@
-import { useEffect } from 'react';
+import type { RefObject } from 'react';
 
 import type { InfiniteScroll } from '@/types/ui.types';
+
+import { useInfiniteScrollObserver } from '@/hooks';
 
 type UseInfiniteScrollArgs<TData, TResponse> = InfiniteScroll<
   TData,
@@ -14,8 +16,10 @@ type UseInfiniteScrollArgs<TData, TResponse> = InfiniteScroll<
     InfiniteScroll<TData, TResponse>,
     'hasMore' | 'isLoadingMore'
   >) => Promise<void>;
-  /** Reference to the scrollable container */
-  scrollContainerRef: React.RefObject<HTMLElement | null>;
+  /** Reference to the scrollable container (IntersectionObserver root) */
+  scrollContainerRef: RefObject<HTMLElement | null>;
+  /** Reference to the sentinel element rendered at the end of the scrollable content */
+  sentinelRef: RefObject<HTMLElement | null>;
   /** Pixels from bottom to trigger  */
   threshold: number;
 };
@@ -31,37 +35,21 @@ export const useInfiniteScroll = <
   isLoadingMore,
   onLoadMore,
   scrollContainerRef,
+  sentinelRef,
   threshold,
 }: UseInfiniteScrollArgs<TData, TResponse>) => {
-  useEffect(() => {
-    const scrollContainer = scrollContainerRef.current;
-    if (!scrollContainer) return;
+  const isEnabled = Boolean(hasMore) && !isLoadingMore && Boolean(onLoadMore);
 
-    const handleScroll = () => {
-      if (isLoadingMore || !hasMore) return;
+  const handleReachEnd = () => {
+    if (!onLoadMore) return;
+    void fetchMoreData({ dataSelector, dataTotalSelector, onLoadMore });
+  };
 
-      const { clientHeight, scrollHeight, scrollTop } = scrollContainer;
-      const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
-
-      if (distanceFromBottom <= threshold && onLoadMore) {
-        void fetchMoreData({ dataSelector, dataTotalSelector, onLoadMore });
-      }
-    };
-
-    // eslint-disable-next-line @typescript-eslint/naming-convention -- DOM API property
-    scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
-
-    return () => {
-      scrollContainer.removeEventListener('scroll', handleScroll);
-    };
-  }, [
-    scrollContainerRef,
+  useInfiniteScrollObserver({
+    isEnabled,
+    onReachEnd: handleReachEnd,
+    rootRef: scrollContainerRef,
+    sentinelRef,
     threshold,
-    isLoadingMore,
-    hasMore,
-    fetchMoreData,
-    onLoadMore,
-    dataSelector,
-    dataTotalSelector,
-  ]);
+  });
 };

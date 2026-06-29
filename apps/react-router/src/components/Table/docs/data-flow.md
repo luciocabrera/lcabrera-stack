@@ -45,7 +45,7 @@ graph TB
     subgraph HOOKS["Specialized Hooks"]
         direction TB
         colResize["useColumnResize<br/><small>RAF-throttled drag</small>"]
-        infScroll["useInfiniteScroll<br/><small>scroll → fetchMore</small>"]
+        infScroll["useInfiniteScroll<br/><small>sentinel intersect → fetchMore</small>"]
         virtHook["useVirtualization<br/><small>visible row calc</small>"]
     end
 

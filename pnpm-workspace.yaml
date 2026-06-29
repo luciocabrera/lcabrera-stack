@@ -24,7 +24,7 @@ catalog:
   '@types/pg': ^8.20.0
   '@types/react': ^19.2.17
   '@types/react-dom': ^19.2.3
-  '@typescript-eslint/utils': ^8.62.0
+  '@typescript-eslint/utils': ^8.62.1
   '@vitest/coverage-v8': ^4.1.9
   babel-plugin-react-compiler: ^1.0.0
   cors: ^2.8.6
@@ -32,19 +32,19 @@ catalog:
   eslint-config-prettier: ^10.1.8
   eslint-plugin-local-rules: ^3.0.2
   eslint-plugin-perfectionist: ^5.9.1
-  eslint-plugin-react-dom: ^5.9.5
+  eslint-plugin-react-dom: ^5.10.0
   eslint-plugin-react-hooks: ^7.1.1
   eslint-plugin-react-refresh: ^0.5.3
-  eslint-plugin-react-x: ^5.9.5
+  eslint-plugin-react-x: ^5.10.0
   eslint-plugin-security: ^4.0.1
   eslint-plugin-unicorn: ^69.0.0
   express: ^5.2.1
-  fallow: ^2.102.0
-  fastify: ^5.8.5
+  fallow: ^2.103.0
+  fastify: ^5.9.0
   globals: ^17.7.0
   isbot: 5.1.44
   jsdom: ^29.1.1
-  knip: ^6.22.0
+  knip: ^6.23.0
   lighthouse: ^13.4.0
   nodemon: ^3.1.14
   pg: ^8.22.0
@@ -54,7 +54,7 @@ catalog:
   react-router: ^8.0.1
   typescript: ^6.0.3
 
-  typescript-eslint: ^8.62.0
+  typescript-eslint: ^8.62.1
   vite: 8.1.0
   vite-plugin-babel: ^1.7.3
   vite-plus: ^0.2.1
@@ -67,89 +67,18 @@ catalogMode: prefer
 minimumReleaseAgeExclude:
   - '@types/*' # type-only packages have zero runtime attack surface
   - '@eslint-react/*' # lint-only packages with frequent coordinated releases
-  - eslint-plugin-unicorn # lint-only package; package-level safeguard for CI policy resolution
-  - eslint-plugin-react-dom # lint-only package
-  - eslint-plugin-react-x # lint-only package
-  - isbot@5.1.41 || 5.1.42 || 5.1.44
-  - knip@6.16.0 || 6.17.1 || 6.18.0 || 6.21.0 || 6.22.0
-  - '@typescript-eslint/eslint-plugin@8.61.0 || 8.62.0'
-  - '@typescript-eslint/parser@8.61.0 || 8.62.0'
-  - '@typescript-eslint/project-service@8.61.0 || 8.62.0'
-  - '@typescript-eslint/scope-manager@8.61.0 || 8.62.0'
-  - '@typescript-eslint/tsconfig-utils@8.61.0 || 8.62.0'
-  - '@typescript-eslint/type-utils@8.61.0 || 8.62.0'
-  - '@typescript-eslint/types@8.61.0 || 8.62.0'
-  - '@typescript-eslint/typescript-estree@8.61.0 || 8.62.0'
-  - '@typescript-eslint/utils@8.61.0 || 8.62.0'
-  - '@typescript-eslint/visitor-keys@8.61.0 || 8.62.0'
-  - typescript-eslint@8.61.0 || 8.62.0
-  - lighthouse@13.4.0
-  - eslint-plugin-security@4.0.1
-  - eslint@10.5.0 || 10.6.0
-  - eslint-plugin-react-refresh@0.5.3
-  - '@vitest/coverage-v8@4.1.9'
-  - '@vitest/expect@4.1.9'
-  - '@vitest/mocker@4.1.9'
-  - '@vitest/pretty-format@4.1.9'
-  - '@vitest/runner@4.1.9'
-  - '@vitest/snapshot@4.1.9'
-  - '@vitest/spy@4.1.9'
-  - '@vitest/utils@4.1.9'
-  - playwright-core@1.61.0 || 1.61.1
-  - playwright@1.61.0 || 1.61.1
-  - vitest@4.1.9
-  - '@babel/code-frame@8.0.0'
-  - '@babel/generator@8.0.0'
-  - '@babel/helper-annotate-as-pure@8.0.0'
-  - '@babel/helper-create-class-features-plugin@8.0.0 || 8.0.1'
-  - '@babel/helper-globals@8.0.0'
-  - '@babel/helper-member-expression-to-functions@8.0.0'
-  - '@babel/helper-module-imports@8.0.0'
-  - '@babel/helper-module-transforms@8.0.0 || 8.0.1'
-  - '@babel/helper-optimise-call-expression@8.0.0'
-  - '@babel/helper-plugin-utils@8.0.0 || 8.0.1'
-  - '@babel/helper-replace-supers@8.0.0 || 8.0.1'
-  - '@babel/helper-skip-transparent-expression-wrappers@8.0.0'
-  - '@babel/helper-string-parser@8.0.0'
-  - '@babel/helper-validator-identifier@8.0.0'
-  - '@babel/helper-validator-option@8.0.0'
-  - '@babel/parser@8.0.0'
-  - '@babel/plugin-syntax-typescript@8.0.0 || 8.0.1'
-  - '@babel/plugin-transform-modules-commonjs@8.0.0 || 8.0.1'
-  - '@babel/plugin-transform-typescript@8.0.0 || 8.0.1'
-  - '@babel/preset-typescript@8.0.0 || 8.0.1'
-  - '@babel/template@8.0.0'
-  - '@babel/traverse@8.0.0'
-  - '@babel/types@8.0.0'
-  - '@fallow-cli/darwin-arm64@2.97.0 || 2.99.0 || 2.100.0 || 2.101.0 || 2.102.0'
-  - '@fallow-cli/darwin-x64@2.97.0 || 2.99.0 || 2.100.0 || 2.101.0 || 2.102.0'
-  - '@fallow-cli/linux-arm64-gnu@2.97.0 || 2.99.0 || 2.100.0 || 2.101.0 || 2.102.0'
-  - '@fallow-cli/linux-arm64-musl@2.97.0 || 2.99.0 || 2.100.0 || 2.101.0 || 2.102.0'
-  - '@fallow-cli/linux-x64-gnu@2.97.0 || 2.99.0 || 2.100.0 || 2.101.0 || 2.102.0'
-  - '@fallow-cli/linux-x64-musl@2.97.0 || 2.99.0 || 2.100.0 || 2.101.0 || 2.102.0'
-  - '@fallow-cli/win32-arm64-msvc@2.97.0 || 2.99.0 || 2.100.0 || 2.101.0 || 2.102.0'
-  - '@fallow-cli/win32-x64-msvc@2.97.0 || 2.99.0 || 2.100.0 || 2.101.0 || 2.102.0'
-  - '@react-router/dev@7.18.0 || 8.0.0 || 8.0.1'
-  - '@react-router/express@7.18.0 || 8.0.0 || 8.0.1'
-  - '@react-router/node@7.18.0 || 8.0.0 || 8.0.1'
-  - '@react-router/serve@7.18.0 || 8.0.0 || 8.0.1'
-  - fallow@2.97.0 || 2.99.0 || 2.100.0 || 2.101.0 || 2.102.0
-  - react-router@7.18.0 || 8.0.0 || 8.0.1
-  - '@voidzero-dev/vite-plus-core@0.2.1'
-  - '@voidzero-dev/vite-plus-darwin-arm64@0.2.1'
-  - '@voidzero-dev/vite-plus-darwin-x64@0.2.1'
-  - '@voidzero-dev/vite-plus-linux-arm64-gnu@0.2.1'
-  - '@voidzero-dev/vite-plus-linux-arm64-musl@0.2.1'
-  - '@voidzero-dev/vite-plus-linux-x64-gnu@0.2.1'
-  - '@voidzero-dev/vite-plus-linux-x64-musl@0.2.1'
-  - '@voidzero-dev/vite-plus-win32-arm64-msvc@0.2.1'
-  - '@voidzero-dev/vite-plus-win32-x64-msvc@0.2.1'
-  - vite-plus@0.2.1
-  - pg-connection-string@2.14.0
-  - pg-protocol@1.15.0
-  - pg@8.22.0
-  - globals@17.7.0
-  - vite@8.1.0
+
+  - '@typescript-eslint/*'
+
+  - '@vitest/*'
+
+  - '@babel/*'
+  - typescript-eslint@8.62.1 || 8.62.0
+  - '@fallow-cli/*'
+
+  - '@react-router/*'
+
+  - '@voidzero-dev/*'
 
 # overrides:
 #   vite: "catalog:"

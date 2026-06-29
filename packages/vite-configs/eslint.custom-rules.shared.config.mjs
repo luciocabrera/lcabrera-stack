@@ -158,7 +158,7 @@ export const createCustomRulesLintConfig = ({ ignorePatterns = [] } = {}) => [
       'security/detect-object-injection': 'off',
       'unicorn/filename-case': 'off',
       'unicorn/prefer-query-selector': 'off',
-      'unicorn/prefer-observer-apis': 'off',
+      // 'unicorn/prefer-observer-apis': 'off',
     },
   },
   // 5. JavaScript files configuration (for Node.js server files, etc.)

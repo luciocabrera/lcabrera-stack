@@ -2,7 +2,7 @@ import * as stylex from '@stylexjs/stylex';
 import { useEffect, useRef } from 'react';
 
 import { InfoBox } from '@/components/InfoBox';
-import { useVirtualization } from '@/hooks';
+import { useInfiniteScrollObserver, useVirtualization } from '@/hooks';
 
 import type { VirtualListBodyProps } from './VirtualListBody.types';
 
@@ -30,6 +30,7 @@ export const VirtualListBody = ({
   shouldFillHeight,
 }: VirtualListBodyProps) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
   const { data, hasMore, isLoading, isLoadingMore } = dataState;
   const isBootstrappingInitialLoad =
@@ -70,25 +71,15 @@ export const VirtualListBody = ({
     }
   }, [onFetchInitial]);
 
-  useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-
-    const handleScroll = () => {
-      if (!hasMore || isLoadingMore) return;
-
-      const { clientHeight, scrollHeight, scrollTop } = container;
-      if (scrollHeight - scrollTop - clientHeight < SCROLL_THRESHOLD) {
-        if (!onFetchMore || isLoadingOptions) return;
-        void onFetchMore();
-      }
-    };
-
-    container.addEventListener('scroll', handleScroll);
-    return () => {
-      container.removeEventListener('scroll', handleScroll);
-    };
-  }, [hasMore, isLoadingMore, isLoadingOptions, onFetchMore]);
+  useInfiniteScrollObserver({
+    isEnabled: hasMore && !isLoadingOptions && Boolean(onFetchMore),
+    onReachEnd: () => {
+      if (onFetchMore) void onFetchMore();
+    },
+    rootRef: scrollContainerRef,
+    sentinelRef,
+    threshold: SCROLL_THRESHOLD,
+  });
 
   return (
     <div
@@ -128,6 +119,7 @@ export const VirtualListBody = ({
             totalHeight={totalHeight}
           />
         )}
+        <div aria-hidden ref={sentinelRef} />
       </div>
     </div>
   );
