@@ -162,6 +162,37 @@ describe('useInfiniteScrollObserver', () => {
     expect(disconnectSpy).toHaveBeenCalled();
   });
 
+  it('does not recreate the observer when only onReachEnd changes', () => {
+    const rootRef = createRef();
+    const sentinelRef = createRef();
+    const latestOnReachEnd = vi.fn();
+
+    const { rerender } = renderHook(
+      ({ onReachEnd }: { readonly onReachEnd: () => void }) => {
+        useInfiniteScrollObserver({
+          isEnabled: true,
+          onReachEnd,
+          rootRef,
+          sentinelRef,
+          threshold: 50,
+        });
+      },
+      { initialProps: { onReachEnd: vi.fn() } },
+    );
+
+    expect(observeSpy).toHaveBeenCalledOnce();
+
+    rerender({ onReachEnd: latestOnReachEnd });
+
+    // The observer is not torn down / recreated on a new callback identity.
+    expect(disconnectSpy).not.toHaveBeenCalled();
+    expect(observeSpy).toHaveBeenCalledOnce();
+
+    // The latest callback is invoked through the ref.
+    triggerIntersection(true);
+    expect(latestOnReachEnd).toHaveBeenCalledOnce();
+  });
+
   it('does nothing when IntersectionObserver is unavailable', () => {
     vi.stubGlobal('IntersectionObserver', undefined);
     const onReachEnd = vi.fn();
