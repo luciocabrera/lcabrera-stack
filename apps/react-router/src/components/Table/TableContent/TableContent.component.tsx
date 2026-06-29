@@ -102,7 +102,11 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
               <TableHeader />
               <TableBody tableContainerRef={containerRef} />
             </TableBase>
-            <div aria-hidden ref={sentinelRef} />
+            <div
+              aria-hidden
+              ref={sentinelRef}
+              {...stylex.props(styles.sentinel)}
+            />
           </div>
         </div>
         <TableDrawersSection />

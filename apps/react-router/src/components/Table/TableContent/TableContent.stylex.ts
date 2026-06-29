@@ -21,6 +21,13 @@ export const styles = stylex.create({
     overflowX: 'scroll',
     overflowY: 'scroll',
   },
+  sentinel: {
+    pointerEvents: 'none',
+    position: 'sticky',
+    height: 0,
+    left: 0,
+    width: '1px',
+  },
   outerContainer: {
     borderColor: colors.borderPrimary,
     borderRadius: borderRadius.lg,
