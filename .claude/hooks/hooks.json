@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "npx claudelint check-all --format json"
+            "command": "claudelint check-all --format json"
           }
         ]
       }
@@ -15,7 +15,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd apps/react-router && vp lint . --fix && vp check --fix && vp run test"
+            "command": "cd apps/react-router && git diff --quiet HEAD -- . || (vp lint . --fix && vp check --fix && vp run test)"
           }
         ]
       }
