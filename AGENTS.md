@@ -511,3 +511,37 @@ Docs are local at `node_modules/vite-plus/docs` or online at https://viteplus.de
 - [ ] Run `vp check` and `vp test` to format, lint, type check and test changes.
 - [ ] Check if there are `vite.config.ts` tasks or `package.json` scripts necessary for validation, run via `vp run <script>`.
 - [ ] If setup, runtime, or package-manager behavior looks wrong, run `vp env doctor` and include its output when asking for help.
+
+## Context Management: Scratchpads & Crash Recovery
+
+These rules apply to any multi-step exploration, research, or codebase
+investigation task (not simple, single-file edits).
+
+### Scratchpad (findings.md)
+
+- Before starting any exploration task, create `findings.md` in the
+  working directory if it does not already exist.
+- As you discover relevant classes, functions, file paths, or dependency
+  relationships, append them to `findings.md` immediately — full path,
+  one-line description. Do not wait until the end of the task.
+- Before each new search or file read, check `findings.md` first for
+  anything already discovered. Do not re-derive information you have
+  already recorded.
+- Treat `findings.md` as your source of truth for specifics. Do not rely
+  on the conversation history to recall exact names or paths.
+
+### Manifest & Crash Recovery (manifest.json)
+
+- Before starting any work, check whether `manifest.json` exists in the
+  working directory.
+  - If it exists, read it first. It contains `explored_paths`,
+    `key_findings`, and `next_steps` from a previous session. Resume
+    from `next_steps` rather than re-exploring `explored_paths`.
+  - If it does not exist, create it now with empty fields.
+- After completing each significant step (finishing a module, tracing a
+  dependency chain, completing a subagent task), update `manifest.json`
+  with any new paths explored, new findings, and a revised `next_steps`
+  list.
+- Keep the manifest current at all times. It is your persistent memory
+  of progress, independent of this conversation, and must survive a
+  crash or session restart.
