@@ -1,26 +1,15 @@
 import * as stylex from '@stylexjs/stylex';
-import { useState } from 'react';
-
-import type { PinConflictResolution } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
-import type { PinConflictState, PinSide } from '@/types/ui.types';
 
 import { Button } from '@/components/Button';
 import { MoreVerticalIcon, PinIcon, PinOffIcon } from '@/components/Icons';
 import { PinSideModal } from '@/components/PinSideModal';
 import {
-  useAcceptHeaderPinConflict,
-  useAcceptHeaderPinSide,
-  useSetColumnPinning,
   useSetColumnSizing,
   useSetColumnSorting,
 } from '@/components/Table/contexts/TableConfig/columns/actions';
 import { useColumnResize } from '@/components/Table/hooks';
 import { DEFAULT_MIN_COLUMN_WIDTH } from '@/components/Table/Table.constants';
 import { PinConflictModal } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/PinConflictModal';
-import {
-  useGetGlobalPinConflictResolutionPreference,
-  useGetGlobalPinSidePreference,
-} from '@/contexts/GlobalSettingsContext/selectors';
 
 import type { TableHeaderCellProps } from './TableHeaderCell.types';
 
@@ -32,6 +21,7 @@ import {
   useSetTableColumnSelectedKey,
   useSetTableDrawersOpenState,
 } from '../contexts/TableConfig/meta/actions';
+import { useTableHeaderPinFlow } from './hooks';
 import { SortIcon } from './SortIcon';
 import {
   skeletonStyles,
@@ -51,21 +41,19 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
   const column = useGetNormalizedColumn<TData>(columnKey);
 
   const setColumnSizing = useSetColumnSizing<TData>();
-  const setColumnPinning = useSetColumnPinning<TData>();
   const setSorting = useSetColumnSorting<TData>();
   const setTableColumnSelectedKey = useSetTableColumnSelectedKey();
   const setTableDrawersOpenState = useSetTableDrawersOpenState();
-  const acceptHeaderPinSide = useAcceptHeaderPinSide<TData>();
-  const acceptHeaderPinConflict = useAcceptHeaderPinConflict<TData>();
-  const globalPinConflictResolutionPreference =
-    useGetGlobalPinConflictResolutionPreference();
-  const globalPinSidePreference = useGetGlobalPinSidePreference();
 
-  const [isPinSideModalOpen, setIsPinSideModalOpen] = useState(false);
-  const [pinConflict, setPinConflict] = useState<PinConflictState>({
-    isOpen: false,
-    side: 'left',
-  });
+  const {
+    handlePinCancel,
+    handlePinClick,
+    handlePinConflictAccept,
+    handlePinConflictCancel,
+    handlePinSideAccept,
+    isPinSideModalOpen,
+    pinConflict,
+  } = useTableHeaderPinFlow<TData>({ columnKey, pinInfo });
 
   const { isHeaderHidden, label, maxWidth, minWidth } = column;
   const effectiveMinWidth = minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
@@ -103,60 +91,6 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
     event.preventDefault();
     event.stopPropagation();
     setColumnSizing({ columnKey, width: undefined });
-  };
-
-  const handlePinClick = () => {
-    if (pinInfo?.side) {
-      setColumnPinning({ columnKey, side: undefined });
-      return;
-    }
-
-    if (globalPinSidePreference) {
-      handlePinAccept(globalPinSidePreference);
-      return;
-    }
-
-    setIsPinSideModalOpen(true);
-  };
-
-  const handlePinAccept = (pinSide: PinSide) => {
-    const conflict = acceptHeaderPinSide({ columnKey, pinSide });
-
-    if (conflict) {
-      if (globalPinConflictResolutionPreference) {
-        handlePinConflictAccept({
-          resolution: globalPinConflictResolutionPreference,
-          sideOverride: conflict.side,
-        });
-      } else {
-        setPinConflict(conflict);
-      }
-    }
-
-    setIsPinSideModalOpen(false);
-  };
-
-  const handlePinCancel = () => {
-    setIsPinSideModalOpen(false);
-  };
-
-  const handlePinConflictAccept = ({
-    resolution,
-    sideOverride,
-  }: {
-    readonly resolution: PinConflictResolution;
-    readonly sideOverride?: 'left' | 'right';
-  }) => {
-    acceptHeaderPinConflict({
-      columnKey,
-      resolution,
-      side: sideOverride ?? pinConflict.side,
-    });
-    setPinConflict({ isOpen: false, side: 'left' });
-  };
-
-  const handlePinConflictCancel = () => {
-    setPinConflict({ isOpen: false, side: 'left' });
   };
 
   const pinnedStylex = getPinnedStyle(pinInfo);
@@ -224,18 +158,13 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
               <PinSideModal
                 columnLabel={label}
                 isOpen={isPinSideModalOpen}
-                onAccept={handlePinAccept}
+                onAccept={handlePinSideAccept}
                 onCancel={handlePinCancel}
               />
               <PinConflictModal
                 columnLabel={label}
                 isOpen={pinConflict.isOpen}
-                onAccept={(resolution) =>
-                  handlePinConflictAccept({
-                    resolution,
-                    sideOverride: pinConflict.side,
-                  })
-                }
+                onAccept={handlePinConflictAccept}
                 onCancel={handlePinConflictCancel}
                 side={pinConflict.side}
               />

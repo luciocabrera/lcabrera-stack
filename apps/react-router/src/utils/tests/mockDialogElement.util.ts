@@ -38,7 +38,7 @@ const setAllDialogsOpen = ({ isOpen }: { readonly isOpen: boolean }) => {
 
 export const mockDialogElement = ({
   shouldSetOpenOnShow = true,
-}: MockDialogElementArgs): MockDialogElementResult => {
+}: MockDialogElementArgs = {}): MockDialogElementResult => {
   // eslint-disable-next-line typescript-eslint/unbound-method -- Saving prototype methods for test teardown restoration
   const savedClose = HTMLDialogElement.prototype.close;
   // eslint-disable-next-line typescript-eslint/unbound-method -- Saving prototype methods for test teardown restoration

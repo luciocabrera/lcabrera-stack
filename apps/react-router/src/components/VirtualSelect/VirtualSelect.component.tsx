@@ -1,18 +1,20 @@
 import * as stylex from '@stylexjs/stylex';
-import { useEffect, useId, useRef, useState } from 'react';
+import { useId, useRef } from 'react';
 
-import type { VirtualListDataState } from '@/components/VirtualList';
 import type { SelectFilter } from '@/types/filterOperators.types';
 
 import { VirtualList } from '@/components/VirtualList';
 import { useClickOutside } from '@/hooks';
 
-import type {
-  VirtualSelectOption,
-  VirtualSelectProps,
-} from './VirtualSelect.types';
+import type { VirtualSelectProps } from './VirtualSelect.types';
 
-import { countVisibleTags, getDropdownStyle } from './utils';
+import { useVirtualSelectDropdown, useVirtualSelectTagOverflow } from './hooks';
+import {
+  getDropdownStyle,
+  resolveVirtualSelectChange,
+  resolveVirtualSelectDisplay,
+  resolveVirtualSelectOptions,
+} from './utils';
 import { busyStyles, styles } from './VirtualSelect.stylex';
 import { VirtualSelectTrigger } from './VirtualSelectTrigger';
 
@@ -39,102 +41,53 @@ export const VirtualSelect = ({
   );
 
   const generatedListboxId = useId();
-
-  const isBusyState = isBusy;
-  const [visibleTagCount, setVisibleTagCount] = useState(selected.length);
-  const [isOpen, setIsOpen] = useState(false);
-
   const resolvedListboxId =
     listboxId ?? `virtual-select-listbox-${generatedListboxId}`;
 
-  // Normalize to { label, value } pairs — plain strings become { label: x, value: x }
-  const optionEntries: VirtualSelectOption[] = options.map((o) =>
-    typeof o === 'string' ? { label: o, value: o } : o,
-  );
+  const { getValueFromLabel, optionEntries, selectedLabels } =
+    resolveVirtualSelectOptions({ options, selected });
 
-  // Map selected values → display labels for VirtualList and Trigger
-  const selectedLabels = selected.map(
-    (v) => optionEntries.find((o) => o.value === v)?.label ?? v,
-  );
+  const visibleTagCount = useVirtualSelectTagOverflow({
+    mode,
+    selected,
+    triggerRef,
+  });
 
-  const hasSelection = selected.length > 0;
-  const isListVisible = isAlwaysOpen ? true : isOpen;
-  const computedVisibleCount =
-    mode === 'multi' && hasSelection ? visibleTagCount : selected.length;
-  const overflowCount = selected.length - computedVisibleCount;
-  const visibleTags = selectedLabels.slice(0, computedVisibleCount);
-  const isMulti = mode === 'multi';
+  const { closeDropdown, isListVisible, isOpen, toggleDropdown } =
+    useVirtualSelectDropdown({ isAlwaysOpen, isBusy, onOpenChange });
 
-  // Static mode: wrap option labels in a VirtualListDataState
-  const effectiveDataState: VirtualListDataState = dataState ?? {
-    data: optionEntries.map((o) => o.label),
-    hasMore: false,
-    isLoading: false,
-    isLoadingMore: false,
-  };
-
-  useEffect(() => {
-    onOpenChange?.(isOpen);
-  }, [isOpen, onOpenChange]);
-
-  // Subscribe to trigger size changes via ResizeObserver so tag overflow
-  // is recalculated whenever the container resizes (e.g. tags added/removed).
-  useEffect(() => {
-    const trigger = triggerRef.current;
-    if (mode !== 'multi' || !trigger) return;
-
-    const observer = new ResizeObserver(() => {
-      setVisibleTagCount(
-        countVisibleTags({ totalCount: selected.length, trigger }),
-      );
+  const { effectiveDataState, isMulti, overflowCount, visibleTags } =
+    resolveVirtualSelectDisplay({
+      dataState,
+      mode,
+      optionEntries,
+      selected,
+      selectedLabels,
+      visibleTagCount,
     });
-    observer.observe(trigger);
-
-    // Also run immediately for the initial measurement
-    setVisibleTagCount(
-      countVisibleTags({ totalCount: selected.length, trigger }),
-    );
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [mode, selected]);
-
-  const handleClose = () => {
-    setIsOpen(false);
-  };
 
   useClickOutside({
-    onClickOutside: handleClose,
+    onClickOutside: closeDropdown,
     ref: containerRef,
   });
 
-  const handleToggleDropdown = () => {
-    if (isBusyState) return;
-    setIsOpen((isCurrentlyOpen) => !isCurrentlyOpen);
-  };
-
   const handleVirtualListChange = (filter?: SelectFilter) => {
-    const selectedInListLabels = filter?.values ?? [];
+    const { nextSelected, shouldCloseDropdown } = resolveVirtualSelectChange({
+      filter,
+      getValueFromLabel,
+      mode,
+      selected,
+    });
 
-    // Map display labels back to values before reporting to parent
-    const selectedValues = selectedInListLabels.map(
-      (label) => optionEntries.find((o) => o.label === label)?.value ?? label,
-    );
+    onChange([...nextSelected]);
 
-    if (mode === 'single') {
-      // Find the newly added value (not in current selected)
-      const newValue = selectedValues.find((v) => !selected.includes(v));
-      onChange(newValue ? [newValue] : []);
-      handleClose();
-      return;
+    if (shouldCloseDropdown) {
+      closeDropdown();
     }
-
-    onChange(selectedValues);
   };
 
   const handleRemoveTag = (label: string) => {
-    const value = optionEntries.find((o) => o.label === label)?.value ?? label;
+    const value = getValueFromLabel(label);
     onChange(selected.filter((v) => v !== value));
   };
 
@@ -146,19 +99,19 @@ export const VirtualSelect = ({
         shouldFillHeight ? styles.containerFill : undefined,
       )}
     >
-      {isBusyState && (
+      {isBusy && (
         <div {...stylex.props(busyStyles.overlay)} aria-hidden='true'>
           <div {...stylex.props(busyStyles.wave)} />
         </div>
       )}
       <VirtualSelectTrigger
         isAlwaysOpen={isAlwaysOpen}
-        isBusy={isBusyState}
+        isBusy={isBusy}
         isOpen={isOpen}
         listboxId={resolvedListboxId}
         mode={mode}
         onRemoveTag={handleRemoveTag}
-        onToggle={handleToggleDropdown}
+        onToggle={toggleDropdown}
         overflowCount={overflowCount}
         placeholder={placeholder}
         selected={selected}
@@ -178,7 +131,7 @@ export const VirtualSelect = ({
         >
           <VirtualList
             dataState={effectiveDataState}
-            filter={{ type: 'select', values: selectedLabels }}
+            filter={{ type: 'select', values: [...selectedLabels] }}
             hasCheckboxes={isMulti}
             hasSelectAll={isMulti}
             listMaxHeight={listMaxHeight}

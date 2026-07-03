@@ -7,12 +7,12 @@ import { useInfiniteScrollObserver, useVirtualization } from '@/hooks';
 import type { VirtualListBodyProps } from './VirtualListBody.types';
 
 import { SkeletonOptions } from '../SkeletonOptions';
-import { getFilteredOptions } from '../utils';
 import {
   DEFAULT_CONTAINER_HEIGHT,
   ITEM_HEIGHT,
   SCROLL_THRESHOLD,
 } from '../VirtualList.constants';
+import { resolveVirtualListBodyState } from './utils';
 import { styles } from './VirtualListBody.stylex';
 import { VirtualListBodyOptions } from './VirtualListBodyOptions';
 
@@ -32,29 +32,21 @@ export const VirtualListBody = ({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
-  const { data, hasMore, isLoading, isLoadingMore } = dataState;
-  const isBootstrappingInitialLoad =
-    Boolean(onFetchInitial) &&
-    data.length === 0 &&
-    !(isLoading || isLoadingMore);
-  const isLoadingOptions = isLoading || isLoadingMore;
-  const isInitialLoading =
-    data.length === 0 && (isLoading || isBootstrappingInitialLoad);
-
-  const filteredOptions = getFilteredOptions({
+  const {
+    contentMode,
+    filteredOptions,
+    isAllSelected,
+    isLoadingOptions,
+    shouldShowSelectAll,
+    totalItems,
+  } = resolveVirtualListBodyState({
+    dataState,
+    hasFetchInitial: Boolean(onFetchInitial),
+    hasSelectAll,
     listFilterMode,
-    options: data,
     searchTerm,
     selectedValues,
   });
-
-  const shouldShowSelectAll = hasSelectAll && filteredOptions.length > 1;
-  const totalItems = shouldShowSelectAll
-    ? filteredOptions.length + 1
-    : filteredOptions.length;
-  const isAllSelected =
-    filteredOptions.length > 0 &&
-    filteredOptions.every((option) => selectedValues.includes(option));
 
   const { containerHeight, endIndex, offsetY, startIndex, totalHeight } =
     useVirtualization({
@@ -72,7 +64,8 @@ export const VirtualListBody = ({
   }, [onFetchInitial]);
 
   useInfiniteScrollObserver({
-    isEnabled: Boolean(hasMore) && !isLoadingOptions && Boolean(onFetchMore),
+    isEnabled:
+      Boolean(dataState.hasMore) && !isLoadingOptions && Boolean(onFetchMore),
     onReachEnd: () => {
       if (onFetchMore) void onFetchMore();
     },
@@ -80,6 +73,36 @@ export const VirtualListBody = ({
     sentinelRef,
     threshold: SCROLL_THRESHOLD,
   });
+
+  const renderContent = () => {
+    if (contentMode === 'loading') {
+      return <SkeletonOptions containerHeight={containerHeight} />;
+    }
+
+    if (contentMode === 'empty') {
+      return (
+        <div {...stylex.props(styles.noResults)}>
+          <InfoBox>No options found</InfoBox>
+        </div>
+      );
+    }
+
+    return (
+      <VirtualListBodyOptions
+        endIndex={endIndex}
+        filteredOptions={filteredOptions}
+        hasCheckboxes={hasCheckboxes}
+        isAllSelected={isAllSelected}
+        isLoadingOptions={isLoadingOptions}
+        offsetY={offsetY}
+        onChange={onChange}
+        selectedValues={selectedValues}
+        shouldShowSelectAll={shouldShowSelectAll}
+        startIndex={startIndex}
+        totalHeight={totalHeight}
+      />
+    );
+  };
 
   return (
     <div
@@ -96,29 +119,7 @@ export const VirtualListBody = ({
             : styles.virtualContainer(listMaxHeight),
         )}
       >
-        {isInitialLoading && (
-          <SkeletonOptions containerHeight={containerHeight} />
-        )}
-        {!isInitialLoading && filteredOptions.length === 0 && (
-          <div {...stylex.props(styles.noResults)}>
-            <InfoBox>No options found</InfoBox>
-          </div>
-        )}
-        {!isInitialLoading && filteredOptions.length > 0 && (
-          <VirtualListBodyOptions
-            endIndex={endIndex}
-            filteredOptions={filteredOptions}
-            hasCheckboxes={hasCheckboxes}
-            isAllSelected={isAllSelected}
-            isLoadingOptions={isLoadingOptions}
-            offsetY={offsetY}
-            onChange={onChange}
-            selectedValues={selectedValues}
-            shouldShowSelectAll={shouldShowSelectAll}
-            startIndex={startIndex}
-            totalHeight={totalHeight}
-          />
-        )}
+        {renderContent()}
         <div aria-hidden ref={sentinelRef} {...stylex.props(styles.sentinel)} />
       </div>
     </div>
