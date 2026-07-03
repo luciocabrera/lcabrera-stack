@@ -7,9 +7,11 @@ import {
   ExpandAllIcon,
   RefreshIcon,
 } from '@/components/Icons';
-import { ICON_SIZE_MD, ICON_SIZE_SM } from '@/design-system/constants';
 
-import type { FiltersSectionToolbarProps } from './FiltersSectionToolbar.types';
+import type {
+  FiltersSectionToolbarProps,
+  FiltersToolbarButton,
+} from './FiltersSectionToolbar.types';
 
 import {
   useClearFilters,
@@ -17,6 +19,7 @@ import {
 } from '../../TableDrawerContext/actions';
 import { useGetColumnFilters } from '../../TableDrawerContext/selectors';
 import { styles } from './FiltersSectionToolbar.stylex';
+import { resolveFiltersToolbarPresentation } from './utils/resolveFiltersToolbarPresentation.util';
 
 const FILTERS_TOOLBAR = {
   clear: { label: 'Clear Filters' },
@@ -39,75 +42,63 @@ export const FiltersSectionToolbar = ({
   const clearFilters = useClearFilters();
   const resetFilters = useResetFilters();
 
+  const { buttonColor, buttonSize, buttonWidth, iconSize, isToolbar } =
+    resolveFiltersToolbarPresentation(variant);
   const hasFilters = Object.keys(filters).length > 0;
-  const isToolbar = variant === 'toolbar';
-  const buttonColor = isToolbar ? 'ghost' : 'outline';
-  const buttonSize = isToolbar ? 'mini' : 'sm';
-  const buttonWidth = isToolbar ? 'auto' : 'full';
-  const iconSize = isToolbar ? ICON_SIZE_SM : ICON_SIZE_MD;
-  const isExpandDisabled = isExpandAllDisabled || !onExpandAll;
-  const isCollapseDisabled = isCollapseAllDisabled || !onCollapseAll;
 
   const handleClear = () => {
     clearFilters();
     onClearAll?.();
   };
 
+  const buttons: readonly FiltersToolbarButton[] = [
+    {
+      icon: <EraserIcon size={iconSize} />,
+      isDisabled: !hasFilters,
+      key: FILTERS_TOOLBAR.clear.label,
+      label: FILTERS_TOOLBAR.clear.label,
+      onClick: handleClear,
+    },
+    {
+      icon: <RefreshIcon size={iconSize} />,
+      key: FILTERS_TOOLBAR.reset.label,
+      label: FILTERS_TOOLBAR.reset.label,
+      onClick: resetFilters,
+    },
+    {
+      icon: <ExpandAllIcon size={iconSize} />,
+      isDisabled: isExpandAllDisabled || !onExpandAll,
+      key: FILTERS_TOOLBAR.expandAll.label,
+      label: FILTERS_TOOLBAR.expandAll.label,
+      onClick: onExpandAll,
+    },
+    {
+      icon: <CollapseAllIcon size={iconSize} />,
+      isDisabled: isCollapseAllDisabled || !onCollapseAll,
+      key: FILTERS_TOOLBAR.collapseAll.label,
+      label: FILTERS_TOOLBAR.collapseAll.label,
+      onClick: onCollapseAll,
+    },
+  ];
+
   return (
     <div {...stylex.props(isToolbar ? styles.toolbar : styles.container)}>
-      <Button
-        aria-label={FILTERS_TOOLBAR.clear.label}
-        color={buttonColor}
-        icon={<EraserIcon size={iconSize} />}
-        isBusy={isBusy}
-        isDisabled={!hasFilters}
-        onClick={handleClear}
-        size={buttonSize}
-        tooltipContent={isToolbar ? FILTERS_TOOLBAR.clear.label : undefined}
-        width={buttonWidth}
-      >
-        {!isToolbar && FILTERS_TOOLBAR.clear.label}
-      </Button>
-      <Button
-        aria-label={FILTERS_TOOLBAR.reset.label}
-        color={buttonColor}
-        icon={<RefreshIcon size={iconSize} />}
-        isBusy={isBusy}
-        onClick={resetFilters}
-        size={buttonSize}
-        tooltipContent={isToolbar ? FILTERS_TOOLBAR.reset.label : undefined}
-        width={buttonWidth}
-      >
-        {!isToolbar && FILTERS_TOOLBAR.reset.label}
-      </Button>
-      <Button
-        aria-label={FILTERS_TOOLBAR.expandAll.label}
-        color={buttonColor}
-        icon={<ExpandAllIcon size={iconSize} />}
-        isBusy={isBusy}
-        isDisabled={isExpandDisabled}
-        onClick={onExpandAll}
-        size={buttonSize}
-        tooltipContent={isToolbar ? FILTERS_TOOLBAR.expandAll.label : undefined}
-        width={buttonWidth}
-      >
-        {!isToolbar && FILTERS_TOOLBAR.expandAll.label}
-      </Button>
-      <Button
-        aria-label={FILTERS_TOOLBAR.collapseAll.label}
-        color={buttonColor}
-        icon={<CollapseAllIcon size={iconSize} />}
-        isBusy={isBusy}
-        isDisabled={isCollapseDisabled}
-        onClick={onCollapseAll}
-        size={buttonSize}
-        tooltipContent={
-          isToolbar ? FILTERS_TOOLBAR.collapseAll.label : undefined
-        }
-        width={buttonWidth}
-      >
-        {!isToolbar && FILTERS_TOOLBAR.collapseAll.label}
-      </Button>
+      {buttons.map((button) => (
+        <Button
+          key={button.key}
+          aria-label={button.label}
+          color={buttonColor}
+          icon={button.icon}
+          isBusy={isBusy}
+          isDisabled={button.isDisabled}
+          onClick={button.onClick}
+          size={buttonSize}
+          tooltipContent={isToolbar ? button.label : undefined}
+          width={buttonWidth}
+        >
+          {!isToolbar && button.label}
+        </Button>
+      ))}
     </div>
   );
 };

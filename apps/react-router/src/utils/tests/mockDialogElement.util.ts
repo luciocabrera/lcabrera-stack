@@ -30,7 +30,6 @@ const setAllDialogsOpen = ({ isOpen }: { readonly isOpen: boolean }) => {
 };
 
 export const mockDialogElement = ({
-  // eslint-disable-next-line unicorn/consistent-boolean-name
   shouldSetOpenOnShow = true,
 }: MockDialogElementArgs = {}) => {
   // eslint-disable-next-line typescript-eslint/unbound-method -- Saving prototype methods for test teardown restoration

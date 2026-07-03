@@ -4,37 +4,17 @@ import { DEFAULT_FILTER_PAGE_SIZE } from '@/components/Table/Table.constants';
 import { getErrorMessage } from '@/components/Table/utils/getErrorMessage.util';
 import { getRequiredOnLoadMore } from '@/components/Table/utils/getRequiredOnLoadMore.util';
 import { logger } from '@/utils/logger';
-import { firePrefetch } from '@/utils/prefetch/firePrefetch.util';
 
 import type {
   FetchFilterDataActionArgs,
   FetchFilterDataCallbackArgs,
-  MaybePrefetchArgs,
 } from './useFetchFilterData.types';
 
 import { getTotalRows } from './getTotalRows.util';
+import { maybePrefetchFilterPage } from './maybePrefetchFilterPage.util';
 import { shouldSkipInitialFetch } from './shouldSkipInitialFetch.util';
 
 export type { FetchFilterDataActionArgs } from './useFetchFilterData.types';
-
-const maybePrefetchInitialPage = <TResponse>({
-  enablePrefetch,
-  hasMore,
-  nextSkip,
-  onLoadMore,
-  prefetchRef,
-}: MaybePrefetchArgs<TResponse>) => {
-  if (!(enablePrefetch && hasMore && prefetchRef)) {
-    return;
-  }
-
-  firePrefetch({
-    limit: DEFAULT_FILTER_PAGE_SIZE,
-    nextSkip,
-    onLoadMore,
-    prefetchRef,
-  });
-};
 
 export const fetchInitialFilterData = <TData, TResponse>({
   columnKey,
@@ -96,7 +76,7 @@ export const fetchInitialFilterData = <TData, TResponse>({
       const metaState = metaStore.get();
       const enablePrefetch = metaState?.enablePrefetch ?? false;
 
-      maybePrefetchInitialPage({
+      maybePrefetchFilterPage({
         enablePrefetch,
         hasMore,
         nextSkip: data.length,

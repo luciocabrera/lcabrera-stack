@@ -20,6 +20,7 @@ FiltersData/
     │   ├── useFetchFilterData.hook.ts        → Lightweight orchestrator that composes initial + paginated fetch actions
     │   ├── useFetchInitialFilterData.hook.ts → Initial filter options load + optional prefetch trigger
     │   └── useFetchMoreFilterData.hook.ts    → Paginated filter options append + cache/prefetch handling
+    │       (initial + more fetchers share maybePrefetchFilterPage.util.ts for the prefetch trigger)
     │
     ├── selectors/
     │   └── useGetFilterData.hook.ts         → Read filter data for a column

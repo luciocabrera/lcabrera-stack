@@ -5,14 +5,14 @@ import { getErrorMessage } from '@/components/Table/utils/getErrorMessage.util';
 import { getRequiredOnLoadMore } from '@/components/Table/utils/getRequiredOnLoadMore.util';
 import { resolveFetchMoreState } from '@/components/Table/utils/resolveFetchMoreState.util';
 import { clearPrefetchCache } from '@/utils/prefetch/clearPrefetchCache.util';
-import { firePrefetch } from '@/utils/prefetch/firePrefetch.util';
 import { resolveFromCacheOrFetch } from '@/utils/prefetch/resolveFromCacheOrFetch.util';
 
 import type {
   FetchFilterDataActionArgs,
   FetchFilterDataCallbackArgs,
-  MaybePrefetchArgs,
 } from './useFetchFilterData.types';
+
+import { maybePrefetchFilterPage } from './maybePrefetchFilterPage.util';
 
 export type { FetchFilterDataActionArgs } from './useFetchFilterData.types';
 
@@ -29,25 +29,6 @@ const clearPrefetchIfPresent = <TResponse>({
   }
 
   clearPrefetchCache({ prefetchRef });
-};
-
-const maybePrefetchNextPage = <TResponse>({
-  enablePrefetch,
-  hasMore,
-  nextSkip,
-  onLoadMore,
-  prefetchRef,
-}: MaybePrefetchArgs<TResponse>) => {
-  if (!(enablePrefetch && hasMore && prefetchRef)) {
-    return;
-  }
-
-  firePrefetch({
-    limit: DEFAULT_FILTER_PAGE_SIZE,
-    nextSkip,
-    onLoadMore,
-    prefetchRef,
-  });
 };
 
 export const fetchMoreFilterData = <TData, TResponse>({
@@ -119,7 +100,7 @@ export const fetchMoreFilterData = <TData, TResponse>({
       const metaState = metaStore.get();
       const enablePrefetch = metaState?.enablePrefetch ?? false;
 
-      maybePrefetchNextPage({
+      maybePrefetchFilterPage({
         enablePrefetch,
         hasMore,
         nextSkip: totalLoadedRows,
