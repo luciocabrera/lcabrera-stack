@@ -24,6 +24,7 @@ export const useVirtualSelectTagOverflow = ({
     if (mode !== 'multi' || !trigger) return;
 
     const measure = () => {
+      // eslint-disable-next-line react-x/set-state-in-effect -- State must be set from DOM measurement (ResizeObserver); cannot be derived during render
       setVisibleTagCount(
         countVisibleTags({ totalCount: selected.length, trigger }),
       );
