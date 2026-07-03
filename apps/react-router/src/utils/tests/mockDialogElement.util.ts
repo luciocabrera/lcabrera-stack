@@ -1,9 +1,5 @@
 import { vi } from 'vitest';
 
-type MockDialogElementArgs = {
-  readonly shouldSetOpenOnShow: boolean;
-};
-
 const setDialogOpen = ({
   dialog,
   isOpen,
@@ -29,11 +25,7 @@ const setAllDialogsOpen = ({ isOpen }: { readonly isOpen: boolean }) => {
   }
 };
 
-export const mockDialogElement = (
-  { shouldSetOpenOnShow }: MockDialogElementArgs = {
-    shouldSetOpenOnShow: true,
-  },
-) => {
+export const mockDialogElement = (shouldSetOpenOnShow = true) => {
   // eslint-disable-next-line typescript-eslint/unbound-method -- Saving prototype methods for test teardown restoration
   const savedClose = HTMLDialogElement.prototype.close;
   // eslint-disable-next-line typescript-eslint/unbound-method -- Saving prototype methods for test teardown restoration

@@ -29,7 +29,7 @@ afterEach(() => {
 });
 
 beforeEach(() => {
-  const setup = mockDialogElement({ shouldSetOpenOnShow: false });
+  const setup = mockDialogElement(false);
   dialogMocksRef.current = {
     closeMock: setup.closeMock,
     restoreMockDialog: setup.restore,
