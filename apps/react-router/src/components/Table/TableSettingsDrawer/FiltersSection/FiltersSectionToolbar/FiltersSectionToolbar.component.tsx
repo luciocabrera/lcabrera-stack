@@ -85,12 +85,12 @@ export const FiltersSectionToolbar = ({
     <div {...stylex.props(isToolbar ? styles.toolbar : styles.container)}>
       {buttons.map((button) => (
         <Button
-          key={button.key}
           aria-label={button.label}
           color={buttonColor}
           icon={button.icon}
           isBusy={isBusy}
           isDisabled={button.isDisabled}
+          key={button.key}
           onClick={button.onClick}
           size={buttonSize}
           tooltipContent={isToolbar ? button.label : undefined}

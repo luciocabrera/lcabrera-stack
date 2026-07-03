@@ -10,7 +10,7 @@ export const resolveDetailsLocale = (locale: string | undefined) => {
   }
 
   if (typeof navigator === 'undefined') {
-    return undefined;
+    return;
   }
 
   return navigator.language;
