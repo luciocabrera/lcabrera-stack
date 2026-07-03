@@ -6,6 +6,7 @@ import type {
   UpdateFilterArgs,
 } from './NumberFilterInput.types';
 
+import { NO_AUTOFILL_INPUT_PROPS } from '../filterInput.constants';
 import { styles } from './NumberFilterInput.stylex';
 import { computeInitialMaxValue, computeInitialValue } from './utils';
 
@@ -58,11 +59,7 @@ export const NumberFilterInput = <TData,>({
       {operator === 'between' ? (
         <div {...stylex.props(styles.inputGroup)}>
           <input
-            autoComplete='one-time-code'
-            data-1p-ignore='true'
-            data-bwignore='true'
-            data-form-type='other'
-            data-lpignore='true'
+            {...NO_AUTOFILL_INPUT_PROPS}
             onChange={handleValueChange}
             placeholder='Min'
             type='number'
@@ -71,11 +68,7 @@ export const NumberFilterInput = <TData,>({
           />
           <span {...stylex.props(styles.separator)}>to</span>
           <input
-            autoComplete='one-time-code'
-            data-1p-ignore='true'
-            data-bwignore='true'
-            data-form-type='other'
-            data-lpignore='true'
+            {...NO_AUTOFILL_INPUT_PROPS}
             onChange={handleMaxValueChange}
             placeholder='Max'
             type='number'
@@ -85,11 +78,7 @@ export const NumberFilterInput = <TData,>({
         </div>
       ) : (
         <input
-          autoComplete='one-time-code'
-          data-1p-ignore='true'
-          data-bwignore='true'
-          data-form-type='other'
-          data-lpignore='true'
+          {...NO_AUTOFILL_INPUT_PROPS}
           onChange={handleValueChange}
           placeholder='Enter number...'
           type='number'

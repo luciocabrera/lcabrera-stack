@@ -8,6 +8,8 @@ appropriate type-specific input component.
 
 ```
 filters/
+├── filterInput.constants.ts              → NO_AUTOFILL_INPUT_PROPS (shared anti-autofill input attrs)
+│
 ├── FilterInputs/                         → Orchestrator: operator + type-based input
 │   ├── FilterInputs.component.tsx         → Operator dropdown + InputContent
 │   ├── FilterInputs.types.ts              → FilterInputsProps

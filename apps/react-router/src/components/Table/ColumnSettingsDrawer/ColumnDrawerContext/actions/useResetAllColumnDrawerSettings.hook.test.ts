@@ -66,9 +66,17 @@ vi.mock(
 
 vi.mock(
   '@/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/utils',
-  () => ({
-    getTableColumnDrawerState: mockGetTableColumnDrawerState,
-  }),
+  async (importOriginal) => {
+    const actual =
+      await importOriginal<
+        typeof import('@/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/utils')
+      >();
+
+    return {
+      ...actual,
+      getTableColumnDrawerState: mockGetTableColumnDrawerState,
+    };
+  },
 );
 
 import { useResetAllColumnDrawerSettings } from './useResetAllColumnDrawerSettings.hook';
