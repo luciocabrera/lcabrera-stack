@@ -1,9 +1,8 @@
 import type {
   OrderConflictResolution,
-  PinConflictResolution,
   UnpinConflictResolution,
 } from './pinningPreferences.types';
-import type { PinSide } from './ui.types';
+import type { PinConflictResolution, PinSide } from './ui.types';
 
 export type GlobalNavigationCollapsedPreference = 'collapsed' | 'expanded';
 

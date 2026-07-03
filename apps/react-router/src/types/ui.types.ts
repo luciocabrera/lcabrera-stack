@@ -19,6 +19,11 @@ export type Pagination = {
   readonly skip: number;
 };
 
+export type PinConflictResolution =
+  | 'move-column'
+  | 'pin-all-between'
+  | 'pin-only';
+
 export type PinConflictState = {
   readonly isOpen: boolean;
   readonly side: 'left' | 'right';

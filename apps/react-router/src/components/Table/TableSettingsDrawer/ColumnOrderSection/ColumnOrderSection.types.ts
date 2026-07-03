@@ -6,7 +6,6 @@ export type ColumnOrderSectionProps = ComponentPropsWithoutRef<'div'> & {
 
 export type {
   OrderConflictResolution,
-  PinConflictResolution,
   UnpinConflictResolution,
 } from '@/types/pinningPreferences.types';
-export type { PinSide } from '@/types/ui.types';
+export type { PinConflictResolution, PinSide } from '@/types/ui.types';

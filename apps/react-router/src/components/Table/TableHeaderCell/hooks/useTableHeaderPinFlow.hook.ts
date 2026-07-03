@@ -1,8 +1,11 @@
 import { useState } from 'react';
 
 import type { DataKey, PinnedColumnInfo } from '@/components/Table/Table.types';
-import type { PinConflictResolution } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
-import type { PinConflictState, PinSide } from '@/types/ui.types';
+import type {
+  PinConflictResolution,
+  PinConflictState,
+  PinSide,
+} from '@/types/ui.types';
 
 import {
   useAcceptHeaderPinConflict,

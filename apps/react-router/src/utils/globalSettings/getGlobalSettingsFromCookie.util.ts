@@ -7,10 +7,9 @@ import type {
 } from '@/types/globalSettings.types';
 import type {
   OrderConflictResolution,
-  PinConflictResolution,
   UnpinConflictResolution,
 } from '@/types/pinningPreferences.types';
-import type { PinSide } from '@/types/ui.types';
+import type { PinConflictResolution, PinSide } from '@/types/ui.types';
 
 import { readFromCookie } from '@/utils/storage/readFromCookie.util';
 

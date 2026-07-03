@@ -1,8 +1,8 @@
-import { useEffect, useState, type RefObject } from 'react';
-
-import { countVisibleTags } from '../utils';
+import { type RefObject, useEffect, useState } from 'react';
 
 import type { VirtualSelectMode } from '../VirtualSelect.types';
+
+import { countVisibleTags } from '../utils';
 
 export type UseVirtualSelectTagOverflowArgs = {
   readonly mode: VirtualSelectMode;
