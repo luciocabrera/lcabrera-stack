@@ -25,21 +25,18 @@ const mulberry32 = (seed: number) => {
   };
 };
 
-export const rng = mulberry32(123_456_789);
+const rng = mulberry32(123_456_789);
 
 // --- Table columns & data ---
 
-export const COLUMNS: TableColumn<MockRow>[] = Array.from(
-  { length: 20 },
-  (_, i) => ({
-    dataType: (['number', 'string', 'boolean', 'date', 'currency'] as const)[
-      i % 5
-    ],
-    key: `col${i + 1}`,
-    label: `Column ${i + 1}`,
-    minWidth: 120,
-  }),
-);
+const COLUMNS: TableColumn<MockRow>[] = Array.from({ length: 20 }, (_, i) => ({
+  dataType: (['number', 'string', 'boolean', 'date', 'currency'] as const)[
+    i % 5
+  ],
+  key: `col${i + 1}`,
+  label: `Column ${i + 1}`,
+  minWidth: 120,
+}));
 
 const randomCurrency = () => (rng() * 10_000).toFixed(2);
 
@@ -71,15 +68,13 @@ const generateCellValue = ({
   return '';
 };
 
-export const tableData: MockRow[] = Array.from(
-  { length: 10_000 },
-  (_, rowIdx) =>
-    Object.fromEntries(
-      COLUMNS.map((col, colIdx) => [
-        col.key,
-        generateCellValue({ colIdx, dataType: col.dataType, rowIdx }),
-      ]),
-    ),
+const tableData: MockRow[] = Array.from({ length: 10_000 }, (_, rowIdx) =>
+  Object.fromEntries(
+    COLUMNS.map((col, colIdx) => [
+      col.key,
+      generateCellValue({ colIdx, dataType: col.dataType, rowIdx }),
+    ]),
+  ),
 );
 
 // --- Table config ---

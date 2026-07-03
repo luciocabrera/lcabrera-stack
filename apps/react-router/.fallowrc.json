@@ -26,6 +26,16 @@
     "vite-plugin-babel",
     "typescript-eslint"
   ],
+  "ignoreExports": [
+    {
+      "file": "src/features/showcase/ShowcasePage/ShowcasePage.stylex.ts",
+      "exports": ["*"]
+    },
+    {
+      "file": "src/features/showcase/ShowcasePage/SidePanelSection/SidePanelSection.stylex.ts",
+      "exports": ["*"]
+    }
+  ],
   "rules": {
     "circular-dependencies": "error",
     "unused-files": "error",
