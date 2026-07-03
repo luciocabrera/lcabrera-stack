@@ -199,9 +199,11 @@ Before creating anything new, check this inventory. If something here does the j
 
 ### `src/utils/api/`
 
-| Function        | Location                | Description                                                                      |
-| --------------- | ----------------------- | -------------------------------------------------------------------------------- |
-| `getApiBaseUrl` | `utils/api/api.util.ts` | Resolves API base URL for SSR/client via request URL, env var, or hostname logic |
+| Function                    | Location                                      | Description                                                                       |
+| --------------------------- | --------------------------------------------- | --------------------------------------------------------------------------------- |
+| `getApiBaseUrl`             | `utils/api/api.util.ts`                       | Resolves API base URL for SSR/client via request URL, env var, or hostname logic  |
+| `buildPaginatedQueryParams` | `utils/api/buildPaginatedQueryParams.util.ts` | Builds `limit`/`skip`/`sort`/`filter` query params for paginated service fetchers |
+| `fetchAndValidate`          | `utils/api/fetchAndValidate.util.ts`          | Fetch + OK-assert + JSON parse + type-guard validation, returning the typed body  |
 
 ### `src/utils/comparison/`
 

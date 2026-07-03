@@ -1,12 +1,16 @@
-import { fakeDelay, getApiBaseUrl } from '@/utils/api';
+import {
+  buildPaginatedQueryParams,
+  fakeDelay,
+  getApiBaseUrl,
+} from '@/utils/api';
 import { createLogger } from '@/utils/logger';
-
-const log = createLogger({ prefix: '[carSales]' });
 
 /**
  * Car Sales API Service
  * Handles database queries for car sales data
  */
+
+const log = createLogger({ prefix: '[carSales]' });
 
 export type CarSale = {
   readonly buyer_address: string;
@@ -101,15 +105,7 @@ export const carSalesApi = {
     skip: number;
     sorting?: { columnKey: string; direction: 'asc' | 'desc' }[];
   }): Promise<CarSalesResponse & { hasMore: boolean }> => {
-    const params = new URLSearchParams({
-      limit: limit.toString(),
-      skip: skip.toString(),
-    });
-
-    // Add sorting parameters if provided
-    if (sorting && sorting.length > 0) {
-      params.append('sort', JSON.stringify(sorting));
-    }
+    const params = buildPaginatedQueryParams({ limit, skip, sorting });
 
     const url = `${getApiBaseUrl(requestUrl)}/car-sales/paginated?${params.toString()}`;
     log.debug('🌐 Fetching from URL:', url);
