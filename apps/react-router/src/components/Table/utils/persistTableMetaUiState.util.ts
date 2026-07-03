@@ -1,9 +1,7 @@
-import {
-  getPersistedUiState,
-  writePersistedUiStateToSessionStorage,
-} from '@/components/Table/utils';
-
 import type { TableMetaState } from '../Table.types';
+
+import { getPersistedUiState } from './getPersistedUiState.util';
+import { writePersistedUiStateToSessionStorage } from './writePersistedUiStateToSessionStorage.util';
 
 type PersistTableMetaUiStateArgs = {
   readonly currentState: TableMetaState | undefined;

@@ -148,3 +148,5 @@ graph LR
 | writePersistedUiStateToSessionStorage    | Write persisted UI slices to sessionStorage (tab-scoped)       |
 | writeStateSlice                          | Write to cookie or localStorage                                |
 | getStorageKey                            | Build persistenceKey:slice key string                          |
+
+`persistTableMetaUiState.util.ts` intentionally uses direct-file imports (not `utils/index.ts`) for persistence helpers to avoid barrel back-import cycles (ADR-007).
