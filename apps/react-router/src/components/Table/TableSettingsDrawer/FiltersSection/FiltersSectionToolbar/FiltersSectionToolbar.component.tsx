@@ -1,6 +1,3 @@
-import * as stylex from '@stylexjs/stylex';
-
-import { Button } from '@/components/Button';
 import {
   CollapseAllIcon,
   EraserIcon,
@@ -8,18 +5,15 @@ import {
   RefreshIcon,
 } from '@/components/Icons';
 
-import type {
-  FiltersSectionToolbarProps,
-  FiltersToolbarButton,
-} from './FiltersSectionToolbar.types';
+import type { SectionToolbarButton } from '../../SectionToolbar';
+import type { FiltersSectionToolbarProps } from './FiltersSectionToolbar.types';
 
+import { SectionToolbar } from '../../SectionToolbar';
 import {
   useClearFilters,
   useResetFilters,
 } from '../../TableDrawerContext/actions';
 import { useGetColumnFilters } from '../../TableDrawerContext/selectors';
-import { styles } from './FiltersSectionToolbar.stylex';
-import { resolveFiltersToolbarPresentation } from './utils/resolveFiltersToolbarPresentation.util';
 
 const FILTERS_TOOLBAR = {
   clear: { label: 'Clear Filters' },
@@ -42,8 +36,6 @@ export const FiltersSectionToolbar = ({
   const clearFilters = useClearFilters();
   const resetFilters = useResetFilters();
 
-  const { buttonColor, buttonSize, buttonWidth, iconSize, isToolbar } =
-    resolveFiltersToolbarPresentation(variant);
   const hasFilters = Object.keys(filters).length > 0;
 
   const handleClear = () => {
@@ -51,29 +43,29 @@ export const FiltersSectionToolbar = ({
     onClearAll?.();
   };
 
-  const buttons: readonly FiltersToolbarButton[] = [
+  const buttons: readonly SectionToolbarButton[] = [
     {
-      icon: <EraserIcon size={iconSize} />,
+      icon: (size) => <EraserIcon size={size} />,
       isDisabled: !hasFilters,
       key: FILTERS_TOOLBAR.clear.label,
       label: FILTERS_TOOLBAR.clear.label,
       onClick: handleClear,
     },
     {
-      icon: <RefreshIcon size={iconSize} />,
+      icon: (size) => <RefreshIcon size={size} />,
       key: FILTERS_TOOLBAR.reset.label,
       label: FILTERS_TOOLBAR.reset.label,
       onClick: resetFilters,
     },
     {
-      icon: <ExpandAllIcon size={iconSize} />,
+      icon: (size) => <ExpandAllIcon size={size} />,
       isDisabled: isExpandAllDisabled || !onExpandAll,
       key: FILTERS_TOOLBAR.expandAll.label,
       label: FILTERS_TOOLBAR.expandAll.label,
       onClick: onExpandAll,
     },
     {
-      icon: <CollapseAllIcon size={iconSize} />,
+      icon: (size) => <CollapseAllIcon size={size} />,
       isDisabled: isCollapseAllDisabled || !onCollapseAll,
       key: FILTERS_TOOLBAR.collapseAll.label,
       label: FILTERS_TOOLBAR.collapseAll.label,
@@ -81,24 +73,5 @@ export const FiltersSectionToolbar = ({
     },
   ];
 
-  return (
-    <div {...stylex.props(isToolbar ? styles.toolbar : styles.container)}>
-      {buttons.map((button) => (
-        <Button
-          aria-label={button.label}
-          color={buttonColor}
-          icon={button.icon}
-          isBusy={isBusy}
-          isDisabled={button.isDisabled}
-          key={button.key}
-          onClick={button.onClick}
-          size={buttonSize}
-          tooltipContent={isToolbar ? button.label : undefined}
-          width={buttonWidth}
-        >
-          {!isToolbar && button.label}
-        </Button>
-      ))}
-    </div>
-  );
+  return <SectionToolbar buttons={buttons} isBusy={isBusy} variant={variant} />;
 };

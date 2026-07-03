@@ -2,8 +2,7 @@ import { readFromCookie } from '@/utils/storage';
 
 import type { PersistedState } from './persistence.types';
 
-import { getStorageKey } from './getStorageKey.util';
-import { PERSISTENCE_VERSION } from './persistence.constants';
+import { collectPersistedStateSlices } from './collectPersistedStateSlices.util';
 
 type ReadPersistedStateFromCookieArgs = {
   readonly cookieString?: string;
@@ -35,43 +34,9 @@ type ReadPersistedStateFromCookieArgs = {
 export const readPersistedStateFromCookie = ({
   cookieString,
   persistenceKey,
-}: ReadPersistedStateFromCookieArgs): Partial<PersistedState> => {
-  const result: { -readonly [K in keyof PersistedState]?: PersistedState[K] } =
-    {};
-  const storageKey = getStorageKey({ persistenceKey });
-
-  const slices: (keyof Omit<PersistedState, 'version'>)[] = [
-    'sorting',
-    'columnFilters',
-    'columnOrder',
-    'columnPinning',
-    'columnSizing',
-    'columnVisibility',
-  ];
-
-  for (const slice of slices) {
-    const sliceKey = `${storageKey}-${slice}`;
-    const rawValue = readFromCookie({ cookieString, key: sliceKey });
-
-    if (rawValue) {
-      try {
-        const parsed = JSON.parse(decodeURIComponent(rawValue)) as {
-          value: unknown;
-          version: number;
-        };
-        if (parsed.version === PERSISTENCE_VERSION) {
-          // Convert array to Set for columnVisibility
-          result[slice] = (
-            slice === 'columnVisibility' && Array.isArray(parsed.value)
-              ? new Set(parsed.value as string[])
-              : parsed.value
-          ) as never;
-        }
-      } catch {
-        // Invalid JSON, skip
-      }
-    }
-  }
-
-  return result;
-};
+}: ReadPersistedStateFromCookieArgs): Partial<PersistedState> =>
+  collectPersistedStateSlices({
+    persistenceKey,
+    readRawSlice: (sliceKey) => readFromCookie({ cookieString, key: sliceKey }),
+    transformRaw: decodeURIComponent,
+  });
