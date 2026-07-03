@@ -30,6 +30,10 @@ export type UseInfiniteScrollObserverArgs = {
  * `onReachEnd` is read through a ref so the observer's lifetime is decoupled from
  * the callback's identity. Callers may pass inline callbacks without causing the
  * observer to disconnect/reconnect (and potentially re-fire) on every render.
+ *
+ * @param onReachEnd - Fired each time the sentinel intersects; may be invoked
+ * repeatedly while the sentinel stays in view, so the handler must be idempotent
+ * (guard against overlapping loads via `isEnabled`).
  */
 export const useInfiniteScrollObserver = ({
   isEnabled,
@@ -37,7 +41,7 @@ export const useInfiniteScrollObserver = ({
   rootRef,
   sentinelRef,
   threshold,
-}: UseInfiniteScrollObserverArgs): void => {
+}: UseInfiniteScrollObserverArgs) => {
   const onReachEndRef = useRef(onReachEnd);
 
   useEffect(() => {

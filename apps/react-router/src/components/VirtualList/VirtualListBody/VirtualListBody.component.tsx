@@ -72,7 +72,7 @@ export const VirtualListBody = ({
   }, [onFetchInitial]);
 
   useInfiniteScrollObserver({
-    isEnabled: hasMore && !isLoadingOptions && Boolean(onFetchMore),
+    isEnabled: Boolean(hasMore) && !isLoadingOptions && Boolean(onFetchMore),
     onReachEnd: () => {
       if (onFetchMore) void onFetchMore();
     },
@@ -119,7 +119,7 @@ export const VirtualListBody = ({
             totalHeight={totalHeight}
           />
         )}
-        <div aria-hidden ref={sentinelRef} />
+        <div aria-hidden ref={sentinelRef} {...stylex.props(styles.sentinel)} />
       </div>
     </div>
   );

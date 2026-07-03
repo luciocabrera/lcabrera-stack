@@ -24,8 +24,8 @@ Run these in order. Stop at the first failure and report it — do not continue 
 cd apps/react-router
 
 vp fmt .             # Step 1 — auto-format (Oxfmt)
-vp lint .            # Step 2 — lint (Oxlint)
-vp check             # Step 3 — TypeScript type-check (react-router typegen + tsc --noEmit)
+vp lint . --fix      # Step 2 — lint (Oxlint)
+vp check --fix       # Step 3 — TypeScript type-check (react-router typegen + tsc --noEmit)
 vp run test          # Step 4 — unit/integration tests (Vitest)
 ```
 
