@@ -4,6 +4,7 @@ This folder contains shared output and validation standards used by:
 
 - code-smell-checker
 - code-smell-zen
+- fallow-code-checker
 
 ## Files
 
@@ -16,4 +17,4 @@ This folder contains shared output and validation standards used by:
 
 ## Intended outcome
 
-Both skills emit structurally equivalent markdown reports that can be consumed by agents without custom parsing per skill.
+All scan skills emit structurally equivalent markdown reports that can be consumed by agents without custom parsing per skill.

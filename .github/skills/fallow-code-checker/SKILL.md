@@ -134,7 +134,7 @@ Use the shared output contract and template:
 Set metadata.skill_name to fallow-code-checker.
 Add `raw_summary_line` in Metadata with verbatim human output.
 Add `raw_artifact` in Metadata with the path to `fallow.raw.json`.
-When the full shared report structure is feasible, use it exactly; otherwise keep section names and field semantics consistent where possible.
+Use the shared report structure exactly — all scan skills emit the same SCHEMA_V1 report so downstream agents need no per-skill parsing.
 
 8. Save the report artifact.
 
