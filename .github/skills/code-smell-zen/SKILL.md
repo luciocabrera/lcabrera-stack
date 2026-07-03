@@ -1,14 +1,11 @@
 ---
 name: code-smell-zen
-description: Scan git diff vs target branch for code smells (Clean Code + GoF + TypeScript/React catalog)
+description: Scan git diff vs target branch for code smells (Clean Code + GoF + TypeScript/React catalog). Use when reviewing a PR, branch diff, or set of changed files for code quality and smell issues.
 argument-hint: '[target-branch] — omit to auto-detect base (origin/main); pass HEAD for uncommitted changes only'
 user-invocable: true
+context: fork
+agent: general-purpose
 allowed-tools: Bash(bash:*,cat:*,date:*,git:*,mkdir:*,tee:*), Read, Grep, Glob
-license: MIT
-metadata:
-  version: '1.0.0'
-  scope: [root]
-  auto_invoke: 'Reviewing a PR, branch diff, or set of changed files for code quality and smell issues'
 ---
 
 # /smell — Code smell review

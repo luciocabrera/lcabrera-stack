@@ -2,11 +2,13 @@
 name: react-router-framework-mode
 description: Build full-stack React applications using React Router's framework mode. Use when configuring routes, working with loaders and actions, handling forms, handling navigation, pending/optimistic UI, error boundaries, or working with react-router.config.ts or other react router conventions.
 user-invocable: true
-license: MIT
-metadata:
-  version: '1.0.0'
-  scope: [root]
-  auto_invoke: 'Working with routes, loaders, actions, forms, navigation, error boundaries, or any React Router framework-mode convention'
+paths:
+  [
+    '**/routes/**',
+    '**/routes.ts',
+    '**/react-router.config.ts',
+    '**/entry.server.tsx',
+  ]
 ---
 
 # React Router Framework Mode

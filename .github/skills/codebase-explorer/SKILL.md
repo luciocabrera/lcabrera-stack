@@ -1,6 +1,8 @@
 ---
 name: codebase-explorer
 description: Multi-phase codebase investigation with context isolation. Use when the user asks to understand how a feature works across a codebase, trace dependencies, map integrations, or investigate an unfamiliar area before making changes. Triggers on requests like "understand how X works", "investigate the codebase", "trace how Y is used across the system".
+argument-hint: 'Feature, module, or question to investigate, for example: how Table filters flow from URL to store'
+user-invocable: true
 allowed-tools: Read, Grep, Glob, Bash
 ---
 
@@ -10,12 +12,22 @@ Follow this procedure for any exploration task. Do not explore the
 codebase directly yourself in the main thread — delegate to subagents
 and keep this thread clean.
 
+This skill is the single owner of the exploration scratchpad and
+crash-recovery procedure. Scratch files live under `.tmp/exploration/`
+(gitignored) — never at the repo root.
+
 ## Step 0 — Setup
 
-1. Check for `manifest.json` in the working directory. If present, read
-   it and resume from `next_steps`. If absent, create it with empty
-   `explored_paths`, `key_findings`, `next_steps`.
-2. Check for `findings.md`. If absent, create it.
+1. Check for `.tmp/exploration/manifest.json`. If present, read it and
+   resume from `next_steps` rather than re-exploring `explored_paths`.
+   If absent, create it with empty `explored_paths`, `key_findings`,
+   `next_steps`.
+2. Check for `.tmp/exploration/findings.md`. If absent, create it.
+3. Treat `findings.md` as the source of truth for specifics: append
+   every relevant path/class/function there immediately (full path +
+   one-line description), and check it before each new search so you
+   never re-derive recorded information. Update `manifest.json` after
+   each significant step — it must survive a crash or session restart.
 
 ## Step 1 — Phase 1: Broad exploration
 

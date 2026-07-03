@@ -1,14 +1,11 @@
 ---
 name: fallow-code-checker
-description: Run a full fallow scan with vp and produce a prioritized, evidence-based report aligned to the code-smell-checker output contract.
+description: Run a full fallow scan with vp and produce a prioritized, evidence-based report aligned to the code-smell-checker output contract. Use when running a full static analysis scan for dead code, unused exports, high complexity, or fallow findings.
 argument-hint: 'Optional scope, for example: repo, apps/react-router, or changed files only'
 user-invocable: true
+context: fork
+agent: general-purpose
 allowed-tools: Bash(bash:*,cat:*,date:*,mkdir:*,npx:*,tee:*,vp:*), Read, Grep, Glob
-license: MIT
-metadata:
-  version: '1.0.0'
-  scope: [root]
-  auto_invoke: 'Running a full static analysis scan for dead code, unused exports, high complexity, or fallow findings'
 ---
 
 # Fallow Full Scan Checker
