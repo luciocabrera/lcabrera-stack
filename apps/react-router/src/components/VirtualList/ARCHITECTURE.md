@@ -152,7 +152,7 @@ parents such as drawer filter cards.
 
 ## Infinite Scroll
 
-A zero-height sentinel element is rendered at the end of the scroll container and
+A 1px sentinel element is rendered at the end of the scroll container and
 watched with `useInfiniteScrollObserver` (`@/hooks`). `IntersectionObserver`
 replaces the previous scroll listener so proximity is computed off the layout
 pass instead of reading `scrollHeight`/`scrollTop`/`clientHeight` on every scroll

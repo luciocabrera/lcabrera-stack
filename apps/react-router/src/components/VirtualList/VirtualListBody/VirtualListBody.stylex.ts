@@ -33,7 +33,7 @@ export const styles = stylex.create({
   },
   sentinel: {
     pointerEvents: 'none',
-    height: 0,
+    height: '1px',
     width: '1px',
   },
   virtualContainer: (height: string) => ({

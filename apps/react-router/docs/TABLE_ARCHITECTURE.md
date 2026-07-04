@@ -487,7 +487,7 @@ return (
 
 **How it works**:
 
-1. Renders a zero-height sentinel element at the end of the scroll container
+1. Renders a 1px sentinel element at the end of the scroll container
 2. Observes it with `IntersectionObserver` (via shared `useInfiniteScrollObserver`), using `threshold` as the bottom `rootMargin`
 3. When the sentinel enters the (margin-expanded) container, calls `fetchMoreData` action
 4. Action updates `isLoadingMore` flag and appends new data

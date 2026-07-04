@@ -24,7 +24,7 @@ export const styles = stylex.create({
   sentinel: {
     pointerEvents: 'none',
     position: 'sticky',
-    height: 0,
+    height: '1px',
     left: 0,
     width: '1px',
   },

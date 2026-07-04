@@ -20,13 +20,13 @@ SectionToolbar/
 Each button is described declaratively; the icon is a component that is invoked
 with the variant-resolved icon size so callers never compute sizing themselves.
 
-| Field        | Purpose                                                   |
-| ------------ | --------------------------------------------------------- |
+| Field        | Purpose                                                       |
+| ------------ | ------------------------------------------------------------- |
 | `icon`       | `ComponentType<IconProps>` — icon component (receives `size`) |
-| `isDisabled` | Optional disabled flag                                    |
-| `key`        | Stable React key + aria-label + tooltip source    |
-| `label`      | Visible label (footer) / tooltip + aria (toolbar) |
-| `onClick`    | Optional click handler                            |
+| `isDisabled` | Optional disabled flag                                        |
+| `key`        | Stable React key + aria-label + tooltip source                |
+| `label`      | Visible label (footer) / tooltip + aria (toolbar)             |
+| `onClick`    | Optional click handler                                        |
 
 ## Variant Presentation
 
