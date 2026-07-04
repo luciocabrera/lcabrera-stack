@@ -1,6 +1,6 @@
 # Utils Architecture
 
-Shared utility layer for formatting, URL state encoding/decoding, storage, performance instrumentation, environment-aware API URL resolution, comparison helpers, filter adapters, and theme cookie management.
+Shared utility layer for formatting, URL state encoding/decoding, storage, performance instrumentation, environment-aware API URL resolution, comparison helpers, runtime type guards, filter adapters, and theme cookie management.
 
 ## Folder Structure
 
@@ -28,6 +28,8 @@ utils/
 │   └── ARCHITECTURE.md      -> Cookie/localStorage read/write utilities
 ├── theme/
 │   └── ARCHITECTURE.md      -> Theme cookie read/write helpers
+├── typeGuards/
+│   └── ARCHITECTURE.md      -> Shared runtime type guards (isObject)
 └── urlState/
     └── ARCHITECTURE.md      -> URL compact state serialization
 ```
@@ -70,4 +72,5 @@ graph TD
 | `security/`   | `getRequestCspNonce` — standardized `x-csp-nonce` request header parser                                                                       |
 | `storage/`    | `readFromCookie`, `writeToCookie`, `writeToLocalStorage`; _internal:_ `parseCookies`                                                          |
 | `theme/`      | `getThemeFromCookie` (`getThemeFromCookie.util.ts`), `setThemeCookie` (`setThemeCookie.util.ts`)                                              |
+| `typeGuards/` | `isObject` — shared non-null object guard used by services and cookie/payload validators                                                      |
 | `urlState/`   | `encodeStateToURL`, `decodeStateFromURL`, `readTableStateFromURL`                                                                             |

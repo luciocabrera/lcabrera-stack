@@ -487,9 +487,9 @@ return (
 
 **How it works**:
 
-1. Listens to scroll events on container
-2. Calculates distance from bottom
-3. When distance < threshold, calls `fetchMoreData` action
+1. Renders a 1px sentinel element at the end of the scroll container
+2. Observes it with `IntersectionObserver` (via shared `useInfiniteScrollObserver`), using `threshold` as the bottom `rootMargin`
+3. When the sentinel enters the (margin-expanded) container, calls `fetchMoreData` action
 4. Action updates `isLoadingMore` flag and appends new data
 
 **Integration**:
@@ -508,6 +508,7 @@ useInfiniteScroll({
   isLoadingMore, // Selector from context
   onLoadMore, // Callback from props
   scrollContainerRef,
+  sentinelRef, // Sentinel element rendered at end of scroll area
   threshold: 100,
 });
 ```
@@ -856,6 +857,7 @@ useInfiniteScroll({
   hasMore,
   isLoadingMore,
   scrollContainerRef,
+  sentinelRef,
   threshold: 100,
 });
 ```

@@ -1,5 +1,3 @@
-import type { ColumnOrderState } from '@/components/Table/Table.types';
-
 import type { ColumnOrderSectionModalsState } from './ColumnOrderSectionContext.types';
 
 export const INITIAL_MODALS_STATE: ColumnOrderSectionModalsState = {
@@ -12,7 +10,7 @@ export const INITIAL_MODALS_STATE: ColumnOrderSectionModalsState = {
   orderConflict: {
     description: '',
     isOpen: false,
-    pendingOrder: [] as unknown as ColumnOrderState,
+    pendingOrder: [],
     pendingPinning: { left: [], right: [] },
   },
   pinSideModal: { columnKey: '', columnLabel: '', isOpen: false },

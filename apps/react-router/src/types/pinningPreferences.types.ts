@@ -1,4 +1,4 @@
-import type { PinSide } from './ui.types';
+import type { PinConflictResolution, PinSide } from './ui.types';
 
 export type OrderConflictResolution =
   | 'pin-to-match-order'
@@ -8,11 +8,6 @@ export type OrderConflictResolution =
 export type OrderConflictResolutionPreferenceOption =
   | 'always-ask'
   | OrderConflictResolution;
-
-export type PinConflictResolution =
-  | 'move-column'
-  | 'pin-all-between'
-  | 'pin-only';
 
 export type PinConflictResolutionPreferenceOption =
   | 'always-ask'

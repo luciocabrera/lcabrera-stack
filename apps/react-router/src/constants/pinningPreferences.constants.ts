@@ -2,13 +2,12 @@ import type { RadioOption } from '@/components/RadioOptionGroup';
 import type {
   OrderConflictResolution,
   OrderConflictResolutionPreferenceOption,
-  PinConflictResolution,
   PinConflictResolutionPreferenceOption,
   PinSidePreferenceOption,
   UnpinConflictResolution,
   UnpinConflictResolutionPreferenceOption,
 } from '@/types/pinningPreferences.types';
-import type { PinSide } from '@/types/ui.types';
+import type { PinConflictResolution, PinSide } from '@/types/ui.types';
 
 export const ORDER_CONFLICT_OPTIONS: readonly RadioOption<OrderConflictResolution>[] =
   [

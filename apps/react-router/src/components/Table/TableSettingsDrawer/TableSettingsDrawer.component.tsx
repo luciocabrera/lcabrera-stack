@@ -29,7 +29,7 @@ import { ColumnOrderSection } from './ColumnOrderSection';
 import { ColumnOrderSectionProvider } from './ColumnOrderSection/ColumnOrderSectionContext/ColumnOrderSectionContext.provider';
 import { DetailsSection } from './DetailsSection';
 import { FiltersSection } from './FiltersSection';
-import { isFilterValid } from './FiltersSection/isFilterValid.util';
+import { isFilterValid } from './FiltersSection/utils/isFilterValid.util';
 import { GeneralSettingsSection } from './GeneralSettingsSection';
 import { SortingSection } from './SortingSection';
 import {

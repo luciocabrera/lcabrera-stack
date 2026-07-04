@@ -132,4 +132,91 @@ describe('readTableLoaderStateFromRequest', () => {
       },
     });
   });
+
+  it('falls back to empty defaults when neither URL state nor cookie state is present', () => {
+    vi.mocked(readPersistedStateFromCookie).mockReturnValue({});
+
+    const request = new Request('https://example.com/orders');
+
+    const result = readTableLoaderStateFromRequest<TestRow>({
+      persistenceKey: 'orders',
+      request,
+    });
+
+    expect(result.columnOrder).toEqual([]);
+    expect(result.columnVisibility).toEqual(new Set());
+    expect(result.columnSizing).toEqual({});
+    expect(result.columnPinning).toEqual({});
+    expect(result.sorting).toEqual([]);
+    expect(result.filters).toEqual({});
+    expect(result.standaloneSortParam).toBeNull();
+    expect(result.standaloneFiltersParam).toBeUndefined();
+  });
+
+  it('uses cookie column order when URL state is absent', () => {
+    vi.mocked(readPersistedStateFromCookie).mockReturnValue({
+      columnOrder: ['status', 'amount'],
+    });
+
+    const request = new Request('https://example.com/orders');
+
+    const result = readTableLoaderStateFromRequest<TestRow>({
+      persistenceKey: 'orders',
+      request,
+    });
+
+    expect(result.columnOrder).toEqual(['status', 'amount']);
+  });
+
+  it('uses cookie column pinning when present', () => {
+    vi.mocked(readPersistedStateFromCookie).mockReturnValue({
+      columnPinning: { left: ['id'], right: [] },
+    });
+
+    const request = new Request('https://example.com/orders');
+
+    const result = readTableLoaderStateFromRequest<TestRow>({
+      persistenceKey: 'orders',
+      request,
+    });
+
+    expect(result.columnPinning).toEqual({ left: ['id'], right: [] });
+  });
+
+  it('returns unsanitized filters when includeFilters is true but no columns provided', () => {
+    vi.mocked(readPersistedStateFromCookie).mockReturnValue({});
+
+    const filters = serializeFiltersToURL({
+      status: { operator: 'equals', type: 'select', value: 'active' },
+    });
+    const request = new Request(
+      `https://example.com/orders?filters=${encodeURIComponent(filters ?? '')}`,
+    );
+
+    const result = readTableLoaderStateFromRequest<TestRow>({
+      includeFilters: true,
+      persistenceKey: 'orders',
+      request,
+    });
+
+    expect(result.filters).toEqual({
+      status: { operator: 'equals', type: 'select', values: ['active'] },
+    });
+    expect(result.standaloneFiltersParam).not.toBeNull();
+  });
+
+  it('returns empty filters when includeFilters is true but no filters param in URL', () => {
+    vi.mocked(readPersistedStateFromCookie).mockReturnValue({});
+
+    const request = new Request('https://example.com/orders');
+
+    const result = readTableLoaderStateFromRequest<TestRow>({
+      includeFilters: true,
+      persistenceKey: 'orders',
+      request,
+    });
+
+    expect(result.filters).toEqual({});
+    expect(result.standaloneFiltersParam).toBeNull();
+  });
 });

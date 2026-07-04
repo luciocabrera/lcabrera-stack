@@ -1,12 +1,8 @@
 ---
 name: store-pattern
 description: External-store + split-context architecture for complex React state. Use when building or modifying stateful UI domains that need granular subscriptions and stable performance (especially Table-like components).
-license: MIT
-metadata:
-  version: '1.0.0'
-  scope: [root]
-  auto_invoke: 'Building or modifying any context, store, selector, or action hook — including Table state, filters, pagination, or any new shared UI state domain'
 user-invocable: true
+paths: ['**/contexts/**']
 allowed-tools: Read
 ---
 

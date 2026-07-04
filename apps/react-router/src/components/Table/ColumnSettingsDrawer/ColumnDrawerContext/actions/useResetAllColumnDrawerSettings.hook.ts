@@ -1,7 +1,9 @@
 import { useColumnDrawerContextValue } from '@/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/useColumnDrawerContextValue.hook';
-import { getTableColumnDrawerState } from '@/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/utils';
+import {
+  closeColumnSettingsDrawer,
+  getTableColumnDrawerState,
+} from '@/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/utils';
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
-import { persistTableMetaUiState } from '@/components/Table/utils';
 
 /**
  * Resets all column drawer settings from the current table state.
@@ -25,24 +27,7 @@ export const useResetAllColumnDrawerSettings = () => {
     columnStore.set(nextDrawerState);
 
     if (shouldCloseDrawer) {
-      const metaState = metaStore.get();
-      const shouldRestoreTableSettings =
-        metaState?.wasTableSettingsOpenBeforeColumnSettings ?? false;
-      const isTableSettingsOpen = shouldRestoreTableSettings
-        ? true
-        : (metaState?.isTableSettingsOpen ?? false);
-
-      const nextStatePatch = {
-        isColumnSettingsOpen: false,
-        isTableSettingsOpen,
-        wasTableSettingsOpenBeforeColumnSettings: false,
-      };
-
-      persistTableMetaUiState({
-        currentState: metaState,
-        nextStatePatch,
-      });
-      metaStore.set(nextStatePatch);
+      closeColumnSettingsDrawer({ metaStore });
     }
   };
 };

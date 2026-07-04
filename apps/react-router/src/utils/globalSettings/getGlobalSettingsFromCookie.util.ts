@@ -1,39 +1,15 @@
-import type {
-  GlobalNavigationCollapsedPreference,
-  GlobalNavigationPinnedPreference,
-  GlobalNavigationPreferences,
-  GlobalPinningPreferences,
-  GlobalSettingsState,
-} from '@/types/globalSettings.types';
-import type {
-  OrderConflictResolution,
-  PinConflictResolution,
-  UnpinConflictResolution,
-} from '@/types/pinningPreferences.types';
-import type { PinSide } from '@/types/ui.types';
+import type { GlobalSettingsState } from '@/types/globalSettings.types';
 
+import { logger } from '@/utils/logger';
 import { readFromCookie } from '@/utils/storage/readFromCookie.util';
+import { isObject } from '@/utils/typeGuards';
 
 import {
   GLOBAL_SETTINGS_COOKIE_KEY,
   GLOBAL_SETTINGS_COOKIE_VERSION,
 } from './globalSettings.constants';
-
-const PIN_SIDE_VALUES = ['closest-edge', 'left', 'right'] as const;
-const NAVIGATION_SIZE_VALUES = ['compact', 'large', 'medium', 'small'] as const;
-const NAVIGATION_COLLAPSED_VALUES = ['collapsed', 'expanded'] as const;
-const NAVIGATION_PINNED_VALUES = ['pinned', 'unpinned'] as const;
-const PIN_CONFLICT_VALUES = [
-  'move-column',
-  'pin-all-between',
-  'pin-only',
-] as const;
-const ORDER_CONFLICT_VALUES = [
-  'pin-to-match-order',
-  'remove-conflicting-pins',
-  'reset-all-pins',
-] as const;
-const UNPIN_CONFLICT_VALUES = ['reorder-to-fill', 'unpin-beyond'] as const;
+import { toGlobalNavigationPreferences } from './toGlobalNavigationPreferences.util';
+import { toGlobalPinningPreferences } from './toGlobalPinningPreferences.util';
 
 type GetGlobalSettingsFromCookieArgs = {
   readonly cookieString?: string;
@@ -45,133 +21,15 @@ type GlobalSettingsCookiePayload = {
   readonly version?: unknown;
 };
 
-const isObject = (value: unknown): value is Record<string, unknown> => {
-  return typeof value === 'object' && value !== null;
-};
-
-const isNavigationSizePreference = (
-  value: unknown,
-): value is GlobalNavigationPreferences['size'] => {
-  return (
-    typeof value === 'string' &&
-    NAVIGATION_SIZE_VALUES.includes(
-      value as (typeof NAVIGATION_SIZE_VALUES)[number],
-    )
-  );
-};
-
-const isNavigationCollapsedPreference = (
-  value: unknown,
-): value is GlobalNavigationCollapsedPreference => {
-  return (
-    typeof value === 'string' &&
-    NAVIGATION_COLLAPSED_VALUES.includes(
-      value as (typeof NAVIGATION_COLLAPSED_VALUES)[number],
-    )
-  );
-};
-
-const isNavigationPinnedPreference = (
-  value: unknown,
-): value is GlobalNavigationPinnedPreference => {
-  return (
-    typeof value === 'string' &&
-    NAVIGATION_PINNED_VALUES.includes(
-      value as (typeof NAVIGATION_PINNED_VALUES)[number],
-    )
-  );
-};
-
-const isPinSide = (value: unknown): value is PinSide => {
-  return (
-    typeof value === 'string' &&
-    PIN_SIDE_VALUES.includes(value as (typeof PIN_SIDE_VALUES)[number])
-  );
-};
-
-const isPinConflictResolution = (
-  value: unknown,
-): value is PinConflictResolution => {
-  return (
-    typeof value === 'string' &&
-    PIN_CONFLICT_VALUES.includes(value as (typeof PIN_CONFLICT_VALUES)[number])
-  );
-};
-
-const isOrderConflictResolution = (
-  value: unknown,
-): value is OrderConflictResolution => {
-  return (
-    typeof value === 'string' &&
-    ORDER_CONFLICT_VALUES.includes(
-      value as (typeof ORDER_CONFLICT_VALUES)[number],
-    )
-  );
-};
-
-const isUnpinConflictResolution = (
-  value: unknown,
-): value is UnpinConflictResolution => {
-  return (
-    typeof value === 'string' &&
-    UNPIN_CONFLICT_VALUES.includes(
-      value as (typeof UNPIN_CONFLICT_VALUES)[number],
-    )
-  );
-};
-
-const toGlobalPinningPreferences = (
-  value: unknown,
-): GlobalPinningPreferences | undefined => {
-  if (!isObject(value)) {
-    return undefined;
-  }
-
-  const pinSide = isPinSide(value['pinSide']) ? value['pinSide'] : undefined;
-  const orderConflictResolution = isOrderConflictResolution(
-    value['orderConflictResolution'],
-  )
-    ? value['orderConflictResolution']
-    : undefined;
-  const pinConflictResolution = isPinConflictResolution(
-    value['pinConflictResolution'],
-  )
-    ? value['pinConflictResolution']
-    : undefined;
-  const unpinConflictResolution = isUnpinConflictResolution(
-    value['unpinConflictResolution'],
-  )
-    ? value['unpinConflictResolution']
-    : undefined;
-
-  return {
-    orderConflictResolution,
-    pinConflictResolution,
-    pinSide,
-    unpinConflictResolution,
-  };
-};
-
-const toGlobalNavigationPreferences = (
-  value: unknown,
-): GlobalNavigationPreferences | undefined => {
-  if (!isObject(value)) {
-    return undefined;
-  }
-
-  const collapsed = isNavigationCollapsedPreference(value['collapsed'])
-    ? value['collapsed']
-    : undefined;
-  const pinned = isNavigationPinnedPreference(value['pinned'])
-    ? value['pinned']
-    : undefined;
-  const size = isNavigationSizePreference(value['size'])
-    ? value['size']
-    : undefined;
-
-  return { collapsed, pinned, size };
-};
-
+/**
+ * Read global settings (pinning + navigation preferences) from the settings
+ * cookie (SSR-safe via optional cookie string).
+ *
+ * Returns the fallback when the cookie is missing, malformed, or has a stale
+ * version; each preference slice falls back independently when invalid.
+ * @param args - Optional raw `Cookie` header string and the fallback state.
+ * @returns The parsed global settings state, or the fallback.
+ */
 export const getGlobalSettingsFromCookie = ({
   cookieString,
   fallback,
@@ -207,7 +65,8 @@ export const getGlobalSettingsFromCookie = ({
       navigation: parsedNavigation ?? fallback.navigation,
       pinning: parsedPinning ?? fallback.pinning,
     };
-  } catch {
+  } catch (error) {
+    logger.debug('[globalSettings] Failed to parse settings cookie:', error);
     return fallback;
   }
 };

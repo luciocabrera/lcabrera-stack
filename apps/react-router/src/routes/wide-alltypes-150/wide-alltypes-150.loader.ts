@@ -6,6 +6,7 @@ import { INITIAL_PAGE_SIZE } from '@/components/Table/Table.constants';
 import { wideAlltypes150Api } from '@/services';
 
 import { readTableLoaderStateFromRequest } from '../utils/readTableLoaderStateFromRequest.util';
+import { sanitizeSorting } from '../utils/sanitizeSorting.util';
 import {
   COLUMNS,
   PERSISTENCE_KEY,
@@ -31,10 +32,7 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
     request,
   });
 
-  const sanitizedSorting = sorting.filter(
-    (s): s is { columnKey: keyof WideAlltypes150; direction: 'asc' | 'desc' } =>
-      s.direction !== undefined && s.columnKey !== 'actions',
-  );
+  const sanitizedSorting = sanitizeSorting<WideAlltypes150>(sorting);
 
   const dataPromise: Promise<WideAlltypes150Response> =
     wideAlltypes150Api.fetchPaginated({

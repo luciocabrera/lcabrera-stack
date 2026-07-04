@@ -1,4 +1,9 @@
-import { getApiBaseUrl } from '@/utils/api';
+import {
+  buildPaginatedQueryParams,
+  fetchAndValidate,
+  getApiBaseUrl,
+} from '@/utils/api';
+import { isObject } from '@/utils/typeGuards';
 
 /**
  * Wide All-Types 150 API Service
@@ -176,9 +181,6 @@ export type WideAlltypes150Response = {
   readonly total: number;
 };
 
-const isObject = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null;
-
 const isWideAlltypes150Response = (
   value: unknown,
 ): value is WideAlltypes150Response =>
@@ -214,31 +216,15 @@ export const wideAlltypes150Api = {
     skip,
     sorting,
   }: FetchWideAlltypes150Params): Promise<WideAlltypes150Response> => {
-    const params = new URLSearchParams({
-      limit: limit.toString(),
-      skip: skip.toString(),
-    });
-
-    if (sorting && sorting.length > 0) {
-      params.append('sort', JSON.stringify(sorting));
-    }
+    const params = buildPaginatedQueryParams({ limit, skip, sorting });
 
     const url = `${getApiBaseUrl(requestUrl)}/wide-alltypes-150/paginated?${params.toString()}`;
 
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error(
-        `API request failed: ${response.status} ${response.statusText}`,
-      );
-    }
-
-    const body = (await response.json()) as unknown;
-    if (!isWideAlltypes150Response(body)) {
-      throw new Error(
+    return fetchAndValidate({
+      isValid: isWideAlltypes150Response,
+      shapeErrorMessage:
         'Unexpected response shape from /wide-alltypes-150/paginated',
-      );
-    }
-    return body;
+      url,
+    });
   },
 };

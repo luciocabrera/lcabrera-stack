@@ -5,7 +5,7 @@
 - schema_version: 1.0
 - report_id: <report-id>
 - generated_at: <YYYY-MM-DDTHH:MM:SSZ>
-- skill_name: <code-smell-checker|code-smell-zen>
+- skill_name: <code-smell-checker|code-smell-zen|fallow-code-checker>
 - repository: <repo-name-or-path>
 - scope_type: <repo|folder|changed-files|diff>
 - scope_value: <scope value>

@@ -21,6 +21,11 @@ Every icon follows the same structural pattern:
 4. Inherit color through `stroke='currentColor'`
 5. Forward remaining SVG props to the root `<svg>` element
 
+Icons in the 24×24 stroke family render through the shared `IconBase`
+component, which owns the standard `<svg>` wrapper and forwards children
+(paths/shapes) plus any svg props. This keeps the wrapper defined once instead
+of being duplicated across every stroke icon.
+
 ## File Structure
 
 ```
@@ -29,6 +34,9 @@ Icons/
 ├── Icons.types.ts               -> Shared IconProps type
 ├── index.ts                     -> Root barrel exporting all icons
 │
+├── IconBase/                    -> Shared 24×24 stroke <svg> wrapper
+│   ├── IconBase.component.tsx
+│   └── index.ts
 ├── BarChartIcon/
 │   ├── BarChartIcon.component.tsx
 │   └── index.ts

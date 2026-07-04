@@ -1,3 +1,5 @@
+import { logger } from '@/utils/logger';
+
 type WriteToLocalStorageArgs = {
   readonly key: string;
   readonly value: string;
@@ -14,7 +16,8 @@ export const writeToLocalStorage = ({
 
   try {
     localStorage.setItem(key, value);
-  } catch {
-    // Storage full or disabled
+  } catch (error) {
+    // Storage full or disabled — fallback is intentional
+    logger.debug('[storage] Failed to write localStorage key:', key, error);
   }
 };

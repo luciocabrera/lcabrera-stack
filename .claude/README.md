@@ -9,31 +9,27 @@ This document describes every layer of the AI config for this project — what e
 ```text
 .claude/
 ├── README.md               ← this file
-├── settings.local.json     ← permissions allow-list (not committed)
-├── hooks/
-│   └── hooks.json          ← automatic commands on session events
+├── settings.json           ← committed: hooks + team-shared permission allow-list
+├── settings.local.json     ← personal permission approvals (not committed)
+├── rules/                  ← path-specific rules, loaded only when editing matching files
+│   ├── typescript.md       ← paths: **/*.ts, **/*.tsx
+│   ├── react-components.md ← paths: **/*.tsx, **/*.jsx, **/*.stylex.ts
+│   ├── testing.md          ← paths: **/*.test.*, **/*.spec.*
+│   └── routes-data.md      ← paths: **/routes/**, **/services/**, **/*.api.ts, …
 ├── skills → ../.github/skills   ← symlink (canonical source is .github/skills/)
 └── agents/
-    ├── quality-gate.agent.md
-    ├── architecture-guard.agent.md
-    └── fallow-scan.agent.md
+    ├── quality-gate.md
+    ├── architecture-guard.md
+    └── fallow-scan.md
 
 .github/
 ├── ARCHITECTURE.md
 ├── copilot-instructions.md → ../AGENTS.md   (Copilot alias)
-└── skills/
-    ├── code-smell-checker/
-    ├── code-smell-shared/
-    ├── code-smell-zen/
-    ├── config-audit/
-    ├── fallow-code-checker/
-    ├── quality-gate-workflow/
-    ├── react-19/
-    ├── react-router-framework-mode/
-    └── store-pattern/
+└── skills/                 ← canonical skill sources (9 skills + code-smell-shared docs)
 
-AGENTS.md   ← single source of truth for all agent instructions
+AGENTS.md   ← single source of truth for universal agent instructions
 CLAUDE.md → AGENTS.md   (symlink — Claude Code reads this)
+GEMINI.md → AGENTS.md   (symlink — Gemini reads this)
 ```
 
 ---
@@ -42,47 +38,65 @@ CLAUDE.md → AGENTS.md   (symlink — Claude Code reads this)
 
 ### AGENTS.md / CLAUDE.md
 
-`AGENTS.md` is the single source of truth for project instructions. `CLAUDE.md` is a symlink to it so Claude Code picks it up automatically. `.github/copilot-instructions.md` is a separate symlink for GitHub Copilot — it points to the same file.
+`AGENTS.md` is the single source of truth for **universal, always-loaded** project instructions: overview, toolchain, non-negotiable rules, skill index, rules index, and documentation workflow. `CLAUDE.md`, `GEMINI.md`, and `.github/copilot-instructions.md` are symlinks to it.
 
 **Edit `AGENTS.md` directly.** Never edit `CLAUDE.md` (it's a symlink).
 
-Contents: project overview, source structure, toolchain commands, TypeScript standards, component standards, styling rules, data layer patterns, state management rules, import conventions, testing, security, and documentation workflow.
+Detailed per-file-type conventions intentionally do **not** live here — they live in `.claude/rules/` (below) to keep the always-loaded context small.
+
+---
+
+### Path-Specific Rules — `.claude/rules/`
+
+Each rule file has a `paths:` frontmatter with glob patterns. Claude Code loads a rule **only when editing files that match its globs** — TypeScript rules don't load while editing docs, React rules don't load while working in `apps/api-server`, etc.
+
+| Rule file             | Loads when editing                              | Owns                                                                         |
+| --------------------- | ----------------------------------------------- | ---------------------------------------------------------------------------- |
+| `typescript.md`       | any `.ts` / `.tsx`                              | strict TS rules, naming conventions, file suffixes, FP/immutability, imports |
+| `react-components.md` | any `.tsx` / `.jsx` / `.stylex.ts`              | component bundle pattern, props naming, React 19 rules, StyleX-only styling  |
+| `testing.md`          | any `.test.*` / `.spec.*`                       | Vitest/Testing Library conventions, `vp run test`, coverage target           |
+| `routes-data.md`      | routes, services, `.api.ts`, RR config, entries | loader/action data flow, store-pattern rule, error handling, Zod             |
+
+**Non-Claude agents** (Copilot, Gemini) don't auto-load these — AGENTS.md §2 tells them to read the matching rule file before editing covered files.
+
+**Adding a rule:** create `.claude/rules/<topic>.md` with `paths: ['glob', …]` frontmatter, then add a row to the table in AGENTS.md §2 and here.
 
 ---
 
 ### Skills — `.github/skills/`
 
-Skills are reusable instruction sets that Claude loads on demand. `.claude/skills` is a symlink to `.github/skills/`, so both paths refer to the same files.
+Skills are on-demand task workflows. `.claude/skills` is a **symlink** to `.github/skills/`, so both paths refer to the same files — edit either, there is one physical copy.
 
-| Skill                         | Purpose                                           | Auto-invokes when…                               |
-| ----------------------------- | ------------------------------------------------- | ------------------------------------------------ |
-| `react-19`                    | React 19 patterns, hooks, compiler rules          | Editing `.tsx`/`.jsx` files                      |
-| `react-router-framework-mode` | Loaders, actions, forms, navigation               | Working with routes or React Router APIs         |
-| `store-pattern`               | Split-context external store architecture         | Touching any context, store, selector, or action |
-| `quality-gate-workflow`       | Post-change validation steps                      | After finishing a code change                    |
-| `code-smell-checker`          | Maintainability audits and tech-debt triage       | Running a baseline smell audit                   |
-| `code-smell-zen`              | Diff-based smell review vs target branch          | Reviewing a PR or branch diff                    |
-| `fallow-code-checker`         | Full fallow static hygiene scan                   | Running dead-code or unused-export analysis      |
-| `config-audit`                | Runs claudelint, triages against known exceptions | After modifying AGENTS.md or any skill           |
+Auto-invocation is driven by the `description` field (Claude matches it against user intent) and, where present, the `paths` frontmatter (skill surfaces when editing matching files). `user-invocable: true` skills can also be triggered explicitly with `/skill-name`.
+
+| Skill                         | Purpose                                                    | Auto-invokes via                                                |
+| ----------------------------- | ---------------------------------------------------------- | --------------------------------------------------------------- |
+| `react-19`                    | React 19 patterns, hooks, compiler rules                   | description + `paths: **/*.tsx, **/*.jsx`                       |
+| `react-router-framework-mode` | Loaders, actions, forms, navigation                        | description + `paths: **/routes/**, routes.ts, …`               |
+| `store-pattern`               | Split-context external store architecture                  | description + `paths: **/contexts/**`                           |
+| `quality-gate-workflow`       | **Canonical** post-change validation sequence              | description (after finishing a code change)                     |
+| `codebase-explorer`           | Phased investigation; owns `.tmp/exploration/` scratchpads | description (understand/trace/investigate)                      |
+| `code-smell-checker`          | Maintainability audits (runs in forked context)            | description                                                     |
+| `code-smell-zen`              | Diff-based smell review (runs in forked context)           | description                                                     |
+| `fallow-code-checker`         | Fallow static hygiene scan (runs in forked context)        | description                                                     |
+| `config-audit`                | claudelint triage + fix plan                               | description + `paths: AGENTS.md, .claude/**, .github/skills/**` |
 
 **Skill anatomy:**
 
 ```text
 skill-name/
-├── SKILL.md          ← loaded into context; overview + procedure
+├── SKILL.md          ← loaded into context; frontmatter + overview + procedure
 ├── references/       ← deep-dive docs read on demand (not always loaded)
-│   └── advanced.md
 └── scripts/          ← executable shell scripts invoked from SKILL.md
-    └── collect-diff.sh
 ```
 
-**Auto-invoke**: skills with `auto_invoke` frontmatter are loaded automatically when conditions match. User-invocable skills can also be triggered with `/skill-name`.
+**Frontmatter contract** (enforced by `scripts/validate-skills.cjs`): `name` (must match folder) and `description` (must contain trigger phrases — it drives auto-invocation) are required. Optional: `argument-hint`, `user-invocable`, `allowed-tools`, `paths` (globs for file-scoped auto-invoke), `context: fork` (isolates verbose output in a sub-agent — used by the three scan/report skills).
 
 ---
 
 ### Agents — `.claude/agents/`
 
-Agents are sub-agents spawned explicitly by Claude (or by you) for isolated, heavy, or parallelisable work. They start with no conversation context — their `.agent.md` file is their full system prompt.
+Agents are sub-agents spawned explicitly by Claude (or by you) for isolated, heavy, or parallelisable work. They start with no conversation context — their markdown file is their full system prompt. Filenames must match the `name:` frontmatter field (`<name>.md`).
 
 | Agent                | Purpose                                                                      | Tools             | When to use                                 |
 | -------------------- | ---------------------------------------------------------------------------- | ----------------- | ------------------------------------------- |
@@ -92,45 +106,29 @@ Agents are sub-agents spawned explicitly by Claude (or by you) for isolated, hea
 
 **Unlike skills**, agents do not auto-invoke. Claude spawns them when it recognises the right moment, or when you ask.
 
-**Agent anatomy:**
+---
 
-```yaml
----
-name: agent-name
-description: When to use this agent (guides selection)
-model: sonnet | haiku | opus
-color: purple | blue | orange | green
-tools:
-  - Bash
-  - Read
----
-System prompt / instructions for the agent...
-```
+### Hooks — `.claude/settings.json`
+
+Hooks are shell commands the harness runs automatically on lifecycle events. They live in the **committed** `.claude/settings.json` (the standard location — not a separate hooks file) so the whole team shares them.
+
+| Event          | Command                                                                                                                  | Purpose                                                           |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------- |
+| `SessionStart` | `claudelint check-all --format json`                                                                                     | Audits AI config health at the top of every session               |
+| `Stop`         | `cd apps/react-router && git diff --quiet HEAD -- . \|\| (vp fmt . && vp lint . --fix && vp check --fix && vp run test)` | Runs the quality gate when Claude finishes, only if files changed |
+
+**Adding a hook:** edit the `hooks` block in `.claude/settings.json`. For automated behaviours ("always run X after Y"), hooks are the right mechanism — not memory or preferences.
 
 ---
 
-### Hooks — `.claude/hooks/hooks.json`
+### Permissions — `.claude/settings.json` + `.claude/settings.local.json`
 
-Hooks are shell commands the harness runs automatically on lifecycle events. They run outside Claude's context — Claude cannot see or act on their output directly.
+Two layers:
 
-| Event          | Command                                                                    | Purpose                                                          |
-| -------------- | -------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| `SessionStart` | `npx claudelint check-all --format json`                                   | Audits AI config health at the top of every session              |
-| `Stop`         | `cd apps/react-router && vp lint . --fix && vp check --fix && vp run test` | Runs the full quality gate every time Claude finishes a response |
-
-**Adding a hook:** edit `.claude/hooks/hooks.json`. For automated behaviours ("always run X after Y"), hooks are the right mechanism — not memory or preferences.
-
----
-
-### Permissions — `.claude/settings.local.json`
-
-The allow-list of Bash commands that are pre-approved and will not prompt for confirmation. Commands not on this list require explicit user approval each time.
-
-**This file is not committed to git** (it's local-only). If you set up this project on a new machine, you'll need to re-approve commands as they come up or copy this file.
+- **`settings.json` (committed)** — team-shared allow-list: the `vp` toolchain, quality-gate commands, claudelint, skill scripts. Anything every contributor will run repeatedly and trusts unconditionally.
+- **`settings.local.json` (not committed — ignored via global gitignore)** — personal one-off approvals accumulated during your own sessions. Keep it small; when an entry proves generally useful, promote it to `settings.json`.
 
 Entries use glob-style patterns: `Bash(cd apps/react-router && vp lint*)` approves any `vp lint` invocation prefixed with that `cd`.
-
-**When to add a new entry:** when a new script, agent, or skill introduces a Bash command that Claude will run repeatedly and you trust it unconditionally.
 
 ---
 
@@ -140,21 +138,20 @@ Entries use glob-style patterns: `Bash(cd apps/react-router && vp lint*)` approv
 You ask Claude to do something
         │
         ▼
-Skills auto-invoke if auto_invoke matches
-        │  (skill loaded into context — Claude reads it before acting)
+Path-specific rules load for the files being edited (.claude/rules/)
+Skills auto-invoke when intent matches description or paths
+        │
         ▼
 Claude works — reads files, edits code
         │
         ├─ Needs heavy/isolated work? → spawns an Agent
-        │       Agent runs with its own tools + system prompt
-        │       Returns a structured result to Claude
+        │       (or a skill with context: fork runs in its own sub-agent)
         │
         ▼
 Claude stops responding
         │
         ▼
-Stop hook fires automatically
-        └─ cd apps/react-router && vp lint . --fix && vp check --fix && vp run test
+Stop hook fires — if apps/react-router changed, runs the quality gate
 ```
 
 **SessionStart hook** fires once when the conversation begins, independently of the above flow.
@@ -163,12 +160,14 @@ Stop hook fires automatically
 
 ## Quick Reference
 
-| I want to…                                              | Go to…                                              |
-| ------------------------------------------------------- | --------------------------------------------------- |
-| Change project instructions for Claude                  | `AGENTS.md`                                         |
-| Add a new skill                                         | `.github/skills/new-skill/SKILL.md`                 |
-| Add or change an automated behaviour (on save, on stop) | `.claude/hooks/hooks.json`                          |
-| Pre-approve a Bash command                              | `.claude/settings.local.json` → `permissions.allow` |
-| Add a background/isolated agent                         | `.claude/agents/new-agent.agent.md`                 |
-| See what claudelint thinks of the config                | Run `/config-audit`                                 |
-| Understand the Table store architecture                 | `.github/skills/store-pattern/SKILL.md`             |
+| I want to…                                               | Go to…                                                                        |
+| -------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| Change universal project instructions                    | `AGENTS.md`                                                                   |
+| Change a file-type convention (TS, components, tests)    | `.claude/rules/<topic>.md`                                                    |
+| Add a new skill                                          | `.github/skills/new-skill/SKILL.md` (then `node scripts/validate-skills.cjs`) |
+| Add or change an automated behaviour (on stop, on start) | `hooks` block in `.claude/settings.json`                                      |
+| Pre-approve a Bash command for the team                  | `.claude/settings.json` → `permissions.allow`                                 |
+| Pre-approve a Bash command just for me                   | `.claude/settings.local.json` → `permissions.allow`                           |
+| Add a background/isolated agent                          | `.claude/agents/<name>.md`                                                    |
+| See what claudelint thinks of the config                 | Run `/config-audit`                                                           |
+| Understand the Table store architecture                  | `.github/skills/store-pattern/SKILL.md`                                       |

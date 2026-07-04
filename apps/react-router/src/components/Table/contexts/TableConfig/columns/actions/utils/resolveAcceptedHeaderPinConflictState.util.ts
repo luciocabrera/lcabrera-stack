@@ -4,7 +4,7 @@ import type {
   DataKey,
   TableColumn,
 } from '@/components/Table/Table.types';
-import type { PinConflictResolution } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
+import type { PinConflictResolution } from '@/types/ui.types';
 
 import {
   buildAllOrderedColumns,

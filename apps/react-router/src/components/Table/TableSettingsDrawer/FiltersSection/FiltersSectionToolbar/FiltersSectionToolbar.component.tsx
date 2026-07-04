@@ -1,22 +1,19 @@
-import * as stylex from '@stylexjs/stylex';
-
-import { Button } from '@/components/Button';
 import {
   CollapseAllIcon,
   EraserIcon,
   ExpandAllIcon,
   RefreshIcon,
 } from '@/components/Icons';
-import { ICON_SIZE_MD, ICON_SIZE_SM } from '@/design-system/constants';
 
+import type { SectionToolbarButton } from '../../SectionToolbar';
 import type { FiltersSectionToolbarProps } from './FiltersSectionToolbar.types';
 
+import { SectionToolbar } from '../../SectionToolbar';
 import {
   useClearFilters,
   useResetFilters,
 } from '../../TableDrawerContext/actions';
 import { useGetColumnFilters } from '../../TableDrawerContext/selectors';
-import { styles } from './FiltersSectionToolbar.stylex';
 
 const FILTERS_TOOLBAR = {
   clear: { label: 'Clear Filters' },
@@ -40,74 +37,41 @@ export const FiltersSectionToolbar = ({
   const resetFilters = useResetFilters();
 
   const hasFilters = Object.keys(filters).length > 0;
-  const isToolbar = variant === 'toolbar';
-  const buttonColor = isToolbar ? 'ghost' : 'outline';
-  const buttonSize = isToolbar ? 'mini' : 'sm';
-  const buttonWidth = isToolbar ? 'auto' : 'full';
-  const iconSize = isToolbar ? ICON_SIZE_SM : ICON_SIZE_MD;
-  const isExpandDisabled = isExpandAllDisabled || !onExpandAll;
-  const isCollapseDisabled = isCollapseAllDisabled || !onCollapseAll;
 
   const handleClear = () => {
     clearFilters();
     onClearAll?.();
   };
 
-  return (
-    <div {...stylex.props(isToolbar ? styles.toolbar : styles.container)}>
-      <Button
-        aria-label={FILTERS_TOOLBAR.clear.label}
-        color={buttonColor}
-        icon={<EraserIcon size={iconSize} />}
-        isBusy={isBusy}
-        isDisabled={!hasFilters}
-        onClick={handleClear}
-        size={buttonSize}
-        tooltipContent={isToolbar ? FILTERS_TOOLBAR.clear.label : undefined}
-        width={buttonWidth}
-      >
-        {!isToolbar && FILTERS_TOOLBAR.clear.label}
-      </Button>
-      <Button
-        aria-label={FILTERS_TOOLBAR.reset.label}
-        color={buttonColor}
-        icon={<RefreshIcon size={iconSize} />}
-        isBusy={isBusy}
-        onClick={resetFilters}
-        size={buttonSize}
-        tooltipContent={isToolbar ? FILTERS_TOOLBAR.reset.label : undefined}
-        width={buttonWidth}
-      >
-        {!isToolbar && FILTERS_TOOLBAR.reset.label}
-      </Button>
-      <Button
-        aria-label={FILTERS_TOOLBAR.expandAll.label}
-        color={buttonColor}
-        icon={<ExpandAllIcon size={iconSize} />}
-        isBusy={isBusy}
-        isDisabled={isExpandDisabled}
-        onClick={onExpandAll}
-        size={buttonSize}
-        tooltipContent={isToolbar ? FILTERS_TOOLBAR.expandAll.label : undefined}
-        width={buttonWidth}
-      >
-        {!isToolbar && FILTERS_TOOLBAR.expandAll.label}
-      </Button>
-      <Button
-        aria-label={FILTERS_TOOLBAR.collapseAll.label}
-        color={buttonColor}
-        icon={<CollapseAllIcon size={iconSize} />}
-        isBusy={isBusy}
-        isDisabled={isCollapseDisabled}
-        onClick={onCollapseAll}
-        size={buttonSize}
-        tooltipContent={
-          isToolbar ? FILTERS_TOOLBAR.collapseAll.label : undefined
-        }
-        width={buttonWidth}
-      >
-        {!isToolbar && FILTERS_TOOLBAR.collapseAll.label}
-      </Button>
-    </div>
-  );
+  const buttons: readonly SectionToolbarButton[] = [
+    {
+      icon: EraserIcon,
+      isDisabled: !hasFilters,
+      key: FILTERS_TOOLBAR.clear.label,
+      label: FILTERS_TOOLBAR.clear.label,
+      onClick: handleClear,
+    },
+    {
+      icon: RefreshIcon,
+      key: FILTERS_TOOLBAR.reset.label,
+      label: FILTERS_TOOLBAR.reset.label,
+      onClick: resetFilters,
+    },
+    {
+      icon: ExpandAllIcon,
+      isDisabled: isExpandAllDisabled || !onExpandAll,
+      key: FILTERS_TOOLBAR.expandAll.label,
+      label: FILTERS_TOOLBAR.expandAll.label,
+      onClick: onExpandAll,
+    },
+    {
+      icon: CollapseAllIcon,
+      isDisabled: isCollapseAllDisabled || !onCollapseAll,
+      key: FILTERS_TOOLBAR.collapseAll.label,
+      label: FILTERS_TOOLBAR.collapseAll.label,
+      onClick: onCollapseAll,
+    },
+  ];
+
+  return <SectionToolbar buttons={buttons} isBusy={isBusy} variant={variant} />;
 };

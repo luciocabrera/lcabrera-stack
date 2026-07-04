@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { ColumnFiltersState, TableColumn } from '@/components/Table';
+import type { ColumnFilter } from '@/types/filterOperators.types';
 
 import { sanitizeFiltersByColumns } from './sanitizeFiltersByColumns.util';
 
@@ -84,11 +85,13 @@ describe('sanitizeFiltersByColumns', () => {
   });
 
   it('accepts multiSelect filter on string column', () => {
+    const nameFilter: ColumnFilter = {
+      type: 'multiSelect',
+      values: ['Alice', 'Bob'],
+    };
     const result = sanitizeFiltersByColumns({
       columns,
-      filters: {
-        name: { type: 'multiSelect', values: ['Alice', 'Bob'] },
-      } as ColumnFiltersState<Row>,
+      filters: { name: nameFilter } as ColumnFiltersState<Row>,
     });
 
     expect(result).toEqual({

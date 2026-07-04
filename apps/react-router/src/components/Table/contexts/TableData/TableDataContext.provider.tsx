@@ -23,9 +23,13 @@ export const TableDataProvider = <TData extends Record<string, unknown>>({
     dataStore.set(getInitialDataState<TData>(dataState ?? {}));
   }, [dataState, dataStore]);
 
-  const value = {
-    dataStore,
-  } as TableDataContextValue;
+  const value: TableDataContextValue<TData> = { dataStore };
 
-  return <TableDataContext value={value}>{children}</TableDataContext>;
+  // The context is declared non-generic; useTableDataContextValue<TData>()
+  // restores the generic on read. Erase the type parameter only here.
+  return (
+    <TableDataContext value={value as TableDataContextValue}>
+      {children}
+    </TableDataContext>
+  );
 };

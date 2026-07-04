@@ -1,9 +1,10 @@
 # Code Smell Report Schema v1.0
 
-This document defines a canonical output contract for both skills:
+This document defines a canonical output contract for the scan skills:
 
 - code-smell-checker
 - code-smell-zen
+- fallow-code-checker
 
 The objective is to keep findings actionable and structurally identical for downstream agent handoff.
 
@@ -50,7 +51,7 @@ Required fields:
 - schema_version: must be 1.0
 - report_id: non-empty string
 - generated_at: ISO-8601 datetime
-- skill_name: code-smell-checker or code-smell-zen
+- skill_name: code-smell-checker, code-smell-zen, or fallow-code-checker
 - repository: repository name/path
 - scope_type: repo | folder | changed-files | diff
 - scope_value: non-empty string

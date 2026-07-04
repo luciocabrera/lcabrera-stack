@@ -1,6 +1,8 @@
 import type { ColumnFiltersState } from '@/components/Table';
 import type { ColumnFilter } from '@/types/filterOperators.types';
 
+import { logger } from '@/utils/logger';
+
 import { deserializeFilter } from './deserializeFilter.util';
 
 /**
@@ -26,7 +28,8 @@ export const deserializeFiltersFromURL = <TData>(
     );
 
     return result as ColumnFiltersState<TData>;
-  } catch {
+  } catch (error) {
+    logger.debug('[urlState] Failed to parse filters param:', error);
     return {} as ColumnFiltersState<TData>;
   }
 };

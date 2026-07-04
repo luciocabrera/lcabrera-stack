@@ -2,9 +2,9 @@
  * Boolean column filter
  */
 export type BooleanFilter = {
-  type: 'boolean';
+  readonly type: 'boolean';
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  value: boolean;
+  readonly value: boolean;
 };
 
 /**
@@ -21,12 +21,12 @@ export type ColumnFilter =
  * Date column filter
  */
 export type DateFilter = {
-  operator: 'after' | 'before' | 'between' | 'equals';
-  type: 'date';
+  readonly operator: 'after' | 'before' | 'between' | 'equals';
+  readonly type: 'date';
   /** ISO date string */
-  value: string;
+  readonly value: string;
   /** Second date for 'between' operator (ISO string) */
-  value2?: string;
+  readonly value2?: string;
 };
 
 export type DateOperatorType = DateFilter['operator'];
@@ -35,7 +35,7 @@ export type DateOperatorType = DateFilter['operator'];
  * Number/currency column filter
  */
 export type NumberFilter = {
-  operator:
+  readonly operator:
     | 'between'
     | 'equals'
     | 'greaterThan'
@@ -43,17 +43,18 @@ export type NumberFilter = {
     | 'lessThan'
     | 'lessThanOrEqual'
     | 'notEquals';
-  type: 'number';
-  value: number;
+  readonly type: 'number';
+  /** Undefined while the user is drafting the filter (empty input) */
+  readonly value: number | undefined;
   /** Second value for 'between' operator */
-  value2?: number;
+  readonly value2?: number;
 };
 
 export type NumberOperatorType = NumberFilter['operator'];
 
 export type OperatorOption<T extends string = string> = {
-  label: string;
-  value: T;
+  readonly label: string;
+  readonly value: T;
 };
 export type OperatorType =
   | DateOperatorType
@@ -69,7 +70,7 @@ export type SelectFilter = {
   /** Single value for 'select' type */
   readonly value?: string;
   /** Multiple values for 'multiSelect' type */
-  readonly values?: string[];
+  readonly values?: readonly string[];
 };
 
 /**

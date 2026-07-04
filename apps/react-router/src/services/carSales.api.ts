@@ -1,12 +1,18 @@
-import { fakeDelay, getApiBaseUrl } from '@/utils/api';
+import {
+  buildPaginatedQueryParams,
+  fakeDelay,
+  fetchAndValidate,
+  getApiBaseUrl,
+} from '@/utils/api';
 import { createLogger } from '@/utils/logger';
-
-const log = createLogger({ prefix: '[carSales]' });
+import { isObject } from '@/utils/typeGuards';
 
 /**
  * Car Sales API Service
  * Handles database queries for car sales data
  */
+
+const log = createLogger({ prefix: '[carSales]' });
 
 export type CarSale = {
   readonly buyer_address: string;
@@ -46,9 +52,6 @@ export type CarSalesResponse = {
   readonly total: number;
 };
 
-const isObject = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null;
-
 const isCarSalesResponse = (value: unknown): value is CarSalesResponse =>
   isObject(value) &&
   Array.isArray(value['data']) &&
@@ -68,23 +71,13 @@ export const carSalesApi = {
    * Returns a promise (non-blocking) to enable React streaming with Suspense
    */
   fetchCarSales: async (requestUrl?: string): Promise<CarSalesResponse> => {
-    const fetchData = async (): Promise<CarSalesResponse> => {
-      const response = await fetch(`${getApiBaseUrl(requestUrl)}/car-sales`);
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch car sales: ${response.statusText}`);
-      }
-
-      const body = (await response.json()) as unknown;
-      if (!isCarSalesResponse(body)) {
-        throw new Error('Unexpected response shape from /car-sales');
-      }
-      return body;
-    };
-
     await fakeDelay();
 
-    return fetchData();
+    return fetchAndValidate({
+      isValid: isCarSalesResponse,
+      shapeErrorMessage: 'Unexpected response shape from /car-sales',
+      url: `${getApiBaseUrl(requestUrl)}/car-sales`,
+    });
   },
 
   /**
@@ -101,38 +94,17 @@ export const carSalesApi = {
     skip: number;
     sorting?: { columnKey: string; direction: 'asc' | 'desc' }[];
   }): Promise<CarSalesResponse & { hasMore: boolean }> => {
-    const params = new URLSearchParams({
-      limit: limit.toString(),
-      skip: skip.toString(),
-    });
-
-    // Add sorting parameters if provided
-    if (sorting && sorting.length > 0) {
-      params.append('sort', JSON.stringify(sorting));
-    }
+    const params = buildPaginatedQueryParams({ limit, skip, sorting });
 
     const url = `${getApiBaseUrl(requestUrl)}/car-sales/paginated?${params.toString()}`;
     log.debug('🌐 Fetching from URL:', url);
 
-    const fetchData = async (): Promise<
-      CarSalesResponse & { hasMore: boolean }
-    > => {
-      const response = await fetch(url);
-
-      log.debug('📡 Response status:', response.status, response.statusText);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch car sales: ${response.statusText}`);
-      }
-
-      const body = (await response.json()) as unknown;
-      if (!isCarSalesPaginatedResponse(body)) {
-        throw new Error('Unexpected response shape from /car-sales/paginated');
-      }
-      return body;
-    };
-
     await fakeDelay();
 
-    return fetchData();
+    return fetchAndValidate({
+      isValid: isCarSalesPaginatedResponse,
+      shapeErrorMessage: 'Unexpected response shape from /car-sales/paginated',
+      url,
+    });
   },
 };

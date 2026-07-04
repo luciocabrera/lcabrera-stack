@@ -1,13 +1,10 @@
 import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 
+import type { WidthPreset } from '@/components/Table/shared/ColumnWidthPresetButtons';
+
 import { Button } from '@/components/Button';
-import {
-  EraserIcon,
-  MaximizeIcon,
-  MinimizeIcon,
-  RefreshIcon,
-} from '@/components/Icons';
+import { EraserIcon, RefreshIcon } from '@/components/Icons';
 import { InfoBox } from '@/components/InfoBox';
 import {
   SidePanelSection,
@@ -15,12 +12,10 @@ import {
   SidePanelSectionMain,
 } from '@/components/SidePanel';
 import { useGetColumns } from '@/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
+import { ColumnWidthPresetButtons } from '@/components/Table/shared/ColumnWidthPresetButtons';
 import { ICON_SIZE_MD } from '@/design-system/constants';
 
-import type {
-  GeneralSettingsSectionProps,
-  WidthPreset,
-} from './GeneralSettingsSection.types';
+import type { GeneralSettingsSectionProps } from './GeneralSettingsSection.types';
 
 import { ColumnOrderSectionToolbar } from '../ColumnOrderSection/ColumnOrderSectionToolbar';
 import { FiltersSectionToolbar } from '../FiltersSection/FiltersSectionToolbar';
@@ -97,38 +92,18 @@ export const GeneralSettingsSection = ({
       <SidePanelSection>
         <SidePanelSectionHeader title='Column Widths' />
         <div {...stylex.props(styles.buttonGroup)}>
-          <Button
-            color={selectedPreset === 'min' ? 'primary' : 'outline'}
-            disabled={!hasMinWidthsConfigured}
-            icon={<MinimizeIcon size={ICON_SIZE_MD} />}
+          <ColumnWidthPresetButtons
+            defaultLabel='Reset to Default Widths'
             isBusy={isBusy}
-            onClick={handleToggleMin}
-            size='sm'
-            width='full'
-          >
-            Set All to Min Width
-          </Button>
-          <Button
-            color={selectedPreset === 'max' ? 'primary' : 'outline'}
-            disabled={!hasMaxWidthsConfigured}
-            icon={<MaximizeIcon size={ICON_SIZE_MD} />}
-            isBusy={isBusy}
-            onClick={handleToggleMax}
-            size='sm'
-            width='full'
-          >
-            Set All to Max Width
-          </Button>
-          <Button
-            color={selectedPreset === 'default' ? 'primary' : 'outline'}
-            icon={<RefreshIcon size={ICON_SIZE_MD} />}
-            isBusy={isBusy}
-            onClick={handleToggleDefault}
-            size='sm'
-            width='full'
-          >
-            Reset to Default Widths
-          </Button>
+            isMaxDisabled={!hasMaxWidthsConfigured}
+            isMinDisabled={!hasMinWidthsConfigured}
+            maxLabel='Set All to Max Width'
+            minLabel='Set All to Min Width'
+            onToggleDefault={handleToggleDefault}
+            onToggleMax={handleToggleMax}
+            onToggleMin={handleToggleMin}
+            selectedPreset={selectedPreset}
+          />
         </div>
       </SidePanelSection>
 

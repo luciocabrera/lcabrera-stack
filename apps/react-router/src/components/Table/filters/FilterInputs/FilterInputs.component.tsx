@@ -74,7 +74,7 @@ export const FilterInputs = <TData = Record<string, unknown>,>({
       onChange({
         operator: newOperator as NumberOperatorType,
         type: 'number',
-        value: undefined as unknown as number,
+        value: undefined,
       });
     } else if (column.dataType === 'date') {
       onChange({

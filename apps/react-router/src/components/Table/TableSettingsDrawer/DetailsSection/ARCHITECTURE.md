@@ -9,11 +9,27 @@ identity fields (title, table name, schema name), and optional technical/custom 
 ```
 DetailsSection/
 ├── index.ts                         → Barrel export
-├── DetailsSection.component.tsx     → Metadata renderer
+├── DetailsSection.component.tsx     → Thin renderer (consumes useDetailsRows)
 ├── DetailsSection.types.ts          → DetailsRow type
 ├── DetailsSection.stylex.ts         → Label/value row styles
-└── DetailsSection.test.tsx          → Required + optional rendering tests
+├── DetailsSection.test.tsx          → Required + optional rendering tests
+├── hooks/
+│   ├── useDetailsRows.hook.ts       → Composes ordered rows from grouped meta
+│   ├── useDetailsIdentityMeta.hook.ts → Identity + locale + metadata reads
+│   └── useDetailsConfigMeta.hook.ts → Technical configuration reads
+└── utils/
+    ├── formatMetadataLabel.util.ts  → Humanize a raw metadata key
+    ├── formatMetadataValue.util.ts  → Format a metadata value for display
+    ├── resolveDetailsLocale.util.ts → Resolve explicit/browser locale
+    ├── buildRequiredRows.util.ts    → Always-visible metric rows
+    ├── buildIdentityRows.util.ts    → Optional title/table/schema rows
+    ├── buildTechnicalRows.util.ts   → Technical config rows (non-empty)
+    └── buildCustomMetadataRows.util.ts → Rows from additionalMetadata map
 ```
+
+> `useDetailsRows` reads two grouped meta hooks (identity + config) plus the
+> data/columns selectors, keeping each hook's subscription count low while
+> preserving granular store subscriptions.
 
 ## Dependencies
 
@@ -32,12 +48,14 @@ graph LR
 
 ```mermaid
 graph TD
-  A["DetailsSection renders"] --> B["Read totals + columns + meta snapshot"]
-  B --> C["Build required rows"]
-  C --> D["Append optional identity rows when defined"]
-  D --> E["Append technical rows"]
-  E --> F["Append additionalMetadata rows"]
-  F --> G["Render label/value list"]
+  A["DetailsSection renders"] --> B["useDetailsRows()"]
+  B --> C["Read totals + columns + meta snapshot"]
+  C --> D["buildRequiredRows"]
+  D --> E["buildIdentityRows (defined only)"]
+  E --> F["buildTechnicalRows (non-empty)"]
+  F --> G["buildCustomMetadataRows"]
+  G --> H["Return composed rows"]
+  H --> I["Render label/value list"]
 ```
 
 ## Row Groups

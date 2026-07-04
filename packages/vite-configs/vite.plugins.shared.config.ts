@@ -79,6 +79,24 @@ const patchDeprecatedOptimizeDeps = (pluginOption: unknown): unknown => {
   };
 };
 
+// The stylex unplugin's configureServer hook starts a 150ms setInterval that
+// is only cleared on `server.httpServer.close`. Vitest runs Vite in middleware
+// mode with no httpServer, so the interval is never cleared and keeps the test
+// process alive ("close timed out after 10000ms"). Dev-server hooks are
+// irrelevant under vitest, so strip the hook for test task runs only.
+const stripConfigureServerHook = (pluginOption: PluginOption): PluginOption => {
+  if (Array.isArray(pluginOption)) {
+    return pluginOption.map(stripConfigureServerHook);
+  }
+
+  if (!isRecord(pluginOption) || !('configureServer' in pluginOption)) {
+    return pluginOption;
+  }
+
+  const { configureServer: _configureServer, ...rest } = pluginOption;
+  return rest as PluginOption;
+};
+
 const isTestTaskRunFromEnv = (): boolean =>
   process.env.REACT_ROUTER_TEST_TASK === 'true' ||
   process.env.VITEST === 'true';
@@ -115,15 +133,17 @@ export const createReactRouterPluginsConfig = ({
           ),
         ];
 
+  const stylexPlugin = stylex.vite({
+    aliases: {
+      '@/*': [fileURLToPath(new URL(stylexAliasPattern, appRootUrl))],
+    },
+    dev: stylexDev,
+    useCSSLayers: stylexUseCSSLayers,
+  });
+
   return [
     ...pluginsBefore,
-    stylex.vite({
-      aliases: {
-        '@/*': [fileURLToPath(new URL(stylexAliasPattern, appRootUrl))],
-      },
-      dev: stylexDev,
-      useCSSLayers: stylexUseCSSLayers,
-    }),
+    isTestTaskRun ? stripConfigureServerHook(stylexPlugin) : stylexPlugin,
     ...(withFixReactRouterAssetsPlugin ? [fixReactRouterAssets()] : []),
     ...reactRouterPlugin,
     ...babelPlugin,

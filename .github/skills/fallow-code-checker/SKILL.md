@@ -1,14 +1,11 @@
 ---
 name: fallow-code-checker
-description: Run a full fallow scan with vp and produce a prioritized, evidence-based report aligned to the code-smell-checker output contract.
+description: Run a full fallow scan with vp and produce a prioritized, evidence-based report aligned to the code-smell-checker output contract. Use when running a full static analysis scan for dead code, unused exports, high complexity, or fallow findings.
 argument-hint: 'Optional scope, for example: repo, apps/react-router, or changed files only'
 user-invocable: true
+context: fork
+agent: general-purpose
 allowed-tools: Bash(bash:*,cat:*,date:*,mkdir:*,npx:*,tee:*,vp:*), Read, Grep, Glob
-license: MIT
-metadata:
-  version: '1.0.0'
-  scope: [root]
-  auto_invoke: 'Running a full static analysis scan for dead code, unused exports, high complexity, or fallow findings'
 ---
 
 # Fallow Full Scan Checker
@@ -137,7 +134,7 @@ Use the shared output contract and template:
 Set metadata.skill_name to fallow-code-checker.
 Add `raw_summary_line` in Metadata with verbatim human output.
 Add `raw_artifact` in Metadata with the path to `fallow.raw.json`.
-When the full shared report structure is feasible, use it exactly; otherwise keep section names and field semantics consistent where possible.
+Use the shared report structure exactly — all scan skills emit the same SCHEMA_V1 report so downstream agents need no per-skill parsing.
 
 8. Save the report artifact.
 

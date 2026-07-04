@@ -60,7 +60,7 @@ describe('executeFetchMore', () => {
 
   it('sets isLoadingMore before fetching and resolves to false after success', async () => {
     const { dataStore, metaStore } = createStores();
-    const isFetchingRef = { current: false };
+    const fetchingRef = { current: false };
     const prefetchRef = makePrefetchRef();
 
     resolveFromCacheOrFetchMock.mockResolvedValue({
@@ -71,7 +71,7 @@ describe('executeFetchMore', () => {
     await executeFetchMore({
       args: { dataSelector, dataTotalSelector, onLoadMore },
       dataStore: dataStore as never,
-      isFetchingRef,
+      isFetchingRef: fetchingRef,
       metaStore: metaStore as never,
       prefetchRef,
     });
@@ -81,7 +81,7 @@ describe('executeFetchMore', () => {
 
   it('appends fetched rows and updates store state on success', async () => {
     const { dataStore, metaStore } = createStores();
-    const isFetchingRef = { current: false };
+    const fetchingRef = { current: false };
     const prefetchRef = makePrefetchRef();
 
     resolveFromCacheOrFetchMock.mockResolvedValue({
@@ -92,7 +92,7 @@ describe('executeFetchMore', () => {
     await executeFetchMore({
       args: { dataSelector, dataTotalSelector, onLoadMore },
       dataStore: dataStore as never,
-      isFetchingRef,
+      isFetchingRef: fetchingRef,
       metaStore: metaStore as never,
       prefetchRef,
     });
@@ -108,13 +108,13 @@ describe('executeFetchMore', () => {
 
   it('returns early when isFetchingRef is already true', async () => {
     const { dataStore, metaStore } = createStores();
-    const isFetchingRef = { current: true };
+    const fetchingRef = { current: true };
     const prefetchRef = makePrefetchRef();
 
     await executeFetchMore({
       args: { dataSelector, dataTotalSelector, onLoadMore },
       dataStore: dataStore as never,
-      isFetchingRef,
+      isFetchingRef: fetchingRef,
       metaStore: metaStore as never,
       prefetchRef,
     });
@@ -124,13 +124,13 @@ describe('executeFetchMore', () => {
 
   it('returns early when hasMore is false', async () => {
     const { dataStore, metaStore } = createStores({ hasMore: false });
-    const isFetchingRef = { current: false };
+    const fetchingRef = { current: false };
     const prefetchRef = makePrefetchRef();
 
     await executeFetchMore({
       args: { dataSelector, dataTotalSelector, onLoadMore },
       dataStore: dataStore as never,
-      isFetchingRef,
+      isFetchingRef: fetchingRef,
       metaStore: metaStore as never,
       prefetchRef,
     });
@@ -140,7 +140,7 @@ describe('executeFetchMore', () => {
 
   it('writes error message to metaStore and clears isLoadingMore on fetch failure', async () => {
     const { dataStore, metaStore } = createStores();
-    const isFetchingRef = { current: false };
+    const fetchingRef = { current: false };
     const prefetchRef = makePrefetchRef();
 
     resolveFromCacheOrFetchMock.mockRejectedValue(new Error('server error'));
@@ -148,7 +148,7 @@ describe('executeFetchMore', () => {
     await executeFetchMore({
       args: { dataSelector, dataTotalSelector, onLoadMore },
       dataStore: dataStore as never,
-      isFetchingRef,
+      isFetchingRef: fetchingRef,
       metaStore: metaStore as never,
       prefetchRef,
     });
@@ -159,7 +159,7 @@ describe('executeFetchMore', () => {
 
   it('resets isFetchingRef to false after completion regardless of outcome', async () => {
     const { dataStore, metaStore } = createStores();
-    const isFetchingRef = { current: false };
+    const fetchingRef = { current: false };
     const prefetchRef = makePrefetchRef();
 
     resolveFromCacheOrFetchMock.mockRejectedValue(new Error('fail'));
@@ -167,17 +167,17 @@ describe('executeFetchMore', () => {
     await executeFetchMore({
       args: { dataSelector, dataTotalSelector, onLoadMore },
       dataStore: dataStore as never,
-      isFetchingRef,
+      isFetchingRef: fetchingRef,
       metaStore: metaStore as never,
       prefetchRef,
     });
 
-    expect(isFetchingRef.current).toBe(false);
+    expect(fetchingRef.current).toBe(false);
   });
 
   it('prevents a second concurrent fetch from running', async () => {
     const { dataStore, metaStore } = createStores();
-    const isFetchingRef = { current: false };
+    const fetchingRef = { current: false };
     const prefetchRef = makePrefetchRef();
 
     const { promise, resolve } = Promise.withResolvers<TestResponse>();
@@ -187,7 +187,7 @@ describe('executeFetchMore', () => {
     const firstFetch = executeFetchMore({
       args: { dataSelector, dataTotalSelector, onLoadMore },
       dataStore: dataStore as never,
-      isFetchingRef,
+      isFetchingRef: fetchingRef,
       metaStore: metaStore as never,
       prefetchRef,
     });
@@ -195,7 +195,7 @@ describe('executeFetchMore', () => {
     const secondFetch = executeFetchMore({
       args: { dataSelector, dataTotalSelector, onLoadMore },
       dataStore: dataStore as never,
-      isFetchingRef,
+      isFetchingRef: fetchingRef,
       metaStore: metaStore as never,
       prefetchRef,
     });

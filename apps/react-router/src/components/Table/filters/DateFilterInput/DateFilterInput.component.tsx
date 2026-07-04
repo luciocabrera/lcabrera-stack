@@ -6,6 +6,7 @@ import type {
   UpdateDateFilterArgs,
 } from './DateFilterInput.types';
 
+import { NO_AUTOFILL_INPUT_PROPS } from '../filterInput.constants';
 import { styles } from './DateFilterInput.stylex';
 import { computeInitialEndDate, computeInitialValue } from './utils';
 
@@ -54,11 +55,7 @@ export const DateFilterInput = ({
       {operator === 'between' ? (
         <div {...stylex.props(styles.inputGroup)}>
           <input
-            autoComplete='one-time-code'
-            data-1p-ignore='true'
-            data-bwignore='true'
-            data-form-type='other'
-            data-lpignore='true'
+            {...NO_AUTOFILL_INPUT_PROPS}
             onChange={handleValueChange}
             type='date'
             value={value}
@@ -66,11 +63,7 @@ export const DateFilterInput = ({
           />
           <span {...stylex.props(styles.separator)}>to</span>
           <input
-            autoComplete='one-time-code'
-            data-1p-ignore='true'
-            data-bwignore='true'
-            data-form-type='other'
-            data-lpignore='true'
+            {...NO_AUTOFILL_INPUT_PROPS}
             onChange={handleEndDateChange}
             type='date'
             value={endDate}
@@ -79,11 +72,7 @@ export const DateFilterInput = ({
         </div>
       ) : (
         <input
-          autoComplete='one-time-code'
-          data-1p-ignore='true'
-          data-bwignore='true'
-          data-form-type='other'
-          data-lpignore='true'
+          {...NO_AUTOFILL_INPUT_PROPS}
           onChange={handleValueChange}
           type='date'
           value={value}

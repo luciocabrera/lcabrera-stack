@@ -4,7 +4,7 @@ import type {
   DataKey,
   TableColumn,
 } from '@/components/Table/Table.types';
-import type { PinConflictResolution } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
+import type { PinConflictResolution } from '@/types/ui.types';
 
 import { syncColumnOrderWithPinning } from '@/components/Table/utils';
 
@@ -44,7 +44,7 @@ export const resolvePinConflictState = <TData>({
   );
 
   if (resolution === 'move-column') {
-    let newOrder = allOrderedColumns
+    let newOrder: ColumnOrderState<TData> = allOrderedColumns
       .filter((column) => column.key !== columnKey)
       .map((column) => column.key);
     const column = allOrderedColumns[index];
@@ -59,7 +59,7 @@ export const resolvePinConflictState = <TData>({
     }
 
     return {
-      columnOrder: newOrder as ColumnOrderState<TData>,
+      columnOrder: newOrder,
       columnPinning: applyPin({
         columnKey,
         columnPinning: currentPinning,

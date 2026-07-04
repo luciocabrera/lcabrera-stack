@@ -1,7 +1,13 @@
 import type { ColumnFiltersState, SortingState } from '@/components/Table';
 
-import { fakeDelay, getApiBaseUrl } from '@/utils/api';
+import {
+  buildPaginatedQueryParams,
+  fakeDelay,
+  fetchAndValidate,
+  getApiBaseUrl,
+} from '@/utils/api';
 import { createLogger } from '@/utils/logger';
+import { isObject } from '@/utils/typeGuards';
 
 const log = createLogger({ prefix: '[orders]' });
 
@@ -82,9 +88,6 @@ type EnterpriseOrderDetailResponse = {
   readonly data: EnterpriseOrder;
 };
 
-const isObject = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null;
-
 const isDistinctValuesResponse = (
   value: unknown,
 ): value is { hasMore: boolean; values: string[] } =>
@@ -139,21 +142,11 @@ export const enterpriseOrdersApi = {
       offset,
     );
 
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error(
-        `API request failed: ${response.status} ${response.statusText}`,
-      );
-    }
-
-    const body = (await response.json()) as unknown;
-    if (!isDistinctValuesResponse(body)) {
-      throw new Error(
-        `Unexpected response shape from /enterprise-orders/distinct/${columnName}`,
-      );
-    }
-    return body;
+    return fetchAndValidate({
+      isValid: isDistinctValuesResponse,
+      shapeErrorMessage: `Unexpected response shape from /enterprise-orders/distinct/${columnName}`,
+      url,
+    });
   },
 
   /**
@@ -169,21 +162,11 @@ export const enterpriseOrdersApi = {
     const url = `${getApiBaseUrl(requestUrl)}/enterprise-orders/${orderId}`;
     log.debug('🎯 Fetching order by ID:', orderId);
 
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error(
-        `API request failed: ${response.status} ${response.statusText}`,
-      );
-    }
-
-    const body = (await response.json()) as unknown;
-    if (!isEnterpriseOrderDetailResponse(body)) {
-      throw new Error(
-        `Unexpected response shape from /enterprise-orders/${orderId}`,
-      );
-    }
-    return body;
+    return fetchAndValidate({
+      isValid: isEnterpriseOrderDetailResponse,
+      shapeErrorMessage: `Unexpected response shape from /enterprise-orders/${orderId}`,
+      url,
+    });
   },
 
   /**
@@ -198,20 +181,7 @@ export const enterpriseOrdersApi = {
   }: FetchEnterpriseOrdersParams): Promise<
     EnterpriseOrdersResponse & { hasMore: boolean }
   > => {
-    const params = new URLSearchParams({
-      limit: limit.toString(),
-      skip: skip.toString(),
-    });
-
-    // Add sorting parameters if provided
-    if (sorting && sorting.length > 0) {
-      params.append('sort', JSON.stringify(sorting));
-    }
-
-    // Add filter parameters if provided
-    if (filter && Object.keys(filter).length > 0) {
-      params.append('filter', JSON.stringify(filter));
-    }
+    const params = buildPaginatedQueryParams({ filter, limit, skip, sorting });
 
     const url = `${getApiBaseUrl(requestUrl)}/enterprise-orders/paginated?${params.toString()}`;
     log.debug('🌐 Fetching from URL:', url);

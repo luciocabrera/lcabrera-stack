@@ -9,7 +9,7 @@ import { ICON_SIZE_MD } from '@/design-system/constants';
 import type { HandleToggleArgs } from '../ActiveFiltersList.types';
 import type { FilterItemProps } from './FilterItem.types';
 
-import { isFilterValid } from '../../isFilterValid.util';
+import { isFilterValid } from '../../utils/isFilterValid.util';
 import { styles } from './FilterItem.stylex';
 
 export const FilterItem = ({

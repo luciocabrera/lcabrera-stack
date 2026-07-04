@@ -3,9 +3,27 @@
 import type { RefObject } from 'react';
 
 import { act, renderHook } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useVirtualization } from './useVirtualization.hook';
+
+const { cancelAnimationFrameMock, requestAnimationFrameMock } = vi.hoisted(
+  () => ({
+    cancelAnimationFrameMock: vi.fn(),
+    requestAnimationFrameMock: vi.fn<
+      (callback: FrameRequestCallback) => number
+    >((callback) => {
+      callback(0);
+      return 1;
+    }),
+  }),
+);
+
+const resizeObserverCallbackRef: {
+  current: ResizeObserverCallback | undefined;
+} = {
+  current: undefined,
+};
 
 type CreateContainerArgs = {
   readonly offsetHeight: number;
@@ -40,6 +58,39 @@ const createContainer = ({
 };
 
 describe('useVirtualization', () => {
+  beforeEach(() => {
+    resizeObserverCallbackRef.current = undefined;
+    requestAnimationFrameMock.mockClear();
+    cancelAnimationFrameMock.mockClear();
+
+    vi.stubGlobal('requestAnimationFrame', requestAnimationFrameMock);
+    vi.stubGlobal('cancelAnimationFrame', cancelAnimationFrameMock);
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        public constructor(callback: ResizeObserverCallback) {
+          resizeObserverCallbackRef.current = callback;
+        }
+
+        public disconnect() {
+          // noop test double
+        }
+
+        public observe() {
+          // noop test double
+        }
+
+        public unobserve() {
+          // noop test double
+        }
+      },
+    );
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   it('computes the initial visible range from container height', () => {
     const container = createContainer({ offsetHeight: 400 });
     const containerRef = {
@@ -85,6 +136,34 @@ describe('useVirtualization', () => {
     expect(result.current.startIndex).toBe(2);
     expect(result.current.endIndex).toBe(16);
     expect(result.current.offsetY).toBe(100);
+    expect(requestAnimationFrameMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('updates the height through ResizeObserver measurements', () => {
+    const container = createContainer({ offsetHeight: 400 });
+    const containerRef = {
+      current: container,
+    } as RefObject<HTMLElement | null>;
+
+    const { result } = renderHook(() =>
+      useVirtualization({
+        containerRef,
+        itemHeight: 50,
+        totalItems: 100,
+      }),
+    );
+
+    Object.defineProperty(container, 'offsetHeight', {
+      configurable: true,
+      value: 520,
+    });
+
+    act(() => {
+      resizeObserverCallbackRef.current?.([], {} as ResizeObserver);
+    });
+
+    expect(result.current.containerHeight).toBe(520);
+    expect(result.current.visibleCount).toBe(11);
   });
 
   it('keeps the previous height when a resize measures zero', () => {
@@ -108,10 +187,64 @@ describe('useVirtualization', () => {
     });
 
     act(() => {
-      globalThis.dispatchEvent(new Event('resize'));
+      resizeObserverCallbackRef.current?.([], {} as ResizeObserver);
     });
 
     expect(result.current.containerHeight).toBe(400);
+  });
+
+  it('can temporarily report an empty window when scrollTop outlives the data', () => {
+    const container = createContainer({ offsetHeight: 100, scrollTop: 600 });
+    const containerRef = {
+      current: container,
+    } as RefObject<HTMLElement | null>;
+
+    const { rerender, result } = renderHook(
+      ({ totalItems }: { readonly totalItems: number }) =>
+        useVirtualization({
+          containerRef,
+          itemHeight: 50,
+          overscan: 0,
+          totalItems,
+        }),
+      {
+        initialProps: {
+          totalItems: 20,
+        },
+      },
+    );
+
+    rerender({ totalItems: 5 });
+
+    expect(result.current.startIndex).toBe(12);
+    expect(result.current.endIndex).toBe(5);
+    expect(result.current.bottomSpacerHeight).toBe(0);
+  });
+
+  it('cancels a pending animation frame when the hook unmounts', () => {
+    requestAnimationFrameMock.mockImplementationOnce(() => 7);
+
+    const container = createContainer({ offsetHeight: 400 });
+    const containerRef = {
+      current: container,
+    } as RefObject<HTMLElement | null>;
+
+    const { unmount } = renderHook(() =>
+      useVirtualization({
+        containerRef,
+        itemHeight: 50,
+        totalItems: 100,
+      }),
+    );
+
+    act(() => {
+      container.scrollTop = 250;
+      container.dispatchEvent(new Event('scroll'));
+    });
+
+    unmount();
+
+    expect(cancelAnimationFrameMock).toHaveBeenCalledWith(7);
   });
 
   it('falls back to the provided default height when no container is mounted', () => {

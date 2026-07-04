@@ -11,7 +11,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
-const REQUIRED_FRONTMATTER_FIELDS = ['name', 'description', 'license'];
+const REQUIRED_FRONTMATTER_FIELDS = ['name', 'description'];
 
 /**
  * @param {string} dir

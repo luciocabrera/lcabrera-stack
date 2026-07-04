@@ -33,7 +33,15 @@ graph TD
   Scroll --> TB["TableBase"]
   TB --> TH["TableHeader"]
   TB --> TBody["TableBody"]
+  Scroll --> Sentinel["div (sentinelRef · infinite-scroll sentinel)"]
 ```
+
+> The sentinel uses `position: sticky; left: 0` so it stays inside the
+> horizontal viewport at every `scrollLeft`. `IntersectionObserver` requires
+> overlap on both axes — a normal block sentinel is only viewport-wide and
+> anchored left, so scrolling the wide table fully right would move it out of
+> view and silently stop fetch-more. Sticky-pinning keeps vertical
+> bottom-detection working regardless of horizontal scroll.
 
 ## Context & Hooks
 
@@ -52,7 +60,7 @@ graph LR
   end
 
   subgraph "Hooks"
-    TC --> scroll["useInfiniteScroll(containerRef, threshold, ...)"]
+    TC --> scroll["useInfiniteScroll(containerRef, sentinelRef, threshold, ...)"]
   end
 
   subgraph "Provides"

@@ -35,12 +35,15 @@ export const setupObservedContainer = ({
 
   onMeasure();
 
-  const resizeObserver = new ResizeObserver(() => {
-    onMeasure();
-  });
+  const resizeObserver =
+    typeof ResizeObserver === 'undefined'
+      ? undefined
+      : new ResizeObserver(() => {
+          onMeasure();
+        });
 
   if (container) {
-    resizeObserver.observe(container);
+    resizeObserver?.observe(container);
   }
 
   syncScrollPosition();
@@ -52,6 +55,6 @@ export const setupObservedContainer = ({
       animationFrameId = -1;
     }
     container?.removeEventListener('scroll', handleScroll);
-    resizeObserver.disconnect();
+    resizeObserver?.disconnect();
   };
 };

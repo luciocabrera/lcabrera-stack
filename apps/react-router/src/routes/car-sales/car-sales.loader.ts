@@ -5,6 +5,7 @@ import type { CarSale, CarSalesResponse } from '@/services';
 import { carSalesApi } from '@/services';
 
 import { readTableLoaderStateFromRequest } from '../utils/readTableLoaderStateFromRequest.util';
+import { sanitizeSorting } from '../utils/sanitizeSorting.util';
 import {
   COLUMNS,
   PERSISTENCE_KEY,
@@ -35,10 +36,7 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
     persistenceKey: PERSISTENCE_KEY,
     request,
   });
-  const sanitizedSorting = sorting.filter(
-    (s): s is { columnKey: keyof CarSale; direction: 'asc' | 'desc' } =>
-      s.direction !== undefined && s.columnKey !== 'actions',
-  );
+  const sanitizedSorting = sanitizeSorting<CarSale>(sorting);
 
   // Return the promise directly (not awaited) for Suspense streaming
   const carSalesPromise: Promise<CarSalesResponse> = carSalesApi.fetchCarSales(

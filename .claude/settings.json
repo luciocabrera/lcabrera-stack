@@ -1,0 +1,48 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(vp fmt*)",
+      "Bash(vp lint*)",
+      "Bash(vp check*)",
+      "Bash(vp install)",
+      "Bash(vp run *)",
+      "Bash(cd apps/react-router && vp fmt*)",
+      "Bash(cd apps/react-router && vp lint*)",
+      "Bash(cd apps/react-router && vp check*)",
+      "Bash(cd apps/react-router && vp run test*)",
+      "Bash(react-router typegen *)",
+      "Bash(tsc --noEmit)",
+      "Bash(claudelint *)",
+      "Bash(npx claudelint *)",
+      "Bash(node scripts/validate-skills.cjs*)",
+      "Bash(node node_modules/vitest/vitest.mjs run *)",
+      "Bash(node apps/react-router/node_modules/vitest/vitest.mjs run *)",
+      "Bash(bash .github/skills/code-smell-zen/scripts/collect-diff.sh*)",
+      "Bash(bash .github/skills/fallow-code-checker/scripts/run-fallow.sh*)",
+      "Write(.tmp/**)",
+      "Edit(.tmp/**)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "claudelint check-all --format json"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd apps/react-router && git diff --quiet HEAD -- . || (vp fmt . && vp lint . --fix && vp check --fix && vp run test)"
+          }
+        ]
+      }
+    ]
+  }
+}

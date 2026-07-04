@@ -8,17 +8,14 @@ const { getPersistedUiStateMock, writePersistedUiStateToSessionStorageMock } =
     writePersistedUiStateToSessionStorageMock: vi.fn(),
   }));
 
-vi.mock('@/components/Table/utils', async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import('@/components/Table/utils')>();
+vi.mock('./getPersistedUiState.util', () => ({
+  getPersistedUiState: getPersistedUiStateMock,
+}));
 
-  return {
-    ...actual,
-    getPersistedUiState: getPersistedUiStateMock,
-    writePersistedUiStateToSessionStorage:
-      writePersistedUiStateToSessionStorageMock,
-  };
-});
+vi.mock('./writePersistedUiStateToSessionStorage.util', () => ({
+  writePersistedUiStateToSessionStorage:
+    writePersistedUiStateToSessionStorageMock,
+}));
 
 import { persistTableMetaUiState } from './persistTableMetaUiState.util';
 

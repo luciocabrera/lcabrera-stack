@@ -1,13 +1,10 @@
 ---
 name: react-19
 description: >
-  React 19 features and patterns with React Compiler.
-  Trigger: When writing React 19 components/hooks in .tsx/.jsx files (Actions, use() hook, refs as props).
-license: MIT
-metadata:
-  version: '1.1.0'
-  scope: [root]
-  auto_invoke: 'Writing or modifying React components, hooks, context, or form actions in .tsx/.jsx files'
+  React 19 features and patterns with React Compiler (Actions, use() hook, refs as props, compiler-safe patterns).
+  Use when writing or modifying React components, hooks, context, or form actions in .tsx/.jsx files.
+user-invocable: true
+paths: ['**/*.tsx', '**/*.jsx']
 allowed-tools: Read
 ---
 

@@ -27,12 +27,7 @@ import {
 
 import type { SettingsDraft } from './Settings.types';
 
-import {
-  DEFAULT_NAVIGATION_COLLAPSED_PREFERENCE,
-  DEFAULT_NAVIGATION_PINNED_PREFERENCE,
-  DEFAULT_NAVIGATION_SIZE_PREFERENCE,
-  DEFAULT_PINNING_PREFERENCE,
-} from './Settings.constants';
+import { DEFAULT_PINNING_PREFERENCE } from './Settings.constants';
 import { styles } from './Settings.stylex';
 import { SettingsOptionSection } from './SettingsOptionSection.component';
 import { toDraft, toGlobalNavigationPreferencesUpdate } from './utils';
@@ -47,27 +42,20 @@ export const Settings = () => {
     return toDraft({ navigationPreferences, pinningPreferences });
   });
 
+  // Single source of truth for default resolution — compare against the same
+  // baseline toDraft produces so preference additions stay in one place.
+  const baseline = toDraft({ navigationPreferences, pinningPreferences });
+
   const hasNavigationChanges =
-    draft.navigationCollapsed !==
-      (navigationPreferences.collapsed ??
-        DEFAULT_NAVIGATION_COLLAPSED_PREFERENCE) ||
-    draft.navigationPinned !==
-      (navigationPreferences.pinned ?? DEFAULT_NAVIGATION_PINNED_PREFERENCE) ||
-    draft.navigationSize !==
-      (navigationPreferences.size ?? DEFAULT_NAVIGATION_SIZE_PREFERENCE);
+    draft.navigationCollapsed !== baseline.navigationCollapsed ||
+    draft.navigationPinned !== baseline.navigationPinned ||
+    draft.navigationSize !== baseline.navigationSize;
 
   const hasPinningChanges =
-    draft.orderConflictResolution !==
-      (pinningPreferences.orderConflictResolution ??
-        DEFAULT_PINNING_PREFERENCE) ||
-    draft.pinSide !==
-      (pinningPreferences.pinSide ?? DEFAULT_PINNING_PREFERENCE) ||
-    draft.pinConflictResolution !==
-      (pinningPreferences.pinConflictResolution ??
-        DEFAULT_PINNING_PREFERENCE) ||
-    draft.unpinConflictResolution !==
-      (pinningPreferences.unpinConflictResolution ??
-        DEFAULT_PINNING_PREFERENCE);
+    draft.orderConflictResolution !== baseline.orderConflictResolution ||
+    draft.pinSide !== baseline.pinSide ||
+    draft.pinConflictResolution !== baseline.pinConflictResolution ||
+    draft.unpinConflictResolution !== baseline.unpinConflictResolution;
 
   const hasChanges = hasNavigationChanges || hasPinningChanges;
 

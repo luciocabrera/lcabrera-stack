@@ -1,5 +1,7 @@
 import type { SortingState } from '@/components/Table';
 
+import { logger } from '@/utils/logger';
+
 type CompactSorting = Record<string, 'asc' | 'desc'>;
 
 /**
@@ -18,7 +20,8 @@ export const deserializeSortingFromURL = <TData>(
       columnKey: columnKey as SortingState<TData>[number]['columnKey'],
       direction,
     }));
-  } catch {
+  } catch (error) {
+    logger.debug('[urlState] Failed to parse sorting param:', error);
     return [];
   }
 };

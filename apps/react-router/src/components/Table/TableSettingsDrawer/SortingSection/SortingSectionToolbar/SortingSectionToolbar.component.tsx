@@ -1,18 +1,15 @@
-import * as stylex from '@stylexjs/stylex';
-
-import { Button } from '@/components/Button';
 import { EraserIcon, ListOrderedIcon, RefreshIcon } from '@/components/Icons';
-import { ICON_SIZE_MD, ICON_SIZE_SM } from '@/design-system/constants';
 
+import type { SectionToolbarButton } from '../../SectionToolbar';
 import type { SortingSectionToolbarProps } from './SortingSectionToolbar.types';
 
+import { SectionToolbar } from '../../SectionToolbar';
 import {
   useClearSorting,
   useResetSorting,
   useSortByColumnOrder,
 } from '../../TableDrawerContext/actions';
 import { useGetColumnsSorting } from '../../TableDrawerContext/selectors';
-import { styles } from './SortingSectionToolbar.stylex';
 
 const SORTING_SECTION_TOOLBAR = {
   clear: { label: 'Clear Sorting' },
@@ -32,59 +29,27 @@ export const SortingSectionToolbar = ({
 
   const hasSorting = sorting.length > 0;
 
-  const isToolbar = variant === 'toolbar';
-  const buttonColor = isToolbar ? 'ghost' : 'outline';
-  const buttonSize = isToolbar ? 'mini' : 'sm';
-  const buttonWidth = isToolbar ? 'auto' : 'full';
-  const iconSize = isToolbar ? ICON_SIZE_SM : ICON_SIZE_MD;
+  const buttons: readonly SectionToolbarButton[] = [
+    {
+      icon: ListOrderedIcon,
+      key: SORTING_SECTION_TOOLBAR.orderByColumnOrder.label,
+      label: SORTING_SECTION_TOOLBAR.orderByColumnOrder.label,
+      onClick: sortByColumnOrder,
+    },
+    {
+      icon: EraserIcon,
+      isDisabled: !hasSorting,
+      key: SORTING_SECTION_TOOLBAR.clear.label,
+      label: SORTING_SECTION_TOOLBAR.clear.label,
+      onClick: clearSorting,
+    },
+    {
+      icon: RefreshIcon,
+      key: SORTING_SECTION_TOOLBAR.reset.label,
+      label: SORTING_SECTION_TOOLBAR.reset.label,
+      onClick: resetSorting,
+    },
+  ];
 
-  return (
-    <div {...stylex.props(isToolbar ? styles.toolbar : styles.container)}>
-      <Button
-        aria-label={SORTING_SECTION_TOOLBAR.orderByColumnOrder.label}
-        color={buttonColor}
-        icon={<ListOrderedIcon size={iconSize} />}
-        isBusy={isBusy}
-        onClick={sortByColumnOrder}
-        size={buttonSize}
-        tooltipContent={
-          isToolbar
-            ? SORTING_SECTION_TOOLBAR.orderByColumnOrder.label
-            : undefined
-        }
-        width={buttonWidth}
-      >
-        {!isToolbar && SORTING_SECTION_TOOLBAR.orderByColumnOrder.label}
-      </Button>
-      <Button
-        aria-label={SORTING_SECTION_TOOLBAR.clear.label}
-        color={buttonColor}
-        icon={<EraserIcon size={iconSize} />}
-        isBusy={isBusy}
-        isDisabled={!hasSorting}
-        onClick={clearSorting}
-        size={buttonSize}
-        tooltipContent={
-          isToolbar ? SORTING_SECTION_TOOLBAR.clear.label : undefined
-        }
-        width={buttonWidth}
-      >
-        {!isToolbar && SORTING_SECTION_TOOLBAR.clear.label}
-      </Button>
-      <Button
-        aria-label={SORTING_SECTION_TOOLBAR.reset.label}
-        color={buttonColor}
-        icon={<RefreshIcon size={iconSize} />}
-        isBusy={isBusy}
-        onClick={resetSorting}
-        size={buttonSize}
-        tooltipContent={
-          isToolbar ? SORTING_SECTION_TOOLBAR.reset.label : undefined
-        }
-        width={buttonWidth}
-      >
-        {!isToolbar && SORTING_SECTION_TOOLBAR.reset.label}
-      </Button>
-    </div>
-  );
+  return <SectionToolbar buttons={buttons} isBusy={isBusy} variant={variant} />;
 };

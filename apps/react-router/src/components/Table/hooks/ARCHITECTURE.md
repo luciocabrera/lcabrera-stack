@@ -7,7 +7,7 @@ Table-specific hooks for column resizing, infinite scroll, and state persistence
 ```
 hooks/
 ├── useColumnResize.hook.ts              → RAF-throttled drag resize
-├── useInfiniteScroll.hook.ts            → Scroll threshold detection
+├── useInfiniteScroll.hook.ts            → Sentinel intersection detection (wraps shared useInfiniteScrollObserver)
 ├── usePersistCookieAction.hook.ts       → Server action cookie persistence for column state
 └── index.ts                             → Barrel export
 ```
@@ -37,21 +37,26 @@ graph LR
 
 ## useInfiniteScroll
 
-Monitors a scroll container and triggers data fetching when near bottom.
+Observes a sentinel element at the end of the scroll container and triggers data
+fetching when it nears the bottom. Delegates to the shared
+`useInfiniteScrollObserver` hook (`@/hooks`), which uses `IntersectionObserver`
+instead of a scroll listener to avoid synchronous layout reads on every scroll
+event.
 
 ```mermaid
 graph LR
-  Scroll["container.onScroll"] --> Check{"distanceFromBottom <= threshold?"}
-  Check -->|"Yes + hasMore + !isLoadingMore"| Fetch["fetchMoreData()"]
-  Check -->|No| Noop["(no-op)"]
+  Sentinel["sentinel enters root + rootMargin"] --> Check{"isEnabled?<br/>(hasMore + !isLoadingMore + onLoadMore)"}
+  Check -->|Yes| Fetch["fetchMoreData()"]
+  Check -->|No| Noop["(observer not attached)"]
 ```
 
-| Param                       | Purpose                               |
-| --------------------------- | ------------------------------------- |
-| `scrollContainerRef`        | Element to watch scroll events on     |
-| `threshold`                 | Pixel distance from bottom to trigger |
-| `hasMore` / `isLoadingMore` | Guard against duplicate fetches       |
-| `fetchMoreData`             | Async function to append next page    |
+| Param                       | Purpose                                                     |
+| --------------------------- | ----------------------------------------------------------- |
+| `scrollContainerRef`        | Scrollable element used as IntersectionObserver root        |
+| `sentinelRef`               | Element rendered at the end of the content to observe       |
+| `threshold`                 | Pixel distance from bottom (encoded as bottom `rootMargin`) |
+| `hasMore` / `isLoadingMore` | Gate the `isEnabled` flag to prevent duplicate fetches      |
+| `fetchMoreData`             | Async function to append next page                          |
 
 Table state hydration is now handled by route `clientLoader`s and passed into
 `TableLayout` as initial state. Keep new loader-seeded merge logic in the

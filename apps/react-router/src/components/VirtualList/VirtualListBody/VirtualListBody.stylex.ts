@@ -31,6 +31,11 @@ export const styles = stylex.create({
     overflow: 'hidden',
     minHeight: 0,
   },
+  sentinel: {
+    pointerEvents: 'none',
+    height: '1px',
+    width: '1px',
+  },
   virtualContainer: (height: string) => ({
     position: 'relative',
     height,

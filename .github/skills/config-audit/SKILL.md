@@ -3,12 +3,8 @@ name: config-audit
 description: Run claudelint check-all, triage findings against known project exceptions, and produce a prioritized fix plan for genuine issues. Use when reviewing AI config health or after modifying AGENTS.md, skills, hooks, or settings.
 argument-hint: 'Optional: pass --verbose to see all skipped exceptions'
 user-invocable: true
+paths: ['AGENTS.md', '.claude/**', '.github/skills/**']
 allowed-tools: Bash(claudelint *)
-license: MIT
-metadata:
-  version: '1.0.0'
-  scope: [root]
-  auto_invoke: 'After modifying AGENTS.md, a skill file, hooks.json, or settings.local.json'
 ---
 
 # Config Audit
@@ -17,9 +13,9 @@ Runs `claudelint check-all`, applies project-specific exception rules to suppres
 
 ## When to Apply
 
-- After modifying `AGENTS.md` / `CLAUDE.md`
+- After modifying `AGENTS.md` / `CLAUDE.md` or any `.claude/rules/*.md` file
 - After adding or editing any skill in `.github/skills/`
-- After changing `.claude/hooks/hooks.json` or `.claude/settings.local.json`
+- After changing `.claude/settings.json` (hooks + shared permissions) or `.claude/settings.local.json`
 - Periodically as an AI config health check
 - Before opening a PR that touches any agent config
 
@@ -48,15 +44,17 @@ Apply these rules **before** building the fix plan. A finding that matches an ex
 
 ### Skills Validator — Exception Rules
 
-| Warning                                        | Reason to skip                                                                |
-| ---------------------------------------------- | ----------------------------------------------------------------------------- |
-| `Skill directory lacks CHANGELOG.md`           | Not required for project-internal skills                                      |
-| `Skill frontmatter lacks "version" field"`     | Low value for project skills that never publish to a registry                 |
-| `File reference \`references/...\` not linked` | Intentional — prose instructions telling which file to open, not broken links |
-| `Unknown string substitution: $BASE`           | Project-specific bash variable in a shell script, not a skill substitution    |
-| `Body too long (N lines)`                      | Arbitrary limit; complex skills like `react-19` legitimately need depth       |
-| `Code block too long (N/40 lines)`             | Arbitrary limit; complete examples need full context                          |
-| `Description missing trigger phrases`          | These skills use the `auto_invoke` frontmatter field instead                  |
+| Warning                                        | Reason to skip                                                                                        |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `Skill directory lacks CHANGELOG.md`           | Not required for project-internal skills                                                              |
+| `Skill frontmatter lacks "version" field"`     | Low value for project skills that never publish to a registry                                         |
+| `File reference \`references/...\` not linked` | Intentional — prose instructions telling which file to open, not broken links                         |
+| `Unknown string substitution: $BASE`           | Project-specific bash variable in a shell script, not a skill substitution                            |
+| `Body too long (N lines)`                      | Arbitrary limit; complex skills like `react-19` legitimately need depth                               |
+| `Code block too long (N/40 lines)`             | Arbitrary limit; complete examples need full context                                                  |
+| `Unknown frontmatter key: "paths"`             | `paths` is a valid Claude Code skill field (file-scoped auto-invoke); claudelint's schema lags behind |
+
+> Note: `Description missing trigger phrases` is **not** an exception — skill descriptions must contain their trigger phrases (they drive auto-invocation). Fix the description instead.
 
 **Never except — always genuine**:
 

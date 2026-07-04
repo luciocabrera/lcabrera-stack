@@ -1,18 +1,17 @@
-import type { FiltersDataState } from '@/components/Table/Table.types';
-
 import { DEFAULT_FILTER_PAGE_SIZE } from '@/components/Table/Table.constants';
 import { getErrorMessage } from '@/components/Table/utils/getErrorMessage.util';
 import { getRequiredOnLoadMore } from '@/components/Table/utils/getRequiredOnLoadMore.util';
 import { resolveFetchMoreState } from '@/components/Table/utils/resolveFetchMoreState.util';
 import { clearPrefetchCache } from '@/utils/prefetch/clearPrefetchCache.util';
-import { firePrefetch } from '@/utils/prefetch/firePrefetch.util';
 import { resolveFromCacheOrFetch } from '@/utils/prefetch/resolveFromCacheOrFetch.util';
 
 import type {
   FetchFilterDataActionArgs,
   FetchFilterDataCallbackArgs,
-  MaybePrefetchArgs,
 } from './useFetchFilterData.types';
+
+import { maybePrefetchFilterPage } from './maybePrefetchFilterPage.util';
+import { setFilterSlice } from './setFilterSlice.util';
 
 export type { FetchFilterDataActionArgs } from './useFetchFilterData.types';
 
@@ -29,25 +28,6 @@ const clearPrefetchIfPresent = <TResponse>({
   }
 
   clearPrefetchCache({ prefetchRef });
-};
-
-const maybePrefetchNextPage = <TResponse>({
-  enablePrefetch,
-  hasMore,
-  nextSkip,
-  onLoadMore,
-  prefetchRef,
-}: MaybePrefetchArgs<TResponse>) => {
-  if (!(enablePrefetch && hasMore && prefetchRef)) {
-    return;
-  }
-
-  firePrefetch({
-    limit: DEFAULT_FILTER_PAGE_SIZE,
-    nextSkip,
-    onLoadMore,
-    prefetchRef,
-  });
 };
 
 export const fetchMoreFilterData = <TData, TResponse>({
@@ -76,12 +56,11 @@ export const fetchMoreFilterData = <TData, TResponse>({
     const requiredOnLoadMore = getRequiredOnLoadMore(onLoadMore);
 
     try {
-      filtersDataStore.set({
-        [columnKey]: {
-          ...currentFilter,
-          isLoadingMore: true,
-        },
-      } as Partial<FiltersDataState<TData>>);
+      setFilterSlice({
+        columnKey,
+        filter: { ...currentFilter, isLoadingMore: true },
+        filtersDataStore,
+      });
 
       const response = await resolveFromCacheOrFetch({
         cache: prefetchRef?.current,
@@ -104,8 +83,9 @@ export const fetchMoreFilterData = <TData, TResponse>({
           response,
         });
 
-      filtersDataStore.set({
-        [columnKey]: {
+      setFilterSlice({
+        columnKey,
+        filter: {
           ...currentFilter,
           data: combinedData,
           hasMore,
@@ -114,12 +94,13 @@ export const fetchMoreFilterData = <TData, TResponse>({
           totalLoadedRows,
           totalRows,
         },
-      } as Partial<FiltersDataState<TData>>);
+        filtersDataStore,
+      });
 
       const metaState = metaStore.get();
       const enablePrefetch = metaState?.enablePrefetch ?? false;
 
-      maybePrefetchNextPage({
+      maybePrefetchFilterPage({
         enablePrefetch,
         hasMore,
         nextSkip: totalLoadedRows,
@@ -133,9 +114,11 @@ export const fetchMoreFilterData = <TData, TResponse>({
       });
       metaStore.set({ error: message });
 
-      filtersDataStore.set({
-        [columnKey]: { ...currentFilter, isLoadingMore: false },
-      } as Partial<FiltersDataState<TData>>);
+      setFilterSlice({
+        columnKey,
+        filter: { ...currentFilter, isLoadingMore: false },
+        filtersDataStore,
+      });
     }
   };
 
