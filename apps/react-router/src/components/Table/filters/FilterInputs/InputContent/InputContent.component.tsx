@@ -1,6 +1,7 @@
 import type {
   DateOperatorType,
   NumberOperatorType,
+  SelectFilter,
   TextFilter,
   TextOperatorType,
 } from '@/types/filterOperators.types';
@@ -49,12 +50,20 @@ export const InputContent = <TData,>({
       );
     }
     default: {
-      // String columns
       const textOp = operator as TextOperatorType;
-
-      // Show SelectFilterInput when column supports options AND operator is equals/notEquals
       const shouldShowSelectList =
         hasFetchableOptions && (textOp === 'equals' || textOp === 'notEquals');
+
+      const handleSelectChange = (selectFilter?: SelectFilter) => {
+        if (selectFilter) {
+          onChange({
+            ...selectFilter,
+            operator: textOp === 'notEquals' ? 'notEquals' : 'equals',
+          });
+        } else {
+          onChange();
+        }
+      };
 
       if (shouldShowSelectList) {
         return (
@@ -66,16 +75,7 @@ export const InputContent = <TData,>({
                 : undefined
             }
             listMaxHeight={listMaxHeight}
-            onChange={(selectFilter) => {
-              if (selectFilter) {
-                onChange({
-                  ...selectFilter,
-                  operator: textOp === 'notEquals' ? 'notEquals' : 'equals',
-                });
-              } else {
-                onChange();
-              }
-            }}
+            onChange={handleSelectChange}
             shouldFillHeight={shouldFillHeight}
           />
         );

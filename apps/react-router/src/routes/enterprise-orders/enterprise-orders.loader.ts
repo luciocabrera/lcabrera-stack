@@ -6,6 +6,7 @@ import { INITIAL_PAGE_SIZE } from '@/components/Table/Table.constants';
 import { enterpriseOrdersApi } from '@/services';
 
 import { readTableLoaderStateFromRequest } from '../utils/readTableLoaderStateFromRequest.util';
+import { sanitizeSorting } from '../utils/sanitizeSorting.util';
 import {
   COLUMNS,
   DEFAULT_COLUMN_PINNING,
@@ -37,10 +38,7 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
     persistenceKey: PERSISTENCE_KEY,
     request,
   });
-  const sanitizedSorting = sorting.filter(
-    (s): s is { columnKey: keyof EnterpriseOrder; direction: 'asc' | 'desc' } =>
-      s.direction !== undefined && s.columnKey !== 'actions',
-  );
+  const sanitizedSorting = sanitizeSorting<EnterpriseOrder>(sorting);
 
   // Return the promise directly (not awaited) for Suspense streaming
   const enterpriseOrdersPromise: Promise<EnterpriseOrdersResponse> =

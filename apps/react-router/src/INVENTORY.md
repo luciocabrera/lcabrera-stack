@@ -6,35 +6,36 @@ Before creating anything new, check this inventory. If something here does the j
 
 ## Components
 
-| Component                            | Location                                               | Description                                                                                                                       |
-| ------------------------------------ | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
-| `AppNavigation`                      | `components/AppNavigation/`                            | App-owned left sidebar navigation using `SidePanel`, `Toolbar`, route item constants, compact/full modes, and pin/unpin controls  |
-| `Button`                             | `components/Button/`                                   | Interactive button — 8 color variants, 5 sizes, icon, loading, tooltip                                                            |
-| `Card`                               | `components/Card/`                                     | Container with elevation, color, padding, and optional interactivity                                                              |
-| `Checkbox`                           | `components/Checkbox/`                                 | Reusable controlled checkbox with shared custom icon overlay used by table and VirtualList                                        |
-| `DevStyleXInject`                    | `components/DevStyleXInject/`                          | Dev-only StyleX CSS injector for HMR; must be at app root                                                                         |
-| `DraggableList`                      | `components/DraggableList/`                            | Drag-and-drop reorderable list using native drag events                                                                           |
-| `Icons`                              | `components/Icons/`                                    | 32 SVG icon components (see `Icons/index.ts` for full list); 24×24 stroke icons share the internal `IconBase` svg wrapper         |
-| `InfoBox`                            | `components/InfoBox/`                                  | Styled container for informational messages and empty states                                                                      |
-| `Modal`                              | `components/Modal/`                                    | Native `<dialog>` modal with title, footer, Esc-to-close                                                                          |
-| `NavLink`                            | `components/NavLink/`                                  | Router-aware navigation link with color, size, icon, orientation                                                                  |
-| `NotificationCenter`                 | `components/NotificationCenter/`                       | Global corner-based notification viewport with dismiss + auto-hide using NotificationContext, local constants, and view utilities |
-| `PinSideModal`                       | `components/PinSideModal/`                             | Modal for choosing column pin side (left / right / closest-edge)                                                                  |
-| `RadioOptionGroup`                   | `components/RadioOptionGroup/`                         | Generic `<TValue extends string>` radio button group                                                                              |
-| `RouteErrorBoundary`                 | `components/RouteErrorBoundary/`                       | Shared route error boundary display with retry button; accepts `defaultMessage` and `error` props                                 |
-| `SidePanel`                          | `components/SidePanel/`                                | Off-canvas panel with 10 sub-components, pinning, portal support                                                                  |
-| `Table`                              | `components/Table/`                                    | Full-featured data table — sort, filter, pin, resize, virtualise, persist, opt-in prefetch (ADR-006)                              |
-| `TableSettingsDrawerSkeleton`        | `components/Table/TableSettingsDrawerSkeleton/`        | Legacy pinned loading shell kept as a fallback artifact; active drawer loading now uses busy overlays on real settings controls   |
-| `TableSettingsDrawer/DetailsSection` | `components/Table/TableSettingsDrawer/DetailsSection/` | Read-only details panel inside table settings showing required counts plus optional metadata                                      |
-| `TableBodyRows`                      | `components/Table/TableBodyRows/`                      | Row-rendering delegate for TableBody — owns the visible-row loop and cell creation via utility reuse                              |
-| `Tabs`                               | `components/Tabs/`                                     | Keyboard-navigable tab bar using React 19 `<Activity>`                                                                            |
-| `Tag`                                | `components/Tag/`                                      | Label chip with optional remove button                                                                                            |
-| `ToggleSwitch`                       | `components/ToggleSwitch/`                             | Accessible boolean toggle (controlled, `role="switch"`)                                                                           |
-| `Toolbar`                            | `components/Toolbar/`                                  | Horizontal/vertical toolbar of Button/NavLink items                                                                               |
-| `SectionToolbar`                     | `components/Table/TableSettingsDrawer/SectionToolbar/` | Shared drawer-section toolbar: renders action buttons from descriptors + owns footer/toolbar variant presentation                 |
-| `Tooltip`                            | `components/Tooltip/`                                  | CSS Anchor + Popover API tooltip, 4 placements, animated                                                                          |
-| `VirtualList`                        | `components/VirtualList/`                              | Virtualized list with extracted Header/Body subcomponents, search, select-all, checkboxes, lazy load, parent-contained sizing     |
-| `VirtualSelect`                      | `components/VirtualSelect/`                            | Parent-contained dropdown select backed by `VirtualList`; `string[]` or `{ label, value }[]` options                              |
+| Component                            | Location                                               | Description                                                                                                                        |
+| ------------------------------------ | ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `AppNavigation`                      | `components/AppNavigation/`                            | App-owned left sidebar navigation using `SidePanel`, `Toolbar`, route item constants, compact/full modes, and pin/unpin controls   |
+| `Button`                             | `components/Button/`                                   | Interactive button — 8 color variants, 5 sizes, icon, loading, tooltip                                                             |
+| `Card`                               | `components/Card/`                                     | Container with elevation, color, padding, and optional interactivity                                                               |
+| `Checkbox`                           | `components/Checkbox/`                                 | Reusable controlled checkbox with shared custom icon overlay used by table and VirtualList                                         |
+| `DevStyleXInject`                    | `components/DevStyleXInject/`                          | Dev-only StyleX CSS injector for HMR; must be at app root                                                                          |
+| `DraggableList`                      | `components/DraggableList/`                            | Drag-and-drop reorderable list using native drag events                                                                            |
+| `Icons`                              | `components/Icons/`                                    | 32 SVG icon components (see `Icons/index.ts` for full list); 24×24 stroke icons share the internal `IconBase` svg wrapper          |
+| `InfoBox`                            | `components/InfoBox/`                                  | Styled container for informational messages and empty states                                                                       |
+| `Modal`                              | `components/Modal/`                                    | Native `<dialog>` modal with title, footer, Esc-to-close                                                                           |
+| `NavLink`                            | `components/NavLink/`                                  | Router-aware navigation link with color, size, icon, orientation                                                                   |
+| `NotificationCenter`                 | `components/NotificationCenter/`                       | Global corner-based notification viewport with dismiss + auto-hide using NotificationContext, local constants, and view utilities  |
+| `PinSideModal`                       | `components/PinSideModal/`                             | Modal for choosing column pin side (left / right / closest-edge)                                                                   |
+| `RadioOptionGroup`                   | `components/RadioOptionGroup/`                         | Generic `<TValue extends string>` radio button group                                                                               |
+| `RouteErrorBoundary`                 | `components/RouteErrorBoundary/`                       | Shared route error boundary display with retry button; accepts `defaultMessage` and `error` props                                  |
+| `SidePanel`                          | `components/SidePanel/`                                | Off-canvas panel with 10 sub-components, pinning, portal support                                                                   |
+| `Table`                              | `components/Table/`                                    | Full-featured data table — sort, filter, pin, resize, virtualise, persist, opt-in prefetch (ADR-006)                               |
+| `TableSettingsDrawerSkeleton`        | `components/Table/TableSettingsDrawerSkeleton/`        | Legacy pinned loading shell kept as a fallback artifact; active drawer loading now uses busy overlays on real settings controls    |
+| `TableSettingsDrawer/DetailsSection` | `components/Table/TableSettingsDrawer/DetailsSection/` | Read-only details panel inside table settings showing required counts plus optional metadata                                       |
+| `TableBodyRows`                      | `components/Table/TableBodyRows/`                      | Row-rendering delegate for TableBody — owns the visible-row loop and cell creation via utility reuse                               |
+| `Tabs`                               | `components/Tabs/`                                     | Keyboard-navigable tab bar using React 19 `<Activity>`                                                                             |
+| `Tag`                                | `components/Tag/`                                      | Label chip with optional remove button                                                                                             |
+| `ToggleSwitch`                       | `components/ToggleSwitch/`                             | Accessible boolean toggle (controlled, `role="switch"`)                                                                            |
+| `Toolbar`                            | `components/Toolbar/`                                  | Horizontal/vertical toolbar of Button/NavLink items                                                                                |
+| `SectionToolbar`                     | `components/Table/TableSettingsDrawer/SectionToolbar/` | Shared drawer-section toolbar: renders action buttons from descriptors + owns footer/toolbar variant presentation                  |
+| `ColumnWidthPresetButtons`           | `components/Table/shared/ColumnWidthPresetButtons/`    | Shared 3-button column-width preset group (min/max/default); used by `GeneralSection` and `GeneralSettingsSection` in both drawers |
+| `Tooltip`                            | `components/Tooltip/`                                  | CSS Anchor + Popover API tooltip, 4 placements, animated                                                                           |
+| `VirtualList`                        | `components/VirtualList/`                              | Virtualized list with extracted Header/Body subcomponents, search, select-all, checkboxes, lazy load, parent-contained sizing      |
+| `VirtualSelect`                      | `components/VirtualSelect/`                            | Parent-contained dropdown select backed by `VirtualList`; `string[]` or `{ label, value }[]` options                               |
 
 ---
 
@@ -147,10 +148,11 @@ Before creating anything new, check this inventory. If something here does the j
 
 ### `src/components/Table/TableSettingsDrawer/TableDrawerContext/actions/`
 
-| Artifact                         | Location                                                                                                 | Description                                                                                     |
-| -------------------------------- | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `buildBatchTableSettingsUpdate`  | `components/Table/TableSettingsDrawer/TableDrawerContext/actions/buildBatchTableSettingsUpdate.util.ts`  | Normalizes a table-drawer snapshot into the full payload expected by `useBatchSetTableSettings` |
-| `useBatchSetTableDrawerSettings` | `components/Table/TableSettingsDrawer/TableDrawerContext/actions/useBatchSetTableDrawerSettings.hook.ts` | Reads drawer-local table state and commits it through the table-level batch action              |
+| Artifact                         | Location                                                                                                 | Description                                                                                                          |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `buildBatchTableSettingsUpdate`  | `components/Table/TableSettingsDrawer/TableDrawerContext/actions/buildBatchTableSettingsUpdate.util.ts`  | Normalizes a table-drawer snapshot into the full payload expected by `useBatchSetTableSettings`                      |
+| `useBatchSetTableDrawerSettings` | `components/Table/TableSettingsDrawer/TableDrawerContext/actions/useBatchSetTableDrawerSettings.hook.ts` | Reads drawer-local table state and commits it through the table-level batch action                                   |
+| `getDefaultColumnPinning`        | `components/Table/TableSettingsDrawer/TableDrawerContext/actions/getDefaultColumnPinning.util.ts`        | Returns table's current column pinning or the empty-side default; shared by clear-all and clear-column-order actions |
 
 ### `src/components/test-utils/`
 
@@ -183,14 +185,15 @@ Before creating anything new, check this inventory. If something here does the j
 
 ### `src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/`
 
-| Function                            | Location                                                                                                                                    | Description                                                                                                        |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `resolveOrderConflictUpdate`        | `components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/resolveOrderConflictUpdate.util.ts`        | Decides whether a reordered column layout can be applied directly or must open/auto-accept the order-conflict flow |
-| `applyToggleColumnPinResolution`    | `components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/applyToggleColumnPinResolution.util.ts`    | Applies resolved toggle-pin outcomes by dispatching pinning updates, modal state updates, and auto-accept actions  |
-| `resolveToggleColumnPinUpdate`      | `components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/resolveToggleColumnPinUpdate.util.ts`      | Resolves static short-circuit plus pin-toggle intent into direct update or modal/auto-accept outcomes              |
-| `resolveAcceptedOrderConflictState` | `components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/resolveAcceptedOrderConflictState.util.ts` | Resolves accepted order-conflict state into final order/pinning with static restoration                            |
-| `resolveAcceptedPinSideUpdate`      | `components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/resolveAcceptedPinSideUpdate.util.ts`      | Resolves accepted pin-side actions into direct updates or conflict-modal/auto-accept outcomes                      |
-| `resolveAcceptedUnpinConflictState` | `components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/resolveAcceptedUnpinConflictState.util.ts` | Resolves unpin-conflict choices into pinning-only updates or reorder+pinning updates                               |
+| Function                            | Location                                                                                                                                    | Description                                                                                                                          |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `resolveOrderConflictUpdate`        | `components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/resolveOrderConflictUpdate.util.ts`        | Decides whether a reordered column layout can be applied directly or must open/auto-accept the order-conflict flow                   |
+| `applyToggleColumnPinResolution`    | `components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/applyToggleColumnPinResolution.util.ts`    | Applies resolved toggle-pin outcomes by dispatching pinning updates, modal state updates, and auto-accept actions                    |
+| `resolveToggleColumnPinUpdate`      | `components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/resolveToggleColumnPinUpdate.util.ts`      | Resolves static short-circuit plus pin-toggle intent into direct update or modal/auto-accept outcomes                                |
+| `resolveAcceptedOrderConflictState` | `components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/resolveAcceptedOrderConflictState.util.ts` | Resolves accepted order-conflict state into final order/pinning with static restoration                                              |
+| `resolveAcceptedPinSideUpdate`      | `components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/resolveAcceptedPinSideUpdate.util.ts`      | Resolves accepted pin-side actions into direct updates or conflict-modal/auto-accept outcomes                                        |
+| `resolveAcceptedUnpinConflictState` | `components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/resolveAcceptedUnpinConflictState.util.ts` | Resolves unpin-conflict choices into pinning-only updates or reorder+pinning updates                                                 |
+| `readPinActionState`                | `components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/utils/readPinActionState.util.ts`                | Reads columns, order, pinning, and static keys from table + drawer store snapshots; shared by pin-conflict and pin-side action hooks |
 
 ### `src/components/Table/contexts/TableData/utils/`
 
@@ -321,9 +324,10 @@ Before creating anything new, check this inventory. If something here does the j
 
 ### `src/routes/utils/`
 
-| Function                          | Location                                               | Description                                                             |
-| --------------------------------- | ------------------------------------------------------ | ----------------------------------------------------------------------- |
-| `readTableLoaderStateFromRequest` | `routes/utils/readTableLoaderStateFromRequest.util.ts` | Shared loader bootstrap from URL + cookie state for table-backed routes |
+| Function                          | Location                                               | Description                                                                                              |
+| --------------------------------- | ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| `readTableLoaderStateFromRequest` | `routes/utils/readTableLoaderStateFromRequest.util.ts` | Shared loader bootstrap from URL + cookie state for table-backed routes                                  |
+| `sanitizeSorting`                 | `routes/utils/sanitizeSorting.util.ts`                 | Strips undefined-direction and `'actions'`-keyed entries from a SortingState before passing to API calls |
 
 ---
 

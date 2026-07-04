@@ -1,4 +1,3 @@
-import type { ColumnOrderState } from '@/components/Table/Table.types';
 import type { PinSide } from '@/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
 
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
@@ -7,6 +6,7 @@ import { useGetGlobalPinConflictResolutionPreference } from '@/contexts/GlobalSe
 
 import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
 import { useAcceptPinConflict } from './useAcceptPinConflict.hook';
+import { readPinActionState } from './utils/readPinActionState.util';
 import { resolveAcceptedPinSideUpdate } from './utils/resolveAcceptedPinSideUpdate.util';
 
 export const useAcceptPinSide = () => {
@@ -21,12 +21,8 @@ export const useAcceptPinSide = () => {
     const pinSideModal = modalsStore.get()?.pinSideModal;
     if (!pinSideModal) return;
 
-    const tableState = tableColumnsStore.get();
-    const columns = tableState?.columns ?? [];
-    const staticKeys = tableState?.staticKeys;
-    const drawerState = drawerColumnsStore.get();
-    const columnsOrder = drawerState?.columnOrder ?? ([] as ColumnOrderState);
-    const columnPinning = drawerState?.columnPinning ?? { left: [], right: [] };
+    const { columnPinning, columns, columnsOrder, staticKeys } =
+      readPinActionState(tableColumnsStore.get(), drawerColumnsStore.get());
 
     const { columnKey } = pinSideModal;
     const resolvedUpdate = resolveAcceptedPinSideUpdate({

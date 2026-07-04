@@ -1,6 +1,8 @@
 import type { ColumnFilter } from '@/types/filterOperators.types';
 
-const isDateFilterValid = (filter: Extract<ColumnFilter, { type: 'date' }>) => {
+export const isDateFilterValid = (
+  filter: Extract<ColumnFilter, { type: 'date' }>,
+) => {
   if (!filter.value) return false;
   if (filter.operator === 'between') {
     return Boolean(filter.value2);
@@ -8,7 +10,7 @@ const isDateFilterValid = (filter: Extract<ColumnFilter, { type: 'date' }>) => {
   return true;
 };
 
-const isNumberFilterValid = (
+export const isNumberFilterValid = (
   filter: Extract<ColumnFilter, { type: 'number' }>,
 ) => {
   const { operator, value, value2 } = filter;
@@ -26,7 +28,7 @@ const isNumberFilterValid = (
   return true;
 };
 
-const isSelectFilterValid = (
+export const isSelectFilterValid = (
   filter: Extract<ColumnFilter, { type: 'multiSelect' | 'select' }>,
 ) => {
   if ('values' in filter && filter.values) {
@@ -35,7 +37,9 @@ const isSelectFilterValid = (
   return Boolean('value' in filter && filter.value);
 };
 
-const isTextFilterValid = (filter: Extract<ColumnFilter, { type: 'text' }>) => {
+export const isTextFilterValid = (
+  filter: Extract<ColumnFilter, { type: 'text' }>,
+) => {
   return Boolean(filter.value?.trim());
 };
 

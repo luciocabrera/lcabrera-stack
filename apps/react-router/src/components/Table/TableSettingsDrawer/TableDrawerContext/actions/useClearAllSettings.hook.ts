@@ -1,7 +1,6 @@
 import type {
   ColumnFiltersState,
   ColumnOrderState,
-  ColumnPinningState,
   ColumnSizingState,
   ColumnVisibilityState,
   SortingState,
@@ -10,6 +9,7 @@ import type {
 import { useTableConfigContextValue } from '@/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 
 import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook';
+import { getDefaultColumnPinning } from './getDefaultColumnPinning.util';
 
 /**
  * Hook to clear all table settings to empty defaults
@@ -19,9 +19,9 @@ export const useClearAllSettings = () => {
   const { columnsStore } = useTableDrawerContextValue();
 
   return () => {
-    const defaultPinning =
-      tableColumnsStore.get()?.columnPinning ??
-      ({ left: [], right: [] } as ColumnPinningState);
+    const defaultPinning = getDefaultColumnPinning(
+      tableColumnsStore.get()?.columnPinning,
+    );
 
     columnsStore.set({
       columnFilters: {} as ColumnFiltersState,

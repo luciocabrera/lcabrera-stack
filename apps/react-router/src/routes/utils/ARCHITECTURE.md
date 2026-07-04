@@ -10,6 +10,7 @@ Shared route-level loader utilities.
 ## Current Utilities
 
 - `readTableLoaderStateFromRequest.util.ts` - Reads table state for SSR loaders from URL params and persisted cookies.
+- `sanitizeSorting.util.ts` - Removes undefined-direction and `'actions'`-key entries from a `SortingState` before passing to API calls. Used by all table route loaders.
 - `shouldRevalidatePersistCookieAction.util.ts` - Skips loader revalidation for `persist-cookie` action responses with `204` status.
 
 ### `readTableLoaderStateFromRequest.util.ts`
