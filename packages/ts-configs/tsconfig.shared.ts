@@ -7,13 +7,19 @@ type TsConfig = {
 type CreateAppTsConfigArgs = {
   readonly exclude?: readonly string[];
   readonly include?: readonly string[];
+  /** Extra path aliases merged on top of the default `@/*` → `./src/*` mapping — for a package's own self-referencing alias (e.g. `@repo/ui/*`) or a cross-package one. */
+  readonly paths?: Record<string, readonly string[]>;
   readonly rootDirs?: readonly string[];
+  /** Extra ambient type roots appended to the default `['vite/client']` — e.g. `'node'` for a package whose src/ mixes browser-context and Node-context (SSR entry) files. */
+  readonly types?: readonly string[];
   readonly tsBuildInfoFile: string;
 };
 
 type CreateNodeTsConfigArgs = {
   readonly exclude?: readonly string[];
   readonly include?: readonly string[];
+  /** Path aliases for this config — node configs have none by default. */
+  readonly paths?: Record<string, readonly string[]>;
   readonly tsBuildInfoFile: string;
 };
 
@@ -34,8 +40,10 @@ const NODE_TS_CONFIG: Omit<TsConfig, 'compilerOptions'> = {
 };
 
 const createAppCompilerOptions = ({
+  paths,
   rootDirs = ['.', './.react-router/types'],
   tsBuildInfoFile,
+  types = [],
 }: CreateAppTsConfigArgs): Record<string, unknown> => ({
   allowImportingTsExtensions: true,
   erasableSyntaxOnly: true,
@@ -54,6 +62,7 @@ const createAppCompilerOptions = ({
   noUnusedParameters: true,
   paths: {
     '@/*': ['./src/*'],
+    ...paths,
   },
   resolveJsonModule: true,
   rootDirs,
@@ -61,12 +70,13 @@ const createAppCompilerOptions = ({
   strict: true,
   target: 'ES2025',
   tsBuildInfoFile,
-  types: ['vite/client'],
+  types: ['vite/client', ...types],
   useDefineForClassFields: true,
   verbatimModuleSyntax: true,
 });
 
 const createNodeCompilerOptions = ({
+  paths,
   tsBuildInfoFile,
 }: CreateNodeTsConfigArgs): Record<string, unknown> => ({
   allowImportingTsExtensions: true,
@@ -81,6 +91,7 @@ const createNodeCompilerOptions = ({
   noUncheckedSideEffectImports: true,
   noUnusedLocals: true,
   noUnusedParameters: true,
+  ...(paths ? { paths } : {}),
   skipLibCheck: true,
   strict: true,
   target: 'ES2025',
@@ -106,12 +117,19 @@ const mergeTsConfig = (
 export const createAppTsConfig = ({
   exclude,
   include,
+  paths,
   rootDirs,
   tsBuildInfoFile,
+  types,
 }: CreateAppTsConfigArgs): TsConfig =>
   mergeTsConfig(
     {
-      compilerOptions: createAppCompilerOptions({ rootDirs, tsBuildInfoFile }),
+      compilerOptions: createAppCompilerOptions({
+        paths,
+        rootDirs,
+        tsBuildInfoFile,
+        types,
+      }),
       exclude: APP_TS_CONFIG.exclude,
       include: APP_TS_CONFIG.include,
     },
@@ -124,11 +142,12 @@ export const createAppTsConfig = ({
 export const createNodeTsConfig = ({
   exclude,
   include,
+  paths,
   tsBuildInfoFile,
 }: CreateNodeTsConfigArgs): TsConfig =>
   mergeTsConfig(
     {
-      compilerOptions: createNodeCompilerOptions({ tsBuildInfoFile }),
+      compilerOptions: createNodeCompilerOptions({ paths, tsBuildInfoFile }),
       exclude: NODE_TS_CONFIG.exclude,
       include: NODE_TS_CONFIG.include,
     },

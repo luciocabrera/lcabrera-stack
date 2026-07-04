@@ -4,8 +4,8 @@ import type { CarSale, CarSalesResponse } from '@/services';
 
 import { carSalesApi } from '@/services';
 
-import { readTableLoaderStateFromRequest } from '../utils/readTableLoaderStateFromRequest.util';
-import { sanitizeSorting } from '../utils/sanitizeSorting.util';
+import { readTableLoaderStateFromRequest } from '@repo/ui/routing/readTableLoaderStateFromRequest.util';
+import { sanitizeSorting } from '@repo/ui/routing/sanitizeSorting.util';
 import {
   COLUMNS,
   PERSISTENCE_KEY,

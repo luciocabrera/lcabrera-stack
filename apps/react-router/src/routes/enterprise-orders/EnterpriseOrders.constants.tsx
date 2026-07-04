@@ -3,16 +3,16 @@ import { Link } from 'react-router';
 import type {
   ColumnPinningState,
   TableColumn,
-} from '@/components/Table/Table.types';
+} from '@repo/ui/components/Table/Table.types';
 
-import { Button } from '@/components/Button';
-import { EyeIcon } from '@/components/Icons';
-import { ICON_SIZE_XS } from '@/design-system/constants/iconSizes.constants';
+import { Button } from '@repo/ui/components/Button';
+import { EyeIcon } from '@repo/ui/components/Icons';
+import { ICON_SIZE_XS } from '@repo/ui/design-system/constants/iconSizes.constants';
 import { type EnterpriseOrder, enterpriseOrdersApi } from '@/services';
 import {
   createDistinctFilterOptions,
   createStaticFilterOptions,
-} from '@/utils/filters';
+} from '@repo/ui/utils/filters';
 
 type BasicColumnArgs = {
   readonly dataType: 'boolean' | 'currency' | 'date' | 'number' | 'string';

@@ -1,10 +1,10 @@
-import type { TableColumn } from '@/components/Table/Table.types';
+import type { TableColumn } from '@repo/ui/components/Table/Table.types';
 
 import {
   getInitialColumnsState,
   getInitialMetaState,
-} from '@/components/Table/contexts/TableConfig/utils';
-import { readPersistedUiStateFromSessionStorage } from '@/components/Table/utils';
+} from '@repo/ui/components/Table/contexts/TableConfig/utils';
+import { readPersistedUiStateFromSessionStorage } from '@repo/ui/components/Table/utils';
 
 import type {
   GenerateCellValueArgs,

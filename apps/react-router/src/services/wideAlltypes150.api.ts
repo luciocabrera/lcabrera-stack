@@ -2,8 +2,8 @@ import {
   buildPaginatedQueryParams,
   fetchAndValidate,
   getApiBaseUrl,
-} from '@/utils/api';
-import { isObject } from '@/utils/typeGuards';
+} from '@repo/api/api';
+import { isObject } from '@repo/ui/utils/typeGuards';
 
 /**
  * Wide All-Types 150 API Service

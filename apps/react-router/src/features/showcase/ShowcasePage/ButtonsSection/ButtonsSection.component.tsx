@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { Button } from '@/components/Button';
+import { Button } from '@repo/ui/components/Button';
 
 import { styles } from '../ShowcasePage.stylex';
 import { ShowcaseSection } from '../ShowcaseSection';

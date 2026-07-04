@@ -1,1 +1,1 @@
-export { action } from './persist-cookie.action';
+export { action } from '@repo/ui/routing/persistCookie.action';

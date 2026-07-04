@@ -2,7 +2,7 @@ import { useLoaderData } from 'react-router';
 
 import type { WideAlltypes150, WideAlltypes150Response } from '@/services';
 
-import { TableLayout } from '@/components/Table/TableLayout';
+import { TableLayout } from '@repo/ui/components/Table/TableLayout';
 import { wideAlltypes150Api } from '@/services';
 
 import type { loader } from './wide-alltypes-150.loader';

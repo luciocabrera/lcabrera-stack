@@ -1,0 +1,70 @@
+import type { TableMetaState } from '@repo/ui/components/Table/Table.types';
+import type { PersistedUiState } from '@repo/ui/components/Table/utils/persistence.types';
+
+import {
+  DEFAULT_COLUMN_OVERSCAN,
+  DEFAULT_OVERSCAN,
+  DEFAULT_ROW_HEIGHT,
+  INFINITE_SCROLL_THRESHOLD,
+  INITIAL_PAGE_SIZE,
+  IS_PREFETCH_ENABLED,
+  LOAD_MORE_PAGE_SIZE,
+} from '@repo/ui/components/Table/Table.constants';
+
+type GetInitialMetaStateArgs = Partial<TableMetaState> & {
+  readonly persistedUiState?: PersistedUiState;
+};
+
+export const getInitialMetaState = ({
+  columnOverscan = DEFAULT_COLUMN_OVERSCAN,
+  columnSettingsSelectedTab = 'general',
+  density = 'compact',
+  drawersSyncNonce = 0,
+  enablePrefetch = IS_PREFETCH_ENABLED,
+  error,
+  initialPageSize = INITIAL_PAGE_SIZE,
+  isBordered = true,
+  isColumnSettingsOpen = false,
+  isColumnSettingsPinned = false,
+  isStriped = true,
+  isTableSettingsOpen = false,
+  isTableSettingsPinned = false,
+  loadMorePageSize = LOAD_MORE_PAGE_SIZE,
+  overscan = DEFAULT_OVERSCAN,
+  persistedUiState = {},
+  persistenceKey = '',
+  placeholderRowCount = INITIAL_PAGE_SIZE,
+  rowHeight = DEFAULT_ROW_HEIGHT,
+  tableSettingsExpandedFilters = [],
+  tableSettingsSelectedTab = 'general',
+  threshold = INFINITE_SCROLL_THRESHOLD,
+  wasTableSettingsOpenBeforeColumnSettings = false,
+  ...rest
+}: GetInitialMetaStateArgs): TableMetaState => {
+  return {
+    columnOverscan,
+    columnSettingsSelectedTab,
+    density,
+    drawersSyncNonce,
+    enablePrefetch,
+    error,
+    initialPageSize,
+    isBordered,
+    isColumnSettingsOpen,
+    isColumnSettingsPinned,
+    isStriped,
+    isTableSettingsOpen,
+    isTableSettingsPinned,
+    loadMorePageSize,
+    overscan,
+    persistenceKey,
+    placeholderRowCount,
+    rowHeight,
+    tableSettingsExpandedFilters,
+    tableSettingsSelectedTab,
+    threshold,
+    wasTableSettingsOpenBeforeColumnSettings,
+    ...rest,
+    ...persistedUiState,
+  };
+};

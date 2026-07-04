@@ -1,0 +1,17 @@
+import * as stylex from '@stylexjs/stylex';
+
+import { filterBaseStyles } from '@repo/ui/design-system/tokens/filters.stylex';
+
+const localStyles = stylex.create({
+  input: {
+    flex: '1',
+    minWidth: 0,
+  },
+});
+
+export const styles = {
+  container: filterBaseStyles.container,
+  input: [filterBaseStyles.input, localStyles.input],
+  inputGroup: filterBaseStyles.inputGroup,
+  separator: filterBaseStyles.separator,
+};

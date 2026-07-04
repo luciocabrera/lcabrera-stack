@@ -2,7 +2,7 @@ import { useLoaderData } from 'react-router';
 
 import type { CarSale, CarSalesResponse } from '@/services';
 
-import { TableLayout } from '@/components/Table/TableLayout';
+import { TableLayout } from '@repo/ui/components/Table/TableLayout';
 
 import type { loader } from './car-sales.loader';
 

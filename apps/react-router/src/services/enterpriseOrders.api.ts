@@ -1,13 +1,16 @@
-import type { ColumnFiltersState, SortingState } from '@/components/Table';
+import type {
+  ColumnFiltersState,
+  SortingState,
+} from '@repo/ui/components/Table';
 
 import {
   buildPaginatedQueryParams,
   fakeDelay,
   fetchAndValidate,
   getApiBaseUrl,
-} from '@/utils/api';
-import { createLogger } from '@/utils/logger';
-import { isObject } from '@/utils/typeGuards';
+} from '@repo/api/api';
+import { createLogger } from '@repo/ui/utils/logger';
+import { isObject } from '@repo/ui/utils/typeGuards';
 
 const log = createLogger({ prefix: '[orders]' });
 

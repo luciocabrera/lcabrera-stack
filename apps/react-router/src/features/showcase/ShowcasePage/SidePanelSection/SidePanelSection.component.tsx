@@ -1,27 +1,32 @@
 import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 
-import { Button } from '@/components/Button';
-import { Card, CardBody, CardDescription, CardTitle } from '@/components/Card';
+import { Button } from '@repo/ui/components/Button';
+import {
+  Card,
+  CardBody,
+  CardDescription,
+  CardTitle,
+} from '@repo/ui/components/Card';
 import {
   InfoIcon,
   MenuCloseIcon,
   MenuIcon,
   SettingsIcon,
   SuccessIcon,
-} from '@/components/Icons';
+} from '@repo/ui/components/Icons';
 import {
   SidePanel,
   SidePanelBody,
   SidePanelFooter,
   SidePanelHeader,
   SidePanelTitle,
-} from '@/components/SidePanel';
+} from '@repo/ui/components/SidePanel';
 import {
   HorizontalToolbarExample,
   HorizontalToolbarExampleShort,
-} from '@/components/Toolbar/Toolbar.examples';
-import { ICON_SIZE_MD } from '@/design-system/constants';
+} from '@repo/ui/components/Toolbar/Toolbar.examples';
+import { ICON_SIZE_MD } from '@repo/ui/design-system/constants';
 
 import { styles as pageStyles } from '../ShowcasePage.stylex';
 import { ShowcaseSection } from '../ShowcaseSection';

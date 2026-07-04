@@ -2,11 +2,11 @@ import type { LoaderFunctionArgs } from 'react-router';
 
 import type { EnterpriseOrder, EnterpriseOrdersResponse } from '@/services';
 
-import { INITIAL_PAGE_SIZE } from '@/components/Table/Table.constants';
+import { INITIAL_PAGE_SIZE } from '@repo/ui/components/Table/Table.constants';
 import { enterpriseOrdersApi } from '@/services';
 
-import { readTableLoaderStateFromRequest } from '../utils/readTableLoaderStateFromRequest.util';
-import { sanitizeSorting } from '../utils/sanitizeSorting.util';
+import { readTableLoaderStateFromRequest } from '@repo/ui/routing/readTableLoaderStateFromRequest.util';
+import { sanitizeSorting } from '@repo/ui/routing/sanitizeSorting.util';
 import {
   COLUMNS,
   DEFAULT_COLUMN_PINNING,

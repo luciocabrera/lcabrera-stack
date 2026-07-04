@@ -1,7 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { spacing, typography } from '@/design-system/tokens/base.stylex';
-import { colors } from '@/design-system/tokens/colors.stylex';
+import { spacing, typography } from '@repo/ui/design-system/tokens/base.stylex';
+import { colors } from '@repo/ui/design-system/tokens/colors.stylex';
 
 export const styles = stylex.create({
   app: {

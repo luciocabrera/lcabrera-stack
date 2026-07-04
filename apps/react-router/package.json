@@ -23,10 +23,10 @@
     "test:watch": "node node_modules/vitest/vitest.mjs"
   },
   "dependencies": {
-    "@react-router/node": "catalog:",
     "@react-router/serve": "catalog:",
+    "@repo/api": "workspace:*",
+    "@repo/ui": "workspace:*",
     "@stylexjs/stylex": "catalog:",
-    "isbot": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-router": "catalog:"

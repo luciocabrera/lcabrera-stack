@@ -1,7 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { Button } from '@/components/Button';
-import { useTheme } from '@/hooks/useTheme.hook';
+import { Button } from '@repo/ui/components/Button';
+import { useTheme } from '@repo/ui/hooks/useTheme.hook';
 
 import { ButtonsSection } from './ButtonsSection';
 import { CardsSection } from './CardsSection';

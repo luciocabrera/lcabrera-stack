@@ -136,6 +136,9 @@ export const createReactRouterPluginsConfig = ({
   const stylexPlugin = stylex.vite({
     aliases: {
       '@/*': [fileURLToPath(new URL(stylexAliasPattern, appRootUrl))],
+      '@repo/ui/*': [
+        fileURLToPath(new URL('../../../packages/ui/src/*', appRootUrl)),
+      ],
     },
     dev: stylexDev,
     useCSSLayers: stylexUseCSSLayers,
