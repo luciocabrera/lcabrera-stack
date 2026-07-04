@@ -17,13 +17,13 @@ SectionToolbar/
 
 ## Button Descriptor
 
-Each button is described declaratively; the icon is a factory invoked with the
-variant-resolved icon size so callers never compute sizing themselves.
+Each button is described declaratively; the icon is a component that is invoked
+with the variant-resolved icon size so callers never compute sizing themselves.
 
-| Field        | Purpose                                           |
-| ------------ | ------------------------------------------------- |
-| `icon`       | `(size: number) => ReactNode` — icon factory      |
-| `isDisabled` | Optional disabled flag                            |
+| Field        | Purpose                                                   |
+| ------------ | --------------------------------------------------------- |
+| `icon`       | `ComponentType<IconProps>` — icon component (receives `size`) |
+| `isDisabled` | Optional disabled flag                                    |
 | `key`        | Stable React key + aria-label + tooltip source    |
 | `label`      | Visible label (footer) / tooltip + aria (toolbar) |
 | `onClick`    | Optional click handler                            |
