@@ -1,6 +1,5 @@
-export type { IconProps } from './Icons.types';
-
 export { BarChartIcon } from './BarChartIcon';
+
 export { CheckIcon } from './CheckIcon';
 export { CollapseAllIcon } from './CollapseAllIcon';
 export { ColumnsOrderIcon } from './ColumnsOrderIcon';
@@ -11,6 +10,7 @@ export { ExpandAllIcon } from './ExpandAllIcon';
 export { EyeIcon } from './EyeIcon';
 export { FileTextIcon } from './FileTextIcon';
 export { HomeIcon } from './HomeIcon';
+export type { IconProps } from './Icons.types';
 export { InfoIcon } from './InfoIcon';
 export { ListAllIcon } from './ListAllIcon';
 export { ListCheckedIcon } from './ListCheckedIcon';
