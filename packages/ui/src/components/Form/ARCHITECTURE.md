@@ -31,17 +31,19 @@ Form/
 │   ├── index.ts               → Barrel: FormProvider + all selectors/actions
 │   └── FormContext/
 │       ├── FormContext.context.ts    → createContext (undefined default)
-│       ├── FormContext.provider.tsx  → Provider: creates formStore, syncs serverErrors prop
-│       ├── FormContext.types.ts      → FormState, FormContextValue, FormProviderProps
+│       ├── FormContext.provider.tsx  → Provider: creates fieldsStore + metaStore, syncs serverErrors/mode props
+│       ├── FormContext.types.ts      → FormFieldsState, FormMetaState, FormContextValue, FormProviderProps
 │       ├── useFormContextValue.hook.ts → use(FormContext) with guard (infra only)
+│       ├── useFieldsStore.hook.ts     → Shared useSyncExternalStore wrapper over fieldsStore (mirrors Table's useColumnsStore/useFiltersStore)
+│       ├── useMetaStore.hook.ts       → Shared useSyncExternalStore wrapper over metaStore (mirrors Table's useMetaStore)
 │       ├── actions/
-│       │   ├── useSetFieldValue.hook.ts  → Writes one field's value
-│       │   └── useSubmitForm.hook.ts     → Pre-submit gate: edit dirty-check + validateFields
+│       │   ├── useSetFieldValue.hook.ts  → Writes one field's value into fieldsStore
+│       │   └── useSubmitForm.hook.ts     → Pre-submit gate: reads metaStore + fieldsStore, dirty-check + validateFields
 │       └── selectors/
-│           ├── useGetFieldError.hook.ts
-│           ├── useGetFieldValue.hook.ts
-│           ├── useGetFormMode.hook.ts
-│           └── useGetIsFormDirty.hook.ts
+│           ├── useGetFieldError.hook.ts   → useFieldsStore((s) => s.errors[accessor])
+│           ├── useGetFieldValue.hook.ts   → useFieldsStore((s) => s.values[accessor])
+│           ├── useGetFormMode.hook.ts     → useMetaStore((s) => s.mode)
+│           └── useGetIsFormDirty.hook.ts  → useFieldsStore((s) => isFormDirty(...))
 │
 ├── FormFields/
 │   ├── FormFields.component.tsx  → Single recursive walker for group/row/tab/leaf
@@ -73,22 +75,53 @@ Form/
 
 ## Store Pattern
 
-One external store per `Form` instance (`FormState<TValues>`), following the
-same `useStore` + split Context/selector/action architecture as `Table`
-(see the `store-pattern` skill). Components never touch `formStore.get()`/
-`.set()` directly — only selector hooks (`useGetField*`) and action hooks
-(`useSetFieldValue`, `useSubmitForm`).
+**Two stores in one `FormContext`, not one combined store** — matching
+`Table`'s `TableConfigContextValue` (`columnsStore` + `metaStore` together)
+rather than treating "one context" as "one store." Split by rate-of-change
+and by whether the state is keyed to a single field, per the `store-pattern`
+skill:
 
 ```typescript
-FormState<TValues> = {
+// Low-frequency, form-level — not keyed by any field
+FormMetaState = {
+  mode: FormMode;
+};
+
+// High-frequency, every slice keyed by accessor
+FormFieldsState<TValues> = {
   errors: FieldErrors<TValues>;
   initialValues: TValues;  // frozen pristine snapshot from mount — edit-mode dirty baseline
-  mode: FormMode;
   values: TValues;
 };
 ```
 
-`Form.component.tsx` is the only place that creates the store (via
+Each store gets its own thin `useSyncExternalStore` wrapper —
+`useFieldsStore(selector)` and `useMetaStore(selector)` — exactly mirroring
+`Table`'s `useColumnsStore`/`useMetaStore`/`useFiltersStore`. Every selector
+hook (`useGetFieldValue`, `useGetFieldError`, `useGetFormMode`,
+`useGetIsFormDirty`) is then a one-line call into the matching store-hook
+with its own selector function — including the accessor-keyed ones
+(`useGetFieldValue(accessor)` selects `state.values[accessor]`), the same
+shape as `Table`'s `useGetNormalizedColumn(columnKey)` and `FiltersData`'s
+`useGetFilterData(columnKey)`. Components never touch `fieldsStore.get()`/
+`.set()` or `metaStore.get()`/`.set()` directly — only these selector hooks
+and the action hooks (`useSetFieldValue`, `useSubmitForm`).
+
+Why split at all, given `useSyncExternalStore`'s snapshot-equality check
+already prevents unnecessary re-renders regardless: every write to either
+store still wakes every subscriber of _that_ store to re-run its selector,
+even when the result doesn't change enough to re-render. Keeping `values`
+(written on every keystroke) out of the same store as `mode` (written
+essentially never) means a value change doesn't invoke `mode`'s selector at
+all — the same reasoning `Table` already applies by keeping `columnsStore`
+separate from `dataStore`. `useSubmitForm` is the one action that needs
+both stores (mode to decide whether to run the dirty check, values/
+initialValues to run it) — reading multiple stores from one action and
+snapshotting each once is an explicitly allowed action responsibility, the
+same as `Table`'s `useSetColumnFilter` reading both `TableConfig` and
+`TableData`.
+
+`Form.component.tsx` is the only place that creates the stores (via
 `FormProvider`) and computes the initial snapshot (`flattenFields` +
 `getInitialValues`) — it renders no fields itself. `FormBody` (its own
 directory) is the actual view: it reads `mode`/`isDirty` via selectors and
@@ -102,7 +135,7 @@ graph TD
   B --> C["handleSubmit calls useSubmitForm({ leafFields })"]
   C --> D{"mode === 'edit' and not dirty?"}
   D -->|"yes"| E["return false → event.preventDefault() → no request sent, DB untouched"]
-  D -->|"no"| F["validateFields → formStore.set({ errors })"]
+  D -->|"no"| F["validateFields → fieldsStore.set({ errors })"]
   F --> G{"any errors?"}
   G -->|"yes"| E
   G -->|"no"| H["return true → RR7 proceeds: real fetch to the action"]

@@ -19,12 +19,12 @@ export const Form = <TValues extends Record<string, unknown>>({
 
   return (
     <FormProvider
-      initialState={{
+      initialFieldsState={{
         errors: serverErrors ?? {},
         initialValues: values,
-        mode,
         values,
       }}
+      mode={mode}
       serverErrors={serverErrors}
     >
       <FormBody {...bodyProps} formId={formId} leafFields={leafFields} />

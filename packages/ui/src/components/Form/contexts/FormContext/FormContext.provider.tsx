@@ -2,22 +2,32 @@ import { useEffect } from 'react';
 
 import { useStore } from '@repo/ui/hooks';
 
-import type { FormContextValue, FormProviderProps } from './FormContext.types';
+import type {
+  FormContextValue,
+  FormMetaState,
+  FormProviderProps,
+} from './FormContext.types';
 
 import { FormContext } from './FormContext.context';
 
 export const FormProvider = <TValues extends Record<string, unknown>>({
   children,
-  initialState,
+  initialFieldsState,
+  mode,
   serverErrors,
 }: FormProviderProps<TValues>) => {
-  const formStore = useStore(initialState);
+  const fieldsStore = useStore(initialFieldsState);
+  const metaStore = useStore<FormMetaState>({ mode });
 
   useEffect(() => {
-    if (serverErrors) formStore.set({ errors: serverErrors });
-  }, [serverErrors, formStore]);
+    if (serverErrors) fieldsStore.set({ errors: serverErrors });
+  }, [serverErrors, fieldsStore]);
 
-  const value: FormContextValue<TValues> = { formStore };
+  useEffect(() => {
+    metaStore.set({ mode });
+  }, [mode, metaStore]);
+
+  const value: FormContextValue<TValues> = { fieldsStore, metaStore };
 
   return (
     <FormContext value={value as FormContextValue}>{children}</FormContext>

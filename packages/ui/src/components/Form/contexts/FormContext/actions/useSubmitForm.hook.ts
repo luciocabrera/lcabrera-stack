@@ -11,16 +11,20 @@ type SubmitFormArgs<TValues extends Record<string, unknown>> = {
 /**
  * Client-side pre-submit gate — progressive enhancement only, the action's
  * Zod parse on the server remains authoritative (ADR-005). Returns whether
- * the in-flight native form submission should proceed.
+ * the in-flight native form submission should proceed. Reads both stores
+ * (mode from metaStore, values from fieldsStore) and snapshots each once,
+ * per the store-pattern's cross-store action rule.
  */
 export const useSubmitForm = <TValues extends Record<string, unknown>>() => {
-  const { formStore } = useFormContextValue<TValues>();
+  const { fieldsStore, metaStore } = useFormContextValue<TValues>();
 
   return ({ leafFields }: SubmitFormArgs<TValues>): boolean => {
-    const state = formStore.get();
-    if (!state) return true;
+    const metaState = metaStore.get();
+    const fieldsState = fieldsStore.get();
+    if (!fieldsState) return true;
 
-    const { initialValues, mode, values } = state;
+    const { initialValues, values } = fieldsState;
+    const mode = metaState?.mode ?? 'create';
 
     if (mode === 'edit') {
       const accessors = leafFields.map((field) => field.accessor);
@@ -33,7 +37,7 @@ export const useSubmitForm = <TValues extends Record<string, unknown>>() => {
     }
 
     const errors = validateFields({ leafFields, values });
-    formStore.set({ errors });
+    fieldsStore.set({ errors });
 
     return Object.keys(errors).length === 0;
   };
