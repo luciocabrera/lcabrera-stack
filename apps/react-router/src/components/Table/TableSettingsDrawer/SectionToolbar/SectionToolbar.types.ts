@@ -1,8 +1,10 @@
-import type { ReactNode } from 'react';
+import type { ComponentType } from 'react';
+
+import type { IconProps } from '@/components/Icons';
 
 export type SectionToolbarButton = {
-  /** Icon factory invoked with the variant-resolved icon size */
-  readonly icon: (size: number) => ReactNode;
+  /** Icon component rendered at the variant-resolved icon size */
+  readonly icon: ComponentType<IconProps>;
   /** Whether the button is disabled */
   readonly isDisabled?: boolean;
   /** Stable React key + aria label + tooltip source */

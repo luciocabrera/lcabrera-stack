@@ -31,20 +31,20 @@ export const SortingSectionToolbar = ({
 
   const buttons: readonly SectionToolbarButton[] = [
     {
-      icon: (size) => <ListOrderedIcon size={size} />,
+      icon: ListOrderedIcon,
       key: SORTING_SECTION_TOOLBAR.orderByColumnOrder.label,
       label: SORTING_SECTION_TOOLBAR.orderByColumnOrder.label,
       onClick: sortByColumnOrder,
     },
     {
-      icon: (size) => <EraserIcon size={size} />,
+      icon: EraserIcon,
       isDisabled: !hasSorting,
       key: SORTING_SECTION_TOOLBAR.clear.label,
       label: SORTING_SECTION_TOOLBAR.clear.label,
       onClick: clearSorting,
     },
     {
-      icon: (size) => <RefreshIcon size={size} />,
+      icon: RefreshIcon,
       key: SORTING_SECTION_TOOLBAR.reset.label,
       label: SORTING_SECTION_TOOLBAR.reset.label,
       onClick: resetSorting,

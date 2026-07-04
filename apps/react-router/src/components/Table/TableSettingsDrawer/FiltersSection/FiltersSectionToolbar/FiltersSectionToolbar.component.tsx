@@ -45,27 +45,27 @@ export const FiltersSectionToolbar = ({
 
   const buttons: readonly SectionToolbarButton[] = [
     {
-      icon: (size) => <EraserIcon size={size} />,
+      icon: EraserIcon,
       isDisabled: !hasFilters,
       key: FILTERS_TOOLBAR.clear.label,
       label: FILTERS_TOOLBAR.clear.label,
       onClick: handleClear,
     },
     {
-      icon: (size) => <RefreshIcon size={size} />,
+      icon: RefreshIcon,
       key: FILTERS_TOOLBAR.reset.label,
       label: FILTERS_TOOLBAR.reset.label,
       onClick: resetFilters,
     },
     {
-      icon: (size) => <ExpandAllIcon size={size} />,
+      icon: ExpandAllIcon,
       isDisabled: isExpandAllDisabled || !onExpandAll,
       key: FILTERS_TOOLBAR.expandAll.label,
       label: FILTERS_TOOLBAR.expandAll.label,
       onClick: onExpandAll,
     },
     {
-      icon: (size) => <CollapseAllIcon size={size} />,
+      icon: CollapseAllIcon,
       isDisabled: isCollapseAllDisabled || !onCollapseAll,
       key: FILTERS_TOOLBAR.collapseAll.label,
       label: FILTERS_TOOLBAR.collapseAll.label,

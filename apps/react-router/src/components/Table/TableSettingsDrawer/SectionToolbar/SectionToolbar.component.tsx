@@ -1,7 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 
 import { Button } from '@/components/Button';
-import { ICON_SIZE_MD, ICON_SIZE_SM } from '@/design-system/constants';
+import { ICON_SIZE_SM } from '@/design-system/constants';
 
 import type { SectionToolbarProps } from './SectionToolbar.types';
 
@@ -21,15 +21,16 @@ export const SectionToolbar = ({
   const buttonColor = isToolbar ? 'ghost' : 'outline';
   const buttonSize = isToolbar ? 'mini' : 'sm';
   const buttonWidth = isToolbar ? 'auto' : 'full';
-  const iconSize = isToolbar ? ICON_SIZE_SM : ICON_SIZE_MD;
+  // Icons default to ICON_SIZE_MD; only the toolbar variant needs an override.
+  const iconSize = isToolbar ? ICON_SIZE_SM : undefined;
 
   return (
     <div {...stylex.props(isToolbar ? styles.toolbar : styles.container)}>
-      {buttons.map((button) => (
+      {buttons.map(({ icon: Icon, ...button }) => (
         <Button
           aria-label={button.label}
           color={buttonColor}
-          icon={button.icon(iconSize)}
+          icon={<Icon size={iconSize} />}
           isBusy={isBusy}
           isDisabled={button.isDisabled}
           key={button.key}

@@ -1,3 +1,5 @@
+export type { IconProps } from './Icons.types';
+
 export { BarChartIcon } from './BarChartIcon';
 export { CheckIcon } from './CheckIcon';
 export { CollapseAllIcon } from './CollapseAllIcon';

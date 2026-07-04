@@ -40,21 +40,21 @@ export const ColumnOrderSectionToolbar = ({
 
   const buttons: readonly SectionToolbarButton[] = [
     {
-      icon: (size) => <ColumnsOrderIcon size={size} />,
+      icon: ColumnsOrderIcon,
       isDisabled: !hasSorting,
       key: COLUMN_ORDER_TOOLBAR.orderBySorting.label,
       label: COLUMN_ORDER_TOOLBAR.orderBySorting.label,
       onClick: orderBySorting,
     },
     {
-      icon: (size) => <EraserIcon size={size} />,
+      icon: EraserIcon,
       isDisabled: !hasClearableState,
       key: COLUMN_ORDER_TOOLBAR.clear.label,
       label: COLUMN_ORDER_TOOLBAR.clear.label,
       onClick: clearColumnOrderSection,
     },
     {
-      icon: (size) => <RefreshIcon size={size} />,
+      icon: RefreshIcon,
       key: COLUMN_ORDER_TOOLBAR.reset.label,
       label: COLUMN_ORDER_TOOLBAR.reset.label,
       onClick: resetColumnOrderAndVisibility,
