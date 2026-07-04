@@ -103,6 +103,21 @@ const configs = [
     }),
     filePath: resolve(workspaceRoot, 'packages/api/tsconfig.app.json'),
   },
+  {
+    // Genuinely Node-only (pg client, fs/path, git CLI via child_process,
+    // no DOM/vite.client usage anywhere) — unlike packages/api. Overrides
+    // createNodeTsConfig's default include (['vite.config.ts'] only, meant
+    // for an app's Node-context sibling config) since this package has no
+    // app-context tsconfig to pair with — its own src/ needs typechecking.
+    config: createNodeTsConfig({
+      include: ['src', 'vite.config.ts'],
+      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
+    }),
+    filePath: resolve(
+      workspaceRoot,
+      'packages/scan-ingestion/tsconfig.app.json',
+    ),
+  },
 ] as const;
 
 await Promise.all(configs.map(writeConfigFile));

@@ -5,15 +5,24 @@
   "type": "module",
   "sideEffects": false,
   "scripts": {
-    "migrate": "node --env-file-if-exists=../../docker/local/.env --env-file-if-exists=.env --experimental-strip-types ./src/db/runMigrations.ts"
+    "format": "vp fmt .",
+    "format:check": "vp fmt --check .",
+    "lint": "vp lint . --fix",
+    "lint:check": "vp lint .",
+    "migrate": "node --env-file-if-exists=../../docker/local/.env --env-file-if-exists=.env --experimental-strip-types ./src/db/runMigrations.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.app.json"
   },
   "dependencies": {
     "pg": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@repo/vite-configs": "workspace:*",
     "@types/node": "catalog:",
     "@types/pg": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plus": "catalog:",
+    "vitest": "catalog:"
   }
 }
