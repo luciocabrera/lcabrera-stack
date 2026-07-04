@@ -1,0 +1,19 @@
+{
+  "name": "@repo/scan-ingestion",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "scripts": {
+    "migrate": "node --env-file-if-exists=../../docker/local/.env --env-file-if-exists=.env --experimental-strip-types ./src/db/runMigrations.ts"
+  },
+  "dependencies": {
+    "pg": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/pg": "catalog:",
+    "typescript": "catalog:"
+  }
+}
