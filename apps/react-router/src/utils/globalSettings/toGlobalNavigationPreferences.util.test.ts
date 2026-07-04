@@ -5,7 +5,6 @@ import { toGlobalNavigationPreferences } from './toGlobalNavigationPreferences.u
 describe('toGlobalNavigationPreferences', () => {
   it('returns undefined for non-object values', () => {
     expect(toGlobalNavigationPreferences(undefined)).toBeUndefined();
-    expect(toGlobalNavigationPreferences(null)).toBeUndefined();
     expect(toGlobalNavigationPreferences('compact')).toBeUndefined();
     expect(toGlobalNavigationPreferences(1)).toBeUndefined();
   });

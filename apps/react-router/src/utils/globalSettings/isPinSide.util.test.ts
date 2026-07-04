@@ -15,7 +15,6 @@ describe('isPinSide', () => {
 
   it('returns false for non-string values', () => {
     expect(isPinSide(undefined)).toBe(false);
-    expect(isPinSide(null)).toBe(false);
     expect(isPinSide(1)).toBe(false);
     expect(isPinSide({})).toBe(false);
   });

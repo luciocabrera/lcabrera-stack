@@ -22,7 +22,10 @@ export const useAcceptPinSide = () => {
     if (!pinSideModal) return;
 
     const { columnPinning, columns, columnsOrder, staticKeys } =
-      readPinActionState(tableColumnsStore.get(), drawerColumnsStore.get());
+      readPinActionState({
+        drawerState: drawerColumnsStore.get(),
+        tableState: tableColumnsStore.get(),
+      });
 
     const { columnKey } = pinSideModal;
     const resolvedUpdate = resolveAcceptedPinSideUpdate({

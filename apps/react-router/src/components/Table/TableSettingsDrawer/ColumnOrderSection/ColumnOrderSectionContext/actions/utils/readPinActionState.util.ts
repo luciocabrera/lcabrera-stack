@@ -6,6 +6,13 @@ import type {
 } from '@/components/Table/Table.types';
 import type { TableDrawerColumnsState } from '@/components/Table/TableSettingsDrawer/TableDrawerContext/TableDrawerContext.types';
 
+type ReadPinActionStateArgs = {
+  readonly drawerState:
+    | TableDrawerColumnsState<Record<string, unknown>>
+    | undefined;
+  readonly tableState: TableColumnsState | undefined;
+};
+
 type ReadPinActionStateResult = {
   readonly columnPinning: ColumnPinningState;
   readonly columns: readonly TableColumn<Record<string, unknown>>[];
@@ -14,10 +21,10 @@ type ReadPinActionStateResult = {
 };
 
 /** Reads the shared column-order and pinning state needed by pin action hooks. */
-export const readPinActionState = (
-  tableState: TableColumnsState | undefined,
-  drawerState: TableDrawerColumnsState<Record<string, unknown>> | undefined,
-): ReadPinActionStateResult => ({
+export const readPinActionState = ({
+  drawerState,
+  tableState,
+}: ReadPinActionStateArgs): ReadPinActionStateResult => ({
   columnPinning: drawerState?.columnPinning ?? { left: [], right: [] },
   columns: tableState?.columns ?? [],
   columnsOrder: drawerState?.columnOrder ?? [],

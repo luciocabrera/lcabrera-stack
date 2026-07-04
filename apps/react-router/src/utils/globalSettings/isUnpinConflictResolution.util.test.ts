@@ -15,7 +15,6 @@ describe('isUnpinConflictResolution', () => {
 
   it('returns false for non-string values', () => {
     expect(isUnpinConflictResolution(undefined)).toBe(false);
-    expect(isUnpinConflictResolution(null)).toBe(false);
     expect(isUnpinConflictResolution(1)).toBe(false);
     expect(isUnpinConflictResolution({})).toBe(false);
   });

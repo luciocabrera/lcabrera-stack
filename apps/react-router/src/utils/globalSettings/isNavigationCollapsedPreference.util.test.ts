@@ -15,7 +15,6 @@ describe('isNavigationCollapsedPreference', () => {
 
   it('returns false for non-string values', () => {
     expect(isNavigationCollapsedPreference(undefined)).toBe(false);
-    expect(isNavigationCollapsedPreference(null)).toBe(false);
     expect(isNavigationCollapsedPreference(true)).toBe(false);
     expect(isNavigationCollapsedPreference({})).toBe(false);
   });

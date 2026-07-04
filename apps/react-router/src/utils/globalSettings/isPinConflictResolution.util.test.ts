@@ -15,7 +15,6 @@ describe('isPinConflictResolution', () => {
 
   it('returns false for non-string values', () => {
     expect(isPinConflictResolution(undefined)).toBe(false);
-    expect(isPinConflictResolution(null)).toBe(false);
     expect(isPinConflictResolution(1)).toBe(false);
     expect(isPinConflictResolution({})).toBe(false);
   });

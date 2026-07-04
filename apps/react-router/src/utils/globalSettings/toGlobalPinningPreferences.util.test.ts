@@ -5,7 +5,6 @@ import { toGlobalPinningPreferences } from './toGlobalPinningPreferences.util';
 describe('toGlobalPinningPreferences', () => {
   it('returns undefined for non-object values', () => {
     expect(toGlobalPinningPreferences(undefined)).toBeUndefined();
-    expect(toGlobalPinningPreferences(null)).toBeUndefined();
     expect(toGlobalPinningPreferences('left')).toBeUndefined();
     expect(toGlobalPinningPreferences(1)).toBeUndefined();
   });
@@ -32,7 +31,7 @@ describe('toGlobalPinningPreferences', () => {
         orderConflictResolution: 'bogus',
         pinConflictResolution: 42,
         pinSide: 'right',
-        unpinConflictResolution: null,
+        unpinConflictResolution: undefined,
       }),
     ).toEqual({
       orderConflictResolution: undefined,

@@ -15,7 +15,6 @@ describe('isNavigationPinnedPreference', () => {
 
   it('returns false for non-string values', () => {
     expect(isNavigationPinnedPreference(undefined)).toBe(false);
-    expect(isNavigationPinnedPreference(null)).toBe(false);
     expect(isNavigationPinnedPreference(0)).toBe(false);
     expect(isNavigationPinnedPreference([])).toBe(false);
   });

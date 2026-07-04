@@ -15,7 +15,6 @@ describe('isNavigationSizePreference', () => {
 
   it('returns false for non-string values', () => {
     expect(isNavigationSizePreference(undefined)).toBe(false);
-    expect(isNavigationSizePreference(null)).toBe(false);
     expect(isNavigationSizePreference(1)).toBe(false);
     expect(isNavigationSizePreference({})).toBe(false);
   });

@@ -21,7 +21,10 @@ export const useAcceptPinConflict = () => {
     if (!conflictModal) return;
 
     const { columnPinning, columns, columnsOrder, staticKeys } =
-      readPinActionState(tableColumnsStore.get(), drawerColumnsStore.get());
+      readPinActionState({
+        drawerState: drawerColumnsStore.get(),
+        tableState: tableColumnsStore.get(),
+      });
 
     const { columnKey, side } = conflictModal;
     const allOrderedColumns = buildAllOrderedColumns({

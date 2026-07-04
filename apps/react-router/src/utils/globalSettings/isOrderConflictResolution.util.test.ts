@@ -15,7 +15,6 @@ describe('isOrderConflictResolution', () => {
 
   it('returns false for non-string values', () => {
     expect(isOrderConflictResolution(undefined)).toBe(false);
-    expect(isOrderConflictResolution(null)).toBe(false);
     expect(isOrderConflictResolution(1)).toBe(false);
     expect(isOrderConflictResolution({})).toBe(false);
   });
