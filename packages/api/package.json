@@ -4,9 +4,18 @@
   "private": true,
   "type": "module",
   "sideEffects": false,
+  "scripts": {
+    "format": "vp fmt .",
+    "format:check": "vp fmt --check .",
+    "lint": "vp lint . --fix",
+    "lint:check": "vp lint .",
+    "typecheck": "tsc --noEmit -p tsconfig.app.json"
+  },
   "devDependencies": {
+    "@repo/vite-configs": "workspace:*",
     "typescript": "catalog:",
     "vite": "catalog:",
+    "vite-plus": "catalog:",
     "vitest": "catalog:"
   }
 }

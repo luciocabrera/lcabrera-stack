@@ -4,6 +4,13 @@
   "private": true,
   "type": "module",
   "sideEffects": false,
+  "scripts": {
+    "format": "vp fmt .",
+    "format:check": "vp fmt --check .",
+    "lint": "vp lint . --fix",
+    "lint:check": "vp lint .",
+    "typecheck": "tsc --noEmit -p tsconfig.app.json"
+  },
   "dependencies": {
     "@react-router/node": "catalog:",
     "@stylexjs/stylex": "catalog:",
@@ -13,12 +20,19 @@
     "react-router": "catalog:"
   },
   "devDependencies": {
+    "@babel/preset-typescript": "catalog:",
+    "@repo/vite-configs": "workspace:*",
+    "@stylexjs/eslint-plugin": "catalog:",
+    "@stylexjs/unplugin": "catalog:",
     "@testing-library/react": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "babel-plugin-react-compiler": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
+    "vite-plugin-babel": "catalog:",
+    "vite-plus": "catalog:",
     "vitest": "catalog:"
   }
 }
