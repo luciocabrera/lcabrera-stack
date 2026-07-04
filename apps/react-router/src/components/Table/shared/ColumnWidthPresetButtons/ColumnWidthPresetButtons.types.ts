@@ -1,5 +1,3 @@
-export type WidthPreset = 'default' | 'max' | 'min' | undefined;
-
 export type ColumnWidthPresetButtonsProps = {
   readonly defaultLabel?: string;
   readonly isBusy?: boolean;
@@ -12,3 +10,5 @@ export type ColumnWidthPresetButtonsProps = {
   readonly onToggleMin: () => void;
   readonly selectedPreset?: WidthPreset;
 };
+
+export type WidthPreset = 'default' | 'max' | 'min' | undefined;
