@@ -230,12 +230,16 @@ Before creating anything new, check this inventory. If something here does the j
 
 ### `src/utils/globalSettings/`
 
-| Function                           | Location                                                        | Description                                                                            |
-| ---------------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| `getGlobalSettingsFromCookie`      | `utils/globalSettings/getGlobalSettingsFromCookie.util.ts`      | Reads global settings (pinning + navigation preferences) from cookie string (SSR-safe) |
-| `serializeGlobalSettingsForCookie` | `utils/globalSettings/serializeGlobalSettingsForCookie.util.ts` | Serialises `GlobalSettingsState` to versioned JSON payload for cookie write            |
-| `GLOBAL_SETTINGS_COOKIE_KEY`       | `utils/globalSettings/globalSettings.constants.ts`              | Cookie key constant (`global-settings`)                                                |
-| `GLOBAL_SETTINGS_COOKIE_VERSION`   | `utils/globalSettings/globalSettings.constants.ts`              | Current payload version; incremented on breaking schema changes                        |
+| Function                                 | Location                                                        | Description                                                                            |
+| ---------------------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `getGlobalSettingsFromCookie`            | `utils/globalSettings/getGlobalSettingsFromCookie.util.ts`      | Reads global settings (pinning + navigation preferences) from cookie string (SSR-safe) |
+| `serializeGlobalSettingsForCookie`       | `utils/globalSettings/serializeGlobalSettingsForCookie.util.ts` | Serialises `GlobalSettingsState` to versioned JSON payload for cookie write            |
+| `GLOBAL_SETTINGS_COOKIE_KEY`             | `utils/globalSettings/globalSettings.constants.ts`              | Cookie key constant (`global-settings`)                                                |
+| `GLOBAL_SETTINGS_COOKIE_VERSION`         | `utils/globalSettings/globalSettings.constants.ts`              | Current payload version; incremented on breaking schema changes                        |
+| `*_VALUES` constants                     | `utils/globalSettings/globalSettings.constants.ts`              | Valid-value arrays (pin side, conflict resolutions, navigation prefs) backing guards   |
+| `toGlobalPinningPreferences`             | `utils/globalSettings/toGlobalPinningPreferences.util.ts`       | Parses/validates the `pinning` cookie payload slice (internal)                         |
+| `toGlobalNavigationPreferences`          | `utils/globalSettings/toGlobalNavigationPreferences.util.ts`    | Parses/validates the `navigation` cookie payload slice (internal)                      |
+| `is*Preference` / `is*Resolution` guards | `utils/globalSettings/is*.util.ts`                              | One type guard per preference value set, each in its own file with unit tests          |
 
 ### `src/utils/theme/`
 
