@@ -1,3 +1,5 @@
+import { logger } from '@/utils/logger';
+
 type DecodeStateFromURLArgs = {
   readonly convertArraysToSets?: readonly string[];
   readonly encoded: string;
@@ -42,7 +44,8 @@ export const decodeStateFromURL = ({
     }
 
     return parsed;
-  } catch {
+  } catch (error) {
+    logger.debug('[urlState] Failed to decode state param:', error);
     return undefined;
   }
 };

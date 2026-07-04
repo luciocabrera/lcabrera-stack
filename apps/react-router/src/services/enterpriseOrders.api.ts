@@ -7,6 +7,7 @@ import {
   getApiBaseUrl,
 } from '@/utils/api';
 import { createLogger } from '@/utils/logger';
+import { isObject } from '@/utils/typeGuards';
 
 const log = createLogger({ prefix: '[orders]' });
 
@@ -86,9 +87,6 @@ export type EnterpriseOrdersResponse = {
 type EnterpriseOrderDetailResponse = {
   readonly data: EnterpriseOrder;
 };
-
-const isObject = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null;
 
 const isDistinctValuesResponse = (
   value: unknown,

@@ -1,5 +1,3 @@
-import type { FiltersDataState } from '@/components/Table/Table.types';
-
 import { DEFAULT_FILTER_PAGE_SIZE } from '@/components/Table/Table.constants';
 import { getErrorMessage } from '@/components/Table/utils/getErrorMessage.util';
 import { getRequiredOnLoadMore } from '@/components/Table/utils/getRequiredOnLoadMore.util';
@@ -12,6 +10,7 @@ import type {
 
 import { getTotalRows } from './getTotalRows.util';
 import { maybePrefetchFilterPage } from './maybePrefetchFilterPage.util';
+import { setFilterSlice } from './setFilterSlice.util';
 import { shouldSkipInitialFetch } from './shouldSkipInitialFetch.util';
 
 export type { FetchFilterDataActionArgs } from './useFetchFilterData.types';
@@ -46,12 +45,11 @@ export const fetchInitialFilterData = <TData, TResponse>({
     const requiredOnLoadMore = getRequiredOnLoadMore(onLoadMore);
 
     try {
-      filtersDataStore.set({
-        [columnKey]: {
-          ...currentFilter,
-          isLoading: true,
-        },
-      } as Partial<FiltersDataState<TData>>);
+      setFilterSlice({
+        columnKey,
+        filter: { ...currentFilter, isLoading: true },
+        filtersDataStore,
+      });
 
       const response = await requiredOnLoadMore({
         limit: DEFAULT_FILTER_PAGE_SIZE,
@@ -62,8 +60,9 @@ export const fetchInitialFilterData = <TData, TResponse>({
       const totalRows = getTotalRows({ data, dataTotalSelector, response });
       const hasMore = totalRows > data.length;
 
-      filtersDataStore.set({
-        [columnKey]: {
+      setFilterSlice({
+        columnKey,
+        filter: {
           ...currentFilter,
           data,
           hasMore,
@@ -71,7 +70,8 @@ export const fetchInitialFilterData = <TData, TResponse>({
           totalLoadedRows: data.length,
           totalRows,
         },
-      } as Partial<FiltersDataState<TData>>);
+        filtersDataStore,
+      });
 
       const metaState = metaStore.get();
       const enablePrefetch = metaState?.enablePrefetch ?? false;
@@ -91,9 +91,11 @@ export const fetchInitialFilterData = <TData, TResponse>({
       });
       metaStore.set({ error: message });
 
-      filtersDataStore.set({
-        [columnKey]: { ...currentFilter, isLoading: false },
-      } as Partial<FiltersDataState<TData>>);
+      setFilterSlice({
+        columnKey,
+        filter: { ...currentFilter, isLoading: false },
+        filtersDataStore,
+      });
     }
   };
 

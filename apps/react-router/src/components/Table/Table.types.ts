@@ -30,15 +30,15 @@ export type ColumnGroupsState<TData = Record<string, unknown>> = {
  * Column order state - array of column keys in display order
  */
 export type ColumnOrderState<TData = Record<string, unknown>> =
-  DataKey<TData>[];
+  readonly DataKey<TData>[];
 /**
  * Column pinning state
  */
 export type ColumnPinningState<TData = Record<string, unknown>> = {
   /** Columns pinned to the left */
-  readonly left: DataKey<TData>[];
+  readonly left: readonly DataKey<TData>[];
   /** Columns pinned to the right */
-  readonly right: DataKey<TData>[];
+  readonly right: readonly DataKey<TData>[];
 };
 
 /**

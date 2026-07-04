@@ -35,3 +35,7 @@ flowchart TD
 
 - `src/services/carSales.api.ts`
 - `src/services/enterpriseOrders.api.ts`
+- `src/services/wideAlltypes150.api.ts`
+
+All three services fetch through `fetchAndValidate` and share the `isObject`
+guard from `@/utils/typeGuards` for their response-shape validators.

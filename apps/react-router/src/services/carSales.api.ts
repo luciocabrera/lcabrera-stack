@@ -1,9 +1,11 @@
 import {
   buildPaginatedQueryParams,
   fakeDelay,
+  fetchAndValidate,
   getApiBaseUrl,
 } from '@/utils/api';
 import { createLogger } from '@/utils/logger';
+import { isObject } from '@/utils/typeGuards';
 
 /**
  * Car Sales API Service
@@ -50,9 +52,6 @@ export type CarSalesResponse = {
   readonly total: number;
 };
 
-const isObject = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null;
-
 const isCarSalesResponse = (value: unknown): value is CarSalesResponse =>
   isObject(value) &&
   Array.isArray(value['data']) &&
@@ -72,23 +71,13 @@ export const carSalesApi = {
    * Returns a promise (non-blocking) to enable React streaming with Suspense
    */
   fetchCarSales: async (requestUrl?: string): Promise<CarSalesResponse> => {
-    const fetchData = async (): Promise<CarSalesResponse> => {
-      const response = await fetch(`${getApiBaseUrl(requestUrl)}/car-sales`);
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch car sales: ${response.statusText}`);
-      }
-
-      const body = (await response.json()) as unknown;
-      if (!isCarSalesResponse(body)) {
-        throw new Error('Unexpected response shape from /car-sales');
-      }
-      return body;
-    };
-
     await fakeDelay();
 
-    return fetchData();
+    return fetchAndValidate({
+      isValid: isCarSalesResponse,
+      shapeErrorMessage: 'Unexpected response shape from /car-sales',
+      url: `${getApiBaseUrl(requestUrl)}/car-sales`,
+    });
   },
 
   /**
@@ -110,25 +99,12 @@ export const carSalesApi = {
     const url = `${getApiBaseUrl(requestUrl)}/car-sales/paginated?${params.toString()}`;
     log.debug('🌐 Fetching from URL:', url);
 
-    const fetchData = async (): Promise<
-      CarSalesResponse & { hasMore: boolean }
-    > => {
-      const response = await fetch(url);
-
-      log.debug('📡 Response status:', response.status, response.statusText);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch car sales: ${response.statusText}`);
-      }
-
-      const body = (await response.json()) as unknown;
-      if (!isCarSalesPaginatedResponse(body)) {
-        throw new Error('Unexpected response shape from /car-sales/paginated');
-      }
-      return body;
-    };
-
     await fakeDelay();
 
-    return fetchData();
+    return fetchAndValidate({
+      isValid: isCarSalesPaginatedResponse,
+      shapeErrorMessage: 'Unexpected response shape from /car-sales/paginated',
+      url,
+    });
   },
 };

@@ -1,3 +1,5 @@
+import { logger } from '@/utils/logger';
+
 type WriteToSessionStorageArgs = {
   readonly key: string;
   readonly value: string;
@@ -14,7 +16,8 @@ export const writeToSessionStorage = ({
   if (typeof sessionStorage === 'undefined') return;
   try {
     sessionStorage.setItem(key, value);
-  } catch {
-    // Storage full or access denied — ignore
+  } catch (error) {
+    // Storage full or access denied — fallback is intentional
+    logger.debug('[storage] Failed to write sessionStorage key:', key, error);
   }
 };

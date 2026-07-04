@@ -33,13 +33,13 @@ type ColumnFilter =
 
 Discriminated on the `type` field:
 
-| `type`                       | Interface       | Operators                                                                                      | `value`           | `value2`                         |
-| ---------------------------- | --------------- | ---------------------------------------------------------------------------------------------- | ----------------- | -------------------------------- |
-| `'boolean'`                  | `BooleanFilter` | _(none)_                                                                                       | `boolean`         | —                                |
-| `'date'`                     | `DateFilter`    | `equals` `before` `after` `between`                                                            | ISO date string   | ISO date string (`between` only) |
-| `'number'`                   | `NumberFilter`  | `equals` `notEquals` `greaterThan` `greaterThanOrEqual` `lessThan` `lessThanOrEqual` `between` | `number`          | `number` (`between` only)        |
-| `'select'` / `'multiSelect'` | `SelectFilter`  | `equals` `notEquals` _(optional)_                                                              | `string` (single) | —                                |
-| `'text'`                     | `TextFilter`    | `contains` `notContains` `equals` `notEquals` `startsWith` `endsWith`                          | `string`          | —                                |
+| `type`                       | Interface       | Operators                                                                                      | `value`                                          | `value2`                         |
+| ---------------------------- | --------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------ | -------------------------------- |
+| `'boolean'`                  | `BooleanFilter` | _(none)_                                                                                       | `boolean`                                        | —                                |
+| `'date'`                     | `DateFilter`    | `equals` `before` `after` `between`                                                            | ISO date string                                  | ISO date string (`between` only) |
+| `'number'`                   | `NumberFilter`  | `equals` `notEquals` `greaterThan` `greaterThanOrEqual` `lessThan` `lessThanOrEqual` `between` | `number \| undefined` (undefined while drafting) | `number` (`between` only)        |
+| `'select'` / `'multiSelect'` | `SelectFilter`  | `equals` `notEquals` _(optional)_                                                              | `string` (single)                                | —                                |
+| `'text'`                     | `TextFilter`    | `contains` `notContains` `equals` `notEquals` `startsWith` `endsWith`                          | `string`                                         | —                                |
 
 ### `SelectFilter` notes
 

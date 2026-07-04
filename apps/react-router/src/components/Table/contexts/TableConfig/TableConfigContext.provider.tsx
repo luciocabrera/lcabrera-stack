@@ -36,10 +36,13 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
   );
   const metaStore = useStore<TableMetaState>(normalizedMetaState);
 
-  const value = {
-    columnsStore,
-    metaStore,
-  } as TableConfigContextValue;
+  const value: TableConfigContextValue<TData> = { columnsStore, metaStore };
 
-  return <TableConfigContext value={value}>{children}</TableConfigContext>;
+  // The context is declared non-generic; useTableConfigContextValue<TData>()
+  // restores the generic on read. Erase the type parameter only here.
+  return (
+    <TableConfigContext value={value as TableConfigContextValue}>
+      {children}
+    </TableConfigContext>
+  );
 };

@@ -1,5 +1,3 @@
-import type { FiltersDataState } from '@/components/Table/Table.types';
-
 import { DEFAULT_FILTER_PAGE_SIZE } from '@/components/Table/Table.constants';
 import { getErrorMessage } from '@/components/Table/utils/getErrorMessage.util';
 import { getRequiredOnLoadMore } from '@/components/Table/utils/getRequiredOnLoadMore.util';
@@ -13,6 +11,7 @@ import type {
 } from './useFetchFilterData.types';
 
 import { maybePrefetchFilterPage } from './maybePrefetchFilterPage.util';
+import { setFilterSlice } from './setFilterSlice.util';
 
 export type { FetchFilterDataActionArgs } from './useFetchFilterData.types';
 
@@ -57,12 +56,11 @@ export const fetchMoreFilterData = <TData, TResponse>({
     const requiredOnLoadMore = getRequiredOnLoadMore(onLoadMore);
 
     try {
-      filtersDataStore.set({
-        [columnKey]: {
-          ...currentFilter,
-          isLoadingMore: true,
-        },
-      } as Partial<FiltersDataState<TData>>);
+      setFilterSlice({
+        columnKey,
+        filter: { ...currentFilter, isLoadingMore: true },
+        filtersDataStore,
+      });
 
       const response = await resolveFromCacheOrFetch({
         cache: prefetchRef?.current,
@@ -85,8 +83,9 @@ export const fetchMoreFilterData = <TData, TResponse>({
           response,
         });
 
-      filtersDataStore.set({
-        [columnKey]: {
+      setFilterSlice({
+        columnKey,
+        filter: {
           ...currentFilter,
           data: combinedData,
           hasMore,
@@ -95,7 +94,8 @@ export const fetchMoreFilterData = <TData, TResponse>({
           totalLoadedRows,
           totalRows,
         },
-      } as Partial<FiltersDataState<TData>>);
+        filtersDataStore,
+      });
 
       const metaState = metaStore.get();
       const enablePrefetch = metaState?.enablePrefetch ?? false;
@@ -114,9 +114,11 @@ export const fetchMoreFilterData = <TData, TResponse>({
       });
       metaStore.set({ error: message });
 
-      filtersDataStore.set({
-        [columnKey]: { ...currentFilter, isLoadingMore: false },
-      } as Partial<FiltersDataState<TData>>);
+      setFilterSlice({
+        columnKey,
+        filter: { ...currentFilter, isLoadingMore: false },
+        filtersDataStore,
+      });
     }
   };
 

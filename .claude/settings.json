@@ -18,7 +18,9 @@
       "Bash(node node_modules/vitest/vitest.mjs run *)",
       "Bash(node apps/react-router/node_modules/vitest/vitest.mjs run *)",
       "Bash(bash .github/skills/code-smell-zen/scripts/collect-diff.sh*)",
-      "Bash(bash .github/skills/fallow-code-checker/scripts/run-fallow.sh*)"
+      "Bash(bash .github/skills/fallow-code-checker/scripts/run-fallow.sh*)",
+      "Write(.tmp/**)",
+      "Edit(.tmp/**)"
     ]
   },
   "hooks": {

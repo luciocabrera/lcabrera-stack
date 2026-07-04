@@ -207,6 +207,12 @@ Before creating anything new, check this inventory. If something here does the j
 | `buildPaginatedQueryParams` | `utils/api/buildPaginatedQueryParams.util.ts` | Builds `limit`/`skip`/`sort`/`filter` query params for paginated service fetchers |
 | `fetchAndValidate`          | `utils/api/fetchAndValidate.util.ts`          | Fetch + OK-assert + JSON parse + type-guard validation, returning the typed body  |
 
+### `src/utils/typeGuards/`
+
+| Function   | Location                            | Description                                                                                       |
+| ---------- | ----------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `isObject` | `utils/typeGuards/isObject.util.ts` | `unknown` → `value is Record<string, unknown>`; shared non-null object guard — never redeclare it |
+
 ### `src/utils/comparison/`
 
 | Function         | Location                                  | Description                                                                |

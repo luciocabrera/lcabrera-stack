@@ -11,7 +11,9 @@ import type {
 } from '@/types/pinningPreferences.types';
 import type { PinConflictResolution, PinSide } from '@/types/ui.types';
 
+import { logger } from '@/utils/logger';
 import { readFromCookie } from '@/utils/storage/readFromCookie.util';
+import { isObject } from '@/utils/typeGuards';
 
 import {
   GLOBAL_SETTINGS_COOKIE_KEY,
@@ -42,10 +44,6 @@ type GetGlobalSettingsFromCookieArgs = {
 type GlobalSettingsCookiePayload = {
   readonly value?: unknown;
   readonly version?: unknown;
-};
-
-const isObject = (value: unknown): value is Record<string, unknown> => {
-  return typeof value === 'object' && value !== null;
 };
 
 const isNavigationSizePreference = (
@@ -206,7 +204,8 @@ export const getGlobalSettingsFromCookie = ({
       navigation: parsedNavigation ?? fallback.navigation,
       pinning: parsedPinning ?? fallback.pinning,
     };
-  } catch {
+  } catch (error) {
+    logger.debug('[globalSettings] Failed to parse settings cookie:', error);
     return fallback;
   }
 };

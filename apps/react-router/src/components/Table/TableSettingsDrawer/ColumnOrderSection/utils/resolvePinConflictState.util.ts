@@ -44,7 +44,7 @@ export const resolvePinConflictState = <TData>({
   );
 
   if (resolution === 'move-column') {
-    let newOrder = allOrderedColumns
+    let newOrder: ColumnOrderState<TData> = allOrderedColumns
       .filter((column) => column.key !== columnKey)
       .map((column) => column.key);
     const column = allOrderedColumns[index];
@@ -59,7 +59,7 @@ export const resolvePinConflictState = <TData>({
     }
 
     return {
-      columnOrder: newOrder as ColumnOrderState<TData>,
+      columnOrder: newOrder,
       columnPinning: applyPin({
         columnKey,
         columnPinning: currentPinning,

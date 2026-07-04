@@ -26,7 +26,7 @@ export const NumberFilterInput = <TData,>({
       onChange({
         operator: 'between',
         type: 'number',
-        value: val === '' ? (undefined as unknown as number) : val,
+        value: val === '' ? undefined : val,
         value2: maxVal === '' ? undefined : maxVal,
       });
       return;
@@ -34,7 +34,7 @@ export const NumberFilterInput = <TData,>({
     onChange({
       operator: op,
       type: 'number',
-      value: val === '' ? (undefined as unknown as number) : val,
+      value: val === '' ? undefined : val,
     });
   };
 

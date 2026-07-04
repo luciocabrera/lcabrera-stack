@@ -1,3 +1,5 @@
+import { logger } from '@/utils/logger';
+
 type ReadFromSessionStorageArgs = {
   readonly key: string;
 };
@@ -12,7 +14,8 @@ export const readFromSessionStorage = ({
   if (typeof sessionStorage === 'undefined') return undefined;
   try {
     return sessionStorage.getItem(key) ?? undefined;
-  } catch {
+  } catch (error) {
+    logger.debug('[storage] Failed to read sessionStorage key:', key, error);
     return undefined;
   }
 };
