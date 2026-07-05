@@ -2,7 +2,7 @@
 
 Before creating anything new, check this inventory. If something here does the job — or could do it with a small enhancement to make it more generic — **prefer enhancing the existing artifact** over creating a new one.
 
-Covers `packages/ui` only. API-layer utilities (`api.util.ts`, `buildPaginatedQueryParams`, `fetchAndValidate`, `api.constants.ts`, `api.types.ts`) live in `@repo/api` (`packages/api/src/`) — small enough it doesn't need its own inventory yet. App-local artifacts (routes, route-specific services) are tracked in each app's own `src/INVENTORY.md`.
+Covers `packages/ui` only. API-layer utilities (`api.util.ts`, `buildPaginatedQueryParams`, `fetchAndValidate`, `api.constants.ts`, `api.types.ts`) and Postgres-access utilities (`db/env.schema.ts`, `db/getPool.util.ts`) live in `@repo/data-access` (`packages/data-access/src/`) — small enough it doesn't need its own inventory yet. App-local artifacts (routes, route-specific services) are tracked in each app's own `src/INVENTORY.md`.
 
 ---
 

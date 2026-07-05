@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@react-router/serve": "catalog:",
-    "@repo/api": "workspace:*",
+    "@repo/data-access": "workspace:*",
     "@repo/ui": "workspace:*",
     "@stylexjs/stylex": "catalog:",
     "react": "catalog:",

@@ -13,6 +13,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.app.json"
   },
   "dependencies": {
+    "@repo/data-access": "workspace:*",
     "pg": "catalog:",
     "zod": "catalog:"
   },

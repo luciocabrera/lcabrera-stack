@@ -1,9 +1,13 @@
 {
-  "name": "@repo/api",
+  "name": "@repo/data-access",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "sideEffects": false,
+  "exports": {
+    "./db/env.schema": "./src/db/env.schema.ts",
+    "./db/getPool.util": "./src/db/getPool.util.ts"
+  },
   "scripts": {
     "format": "vp fmt .",
     "format:check": "vp fmt --check .",
@@ -11,8 +15,14 @@
     "lint:check": "vp lint .",
     "typecheck": "tsc --noEmit -p tsconfig.app.json"
   },
+  "dependencies": {
+    "pg": "catalog:",
+    "zod": "catalog:"
+  },
   "devDependencies": {
     "@repo/vite-configs": "workspace:*",
+    "@types/node": "catalog:",
+    "@types/pg": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
     "vite-plus": "catalog:",

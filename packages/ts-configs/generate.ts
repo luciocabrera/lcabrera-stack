@@ -51,7 +51,7 @@ const configs = [
   {
     config: createAppTsConfig({
       paths: {
-        '@repo/api/*': ['../../packages/api/src/*'],
+        '@repo/data-access/*': ['../../packages/data-access/src/*'],
         '@repo/ui/*': ['../../packages/ui/src/*'],
       },
       tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
@@ -72,10 +72,10 @@ const configs = [
       // tsconfig.json from a file *inside* packages/ui (an editor's
       // language server, or tsc/lint invoked directly against this
       // package) can still resolve @repo/ui's own self-referencing
-      // imports and @repo/api cross-imports — without it, only a
+      // imports and @repo/data-access cross-imports — without it, only a
       // consuming app's own tsconfig knew about these aliases.
       paths: {
-        '@repo/api/*': ['../api/src/*'],
+        '@repo/data-access/*': ['../data-access/src/*'],
         '@repo/ui/*': ['./src/*'],
       },
       tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
@@ -89,28 +89,38 @@ const configs = [
     filePath: resolve(workspaceRoot, 'packages/ui/tsconfig.app.json'),
   },
   {
-    // Despite having no React, packages/api runs in the browser (fetch
-    // utilities executed client-side) and needs import.meta.env (vite/client)
-    // plus DOM lib (its tests reference Window/Location) — createAppTsConfig
-    // fits its actual runtime better than createNodeTsConfig, which assumes
-    // no DOM/vite context at all. Confirmed no node: built-ins are used
-    // anywhere in this package.
+    // packages/data-access has two genuinely different runtime contexts in
+    // one package, deliberately (renamed from packages/api when it grew a
+    // Postgres db/ subtree alongside its original browser fetch utilities —
+    // see ADR-008): src/api/ runs in the browser (fetch utilities executed
+    // client-side, needs import.meta.env/vite/client + DOM lib for its
+    // Window/Location test references) while src/db/ is Node-only (pg
+    // client, process.env). Mirrors packages/ui's own precedent exactly
+    // (its src/entry/ SSR utilities mix into an otherwise browser-context
+    // package) — createAppTsConfig + types: ['node'] appended, one project
+    // covers both since this package has no vite.config-anchored node
+    // split either.
     config: createAppTsConfig({
       paths: {
-        '@repo/api/*': ['./src/*'],
+        '@repo/data-access/*': ['./src/*'],
       },
       tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
+      types: ['node'],
     }),
-    filePath: resolve(workspaceRoot, 'packages/api/tsconfig.app.json'),
+    filePath: resolve(workspaceRoot, 'packages/data-access/tsconfig.app.json'),
   },
   {
     // Genuinely Node-only (pg client, fs/path, git CLI via child_process,
-    // no DOM/vite.client usage anywhere) — unlike packages/api. Overrides
+    // no DOM/vite.client usage anywhere) — unlike packages/data-access's
+    // src/api/ half. Overrides
     // createNodeTsConfig's default include (['vite.config.ts'] only, meant
     // for an app's Node-context sibling config) since this package has no
     // app-context tsconfig to pair with — its own src/ needs typechecking.
     config: createNodeTsConfig({
       include: ['src', 'vite.config.ts'],
+      paths: {
+        '@repo/scan-ingestion/*': ['./src/*'],
+      },
       tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
     }),
     filePath: resolve(

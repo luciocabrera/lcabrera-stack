@@ -8,7 +8,7 @@ import {
   fakeDelay,
   fetchAndValidate,
   getApiBaseUrl,
-} from '@repo/api/api';
+} from '@repo/data-access/api';
 import { createLogger } from '@repo/ui/utils/logger';
 import { isObject } from '@repo/ui/utils/typeGuards';
 

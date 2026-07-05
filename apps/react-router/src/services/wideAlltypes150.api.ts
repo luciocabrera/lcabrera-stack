@@ -2,7 +2,7 @@ import {
   buildPaginatedQueryParams,
   fetchAndValidate,
   getApiBaseUrl,
-} from '@repo/api/api';
+} from '@repo/data-access/api';
 import { isObject } from '@repo/ui/utils/typeGuards';
 
 /**

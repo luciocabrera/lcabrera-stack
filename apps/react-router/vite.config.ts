@@ -19,8 +19,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('src', import.meta.url)),
-      '@repo/api': fileURLToPath(
-        new URL('../../packages/api/src', import.meta.url),
+      '@repo/data-access': fileURLToPath(
+        new URL('../../packages/data-access/src', import.meta.url),
       ),
       '@repo/ui': fileURLToPath(
         new URL('../../packages/ui/src', import.meta.url),

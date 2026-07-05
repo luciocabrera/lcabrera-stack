@@ -17,7 +17,7 @@
     "noUnusedParameters": true,
     "paths": {
       "@/*": ["./src/*"],
-      "@repo/api/*": ["../api/src/*"],
+      "@repo/data-access/*": ["../data-access/src/*"],
       "@repo/ui/*": ["./src/*"]
     },
     "resolveJsonModule": true,
