@@ -1,13 +1,6 @@
-import { useId } from 'react';
-
 import { Checkbox } from '@repo/ui/components/Checkbox';
 import { ToggleSwitch } from '@repo/ui/components/ToggleSwitch';
-import { useSetFieldValue } from '@repo/ui/components/Form/contexts/FormContext/actions';
-import {
-  useGetFieldError,
-  useGetFieldValue,
-  useGetFormMode,
-} from '@repo/ui/components/Form/contexts/FormContext/selectors';
+import { useFormField } from '@repo/ui/components/Form/fields/useFormField.hook';
 import { FormFieldChrome } from '@repo/ui/components/Form/FormFieldChrome/FormFieldChrome.component';
 
 import type { BooleanFieldProps } from './BooleanField.types';
@@ -15,15 +8,15 @@ import type { BooleanFieldProps } from './BooleanField.types';
 export const BooleanField = <TValues extends Record<string, unknown>>({
   field,
 }: BooleanFieldProps<TValues>) => {
-  const fieldId = useId();
-  const mode = useGetFormMode();
-  const value = useGetFieldValue<TValues>(field.accessor);
-  const error = useGetFieldError<TValues>(field.accessor);
-  const setFieldValue = useSetFieldValue<TValues>();
+  const { error, fieldId, isDisabled, setValue, value } =
+    useFormField<TValues>(field);
 
-  const isDisabled = mode === 'view' || Boolean(field.disabled);
   const isChecked = Boolean(value);
   const variant = field.variant ?? 'checkbox';
+
+  const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setValue(event.target.checked);
+  };
 
   return (
     <FormFieldChrome
@@ -40,7 +33,7 @@ export const BooleanField = <TValues extends Record<string, unknown>>({
           isDisabled={isDisabled}
           label={field.label}
           name={field.accessor}
-          onChange={(next) => setFieldValue(field.accessor, next)}
+          onChange={setValue}
         />
       ) : (
         <Checkbox
@@ -48,9 +41,7 @@ export const BooleanField = <TValues extends Record<string, unknown>>({
           isChecked={isChecked}
           isDisabled={isDisabled}
           name={field.accessor}
-          onChange={(event) =>
-            setFieldValue(field.accessor, event.target.checked)
-          }
+          onChange={handleCheckboxChange}
         />
       )}
     </FormFieldChrome>

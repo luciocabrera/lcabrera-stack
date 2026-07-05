@@ -66,6 +66,7 @@ Form/
 │   └── FormFieldChrome.types.ts
 │
 ├── fields/
+│   ├── useFormField.hook.ts → Shared per-leaf-field wiring: useId + value/error/mode selectors + isDisabled + accessor-bound setValue (every leaf field consumes it)
 │   ├── TextField/     → text | email | password | textarea (new bare input)
 │   ├── NumberField/   → number (new bare input)
 │   ├── DateField/     → date | datetime (new bare input)

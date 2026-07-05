@@ -1,13 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
-import { useId } from 'react';
 
 import { filterBaseStyles } from '@repo/ui/design-system/tokens/filters.stylex';
-import { useSetFieldValue } from '@repo/ui/components/Form/contexts/FormContext/actions';
-import {
-  useGetFieldError,
-  useGetFieldValue,
-  useGetFormMode,
-} from '@repo/ui/components/Form/contexts/FormContext/selectors';
+import { useFormField } from '@repo/ui/components/Form/fields/useFormField.hook';
 import { FormFieldChrome } from '@repo/ui/components/Form/FormFieldChrome/FormFieldChrome.component';
 
 import type { DateFieldProps } from './DateField.types';
@@ -15,13 +9,12 @@ import type { DateFieldProps } from './DateField.types';
 export const DateField = <TValues extends Record<string, unknown>>({
   field,
 }: DateFieldProps<TValues>) => {
-  const fieldId = useId();
-  const mode = useGetFormMode();
-  const value = useGetFieldValue<TValues>(field.accessor);
-  const error = useGetFieldError<TValues>(field.accessor);
-  const setFieldValue = useSetFieldValue<TValues>();
+  const { error, fieldId, isDisabled, setValue, value } =
+    useFormField<TValues>(field);
 
-  const isDisabled = mode === 'view' || Boolean(field.disabled);
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setValue(event.target.value);
+  };
 
   return (
     <FormFieldChrome
@@ -36,9 +29,7 @@ export const DateField = <TValues extends Record<string, unknown>>({
           disabled={isDisabled}
           id={fieldId}
           name={field.accessor}
-          onChange={(event) =>
-            setFieldValue(field.accessor, event.target.value)
-          }
+          onChange={handleChange}
           required={field.clientValidation?.required}
           type={field.type === 'datetime' ? 'datetime-local' : 'date'}
           value={(value as string | undefined) ?? ''}

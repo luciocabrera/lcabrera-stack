@@ -1,15 +1,10 @@
 import * as stylex from '@stylexjs/stylex';
-import { useId, useState } from 'react';
+import { useState } from 'react';
 
 import { Button } from '@repo/ui/components/Button';
 import { FolderIcon } from '@repo/ui/components/Icons';
 import { NO_AUTOFILL_INPUT_PROPS } from '@repo/ui/components/Table/filters/filterInput.constants';
-import { useSetFieldValue } from '@repo/ui/components/Form/contexts/FormContext/actions';
-import {
-  useGetFieldError,
-  useGetFieldValue,
-  useGetFormMode,
-} from '@repo/ui/components/Form/contexts/FormContext/selectors';
+import { useFormField } from '@repo/ui/components/Form/fields/useFormField.hook';
 import { FormFieldChrome } from '@repo/ui/components/Form/FormFieldChrome/FormFieldChrome.component';
 
 import type { PathFieldProps } from './PathField.types';
@@ -20,15 +15,19 @@ import { styles } from './PathField.stylex';
 export const PathField = <TValues extends Record<string, unknown>>({
   field,
 }: PathFieldProps<TValues>) => {
-  const fieldId = useId();
-  const mode = useGetFormMode();
-  const value = useGetFieldValue<TValues>(field.accessor);
-  const error = useGetFieldError<TValues>(field.accessor);
-  const setFieldValue = useSetFieldValue<TValues>();
+  const { error, fieldId, isDisabled, setValue, value } =
+    useFormField<TValues>(field);
   const [isBrowserOpen, setIsBrowserOpen] = useState(false);
 
-  const isDisabled = mode === 'view' || Boolean(field.disabled);
   const stringValue = (value as string | undefined) ?? '';
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setValue(event.target.value);
+  };
+
+  const handleCloose = () => {
+    setIsBrowserOpen(false);
+  };
 
   return (
     <FormFieldChrome
@@ -44,9 +43,7 @@ export const PathField = <TValues extends Record<string, unknown>>({
           disabled={isDisabled}
           id={fieldId}
           name={field.accessor}
-          onChange={(event) =>
-            setFieldValue(field.accessor, event.target.value)
-          }
+          onChange={handleChange}
           placeholder={field.placeholder}
           required={field.clientValidation?.required}
           type='text'
@@ -71,8 +68,8 @@ export const PathField = <TValues extends Record<string, unknown>>({
         browseAction={field.browseAction}
         initialPath={stringValue || undefined}
         isOpen={isBrowserOpen}
-        onClose={() => setIsBrowserOpen(false)}
-        onSelect={(path) => setFieldValue(field.accessor, path)}
+        onClose={handleCloose}
+        onSelect={setValue}
       />
     </FormFieldChrome>
   );

@@ -1,12 +1,5 @@
-import { useId } from 'react';
-
 import { VirtualSelect } from '@repo/ui/components/VirtualSelect';
-import { useSetFieldValue } from '@repo/ui/components/Form/contexts/FormContext/actions';
-import {
-  useGetFieldError,
-  useGetFieldValue,
-  useGetFormMode,
-} from '@repo/ui/components/Form/contexts/FormContext/selectors';
+import { useFormField } from '@repo/ui/components/Form/fields/useFormField.hook';
 import { FormFieldChrome } from '@repo/ui/components/Form/FormFieldChrome/FormFieldChrome.component';
 
 import type { SelectFieldProps } from './SelectField.types';
@@ -29,21 +22,14 @@ const resolveSelectedValues = (
 export const SelectField = <TValues extends Record<string, unknown>>({
   field,
 }: SelectFieldProps<TValues>) => {
-  const fieldId = useId();
-  const mode = useGetFormMode();
-  const value = useGetFieldValue<TValues>(field.accessor);
-  const error = useGetFieldError<TValues>(field.accessor);
-  const setFieldValue = useSetFieldValue<TValues>();
+  const { error, fieldId, isDisabled, setValue, value } =
+    useFormField<TValues>(field);
 
-  const isDisabled = mode === 'view' || Boolean(field.disabled);
   const selectMode = field.mode ?? 'single';
   const selected = resolveSelectedValues(selectMode, value);
 
   const handleChange = (nextSelected: string[]) => {
-    setFieldValue(
-      field.accessor,
-      selectMode === 'multi' ? nextSelected : (nextSelected[0] ?? ''),
-    );
+    setValue(selectMode === 'multi' ? nextSelected : (nextSelected[0] ?? ''));
   };
 
   return (

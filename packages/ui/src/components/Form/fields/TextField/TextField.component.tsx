@@ -1,14 +1,8 @@
 import * as stylex from '@stylexjs/stylex';
-import { useId } from 'react';
 
 import { NO_AUTOFILL_INPUT_PROPS } from '@repo/ui/components/Table/filters/filterInput.constants';
 import { filterBaseStyles } from '@repo/ui/design-system/tokens/filters.stylex';
-import { useSetFieldValue } from '@repo/ui/components/Form/contexts/FormContext/actions';
-import {
-  useGetFieldError,
-  useGetFieldValue,
-  useGetFormMode,
-} from '@repo/ui/components/Form/contexts/FormContext/selectors';
+import { useFormField } from '@repo/ui/components/Form/fields/useFormField.hook';
 import { FormFieldChrome } from '@repo/ui/components/Form/FormFieldChrome/FormFieldChrome.component';
 
 import type { TextFieldProps } from './TextField.types';
@@ -18,14 +12,16 @@ import { styles } from './TextField.stylex';
 export const TextField = <TValues extends Record<string, unknown>>({
   field,
 }: TextFieldProps<TValues>) => {
-  const fieldId = useId();
-  const mode = useGetFormMode();
-  const value = useGetFieldValue<TValues>(field.accessor);
-  const error = useGetFieldError<TValues>(field.accessor);
-  const setFieldValue = useSetFieldValue<TValues>();
+  const { error, fieldId, isDisabled, setValue, value } =
+    useFormField<TValues>(field);
 
-  const isDisabled = mode === 'view' || Boolean(field.disabled);
   const stringValue = (value as string | undefined) ?? '';
+
+  const handleChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    setValue(event.target.value);
+  };
 
   return (
     <FormFieldChrome
@@ -42,9 +38,7 @@ export const TextField = <TValues extends Record<string, unknown>>({
           maxLength={field.clientValidation?.maxLength}
           minLength={field.clientValidation?.minLength}
           name={field.accessor}
-          onChange={(event) =>
-            setFieldValue(field.accessor, event.target.value)
-          }
+          onChange={handleChange}
           placeholder={field.placeholder}
           required={field.clientValidation?.required}
           value={stringValue}
@@ -59,9 +53,7 @@ export const TextField = <TValues extends Record<string, unknown>>({
             maxLength={field.clientValidation?.maxLength}
             minLength={field.clientValidation?.minLength}
             name={field.accessor}
-            onChange={(event) =>
-              setFieldValue(field.accessor, event.target.value)
-            }
+            onChange={handleChange}
             pattern={field.clientValidation?.pattern}
             placeholder={field.placeholder}
             required={field.clientValidation?.required}
