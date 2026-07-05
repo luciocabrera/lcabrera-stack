@@ -12,8 +12,7 @@ Utilities supporting `NotificationCenter.component.tsx`.
 
 - `groupNotificationsByPlacement.util.ts`: builds the placement map used by the component render loop
 - `sortNotificationsByNewest.util.ts`: returns newest notifications first without mutating the source array
-- `getAccentStyle.util.ts`: maps notification variants to `NotificationItem` StyleX accent rail styles
-- `getNotificationCardColor.util.ts`: maps notification variants to semantic Card colors
+- `getAccentStyle.util.ts`: maps notification variants to `NotificationItem` StyleX accent rail + variant wash gradient styles
 - `getNotificationDismissIconStyle.util.ts`: maps notification variants to `NotificationItem` dismiss icon color styles
 
 ## Constants Dependency

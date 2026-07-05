@@ -4,7 +4,9 @@ Declarative, `fields`-driven form component — the `Table`/`columns` philosophy
 applied to forms (`fields` instead of `columns`). Renders from a recursive
 `group`/`row`/`tab`/leaf field tree, submits through React Router 7's native
 `<Form>` (or `useFetcher().Form` as an opt-in), and supports `create`/`edit`/
-`view` modes with dirty-check-gated edit submission. See ADR-005.
+`view` modes with dirty-check-gated edit submission and a built-in
+Accept/Cancel footer (see ADR-005, and ADR-014 for the `path` field type
+and Cancel's discard-changes confirmation).
 
 ## File Structure
 
@@ -70,8 +72,10 @@ Form/
 │   ├── BooleanField/  → wraps Checkbox or ToggleSwitch
 │   ├── SelectField/   → wraps VirtualSelect + hidden inputs for FormData
 │   ├── RadioField/    → wraps RadioOptionGroup
+│   ├── PathField/     → path — text input + Browse… button, opens PathBrowserModal
+│   │   └── PathBrowserModal/ → Private delegate — breadcrumb-free directory drill-down, fetches @repo/ui/routing/browseDirectory.loader via useFetcher().load
 │   └── CustomField/   → escape hatch via field.renderField(...)
-│   (each: <Name>.component.tsx + <Name>.types.ts, TextField/RadioField also <Name>.stylex.ts)
+│   (each: <Name>.component.tsx + <Name>.types.ts, TextField/RadioField/PathBrowserModal also <Name>.stylex.ts)
 │
 └── utils/
     ├── flattenFields.util.ts    → Recursive walker → readonly LeafFieldDef[]
@@ -171,6 +175,41 @@ it changes identity.
 - **`view`**: every leaf field forced `isDisabled`; the footer (submit/
   cancel buttons) is not rendered at all.
 
+## Cancel & Discard-Changes Flow
+
+The footer's Cancel button is always rendered (whenever the footer itself
+renders — `create`/`edit`, never `view`) and its behavior is entirely
+built into `FormBody`, not left to each consumer to wire up:
+
+```mermaid
+graph TD
+  A["User clicks Cancel"] --> B{"isDirty?"}
+  B -->|"no"| C["goBack(cancelTo) immediately"]
+  B -->|"yes"| D["Open ConfirmDialog: 'Discard changes?'"]
+  D -->|"Keep Editing"| E["Close dialog, stay on the form"]
+  D -->|"Discard Changes"| C
+  C --> F{"history.state.idx > 0?"}
+  F -->|"yes"| G["navigate(-1) — back to wherever the user actually came from"]
+  F -->|"no"| H["navigate(cancelTo) — e.g. a bookmarked/pasted URL with no in-app history"]
+```
+
+- **`cancelTo`** (required prop) is the fallback route — conventionally the
+  entity's list route (`/cqms/projects`), but a consumer scoped to one
+  parent entity can point narrower (`trigger-scan` cancels to that
+  project's detail page, not the top-level project list).
+- **`useBackNavigate`** (`packages/ui/src/hooks/`) owns the "was there a
+  real in-app previous page" decision via `history.state.idx` — react-
+  router's own browser-history position marker — so Cancel doesn't
+  strand the user on an external referrer or a blank tab. Generic, reused
+  anywhere a "Back" affordance needs the same judgment call, not
+  Form-specific.
+- **`ConfirmDialog`** (`packages/ui/src/components/ConfirmDialog/`) is a
+  plain, Form-agnostic yes/no prompt built on `Modal` — the "would lose
+  changes" gate reuses the exact same `isDirty` the submit button already
+  computes, so "don't bother the API with no changes" (submit-disabled)
+  and "don't silently lose changes on cancel" (confirm-gated) are two
+  faces of the same dirty check.
+
 ## Registry Dispatch, Not a Switch
 
 `FormField.constants.ts`'s `fieldRegistry` maps `field.type` → component.
@@ -196,3 +235,9 @@ automatically via `name`. Two components need explicit handling:
 
 CQMS's `new-project` and `trigger-scan` route actions (Implementation Plan
 step 8) are the first real consumers, both using `mode: 'create'`.
+`edit-project` (`mode: 'edit'`) is the first `path`-type-field consumer —
+`localPath` browses the server's real filesystem via
+`@repo/ui/routing/browseDirectory.loader` (re-exported as a thin resource
+route, `admin_system`'s `_action/browse-directory`), deliberately
+unscoped — this app registers local repos that can live anywhere on the
+machine, so there's no meaningful root to sandbox browsing to.

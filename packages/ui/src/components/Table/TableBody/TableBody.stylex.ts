@@ -6,4 +6,8 @@ export const styles = stylex.create({
     position: 'relative',
     height,
   }),
+  bodyEmpty: {
+    display: 'table-row-group',
+    position: 'relative',
+  },
 });

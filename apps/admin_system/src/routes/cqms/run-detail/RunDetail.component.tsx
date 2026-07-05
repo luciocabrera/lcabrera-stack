@@ -1,0 +1,37 @@
+import type { RunScanRow } from '@repo/scan-ingestion/queries/getRunScans.util';
+
+import { StatusBadge } from '@repo/ui/components/StatusBadge';
+import { TableLayout } from '@repo/ui/components/Table/TableLayout';
+import { createEmptyColumnsState } from '@repo/ui/components/Table/utils/createEmptyColumnsState.util';
+import { useLoaderData } from 'react-router';
+
+import type { loader } from './runDetail.loader';
+
+import { resolveRunStatusTone } from '../utils/resolveRunStatusTone.util';
+import { RUN_SCANS_COLUMNS } from './RunDetail.constants';
+
+export const RunDetail = () => {
+  const { run, scansPromise } = useLoaderData<typeof loader>();
+
+  return (
+    <div>
+      <h1>
+        Run{' '}
+        <StatusBadge
+          label={run.status}
+          tone={resolveRunStatusTone(run.status)}
+        />
+      </h1>
+      <p>Origin: {run.origin}</p>
+      {run.git_branch && <p>Branch: {run.git_branch}</p>}
+
+      <h2>Scans</h2>
+      <TableLayout<RunScanRow, readonly RunScanRow[]>
+        columnsState={createEmptyColumnsState({ columns: RUN_SCANS_COLUMNS })}
+        dataPromise={scansPromise}
+        dataSelector={(rows) => rows}
+        metaState={{ title: 'Scans' }}
+      />
+    </div>
+  );
+};

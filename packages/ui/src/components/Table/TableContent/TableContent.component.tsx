@@ -27,6 +27,7 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   actions,
   dataSelector,
   dataTotalSelector,
+  emptyState,
   icon,
   onLoadMore,
 }: TableContentProps<TData, TResponse>) => {
@@ -100,7 +101,10 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
           >
             <TableBase>
               <TableHeader />
-              <TableBody tableContainerRef={containerRef} />
+              <TableBody
+                emptyState={emptyState}
+                tableContainerRef={containerRef}
+              />
             </TableBase>
             <div
               aria-hidden

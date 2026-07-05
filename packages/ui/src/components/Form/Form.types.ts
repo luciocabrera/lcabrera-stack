@@ -62,6 +62,13 @@ export type DateFieldDef<TValues extends Record<string, unknown>> =
     readonly type: 'date' | 'datetime';
   };
 
+export type PathFieldDef<TValues extends Record<string, unknown>> =
+  BaseFieldDef<TValues> & {
+    /** Resource route URL that lists a directory's subdirectories — see `browseDirectory.loader.ts`. */
+    readonly browseAction: string;
+    readonly type: 'path';
+  };
+
 export type RenderFieldArgs = {
   readonly error?: string;
   readonly isDisabled: boolean;
@@ -80,6 +87,7 @@ export type LeafFieldDef<TValues extends Record<string, unknown>> =
   | CustomFieldDef<TValues>
   | DateFieldDef<TValues>
   | NumberFieldDef<TValues>
+  | PathFieldDef<TValues>
   | RadioFieldDef<TValues>
   | SelectFieldDef<TValues>
   | TextFieldDef<TValues>;
@@ -116,12 +124,13 @@ export type FieldErrors<TValues extends Record<string, unknown>> = Partial<
 export type FormProps<TValues extends Record<string, unknown>> = {
   readonly action?: string;
   readonly cancelLabel?: string;
+  /** Fallback route Cancel navigates to when there's no valid in-app history entry to return to — typically this entity's list route. */
+  readonly cancelTo: string;
   readonly children?: ReactNode;
   readonly fields: readonly FieldNode<TValues>[];
   readonly initialValues?: Partial<TValues>;
   readonly method?: 'delete' | 'patch' | 'post' | 'put';
   readonly mode: FormMode;
-  readonly onCancel?: () => void;
   readonly serverErrors?: FieldErrors<TValues>;
   readonly submission?: FormSubmission;
   readonly submitLabel?: string;

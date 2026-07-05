@@ -83,11 +83,14 @@ export const styles = stylex.create({
   itemSurface: {
     borderRadius: borderRadius.lg,
     overflow: 'hidden',
-    backgroundColor: colors.surfaceElevated,
+    backdropFilter: colors.glassBackdropFilterPrimary,
+    backgroundColor: colors.surfacePrimary,
     boxShadow: shadows.lg,
     borderLeftColor: colors.borderPrimary,
     borderLeftStyle: 'solid',
     borderLeftWidth: '4px',
+    paddingBlock: spacing.md,
+    paddingInline: spacing.md,
     width: '100%',
   },
   itemSurfaceHover: {
@@ -98,23 +101,30 @@ export const styles = stylex.create({
   },
   itemSurfaceDefault: {
     borderLeftColor: colors.borderPrimary,
+    backgroundImage: `linear-gradient(140deg, ${colors.notificationGradientBase} 0%, ${colors.success} 250%)`,
   },
   itemSurfaceError: {
+    backgroundImage: `linear-gradient(140deg, ${colors.notificationGradientBase} 0%, ${colors.error} 250%)`,
     borderLeftColor: colors.error,
   },
   itemSurfaceInfo: {
+    backgroundImage: `linear-gradient(140deg, ${colors.notificationGradientBase} 0%, ${colors.info} 250%)`,
     borderLeftColor: colors.info,
   },
   itemSurfacePrimary: {
+    backgroundImage: `linear-gradient(140deg, ${colors.notificationGradientBase} 0%, ${colors.brandPrimary} 250%)`,
     borderLeftColor: colors.brandPrimary,
   },
   itemSurfaceSecondary: {
+    backgroundImage: `linear-gradient(140deg, ${colors.notificationGradientBase} 0%, ${colors.brandSecondary} 250%)`,
     borderLeftColor: colors.brandSecondary,
   },
   itemSurfaceSuccess: {
+    backgroundImage: `linear-gradient(140deg, ${colors.notificationGradientBase} 0%, ${colors.success} 250%)`,
     borderLeftColor: colors.success,
   },
   itemSurfaceWarning: {
+    backgroundImage: `linear-gradient(140deg, ${colors.notificationGradientBase} 0%, ${colors.warning} 250%)`,
     borderLeftColor: colors.warning,
   },
   message: {

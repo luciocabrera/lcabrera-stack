@@ -7,6 +7,7 @@ import { cardStyles } from './Card.stylex';
 export const Card = ({
   children,
   color = 'default',
+  customStylex,
   elevation = 'sm',
   interactive = 'static',
   padding,
@@ -26,6 +27,7 @@ export const Card = ({
         cardStyles.color[color],
         isInteractive && cardStyles.rippleBase,
         cardStyles.interactive[interactive],
+        customStylex,
       )}
     >
       {children}

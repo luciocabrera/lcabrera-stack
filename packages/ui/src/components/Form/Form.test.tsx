@@ -7,14 +7,27 @@ import {
   screen,
   waitFor,
 } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createRoutesStub } from 'react-router';
+
+import { mockDialogElement } from '@repo/ui/utils/tests/mockDialogElement.util';
 
 import type { FieldNode, FormMode } from './Form.types';
 
 import { Form } from './Form.component';
 
+const dialogMocksRef: { current: { readonly restoreMockDialog: () => void } } =
+  {
+    current: { restoreMockDialog: () => {} },
+  };
+
+beforeEach(() => {
+  const setup = mockDialogElement(false);
+  dialogMocksRef.current = { restoreMockDialog: setup.restore };
+});
+
 afterEach(() => {
+  dialogMocksRef.current.restoreMockDialog();
   cleanup();
 });
 
@@ -79,6 +92,7 @@ const renderForm = ({
     {
       Component: () => (
         <Form<Values>
+          cancelTo='/list'
           fields={fields}
           initialValues={initialValues}
           mode={mode}
@@ -88,6 +102,7 @@ const renderForm = ({
       action,
       path: '/',
     },
+    { Component: () => <p>List Page</p>, path: '/list' },
   ]);
 
   return render(<Stub initialEntries={['/']} />);
@@ -168,5 +183,93 @@ describe('Form', () => {
 
     fireEvent.click(submitButton);
     await waitFor(() => expect(action).toHaveBeenCalledTimes(1));
+  });
+
+  it('navigates straight to cancelTo when Cancel is clicked with no changes', async () => {
+    renderForm({
+      action: vi.fn(),
+      initialValues: { name: 'Ada' },
+      mode: 'edit',
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+
+    expect(await screen.findByText('List Page')).not.toBeNull();
+  });
+
+  it('shows a discard-changes confirmation when Cancel is clicked with unsaved changes', async () => {
+    renderForm({
+      action: vi.fn(),
+      initialValues: { name: 'Ada' },
+      mode: 'edit',
+    });
+
+    fireEvent.change(screen.getByLabelText('Name', { exact: false }), {
+      target: { value: 'Grace' },
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+
+    expect(
+      await screen.findByRole('heading', {
+        hidden: true,
+        name: 'Discard changes?',
+      }),
+    ).not.toBeNull();
+    expect(screen.queryByText('List Page')).toBeNull();
+  });
+
+  it('stays on the form when "Keep Editing" is chosen from the discard-changes confirmation', async () => {
+    renderForm({
+      action: vi.fn(),
+      initialValues: { name: 'Ada' },
+      mode: 'edit',
+    });
+
+    fireEvent.change(screen.getByLabelText('Name', { exact: false }), {
+      target: { value: 'Grace' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+
+    fireEvent.click(
+      screen.getByRole('button', { hidden: true, name: 'Keep Editing' }),
+    );
+
+    expect(document.querySelector('dialog')?.open).toBe(false);
+    expect(screen.queryByText('List Page')).toBeNull();
+  });
+
+  it('navigates to cancelTo after confirming "Discard Changes"', async () => {
+    renderForm({
+      action: vi.fn(),
+      initialValues: { name: 'Ada' },
+      mode: 'edit',
+    });
+
+    fireEvent.change(screen.getByLabelText('Name', { exact: false }), {
+      target: { value: 'Grace' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+
+    fireEvent.click(
+      screen.getByRole('button', { hidden: true, name: 'Discard Changes' }),
+    );
+
+    expect(await screen.findByText('List Page')).not.toBeNull();
+  });
+
+  it('defaults the submit button label to "Accept" when submitLabel is not provided', () => {
+    const Stub = createRoutesStub([
+      {
+        Component: () => (
+          <Form<Values> cancelTo='/list' fields={buildFields()} mode='create' />
+        ),
+        path: '/',
+      },
+    ]);
+
+    render(<Stub initialEntries={['/']} />);
+
+    expect(screen.getByRole('button', { name: 'Accept' })).not.toBeNull();
   });
 });

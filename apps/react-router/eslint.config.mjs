@@ -2,4 +2,5 @@ import { createCustomRulesLintConfig } from '@repo/vite-configs/eslint-custom-ru
 
 export default createCustomRulesLintConfig({
   ignorePatterns: ['src/components/Tooltip/Tooltip.stylex.ts'],
+  tsconfigRootDir: import.meta.dirname,
 });

@@ -104,6 +104,7 @@ export const darkTheme = stylex.createTheme(colors, {
   hover: 'oklch(100% 0 0 / 0.09)',
   active: 'oklch(100% 0 0 / 0.10)',
   overlay: 'oklch(0% 0 0 / 0.7)', // modal/dialog backdrop (darker for dark theme)
+  notificationGradientBase: '#000000ab', // translucent black wash for dark surfaces
   patternDot: '#333333', // subtle light-grey dots on the near-black background
   shadowHover:
     '0 20px 25px -5px oklch(0% 0 0 / 0.45), 0 10px 10px -5px oklch(0% 0 0 / 0.28)',

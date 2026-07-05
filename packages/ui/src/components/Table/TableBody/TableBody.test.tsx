@@ -87,6 +87,24 @@ vi.mock('@repo/ui/components/Table/TableBodyRows', () => ({
   TableBodyRows: MockTableBodyRows,
 }));
 
+vi.mock('@repo/ui/components/Table/TableEmptyState', () => ({
+  TableEmptyState: ({
+    message,
+    title,
+  }: {
+    readonly message?: string;
+    readonly title?: string;
+  }) => (
+    <tr
+      data-message={message}
+      data-testid='table-empty-state'
+      data-title={title}
+    >
+      <td>empty</td>
+    </tr>
+  ),
+}));
+
 vi.mock('@repo/ui/hooks', () => ({
   useVirtualization: useVirtualizationMock,
 }));
@@ -218,5 +236,60 @@ describe('TableBody', () => {
     expect(useVirtualizationMock).toHaveBeenCalledWith(
       expect.objectContaining({ totalItems: 42 }),
     );
+  });
+
+  it('renders the empty state when there are no rows and not loading', () => {
+    setupDefaultMocks();
+    useGetTableTotalLoadedRowsMock.mockReturnValue(0);
+    useVirtualizationMock.mockReturnValue({
+      bottomSpacerHeight: 0,
+      endIndex: 0,
+      offsetY: 0,
+      startIndex: 0,
+      totalHeight: 0,
+    });
+
+    const tableContainerRef = {
+      current: document.createElement('div'),
+    } as RefObject<HTMLDivElement | null>;
+
+    render(
+      <table>
+        <TableBody
+          emptyState={{ title: 'Nothing here' }}
+          tableContainerRef={tableContainerRef}
+        />
+      </table>,
+    );
+
+    const emptyState = screen.getByTestId('table-empty-state');
+    expect(emptyState.dataset.title).toBe('Nothing here');
+    expect(screen.queryByTestId('table-body-rows')).toBeNull();
+  });
+
+  it('does not render the empty state while loading with no rows', () => {
+    setupDefaultMocks();
+    useGetTableTotalLoadedRowsMock.mockReturnValue(0);
+    useGetTableIsLoadingMock.mockReturnValue(true);
+    useVirtualizationMock.mockReturnValue({
+      bottomSpacerHeight: 0,
+      endIndex: 0,
+      offsetY: 0,
+      startIndex: 0,
+      totalHeight: 0,
+    });
+
+    const tableContainerRef = {
+      current: document.createElement('div'),
+    } as RefObject<HTMLDivElement | null>;
+
+    render(
+      <table>
+        <TableBody tableContainerRef={tableContainerRef} />
+      </table>,
+    );
+
+    expect(screen.queryByTestId('table-empty-state')).toBeNull();
+    expect(screen.getByTestId('table-body-rows')).not.toBeNull();
   });
 });

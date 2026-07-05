@@ -12,9 +12,9 @@ describe('inferTableColumnsFromJson', () => {
       rows: [{ active: true, age: 30, name: 'Ada' }],
     });
     expect(result).toEqual([
-      { dataType: 'boolean', key: 'active', label: 'Active' },
-      { dataType: 'number', key: 'age', label: 'Age' },
-      { dataType: 'string', key: 'name', label: 'Name' },
+      { dataType: 'boolean', key: 'active', label: 'Active', minWidth: 120 },
+      { dataType: 'number', key: 'age', label: 'Age', minWidth: 120 },
+      { dataType: 'string', key: 'name', label: 'Name', minWidth: 120 },
     ]);
   });
 
@@ -23,7 +23,12 @@ describe('inferTableColumnsFromJson', () => {
       rows: [{ generatedAt: '2026-07-04T12:00:00Z' }],
     });
     expect(result).toEqual([
-      { dataType: 'date', key: 'generatedAt', label: 'Generated At' },
+      {
+        dataType: 'date',
+        key: 'generatedAt',
+        label: 'Generated At',
+        minWidth: 120,
+      },
     ]);
   });
 
@@ -39,7 +44,7 @@ describe('inferTableColumnsFromJson', () => {
       rows: [{ value: 1 }, { value: 'two' }],
     });
     expect(result).toEqual([
-      { dataType: 'string', key: 'value', label: 'Value' },
+      { dataType: 'string', key: 'value', label: 'Value', minWidth: 120 },
     ]);
   });
 
@@ -48,7 +53,7 @@ describe('inferTableColumnsFromJson', () => {
       rows: [{ count: null }, { count: 5 }],
     });
     expect(result).toEqual([
-      { dataType: 'number', key: 'count', label: 'Count' },
+      { dataType: 'number', key: 'count', label: 'Count', minWidth: 120 },
     ]);
   });
 

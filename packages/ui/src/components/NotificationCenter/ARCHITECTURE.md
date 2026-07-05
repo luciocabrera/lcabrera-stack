@@ -23,8 +23,7 @@ Reusable viewport-based notification UI with:
 - `NotificationCenter.types.ts`: local view props and placement map types
 - `utils/groupNotificationsByPlacement.util.ts`: groups notifications into placement buckets
 - `utils/sortNotificationsByNewest.util.ts`: returns newest notifications first without mutating state
-- `utils/getAccentStyle.util.ts`: maps notification variants to accent rail styles consumed by `NotificationItem`
-- `utils/getNotificationCardColor.util.ts`: maps notification variants to semantic Card color consumed by `NotificationItem`
+- `utils/getAccentStyle.util.ts`: maps notification variants to accent rail + variant wash gradient styles consumed by `NotificationItem`
 
 ## Behavior
 
@@ -33,6 +32,6 @@ Reusable viewport-based notification UI with:
 - renders one fixed viewport per placement with active items
 - opens each active viewport as a manual popover so the host enters the browser top layer
 - renders notifications as composed Card surfaces with a left accent rail derived from variant
-- applies semantic Card `error` styling for error notifications (red border + subtle error background)
+- keeps Card surface neutral for all variants and uses the left accent rail to communicate severity
 - applies a subtle hover elevation effect to keep visual parity with hoverable card affordances
 - dismiss button calls `dismissNotification(id)`

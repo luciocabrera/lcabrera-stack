@@ -6,6 +6,7 @@ import { BooleanField } from '@repo/ui/components/Form/fields/BooleanField/Boole
 import { CustomField } from '@repo/ui/components/Form/fields/CustomField/CustomField.component';
 import { DateField } from '@repo/ui/components/Form/fields/DateField/DateField.component';
 import { NumberField } from '@repo/ui/components/Form/fields/NumberField/NumberField.component';
+import { PathField } from '@repo/ui/components/Form/fields/PathField/PathField.component';
 import { RadioField } from '@repo/ui/components/Form/fields/RadioField/RadioField.component';
 import { SelectField } from '@repo/ui/components/Form/fields/SelectField/SelectField.component';
 import { TextField } from '@repo/ui/components/Form/fields/TextField/TextField.component';
@@ -32,6 +33,7 @@ export const fieldRegistry: Record<
   email: TextField as AnyFieldComponent,
   number: NumberField as AnyFieldComponent,
   password: TextField as AnyFieldComponent,
+  path: PathField as AnyFieldComponent,
   radio: RadioField as AnyFieldComponent,
   select: SelectField as AnyFieldComponent,
   text: TextField as AnyFieldComponent,

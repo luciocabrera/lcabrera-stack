@@ -15,6 +15,7 @@ export const TableLayout = <
   TData extends Record<string, unknown>,
   TResponse = Record<string, unknown>,
 >({
+  actions,
   columnsState,
   dataPromise,
   dataSelector,
@@ -32,6 +33,7 @@ export const TableLayout = <
           <TableSuspenseBoundary<TData, TResponse> dataPromise={dataPromise}>
             {(response) => (
               <Table<TData, TResponse>
+                actions={actions}
                 dataSelector={dataSelector}
                 dataTotalSelector={dataTotalSelector}
                 onLoadMore={onLoadMore}

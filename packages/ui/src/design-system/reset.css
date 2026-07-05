@@ -1,0 +1,49 @@
+/* Shared base reset — every consuming app's own index.css/app.css should
+   `@import` this rather than hand-copying it. Extracted after admin_system
+   shipped without it: unstyled <h1>/<h2>/<p> margins produced visibly
+   inconsistent spacing against apps/react-router, which had this reset
+   from the start. */
+* {
+  box-sizing: border-box;
+}
+
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  scrollbar-width: thin;
+  scrollbar-color: #4a5568 transparent;
+}
+
+body::-webkit-scrollbar {
+  width: 8px;
+}
+
+body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+body::-webkit-scrollbar-thumb {
+  background-color: #4a5568;
+  border-radius: 4px;
+}

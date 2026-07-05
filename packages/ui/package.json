@@ -17,6 +17,7 @@
     "isbot": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
+    "react-markdown": "catalog:",
     "react-router": "catalog:"
   },
   "devDependencies": {

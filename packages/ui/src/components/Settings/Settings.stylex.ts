@@ -23,11 +23,6 @@ export const styles = stylex.create({
     fontSize: typography.fontSizeSm,
     lineHeight: typography.lineHeightNormal,
   },
-  section: {
-    gap: spacing.sm,
-    display: 'flex',
-    flexDirection: 'column',
-  },
   tabSections: {
     gap: spacing.lg,
     display: 'flex',
@@ -37,13 +32,6 @@ export const styles = stylex.create({
     margin: 0,
     color: colors.textPrimary,
     fontSize: typography.fontSize3xl,
-    fontWeight: typography.fontWeightSemibold,
-    lineHeight: typography.lineHeightTight,
-  },
-  sectionTitle: {
-    margin: 0,
-    color: colors.textPrimary,
-    fontSize: typography.fontSizeLg,
     fontWeight: typography.fontWeightSemibold,
     lineHeight: typography.lineHeightTight,
   },

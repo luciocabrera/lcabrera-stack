@@ -9,6 +9,7 @@ hooks/
 ├── index.ts                              → Barrel export
 ├── useClickOutside.hook.ts               → Detect mousedown outside a DOM element
 ├── useColumnVirtualization.hook.ts       → Horizontal virtual-scroll geometry computation
+├── useElementSize.hook.ts                → Track a ref element's client size via ResizeObserver (SSR-safe)
 ├── useInfiniteScrollObserver.hook.ts     → IntersectionObserver sentinel trigger for infinite scroll
 ├── useNotifyOnError.hook.ts              → Fire error toast whenever error identity changes
 ├── useStore.hook.ts                      → Lightweight external store (useSyncExternalStore-compatible)
@@ -27,6 +28,7 @@ hooks/
 | --------------------------- | ------------- | ---------------------------------------------- | --------------------------------------------- |
 | `useClickOutside`           | DOM event     | `void`                                         | `document` mousedown                          |
 | `useColumnVirtualization`   | Layout/scroll | `{ startIndex, endIndex, leftSpacerWidth, … }` | `ResizeObserver` + scroll events on container |
+| `useElementSize`            | Layout        | `{ height, width }`                            | `ResizeObserver` on the ref element           |
 | `useInfiniteScrollObserver` | Layout/scroll | `void`                                         | `IntersectionObserver` on a sentinel element  |
 | `useNotifyOnError`          | Notification  | `void`                                         | `useNotifyAction`, `useEffect`                |
 | `useStore`                  | State mgmt    | `TStore<TData>`                                | `useRef`, `shallowEqual`                      |

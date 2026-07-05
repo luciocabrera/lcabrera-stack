@@ -1,0 +1,30 @@
+import { getPool } from '@repo/data-access/db/getPool.util';
+
+export type RunRow = {
+  readonly created_at: string;
+  readonly finished_at: string | null;
+  readonly git_branch: string | null;
+  readonly git_commit_sha: string | null;
+  readonly id: string;
+  readonly origin: string;
+  readonly project_id: string;
+  readonly requested_scanners: readonly string[];
+  readonly started_at: string | null;
+  readonly status: string;
+  readonly triggered_by: string | null;
+};
+
+type GetRunByIdArgs = {
+  readonly runId: string;
+};
+
+export const getRunById = async ({
+  runId,
+}: GetRunByIdArgs): Promise<RunRow | undefined> => {
+  const pool = getPool();
+  const result = await pool.query<RunRow>(
+    'SELECT * FROM cqms.runs WHERE id = $1',
+    [runId],
+  );
+  return result.rows[0];
+};

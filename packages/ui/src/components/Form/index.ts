@@ -13,6 +13,7 @@ export type {
   GroupFieldNode,
   LeafFieldDef,
   NumberFieldDef,
+  PathFieldDef,
   RadioFieldDef,
   RenderFieldArgs,
   RowFieldNode,

@@ -1,3 +1,4 @@
+import type { StyleXStyles } from '@stylexjs/stylex';
 import type { ComponentPropsWithoutRef } from 'react';
 
 export type CardColor =
@@ -17,6 +18,7 @@ export type CardPadding = 'lg' | 'md' | 'none' | 'sm' | 'xl';
 
 export type CardProps = ComponentPropsWithoutRef<'div'> & {
   readonly color?: CardColor;
+  readonly customStylex?: StyleXStyles;
   readonly elevation?: CardElevation;
   readonly interactive?: CardInteractive;
   readonly padding?: CardPadding;

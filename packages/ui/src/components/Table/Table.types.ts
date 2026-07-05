@@ -286,5 +286,14 @@ export type TableProps<
 type BaseProps = ComponentPropsWithRef<'table'> & {
   readonly actions?: ReactNode;
   readonly customStylex?: StyleXStyles;
+  readonly emptyState?: TableEmptyStateConfig;
   readonly icon?: ReactNode;
+};
+
+/**
+ * Optional content overrides for the table's empty (no-data) state.
+ */
+export type TableEmptyStateConfig = {
+  readonly message?: ReactNode;
+  readonly title?: ReactNode;
 };

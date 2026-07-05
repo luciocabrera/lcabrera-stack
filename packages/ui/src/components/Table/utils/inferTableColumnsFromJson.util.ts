@@ -120,6 +120,11 @@ export const inferTableColumnsFromJson = ({
       ...(dataType === undefined ? {} : { dataType }),
       key,
       label: humanizeKey(key),
+      // Without an explicit minWidth, an inferred column with a short
+      // label (or an empty/short-valued column) collapses to little more
+      // than its sort-icon width — a real, previously-caught issue in
+      // hand-authored CQMS columns applies equally here.
+      minWidth: 120,
       ...(isComplex
         ? {
             render: (row: Record<string, unknown>) => JSON.stringify(row[key]),

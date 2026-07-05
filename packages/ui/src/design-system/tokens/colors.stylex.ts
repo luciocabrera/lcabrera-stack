@@ -56,6 +56,8 @@ export const colors = stylex.defineVars({
 
   // Interactive states
   hover: 'var(--hover)',
+  // Notification surface gradient base (fades to the variant color)
+  notificationGradientBase: 'var(--notification-gradient-base)',
   overlay: 'var(--overlay)',
   // Decorative background pattern (dotted grid)
   patternDot: 'var(--pattern-dot)',

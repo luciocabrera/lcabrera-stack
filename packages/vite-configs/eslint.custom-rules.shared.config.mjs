@@ -88,7 +88,16 @@ const unicornImport = await importFromWorkspace('eslint-plugin-unicorn');
 const unicorn = unicornImport.default ?? unicornImport;
 const globalsImport = await importFromWorkspace('globals');
 const globals = globalsImport.default ?? globalsImport;
-const TYPESCRIPT_LANGUAGE_OPTIONS = {
+// tsconfigRootDir is required once more than one app in this monorepo has
+// this same eslint.config.mjs shape (as of admin_system's addition):
+// without it, typescript-eslint's parser auto-detects candidate tsconfig
+// roots by walking up from cwd, and throws "multiple candidate
+// TSConfigRootDirs are present" the moment it finds more than one match —
+// e.g. an editor's ESLint extension linting a file without first cd-ing
+// into that one app's directory (unlike this repo's own `eslint .`
+// package.json scripts, which are always run with cwd already scoped to
+// a single app, so they never hit this ambiguity on the CLI).
+const createTypescriptLanguageOptions = (tsconfigRootDir) => ({
   ecmaVersion: 'latest',
   parser: tseslint.parser,
   parserOptions: {
@@ -96,8 +105,9 @@ const TYPESCRIPT_LANGUAGE_OPTIONS = {
       jsx: true,
     },
     sourceType: 'module',
+    tsconfigRootDir,
   },
-};
+});
 
 const GLOBAL_IGNORES = [
   '.react-router/**',
@@ -110,7 +120,10 @@ const GLOBAL_IGNORES = [
   'utils/**',
 ];
 
-export const createCustomRulesLintConfig = ({ ignorePatterns = [] } = {}) => [
+export const createCustomRulesLintConfig = ({
+  ignorePatterns = [],
+  tsconfigRootDir = process.cwd(),
+} = {}) => [
   // 1. Core ESLint
   eslint.configs.recommended,
   // Add security recommended config here (good spot: after core but before styling/sorting)
@@ -180,7 +193,7 @@ export const createCustomRulesLintConfig = ({ ignorePatterns = [] } = {}) => [
   },
   {
     files: ['src/**/*.ts', 'src/**/*.tsx'],
-    languageOptions: TYPESCRIPT_LANGUAGE_OPTIONS,
+    languageOptions: createTypescriptLanguageOptions(tsconfigRootDir),
     plugins: {
       '@stylexjs': stylexPlugin,
       'typescript-eslint': tseslint.plugin,
@@ -224,7 +237,7 @@ export const createCustomRulesLintConfig = ({ ignorePatterns = [] } = {}) => [
       'src/**/*.errorBoundary.tsx',
       'src/**/*.layout.tsx',
     ],
-    languageOptions: TYPESCRIPT_LANGUAGE_OPTIONS,
+    languageOptions: createTypescriptLanguageOptions(tsconfigRootDir),
     plugins: {
       'local-rules': localRules,
     },

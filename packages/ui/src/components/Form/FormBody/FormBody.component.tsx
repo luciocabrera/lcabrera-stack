@@ -1,15 +1,18 @@
 import type { FormEvent } from 'react';
 
 import * as stylex from '@stylexjs/stylex';
+import { useState } from 'react';
 import { Form as RouterForm, useFetcher, useNavigation } from 'react-router';
 
 import { Button } from '@repo/ui/components/Button';
+import { ConfirmDialog } from '@repo/ui/components/ConfirmDialog';
 import { useSubmitForm } from '@repo/ui/components/Form/contexts/FormContext/actions';
 import {
   useGetFormMode,
   useGetIsFormDirty,
 } from '@repo/ui/components/Form/contexts/FormContext/selectors';
 import { FormFields } from '@repo/ui/components/Form/FormFields/FormFields.component';
+import { useBackNavigate } from '@repo/ui/hooks';
 
 import type { FormBodyProps } from './FormBody.types';
 
@@ -18,14 +21,14 @@ import { styles } from './FormBody.stylex';
 export const FormBody = <TValues extends Record<string, unknown>>({
   action,
   cancelLabel = 'Cancel',
+  cancelTo,
   children,
   fields,
   formId,
   leafFields,
   method = 'post',
-  onCancel,
   submission = 'navigation',
-  submitLabel = 'Save',
+  submitLabel = 'Accept',
 }: FormBodyProps<TValues>) => {
   const mode = useGetFormMode();
   const isDirty = useGetIsFormDirty<TValues>(
@@ -34,6 +37,8 @@ export const FormBody = <TValues extends Record<string, unknown>>({
   const submitForm = useSubmitForm<TValues>();
   const navigation = useNavigation();
   const fetcher = useFetcher();
+  const goBack = useBackNavigate();
+  const [isConfirmDiscardOpen, setIsConfirmDiscardOpen] = useState(false);
 
   const isFetcherSubmission = submission === 'fetcher';
   const isSubmitting = isFetcherSubmission
@@ -44,6 +49,14 @@ export const FormBody = <TValues extends Record<string, unknown>>({
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     if (!submitForm({ leafFields })) {
       event.preventDefault();
+    }
+  };
+
+  const handleCancelClick = () => {
+    if (isDirty) {
+      setIsConfirmDiscardOpen(true);
+    } else {
+      goBack(cancelTo);
     }
   };
 
@@ -65,16 +78,14 @@ export const FormBody = <TValues extends Record<string, unknown>>({
       <FormFields fields={fields} />
       {mode !== 'view' && (
         <div {...stylex.props(styles.footer)}>
-          {onCancel && (
-            <Button
-              color='ghost'
-              onClick={onCancel}
-              type='button'
-              variant='flat'
-            >
-              {cancelLabel}
-            </Button>
-          )}
+          <Button
+            color='ghost'
+            onClick={handleCancelClick}
+            type='button'
+            variant='flat'
+          >
+            {cancelLabel}
+          </Button>
           {children}
           <Button
             color='primary'
@@ -87,6 +98,18 @@ export const FormBody = <TValues extends Record<string, unknown>>({
           </Button>
         </div>
       )}
+      <ConfirmDialog
+        cancelLabel='Keep Editing'
+        confirmLabel='Discard Changes'
+        description='You have unsaved changes. Leaving now will lose them.'
+        isOpen={isConfirmDiscardOpen}
+        onCancel={() => setIsConfirmDiscardOpen(false)}
+        onConfirm={() => {
+          setIsConfirmDiscardOpen(false);
+          goBack(cancelTo);
+        }}
+        title='Discard changes?'
+      />
     </FormComponent>
   );
 };

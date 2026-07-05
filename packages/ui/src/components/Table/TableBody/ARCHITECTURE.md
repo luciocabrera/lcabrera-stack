@@ -29,14 +29,25 @@ for virtualisation, and delegates row rendering to `TableBodyRows` via props
 `{ startIndex, endIndex, isLoadingState }`. Data-dependent re-renders are
 scoped to `TableBodyRows`.
 
+## Design Decision — Empty State
+
+When `totalLoadedRows === 0` **and** the table is not loading
+(`!isLoading && !isLoadingMore`), `TableBody` renders a single
+`TableEmptyState` row inside a non-grid `tbody` (`styles.bodyEmpty` uses
+`display: table-row-group` so the empty cell can size naturally and its sticky
+content can center). During loading with zero rows the skeleton path still
+renders — the empty state never flashes before data resolves. Optional
+`emptyState.{title,message}` overrides are threaded from `TableProps` through
+`TableContent`.
+
 ## File Structure
 
 ```
 TableBody/
-├── TableBody.component.tsx   → <tbody> with SpacerRow-based row virtualisation
-├── TableBody.test.tsx        → Unit tests for virtualisation window, cell rendering, spacers
-├── TableBody.types.ts        → TableBodyProps (tableContainerRef)
-├── TableBody.stylex.ts       → Placeholder (no active styles; spacers handle positioning)
+├── TableBody.component.tsx   → <tbody> with SpacerRow-based row virtualisation (+ empty-state branch)
+├── TableBody.test.tsx        → Unit tests for virtualisation window, cell rendering, spacers, empty state
+├── TableBody.types.ts        → TableBodyProps (emptyState, tableContainerRef)
+├── TableBody.stylex.ts       → body(height) grid style + bodyEmpty (table-row-group) for the empty state
 ├── index.ts                  → Barrel export
 │
 └── utils/

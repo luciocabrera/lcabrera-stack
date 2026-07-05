@@ -1,6 +1,6 @@
 import type { ToolbarItemConfig } from '@repo/ui/components/Toolbar/Toolbar.types';
 
-import { ListAllIcon } from '@repo/ui/components/Icons';
+import { ListAllIcon, SettingsIcon } from '@repo/ui/components/Icons';
 
 /**
  * Returns navigation items with icons scaled to the given size.
@@ -14,6 +14,12 @@ export const getNavigationItems = (
     icon: <ListAllIcon size={iconSize} />,
     label: 'Projects',
     to: '/cqms',
+    type: 'link',
+  },
+  {
+    icon: <SettingsIcon size={iconSize} />,
+    label: 'Settings',
+    to: '/settings',
     type: 'link',
   },
 ];
