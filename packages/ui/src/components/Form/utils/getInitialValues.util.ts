@@ -29,8 +29,7 @@ export const getInitialValues = <TValues extends Record<string, unknown>>({
 
   for (const field of leafFields) {
     const provided = initialValues?.[field.accessor];
-    values[field.accessor] =
-      provided === undefined ? getDefaultValueForField(field) : provided;
+    values[field.accessor] = provided ?? getDefaultValueForField(field);
   }
 
   return values as TValues;

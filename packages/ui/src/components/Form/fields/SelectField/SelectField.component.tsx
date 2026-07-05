@@ -11,6 +11,21 @@ import { FormFieldChrome } from '@repo/ui/components/Form/FormFieldChrome/FormFi
 
 import type { SelectFieldProps } from './SelectField.types';
 
+const resolveSelectedValues = (
+  mode: 'multi' | 'single',
+  value: unknown,
+): string[] => {
+  if (mode === 'multi') {
+    return (value as string[] | undefined) ?? [];
+  }
+
+  if (value) {
+    return [value as string];
+  }
+
+  return [];
+};
+
 export const SelectField = <TValues extends Record<string, unknown>>({
   field,
 }: SelectFieldProps<TValues>) => {
@@ -22,12 +37,7 @@ export const SelectField = <TValues extends Record<string, unknown>>({
 
   const isDisabled = mode === 'view' || Boolean(field.disabled);
   const selectMode = field.mode ?? 'single';
-  const selected =
-    selectMode === 'multi'
-      ? ((value as string[] | undefined) ?? [])
-      : value
-        ? [value as string]
-        : [];
+  const selected = resolveSelectedValues(selectMode, value);
 
   const handleChange = (nextSelected: string[]) => {
     setFieldValue(

@@ -2,11 +2,17 @@ import { execFileSync } from 'node:child_process';
 import { realpathSync } from 'node:fs';
 import { basename } from 'node:path';
 
+// Restrict command lookup to fixed, non-writable system directories so a
+// writable (potentially attacker-controlled) directory earlier in the
+// inherited PATH cannot shadow the real `git` binary (Sonar S4036).
+const TRUSTED_PATH = '/usr/local/bin:/usr/bin:/bin';
+
 const runGit = (args: readonly string[], cwd: string): string | undefined => {
   try {
     return execFileSync('git', args, {
       cwd,
       encoding: 'utf8',
+      env: { ...process.env, PATH: TRUSTED_PATH },
       stdio: ['ignore', 'pipe', 'ignore'],
     }).trim();
   } catch {

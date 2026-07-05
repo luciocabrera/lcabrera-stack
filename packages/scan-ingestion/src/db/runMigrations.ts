@@ -82,7 +82,9 @@ const runMigrations = async (): Promise<void> => {
   }
 };
 
-runMigrations().catch((error: unknown) => {
+try {
+  await runMigrations();
+} catch (error: unknown) {
   console.error('❌ Migration failed:', error);
   process.exitCode = 1;
-});
+}

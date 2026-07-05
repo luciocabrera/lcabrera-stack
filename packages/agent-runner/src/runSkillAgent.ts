@@ -33,18 +33,37 @@ export const runSkillAgent = async (
   const { body, frontmatter } = loadSkillFrontmatter({
     skillPath: args.skillPath,
   });
-  const allowedTools = deriveAllowedTools({ frontmatter });
+  const skillAllowedTools = deriveAllowedTools({ frontmatter });
+  // `Write` is granted here unconditionally, on top of the skill's own
+  // frontmatter — discovered empirically across three live runs that this
+  // is genuinely required, not an oversight to route around:
+  // 1st run: completed 'success' with real turns/cost but never invoked
+  //    any tool to save anything — the model treated "Saving the Report"
+  //    as descriptive rather than mandatory. Fixed with the prompt preamble.
+  // 2nd run: correctly attempted to save, tried `Write` (denied — not in
+  //    the skill's own frontmatter) then `printf`/`echo` (also denied, not
+  //    allowlisted) — never tried the one thing nominally granted
+  //    (`cat`/`tee` via Bash).
+  // 3rd run (after prompting it toward `cat > file <<'EOF'`): it did try
+  //    exactly that heredoc form — and it was STILL denied. Claude Code's
+  //    permission system gates any Bash command containing output
+  //    redirection as its own capability, independent of the `cat:*`/
+  //    `tee:*` command-prefix allowlist — a real, separate security
+  //    boundary, not a bug to work around.
+  // 4th run (bare 'Write' added to allowedTools): STILL denied. Write/Edit
+  //    are path-scoped tools, not bare-name tools — this repo's OWN
+  //    .claude/settings.json already shows the real syntax
+  //    (`"Write(.tmp/**)"`, `"Edit(.tmp/**)"`), the same `Tool(pattern)`
+  //    shape Bash uses. A bare `'Write'` string matches nothing.
+  //    `Write(${outputDirectory}/**)` is the correct grant — scoped to
+  //    exactly the one directory this session should ever write to, which
+  //    is also a real security property, not just a syntax fix.
+  const allowedTools = [
+    ...skillAllowedTools,
+    `Write(${args.outputDirectory}/**)`,
+  ];
 
-  // The skill's own Markdown body is written for an *interactive* Claude
-  // Code session, where its imperative instructions ("always save without
-  // prompting") carry implicit weight from the slash-command invocation
-  // itself. Fed as a bare prompt to a one-shot query(), that framing is
-  // lost — discovered empirically: a first live run completed with
-  // subtype 'success' and real turns/cost but never actually invoked the
-  // Bash tool to save anything, because the model treated "Saving the
-  // Report" as descriptive rather than mandatory-to-execute. This preamble
-  // makes the unattended, single-shot, must-actually-execute nature explicit.
-  const prompt = `You are running fully autonomously and non-interactively — there is no user to ask follow-up questions, and no further turn after this one. You must actually execute every action this skill describes, including all file-writing and shell steps (e.g. "Saving the Report") — do not just describe or summarize what you would do. Treat every imperative instruction in the skill below ("always save", "tell the user", etc.) as something you must literally do via tool calls before finishing.
+  const prompt = `You are running fully autonomously and non-interactively — there is no user to ask follow-up questions, and no further turn after this one. You must actually execute every action this skill describes, including all file-writing and shell steps (e.g. "Saving the Report") — do not just describe or summarize what you would do. Treat every imperative instruction in the skill below ("always save", "tell the user", etc.) as something you must literally do via tool calls before finishing. Use the Write tool to create report files — it is available in this session.
 
 ${body}${
     args.scopeArgument

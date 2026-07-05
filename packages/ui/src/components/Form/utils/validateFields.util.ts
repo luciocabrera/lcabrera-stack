@@ -1,7 +1,47 @@
 import type {
+  FieldClientValidation,
   FieldErrors,
   LeafFieldDef,
 } from '@repo/ui/components/Form/Form.types';
+
+type ValidateRuleArgs<TValue> = {
+  readonly message: string;
+  readonly validation: FieldClientValidation;
+  readonly value: TValue;
+};
+
+const validateStringValue = ({
+  message,
+  validation,
+  value,
+}: ValidateRuleArgs<string>): string | undefined => {
+  if (
+    validation.minLength !== undefined &&
+    value.length < validation.minLength
+  ) {
+    return message;
+  }
+  if (
+    validation.maxLength !== undefined &&
+    value.length > validation.maxLength
+  ) {
+    return message;
+  }
+  if (validation.pattern && !new RegExp(validation.pattern).test(value)) {
+    return message;
+  }
+  return undefined;
+};
+
+const validateNumberValue = ({
+  message,
+  validation,
+  value,
+}: ValidateRuleArgs<number>): string | undefined => {
+  if (validation.min !== undefined && value < validation.min) return message;
+  if (validation.max !== undefined && value > validation.max) return message;
+  return undefined;
+};
 
 const validateField = <TValues extends Record<string, unknown>>(
   field: LeafFieldDef<TValues>,
@@ -23,26 +63,11 @@ const validateField = <TValues extends Record<string, unknown>>(
   if (isEmpty) return undefined;
 
   if (typeof value === 'string') {
-    if (
-      validation.minLength !== undefined &&
-      value.length < validation.minLength
-    ) {
-      return message;
-    }
-    if (
-      validation.maxLength !== undefined &&
-      value.length > validation.maxLength
-    ) {
-      return message;
-    }
-    if (validation.pattern && !new RegExp(validation.pattern).test(value)) {
-      return message;
-    }
+    return validateStringValue({ message, validation, value });
   }
 
   if (typeof value === 'number') {
-    if (validation.min !== undefined && value < validation.min) return message;
-    if (validation.max !== undefined && value > validation.max) return message;
+    return validateNumberValue({ message, validation, value });
   }
 
   return undefined;

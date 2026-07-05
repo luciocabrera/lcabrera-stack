@@ -43,6 +43,40 @@ const toError = (error: unknown): Error => {
   return new Error('Unknown server-side streaming error');
 };
 
+type BuildShellStreamResponseArgs = {
+  readonly clearRenderTimeout: () => void;
+  readonly pipe: (destination: PassThrough) => void;
+  readonly responseHeaders: Headers;
+  readonly responseStatusCode: number;
+};
+
+const buildShellStreamResponse = ({
+  clearRenderTimeout,
+  pipe,
+  responseHeaders,
+  responseStatusCode,
+}: BuildShellStreamResponseArgs): Response => {
+  const body = new PassThrough({
+    final(callback) {
+      // Clear the timeout to prevent retaining the closure and memory leak.
+      clearRenderTimeout();
+      callback();
+    },
+  });
+  // Increase max listeners to prevent warning with compression middleware.
+  body.setMaxListeners(20);
+  const stream = createReadableStreamFromReadable(body);
+
+  responseHeaders.set('Content-Type', 'text/html');
+
+  pipe(body);
+
+  return new Response(stream, {
+    headers: responseHeaders,
+    status: responseStatusCode,
+  });
+};
+
 /**
  * Builds the `entry.server.tsx` default export every app needs identically
  * (streaming SSR via renderToPipeableStream, bot/SPA-mode full-render
@@ -103,6 +137,11 @@ export const createHandleRequest = ({
         abortDelay,
       );
 
+      const clearRenderTimeout = () => {
+        clearTimeout(timeoutId);
+        timeoutId = undefined;
+      };
+
       const { abort, pipe } = renderToPipeableStream(
         <ServerRouter context={routerContext} url={request.url} />,
         {
@@ -122,26 +161,12 @@ export const createHandleRequest = ({
           [readyOption]() {
             isShellRendered = true;
 
-            const body = new PassThrough({
-              final(callback) {
-                // Clear the timeout to prevent retaining the closure and memory leak.
-                clearTimeout(timeoutId);
-                timeoutId = undefined;
-                callback();
-              },
-            });
-            // Increase max listeners to prevent warning with compression middleware.
-            body.setMaxListeners(20);
-            const stream = createReadableStreamFromReadable(body);
-
-            responseHeaders.set('Content-Type', 'text/html');
-
-            pipe(body);
-
             resolve(
-              new Response(stream, {
-                headers: responseHeaders,
-                status: responseStatusCode,
+              buildShellStreamResponse({
+                clearRenderTimeout,
+                pipe,
+                responseHeaders,
+                responseStatusCode,
               }),
             );
           },

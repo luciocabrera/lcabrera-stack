@@ -12,8 +12,12 @@ type InferTableColumnsFromJsonArgs = {
   readonly rows: readonly Record<string, unknown>[];
 };
 
-const ISO_DATE_PATTERN =
-  /^\d{4}-\d{2}-\d{2}([T ]\d{2}:\d{2}(:\d{2})?(\.\d+)?(Z|[+-]\d{2}:?\d{2})?)?$/;
+const ISO_DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+const ISO_DATE_TIME_PATTERN =
+  /^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}(:\d{2})?(\.\d+)?(Z|[+-]\d{2}:?\d{2})?$/;
+
+const isIsoDateString = (value: string): boolean =>
+  ISO_DATE_ONLY_PATTERN.test(value) || ISO_DATE_TIME_PATTERN.test(value);
 
 const inferValueType = (value: unknown): InferredValueType => {
   if (Array.isArray(value)) {
@@ -29,7 +33,7 @@ const inferValueType = (value: unknown): InferredValueType => {
   }
 
   if (typeof value === 'string') {
-    return ISO_DATE_PATTERN.test(value) ? 'date' : 'string';
+    return isIsoDateString(value) ? 'date' : 'string';
   }
 
   if (typeof value === 'object' && value !== null) {
