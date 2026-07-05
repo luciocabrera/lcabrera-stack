@@ -78,11 +78,11 @@ const run = async (): Promise<void> => {
   );
 };
 
-run()
-  .catch((error: unknown) => {
-    console.error('❌ Ingestion failed:', error);
-    process.exitCode = 1;
-  })
-  .finally(() => {
-    void closePool();
-  });
+try {
+  await run();
+} catch (error: unknown) {
+  console.error('❌ Ingestion failed:', error);
+  process.exitCode = 1;
+} finally {
+  await closePool();
+}
