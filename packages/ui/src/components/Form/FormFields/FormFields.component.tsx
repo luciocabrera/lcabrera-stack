@@ -1,45 +1,19 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { Tabs } from '@repo/ui/components/Tabs';
 import { FormField } from '@repo/ui/components/Form/FormField/FormField.component';
-
-import type { FieldNode } from '@repo/ui/components/Form/Form.types';
 
 import type { FormFieldsProps } from './FormFields.types';
 
+import { FormFieldGroup } from './FormFieldGroup/FormFieldGroup.component';
+import { FormFieldRow } from './FormFieldRow/FormFieldRow.component';
+import { FormFieldTabs } from './FormFieldTabs/FormFieldTabs.component';
 import { styles } from './FormFields.stylex';
-
-/**
- * Collects every leaf `accessor` beneath a node. Accessors are unique keys of
- * `TValues`, so the joined result is a stable, content-derived identity for
- * group/row/tab containers that have no id of their own.
- */
-const collectAccessors = <TValues extends Record<string, unknown>>(
-  node: FieldNode<TValues>,
-): readonly string[] => {
-  switch (node.type) {
-    case 'group':
-    case 'row': {
-      return node.fields.flatMap((child) => collectAccessors(child));
-    }
-    case 'tab': {
-      return node.tabs.flatMap((tab) =>
-        tab.fields.flatMap((child) => collectAccessors(child)),
-      );
-    }
-    default: {
-      return [node.accessor];
-    }
-  }
-};
-
-const getFieldKey = <TValues extends Record<string, unknown>>(
-  node: FieldNode<TValues>,
-): string => `${node.type}:${collectAccessors(node).join('|')}`;
+import { getFieldKey } from './utils/getFieldKey.util';
 
 /**
  * Single recursive walker for group/row/tab/leaf nodes — the render-side
- * counterpart to flattenFields.util.ts (ADR-005).
+ * counterpart to flattenFields.util.ts (ADR-005). Each node type delegates to
+ * its own subcomponent; only the stable-key computation lives here.
  */
 export const FormFields = <TValues extends Record<string, unknown>>({
   fields,
@@ -51,42 +25,13 @@ export const FormFields = <TValues extends Record<string, unknown>>({
 
         switch (field.type) {
           case 'group': {
-            return (
-              <div key={key} {...stylex.props(styles.group)}>
-                {field.label && (
-                  <span {...stylex.props(styles.groupLabel)}>
-                    {field.label}
-                  </span>
-                )}
-                <FormFields fields={field.fields} />
-              </div>
-            );
+            return <FormFieldGroup field={field} key={key} />;
           }
           case 'row': {
-            return (
-              <div key={key} {...stylex.props(styles.row)}>
-                {field.fields.map((rowField) => (
-                  <div
-                    key={getFieldKey(rowField)}
-                    {...stylex.props(styles.rowField)}
-                  >
-                    <FormFields fields={[rowField]} />
-                  </div>
-                ))}
-              </div>
-            );
+            return <FormFieldRow field={field} key={key} />;
           }
           case 'tab': {
-            return (
-              <Tabs
-                key={key}
-                tabs={field.tabs.map((tab) => ({
-                  children: <FormFields fields={tab.fields} />,
-                  header: tab.label,
-                  key: tab.label,
-                }))}
-              />
-            );
+            return <FormFieldTabs field={field} key={key} />;
           }
           default: {
             return <FormField field={field} key={key} />;
