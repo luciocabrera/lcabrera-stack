@@ -6,13 +6,15 @@ Utilities supporting `NotificationCenter.component.tsx`.
 
 - keep view-only transformation logic out of the component file
 - centralise placement grouping and ordering rules
-- centralise variant-to-style resolution for the accent rail
+- centralise variant-to-style resolution for notification visual semantics
 
 ## Utilities
 
 - `groupNotificationsByPlacement.util.ts`: builds the placement map used by the component render loop
 - `sortNotificationsByNewest.util.ts`: returns newest notifications first without mutating the source array
-- `getAccentStyle.util.ts`: maps notification variants to StyleX accent rail styles
+- `getAccentStyle.util.ts`: maps notification variants to `NotificationItem` StyleX accent rail styles
+- `getNotificationCardColor.util.ts`: maps notification variants to semantic Card colors
+- `getNotificationDismissIconStyle.util.ts`: maps notification variants to `NotificationItem` dismiss icon color styles
 
 ## Constants Dependency
 

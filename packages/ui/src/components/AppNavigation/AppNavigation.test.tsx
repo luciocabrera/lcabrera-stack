@@ -6,11 +6,20 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { GlobalSettingsState } from '@repo/ui/types/globalSettings.types';
 
+import type { ToolbarItemConfig } from '@repo/ui/components/Toolbar/Toolbar.types';
+
 import { GlobalSettingsProvider } from '@repo/ui/contexts/GlobalSettingsContext';
 // import { useSetGlobalNavigationPreferences } from '@repo/ui/contexts/GlobalSettingsContext/actions';
 import { mockDialogElement } from '@repo/ui/utils/tests/mockDialogElement.util';
 
 import { AppNavigation } from './AppNavigation.component';
+
+// Fixture only — real route items are supplied by each consuming app (see
+// AppNavigationProps.getNavigationItems' own doc), not owned by this package.
+const getFixtureNavigationItems = (): readonly ToolbarItemConfig[] => [
+  { end: true, label: 'Home', to: '/', type: 'link' },
+  { label: 'Enterprise Orders', to: '/enterprise-orders', type: 'link' },
+];
 
 // const ExternalPinTrigger = ({
 //   pinned,
@@ -46,6 +55,7 @@ const renderWithGlobalSettings = ({
         element: (
           <GlobalSettingsProvider initialSettings={initialSettings}>
             <AppNavigation
+              getNavigationItems={getFixtureNavigationItems}
               isDarkMode={isDarkMode}
               onToggleTheme={onToggleTheme}
             />

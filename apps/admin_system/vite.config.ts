@@ -19,18 +19,19 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('src', import.meta.url)),
+      '@repo/data-access': fileURLToPath(
+        new URL('../../packages/data-access/src', import.meta.url),
+      ),
+      '@repo/scan-ingestion': fileURLToPath(
+        new URL('../../packages/scan-ingestion/src', import.meta.url),
+      ),
+      '@repo/ui': fileURLToPath(
+        new URL('../../packages/ui/src', import.meta.url),
+      ),
     },
     tsconfigPaths: true,
   },
   run: runConfig,
-  server: {
-    proxy: {
-      '/api': {
-        changeOrigin: true,
-        target: 'http://localhost:3001',
-      },
-    },
-  },
   staged: {
     '*': 'vp check --fix',
   },

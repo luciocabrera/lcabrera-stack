@@ -13,10 +13,11 @@
     "typecheck": "react-router typegen && tsc"
   },
   "dependencies": {
-    "@react-router/node": "catalog:",
     "@react-router/serve": "catalog:",
+    "@repo/data-access": "workspace:*",
+    "@repo/scan-ingestion": "workspace:*",
+    "@repo/ui": "workspace:*",
     "@stylexjs/stylex": "catalog:",
-    "isbot": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-router": "catalog:"
@@ -26,6 +27,7 @@
     "@repo/vite-configs": "workspace:*",
     "@stylexjs/eslint-plugin": "catalog:",
     "@stylexjs/unplugin": "catalog:",
+    "@testing-library/react": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
@@ -42,6 +44,7 @@
     "eslint-plugin-react-x": "catalog:",
     "eslint-plugin-security": "catalog:",
     "eslint-plugin-unicorn": "catalog:",
+    "jsdom": "catalog:",
     "typescript": "catalog:",
     "typescript-eslint": "catalog:",
     "vite": "catalog:",

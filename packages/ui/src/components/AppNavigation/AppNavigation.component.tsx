@@ -26,7 +26,6 @@ import {
   getBodyDensityStyle,
   getBrandIconSizeStyle,
   getHeaderDensityStyle,
-  getNavigationItems,
   isNavigationPinned,
   resolveThemeLabel,
 } from './utils';
@@ -36,6 +35,7 @@ import {
  */
 export const AppNavigation = ({
   defaultIsPinned = true,
+  getNavigationItems,
   isDarkMode,
   onToggleTheme,
 }: AppNavigationProps) => {

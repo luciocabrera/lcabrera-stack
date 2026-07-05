@@ -59,7 +59,7 @@ describe('AppShell', () => {
   });
 
   it('renders the routed outlet and notification center', () => {
-    render(<AppShell />);
+    render(<AppShell getNavigationItems={() => []} />);
 
     expect(screen.getByTestId('outlet').textContent).toBe('Outlet');
     expect(screen.getByTestId('notification-center').textContent).toBe(
@@ -68,7 +68,7 @@ describe('AppShell', () => {
   });
 
   it('wires the theme toggle button to useTheme', () => {
-    render(<AppShell />);
+    render(<AppShell getNavigationItems={() => []} />);
 
     fireEvent.click(screen.getByRole('button', { name: /Dark Mode/i }));
 

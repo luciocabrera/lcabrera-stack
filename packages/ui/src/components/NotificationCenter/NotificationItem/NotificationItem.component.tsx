@@ -5,7 +5,11 @@ import { MenuCloseIcon } from '@repo/ui/components/Icons';
 
 import type { NotificationItemProps } from './NotificationItem.types';
 
-import { getAccentStyle, getNotificationCardColor } from '../utils';
+import {
+  getAccentStyle,
+  getNotificationCardColor,
+  getNotificationDismissIconStyle,
+} from '../utils';
 import { styles } from './NotificationItem.stylex';
 
 export const NotificationItem = ({
@@ -41,7 +45,10 @@ export const NotificationItem = ({
               aria-label='Dismiss notification'
               onClick={handleDismissClick}
               type='button'
-              {...stylex.props(styles.dismissButton)}
+              {...stylex.props(
+                styles.dismissButton,
+                getNotificationDismissIconStyle(notification.variant),
+              )}
             >
               <MenuCloseIcon size={14} />
             </button>

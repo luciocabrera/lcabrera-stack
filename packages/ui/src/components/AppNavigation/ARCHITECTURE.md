@@ -24,7 +24,7 @@ graph LR
   AppNavigation --> Icons
   AppNavigation --> SidePanel
   AppNavigation --> Toolbar
-  AppNavigation --> NAVIGATION_ITEMS
+  ConsumingApp -. "getNavigationItems prop" .-> AppNavigation
 ```
 
 ## Render Flow
@@ -52,15 +52,22 @@ graph TD
 
 ## Props
 
-| Prop              | Type      | Default | Description                           |
-| ----------------- | --------- | ------- | ------------------------------------- |
-| `defaultIsPinned` | `boolean` | `true`  | Initial pinned/unpinned sidebar state |
+| Prop                 | Type                                                 | Default | Description                                             |
+| -------------------- | ---------------------------------------------------- | ------- | ------------------------------------------------------- |
+| `defaultIsPinned`    | `boolean`                                            | `true`  | Initial pinned/unpinned sidebar state                   |
+| `getNavigationItems` | `(iconSize: number) => readonly ToolbarItemConfig[]` | —       | Returns this app's own route links, sized to `iconSize` |
 
 ## Route Items
 
-Add, remove, or reorder sidebar links in `AppNavigation.constants.tsx`. The
-constant is typed as `readonly ToolbarItemConfig[]`, so every item is rendered
-through the existing `Toolbar` and `NavLink` contracts.
+`AppNavigation` is app-agnostic — it has no opinion on what routes exist.
+Each consuming app supplies its own `getNavigationItems` function (e.g.
+`apps/react-router/src/root/getNavigationItems.util.tsx`), passed down
+through `AppShell`'s own `getNavigationItems` prop. Every returned item is
+typed `ToolbarItemConfig` and rendered through the existing `Toolbar`/
+`NavLink` contracts. This function previously lived inside this package
+(`utils/getNavigationItems.util.tsx`) with `apps/react-router`'s routes
+hardcoded into it — moved out because a shared package should not encode
+one specific consuming app's route list.
 
 ## Compact Mode
 

@@ -1,19 +1,15 @@
-import type { MouseEvent } from 'react';
-
 import * as stylex from '@stylexjs/stylex';
 import { useEffect, useRef } from 'react';
 
 import type { NotificationPlacement } from '@repo/ui/contexts/NotificationContext';
 
-import { Card } from '@repo/ui/components/Card';
-import { MenuCloseIcon } from '@repo/ui/components/Icons';
 import { useDismissNotificationAction } from '@repo/ui/contexts/NotificationContext/actions';
 import { useGetNotifications } from '@repo/ui/contexts/NotificationContext/selectors';
 
+import { NotificationItem } from './NotificationItem';
 import { NOTIFICATION_CENTER_PLACEMENTS } from './NotificationCenter.constants';
 import { styles } from './NotificationCenter.stylex';
 import {
-  getAccentStyle,
   groupNotificationsByPlacement,
   sortNotificationsByNewest,
 } from './utils';
@@ -40,14 +36,6 @@ export const NotificationCenter = () => {
   }, [notifications]);
 
   if (notifications.length === 0) return;
-
-  const handleDismissClick = (event: MouseEvent<HTMLButtonElement>): void => {
-    const notificationId = event.currentTarget.dataset.notificationId;
-
-    if (notificationId) {
-      dismissNotification(notificationId);
-    }
-  };
 
   return (
     <>
@@ -92,38 +80,11 @@ export const NotificationCenter = () => {
               )}
             >
               {placementNotifications.map((notification) => (
-                <div key={notification.id} {...stylex.props(styles.item)}>
-                  <div
-                    {...stylex.props(
-                      styles.itemSurface,
-                      getAccentStyle(notification.variant),
-                    )}
-                  >
-                    <Card color='default' elevation='md' padding='md'>
-                      <div {...stylex.props(styles.itemBody)}>
-                        <div {...stylex.props(styles.itemContent)}>
-                          {notification.title ? (
-                            <p {...stylex.props(styles.title)}>
-                              {notification.title}
-                            </p>
-                          ) : undefined}
-                          <p {...stylex.props(styles.message)}>
-                            {notification.message}
-                          </p>
-                        </div>
-                        <button
-                          aria-label='Dismiss notification'
-                          data-notification-id={notification.id}
-                          onClick={handleDismissClick}
-                          type='button'
-                          {...stylex.props(styles.dismissButton)}
-                        >
-                          <MenuCloseIcon size={14} />
-                        </button>
-                      </div>
-                    </Card>
-                  </div>
-                </div>
+                <NotificationItem
+                  key={notification.id}
+                  notification={notification}
+                  onDismiss={dismissNotification}
+                />
               ))}
             </div>
           </div>

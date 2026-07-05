@@ -1,6 +1,6 @@
 import type { AppNotification } from '@repo/ui/contexts/NotificationContext';
 
-import { styles } from '../NotificationCenter.stylex';
+import { styles } from '../NotificationItem/NotificationItem.stylex';
 
 /** Resolves the accent rail style for a notification variant. */
 export const getAccentStyle = (variant: AppNotification['variant']) => {

@@ -31,12 +31,32 @@ export const styles = stylex.create({
     transition: `background-color ${transitions.fast} ${easing.easeInOut}, color ${transitions.fast} ${easing.easeInOut}`,
     alignItems: 'center',
     backgroundColor: 'transparent',
-    color: colors.textSecondary,
     cursor: 'pointer',
     display: 'inline-flex',
     justifyContent: 'center',
     height: '1.5rem',
     width: '1.5rem',
+  },
+  dismissButtonDefault: {
+    color: colors.textSecondary,
+  },
+  dismissButtonError: {
+    color: colors.errorText,
+  },
+  dismissButtonInfo: {
+    color: colors.infoText,
+  },
+  dismissButtonPrimary: {
+    color: colors.brandPrimaryText,
+  },
+  dismissButtonSecondary: {
+    color: colors.brandSecondaryText,
+  },
+  dismissButtonSuccess: {
+    color: colors.successText,
+  },
+  dismissButtonWarning: {
+    color: colors.warningText,
   },
   item: {
     animationDuration: transitions.normal,
