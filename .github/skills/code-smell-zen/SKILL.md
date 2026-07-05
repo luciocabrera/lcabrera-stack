@@ -291,15 +291,15 @@ If the diff has no findings, keep all sections, set all counts to 0, write "No c
 
 After producing the final report, **always** save it to disk without prompting the user:
 
-1. Capture the current timestamp: `date +%Y-%m-%d--%H-%M-%S`
-2. Create the output directory: `.tmp/code-smell-zen/{timestamp}/`
+1. Determine the output directory. Check whether the `OUTPUT_DIR` environment variable is already set (`echo "$OUTPUT_DIR"`) — a UI-triggered scan sets this so its scratch files land in the right place, not the target project's own working tree. If it's set, use it as-is. Otherwise, capture the current timestamp (`date +%Y-%m-%d--%H-%M-%S`) and use `.tmp/code-smell-zen/{timestamp}/`.
+2. Create the output directory (`mkdir -p`) if it doesn't already exist.
 3. Write the full report as `report.md` inside that directory, using the same markdown structure emitted in Step 5.
 4. Build `report.json` from the same findings, following `../code-smell-shared/REPORT_JSON_CONTRACT.md` exactly (flatten severity counts, map any non-canonical `status` — e.g. `resolved` — to `done`; every finding is `single_location`, this skill never emits `duplication_group`), and write it as `report.json` in the same directory.
 5. Tell the user the paths to both saved files.
-6. Ingest into CQMS (best-effort — do not fail the skill run if this step fails; both files are already saved regardless). Run, substituting `{timestamp}` with the exact value from step 1 and `<BASE>` with the base resolved in Step 1:
+6. Ingest into CQMS (best-effort — do not fail the skill run if this step fails; both files are already saved regardless). Run, substituting `$OUTPUT_DIR` with the resolved directory from step 1 and `<BASE>` with the base resolved in Step 1:
 
 ```bash
-node --env-file-if-exists=docker/local/.env --env-file-if-exists=packages/scan-ingestion/.env --experimental-strip-types packages/scan-ingestion/src/cli/ingest.cli.ts --skill=code-smell-zen --run-dir=".tmp/code-smell-zen/{timestamp}" --local-path="$(git rev-parse --show-toplevel)" --scope-type=diff --scope-value="<BASE>..HEAD"
+node --env-file-if-exists=docker/local/.env --env-file-if-exists=packages/scan-ingestion/.env --experimental-strip-types packages/scan-ingestion/src/cli/ingest.cli.ts --skill=code-smell-zen --run-dir="$OUTPUT_DIR" --local-path="$(git rev-parse --show-toplevel)" --scope-type=diff --scope-value="<BASE>..HEAD"
 ```
 
 If it fails (e.g. `cqms_db` unreachable), tell the user the ingestion failed and why, but do not treat it as a skill failure.
