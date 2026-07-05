@@ -2,6 +2,13 @@
 
 Before creating anything new, check this inventory. If something here does the job — or could do it with a small enhancement to make it more generic — **prefer enhancing the existing artifact** over creating a new one.
 
+**Visibility.** Every artifact is either **Public** or a **Private delegate**, and its location tells you which:
+
+- **Public** — exported from a barrel `index.ts` and imported across modules via `@repo/ui/...`. Every top-level `components/<Name>/` entry is Public.
+- **Private delegate** — nested _inside_ another component/module and imported only within that parent (everything under `components/Form/…`, `components/Table/…`, and every `*/utils/` or `hooks/utils/` helper).
+
+Private delegates are catalogued here on purpose — reuse or lift one before writing a duplicate — but treat them as internal: prefer enhancing or relocating over importing them across unrelated modules.
+
 Covers `packages/ui` only. API-layer utilities (`api.util.ts`, `buildPaginatedQueryParams`, `fetchAndValidate`, `api.constants.ts`, `api.types.ts`) and Postgres-access utilities (`db/env.schema.ts`, `db/getPool.util.ts`) live in `@repo/data-access` (`packages/data-access/src/`) — small enough it doesn't need its own inventory yet. App-local artifacts (routes, route-specific services) are tracked in each app's own `src/INVENTORY.md`.
 
 ---
@@ -39,6 +46,20 @@ Covers `packages/ui` only. API-layer utilities (`api.util.ts`, `buildPaginatedQu
 | `Tooltip`                            | `components/Tooltip/`                                  | CSS Anchor + Popover API tooltip, 4 placements, animated                                                                                                                                                                        |
 | `VirtualList`                        | `components/VirtualList/`                              | Virtualized list with extracted Header/Body subcomponents, search, select-all, checkboxes, lazy load, parent-contained sizing                                                                                                   |
 | `VirtualSelect`                      | `components/VirtualSelect/`                            | Parent-contained dropdown select backed by `VirtualList`; `string[]` or `{ label, value }[]` options                                                                                                                            |
+| `FormBody`                           | `components/Form/FormBody/`                            | Private delegate — the Form view: RR7 native `<Form>`/`fetcher.Form`, footer, and dirty-check-gated submit                                                                                                                      |
+| `FormFields`                         | `components/Form/FormFields/`                          | Private delegate — recursive walker; computes a stable key and dispatches each node type to its subcomponent                                                                                                                    |
+| `FormFieldGroup`                     | `components/Form/FormFields/FormFieldGroup/`           | Private delegate — renders a `group` node: optional label + nested `FormFields`                                                                                                                                                 |
+| `FormFieldRow`                       | `components/Form/FormFields/FormFieldRow/`             | Private delegate — renders a `row` node: horizontal equal-flex cells of nested `FormFields`                                                                                                                                     |
+| `FormFieldTabs`                      | `components/Form/FormFields/FormFieldTabs/`            | Private delegate — renders a `tab` node: one `Tabs` panel per tab                                                                                                                                                               |
+| `FormField`                          | `components/Form/FormField/`                           | Private delegate — registry dispatch by `field.type` to the matching leaf field component                                                                                                                                       |
+| `FormFieldChrome`                    | `components/Form/FormFieldChrome/`                     | Private delegate — shared label/description/error wrapper for leaf fields                                                                                                                                                       |
+| `TextField`                          | `components/Form/fields/TextField/`                    | Private delegate — leaf input for `text`/`email`/`password`/`textarea`                                                                                                                                                          |
+| `NumberField`                        | `components/Form/fields/NumberField/`                  | Private delegate — leaf input for `number`                                                                                                                                                                                      |
+| `DateField`                          | `components/Form/fields/DateField/`                    | Private delegate — leaf input for `date`/`datetime`                                                                                                                                                                             |
+| `BooleanField`                       | `components/Form/fields/BooleanField/`                 | Private delegate — wraps `Checkbox` or `ToggleSwitch` for `boolean`                                                                                                                                                             |
+| `SelectField`                        | `components/Form/fields/SelectField/`                  | Private delegate — wraps `VirtualSelect` + hidden inputs for FormData                                                                                                                                                           |
+| `RadioField`                         | `components/Form/fields/RadioField/`                   | Private delegate — wraps `RadioOptionGroup` for `radio`                                                                                                                                                                         |
+| `CustomField`                        | `components/Form/fields/CustomField/`                  | Private delegate — escape hatch rendering `field.renderField(...)`                                                                                                                                                              |
 
 ---
 
@@ -70,6 +91,25 @@ Covers `packages/ui` only. API-layer utilities (`api.util.ts`, `buildPaginatedQu
 | --------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 | `getVerticalVirtualizationWindow` | `hooks/utils/getVerticalVirtualizationWindow.util.ts` | Computes fixed-row virtualization window geometry shared by vertical hooks                              |
 | `setupObservedContainer`          | `hooks/utils/setupObservedContainer.util.ts`          | Attaches a ResizeObserver + scroll listener to a container element; preserves scroll position on resize |
+
+### `src/components/Form/utils/` _(private delegates)_
+
+| Function              | Location                                            | Description                                                                                 |
+| --------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `flattenFields`       | `components/Form/utils/flattenFields.util.ts`       | Recursive walker → `readonly LeafFieldDef[]` (render/validation source of truth)            |
+| `getInitialValues`    | `components/Form/utils/getInitialValues.util.ts`    | Merges `leafFields` defaults with `initialValues` → full `TValues`                          |
+| `validateFields`      | `components/Form/utils/validateFields.util.ts`      | Orchestrates client validation over leaf fields → `FieldErrors` (non-Zod, instant feedback) |
+| `validateField`       | `components/Form/utils/validateField.util.ts`       | Validates one leaf field's value; delegates to the string/number helpers                    |
+| `validateStringValue` | `components/Form/utils/validateStringValue.util.ts` | `minLength`/`maxLength`/`pattern` check for string values                                   |
+| `validateNumberValue` | `components/Form/utils/validateNumberValue.util.ts` | `min`/`max` check for number values                                                         |
+| `isFormDirty`         | `components/Form/utils/isFormDirty.util.ts`         | Array-aware subset compare of values vs the initial snapshot for edit-mode gating           |
+
+### `src/components/Form/FormFields/utils/` _(private delegates)_
+
+| Function           | Location                                                    | Description                                                           |
+| ------------------ | ----------------------------------------------------------- | --------------------------------------------------------------------- |
+| `collectAccessors` | `components/Form/FormFields/utils/collectAccessors.util.ts` | Node → flattened list of descendant leaf accessors (recursive)        |
+| `getFieldKey`      | `components/Form/FormFields/utils/getFieldKey.util.ts`      | Node → stable React key derived from node type + descendant accessors |
 
 ### `src/components/Table/TableBody/utils/`
 

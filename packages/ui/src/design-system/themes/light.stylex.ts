@@ -88,6 +88,7 @@ export const lightTheme = stylex.createTheme(colors, {
   hover: 'oklch(0% 0 0 / 0.04)', // rgba(0,0,0,.04)
   active: 'oklch(0% 0 0 / 0.08)', // rgba(0,0,0,.08)
   overlay: 'oklch(0% 0 0 / 0.5)', // modal/dialog backdrop
+  patternDot: 'oklch(90% 0.004 250)', // subtle light-grey dots on the light background
   shadowHover:
     '0 20px 25px -5px oklch(0% 0 0 / 0.15), 0 10px 10px -5px oklch(0% 0 0 / 0.08)',
 });

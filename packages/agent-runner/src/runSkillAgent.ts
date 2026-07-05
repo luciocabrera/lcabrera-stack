@@ -9,8 +9,11 @@ import type {
 } from './runSkillAgent.types.ts';
 
 import { assertSafeTargetPath } from './assertSafeTargetPath.util.ts';
+import { cqmsRepoRoot } from './cqmsRepoRoot.util.ts';
 import { deriveAllowedTools } from './deriveAllowedTools.util.ts';
 import { loadSkillFrontmatter } from './skillFrontmatter.util.ts';
+
+const MAX_TURNS = 40;
 
 const describeMessage = (message: { type: string }): string =>
   'subtype' in message
@@ -63,7 +66,41 @@ export const runSkillAgent = async (
     `Write(${args.outputDirectory}/**)`,
   ];
 
+  // 5th run (Write path-scoping fix in place): completed 'success' but took
+  // ~38 minutes instead of ~1-2 like every prior run, and still failed to
+  // save. Two compounding causes, both fixed below rather than found by
+  // another blind live attempt:
+  // - It tried to read OUTPUT_DIR via `echo`/`printenv` — neither is in the
+  //   skill's allowed Bash commands (only cat/date/git/mkdir/node/tee), so
+  //   that always fails. It then fell back to the skill's own default path
+  //   *inside the target repo*, outside the Write() grant → denied, exactly
+  //   as designed, but for the wrong reason (it never had the real value).
+  //   Fix: state the resolved output directory directly in the prompt —
+  //   no need for it to introspect an env var through a restricted shell.
+  // - The skill's `../code-smell-shared/*.md` links are relative to the
+  //   skill file's location *inside this CQMS repo*, meaningless from
+  //   `cwd = targetProjectPath` (a different, unrelated repo). It repeatedly
+  //   tried whole-filesystem searches (`find /`, root Glob) hunting for
+  //   them — each a real 60s ripgrep timeout, which is almost certainly
+  //   where the extra ~36 minutes went. Fix: state the shared docs'
+  //   absolute path directly and grant `additionalDirectories` for it, so
+  //   an absolute Read succeeds immediately instead of a blind search.
+  // args.skillPath is already the skill's own directory (e.g.
+  // '.github/skills/code-smell-checker'), matching loadSkillFrontmatter's
+  // own `join(cqmsRepoRoot, skillPath, 'SKILL.md')` — no dirname() needed.
+  const skillDirectory = join(cqmsRepoRoot, args.skillPath);
+  const sharedDocsDirectory = join(
+    cqmsRepoRoot,
+    '.github/skills/code-smell-shared',
+  );
   const prompt = `You are running fully autonomously and non-interactively — there is no user to ask follow-up questions, and no further turn after this one. You must actually execute every action this skill describes, including all file-writing and shell steps (e.g. "Saving the Report") — do not just describe or summarize what you would do. Treat every imperative instruction in the skill below ("always save", "tell the user", etc.) as something you must literally do via tool calls before finishing. Use the Write tool to create report files — it is available in this session.
+
+Your output directory for this run is exactly: ${args.outputDirectory}
+Do not check an OUTPUT_DIR environment variable and do not compute your own timestamped path — use the directory above verbatim for every file you save.
+
+This skill's own directory (for any file referenced relative to the skill, e.g. "../code-smell-shared/...") is at the absolute path: ${skillDirectory}
+The shared docs directory it references is at the absolute path: ${sharedDocsDirectory}
+Read these using their absolute paths directly — do not search the filesystem for them, and do not attempt relative paths like "../code-smell-shared/SCHEMA_V1.md" since your working directory is the project being scanned, not this path.
 
 ${body}${
     args.scopeArgument
@@ -80,6 +117,7 @@ ${body}${
   try {
     for await (const message of query({
       options: {
+        additionalDirectories: [skillDirectory, sharedDocsDirectory],
         allowedTools: [...allowedTools],
         cwd: args.targetProjectPath,
         // Small required deviation (TECH_SPEC §2.6): the 3 Agent-SDK-driven
@@ -88,6 +126,7 @@ ${body}${
         // scan of another project would write CQMS scratch files into that
         // project's own working tree.
         env: { ...process.env, OUTPUT_DIR: args.outputDirectory },
+        maxTurns: MAX_TURNS,
         permissionMode: 'dontAsk',
       },
       prompt,

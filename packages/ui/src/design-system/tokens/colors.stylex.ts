@@ -57,6 +57,8 @@ export const colors = stylex.defineVars({
   // Interactive states
   hover: 'var(--hover)',
   overlay: 'var(--overlay)',
+  // Decorative background pattern (dotted grid)
+  patternDot: 'var(--pattern-dot)',
   // Shadows
   shadowHover: 'var(--shadow-hover)',
   info: 'var(--info)',

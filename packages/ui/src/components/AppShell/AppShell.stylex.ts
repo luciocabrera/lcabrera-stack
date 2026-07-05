@@ -29,6 +29,11 @@ const specific = stylex.create({
     scrollbarWidth: 'thin',
     minHeight: 0,
     overflowY: 'auto',
+
+    backgroundImage: `radial-gradient(circle, ${colors.patternDot} 0.1rem, transparent 0%)`,
+    backgroundSize: '2rem 2rem',
+    backgroundRepeat: 'round',
+    maskImage: 'linear-gradient(to bottom, #000000, #000000)',
   },
 });
 
