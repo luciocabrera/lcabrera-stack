@@ -14,6 +14,7 @@ import { ThemeContext } from './ThemeContext.context';
  * Wraps the application to provide theme context to all child components
  */
 export const ThemeProvider = ({
+  appId,
   children,
   defaultTheme = 'light',
   initialTheme,
@@ -26,7 +27,7 @@ export const ThemeProvider = ({
   const setTheme = (newTheme: ThemeMode) => {
     setThemeState(newTheme);
     // Sync to cookie for SSR
-    setThemeCookie(newTheme);
+    setThemeCookie(newTheme, appId);
   };
 
   const toggleTheme = () => {

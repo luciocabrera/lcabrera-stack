@@ -7,6 +7,7 @@ Composes the three app-wide providers (theme, global settings, notifications) ev
 ## Public API
 
 - `AppProvidersProps` (`AppProviders.types.ts`)
+  - `appId?: string` — per-app id used to scope the theme / global-settings cookies (cookies are shared across ports on the same host, so each app must pass a distinct id)
   - `children: ReactNode`
   - `defaultTheme?: ThemeMode` — default is `'light'`
   - `initialTheme?: ThemeMode` — SSR-derived value from the route's loader; takes priority over `defaultTheme`
@@ -15,8 +16,8 @@ Composes the three app-wide providers (theme, global settings, notifications) ev
 ## Composition
 
 ```
-ThemeProvider(defaultTheme, initialTheme)
-  GlobalSettingsProvider(initialSettings=globalSettings)
+ThemeProvider(appId, defaultTheme, initialTheme)
+  GlobalSettingsProvider(appId, initialSettings=globalSettings)
     NotificationProvider
       children
 ```

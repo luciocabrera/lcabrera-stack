@@ -7,6 +7,7 @@ const {
   MockTable,
   readPersistedDataStateFromSessionStorageMock,
   useGetColumnsMock,
+  useGetTableAppIdMock,
   useGetTablePersistenceKeyMock,
   useGetTablePlaceholderRowCountMock,
 } = vi.hoisted(() => ({
@@ -20,6 +21,7 @@ const {
         }
   >(() => {}),
   useGetColumnsMock: vi.fn(),
+  useGetTableAppIdMock: vi.fn(() => undefined),
   useGetTablePersistenceKeyMock: vi.fn(() => 'orders'),
   useGetTablePlaceholderRowCountMock: vi.fn(),
 }));
@@ -34,6 +36,7 @@ vi.mock(
 vi.mock(
   '@repo/ui/components/Table/contexts/TableConfig/meta/selectors',
   () => ({
+    useGetTableAppId: useGetTableAppIdMock,
     useGetTablePersistenceKey: useGetTablePersistenceKeyMock,
     useGetTablePlaceholderRowCount: useGetTablePlaceholderRowCountMock,
   }),

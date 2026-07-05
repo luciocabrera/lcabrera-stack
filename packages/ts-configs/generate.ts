@@ -37,7 +37,19 @@ const configs = [
     filePath: resolve(packageDirectory, 'tsconfig.node.json'),
   },
   {
+    // admin_system consumes @repo/data-access/@repo/scan-ingestion/@repo/ui
+    // directly (CQMS routes, TECH_SPEC §2.4/§2.8) — without these, this
+    // config drifts from the actual hand-verified tsconfig.app.json the
+    // moment this generator re-runs for an unrelated reason (found the
+    // hard way: re-running it for apps/scan-orchestrator's new entry
+    // silently wiped these three, breaking oxlint resolution for the
+    // entire cqms routes tree).
     config: createAppTsConfig({
+      paths: {
+        '@repo/data-access/*': ['../../packages/data-access/src/*'],
+        '@repo/scan-ingestion/*': ['../../packages/scan-ingestion/src/*'],
+        '@repo/ui/*': ['../../packages/ui/src/*'],
+      },
       tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
     }),
     filePath: resolve(workspaceRoot, 'apps/admin_system/tsconfig.app.json'),
@@ -139,6 +151,22 @@ const configs = [
       tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
     }),
     filePath: resolve(workspaceRoot, 'packages/agent-runner/tsconfig.app.json'),
+  },
+  {
+    // Genuinely Node-only — the standalone scan-orchestrator process
+    // (Implementation Plan step 9): a dedicated Postgres LISTEN client, a
+    // plain node:http + ws server, no DOM/vite.client usage anywhere.
+    config: createNodeTsConfig({
+      include: ['src', 'vite.config.ts'],
+      paths: {
+        '@repo/scan-orchestrator/*': ['./src/*'],
+      },
+      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
+    }),
+    filePath: resolve(
+      workspaceRoot,
+      'apps/scan-orchestrator/tsconfig.app.json',
+    ),
   },
 ] as const;
 

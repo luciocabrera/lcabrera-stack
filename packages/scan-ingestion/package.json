@@ -4,6 +4,11 @@
   "private": true,
   "type": "module",
   "sideEffects": false,
+  "exports": {
+    "./ingestion/ingestReport": "./src/ingestion/ingestReport.ts",
+    "./ingestion/ingestReport.types": "./src/ingestion/ingestReport.types.ts",
+    "./queries/*.util": "./src/queries/*.util.ts"
+  },
   "scripts": {
     "format": "vp fmt .",
     "format:check": "vp fmt --check .",

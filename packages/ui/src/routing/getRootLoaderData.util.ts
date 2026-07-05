@@ -4,6 +4,12 @@ import { getRequestCspNonce } from '@repo/ui/utils/security';
 import { getThemeFromCookie } from '@repo/ui/utils/theme';
 
 type GetRootLoaderDataArgs = {
+  /**
+   * Per-application identifier used to scope the theme / global-settings
+   * cookies. Cookies are shared across ports on the same host, so each app must
+   * pass its own id to keep preferences isolated.
+   */
+  readonly appId?: string;
   readonly request: Request;
 };
 
@@ -14,14 +20,18 @@ type GetRootLoaderDataArgs = {
  * app's generated Route.LoaderArgs type — root has no dynamic params, so
  * nothing is lost, and this stays usable from any app's root loader.
  */
-export const getRootLoaderData = ({ request }: GetRootLoaderDataArgs) => {
+export const getRootLoaderData = ({
+  appId,
+  request,
+}: GetRootLoaderDataArgs) => {
   const cspNonce = getRequestCspNonce(request);
   const cookieHeader = request.headers.get('Cookie');
   const globalSettings = getGlobalSettingsFromCookie({
+    appId,
     cookieString: cookieHeader ?? undefined,
     fallback: INITIAL_GLOBAL_SETTINGS,
   });
-  const theme = getThemeFromCookie(cookieHeader);
+  const theme = getThemeFromCookie(cookieHeader, appId);
 
   return { cspNonce, globalSettings, theme };
 };

@@ -6,7 +6,10 @@ import type {
   TableColumn,
 } from '@repo/ui/components/Table';
 
-import { readPersistedStateFromCookie } from '@repo/ui/components/Table/utils';
+import {
+  readPersistedStateFromCookie,
+  readPersistedUiFlagsFromCookie,
+} from '@repo/ui/components/Table/utils';
 import {
   deserializeFiltersFromURL,
   deserializeSortingFromURL,
@@ -18,10 +21,26 @@ import { sanitizeFiltersByColumns } from './sanitizeFiltersByColumns.util';
 type ReadTableLoaderStateFromRequestArgs<
   TData extends Record<string, unknown>,
 > = {
+  /**
+   * Per-application identifier used to scope persisted cookies so tables in
+   * different apps that share a `persistenceKey` do not read each other's state.
+   */
+  readonly appId?: string;
   readonly columns?: readonly TableColumn<TData>[];
   readonly includeFilters?: boolean;
   readonly persistenceKey: string;
   readonly request: Request;
+};
+
+/**
+ * Drawer open/pinned flags read from cookies so the loader can SSR-seed the
+ * table's initial meta state and avoid a hydration layout shift.
+ */
+type LoaderMetaUiFlags = {
+  readonly isColumnSettingsOpen?: boolean;
+  readonly isColumnSettingsPinned?: boolean;
+  readonly isTableSettingsOpen?: boolean;
+  readonly isTableSettingsPinned?: boolean;
 };
 
 type ReadTableLoaderStateFromRequestResult<TData> = {
@@ -30,6 +49,7 @@ type ReadTableLoaderStateFromRequestResult<TData> = {
   readonly columnSizing: ColumnSizingState<TData>;
   readonly columnVisibility: Set<keyof TData>;
   readonly filters: ColumnFiltersState<TData>;
+  readonly metaUiFlags: LoaderMetaUiFlags;
   readonly sorting: SortingState<TData>;
   readonly standaloneFiltersParam: null | string | undefined;
   readonly standaloneSortParam: null | string;
@@ -41,6 +61,7 @@ type ReadTableLoaderStateFromRequestResult<TData> = {
 export const readTableLoaderStateFromRequest = <
   TData extends Record<string, unknown>,
 >({
+  appId,
   columns,
   includeFilters = false,
   persistenceKey,
@@ -55,6 +76,13 @@ export const readTableLoaderStateFromRequest = <
 
   const cookieHeader = request.headers.get('Cookie');
   const cookieState = readPersistedStateFromCookie({
+    appId,
+    cookieString: cookieHeader ?? undefined,
+    persistenceKey,
+  });
+
+  const metaUiFlags = readPersistedUiFlagsFromCookie({
+    appId,
     cookieString: cookieHeader ?? undefined,
     persistenceKey,
   });
@@ -71,7 +99,8 @@ export const readTableLoaderStateFromRequest = <
     {}) as ColumnSizingState<TData>;
 
   const columnPinning =
-    cookieState.columnPinning ?? ({} as ColumnPinningState<TData>);
+    cookieState.columnPinning ??
+    ({ left: [], right: [] } as ColumnPinningState<TData>);
 
   const standaloneSortParam = url.searchParams.get('sorting');
   const sorting = standaloneSortParam
@@ -99,6 +128,7 @@ export const readTableLoaderStateFromRequest = <
     columnSizing,
     columnVisibility,
     filters,
+    metaUiFlags,
     sorting,
     standaloneFiltersParam,
     standaloneSortParam,

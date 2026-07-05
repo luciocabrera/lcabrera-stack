@@ -7,8 +7,12 @@ import {
   GLOBAL_SETTINGS_COOKIE_KEY,
   serializeGlobalSettingsForCookie,
 } from '@repo/ui/utils/globalSettings';
+import { getAppScopedCookieKey } from '@repo/ui/utils/storage';
+
+import { useGlobalSettingsContextValue } from '../useGlobalSettingsContextValue.hook';
 
 export const usePersistGlobalSettingsAction = () => {
+  const { appId } = useGlobalSettingsContextValue();
   const fetcher = useFetcher({ key: 'persist-global-settings' });
   const location = useLocation();
 
@@ -21,7 +25,10 @@ export const usePersistGlobalSettingsAction = () => {
         currentUrl,
         entries: JSON.stringify([
           {
-            key: GLOBAL_SETTINGS_COOKIE_KEY,
+            key: getAppScopedCookieKey({
+              appId,
+              key: GLOBAL_SETTINGS_COOKIE_KEY,
+            }),
             searchParamKey: '',
             searchParamValue: '',
             value: serializedSettings,

@@ -32,4 +32,5 @@ docker/local/pgpass
 
 packages/eslint-local-rules/build/
 apps/api-server/.env
+apps/scan-orchestrator/.env
 .claudelint-cache/

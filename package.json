@@ -11,6 +11,7 @@
     "ready": "vp run check:safe && vp run build:all",
     "dev": "pnpm --parallel --filter car-sales-api --filter vite-react-compiler run dev",
     "dev:fast": "pnpm --parallel --filter car-sales-api-fast --filter vite-react-compiler run dev",
+    "dev:cqms": "pnpm --parallel --filter admin-system --filter @repo/scan-orchestrator run dev",
     "db:up": "docker compose -f docker/local/docker-compose.yml --env-file docker/local/.env up -d postgres pgadmin",
     "db:status": "docker compose -f docker/local/docker-compose.yml --env-file docker/local/.env ps",
     "db:down": "docker compose -f docker/local/docker-compose.yml --env-file docker/local/.env down",

@@ -1,6 +1,7 @@
 import type { ThemeMode } from '@repo/ui/types/theme.types';
 
 import { PERSIST_COOKIE_ACTION } from '@repo/ui/constants/globalSettings.constants';
+import { getAppScopedCookieKey } from '@repo/ui/utils/storage';
 
 import { THEME_COOKIE_NAME } from './themeCookie.constants';
 
@@ -11,7 +12,10 @@ type PersistThemeCookieEntry = {
   readonly value: ThemeMode;
 };
 
-const persistThemeCookieServerSide = (theme: ThemeMode): void => {
+const persistThemeCookieServerSide = (
+  theme: ThemeMode,
+  appId?: string,
+): void => {
   if (
     globalThis.fetch === undefined ||
     globalThis.FormData === undefined ||
@@ -23,7 +27,7 @@ const persistThemeCookieServerSide = (theme: ThemeMode): void => {
   const currentUrl = `${globalThis.location.pathname}${globalThis.location.search}`;
   const entries: readonly PersistThemeCookieEntry[] = [
     {
-      key: THEME_COOKIE_NAME,
+      key: getAppScopedCookieKey({ appId, key: THEME_COOKIE_NAME }),
       searchParamKey: '',
       searchParamValue: '',
       value: theme,
@@ -42,8 +46,12 @@ const persistThemeCookieServerSide = (theme: ThemeMode): void => {
 
 /**
  * Set theme cookie (for client-side use).
+ *
+ * @param theme - The theme mode to persist.
+ * @param appId - Optional per-app id used to scope the cookie key so apps
+ *   sharing a host (cookies ignore port) do not overwrite each other.
  */
-export const setThemeCookie = (theme: ThemeMode): void => {
+export const setThemeCookie = (theme: ThemeMode, appId?: string): void => {
   // Persist through the React Router action so Set-Cookie comes from the server.
-  persistThemeCookieServerSide(theme);
+  persistThemeCookieServerSide(theme, appId);
 };

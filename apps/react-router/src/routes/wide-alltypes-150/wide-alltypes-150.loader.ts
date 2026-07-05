@@ -5,6 +5,7 @@ import type { WideAlltypes150, WideAlltypes150Response } from '@/services';
 import { INITIAL_PAGE_SIZE } from '@repo/ui/components/Table/Table.constants';
 import { wideAlltypes150Api } from '@/services';
 
+import { APP_ID } from '@/constants/app.constants';
 import { readTableLoaderStateFromRequest } from '@repo/ui/routing/readTableLoaderStateFromRequest.util';
 import { sanitizeSorting } from '@repo/ui/routing/sanitizeSorting.util';
 import {
@@ -22,10 +23,12 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
     columnSizing,
     columnVisibility,
     filters,
+    metaUiFlags,
     sorting,
     standaloneFiltersParam,
     standaloneSortParam,
   } = readTableLoaderStateFromRequest<WideAlltypes150>({
+    appId: APP_ID,
     columns: COLUMNS,
     includeFilters: true,
     persistenceKey: PERSISTENCE_KEY,
@@ -55,6 +58,8 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
     dataPromise,
     key: `${standaloneSortParam ?? ''}${standaloneFiltersParam ?? ''}`,
     metaState: {
+      ...metaUiFlags,
+      appId: APP_ID,
       persistenceKey: PERSISTENCE_KEY,
       schemaName: SCHEMA_NAME,
       tableName: TABLE_NAME,

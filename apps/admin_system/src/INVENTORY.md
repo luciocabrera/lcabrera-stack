@@ -8,18 +8,24 @@ Shared components/hooks/utils/design-tokens live in `@repo/ui` — see [`package
 
 ## Routes
 
-| Route                                                      | Location                        | Description                                                                                                                                            |
-| ---------------------------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `/settings`                                                | `routes/settings/`              | Re-export of the shared `@repo/ui/components/Settings` page, mirroring `apps/react-router`'s own route                                                 |
-| `/_action/browse-directory`                                | `routes/api/browse-directory/`  | Resource route — thin re-export of `@repo/ui/routing/browseDirectory.loader`; lists a directory's real subdirectories for `Form`'s `path`-type fields  |
-| `/cqms`                                                    | `routes/cqms/cqmsIndex.root.ts` | Redirects to `/cqms/projects`                                                                                                                          |
-| `/cqms/projects`                                           | `routes/cqms/root.ts`           | Project list — `TableLayout` fed `project_run_summary` rows (streamed via `projectsPromise`); "New Project" renders via `Table`'s own `actions` slot   |
-| `/cqms/projects/new`                                       | `routes/cqms/new-project/`      | Register a project (`Form` in a `SectionCard`, action-only) — calls `registerProject`                                                                  |
-| `/cqms/projects/edit/:projectId`                           | `routes/cqms/edit-project/`     | Rename/re-path a project (`Form` mode='edit' in a `SectionCard`, loader+action) — calls `updateProject`                                                |
-| `/cqms/projects/view/:projectId`                           | `routes/cqms/project-detail/`   | Project header + trend sparklines (`use()`+Suspense) + runs `TableLayout`; links to edit + trigger-scan                                                |
-| `/cqms/projects/view/:projectId/trigger-scan`              | `routes/cqms/trigger-scan/`     | Trigger a scan (`Form` in a `SectionCard`, multi-select scanners, streamed via `scannersPromise`) — calls `triggerScan`; does not spawn a job (step 9) |
-| `/cqms/projects/view/:projectId/runs/:runId`               | `routes/cqms/run-detail/`       | One run's scans `TableLayout`                                                                                                                          |
-| `/cqms/projects/view/:projectId/runs/:runId/scans/:scanId` | `routes/cqms/scan-detail/`      | Tabs: `MarkdownRenderer` report (streamed via `reportPromise`), findings `TableLayout`, `JsonExplorer` for raw JSON                                    |
+| Route                                                      | Location                        | Description                                                                                                                                                                                        |
+| ---------------------------------------------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/settings`                                                | `routes/settings/`              | Re-export of the shared `@repo/ui/components/Settings` page, mirroring `apps/react-router`'s own route                                                                                             |
+| `/_action/browse-directory`                                | `routes/api/browse-directory/`  | Resource route — thin re-export of `@repo/ui/routing/browseDirectory.loader`; lists a directory's real subdirectories for `Form`'s `path`-type fields                                              |
+| `/cqms`                                                    | `routes/cqms/cqmsIndex.root.ts` | Redirects to `/cqms/projects`                                                                                                                                                                      |
+| `/cqms/projects`                                           | `routes/cqms/root.ts`           | Project list — `TableLayout` fed `project_run_summary` rows (streamed via `projectsPromise`); "New Project" renders via `Table`'s own `actions` slot                                               |
+| `/cqms/projects/new`                                       | `routes/cqms/new-project/`      | Register a project (`Form` in a `SectionCard`, action-only) — calls `registerProject`                                                                                                              |
+| `/cqms/projects/edit/:projectId`                           | `routes/cqms/edit-project/`     | Rename/re-path a project (`Form` mode='edit' in a `SectionCard`, loader+action) — calls `updateProject`                                                                                            |
+| `/cqms/projects/view/:projectId`                           | `routes/cqms/project-detail/`   | Project header + trend sparklines (`use()`+Suspense) + runs `TableLayout`; links to edit + trigger-scan                                                                                            |
+| `/cqms/projects/view/:projectId/trigger-scan`              | `routes/cqms/trigger-scan/`     | Trigger a scan (`Form` in a `SectionCard`, multi-select scanners, streamed via `scannersPromise`) — calls `triggerScan`; `apps/scan-orchestrator` picks the run up via `LISTEN`/`NOTIFY` (ADR-015) |
+| `/cqms/projects/view/:projectId/runs/:runId`               | `routes/cqms/run-detail/`       | One run's scans `TableLayout`; subscribes to live status via `useRunStatusSocket`                                                                                                                  |
+| `/cqms/projects/view/:projectId/runs/:runId/scans/:scanId` | `routes/cqms/scan-detail/`      | Tabs: `MarkdownRenderer` report (streamed via `reportPromise`), findings `TableLayout`, `JsonExplorer` for raw JSON                                                                                |
+
+## Hooks
+
+| Hook                 | Location                           | Description                                                                                                                                                  |
+| -------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `useRunStatusSocket` | `hooks/useRunStatusSocket.hook.ts` | Subscribes to `apps/scan-orchestrator`'s `/ws/runs` WebSocket for one `runId`; calls `revalidate()` on any message (cache-invalidation signal only, ADR-015) |
 
 ## CQMS-local Utils
 

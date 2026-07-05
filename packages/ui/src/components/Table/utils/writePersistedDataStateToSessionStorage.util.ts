@@ -11,6 +11,7 @@ import {
 type WritePersistedDataStateToSessionStorageArgs<
   TData = Record<string, unknown>,
 > = {
+  readonly appId?: string;
   readonly dataState: PersistedDataState<TData>;
   readonly persistenceKey: string;
 };
@@ -22,10 +23,11 @@ type WritePersistedDataStateToSessionStorageArgs<
 export const writePersistedDataStateToSessionStorage = <
   TData = Record<string, unknown>,
 >({
+  appId,
   dataState,
   persistenceKey,
 }: WritePersistedDataStateToSessionStorageArgs<TData>): void => {
-  const key = `${getStorageKey({ persistenceKey })}-${DATA_STATE_SESSION_KEY_SUFFIX}`;
+  const key = `${getStorageKey({ appId, persistenceKey })}-${DATA_STATE_SESSION_KEY_SUFFIX}`;
   const serialized = encodeURIComponent(
     JSON.stringify({ value: dataState, version: PERSISTENCE_VERSION }),
   );

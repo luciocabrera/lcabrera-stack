@@ -4,6 +4,7 @@ import type { SkeletonResponse } from './TableSkeleton.types';
 
 import { useGetColumns } from '../contexts/TableConfig/columns/selectors';
 import {
+  useGetTableAppId,
   useGetTablePersistenceKey,
   useGetTablePlaceholderRowCount,
 } from '../contexts/TableConfig/meta/selectors';
@@ -13,6 +14,7 @@ import { readPersistedDataStateFromSessionStorage } from '../utils';
 
 export const TableSkeleton = () => {
   const columns = useGetColumns();
+  const appId = useGetTableAppId();
   const persistenceKey = useGetTablePersistenceKey();
   const placeholderRowCount = useGetTablePlaceholderRowCount();
   const persistedDataState = useMemo<
@@ -23,9 +25,10 @@ export const TableSkeleton = () => {
       }
   >(() => {
     return readPersistedDataStateFromSessionStorage<Record<string, unknown>>({
+      appId,
       persistenceKey,
     });
-  }, [persistenceKey]);
+  }, [appId, persistenceKey]);
 
   const hasPersistedRows = (persistedDataState?.data.length ?? 0) > 0;
   const placeholderData = generatePlaceholderData<Record<string, unknown>>({

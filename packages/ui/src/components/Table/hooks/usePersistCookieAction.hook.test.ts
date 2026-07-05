@@ -28,9 +28,21 @@ const { mockUseFetcher, mockUseLocation } = vi.hoisted(() => ({
   }),
 }));
 
+const { metaStoreGetMock } = vi.hoisted(() => ({
+  metaStoreGetMock: vi.fn<() => Record<string, unknown> | undefined>(
+    () => ({}),
+  ),
+}));
+
 vi.mock('react-router', () => ({
   useFetcher: mockUseFetcher,
   useLocation: mockUseLocation,
+}));
+
+vi.mock('../contexts/TableConfig/useTableConfigContextValue.hook', () => ({
+  useTableConfigContextValue: () => ({
+    metaStore: { get: metaStoreGetMock },
+  }),
 }));
 
 vi.mock('../utils', () => ({
@@ -51,6 +63,8 @@ describe('usePersistTableStateAction', () => {
     serializeStateSliceMock.mockReset();
     submitMock.mockReset();
     writeToSessionStorageMock.mockReset();
+    metaStoreGetMock.mockReset();
+    metaStoreGetMock.mockReturnValue({});
   });
 
   it('serializes and submits a single persistence entry', () => {
@@ -203,5 +217,30 @@ describe('usePersistTableStateAction', () => {
     });
     expect(writeToSessionStorageMock).not.toHaveBeenCalled();
     expect(submitMock).not.toHaveBeenCalled();
+  });
+
+  it('scopes serialization with the appId from the meta store', () => {
+    metaStoreGetMock.mockReturnValue({ appId: 'admin-system' });
+    serializeStateSliceMock.mockReturnValue({
+      key: 'table-state-admin-system-orders-sorting',
+      value: '[]',
+    });
+
+    const { result } = renderHook(() => usePersistTableStateAction());
+
+    act(() => {
+      result.current({
+        persistenceKey: 'orders',
+        slice: 'sorting',
+        valueSlice: [],
+      });
+    });
+
+    expect(serializeStateSliceMock).toHaveBeenCalledWith({
+      appId: 'admin-system',
+      persistenceKey: 'orders',
+      slice: 'sorting',
+      value: [],
+    });
   });
 });

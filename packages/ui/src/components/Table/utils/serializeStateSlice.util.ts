@@ -9,6 +9,7 @@ type SerializedStateSlice = {
 };
 
 type SerializeStateSliceArgs = {
+  readonly appId?: string;
   readonly persistenceKey: string;
   readonly slice: keyof TablePersistenceConfig;
   readonly value: unknown;
@@ -21,11 +22,12 @@ type SerializeStateSliceArgs = {
  * Shared by both writeStateSlice (direct write) and server action persistence.
  */
 export const serializeStateSlice = ({
+  appId,
   persistenceKey,
   slice,
   value,
 }: SerializeStateSliceArgs): SerializedStateSlice => {
-  const key = `${getStorageKey({ persistenceKey })}-${slice}`;
+  const key = `${getStorageKey({ appId, persistenceKey })}-${slice}`;
 
   // Convert Set to Array for columnVisibility
   const serializableValue =

@@ -9,6 +9,7 @@ import {
 } from './persistence.constants';
 
 type ReadPersistedUiStateFromSessionStorageArgs = {
+  readonly appId?: string;
   readonly persistenceKey: string;
 };
 
@@ -17,9 +18,10 @@ type ReadPersistedUiStateFromSessionStorageArgs = {
  * Returns an empty object on SSR or if no session data exists.
  */
 export const readPersistedUiStateFromSessionStorage = ({
+  appId,
   persistenceKey,
 }: ReadPersistedUiStateFromSessionStorageArgs): PersistedUiState => {
-  const key = `${getStorageKey({ persistenceKey })}-${UI_STATE_SESSION_KEY_SUFFIX}`;
+  const key = `${getStorageKey({ appId, persistenceKey })}-${UI_STATE_SESSION_KEY_SUFFIX}`;
   const rawValue = readFromSessionStorage({ key });
 
   if (!rawValue) return {};

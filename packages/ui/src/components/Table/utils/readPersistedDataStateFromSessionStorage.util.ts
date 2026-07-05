@@ -9,6 +9,7 @@ import {
 } from './persistence.constants';
 
 type ReadPersistedDataStateFromSessionStorageArgs = {
+  readonly appId?: string;
   readonly persistenceKey: string;
 };
 
@@ -19,11 +20,12 @@ type ReadPersistedDataStateFromSessionStorageArgs = {
 export const readPersistedDataStateFromSessionStorage = <
   TData = Record<string, unknown>,
 >({
+  appId,
   persistenceKey,
 }: ReadPersistedDataStateFromSessionStorageArgs):
   | PersistedDataState<TData>
   | undefined => {
-  const key = `${getStorageKey({ persistenceKey })}-${DATA_STATE_SESSION_KEY_SUFFIX}`;
+  const key = `${getStorageKey({ appId, persistenceKey })}-${DATA_STATE_SESSION_KEY_SUFFIX}`;
   const rawValue = readFromSessionStorage({ key });
 
   if (!rawValue) return undefined;

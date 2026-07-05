@@ -11,13 +11,18 @@ import type { AppProvidersProps } from './AppProviders.types';
  * component owns the provider order/composition itself.
  */
 export const AppProviders = ({
+  appId,
   children,
   defaultTheme = 'light',
   globalSettings,
   initialTheme,
 }: AppProvidersProps) => (
-  <ThemeProvider defaultTheme={defaultTheme} initialTheme={initialTheme}>
-    <GlobalSettingsProvider initialSettings={globalSettings}>
+  <ThemeProvider
+    appId={appId}
+    defaultTheme={defaultTheme}
+    initialTheme={initialTheme}
+  >
+    <GlobalSettingsProvider appId={appId} initialSettings={globalSettings}>
       <NotificationProvider>{children}</NotificationProvider>
     </GlobalSettingsProvider>
   </ThemeProvider>

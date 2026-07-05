@@ -6,13 +6,14 @@ import { INITIAL_GLOBAL_SETTINGS } from './GlobalSettingsContext.constants';
 import { GlobalSettingsContext } from './GlobalSettingsContext.context';
 
 export const GlobalSettingsProvider = ({
+  appId,
   children,
   initialSettings,
 }: GlobalSettingsProviderProps) => {
   const settingsStore = useStore(initialSettings ?? INITIAL_GLOBAL_SETTINGS);
 
   return (
-    <GlobalSettingsContext value={{ settingsStore }}>
+    <GlobalSettingsContext value={{ appId, settingsStore }}>
       {children}
     </GlobalSettingsContext>
   );

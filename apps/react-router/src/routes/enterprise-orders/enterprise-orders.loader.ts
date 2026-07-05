@@ -3,6 +3,7 @@ import type { LoaderFunctionArgs } from 'react-router';
 import type { EnterpriseOrder, EnterpriseOrdersResponse } from '@/services';
 
 import { INITIAL_PAGE_SIZE } from '@repo/ui/components/Table/Table.constants';
+import { APP_ID } from '@/constants/app.constants';
 import { enterpriseOrdersApi } from '@/services';
 
 import { readTableLoaderStateFromRequest } from '@repo/ui/routing/readTableLoaderStateFromRequest.util';
@@ -29,10 +30,12 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
     columnSizing,
     columnVisibility,
     filters,
+    metaUiFlags,
     sorting,
     standaloneFiltersParam,
     standaloneSortParam,
   } = readTableLoaderStateFromRequest<EnterpriseOrder>({
+    appId: APP_ID,
     columns: COLUMNS,
     includeFilters: true,
     persistenceKey: PERSISTENCE_KEY,
@@ -64,6 +67,8 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
     enterpriseOrdersPromise,
     key: `${standaloneSortParam ?? ''}${standaloneFiltersParam ?? ''}`,
     metaState: {
+      ...metaUiFlags,
+      appId: APP_ID,
       persistenceKey: PERSISTENCE_KEY,
       schemaName: SCHEMA_NAME,
       tableName: TABLE_NAME,

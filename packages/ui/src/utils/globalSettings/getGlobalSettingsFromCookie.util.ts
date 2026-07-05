@@ -1,6 +1,7 @@
 import type { GlobalSettingsState } from '@repo/ui/types/globalSettings.types';
 
 import { logger } from '@repo/ui/utils/logger';
+import { getAppScopedCookieKey } from '@repo/ui/utils/storage';
 import { readFromCookie } from '@repo/ui/utils/storage/readFromCookie.util';
 import { isObject } from '@repo/ui/utils/typeGuards';
 
@@ -12,6 +13,7 @@ import { toGlobalNavigationPreferences } from './toGlobalNavigationPreferences.u
 import { toGlobalPinningPreferences } from './toGlobalPinningPreferences.util';
 
 type GetGlobalSettingsFromCookieArgs = {
+  readonly appId?: string;
   readonly cookieString?: string;
   readonly fallback: GlobalSettingsState;
 };
@@ -31,12 +33,13 @@ type GlobalSettingsCookiePayload = {
  * @returns The parsed global settings state, or the fallback.
  */
 export const getGlobalSettingsFromCookie = ({
+  appId,
   cookieString,
   fallback,
 }: GetGlobalSettingsFromCookieArgs): GlobalSettingsState => {
   const rawCookie = readFromCookie({
     cookieString,
-    key: GLOBAL_SETTINGS_COOKIE_KEY,
+    key: getAppScopedCookieKey({ appId, key: GLOBAL_SETTINGS_COOKIE_KEY }),
   });
 
   if (!rawCookie) {

@@ -7,6 +7,7 @@ export { persistTableMetaUiState } from './persistTableMetaUiState.util';
 export { readPersistedDataStateFromSessionStorage } from './readPersistedDataStateFromSessionStorage.util';
 export { readPersistedStateFromCookie } from './readPersistedStateFromCookie.util';
 export { readPersistedStateFromSessionStorage } from './readPersistedStateFromSessionStorage.util';
+export { readPersistedUiFlagsFromCookie } from './readPersistedUiFlagsFromCookie.util';
 export { readPersistedUiStateFromSessionStorage } from './readPersistedUiStateFromSessionStorage.util';
 export { serializeStateSlice } from './serializeStateSlice.util';
 export { syncColumnOrderWithPinning } from './syncColumnOrderWithPinning.util';

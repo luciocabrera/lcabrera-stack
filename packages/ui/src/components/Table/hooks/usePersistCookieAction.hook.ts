@@ -10,6 +10,7 @@ import { writeToSessionStorage } from '@repo/ui/utils/storage';
 
 import type { TablePersistenceConfig } from '../Table.types';
 
+import { useTableConfigContextValue } from '../contexts/TableConfig/useTableConfigContextValue.hook';
 import { serializeStateSlice } from '../utils';
 
 type PersistCookieEntry<TSlice = unknown> = {
@@ -38,6 +39,7 @@ type PersistTableStateAction = {
 };
 
 export const usePersistTableStateAction = (): PersistTableStateAction => {
+  const { metaStore } = useTableConfigContextValue();
   const fetcher = useFetcher({ key: 'persist-table-state' });
   const location = useLocation();
   const notify = useNotifyAction();
@@ -45,6 +47,9 @@ export const usePersistTableStateAction = (): PersistTableStateAction => {
   return (args: PersistCookieEntry | PersistCookieEntry[]) => {
     const entries = Array.isArray(args) ? args : [args];
     const currentUrl = `${location.pathname}${location.search}`;
+    // Scope keys to the current app so tables in different apps that reuse the
+    // same persistenceKey never share cookies / storage entries.
+    const appId = metaStore.get()?.appId;
 
     const serializedEntries = entries.map(
       ({
@@ -57,6 +62,7 @@ export const usePersistTableStateAction = (): PersistTableStateAction => {
         const { key, value } =
           persistenceKey && slice
             ? serializeStateSlice({
+                appId,
                 persistenceKey,
                 slice,
                 value: valueSlice,

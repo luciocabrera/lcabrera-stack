@@ -10,6 +10,9 @@ The 9 steps below are executed **one at a time, gated** — before starting each
 
 ## Steps
 
+**All 9 steps are complete.** Step 9's build produced two real, previously-hidden bugs
+(the `linter-checker` skill only ever worked against this repo; `packages/scan-ingestion`'s new `exports` map briefly broke every other subpath) — see ADR-015 for both.
+
 1. **Extract `packages/ui`** — Table (including the runtime-inferred-columns extension, TECH*SPEC §2.9 — budget real design time here, it's new capability, not a lift-and-shift), `useStore.hook.ts`, loader-state utils, Card, SidePanel, Icons, RouteErrorBoundary, Tabs, Modal, Toolbar/AppNavigation/NavLink, design tokens; update `apps/react-router`'s imports; write the ADR. \_Blocks every later step that needs shared components.*
 2. **Build the generic `Form` component** (TECH*SPEC §2.10) — can run in parallel with step 1's Table work (same package), since it depends only on the migrated `useStore.hook.ts`, not on Table itself. \_No CQMS route needs this until step 8, but building it here keeps all `packages/ui` foundational work together.*
 3. **Provision the CQMS schema** — `packages/scan-ingestion` migration 0001 (uuid PKs) + 0002 (functions) + 0003 (views) from TECH*SPEC §2.3/§2.3a, minimal migration runner, seed the 4 `scanners` rows, run against the already-running `docker/local` Postgres instance (new database name, same container — no new infra). \_Everything else reads/writes these tables.*
@@ -18,7 +21,13 @@ The 9 steps below are executed **one at a time, gated** — before starting each
 6. **Build the new `linter-checker` skill** (TECH*SPEC §2.5: deterministic mapping script + templated report.md, mirrors `fallow-code-checker`'s directory shape), wire the ingestion CLI into all 4 skills' final steps, update `.claude/settings.json` allowlists, run `scripts/validate-skills.cjs`. \_Validates ingestion with a human-in-the-loop run before anything unattended depends on it.*
 7. **Build `packages/agent-runner`** — SKILL.md loader/parser, tool/cwd scoping, child-process sandboxing, the `OUTPUT_DIR` convention change to the 3 Agent-SDK-driven skills (not linter). _Depends on skills already being ingestion-aware and JSON-emitting._
 8. **Build `admin_system`'s CQMS routes/UI** against real rows produced manually via steps 3–6's CLI, including the `Form`-based `new-project`/`trigger-scan` forms and the `JsonExplorer`/`inferTableColumnsFromJson` work against real `raw_json` samples from all 4 scanners. _Isolates UI bugs from job-orchestration bugs; needs `packages/ui` from steps 1–2._
-9. **Replace `admin_system`'s server with the custom Express + WebSocket entry** (TECH*SPEC §2.7: `server.ts`, `runStatusHub.util.ts`, the dev-mode Vite plugin), then **wire `trigger-scan` + background job + WebSocket status push**, branching per §2.5 (deterministic linter → plain child process; other 3 → `agent-runner`). \_Last — the integration of every prior piece, and the highest-risk (security-sensitive, async, unattended, new server infra) item.*
+9. **Build a standalone `apps/scan-orchestrator` process** (TECH_SPEC §2.7, revised: two processes, not one custom `admin_system/server.ts`). `apps/admin_system` stays on stock `react-router dev`/`@react-router/serve`, completely untouched — no custom server entry, no Express, no Vite plugin. The new process:
+   - a one-line `pg_notify('cqms_scan_queued', run_id::text)` addition to `fn_create_run_with_scans`, plus a dedicated `LISTEN` connection in the orchestrator reacting to it;
+   - a reconciliation poll (`SELECT * FROM scans WHERE status = 'queued'`, on startup and on a slow interval) as the durability backstop, since `NOTIFY` itself isn't persisted;
+   - the actual job execution, branching per §2.5 on `scanners.deterministic` (linter → plain child process; the other 3 → `@repo/agent-runner`'s `runSkillAgent`), calling `ingestReport()` / writing status transitions;
+   - a plain `node:http` + `ws` `WebSocketServer` and `runStatusHub.util.ts` (in-memory `Map<runId, Set<WebSocket>>`), published to immediately after each transition since execution and the hub now share one process.
+
+   Client-side: point `useRunStatusSocket.hook.ts` at the orchestrator's own WS origin instead of same-origin. _Last — the integration of every prior piece, and still the highest-risk (security-sensitive, async, unattended, new process) item, but no longer entangled with `admin_system`'s own dev/prod server lifecycle._
 
 ## Phase 2 (explicitly out of scope now)
 

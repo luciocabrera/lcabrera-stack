@@ -5,6 +5,8 @@ import { TableLayout } from '@repo/ui/components/Table/TableLayout';
 import { createEmptyColumnsState } from '@repo/ui/components/Table/utils/createEmptyColumnsState.util';
 import { useLoaderData } from 'react-router';
 
+import { useRunStatusSocket } from '@/hooks/useRunStatusSocket.hook';
+
 import type { loader } from './runDetail.loader';
 
 import { resolveRunStatusTone } from '../utils/resolveRunStatusTone.util';
@@ -12,6 +14,7 @@ import { RUN_SCANS_COLUMNS } from './RunDetail.constants';
 
 export const RunDetail = () => {
   const { run, scansPromise } = useLoaderData<typeof loader>();
+  useRunStatusSocket({ runId: run.id });
 
   return (
     <div>

@@ -29,6 +29,17 @@ describe('getInitialColumnsState (TableConfig)', () => {
     expect(result.effectiveColumns).toHaveLength(2);
   });
 
+  it('normalizes a partial columnPinning object (cookie miss) without crashing', () => {
+    const result = getInitialColumnsState({
+      columns,
+      // A `{}` pinning value can arrive when no pinning cookie is present.
+      columnPinning: {} as never,
+      persistenceKey,
+    });
+    expect(result.columnPinning).toEqual({ left: [], right: [] });
+    expect(result.pinnedColumnOffsets).toEqual({});
+  });
+
   it('computes normalizedColumns', () => {
     const result = getInitialColumnsState({ columns, persistenceKey });
     // normalizedColumns is a Record keyed by column key, not an array

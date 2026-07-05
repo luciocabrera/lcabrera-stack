@@ -155,6 +155,11 @@ Table state uses two write paths with a shared hydration model:
 - Cookies + URL for SSR/shareable column state (filters, sorting, pinning, sizing, visibility)
 - sessionStorage (tab-scoped) for per-tab working copies (drawer UI + data rows)
 - Meta UI state is written by the mutation action itself, not by a subscription effect
+- The drawer **open/pinned flags** are additionally mirrored to a `-uiFlags` cookie
+  so the loader can SSR-seed the drawer in its persisted open/pinned state and
+  avoid a hydration layout shift (tab/expanded-filter state stays sessionStorage-only)
+- All persisted keys are optionally scoped by an **`appId`** (`table-state-{appId}-{persistenceKey}`)
+  so tables in different apps that share a `persistenceKey` never collide
 - Query revalidation is conditional: only effective filter/sort URL changes trigger
   redirect and loader rerun.
 
@@ -170,10 +175,11 @@ graph LR
   Decision -->|No| Stable["204 response, no revalidation"]
 
   MetaChange["meta UI mutation"] --> MetaAction["persistTableMetaUiState()"]
-  MetaAction --> MetaSession["sessionStorage write only"]
+  MetaAction --> MetaSession["sessionStorage write"]
+  MetaAction --> MetaFlagsCookie["-uiFlags cookie (open/pinned) for SSR seed"]
 
-  Load["Page load"] --> CookieRead["readPersistedStateFromCookie()"]
-  CookieRead --> Init["Provider initial state"]
+  Load["Page load"] --> CookieRead["readPersistedStateFromCookie() + readPersistedUiFlagsFromCookie()"]
+  CookieRead --> Init["Provider initial state (columns + drawer flags)"]
   Load --> Mount["client mount"]
   Mount --> SessionRead["TableConfigProvider / TableDataProvider hydration effects"]
   SessionRead --> Init

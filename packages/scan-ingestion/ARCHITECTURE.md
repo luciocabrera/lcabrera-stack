@@ -125,3 +125,40 @@ run-status finalization, then cleanup), and the CLI wrapper itself was run
 directly (`node --experimental-strip-types src/cli/ingest.cli.ts ...`)
 against a real temporary git repo, with the resulting Postgres rows queried
 directly to confirm correctness before cleanup.
+
+## `queries/` — the read/write layer `admin_system` and `apps/scan-orchestrator` consume
+
+`src/queries/*.util.ts` — one file per query (`getProjectListView`,
+`triggerScan`, `markScanFailed`, etc.), each a thin `pool.query<Row>(...)`
+call, mirroring `ingestReport`'s own "thin wrapper, DB owns the logic"
+philosophy (TECH_SPEC §2.3a). Every read/write CQMS needs, anywhere in the
+monorepo, goes through this directory — no other package or app touches
+`cqms.*` tables directly.
+
+## `package.json` `exports` — real, not just tsconfig-aliased (ADR-015)
+
+`admin_system` (Vite-mediated) has always resolved `@repo/scan-ingestion/*`
+via its own `vite.config.ts` `resolve.alias`, independent of this package's
+`package.json`. That changed the moment a **plain-Node** consumer outside
+this package showed up (`apps/scan-orchestrator`, ADR-015) — Node's real
+ESM resolver only understands `package.json`'s `exports` field, not
+Vite/tsconfig aliasing. `exports` is scoped to `"./ingestion/ingestReport"`
+
+- `"./ingestion/ingestReport.types"` (the only two `ingestion/` files
+  anything outside this package imports — the rest are `ingestReport`'s own
+  internal helpers) and a wildcard `"./queries/*.util": "./src/queries/*.util.ts"`
+  (every file in `queries/` is already meant to be publicly importable, by
+  directory convention).
+
+**Important footgun, hit once already**: `exports`, once present, is
+_exclusive_ — any subpath not listed becomes unresolvable via real Node/
+`exports`-aware resolution for **every** consumer, not just new ones. Adding
+only the 4 newest query utils here initially broke oxlint's resolution
+(which reads `exports` strictly) for every previously-working
+`@repo/scan-ingestion/queries/*` import across `admin_system`'s entire
+`cqms` routes tree. If you add a new file under `queries/` or `ingestion/`,
+it's covered automatically by the existing patterns — but if you ever need
+a subpath _outside_ those two directories, it must be added to `exports`
+explicitly, or it will quietly stop resolving for any strictly-`exports`-aware
+tool while continuing to work fine under Vite's separate alias-based
+resolution (a working `tsc`/Vite dev server is not proof this is fine).

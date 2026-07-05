@@ -4,6 +4,7 @@ import { getStorageKey } from './getStorageKey.util';
 import { PERSISTENCE_VERSION } from './persistence.constants';
 
 type CollectPersistedStateSlicesArgs = {
+  readonly appId?: string;
   readonly persistenceKey: string;
   readonly readRawSlice: (sliceKey: string) => null | string | undefined;
   readonly transformRaw?: (raw: string) => string;
@@ -27,6 +28,7 @@ const PERSISTED_SLICES = [
  * @returns The parsed partial persisted state.
  */
 export const collectPersistedStateSlices = <TData = Record<string, unknown>>({
+  appId,
   persistenceKey,
   readRawSlice,
   transformRaw,
@@ -34,7 +36,7 @@ export const collectPersistedStateSlices = <TData = Record<string, unknown>>({
   const result: {
     -readonly [K in keyof PersistedState<TData>]?: PersistedState<TData>[K];
   } = {};
-  const storageKey = getStorageKey({ persistenceKey });
+  const storageKey = getStorageKey({ appId, persistenceKey });
 
   for (const slice of PERSISTED_SLICES) {
     const rawValue = readRawSlice(`${storageKey}-${slice}`);

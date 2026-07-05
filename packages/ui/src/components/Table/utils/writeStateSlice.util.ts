@@ -5,6 +5,7 @@ import type { StorageType, TablePersistenceConfig } from '../Table.types';
 import { serializeStateSlice } from './serializeStateSlice.util';
 
 type WriteStateSliceArgs = {
+  readonly appId?: string;
   readonly headers?: Headers;
   readonly persistenceKey: string;
   readonly slice: keyof TablePersistenceConfig;
@@ -19,6 +20,7 @@ type WriteStateSliceArgs = {
  * For server action persistence via useFetcher, use serializeStateSlice + usePersistCookieAction instead.
  */
 export const writeStateSlice = ({
+  appId,
   headers,
   persistenceKey,
   slice,
@@ -26,6 +28,7 @@ export const writeStateSlice = ({
   value,
 }: WriteStateSliceArgs): void => {
   const { key, value: serialized } = serializeStateSlice({
+    appId,
     persistenceKey,
     slice,
     value,

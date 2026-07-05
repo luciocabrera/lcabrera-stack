@@ -4,6 +4,7 @@ import type { TableColumn } from '@repo/ui/components/Table';
 
 vi.mock('@repo/ui/components/Table/utils', () => ({
   readPersistedStateFromCookie: vi.fn(),
+  readPersistedUiFlagsFromCookie: vi.fn(() => ({})),
 }));
 
 import { readPersistedStateFromCookie } from '@repo/ui/components/Table/utils';
@@ -146,7 +147,7 @@ describe('readTableLoaderStateFromRequest', () => {
     expect(result.columnOrder).toEqual([]);
     expect(result.columnVisibility).toEqual(new Set());
     expect(result.columnSizing).toEqual({});
-    expect(result.columnPinning).toEqual({});
+    expect(result.columnPinning).toEqual({ left: [], right: [] });
     expect(result.sorting).toEqual([]);
     expect(result.filters).toEqual({});
     expect(result.standaloneSortParam).toBeNull();

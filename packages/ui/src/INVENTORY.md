@@ -155,7 +155,7 @@ Covers `packages/ui` only. API-layer utilities (`api.util.ts`, `buildPaginatedQu
 | `getPersistedUiState`                      | `components/Table/utils/getPersistedUiState.util.ts`                      | Extracts the persisted drawer/tab/filter UI subset from full table meta state                             |
 | `persistTableMetaUiState`                  | `components/Table/utils/persistTableMetaUiState.util.ts`                  | Persists tab-scoped table meta UI slices directly from mutation actions                                   |
 | `getStaticColumnKeys`                      | `components/Table/utils/getStaticColumnKeys.util.ts`                      | Returns a `Set` of keys for columns marked as non-reorderable                                             |
-| `getStorageKey`                            | `components/Table/utils/getStorageKey.util.ts`                            | Builds a namespaced `persistenceKey:slice` storage key                                                    |
+| `getStorageKey`                            | `components/Table/utils/getStorageKey.util.ts`                            | Builds a namespaced storage key, optionally scoped by `appId`: `table-state-{appId}-{persistenceKey}`     |
 | `insertAfterLeftPinned`                    | `components/Table/utils/insertAfterLeftPinned.util.ts`                    | Inserts a column immediately after the remaining left-pinned group in an order array                      |
 | `insertBeforeRightPinned`                  | `components/Table/utils/insertBeforeRightPinned.util.ts`                  | Inserts a column immediately before the remaining right-pinned group in an order array                    |
 | `resolveUnpinnedOrder`                     | `components/Table/utils/resolveUnpinnedOrder.util.ts`                     | Resolves unpin placement based on previous pin side and current pinning groups                            |
@@ -164,6 +164,8 @@ Covers `packages/ui` only. API-layer utilities (`api.util.ts`, `buildPaginatedQu
 | `readPersistedStateFromSessionStorage`     | `components/Table/utils/readPersistedStateFromSessionStorage.util.ts`     | Reads tab-scoped persisted column state slices from sessionStorage                                        |
 | `collectPersistedStateSlices`              | `components/Table/utils/collectPersistedStateSlices.util.ts`              | Shared slice collector for the cookie/sessionStorage readers (version check + `columnVisibility` Set)     |
 | `readPersistedUiStateFromSessionStorage`   | `components/Table/utils/readPersistedUiStateFromSessionStorage.util.ts`   | Reads tab-scoped persisted table UI slices (drawers/tab/expanded filters)                                 |
+| `readPersistedUiFlagsFromCookie`           | `components/Table/utils/readPersistedUiFlagsFromCookie.util.ts`           | SSR-safe read of drawer open/pinned flags from cookie so the loader can seed the drawer without shift     |
+| `writePersistedUiFlagsToCookie`            | `components/Table/utils/writePersistedUiFlagsToCookie.util.ts`            | Mirrors drawer open/pinned flags to a cookie (SSR seed) alongside the sessionStorage UI write             |
 | `resolveFetchMoreState`                    | `components/Table/utils/resolveFetchMoreState.util.ts`                    | Shared helper that merges paginated rows/options and recomputes `hasMore`, `totalLoadedRows`, `totalRows` |
 | `serializeStateSlice`                      | `components/Table/utils/serializeStateSlice.util.ts`                      | Converts a state slice to a `{ key, value }` payload for cookie/localStorage write                        |
 | `splitColumnsByPinning`                    | `components/Table/utils/splitColumnsByPinning.util.ts`                    | Splits effective columns into left, center, and right pin groups                                          |
@@ -293,23 +295,23 @@ Covers `packages/ui` only. API-layer utilities (`api.util.ts`, `buildPaginatedQu
 
 ### `src/utils/globalSettings/`
 
-| Function                                 | Location                                                        | Description                                                                            |
-| ---------------------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| `getGlobalSettingsFromCookie`            | `utils/globalSettings/getGlobalSettingsFromCookie.util.ts`      | Reads global settings (pinning + navigation preferences) from cookie string (SSR-safe) |
-| `serializeGlobalSettingsForCookie`       | `utils/globalSettings/serializeGlobalSettingsForCookie.util.ts` | Serialises `GlobalSettingsState` to versioned JSON payload for cookie write            |
-| `GLOBAL_SETTINGS_COOKIE_KEY`             | `utils/globalSettings/globalSettings.constants.ts`              | Cookie key constant (`global-settings`)                                                |
-| `GLOBAL_SETTINGS_COOKIE_VERSION`         | `utils/globalSettings/globalSettings.constants.ts`              | Current payload version; incremented on breaking schema changes                        |
-| `*_VALUES` constants                     | `utils/globalSettings/globalSettings.constants.ts`              | Valid-value arrays (pin side, conflict resolutions, navigation prefs) backing guards   |
-| `toGlobalPinningPreferences`             | `utils/globalSettings/toGlobalPinningPreferences.util.ts`       | Parses/validates the `pinning` cookie payload slice (internal)                         |
-| `toGlobalNavigationPreferences`          | `utils/globalSettings/toGlobalNavigationPreferences.util.ts`    | Parses/validates the `navigation` cookie payload slice (internal)                      |
-| `is*Preference` / `is*Resolution` guards | `utils/globalSettings/is*.util.ts`                              | One type guard per preference value set, each in its own file with unit tests          |
+| Function                                 | Location                                                        | Description                                                                                                       |
+| ---------------------------------------- | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `getGlobalSettingsFromCookie`            | `utils/globalSettings/getGlobalSettingsFromCookie.util.ts`      | Reads global settings (pinning + navigation preferences) from cookie string, optionally `appId`-scoped (SSR-safe) |
+| `serializeGlobalSettingsForCookie`       | `utils/globalSettings/serializeGlobalSettingsForCookie.util.ts` | Serialises `GlobalSettingsState` to versioned JSON payload for cookie write                                       |
+| `GLOBAL_SETTINGS_COOKIE_KEY`             | `utils/globalSettings/globalSettings.constants.ts`              | Cookie key constant (`global-settings`)                                                                           |
+| `GLOBAL_SETTINGS_COOKIE_VERSION`         | `utils/globalSettings/globalSettings.constants.ts`              | Current payload version; incremented on breaking schema changes                                                   |
+| `*_VALUES` constants                     | `utils/globalSettings/globalSettings.constants.ts`              | Valid-value arrays (pin side, conflict resolutions, navigation prefs) backing guards                              |
+| `toGlobalPinningPreferences`             | `utils/globalSettings/toGlobalPinningPreferences.util.ts`       | Parses/validates the `pinning` cookie payload slice (internal)                                                    |
+| `toGlobalNavigationPreferences`          | `utils/globalSettings/toGlobalNavigationPreferences.util.ts`    | Parses/validates the `navigation` cookie payload slice (internal)                                                 |
+| `is*Preference` / `is*Resolution` guards | `utils/globalSettings/is*.util.ts`                              | One type guard per preference value set, each in its own file with unit tests                                     |
 
 ### `src/utils/theme/`
 
-| Function             | Location                                 | Description                                      |
-| -------------------- | ---------------------------------------- | ------------------------------------------------ |
-| `getThemeFromCookie` | `utils/theme/getThemeFromCookie.util.ts` | Read theme mode from a cookie header (SSR-safe)  |
-| `setThemeCookie`     | `utils/theme/setThemeCookie.util.ts`     | Write theme mode to browser cookie (client-safe) |
+| Function             | Location                                 | Description                                                                                 |
+| -------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `getThemeFromCookie` | `utils/theme/getThemeFromCookie.util.ts` | Read theme mode from a cookie header, optionally `appId`-scoped (SSR-safe)                  |
+| `setThemeCookie`     | `utils/theme/setThemeCookie.util.ts`     | Write theme mode to browser cookie via the persist-cookie action, optionally `appId`-scoped |
 
 ### `src/utils/logger/`
 
@@ -353,13 +355,14 @@ Covers `packages/ui` only. API-layer utilities (`api.util.ts`, `buildPaginatedQu
 
 ### `src/utils/storage/`
 
-| Function              | Location                                    | Description                                                                       |
-| --------------------- | ------------------------------------------- | --------------------------------------------------------------------------------- |
-| `buildCookieString`   | `utils/storage/buildCookieString.util.ts`   | Serialises key/value to a `Set-Cookie` string (1y expiry, `SameSite=Lax`)         |
-| `parseCookies`        | `utils/storage/parseCookies.util.ts`        | _Internal_: Used by `readFromCookie` and `writeToCookie`                          |
-| `readFromCookie`      | `utils/storage/readFromCookie.util.ts`      | Reads a named cookie value from `document.cookie` or a provided string (SSR-safe) |
-| `writeToCookie`       | `utils/storage/writeToCookie.util.ts`       | Writes a cookie via `document.cookie` or returns a `Set-Cookie` header (SSR-safe) |
-| `writeToLocalStorage` | `utils/storage/writeToLocalStorage.util.ts` | Writes to `localStorage` with error handling for quota/disabled scenarios         |
+| Function                | Location                                      | Description                                                                                                  |
+| ----------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `buildCookieString`     | `utils/storage/buildCookieString.util.ts`     | Serialises key/value to a `Set-Cookie` string (1y expiry, `SameSite=Lax`)                                    |
+| `getAppScopedCookieKey` | `utils/storage/getAppScopedCookieKey.util.ts` | Builds an optionally `appId`-prefixed cookie key so same-host apps don't share theme/global-settings cookies |
+| `parseCookies`          | `utils/storage/parseCookies.util.ts`          | _Internal_: Used by `readFromCookie` and `writeToCookie`                                                     |
+| `readFromCookie`        | `utils/storage/readFromCookie.util.ts`        | Reads a named cookie value from `document.cookie` or a provided string (SSR-safe)                            |
+| `writeToCookie`         | `utils/storage/writeToCookie.util.ts`         | Writes a cookie via `document.cookie` or returns a `Set-Cookie` header (SSR-safe)                            |
+| `writeToLocalStorage`   | `utils/storage/writeToLocalStorage.util.ts`   | Writes to `localStorage` with error handling for quota/disabled scenarios                                    |
 
 ### `src/utils/urlState/`
 

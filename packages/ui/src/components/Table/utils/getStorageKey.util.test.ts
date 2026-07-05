@@ -12,4 +12,10 @@ describe('getStorageKey', () => {
   it('works with empty string', () => {
     expect(getStorageKey({ persistenceKey: '' })).toBe('table-state-');
   });
+
+  it('scopes the key with appId when provided', () => {
+    expect(
+      getStorageKey({ appId: 'admin-system', persistenceKey: 'myTable' }),
+    ).toBe('table-state-admin-system-myTable');
+  });
 });

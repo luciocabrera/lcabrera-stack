@@ -5,6 +5,7 @@ import type { PersistedState } from './persistence.types';
 import { collectPersistedStateSlices } from './collectPersistedStateSlices.util';
 
 type ReadPersistedStateFromCookieArgs = {
+  readonly appId?: string;
   readonly cookieString?: string;
   readonly persistenceKey: string;
 };
@@ -32,10 +33,12 @@ type ReadPersistedStateFromCookieArgs = {
  * ```
  */
 export const readPersistedStateFromCookie = ({
+  appId,
   cookieString,
   persistenceKey,
 }: ReadPersistedStateFromCookieArgs): Partial<PersistedState> =>
   collectPersistedStateSlices({
+    appId,
     persistenceKey,
     readRawSlice: (sliceKey) => readFromCookie({ cookieString, key: sliceKey }),
     transformRaw: decodeURIComponent,

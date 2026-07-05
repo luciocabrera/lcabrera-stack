@@ -128,6 +128,7 @@ TableColumnsState<TData> = {
 
 ```typescript
 TableMetaState = {
+  appId?: string;                    // App id used to namespace persisted cookie/storage keys
   columnSelectedKey: string | null;  // Currently selected column key
   density: TableDensity;             // compact | normal | comfortable
   drawersSyncNonce?: number;          // Monotonic nonce used to force drawer provider re-seed
@@ -247,27 +248,28 @@ subscription effect in the provider.
 
 ## Meta Selectors
 
-| Hook                                 | Returns                                                                | Description                         |
-| ------------------------------------ | ---------------------------------------------------------------------- | ----------------------------------- |
-| `useGetTableAdditionalMetadata`      | `Record<string, TableMetadataValue \| null \| undefined> \| undefined` | Optional custom metadata map        |
-| `useGetTableColumnSelectedKey`       | `string \| null`                                                       | Currently selected column key       |
-| `useGetTableDensity`                 | `TableDensity`                                                         | Table density setting               |
-| `useGetTableDrawersSyncNonce`        | `number`                                                               | Drawer remount nonce for panel sync |
-| `useGetTableEnablePrefetch`          | `boolean`                                                              | Whether prefetch buffer is active   |
-| `useGetTableInitialPageSize`         | `number`                                                               | Initial page row count              |
-| `useGetTableIsBordered`              | `boolean`                                                              | Whether borders are shown           |
-| `useGetTableIsColumnSettingsOpen`    | `boolean`                                                              | Column settings drawer state        |
-| `useGetTableIsTableSettingsPinned`   | `boolean`                                                              | Table settings pinned state         |
-| `useGetTableIsStriped`               | `boolean`                                                              | Whether rows are striped            |
-| `useGetTableIsTableSettingsOpen`     | `boolean`                                                              | Table settings drawer state         |
-| `useGetTableLoadMorePageSize`        | `number`                                                               | Subsequent page row count           |
-| `useGetTableOverscan`                | `number`                                                               | Virtual scroll overscan count       |
-| `useGetTablePersistenceKey`          | `string`                                                               | Persistence key for URL/cookie sync |
-| `useGetTablePlaceholderRowCount`     | `number`                                                               | Skeleton row count                  |
-| `useGetTableRowHeight`               | `number`                                                               | Row height in px                    |
-| `useGetTableSchemaName`              | `string \| undefined`                                                  | Optional schema name                |
-| `useGetTableSettingsExpandedFilters` | `string[]`                                                             | Persisted expanded filter keys      |
-| `useGetTableSettingsSelectedTab`     | `string`                                                               | Persisted table settings tab key    |
-| `useGetTableTableName`               | `string \| undefined`                                                  | Optional table name                 |
-| `useGetTableThreshold`               | `number`                                                               | Fetch-more scroll threshold         |
-| `useGetTableTitle`                   | `string`                                                               | Table display title                 |
+| Hook                                 | Returns                                                                | Description                             |
+| ------------------------------------ | ---------------------------------------------------------------------- | --------------------------------------- |
+| `useGetTableAdditionalMetadata`      | `Record<string, TableMetadataValue \| null \| undefined> \| undefined` | Optional custom metadata map            |
+| `useGetTableColumnSelectedKey`       | `string \| null`                                                       | Currently selected column key           |
+| `useGetTableDensity`                 | `TableDensity`                                                         | Table density setting                   |
+| `useGetTableDrawersSyncNonce`        | `number`                                                               | Drawer remount nonce for panel sync     |
+| `useGetTableEnablePrefetch`          | `boolean`                                                              | Whether prefetch buffer is active       |
+| `useGetTableInitialPageSize`         | `number`                                                               | Initial page row count                  |
+| `useGetTableIsBordered`              | `boolean`                                                              | Whether borders are shown               |
+| `useGetTableIsColumnSettingsOpen`    | `boolean`                                                              | Column settings drawer state            |
+| `useGetTableIsTableSettingsPinned`   | `boolean`                                                              | Table settings pinned state             |
+| `useGetTableIsStriped`               | `boolean`                                                              | Whether rows are striped                |
+| `useGetTableIsTableSettingsOpen`     | `boolean`                                                              | Table settings drawer state             |
+| `useGetTableLoadMorePageSize`        | `number`                                                               | Subsequent page row count               |
+| `useGetTableOverscan`                | `number`                                                               | Virtual scroll overscan count           |
+| `useGetTableAppId`                   | `string \| undefined`                                                  | App id used to namespace persisted keys |
+| `useGetTablePersistenceKey`          | `string`                                                               | Persistence key for URL/cookie sync     |
+| `useGetTablePlaceholderRowCount`     | `number`                                                               | Skeleton row count                      |
+| `useGetTableRowHeight`               | `number`                                                               | Row height in px                        |
+| `useGetTableSchemaName`              | `string \| undefined`                                                  | Optional schema name                    |
+| `useGetTableSettingsExpandedFilters` | `string[]`                                                             | Persisted expanded filter keys          |
+| `useGetTableSettingsSelectedTab`     | `string`                                                               | Persisted table settings tab key        |
+| `useGetTableTableName`               | `string \| undefined`                                                  | Optional table name                     |
+| `useGetTableThreshold`               | `number`                                                               | Fetch-more scroll threshold             |
+| `useGetTableTitle`                   | `string`                                                               | Table display title                     |

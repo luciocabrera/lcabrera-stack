@@ -5,6 +5,7 @@ import type { PersistedState } from './persistence.types';
 import { collectPersistedStateSlices } from './collectPersistedStateSlices.util';
 
 type ReadPersistedStateFromSessionStorageArgs = {
+  readonly appId?: string;
   readonly persistenceKey: string;
 };
 
@@ -16,9 +17,11 @@ type ReadPersistedStateFromSessionStorageArgs = {
 export const readPersistedStateFromSessionStorage = <
   TData = Record<string, unknown>,
 >({
+  appId,
   persistenceKey,
 }: ReadPersistedStateFromSessionStorageArgs): Partial<PersistedState<TData>> =>
   collectPersistedStateSlices<TData>({
+    appId,
     persistenceKey,
     readRawSlice: (sliceKey) => readFromSessionStorage({ key: sliceKey }),
   });

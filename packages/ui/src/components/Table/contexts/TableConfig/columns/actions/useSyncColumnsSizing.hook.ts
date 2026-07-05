@@ -6,9 +6,12 @@ export const useSyncColumnsSizing = () => {
 
   return () => {
     const columnsSizing = columnsStore.get()?.columnSizing;
-    const persistenceKey = metaStore.get()?.persistenceKey;
+    const metaState = metaStore.get();
+    const appId = metaState?.appId;
+    const persistenceKey = metaState?.persistenceKey;
     if (columnsSizing && persistenceKey) {
       writeStateSlice({
+        appId,
         persistenceKey,
         slice: 'columnSizing',
         storageType: 'cookie',

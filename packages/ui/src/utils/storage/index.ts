@@ -1,3 +1,4 @@
+export { getAppScopedCookieKey } from './getAppScopedCookieKey.util';
 export { readFromCookie } from './readFromCookie.util';
 export { readFromSessionStorage } from './readFromSessionStorage.util';
 export { writeToCookie } from './writeToCookie.util';

@@ -30,4 +30,8 @@ App-level store-backed context for global user preferences persisted in cookies 
 ## Persistence
 
 - Single cookie key stores versioned JSON for global settings.
+- The cookie key is optionally scoped by the provider's `appId` prop
+  (`{appId}-global-settings`). Cookies are shared across ports on the same host,
+  so each app passes a distinct `appId` to keep preferences isolated. The
+  `appId` lives on the context value and is read by `usePersistGlobalSettingsAction`.
 - Writes use `/_action/persist-cookie` to support SSR Set-Cookie behavior.

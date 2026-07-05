@@ -12,10 +12,17 @@ Theme-domain cookie management — reading and writing the user's preferred them
 
 ## Function Responsibilities
 
-| Function             | Side   | Description                                                                           |
-| -------------------- | ------ | ------------------------------------------------------------------------------------- |
-| `getThemeFromCookie` | shared | Reads theme from request cookie header and falls back to `document.cookie` in browser |
-| `setThemeCookie`     | client | Persists theme exclusively through `/_action/persist-cookie`                          |
+| Function             | Side   | Description                                                                                                                                   |
+| -------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `getThemeFromCookie` | shared | Reads theme from request cookie header and falls back to `document.cookie` in browser; accepts an optional `appId` to read the app-scoped key |
+| `setThemeCookie`     | client | Persists theme exclusively through `/_action/persist-cookie`; accepts an optional `appId` to scope the cookie key                             |
+
+## App scoping
+
+Cookies are shared across ports on the same host, so `getThemeFromCookie` /
+`setThemeCookie` accept an optional `appId` that scopes the key to
+`{appId}-theme` (via `getAppScopedCookieKey`). The `appId` flows from each app's
+`APP_ID` constant through the root loader (read) and `ThemeProvider` (write).
 
 ## Consumers
 

@@ -221,6 +221,11 @@ export type TableMetaState = {
   readonly additionalMetadata?: Readonly<
     Record<string, null | TableMetadataValue | undefined>
   >;
+  /**
+   * Per-application identifier used to namespace persisted cookie / storage
+   * keys so tables in different apps that share a `persistenceKey` do not clash.
+   */
+  readonly appId?: string;
   readonly columnOverscan: number;
   readonly columnSelectedKey?: string;
   readonly columnSettingsSelectedTab: string;

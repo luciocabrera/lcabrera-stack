@@ -5,6 +5,7 @@ import type { CarSale, CarSalesResponse } from '@/services';
 import { INITIAL_PAGE_SIZE } from '@repo/ui/components/Table/Table.constants';
 import { carSalesApi } from '@/services';
 
+import { APP_ID } from '@/constants/app.constants';
 import { COLUMNS } from '../car-sales/CarSales.constants';
 import { readTableLoaderStateFromRequest } from '@repo/ui/routing/readTableLoaderStateFromRequest.util';
 import {
@@ -21,10 +22,12 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
     columnSizing,
     columnVisibility,
     filters,
+    metaUiFlags,
     sorting,
     standaloneFiltersParam,
     standaloneSortParam,
   } = readTableLoaderStateFromRequest<CarSale>({
+    appId: APP_ID,
     columns: COLUMNS,
     includeFilters: true,
     persistenceKey: PERSISTENCE_KEY,
@@ -59,6 +62,8 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
     },
     key: `${standaloneSortParam ?? ''}${standaloneFiltersParam ?? ''}`,
     metaState: {
+      ...metaUiFlags,
+      appId: APP_ID,
       persistenceKey: PERSISTENCE_KEY,
       schemaName: SCHEMA_NAME,
       tableName: TABLE_NAME,

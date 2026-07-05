@@ -9,6 +9,7 @@ import {
 } from './persistence.constants';
 
 type WritePersistedUiStateToSessionStorageArgs = {
+  readonly appId?: string;
   readonly persistenceKey: string;
   readonly uiState: PersistedUiState;
 };
@@ -18,10 +19,11 @@ type WritePersistedUiStateToSessionStorageArgs = {
  * Stored as a single versioned JSON blob under the uiState key.
  */
 export const writePersistedUiStateToSessionStorage = ({
+  appId,
   persistenceKey,
   uiState,
 }: WritePersistedUiStateToSessionStorageArgs): void => {
-  const key = `${getStorageKey({ persistenceKey })}-${UI_STATE_SESSION_KEY_SUFFIX}`;
+  const key = `${getStorageKey({ appId, persistenceKey })}-${UI_STATE_SESSION_KEY_SUFFIX}`;
   const serialized = encodeURIComponent(
     JSON.stringify({ value: uiState, version: PERSISTENCE_VERSION }),
   );

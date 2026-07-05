@@ -12,8 +12,31 @@ import { fileURLToPath } from 'node:url';
 const scriptDirectory = fileURLToPath(new URL('.', import.meta.url));
 const repoRoot = resolve(scriptDirectory, '..', '..', '..', '..');
 
-const scopeArgument = process.argv[2] ?? 'apps/react-router';
-const scopeDirectory = resolve(repoRoot, scopeArgument);
+// --- Arg parsing: legacy positional usage (`node script.mjs apps/react-router`,
+// always relative to this CQMS repo) stays fully unchanged. `--target=<abs>`
+// is new — the CQMS scan-orchestrator uses it to point this script at an
+// arbitrary registered project, which may not have `vp`/this repo's own
+// tooling at all (ADR-015). ---
+const rawArgs = process.argv.slice(2);
+const flags = {};
+const positional = [];
+for (const arg of rawArgs) {
+  const match = /^--([^=]+)=(.*)$/.exec(arg);
+  if (match) {
+    flags[match[1]] = match[2];
+  } else if (arg === '--skip-ingest') {
+    flags['skip-ingest'] = true;
+  } else {
+    positional.push(arg);
+  }
+}
+
+const isTargetMode = Boolean(flags.target);
+const scopeArgument =
+  flags.scope ?? positional[0] ?? (isTargetMode ? '.' : 'apps/react-router');
+const scopeDirectory = isTargetMode
+  ? resolve(flags.target, scopeArgument)
+  : resolve(repoRoot, scopeArgument);
 
 const runCapturingStdout = (command, args, cwd) => {
   try {
@@ -41,7 +64,7 @@ const runGit = (args, cwd) => {
 };
 
 const gitRoot =
-  runGit(['rev-parse', '--show-toplevel'], scopeDirectory) ?? repoRoot;
+  runGit(['rev-parse', '--show-toplevel'], scopeDirectory) ?? scopeDirectory;
 
 const toGitRootRelative = (candidatePath) => {
   const absolute = candidatePath.startsWith('/')
@@ -50,10 +73,55 @@ const toGitRootRelative = (candidatePath) => {
   return relative(gitRoot, absolute);
 };
 
-// --- 1. Run oxlint via `vp lint` (not the raw oxlint binary) so this
-// matches the exact rule set developers actually see — vp merges in each
-// app/package's own vite.config.ts `lint:` block. ---
+const ESLINT_CONFIG_NAMES = [
+  'eslint.config.mjs',
+  'eslint.config.js',
+  'eslint.config.cjs',
+  'eslint.config.ts',
+];
+const OXLINT_CONFIG_NAMES = ['oxlint.json', '.oxlintrc.json'];
+
+const findConfigFile = (dir, candidateNames) =>
+  candidateNames.find((name) => existsSync(join(dir, name)));
+
+// An arbitrary target project's own tooling can be broken in ways this
+// repo's own packages never are (mismatched dependency versions, a
+// corrupted node_modules, etc.) — a hard execution failure there must
+// degrade this one scanner gracefully (0 findings, failure noted in
+// top_risk) rather than crash the whole scan and produce no report at all.
+const toolFailures = [];
+
+// --- 1. Run oxlint. Legacy mode (no --target) always runs `vp lint` (this
+// repo's own tool — vp merges in each app/package's own vite.config.ts
+// `lint:` block, matching what a developer actually sees), unchanged from
+// the original script. Target mode runs raw `oxlint` instead — an
+// arbitrary registered project has no reason to have `vp` installed — and
+// only if the target actually opted into an oxlint config; skipping
+// gracefully (not erroring) otherwise, since most projects won't. ---
+const EMPTY_OXLINT_RESULT = {
+  diagnostics: [],
+  number_of_files: 0,
+  number_of_rules: 0,
+};
+
 const runOxlint = () => {
+  if (isTargetMode) {
+    if (!findConfigFile(scopeDirectory, OXLINT_CONFIG_NAMES)) {
+      return EMPTY_OXLINT_RESULT;
+    }
+    try {
+      const raw = runCapturingStdout(
+        'npx',
+        ['oxlint', '.', '--format', 'json'],
+        scopeDirectory,
+      );
+      return JSON.parse(raw);
+    } catch (error) {
+      toolFailures.push(`oxlint failed to run: ${error.message}`);
+      return EMPTY_OXLINT_RESULT;
+    }
+  }
+
   const raw = runCapturingStdout(
     'npx',
     ['vp', 'lint', '.', '--format', 'json'],
@@ -62,20 +130,31 @@ const runOxlint = () => {
   try {
     return JSON.parse(raw);
   } catch {
-    return { diagnostics: [], number_of_files: 0, number_of_rules: 0 };
+    return EMPTY_OXLINT_RESULT;
   }
 };
 
-// --- 2. Run the custom-rules eslint pass, only if this scope has one. ---
+// --- 2. Run the custom-rules eslint pass, only if this scope has one —
+// checks every real eslint flat-config filename, not just this repo's own
+// `.mjs` convention, since an arbitrary target project may use any of them. ---
 const runEslint = () => {
-  const eslintConfigPath = join(scopeDirectory, 'eslint.config.mjs');
-  if (!existsSync(eslintConfigPath)) return [];
+  const eslintConfigName = findConfigFile(scopeDirectory, ESLINT_CONFIG_NAMES);
+  if (!eslintConfigName) return [];
 
-  const raw = runCapturingStdout(
-    'npx',
-    ['eslint', '.', '--config', 'eslint.config.mjs', '--format', 'json'],
-    scopeDirectory,
-  );
+  let raw;
+  try {
+    raw = runCapturingStdout(
+      'npx',
+      ['eslint', '.', '--config', eslintConfigName, '--format', 'json'],
+      scopeDirectory,
+    );
+  } catch (error) {
+    if (isTargetMode) {
+      toolFailures.push(`eslint failed to run: ${error.message}`);
+      return [];
+    }
+    throw error;
+  }
   try {
     return JSON.parse(raw);
   } catch {
@@ -131,7 +210,7 @@ const mapOxlintDiagnostics = (oxlintResult) =>
       status: 'open',
       tags: [deriveTag('oxlint', ruleId)],
       verification_steps: [
-        `Re-run \`vp lint\` and confirm ${ruleId} no longer reports here.`,
+        `Re-run \`${isTargetMode ? 'oxlint' : 'vp lint'}\` and confirm ${ruleId} no longer reports here.`,
       ],
       why: message,
     };
@@ -197,6 +276,10 @@ const renderReportMarkdown = (report) => {
     (a, b) => b[1] - a[1],
   )[0]?.[0];
 
+  const lintToolingLabel = isTargetMode
+    ? 'oxlint/eslint (as configured by the target project)'
+    : '`vp lint`/eslint';
+
   const findingsSection =
     report.findings.length === 0
       ? 'No lint findings.'
@@ -229,7 +312,7 @@ const renderReportMarkdown = (report) => {
       return `${index + 1}. queue_rank: ${index + 1}
    - target_finding_ids: ${targetIds.join(', ')}
    - reason_for_order: ${count} finding(s) for \`${ruleId}\` — fixing the rule once resolves all instances.
-   - expected_outcome: \`${ruleId}\` no longer reported by \`vp lint\`/eslint.`;
+   - expected_outcome: \`${ruleId}\` no longer reported by ${lintToolingLabel}.`;
     })
     .join('\n\n');
 
@@ -241,7 +324,7 @@ const renderReportMarkdown = (report) => {
 - report_id: ${report.report_id}
 - generated_at: ${report.generated_at}
 - skill_name: linter-checker
-- repository: ${relative(repoRoot, gitRoot) || '.'}
+- repository: ${isTargetMode ? gitRoot : relative(repoRoot, gitRoot) || '.'}
 - scope_type: folder
 - scope_value: ${scopeArgument}
 - severity_scale: BLOCKER, HIGH, MEDIUM, LOW, NIT
@@ -258,7 +341,7 @@ const renderReportMarkdown = (report) => {
 - top_risk: ${report.top_risk}
 - first_3_actions:
   1. ${topRuleId ? `Fix all instances of \`${topRuleId}\` (the most frequent rule).` : 'No actions required.'}
-  2. ${report.findings.length > 0 ? 'Re-run `vp lint` and the custom-rules eslint pass after fixes.' : ''}
+  2. ${report.findings.length > 0 ? `Re-run ${lintToolingLabel} after fixes.` : ''}
   3. ${report.findings.length > 0 ? 'Confirm CI lint gate is clean before merge.' : ''}
 
 ## Findings
@@ -284,7 +367,7 @@ None.
 ## Closure Criteria
 
 - No HIGH findings remain unresolved before merge.
-- \`vp lint\` and the custom-rules eslint pass both report zero diagnostics for this scope.
+- ${lintToolingLabel} report zero diagnostics for this scope.
 `;
 };
 
@@ -294,7 +377,13 @@ const main = () => {
     .replace(/[:.]/g, '-')
     .replace('T', '--')
     .replace('Z', '');
-  const outputDirectory = join(repoRoot, '.tmp', 'linter-checker', timestamp);
+  // CQMS scratch files always live under this repo's own .tmp, never inside
+  // an arbitrary scanned project's working tree (same principle as the
+  // Agent-SDK skills' OUTPUT_DIR convention, TECH_SPEC §2.6) — unless the
+  // caller (the scan-orchestrator) explicitly overrides it.
+  const outputDirectory = flags['output-dir']
+    ? resolve(flags['output-dir'])
+    : join(repoRoot, '.tmp', 'linter-checker', timestamp);
   mkdirSync(outputDirectory, { recursive: true });
 
   const oxlintResult = runOxlint();
@@ -337,7 +426,13 @@ const main = () => {
     report_id: `linter-${timestamp}`,
     top_risk: topRule
       ? `\`${topRule[0]}\` reported ${topRule[1]} time(s) — the most frequent lint violation in this scope.`
-      : 'No lint findings.',
+      : toolFailures.length > 0
+        ? toolFailures.join(' ')
+        : isTargetMode &&
+            !findConfigFile(scopeDirectory, OXLINT_CONFIG_NAMES) &&
+            !findConfigFile(scopeDirectory, ESLINT_CONFIG_NAMES)
+          ? 'No oxlint/eslint configuration detected for this project — nothing was linted.'
+          : 'No lint findings.',
   };
 
   writeFileSync(
@@ -351,12 +446,17 @@ const main = () => {
     'utf8',
   );
 
-  console.log(`Run directory: ${relative(repoRoot, outputDirectory)}/`);
+  console.log(`Run directory: ${outputDirectory}/`);
   console.log(
     `Findings: ${findings.length} (${highCount} HIGH, ${mediumCount} MEDIUM)`,
   );
 
-  // --- 5. Ingest into CQMS — best-effort, matching the other 3 skills. ---
+  // --- 5. Ingest into CQMS — best-effort, matching the other 3 skills.
+  // Skipped when the caller already has its own run/scan row to attach to
+  // and will call ingestReport() itself (the scan-orchestrator's case) —
+  // --skip-ingest avoids a redundant, ad-hoc-path ingestion attempt. ---
+  if (flags['skip-ingest']) return;
+
   try {
     execFileSync(
       'node',

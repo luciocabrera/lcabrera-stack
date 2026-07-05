@@ -4,6 +4,7 @@ import { useLoaderData } from 'react-router';
 
 import type { loader as rootLoader } from './root.loader';
 
+import { APP_ID } from '@/constants/app.constants';
 import { getNavigationItems } from './getNavigationItems.util';
 
 export const Root = () => {
@@ -11,6 +12,7 @@ export const Root = () => {
 
   return (
     <AppProviders
+      appId={APP_ID}
       defaultTheme='light'
       globalSettings={globalSettings}
       initialTheme={theme}

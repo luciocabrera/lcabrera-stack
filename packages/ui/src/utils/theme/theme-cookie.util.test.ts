@@ -38,6 +38,16 @@ describe('getThemeFromCookie', () => {
 
     expect(getThemeFromCookie(undefined)).toBe('dark');
   });
+
+  it('reads the app-scoped key when appId is provided', () => {
+    expect(getThemeFromCookie('admin-system-theme=dark', 'admin-system')).toBe(
+      'dark',
+    );
+  });
+
+  it('ignores the unscoped key when an appId is provided', () => {
+    expect(getThemeFromCookie('theme=dark', 'admin-system')).toBeUndefined();
+  });
 });
 
 describe('setThemeCookie', () => {
@@ -70,5 +80,25 @@ describe('setThemeCookie', () => {
       body: expect.any(FormData),
       method: 'POST',
     });
+  });
+
+  it('scopes the persisted cookie key with the appId', () => {
+    const fetchMock = vi.fn<
+      (input: string, init: { body: FormData }) => Promise<Response>
+    >(() => Promise.resolve(new Response(undefined)));
+    vi.stubGlobal('fetch', fetchMock);
+    vi.stubGlobal('location', { pathname: '/car-sales', search: '' });
+
+    setThemeCookie('dark', 'admin-system');
+
+    const call = fetchMock.mock.calls[0];
+    const url = call?.[0];
+    const formData = call?.[1]?.body;
+    const entries = JSON.parse(
+      (formData?.get('entries') as string) ?? '[]',
+    ) as readonly { key: string }[];
+
+    expect(url).toBe('/_action/persist-cookie');
+    expect(entries[0]?.key).toBe('admin-system-theme');
   });
 });

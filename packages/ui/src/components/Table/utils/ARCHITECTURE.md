@@ -25,6 +25,8 @@ utils/
 ├── readPersistedStateFromCookie.util.ts          → SSR-safe cookie state read
 ├── readPersistedStateFromSessionStorage.util.ts  → Read tab-scoped persisted column slices
 ├── readPersistedUiStateFromSessionStorage.util.ts → Read tab-scoped persisted drawer UI slices
+├── readPersistedUiFlagsFromCookie.util.ts        → SSR-safe read of drawer open/pinned flags from cookie
+├── writePersistedUiFlagsToCookie.util.ts         → Mirror drawer open/pinned flags to cookie (SSR seed)
 ├── resolveFetchMoreState.util.ts                 → Shared append/hasMore/total resolution for paginated fetch actions
 ├── serializeStateSlice.util.ts                   → JSON serialize a state slice
 ├── splitColumnsByPinning.util.ts                 → Split columns into left/center/right groups
@@ -146,7 +148,9 @@ graph LR
 | serializeStateSlice                      | Convert a state slice to key/value payload                     |
 | writePersistedDataStateToSessionStorage  | Write persisted data rows to sessionStorage (tab-scoped)       |
 | writePersistedUiStateToSessionStorage    | Write persisted UI slices to sessionStorage (tab-scoped)       |
+| readPersistedUiFlagsFromCookie           | SSR-safe read of drawer open/pinned flags from cookie          |
+| writePersistedUiFlagsToCookie            | Mirror drawer open/pinned flags to a cookie for SSR seeding    |
 | writeStateSlice                          | Write to cookie or localStorage                                |
-| getStorageKey                            | Build persistenceKey:slice key string                          |
+| getStorageKey                            | Build storage key, optionally `appId`-scoped                   |
 
 `persistTableMetaUiState.util.ts` intentionally uses direct-file imports (not `utils/index.ts`) for persistence helpers to avoid barrel back-import cycles (ADR-007).

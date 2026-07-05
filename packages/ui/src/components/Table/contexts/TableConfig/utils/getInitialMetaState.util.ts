@@ -16,6 +16,7 @@ type GetInitialMetaStateArgs = Partial<TableMetaState> & {
 };
 
 export const getInitialMetaState = ({
+  appId,
   columnOverscan = DEFAULT_COLUMN_OVERSCAN,
   columnSettingsSelectedTab = 'general',
   density = 'compact',
@@ -42,6 +43,7 @@ export const getInitialMetaState = ({
   ...rest
 }: GetInitialMetaStateArgs): TableMetaState => {
   return {
+    appId,
     columnOverscan,
     columnSettingsSelectedTab,
     density,
