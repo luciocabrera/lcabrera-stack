@@ -128,6 +128,18 @@ const configs = [
       'packages/scan-ingestion/tsconfig.app.json',
     ),
   },
+  {
+    // Genuinely Node-only — spawns the Claude Agent SDK's own CLI
+    // subprocess, no DOM/vite.client usage anywhere.
+    config: createNodeTsConfig({
+      include: ['src', 'vite.config.ts'],
+      paths: {
+        '@repo/agent-runner/*': ['./src/*'],
+      },
+      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
+    }),
+    filePath: resolve(workspaceRoot, 'packages/agent-runner/tsconfig.app.json'),
+  },
 ] as const;
 
 await Promise.all(configs.map(writeConfigFile));
