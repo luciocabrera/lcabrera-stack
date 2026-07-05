@@ -49,12 +49,12 @@ Form/
 │   ├── FormFields.component.tsx  → Recursive walker: computes stable key, dispatches each node type to its subcomponent
 │   ├── FormFields.stylex.ts      → `stack` layout only
 │   ├── FormFields.types.ts
-│   ├── FormFieldGroup/           → `group` node: optional label + nested FormFields (.component + .types + .stylex)
-│   ├── FormFieldRow/             → `row` node: horizontal equal-flex cells of nested FormFields (.component + .types + .stylex)
-│   ├── FormFieldTabs/            → `tab` node: one Tabs panel per tab (.component + .types)
+│   ├── FormFieldGroup/           → `group` node: optional label + nested FormFields (.component + .types + .stylex + .test)
+│   ├── FormFieldRow/             → `row` node: horizontal equal-flex cells of nested FormFields (.component + .types + .stylex + .test)
+│   ├── FormFieldTabs/            → `tab` node: one Tabs panel per tab (.component + .types + .test)
 │   └── utils/
-│       ├── collectAccessors.util.ts → Node → flattened leaf accessors (recursive)
-│       └── getFieldKey.util.ts      → Node → stable `type:accessor|accessor` React key
+│       ├── collectAccessors.util.ts → Node → flattened leaf accessors (recursive, + .test)
+│       └── getFieldKey.util.ts      → Node → stable `type:accessor|accessor` React key (+ .test)
 ├── FormField/
 │   ├── FormField.component.tsx   → Registry dispatch by field.type
 │   ├── FormField.types.ts
