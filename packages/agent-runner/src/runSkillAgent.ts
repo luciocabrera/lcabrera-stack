@@ -1,6 +1,7 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 
+import type { CanUseTool } from '@anthropic-ai/claude-agent-sdk';
 import { query } from '@anthropic-ai/claude-agent-sdk';
 
 import type {
@@ -37,34 +38,41 @@ export const runSkillAgent = async (
     skillPath: args.skillPath,
   });
   const skillAllowedTools = deriveAllowedTools({ frontmatter });
-  // `Write` is granted here unconditionally, on top of the skill's own
-  // frontmatter — discovered empirically across three live runs that this
-  // is genuinely required, not an oversight to route around:
-  // 1st run: completed 'success' with real turns/cost but never invoked
-  //    any tool to save anything — the model treated "Saving the Report"
-  //    as descriptive rather than mandatory. Fixed with the prompt preamble.
-  // 2nd run: correctly attempted to save, tried `Write` (denied — not in
-  //    the skill's own frontmatter) then `printf`/`echo` (also denied, not
-  //    allowlisted) — never tried the one thing nominally granted
-  //    (`cat`/`tee` via Bash).
-  // 3rd run (after prompting it toward `cat > file <<'EOF'`): it did try
-  //    exactly that heredoc form — and it was STILL denied. Claude Code's
-  //    permission system gates any Bash command containing output
-  //    redirection as its own capability, independent of the `cat:*`/
-  //    `tee:*` command-prefix allowlist — a real, separate security
-  //    boundary, not a bug to work around.
-  // 4th run (bare 'Write' added to allowedTools): STILL denied. Write/Edit
-  //    are path-scoped tools, not bare-name tools — this repo's OWN
-  //    .claude/settings.json already shows the real syntax
-  //    (`"Write(.tmp/**)"`, `"Edit(.tmp/**)"`), the same `Tool(pattern)`
-  //    shape Bash uses. A bare `'Write'` string matches nothing.
-  //    `Write(${outputDirectory}/**)` is the correct grant — scoped to
-  //    exactly the one directory this session should ever write to, which
-  //    is also a real security property, not just a syntax fix.
-  const allowedTools = [
-    ...skillAllowedTools,
-    `Write(${args.outputDirectory}/**)`,
-  ];
+  // Write is deliberately NOT granted via allowedTools/settings.permissions —
+  // 6 live runs (see git history for the earlier 4 permission-syntax
+  // attempts) converged on a much bigger discovery than any syntax fix:
+  // Write/Edit always route through the SDK's "ask" path, which is only
+  // ever resolved by a `canUseTool` callback (below) — no static allow
+  // pattern of any shape (`allowedTools`, or the Settings-shaped
+  // `settings.permissions.allow` that `.claude/settings.json` uses) grants
+  // it, in ANY permissionMode, including 'dontAsk'. Confirmed empirically:
+  // `permissionMode: 'dontAsk'` auto-denies the entire "ask" path *without
+  // ever invoking canUseTool at all* — matching the SDK's own
+  // `tool_use_denied` doc comment, which lists "dontAsk mode" as one of
+  // several deny short-circuits distinct from "the 'ask' path" that
+  // canUseTool handles. `permissionMode: 'default'` + a `canUseTool`
+  // callback is the only combination that ever actually got a Write call
+  // approved in isolation. Bash, by contrast, IS resolved via static
+  // allowedTools patterns without ever reaching canUseTool (confirmed by
+  // logging canUseTool invocations in the same live test) — so the
+  // skill's own frontmatter-derived Bash/Read/Grep/Glob patterns stay on
+  // `allowedTools` unchanged; only Write moves to `canUseTool`.
+  const allowedTools = [...skillAllowedTools];
+
+  const canUseTool: CanUseTool = async (toolName, input) => {
+    if (
+      toolName === 'Write' &&
+      typeof input.file_path === 'string' &&
+      input.file_path.startsWith(`${args.outputDirectory}/`)
+    ) {
+      return { behavior: 'allow', updatedInput: input };
+    }
+
+    return {
+      behavior: 'deny',
+      message: `${toolName} is not permitted in this unattended scan session.`,
+    };
+  };
 
   // 5th run (Write path-scoping fix in place): completed 'success' but took
   // ~38 minutes instead of ~1-2 like every prior run, and still failed to
@@ -119,6 +127,7 @@ ${body}${
       options: {
         additionalDirectories: [skillDirectory, sharedDocsDirectory],
         allowedTools: [...allowedTools],
+        canUseTool,
         cwd: args.targetProjectPath,
         // Small required deviation (TECH_SPEC §2.6): the 3 Agent-SDK-driven
         // skills honor a pre-set OUTPUT_DIR, falling back to their own
@@ -127,7 +136,11 @@ ${body}${
         // project's own working tree.
         env: { ...process.env, OUTPUT_DIR: args.outputDirectory },
         maxTurns: MAX_TURNS,
-        permissionMode: 'dontAsk',
+        // NOT 'dontAsk' — see the canUseTool comment above. 'default' is
+        // what actually invokes canUseTool instead of silently short-
+        // circuiting the ask path; canUseTool fully replaces any
+        // interactive prompt, so this never blocks on stdin.
+        permissionMode: 'default',
       },
       prompt,
     })) {
@@ -150,7 +163,13 @@ ${body}${
     errorMessage = error instanceof Error ? error.message : String(error);
   }
 
-  if (permissionDenials.length > 0) {
+  // Only surfaced when the run itself failed — a handful of denied Bash/Edit
+  // calls the agent worked around on its own (e.g. it tried Edit, got
+  // denied, and used Write instead) are not failures and shouldn't populate
+  // errorMessage on an otherwise-successful run. Per-run denial counts are
+  // exactly the kind of thing the health_metrics telemetry work (tracked
+  // separately) should capture instead of overloading errorMessage with it.
+  if (!success && permissionDenials.length > 0) {
     errorMessage ??= `Tool calls were denied: ${JSON.stringify(permissionDenials)}`;
   }
 
