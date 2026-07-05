@@ -13,9 +13,21 @@ const components: Components = {
     <blockquote {...props} {...stylex.props(styles.blockquote)} />
   ),
   code: (props) => <code {...props} {...stylex.props(styles.code)} />,
-  h1: (props) => <h1 {...props} {...stylex.props(styles.heading1)} />,
-  h2: (props) => <h2 {...props} {...stylex.props(styles.heading2)} />,
-  h3: (props) => <h3 {...props} {...stylex.props(styles.heading3)} />,
+  h1: ({ children, ...props }) => (
+    <h1 {...props} {...stylex.props(styles.heading1)}>
+      {children}
+    </h1>
+  ),
+  h2: ({ children, ...props }) => (
+    <h2 {...props} {...stylex.props(styles.heading2)}>
+      {children}
+    </h2>
+  ),
+  h3: ({ children, ...props }) => (
+    <h3 {...props} {...stylex.props(styles.heading3)}>
+      {children}
+    </h3>
+  ),
   ol: (props) => <ol {...props} {...stylex.props(styles.list)} />,
   p: (props) => <p {...props} {...stylex.props(styles.paragraph)} />,
   pre: (props) => <pre {...props} {...stylex.props(styles.pre)} />,

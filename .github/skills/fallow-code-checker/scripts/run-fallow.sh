@@ -6,7 +6,7 @@ set -euo pipefail
 # Honor a pre-set OUTPUT_DIR (packages/agent-runner sets this for a
 # UI-triggered scan of another project — TECH_SPEC §2.6) — otherwise fall
 # back to today's self-generated timestamped path for the interactive case.
-if [ -z "${OUTPUT_DIR:-}" ]; then
+if [[ -z "${OUTPUT_DIR:-}" ]]; then
   TIMESTAMP=$(date +%Y-%m-%d--%H-%M-%S)
   OUTPUT_DIR=".tmp/fallow-code-checker/$TIMESTAMP"
 fi

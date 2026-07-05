@@ -21,6 +21,51 @@ const describeMessage = (message: { type: string }): string =>
     ? `${message.type}:${(message as { subtype: string }).subtype}`
     : message.type;
 
+type ResultMessage = {
+  readonly errors?: readonly string[];
+  readonly num_turns: number;
+  readonly permission_denials: readonly unknown[];
+  readonly subtype: string;
+  readonly total_cost_usd: number;
+};
+
+type ResultMessageSummary = {
+  readonly errorMessage: string | undefined;
+  readonly numTurns: number;
+  readonly permissionDenials: readonly unknown[];
+  readonly success: boolean;
+  readonly totalCostUsd: number;
+};
+
+const resolveResultErrorMessage = (
+  message: ResultMessage,
+  success: boolean,
+): string | undefined => {
+  if (success) {
+    return undefined;
+  }
+
+  if (message.errors !== undefined && message.errors.length > 0) {
+    return message.errors.join('; ');
+  }
+
+  return message.subtype;
+};
+
+const summarizeResultMessage = (
+  message: ResultMessage,
+): ResultMessageSummary => {
+  const success = message.subtype === 'success';
+
+  return {
+    errorMessage: resolveResultErrorMessage(message, success),
+    numTurns: message.num_turns,
+    permissionDenials: message.permission_denials,
+    success,
+    totalCostUsd: message.total_cost_usd,
+  };
+};
+
 /**
  * Loads the real SKILL.md (TECH_SPEC §2.6), runs an actual Agent SDK
  * session with cwd = targetProjectPath and a tool allowlist derived from
@@ -145,16 +190,8 @@ ${body}${
       prompt,
     })) {
       if (message.type === 'result') {
-        totalCostUsd = message.total_cost_usd;
-        numTurns = message.num_turns;
-        success = message.subtype === 'success';
-        permissionDenials = message.permission_denials;
-        if (!success) {
-          errorMessage =
-            'errors' in message && message.errors.length > 0
-              ? message.errors.join('; ')
-              : message.subtype;
-        }
+        ({ errorMessage, numTurns, permissionDenials, success, totalCostUsd } =
+          summarizeResultMessage(message));
       }
 
       args.onProgress?.(describeMessage(message));

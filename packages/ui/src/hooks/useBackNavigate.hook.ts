@@ -13,7 +13,7 @@ export const useBackNavigate = () => {
   const navigate = useNavigate();
 
   return (fallbackTo: string) => {
-    const state = window.history.state as BrowserHistoryState;
+    const state = globalThis.history.state as BrowserHistoryState;
 
     if (typeof state?.idx === 'number' && state.idx > 0) {
       void navigate(-1);
