@@ -2,11 +2,17 @@ import { updateProject } from '@repo/scan-ingestion/queries/updateProject.util';
 import { type ActionFunctionArgs, data, redirect } from 'react-router';
 import { z } from 'zod';
 
+import { requireUser } from '@/auth/requireUser.util';
+
 import { editProjectSchema } from './editProject.schema';
 
 const paramsSchema = z.object({ projectId: z.string().uuid() });
 
 export const action = async ({ params, request }: ActionFunctionArgs) => {
+  // Actions run BEFORE loaders, so the layout loader's gate does not
+  // cover POSTs — every cqms action authenticates itself (ADR-017).
+  await requireUser({ request });
+
   const parsedParams = paramsSchema.safeParse(params);
   if (!parsedParams.success) {
     throw data('Invalid project id.', { status: 400 });

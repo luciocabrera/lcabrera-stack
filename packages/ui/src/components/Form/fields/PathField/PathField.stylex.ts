@@ -6,6 +6,10 @@ export const styles = stylex.create({
   browseButton: {
     flexShrink: 0,
   },
+  fieldContainer: {
+    position: 'relative',
+    width: '100%',
+  },
   container: {
     borderColor: {
       default: colors.borderPrimary,

@@ -2,6 +2,8 @@ import { index, route, type RouteConfig } from '@react-router/dev/routes';
 
 export default [
   index('routes/home/root.ts'),
+  route('login', 'routes/login/root.ts'),
+  route('logout', 'routes/logout/root.ts'),
   route('_action/persist-cookie', 'routes/api/persist-cookie/root.ts'),
   route('_action/browse-directory', 'routes/api/browse-directory/root.ts'),
   route('settings', 'routes/settings/root.ts'),

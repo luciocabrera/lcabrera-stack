@@ -73,8 +73,8 @@ Form/
 │   ├── BooleanField/  → wraps Checkbox or ToggleSwitch
 │   ├── SelectField/   → wraps VirtualSelect + hidden inputs for FormData
 │   ├── RadioField/    → wraps RadioOptionGroup
-│   ├── PathField/     → path — text input + Browse… button, opens PathBrowserModal
-│   │   └── PathBrowserModal/ → Private delegate — breadcrumb-free directory drill-down, fetches @repo/ui/routing/browseDirectory.loader via useFetcher().load
+│   ├── PathField/     → path — text input + Browse… button, opens inline PathBrowserModal list panel
+│   │   └── PathBrowserModal/ → Private delegate — breadcrumb-free directory drill-down panel, fetches @repo/ui/routing/browseDirectory.loader via useFetcher().load
 │   └── CustomField/   → escape hatch via field.renderField(...)
 │   (each: <Name>.component.tsx + <Name>.types.ts, TextField/RadioField/PathBrowserModal also <Name>.stylex.ts)
 │

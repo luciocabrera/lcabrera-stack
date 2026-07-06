@@ -10,8 +10,10 @@ Shared components/hooks/utils/design-tokens live in `@repo/ui` — see [`package
 
 | Route                                                      | Location                        | Description                                                                                                                                                                                        |
 | ---------------------------------------------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/login`                                                   | `routes/login/`                 | Username/password sign-in (`Form` in a `SectionCard`, loader+action) — `authenticateUser` + cookie session; bounces already-authenticated visitors to the app (ADR-017)                            |
+| `/logout`                                                  | `routes/logout/`                | Action-only (POST) — destroys the auth session and redirects to `/login` (ADR-017)                                                                                                                 |
 | `/settings`                                                | `routes/settings/`              | Re-export of the shared `@repo/ui/components/Settings` page, mirroring `apps/react-router`'s own route                                                                                             |
-| `/_action/browse-directory`                                | `routes/api/browse-directory/`  | Resource route — thin re-export of `@repo/ui/routing/browseDirectory.loader`; lists a directory's real subdirectories for `Form`'s `path`-type fields                                              |
+| `/_action/browse-directory`                                | `routes/api/browse-directory/`  | Resource route — `requireUser`-gated wrapper (ADR-017) around `@repo/ui/routing/browseDirectory.loader`; lists a directory's real subdirectories for `Form`'s `path`-type fields                   |
 | `/cqms`                                                    | `routes/cqms/cqmsIndex.root.ts` | Redirects to `/cqms/projects`                                                                                                                                                                      |
 | `/cqms/projects`                                           | `routes/cqms/root.ts`           | Project list — `TableLayout` fed `project_run_summary` rows (streamed via `projectsPromise`); "New Project" renders via `Table`'s own `actions` slot                                               |
 | `/cqms/projects/new`                                       | `routes/cqms/new-project/`      | Register a project (`Form` in a `SectionCard`, action-only) — calls `registerProject`                                                                                                              |
@@ -26,6 +28,13 @@ Shared components/hooks/utils/design-tokens live in `@repo/ui` — see [`package
 | Hook                 | Location                           | Description                                                                                                                                                                                                                                                                 |
 | -------------------- | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `useRunStatusSocket` | `hooks/useRunStatusSocket.hook.ts` | Subscribes to `apps/scan-orchestrator`'s `/ws/runs` WebSocket for one `runId`; calls `revalidate()` on any message (cache-invalidation signal only, ADR-015) and surfaces a `useNotifyAction` toast on a terminal `scan-status` (`failed`/`succeeded`) transition (ADR-016) |
+
+## Auth (ADR-017)
+
+| Artifact            | Location                         | Description                                                                                                                                                                    |
+| ------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `requireUser`       | `auth/requireUser.util.ts`       | The gate every cqms loader/action calls first — validates the session's userId against `cqms.v_users` per request, else throws a redirect to `/login?redirectTo=<destination>` |
+| `getSessionStorage` | `auth/getSessionStorage.util.ts` | Cookie session storage (`__cqms_session`, httpOnly, sameSite=lax) signed with the Zod-validated `SESSION_SECRET` (`auth/env.schema.ts`)                                        |
 
 ## CQMS-local Utils
 

@@ -1,7 +1,6 @@
 // @vitest-environment jsdom
 
 import { loader as browseDirectoryLoader } from '@repo/ui/routing/browseDirectory.loader';
-import { mockDialogElement } from '@repo/ui/utils/tests/mockDialogElement.util';
 import {
   cleanup,
   fireEvent,
@@ -16,7 +15,6 @@ import {
   afterAll,
   afterEach,
   beforeAll,
-  beforeEach,
   describe,
   expect,
   it,
@@ -25,19 +23,8 @@ import {
 
 import { PathBrowserModal } from './PathBrowserModal.component';
 
-const dialogMocksRef: { current: { readonly restoreMockDialog: () => void } } =
-  {
-    current: { restoreMockDialog: () => {} },
-  };
-
 afterEach(() => {
-  dialogMocksRef.current.restoreMockDialog();
   cleanup();
-});
-
-beforeEach(() => {
-  const setup = mockDialogElement(false);
-  dialogMocksRef.current = { restoreMockDialog: setup.restore };
 });
 
 describe('PathBrowserModal', () => {
@@ -69,8 +56,10 @@ describe('PathBrowserModal', () => {
   });
 
   const renderModal = (props: {
+    readonly onClose?: () => void;
     readonly onSelect?: (path: string) => void;
   }) => {
+    const onClose = props.onClose ?? vi.fn();
     const onSelect = props.onSelect ?? vi.fn();
     const Stub = createRoutesStub([
       {
@@ -79,7 +68,7 @@ describe('PathBrowserModal', () => {
             browseAction='/_action/browse-directory'
             initialPath={root}
             isOpen
-            onClose={vi.fn()}
+            onClose={onClose}
             onSelect={onSelect}
           />
         ),
@@ -91,7 +80,7 @@ describe('PathBrowserModal', () => {
       },
     ]);
 
-    return { onSelect, ...render(<Stub initialEntries={['/']} />) };
+    return { onClose, onSelect, ...render(<Stub initialEntries={['/']} />) };
   };
 
   it('lists real subdirectories of the initial path', async () => {
@@ -110,6 +99,20 @@ describe('PathBrowserModal', () => {
     expect(await screen.findByText('cqms')).not.toBeNull();
   });
 
+  it('drills into the active option when Enter is pressed', async () => {
+    mkdirSync(path.join(root, 'projects', 'cqms'), { recursive: true });
+    mkdirSync(path.join(root, 'downloads', 'archive'), { recursive: true });
+    renderModal({});
+
+    const listbox = await screen.findByRole('listbox', {
+      name: 'Choose a folder',
+    });
+
+    fireEvent.keyDown(listbox, { key: 'Enter' });
+
+    expect(await screen.findByText(/archive|cqms/)).not.toBeNull();
+  });
+
   it('calls onSelect with the currently browsed path and closes', async () => {
     const onSelect = vi.fn();
     renderModal({ onSelect });
@@ -117,9 +120,33 @@ describe('PathBrowserModal', () => {
     await screen.findByText('projects');
 
     fireEvent.click(
-      screen.getByRole('button', { hidden: true, name: 'Select This Folder' }),
+      screen.getByRole('button', { hidden: true, name: 'Use Current' }),
     );
 
     await waitFor(() => expect(onSelect).toHaveBeenCalledWith(root));
+  });
+
+  it('renders as an inline listbox, not a dialog', async () => {
+    renderModal({});
+
+    await screen.findByText('projects');
+
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(
+      screen.getByRole('listbox', { name: 'Choose a folder' }),
+    ).not.toBeNull();
+  });
+
+  it('closes when Escape is pressed', async () => {
+    const onClose = vi.fn();
+    renderModal({ onClose });
+
+    const listbox = await screen.findByRole('listbox', {
+      name: 'Choose a folder',
+    });
+
+    fireEvent.keyDown(listbox, { key: 'Escape' });
+
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
   });
 });
