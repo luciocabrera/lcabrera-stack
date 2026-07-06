@@ -1,6 +1,5 @@
-import * as stylex from '@stylexjs/stylex';
-
 import { Card } from '@repo/ui/components/Card';
+import * as stylex from '@stylexjs/stylex';
 
 import type { SectionCardProps } from './SectionCard.types';
 

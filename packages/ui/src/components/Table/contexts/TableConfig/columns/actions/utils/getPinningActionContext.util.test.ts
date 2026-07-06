@@ -1,9 +1,9 @@
-import { describe, expect, it } from 'vitest';
-
 import type {
   ColumnSizingState,
   TableColumnsState,
 } from '@repo/ui/components/Table/Table.types';
+
+import { describe, expect, it } from 'vitest';
 
 import { getPinningActionContext } from './getPinningActionContext.util';
 

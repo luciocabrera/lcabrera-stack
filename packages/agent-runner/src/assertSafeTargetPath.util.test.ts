@@ -1,7 +1,6 @@
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { assertSafeTargetPath } from './assertSafeTargetPath.util.ts';
@@ -15,7 +14,7 @@ describe('assertSafeTargetPath', () => {
   });
 
   afterEach(() => {
-    rmSync(tempDir, { recursive: true, force: true });
+    rmSync(tempDir, { force: true, recursive: true });
   });
 
   it('accepts an absolute, existing path outside the CQMS repo', () => {

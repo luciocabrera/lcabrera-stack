@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router';
 
-type BrowserHistoryState = { readonly idx?: number } | null;
+type BrowserHistoryState = null | { readonly idx?: number };
 
 /**
  * Navigates to the previous in-app entry when this SPA session's history

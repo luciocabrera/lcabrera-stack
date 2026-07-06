@@ -1,10 +1,9 @@
-import type { StyleXStyles } from '@stylexjs/stylex';
-import type { ComponentPropsWithoutRef, ReactNode } from 'react';
-
 import type {
   PinnedColumnInfo,
   TableColumn,
 } from '@repo/ui/components/Table/Table.types';
+import type { StyleXStyles } from '@stylexjs/stylex';
+import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 
 export type TableBodyCellProps<TData extends Record<string, unknown>> =
   ComponentPropsWithoutRef<'td'> &

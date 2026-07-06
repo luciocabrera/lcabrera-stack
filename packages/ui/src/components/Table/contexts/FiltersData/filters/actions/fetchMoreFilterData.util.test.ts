@@ -1,8 +1,5 @@
 // @vitest-environment jsdom
 
-import { act, renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-
 import type {
   FiltersDataState,
   TableMetaState,
@@ -11,6 +8,8 @@ import type { TStore } from '@repo/ui/hooks/useStore.hook';
 
 import { DEFAULT_FILTER_PAGE_SIZE } from '@repo/ui/components/Table/Table.constants';
 import { createPaginatedFetchActionMocks } from '@repo/ui/utils/tests/createPaginatedFetchActionMocks.util';
+import { act, renderHook } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { fetchMoreFilterData } from './fetchMoreFilterData.util';
 

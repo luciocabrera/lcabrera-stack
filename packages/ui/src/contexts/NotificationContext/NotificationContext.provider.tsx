@@ -1,6 +1,5 @@
-import { useEffect, useRef } from 'react';
-
 import { useStore } from '@repo/ui/hooks';
+import { useEffect, useRef } from 'react';
 
 import type {
   NotificationProviderProps,

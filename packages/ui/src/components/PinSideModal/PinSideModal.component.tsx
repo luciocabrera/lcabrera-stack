@@ -1,12 +1,11 @@
-import * as stylex from '@stylexjs/stylex';
-import { useState } from 'react';
-
 import type { PinSide } from '@repo/ui/types/ui.types';
 
 import { Button } from '@repo/ui/components/Button';
 import { Modal } from '@repo/ui/components/Modal';
 import { RadioOptionGroup } from '@repo/ui/components/RadioOptionGroup';
 import { PIN_SIDE_OPTIONS } from '@repo/ui/constants/pinningPreferences.constants';
+import * as stylex from '@stylexjs/stylex';
+import { useState } from 'react';
 
 import type { PinSideModalProps } from './PinSideModal.types';
 

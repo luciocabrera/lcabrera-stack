@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
-
 import type { FieldNode } from '@repo/ui/components/Form/Form.types';
+
+import { describe, expect, it } from 'vitest';
 
 import { flattenFields } from './flattenFields.util';
 

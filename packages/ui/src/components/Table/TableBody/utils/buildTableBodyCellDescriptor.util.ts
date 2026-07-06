@@ -1,11 +1,10 @@
-import type { ReactNode } from 'react';
-
 import type {
   ColumnSizingState,
   DataKey,
   PinnedColumnInfo,
   TableColumn,
 } from '@repo/ui/components/Table/Table.types';
+import type { ReactNode } from 'react';
 
 import { DEFAULT_MIN_COLUMN_WIDTH } from '@repo/ui/components/Table/Table.constants';
 

@@ -18,7 +18,7 @@ describe('useBackNavigate', () => {
   });
 
   it('navigates back when the current history entry has an earlier in-app entry', () => {
-    window.history.replaceState({ idx: 2 }, '');
+    globalThis.history.replaceState({ idx: 2 }, '');
 
     const { result } = renderHook(() => useBackNavigate());
     result.current('/fallback');
@@ -27,7 +27,7 @@ describe('useBackNavigate', () => {
   });
 
   it('navigates to the fallback when this is the first entry in the SPA session', () => {
-    window.history.replaceState({ idx: 0 }, '');
+    globalThis.history.replaceState({ idx: 0 }, '');
 
     const { result } = renderHook(() => useBackNavigate());
     result.current('/fallback');
@@ -36,7 +36,7 @@ describe('useBackNavigate', () => {
   });
 
   it('navigates to the fallback when history.state carries no react-router idx at all', () => {
-    window.history.replaceState(null, '');
+    globalThis.history.replaceState(null, '');
 
     const { result } = renderHook(() => useBackNavigate());
     result.current('/fallback');

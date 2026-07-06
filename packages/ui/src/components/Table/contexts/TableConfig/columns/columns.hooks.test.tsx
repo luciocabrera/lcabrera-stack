@@ -1,12 +1,11 @@
 // @vitest-environment jsdom
 
-import { act, renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-
 import {
   createMockStore,
   type MockStore,
 } from '@repo/ui/utils/tests/createMockStore.util';
+import { act, renderHook } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const createInitialColumnsState = () => {
   return {

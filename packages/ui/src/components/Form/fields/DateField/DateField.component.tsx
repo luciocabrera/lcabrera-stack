@@ -1,8 +1,7 @@
-import * as stylex from '@stylexjs/stylex';
-
-import { filterBaseStyles } from '@repo/ui/design-system/tokens/filters.stylex';
 import { useFormField } from '@repo/ui/components/Form/fields/useFormField.hook';
 import { FormFieldChrome } from '@repo/ui/components/Form/FormFieldChrome/FormFieldChrome.component';
+import { filterBaseStyles } from '@repo/ui/design-system/tokens/filters.stylex';
+import * as stylex from '@stylexjs/stylex';
 
 import type { DateFieldProps } from './DateField.types';
 

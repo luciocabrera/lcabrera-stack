@@ -1,7 +1,6 @@
-import * as stylex from '@stylexjs/stylex';
-
 import { spacing, typography } from '@repo/ui/design-system/tokens/base.stylex';
 import { colors } from '@repo/ui/design-system/tokens/colors.stylex';
+import * as stylex from '@stylexjs/stylex';
 
 export const styles = stylex.create({
   cell: {
@@ -16,8 +15,8 @@ export const styles = stylex.create({
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
-    maxWidth: '100%',
     textAlign: 'center',
+    maxWidth: '100%',
   },
   illustration: {
     color: colors.textTertiary,
@@ -42,14 +41,14 @@ export const styles = stylex.create({
   },
   viewport: (height: number, width: number) => ({
     padding: spacing.md,
+    overflow: 'hidden',
     alignItems: 'center',
     boxSizing: 'border-box',
     display: 'flex',
-    height: height > 0 ? `${height}px` : 'auto',
     justifyContent: 'center',
-    left: 0,
-    overflow: 'hidden',
     position: 'sticky',
+    height: height > 0 ? `${height}px` : 'auto',
+    left: 0,
     top: 0,
     width: width > 0 ? `${width}px` : '100%',
   }),

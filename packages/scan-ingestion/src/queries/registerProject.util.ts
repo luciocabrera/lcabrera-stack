@@ -1,16 +1,15 @@
+import { getPool } from '@repo/data-access/db/getPool.util';
 import { existsSync } from 'node:fs';
 
-import { getPool } from '@repo/data-access/db/getPool.util';
-
 import { resolveLocalPath } from '../ingestion/resolveLocalPath.util.ts';
+
+export type RegisterProjectResult = {
+  readonly projectId: string;
+};
 
 type RegisterProjectArgs = {
   readonly localPath: string;
   readonly name: string;
-};
-
-export type RegisterProjectResult = {
-  readonly projectId: string;
 };
 
 /**

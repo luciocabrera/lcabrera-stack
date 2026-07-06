@@ -1,7 +1,6 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-
 import { resolveFromCacheOrFetch } from '@repo/ui/utils/prefetch/resolveFromCacheOrFetch.util';
 import { createMockStore } from '@repo/ui/utils/tests/createMockStore.util';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { DataState } from './fetchMoreData.types';
 

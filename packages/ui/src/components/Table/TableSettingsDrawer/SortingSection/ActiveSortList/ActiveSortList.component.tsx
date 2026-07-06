@@ -1,5 +1,3 @@
-import * as stylex from '@stylexjs/stylex';
-
 import type { DraggableItem } from '@repo/ui/components/DraggableList';
 
 import { DraggableList } from '@repo/ui/components/DraggableList';
@@ -9,6 +7,7 @@ import {
   SidePanelSectionHeader,
 } from '@repo/ui/components/SidePanel';
 import { useGetColumns } from '@repo/ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
+import * as stylex from '@stylexjs/stylex';
 
 import type { SortItem } from '../SortingSection.types';
 import type { ActiveSortListProps } from './ActiveSortList.types';

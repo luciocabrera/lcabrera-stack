@@ -1,8 +1,7 @@
+import { closePool, getPool } from '@repo/data-access/db/getPool.util';
 import { mkdtempSync, realpathSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-
-import { closePool, getPool } from '@repo/data-access/db/getPool.util';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { markScanFailed } from './markScanFailed.util.ts';
@@ -55,8 +54,8 @@ describe('markScanFailed', () => {
     });
 
     const scanResult = await pool.query<{
-      duration_ms: number | null;
-      error_message: string | null;
+      duration_ms: null | number;
+      error_message: null | string;
       finished_at: Date | null;
       status: string;
     }>(

@@ -1,6 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-
 import { firePrefetch } from '@repo/ui/utils/prefetch/firePrefetch.util';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { maybePrefetchNextPage } from './maybePrefetchNextPage.util';
 

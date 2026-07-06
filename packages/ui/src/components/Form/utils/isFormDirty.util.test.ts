@@ -32,7 +32,7 @@ describe('isFormDirty', () => {
     const initialValues: Values = { name: 'Ada', tags: ['a', 'b'] };
     const currentValues: Values = {
       name: 'Ada',
-      tags: Array.from(initialValues.tags),
+      tags: [...initialValues.tags],
     };
 
     expect(

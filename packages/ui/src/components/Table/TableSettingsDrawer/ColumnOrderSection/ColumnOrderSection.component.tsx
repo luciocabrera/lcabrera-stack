@@ -1,5 +1,3 @@
-import * as stylex from '@stylexjs/stylex';
-
 import type { DraggableItem } from '@repo/ui/components/DraggableList';
 
 import { DraggableList } from '@repo/ui/components/DraggableList';
@@ -16,6 +14,7 @@ import {
   useGetColumnVisibility,
 } from '@repo/ui/components/Table/TableSettingsDrawer/TableDrawerContext/selectors';
 import { ToggleSwitch } from '@repo/ui/components/ToggleSwitch';
+import * as stylex from '@stylexjs/stylex';
 
 import type { ColumnOrderSectionProps } from './ColumnOrderSection.types';
 

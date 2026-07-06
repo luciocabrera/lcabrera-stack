@@ -1,15 +1,15 @@
-import type { ReactNode } from 'react';
-
-import type { TStore } from '@repo/ui/hooks/useStore.hook';
-
 import type {
   FieldErrors,
   FormMode,
 } from '@repo/ui/components/Form/Form.types';
+import type { TStore } from '@repo/ui/hooks/useStore.hook';
+import type { ReactNode } from 'react';
 
-/** Form-level metadata — low-frequency, not keyed by any single field. */
-export type FormMetaState = {
-  readonly mode: FormMode;
+export type FormContextValue<
+  TValues extends Record<string, unknown> = Record<string, unknown>,
+> = {
+  readonly fieldsStore: TStore<FormFieldsState<TValues>>;
+  readonly metaStore: TStore<FormMetaState>;
 };
 
 /** Per-field data — high-frequency, every slice keyed by accessor. */
@@ -20,11 +20,9 @@ export type FormFieldsState<TValues extends Record<string, unknown>> = {
   readonly values: TValues;
 };
 
-export type FormContextValue<
-  TValues extends Record<string, unknown> = Record<string, unknown>,
-> = {
-  readonly fieldsStore: TStore<FormFieldsState<TValues>>;
-  readonly metaStore: TStore<FormMetaState>;
+/** Form-level metadata — low-frequency, not keyed by any single field. */
+export type FormMetaState = {
+  readonly mode: FormMode;
 };
 
 export type FormProviderProps<TValues extends Record<string, unknown>> = {

@@ -1,13 +1,13 @@
 import type { NextFunction, Request, RequestHandler, Response } from 'express';
 
+type CreateRequestHandlerArgs = {
+  readonly handler: (args: RequestHandlerArgs) => Promise<void> | void;
+};
+
 type RequestHandlerArgs = {
   readonly next: NextFunction;
   readonly request: Request;
   readonly response: Response;
-};
-
-type CreateRequestHandlerArgs = {
-  readonly handler: (args: RequestHandlerArgs) => Promise<void> | void;
 };
 
 /**

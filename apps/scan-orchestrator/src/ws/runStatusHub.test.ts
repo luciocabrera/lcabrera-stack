@@ -8,10 +8,10 @@ const CLOSED = 3;
 const createFakeSocket = (readyState: number) => {
   const listeners = new Map<string, () => void>();
   return {
-    OPEN,
     on: vi.fn((event: string, handler: () => void) => {
       listeners.set(event, handler);
     }),
+    OPEN,
     readyState,
     send: vi.fn(),
     triggerClose: () => listeners.get('close')?.(),

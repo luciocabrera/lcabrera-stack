@@ -1,7 +1,6 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-
 import { firePrefetch } from '@repo/ui/utils/prefetch/firePrefetch.util';
 import { createMockStore } from '@repo/ui/utils/tests/createMockStore.util';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { DataState } from './fetchMoreData.types';
 

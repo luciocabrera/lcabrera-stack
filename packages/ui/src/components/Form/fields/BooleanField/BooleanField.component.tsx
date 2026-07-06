@@ -1,7 +1,7 @@
 import { Checkbox } from '@repo/ui/components/Checkbox';
-import { ToggleSwitch } from '@repo/ui/components/ToggleSwitch';
 import { useFormField } from '@repo/ui/components/Form/fields/useFormField.hook';
 import { FormFieldChrome } from '@repo/ui/components/Form/FormFieldChrome/FormFieldChrome.component';
+import { ToggleSwitch } from '@repo/ui/components/ToggleSwitch';
 
 import type { BooleanFieldProps } from './BooleanField.types';
 

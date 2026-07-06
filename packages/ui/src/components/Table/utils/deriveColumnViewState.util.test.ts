@@ -1,9 +1,9 @@
-import { describe, expect, it } from 'vitest';
-
 import type {
   ColumnSizingState,
   TableColumn,
 } from '@repo/ui/components/Table/Table.types';
+
+import { describe, expect, it } from 'vitest';
 
 import { deriveColumnViewState } from './deriveColumnViewState.util';
 

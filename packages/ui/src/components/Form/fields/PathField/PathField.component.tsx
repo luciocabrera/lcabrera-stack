@@ -1,11 +1,10 @@
-import * as stylex from '@stylexjs/stylex';
-import { useState } from 'react';
-
 import { Button } from '@repo/ui/components/Button';
-import { FolderIcon } from '@repo/ui/components/Icons';
-import { NO_AUTOFILL_INPUT_PROPS } from '@repo/ui/components/Table/filters/filterInput.constants';
 import { useFormField } from '@repo/ui/components/Form/fields/useFormField.hook';
 import { FormFieldChrome } from '@repo/ui/components/Form/FormFieldChrome/FormFieldChrome.component';
+import { FolderIcon } from '@repo/ui/components/Icons';
+import { NO_AUTOFILL_INPUT_PROPS } from '@repo/ui/components/Table/filters/filterInput.constants';
+import * as stylex from '@stylexjs/stylex';
+import { useState } from 'react';
 
 import type { PathFieldProps } from './PathField.types';
 

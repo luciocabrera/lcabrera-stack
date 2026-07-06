@@ -1,11 +1,10 @@
-import { unplugin as stylex } from '@stylexjs/unplugin';
-import { reactRouter } from '@react-router/dev/vite';
-import { fileURLToPath, URL } from 'node:url';
-import { fixReactRouterAssets } from '@repo/plugins/fixReactRouterAssets';
-import babel from 'vite-plugin-babel';
 import type { PluginOption } from 'vite-plus';
 
-type UnknownRecord = Record<string, unknown>;
+import { reactRouter } from '@react-router/dev/vite';
+import { fixReactRouterAssets } from '@repo/plugins/fixReactRouterAssets';
+import { unplugin as stylex } from '@stylexjs/unplugin';
+import { fileURLToPath, URL } from 'node:url';
+import babel from 'vite-plugin-babel';
 
 type CreateReactRouterPluginsConfigArgs = {
   readonly appRootUrl: string;
@@ -21,6 +20,8 @@ type CreateReactRouterPluginsConfigArgs = {
   readonly withFixReactRouterAssetsPlugin?: boolean;
   readonly withReactRouterPlugin?: boolean;
 };
+
+type UnknownRecord = Record<string, unknown>;
 
 const isRecord = (value: unknown): value is UnknownRecord =>
   typeof value === 'object' && value !== null;

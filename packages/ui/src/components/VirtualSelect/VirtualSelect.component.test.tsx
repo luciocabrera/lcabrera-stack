@@ -1,5 +1,7 @@
 // @vitest-environment jsdom
 
+import type { VirtualListDataState } from '@repo/ui/components/VirtualList';
+import type { SelectFilter } from '@repo/ui/types/filterOperators.types';
 import type { RefObject } from 'react';
 
 import {
@@ -11,9 +13,6 @@ import {
   waitFor,
 } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
-import type { VirtualListDataState } from '@repo/ui/components/VirtualList';
-import type { SelectFilter } from '@repo/ui/types/filterOperators.types';
 
 const {
   countVisibleTagsMock,

@@ -1,10 +1,9 @@
 // @vitest-environment jsdom
 
-import { act, renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-
 import { LOAD_MORE_PAGE_SIZE } from '@repo/ui/components/Table/Table.constants';
 import { createPaginatedFetchActionMocks } from '@repo/ui/utils/tests/createPaginatedFetchActionMocks.util';
+import { act, renderHook } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useFetchMoreData } from './useFetchMoreData.hook';
 

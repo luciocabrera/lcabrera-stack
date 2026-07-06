@@ -1,9 +1,3 @@
-export type ScannerId =
-  | 'code-smell-checker'
-  | 'code-smell-zen'
-  | 'fallow'
-  | 'linter';
-
 export type RunSkillAgentArgs = {
   /** Reported as the session streams — → scans.progress_message + WebSocket push (TECH_SPEC §2.7). */
   readonly onProgress?: (message: string) => void;
@@ -31,3 +25,9 @@ export type RunSkillAgentResult = {
   readonly success: boolean;
   readonly totalCostUsd?: number;
 };
+
+export type ScannerId =
+  | 'code-smell-checker'
+  | 'code-smell-zen'
+  | 'fallow'
+  | 'linter';

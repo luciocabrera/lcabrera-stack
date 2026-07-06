@@ -1,11 +1,10 @@
-import * as stylex from '@stylexjs/stylex';
-
 import { Table } from '@repo/ui/components/Table';
 import {
   FiltersDataProvider,
   TableConfigProvider,
 } from '@repo/ui/components/Table/contexts';
 import { TableSuspenseBoundary } from '@repo/ui/components/Table/TableSuspenseBoundary';
+import * as stylex from '@stylexjs/stylex';
 
 import type { TableLayoutProps } from './TableLayout.types';
 

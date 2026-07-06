@@ -2,11 +2,10 @@
 
 import type { ReactNode } from 'react';
 
+import { AppProviders } from '@repo/ui/components/AppProviders';
 import { cleanup, render, screen } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { afterEach, describe, expect, it } from 'vitest';
-
-import { AppProviders } from '@repo/ui/components/AppProviders';
 
 import { StaticTable } from './StaticTable.component';
 

@@ -1,7 +1,6 @@
-import { fileURLToPath, URL } from 'node:url';
-
-import { createFmtConfig } from '@repo/vite-configs/fmt';
 import { createApiLintConfig } from '@repo/vite-configs/api-lint';
+import { createFmtConfig } from '@repo/vite-configs/fmt';
+import { fileURLToPath, URL } from 'node:url';
 import { defineConfig } from 'vite-plus';
 
 const fmtConfig = createFmtConfig();

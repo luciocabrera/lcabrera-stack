@@ -45,24 +45,29 @@ const inferValueType = (value: unknown): InferredValueType => {
 
 const humanizeKey = (key: string): string =>
   key
-    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
-    .replace(/[_-]+/g, ' ')
+    .replaceAll(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .replaceAll(/[_-]+/g, ' ')
     .replace(/^./, (char) => char.toUpperCase());
 
 const toTableColumnDataType = (
   inferredType: InferredValueType,
 ): TableColumnDataType | undefined => {
   switch (inferredType) {
-    case 'boolean':
+    case 'boolean': {
       return 'boolean';
-    case 'date':
+    }
+    case 'date': {
       return 'date';
-    case 'number':
+    }
+    case 'number': {
       return 'number';
-    case 'string':
+    }
+    case 'string': {
       return 'string';
-    default:
+    }
+    default: {
       return undefined;
+    }
   }
 };
 
@@ -117,7 +122,7 @@ export const inferTableColumnsFromJson = ({
     const isComplex = inferredType === 'object' || inferredType === 'array';
 
     return {
-      ...(dataType === undefined ? {} : { dataType }),
+      ...(dataType !== undefined && { dataType }),
       key,
       label: humanizeKey(key),
       // Without an explicit minWidth, an inferred column with a short
@@ -125,11 +130,9 @@ export const inferTableColumnsFromJson = ({
       // than its sort-icon width — a real, previously-caught issue in
       // hand-authored CQMS columns applies equally here.
       minWidth: 120,
-      ...(isComplex
-        ? {
-            render: (row: Record<string, unknown>) => JSON.stringify(row[key]),
-          }
-        : {}),
+      ...(isComplex && {
+        render: (row: Record<string, unknown>) => JSON.stringify(row[key]),
+      }),
     } satisfies TableColumn<Record<string, unknown>>;
   });
 };

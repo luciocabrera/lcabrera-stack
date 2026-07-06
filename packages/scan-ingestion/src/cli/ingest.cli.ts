@@ -1,6 +1,10 @@
+import { closePool } from '@repo/data-access/db/getPool.util';
 import { join } from 'node:path';
 
-import { closePool } from '@repo/data-access/db/getPool.util';
+import type {
+  IngestReportArgs,
+  IngestReportOrigin,
+} from '../ingestion/ingestReport.types.ts';
 
 // Relative imports for same-package modules, deliberately: this file runs
 // directly via `node --experimental-strip-types` (see package.json),
@@ -11,10 +15,6 @@ import { closePool } from '@repo/data-access/db/getPool.util';
 // a genuine cross-package import resolved via a real package.json
 // `exports` map, not a self-referencing alias.
 import { ingestReport } from '../ingestion/ingestReport.ts';
-import type {
-  IngestReportArgs,
-  IngestReportOrigin,
-} from '../ingestion/ingestReport.types.ts';
 import {
   scannerIdSchema,
   scopeTypeSchema,

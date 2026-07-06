@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
-
 import type { TableColumn } from '@repo/ui/components/Table/Table.types';
+
+import { describe, expect, it } from 'vitest';
 
 import { getNormalizedColumns } from './getNormalizedColumns.util';
 

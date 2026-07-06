@@ -28,20 +28,6 @@ export type PersistedState<TData = Record<string, unknown>> = {
 };
 
 /**
- * Meta UI state persisted per-tab in sessionStorage only.
- * These fields are not written to cookies and are never sent to the server.
- */
-export type PersistedUiState = {
-  readonly columnSettingsSelectedTab?: string;
-  readonly isColumnSettingsOpen?: boolean;
-  readonly isColumnSettingsPinned?: boolean;
-  readonly isTableSettingsOpen?: boolean;
-  readonly isTableSettingsPinned?: boolean;
-  readonly tableSettingsExpandedFilters?: readonly string[];
-  readonly tableSettingsSelectedTab?: string;
-};
-
-/**
  * Subset of drawer flags mirrored into a cookie so they can be read in the SSR
  * loader and used to seed the initial meta state. Keeping this to the
  * open/pinned booleans is enough to reserve the drawer's width on first paint
@@ -53,4 +39,18 @@ export type PersistedUiFlags = {
   readonly isColumnSettingsPinned?: boolean;
   readonly isTableSettingsOpen?: boolean;
   readonly isTableSettingsPinned?: boolean;
+};
+
+/**
+ * Meta UI state persisted per-tab in sessionStorage only.
+ * These fields are not written to cookies and are never sent to the server.
+ */
+export type PersistedUiState = {
+  readonly columnSettingsSelectedTab?: string;
+  readonly isColumnSettingsOpen?: boolean;
+  readonly isColumnSettingsPinned?: boolean;
+  readonly isTableSettingsOpen?: boolean;
+  readonly isTableSettingsPinned?: boolean;
+  readonly tableSettingsExpandedFilters?: readonly string[];
+  readonly tableSettingsSelectedTab?: string;
 };

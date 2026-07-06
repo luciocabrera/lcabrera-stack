@@ -2,10 +2,9 @@
 // Dispatch behavior tests for useToggleColumnPin.
 // Business logic for each resolution kind is covered in resolveToggleColumnPinUpdate.util.test.ts.
 
+import { createColumnOrderSectionActionMocks } from '@repo/ui/utils/tests/createColumnOrderSectionActionMocks.util';
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-import { createColumnOrderSectionActionMocks } from '@repo/ui/utils/tests/createColumnOrderSectionActionMocks.util';
 
 import { useToggleColumnPin } from './useToggleColumnPin.hook';
 

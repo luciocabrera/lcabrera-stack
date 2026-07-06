@@ -1,14 +1,13 @@
-import * as stylex from '@stylexjs/stylex';
-import { useEffect, useRef } from 'react';
-
 import type { NotificationPlacement } from '@repo/ui/contexts/NotificationContext';
 
 import { useDismissNotificationAction } from '@repo/ui/contexts/NotificationContext/actions';
 import { useGetNotifications } from '@repo/ui/contexts/NotificationContext/selectors';
+import * as stylex from '@stylexjs/stylex';
+import { useEffect, useRef } from 'react';
 
-import { NotificationItem } from './NotificationItem';
 import { NOTIFICATION_CENTER_PLACEMENTS } from './NotificationCenter.constants';
 import { styles } from './NotificationCenter.stylex';
+import { NotificationItem } from './NotificationItem';
 import {
   groupNotificationsByPlacement,
   sortNotificationsByNewest,

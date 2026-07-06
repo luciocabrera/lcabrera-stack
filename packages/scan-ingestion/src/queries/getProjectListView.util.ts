@@ -4,13 +4,13 @@ export type ProjectListViewRow = {
   readonly created_at: string;
   readonly default_branch: string;
   readonly id: string;
-  readonly last_scanned_at: string | null;
-  readonly latest_run_id: string | null;
-  readonly latest_run_status: string | null;
+  readonly last_scanned_at: null | string;
+  readonly latest_run_id: null | string;
+  readonly latest_run_status: null | string;
   readonly local_path: string;
   readonly name: string;
-  readonly total_high: number | null;
-  readonly total_medium: number | null;
+  readonly total_high: null | number;
+  readonly total_medium: null | number;
 };
 
 /**

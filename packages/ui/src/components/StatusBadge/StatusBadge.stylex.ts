@@ -1,21 +1,20 @@
-import * as stylex from '@stylexjs/stylex';
-
 import {
   borderRadius,
   spacing,
   typography,
 } from '@repo/ui/design-system/tokens/base.stylex';
 import { colors } from '@repo/ui/design-system/tokens/colors.stylex';
+import * as stylex from '@stylexjs/stylex';
 
 const base = stylex.create({
   badge: {
-    alignItems: 'center',
     borderRadius: borderRadius.full,
+    paddingBlock: spacing.xs,
+    paddingInline: spacing.sm,
+    alignItems: 'center',
     display: 'inline-flex',
     fontSize: typography.fontSizeXs,
     fontWeight: typography.fontWeightSemibold,
-    paddingBlock: spacing.xs,
-    paddingInline: spacing.sm,
     whiteSpace: 'nowrap',
     width: 'fit-content',
   },

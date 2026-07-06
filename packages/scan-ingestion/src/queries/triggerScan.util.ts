@@ -1,14 +1,14 @@
 import { getPool } from '@repo/data-access/db/getPool.util';
 
+export type TriggerScanResult = {
+  readonly runId: string;
+};
+
 type TriggerScanArgs = {
   readonly projectId: string;
   readonly scannerIds: readonly string[];
   readonly scopeValue: string;
   readonly triggeredBy?: string;
-};
-
-export type TriggerScanResult = {
-  readonly runId: string;
 };
 
 /**

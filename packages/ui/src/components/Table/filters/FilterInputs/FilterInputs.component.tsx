@@ -1,6 +1,3 @@
-import * as stylex from '@stylexjs/stylex';
-import { Activity, useState } from 'react';
-
 import type {
   ColumnFilter,
   DateOperatorType,
@@ -10,6 +7,8 @@ import type {
 
 import { useGetNormalizedColumn } from '@repo/ui/components/Table/contexts/TableConfig/columns/selectors/useGetNormalizedColumn.hook';
 import { VirtualSelect } from '@repo/ui/components/VirtualSelect';
+import * as stylex from '@stylexjs/stylex';
+import { Activity, useState } from 'react';
 
 import type { FilterInputsProps } from './FilterInputs.types';
 

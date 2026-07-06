@@ -1,7 +1,5 @@
 import type { RefObject } from 'react';
 
-import { useEffect, useState } from 'react';
-
 import {
   DEFAULT_CONTAINER_HEIGHT,
   DEFAULT_ROW_OVERSCAN,
@@ -10,6 +8,7 @@ import {
   getVerticalVirtualizationWindow,
   setupObservedContainer,
 } from '@repo/ui/hooks/utils';
+import { useEffect, useState } from 'react';
 
 export type UseVirtualizationArgs = {
   readonly containerRef: RefObject<HTMLElement | null | undefined>;

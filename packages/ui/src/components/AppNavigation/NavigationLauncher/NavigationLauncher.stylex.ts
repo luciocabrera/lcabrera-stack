@@ -1,7 +1,6 @@
-import * as stylex from '@stylexjs/stylex';
-
 import { shadows, spacing } from '@repo/ui/design-system/tokens/base.stylex';
 import { colors } from '@repo/ui/design-system/tokens/colors.stylex';
+import * as stylex from '@stylexjs/stylex';
 
 export const launcherStyles = stylex.create({
   launcher: {

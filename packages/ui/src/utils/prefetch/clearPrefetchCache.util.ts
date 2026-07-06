@@ -1,6 +1,5 @@
-import type { RefObject } from 'react';
-
 import type { PrefetchCache } from '@repo/ui/types/ui.types';
+import type { RefObject } from 'react';
 
 type ClearPrefetchCacheArgs<TResponse> = {
   readonly prefetchRef:

@@ -1,7 +1,6 @@
-import * as stylex from '@stylexjs/stylex';
-
 import { CheckIcon } from '@repo/ui/components/Icons';
 import { ICON_SIZE_XXS } from '@repo/ui/design-system/constants';
+import * as stylex from '@stylexjs/stylex';
 
 import type { CheckboxProps } from './Checkbox.types';
 

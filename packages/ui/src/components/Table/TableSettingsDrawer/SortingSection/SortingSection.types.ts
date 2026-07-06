@@ -1,6 +1,5 @@
-import type { ComponentPropsWithoutRef } from 'react';
-
 import type { SortDirection } from '@repo/ui/types/ui.types';
+import type { ComponentPropsWithoutRef } from 'react';
 
 export type SortingSectionProps = ComponentPropsWithoutRef<'div'> & {
   readonly isBusy?: boolean;

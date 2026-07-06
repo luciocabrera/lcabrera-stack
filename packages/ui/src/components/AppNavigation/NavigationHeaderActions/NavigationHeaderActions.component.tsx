@@ -1,5 +1,3 @@
-import * as stylex from '@stylexjs/stylex';
-
 import { Button } from '@repo/ui/components/Button';
 import {
   MaximizeIcon,
@@ -8,6 +6,7 @@ import {
   PinIcon,
   PinOffIcon,
 } from '@repo/ui/components/Icons';
+import * as stylex from '@stylexjs/stylex';
 
 import type { NavigationHeaderActionsProps } from './NavigationHeaderActions.types';
 

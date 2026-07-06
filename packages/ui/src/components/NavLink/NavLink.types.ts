@@ -1,13 +1,12 @@
-import type { StyleXStyles } from '@stylexjs/stylex';
-import type { ReactNode } from 'react';
-import type { NavLinkProps as RouterNavLinkProps } from 'react-router';
-
 import type {
   DesignSystemColor,
   DesignSystemOrientation,
   DesignSystemSize,
   DesignSystemWidth,
 } from '@repo/ui/types/design-system.types';
+import type { StyleXStyles } from '@stylexjs/stylex';
+import type { ReactNode } from 'react';
+import type { NavLinkProps as RouterNavLinkProps } from 'react-router';
 
 export type NavLinkProps = Omit<RouterNavLinkProps, 'children'> & {
   readonly children: ReactNode;

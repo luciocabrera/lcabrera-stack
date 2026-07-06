@@ -2,14 +2,14 @@
   "kind": "dead-code",
   "schema_version": 7,
   "version": "3.0.0",
-  "elapsed_ms": 125,
+  "elapsed_ms": 133,
   "total_issues": 83,
   "entry_points": {
-    "total": 592,
+    "total": 606,
     "sources": {
       "manual_entry": 23,
-      "package.json": 41,
-      "plugin": 528
+      "package.json": 42,
+      "plugin": 541
     }
   },
   "summary": {
@@ -837,7 +837,7 @@
       "is_type_only": true,
       "line": 56,
       "col": 12,
-      "span_start": 1568,
+      "span_start": 1576,
       "is_re_export": false,
       "actions": [
         {
@@ -1777,7 +1777,7 @@
       "package_name": "@repo/data-access",
       "location": "dependencies",
       "path": "apps/admin_system/package.json",
-      "line": 17,
+      "line": 18,
       "used_in_workspaces": [
         "apps/react-router",
         "apps/scan-orchestrator",
@@ -1804,7 +1804,7 @@
       "package_name": "@stylexjs/stylex",
       "location": "dependencies",
       "path": "apps/admin_system/package.json",
-      "line": 20,
+      "line": 21,
       "used_in_workspaces": ["apps/react-router", "packages/ui"],
       "actions": [
         {
@@ -1835,17 +1835,17 @@
       "imported_from": [
         {
           "path": "apps/api-server/vite.config.ts",
-          "line": 1,
+          "line": 3,
           "col": 9
         },
         {
           "path": "apps/api-server-fast/vite.config.ts",
-          "line": 1,
+          "line": 3,
           "col": 9
         },
         {
           "path": "apps/shared/vite.config.ts",
-          "line": 1,
+          "line": 2,
           "col": 9
         },
         {
@@ -1887,12 +1887,47 @@
         "packages/ui/src/components/Form/FormFields/FormFields.component.tsx"
       ],
       "length": 2,
-      "line": 3,
+      "line": 1,
       "col": 9,
       "edges": [
         {
           "path": "packages/ui/src/components/Form/FormFields/FormFieldGroup/FormFieldGroup.component.tsx",
-          "line": 3,
+          "line": 1,
+          "col": 9
+        },
+        {
+          "path": "packages/ui/src/components/Form/FormFields/FormFields.component.tsx",
+          "line": 6,
+          "col": 9
+        }
+      ],
+      "actions": [
+        {
+          "type": "refactor-cycle",
+          "auto_fixable": false,
+          "description": "Extract shared logic into a separate module to break the cycle",
+          "note": "Circular imports can cause initialization issues and make code harder to reason about"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the line",
+          "comment": "// fallow-ignore-next-line circular-dependency"
+        }
+      ]
+    },
+    {
+      "files": [
+        "packages/ui/src/components/Form/FormFields/FormFieldRow/FormFieldRow.component.tsx",
+        "packages/ui/src/components/Form/FormFields/FormFields.component.tsx"
+      ],
+      "length": 2,
+      "line": 1,
+      "col": 9,
+      "edges": [
+        {
+          "path": "packages/ui/src/components/Form/FormFields/FormFieldRow/FormFieldRow.component.tsx",
+          "line": 1,
           "col": 9
         },
         {
@@ -1918,51 +1953,16 @@
     },
     {
       "files": [
-        "packages/ui/src/components/Form/FormFields/FormFieldRow/FormFieldRow.component.tsx",
-        "packages/ui/src/components/Form/FormFields/FormFields.component.tsx"
-      ],
-      "length": 2,
-      "line": 3,
-      "col": 9,
-      "edges": [
-        {
-          "path": "packages/ui/src/components/Form/FormFields/FormFieldRow/FormFieldRow.component.tsx",
-          "line": 3,
-          "col": 9
-        },
-        {
-          "path": "packages/ui/src/components/Form/FormFields/FormFields.component.tsx",
-          "line": 8,
-          "col": 9
-        }
-      ],
-      "actions": [
-        {
-          "type": "refactor-cycle",
-          "auto_fixable": false,
-          "description": "Extract shared logic into a separate module to break the cycle",
-          "note": "Circular imports can cause initialization issues and make code harder to reason about"
-        },
-        {
-          "type": "suppress-line",
-          "auto_fixable": false,
-          "description": "Suppress with an inline comment above the line",
-          "comment": "// fallow-ignore-next-line circular-dependency"
-        }
-      ]
-    },
-    {
-      "files": [
         "packages/ui/src/components/Form/FormFields/FormFieldTabs/FormFieldTabs.component.tsx",
         "packages/ui/src/components/Form/FormFields/FormFields.component.tsx"
       ],
       "length": 2,
-      "line": 2,
+      "line": 1,
       "col": 9,
       "edges": [
         {
           "path": "packages/ui/src/components/Form/FormFields/FormFieldTabs/FormFieldTabs.component.tsx",
-          "line": 2,
+          "line": 1,
           "col": 9
         },
         {
@@ -2022,7 +2022,7 @@
   ],
   "_meta": {
     "telemetry": {
-      "analysis_run_id": "run_1cac3becda4e539a"
+      "analysis_run_id": "run_d4c9770740f0d0e2"
     }
   }
 }

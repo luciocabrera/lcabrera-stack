@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
-
 import type { TableColumnsState } from '@repo/ui/components/Table/Table.types';
+
+import { describe, expect, it } from 'vitest';
 
 import { getTableColumnDrawerState } from './getTableColumnDrawerState.util';
 

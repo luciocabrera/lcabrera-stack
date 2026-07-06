@@ -1,16 +1,15 @@
 // @vitest-environment jsdom
 
-import type { ReactNode } from 'react';
-
-import { cleanup, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
-
 import type {
   ColumnSizingState,
   DataKey,
   PinnedColumnInfo,
   TableColumn,
 } from '@repo/ui/components/Table/Table.types';
+import type { ReactNode } from 'react';
+
+import { cleanup, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 type MockTableBodyCellProps = {
   readonly children?: ReactNode;

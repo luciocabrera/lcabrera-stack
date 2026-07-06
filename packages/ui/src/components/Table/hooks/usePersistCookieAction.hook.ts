@@ -1,5 +1,3 @@
-import { useFetcher, useLocation } from 'react-router';
-
 import {
   MAX_COOKIE_ENTRY_VALUE_LENGTH,
   PERSIST_COOKIE_ACTION,
@@ -7,6 +5,7 @@ import {
 } from '@repo/ui/constants/globalSettings.constants';
 import { useNotifyAction } from '@repo/ui/contexts/NotificationContext/actions';
 import { writeToSessionStorage } from '@repo/ui/utils/storage';
+import { useFetcher, useLocation } from 'react-router';
 
 import type { TablePersistenceConfig } from '../Table.types';
 

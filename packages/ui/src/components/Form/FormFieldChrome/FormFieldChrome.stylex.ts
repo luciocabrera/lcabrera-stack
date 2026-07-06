@@ -1,7 +1,6 @@
-import * as stylex from '@stylexjs/stylex';
-
 import { spacing, typography } from '@repo/ui/design-system/tokens/base.stylex';
 import { colors } from '@repo/ui/design-system/tokens/colors.stylex';
+import * as stylex from '@stylexjs/stylex';
 
 export const styles = stylex.create({
   container: {
@@ -10,14 +9,14 @@ export const styles = stylex.create({
     flexDirection: 'column',
   },
   description: {
+    margin: 0,
     color: colors.textSecondary,
     fontSize: typography.fontSizeSm,
-    margin: 0,
   },
   error: {
+    margin: 0,
     color: colors.errorText,
     fontSize: typography.fontSizeSm,
-    margin: 0,
   },
   label: {
     color: colors.textPrimary,

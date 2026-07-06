@@ -1,11 +1,10 @@
-import * as stylex from '@stylexjs/stylex';
-
 import {
   ListAllIcon,
   ListCheckedIcon,
   ListUncheckedIcon,
 } from '@repo/ui/components/Icons';
 import { ICON_SIZE_MD } from '@repo/ui/design-system/constants';
+import * as stylex from '@stylexjs/stylex';
 
 import type { VirtualListFooterProps } from './VirtualListFooter.types';
 

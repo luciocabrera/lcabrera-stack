@@ -3,7 +3,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { API_SERVER_PORT, CONFIG } from '../api.constants';
-
 import { getApiBaseUrl } from './api.util';
 
 const originalEnvApiUrl = import.meta.env.VITE_API_URL;

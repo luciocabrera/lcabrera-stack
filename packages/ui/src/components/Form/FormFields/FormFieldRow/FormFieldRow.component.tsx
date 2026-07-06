@@ -1,7 +1,6 @@
-import * as stylex from '@stylexjs/stylex';
-
 import { FormFields } from '@repo/ui/components/Form/FormFields/FormFields.component';
 import { getFieldKey } from '@repo/ui/components/Form/FormFields/utils/getFieldKey.util';
+import * as stylex from '@stylexjs/stylex';
 
 import type { FormFieldRowProps } from './FormFieldRow.types';
 

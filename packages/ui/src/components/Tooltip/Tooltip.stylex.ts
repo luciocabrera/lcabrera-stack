@@ -1,8 +1,6 @@
 /* oxlint-disable @typescript-eslint/no-unsafe-assignment */
 
 /* eslint-disable @stylexjs/valid-styles */
-import * as stylex from '@stylexjs/stylex';
-
 import {
   borderRadius,
   easing,
@@ -13,6 +11,7 @@ import {
   typography,
 } from '@repo/ui/design-system/tokens/base.stylex';
 import { colors } from '@repo/ui/design-system/tokens/colors.stylex';
+import * as stylex from '@stylexjs/stylex';
 
 export const styles = stylex.create({
   trigger: (anchorName: string) => ({

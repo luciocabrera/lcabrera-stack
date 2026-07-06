@@ -18,7 +18,7 @@ type CreateQueueProcessorArgs = {
  */
 export const createQueueProcessor = ({ hub }: CreateQueueProcessorArgs) => {
   let isProcessing = false;
-  let wakeRequestedDuringProcessing = false;
+  let isWakeRequestedDuringProcessing = false;
 
   const drain = async (): Promise<void> => {
     let queued = await getQueuedScans();
@@ -32,7 +32,7 @@ export const createQueueProcessor = ({ hub }: CreateQueueProcessorArgs) => {
 
   const wake = (): void => {
     if (isProcessing) {
-      wakeRequestedDuringProcessing = true;
+      isWakeRequestedDuringProcessing = true;
       return;
     }
 
@@ -43,8 +43,8 @@ export const createQueueProcessor = ({ hub }: CreateQueueProcessorArgs) => {
       })
       .finally(() => {
         isProcessing = false;
-        if (wakeRequestedDuringProcessing) {
-          wakeRequestedDuringProcessing = false;
+        if (isWakeRequestedDuringProcessing) {
+          isWakeRequestedDuringProcessing = false;
           wake();
         }
       });

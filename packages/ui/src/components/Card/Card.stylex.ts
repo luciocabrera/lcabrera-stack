@@ -1,5 +1,3 @@
-import * as stylex from '@stylexjs/stylex';
-
 import {
   borderRadius,
   easing,
@@ -9,6 +7,7 @@ import {
 } from '@repo/ui/design-system/tokens/base.stylex';
 import { colors } from '@repo/ui/design-system/tokens/colors.stylex';
 import { rippleBase } from '@repo/ui/design-system/tokens/commons.stylex';
+import * as stylex from '@stylexjs/stylex';
 
 const baseStyles = stylex.create({
   card: {

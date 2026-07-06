@@ -1,9 +1,9 @@
 import { getPool } from '@repo/data-access/db/getPool.util';
 
 export type ScanRow = {
-  readonly duration_ms: number | null;
-  readonly error_message: string | null;
-  readonly health_metrics: Record<string, unknown> | null;
+  readonly duration_ms: null | number;
+  readonly error_message: null | string;
+  readonly health_metrics: null | Record<string, unknown>;
   readonly id: string;
   readonly project_id: string;
   readonly raw_json: unknown;

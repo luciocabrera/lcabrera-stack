@@ -1,10 +1,9 @@
-import * as stylex from '@stylexjs/stylex';
-
 import { Button } from '@repo/ui/components/Button';
 import { MenuCloseIcon } from '@repo/ui/components/Icons';
 import { FilterInputs } from '@repo/ui/components/Table/filters/FilterInputs';
 import { LIST_MAX_HEIGHT } from '@repo/ui/components/VirtualList/VirtualList.constants';
 import { ICON_SIZE_MD } from '@repo/ui/design-system/constants';
+import * as stylex from '@stylexjs/stylex';
 
 import type { HandleToggleArgs } from '../ActiveFiltersList.types';
 import type { FilterItemProps } from './FilterItem.types';

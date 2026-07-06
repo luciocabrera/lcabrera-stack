@@ -1,8 +1,8 @@
+import type { CanUseTool } from '@anthropic-ai/claude-agent-sdk';
+
+import { query } from '@anthropic-ai/claude-agent-sdk';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
-
-import type { CanUseTool } from '@anthropic-ai/claude-agent-sdk';
-import { query } from '@anthropic-ai/claude-agent-sdk';
 
 import type {
   RunSkillAgentArgs,
@@ -55,13 +55,13 @@ const resolveResultErrorMessage = (
 const summarizeResultMessage = (
   message: ResultMessage,
 ): ResultMessageSummary => {
-  const success = message.subtype === 'success';
+  const isSuccess = message.subtype === 'success';
 
   return {
-    errorMessage: resolveResultErrorMessage(message, success),
+    errorMessage: resolveResultErrorMessage(message, isSuccess),
     numTurns: message.num_turns,
     permissionDenials: message.permission_denials,
-    success,
+    success: isSuccess,
     totalCostUsd: message.total_cost_usd,
   };
 };
@@ -163,7 +163,7 @@ ${body}${
 
   let totalCostUsd: number | undefined;
   let numTurns: number | undefined;
-  let success = false;
+  let isSuccess = false;
   let errorMessage: string | undefined;
   let permissionDenials: readonly unknown[] = [];
 
@@ -190,8 +190,13 @@ ${body}${
       prompt,
     })) {
       if (message.type === 'result') {
-        ({ errorMessage, numTurns, permissionDenials, success, totalCostUsd } =
-          summarizeResultMessage(message));
+        ({
+          errorMessage,
+          numTurns,
+          permissionDenials,
+          success: isSuccess,
+          totalCostUsd,
+        } = summarizeResultMessage(message));
       }
 
       args.onProgress?.(describeMessage(message));
@@ -206,7 +211,7 @@ ${body}${
   // errorMessage on an otherwise-successful run. Per-run denial counts are
   // exactly the kind of thing the health_metrics telemetry work (tracked
   // separately) should capture instead of overloading errorMessage with it.
-  if (!success && permissionDenials.length > 0) {
+  if (!isSuccess && permissionDenials.length > 0) {
     errorMessage ??= `Tool calls were denied: ${JSON.stringify(permissionDenials)}`;
   }
 
@@ -214,10 +219,10 @@ ${body}${
   const reportJsonPath = join(args.outputDirectory, 'report.json');
 
   if (
-    success &&
+    isSuccess &&
     (!existsSync(reportMarkdownPath) || !existsSync(reportJsonPath))
   ) {
-    success = false;
+    isSuccess = false;
     errorMessage ??=
       'Agent session completed but expected output files are missing.';
   }
@@ -229,7 +234,7 @@ ${body}${
     reportMarkdownPath: existsSync(reportMarkdownPath)
       ? reportMarkdownPath
       : undefined,
-    success,
+    success: isSuccess,
     totalCostUsd,
   };
 };

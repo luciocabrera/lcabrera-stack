@@ -1,7 +1,5 @@
 import type { ScannerId, ScopeType } from './report.schema.ts';
 
-export type IngestReportOrigin = 'ci' | 'interactive_session' | 'ui_agent_sdk';
-
 export type IngestReportArgs = {
   readonly localPath: string;
   readonly origin: IngestReportOrigin;
@@ -16,6 +14,8 @@ export type IngestReportArgs = {
   readonly scopeValue: string;
   readonly triggeredBy?: string;
 };
+
+export type IngestReportOrigin = 'ci' | 'interactive_session' | 'ui_agent_sdk';
 
 export type IngestReportResult = {
   readonly findingsIngested: number;

@@ -8,6 +8,10 @@
     "./generate": "./generate.ts"
   },
   "scripts": {
-    "generate": "node --experimental-strip-types ./generate.ts"
+    "generate": "node --experimental-strip-types ./generate.ts",
+    "test": "node node_modules/vitest/vitest.mjs run --passWithNoTests"
+  },
+  "devDependencies": {
+    "vitest": "catalog:"
   }
 }

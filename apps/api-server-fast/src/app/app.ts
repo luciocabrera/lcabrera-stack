@@ -1,13 +1,15 @@
+import type { Pool } from 'pg';
+
 import cors from '@fastify/cors';
+import { HttpError } from 'api-shared';
 import Fastify, {
   type FastifyInstance,
   type FastifyReply,
   type FastifyRequest,
 } from 'fastify';
-import type { Pool } from 'pg';
 
 import type { EnvConfig } from '../config/env.schema';
-import { HttpError } from 'api-shared';
+
 import { createCarSalesPlugin } from '../features/carSales/carSales.plugin';
 import { createDbSanityPlugin } from '../features/dbSanity/dbSanity.plugin';
 import { createEnterpriseOrdersPlugin } from '../features/enterpriseOrders/enterpriseOrders.plugin';
@@ -53,7 +55,7 @@ const logApiRequest = ({
 }) => {
   const timestamp = formatHumanTimestamp();
   const durationMs = getDurationMs({ request }).toFixed(1);
-  const endpoint = request.url.split('?')[0] ?? request.url;
+  const endpoint = request.url.split('?', 1)[0] ?? request.url;
 
   console.info(
     `[API][${timestamp}] ${request.method} ${endpoint} -> ${reply.statusCode} (${durationMs}ms)`,

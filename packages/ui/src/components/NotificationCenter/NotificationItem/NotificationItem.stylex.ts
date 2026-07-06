@@ -1,5 +1,3 @@
-import * as stylex from '@stylexjs/stylex';
-
 import {
   borderRadius,
   easing,
@@ -9,6 +7,7 @@ import {
   typography,
 } from '@repo/ui/design-system/tokens/base.stylex';
 import { colors } from '@repo/ui/design-system/tokens/colors.stylex';
+import * as stylex from '@stylexjs/stylex';
 
 const slideUpFadeIn = stylex.keyframes({
   '0%': {
@@ -83,14 +82,14 @@ export const styles = stylex.create({
   itemSurface: {
     borderRadius: borderRadius.lg,
     overflow: 'hidden',
+    paddingBlock: spacing.md,
+    paddingInline: spacing.md,
     backdropFilter: colors.glassBackdropFilterPrimary,
     backgroundColor: colors.surfacePrimary,
     boxShadow: shadows.lg,
     borderLeftColor: colors.borderPrimary,
     borderLeftStyle: 'solid',
     borderLeftWidth: '4px',
-    paddingBlock: spacing.md,
-    paddingInline: spacing.md,
     width: '100%',
   },
   itemSurfaceHover: {
@@ -100,8 +99,8 @@ export const styles = stylex.create({
     },
   },
   itemSurfaceDefault: {
-    borderLeftColor: colors.borderPrimary,
     backgroundImage: `linear-gradient(140deg, ${colors.notificationGradientBase} 0%, ${colors.success} 250%)`,
+    borderLeftColor: colors.borderPrimary,
   },
   itemSurfaceError: {
     backgroundImage: `linear-gradient(140deg, ${colors.notificationGradientBase} 0%, ${colors.error} 250%)`,

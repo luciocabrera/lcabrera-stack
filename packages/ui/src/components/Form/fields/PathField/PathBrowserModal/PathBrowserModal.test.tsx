@@ -1,9 +1,7 @@
 // @vitest-environment jsdom
 
-import { mkdirSync, mkdtempSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-
+import { loader as browseDirectoryLoader } from '@repo/ui/routing/browseDirectory.loader';
+import { mockDialogElement } from '@repo/ui/utils/tests/mockDialogElement.util';
 import {
   cleanup,
   fireEvent,
@@ -11,6 +9,10 @@ import {
   screen,
   waitFor,
 } from '@testing-library/react';
+import { mkdirSync, mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { createRoutesStub } from 'react-router';
 import {
   afterAll,
   afterEach,
@@ -21,10 +23,6 @@ import {
   it,
   vi,
 } from 'vitest';
-import { createRoutesStub } from 'react-router';
-
-import { mockDialogElement } from '@repo/ui/utils/tests/mockDialogElement.util';
-import { loader as browseDirectoryLoader } from '@repo/ui/routing/browseDirectory.loader';
 
 import { PathBrowserModal } from './PathBrowserModal.component';
 
@@ -53,7 +51,7 @@ describe('PathBrowserModal', () => {
   });
 
   afterAll(() => {
-    rmSync(root, { recursive: true, force: true });
+    rmSync(root, { force: true, recursive: true });
   });
 
   const renderModal = (props: {

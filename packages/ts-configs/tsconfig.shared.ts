@@ -1,18 +1,12 @@
-type TsConfig = {
-  readonly compilerOptions: Record<string, unknown>;
-  readonly exclude: readonly string[];
-  readonly include: readonly string[];
-};
-
 type CreateAppTsConfigArgs = {
   readonly exclude?: readonly string[];
   readonly include?: readonly string[];
   /** Extra path aliases merged on top of the default `@/*` → `./src/*` mapping — for a package's own self-referencing alias (e.g. `@repo/ui/*`) or a cross-package one. */
   readonly paths?: Record<string, readonly string[]>;
   readonly rootDirs?: readonly string[];
+  readonly tsBuildInfoFile: string;
   /** Extra ambient type roots appended to the default `['vite/client']` — e.g. `'node'` for a package whose src/ mixes browser-context and Node-context (SSR entry) files. */
   readonly types?: readonly string[];
-  readonly tsBuildInfoFile: string;
 };
 
 type CreateNodeTsConfigArgs = {
@@ -21,6 +15,12 @@ type CreateNodeTsConfigArgs = {
   /** Path aliases for this config — node configs have none by default. */
   readonly paths?: Record<string, readonly string[]>;
   readonly tsBuildInfoFile: string;
+};
+
+type TsConfig = {
+  readonly compilerOptions: Record<string, unknown>;
+  readonly exclude: readonly string[];
+  readonly include: readonly string[];
 };
 
 const APP_TS_CONFIG: Omit<TsConfig, 'compilerOptions'> = {
@@ -91,7 +91,7 @@ const createNodeCompilerOptions = ({
   noUncheckedSideEffectImports: true,
   noUnusedLocals: true,
   noUnusedParameters: true,
-  ...(paths ? { paths } : {}),
+  ...(paths && { paths }),
   skipLibCheck: true,
   strict: true,
   target: 'ES2025',

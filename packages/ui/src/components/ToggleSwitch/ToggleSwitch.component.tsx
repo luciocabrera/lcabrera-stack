@@ -1,10 +1,9 @@
 import type { ChangeEvent, FocusEvent } from 'react';
 
-import * as stylex from '@stylexjs/stylex';
-import { useId, useState } from 'react';
-
 import { CheckIcon } from '@repo/ui/components/Icons';
 import { ICON_SIZE_XXS } from '@repo/ui/design-system/constants';
+import * as stylex from '@stylexjs/stylex';
+import { useId, useState } from 'react';
 
 import type { ToggleSwitchProps } from './ToggleSwitch.types';
 

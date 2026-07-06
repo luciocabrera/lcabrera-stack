@@ -1,5 +1,5 @@
-import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
@@ -138,6 +138,14 @@ export const createCustomRulesLintConfig = async ({
   const globals = globalsImport.default ?? globalsImport;
 
   return [
+    {
+      // Oxlint consumes eslint-disable comments too — eslint must never
+      // remove directives it considers "unused" (they may be suppressing an
+      // oxlint rule of the same name), so unused-directive reporting is off.
+      linterOptions: {
+        reportUnusedDisableDirectives: 'off',
+      },
+    },
     // 1. Core ESLint
     eslint.configs.recommended,
     // Add security recommended config here (good spot: after core but before styling/sorting)
@@ -171,6 +179,15 @@ export const createCustomRulesLintConfig = async ({
 
     {
       rules: {
+        // Escalated from the plugins' default `warn` so the bulk-suppression
+        // baseline (eslint-suppressions.json) covers inherited findings and
+        // NEW occurrences fail the gate (suppressions only apply to
+        // error-severity rules).
+        'react-x/set-state-in-effect': 'error',
+        'security/detect-non-literal-fs-filename': 'error',
+        'security/detect-non-literal-regexp': 'error',
+        'security/detect-object-injection': 'off',
+        'security/detect-unsafe-regex': 'error',
         'unicorn/consistent-boolean-name': [
           'error',
           {
@@ -179,12 +196,14 @@ export const createCustomRulesLintConfig = async ({
             },
           },
         ],
-        'unicorn/name-replacements': 'off',
-        'unicorn/prevent-abbreviations': 'off',
-        'unicorn/no-array-reduce': 'off',
-        'security/detect-object-injection': 'off',
         'unicorn/filename-case': 'off',
+        'unicorn/name-replacements': 'off',
+        'unicorn/no-array-reduce': 'off',
+        // Auto-fixer rewrites http:// string literals to https://, silently
+        // corrupting test fixtures and local-dev URLs — see the base factory.
+        'unicorn/prefer-https': 'off',
         'unicorn/prefer-query-selector': 'off',
+        'unicorn/prevent-abbreviations': 'off',
       },
     },
     // 5. JavaScript files configuration (for Node.js server files, etc.)
@@ -213,9 +232,9 @@ export const createCustomRulesLintConfig = async ({
       ),
       plugins: {
         '@stylexjs': stylexPlugin,
-        'typescript-eslint': tseslint.plugin,
         '@typescript-eslint': tseslint.plugin,
         'local-rules': localRules,
+        'typescript-eslint': tseslint.plugin,
       },
       rules: {
         '@stylexjs/sort-keys': 'warn',

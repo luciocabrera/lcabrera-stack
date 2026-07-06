@@ -1,0 +1,10 @@
+{
+  "fixReactRouterAssets.plugin.ts": {
+    "security/detect-non-literal-fs-filename": {
+      "count": 7
+    },
+    "unicorn/no-unreadable-for-of-expression": {
+      "count": 1
+    }
+  }
+}

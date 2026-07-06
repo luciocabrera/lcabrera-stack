@@ -1,8 +1,7 @@
+import { readEnvConfig } from '@repo/data-access/db/env.schema';
 import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-
-import { readEnvConfig } from '@repo/data-access/db/env.schema';
 import { Client } from 'pg';
 
 const migrationsDirectory = join(

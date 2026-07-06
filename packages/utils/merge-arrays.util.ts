@@ -1,6 +1,6 @@
 type MergeArraysArgs<T> = {
-  readonly baseValue?: readonly T[] | null;
-  readonly overrideValue?: readonly T[] | null;
+  readonly baseValue?: null | readonly T[];
+  readonly overrideValue?: null | readonly T[];
 };
 
 /**
@@ -10,7 +10,7 @@ export const mergeArrays = <T>({
   baseValue,
   overrideValue,
 }: MergeArraysArgs<T>): T[] | undefined => {
-  if (baseValue == null && overrideValue == null) {
+  if (baseValue == undefined && overrideValue == undefined) {
     return undefined;
   }
 

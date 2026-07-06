@@ -20,15 +20,15 @@ const runGit = (args: readonly string[], cwd: string): string | undefined => {
   }
 };
 
-type ResolveProjectPathArgs = {
-  readonly localPath: string;
-};
-
 export type ResolvedProjectPath = {
   readonly canonicalPath: string;
   readonly gitBranch: string | undefined;
   readonly gitCommitSha: string | undefined;
   readonly projectName: string;
+};
+
+type ResolveProjectPathArgs = {
+  readonly localPath: string;
 };
 
 /**

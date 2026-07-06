@@ -30,7 +30,7 @@ jobs:
 
       - name: Generate route types & build ESLint rules
         id: preflight
-        run: vp run typegen:all && vp run build:eslint-rules
+        run: vp run typegen:all && vp run --filter eslint-local-rules-shared build
 
       - name: Format · Lint · Type-check
         id: quality_gate

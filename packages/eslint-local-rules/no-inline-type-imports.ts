@@ -7,23 +7,6 @@
 import type { Rule } from 'eslint';
 
 const rule: Rule.RuleModule = {
-  meta: {
-    docs: {
-      description:
-        'Enforce separate type imports instead of inline type imports',
-      recommended: false,
-    },
-    fixable: 'code',
-    messages: {
-      noInlineTypeImport:
-        'Use separate type import syntax: "import type { {{names}} }" instead of inline "type" keyword',
-      redundantInlineType:
-        'Redundant inline "type" keyword in import type statement. Remove "type" from: {{names}}',
-    },
-    schema: [],
-    type: 'suggestion',
-  },
-
   create(context) {
     return {
       ImportDeclaration(node: any) {
@@ -55,14 +38,12 @@ const rule: Rule.RuleModule = {
                   .map((specifier: any) => {
                     if (specifier.type !== 'ImportSpecifier') return null;
 
-                    if (specifier.imported.name === specifier.local.name) {
-                      return specifier.imported.name;
-                    } else {
-                      return `${specifier.imported.name} as ${specifier.local.name}`;
-                    }
+                    return specifier.imported.name === specifier.local.name
+                      ? specifier.imported.name
+                      : `${specifier.imported.name} as ${specifier.local.name}`;
                   })
                   .filter(
-                    (name: string | null): name is string => name !== null,
+                    (name: null | string): name is string => name !== null,
                   )
                   .join(', ');
 
@@ -115,11 +96,9 @@ const rule: Rule.RuleModule = {
             const importedNames = node.specifiers
               .filter((specifier: any) => specifier.type === 'ImportSpecifier')
               .map((specifier: any) => {
-                if (specifier.imported.name === specifier.local.name) {
-                  return specifier.imported.name;
-                } else {
-                  return `${specifier.imported.name} as ${specifier.local.name}`;
-                }
+                return specifier.imported.name === specifier.local.name
+                  ? specifier.imported.name
+                  : `${specifier.imported.name} as ${specifier.local.name}`;
               })
               .join(', ');
 
@@ -133,6 +112,23 @@ const rule: Rule.RuleModule = {
         });
       },
     };
+  },
+
+  meta: {
+    docs: {
+      description:
+        'Enforce separate type imports instead of inline type imports',
+      recommended: false,
+    },
+    fixable: 'code',
+    messages: {
+      noInlineTypeImport:
+        'Use separate type import syntax: "import type { {{names}} }" instead of inline "type" keyword',
+      redundantInlineType:
+        'Redundant inline "type" keyword in import type statement. Remove "type" from: {{names}}',
+    },
+    schema: [],
+    type: 'suggestion',
   },
 };
 

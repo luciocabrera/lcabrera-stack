@@ -1,5 +1,3 @@
-import * as stylex from '@stylexjs/stylex';
-
 import {
   useGetTableOverscan,
   useGetTableRowHeight,
@@ -8,6 +6,7 @@ import { SpacerRow } from '@repo/ui/components/Table/SpacerRow';
 import { TableBodyRows } from '@repo/ui/components/Table/TableBodyRows';
 import { TableEmptyState } from '@repo/ui/components/Table/TableEmptyState';
 import { useVirtualization } from '@repo/ui/hooks';
+import * as stylex from '@stylexjs/stylex';
 
 import type { TableBodyProps } from './TableBody.types';
 

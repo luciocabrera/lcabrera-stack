@@ -1,7 +1,7 @@
+import type { Components } from 'react-markdown';
+
 import * as stylex from '@stylexjs/stylex';
 import Markdown from 'react-markdown';
-
-import type { Components } from 'react-markdown';
 
 import type { MarkdownRendererProps } from './MarkdownRenderer.types';
 

@@ -1,10 +1,9 @@
-import * as stylex from '@stylexjs/stylex';
-import { useState } from 'react';
-
 import { Button } from '@repo/ui/components/Button';
 import { Modal } from '@repo/ui/components/Modal';
 import { RadioOptionGroup } from '@repo/ui/components/RadioOptionGroup';
 import { ORDER_CONFLICT_OPTIONS } from '@repo/ui/constants/pinningPreferences.constants';
+import * as stylex from '@stylexjs/stylex';
+import { useState } from 'react';
 
 import type { OrderConflictResolution } from '../ColumnOrderSection.types';
 import type { OrderConflictModalProps } from './OrderConflictModal.types';

@@ -7,7 +7,6 @@ import { join } from 'node:path';
 // duplicating the ~20-line frontmatter parser.
 // @ts-expect-error -- plain CJS script, no type declarations
 import { parseFrontmatter } from '../../../scripts/validate-skills.cjs';
-
 import { cqmsRepoRoot } from './cqmsRepoRoot.util.ts';
 
 export type SkillFrontmatter = {
@@ -24,7 +23,7 @@ export const loadSkillFrontmatter = ({
   skillPath,
 }: LoadSkillFrontmatterArgs): SkillFrontmatter => {
   const skillMdPath = join(cqmsRepoRoot, skillPath, 'SKILL.md');
-  const parsed: SkillFrontmatter | null = parseFrontmatter(skillMdPath);
+  const parsed: null | SkillFrontmatter = parseFrontmatter(skillMdPath);
 
   if (!parsed) {
     throw new Error(`Could not parse frontmatter from ${skillMdPath}`);

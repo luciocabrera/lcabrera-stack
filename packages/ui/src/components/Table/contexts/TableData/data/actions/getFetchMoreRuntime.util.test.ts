@@ -1,8 +1,7 @@
-import { describe, expect, it, vi } from 'vitest';
-
 import type { TableMetaState } from '@repo/ui/components/Table/Table.types';
 
 import { LOAD_MORE_PAGE_SIZE } from '@repo/ui/components/Table/Table.constants';
+import { describe, expect, it, vi } from 'vitest';
 
 import { getFetchMoreRuntime } from './getFetchMoreRuntime.util';
 

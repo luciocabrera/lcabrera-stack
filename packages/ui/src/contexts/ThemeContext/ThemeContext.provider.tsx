@@ -1,8 +1,7 @@
-import { useState } from 'react';
-
 import type { ThemeMode } from '@repo/ui/types/theme.types';
 
 import { setThemeCookie } from '@repo/ui/utils/theme';
+import { useState } from 'react';
 
 import type { ThemeProviderProps } from './ThemeContext.types';
 

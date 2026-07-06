@@ -1,6 +1,5 @@
-import { useRef } from 'react';
-
 import { isShallowEqual } from '@repo/ui/utils';
+import { useRef } from 'react';
 
 /**
  * Store type with get, set, subscribe, reset, and getServerSnapshot methods

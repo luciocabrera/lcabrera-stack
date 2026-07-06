@@ -1,5 +1,3 @@
-import * as stylex from '@stylexjs/stylex';
-
 import { Button } from '@repo/ui/components/Button';
 import {
   MoreVerticalIcon,
@@ -14,6 +12,7 @@ import {
 import { useColumnResize } from '@repo/ui/components/Table/hooks';
 import { DEFAULT_MIN_COLUMN_WIDTH } from '@repo/ui/components/Table/Table.constants';
 import { PinConflictModal } from '@repo/ui/components/Table/TableSettingsDrawer/ColumnOrderSection/PinConflictModal';
+import * as stylex from '@stylexjs/stylex';
 
 import type { TableHeaderCellProps } from './TableHeaderCell.types';
 

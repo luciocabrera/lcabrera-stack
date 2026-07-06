@@ -15,7 +15,7 @@ const hub = createRunStatusHub();
 const queueProcessor = createQueueProcessor({ hub });
 
 const httpServer = createHttpServer();
-attachWebSocketServer({ hub, httpServer });
+attachWebSocketServer({ httpServer, hub });
 
 httpServer.listen(envConfig.SCAN_ORCHESTRATOR_PORT, '0.0.0.0', () => {
   console.warn(

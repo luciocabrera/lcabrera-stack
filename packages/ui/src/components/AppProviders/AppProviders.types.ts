@@ -1,7 +1,6 @@
-import type { ReactNode } from 'react';
-
 import type { GlobalSettingsState } from '@repo/ui/types/globalSettings.types';
 import type { ThemeMode } from '@repo/ui/types/theme.types';
+import type { ReactNode } from 'react';
 
 export type AppProvidersProps = {
   /** Per-app id used to scope theme / global-settings cookies across same-host apps */

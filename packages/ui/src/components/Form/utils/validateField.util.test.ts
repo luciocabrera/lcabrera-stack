@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
-
 import type { LeafFieldDef } from '@repo/ui/components/Form/Form.types';
+
+import { describe, expect, it } from 'vitest';
 
 import { validateField } from './validateField.util';
 

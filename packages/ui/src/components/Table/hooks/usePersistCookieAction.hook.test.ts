@@ -1,9 +1,8 @@
 // @vitest-environment jsdom
 
+import { MAX_COOKIE_ENTRY_VALUE_LENGTH } from '@repo/ui/constants/globalSettings.constants';
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-import { MAX_COOKIE_ENTRY_VALUE_LENGTH } from '@repo/ui/constants/globalSettings.constants';
 
 import type { TablePersistenceConfig } from '../Table.types';
 

@@ -1,6 +1,5 @@
-import type { ComponentType } from 'react';
-
 import type { IconProps } from '@repo/ui/components/Icons';
+import type { ComponentType } from 'react';
 
 export type SectionToolbarButton = {
   /** Icon component rendered at the variant-resolved icon size */

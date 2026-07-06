@@ -1,6 +1,6 @@
 import type { Server } from 'node:http';
 
-import { WebSocketServer, type RawData } from 'ws';
+import { type RawData, WebSocketServer } from 'ws';
 import { z } from 'zod';
 
 import type { RunStatusHub } from './runStatusHub.ts';
@@ -11,8 +11,8 @@ const subscribeMessageSchema = z.object({
 });
 
 type AttachWebSocketServerArgs = {
-  readonly hub: RunStatusHub;
   readonly httpServer: Server;
+  readonly hub: RunStatusHub;
 };
 
 const decodeRawData = (data: RawData): string => {
@@ -33,8 +33,8 @@ const decodeRawData = (data: RawData): string => {
  * not fatal to the connection.
  */
 export const attachWebSocketServer = ({
-  hub,
   httpServer,
+  hub,
 }: AttachWebSocketServerArgs): WebSocketServer => {
   const wss = new WebSocketServer({ path: '/ws/runs', server: httpServer });
 

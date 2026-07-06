@@ -1,6 +1,6 @@
-import * as stylex from '@stylexjs/stylex';
-
 import type { TableColumnDataType } from '@repo/ui/components/Table/Table.types';
+
+import * as stylex from '@stylexjs/stylex';
 
 import type { TableBodyCellProps } from '../TableBodyCell.types';
 

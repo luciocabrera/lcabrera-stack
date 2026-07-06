@@ -31,7 +31,7 @@ describe('attachWebSocketServer', () => {
 
   it('delivers a real published message to a client subscribed to that run', async () => {
     const hub = createRunStatusHub();
-    attachWebSocketServer({ hub, httpServer });
+    attachWebSocketServer({ httpServer, hub });
 
     const runId = crypto.randomUUID();
     const client = new WebSocket(`ws://127.0.0.1:${port}/ws/runs`);
@@ -65,7 +65,7 @@ describe('attachWebSocketServer', () => {
 
   it('does not deliver a message to a client subscribed to a different run', async () => {
     const hub = createRunStatusHub();
-    attachWebSocketServer({ hub, httpServer });
+    attachWebSocketServer({ httpServer, hub });
 
     const client = new WebSocket(`ws://127.0.0.1:${port}/ws/runs`);
     await waitForOpen(client);
@@ -74,9 +74,9 @@ describe('attachWebSocketServer', () => {
     );
     await wait(50);
 
-    let received = false;
+    let isReceived = false;
     client.on('message', () => {
-      received = true;
+      isReceived = true;
     });
 
     hub.publish(crypto.randomUUID(), {
@@ -88,13 +88,13 @@ describe('attachWebSocketServer', () => {
     });
     await wait(50);
 
-    expect(received).toBe(false);
+    expect(isReceived).toBe(false);
     client.close();
   });
 
   it('ignores a malformed message without closing the connection', async () => {
     const hub = createRunStatusHub();
-    attachWebSocketServer({ hub, httpServer });
+    attachWebSocketServer({ httpServer, hub });
 
     const client = new WebSocket(`ws://127.0.0.1:${port}/ws/runs`);
     await waitForOpen(client);

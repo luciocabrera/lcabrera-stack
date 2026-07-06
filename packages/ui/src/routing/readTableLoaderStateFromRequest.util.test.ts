@@ -1,6 +1,6 @@
-import { describe, expect, it, vi } from 'vitest';
-
 import type { TableColumn } from '@repo/ui/components/Table';
+
+import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('@repo/ui/components/Table/utils', () => ({
   readPersistedStateFromCookie: vi.fn(),

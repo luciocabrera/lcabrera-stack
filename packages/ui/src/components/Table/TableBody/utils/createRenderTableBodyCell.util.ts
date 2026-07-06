@@ -1,5 +1,3 @@
-import { createElement } from 'react';
-
 import type {
   ColumnSizingState,
   DataKey,
@@ -8,6 +6,7 @@ import type {
 } from '@repo/ui/components/Table/Table.types';
 
 import { TableBodyCell } from '@repo/ui/components/Table/TableBodyCell';
+import { createElement } from 'react';
 
 import {
   buildTableBodyCellDescriptor,

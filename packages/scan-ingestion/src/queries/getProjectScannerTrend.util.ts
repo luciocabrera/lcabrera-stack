@@ -2,10 +2,10 @@ import { getPool } from '@repo/data-access/db/getPool.util';
 
 export type ProjectScannerTrendRow = {
   readonly created_at: string;
-  readonly high_count: number | null;
-  readonly high_count_delta: number | null;
-  readonly medium_count: number | null;
-  readonly medium_count_delta: number | null;
+  readonly high_count: null | number;
+  readonly high_count_delta: null | number;
+  readonly medium_count: null | number;
+  readonly medium_count_delta: null | number;
   readonly run_id: string;
   readonly scanner_id: string;
 };

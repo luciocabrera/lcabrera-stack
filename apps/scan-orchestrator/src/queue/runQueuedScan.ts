@@ -1,13 +1,13 @@
-import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync } from 'node:fs';
-import { join } from 'node:path';
+import type { QueuedScanRow } from '@repo/scan-ingestion/queries/getQueuedScans.util';
 
 import { runSkillAgent } from '@repo/agent-runner';
 import { ingestReport } from '@repo/scan-ingestion/ingestion/ingestReport';
-import type { QueuedScanRow } from '@repo/scan-ingestion/queries/getQueuedScans.util';
 import { markScanFailed } from '@repo/scan-ingestion/queries/markScanFailed.util';
 import { markScanRunning } from '@repo/scan-ingestion/queries/markScanRunning.util';
 import { updateScanProgress } from '@repo/scan-ingestion/queries/updateScanProgress.util';
+import { execFileSync } from 'node:child_process';
+import { existsSync, mkdirSync } from 'node:fs';
+import { join } from 'node:path';
 
 import type { RunStatusHub } from '../ws/runStatusHub.ts';
 

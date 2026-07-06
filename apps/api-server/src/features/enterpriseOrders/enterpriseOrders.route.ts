@@ -1,5 +1,6 @@
-import { Router } from 'express';
 import type { Pool } from 'pg';
+
+import { Router } from 'express';
 
 import type { EnvConfig } from '../../config/env.schema';
 

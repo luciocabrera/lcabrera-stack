@@ -1,8 +1,7 @@
-import { useEffect } from 'react';
-
 import type { TableDataState } from '@repo/ui/components/Table/Table.types';
 
 import { useStore } from '@repo/ui/hooks';
+import { useEffect } from 'react';
 
 import type {
   TableDataContextValue,

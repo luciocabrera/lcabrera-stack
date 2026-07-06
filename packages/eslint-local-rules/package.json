@@ -8,6 +8,7 @@
   "devDependencies": {
     "@typescript-eslint/utils": "catalog:",
     "eslint": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

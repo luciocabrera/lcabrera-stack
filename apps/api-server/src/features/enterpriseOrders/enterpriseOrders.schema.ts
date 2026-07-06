@@ -1,14 +1,15 @@
-import { z } from 'zod';
+import type { SortRule } from 'api-shared';
 
 import { HttpError } from 'api-shared';
-import type { SortRule } from 'api-shared';
-import { parseJsonQueryParam } from '../../utils/parseJsonQueryParam.util';
-import { parseSortingRules } from '../../utils/parseSortingRules.util';
+import { z } from 'zod';
 
 import type {
   EnterpriseOrdersFilter,
   EnterpriseOrdersFilters,
 } from './enterpriseOrders.types';
+
+import { parseJsonQueryParam } from '../../utils/parseJsonQueryParam.util';
+import { parseSortingRules } from '../../utils/parseSortingRules.util';
 
 const booleanFilterSchema = z.object({
   type: z.literal('boolean'),

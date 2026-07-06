@@ -1,5 +1,3 @@
-import { describe, expect, it } from 'vitest';
-
 import type { TableColumn } from '@repo/ui/components/Table';
 import type {
   BooleanFilter,
@@ -8,6 +6,8 @@ import type {
   SelectFilter,
   TextFilter,
 } from '@repo/ui/types/filterOperators.types';
+
+import { describe, expect, it } from 'vitest';
 
 import { isFilterCompatibleWithColumn } from './isFilterCompatibleWithColumn.util';
 

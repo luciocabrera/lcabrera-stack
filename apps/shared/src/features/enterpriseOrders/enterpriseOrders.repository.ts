@@ -1,21 +1,21 @@
 import type {
   CountRow,
   DbRow,
-  QueryValue,
   Queryable,
+  QueryValue,
   SortRule,
 } from '../../types/api.types.js';
-import { buildOrderByClause } from '../../utils/buildOrderByClause.util.js';
-import { formatPgAdminQuery } from '../../utils/formatPgAdminQuery.util.js';
-
-import { buildEnterpriseOrdersWhereClause } from './buildEnterpriseOrdersWhereClause.util.js';
-import { DEFAULT_ENTERPRISE_ORDER_SORTING } from './enterpriseOrders.constants.js';
 import type {
   EnterpriseOrderDetailResponse,
   EnterpriseOrdersDistinctResponse,
   EnterpriseOrdersFilters,
   EnterpriseOrdersResponse,
 } from './enterpriseOrders.types.js';
+
+import { buildOrderByClause } from '../../utils/buildOrderByClause.util.js';
+import { formatPgAdminQuery } from '../../utils/formatPgAdminQuery.util.js';
+import { buildEnterpriseOrdersWhereClause } from './buildEnterpriseOrdersWhereClause.util.js';
+import { DEFAULT_ENTERPRISE_ORDER_SORTING } from './enterpriseOrders.constants.js';
 
 export type EnterpriseOrdersRepository = {
   readonly getDistinctValues: (

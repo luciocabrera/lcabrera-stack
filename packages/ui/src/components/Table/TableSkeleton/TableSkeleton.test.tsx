@@ -21,7 +21,7 @@ const {
         }
   >(() => {}),
   useGetColumnsMock: vi.fn(),
-  useGetTableAppIdMock: vi.fn(() => undefined),
+  useGetTableAppIdMock: vi.fn(() => {}),
   useGetTablePersistenceKeyMock: vi.fn(() => 'orders'),
   useGetTablePlaceholderRowCountMock: vi.fn(),
 }));

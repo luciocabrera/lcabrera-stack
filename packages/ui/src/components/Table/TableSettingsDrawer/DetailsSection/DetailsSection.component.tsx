@@ -1,10 +1,9 @@
-import * as stylex from '@stylexjs/stylex';
-
 import {
   SidePanelSection,
   SidePanelSectionHeader,
   SidePanelSectionMain,
 } from '@repo/ui/components/SidePanel';
+import * as stylex from '@stylexjs/stylex';
 
 import type { DetailsSectionProps } from './DetailsSection.types';
 

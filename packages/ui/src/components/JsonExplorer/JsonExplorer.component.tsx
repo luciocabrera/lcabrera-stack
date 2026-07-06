@@ -1,8 +1,7 @@
-import * as stylex from '@stylexjs/stylex';
-
 import { CopyButton } from '@repo/ui/components/CopyButton';
 import { StaticTable } from '@repo/ui/components/StaticTable';
 import { Tabs } from '@repo/ui/components/Tabs';
+import * as stylex from '@stylexjs/stylex';
 
 import type { JsonExplorerProps } from './JsonExplorer.types';
 

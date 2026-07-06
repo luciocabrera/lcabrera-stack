@@ -1,6 +1,5 @@
-import type { ReactNode } from 'react';
-
 import type { TableColumn } from '@repo/ui/components/Table';
+import type { ReactNode } from 'react';
 
 export type StaticTableProps<TData extends Record<string, unknown>> = {
   readonly actions?: ReactNode;

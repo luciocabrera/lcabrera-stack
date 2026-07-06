@@ -1,9 +1,8 @@
-import { useState } from 'react';
-
 import {
   SidePanelSectionMain,
   SidePanelSectionOverlay,
 } from '@repo/ui/components/SidePanel';
+import { useState } from 'react';
 
 import type { SortingSectionProps } from './SortingSection.types';
 

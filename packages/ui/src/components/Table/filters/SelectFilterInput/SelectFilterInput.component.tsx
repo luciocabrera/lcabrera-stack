@@ -1,5 +1,3 @@
-import { useRef } from 'react';
-
 import type { FilterOptionsResponse } from '@repo/ui/components/Table/Table.types';
 import type { PrefetchCache } from '@repo/ui/types/ui.types';
 
@@ -7,6 +5,7 @@ import { useFetchFilterData } from '@repo/ui/components/Table/contexts/FiltersDa
 import { useGetFilterData } from '@repo/ui/components/Table/contexts/FiltersData/filters/selectors';
 import { useGetNormalizedColumn } from '@repo/ui/components/Table/contexts/TableConfig/columns/selectors';
 import { VirtualSelect } from '@repo/ui/components/VirtualSelect';
+import { useRef } from 'react';
 
 import type { SelectFilterInputProps } from './SelectFilterInput.types';
 

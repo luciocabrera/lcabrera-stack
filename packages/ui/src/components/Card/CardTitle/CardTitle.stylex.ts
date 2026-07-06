@@ -1,6 +1,5 @@
-import * as stylex from '@stylexjs/stylex';
-
 import { spacing, typography } from '@repo/ui/design-system/tokens/base.stylex';
+import * as stylex from '@stylexjs/stylex';
 
 export const cardTitleStyles = stylex.create({
   title: {

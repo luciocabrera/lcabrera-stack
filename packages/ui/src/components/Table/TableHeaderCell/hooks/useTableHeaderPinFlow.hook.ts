@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 import type {
   DataKey,
   PinnedColumnInfo,
@@ -19,6 +17,7 @@ import {
   useGetGlobalPinConflictResolutionPreference,
   useGetGlobalPinSidePreference,
 } from '@repo/ui/contexts/GlobalSettingsContext/selectors';
+import { useState } from 'react';
 
 const CLOSED_PIN_CONFLICT_STATE: PinConflictState = {
   isOpen: false,

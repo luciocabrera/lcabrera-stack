@@ -1,6 +1,5 @@
-import { describe, expect, it } from 'vitest';
-
 import { createMockStore } from '@repo/ui/utils/tests/createMockStore.util';
+import { describe, expect, it } from 'vitest';
 
 import type { DataState } from './fetchMoreData.types';
 

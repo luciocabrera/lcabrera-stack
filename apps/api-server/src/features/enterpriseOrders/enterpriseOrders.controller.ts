@@ -8,12 +8,12 @@ import {
   HttpError,
 } from 'api-shared';
 
+import type { EnterpriseOrdersRepository } from './enterpriseOrders.repository';
+
 import { createRequestHandler } from '../../utils/createRequestHandler.util';
 import { delay } from '../../utils/delay.util';
 import { readQueryInteger } from '../../utils/readQueryInteger.util';
 import { readQueryValue } from '../../utils/readQueryValue.util';
-
-import type { EnterpriseOrdersRepository } from './enterpriseOrders.repository';
 import {
   parseDistinctColumnName,
   parseEnterpriseOrdersFilters,

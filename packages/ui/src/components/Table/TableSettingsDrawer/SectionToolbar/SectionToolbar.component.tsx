@@ -1,7 +1,6 @@
-import * as stylex from '@stylexjs/stylex';
-
 import { Button } from '@repo/ui/components/Button';
 import { ICON_SIZE_SM } from '@repo/ui/design-system/constants';
+import * as stylex from '@stylexjs/stylex';
 
 import type { SectionToolbarProps } from './SectionToolbar.types';
 

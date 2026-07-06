@@ -1,6 +1,5 @@
-import type { StyleXStyles } from '@stylexjs/stylex';
-
 import type { VirtualListDataState } from '@repo/ui/components/VirtualList';
+import type { StyleXStyles } from '@stylexjs/stylex';
 
 export type VirtualSelectMode = 'multi' | 'single';
 

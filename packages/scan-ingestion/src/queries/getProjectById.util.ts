@@ -4,7 +4,7 @@ export type ProjectRow = {
   readonly created_at: string;
   readonly default_branch: string;
   readonly id: string;
-  readonly last_scanned_at: string | null;
+  readonly last_scanned_at: null | string;
   readonly local_path: string;
   readonly name: string;
 };

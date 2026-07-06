@@ -15,17 +15,17 @@ type CreateHandleRequestArgs = {
   readonly stylexCssHref: string;
 };
 
+type CreateHandleRequestResult = {
+  readonly handleRequest: HandleRequest;
+  readonly streamTimeout: number;
+};
+
 type HandleRequest = (
   request: Request,
   responseStatusCode: number,
   responseHeaders: Headers,
   routerContext: EntryContext,
 ) => Promise<Response>;
-
-type CreateHandleRequestResult = {
-  readonly handleRequest: HandleRequest;
-  readonly streamTimeout: number;
-};
 
 const toError = (error: unknown): Error => {
   if (error instanceof Error) {

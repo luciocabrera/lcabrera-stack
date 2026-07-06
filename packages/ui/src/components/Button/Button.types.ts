@@ -1,10 +1,3 @@
-import type { StyleXStyles } from '@stylexjs/stylex';
-import type {
-  ComponentPropsWithoutRef,
-  MouseEventHandler,
-  ReactNode,
-} from 'react';
-
 import type {
   DesignSystemColor,
   DesignSystemOrientation,
@@ -12,6 +5,12 @@ import type {
   DesignSystemStyle,
   DesignSystemWidth,
 } from '@repo/ui/types/design-system.types';
+import type { StyleXStyles } from '@stylexjs/stylex';
+import type {
+  ComponentPropsWithoutRef,
+  MouseEventHandler,
+  ReactNode,
+} from 'react';
 
 export type ButtonProps = Omit<
   ComponentPropsWithoutRef<'button'>,

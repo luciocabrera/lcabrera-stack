@@ -1,5 +1,3 @@
-import * as stylex from '@stylexjs/stylex';
-
 import {
   borderRadius,
   shadows,
@@ -14,6 +12,7 @@ import {
   skeleton,
   widthVariants,
 } from '@repo/ui/design-system/tokens/commons.stylex';
+import * as stylex from '@stylexjs/stylex';
 
 const buttonSpecificStyles = stylex.create({
   button: {

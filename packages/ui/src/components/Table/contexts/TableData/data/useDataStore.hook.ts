@@ -1,6 +1,6 @@
-import { useSyncExternalStore } from 'react';
-
 import type { TableDataState } from '@repo/ui/components/Table/Table.types';
+
+import { useSyncExternalStore } from 'react';
 
 import { useTableDataContextValue } from './useTableDataContextValue.hook';
 

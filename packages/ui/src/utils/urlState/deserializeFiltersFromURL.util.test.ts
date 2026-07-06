@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
-
 import type { ColumnFiltersState } from '@repo/ui/components/Table';
+
+import { describe, expect, it } from 'vitest';
 
 import { deserializeFiltersFromURL } from './deserializeFiltersFromURL.util';
 

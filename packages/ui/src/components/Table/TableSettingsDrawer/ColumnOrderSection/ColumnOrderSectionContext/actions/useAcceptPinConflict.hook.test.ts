@@ -2,10 +2,9 @@
 // Dispatch behavior tests for useAcceptPinConflict.
 // Business logic is covered in resolvePinConflictState.util.test.ts.
 
+import { createColumnOrderSectionActionMocks } from '@repo/ui/utils/tests/createColumnOrderSectionActionMocks.util';
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-import { createColumnOrderSectionActionMocks } from '@repo/ui/utils/tests/createColumnOrderSectionActionMocks.util';
 
 import { useAcceptPinConflict } from './useAcceptPinConflict.hook';
 

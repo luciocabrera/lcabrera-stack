@@ -93,21 +93,6 @@ const createMergeDuplicateImportsFix = ({
 };
 
 const rule: Rule.RuleModule = {
-  meta: {
-    docs: {
-      description:
-        'Merge duplicate imports from the same source into a single import statement',
-      recommended: false,
-    },
-    fixable: 'code',
-    messages: {
-      duplicateImport:
-        'Multiple imports from "{{source}}". Merge into a single import statement.',
-    },
-    schema: [],
-    type: 'suggestion',
-  },
-
   create(context) {
     return {
       Program(node: any) {
@@ -134,6 +119,21 @@ const rule: Rule.RuleModule = {
         });
       },
     };
+  },
+
+  meta: {
+    docs: {
+      description:
+        'Merge duplicate imports from the same source into a single import statement',
+      recommended: false,
+    },
+    fixable: 'code',
+    messages: {
+      duplicateImport:
+        'Multiple imports from "{{source}}". Merge into a single import statement.',
+    },
+    schema: [],
+    type: 'suggestion',
   },
 };
 

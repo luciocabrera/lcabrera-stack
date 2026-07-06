@@ -1,6 +1,6 @@
-import { useSyncExternalStore } from 'react';
-
 import type { FiltersDataState } from '@repo/ui/components/Table/Table.types';
+
+import { useSyncExternalStore } from 'react';
 
 import { useFiltersDataContextValue } from '../useFiltersDataContextValue.hook';
 

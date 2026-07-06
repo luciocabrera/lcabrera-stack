@@ -1,6 +1,5 @@
-import type { RefObject } from 'react';
-
 import type { InfiniteScroll } from '@repo/ui/types/ui.types';
+import type { RefObject } from 'react';
 
 import { useInfiniteScrollObserver } from '@repo/ui/hooks';
 

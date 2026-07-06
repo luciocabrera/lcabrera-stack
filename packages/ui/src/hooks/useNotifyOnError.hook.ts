@@ -1,6 +1,5 @@
-import { useEffect } from 'react';
-
 import { useNotifyAction } from '@repo/ui/contexts/NotificationContext/actions';
+import { useEffect } from 'react';
 
 const NOTIFY_ON_ERROR_DURATION_MS = 10_000;
 

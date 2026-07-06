@@ -1,46 +1,45 @@
-import * as stylex from '@stylexjs/stylex';
-
 import {
   borderRadius,
   spacing,
   typography,
 } from '@repo/ui/design-system/tokens/base.stylex';
 import { colors } from '@repo/ui/design-system/tokens/colors.stylex';
+import * as stylex from '@stylexjs/stylex';
 
 export const styles = stylex.create({
   blockquote: {
+    marginBlock: spacing.sm,
     borderInlineStartColor: colors.borderPrimary,
     borderInlineStartStyle: 'solid',
     borderInlineStartWidth: '3px',
     color: colors.textSecondary,
-    marginBlock: spacing.sm,
     paddingInlineStart: spacing.md,
   },
   code: {
-    backgroundColor: colors.backgroundTertiary,
     borderRadius: borderRadius.sm,
-    fontFamily: 'monospace',
-    fontSize: typography.fontSizeSm,
     paddingBlock: '0.125rem',
     paddingInline: spacing.xs,
+    backgroundColor: colors.backgroundTertiary,
+    fontFamily: 'monospace',
+    fontSize: typography.fontSizeSm,
   },
   container: {
     color: colors.textPrimary,
   },
   heading1: {
+    marginBlock: spacing.md,
     fontSize: typography.fontSize2xl,
     fontWeight: typography.fontWeightBold,
-    marginBlock: spacing.md,
   },
   heading2: {
+    marginBlock: spacing.md,
     fontSize: typography.fontSizeXl,
     fontWeight: typography.fontWeightSemibold,
-    marginBlock: spacing.md,
   },
   heading3: {
+    marginBlock: spacing.sm,
     fontSize: typography.fontSizeLg,
     fontWeight: typography.fontWeightSemibold,
-    marginBlock: spacing.sm,
   },
   link: {
     color: colors.brandPrimary,
@@ -50,8 +49,8 @@ export const styles = stylex.create({
     paddingInlineStart: spacing.lg,
   },
   paragraph: {
-    lineHeight: 1.6,
     marginBlock: spacing.sm,
+    lineHeight: 1.6,
   },
   pre: {
     // No own background/padding — react-markdown always nests a <code> (styled

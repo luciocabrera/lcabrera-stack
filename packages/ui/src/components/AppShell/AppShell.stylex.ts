@@ -1,8 +1,7 @@
-import * as stylex from '@stylexjs/stylex';
-
 import { typography } from '@repo/ui/design-system/tokens/base.stylex';
 import { colors } from '@repo/ui/design-system/tokens/colors.stylex';
 import { overlayStyles } from '@repo/ui/design-system/tokens/commons.stylex';
+import * as stylex from '@stylexjs/stylex';
 
 const specific = stylex.create({
   appShell: {
@@ -25,15 +24,14 @@ const specific = stylex.create({
   },
   outletWrapper: {
     flex: '1 1 auto',
+    backgroundImage: `radial-gradient(circle, ${colors.patternDot} 0.1rem, transparent 0%)`,
+    backgroundRepeat: 'round',
+    backgroundSize: '2rem 2rem',
+    maskImage: 'linear-gradient(to bottom, #000000, #000000)',
     scrollbarColor: `${colors.borderSecondary} transparent`,
     scrollbarWidth: 'thin',
     minHeight: 0,
     overflowY: 'auto',
-
-    backgroundImage: `radial-gradient(circle, ${colors.patternDot} 0.1rem, transparent 0%)`,
-    backgroundSize: '2rem 2rem',
-    backgroundRepeat: 'round',
-    maskImage: 'linear-gradient(to bottom, #000000, #000000)',
   },
 });
 

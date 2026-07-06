@@ -1,6 +1,6 @@
-import { useSyncExternalStore } from 'react';
-
 import type { GlobalSettingsState } from '@repo/ui/types/globalSettings.types';
+
+import { useSyncExternalStore } from 'react';
 
 import { INITIAL_GLOBAL_SETTINGS } from './GlobalSettingsContext.constants';
 import { useGlobalSettingsContextValue } from './useGlobalSettingsContextValue.hook';

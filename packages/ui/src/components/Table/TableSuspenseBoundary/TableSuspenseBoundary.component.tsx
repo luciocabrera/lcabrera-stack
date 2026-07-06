@@ -1,6 +1,5 @@
-import { Suspense } from 'react';
-
 import { TableDataResolver } from '@repo/ui/components/Table/TableDataResolver';
+import { Suspense } from 'react';
 
 import type { TableSuspenseBoundaryProps } from './TableSuspenseBoundary.types';
 

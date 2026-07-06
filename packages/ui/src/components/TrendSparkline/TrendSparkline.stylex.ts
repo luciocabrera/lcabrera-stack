@@ -1,6 +1,5 @@
-import * as stylex from '@stylexjs/stylex';
-
 import { colors } from '@repo/ui/design-system/tokens/colors.stylex';
+import * as stylex from '@stylexjs/stylex';
 
 const base = stylex.create({
   line: {

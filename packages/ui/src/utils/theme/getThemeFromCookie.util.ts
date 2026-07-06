@@ -2,6 +2,7 @@ import type { ThemeMode } from '@repo/ui/types/theme.types';
 
 import { getAppScopedCookieKey } from '@repo/ui/utils/storage';
 import { readFromCookie } from '@repo/ui/utils/storage/readFromCookie.util';
+
 import { THEME_COOKIE_NAME } from './themeCookie.constants';
 
 /**

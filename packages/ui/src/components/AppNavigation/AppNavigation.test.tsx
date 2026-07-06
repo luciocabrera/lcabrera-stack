@@ -1,16 +1,14 @@
 // @vitest-environment jsdom
 
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { createMemoryRouter, RouterProvider } from 'react-router';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
-import type { GlobalSettingsState } from '@repo/ui/types/globalSettings.types';
-
 import type { ToolbarItemConfig } from '@repo/ui/components/Toolbar/Toolbar.types';
+import type { GlobalSettingsState } from '@repo/ui/types/globalSettings.types';
 
 import { GlobalSettingsProvider } from '@repo/ui/contexts/GlobalSettingsContext';
 // import { useSetGlobalNavigationPreferences } from '@repo/ui/contexts/GlobalSettingsContext/actions';
 import { mockDialogElement } from '@repo/ui/utils/tests/mockDialogElement.util';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { createMemoryRouter, RouterProvider } from 'react-router';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AppNavigation } from './AppNavigation.component';
 

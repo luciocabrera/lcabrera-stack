@@ -1,6 +1,5 @@
-import type { ReactNode } from 'react';
-
 import type { LeafFieldDef } from '@repo/ui/components/Form/Form.types';
+import type { ReactNode } from 'react';
 
 import { BooleanField } from '@repo/ui/components/Form/fields/BooleanField/BooleanField.component';
 import { CustomField } from '@repo/ui/components/Form/fields/CustomField/CustomField.component';

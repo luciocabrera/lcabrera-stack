@@ -1,6 +1,6 @@
-import { useSyncExternalStore } from 'react';
-
 import type { TableColumnsState } from '@repo/ui/components/Table/Table.types';
+
+import { useSyncExternalStore } from 'react';
 
 import { useTableDrawerContextValue } from './useTableDrawerContextValue.hook';
 

@@ -1,5 +1,6 @@
-import { Router } from 'express';
 import type { Pool } from 'pg';
+
+import { Router } from 'express';
 
 import { createWideAlltypes150Controller } from './wideAlltypes150.controller';
 import { createWideAlltypes150Repository } from './wideAlltypes150.repository';

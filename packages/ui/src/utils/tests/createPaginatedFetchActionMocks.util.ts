@@ -1,6 +1,6 @@
-import { vi } from 'vitest';
-
 import type { PrefetchCache } from '@repo/ui/types/ui.types';
+
+import { vi } from 'vitest';
 
 import { createMockStore } from './createMockStore.util';
 

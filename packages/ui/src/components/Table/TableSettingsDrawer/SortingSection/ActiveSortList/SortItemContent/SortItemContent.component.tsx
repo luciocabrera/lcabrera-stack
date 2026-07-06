@@ -1,5 +1,3 @@
-import * as stylex from '@stylexjs/stylex';
-
 import { Button } from '@repo/ui/components/Button';
 import {
   MenuCloseIcon,
@@ -7,6 +5,7 @@ import {
   SortDescIcon,
 } from '@repo/ui/components/Icons';
 import { ICON_SIZE_MD } from '@repo/ui/design-system/constants';
+import * as stylex from '@stylexjs/stylex';
 
 import type { SortItemContentProps } from './SortItemContent.types';
 

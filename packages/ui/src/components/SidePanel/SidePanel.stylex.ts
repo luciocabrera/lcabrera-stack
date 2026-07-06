@@ -1,5 +1,3 @@
-import * as stylex from '@stylexjs/stylex';
-
 import {
   easing,
   shadows,
@@ -7,6 +5,7 @@ import {
   zIndex,
 } from '@repo/ui/design-system/tokens/base.stylex';
 import { colors } from '@repo/ui/design-system/tokens/colors.stylex';
+import * as stylex from '@stylexjs/stylex';
 
 const baseStyles = stylex.create({
   dialog: {

@@ -1,9 +1,8 @@
-import * as stylex from '@stylexjs/stylex';
-import { useEffect, useRef } from 'react';
-
 import { Button } from '@repo/ui/components/Button';
 import { MenuCloseIcon } from '@repo/ui/components/Icons';
 import { ICON_SIZE_MD } from '@repo/ui/design-system/constants/iconSizes.constants';
+import * as stylex from '@stylexjs/stylex';
+import { useEffect, useRef } from 'react';
 
 import type { ModalProps } from './Modal.types';
 

@@ -1,6 +1,5 @@
-import * as stylex from '@stylexjs/stylex';
-
 import { FormFields } from '@repo/ui/components/Form/FormFields/FormFields.component';
+import * as stylex from '@stylexjs/stylex';
 
 import type { FormFieldGroupProps } from './FormFieldGroup.types';
 

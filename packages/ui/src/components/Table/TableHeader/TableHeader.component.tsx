@@ -1,5 +1,3 @@
-import * as stylex from '@stylexjs/stylex';
-
 import {
   useGetColumnGroups,
   useGetPinnedColumnOffsets,
@@ -8,6 +6,7 @@ import {
   useGetTableIsLoading,
   useGetTableIsLoadingMore,
 } from '@repo/ui/components/Table/contexts/TableData/data/selectors';
+import * as stylex from '@stylexjs/stylex';
 
 import type { TableHeaderProps } from './TableHeader.types';
 

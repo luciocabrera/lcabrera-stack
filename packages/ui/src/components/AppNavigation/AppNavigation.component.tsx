@@ -1,6 +1,3 @@
-import * as stylex from '@stylexjs/stylex';
-import { useState } from 'react';
-
 import { Button } from '@repo/ui/components/Button';
 import { MenuIcon } from '@repo/ui/components/Icons';
 import {
@@ -15,6 +12,8 @@ import {
   useGetGlobalNavigationPinnedPreference,
   useGetGlobalNavigationSizePreference,
 } from '@repo/ui/contexts/GlobalSettingsContext/selectors';
+import * as stylex from '@stylexjs/stylex';
+import { useState } from 'react';
 
 import type { AppNavigationProps } from './AppNavigation.types';
 

@@ -1,10 +1,9 @@
-import { describe, expect, it } from 'vitest';
-
 import {
   DATE_OPERATORS,
   NUMBER_OPERATORS,
   TEXT_OPERATORS,
 } from '@repo/ui/constants/filterOperators.constants';
+import { describe, expect, it } from 'vitest';
 
 import { getOperatorOptions } from './getOperatorOptions.util';
 

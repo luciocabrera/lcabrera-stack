@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
-
 import type { FieldClientValidation } from '@repo/ui/components/Form/Form.types';
+
+import { describe, expect, it } from 'vitest';
 
 import { validateStringValue } from './validateStringValue.util';
 

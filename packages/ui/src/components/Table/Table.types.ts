@@ -1,6 +1,3 @@
-import type { StyleXStyles } from '@stylexjs/stylex';
-import type { ComponentPropsWithRef, ReactNode } from 'react';
-
 import type { ColumnFilter } from '@repo/ui/types/filterOperators.types';
 import type {
   CurrencyFormatOptions,
@@ -8,6 +5,8 @@ import type {
   NumberFormatOptions,
 } from '@repo/ui/types/format.types';
 import type { InfiniteScroll, Sorting } from '@repo/ui/types/ui.types';
+import type { StyleXStyles } from '@stylexjs/stylex';
+import type { ComponentPropsWithRef, ReactNode } from 'react';
 
 /**
  * Column filters state - maps column key to filter configuration
@@ -215,6 +214,14 @@ export type TableDataState<TData> = {
 
 export type TableDensity = 'comfortable' | 'compact';
 
+/**
+ * Optional content overrides for the table's empty (no-data) state.
+ */
+export type TableEmptyStateConfig = {
+  readonly message?: ReactNode;
+  readonly title?: ReactNode;
+};
+
 export type TableMetadataValue = boolean | number | string;
 
 export type TableMetaState = {
@@ -293,12 +300,4 @@ type BaseProps = ComponentPropsWithRef<'table'> & {
   readonly customStylex?: StyleXStyles;
   readonly emptyState?: TableEmptyStateConfig;
   readonly icon?: ReactNode;
-};
-
-/**
- * Optional content overrides for the table's empty (no-data) state.
- */
-export type TableEmptyStateConfig = {
-  readonly message?: ReactNode;
-  readonly title?: ReactNode;
 };

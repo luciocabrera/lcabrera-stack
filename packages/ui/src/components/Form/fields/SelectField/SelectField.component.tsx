@@ -1,6 +1,6 @@
-import { VirtualSelect } from '@repo/ui/components/VirtualSelect';
 import { useFormField } from '@repo/ui/components/Form/fields/useFormField.hook';
 import { FormFieldChrome } from '@repo/ui/components/Form/FormFieldChrome/FormFieldChrome.component';
+import { VirtualSelect } from '@repo/ui/components/VirtualSelect';
 
 import type { SelectFieldProps } from './SelectField.types';
 

@@ -1,13 +1,12 @@
-// @vitest-environment jsdom
-import { act, renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-
 import type { TableMetaState } from '@repo/ui/components/Table/Table.types';
 
 import {
   createMockStore,
   type MockStore,
 } from '@repo/ui/utils/tests/createMockStore.util';
+// @vitest-environment jsdom
+import { act, renderHook } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const createInitialMetaState = (): TableMetaState => {
   return {

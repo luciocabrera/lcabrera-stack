@@ -1,9 +1,8 @@
-import * as stylex from '@stylexjs/stylex';
-import { useNavigate, useRevalidator } from 'react-router';
-
 import { Button } from '@repo/ui/components/Button';
 import { ErrorDescriptive } from '@repo/ui/components/Icons';
 import { Title } from '@repo/ui/components/Title';
+import * as stylex from '@stylexjs/stylex';
+import { useNavigate, useRevalidator } from 'react-router';
 
 import type { RouteErrorBoundaryProps } from './RouteErrorBoundary.types';
 

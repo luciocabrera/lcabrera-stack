@@ -1,8 +1,7 @@
 import type { ReactNode } from 'react';
 
-import * as stylex from '@stylexjs/stylex';
-
 import { Tag } from '@repo/ui/components/Tag';
+import * as stylex from '@stylexjs/stylex';
 
 import type { VirtualSelectTriggerProps } from '../VirtualSelectTrigger.types';
 

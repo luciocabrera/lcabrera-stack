@@ -1,5 +1,3 @@
-import * as stylex from '@stylexjs/stylex';
-
 import {
   borderRadius,
   spacing,
@@ -8,6 +6,7 @@ import {
 import { colors } from '@repo/ui/design-system/tokens/colors.stylex';
 import { skeleton } from '@repo/ui/design-system/tokens/commons.stylex';
 import { filterBaseStyles } from '@repo/ui/design-system/tokens/filters.stylex';
+import * as stylex from '@stylexjs/stylex';
 
 const localStyles = stylex.create({
   label: {

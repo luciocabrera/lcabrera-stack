@@ -1,8 +1,7 @@
-import * as stylex from '@stylexjs/stylex';
-import { useEffect, useRef } from 'react';
-
 import { Button } from '@repo/ui/components/Button';
 import { SettingsIcon } from '@repo/ui/components/Icons';
+import * as stylex from '@stylexjs/stylex';
+import { useEffect, useRef } from 'react';
 
 import type { TableContentProps } from './TableContent.types';
 

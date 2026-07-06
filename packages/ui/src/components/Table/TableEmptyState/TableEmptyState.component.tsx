@@ -1,12 +1,11 @@
-import * as stylex from '@stylexjs/stylex';
-import { useEffect, useState } from 'react';
-import { useRevalidator } from 'react-router';
-
 import { Button } from '@repo/ui/components/Button';
 import { NoDataDescriptive } from '@repo/ui/components/Icons';
 import { useGetColumnGroups } from '@repo/ui/components/Table/contexts/TableConfig/columns/selectors';
 import { useTableContainerRef } from '@repo/ui/components/Table/contexts/TableWrapper';
 import { useElementSize } from '@repo/ui/hooks';
+import * as stylex from '@stylexjs/stylex';
+import { useEffect, useState } from 'react';
+import { useRevalidator } from 'react-router';
 
 import type { TableEmptyStateProps } from './TableEmptyState.types';
 

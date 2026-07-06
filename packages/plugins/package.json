@@ -5,5 +5,11 @@
   "type": "module",
   "exports": {
     "./fixReactRouterAssets": "./fixReactRouterAssets.plugin.ts"
+  },
+  "scripts": {
+    "test": "node node_modules/vitest/vitest.mjs run --passWithNoTests"
+  },
+  "devDependencies": {
+    "vitest": "catalog:"
   }
 }

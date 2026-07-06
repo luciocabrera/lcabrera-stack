@@ -1,5 +1,3 @@
-import { describe, expect, it } from 'vitest';
-
 import {
   DEFAULT_COLUMN_OVERSCAN,
   DEFAULT_OVERSCAN,
@@ -10,6 +8,7 @@ import {
   IS_PREFETCH_ENABLED,
   LOAD_MORE_PAGE_SIZE,
 } from '@repo/ui/components/Table/Table.constants';
+import { describe, expect, it } from 'vitest';
 
 import { getInitialMetaState } from './getInitialMetaState.util';
 

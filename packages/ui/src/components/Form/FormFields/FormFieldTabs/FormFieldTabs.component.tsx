@@ -1,5 +1,5 @@
-import { Tabs } from '@repo/ui/components/Tabs';
 import { FormFields } from '@repo/ui/components/Form/FormFields/FormFields.component';
+import { Tabs } from '@repo/ui/components/Tabs';
 
 import type { FormFieldTabsProps } from './FormFieldTabs.types';
 

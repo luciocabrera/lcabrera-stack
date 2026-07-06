@@ -46,7 +46,7 @@ vp check
 vp run test
 
 # Custom architectural lint rules (ESLint pass)
-vp run lint:custom-rules
+vp run lint:eslint:check
 ```
 
 ## Important Command Notes

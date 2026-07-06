@@ -1,10 +1,9 @@
-import * as stylex from '@stylexjs/stylex';
-import { useId, useRef } from 'react';
-
 import type { SelectFilter } from '@repo/ui/types/filterOperators.types';
 
 import { VirtualList } from '@repo/ui/components/VirtualList';
 import { useClickOutside } from '@repo/ui/hooks';
+import * as stylex from '@stylexjs/stylex';
+import { useId, useRef } from 'react';
 
 import type { VirtualSelectProps } from './VirtualSelect.types';
 

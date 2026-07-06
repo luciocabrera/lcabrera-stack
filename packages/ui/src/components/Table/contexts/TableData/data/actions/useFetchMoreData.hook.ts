@@ -1,8 +1,7 @@
-import { useRef } from 'react';
-
 import type { PrefetchCache } from '@repo/ui/types/ui.types';
 
 import { useTableConfigContextValue } from '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { useRef } from 'react';
 
 import type { FetchMoreDataArgs } from './fetchMoreData.types';
 

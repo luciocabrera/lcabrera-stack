@@ -22,7 +22,7 @@ const normalizeImportPath = (source: string): string => {
   return normalized;
 };
 
-const getQuoteCharacter = (rawSourceText: string): '"' | "'" =>
+const getQuoteCharacter = (rawSourceText: string): "'" | '"' =>
   rawSourceText.startsWith('"') ? '"' : "'";
 
 const reportIfPathNeedsCleanup = ({
@@ -65,21 +65,6 @@ const reportIfPathNeedsCleanup = ({
 };
 
 const rule: Rule.RuleModule = {
-  meta: {
-    docs: {
-      description:
-        'Enforce extensionless and indexless internal import/export paths',
-      recommended: false,
-    },
-    fixable: 'code',
-    messages: {
-      cleanImportPath:
-        'Use clean path "{{cleanedPath}}" instead of "{{sourceValue}}".',
-    },
-    schema: [],
-    type: 'suggestion',
-  },
-
   create(context) {
     return {
       ExportAllDeclaration(node: any) {
@@ -101,6 +86,21 @@ const rule: Rule.RuleModule = {
         });
       },
     };
+  },
+
+  meta: {
+    docs: {
+      description:
+        'Enforce extensionless and indexless internal import/export paths',
+      recommended: false,
+    },
+    fixable: 'code',
+    messages: {
+      cleanImportPath:
+        'Use clean path "{{cleanedPath}}" instead of "{{sourceValue}}".',
+    },
+    schema: [],
+    type: 'suggestion',
   },
 };
 

@@ -1,8 +1,7 @@
+import { closePool, getPool } from '@repo/data-access/db/getPool.util';
 import { mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-
-import { closePool, getPool } from '@repo/data-access/db/getPool.util';
 import { afterAll, afterEach, describe, expect, it } from 'vitest';
 
 import { ingestReport } from './ingestReport.ts';

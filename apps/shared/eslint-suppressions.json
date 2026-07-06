@@ -1,0 +1,38 @@
+{
+  "src/features/carSales/carSales.repository.ts": {
+    "unicorn/prefer-number-coercion": {
+      "count": 1
+    }
+  },
+  "src/features/dbSanity/dbSanity.repository.ts": {
+    "unicorn/prefer-number-coercion": {
+      "count": 1
+    }
+  },
+  "src/features/enterpriseOrders/enterpriseOrders.repository.ts": {
+    "unicorn/prefer-number-coercion": {
+      "count": 1
+    }
+  },
+  "src/features/wideAlltypes150/wideAlltypes150.repository.ts": {
+    "unicorn/prefer-number-coercion": {
+      "count": 1
+    }
+  },
+  "src/utils/formatPgAdminQuery.util.test.ts": {
+    "unicorn/no-null": {
+      "count": 1
+    }
+  },
+  "src/utils/formatPgAdminQuery.util.ts": {
+    "local-rules/destructuring-for-functions": {
+      "count": 1
+    },
+    "security/detect-non-literal-regexp": {
+      "count": 1
+    },
+    "unicorn/no-unsafe-string-replacement": {
+      "count": 1
+    }
+  }
+}

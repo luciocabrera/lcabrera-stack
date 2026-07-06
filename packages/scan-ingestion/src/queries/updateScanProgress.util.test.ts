@@ -1,8 +1,7 @@
+import { closePool, getPool } from '@repo/data-access/db/getPool.util';
 import { mkdtempSync, realpathSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-
-import { closePool, getPool } from '@repo/data-access/db/getPool.util';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { triggerScan } from './triggerScan.util.ts';
@@ -48,7 +47,7 @@ describe('updateScanProgress', () => {
 
     await updateScanProgress({ progressMessage: 'assistant:message', scanId });
 
-    const result = await pool.query<{ progress_message: string | null }>(
+    const result = await pool.query<{ progress_message: null | string }>(
       'SELECT progress_message FROM cqms.scans WHERE id = $1',
       [scanId],
     );

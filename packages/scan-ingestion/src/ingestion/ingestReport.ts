@@ -1,6 +1,5 @@
-import { readFileSync } from 'node:fs';
-
 import { getPool } from '@repo/data-access/db/getPool.util';
+import { readFileSync } from 'node:fs';
 
 import type {
   IngestReportArgs,

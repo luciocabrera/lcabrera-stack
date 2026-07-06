@@ -11,13 +11,13 @@ type ResizeCallback = () => void;
 class MockResizeObserver {
   public static callbacks: ResizeCallback[] = [];
 
+  public disconnect = vi.fn();
+
+  public observe = vi.fn();
+  public unobserve = vi.fn();
   public constructor(callback: ResizeCallback) {
     MockResizeObserver.callbacks.push(callback);
   }
-
-  public disconnect = vi.fn();
-  public observe = vi.fn();
-  public unobserve = vi.fn();
 }
 
 const createSizedElement = ({
@@ -29,8 +29,10 @@ const createSizedElement = ({
 }): HTMLDivElement => {
   const element = document.createElement('div');
 
-  Object.defineProperty(element, 'clientHeight', { value: height });
-  Object.defineProperty(element, 'clientWidth', { value: width });
+  Object.defineProperties(element, {
+    clientHeight: { value: height },
+    clientWidth: { value: width },
+  });
 
   return element;
 };

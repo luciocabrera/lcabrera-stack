@@ -1,8 +1,8 @@
+import type { LoaderFunctionArgs } from 'react-router';
+
 import { readdir } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { dirname, resolve } from 'node:path';
-
-import type { LoaderFunctionArgs } from 'react-router';
 
 import type { BrowseDirectoryResult } from './browseDirectory.types';
 

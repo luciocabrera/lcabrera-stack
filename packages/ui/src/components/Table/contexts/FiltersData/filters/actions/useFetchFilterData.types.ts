@@ -1,5 +1,3 @@
-import type { RefObject } from 'react';
-
 import type {
   DataKey,
   FiltersDataState,
@@ -7,6 +5,7 @@ import type {
 } from '@repo/ui/components/Table/Table.types';
 import type { TStore } from '@repo/ui/hooks/useStore.hook';
 import type { InfiniteScroll, PrefetchCache } from '@repo/ui/types/ui.types';
+import type { RefObject } from 'react';
 
 export type FetchFilterDataActionArgs<TData, TResponse> = {
   readonly columnKey: DataKey<TData>;

@@ -1,7 +1,6 @@
-import type { ReactNode } from 'react';
-
 import type { CardColor } from '@repo/ui/components/Card';
 import type { TStore } from '@repo/ui/hooks';
+import type { ReactNode } from 'react';
 
 export type AppNotification = {
   readonly durationMs: number;

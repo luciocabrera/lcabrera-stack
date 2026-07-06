@@ -1,8 +1,7 @@
-import * as stylex from '@stylexjs/stylex';
-import { useEffect, useRef } from 'react';
-
 import { InfoBox } from '@repo/ui/components/InfoBox';
 import { useInfiniteScrollObserver, useVirtualization } from '@repo/ui/hooks';
+import * as stylex from '@stylexjs/stylex';
+import { useEffect, useRef } from 'react';
 
 import type { VirtualListBodyProps } from './VirtualListBody.types';
 

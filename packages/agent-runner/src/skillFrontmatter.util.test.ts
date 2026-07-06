@@ -9,10 +9,10 @@ describe('loadSkillFrontmatter', () => {
     });
 
     expect(result.frontmatter).toEqual({
-      name: 'fixture-skill',
+      'allowed-tools': 'Bash(cat:*,git:*), Read, Grep',
       description:
         'Test fixture only — not a real skill, used by skillFrontmatter.util.test.ts.',
-      'allowed-tools': 'Bash(cat:*,git:*), Read, Grep',
+      name: 'fixture-skill',
     });
     expect(result.body).toContain('# Fixture Skill');
     expect(result.body).toContain(

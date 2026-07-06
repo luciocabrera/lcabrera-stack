@@ -1,6 +1,3 @@
-import * as stylex from '@stylexjs/stylex';
-import { useState } from 'react';
-
 import { Button } from '@repo/ui/components/Button';
 import { SidePanelSectionHeader } from '@repo/ui/components/SidePanel';
 import {
@@ -8,6 +5,8 @@ import {
   useGetNormalizedColumns,
 } from '@repo/ui/components/Table/contexts/TableConfig/columns/selectors';
 import { VirtualSelect } from '@repo/ui/components/VirtualSelect';
+import * as stylex from '@stylexjs/stylex';
+import { useState } from 'react';
 
 import type { AddFilterSectionProps } from './AddFilterSection.types';
 

@@ -2,11 +2,10 @@
 
 import type { ReactNode } from 'react';
 
+import { createMockStore } from '@repo/ui/utils/tests/createMockStore.util';
 import { act, renderHook } from '@testing-library/react';
 import { createElement } from 'react';
 import { describe, expect, it } from 'vitest';
-
-import { createMockStore } from '@repo/ui/utils/tests/createMockStore.util';
 
 import type { TableDrawerContextValue } from './TableDrawerContext.types';
 

@@ -1,34 +1,33 @@
-import * as stylex from '@stylexjs/stylex';
-
 import {
   borderRadius,
   spacing,
   typography,
 } from '@repo/ui/design-system/tokens/base.stylex';
 import { colors } from '@repo/ui/design-system/tokens/colors.stylex';
+import * as stylex from '@stylexjs/stylex';
 
 export const styles = stylex.create({
   currentPath: {
+    color: colors.textSecondary,
     fontFamily: typography.fontFamilyMono,
     fontSize: typography.fontSizeSm,
     overflowWrap: 'anywhere',
-    color: colors.textSecondary,
   },
   entryButton: {
-    gap: spacing.sm,
-    alignItems: 'center',
-    display: 'flex',
-    width: '100%',
-    padding: spacing.sm,
-    borderRadius: borderRadius.md,
-    borderStyle: 'none',
-    backgroundColor: 'transparent',
-    color: colors.textPrimary,
-    cursor: 'pointer',
-    textAlign: 'left',
     ':hover': {
       backgroundColor: colors.surfaceSecondary,
     },
+    padding: spacing.sm,
+    borderRadius: borderRadius.md,
+    borderStyle: 'none',
+    gap: spacing.sm,
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+    color: colors.textPrimary,
+    cursor: 'pointer',
+    display: 'flex',
+    textAlign: 'left',
+    width: '100%',
   },
   error: {
     color: colors.errorText,

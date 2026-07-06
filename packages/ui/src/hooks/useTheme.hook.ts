@@ -1,8 +1,7 @@
-import { use } from 'react';
-
 import type { ThemeContextValue } from '@repo/ui/types/theme.types';
 
 import { ThemeContext } from '@repo/ui/contexts/ThemeContext';
+import { use } from 'react';
 
 /**
  * Custom hook to access theme context

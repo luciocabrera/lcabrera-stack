@@ -1,5 +1,5 @@
-import { Pool } from 'pg';
 import { runStartupDbSanityCheck } from 'api-shared';
+import { Pool } from 'pg';
 
 import { createApp } from './app/app';
 import { readEnvConfig } from './config/env.util';

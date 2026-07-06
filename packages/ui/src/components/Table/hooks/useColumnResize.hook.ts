@@ -1,9 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-
 import {
   DEFAULT_MAX_COLUMN_WIDTH,
   DEFAULT_MIN_COLUMN_WIDTH,
 } from '@repo/ui/components/Table/Table.constants';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useSyncColumnsSizing } from '../contexts/TableConfig/columns/actions/useSyncColumnsSizing.hook';
 

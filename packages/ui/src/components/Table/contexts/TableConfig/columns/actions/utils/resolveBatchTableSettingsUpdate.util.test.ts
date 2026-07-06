@@ -1,5 +1,3 @@
-import { describe, expect, it, vi } from 'vitest';
-
 import type {
   ColumnFiltersState,
   ColumnOrderState,
@@ -8,6 +6,8 @@ import type {
   ColumnVisibilityState,
   SortingState,
 } from '@repo/ui/components/Table/Table.types';
+
+import { describe, expect, it, vi } from 'vitest';
 
 import { resolveBatchTableSettingsUpdate } from './resolveBatchTableSettingsUpdate.util';
 

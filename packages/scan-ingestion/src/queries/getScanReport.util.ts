@@ -11,7 +11,7 @@ export type ScanReportRow = {
   readonly report_json: Record<string, unknown>;
   readonly report_markdown: string;
   readonly scan_id: string;
-  readonly top_risk: string | null;
+  readonly top_risk: null | string;
 };
 
 type GetScanReportArgs = {

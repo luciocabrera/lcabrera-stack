@@ -1,12 +1,12 @@
-import * as stylex from '@stylexjs/stylex';
-import { useEffect, useRef, useState } from 'react';
-import { useFetcher } from 'react-router';
+import type { BrowseDirectoryResult } from '@repo/ui/routing/browseDirectory.types';
 
 import { Button } from '@repo/ui/components/Button';
 import { FolderIcon } from '@repo/ui/components/Icons';
 import { Modal } from '@repo/ui/components/Modal';
 import { ICON_SIZE_SM } from '@repo/ui/design-system/constants/iconSizes.constants';
-import type { BrowseDirectoryResult } from '@repo/ui/routing/browseDirectory.types';
+import * as stylex from '@stylexjs/stylex';
+import { useEffect, useRef, useState } from 'react';
+import { useFetcher } from 'react-router';
 
 import type { PathBrowserModalProps } from './PathBrowserModal.types';
 

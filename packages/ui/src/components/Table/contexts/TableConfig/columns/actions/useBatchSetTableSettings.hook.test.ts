@@ -1,8 +1,5 @@
 // @vitest-environment jsdom
 
-import { act, renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-
 import type {
   ColumnFiltersState,
   ColumnOrderState,
@@ -11,6 +8,9 @@ import type {
   ColumnVisibilityState,
   SortingState,
 } from '@repo/ui/components/Table/Table.types';
+
+import { act, renderHook } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useBatchSetTableSettings } from './useBatchSetTableSettings.hook';
 

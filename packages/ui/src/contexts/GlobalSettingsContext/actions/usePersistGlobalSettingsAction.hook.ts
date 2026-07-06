@@ -1,5 +1,3 @@
-import { useFetcher, useLocation } from 'react-router';
-
 import type { GlobalSettingsState } from '@repo/ui/types/globalSettings.types';
 
 import { PERSIST_COOKIE_ACTION } from '@repo/ui/constants/globalSettings.constants';
@@ -8,6 +6,7 @@ import {
   serializeGlobalSettingsForCookie,
 } from '@repo/ui/utils/globalSettings';
 import { getAppScopedCookieKey } from '@repo/ui/utils/storage';
+import { useFetcher, useLocation } from 'react-router';
 
 import { useGlobalSettingsContextValue } from '../useGlobalSettingsContextValue.hook';
 

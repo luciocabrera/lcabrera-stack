@@ -1,9 +1,8 @@
-import * as stylex from '@stylexjs/stylex';
-
 import {
   SidePanelSectionHeader,
   SidePanelSectionMain,
 } from '@repo/ui/components/SidePanel';
+import * as stylex from '@stylexjs/stylex';
 
 import type { FilterSectionProps } from './FilterSection.types';
 

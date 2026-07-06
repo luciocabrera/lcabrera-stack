@@ -4,6 +4,7 @@ export {
   MAX_WIDE_ALLTYPES_LIMIT,
   SANITY_TABLES,
 } from './constants/server.constants.js';
+export { HttpError } from './errors/httpError.js';
 export {
   CAR_SALES_SORTABLE_COLUMNS,
   DEFAULT_CAR_SALES_SORTING,
@@ -16,12 +17,12 @@ export type {
 } from './features/carSales/carSales.types.js';
 export { createDbSanityRepository } from './features/dbSanity/dbSanity.repository.js';
 export type { DbSanityRepository } from './features/dbSanity/dbSanity.repository.js';
+export { buildEnterpriseOrdersWhereClause } from './features/enterpriseOrders/buildEnterpriseOrdersWhereClause.util.js';
 export {
   DEFAULT_ENTERPRISE_ORDER_SORTING,
   ENTERPRISE_ORDER_ALLOWED_COLUMNS,
   ENTERPRISE_ORDER_DISTINCT_COLUMNS,
 } from './features/enterpriseOrders/enterpriseOrders.constants.js';
-export { buildEnterpriseOrdersWhereClause } from './features/enterpriseOrders/buildEnterpriseOrdersWhereClause.util.js';
 export { createEnterpriseOrdersRepository } from './features/enterpriseOrders/enterpriseOrders.repository.js';
 export type { EnterpriseOrdersRepository } from './features/enterpriseOrders/enterpriseOrders.repository.js';
 export type {
@@ -42,7 +43,6 @@ export {
 } from './features/wideAlltypes150/wideAlltypes150.constants.js';
 export { createWideAlltypes150Repository } from './features/wideAlltypes150/wideAlltypes150.repository.js';
 export type { WideAlltypes150Repository } from './features/wideAlltypes150/wideAlltypes150.repository.js';
-export { HttpError } from './errors/httpError.js';
 export type {
   ApiSuccessResponse,
   CountRow,

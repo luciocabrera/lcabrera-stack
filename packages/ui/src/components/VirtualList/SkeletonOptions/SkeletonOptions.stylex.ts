@@ -1,8 +1,7 @@
-import * as stylex from '@stylexjs/stylex';
-
 import { spacing } from '@repo/ui/design-system/tokens/base.stylex';
 import { colors } from '@repo/ui/design-system/tokens/colors.stylex';
 import { skeleton } from '@repo/ui/design-system/tokens/commons.stylex';
+import * as stylex from '@stylexjs/stylex';
 
 export const styles = stylex.create({
   option: {

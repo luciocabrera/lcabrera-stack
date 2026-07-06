@@ -1,13 +1,11 @@
+import { closePool, getPool } from '@repo/data-access/db/getPool.util';
 import { mkdtempSync, realpathSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-
-import { closePool, getPool } from '@repo/data-access/db/getPool.util';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { runQueuedScan } from './runQueuedScan.ts';
-
 import { createRunStatusHub } from '../ws/runStatusHub.ts';
+import { runQueuedScan } from './runQueuedScan.ts';
 
 describe('runQueuedScan (deterministic linter branch)', () => {
   let projectDir: string;
@@ -87,5 +85,5 @@ describe('runQueuedScan (deterministic linter branch)', () => {
     expect(report.rows[0]?.top_risk).toContain(
       'No oxlint/eslint configuration detected',
     );
-  }, 20000);
+  }, 20_000);
 });

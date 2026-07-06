@@ -1,6 +1,5 @@
-import * as stylex from '@stylexjs/stylex';
-
 import { ClearResetToolbarButtons } from '@repo/ui/components/Table/ColumnSettingsDrawer/ClearResetToolbarButtons/ClearResetToolbarButtons.component';
+import * as stylex from '@stylexjs/stylex';
 
 import type { SortingSectionToolbarProps } from './SortingSectionToolbar.types';
 

@@ -1,5 +1,3 @@
-import * as stylex from '@stylexjs/stylex';
-
 import { Button } from '@repo/ui/components/Button';
 import { PinLeftIcon, PinRightIcon } from '@repo/ui/components/Icons';
 import {
@@ -8,6 +6,7 @@ import {
   SidePanelSectionMain,
 } from '@repo/ui/components/SidePanel';
 import { ICON_SIZE_MD } from '@repo/ui/design-system/constants';
+import * as stylex from '@stylexjs/stylex';
 
 import type { PinningSectionProps } from './PinningSection.types';
 

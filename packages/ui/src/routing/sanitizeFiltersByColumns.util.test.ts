@@ -1,10 +1,10 @@
-import { describe, expect, it } from 'vitest';
-
 import type {
   ColumnFiltersState,
   TableColumn,
 } from '@repo/ui/components/Table';
 import type { ColumnFilter } from '@repo/ui/types/filterOperators.types';
+
+import { describe, expect, it } from 'vitest';
 
 import { sanitizeFiltersByColumns } from './sanitizeFiltersByColumns.util';
 

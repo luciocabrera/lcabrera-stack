@@ -1,10 +1,10 @@
-import { describe, expect, it } from 'vitest';
-
 import type {
   ColumnFiltersState,
   ColumnSizingState,
   SortingState,
 } from '@repo/ui/components/Table/Table.types';
+
+import { describe, expect, it } from 'vitest';
 
 import { buildBatchTableSettingsUpdate } from './buildBatchTableSettingsUpdate.util';
 

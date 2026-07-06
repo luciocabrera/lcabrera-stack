@@ -118,12 +118,25 @@ Selection guideline:
 
 ### Monorepo-Wide Commands (run from repo root)
 
-| Task                       | Command            |
-| -------------------------- | ------------------ |
-| Verify everything is ready | `vp run ready`     |
-| Run all tests recursively  | `vp run test -r`   |
-| Build all apps             | `vp run build:all` |
-| Start dev servers          | `vp run dev`       |
+Root scripts are **orchestration only** — anything project-specific lives in that project's own package.json. The `<task>:all` family fans out recursively in workspace dependency order.
+
+| Task                                     | Command                                                |
+| ---------------------------------------- | ------------------------------------------------------ |
+| Verify everything is ready               | `vp run ready`                                         |
+| Run all tests (every workspace)          | `vp run test:all`                                      |
+| Build all workspaces                     | `vp run build:all`                                     |
+| Lint everything WITH fix (oxlint+eslint) | `vp run lint:all`                                      |
+| Format everything                        | `vp run format:all`                                    |
+| Typegen (both React Router apps)         | `vp run typegen:all`                                   |
+| Full gate (typegen+check+tests)          | `vp run check:safe`                                    |
+| Dev servers (frontend + express api)     | `vp run dev` (`dev:fast` = fastify, `dev:cqms` = CQMS) |
+| Prod servers (frontend + express api)    | `vp run start` (`start:fast`, `start:cqms`)            |
+
+There is deliberately **no `start:all`/`dev:all`**: `car-sales-api` and `car-sales-api-fast` are performance-comparison alternatives serving the same domain and must never run at the same time — always pick one combo.
+
+**Both linters run in every workspace.** Oxlint (`vp lint`) covers the whole tree from the root; the eslint pass (`vp run lint:eslint` / `lint:eslint:check`) exists in all 15 workspaces — React workspaces use `@repo/vite-configs/eslint-custom-rules`, node/library workspaces use `@repo/vite-configs/eslint-base-custom-rules` (same stack minus React/StyleX, and without `clean-import-paths`, which strips the import extensions node-resolution code requires). Inherited eslint violations are baselined per workspace in `eslint-suppressions.json` (ESLint bulk suppressions) — **new violations fail the gate**; burn debt down and shrink the baseline with `npx eslint . --config eslint.config.mjs --prune-suppressions`. Never add new entries by hand — fix the code instead.
+
+Known constraint: `scan-orchestrator`'s queue integration test shares the local CQMS Postgres queue — while `vp run dev:cqms` is running, the live orchestrator races the test for queued scans and `vp run test:all` can flake on `runQueuedScan.test.ts` (duplicate `reports_scan_id_key`). Stop the CQMS dev session before a full test run, or treat that single failure as environmental.
 
 ### Fallow Static Analysis (run from repo root)
 
@@ -155,13 +168,13 @@ CI runs `fallow audit --gate new-only` on every PR (`check-safe.yml`) — it fai
 
 ### Local Database Workflow (run from repo root)
 
-| Task                     | Command            |
-| ------------------------ | ------------------ |
-| Start local PostgreSQL   | `vp run db:up`     |
-| Check DB status          | `vp run db:status` |
-| Seed data                | `vp run seed`      |
-| Start + seed in one step | `vp run db:seed`   |
-| Stop local PostgreSQL    | `vp run db:down`   |
+| Task                     | Command                                                              |
+| ------------------------ | -------------------------------------------------------------------- |
+| Start local PostgreSQL   | `vp run db:up`                                                       |
+| Check DB status          | `vp run db:status`                                                   |
+| Seed data                | `vp run --filter car-sales-api seed` (or `vp run seed` from the app) |
+| Start + seed in one step | `vp run --filter car-sales-api db:seed`                              |
+| Stop local PostgreSQL    | `vp run db:down`                                                     |
 
 The API server (`apps/api-server/`) reads env from `docker/local/.env`. The frontend proxies `/api` to `http://localhost:3001`.
 

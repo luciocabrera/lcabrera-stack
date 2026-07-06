@@ -1,9 +1,9 @@
-import { describe, expect, it } from 'vitest';
-
 import type {
   ColumnFiltersState,
   ColumnSizingState,
 } from '@repo/ui/components/Table/Table.types';
+
+import { describe, expect, it } from 'vitest';
 
 import { buildPersistencePayload } from './buildPersistencePayload.util';
 

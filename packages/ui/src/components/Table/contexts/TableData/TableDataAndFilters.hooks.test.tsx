@@ -2,11 +2,10 @@
 
 import type { ReactNode } from 'react';
 
+import { createMockStore } from '@repo/ui/utils/tests/createMockStore.util';
 import { act, renderHook } from '@testing-library/react';
 import { createElement } from 'react';
 import { describe, expect, it } from 'vitest';
-
-import { createMockStore } from '@repo/ui/utils/tests/createMockStore.util';
 
 import type { FiltersDataContextValue } from '../FiltersData/FiltersDataContext.types';
 import type { TableDataContextValue } from './TableDataContext.types';

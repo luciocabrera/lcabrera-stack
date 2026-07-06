@@ -1,12 +1,11 @@
 // @vitest-environment jsdom
 
+import type { ThemeContextValue } from '@repo/ui/types/theme.types';
 import type { ReactNode } from 'react';
 
 import { renderHook } from '@testing-library/react';
 import { createElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
-
-import type { ThemeContextValue } from '@repo/ui/types/theme.types';
 
 vi.mock('@repo/ui/contexts/ThemeContext', async () => {
   const { createContext } = await import('react');

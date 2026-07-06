@@ -1,6 +1,5 @@
-import type { ReactNode } from 'react';
-
 import type { DataKey } from '@repo/ui/components/Table/Table.types';
+import type { ReactNode } from 'react';
 
 export type InfiniteScroll<TData, TResponse> = {
   readonly dataSelector?: (response: TResponse) => readonly TData[];

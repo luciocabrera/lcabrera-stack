@@ -1,0 +1,60 @@
+{
+  "src/cqmsRepoRoot.util.ts": {
+    "unicorn/import-style": {
+      "count": 1
+    }
+  },
+  "src/queue/listenForQueuedScans.ts": {
+    "unicorn/prefer-await": {
+      "count": 4
+    }
+  },
+  "src/queue/processQueue.ts": {
+    "unicorn/prefer-await": {
+      "count": 2
+    }
+  },
+  "src/queue/runQueuedScan.test.ts": {
+    "local-rules/destructuring-for-functions": {
+      "count": 1
+    },
+    "security/detect-non-literal-fs-filename": {
+      "count": 1
+    },
+    "unicorn/import-style": {
+      "count": 1
+    },
+    "unicorn/max-nested-calls": {
+      "count": 1
+    }
+  },
+  "src/queue/runQueuedScan.ts": {
+    "local-rules/destructuring-for-functions": {
+      "count": 3
+    },
+    "security/detect-non-literal-fs-filename": {
+      "count": 5
+    },
+    "unicorn/import-style": {
+      "count": 1
+    },
+    "unicorn/prefer-await": {
+      "count": 1
+    }
+  },
+  "src/ws/createHttpServer.ts": {
+    "local-rules/destructuring-for-functions": {
+      "count": 1
+    }
+  },
+  "src/ws/runStatusHub.test.ts": {
+    "local-rules/destructuring-for-functions": {
+      "count": 1
+    }
+  },
+  "src/ws/runStatusHub.ts": {
+    "local-rules/destructuring-for-functions": {
+      "count": 2
+    }
+  }
+}

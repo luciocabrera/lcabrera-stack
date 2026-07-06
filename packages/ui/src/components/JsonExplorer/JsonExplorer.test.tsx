@@ -2,12 +2,11 @@
 
 import type { ReactNode } from 'react';
 
+import { AppProviders } from '@repo/ui/components/AppProviders';
+import { inferTableColumnsFromJson } from '@repo/ui/components/Table/utils/inferTableColumnsFromJson.util';
 import { cleanup, render, screen } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
-
-import { AppProviders } from '@repo/ui/components/AppProviders';
-import { inferTableColumnsFromJson } from '@repo/ui/components/Table/utils/inferTableColumnsFromJson.util';
 
 import { JsonExplorer } from './JsonExplorer.component';
 

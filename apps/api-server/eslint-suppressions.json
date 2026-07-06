@@ -1,0 +1,43 @@
+{
+  "src/app/app.ts": {
+    "local-rules/destructuring-for-functions": {
+      "count": 1
+    },
+    "unicorn/no-null": {
+      "count": 1
+    }
+  },
+  "src/config/env.schema.ts": {
+    "unicorn/no-array-callback-reference": {
+      "count": 1
+    },
+    "unicorn/prefer-includes-over-repeated-comparisons": {
+      "count": 1
+    }
+  },
+  "src/features/enterpriseOrders/enterpriseOrders.controller.ts": {
+    "unicorn/prefer-number-coercion": {
+      "count": 1
+    }
+  },
+  "src/middleware/error.middleware.ts": {
+    "@typescript-eslint/no-unused-vars": {
+      "count": 1
+    }
+  },
+  "src/utils/createRequestHandler.util.ts": {
+    "unicorn/prefer-await": {
+      "count": 1
+    }
+  },
+  "src/utils/delay.util.test.ts": {
+    "unicorn/prefer-await": {
+      "count": 1
+    }
+  },
+  "src/utils/readQueryInteger.util.ts": {
+    "unicorn/prefer-number-coercion": {
+      "count": 1
+    }
+  }
+}

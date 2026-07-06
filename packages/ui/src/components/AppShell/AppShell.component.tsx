@@ -1,11 +1,10 @@
-import * as stylex from '@stylexjs/stylex';
-import { Outlet } from 'react-router';
-
 import { AppNavigation } from '@repo/ui/components/AppNavigation';
 import { NotificationCenter } from '@repo/ui/components/NotificationCenter';
 import { darkTheme } from '@repo/ui/design-system/themes/dark.stylex';
 import { lightTheme } from '@repo/ui/design-system/themes/light.stylex';
 import { useTheme } from '@repo/ui/hooks/useTheme.hook';
+import * as stylex from '@stylexjs/stylex';
+import { Outlet } from 'react-router';
 
 import type { AppShellProps } from './AppShell.types';
 

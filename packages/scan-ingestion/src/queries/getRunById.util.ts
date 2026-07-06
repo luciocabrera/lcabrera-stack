@@ -2,16 +2,16 @@ import { getPool } from '@repo/data-access/db/getPool.util';
 
 export type RunRow = {
   readonly created_at: string;
-  readonly finished_at: string | null;
-  readonly git_branch: string | null;
-  readonly git_commit_sha: string | null;
+  readonly finished_at: null | string;
+  readonly git_branch: null | string;
+  readonly git_commit_sha: null | string;
   readonly id: string;
   readonly origin: string;
   readonly project_id: string;
   readonly requested_scanners: readonly string[];
-  readonly started_at: string | null;
+  readonly started_at: null | string;
   readonly status: string;
-  readonly triggered_by: string | null;
+  readonly triggered_by: null | string;
 };
 
 type GetRunByIdArgs = {

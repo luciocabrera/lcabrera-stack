@@ -1,6 +1,6 @@
-import { vi } from 'vitest';
-
 import type { ColumnOrderSectionModalsState } from '@repo/ui/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/ColumnOrderSectionContext.types';
+
+import { vi } from 'vitest';
 
 type CreateColumnOrderSectionActionMocksArgs = {
   readonly initialDrawerState: LooseDrawerState;

@@ -1,12 +1,11 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
-
-import type { TabFieldNode } from '@repo/ui/components/Form/Form.types';
 import type { FormFieldsState } from '@repo/ui/components/Form/contexts/FormContext/FormContext.types';
+import type { TabFieldNode } from '@repo/ui/components/Form/Form.types';
 
 import { FormProvider } from '@repo/ui/components/Form/contexts';
+import { cleanup, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import { FormFieldTabs } from './FormFieldTabs.component';
 

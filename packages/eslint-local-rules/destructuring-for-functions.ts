@@ -5,19 +5,6 @@
 import type { Rule } from 'eslint';
 
 const rule: Rule.RuleModule = {
-  meta: {
-    docs: {
-      description:
-        'Enforce object parameter pattern for functions with multiple parameters',
-      recommended: false,
-    },
-    messages: {
-      useObjectParam:
-        'Functions with multiple parameters should use a single object parameter with a named type.',
-    },
-    schema: [],
-    type: 'suggestion',
-  },
   create(context) {
     return {
       ArrowFunctionExpression(node: any) {
@@ -30,6 +17,19 @@ const rule: Rule.RuleModule = {
         checkFunction(node, context);
       },
     };
+  },
+  meta: {
+    docs: {
+      description:
+        'Enforce object parameter pattern for functions with multiple parameters',
+      recommended: false,
+    },
+    messages: {
+      useObjectParam:
+        'Functions with multiple parameters should use a single object parameter with a named type.',
+    },
+    schema: [],
+    type: 'suggestion',
   },
 };
 

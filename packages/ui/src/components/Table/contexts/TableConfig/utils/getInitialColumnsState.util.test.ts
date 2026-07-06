@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
-
 import type { TableColumn } from '@repo/ui/components/Table/Table.types';
+
+import { describe, expect, it } from 'vitest';
 
 import { getInitialColumnsState } from './getInitialColumnsState.util';
 
@@ -31,9 +31,9 @@ describe('getInitialColumnsState (TableConfig)', () => {
 
   it('normalizes a partial columnPinning object (cookie miss) without crashing', () => {
     const result = getInitialColumnsState({
-      columns,
       // A `{}` pinning value can arrive when no pinning cookie is present.
       columnPinning: {} as never,
+      columns,
       persistenceKey,
     });
     expect(result.columnPinning).toEqual({ left: [], right: [] });

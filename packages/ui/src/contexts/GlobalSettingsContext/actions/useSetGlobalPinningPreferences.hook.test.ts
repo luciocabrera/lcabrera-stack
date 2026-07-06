@@ -1,14 +1,13 @@
 // @vitest-environment jsdom
 
-import { act, renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-
 import type { GlobalSettingsState } from '@repo/ui/types/globalSettings.types';
 
 import {
   createMockStore,
   type MockStore,
 } from '@repo/ui/utils/tests/createMockStore.util';
+import { act, renderHook } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const settingsStoreRef: {
   current: MockStore<GlobalSettingsState | undefined>;

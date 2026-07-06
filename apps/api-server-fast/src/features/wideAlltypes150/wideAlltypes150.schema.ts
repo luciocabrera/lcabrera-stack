@@ -1,5 +1,6 @@
-import { DEFAULT_PAGE_LIMIT, MAX_WIDE_ALLTYPES_LIMIT } from 'api-shared';
 import type { SortRule } from 'api-shared';
+
+import { DEFAULT_PAGE_LIMIT, MAX_WIDE_ALLTYPES_LIMIT } from 'api-shared';
 
 import { WIDE_ALLTYPES_SORTABLE_COLUMNS } from './wideAlltypes150.constants';
 
@@ -18,30 +19,30 @@ export type PaginatedWideAlltypesQuery = {
  * Replaces the Zod-based `parseWideAlltypesSorting` from the Express version.
  */
 export const paginatedWideAlltypesQuerySchema = {
-  type: 'object',
   properties: {
     limit: {
-      type: 'integer',
       default: DEFAULT_PAGE_LIMIT,
       maximum: MAX_WIDE_ALLTYPES_LIMIT,
       minimum: 1,
+      type: 'integer',
     },
-    skip: { type: 'integer', default: 0, minimum: 0 },
+    skip: { default: 0, minimum: 0, type: 'integer' },
     sort: {
-      type: 'array',
       default: [],
       items: {
-        type: 'object',
-        required: ['columnKey', 'direction'],
+        additionalProperties: false,
         properties: {
           columnKey: {
-            type: 'string',
             enum: [...WIDE_ALLTYPES_SORTABLE_COLUMNS],
+            type: 'string',
           },
-          direction: { type: 'string', enum: ['asc', 'desc'] },
+          direction: { enum: ['asc', 'desc'], type: 'string' },
         },
-        additionalProperties: false,
+        required: ['columnKey', 'direction'],
+        type: 'object',
       },
+      type: 'array',
     },
   },
+  type: 'object',
 };

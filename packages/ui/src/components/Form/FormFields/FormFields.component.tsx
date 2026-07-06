@@ -1,13 +1,12 @@
-import * as stylex from '@stylexjs/stylex';
-
 import { FormField } from '@repo/ui/components/Form/FormField/FormField.component';
+import * as stylex from '@stylexjs/stylex';
 
 import type { FormFieldsProps } from './FormFields.types';
 
 import { FormFieldGroup } from './FormFieldGroup/FormFieldGroup.component';
 import { FormFieldRow } from './FormFieldRow/FormFieldRow.component';
-import { FormFieldTabs } from './FormFieldTabs/FormFieldTabs.component';
 import { styles } from './FormFields.stylex';
+import { FormFieldTabs } from './FormFieldTabs/FormFieldTabs.component';
 import { getFieldKey } from './utils/getFieldKey.util';
 
 /**

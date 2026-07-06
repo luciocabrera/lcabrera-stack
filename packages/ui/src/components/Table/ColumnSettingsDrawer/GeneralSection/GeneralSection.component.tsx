@@ -1,6 +1,3 @@
-import * as stylex from '@stylexjs/stylex';
-import { useState } from 'react';
-
 import type { WidthPreset } from '@repo/ui/components/Table/shared/ColumnWidthPresetButtons';
 
 import { Button } from '@repo/ui/components/Button';
@@ -15,6 +12,8 @@ import { useGetNormalizedColumn } from '@repo/ui/components/Table/contexts/Table
 import { ColumnWidthPresetButtons } from '@repo/ui/components/Table/shared/ColumnWidthPresetButtons';
 import { DEFAULT_MIN_COLUMN_WIDTH } from '@repo/ui/components/Table/Table.constants';
 import { ICON_SIZE_MD } from '@repo/ui/design-system/constants';
+import * as stylex from '@stylexjs/stylex';
+import { useState } from 'react';
 
 import type { GeneralSectionProps } from './GeneralSection.types';
 

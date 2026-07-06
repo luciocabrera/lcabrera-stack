@@ -18,6 +18,17 @@ import {
 
 import { sanitizeFiltersByColumns } from './sanitizeFiltersByColumns.util';
 
+/**
+ * Drawer open/pinned flags read from cookies so the loader can SSR-seed the
+ * table's initial meta state and avoid a hydration layout shift.
+ */
+type LoaderMetaUiFlags = {
+  readonly isColumnSettingsOpen?: boolean;
+  readonly isColumnSettingsPinned?: boolean;
+  readonly isTableSettingsOpen?: boolean;
+  readonly isTableSettingsPinned?: boolean;
+};
+
 type ReadTableLoaderStateFromRequestArgs<
   TData extends Record<string, unknown>,
 > = {
@@ -30,17 +41,6 @@ type ReadTableLoaderStateFromRequestArgs<
   readonly includeFilters?: boolean;
   readonly persistenceKey: string;
   readonly request: Request;
-};
-
-/**
- * Drawer open/pinned flags read from cookies so the loader can SSR-seed the
- * table's initial meta state and avoid a hydration layout shift.
- */
-type LoaderMetaUiFlags = {
-  readonly isColumnSettingsOpen?: boolean;
-  readonly isColumnSettingsPinned?: boolean;
-  readonly isTableSettingsOpen?: boolean;
-  readonly isTableSettingsPinned?: boolean;
 };
 
 type ReadTableLoaderStateFromRequestResult<TData> = {

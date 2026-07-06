@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
-
 import type { GlobalSettingsState } from '@repo/ui/types/globalSettings.types';
+
+import { describe, expect, it } from 'vitest';
 
 import { getGlobalSettingsFromCookie } from './getGlobalSettingsFromCookie.util';
 import {

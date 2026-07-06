@@ -2,11 +2,11 @@ import { getPool } from '@repo/data-access/db/getPool.util';
 
 export type ScanFindingRow = {
   readonly confidence: string;
-  readonly effort: string | null;
-  readonly evidence_excerpt: string | null;
+  readonly effort: null | string;
+  readonly evidence_excerpt: null | string;
   readonly finding_id: string;
   readonly fix: string;
-  readonly location_hint: string | null;
+  readonly location_hint: null | string;
   readonly location_path: string;
   readonly rule_id: string;
   readonly severity: string;
@@ -14,16 +14,16 @@ export type ScanFindingRow = {
   readonly why: string;
 };
 
+export type ScanFindingsResult = {
+  readonly rows: readonly ScanFindingRow[];
+  readonly total: number;
+};
+
 type GetScanFindingsArgs = {
   readonly limit: number;
   readonly scanId: string;
   readonly severity?: string;
   readonly skip: number;
-};
-
-export type ScanFindingsResult = {
-  readonly rows: readonly ScanFindingRow[];
-  readonly total: number;
 };
 
 /**

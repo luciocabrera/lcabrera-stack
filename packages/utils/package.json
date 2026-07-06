@@ -7,5 +7,11 @@
   "exports": {
     "./merge-arrays": "./merge-arrays.util.ts",
     "./merge-objects": "./merge-objects.util.ts"
+  },
+  "scripts": {
+    "test": "node node_modules/vitest/vitest.mjs run --passWithNoTests"
+  },
+  "devDependencies": {
+    "vitest": "catalog:"
   }
 }

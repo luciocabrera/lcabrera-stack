@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import { mockDialogElement } from '@repo/ui/utils/tests/mockDialogElement.util';
 import {
   cleanup,
   fireEvent,
@@ -7,10 +8,8 @@ import {
   screen,
   waitFor,
 } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createRoutesStub } from 'react-router';
-
-import { mockDialogElement } from '@repo/ui/utils/tests/mockDialogElement.util';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { FieldNode, FormMode } from './Form.types';
 
@@ -90,6 +89,7 @@ const renderForm = ({
 }) => {
   const Stub = createRoutesStub([
     {
+      action,
       Component: () => (
         <Form<Values>
           cancelTo='/list'
@@ -99,7 +99,6 @@ const renderForm = ({
           submitLabel='Save'
         />
       ),
-      action,
       path: '/',
     },
     { Component: () => <p>List Page</p>, path: '/list' },

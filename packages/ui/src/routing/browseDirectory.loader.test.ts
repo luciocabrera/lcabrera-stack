@@ -1,9 +1,8 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { RouterContextProvider } from 'react-router';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { loader } from './browseDirectory.loader';
 
@@ -29,7 +28,7 @@ describe('browseDirectory loader', () => {
   });
 
   afterAll(() => {
-    rmSync(root, { recursive: true, force: true });
+    rmSync(root, { force: true, recursive: true });
   });
 
   it('lists only real subdirectories of a real path, sorted by name', async () => {

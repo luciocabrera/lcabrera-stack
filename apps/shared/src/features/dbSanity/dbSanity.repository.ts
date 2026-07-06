@@ -1,9 +1,10 @@
-import { SANITY_TABLES } from '../../constants/server.constants.js';
 import type {
   CountRow,
   DbSanityResult,
   Queryable,
 } from '../../types/api.types.js';
+
+import { SANITY_TABLES } from '../../constants/server.constants.js';
 
 export type DbSanityRepository = {
   readonly getDbSanity: () => Promise<DbSanityResult>;

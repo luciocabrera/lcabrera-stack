@@ -340,6 +340,9 @@ importers:
       '@types/pg':
         specifier: 'catalog:'
         version: 8.20.0
+      eslint:
+        specifier: 'catalog:'
+        version: 10.6.0(jiti@2.7.0)
       nodemon:
         specifier: 'catalog:'
         version: 3.1.14
@@ -374,6 +377,9 @@ importers:
       '@types/pg':
         specifier: 'catalog:'
         version: 8.20.0
+      eslint:
+        specifier: 'catalog:'
+        version: 10.6.0(jiti@2.7.0)
       nodemon:
         specifier: 'catalog:'
         version: 3.1.14
@@ -544,6 +550,9 @@ importers:
       '@types/ws':
         specifier: 'catalog:'
         version: 8.18.1
+      eslint:
+        specifier: 'catalog:'
+        version: 10.6.0(jiti@2.7.0)
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
@@ -565,6 +574,9 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 26.1.0
+      eslint:
+        specifier: 'catalog:'
+        version: 10.6.0(jiti@2.7.0)
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
@@ -587,6 +599,9 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 26.1.0
+      eslint:
+        specifier: 'catalog:'
+        version: 10.6.0(jiti@2.7.0)
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
@@ -618,6 +633,9 @@ importers:
       '@types/pg':
         specifier: 'catalog:'
         version: 8.20.0
+      eslint:
+        specifier: 'catalog:'
+        version: 10.6.0(jiti@2.7.0)
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
@@ -642,8 +660,15 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.9(@opentelemetry/api@1.9.1)(@types/node@26.1.0)(@vitest/browser-preview@4.1.9)(@vitest/coverage-v8@4.1.9)(jsdom@29.1.1)(vite@8.1.3(@types/node@26.1.0)(jiti@2.7.0)(yaml@2.9.0))
 
-  packages/plugins: {}
+  packages/plugins:
+    devDependencies:
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.9(@opentelemetry/api@1.9.1)(@types/node@26.1.0)(@vitest/browser-preview@4.1.9)(@vitest/coverage-v8@4.1.9)(jsdom@29.1.1)(vite@8.1.3(@types/node@26.1.0)(jiti@2.7.0)(yaml@2.9.0))
 
   packages/scan-ingestion:
     dependencies:
@@ -666,6 +691,9 @@ importers:
       '@types/pg':
         specifier: 'catalog:'
         version: 8.20.0
+      eslint:
+        specifier: 'catalog:'
+        version: 10.6.0(jiti@2.7.0)
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
@@ -679,7 +707,11 @@ importers:
         specifier: 'catalog:'
         version: 4.1.9(@opentelemetry/api@1.9.1)(@types/node@26.1.0)(@vitest/browser-preview@4.1.9)(@vitest/coverage-v8@4.1.9)(jsdom@29.1.1)(vite@8.1.3(@types/node@26.1.0)(jiti@2.7.0)(yaml@2.9.0))
 
-  packages/ts-configs: {}
+  packages/ts-configs:
+    devDependencies:
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.9(@opentelemetry/api@1.9.1)(@types/node@26.1.0)(@vitest/browser-preview@4.1.9)(@vitest/coverage-v8@4.1.9)(jsdom@29.1.1)(vite@8.1.3(@types/node@26.1.0)(jiti@2.7.0)(yaml@2.9.0))
 
   packages/ui:
     dependencies:
@@ -708,6 +740,9 @@ importers:
       '@babel/preset-typescript':
         specifier: 'catalog:'
         version: 8.0.1
+      '@eslint/js':
+        specifier: 'catalog:'
+        version: 10.0.1(eslint@10.6.0(jiti@2.7.0))
       '@repo/vite-configs':
         specifier: workspace:*
         version: link:../vite-configs
@@ -732,9 +767,45 @@ importers:
       babel-plugin-react-compiler:
         specifier: 'catalog:'
         version: 1.0.0
+      eslint:
+        specifier: 'catalog:'
+        version: 10.6.0(jiti@2.7.0)
+      eslint-config-prettier:
+        specifier: 'catalog:'
+        version: 10.1.8(eslint@10.6.0(jiti@2.7.0))
+      eslint-plugin-local-rules:
+        specifier: 'catalog:'
+        version: 3.0.2
+      eslint-plugin-perfectionist:
+        specifier: 'catalog:'
+        version: 5.9.1(eslint@10.6.0(jiti@2.7.0))(typescript@6.0.3)
+      eslint-plugin-react-dom:
+        specifier: 'catalog:'
+        version: 5.11.0(eslint@10.6.0(jiti@2.7.0))(typescript@6.0.3)
+      eslint-plugin-react-hooks:
+        specifier: 'catalog:'
+        version: 7.1.1(eslint@10.6.0(jiti@2.7.0))
+      eslint-plugin-react-refresh:
+        specifier: 'catalog:'
+        version: 0.5.3(eslint@10.6.0(jiti@2.7.0))
+      eslint-plugin-react-x:
+        specifier: 'catalog:'
+        version: 5.11.0(eslint@10.6.0(jiti@2.7.0))(typescript@6.0.3)
+      eslint-plugin-security:
+        specifier: 'catalog:'
+        version: 4.0.1
+      eslint-plugin-unicorn:
+        specifier: 'catalog:'
+        version: 70.0.0(eslint@10.6.0(jiti@2.7.0))
+      globals:
+        specifier: 'catalog:'
+        version: 17.7.0
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
+      typescript-eslint:
+        specifier: 'catalog:'
+        version: 8.62.1(eslint@10.6.0(jiti@2.7.0))(typescript@6.0.3)
       vite:
         specifier: 'catalog:'
         version: 8.1.3(@types/node@26.1.0)(jiti@2.7.0)(yaml@2.9.0)
@@ -748,13 +819,20 @@ importers:
         specifier: 'catalog:'
         version: 4.1.9(@opentelemetry/api@1.9.1)(@types/node@26.1.0)(@vitest/browser-preview@4.1.9)(@vitest/coverage-v8@4.1.9)(jsdom@29.1.1)(vite@8.1.3(@types/node@26.1.0)(jiti@2.7.0)(yaml@2.9.0))
 
-  packages/utils: {}
+  packages/utils:
+    devDependencies:
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.9(@opentelemetry/api@1.9.1)(@types/node@26.1.0)(@vitest/browser-preview@4.1.9)(@vitest/coverage-v8@4.1.9)(jsdom@29.1.1)(vite@8.1.3(@types/node@26.1.0)(jiti@2.7.0)(yaml@2.9.0))
 
   packages/vite-configs:
     devDependencies:
       '@babel/preset-typescript':
         specifier: 'catalog:'
         version: 8.0.1
+      '@eslint/js':
+        specifier: 'catalog:'
+        version: 10.0.1(eslint@10.6.0(jiti@2.7.0))
       '@react-router/dev':
         specifier: 'catalog:'
         version: 8.1.0(@react-router/serve@8.1.0(react-router@8.1.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3))(react-router@8.1.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@6.0.3)(vite@8.1.3(@types/node@26.1.0)(jiti@2.7.0)(yaml@2.9.0))
@@ -770,12 +848,36 @@ importers:
       babel-plugin-react-compiler:
         specifier: 'catalog:'
         version: 1.0.0
+      eslint:
+        specifier: 'catalog:'
+        version: 10.6.0(jiti@2.7.0)
+      eslint-config-prettier:
+        specifier: 'catalog:'
+        version: 10.1.8(eslint@10.6.0(jiti@2.7.0))
+      eslint-plugin-perfectionist:
+        specifier: 'catalog:'
+        version: 5.9.1(eslint@10.6.0(jiti@2.7.0))(typescript@6.0.3)
+      eslint-plugin-security:
+        specifier: 'catalog:'
+        version: 4.0.1
+      eslint-plugin-unicorn:
+        specifier: 'catalog:'
+        version: 70.0.0(eslint@10.6.0(jiti@2.7.0))
+      globals:
+        specifier: 'catalog:'
+        version: 17.7.0
+      typescript-eslint:
+        specifier: 'catalog:'
+        version: 8.62.1(eslint@10.6.0(jiti@2.7.0))(typescript@6.0.3)
       vite-plugin-babel:
         specifier: 'catalog:'
         version: 1.7.3(@babel/core@7.29.7)(vite@8.1.3(@types/node@26.1.0)(jiti@2.7.0)(yaml@2.9.0))
       vite-plus:
         specifier: 'catalog:'
         version: 0.2.2(@opentelemetry/api@1.9.1)(@types/node@26.1.0)(@vitest/coverage-v8@4.1.9)(jiti@2.7.0)(jsdom@29.1.1)(typescript@6.0.3)(vite@8.1.3(@types/node@26.1.0)(jiti@2.7.0)(yaml@2.9.0))(yaml@2.9.0)
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.9(@opentelemetry/api@1.9.1)(@types/node@26.1.0)(@vitest/browser-preview@4.1.9)(@vitest/coverage-v8@4.1.9)(jsdom@29.1.1)(vite@8.1.3(@types/node@26.1.0)(jiti@2.7.0)(yaml@2.9.0))
 
 packages:
 

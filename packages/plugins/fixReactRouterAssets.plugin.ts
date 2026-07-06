@@ -59,8 +59,8 @@ const getClientCssFiles = ({
 };
 
 const ensureServerCssFile = ({
-  clientCssFiles,
   clientAssetsDir,
+  clientCssFiles,
   cssPath,
   serverBuildDir,
 }: {

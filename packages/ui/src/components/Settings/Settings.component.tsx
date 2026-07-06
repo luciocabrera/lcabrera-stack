@@ -1,6 +1,3 @@
-import * as stylex from '@stylexjs/stylex';
-import { useState } from 'react';
-
 import type { TabItem } from '@repo/ui/components/Tabs';
 
 import { Button } from '@repo/ui/components/Button';
@@ -24,6 +21,8 @@ import {
   useGetGlobalNavigationPreferences,
   useGetGlobalPinningPreferences,
 } from '@repo/ui/contexts/GlobalSettingsContext/selectors';
+import * as stylex from '@stylexjs/stylex';
+import { useState } from 'react';
 
 import type { SettingsDraft } from './Settings.types';
 
