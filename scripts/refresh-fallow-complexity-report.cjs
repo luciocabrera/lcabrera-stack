@@ -222,14 +222,14 @@ Current metrics from JSON:
 
 Use this report as triage guidance grounded on the current JSON snapshot. For planning and trend tracking, avoid terminal-parsed values and rely on the artifact above.
 
-## Representative High-Severity Findings
+## Top High-Severity Findings (limit: ${topFindingsLimit} — rerun with --top=N for more)
 
-${buildTopFindings(findings)}
+${buildTopFindings(findings, topFindingsLimit)}
 
 ## Drift Control
 
 1. Run this script before updating planning docs.
-2. Keep apps/react-router/docs/coordination/PROGRESS_TRACKER.md baseline aligned to this JSON snapshot.
+2. Never copy these numbers into other docs — reference the canonical artifacts in reports/fallow/ instead (single source of truth).
 3. Treat older threshold counts as historical context only.
 `;
 
