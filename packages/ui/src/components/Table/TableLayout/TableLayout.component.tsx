@@ -30,7 +30,11 @@ export const TableLayout = <
         metaState={metaState}
       >
         <FiltersDataProvider<TData> columns={columnsState.columns}>
-          <TableSuspenseBoundary<TData, TResponse> dataPromise={dataPromise}>
+          <TableSuspenseBoundary<TData, TResponse>
+            actions={actions}
+            crud={crud}
+            dataPromise={dataPromise}
+          >
             {(response) => (
               <Table<TData, TResponse>
                 actions={actions}

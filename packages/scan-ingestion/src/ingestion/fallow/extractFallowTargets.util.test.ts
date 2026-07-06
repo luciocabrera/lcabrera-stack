@@ -11,8 +11,8 @@ describe('extractFallowTargets', () => {
           {
             category: 'break_circular_dependency',
             confidence: 'high',
-            effort: 'medium',
             efficiency: 13.8,
+            effort: 'medium',
             evidence: { cycle_path: ['src/A.tsx', 'src/B.tsx'] },
             factors: [{ metric: 'fan_in', threshold: 3, value: 4 }],
             path: 'src/FormFields.component.tsx',
@@ -27,8 +27,8 @@ describe('extractFallowTargets', () => {
       {
         category: 'break_circular_dependency',
         confidence: 'high',
-        effort: 'medium',
         efficiency: 13.8,
+        effort: 'medium',
         evidence: { cycle_path: ['src/A.tsx', 'src/B.tsx'] },
         factors: [{ metric: 'fan_in', threshold: 3, value: 4 }],
         file_path: 'src/FormFields.component.tsx',

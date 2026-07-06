@@ -16,13 +16,64 @@ const DEFAULT_TITLE_SINGULAR = 'Record';
 export const TableRowActionsMenu = <TData extends Record<string, unknown>>({
   crud,
   customActions,
+  isLoadingState = false,
   row,
   titleSingular,
 }: TableRowActionsMenuProps<TData>) => {
   const fetcher = useFetcher();
   const menuRef = useRef<HTMLDivElement>(null);
   const menuId = useId().replaceAll(':', '');
+  const triggerId = `${menuId}-trigger`;
   const resolvedTitleSingular = titleSingular ?? DEFAULT_TITLE_SINGULAR;
+
+  const positionMenuToTrigger = () => {
+    const menuElement = menuRef.current;
+    const triggerElement = document.getElementById(triggerId);
+
+    if (!menuElement || !triggerElement) {
+      return;
+    }
+
+    const triggerRect = triggerElement.getBoundingClientRect();
+    const menuRect = menuElement.getBoundingClientRect();
+
+    const viewportPadding = 8;
+    const top = triggerRect.bottom + 4;
+    const alignedLeft = triggerRect.right - menuRect.width;
+    const maxLeft = window.innerWidth - menuRect.width - viewportPadding;
+    const left = Math.min(maxLeft, Math.max(viewportPadding, alignedLeft));
+
+    menuElement.style.margin = '0';
+    menuElement.style.left = `${left}px`;
+    menuElement.style.position = 'fixed';
+    menuElement.style.top = `${top}px`;
+  };
+
+  const handleToggleMenu = () => {
+    const menuElement = menuRef.current;
+
+    if (!menuElement) {
+      return;
+    }
+
+    if (menuElement.matches(':popover-open')) {
+      menuElement.hidePopover();
+
+      return;
+    }
+
+    menuElement.showPopover();
+    requestAnimationFrame(positionMenuToTrigger);
+  };
+
+  if (isLoadingState) {
+    return (
+      <div {...stylex.props(styles.trigger)}>
+        <TableActionButton isDisabled menuId={menuId} />
+      </div>
+    );
+  }
+
   const rowId = resolveCrudRowId({ idAccessor: crud.idAccessor, row });
 
   const handleDelete = () => {
@@ -50,7 +101,11 @@ export const TableRowActionsMenu = <TData extends Record<string, unknown>>({
 
   return (
     <div {...stylex.props(styles.trigger)}>
-      <TableActionButton menuId={menuId} />
+      <TableActionButton
+        menuId={menuId}
+        onClick={handleToggleMenu}
+        triggerId={triggerId}
+      />
       <div
         id={menuId}
         popover='auto'

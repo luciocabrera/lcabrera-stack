@@ -37,17 +37,15 @@ export const fallowUnusedDependencySchema = z.object({
   used_in_workspaces: z.array(z.string()).nullish(),
 });
 
+const fallowImportSiteSchema = z.object({
+  col: z.number().nullish(),
+  line: z.number().nullish(),
+  path: z.string().default(''),
+});
+
 export const fallowUnlistedDependencySchema = z.object({
   actions: fallowActionListSchema,
-  imported_from: z
-    .array(
-      z.object({
-        col: z.number().nullish(),
-        line: z.number().nullish(),
-        path: z.string().default(''),
-      }),
-    )
-    .default([]),
+  imported_from: z.array(fallowImportSiteSchema).default([]),
   package_name: z.string().default(''),
 });
 
@@ -173,8 +171,8 @@ export const fallowLargeFunctionSchema = z.object({
 export const fallowTargetSchema = z.object({
   category: z.string().nullish(),
   confidence: z.string().nullish(),
-  effort: z.string().nullish(),
   efficiency: z.number().nullish(),
+  effort: z.string().nullish(),
   evidence: z.unknown().nullish(),
   factors: z.unknown().nullish(),
   path: z.string().default(''),
@@ -248,12 +246,12 @@ const fallowHealthSchema = z.object({
   vital_signs: fallowVitalSignsSchema.nullish(),
 });
 
+const fallowTelemetrySchema = z.object({
+  analysis_run_id: z.string().nullish(),
+});
+
 export const fallowRawSchema = z.object({
-  _meta: z
-    .object({
-      telemetry: z.object({ analysis_run_id: z.string().nullish() }).nullish(),
-    })
-    .nullish(),
+  _meta: z.object({ telemetry: fallowTelemetrySchema.nullish() }).nullish(),
   check: fallowCheckSchema.nullish(),
   dupes: fallowDupesSchema.nullish(),
   elapsed_ms: z.number().nullish(),

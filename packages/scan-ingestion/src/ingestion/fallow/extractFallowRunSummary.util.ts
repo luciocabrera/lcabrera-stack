@@ -1,6 +1,5 @@
+import type { FallowRunSummaryInput } from './fallowDetail.types.ts';
 import type { FallowRaw } from './fallowRaw.schema.ts';
-
-import { type FallowRunSummaryInput } from './fallowDetail.types.ts';
 
 type ExtractFallowRunSummaryArgs = {
   readonly raw: FallowRaw;
@@ -42,13 +41,13 @@ export const extractFallowRunSummary = ({
     dead_exports: counts?.dead_exports ?? undefined,
     dead_file_pct: vitalSigns?.dead_file_pct ?? undefined,
     dead_files: counts?.dead_files ?? undefined,
-    duplication_percentage: dupesStats?.duplication_percentage ?? undefined,
     dupes_duplicated_lines: dupesStats?.duplicated_lines ?? undefined,
     dupes_duplicated_tokens: dupesStats?.duplicated_tokens ?? undefined,
     dupes_files_with_clones: dupesStats?.files_with_clones ?? undefined,
     dupes_total_files: dupesStats?.total_files ?? undefined,
     dupes_total_lines: dupesStats?.total_lines ?? undefined,
     dupes_total_tokens: dupesStats?.total_tokens ?? undefined,
+    duplication_percentage: dupesStats?.duplication_percentage ?? undefined,
     elapsed_ms: raw.elapsed_ms ?? undefined,
     entry_points: raw.check?.entry_points ?? undefined,
     fallow_version: raw.version ?? undefined,

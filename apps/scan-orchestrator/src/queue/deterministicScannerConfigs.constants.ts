@@ -23,6 +23,11 @@ export const DETERMINISTIC_SCANNER_CONFIGS = {
     scriptPath:
       '.github/skills/linter-checker/scripts/generate-eslint-report.mjs',
   },
+  fallow: {
+    rawArtifactFileName: 'fallow.raw.json',
+    scriptPath:
+      '.github/skills/fallow-code-checker/scripts/generate-fallow-report.mjs',
+  },
   oxlint: {
     rawArtifactFileName: 'oxlint.raw.json',
     scriptPath:

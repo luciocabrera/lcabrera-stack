@@ -1,13 +1,13 @@
 import { getPool } from '@repo/data-access/db/getPool.util';
 
 export type ScanFallowSummary = {
-  readonly average_maintainability: number | null;
+  readonly average_maintainability: null | number;
   readonly check_total_issues: number;
   readonly circular_dependency_count: number;
   readonly clone_group_count: number;
   readonly clone_instance_count: number;
   readonly dead_code_count: number;
-  readonly fallow_version: string | null;
+  readonly fallow_version: null | string;
   readonly file_score_count: number;
   readonly files_analyzed: number;
   readonly function_finding_count: number;

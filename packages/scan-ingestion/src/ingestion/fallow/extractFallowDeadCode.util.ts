@@ -1,6 +1,5 @@
+import type { FallowDeadCodeInput } from './fallowDetail.types.ts';
 import type { FallowRaw } from './fallowRaw.schema.ts';
-
-import { type FallowDeadCodeInput } from './fallowDetail.types.ts';
 
 type ExtractFallowDeadCodeArgs = {
   readonly raw: FallowRaw;

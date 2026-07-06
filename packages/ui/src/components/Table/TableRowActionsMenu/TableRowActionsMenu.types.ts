@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 export type TableRowActionsMenuProps<TData extends Record<string, unknown>> = {
   readonly crud: TableCrudConfig<TData>;
   readonly customActions?: ReactNode;
+  readonly isLoadingState?: boolean;
   readonly row: TData;
   readonly titleSingular?: string;
 };

@@ -1,3 +1,112 @@
+export type FallowCircularDependencyInput = {
+  readonly col?: number;
+  readonly cycle_length: number;
+  readonly edges?: readonly unknown[];
+  readonly entry_file_path?: string;
+  readonly files: readonly string[];
+  readonly line?: number;
+};
+
+export type FallowCloneGroupInput = {
+  readonly fingerprint?: string;
+  readonly instances: readonly FallowCloneInstanceInput[];
+  readonly line_count: number;
+  readonly suggested_name?: string;
+  readonly token_count: number;
+};
+
+export type FallowCloneInstanceInput = {
+  readonly end_col?: number;
+  readonly end_line?: number;
+  readonly file_path: string;
+  readonly fragment?: string;
+  readonly start_col?: number;
+  readonly start_line?: number;
+};
+
+export type FallowDeadCodeCategory =
+  | 'unlisted_dependency'
+  | 'unresolved_import'
+  | 'unused_dependency'
+  | 'unused_export'
+  | 'unused_file'
+  | 'unused_type';
+
+export type FallowDeadCodeInput = {
+  readonly category: FallowDeadCodeCategory;
+  readonly col?: number;
+  readonly dependency_location?: string;
+  readonly detail?: Readonly<Record<string, unknown>>;
+  readonly export_name?: string;
+  readonly file_path?: string;
+  readonly is_re_export?: boolean;
+  readonly is_type_only?: boolean;
+  readonly line?: number;
+  readonly package_name?: string;
+};
+
+/** The p_detail jsonb passed to sp_ingest_fallow_detail. */
+export type FallowDetailInput = {
+  readonly circular_dependencies: readonly FallowCircularDependencyInput[];
+  readonly clone_groups: readonly FallowCloneGroupInput[];
+  readonly dead_code: readonly FallowDeadCodeInput[];
+  readonly file_scores: readonly FallowFileScoreInput[];
+  readonly function_findings: readonly FallowFunctionFindingInput[];
+  readonly hotspots: readonly FallowHotspotInput[];
+  readonly large_functions: readonly FallowLargeFunctionInput[];
+  readonly targets: readonly FallowTargetInput[];
+};
+
+export type FallowFileScoreInput = {
+  readonly complexity_density?: number;
+  readonly crap_above_threshold?: number;
+  readonly crap_max?: number;
+  readonly dead_code_ratio?: number;
+  readonly fan_in: number;
+  readonly fan_out: number;
+  readonly file_path: string;
+  readonly function_count?: number;
+  readonly lines?: number;
+  readonly maintainability_index?: number;
+  readonly total_cognitive?: number;
+  readonly total_cyclomatic?: number;
+};
+
+export type FallowFunctionFindingInput = {
+  readonly cognitive?: number;
+  readonly col?: number;
+  readonly coverage_source?: string;
+  readonly coverage_tier?: string;
+  readonly crap?: number;
+  readonly cyclomatic?: number;
+  readonly exceeded?: string;
+  readonly file_path: string;
+  readonly function_name?: string;
+  readonly line?: number;
+  readonly line_count?: number;
+  readonly param_count?: number;
+  readonly severity?: string;
+};
+
+export type FallowHotspotInput = {
+  readonly commits?: number;
+  readonly complexity_density?: number;
+  readonly fan_in?: number;
+  readonly file_path: string;
+  readonly lines_added?: number;
+  readonly lines_deleted?: number;
+  readonly score?: number;
+  readonly trend?: string;
+  readonly weighted_commits?: number;
+};
+
+export type FallowLargeFunctionInput = {
+  readonly file_path: string;
+  readonly function_name?: string;
+  readonly line?: number;
+  readonly line_count: number;
+};
+
 /**
  * Row shapes for sp_ingest_fallow_detail's jsonb_to_record(set) calls
  * (ADR-019 addendum, Step 4). Optional keys are simply omitted —
@@ -28,13 +137,13 @@ export type FallowRunSummaryInput = {
   readonly dead_exports?: number;
   readonly dead_file_pct?: number;
   readonly dead_files?: number;
-  readonly duplication_percentage?: number;
   readonly dupes_duplicated_lines?: number;
   readonly dupes_duplicated_tokens?: number;
   readonly dupes_files_with_clones?: number;
   readonly dupes_total_files?: number;
   readonly dupes_total_lines?: number;
   readonly dupes_total_tokens?: number;
+  readonly duplication_percentage?: number;
   readonly elapsed_ms?: number;
   readonly entry_points?: Readonly<Record<string, unknown>>;
   readonly fallow_version?: string;
@@ -79,123 +188,14 @@ export type FallowRunSummaryInput = {
   readonly unused_deps_per_k_files?: number;
 };
 
-export type FallowFileScoreInput = {
-  readonly complexity_density?: number;
-  readonly crap_above_threshold?: number;
-  readonly crap_max?: number;
-  readonly dead_code_ratio?: number;
-  readonly fan_in: number;
-  readonly fan_out: number;
-  readonly file_path: string;
-  readonly function_count?: number;
-  readonly lines?: number;
-  readonly maintainability_index?: number;
-  readonly total_cognitive?: number;
-  readonly total_cyclomatic?: number;
-};
-
-export type FallowHotspotInput = {
-  readonly commits?: number;
-  readonly complexity_density?: number;
-  readonly fan_in?: number;
-  readonly file_path: string;
-  readonly lines_added?: number;
-  readonly lines_deleted?: number;
-  readonly score?: number;
-  readonly trend?: string;
-  readonly weighted_commits?: number;
-};
-
-export type FallowCloneInstanceInput = {
-  readonly end_col?: number;
-  readonly end_line?: number;
-  readonly file_path: string;
-  readonly fragment?: string;
-  readonly start_col?: number;
-  readonly start_line?: number;
-};
-
-export type FallowCloneGroupInput = {
-  readonly fingerprint?: string;
-  readonly instances: readonly FallowCloneInstanceInput[];
-  readonly line_count: number;
-  readonly suggested_name?: string;
-  readonly token_count: number;
-};
-
-export type FallowDeadCodeCategory =
-  | 'unlisted_dependency'
-  | 'unresolved_import'
-  | 'unused_dependency'
-  | 'unused_export'
-  | 'unused_file'
-  | 'unused_type';
-
-export type FallowDeadCodeInput = {
-  readonly category: FallowDeadCodeCategory;
-  readonly col?: number;
-  readonly dependency_location?: string;
-  readonly detail?: Readonly<Record<string, unknown>>;
-  readonly export_name?: string;
-  readonly file_path?: string;
-  readonly is_re_export?: boolean;
-  readonly is_type_only?: boolean;
-  readonly line?: number;
-  readonly package_name?: string;
-};
-
-export type FallowCircularDependencyInput = {
-  readonly col?: number;
-  readonly cycle_length: number;
-  readonly edges?: readonly unknown[];
-  readonly entry_file_path?: string;
-  readonly files: readonly string[];
-  readonly line?: number;
-};
-
-export type FallowLargeFunctionInput = {
-  readonly file_path: string;
-  readonly function_name?: string;
-  readonly line?: number;
-  readonly line_count: number;
-};
-
 export type FallowTargetInput = {
   readonly category?: string;
   readonly confidence?: string;
-  readonly effort?: string;
   readonly efficiency?: number;
+  readonly effort?: string;
   readonly evidence?: unknown;
   readonly factors?: unknown;
   readonly file_path: string;
   readonly priority?: number;
   readonly recommendation?: string;
-};
-
-export type FallowFunctionFindingInput = {
-  readonly cognitive?: number;
-  readonly col?: number;
-  readonly coverage_source?: string;
-  readonly coverage_tier?: string;
-  readonly crap?: number;
-  readonly cyclomatic?: number;
-  readonly exceeded?: string;
-  readonly file_path: string;
-  readonly function_name?: string;
-  readonly line?: number;
-  readonly line_count?: number;
-  readonly param_count?: number;
-  readonly severity?: string;
-};
-
-/** The p_detail jsonb passed to sp_ingest_fallow_detail. */
-export type FallowDetailInput = {
-  readonly circular_dependencies: readonly FallowCircularDependencyInput[];
-  readonly clone_groups: readonly FallowCloneGroupInput[];
-  readonly dead_code: readonly FallowDeadCodeInput[];
-  readonly file_scores: readonly FallowFileScoreInput[];
-  readonly function_findings: readonly FallowFunctionFindingInput[];
-  readonly hotspots: readonly FallowHotspotInput[];
-  readonly large_functions: readonly FallowLargeFunctionInput[];
-  readonly targets: readonly FallowTargetInput[];
 };

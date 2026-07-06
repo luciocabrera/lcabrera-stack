@@ -1,6 +1,5 @@
+import type { FallowFunctionFindingInput } from './fallowDetail.types.ts';
 import type { FallowRaw } from './fallowRaw.schema.ts';
-
-import { type FallowFunctionFindingInput } from './fallowDetail.types.ts';
 
 type ExtractFallowFunctionFindingsArgs = {
   readonly raw: FallowRaw;

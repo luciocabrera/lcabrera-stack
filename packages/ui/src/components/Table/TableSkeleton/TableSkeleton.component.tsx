@@ -1,6 +1,9 @@
 import { useMemo } from 'react';
 
-import type { SkeletonResponse } from './TableSkeleton.types';
+import type {
+  SkeletonResponse,
+  TableSkeletonProps,
+} from './TableSkeleton.types';
 
 import { useGetColumns } from '../contexts/TableConfig/columns/selectors';
 import {
@@ -12,30 +15,33 @@ import { Table } from '../Table.component';
 import { generatePlaceholderData } from '../TableBody/utils';
 import { readPersistedDataStateFromSessionStorage } from '../utils';
 
-export const TableSkeleton = () => {
-  const columns = useGetColumns();
+export const TableSkeleton = <TData extends Record<string, unknown>>({
+  actions,
+  crud,
+}: TableSkeletonProps<TData>) => {
+  const columns = useGetColumns<TData>();
   const appId = useGetTableAppId();
   const persistenceKey = useGetTablePersistenceKey();
   const placeholderRowCount = useGetTablePlaceholderRowCount();
   const persistedDataState = useMemo<
     | undefined
     | {
-        readonly data: readonly Record<string, unknown>[];
+        readonly data: readonly TData[];
         readonly totalRows?: number;
       }
   >(() => {
-    return readPersistedDataStateFromSessionStorage<Record<string, unknown>>({
+    return readPersistedDataStateFromSessionStorage<TData>({
       appId,
       persistenceKey,
     });
   }, [appId, persistenceKey]);
 
   const hasPersistedRows = (persistedDataState?.data.length ?? 0) > 0;
-  const placeholderData = generatePlaceholderData<Record<string, unknown>>({
+  const placeholderData = generatePlaceholderData<TData>({
     columns,
     rowCount: placeholderRowCount,
   });
-  const effectiveData: Record<string, unknown>[] = hasPersistedRows
+  const effectiveData: TData[] = hasPersistedRows
     ? [...(persistedDataState?.data ?? [])]
     : placeholderData;
   const totalRows = hasPersistedRows
@@ -43,7 +49,9 @@ export const TableSkeleton = () => {
     : effectiveData.length;
 
   return (
-    <Table<Record<string, unknown>, SkeletonResponse>
+    <Table<TData, SkeletonResponse<TData>>
+      actions={actions}
+      crud={crud}
       dataSelector={(response) => response.data}
       dataTotalSelector={(response) => response.totalRows}
       isLoading

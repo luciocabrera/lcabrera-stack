@@ -9,11 +9,13 @@ export const TableSuspenseBoundary = <
   TData extends Record<string, unknown>,
   TResponse,
 >({
+  actions,
   children,
+  crud,
   dataPromise,
 }: TableSuspenseBoundaryProps<TData, TResponse>) => {
   return (
-    <Suspense fallback={<TableSkeleton />}>
+    <Suspense fallback={<TableSkeleton<TData> actions={actions} crud={crud} />}>
       <TableDataResolver<TResponse> dataPromise={dataPromise}>
         {children}
       </TableDataResolver>

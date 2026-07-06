@@ -36,5 +36,6 @@ export const styles = stylex.create({
     alignItems: 'center',
     display: 'flex',
     justifyContent: 'center',
+    width: '100%',
   },
 });

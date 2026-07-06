@@ -70,6 +70,7 @@ export const buildTableBodyCellDescriptor = <
         <TableRowActionsMenu
           crud={crud}
           customActions={customActions}
+          isLoadingState={isLoadingState}
           row={rowData as TData}
           titleSingular={titleSingular}
         />

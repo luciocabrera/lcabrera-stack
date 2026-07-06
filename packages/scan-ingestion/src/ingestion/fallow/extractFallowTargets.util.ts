@@ -1,6 +1,5 @@
+import type { FallowTargetInput } from './fallowDetail.types.ts';
 import type { FallowRaw } from './fallowRaw.schema.ts';
-
-import { type FallowTargetInput } from './fallowDetail.types.ts';
 
 type ExtractFallowTargetsArgs = {
   readonly raw: FallowRaw;
@@ -17,8 +16,8 @@ export const extractFallowTargets = ({
   (raw.health?.targets ?? []).map((target) => ({
     category: target.category ?? undefined,
     confidence: target.confidence ?? undefined,
-    effort: target.effort ?? undefined,
     efficiency: target.efficiency ?? undefined,
+    effort: target.effort ?? undefined,
     evidence: target.evidence ?? undefined,
     factors: target.factors ?? undefined,
     file_path: target.path,

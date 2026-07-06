@@ -1,6 +1,5 @@
+import type { FallowCloneGroupInput } from './fallowDetail.types.ts';
 import type { FallowRaw } from './fallowRaw.schema.ts';
-
-import { type FallowCloneGroupInput } from './fallowDetail.types.ts';
 
 type ExtractFallowCloneGroupsArgs = {
   readonly raw: FallowRaw;
