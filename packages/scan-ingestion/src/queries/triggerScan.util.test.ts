@@ -35,7 +35,7 @@ describe('triggerScan', () => {
   it('creates a run with one queued scan per requested scanner', async () => {
     const result = await triggerScan({
       projectId,
-      scannerIds: ['linter', 'code-smell-checker'],
+      scannerIds: ['eslint', 'code-smell-checker'],
       scopeValue: '.',
       userId: systemUserId,
     });
@@ -51,7 +51,7 @@ describe('triggerScan', () => {
     ]);
     expect(runRow.rows[0]?.status).toBe('running');
     expect(runRow.rows[0]?.requested_scanners).toEqual([
-      'linter',
+      'eslint',
       'code-smell-checker',
     ]);
 
@@ -66,7 +66,7 @@ describe('triggerScan', () => {
     expect(scanRows.rows).toHaveLength(2);
     expect(scanRows.rows.map((row) => row.scanner_id)).toEqual([
       'code-smell-checker',
-      'linter',
+      'eslint',
     ]);
     expect(scanRows.rows.every((row) => row.status === 'queued')).toBe(true);
     expect(scanRows.rows.every((row) => row.scope_value === '.')).toBe(true);

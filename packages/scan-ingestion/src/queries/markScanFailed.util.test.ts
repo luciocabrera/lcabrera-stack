@@ -37,7 +37,7 @@ describe('markScanFailed', () => {
   it('marks a real scan failed, records the error, and finalizes the run as failed', async () => {
     const { runId } = await triggerScan({
       projectId,
-      scannerIds: ['linter'],
+      scannerIds: ['eslint'],
       scopeValue: '.',
       userId: systemUserId,
     });

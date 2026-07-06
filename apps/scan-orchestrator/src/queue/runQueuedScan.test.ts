@@ -43,7 +43,7 @@ describe('runQueuedScan (deterministic linter branch)', () => {
     const pool = getPool();
     const runResult = await pool.query<{ fn_create_run_with_scans: string }>(
       `SELECT cqms.fn_create_run_with_scans($1, $2, 'ui_agent_sdk', $3, NULL, NULL, NULL, 'repo', '.') AS fn_create_run_with_scans`,
-      [systemUserId, projectId, JSON.stringify(['linter'])],
+      [systemUserId, projectId, JSON.stringify(['eslint'])],
     );
     const runId = runResult.rows[0]?.fn_create_run_with_scans ?? '';
 
@@ -69,7 +69,7 @@ describe('runQueuedScan (deterministic linter branch)', () => {
         project_id: projectId,
         run_id: runId,
         scan_id: scanId,
-        scanner_id: 'linter',
+        scanner_id: 'eslint',
         scope_type: 'repo',
         scope_value: '.',
         skill_path: '.github/skills/linter-checker',
@@ -92,7 +92,7 @@ describe('runQueuedScan (deterministic linter branch)', () => {
       scanId,
     ]);
     expect(report.rows[0]?.top_risk).toContain(
-      'No oxlint/eslint configuration detected',
+      'No eslint configuration detected',
     );
   }, 20_000);
 });

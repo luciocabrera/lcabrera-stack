@@ -36,7 +36,7 @@ describe('markScanRunning', () => {
   it('transitions a real queued scan to running and sets started_at', async () => {
     const { runId } = await triggerScan({
       projectId,
-      scannerIds: ['linter'],
+      scannerIds: ['eslint'],
       scopeValue: '.',
       userId: systemUserId,
     });

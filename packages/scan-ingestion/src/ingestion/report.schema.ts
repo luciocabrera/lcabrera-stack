@@ -1,10 +1,14 @@
 import { z } from 'zod';
 
+// 'linter' was split into 'eslint' + 'oxlint' (ADR-019); the retired id is
+// deliberately absent so nothing NEW can ingest as the combined scanner —
+// historical linter scans stay readable, they just can't gain siblings.
 export const scannerIdSchema = z.enum([
   'code-smell-checker',
   'code-smell-zen',
+  'eslint',
   'fallow',
-  'linter',
+  'oxlint',
 ]);
 export type ScannerId = z.infer<typeof scannerIdSchema>;
 

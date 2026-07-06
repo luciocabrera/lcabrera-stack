@@ -36,7 +36,7 @@ describe('getQueuedScans', () => {
   it('lists a real queued scan joined to its scanner and project shape', async () => {
     const { runId } = await triggerScan({
       projectId,
-      scannerIds: ['linter'],
+      scannerIds: ['eslint'],
       scopeValue: '.',
       userId: systemUserId,
     });
@@ -45,7 +45,7 @@ describe('getQueuedScans', () => {
     const row = rows.find((candidate) => candidate.run_id === runId);
 
     expect(row).toBeDefined();
-    expect(row?.scanner_id).toBe('linter');
+    expect(row?.scanner_id).toBe('eslint');
     expect(row?.deterministic).toBe(true);
     expect(row?.skill_path).toBe('.github/skills/linter-checker');
     expect(row?.local_path).toBe(projectDir);

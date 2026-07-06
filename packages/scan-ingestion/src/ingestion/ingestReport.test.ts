@@ -120,7 +120,7 @@ describe('ingestReport', () => {
     const runId = runResult.rows[0]?.fn_create_run;
 
     await pool.query(
-      `SELECT cqms.fn_create_ad_hoc_scan($1, $2, $3, 'linter', 'repo', '.')`,
+      `SELECT cqms.fn_create_ad_hoc_scan($1, $2, $3, 'eslint', 'repo', '.')`,
       [systemUserId, runId, projectId],
     );
 
@@ -136,7 +136,7 @@ describe('ingestReport', () => {
       reportJsonPath: path.join(reportDir, 'report.json'),
       reportMarkdownPath: path.join(reportDir, 'report.md'),
       runId,
-      scannerId: 'linter',
+      scannerId: 'eslint',
       scopeType: 'repo',
       scopeValue: '.',
       userId: systemUserId,

@@ -51,7 +51,7 @@ describe('queries', () => {
 
     const scanResult = await pool.query<{ id: string }>(
       `INSERT INTO cqms.scans (run_id, project_id, scanner_id, status, scope_type, scope_value, started_at, finished_at, duration_ms, raw_json)
-       VALUES ($1, $2, 'linter', 'succeeded', 'repo', '.', now(), now(), 1234, '{"kind":"combined"}'::jsonb)
+       VALUES ($1, $2, 'eslint', 'succeeded', 'repo', '.', now(), now(), 1234, '{"kind":"combined"}'::jsonb)
        RETURNING id`,
       [runId, projectId],
     );
@@ -110,7 +110,7 @@ describe('queries', () => {
   it('getProjectScannerTrend returns one row for the seeded run', async () => {
     const trend = await getProjectScannerTrend({ projectId });
     expect(trend).toHaveLength(1);
-    expect(trend[0]?.scanner_id).toBe('linter');
+    expect(trend[0]?.scanner_id).toBe('eslint');
     expect(trend[0]?.high_count).toBe(1);
   });
 
@@ -131,7 +131,7 @@ describe('queries', () => {
 
   it('getScanById returns the seeded scan', async () => {
     const scan = await getScanById({ scanId });
-    expect(scan?.scanner_id).toBe('linter');
+    expect(scan?.scanner_id).toBe('eslint');
     expect(scan?.status).toBe('succeeded');
   });
 

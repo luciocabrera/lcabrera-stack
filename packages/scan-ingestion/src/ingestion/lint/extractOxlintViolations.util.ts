@@ -1,0 +1,47 @@
+import path from 'node:path';
+
+import type { LintViolationInput } from './lintViolation.types.ts';
+import type { OxlintRaw } from './oxlintRaw.schema.ts';
+
+type ExtractOxlintViolationsArgs = {
+  /** The registered project root — file_path is stored relative to it. */
+  readonly localPath: string;
+  readonly raw: OxlintRaw;
+  /** The scan's scope ('.' or a subfolder) — oxlint filenames are relative to the directory it ran in. */
+  readonly scopeValue: string;
+};
+
+/**
+ * Explodes oxlint diagnostics into cqms.lint_violations rows. oxlint has
+ * no suppression concept in its JSON and no per-diagnostic fix payload, so
+ * suppressed/fixable are always false; `help` text stays on the canonical
+ * finding (report.json), while `url` lands here as help_url.
+ */
+export const extractOxlintViolations = ({
+  localPath,
+  raw,
+  scopeValue,
+}: ExtractOxlintViolationsArgs): readonly LintViolationInput[] => {
+  const scopeDirectory = path.resolve(localPath, scopeValue);
+
+  return raw.diagnostics.map((diagnostic) => {
+    const absolute = diagnostic.filename.startsWith('/')
+      ? diagnostic.filename
+      : path.resolve(scopeDirectory, diagnostic.filename);
+    const span = diagnostic.labels?.[0]?.span;
+
+    return {
+      col: span?.column ?? undefined,
+      file_path: path.relative(localPath, absolute),
+      fixable: false,
+      help_url: diagnostic.url ?? undefined,
+      line: span?.line ?? undefined,
+      message: diagnostic.message,
+      rule_id: diagnostic.code ?? 'oxlint(unknown)',
+      severity: diagnostic.severity === 'error' ? 'HIGH' : 'MEDIUM',
+      severity_raw: diagnostic.severity,
+      source: 'oxlint',
+      suppressed: false,
+    };
+  });
+};

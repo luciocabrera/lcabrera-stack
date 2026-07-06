@@ -14,6 +14,7 @@ import type {
 // src/cli/ingest.cli.ts (plain `node --experimental-strip-types`).
 import { readTextFileWithin } from '../fs/readTextFileWithin.util.ts';
 import { buildFileInventory } from './buildFileInventory.util.ts';
+import { ingestScanDetail } from './ingestScanDetail.ts';
 import { reportSchema } from './report.schema.ts';
 import { resolveScan } from './resolveScan.util.ts';
 
@@ -98,6 +99,27 @@ export const ingestReport = async (
       fileInventory ? JSON.stringify(fileInventory) : undefined,
     ],
   );
+
+  if (rawJson !== undefined) {
+    try {
+      await ingestScanDetail({
+        localPath: args.localPath,
+        rawJson,
+        scanId,
+        scannerId: args.scannerId,
+        scopeValue: args.scopeValue,
+        userId: args.userId,
+      });
+    } catch (error) {
+      // Log-and-continue (ADR-019): the generic layer (report + findings)
+      // is already committed and the scan already succeeded — a raw-shape
+      // drift in a future tool version must not flip it to failed.
+      console.warn(
+        `⚠️  Detail extraction failed for ${args.scannerId} scan ${scanId} (generic ingestion already succeeded):`,
+        error,
+      );
+    }
+  }
 
   return {
     findingsIngested: report.findings.length,

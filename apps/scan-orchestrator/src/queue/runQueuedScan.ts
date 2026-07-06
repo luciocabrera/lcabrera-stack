@@ -12,14 +12,14 @@ import type { RunStatusHub } from '../ws/runStatusHub.ts';
 
 import { cqmsRepoRoot } from '../cqmsRepoRoot.util.ts';
 import {
+  DETERMINISTIC_SCANNER_CONFIGS,
+  type DeterministicScannerId,
+  isDeterministicScannerId,
+} from './deterministicScannerConfigs.constants.ts';
+import {
   createScanOutputDirectory,
   getScanOutputPathIfExists,
 } from './scanOutputPaths.util.ts';
-
-const LINTER_SCRIPT_PATH = path.join(
-  cqmsRepoRoot,
-  '.github/skills/linter-checker/scripts/generate-linter-report.mjs',
-);
 
 type PublishStatusArgs = {
   readonly hub: RunStatusHub;
@@ -58,22 +58,26 @@ const persistScanProgress = async ({
   }
 };
 
-type RunDeterministicLinterArgs = {
+type RunDeterministicScanArgs = {
   readonly outputDirectory: string;
   readonly scan: QueuedScanRow;
+  readonly scannerId: DeterministicScannerId;
   readonly userId: string;
 };
 
-const runDeterministicLinter = async ({
+const runDeterministicScan = async ({
   outputDirectory,
   scan,
+  scannerId,
   userId,
-}: RunDeterministicLinterArgs): Promise<'failed' | 'succeeded'> => {
+}: RunDeterministicScanArgs): Promise<'failed' | 'succeeded'> => {
+  const config = DETERMINISTIC_SCANNER_CONFIGS[scannerId];
+
   try {
     execFileSync(
       'node',
       [
-        LINTER_SCRIPT_PATH,
+        path.join(cqmsRepoRoot, config.scriptPath),
         `--target=${scan.local_path}`,
         `--scope=${scan.scope_value || '.'}`,
         `--output-dir=${outputDirectory}`,
@@ -85,7 +89,7 @@ const runDeterministicLinter = async ({
     // Real execution failures already degrade to a report.json noting the
     // failure (the script's own resilience, ADR-015) — this catch only
     // covers the script itself failing to even start.
-    console.error(`❌ linter-checker script failed to run:`, error);
+    console.error(`❌ ${scannerId} runner script failed to run:`, error);
   }
 
   const reportMarkdownPath = getScanOutputPathIfExists({
@@ -99,7 +103,7 @@ const runDeterministicLinter = async ({
 
   if (!reportMarkdownPath || !reportJsonPath) {
     await markScanFailed({
-      errorMessage: 'linter-checker script did not produce report files.',
+      errorMessage: `${scannerId} runner script did not produce report files.`,
       runId: scan.run_id,
       scanId: scan.scan_id,
       userId,
@@ -111,13 +115,13 @@ const runDeterministicLinter = async ({
     localPath: scan.local_path,
     origin: 'ui_agent_sdk',
     rawJsonPath: getScanOutputPathIfExists({
-      fileName: 'linter.raw.json',
+      fileName: config.rawArtifactFileName,
       scanId: scan.scan_id,
     }),
     reportJsonPath,
     reportMarkdownPath,
     runId: scan.run_id,
-    scannerId: 'linter',
+    scannerId,
     scopeType: scan.scope_type as 'changed-files' | 'diff' | 'folder' | 'repo',
     scopeValue: scan.scope_value,
     userId,
@@ -211,7 +215,8 @@ type RunQueuedScanArgs = {
 /**
  * Executes one queued scan end to end (TECH_SPEC §2.7): marks it running,
  * branches per scanners.deterministic exactly as originally planned
- * (§2.5) — linter via a plain child process, the other three via
+ * (§2.5) — deterministic scanners via their registered runner script
+ * (DETERMINISTIC_SCANNER_CONFIGS, ADR-019), the LLM scanners via
  * @repo/agent-runner — then ingests the result or marks the scan failed.
  * Any unexpected error here is caught and turned into a failed scan
  * rather than crashing the whole orchestrator process; one bad scan must
@@ -229,9 +234,24 @@ export const runQueuedScan = async ({
 
   let finalStatus: 'failed' | 'succeeded';
   try {
-    finalStatus = scan.deterministic
-      ? await runDeterministicLinter({ outputDirectory, scan, userId })
-      : await runAgentSkill({ hub, outputDirectory, scan, userId });
+    if (scan.deterministic) {
+      // A deterministic scanner without a registered runner (e.g. a stale
+      // queued scan for the retired 'linter', or a registry-added scanner
+      // whose script was never created) fails with a clear reason.
+      if (!isDeterministicScannerId(scan.scanner_id)) {
+        throw new Error(
+          `No deterministic runner registered for scanner '${scan.scanner_id}'.`,
+        );
+      }
+      finalStatus = await runDeterministicScan({
+        outputDirectory,
+        scan,
+        scannerId: scan.scanner_id,
+        userId,
+      });
+    } else {
+      finalStatus = await runAgentSkill({ hub, outputDirectory, scan, userId });
+    }
   } catch (error) {
     console.error(`❌ Scan ${scan.scan_id} failed unexpectedly:`, error);
     await markScanFailed({

@@ -8,18 +8,20 @@ describe('getActiveScanners', () => {
     await closePool();
   });
 
-  it('returns the seeded active scanners (ADR-006/0004_seed_scanners.sql)', async () => {
+  it('returns the active scanners — eslint/oxlint in, retired linter out (ADR-019)', async () => {
     const scanners = await getActiveScanners();
     const scannerIds = scanners.map((s) => s.scanner_id);
 
     expect(scannerIds).toEqual(
       expect.arrayContaining([
         'fallow',
-        'linter',
+        'eslint',
+        'oxlint',
         'code-smell-checker',
         'code-smell-zen',
       ]),
     );
+    expect(scannerIds).not.toContain('linter');
     expect(scanners.every((s) => s.display_name.length > 0)).toBe(true);
   });
 
