@@ -1,13 +1,14 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
-import type { WideAlltypes150, WideAlltypes150Response } from '@/services';
-
 import { INITIAL_PAGE_SIZE } from '@repo/ui/components/Table/Table.constants';
-import { wideAlltypes150Api } from '@/services';
-
-import { APP_ID } from '@/constants/app.constants';
 import { readTableLoaderStateFromRequest } from '@repo/ui/routing/readTableLoaderStateFromRequest.util';
 import { sanitizeSorting } from '@repo/ui/routing/sanitizeSorting.util';
+
+import type { WideAlltypes150, WideAlltypes150Response } from '@/services';
+
+import { APP_ID } from '@/constants/app.constants';
+import { wideAlltypes150Api } from '@/services';
+
 import {
   COLUMNS,
   PERSISTENCE_KEY,

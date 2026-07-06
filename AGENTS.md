@@ -129,6 +129,8 @@ Selection guideline:
 
 Fallow is configured once at the repo root (`.fallowrc.json`) and auto-detects every pnpm workspace — never add per-app fallow configs or dependencies. Scope any command's output with `-w`, e.g. `vp run fallow:dead-code -w 'apps/react-router'`.
 
+**Entry policy**: `entry` in `.fallowrc.json` is only for files invoked outside the import graph (root/app scripts, skill runner scripts, vite config fragments in `config/` dirs, CLIs run via `node`). Package/framework entry points are auto-detected — do not enumerate workspaces. Caution: fallow's `*` glob crosses `/`, so a pattern like `apps/*/config/**` also swallows `src/config/` files and silently masks real findings — keep config-dir entries as explicit paths and verify with `vp run fallow:dead-code` that the issue count doesn't drop unexpectedly after editing entries.
+
 **Output convention** — `reports/fallow/` is the **single canonical location** for every fallow artifact. Scripts, skills, agents, docs, and developers all write to and read from it; never invent another output path.
 
 | Path                                              | Tracked?   | Contents                                                                      |

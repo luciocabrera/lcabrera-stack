@@ -1,5 +1,3 @@
-import * as stylex from '@stylexjs/stylex';
-
 import { Button } from '@repo/ui/components/Button';
 import {
   Card,
@@ -15,6 +13,7 @@ import {
   SuccessIcon,
   WarningIcon,
 } from '@repo/ui/components/Icons';
+import * as stylex from '@stylexjs/stylex';
 
 import { styles } from '../ShowcasePage.stylex';
 import { ShowcaseSection } from '../ShowcaseSection';

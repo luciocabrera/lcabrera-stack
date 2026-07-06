@@ -1,4 +1,5 @@
 import type { TableColumn } from '@repo/ui/components/Table/Table.types';
+
 import type { WideAlltypes150 } from '@/services';
 
 export const PERSISTENCE_KEY = 'wide-alltypes-150-table';

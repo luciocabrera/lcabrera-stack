@@ -1,12 +1,11 @@
 // @vitest-environment jsdom
 
+import type { GlobalSettingsState } from '@repo/ui/types/globalSettings.types';
+import type { ThemeMode } from '@repo/ui/types/theme.types';
 import type { ReactNode } from 'react';
 
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-import type { GlobalSettingsState } from '@repo/ui/types/globalSettings.types';
-import type { ThemeMode } from '@repo/ui/types/theme.types';
 
 const { useLoaderDataMock } = vi.hoisted(() => ({
   useLoaderDataMock: vi.fn(),

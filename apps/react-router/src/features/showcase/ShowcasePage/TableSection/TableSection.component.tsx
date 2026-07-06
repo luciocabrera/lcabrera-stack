@@ -1,7 +1,6 @@
-import * as stylex from '@stylexjs/stylex';
-
 import { Button } from '@repo/ui/components/Button';
 import { TableLayout } from '@repo/ui/components/Table/TableLayout';
+import * as stylex from '@stylexjs/stylex';
 
 import type { MockResponse, MockRow } from '../ShowcasePage.types';
 

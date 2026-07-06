@@ -1,4 +1,5 @@
 import type { TableColumn } from '@repo/ui/components/Table/Table.types';
+
 import type { CarSale } from '@/services';
 
 export const PERSISTENCE_KEY = 'car-sales-table';

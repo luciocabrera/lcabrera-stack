@@ -1,12 +1,13 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
-import type { CarSale, CarSalesResponse } from '@/services';
-
-import { carSalesApi } from '@/services';
-
-import { APP_ID } from '@/constants/app.constants';
 import { readTableLoaderStateFromRequest } from '@repo/ui/routing/readTableLoaderStateFromRequest.util';
 import { sanitizeSorting } from '@repo/ui/routing/sanitizeSorting.util';
+
+import type { CarSale, CarSalesResponse } from '@/services';
+
+import { APP_ID } from '@/constants/app.constants';
+import { carSalesApi } from '@/services';
+
 import {
   COLUMNS,
   PERSISTENCE_KEY,

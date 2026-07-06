@@ -2,7 +2,7 @@
   "kind": "health",
   "schema_version": 7,
   "version": "3.0.0",
-  "elapsed_ms": 33,
+  "elapsed_ms": 31,
   "findings": [],
   "summary": {
     "files_analyzed": 1908,
@@ -12,14 +12,14 @@
     "max_cognitive_threshold": 15,
     "max_crap_threshold": 30.0,
     "files_scored": 1228,
-    "average_maintainability": 93.1,
+    "average_maintainability": 93.2,
     "coverage_model": "static_estimated",
     "severity_critical_count": 8,
     "severity_high_count": 5,
     "severity_moderate_count": 44
   },
   "vital_signs": {
-    "dead_file_pct": 0.6,
+    "dead_file_pct": 0.5,
     "dead_export_pct": 2.9,
     "avg_cyclomatic": 1.5,
     "critical_complexity_pct": 0.0,
@@ -27,8 +27,8 @@
     "duplication_pct": 1.2,
     "hotspot_count": 1,
     "hotspot_top_pct_count": 20,
-    "maintainability_avg": 93.1,
-    "maintainability_low_pct": 0.1,
+    "maintainability_avg": 93.2,
+    "maintainability_low_pct": 0.0,
     "unused_dep_count": 2,
     "unused_deps_per_k_files": 1.0,
     "circular_dep_count": 3,
@@ -36,7 +36,7 @@
     "counts": {
       "total_files": 1908,
       "total_exports": 2372,
-      "dead_files": 12,
+      "dead_files": 9,
       "dead_exports": 68,
       "duplicated_lines": 508,
       "total_lines": 80044,
@@ -169,14 +169,14 @@
   },
   "health_score": {
     "formula_version": 2,
-    "score": 77.4,
+    "score": 77.6,
     "grade": "B",
     "penalties": {
       "dead_files": 0.1,
       "dead_exports": 0.6,
       "complexity": 0.0,
       "p90_complexity": 0.0,
-      "maintainability": 0.2,
+      "maintainability": 0.0,
       "hotspots": 10.0,
       "unused_deps": 0.5,
       "circular_deps": 0.8,
@@ -232,9 +232,9 @@
       "path": ".github/skills/linter-checker/scripts/generate-linter-report.mjs",
       "fan_in": 0,
       "fan_out": 0,
-      "dead_code_ratio": 1.0,
+      "dead_code_ratio": 0.0,
       "complexity_density": 0.16,
-      "maintainability_index": 75.2,
+      "maintainability_index": 95.2,
       "total_cyclomatic": 80,
       "total_cognitive": 59,
       "function_count": 25,
@@ -260,9 +260,9 @@
       "path": "packages/scan-ingestion/src/cli/ingest.cli.ts",
       "fan_in": 0,
       "fan_out": 4,
-      "dead_code_ratio": 1.0,
+      "dead_code_ratio": 0.0,
       "complexity_density": 0.16,
-      "maintainability_index": 68.8,
+      "maintainability_index": 88.8,
       "total_cyclomatic": 14,
       "total_cognitive": 10,
       "function_count": 3,
@@ -2343,20 +2343,6 @@
       "crap_above_threshold": 0
     },
     {
-      "path": "apps/api-server-fast/scripts/smoke-test.js",
-      "fan_in": 0,
-      "fan_out": 0,
-      "dead_code_ratio": 1.0,
-      "complexity_density": 0.19,
-      "maintainability_index": 74.3,
-      "total_cyclomatic": 16,
-      "total_cognitive": 1,
-      "function_count": 11,
-      "lines": 84,
-      "crap_max": 6.0,
-      "crap_above_threshold": 0
-    },
-    {
       "path": "packages/ui/src/components/Form/fields/PathField/PathBrowserModal/PathBrowserModal.component.tsx",
       "fan_in": 2,
       "fan_out": 7,
@@ -3417,6 +3403,20 @@
       "total_cognitive": 1,
       "function_count": 2,
       "lines": 28,
+      "crap_max": 6.0,
+      "crap_above_threshold": 0
+    },
+    {
+      "path": "apps/api-server-fast/scripts/smoke-test.js",
+      "fan_in": 0,
+      "fan_out": 0,
+      "dead_code_ratio": 0.0,
+      "complexity_density": 0.19,
+      "maintainability_index": 94.3,
+      "total_cyclomatic": 16,
+      "total_cognitive": 1,
+      "function_count": 11,
+      "lines": 84,
       "crap_max": 6.0,
       "crap_above_threshold": 0
     },
@@ -17584,7 +17584,7 @@
       "path": "apps/react-router/src/features/showcase/ShowcasePage/ShowcasePage.component.tsx",
       "score": 20.5,
       "commits": 13,
-      "weighted_commits": 11.7,
+      "weighted_commits": 11.69,
       "lines_added": 767,
       "lines_deleted": 737,
       "complexity_density": 0.06,
@@ -17657,9 +17657,9 @@
     },
     {
       "path": "apps/react-router/src/routes/wide-alltypes-150/WideAlltypes150.constants.ts",
-      "score": 18.7,
+      "score": 18.6,
       "commits": 8,
-      "weighted_commits": 6.38,
+      "weighted_commits": 6.37,
       "lines_added": 130,
       "lines_deleted": 40,
       "complexity_density": 0.1,
@@ -18208,9 +18208,9 @@
     },
     {
       "path": "apps/react-router/src/routes/home/Home.component.tsx",
-      "score": 9.4,
+      "score": 9.3,
       "commits": 3,
-      "weighted_commits": 1.88,
+      "weighted_commits": 1.87,
       "lines_added": 7,
       "lines_deleted": 2,
       "complexity_density": 0.17,
@@ -18458,9 +18458,9 @@
     },
     {
       "path": "apps/react-router/src/features/showcase/ShowcasePage/TableSection/TableSection.component.tsx",
-      "score": 6.7,
+      "score": 6.6,
       "commits": 3,
-      "weighted_commits": 2.85,
+      "weighted_commits": 2.84,
       "lines_added": 40,
       "lines_deleted": 2,
       "complexity_density": 0.08,
@@ -18985,7 +18985,7 @@
       "path": "apps/react-router/src/features/showcase/ShowcasePage/CardsSection/CardsSection.component.tsx",
       "score": 1.7,
       "commits": 3,
-      "weighted_commits": 2.85,
+      "weighted_commits": 2.84,
       "lines_added": 133,
       "lines_deleted": 4,
       "complexity_density": 0.02,
@@ -20733,7 +20733,7 @@
   },
   "_meta": {
     "telemetry": {
-      "analysis_run_id": "run_cbfc75973b48100a"
+      "analysis_run_id": "run_c1ef9ca3f95a7d72"
     }
   }
 }

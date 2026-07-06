@@ -13,8 +13,8 @@ Current metrics from JSON:
 - Functions above threshold: 57
 - Functions analyzed: 5438
 - Files analyzed: 1908
-- Average maintainability: 93.1 (good)
-- Dead-code issues: 86 (check.total_issues)
+- Average maintainability: 93.2 (good)
+- Dead-code issues: 83 (check.total_issues)
 - Duplicate clone groups: 15 (dupes.stats.clone_groups)
 - Severity split: 8 critical, 5 high, 44 moderate
 - Thresholds: cyclomatic 20, cognitive 15, CRAP 30

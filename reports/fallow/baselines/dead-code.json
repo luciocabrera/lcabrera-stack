@@ -1,15 +1,12 @@
 {
   "unused_files": [
-    ".github/skills/linter-checker/scripts/generate-linter-report.mjs",
     "apps/api-server/src/constants/server.constants.ts",
     "apps/api-server/src/features/carSales/carSales.types.ts",
     "apps/api-server/src/types/api.types.ts",
-    "apps/api-server-fast/scripts/smoke-test.js",
     "apps/api-server-fast/src/constants/server.constants.ts",
     "apps/api-server-fast/src/errors/httpError.ts",
     "apps/api-server-fast/src/features/carSales/carSales.types.ts",
     "apps/api-server-fast/src/types/api.types.ts",
-    "packages/scan-ingestion/src/cli/ingest.cli.ts",
     "packages/ui/src/components/Form/FormBody/index.ts",
     "packages/ui/src/components/Form/fields/PathField/index.ts"
   ],

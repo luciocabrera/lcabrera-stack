@@ -1,5 +1,3 @@
-import { Link } from 'react-router';
-
 import type {
   ColumnPinningState,
   TableColumn,
@@ -8,11 +6,13 @@ import type {
 import { Button } from '@repo/ui/components/Button';
 import { EyeIcon } from '@repo/ui/components/Icons';
 import { ICON_SIZE_XS } from '@repo/ui/design-system/constants/iconSizes.constants';
-import { type EnterpriseOrder, enterpriseOrdersApi } from '@/services';
 import {
   createDistinctFilterOptions,
   createStaticFilterOptions,
 } from '@repo/ui/utils/filters';
+import { Link } from 'react-router';
+
+import { type EnterpriseOrder, enterpriseOrdersApi } from '@/services';
 
 type BasicColumnArgs = {
   readonly dataType: 'boolean' | 'currency' | 'date' | 'number' | 'string';

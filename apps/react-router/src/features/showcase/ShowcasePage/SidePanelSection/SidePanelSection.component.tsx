@@ -1,6 +1,3 @@
-import * as stylex from '@stylexjs/stylex';
-import { useState } from 'react';
-
 import { Button } from '@repo/ui/components/Button';
 import {
   Card,
@@ -27,6 +24,8 @@ import {
   HorizontalToolbarExampleShort,
 } from '@repo/ui/components/Toolbar/Toolbar.examples';
 import { ICON_SIZE_MD } from '@repo/ui/design-system/constants';
+import * as stylex from '@stylexjs/stylex';
+import { useState } from 'react';
 
 import { styles as pageStyles } from '../ShowcasePage.stylex';
 import { ShowcaseSection } from '../ShowcaseSection';

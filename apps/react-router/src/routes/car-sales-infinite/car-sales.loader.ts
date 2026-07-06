@@ -1,13 +1,14 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
+import { INITIAL_PAGE_SIZE } from '@repo/ui/components/Table/Table.constants';
+import { readTableLoaderStateFromRequest } from '@repo/ui/routing/readTableLoaderStateFromRequest.util';
+
 import type { CarSale, CarSalesResponse } from '@/services';
 
-import { INITIAL_PAGE_SIZE } from '@repo/ui/components/Table/Table.constants';
+import { APP_ID } from '@/constants/app.constants';
 import { carSalesApi } from '@/services';
 
-import { APP_ID } from '@/constants/app.constants';
 import { COLUMNS } from '../car-sales/CarSales.constants';
-import { readTableLoaderStateFromRequest } from '@repo/ui/routing/readTableLoaderStateFromRequest.util';
 import {
   PERSISTENCE_KEY,
   SCHEMA_NAME,

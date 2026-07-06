@@ -2,10 +2,13 @@
   "$schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schema.json",
   "entry": [
     "scripts/**/*.{cjs,mjs,js}",
+    ".github/skills/*/scripts/*.{js,mjs,cjs}",
     "apps/react-router/lighthouse.config.js",
-    "apps/react-router/config/**/*.ts",
-    "apps/react-router/utils/**/*.ts",
-    "apps/react-router/scripts/**/*.{ts,js,mjs}"
+    "apps/react-router/config/*.ts",
+    "apps/admin_system/config/*.ts",
+    "packages/ui/config/*.ts",
+    "apps/*/scripts/**/*.{ts,js,mjs}",
+    "packages/scan-ingestion/src/cli/*.ts"
   ],
   "ignorePatterns": [
     "**/build/**",
