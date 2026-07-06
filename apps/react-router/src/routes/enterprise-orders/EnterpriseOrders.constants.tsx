@@ -1,28 +1,34 @@
 import type {
   ColumnPinningState,
+  TableCrudConfig,
   TableColumn,
 } from '@repo/ui/components/Table/Table.types';
 
-import { Button } from '@repo/ui/components/Button';
-import { EyeIcon } from '@repo/ui/components/Icons';
 import {
   createBasicColumn,
   createDistinctStringColumn,
 } from '@repo/ui/components/Table/utils';
-import { ICON_SIZE_XS } from '@repo/ui/design-system/constants/iconSizes.constants';
 import { createStaticFilterOptions } from '@repo/ui/utils/filters';
-import * as stylex from '@stylexjs/stylex';
-import { Link } from 'react-router';
 
 import { type EnterpriseOrder, enterpriseOrdersApi } from '@/services';
 
-import { styles } from './EnterpriseOrders.constants.stylex';
-
-export const TITLE = 'Enterprise Orders - Infinite Scroll';
+export const TITLE = {
+  plural: 'Enterprise Orders',
+  singular: 'Order',
+};
 export const TABLE_NAME = 'enterprise_orders';
 export const SCHEMA_NAME = 'public';
 
 export const PERSISTENCE_KEY = 'enterprise-orders-table';
+
+export const CRUD: TableCrudConfig<EnterpriseOrder> = {
+  create: true,
+  delete: true,
+  deleteActionPath: '/_action/enterprise-orders/delete',
+  idAccessor: 'order_id',
+  read: true,
+  update: true,
+};
 
 export const DEFAULT_COLUMN_PINNING: ColumnPinningState<EnterpriseOrder> = {
   left: [],
@@ -299,21 +305,5 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
     label: 'Actions',
     maxWidth: 32,
     minWidth: 32,
-    render: (row) => (
-      <div {...stylex.props(styles.actionsCellContent)}>
-        <Link
-          prefetch='intent'
-          to={`/enterprise-orders/${String(row.order_id)}`}
-        >
-          <Button
-            aria-label={`View order ${String(row.order_id)}`}
-            color='ghost'
-            icon={<EyeIcon size={ICON_SIZE_XS} />}
-            size='embedded'
-            width='auto'
-          />
-        </Link>
-      </div>
-    ),
   },
 ];

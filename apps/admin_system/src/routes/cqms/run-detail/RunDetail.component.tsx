@@ -33,7 +33,7 @@ export const RunDetail = () => {
         columnsState={createEmptyColumnsState({ columns: RUN_SCANS_COLUMNS })}
         dataPromise={scansPromise}
         dataSelector={(rows) => rows}
-        metaState={{ title: 'Scans' }}
+        metaState={{ title: { plural: 'Scans', singular: 'Scan' } }}
       />
     </div>
   );

@@ -94,7 +94,10 @@ export const SHOWCASE_META_STATE = getInitialMetaState({
     persistenceKey: PERSISTENCE_KEY,
   }),
   persistenceKey: PERSISTENCE_KEY,
-  title: 'Data Table',
+  title: {
+    plural: 'Data Table',
+    singular: 'Row',
+  },
 });
 
 const fetchTableData = (): Promise<MockResponse> =>

@@ -29,7 +29,10 @@ describe('getPersistedUiState', () => {
       tableSettingsExpandedFilters: ['status'],
       tableSettingsSelectedTab: 'filters',
       threshold: 200,
-      title: 'Orders',
+      title: {
+        plural: 'Orders',
+        singular: 'Order',
+      },
       wasTableSettingsOpenBeforeColumnSettings: true,
     } satisfies TableMetaState;
 

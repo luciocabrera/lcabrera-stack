@@ -6,7 +6,10 @@ import { useEffect, useRef } from 'react';
 import type { TableContentProps } from './TableContent.types';
 
 import { useToogleTableIsTableSettingsOpen } from '../contexts/TableConfig/meta/actions';
-import { useGetTableThreshold } from '../contexts/TableConfig/meta/selectors';
+import {
+  useGetTableThreshold,
+  useGetTableTitleSingular,
+} from '../contexts/TableConfig/meta/selectors';
 import { useFetchMoreData } from '../contexts/TableData/data/actions';
 import {
   useGetTableHasMore,
@@ -17,13 +20,16 @@ import { TableWrapperContext } from '../contexts/TableWrapper/TableWrapperContex
 import { useInfiniteScroll } from '../hooks';
 import { TableBase } from '../TableBase';
 import { TableBody } from '../TableBody';
+import { TableCreateLink } from '../TableCreateLink';
 import { TableDrawersSection } from '../TableDrawersSection';
 import { TableHeader } from '../TableHeader';
 import { TableTitle } from '../TableTitle';
+import { validateTableCrudConfig } from '../utils/validateTableCrudConfig.util';
 import { styles } from './TableContent.stylex';
 
 export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   actions,
+  crud,
   dataSelector,
   dataTotalSelector,
   emptyState,
@@ -34,6 +40,7 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   const isLoading = useGetTableIsLoading();
   const isLoadingMore = useGetTableIsLoadingMore();
   const hasMore = useGetTableHasMore();
+  const titleSingular = useGetTableTitleSingular();
 
   const fetchMoreData = useFetchMoreData<TData, TResponse>();
   const toggleTableIsTableSettingsOpen = useToogleTableIsTableSettingsOpen();
@@ -43,6 +50,9 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   const wasLoadingRef = useRef(isLoading);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const wrapperContextValue = { containerRef, wrapperRef };
+  const resolvedTitleSingular = titleSingular ?? 'Record';
+
+  validateTableCrudConfig({ crud });
 
   useEffect(() => {
     const wasLoading = wasLoadingRef.current;
@@ -78,6 +88,9 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
             actions={
               <>
                 {actions}
+                {crud?.create && (
+                  <TableCreateLink title={resolvedTitleSingular} to='new' />
+                )}
                 <Button
                   aria-label='Table settings'
                   color='ghost'
@@ -100,8 +113,10 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
           >
             <TableBase>
               <TableHeader />
-              <TableBody
+              <TableBody<TData>
+                crud={crud}
                 emptyState={emptyState}
+                titleSingular={resolvedTitleSingular}
                 tableContainerRef={containerRef}
               />
             </TableBase>

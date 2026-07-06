@@ -52,7 +52,9 @@ export const ScanDetail = () => {
                 dataPromise={findingsPromise}
                 dataSelector={(response) => response.rows}
                 dataTotalSelector={(response) => response.total}
-                metaState={{ title: 'Findings' }}
+                metaState={{
+                  title: { plural: 'Findings', singular: 'Finding' },
+                }}
               />
             ),
             header: 'Findings',

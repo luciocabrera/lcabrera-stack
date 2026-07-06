@@ -33,10 +33,15 @@ does, and the only one that ever needs `ANTHROPIC_API_KEY`.
 
 `runQueuedScan.ts` branches on `scanners.deterministic` (TECH_SPEC §2.5):
 
-- **linter** (deterministic): spawns
-  `.github/skills/linter-checker/scripts/generate-linter-report.mjs
---target=<local_path> --scope=<scope_value> --output-dir=<dir>
---skip-ingest` as a child process.
+- **Deterministic scanners** (eslint, oxlint — ADR-019's split of the
+  retired `linter`): looked up in
+  `deterministicScannerConfigs.constants.ts` (`scanner_id →
+  {scriptPath, rawArtifactFileName}` — a TS map, not a DB column;
+  executing DB-stored paths would widen the attack surface) and spawned
+  as `node <scriptPath> --target=<local_path> --scope=<scope_value>
+--output-dir=<dir> --skip-ingest`. A deterministic scanner with no
+  registered runner fails with an explicit message instead of crashing
+  the queue.
 - **fallow / code-smell-checker / code-smell-zen** (not deterministic): calls
   `@repo/agent-runner`'s `runSkillAgent`, streaming `onProgress` into
   `scans.progress_message` and a `scan-progress` WebSocket push per turn.

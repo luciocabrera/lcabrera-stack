@@ -107,7 +107,7 @@ vi.mock(
     useGetTableSchemaName: () => metaStateMock.schemaName,
     useGetTableTableName: () => metaStateMock.tableName,
     useGetTableThreshold: () => metaStateMock.threshold,
-    useGetTableTitle: () => metaStateMock.title,
+    useGetTableTitlePlural: () => metaStateMock.title,
   }),
 );
 

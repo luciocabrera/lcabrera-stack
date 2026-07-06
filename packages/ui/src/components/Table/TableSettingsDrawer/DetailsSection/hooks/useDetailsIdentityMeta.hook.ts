@@ -3,7 +3,7 @@ import {
   useGetTableLocale,
   useGetTableSchemaName,
   useGetTableTableName,
-  useGetTableTitle,
+  useGetTableTitlePlural,
 } from '@repo/ui/components/Table/contexts/TableConfig/meta/selectors';
 
 /**
@@ -16,6 +16,6 @@ export const useDetailsIdentityMeta = () => {
     locale: useGetTableLocale(),
     schemaName: useGetTableSchemaName(),
     tableName: useGetTableTableName(),
-    title: useGetTableTitle(),
+    title: useGetTableTitlePlural(),
   };
 };

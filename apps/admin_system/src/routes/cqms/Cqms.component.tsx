@@ -9,14 +9,19 @@ import type { loader } from './cqms.loader';
 
 import { PROJECT_LIST_COLUMNS } from './Cqms.constants';
 
-const TITLE = 'Projects';
+const TITLE = {
+  plural: 'Projects',
+  singular: 'Project',
+};
 
 export const Cqms = () => {
   const { projectsPromise } = useLoaderData<typeof loader>();
 
   return (
     <TableLayout<ProjectListViewRow, readonly ProjectListViewRow[]>
-      actions={<TableCreateLink title={TITLE} to='/cqms/projects/new' />}
+      actions={
+        <TableCreateLink title={TITLE.singular} to='/cqms/projects/new' />
+      }
       columnsState={createEmptyColumnsState({
         columns: PROJECT_LIST_COLUMNS,
       })}

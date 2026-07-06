@@ -2,14 +2,14 @@ import { Title } from '@repo/ui/components/Title/Title.component';
 
 import type { TableTitleProps } from './TableTitle.types';
 
-import { useGetTableTitle } from '../contexts/TableConfig/meta/selectors';
+import { useGetTableTitlePlural } from '../contexts/TableConfig/meta/selectors';
 
 export const TableTitle = ({
   actions,
   customStylex,
   icon,
 }: TableTitleProps) => {
-  const title = useGetTableTitle();
+  const title = useGetTableTitlePlural();
 
   return (
     <Title actions={actions} customStylex={customStylex} icon={icon}>

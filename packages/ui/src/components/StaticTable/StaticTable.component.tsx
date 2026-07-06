@@ -24,7 +24,16 @@ export const StaticTable = <TData extends Record<string, unknown>>({
 }: StaticTableProps<TData>) => (
   <TableConfigProvider<TData>
     columnsState={createEmptyColumnsState({ columns })}
-    metaState={title ? { title } : {}}
+    metaState={
+      title
+        ? {
+            title: {
+              plural: title,
+              singular: 'Row',
+            },
+          }
+        : {}
+    }
   >
     <FiltersDataProvider<TData> columns={[...columns]}>
       <Table<TData, readonly TData[]>

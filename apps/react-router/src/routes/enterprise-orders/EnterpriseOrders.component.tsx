@@ -7,6 +7,7 @@ import { enterpriseOrdersApi } from '@/services';
 
 import type { loader } from './enterprise-orders.loader';
 
+import { CRUD } from './EnterpriseOrders.constants';
 import { hydrateEnterpriseOrdersColumnsState } from './hydrateEnterpriseOrdersColumnsState.util';
 
 export const EnterpriseOrders = () => {
@@ -18,6 +19,7 @@ export const EnterpriseOrders = () => {
   return (
     <TableLayout<EnterpriseOrder, EnterpriseOrdersResponse>
       columnsState={hydratedColumnsState}
+      crud={CRUD}
       dataPromise={enterpriseOrdersPromise}
       dataSelector={(response) => response.data}
       dataTotalSelector={(response) => response.total}

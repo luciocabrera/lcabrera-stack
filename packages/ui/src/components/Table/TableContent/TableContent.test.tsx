@@ -11,6 +11,7 @@ const {
   useGetTableHasMoreMock,
   useGetTableIsLoadingMock,
   useGetTableIsLoadingMoreMock,
+  useGetTableTitleSingularMock,
   useGetTableThresholdMock,
   useInfiniteScrollMock,
   useToogleTableIsTableSettingsOpenMock,
@@ -19,6 +20,7 @@ const {
   useGetTableHasMoreMock: vi.fn(),
   useGetTableIsLoadingMock: vi.fn(),
   useGetTableIsLoadingMoreMock: vi.fn(),
+  useGetTableTitleSingularMock: vi.fn(),
   useGetTableThresholdMock: vi.fn(),
   useInfiniteScrollMock: vi.fn(),
   useToogleTableIsTableSettingsOpenMock: vi.fn(() => vi.fn()),
@@ -68,6 +70,7 @@ vi.mock('../contexts/TableConfig/meta/actions', () => ({
 
 vi.mock('../contexts/TableConfig/meta/selectors', () => ({
   useGetTableThreshold: useGetTableThresholdMock,
+  useGetTableTitleSingular: useGetTableTitleSingularMock,
 }));
 
 vi.mock('../contexts/TableData/data/actions', () => ({
@@ -107,6 +110,7 @@ vi.mock('../TableTitle', () => ({
 describe('TableContent', () => {
   beforeEach(() => {
     useGetTableThresholdMock.mockReturnValue(200);
+    useGetTableTitleSingularMock.mockReturnValue('Order');
     useGetTableHasMoreMock.mockReturnValue(true);
     useGetTableIsLoadingMock.mockReturnValue(false);
     useGetTableIsLoadingMoreMock.mockReturnValue(false);

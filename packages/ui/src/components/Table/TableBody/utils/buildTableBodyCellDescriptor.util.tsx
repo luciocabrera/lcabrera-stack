@@ -3,10 +3,12 @@ import type {
   DataKey,
   PinnedColumnInfo,
   TableColumn,
+  TableCrudConfig,
 } from '@repo/ui/components/Table/Table.types';
 import type { ReactNode } from 'react';
 
 import { DEFAULT_MIN_COLUMN_WIDTH } from '@repo/ui/components/Table/Table.constants';
+import { TableRowActionsMenu } from '@repo/ui/components/Table/TableRowActionsMenu';
 
 export type TableBodyCellDescriptor<TData extends Record<string, unknown>> =
   | {
@@ -35,9 +37,11 @@ export type TableBodyCellDescriptor<TData extends Record<string, unknown>> =
 type BuildTableBodyCellDescriptorArgs<TData extends Record<string, unknown>> = {
   readonly col: TableColumn<TData>;
   readonly columnSizing: ColumnSizingState<TData>;
+  readonly crud?: TableCrudConfig<TData>;
   readonly isLoadingState: boolean;
   readonly pinnedOffsets: Partial<Record<DataKey<TData>, PinnedColumnInfo>>;
   readonly rowData: Record<string, unknown>;
+  readonly titleSingular?: string;
 };
 
 /**
@@ -48,17 +52,41 @@ export const buildTableBodyCellDescriptor = <
 >({
   col,
   columnSizing,
+  crud,
   isLoadingState,
   pinnedOffsets,
   rowData,
+  titleSingular,
 }: BuildTableBodyCellDescriptorArgs<TData>): TableBodyCellDescriptor<TData> => {
   const minWidth = col.minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
   const width = columnSizing[col.key] ?? minWidth;
   const pinInfo = pinnedOffsets[col.key];
 
-  if (col.render) {
+  const customActions = col.render?.(rowData as TData);
+
+  if (col.key === 'actions' && crud) {
     return {
-      children: col.render(rowData as TData),
+      children: (
+        <TableRowActionsMenu
+          crud={crud}
+          customActions={customActions}
+          row={rowData as TData}
+          titleSingular={titleSingular}
+        />
+      ),
+      isLoadingState,
+      key: col.key,
+      kind: 'custom',
+      label: '',
+      minWidth,
+      pinInfo,
+      width,
+    };
+  }
+
+  if (customActions) {
+    return {
+      children: customActions,
       isLoadingState,
       key: col.key,
       kind: 'custom',

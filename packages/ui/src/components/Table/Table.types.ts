@@ -57,6 +57,26 @@ export type ColumnVisibilityState<TData = Record<string, unknown>> = Set<
 
 export type DataKey<TData> = 'actions' | (keyof TData & string);
 
+export type TableCrudId = number | string;
+
+export type TableCrudIdAccessor<TData extends Record<string, unknown>> =
+  | ((row: TData) => TableCrudId)
+  | (keyof TData & string);
+
+export type TableCrudConfig<TData extends Record<string, unknown>> = {
+  readonly create?: boolean;
+  readonly delete?: boolean;
+  readonly deleteActionPath?: string;
+  readonly idAccessor: TableCrudIdAccessor<TData>;
+  readonly read?: boolean;
+  readonly update?: boolean;
+};
+
+export type TableTitle = {
+  readonly plural: string;
+  readonly singular: string;
+};
+
 export type FilterData = {
   readonly data: string[];
   readonly hasMore: boolean;
@@ -263,7 +283,7 @@ export type TableMetaState = {
   readonly tableSettingsExpandedFilters: readonly string[];
   readonly tableSettingsSelectedTab: string;
   readonly threshold: number;
-  readonly title?: string;
+  readonly title?: TableTitle;
   readonly wasTableSettingsOpenBeforeColumnSettings?: boolean;
 };
 
@@ -288,16 +308,18 @@ export type TablePersistenceConfig = {
 export type TableProps<
   TData extends Record<string, unknown>,
   TResponse,
-> = BaseProps &
+> = BaseProps<TData> &
   InfiniteScroll<TData, TResponse> & {
     readonly isFlexWrapperEnabled?: boolean;
     readonly isLoading?: boolean;
     readonly response: TResponse;
   };
 
-type BaseProps = ComponentPropsWithRef<'table'> & {
-  readonly actions?: ReactNode;
-  readonly customStylex?: StyleXStyles;
-  readonly emptyState?: TableEmptyStateConfig;
-  readonly icon?: ReactNode;
-};
+type BaseProps<TData extends Record<string, unknown>> =
+  ComponentPropsWithRef<'table'> & {
+    readonly actions?: ReactNode;
+    readonly crud?: TableCrudConfig<TData>;
+    readonly customStylex?: StyleXStyles;
+    readonly emptyState?: TableEmptyStateConfig;
+    readonly icon?: ReactNode;
+  };

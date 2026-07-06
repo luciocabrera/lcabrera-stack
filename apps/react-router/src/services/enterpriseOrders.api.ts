@@ -124,6 +124,27 @@ type FetchEnterpriseOrdersParams = {
  */
 export const enterpriseOrdersApi = {
   /**
+   * Delete an enterprise order by ID
+   */
+  deleteEnterpriseOrder: async ({
+    orderId,
+    requestUrl,
+  }: {
+    orderId: number;
+    requestUrl?: string;
+  }): Promise<void> => {
+    const url = `${getApiBaseUrl(requestUrl)}/enterprise-orders/${orderId}`;
+
+    const response = await fetch(url, { method: 'DELETE' });
+
+    if (!response.ok) {
+      throw new Error(
+        `API request failed: ${response.status} ${response.statusText}`,
+      );
+    }
+  },
+
+  /**
    * Fetch distinct values for a column (for dynamic filter options)
    */
   fetchDistinctValues: async ({

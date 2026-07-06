@@ -5,24 +5,24 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { TableTitle } from './TableTitle.component';
 
-const { useGetTableTitleMock } = vi.hoisted(() => ({
-  useGetTableTitleMock: vi.fn(),
+const { useGetTableTitlePluralMock } = vi.hoisted(() => ({
+  useGetTableTitlePluralMock: vi.fn(),
 }));
 
 vi.mock('../contexts/TableConfig/meta/selectors', () => ({
-  useGetTableTitle: useGetTableTitleMock,
+  useGetTableTitlePlural: useGetTableTitlePluralMock,
 }));
 
 describe('TableTitle', () => {
   it('renders nothing when title, icon, and actions are all missing', () => {
-    useGetTableTitleMock.mockReturnValue('');
+    useGetTableTitlePluralMock.mockReturnValue('');
 
     const { container } = render(<TableTitle />);
     expect(container.firstChild).toBeNull();
   });
 
   it('renders the title from selector', () => {
-    useGetTableTitleMock.mockReturnValue('Enterprise Orders');
+    useGetTableTitlePluralMock.mockReturnValue('Enterprise Orders');
 
     render(<TableTitle />);
 
@@ -31,7 +31,7 @@ describe('TableTitle', () => {
   });
 
   it('renders icon and actions slots when provided', () => {
-    useGetTableTitleMock.mockReturnValue('');
+    useGetTableTitlePluralMock.mockReturnValue('');
 
     render(
       <TableTitle

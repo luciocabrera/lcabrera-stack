@@ -9,7 +9,7 @@ export type TableLayoutProps<
   TResponse,
 > = Pick<
   TableProps<TData, TResponse>,
-  'actions' | 'dataSelector' | 'dataTotalSelector' | 'onLoadMore'
+  'actions' | 'crud' | 'dataSelector' | 'dataTotalSelector' | 'onLoadMore'
 > & {
   /** Loader-seeded initial columns state (required) */
   readonly columnsState: Omit<

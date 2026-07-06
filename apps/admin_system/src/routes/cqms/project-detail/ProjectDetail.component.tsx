@@ -40,7 +40,7 @@ export const ProjectDetail = () => {
         })}
         dataPromise={runsPromise}
         dataSelector={(rows) => rows}
-        metaState={{ title: 'Runs' }}
+        metaState={{ title: { plural: 'Runs', singular: 'Run' } }}
       />
     </div>
   );

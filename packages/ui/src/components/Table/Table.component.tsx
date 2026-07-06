@@ -8,6 +8,7 @@ import { TableContent } from './TableContent';
 
 export const Table = <TData extends Record<string, unknown>, TResponse>({
   actions,
+  crud,
   dataSelector,
   dataTotalSelector,
   emptyState,
@@ -32,6 +33,7 @@ export const Table = <TData extends Record<string, unknown>, TResponse>({
     >
       <TableContent
         actions={actions}
+        crud={crud}
         dataSelector={dataSelector}
         dataTotalSelector={dataTotalSelector}
         emptyState={emptyState}
