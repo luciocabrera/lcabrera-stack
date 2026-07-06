@@ -153,10 +153,12 @@ export const PathBrowserModal = ({
           <Button
             isDisabled={!result?.parentPath || isLoading}
             onClick={() => {
-              if (result?.parentPath) {
-                setCurrentPath(result.parentPath);
-                setActiveEntryIndex(0);
+              if (!result?.parentPath) {
+                return;
               }
+
+              setCurrentPath(result.parentPath);
+              setActiveEntryIndex(0);
             }}
             size='mini'
             type='button'
