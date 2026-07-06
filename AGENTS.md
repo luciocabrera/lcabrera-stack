@@ -126,6 +126,7 @@ Root scripts are **orchestration only** — anything project-specific lives in t
 | Run all tests (every workspace)          | `vp run test:all`                                      |
 | Build all workspaces                     | `vp run build:all`                                     |
 | Lint everything WITH fix (oxlint+eslint) | `vp run lint:all`                                      |
+| Regenerate lint JSON reports             | `vp run lint:report`                                   |
 | Format everything                        | `vp run format:all`                                    |
 | Typegen (both React Router apps)         | `vp run typegen:all`                                   |
 | Full gate (typegen+check+tests)          | `vp run check:safe`                                    |
@@ -135,6 +136,8 @@ Root scripts are **orchestration only** — anything project-specific lives in t
 There is deliberately **no `start:all`/`dev:all`**: `car-sales-api` and `car-sales-api-fast` are performance-comparison alternatives serving the same domain and must never run at the same time — always pick one combo.
 
 **Both linters run in every workspace.** Oxlint (`vp lint`) covers the whole tree from the root; the eslint pass (`vp run lint:eslint` / `lint:eslint:check`) exists in all 15 workspaces — React workspaces use `@repo/vite-configs/eslint-custom-rules`, node/library workspaces use `@repo/vite-configs/eslint-base-custom-rules` (same stack minus React/StyleX, and without `clean-import-paths`, which strips the import extensions node-resolution code requires). Inherited eslint violations are baselined per workspace in `eslint-suppressions.json` (ESLint bulk suppressions) — **new violations fail the gate**; burn debt down and shrink the baseline with `npx eslint . --config eslint.config.mjs --prune-suppressions`. Never add new entries by hand — fix the code instead.
+
+**Lint JSON reports** follow the fallow output convention: `vp run lint:report` (script: `scripts/generate-lint-reports.mjs`, supports `--only=eslint|oxlint`) regenerates `reports/oxlint/full-latest.json` (one repo-wide `vp lint . --format=json` run) and `reports/eslint/full-latest.json` (the standard eslint `--format json` result array merged across all 15 workspaces, repo-relative paths). Both are tracked. ESLint runs in check mode — regenerating a report never mutates sources — and the baselined debt is visible per file in each entry's `suppressedMessages`, so the report is the place to inspect what the suppressions actually cover.
 
 Known constraint: `scan-orchestrator`'s queue integration test shares the local CQMS Postgres queue — while `vp run dev:cqms` is running, the live orchestrator races the test for queued scans and `vp run test:all` can flake on `runQueuedScan.test.ts` (duplicate `reports_scan_id_key`). Stop the CQMS dev session before a full test run, or treat that single failure as environmental.
 

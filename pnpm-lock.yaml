@@ -651,6 +651,9 @@ importers:
 
   packages/eslint-local-rules:
     devDependencies:
+      '@repo/vite-configs':
+        specifier: workspace:*
+        version: link:../vite-configs
       '@typescript-eslint/utils':
         specifier: 'catalog:'
         version: 8.62.1(eslint@10.6.0(jiti@2.7.0))(typescript@6.0.3)
@@ -666,6 +669,9 @@ importers:
 
   packages/plugins:
     devDependencies:
+      eslint:
+        specifier: 'catalog:'
+        version: 10.6.0(jiti@2.7.0)
       vitest:
         specifier: 'catalog:'
         version: 4.1.9(@opentelemetry/api@1.9.1)(@types/node@26.1.0)(@vitest/browser-preview@4.1.9)(@vitest/coverage-v8@4.1.9)(jsdom@29.1.1)(vite@8.1.3(@types/node@26.1.0)(jiti@2.7.0)(yaml@2.9.0))
@@ -709,6 +715,12 @@ importers:
 
   packages/ts-configs:
     devDependencies:
+      '@repo/vite-configs':
+        specifier: workspace:*
+        version: link:../vite-configs
+      eslint:
+        specifier: 'catalog:'
+        version: 10.6.0(jiti@2.7.0)
       vitest:
         specifier: 'catalog:'
         version: 4.1.9(@opentelemetry/api@1.9.1)(@types/node@26.1.0)(@vitest/browser-preview@4.1.9)(@vitest/coverage-v8@4.1.9)(jsdom@29.1.1)(vite@8.1.3(@types/node@26.1.0)(jiti@2.7.0)(yaml@2.9.0))
@@ -821,6 +833,9 @@ importers:
 
   packages/utils:
     devDependencies:
+      eslint:
+        specifier: 'catalog:'
+        version: 10.6.0(jiti@2.7.0)
       vitest:
         specifier: 'catalog:'
         version: 4.1.9(@opentelemetry/api@1.9.1)(@types/node@26.1.0)(@vitest/browser-preview@4.1.9)(@vitest/coverage-v8@4.1.9)(jsdom@29.1.1)(vite@8.1.3(@types/node@26.1.0)(jiti@2.7.0)(yaml@2.9.0))
