@@ -20,6 +20,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const parentPath = parent === targetPath ? undefined : parent;
 
   try {
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
     const dirents = await readdir(targetPath, { withFileTypes: true });
     const entries = dirents
       .filter((entry) => entry.isDirectory())
