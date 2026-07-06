@@ -1,8 +1,9 @@
 import { closePool, getPool } from '@repo/data-access/db/getPool.util';
+import { makeDirectoryWithin } from '@repo/scan-ingestion/fs/makeDirectoryWithin.util.ts';
+import { makeTempDirectory } from '@repo/scan-ingestion/testing/makeTempDirectory.util.ts';
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, realpathSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { rmSync } from 'node:fs';
+import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { updateProject } from './updateProject.util.ts';
@@ -13,12 +14,8 @@ describe('updateProject', () => {
   let projectId: string;
 
   beforeAll(async () => {
-    projectDir = realpathSync(
-      mkdtempSync(join(tmpdir(), 'scan-ingestion-update-')),
-    );
-    otherDir = realpathSync(
-      mkdtempSync(join(tmpdir(), 'scan-ingestion-update-other-')),
-    );
+    projectDir = makeTempDirectory('scan-ingestion-update-');
+    otherDir = makeTempDirectory('scan-ingestion-update-other-');
 
     const pool = getPool();
     const result = await pool.query<{ fn_upsert_project: string }>(
@@ -74,12 +71,12 @@ describe('updateProject', () => {
   });
 
   it("updates local_path to a real subfolder of a git repo, not that repo's root", async () => {
-    const repoRoot = realpathSync(
-      mkdtempSync(join(tmpdir(), 'scan-ingestion-update-repo-')),
-    );
+    const repoRoot = makeTempDirectory('scan-ingestion-update-repo-');
     execFileSync('git', ['init'], { cwd: repoRoot });
-    const subfolder = join(repoRoot, 'packages', 'some-package');
-    mkdirSync(subfolder, { recursive: true });
+    const subfolder = makeDirectoryWithin({
+      baseDirectory: repoRoot,
+      targetPath: path.join('packages', 'some-package'),
+    });
 
     try {
       await updateProject({

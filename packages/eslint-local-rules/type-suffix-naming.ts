@@ -2,15 +2,21 @@
 // - Function parameter types must end with 'Args' (not 'Arguments')
 // - React component prop types must end with 'Props'
 
-import type { Rule } from 'eslint';
+import type { TSESTree } from '@typescript-eslint/utils';
 
-const rule: Rule.RuleModule = {
+import { ESLintUtils } from '@typescript-eslint/utils';
+
+const createRule = ESLintUtils.RuleCreator(
+  (name) => `https://example.com/rule/${name}`,
+);
+
+export default createRule({
   create(context) {
     const filename = context.filename;
     const isReactFile = filename.endsWith('.tsx') || filename.endsWith('.jsx');
 
     return {
-      TSTypeAliasDeclaration(node: any) {
+      TSTypeAliasDeclaration(node: TSESTree.TSTypeAliasDeclaration) {
         const typeName = node.id.name;
 
         // Check for incorrect 'Arguments' suffix (should be 'Args')
@@ -23,11 +29,8 @@ const rule: Rule.RuleModule = {
               typeName,
             },
             fix(fixer) {
-              // Find all references to this type in the file
-              const fixes = [];
-
               // Fix the type definition itself
-              fixes.push(fixer.replaceText(node.id, suggestedName));
+              const fixes = [fixer.replaceText(node.id, suggestedName)];
 
               return fixes;
             },
@@ -55,11 +58,11 @@ const rule: Rule.RuleModule = {
       },
     };
   },
+  defaultOptions: [],
   meta: {
     docs: {
       description:
         'Enforce proper type suffix naming: Args for function parameters, Props for React components',
-      recommended: true,
     },
     fixable: 'code',
     messages: {
@@ -71,6 +74,5 @@ const rule: Rule.RuleModule = {
     schema: [],
     type: 'suggestion',
   },
-};
-
-export default rule;
+  name: 'type-suffix-naming',
+});

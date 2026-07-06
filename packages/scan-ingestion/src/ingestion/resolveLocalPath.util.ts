@@ -1,4 +1,4 @@
-import { realpathSync } from 'node:fs';
+import { canonicalRealPath } from '../fs/canonicalRealPath.util.ts';
 
 type ResolveLocalPathArgs = {
   readonly localPath: string;
@@ -15,6 +15,17 @@ type ResolveLocalPathArgs = {
  * project to point at a specific subfolder (e.g. `packages/ui`) distinct
  * from the whole repo — an edit to a different subfolder of the same repo
  * appeared to silently do nothing.
+ *
+ * Also doubles as the existence check (the filesystem check Zod cannot do
+ * at the boundary — TECH_SPEC §2.4): realpath throws for a missing path,
+ * surfaced as the caller-facing "Path does not exist" error.
  */
-export const resolveLocalPath = ({ localPath }: ResolveLocalPathArgs): string =>
-  realpathSync(localPath);
+export const resolveLocalPath = ({
+  localPath,
+}: ResolveLocalPathArgs): string => {
+  try {
+    return canonicalRealPath(localPath);
+  } catch {
+    throw new Error(`Path does not exist: ${localPath}`);
+  }
+};

@@ -6,41 +6,65 @@ import { markScanFailed } from '@repo/scan-ingestion/queries/markScanFailed.util
 import { markScanRunning } from '@repo/scan-ingestion/queries/markScanRunning.util';
 import { updateScanProgress } from '@repo/scan-ingestion/queries/updateScanProgress.util';
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync } from 'node:fs';
-import { join } from 'node:path';
+import path from 'node:path';
 
 import type { RunStatusHub } from '../ws/runStatusHub.ts';
 
 import { cqmsRepoRoot } from '../cqmsRepoRoot.util.ts';
+import {
+  createScanOutputDirectory,
+  getScanOutputPathIfExists,
+} from './scanOutputPaths.util.ts';
 
-const LINTER_SCRIPT_PATH = join(
+const LINTER_SCRIPT_PATH = path.join(
   cqmsRepoRoot,
   '.github/skills/linter-checker/scripts/generate-linter-report.mjs',
 );
 
-type RunQueuedScanArgs = {
+type PublishStatusArgs = {
   readonly hub: RunStatusHub;
   readonly scan: QueuedScanRow;
+  readonly status: string;
 };
 
-const publishStatus = (
-  hub: RunStatusHub,
-  scan: QueuedScanRow,
-  status: string,
-): void => {
-  hub.publish(scan.run_id, {
+const publishStatus = ({ hub, scan, status }: PublishStatusArgs): void => {
+  hub.publish({
+    payload: {
+      runId: scan.run_id,
+      scanId: scan.scan_id,
+      scannerId: scan.scanner_id,
+      status,
+      type: 'scan-status',
+    },
     runId: scan.run_id,
-    scanId: scan.scan_id,
-    scannerId: scan.scanner_id,
-    status,
-    type: 'scan-status',
   });
 };
 
-const runDeterministicLinter = async (
-  scan: QueuedScanRow,
-  outputDirectory: string,
-): Promise<'failed' | 'succeeded'> => {
+type PersistScanProgressArgs = {
+  readonly progressMessage: string;
+  readonly scanId: string;
+};
+
+const persistScanProgress = async ({
+  progressMessage,
+  scanId,
+}: PersistScanProgressArgs): Promise<void> => {
+  try {
+    await updateScanProgress({ progressMessage, scanId });
+  } catch (error) {
+    console.error('❌ Failed to persist scan progress:', error);
+  }
+};
+
+type RunDeterministicLinterArgs = {
+  readonly outputDirectory: string;
+  readonly scan: QueuedScanRow;
+};
+
+const runDeterministicLinter = async ({
+  outputDirectory,
+  scan,
+}: RunDeterministicLinterArgs): Promise<'failed' | 'succeeded'> => {
   try {
     execFileSync(
       'node',
@@ -60,10 +84,16 @@ const runDeterministicLinter = async (
     console.error(`❌ linter-checker script failed to run:`, error);
   }
 
-  const reportMarkdownPath = join(outputDirectory, 'report.md');
-  const reportJsonPath = join(outputDirectory, 'report.json');
+  const reportMarkdownPath = getScanOutputPathIfExists({
+    fileName: 'report.md',
+    scanId: scan.scan_id,
+  });
+  const reportJsonPath = getScanOutputPathIfExists({
+    fileName: 'report.json',
+    scanId: scan.scan_id,
+  });
 
-  if (!existsSync(reportMarkdownPath) || !existsSync(reportJsonPath)) {
+  if (!reportMarkdownPath || !reportJsonPath) {
     await markScanFailed({
       errorMessage: 'linter-checker script did not produce report files.',
       runId: scan.run_id,
@@ -72,12 +102,13 @@ const runDeterministicLinter = async (
     return 'failed';
   }
 
-  const rawJsonPath = join(outputDirectory, 'linter.raw.json');
-
   await ingestReport({
     localPath: scan.local_path,
     origin: 'ui_agent_sdk',
-    rawJsonPath: existsSync(rawJsonPath) ? rawJsonPath : undefined,
+    rawJsonPath: getScanOutputPathIfExists({
+      fileName: 'linter.raw.json',
+      scanId: scan.scan_id,
+    }),
     reportJsonPath,
     reportMarkdownPath,
     runId: scan.run_id,
@@ -88,25 +119,32 @@ const runDeterministicLinter = async (
   return 'succeeded';
 };
 
-const runAgentSkill = async (
-  scan: QueuedScanRow,
-  outputDirectory: string,
-  hub: RunStatusHub,
-): Promise<'failed' | 'succeeded'> => {
+type RunAgentSkillArgs = {
+  readonly hub: RunStatusHub;
+  readonly outputDirectory: string;
+  readonly scan: QueuedScanRow;
+};
+
+const runAgentSkill = async ({
+  hub,
+  outputDirectory,
+  scan,
+}: RunAgentSkillArgs): Promise<'failed' | 'succeeded'> => {
   const result = await runSkillAgent({
     onProgress: (message) => {
-      updateScanProgress({
+      void persistScanProgress({
         progressMessage: message,
         scanId: scan.scan_id,
-      }).catch((error: unknown) => {
-        console.error('❌ Failed to persist scan progress:', error);
       });
-      hub.publish(scan.run_id, {
+      hub.publish({
+        payload: {
+          runId: scan.run_id,
+          scanId: scan.scan_id,
+          scannerId: scan.scanner_id,
+          status: message,
+          type: 'scan-progress',
+        },
         runId: scan.run_id,
-        scanId: scan.scan_id,
-        scannerId: scan.scanner_id,
-        status: message,
-        type: 'scan-progress',
       });
     },
     outputDirectory,
@@ -129,15 +167,16 @@ const runAgentSkill = async (
     return 'failed';
   }
 
-  // Only fallow's skill produces a raw artifact today (TECH_SPEC §2.4).
-  const rawJsonPath = join(outputDirectory, 'fallow.raw.json');
-
   await ingestReport({
     localPath: scan.local_path,
     origin: 'ui_agent_sdk',
+    // Only fallow's skill produces a raw artifact today (TECH_SPEC §2.4).
     rawJsonPath:
-      scan.scanner_id === 'fallow' && existsSync(rawJsonPath)
-        ? rawJsonPath
+      scan.scanner_id === 'fallow'
+        ? getScanOutputPathIfExists({
+            fileName: 'fallow.raw.json',
+            scanId: scan.scan_id,
+          })
         : undefined,
     reportJsonPath: result.reportJsonPath,
     reportMarkdownPath: result.reportMarkdownPath,
@@ -150,6 +189,11 @@ const runAgentSkill = async (
     scopeValue: scan.scope_value,
   });
   return 'succeeded';
+};
+
+type RunQueuedScanArgs = {
+  readonly hub: RunStatusHub;
+  readonly scan: QueuedScanRow;
 };
 
 /**
@@ -166,21 +210,15 @@ export const runQueuedScan = async ({
   scan,
 }: RunQueuedScanArgs): Promise<void> => {
   await markScanRunning({ scanId: scan.scan_id });
-  publishStatus(hub, scan, 'running');
+  publishStatus({ hub, scan, status: 'running' });
 
-  const outputDirectory = join(
-    cqmsRepoRoot,
-    '.tmp',
-    'scan-orchestrator',
-    scan.scan_id,
-  );
-  mkdirSync(outputDirectory, { recursive: true });
+  const outputDirectory = createScanOutputDirectory({ scanId: scan.scan_id });
 
   let finalStatus: 'failed' | 'succeeded';
   try {
     finalStatus = scan.deterministic
-      ? await runDeterministicLinter(scan, outputDirectory)
-      : await runAgentSkill(scan, outputDirectory, hub);
+      ? await runDeterministicLinter({ outputDirectory, scan })
+      : await runAgentSkill({ hub, outputDirectory, scan });
   } catch (error) {
     console.error(`❌ Scan ${scan.scan_id} failed unexpectedly:`, error);
     await markScanFailed({
@@ -191,5 +229,5 @@ export const runQueuedScan = async ({
     finalStatus = 'failed';
   }
 
-  publishStatus(hub, scan, finalStatus);
+  publishStatus({ hub, scan, status: finalStatus });
 };

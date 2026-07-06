@@ -1,8 +1,9 @@
-import { readdirSync, readFileSync } from 'node:fs';
-import { join, relative, sep } from 'node:path';
+import path from 'node:path';
 
 import type { RunFileInput } from './report.schema.ts';
 
+import { listDirectoryWithin } from '../fs/listDirectoryWithin.util.ts';
+import { readTextFileWithin } from '../fs/readTextFileWithin.util.ts';
 import { classifyFileTypeCategory } from './classifyFileTypeCategory.util.ts';
 
 const IGNORED_DIRECTORIES = new Set([
@@ -20,37 +21,59 @@ const getExtension = (fileName: string): string => {
   return dotIndex === -1 ? '' : fileName.slice(dotIndex);
 };
 
-const readLineCount = (filePath: string): number | undefined => {
+type ReadLineCountArgs = {
+  readonly fullPath: string;
+  readonly rootPath: string;
+};
+
+const readLineCount = ({
+  fullPath,
+  rootPath,
+}: ReadLineCountArgs): number | undefined => {
   try {
-    return readFileSync(filePath, 'utf8').split('\n').length;
+    return readTextFileWithin({
+      baseDirectory: rootPath,
+      targetPath: fullPath,
+    }).split('\n').length;
   } catch {
     return undefined;
   }
 };
 
-const walk = (
-  currentPath: string,
-  rootPath: string,
-  results: RunFileInput[],
-): void => {
-  for (const entry of readdirSync(currentPath, { withFileTypes: true })) {
+type WalkArgs = {
+  readonly currentPath: string;
+  readonly results: RunFileInput[];
+  readonly rootPath: string;
+};
+
+const walk = ({ currentPath, results, rootPath }: WalkArgs): void => {
+  const entries = listDirectoryWithin({
+    baseDirectory: rootPath,
+    targetPath: currentPath,
+  });
+
+  for (const entry of entries) {
     if (entry.isDirectory()) {
       if (IGNORED_DIRECTORIES.has(entry.name)) continue;
-      walk(join(currentPath, entry.name), rootPath, results);
+      walk({
+        currentPath: path.join(currentPath, entry.name),
+        results,
+        rootPath,
+      });
       continue;
     }
 
     if (!entry.isFile()) continue;
 
-    const fullPath = join(currentPath, entry.name);
-    const filePath = relative(rootPath, fullPath);
+    const fullPath = path.join(currentPath, entry.name);
+    const filePath = path.relative(rootPath, fullPath);
 
     results.push({
       extension: getExtension(entry.name),
       file_path: filePath,
       file_type_category: classifyFileTypeCategory(entry.name),
-      line_count: readLineCount(fullPath),
-      nested_level: filePath.split(sep).length - 1,
+      line_count: readLineCount({ fullPath, rootPath }),
+      nested_level: filePath.split(path.sep).length - 1,
     });
   }
 };
@@ -67,6 +90,6 @@ export const buildFileInventory = ({
   rootPath,
 }: BuildFileInventoryArgs): readonly RunFileInput[] => {
   const results: RunFileInput[] = [];
-  walk(rootPath, rootPath, results);
+  walk({ currentPath: rootPath, results, rootPath });
   return results;
 };

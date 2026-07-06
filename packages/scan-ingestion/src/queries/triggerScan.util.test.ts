@@ -1,7 +1,6 @@
 import { closePool, getPool } from '@repo/data-access/db/getPool.util';
-import { mkdtempSync, realpathSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { makeTempDirectory } from '@repo/scan-ingestion/testing/makeTempDirectory.util.ts';
+import { rmSync } from 'node:fs';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { triggerScan } from './triggerScan.util.ts';
@@ -11,9 +10,7 @@ describe('triggerScan', () => {
   let projectId: string;
 
   beforeAll(async () => {
-    projectDir = realpathSync(
-      mkdtempSync(join(tmpdir(), 'scan-ingestion-trigger-')),
-    );
+    projectDir = makeTempDirectory('scan-ingestion-trigger-');
 
     const pool = getPool();
     const result = await pool.query<{ fn_upsert_project: string }>(

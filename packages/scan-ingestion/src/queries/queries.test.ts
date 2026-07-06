@@ -1,7 +1,6 @@
 import { closePool, getPool } from '@repo/data-access/db/getPool.util';
-import { mkdtempSync, realpathSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { makeTempDirectory } from '@repo/scan-ingestion/testing/makeTempDirectory.util.ts';
+import { rmSync } from 'node:fs';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { getProjectById } from './getProjectById.util.ts';
@@ -29,9 +28,7 @@ describe('queries', () => {
   let scanId: string;
 
   beforeAll(async () => {
-    projectDir = realpathSync(
-      mkdtempSync(join(tmpdir(), 'scan-ingestion-queries-')),
-    );
+    projectDir = makeTempDirectory('scan-ingestion-queries-');
 
     const pool = getPool();
 

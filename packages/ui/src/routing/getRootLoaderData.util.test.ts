@@ -47,10 +47,10 @@ describe('getRootLoaderData', () => {
     const result = getRootLoaderData({ request });
 
     expect(getRequestCspNonceMock).toHaveBeenCalledWith(request);
-    expect(getThemeFromCookieMock).toHaveBeenCalledWith(
-      'theme=dark; other=1',
-      undefined,
-    );
+    expect(getThemeFromCookieMock).toHaveBeenCalledWith({
+      appId: undefined,
+      cookieHeader: 'theme=dark; other=1',
+    });
     expect(getGlobalSettingsFromCookieMock).toHaveBeenCalledWith({
       appId: undefined,
       cookieString: 'theme=dark; other=1',
@@ -75,7 +75,10 @@ describe('getRootLoaderData', () => {
 
     getRootLoaderData({ request });
 
-    expect(getThemeFromCookieMock).toHaveBeenCalledWith(null, undefined);
+    expect(getThemeFromCookieMock).toHaveBeenCalledWith({
+      appId: undefined,
+      cookieHeader: undefined,
+    });
     expect(getGlobalSettingsFromCookieMock).toHaveBeenCalledWith({
       appId: undefined,
       cookieString: undefined,
@@ -97,10 +100,10 @@ describe('getRootLoaderData', () => {
 
     getRootLoaderData({ appId: 'admin-system', request });
 
-    expect(getThemeFromCookieMock).toHaveBeenCalledWith(
-      'admin-system-theme=dark',
-      'admin-system',
-    );
+    expect(getThemeFromCookieMock).toHaveBeenCalledWith({
+      appId: 'admin-system',
+      cookieHeader: 'admin-system-theme=dark',
+    });
     expect(getGlobalSettingsFromCookieMock).toHaveBeenCalledWith({
       appId: 'admin-system',
       cookieString: 'admin-system-theme=dark',

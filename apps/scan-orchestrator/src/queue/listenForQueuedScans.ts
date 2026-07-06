@@ -8,6 +8,15 @@ type ListenForQueuedScansArgs = {
   readonly onWake: () => void;
 };
 
+const endClientQuietly = async (client: Client): Promise<void> => {
+  try {
+    await client.end();
+  } catch {
+    // The connection is already broken — there is nothing useful left to do
+    // with a failure to close it; reconnection is already scheduled.
+  }
+};
+
 /**
  * Holds one dedicated, non-pooled Postgres client LISTENing on
  * cqms_scan_queued (TECH_SPEC §2.7) — separate from scan-ingestion's
@@ -37,20 +46,22 @@ export const listenForQueuedScans = ({
 
     client.on('error', (error) => {
       console.error('❌ LISTEN connection error, reconnecting:', error);
-      client.end().catch(() => {});
+      void endClientQuietly(client);
       setTimeout(connect, RECONNECT_DELAY_MS);
     });
 
-    client
-      .connect()
-      .then(() => client.query(`LISTEN ${NOTIFY_CHANNEL}`))
-      .then(() => {
+    const establishListen = async (): Promise<void> => {
+      try {
+        await client.connect();
+        await client.query(`LISTEN ${NOTIFY_CHANNEL}`);
         console.warn(`👂 Listening on Postgres channel "${NOTIFY_CHANNEL}"`);
-      })
-      .catch((error: unknown) => {
+      } catch (error) {
         console.error('❌ Failed to establish LISTEN connection:', error);
         setTimeout(connect, RECONNECT_DELAY_MS);
-      });
+      }
+    };
+
+    void establishListen();
   };
 
   connect();

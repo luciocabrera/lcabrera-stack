@@ -1,5 +1,4 @@
 import { getPool } from '@repo/data-access/db/getPool.util';
-import { existsSync } from 'node:fs';
 
 import { resolveLocalPath } from '../ingestion/resolveLocalPath.util.ts';
 
@@ -21,16 +20,14 @@ type RegisterProjectArgs = {
  * subdirectory of another registered (or unregistered) git repo. The
  * filesystem-existence check is exactly the kind of thing Zod cannot do
  * on its own (TECH_SPEC §2.4's "why Zod stays at the boundary" note) —
- * it's a Node-only check, done here rather than duplicated by the caller.
+ * it's a Node-only check, performed by `resolveLocalPath` itself (realpath
+ * throws "Path does not exist" for a missing path) rather than duplicated
+ * by the caller.
  */
 export const registerProject = async ({
   localPath,
   name,
 }: RegisterProjectArgs): Promise<RegisterProjectResult> => {
-  if (!existsSync(localPath)) {
-    throw new Error(`Path does not exist: ${localPath}`);
-  }
-
   const canonicalPath = resolveLocalPath({ localPath });
 
   const pool = getPool();

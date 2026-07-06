@@ -31,7 +31,10 @@ export const getRootLoaderData = ({
     cookieString: cookieHeader ?? undefined,
     fallback: INITIAL_GLOBAL_SETTINGS,
   });
-  const theme = getThemeFromCookie(cookieHeader, appId);
+  const theme = getThemeFromCookie({
+    appId,
+    cookieHeader: cookieHeader ?? undefined,
+  });
 
   return { cspNonce, globalSettings, theme };
 };

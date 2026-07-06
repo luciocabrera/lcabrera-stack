@@ -4,20 +4,20 @@ import { classifyFileTypeCategory } from './classifyFileTypeCategory.util.ts';
 
 describe('classifyFileTypeCategory', () => {
   it.each([
-    ['Button.component.tsx', 'component'],
-    ['useStore.hook.ts', 'hook'],
-    ['formatDate.util.ts', 'util'],
-    ['api.util.test.ts', 'test'],
-    ['fetchAndValidate.util.spec.ts', 'test'],
-    ['users.repository.ts', 'repository'],
-    ['users.controller.ts', 'controller'],
-    ['users.route.ts', 'route'],
-    ['Table.types.ts', 'types'],
-    ['Card.stylex.ts', 'stylex'],
-    ['api.constants.ts', 'constants'],
-    ['report.schema.ts', 'schema'],
-    ['README.md', 'other'],
-  ])('classifies %s as %s', (fileName, expected) => {
+    { expected: 'component', fileName: 'Button.component.tsx' },
+    { expected: 'hook', fileName: 'useStore.hook.ts' },
+    { expected: 'util', fileName: 'formatDate.util.ts' },
+    { expected: 'test', fileName: 'api.util.test.ts' },
+    { expected: 'test', fileName: 'fetchAndValidate.util.spec.ts' },
+    { expected: 'repository', fileName: 'users.repository.ts' },
+    { expected: 'controller', fileName: 'users.controller.ts' },
+    { expected: 'route', fileName: 'users.route.ts' },
+    { expected: 'types', fileName: 'Table.types.ts' },
+    { expected: 'stylex', fileName: 'Card.stylex.ts' },
+    { expected: 'constants', fileName: 'api.constants.ts' },
+    { expected: 'schema', fileName: 'report.schema.ts' },
+    { expected: 'other', fileName: 'README.md' },
+  ])('classifies $fileName as $expected', ({ expected, fileName }) => {
     expect(classifyFileTypeCategory(fileName)).toBe(expected);
   });
 });

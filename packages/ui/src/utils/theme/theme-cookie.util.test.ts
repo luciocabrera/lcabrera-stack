@@ -9,44 +9,53 @@ describe('getThemeFromCookie', () => {
     vi.restoreAllMocks();
   });
 
-  it('returns undefined for null cookieHeader', () => {
-    expect(getThemeFromCookie(undefined)).toBeUndefined();
+  it('returns undefined for a missing cookieHeader', () => {
+    expect(getThemeFromCookie({})).toBeUndefined();
   });
 
   it('returns undefined for empty string', () => {
-    expect(getThemeFromCookie('')).toBeUndefined();
+    expect(getThemeFromCookie({ cookieHeader: '' })).toBeUndefined();
   });
 
   it('returns dark when cookie has theme=dark', () => {
-    expect(getThemeFromCookie('theme=dark')).toBe('dark');
+    expect(getThemeFromCookie({ cookieHeader: 'theme=dark' })).toBe('dark');
   });
 
   it('returns light when cookie has theme=light', () => {
-    expect(getThemeFromCookie('theme=light')).toBe('light');
+    expect(getThemeFromCookie({ cookieHeader: 'theme=light' })).toBe('light');
   });
 
   it('returns undefined for unknown theme value', () => {
-    expect(getThemeFromCookie('theme=sunset')).toBeUndefined();
+    expect(
+      getThemeFromCookie({ cookieHeader: 'theme=sunset' }),
+    ).toBeUndefined();
   });
 
   it('returns undefined when no theme cookie present', () => {
-    expect(getThemeFromCookie('lang=en; session=abc')).toBeUndefined();
+    expect(
+      getThemeFromCookie({ cookieHeader: 'lang=en; session=abc' }),
+    ).toBeUndefined();
   });
 
-  it('falls back to document.cookie when cookieHeader is null in browser', () => {
+  it('falls back to document.cookie when cookieHeader is not provided in browser', () => {
     vi.stubGlobal('document', { cookie: 'theme=dark; lang=en' });
 
-    expect(getThemeFromCookie(undefined)).toBe('dark');
+    expect(getThemeFromCookie({})).toBe('dark');
   });
 
   it('reads the app-scoped key when appId is provided', () => {
-    expect(getThemeFromCookie('admin-system-theme=dark', 'admin-system')).toBe(
-      'dark',
-    );
+    expect(
+      getThemeFromCookie({
+        appId: 'admin-system',
+        cookieHeader: 'admin-system-theme=dark',
+      }),
+    ).toBe('dark');
   });
 
   it('ignores the unscoped key when an appId is provided', () => {
-    expect(getThemeFromCookie('theme=dark', 'admin-system')).toBeUndefined();
+    expect(
+      getThemeFromCookie({ appId: 'admin-system', cookieHeader: 'theme=dark' }),
+    ).toBeUndefined();
   });
 });
 
@@ -60,7 +69,7 @@ describe('setThemeCookie', () => {
     vi.stubGlobal('fetch', undefined);
 
     // Should not throw
-    expect(() => setThemeCookie('light')).not.toThrow();
+    expect(() => setThemeCookie({ theme: 'light' })).not.toThrow();
   });
 
   it('submits theme persistence to server action when fetch is available', async () => {
@@ -71,7 +80,7 @@ describe('setThemeCookie', () => {
       search: '?page=2',
     });
 
-    setThemeCookie('dark');
+    setThemeCookie({ theme: 'dark' });
 
     await Promise.resolve();
 
@@ -89,7 +98,7 @@ describe('setThemeCookie', () => {
     vi.stubGlobal('fetch', fetchMock);
     vi.stubGlobal('location', { pathname: '/car-sales', search: '' });
 
-    setThemeCookie('dark', 'admin-system');
+    setThemeCookie({ appId: 'admin-system', theme: 'dark' });
 
     const call = fetchMock.mock.calls[0];
     const url = call?.[0];

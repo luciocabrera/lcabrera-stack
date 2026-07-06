@@ -37,14 +37,25 @@ export const useElementSize = ({ ref }: UseElementSizeArgs): ElementSize => {
       );
     };
 
-    measure();
+    // The initial measurement is deferred to a microtask so the effect body
+    // never sets state synchronously (react-x/set-state-in-effect); with a
+    // real ResizeObserver, `observe()` also delivers an initial callback.
+    let isMeasureCancelled = false;
+    queueMicrotask(() => {
+      if (!isMeasureCancelled) measure();
+    });
 
-    if (typeof ResizeObserver === 'undefined') return;
+    if (typeof ResizeObserver === 'undefined') {
+      return () => {
+        isMeasureCancelled = true;
+      };
+    }
 
     const observer = new ResizeObserver(measure);
     observer.observe(element);
 
     return () => {
+      isMeasureCancelled = true;
       observer.disconnect();
     };
   }, [ref]);

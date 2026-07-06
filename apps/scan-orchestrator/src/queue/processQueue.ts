@@ -30,6 +30,20 @@ export const createQueueProcessor = ({ hub }: CreateQueueProcessorArgs) => {
     }
   };
 
+  const drainAndReschedule = async (): Promise<void> => {
+    try {
+      await drain();
+    } catch (error) {
+      console.error('❌ Queue processor drain failed:', error);
+    } finally {
+      isProcessing = false;
+      if (isWakeRequestedDuringProcessing) {
+        isWakeRequestedDuringProcessing = false;
+        wake();
+      }
+    }
+  };
+
   const wake = (): void => {
     if (isProcessing) {
       isWakeRequestedDuringProcessing = true;
@@ -37,17 +51,7 @@ export const createQueueProcessor = ({ hub }: CreateQueueProcessorArgs) => {
     }
 
     isProcessing = true;
-    drain()
-      .catch((error: unknown) => {
-        console.error('❌ Queue processor drain failed:', error);
-      })
-      .finally(() => {
-        isProcessing = false;
-        if (isWakeRequestedDuringProcessing) {
-          isWakeRequestedDuringProcessing = false;
-          wake();
-        }
-      });
+    void drainAndReschedule();
   };
 
   return { wake };

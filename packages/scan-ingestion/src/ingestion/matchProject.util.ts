@@ -1,15 +1,21 @@
 import { execFileSync } from 'node:child_process';
-import { realpathSync } from 'node:fs';
-import { basename } from 'node:path';
+import path from 'node:path';
+
+import { canonicalRealPath } from '../fs/canonicalRealPath.util.ts';
 
 // Restrict command lookup to fixed, non-writable system directories so a
 // writable (potentially attacker-controlled) directory earlier in the
 // inherited PATH cannot shadow the real `git` binary (Sonar S4036).
 const TRUSTED_PATH = '/usr/local/bin:/usr/bin:/bin';
 
-const runGit = (args: readonly string[], cwd: string): string | undefined => {
+type RunGitArgs = {
+  readonly cwd: string;
+  readonly gitArgs: readonly string[];
+};
+
+const runGit = ({ cwd, gitArgs }: RunGitArgs): string | undefined => {
   try {
-    return execFileSync('git', args, {
+    return execFileSync('git', gitArgs, {
       cwd,
       encoding: 'utf8',
       env: { ...process.env, PATH: TRUSTED_PATH },
@@ -42,13 +48,22 @@ type ResolveProjectPathArgs = {
 export const resolveProjectPath = ({
   localPath,
 }: ResolveProjectPathArgs): ResolvedProjectPath => {
-  const gitRoot = runGit(['rev-parse', '--show-toplevel'], localPath);
-  const canonicalPath = realpathSync(gitRoot ?? localPath);
+  const gitRoot = runGit({
+    cwd: localPath,
+    gitArgs: ['rev-parse', '--show-toplevel'],
+  });
+  const canonicalPath = canonicalRealPath(gitRoot ?? localPath);
 
   return {
     canonicalPath,
-    gitBranch: runGit(['rev-parse', '--abbrev-ref', 'HEAD'], canonicalPath),
-    gitCommitSha: runGit(['rev-parse', 'HEAD'], canonicalPath),
-    projectName: basename(canonicalPath),
+    gitBranch: runGit({
+      cwd: canonicalPath,
+      gitArgs: ['rev-parse', '--abbrev-ref', 'HEAD'],
+    }),
+    gitCommitSha: runGit({
+      cwd: canonicalPath,
+      gitArgs: ['rev-parse', 'HEAD'],
+    }),
+    projectName: path.basename(canonicalPath),
   };
 };

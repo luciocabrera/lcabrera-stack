@@ -1,5 +1,5 @@
 import { getPool } from '@repo/data-access/db/getPool.util';
-import { readFileSync } from 'node:fs';
+import path from 'node:path';
 
 import type {
   IngestReportArgs,
@@ -12,6 +12,7 @@ import type {
 // understands natively, same as any real npm dependency. That's what makes
 // it safe to use here even though this module is transitively loaded by
 // src/cli/ingest.cli.ts (plain `node --experimental-strip-types`).
+import { readTextFileWithin } from '../fs/readTextFileWithin.util.ts';
 import { buildFileInventory } from './buildFileInventory.util.ts';
 import { reportSchema } from './report.schema.ts';
 import { resolveScan } from './resolveScan.util.ts';
@@ -29,27 +30,45 @@ export const ingestReport = async (
 ): Promise<IngestReportResult> => {
   const pool = getPool();
 
+  // All three report artifacts are produced into (and validated against) the
+  // same run directory — the directory containing report.json.
+  const reportDirectory = path.dirname(args.reportJsonPath);
   const rawReportJson: unknown = JSON.parse(
-    readFileSync(args.reportJsonPath, 'utf8'),
+    readTextFileWithin({
+      baseDirectory: reportDirectory,
+      targetPath: args.reportJsonPath,
+    }),
   );
   const report = reportSchema.parse(rawReportJson);
-  const reportMarkdown = readFileSync(args.reportMarkdownPath, 'utf8');
+  const reportMarkdown = readTextFileWithin({
+    baseDirectory: reportDirectory,
+    targetPath: args.reportMarkdownPath,
+  });
   const rawJson = args.rawJsonPath
-    ? (JSON.parse(readFileSync(args.rawJsonPath, 'utf8')) as unknown)
+    ? (JSON.parse(
+        readTextFileWithin({
+          baseDirectory: reportDirectory,
+          targetPath: args.rawJsonPath,
+        }),
+      ) as unknown)
     : undefined;
 
-  const { projectId, runId, scanId } = await resolveScan(pool, args);
+  const { projectId, runId, scanId } = await resolveScan({
+    ingestArgs: args,
+    pool,
+  });
 
   if (rawJson !== undefined || report.health_metrics) {
+    // pg serializes undefined parameters as SQL NULL (pg prepareValue).
     await pool.query(
       'UPDATE cqms.scans SET raw_json = $1, health_metrics = $2 WHERE id = $3',
-      [rawJson ?? null, report.health_metrics ?? null, scanId],
+      [rawJson, report.health_metrics, scanId],
     );
   }
 
   const fileInventory = SCOPES_WITH_FILE_INVENTORY.has(args.scopeType)
     ? buildFileInventory({ rootPath: args.localPath })
-    : null;
+    : undefined;
 
   await pool.query(
     'CALL cqms.sp_ingest_scan_result($1, $2, $3, $4, $5, $6, $7)',
@@ -67,10 +86,13 @@ export const ingestReport = async (
         medium_count: report.medium_count,
         nit_count: report.nit_count,
         report_id: report.report_id,
-        top_risk: report.top_risk ?? null,
+        // Omitted when undefined — jsonb_to_record yields SQL NULL for
+        // absent keys, same as an explicit JSON null.
+        top_risk: report.top_risk,
       }),
       JSON.stringify(report.findings),
-      fileInventory ? JSON.stringify(fileInventory) : null,
+      // undefined is serialized as SQL NULL by pg (prepareValue).
+      fileInventory ? JSON.stringify(fileInventory) : undefined,
     ],
   );
 

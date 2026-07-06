@@ -1,7 +1,7 @@
 import { closePool, getPool } from '@repo/data-access/db/getPool.util';
 import { mkdtempSync, realpathSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { createRunStatusHub } from '../ws/runStatusHub.ts';
@@ -12,9 +12,12 @@ describe('runQueuedScan (deterministic linter branch)', () => {
   let projectId: string;
 
   beforeAll(async () => {
-    projectDir = realpathSync(
-      mkdtempSync(join(tmpdir(), 'run-queued-scan-test-')),
+    const temporaryDirectoryTemplate = path.join(
+      tmpdir(),
+      'run-queued-scan-test-',
     );
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- canonicalizes the temp directory this test just created itself via mkdtempSync; no external input involved
+    projectDir = realpathSync(mkdtempSync(temporaryDirectoryTemplate));
 
     const pool = getPool();
     const result = await pool.query<{ fn_upsert_project: string }>(
@@ -48,9 +51,9 @@ describe('runQueuedScan (deterministic linter branch)', () => {
     const hub = createRunStatusHub();
     const publishedStatuses: string[] = [];
     const originalPublish = hub.publish;
-    hub.publish = (id, payload) => {
-      publishedStatuses.push(payload.status);
-      originalPublish(id, payload);
+    hub.publish = (args) => {
+      publishedStatuses.push(args.payload.status);
+      originalPublish(args);
     };
 
     await runQueuedScan({

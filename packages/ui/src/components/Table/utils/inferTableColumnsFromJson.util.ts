@@ -13,8 +13,11 @@ type InferTableColumnsFromJsonArgs = {
 };
 
 const ISO_DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+// `(x|)` is behaviorally identical to `(x)?` but avoids the
+// optional-group-wrapping-a-quantifier shape that
+// security/detect-unsafe-regex (safe-regex) rejects as backtracking-prone.
 const ISO_DATE_TIME_PATTERN =
-  /^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}(:\d{2})?(\.\d+)?([Z+-][\d:]*)?$/;
+  /^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}(:\d{2}|)(\.\d+|)([Z+-][\d:]*|)$/;
 
 const isIsoDateString = (value: string): boolean =>
   ISO_DATE_ONLY_PATTERN.test(value) || ISO_DATE_TIME_PATTERN.test(value);
@@ -48,6 +51,35 @@ const humanizeKey = (key: string): string =>
     .replaceAll(/([a-z0-9])([A-Z])/g, '$1 $2')
     .replaceAll(/[_-]+/g, ' ')
     .replace(/^./, (char) => char.toUpperCase());
+
+type ObserveValueTypeArgs = {
+  readonly key: string;
+  readonly typeByKey: Map<string, InferredValueType>;
+  readonly value: unknown;
+};
+
+const observeValueType = ({
+  key,
+  typeByKey,
+  value,
+}: ObserveValueTypeArgs): void => {
+  if (value === undefined || value === null) {
+    return;
+  }
+
+  const inferredType = inferValueType(value);
+  const existingType = typeByKey.get(key);
+
+  if (existingType === undefined) {
+    typeByKey.set(key, inferredType);
+  } else if (existingType !== inferredType) {
+    // A column observed with conflicting types across rows falls back to
+    // 'string' rather than silently picking one — mixed-shape JSON
+    // (common across different scanners' raw output) renders as text
+    // instead of guessing wrong.
+    typeByKey.set(key, 'string');
+  }
+};
 
 const toTableColumnDataType = (
   inferredType: InferredValueType,
@@ -90,29 +122,13 @@ export const inferTableColumnsFromJson = ({
   const typeByKey = new Map<string, InferredValueType>();
 
   for (const row of rows) {
-    for (const key of Object.keys(row)) {
+    for (const [key, value] of Object.entries(row)) {
       if (!seenKeys.has(key)) {
         seenKeys.add(key);
         keyOrder.push(key);
       }
 
-      const value = row[key];
-      if (value === undefined || value === null) {
-        continue;
-      }
-
-      const inferredType = inferValueType(value);
-      const existingType = typeByKey.get(key);
-
-      if (existingType === undefined) {
-        typeByKey.set(key, inferredType);
-      } else if (existingType !== inferredType) {
-        // A column observed with conflicting types across rows falls back to
-        // 'string' rather than silently picking one — mixed-shape JSON
-        // (common across different scanners' raw output) renders as text
-        // instead of guessing wrong.
-        typeByKey.set(key, 'string');
-      }
+      observeValueType({ key, typeByKey, value });
     }
   }
 

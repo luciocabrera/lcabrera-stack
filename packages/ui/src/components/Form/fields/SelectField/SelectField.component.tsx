@@ -4,10 +4,15 @@ import { VirtualSelect } from '@repo/ui/components/VirtualSelect';
 
 import type { SelectFieldProps } from './SelectField.types';
 
-const resolveSelectedValues = (
-  mode: 'multi' | 'single',
-  value: unknown,
-): string[] => {
+type ResolveSelectedValuesArgs = {
+  readonly mode: 'multi' | 'single';
+  readonly value: unknown;
+};
+
+const resolveSelectedValues = ({
+  mode,
+  value,
+}: ResolveSelectedValuesArgs): string[] => {
   if (mode === 'multi') {
     return (value as string[] | undefined) ?? [];
   }
@@ -26,7 +31,7 @@ export const SelectField = <TValues extends Record<string, unknown>>({
     useFormField<TValues>(field);
 
   const selectMode = field.mode ?? 'single';
-  const selected = resolveSelectedValues(selectMode, value);
+  const selected = resolveSelectedValues({ mode: selectMode, value });
 
   const handleChange = (nextSelected: string[]) => {
     setValue(selectMode === 'multi' ? nextSelected : (nextSelected[0] ?? ''));

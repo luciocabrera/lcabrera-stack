@@ -5,18 +5,22 @@ import { readFromCookie } from '@repo/ui/utils/storage/readFromCookie.util';
 
 import { THEME_COOKIE_NAME } from './themeCookie.constants';
 
+type GetThemeFromCookieArgs = {
+  /** Optional per-app id used to scope the cookie key. */
+  readonly appId?: string;
+  /** Raw `Cookie` header string (SSR) or undefined (client). */
+  readonly cookieHeader?: string;
+};
+
 /**
  * Get theme from cookie (SSR and browser-safe).
- *
- * @param cookieHeader - Raw `Cookie` header string (SSR) or undefined (client).
- * @param appId - Optional per-app id used to scope the cookie key.
  */
-export const getThemeFromCookie = (
-  cookieHeader: null | string | undefined,
-  appId?: string,
-): ThemeMode | undefined => {
+export const getThemeFromCookie = ({
+  appId,
+  cookieHeader,
+}: GetThemeFromCookieArgs): ThemeMode | undefined => {
   const theme = readFromCookie({
-    cookieString: cookieHeader ?? undefined,
+    cookieString: cookieHeader,
     key: getAppScopedCookieKey({ appId, key: THEME_COOKIE_NAME }),
   });
 

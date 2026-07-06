@@ -23,7 +23,7 @@ export type FieldClientValidation = {
   readonly message?: string;
   readonly min?: number;
   readonly minLength?: number;
-  readonly pattern?: string;
+  readonly pattern?: RegExp;
   readonly required?: boolean;
 };
 

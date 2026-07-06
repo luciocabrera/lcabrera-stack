@@ -10,11 +10,17 @@ export type ResolvedScan = {
   readonly scanId: string;
 };
 
-const resolveExistingScan = async (
-  pool: Pool,
-  args: IngestReportArgs,
-  runId: string,
-): Promise<ResolvedScan> => {
+type ResolveExistingScanArgs = {
+  readonly ingestArgs: IngestReportArgs;
+  readonly pool: Pool;
+  readonly runId: string;
+};
+
+const resolveExistingScan = async ({
+  ingestArgs,
+  pool,
+  runId,
+}: ResolveExistingScanArgs): Promise<ResolvedScan> => {
   const runResult = await pool.query<{ project_id: string }>(
     'SELECT project_id FROM cqms.runs WHERE id = $1',
     [runId],
@@ -28,24 +34,29 @@ const resolveExistingScan = async (
     `SELECT id FROM cqms.scans
      WHERE run_id = $1 AND scanner_id = $2
      ORDER BY created_at DESC LIMIT 1`,
-    [runId, args.scannerId],
+    [runId, ingestArgs.scannerId],
   );
   const scanId = scanResult.rows[0]?.id;
   if (!scanId) {
     throw new Error(
-      `No scan found for runId=${runId}, scannerId=${args.scannerId}`,
+      `No scan found for runId=${runId}, scannerId=${ingestArgs.scannerId}`,
     );
   }
 
   return { projectId, runId, scanId };
 };
 
-const createAdHocScan = async (
-  pool: Pool,
-  args: IngestReportArgs,
-): Promise<ResolvedScan> => {
+type CreateAdHocScanArgs = {
+  readonly ingestArgs: IngestReportArgs;
+  readonly pool: Pool;
+};
+
+const createAdHocScan = async ({
+  ingestArgs,
+  pool,
+}: CreateAdHocScanArgs): Promise<ResolvedScan> => {
   const { canonicalPath, gitBranch, gitCommitSha, projectName } =
-    resolveProjectPath({ localPath: args.localPath });
+    resolveProjectPath({ localPath: ingestArgs.localPath });
 
   const upsertResult = await pool.query<{ fn_upsert_project: string }>(
     'SELECT cqms.fn_upsert_project($1, $2) AS fn_upsert_project',
@@ -58,11 +69,12 @@ const createAdHocScan = async (
     'SELECT cqms.fn_create_run($1, $2, $3, $4, $5, $6) AS fn_create_run',
     [
       projectId,
-      args.origin,
-      JSON.stringify([args.scannerId]),
-      args.triggeredBy ?? null,
-      gitCommitSha ?? null,
-      gitBranch ?? null,
+      ingestArgs.origin,
+      JSON.stringify([ingestArgs.scannerId]),
+      // undefined parameters are serialized as SQL NULL by pg (prepareValue).
+      ingestArgs.triggeredBy,
+      gitCommitSha,
+      gitBranch,
     ],
   );
   const runId = createRunResult.rows[0]?.fn_create_run;
@@ -72,7 +84,13 @@ const createAdHocScan = async (
     `INSERT INTO cqms.scans (run_id, project_id, scanner_id, status, scope_type, scope_value, started_at)
      VALUES ($1, $2, $3, 'running', $4, $5, now())
      RETURNING id`,
-    [runId, projectId, args.scannerId, args.scopeType, args.scopeValue],
+    [
+      runId,
+      projectId,
+      ingestArgs.scannerId,
+      ingestArgs.scopeType,
+      ingestArgs.scopeValue,
+    ],
   );
   const scanId = scanInsertResult.rows[0]?.id;
   if (!scanId) throw new Error('scan insert returned no id');
@@ -80,16 +98,21 @@ const createAdHocScan = async (
   return { projectId, runId, scanId };
 };
 
+type ResolveScanArgs = {
+  readonly ingestArgs: IngestReportArgs;
+  readonly pool: Pool;
+};
+
 /**
- * UI path (args.runId present): run + scan already exist (created by the
- * trigger-scan action before the job started) — just locate them. Ad hoc
+ * UI path (ingestArgs.runId present): run + scan already exist (created by
+ * the trigger-scan action before the job started) — just locate them. Ad hoc
  * path (no runId): resolve the project's canonical git-root path, upsert
  * the project, and create both run and scan rows here.
  */
-export const resolveScan = async (
-  pool: Pool,
-  args: IngestReportArgs,
-): Promise<ResolvedScan> =>
-  args.runId
-    ? resolveExistingScan(pool, args, args.runId)
-    : createAdHocScan(pool, args);
+export const resolveScan = async ({
+  ingestArgs,
+  pool,
+}: ResolveScanArgs): Promise<ResolvedScan> =>
+  ingestArgs.runId
+    ? resolveExistingScan({ ingestArgs, pool, runId: ingestArgs.runId })
+    : createAdHocScan({ ingestArgs, pool });

@@ -119,60 +119,62 @@ export const createHandleRequest = ({
     const cspNonce = getRequestCspNonce(request);
     addPreloadHeaders(responseHeaders);
 
-    return new Promise((resolve, reject) => {
-      let isShellRendered = false;
-      const userAgent = request.headers.get('user-agent');
+    const { promise, reject, resolve } = Promise.withResolvers<Response>();
 
-      // Ensure requests from bots and SPA Mode renders wait for all content
-      // to load before responding — see React Router's renderToPipeableStream docs.
-      const readyOption: keyof RenderToPipeableStreamOptions =
-        (userAgent && isbot(userAgent)) || routerContext.isSpaMode
-          ? 'onAllReady'
-          : 'onShellReady';
+    let isShellRendered = false;
+    const userAgent = request.headers.get('user-agent');
 
-      // Abort the rendering stream after the timeout so it has time to
-      // flush down the rejected boundaries.
-      let timeoutId: ReturnType<typeof setTimeout> | undefined = setTimeout(
-        () => abort(),
-        abortDelay,
-      );
+    // Ensure requests from bots and SPA Mode renders wait for all content
+    // to load before responding — see React Router's renderToPipeableStream docs.
+    const readyOption: keyof RenderToPipeableStreamOptions =
+      (userAgent && isbot(userAgent)) || routerContext.isSpaMode
+        ? 'onAllReady'
+        : 'onShellReady';
 
-      const clearRenderTimeout = () => {
-        clearTimeout(timeoutId);
-        timeoutId = undefined;
-      };
+    // Abort the rendering stream after the timeout so it has time to
+    // flush down the rejected boundaries.
+    let timeoutId: ReturnType<typeof setTimeout> | undefined = setTimeout(
+      () => abort(),
+      abortDelay,
+    );
 
-      const { abort, pipe } = renderToPipeableStream(
-        <ServerRouter context={routerContext} url={request.url} />,
-        {
-          nonce: cspNonce,
-          onError(error: unknown) {
-            responseStatusCode = 500;
-            // Log streaming rendering errors from inside the shell. Don't
-            // log errors encountered during initial shell rendering since
-            // they'll reject and get logged via onShellError.
-            if (isShellRendered) {
-              console.error(toError(error));
-            }
-          },
-          onShellError(error: unknown) {
-            reject(toError(error));
-          },
-          [readyOption]() {
-            isShellRendered = true;
+    const clearRenderTimeout = () => {
+      clearTimeout(timeoutId);
+      timeoutId = undefined;
+    };
 
-            resolve(
-              buildShellStreamResponse({
-                clearRenderTimeout,
-                pipe,
-                responseHeaders,
-                responseStatusCode,
-              }),
-            );
-          },
+    const { abort, pipe } = renderToPipeableStream(
+      <ServerRouter context={routerContext} url={request.url} />,
+      {
+        nonce: cspNonce,
+        onError(error: unknown) {
+          responseStatusCode = 500;
+          // Log streaming rendering errors from inside the shell. Don't
+          // log errors encountered during initial shell rendering since
+          // they'll reject and get logged via onShellError.
+          if (isShellRendered) {
+            console.error(toError(error));
+          }
         },
-      );
-    });
+        onShellError(error: unknown) {
+          reject(toError(error));
+        },
+        [readyOption]() {
+          isShellRendered = true;
+
+          resolve(
+            buildShellStreamResponse({
+              clearRenderTimeout,
+              pipe,
+              responseHeaders,
+              responseStatusCode,
+            }),
+          );
+        },
+      },
+    );
+
+    return promise;
   };
 
   return { handleRequest, streamTimeout };

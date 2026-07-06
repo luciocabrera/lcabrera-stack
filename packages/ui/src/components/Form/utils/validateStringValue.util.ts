@@ -28,7 +28,7 @@ export const validateStringValue = ({
   ) {
     return message;
   }
-  if (validation.pattern && !new RegExp(validation.pattern).test(value)) {
+  if (validation.pattern && !validation.pattern.test(value)) {
     return message;
   }
   return undefined;

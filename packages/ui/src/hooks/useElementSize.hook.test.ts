@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 import type { RefObject } from 'react';
 
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
+import { createRef } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { useElementSize } from './useElementSize.hook';
@@ -45,30 +46,36 @@ afterEach(() => {
 describe('useElementSize', () => {
   it('returns a zero size when the ref has no element', () => {
     vi.stubGlobal('ResizeObserver', MockResizeObserver);
-    const ref = { current: null } as RefObject<HTMLElement | null>;
+    const ref = createRef<HTMLElement>();
 
     const { result } = renderHook(() => useElementSize({ ref }));
 
     expect(result.current).toEqual({ height: 0, width: 0 });
   });
 
-  it('measures the element size on mount', () => {
+  it('measures the element size on mount', async () => {
     vi.stubGlobal('ResizeObserver', MockResizeObserver);
     const element = createSizedElement({ height: 200, width: 300 });
     const ref = { current: element } as RefObject<HTMLElement | null>;
 
     const { result } = renderHook(() => useElementSize({ ref }));
 
-    expect(result.current).toEqual({ height: 200, width: 300 });
+    // The initial measurement is a microtask away (deferred out of the
+    // effect body), so wait for it rather than asserting synchronously.
+    await waitFor(() =>
+      expect(result.current).toEqual({ height: 200, width: 300 }),
+    );
   });
 
-  it('measures once without a ResizeObserver (SSR-safe fallback)', () => {
+  it('measures once without a ResizeObserver (SSR-safe fallback)', async () => {
     vi.stubGlobal('ResizeObserver', undefined);
     const element = createSizedElement({ height: 120, width: 480 });
     const ref = { current: element } as RefObject<HTMLElement | null>;
 
     const { result } = renderHook(() => useElementSize({ ref }));
 
-    expect(result.current).toEqual({ height: 120, width: 480 });
+    await waitFor(() =>
+      expect(result.current).toEqual({ height: 120, width: 480 }),
+    );
   });
 });

@@ -43,12 +43,15 @@ describe('attachWebSocketServer', () => {
       client.on('message', (data: Buffer) => resolve(data.toString('utf8')));
     });
 
-    hub.publish(runId, {
+    hub.publish({
+      payload: {
+        runId,
+        scanId: 'scan-1',
+        scannerId: 'linter',
+        status: 'running',
+        type: 'scan-status',
+      },
       runId,
-      scanId: 'scan-1',
-      scannerId: 'linter',
-      status: 'running',
-      type: 'scan-status',
     });
 
     const message = await messagePromise;
@@ -79,12 +82,15 @@ describe('attachWebSocketServer', () => {
       isReceived = true;
     });
 
-    hub.publish(crypto.randomUUID(), {
+    hub.publish({
+      payload: {
+        runId: crypto.randomUUID(),
+        scanId: 'scan-1',
+        scannerId: 'linter',
+        status: 'running',
+        type: 'scan-status',
+      },
       runId: crypto.randomUUID(),
-      scanId: 'scan-1',
-      scannerId: 'linter',
-      status: 'running',
-      type: 'scan-status',
     });
     await wait(50);
 

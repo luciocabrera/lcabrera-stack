@@ -112,7 +112,7 @@ describe('Form', () => {
     let submittedFormData: FormData | undefined;
     const action = vi.fn(async ({ request }: { request: Request }) => {
       submittedFormData = await request.formData();
-      return null;
+      return { ok: true };
     });
 
     renderForm({ action, mode: 'create' });
@@ -136,7 +136,7 @@ describe('Form', () => {
   });
 
   it('blocks submission and shows an inline error when a required field is empty', async () => {
-    const action = vi.fn(async () => null);
+    const action = vi.fn(async () => ({ ok: true }));
 
     renderForm({ action, mode: 'create' });
 
@@ -164,7 +164,7 @@ describe('Form', () => {
   it('keeps the submit button disabled in edit mode until a value actually changes', async () => {
     const action = vi.fn(async ({ request }: { request: Request }) => {
       await request.formData();
-      return null;
+      return { ok: true };
     });
 
     renderForm({ action, initialValues: { name: 'Ada' }, mode: 'edit' });

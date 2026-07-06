@@ -1,5 +1,4 @@
 import { getPool } from '@repo/data-access/db/getPool.util';
-import { existsSync } from 'node:fs';
 
 import { resolveLocalPath } from '../ingestion/resolveLocalPath.util.ts';
 
@@ -19,17 +18,15 @@ type UpdateProjectArgs = {
  * real bug: re-pathing a project to a subfolder of the same git repo
  * (e.g. `packages/ui` inside a monorepo already registered at its root)
  * silently canonicalized back to the unchanged root path, making the
- * edit appear to do nothing.
+ * edit appear to do nothing. The path-existence check lives inside
+ * `resolveLocalPath` (realpath throws "Path does not exist" for a missing
+ * path).
  */
 export const updateProject = async ({
   localPath,
   name,
   projectId,
 }: UpdateProjectArgs): Promise<void> => {
-  if (!existsSync(localPath)) {
-    throw new Error(`Path does not exist: ${localPath}`);
-  }
-
   const canonicalPath = resolveLocalPath({ localPath });
 
   const pool = getPool();

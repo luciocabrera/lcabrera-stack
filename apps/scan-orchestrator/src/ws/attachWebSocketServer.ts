@@ -49,7 +49,7 @@ export const attachWebSocketServer = ({
 
       const result = subscribeMessageSchema.safeParse(parsed);
       if (result.success) {
-        hub.subscribe(result.data.runId, socket);
+        hub.subscribe({ runId: result.data.runId, socket });
       }
     });
   });

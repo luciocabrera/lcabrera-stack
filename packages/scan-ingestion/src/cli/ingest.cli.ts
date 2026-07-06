@@ -1,5 +1,5 @@
 import { closePool } from '@repo/data-access/db/getPool.util';
-import { join } from 'node:path';
+import path from 'node:path';
 
 import type {
   IngestReportArgs,
@@ -60,10 +60,10 @@ const run = async (): Promise<void> => {
     localPath,
     origin: (flags.origin ?? 'interactive_session') as IngestReportOrigin,
     rawJsonPath: flags['raw-json']
-      ? join(runDir, flags['raw-json'])
+      ? path.join(runDir, flags['raw-json'])
       : undefined,
-    reportJsonPath: join(runDir, REPORT_JSON_FILENAME),
-    reportMarkdownPath: join(runDir, REPORT_MARKDOWN_FILENAME),
+    reportJsonPath: path.join(runDir, REPORT_JSON_FILENAME),
+    reportMarkdownPath: path.join(runDir, REPORT_MARKDOWN_FILENAME),
     runId: flags['run-id'],
     scannerId: scannerIdSchema.parse(skill),
     scopeType: scopeTypeSchema.parse(flags['scope-type'] ?? 'repo'),

@@ -36,7 +36,7 @@ describe('useBackNavigate', () => {
   });
 
   it('navigates to the fallback when history.state carries no react-router idx at all', () => {
-    globalThis.history.replaceState(null, '');
+    globalThis.history.replaceState(undefined, '');
 
     const { result } = renderHook(() => useBackNavigate());
     result.current('/fallback');

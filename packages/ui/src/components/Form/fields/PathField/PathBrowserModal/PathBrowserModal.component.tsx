@@ -22,7 +22,30 @@ export const PathBrowserModal = ({
   const fetcher = useFetcher<BrowseDirectoryResult>();
   const [currentPath, setCurrentPath] = useState(initialPath);
   const loadRef = useRef(fetcher.load);
-  loadRef.current = fetcher.load;
+
+  // Keep the ref pointing at the latest fetcher.load without depending on its
+  // identity in the load effect below ("latest ref" pattern — updated in an
+  // effect, never during render).
+  useEffect(() => {
+    loadRef.current = fetcher.load;
+  });
+
+  // Reset the browsed path whenever the modal (re)opens or the field value
+  // backing `initialPath` changes — adjusted during render (guarded by the
+  // previous-value comparison) instead of via a state-setting effect.
+  const [previousResetKey, setPreviousResetKey] = useState({
+    initialPath,
+    isOpen,
+  });
+  if (
+    previousResetKey.initialPath !== initialPath ||
+    previousResetKey.isOpen !== isOpen
+  ) {
+    setPreviousResetKey({ initialPath, isOpen });
+    if (isOpen) {
+      setCurrentPath(initialPath);
+    }
+  }
 
   useEffect(() => {
     if (!isOpen) return;
@@ -31,12 +54,6 @@ export const PathBrowserModal = ({
     if (currentPath) params.set('path', currentPath);
     void loadRef.current(`${browseAction}?${params.toString()}`);
   }, [browseAction, currentPath, isOpen]);
-
-  useEffect(() => {
-    if (isOpen) {
-      setCurrentPath(initialPath);
-    }
-  }, [isOpen, initialPath]);
 
   const result = fetcher.data;
   const isLoading = fetcher.state !== 'idle';
@@ -76,7 +93,7 @@ export const PathBrowserModal = ({
         </span>
         <Button
           isDisabled={!result?.parentPath || isLoading}
-          onClick={() => setCurrentPath(result?.parentPath ?? undefined)}
+          onClick={() => setCurrentPath(result?.parentPath)}
           size='mini'
           type='button'
           variant='flat'

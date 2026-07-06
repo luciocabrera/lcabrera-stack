@@ -40,18 +40,28 @@ export const TableEmptyState = ({
     if (!header) return;
 
     const measure = () => {
-      // eslint-disable-next-line react-x/set-state-in-effect -- Header height must be read from the DOM (offsetHeight); it cannot be derived during render
       setHeaderHeight(header.offsetHeight);
     };
 
-    measure();
+    // The initial measurement is deferred to a microtask so the effect body
+    // never sets state synchronously (react-x/set-state-in-effect); with a
+    // real ResizeObserver, `observe()` also delivers an initial callback.
+    let isMeasureCancelled = false;
+    queueMicrotask(() => {
+      if (!isMeasureCancelled) measure();
+    });
 
-    if (typeof ResizeObserver === 'undefined') return;
+    if (typeof ResizeObserver === 'undefined') {
+      return () => {
+        isMeasureCancelled = true;
+      };
+    }
 
     const observer = new ResizeObserver(measure);
     observer.observe(header);
 
     return () => {
+      isMeasureCancelled = true;
       observer.disconnect();
     };
   }, [containerRef]);

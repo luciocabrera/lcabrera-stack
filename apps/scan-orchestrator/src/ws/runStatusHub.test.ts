@@ -8,6 +8,7 @@ const CLOSED = 3;
 const createFakeSocket = (readyState: number) => {
   const listeners = new Map<string, () => void>();
   return {
+    // eslint-disable-next-line local-rules/destructuring-for-functions -- mimics ws.WebSocket's on(event, handler) signature, which is fixed by the library
     on: vi.fn((event: string, handler: () => void) => {
       listeners.set(event, handler);
     }),
@@ -24,15 +25,18 @@ describe('createRunStatusHub', () => {
     const socketA = createFakeSocket(OPEN);
     const socketB = createFakeSocket(OPEN);
 
-    hub.subscribe('run-1', socketA as never);
-    hub.subscribe('run-1', socketB as never);
+    hub.subscribe({ runId: 'run-1', socket: socketA as never });
+    hub.subscribe({ runId: 'run-1', socket: socketB as never });
 
-    hub.publish('run-1', {
+    hub.publish({
+      payload: {
+        runId: 'run-1',
+        scanId: 'scan-1',
+        scannerId: 'linter',
+        status: 'running',
+        type: 'scan-status',
+      },
       runId: 'run-1',
-      scanId: 'scan-1',
-      scannerId: 'linter',
-      status: 'running',
-      type: 'scan-status',
     });
 
     expect(socketA.send).toHaveBeenCalledTimes(1);
@@ -50,13 +54,16 @@ describe('createRunStatusHub', () => {
     const hub = createRunStatusHub();
     const socket = createFakeSocket(OPEN);
 
-    hub.subscribe('run-1', socket as never);
-    hub.publish('run-2', {
+    hub.subscribe({ runId: 'run-1', socket: socket as never });
+    hub.publish({
+      payload: {
+        runId: 'run-2',
+        scanId: 'scan-2',
+        scannerId: 'linter',
+        status: 'running',
+        type: 'scan-status',
+      },
       runId: 'run-2',
-      scanId: 'scan-2',
-      scannerId: 'linter',
-      status: 'running',
-      type: 'scan-status',
     });
 
     expect(socket.send).not.toHaveBeenCalled();
@@ -66,13 +73,16 @@ describe('createRunStatusHub', () => {
     const hub = createRunStatusHub();
     const socket = createFakeSocket(CLOSED);
 
-    hub.subscribe('run-1', socket as never);
-    hub.publish('run-1', {
+    hub.subscribe({ runId: 'run-1', socket: socket as never });
+    hub.publish({
+      payload: {
+        runId: 'run-1',
+        scanId: 'scan-1',
+        scannerId: 'linter',
+        status: 'running',
+        type: 'scan-status',
+      },
       runId: 'run-1',
-      scanId: 'scan-1',
-      scannerId: 'linter',
-      status: 'running',
-      type: 'scan-status',
     });
 
     expect(socket.send).not.toHaveBeenCalled();
@@ -82,15 +92,18 @@ describe('createRunStatusHub', () => {
     const hub = createRunStatusHub();
     const socket = createFakeSocket(OPEN);
 
-    hub.subscribe('run-1', socket as never);
+    hub.subscribe({ runId: 'run-1', socket: socket as never });
     socket.triggerClose();
 
-    hub.publish('run-1', {
+    hub.publish({
+      payload: {
+        runId: 'run-1',
+        scanId: 'scan-1',
+        scannerId: 'linter',
+        status: 'running',
+        type: 'scan-status',
+      },
       runId: 'run-1',
-      scanId: 'scan-1',
-      scannerId: 'linter',
-      status: 'running',
-      type: 'scan-status',
     });
 
     expect(socket.send).not.toHaveBeenCalled();
@@ -99,12 +112,15 @@ describe('createRunStatusHub', () => {
   it('is a no-op when publishing to a run with no subscribers', () => {
     const hub = createRunStatusHub();
     expect(() =>
-      hub.publish('no-subscribers', {
+      hub.publish({
+        payload: {
+          runId: 'no-subscribers',
+          scanId: 'scan-1',
+          scannerId: 'linter',
+          status: 'running',
+          type: 'scan-status',
+        },
         runId: 'no-subscribers',
-        scanId: 'scan-1',
-        scannerId: 'linter',
-        status: 'running',
-        type: 'scan-status',
       }),
     ).not.toThrow();
   });

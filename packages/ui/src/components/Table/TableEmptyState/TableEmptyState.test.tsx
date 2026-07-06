@@ -2,6 +2,7 @@
 import type { ReactNode } from 'react';
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { createRef } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const {
@@ -69,7 +70,7 @@ beforeEach(() => {
     rightPinnedCols: [],
   });
   useElementSizeMock.mockReturnValue({ height: 0, width: 0 });
-  useTableContainerRefMock.mockReturnValue({ current: null });
+  useTableContainerRefMock.mockReturnValue(createRef<HTMLDivElement>());
 });
 
 afterEach(() => {

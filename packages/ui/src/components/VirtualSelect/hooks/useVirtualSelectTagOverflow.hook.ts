@@ -24,7 +24,6 @@ export const useVirtualSelectTagOverflow = ({
     if (mode !== 'multi' || !trigger) return;
 
     const measure = () => {
-      // eslint-disable-next-line react-x/set-state-in-effect -- State must be set from DOM measurement (ResizeObserver); cannot be derived during render
       setVisibleTagCount(
         countVisibleTags({ totalCount: selected.length, trigger }),
       );
@@ -33,10 +32,16 @@ export const useVirtualSelectTagOverflow = ({
     const observer = new ResizeObserver(measure);
     observer.observe(trigger);
 
-    // Initial measurement so tag count reflects current layout immediately.
-    measure();
+    // The initial measurement is deferred to a microtask so the effect body
+    // never sets state synchronously (react-x/set-state-in-effect); a real
+    // ResizeObserver also delivers an initial callback on observe().
+    let isMeasureCancelled = false;
+    queueMicrotask(() => {
+      if (!isMeasureCancelled) measure();
+    });
 
     return () => {
+      isMeasureCancelled = true;
       observer.disconnect();
     };
   }, [mode, selected, triggerRef]);

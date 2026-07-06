@@ -15,10 +15,20 @@ export type RunStatusPayload = {
  * function call, not a cross-process bridge. Not in packages/scan-ingestion,
  * which stays framework-agnostic with no WebSocket concept.
  */
+type PublishArgs = {
+  readonly payload: RunStatusPayload;
+  readonly runId: string;
+};
+
+type SubscribeArgs = {
+  readonly runId: string;
+  readonly socket: WebSocket;
+};
+
 export const createRunStatusHub = () => {
   const subscribers = new Map<string, Set<WebSocket>>();
 
-  const subscribe = (runId: string, socket: WebSocket): void => {
+  const subscribe = ({ runId, socket }: SubscribeArgs): void => {
     let sockets = subscribers.get(runId);
     if (!sockets) {
       sockets = new Set();
@@ -34,7 +44,7 @@ export const createRunStatusHub = () => {
     });
   };
 
-  const publish = (runId: string, payload: RunStatusPayload): void => {
+  const publish = ({ payload, runId }: PublishArgs): void => {
     const sockets = subscribers.get(runId);
     if (!sockets) return;
 

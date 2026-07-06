@@ -1,8 +1,9 @@
 import { closePool, getPool } from '@repo/data-access/db/getPool.util';
+import { makeDirectoryWithin } from '@repo/scan-ingestion/fs/makeDirectoryWithin.util.ts';
+import { makeTempDirectory } from '@repo/scan-ingestion/testing/makeTempDirectory.util.ts';
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, realpathSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { rmSync } from 'node:fs';
+import path from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
 
 import { registerProject } from './registerProject.util.ts';
@@ -22,9 +23,7 @@ describe('registerProject', () => {
   });
 
   it('registers a new project at its canonicalized path', async () => {
-    const projectDir = realpathSync(
-      mkdtempSync(join(tmpdir(), 'scan-ingestion-register-')),
-    );
+    const projectDir = makeTempDirectory('scan-ingestion-register-');
     createdProjectPaths.push(projectDir);
 
     const result = await registerProject({
@@ -54,9 +53,7 @@ describe('registerProject', () => {
   });
 
   it('upserts (not duplicates) when the same local_path is registered twice', async () => {
-    const projectDir = realpathSync(
-      mkdtempSync(join(tmpdir(), 'scan-ingestion-register-')),
-    );
+    const projectDir = makeTempDirectory('scan-ingestion-register-');
     createdProjectPaths.push(projectDir);
 
     const first = await registerProject({
@@ -72,12 +69,12 @@ describe('registerProject', () => {
   });
 
   it("registers a real subfolder of a git repo as its own distinct project, not that repo's root", async () => {
-    const repoRoot = realpathSync(
-      mkdtempSync(join(tmpdir(), 'scan-ingestion-register-repo-')),
-    );
+    const repoRoot = makeTempDirectory('scan-ingestion-register-repo-');
     execFileSync('git', ['init'], { cwd: repoRoot });
-    const subfolder = join(repoRoot, 'packages', 'some-package');
-    mkdirSync(subfolder, { recursive: true });
+    const subfolder = makeDirectoryWithin({
+      baseDirectory: repoRoot,
+      targetPath: path.join('packages', 'some-package'),
+    });
 
     try {
       const result = await registerProject({

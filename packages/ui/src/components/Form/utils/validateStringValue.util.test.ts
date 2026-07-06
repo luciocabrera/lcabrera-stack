@@ -22,7 +22,7 @@ describe('validateStringValue', () => {
   });
 
   it('returns the message when the value does not match the pattern', () => {
-    const validation: FieldClientValidation = { pattern: '^[a-z]+$' };
+    const validation: FieldClientValidation = { pattern: /^[a-z]+$/ };
 
     expect(
       validateStringValue({ message: 'Invalid', validation, value: 'ABC' }),
@@ -33,7 +33,7 @@ describe('validateStringValue', () => {
     const validation: FieldClientValidation = {
       maxLength: 5,
       minLength: 2,
-      pattern: '^[a-z]+$',
+      pattern: /^[a-z]+$/,
     };
 
     expect(

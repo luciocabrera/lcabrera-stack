@@ -14,15 +14,15 @@ export const styles = stylex.create({
     overflowWrap: 'anywhere',
   },
   entryButton: {
-    ':hover': {
-      backgroundColor: colors.surfaceSecondary,
-    },
     padding: spacing.sm,
     borderRadius: borderRadius.md,
     borderStyle: 'none',
     gap: spacing.sm,
     alignItems: 'center',
-    backgroundColor: 'transparent',
+    backgroundColor: {
+      ':hover': colors.surfaceSecondary,
+      default: 'transparent',
+    },
     color: colors.textPrimary,
     cursor: 'pointer',
     display: 'flex',

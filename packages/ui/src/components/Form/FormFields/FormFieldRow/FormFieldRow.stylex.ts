@@ -8,6 +8,6 @@ export const styles = stylex.create({
     flexDirection: 'row',
   },
   rowField: {
-    flex: 1,
+    flex: '1',
   },
 });

@@ -9,9 +9,8 @@ import {
   screen,
   waitFor,
 } from '@testing-library/react';
-import { mkdirSync, mkdtempSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { mkdirSync, rmSync } from 'node:fs';
+import path from 'node:path';
 import { createRoutesStub } from 'react-router';
 import {
   afterAll,
@@ -42,12 +41,20 @@ beforeEach(() => {
 });
 
 describe('PathBrowserModal', () => {
-  let root: string;
+  // Statically-derived fixture root (cwd is packages/ui when vitest runs):
+  // security/detect-non-literal-fs-filename only accepts statically
+  // resolvable paths, which a mkdtempSync result can never be.
+  const root = path.join(
+    process.cwd(),
+    'node_modules',
+    '.cache',
+    'path-browser-modal-test',
+  );
 
   beforeAll(() => {
-    root = mkdtempSync(join(tmpdir(), 'path-browser-modal-test-'));
-    mkdirSync(join(root, 'projects'));
-    mkdirSync(join(root, 'downloads'));
+    rmSync(root, { force: true, recursive: true });
+    mkdirSync(path.join(root, 'projects'), { recursive: true });
+    mkdirSync(path.join(root, 'downloads'));
   });
 
   afterAll(() => {
@@ -88,7 +95,7 @@ describe('PathBrowserModal', () => {
   });
 
   it('drills into a subdirectory when clicked and lists its contents', async () => {
-    mkdirSync(join(root, 'projects', 'cqms'));
+    mkdirSync(path.join(root, 'projects', 'cqms'));
     renderModal({});
 
     fireEvent.click(await screen.findByText('projects'));

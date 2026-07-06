@@ -15,7 +15,7 @@ export const JsonExplorer = ({ sections }: JsonExplorerProps) => (
           <div {...stylex.props(styles.sectionHeader)}>
             <CopyButton
               label='Copy raw JSON'
-              value={JSON.stringify(section.rows, null, 2)}
+              value={JSON.stringify(section.rows, undefined, 2)}
             />
           </div>
           <StaticTable

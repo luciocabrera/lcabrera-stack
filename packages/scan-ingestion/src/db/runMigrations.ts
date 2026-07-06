@@ -1,18 +1,20 @@
 import { readEnvConfig } from '@repo/data-access/db/env.schema';
-import { readdirSync, readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { readdirSync } from 'node:fs';
+import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Client } from 'pg';
 
-const migrationsDirectory = join(
-  dirname(fileURLToPath(import.meta.url)),
+import { readTextFileWithin } from '../fs/readTextFileWithin.util.ts';
+
+const migrationsDirectory = path.join(
+  path.dirname(fileURLToPath(import.meta.url)),
   'migrations',
 );
 
 const getMigrationFiles = (): readonly string[] =>
   readdirSync(migrationsDirectory)
     .filter((file) => file.endsWith('.sql'))
-    .toSorted();
+    .toSorted((left, right) => left.localeCompare(right));
 
 const ensureMigrationsTable = async (client: Client): Promise<void> => {
   await client.query(`
@@ -31,8 +33,19 @@ const getAppliedMigrations = async (client: Client): Promise<Set<string>> => {
   return new Set(result.rows.map((row) => row.filename));
 };
 
-const applyMigration = async (client: Client, file: string): Promise<void> => {
-  const sql = readFileSync(join(migrationsDirectory, file), 'utf8');
+type ApplyMigrationArgs = {
+  readonly client: Client;
+  readonly file: string;
+};
+
+const applyMigration = async ({
+  client,
+  file,
+}: ApplyMigrationArgs): Promise<void> => {
+  const sql = readTextFileWithin({
+    baseDirectory: migrationsDirectory,
+    targetPath: file,
+  });
 
   await client.query('BEGIN');
   try {
@@ -72,7 +85,7 @@ const runMigrations = async (): Promise<void> => {
       }
 
       console.warn(`▶️  Applying migration: ${file}`);
-      await applyMigration(client, file);
+      await applyMigration({ client, file });
     }
 
     console.warn('✅ All migrations applied.');

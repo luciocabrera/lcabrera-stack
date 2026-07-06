@@ -1,6 +1,8 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { makeDirectoryWithin } from '@repo/scan-ingestion/fs/makeDirectoryWithin.util.ts';
+import { writeTextFileWithin } from '@repo/scan-ingestion/fs/writeTextFileWithin.util.ts';
+import { makeTempDirectory } from '@repo/scan-ingestion/testing/makeTempDirectory.util.ts';
+import { rmSync } from 'node:fs';
+import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { buildFileInventory } from './buildFileInventory.util.ts';
@@ -9,20 +11,30 @@ describe('buildFileInventory', () => {
   let rootPath: string;
 
   beforeEach(() => {
-    rootPath = mkdtempSync(join(tmpdir(), 'scan-ingestion-test-'));
-    mkdirSync(join(rootPath, 'src', 'utils'), { recursive: true });
-    mkdirSync(join(rootPath, 'node_modules', 'ignored-pkg'), {
-      recursive: true,
+    rootPath = makeTempDirectory('scan-ingestion-test-');
+    makeDirectoryWithin({
+      baseDirectory: rootPath,
+      targetPath: path.join('src', 'utils'),
     });
-    writeFileSync(join(rootPath, 'src', 'App.component.tsx'), 'a\nb\nc\n');
-    writeFileSync(
-      join(rootPath, 'src', 'utils', 'formatDate.util.ts'),
-      'export const x = 1;\n',
-    );
-    writeFileSync(
-      join(rootPath, 'node_modules', 'ignored-pkg', 'index.js'),
-      'ignored',
-    );
+    makeDirectoryWithin({
+      baseDirectory: rootPath,
+      targetPath: path.join('node_modules', 'ignored-pkg'),
+    });
+    writeTextFileWithin({
+      baseDirectory: rootPath,
+      content: 'a\nb\nc\n',
+      targetPath: path.join('src', 'App.component.tsx'),
+    });
+    writeTextFileWithin({
+      baseDirectory: rootPath,
+      content: 'export const x = 1;\n',
+      targetPath: path.join('src', 'utils', 'formatDate.util.ts'),
+    });
+    writeTextFileWithin({
+      baseDirectory: rootPath,
+      content: 'ignored',
+      targetPath: path.join('node_modules', 'ignored-pkg', 'index.js'),
+    });
   });
 
   afterEach(() => {
@@ -31,7 +43,9 @@ describe('buildFileInventory', () => {
 
   it('collects files recursively with category/extension/nested_level', () => {
     const inventory = buildFileInventory({ rootPath });
-    const paths = inventory.map((file) => file.file_path).toSorted();
+    const paths = inventory
+      .map((file) => file.file_path)
+      .toSorted((left, right) => left.localeCompare(right));
 
     expect(paths).toEqual([
       'src/App.component.tsx',

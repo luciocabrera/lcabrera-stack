@@ -24,7 +24,7 @@ const renderWithRouter = (element: ReactNode) => {
   const router = createMemoryRouter(
     [
       { element: <AppProviders>{element}</AppProviders>, path: '/' },
-      { action: async () => null, path: '/_action/persist-cookie' },
+      { action: async () => ({ ok: true }), path: '/_action/persist-cookie' },
     ],
     { initialEntries: ['/'] },
   );

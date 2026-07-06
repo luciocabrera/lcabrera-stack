@@ -6,6 +6,7 @@ export type BrowseDirectoryEntry = {
 export type BrowseDirectoryResult = {
   readonly entries: readonly BrowseDirectoryEntry[];
   readonly error?: string;
-  readonly parentPath: null | string;
+  /** Absent when the browsed path is the filesystem root. */
+  readonly parentPath?: string;
   readonly path: string;
 };

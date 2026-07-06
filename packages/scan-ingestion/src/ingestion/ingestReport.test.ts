@@ -1,7 +1,8 @@
 import { closePool, getPool } from '@repo/data-access/db/getPool.util';
-import { mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { writeTextFileWithin } from '@repo/scan-ingestion/fs/writeTextFileWithin.util.ts';
+import { makeTempDirectory } from '@repo/scan-ingestion/testing/makeTempDirectory.util.ts';
+import { rmSync } from 'node:fs';
+import path from 'node:path';
 import { afterAll, afterEach, describe, expect, it } from 'vitest';
 
 import { ingestReport } from './ingestReport.ts';
@@ -30,16 +31,22 @@ describe('ingestReport', () => {
   });
 
   const writeReportFiles = (report: Record<string, unknown>) => {
-    workDir = mkdtempSync(join(tmpdir(), 'scan-ingestion-report-'));
-    writeFileSync(join(workDir, 'report.json'), JSON.stringify(report), 'utf8');
-    writeFileSync(join(workDir, 'report.md'), '# Test Report\n', 'utf8');
+    workDir = makeTempDirectory('scan-ingestion-report-');
+    writeTextFileWithin({
+      baseDirectory: workDir,
+      content: JSON.stringify(report),
+      targetPath: 'report.json',
+    });
+    writeTextFileWithin({
+      baseDirectory: workDir,
+      content: '# Test Report\n',
+      targetPath: 'report.md',
+    });
     return workDir;
   };
 
   it('creates a project/run/scan and ingests findings on the ad hoc path (no runId)', async () => {
-    const projectDir = realpathSync(
-      mkdtempSync(join(tmpdir(), 'scan-ingestion-project-')),
-    );
+    const projectDir = makeTempDirectory('scan-ingestion-project-');
     createdProjectPaths.push(projectDir);
 
     const reportDir = writeReportFiles({
@@ -63,8 +70,8 @@ describe('ingestReport', () => {
     const result = await ingestReport({
       localPath: projectDir,
       origin: 'interactive_session',
-      reportJsonPath: join(reportDir, 'report.json'),
-      reportMarkdownPath: join(reportDir, 'report.md'),
+      reportJsonPath: path.join(reportDir, 'report.json'),
+      reportMarkdownPath: path.join(reportDir, 'report.md'),
       scannerId: 'code-smell-checker',
       scopeType: 'repo',
       scopeValue: '.',
@@ -88,9 +95,7 @@ describe('ingestReport', () => {
   });
 
   it('reuses an existing run/scan on the UI path (runId provided)', async () => {
-    const projectDir = realpathSync(
-      mkdtempSync(join(tmpdir(), 'scan-ingestion-project-')),
-    );
+    const projectDir = makeTempDirectory('scan-ingestion-project-');
     createdProjectPaths.push(projectDir);
 
     const pool = getPool();
@@ -121,8 +126,8 @@ describe('ingestReport', () => {
     const result = await ingestReport({
       localPath: projectDir,
       origin: 'ui_agent_sdk',
-      reportJsonPath: join(reportDir, 'report.json'),
-      reportMarkdownPath: join(reportDir, 'report.md'),
+      reportJsonPath: path.join(reportDir, 'report.json'),
+      reportMarkdownPath: path.join(reportDir, 'report.md'),
       runId,
       scannerId: 'linter',
       scopeType: 'repo',

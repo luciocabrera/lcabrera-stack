@@ -26,7 +26,7 @@ export const ThemeProvider = ({
   const setTheme = (newTheme: ThemeMode) => {
     setThemeState(newTheme);
     // Sync to cookie for SSR
-    setThemeCookie(newTheme, appId);
+    setThemeCookie({ appId, theme: newTheme });
   };
 
   const toggleTheme = () => {

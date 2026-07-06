@@ -12,10 +12,20 @@ type PersistThemeCookieEntry = {
   readonly value: ThemeMode;
 };
 
-const persistThemeCookieServerSide = (
-  theme: ThemeMode,
-  appId?: string,
-): void => {
+type SetThemeCookieArgs = {
+  /**
+   * Optional per-app id used to scope the cookie key so apps sharing a host
+   * (cookies ignore port) do not overwrite each other.
+   */
+  readonly appId?: string;
+  /** The theme mode to persist. */
+  readonly theme: ThemeMode;
+};
+
+const persistThemeCookieServerSide = ({
+  appId,
+  theme,
+}: SetThemeCookieArgs): void => {
   if (
     globalThis.fetch === undefined ||
     globalThis.FormData === undefined ||
@@ -46,12 +56,8 @@ const persistThemeCookieServerSide = (
 
 /**
  * Set theme cookie (for client-side use).
- *
- * @param theme - The theme mode to persist.
- * @param appId - Optional per-app id used to scope the cookie key so apps
- *   sharing a host (cookies ignore port) do not overwrite each other.
  */
-export const setThemeCookie = (theme: ThemeMode, appId?: string): void => {
+export const setThemeCookie = ({ appId, theme }: SetThemeCookieArgs): void => {
   // Persist through the React Router action so Set-Cookie comes from the server.
-  persistThemeCookieServerSide(theme, appId);
+  persistThemeCookieServerSide({ appId, theme });
 };

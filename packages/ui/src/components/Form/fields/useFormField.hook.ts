@@ -40,7 +40,7 @@ export const useFormField = <TValues extends Record<string, unknown>>({
     error,
     fieldId,
     isDisabled: mode === 'view' || Boolean(disabled),
-    setValue: (next: unknown) => setFieldValue(accessor, next),
+    setValue: (next: unknown) => setFieldValue({ accessor, value: next }),
     value,
   };
 };

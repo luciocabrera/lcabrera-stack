@@ -6,6 +6,7 @@ import { createServer, type Server } from 'node:http';
  * traffic, only the WebSocket upgrade at /ws/runs and a bare health check.
  */
 export const createHttpServer = (): Server =>
+  // eslint-disable-next-line local-rules/destructuring-for-functions -- node:http's RequestListener signature is fixed by the platform
   createServer((request, response) => {
     if (request.url === '/healthz') {
       response.writeHead(200, { 'Content-Type': 'text/plain' });

@@ -2,7 +2,7 @@ import type { LoaderFunctionArgs } from 'react-router';
 
 import { readdir } from 'node:fs/promises';
 import { homedir } from 'node:os';
-import { dirname, resolve } from 'node:path';
+import path from 'node:path';
 
 import type { BrowseDirectoryResult } from './browseDirectory.types';
 
@@ -15,9 +15,9 @@ import type { BrowseDirectoryResult } from './browseDirectory.types';
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
   const requestedPath = url.searchParams.get('path')?.trim();
-  const targetPath = resolve(requestedPath || homedir());
-  const parent = dirname(targetPath);
-  const parentPath = parent === targetPath ? null : parent;
+  const targetPath = path.resolve(requestedPath || homedir());
+  const parent = path.dirname(targetPath);
+  const parentPath = parent === targetPath ? undefined : parent;
 
   try {
     const dirents = await readdir(targetPath, { withFileTypes: true });
@@ -25,9 +25,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       .filter((entry) => entry.isDirectory())
       .map((entry) => ({
         name: entry.name,
-        path: resolve(targetPath, entry.name),
+        path: path.resolve(targetPath, entry.name),
       }))
-      .sort((a, b) => a.name.localeCompare(b.name));
+      .toSorted((a, b) => a.name.localeCompare(b.name));
 
     return {
       entries,
