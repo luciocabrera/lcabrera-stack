@@ -103,6 +103,7 @@ describe('PathBrowserModal', () => {
     mkdirSync(path.join(root, 'projects', 'cqms'), { recursive: true });
     mkdirSync(path.join(root, 'downloads', 'archive'), { recursive: true });
     renderModal({});
+    await screen.findByText('projects');
 
     const pathBrowser = document.querySelector<HTMLDivElement>(
       'div[aria-label="Choose a folder"]',
