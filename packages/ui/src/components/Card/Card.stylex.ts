@@ -15,7 +15,6 @@ const baseStyles = stylex.create({
     borderRadius: borderRadius.lg,
     borderStyle: 'solid',
     borderWidth: '1px',
-    overflow: 'hidden',
     transition: `all ${transitions.normal} ${easing.easeInOut}`,
     backgroundColor: colors.surfacePrimary,
     containerName: 'card',
