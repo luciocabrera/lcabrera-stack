@@ -34,3 +34,6 @@ packages/eslint-local-rules/build/
 apps/api-server/.env
 apps/scan-orchestrator/.env
 .claudelint-cache/
+
+# Fallow per-run artifacts (canonical root: reports/fallow/ — see AGENTS.md)
+reports/fallow/runs/

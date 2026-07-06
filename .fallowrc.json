@@ -1,10 +1,19 @@
 {
   "$schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schema.json",
   "entry": [
-    "lighthouse.config.js",
-    "config/**/*.ts",
-    "utils/**/*.ts",
-    "scripts/**/*.{ts,js,mjs}"
+    "scripts/**/*.{cjs,mjs,js}",
+    "apps/react-router/lighthouse.config.js",
+    "apps/react-router/config/**/*.ts",
+    "apps/react-router/utils/**/*.ts",
+    "apps/react-router/scripts/**/*.{ts,js,mjs}"
+  ],
+  "ignorePatterns": [
+    "**/build/**",
+    "**/.react-router/**",
+    "**/.tmp/**",
+    "**/coverage/**",
+    "miscelanious/**",
+    "reports/**"
   ],
   "ignoreDependencies": [
     "@babel/preset-typescript",
@@ -28,11 +37,11 @@
   ],
   "ignoreExports": [
     {
-      "file": "src/features/showcase/ShowcasePage/ShowcasePage.stylex.ts",
+      "file": "apps/react-router/src/features/showcase/ShowcasePage/ShowcasePage.stylex.ts",
       "exports": ["*"]
     },
     {
-      "file": "src/features/showcase/ShowcasePage/SidePanelSection/SidePanelSection.stylex.ts",
+      "file": "apps/react-router/src/features/showcase/ShowcasePage/SidePanelSection/SidePanelSection.stylex.ts",
       "exports": ["*"]
     }
   ],
@@ -42,5 +51,15 @@
     "unused-exports": "warn",
     "unused-types": "warn",
     "unused-dependencies": "warn"
+  },
+  "duplicates": {
+    "mode": "mild",
+    "ignoreImports": true
+  },
+  "audit": {
+    "gate": "new-only",
+    "deadCodeBaseline": "reports/fallow/baselines/dead-code.json",
+    "healthBaseline": "reports/fallow/baselines/health.json",
+    "dupesBaseline": "reports/fallow/baselines/dupes.json"
   }
 }

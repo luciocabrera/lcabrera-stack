@@ -179,6 +179,9 @@ importers:
       '@repo/vite-configs':
         specifier: workspace:*
         version: link:packages/vite-configs
+      fallow:
+        specifier: 'catalog:'
+        version: 3.0.0
       vite-plus:
         specifier: 'catalog:'
         version: 0.2.2(@opentelemetry/api@1.9.1)(@types/node@26.1.0)(@vitest/coverage-v8@4.1.9)(jiti@2.7.0)(jsdom@29.1.1)(typescript@6.0.3)(vite@8.1.3(@types/node@26.1.0)(jiti@2.7.0)(yaml@2.9.0))(yaml@2.9.0)
@@ -474,9 +477,6 @@ importers:
       eslint-plugin-unicorn:
         specifier: 'catalog:'
         version: 70.0.0(eslint@10.6.0(jiti@2.7.0))
-      fallow:
-        specifier: 'catalog:'
-        version: 3.0.0
       globals:
         specifier: 'catalog:'
         version: 17.7.0

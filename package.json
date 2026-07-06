@@ -24,6 +24,11 @@
     "skills:report": "node scripts/generate-skills-compliance-report.cjs",
     "skills:source-audit": "node scripts/generate-source-smell-report.cjs && node scripts/bootstrap-agenting-handoff.cjs",
     "skills:handoff": "node scripts/bootstrap-agenting-handoff.cjs",
+    "fallow:full": "fallow",
+    "fallow:dead-code": "fallow dead-code",
+    "fallow:health": "fallow health --file-scores --hotspots --targets --score",
+    "fallow:dupes": "fallow dupes",
+    "fallow:audit": "fallow audit",
     "fallow:refresh-report": "node scripts/refresh-fallow-complexity-report.cjs",
     "typegen:admin-system": "cd apps/admin_system && vp run typegen",
     "typegen:all": "vp run typegen:router && vp run typegen:admin-system",
@@ -34,6 +39,7 @@
   },
   "devDependencies": {
     "@repo/vite-configs": "workspace:*",
+    "fallow": "catalog:",
     "vite-plus": "catalog:"
   },
   "engines": {

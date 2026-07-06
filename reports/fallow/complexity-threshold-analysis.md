@@ -5,8 +5,8 @@
 Source of truth for this report:
 
 - Command scope: apps/react-router
-- Command: node node_modules/fallow/bin/fallow --format json --output-file /home/lucio/workspaces/vite-react-compiler/reports/fallow/fallow-full-latest.json --quiet
-- JSON artifact: reports/fallow/fallow-full-latest.json
+- Command: node node_modules/fallow/bin/fallow --format json --output-file /home/lucio/workspaces/vite-react-compiler/reports/fallow/full-latest.json --quiet
+- JSON artifact: reports/fallow/full-latest.json
 
 Current metrics from JSON:
 

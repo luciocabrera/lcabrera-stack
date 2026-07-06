@@ -1,15 +1,71 @@
 #!/usr/bin/env node
 
+/**
+ * Refresh the fallow complexity snapshot and its derived docs.
+ *
+ * Runs a full fallow scan (dead code + duplication + health) using the root
+ * `.fallowrc.json`, writes the raw JSON artifact, and regenerates
+ * `reports/fallow/complexity-threshold-analysis.md` from it.
+ *
+ * Usage:
+ *   node scripts/refresh-fallow-complexity-report.cjs [workspace-glob] [--top=N]
+ *
+ * The optional `workspace-glob` uses fallow `-w` syntax (exact package name,
+ * workspace path, glob, or `!` negation). Without it the entire monorepo is
+ * scanned. `--top=N` controls how many critical/high findings are listed in
+ * the generated summary (default: 20; pass a large N to list them all).
+ *
+ * @example
+ * // Entire monorepo (default) — via vp (preferred) or node directly:
+ * //   vp run fallow:refresh-report
+ * //   node scripts/refresh-fallow-complexity-report.cjs
+ *
+ * @example
+ * // Scope to the react-router app:
+ * //   vp run fallow:refresh-report -- apps/react-router
+ * //   node scripts/refresh-fallow-complexity-report.cjs apps/react-router
+ *
+ * @example
+ * // Scope to all apps except one:
+ * //   node scripts/refresh-fallow-complexity-report.cjs 'apps/*,!apps/shared'
+ *
+ * @example
+ * // List every critical/high finding (e.g. for an agent handoff):
+ * //   vp run fallow:refresh-report -- --top=1000
+ * //   node scripts/refresh-fallow-complexity-report.cjs apps/react-router --top=50
+ *
+ * Outputs — always under `reports/fallow/`, the single canonical location for
+ * every fallow artifact (see AGENTS.md "Fallow Static Analysis"):
+ *   - reports/fallow/full-latest.json                  (raw fallow JSON)
+ *   - reports/fallow/complexity-threshold-analysis.md  (regenerated summary)
+ */
+
 const fs = require('node:fs');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 
 const repoRoot = path.resolve(__dirname, '..');
-const appDir = path.join(repoRoot, 'apps', 'react-router');
+
+const DEFAULT_TOP_FINDINGS = 20;
+const cliArgs = process.argv.slice(2);
+// Optional workspace glob (fallow -w syntax), e.g. 'apps/react-router' or
+// 'apps/*'. No positional argument scans the entire monorepo.
+const workspaceScope = cliArgs.find((arg) => !arg.startsWith('--')) ?? null;
+const topFlag = cliArgs.find((arg) => arg.startsWith('--top='));
+const topFindingsLimit = topFlag
+  ? Number.parseInt(topFlag.slice('--top='.length), 10)
+  : DEFAULT_TOP_FINDINGS;
+
+if (!Number.isInteger(topFindingsLimit) || topFindingsLimit < 1) {
+  throw new TypeError(
+    `Invalid --top value: expected a positive integer, got "${topFlag}".`,
+  );
+}
+
 const jsonDir = path.join(repoRoot, 'reports', 'fallow');
-const jsonPath = path.join(jsonDir, 'fallow-full-latest.json');
+const jsonPath = path.join(jsonDir, 'full-latest.json');
 const fallowPackageJsonPath = require.resolve('fallow/package.json', {
-  paths: [appDir],
+  paths: [repoRoot],
 });
 const fallowPackageJson = JSON.parse(
   fs.readFileSync(fallowPackageJsonPath, 'utf8'),
@@ -37,15 +93,8 @@ const fixedPathEnv =
 const analysisPath = path.join(
   repoRoot,
   'reports',
-  'fallow-complexity-threshold-analysis.md',
-);
-const trackerPath = path.join(
-  repoRoot,
-  'apps',
-  'react-router',
-  'docs',
-  'coordination',
-  'PROGRESS_TRACKER.md',
+  'fallow',
+  'complexity-threshold-analysis.md',
 );
 
 const ensureDir = (dirPath) => {
@@ -54,6 +103,11 @@ const ensureDir = (dirPath) => {
   }
 };
 
+/**
+ * Run the fallow CLI from the repo root (honoring `workspaceScope`) and write
+ * the raw JSON artifact to `reports/fallow/full-latest.json`.
+ * Exits the process with fallow's status code on failure.
+ */
 const runFallowJson = () => {
   if (!fs.existsSync(fallowBinPath)) {
     throw new TypeError(
@@ -61,11 +115,20 @@ const runFallowJson = () => {
     );
   }
 
+  const scopeArgs = workspaceScope ? ['-w', workspaceScope] : [];
   const result = spawnSync(
     process.execPath,
-    [fallowBinPath, '--format', 'json', '--output-file', jsonPath, '--quiet'],
+    [
+      fallowBinPath,
+      ...scopeArgs,
+      '--format',
+      'json',
+      '--output-file',
+      jsonPath,
+      '--quiet',
+    ],
     {
-      cwd: appDir,
+      cwd: repoRoot,
       stdio: 'inherit',
       env: { ...process.env, PATH: fixedPathEnv },
     },
@@ -82,7 +145,16 @@ const severityRank = {
   moderate: 2,
 };
 
-const buildTopFindings = (findings) => {
+/**
+ * Render the top critical/high health findings (sorted by severity then CRAP
+ * score) as a markdown bullet list.
+ *
+ * @param {Array<{severity: string, crap?: number, path: string, line: number, symbol?: string, exceeded: string}>} findings
+ *   Entries from `health.findings` in the fallow JSON.
+ * @param {number} limit Maximum number of findings to list (`--top=N` CLI flag).
+ * @returns {string} Markdown bullets, or a placeholder line when none qualify.
+ */
+const buildTopFindings = (findings, limit) => {
   const ranked = [...findings]
     .filter(
       (finding) =>
@@ -98,7 +170,7 @@ const buildTopFindings = (findings) => {
 
       return (b.crap ?? 0) - (a.crap ?? 0);
     })
-    .slice(0, 8);
+    .slice(0, limit);
 
   if (ranked.length === 0) {
     return '- No critical/high findings in current snapshot.';
@@ -112,6 +184,12 @@ const buildTopFindings = (findings) => {
     .join('\n');
 };
 
+/**
+ * Regenerate `reports/fallow/complexity-threshold-analysis.md` from the
+ * current fallow JSON snapshot (scope, metrics, top findings).
+ *
+ * @param {object} jsonData Parsed fallow full-scan JSON (`check`/`dupes`/`health` sections).
+ */
 const refreshAnalysisDoc = (jsonData) => {
   const summary = jsonData.health?.summary ?? {};
   const checkSummary = jsonData.check?.summary ?? {};
@@ -125,9 +203,9 @@ const refreshAnalysisDoc = (jsonData) => {
 
 Source of truth for this report:
 
-- Command scope: apps/react-router
-- Command: node node_modules/fallow/bin/fallow --format json --output-file ${jsonPath} --quiet
-- JSON artifact: reports/fallow/fallow-full-latest.json
+- Command scope: ${workspaceScope ?? 'entire monorepo'} (root .fallowrc.json${workspaceScope ? ', scoped via -w' : ''})
+- Command: node node_modules/fallow/bin/fallow${workspaceScope ? ` -w ${workspaceScope}` : ''} --format json --output-file ${jsonPath} --quiet
+- JSON artifact: reports/fallow/full-latest.json
 
 Current metrics from JSON:
 
@@ -158,43 +236,17 @@ ${buildTopFindings(findings)}
   fs.writeFileSync(analysisPath, markdown);
 };
 
-const refreshTracker = (jsonData) => {
-  const summary = jsonData.health?.summary ?? {};
-  const checkSummary = jsonData.check?.summary ?? {};
-  const dupesStats = jsonData.dupes?.stats ?? {};
-  const date = new Date().toISOString().slice(0, 10);
-  let tracker = fs.readFileSync(trackerPath, 'utf8');
-
-  tracker = tracker.replace(
-    /Last updated: \d{4}-\d{2}-\d{2}/,
-    `Last updated: ${date}`,
-  );
-
-  tracker = tracker.replace(
-    /- Fallow full \(`vp run fallow:full`\): .*$/m,
-    `- Fallow full (\`vp run fallow:full\`): ${summary.functions_above_threshold ?? 'n/a'} above threshold · maintainability ${summary.average_maintainability ?? 'n/a'} (good) · ${summary.functions_analyzed ?? 'n/a'} analyzed`,
-  );
-
-  tracker = tracker.replace(
-    /- Fallow full failures: .*$/m,
-    `- Fallow full failures: dead-code (${checkSummary.total_issues ?? jsonData.check?.total_issues ?? 'n/a'} issues), dupes (${dupesStats.clone_groups ?? 'n/a'} clone groups), health (${summary.functions_above_threshold ?? 'n/a'} above threshold)`,
-  );
-
-  fs.writeFileSync(trackerPath, tracker);
-};
-
 const main = () => {
   ensureDir(jsonDir);
   runFallowJson();
 
   const jsonData = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
   refreshAnalysisDoc(jsonData);
-  refreshTracker(jsonData);
 
   console.log('Fallow snapshot and docs refreshed from JSON source.');
+  console.log(`- Scope: ${workspaceScope ?? 'entire monorepo'}`);
   console.log(`- JSON: ${jsonPath}`);
   console.log(`- Analysis: ${analysisPath}`);
-  console.log(`- Tracker: ${trackerPath}`);
 };
 
 main();
