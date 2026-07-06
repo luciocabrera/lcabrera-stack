@@ -22,7 +22,7 @@
  *
  * @example
  * // Scope to the react-router app:
- * //   vp run fallow:refresh-report -- apps/react-router
+ * //   vp run fallow:refresh-report apps/react-router
  * //   node scripts/refresh-fallow-complexity-report.cjs apps/react-router
  *
  * @example
@@ -31,7 +31,7 @@
  *
  * @example
  * // List every critical/high finding (e.g. for an agent handoff):
- * //   vp run fallow:refresh-report -- --top=1000
+ * //   vp run fallow:refresh-report --top=1000
  * //   node scripts/refresh-fallow-complexity-report.cjs apps/react-router --top=50
  *
  * Outputs — always under `reports/fallow/`, the single canonical location for

@@ -60,6 +60,70 @@ jobs:
           echo "| Lint | $CHECK_STATUS |" >> "$GITHUB_STEP_SUMMARY"
           echo "| TypeScript | $CHECK_STATUS |" >> "$GITHUB_STEP_SUMMARY"
 
+  fallow-audit:
+    name: Fallow Audit (new-only gate)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          # fallow audit diffs against the PR base ref, so it needs history
+          fetch-depth: 0
+
+      - name: Setup Vite+
+        uses: voidzero-dev/setup-vp@8ecb39174989ce55af90f45cf55b02738599831d
+        with:
+          cache: true
+          run-install: false
+
+      - name: Install dependencies
+        run: vp install --frozen-lockfile --ignore-scripts && vp config
+
+      - name: Fallow audit vs base branch
+        id: fallow_audit
+        # Gate mode, severity mapping, and baselines come from .fallowrc.json
+        # (audit.gate: new-only) — only newly-introduced dead code, complexity,
+        # or duplication fails this step (exit 1). Exit 2 = runtime/config error.
+        run: |
+          set -o pipefail
+          STATUS=0
+          vp run fallow:audit --base "origin/${{ github.base_ref }}" --format json --quiet | tee fallow-audit.raw.txt || STATUS=$?
+          # vp run echoes a command banner before the JSON — keep everything
+          # from the first JSON line onward so the summary step can parse it,
+          # then propagate fallow's exit code (1 = introduced issues, 2 = error).
+          awk 'found || /^[{[]/ {found=1; print}' fallow-audit.raw.txt > fallow-audit.json
+          exit $STATUS
+
+      - name: Write fallow summary
+        if: always()
+        run: |
+          {
+            echo "## 🌾 Fallow Audit"
+            echo ""
+            if [[ -s fallow-audit.json ]] && jq -e . fallow-audit.json > /dev/null 2>&1; then
+              VERDICT=$(jq -r '.verdict // "unknown"' fallow-audit.json)
+              case "$VERDICT" in
+                pass) BADGE="✅" ;;
+                warn) BADGE="⚠️" ;;
+                *)    BADGE="❌" ;;
+              esac
+              echo "| Field | Value |"
+              echo "|-------|-------|"
+              echo "| Verdict | $BADGE $VERDICT |"
+              echo "| Base | \`origin/${{ github.base_ref }}\` |"
+              echo "| Dead code introduced | $(jq -r '.attribution.dead_code_introduced // "n/a"' fallow-audit.json) |"
+              echo "| Complexity introduced | $(jq -r '.attribution.complexity_introduced // "n/a"' fallow-audit.json) |"
+              echo "| Duplication introduced | $(jq -r '.attribution.duplication_introduced // "n/a"' fallow-audit.json) |"
+              echo ""
+              echo "> Gate \`new-only\`: only newly-introduced issues fail this job. Inherited findings are covered by \`reports/fallow/baselines/\`."
+            else
+              echo "❌ Audit did not produce JSON output — check the job log (exit 2 usually means an invalid base ref or config error)."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
   unit-tests:
     name: Unit Tests & Coverage
     runs-on: ubuntu-latest

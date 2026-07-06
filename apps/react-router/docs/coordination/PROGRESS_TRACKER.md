@@ -7,7 +7,7 @@ Project: apps/react-router
 
 Fallow metrics are **not duplicated here** — the single canonical source for all fallow artifacts is `reports/fallow/` (see AGENTS.md "Fallow Static Analysis"):
 
-- Machine-readable snapshot: `reports/fallow/full-latest.json` (refresh with `vp run fallow:refresh-report -- apps/react-router`)
+- Machine-readable snapshot: `reports/fallow/full-latest.json` (refresh with `vp run fallow:refresh-report apps/react-router`)
 - Human summary: `reports/fallow/complexity-threshold-analysis.md`
 - Quality gate: `vp check` passes (format + lint + type)
 - Worktree status: active (see current `git status --short`)

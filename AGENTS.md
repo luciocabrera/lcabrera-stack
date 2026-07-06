@@ -127,7 +127,7 @@ Selection guideline:
 
 ### Fallow Static Analysis (run from repo root)
 
-Fallow is configured once at the repo root (`.fallowrc.json`) and auto-detects every pnpm workspace — never add per-app fallow configs or dependencies. Scope any command's output with `-w`, e.g. `vp run fallow:dead-code -- -w 'apps/react-router'`.
+Fallow is configured once at the repo root (`.fallowrc.json`) and auto-detects every pnpm workspace — never add per-app fallow configs or dependencies. Scope any command's output with `-w`, e.g. `vp run fallow:dead-code -w 'apps/react-router'`.
 
 **Output convention** — `reports/fallow/` is the **single canonical location** for every fallow artifact. Scripts, skills, agents, docs, and developers all write to and read from it; never invent another output path.
 
@@ -140,14 +140,14 @@ Fallow is configured once at the repo root (`.fallowrc.json`) and auto-detects e
 
 Sole exception: CQMS UI-triggered scans run by `apps/scan-orchestrator` use their own `.tmp/scan-orchestrator/<scan_id>/` workspace — their results land in the CQMS database, not the filesystem.
 
-| Task                                  | Command                                                                    |
-| ------------------------------------- | -------------------------------------------------------------------------- |
-| Full scan (dead code, dupes, health)  | `vp run fallow:full`                                                       |
-| Dead code only                        | `vp run fallow:dead-code`                                                  |
-| Complexity/health report              | `vp run fallow:health`                                                     |
-| Duplication report                    | `vp run fallow:dupes`                                                      |
-| PR-style gate vs main (run before PR) | `vp run fallow:audit -- --base main`                                       |
-| Refresh complexity threshold report   | `vp run fallow:refresh-report` (optionally `-- <workspace-glob>` to scope) |
+| Task                                  | Command                                                                      |
+| ------------------------------------- | ---------------------------------------------------------------------------- |
+| Full scan (dead code, dupes, health)  | `vp run fallow:full`                                                         |
+| Dead code only                        | `vp run fallow:dead-code`                                                    |
+| Complexity/health report              | `vp run fallow:health`                                                       |
+| Duplication report                    | `vp run fallow:dupes`                                                        |
+| PR-style gate vs main (run before PR) | `vp run fallow:audit --base main`                                            |
+| Refresh complexity threshold report   | `vp run fallow:refresh-report` (optionally `<workspace-glob>` and `--top=N`) |
 
 CI runs `fallow audit --gate new-only` on every PR (`check-safe.yml`) — it fails only on newly-introduced dead code, complexity, or duplication; inherited debt is covered by baselines in `reports/fallow/baselines/`.
 
