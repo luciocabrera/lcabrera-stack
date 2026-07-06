@@ -52,7 +52,7 @@ TableBody/
 │
 └── utils/
   ├── ARCHITECTURE.md                 → TableBody utility architecture
-  ├── buildTableBodyCellDescriptor.util.ts → Derives pure cell descriptor data (with isLoadingState)
+  ├── buildTableBodyCellDescriptor.util.tsx → Derives pure cell descriptor data (with isLoadingState)
   ├── createRenderTableBodyCell.util.ts    → Creates stable cell renderer bound to sizing/offsets/loading
   ├── generatePlaceholderData.util.ts → Creates skeleton row objects
   ├── getTotalVisibleColumnCount.util.ts → Computes spacer-row colSpan
@@ -127,6 +127,9 @@ Cell rendering is delegated to `TableBodyRows` using the
 
 - **Custom render**: If `column.render` is defined, passes children to `<TableBodyCell>`
 - **Default render**: Passes `value`, `dataType`, `format`, `label` as props
+- **CRUD actions render**: For the `actions` column with `crud` enabled,
+  wraps row actions in `TableRowActionsMenu` and appends any custom action
+  content from `column.render` after built-in CRUD menu items
 - Each cell receives `pinInfo` from the store's `pinnedColumnOffsets` slice
 - Width is resolved from `columnSizing[col.key]` or `col.minWidth`
 - `isLoadingState` is forwarded through the cell descriptor to each `<TableBodyCell>`

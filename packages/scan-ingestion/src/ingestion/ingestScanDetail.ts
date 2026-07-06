@@ -1,5 +1,17 @@
 import { getPool } from '@repo/data-access/db/getPool.util';
 
+import type { FallowDetailInput } from './fallow/fallowDetail.types.ts';
+
+import { extractFallowCircularDependencies } from './fallow/extractFallowCircularDependencies.util.ts';
+import { extractFallowCloneGroups } from './fallow/extractFallowCloneGroups.util.ts';
+import { extractFallowDeadCode } from './fallow/extractFallowDeadCode.util.ts';
+import { extractFallowFileScores } from './fallow/extractFallowFileScores.util.ts';
+import { extractFallowFunctionFindings } from './fallow/extractFallowFunctionFindings.util.ts';
+import { extractFallowHotspots } from './fallow/extractFallowHotspots.util.ts';
+import { extractFallowLargeFunctions } from './fallow/extractFallowLargeFunctions.util.ts';
+import { extractFallowRunSummary } from './fallow/extractFallowRunSummary.util.ts';
+import { extractFallowTargets } from './fallow/extractFallowTargets.util.ts';
+import { fallowRawSchema } from './fallow/fallowRaw.schema.ts';
 import { eslintRawSchema } from './lint/eslintRaw.schema.ts';
 import { extractEslintRunSummary } from './lint/extractEslintRunSummary.util.ts';
 import { extractEslintViolations } from './lint/extractEslintViolations.util.ts';
@@ -58,6 +70,28 @@ export const ingestScanDetail = async ({
       scanId,
       JSON.stringify(master),
       JSON.stringify(violations),
+    ]);
+    return;
+  }
+
+  if (scannerId === 'fallow') {
+    const raw = fallowRawSchema.parse(rawJson);
+    const master = extractFallowRunSummary({ raw });
+    const detail: FallowDetailInput = {
+      circular_dependencies: extractFallowCircularDependencies({ raw }),
+      clone_groups: extractFallowCloneGroups({ raw }),
+      dead_code: extractFallowDeadCode({ raw }),
+      file_scores: extractFallowFileScores({ raw }),
+      function_findings: extractFallowFunctionFindings({ raw }),
+      hotspots: extractFallowHotspots({ raw }),
+      large_functions: extractFallowLargeFunctions({ raw }),
+      targets: extractFallowTargets({ raw }),
+    };
+    await pool.query('CALL cqms.sp_ingest_fallow_detail($1, $2, $3, $4)', [
+      userId,
+      scanId,
+      JSON.stringify(master),
+      JSON.stringify(detail),
     ]);
   }
 };

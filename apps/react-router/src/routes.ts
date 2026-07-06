@@ -14,7 +14,10 @@ export default [
     index('routes/enterprise-orders/root.tsx'),
     route('new', 'routes/enterprise-orders/new-order/root.tsx'),
     route('edit/:orderId', 'routes/enterprise-orders/edit-order/root.tsx'),
-    route('view/:orderId', 'routes/enterprise-orders/order-detail/root.ts'),
+    route(
+      'view/:orderId',
+      'routes/enterprise-orders/order-detail-view/root.ts',
+    ),
     route(':orderId', 'routes/enterprise-orders/order-detail/root.ts'),
   ]),
   route('wide-alltypes-150', 'routes/wide-alltypes-150/layout.ts', [

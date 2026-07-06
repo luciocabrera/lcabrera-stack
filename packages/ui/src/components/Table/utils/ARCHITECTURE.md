@@ -29,10 +29,12 @@ utils/
 ├── readPersistedUiStateFromSessionStorage.util.ts → Read tab-scoped persisted drawer UI slices
 ├── readPersistedUiFlagsFromCookie.util.ts        → SSR-safe read of drawer open/pinned flags from cookie
 ├── writePersistedUiFlagsToCookie.util.ts         → Mirror drawer open/pinned flags to cookie (SSR seed)
+├── resolveCrudRowId.util.ts                       → Resolve CRUD row id from key accessor or resolver function
 ├── resolveFetchMoreState.util.ts                 → Shared append/hasMore/total resolution for paginated fetch actions
 ├── serializeStateSlice.util.ts                   → JSON serialize a state slice
 ├── splitColumnsByPinning.util.ts                 → Split columns into left/center/right groups
 ├── syncColumnOrderWithPinning.util.ts            → Pin-aware column reordering
+├── validateTableCrudConfig.util.ts               → Validate CRUD config shape/invariants
 ├── writePersistedDataStateToSessionStorage.util.ts → Write tab-scoped persisted table rows
 ├── writePersistedUiStateToSessionStorage.util.ts → Write tab-scoped persisted drawer UI slices
 ├── writeStateSlice.util.ts                       → Write to cookie/localStorage
@@ -117,9 +119,11 @@ graph TD
 | getStaticColumnKeys          | columns                                                     | Set<string>                                                                | Keys of locked/static columns                                                                 |
 | getPinnedColumnOffsets       | pinning, sizing, columns                                    | Record<key, PinnedColumnInfo>                                              | Sticky positions for pinned columns                                                           |
 | getColumnPinSide             | columnKey, pinning                                          | PinSide or undefined                                                       | Which side a column is pinned to                                                              |
+| resolveCrudRowId             | row, idAccessor                                             | string                                                                     | Resolve row id for CRUD links and delete actions from a configured accessor                   |
 | resolveFetchMoreState        | currentData, selectors, response, totals                    | { combinedData, hasMore, totalLoadedRows, totalRows }                      | Shared pagination merge logic used by table rows and filter-options load-more                 |
 | splitColumnsByPinning        | pinning, effectiveColumns                                   | ColumnGroupsState                                                          | Split columns into left/center/right                                                          |
 | syncColumnOrderWithPinning   | order, previous/new pinning                                 | string[]                                                                   | Reorder to keep pinned columns grouped; unpin columns move adjacent to remaining pinned group |
+| validateTableCrudConfig      | crud config                                                 | void                                                                       | Enforce CRUD config invariants before rendering CRUD UI                                       |
 
 getPinnedColumnOffsets computes offsets and boundary markers (isLastPinnedLeft, isFirstPinnedRight) from effective column order so shadow boundaries stay aligned with rendered sticky positions even if pinning arrays are out of order.
 

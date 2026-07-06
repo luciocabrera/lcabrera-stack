@@ -201,6 +201,8 @@ See [hooks/ARCHITECTURE.md](hooks/ARCHITECTURE.md) and
 | TableBody                   | [TableBody/ARCHITECTURE.md](TableBody/ARCHITECTURE.md)                                     |
 | TableBodyCell               | [TableBodyCell/ARCHITECTURE.md](TableBodyCell/ARCHITECTURE.md)                             |
 | TableRow                    | [TableRow/ARCHITECTURE.md](TableRow/ARCHITECTURE.md)                                       |
+| TableActionButton           | [TableActionButton/ARCHITECTURE.md](TableActionButton/ARCHITECTURE.md)                     |
+| TableRowActionsMenu         | [TableRowActionsMenu/ARCHITECTURE.md](TableRowActionsMenu/ARCHITECTURE.md)                 |
 | SpacerRow                   | [SpacerRow/ARCHITECTURE.md](SpacerRow/ARCHITECTURE.md)                                     |
 | SpacerCell                  | [SpacerCell/ARCHITECTURE.md](SpacerCell/ARCHITECTURE.md)                                   |
 | TableTitle                  | [TableTitle/ARCHITECTURE.md](TableTitle/ARCHITECTURE.md)                                   |

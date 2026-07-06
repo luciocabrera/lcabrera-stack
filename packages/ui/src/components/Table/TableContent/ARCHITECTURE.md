@@ -1,7 +1,8 @@
 # TableContent Architecture
 
 Main layout component that assembles the table UI: title bar, scrollable
-table container with header/body, infinite scroll, and settings drawers.
+table container with header/body, optional CRUD header action, infinite
+scroll, and settings drawers.
 Also provides the `TableWrapperContext` with a ref to the wrapper element.
 The scroll container can be scroll-locked during the initial loading state,
 while header/body cells keep rendering the per-cell shimmer overlay.
@@ -27,7 +28,7 @@ graph TD
   Wrapper --> Drawers["TableDrawersSection"]
 
   Outer --> Title["TableTitle"]
-  Title --> Actions["Settings button + user actions"]
+  Title --> Actions["Settings button + user actions + optional create action"]
   Outer --> Scroll["div (containerRef · scroll area)"]
 
   Scroll --> TB["TableBase"]
@@ -52,6 +53,7 @@ graph LR
     TC --> isLoading["useGetTableIsLoading()"]
     TC --> isLoadingMore["useGetTableIsLoadingMore()"]
     TC --> hasMore["useGetTableHasMore()"]
+    TC --> titleSingular["useGetTableTitleSingular()"]
   end
 
   subgraph "Actions"
@@ -61,12 +63,19 @@ graph LR
 
   subgraph "Hooks"
     TC --> scroll["useInfiniteScroll(containerRef, sentinelRef, threshold, ...)"]
+    TC --> validateCrud["validateTableCrudConfig({ crud })"]
   end
 
   subgraph "Provides"
     TC --> wrapperCtx["TableWrapperContext { wrapperRef }"]
   end
 ```
+
+## CRUD Header Integration
+
+When `crud.create` is enabled, `TableContent` renders `TableCreateLink` in the
+title actions cluster between caller-provided `actions` and the settings button.
+The link label uses `meta.title.singular` (falling back to `Record`).
 
 ## Refs
 
