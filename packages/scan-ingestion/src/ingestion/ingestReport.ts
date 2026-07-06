@@ -60,10 +60,12 @@ export const ingestReport = async (
 
   if (rawJson !== undefined || report.health_metrics) {
     // pg serializes undefined parameters as SQL NULL (pg prepareValue).
-    await pool.query(
-      'UPDATE cqms.scans SET raw_json = $1, health_metrics = $2 WHERE id = $3',
-      [rawJson, report.health_metrics, scanId],
-    );
+    await pool.query('SELECT cqms.fn_set_scan_raw_artifacts($1, $2, $3, $4)', [
+      args.userId,
+      scanId,
+      rawJson,
+      report.health_metrics,
+    ]);
   }
 
   const fileInventory = SCOPES_WITH_FILE_INVENTORY.has(args.scopeType)
@@ -71,8 +73,9 @@ export const ingestReport = async (
     : undefined;
 
   await pool.query(
-    'CALL cqms.sp_ingest_scan_result($1, $2, $3, $4, $5, $6, $7)',
+    'CALL cqms.sp_ingest_scan_result($1, $2, $3, $4, $5, $6, $7, $8)',
     [
+      args.userId,
       scanId,
       runId,
       reportMarkdown,

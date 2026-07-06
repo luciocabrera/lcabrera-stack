@@ -13,6 +13,8 @@ export type IngestReportArgs = {
   readonly scopeType: ScopeType;
   readonly scopeValue: string;
   readonly triggeredBy?: string;
+  /** The acting user for audit fields + fn_assert_permission (ADR-018). Non-interactive callers (orchestrator, CLI) resolve the seeded 'system' user. */
+  readonly userId: string;
 };
 
 export type IngestReportOrigin = 'ci' | 'interactive_session' | 'ui_agent_sdk';

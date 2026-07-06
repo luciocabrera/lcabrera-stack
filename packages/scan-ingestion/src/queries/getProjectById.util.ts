@@ -18,7 +18,7 @@ export const getProjectById = async ({
 }: GetProjectByIdArgs): Promise<ProjectRow | undefined> => {
   const pool = getPool();
   const result = await pool.query<ProjectRow>(
-    'SELECT * FROM cqms.projects WHERE id = $1',
+    'SELECT * FROM cqms.v_projects WHERE id = $1',
     [projectId],
   );
   return result.rows[0];

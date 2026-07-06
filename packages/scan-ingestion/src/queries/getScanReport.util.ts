@@ -23,7 +23,7 @@ export const getScanReport = async ({
 }: GetScanReportArgs): Promise<ScanReportRow | undefined> => {
   const pool = getPool();
   const result = await pool.query<ScanReportRow>(
-    'SELECT * FROM cqms.reports WHERE scan_id = $1',
+    'SELECT * FROM cqms.v_reports WHERE scan_id = $1',
     [scanId],
   );
   return result.rows[0];

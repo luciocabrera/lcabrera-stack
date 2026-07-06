@@ -66,9 +66,6 @@ export const PathBrowserModal = ({
   const hasActiveOption = activeEntryIndex < entries.length;
   const normalizedActiveEntryIndex = hasActiveOption ? activeEntryIndex : 0;
   const resolvedPath = result?.path ?? currentPath;
-  const activeOptionId = hasActiveOption
-    ? `${listboxId}-option-${activeEntryIndex}`
-    : undefined;
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (event.key === 'Escape') {
@@ -129,10 +126,8 @@ export const PathBrowserModal = ({
 
   return (
     <div
-      aria-activedescendant={activeOptionId}
       aria-label='Choose a folder'
       onKeyDown={handleKeyDown}
-      role='listbox'
       tabIndex={0}
       {...stylex.props(styles.dropdown)}
     >
@@ -171,17 +166,15 @@ export const PathBrowserModal = ({
 
       {result?.error && <p {...stylex.props(styles.error)}>{result.error}</p>}
 
-      <ul role='presentation' {...stylex.props(styles.list)}>
+      <ul {...stylex.props(styles.list)}>
         {entries.map((entry, index) => (
           <li key={entry.path}>
             <button
-              aria-selected={index === activeEntryIndex}
               id={`${listboxId}-option-${index}`}
               onClick={() => {
                 setCurrentPath(entry.path);
                 setActiveEntryIndex(0);
               }}
-              role='option'
               type='button'
               {...stylex.props(
                 styles.entryButton,

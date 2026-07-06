@@ -4,19 +4,24 @@ import { rmSync } from 'node:fs';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { getQueuedScans } from './getQueuedScans.util.ts';
+import { getUserByUsername } from './getUserByUsername.util.ts';
 import { triggerScan } from './triggerScan.util.ts';
 
 describe('getQueuedScans', () => {
   let projectDir: string;
   let projectId: string;
+  let systemUserId: string;
 
   beforeAll(async () => {
+    const systemUser = await getUserByUsername({ username: 'system' });
+    systemUserId = systemUser?.id ?? '';
+
     projectDir = makeTempDirectory('scan-ingestion-queued-');
 
     const pool = getPool();
     const result = await pool.query<{ fn_upsert_project: string }>(
-      'SELECT cqms.fn_upsert_project($1, $2) AS fn_upsert_project',
-      ['get-queued-scans-test-project', projectDir],
+      'SELECT cqms.fn_upsert_project($1, $2, $3) AS fn_upsert_project',
+      [systemUserId, 'get-queued-scans-test-project', projectDir],
     );
     projectId = result.rows[0]?.fn_upsert_project ?? '';
   });
@@ -33,6 +38,7 @@ describe('getQueuedScans', () => {
       projectId,
       scannerIds: ['linter'],
       scopeValue: '.',
+      userId: systemUserId,
     });
 
     const rows = await getQueuedScans();
@@ -51,6 +57,7 @@ describe('getQueuedScans', () => {
       projectId,
       scannerIds: ['code-smell-zen'],
       scopeValue: '.',
+      userId: systemUserId,
     });
 
     const pool = getPool();

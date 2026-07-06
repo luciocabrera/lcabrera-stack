@@ -43,14 +43,16 @@ const publishStatus = ({ hub, scan, status }: PublishStatusArgs): void => {
 type PersistScanProgressArgs = {
   readonly progressMessage: string;
   readonly scanId: string;
+  readonly userId: string;
 };
 
 const persistScanProgress = async ({
   progressMessage,
   scanId,
+  userId,
 }: PersistScanProgressArgs): Promise<void> => {
   try {
-    await updateScanProgress({ progressMessage, scanId });
+    await updateScanProgress({ progressMessage, scanId, userId });
   } catch (error) {
     console.error('❌ Failed to persist scan progress:', error);
   }
@@ -59,11 +61,13 @@ const persistScanProgress = async ({
 type RunDeterministicLinterArgs = {
   readonly outputDirectory: string;
   readonly scan: QueuedScanRow;
+  readonly userId: string;
 };
 
 const runDeterministicLinter = async ({
   outputDirectory,
   scan,
+  userId,
 }: RunDeterministicLinterArgs): Promise<'failed' | 'succeeded'> => {
   try {
     execFileSync(
@@ -98,6 +102,7 @@ const runDeterministicLinter = async ({
       errorMessage: 'linter-checker script did not produce report files.',
       runId: scan.run_id,
       scanId: scan.scan_id,
+      userId,
     });
     return 'failed';
   }
@@ -115,6 +120,7 @@ const runDeterministicLinter = async ({
     scannerId: 'linter',
     scopeType: scan.scope_type as 'changed-files' | 'diff' | 'folder' | 'repo',
     scopeValue: scan.scope_value,
+    userId,
   });
   return 'succeeded';
 };
@@ -123,18 +129,21 @@ type RunAgentSkillArgs = {
   readonly hub: RunStatusHub;
   readonly outputDirectory: string;
   readonly scan: QueuedScanRow;
+  readonly userId: string;
 };
 
 const runAgentSkill = async ({
   hub,
   outputDirectory,
   scan,
+  userId,
 }: RunAgentSkillArgs): Promise<'failed' | 'succeeded'> => {
   const result = await runSkillAgent({
     onProgress: (message) => {
       void persistScanProgress({
         progressMessage: message,
         scanId: scan.scan_id,
+        userId,
       });
       hub.publish({
         payload: {
@@ -163,6 +172,7 @@ const runAgentSkill = async ({
         result.errorMessage ?? 'Agent session did not produce a report.',
       runId: scan.run_id,
       scanId: scan.scan_id,
+      userId,
     });
     return 'failed';
   }
@@ -187,6 +197,7 @@ const runAgentSkill = async ({
       | 'fallow',
     scopeType: scan.scope_type as 'changed-files' | 'diff' | 'folder' | 'repo',
     scopeValue: scan.scope_value,
+    userId,
   });
   return 'succeeded';
 };
@@ -194,6 +205,7 @@ const runAgentSkill = async ({
 type RunQueuedScanArgs = {
   readonly hub: RunStatusHub;
   readonly scan: QueuedScanRow;
+  readonly userId: string;
 };
 
 /**
@@ -208,8 +220,9 @@ type RunQueuedScanArgs = {
 export const runQueuedScan = async ({
   hub,
   scan,
+  userId,
 }: RunQueuedScanArgs): Promise<void> => {
-  await markScanRunning({ scanId: scan.scan_id });
+  await markScanRunning({ scanId: scan.scan_id, userId });
   publishStatus({ hub, scan, status: 'running' });
 
   const outputDirectory = createScanOutputDirectory({ scanId: scan.scan_id });
@@ -217,14 +230,15 @@ export const runQueuedScan = async ({
   let finalStatus: 'failed' | 'succeeded';
   try {
     finalStatus = scan.deterministic
-      ? await runDeterministicLinter({ outputDirectory, scan })
-      : await runAgentSkill({ hub, outputDirectory, scan });
+      ? await runDeterministicLinter({ outputDirectory, scan, userId })
+      : await runAgentSkill({ hub, outputDirectory, scan, userId });
   } catch (error) {
     console.error(`❌ Scan ${scan.scan_id} failed unexpectedly:`, error);
     await markScanFailed({
       errorMessage: error instanceof Error ? error.message : String(error),
       runId: scan.run_id,
       scanId: scan.scan_id,
+      userId,
     });
     finalStatus = 'failed';
   }

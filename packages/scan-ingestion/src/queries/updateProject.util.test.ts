@@ -6,21 +6,26 @@ import { rmSync } from 'node:fs';
 import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
+import { getUserByUsername } from './getUserByUsername.util.ts';
 import { updateProject } from './updateProject.util.ts';
 
 describe('updateProject', () => {
   let projectDir: string;
   let otherDir: string;
   let projectId: string;
+  let systemUserId: string;
 
   beforeAll(async () => {
+    const systemUser = await getUserByUsername({ username: 'system' });
+    systemUserId = systemUser?.id ?? '';
+
     projectDir = makeTempDirectory('scan-ingestion-update-');
     otherDir = makeTempDirectory('scan-ingestion-update-other-');
 
     const pool = getPool();
     const result = await pool.query<{ fn_upsert_project: string }>(
-      'SELECT cqms.fn_upsert_project($1, $2) AS fn_upsert_project',
-      ['update-test-project', projectDir],
+      'SELECT cqms.fn_upsert_project($1, $2, $3) AS fn_upsert_project',
+      [systemUserId, 'update-test-project', projectDir],
     );
     projectId = result.rows[0]?.fn_upsert_project ?? '';
   });
@@ -38,6 +43,7 @@ describe('updateProject', () => {
       localPath: otherDir,
       name: 'renamed-project',
       projectId,
+      userId: systemUserId,
     });
 
     const pool = getPool();
@@ -56,6 +62,7 @@ describe('updateProject', () => {
         localPath: '/does/not/exist/at/all',
         name: 'nope',
         projectId,
+        userId: systemUserId,
       }),
     ).rejects.toThrow(/does not exist/);
   });
@@ -66,6 +73,7 @@ describe('updateProject', () => {
         localPath: projectDir,
         name: 'nope',
         projectId: '00000000-0000-0000-0000-000000000000',
+        userId: systemUserId,
       }),
     ).rejects.toThrow(/not found/);
   });
@@ -83,6 +91,7 @@ describe('updateProject', () => {
         localPath: subfolder,
         name: 're-pathed-project',
         projectId,
+        userId: systemUserId,
       });
 
       const pool = getPool();

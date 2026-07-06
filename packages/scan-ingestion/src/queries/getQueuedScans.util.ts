@@ -20,21 +20,17 @@ export type QueuedScanRow = {
  * second round-trip. Read on both the LISTEN/NOTIFY wake-up and the
  * reconciliation poll — the same query serves both, since exactly-once
  * processing is guaranteed by the row's own status transition, not by
- * which caller triggered the read.
+ * which caller triggered the read. The 3-table join lives in the
+ * cqms.v_queued_scans view (ADR-018) — soft-deleted scans, projects, or
+ * scanners drop out of the queue there.
  */
 export const getQueuedScans = async (): Promise<readonly QueuedScanRow[]> => {
   const pool = getPool();
   const result = await pool.query<QueuedScanRow>(
-    `SELECT
-       s.id AS scan_id, s.run_id, s.project_id, s.scanner_id,
-       s.scope_type, s.scope_value,
-       sc.deterministic, sc.skill_path,
-       p.local_path
-     FROM cqms.scans s
-     JOIN cqms.scanners sc ON sc.scanner_id = s.scanner_id
-     JOIN cqms.projects p ON p.id = s.project_id
-     WHERE s.status = 'queued'
-     ORDER BY s.created_at ASC`,
+    `SELECT scan_id, run_id, project_id, scanner_id, scope_type, scope_value,
+            deterministic, skill_path, local_path
+     FROM cqms.v_queued_scans
+     ORDER BY created_at ASC`,
   );
   return result.rows;
 };

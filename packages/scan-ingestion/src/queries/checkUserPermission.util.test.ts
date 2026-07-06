@@ -3,13 +3,17 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { hashPassword } from '../auth/hashPassword.util.ts';
 import { checkUserPermission } from './checkUserPermission.util.ts';
+import { getUserByUsername } from './getUserByUsername.util.ts';
 
 describe('checkUserPermission', () => {
   let viewerUserId: string;
   let projectId: string;
+  let systemUserId: string;
 
   beforeAll(async () => {
     const pool = getPool();
+    const systemUser = await getUserByUsername({ username: 'system' });
+    systemUserId = systemUser?.id ?? '';
     const created = await pool.query<{ id: string }>(
       `INSERT INTO cqms.users (username, display_name, password_hash)
        VALUES ($1, $2, $3) RETURNING id`,
@@ -28,8 +32,8 @@ describe('checkUserPermission', () => {
     );
 
     const project = await pool.query<{ fn_upsert_project: string }>(
-      'SELECT cqms.fn_upsert_project($1, $2) AS fn_upsert_project',
-      ['perm-test-project', '/tmp/perm-test-project-path'],
+      'SELECT cqms.fn_upsert_project($1, $2, $3) AS fn_upsert_project',
+      [systemUserId, 'perm-test-project', '/tmp/perm-test-project-path'],
     );
     projectId = project.rows[0]?.fn_upsert_project ?? '';
   });

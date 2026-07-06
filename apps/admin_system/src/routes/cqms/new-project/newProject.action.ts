@@ -8,7 +8,7 @@ import { newProjectSchema } from './newProject.schema';
 export const action = async ({ request }: ActionFunctionArgs) => {
   // Actions run BEFORE loaders, so the layout loader's gate does not
   // cover POSTs — every cqms action authenticates itself (ADR-017).
-  await requireUser({ request });
+  const user = await requireUser({ request });
 
   const formData = await request.formData();
   const parsed = newProjectSchema.safeParse({
@@ -27,7 +27,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   }
 
   try {
-    const { projectId } = await registerProject(parsed.data);
+    const { projectId } = await registerProject({
+      ...parsed.data,
+      userId: user.id,
+    });
     return redirect(`/cqms/projects/view/${projectId}`);
   } catch (error) {
     return {

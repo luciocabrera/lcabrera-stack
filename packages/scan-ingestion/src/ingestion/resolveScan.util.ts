@@ -22,7 +22,7 @@ const resolveExistingScan = async ({
   runId,
 }: ResolveExistingScanArgs): Promise<ResolvedScan> => {
   const runResult = await pool.query<{ project_id: string }>(
-    'SELECT project_id FROM cqms.runs WHERE id = $1',
+    'SELECT project_id FROM cqms.v_runs WHERE id = $1',
     [runId],
   );
   const projectId = runResult.rows[0]?.project_id;
@@ -31,7 +31,7 @@ const resolveExistingScan = async ({
   }
 
   const scanResult = await pool.query<{ id: string }>(
-    `SELECT id FROM cqms.scans
+    `SELECT id FROM cqms.v_scans
      WHERE run_id = $1 AND scanner_id = $2
      ORDER BY created_at DESC LIMIT 1`,
     [runId, ingestArgs.scannerId],
@@ -59,15 +59,16 @@ const createAdHocScan = async ({
     resolveProjectPath({ localPath: ingestArgs.localPath });
 
   const upsertResult = await pool.query<{ fn_upsert_project: string }>(
-    'SELECT cqms.fn_upsert_project($1, $2) AS fn_upsert_project',
-    [projectName, canonicalPath],
+    'SELECT cqms.fn_upsert_project($1, $2, $3) AS fn_upsert_project',
+    [ingestArgs.userId, projectName, canonicalPath],
   );
   const projectId = upsertResult.rows[0]?.fn_upsert_project;
   if (!projectId) throw new Error('fn_upsert_project returned no id');
 
   const createRunResult = await pool.query<{ fn_create_run: string }>(
-    'SELECT cqms.fn_create_run($1, $2, $3, $4, $5, $6) AS fn_create_run',
+    'SELECT cqms.fn_create_run($1, $2, $3, $4, $5, $6, $7) AS fn_create_run',
     [
+      ingestArgs.userId,
       projectId,
       ingestArgs.origin,
       JSON.stringify([ingestArgs.scannerId]),
@@ -80,11 +81,10 @@ const createAdHocScan = async ({
   const runId = createRunResult.rows[0]?.fn_create_run;
   if (!runId) throw new Error('fn_create_run returned no id');
 
-  const scanInsertResult = await pool.query<{ id: string }>(
-    `INSERT INTO cqms.scans (run_id, project_id, scanner_id, status, scope_type, scope_value, started_at)
-     VALUES ($1, $2, $3, 'running', $4, $5, now())
-     RETURNING id`,
+  const scanInsertResult = await pool.query<{ fn_create_ad_hoc_scan: string }>(
+    'SELECT cqms.fn_create_ad_hoc_scan($1, $2, $3, $4, $5, $6) AS fn_create_ad_hoc_scan',
     [
+      ingestArgs.userId,
       runId,
       projectId,
       ingestArgs.scannerId,
@@ -92,8 +92,8 @@ const createAdHocScan = async ({
       ingestArgs.scopeValue,
     ],
   );
-  const scanId = scanInsertResult.rows[0]?.id;
-  if (!scanId) throw new Error('scan insert returned no id');
+  const scanId = scanInsertResult.rows[0]?.fn_create_ad_hoc_scan;
+  if (!scanId) throw new Error('fn_create_ad_hoc_scan returned no id');
 
   return { projectId, runId, scanId };
 };

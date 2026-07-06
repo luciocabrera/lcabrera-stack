@@ -1,4 +1,5 @@
 import { closePool, getPool } from '@repo/data-access/db/getPool.util';
+import { getUserByUsername } from '@repo/scan-ingestion/queries/getUserByUsername.util';
 import { mkdtempSync, realpathSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -10,8 +11,12 @@ import { runQueuedScan } from './runQueuedScan.ts';
 describe('runQueuedScan (deterministic linter branch)', () => {
   let projectDir: string;
   let projectId: string;
+  let systemUserId: string;
 
   beforeAll(async () => {
+    const systemUser = await getUserByUsername({ username: 'system' });
+    systemUserId = systemUser?.id ?? '';
+
     const temporaryDirectoryTemplate = path.join(
       tmpdir(),
       'run-queued-scan-test-',
@@ -21,8 +26,8 @@ describe('runQueuedScan (deterministic linter branch)', () => {
 
     const pool = getPool();
     const result = await pool.query<{ fn_upsert_project: string }>(
-      'SELECT cqms.fn_upsert_project($1, $2) AS fn_upsert_project',
-      ['run-queued-scan-test-project', projectDir],
+      'SELECT cqms.fn_upsert_project($1, $2, $3) AS fn_upsert_project',
+      [systemUserId, 'run-queued-scan-test-project', projectDir],
     );
     projectId = result.rows[0]?.fn_upsert_project ?? '';
   });
@@ -37,8 +42,8 @@ describe('runQueuedScan (deterministic linter branch)', () => {
   it('runs a real linter scan end to end and ingests a real report', async () => {
     const pool = getPool();
     const runResult = await pool.query<{ fn_create_run_with_scans: string }>(
-      `SELECT cqms.fn_create_run_with_scans($1, 'ui_agent_sdk', $2, NULL, NULL, NULL, 'repo', '.') AS fn_create_run_with_scans`,
-      [projectId, JSON.stringify(['linter'])],
+      `SELECT cqms.fn_create_run_with_scans($1, $2, 'ui_agent_sdk', $3, NULL, NULL, NULL, 'repo', '.') AS fn_create_run_with_scans`,
+      [systemUserId, projectId, JSON.stringify(['linter'])],
     );
     const runId = runResult.rows[0]?.fn_create_run_with_scans ?? '';
 
@@ -69,6 +74,7 @@ describe('runQueuedScan (deterministic linter branch)', () => {
         scope_value: '.',
         skill_path: '.github/skills/linter-checker',
       },
+      userId: systemUserId,
     });
 
     expect(publishedStatuses).toEqual(['running', 'succeeded']);

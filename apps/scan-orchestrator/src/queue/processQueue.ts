@@ -1,8 +1,11 @@
 import { getQueuedScans } from '@repo/scan-ingestion/queries/getQueuedScans.util';
+import { getUserByUsername } from '@repo/scan-ingestion/queries/getUserByUsername.util';
 
 import type { RunStatusHub } from '../ws/runStatusHub.ts';
 
 import { runQueuedScan } from './runQueuedScan.ts';
+
+const SYSTEM_USERNAME = 'system';
 
 type CreateQueueProcessorArgs = {
   readonly hub: RunStatusHub;
@@ -21,10 +24,20 @@ export const createQueueProcessor = ({ hub }: CreateQueueProcessorArgs) => {
   let isWakeRequestedDuringProcessing = false;
 
   const drain = async (): Promise<void> => {
+    // The orchestrator's actor identity for audit fields and permission
+    // checks (ADR-018) — resolved per drain, not cached across the process
+    // lifetime, so a disabled system user stops the queue on the next wake.
+    const systemUser = await getUserByUsername({ username: SYSTEM_USERNAME });
+    if (systemUser === undefined) {
+      throw new Error(
+        "The seeded 'system' user was not found — run migrations first.",
+      );
+    }
+
     let queued = await getQueuedScans();
     while (queued.length > 0) {
       for (const scan of queued) {
-        await runQueuedScan({ hub, scan });
+        await runQueuedScan({ hub, scan, userId: systemUser.id });
       }
       queued = await getQueuedScans();
     }

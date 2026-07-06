@@ -19,6 +19,9 @@ import {
   scannerIdSchema,
   scopeTypeSchema,
 } from '../ingestion/report.schema.ts';
+import { getUserByUsername } from '../queries/getUserByUsername.util.ts';
+
+const SYSTEM_USERNAME = 'system';
 
 const REPORT_JSON_FILENAME = 'report.json';
 const REPORT_MARKDOWN_FILENAME = 'report.md';
@@ -56,6 +59,15 @@ const run = async (): Promise<void> => {
     return;
   }
 
+  // Non-interactive actor identity (ADR-018): the CLI acts as the seeded
+  // 'system' user for audit fields and permission checks.
+  const systemUser = await getUserByUsername({ username: SYSTEM_USERNAME });
+  if (systemUser === undefined) {
+    throw new Error(
+      "The seeded 'system' user was not found — run migrations first (vp run migrate).",
+    );
+  }
+
   const args: IngestReportArgs = {
     localPath,
     origin: (flags.origin ?? 'interactive_session') as IngestReportOrigin,
@@ -69,6 +81,7 @@ const run = async (): Promise<void> => {
     scopeType: scopeTypeSchema.parse(flags['scope-type'] ?? 'repo'),
     scopeValue: flags['scope-value'] ?? '.',
     triggeredBy: flags['triggered-by'],
+    userId: systemUser.id,
   };
 
   const result = await ingestReport(args);

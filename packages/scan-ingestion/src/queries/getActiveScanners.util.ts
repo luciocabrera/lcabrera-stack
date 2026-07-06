@@ -9,7 +9,7 @@ export type ScannerRow = {
 export const getActiveScanners = async (): Promise<readonly ScannerRow[]> => {
   const pool = getPool();
   const result = await pool.query<ScannerRow>(
-    'SELECT scanner_id, display_name FROM cqms.scanners WHERE is_active = true ORDER BY display_name',
+    'SELECT scanner_id, display_name FROM cqms.v_scanners WHERE is_active = true ORDER BY display_name',
   );
   return result.rows;
 };

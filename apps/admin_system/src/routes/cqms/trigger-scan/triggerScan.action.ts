@@ -11,7 +11,7 @@ const paramsSchema = z.object({ projectId: z.string().uuid() });
 export const action = async ({ params, request }: ActionFunctionArgs) => {
   // Actions run BEFORE loaders, so the layout loader's gate does not
   // cover POSTs — every cqms action authenticates itself (ADR-017).
-  await requireUser({ request });
+  const user = await requireUser({ request });
 
   const parsedParams = paramsSchema.safeParse(params);
   if (!parsedParams.success) {
@@ -35,6 +35,8 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
     projectId: parsedParams.data.projectId,
     scannerIds: parsed.data.scannerIds,
     scopeValue: '.',
+    triggeredBy: user.username,
+    userId: user.id,
   });
 
   return redirect(

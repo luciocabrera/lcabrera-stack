@@ -12,6 +12,7 @@ import { getRunScans } from './getRunScans.util.ts';
 import { getScanById } from './getScanById.util.ts';
 import { getScanFindings } from './getScanFindings.util.ts';
 import { getScanReport } from './getScanReport.util.ts';
+import { getUserByUsername } from './getUserByUsername.util.ts';
 
 /**
  * Real integration tests against the live cqms_db — no mocked pg client,
@@ -24,23 +25,27 @@ import { getScanReport } from './getScanReport.util.ts';
 describe('queries', () => {
   let projectDir: string;
   let projectId: string;
+  let systemUserId: string;
   let runId: string;
   let scanId: string;
 
   beforeAll(async () => {
+    const systemUser = await getUserByUsername({ username: 'system' });
+    systemUserId = systemUser?.id ?? '';
+
     projectDir = makeTempDirectory('scan-ingestion-queries-');
 
     const pool = getPool();
 
     const projectResult = await pool.query<{ fn_upsert_project: string }>(
-      'SELECT cqms.fn_upsert_project($1, $2) AS fn_upsert_project',
-      ['queries-test-project', projectDir],
+      'SELECT cqms.fn_upsert_project($1, $2, $3) AS fn_upsert_project',
+      [systemUserId, 'queries-test-project', projectDir],
     );
     projectId = projectResult.rows[0]?.fn_upsert_project ?? '';
 
     const runResult = await pool.query<{ fn_create_run: string }>(
-      `SELECT cqms.fn_create_run($1, 'interactive_session', '["linter"]'::jsonb, 'test-user', 'abc123', 'main') AS fn_create_run`,
-      [projectId],
+      `SELECT cqms.fn_create_run($1, $2, 'interactive_session', '["linter"]'::jsonb, 'test-user', 'abc123', 'main') AS fn_create_run`,
+      [systemUserId, projectId],
     );
     runId = runResult.rows[0]?.fn_create_run ?? '';
 

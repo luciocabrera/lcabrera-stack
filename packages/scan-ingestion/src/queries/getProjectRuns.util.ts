@@ -23,7 +23,9 @@ type GetProjectRunsArgs = {
 /**
  * Paginated runs for one project, each with its own severity rollup —
  * unlike `project_run_summary` (latest run only, TECH_SPEC §2.3a), this
- * covers every run so `project-detail`'s Table can list run history.
+ * covers every run so `project-detail`'s Table can list run history. The
+ * rollup join lives in the cqms.v_project_runs view (ADR-018); only the
+ * filter + pagination stay here.
  */
 export const getProjectRuns = async ({
   limit,
@@ -32,15 +34,9 @@ export const getProjectRuns = async ({
 }: GetProjectRunsArgs): Promise<readonly ProjectRunRow[]> => {
   const pool = getPool();
   const result = await pool.query<ProjectRunRow>(
-    `SELECT r.*,
-            COALESCE(SUM(rep.high_count), 0)::int AS total_high,
-            COALESCE(SUM(rep.medium_count), 0)::int AS total_medium
-     FROM cqms.runs r
-     LEFT JOIN cqms.scans s ON s.run_id = r.id
-     LEFT JOIN cqms.reports rep ON rep.scan_id = s.id
-     WHERE r.project_id = $1
-     GROUP BY r.id
-     ORDER BY r.created_at DESC
+    `SELECT * FROM cqms.v_project_runs
+     WHERE project_id = $1
+     ORDER BY created_at DESC
      LIMIT $2 OFFSET $3`,
     [projectId, limit, skip],
   );

@@ -23,7 +23,7 @@ export const getRunById = async ({
 }: GetRunByIdArgs): Promise<RunRow | undefined> => {
   const pool = getPool();
   const result = await pool.query<RunRow>(
-    'SELECT * FROM cqms.runs WHERE id = $1',
+    'SELECT * FROM cqms.v_runs WHERE id = $1',
     [runId],
   );
   return result.rows[0];

@@ -6,6 +6,7 @@ type UpdateProjectArgs = {
   readonly localPath: string;
   readonly name: string;
   readonly projectId: string;
+  readonly userId: string;
 };
 
 /**
@@ -26,16 +27,17 @@ export const updateProject = async ({
   localPath,
   name,
   projectId,
+  userId,
 }: UpdateProjectArgs): Promise<void> => {
   const canonicalPath = resolveLocalPath({ localPath });
 
   const pool = getPool();
-  const result = await pool.query(
-    'UPDATE cqms.projects SET name = $1, local_path = $2 WHERE id = $3',
-    [name, canonicalPath, projectId],
-  );
-
-  if (result.rowCount === 0) {
-    throw new Error('Project not found.');
-  }
+  // fn_update_project asserts the 'update project' permission first and
+  // raises 'Project not found.' for a missing/soft-deleted row (ADR-018).
+  await pool.query('SELECT cqms.fn_update_project($1, $2, $3, $4)', [
+    userId,
+    projectId,
+    name,
+    canonicalPath,
+  ]);
 };

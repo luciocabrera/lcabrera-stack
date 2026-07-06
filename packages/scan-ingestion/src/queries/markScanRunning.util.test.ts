@@ -3,20 +3,25 @@ import { makeTempDirectory } from '@repo/scan-ingestion/testing/makeTempDirector
 import { rmSync } from 'node:fs';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
+import { getUserByUsername } from './getUserByUsername.util.ts';
 import { markScanRunning } from './markScanRunning.util.ts';
 import { triggerScan } from './triggerScan.util.ts';
 
 describe('markScanRunning', () => {
   let projectDir: string;
   let projectId: string;
+  let systemUserId: string;
 
   beforeAll(async () => {
+    const systemUser = await getUserByUsername({ username: 'system' });
+    systemUserId = systemUser?.id ?? '';
+
     projectDir = makeTempDirectory('scan-ingestion-mark-running-');
 
     const pool = getPool();
     const result = await pool.query<{ fn_upsert_project: string }>(
-      'SELECT cqms.fn_upsert_project($1, $2) AS fn_upsert_project',
-      ['mark-scan-running-test-project', projectDir],
+      'SELECT cqms.fn_upsert_project($1, $2, $3) AS fn_upsert_project',
+      [systemUserId, 'mark-scan-running-test-project', projectDir],
     );
     projectId = result.rows[0]?.fn_upsert_project ?? '';
   });
@@ -33,6 +38,7 @@ describe('markScanRunning', () => {
       projectId,
       scannerIds: ['linter'],
       scopeValue: '.',
+      userId: systemUserId,
     });
 
     const pool = getPool();
@@ -42,7 +48,7 @@ describe('markScanRunning', () => {
     );
     const scanId = scanRow.rows[0]?.id ?? '';
 
-    await markScanRunning({ scanId });
+    await markScanRunning({ scanId, userId: systemUserId });
 
     const result = await pool.query<{
       started_at: Date | null;

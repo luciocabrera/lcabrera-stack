@@ -4,12 +4,19 @@ import { makeTempDirectory } from '@repo/scan-ingestion/testing/makeTempDirector
 import { execFileSync } from 'node:child_process';
 import { rmSync } from 'node:fs';
 import path from 'node:path';
-import { afterAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
+import { getUserByUsername } from './getUserByUsername.util.ts';
 import { registerProject } from './registerProject.util.ts';
 
 describe('registerProject', () => {
   const createdProjectPaths: string[] = [];
+  let systemUserId: string;
+
+  beforeAll(async () => {
+    const systemUser = await getUserByUsername({ username: 'system' });
+    systemUserId = systemUser?.id ?? '';
+  });
 
   afterAll(async () => {
     const pool = getPool();
@@ -29,6 +36,7 @@ describe('registerProject', () => {
     const result = await registerProject({
       localPath: projectDir,
       name: 'register-test-project',
+      userId: systemUserId,
     });
 
     expect(result.projectId).toBeTruthy();
@@ -48,6 +56,7 @@ describe('registerProject', () => {
       registerProject({
         localPath: '/does/not/exist/at/all',
         name: 'nope',
+        userId: systemUserId,
       }),
     ).rejects.toThrow(/does not exist/);
   });
@@ -59,10 +68,12 @@ describe('registerProject', () => {
     const first = await registerProject({
       localPath: projectDir,
       name: 'first-name',
+      userId: systemUserId,
     });
     const second = await registerProject({
       localPath: projectDir,
       name: 'second-name',
+      userId: systemUserId,
     });
 
     expect(second.projectId).toBe(first.projectId);
@@ -80,6 +91,7 @@ describe('registerProject', () => {
       const result = await registerProject({
         localPath: subfolder,
         name: 'subfolder-project',
+        userId: systemUserId,
       });
 
       const pool = getPool();

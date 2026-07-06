@@ -9,6 +9,7 @@ export type RegisterProjectResult = {
 type RegisterProjectArgs = {
   readonly localPath: string;
   readonly name: string;
+  readonly userId: string;
 };
 
 /**
@@ -27,13 +28,14 @@ type RegisterProjectArgs = {
 export const registerProject = async ({
   localPath,
   name,
+  userId,
 }: RegisterProjectArgs): Promise<RegisterProjectResult> => {
   const canonicalPath = resolveLocalPath({ localPath });
 
   const pool = getPool();
   const result = await pool.query<{ fn_upsert_project: string }>(
-    'SELECT cqms.fn_upsert_project($1, $2) AS fn_upsert_project',
-    [name, canonicalPath],
+    'SELECT cqms.fn_upsert_project($1, $2, $3) AS fn_upsert_project',
+    [userId, name, canonicalPath],
   );
 
   const projectId = result.rows[0]?.fn_upsert_project;

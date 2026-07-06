@@ -3,8 +3,9 @@ import { writeTextFileWithin } from '@repo/scan-ingestion/fs/writeTextFileWithin
 import { makeTempDirectory } from '@repo/scan-ingestion/testing/makeTempDirectory.util.ts';
 import { rmSync } from 'node:fs';
 import path from 'node:path';
-import { afterAll, afterEach, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 
+import { getUserByUsername } from '../queries/getUserByUsername.util.ts';
 import { ingestReport } from './ingestReport.ts';
 
 /**
@@ -15,6 +16,12 @@ import { ingestReport } from './ingestReport.ts';
 describe('ingestReport', () => {
   const createdProjectPaths: string[] = [];
   let workDir: string;
+  let systemUserId: string;
+
+  beforeAll(async () => {
+    const systemUser = await getUserByUsername({ username: 'system' });
+    systemUserId = systemUser?.id ?? '';
+  });
 
   afterEach(() => {
     if (workDir) rmSync(workDir, { force: true, recursive: true });
@@ -75,6 +82,7 @@ describe('ingestReport', () => {
       scannerId: 'code-smell-checker',
       scopeType: 'repo',
       scopeValue: '.',
+      userId: systemUserId,
     });
 
     expect(result.findingsIngested).toBe(1);
@@ -100,21 +108,20 @@ describe('ingestReport', () => {
 
     const pool = getPool();
     const projectResult = await pool.query<{ fn_upsert_project: string }>(
-      'SELECT cqms.fn_upsert_project($1, $2) AS fn_upsert_project',
-      ['ui-path-project', projectDir],
+      'SELECT cqms.fn_upsert_project($1, $2, $3) AS fn_upsert_project',
+      [systemUserId, 'ui-path-project', projectDir],
     );
     const projectId = projectResult.rows[0]?.fn_upsert_project;
 
     const runResult = await pool.query<{ fn_create_run: string }>(
-      `SELECT cqms.fn_create_run($1, 'ui_agent_sdk', '["linter"]'::jsonb, NULL, NULL, NULL) AS fn_create_run`,
-      [projectId],
+      `SELECT cqms.fn_create_run($1, $2, 'ui_agent_sdk', '["linter"]'::jsonb, NULL, NULL, NULL) AS fn_create_run`,
+      [systemUserId, projectId],
     );
     const runId = runResult.rows[0]?.fn_create_run;
 
     await pool.query(
-      `INSERT INTO cqms.scans (run_id, project_id, scanner_id, status, scope_type, scope_value, started_at)
-       VALUES ($1, $2, 'linter', 'running', 'repo', '.', now())`,
-      [runId, projectId],
+      `SELECT cqms.fn_create_ad_hoc_scan($1, $2, $3, 'linter', 'repo', '.')`,
+      [systemUserId, runId, projectId],
     );
 
     const reportDir = writeReportFiles({
@@ -132,6 +139,7 @@ describe('ingestReport', () => {
       scannerId: 'linter',
       scopeType: 'repo',
       scopeValue: '.',
+      userId: systemUserId,
     });
 
     expect(result.runId).toBe(runId);
