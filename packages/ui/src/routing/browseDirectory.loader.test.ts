@@ -17,11 +17,14 @@ const buildArgs = (targetPath: string) => {
 };
 
 describe('browseDirectory loader', () => {
-  // Statically-derived fixture root (cwd is packages/ui when vitest runs):
+  // Statically-derived fixture root (packages/ui/node_modules/.cache):
   // security/detect-non-literal-fs-filename only accepts statically
-  // resolvable paths, which a mkdtempSync result can never be.
+  // resolvable paths (import.meta.dirname + literals), which a mkdtempSync
+  // result can never be.
   const root = path.join(
-    process.cwd(),
+    import.meta.dirname,
+    '..',
+    '..',
     'node_modules',
     '.cache',
     'browse-directory-loader-test',

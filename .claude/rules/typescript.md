@@ -74,6 +74,11 @@ type UserId = string & { readonly __brand: 'UserId' };
 | Constant  | `*.constants.ts`             | `api.constants.ts`          |
 | Schema    | `*.schema.ts`                | `user.schema.ts`            |
 
+## One Util Per File
+
+- **Every utility function lives in its own `*.util.ts` file with a colocated `*.util.test.ts`** — never stack multiple module-level helper functions inside one util file, even "private" ones only used by the main export. Extract each helper to its own file with its own unit test (see `packages/ui/src/entry/`: `createHandleRequest.util.tsx` imports `toError.util.ts`, `buildShellStreamResponse.util.ts`, `addPreloadHeaders.util.ts`, each individually tested).
+- Small closures that capture local state stay inline; anything expressible as a top-level function with explicit args gets its own file.
+
 ## Functional Programming & Immutability
 
 - **All `*.util.ts` functions must be pure** — same input → same output, no side effects.

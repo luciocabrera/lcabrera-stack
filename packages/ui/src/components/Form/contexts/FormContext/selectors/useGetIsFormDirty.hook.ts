@@ -3,7 +3,7 @@ import { isFormDirty } from '@repo/ui/components/Form/utils/isFormDirty.util';
 
 export const useGetIsFormDirty = <TValues extends Record<string, unknown>>(
   accessors: readonly (keyof TValues & string)[],
-): boolean =>
+) =>
   useFieldsStore<boolean, TValues>((state) =>
     isFormDirty({
       accessors,

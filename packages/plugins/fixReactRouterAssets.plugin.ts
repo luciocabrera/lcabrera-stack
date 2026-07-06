@@ -76,12 +76,13 @@ const ensureServerCssFile = ({
 
   fs.mkdirSync(path.dirname(serverFile), { recursive: true });
 
-  if (clientCssFiles.length === 0) {
+  const [firstClientCssFile] = clientCssFiles;
+  if (firstClientCssFile === undefined) {
     fs.writeFileSync(serverFile, '');
     return;
   }
 
-  const clientSource = path.join(clientAssetsDir, clientCssFiles[0]);
+  const clientSource = path.join(clientAssetsDir, firstClientCssFile);
   fs.copyFileSync(clientSource, serverFile);
 };
 

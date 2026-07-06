@@ -20,8 +20,8 @@ export const styles = stylex.create({
     gap: spacing.sm,
     alignItems: 'center',
     backgroundColor: {
-      ':hover': colors.surfaceSecondary,
       default: 'transparent',
+      ':hover': colors.surfaceSecondary,
     },
     color: colors.textPrimary,
     cursor: 'pointer',

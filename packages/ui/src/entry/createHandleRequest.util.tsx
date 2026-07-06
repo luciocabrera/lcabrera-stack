@@ -1,14 +1,15 @@
 import type { RenderToPipeableStreamOptions } from 'react-dom/server';
 import type { EntryContext } from 'react-router';
 
-import { createReadableStreamFromReadable } from '@react-router/node';
 import { getRequestCspNonce } from '@repo/ui/utils/security';
 import { isbot } from 'isbot';
-import { PassThrough } from 'node:stream';
 import { renderToPipeableStream } from 'react-dom/server';
 import { ServerRouter } from 'react-router';
 
+import { addPreloadHeaders } from './addPreloadHeaders.util';
+import { buildShellStreamResponse } from './buildShellStreamResponse.util';
 import { getStreamTimeout } from './getStreamTimeout.util';
+import { toError } from './toError.util';
 
 type CreateHandleRequestArgs = {
   /** The app's own compiled StyleX stylesheet URL (`import stylexCssHref from './stylex.css?url'`) — a per-app build artifact, cannot be sourced from this package. */
@@ -20,62 +21,14 @@ type CreateHandleRequestResult = {
   readonly streamTimeout: number;
 };
 
+// Positional signature is React Router's entry.server contract — status code
+// second, headers third. Do not reorder (or alphabetize) these parameters.
 type HandleRequest = (
   request: Request,
   responseStatusCode: number,
   responseHeaders: Headers,
   routerContext: EntryContext,
 ) => Promise<Response>;
-
-const toError = (error: unknown): Error => {
-  if (error instanceof Error) {
-    return error;
-  }
-
-  if (typeof error === 'string') {
-    return new Error(error);
-  }
-
-  if (error && typeof error === 'object') {
-    return new Error(JSON.stringify(error));
-  }
-
-  return new Error('Unknown server-side streaming error');
-};
-
-type BuildShellStreamResponseArgs = {
-  readonly clearRenderTimeout: () => void;
-  readonly pipe: (destination: PassThrough) => void;
-  readonly responseHeaders: Headers;
-  readonly responseStatusCode: number;
-};
-
-const buildShellStreamResponse = ({
-  clearRenderTimeout,
-  pipe,
-  responseHeaders,
-  responseStatusCode,
-}: BuildShellStreamResponseArgs): Response => {
-  const body = new PassThrough({
-    final(callback) {
-      // Clear the timeout to prevent retaining the closure and memory leak.
-      clearRenderTimeout();
-      callback();
-    },
-  });
-  // Increase max listeners to prevent warning with compression middleware.
-  body.setMaxListeners(20);
-  const stream = createReadableStreamFromReadable(body);
-
-  responseHeaders.set('Content-Type', 'text/html');
-
-  pipe(body);
-
-  return new Response(stream, {
-    headers: responseHeaders,
-    status: responseStatusCode,
-  });
-};
 
 /**
  * Builds the `entry.server.tsx` default export every app needs identically
@@ -96,10 +49,7 @@ export const createHandleRequest = ({
   const streamTimeout = getStreamTimeout();
   const abortDelay = streamTimeout + 1000;
 
-  const addPreloadHeaders = (headers: Headers) => {
-    headers.append('Link', `<${stylexCssHref}>; rel=preload; as=style`);
-  };
-
+  // eslint-disable-next-line local-rules/destructuring-for-functions
   const handleRequest: HandleRequest = (
     request,
     responseStatusCode,
@@ -117,7 +67,7 @@ export const createHandleRequest = ({
     }
 
     const cspNonce = getRequestCspNonce(request);
-    addPreloadHeaders(responseHeaders);
+    addPreloadHeaders({ responseHeaders, stylexCssHref });
 
     const { promise, reject, resolve } = Promise.withResolvers<Response>();
 
