@@ -100,25 +100,27 @@ export const ingestReport = async (
     ],
   );
 
-  if (rawJson !== undefined) {
-    try {
-      await ingestScanDetail({
-        localPath: args.localPath,
-        rawJson,
-        scanId,
-        scannerId: args.scannerId,
-        scopeValue: args.scopeValue,
-        userId: args.userId,
-      });
-    } catch (error) {
-      // Log-and-continue (ADR-019): the generic layer (report + findings)
-      // is already committed and the scan already succeeded — a raw-shape
-      // drift in a future tool version must not flip it to failed.
-      console.warn(
-        `⚠️  Detail extraction failed for ${args.scannerId} scan ${scanId} (generic ingestion already succeeded):`,
-        error,
-      );
-    }
+  try {
+    // Unconditional since Step 5: the LLM scanners have no raw artifact —
+    // their master rolls up the already-validated report; the dispatcher
+    // skips raw-based extraction itself when rawJson is absent.
+    await ingestScanDetail({
+      localPath: args.localPath,
+      rawJson,
+      report,
+      scanId,
+      scannerId: args.scannerId,
+      scopeValue: args.scopeValue,
+      userId: args.userId,
+    });
+  } catch (error) {
+    // Log-and-continue (ADR-019): the generic layer (report + findings)
+    // is already committed and the scan already succeeded — a raw-shape
+    // drift in a future tool version must not flip it to failed.
+    console.warn(
+      `⚠️  Detail extraction failed for ${args.scannerId} scan ${scanId} (generic ingestion already succeeded):`,
+      error,
+    );
   }
 
   return {

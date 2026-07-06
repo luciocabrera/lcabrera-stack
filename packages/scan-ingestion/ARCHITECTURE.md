@@ -39,6 +39,8 @@ scan-ingestion/
 │   │   ├── ingestReport.types.ts         → IngestReportArgs/Result
 │   │   ├── ingestScanDetail.ts           → Master/detail extraction dispatcher (ADR-019) — internal, NOT exported
 │   │   ├── lint/                         → eslint/oxlint raw schemas + pure extractors (violations + run summaries)
+│   │   ├── fallow/                       → fallow raw schema + pure extractors (master + 8 detail tables — ADR-019 addendum)
+│   │   ├── codeSmell/                    → code-smell master rollup from the parsed report (details = views over scan_findings)
 │   │   ├── resolveScan.util.ts           → UI path (lookup) vs ad hoc path (create project+run+scan)
 │   │   ├── matchProject.util.ts          → git rev-parse --show-toplevel + realpath (ad hoc path ONLY — see below)
 │   │   ├── resolveLocalPath.util.ts      → realpath only, no git walk (UI register/edit path — see below)
@@ -127,12 +129,18 @@ genuinely thin wrapper.
    `null` for `diff`-scoped scans (`code-smell-zen`).
 6. `CALL cqms.sp_ingest_scan_result(...)` — the one multi-table write, done
    entirely in Postgres (TECH_SPEC §2.3a), not hand-assembled in TypeScript.
-7. `ingestScanDetail` (ADR-019) — per-scanner master/detail extraction
-   (eslint/oxlint today; fallow/app-graph follow the same shape): loose
-   Zod parse of the raw artifact → pure extractors → an idempotent
-   DELETE-then-INSERT procedure per scanner. Wrapped in log-and-continue:
-   it runs AFTER the generic layer committed, so a raw-shape drift in a
+7. `ingestScanDetail` (ADR-019) — per-scanner master/detail extraction,
+   called unconditionally (Step 5): the deterministic scanners
+   (eslint/oxlint/fallow; app-graph follows the same shape) loose-Zod
+   parse their verbatim raw artifact → pure extractors → an idempotent
+   DELETE-then-INSERT procedure per scanner (skipped when rawJson is
+   absent); the LLM scanners (code-smell-\*) have no raw artifact — their
+   master rolls up the already-validated report, and their "detail" is a
+   scanner-filtered VIEW over scan_findings. Wrapped in log-and-continue:
+   it runs AFTER the generic layer committed, so a shape drift in a
    future tool version can never flip an already-succeeded scan to failed.
+   Fallow file paths are stored as fallow reports them (git-root-relative
+   of the scanned repo = project-relative for root-registered projects).
 
 ## Verification
 

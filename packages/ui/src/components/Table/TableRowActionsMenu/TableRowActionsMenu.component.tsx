@@ -8,6 +8,7 @@ import { useFetcher } from 'react-router';
 
 import type { TableRowActionsMenuProps } from './TableRowActionsMenu.types';
 
+import { useTableContainerRef } from '../contexts/TableWrapper';
 import { resolveCrudRowId } from '../utils/resolveCrudRowId.util';
 import { styles } from './TableRowActionsMenu.stylex';
 
@@ -20,6 +21,7 @@ export const TableRowActionsMenu = <TData extends Record<string, unknown>>({
   row,
   titleSingular,
 }: TableRowActionsMenuProps<TData>) => {
+  const containerRef = useTableContainerRef();
   const fetcher = useFetcher();
   const menuRef = useRef<HTMLDivElement>(null);
   const menuId = useId().replaceAll(':', '');
@@ -35,16 +37,47 @@ export const TableRowActionsMenu = <TData extends Record<string, unknown>>({
     }
 
     const triggerRect = triggerElement.getBoundingClientRect();
+    const triggerCellRect = triggerElement
+      .closest('td')
+      ?.getBoundingClientRect();
     const menuRect = menuElement.getBoundingClientRect();
+    const containerRect = containerRef.current?.getBoundingClientRect() ?? {
+      bottom: window.innerHeight,
+      left: 0,
+      right: window.innerWidth,
+      top: 0,
+    };
 
     const viewportPadding = 8;
-    const top = triggerRect.bottom + 4;
-    const alignedLeft = triggerRect.right - menuRect.width;
-    const maxLeft = window.innerWidth - menuRect.width - viewportPadding;
-    const left = Math.min(maxLeft, Math.max(viewportPadding, alignedLeft));
+    const menuGap = 4;
+    const spaceBelow = containerRect.bottom - triggerRect.bottom;
+    const spaceAbove = triggerRect.top - containerRect.top;
+    const shouldOpenAbove =
+      spaceBelow < menuRect.height + viewportPadding + menuGap &&
+      spaceAbove > menuGap;
+
+    const nextTop = shouldOpenAbove
+      ? triggerRect.top - menuRect.height - menuGap
+      : triggerRect.bottom + menuGap;
+
+    const minTop = containerRect.top + viewportPadding;
+    const maxTop = containerRect.bottom - menuRect.height - viewportPadding;
+    const top = Math.min(maxTop, Math.max(minTop, nextTop));
+    const anchorRight = triggerCellRect?.right ?? triggerRect.right;
+    const alignedLeft = anchorRight - menuRect.width;
+    const minLeft = containerRect.left + viewportPadding;
+    const maxLeft = containerRect.right - menuRect.width - viewportPadding;
+    const left = Math.min(maxLeft, Math.max(minLeft, alignedLeft));
 
     menuElement.style.margin = '0';
+    menuElement.style.setProperty('backdrop-filter', 'none', 'important');
+    menuElement.style.setProperty(
+      'background-color',
+      'rgb(15, 23, 42)',
+      'important',
+    );
     menuElement.style.left = `${left}px`;
+    menuElement.style.setProperty('opacity', '1', 'important');
     menuElement.style.position = 'fixed';
     menuElement.style.top = `${top}px`;
   };
