@@ -142,6 +142,8 @@ Covers `packages/ui` only. API-layer utilities (`api.util.ts`, `buildPaginatedQu
 
 | Function                                   | Location                                                                  | Description                                                                                               |
 | ------------------------------------------ | ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `createBasicColumn`                        | `components/Table/utils/createBasicColumn.util.ts`                        | Builds reusable non-render table columns from typed metadata (data type, key, label, widths)              |
+| `createDistinctStringColumn`               | `components/Table/utils/createDistinctStringColumn.util.ts`               | Builds reusable distinct-filter string columns by composing filter-option adapter wiring                  |
 | `deriveColumnViewState`                    | `components/Table/utils/deriveColumnViewState.util.ts`                    | Composes normalized columns with effective columns, grouped pinning state, and pinned offsets             |
 | `getColumnPinSide`                         | `components/Table/utils/getColumnPinSide.util.ts`                         | Returns `'left'`, `'right'`, or `undefined` for a column key given current pinning state                  |
 | `getEffectiveColumns`                      | `components/Table/utils/getEffectiveColumns.util.ts`                      | Returns visible columns in display order applying visibility, order, and pinning                          |

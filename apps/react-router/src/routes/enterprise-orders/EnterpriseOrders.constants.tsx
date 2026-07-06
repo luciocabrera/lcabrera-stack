@@ -5,69 +5,18 @@ import type {
 
 import { Button } from '@repo/ui/components/Button';
 import { EyeIcon } from '@repo/ui/components/Icons';
-import { ICON_SIZE_XS } from '@repo/ui/design-system/constants/iconSizes.constants';
 import {
-  createDistinctFilterOptions,
-  createStaticFilterOptions,
-} from '@repo/ui/utils/filters';
+  createBasicColumn,
+  createDistinctStringColumn,
+} from '@repo/ui/components/Table/utils';
+import { ICON_SIZE_XS } from '@repo/ui/design-system/constants/iconSizes.constants';
+import { createStaticFilterOptions } from '@repo/ui/utils/filters';
 import * as stylex from '@stylexjs/stylex';
 import { Link } from 'react-router';
 
 import { type EnterpriseOrder, enterpriseOrdersApi } from '@/services';
 
 import { styles } from './EnterpriseOrders.constants.stylex';
-
-type BasicColumnArgs = {
-  readonly dataType: 'boolean' | 'currency' | 'date' | 'number' | 'string';
-  readonly key: keyof EnterpriseOrder;
-  readonly label: string;
-  readonly maxWidth: number;
-  readonly minWidth: number;
-};
-
-type DistinctStringColumnArgs = {
-  readonly columnName: keyof EnterpriseOrder;
-  readonly key: keyof EnterpriseOrder;
-  readonly label: string;
-  readonly maxWidth: number;
-  readonly minWidth: number;
-};
-
-const createDistinctStringColumn = ({
-  columnName,
-  key,
-  label,
-  maxWidth,
-  minWidth,
-}: DistinctStringColumnArgs): TableColumn<EnterpriseOrder> => {
-  return {
-    dataType: 'string',
-    ...createDistinctFilterOptions<EnterpriseOrder>({
-      columnName,
-      fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
-    }),
-    key,
-    label,
-    maxWidth,
-    minWidth,
-  };
-};
-
-const createBasicColumn = ({
-  dataType,
-  key,
-  label,
-  maxWidth,
-  minWidth,
-}: BasicColumnArgs): TableColumn<EnterpriseOrder> => {
-  return {
-    dataType,
-    key,
-    label,
-    maxWidth,
-    minWidth,
-  };
-};
 
 export const TITLE = 'Enterprise Orders - Infinite Scroll';
 export const TABLE_NAME = 'enterprise_orders';
@@ -90,6 +39,7 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   }),
   createDistinctStringColumn({
     columnName: 'order_number',
+    fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
     key: 'order_number',
     label: 'Order #',
     maxWidth: 180,
@@ -142,6 +92,7 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   }),
   createDistinctStringColumn({
     columnName: 'customer_email',
+    fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
     key: 'customer_email',
     label: 'Email',
     maxWidth: 280,
@@ -149,6 +100,7 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   }),
   createDistinctStringColumn({
     columnName: 'customer_type',
+    fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
     key: 'customer_type',
     label: 'Customer Type',
     maxWidth: 180,
@@ -264,6 +216,7 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   }),
   createDistinctStringColumn({
     columnName: 'shipping_city',
+    fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
     key: 'shipping_city',
     label: 'Ship City',
     maxWidth: 180,
@@ -271,6 +224,7 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   }),
   createDistinctStringColumn({
     columnName: 'shipping_state',
+    fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
     key: 'shipping_state',
     label: 'Ship State',
     maxWidth: 150,
@@ -278,6 +232,7 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   }),
   createDistinctStringColumn({
     columnName: 'shipping_country',
+    fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
     key: 'shipping_country',
     label: 'Ship Country',
     maxWidth: 180,
@@ -285,6 +240,7 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   }),
   createDistinctStringColumn({
     columnName: 'carrier',
+    fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
     key: 'carrier',
     label: 'Carrier',
     maxWidth: 150,
@@ -292,6 +248,7 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   }),
   createDistinctStringColumn({
     columnName: 'warehouse_location',
+    fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
     key: 'warehouse_location',
     label: 'Warehouse',
     maxWidth: 180,

@@ -7,6 +7,8 @@ Pure utility functions for column processing and state persistence.
 ```
 utils/
 ├── arePersistedUiStatesEqual.util.ts             → Compare persisted table UI slices only
+├── createBasicColumn.util.ts                     → Build generic non-render table columns from shared metadata
+├── createDistinctStringColumn.util.ts            → Build string columns wired to distinct-filter adapters
 ├── deriveColumnViewState.util.ts                 → Compose normalized columns + pinning-derived slices
 ├── getColumnPinSide.util.ts                      → Detect which side a column is pinned to
 ├── getEffectiveColumns.util.ts                   → Apply visibility + order + pinning
@@ -104,18 +106,20 @@ graph TD
   end
 ```
 
-| Function                     | Input                                       | Output                                                                     | Purpose                                                                                       |
-| ---------------------------- | ------------------------------------------- | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| deriveColumnViewState        | columns, sorting, order, pinning, sizing    | { normalizedColumns, effectiveColumns, columnGroups, pinnedColumnOffsets } | Compose sort metadata with pinning-dependent derived state in one call                        |
-| getEffectiveColumns          | columns, order, visibility                  | TableColumn[]                                                              | Visible columns in display order; pinned columns follow reconciled display order              |
-| getPinnedDerivedColumnsState | columns, order, pinning, sizing, visibility | { effectiveColumns, columnGroups, pinnedColumnOffsets }                    | Recompute all pinning-dependent derived slices in one call                                    |
-| getNormalizedColumns         | columns, sorting                            | NormalizedColumnsState                                                     | Columns enriched with sort metadata                                                           |
-| getStaticColumnKeys          | columns                                     | Set<string>                                                                | Keys of locked/static columns                                                                 |
-| getPinnedColumnOffsets       | pinning, sizing, columns                    | Record<key, PinnedColumnInfo>                                              | Sticky positions for pinned columns                                                           |
-| getColumnPinSide             | columnKey, pinning                          | PinSide or undefined                                                       | Which side a column is pinned to                                                              |
-| resolveFetchMoreState        | currentData, selectors, response, totals    | { combinedData, hasMore, totalLoadedRows, totalRows }                      | Shared pagination merge logic used by table rows and filter-options load-more                 |
-| splitColumnsByPinning        | pinning, effectiveColumns                   | ColumnGroupsState                                                          | Split columns into left/center/right                                                          |
-| syncColumnOrderWithPinning   | order, previous/new pinning                 | string[]                                                                   | Reorder to keep pinned columns grouped; unpin columns move adjacent to remaining pinned group |
+| Function                     | Input                                                       | Output                                                                     | Purpose                                                                                       |
+| ---------------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| createBasicColumn            | dataType, key, label, min/max widths                        | TableColumn                                                                | Build reusable basic typed columns in app route constants without re-declaring helper logic   |
+| createDistinctStringColumn   | columnName, key, label, min/max widths, fetchDistinctValues | TableColumn                                                                | Build reusable distinct-filter string columns with filter adapter wiring                      |
+| deriveColumnViewState        | columns, sorting, order, pinning, sizing                    | { normalizedColumns, effectiveColumns, columnGroups, pinnedColumnOffsets } | Compose sort metadata with pinning-dependent derived state in one call                        |
+| getEffectiveColumns          | columns, order, visibility                                  | TableColumn[]                                                              | Visible columns in display order; pinned columns follow reconciled display order              |
+| getPinnedDerivedColumnsState | columns, order, pinning, sizing, visibility                 | { effectiveColumns, columnGroups, pinnedColumnOffsets }                    | Recompute all pinning-dependent derived slices in one call                                    |
+| getNormalizedColumns         | columns, sorting                                            | NormalizedColumnsState                                                     | Columns enriched with sort metadata                                                           |
+| getStaticColumnKeys          | columns                                                     | Set<string>                                                                | Keys of locked/static columns                                                                 |
+| getPinnedColumnOffsets       | pinning, sizing, columns                                    | Record<key, PinnedColumnInfo>                                              | Sticky positions for pinned columns                                                           |
+| getColumnPinSide             | columnKey, pinning                                          | PinSide or undefined                                                       | Which side a column is pinned to                                                              |
+| resolveFetchMoreState        | currentData, selectors, response, totals                    | { combinedData, hasMore, totalLoadedRows, totalRows }                      | Shared pagination merge logic used by table rows and filter-options load-more                 |
+| splitColumnsByPinning        | pinning, effectiveColumns                                   | ColumnGroupsState                                                          | Split columns into left/center/right                                                          |
+| syncColumnOrderWithPinning   | order, previous/new pinning                                 | string[]                                                                   | Reorder to keep pinned columns grouped; unpin columns move adjacent to remaining pinned group |
 
 getPinnedColumnOffsets computes offsets and boundary markers (isLastPinnedLeft, isFirstPinnedRight) from effective column order so shadow boundaries stay aligned with rendered sticky positions even if pinning arrays are out of order.
 

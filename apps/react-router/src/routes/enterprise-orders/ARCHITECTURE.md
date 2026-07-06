@@ -38,6 +38,6 @@ column.
 
 ## Duplication Guardrail
 
-- Repeated distinct-filter string columns are composed through `createDistinctStringColumn(...)` in [src/routes/enterprise-orders/EnterpriseOrders.constants.tsx](src/routes/enterprise-orders/EnterpriseOrders.constants.tsx).
+- Repeated distinct-filter string columns are composed through `createDistinctStringColumn(...)` from `@repo/ui/components/Table/utils` in [src/routes/enterprise-orders/EnterpriseOrders.constants.tsx](src/routes/enterprise-orders/EnterpriseOrders.constants.tsx).
 - This keeps `columnName` + `fetchDistinctValues` wiring consistent across customer and shipping fields while preserving each column's label/width metadata.
 - The client-side hydration path now lives in the loader rather than `TableConfigProvider`, which keeps store initialization explicit and side-effect free.
