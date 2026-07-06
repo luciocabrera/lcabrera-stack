@@ -91,8 +91,8 @@ export const SidePanelSection = () => {
           <Button onClick={handleCloseLeft} size='sm' width='full'>
             <span {...stylex.props(styles.iconLeft)}>
               <MenuCloseIcon size={ICON_SIZE_MD} />
-            </span>
-            Close
+            </span>{' '}
+            {'Close'}
           </Button>
         </SidePanelFooter>
       </SidePanel>
