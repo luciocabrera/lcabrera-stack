@@ -18,7 +18,23 @@ The file [src/routes/enterprise-orders/EnterpriseOrders.constants.tsx](src/route
 
 The route loader also uses `COLUMNS` as the source of truth for standalone URL filter validation, so mismatched filter payloads are discarded before the enterprise orders API request is built.
 
-The route `clientLoader` also restores tab-scoped table state from sessionStorage and returns loader-seeded `columnsState` and `metaState` so `TableLayout` can initialize its stores before first render.
+Because route-loader payloads must stay serializable, the loader returns an empty
+`columnsState.columns` array and preserves only serializable slices (filters,
+sorting, order, sizing, visibility, pinning).
+
+`EnterpriseOrders.component.tsx` rehydrates `columnsState.columns` via
+`hydrateEnterpriseOrdersColumnsState(...)` before passing state to `TableLayout`.
+This restores non-serializable client concerns (for example the actions-cell
+`render` function and filter option callbacks) while keeping loader data safe
+for SSR/hydration boundaries.
+
+The hydration utility also normalizes pinning so `actions` is always pinned on
+the right, and the column definition itself is marked static + non-resizable,
+which prevents unpinning and width changes from UI controls.
+
+The actions-cell link content is center-aligned via route-local StyleX styles
+so the icon button remains visually centered in the narrow pinned actions
+column.
 
 ## Duplication Guardrail
 

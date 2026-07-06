@@ -59,7 +59,9 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
       columnFilters: filters,
       columnOrder,
       columnPinning,
-      columns: COLUMNS,
+      // Keep loader data serializable; function-bearing column definitions are
+      // rehydrated in the route component before passing into TableLayout.
+      columns: [],
       columnSizing,
       columnVisibility,
       sorting: sanitizedSorting,

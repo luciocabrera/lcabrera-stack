@@ -10,9 +10,12 @@ import {
   createDistinctFilterOptions,
   createStaticFilterOptions,
 } from '@repo/ui/utils/filters';
+import * as stylex from '@stylexjs/stylex';
 import { Link } from 'react-router';
 
 import { type EnterpriseOrder, enterpriseOrdersApi } from '@/services';
+
+import { styles } from './EnterpriseOrders.constants.stylex';
 
 type BasicColumnArgs = {
   readonly dataType: 'boolean' | 'currency' | 'date' | 'number' | 'string';
@@ -332,6 +335,7 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   {
     isFilterable: false,
     isHeaderHidden: true,
+    isResizable: false,
     isSortable: false,
     isStatic: true,
     key: 'actions',
@@ -339,15 +343,20 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
     maxWidth: 32,
     minWidth: 32,
     render: (row) => (
-      <Link prefetch='intent' to={`/enterprise-orders/${String(row.order_id)}`}>
-        <Button
-          aria-label={`View order ${String(row.order_id)}`}
-          color='ghost'
-          icon={<EyeIcon size={ICON_SIZE_XS} />}
-          size='embedded'
-          width='auto'
-        />
-      </Link>
+      <div {...stylex.props(styles.actionsCellContent)}>
+        <Link
+          prefetch='intent'
+          to={`/enterprise-orders/${String(row.order_id)}`}
+        >
+          <Button
+            aria-label={`View order ${String(row.order_id)}`}
+            color='ghost'
+            icon={<EyeIcon size={ICON_SIZE_XS} />}
+            size='embedded'
+            width='auto'
+          />
+        </Link>
+      </div>
     ),
   },
 ];
