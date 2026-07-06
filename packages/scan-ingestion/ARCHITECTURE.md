@@ -25,12 +25,17 @@ scan-ingestion/
 │   │   ├── getPool.util.ts       → Lazy singleton pg.Pool + closePool (library, no single entry point)
 │   │   └── runMigrations.ts      → Minimal runner (ADR-006) — plain node script, relative imports
 │   │
+│   ├── fs/
+│   │   ├── canonicalRealPath.util.ts     → realpath canonicalization of operator-supplied paths
+│   │   └── *Within.util.ts               → containment-checked fs ops (resolve/read/write/list/mkdir)
+│   │
 │   ├── ingestion/
 │   │   ├── report.schema.ts             → The report.json contract (Zod) — ScanFinding, RunFileInput, Report
 │   │   ├── ingestReport.ts               → The core function
 │   │   ├── ingestReport.types.ts         → IngestReportArgs/Result
 │   │   ├── resolveScan.util.ts           → UI path (lookup) vs ad hoc path (create project+run+scan)
-│   │   ├── matchProject.util.ts          → git rev-parse --show-toplevel + realpath canonicalization
+│   │   ├── matchProject.util.ts          → git rev-parse --show-toplevel + realpath (ad hoc path ONLY — see below)
+│   │   ├── resolveLocalPath.util.ts      → realpath only, no git walk (UI register/edit path — see below)
 │   │   ├── classifyFileTypeCategory.util.ts → Suffix → category (component/hook/util/...)
 │   │   └── buildFileInventory.util.ts    → Walks localPath → RunFileInput[] (whole-project scopes only)
 │   │
@@ -125,6 +130,31 @@ run-status finalization, then cleanup), and the CLI wrapper itself was run
 directly (`node --experimental-strip-types src/cli/ingest.cli.ts ...`)
 against a real temporary git repo, with the resulting Postgres rows queried
 directly to confirm correctness before cleanup.
+
+## Two path resolvers, deliberately distinct (ADR-016)
+
+`ingestion/` holds two canonicalizers that must never be swapped for each
+other:
+
+- **`resolveProjectPath`** (`matchProject.util.ts`): realpath **plus**
+  `git rev-parse --show-toplevel` — any path inside a repo canonicalizes
+  to that repo's root. Correct for exactly one caller: the ad hoc
+  interactive-session path (`resolveScan.util.ts`), where a skill run
+  from any subdirectory should attach to the repo-root project.
+- **`resolveLocalPath`** (`resolveLocalPath.util.ts`): realpath only, no
+  git awareness. Used by `queries/registerProject.util.ts` and
+  `queries/updateProject.util.ts` — a UI-picked path means exactly that
+  folder, including a subfolder of a repo registered separately at its
+  root. It also doubles as the filesystem-existence check Zod can't do at
+  the action boundary (realpath throws → "Path does not exist").
+
+Reusing the git-walking resolver for the UI actions was a real shipped
+bug: re-pathing a project to a subfolder of the same repo (e.g.
+`packages/ui` inside a monorepo registered at its root) silently
+canonicalized back to the unchanged root, making the edit appear to do
+nothing. Regression tests in `registerProject.util.test.ts` /
+`updateProject.util.test.ts` pin the subfolder behavior against a real
+`git init`ed tmpdir.
 
 ## `queries/` — the read/write layer `admin_system` and `apps/scan-orchestrator` consume
 
