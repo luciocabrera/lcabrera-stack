@@ -2,9 +2,10 @@ import { AppProviders } from '@repo/ui/components/AppProviders';
 import { AppShell } from '@repo/ui/components/AppShell';
 import { useLoaderData } from 'react-router';
 
+import { APP_ID } from '@/constants/app.constants';
+
 import type { loader as rootLoader } from './root.loader';
 
-import { APP_ID } from '@/constants/app.constants';
 import { getNavigationItems } from './getNavigationItems.util';
 
 export const Root = () => {

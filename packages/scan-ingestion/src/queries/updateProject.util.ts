@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs';
 
 import { getPool } from '@repo/data-access/db/getPool.util';
 
-import { resolveProjectPath } from '../ingestion/matchProject.util.ts';
+import { resolveLocalPath } from '../ingestion/resolveLocalPath.util.ts';
 
 type UpdateProjectArgs = {
   readonly localPath: string;
@@ -15,7 +15,12 @@ type UpdateProjectArgs = {
  * upserts by the `local_path` unique constraint — the ad hoc ingestion
  * matching key), this updates a specific, already-known project row by
  * id, so changing `localPath` here is a real rename of that row's key,
- * not a match-or-create.
+ * not a match-or-create. Canonicalizes via `resolveLocalPath` (realpath
+ * only, no git-root walking) — using the git-walking resolver here was a
+ * real bug: re-pathing a project to a subfolder of the same git repo
+ * (e.g. `packages/ui` inside a monorepo already registered at its root)
+ * silently canonicalized back to the unchanged root path, making the
+ * edit appear to do nothing.
  */
 export const updateProject = async ({
   localPath,
@@ -26,7 +31,7 @@ export const updateProject = async ({
     throw new Error(`Path does not exist: ${localPath}`);
   }
 
-  const { canonicalPath } = resolveProjectPath({ localPath });
+  const canonicalPath = resolveLocalPath({ localPath });
 
   const pool = getPool();
   const result = await pool.query(

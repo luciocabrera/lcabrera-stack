@@ -23,9 +23,9 @@ Shared components/hooks/utils/design-tokens live in `@repo/ui` — see [`package
 
 ## Hooks
 
-| Hook                 | Location                           | Description                                                                                                                                                  |
-| -------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `useRunStatusSocket` | `hooks/useRunStatusSocket.hook.ts` | Subscribes to `apps/scan-orchestrator`'s `/ws/runs` WebSocket for one `runId`; calls `revalidate()` on any message (cache-invalidation signal only, ADR-015) |
+| Hook                 | Location                           | Description                                                                                                                                                                                                                                                                 |
+| -------------------- | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `useRunStatusSocket` | `hooks/useRunStatusSocket.hook.ts` | Subscribes to `apps/scan-orchestrator`'s `/ws/runs` WebSocket for one `runId`; calls `revalidate()` on any message (cache-invalidation signal only, ADR-015) and surfaces a `useNotifyAction` toast on a terminal `scan-status` (`failed`/`succeeded`) transition (ADR-016) |
 
 ## CQMS-local Utils
 

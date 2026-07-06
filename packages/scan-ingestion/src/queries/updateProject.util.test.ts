@@ -1,4 +1,5 @@
-import { mkdtempSync, realpathSync, rmSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { mkdirSync, mkdtempSync, realpathSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -71,5 +72,33 @@ describe('updateProject', () => {
         projectId: '00000000-0000-0000-0000-000000000000',
       }),
     ).rejects.toThrow(/not found/);
+  });
+
+  it("updates local_path to a real subfolder of a git repo, not that repo's root", async () => {
+    const repoRoot = realpathSync(
+      mkdtempSync(join(tmpdir(), 'scan-ingestion-update-repo-')),
+    );
+    execFileSync('git', ['init'], { cwd: repoRoot });
+    const subfolder = join(repoRoot, 'packages', 'some-package');
+    mkdirSync(subfolder, { recursive: true });
+
+    try {
+      await updateProject({
+        localPath: subfolder,
+        name: 're-pathed-project',
+        projectId,
+      });
+
+      const pool = getPool();
+      const row = await pool.query<{ local_path: string }>(
+        'SELECT local_path FROM cqms.projects WHERE id = $1',
+        [projectId],
+      );
+
+      expect(row.rows[0]?.local_path).toBe(subfolder);
+      expect(row.rows[0]?.local_path).not.toBe(repoRoot);
+    } finally {
+      rmSync(repoRoot, { force: true, recursive: true });
+    }
   });
 });

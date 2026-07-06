@@ -1,4 +1,5 @@
-import { mkdtempSync, realpathSync, rmSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { mkdirSync, mkdtempSync, realpathSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -69,5 +70,36 @@ describe('registerProject', () => {
     });
 
     expect(second.projectId).toBe(first.projectId);
+  });
+
+  it("registers a real subfolder of a git repo as its own distinct project, not that repo's root", async () => {
+    const repoRoot = realpathSync(
+      mkdtempSync(join(tmpdir(), 'scan-ingestion-register-repo-')),
+    );
+    execFileSync('git', ['init'], { cwd: repoRoot });
+    const subfolder = join(repoRoot, 'packages', 'some-package');
+    mkdirSync(subfolder, { recursive: true });
+
+    try {
+      const result = await registerProject({
+        localPath: subfolder,
+        name: 'subfolder-project',
+      });
+
+      const pool = getPool();
+      const row = await pool.query<{ local_path: string }>(
+        'SELECT local_path FROM cqms.projects WHERE id = $1',
+        [result.projectId],
+      );
+
+      expect(row.rows[0]?.local_path).toBe(subfolder);
+      expect(row.rows[0]?.local_path).not.toBe(repoRoot);
+
+      await pool.query('DELETE FROM cqms.projects WHERE id = $1', [
+        result.projectId,
+      ]);
+    } finally {
+      rmSync(repoRoot, { force: true, recursive: true });
+    }
   });
 });
