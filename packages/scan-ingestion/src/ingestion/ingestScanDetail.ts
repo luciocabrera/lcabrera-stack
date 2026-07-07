@@ -7,6 +7,7 @@ import { appGraphRawSchema } from './appGraph/appGraphRaw.schema.ts';
 import { extractAppGraphNodes } from './appGraph/extractAppGraphNodes.util.ts';
 import { extractAppGraphRunSummary } from './appGraph/extractAppGraphRunSummary.util.ts';
 import { extractCodeSmellRunSummary } from './codeSmell/extractCodeSmellRunSummary.util.ts';
+import { extractGenericDetailRows } from './extractGenericDetailRows.util.ts';
 import { extractFallowCircularDependencies } from './fallow/extractFallowCircularDependencies.util.ts';
 import { extractFallowCloneGroups } from './fallow/extractFallowCloneGroups.util.ts';
 import { extractFallowDeadCode } from './fallow/extractFallowDeadCode.util.ts';
@@ -135,5 +136,17 @@ export const ingestScanDetail = async ({
       JSON.stringify(master),
       JSON.stringify(nodes),
     ]);
+    return;
   }
+
+  // Registry-added scanner without a bespoke extractor (ADR-023): its raw
+  // artifact's rows land in the auto-created cqms.scanner_detail_* table.
+  // The procedure raises when that table does not exist (e.g. a backfill
+  // over the retired 'linter') — caught by ingestReport's log-and-continue.
+  const rows = extractGenericDetailRows({ rawJson });
+  await pool.query('CALL cqms.sp_ingest_generic_detail($1, $2, $3)', [
+    userId,
+    scanId,
+    JSON.stringify(rows),
+  ]);
 };

@@ -47,7 +47,11 @@ scan-ingestion/
 │   │   ├── matchProject.util.ts          → git rev-parse --show-toplevel + realpath (ad hoc path ONLY — see below)
 │   │   ├── resolveLocalPath.util.ts      → realpath only, no git walk (UI register/edit path — see below)
 │   │   ├── classifyFileTypeCategory.util.ts → Suffix → category (component/hook/util/...)
+│   │   ├── extractGenericDetailRows.util.ts → rows for a registry-added scanner's generic detail table (ADR-023)
 │   │   └── buildFileInventory.util.ts    → Walks localPath → RunFileInput[] (whole-project scopes only)
+│   │
+│   ├── registry/           → Scanner-registry artifact generation (ADR-023; writeScannerArtifacts exported for admin_system):
+│   │                         SKILL.md / runner-scaffold templates, strictly create-if-missing, fs/*Within-gated repo-root writes
 │   │
 │   └── cli/
 │       └── ingest.cli.ts   → Thin argv wrapper each skill's final step invokes (relative imports — see below)
@@ -145,6 +149,10 @@ genuinely thin wrapper.
    future tool version can never flip an already-succeeded scan to failed.
    Fallow file paths are stored as fallow reports them (git-root-relative
    of the scanned repo = project-relative for root-registered projects).
+   A scanner id with no bespoke branch (registry-added, ADR-023) falls
+   through to `sp_ingest_generic_detail` via `extractGenericDetailRows` —
+   `scannerIdSchema` validates format only since ADR-023; existence
+   authority is scans.scanner_id's FK.
 
 ## Verification
 

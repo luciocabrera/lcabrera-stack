@@ -8,7 +8,8 @@
     "./ingestion/ingestReport": "./src/ingestion/ingestReport.ts",
     "./ingestion/ingestReport.types": "./src/ingestion/ingestReport.types.ts",
     "./ingestion/workspaces/discoverProjectWorkspaces.util": "./src/ingestion/workspaces/discoverProjectWorkspaces.util.ts",
-    "./queries/*.util": "./src/queries/*.util.ts"
+    "./queries/*.util": "./src/queries/*.util.ts",
+    "./registry/writeScannerArtifacts.util": "./src/registry/writeScannerArtifacts.util.ts"
   },
   "scripts": {
     "format": "vp fmt .",

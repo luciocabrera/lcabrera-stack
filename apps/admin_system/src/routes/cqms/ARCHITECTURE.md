@@ -18,8 +18,18 @@ route('cqms', 'routes/cqms/layout.ts', [
   route('projects/view/:projectId/trigger-scan', 'routes/cqms/trigger-scan/root.ts'), → action
   route('projects/view/:projectId/runs/:runId', 'routes/cqms/run-detail/root.ts'),
   route('projects/view/:projectId/runs/:runId/scans/:scanId', 'routes/cqms/scan-detail/root.ts'),
+  route('scanners', 'routes/cqms/scanners/root.ts'),               → scanner registry list (ADR-023)
+  route('scanners/new', 'routes/cqms/new-scanner/root.ts'),        → register scanner (action)
+  route('scanners/edit/:scannerId', 'routes/cqms/edit-scanner/root.ts'), → update + version bump (loader+action)
+  route('scanners/view/:scannerId', 'routes/cqms/scanner-detail/root.ts'), → registry fields + version history
 ])
 ```
+
+The scanners list is the first consumer of the Table's crud metadata
+(`metaState.crud` + an `isPrimaryKey` column): the create link and the
+per-row view/edit actions are rendered by the Table itself from the
+relative `new` / `view/:id` / `edit/:id` convention — no hand-rolled link
+columns. No crud `delete`: scanners soft-retire via `is_active`.
 
 `list` / `new` / `edit/:id` / `view/:id` is CQMS's (and this repo's first)
 real CRUD convention — see ADR-013. `trigger-scan`/`run-detail`/

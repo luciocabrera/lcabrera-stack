@@ -1,16 +1,18 @@
 import { z } from 'zod';
 
-// 'linter' was split into 'eslint' + 'oxlint' (ADR-019); the retired id is
-// deliberately absent so nothing NEW can ingest as the combined scanner —
-// historical linter scans stay readable, they just can't gain siblings.
-export const scannerIdSchema = z.enum([
-  'app-graph',
-  'code-smell-checker',
-  'code-smell-zen',
-  'eslint',
-  'fallow',
-  'oxlint',
-]);
+/**
+ * Was a closed enum until ADR-023 opened the registry: a registered
+ * scanner's id is a DB row, so this schema validates FORMAT only (the same
+ * pattern fn_register_scanner enforces) and existence authority moved to
+ * scans.scanner_id's foreign key. The retired 'linter' still can't gain
+ * new scans in practice — it is is_active=false and has no runner.
+ */
+export const scannerIdSchema = z
+  .string()
+  .regex(
+    /^[a-z0-9][a-z0-9-]{0,47}$/,
+    'scanner id must be lowercase kebab-case (max 48 chars)',
+  );
 export type ScannerId = z.infer<typeof scannerIdSchema>;
 
 export const scopeTypeSchema = z.enum([

@@ -25,5 +25,9 @@ export default [
       'projects/view/:projectId/runs/:runId/scans/:scanId',
       'routes/cqms/scan-detail/root.ts',
     ),
+    route('scanners', 'routes/cqms/scanners/root.ts'),
+    route('scanners/new', 'routes/cqms/new-scanner/root.ts'),
+    route('scanners/edit/:scannerId', 'routes/cqms/edit-scanner/root.ts'),
+    route('scanners/view/:scannerId', 'routes/cqms/scanner-detail/root.ts'),
   ]),
 ] satisfies RouteConfig;
