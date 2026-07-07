@@ -3,6 +3,9 @@ import { getPool } from '@repo/data-access/db/getPool.util';
 import type { FallowDetailInput } from './fallow/fallowDetail.types.ts';
 import type { Report } from './report.schema.ts';
 
+import { appGraphRawSchema } from './appGraph/appGraphRaw.schema.ts';
+import { extractAppGraphNodes } from './appGraph/extractAppGraphNodes.util.ts';
+import { extractAppGraphRunSummary } from './appGraph/extractAppGraphRunSummary.util.ts';
 import { extractCodeSmellRunSummary } from './codeSmell/extractCodeSmellRunSummary.util.ts';
 import { extractFallowCircularDependencies } from './fallow/extractFallowCircularDependencies.util.ts';
 import { extractFallowCloneGroups } from './fallow/extractFallowCloneGroups.util.ts';
@@ -118,6 +121,19 @@ export const ingestScanDetail = async ({
       scanId,
       JSON.stringify(master),
       JSON.stringify(detail),
+    ]);
+    return;
+  }
+
+  if (scannerId === 'app-graph') {
+    const raw = appGraphRawSchema.parse(rawJson);
+    const master = extractAppGraphRunSummary({ raw });
+    const nodes = extractAppGraphNodes({ raw });
+    await pool.query('CALL cqms.sp_ingest_app_graph($1, $2, $3, $4)', [
+      userId,
+      scanId,
+      JSON.stringify(master),
+      JSON.stringify(nodes),
     ]);
   }
 };

@@ -67,7 +67,7 @@ export const PathBrowserModal = ({
   const normalizedActiveEntryIndex = hasActiveOption ? activeEntryIndex : 0;
   const resolvedPath = result?.path ?? currentPath;
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLUListElement>) => {
     if (event.key === 'Escape') {
       event.preventDefault();
       onClose();
@@ -125,12 +125,7 @@ export const PathBrowserModal = ({
   };
 
   return (
-    <div
-      aria-label='Choose a folder'
-      onKeyDown={handleKeyDown}
-      tabIndex={0}
-      {...stylex.props(styles.dropdown)}
-    >
+    <div {...stylex.props(styles.dropdown)}>
       <div {...stylex.props(styles.header)}>
         <span {...stylex.props(styles.currentPath)}>
           {resolvedPath ?? 'Loading…'}
@@ -166,15 +161,29 @@ export const PathBrowserModal = ({
 
       {result?.error && <p {...stylex.props(styles.error)}>{result.error}</p>}
 
-      <ul {...stylex.props(styles.list)}>
+      <ul
+        aria-activedescendant={
+          entries.length > 0
+            ? `${listboxId}-option-${normalizedActiveEntryIndex}`
+            : undefined
+        }
+        aria-label='Choose a folder'
+        onKeyDown={handleKeyDown}
+        role='listbox'
+        tabIndex={0}
+        {...stylex.props(styles.list)}
+      >
         {entries.map((entry, index) => (
           <li key={entry.path}>
             <button
+              aria-selected={index === activeEntryIndex}
               id={`${listboxId}-option-${index}`}
               onClick={() => {
                 setCurrentPath(entry.path);
                 setActiveEntryIndex(0);
               }}
+              role='option'
+              tabIndex={-1}
               type='button'
               {...stylex.props(
                 styles.entryButton,

@@ -18,6 +18,11 @@ export type DeterministicScannerId = keyof typeof DETERMINISTIC_SCANNER_CONFIGS;
  * crashing on a broken target (ADR-015).
  */
 export const DETERMINISTIC_SCANNER_CONFIGS = {
+  'app-graph': {
+    rawArtifactFileName: 'app-graph.raw.json',
+    scriptPath:
+      '.github/skills/app-graph/scripts/generate-app-graph-report.mjs',
+  },
   eslint: {
     rawArtifactFileName: 'eslint.raw.json',
     scriptPath:

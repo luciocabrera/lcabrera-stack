@@ -41,6 +41,7 @@ scan-ingestion/
 │   │   ├── lint/                         → eslint/oxlint raw schemas + pure extractors (violations + run summaries)
 │   │   ├── fallow/                       → fallow raw schema + pure extractors (master + 8 detail tables — ADR-019 addendum)
 │   │   ├── codeSmell/                    → code-smell master rollup from the parsed report (details = views over scan_findings)
+│   │   ├── appGraph/                     → app-graph raw schema + node/summary extractors (structure inventory — ADR-022)
 │   │   ├── workspaces/                   → monorepo workspace discovery (pnpm/npm globs → dirs with package.json — ADR-021; exported for admin_system)
 │   │   ├── resolveScan.util.ts           → UI path (lookup) vs ad hoc path (create project+run+scan)
 │   │   ├── matchProject.util.ts          → git rev-parse --show-toplevel + realpath (ad hoc path ONLY — see below)

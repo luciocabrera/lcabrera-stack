@@ -39,10 +39,11 @@
   "devDependencies": {
     "@repo/vite-configs": "workspace:*",
     "fallow": "catalog:",
+    "ts-morph": "catalog:",
     "vite-plus": "catalog:"
   },
   "engines": {
     "node": ">=25"
   },
-  "packageManager": "pnpm@11.9.0"
+  "packageManager": "pnpm@11.10.0"
 }

@@ -58,6 +58,7 @@ catalog:
   react-dom: ^19.2.7
   react-markdown: ^10.1.0
   react-router: ^8.1.0
+  ts-morph: ^28.0.0
   typescript: ^6.0.3
 
   typescript-eslint: ^8.63.0

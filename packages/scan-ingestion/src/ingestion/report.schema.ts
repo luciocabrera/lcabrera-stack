@@ -4,6 +4,7 @@ import { z } from 'zod';
 // deliberately absent so nothing NEW can ingest as the combined scanner —
 // historical linter scans stay readable, they just can't gain siblings.
 export const scannerIdSchema = z.enum([
+  'app-graph',
   'code-smell-checker',
   'code-smell-zen',
   'eslint',
