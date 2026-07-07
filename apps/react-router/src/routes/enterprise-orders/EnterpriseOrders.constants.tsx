@@ -1,7 +1,7 @@
 import type {
   ColumnPinningState,
-  TableCrudConfig,
   TableColumn,
+  TableCrudConfig,
 } from '@repo/ui/components/Table/Table.types';
 
 import {

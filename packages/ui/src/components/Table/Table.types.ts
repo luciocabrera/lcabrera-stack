@@ -57,26 +57,6 @@ export type ColumnVisibilityState<TData = Record<string, unknown>> = Set<
 
 export type DataKey<TData> = 'actions' | (keyof TData & string);
 
-export type TableCrudId = number | string;
-
-export type TableCrudIdAccessor<TData extends Record<string, unknown>> =
-  | ((row: TData) => TableCrudId)
-  | (keyof TData & string);
-
-export type TableCrudConfig<TData extends Record<string, unknown>> = {
-  readonly create?: boolean;
-  readonly delete?: boolean;
-  readonly deleteActionPath?: string;
-  readonly idAccessor: TableCrudIdAccessor<TData>;
-  readonly read?: boolean;
-  readonly update?: boolean;
-};
-
-export type TableTitle = {
-  readonly plural: string;
-  readonly singular: string;
-};
-
 export type FilterData = {
   readonly data: string[];
   readonly hasMore: boolean;
@@ -217,6 +197,21 @@ export type TableColumnsState<TData = Record<string, unknown>> = {
   readonly staticKeys: Set<string>;
 };
 
+export type TableCrudConfig<TData extends Record<string, unknown>> = {
+  readonly create?: boolean;
+  readonly delete?: boolean;
+  readonly deleteActionPath?: string;
+  readonly idAccessor: TableCrudIdAccessor<TData>;
+  readonly read?: boolean;
+  readonly update?: boolean;
+};
+
+export type TableCrudId = number | string;
+
+export type TableCrudIdAccessor<TData extends Record<string, unknown>> =
+  | ((row: TData) => TableCrudId)
+  | (keyof TData & string);
+
 export type TableDataState<TData> = {
   /** Table data array */
   readonly data: readonly TData[] /** Pagination state */;
@@ -314,6 +309,11 @@ export type TableProps<
     readonly isLoading?: boolean;
     readonly response: TResponse;
   };
+
+export type TableTitle = {
+  readonly plural: string;
+  readonly singular: string;
+};
 
 type BaseProps<TData extends Record<string, unknown>> =
   ComponentPropsWithRef<'table'> & {

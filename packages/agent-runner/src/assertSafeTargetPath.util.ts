@@ -8,9 +8,14 @@ import { cqmsRepoRoot } from './cqmsRepoRoot.util.ts';
  * agent-runner is deliberately free of any DB dependency, kept separate
  * from scan-ingestion). The real authority check — targetProjectPath must
  * match a row in cqms.projects.local_path — is the caller's
- * responsibility (admin_system's background job). This just guards
- * against the one thing agent-runner CAN verify on its own: never let a
- * scan target resolve to this CQMS repo's own source/credentials.
+ * responsibility (admin_system's background job).
+ *
+ * Self-scan (target = the CQMS repo root itself) is ALLOWED since ADR-020
+ * — credential exposure is handled by the secret-file PreToolUse guard
+ * (secretFileGuardHook), not by banning the target. What stays
+ * rejected is any ANCESTOR of the repo (e.g. $HOME): that would hand the
+ * session everything around the repo too (~/.ssh, other checkouts) —
+ * scope the guard cannot meaningfully bound.
  */
 export const assertSafeTargetPath = (targetProjectPath: string): void => {
   if (!targetProjectPath.startsWith(sep)) {
@@ -24,12 +29,7 @@ export const assertSafeTargetPath = (targetProjectPath: string): void => {
   const resolvedTarget = resolve(targetProjectPath);
   const resolvedCqmsRoot = resolve(cqmsRepoRoot);
 
-  if (
-    resolvedTarget === resolvedCqmsRoot ||
-    resolvedCqmsRoot.startsWith(`${resolvedTarget}${sep}`)
-  ) {
-    throw new Error(
-      'targetProjectPath must not be, or contain, the CQMS repo itself.',
-    );
+  if (resolvedCqmsRoot.startsWith(`${resolvedTarget}${sep}`)) {
+    throw new Error('targetProjectPath must not contain the CQMS repo itself.');
   }
 };

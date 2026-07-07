@@ -11,8 +11,8 @@ const {
   useGetTableHasMoreMock,
   useGetTableIsLoadingMock,
   useGetTableIsLoadingMoreMock,
-  useGetTableTitleSingularMock,
   useGetTableThresholdMock,
+  useGetTableTitleSingularMock,
   useInfiniteScrollMock,
   useToogleTableIsTableSettingsOpenMock,
 } = vi.hoisted(() => ({
@@ -20,8 +20,8 @@ const {
   useGetTableHasMoreMock: vi.fn(),
   useGetTableIsLoadingMock: vi.fn(),
   useGetTableIsLoadingMoreMock: vi.fn(),
-  useGetTableTitleSingularMock: vi.fn(),
   useGetTableThresholdMock: vi.fn(),
+  useGetTableTitleSingularMock: vi.fn(),
   useInfiniteScrollMock: vi.fn(),
   useToogleTableIsTableSettingsOpenMock: vi.fn(() => vi.fn()),
 }));

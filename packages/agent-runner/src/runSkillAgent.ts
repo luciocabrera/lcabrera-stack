@@ -12,6 +12,7 @@ import type {
 import { assertSafeTargetPath } from './assertSafeTargetPath.util.ts';
 import { cqmsRepoRoot } from './cqmsRepoRoot.util.ts';
 import { deriveAllowedTools } from './deriveAllowedTools.util.ts';
+import { secretFileGuardHook } from './secretFileGuardHook.util.ts';
 import { loadSkillFrontmatter } from './skillFrontmatter.util.ts';
 
 const MAX_TURNS = 40;
@@ -180,6 +181,20 @@ ${body}${
         // scan of another project would write CQMS scratch files into that
         // project's own working tree.
         env: { ...process.env, OUTPUT_DIR: args.outputDirectory },
+        // Secret-file guard (ADR-020): PreToolUse is the only interception
+        // point for statically-allowed tools — canUseTool never fires for
+        // them (see the Write comment above), so an allowlisted Read or
+        // Bash(cat:*) could otherwise read .env/keys. Self-scan makes this
+        // real: the target may be the CQMS repo itself, whose
+        // docker/local/.env holds the live DB credentials.
+        hooks: {
+          PreToolUse: [
+            {
+              hooks: [secretFileGuardHook],
+              matcher: 'Bash|Glob|Grep|Read',
+            },
+          ],
+        },
         maxTurns: MAX_TURNS,
         // NOT 'dontAsk' — see the canUseTool comment above. 'default' is
         // what actually invokes canUseTool instead of silently short-

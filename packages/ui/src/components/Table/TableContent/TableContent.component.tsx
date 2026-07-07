@@ -116,8 +116,8 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
               <TableBody<TData>
                 crud={crud}
                 emptyState={emptyState}
-                titleSingular={resolvedTitleSingular}
                 tableContainerRef={containerRef}
+                titleSingular={resolvedTitleSingular}
               />
             </TableBase>
             <div

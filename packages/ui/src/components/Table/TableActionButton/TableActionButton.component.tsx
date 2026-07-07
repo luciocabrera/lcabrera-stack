@@ -14,8 +14,8 @@ export const TableActionButton = ({
       aria-label='Row actions'
       color='ghost'
       data-menu-id={menuId}
-      id={triggerId}
       icon={<MoreVerticalIcon size={14} />}
+      id={triggerId}
       isDisabled={isDisabled}
       onClick={onClick}
       size='embedded'

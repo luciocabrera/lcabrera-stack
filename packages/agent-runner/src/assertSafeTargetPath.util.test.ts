@@ -33,15 +33,19 @@ describe('assertSafeTargetPath', () => {
     );
   });
 
-  it('rejects the CQMS repo root itself', () => {
-    expect(() => assertSafeTargetPath(cqmsRepoRoot)).toThrow(
-      /must not be, or contain, the CQMS repo itself/,
-    );
+  it('accepts the CQMS repo root itself (self-scan, ADR-020)', () => {
+    expect(() => assertSafeTargetPath(cqmsRepoRoot)).not.toThrow();
+  });
+
+  it('accepts a directory inside the CQMS repo', () => {
+    expect(() =>
+      assertSafeTargetPath(join(cqmsRepoRoot, 'packages')),
+    ).not.toThrow();
   });
 
   it('rejects a directory that contains the CQMS repo', () => {
     expect(() => assertSafeTargetPath(join(cqmsRepoRoot, '..'))).toThrow(
-      /must not be, or contain, the CQMS repo itself/,
+      /must not contain the CQMS repo itself/,
     );
   });
 });

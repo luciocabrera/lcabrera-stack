@@ -2,8 +2,8 @@ import type {
   ColumnSizingState,
   DataKey,
   PinnedColumnInfo,
-  TableCrudConfig,
   TableColumn,
+  TableCrudConfig,
 } from '@repo/ui/components/Table/Table.types';
 
 import { TableBodyCell } from '@repo/ui/components/Table/TableBodyCell';
