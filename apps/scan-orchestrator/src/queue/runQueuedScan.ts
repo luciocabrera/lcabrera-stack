@@ -2,8 +2,8 @@ import type { QueuedScanRow } from '@repo/scan-ingestion/queries/getQueuedScans.
 
 import { runSkillAgent } from '@repo/agent-runner';
 import { ingestReport } from '@repo/scan-ingestion/ingestion/ingestReport';
+import { claimQueuedScan } from '@repo/scan-ingestion/queries/claimQueuedScan.util';
 import { markScanFailed } from '@repo/scan-ingestion/queries/markScanFailed.util';
-import { markScanRunning } from '@repo/scan-ingestion/queries/markScanRunning.util';
 import { updateScanProgress } from '@repo/scan-ingestion/queries/updateScanProgress.util';
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
@@ -213,10 +213,12 @@ type RunQueuedScanArgs = {
 };
 
 /**
- * Executes one queued scan end to end (TECH_SPEC §2.7): marks it running,
- * branches per scanners.deterministic exactly as originally planned
- * (§2.5) — deterministic scanners via their registered runner script
- * (DETERMINISTIC_SCANNER_CONFIGS, ADR-019), the LLM scanners via
+ * Executes one queued scan end to end (TECH_SPEC §2.7): CLAIMS it
+ * (queued → running atomically — a lost claim means another orchestrator
+ * or an overlapping wake already owns it, so this caller just skips it,
+ * ADR-026), branches per scanners.deterministic exactly as originally
+ * planned (§2.5) — deterministic scanners via their registered runner
+ * script (DETERMINISTIC_SCANNER_CONFIGS, ADR-019), the LLM scanners via
  * @repo/agent-runner — then ingests the result or marks the scan failed.
  * Any unexpected error here is caught and turned into a failed scan
  * rather than crashing the whole orchestrator process; one bad scan must
@@ -227,7 +229,10 @@ export const runQueuedScan = async ({
   scan,
   userId,
 }: RunQueuedScanArgs): Promise<void> => {
-  await markScanRunning({ scanId: scan.scan_id, userId });
+  const isClaimed = await claimQueuedScan({ scanId: scan.scan_id, userId });
+  if (!isClaimed) {
+    return;
+  }
   publishStatus({ hub, scan, status: 'running' });
 
   const outputDirectory = createScanOutputDirectory({ scanId: scan.scan_id });

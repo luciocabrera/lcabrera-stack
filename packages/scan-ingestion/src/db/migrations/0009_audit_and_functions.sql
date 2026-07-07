@@ -49,26 +49,46 @@ ALTER TABLE cqms.scan_findings ADD COLUMN created_by uuid REFERENCES cqms.users(
 ALTER TABLE cqms.run_files     ADD COLUMN created_by uuid REFERENCES cqms.users(id);
 
 -- ── B. Read views ────────────────────────────────────────────────────────
--- SELECT * is expanded at CREATE VIEW time — any later ALTER TABLE ADD
--- COLUMN needs the affected view recreated to expose the new column.
+-- Column lists are spelled out explicitly (not SELECT *) — any later ALTER
+-- TABLE ADD COLUMN still needs the affected view recreated to expose the
+-- new column, since a view's column list is fixed at CREATE VIEW time
+-- either way.
 
 CREATE VIEW cqms.v_projects AS
-  SELECT * FROM cqms.projects WHERE deleted_at IS NULL;
+  SELECT id, name, local_path, default_branch, created_at, last_scanned_at,
+         created_by, edited_by, edited_at, enabled, deleted_at
+  FROM cqms.projects WHERE deleted_at IS NULL;
 
 CREATE VIEW cqms.v_scanners AS
-  SELECT * FROM cqms.scanners WHERE deleted_at IS NULL;
+  SELECT scanner_id, display_name, skill_path, deterministic, supports_diff_scope,
+         is_active, created_by, created_at, edited_by, edited_at, enabled, deleted_at
+  FROM cqms.scanners WHERE deleted_at IS NULL;
 
 CREATE VIEW cqms.v_runs AS
-  SELECT * FROM cqms.runs WHERE deleted_at IS NULL;
+  SELECT id, project_id, origin, triggered_by, status, requested_scanners,
+         git_commit_sha, git_branch, started_at, finished_at, created_at, updated_at,
+         created_by, edited_by, edited_at, enabled, deleted_at
+  FROM cqms.runs WHERE deleted_at IS NULL;
 
 CREATE VIEW cqms.v_scans AS
-  SELECT * FROM cqms.scans WHERE deleted_at IS NULL;
+  SELECT id, run_id, project_id, scanner_id, status, scope_type, scope_value,
+         base_branch, head_branch, commit_range, started_at, finished_at,
+         duration_ms, progress_message, error_message, raw_json, raw_artifact_path,
+         health_metrics, created_at, created_by, edited_by, edited_at, enabled, deleted_at
+  FROM cqms.scans WHERE deleted_at IS NULL;
 
 CREATE VIEW cqms.v_reports AS
-  SELECT * FROM cqms.reports;
+  SELECT id, scan_id, schema_version, report_id, generated_at, report_markdown,
+         report_json, files_analyzed, blocker_count, high_count, medium_count,
+         low_count, nit_count, top_risk, created_at, created_by
+  FROM cqms.reports;
 
 CREATE VIEW cqms.v_scan_findings AS
-  SELECT * FROM cqms.scan_findings;
+  SELECT id, scan_id, finding_id, rule_id, severity, confidence, location_path,
+         location_hint, evidence_excerpt, why, fix, effort, defer_risk,
+         verification_steps, status, owner, dependencies, related_findings,
+         tags, finding_kind, extra, created_at, created_by
+  FROM cqms.scan_findings;
 
 -- Replaces getQueuedScans' hand-written 3-table join (the orchestrator's
 -- queue read) — soft-deleted scans/projects/scanners drop out of the queue.
@@ -143,6 +163,23 @@ CREATE VIEW cqms.project_scanner_trend AS
 
 -- ── C. Write functions — p_user_id first, fn_assert_permission first ─────
 
+-- Constant-style helpers: PL/pgSQL has no shared cross-function constant,
+-- so the repeated 'update' action and 'running' status literals below are
+-- each defined once here and referenced everywhere else in this file.
+CREATE FUNCTION cqms.fn_assert_update_permission(
+  p_user_id uuid, p_resource_type text, p_resource_id uuid DEFAULT NULL
+) RETURNS void AS $$
+BEGIN
+  PERFORM cqms.fn_assert_permission(p_user_id, 'update', p_resource_type, p_resource_id);
+END;
+$$ LANGUAGE plpgsql;
+
+-- Shared by cqms.runs.status and cqms.scans.status (each has its own
+-- independent CHECK constraint enumerating 'running' as a valid value).
+CREATE FUNCTION cqms.fn_status_running() RETURNS text AS $$
+  SELECT 'running';
+$$ LANGUAGE sql IMMUTABLE;
+
 DROP FUNCTION cqms.fn_upsert_project(text, text);
 CREATE FUNCTION cqms.fn_upsert_project(
   p_user_id uuid, p_name text, p_local_path text
@@ -165,7 +202,7 @@ CREATE FUNCTION cqms.fn_update_project(
   p_user_id uuid, p_project_id uuid, p_name text, p_local_path text
 ) RETURNS void AS $$
 BEGIN
-  PERFORM cqms.fn_assert_permission(p_user_id, 'update', 'project', p_project_id);
+  PERFORM cqms.fn_assert_update_permission(p_user_id, 'project', p_project_id);
   UPDATE cqms.projects
   SET name = p_name, local_path = p_local_path,
       edited_by = p_user_id, edited_at = now()
@@ -190,7 +227,7 @@ BEGIN
   INSERT INTO cqms.runs (project_id, origin, requested_scanners, triggered_by,
                          git_commit_sha, git_branch, status, started_at, created_by)
   VALUES (p_project_id, p_origin, p_requested_scanners, p_triggered_by,
-          p_git_commit_sha, p_git_branch, 'running', now(), p_user_id)
+          p_git_commit_sha, p_git_branch, cqms.fn_status_running(), now(), p_user_id)
   RETURNING id INTO v_id;
   RETURN v_id;
 END;
@@ -230,7 +267,7 @@ BEGIN
   PERFORM cqms.fn_assert_permission(p_user_id, 'execute', 'scan', p_project_id);
   INSERT INTO cqms.scans (run_id, project_id, scanner_id, status, scope_type,
                           scope_value, started_at, created_by)
-  VALUES (p_run_id, p_project_id, p_scanner_id, 'running', p_scope_type,
+  VALUES (p_run_id, p_project_id, p_scanner_id, cqms.fn_status_running(), p_scope_type,
           p_scope_value, now(), p_user_id)
   RETURNING id INTO v_id;
   RETURN v_id;
@@ -241,11 +278,11 @@ CREATE FUNCTION cqms.fn_mark_scan_running(
   p_user_id uuid, p_scan_id uuid
 ) RETURNS void AS $$
 BEGIN
-  PERFORM cqms.fn_assert_permission(p_user_id, 'update', 'scan', p_scan_id);
+  PERFORM cqms.fn_assert_update_permission(p_user_id, 'scan', p_scan_id);
   -- started_at is set here (not at scan creation): sp_ingest_scan_result's
   -- duration_ms is now() - started_at, and a scan can sit queued a while.
   UPDATE cqms.scans
-  SET status = 'running', started_at = now(),
+  SET status = cqms.fn_status_running(), started_at = now(),
       edited_by = p_user_id, edited_at = now()
   WHERE id = p_scan_id AND deleted_at IS NULL;
 END;
@@ -255,7 +292,7 @@ CREATE FUNCTION cqms.fn_mark_scan_failed(
   p_user_id uuid, p_scan_id uuid, p_run_id uuid, p_error_message text
 ) RETURNS void AS $$
 BEGIN
-  PERFORM cqms.fn_assert_permission(p_user_id, 'update', 'scan', p_scan_id);
+  PERFORM cqms.fn_assert_update_permission(p_user_id, 'scan', p_scan_id);
   UPDATE cqms.scans
   SET status = 'failed', error_message = p_error_message, finished_at = now(),
       duration_ms = EXTRACT(epoch FROM (now() - started_at)) * 1000,
@@ -269,7 +306,7 @@ CREATE FUNCTION cqms.fn_update_scan_progress(
   p_user_id uuid, p_scan_id uuid, p_progress_message text
 ) RETURNS void AS $$
 BEGIN
-  PERFORM cqms.fn_assert_permission(p_user_id, 'update', 'scan', p_scan_id);
+  PERFORM cqms.fn_assert_update_permission(p_user_id, 'scan', p_scan_id);
   UPDATE cqms.scans
   SET progress_message = p_progress_message,
       edited_by = p_user_id, edited_at = now()
@@ -283,7 +320,7 @@ CREATE FUNCTION cqms.fn_set_scan_raw_artifacts(
   p_user_id uuid, p_scan_id uuid, p_raw_json jsonb, p_health_metrics jsonb
 ) RETURNS void AS $$
 BEGIN
-  PERFORM cqms.fn_assert_permission(p_user_id, 'update', 'scan', p_scan_id);
+  PERFORM cqms.fn_assert_update_permission(p_user_id, 'scan', p_scan_id);
   UPDATE cqms.scans
   SET raw_json = p_raw_json, health_metrics = p_health_metrics,
       edited_by = p_user_id, edited_at = now()
@@ -298,7 +335,7 @@ CREATE PROCEDURE cqms.sp_ingest_scan_result(
   p_file_inventory jsonb
 ) LANGUAGE plpgsql AS $$
 BEGIN
-  PERFORM cqms.fn_assert_permission(p_user_id, 'update', 'scan', p_scan_id);
+  PERFORM cqms.fn_assert_update_permission(p_user_id, 'scan', p_scan_id);
 
   INSERT INTO cqms.reports (scan_id, report_id, generated_at, report_markdown, report_json, files_analyzed, blocker_count, high_count, medium_count, low_count, nit_count, top_risk, created_by)
   SELECT p_scan_id, r.report_id, r.generated_at, p_report_markdown, p_report_json,
