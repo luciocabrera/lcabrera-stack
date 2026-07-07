@@ -29,7 +29,6 @@ describe('getScanLintRuleSummary', () => {
     const { runId } = await triggerScan({
       projectId,
       scannerIds: ['eslint'],
-      scopeValue: '.',
       userId: systemUserId,
     });
     const scanRow = await pool.query<{ id: string }>(

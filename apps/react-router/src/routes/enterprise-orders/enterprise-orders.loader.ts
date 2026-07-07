@@ -1,6 +1,7 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
 import { INITIAL_PAGE_SIZE } from '@repo/ui/components/Table/Table.constants';
+import { appendPrimaryKeySorting } from '@repo/ui/routing/appendPrimaryKeySorting.util';
 import { readTableLoaderStateFromRequest } from '@repo/ui/routing/readTableLoaderStateFromRequest.util';
 import { sanitizeSorting } from '@repo/ui/routing/sanitizeSorting.util';
 
@@ -11,7 +12,9 @@ import { enterpriseOrdersApi } from '@/services';
 
 import {
   COLUMNS,
+  CRUD,
   DEFAULT_COLUMN_PINNING,
+  DELETE_ACTION_PATH,
   PERSISTENCE_KEY,
   SCHEMA_NAME,
   TABLE_NAME,
@@ -43,6 +46,12 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
     request,
   });
   const sanitizedSorting = sanitizeSorting<EnterpriseOrder>(sorting);
+  // Always append the primary-key column(s) so server pagination has a stable
+  // ordering. The store keeps only the user's sorting (sanitizedSorting).
+  const effectiveSorting = appendPrimaryKeySorting<EnterpriseOrder>({
+    columns: COLUMNS,
+    sorting: sanitizedSorting,
+  });
 
   // Return the promise directly (not awaited) for Suspense streaming
   const enterpriseOrdersPromise: Promise<EnterpriseOrdersResponse> =
@@ -51,7 +60,7 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
       limit: INITIAL_PAGE_SIZE,
       requestUrl: request.url,
       skip: 0,
-      sorting: sanitizedSorting,
+      sorting: effectiveSorting,
     });
 
   return {
@@ -72,6 +81,8 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
     metaState: {
       ...metaUiFlags,
       appId: APP_ID,
+      crud: CRUD,
+      deleteActionPath: DELETE_ACTION_PATH,
       persistenceKey: PERSISTENCE_KEY,
       schemaName: SCHEMA_NAME,
       tableName: TABLE_NAME,

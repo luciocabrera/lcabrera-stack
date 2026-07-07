@@ -1,4 +1,6 @@
 import { TableLayout } from '@repo/ui/components/Table/TableLayout';
+import { appendPrimaryKeySorting } from '@repo/ui/routing/appendPrimaryKeySorting.util';
+import { sanitizeSorting } from '@repo/ui/routing/sanitizeSorting.util';
 import { useLoaderData } from 'react-router';
 
 import type { CarSale } from '@/services';
@@ -23,7 +25,10 @@ export const CarSales = () => {
         carSalesApi.fetchCarSalesPaginated({
           limit,
           skip,
-          sorting: columnsState?.sorting ?? [],
+          sorting: appendPrimaryKeySorting<CarSale>({
+            columns: columnsState.columns,
+            sorting: sanitizeSorting<CarSale>(columnsState?.sorting ?? []),
+          }),
         })
       }
     />

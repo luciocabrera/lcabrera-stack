@@ -7,6 +7,7 @@ type CreateDistinctStringColumnArgs<TData extends Record<string, unknown>> = {
   readonly fetchDistinctValues: (
     args: FetchDistinctValuesArgs<TData>,
   ) => Promise<FilterOptionsResponse>;
+  readonly isPrimaryKey?: boolean;
   readonly key: keyof TData & string;
   readonly label: string;
   readonly maxWidth: number;
@@ -24,6 +25,7 @@ export const createDistinctStringColumn = <
 >({
   columnName,
   fetchDistinctValues,
+  isPrimaryKey,
   key,
   label,
   maxWidth,
@@ -39,5 +41,6 @@ export const createDistinctStringColumn = <
     label,
     maxWidth,
     minWidth,
+    ...(isPrimaryKey === true && { isPrimaryKey }),
   };
 };

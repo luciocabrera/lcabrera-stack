@@ -2,6 +2,7 @@ import type { TableColumn, TableColumnDataType } from '../Table.types';
 
 type CreateBasicColumnArgs<TData extends Record<string, unknown>> = {
   readonly dataType: TableColumnDataType;
+  readonly isPrimaryKey?: boolean;
   readonly key: keyof TData & string;
   readonly label: string;
   readonly maxWidth: number;
@@ -10,6 +11,7 @@ type CreateBasicColumnArgs<TData extends Record<string, unknown>> = {
 
 export const createBasicColumn = <TData extends Record<string, unknown>>({
   dataType,
+  isPrimaryKey,
   key,
   label,
   maxWidth,
@@ -21,5 +23,6 @@ export const createBasicColumn = <TData extends Record<string, unknown>>({
     label,
     maxWidth,
     minWidth,
+    ...(isPrimaryKey === true && { isPrimaryKey }),
   };
 };

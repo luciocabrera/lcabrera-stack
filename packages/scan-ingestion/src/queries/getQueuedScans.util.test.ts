@@ -37,7 +37,6 @@ describe('getQueuedScans', () => {
     const { runId } = await triggerScan({
       projectId,
       scannerIds: ['eslint'],
-      scopeValue: '.',
       userId: systemUserId,
     });
 
@@ -56,7 +55,6 @@ describe('getQueuedScans', () => {
     const { runId } = await triggerScan({
       projectId,
       scannerIds: ['code-smell-zen'],
-      scopeValue: '.',
       userId: systemUserId,
     });
 

@@ -1,13 +1,10 @@
-import type {
-  TableCrudConfig,
-  TableCrudId,
-} from '@repo/ui/components/Table/Table.types';
+import type { TableCrudConfig } from '@repo/ui/components/Table/Table.types';
 import type { ReactNode } from 'react';
 
-export type TableActionMenuProps<TData extends Record<string, unknown>> = {
-  readonly crud: TableCrudConfig<TData>;
+export type TableActionMenuProps = {
+  readonly crud: TableCrudConfig;
   readonly customActions?: ReactNode;
   readonly onDelete: () => void;
   readonly resolvedTitleSingular: string;
-  readonly rowId: TableCrudId;
+  readonly rowId: string;
 };

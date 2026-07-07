@@ -16,7 +16,6 @@ export const TableLayout = <
 >({
   actions,
   columnsState,
-  crud,
   dataPromise,
   dataSelector,
   dataTotalSelector,
@@ -27,19 +26,16 @@ export const TableLayout = <
     <div {...stylex.props(styles.container)}>
       <TableConfigProvider<TData>
         columnsState={columnsState}
-        crud={crud}
         metaState={metaState}
       >
         <FiltersDataProvider<TData> columns={columnsState.columns}>
           <TableSuspenseBoundary<TData, TResponse>
             actions={actions}
-            crud={crud}
             dataPromise={dataPromise}
           >
             {(response) => (
               <Table<TData, TResponse>
                 actions={actions}
-                crud={crud}
                 dataSelector={dataSelector}
                 dataTotalSelector={dataTotalSelector}
                 onLoadMore={onLoadMore}

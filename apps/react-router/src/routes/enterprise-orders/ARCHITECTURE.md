@@ -22,8 +22,9 @@ Because route-loader payloads must stay serializable, the loader returns an empt
 `columnsState.columns` array and preserves only serializable slices (filters,
 sorting, order, sizing, visibility, pinning).
 
-`EnterpriseOrders.component.tsx` rehydrates `columnsState.columns` via
-`hydrateEnterpriseOrdersColumnsState(...)` before passing state to `TableLayout`.
+`EnterpriseOrders.component.tsx` rehydrates `columnsState.columns` via the
+shared `hydrateTableColumnsState({ columns: COLUMNS, columnsState })` util
+(`@repo/ui/components/Table/utils`) before passing state to `TableLayout`.
 This restores non-serializable client concerns (for example the actions-cell
 `render` function and filter option callbacks) while keeping loader data safe
 for SSR/hydration boundaries.

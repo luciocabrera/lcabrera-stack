@@ -130,6 +130,8 @@ TableColumnsState<TData> = {
 TableMetaState = {
   appId?: string;                    // App id used to namespace persisted cookie/storage keys
   columnSelectedKey: string | null;  // Currently selected column key
+  crud?: TableCrudConfig;            // CRUD feature flags (create/read/update/delete) for row actions + create link (read via useGetTableCrud)
+  deleteActionPath?: string;         // Action route the row delete submit posts to (required when crud.delete)
   density: TableDensity;             // compact | normal | comfortable
   drawersSyncNonce?: number;          // Monotonic nonce used to force drawer provider re-seed
   enablePrefetch: boolean;           // Prefetch next page after load-more (ADR-006)

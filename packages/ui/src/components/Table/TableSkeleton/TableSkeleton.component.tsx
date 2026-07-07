@@ -17,7 +17,6 @@ import { readPersistedDataStateFromSessionStorage } from '../utils';
 
 export const TableSkeleton = <TData extends Record<string, unknown>>({
   actions,
-  crud,
 }: TableSkeletonProps<TData>) => {
   const columns = useGetColumns<TData>();
   const appId = useGetTableAppId();
@@ -51,7 +50,6 @@ export const TableSkeleton = <TData extends Record<string, unknown>>({
   return (
     <Table<TData, SkeletonResponse<TData>>
       actions={actions}
-      crud={crud}
       dataSelector={(response) => response.data}
       dataTotalSelector={(response) => response.totalRows}
       isLoading

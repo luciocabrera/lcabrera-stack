@@ -1,4 +1,7 @@
+import { discoverProjectWorkspaces } from '@repo/scan-ingestion/ingestion/workspaces/discoverProjectWorkspaces.util';
+import { getProjectById } from '@repo/scan-ingestion/queries/getProjectById.util';
 import { registerProject } from '@repo/scan-ingestion/queries/registerProject.util';
+import { replaceProjectWorkspaces } from '@repo/scan-ingestion/queries/replaceProjectWorkspaces.util';
 import { type ActionFunctionArgs, redirect } from 'react-router';
 
 import { requireUser } from '@/auth/requireUser.util';
@@ -31,6 +34,25 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       ...parsed.data,
       userId: user.id,
     });
+
+    // Best-effort workspace discovery (ADR-021) — against the STORED
+    // (canonicalized) path, not the raw form value; a failure must never
+    // block registration.
+    try {
+      const project = await getProjectById({ projectId });
+      if (project) {
+        await replaceProjectWorkspaces({
+          projectId,
+          userId: user.id,
+          workspaces: discoverProjectWorkspaces({
+            rootPath: project.local_path,
+          }),
+        });
+      }
+    } catch (workspaceError) {
+      console.warn('Workspace discovery failed (non-fatal):', workspaceError);
+    }
+
     return redirect(`/cqms/projects/view/${projectId}`);
   } catch (error) {
     return {

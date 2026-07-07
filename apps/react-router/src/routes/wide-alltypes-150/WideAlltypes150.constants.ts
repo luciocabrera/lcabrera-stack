@@ -56,6 +56,7 @@ const PG_TYPE_LABELS: Readonly<Record<number, string>> = {
 
 const ID_COLUMN: TableColumn<WideAlltypes150> = {
   dataType: 'number',
+  isPrimaryKey: true,
   key: 'id',
   label: 'ID',
   minWidth: 80,

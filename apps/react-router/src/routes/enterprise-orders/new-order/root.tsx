@@ -1,6 +1,6 @@
 import { SectionCard } from '@repo/ui/components/SectionCard';
 
-const NewOrder = () => {
+export const NewOrder = () => {
   return (
     <SectionCard
       description='Create flow for enterprise orders is not implemented yet.'
@@ -10,5 +10,3 @@ const NewOrder = () => {
     </SectionCard>
   );
 };
-
-export default NewOrder;

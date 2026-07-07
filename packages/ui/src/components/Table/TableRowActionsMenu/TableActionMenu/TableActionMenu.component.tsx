@@ -7,13 +7,13 @@ import type { TableActionMenuProps } from './TableActionMenu.types';
 
 import { styles } from '../TableRowActionsMenu.stylex';
 
-export const TableActionMenu = <TData extends Record<string, unknown>>({
+export const TableActionMenu = ({
   crud,
   customActions,
   onDelete,
   resolvedTitleSingular,
   rowId,
-}: TableActionMenuProps<TData>) => {
+}: TableActionMenuProps) => {
   return (
     <div {...stylex.props(styles.menuActions)}>
       {crud.read && (

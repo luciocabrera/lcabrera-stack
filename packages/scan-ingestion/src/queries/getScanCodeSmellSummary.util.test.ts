@@ -75,7 +75,6 @@ describe('getScanCodeSmellSummary', () => {
     const triggered = await triggerScan({
       projectId,
       scannerIds: ['code-smell-checker'],
-      scopeValue: '.',
       userId: systemUserId,
     });
     runId = triggered.runId;

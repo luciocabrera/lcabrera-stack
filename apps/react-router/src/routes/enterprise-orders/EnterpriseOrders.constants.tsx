@@ -21,11 +21,11 @@ export const SCHEMA_NAME = 'public';
 
 export const PERSISTENCE_KEY = 'enterprise-orders-table';
 
-export const CRUD: TableCrudConfig<EnterpriseOrder> = {
+export const DELETE_ACTION_PATH = '/_action/enterprise-orders/delete';
+
+export const CRUD: TableCrudConfig = {
   create: true,
   delete: true,
-  deleteActionPath: '/_action/enterprise-orders/delete',
-  idAccessor: 'order_id',
   read: true,
   update: true,
 };
@@ -38,6 +38,7 @@ export const DEFAULT_COLUMN_PINNING: ColumnPinningState<EnterpriseOrder> = {
 export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   createBasicColumn({
     dataType: 'number',
+    isPrimaryKey: true,
     key: 'order_id',
     label: 'Order ID',
     maxWidth: 120,

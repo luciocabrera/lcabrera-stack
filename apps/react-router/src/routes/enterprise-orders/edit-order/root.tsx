@@ -1,7 +1,7 @@
 import { SectionCard } from '@repo/ui/components/SectionCard';
 import { useParams } from 'react-router';
 
-const EditOrder = () => {
+export const EditOrder = () => {
   const params = useParams();
 
   return (
@@ -13,5 +13,3 @@ const EditOrder = () => {
     </SectionCard>
   );
 };
-
-export default EditOrder;

@@ -7,6 +7,7 @@
   "exports": {
     "./ingestion/ingestReport": "./src/ingestion/ingestReport.ts",
     "./ingestion/ingestReport.types": "./src/ingestion/ingestReport.types.ts",
+    "./ingestion/workspaces/discoverProjectWorkspaces.util": "./src/ingestion/workspaces/discoverProjectWorkspaces.util.ts",
     "./queries/*.util": "./src/queries/*.util.ts"
   },
   "scripts": {

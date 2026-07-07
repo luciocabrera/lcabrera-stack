@@ -8,8 +8,10 @@ import type {
   TableRowActionsMenuProps,
 } from './TableRowActionsMenu.types';
 
+import { useGetColumns } from '../contexts/TableConfig/columns/selectors';
 import {
   useGetTableCrud,
+  useGetTableDeleteActionPath,
   useGetTableTitleSingular,
 } from '../contexts/TableConfig/meta/selectors';
 import { useTableContainerRef } from '../contexts/TableWrapper';
@@ -29,8 +31,10 @@ export const TableRowActionsMenu = <TData extends Record<string, unknown>>({
   isLoadingState = false,
   row,
 }: TableRowActionsMenuProps<TData>) => {
-  const crud = useGetTableCrud<TData>();
+  const crud = useGetTableCrud();
+  const columns = useGetColumns<TData>();
   const containerRef = useTableContainerRef();
+  const deleteActionPath = useGetTableDeleteActionPath();
   const fetcher = useFetcher();
   const titleSingular = useGetTableTitleSingular();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -111,7 +115,7 @@ export const TableRowActionsMenu = <TData extends Record<string, unknown>>({
   }
 
   const resolvedTitleSingular = titleSingular ?? DEFAULT_TITLE_SINGULAR;
-  const rowId = resolveCrudRowId({ idAccessor: crud.idAccessor, row });
+  const rowId = resolveCrudRowId({ columns, row });
 
   const handleToggleMenu = () => {
     const menuElement = menuRef.current;
@@ -186,7 +190,7 @@ export const TableRowActionsMenu = <TData extends Record<string, unknown>>({
   };
 
   const handleDelete = () => {
-    if (!crud.deleteActionPath) return;
+    if (!deleteActionPath) return;
 
     const shouldDelete = globalThis.confirm(
       `Are you sure you want to delete this ${resolvedTitleSingular.toLowerCase()}?`,
@@ -200,7 +204,7 @@ export const TableRowActionsMenu = <TData extends Record<string, unknown>>({
         intent: 'delete',
       },
       {
-        action: crud.deleteActionPath,
+        action: deleteActionPath,
         method: 'post',
       },
     );

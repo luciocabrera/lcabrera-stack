@@ -17,7 +17,6 @@ import { getInitialColumnsState, getInitialMetaState } from './utils';
 export const TableConfigProvider = <TData extends Record<string, unknown>>({
   children,
   columnsState,
-  crud, //TODO: it should be inside the metaState
   metaState,
 }: TableConfigProviderProps<TData>) => {
   const normalizedColumnsState = getInitialColumnsState<TData>({
@@ -41,7 +40,6 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
 
   const value: TableConfigContextValue<TData> = {
     columnsStore,
-    crud,
     metaStore,
   };
 

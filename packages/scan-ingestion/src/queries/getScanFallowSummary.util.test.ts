@@ -105,7 +105,6 @@ describe('getScanFallowSummary', () => {
     const { runId } = await triggerScan({
       projectId,
       scannerIds: ['fallow'],
-      scopeValue: '.',
       userId: systemUserId,
     });
     const scanRow = await pool.query<{ id: string }>(

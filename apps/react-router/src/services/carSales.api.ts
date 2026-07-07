@@ -1,3 +1,5 @@
+import type { SortingState } from '@repo/ui/components/Table';
+
 import {
   buildPaginatedQueryParams,
   fakeDelay,
@@ -92,7 +94,7 @@ export const carSalesApi = {
     limit: number;
     requestUrl?: string;
     skip: number;
-    sorting?: { columnKey: string; direction: 'asc' | 'desc' }[];
+    sorting?: SortingState<CarSale>;
   }): Promise<CarSalesResponse & { hasMore: boolean }> => {
     const params = buildPaginatedQueryParams({ limit, skip, sorting });
 

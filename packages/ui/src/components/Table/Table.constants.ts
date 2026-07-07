@@ -22,3 +22,10 @@ export const DEFAULT_OVERSCAN = 20;
 export const DEFAULT_COLUMN_OVERSCAN = 2;
 
 export const IS_PREFETCH_ENABLED = true;
+
+/**
+ * Delimiter joining multiple primary-key column values into a single row id
+ * segment for CRUD links/actions. Each value is URL-encoded before joining, so
+ * a single-column primary key yields the raw (encoded) value unchanged.
+ */
+export const PRIMARY_KEY_ID_DELIMITER = '_';

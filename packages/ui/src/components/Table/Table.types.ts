@@ -133,6 +133,13 @@ export type TableColumn<TData> = {
   readonly isFilterable?: boolean;
   /** Whether to hide the header content (label, controls, resize handle) */
   readonly isHeaderHidden?: boolean;
+  /**
+   * Whether this column is part of the table's primary key. The primary-key
+   * column(s) identify a row for CRUD links/actions and are always appended
+   * to the query sort (in declaration order) to guarantee a stable ordering
+   * for pagination.
+   */
+  readonly isPrimaryKey?: boolean;
   /** Whether this column can be resized by the user (default: true) */
   readonly isResizable?: boolean;
   /** Whether this column is sortable (default: true) */
@@ -197,20 +204,34 @@ export type TableColumnsState<TData = Record<string, unknown>> = {
   readonly staticKeys: Set<string>;
 };
 
-export type TableCrudConfig<TData extends Record<string, unknown>> = {
+/**
+ * Serializable subset of `TableColumnsState` — omits the derived/computed
+ * slices (groups, effective/normalized columns, pinned offsets, static keys)
+ * that are recomputed client-side. Used for loader-seeded initial state
+ * (`TableLayout`'s `columnsState` prop) and by `hydrateTableColumnsState`.
+ */
+export type TableColumnsStateInput<TData = Record<string, unknown>> = Omit<
+  TableColumnsState<TData>,
+  | 'columnGroups'
+  | 'effectiveColumns'
+  | 'normalizedColumns'
+  | 'pinnedColumnOffsets'
+  | 'staticKeys'
+>;
+
+/**
+ * CRUD feature flags for a table. Each flag toggles a database operation
+ * (create / read / update / delete) exposed through the row actions menu and
+ * create link. The row id used by those actions is derived from the column(s)
+ * marked `isPrimaryKey`; the delete endpoint is configured via
+ * `TableMetaState.deleteActionPath`.
+ */
+export type TableCrudConfig = {
   readonly create?: boolean;
   readonly delete?: boolean;
-  readonly deleteActionPath?: string;
-  readonly idAccessor: TableCrudIdAccessor<TData>;
   readonly read?: boolean;
   readonly update?: boolean;
 };
-
-export type TableCrudId = number | string;
-
-export type TableCrudIdAccessor<TData extends Record<string, unknown>> =
-  | ((row: TData) => TableCrudId)
-  | (keyof TData & string);
 
 export type TableDataState<TData> = {
   /** Table data array */
@@ -251,6 +272,10 @@ export type TableMetaState = {
   readonly columnOverscan: number;
   readonly columnSelectedKey?: string;
   readonly columnSettingsSelectedTab: string;
+  /** CRUD feature flags for row actions and create link */
+  readonly crud?: TableCrudConfig;
+  /** Action route the row delete submit posts to (required when crud.delete) */
+  readonly deleteActionPath?: string;
   readonly density: TableDensity;
   readonly drawersSyncNonce?: number;
   /** Whether to prefetch the next page after each load-more completes */
@@ -303,7 +328,7 @@ export type TablePersistenceConfig = {
 export type TableProps<
   TData extends Record<string, unknown>,
   TResponse,
-> = BaseProps<TData> &
+> = BaseProps &
   InfiniteScroll<TData, TResponse> & {
     readonly isFlexWrapperEnabled?: boolean;
     readonly isLoading?: boolean;
@@ -315,11 +340,9 @@ export type TableTitle = {
   readonly singular: string;
 };
 
-type BaseProps<TData extends Record<string, unknown>> =
-  ComponentPropsWithRef<'table'> & {
-    readonly actions?: ReactNode;
-    readonly crud?: TableCrudConfig<TData>;
-    readonly customStylex?: StyleXStyles;
-    readonly emptyState?: TableEmptyStateConfig;
-    readonly icon?: ReactNode;
-  };
+type BaseProps = ComponentPropsWithRef<'table'> & {
+  readonly actions?: ReactNode;
+  readonly customStylex?: StyleXStyles;
+  readonly emptyState?: TableEmptyStateConfig;
+  readonly icon?: ReactNode;
+};

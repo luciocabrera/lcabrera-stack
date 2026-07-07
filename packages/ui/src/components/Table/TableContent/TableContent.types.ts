@@ -6,7 +6,6 @@ export type TableContentProps<
 > = Pick<
   TableProps<TData, TResponse>,
   | 'actions'
-  | 'crud'
   | 'dataSelector'
   | 'dataTotalSelector'
   | 'emptyState'

@@ -31,7 +31,7 @@ scan-ingestion/
 │   │
 │   ├── fs/
 │   │   ├── canonicalRealPath.util.ts     → realpath canonicalization of operator-supplied paths
-│   │   └── *Within.util.ts               → containment-checked fs ops (resolve/read/write/list/mkdir)
+│   │   └── *Within.util.ts               → containment-checked fs ops (resolve/read/write/list/mkdir/exists)
 │   │
 │   ├── ingestion/
 │   │   ├── report.schema.ts             → The report.json contract (Zod) — ScanFinding, RunFileInput, Report
@@ -41,6 +41,7 @@ scan-ingestion/
 │   │   ├── lint/                         → eslint/oxlint raw schemas + pure extractors (violations + run summaries)
 │   │   ├── fallow/                       → fallow raw schema + pure extractors (master + 8 detail tables — ADR-019 addendum)
 │   │   ├── codeSmell/                    → code-smell master rollup from the parsed report (details = views over scan_findings)
+│   │   ├── workspaces/                   → monorepo workspace discovery (pnpm/npm globs → dirs with package.json — ADR-021; exported for admin_system)
 │   │   ├── resolveScan.util.ts           → UI path (lookup) vs ad hoc path (create project+run+scan)
 │   │   ├── matchProject.util.ts          → git rev-parse --show-toplevel + realpath (ad hoc path ONLY — see below)
 │   │   ├── resolveLocalPath.util.ts      → realpath only, no git walk (UI register/edit path — see below)
@@ -118,9 +119,11 @@ genuinely thin wrapper.
 2. Read `reportMarkdownPath` (verbatim) and `rawJsonPath` if given (only
    `fallow` populates this today).
 3. `resolveScan` — **UI path** (`args.runId` given): look up the existing
-   run's `project_id` and find the matching `(run_id, scanner_id)` scan row
-   (already created by the trigger-scan action before the job started) via
-   `v_runs`/`v_scans`. **Ad hoc path** (no `runId`): `resolveProjectPath`
+   run's `project_id` and find the matching
+   `(run_id, scanner_id, scope_type, scope_value)` scan row (already
+   created by the trigger-scan action before the job started) via
+   `v_runs`/`v_scans` — scope-qualified since ADR-021's scanners×scopes
+   fan-out made `(run_id, scanner_id)` alone ambiguous. **Ad hoc path** (no `runId`): `resolveProjectPath`
    (git-root + realpath), `fn_upsert_project`, `fn_create_run`, then
    `fn_create_ad_hoc_scan` (ADR-018 — no direct INSERT).
 4. If `rawJson`/`health_metrics` present, `fn_set_scan_raw_artifacts`

@@ -5,8 +5,11 @@ import { useEffect, useRef } from 'react';
 
 import type { TableContentProps } from './TableContent.types';
 
+import { useGetColumns } from '../contexts/TableConfig/columns/selectors';
 import { useToogleTableIsTableSettingsOpen } from '../contexts/TableConfig/meta/actions';
 import {
+  useGetTableCrud,
+  useGetTableDeleteActionPath,
   useGetTableThreshold,
   useGetTableTitleSingular,
 } from '../contexts/TableConfig/meta/selectors';
@@ -29,7 +32,6 @@ import { styles } from './TableContent.stylex';
 
 export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   actions,
-  crud,
   dataSelector,
   dataTotalSelector,
   emptyState,
@@ -41,6 +43,9 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   const isLoadingMore = useGetTableIsLoadingMore();
   const hasMore = useGetTableHasMore();
   const titleSingular = useGetTableTitleSingular();
+  const crud = useGetTableCrud();
+  const columns = useGetColumns<TData>();
+  const deleteActionPath = useGetTableDeleteActionPath();
 
   const fetchMoreData = useFetchMoreData<TData, TResponse>();
   const toggleTableIsTableSettingsOpen = useToogleTableIsTableSettingsOpen();
@@ -52,7 +57,7 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   const wrapperContextValue = { containerRef, wrapperRef };
   const resolvedTitleSingular = titleSingular ?? 'Record';
 
-  validateTableCrudConfig({ crud });
+  validateTableCrudConfig({ columns, crud, deleteActionPath });
 
   useEffect(() => {
     const wasLoading = wasLoadingRef.current;

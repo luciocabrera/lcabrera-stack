@@ -7,5 +7,5 @@ export type SkeletonResponse<TData extends Record<string, unknown>> = {
 
 export type TableSkeletonProps<TData extends Record<string, unknown>> = Pick<
   TableProps<TData, SkeletonResponse<TData>>,
-  'actions' | 'crud'
+  'actions'
 >;

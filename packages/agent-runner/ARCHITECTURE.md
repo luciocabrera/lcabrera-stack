@@ -31,15 +31,21 @@ src/
 ├── cqmsRepoRoot.util.ts           → Resolves this repo's root from import.meta.url
 ├── skillFrontmatter.util.ts       → Loads + parses a real SKILL.md (reuses scripts/validate-skills.cjs's parser)
 ├── deriveAllowedTools.util.ts     → SKILL.md's condensed allowed-tools: string → one allowedTools[] entry per pattern
-├── assertSafeTargetPath.util.ts   → Defense-in-depth: rejects a target path that is/contains this CQMS repo
+├── assertSafeTargetPath.util.ts   → Defense-in-depth: rejects a target path that CONTAINS this CQMS repo (self-scan allowed — ADR-020)
+├── isSecretFilePath.util.ts       → Basename predicate: .env family (minus .example/.sample/.template), keys, .npmrc, credentials…
+├── collectToolInputPaths.util.ts  → Per-tool path-candidate extraction (Read/Glob/Grep fields; Bash command tokens)
+├── secretFileGuardHook.util.ts    → PreToolUse HookCallback denying secret-file access (ADR-020)
 └── __fixtures__/                  → Tiny SKILL.md fixtures for skillFrontmatter.util.test.ts only
 ```
 
 ## `runSkillAgent()` — what it actually does, in order
 
 1. `assertSafeTargetPath(targetProjectPath)` — must be absolute, must exist,
-   must not be (or contain) this CQMS repo. This is defense-in-depth only;
-   the real authority check (`targetProjectPath` must match a row in
+   must not CONTAIN this CQMS repo (an ancestor target like `$HOME` would
+   hand the session `~/.ssh` and every sibling checkout). Being the repo
+   root itself is allowed — self-scan, ADR-020; the secret-file guard below
+   is what makes that safe. This is defense-in-depth only; the real
+   authority check (`targetProjectPath` must match a row in
    `cqms.projects.local_path`) is the caller's job — this package has no DB
    access to perform that check itself.
 2. `loadSkillFrontmatter({ skillPath })` — reads the real `SKILL.md` off
@@ -62,6 +68,12 @@ src/
      Read/Glob reach to the two absolute paths named in the prompt.
    - `allowedTools` — the skill's own derived Bash/Read/Grep/Glob patterns.
    - `canUseTool` — the sole mechanism that grants Write (see below).
+   - `hooks: { PreToolUse: [secretFileGuardHook] }` (matcher
+     `Bash|Glob|Grep|Read`) — denies access to credential-bearing files
+     (ADR-020). A hook is the only interception point that works for
+     statically-allowed tools: they resolve against `allowedTools` before
+     the ask path, so `canUseTool` never sees them; PreToolUse denies cut
+     in ahead of that static allow (verified live).
    - `permissionMode: 'default'` — **not** `'dontAsk'`; see below.
    - `maxTurns: 40` — a safety net against a runaway session.
    - `env: { ...process.env, OUTPUT_DIR: outputDirectory }` — kept for the

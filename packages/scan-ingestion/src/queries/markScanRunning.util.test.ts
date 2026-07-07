@@ -37,7 +37,6 @@ describe('markScanRunning', () => {
     const { runId } = await triggerScan({
       projectId,
       scannerIds: ['eslint'],
-      scopeValue: '.',
       userId: systemUserId,
     });
 

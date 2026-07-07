@@ -30,16 +30,22 @@ const resolveExistingScan = async ({
     throw new Error(`No run found for runId=${runId}`);
   }
 
+  // Scope-qualified since ADR-021: a run fans out as scanners × scopes, so
+  // (run_id, scanner_id) alone is ambiguous — two eslint scans of the same
+  // run (different workspaces) share a created_at, and an unqualified
+  // LIMIT 1 ingested one workspace's report into the other's scan row
+  // (caught live: the second ingest then died on reports_scan_id_key).
   const scanResult = await pool.query<{ id: string }>(
     `SELECT id FROM cqms.v_scans
      WHERE run_id = $1 AND scanner_id = $2
+       AND scope_type = $3 AND scope_value = $4
      ORDER BY created_at DESC LIMIT 1`,
-    [runId, ingestArgs.scannerId],
+    [runId, ingestArgs.scannerId, ingestArgs.scopeType, ingestArgs.scopeValue],
   );
   const scanId = scanResult.rows[0]?.id;
   if (!scanId) {
     throw new Error(
-      `No scan found for runId=${runId}, scannerId=${ingestArgs.scannerId}`,
+      `No scan found for runId=${runId}, scannerId=${ingestArgs.scannerId}, scope=${ingestArgs.scopeType}:${ingestArgs.scopeValue}`,
     );
   }
 

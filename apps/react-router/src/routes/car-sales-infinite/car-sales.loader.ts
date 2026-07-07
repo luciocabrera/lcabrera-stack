@@ -1,6 +1,7 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
 import { INITIAL_PAGE_SIZE } from '@repo/ui/components/Table/Table.constants';
+import { appendPrimaryKeySorting } from '@repo/ui/routing/appendPrimaryKeySorting.util';
 import { readTableLoaderStateFromRequest } from '@repo/ui/routing/readTableLoaderStateFromRequest.util';
 
 import type { CarSale, CarSalesResponse } from '@/services';
@@ -47,7 +48,10 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
       limit: INITIAL_PAGE_SIZE,
       requestUrl: request.url,
       skip: 0,
-      sorting: sanitizedSorting,
+      sorting: appendPrimaryKeySorting<CarSale>({
+        columns: COLUMNS,
+        sorting: sanitizedSorting,
+      }),
     });
 
   return {

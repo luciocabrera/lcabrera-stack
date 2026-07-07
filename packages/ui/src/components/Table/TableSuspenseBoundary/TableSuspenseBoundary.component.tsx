@@ -11,11 +11,10 @@ export const TableSuspenseBoundary = <
 >({
   actions,
   children,
-  crud,
   dataPromise,
 }: TableSuspenseBoundaryProps<TData, TResponse>) => {
   return (
-    <Suspense fallback={<TableSkeleton<TData> actions={actions} crud={crud} />}>
+    <Suspense fallback={<TableSkeleton<TData> actions={actions} />}>
       <TableDataResolver<TResponse> dataPromise={dataPromise}>
         {children}
       </TableDataResolver>

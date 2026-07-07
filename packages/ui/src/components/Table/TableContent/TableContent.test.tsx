@@ -8,6 +8,9 @@ import { TableContent } from './TableContent.component';
 
 const {
   useFetchMoreDataMock,
+  useGetColumnsMock,
+  useGetTableCrudMock,
+  useGetTableDeleteActionPathMock,
   useGetTableHasMoreMock,
   useGetTableIsLoadingMock,
   useGetTableIsLoadingMoreMock,
@@ -17,6 +20,9 @@ const {
   useToogleTableIsTableSettingsOpenMock,
 } = vi.hoisted(() => ({
   useFetchMoreDataMock: vi.fn(() => vi.fn()),
+  useGetColumnsMock: vi.fn(() => []),
+  useGetTableCrudMock: vi.fn(),
+  useGetTableDeleteActionPathMock: vi.fn(),
   useGetTableHasMoreMock: vi.fn(),
   useGetTableIsLoadingMock: vi.fn(),
   useGetTableIsLoadingMoreMock: vi.fn(),
@@ -68,7 +74,13 @@ vi.mock('../contexts/TableConfig/meta/actions', () => ({
   useToogleTableIsTableSettingsOpen: useToogleTableIsTableSettingsOpenMock,
 }));
 
+vi.mock('../contexts/TableConfig/columns/selectors', () => ({
+  useGetColumns: useGetColumnsMock,
+}));
+
 vi.mock('../contexts/TableConfig/meta/selectors', () => ({
+  useGetTableCrud: useGetTableCrudMock,
+  useGetTableDeleteActionPath: useGetTableDeleteActionPathMock,
   useGetTableThreshold: useGetTableThresholdMock,
   useGetTableTitleSingular: useGetTableTitleSingularMock,
 }));

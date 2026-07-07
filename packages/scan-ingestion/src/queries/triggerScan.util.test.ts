@@ -36,7 +36,6 @@ describe('triggerScan', () => {
     const result = await triggerScan({
       projectId,
       scannerIds: ['eslint', 'code-smell-checker'],
-      scopeValue: '.',
       userId: systemUserId,
     });
 
@@ -70,5 +69,35 @@ describe('triggerScan', () => {
     ]);
     expect(scanRows.rows.every((row) => row.status === 'queued')).toBe(true);
     expect(scanRows.rows.every((row) => row.scope_value === '.')).toBe(true);
+  });
+
+  it('fans out scanners × workspace scopes as folder-scoped scans (ADR-021)', async () => {
+    const result = await triggerScan({
+      projectId,
+      scannerIds: ['eslint', 'oxlint'],
+      userId: systemUserId,
+      workspacePaths: ['apps/web', 'packages/ui'],
+    });
+
+    const pool = getPool();
+    const scanRows = await pool.query<{
+      scanner_id: string;
+      scope_type: string;
+      scope_value: string;
+    }>(
+      'SELECT scanner_id, scope_type, scope_value FROM cqms.scans WHERE run_id = $1 ORDER BY scanner_id, scope_value',
+      [result.runId],
+    );
+
+    expect(
+      scanRows.rows.map(
+        (row) => `${row.scanner_id}:${row.scope_type}:${row.scope_value}`,
+      ),
+    ).toEqual([
+      'eslint:folder:apps/web',
+      'eslint:folder:packages/ui',
+      'oxlint:folder:apps/web',
+      'oxlint:folder:packages/ui',
+    ]);
   });
 });

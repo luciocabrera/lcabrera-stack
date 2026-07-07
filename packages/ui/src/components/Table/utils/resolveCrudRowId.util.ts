@@ -1,39 +1,46 @@
-import type {
-  TableCrudId,
-  TableCrudIdAccessor,
-} from '@repo/ui/components/Table/Table.types';
+import type { TableColumn } from '@repo/ui/components/Table/Table.types';
+
+import { PRIMARY_KEY_ID_DELIMITER } from '@repo/ui/components/Table/Table.constants';
+
+import { resolvePrimaryKeyColumnKeys } from './resolvePrimaryKeyColumnKeys.util';
 
 type ResolveCrudRowIdArgs<TData extends Record<string, unknown>> = {
-  readonly idAccessor: TableCrudIdAccessor<TData>;
+  readonly columns: readonly TableColumn<TData>[];
   readonly row: TData;
 };
 
-const isValidCrudId = (value: unknown): value is TableCrudId =>
+const isValidIdValue = (value: unknown): value is number | string =>
   typeof value === 'number' || typeof value === 'string';
 
+/**
+ * Build the row id used by CRUD links (`view/:id`, `edit/:id`) and the delete
+ * submit payload from the primary-key column(s). A single primary key yields
+ * the raw (URL-encoded) value; a composite key joins each encoded value with
+ * `PRIMARY_KEY_ID_DELIMITER`, in column-declaration order.
+ */
 export const resolveCrudRowId = <TData extends Record<string, unknown>>({
-  idAccessor,
+  columns,
   row,
-}: ResolveCrudRowIdArgs<TData>): TableCrudId => {
-  if (typeof idAccessor === 'function') {
-    const resolvedId = idAccessor(row);
+}: ResolveCrudRowIdArgs<TData>): string => {
+  const primaryKeyKeys = resolvePrimaryKeyColumnKeys({ columns });
 
-    if (!isValidCrudId(resolvedId)) {
-      throw new TypeError(
-        'crud.idAccessor function must return string or number',
-      );
-    }
-
-    return resolvedId;
-  }
-
-  const resolvedId = row[idAccessor];
-
-  if (!isValidCrudId(resolvedId)) {
+  if (primaryKeyKeys.length === 0) {
     throw new TypeError(
-      `crud.idAccessor key "${idAccessor}" must resolve to string or number`,
+      'Table crud requires at least one column with isPrimaryKey to resolve a row id',
     );
   }
 
-  return resolvedId;
+  return primaryKeyKeys
+    .map((key) => {
+      const value = row[key];
+
+      if (!isValidIdValue(value)) {
+        throw new TypeError(
+          `Primary-key column "${String(key)}" must resolve to string or number`,
+        );
+      }
+
+      return encodeURIComponent(String(value));
+    })
+    .join(PRIMARY_KEY_ID_DELIMITER);
 };

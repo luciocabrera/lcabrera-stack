@@ -1,3 +1,6 @@
+import { discoverProjectWorkspaces } from '@repo/scan-ingestion/ingestion/workspaces/discoverProjectWorkspaces.util';
+import { getProjectById } from '@repo/scan-ingestion/queries/getProjectById.util';
+import { replaceProjectWorkspaces } from '@repo/scan-ingestion/queries/replaceProjectWorkspaces.util';
 import { triggerScan as triggerScanMutation } from '@repo/scan-ingestion/queries/triggerScan.util';
 import { type ActionFunctionArgs, data, redirect } from 'react-router';
 import { z } from 'zod';
@@ -21,6 +24,7 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const parsed = triggerScanSchema.safeParse({
     scannerIds: formData.getAll('scannerIds'),
+    workspacePaths: formData.getAll('workspacePaths'),
   });
 
   if (!parsed.success) {
@@ -31,12 +35,50 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
     };
   }
 
+  // Selected workspaces are validated against a FRESH discovery — the
+  // form's options could be stale (workspace deleted since the page
+  // loaded), and form values are attacker-controllable anyway (ADR-021).
+  const project = await getProjectById({
+    projectId: parsedParams.data.projectId,
+  });
+  if (!project) {
+    throw data('Project not found.', { status: 404 });
+  }
+  const discovered = discoverProjectWorkspaces({
+    rootPath: project.local_path,
+  });
+  const discoveredPaths = new Set(
+    discovered.map((workspace) => workspace.workspace_path),
+  );
+  const unknownSelection = parsed.data.workspacePaths.find(
+    (workspacePath) => !discoveredPaths.has(workspacePath),
+  );
+  if (unknownSelection !== undefined) {
+    return {
+      errors: {
+        workspacePaths: `Not a workspace of this project: ${unknownSelection}`,
+      },
+    };
+  }
+
+  // Best-effort snapshot refresh — discovery already happened for
+  // validation, so persist it; a failure here must not block the scan.
+  try {
+    await replaceProjectWorkspaces({
+      projectId: project.id,
+      userId: user.id,
+      workspaces: discovered,
+    });
+  } catch (error) {
+    console.warn('Workspace snapshot refresh failed (non-fatal):', error);
+  }
+
   const { runId } = await triggerScanMutation({
     projectId: parsedParams.data.projectId,
     scannerIds: parsed.data.scannerIds,
-    scopeValue: '.',
     triggeredBy: user.username,
     userId: user.id,
+    workspacePaths: parsed.data.workspacePaths,
   });
 
   return redirect(

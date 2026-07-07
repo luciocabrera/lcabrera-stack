@@ -37,7 +37,6 @@ describe('updateScanProgress', () => {
     const { runId } = await triggerScan({
       projectId,
       scannerIds: ['fallow'],
-      scopeValue: '.',
       userId: systemUserId,
     });
 

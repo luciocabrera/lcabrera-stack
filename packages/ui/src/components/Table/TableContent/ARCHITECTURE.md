@@ -54,6 +54,7 @@ graph LR
     TC --> isLoadingMore["useGetTableIsLoadingMore()"]
     TC --> hasMore["useGetTableHasMore()"]
     TC --> titleSingular["useGetTableTitleSingular()"]
+    TC --> crud["useGetTableCrud()"]
   end
 
   subgraph "Actions"
@@ -73,9 +74,11 @@ graph LR
 
 ## CRUD Header Integration
 
-When `crud.create` is enabled, `TableContent` renders `TableCreateLink` in the
-title actions cluster between caller-provided `actions` and the settings button.
-The link label uses `meta.title.singular` (falling back to `Record`).
+The CRUD config is read from the meta store via `useGetTableCrud()` (no longer
+prop-drilled). When `crud.create` is enabled, `TableContent` renders
+`TableCreateLink` in the title actions cluster between caller-provided `actions`
+and the settings button. The link label uses `meta.title.singular` (falling
+back to `Record`).
 
 ## Refs
 

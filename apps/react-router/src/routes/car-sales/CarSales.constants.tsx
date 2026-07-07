@@ -17,6 +17,7 @@ export const TITLE = {
 export const COLUMNS: TableColumn<CarSale>[] = [
   {
     dataType: 'number',
+    isPrimaryKey: true,
     key: 'car_id',
     label: 'ID',
     maxWidth: 150,

@@ -1,3 +1,5 @@
+import type { SortingState } from '@repo/ui/components/Table';
+
 import {
   buildPaginatedQueryParams,
   fetchAndValidate,
@@ -193,10 +195,7 @@ type FetchWideAlltypes150Params = {
   readonly limit: number;
   readonly requestUrl?: string;
   readonly skip: number;
-  readonly sorting?: readonly {
-    readonly columnKey: keyof WideAlltypes150;
-    readonly direction: 'asc' | 'desc';
-  }[];
+  readonly sorting?: SortingState<WideAlltypes150>;
 };
 
 // ─── Service ──────────────────────────────────────────────────────────────────
