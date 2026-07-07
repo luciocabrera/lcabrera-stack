@@ -94,5 +94,32 @@ describe('runQueuedScan (deterministic linter branch)', () => {
     expect(report.rows[0]?.top_risk).toContain(
       'No eslint configuration detected',
     );
+
+    // A second pass over the same (no longer queued) scan must LOSE the
+    // claim and do nothing (ADR-026) — no status published, no
+    // re-execution, scan untouched.
+    const statusesBeforeSecondPass = [...publishedStatuses];
+    await runQueuedScan({
+      hub,
+      scan: {
+        deterministic: true,
+        local_path: projectDir,
+        project_id: projectId,
+        run_id: runId,
+        scan_id: scanId,
+        scanner_id: 'eslint',
+        scope_type: 'repo',
+        scope_value: '.',
+        skill_path: '.github/skills/linter-checker',
+      },
+      userId: systemUserId,
+    });
+    expect(publishedStatuses).toEqual(statusesBeforeSecondPass);
+
+    const scanAfterSecondPass = await pool.query<{ status: string }>(
+      'SELECT status FROM cqms.scans WHERE id = $1',
+      [scanId],
+    );
+    expect(scanAfterSecondPass.rows[0]?.status).toBe('succeeded');
   }, 20_000);
 });

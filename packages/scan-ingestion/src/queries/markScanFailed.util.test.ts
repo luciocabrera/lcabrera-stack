@@ -1,19 +1,29 @@
 import { closePool, getPool } from '@repo/data-access/db/getPool.util';
+import { acquireAdvisoryTestLock } from '@repo/scan-ingestion/testing/acquireAdvisoryTestLock.util.ts';
 import { makeTempDirectory } from '@repo/scan-ingestion/testing/makeTempDirectory.util.ts';
 import { rmSync } from 'node:fs';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
+import { claimQueuedScan } from './claimQueuedScan.util.ts';
 import { getUserByUsername } from './getUserByUsername.util.ts';
 import { markScanFailed } from './markScanFailed.util.ts';
-import { markScanRunning } from './markScanRunning.util.ts';
 import { triggerScan } from './triggerScan.util.ts';
 
 describe('markScanFailed', () => {
   let projectDir: string;
   let projectId: string;
+  let releaseLock: () => Promise<void>;
   let systemUserId: string;
 
   beforeAll(async () => {
+    // This file briefly holds a scan at 'running'; the
+    // failStaleRunningScans file sweeps EVERY running scan — serialize the
+    // files (vitest runs files in parallel workers).
+    const lock = await acquireAdvisoryTestLock({
+      lockName: 'cqms-scan-status-tests',
+    });
+    releaseLock = lock.release;
+
     const systemUser = await getUserByUsername({ username: 'system' });
     systemUserId = systemUser?.id ?? '';
 
@@ -30,6 +40,7 @@ describe('markScanFailed', () => {
   afterAll(async () => {
     const pool = getPool();
     await pool.query('DELETE FROM cqms.projects WHERE id = $1', [projectId]);
+    await releaseLock();
     await closePool();
     rmSync(projectDir, { force: true, recursive: true });
   });
@@ -48,7 +59,7 @@ describe('markScanFailed', () => {
     );
     const scanId = scanRow.rows[0]?.id ?? '';
 
-    await markScanRunning({ scanId, userId: systemUserId });
+    await claimQueuedScan({ scanId, userId: systemUserId });
     await markScanFailed({
       errorMessage: 'eslint failed to run: something broke',
       runId,
