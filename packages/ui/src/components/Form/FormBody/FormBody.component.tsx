@@ -45,6 +45,9 @@ export const FormBody = <TValues extends Record<string, unknown>>({
     : navigation.state === 'submitting' &&
       navigation.formData?.get('formId') === formId;
 
+  const FormComponent = isFetcherSubmission ? fetcher.Form : RouterForm;
+  const isSubmitDisabled = isSubmitting || (mode === 'edit' && !isDirty);
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     if (!submitForm({ leafFields })) {
       event.preventDefault();
@@ -59,13 +62,14 @@ export const FormBody = <TValues extends Record<string, unknown>>({
     }
   };
 
-  const FormComponent = isFetcherSubmission ? fetcher.Form : RouterForm;
-  const isSubmitDisabled = isSubmitting || (mode === 'edit' && !isDirty);
+  const handleAcceptConfirm = () => {
+    setIsConfirmDiscardOpen(false);
+    goBack(cancelTo);
+  };
+
+  const handleCancelConfirm = () => setIsConfirmDiscardOpen(false);
 
   return (
-    // noValidate: leaf inputs still carry native required/min/max for a11y,
-    // but native constraint validation would otherwise block the submit
-    // event entirely before handleSubmit/preventDefault ever runs.
     <FormComponent
       action={action}
       method={method}
@@ -78,37 +82,30 @@ export const FormBody = <TValues extends Record<string, unknown>>({
       {mode !== 'view' && (
         <div {...stylex.props(styles.footer)}>
           <Button
-            color='ghost'
-            onClick={handleCancelClick}
-            type='button'
-            variant='flat'
-          >
-            {cancelLabel}
-          </Button>
-          {children}
-          <Button
             color='primary'
             isBusy={isSubmitting}
             isDisabled={isSubmitDisabled}
             type='submit'
-            variant='solid'
           >
             {submitLabel}
           </Button>
+          <Button color='outline' onClick={handleCancelClick}>
+            {cancelLabel}
+          </Button>
+          {children}
         </div>
       )}
-      <ConfirmDialog
-        cancelLabel='Keep Editing'
-        confirmLabel='Discard Changes'
-        description='You have unsaved changes. Leaving now will lose them.'
-        isOpen={isConfirmDiscardOpen}
-        onCancel={() => setIsConfirmDiscardOpen(false)}
-        onConfirm={() => {
-          setIsConfirmDiscardOpen(false);
-          goBack(cancelTo);
-        }}
-        title='Discard changes?'
-      />
+      {isConfirmDiscardOpen && (
+        <ConfirmDialog
+          cancelLabel='Keep Editing'
+          confirmLabel='Discard Changes'
+          description='You have unsaved changes. Leaving now will lose them.'
+          isOpen={isConfirmDiscardOpen}
+          onCancel={handleCancelConfirm}
+          onConfirm={handleAcceptConfirm}
+          title='Discard changes?'
+        />
+      )}
     </FormComponent>
   );
 };

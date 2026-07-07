@@ -91,7 +91,7 @@ export const SidePanelSection = () => {
           <Button onClick={handleCloseLeft} size='sm' width='full'>
             <span {...stylex.props(styles.iconLeft)}>
               <MenuCloseIcon size={ICON_SIZE_MD} />
-            </span>{' '}
+            </span>
             {'Close'}
           </Button>
         </SidePanelFooter>
@@ -125,6 +125,9 @@ export const SidePanelSection = () => {
         </SidePanelBody>
         <SidePanelFooter>
           <div {...stylex.props(styles.buttonRow)}>
+            <Button onClick={handleCloseRight} size='sm' width='full'>
+              Confirm
+            </Button>
             <Button
               color='ghost'
               onClick={handleCloseRight}
@@ -132,9 +135,6 @@ export const SidePanelSection = () => {
               width='full'
             >
               Cancel
-            </Button>
-            <Button onClick={handleCloseRight} size='sm' width='full'>
-              Confirm
             </Button>
           </div>
         </SidePanelFooter>

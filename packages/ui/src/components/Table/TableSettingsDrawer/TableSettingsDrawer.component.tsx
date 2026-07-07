@@ -157,20 +157,10 @@ export const TableSettingsDrawer = ({
         </ColumnOrderSectionProvider>
       </SidePanelBody>
       <SidePanelFooter>
-        <Button
-          color='primary'
-          isBusy={isBusy}
-          onClick={handleAccept}
-          size='sm'
-        >
+        <Button color='primary' isBusy={isBusy} onClick={handleAccept}>
           Accept
         </Button>
-        <Button
-          color='outline'
-          isBusy={isBusy}
-          onClick={handleCancel}
-          size='sm'
-        >
+        <Button color='outline' isBusy={isBusy} onClick={handleCancel}>
           Cancel
         </Button>
       </SidePanelFooter>
