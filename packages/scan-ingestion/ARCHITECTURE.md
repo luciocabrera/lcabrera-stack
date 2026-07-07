@@ -135,7 +135,7 @@ genuinely thin wrapper.
    entirely in Postgres (TECH_SPEC §2.3a), not hand-assembled in TypeScript.
 7. `ingestScanDetail` (ADR-019) — per-scanner master/detail extraction,
    called unconditionally (Step 5): the deterministic scanners
-   (eslint/oxlint/fallow; app-graph follows the same shape) loose-Zod
+   (eslint/oxlint/fallow/app-graph) loose-Zod
    parse their verbatim raw artifact → pure extractors → an idempotent
    DELETE-then-INSERT procedure per scanner (skipped when rawJson is
    absent); the LLM scanners (code-smell-\*) have no raw artifact — their
