@@ -1,3 +1,5 @@
+import type { Pagination } from '@repo/ui/types/ui.types';
+
 import { TableLayout } from '@repo/ui/components/Table/TableLayout';
 import { hydrateTableColumnsState } from '@repo/ui/components/Table/utils';
 import { appendPrimaryKeySorting } from '@repo/ui/routing/appendPrimaryKeySorting.util';
@@ -20,6 +22,19 @@ export const EnterpriseOrders = () => {
     columnsState,
   });
 
+  const handleLoadMore = async ({ limit, skip }: Pagination) =>
+    enterpriseOrdersApi.fetchEnterpriseOrdersPaginated({
+      filter: hydratedColumnsState?.columnFilters ?? {},
+      limit,
+      skip,
+      sorting: appendPrimaryKeySorting<EnterpriseOrder>({
+        columns: hydratedColumnsState.columns,
+        sorting: sanitizeSorting<EnterpriseOrder>(
+          hydratedColumnsState?.sorting ?? [],
+        ),
+      }),
+    });
+
   return (
     <TableLayout<EnterpriseOrder, EnterpriseOrdersResponse>
       columnsState={hydratedColumnsState}
@@ -27,19 +42,7 @@ export const EnterpriseOrders = () => {
       dataSelector={(response) => response.data}
       dataTotalSelector={(response) => response.total}
       metaState={metaState}
-      onLoadMore={async ({ limit, skip }) =>
-        enterpriseOrdersApi.fetchEnterpriseOrdersPaginated({
-          filter: hydratedColumnsState?.columnFilters ?? {},
-          limit,
-          skip,
-          sorting: appendPrimaryKeySorting<EnterpriseOrder>({
-            columns: hydratedColumnsState.columns,
-            sorting: sanitizeSorting<EnterpriseOrder>(
-              hydratedColumnsState?.sorting ?? [],
-            ),
-          }),
-        })
-      }
+      onLoadMore={handleLoadMore}
     />
   );
 };
