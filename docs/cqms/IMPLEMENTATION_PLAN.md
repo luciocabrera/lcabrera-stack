@@ -2,7 +2,7 @@
 
 See also: [PRD.md](./PRD.md), [TECH_SPEC.md](./TECH_SPEC.md), ADRs in [decisions/](./decisions/).
 
-Phase 1 only; Phase 2 = the dependency graph (§ below), explicitly out of scope for this build.
+Phase 1 (the original 9 steps) and Phase 3 (per-scanner extraction + RBAC + registry, § below) are both complete; Phase 2 = the dependency graph (§ below), still explicitly out of scope.
 
 ## Execution model
 
@@ -31,7 +31,23 @@ The 9 steps below are executed **one at a time, gated** — before starting each
 
 ## Phase 2 (explicitly out of scope now)
 
-Per-symbol dependency graph (`symbols`/`symbol_references` tables, TECH_SPEC §2.3), tooling recommendation `ts-morph`, to feed an LLM reasoning pass over duplication/misplaced-exports once Phase 1's data model is proven in production.
+Per-symbol dependency graph (`symbols`/`symbol_references` tables, TECH_SPEC §2.3), tooling recommendation `ts-morph`, to feed an LLM reasoning pass over duplication/misplaced-exports once Phase 1's data model is proven in production. Phase 3's `app_graph_nodes` + the ts-morph catalog dependency (ADR-022) lay its groundwork without building it.
+
+## Phase 3 — per-scanner extraction, RBAC, scanner registry, app graph (complete, 2026-07)
+
+Same gated execution model as Phase 1 (one step at a time, ADR lands with its step). Everything tool-specific was trapped in opaque jsonb (`scans.raw_json`/`scans.health_metrics`); Phase 3 added per-scanner **master/detail tables** (1:1 master row per scan), Postgres-enforced **RBAC**, a **scanner registry** with UI registration + artifact generation, and made **every DB operation go through functions/procedures/views** — tables are never touched directly. Interview decisions (2026-07-06) are recorded at the top of each ADR.
+
+1. **RBAC schema + auth core** (migration 0008; [ADR-017](./decisions/ADR-017-rbac-schema-and-auth-core.md)) — users/roles/permissions/role_permissions/user_roles/resource_grants, `fn_assert_permission` (deny-by-default, typed exceptions), scrypt password hashing, `/login` + cookie session + `requireUser`.
+2. **Audit fields + functions-only retrofit** (migration 0009; [ADR-018](./decisions/ADR-018-audit-fields-and-functions-only-access.md)) — audit columns on all entities, every query util moved to views/`p_user_id`-first functions; orchestrator writes as the seeded `system` user.
+3. **Lint split + master/detail** (migration 0010; [ADR-019](./decisions/ADR-019-lint-split-and-master-detail-extraction.md)) — `eslint`/`oxlint` as independent scanners (`linter` soft-retired), shared `lint_violations` detail + per-tool masters, `DETERMINISTIC_SCANNER_CONFIGS` map in the orchestrator.
+4. **Deterministic fallow** (migration 0011; ADR-019) — `fallow --format json` run directly like the linter; `fallow_runs` master + the full detail family (file scores, hotspots, clones, dead code, circular deps, large functions, targets, function findings).
+5. **Code-smell masters** (migration 0012; ADR-019) — `code_smell_checker_runs`/`code_smell_zen_runs` masters; details stay views over `scan_findings`.
+6. **Self-scan + secret guard** ([ADR-020](./decisions/ADR-020-self-scan-and-secret-file-guard.md)) — repo-root targets allowed (ancestor block kept); Agent-SDK PreToolUse hook denies secret-file reads in scanner sessions.
+7. **Workspace discovery + scoped scans** (migration 0013; [ADR-021](./decisions/ADR-021-workspace-discovery-and-scoped-scans.md)) — `project_workspaces` + discovery from pnpm-workspace.yaml/package.json, trigger-scan workspace multi-select, longest-prefix attribution views.
+8. **App-graph scanner** (migration 0014; [ADR-022](./decisions/ADR-022-app-graph-scanner.md)) — deterministic tree inventory (`app_graph_runs` + `app_graph_nodes`), per-file export/function/type counts via ts-morph.
+9. **Scanner registry + artifact generation** (migration 0015; [ADR-023](./decisions/ADR-023-scanner-registry-and-artifact-generation.md)) — extended `scanners` columns + `scanner_versions` snapshots, `/cqms/scanners` CRUD UI, template-generated SKILL.md/runner scaffolds (code on disk stays authoritative), auto-created generic detail tables.
+10. **User/role management UI** (migration 0016; [ADR-024](./decisions/ADR-024-user-role-management.md)) — `/cqms/admin/users` + `/cqms/admin/roles`, per-instance grants editor on project detail, lockout guards, password rotation.
+11. **Docs sync + final E2E** — this document, INVENTORY.md, ARCHITECTURE.md sweeps; full self-scan of the CQMS repo with all scanners, workspace-scoped run, external-repo degradation, permission negative test, dummy-scanner registration round-trip.
 
 ## Verification plan
 

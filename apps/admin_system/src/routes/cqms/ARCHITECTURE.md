@@ -95,11 +95,11 @@ status or trend direction means. `resolveRunStatusTone.util.ts` and
 `groupTrendByScanner.util.ts` (both in `routes/cqms/utils/`) are that
 domain-specific mapping — see their own doc comments.
 
-## What step 9 still owns
+## What the orchestrator owns (not these routes)
 
 `trigger-scan`'s action only inserts a `queued` run + scan rows
 (`triggerScan.util.ts` in `scan-ingestion`) — it does not execute
-anything. The background-job orchestrator that picks up `queued` scans,
-runs them (`runSkillAgent` or the deterministic linter script per
-TECH_SPEC §2.5), calls `ingestReport`, and pushes live status over
-WebSocket is Implementation Plan step 9, not built here.
+anything. `apps/scan-orchestrator` (ADR-015) picks `queued` scans up via
+`LISTEN`/`NOTIFY`, runs them (`runSkillAgent` or a deterministic runner
+script per `DETERMINISTIC_SCANNER_CONFIGS`), calls `ingestReport`, and
+pushes live status over its own WebSocket (`useRunStatusSocket`).

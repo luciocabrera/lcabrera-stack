@@ -36,6 +36,20 @@ const findingStatusSchema = z.enum(['open', 'in-progress', 'done', 'deferred']);
 const findingKindSchema = z.enum(['single_location', 'duplication_group']);
 
 /**
+ * The LLM scanners sometimes emit a string-array field as a bare string
+ * (`"related_findings": "F-001, F-003"` or a prose sentence in
+ * `dependencies`) — observed live in Phase 3's final E2E, where it failed
+ * an otherwise-valid 12-finding report. Lifting a bare string to a
+ * one-element array is mechanical type repair, not the semantic coercion
+ * ADR-007 forbids: content is preserved verbatim, never split or
+ * reinterpreted.
+ */
+const lenientStringArraySchema = z.preprocess(
+  (value) => (typeof value === 'string' ? [value] : value),
+  z.array(z.string()),
+);
+
+/**
  * Mirrors cqms.scan_findings' actual NOT NULL/CHECK constraints (not a
  * field-by-field transcription of SCHEMA_V1.md's "required" list) — per
  * TECH_SPEC §2.3a, Postgres owns per-field validity authority.
@@ -51,7 +65,7 @@ const findingKindSchema = z.enum(['single_location', 'duplication_group']);
 export const scanFindingSchema = z.object({
   confidence: confidenceSchema,
   defer_risk: z.string().nullish(),
-  dependencies: z.array(z.string()).nullish(),
+  dependencies: lenientStringArraySchema.nullish(),
   effort: effortSchema.nullish(),
   evidence_excerpt: z.string().nullish(),
   extra: z.record(z.string(), z.unknown()).default({}),
@@ -61,12 +75,12 @@ export const scanFindingSchema = z.object({
   location_hint: z.string().nullish(),
   location_path: z.string().min(1),
   owner: z.string().nullish(),
-  related_findings: z.array(z.string()).nullish(),
+  related_findings: lenientStringArraySchema.nullish(),
   rule_id: z.string().min(1),
   severity: severitySchema,
   status: findingStatusSchema.default('open'),
-  tags: z.array(z.string()).nullish(),
-  verification_steps: z.array(z.string()).default([]),
+  tags: lenientStringArraySchema.nullish(),
+  verification_steps: lenientStringArraySchema.default([]),
   why: z.string().min(1),
 });
 export type ScanFinding = z.infer<typeof scanFindingSchema>;

@@ -38,6 +38,7 @@ type MakeGenericFindingArgs = {
 const makeGenericFinding = ({ findingId, ruleId }: MakeGenericFindingArgs) => ({
   confidence: 'high',
   defer_risk: undefined,
+  dependencies: ['land F-000 first'],
   effort: 'small',
   evidence_excerpt: undefined,
   extra: {},
@@ -46,7 +47,14 @@ const makeGenericFinding = ({ findingId, ruleId }: MakeGenericFindingArgs) => ({
   fix: 'Fix it.',
   location_hint: '1:1',
   location_path: 'src/a.ts',
+  owner: 'zz-team',
+  related_findings: ['F-000'],
   rule_id: ruleId,
+  // Required since 0017: the procedure's recordset now reads status
+  // (jsonb_to_recordset applies no column DEFAULTs), relying on
+  // reportSchema's `.default('open')` — a hand-built payload must honor
+  // the same contract.
+  status: 'open',
   tags: ['structure'],
   verification_steps: ['Re-run the scan.'],
   why: 'Because.',
@@ -164,6 +172,20 @@ describe('getScanCodeSmellSummary', () => {
       [scanId],
     );
     expect(zenView.rows).toHaveLength(0);
+  });
+
+  it('persists dependencies/related_findings/owner/status (0017 — dropped silently before)', async () => {
+    const pool = getPool();
+    const row = await pool.query(
+      'SELECT dependencies, related_findings, owner, status FROM cqms.scan_findings WHERE scan_id = $1 LIMIT 1',
+      [scanId],
+    );
+    expect(row.rows[0]).toEqual({
+      dependencies: ['land F-000 first'],
+      owner: 'zz-team',
+      related_findings: ['F-000'],
+      status: 'open',
+    });
   });
 
   it('re-ingestion is idempotent (DELETE-then-INSERT)', async () => {

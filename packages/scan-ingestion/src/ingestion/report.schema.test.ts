@@ -47,6 +47,38 @@ describe('scanFindingSchema', () => {
       ).not.toThrow();
     }
   });
+
+  it('lifts a bare string in a string-array field to a one-element array, preserving content verbatim — the LLM scanners emit this drift in the wild (Phase 3 final E2E)', () => {
+    const parsed = scanFindingSchema.parse({
+      ...minimalFinding,
+      dependencies: 'land F-001 first, then restructure',
+      related_findings: 'F-001, F-003',
+      tags: 'complexity',
+      verification_steps: 'run the suite',
+    });
+
+    expect(parsed.dependencies).toEqual(['land F-001 first, then restructure']);
+    expect(parsed.related_findings).toEqual(['F-001, F-003']);
+    expect(parsed.tags).toEqual(['complexity']);
+    expect(parsed.verification_steps).toEqual(['run the suite']);
+  });
+
+  it('still accepts real arrays and nullish values in the lifted fields', () => {
+    const parsed = scanFindingSchema.parse({
+      ...minimalFinding,
+      dependencies: null,
+      related_findings: ['F-001', 'F-003'],
+    });
+
+    expect(parsed.dependencies).toBeNull();
+    expect(parsed.related_findings).toEqual(['F-001', 'F-003']);
+  });
+
+  it('still rejects non-string array members in the lifted fields', () => {
+    expect(() =>
+      scanFindingSchema.parse({ ...minimalFinding, tags: [42] }),
+    ).toThrow();
+  });
 });
 
 describe('reportSchema', () => {

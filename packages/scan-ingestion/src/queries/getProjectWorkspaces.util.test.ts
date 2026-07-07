@@ -25,6 +25,11 @@ const makeGenericFinding = ({
   location_path: locationPath,
   rule_id: 'CC.G5',
   severity: 'MEDIUM',
+  // Required since 0017: the procedure's recordset now reads status
+  // (jsonb_to_recordset applies no column DEFAULTs), relying on
+  // reportSchema's `.default('open')` — a hand-built payload must honor
+  // the same contract.
+  status: 'open',
   verification_steps: [],
   why: 'Because.',
 });
