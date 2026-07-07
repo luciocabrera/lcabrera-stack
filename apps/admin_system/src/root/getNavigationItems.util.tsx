@@ -3,6 +3,7 @@ import type { ToolbarItemConfig } from '@repo/ui/components/Toolbar/Toolbar.type
 import {
   ListAllIcon,
   ListCheckedIcon,
+  LockIcon,
   SettingsIcon,
 } from '@repo/ui/components/Icons';
 
@@ -24,6 +25,18 @@ export const getNavigationItems = (
     icon: <ListCheckedIcon size={iconSize} />,
     label: 'Scanners',
     to: '/cqms/scanners',
+    type: 'link',
+  },
+  {
+    icon: <LockIcon size={iconSize} />,
+    label: 'Users',
+    to: '/cqms/admin/users',
+    type: 'link',
+  },
+  {
+    icon: <LockIcon size={iconSize} />,
+    label: 'Roles',
+    to: '/cqms/admin/roles',
     type: 'link',
   },
   {

@@ -29,5 +29,13 @@ export default [
     route('scanners/new', 'routes/cqms/new-scanner/root.ts'),
     route('scanners/edit/:scannerId', 'routes/cqms/edit-scanner/root.ts'),
     route('scanners/view/:scannerId', 'routes/cqms/scanner-detail/root.ts'),
+    route('admin/users', 'routes/cqms/users/root.ts'),
+    route('admin/users/new', 'routes/cqms/new-user/root.ts'),
+    route('admin/users/edit/:username', 'routes/cqms/edit-user/root.ts'),
+    route('admin/users/view/:username', 'routes/cqms/user-detail/root.ts'),
+    route('admin/roles', 'routes/cqms/roles/root.ts'),
+    route('admin/roles/new', 'routes/cqms/new-role/root.ts'),
+    route('admin/roles/edit/:roleName', 'routes/cqms/edit-role/root.ts'),
+    route('admin/roles/view/:roleName', 'routes/cqms/role-detail/root.ts'),
   ]),
 ] satisfies RouteConfig;

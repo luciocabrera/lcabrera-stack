@@ -8,7 +8,7 @@ never talks to `apps/api-server`, per TECH_SPEC decision #4.
 
 ## Route Tree
 
-```
+```ts
 route('cqms', 'routes/cqms/layout.ts', [
   index('routes/cqms/cqmsIndex.root.ts'),                          → redirects to /cqms/projects
   route('projects', 'routes/cqms/root.ts'),                        → project list
@@ -22,8 +22,22 @@ route('cqms', 'routes/cqms/layout.ts', [
   route('scanners/new', 'routes/cqms/new-scanner/root.ts'),        → register scanner (action)
   route('scanners/edit/:scannerId', 'routes/cqms/edit-scanner/root.ts'), → update + version bump (loader+action)
   route('scanners/view/:scannerId', 'routes/cqms/scanner-detail/root.ts'), → registry fields + version history
+  route('admin/users', 'routes/cqms/users/root.ts'),               → user management list (ADR-024, permission-gated)
+  route('admin/users/new', 'routes/cqms/new-user/root.ts'),        → create user + roles (action)
+  route('admin/users/edit/:username', 'routes/cqms/edit-user/root.ts'), → display name/enabled/roles/password
+  route('admin/users/view/:username', 'routes/cqms/user-detail/root.ts'),
+  route('admin/roles', 'routes/cqms/roles/root.ts'),               → role management list (ADR-024)
+  route('admin/roles/new', 'routes/cqms/new-role/root.ts'),        → create role + permissions (action)
+  route('admin/roles/edit/:roleName', 'routes/cqms/edit-role/root.ts'), → description/enabled/permission matrix
+  route('admin/roles/view/:roleName', 'routes/cqms/role-detail/root.ts'),
 ])
 ```
+
+The admin routes are keyed by the natural keys (username / role_name —
+both immutable in Postgres) and gated by `requirePermission`
+(requireUser → checkUserPermission → 403 with the DB's own reason);
+project-detail additionally hosts the per-instance grants editor
+(fetcher intents `grant-add`/`grant-delete`, admin-only — ADR-024).
 
 The scanners list is the first consumer of the Table's crud metadata
 (`metaState.crud` + an `isPrimaryKey` column): the create link and the

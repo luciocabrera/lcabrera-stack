@@ -73,15 +73,26 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
     console.warn('Workspace snapshot refresh failed (non-fatal):', error);
   }
 
-  const { runId } = await triggerScanMutation({
-    projectId: parsedParams.data.projectId,
-    scannerIds: parsed.data.scannerIds,
-    triggeredBy: user.username,
-    userId: user.id,
-    workspacePaths: parsed.data.workspacePaths,
-  });
+  try {
+    const { runId } = await triggerScanMutation({
+      projectId: parsedParams.data.projectId,
+      scannerIds: parsed.data.scannerIds,
+      triggeredBy: user.username,
+      userId: user.id,
+      workspacePaths: parsed.data.workspacePaths,
+    });
 
-  return redirect(
-    `/cqms/projects/view/${parsedParams.data.projectId}/runs/${runId}`,
-  );
+    return redirect(
+      `/cqms/projects/view/${parsedParams.data.projectId}/runs/${runId}`,
+    );
+  } catch (error) {
+    // fn_create_run's typed rejection (e.g. a viewer without the
+    // execute/scan grant, ADR-024) renders as a field error, not a 500.
+    return {
+      errors: {
+        scannerIds:
+          error instanceof Error ? error.message : 'Failed to start the scan.',
+      },
+    };
+  }
 };

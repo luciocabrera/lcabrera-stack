@@ -9,10 +9,18 @@ import { useLoaderData } from 'react-router';
 import type { loader } from './projectDetail.loader';
 
 import { PROJECT_RUNS_COLUMNS } from './ProjectDetail.constants';
+import { ProjectGrantsPanel } from './ProjectGrantsPanel/ProjectGrantsPanel.component';
 import { ProjectTrendPanel } from './ProjectTrendPanel';
 
 export const ProjectDetail = () => {
-  const { project, runsPromise, trendPromise } = useLoaderData<typeof loader>();
+  const {
+    canManageGrants,
+    grantsPromise,
+    project,
+    runsPromise,
+    trendPromise,
+    usersPromise,
+  } = useLoaderData<typeof loader>();
 
   return (
     <div>
@@ -42,6 +50,18 @@ export const ProjectDetail = () => {
         dataSelector={(rows) => rows}
         metaState={{ title: { plural: 'Runs', singular: 'Run' } }}
       />
+
+      {canManageGrants && (
+        <>
+          <h2>Access Grants</h2>
+          <Suspense fallback={<p>Loading grants…</p>}>
+            <ProjectGrantsPanel
+              grantsPromise={grantsPromise}
+              usersPromise={usersPromise}
+            />
+          </Suspense>
+        </>
+      )}
     </div>
   );
 };
