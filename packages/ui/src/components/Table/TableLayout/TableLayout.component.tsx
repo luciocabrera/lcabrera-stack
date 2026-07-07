@@ -27,6 +27,7 @@ export const TableLayout = <
     <div {...stylex.props(styles.container)}>
       <TableConfigProvider<TData>
         columnsState={columnsState}
+        crud={crud}
         metaState={metaState}
       >
         <FiltersDataProvider<TData> columns={columnsState.columns}>

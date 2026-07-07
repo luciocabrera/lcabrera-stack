@@ -12,12 +12,10 @@ import type { TableBodyRowsProps } from './TableBodyRows.types';
 import { useGetTableData } from '../contexts/TableData/data/selectors';
 
 export const TableBodyRows = <TData extends Record<string, unknown>>({
-  crud,
   endIndex,
   isLoadingState,
   startIndex,
-  titleSingular,
-}: TableBodyRowsProps<TData>) => {
+}: TableBodyRowsProps) => {
   const data = useGetTableData<TData>();
   const { centerCols, leftPinnedCols, rightPinnedCols } = useGetColumnGroups();
   const columnSizing = useGetColumnSizing<TData>();
@@ -27,10 +25,8 @@ export const TableBodyRows = <TData extends Record<string, unknown>>({
 
   const renderBodyCell = createRenderTableBodyCell({
     columnSizing,
-    crud,
     isLoadingState,
     pinnedOffsets,
-    titleSingular,
   });
 
   return (

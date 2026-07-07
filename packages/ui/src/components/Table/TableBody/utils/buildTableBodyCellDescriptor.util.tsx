@@ -3,7 +3,6 @@ import type {
   DataKey,
   PinnedColumnInfo,
   TableColumn,
-  TableCrudConfig,
 } from '@repo/ui/components/Table/Table.types';
 import type { ReactNode } from 'react';
 
@@ -37,11 +36,9 @@ export type TableBodyCellDescriptor<TData extends Record<string, unknown>> =
 type BuildTableBodyCellDescriptorArgs<TData extends Record<string, unknown>> = {
   readonly col: TableColumn<TData>;
   readonly columnSizing: ColumnSizingState<TData>;
-  readonly crud?: TableCrudConfig<TData>;
   readonly isLoadingState: boolean;
   readonly pinnedOffsets: Partial<Record<DataKey<TData>, PinnedColumnInfo>>;
   readonly rowData: Record<string, unknown>;
-  readonly titleSingular?: string;
 };
 
 /**
@@ -52,11 +49,9 @@ export const buildTableBodyCellDescriptor = <
 >({
   col,
   columnSizing,
-  crud,
   isLoadingState,
   pinnedOffsets,
   rowData,
-  titleSingular,
 }: BuildTableBodyCellDescriptorArgs<TData>): TableBodyCellDescriptor<TData> => {
   const minWidth = col.minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
   const width = columnSizing[col.key] ?? minWidth;
@@ -64,15 +59,13 @@ export const buildTableBodyCellDescriptor = <
 
   const customActions = col.render?.(rowData as TData);
 
-  if (col.key === 'actions' && crud) {
+  if (col.key === 'actions') {
     return {
       children: (
         <TableRowActionsMenu
-          crud={crud}
           customActions={customActions}
           isLoadingState={isLoadingState}
           row={rowData as TData}
-          titleSingular={titleSingular}
         />
       ),
       isLoadingState,

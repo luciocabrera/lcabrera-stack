@@ -3,7 +3,6 @@ import type {
   DataKey,
   PinnedColumnInfo,
   TableColumn,
-  TableCrudConfig,
 } from '@repo/ui/components/Table/Table.types';
 
 import { TableBodyCell } from '@repo/ui/components/Table/TableBodyCell';
@@ -16,10 +15,8 @@ import {
 
 type CreateRenderTableBodyCellArgs<TData extends Record<string, unknown>> = {
   readonly columnSizing: ColumnSizingState<TData>;
-  readonly crud?: TableCrudConfig<TData>;
   readonly isLoadingState: boolean;
   readonly pinnedOffsets: Partial<Record<DataKey<TData>, PinnedColumnInfo>>;
-  readonly titleSingular?: string;
 };
 
 type RenderBodyCellArgs<TData extends Record<string, unknown>> = {
@@ -66,20 +63,16 @@ const renderFromDescriptor = <TData extends Record<string, unknown>>({
 export const createRenderTableBodyCell =
   <TData extends Record<string, unknown>>({
     columnSizing,
-    crud,
     isLoadingState,
     pinnedOffsets,
-    titleSingular,
   }: CreateRenderTableBodyCellArgs<TData>) =>
   ({ col, rowData }: RenderBodyCellArgs<TData>) => {
     const descriptor = buildTableBodyCellDescriptor({
       col,
       columnSizing,
-      crud,
       isLoadingState,
       pinnedOffsets,
       rowData,
-      titleSingular,
     });
 
     return renderFromDescriptor({ descriptor });

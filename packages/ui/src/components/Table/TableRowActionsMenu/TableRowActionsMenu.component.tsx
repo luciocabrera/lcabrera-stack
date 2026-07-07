@@ -8,6 +8,10 @@ import type {
   TableRowActionsMenuProps,
 } from './TableRowActionsMenu.types';
 
+import {
+  useGetTableCrud,
+  useGetTableTitleSingular,
+} from '../contexts/TableConfig/meta/selectors';
 import { useTableContainerRef } from '../contexts/TableWrapper';
 import { resolveCrudRowId } from '../utils/resolveCrudRowId.util';
 import { TableActionMenu } from './TableActionMenu';
@@ -21,27 +25,26 @@ const MENU_REPOSITION_FRAMES = 10;
 const MENU_VIEWPORT_PADDING_PX = 8;
 
 export const TableRowActionsMenu = <TData extends Record<string, unknown>>({
-  crud,
   customActions,
   isLoadingState = false,
   row,
-  titleSingular,
 }: TableRowActionsMenuProps<TData>) => {
+  const crud = useGetTableCrud<TData>();
   const containerRef = useTableContainerRef();
   const fetcher = useFetcher();
+  const titleSingular = useGetTableTitleSingular();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const menuId = useId().replaceAll(':', '');
   const [menuPosition, setMenuPosition] = useState<MenuPosition>();
   const triggerId = `${menuId}-trigger`;
-  const resolvedTitleSingular = titleSingular ?? DEFAULT_TITLE_SINGULAR;
 
   useEffect(() => {
     const menuElement = menuRef.current;
     const containerElement = containerRef.current;
     const triggerElement = document.getElementById(triggerId);
 
-    if (!menuElement || !containerElement || !triggerElement) {
+    if (!crud || !menuElement || !containerElement || !triggerElement) {
       return;
     }
 
@@ -93,7 +96,11 @@ export const TableRowActionsMenu = <TData extends Record<string, unknown>>({
       intersectionObserver.disconnect();
       resizeObserver.disconnect();
     };
-  }, [containerRef, triggerId]);
+  }, [containerRef, crud, triggerId]);
+
+  if (!crud) {
+    return customActions;
+  }
 
   if (isLoadingState) {
     return (
@@ -103,6 +110,7 @@ export const TableRowActionsMenu = <TData extends Record<string, unknown>>({
     );
   }
 
+  const resolvedTitleSingular = titleSingular ?? DEFAULT_TITLE_SINGULAR;
   const rowId = resolveCrudRowId({ idAccessor: crud.idAccessor, row });
 
   const handleToggleMenu = () => {

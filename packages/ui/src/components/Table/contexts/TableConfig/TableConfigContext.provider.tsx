@@ -17,6 +17,7 @@ import { getInitialColumnsState, getInitialMetaState } from './utils';
 export const TableConfigProvider = <TData extends Record<string, unknown>>({
   children,
   columnsState,
+  crud, //TODO: it should be inside the metaState
   metaState,
 }: TableConfigProviderProps<TData>) => {
   const normalizedColumnsState = getInitialColumnsState<TData>({
@@ -38,7 +39,11 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
   );
   const metaStore = useStore<TableMetaState>(normalizedMetaState);
 
-  const value: TableConfigContextValue<TData> = { columnsStore, metaStore };
+  const value: TableConfigContextValue<TData> = {
+    columnsStore,
+    crud,
+    metaStore,
+  };
 
   // The context is declared non-generic; useTableConfigContextValue<TData>()
   // restores the generic on read. Erase the type parameter only here.

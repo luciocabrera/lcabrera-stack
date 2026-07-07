@@ -17,12 +17,10 @@ import {
 } from '../contexts/TableData/data/selectors';
 import { styles } from './TableBody.stylex';
 
-export const TableBody = <TData extends Record<string, unknown>>({
-  crud,
+export const TableBody = ({
   emptyState,
   tableContainerRef,
-  titleSingular,
-}: TableBodyProps<TData>) => {
+}: TableBodyProps) => {
   const totalLoadedRows = useGetTableTotalLoadedRows();
   const isLoading = useGetTableIsLoading();
   const isLoadingMore = useGetTableIsLoadingMore();
@@ -52,12 +50,10 @@ export const TableBody = <TData extends Record<string, unknown>>({
   return (
     <tbody data-testid='table-body' {...stylex.props(styles.body(totalHeight))}>
       {offsetY > 0 && <SpacerRow height={offsetY} />}
-      <TableBodyRows<TData>
-        crud={crud}
+      <TableBodyRows
         endIndex={endIndex}
         isLoadingState={isLoadingState}
         startIndex={startIndex}
-        titleSingular={titleSingular}
       />
       {bottomSpacerHeight > 0 && <SpacerRow height={bottomSpacerHeight} />}
     </tbody>
