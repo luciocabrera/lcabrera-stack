@@ -29,3 +29,5 @@ export const IS_PREFETCH_ENABLED = true;
  * a single-column primary key yields the raw (encoded) value unchanged.
  */
 export const PRIMARY_KEY_ID_DELIMITER = '_';
+
+export const ACTIONS_COLUMN_KEY = 'actions';

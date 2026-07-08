@@ -1,6 +1,5 @@
 import type { ProjectListViewRow } from '@repo/scan-ingestion/queries/getProjectListView.util';
 
-import { TableCreateLink } from '@repo/ui/components/Table/TableCreateLink';
 import { TableLayout } from '@repo/ui/components/Table/TableLayout';
 import { createEmptyColumnsState } from '@repo/ui/components/Table/utils/createEmptyColumnsState.util';
 import { useLoaderData } from 'react-router';
@@ -14,20 +13,27 @@ const TITLE = {
   singular: 'Project',
 };
 
+/**
+ * Project list — crud metadata convention (see scanners/users/roles).
+ * Navigation comes entirely from the Table's crud metadata: `create` renders
+ * the header "new" link, `read`/`update` render per-row view/edit actions
+ * targeting `view/<id>` / `edit/<id>` relative to this route (the id column
+ * is the primary key). No delete — no delete function exists for projects.
+ */
 export const Cqms = () => {
   const { projectsPromise } = useLoaderData<typeof loader>();
 
   return (
     <TableLayout<ProjectListViewRow, readonly ProjectListViewRow[]>
-      actions={
-        <TableCreateLink title={TITLE.singular} to='/cqms/projects/new' />
-      }
       columnsState={createEmptyColumnsState({
         columns: PROJECT_LIST_COLUMNS,
       })}
       dataPromise={projectsPromise}
       dataSelector={(rows) => rows}
-      metaState={{ title: TITLE }}
+      metaState={{
+        crud: { create: true, read: true, update: true },
+        title: TITLE,
+      }}
     />
   );
 };

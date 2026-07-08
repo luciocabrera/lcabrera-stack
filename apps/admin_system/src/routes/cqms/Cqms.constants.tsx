@@ -2,20 +2,19 @@ import type { ProjectListViewRow } from '@repo/scan-ingestion/queries/getProject
 import type { TableColumn } from '@repo/ui/components/Table';
 
 import { StatusBadge } from '@repo/ui/components/StatusBadge';
-import { Link } from 'react-router';
 
 import { resolveRunStatusTone } from './utils/resolveRunStatusTone.util';
 
 export const PROJECT_LIST_COLUMNS: readonly TableColumn<ProjectListViewRow>[] =
   [
     {
-      key: 'name',
-      label: 'Project',
-      minWidth: 160,
-      render: (row) => (
-        <Link to={`/cqms/projects/view/${row.id}`}>{row.name}</Link>
-      ),
+      dataType: 'string',
+      isPrimaryKey: true,
+      key: 'id',
+      label: 'ID',
+      minWidth: 220,
     },
+    { dataType: 'string', key: 'name', label: 'Project', minWidth: 160 },
     { dataType: 'string', key: 'local_path', label: 'Path', minWidth: 220 },
     {
       key: 'latest_run_status',
@@ -43,11 +42,5 @@ export const PROJECT_LIST_COLUMNS: readonly TableColumn<ProjectListViewRow>[] =
       key: 'last_scanned_at',
       label: 'Last Scanned',
       minWidth: 150,
-    },
-    {
-      key: 'id',
-      label: '',
-      minWidth: 70,
-      render: (row) => <Link to={`/cqms/projects/edit/${row.id}`}>Edit</Link>,
     },
   ];
