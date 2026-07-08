@@ -1,6 +1,7 @@
 import type { ToolbarItemConfig } from '@repo/ui/components/Toolbar/Toolbar.types';
 
 import {
+  BarChartIcon,
   ListAllIcon,
   ListCheckedIcon,
   LockIcon,
@@ -37,6 +38,12 @@ export const getNavigationItems = (
     icon: <LockIcon size={iconSize} />,
     label: 'Roles',
     to: '/cqms/admin/roles',
+    type: 'link',
+  },
+  {
+    icon: <BarChartIcon size={iconSize} />,
+    label: 'LLM Usage',
+    to: '/cqms/admin/llm-usage',
     type: 'link',
   },
   {
