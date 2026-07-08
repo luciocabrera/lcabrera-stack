@@ -15,6 +15,7 @@ The project enforces `strict: true` with additional flags: `noUncheckedIndexedAc
 - **Use `readonly T[]` for arrays in types** — prevents accidental mutation. Never use `ReadonlyArray<T>` (the `readonly T[]` shorthand is preferred throughout this codebase).
 - **Never use `any`** — use `unknown` with type guards instead.
 - **Never use `React.FC`** — use explicit arrow functions with typed props.
+- **Never write an explicit function/hook/component return type as a first approach — let TypeScript infer it.** Only add one when inference genuinely fails or produces the wrong type: recursive functions, complex conditional/mapped-type returns (see `Curry`/`Pipe` under Variadic Tuple Types below), overloaded signatures, or deliberately widening a literal/narrow inferred type. Do not add `: void`, `: string`, `: JSX.Element`, `: Promise<void>`, etc. out of habit — if you catch yourself typing a return annotation, delete it first and only restore it if `tsc`/inference actually needs it.
 - **For `unicorn(no-nested-ternary)` violations, rewrite logic using `if/else` or early returns** — do not "fix" by adding parentheses around nested ternaries, because formatter/lint cycles may remove them and re-trigger the error.
 
 ## Function Parameters
@@ -24,15 +25,15 @@ The project enforces `strict: true` with additional flags: `noUncheckedIndexedAc
 - **Hook signatures should use readonly argument objects** (for `*Args` hook parameter types). Keep callback parameter types compatible with callers (for example React state setters) and avoid over-constraining callback inputs when it breaks assignability.
 
 ```typescript
-// ✅ Object params with Args suffix
+// ✅ Object params with Args suffix — return type omitted, TypeScript infers it
 type FormatCurrencyArgs = {
   readonly amount: number;
   readonly currency: string;
 };
-export const formatCurrency = ({ amount, currency }: FormatCurrencyArgs): string => { ... };
+export const formatCurrency = ({ amount, currency }: FormatCurrencyArgs) => { ... };
 
-// ✅ Single param
-export const formatDate = (date: Date): string => { ... };
+// ✅ Single param — return type omitted, TypeScript infers it
+export const formatDate = (date: Date) => { ... };
 ```
 
 ## Naming Conventions for Types

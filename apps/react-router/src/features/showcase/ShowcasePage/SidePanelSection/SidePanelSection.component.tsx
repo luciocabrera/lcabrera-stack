@@ -19,10 +19,6 @@ import {
   SidePanelHeader,
   SidePanelTitle,
 } from '@repo/ui/components/SidePanel';
-import {
-  HorizontalToolbarExample,
-  HorizontalToolbarExampleShort,
-} from '@repo/ui/components/Toolbar/Toolbar.examples';
 import { ICON_SIZE_MD } from '@repo/ui/design-system/constants';
 import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
@@ -119,9 +115,6 @@ export const SidePanelSection = () => {
             <p>This right panel is larger (lg size).</p>
             <p>You can put any content here, including other components.</p>
           </div>
-
-          <HorizontalToolbarExample />
-          <HorizontalToolbarExampleShort />
         </SidePanelBody>
         <SidePanelFooter>
           <div {...stylex.props(styles.buttonRow)}>

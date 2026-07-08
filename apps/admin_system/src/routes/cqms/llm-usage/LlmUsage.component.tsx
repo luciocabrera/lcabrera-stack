@@ -1,3 +1,4 @@
+import * as stylex from '@stylexjs/stylex';
 import { Suspense } from 'react';
 import { useLoaderData } from 'react-router';
 
@@ -5,6 +6,7 @@ import type { loader } from './llmUsage.loader';
 
 import { CappedLlmUsageAttemptsTable } from './CappedLlmUsageAttemptsTable';
 import { DailyLlmCostPanel } from './DailyLlmCostPanel';
+import { styles } from './LlmUsage.stylex';
 import { ProjectLlmCostTable } from './ProjectLlmCostTable';
 import { ScannerLlmCostTable } from './ScannerLlmCostTable';
 
@@ -25,15 +27,21 @@ export const LlmUsage = () => {
       </Suspense>
 
       <h2>Cost by Scanner</h2>
-      <ScannerLlmCostTable scannerCostPromise={scannerCostPromise} />
+      <div {...stylex.props(styles.tableWrapper)}>
+        <ScannerLlmCostTable scannerCostPromise={scannerCostPromise} />
+      </div>
 
       <h2>Cost by Project</h2>
-      <ProjectLlmCostTable projectCostPromise={projectCostPromise} />
+      <div {...stylex.props(styles.tableWrapper)}>
+        <ProjectLlmCostTable projectCostPromise={projectCostPromise} />
+      </div>
 
       <h2>Capped Attempts</h2>
-      <CappedLlmUsageAttemptsTable
-        cappedAttemptsPromise={cappedAttemptsPromise}
-      />
+      <div {...stylex.props(styles.tableWrapper)}>
+        <CappedLlmUsageAttemptsTable
+          cappedAttemptsPromise={cappedAttemptsPromise}
+        />
+      </div>
     </div>
   );
 };
