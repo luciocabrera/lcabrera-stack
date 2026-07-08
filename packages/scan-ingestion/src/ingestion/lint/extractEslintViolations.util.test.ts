@@ -35,6 +35,7 @@ describe('extractEslintViolations', () => {
         end_col: 12,
         end_line: 3,
         file_path: 'apps/web/src/foo.ts',
+        finding_id: expect.any(String),
         fixable: false,
         line: 3,
         message: 'Unexpected any.',
@@ -43,11 +44,42 @@ describe('extractEslintViolations', () => {
         severity: 'HIGH',
         severity_raw: '2',
         source: 'eslint',
+        suggestion_text:
+          'Address per rule: @typescript-eslint/no-explicit-any.',
         suppressed: false,
         suppression_justification: undefined,
         suppression_kind: undefined,
       },
     ]);
+  });
+
+  it('uses the real suggestion description as suggestion_text when eslint provides one', () => {
+    const raw = eslintRawSchema.parse({
+      results: [
+        {
+          filePath: '/repo/src/num.ts',
+          messages: [
+            {
+              message: 'Prefer `Number.isSafeInteger()`.',
+              ruleId: 'unicorn/prefer-number-is-safe-integer',
+              severity: 2,
+              suggestions: [
+                {
+                  desc: 'Replace `Number.isInteger()` with `Number.isSafeInteger()`.',
+                  fix: { range: [349, 358], text: 'isSafeInteger' },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    const violations = extractEslintViolations({ localPath: LOCAL_PATH, raw });
+
+    expect(violations[0]?.suggestion_text).toBe(
+      'Replace `Number.isInteger()` with `Number.isSafeInteger()`.',
+    );
   });
 
   it('includes suppressedMessages as suppressed rows with kind and justification', () => {
@@ -102,6 +134,9 @@ describe('extractEslintViolations', () => {
     const violations = extractEslintViolations({ localPath: LOCAL_PATH, raw });
 
     expect(violations[0]?.fixable).toBe(true);
+    expect(violations[0]?.suggestion_text).toBe(
+      'Autofixable via `eslint --fix` (rule: perfectionist/sort-imports).',
+    );
   });
 
   it('falls back to eslint(unknown) for a missing ruleId (fatal parse errors)', () => {

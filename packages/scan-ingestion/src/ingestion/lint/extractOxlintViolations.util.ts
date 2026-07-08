@@ -3,6 +3,9 @@ import path from 'node:path';
 import type { LintViolationInput } from './lintViolation.types.ts';
 import type { OxlintRaw } from './oxlintRaw.schema.ts';
 
+import { makeFindingId } from '../../../../../.github/skills/code-smell-shared/scripts/deterministic-scan-shared.mjs';
+import { buildOxlintFixText } from '../../../../../.github/skills/code-smell-shared/scripts/finding-templates.mjs';
+
 type ExtractOxlintViolationsArgs = {
   /** The registered project root — file_path is stored relative to it. */
   readonly localPath: string;
@@ -28,19 +31,31 @@ export const extractOxlintViolations = ({
     const absolute = diagnostic.filename.startsWith('/')
       ? diagnostic.filename
       : path.resolve(scopeDirectory, diagnostic.filename);
+    const filePath = path.relative(localPath, absolute);
     const span = diagnostic.labels?.[0]?.span;
+    const ruleId = diagnostic.code ?? 'oxlint(unknown)';
+    // Matches generate-oxlint-report.mjs's locationHint construction
+    // exactly, so finding_id agrees with report.json's copy (ADR-028).
+    const locationHint = span ? `${span.line}:${span.column}` : '';
 
     return {
       col: span?.column ?? undefined,
-      file_path: path.relative(localPath, absolute),
+      file_path: filePath,
+      finding_id: makeFindingId(
+        ruleId,
+        filePath,
+        locationHint,
+        diagnostic.message,
+      ),
       fixable: false,
       help_url: diagnostic.url ?? undefined,
       line: span?.line ?? undefined,
       message: diagnostic.message,
-      rule_id: diagnostic.code ?? 'oxlint(unknown)',
+      rule_id: ruleId,
       severity: diagnostic.severity === 'error' ? 'HIGH' : 'MEDIUM',
       severity_raw: diagnostic.severity,
       source: 'oxlint',
+      suggestion_text: buildOxlintFixText(diagnostic, ruleId),
       suppressed: false,
     };
   });

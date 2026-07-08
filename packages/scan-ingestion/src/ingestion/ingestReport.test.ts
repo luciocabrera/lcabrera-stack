@@ -145,4 +145,55 @@ describe('ingestReport', () => {
     expect(result.runId).toBe(runId);
     expect(result.projectId).toBe(projectId);
   });
+
+  it('does not dual-write into scan_findings for scanners with their own detail tables (ADR-028)', async () => {
+    const projectDir = makeTempDirectory('scan-ingestion-project-');
+    createdProjectPaths.push(projectDir);
+
+    const reportDir = writeReportFiles({
+      findings: [
+        {
+          confidence: 'high',
+          finding_id: 'eslint-f1',
+          fix: 'Address per rule: no-unused-vars.',
+          location_path: 'src/foo.ts',
+          rule_id: 'no-unused-vars',
+          severity: 'HIGH',
+          why: "'x' is declared but never used.",
+        },
+      ],
+      generated_at: '2026-01-01T00:00:00Z',
+      high_count: 1,
+      report_id: 'report-ingest-test-3',
+      top_risk: 'no-unused-vars',
+    });
+
+    const result = await ingestReport({
+      localPath: projectDir,
+      origin: 'interactive_session',
+      reportJsonPath: path.join(reportDir, 'report.json'),
+      reportMarkdownPath: path.join(reportDir, 'report.md'),
+      scannerId: 'eslint',
+      scopeType: 'repo',
+      scopeValue: '.',
+      userId: systemUserId,
+    });
+
+    // The report itself still claims the real finding count — only the
+    // scan_findings row-insert is skipped, not the report metadata.
+    expect(result.findingsIngested).toBe(1);
+
+    const pool = getPool();
+    const findingRows = await pool.query(
+      'SELECT * FROM cqms.scan_findings WHERE scan_id = $1',
+      [result.scanId],
+    );
+    expect(findingRows.rows).toHaveLength(0);
+
+    const reportRow = await pool.query<{ high_count: number }>(
+      'SELECT high_count FROM cqms.reports WHERE scan_id = $1',
+      [result.scanId],
+    );
+    expect(reportRow.rows[0]?.high_count).toBe(1);
+  });
 });

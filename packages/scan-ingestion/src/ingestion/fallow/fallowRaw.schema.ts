@@ -169,6 +169,7 @@ export const fallowLargeFunctionSchema = z.object({
 });
 
 export const fallowTargetSchema = z.object({
+  actions: fallowActionListSchema,
   category: z.string().nullish(),
   confidence: z.string().nullish(),
   efficiency: z.number().nullish(),
@@ -178,6 +179,13 @@ export const fallowTargetSchema = z.object({
   path: z.string().default(''),
   priority: z.number().nullish(),
   recommendation: z.string().nullish(),
+});
+
+// fallow's own suggested next CLI commands — top-level, not per-finding.
+export const fallowNextStepSchema = z.object({
+  command: z.string().nullish(),
+  id: z.string().nullish(),
+  reason: z.string().nullish(),
 });
 
 const fallowHealthSummarySchema = z.object({
@@ -266,6 +274,7 @@ export const fallowRawSchema = z.object({
     })
     .nullish(),
   kind: z.string().nullish(),
+  next_steps: z.array(fallowNextStepSchema).default([]),
   schema_version: z.number().nullish(),
   version: z.string().nullish(),
 });

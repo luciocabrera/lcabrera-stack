@@ -12,6 +12,7 @@ export type LintViolationInput = {
   readonly end_col?: number;
   readonly end_line?: number;
   readonly file_path: string;
+  readonly finding_id?: string;
   readonly fixable: boolean;
   readonly help_url?: string;
   readonly line?: number;
@@ -21,6 +22,7 @@ export type LintViolationInput = {
   readonly severity: 'HIGH' | 'MEDIUM';
   readonly severity_raw: string;
   readonly source: 'eslint' | 'oxlint';
+  readonly suggestion_text?: string;
   readonly suppressed: boolean;
   readonly suppression_justification?: string;
   readonly suppression_kind?: string;

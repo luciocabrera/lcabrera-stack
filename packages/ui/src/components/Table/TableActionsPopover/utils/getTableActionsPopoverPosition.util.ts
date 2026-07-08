@@ -7,7 +7,7 @@ type BoundsRect = {
   readonly width: number;
 };
 
-type GetTableRowActionsMenuPositionArgs = {
+type GetTableActionsPopoverPositionArgs = {
   readonly containerRect: BoundsRect;
   readonly horizontalNudgePx: number;
   readonly menuGapPx: number;
@@ -17,12 +17,12 @@ type GetTableRowActionsMenuPositionArgs = {
   readonly viewportPaddingPx: number;
 };
 
-type TableRowActionsMenuPosition = {
+type TableActionsPopoverPosition = {
   readonly left: number;
   readonly top: number;
 };
 
-export const getTableRowActionsMenuPosition = ({
+export const getTableActionsPopoverPosition = ({
   containerRect,
   horizontalNudgePx,
   menuGapPx,
@@ -30,7 +30,7 @@ export const getTableRowActionsMenuPosition = ({
   triggerCellRight,
   triggerRect,
   viewportPaddingPx,
-}: GetTableRowActionsMenuPositionArgs): TableRowActionsMenuPosition => {
+}: GetTableActionsPopoverPositionArgs): TableActionsPopoverPosition => {
   const spaceBelow = containerRect.bottom - triggerRect.bottom;
   const spaceAbove = triggerRect.top - containerRect.top;
   const requiredSpace = menuRect.height + viewportPaddingPx + menuGapPx;

@@ -15,6 +15,7 @@ import { extractFallowFileScores } from './fallow/extractFallowFileScores.util.t
 import { extractFallowFunctionFindings } from './fallow/extractFallowFunctionFindings.util.ts';
 import { extractFallowHotspots } from './fallow/extractFallowHotspots.util.ts';
 import { extractFallowLargeFunctions } from './fallow/extractFallowLargeFunctions.util.ts';
+import { extractFallowNextSteps } from './fallow/extractFallowNextSteps.util.ts';
 import { extractFallowRunSummary } from './fallow/extractFallowRunSummary.util.ts';
 import { extractFallowTargets } from './fallow/extractFallowTargets.util.ts';
 import { fallowRawSchema } from './fallow/fallowRaw.schema.ts';
@@ -115,6 +116,7 @@ export const ingestScanDetail = async ({
       function_findings: extractFallowFunctionFindings({ raw }),
       hotspots: extractFallowHotspots({ raw }),
       large_functions: extractFallowLargeFunctions({ raw }),
+      next_steps: extractFallowNextSteps({ raw }),
       targets: extractFallowTargets({ raw }),
     };
     await pool.query('CALL cqms.sp_ingest_fallow_detail($1, $2, $3, $4)', [

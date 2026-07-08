@@ -67,7 +67,7 @@ const detailFixture = {
       exceeded: 'all',
       file_path: 'src/a.ts',
       function_name: 'bigOne',
-      severity: 'critical',
+      severity_raw: 'critical',
     },
   ],
   hotspots: [{ commits: 12, file_path: 'src/a.ts', score: 66 }],

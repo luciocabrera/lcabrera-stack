@@ -22,11 +22,18 @@ describe('extractFallowCircularDependencies', () => {
     expect(extractFallowCircularDependencies({ raw })).toEqual([
       {
         col: 9,
+        confidence: 'high',
         cycle_length: 2,
         edges: [{ col: 9, line: 1, path: 'src/A.tsx' }],
+        effort: 'medium',
         entry_file_path: 'src/A.tsx',
         files: ['src/A.tsx', 'src/B.tsx'],
+        finding_id: expect.any(String),
+        fix: 'Extract the shared logic into a separate module to break the cycle.',
         line: 1,
+        rule_id: 'fallow/circular-dependency',
+        severity: 'MEDIUM',
+        why: 'Import cycle of length 2: src/A.tsx → src/B.tsx.',
       },
     ]);
   });

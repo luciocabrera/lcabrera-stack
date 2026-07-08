@@ -21,6 +21,16 @@ import { resolveScan } from './resolveScan.util.ts';
 const SCOPES_WITH_FILE_INVENTORY = new Set(['folder', 'repo']);
 
 /**
+ * Scanners whose findings now live in their own detail tables with the
+ * full prose shape (rule_id/severity/why/fix/etc., ADR-028) and are
+ * surfaced via cqms.v_all_findings — cqms.scan_findings stops receiving
+ * their rows so the same fact isn't stored twice. Remaining scanners
+ * (the LLM-based ones, with no raw artifact and no detail table of their
+ * own) keep scan_findings as their only representation.
+ */
+const SCANNERS_WITH_DETAIL_FINDINGS = new Set(['eslint', 'fallow', 'oxlint']);
+
+/**
  * Thin validate-then-call wrapper (TECH_SPEC §2.3a/§2.4) — Zod-parses
  * report.json off disk, resolves/creates the run+scan, then delegates the
  * actual multi-table write to sp_ingest_scan_result. No hand-assembled
@@ -94,7 +104,11 @@ export const ingestReport = async (
         // absent keys, same as an explicit JSON null.
         top_risk: report.top_risk,
       }),
-      JSON.stringify(report.findings),
+      JSON.stringify(
+        SCANNERS_WITH_DETAIL_FINDINGS.has(args.scannerId)
+          ? []
+          : report.findings,
+      ),
       // undefined is serialized as SQL NULL by pg (prepareValue).
       fileInventory ? JSON.stringify(fileInventory) : undefined,
     ],

@@ -47,14 +47,14 @@ export const getScanFindings = async ({
   const [rowsResult, countResult] = await Promise.all([
     pool.query<ScanFindingRow>(
       `SELECT confidence, effort, evidence_excerpt, finding_id, fix, location_hint, location_path, rule_id, severity, status, why
-       FROM cqms.v_scan_findings
+       FROM cqms.v_all_findings
        WHERE scan_id = $1 ${severityFilter}
        ORDER BY severity, location_path
        LIMIT $2 OFFSET $3`,
       params,
     ),
     pool.query<{ count: string }>(
-      `SELECT count(*) FROM cqms.v_scan_findings WHERE scan_id = $1 ${severity ? 'AND severity = $2' : ''}`,
+      `SELECT count(*) FROM cqms.v_all_findings WHERE scan_id = $1 ${severity ? 'AND severity = $2' : ''}`,
       severity ? [scanId, severity] : [scanId],
     ),
   ]);

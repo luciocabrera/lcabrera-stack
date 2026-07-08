@@ -1,18 +1,34 @@
 export type FallowCircularDependencyInput = {
   readonly col?: number;
+  readonly confidence?: string;
   readonly cycle_length: number;
   readonly edges?: readonly unknown[];
+  readonly effort?: string;
   readonly entry_file_path?: string;
   readonly files: readonly string[];
+  readonly finding_id?: string;
+  readonly fix?: string;
   readonly line?: number;
+  readonly rule_id?: string;
+  readonly severity?: string;
+  readonly why?: string;
 };
 
 export type FallowCloneGroupInput = {
+  readonly confidence?: string;
+  readonly effort?: string;
+  readonly finding_id?: string;
   readonly fingerprint?: string;
+  readonly fix?: string;
   readonly instances: readonly FallowCloneInstanceInput[];
   readonly line_count: number;
+  readonly location_hint?: string;
+  readonly location_path?: string;
+  readonly rule_id?: string;
+  readonly severity?: string;
   readonly suggested_name?: string;
   readonly token_count: number;
+  readonly why?: string;
 };
 
 export type FallowCloneInstanceInput = {
@@ -35,14 +51,21 @@ export type FallowDeadCodeCategory =
 export type FallowDeadCodeInput = {
   readonly category: FallowDeadCodeCategory;
   readonly col?: number;
+  readonly confidence?: string;
   readonly dependency_location?: string;
   readonly detail?: Readonly<Record<string, unknown>>;
+  readonly effort?: string;
   readonly export_name?: string;
   readonly file_path?: string;
+  readonly finding_id?: string;
+  readonly fix?: string;
   readonly is_re_export?: boolean;
   readonly is_type_only?: boolean;
   readonly line?: number;
   readonly package_name?: string;
+  readonly rule_id?: string;
+  readonly severity?: string;
+  readonly why?: string;
 };
 
 /** The p_detail jsonb passed to sp_ingest_fallow_detail. */
@@ -54,6 +77,7 @@ export type FallowDetailInput = {
   readonly function_findings: readonly FallowFunctionFindingInput[];
   readonly hotspots: readonly FallowHotspotInput[];
   readonly large_functions: readonly FallowLargeFunctionInput[];
+  readonly next_steps: readonly FallowNextStepInput[];
   readonly targets: readonly FallowTargetInput[];
 };
 
@@ -75,17 +99,25 @@ export type FallowFileScoreInput = {
 export type FallowFunctionFindingInput = {
   readonly cognitive?: number;
   readonly col?: number;
+  readonly confidence?: string;
   readonly coverage_source?: string;
   readonly coverage_tier?: string;
   readonly crap?: number;
   readonly cyclomatic?: number;
+  readonly effort?: string;
   readonly exceeded?: string;
   readonly file_path: string;
+  readonly finding_id?: string;
+  readonly fix?: string;
   readonly function_name?: string;
   readonly line?: number;
   readonly line_count?: number;
   readonly param_count?: number;
+  readonly rule_id?: string;
+  /** Canonical BLOCKER..NIT — fallow's own critical|high|moderate scale is severity_raw. */
   readonly severity?: string;
+  readonly severity_raw?: string;
+  readonly why?: string;
 };
 
 export type FallowHotspotInput = {
@@ -105,6 +137,13 @@ export type FallowLargeFunctionInput = {
   readonly function_name?: string;
   readonly line?: number;
   readonly line_count: number;
+};
+
+/** fallow's own suggested next CLI commands (top-level next_steps). */
+export type FallowNextStepInput = {
+  readonly command?: string;
+  readonly reason?: string;
+  readonly step_id?: string;
 };
 
 /**
@@ -189,6 +228,7 @@ export type FallowRunSummaryInput = {
 };
 
 export type FallowTargetInput = {
+  readonly actions?: readonly unknown[];
   readonly category?: string;
   readonly confidence?: string;
   readonly efficiency?: number;

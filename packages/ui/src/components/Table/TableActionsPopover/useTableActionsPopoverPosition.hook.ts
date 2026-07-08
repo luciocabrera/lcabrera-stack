@@ -2,9 +2,9 @@ import type { RefObject } from 'react';
 
 import { useEffect, useRef, useState } from 'react';
 
-import type { MenuPosition } from './TableRowActionsMenu.types';
+import type { MenuPosition } from './TableActionsPopover.types';
 
-import { getTableRowActionsMenuPosition } from './utils/getTableRowActionsMenuPosition.util';
+import { getTableActionsPopoverPosition } from './utils/getTableActionsPopoverPosition.util';
 
 const MENU_GAP_PX = 4;
 const MENU_HORIZONTAL_NUDGE_PX = 2;
@@ -41,10 +41,12 @@ const computeMenuPosition = ({
   triggerElement,
 }: ComputeMenuPositionArgs) => {
   const triggerRect = triggerElement.getBoundingClientRect();
-  const triggerCellRect = triggerElement.closest('td')?.getBoundingClientRect();
+  const triggerCellRect = triggerElement
+    .closest('td, th')
+    ?.getBoundingClientRect();
   const menuRect = menuElement.getBoundingClientRect();
 
-  return getTableRowActionsMenuPosition({
+  return getTableActionsPopoverPosition({
     containerRect,
     horizontalNudgePx: MENU_HORIZONTAL_NUDGE_PX,
     menuGapPx: MENU_GAP_PX,
@@ -55,23 +57,24 @@ const computeMenuPosition = ({
   });
 };
 
-type UseTableRowActionsMenuPositionArgs = {
+type UseTableActionsPopoverPositionArgs = {
   readonly containerRef: RefObject<HTMLDivElement | null>;
   readonly isEnabled: boolean;
   readonly triggerId: string;
 };
 
 /**
- * Owns the row-actions popover's open state and viewport-aware coordinates.
+ * Owns a table actions popover's open state and viewport-aware coordinates.
  * Repositioning is recomputed on resize/intersection while open, and across
  * several animation frames right after opening because virtualization/load-more
- * can shift row geometry immediately after the click.
+ * can shift trigger geometry immediately after the click. Shared by
+ * TableRowActionsMenu (row actions) and TableHeaderActionsMenu (column actions).
  */
-export const useTableRowActionsMenuPosition = ({
+export const useTableActionsPopoverPosition = ({
   containerRef,
   isEnabled,
   triggerId,
-}: UseTableRowActionsMenuPositionArgs) => {
+}: UseTableActionsPopoverPositionArgs) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const [menuPosition, setMenuPosition] = useState<MenuPosition>();
@@ -111,20 +114,26 @@ export const useTableRowActionsMenuPosition = ({
       );
     };
 
-    const resizeObserver = new ResizeObserver(repositionWhenOpen);
-    resizeObserver.observe(containerElement);
-    resizeObserver.observe(menuElement);
-    resizeObserver.observe(triggerElement);
+    const resizeObserver =
+      typeof ResizeObserver === 'undefined'
+        ? undefined
+        : new ResizeObserver(repositionWhenOpen);
+    resizeObserver?.observe(containerElement);
+    resizeObserver?.observe(menuElement);
+    resizeObserver?.observe(triggerElement);
 
-    const intersectionObserver = new IntersectionObserver(repositionWhenOpen, {
-      root: containerElement,
-      threshold: [0, 1],
-    });
-    intersectionObserver.observe(triggerElement);
+    const intersectionObserver =
+      typeof IntersectionObserver === 'undefined'
+        ? undefined
+        : new IntersectionObserver(repositionWhenOpen, {
+            root: containerElement,
+            threshold: [0, 1],
+          });
+    intersectionObserver?.observe(triggerElement);
 
     return () => {
-      intersectionObserver.disconnect();
-      resizeObserver.disconnect();
+      intersectionObserver?.disconnect();
+      resizeObserver?.disconnect();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- closeMenu is stable per render and re-derived from refs, not reactive state
   }, [containerRef, isEnabled, triggerId]);

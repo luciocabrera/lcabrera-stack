@@ -31,6 +31,7 @@ describe('extractOxlintViolations', () => {
       {
         col: 7,
         file_path: 'packages/ui/src/foo.ts',
+        finding_id: expect.any(String),
         fixable: false,
         help_url: 'https://example.test/no-unused-vars',
         line: 12,
@@ -39,6 +40,7 @@ describe('extractOxlintViolations', () => {
         severity: 'MEDIUM',
         severity_raw: 'warning',
         source: 'oxlint',
+        suggestion_text: 'Remove the variable.',
         suppressed: false,
       },
     ]);
@@ -91,6 +93,7 @@ describe('extractOxlintViolations', () => {
       file_path: 'src/abs.ts',
       line: undefined,
       rule_id: 'oxlint(unknown)',
+      suggestion_text: 'Address per rule: oxlint(unknown).',
     });
   });
 });

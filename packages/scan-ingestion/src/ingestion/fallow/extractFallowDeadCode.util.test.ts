@@ -68,8 +68,15 @@ describe('extractFallowDeadCode', () => {
     ]);
     expect(rows[0]).toEqual({
       category: 'unused_file',
+      confidence: 'high',
       detail: { actions: [{ type: 'delete-file' }] },
+      effort: 'small',
       file_path: 'src/server.constants.ts',
+      finding_id: expect.any(String),
+      fix: 'Verify no dynamic/framework usage, then delete the file (or suppress with a fallow-ignore-file comment).',
+      rule_id: 'fallow/unused-file',
+      severity: 'MEDIUM',
+      why: 'File is never imported from any detected entry point.',
     });
     expect(rows[1]).toMatchObject({
       category: 'unused_export',
@@ -78,12 +85,17 @@ describe('extractFallowDeadCode', () => {
       is_re_export: true,
       is_type_only: false,
       line: 3,
+      rule_id: 'fallow/unused-export',
+      severity: 'MEDIUM',
+      why: 'Export `DEFAULT_SORTING` is never imported anywhere.',
     });
     expect(rows[3]).toMatchObject({
       category: 'unused_dependency',
       dependency_location: 'dependencies',
       file_path: 'apps/admin_system/package.json',
       package_name: '@repo/data-access',
+      rule_id: 'fallow/unused-dependency',
+      severity: 'HIGH',
     });
     expect(rows[3]?.detail).toMatchObject({
       used_in_workspaces: ['apps/react-router'],
@@ -94,6 +106,8 @@ describe('extractFallowDeadCode', () => {
       file_path: 'apps/web/vite.config.ts',
       line: 3,
       package_name: 'vite-plus',
+      rule_id: 'fallow/unlisted-dependency',
+      severity: 'HIGH',
     });
   });
 

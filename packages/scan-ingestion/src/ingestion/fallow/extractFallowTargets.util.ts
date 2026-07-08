@@ -14,6 +14,7 @@ export const extractFallowTargets = ({
   raw,
 }: ExtractFallowTargetsArgs): readonly FallowTargetInput[] =>
   (raw.health?.targets ?? []).map((target) => ({
+    actions: target.actions,
     category: target.category ?? undefined,
     confidence: target.confidence ?? undefined,
     efficiency: target.efficiency ?? undefined,

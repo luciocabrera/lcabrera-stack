@@ -38,7 +38,11 @@ describe('extractFallowCloneGroups', () => {
 
     expect(groups).toHaveLength(2);
     expect(groups[0]).toEqual({
+      confidence: 'high',
+      effort: 'medium',
+      finding_id: expect.any(String),
       fingerprint: 'abc123',
+      fix: 'Extract the duplicated block into a shared helper (suggested name: `parseProjectParams`).',
       instances: [
         {
           end_col: 4,
@@ -58,8 +62,13 @@ describe('extractFallowCloneGroups', () => {
         },
       ],
       line_count: 13,
+      location_hint: '7-19',
+      location_path: 'src/editProject.action.ts',
+      rule_id: 'fallow/duplicate-code',
+      severity: 'MEDIUM',
       suggested_name: 'parseProjectParams',
       token_count: 120,
+      why: '2 duplicated instance(s) of the same 13-line block (120 tokens).',
     });
     // NOT NULL columns always emitted, even when the raw group omits them.
     expect(groups[1]).toMatchObject({ line_count: 0, token_count: 50 });

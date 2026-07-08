@@ -1,6 +1,7 @@
 import { Button } from '@repo/ui/components/Button';
 import { EraserIcon, EyeIcon, FileTextIcon } from '@repo/ui/components/Icons';
 import { NavLink } from '@repo/ui/components/NavLink';
+import { tableActionsPopoverStyles } from '@repo/ui/components/Table/TableActionsPopover';
 import * as stylex from '@stylexjs/stylex';
 
 import type { TableActionMenuProps } from './TableActionMenu.types';
@@ -15,13 +16,13 @@ export const TableActionMenu = ({
   rowId,
 }: TableActionMenuProps) => {
   return (
-    <div {...stylex.props(styles.menuActions)}>
+    <div {...stylex.props(tableActionsPopoverStyles.menuActions)}>
       {crud.read && (
         <NavLink
           color='ghost'
-          customStylex={styles.menuItem}
+          customStylex={tableActionsPopoverStyles.menuItem}
           icon={
-            <span {...stylex.props(styles.menuIcon)}>
+            <span {...stylex.props(tableActionsPopoverStyles.menuIcon)}>
               <EyeIcon size={16} />
             </span>
           }
@@ -36,9 +37,9 @@ export const TableActionMenu = ({
       {crud.update && (
         <NavLink
           color='ghost'
-          customStylex={styles.menuItem}
+          customStylex={tableActionsPopoverStyles.menuItem}
           icon={
-            <span {...stylex.props(styles.menuIcon)}>
+            <span {...stylex.props(tableActionsPopoverStyles.menuIcon)}>
               <FileTextIcon size={16} />
             </span>
           }
@@ -53,9 +54,9 @@ export const TableActionMenu = ({
       {crud.delete && (
         <Button
           color='ghost'
-          customStylex={styles.menuItem}
+          customStylex={tableActionsPopoverStyles.menuItem}
           icon={
-            <span {...stylex.props(styles.menuIcon)}>
+            <span {...stylex.props(tableActionsPopoverStyles.menuIcon)}>
               <EraserIcon size={16} />
             </span>
           }

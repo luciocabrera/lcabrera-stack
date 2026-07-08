@@ -9,6 +9,7 @@ import { ColumnsOrderIcon } from './ColumnsOrderIcon';
 import { EraserIcon } from './EraserIcon';
 import { ErrorIcon } from './ErrorIcon';
 import { EyeIcon } from './EyeIcon';
+import { EyeOffIcon } from './EyeOffIcon';
 import { FileTextIcon } from './FileTextIcon';
 import { FilterIcon } from './FilterIcon';
 import { HomeIcon } from './HomeIcon';
@@ -44,6 +45,7 @@ const iconComponents = [
   { Component: EraserIcon, defaultSize: 16, name: 'EraserIcon' },
   { Component: ErrorIcon, defaultSize: 24, name: 'ErrorIcon' },
   { Component: EyeIcon, defaultSize: 24, name: 'EyeIcon' },
+  { Component: EyeOffIcon, defaultSize: 24, name: 'EyeOffIcon' },
   { Component: FileTextIcon, defaultSize: 24, name: 'FileTextIcon' },
   { Component: FilterIcon, defaultSize: 16, name: 'FilterIcon' },
   { Component: HomeIcon, defaultSize: 24, name: 'HomeIcon' },

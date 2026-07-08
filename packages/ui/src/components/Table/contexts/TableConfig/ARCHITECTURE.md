@@ -22,10 +22,10 @@ TableConfig/
 │   │   ├── utils/resolveBatchColumnSettingsUpdate.util.ts → Build next derived column config slices for one batch column update
 │   │   ├── utils/resolveBatchTableSettingsUpdate.util.ts → Build next derived column config slices for one table-wide settings update
 │   │   ├── utils/commitPinningAndOrderUpdate.util.ts → Shared persist+store commit helper for pinning actions
+│   │   ├── utils/commitResolvedVisibilityState.util.ts → Shared persist+store commit helper for visibility actions
 │   │   ├── utils/resolveColumnPinningUpdate.util.ts  → Build next pinning state + synced order for one pinning change
 │   │   ├── utils/resolveColumnSizingUpdate.util.ts   → Build next sizing map + pinned offsets for one column resize
-│   │   ├── useAcceptHeaderPinConflict.hook.ts   → Resolve pin conflict from header
-│   │   ├── useAcceptHeaderPinSide.hook.ts       → Accept pin side from header
+│   │   ├── utils/resolveColumnVisibilityUpdate.util.ts → Build next columnVisibility Set for one column show/hide
 │   │   ├── useBatchSetColumnSettings.hook.ts    → Bulk-update multiple column fields
 │   │   ├── useBatchSetTableSettings.hook.ts     → Push settings from drawer → store
 │   │   ├── useResetColumnFilter.hook.ts         → Clear filter for one column
@@ -33,6 +33,7 @@ TableConfig/
 │   │   ├── useSetColumnPinning.hook.ts          → Set pinning state
 │   │   ├── useSetColumnSizing.hook.ts           → Set column widths
 │   │   ├── useSetColumnSorting.hook.ts          → Set sorting state
+│   │   ├── useSetColumnVisibility.hook.ts       → Show/hide a single column directly on the live store (not a drawer draft)
 │   │   └── useSyncColumnsSizing.hook.ts         → Sync sizing after layout changes
 │   │
 │   └── selectors/
@@ -187,21 +188,20 @@ so SSR and the initial client render already agree on the seeded state.
 
 ## Columns Actions
 
-| Hook                         | Reads From     | Writes To      | Description                                                                                                                   |
-| ---------------------------- | -------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `useBatchSetColumnSettings`  | —              | `columnsStore` | Bulk-set multiple column fields at once                                                                                       |
-| `useBatchSetTableSettings`   | —              | `columnsStore` | Push all settings from TableSettingsDrawer                                                                                    |
-| `useResetColumnFilter`       | —              | `columnsStore` | Remove filter for a single column                                                                                             |
-| `useSetColumnFilter`         | —              | `columnsStore` | Set filter value for a single column                                                                                          |
-| `useSetColumnPinning`        | `columnsStore` | `columnsStore` | Update pinning, keep column order synced (including header unpin reorder-to-fill), and commit pinning/order via shared helper |
-| `useSetColumnSizing`         | `columnsStore` | `columnsStore` | Set column width map and recompute pinned offsets via shared sizing resolver                                                  |
-| `useSetColumnSorting`        | `columnsStore` | `columnsStore` | Toggle/set sort for a column                                                                                                  |
-| `useSyncColumnsSizing`       | `columnsStore` | `columnsStore` | Recalculate sizing after layout shift                                                                                         |
-| `useAcceptHeaderPinConflict` | `columnsStore` | `columnsStore` | Resolve pin contiguity conflict from header and keep order synced                                                             |
-| `useAcceptHeaderPinSide`     | `columnsStore` | `columnsStore` | Accept pin side choice from header, keep order synced, and commit pinning/order via shared helper                             |
+| Hook                        | Reads From     | Writes To      | Description                                                                                                                   |
+| --------------------------- | -------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `useBatchSetColumnSettings` | —              | `columnsStore` | Bulk-set multiple column fields at once                                                                                       |
+| `useBatchSetTableSettings`  | —              | `columnsStore` | Push all settings from TableSettingsDrawer                                                                                    |
+| `useResetColumnFilter`      | —              | `columnsStore` | Remove filter for a single column                                                                                             |
+| `useSetColumnFilter`        | —              | `columnsStore` | Set filter value for a single column                                                                                          |
+| `useSetColumnPinning`       | `columnsStore` | `columnsStore` | Update pinning, keep column order synced (including header unpin reorder-to-fill), and commit pinning/order via shared helper |
+| `useSetColumnSizing`        | `columnsStore` | `columnsStore` | Set column width map and recompute pinned offsets via shared sizing resolver                                                  |
+| `useSetColumnSorting`       | `columnsStore` | `columnsStore` | Toggle/set sort for a column                                                                                                  |
+| `useSetColumnVisibility`    | `columnsStore` | `columnsStore` | Show/hide a single column directly (quick-access affordance, e.g. the header actions menu) and commit via shared helper       |
+| `useSyncColumnsSizing`      | `columnsStore` | `columnsStore` | Recalculate sizing after layout shift                                                                                         |
 
-Direct header mutation actions (`useSetColumnSorting`, `useSetColumnPinning`,
-`useAcceptHeaderPinSide`, `useAcceptHeaderPinConflict`) also bump
+Direct mutation actions (`useSetColumnSorting`, `useSetColumnPinning`,
+`useSetColumnVisibility`) also bump
 `metaStore.drawersSyncNonce` after successful commits. `TableDrawersSection`
 uses this nonce in provider keys to remount drawer-local stores and keep panel
 state aligned with source-of-truth column state.

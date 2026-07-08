@@ -9,6 +9,7 @@ export { ErrorDescriptive } from './ErrorDescriptive';
 export { ErrorIcon } from './ErrorIcon';
 export { ExpandAllIcon } from './ExpandAllIcon';
 export { EyeIcon } from './EyeIcon';
+export { EyeOffIcon } from './EyeOffIcon';
 export { FileTextIcon } from './FileTextIcon';
 export { FolderIcon } from './FolderIcon';
 export { HomeIcon } from './HomeIcon';

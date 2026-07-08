@@ -1,37 +1,44 @@
 # TableHeaderCell Architecture
 
-Interactive column header cell with sorting, pinning, resizing, and
-column settings controls. The most complex cell component in the table.
+Interactive column header cell with sorting, pinning, resizing, visibility,
+and per-column settings — all consolidated behind a single actions-menu
+trigger so narrow columns still show their label instead of being crowded out
+by inline icon buttons.
 
 ## File Structure
 
-```
+```text
 TableHeaderCell/
-├── TableHeaderCell.component.tsx   → <th> with sort/pin/resize/settings controls
-├── TableHeaderCell.types.ts        → TableHeaderCellProps (columnKey, pinInfo)
-├── TableHeaderCell.stylex.ts       → Pinned positioning, resize handle, shimmer
-├── index.ts                        → Barrel export
+├── TableHeaderCell.component.tsx        → <th> rendering label + ResizeHandle + TableHeaderActionsMenu
+├── TableHeaderCell.types.ts             → TableHeaderCellProps (columnKey, pinInfo)
+├── TableHeaderCell.stylex.ts            → Pinned positioning, base cell layout, shimmer
+├── TableHeaderCell.test.tsx             → Unit coverage for label/resize/menu wiring
+├── index.ts                             → Barrel export
 │
-├── SortIcon/
-│   ├── SortIcon.tsx                → Renders asc/desc/neutral icon
-│   ├── SortIcon.types.ts           → SortIconProps (direction)
+├── ResizeHandle/
+│   ├── ResizeHandle.component.tsx       → Drag-resize handle; owns useColumnResize + double-click reset
+│   ├── ResizeHandle.types.ts            → ResizeHandleProps<TData>
+│   ├── ResizeHandle.stylex.ts           → Resize handle line/hover/active styles
+│   └── index.ts
+│
+├── TableHeaderActionsMenu/
+│   ├── TableHeaderActionsMenu.component.tsx → Popover menu: sort/pin/hide/manage column
+│   ├── TableHeaderActionsMenu.types.ts      → Props (isSortable, isStatic, hasSettings, pinSide, sortDirection)
 │   └── index.ts
 │
 └── utils/
-    ├── getNextSortDirection.util.ts → Cycle: undefined → asc → desc → undefined
-    ├── getPinnedStyle.util.ts       → Returns left/right pinned StyleX
-    ├── getShadowStyle.util.ts       → Returns shadow separator StyleX
-    └── index.ts
+    ├── getPinnedStyle.util.ts           → Returns left/right pinned StyleX
+    └── getShadowStyle.util.ts           → Returns shadow separator StyleX
 ```
 
 ## Props
 
-| Prop           | Type                | Description                    |
-| -------------- | ------------------- | ------------------------------ |
-| `columnKey`    | `DataKey<TData>`    | Column identifier              |
-| `hasSettings`  | `boolean`           | Show settings (gear) button    |
-| `pinInfo`      | `PinnedColumnInfo?` | Pin side, offset, shadow flags |
-| `customStylex` | `StyleXStyles?`     | Override styles                |
+| Prop           | Type                | Description                      |
+| -------------- | ------------------- | -------------------------------- |
+| `columnKey`    | `DataKey<TData>`    | Column identifier                |
+| `hasSettings`  | `boolean`           | Enables the "Manage Column" item |
+| `pinInfo`      | `PinnedColumnInfo?` | Pin side, offset, shadow flags   |
+| `customStylex` | `StyleXStyles?`     | Override styles                  |
 
 ## Context Dependencies
 
@@ -44,64 +51,42 @@ graph LR
 
   THC["TableHeaderCell"]
 
-  subgraph "Writes (actions)"
-    THC --> A1["useSetColumnSizing"]
-    THC --> A2["useSetColumnPinning"]
-    THC --> A3["useSetColumnSorting"]
-    THC --> A4["useSetTableColumnSelectedKey"]
-    THC --> A5["useToogleTableIsColumnSettingsOpen"]
-    THC --> A6["useAcceptHeaderPinSide"]
-    THC --> A7["useAcceptHeaderPinConflict"]
-  end
+  THC --> RH["ResizeHandle"]
+  THC --> Menu["TableHeaderActionsMenu"]
 ```
 
-## Interactions
+## Actions Menu
 
-### Sort
+A single `MoreVerticalIcon` trigger (`TableActionsPopover`, shared with
+`TableRowActionsMenu` — see `components/Table/TableActionsPopover/ARCHITECTURE.md`)
+opens a popover built by `TableHeaderActionsMenu`, replacing the previous
+inline pin/sort/settings buttons:
 
-```mermaid
-graph LR
-  Click["Click sort button"] --> Next["getNextSortDirection()"]
-  Next --> Set["setSorting({ columnKey, direction })"]
-```
+- **Sort** (when `isSortable`): "Ascending"/"Descending" toggle the direction
+  on/off exactly like `ColumnSettingsDrawer/SortingSection`
+  (`direction === current ? undefined : direction`); "Clear Sorting" appears
+  only when a direction is currently applied.
+- **Pin** (when `!isStatic`): "Pin Left"/"Pin Right" toggle via
+  `useSetColumnPinning` directly — no side-selection or conflict modal, same
+  silent behavior as `ColumnSettingsDrawer/PinningSection`.
+- **Hide Column** (when `!isStatic`): `useSetColumnVisibility({ columnKey,
+isVisible: false })` — a single-column, table-level visibility action (see
+  `contexts/TableConfig/ARCHITECTURE.md`), distinct from the settings-drawer's
+  draft-scoped `useToggleColumnVisibility`.
+- **Manage Column** (when `hasSettings`): opens the per-column
+  `ColumnSettingsDrawer` — identical wiring to the previous "Settings for
+  {label}" button (`setTableColumnSelectedKey` + `setTableDrawersOpenState({
+isColumnSettingsOpen: true, isTableSettingsOpen: false })`).
 
-Cycles through `undefined → asc → desc → undefined`.
-
-### Pin
-
-```mermaid
-graph TD
-  Click["Click pin button"] --> Check{"Already pinned?"}
-  Check -->|Yes| Unpin["setColumnPinning({ columnKey, side: undefined })"]
-  Check -->|No| PrefCheck{"Global pin-side pref saved?"}
-  PrefCheck -->|Yes| AutoPin["handlePinAccept(savedPref) — skip modal"]
-  PrefCheck -->|No| Modal["Open PinSideModal"]
-  Modal --> Accept["handlePinAccept(pinSide)"]
-  AutoPin --> Accept
-  Accept --> PinAction["acceptHeaderPinSide({ columnKey, pinSide })"]
-  PinAction --> Conflict{"Pin conflict?"}
-  Conflict -->|No| Done["Column pinned"]
-  Conflict -->|Yes| ConflictPrefCheck{"Global conflict pref saved?"}
-  ConflictPrefCheck -->|Yes| AutoConflict["handlePinConflictAccept(savedPref) — skip modal"]
-  ConflictPrefCheck -->|No| ConflictModal["Open PinConflictModal"]
-  ConflictModal --> Resolve["handlePinConflictAccept(resolution)"]
-  AutoConflict --> Resolve
-  Resolve --> acceptHeaderPinConflict["acceptHeaderPinConflict({ resolution })"]
-```
-
-Runtime prompt selections in this component resolve the current pinning action only and do not persist global preferences.
+Every item closes the popover via the render-prop `closeMenu` after firing its
+action. The menu renders nothing (no trigger) when the column has no
+sortable/pinnable/settings affordance at all.
 
 ### Resize
 
-Uses `useColumnResize` hook with RAF-throttled mouse tracking.
-Double-click on resize handle resets column to auto width.
-
-### Settings
-
-Opens `ColumnSettingsDrawer` by setting the selected column key
-and setting `isColumnSettingsOpen = true` while forcing
-`isTableSettingsOpen = false` in meta state, so per-column
-settings takes precedence over table settings.
+`ResizeHandle` fully owns `useColumnResize` (RAF-throttled drag resize) and
+the double-click-to-reset-width handler; `TableHeaderCell` only passes
+`columnKey`, `columnLabel`, `currentWidth`, `maxWidth`, `minWidth`.
 
 ## Loading State
 

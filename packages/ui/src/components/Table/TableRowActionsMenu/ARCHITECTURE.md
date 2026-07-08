@@ -9,9 +9,7 @@ Popover API.
 - Resolve row ids through `resolveCrudRowId` from the column(s) marked `isPrimaryKey`.
 - Perform delete with a confirmation prompt and React Router `useFetcher().submit()` to `metaState.deleteActionPath`.
 - Append custom action-column content after built-in CRUD menu entries.
-- Compute popover coordinates through pure util logic and apply coordinates via StyleX dynamic styles.
-- Render menu actions only while `isMenuOpen` is true to keep menu subtree lifecycle aligned with popover visibility.
-- Own popover open state, coordinates, and reposition observers via the colocated `useTableRowActionsMenuPosition` hook, keeping the component itself limited to CRUD/delete wiring.
+- Delegate the trigger button, popover panel, and coordinate positioning to the shared `TableActionsPopover` (see `components/Table/TableActionsPopover/ARCHITECTURE.md`) — this component only wires CRUD/delete behavior into the popover's render-prop `children`.
 
 ## File Structure
 
@@ -21,13 +19,9 @@ TableRowActionsMenu/
 │   ├── TableActionMenu.component.tsx              → Extracted view/edit/delete/custom-actions renderer
 │   ├── TableActionMenu.types.ts                   → Local props contract
 │   └── index.ts                                   → Local barrel
-├── TableRowActionsMenu.component.tsx      → Menu trigger + popover panel + CRUD item wiring
-├── TableRowActionsMenu.stylex.ts          → Trigger/menu/item styles
+├── TableRowActionsMenu.component.tsx      → CRUD/delete wiring, composed into TableActionsPopover's children
+├── TableRowActionsMenu.stylex.ts          → customActions separator style (row-specific)
 ├── TableRowActionsMenu.types.ts           → Props contract
-├── useTableRowActionsMenuPosition.hook.ts → Popover open state + ResizeObserver/IntersectionObserver-driven coordinate recompute
-├── utils/
-│   ├── getTableRowActionsMenuPosition.util.ts       → Pure coordinate computation (no side effects)
-│   └── getTableRowActionsMenuPosition.util.test.ts  → Unit coverage for positioning behavior
 ├── ARCHITECTURE.md                     → This file
 └── index.ts                            → Barrel export
 ```
@@ -36,11 +30,9 @@ TableRowActionsMenu/
 
 ```mermaid
 graph TD
-  Menu["TableRowActionsMenu"] --> Hook["useTableRowActionsMenuPosition"]
-  Hook --> Trigger["TableActionButton (handleToggleMenu)"]
-  Menu --> Popover["div popover"]
-  Popover --> OpenCheck{"isMenuOpen?"}
-  OpenCheck -->|yes| ActionMenu["TableActionMenu"]
+  Menu["TableRowActionsMenu"] --> Popover["TableActionsPopover (ariaLabel/label='Row actions')"]
+  Popover --> Children["children({ closeMenu })"]
+  Children --> ActionMenu["TableActionMenu"]
   ActionMenu --> BuiltIn["view/edit/delete (enabled only)"]
   ActionMenu --> Custom["customActions (optional, appended)"]
   BuiltIn --> Delete["confirm() -> fetcher.submit(intent=delete,id) -> closeMenu()"]

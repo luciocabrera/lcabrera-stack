@@ -12,6 +12,10 @@ const eslintSuppressionSchema = z.object({
   kind: z.string().nullish(),
 });
 
+const eslintSuggestionSchema = z.object({
+  desc: z.string().nullish(),
+});
+
 export const eslintMessageSchema = z.object({
   column: z.number().nullish(),
   endColumn: z.number().nullish(),
@@ -22,6 +26,7 @@ export const eslintMessageSchema = z.object({
   messageId: z.string().nullish(),
   ruleId: z.string().nullish(),
   severity: z.number().default(1),
+  suggestions: z.array(eslintSuggestionSchema).nullish(),
   suppressions: z.array(eslintSuppressionSchema).nullish(),
 });
 

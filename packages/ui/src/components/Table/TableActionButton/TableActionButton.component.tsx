@@ -4,14 +4,16 @@ import { MoreVerticalIcon } from '@repo/ui/components/Icons';
 import type { TableActionButtonProps } from './TableActionButton.types';
 
 export const TableActionButton = ({
+  ariaLabel,
   isDisabled = false,
+  label,
   menuId,
   onClick,
   triggerId,
 }: TableActionButtonProps) => {
   return (
     <Button
-      aria-label='Row actions'
+      aria-label={ariaLabel}
       color='ghost'
       data-menu-id={menuId}
       icon={<MoreVerticalIcon size={14} />}
@@ -21,7 +23,7 @@ export const TableActionButton = ({
       size='embedded'
       width='auto'
     >
-      Row actions
+      {label}
     </Button>
   );
 };

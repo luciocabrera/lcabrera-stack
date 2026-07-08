@@ -9,6 +9,13 @@ describe('extractFallowTargets', () => {
       health: {
         targets: [
           {
+            actions: [
+              {
+                auto_fixable: false,
+                description: 'Break the cycle',
+                type: 'apply-refactoring',
+              },
+            ],
             category: 'break_circular_dependency',
             confidence: 'high',
             efficiency: 13.8,
@@ -25,6 +32,13 @@ describe('extractFallowTargets', () => {
 
     expect(extractFallowTargets({ raw })).toEqual([
       {
+        actions: [
+          {
+            auto_fixable: false,
+            description: 'Break the cycle',
+            type: 'apply-refactoring',
+          },
+        ],
         category: 'break_circular_dependency',
         confidence: 'high',
         efficiency: 13.8,

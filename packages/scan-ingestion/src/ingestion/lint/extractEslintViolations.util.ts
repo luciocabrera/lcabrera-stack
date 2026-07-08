@@ -3,6 +3,9 @@ import path from 'node:path';
 import type { EslintMessage, EslintRaw } from './eslintRaw.schema.ts';
 import type { LintViolationInput } from './lintViolation.types.ts';
 
+import { makeFindingId } from '../../../../../.github/skills/code-smell-shared/scripts/deterministic-scan-shared.mjs';
+import { buildEslintFixText } from '../../../../../.github/skills/code-smell-shared/scripts/finding-templates.mjs';
+
 type ExtractEslintViolationsArgs = {
   /** The registered project root — file_path is stored relative to it (workspace attribution relies on this). */
   readonly localPath: string;
@@ -21,19 +24,26 @@ const mapMessage = ({
   suppressed,
 }: MapMessageArgs): LintViolationInput => {
   const suppression = message.suppressions?.[0];
+  const ruleId = message.ruleId ?? 'eslint(unknown)';
+  // Matches generate-eslint-report.mjs's locationHint construction exactly
+  // (`${message.line}:${message.column}`) so finding_id agrees with
+  // report.json's copy of the same fact (ADR-028).
+  const locationHint = `${message.line}:${message.column}`;
   return {
     col: message.column ?? undefined,
     end_col: message.endColumn ?? undefined,
     end_line: message.endLine ?? undefined,
     file_path: filePath,
+    finding_id: makeFindingId(ruleId, filePath, locationHint, message.message),
     fixable: Boolean(message.fix),
     line: message.line ?? undefined,
     message: message.message,
     message_id: message.messageId ?? undefined,
-    rule_id: message.ruleId ?? 'eslint(unknown)',
+    rule_id: ruleId,
     severity: message.severity === 2 ? 'HIGH' : 'MEDIUM',
     severity_raw: String(message.severity),
     source: 'eslint',
+    suggestion_text: buildEslintFixText(message, ruleId),
     suppressed,
     suppression_justification: suppression?.justification ?? undefined,
     suppression_kind: suppression?.kind ?? undefined,

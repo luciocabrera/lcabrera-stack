@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { getTableRowActionsMenuPosition } from './getTableRowActionsMenuPosition.util';
+import { getTableActionsPopoverPosition } from './getTableActionsPopoverPosition.util';
 
-describe('getTableRowActionsMenuPosition', () => {
+describe('getTableActionsPopoverPosition', () => {
   it('positions the menu below and right-aligned with the trigger cell when space is available', () => {
-    const position = getTableRowActionsMenuPosition({
+    const position = getTableActionsPopoverPosition({
       containerRect: {
         bottom: 500,
         height: 500,
@@ -42,7 +42,7 @@ describe('getTableRowActionsMenuPosition', () => {
   });
 
   it('flips above when there is not enough space below', () => {
-    const position = getTableRowActionsMenuPosition({
+    const position = getTableActionsPopoverPosition({
       containerRect: {
         bottom: 300,
         height: 300,
@@ -80,7 +80,7 @@ describe('getTableRowActionsMenuPosition', () => {
   });
 
   it('clamps to container boundaries when the menu would overflow', () => {
-    const position = getTableRowActionsMenuPosition({
+    const position = getTableActionsPopoverPosition({
       containerRect: {
         bottom: 220,
         height: 200,
