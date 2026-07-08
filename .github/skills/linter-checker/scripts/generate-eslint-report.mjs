@@ -4,6 +4,7 @@
 // every real config filename — an arbitrary target may use any of them),
 // producing eslint.raw.json + report.json + report.md unattended.
 
+import { buildEslintFixText } from '../../code-smell-shared/scripts/finding-templates.mjs';
 import {
   buildReport,
   deriveTag,
@@ -81,7 +82,7 @@ const mapEslintResults = (eslintResults) =>
           locationHint,
           messageText,
         ),
-        fix: `Address per rule: ${ruleId}.`,
+        fix: buildEslintFixText(message, ruleId),
         location_hint: locationHint,
         location_path: locationPath,
         rule_id: ruleId,

@@ -5,6 +5,7 @@
 // and only if the target opted into an oxlint config — skipping gracefully
 // otherwise, since most projects won't have one.
 
+import { buildOxlintFixText } from '../../code-smell-shared/scripts/finding-templates.mjs';
 import {
   buildReport,
   deriveTag,
@@ -81,7 +82,7 @@ const mapOxlintDiagnostics = (oxlintResult) =>
         url: diagnostic.url ?? null,
       },
       finding_id: makeFindingId(ruleId, locationPath, locationHint, message),
-      fix: diagnostic.help ?? `Address per rule: ${ruleId}.`,
+      fix: buildOxlintFixText(diagnostic, ruleId),
       location_hint: locationHint,
       location_path: locationPath,
       rule_id: ruleId,

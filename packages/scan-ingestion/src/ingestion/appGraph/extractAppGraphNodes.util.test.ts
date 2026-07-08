@@ -72,7 +72,7 @@ describe('extractAppGraphNodes', () => {
     });
   });
 
-  it('drops nodes without a node_id and coerces unknown node types to file', () => {
+  it('drops nodes without a node_id and drops nodes with an unrecognized node_type', () => {
     const raw = appGraphRawSchema.parse({
       nodes: [
         { name: 'ghost.ts', node_type: 'file', path: 'ghost.ts' },
@@ -82,14 +82,98 @@ describe('extractAppGraphNodes', () => {
           node_type: 'symlink',
           path: 'weird.ts',
         },
+        {
+          name: 'real.ts',
+          node_id: 8,
+          node_type: 'file',
+          path: 'real.ts',
+        },
       ],
     });
 
     const rows = extractAppGraphNodes({ raw });
 
+    // 'symlink' is outside the CHECK constraint's known set and can no
+    // longer be safely coerced onto 'file' now that 'file' means something
+    // specific (only 'file' rows get a file_type_category) — it's dropped,
+    // same as a node missing its node_id.
     expect(rows).toHaveLength(1);
-    expect(rows[0]?.node_id).toBe(7);
+    expect(rows[0]?.node_id).toBe(8);
     expect(rows[0]?.node_type).toBe('file');
     expect(rows[0]?.file_type_category).toBe('other');
+  });
+
+  it('passes through every ADR-027 symbol node type with its symbol fields, nested under its file', () => {
+    const raw = appGraphRawSchema.parse({
+      nodes: [
+        {
+          child_file_count: 1,
+          child_folder_count: 0,
+          name: 'useThing.hook.ts',
+          nested_level: 0,
+          node_id: 1,
+          node_type: 'file',
+          path: 'src/useThing.hook.ts',
+        },
+        {
+          end_line: 12,
+          is_exported: true,
+          is_hook: true,
+          name: 'useThing',
+          nested_level: 1,
+          node_id: 2,
+          node_type: 'function',
+          parent_node_id: 1,
+          path: 'src/useThing.hook.ts',
+          start_line: 1,
+          symbol_name: 'useThing',
+        },
+        {
+          end_line: 10,
+          is_exported: false,
+          name: 'formatValue',
+          nested_level: 2,
+          node_id: 3,
+          node_type: 'function',
+          parent_node_id: 2,
+          path: 'src/useThing.hook.ts',
+          start_line: 5,
+          symbol_name: 'formatValue',
+        },
+      ],
+    });
+
+    const [fileRow, hookRow, nestedRow] = extractAppGraphNodes({ raw });
+
+    expect(fileRow?.node_type).toBe('file');
+    expect(fileRow?.file_type_category).toBe('hook');
+
+    expect(hookRow).toMatchObject({
+      end_line: 12,
+      is_exported: true,
+      is_hook: true,
+      node_id: 2,
+      node_type: 'function',
+      parent_node_id: 1,
+      start_line: 1,
+      symbol_name: 'useThing',
+    });
+    // Symbol rows never get a file_type_category, even nested under a
+    // 'function' node_type that isn't 'file'.
+    expect(hookRow).not.toHaveProperty('file_type_category');
+    expect(hookRow?.is_component).toBeUndefined();
+
+    // A nested, non-exported helper: is_exported false is still emitted
+    // (a real fact worth keeping), but no is_hook/is_component tagging —
+    // that heuristic only ever applies to top-level exported symbols,
+    // which is entirely the runner's responsibility, not re-verified here.
+    expect(nestedRow).toMatchObject({
+      is_exported: false,
+      node_id: 3,
+      node_type: 'function',
+      parent_node_id: 2,
+      symbol_name: 'formatValue',
+    });
+    expect(nestedRow?.is_hook).toBeUndefined();
   });
 });

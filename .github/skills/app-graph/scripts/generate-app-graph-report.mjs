@@ -149,22 +149,157 @@ const countTypes = (sourceFile) =>
   sourceFile.getTypeAliases().length +
   sourceFile.getEnums().length;
 
-const analyzeSourceText = (nodePath, text) => {
-  if (!project) return { export_count: 0, function_count: 0, type_count: 0 };
+// Mirrors classifyFileTypeCategory.util.ts's suffix convention (same
+// technique this file already uses for IGNORED_DIRECTORIES) — only needed
+// here to gate the component/hook naming heuristic below, so the full
+// category list is kept for parity even though only 'component'/'hook'
+// drive a decision.
+const CATEGORY_SUFFIXES = [
+  { category: 'test', suffix: '.test.tsx' },
+  { category: 'test', suffix: '.test.ts' },
+  { category: 'test', suffix: '.spec.tsx' },
+  { category: 'test', suffix: '.spec.ts' },
+  { category: 'component', suffix: '.component.tsx' },
+  { category: 'component', suffix: '.component.ts' },
+  { category: 'hook', suffix: '.hook.ts' },
+  { category: 'hook', suffix: '.hook.tsx' },
+  { category: 'util', suffix: '.util.ts' },
+  { category: 'util', suffix: '.util.tsx' },
+  { category: 'service_api', suffix: '.api.ts' },
+  { category: 'repository', suffix: '.repository.ts' },
+  { category: 'controller', suffix: '.controller.ts' },
+  { category: 'route', suffix: '.route.ts' },
+  { category: 'route', suffix: '.route.tsx' },
+  { category: 'types', suffix: '.types.ts' },
+  { category: 'stylex', suffix: '.stylex.ts' },
+  { category: 'constants', suffix: '.constants.ts' },
+  { category: 'schema', suffix: '.schema.ts' },
+];
+
+const classifyFileTypeCategory = (fileName) =>
+  CATEGORY_SUFFIXES.find(({ suffix }) => fileName.endsWith(suffix))?.category ??
+  'other';
+
+// Symbol-node kinds (ADR-027): every named function/method/class/
+// interface/type-alias/enum, recursively to arbitrary depth. Matches
+// countFunctions' existing exclusion — an ArrowFunction/FunctionExpression
+// only counts when bound to a name (VariableDeclaration or
+// PropertyAssignment); inline anonymous callbacks never become nodes.
+const SYMBOL_NODE_TYPE_BY_KIND = tsMorph
+  ? new Map([
+      [tsMorph.SyntaxKind.FunctionDeclaration, 'function'],
+      [tsMorph.SyntaxKind.MethodDeclaration, 'method'],
+      [tsMorph.SyntaxKind.ClassDeclaration, 'class'],
+      [tsMorph.SyntaxKind.InterfaceDeclaration, 'interface'],
+      [tsMorph.SyntaxKind.TypeAliasDeclaration, 'type_alias'],
+      [tsMorph.SyntaxKind.EnumDeclaration, 'enum'],
+      [tsMorph.SyntaxKind.ArrowFunction, 'function'],
+      [tsMorph.SyntaxKind.FunctionExpression, 'function'],
+    ])
+  : new Map();
+
+// True for an ArrowFunction/FunctionExpression bound to a variable
+// declaration or object property name — the same parentKind check
+// countFunctions already uses.
+const isBoundFunctionLike = (node, kind) => {
+  const { SyntaxKind } = tsMorph;
+  if (
+    kind !== SyntaxKind.ArrowFunction &&
+    kind !== SyntaxKind.FunctionExpression
+  ) {
+    return false;
+  }
+  const parentKind = node.getParent()?.getKind();
+  return (
+    parentKind === SyntaxKind.VariableDeclaration ||
+    parentKind === SyntaxKind.PropertyAssignment
+  );
+};
+
+const isSymbolCandidate = (node, kind) => {
+  const { SyntaxKind } = tsMorph;
+  if (!SYMBOL_NODE_TYPE_BY_KIND.has(kind)) return false;
+  if (
+    kind === SyntaxKind.ArrowFunction ||
+    kind === SyntaxKind.FunctionExpression
+  ) {
+    return isBoundFunctionLike(node, kind);
+  }
+  return true;
+};
+
+// The declared name, or undefined for an anonymous declaration/expression
+// (e.g. `export default function () {}`, a computed method name) — such
+// nodes don't become their own node but recursion still continues through
+// them with the current parent unchanged.
+const getDeclaredName = (node, kind) => {
+  const { SyntaxKind } = tsMorph;
   try {
-    const sourceFile = project.createSourceFile(nodePath, text, {
+    if (
+      kind === SyntaxKind.ArrowFunction ||
+      kind === SyntaxKind.FunctionExpression
+    ) {
+      const bindingNode = node.getParent();
+      return typeof bindingNode?.getName === 'function'
+        ? bindingNode.getName()
+        : undefined;
+    }
+    return typeof node.getName === 'function' ? node.getName() : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+// Whether the top-level `export` statement targets this declaration.
+// MethodDeclaration has no export modifier of its own (class members
+// aren't independently exported) and always reports false.
+const getIsExported = (node, kind) => {
+  const { SyntaxKind } = tsMorph;
+  if (
+    kind === SyntaxKind.ArrowFunction ||
+    kind === SyntaxKind.FunctionExpression
+  ) {
+    const bindingNode = node.getParent();
+    if (bindingNode?.getKind() === SyntaxKind.VariableDeclaration) {
+      const statement = bindingNode.getVariableStatement?.();
+      return statement ? statement.isExported() : false;
+    }
+    return false;
+  }
+  return typeof node.isExported === 'function' ? node.isExported() : false;
+};
+
+const isPascalCaseName = (name) => /^[A-Z][A-Za-z0-9]*$/.test(name);
+const isHookName = (name) => /^use[A-Z0-9]/.test(name);
+
+// Mutates fileNode in place with the computed counts (and, on success,
+// the ADR-027 symbol nodes beneath it) — fileNode is already the object
+// pushed into `nodes`, so this is the only place that needs the file's
+// counts, keeping the per-file createSourceFile/forget() lifecycle intact
+// (the symbol walk runs BEFORE forget(), never after — a forgotten
+// SourceFile's descendants are no longer usable).
+const analyzeSourceText = ({ fileCategory, fileNode, filePath, text }) => {
+  if (!project) return;
+  try {
+    const sourceFile = project.createSourceFile(filePath, text, {
       overwrite: true,
     });
-    const counts = {
-      export_count: countExports(sourceFile),
-      function_count: countFunctions(sourceFile),
-      type_count: countTypes(sourceFile),
-    };
+    fileNode.export_count = countExports(sourceFile);
+    fileNode.function_count = countFunctions(sourceFile);
+    fileNode.type_count = countTypes(sourceFile);
+    fileNode.is_analyzed = true;
+    walkForSymbols(
+      sourceFile,
+      {
+        isFile: true,
+        nestedLevel: fileNode.nested_level,
+        nodeId: fileNode.node_id,
+      },
+      { fileCategory, filePath },
+    );
     sourceFile.forget();
-    return { ...counts, is_analyzed: true };
   } catch (error) {
-    toolFailures.push(`parse failed for ${nodePath}: ${error.message}`);
-    return { export_count: 0, function_count: 0, type_count: 0 };
+    toolFailures.push(`parse failed for ${filePath}: ${error.message}`);
   }
 };
 
@@ -178,8 +313,96 @@ const makeNode = (fields) => {
   return node;
 };
 
+const makeSymbolNode = ({
+  fileCategory,
+  filePath,
+  isTopLevel,
+  name,
+  nodeType,
+  parentNestedLevel,
+  parentNodeId,
+  tsNode,
+}) => {
+  const isExported = getIsExported(tsNode, tsNode.getKind());
+  const isComponent =
+    isTopLevel &&
+    isExported &&
+    fileCategory === 'component' &&
+    isPascalCaseName(name);
+  const isHook =
+    isTopLevel && isExported && fileCategory === 'hook' && isHookName(name);
+
+  return makeNode({
+    child_file_count: 0,
+    child_folder_count: 0,
+    end_line: tsNode.getEndLineNumber(),
+    export_count: 0,
+    extension: '',
+    function_count: 0,
+    ...(isComponent && { is_component: true }),
+    is_exported: isExported,
+    ...(isHook && { is_hook: true }),
+    line_count: null,
+    name,
+    nested_level: parentNestedLevel + 1,
+    node_type: nodeType,
+    parent_node_id: parentNodeId,
+    path: filePath,
+    start_line: tsNode.getStartLineNumber(),
+    symbol_name: name,
+    type_count: 0,
+  });
+};
+
+// Recursive walker (ADR-027): visits every immediate child via
+// forEachChildAsArray (not the flattened forEachDescendant countFunctions
+// uses) so nesting is tracked precisely — a candidate declaration becomes
+// its own node parented to the current container, and its own subtree is
+// then walked with itself as the new container. Non-candidate nodes (an
+// `if` block, a plain call expression, …) recurse with the container
+// unchanged, so a helper nested arbitrarily deep inside ordinary control
+// flow still resolves back to the nearest enclosing named declaration (or
+// the file, if none).
+const walkForSymbols = (containerTsNode, parentContext, fileContext) => {
+  for (const child of containerTsNode.forEachChildAsArray()) {
+    const kind = child.getKind();
+    if (!isSymbolCandidate(child, kind)) {
+      walkForSymbols(child, parentContext, fileContext);
+      continue;
+    }
+
+    const name = getDeclaredName(child, kind);
+    if (!name) {
+      walkForSymbols(child, parentContext, fileContext);
+      continue;
+    }
+
+    const symbolNode = makeSymbolNode({
+      fileCategory: fileContext.fileCategory,
+      filePath: fileContext.filePath,
+      isTopLevel: parentContext.isFile,
+      name,
+      nodeType: SYMBOL_NODE_TYPE_BY_KIND.get(kind),
+      parentNestedLevel: parentContext.nestedLevel,
+      parentNodeId: parentContext.nodeId,
+      tsNode: child,
+    });
+
+    walkForSymbols(
+      child,
+      {
+        isFile: false,
+        nestedLevel: symbolNode.nested_level,
+        nodeId: symbolNode.node_id,
+      },
+      fileContext,
+    );
+  }
+};
+
 const makeFileNode = ({ absolutePath, name, nestedLevel, parentNodeId }) => {
   const extension = getExtension(name);
+  const filePath = relative(context.gitRoot, absolutePath);
   let text;
   try {
     text = readFileSync(absolutePath, 'utf8');
@@ -187,23 +410,33 @@ const makeFileNode = ({ absolutePath, name, nestedLevel, parentNodeId }) => {
     text = undefined;
   }
 
-  const symbolCounts =
-    text !== undefined && ANALYZABLE_EXTENSIONS.has(extension)
-      ? analyzeSourceText(relative(context.gitRoot, absolutePath), text)
-      : { export_count: 0, function_count: 0, type_count: 0 };
-
-  return makeNode({
+  // The file node is created FIRST (before parsing) so its node_id exists
+  // to parent any symbol nodes analyzeSourceText discovers underneath it.
+  const fileNode = makeNode({
     child_file_count: 0,
     child_folder_count: 0,
+    export_count: 0,
     extension,
+    function_count: 0,
     line_count: text === undefined ? null : text.split('\n').length,
     name,
     nested_level: nestedLevel,
     node_type: 'file',
     parent_node_id: parentNodeId,
-    path: relative(context.gitRoot, absolutePath),
-    ...symbolCounts,
+    path: filePath,
+    type_count: 0,
   });
+
+  if (text !== undefined && ANALYZABLE_EXTENSIONS.has(extension)) {
+    analyzeSourceText({
+      fileCategory: classifyFileTypeCategory(name),
+      fileNode,
+      filePath,
+      text,
+    });
+  }
+
+  return fileNode;
 };
 
 const walkDirectory = ({ absolutePath, nestedLevel, parentNodeId }) => {
@@ -252,10 +485,17 @@ const walkDirectory = ({ absolutePath, nestedLevel, parentNodeId }) => {
 
 const buildStats = () => {
   const fileNodes = nodes.filter((node) => node.node_type === 'file');
+  // folder_count must be counted explicitly rather than `nodes.length -
+  // fileNodes.length` — that subtraction only worked back when folder/file
+  // were the only two node types; ADR-027's symbol nodes would otherwise
+  // get miscounted as folders.
+  const folderCount = nodes.filter(
+    (node) => node.node_type === 'folder',
+  ).length;
   return {
     analyzed_file_count: fileNodes.filter((node) => node.is_analyzed).length,
     file_count: fileNodes.length,
-    folder_count: nodes.length - fileNodes.length,
+    folder_count: folderCount,
     max_depth: nodes.reduce((max, node) => Math.max(max, node.nested_level), 0),
     total_export_count: fileNodes.reduce((s, n) => s + n.export_count, 0),
     total_function_count: fileNodes.reduce((s, n) => s + n.function_count, 0),
