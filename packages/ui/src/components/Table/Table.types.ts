@@ -272,7 +272,6 @@ export type TableMetaState = {
   readonly columnOverscan: number;
   readonly columnSelectedKey?: string;
   readonly columnSettingsSelectedTab: string;
-  /** CRUD feature flags for row actions and create link */
   readonly crud?: TableCrudConfig;
   /** Action route the row delete submit posts to (required when crud.delete) */
   readonly deleteActionPath?: string;
