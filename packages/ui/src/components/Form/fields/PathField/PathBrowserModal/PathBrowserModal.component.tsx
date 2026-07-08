@@ -1,15 +1,14 @@
-import type { BrowseDirectoryResult } from '@repo/ui/routing/browseDirectory.types';
-
 import { Button } from '@repo/ui/components/Button';
 import { FolderIcon } from '@repo/ui/components/Icons';
 import { ICON_SIZE_SM } from '@repo/ui/design-system/constants/iconSizes.constants';
 import * as stylex from '@stylexjs/stylex';
-import { useEffect, useId, useRef, useState } from 'react';
-import { useFetcher } from 'react-router';
+import { useId } from 'react';
 
 import type { PathBrowserModalProps } from './PathBrowserModal.types';
 
 import { styles } from './PathBrowserModal.stylex';
+import { usePathBrowserDirectory } from './usePathBrowserDirectory.hook';
+import { usePathBrowserEntryNavigation } from './usePathBrowserEntryNavigation.hook';
 
 export const PathBrowserModal = ({
   browseAction,
@@ -18,110 +17,42 @@ export const PathBrowserModal = ({
   onClose,
   onSelect,
 }: PathBrowserModalProps) => {
-  const fetcher = useFetcher<BrowseDirectoryResult>();
   const listboxId = useId();
-  const [currentPath, setCurrentPath] = useState(initialPath);
-  const [activeEntryIndex, setActiveEntryIndex] = useState(0);
-  const loadRef = useRef(fetcher.load);
-
-  // Keep the ref pointing at the latest fetcher.load without depending on its
-  // identity in the load effect below ("latest ref" pattern — updated in an
-  // effect, never during render).
-  useEffect(() => {
-    loadRef.current = fetcher.load;
-  });
-
-  // Reset the browsed path whenever the modal (re)opens or the field value
-  // backing `initialPath` changes — adjusted during render (guarded by the
-  // previous-value comparison) instead of via a state-setting effect.
-  const [previousResetKey, setPreviousResetKey] = useState({
-    initialPath,
-    isOpen,
-  });
-  if (
-    previousResetKey.initialPath !== initialPath ||
-    previousResetKey.isOpen !== isOpen
-  ) {
-    setPreviousResetKey({ initialPath, isOpen });
-    if (isOpen) {
-      setCurrentPath(initialPath);
-    }
-  }
-
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const params = new URLSearchParams();
-    if (currentPath) params.set('path', currentPath);
-    void loadRef.current(`${browseAction}?${params.toString()}`);
-  }, [browseAction, currentPath, isOpen]);
+  const { entries, error, isLoading, navigateTo, parentPath, resolvedPath } =
+    usePathBrowserDirectory({ browseAction, initialPath, isOpen });
+  const { activeEntryIndex, handleKeyDown, resetActiveEntryIndex } =
+    usePathBrowserEntryNavigation({
+      entries,
+      onEscape: onClose,
+      onSelectEntry: navigateTo,
+    });
 
   if (!isOpen) {
     return;
   }
 
-  const result = fetcher.data;
-  const entries = result?.entries ?? [];
-  const isLoading = fetcher.state !== 'idle';
-  const hasActiveOption = activeEntryIndex < entries.length;
-  const normalizedActiveEntryIndex = hasActiveOption ? activeEntryIndex : 0;
-  const resolvedPath = result?.path ?? currentPath;
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLUListElement>) => {
-    if (event.key === 'Escape') {
-      event.preventDefault();
-      onClose();
-      return;
-    }
-
-    if (entries.length === 0) {
-      return;
-    }
-
-    if (event.key === 'ArrowDown') {
-      event.preventDefault();
-      setActiveEntryIndex(
-        (previousIndex) => (previousIndex + 1) % entries.length,
-      );
-      return;
-    }
-
-    if (event.key === 'ArrowUp') {
-      event.preventDefault();
-      setActiveEntryIndex(
-        (previousIndex) =>
-          (previousIndex - 1 + entries.length) % entries.length,
-      );
-      return;
-    }
-
-    if (event.key === 'Home') {
-      event.preventDefault();
-      setActiveEntryIndex(0);
-      return;
-    }
-
-    if (event.key === 'End') {
-      event.preventDefault();
-      setActiveEntryIndex(entries.length - 1);
-      return;
-    }
-
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      const activeEntry = entries[normalizedActiveEntryIndex];
-      if (activeEntry) {
-        setCurrentPath(activeEntry.path);
-        setActiveEntryIndex(0);
-      }
-    }
-  };
+  const normalizedActiveEntryIndex =
+    activeEntryIndex < entries.length ? activeEntryIndex : 0;
 
   const handleSelect = () => {
     if (resolvedPath) {
       onSelect(resolvedPath);
     }
     onClose();
+  };
+
+  const handleNavigateUp = () => {
+    if (!parentPath) {
+      return;
+    }
+
+    navigateTo(parentPath);
+    resetActiveEntryIndex();
+  };
+
+  const handleEntryClick = (entryPath: string) => {
+    navigateTo(entryPath);
+    resetActiveEntryIndex();
   };
 
   return (
@@ -141,15 +72,8 @@ export const PathBrowserModal = ({
             Use Current
           </Button>
           <Button
-            isDisabled={!result?.parentPath || isLoading}
-            onClick={() => {
-              if (!result?.parentPath) {
-                return;
-              }
-
-              setCurrentPath(result.parentPath);
-              setActiveEntryIndex(0);
-            }}
+            isDisabled={!parentPath || isLoading}
+            onClick={handleNavigateUp}
             size='mini'
             type='button'
             variant='flat'
@@ -159,7 +83,7 @@ export const PathBrowserModal = ({
         </div>
       </div>
 
-      {result?.error && <p {...stylex.props(styles.error)}>{result.error}</p>}
+      {error && <p {...stylex.props(styles.error)}>{error}</p>}
 
       <ul
         aria-activedescendant={
@@ -178,10 +102,7 @@ export const PathBrowserModal = ({
             <button
               aria-selected={index === activeEntryIndex}
               id={`${listboxId}-option-${index}`}
-              onClick={() => {
-                setCurrentPath(entry.path);
-                setActiveEntryIndex(0);
-              }}
+              onClick={() => handleEntryClick(entry.path)}
               role='option'
               tabIndex={-1}
               type='button'
