@@ -7,13 +7,11 @@ import * as stylex from '@stylexjs/stylex';
 import { useEffect, useState } from 'react';
 import { useRevalidator } from 'react-router';
 
-import type { TableEmptyStateProps } from './TableEmptyState.types';
-
+import { useGetTableTitleSingular } from '../contexts/TableConfig/meta/selectors';
 import { styles } from './TableEmptyState.stylex';
 
 const DEFAULT_MESSAGE =
   'No records match the current view. Try adjusting your filters or refreshing the table.';
-const DEFAULT_TITLE = 'No data found';
 
 /**
  * Empty-state row rendered inside the table body when there are no rows and the
@@ -22,18 +20,24 @@ const DEFAULT_TITLE = 'No data found';
  * centered in the visible body area — both axes — without introducing a
  * vertical scrollbar, even when the table body overflows horizontally.
  */
-export const TableEmptyState = ({
-  message = DEFAULT_MESSAGE,
-  title = DEFAULT_TITLE,
-}: TableEmptyStateProps) => {
+export const TableEmptyState = () => {
   const { centerCols, leftPinnedCols, rightPinnedCols } = useGetColumnGroups();
+  const titleSingular = useGetTableTitleSingular();
+
   const containerRef = useTableContainerRef();
   const { height: containerHeight, width } = useElementSize({
     ref: containerRef,
   });
-  const [headerHeight, setHeaderHeight] = useState(0);
   const { revalidate } = useRevalidator();
 
+  const [headerHeight, setHeaderHeight] = useState(0);
+
+  const colSpan =
+    leftPinnedCols.length + centerCols.length + rightPinnedCols.length;
+  const viewportHeight =
+    containerHeight > 0 ? Math.max(0, containerHeight - headerHeight) : 0;
+
+  // TODO: Check other resize observers maybe we can have an unihe sharable hook for this
   useEffect(() => {
     const header = containerRef.current?.querySelector<HTMLElement>('thead');
 
@@ -66,11 +70,6 @@ export const TableEmptyState = ({
     };
   }, [containerRef]);
 
-  const colSpan =
-    leftPinnedCols.length + centerCols.length + rightPinnedCols.length;
-  const viewportHeight =
-    containerHeight > 0 ? Math.max(0, containerHeight - headerHeight) : 0;
-
   return (
     <tr {...stylex.props(styles.row)}>
       <td colSpan={colSpan} {...stylex.props(styles.cell)}>
@@ -79,12 +78,8 @@ export const TableEmptyState = ({
             <div {...stylex.props(styles.illustration)}>
               <NoDataDescriptive />
             </div>
-            {title ? (
-              <h3 {...stylex.props(styles.title)}>{title}</h3>
-            ) : undefined}
-            {message ? (
-              <p {...stylex.props(styles.message)}>{message}</p>
-            ) : undefined}
+            <h3 {...stylex.props(styles.title)}>{titleSingular}</h3>
+            <p {...stylex.props(styles.message)}>{DEFAULT_MESSAGE}</p>
             <Button color='primary' onClick={revalidate}>
               Retry
             </Button>

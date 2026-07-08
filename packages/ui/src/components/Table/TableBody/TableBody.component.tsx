@@ -17,15 +17,13 @@ import {
 } from '../contexts/TableData/data/selectors';
 import { styles } from './TableBody.stylex';
 
-export const TableBody = ({
-  emptyState,
-  tableContainerRef,
-}: TableBodyProps) => {
+export const TableBody = ({ tableContainerRef }: TableBodyProps) => {
   const totalLoadedRows = useGetTableTotalLoadedRows();
   const isLoading = useGetTableIsLoading();
   const isLoadingMore = useGetTableIsLoadingMore();
   const rowHeight = useGetTableRowHeight();
   const overscan = useGetTableOverscan();
+
   const isLoadingState = isLoading || isLoadingMore;
   const isEmpty = totalLoadedRows === 0 && !isLoadingState;
 
@@ -40,10 +38,7 @@ export const TableBody = ({
   if (isEmpty)
     return (
       <tbody data-testid='table-body' {...stylex.props(styles.bodyEmpty)}>
-        <TableEmptyState
-          message={emptyState?.message}
-          title={emptyState?.title}
-        />
+        <TableEmptyState />
       </tbody>
     );
 

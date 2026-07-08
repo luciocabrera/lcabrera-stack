@@ -308,3 +308,4 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
     minWidth: 32,
   },
 ];
+// TODO: If the table has crud we have to add the actions column to the pinned columns, otherwise it will be hidden when scrolling horizontally

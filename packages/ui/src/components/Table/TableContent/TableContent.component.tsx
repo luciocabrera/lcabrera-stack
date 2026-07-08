@@ -5,11 +5,9 @@ import { useEffect, useRef } from 'react';
 
 import type { TableContentProps } from './TableContent.types';
 
-import { useGetColumns } from '../contexts/TableConfig/columns/selectors';
 import { useToogleTableIsTableSettingsOpen } from '../contexts/TableConfig/meta/actions';
 import {
   useGetTableCrud,
-  useGetTableDeleteActionPath,
   useGetTableThreshold,
   useGetTableTitleSingular,
 } from '../contexts/TableConfig/meta/selectors';
@@ -27,14 +25,12 @@ import { TableCreateLink } from '../TableCreateLink';
 import { TableDrawersSection } from '../TableDrawersSection';
 import { TableHeader } from '../TableHeader';
 import { TableTitle } from '../TableTitle';
-import { validateTableCrudConfig } from '../utils/validateTableCrudConfig.util';
 import { styles } from './TableContent.stylex';
 
 export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   actions,
   dataSelector,
   dataTotalSelector,
-  emptyState,
   icon,
   onLoadMore,
 }: TableContentProps<TData, TResponse>) => {
@@ -44,8 +40,6 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   const hasMore = useGetTableHasMore();
   const titleSingular = useGetTableTitleSingular();
   const crud = useGetTableCrud();
-  const columns = useGetColumns<TData>();
-  const deleteActionPath = useGetTableDeleteActionPath();
 
   const fetchMoreData = useFetchMoreData<TData, TResponse>();
   const toggleTableIsTableSettingsOpen = useToogleTableIsTableSettingsOpen();
@@ -56,8 +50,6 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   const wrapperRef = useRef<HTMLDivElement>(null);
   const wrapperContextValue = { containerRef, wrapperRef };
   const resolvedTitleSingular = titleSingular ?? 'Record';
-
-  validateTableCrudConfig({ columns, crud, deleteActionPath });
 
   useEffect(() => {
     const wasLoading = wasLoadingRef.current;
@@ -118,10 +110,7 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
           >
             <TableBase>
               <TableHeader />
-              <TableBody
-                emptyState={emptyState}
-                tableContainerRef={containerRef}
-              />
+              <TableBody tableContainerRef={containerRef} />
             </TableBase>
             <div
               aria-hidden
