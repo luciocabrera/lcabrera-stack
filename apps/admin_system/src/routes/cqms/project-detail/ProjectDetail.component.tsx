@@ -1,6 +1,7 @@
 import type { ProjectRunRow } from '@repo/scan-ingestion/queries/getProjectRuns.util';
 
 import { NavLink } from '@repo/ui/components/NavLink';
+import { StatusBadge } from '@repo/ui/components/StatusBadge';
 import { TableLayout } from '@repo/ui/components/Table/TableLayout';
 import { createEmptyColumnsState } from '@repo/ui/components/Table/utils/createEmptyColumnsState.util';
 import { Suspense } from 'react';
@@ -8,6 +9,7 @@ import { useLoaderData } from 'react-router';
 
 import type { loader } from './projectDetail.loader';
 
+import { resolveRunStatusTone } from '../utils/resolveRunStatusTone.util';
 import { PROJECT_RUNS_COLUMNS } from './ProjectDetail.constants';
 import { ProjectGrantsPanel } from './ProjectGrantsPanel/ProjectGrantsPanel.component';
 import { ProjectTrendPanel } from './ProjectTrendPanel';
@@ -16,6 +18,7 @@ export const ProjectDetail = () => {
   const {
     canManageGrants,
     grantsPromise,
+    hasActiveRun,
     project,
     runsPromise,
     trendPromise,
@@ -26,12 +29,19 @@ export const ProjectDetail = () => {
     <div>
       <h1>{project.name}</h1>
       <p>{project.local_path}</p>
-      <NavLink
-        color='primary'
-        to={`/cqms/projects/view/${project.id}/trigger-scan`}
-      >
-        Trigger Scan
-      </NavLink>
+      {hasActiveRun ? (
+        <span>
+          <StatusBadge label='running' tone={resolveRunStatusTone('running')} />{' '}
+          A scan is already running for this project.
+        </span>
+      ) : (
+        <NavLink
+          color='primary'
+          to={`/cqms/projects/view/${project.id}/trigger-scan`}
+        >
+          Trigger Scan
+        </NavLink>
+      )}
       <NavLink color='ghost' to={`/cqms/projects/edit/${project.id}`}>
         Edit Project
       </NavLink>

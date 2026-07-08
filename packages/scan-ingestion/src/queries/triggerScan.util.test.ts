@@ -69,6 +69,16 @@ describe('triggerScan', () => {
     ]);
     expect(scanRows.rows.every((row) => row.status === 'queued')).toBe(true);
     expect(scanRows.rows.every((row) => row.scope_value === '.')).toBe(true);
+
+    // Finalize this run so it no longer counts as "active" — the next
+    // test triggers another scan for the same shared project, and the
+    // concurrency guardrail (migration 0021) now rejects a second run
+    // while one is still queued/running for the same project.
+    await pool.query(
+      `UPDATE cqms.scans SET status = 'succeeded' WHERE run_id = $1`,
+      [result.runId],
+    );
+    await pool.query('SELECT cqms.fn_finalize_run_status($1)', [result.runId]);
   });
 
   it('fans out scanners × workspace scopes as folder-scoped scans (ADR-021)', async () => {
@@ -99,5 +109,41 @@ describe('triggerScan', () => {
       'oxlint:folder:apps/web',
       'oxlint:folder:packages/ui',
     ]);
+  });
+
+  it('rejects a new run while one is already active for the project, then succeeds once it is finalized (concurrency guardrail)', async () => {
+    // The previous test's run is still 'running' (never finalized) — a
+    // real second submission for the same project must be rejected here.
+    await expect(
+      triggerScan({
+        projectId,
+        scannerIds: ['eslint'],
+        userId: systemUserId,
+      }),
+    ).rejects.toThrow(
+      'A scan is already running for this project. Wait for it to finish before starting another.',
+    );
+
+    const pool = getPool();
+    const activeRun = await pool.query<{ id: string }>(
+      `SELECT id FROM cqms.runs WHERE project_id = $1 AND status = 'running'`,
+      [projectId],
+    );
+    const activeRunId = activeRun.rows[0]?.id ?? '';
+    await pool.query(
+      `UPDATE cqms.scans SET status = 'succeeded' WHERE run_id = $1`,
+      [activeRunId],
+    );
+    await pool.query('SELECT cqms.fn_finalize_run_status($1)', [activeRunId]);
+
+    const result = await triggerScan({
+      projectId,
+      scannerIds: ['eslint'],
+      userId: systemUserId,
+    });
+    expect(result.runId).toBeTruthy();
+
+    // Leave this run active too — nothing later in this file depends on
+    // it, and the shared project is deleted wholesale in afterAll.
   });
 });

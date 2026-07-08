@@ -4,6 +4,8 @@ import type { FormFieldsState } from '@repo/ui/components/Form/contexts/FormCont
 import type { GroupFieldNode } from '@repo/ui/components/Form/Form.types';
 
 import { FormProvider } from '@repo/ui/components/Form/contexts';
+import { FormFieldsRendererContext } from '@repo/ui/components/Form/FormFields/contexts/FormFieldsRendererContext/FormFieldsRendererContext.context';
+import { FormFields } from '@repo/ui/components/Form/FormFields/FormFields.component';
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
@@ -24,7 +26,11 @@ const renderGroup = (field: GroupFieldNode<Values>) => {
 
   return render(
     <FormProvider<Values> initialFieldsState={initialFieldsState} mode='create'>
-      <FormFieldGroup<Values> field={field} />
+      <FormFieldsRendererContext
+        value={(nested) => <FormFields fields={nested} />}
+      >
+        <FormFieldGroup<Values> field={field} />
+      </FormFieldsRendererContext>
     </FormProvider>,
   );
 };

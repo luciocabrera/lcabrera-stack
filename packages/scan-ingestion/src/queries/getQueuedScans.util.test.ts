@@ -49,6 +49,17 @@ describe('getQueuedScans', () => {
     expect(row?.skill_path).toBe('.github/skills/linter-checker');
     expect(row?.local_path).toBe(projectDir);
     expect(row?.scope_value).toBe('.');
+
+    // Finalize this run so it no longer counts as "active" — the next
+    // test triggers another scan for the same shared project, and the
+    // concurrency guardrail (migration 0021) now rejects a second run
+    // while one is still queued/running for the same project.
+    const pool = getPool();
+    await pool.query(
+      `UPDATE cqms.scans SET status = 'succeeded' WHERE run_id = $1`,
+      [runId],
+    );
+    await pool.query('SELECT cqms.fn_finalize_run_status($1)', [runId]);
   });
 
   it('does not list a scan once it is no longer queued', async () => {

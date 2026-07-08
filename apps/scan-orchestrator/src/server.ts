@@ -15,7 +15,10 @@ const SYSTEM_USERNAME = 'system';
 const envConfig = readEnvConfig({ env: process.env });
 
 const hub = createRunStatusHub();
-const queueProcessor = createQueueProcessor({ hub });
+const queueProcessor = createQueueProcessor({
+  dailyCapUsd: envConfig.LLM_DAILY_COST_CAP_USD,
+  hub,
+});
 
 const httpServer = createHttpServer();
 attachWebSocketServer({ httpServer, hub });

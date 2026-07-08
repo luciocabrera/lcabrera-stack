@@ -7,6 +7,9 @@ import { z } from 'zod';
 
 import { requireUser } from '@/auth/requireUser.util';
 
+import { isCheckboxChecked } from '../utils/isCheckboxChecked.util';
+import { computeFanOutCount } from './computeFanOutCount.util';
+import { FAN_OUT_CONFIRMATION_THRESHOLD } from './triggerScan.constants';
 import { triggerScanSchema } from './triggerScan.schema';
 
 const paramsSchema = z.object({ projectId: z.string().uuid() });
@@ -23,6 +26,7 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
 
   const formData = await request.formData();
   const parsed = triggerScanSchema.safeParse({
+    confirmFanOut: isCheckboxChecked({ formData, name: 'confirmFanOut' }),
     scannerIds: formData.getAll('scannerIds'),
     workspacePaths: formData.getAll('workspacePaths'),
   });
@@ -57,6 +61,25 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
     return {
       errors: {
         workspacePaths: `Not a workspace of this project: ${unknownSelection}`,
+      },
+    };
+  }
+
+  // The actual multiplier behind the cost incident this guards against:
+  // scanners × workspaces fan out into that many queued scans from one
+  // submission. Past the threshold, require an explicit confirmation
+  // rather than silently queuing a large batch.
+  const fanOutCount = computeFanOutCount({
+    scannerCount: parsed.data.scannerIds.length,
+    workspaceCount: parsed.data.workspacePaths.length,
+  });
+  if (
+    fanOutCount > FAN_OUT_CONFIRMATION_THRESHOLD &&
+    !parsed.data.confirmFanOut
+  ) {
+    return {
+      errors: {
+        confirmFanOut: `This will queue ${fanOutCount} scans. Check the box below to confirm and start the scan.`,
       },
     };
   }

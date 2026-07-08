@@ -50,13 +50,29 @@ export const TriggerScanForm = ({
           },
         ] satisfies readonly FieldNode<TriggerScanValues>[])
       : []),
+    // Only rendered once the action has actually rejected an over-threshold
+    // submission — a normal-sized selection never shows this field at all.
+    ...(serverErrors?.confirmFanOut
+      ? ([
+          {
+            accessor: 'confirmFanOut',
+            description: serverErrors.confirmFanOut,
+            label: 'I understand — queue these scans anyway',
+            type: 'boolean',
+          },
+        ] satisfies readonly FieldNode<TriggerScanValues>[])
+      : []),
   ];
 
   return (
     <Form<TriggerScanValues>
       cancelTo={`/cqms/projects/view/${projectId}`}
       fields={fields}
-      initialValues={{ scannerIds: [], workspacePaths: [] }}
+      initialValues={{
+        confirmFanOut: false,
+        scannerIds: [],
+        workspacePaths: [],
+      }}
       mode='create'
       serverErrors={serverErrors}
       submitLabel='Start Scan'

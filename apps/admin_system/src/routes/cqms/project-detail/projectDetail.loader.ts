@@ -1,6 +1,7 @@
 import { checkUserPermission } from '@repo/scan-ingestion/queries/checkUserPermission.util';
 import { getProjectById } from '@repo/scan-ingestion/queries/getProjectById.util';
 import { getProjectGrants } from '@repo/scan-ingestion/queries/getProjectGrants.util';
+import { getProjectHasActiveRun } from '@repo/scan-ingestion/queries/getProjectHasActiveRun.util';
 import { getProjectRuns } from '@repo/scan-ingestion/queries/getProjectRuns.util';
 import { getProjectScannerTrend } from '@repo/scan-ingestion/queries/getProjectScannerTrend.util';
 import { getUserListView } from '@repo/scan-ingestion/queries/getUserListView.util';
@@ -34,6 +35,10 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
     throw data('Project not found.', { status: 404 });
   }
 
+  // Cheap boolean, awaited directly like `project`/`canManageGrants` — the
+  // "Trigger Scan" link needs it to decide whether to render at all.
+  const hasActiveRun = await getProjectHasActiveRun({ projectId });
+
   const grantPermission = await checkUserPermission({
     action: 'update',
     resourceId: projectId,
@@ -54,6 +59,7 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
   return {
     canManageGrants,
     grantsPromise,
+    hasActiveRun,
     project,
     runsPromise,
     trendPromise,

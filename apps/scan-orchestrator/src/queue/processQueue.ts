@@ -8,6 +8,7 @@ import { runQueuedScan } from './runQueuedScan.ts';
 const SYSTEM_USERNAME = 'system';
 
 type CreateQueueProcessorArgs = {
+  readonly dailyCapUsd: number;
   readonly hub: RunStatusHub;
 };
 
@@ -19,7 +20,10 @@ type CreateQueueProcessorArgs = {
  * firing while a scan is still running) just set a flag rather than
  * starting a second overlapping drain.
  */
-export const createQueueProcessor = ({ hub }: CreateQueueProcessorArgs) => {
+export const createQueueProcessor = ({
+  dailyCapUsd,
+  hub,
+}: CreateQueueProcessorArgs) => {
   let isProcessing = false;
   let isWakeRequestedDuringProcessing = false;
 
@@ -37,7 +41,7 @@ export const createQueueProcessor = ({ hub }: CreateQueueProcessorArgs) => {
     let queued = await getQueuedScans();
     while (queued.length > 0) {
       for (const scan of queued) {
-        await runQueuedScan({ hub, scan, userId: systemUser.id });
+        await runQueuedScan({ dailyCapUsd, hub, scan, userId: systemUser.id });
       }
       queued = await getQueuedScans();
     }

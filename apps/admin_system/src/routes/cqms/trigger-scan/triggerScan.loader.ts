@@ -1,6 +1,7 @@
 import { discoverProjectWorkspaces } from '@repo/scan-ingestion/ingestion/workspaces/discoverProjectWorkspaces.util';
 import { getActiveScanners } from '@repo/scan-ingestion/queries/getActiveScanners.util';
 import { getProjectById } from '@repo/scan-ingestion/queries/getProjectById.util';
+import { getProjectHasActiveRun } from '@repo/scan-ingestion/queries/getProjectHasActiveRun.util';
 import { data, type LoaderFunctionArgs } from 'react-router';
 import { z } from 'zod';
 
@@ -24,17 +25,26 @@ const loadWorkspaces = async (projectId: string) => {
  * the form should offer what exists on disk right now. The action
  * re-discovers for validation and persists the snapshot then.
  */
-export const loader = ({ params }: LoaderFunctionArgs) => {
+export const loader = async ({ params }: LoaderFunctionArgs) => {
   const parsedParams = paramsSchema.safeParse(params);
   if (!parsedParams.success) {
     throw data('Invalid project id.', { status: 400 });
   }
 
+  const { projectId } = parsedParams.data;
+
+  // Defense in depth (direct URL nav, stale tab, back-button) — the
+  // project page already hides the link into this route when a run is
+  // active, and the server-side function asserts this too (migration
+  // 0021), but this stops the form from even rendering as the third layer.
+  const hasActiveRun = await getProjectHasActiveRun({ projectId });
+
   const scannersPromise = getActiveScanners();
-  const workspacesPromise = loadWorkspaces(parsedParams.data.projectId);
+  const workspacesPromise = loadWorkspaces(projectId);
 
   return {
-    projectId: parsedParams.data.projectId,
+    hasActiveRun,
+    projectId,
     scannersPromise,
     workspacesPromise,
   };

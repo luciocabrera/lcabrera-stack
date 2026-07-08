@@ -44,20 +44,15 @@ export const AppNavigation = ({
   const navigationSizePreference = useGetGlobalNavigationSizePreference();
   const setGlobalNavigationPreferences = useSetGlobalNavigationPreferences();
 
-  const [isOpen, setIsOpen] = useState(() => {
-    const isPinnedInitially = isNavigationPinned({
-      defaultIsPinned,
-      navigationPinnedPreference,
-    });
-
-    return !isPinnedInitially;
-  });
-
-  const isExpanded = navigationCollapsedPreference !== 'collapsed';
   const isPinned = isNavigationPinned({
     defaultIsPinned,
     navigationPinnedPreference,
   });
+
+  const [isOpen, setIsOpen] = useState(!isPinned);
+
+  const isExpanded = navigationCollapsedPreference !== 'collapsed';
+
   const isCollapsed = !isExpanded;
 
   const density = NAV_DENSITY[navigationSizePreference ?? 'medium'];

@@ -8,7 +8,7 @@ import type { loader } from './triggerScan.loader';
 import { TriggerScanForm } from './TriggerScanForm';
 
 export const TriggerScan = () => {
-  const { projectId, scannersPromise, workspacesPromise } =
+  const { hasActiveRun, projectId, scannersPromise, workspacesPromise } =
     useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const serverErrors =
@@ -19,14 +19,21 @@ export const TriggerScan = () => {
       description='Pick which scanners to run against this project, optionally scoped to specific workspaces.'
       title='Trigger Scan'
     >
-      <Suspense fallback={<p>Loading scanners…</p>}>
-        <TriggerScanForm
-          projectId={projectId}
-          scannersPromise={scannersPromise}
-          serverErrors={serverErrors}
-          workspacesPromise={workspacesPromise}
-        />
-      </Suspense>
+      {hasActiveRun ? (
+        <p>
+          A scan is already running for this project — wait for it to finish
+          before starting another.
+        </p>
+      ) : (
+        <Suspense fallback={<p>Loading scanners…</p>}>
+          <TriggerScanForm
+            projectId={projectId}
+            scannersPromise={scannersPromise}
+            serverErrors={serverErrors}
+            workspacesPromise={workspacesPromise}
+          />
+        </Suspense>
+      )}
     </SectionCard>
   );
 };

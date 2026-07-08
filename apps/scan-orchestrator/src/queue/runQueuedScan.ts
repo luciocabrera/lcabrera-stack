@@ -3,7 +3,9 @@ import type { QueuedScanRow } from '@repo/scan-ingestion/queries/getQueuedScans.
 import { runSkillAgent } from '@repo/agent-runner';
 import { ingestReport } from '@repo/scan-ingestion/ingestion/ingestReport';
 import { claimQueuedScan } from '@repo/scan-ingestion/queries/claimQueuedScan.util';
+import { getTrailingLlmCostUsd } from '@repo/scan-ingestion/queries/getTrailingLlmCostUsd.util';
 import { markScanFailed } from '@repo/scan-ingestion/queries/markScanFailed.util';
+import { recordScanLlmUsage } from '@repo/scan-ingestion/queries/recordScanLlmUsage.util';
 import { updateScanProgress } from '@repo/scan-ingestion/queries/updateScanProgress.util';
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
@@ -130,6 +132,7 @@ const runDeterministicScan = async ({
 };
 
 type RunAgentSkillArgs = {
+  readonly dailyCapUsd: number;
   readonly hub: RunStatusHub;
   readonly outputDirectory: string;
   readonly scan: QueuedScanRow;
@@ -137,11 +140,40 @@ type RunAgentSkillArgs = {
 };
 
 const runAgentSkill = async ({
+  dailyCapUsd,
   hub,
   outputDirectory,
   scan,
   userId,
 }: RunAgentSkillArgs): Promise<'failed' | 'succeeded'> => {
+  // Checked BEFORE calling the Agent SDK at all — a capped attempt costs
+  // nothing and never runs runSkillAgent(), but is still logged so the
+  // report shows it was tried and skipped, not silently dropped.
+  const trailingCostUsd = await getTrailingLlmCostUsd();
+  if (trailingCostUsd >= dailyCapUsd) {
+    const cappedMessage = `Org-wide 24h LLM spend $${trailingCostUsd.toFixed(2)} is at/over the $${dailyCapUsd.toFixed(2)} cap.`;
+    try {
+      await recordScanLlmUsage({
+        errorMessage: cappedMessage,
+        outcome: 'capped',
+        projectId: scan.project_id,
+        runId: scan.run_id,
+        scanId: scan.scan_id,
+        scannerId: scan.scanner_id,
+        userId,
+      });
+    } catch (error) {
+      console.error('❌ Failed to persist capped LLM usage log:', error);
+    }
+    await markScanFailed({
+      errorMessage: `Scan skipped — ${cappedMessage}`,
+      runId: scan.run_id,
+      scanId: scan.scan_id,
+      userId,
+    });
+    return 'failed';
+  }
+
   const result = await runSkillAgent({
     onProgress: (message) => {
       void persistScanProgress({
@@ -170,7 +202,29 @@ const runAgentSkill = async ({
     targetProjectPath: scan.local_path,
   });
 
-  if (!result.success || !result.reportMarkdownPath || !result.reportJsonPath) {
+  const succeeded =
+    result.success && !!result.reportMarkdownPath && !!result.reportJsonPath;
+
+  // Logged regardless of success/failure — a failed run may still have
+  // consumed real, non-refundable API cost, and it must count toward the
+  // next scan's cap check exactly like a succeeded one does.
+  try {
+    await recordScanLlmUsage({
+      errorMessage: result.errorMessage,
+      numTurns: result.numTurns,
+      outcome: succeeded ? 'succeeded' : 'failed',
+      projectId: scan.project_id,
+      runId: scan.run_id,
+      scanId: scan.scan_id,
+      scannerId: scan.scanner_id,
+      totalCostUsd: result.totalCostUsd,
+      userId,
+    });
+  } catch (error) {
+    console.error('❌ Failed to persist LLM usage log:', error);
+  }
+
+  if (!succeeded) {
     await markScanFailed({
       errorMessage:
         result.errorMessage ?? 'Agent session did not produce a report.',
@@ -207,6 +261,7 @@ const runAgentSkill = async ({
 };
 
 type RunQueuedScanArgs = {
+  readonly dailyCapUsd: number;
   readonly hub: RunStatusHub;
   readonly scan: QueuedScanRow;
   readonly userId: string;
@@ -225,6 +280,7 @@ type RunQueuedScanArgs = {
  * not take down the queue for every other project.
  */
 export const runQueuedScan = async ({
+  dailyCapUsd,
   hub,
   scan,
   userId,
@@ -255,7 +311,13 @@ export const runQueuedScan = async ({
         userId,
       });
     } else {
-      finalStatus = await runAgentSkill({ hub, outputDirectory, scan, userId });
+      finalStatus = await runAgentSkill({
+        dailyCapUsd,
+        hub,
+        outputDirectory,
+        scan,
+        userId,
+      });
     }
   } catch (error) {
     console.error(`❌ Scan ${scan.scan_id} failed unexpectedly:`, error);

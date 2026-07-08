@@ -51,6 +51,11 @@ Form/
 │   ├── FormFields.component.tsx  → Recursive walker: computes stable key, dispatches each node type to its subcomponent
 │   ├── FormFields.stylex.ts      → `stack` layout only
 │   ├── FormFields.types.ts
+│   ├── contexts/
+│   │   └── FormFieldsRendererContext/ → Supplies `FormFields` itself to Group/Row/Tabs (see below — breaks an import cycle)
+│   │       ├── FormFieldsRendererContext.context.ts → createContext (undefined default)
+│   │       ├── FormFieldsRendererContext.types.ts   → RenderFieldsFn (TValues erased to Record<string, unknown> at the boundary, mirrors AnyFieldComponent)
+│   │       └── useFormFieldsRendererContext.hook.ts → use(context) with guard (infra only)
 │   ├── FormFieldGroup/           → `group` node: optional label + nested FormFields (.component + .types + .stylex + .test)
 │   ├── FormFieldRow/             → `row` node: horizontal equal-flex cells of nested FormFields (.component + .types + .stylex + .test)
 │   ├── FormFieldTabs/            → `tab` node: one Tabs panel per tab (.component + .types + .test)
@@ -219,6 +224,26 @@ Each leaf component is generic over its own `TValues`; erased to a loose
 `AnyFieldComponent` shape at the registry boundary and narrowed back inside
 each leaf via its own concrete field-def type — the one intentional `any`
 in this component, confined to that single boundary.
+
+## Breaking the FormFields ↔ Group/Row/Tabs Cycle
+
+`FormFields` dispatches to `FormFieldGroup`/`FormFieldRow`/`FormFieldTabs`,
+and each of those recurses back into `FormFields` to render its own nested
+`fields` array (`group.fields`, each `row` cell, each `tab`'s `fields`) —
+genuine mutual recursion inherent to the group/row/tab/leaf tree shape, not
+a mistake. A direct import in both directions is a real circular
+dependency, though, so the recursive capability is threaded through
+`FormFields/contexts/FormFieldsRendererContext/` instead: `FormFields`
+provides itself (`(nested) => <FormFields fields={nested} />`) as the
+context value, and `FormFieldGroup`/`FormFieldRow`/`FormFieldTabs` consume
+it via `useFormFieldsRendererContext()` rather than importing
+`FormFields.component.tsx`. Same erase-at-the-boundary technique as
+`AnyFieldComponent` above (`RenderFieldsFn` erases `TValues` to
+`Record<string, unknown>`, narrowed back with a cast at each call site).
+Unit tests for the three subcomponents provide the context manually
+(`<FormFieldsRendererContext value={(nested) => <FormFields fields={nested} />}>`)
+since they render each subcomponent in isolation rather than through the
+full `FormFields` tree.
 
 ## Native Form Participation
 
