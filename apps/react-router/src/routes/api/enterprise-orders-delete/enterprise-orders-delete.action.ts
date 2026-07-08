@@ -9,7 +9,7 @@ const parseOrderId = (value: FormDataEntryValue | null) => {
 
   const orderId = Number(value);
 
-  if (!Number.isInteger(orderId) || orderId <= 0) {
+  if (!Number.isSafeInteger(orderId) || orderId <= 0) {
     throw data({ error: 'Invalid order id' }, { status: 400 });
   }
 
