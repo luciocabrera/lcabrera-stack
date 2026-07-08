@@ -8,7 +8,7 @@ allowBuilds:
 blockExoticSubdeps: true
 
 catalog:
-  '@anthropic-ai/claude-agent-sdk': ^0.3.202
+  '@anthropic-ai/claude-agent-sdk': ^0.3.204
   '@babel/preset-typescript': ^8.0.1
   '@eslint/js': ^10.0.1
   '@fastify/cors': ^11.2.0
@@ -21,7 +21,7 @@ catalog:
   '@testing-library/react': ^16.3.2
   '@types/cors': ^2.8.19
   '@types/express': ^5.0.6
-  '@types/node': ^26.1.0
+  '@types/node': ^26.1.1
   '@types/pg': ^8.20.0
   '@types/react': ^19.2.17
   '@types/react-dom': ^19.2.3
@@ -30,26 +30,26 @@ catalog:
   # Pinned exact to match the exact `vitest: 4.1.9` pin below — 4.1.10 is a
   # broken upstream publish (its @vitest/pretty-format@4.1.10 dep was never
   # published), so a caret range fails resolution entirely.
-  '@vitest/coverage-v8': 4.1.9
+  '@vitest/coverage-v8': 4.1.10
   babel-plugin-react-compiler: ^1.0.0
   cors: ^2.8.6
   eslint: ^10.6.0
   eslint-config-prettier: ^10.1.8
   eslint-plugin-local-rules: ^3.0.2
-  eslint-plugin-perfectionist: ^5.9.1
-  eslint-plugin-react-dom: ^5.11.2
+  eslint-plugin-perfectionist: ^5.10.0
+  eslint-plugin-react-dom: ^5.12.0
   eslint-plugin-react-hooks: ^7.1.1
   eslint-plugin-react-refresh: ^0.5.3
-  eslint-plugin-react-x: ^5.11.2
+  eslint-plugin-react-x: ^5.12.0
   eslint-plugin-security: ^4.0.1
-  eslint-plugin-unicorn: ^70.0.0
+  eslint-plugin-unicorn: ^71.1.0
   express: ^5.2.1
   fallow: ^3.2.0
   fastify: ^5.10.0
   globals: ^17.7.0
-  isbot: 5.1.44
+  isbot: 5.2.0
   jsdom: ^29.1.1
-  knip: ^6.24.0
+  knip: ^6.25.0
   lighthouse: ^13.4.0
   nodemon: ^3.1.14
   pg: ^8.22.0
@@ -64,8 +64,8 @@ catalog:
   typescript-eslint: ^8.63.0
   vite: 8.1.3
   vite-plugin-babel: ^1.7.3
-  vite-plus: ^0.2.2
-  vitest: 4.1.9
+  vite-plus: ^0.2.4
+  vitest: 4.1.10
   ws: ^8.21.0
 
   zod: ^4.4.3
@@ -87,19 +87,19 @@ minimumReleaseAgeExclude:
   - '@react-router/*'
 
   - '@voidzero-dev/*'
-  - eslint-plugin-react-dom@5.10.1 || 5.10.2 || 5.10.3 || 5.11.0
-  - eslint-plugin-react-x@5.10.1 || 5.10.2 || 5.10.3 || 5.11.0
-  - vite-plus@0.2.2
+  - eslint-plugin-react-dom@5.10.1 || 5.10.2 || 5.10.3 || 5.11.0 || 5.12.0
+  - eslint-plugin-react-x@5.10.1 || 5.10.2 || 5.10.3 || 5.11.0 || 5.12.0
+  - vite-plus@0.2.2 || 0.2.4
   - fallow@3.0.0
-  - '@anthropic-ai/claude-agent-sdk-darwin-arm64@0.3.202'
-  - '@anthropic-ai/claude-agent-sdk-darwin-x64@0.3.202'
-  - '@anthropic-ai/claude-agent-sdk-linux-arm64-musl@0.3.202'
-  - '@anthropic-ai/claude-agent-sdk-linux-arm64@0.3.202'
-  - '@anthropic-ai/claude-agent-sdk-linux-x64-musl@0.3.202'
-  - '@anthropic-ai/claude-agent-sdk-linux-x64@0.3.202'
-  - '@anthropic-ai/claude-agent-sdk-win32-arm64@0.3.202'
-  - '@anthropic-ai/claude-agent-sdk-win32-x64@0.3.202'
-  - '@anthropic-ai/claude-agent-sdk@0.3.202'
+  - '@anthropic-ai/claude-agent-sdk-darwin-arm64@0.3.202 || 0.3.204'
+  - '@anthropic-ai/claude-agent-sdk-darwin-x64@0.3.202 || 0.3.204'
+  - '@anthropic-ai/claude-agent-sdk-linux-arm64-musl@0.3.202 || 0.3.204'
+  - '@anthropic-ai/claude-agent-sdk-linux-arm64@0.3.202 || 0.3.204'
+  - '@anthropic-ai/claude-agent-sdk-linux-x64-musl@0.3.202 || 0.3.204'
+  - '@anthropic-ai/claude-agent-sdk-linux-x64@0.3.202 || 0.3.204'
+  - '@anthropic-ai/claude-agent-sdk-win32-arm64@0.3.202 || 0.3.204'
+  - '@anthropic-ai/claude-agent-sdk-win32-x64@0.3.202 || 0.3.204'
+  - '@anthropic-ai/claude-agent-sdk@0.3.202 || 0.3.204'
 
 # overrides:
 #   vite: "catalog:"
