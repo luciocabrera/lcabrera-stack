@@ -57,4 +57,36 @@ describe('getInitialColumnsState (TableConfig)', () => {
     expect(result.staticKeys.has('id')).toBe(true);
     expect(result.staticKeys.has('name')).toBe(false);
   });
+
+  it('does not add or pin an actions column when crud is undefined', () => {
+    const result = getInitialColumnsState({ columns, persistenceKey });
+    expect(result.columns.some((column) => column.key === 'actions')).toBe(
+      false,
+    );
+    expect(result.columnPinning.right).toEqual([]);
+  });
+
+  it('does not add an actions column when only crud.create is enabled', () => {
+    const result = getInitialColumnsState({
+      columns,
+      crud: { create: true },
+      persistenceKey,
+    });
+    expect(result.columns.some((column) => column.key === 'actions')).toBe(
+      false,
+    );
+    expect(result.columnPinning.right).toEqual([]);
+  });
+
+  it('synthesizes and right-pins the actions column when crud.delete is enabled', () => {
+    const result = getInitialColumnsState({
+      columns,
+      crud: { delete: true },
+      persistenceKey,
+    });
+    expect(result.columns.some((column) => column.key === 'actions')).toBe(
+      true,
+    );
+    expect(result.columnPinning.right).toEqual(['actions']);
+  });
 });

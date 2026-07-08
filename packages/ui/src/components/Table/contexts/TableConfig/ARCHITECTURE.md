@@ -78,7 +78,7 @@ TableConfig/
 │       └── useGetTableTitle.hook.ts                      → Table title string
 │
 ├── utils/
-  ├── getInitialColumnsState.util.ts       → Build initial columns state from props
+  ├── getInitialColumnsState.util.ts       → Build initial columns state from props; synthesizes the `actions` column via `resolveTableActionsColumn` when `crud.read/update/delete` is enabled (or a consumer `actions` column is declared), and only force-pins it right when it actually exists
   ├── getInitialMetaState.util.ts          → Build initial meta state from props
   ├── resolveHydratedTableConfigState.util.ts → Merge route defaults with persisted column/UI state
   └── index.ts                             → Barrel: utils
@@ -160,13 +160,21 @@ TableMetaState = {
 ```mermaid
 graph TD
   A["TableConfigProvider receives columns + config props"]
-  A --> B["getInitialColumnsState(columnsState)"]
+  A --> B["getInitialColumnsState(columnsState, crud)"]
   A --> C["getInitialMetaState(metaState)"]
-  B --> D["useStore(columnsInitial) → columnsStore"]
+  B --> B1["resolveTableActionsColumn(columns, crud)"]
+  B1 --> D["useStore(columnsInitial) → columnsStore"]
   C --> E["useStore(metaInitial) → metaStore"]
   D --> F["Provide { columnsStore, metaStore } via TableConfigContext"]
   E --> F
 ```
+
+Consumers no longer need to declare an `actions` column by hand: `crud` is
+threaded from `metaState.crud` into `getInitialColumnsState`, which appends
+the synthesized column (and force-pins it right) whenever `read`/`update`/
+`delete` is enabled. `crud.create` alone never adds it (header-only, no row
+id). A consumer-declared `key: 'actions'` column (e.g. with a custom `render`
+for extra menu items) is still honored and merged onto the defaults.
 
 Session hydration now happens in route `clientLoader`s before the table mounts,
 so SSR and the initial client render already agree on the seeded state.

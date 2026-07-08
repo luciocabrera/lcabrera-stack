@@ -22,6 +22,7 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
   const normalizedColumnsState = getInitialColumnsState<TData>({
     ...columnsState,
     appId: metaState?.appId,
+    crud: metaState?.crud,
     persistenceKey: metaState?.persistenceKey ?? '',
   });
   const persistedUiState = readPersistedUiStateFromSessionStorage({

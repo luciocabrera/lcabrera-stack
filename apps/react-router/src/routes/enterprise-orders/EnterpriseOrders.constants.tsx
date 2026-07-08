@@ -296,16 +296,4 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
     maxWidth: 150,
     minWidth: 130,
   }),
-  {
-    isFilterable: false,
-    isHeaderHidden: true,
-    isResizable: false,
-    isSortable: false,
-    isStatic: true,
-    key: 'actions',
-    label: 'Actions',
-    maxWidth: 32,
-    minWidth: 32,
-  },
 ];
-// TODO: If the table has crud we have to add the actions column to the pinned columns, otherwise it will be hidden when scrolling horizontally

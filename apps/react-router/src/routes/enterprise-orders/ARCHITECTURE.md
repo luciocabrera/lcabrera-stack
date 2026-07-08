@@ -13,25 +13,22 @@ Enterprise table route for large-order operational data with a dedicated constan
 The file [src/routes/enterprise-orders/EnterpriseOrders.constants.tsx](src/routes/enterprise-orders/EnterpriseOrders.constants.tsx) owns:
 
 - `PERSISTENCE_KEY` used by the table persistence layer.
-- `DEFAULT_COLUMN_PINNING` route default pinning (`actions` pinned right).
-- `COLUMNS` definitions, including filter adapters and the row-level actions button.
+- `DEFAULT_COLUMN_PINNING` route default pinning (`actions` pinned right, used
+  by the "reset to default pinning" flow).
+- `COLUMNS` definitions, including filter adapters. `COLUMNS` no longer
+  declares an `actions` entry: since `CRUD` (passed as `metaState.crud`)
+  enables `read`/`update`/`delete`, `@repo/ui/components/Table`'s
+  `getInitialColumnsState` synthesizes and right-pins the row-actions column
+  automatically (see `resolveTableActionsColumn` /
+  `createActionsColumn` in `@repo/ui/components/Table/utils`).
 
 The route loader also uses `COLUMNS` as the source of truth for standalone URL filter validation, so mismatched filter payloads are discarded before the enterprise orders API request is built.
 
-Because route-loader payloads must stay serializable, the loader returns an empty
-`columnsState.columns` array and preserves only serializable slices (filters,
-sorting, order, sizing, visibility, pinning).
-
-`EnterpriseOrders.component.tsx` rehydrates `columnsState.columns` via the
-shared `hydrateTableColumnsState({ columns: COLUMNS, columnsState })` util
-(`@repo/ui/components/Table/utils`) before passing state to `TableLayout`.
-This restores non-serializable client concerns (for example the actions-cell
-`render` function and filter option callbacks) while keeping loader data safe
-for SSR/hydration boundaries.
-
-The hydration utility also normalizes pinning so `actions` is always pinned on
-the right, and the column definition itself is marked static + non-resizable,
-which prevents unpinning and width changes from UI controls.
+`EnterpriseOrders.component.tsx` passes `columnsState` (including `COLUMNS`)
+straight from the loader into `TableLayout` — there is no client-side
+rehydration step. The synthesized actions column is static + non-resizable +
+non-filterable by default, which prevents unpinning and width changes from UI
+controls.
 
 The actions-cell link content is center-aligned via route-local StyleX styles
 so the icon button remains visually centered in the narrow pinned actions
@@ -41,4 +38,4 @@ column.
 
 - Repeated distinct-filter string columns are composed through `createDistinctStringColumn(...)` from `@repo/ui/components/Table/utils` in [src/routes/enterprise-orders/EnterpriseOrders.constants.tsx](src/routes/enterprise-orders/EnterpriseOrders.constants.tsx).
 - This keeps `columnName` + `fetchDistinctValues` wiring consistent across customer and shipping fields while preserving each column's label/width metadata.
-- The client-side hydration path now lives in the loader rather than `TableConfigProvider`, which keeps store initialization explicit and side-effect free.
+- The row-actions column is likewise never hand-declared here — it's synthesized by `TableConfigProvider` (via `getInitialColumnsState` / `resolveTableActionsColumn`) from `CRUD`, keeping store initialization explicit and side-effect free.

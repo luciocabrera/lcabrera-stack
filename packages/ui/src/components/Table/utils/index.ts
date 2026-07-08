@@ -1,3 +1,4 @@
+export { createActionsColumn } from './createActionsColumn.util';
 export { createBasicColumn } from './createBasicColumn.util';
 export { createDistinctStringColumn } from './createDistinctStringColumn.util';
 export { deriveColumnViewState } from './deriveColumnViewState.util';
@@ -5,7 +6,6 @@ export { getColumnPinSide } from './getColumnPinSide.util';
 export { getNormalizedColumns } from './getNormalizedColumns.util';
 export { getPinnedColumnOffsets } from './getPinnedColumnOffsets.util';
 export { getPinnedDerivedColumnsState } from './getPinnedDerivedColumnsState.util';
-export { hydrateTableColumnsState } from './hydrateTableColumnsState.util';
 export { persistTableMetaUiState } from './persistTableMetaUiState.util';
 export { readPersistedDataStateFromSessionStorage } from './readPersistedDataStateFromSessionStorage.util';
 export { readPersistedStateFromCookie } from './readPersistedStateFromCookie.util';
@@ -13,6 +13,7 @@ export { readPersistedStateFromSessionStorage } from './readPersistedStateFromSe
 export { readPersistedUiFlagsFromCookie } from './readPersistedUiFlagsFromCookie.util';
 export { readPersistedUiStateFromSessionStorage } from './readPersistedUiStateFromSessionStorage.util';
 export { resolvePrimaryKeyColumnKeys } from './resolvePrimaryKeyColumnKeys.util';
+export { resolveTableActionsColumn } from './resolveTableActionsColumn.util';
 export { serializeStateSlice } from './serializeStateSlice.util';
 export { syncColumnOrderWithPinning } from './syncColumnOrderWithPinning.util';
 export { writeStateSlice } from './writeStateSlice.util';

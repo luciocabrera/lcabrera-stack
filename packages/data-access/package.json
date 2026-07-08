@@ -6,7 +6,10 @@
   "sideEffects": false,
   "exports": {
     "./db/env.schema": "./src/db/env.schema.ts",
-    "./db/getPool.util": "./src/db/getPool.util.ts"
+    "./db/getPool.util": "./src/db/getPool.util.ts",
+    "./db/queryBuilder/QueryBuilder.types": "./src/db/queryBuilder/QueryBuilder.types.ts",
+    "./db/queryBuilder/buildCountQuery.util": "./src/db/queryBuilder/buildCountQuery.util.ts",
+    "./db/queryBuilder/buildSelectQuery.util": "./src/db/queryBuilder/buildSelectQuery.util.ts"
   },
   "scripts": {
     "format": "vp fmt .",

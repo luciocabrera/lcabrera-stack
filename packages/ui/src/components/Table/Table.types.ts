@@ -208,7 +208,7 @@ export type TableColumnsState<TData = Record<string, unknown>> = {
  * Serializable subset of `TableColumnsState` — omits the derived/computed
  * slices (groups, effective/normalized columns, pinned offsets, static keys)
  * that are recomputed client-side. Used for loader-seeded initial state
- * (`TableLayout`'s `columnsState` prop) and by `hydrateTableColumnsState`.
+ * (`TableLayout`'s `columnsState` prop).
  */
 export type TableColumnsStateInput<TData = Record<string, unknown>> = Omit<
   TableColumnsState<TData>,
@@ -225,6 +225,14 @@ export type TableColumnsStateInput<TData = Record<string, unknown>> = Omit<
  * create link. The row id used by those actions is derived from the column(s)
  * marked `isPrimaryKey`; the delete endpoint is configured via
  * `TableMetaState.deleteActionPath`.
+ *
+ * The table auto-adds its row-actions column (pinned right) whenever
+ * `read`, `update`, or `delete` is enabled — consumers no longer need to
+ * declare a `key: 'actions'` column by hand. `create` alone never adds it
+ * (it only renders the header-level create link, which needs no row id). A
+ * column with `key: 'actions'` is still optional for consumers who want to
+ * append custom per-row menu content (typically via `render`); it is merged
+ * onto the auto-generated defaults rather than replacing them.
  */
 export type TableCrudConfig = {
   readonly create?: boolean;

@@ -64,7 +64,6 @@ graph LR
 
   subgraph "Hooks"
     TC --> scroll["useInfiniteScroll(containerRef, sentinelRef, threshold, ...)"]
-    TC --> validateCrud["validateTableCrudConfig({ crud })"]
   end
 
   subgraph "Provides"
@@ -79,6 +78,12 @@ prop-drilled). When `crud.create` is enabled, `TableContent` renders
 `TableCreateLink` in the title actions cluster between caller-provided `actions`
 and the settings button. The link label uses `meta.title.singular` (falling
 back to `Record`).
+
+The row-level `actions` column itself (view/edit/delete menu) is a separate
+concern handled by `getInitialColumnsState` / `resolveTableActionsColumn`
+(`@repo/ui/components/Table/utils`), which synthesizes it whenever
+`crud.read`/`update`/`delete` is enabled — `crud.create` alone never adds it,
+since the create action has no row id.
 
 ## Refs
 

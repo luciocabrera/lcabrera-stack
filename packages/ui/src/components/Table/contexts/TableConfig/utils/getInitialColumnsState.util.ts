@@ -4,6 +4,7 @@ import type {
   ColumnSizingState,
   DataKey,
   TableColumnsState,
+  TableCrudConfig,
   TableMetaState,
 } from '@repo/ui/components/Table/Table.types';
 
@@ -11,12 +12,17 @@ import { ACTIONS_COLUMN_KEY } from '@repo/ui/components/Table/Table.constants';
 import {
   deriveColumnViewState,
   readPersistedStateFromSessionStorage,
+  resolveTableActionsColumn,
 } from '@repo/ui/components/Table/utils';
 
-type GetInitialTableStateArgs<TData> = Partial<TableColumnsState<TData>> &
-  Pick<TableMetaState, 'appId' | 'persistenceKey'>;
+type GetInitialTableStateArgs<TData extends Record<string, unknown>> = Partial<
+  TableColumnsState<TData>
+> &
+  Pick<TableMetaState, 'appId' | 'persistenceKey'> & {
+    readonly crud?: TableCrudConfig;
+  };
 
-export const getInitialColumnsState = <TData>({
+export const getInitialColumnsState = <TData extends Record<string, unknown>>({
   appId,
   columnFilters = {} as ColumnFiltersState<TData>,
   columnOrder = [],
@@ -24,6 +30,7 @@ export const getInitialColumnsState = <TData>({
   columns = [],
   columnSizing = {} as ColumnSizingState<TData>,
   columnVisibility = new Set<DataKey<TData>>(),
+  crud,
   persistenceKey,
   sorting = [],
 }: GetInitialTableStateArgs<TData>) => {
@@ -31,6 +38,9 @@ export const getInitialColumnsState = <TData>({
     appId,
     persistenceKey,
   });
+
+  const { columns: resolvedColumns, hasActionsColumn } =
+    resolveTableActionsColumn<TData>({ columns, crud });
 
   const rawColumnPinning = sessionState.columnPinning ?? columnPinning;
   const pinnedLeft = rawColumnPinning.left.filter(
@@ -42,7 +52,9 @@ export const getInitialColumnsState = <TData>({
 
   const nextColumnPinning = {
     left: pinnedLeft,
-    right: [...pinnedRight, ACTIONS_COLUMN_KEY],
+    right: hasActionsColumn
+      ? [...pinnedRight, ACTIONS_COLUMN_KEY]
+      : pinnedRight,
   } as ColumnPinningState<TData>;
   const nextColumnOrder = sessionState.columnOrder ?? columnOrder;
   const nextColumnSizing = sessionState.columnSizing ?? columnSizing;
@@ -58,7 +70,7 @@ export const getInitialColumnsState = <TData>({
   } = deriveColumnViewState<TData>({
     columnOrder: nextColumnOrder,
     columnPinning: nextColumnPinning,
-    columns,
+    columns: resolvedColumns,
     columnSizing: nextColumnSizing,
     columnVisibility: nextColumnVisibility,
     sorting,
@@ -69,7 +81,7 @@ export const getInitialColumnsState = <TData>({
     columnGroups,
     columnOrder: nextColumnOrder,
     columnPinning: nextColumnPinning,
-    columns,
+    columns: resolvedColumns,
     columnSizing: nextColumnSizing,
     columnVisibility: nextColumnVisibility,
     effectiveColumns,
