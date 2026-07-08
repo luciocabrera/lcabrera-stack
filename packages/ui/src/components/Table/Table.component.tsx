@@ -10,7 +10,6 @@ export const Table = <TData extends Record<string, unknown>, TResponse>({
   actions,
   dataSelector,
   dataTotalSelector,
-  emptyState,
   icon,
   isFlexWrapperEnabled = true,
   isLoading = false,
@@ -34,7 +33,6 @@ export const Table = <TData extends Record<string, unknown>, TResponse>({
         actions={actions}
         dataSelector={dataSelector}
         dataTotalSelector={dataTotalSelector}
-        emptyState={emptyState}
         icon={icon}
         onLoadMore={onLoadMore}
       />

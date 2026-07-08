@@ -343,6 +343,5 @@ export type TableTitle = {
 type BaseProps = ComponentPropsWithRef<'table'> & {
   readonly actions?: ReactNode;
   readonly customStylex?: StyleXStyles;
-  readonly emptyState?: TableEmptyStateConfig;
   readonly icon?: ReactNode;
 };
