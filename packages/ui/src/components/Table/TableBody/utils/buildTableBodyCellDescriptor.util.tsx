@@ -9,6 +9,7 @@ import type { ReactNode } from 'react';
 import { DEFAULT_MIN_COLUMN_WIDTH } from '@repo/ui/components/Table/Table.constants';
 import { TableRowActionsMenu } from '@repo/ui/components/Table/TableRowActionsMenu';
 
+// TODO: Get from the columns types
 export type TableBodyCellDescriptor<TData extends Record<string, unknown>> =
   | {
       readonly children: ReactNode;
@@ -38,7 +39,7 @@ type BuildTableBodyCellDescriptorArgs<TData extends Record<string, unknown>> = {
   readonly columnSizing: ColumnSizingState<TData>;
   readonly isLoadingState: boolean;
   readonly pinnedOffsets: Partial<Record<DataKey<TData>, PinnedColumnInfo>>;
-  readonly rowData: Record<string, unknown>;
+  readonly row: TData;
 };
 
 /**
@@ -51,13 +52,13 @@ export const buildTableBodyCellDescriptor = <
   columnSizing,
   isLoadingState,
   pinnedOffsets,
-  rowData,
+  row,
 }: BuildTableBodyCellDescriptorArgs<TData>): TableBodyCellDescriptor<TData> => {
   const minWidth = col.minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
   const width = columnSizing[col.key] ?? minWidth;
   const pinInfo = pinnedOffsets[col.key];
 
-  const customActions = col.render?.(rowData as TData);
+  const customActions = col.render?.(row);
 
   if (col.key === 'actions') {
     return {
@@ -65,7 +66,7 @@ export const buildTableBodyCellDescriptor = <
         <TableRowActionsMenu
           customActions={customActions}
           isLoadingState={isLoadingState}
-          row={rowData as TData}
+          row={row}
         />
       ),
       isLoadingState,
@@ -100,7 +101,7 @@ export const buildTableBodyCellDescriptor = <
     label: col.label,
     minWidth,
     pinInfo,
-    value: Object.hasOwn(rowData, col.key) ? rowData[col.key] : '',
+    value: Object.hasOwn(row, col.key) ? row[col.key] : '',
     width,
   };
 };

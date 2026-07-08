@@ -56,7 +56,7 @@ describe('createRenderTableBodyCell', () => {
     render(
       <table>
         <tbody>
-          <tr>{renderBodyCell({ col, rowData: { amount: 12 } })}</tr>
+          <tr>{renderBodyCell({ col, row: { amount: 12 } })}</tr>
         </tbody>
       </table>,
     );
@@ -79,7 +79,7 @@ describe('createRenderTableBodyCell', () => {
     render(
       <table>
         <tbody>
-          <tr>{renderBodyCell({ col, rowData: { name: 'Z' } })}</tr>
+          <tr>{renderBodyCell({ col, row: { name: 'Z' } })}</tr>
         </tbody>
       </table>,
     );
@@ -109,7 +109,7 @@ describe('createRenderTableBodyCell', () => {
     render(
       <table>
         <tbody>
-          <tr>{renderBodyCell({ col, rowData: { name: 'A' } })}</tr>
+          <tr>{renderBodyCell({ col, row: { name: 'A' } })}</tr>
         </tbody>
       </table>,
     );

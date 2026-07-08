@@ -21,9 +21,9 @@ type CreateRenderTableBodyCellArgs<TData extends Record<string, unknown>> = {
 
 type RenderBodyCellArgs<TData extends Record<string, unknown>> = {
   readonly col: TableColumn<TData>;
-  readonly rowData: Record<string, unknown>;
+  readonly row: TData;
 };
-
+// TODO: sPlit in different .util
 const renderFromDescriptor = <TData extends Record<string, unknown>>({
   descriptor,
 }: {
@@ -66,13 +66,13 @@ export const createRenderTableBodyCell =
     isLoadingState,
     pinnedOffsets,
   }: CreateRenderTableBodyCellArgs<TData>) =>
-  ({ col, rowData }: RenderBodyCellArgs<TData>) => {
+  ({ col, row }: RenderBodyCellArgs<TData>) => {
     const descriptor = buildTableBodyCellDescriptor({
       col,
       columnSizing,
       isLoadingState,
       pinnedOffsets,
-      rowData,
+      row,
     });
 
     return renderFromDescriptor({ descriptor });

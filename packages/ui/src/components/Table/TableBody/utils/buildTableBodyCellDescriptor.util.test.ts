@@ -30,7 +30,7 @@ describe('buildTableBodyCellDescriptor', () => {
       columnSizing: {} as ColumnSizingState<Row>,
       isLoadingState: false,
       pinnedOffsets: {} as Record<RowKey, PinnedColumnInfo>,
-      rowData: { amount: 42 },
+      row: { amount: 42 },
     });
 
     expect(descriptor).toEqual({
@@ -58,7 +58,7 @@ describe('buildTableBodyCellDescriptor', () => {
       columnSizing: { name: 180 } as ColumnSizingState<Row>,
       isLoadingState: false,
       pinnedOffsets: {} as Record<RowKey, PinnedColumnInfo>,
-      rowData: { name: 'A' },
+      row: { name: 'A' },
     });
 
     expect(descriptor).toEqual({
@@ -92,7 +92,7 @@ describe('buildTableBodyCellDescriptor', () => {
       pinnedOffsets: {
         name: pinInfo,
       } as Record<RowKey, PinnedColumnInfo>,
-      rowData: {},
+      row: {},
     });
 
     expect(descriptor).toEqual({

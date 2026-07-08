@@ -66,6 +66,7 @@ describe('scanFindingSchema', () => {
   it('still accepts real arrays and nullish values in the lifted fields', () => {
     const parsed = scanFindingSchema.parse({
       ...minimalFinding,
+      // eslint-disable-next-line unicorn/no-null
       dependencies: null,
       related_findings: ['F-001', 'F-003'],
     });

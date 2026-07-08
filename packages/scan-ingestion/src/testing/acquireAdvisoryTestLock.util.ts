@@ -1,6 +1,6 @@
-import { getPool } from '@repo/data-access/db/getPool.util';
-
 import type { PoolClient } from 'pg';
+
+import { getPool } from '@repo/data-access/db/getPool.util';
 
 type AcquireAdvisoryTestLockArgs = {
   readonly lockName: string;

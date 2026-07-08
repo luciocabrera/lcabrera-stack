@@ -33,24 +33,23 @@ export const TableBodyRows = <TData extends Record<string, unknown>>({
     <>
       {visibleRows.map((row, index) => {
         const rowIndex = startIndex + index;
-        const rowData = row as Record<string, unknown>;
 
         return (
           <TableRow key={rowIndex}>
             {renderTableBodyColumnGroup({
               columns: leftPinnedCols,
               renderCell: renderBodyCell,
-              rowData,
+              row,
             })}
             {renderTableBodyColumnGroup({
               columns: centerCols,
               renderCell: renderBodyCell,
-              rowData,
+              row,
             })}
             {renderTableBodyColumnGroup({
               columns: rightPinnedCols,
               renderCell: renderBodyCell,
-              rowData,
+              row,
             })}
           </TableRow>
         );

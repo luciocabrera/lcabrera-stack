@@ -72,7 +72,7 @@ describe('failStaleRunningScans (ADR-026, real DB)', () => {
     expect(sweptCount).toBeGreaterThanOrEqual(1);
 
     const eslintScan = await pool.query<{
-      error_message: string | null;
+      error_message: null | string;
       status: string;
     }>('SELECT status, error_message FROM cqms.scans WHERE id = $1', [
       eslintScanId,
