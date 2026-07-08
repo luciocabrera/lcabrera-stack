@@ -1,15 +1,15 @@
-import { describe, expect, it } from 'vitest';
-
 import type { TableColumnsStateInput } from '@repo/ui/components/Table/Table.types';
 
+import { describe, expect, it } from 'vitest';
+
 import { hydrateTableColumnsState } from './hydrateTableColumnsState.util';
+
+type TestColumnsState = TableColumnsStateInput<TestRow>;
 
 type TestRow = {
   readonly customer_name: string;
   readonly order_id: number;
 };
-
-type TestColumnsState = TableColumnsStateInput<TestRow>;
 
 const TEST_COLUMNS = [
   { key: 'order_id' as const, label: 'Order ID' },

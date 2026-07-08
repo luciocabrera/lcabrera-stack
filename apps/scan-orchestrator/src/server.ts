@@ -53,18 +53,16 @@ const reconcileStaleScansAtStartup = async (): Promise<void> => {
 // queued while this process was down entirely.
 let reconcileInterval: NodeJS.Timeout | undefined;
 
-const startQueue = async (): Promise<void> => {
+try {
   await reconcileStaleScansAtStartup();
   listenForQueuedScans({ onWake: queueProcessor.wake });
   reconcileInterval = setInterval(queueProcessor.wake, RECONCILE_INTERVAL_MS);
   queueProcessor.wake();
-};
-
-void startQueue().catch((error: unknown) => {
+} catch (error: unknown) {
   console.error('❌ Failed to start the scan queue:', error);
   process.exitCode = 1;
   httpServer.close();
-});
+}
 
 const shutdown = async (): Promise<void> => {
   console.warn('🛑 Shutting down scan-orchestrator');
