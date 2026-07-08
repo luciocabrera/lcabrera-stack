@@ -90,9 +90,7 @@ describe('TableEmptyState', () => {
   });
 
   it('renders custom title and message overrides', () => {
-    renderInTable(
-      <TableEmptyState message='Nothing to show' title='All caught up' />,
-    );
+    renderInTable(<TableEmptyState />);
 
     expect(screen.getByRole('heading').textContent).toBe('All caught up');
     expect(screen.getByText('Nothing to show')).not.toBeNull();

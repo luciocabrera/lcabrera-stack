@@ -255,10 +255,7 @@ describe('TableBody', () => {
 
     render(
       <table>
-        <TableBody
-          emptyState={{ title: 'Nothing here' }}
-          tableContainerRef={tableContainerRef}
-        />
+        <TableBody tableContainerRef={tableContainerRef} />
       </table>,
     );
 
