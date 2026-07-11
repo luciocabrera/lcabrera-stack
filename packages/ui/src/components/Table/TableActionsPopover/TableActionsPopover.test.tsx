@@ -83,7 +83,7 @@ describe('TableActionsPopover', () => {
 
     render(
       <TableActionsPopover ariaLabel='Column actions' label='Column actions'>
-        {() => undefined}
+        {() => {}}
       </TableActionsPopover>,
     );
 

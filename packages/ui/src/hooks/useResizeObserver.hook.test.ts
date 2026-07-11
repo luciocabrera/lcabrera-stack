@@ -27,11 +27,11 @@ afterEach(() => {
 });
 
 describe('useResizeObserver', () => {
-  it('does nothing when the target resolves to null', () => {
+  it('does nothing when the target resolves to no element', () => {
     vi.stubGlobal('ResizeObserver', MockResizeObserver);
     const onMeasure = vi.fn();
 
-    renderHook(() => useResizeObserver({ getTarget: () => null, onMeasure }));
+    renderHook(() => useResizeObserver({ getTarget: () => {}, onMeasure }));
 
     expect(onMeasure).not.toHaveBeenCalled();
     expect(MockResizeObserver.instances).toHaveLength(0);
