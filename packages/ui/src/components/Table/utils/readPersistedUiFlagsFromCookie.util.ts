@@ -3,10 +3,8 @@ import { readFromCookie } from '@repo/ui/utils/storage';
 import type { PersistedUiFlags } from './persistence.types';
 
 import { getStorageKey } from './getStorageKey.util';
-import {
-  PERSISTENCE_VERSION,
-  UI_FLAGS_COOKIE_KEY_SUFFIX,
-} from './persistence.constants';
+import { parseVersionedPayload } from './parseVersionedPayload.util';
+import { UI_FLAGS_COOKIE_KEY_SUFFIX } from './persistence.constants';
 
 type ReadPersistedUiFlagsFromCookieArgs = {
   readonly appId?: string;
@@ -30,17 +28,5 @@ export const readPersistedUiFlagsFromCookie = ({
 
   if (!rawValue) return {};
 
-  try {
-    const parsed = JSON.parse(decodeURIComponent(rawValue)) as {
-      value: unknown;
-      version: number;
-    };
-    if (parsed.version === PERSISTENCE_VERSION) {
-      return parsed.value as PersistedUiFlags;
-    }
-  } catch {
-    // Invalid JSON — skip
-  }
-
-  return {};
+  return parseVersionedPayload<PersistedUiFlags>({ rawValue }) ?? {};
 };

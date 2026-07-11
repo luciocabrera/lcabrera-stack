@@ -12,6 +12,17 @@ export const SelectOption = ({
   onToggle,
   option,
 }: SelectOptionProps) => {
+  const content = (
+    <>
+      <span {...stylex.props(styles.label)}>{option}</span>
+      {isLoading && (
+        <div {...stylex.props(skeletonStyles.loadingOverlay)}>
+          <div {...stylex.props(skeletonStyles.shimmerWave)} />
+        </div>
+      )}
+    </>
+  );
+
   if (!hasCheckbox) {
     return (
       <button
@@ -25,31 +36,19 @@ export const SelectOption = ({
           isLoading && styles.optionDisabled,
         )}
       >
-        <span {...stylex.props(styles.label)}>{option}</span>
-        {isLoading && (
-          <div {...stylex.props(skeletonStyles.loadingOverlay)}>
-            <div {...stylex.props(skeletonStyles.shimmerWave)} />
-          </div>
-        )}
+        {content}
       </button>
     );
   }
 
   return (
     <label {...stylex.props(styles.option, isLoading && styles.optionDisabled)}>
-      {hasCheckbox && (
-        <Checkbox
-          isChecked={isSelected}
-          isDisabled={isLoading}
-          onChange={onToggle}
-        />
-      )}
-      <span {...stylex.props(styles.label)}>{option}</span>
-      {isLoading && (
-        <div {...stylex.props(skeletonStyles.loadingOverlay)}>
-          <div {...stylex.props(skeletonStyles.shimmerWave)} />
-        </div>
-      )}
+      <Checkbox
+        isChecked={isSelected}
+        isDisabled={isLoading}
+        onChange={onToggle}
+      />
+      {content}
     </label>
   );
 };

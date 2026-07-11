@@ -3,10 +3,8 @@ import { readFromSessionStorage } from '@repo/ui/utils/storage';
 import type { PersistedUiState } from './persistence.types';
 
 import { getStorageKey } from './getStorageKey.util';
-import {
-  PERSISTENCE_VERSION,
-  UI_STATE_SESSION_KEY_SUFFIX,
-} from './persistence.constants';
+import { parseVersionedPayload } from './parseVersionedPayload.util';
+import { UI_STATE_SESSION_KEY_SUFFIX } from './persistence.constants';
 
 type ReadPersistedUiStateFromSessionStorageArgs = {
   readonly appId?: string;
@@ -26,17 +24,5 @@ export const readPersistedUiStateFromSessionStorage = ({
 
   if (!rawValue) return {};
 
-  try {
-    const parsed = JSON.parse(decodeURIComponent(rawValue)) as {
-      value: unknown;
-      version: number;
-    };
-    if (parsed.version === PERSISTENCE_VERSION) {
-      return parsed.value as PersistedUiState;
-    }
-  } catch {
-    // Invalid JSON — skip
-  }
-
-  return {};
+  return parseVersionedPayload<PersistedUiState>({ rawValue }) ?? {};
 };
