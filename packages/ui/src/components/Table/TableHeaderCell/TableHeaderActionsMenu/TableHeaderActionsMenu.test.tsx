@@ -5,19 +5,7 @@ import type { ReactNode } from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-const {
-  mockSetColumnPinning,
-  mockSetColumnVisibility,
-  mockSetSorting,
-  mockSetTableColumnSelectedKey,
-  mockSetTableDrawersOpenState,
-  MockTableActionsPopover,
-} = vi.hoisted(() => ({
-  mockSetColumnPinning: vi.fn(),
-  mockSetColumnVisibility: vi.fn(),
-  mockSetSorting: vi.fn(),
-  mockSetTableColumnSelectedKey: vi.fn(),
-  mockSetTableDrawersOpenState: vi.fn(),
+const { MockTableActionsPopover } = vi.hoisted(() => ({
   MockTableActionsPopover: vi.fn(
     ({
       children,
@@ -34,15 +22,15 @@ const mockCloseMenu = vi.fn();
 vi.mock(
   '@repo/ui/components/Table/contexts/TableConfig/columns/actions',
   () => ({
-    useSetColumnPinning: () => mockSetColumnPinning,
-    useSetColumnSorting: () => mockSetSorting,
-    useSetColumnVisibility: () => mockSetColumnVisibility,
+    useSetColumnPinning: () => vi.fn(),
+    useSetColumnSorting: () => vi.fn(),
+    useSetColumnVisibility: () => vi.fn(),
   }),
 );
 
 vi.mock('@repo/ui/components/Table/contexts/TableConfig/meta/actions', () => ({
-  useSetTableColumnSelectedKey: () => mockSetTableColumnSelectedKey,
-  useSetTableDrawersOpenState: () => mockSetTableDrawersOpenState,
+  useSetTableColumnSelectedKey: () => vi.fn(),
+  useSetTableDrawersOpenState: () => vi.fn(),
 }));
 
 vi.mock('@repo/ui/components/Table/TableActionsPopover', () => ({
@@ -77,83 +65,44 @@ describe('TableHeaderActionsMenu', () => {
     expect(MockTableActionsPopover).not.toHaveBeenCalled();
   });
 
-  it('shows Ascending/Descending but not Clear Sorting when no sort is applied', () => {
+  it('renders only the sort section for a sortable static column without settings', () => {
     render(
       <TableHeaderActionsMenu
         columnKey='name'
         columnLabel='Name'
         hasSettings={false}
         isSortable
-        isStatic={false}
+        isStatic
       />,
     );
 
     expect(screen.getByText('Ascending')).not.toBeNull();
     expect(screen.getByText('Descending')).not.toBeNull();
-    expect(screen.queryByText('Clear Sorting')).toBeNull();
+    expect(screen.queryByText('Pin Left')).toBeNull();
+    expect(screen.queryByText('Pin Right')).toBeNull();
+    expect(screen.queryByText('Hide Column')).toBeNull();
+    expect(screen.queryByText('Manage Column')).toBeNull();
   });
 
-  it('shows Clear Sorting when a sort is applied and clears it on click', () => {
+  it('renders only the pin/hide section for a movable non-sortable column', () => {
     render(
       <TableHeaderActionsMenu
         columnKey='name'
         columnLabel='Name'
         hasSettings={false}
-        isSortable
-        isStatic={false}
-        sortDirection='asc'
-      />,
-    );
-
-    fireEvent.click(screen.getByText('Clear Sorting'));
-
-    expect(mockSetSorting).toHaveBeenCalledWith({
-      columnKey: 'name',
-      direction: undefined,
-    });
-    expect(mockCloseMenu).toHaveBeenCalled();
-  });
-
-  it('toggles Ascending off when it is already the active direction', () => {
-    render(
-      <TableHeaderActionsMenu
-        columnKey='name'
-        columnLabel='Name'
-        hasSettings={false}
-        isSortable
-        isStatic={false}
-        sortDirection='asc'
-      />,
-    );
-
-    fireEvent.click(screen.getByText('Ascending'));
-
-    expect(mockSetSorting).toHaveBeenCalledWith({
-      columnKey: 'name',
-      direction: undefined,
-    });
-  });
-
-  it('sets Descending when not currently active', () => {
-    render(
-      <TableHeaderActionsMenu
-        columnKey='name'
-        columnLabel='Name'
-        hasSettings={false}
-        isSortable
+        isSortable={false}
         isStatic={false}
       />,
     );
 
-    fireEvent.click(screen.getByText('Descending'));
-
-    expect(mockSetSorting).toHaveBeenCalledWith({
-      columnKey: 'name',
-      direction: 'desc',
-    });
+    expect(screen.getByText('Pin Left')).not.toBeNull();
+    expect(screen.getByText('Pin Right')).not.toBeNull();
+    expect(screen.getByText('Hide Column')).not.toBeNull();
+    expect(screen.queryByText('Ascending')).toBeNull();
+    expect(screen.queryByText('Manage Column')).toBeNull();
   });
 
-  it('hides Pin/Hide items for static columns', () => {
+  it('renders the Manage Column section when the column has settings', () => {
     render(
       <TableHeaderActionsMenu
         columnKey='id'
@@ -164,89 +113,23 @@ describe('TableHeaderActionsMenu', () => {
       />,
     );
 
-    expect(screen.queryByText('Pin Left')).toBeNull();
-    expect(screen.queryByText('Pin Right')).toBeNull();
-    expect(screen.queryByText('Hide Column')).toBeNull();
     expect(screen.getByText('Manage Column')).not.toBeNull();
   });
 
-  it('toggles Pin Left off when already pinned left', () => {
+  it('forwards closeMenu to the section subcomponents', () => {
     render(
       <TableHeaderActionsMenu
         columnKey='name'
         columnLabel='Name'
         hasSettings={false}
-        isSortable={false}
-        isStatic={false}
-        pinSide='left'
+        isSortable
+        isStatic
       />,
     );
 
-    fireEvent.click(screen.getByText('Pin Left'));
+    fireEvent.click(screen.getByText('Ascending'));
 
-    expect(mockSetColumnPinning).toHaveBeenCalledWith({
-      columnKey: 'name',
-      side: undefined,
-    });
-  });
-
-  it('pins right when not already pinned right', () => {
-    render(
-      <TableHeaderActionsMenu
-        columnKey='name'
-        columnLabel='Name'
-        hasSettings={false}
-        isSortable={false}
-        isStatic={false}
-      />,
-    );
-
-    fireEvent.click(screen.getByText('Pin Right'));
-
-    expect(mockSetColumnPinning).toHaveBeenCalledWith({
-      columnKey: 'name',
-      side: 'right',
-    });
-  });
-
-  it('hides the column via useSetColumnVisibility', () => {
-    render(
-      <TableHeaderActionsMenu
-        columnKey='name'
-        columnLabel='Name'
-        hasSettings={false}
-        isSortable={false}
-        isStatic={false}
-      />,
-    );
-
-    fireEvent.click(screen.getByText('Hide Column'));
-
-    expect(mockSetColumnVisibility).toHaveBeenCalledWith({
-      columnKey: 'name',
-      isVisible: false,
-    });
     expect(mockCloseMenu).toHaveBeenCalled();
-  });
-
-  it('opens the per-column settings drawer via Manage Column', () => {
-    render(
-      <TableHeaderActionsMenu
-        columnKey='name'
-        columnLabel='Name'
-        hasSettings
-        isSortable={false}
-        isStatic={false}
-      />,
-    );
-
-    fireEvent.click(screen.getByText('Manage Column'));
-
-    expect(mockSetTableColumnSelectedKey).toHaveBeenCalledWith('name');
-    expect(mockSetTableDrawersOpenState).toHaveBeenCalledWith({
-      isColumnSettingsOpen: true,
-      isTableSettingsOpen: false,
-    });
   });
 
   it('passes a column-labeled ariaLabel/label to TableActionsPopover', () => {

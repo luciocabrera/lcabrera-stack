@@ -22,8 +22,11 @@ TableHeaderCell/
 │   └── index.ts
 │
 ├── TableHeaderActionsMenu/
-│   ├── TableHeaderActionsMenu.component.tsx → Popover menu: sort/pin/hide/manage column
+│   ├── TableHeaderActionsMenu.component.tsx → Popover menu shell: gates sections + forwards closeMenu
 │   ├── TableHeaderActionsMenu.types.ts      → Props (isSortable, isStatic, hasSettings, pinSide, sortDirection)
+│   ├── SortActions/                         → Ascending/Descending/Clear Sorting items; owns useSetColumnSorting
+│   ├── PinAndHideActions/                   → Pin Left/Pin Right/Hide Column items; owns useSetColumnPinning + useSetColumnVisibility
+│   ├── ManageColumnAction/                  → Manage Column item; owns the drawer-open meta actions
 │   └── index.ts
 │
 └── utils/
@@ -62,25 +65,29 @@ A single `MoreVerticalIcon` trigger (`TableActionsPopover`, shared with
 opens a popover built by `TableHeaderActionsMenu`, replacing the previous
 inline pin/sort/settings buttons:
 
-- **Sort** (when `isSortable`): "Ascending"/"Descending" toggle the direction
-  on/off exactly like `ColumnSettingsDrawer/SortingSection`
+- **Sort** (`SortActions`, when `isSortable`): "Ascending"/"Descending" toggle
+  the direction on/off exactly like `ColumnSettingsDrawer/SortingSection`
   (`direction === current ? undefined : direction`); "Clear Sorting" appears
   only when a direction is currently applied.
-- **Pin** (when `!isStatic`): "Pin Left"/"Pin Right" toggle via
-  `useSetColumnPinning` directly — no side-selection or conflict modal, same
-  silent behavior as `ColumnSettingsDrawer/PinningSection`.
-- **Hide Column** (when `!isStatic`): `useSetColumnVisibility({ columnKey,
-isVisible: false })` — a single-column, table-level visibility action (see
-  `contexts/TableConfig/ARCHITECTURE.md`), distinct from the settings-drawer's
-  draft-scoped `useToggleColumnVisibility`.
-- **Manage Column** (when `hasSettings`): opens the per-column
-  `ColumnSettingsDrawer` — identical wiring to the previous "Settings for
-  {label}" button (`setTableColumnSelectedKey` + `setTableDrawersOpenState({
-isColumnSettingsOpen: true, isTableSettingsOpen: false })`).
+- **Pin** (`PinAndHideActions`, when `!isStatic`): "Pin Left"/"Pin Right"
+  toggle via `useSetColumnPinning` directly — no side-selection or conflict
+  modal, same silent behavior as `ColumnSettingsDrawer/PinningSection`.
+- **Hide Column** (`PinAndHideActions`, when `!isStatic`):
+  `useSetColumnVisibility({ columnKey, isVisible: false })` — a single-column,
+  table-level visibility action (see `contexts/TableConfig/ARCHITECTURE.md`),
+  distinct from the settings-drawer's draft-scoped `useToggleColumnVisibility`.
+- **Manage Column** (`ManageColumnAction`, when `hasSettings`): opens the
+  per-column `ColumnSettingsDrawer` — identical wiring to the previous
+  "Settings for {label}" button (`setTableColumnSelectedKey` +
+  `setTableDrawersOpenState({ isColumnSettingsOpen: true,
+isTableSettingsOpen: false })`).
 
-Every item closes the popover via the render-prop `closeMenu` after firing its
-action. The menu renders nothing (no trigger) when the column has no
-sortable/pinnable/settings affordance at all.
+Each section is a private-delegate subcomponent (direct file imports, no
+barrels — ADR-007) that owns its store-action hooks and click handlers;
+`TableHeaderActionsMenu` itself only gates which sections render and forwards
+the popover's render-prop `closeMenu` to each section's `onClose`, so every
+item closes the popover after firing its action. The menu renders nothing (no
+trigger) when the column has no sortable/pinnable/settings affordance at all.
 
 ### Resize
 
