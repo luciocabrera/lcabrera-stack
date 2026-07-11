@@ -15,9 +15,9 @@ TableTitle/
 
 ## Context Dependencies
 
-| Selector           | Purpose            |
-| ------------------ | ------------------ |
-| `useGetTableTitle` | Table heading text |
+| Selector                 | Purpose                          |
+| ------------------------ | -------------------------------- |
+| `useGetTableTitlePlural` | Table heading text (plural form) |
 
 ## Props
 

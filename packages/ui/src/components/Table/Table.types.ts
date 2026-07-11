@@ -258,14 +258,6 @@ export type TableDataState<TData> = {
 
 export type TableDensity = 'comfortable' | 'compact';
 
-/**
- * Optional content overrides for the table's empty (no-data) state.
- */
-export type TableEmptyStateConfig = {
-  readonly message?: ReactNode;
-  readonly title?: ReactNode;
-};
-
 export type TableMetadataValue = boolean | number | string;
 
 export type TableMetaState = {

@@ -1,4 +1,3 @@
-export { createActionsColumn } from './createActionsColumn.util';
 export { createBasicColumn } from './createBasicColumn.util';
 export { createDistinctStringColumn } from './createDistinctStringColumn.util';
 export { deriveColumnViewState } from './deriveColumnViewState.util';

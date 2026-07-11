@@ -23,11 +23,6 @@ export type PinConflictResolution =
   | 'pin-all-between'
   | 'pin-only';
 
-export type PinConflictState = {
-  readonly isOpen: boolean;
-  readonly side: 'left' | 'right';
-};
-
 export type PinSide = 'closest-edge' | 'left' | 'right';
 
 export type PrefetchCache<TResponse> = {

@@ -97,7 +97,6 @@ import { useGetTableRowHeight } from './selectors/useGetTableRowHeight.hook';
 import { useGetTableSettingsExpandedFilters } from './selectors/useGetTableSettingsExpandedFilters.hook';
 import { useGetTableSettingsSelectedTab } from './selectors/useGetTableSettingsSelectedTab.hook';
 import { useGetTableThreshold } from './selectors/useGetTableThreshold.hook';
-import { useGetTableTitle } from './selectors/useGetTableTitle.hook';
 import { useGetTableTitlePlural } from './selectors/useGetTableTitlePlural.hook';
 import { useGetTableTitleSingular } from './selectors/useGetTableTitleSingular.hook';
 import { useMetaStore } from './useMetaStore.hook';
@@ -182,10 +181,6 @@ describe('TableConfig meta hooks', () => {
       renderHook(() => useGetTableSettingsSelectedTab()).result.current,
     ).toBe('general');
     expect(renderHook(() => useGetTableThreshold()).result.current).toBe(200);
-    expect(renderHook(() => useGetTableTitle()).result.current).toEqual({
-      plural: 'Orders',
-      singular: 'Order',
-    });
     expect(renderHook(() => useGetTableTitlePlural()).result.current).toBe(
       'Orders',
     );

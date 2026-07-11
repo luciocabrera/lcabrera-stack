@@ -25,6 +25,5 @@ export { useGetTableSettingsExpandedFilters } from './useGetTableSettingsExpande
 export { useGetTableSettingsSelectedTab } from './useGetTableSettingsSelectedTab.hook';
 export { useGetTableTableName } from './useGetTableTableName.hook';
 export { useGetTableThreshold } from './useGetTableThreshold.hook';
-export { useGetTableTitle } from './useGetTableTitle.hook';
 export { useGetTableTitlePlural } from './useGetTableTitlePlural.hook';
 export { useGetTableTitleSingular } from './useGetTableTitleSingular.hook';

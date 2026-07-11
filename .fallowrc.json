@@ -40,6 +40,10 @@
   ],
   "ignoreExports": [
     {
+      "file": "packages/ui/src/components/Icons/index.ts",
+      "exports": ["SortNeutralIcon", "UserIcon"]
+    },
+    {
       "file": "apps/react-router/src/features/showcase/ShowcasePage/ShowcasePage.stylex.ts",
       "exports": ["*"]
     },

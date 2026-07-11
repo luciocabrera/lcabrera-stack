@@ -76,7 +76,8 @@ TableConfig/
 │       ├── useGetTableSchemaName.hook.ts                 → Optional schema name
 │       ├── useGetTableTableName.hook.ts                  → Optional table name
 │       ├── useGetTableThreshold.hook.ts                  → Fetch-more threshold
-│       └── useGetTableTitle.hook.ts                      → Table title string
+│       ├── useGetTableTitlePlural.hook.ts                → Plural table title string
+│       └── useGetTableTitleSingular.hook.ts              → Singular table title string
 │
 ├── utils/
   ├── getInitialColumnsState.util.ts       → Build initial columns state from props; synthesizes the `actions` column via `resolveTableActionsColumn` when `crud.read/update/delete` is enabled (or a consumer `actions` column is declared), and only force-pins it right when it actually exists
@@ -282,4 +283,5 @@ subscription effect in the provider.
 | `useGetTableSettingsSelectedTab`     | `string`                                                               | Persisted table settings tab key        |
 | `useGetTableTableName`               | `string \| undefined`                                                  | Optional table name                     |
 | `useGetTableThreshold`               | `number`                                                               | Fetch-more scroll threshold             |
-| `useGetTableTitle`                   | `string`                                                               | Table display title                     |
+| `useGetTableTitlePlural`             | `string`                                                               | Plural table display title              |
+| `useGetTableTitleSingular`           | `string`                                                               | Singular table display title            |

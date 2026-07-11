@@ -1,30 +1,29 @@
-# TableTitle Architecture
+# Title Architecture
 
-Optional title bar displayed above the table with icon, heading, and action slots.
+Generic title bar with icon, heading (children), and action slots. Purely presentational — no context dependencies.
 
 ## File Structure
 
 ```
-TableTitle/
-├── TableTitle.component.tsx   → Conditionally renders title/icon/actions
-├── TableTitle.test.tsx        → Unit tests for empty, title, and slot rendering states
-├── TableTitle.types.ts        → TableTitleProps (actions, customStylex, icon)
-├── TableTitle.stylex.ts       → Container, titleSection, icon, actions layout
-└── index.ts                   → Barrel export
+Title/
+├── Title.component.tsx   → Conditionally renders icon/heading/actions
+├── Title.test.tsx        → Unit tests for empty, title, and slot rendering states
+├── Title.types.ts        → TitleProps (actions, customStylex, icon + div props)
+├── Title.stylex.ts       → Container, titleSection, icon, actions layout
+└── index.ts              → Barrel export
 ```
 
 ## Context Dependencies
 
-| Selector           | Purpose            |
-| ------------------ | ------------------ |
-| `useGetTableTitle` | Table heading text |
+None — the heading text comes from `children`.
 
 ## Props
 
 | Prop           | Type            | Description            |
 | -------------- | --------------- | ---------------------- |
+| `children`     | `ReactNode?`    | Heading text (`<h2>`)  |
 | `actions`      | `ReactNode?`    | Right-side action slot |
 | `icon`         | `ReactNode?`    | Left-side icon slot    |
 | `customStylex` | `StyleXStyles?` | Override styles        |
 
-Returns `undefined` (renders nothing) when title, icon, and actions are all empty.
+Returns `undefined` (renders nothing) when children, icon, and actions are all empty.
