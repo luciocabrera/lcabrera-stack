@@ -1,22 +1,22 @@
 # Fallow Complexity Threshold Analysis
 
-## Canonical Snapshot (2026-07-07)
+## Canonical Snapshot (2026-07-11)
 
 Source of truth for this report:
 
 - Command scope: entire monorepo (root .fallowrc.json)
-- Command: node node_modules/fallow/bin/fallow --format json --output-file /home/lucio/workspaces/vite-react-compiler/reports/fallow/full-latest.json --quiet
+- Command: node node_modules/fallow/bin/fallow --format json --output-file /home/lucio/workspace/vite-react-compiler/reports/fallow/full-latest.json --quiet
 - JSON artifact: reports/fallow/full-latest.json
 
 Current metrics from JSON:
 
-- Functions above threshold: 97
-- Functions analyzed: 6129
-- Files analyzed: 2191
+- Functions above threshold: 93
+- Functions analyzed: 6540
+- Files analyzed: 2321
 - Average maintainability: 93.2 (good)
-- Dead-code issues: 119 (check.total_issues)
-- Duplicate clone groups: 29 (dupes.stats.clone_groups)
-- Severity split: 18 critical, 18 high, 61 moderate
+- Dead-code issues: 130 (check.total_issues)
+- Duplicate clone groups: 26 (dupes.stats.clone_groups)
+- Severity split: 19 critical, 20 high, 54 moderate
 - Thresholds: cyclomatic 20, cognitive 15, CRAP 30
 
 ## Interpretation
@@ -33,17 +33,17 @@ Use this report as triage guidance grounded on the current JSON snapshot. For pl
 - packages/scan-ingestion/src/ingestion/fallow/extractFallowRunSummary.util.ts:16 (<anonymous>) - CRITICAL all
 - packages/eslint-local-rules/single-component-export.ts:20 (<anonymous>) - CRITICAL crap
 - apps/admin_system/src/routes/cqms/edit-user/editUser.action.ts:17 (<anonymous>) - CRITICAL crap
-- .github/skills/fallow-code-checker/scripts/generate-fallow-report.mjs:318 (<anonymous>) - CRITICAL crap
 - apps/admin_system/src/routes/cqms/project-detail/projectDetail.action.ts:22 (<anonymous>) - CRITICAL crap
+- .github/skills/fallow-code-checker/scripts/generate-fallow-report.mjs:227 (<anonymous>) - CRITICAL crap
 - .github/skills/linter-checker/scripts/lint-report-shared.mjs:83 (<anonymous>) - CRITICAL crap
-- .github/skills/linter-checker/scripts/generate-oxlint-report.mjs:66 (<anonymous>) - CRITICAL crap
-- .github/skills/fallow-code-checker/scripts/generate-fallow-report.mjs:156 (<anonymous>) - CRITICAL crap
+- apps/admin_system/src/routes/cqms/trigger-scan/triggerScan.action.ts:17 (<anonymous>) - CRITICAL crap
 - apps/admin_system/src/routes/cqms/new-user/newUser.action.ts:9 (<anonymous>) - CRITICAL crap
-- apps/admin_system/src/routes/cqms/edit-role/editRole.action.ts:16 (<anonymous>) - CRITICAL crap
-- .github/skills/fallow-code-checker/scripts/generate-fallow-report.mjs:62 (<anonymous>) - CRITICAL crap
-- .github/skills/fallow-code-checker/scripts/generate-fallow-report.mjs:333 (<anonymous>) - CRITICAL crap
+- .github/skills/fallow-code-checker/scripts/generate-fallow-report.mjs:162 (<anonymous>) - CRITICAL crap
 - apps/admin_system/src/routes/cqms/scanner-detail/ScannerDetail.component.tsx:14 (<anonymous>) - CRITICAL crap
-- packages/scan-ingestion/src/cli/ingest.cli.ts:50 (<anonymous>) - HIGH crap
+- .github/skills/linter-checker/scripts/generate-oxlint-report.mjs:67 (<anonymous>) - CRITICAL crap
+- .github/skills/fallow-code-checker/scripts/generate-fallow-report.mjs:73 (<anonymous>) - CRITICAL crap
+- .github/skills/fallow-code-checker/scripts/generate-fallow-report.mjs:242 (<anonymous>) - CRITICAL crap
+- apps/admin_system/src/routes/cqms/edit-role/editRole.action.ts:16 (<anonymous>) - CRITICAL crap
 - apps/admin_system/src/routes/cqms/edit-project/editProject.action.ts:14 (<anonymous>) - HIGH crap
 
 ## Drift Control

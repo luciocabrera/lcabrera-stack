@@ -1,37 +1,74 @@
 {
   "kind": "dupes",
   "schema_version": 7,
-  "version": "3.0.0",
-  "elapsed_ms": 28,
+  "version": "3.3.0",
+  "elapsed_ms": 30,
   "clone_groups": [
     {
       "instances": [
         {
+          "file": ".github/skills/app-graph/scripts/generate-app-graph-report.mjs",
+          "start_line": 157,
+          "end_line": 177,
+          "start_col": 0,
+          "end_col": 1,
+          "fragment": "const CATEGORY_SUFFIXES = [\n  { category: 'test', suffix: '.test.tsx' },\n  { category: 'test', suffix: '.test.ts' },\n  { category: 'test', suffix: '.spec.tsx' },\n  { category: 'test', suffix: '.spec.ts' },\n  { category: 'component', suffix: '.component.tsx' },\n  { category: 'component', suffix: '.component.ts' },\n  { category: 'hook', suffix: '.hook.ts' },\n  { category: 'hook', suffix: '.hook.tsx' },\n  { category: 'util', suffix: '.util.ts' },\n  { category: 'util', suffix: '.util.tsx' },\n  { category: 'service_api', suffix: '.api.ts' },\n  { category: 'repository', suffix: '.repository.ts' },\n  { category: 'controller', suffix: '.controller.ts' },\n  { category: 'route', suffix: '.route.ts' },\n  { category: 'route', suffix: '.route.tsx' },\n  { category: 'types', suffix: '.types.ts' },\n  { category: 'stylex', suffix: '.stylex.ts' },\n  { category: 'constants', suffix: '.constants.ts' },\n  { category: 'schema', suffix: '.schema.ts' },\n]"
+        },
+        {
+          "file": "packages/scan-ingestion/src/ingestion/classifyFileTypeCategory.util.ts",
+          "start_line": 1,
+          "end_line": 24,
+          "start_col": 0,
+          "end_col": 1,
+          "fragment": "const CATEGORY_SUFFIXES: readonly {\n  readonly category: string;\n  readonly suffix: string;\n}[] = [\n  { category: 'test', suffix: '.test.tsx' },\n  { category: 'test', suffix: '.test.ts' },\n  { category: 'test', suffix: '.spec.tsx' },\n  { category: 'test', suffix: '.spec.ts' },\n  { category: 'component', suffix: '.component.tsx' },\n  { category: 'component', suffix: '.component.ts' },\n  { category: 'hook', suffix: '.hook.ts' },\n  { category: 'hook', suffix: '.hook.tsx' },\n  { category: 'util', suffix: '.util.ts' },\n  { category: 'util', suffix: '.util.tsx' },\n  { category: 'service_api', suffix: '.api.ts' },\n  { category: 'repository', suffix: '.repository.ts' },\n  { category: 'controller', suffix: '.controller.ts' },\n  { category: 'route', suffix: '.route.ts' },\n  { category: 'route', suffix: '.route.tsx' },\n  { category: 'types', suffix: '.types.ts' },\n  { category: 'stylex', suffix: '.stylex.ts' },\n  { category: 'constants', suffix: '.constants.ts' },\n  { category: 'schema', suffix: '.schema.ts' },\n]"
+        }
+      ],
+      "token_count": 120,
+      "line_count": 24,
+      "fingerprint": "dup:df3a89ee",
+      "suggested_name": "category",
+      "actions": [
+        {
+          "type": "extract-shared",
+          "auto_fixable": false,
+          "description": "Extract duplicated code (24 lines, 2 instances) into a shared function"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the duplicated code",
+          "comment": "// fallow-ignore-next-line code-duplication"
+        }
+      ]
+    },
+    {
+      "instances": [
+        {
           "file": "apps/admin_system/src/routes/cqms/edit-project/editProject.action.ts",
-          "start_line": 7,
-          "end_line": 19,
+          "start_line": 12,
+          "end_line": 28,
           "start_col": 0,
           "end_col": 4,
-          "fragment": "const paramsSchema = z.object({ projectId: z.string().uuid() });\n\nexport const action = async ({ params, request }: ActionFunctionArgs) => {\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid project id.', { status: 400 });\n  }\n\n  const formData = await request.formData();\n  const parsed = editProjectSchema.safeParse({\n    localPath: formData.get('localPath'),\n    name: formData.get('name'),\n  })"
+          "fragment": "const paramsSchema = z.object({ projectId: z.string().uuid() });\n\nexport const action = async ({ params, request }: ActionFunctionArgs) => {\n  // Actions run BEFORE loaders, so the layout loader's gate does not\n  // cover POSTs — every cqms action authenticates itself (ADR-017).\n  const user = await requireUser({ request });\n\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid project id.', { status: 400 });\n  }\n\n  const formData = await request.formData();\n  const parsed = editProjectSchema.safeParse({\n    localPath: formData.get('localPath'),\n    name: formData.get('name'),\n  })"
         },
         {
           "file": "apps/admin_system/src/routes/cqms/trigger-scan/triggerScan.action.ts",
-          "start_line": 7,
-          "end_line": 18,
+          "start_line": 15,
+          "end_line": 32,
           "start_col": 0,
           "end_col": 4,
-          "fragment": "const paramsSchema = z.object({ projectId: z.string().uuid() });\n\nexport const action = async ({ params, request }: ActionFunctionArgs) => {\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid project id.', { status: 400 });\n  }\n\n  const formData = await request.formData();\n  const parsed = triggerScanSchema.safeParse({\n    scannerIds: formData.getAll('scannerIds'),\n  })"
+          "fragment": "const paramsSchema = z.object({ projectId: z.string().uuid() });\n\nexport const action = async ({ params, request }: ActionFunctionArgs) => {\n  // Actions run BEFORE loaders, so the layout loader's gate does not\n  // cover POSTs — every cqms action authenticates itself (ADR-017).\n  const user = await requireUser({ request });\n\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid project id.', { status: 400 });\n  }\n\n  const formData = await request.formData();\n  const parsed = triggerScanSchema.safeParse({\n    confirmFanOut: isCheckboxChecked({ formData, name: 'confirmFanOut' }),\n    scannerIds: formData.getAll('scannerIds'),\n    workspacePaths: formData.getAll('workspacePaths'),\n  })"
         }
       ],
-      "token_count": 85,
-      "line_count": 13,
-      "fingerprint": "dup:fb0f6a65",
+      "token_count": 98,
+      "line_count": 18,
+      "fingerprint": "dup:06358c11",
       "suggested_name": "formData",
       "actions": [
         {
           "type": "extract-shared",
           "auto_fixable": false,
-          "description": "Extract duplicated code (13 lines, 2 instances) into a shared function"
+          "description": "Extract duplicated code (18 lines, 2 instances) into a shared function"
         },
         {
           "type": "suppress-line",
@@ -45,29 +82,37 @@
       "instances": [
         {
           "file": "apps/admin_system/src/routes/cqms/edit-project/editProject.action.ts",
-          "start_line": 16,
-          "end_line": 37,
-          "start_col": 34,
-          "end_col": 3,
-          "fragment": ".safeParse({\n    localPath: formData.get('localPath'),\n    name: formData.get('name'),\n  });\n\n  if (!parsed.success) {\n    const fieldErrors = parsed.error.flatten().fieldErrors;\n    return {\n      errors: {\n        localPath: fieldErrors.localPath?.[0],\n        name: fieldErrors.name?.[0],\n      },\n    };\n  }\n\n  try {\n    await updateProject({\n      ...parsed.data,\n      projectId: parsedParams.data.projectId,\n    });\n    return redirect(`/cqms/projects/view/${parsedParams.data.projectId}`);\n  }"
+          "start_line": 12,
+          "end_line": 24,
+          "start_col": 59,
+          "end_col": 44,
+          "fragment": ") });\n\nexport const action = async ({ params, request }: ActionFunctionArgs) => {\n  // Actions run BEFORE loaders, so the layout loader's gate does not\n  // cover POSTs — every cqms action authenticates itself (ADR-017).\n  const user = await requireUser({ request });\n\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid project id.', { status: 400 });\n  }\n\n  const formData = await request.formData();"
         },
         {
-          "file": "apps/admin_system/src/routes/cqms/new-project/newProject.action.ts",
-          "start_line": 8,
-          "end_line": 26,
-          "start_col": 33,
-          "end_col": 3,
-          "fragment": ".safeParse({\n    localPath: formData.get('localPath'),\n    name: formData.get('name'),\n  });\n\n  if (!parsed.success) {\n    const fieldErrors = parsed.error.flatten().fieldErrors;\n    return {\n      errors: {\n        localPath: fieldErrors.localPath?.[0],\n        name: fieldErrors.name?.[0],\n      },\n    };\n  }\n\n  try {\n    const { projectId } = await registerProject(parsed.data);\n    return redirect(`/cqms/projects/view/${projectId}`);\n  }"
+          "file": "apps/admin_system/src/routes/cqms/project-detail/projectDetail.action.ts",
+          "start_line": 13,
+          "end_line": 31,
+          "start_col": 70,
+          "end_col": 42,
+          "fragment": "),\n});\n\n/**\n * The grants editor's fetcher endpoint (ADR-024): intent 'grant-add' /\n * 'grant-delete'. fn_create_resource_grant / fn_delete_resource_grant\n * assert 'update' on the grant's resource type in Postgres — a rejection\n * comes back as `grantError` for the panel to render inline.\n */\nexport const action = async ({ params, request }: ActionFunctionArgs) => {\n  // Actions run BEFORE loaders — every cqms action authenticates itself\n  // (ADR-017).\n  const user = await requireUser({ request });\n\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid project id.', { status: 400 });\n  }\n  const { projectId } = parsedParams.data;"
+        },
+        {
+          "file": "apps/admin_system/src/routes/cqms/trigger-scan/triggerScan.action.ts",
+          "start_line": 15,
+          "end_line": 27,
+          "start_col": 59,
+          "end_col": 44,
+          "fragment": ") });\n\nexport const action = async ({ params, request }: ActionFunctionArgs) => {\n  // Actions run BEFORE loaders, so the layout loader's gate does not\n  // cover POSTs — every cqms action authenticates itself (ADR-017).\n  const user = await requireUser({ request });\n\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid project id.', { status: 400 });\n  }\n\n  const formData = await request.formData();"
         }
       ],
-      "token_count": 68,
-      "line_count": 22,
-      "fingerprint": "dup:a965b2c2",
+      "token_count": 69,
+      "line_count": 19,
+      "fingerprint": "dup:a583eaa4",
       "actions": [
         {
           "type": "extract-shared",
           "auto_fixable": false,
-          "description": "Extract duplicated code (22 lines, 2 instances) into a shared function"
+          "description": "Extract duplicated code (19 lines, 3 instances) into a shared function"
         },
         {
           "type": "suppress-line",
@@ -80,30 +125,31 @@
     {
       "instances": [
         {
-          "file": "apps/admin_system/src/routes/cqms/edit-project/editProject.loader.ts",
-          "start_line": 5,
-          "end_line": 16,
-          "start_col": 0,
-          "end_col": 5,
-          "fragment": "const paramsSchema = z.object({ projectId: z.string().uuid() });\n\n/** Awaited — needed to pre-fill the Form and to 404 on an unknown project. */\nexport const loader = async ({ params }: LoaderFunctionArgs) => {\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid project id.', { status: 400 });\n  }\n\n  const project = await getProjectById({\n    projectId: parsedParams.data.projectId,\n  });"
+          "file": "apps/admin_system/src/routes/cqms/edit-project/editProject.action.ts",
+          "start_line": 25,
+          "end_line": 67,
+          "start_col": 34,
+          "end_col": 3,
+          "fragment": ".safeParse({\n    localPath: formData.get('localPath'),\n    name: formData.get('name'),\n  });\n\n  if (!parsed.success) {\n    const fieldErrors = parsed.error.flatten().fieldErrors;\n    return {\n      errors: {\n        localPath: fieldErrors.localPath?.[0],\n        name: fieldErrors.name?.[0],\n      },\n    };\n  }\n\n  try {\n    await updateProject({\n      ...parsed.data,\n      projectId: parsedParams.data.projectId,\n      userId: user.id,\n    });\n\n    // Best-effort workspace re-discovery (ADR-021) — the local path may\n    // have changed; against the STORED (canonicalized) path, non-fatal.\n    try {\n      const project = await getProjectById({\n        projectId: parsedParams.data.projectId,\n      });\n      if (project) {\n        await replaceProjectWorkspaces({\n          projectId: project.id,\n          userId: user.id,\n          workspaces: discoverProjectWorkspaces({\n            rootPath: project.local_path,\n          }),\n        });\n      }\n    } catch (workspaceError) {\n      console.warn('Workspace discovery failed (non-fatal):', workspaceError);\n    }\n\n    return redirect(`/cqms/projects/view/${parsedParams.data.projectId}`);\n  }"
         },
         {
-          "file": "apps/admin_system/src/routes/cqms/project-detail/projectDetail.loader.ts",
-          "start_line": 7,
-          "end_line": 20,
-          "start_col": 0,
-          "end_col": 42,
-          "fragment": "const paramsSchema = z.object({ projectId: z.string().uuid() });\n\n/**\n * `project` is awaited directly — the page can't render (or 404) without\n * it. `runs`/`trend` are returned as unawaited promises for Suspense\n * streaming, same convention as `enterprise-orders.loader.ts`.\n */\nexport const loader = async ({ params }: LoaderFunctionArgs) => {\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid project id.', { status: 400 });\n  }\n\n  const { projectId } = parsedParams.data;"
+          "file": "apps/admin_system/src/routes/cqms/new-project/newProject.action.ts",
+          "start_line": 17,
+          "end_line": 57,
+          "start_col": 33,
+          "end_col": 3,
+          "fragment": ".safeParse({\n    localPath: formData.get('localPath'),\n    name: formData.get('name'),\n  });\n\n  if (!parsed.success) {\n    const fieldErrors = parsed.error.flatten().fieldErrors;\n    return {\n      errors: {\n        localPath: fieldErrors.localPath?.[0],\n        name: fieldErrors.name?.[0],\n      },\n    };\n  }\n\n  try {\n    const { projectId } = await registerProject({\n      ...parsed.data,\n      userId: user.id,\n    });\n\n    // Best-effort workspace discovery (ADR-021) — against the STORED\n    // (canonicalized) path, not the raw form value; a failure must never\n    // block registration.\n    try {\n      const project = await getProjectById({ projectId });\n      if (project) {\n        await replaceProjectWorkspaces({\n          projectId,\n          userId: user.id,\n          workspaces: discoverProjectWorkspaces({\n            rootPath: project.local_path,\n          }),\n        });\n      }\n    } catch (workspaceError) {\n      console.warn('Workspace discovery failed (non-fatal):', workspaceError);\n    }\n\n    return redirect(`/cqms/projects/view/${projectId}`);\n  }"
         }
       ],
-      "token_count": 69,
-      "line_count": 14,
-      "fingerprint": "dup:970fb52d",
+      "token_count": 68,
+      "line_count": 43,
+      "fingerprint": "dup:6c15cb77",
+      "suggested_name": "projectId",
       "actions": [
         {
           "type": "extract-shared",
           "auto_fixable": false,
-          "description": "Extract duplicated code (14 lines, 2 instances) into a shared function"
+          "description": "Extract duplicated code (43 lines, 2 instances) into a shared function"
         },
         {
           "type": "suppress-line",
@@ -122,14 +168,6 @@
           "start_col": 43,
           "end_col": 15,
           "fragment": "z.string().uuid() });\n\n/** Awaited — needed to pre-fill the Form and to 404 on an unknown project. */\nexport const loader = async ({ params }: LoaderFunctionArgs) => {\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data("
-        },
-        {
-          "file": "apps/admin_system/src/routes/cqms/project-detail/projectDetail.loader.ts",
-          "start_line": 7,
-          "end_line": 17,
-          "start_col": 43,
-          "end_col": 15,
-          "fragment": "z.string().uuid() });\n\n/**\n * `project` is awaited directly — the page can't render (or 404) without\n * it. `runs`/`trend` are returned as unawaited promises for Suspense\n * streaming, same convention as `enterprise-orders.loader.ts`.\n */\nexport const loader = async ({ params }: LoaderFunctionArgs) => {\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data("
         },
         {
           "file": "apps/admin_system/src/routes/cqms/run-detail/runDetail.loader.ts",
@@ -156,7 +194,391 @@
         {
           "type": "extract-shared",
           "auto_fixable": false,
-          "description": "Extract duplicated code (13 lines, 4 instances) into a shared function"
+          "description": "Extract duplicated code (13 lines, 3 instances) into a shared function"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the duplicated code",
+          "comment": "// fallow-ignore-next-line code-duplication"
+        }
+      ]
+    },
+    {
+      "instances": [
+        {
+          "file": "apps/admin_system/src/routes/cqms/edit-role/editRole.action.ts",
+          "start_line": 13,
+          "end_line": 24,
+          "start_col": 12,
+          "end_col": 15,
+          "fragment": "z.string().regex(/^[a-z0-9][a-z0-9-]{1,63}$/),\n});\n\nexport const action = async ({ params, request }: ActionFunctionArgs) => {\n  // Actions run BEFORE loaders — every cqms action authenticates itself\n  // (ADR-017); the management functions assert 'update' on 'role' and the\n  // seeded admin role stays immutable in Postgres.\n  const user = await requireUser({ request });\n\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data("
+        },
+        {
+          "file": "apps/admin_system/src/routes/cqms/edit-scanner/editScanner.action.ts",
+          "start_line": 13,
+          "end_line": 23,
+          "start_col": 13,
+          "end_col": 15,
+          "fragment": "z.string().regex(/^[a-z0-9][a-z0-9-]{0,47}$/),\n});\n\nexport const action = async ({ params, request }: ActionFunctionArgs) => {\n  // Actions run BEFORE loaders — every cqms action authenticates itself\n  // (ADR-017).\n  const user = await requireUser({ request });\n\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data("
+        },
+        {
+          "file": "apps/admin_system/src/routes/cqms/edit-user/editUser.action.ts",
+          "start_line": 14,
+          "end_line": 26,
+          "start_col": 12,
+          "end_col": 15,
+          "fragment": "z.string().regex(/^[a-z0-9][a-z0-9._-]{1,63}$/),\n});\n\nexport const action = async ({ params, request }: ActionFunctionArgs) => {\n  // Actions run BEFORE loaders — every cqms action authenticates itself\n  // (ADR-017); the management functions assert 'update' on 'user' and\n  // carry the lockout guards (own account, system account, own admin\n  // role) in Postgres.\n  const user = await requireUser({ request });\n\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data("
+        }
+      ],
+      "token_count": 69,
+      "line_count": 13,
+      "fingerprint": "dup:c7af22c9",
+      "suggested_name": "parsedParams",
+      "actions": [
+        {
+          "type": "extract-shared",
+          "auto_fixable": false,
+          "description": "Extract duplicated code (13 lines, 3 instances) into a shared function"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the duplicated code",
+          "comment": "// fallow-ignore-next-line code-duplication"
+        }
+      ]
+    },
+    {
+      "instances": [
+        {
+          "file": "apps/admin_system/src/routes/cqms/edit-role/editRole.action.ts",
+          "start_line": 20,
+          "end_line": 33,
+          "start_col": 33,
+          "end_col": 44,
+          "fragment": "{ request });\n\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid role name.', { status: 400 });\n  }\n  const role = await getRoleWithPermissions({\n    roleName: parsedParams.data.roleName,\n  });\n  if (!role) {\n    throw data('Role not found.', { status: 404 });\n  }\n\n  const formData = await request.formData();"
+        },
+        {
+          "file": "apps/admin_system/src/routes/cqms/edit-role/editRole.loader.ts",
+          "start_line": 14,
+          "end_line": 28,
+          "start_col": 26,
+          "end_col": 49,
+          "fragment": "{ action: 'update', request, resourceType: 'role' });\n\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid role name.', { status: 400 });\n  }\n\n  const role = await getRoleWithPermissions({\n    roleName: parsedParams.data.roleName,\n  });\n  if (!role) {\n    throw data('Role not found.', { status: 404 });\n  }\n\n  const permissionsPromise = getAllPermissions();"
+        },
+        {
+          "file": "apps/admin_system/src/routes/cqms/role-detail/roleDetail.loader.ts",
+          "start_line": 13,
+          "end_line": 28,
+          "start_col": 26,
+          "end_col": 48,
+          "fragment": "{ action: 'read', request, resourceType: 'role' });\n\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid role name.', { status: 400 });\n  }\n\n  const role = await getRoleWithPermissions({\n    roleName: parsedParams.data.roleName,\n  });\n  if (!role) {\n    throw data('Role not found.', { status: 404 });\n  }\n\n  // Awaited alongside the role: the page maps permission ids to labels.\n  const permissions = await getAllPermissions();"
+        }
+      ],
+      "token_count": 71,
+      "line_count": 16,
+      "fingerprint": "dup:c77141bc",
+      "suggested_name": "parsedParams",
+      "actions": [
+        {
+          "type": "extract-shared",
+          "auto_fixable": false,
+          "description": "Extract duplicated code (16 lines, 3 instances) into a shared function"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the duplicated code",
+          "comment": "// fallow-ignore-next-line code-duplication"
+        }
+      ]
+    },
+    {
+      "instances": [
+        {
+          "file": "apps/admin_system/src/routes/cqms/edit-role/editRole.loader.ts",
+          "start_line": 14,
+          "end_line": 28,
+          "start_col": 46,
+          "end_col": 49,
+          "fragment": "request, resourceType: 'role' });\n\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid role name.', { status: 400 });\n  }\n\n  const role = await getRoleWithPermissions({\n    roleName: parsedParams.data.roleName,\n  });\n  if (!role) {\n    throw data('Role not found.', { status: 404 });\n  }\n\n  const permissionsPromise = getAllPermissions();"
+        },
+        {
+          "file": "apps/admin_system/src/routes/cqms/role-detail/roleDetail.loader.ts",
+          "start_line": 13,
+          "end_line": 28,
+          "start_col": 44,
+          "end_col": 48,
+          "fragment": "request, resourceType: 'role' });\n\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid role name.', { status: 400 });\n  }\n\n  const role = await getRoleWithPermissions({\n    roleName: parsedParams.data.roleName,\n  });\n  if (!role) {\n    throw data('Role not found.', { status: 404 });\n  }\n\n  // Awaited alongside the role: the page maps permission ids to labels.\n  const permissions = await getAllPermissions();"
+        }
+      ],
+      "token_count": 75,
+      "line_count": 16,
+      "fingerprint": "dup:fee7ec09",
+      "actions": [
+        {
+          "type": "extract-shared",
+          "auto_fixable": false,
+          "description": "Extract duplicated code (16 lines, 2 instances) into a shared function"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the duplicated code",
+          "comment": "// fallow-ignore-next-line code-duplication"
+        }
+      ]
+    },
+    {
+      "instances": [
+        {
+          "file": "apps/admin_system/src/routes/cqms/edit-scanner/editScanner.action.ts",
+          "start_line": 36,
+          "end_line": 49,
+          "start_col": 59,
+          "end_col": 49,
+          "fragment": ") ?? '',\n    stepsMarkdown: formData.get('stepsMarkdown') ?? '',\n    supportsDiffScope: isCheckboxChecked({\n      formData,\n      name: 'supportsDiffScope',\n    }),\n  });\n\n  if (!parsed.success) {\n    const fieldErrors = parsed.error.flatten().fieldErrors;\n    return {\n      errors: {\n        configDetection: fieldErrors.configDetection?.[0],\n        displayName: fieldErrors.displayName?.[0]"
+        },
+        {
+          "file": "apps/admin_system/src/routes/cqms/new-scanner/newScanner.action.ts",
+          "start_line": 25,
+          "end_line": 38,
+          "start_col": 39,
+          "end_col": 49,
+          "fragment": ") ?? '',\n    stepsMarkdown: formData.get('stepsMarkdown') ?? '',\n    supportsDiffScope: isCheckboxChecked({\n      formData,\n      name: 'supportsDiffScope',\n    }),\n  });\n\n  if (!parsed.success) {\n    const fieldErrors = parsed.error.flatten().fieldErrors;\n    return {\n      errors: {\n        configDetection: fieldErrors.configDetection?.[0],\n        displayName: fieldErrors.displayName?.[0]"
+        }
+      ],
+      "token_count": 68,
+      "line_count": 14,
+      "fingerprint": "dup:b520f8a7",
+      "suggested_name": "fieldErrors",
+      "actions": [
+        {
+          "type": "extract-shared",
+          "auto_fixable": false,
+          "description": "Extract duplicated code (14 lines, 2 instances) into a shared function"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the duplicated code",
+          "comment": "// fallow-ignore-next-line code-duplication"
+        }
+      ]
+    },
+    {
+      "instances": [
+        {
+          "file": "apps/admin_system/src/routes/cqms/edit-scanner/editScanner.action.ts",
+          "start_line": 81,
+          "end_line": 97,
+          "start_col": 6,
+          "end_col": 5,
+          "fragment": "writeScannerArtifacts({\n        allowedTools: values.allowedTools\n          ? values.allowedTools.split(',').map((tool) => tool.trim())\n          : undefined,\n        description: values.description || undefined,\n        displayName: values.displayName,\n        isDeterministic: values.deterministic,\n        rawArtifactFileName: values.rawArtifactFileName || undefined,\n        scannerId,\n        stepsMarkdown: values.stepsMarkdown || undefined,\n      });\n    } catch (ensureError) {\n      console.warn(\n        'Scanner artifact/detail-table ensure failed (non-fatal):',\n        ensureError,\n      );\n    }"
+        },
+        {
+          "file": "apps/admin_system/src/routes/cqms/new-scanner/newScanner.action.ts",
+          "start_line": 72,
+          "end_line": 88,
+          "start_col": 6,
+          "end_col": 5,
+          "fragment": "writeScannerArtifacts({\n        allowedTools: values.allowedTools\n          ? values.allowedTools.split(',').map((tool) => tool.trim())\n          : undefined,\n        description: values.description || undefined,\n        displayName: values.displayName,\n        isDeterministic: values.deterministic,\n        rawArtifactFileName: values.rawArtifactFileName || undefined,\n        scannerId,\n        stepsMarkdown: values.stepsMarkdown || undefined,\n      });\n    } catch (artifactError) {\n      console.warn(\n        'Scanner artifact scaffolding failed (non-fatal):',\n        artifactError,\n      );\n    }"
+        }
+      ],
+      "token_count": 70,
+      "line_count": 17,
+      "fingerprint": "dup:00f9520f",
+      "suggested_name": "allowedTools",
+      "actions": [
+        {
+          "type": "extract-shared",
+          "auto_fixable": false,
+          "description": "Extract duplicated code (17 lines, 2 instances) into a shared function"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the duplicated code",
+          "comment": "// fallow-ignore-next-line code-duplication"
+        }
+      ]
+    },
+    {
+      "instances": [
+        {
+          "file": "apps/admin_system/src/routes/cqms/edit-scanner/editScanner.loader.ts",
+          "start_line": 5,
+          "end_line": 21,
+          "start_col": 0,
+          "end_col": 3,
+          "fragment": "const paramsSchema = z.object({\n  scannerId: z.string().regex(/^[a-z0-9][a-z0-9-]{0,47}$/),\n});\n\n/** Awaited — needed to pre-fill the Form and to 404 on an unknown scanner. */\nexport const loader = async ({ params }: LoaderFunctionArgs) => {\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid scanner id.', { status: 400 });\n  }\n\n  const scanner = await getScannerById({\n    scannerId: parsedParams.data.scannerId,\n  });\n  if (!scanner) {\n    throw data('Scanner not found.', { status: 404 });\n  }"
+        },
+        {
+          "file": "apps/admin_system/src/routes/cqms/scanner-detail/scannerDetail.loader.ts",
+          "start_line": 6,
+          "end_line": 25,
+          "start_col": 0,
+          "end_col": 3,
+          "fragment": "const paramsSchema = z.object({\n  scannerId: z.string().regex(/^[a-z0-9][a-z0-9-]{0,47}$/),\n});\n\n/**\n * The scanner row is awaited (the page header needs it, and an unknown id\n * must 404); the version history streams like every other table promise.\n */\nexport const loader = async ({ params }: LoaderFunctionArgs) => {\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid scanner id.', { status: 400 });\n  }\n\n  const scanner = await getScannerById({\n    scannerId: parsedParams.data.scannerId,\n  });\n  if (!scanner) {\n    throw data('Scanner not found.', { status: 404 });\n  }"
+        }
+      ],
+      "token_count": 105,
+      "line_count": 20,
+      "fingerprint": "dup:f9761c2a",
+      "actions": [
+        {
+          "type": "extract-shared",
+          "auto_fixable": false,
+          "description": "Extract duplicated code (20 lines, 2 instances) into a shared function"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the duplicated code",
+          "comment": "// fallow-ignore-next-line code-duplication"
+        }
+      ]
+    },
+    {
+      "instances": [
+        {
+          "file": "apps/admin_system/src/routes/cqms/edit-scanner/editScanner.schema.ts",
+          "start_line": 3,
+          "end_line": 28,
+          "start_col": 0,
+          "end_col": 3,
+          "fragment": "const isJsonObjectOrEmpty = (value: string): boolean => {\n  if (value === '') return true;\n  try {\n    const parsed: unknown = JSON.parse(value);\n    return typeof parsed === 'object' && parsed !== null;\n  } catch {\n    return false;\n  }\n};\n\n/** scanner_id and skill_path are immutable (ADR-023) — not form fields. */\nexport const editScannerSchema = z.object({\n  allowedTools: z.string().trim(),\n  commandTemplate: z.string().trim(),\n  configDetection: z\n    .string()\n    .trim()\n    .refine(isJsonObjectOrEmpty, 'Must be a valid JSON object (or empty).'),\n  description: z.string().trim(),\n  deterministic: z.boolean(),\n  displayName: z.string().trim().min(1, 'Display name is required.'),\n  isActive: z.boolean(),\n  rawArtifactFileName: z.string().trim(),\n  stepsMarkdown: z.string().trim(),\n  supportsDiffScope: z.boolean(),\n});"
+        },
+        {
+          "file": "apps/admin_system/src/routes/cqms/new-scanner/newScanner.schema.ts",
+          "start_line": 3,
+          "end_line": 38,
+          "start_col": 0,
+          "end_col": 3,
+          "fragment": "const isJsonObjectOrEmpty = (value: string): boolean => {\n  if (value === '') return true;\n  try {\n    const parsed: unknown = JSON.parse(value);\n    return typeof parsed === 'object' && parsed !== null;\n  } catch {\n    return false;\n  }\n};\n\n/**\n * Mirrors fn_register_scanner's own validation (ADR-023) so the user gets\n * a field error instead of a raised exception for the common mistakes; the\n * DB stays the authority.\n */\nexport const newScannerSchema = z.object({\n  allowedTools: z.string().trim(),\n  commandTemplate: z.string().trim(),\n  configDetection: z\n    .string()\n    .trim()\n    .refine(isJsonObjectOrEmpty, 'Must be a valid JSON object (or empty).'),\n  description: z.string().trim(),\n  deterministic: z.boolean(),\n  displayName: z.string().trim().min(1, 'Display name is required.'),\n  rawArtifactFileName: z.string().trim(),\n  scannerId: z\n    .string()\n    .trim()\n    .regex(\n      /^[a-z0-9][a-z0-9-]{0,47}$/,\n      'Lowercase kebab-case, max 48 chars (e.g. my-scanner).',\n    ),\n  stepsMarkdown: z.string().trim(),\n  supportsDiffScope: z.boolean(),\n});"
+        }
+      ],
+      "token_count": 52,
+      "line_count": 36,
+      "fingerprint": "dup:9ba56230",
+      "suggested_name": "trim",
+      "actions": [
+        {
+          "type": "extract-shared",
+          "auto_fixable": false,
+          "description": "Extract duplicated code (36 lines, 2 instances) into a shared function"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the duplicated code",
+          "comment": "// fallow-ignore-next-line code-duplication"
+        }
+      ]
+    },
+    {
+      "instances": [
+        {
+          "file": "apps/admin_system/src/routes/cqms/edit-scanner/editScanner.schema.ts",
+          "start_line": 14,
+          "end_line": 23,
+          "start_col": 13,
+          "end_col": 68,
+          "fragment": "editScannerSchema = z.object({\n  allowedTools: z.string().trim(),\n  commandTemplate: z.string().trim(),\n  configDetection: z\n    .string()\n    .trim()\n    .refine(isJsonObjectOrEmpty, 'Must be a valid JSON object (or empty).'),\n  description: z.string().trim(),\n  deterministic: z.boolean(),\n  displayName: z.string().trim().min(1, 'Display name is required.')"
+        },
+        {
+          "file": "apps/admin_system/src/routes/cqms/new-scanner/newScanner.schema.ts",
+          "start_line": 18,
+          "end_line": 27,
+          "start_col": 13,
+          "end_col": 68,
+          "fragment": "newScannerSchema = z.object({\n  allowedTools: z.string().trim(),\n  commandTemplate: z.string().trim(),\n  configDetection: z\n    .string()\n    .trim()\n    .refine(isJsonObjectOrEmpty, 'Must be a valid JSON object (or empty).'),\n  description: z.string().trim(),\n  deterministic: z.boolean(),\n  displayName: z.string().trim().min(1, 'Display name is required.')"
+        }
+      ],
+      "token_count": 78,
+      "line_count": 10,
+      "fingerprint": "dup:0b0eab9b",
+      "suggested_name": "trim",
+      "actions": [
+        {
+          "type": "extract-shared",
+          "auto_fixable": false,
+          "description": "Extract duplicated code (10 lines, 2 instances) into a shared function"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the duplicated code",
+          "comment": "// fallow-ignore-next-line code-duplication"
+        }
+      ]
+    },
+    {
+      "instances": [
+        {
+          "file": "apps/admin_system/src/routes/cqms/edit-user/editUser.loader.ts",
+          "start_line": 14,
+          "end_line": 26,
+          "start_col": 46,
+          "end_col": 3,
+          "fragment": "request, resourceType: 'user' });\n\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid username.', { status: 400 });\n  }\n\n  const user = await getUserWithRoles({\n    username: parsedParams.data.username,\n  });\n  if (!user) {\n    throw data('User not found.', { status: 404 });\n  }"
+        },
+        {
+          "file": "apps/admin_system/src/routes/cqms/user-detail/userDetail.loader.ts",
+          "start_line": 12,
+          "end_line": 24,
+          "start_col": 44,
+          "end_col": 3,
+          "fragment": "request, resourceType: 'user' });\n\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid username.', { status: 400 });\n  }\n\n  const user = await getUserWithRoles({\n    username: parsedParams.data.username,\n  });\n  if (!user) {\n    throw data('User not found.', { status: 404 });\n  }"
+        }
+      ],
+      "token_count": 74,
+      "line_count": 13,
+      "fingerprint": "dup:07308dfa",
+      "suggested_name": "parsedParams",
+      "actions": [
+        {
+          "type": "extract-shared",
+          "auto_fixable": false,
+          "description": "Extract duplicated code (13 lines, 2 instances) into a shared function"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the duplicated code",
+          "comment": "// fallow-ignore-next-line code-duplication"
+        }
+      ]
+    },
+    {
+      "instances": [
+        {
+          "file": "apps/admin_system/src/routes/cqms/project-detail/projectDetail.action.ts",
+          "start_line": 25,
+          "end_line": 33,
+          "start_col": 2,
+          "end_col": 44,
+          "fragment": "const user = await requireUser({ request });\n\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid project id.', { status: 400 });\n  }\n  const { projectId } = parsedParams.data;\n\n  const formData = await request.formData();"
+        },
+        {
+          "file": "apps/admin_system/src/routes/cqms/project-detail/projectDetail.loader.ts",
+          "start_line": 24,
+          "end_line": 33,
+          "start_col": 2,
+          "end_col": 54,
+          "fragment": "const user = await requireUser({ request });\n\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid project id.', { status: 400 });\n  }\n\n  const { projectId } = parsedParams.data;\n\n  const project = await getProjectById({ projectId });"
+        }
+      ],
+      "token_count": 53,
+      "line_count": 10,
+      "fingerprint": "dup:75fe2272",
+      "suggested_name": "parsedParams",
+      "actions": [
+        {
+          "type": "extract-shared",
+          "auto_fixable": false,
+          "description": "Extract duplicated code (10 lines, 2 instances) into a shared function"
         },
         {
           "type": "suppress-line",
@@ -252,8 +674,8 @@
         },
         {
           "file": "apps/scan-orchestrator/src/server.ts",
-          "start_line": 37,
-          "end_line": 54,
+          "start_line": 70,
+          "end_line": 87,
           "start_col": 6,
           "end_col": 3,
           "fragment": "shutdown = async (): Promise<void> => {\n  console.warn('🛑 Shutting down scan-orchestrator');\n  clearInterval(reconcileInterval);\n  await new Promise<void>((resolve) => httpServer.close(() => resolve()));\n  await closePool();\n};\n\nprocess.on('SIGINT', () => {\n  void shutdown().catch((error: unknown) => {\n    console.error('❌ Error during SIGINT shutdown:', error);\n  });\n});\n\nprocess.on('SIGTERM', () => {\n  void shutdown().catch((error: unknown) => {\n    console.error('❌ Error during SIGTERM shutdown:', error);\n  });\n});"
@@ -363,29 +785,29 @@
         },
         {
           "file": "apps/react-router/src/routes/enterprise-orders/enterprise-orders.loader.ts",
-          "start_line": 27,
-          "end_line": 55,
+          "start_line": 30,
+          "end_line": 54,
           "start_col": 0,
-          "end_col": 7,
-          "fragment": "export const loader = ({ request }: LoaderFunctionArgs) => {\n  const {\n    columnOrder,\n    columnPinning,\n    columnSizing,\n    columnVisibility,\n    filters,\n    metaUiFlags,\n    sorting,\n    standaloneFiltersParam,\n    standaloneSortParam,\n  } = readTableLoaderStateFromRequest<EnterpriseOrder>({\n    appId: APP_ID,\n    columns: COLUMNS,\n    includeFilters: true,\n    persistenceKey: PERSISTENCE_KEY,\n    request,\n  });\n  const sanitizedSorting = sanitizeSorting<EnterpriseOrder>(sorting);\n\n  // Return the promise directly (not awaited) for Suspense streaming\n  const enterpriseOrdersPromise: Promise<EnterpriseOrdersResponse> =\n    enterpriseOrdersApi.fetchEnterpriseOrdersPaginated({\n      filter: filters,\n      limit: INITIAL_PAGE_SIZE,\n      requestUrl: request.url,\n      skip: 0,\n      sorting: sanitizedSorting,\n    });"
+          "end_col": 5,
+          "fragment": "export const loader = ({ request }: LoaderFunctionArgs) => {\n  const {\n    columnOrder,\n    columnPinning,\n    columnSizing,\n    columnVisibility,\n    filters,\n    metaUiFlags,\n    sorting,\n    standaloneFiltersParam,\n    standaloneSortParam,\n  } = readTableLoaderStateFromRequest<EnterpriseOrder>({\n    appId: APP_ID,\n    columns: COLUMNS,\n    includeFilters: true,\n    persistenceKey: PERSISTENCE_KEY,\n    request,\n  });\n  const sanitizedSorting = sanitizeSorting<EnterpriseOrder>(sorting);\n  // Always append the primary-key column(s) so server pagination has a stable\n  // ordering. The store keeps only the user's sorting (sanitizedSorting).\n  const effectiveSorting = appendPrimaryKeySorting<EnterpriseOrder>({\n    columns: COLUMNS,\n    sorting: sanitizedSorting,\n  });"
         },
         {
           "file": "apps/react-router/src/routes/wide-alltypes-150/wide-alltypes-150.loader.ts",
-          "start_line": 20,
-          "end_line": 47,
+          "start_line": 21,
+          "end_line": 51,
           "start_col": 0,
           "end_col": 7,
-          "fragment": "export const loader = ({ request }: LoaderFunctionArgs) => {\n  const {\n    columnOrder,\n    columnPinning,\n    columnSizing,\n    columnVisibility,\n    filters,\n    metaUiFlags,\n    sorting,\n    standaloneFiltersParam,\n    standaloneSortParam,\n  } = readTableLoaderStateFromRequest<WideAlltypes150>({\n    appId: APP_ID,\n    columns: COLUMNS,\n    includeFilters: true,\n    persistenceKey: PERSISTENCE_KEY,\n    request,\n  });\n\n  const sanitizedSorting = sanitizeSorting<WideAlltypes150>(sorting);\n\n  const dataPromise: Promise<WideAlltypes150Response> =\n    wideAlltypes150Api.fetchPaginated({\n      limit: INITIAL_PAGE_SIZE,\n      requestUrl: request.url,\n      skip: 0,\n      sorting: sanitizedSorting,\n    });"
+          "fragment": "export const loader = ({ request }: LoaderFunctionArgs) => {\n  const {\n    columnOrder,\n    columnPinning,\n    columnSizing,\n    columnVisibility,\n    filters,\n    metaUiFlags,\n    sorting,\n    standaloneFiltersParam,\n    standaloneSortParam,\n  } = readTableLoaderStateFromRequest<WideAlltypes150>({\n    appId: APP_ID,\n    columns: COLUMNS,\n    includeFilters: true,\n    persistenceKey: PERSISTENCE_KEY,\n    request,\n  });\n\n  const sanitizedSorting = sanitizeSorting<WideAlltypes150>(sorting);\n\n  const dataPromise: Promise<WideAlltypes150Response> =\n    wideAlltypes150Api.fetchPaginated({\n      limit: INITIAL_PAGE_SIZE,\n      requestUrl: request.url,\n      skip: 0,\n      sorting: appendPrimaryKeySorting<WideAlltypes150>({\n        columns: COLUMNS,\n        sorting: sanitizedSorting,\n      }),\n    });"
         }
       ],
       "token_count": 61,
-      "line_count": 29,
+      "line_count": 31,
       "fingerprint": "dup:a6f7f118",
       "actions": [
         {
           "type": "extract-shared",
           "auto_fixable": false,
-          "description": "Extract duplicated code (29 lines, 3 instances) into a shared function"
+          "description": "Extract duplicated code (31 lines, 3 instances) into a shared function"
         },
         {
           "type": "suppress-line",
@@ -407,24 +829,24 @@
         },
         {
           "file": "apps/react-router/src/routes/car-sales-infinite/car-sales.loader.ts",
-          "start_line": 19,
-          "end_line": 40,
+          "start_line": 20,
+          "end_line": 41,
           "start_col": 0,
           "end_col": 59,
           "fragment": "export const loader = ({ request }: LoaderFunctionArgs) => {\n  const {\n    columnOrder,\n    columnPinning,\n    columnSizing,\n    columnVisibility,\n    filters,\n    metaUiFlags,\n    sorting,\n    standaloneFiltersParam,\n    standaloneSortParam,\n  } = readTableLoaderStateFromRequest<CarSale>({\n    appId: APP_ID,\n    columns: COLUMNS,\n    includeFilters: true,\n    persistenceKey: PERSISTENCE_KEY,\n    request,\n  });\n  const isValidSortEntry = (\n    s: (typeof sorting)[number],\n  ): s is { columnKey: keyof CarSale; direction: 'asc' | 'desc' } =>\n    s.direction !== undefined && s.columnKey !== 'actions';"
         },
         {
           "file": "apps/react-router/src/routes/enterprise-orders/enterprise-orders.loader.ts",
-          "start_line": 27,
-          "end_line": 45,
+          "start_line": 30,
+          "end_line": 48,
           "start_col": 0,
           "end_col": 69,
           "fragment": "export const loader = ({ request }: LoaderFunctionArgs) => {\n  const {\n    columnOrder,\n    columnPinning,\n    columnSizing,\n    columnVisibility,\n    filters,\n    metaUiFlags,\n    sorting,\n    standaloneFiltersParam,\n    standaloneSortParam,\n  } = readTableLoaderStateFromRequest<EnterpriseOrder>({\n    appId: APP_ID,\n    columns: COLUMNS,\n    includeFilters: true,\n    persistenceKey: PERSISTENCE_KEY,\n    request,\n  });\n  const sanitizedSorting = sanitizeSorting<EnterpriseOrder>(sorting);"
         },
         {
           "file": "apps/react-router/src/routes/wide-alltypes-150/wide-alltypes-150.loader.ts",
-          "start_line": 20,
-          "end_line": 39,
+          "start_line": 21,
+          "end_line": 40,
           "start_col": 0,
           "end_col": 69,
           "fragment": "export const loader = ({ request }: LoaderFunctionArgs) => {\n  const {\n    columnOrder,\n    columnPinning,\n    columnSizing,\n    columnVisibility,\n    filters,\n    metaUiFlags,\n    sorting,\n    standaloneFiltersParam,\n    standaloneSortParam,\n  } = readTableLoaderStateFromRequest<WideAlltypes150>({\n    appId: APP_ID,\n    columns: COLUMNS,\n    includeFilters: true,\n    persistenceKey: PERSISTENCE_KEY,\n    request,\n  });\n\n  const sanitizedSorting = sanitizeSorting<WideAlltypes150>(sorting);"
@@ -439,6 +861,50 @@
           "type": "extract-shared",
           "auto_fixable": false,
           "description": "Extract duplicated code (22 lines, 4 instances) into a shared function"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the duplicated code",
+          "comment": "// fallow-ignore-next-line code-duplication"
+        }
+      ]
+    },
+    {
+      "instances": [
+        {
+          "file": "packages/scan-ingestion/src/queries/getDailyLlmCost.util.ts",
+          "start_line": 29,
+          "end_line": 43,
+          "start_col": 44,
+          "end_col": 1,
+          "fragment": "{\n    fields: FIELDS,\n    schema: 'llm_usage',\n    sort: [{ column: 'usage_date', direction: 'asc' }],\n    table: 'v_daily_llm_cost',\n  });\n\n  const result = await getPool().query<DailyLlmCostDbRow>(text, [...values]);\n\n  // pg returns `numeric` columns as strings, not JS numbers.\n  return result.rows.map((row) => ({\n    ...row,\n    total_cost_usd: Number(row.total_cost_usd),\n  }));\n}"
+        },
+        {
+          "file": "packages/scan-ingestion/src/queries/getProjectLlmCost.util.ts",
+          "start_line": 32,
+          "end_line": 45,
+          "start_col": 44,
+          "end_col": 1,
+          "fragment": "{\n    fields: FIELDS,\n    schema: 'llm_usage',\n    sort: [{ column: 'total_cost_usd', direction: 'desc' }],\n    table: 'v_project_llm_cost',\n  });\n\n  const result = await getPool().query<ProjectLlmCostDbRow>(text, [...values]);\n\n  return result.rows.map((row) => ({\n    ...row,\n    total_cost_usd: Number(row.total_cost_usd),\n  }));\n}"
+        },
+        {
+          "file": "packages/scan-ingestion/src/queries/getScannerLlmCost.util.ts",
+          "start_line": 32,
+          "end_line": 45,
+          "start_col": 44,
+          "end_col": 1,
+          "fragment": "{\n    fields: FIELDS,\n    schema: 'llm_usage',\n    sort: [{ column: 'total_cost_usd', direction: 'desc' }],\n    table: 'v_scanner_llm_cost',\n  });\n\n  const result = await getPool().query<ScannerLlmCostDbRow>(text, [...values]);\n\n  return result.rows.map((row) => ({\n    ...row,\n    total_cost_usd: Number(row.total_cost_usd),\n  }));\n}"
+        }
+      ],
+      "token_count": 52,
+      "line_count": 15,
+      "fingerprint": "dup:20e62e0a",
+      "actions": [
+        {
+          "type": "extract-shared",
+          "auto_fixable": false,
+          "description": "Extract duplicated code (15 lines, 3 instances) into a shared function"
         },
         {
           "type": "suppress-line",
@@ -476,114 +942,6 @@
           "type": "extract-shared",
           "auto_fixable": false,
           "description": "Extract duplicated code (11 lines, 2 instances) into a shared function"
-        },
-        {
-          "type": "suppress-line",
-          "auto_fixable": false,
-          "description": "Suppress with an inline comment above the duplicated code",
-          "comment": "// fallow-ignore-next-line code-duplication"
-        }
-      ]
-    },
-    {
-      "instances": [
-        {
-          "file": "packages/ui/src/components/Table/utils/readPersistedUiFlagsFromCookie.util.ts",
-          "start_line": 29,
-          "end_line": 39,
-          "start_col": 50,
-          "end_col": 45,
-          "fragment": "key });\n\n  if (!rawValue) return {};\n\n  try {\n    const parsed = JSON.parse(decodeURIComponent(rawValue)) as {\n      value: unknown;\n      version: number;\n    };\n    if (parsed.version === PERSISTENCE_VERSION) {\n      return parsed.value as PersistedUiFlags"
-        },
-        {
-          "file": "packages/ui/src/components/Table/utils/readPersistedUiStateFromSessionStorage.util.ts",
-          "start_line": 25,
-          "end_line": 35,
-          "start_col": 44,
-          "end_col": 45,
-          "fragment": "key });\n\n  if (!rawValue) return {};\n\n  try {\n    const parsed = JSON.parse(decodeURIComponent(rawValue)) as {\n      value: unknown;\n      version: number;\n    };\n    if (parsed.version === PERSISTENCE_VERSION) {\n      return parsed.value as PersistedUiState"
-        }
-      ],
-      "token_count": 54,
-      "line_count": 11,
-      "fingerprint": "dup:aeae83a1",
-      "actions": [
-        {
-          "type": "extract-shared",
-          "auto_fixable": false,
-          "description": "Extract duplicated code (11 lines, 2 instances) into a shared function"
-        },
-        {
-          "type": "suppress-line",
-          "auto_fixable": false,
-          "description": "Suppress with an inline comment above the duplicated code",
-          "comment": "// fallow-ignore-next-line code-duplication"
-        }
-      ]
-    },
-    {
-      "instances": [
-        {
-          "file": "packages/ui/src/components/Toolbar/Toolbar.examples.tsx",
-          "start_line": 33,
-          "end_line": 68,
-          "start_col": 4,
-          "end_col": 1,
-          "fragment": "{\n      color: 'primary',\n      icon: <SettingsIcon size={20} />,\n      label: 'Publish',\n      onClick: () => {\n        logger.info('Publish clicked');\n      },\n      type: 'button',\n    },\n    {\n      color: 'outline',\n      icon: <UserIcon size={20} />,\n      label: 'Settings',\n      to: '/settings',\n      type: 'link',\n    },\n    {\n      color: 'error',\n      icon: <SettingsIcon size={20} />,\n      label: 'Logout',\n      onClick: () => {\n        logger.info('Logout clicked');\n      },\n      type: 'button',\n    },\n  ];\n\n  return (\n    <Toolbar\n      aria-label='Document actions'\n      data-testid='document-actions'\n      items={actionItems}\n      orientation='horizontal'\n    />\n  );\n}"
-        },
-        {
-          "file": "packages/ui/src/components/Toolbar/Toolbar.examples.tsx",
-          "start_line": 72,
-          "end_line": 107,
-          "start_col": 4,
-          "end_col": 1,
-          "fragment": "{\n      color: 'primary',\n      icon: <SettingsIcon size={20} />,\n      label: 'Publish',\n      onClick: () => {\n        logger.info('Publish clicked');\n      },\n      type: 'button',\n    },\n    {\n      color: 'outline',\n      icon: <UserIcon size={20} />,\n      label: 'Settings',\n      to: '/settings',\n      type: 'link',\n    },\n    {\n      color: 'error',\n      icon: <SettingsIcon size={20} />,\n      label: 'Logout',\n      onClick: () => {\n        logger.info('Logout clicked');\n      },\n      type: 'button',\n    },\n  ];\n\n  return (\n    <Toolbar\n      aria-label='Document actions'\n      data-testid='document-actions'\n      items={actionItems}\n      orientation='horizontal'\n    />\n  );\n}"
-        }
-      ],
-      "token_count": 83,
-      "line_count": 36,
-      "fingerprint": "dup:3b5ad52e",
-      "actions": [
-        {
-          "type": "extract-shared",
-          "auto_fixable": false,
-          "description": "Extract duplicated code (36 lines, 2 instances) into a shared function"
-        },
-        {
-          "type": "suppress-line",
-          "auto_fixable": false,
-          "description": "Suppress with an inline comment above the duplicated code",
-          "comment": "// fallow-ignore-next-line code-duplication"
-        }
-      ]
-    },
-    {
-      "instances": [
-        {
-          "file": "packages/ui/src/components/VirtualList/SelectOption/SelectOption.component.tsx",
-          "start_line": 17,
-          "end_line": 34,
-          "start_col": 6,
-          "end_col": 15,
-          "fragment": "<button\n        aria-pressed={isSelected}\n        disabled={isLoading}\n        onClick={onToggle}\n        type='button'\n        {...stylex.props(\n          styles.option,\n          styles.optionButtonReset,\n          isLoading && styles.optionDisabled,\n        )}\n      >\n        <span {...stylex.props(styles.label)}>{option}</span>\n        {isLoading && (\n          <div {...stylex.props(skeletonStyles.loadingOverlay)}>\n            <div {...stylex.props(skeletonStyles.shimmerWave)} />\n          </div>\n        )}\n      </button>"
-        },
-        {
-          "file": "packages/ui/src/components/VirtualList/SelectOption/SelectOption.component.tsx",
-          "start_line": 41,
-          "end_line": 53,
-          "start_col": 8,
-          "end_col": 12,
-          "fragment": "<Checkbox\n          isChecked={isSelected}\n          isDisabled={isLoading}\n          onChange={onToggle}\n        />\n      )}\n      <span {...stylex.props(styles.label)}>{option}</span>\n      {isLoading && (\n        <div {...stylex.props(skeletonStyles.loadingOverlay)}>\n          <div {...stylex.props(skeletonStyles.shimmerWave)} />\n        </div>\n      )}\n    </label>"
-        }
-      ],
-      "token_count": 50,
-      "line_count": 18,
-      "fingerprint": "dup:204a62b1",
-      "actions": [
-        {
-          "type": "extract-shared",
-          "auto_fixable": false,
-          "description": "Extract duplicated code (18 lines, 2 instances) into a shared function"
         },
         {
           "type": "suppress-line",
@@ -669,37 +1027,38 @@
   "clone_families": [
     {
       "files": [
-        "apps/admin_system/src/routes/cqms/edit-project/editProject.action.ts",
-        "apps/admin_system/src/routes/cqms/new-project/newProject.action.ts"
+        ".github/skills/app-graph/scripts/generate-app-graph-report.mjs",
+        "packages/scan-ingestion/src/ingestion/classifyFileTypeCategory.util.ts"
       ],
       "groups": [
         {
           "instances": [
             {
-              "file": "apps/admin_system/src/routes/cqms/edit-project/editProject.action.ts",
-              "start_line": 16,
-              "end_line": 37,
-              "start_col": 34,
-              "end_col": 3,
-              "fragment": ".safeParse({\n    localPath: formData.get('localPath'),\n    name: formData.get('name'),\n  });\n\n  if (!parsed.success) {\n    const fieldErrors = parsed.error.flatten().fieldErrors;\n    return {\n      errors: {\n        localPath: fieldErrors.localPath?.[0],\n        name: fieldErrors.name?.[0],\n      },\n    };\n  }\n\n  try {\n    await updateProject({\n      ...parsed.data,\n      projectId: parsedParams.data.projectId,\n    });\n    return redirect(`/cqms/projects/view/${parsedParams.data.projectId}`);\n  }"
+              "file": ".github/skills/app-graph/scripts/generate-app-graph-report.mjs",
+              "start_line": 157,
+              "end_line": 177,
+              "start_col": 0,
+              "end_col": 1,
+              "fragment": "const CATEGORY_SUFFIXES = [\n  { category: 'test', suffix: '.test.tsx' },\n  { category: 'test', suffix: '.test.ts' },\n  { category: 'test', suffix: '.spec.tsx' },\n  { category: 'test', suffix: '.spec.ts' },\n  { category: 'component', suffix: '.component.tsx' },\n  { category: 'component', suffix: '.component.ts' },\n  { category: 'hook', suffix: '.hook.ts' },\n  { category: 'hook', suffix: '.hook.tsx' },\n  { category: 'util', suffix: '.util.ts' },\n  { category: 'util', suffix: '.util.tsx' },\n  { category: 'service_api', suffix: '.api.ts' },\n  { category: 'repository', suffix: '.repository.ts' },\n  { category: 'controller', suffix: '.controller.ts' },\n  { category: 'route', suffix: '.route.ts' },\n  { category: 'route', suffix: '.route.tsx' },\n  { category: 'types', suffix: '.types.ts' },\n  { category: 'stylex', suffix: '.stylex.ts' },\n  { category: 'constants', suffix: '.constants.ts' },\n  { category: 'schema', suffix: '.schema.ts' },\n]"
             },
             {
-              "file": "apps/admin_system/src/routes/cqms/new-project/newProject.action.ts",
-              "start_line": 8,
-              "end_line": 26,
-              "start_col": 33,
-              "end_col": 3,
-              "fragment": ".safeParse({\n    localPath: formData.get('localPath'),\n    name: formData.get('name'),\n  });\n\n  if (!parsed.success) {\n    const fieldErrors = parsed.error.flatten().fieldErrors;\n    return {\n      errors: {\n        localPath: fieldErrors.localPath?.[0],\n        name: fieldErrors.name?.[0],\n      },\n    };\n  }\n\n  try {\n    const { projectId } = await registerProject(parsed.data);\n    return redirect(`/cqms/projects/view/${projectId}`);\n  }"
+              "file": "packages/scan-ingestion/src/ingestion/classifyFileTypeCategory.util.ts",
+              "start_line": 1,
+              "end_line": 24,
+              "start_col": 0,
+              "end_col": 1,
+              "fragment": "const CATEGORY_SUFFIXES: readonly {\n  readonly category: string;\n  readonly suffix: string;\n}[] = [\n  { category: 'test', suffix: '.test.tsx' },\n  { category: 'test', suffix: '.test.ts' },\n  { category: 'test', suffix: '.spec.tsx' },\n  { category: 'test', suffix: '.spec.ts' },\n  { category: 'component', suffix: '.component.tsx' },\n  { category: 'component', suffix: '.component.ts' },\n  { category: 'hook', suffix: '.hook.ts' },\n  { category: 'hook', suffix: '.hook.tsx' },\n  { category: 'util', suffix: '.util.ts' },\n  { category: 'util', suffix: '.util.tsx' },\n  { category: 'service_api', suffix: '.api.ts' },\n  { category: 'repository', suffix: '.repository.ts' },\n  { category: 'controller', suffix: '.controller.ts' },\n  { category: 'route', suffix: '.route.ts' },\n  { category: 'route', suffix: '.route.tsx' },\n  { category: 'types', suffix: '.types.ts' },\n  { category: 'stylex', suffix: '.stylex.ts' },\n  { category: 'constants', suffix: '.constants.ts' },\n  { category: 'schema', suffix: '.schema.ts' },\n]"
             }
           ],
-          "token_count": 68,
-          "line_count": 22,
-          "fingerprint": "dup:a965b2c2",
+          "token_count": 120,
+          "line_count": 24,
+          "fingerprint": "dup:df3a89ee",
+          "suggested_name": "category",
           "actions": [
             {
               "type": "extract-shared",
               "auto_fixable": false,
-              "description": "Extract duplicated code (22 lines, 2 instances) into a shared function"
+              "description": "Extract duplicated code (24 lines, 2 instances) into a shared function"
             },
             {
               "type": "suppress-line",
@@ -710,26 +1069,180 @@
           ]
         }
       ],
-      "total_duplicated_lines": 22,
-      "total_duplicated_tokens": 68,
+      "total_duplicated_lines": 24,
+      "total_duplicated_tokens": 120,
       "suggestions": [
         {
           "kind": "ExtractFunction",
-          "description": "Extract shared function (22 lines) from editProject.action.ts, newProject.action.ts",
-          "estimated_savings": 22
+          "description": "Extract shared function (24 lines) from generate-app-graph-report.mjs, classifyFileTypeCategory.util.ts",
+          "estimated_savings": 24
         }
       ],
       "actions": [
         {
           "type": "extract-shared",
           "auto_fixable": false,
-          "description": "Extract 1 duplicated code block (22 lines) into a shared module",
+          "description": "Extract 1 duplicated code block (24 lines) into a shared module",
           "note": "These clone groups share the same files, indicating a structural relationship; refactor together"
         },
         {
           "type": "apply-suggestion",
           "auto_fixable": false,
-          "description": "Extract shared function (22 lines) from editProject.action.ts, newProject.action.ts"
+          "description": "Extract shared function (24 lines) from generate-app-graph-report.mjs, classifyFileTypeCategory.util.ts"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the duplicated code",
+          "comment": "// fallow-ignore-next-line code-duplication"
+        }
+      ]
+    },
+    {
+      "files": [
+        "apps/admin_system/src/routes/cqms/edit-project/editProject.action.ts",
+        "apps/admin_system/src/routes/cqms/new-project/newProject.action.ts"
+      ],
+      "groups": [
+        {
+          "instances": [
+            {
+              "file": "apps/admin_system/src/routes/cqms/edit-project/editProject.action.ts",
+              "start_line": 25,
+              "end_line": 67,
+              "start_col": 34,
+              "end_col": 3,
+              "fragment": ".safeParse({\n    localPath: formData.get('localPath'),\n    name: formData.get('name'),\n  });\n\n  if (!parsed.success) {\n    const fieldErrors = parsed.error.flatten().fieldErrors;\n    return {\n      errors: {\n        localPath: fieldErrors.localPath?.[0],\n        name: fieldErrors.name?.[0],\n      },\n    };\n  }\n\n  try {\n    await updateProject({\n      ...parsed.data,\n      projectId: parsedParams.data.projectId,\n      userId: user.id,\n    });\n\n    // Best-effort workspace re-discovery (ADR-021) — the local path may\n    // have changed; against the STORED (canonicalized) path, non-fatal.\n    try {\n      const project = await getProjectById({\n        projectId: parsedParams.data.projectId,\n      });\n      if (project) {\n        await replaceProjectWorkspaces({\n          projectId: project.id,\n          userId: user.id,\n          workspaces: discoverProjectWorkspaces({\n            rootPath: project.local_path,\n          }),\n        });\n      }\n    } catch (workspaceError) {\n      console.warn('Workspace discovery failed (non-fatal):', workspaceError);\n    }\n\n    return redirect(`/cqms/projects/view/${parsedParams.data.projectId}`);\n  }"
+            },
+            {
+              "file": "apps/admin_system/src/routes/cqms/new-project/newProject.action.ts",
+              "start_line": 17,
+              "end_line": 57,
+              "start_col": 33,
+              "end_col": 3,
+              "fragment": ".safeParse({\n    localPath: formData.get('localPath'),\n    name: formData.get('name'),\n  });\n\n  if (!parsed.success) {\n    const fieldErrors = parsed.error.flatten().fieldErrors;\n    return {\n      errors: {\n        localPath: fieldErrors.localPath?.[0],\n        name: fieldErrors.name?.[0],\n      },\n    };\n  }\n\n  try {\n    const { projectId } = await registerProject({\n      ...parsed.data,\n      userId: user.id,\n    });\n\n    // Best-effort workspace discovery (ADR-021) — against the STORED\n    // (canonicalized) path, not the raw form value; a failure must never\n    // block registration.\n    try {\n      const project = await getProjectById({ projectId });\n      if (project) {\n        await replaceProjectWorkspaces({\n          projectId,\n          userId: user.id,\n          workspaces: discoverProjectWorkspaces({\n            rootPath: project.local_path,\n          }),\n        });\n      }\n    } catch (workspaceError) {\n      console.warn('Workspace discovery failed (non-fatal):', workspaceError);\n    }\n\n    return redirect(`/cqms/projects/view/${projectId}`);\n  }"
+            }
+          ],
+          "token_count": 68,
+          "line_count": 43,
+          "fingerprint": "dup:6c15cb77",
+          "suggested_name": "projectId",
+          "actions": [
+            {
+              "type": "extract-shared",
+              "auto_fixable": false,
+              "description": "Extract duplicated code (43 lines, 2 instances) into a shared function"
+            },
+            {
+              "type": "suppress-line",
+              "auto_fixable": false,
+              "description": "Suppress with an inline comment above the duplicated code",
+              "comment": "// fallow-ignore-next-line code-duplication"
+            }
+          ]
+        }
+      ],
+      "total_duplicated_lines": 43,
+      "total_duplicated_tokens": 68,
+      "suggestions": [
+        {
+          "kind": "ExtractFunction",
+          "description": "Extract shared function (43 lines) from editProject.action.ts, newProject.action.ts",
+          "estimated_savings": 43
+        }
+      ],
+      "actions": [
+        {
+          "type": "extract-shared",
+          "auto_fixable": false,
+          "description": "Extract 1 duplicated code block (43 lines) into a shared module",
+          "note": "These clone groups share the same files, indicating a structural relationship; refactor together"
+        },
+        {
+          "type": "apply-suggestion",
+          "auto_fixable": false,
+          "description": "Extract shared function (43 lines) from editProject.action.ts, newProject.action.ts"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the duplicated code",
+          "comment": "// fallow-ignore-next-line code-duplication"
+        }
+      ]
+    },
+    {
+      "files": [
+        "apps/admin_system/src/routes/cqms/edit-project/editProject.action.ts",
+        "apps/admin_system/src/routes/cqms/project-detail/projectDetail.action.ts",
+        "apps/admin_system/src/routes/cqms/trigger-scan/triggerScan.action.ts"
+      ],
+      "groups": [
+        {
+          "instances": [
+            {
+              "file": "apps/admin_system/src/routes/cqms/edit-project/editProject.action.ts",
+              "start_line": 12,
+              "end_line": 24,
+              "start_col": 59,
+              "end_col": 44,
+              "fragment": ") });\n\nexport const action = async ({ params, request }: ActionFunctionArgs) => {\n  // Actions run BEFORE loaders, so the layout loader's gate does not\n  // cover POSTs — every cqms action authenticates itself (ADR-017).\n  const user = await requireUser({ request });\n\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid project id.', { status: 400 });\n  }\n\n  const formData = await request.formData();"
+            },
+            {
+              "file": "apps/admin_system/src/routes/cqms/project-detail/projectDetail.action.ts",
+              "start_line": 13,
+              "end_line": 31,
+              "start_col": 70,
+              "end_col": 42,
+              "fragment": "),\n});\n\n/**\n * The grants editor's fetcher endpoint (ADR-024): intent 'grant-add' /\n * 'grant-delete'. fn_create_resource_grant / fn_delete_resource_grant\n * assert 'update' on the grant's resource type in Postgres — a rejection\n * comes back as `grantError` for the panel to render inline.\n */\nexport const action = async ({ params, request }: ActionFunctionArgs) => {\n  // Actions run BEFORE loaders — every cqms action authenticates itself\n  // (ADR-017).\n  const user = await requireUser({ request });\n\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid project id.', { status: 400 });\n  }\n  const { projectId } = parsedParams.data;"
+            },
+            {
+              "file": "apps/admin_system/src/routes/cqms/trigger-scan/triggerScan.action.ts",
+              "start_line": 15,
+              "end_line": 27,
+              "start_col": 59,
+              "end_col": 44,
+              "fragment": ") });\n\nexport const action = async ({ params, request }: ActionFunctionArgs) => {\n  // Actions run BEFORE loaders, so the layout loader's gate does not\n  // cover POSTs — every cqms action authenticates itself (ADR-017).\n  const user = await requireUser({ request });\n\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid project id.', { status: 400 });\n  }\n\n  const formData = await request.formData();"
+            }
+          ],
+          "token_count": 69,
+          "line_count": 19,
+          "fingerprint": "dup:a583eaa4",
+          "actions": [
+            {
+              "type": "extract-shared",
+              "auto_fixable": false,
+              "description": "Extract duplicated code (19 lines, 3 instances) into a shared function"
+            },
+            {
+              "type": "suppress-line",
+              "auto_fixable": false,
+              "description": "Suppress with an inline comment above the duplicated code",
+              "comment": "// fallow-ignore-next-line code-duplication"
+            }
+          ]
+        }
+      ],
+      "total_duplicated_lines": 19,
+      "total_duplicated_tokens": 69,
+      "suggestions": [
+        {
+          "kind": "ExtractFunction",
+          "description": "Extract shared function (19 lines) from editProject.action.ts, projectDetail.action.ts, triggerScan.action.ts",
+          "estimated_savings": 38
+        }
+      ],
+      "actions": [
+        {
+          "type": "extract-shared",
+          "auto_fixable": false,
+          "description": "Extract 1 duplicated code block (19 lines) into a shared module",
+          "note": "These clone groups share the same files, indicating a structural relationship; refactor together"
+        },
+        {
+          "type": "apply-suggestion",
+          "auto_fixable": false,
+          "description": "Extract shared function (19 lines) from editProject.action.ts, projectDetail.action.ts, triggerScan.action.ts"
         },
         {
           "type": "suppress-line",
@@ -749,30 +1262,30 @@
           "instances": [
             {
               "file": "apps/admin_system/src/routes/cqms/edit-project/editProject.action.ts",
-              "start_line": 7,
-              "end_line": 19,
+              "start_line": 12,
+              "end_line": 28,
               "start_col": 0,
               "end_col": 4,
-              "fragment": "const paramsSchema = z.object({ projectId: z.string().uuid() });\n\nexport const action = async ({ params, request }: ActionFunctionArgs) => {\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid project id.', { status: 400 });\n  }\n\n  const formData = await request.formData();\n  const parsed = editProjectSchema.safeParse({\n    localPath: formData.get('localPath'),\n    name: formData.get('name'),\n  })"
+              "fragment": "const paramsSchema = z.object({ projectId: z.string().uuid() });\n\nexport const action = async ({ params, request }: ActionFunctionArgs) => {\n  // Actions run BEFORE loaders, so the layout loader's gate does not\n  // cover POSTs — every cqms action authenticates itself (ADR-017).\n  const user = await requireUser({ request });\n\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid project id.', { status: 400 });\n  }\n\n  const formData = await request.formData();\n  const parsed = editProjectSchema.safeParse({\n    localPath: formData.get('localPath'),\n    name: formData.get('name'),\n  })"
             },
             {
               "file": "apps/admin_system/src/routes/cqms/trigger-scan/triggerScan.action.ts",
-              "start_line": 7,
-              "end_line": 18,
+              "start_line": 15,
+              "end_line": 32,
               "start_col": 0,
               "end_col": 4,
-              "fragment": "const paramsSchema = z.object({ projectId: z.string().uuid() });\n\nexport const action = async ({ params, request }: ActionFunctionArgs) => {\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid project id.', { status: 400 });\n  }\n\n  const formData = await request.formData();\n  const parsed = triggerScanSchema.safeParse({\n    scannerIds: formData.getAll('scannerIds'),\n  })"
+              "fragment": "const paramsSchema = z.object({ projectId: z.string().uuid() });\n\nexport const action = async ({ params, request }: ActionFunctionArgs) => {\n  // Actions run BEFORE loaders, so the layout loader's gate does not\n  // cover POSTs — every cqms action authenticates itself (ADR-017).\n  const user = await requireUser({ request });\n\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid project id.', { status: 400 });\n  }\n\n  const formData = await request.formData();\n  const parsed = triggerScanSchema.safeParse({\n    confirmFanOut: isCheckboxChecked({ formData, name: 'confirmFanOut' }),\n    scannerIds: formData.getAll('scannerIds'),\n    workspacePaths: formData.getAll('workspacePaths'),\n  })"
             }
           ],
-          "token_count": 85,
-          "line_count": 13,
-          "fingerprint": "dup:fb0f6a65",
+          "token_count": 98,
+          "line_count": 18,
+          "fingerprint": "dup:06358c11",
           "suggested_name": "formData",
           "actions": [
             {
               "type": "extract-shared",
               "auto_fixable": false,
-              "description": "Extract duplicated code (13 lines, 2 instances) into a shared function"
+              "description": "Extract duplicated code (18 lines, 2 instances) into a shared function"
             },
             {
               "type": "suppress-line",
@@ -783,26 +1296,26 @@
           ]
         }
       ],
-      "total_duplicated_lines": 13,
-      "total_duplicated_tokens": 85,
+      "total_duplicated_lines": 18,
+      "total_duplicated_tokens": 98,
       "suggestions": [
         {
           "kind": "ExtractFunction",
-          "description": "Extract shared function (13 lines) from editProject.action.ts, triggerScan.action.ts",
-          "estimated_savings": 13
+          "description": "Extract shared function (18 lines) from editProject.action.ts, triggerScan.action.ts",
+          "estimated_savings": 18
         }
       ],
       "actions": [
         {
           "type": "extract-shared",
           "auto_fixable": false,
-          "description": "Extract 1 duplicated code block (13 lines) into a shared module",
+          "description": "Extract 1 duplicated code block (18 lines) into a shared module",
           "note": "These clone groups share the same files, indicating a structural relationship; refactor together"
         },
         {
           "type": "apply-suggestion",
           "auto_fixable": false,
-          "description": "Extract shared function (13 lines) from editProject.action.ts, triggerScan.action.ts"
+          "description": "Extract shared function (18 lines) from editProject.action.ts, triggerScan.action.ts"
         },
         {
           "type": "suppress-line",
@@ -815,79 +1328,6 @@
     {
       "files": [
         "apps/admin_system/src/routes/cqms/edit-project/editProject.loader.ts",
-        "apps/admin_system/src/routes/cqms/project-detail/projectDetail.loader.ts"
-      ],
-      "groups": [
-        {
-          "instances": [
-            {
-              "file": "apps/admin_system/src/routes/cqms/edit-project/editProject.loader.ts",
-              "start_line": 5,
-              "end_line": 16,
-              "start_col": 0,
-              "end_col": 5,
-              "fragment": "const paramsSchema = z.object({ projectId: z.string().uuid() });\n\n/** Awaited — needed to pre-fill the Form and to 404 on an unknown project. */\nexport const loader = async ({ params }: LoaderFunctionArgs) => {\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid project id.', { status: 400 });\n  }\n\n  const project = await getProjectById({\n    projectId: parsedParams.data.projectId,\n  });"
-            },
-            {
-              "file": "apps/admin_system/src/routes/cqms/project-detail/projectDetail.loader.ts",
-              "start_line": 7,
-              "end_line": 20,
-              "start_col": 0,
-              "end_col": 42,
-              "fragment": "const paramsSchema = z.object({ projectId: z.string().uuid() });\n\n/**\n * `project` is awaited directly — the page can't render (or 404) without\n * it. `runs`/`trend` are returned as unawaited promises for Suspense\n * streaming, same convention as `enterprise-orders.loader.ts`.\n */\nexport const loader = async ({ params }: LoaderFunctionArgs) => {\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid project id.', { status: 400 });\n  }\n\n  const { projectId } = parsedParams.data;"
-            }
-          ],
-          "token_count": 69,
-          "line_count": 14,
-          "fingerprint": "dup:970fb52d",
-          "actions": [
-            {
-              "type": "extract-shared",
-              "auto_fixable": false,
-              "description": "Extract duplicated code (14 lines, 2 instances) into a shared function"
-            },
-            {
-              "type": "suppress-line",
-              "auto_fixable": false,
-              "description": "Suppress with an inline comment above the duplicated code",
-              "comment": "// fallow-ignore-next-line code-duplication"
-            }
-          ]
-        }
-      ],
-      "total_duplicated_lines": 14,
-      "total_duplicated_tokens": 69,
-      "suggestions": [
-        {
-          "kind": "ExtractFunction",
-          "description": "Extract shared function (14 lines) from editProject.loader.ts, projectDetail.loader.ts",
-          "estimated_savings": 14
-        }
-      ],
-      "actions": [
-        {
-          "type": "extract-shared",
-          "auto_fixable": false,
-          "description": "Extract 1 duplicated code block (14 lines) into a shared module",
-          "note": "These clone groups share the same files, indicating a structural relationship; refactor together"
-        },
-        {
-          "type": "apply-suggestion",
-          "auto_fixable": false,
-          "description": "Extract shared function (14 lines) from editProject.loader.ts, projectDetail.loader.ts"
-        },
-        {
-          "type": "suppress-line",
-          "auto_fixable": false,
-          "description": "Suppress with an inline comment above the duplicated code",
-          "comment": "// fallow-ignore-next-line code-duplication"
-        }
-      ]
-    },
-    {
-      "files": [
-        "apps/admin_system/src/routes/cqms/edit-project/editProject.loader.ts",
-        "apps/admin_system/src/routes/cqms/project-detail/projectDetail.loader.ts",
         "apps/admin_system/src/routes/cqms/run-detail/runDetail.loader.ts",
         "apps/admin_system/src/routes/cqms/scan-detail/scanDetail.loader.ts"
       ],
@@ -901,14 +1341,6 @@
               "start_col": 43,
               "end_col": 15,
               "fragment": "z.string().uuid() });\n\n/** Awaited — needed to pre-fill the Form and to 404 on an unknown project. */\nexport const loader = async ({ params }: LoaderFunctionArgs) => {\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data("
-            },
-            {
-              "file": "apps/admin_system/src/routes/cqms/project-detail/projectDetail.loader.ts",
-              "start_line": 7,
-              "end_line": 17,
-              "start_col": 43,
-              "end_col": 15,
-              "fragment": "z.string().uuid() });\n\n/**\n * `project` is awaited directly — the page can't render (or 404) without\n * it. `runs`/`trend` are returned as unawaited promises for Suspense\n * streaming, same convention as `enterprise-orders.loader.ts`.\n */\nexport const loader = async ({ params }: LoaderFunctionArgs) => {\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data("
             },
             {
               "file": "apps/admin_system/src/routes/cqms/run-detail/runDetail.loader.ts",
@@ -935,7 +1367,7 @@
             {
               "type": "extract-shared",
               "auto_fixable": false,
-              "description": "Extract duplicated code (13 lines, 4 instances) into a shared function"
+              "description": "Extract duplicated code (13 lines, 3 instances) into a shared function"
             },
             {
               "type": "suppress-line",
@@ -951,8 +1383,8 @@
       "suggestions": [
         {
           "kind": "ExtractFunction",
-          "description": "Extract shared function (13 lines) from editProject.loader.ts, projectDetail.loader.ts, runDetail.loader.ts, scanDetail.loader.ts",
-          "estimated_savings": 39
+          "description": "Extract shared function (13 lines) from editProject.loader.ts, runDetail.loader.ts, scanDetail.loader.ts",
+          "estimated_savings": 26
         }
       ],
       "actions": [
@@ -965,7 +1397,701 @@
         {
           "type": "apply-suggestion",
           "auto_fixable": false,
-          "description": "Extract shared function (13 lines) from editProject.loader.ts, projectDetail.loader.ts, runDetail.loader.ts, scanDetail.loader.ts"
+          "description": "Extract shared function (13 lines) from editProject.loader.ts, runDetail.loader.ts, scanDetail.loader.ts"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the duplicated code",
+          "comment": "// fallow-ignore-next-line code-duplication"
+        }
+      ]
+    },
+    {
+      "files": [
+        "apps/admin_system/src/routes/cqms/edit-role/editRole.action.ts",
+        "apps/admin_system/src/routes/cqms/edit-role/editRole.loader.ts",
+        "apps/admin_system/src/routes/cqms/role-detail/roleDetail.loader.ts"
+      ],
+      "groups": [
+        {
+          "instances": [
+            {
+              "file": "apps/admin_system/src/routes/cqms/edit-role/editRole.action.ts",
+              "start_line": 20,
+              "end_line": 33,
+              "start_col": 33,
+              "end_col": 44,
+              "fragment": "{ request });\n\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid role name.', { status: 400 });\n  }\n  const role = await getRoleWithPermissions({\n    roleName: parsedParams.data.roleName,\n  });\n  if (!role) {\n    throw data('Role not found.', { status: 404 });\n  }\n\n  const formData = await request.formData();"
+            },
+            {
+              "file": "apps/admin_system/src/routes/cqms/edit-role/editRole.loader.ts",
+              "start_line": 14,
+              "end_line": 28,
+              "start_col": 26,
+              "end_col": 49,
+              "fragment": "{ action: 'update', request, resourceType: 'role' });\n\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid role name.', { status: 400 });\n  }\n\n  const role = await getRoleWithPermissions({\n    roleName: parsedParams.data.roleName,\n  });\n  if (!role) {\n    throw data('Role not found.', { status: 404 });\n  }\n\n  const permissionsPromise = getAllPermissions();"
+            },
+            {
+              "file": "apps/admin_system/src/routes/cqms/role-detail/roleDetail.loader.ts",
+              "start_line": 13,
+              "end_line": 28,
+              "start_col": 26,
+              "end_col": 48,
+              "fragment": "{ action: 'read', request, resourceType: 'role' });\n\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid role name.', { status: 400 });\n  }\n\n  const role = await getRoleWithPermissions({\n    roleName: parsedParams.data.roleName,\n  });\n  if (!role) {\n    throw data('Role not found.', { status: 404 });\n  }\n\n  // Awaited alongside the role: the page maps permission ids to labels.\n  const permissions = await getAllPermissions();"
+            }
+          ],
+          "token_count": 71,
+          "line_count": 16,
+          "fingerprint": "dup:c77141bc",
+          "suggested_name": "parsedParams",
+          "actions": [
+            {
+              "type": "extract-shared",
+              "auto_fixable": false,
+              "description": "Extract duplicated code (16 lines, 3 instances) into a shared function"
+            },
+            {
+              "type": "suppress-line",
+              "auto_fixable": false,
+              "description": "Suppress with an inline comment above the duplicated code",
+              "comment": "// fallow-ignore-next-line code-duplication"
+            }
+          ]
+        }
+      ],
+      "total_duplicated_lines": 16,
+      "total_duplicated_tokens": 71,
+      "suggestions": [
+        {
+          "kind": "ExtractFunction",
+          "description": "Extract shared function (16 lines) from editRole.action.ts, editRole.loader.ts, roleDetail.loader.ts",
+          "estimated_savings": 32
+        }
+      ],
+      "actions": [
+        {
+          "type": "extract-shared",
+          "auto_fixable": false,
+          "description": "Extract 1 duplicated code block (16 lines) into a shared module",
+          "note": "These clone groups share the same files, indicating a structural relationship; refactor together"
+        },
+        {
+          "type": "apply-suggestion",
+          "auto_fixable": false,
+          "description": "Extract shared function (16 lines) from editRole.action.ts, editRole.loader.ts, roleDetail.loader.ts"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the duplicated code",
+          "comment": "// fallow-ignore-next-line code-duplication"
+        }
+      ]
+    },
+    {
+      "files": [
+        "apps/admin_system/src/routes/cqms/edit-role/editRole.action.ts",
+        "apps/admin_system/src/routes/cqms/edit-scanner/editScanner.action.ts",
+        "apps/admin_system/src/routes/cqms/edit-user/editUser.action.ts"
+      ],
+      "groups": [
+        {
+          "instances": [
+            {
+              "file": "apps/admin_system/src/routes/cqms/edit-role/editRole.action.ts",
+              "start_line": 13,
+              "end_line": 24,
+              "start_col": 12,
+              "end_col": 15,
+              "fragment": "z.string().regex(/^[a-z0-9][a-z0-9-]{1,63}$/),\n});\n\nexport const action = async ({ params, request }: ActionFunctionArgs) => {\n  // Actions run BEFORE loaders — every cqms action authenticates itself\n  // (ADR-017); the management functions assert 'update' on 'role' and the\n  // seeded admin role stays immutable in Postgres.\n  const user = await requireUser({ request });\n\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data("
+            },
+            {
+              "file": "apps/admin_system/src/routes/cqms/edit-scanner/editScanner.action.ts",
+              "start_line": 13,
+              "end_line": 23,
+              "start_col": 13,
+              "end_col": 15,
+              "fragment": "z.string().regex(/^[a-z0-9][a-z0-9-]{0,47}$/),\n});\n\nexport const action = async ({ params, request }: ActionFunctionArgs) => {\n  // Actions run BEFORE loaders — every cqms action authenticates itself\n  // (ADR-017).\n  const user = await requireUser({ request });\n\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data("
+            },
+            {
+              "file": "apps/admin_system/src/routes/cqms/edit-user/editUser.action.ts",
+              "start_line": 14,
+              "end_line": 26,
+              "start_col": 12,
+              "end_col": 15,
+              "fragment": "z.string().regex(/^[a-z0-9][a-z0-9._-]{1,63}$/),\n});\n\nexport const action = async ({ params, request }: ActionFunctionArgs) => {\n  // Actions run BEFORE loaders — every cqms action authenticates itself\n  // (ADR-017); the management functions assert 'update' on 'user' and\n  // carry the lockout guards (own account, system account, own admin\n  // role) in Postgres.\n  const user = await requireUser({ request });\n\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data("
+            }
+          ],
+          "token_count": 69,
+          "line_count": 13,
+          "fingerprint": "dup:c7af22c9",
+          "suggested_name": "parsedParams",
+          "actions": [
+            {
+              "type": "extract-shared",
+              "auto_fixable": false,
+              "description": "Extract duplicated code (13 lines, 3 instances) into a shared function"
+            },
+            {
+              "type": "suppress-line",
+              "auto_fixable": false,
+              "description": "Suppress with an inline comment above the duplicated code",
+              "comment": "// fallow-ignore-next-line code-duplication"
+            }
+          ]
+        }
+      ],
+      "total_duplicated_lines": 13,
+      "total_duplicated_tokens": 69,
+      "suggestions": [
+        {
+          "kind": "ExtractFunction",
+          "description": "Extract shared function (13 lines) from editRole.action.ts, editScanner.action.ts, editUser.action.ts",
+          "estimated_savings": 26
+        }
+      ],
+      "actions": [
+        {
+          "type": "extract-shared",
+          "auto_fixable": false,
+          "description": "Extract 1 duplicated code block (13 lines) into a shared module",
+          "note": "These clone groups share the same files, indicating a structural relationship; refactor together"
+        },
+        {
+          "type": "apply-suggestion",
+          "auto_fixable": false,
+          "description": "Extract shared function (13 lines) from editRole.action.ts, editScanner.action.ts, editUser.action.ts"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the duplicated code",
+          "comment": "// fallow-ignore-next-line code-duplication"
+        }
+      ]
+    },
+    {
+      "files": [
+        "apps/admin_system/src/routes/cqms/edit-role/editRole.loader.ts",
+        "apps/admin_system/src/routes/cqms/role-detail/roleDetail.loader.ts"
+      ],
+      "groups": [
+        {
+          "instances": [
+            {
+              "file": "apps/admin_system/src/routes/cqms/edit-role/editRole.loader.ts",
+              "start_line": 14,
+              "end_line": 28,
+              "start_col": 46,
+              "end_col": 49,
+              "fragment": "request, resourceType: 'role' });\n\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid role name.', { status: 400 });\n  }\n\n  const role = await getRoleWithPermissions({\n    roleName: parsedParams.data.roleName,\n  });\n  if (!role) {\n    throw data('Role not found.', { status: 404 });\n  }\n\n  const permissionsPromise = getAllPermissions();"
+            },
+            {
+              "file": "apps/admin_system/src/routes/cqms/role-detail/roleDetail.loader.ts",
+              "start_line": 13,
+              "end_line": 28,
+              "start_col": 44,
+              "end_col": 48,
+              "fragment": "request, resourceType: 'role' });\n\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid role name.', { status: 400 });\n  }\n\n  const role = await getRoleWithPermissions({\n    roleName: parsedParams.data.roleName,\n  });\n  if (!role) {\n    throw data('Role not found.', { status: 404 });\n  }\n\n  // Awaited alongside the role: the page maps permission ids to labels.\n  const permissions = await getAllPermissions();"
+            }
+          ],
+          "token_count": 75,
+          "line_count": 16,
+          "fingerprint": "dup:fee7ec09",
+          "actions": [
+            {
+              "type": "extract-shared",
+              "auto_fixable": false,
+              "description": "Extract duplicated code (16 lines, 2 instances) into a shared function"
+            },
+            {
+              "type": "suppress-line",
+              "auto_fixable": false,
+              "description": "Suppress with an inline comment above the duplicated code",
+              "comment": "// fallow-ignore-next-line code-duplication"
+            }
+          ]
+        }
+      ],
+      "total_duplicated_lines": 16,
+      "total_duplicated_tokens": 75,
+      "suggestions": [
+        {
+          "kind": "ExtractFunction",
+          "description": "Extract shared function (16 lines) from editRole.loader.ts, roleDetail.loader.ts",
+          "estimated_savings": 16
+        }
+      ],
+      "actions": [
+        {
+          "type": "extract-shared",
+          "auto_fixable": false,
+          "description": "Extract 1 duplicated code block (16 lines) into a shared module",
+          "note": "These clone groups share the same files, indicating a structural relationship; refactor together"
+        },
+        {
+          "type": "apply-suggestion",
+          "auto_fixable": false,
+          "description": "Extract shared function (16 lines) from editRole.loader.ts, roleDetail.loader.ts"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the duplicated code",
+          "comment": "// fallow-ignore-next-line code-duplication"
+        }
+      ]
+    },
+    {
+      "files": [
+        "apps/admin_system/src/routes/cqms/edit-scanner/editScanner.action.ts",
+        "apps/admin_system/src/routes/cqms/new-scanner/newScanner.action.ts"
+      ],
+      "groups": [
+        {
+          "instances": [
+            {
+              "file": "apps/admin_system/src/routes/cqms/edit-scanner/editScanner.action.ts",
+              "start_line": 36,
+              "end_line": 49,
+              "start_col": 59,
+              "end_col": 49,
+              "fragment": ") ?? '',\n    stepsMarkdown: formData.get('stepsMarkdown') ?? '',\n    supportsDiffScope: isCheckboxChecked({\n      formData,\n      name: 'supportsDiffScope',\n    }),\n  });\n\n  if (!parsed.success) {\n    const fieldErrors = parsed.error.flatten().fieldErrors;\n    return {\n      errors: {\n        configDetection: fieldErrors.configDetection?.[0],\n        displayName: fieldErrors.displayName?.[0]"
+            },
+            {
+              "file": "apps/admin_system/src/routes/cqms/new-scanner/newScanner.action.ts",
+              "start_line": 25,
+              "end_line": 38,
+              "start_col": 39,
+              "end_col": 49,
+              "fragment": ") ?? '',\n    stepsMarkdown: formData.get('stepsMarkdown') ?? '',\n    supportsDiffScope: isCheckboxChecked({\n      formData,\n      name: 'supportsDiffScope',\n    }),\n  });\n\n  if (!parsed.success) {\n    const fieldErrors = parsed.error.flatten().fieldErrors;\n    return {\n      errors: {\n        configDetection: fieldErrors.configDetection?.[0],\n        displayName: fieldErrors.displayName?.[0]"
+            }
+          ],
+          "token_count": 68,
+          "line_count": 14,
+          "fingerprint": "dup:b520f8a7",
+          "suggested_name": "fieldErrors",
+          "actions": [
+            {
+              "type": "extract-shared",
+              "auto_fixable": false,
+              "description": "Extract duplicated code (14 lines, 2 instances) into a shared function"
+            },
+            {
+              "type": "suppress-line",
+              "auto_fixable": false,
+              "description": "Suppress with an inline comment above the duplicated code",
+              "comment": "// fallow-ignore-next-line code-duplication"
+            }
+          ]
+        },
+        {
+          "instances": [
+            {
+              "file": "apps/admin_system/src/routes/cqms/edit-scanner/editScanner.action.ts",
+              "start_line": 81,
+              "end_line": 97,
+              "start_col": 6,
+              "end_col": 5,
+              "fragment": "writeScannerArtifacts({\n        allowedTools: values.allowedTools\n          ? values.allowedTools.split(',').map((tool) => tool.trim())\n          : undefined,\n        description: values.description || undefined,\n        displayName: values.displayName,\n        isDeterministic: values.deterministic,\n        rawArtifactFileName: values.rawArtifactFileName || undefined,\n        scannerId,\n        stepsMarkdown: values.stepsMarkdown || undefined,\n      });\n    } catch (ensureError) {\n      console.warn(\n        'Scanner artifact/detail-table ensure failed (non-fatal):',\n        ensureError,\n      );\n    }"
+            },
+            {
+              "file": "apps/admin_system/src/routes/cqms/new-scanner/newScanner.action.ts",
+              "start_line": 72,
+              "end_line": 88,
+              "start_col": 6,
+              "end_col": 5,
+              "fragment": "writeScannerArtifacts({\n        allowedTools: values.allowedTools\n          ? values.allowedTools.split(',').map((tool) => tool.trim())\n          : undefined,\n        description: values.description || undefined,\n        displayName: values.displayName,\n        isDeterministic: values.deterministic,\n        rawArtifactFileName: values.rawArtifactFileName || undefined,\n        scannerId,\n        stepsMarkdown: values.stepsMarkdown || undefined,\n      });\n    } catch (artifactError) {\n      console.warn(\n        'Scanner artifact scaffolding failed (non-fatal):',\n        artifactError,\n      );\n    }"
+            }
+          ],
+          "token_count": 70,
+          "line_count": 17,
+          "fingerprint": "dup:00f9520f",
+          "suggested_name": "allowedTools",
+          "actions": [
+            {
+              "type": "extract-shared",
+              "auto_fixable": false,
+              "description": "Extract duplicated code (17 lines, 2 instances) into a shared function"
+            },
+            {
+              "type": "suppress-line",
+              "auto_fixable": false,
+              "description": "Suppress with an inline comment above the duplicated code",
+              "comment": "// fallow-ignore-next-line code-duplication"
+            }
+          ]
+        }
+      ],
+      "total_duplicated_lines": 31,
+      "total_duplicated_tokens": 138,
+      "suggestions": [
+        {
+          "kind": "ExtractFunction",
+          "description": "Extract shared function (17 lines) from editScanner.action.ts, newScanner.action.ts",
+          "estimated_savings": 17
+        },
+        {
+          "kind": "ExtractFunction",
+          "description": "Extract shared function (14 lines) from editScanner.action.ts, newScanner.action.ts",
+          "estimated_savings": 14
+        }
+      ],
+      "actions": [
+        {
+          "type": "extract-shared",
+          "auto_fixable": false,
+          "description": "Extract 2 duplicated code blocks (31 lines) into a shared module",
+          "note": "These clone groups share the same files, indicating a structural relationship; refactor together"
+        },
+        {
+          "type": "apply-suggestion",
+          "auto_fixable": false,
+          "description": "Extract shared function (17 lines) from editScanner.action.ts, newScanner.action.ts"
+        },
+        {
+          "type": "apply-suggestion",
+          "auto_fixable": false,
+          "description": "Extract shared function (14 lines) from editScanner.action.ts, newScanner.action.ts"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the duplicated code",
+          "comment": "// fallow-ignore-next-line code-duplication"
+        }
+      ]
+    },
+    {
+      "files": [
+        "apps/admin_system/src/routes/cqms/edit-scanner/editScanner.loader.ts",
+        "apps/admin_system/src/routes/cqms/scanner-detail/scannerDetail.loader.ts"
+      ],
+      "groups": [
+        {
+          "instances": [
+            {
+              "file": "apps/admin_system/src/routes/cqms/edit-scanner/editScanner.loader.ts",
+              "start_line": 5,
+              "end_line": 21,
+              "start_col": 0,
+              "end_col": 3,
+              "fragment": "const paramsSchema = z.object({\n  scannerId: z.string().regex(/^[a-z0-9][a-z0-9-]{0,47}$/),\n});\n\n/** Awaited — needed to pre-fill the Form and to 404 on an unknown scanner. */\nexport const loader = async ({ params }: LoaderFunctionArgs) => {\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid scanner id.', { status: 400 });\n  }\n\n  const scanner = await getScannerById({\n    scannerId: parsedParams.data.scannerId,\n  });\n  if (!scanner) {\n    throw data('Scanner not found.', { status: 404 });\n  }"
+            },
+            {
+              "file": "apps/admin_system/src/routes/cqms/scanner-detail/scannerDetail.loader.ts",
+              "start_line": 6,
+              "end_line": 25,
+              "start_col": 0,
+              "end_col": 3,
+              "fragment": "const paramsSchema = z.object({\n  scannerId: z.string().regex(/^[a-z0-9][a-z0-9-]{0,47}$/),\n});\n\n/**\n * The scanner row is awaited (the page header needs it, and an unknown id\n * must 404); the version history streams like every other table promise.\n */\nexport const loader = async ({ params }: LoaderFunctionArgs) => {\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid scanner id.', { status: 400 });\n  }\n\n  const scanner = await getScannerById({\n    scannerId: parsedParams.data.scannerId,\n  });\n  if (!scanner) {\n    throw data('Scanner not found.', { status: 404 });\n  }"
+            }
+          ],
+          "token_count": 105,
+          "line_count": 20,
+          "fingerprint": "dup:f9761c2a",
+          "actions": [
+            {
+              "type": "extract-shared",
+              "auto_fixable": false,
+              "description": "Extract duplicated code (20 lines, 2 instances) into a shared function"
+            },
+            {
+              "type": "suppress-line",
+              "auto_fixable": false,
+              "description": "Suppress with an inline comment above the duplicated code",
+              "comment": "// fallow-ignore-next-line code-duplication"
+            }
+          ]
+        }
+      ],
+      "total_duplicated_lines": 20,
+      "total_duplicated_tokens": 105,
+      "suggestions": [
+        {
+          "kind": "ExtractFunction",
+          "description": "Extract shared function (20 lines) from editScanner.loader.ts, scannerDetail.loader.ts",
+          "estimated_savings": 20
+        }
+      ],
+      "actions": [
+        {
+          "type": "extract-shared",
+          "auto_fixable": false,
+          "description": "Extract 1 duplicated code block (20 lines) into a shared module",
+          "note": "These clone groups share the same files, indicating a structural relationship; refactor together"
+        },
+        {
+          "type": "apply-suggestion",
+          "auto_fixable": false,
+          "description": "Extract shared function (20 lines) from editScanner.loader.ts, scannerDetail.loader.ts"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the duplicated code",
+          "comment": "// fallow-ignore-next-line code-duplication"
+        }
+      ]
+    },
+    {
+      "files": [
+        "apps/admin_system/src/routes/cqms/edit-scanner/editScanner.schema.ts",
+        "apps/admin_system/src/routes/cqms/new-scanner/newScanner.schema.ts"
+      ],
+      "groups": [
+        {
+          "instances": [
+            {
+              "file": "apps/admin_system/src/routes/cqms/edit-scanner/editScanner.schema.ts",
+              "start_line": 3,
+              "end_line": 28,
+              "start_col": 0,
+              "end_col": 3,
+              "fragment": "const isJsonObjectOrEmpty = (value: string): boolean => {\n  if (value === '') return true;\n  try {\n    const parsed: unknown = JSON.parse(value);\n    return typeof parsed === 'object' && parsed !== null;\n  } catch {\n    return false;\n  }\n};\n\n/** scanner_id and skill_path are immutable (ADR-023) — not form fields. */\nexport const editScannerSchema = z.object({\n  allowedTools: z.string().trim(),\n  commandTemplate: z.string().trim(),\n  configDetection: z\n    .string()\n    .trim()\n    .refine(isJsonObjectOrEmpty, 'Must be a valid JSON object (or empty).'),\n  description: z.string().trim(),\n  deterministic: z.boolean(),\n  displayName: z.string().trim().min(1, 'Display name is required.'),\n  isActive: z.boolean(),\n  rawArtifactFileName: z.string().trim(),\n  stepsMarkdown: z.string().trim(),\n  supportsDiffScope: z.boolean(),\n});"
+            },
+            {
+              "file": "apps/admin_system/src/routes/cqms/new-scanner/newScanner.schema.ts",
+              "start_line": 3,
+              "end_line": 38,
+              "start_col": 0,
+              "end_col": 3,
+              "fragment": "const isJsonObjectOrEmpty = (value: string): boolean => {\n  if (value === '') return true;\n  try {\n    const parsed: unknown = JSON.parse(value);\n    return typeof parsed === 'object' && parsed !== null;\n  } catch {\n    return false;\n  }\n};\n\n/**\n * Mirrors fn_register_scanner's own validation (ADR-023) so the user gets\n * a field error instead of a raised exception for the common mistakes; the\n * DB stays the authority.\n */\nexport const newScannerSchema = z.object({\n  allowedTools: z.string().trim(),\n  commandTemplate: z.string().trim(),\n  configDetection: z\n    .string()\n    .trim()\n    .refine(isJsonObjectOrEmpty, 'Must be a valid JSON object (or empty).'),\n  description: z.string().trim(),\n  deterministic: z.boolean(),\n  displayName: z.string().trim().min(1, 'Display name is required.'),\n  rawArtifactFileName: z.string().trim(),\n  scannerId: z\n    .string()\n    .trim()\n    .regex(\n      /^[a-z0-9][a-z0-9-]{0,47}$/,\n      'Lowercase kebab-case, max 48 chars (e.g. my-scanner).',\n    ),\n  stepsMarkdown: z.string().trim(),\n  supportsDiffScope: z.boolean(),\n});"
+            }
+          ],
+          "token_count": 52,
+          "line_count": 36,
+          "fingerprint": "dup:9ba56230",
+          "suggested_name": "trim",
+          "actions": [
+            {
+              "type": "extract-shared",
+              "auto_fixable": false,
+              "description": "Extract duplicated code (36 lines, 2 instances) into a shared function"
+            },
+            {
+              "type": "suppress-line",
+              "auto_fixable": false,
+              "description": "Suppress with an inline comment above the duplicated code",
+              "comment": "// fallow-ignore-next-line code-duplication"
+            }
+          ]
+        },
+        {
+          "instances": [
+            {
+              "file": "apps/admin_system/src/routes/cqms/edit-scanner/editScanner.schema.ts",
+              "start_line": 14,
+              "end_line": 23,
+              "start_col": 13,
+              "end_col": 68,
+              "fragment": "editScannerSchema = z.object({\n  allowedTools: z.string().trim(),\n  commandTemplate: z.string().trim(),\n  configDetection: z\n    .string()\n    .trim()\n    .refine(isJsonObjectOrEmpty, 'Must be a valid JSON object (or empty).'),\n  description: z.string().trim(),\n  deterministic: z.boolean(),\n  displayName: z.string().trim().min(1, 'Display name is required.')"
+            },
+            {
+              "file": "apps/admin_system/src/routes/cqms/new-scanner/newScanner.schema.ts",
+              "start_line": 18,
+              "end_line": 27,
+              "start_col": 13,
+              "end_col": 68,
+              "fragment": "newScannerSchema = z.object({\n  allowedTools: z.string().trim(),\n  commandTemplate: z.string().trim(),\n  configDetection: z\n    .string()\n    .trim()\n    .refine(isJsonObjectOrEmpty, 'Must be a valid JSON object (or empty).'),\n  description: z.string().trim(),\n  deterministic: z.boolean(),\n  displayName: z.string().trim().min(1, 'Display name is required.')"
+            }
+          ],
+          "token_count": 78,
+          "line_count": 10,
+          "fingerprint": "dup:0b0eab9b",
+          "suggested_name": "trim",
+          "actions": [
+            {
+              "type": "extract-shared",
+              "auto_fixable": false,
+              "description": "Extract duplicated code (10 lines, 2 instances) into a shared function"
+            },
+            {
+              "type": "suppress-line",
+              "auto_fixable": false,
+              "description": "Suppress with an inline comment above the duplicated code",
+              "comment": "// fallow-ignore-next-line code-duplication"
+            }
+          ]
+        }
+      ],
+      "total_duplicated_lines": 46,
+      "total_duplicated_tokens": 130,
+      "suggestions": [
+        {
+          "kind": "ExtractFunction",
+          "description": "Extract shared function (10 lines) from editScanner.schema.ts, newScanner.schema.ts",
+          "estimated_savings": 10
+        },
+        {
+          "kind": "ExtractFunction",
+          "description": "Extract shared function (36 lines) from editScanner.schema.ts, newScanner.schema.ts",
+          "estimated_savings": 36
+        }
+      ],
+      "actions": [
+        {
+          "type": "extract-shared",
+          "auto_fixable": false,
+          "description": "Extract 2 duplicated code blocks (46 lines) into a shared module",
+          "note": "These clone groups share the same files, indicating a structural relationship; refactor together"
+        },
+        {
+          "type": "apply-suggestion",
+          "auto_fixable": false,
+          "description": "Extract shared function (10 lines) from editScanner.schema.ts, newScanner.schema.ts"
+        },
+        {
+          "type": "apply-suggestion",
+          "auto_fixable": false,
+          "description": "Extract shared function (36 lines) from editScanner.schema.ts, newScanner.schema.ts"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the duplicated code",
+          "comment": "// fallow-ignore-next-line code-duplication"
+        }
+      ]
+    },
+    {
+      "files": [
+        "apps/admin_system/src/routes/cqms/edit-user/editUser.loader.ts",
+        "apps/admin_system/src/routes/cqms/user-detail/userDetail.loader.ts"
+      ],
+      "groups": [
+        {
+          "instances": [
+            {
+              "file": "apps/admin_system/src/routes/cqms/edit-user/editUser.loader.ts",
+              "start_line": 14,
+              "end_line": 26,
+              "start_col": 46,
+              "end_col": 3,
+              "fragment": "request, resourceType: 'user' });\n\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid username.', { status: 400 });\n  }\n\n  const user = await getUserWithRoles({\n    username: parsedParams.data.username,\n  });\n  if (!user) {\n    throw data('User not found.', { status: 404 });\n  }"
+            },
+            {
+              "file": "apps/admin_system/src/routes/cqms/user-detail/userDetail.loader.ts",
+              "start_line": 12,
+              "end_line": 24,
+              "start_col": 44,
+              "end_col": 3,
+              "fragment": "request, resourceType: 'user' });\n\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid username.', { status: 400 });\n  }\n\n  const user = await getUserWithRoles({\n    username: parsedParams.data.username,\n  });\n  if (!user) {\n    throw data('User not found.', { status: 404 });\n  }"
+            }
+          ],
+          "token_count": 74,
+          "line_count": 13,
+          "fingerprint": "dup:07308dfa",
+          "suggested_name": "parsedParams",
+          "actions": [
+            {
+              "type": "extract-shared",
+              "auto_fixable": false,
+              "description": "Extract duplicated code (13 lines, 2 instances) into a shared function"
+            },
+            {
+              "type": "suppress-line",
+              "auto_fixable": false,
+              "description": "Suppress with an inline comment above the duplicated code",
+              "comment": "// fallow-ignore-next-line code-duplication"
+            }
+          ]
+        }
+      ],
+      "total_duplicated_lines": 13,
+      "total_duplicated_tokens": 74,
+      "suggestions": [
+        {
+          "kind": "ExtractFunction",
+          "description": "Extract shared function (13 lines) from editUser.loader.ts, userDetail.loader.ts",
+          "estimated_savings": 13
+        }
+      ],
+      "actions": [
+        {
+          "type": "extract-shared",
+          "auto_fixable": false,
+          "description": "Extract 1 duplicated code block (13 lines) into a shared module",
+          "note": "These clone groups share the same files, indicating a structural relationship; refactor together"
+        },
+        {
+          "type": "apply-suggestion",
+          "auto_fixable": false,
+          "description": "Extract shared function (13 lines) from editUser.loader.ts, userDetail.loader.ts"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the duplicated code",
+          "comment": "// fallow-ignore-next-line code-duplication"
+        }
+      ]
+    },
+    {
+      "files": [
+        "apps/admin_system/src/routes/cqms/project-detail/projectDetail.action.ts",
+        "apps/admin_system/src/routes/cqms/project-detail/projectDetail.loader.ts"
+      ],
+      "groups": [
+        {
+          "instances": [
+            {
+              "file": "apps/admin_system/src/routes/cqms/project-detail/projectDetail.action.ts",
+              "start_line": 25,
+              "end_line": 33,
+              "start_col": 2,
+              "end_col": 44,
+              "fragment": "const user = await requireUser({ request });\n\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid project id.', { status: 400 });\n  }\n  const { projectId } = parsedParams.data;\n\n  const formData = await request.formData();"
+            },
+            {
+              "file": "apps/admin_system/src/routes/cqms/project-detail/projectDetail.loader.ts",
+              "start_line": 24,
+              "end_line": 33,
+              "start_col": 2,
+              "end_col": 54,
+              "fragment": "const user = await requireUser({ request });\n\n  const parsedParams = paramsSchema.safeParse(params);\n  if (!parsedParams.success) {\n    throw data('Invalid project id.', { status: 400 });\n  }\n\n  const { projectId } = parsedParams.data;\n\n  const project = await getProjectById({ projectId });"
+            }
+          ],
+          "token_count": 53,
+          "line_count": 10,
+          "fingerprint": "dup:75fe2272",
+          "suggested_name": "parsedParams",
+          "actions": [
+            {
+              "type": "extract-shared",
+              "auto_fixable": false,
+              "description": "Extract duplicated code (10 lines, 2 instances) into a shared function"
+            },
+            {
+              "type": "suppress-line",
+              "auto_fixable": false,
+              "description": "Suppress with an inline comment above the duplicated code",
+              "comment": "// fallow-ignore-next-line code-duplication"
+            }
+          ]
+        }
+      ],
+      "total_duplicated_lines": 10,
+      "total_duplicated_tokens": 53,
+      "suggestions": [
+        {
+          "kind": "ExtractFunction",
+          "description": "Extract shared function (10 lines) from projectDetail.action.ts, projectDetail.loader.ts",
+          "estimated_savings": 10
+        }
+      ],
+      "actions": [
+        {
+          "type": "extract-shared",
+          "auto_fixable": false,
+          "description": "Extract 1 duplicated code block (10 lines) into a shared module",
+          "note": "These clone groups share the same files, indicating a structural relationship; refactor together"
+        },
+        {
+          "type": "apply-suggestion",
+          "auto_fixable": false,
+          "description": "Extract shared function (10 lines) from projectDetail.action.ts, projectDetail.loader.ts"
         },
         {
           "type": "suppress-line",
@@ -1139,8 +2265,8 @@
             },
             {
               "file": "apps/scan-orchestrator/src/server.ts",
-              "start_line": 37,
-              "end_line": 54,
+              "start_line": 70,
+              "end_line": 87,
               "start_col": 6,
               "end_col": 3,
               "fragment": "shutdown = async (): Promise<void> => {\n  console.warn('🛑 Shutting down scan-orchestrator');\n  clearInterval(reconcileInterval);\n  await new Promise<void>((resolve) => httpServer.close(() => resolve()));\n  await closePool();\n};\n\nprocess.on('SIGINT', () => {\n  void shutdown().catch((error: unknown) => {\n    console.error('❌ Error during SIGINT shutdown:', error);\n  });\n});\n\nprocess.on('SIGTERM', () => {\n  void shutdown().catch((error: unknown) => {\n    console.error('❌ Error during SIGTERM shutdown:', error);\n  });\n});"
@@ -1360,24 +2486,24 @@
             },
             {
               "file": "apps/react-router/src/routes/car-sales-infinite/car-sales.loader.ts",
-              "start_line": 19,
-              "end_line": 40,
+              "start_line": 20,
+              "end_line": 41,
               "start_col": 0,
               "end_col": 59,
               "fragment": "export const loader = ({ request }: LoaderFunctionArgs) => {\n  const {\n    columnOrder,\n    columnPinning,\n    columnSizing,\n    columnVisibility,\n    filters,\n    metaUiFlags,\n    sorting,\n    standaloneFiltersParam,\n    standaloneSortParam,\n  } = readTableLoaderStateFromRequest<CarSale>({\n    appId: APP_ID,\n    columns: COLUMNS,\n    includeFilters: true,\n    persistenceKey: PERSISTENCE_KEY,\n    request,\n  });\n  const isValidSortEntry = (\n    s: (typeof sorting)[number],\n  ): s is { columnKey: keyof CarSale; direction: 'asc' | 'desc' } =>\n    s.direction !== undefined && s.columnKey !== 'actions';"
             },
             {
               "file": "apps/react-router/src/routes/enterprise-orders/enterprise-orders.loader.ts",
-              "start_line": 27,
-              "end_line": 45,
+              "start_line": 30,
+              "end_line": 48,
               "start_col": 0,
               "end_col": 69,
               "fragment": "export const loader = ({ request }: LoaderFunctionArgs) => {\n  const {\n    columnOrder,\n    columnPinning,\n    columnSizing,\n    columnVisibility,\n    filters,\n    metaUiFlags,\n    sorting,\n    standaloneFiltersParam,\n    standaloneSortParam,\n  } = readTableLoaderStateFromRequest<EnterpriseOrder>({\n    appId: APP_ID,\n    columns: COLUMNS,\n    includeFilters: true,\n    persistenceKey: PERSISTENCE_KEY,\n    request,\n  });\n  const sanitizedSorting = sanitizeSorting<EnterpriseOrder>(sorting);"
             },
             {
               "file": "apps/react-router/src/routes/wide-alltypes-150/wide-alltypes-150.loader.ts",
-              "start_line": 20,
-              "end_line": 39,
+              "start_line": 21,
+              "end_line": 40,
               "start_col": 0,
               "end_col": 69,
               "fragment": "export const loader = ({ request }: LoaderFunctionArgs) => {\n  const {\n    columnOrder,\n    columnPinning,\n    columnSizing,\n    columnVisibility,\n    filters,\n    metaUiFlags,\n    sorting,\n    standaloneFiltersParam,\n    standaloneSortParam,\n  } = readTableLoaderStateFromRequest<WideAlltypes150>({\n    appId: APP_ID,\n    columns: COLUMNS,\n    includeFilters: true,\n    persistenceKey: PERSISTENCE_KEY,\n    request,\n  });\n\n  const sanitizedSorting = sanitizeSorting<WideAlltypes150>(sorting);"
@@ -1450,29 +2576,29 @@
             },
             {
               "file": "apps/react-router/src/routes/enterprise-orders/enterprise-orders.loader.ts",
-              "start_line": 27,
-              "end_line": 55,
+              "start_line": 30,
+              "end_line": 54,
               "start_col": 0,
-              "end_col": 7,
-              "fragment": "export const loader = ({ request }: LoaderFunctionArgs) => {\n  const {\n    columnOrder,\n    columnPinning,\n    columnSizing,\n    columnVisibility,\n    filters,\n    metaUiFlags,\n    sorting,\n    standaloneFiltersParam,\n    standaloneSortParam,\n  } = readTableLoaderStateFromRequest<EnterpriseOrder>({\n    appId: APP_ID,\n    columns: COLUMNS,\n    includeFilters: true,\n    persistenceKey: PERSISTENCE_KEY,\n    request,\n  });\n  const sanitizedSorting = sanitizeSorting<EnterpriseOrder>(sorting);\n\n  // Return the promise directly (not awaited) for Suspense streaming\n  const enterpriseOrdersPromise: Promise<EnterpriseOrdersResponse> =\n    enterpriseOrdersApi.fetchEnterpriseOrdersPaginated({\n      filter: filters,\n      limit: INITIAL_PAGE_SIZE,\n      requestUrl: request.url,\n      skip: 0,\n      sorting: sanitizedSorting,\n    });"
+              "end_col": 5,
+              "fragment": "export const loader = ({ request }: LoaderFunctionArgs) => {\n  const {\n    columnOrder,\n    columnPinning,\n    columnSizing,\n    columnVisibility,\n    filters,\n    metaUiFlags,\n    sorting,\n    standaloneFiltersParam,\n    standaloneSortParam,\n  } = readTableLoaderStateFromRequest<EnterpriseOrder>({\n    appId: APP_ID,\n    columns: COLUMNS,\n    includeFilters: true,\n    persistenceKey: PERSISTENCE_KEY,\n    request,\n  });\n  const sanitizedSorting = sanitizeSorting<EnterpriseOrder>(sorting);\n  // Always append the primary-key column(s) so server pagination has a stable\n  // ordering. The store keeps only the user's sorting (sanitizedSorting).\n  const effectiveSorting = appendPrimaryKeySorting<EnterpriseOrder>({\n    columns: COLUMNS,\n    sorting: sanitizedSorting,\n  });"
             },
             {
               "file": "apps/react-router/src/routes/wide-alltypes-150/wide-alltypes-150.loader.ts",
-              "start_line": 20,
-              "end_line": 47,
+              "start_line": 21,
+              "end_line": 51,
               "start_col": 0,
               "end_col": 7,
-              "fragment": "export const loader = ({ request }: LoaderFunctionArgs) => {\n  const {\n    columnOrder,\n    columnPinning,\n    columnSizing,\n    columnVisibility,\n    filters,\n    metaUiFlags,\n    sorting,\n    standaloneFiltersParam,\n    standaloneSortParam,\n  } = readTableLoaderStateFromRequest<WideAlltypes150>({\n    appId: APP_ID,\n    columns: COLUMNS,\n    includeFilters: true,\n    persistenceKey: PERSISTENCE_KEY,\n    request,\n  });\n\n  const sanitizedSorting = sanitizeSorting<WideAlltypes150>(sorting);\n\n  const dataPromise: Promise<WideAlltypes150Response> =\n    wideAlltypes150Api.fetchPaginated({\n      limit: INITIAL_PAGE_SIZE,\n      requestUrl: request.url,\n      skip: 0,\n      sorting: sanitizedSorting,\n    });"
+              "fragment": "export const loader = ({ request }: LoaderFunctionArgs) => {\n  const {\n    columnOrder,\n    columnPinning,\n    columnSizing,\n    columnVisibility,\n    filters,\n    metaUiFlags,\n    sorting,\n    standaloneFiltersParam,\n    standaloneSortParam,\n  } = readTableLoaderStateFromRequest<WideAlltypes150>({\n    appId: APP_ID,\n    columns: COLUMNS,\n    includeFilters: true,\n    persistenceKey: PERSISTENCE_KEY,\n    request,\n  });\n\n  const sanitizedSorting = sanitizeSorting<WideAlltypes150>(sorting);\n\n  const dataPromise: Promise<WideAlltypes150Response> =\n    wideAlltypes150Api.fetchPaginated({\n      limit: INITIAL_PAGE_SIZE,\n      requestUrl: request.url,\n      skip: 0,\n      sorting: appendPrimaryKeySorting<WideAlltypes150>({\n        columns: COLUMNS,\n        sorting: sanitizedSorting,\n      }),\n    });"
             }
           ],
           "token_count": 61,
-          "line_count": 29,
+          "line_count": 31,
           "fingerprint": "dup:a6f7f118",
           "actions": [
             {
               "type": "extract-shared",
               "auto_fixable": false,
-              "description": "Extract duplicated code (29 lines, 3 instances) into a shared function"
+              "description": "Extract duplicated code (31 lines, 3 instances) into a shared function"
             },
             {
               "type": "suppress-line",
@@ -1483,26 +2609,107 @@
           ]
         }
       ],
-      "total_duplicated_lines": 29,
+      "total_duplicated_lines": 31,
       "total_duplicated_tokens": 61,
       "suggestions": [
         {
           "kind": "ExtractFunction",
-          "description": "Extract shared function (29 lines) from car-sales.loader.ts, enterprise-orders.loader.ts, wide-alltypes-150.loader.ts",
-          "estimated_savings": 58
+          "description": "Extract shared function (31 lines) from car-sales.loader.ts, enterprise-orders.loader.ts, wide-alltypes-150.loader.ts",
+          "estimated_savings": 62
         }
       ],
       "actions": [
         {
           "type": "extract-shared",
           "auto_fixable": false,
-          "description": "Extract 1 duplicated code block (29 lines) into a shared module",
+          "description": "Extract 1 duplicated code block (31 lines) into a shared module",
           "note": "These clone groups share the same files, indicating a structural relationship; refactor together"
         },
         {
           "type": "apply-suggestion",
           "auto_fixable": false,
-          "description": "Extract shared function (29 lines) from car-sales.loader.ts, enterprise-orders.loader.ts, wide-alltypes-150.loader.ts"
+          "description": "Extract shared function (31 lines) from car-sales.loader.ts, enterprise-orders.loader.ts, wide-alltypes-150.loader.ts"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the duplicated code",
+          "comment": "// fallow-ignore-next-line code-duplication"
+        }
+      ]
+    },
+    {
+      "files": [
+        "packages/scan-ingestion/src/queries/getDailyLlmCost.util.ts",
+        "packages/scan-ingestion/src/queries/getProjectLlmCost.util.ts",
+        "packages/scan-ingestion/src/queries/getScannerLlmCost.util.ts"
+      ],
+      "groups": [
+        {
+          "instances": [
+            {
+              "file": "packages/scan-ingestion/src/queries/getDailyLlmCost.util.ts",
+              "start_line": 29,
+              "end_line": 43,
+              "start_col": 44,
+              "end_col": 1,
+              "fragment": "{\n    fields: FIELDS,\n    schema: 'llm_usage',\n    sort: [{ column: 'usage_date', direction: 'asc' }],\n    table: 'v_daily_llm_cost',\n  });\n\n  const result = await getPool().query<DailyLlmCostDbRow>(text, [...values]);\n\n  // pg returns `numeric` columns as strings, not JS numbers.\n  return result.rows.map((row) => ({\n    ...row,\n    total_cost_usd: Number(row.total_cost_usd),\n  }));\n}"
+            },
+            {
+              "file": "packages/scan-ingestion/src/queries/getProjectLlmCost.util.ts",
+              "start_line": 32,
+              "end_line": 45,
+              "start_col": 44,
+              "end_col": 1,
+              "fragment": "{\n    fields: FIELDS,\n    schema: 'llm_usage',\n    sort: [{ column: 'total_cost_usd', direction: 'desc' }],\n    table: 'v_project_llm_cost',\n  });\n\n  const result = await getPool().query<ProjectLlmCostDbRow>(text, [...values]);\n\n  return result.rows.map((row) => ({\n    ...row,\n    total_cost_usd: Number(row.total_cost_usd),\n  }));\n}"
+            },
+            {
+              "file": "packages/scan-ingestion/src/queries/getScannerLlmCost.util.ts",
+              "start_line": 32,
+              "end_line": 45,
+              "start_col": 44,
+              "end_col": 1,
+              "fragment": "{\n    fields: FIELDS,\n    schema: 'llm_usage',\n    sort: [{ column: 'total_cost_usd', direction: 'desc' }],\n    table: 'v_scanner_llm_cost',\n  });\n\n  const result = await getPool().query<ScannerLlmCostDbRow>(text, [...values]);\n\n  return result.rows.map((row) => ({\n    ...row,\n    total_cost_usd: Number(row.total_cost_usd),\n  }));\n}"
+            }
+          ],
+          "token_count": 52,
+          "line_count": 15,
+          "fingerprint": "dup:20e62e0a",
+          "actions": [
+            {
+              "type": "extract-shared",
+              "auto_fixable": false,
+              "description": "Extract duplicated code (15 lines, 3 instances) into a shared function"
+            },
+            {
+              "type": "suppress-line",
+              "auto_fixable": false,
+              "description": "Suppress with an inline comment above the duplicated code",
+              "comment": "// fallow-ignore-next-line code-duplication"
+            }
+          ]
+        }
+      ],
+      "total_duplicated_lines": 15,
+      "total_duplicated_tokens": 52,
+      "suggestions": [
+        {
+          "kind": "ExtractFunction",
+          "description": "Extract shared function (15 lines) from getDailyLlmCost.util.ts, getProjectLlmCost.util.ts, getScannerLlmCost.util.ts",
+          "estimated_savings": 30
+        }
+      ],
+      "actions": [
+        {
+          "type": "extract-shared",
+          "auto_fixable": false,
+          "description": "Extract 1 duplicated code block (15 lines) into a shared module",
+          "note": "These clone groups share the same files, indicating a structural relationship; refactor together"
+        },
+        {
+          "type": "apply-suggestion",
+          "auto_fixable": false,
+          "description": "Extract shared function (15 lines) from getDailyLlmCost.util.ts, getProjectLlmCost.util.ts, getScannerLlmCost.util.ts"
         },
         {
           "type": "suppress-line",
@@ -1576,218 +2783,6 @@
           "type": "apply-suggestion",
           "auto_fixable": false,
           "description": "Extract shared function (11 lines) from useColumnsStore.hook.ts, useColumnsStore.hook.ts"
-        },
-        {
-          "type": "suppress-line",
-          "auto_fixable": false,
-          "description": "Suppress with an inline comment above the duplicated code",
-          "comment": "// fallow-ignore-next-line code-duplication"
-        }
-      ]
-    },
-    {
-      "files": [
-        "packages/ui/src/components/Table/utils/readPersistedUiFlagsFromCookie.util.ts",
-        "packages/ui/src/components/Table/utils/readPersistedUiStateFromSessionStorage.util.ts"
-      ],
-      "groups": [
-        {
-          "instances": [
-            {
-              "file": "packages/ui/src/components/Table/utils/readPersistedUiFlagsFromCookie.util.ts",
-              "start_line": 29,
-              "end_line": 39,
-              "start_col": 50,
-              "end_col": 45,
-              "fragment": "key });\n\n  if (!rawValue) return {};\n\n  try {\n    const parsed = JSON.parse(decodeURIComponent(rawValue)) as {\n      value: unknown;\n      version: number;\n    };\n    if (parsed.version === PERSISTENCE_VERSION) {\n      return parsed.value as PersistedUiFlags"
-            },
-            {
-              "file": "packages/ui/src/components/Table/utils/readPersistedUiStateFromSessionStorage.util.ts",
-              "start_line": 25,
-              "end_line": 35,
-              "start_col": 44,
-              "end_col": 45,
-              "fragment": "key });\n\n  if (!rawValue) return {};\n\n  try {\n    const parsed = JSON.parse(decodeURIComponent(rawValue)) as {\n      value: unknown;\n      version: number;\n    };\n    if (parsed.version === PERSISTENCE_VERSION) {\n      return parsed.value as PersistedUiState"
-            }
-          ],
-          "token_count": 54,
-          "line_count": 11,
-          "fingerprint": "dup:aeae83a1",
-          "actions": [
-            {
-              "type": "extract-shared",
-              "auto_fixable": false,
-              "description": "Extract duplicated code (11 lines, 2 instances) into a shared function"
-            },
-            {
-              "type": "suppress-line",
-              "auto_fixable": false,
-              "description": "Suppress with an inline comment above the duplicated code",
-              "comment": "// fallow-ignore-next-line code-duplication"
-            }
-          ]
-        }
-      ],
-      "total_duplicated_lines": 11,
-      "total_duplicated_tokens": 54,
-      "suggestions": [
-        {
-          "kind": "ExtractFunction",
-          "description": "Extract shared function (11 lines) from readPersistedUiFlagsFromCookie.util.ts, readPersistedUiStateFromSessionStorage.util.ts",
-          "estimated_savings": 11
-        }
-      ],
-      "actions": [
-        {
-          "type": "extract-shared",
-          "auto_fixable": false,
-          "description": "Extract 1 duplicated code block (11 lines) into a shared module",
-          "note": "These clone groups share the same files, indicating a structural relationship; refactor together"
-        },
-        {
-          "type": "apply-suggestion",
-          "auto_fixable": false,
-          "description": "Extract shared function (11 lines) from readPersistedUiFlagsFromCookie.util.ts, readPersistedUiStateFromSessionStorage.util.ts"
-        },
-        {
-          "type": "suppress-line",
-          "auto_fixable": false,
-          "description": "Suppress with an inline comment above the duplicated code",
-          "comment": "// fallow-ignore-next-line code-duplication"
-        }
-      ]
-    },
-    {
-      "files": ["packages/ui/src/components/Toolbar/Toolbar.examples.tsx"],
-      "groups": [
-        {
-          "instances": [
-            {
-              "file": "packages/ui/src/components/Toolbar/Toolbar.examples.tsx",
-              "start_line": 33,
-              "end_line": 68,
-              "start_col": 4,
-              "end_col": 1,
-              "fragment": "{\n      color: 'primary',\n      icon: <SettingsIcon size={20} />,\n      label: 'Publish',\n      onClick: () => {\n        logger.info('Publish clicked');\n      },\n      type: 'button',\n    },\n    {\n      color: 'outline',\n      icon: <UserIcon size={20} />,\n      label: 'Settings',\n      to: '/settings',\n      type: 'link',\n    },\n    {\n      color: 'error',\n      icon: <SettingsIcon size={20} />,\n      label: 'Logout',\n      onClick: () => {\n        logger.info('Logout clicked');\n      },\n      type: 'button',\n    },\n  ];\n\n  return (\n    <Toolbar\n      aria-label='Document actions'\n      data-testid='document-actions'\n      items={actionItems}\n      orientation='horizontal'\n    />\n  );\n}"
-            },
-            {
-              "file": "packages/ui/src/components/Toolbar/Toolbar.examples.tsx",
-              "start_line": 72,
-              "end_line": 107,
-              "start_col": 4,
-              "end_col": 1,
-              "fragment": "{\n      color: 'primary',\n      icon: <SettingsIcon size={20} />,\n      label: 'Publish',\n      onClick: () => {\n        logger.info('Publish clicked');\n      },\n      type: 'button',\n    },\n    {\n      color: 'outline',\n      icon: <UserIcon size={20} />,\n      label: 'Settings',\n      to: '/settings',\n      type: 'link',\n    },\n    {\n      color: 'error',\n      icon: <SettingsIcon size={20} />,\n      label: 'Logout',\n      onClick: () => {\n        logger.info('Logout clicked');\n      },\n      type: 'button',\n    },\n  ];\n\n  return (\n    <Toolbar\n      aria-label='Document actions'\n      data-testid='document-actions'\n      items={actionItems}\n      orientation='horizontal'\n    />\n  );\n}"
-            }
-          ],
-          "token_count": 83,
-          "line_count": 36,
-          "fingerprint": "dup:3b5ad52e",
-          "actions": [
-            {
-              "type": "extract-shared",
-              "auto_fixable": false,
-              "description": "Extract duplicated code (36 lines, 2 instances) into a shared function"
-            },
-            {
-              "type": "suppress-line",
-              "auto_fixable": false,
-              "description": "Suppress with an inline comment above the duplicated code",
-              "comment": "// fallow-ignore-next-line code-duplication"
-            }
-          ]
-        }
-      ],
-      "total_duplicated_lines": 36,
-      "total_duplicated_tokens": 83,
-      "suggestions": [
-        {
-          "kind": "ExtractFunction",
-          "description": "Extract shared function (36 lines) from Toolbar.examples.tsx, Toolbar.examples.tsx",
-          "estimated_savings": 36
-        }
-      ],
-      "actions": [
-        {
-          "type": "extract-shared",
-          "auto_fixable": false,
-          "description": "Extract 1 duplicated code block (36 lines) into a shared module",
-          "note": "These clone groups share the same files, indicating a structural relationship; refactor together"
-        },
-        {
-          "type": "apply-suggestion",
-          "auto_fixable": false,
-          "description": "Extract shared function (36 lines) from Toolbar.examples.tsx, Toolbar.examples.tsx"
-        },
-        {
-          "type": "suppress-line",
-          "auto_fixable": false,
-          "description": "Suppress with an inline comment above the duplicated code",
-          "comment": "// fallow-ignore-next-line code-duplication"
-        }
-      ]
-    },
-    {
-      "files": [
-        "packages/ui/src/components/VirtualList/SelectOption/SelectOption.component.tsx"
-      ],
-      "groups": [
-        {
-          "instances": [
-            {
-              "file": "packages/ui/src/components/VirtualList/SelectOption/SelectOption.component.tsx",
-              "start_line": 17,
-              "end_line": 34,
-              "start_col": 6,
-              "end_col": 15,
-              "fragment": "<button\n        aria-pressed={isSelected}\n        disabled={isLoading}\n        onClick={onToggle}\n        type='button'\n        {...stylex.props(\n          styles.option,\n          styles.optionButtonReset,\n          isLoading && styles.optionDisabled,\n        )}\n      >\n        <span {...stylex.props(styles.label)}>{option}</span>\n        {isLoading && (\n          <div {...stylex.props(skeletonStyles.loadingOverlay)}>\n            <div {...stylex.props(skeletonStyles.shimmerWave)} />\n          </div>\n        )}\n      </button>"
-            },
-            {
-              "file": "packages/ui/src/components/VirtualList/SelectOption/SelectOption.component.tsx",
-              "start_line": 41,
-              "end_line": 53,
-              "start_col": 8,
-              "end_col": 12,
-              "fragment": "<Checkbox\n          isChecked={isSelected}\n          isDisabled={isLoading}\n          onChange={onToggle}\n        />\n      )}\n      <span {...stylex.props(styles.label)}>{option}</span>\n      {isLoading && (\n        <div {...stylex.props(skeletonStyles.loadingOverlay)}>\n          <div {...stylex.props(skeletonStyles.shimmerWave)} />\n        </div>\n      )}\n    </label>"
-            }
-          ],
-          "token_count": 50,
-          "line_count": 18,
-          "fingerprint": "dup:204a62b1",
-          "actions": [
-            {
-              "type": "extract-shared",
-              "auto_fixable": false,
-              "description": "Extract duplicated code (18 lines, 2 instances) into a shared function"
-            },
-            {
-              "type": "suppress-line",
-              "auto_fixable": false,
-              "description": "Suppress with an inline comment above the duplicated code",
-              "comment": "// fallow-ignore-next-line code-duplication"
-            }
-          ]
-        }
-      ],
-      "total_duplicated_lines": 18,
-      "total_duplicated_tokens": 50,
-      "suggestions": [
-        {
-          "kind": "ExtractFunction",
-          "description": "Extract shared function (18 lines) from SelectOption.component.tsx, SelectOption.component.tsx",
-          "estimated_savings": 18
-        }
-      ],
-      "actions": [
-        {
-          "type": "extract-shared",
-          "auto_fixable": false,
-          "description": "Extract 1 duplicated code block (18 lines) into a shared module",
-          "note": "These clone groups share the same files, indicating a structural relationship; refactor together"
-        },
-        {
-          "type": "apply-suggestion",
-          "auto_fixable": false,
-          "description": "Extract shared function (18 lines) from SelectOption.component.tsx, SelectOption.component.tsx"
         },
         {
           "type": "suppress-line",
@@ -1943,20 +2938,20 @@
     }
   ],
   "stats": {
-    "total_files": 720,
-    "files_with_clones": 30,
-    "total_lines": 41753,
-    "duplicated_lines": 643,
-    "total_tokens": 128771,
-    "duplicated_tokens": 1325,
-    "clone_groups": 17,
-    "clone_instances": 39,
-    "duplication_percentage": 1.5400091011424328
+    "total_files": 929,
+    "files_with_clones": 44,
+    "total_lines": 52913,
+    "duplicated_lines": 933,
+    "total_tokens": 166132,
+    "duplicated_tokens": 2249,
+    "clone_groups": 26,
+    "clone_instances": 60,
+    "duplication_percentage": 1.7632717857615332
   },
   "next_steps": [
     {
       "id": "trace-clone",
-      "command": "fallow dupes --trace dup:204a62b1",
+      "command": "fallow dupes --trace dup:00f9520f",
       "reason": "see sibling locations and an extract-function suggestion"
     },
     {
@@ -1967,7 +2962,7 @@
   ],
   "_meta": {
     "telemetry": {
-      "analysis_run_id": "run_f51b3a8eb08d6791"
+      "analysis_run_id": "run_c7e9993c7aba677d"
     }
   }
 }

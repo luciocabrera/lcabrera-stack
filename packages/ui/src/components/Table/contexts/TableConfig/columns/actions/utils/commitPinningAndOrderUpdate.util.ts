@@ -7,6 +7,8 @@ import type {
   TableColumnsState,
 } from '@repo/ui/components/Table/Table.types';
 
+import type { PersistTableStateEntry } from './commitResolvedColumnState.types';
+
 type CommitPinningAndOrderUpdateArgs<TData> = {
   readonly columnGroups: ColumnGroupsState<TData>;
   readonly columnsStore: {
@@ -17,11 +19,7 @@ type CommitPinningAndOrderUpdateArgs<TData> = {
   readonly newPinning: ColumnPinningState<TData>;
   readonly persistenceKey: string;
   readonly persistTableState: (
-    entries: {
-      readonly persistenceKey: string;
-      readonly slice: 'columnOrder' | 'columnPinning';
-      readonly valueSlice: unknown;
-    }[],
+    entries: PersistTableStateEntry<'columnOrder' | 'columnPinning'>[],
   ) => boolean;
   readonly pinnedColumnOffsets: PinnedColumnOffsetsState<TData>;
 };
