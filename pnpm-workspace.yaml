@@ -11,10 +11,10 @@ catalog:
   '@anthropic-ai/claude-agent-sdk': ^0.3.204
   '@babel/preset-typescript': ^8.0.1
   '@eslint/js': ^10.0.1
-  '@fastify/cors': ^11.2.0
-  '@react-router/dev': ^8.1.0
-  '@react-router/node': ^8.1.0
-  '@react-router/serve': ^8.1.0
+  '@fastify/cors': ^11.3.0
+  '@react-router/dev': ^8.2.0
+  '@react-router/node': ^8.2.0
+  '@react-router/serve': ^8.2.0
   '@stylexjs/eslint-plugin': ^0.19.0
   '@stylexjs/stylex': ^0.19.0
   '@stylexjs/unplugin': ^0.19.0
@@ -25,31 +25,30 @@ catalog:
   '@types/pg': ^8.20.0
   '@types/react': ^19.2.17
   '@types/react-dom': ^19.2.3
+
   '@types/ws': ^8.18.1
   '@typescript-eslint/utils': ^8.63.0
-  # Pinned exact to match the exact `vitest: 4.1.9` pin below — 4.1.10 is a
-  # broken upstream publish (its @vitest/pretty-format@4.1.10 dep was never
-  # published), so a caret range fails resolution entirely.
-  '@vitest/coverage-v8': 4.1.10
+  '@vitest/coverage-v8': ^4.1.10
+
   babel-plugin-react-compiler: ^1.0.0
   cors: ^2.8.6
-  eslint: ^10.6.0
+  eslint: ^10.7.0
   eslint-config-prettier: ^10.1.8
   eslint-plugin-local-rules: ^3.0.2
   eslint-plugin-perfectionist: ^5.10.0
-  eslint-plugin-react-dom: ^5.12.0
+  eslint-plugin-react-dom: ^5.14.2
   eslint-plugin-react-hooks: ^7.1.1
   eslint-plugin-react-refresh: ^0.5.3
-  eslint-plugin-react-x: ^5.12.0
+  eslint-plugin-react-x: ^5.14.2
   eslint-plugin-security: ^4.0.1
   eslint-plugin-unicorn: ^71.1.0
   express: ^5.2.1
-  fallow: ^3.2.0
+  fallow: ^3.3.0
   fastify: ^5.10.0
   globals: ^17.7.0
   isbot: 5.2.0
   jsdom: ^29.1.1
-  knip: ^6.25.0
+  knip: ^6.26.0
   lighthouse: ^13.4.0
   nodemon: ^3.1.14
   pg: ^8.22.0
@@ -57,16 +56,16 @@ catalog:
   react: ^19.2.7
   react-dom: ^19.2.7
   react-markdown: ^10.1.0
-  react-router: ^8.1.0
   ts-morph: ^28.0.0
-  typescript: ^6.0.3
+  ws: ^8.21.0
+  react-router: ^8.2.0
+  typescript: ^7.0.2
 
   typescript-eslint: ^8.63.0
-  vite: 8.1.3
+  vite: 8.1.4
   vite-plugin-babel: ^1.7.3
   vite-plus: ^0.2.4
   vitest: 4.1.10
-  ws: ^8.21.0
 
   zod: ^4.4.3
 
@@ -100,6 +99,11 @@ minimumReleaseAgeExclude:
   - '@anthropic-ai/claude-agent-sdk-win32-arm64@0.3.202 || 0.3.204'
   - '@anthropic-ai/claude-agent-sdk-win32-x64@0.3.202 || 0.3.204'
   - '@anthropic-ai/claude-agent-sdk@0.3.202 || 0.3.204'
+  - eslint-plugin-react-dom@5.10.1 || 5.10.2 || 5.10.3 || 5.14.2
+  - eslint-plugin-react-x@5.10.1 || 5.10.2 || 5.10.3 || 5.14.2
+  - vite-plus@0.2.2
+  - eslint@10.7.0
+  - knip@6.26.0
 
 # overrides:
 #   vite: "catalog:"
