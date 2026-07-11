@@ -32,7 +32,7 @@ export const VirtualSelectDropdown = ({
   selectedLabels,
   shouldFillHeight,
 }: VirtualSelectDropdownProps) => {
-  if (!isListVisible) return null;
+  if (!isListVisible) return;
 
   const isMulti = mode === 'multi';
 
