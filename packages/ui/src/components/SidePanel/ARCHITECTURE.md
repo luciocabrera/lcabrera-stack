@@ -5,9 +5,17 @@
 ```
 SidePanel/
 ├── index.ts                          → Barrel export: SidePanel + all sub-components
-├── SidePanel.component.tsx           → Root component (dialog/aside with portal support)
+├── SidePanel.component.tsx           → Root selector: isPinned ? PinnedSidePanel : DialogSidePanel
 ├── SidePanel.types.tsx               → SidePanelProps + variant types
 ├── SidePanel.stylex.ts               → All root styles (local variants)
+│
+├── PinnedSidePanel/                  → Private delegate (no barrel): always-visible aside, optional portal, zero effects
+│   ├── PinnedSidePanel.component.tsx
+│   └── PinnedSidePanel.types.ts      → children, portalContainer?, position, size
+│
+├── DialogSidePanel/                  → Private delegate (no barrel): native dialog lifecycle + close-event forwarding
+│   ├── DialogSidePanel.component.tsx
+│   └── DialogSidePanel.types.ts      → children, isOpen, onClose?, position, shouldShowOverlay, size
 │
 ├── SidePanelHeader/                  → Top section with actions slot
 │   ├── index.ts
@@ -68,8 +76,12 @@ SidePanel/
 ```mermaid
 graph LR
   SidePanel --> SidePanel.types
-  SidePanel --> SidePanel.stylex
-  SidePanel --> ReactDOM["createPortal (react-dom)"]
+  SidePanel --> PinnedSidePanel
+  SidePanel --> DialogSidePanel
+
+  PinnedSidePanel --> SidePanel.stylex
+  PinnedSidePanel --> ReactDOM["createPortal (react-dom)"]
+  DialogSidePanel --> SidePanel.stylex
 
   SidePanel.stylex --> base.stylex
   SidePanel.stylex --> colors.stylex
@@ -109,18 +121,16 @@ graph LR
 
 ```mermaid
 graph TD
-  A[Destructure props with defaults] --> B[Compute shouldShowBackdrop]
-  B --> C[Build panelStyles via stylex.props]
-  C --> D{isPinned?}
+  A[Destructure props with defaults] --> D{isPinned?}
 
-  D -- Yes --> E["Render as aside role=complementary"]
+  D -- Yes --> E["PinnedSidePanel: aside, open style, no backdrop, pinned"]
   E --> F{portalContainer?}
   F -- Yes --> G[createPortal into container]
   F -- No --> H[Return aside directly]
 
-  D -- No --> I["Render as dialog"]
+  D -- No --> I["DialogSidePanel: dialog + panelStyles from isOpen/shouldShowOverlay"]
   I --> J{isOpen?}
-  J -- Yes --> K{shouldShowBackdrop?}
+  J -- Yes --> K{shouldShowOverlay?}
   K -- Yes --> L["dialog.showModal()"]
   K -- No --> M["dialog.show()"]
   J -- No --> N["dialog.close()"]
@@ -128,6 +138,9 @@ graph TD
   I --> O["Listen for native close event (ESC key)"]
   O --> P["Call onClose callback"]
 ```
+
+Switching to pinned mode unmounts `DialogSidePanel`; removing the `<dialog>`
+from the document closes it natively, so no cross-mode guard effects exist.
 
 ## Props
 
