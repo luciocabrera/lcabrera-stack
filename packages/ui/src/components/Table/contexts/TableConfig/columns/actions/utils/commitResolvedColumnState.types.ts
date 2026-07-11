@@ -6,17 +6,10 @@ import type {
   TableColumn,
   TableColumnsState,
   TableMetaState,
+  TablePersistenceConfig,
+  TablePersistenceSliceEntry,
 } from '@repo/ui/components/Table/Table.types';
-
-/**
- * One `{ slice → value }` write handed to `persistTableState`, narrowed via
- * `TSlice` to the persisted slices a given commit path is allowed to touch.
- */
-export type PersistTableStateEntry<TSlice extends string> = {
-  readonly persistenceKey: string;
-  readonly slice: TSlice;
-  readonly valueSlice: unknown;
-};
+import type { TStore } from '@repo/ui/hooks/useStore.hook';
 
 /**
  * Shared argument shape of the `commitResolved*State` utils: the resolved
@@ -25,21 +18,20 @@ export type PersistTableStateEntry<TSlice extends string> = {
  * Variants re-require members they depend on (e.g. visibility re-requires
  * `columnVisibility`) via intersection.
  */
-export type CommitResolvedColumnStateArgs<TData, TSlice extends string> = {
+export type CommitResolvedColumnStateArgs<
+  TData,
+  TSlice extends keyof TablePersistenceConfig,
+> = {
   readonly columnOrder: ColumnOrderState<TData>;
   readonly columnPinning: ColumnPinningState<TData>;
   readonly columns: readonly TableColumn<TData>[];
   readonly columnSizing?: ColumnSizingState<TData>;
-  readonly columnsStore: {
-    readonly set: (state: Partial<TableColumnsState<TData>>) => void;
-  };
+  readonly columnsStore: Pick<TStore<TableColumnsState<TData>>, 'set'>;
   readonly columnVisibility?: ColumnVisibilityState<TData>;
   readonly drawersSyncNonce: number;
-  readonly metaStore: {
-    readonly set: (state: Partial<TableMetaState>) => void;
-  };
+  readonly metaStore: Pick<TStore<TableMetaState>, 'set'>;
   readonly persistenceKey: string;
   readonly persistTableState: (
-    entries: PersistTableStateEntry<TSlice>[],
+    entries: TablePersistenceSliceEntry<TSlice>[],
   ) => boolean;
 };

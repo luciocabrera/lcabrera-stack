@@ -5,21 +5,19 @@ import type {
   PinnedColumnOffsetsState,
   TableColumn,
   TableColumnsState,
+  TablePersistenceSliceEntry,
 } from '@repo/ui/components/Table/Table.types';
-
-import type { PersistTableStateEntry } from './commitResolvedColumnState.types';
+import type { TStore } from '@repo/ui/hooks/useStore.hook';
 
 type CommitPinningAndOrderUpdateArgs<TData> = {
   readonly columnGroups: ColumnGroupsState<TData>;
-  readonly columnsStore: {
-    readonly set: (state: Partial<TableColumnsState<TData>>) => void;
-  };
+  readonly columnsStore: Pick<TStore<TableColumnsState<TData>>, 'set'>;
   readonly effectiveColumns: TableColumn<TData>[];
   readonly newColumnOrder: ColumnOrderState<TData>;
   readonly newPinning: ColumnPinningState<TData>;
   readonly persistenceKey: string;
   readonly persistTableState: (
-    entries: PersistTableStateEntry<'columnOrder' | 'columnPinning'>[],
+    entries: TablePersistenceSliceEntry<'columnOrder' | 'columnPinning'>[],
   ) => boolean;
   readonly pinnedColumnOffsets: PinnedColumnOffsetsState<TData>;
 };

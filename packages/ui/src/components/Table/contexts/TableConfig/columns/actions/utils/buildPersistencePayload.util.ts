@@ -5,7 +5,7 @@ import type {
   ColumnSizingState,
   ColumnVisibilityState,
   SortingState,
-  TablePersistenceConfig,
+  TablePersistenceEntry,
 } from '@repo/ui/components/Table/Table.types';
 
 import {
@@ -23,14 +23,6 @@ type BuildPersistencePayloadArgs<TData> = {
   readonly sorting: SortingState<TData>;
 };
 
-type PersistenceEntry<TSlice = unknown> = {
-  readonly persistenceKey?: string;
-  readonly searchParamKey?: string;
-  readonly searchParamValue?: string;
-  readonly slice?: keyof TablePersistenceConfig;
-  readonly valueSlice?: TSlice;
-};
-
 export const buildPersistencePayload = <TData>({
   columnFilters,
   columnOrder,
@@ -39,8 +31,8 @@ export const buildPersistencePayload = <TData>({
   columnVisibility,
   persistenceKey,
   sorting,
-}: BuildPersistencePayloadArgs<TData>): PersistenceEntry[] => {
-  const entries: PersistenceEntry[] = [
+}: BuildPersistencePayloadArgs<TData>): TablePersistenceEntry[] => {
+  const entries: TablePersistenceEntry[] = [
     {
       searchParamKey: 'filters',
       searchParamValue: serializeFiltersToURL(columnFilters),

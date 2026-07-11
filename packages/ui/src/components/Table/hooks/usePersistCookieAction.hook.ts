@@ -7,18 +7,10 @@ import { useNotifyAction } from '@repo/ui/contexts/NotificationContext/actions';
 import { writeToSessionStorage } from '@repo/ui/utils/storage';
 import { useFetcher, useLocation } from 'react-router';
 
-import type { TablePersistenceConfig } from '../Table.types';
+import type { TablePersistenceEntry } from '../Table.types';
 
 import { useTableConfigContextValue } from '../contexts/TableConfig/useTableConfigContextValue.hook';
 import { serializeStateSlice } from '../utils';
-
-type PersistCookieEntry<TSlice = unknown> = {
-  persistenceKey?: string;
-  searchParamKey?: string;
-  searchParamValue?: string;
-  slice?: keyof TablePersistenceConfig;
-  valueSlice?: TSlice;
-};
 
 /**
  * Hook that persists table state via two channels:
@@ -32,18 +24,13 @@ type PersistCookieEntry<TSlice = unknown> = {
  *
  * Supports both a single entry and a batch of entries.
  */
-type PersistTableStateAction = {
-  <TSlice>(entry: PersistCookieEntry<TSlice>): boolean;
-  (entries: PersistCookieEntry[]): boolean;
-};
-
-export const usePersistTableStateAction = (): PersistTableStateAction => {
+export const usePersistTableStateAction = () => {
   const { metaStore } = useTableConfigContextValue();
   const fetcher = useFetcher({ key: 'persist-table-state' });
   const location = useLocation();
   const notify = useNotifyAction();
 
-  return (args: PersistCookieEntry | PersistCookieEntry[]) => {
+  return (args: TablePersistenceEntry | TablePersistenceEntry[]) => {
     const entries = Array.isArray(args) ? args : [args];
     const currentUrl = `${location.pathname}${location.search}`;
     // Scope keys to the current app so tables in different apps that reuse the

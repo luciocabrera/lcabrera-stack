@@ -1,14 +1,12 @@
-import type { KeyboardEvent } from 'react';
-
 import type { VirtualSelectTriggerProps } from './VirtualSelectTrigger.types';
 
 import {
   assignTriggerRef,
   getTriggerStyleProps,
-  handleDivTriggerKeyDown,
   renderChevron,
   renderTriggerContent,
 } from './utils';
+import { VirtualSelectDivTrigger } from './VirtualSelectDivTrigger/VirtualSelectDivTrigger.component';
 
 export const VirtualSelectTrigger = ({
   isAlwaysOpen,
@@ -39,43 +37,23 @@ export const VirtualSelectTrigger = ({
   });
   const chevron = renderChevron({ isAlwaysOpen, isOpen });
 
-  // The static (isAlwaysOpen) and interactive div triggers share the same
-  // shell — only the interaction props differ, so they are spread
-  // conditionally. The <button> branch stays separate for native semantics.
+  // VirtualSelectDivTrigger owns both div variants (static isAlwaysOpen and
+  // interactive tag mode). The <button> branch stays separate for native
+  // semantics.
   if (shouldUseDivTrigger) {
-    const interactionProps = isAlwaysOpen
-      ? undefined
-      : {
-          'aria-controls': listboxId,
-          'aria-disabled': shouldDisableInteraction,
-          'aria-expanded': isOpen,
-          'aria-haspopup': 'listbox' as const,
-          onClick: shouldDisableInteraction ? undefined : onToggle,
-          onKeyDown: shouldDisableInteraction
-            ? undefined
-            : (event: KeyboardEvent<HTMLDivElement>) => {
-                handleDivTriggerKeyDown({ event, onToggle });
-              },
-          role: 'button' as const,
-          tabIndex: shouldDisableInteraction ? -1 : 0,
-        };
-
     return (
-      <div
-        ref={(node) => {
-          assignTriggerRef({ node, triggerRef });
-        }}
-        {...interactionProps}
-        {...getTriggerStyleProps({
-          isBusy,
-          isOpen,
-          isStatic: isAlwaysOpen,
-          mode,
-        })}
+      <VirtualSelectDivTrigger
+        isAlwaysOpen={isAlwaysOpen}
+        isBusy={isBusy}
+        isOpen={isOpen}
+        listboxId={listboxId}
+        mode={mode}
+        onToggle={onToggle}
+        triggerRef={triggerRef}
       >
         {content}
         {chevron}
-      </div>
+      </VirtualSelectDivTrigger>
     );
   }
 

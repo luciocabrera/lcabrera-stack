@@ -8,17 +8,25 @@ When busy, the trigger renders in a disabled state so it cannot open the dropdow
 ```
 VirtualSelectTrigger/
 ├── index.ts                              → Barrel export
-├── VirtualSelectTrigger.component.tsx   → Trigger element (button when safe, div for tag mode)
+├── VirtualSelectTrigger.component.tsx   → Picks the trigger element (button when safe, div delegate for tag/static mode)
 ├── VirtualSelectTrigger.stylex.ts       → Styles + TRIGGER_MAX_HEIGHT constant
-└── VirtualSelectTrigger.types.ts        → Props
+├── VirtualSelectTrigger.types.ts        → Props
+├── utils/                               → One-per-file trigger helpers (ref assign, style props, keydown, render content/chevron)
+└── VirtualSelectDivTrigger/             → Private delegate — div trigger shell (static isAlwaysOpen + interactive tag mode)
+    ├── VirtualSelectDivTrigger.component.tsx
+    └── VirtualSelectDivTrigger.types.ts
 ```
+
+`VirtualSelectDivTrigger` is a private delegate (no `index.ts`, imported via direct file path — ADR-007). It derives `shouldDisableInteraction` from `isBusy || isAlwaysOpen` and spreads the interaction props (`role='button'`, aria wiring, click/keydown, `tabIndex`) only in the interactive variant; the static variant renders the same shell with no interaction props. It receives the already-rendered content + chevron as `children` and reuses the shared `utils/` helpers and `VirtualSelectTrigger.stylex.ts` styles — it has no styles of its own.
 
 ## Dependencies
 
 ```mermaid
 graph LR
-  VST["VirtualSelectTrigger"] --> Tag["Tag component"]
+  VST["VirtualSelectTrigger"] --> VSDT["VirtualSelectDivTrigger (div shell delegate)"]
+  VST --> Tag["Tag component"]
   VST --> VST_stylex["VirtualSelectTrigger.stylex (TRIGGER_MAX_HEIGHT)"]
+  VSDT --> VST_stylex
   VST_stylex --> base_tokens["design-system/tokens/base.stylex"]
   VST_stylex --> colors["design-system/tokens/colors.stylex"]
   VST_stylex --> busy["busy trigger styles"]
@@ -39,6 +47,9 @@ graph TD
   A --> J{"!isAlwaysOpen?"}
   J -->|yes| K["span.chevron (↑ open / ↓ closed)"]
   J -->|no| L["(no chevron)"]
+  A --> M{"isAlwaysOpen or tag mode?"}
+  M -->|yes| N["VirtualSelectDivTrigger (div shell, conditional interaction props)"]
+  M -->|no| O["native button trigger"]
 ```
 
 ## Props

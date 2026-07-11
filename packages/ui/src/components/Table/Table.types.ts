@@ -324,6 +324,33 @@ export type TablePersistenceConfig = {
   readonly sorting?: StorageType;
 };
 
+/**
+ * One persistence write handed to `usePersistTableStateAction`: a
+ * `{ persistenceKey, slice, valueSlice }` state-slice write, a
+ * `{ searchParamKey, searchParamValue }` URL write, or both. `TSlice`
+ * narrows which persisted slices a given caller is allowed to touch.
+ */
+export type TablePersistenceEntry<
+  TSlice extends keyof TablePersistenceConfig = keyof TablePersistenceConfig,
+> = {
+  readonly persistenceKey?: string;
+  readonly searchParamKey?: string;
+  readonly searchParamValue?: string;
+  readonly slice?: TSlice;
+  readonly valueSlice?: unknown;
+};
+
+/**
+ * Slice-write variant of `TablePersistenceEntry` with the slice fields
+ * required — the shape the column-state commit paths hand to
+ * `persistTableState`.
+ */
+export type TablePersistenceSliceEntry<
+  TSlice extends keyof TablePersistenceConfig = keyof TablePersistenceConfig,
+> = Required<
+  Pick<TablePersistenceEntry<TSlice>, 'persistenceKey' | 'slice' | 'valueSlice'>
+>;
+
 export type TableProps<
   TData extends Record<string, unknown>,
   TResponse,
