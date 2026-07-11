@@ -8,9 +8,9 @@ const {
   setGlobalNavigationPreferencesMock,
   sizePreferenceMock,
 } = vi.hoisted(() => ({
-  collapsedPreferenceMock: vi.fn<() => string | undefined>(() => undefined),
+  collapsedPreferenceMock: vi.fn<() => string | undefined>(() => {}),
   setGlobalNavigationPreferencesMock: vi.fn(),
-  sizePreferenceMock: vi.fn<() => string | undefined>(() => undefined),
+  sizePreferenceMock: vi.fn<() => string | undefined>(() => {}),
 }));
 
 type MockHeaderActionsProps = {

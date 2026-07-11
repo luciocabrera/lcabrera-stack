@@ -6,8 +6,8 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { collapsedPreferenceMock, sizePreferenceMock } = vi.hoisted(() => ({
-  collapsedPreferenceMock: vi.fn<() => string | undefined>(() => undefined),
-  sizePreferenceMock: vi.fn<() => string | undefined>(() => undefined),
+  collapsedPreferenceMock: vi.fn<() => string | undefined>(() => {}),
+  sizePreferenceMock: vi.fn<() => string | undefined>(() => {}),
 }));
 
 type MockButtonProps = {

@@ -1,4 +1,4 @@
-import { styles } from '../VirtualSelect.stylex';
+import { styles } from '../VirtualSelectDropdown.stylex';
 
 type GetDropdownStyleArgs = {
   readonly isAlwaysOpen: boolean | undefined;

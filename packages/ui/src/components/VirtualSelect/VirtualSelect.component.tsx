@@ -1,6 +1,3 @@
-import type { SelectFilter } from '@repo/ui/types/filterOperators.types';
-
-import { VirtualList } from '@repo/ui/components/VirtualList';
 import { useClickOutside } from '@repo/ui/hooks';
 import * as stylex from '@stylexjs/stylex';
 import { useId, useRef } from 'react';
@@ -9,13 +6,12 @@ import type { VirtualSelectProps } from './VirtualSelect.types';
 
 import { useVirtualSelectDropdown, useVirtualSelectTagOverflow } from './hooks';
 import {
-  getDropdownStyle,
-  resolveVirtualSelectChange,
   resolveVirtualSelectDisplay,
   resolveVirtualSelectOptions,
 } from './utils';
-import { busyStyles, styles } from './VirtualSelect.stylex';
-import { VirtualSelectTrigger } from './VirtualSelectTrigger';
+import { styles } from './VirtualSelect.stylex';
+import { VirtualSelectDropdown } from './VirtualSelectDropdown/VirtualSelectDropdown.component';
+import { VirtualSelectHeader } from './VirtualSelectHeader/VirtualSelectHeader.component';
 
 export const VirtualSelect = ({
   customStylex,
@@ -55,7 +51,7 @@ export const VirtualSelect = ({
   const { closeDropdown, isListVisible, isOpen, toggleDropdown } =
     useVirtualSelectDropdown({ isAlwaysOpen, isBusy, onOpenChange });
 
-  const { effectiveDataState, isMulti, overflowCount, visibleTags } =
+  const { effectiveDataState, overflowCount, visibleTags } =
     resolveVirtualSelectDisplay({
       dataState,
       mode,
@@ -70,26 +66,6 @@ export const VirtualSelect = ({
     ref: containerRef,
   });
 
-  const handleVirtualListChange = (filter?: SelectFilter) => {
-    const { nextSelected, shouldCloseDropdown } = resolveVirtualSelectChange({
-      filter,
-      getValueFromLabel,
-      mode,
-      selected,
-    });
-
-    onChange([...nextSelected]);
-
-    if (shouldCloseDropdown) {
-      closeDropdown();
-    }
-  };
-
-  const handleRemoveTag = (label: string) => {
-    const value = getValueFromLabel(label);
-    onChange(selected.filter((v) => v !== value));
-  };
-
   return (
     <div
       ref={containerRef}
@@ -98,19 +74,14 @@ export const VirtualSelect = ({
         shouldFillHeight ? styles.containerFill : undefined,
       )}
     >
-      {/* VirtualSelectHeader */}
-      {isBusy && (
-        <div {...stylex.props(busyStyles.overlay)} aria-hidden='true'>
-          <div {...stylex.props(busyStyles.wave)} />
-        </div>
-      )}
-      <VirtualSelectTrigger
+      <VirtualSelectHeader
+        getValueFromLabel={getValueFromLabel}
         isAlwaysOpen={isAlwaysOpen}
         isBusy={isBusy}
         isOpen={isOpen}
         listboxId={resolvedListboxId}
         mode={mode}
-        onRemoveTag={handleRemoveTag}
+        onChange={onChange}
         onToggle={toggleDropdown}
         overflowCount={overflowCount}
         placeholder={placeholder}
@@ -118,30 +89,23 @@ export const VirtualSelect = ({
         triggerRef={triggerRef}
         visibleTags={visibleTags}
       />
-      {/* VirtualSelectDropdown */}
-      {isListVisible && (
-        <div
-          id={resolvedListboxId}
-          role='listbox'
-          {...stylex.props(
-            styles.dropdownBase,
-            getDropdownStyle({ isAlwaysOpen, shouldFillHeight }),
-            customStylex,
-          )}
-        >
-          <VirtualList
-            dataState={effectiveDataState}
-            filter={{ type: 'select', values: [...selectedLabels] }}
-            hasCheckboxes={isMulti}
-            hasSelectAll={isMulti}
-            listMaxHeight={listMaxHeight}
-            onChange={handleVirtualListChange}
-            onFetchInitial={onFetchInitial}
-            onFetchMore={onFetchMore}
-            shouldFillHeight={shouldFillHeight}
-          />
-        </div>
-      )}
+      <VirtualSelectDropdown
+        customStylex={customStylex}
+        dataState={effectiveDataState}
+        getValueFromLabel={getValueFromLabel}
+        isAlwaysOpen={isAlwaysOpen}
+        isListVisible={isListVisible}
+        listboxId={resolvedListboxId}
+        listMaxHeight={listMaxHeight}
+        mode={mode}
+        onChange={onChange}
+        onClose={closeDropdown}
+        onFetchInitial={onFetchInitial}
+        onFetchMore={onFetchMore}
+        selected={selected}
+        selectedLabels={selectedLabels}
+        shouldFillHeight={shouldFillHeight}
+      />
     </div>
   );
 };
