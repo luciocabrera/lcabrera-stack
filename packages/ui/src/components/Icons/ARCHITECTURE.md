@@ -52,6 +52,16 @@ Icons/
 ├── EraserIcon/
 │   ├── EraserIcon.component.tsx
 │   └── index.ts
+├── ErrorDescriptive/            -> Animated error-state illustration (see Descriptive Illustrations)
+│   ├── ErrorDescriptive.component.tsx
+│   ├── ErrorDescriptive.stylex.ts
+│   ├── index.ts
+│   ├── BrokenLink/
+│   ├── ConnectionPulse/
+│   ├── DisruptionParticles/
+│   ├── LaptopClient/
+│   ├── ServerRack/
+│   └── WarningBadge/
 ├── ErrorIcon/
 │   ├── ErrorIcon.component.tsx
 │   └── index.ts
@@ -103,6 +113,15 @@ Icons/
 ├── MoreVerticalIcon/
 │   ├── MoreVerticalIcon.component.tsx
 │   └── index.ts
+├── NoDataDescriptive/           -> Animated no-data illustration (see Descriptive Illustrations)
+│   ├── NoDataDescriptive.component.tsx
+│   ├── NoDataDescriptive.stylex.ts
+│   ├── NoDataDescriptive.test.tsx
+│   ├── index.ts
+│   ├── FloatingParticles/
+│   ├── MagnifyingGlass/
+│   ├── PulseHalo/
+│   └── TableSheet/
 ├── PinIcon/
 │   ├── PinIcon.component.tsx
 │   └── index.ts
@@ -260,6 +279,32 @@ The set naturally groups into a few functional families:
 | Table and Data      | `ColumnsOrderIcon`, `FilterIcon`, `SortAscIcon`, `SortDescIcon`, `SortNeutralIcon`, `SortClearIcon`, `ListAllIcon`, `ListCheckedIcon`, `ListUncheckedIcon`, `ListOrderedIcon`, `ExpandAllIcon`, `CollapseAllIcon` |
 | Pinning and Layout  | `PinIcon`, `PinLeftIcon`, `PinRightIcon`, `PinOffIcon`, `MaximizeIcon`, `MinimizeIcon`                                                                                                                            |
 | Actions             | `RefreshIcon`, `EraserIcon`, `LockIcon`, `EyeIcon`, `MenuCloseIcon`, `FileTextIcon`, `BarChartIcon`                                                                                                               |
+
+## Descriptive Illustrations
+
+`ErrorDescriptive` and `NoDataDescriptive` are larger animated scenes (viewBox
+`0 0 360 220`) rather than 24×24 stroke icons. They follow a different, shared
+pattern:
+
+- The root component owns only the `<svg>` element plus its accessible
+  `<title>`/`<desc>` pair (`role='img'`, `aria-labelledby`), and composes one
+  subcomponent per visual group in the scene.
+- Each visual group lives in its own bundle directory
+  (`Subcomponent.component.tsx` + `Subcomponent.stylex.ts` + `index.ts`) and
+  renders a single `<g>` element. Groups without styling needs skip the stylex
+  file (e.g. `DisruptionParticles`).
+- Animation keyframes are colocated in the stylex file of the subcomponent
+  that uses them, and every animation collapses under
+  `@media (prefers-reduced-motion: reduce)`.
+- All fills and strokes use `currentColor` so the illustration inherits the
+  surrounding theme color.
+
+Scene breakdown:
+
+| Illustration        | Subcomponents                                                                                        |
+| ------------------- | ---------------------------------------------------------------------------------------------------- |
+| `ErrorDescriptive`  | `ServerRack`, `LaptopClient`, `ConnectionPulse`, `BrokenLink`, `DisruptionParticles`, `WarningBadge` |
+| `NoDataDescriptive` | `PulseHalo`, `TableSheet`, `MagnifyingGlass`, `FloatingParticles`                                    |
 
 ## Representative Examples
 
