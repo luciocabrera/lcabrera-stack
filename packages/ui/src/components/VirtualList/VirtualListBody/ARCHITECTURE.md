@@ -8,9 +8,7 @@ Virtualized options body extracted from `VirtualList` to own list-specific orche
 - Compute and handle select-all / option toggle selection changes
 - Manage virtualization (`useVirtualization`) and infinite-scroll triggering (`useInfiniteScrollObserver` on a sentinel element, calling `onFetchMore`)
 - Trigger optional initial fetch (`onFetchInitial`) on mount
-- Render loading placeholders via `SkeletonOptions` during initial load
-- Render empty-state message when filtered results are empty
-- Render the virtualized scroll area via `VirtualListBodyOptions` (extracted sub-component)
+- Delegate content rendering to `VirtualListBodyChildren`, which dispatches by `contentMode`: loading placeholders (`SkeletonOptions`), empty-state message (`InfoBox`, owns the `noResults` style), or the virtualized scroll area (`VirtualListBodyOptions`)
 - `VirtualListBodyOptions` owns the virtual scroll area layout (`virtualScrollArea` / `virtualOffset` styles), key generation logic, and `VirtualizedOption` dispatch
 
 ## Props
@@ -31,6 +29,7 @@ Virtualized options body extracted from `VirtualList` to own list-specific orche
 
 ## Sub-components
 
-| Component                | Location                    | Responsibility                                                                   |
-| ------------------------ | --------------------------- | -------------------------------------------------------------------------------- |
-| `VirtualListBodyOptions` | `./VirtualListBodyOptions/` | Virtual scroll area layout, key generation, and `VirtualizedOption` row dispatch |
+| Component                 | Location                     | Responsibility                                                                            |
+| ------------------------- | ---------------------------- | ----------------------------------------------------------------------------------------- |
+| `VirtualListBodyChildren` | `./VirtualListBodyChildren/` | Content dispatch by `contentMode`: loading skeleton, empty-state message, or options list |
+| `VirtualListBodyOptions`  | `./VirtualListBodyOptions/`  | Virtual scroll area layout, key generation, and `VirtualizedOption` row dispatch          |

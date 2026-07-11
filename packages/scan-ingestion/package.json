@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@repo/data-access": "workspace:*",
+    "fflate": "catalog:",
     "pg": "catalog:",
     "zod": "catalog:"
   },

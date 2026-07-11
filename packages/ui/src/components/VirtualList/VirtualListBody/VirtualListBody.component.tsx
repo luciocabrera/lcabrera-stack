@@ -1,11 +1,9 @@
-import { InfoBox } from '@repo/ui/components/InfoBox';
 import { useInfiniteScrollObserver, useVirtualization } from '@repo/ui/hooks';
 import * as stylex from '@stylexjs/stylex';
 import { useEffect, useRef } from 'react';
 
 import type { VirtualListBodyProps } from './VirtualListBody.types';
 
-import { SkeletonOptions } from '../SkeletonOptions';
 import {
   DEFAULT_CONTAINER_HEIGHT,
   ITEM_HEIGHT,
@@ -13,7 +11,7 @@ import {
 } from '../VirtualList.constants';
 import { resolveVirtualListBodyState } from './utils';
 import { styles } from './VirtualListBody.stylex';
-import { VirtualListBodyOptions } from './VirtualListBodyOptions';
+import { VirtualListBodyChildren } from './VirtualListBodyChildren/VirtualListBodyChildren.component';
 
 export const VirtualListBody = ({
   dataState,
@@ -73,36 +71,6 @@ export const VirtualListBody = ({
     threshold: SCROLL_THRESHOLD,
   });
 
-  const renderContent = () => {
-    if (contentMode === 'loading') {
-      return <SkeletonOptions containerHeight={containerHeight} />;
-    }
-
-    if (contentMode === 'empty') {
-      return (
-        <div {...stylex.props(styles.noResults)}>
-          <InfoBox>No options found</InfoBox>
-        </div>
-      );
-    }
-
-    return (
-      <VirtualListBodyOptions
-        endIndex={endIndex}
-        filteredOptions={filteredOptions}
-        hasCheckboxes={hasCheckboxes}
-        isAllSelected={isAllSelected}
-        isLoadingOptions={isLoadingOptions}
-        offsetY={offsetY}
-        onChange={onChange}
-        selectedValues={selectedValues}
-        shouldShowSelectAll={shouldShowSelectAll}
-        startIndex={startIndex}
-        totalHeight={totalHeight}
-      />
-    );
-  };
-
   return (
     <div
       {...stylex.props(
@@ -118,7 +86,22 @@ export const VirtualListBody = ({
             : styles.virtualContainer(listMaxHeight),
         )}
       >
-        {renderContent()}
+        <VirtualListBodyChildren
+          containerHeight={containerHeight}
+          contentMode={contentMode}
+          endIndex={endIndex}
+          filteredOptions={filteredOptions}
+          hasCheckboxes={hasCheckboxes}
+          isAllSelected={isAllSelected}
+          isLoadingOptions={isLoadingOptions}
+          offsetY={offsetY}
+          onChange={onChange}
+          selectedValues={selectedValues}
+          shouldShowSelectAll={shouldShowSelectAll}
+          startIndex={startIndex}
+          totalHeight={totalHeight}
+        />
+
         <div aria-hidden ref={sentinelRef} {...stylex.props(styles.sentinel)} />
       </div>
     </div>

@@ -5,8 +5,13 @@ export type ProjectRow = {
   readonly default_branch: string;
   readonly id: string;
   readonly last_scanned_at: null | string;
-  readonly local_path: string;
+  readonly latest_snapshot_id: null | string;
   readonly name: string;
+  /** Server directory of the latest synced snapshot — null until first sync (ADR-028). */
+  readonly snapshot_path: null | string;
+  readonly sync_source: null | string;
+  readonly synced_at: null | string;
+  readonly synced_by: null | string;
 };
 
 type GetProjectByIdArgs = {

@@ -41,8 +41,8 @@ const parseArgs = (argv: readonly string[]): Record<string, string> => {
 
 const printUsage = (): void => {
   console.error(
-    'Usage: ingest.cli.ts --skill=<scannerId> --run-dir=<dir> --local-path=<path>' +
-      ' [--scope-type=repo] [--scope-value=.] [--run-id=<uuid>]' +
+    'Usage: ingest.cli.ts --skill=<scannerId> --run-dir=<dir> --project-id=<uuid>' +
+      ' [--target-root=<path>] [--scope-type=repo] [--scope-value=.] [--run-id=<uuid>]' +
       ' [--origin=interactive_session] [--triggered-by=<id>] [--raw-json=<filename>]',
   );
 };
@@ -51,9 +51,12 @@ const run = async (): Promise<void> => {
   const flags = parseArgs(process.argv.slice(2));
   const skill = flags.skill;
   const runDir = flags['run-dir'];
-  const localPath = flags['local-path'];
+  // Path-based project matching retired with ADR-028 — ad hoc ingestion
+  // attaches to an existing project by id. --target-root is the directory
+  // the scan ran against (lint-path relativization + git stamping only).
+  const projectId = flags['project-id'];
 
-  if (!skill || !runDir || !localPath) {
+  if (!skill || !runDir || !projectId) {
     printUsage();
     process.exitCode = 1;
     return;
@@ -69,8 +72,8 @@ const run = async (): Promise<void> => {
   }
 
   const args: IngestReportArgs = {
-    localPath,
     origin: (flags.origin ?? 'interactive_session') as IngestReportOrigin,
+    projectId,
     rawJsonPath: flags['raw-json']
       ? path.join(runDir, flags['raw-json'])
       : undefined,
@@ -80,6 +83,7 @@ const run = async (): Promise<void> => {
     scannerId: scannerIdSchema.parse(skill),
     scopeType: scopeTypeSchema.parse(flags['scope-type'] ?? 'repo'),
     scopeValue: flags['scope-value'] ?? '.',
+    targetRootPath: flags['target-root'] ?? process.cwd(),
     triggeredBy: flags['triggered-by'],
     userId: systemUser.id,
   };

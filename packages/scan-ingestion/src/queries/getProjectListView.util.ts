@@ -7,8 +7,8 @@ export type ProjectListViewRow = {
   readonly last_scanned_at: null | string;
   readonly latest_run_id: null | string;
   readonly latest_run_status: null | string;
-  readonly local_path: string;
   readonly name: string;
+  readonly synced_at: null | string;
   readonly total_high: null | number;
   readonly total_medium: null | number;
 };

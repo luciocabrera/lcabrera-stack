@@ -7,11 +7,11 @@ import { makeFindingId } from '../../../../../.github/skills/code-smell-shared/s
 import { buildOxlintFixText } from '../../../../../.github/skills/code-smell-shared/scripts/finding-templates.mjs';
 
 type ExtractOxlintViolationsArgs = {
-  /** The registered project root — file_path is stored relative to it. */
-  readonly localPath: string;
   readonly raw: OxlintRaw;
   /** The scan's scope ('.' or a subfolder) — oxlint filenames are relative to the directory it ran in. */
   readonly scopeValue: string;
+  /** The scan's target root (snapshot dir for UI runs, ADR-028) — file_path is stored relative to it. */
+  readonly targetRootPath: string;
 };
 
 /**
@@ -21,17 +21,17 @@ type ExtractOxlintViolationsArgs = {
  * finding (report.json), while `url` lands here as help_url.
  */
 export const extractOxlintViolations = ({
-  localPath,
   raw,
   scopeValue,
+  targetRootPath,
 }: ExtractOxlintViolationsArgs): readonly LintViolationInput[] => {
-  const scopeDirectory = path.resolve(localPath, scopeValue);
+  const scopeDirectory = path.resolve(targetRootPath, scopeValue);
 
   return raw.diagnostics.map((diagnostic) => {
     const absolute = diagnostic.filename.startsWith('/')
       ? diagnostic.filename
       : path.resolve(scopeDirectory, diagnostic.filename);
-    const filePath = path.relative(localPath, absolute);
+    const filePath = path.relative(targetRootPath, absolute);
     const span = diagnostic.labels?.[0]?.span;
     const ruleId = diagnostic.code ?? 'oxlint(unknown)';
     // Matches generate-oxlint-report.mjs's locationHint construction

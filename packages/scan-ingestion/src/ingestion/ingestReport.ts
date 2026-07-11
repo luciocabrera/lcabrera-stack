@@ -80,7 +80,7 @@ export const ingestReport = async (
   }
 
   const fileInventory = SCOPES_WITH_FILE_INVENTORY.has(args.scopeType)
-    ? buildFileInventory({ rootPath: args.localPath })
+    ? buildFileInventory({ rootPath: args.targetRootPath })
     : undefined;
 
   await pool.query(
@@ -119,8 +119,8 @@ export const ingestReport = async (
     // their master rolls up the already-validated report; the dispatcher
     // skips raw-based extraction itself when rawJson is absent.
     await ingestScanDetail({
-      localPath: args.localPath,
       rawJson,
+      targetRootPath: args.targetRootPath,
       report,
       scanId,
       scannerId: args.scannerId,

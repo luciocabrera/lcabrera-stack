@@ -27,13 +27,14 @@ import { extractOxlintViolations } from './lint/extractOxlintViolations.util.ts'
 import { oxlintRawSchema } from './lint/oxlintRaw.schema.ts';
 
 type IngestScanDetailArgs = {
-  readonly localPath: string;
   /** The verbatim tool artifact — absent for the LLM scanners (report-only). */
   readonly rawJson: unknown;
   readonly report: Report;
   readonly scanId: string;
   readonly scannerId: string;
   readonly scopeValue: string;
+  /** The directory the scan ran against — lint file paths are stored relative to it (ADR-028). */
+  readonly targetRootPath: string;
   readonly userId: string;
 };
 
@@ -51,12 +52,12 @@ type IngestScanDetailArgs = {
  * version must never flip an already-succeeded scan to failed.
  */
 export const ingestScanDetail = async ({
-  localPath,
   rawJson,
   report,
   scanId,
   scannerId,
   scopeValue,
+  targetRootPath,
   userId,
 }: IngestScanDetailArgs): Promise<void> => {
   const pool = getPool();
@@ -82,7 +83,7 @@ export const ingestScanDetail = async ({
   if (scannerId === 'eslint') {
     const raw = eslintRawSchema.parse(rawJson);
     const master = extractEslintRunSummary({ raw });
-    const violations = extractEslintViolations({ localPath, raw });
+    const violations = extractEslintViolations({ raw, targetRootPath });
     await pool.query('CALL cqms.sp_ingest_eslint_detail($1, $2, $3, $4)', [
       userId,
       scanId,
@@ -95,7 +96,11 @@ export const ingestScanDetail = async ({
   if (scannerId === 'oxlint') {
     const raw = oxlintRawSchema.parse(rawJson);
     const master = extractOxlintRunSummary({ raw });
-    const violations = extractOxlintViolations({ localPath, raw, scopeValue });
+    const violations = extractOxlintViolations({
+      raw,
+      scopeValue,
+      targetRootPath,
+    });
     await pool.query('CALL cqms.sp_ingest_oxlint_detail($1, $2, $3, $4)', [
       userId,
       scanId,

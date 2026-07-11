@@ -7,9 +7,9 @@ import { makeFindingId } from '../../../../../.github/skills/code-smell-shared/s
 import { buildEslintFixText } from '../../../../../.github/skills/code-smell-shared/scripts/finding-templates.mjs';
 
 type ExtractEslintViolationsArgs = {
-  /** The registered project root — file_path is stored relative to it (workspace attribution relies on this). */
-  readonly localPath: string;
   readonly raw: EslintRaw;
+  /** The scan's target root (snapshot dir for UI runs, ADR-028) — file_path is stored relative to it (workspace attribution relies on this). */
+  readonly targetRootPath: string;
 };
 
 type MapMessageArgs = {
@@ -58,12 +58,12 @@ const mapMessage = ({
  * project-root-relative so the workspace-attribution prefix views work.
  */
 export const extractEslintViolations = ({
-  localPath,
   raw,
+  targetRootPath,
 }: ExtractEslintViolationsArgs): readonly LintViolationInput[] =>
   raw.results.flatMap((fileResult) => {
     const filePath = fileResult.filePath.startsWith('/')
-      ? path.relative(localPath, fileResult.filePath)
+      ? path.relative(targetRootPath, fileResult.filePath)
       : fileResult.filePath;
     return [
       ...fileResult.messages.map((message) =>

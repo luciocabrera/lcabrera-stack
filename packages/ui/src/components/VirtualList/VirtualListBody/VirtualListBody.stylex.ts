@@ -6,12 +6,6 @@ import { colors } from '@repo/ui/design-system/tokens/colors.stylex';
 import * as stylex from '@stylexjs/stylex';
 
 export const styles = stylex.create({
-  noResults: {
-    alignItems: 'center',
-    display: 'flex',
-    justifyContent: 'center',
-    height: '100%',
-  },
   optionsList: {
     borderColor: colors.borderPrimary,
     borderRadius: borderRadius.md,

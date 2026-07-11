@@ -2,7 +2,7 @@ import type { Pool } from 'pg';
 
 import type { IngestReportArgs } from './ingestReport.types.ts';
 
-import { resolveProjectPath } from './matchProject.util.ts';
+import { readGitMetadata } from './git/readGitMetadata.util.ts';
 
 export type ResolvedScan = {
   readonly projectId: string;
@@ -61,15 +61,26 @@ const createAdHocScan = async ({
   ingestArgs,
   pool,
 }: CreateAdHocScanArgs): Promise<ResolvedScan> => {
-  const { canonicalPath, gitBranch, gitCommitSha, projectName } =
-    resolveProjectPath({ localPath: ingestArgs.localPath });
+  // Path-based match-or-create retired with the local_path model (ADR-028):
+  // ad hoc evidence imports attach to a project that already exists.
+  const projectId = ingestArgs.projectId;
+  if (!projectId) {
+    throw new Error(
+      'Ad hoc ingestion requires --project-id — path-based project matching was removed (ADR-028).',
+    );
+  }
 
-  const upsertResult = await pool.query<{ fn_upsert_project: string }>(
-    'SELECT cqms.fn_upsert_project($1, $2, $3) AS fn_upsert_project',
-    [ingestArgs.userId, projectName, canonicalPath],
+  const projectResult = await pool.query<{ id: string }>(
+    'SELECT id FROM cqms.v_projects WHERE id = $1',
+    [projectId],
   );
-  const projectId = upsertResult.rows[0]?.fn_upsert_project;
-  if (!projectId) throw new Error('fn_upsert_project returned no id');
+  if (!projectResult.rows[0]) {
+    throw new Error(`No project found for projectId=${projectId}`);
+  }
+
+  const { gitBranch, gitCommitSha } = readGitMetadata({
+    cwd: ingestArgs.targetRootPath,
+  });
 
   const createRunResult = await pool.query<{ fn_create_run: string }>(
     'SELECT cqms.fn_create_run($1, $2, $3, $4, $5, $6, $7) AS fn_create_run',
@@ -112,8 +123,10 @@ type ResolveScanArgs = {
 /**
  * UI path (ingestArgs.runId present): run + scan already exist (created by
  * the trigger-scan action before the job started) — just locate them. Ad hoc
- * path (no runId): resolve the project's canonical git-root path, upsert
- * the project, and create both run and scan rows here.
+ * path (no runId): attach to the pre-registered project named by
+ * ingestArgs.projectId (ADR-028 — no more match-by-path upsert), stamp
+ * git metadata from the target root when available, and create both run
+ * and scan rows here.
  */
 export const resolveScan = async ({
   ingestArgs,
