@@ -105,15 +105,10 @@ describe('PathBrowserModal', () => {
     renderModal({});
     await screen.findByText('projects');
 
-    const pathBrowser = document.querySelector<HTMLDivElement>(
-      'div[aria-label="Choose a folder"]',
+    fireEvent.keyDown(
+      screen.getByRole('listbox', { name: 'Choose a folder' }),
+      { key: 'Enter' },
     );
-
-    if (!pathBrowser) {
-      throw new Error('Path browser container not found');
-    }
-
-    fireEvent.keyDown(pathBrowser, { key: 'Enter' });
 
     expect(await screen.findByText(/archive|cqms/)).not.toBeNull();
   });
@@ -131,28 +126,25 @@ describe('PathBrowserModal', () => {
     await waitFor(() => expect(onSelect).toHaveBeenCalledWith(root));
   });
 
-  it('renders as an inline list, not a dialog', async () => {
+  it('renders as an inline listbox, not a dialog', async () => {
     renderModal({});
 
     await screen.findByText('projects');
 
     expect(screen.queryByRole('dialog')).toBeNull();
-    expect(screen.getByRole('list')).not.toBeNull();
+    expect(
+      screen.getByRole('listbox', { name: 'Choose a folder' }),
+    ).not.toBeNull();
   });
 
   it('closes when Escape is pressed', async () => {
     const onClose = vi.fn();
     renderModal({ onClose });
 
-    const pathBrowser = document.querySelector<HTMLDivElement>(
-      'div[aria-label="Choose a folder"]',
+    fireEvent.keyDown(
+      screen.getByRole('listbox', { name: 'Choose a folder' }),
+      { key: 'Escape' },
     );
-
-    if (!pathBrowser) {
-      throw new Error('Path browser container not found');
-    }
-
-    fireEvent.keyDown(pathBrowser, { key: 'Escape' });
 
     await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
   });

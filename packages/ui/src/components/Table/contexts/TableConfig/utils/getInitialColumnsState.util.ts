@@ -42,11 +42,14 @@ export const getInitialColumnsState = <TData extends Record<string, unknown>>({
   const { columns: resolvedColumns, hasActionsColumn } =
     resolveTableActionsColumn<TData>({ columns, crud });
 
-  const rawColumnPinning = sessionState.columnPinning ?? columnPinning;
-  const pinnedLeft = rawColumnPinning.left.filter(
+  // Persisted pinning state can arrive partial (e.g. `{}` on a cookie miss),
+  // so treat both sides as optional and normalize to empty arrays.
+  const rawColumnPinning: Partial<ColumnPinningState<TData>> =
+    sessionState.columnPinning ?? columnPinning;
+  const pinnedLeft = (rawColumnPinning.left ?? []).filter(
     (columnKey) => columnKey !== ACTIONS_COLUMN_KEY,
   );
-  const pinnedRight = rawColumnPinning.right.filter(
+  const pinnedRight = (rawColumnPinning.right ?? []).filter(
     (columnKey) => columnKey !== ACTIONS_COLUMN_KEY,
   );
 

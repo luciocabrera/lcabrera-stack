@@ -88,18 +88,8 @@ vi.mock('@repo/ui/components/Table/TableBodyRows', () => ({
 }));
 
 vi.mock('@repo/ui/components/Table/TableEmptyState', () => ({
-  TableEmptyState: ({
-    message,
-    title,
-  }: {
-    readonly message?: string;
-    readonly title?: string;
-  }) => (
-    <tr
-      data-message={message}
-      data-testid='table-empty-state'
-      data-title={title}
-    >
+  TableEmptyState: () => (
+    <tr data-testid='table-empty-state'>
       <td>empty</td>
     </tr>
   ),
@@ -259,8 +249,7 @@ describe('TableBody', () => {
       </table>,
     );
 
-    const emptyState = screen.getByTestId('table-empty-state');
-    expect(emptyState.dataset.title).toBe('Nothing here');
+    expect(screen.getByTestId('table-empty-state')).not.toBeNull();
     expect(screen.queryByTestId('table-body-rows')).toBeNull();
   });
 

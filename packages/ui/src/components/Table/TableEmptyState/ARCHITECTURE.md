@@ -42,7 +42,7 @@ container scrolls horizontally). A naive centered cell would center against the
 TableEmptyState/
 ├── TableEmptyState.component.tsx → <tr><td colSpan><sticky sized box> illustration + title + message + Retry
 ├── TableEmptyState.stylex.ts     → viewport(height,width) sticky/centered box + content/title/message styles
-├── TableEmptyState.test.tsx      → Unit tests (defaults, overrides, colSpan, retry → revalidate)
+├── TableEmptyState.test.tsx      → Unit tests (store-driven title, colSpan, header observation, retry → revalidate)
 └── index.ts                      → Barrel export
 ```
 

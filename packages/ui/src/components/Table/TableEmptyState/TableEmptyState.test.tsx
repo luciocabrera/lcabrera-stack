@@ -9,11 +9,15 @@ const {
   revalidateMock,
   useElementSizeMock,
   useGetColumnGroupsMock,
+  useGetTableTitleSingularMock,
+  useResizeObserverMock,
   useTableContainerRefMock,
 } = vi.hoisted(() => ({
   revalidateMock: vi.fn(),
   useElementSizeMock: vi.fn(),
   useGetColumnGroupsMock: vi.fn(),
+  useGetTableTitleSingularMock: vi.fn(),
+  useResizeObserverMock: vi.fn(),
   useTableContainerRefMock: vi.fn(),
 }));
 
@@ -52,6 +56,11 @@ vi.mock('@repo/ui/components/Table/contexts/TableWrapper', () => ({
 
 vi.mock('@repo/ui/hooks', () => ({
   useElementSize: useElementSizeMock,
+  useResizeObserver: useResizeObserverMock,
+}));
+
+vi.mock('../contexts/TableConfig/meta/selectors', () => ({
+  useGetTableTitleSingular: useGetTableTitleSingularMock,
 }));
 
 import { TableEmptyState } from './TableEmptyState.component';
@@ -70,6 +79,7 @@ beforeEach(() => {
     rightPinnedCols: [],
   });
   useElementSizeMock.mockReturnValue({ height: 0, width: 0 });
+  useGetTableTitleSingularMock.mockReturnValue('Order');
   useTableContainerRefMock.mockReturnValue(createRef<HTMLDivElement>());
 });
 
@@ -79,27 +89,39 @@ afterEach(() => {
 });
 
 describe('TableEmptyState', () => {
-  it('renders the default title, message and illustration', () => {
+  it('renders the table-config singular title, default message and illustration', () => {
     renderInTable(<TableEmptyState />);
 
-    expect(screen.getByRole('heading').textContent).toBe('No data found');
+    expect(screen.getByRole('heading').textContent).toBe('Order');
     expect(screen.getByTestId('no-data-icon')).not.toBeNull();
     expect(
       screen.getByText(/No records match the current view/),
     ).not.toBeNull();
   });
 
-  it('renders custom title and message overrides', () => {
+  it('reflects the meta store title in the heading', () => {
+    useGetTableTitleSingularMock.mockReturnValue('Enterprise Order');
+
     renderInTable(<TableEmptyState />);
 
-    expect(screen.getByRole('heading').textContent).toBe('All caught up');
-    expect(screen.getByText('Nothing to show')).not.toBeNull();
+    expect(screen.getByRole('heading').textContent).toBe('Enterprise Order');
   });
 
   it('spans every visible column via colSpan', () => {
     const { container } = renderInTable(<TableEmptyState />);
 
     expect(container.querySelector('td')?.getAttribute('colspan')).toBe('3');
+  });
+
+  it('observes the sticky header height via useResizeObserver', () => {
+    renderInTable(<TableEmptyState />);
+
+    expect(useResizeObserverMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        getTarget: expect.any(Function),
+        onMeasure: expect.any(Function),
+      }),
+    );
   });
 
   it('revalidates the route when Retry is clicked', () => {

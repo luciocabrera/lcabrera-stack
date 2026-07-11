@@ -95,17 +95,17 @@ export const FormBody = <TValues extends Record<string, unknown>>({
           {children}
         </div>
       )}
-      {isConfirmDiscardOpen && (
-        <ConfirmDialog
-          cancelLabel='Keep Editing'
-          confirmLabel='Discard Changes'
-          description='You have unsaved changes. Leaving now will lose them.'
-          isOpen={isConfirmDiscardOpen}
-          onCancel={handleCancelConfirm}
-          onConfirm={handleAcceptConfirm}
-          title='Discard changes?'
-        />
-      )}
+      {/* Stays mounted — Modal owns the native dialog lifecycle via isOpen
+          (ADR-001), so closing keeps the <dialog> in the DOM with open=false */}
+      <ConfirmDialog
+        cancelLabel='Keep Editing'
+        confirmLabel='Discard Changes'
+        description='You have unsaved changes. Leaving now will lose them.'
+        isOpen={isConfirmDiscardOpen}
+        onCancel={handleCancelConfirm}
+        onConfirm={handleAcceptConfirm}
+        title='Discard changes?'
+      />
     </FormComponent>
   );
 };
