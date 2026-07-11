@@ -11,10 +11,19 @@ Toolbar/
 ├── ARCHITECTURE.md         -> This documentation
 ├── index.ts                -> Barrel export: Toolbar + Toolbar types
 ├── README.md               -> Usage guide and examples
-├── Toolbar.component.tsx   -> Main orchestration component
-├── Toolbar.examples.tsx    -> Example configurations
+├── Toolbar.component.tsx   -> nav/ul layout shell; maps items to ToolbarItem
 ├── Toolbar.stylex.ts       -> Layout and responsive styles
-└── Toolbar.types.ts        -> Item configuration unions and ToolbarProps
+├── Toolbar.test.tsx        -> Unit tests (nav render, button/link items)
+├── Toolbar.types.ts        -> Item configuration unions and ToolbarProps
+│
+├── ToolbarItem/            -> Private delegate (no barrel): one entry = li + Button/NavLink branch
+│   ├── ToolbarItem.component.tsx
+│   ├── ToolbarItem.test.tsx
+│   └── ToolbarItem.types.ts -> { isCompact, item, orientation, size }
+│
+└── utils/                  -> One-per-file size→style lookups (no barrel)
+    ├── getCompactControlStyle.util.ts (+ test)
+    └── getCompactItemStyle.util.ts (+ test)
 ```
 
 ## Dependencies
@@ -23,8 +32,12 @@ Toolbar/
 graph LR
   Toolbar[Toolbar component] --> Types[Toolbar types]
   Toolbar --> Styles[Toolbar styles]
-  Toolbar --> Button[Button component]
-  Toolbar --> NavLink[NavLink component]
+  Toolbar --> Item[ToolbarItem component]
+
+  Item --> Button[Button component]
+  Item --> NavLink[NavLink component]
+  Item --> ControlStyle[getCompactControlStyle util]
+  Item --> ItemStyle[getCompactItemStyle util]
 
   Types --> ButtonTypes[Button types]
   Types --> NavLinkTypes[NavLink types]
@@ -87,24 +100,24 @@ graph TD
   A[Read props and defaults] --> B[Render nav element]
   B --> C[Apply toolbar styles based on orientation]
   C --> D[Render unordered list with matching layout styles]
-  D --> E[Map items]
-  E --> F[Build stable item key from label]
+  D --> E[Map items to ToolbarItem, keyed by label]
+  E --> F[ToolbarItem resolves item size and compact styles]
   F --> G[Render list item]
   G --> H{Item type is button}
-  H -- yes --> I[Render Button]
-  H -- no --> J[Render NavLink]
-  I --> K[Pass shared orientation and resolved size]
+  H -- yes --> I[Render Button with shared control props]
+  H -- no --> J[Render NavLink with shared control props]
+  I --> K{isCompact?}
   J --> K
-  K --> L{isCompact?}
-L -- yes --> M[Apply size-matched square control override and right-side tooltip]
-  L -- no --> N[Force full width item content]
+  K -- yes --> M[Apply size-matched square control override, aria-label and right-side tooltip]
+  K -- no --> N[Force full width item content]
 ```
 
 ## Item Rendering Strategy
 
-Toolbar does not render items directly from raw props. Instead, it normalizes a
-small shared layout contract and then delegates visual and interactive behavior
-to Button or NavLink.
+Toolbar itself is only the `nav`/`ul` layout shell. Each entry is rendered by
+the private `ToolbarItem` delegate, which derives the resolved size and compact
+styles, builds the shared control props once, and branches between Button and
+NavLink.
 
 ```mermaid
 flowchart TD
@@ -214,7 +227,7 @@ allows items to expand to full width when the toolbar container becomes narrow.
 
 ## Examples and Intended Consumers
 
-`Toolbar.examples.tsx` demonstrates two main use cases:
+Two main use cases:
 
 - vertical navigation for side panels
 - horizontal action bars mixing links and buttons
