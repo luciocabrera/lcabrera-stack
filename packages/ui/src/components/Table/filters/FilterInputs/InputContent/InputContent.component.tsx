@@ -1,8 +1,6 @@
 import type {
   DateOperatorType,
   NumberOperatorType,
-  SelectFilter,
-  TextFilter,
   TextOperatorType,
 } from '@repo/ui/types/filterOperators.types';
 
@@ -10,8 +8,7 @@ import type { InputContentProps } from './InputContent.types';
 
 import { DateFilterInput } from '../../DateFilterInput';
 import { NumberFilterInput } from '../../NumberFilterInput';
-import { SelectFilterInput } from '../../SelectFilterInput';
-import { TextFilterInput } from '../../TextFilterInput';
+import { TextOrSelectFilterInput } from './TextOrSelectFilterInput/TextOrSelectFilterInput.component';
 
 /**
  * Renders the appropriate filter input based on column data type.
@@ -50,43 +47,15 @@ export const InputContent = <TData,>({
       );
     }
     default: {
-      const textOp = operator as TextOperatorType;
-      const shouldShowSelectList =
-        hasFetchableOptions && (textOp === 'equals' || textOp === 'notEquals');
-
-      const handleSelectChange = (selectFilter?: SelectFilter) => {
-        if (selectFilter) {
-          onChange({
-            ...selectFilter,
-            operator: textOp === 'notEquals' ? 'notEquals' : 'equals',
-          });
-        } else {
-          onChange();
-        }
-      };
-
-      if (shouldShowSelectList) {
-        return (
-          <SelectFilterInput
-            columnKey={columnKey}
-            filter={
-              filter?.type === 'select' || filter?.type === 'multiSelect'
-                ? filter
-                : undefined
-            }
-            listMaxHeight={listMaxHeight}
-            onChange={handleSelectChange}
-            shouldFillHeight={shouldFillHeight}
-          />
-        );
-      }
-
       return (
-        <TextFilterInput
+        <TextOrSelectFilterInput
           columnKey={columnKey}
-          filter={filter as TextFilter}
+          filter={filter}
+          hasFetchableOptions={hasFetchableOptions}
+          listMaxHeight={listMaxHeight}
           onChange={onChange}
-          operator={textOp}
+          operator={operator as TextOperatorType}
+          shouldFillHeight={shouldFillHeight}
         />
       );
     }

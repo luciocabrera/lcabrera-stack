@@ -22,6 +22,8 @@ export const Button = ({
   width = 'full',
   ...rest
 }: ButtonProps) => {
+  const isPrimary = color === 'primary';
+
   const button = (
     <button
       data-testid='button'
@@ -38,7 +40,7 @@ export const Button = ({
         isIconOnly && buttonStyles.iconOnly,
         isBusy && buttonStyles.busyState,
         customStylex,
-        color === 'primary' && buttonStyles.overlayParent,
+        isPrimary && buttonStyles.overlayParent,
       )}
     >
       {isBusy && (
@@ -55,7 +57,7 @@ export const Button = ({
       >
         {children}
       </span>
-      {color === 'primary' && (
+      {isPrimary && (
         <div
           {...stylex.props(
             buttonStyles.overlay,

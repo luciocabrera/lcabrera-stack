@@ -17,9 +17,14 @@ filters/
 │   ├── index.ts
 │   │
 │   ├── InputContent/                      → Switch-based renderer
-│   │   ├── InputContent.component.tsx      → Routes to type-specific input
+│   │   ├── InputContent.component.tsx      → Pure dispatch: routes to type-specific input
 │   │   ├── InputContent.types.ts           → InputContentProps
-│   │   └── index.ts
+│   │   ├── index.ts
+│   │   │
+│   │   └── TextOrSelectFilterInput/       → Private delegate (no barrel): text-typed default branch
+│   │       ├── TextOrSelectFilterInput.component.tsx → Select list (fetchable + equality op) vs text input + operator mapping
+│   │       ├── TextOrSelectFilterInput.test.tsx
+│   │       └── TextOrSelectFilterInput.types.ts
 │   │
 │   └── utils/
 │       ├── getOperatorFromFilter.util.ts   → Extract or default to 'equals'
