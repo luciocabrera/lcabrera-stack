@@ -14,14 +14,6 @@ const FIELDS: readonly FieldNode<NewProjectValues>[] = [
     label: 'Project Name',
     type: 'text',
   },
-  {
-    accessor: 'localPath',
-    browseAction: '/_action/browse-directory',
-    clientValidation: { required: true },
-    description: 'Absolute path to the project on this machine.',
-    label: 'Local Path',
-    type: 'path',
-  },
 ];
 
 export const NewProject = () => {
@@ -31,7 +23,7 @@ export const NewProject = () => {
 
   return (
     <SectionCard
-      description='Register a project by its absolute local path so CQMS can scan it.'
+      description='Register a project, then upload a code snapshot from its page to enable scans.'
       title='New Project'
     >
       <Form<NewProjectValues>

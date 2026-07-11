@@ -1,3 +1,4 @@
+import type { ProjectRow } from '@repo/scan-ingestion/queries/getProjectById.util';
 import type { ProjectRunRow } from '@repo/scan-ingestion/queries/getProjectRuns.util';
 
 import { NavLink } from '@repo/ui/components/NavLink';
@@ -12,7 +13,41 @@ import type { loader } from './projectDetail.loader';
 import { resolveRunStatusTone } from '../utils/resolveRunStatusTone.util';
 import { PROJECT_RUNS_COLUMNS } from './ProjectDetail.constants';
 import { ProjectGrantsPanel } from './ProjectGrantsPanel/ProjectGrantsPanel.component';
+import { ProjectSyncPanel } from './ProjectSyncPanel/ProjectSyncPanel.component';
 import { ProjectTrendPanel } from './ProjectTrendPanel';
+
+type RenderTriggerAffordanceArgs = {
+  readonly hasActiveRun: boolean;
+  readonly project: ProjectRow;
+};
+
+// Three-state affordance: an active run wins (0021's guard), then the
+// snapshot precondition (ADR-028 — the DB rejects snapshot-less triggers,
+// this just stops the dead-end navigation), then the live link.
+const renderTriggerAffordance = ({
+  hasActiveRun,
+  project,
+}: RenderTriggerAffordanceArgs) => {
+  if (hasActiveRun) {
+    return (
+      <span>
+        <StatusBadge label='running' tone={resolveRunStatusTone('running')} /> A
+        scan is already running for this project.
+      </span>
+    );
+  }
+  if (!project.latest_snapshot_id) {
+    return <p>Upload a code snapshot below to enable scans.</p>;
+  }
+  return (
+    <NavLink
+      color='primary'
+      to={`/cqms/projects/view/${project.id}/trigger-scan`}
+    >
+      Trigger Scan
+    </NavLink>
+  );
+};
 
 export const ProjectDetail = () => {
   const {
@@ -28,23 +63,13 @@ export const ProjectDetail = () => {
   return (
     <div>
       <h1>{project.name}</h1>
-      <p>{project.local_path}</p>
-      {hasActiveRun ? (
-        <span>
-          <StatusBadge label='running' tone={resolveRunStatusTone('running')} />{' '}
-          A scan is already running for this project.
-        </span>
-      ) : (
-        <NavLink
-          color='primary'
-          to={`/cqms/projects/view/${project.id}/trigger-scan`}
-        >
-          Trigger Scan
-        </NavLink>
-      )}
+      {renderTriggerAffordance({ hasActiveRun, project })}
       <NavLink color='ghost' to={`/cqms/projects/edit/${project.id}`}>
         Edit Project
       </NavLink>
+
+      <h2>Code Snapshot</h2>
+      <ProjectSyncPanel project={project} />
 
       <h2>Trend</h2>
       <Suspense fallback={<p>Loading trend…</p>}>
