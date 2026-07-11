@@ -98,6 +98,7 @@ export const VirtualSelect = ({
         shouldFillHeight ? styles.containerFill : undefined,
       )}
     >
+      {/* VirtualSelectHeader */}
       {isBusy && (
         <div {...stylex.props(busyStyles.overlay)} aria-hidden='true'>
           <div {...stylex.props(busyStyles.wave)} />
@@ -117,7 +118,7 @@ export const VirtualSelect = ({
         triggerRef={triggerRef}
         visibleTags={visibleTags}
       />
-      {/* Dropdown */}
+      {/* VirtualSelectDropdown */}
       {isListVisible && (
         <div
           id={resolvedListboxId}
