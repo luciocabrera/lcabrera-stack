@@ -5,9 +5,14 @@
 ```
 DraggableList/
 ├── index.ts                       → Barrel export: DraggableList + types
-├── DraggableList.component.tsx    → Component logic & render
+├── DraggableList.component.tsx    → ul shell; maps items to DraggableListItem
 ├── DraggableList.types.ts         → DraggableItem, DraggableListProps, UseDraggableListProps
 ├── DraggableList.stylex.ts        → All styles (local, no shared variants)
+│
+├── DraggableListItem/             → Private delegate (no barrel): li + drag state/wiring per item
+│   ├── DraggableListItem.component.tsx
+│   ├── DraggableListItem.test.tsx
+│   └── DraggableListItem.types.ts → { dragItemId, isBusy, item, onDragEnd, onDragEnter, onDragStart }
 │
 ├── hooks/
 │   ├── index.ts
@@ -25,7 +30,10 @@ graph LR
   DraggableList --> DraggableList.types
   DraggableList --> DraggableList.stylex
   DraggableList --> useDraggableList
-  DraggableList --> handleDragOver
+  DraggableList --> DraggableListItem
+
+  DraggableListItem --> DraggableList.stylex
+  DraggableListItem --> handleDragOver
 
   useDraggableList --> DraggableList.types
 
@@ -39,7 +47,7 @@ graph LR
 graph TD
   A[Destructure props] --> B[Call useDraggableList hook]
   B --> C["Render ul role=list"]
-  C --> D[Map over items]
+  C --> D[Map items to DraggableListItem]
   D --> E{item.isDraggable?}
   E -- Yes --> F[Attach drag handlers]
   F --> G[Render drag handle + content]
