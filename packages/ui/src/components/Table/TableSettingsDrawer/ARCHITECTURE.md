@@ -5,7 +5,26 @@
 ```
 TableSettingsDrawer/
 ├── index.ts                              → Barrel export: TableSettingsDrawer
-├── TableSettingsDrawer.component.tsx      → Root: SidePanel with tabbed sections
+├── TableSettingsDrawer.component.tsx      → Root: SidePanel composing header/body/footer
+│
+├── TableSettingsDrawerHeader/            → Title + pin/close toolbar
+│   ├── TableSettingsDrawerHeader.component.tsx
+│   ├── TableSettingsDrawerHeader.types.ts
+│   └── TableSettingsDrawerHeader.test.tsx
+│
+├── TableSettingsDrawerBody/              → Tabbed sections container
+│   ├── TableSettingsDrawerBody.component.tsx
+│   ├── TableSettingsDrawerBody.types.ts
+│   └── TableSettingsDrawerBody.test.tsx
+│
+├── TableSettingsDrawerFooter/            → Accept/Cancel buttons
+│   ├── TableSettingsDrawerFooter.component.tsx
+│   ├── TableSettingsDrawerFooter.types.ts
+│   └── TableSettingsDrawerFooter.test.tsx
+│
+├── hooks/                                → Handlers shared across the drawer shell
+│   ├── useCancelTableSettings.hook.ts     → Reset drawer state + close if unpinned (busy-guarded)
+│   └── useCloseTableSettingsIfUnpinned.hook.ts → Close drawer unless pinned
 │
 ├── TableDrawerContext/                   → Store-based context for drawer state
 │   ├── TableDrawerContext.context.ts      → createContext
@@ -87,15 +106,31 @@ TableSettingsDrawer/
 ```mermaid
 graph LR
   TSD["TableSettingsDrawer"] --> SidePanel
-  TSD --> SidePanelHeader
-  TSD --> SidePanelHeaderToolbar
-  TSD --> SidePanelBody
-  TSD --> SidePanelFooter
-  TSD --> SidePanelTitle
-  TSD --> Tabs
-  TSD --> Button
-  TSD --> SettingsIcon
-  TSD --> TableDrawerContext
+  TSD --> TSDHeader["TableSettingsDrawerHeader"]
+  TSD --> TSDBody["TableSettingsDrawerBody"]
+  TSD --> TSDFooter["TableSettingsDrawerFooter"]
+  TSD --> CancelHook["useCancelTableSettings"]
+
+  TSDHeader --> SidePanelHeader
+  TSDHeader --> SidePanelHeaderToolbar
+  TSDHeader --> SidePanelTitle
+  TSDHeader --> SettingsIcon
+  TSDHeader --> CancelHook
+  TSDHeader --> TableConfigContext
+
+  TSDBody --> SidePanelBody
+  TSDBody --> Tabs
+  TSDBody --> TableConfigContext
+
+  TSDFooter --> SidePanelFooter
+  TSDFooter --> Button
+  TSDFooter --> CancelHook
+  TSDFooter --> CloseHook["useCloseTableSettingsIfUnpinned"]
+  TSDFooter --> TableDrawerContext
+
+  CancelHook --> CloseHook
+  CancelHook --> TableDrawerContext
+  CloseHook --> TableConfigContext
 
   TableDrawerContext --> useStore["useStore (custom hook)"]
   TableDrawerContext --> TableConfigContext
@@ -130,9 +165,16 @@ graph LR
 
 ```mermaid
 graph TD
-  A["TableSettingsDrawer renders"] --> B["Read batch/reset actions"]
-  B --> C["Manage isPinned state"]
-  C --> D["Build tabs array"]
+  A["TableSettingsDrawer renders SidePanel"] --> O["TableSettingsDrawerHeader: Settings icon + title + pin/close toolbar"]
+  A --> P["TableSettingsDrawerBody: Tabs component"]
+  A --> Q["TableSettingsDrawerFooter: Accept + Cancel buttons"]
+
+  O --> W{"Toggle pin?"}
+  W -->|Yes| X["set isTableSettingsPinned"]
+  O --> C2{"Toolbar close?"}
+  C2 -->|Yes| V
+
+  P --> D["Build tabs array"]
 
   D --> E["Tab: General"]
   E --> F["GeneralSettingsSection"]
@@ -150,11 +192,6 @@ graph TD
   K --> L["ColumnOrderSectionProvider"]
   L --> M["ColumnOrderSection"]
 
-  C --> N["Render SidePanel"]
-  N --> O["Header: Settings icon + title + pin/close toolbar"]
-  N --> P["Body: Tabs component"]
-  N --> Q["Footer: Accept + Cancel buttons"]
-
   Q --> R{"Accept?"}
   R -->|Yes + invalid filters| S["notify('Invalid filters') + keep drawer open"]
   R -->|Yes + valid filters| T["batchSetTableDrawerSettings()"]
@@ -162,10 +199,12 @@ graph TD
   U -->|Yes| K1["Keep drawer open"]
   U -->|No| K2["set isTableSettingsOpen=false"]
   Q --> C{"Cancel?"}
-  C -->|Yes| V["resetTableSettings()"]
-  V --> P{"Pinned?"}
-  P -->|Yes| K3["Keep drawer open"]
-  P -->|No| K4["set isTableSettingsOpen=false"]
+  C -->|Yes| V["useCancelTableSettings: resetTableSettings()"]
+  A --> C3{"Panel close?"}
+  C3 -->|Yes| V
+  V --> P2{"Pinned?"}
+  P2 -->|Yes| K3["Keep drawer open"]
+  P2 -->|No| K4["set isTableSettingsOpen=false"]
 ```
 
 ## State Management: TableDrawerContext
@@ -183,8 +222,11 @@ See [TableDrawerContext/ARCHITECTURE.md](TableDrawerContext/ARCHITECTURE.md) for
 - **Pin state**: `isTableSettingsPinned` is owned by `TableConfig.metaStore`, not local component state
 - **Expanded filter children state**: `tableSettingsExpandedFilters` is owned by `TableConfig.metaStore` and restored by `FiltersSection`
 - **Selected tab state**: `tableSettingsSelectedTab` is owned by `TableConfig.metaStore` and wired through controlled `Tabs`
-- **Cancel**: `useResetTableSettings()` reads current table state back into
-  the drawer store; it closes only when unpinned
+- **Cancel**: `hooks/useCancelTableSettings` (shared by the panel close, the
+  header toolbar close, and the footer Cancel button) calls
+  `useResetTableSettings()` to read current table state back into the drawer
+  store, then `hooks/useCloseTableSettingsIfUnpinned` closes only when
+  unpinned; the whole flow no-ops while busy
 
 ## Tab Sections
 

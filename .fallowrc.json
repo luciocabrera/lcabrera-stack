@@ -52,6 +52,15 @@
       "exports": ["*"]
     }
   ],
+  "health": {
+    "thresholdOverrides": [
+      {
+        "files": ["**/*.test.*"],
+        "maxUnitSize": 10000,
+        "reason": "describe()/it() blocks in test suites legitimately span hundreds of lines; complexity checks still apply."
+      }
+    ]
+  },
   "rules": {
     "circular-dependencies": "error",
     "unused-files": "error",
