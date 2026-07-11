@@ -2,9 +2,9 @@ import { Button } from '@repo/ui/components/Button';
 import { NoDataDescriptive } from '@repo/ui/components/Icons';
 import { useGetColumnGroups } from '@repo/ui/components/Table/contexts/TableConfig/columns/selectors';
 import { useTableContainerRef } from '@repo/ui/components/Table/contexts/TableWrapper';
-import { useElementSize } from '@repo/ui/hooks';
+import { useElementSize, useResizeObserver } from '@repo/ui/hooks';
 import * as stylex from '@stylexjs/stylex';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRevalidator } from 'react-router';
 
 import { useGetTableTitleSingular } from '../contexts/TableConfig/meta/selectors';
@@ -37,38 +37,14 @@ export const TableEmptyState = () => {
   const viewportHeight =
     containerHeight > 0 ? Math.max(0, containerHeight - headerHeight) : 0;
 
-  // TODO: Check other resize observers maybe we can have an unihe sharable hook for this
-  useEffect(() => {
-    const header = containerRef.current?.querySelector<HTMLElement>('thead');
-
-    if (!header) return;
-
-    const measure = () => {
+  // Track the sticky header's border-box height (offsetHeight) so the empty
+  // state can fill exactly the remaining visible body area.
+  useResizeObserver({
+    getTarget: () => containerRef.current?.querySelector<HTMLElement>('thead'),
+    onMeasure: (header) => {
       setHeaderHeight(header.offsetHeight);
-    };
-
-    // The initial measurement is deferred to a microtask so the effect body
-    // never sets state synchronously (react-x/set-state-in-effect); with a
-    // real ResizeObserver, `observe()` also delivers an initial callback.
-    let isMeasureCancelled = false;
-    queueMicrotask(() => {
-      if (!isMeasureCancelled) measure();
-    });
-
-    if (typeof ResizeObserver === 'undefined') {
-      return () => {
-        isMeasureCancelled = true;
-      };
-    }
-
-    const observer = new ResizeObserver(measure);
-    observer.observe(header);
-
-    return () => {
-      isMeasureCancelled = true;
-      observer.disconnect();
-    };
-  }, [containerRef]);
+    },
+  });
 
   return (
     <tr {...stylex.props(styles.row)}>

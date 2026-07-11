@@ -12,6 +12,7 @@ hooks/
 ├── useElementSize.hook.ts                → Track a ref element's client size via ResizeObserver (SSR-safe)
 ├── useInfiniteScrollObserver.hook.ts     → IntersectionObserver sentinel trigger for infinite scroll
 ├── useNotifyOnError.hook.ts              → Fire error toast whenever error identity changes
+├── useResizeObserver.hook.ts             → Low-level ResizeObserver lifecycle (lazy target, deferred initial measure, SSR-safe)
 ├── useStore.hook.ts                      → Lightweight external store (useSyncExternalStore-compatible)
 ├── useTheme.hook.ts                      → Access ThemeContext via React 19 use()
 ├── useVirtualization.hook.ts             → Vertical virtual-scroll geometry computation (ResizeObserver-based)
@@ -28,7 +29,8 @@ hooks/
 | --------------------------- | ------------- | ---------------------------------------------- | --------------------------------------------- |
 | `useClickOutside`           | DOM event     | `void`                                         | `document` mousedown                          |
 | `useColumnVirtualization`   | Layout/scroll | `{ startIndex, endIndex, leftSpacerWidth, … }` | `ResizeObserver` + scroll events on container |
-| `useElementSize`            | Layout        | `{ height, width }`                            | `ResizeObserver` on the ref element           |
+| `useElementSize`            | Layout        | `{ height, width }`                            | `useResizeObserver` on the ref element        |
+| `useResizeObserver`         | Layout        | `void`                                         | `ResizeObserver` on a lazily-resolved target  |
 | `useInfiniteScrollObserver` | Layout/scroll | `void`                                         | `IntersectionObserver` on a sentinel element  |
 | `useNotifyOnError`          | Notification  | `void`                                         | `useNotifyAction`, `useEffect`                |
 | `useStore`                  | State mgmt    | `TStore<TData>`                                | `useRef`, `shallowEqual`                      |
