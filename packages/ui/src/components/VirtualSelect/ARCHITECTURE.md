@@ -7,9 +7,15 @@ Dropdown select component (single or multi) backed by a virtualized list, with t
 ```
 VirtualSelect/
 ├── index.ts                          → Barrel export
-├── VirtualSelect.component.tsx       → Orchestrator: open state, tag layout, data bridge
+├── VirtualSelect.component.tsx       → Orchestrator: refs, open state, option/display resolution
 ├── VirtualSelect.types.ts            → VirtualSelectProps, VirtualSelectMode
-├── VirtualSelect.stylex.ts           → Container + dropdown position styles
+├── VirtualSelect.stylex.ts           → Container styles
+│
+├── VirtualSelectHeader/              → Private delegate — busy overlay + trigger, owns tag removal
+│   └── (see its ARCHITECTURE.md)
+│
+├── VirtualSelectDropdown/            → Private delegate — positioned listbox shell around VirtualList,
+│   └── (see its ARCHITECTURE.md)       owns selection-change resolution + dropdown styles
 │
 ├── VirtualSelectTrigger/             → Combobox trigger (placeholder / label / tag chips)
 │   ├── ARCHITECTURE.md
@@ -18,32 +24,46 @@ VirtualSelect/
 │   ├── VirtualSelectTrigger.stylex.ts   (exports TRIGGER_MAX_HEIGHT)
 │   └── VirtualSelectTrigger.types.ts
 │
+├── hooks/
+│   ├── useVirtualSelectDropdown.hook.ts     → Open/close state + onOpenChange notification
+│   └── useVirtualSelectTagOverflow.hook.ts  → ResizeObserver-driven visible tag count
+│
 └── utils/
     ├── ARCHITECTURE.md
     ├── index.ts
-    ├── countVisibleTags.util.ts      → DOM-measure visible tag count
-    └── getDropdownStyle.util.ts      → Pick dropdown position style
+    └── (option/selection/display resolution — see utils/ARCHITECTURE.md)
 ```
+
+`VirtualSelectHeader` and `VirtualSelectDropdown` are private delegates (no `index.ts`, imported via direct file paths — ADR-007).
 
 ## Component Hierarchy
 
 ```mermaid
 graph TD
-  VS["VirtualSelect"] --> VST["VirtualSelectTrigger"]
-  VS --> VL["VirtualList (dropdown)"]
+  VS["VirtualSelect"] --> VSH["VirtualSelectHeader"]
+  VS --> VSD["VirtualSelectDropdown"]
+  VSH --> VST["VirtualSelectTrigger"]
+  VSD --> VL["VirtualList"]
 ```
 
 ## Dependencies
 
 ```mermaid
 graph LR
-  VS["VirtualSelect"] --> VST["VirtualSelectTrigger"]
-  VS --> VL["VirtualList"]
+  VS["VirtualSelect"] --> VSH["VirtualSelectHeader"]
+  VS --> VSD["VirtualSelectDropdown"]
   VS --> useClickOutside["useClickOutside (hook)"]
-  VS --> countVisibleTags["utils/countVisibleTags"]
-  VS --> getDropdownStyle["utils/getDropdownStyle"]
-  VS --> VS_stylex["VirtualSelect.stylex"]
-  VS --> skeleton["design-system/tokens/commons.stylex\n<small>skeleton.loadingOverlay + shimmerWave</small>"]
+  VS --> hooks["hooks/useVirtualSelectDropdown + useVirtualSelectTagOverflow"]
+  VS --> resolveOptions["utils/resolveVirtualSelectOptions"]
+  VS --> resolveDisplay["utils/resolveVirtualSelectDisplay"]
+  VS --> VS_stylex["VirtualSelect.stylex (container)"]
+
+  VSH --> VST["VirtualSelectTrigger"]
+  VSH --> VSH_stylex["VirtualSelectHeader.stylex\n<small>skeleton.loadingOverlay + shimmerWave</small>"]
+
+  VSD --> VL["VirtualList"]
+  VSD --> resolveChange["utils/resolveVirtualSelectChange"]
+  VSD --> VSD_stylex["VirtualSelectDropdown.stylex + getDropdownStyle"]
 
   VST --> Tag["Tag component"]
   VST --> VST_stylex["VirtualSelectTrigger.stylex"]
@@ -57,16 +77,19 @@ graph LR
 graph TD
   Parent -->|"selected[], onChange, options/dataState"| VS["VirtualSelect"]
 
-  VS -->|"visibleTags, overflowCount"| VST["VirtualSelectTrigger"]
-  VST -->|"onRemoveTag → filters selected"| VS
-  VST -->|"onToggle → setIsOpen"| VS
+  VS -->|"visibleTags, overflowCount, getValueFromLabel"| VSH["VirtualSelectHeader"]
+  VSH -->|"handleRemoveTag → onChange(filtered selected)"| Parent
+  VSH -->|"onToggle → toggleDropdown"| VS
 
-  VS -->|"filter={type:'select', values:selected}"| VL["VirtualList"]
-  VL -->|"onChange(SelectFilter)"| VS
+  VS -->|"effectiveDataState, selectedLabels, getValueFromLabel"| VSD["VirtualSelectDropdown"]
+  VSD -->|"filter={type:'select', values:selectedLabels}"| VL["VirtualList"]
+  VL -->|"onChange(SelectFilter)"| VSD
 
-  VS -->|"mode=single: pick new value, close"| Parent
-  VS -->|"mode=multi: forward all values"| Parent
+  VSD -->|"mode=single: onChange(new value) + onClose"| Parent
+  VSD -->|"mode=multi: onChange(all values), stays open"| Parent
 ```
+
+The orchestrator resolves options (`resolveVirtualSelectOptions`), display state (`resolveVirtualSelectDisplay`), open state (`useVirtualSelectDropdown`), and tag overflow (`useVirtualSelectTagOverflow`), then hands the derived values to the two delegates. The delegates own their handlers: `VirtualSelectHeader` resolves tag removal, `VirtualSelectDropdown` resolves list selection changes.
 
 ## Selection Modes
 
@@ -77,13 +100,7 @@ graph TD
 
 ## Dropdown Positioning
 
-Controlled by `getDropdownStyle(isAlwaysOpen, shouldFillHeight)`:
-
-| `isAlwaysOpen` | `shouldFillHeight` | Style applied        | Behaviour                           |
-| -------------- | ------------------ | -------------------- | ----------------------------------- |
-| `false`        | any                | `dropdownAbsolute`   | Floats below trigger, z-elevated    |
-| `true`         | `false`            | `dropdownStatic`     | Inline block (e.g. filter panel)    |
-| `true`         | `true`             | `dropdownStaticFill` | Flex-fill (e.g. full-height drawer) |
+Owned by `VirtualSelectDropdown` (see its `ARCHITECTURE.md`): `getDropdownStyle({ isAlwaysOpen, shouldFillHeight })` picks between floating (`dropdownAbsolute`), inline (`dropdownStatic`), and fill-height (`dropdownStaticFill`) positioning.
 
 The container and dropdown use explicit `border-box`, `min-width: 0`, and
 `max-width: 100%` sizing so both floating and always-open variants remain
@@ -96,7 +113,7 @@ graph TD
   A["VirtualSelect mounts"] --> B{"dataState prop provided?"}
   B -->|yes| C["use dataState directly (async/paginated)"]
   B -->|no| D["wrap options[] in synthetic VirtualListDataState (hasMore=false, isLoading=false)"]
-  C & D --> VL["pass effectiveDataState to VirtualList"]
+  C & D --> VL["pass effectiveDataState to VirtualSelectDropdown → VirtualList"]
 ```
 
 ## Tag Overflow (multi mode)
@@ -112,11 +129,11 @@ graph TD
 
 ## Click-Outside Handling
 
-`useClickOutside` listens on `containerRef` (wraps both trigger and dropdown). When a click lands outside the container, `handleClose()` sets `isOpen = false`.
+`useClickOutside` listens on `containerRef` (wraps both header and dropdown). When a click lands outside the container, `closeDropdown()` sets `isOpen = false`.
 
 ## Busy State
 
-When `isBusy` is true, VirtualSelect renders a shimmer overlay over the container and suppresses trigger toggles so the dropdown cannot be opened while the parent UI is loading.
+Owned by `VirtualSelectHeader` (see its `ARCHITECTURE.md`): when `isBusy` is true, a shimmer overlay renders over the container and the trigger is disabled so the dropdown cannot be opened while the parent UI is loading. `useVirtualSelectDropdown` also suppresses `toggleDropdown` while busy.
 
 ## Props
 
@@ -126,6 +143,7 @@ When `isBusy` is true, VirtualSelect renders a shimmer overlay over the containe
 | `dataState`        | `VirtualListDataState`         | —             | Async data (mutually exclusive with `options`)     |
 | `isBusy`           | `boolean`                      | `false`       | Shows a shimmer overlay and disables trigger input |
 | `isAlwaysOpen`     | `boolean`                      | `false`       | List is always visible; trigger is non-interactive |
+| `listboxId`        | `string`                       | generated     | id wiring the trigger/listbox ARIA relationship    |
 | `listMaxHeight`    | `string`                       | `'18.75rem'`  | CSS max-height for the VirtualList scroll area     |
 | `mode`             | `'single' \| 'multi'`          | —             | Selection behaviour (required)                     |
 | `onChange`         | `(selected: string[]) => void` | —             | Called on every selection change                   |

@@ -57,9 +57,9 @@ describe('AllSettingsSection', () => {
   it('renders the section header', () => {
     render(<AllSettingsSection />);
 
-    expect(screen.getByRole('heading', { name: 'All Settings' })).not.toBe(
-      null,
-    );
+    expect(
+      screen.getByRole('heading', { name: 'All Settings' }),
+    ).not.toBeNull();
   });
 
   it('clears all settings through the drawer action', () => {

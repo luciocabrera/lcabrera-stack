@@ -1,14 +1,19 @@
 # utils/ Architecture
 
-Pure utility functions for VirtualSelect: tag overflow measurement and dropdown positioning.
+Pure utility functions for VirtualSelect: tag overflow measurement and option/selection/display resolution. Dropdown positioning (`getDropdownStyle`) lives with its owner in `../VirtualSelectDropdown/utils/`.
 
 ## File Structure
 
 ```
 utils/
-├── index.ts                       → Barrel export
-├── countVisibleTags.util.ts       → DOM-measure how many tags fit in the trigger
-└── getDropdownStyle.util.ts       → Select the correct dropdown position style
+├── index.ts                             → Barrel export
+├── countVisibleTags.util.ts             → DOM-measure how many tags fit in the trigger
+├── buildFallbackDataState.util.ts       → Wrap static options in a synthetic VirtualListDataState
+├── toOptionEntry.util.ts                → Normalize string | {label,value} into an option entry
+├── resolveVirtualSelectOptions.util.ts  → Option entries + label↔value mapping + selected labels
+├── resolveVirtualSelectDisplay.util.ts  → effectiveDataState, visibleTags, overflowCount
+├── resolveVirtualSelectChange.util.ts   → Map a VirtualList SelectFilter to the next selection
+└── resolveSingleModeChange.util.ts      → Pick the newly added value in single mode
 ```
 
 ## Dependencies
@@ -16,7 +21,9 @@ utils/
 ```mermaid
 graph LR
   CVT["countVisibleTags()"] --> TRIGGER_MAX_HEIGHT["VirtualSelectTrigger (TRIGGER_MAX_HEIGHT = 88px)"]
-  GDS["getDropdownStyle()"] --> VL_stylex["VirtualSelect.stylex (dropdownAbsolute, dropdownStatic, dropdownStaticFill)"]
+  RVSO["resolveVirtualSelectOptions()"] --> TOE["toOptionEntry()"]
+  RVSD["resolveVirtualSelectDisplay()"] --> BFDS["buildFallbackDataState()"]
+  RVSC["resolveVirtualSelectChange()"] --> RSMC["resolveSingleModeChange()"]
 ```
 
 ## `countVisibleTags`
@@ -49,22 +56,13 @@ graph TD
 
 When some tags overflow, one visible slot is reserved for the `"+N more"` badge — but at least **1** real tag is always shown.
 
-## `getDropdownStyle`
+## Resolution Utilities
 
-### Logic
-
-```mermaid
-graph TD
-  A["getDropdownStyle(isAlwaysOpen, shouldFillHeight)"]
-  A --> B{"isAlwaysOpen?"}
-  B -->|no| C["dropdownAbsolute (positioned below trigger, z-index elevated)"]
-  B -->|yes| D{"shouldFillHeight?"}
-  D -->|yes| E["dropdownStaticFill (flex: 1, relative)"]
-  D -->|no| F["dropdownStatic (position: relative)"]
-```
-
-| Input                           | Output style         | Use case                           |
-| ------------------------------- | -------------------- | ---------------------------------- |
-| `isAlwaysOpen=false`            | `dropdownAbsolute`   | Normal dropdown (overlays content) |
-| `isAlwaysOpen=true, fill=false` | `dropdownStatic`     | Inline / embedded list             |
-| `isAlwaysOpen=true, fill=true`  | `dropdownStaticFill` | Fill-height panel (e.g. drawer)    |
+| Util                          | Consumed by             | Role                                                                                     |
+| ----------------------------- | ----------------------- | ---------------------------------------------------------------------------------------- |
+| `resolveVirtualSelectOptions` | `VirtualSelect`         | Normalizes options, builds `getLabelFromValue`/`getValueFromLabel`, maps selected labels |
+| `resolveVirtualSelectDisplay` | `VirtualSelect`         | Derives `effectiveDataState` (async or fallback), `visibleTags`, `overflowCount`         |
+| `resolveVirtualSelectChange`  | `VirtualSelectDropdown` | Maps a `SelectFilter` to `{ nextSelected, shouldCloseDropdown }` per mode                |
+| `resolveSingleModeChange`     | (internal)              | Picks the newly added value in single mode                                               |
+| `buildFallbackDataState`      | (internal)              | Wraps static option labels in a synthetic non-loading `VirtualListDataState`             |
+| `toOptionEntry`               | (internal)              | Normalizes `string \| { label, value }` options                                          |

@@ -79,9 +79,9 @@ describe('ColumnWidthsSection', () => {
   it('renders the section header', () => {
     render(<ColumnWidthsSection />);
 
-    expect(screen.getByRole('heading', { name: 'Column Widths' })).not.toBe(
-      null,
-    );
+    expect(
+      screen.getByRole('heading', { name: 'Column Widths' }),
+    ).not.toBeNull();
   });
 
   it('applies the min preset sizing for columns with a min width', () => {
