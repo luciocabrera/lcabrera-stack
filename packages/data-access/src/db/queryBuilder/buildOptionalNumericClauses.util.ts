@@ -1,4 +1,4 @@
-export type OptionalNumericClause = {
+type OptionalNumericClause = {
   readonly keyword: 'LIMIT' | 'OFFSET';
   readonly value: number | undefined;
 };
