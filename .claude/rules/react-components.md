@@ -35,12 +35,16 @@ export const Button = ({ disabled = false, label, onClick }: ButtonProps) => {
 
 ## Barrel Files
 
-Each directory exposes a controlled public API via `index.ts`. Use explicit named exports, never `export *`.
+Each **public** directory exposes a controlled API via `index.ts`. Use explicit named exports, never `export *`.
 
 ```typescript
 export { Button } from './Button';
+// Props type re-export ONLY when an external consumer actually imports it:
 export type { ButtonProps } from './Button.types';
 ```
+
+- Re-export a Props/aux type from the barrel **only when it is consumed externally** (ADR-007: remove unused re-exports; fallow flags them as `unused-types`). Internal consumers import types directly from the `.types.ts` file.
+- Private delegates (subcomponents/utils consumed only inside their parent module) are imported via direct file paths and get **no** `index.ts` — ADR-007 rule 3 bans deep implementation barrels nobody imports through.
 
 ## Props Naming
 

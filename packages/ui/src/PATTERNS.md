@@ -34,6 +34,8 @@ ParentComponent/
 - Types live in `.types.ts`, never inline in the component file
 - Stylex styles live in `.stylex.ts`, never inline in the component file
 - Utilities live in `utils/` subdirectory with `.util.ts` suffix
+- Barrels export what is **actually consumed externally** — the component always, its Props type only when an external consumer imports it (ADR-007: remove unused re-exports; fallow flags them). Internal consumers of a Props type import it directly from the `.types.ts` file.
+- Private delegates (subcomponents/utils only consumed inside their parent module) are imported via direct file paths and need no `index.ts` at all — do not add barrels nobody imports through (ADR-007 rule 3 bans deep `utils/` implementation barrels).
 
 ---
 
