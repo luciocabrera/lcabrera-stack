@@ -5,9 +5,27 @@
 ```
 ColumnSettingsDrawer/
 ├── index.ts                              → Barrel export: ColumnSettingsDrawer + types
-├── ColumnSettingsDrawer.component.tsx     → Root: SidePanel with tabbed sections
-├── ColumnSettingsDrawer.test.tsx          → Unit tests for conditional tabs and footer actions
+├── ColumnSettingsDrawer.component.tsx     → Root: SidePanel composing header/body/footer
+├── ColumnSettingsDrawer.test.tsx          → Integration tests for conditional tabs and drawer actions
 ├── ColumnSettingsDrawer.types.ts          → Props: { columnKey }
+│
+├── ColumnSettingsDrawerHeader/           → Column label + pin/close toolbar
+│   ├── ColumnSettingsDrawerHeader.component.tsx
+│   ├── ColumnSettingsDrawerHeader.types.ts
+│   └── ColumnSettingsDrawerHeader.test.tsx
+│
+├── ColumnSettingsDrawerBody/             → Capability-driven tabbed sections container
+│   ├── ColumnSettingsDrawerBody.component.tsx
+│   ├── ColumnSettingsDrawerBody.types.ts
+│   └── ColumnSettingsDrawerBody.test.tsx
+│
+├── ColumnSettingsDrawerFooter/           → Accept/Cancel buttons
+│   ├── ColumnSettingsDrawerFooter.component.tsx
+│   ├── ColumnSettingsDrawerFooter.types.ts
+│   └── ColumnSettingsDrawerFooter.test.tsx
+│
+├── hooks/                                → Handlers shared across the drawer shell
+│   └── useCancelColumnSettings.hook.ts    → Busy-guarded reset-from-table + close-unless-pinned
 │
 ├── ColumnDrawerContext/                   → Store-based context for drawer state
 │   ├── ColumnDrawerContext.context.ts     → createContext
@@ -78,10 +96,24 @@ ColumnSettingsDrawer/
 ```mermaid
 graph LR
   CSD["ColumnSettingsDrawer"] --> SidePanel
-  CSD --> SidePanelHeaderToolbar
-  CSD --> Tabs
-  CSD --> Button
-  CSD --> ColumnDrawerContext
+  CSD --> CSDHeader["ColumnSettingsDrawerHeader"]
+  CSD --> CSDBody["ColumnSettingsDrawerBody"]
+  CSD --> CSDFooter["ColumnSettingsDrawerFooter"]
+  CSD --> CancelHook["useCancelColumnSettings"]
+
+  CSDHeader --> SidePanelHeaderToolbar
+  CSDHeader --> CancelHook
+  CSDHeader --> TableConfigContext
+
+  CSDBody --> Tabs
+  CSDBody --> TableConfigContext
+
+  CSDFooter --> Button
+  CSDFooter --> CancelHook
+  CSDFooter --> ColumnDrawerContext
+
+  CancelHook --> ColumnDrawerContext
+  CancelHook --> TableConfigContext
 
   ColumnDrawerContext --> useStore["useStore (custom hook)"]
   ColumnDrawerContext --> TableConfigContext
@@ -98,7 +130,16 @@ graph LR
 
 ```mermaid
 graph TD
-  A[Receive columnKey prop] --> B[Read column config from TableConfigContext]
+  A["ColumnSettingsDrawer renders SidePanel"] --> O["ColumnSettingsDrawerHeader: column label + pin/close toolbar"]
+  A --> P["ColumnSettingsDrawerBody: Tabs component"]
+  A --> Q["ColumnSettingsDrawerFooter: Accept + Cancel buttons"]
+
+  O --> W{Toggle pin?}
+  W -- Yes --> X["set isColumnSettingsPinned"]
+  O --> T2{Toolbar close?}
+  T2 -- Yes --> U
+
+  P --> B[Read column config from TableConfigContext]
   B --> C[Determine conditional tabs]
   C --> D{isFilterable + dataType?}
   D -- Yes --> E[Include Filter tab]
@@ -117,15 +158,12 @@ graph TD
   K --> M
   L --> M
 
-  M --> N["Render SidePanel"]
-  N --> O["Header: title + pin/close toolbar"]
-  N --> P["Body: Tabs component"]
-  N --> Q["Footer: Accept + Cancel buttons"]
-
   Q --> R{Accept?}
-  R -- Yes --> S["batchSetColumnDrawerSettings()"]
+  R -- Yes --> S["batchSetColumnDrawerSettings() — drawer stays open"]
   Q --> T{Cancel?}
-  T -- Yes --> U["resetToTableState()"]
+  T -- Yes --> U["useCancelColumnSettings: resetAllColumnDrawerSettings(!isPinned)"]
+  A --> T3{Panel close?}
+  T3 -- Yes --> U
 ```
 
 ## State Management: ColumnDrawerContext
@@ -139,9 +177,13 @@ See [ColumnDrawerContext/ARCHITECTURE.md](ColumnDrawerContext/ARCHITECTURE.md) f
 
 - **Accept**: `useBatchSetColumnDrawerSettings` reads all drawer state and pushes it to
   `TableConfigContext` via `useBatchSetColumnSettings`
-- **Cancel**: `useResetAllColumnDrawerSettings(true)` reads current table state back into
-  the drawer store and closes the drawer while restoring table-settings visibility from
-  `wasTableSettingsOpenBeforeColumnSettings` snapshot in `metaStore`
+- **Cancel**: `hooks/useCancelColumnSettings` (shared by the panel close, the
+  header toolbar close, and the footer Cancel button) calls
+  `useResetAllColumnDrawerSettings(!isPinned)` — it reads current table state
+  back into the drawer store and, when unpinned, closes the drawer while
+  restoring table-settings visibility from
+  `wasTableSettingsOpenBeforeColumnSettings` snapshot in `metaStore`; the
+  whole flow no-ops while busy
 
 ## Tab Sections
 
