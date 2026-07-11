@@ -8,10 +8,30 @@ components rather than introducing a second navigation primitive.
 ```
 AppNavigation/
 ├── index.ts                         → Barrel export
-├── AppNavigation.component.tsx      → Sidebar state and render composition
-├── AppNavigation.constants.tsx      → Single editable route item registry
-├── AppNavigation.stylex.ts          → Layout-only StyleX styles
+├── AppNavigation.component.tsx      → Shell: pin/open state + SidePanel composing header/body/footer
+├── AppNavigation.constants.ts       → NAV_DENSITY size-preference map
+├── AppNavigation.stylex.ts          → Shared layout StyleX styles (consumed by subcomponents + utils)
 ├── AppNavigation.types.ts           → Props and local variant types
+├── AppNavigation.test.tsx           → Integration tests (real GlobalSettingsProvider)
+│
+├── NavigationHeader/                → Brand + expand/pin/close actions placement
+│   ├── NavigationHeader.component.tsx
+│   ├── NavigationHeader.types.ts
+│   └── NavigationHeader.test.tsx
+│
+├── NavigationBody/                  → Vertical toolbar of app-supplied route links
+│   ├── NavigationBody.component.tsx
+│   ├── NavigationBody.types.ts
+│   └── NavigationBody.test.tsx
+│
+├── NavigationFooter/                → Theme toggle button
+│   ├── NavigationFooter.component.tsx
+│   ├── NavigationFooter.types.ts
+│   └── NavigationFooter.test.tsx
+│
+├── NavigationHeaderActions/         → Expand/collapse, pin, close control buttons
+├── NavigationLauncher/              → Floating open button when unpinned
+├── utils/                           → Density styles, pin resolution, labels (individually tested)
 └── ARCHITECTURE.md                  → This document
 ```
 
@@ -19,13 +39,32 @@ AppNavigation/
 
 ```mermaid
 graph LR
-  AppNavigation --> Button
-  AppNavigation --> GlobalSettingsSelectors
-  AppNavigation --> Icons
   AppNavigation --> SidePanel
-  AppNavigation --> Toolbar
+  AppNavigation --> NavHeader["NavigationHeader"]
+  AppNavigation --> NavBody["NavigationBody"]
+  AppNavigation --> NavFooter["NavigationFooter"]
+  AppNavigation --> NavLauncher["NavigationLauncher"]
+  AppNavigation --> GlobalSettingsSelectors
+
+  NavHeader --> Icons
+  NavHeader --> NavHeaderActions["NavigationHeaderActions"]
+  NavHeader --> GlobalSettingsSelectors
+  NavHeader --> GlobalSettingsActions
+
+  NavBody --> Toolbar
+  NavBody --> GlobalSettingsSelectors
+
+  NavFooter --> Button
+  NavFooter --> GlobalSettingsSelectors
+
   ConsumingApp -. "getNavigationItems prop" .-> AppNavigation
 ```
+
+Each subcomponent reads the collapsed/size preferences it needs directly from
+`GlobalSettingsContext` selectors; the parent only passes what it owns —
+`isPinned` (derived from the `defaultIsPinned` prop + preference) and the
+off-canvas `onClose` handler, plus the pass-through consumer props
+(`getNavigationItems`, `isDarkMode`, `onToggleTheme`).
 
 ## Render Flow
 

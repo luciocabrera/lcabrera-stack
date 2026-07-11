@@ -8,32 +8,48 @@ clear/reset actions from all other sections (Filters, Sorting, Columns).
 ```
 GeneralSettingsSection/
 ├── index.ts                                → Barrel export
-├── GeneralSettingsSection.component.tsx     → Width presets + section toolbars + all settings
-├── GeneralSettingsSection.types.ts          → Props + WidthPreset type
-└── GeneralSettingsSection.stylex.ts         → Section-specific styles
+├── GeneralSettingsSection.component.tsx     → Thin composition: width presets + section toolbars + all settings
+├── GeneralSettingsSection.types.ts          → Props
+├── GeneralSettingsSection.test.tsx          → Composition tests
+│
+├── ColumnWidthsSection/                     → Width preset toggles (owns preset state)
+│   ├── ColumnWidthsSection.component.tsx
+│   ├── ColumnWidthsSection.types.ts
+│   ├── ColumnWidthsSection.stylex.ts
+│   └── ColumnWidthsSection.test.tsx
+│
+├── AllSettingsSection/                      → Clear/reset-all buttons
+│   ├── AllSettingsSection.component.tsx
+│   ├── AllSettingsSection.types.ts
+│   ├── AllSettingsSection.stylex.ts
+│   └── AllSettingsSection.test.tsx
+│
+└── utils/
+    ├── buildPresetColumnSizing.util.ts      → Pure preset → ColumnSizingState mapping
+    └── buildPresetColumnSizing.util.test.ts
 ```
 
 ## Dependencies
 
 ```mermaid
 graph LR
-  GS["GeneralSettingsSection"] --> SidePanelSection
-  GS --> SidePanelSectionHeader
-  GS --> SidePanelSectionMain
-  GS --> Button
+  GS["GeneralSettingsSection"] --> SidePanelSectionMain
   GS --> InfoBox
-  GS --> Icons["MinimizeIcon, MaximizeIcon, RefreshIcon, EraserIcon"]
-
-  GS --> useGetColumns["useGetColumns (TableConfig)"]
-  GS --> useClearAllSettings["useClearAllSettings (action)"]
-  GS --> useResetTableSettings["useResetTableSettings (action)"]
-  GS --> useSetColumnsSizing["useSetColumnsSizing (action)"]
-
+  GS --> CWS["ColumnWidthsSection"]
+  GS --> ASS["AllSettingsSection"]
   GS --> FSToolbar["FiltersSectionToolbar (footer variant)"]
   GS --> SSToolbar["SortingSectionToolbar (footer variant)"]
   GS --> COSToolbar["ColumnOrderSectionToolbar (footer variant)"]
 
-  GS_stylex["GeneralSettingsSection.stylex"] --> drawerSectionStyles
+  CWS --> ColumnWidthPresetButtons
+  CWS --> useGetColumns["useGetColumns (TableConfig)"]
+  CWS --> useSetColumnsSizing["useSetColumnsSizing (action)"]
+  CWS --> buildPresetColumnSizing["buildPresetColumnSizing (util)"]
+
+  ASS --> Button
+  ASS --> Icons["RefreshIcon, EraserIcon"]
+  ASS --> useClearAllSettings["useClearAllSettings (action)"]
+  ASS --> useResetTableSettings["useResetTableSettings (action)"]
 ```
 
 ## Render Flow
@@ -80,9 +96,9 @@ graph TD
 
 ## Local State
 
-| State            | Type                                                       | Purpose                                              |
-| ---------------- | ---------------------------------------------------------- | ---------------------------------------------------- |
-| `selectedPreset` | `WidthPreset` (`'min' \| 'max' \| 'default' \| undefined`) | Track which width button is active (toggle behavior) |
+| State            | Owner                 | Type                                                       | Purpose                                              |
+| ---------------- | --------------------- | ---------------------------------------------------------- | ---------------------------------------------------- |
+| `selectedPreset` | `ColumnWidthsSection` | `WidthPreset` (`'min' \| 'max' \| 'default' \| undefined`) | Track which width button is active (toggle behavior) |
 
 ## Cross-Section Toolbar Reuse
 

@@ -60,9 +60,11 @@ TableSettingsDrawer/
 │       └── useGetColumnVisibility
 │
 ├── GeneralSettingsSection/                → Width presets + cross-section toolbars
-│   ├── GeneralSettingsSection.component.tsx
+│   ├── GeneralSettingsSection.component.tsx → Thin composition
 │   ├── GeneralSettingsSection.types.ts
-│   ├── GeneralSettingsSection.stylex.ts
+│   ├── ColumnWidthsSection/               → Width preset toggles (owns preset state)
+│   ├── AllSettingsSection/                → Clear/reset-all buttons
+│   ├── utils/                             → buildPresetColumnSizing
 │   └── index.ts
 │
 ├── DetailsSection/                        → Read-only table metadata and metrics
