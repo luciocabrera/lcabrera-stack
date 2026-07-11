@@ -24,7 +24,7 @@ describe('resolveColumnVisibilityUpdate', () => {
   it('removes the column key when showing a hidden column', () => {
     const result = resolveColumnVisibilityUpdate<TData>({
       columnKey: 'name',
-      columnVisibility: new Set(['name', 'age']),
+      columnVisibility: new Set(['age', 'name']),
       isVisible: true,
     });
 

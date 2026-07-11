@@ -2,8 +2,8 @@ import * as stylex from '@stylexjs/stylex';
 
 import type { ToolbarProps } from './Toolbar.types';
 
-import { ToolbarItem } from './ToolbarItem/ToolbarItem.component';
 import { styles } from './Toolbar.stylex';
+import { ToolbarItem } from './ToolbarItem/ToolbarItem.component';
 
 export const Toolbar = ({
   isCompact = false,

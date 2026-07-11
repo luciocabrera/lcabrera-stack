@@ -133,7 +133,7 @@ describe('TableHeaderCell', () => {
 
     const { container } = renderCell({ isLoadingState: true });
 
-    expect(container.querySelector('th > div')).not.toBeNull();
+    expect(container.querySelector(':scope th > div')).not.toBeNull();
   });
 
   it('renders nothing but the skeleton when isHeaderHidden is true', () => {

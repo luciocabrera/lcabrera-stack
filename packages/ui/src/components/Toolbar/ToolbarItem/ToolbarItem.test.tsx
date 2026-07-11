@@ -100,6 +100,6 @@ describe('ToolbarItem', () => {
 
     const button = screen.getByRole('button', { name: 'Refresh' });
     expect(button.getAttribute('aria-label')).toBe('Refresh');
-    expect(button.getAttribute('data-icon-only')).toBe('true');
+    expect(button.dataset.iconOnly).toBe('true');
   });
 });

@@ -1,17 +1,22 @@
 import { describe, expect, it } from 'vitest';
 
-import { PERSISTENCE_VERSION } from './persistence.constants';
 import { parseVersionedPayload } from './parseVersionedPayload.util';
+import { PERSISTENCE_VERSION } from './persistence.constants';
 
-const encodePayload = (value: unknown, version: number) =>
+type EncodePayloadArgs = {
+  readonly value: unknown;
+  readonly version: number;
+};
+
+const encodePayload = ({ value, version }: EncodePayloadArgs) =>
   encodeURIComponent(JSON.stringify({ value, version }));
 
 describe('parseVersionedPayload', () => {
   it('returns the value when the version matches', () => {
-    const rawValue = encodePayload(
-      { isSettingsOpen: true },
-      PERSISTENCE_VERSION,
-    );
+    const rawValue = encodePayload({
+      value: { isSettingsOpen: true },
+      version: PERSISTENCE_VERSION,
+    });
 
     expect(
       parseVersionedPayload<{ isSettingsOpen: boolean }>({ rawValue }),
@@ -19,7 +24,10 @@ describe('parseVersionedPayload', () => {
   });
 
   it('returns undefined on a version mismatch', () => {
-    const rawValue = encodePayload({ stale: true }, PERSISTENCE_VERSION + 1);
+    const rawValue = encodePayload({
+      value: { stale: true },
+      version: PERSISTENCE_VERSION + 1,
+    });
 
     expect(parseVersionedPayload({ rawValue })).toBeUndefined();
   });

@@ -44,7 +44,7 @@ export const TableHeaderActionsMenu = <TData,>({
 
   const hasAnyAction = isSortable || !isStatic || hasSettings;
 
-  if (!hasAnyAction) return null;
+  if (!hasAnyAction) return;
 
   return (
     <TableActionsPopover

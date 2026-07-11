@@ -20,7 +20,7 @@ export const resolveColumnVisibilityUpdate = <TData>({
   isVisible,
 }: ResolveColumnVisibilityUpdateArgs<TData>): ColumnVisibilityState<TData> => {
   const nextVisibility: ColumnVisibilityState<TData> = new Set(
-    columnVisibility ?? [],
+    columnVisibility,
   );
 
   if (isVisible) {

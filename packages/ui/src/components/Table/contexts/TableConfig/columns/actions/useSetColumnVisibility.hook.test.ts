@@ -80,7 +80,7 @@ describe('useSetColumnVisibility', () => {
   it('shows a currently-hidden column', () => {
     setColumnsState({
       ...createInitialColumnsState(),
-      columnVisibility: new Set(['name', 'age']),
+      columnVisibility: new Set(['age', 'name']),
     });
 
     const { result } = renderHook(() => useSetColumnVisibility<TData>());

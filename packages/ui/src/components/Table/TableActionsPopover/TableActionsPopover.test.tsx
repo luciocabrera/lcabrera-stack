@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 const { mockUseTableActionsPopoverPosition, mockUseTableContainerRef } =
   vi.hoisted(() => ({
     mockUseTableActionsPopoverPosition: vi.fn(),
-    mockUseTableContainerRef: vi.fn(() => ({ current: null })),
+    mockUseTableContainerRef: vi.fn(() => ({ current: undefined })),
   }));
 
 vi.mock('@repo/ui/components/Table/contexts/TableWrapper', () => ({
@@ -29,7 +29,7 @@ describe('TableActionsPopover', () => {
       handleToggleMenu: vi.fn(),
       isMenuOpen: false,
       menuPosition: undefined,
-      menuRef: { current: null },
+      menuRef: { current: undefined },
     });
 
     render(
@@ -52,7 +52,7 @@ describe('TableActionsPopover', () => {
       handleToggleMenu: vi.fn(),
       isMenuOpen: true,
       menuPosition: { left: 10, top: 20 },
-      menuRef: { current: null },
+      menuRef: { current: undefined },
     });
 
     render(
@@ -78,12 +78,12 @@ describe('TableActionsPopover', () => {
       handleToggleMenu,
       isMenuOpen: false,
       menuPosition: undefined,
-      menuRef: { current: null },
+      menuRef: { current: undefined },
     });
 
     render(
       <TableActionsPopover ariaLabel='Column actions' label='Column actions'>
-        {() => null}
+        {() => undefined}
       </TableActionsPopover>,
     );
 
