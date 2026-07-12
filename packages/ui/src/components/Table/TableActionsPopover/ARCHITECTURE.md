@@ -29,12 +29,14 @@ mechanics instead of duplicating them.
 ```text
 TableActionsPopover/
 ├── TableActionsPopover.component.tsx      → Trigger + popover panel + render-prop children
-├── TableActionsPopover.types.ts           → Props, MenuPosition, render-prop context type
+├── TableActionsPopover.types.ts           → Props, BoundsRect, MenuPosition, render-prop context type
 ├── TableActionsPopover.stylex.ts          → trigger/menu/menuItem/menuIcon/menuActions styles (shared)
 ├── useTableActionsPopoverPosition.hook.ts → Popover open state + coordinate recompute
 ├── utils/
+│   ├── createViewportRect.util.ts                   → Pure: window dimensions → whole-viewport BoundsRect
+│   │                                                  (fallback container bounds, built at reposition time)
 │   ├── getTableActionsPopoverPosition.util.ts       → Pure coordinate computation (no side effects)
-│   └── getTableActionsPopoverPosition.util.test.ts  → Unit coverage for positioning behavior
+│   └── *.util.test.ts                               → Unit coverage per util
 ├── ARCHITECTURE.md                        → This file
 └── index.ts                               → Barrel export
 ```

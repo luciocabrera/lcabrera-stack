@@ -1,11 +1,4 @@
-type BoundsRect = {
-  readonly bottom: number;
-  readonly height: number;
-  readonly left: number;
-  readonly right: number;
-  readonly top: number;
-  readonly width: number;
-};
+import type { BoundsRect } from '../TableActionsPopover.types';
 
 type GetTableActionsPopoverPositionArgs = {
   readonly containerRect: BoundsRect;

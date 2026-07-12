@@ -2,32 +2,15 @@ import type { RefObject } from 'react';
 
 import { useEffect, useRef, useState } from 'react';
 
-import type { MenuPosition } from './TableActionsPopover.types';
+import type { BoundsRect, MenuPosition } from './TableActionsPopover.types';
 
+import { createViewportRect } from './utils/createViewportRect.util';
 import { getTableActionsPopoverPosition } from './utils/getTableActionsPopoverPosition.util';
 
 const MENU_GAP_PX = 4;
 const MENU_HORIZONTAL_NUDGE_PX = 2;
 const MENU_REPOSITION_FRAMES = 10;
 const MENU_VIEWPORT_PADDING_PX = 8;
-
-type BoundsRect = {
-  readonly bottom: number;
-  readonly height: number;
-  readonly left: number;
-  readonly right: number;
-  readonly top: number;
-  readonly width: number;
-};
-
-const FALLBACK_CONTAINER_RECT: BoundsRect = {
-  bottom: globalThis.innerHeight,
-  height: globalThis.innerHeight,
-  left: 0,
-  right: globalThis.innerWidth,
-  top: 0,
-  width: globalThis.innerWidth,
-};
 
 type ComputeMenuPositionArgs = {
   readonly containerRect: BoundsRect;
@@ -172,7 +155,11 @@ export const useTableActionsPopoverPosition = ({
         computeMenuPosition({
           containerRect:
             containerRef.current?.getBoundingClientRect() ??
-            FALLBACK_CONTAINER_RECT,
+            // Read the window size at reposition time, not import time
+            createViewportRect({
+              height: globalThis.innerHeight,
+              width: globalThis.innerWidth,
+            }),
           menuElement,
           triggerElement,
         }),
