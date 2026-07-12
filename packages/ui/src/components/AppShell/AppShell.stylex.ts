@@ -6,7 +6,6 @@ import * as stylex from '@stylexjs/stylex';
 const specific = stylex.create({
   appShell: {
     flex: '1 1 auto',
-
     display: 'flex',
     minHeight: 0,
   },

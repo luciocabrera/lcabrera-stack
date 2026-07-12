@@ -43,25 +43,24 @@ export const Modal = ({
   }, [onClose]);
 
   return (
-    <dialog
-      ref={dialogRef}
-      {...stylex.props(modalStyles.dialog, modalStyles.backdrop)}
-    >
-      {title && (
-        <div {...stylex.props(modalStyles.header)}>
-          <h2 {...stylex.props(modalStyles.title)}>{title}</h2>
-          <Button
-            aria-label='Close'
-            color='ghost'
-            icon={<MenuCloseIcon size={ICON_SIZE_MD} />}
-            onClick={onClose}
-            size='mini'
-            width='auto'
-          />
-        </div>
-      )}
-      <div {...stylex.props(modalStyles.body)}>{children}</div>
-      {footer && <div {...stylex.props(modalStyles.footer)}>{footer}</div>}
+    <dialog ref={dialogRef} {...stylex.props(modalStyles.dialog)}>
+      <div {...stylex.props(modalStyles.container)}>
+        {title && (
+          <div {...stylex.props(modalStyles.header)}>
+            <h2 {...stylex.props(modalStyles.title)}>{title}</h2>
+            <Button
+              aria-label='Close'
+              color='ghost'
+              icon={<MenuCloseIcon size={ICON_SIZE_MD} />}
+              onClick={onClose}
+              size='mini'
+              width='auto'
+            />
+          </div>
+        )}
+        <div {...stylex.props(modalStyles.body)}>{children}</div>
+        {footer && <div {...stylex.props(modalStyles.footer)}>{footer}</div>}
+      </div>
     </dialog>
   );
 };
