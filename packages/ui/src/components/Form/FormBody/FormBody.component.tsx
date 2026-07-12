@@ -57,6 +57,8 @@ export const FormBody = <TValues extends Record<string, unknown>>({
       <input name='formId' type='hidden' value={formId} />
       {/*  TODO: The fields should be gotten in the FormFields componenet directly using a selector , following the store context pattern,  */}
       <FormFields fields={fields} />
+      {/* leafFields,cancelLabel and submitLabel should be gotten in the FormBodyFooter component directly using a selector, following the store context pattern */}
+      {/* isSubmitting  is just used inside the FormBodyFooter component, that componet should calculate it instead the parent doing the calculation to just prop drill*/}
       <FormBodyFooter
         cancelLabel={cancelLabel}
         cancelTo={cancelTo}
