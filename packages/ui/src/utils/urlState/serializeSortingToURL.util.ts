@@ -9,13 +9,13 @@ type CompactSorting = Record<string, 'asc' | 'desc'>;
  * into `{"name":"asc"}` — much shorter than the verbose array format.
  */
 export const serializeSortingToURL = <TData>(sorting: SortingState<TData>) => {
-  if (sorting.length === 0) return undefined;
+  if (sorting.length === 0) return;
 
   const entries = sorting
     .filter(({ direction }) => direction !== undefined)
     .map(({ columnKey, direction }) => [columnKey, direction] as const);
 
-  if (entries.length === 0) return undefined;
+  if (entries.length === 0) return;
 
   const compact = Object.fromEntries(entries) as CompactSorting;
 

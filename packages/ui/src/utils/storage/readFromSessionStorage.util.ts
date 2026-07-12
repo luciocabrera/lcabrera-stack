@@ -9,11 +9,11 @@ type ReadFromSessionStorageArgs = {
  * Returns undefined on SSR or if the key does not exist.
  */
 export const readFromSessionStorage = ({ key }: ReadFromSessionStorageArgs) => {
-  if (typeof sessionStorage === 'undefined') return undefined;
+  if (typeof sessionStorage === 'undefined') return;
   try {
     return sessionStorage.getItem(key) ?? undefined;
   } catch (error) {
     logger.debug('[storage] Failed to read sessionStorage key:', key, error);
-    return undefined;
+    return;
   }
 };

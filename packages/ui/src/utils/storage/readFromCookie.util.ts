@@ -24,5 +24,5 @@ export const readFromCookie = ({ cookieString, key }: ReadFromCookieArgs) => {
     return cookies[key];
   }
 
-  return undefined;
+  return;
 };

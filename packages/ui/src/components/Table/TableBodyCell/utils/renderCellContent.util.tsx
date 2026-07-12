@@ -24,7 +24,7 @@ const parseNumberValue = (value: unknown) => {
   }
 
   if (typeof value !== 'string') {
-    return undefined;
+    return;
   }
 
   const parsed = Number(value);

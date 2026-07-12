@@ -10,7 +10,7 @@ import { serializeFilter } from './serializeFilter.util';
  */
 export const serializeFiltersToURL = (filters: ColumnFiltersState) => {
   const entries = Object.entries(filters);
-  if (entries.length === 0) return undefined;
+  if (entries.length === 0) return;
 
   const compact = Object.fromEntries(
     entries.map(([columnKey, filter]) => [

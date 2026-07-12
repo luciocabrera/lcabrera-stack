@@ -19,7 +19,7 @@ export const validateField = <TValues extends Record<string, unknown>>({
   value,
 }: ValidateFieldArgs<TValues>) => {
   const validation = field.clientValidation;
-  if (!validation) return undefined;
+  if (!validation) return;
 
   const message = validation.message ?? `${field.label} is invalid.`;
   const isEmpty =
@@ -31,7 +31,7 @@ export const validateField = <TValues extends Record<string, unknown>>({
     return validation.message ?? `${field.label} is required.`;
   }
 
-  if (isEmpty) return undefined;
+  if (isEmpty) return;
 
   if (typeof value === 'string') {
     return validateStringValue({ message, validation, value });
@@ -41,5 +41,5 @@ export const validateField = <TValues extends Record<string, unknown>>({
     return validateNumberValue({ message, validation, value });
   }
 
-  return undefined;
+  return;
 };

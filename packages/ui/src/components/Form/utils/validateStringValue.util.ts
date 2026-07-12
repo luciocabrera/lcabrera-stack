@@ -31,5 +31,5 @@ export const validateStringValue = ({
   if (validation.pattern && !validation.pattern.test(value)) {
     return message;
   }
-  return undefined;
+  return;
 };
