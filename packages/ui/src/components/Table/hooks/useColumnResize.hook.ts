@@ -1,10 +1,8 @@
-import {
-  DEFAULT_MAX_COLUMN_WIDTH,
-  DEFAULT_MIN_COLUMN_WIDTH,
-} from '@repo/ui/components/Table/Table.constants';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useSyncColumnsSizing } from '../contexts/TableConfig/columns/actions/useSyncColumnsSizing.hook';
+import { createResizeStartData } from './utils/createResizeStartData.util';
+import { resolveResizeWidth } from './utils/resolveResizeWidth.util';
 
 export type OnResizeParams = {
   columnKey: string;
@@ -73,13 +71,16 @@ export const useColumnResize = ({
 
       // Use RAF to throttle updates for smooth performance
       const newAnimationFrameId = requestAnimationFrame(() => {
-        const delta = event.clientX - initialX;
-        const newWidth = Math.max(
-          minWidth,
-          Math.min(maxWidth, initialWidth + delta),
-        );
-
-        onResize({ columnKey, width: newWidth });
+        onResize({
+          columnKey,
+          width: resolveResizeWidth({
+            clientX: event.clientX,
+            initialWidth,
+            initialX,
+            maxWidth,
+            minWidth,
+          }),
+        });
       });
 
       resizeDataRef.current.animationFrameId = newAnimationFrameId;
@@ -107,16 +108,14 @@ export const useColumnResize = ({
       event.preventDefault();
       event.stopPropagation();
 
-      const effectiveMinWidth = minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
-      const effectiveMaxWidth = maxWidth ?? DEFAULT_MAX_COLUMN_WIDTH;
-      const effectiveCurrentWidth = currentWidth ?? effectiveMinWidth;
-
       resizeDataRef.current = {
         animationFrameId: undefined,
-        initialWidth: effectiveCurrentWidth,
-        initialX: event.clientX,
-        maxWidth: effectiveMaxWidth,
-        minWidth: effectiveMinWidth,
+        ...createResizeStartData({
+          clientX: event.clientX,
+          currentWidth,
+          maxWidth,
+          minWidth,
+        }),
       };
 
       setIsResizing(true);

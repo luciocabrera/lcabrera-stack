@@ -6,23 +6,30 @@ Table-specific hooks for column resizing, infinite scroll, and state persistence
 
 ```
 hooks/
-├── useColumnResize.hook.ts              → RAF-throttled drag resize
+├── useColumnResize.hook.ts              → RAF-throttled drag resize (DOM wiring only)
 ├── useInfiniteScroll.hook.ts            → Sentinel intersection detection (wraps shared useInfiniteScrollObserver)
 ├── usePersistCookieAction.hook.ts       → Server action cookie persistence for column state
 ├── useScrollResetAfterLoad.hook.ts      → Self-connected scroll-to-origin after full (non-load-more) loads
+├── utils/
+│   ├── createResizeStartData.util.ts    → Drag-start snapshot: origin + effective width/bounds (+ .test)
+│   └── resolveResizeWidth.util.ts       → Pointer delta → clamped column width (+ .test)
 └── index.ts                             → Barrel export
 ```
 
 ## useColumnResize
 
-RAF-throttled mouse drag handler for column width adjustment.
+RAF-throttled mouse drag handler for column width adjustment. The pure
+computations live in `utils/` (`createResizeStartData` resolves the drag
+origin and effective bounds; `resolveResizeWidth` clamps the dragged width);
+the hook keeps only the DOM wiring — document listeners, RAF bookkeeping,
+and body cursor/selection toggles.
 
 ```mermaid
 graph LR
-  MD["onMouseDown"] --> Track["Track initialX + initialWidth"]
+  MD["onMouseDown"] --> Track["createResizeStartData → drag origin + bounds"]
   Track --> Move["document.onMouseMove"]
   Move --> RAF["requestAnimationFrame"]
-  RAF --> Clamp["clamp(min, max, initialWidth + delta)"]
+  RAF --> Clamp["resolveResizeWidth (clamped delta)"]
   Clamp --> Resize["onResize({ columnKey, width })"]
   Move --> Up["document.onMouseUp"]
   Up --> Sync["useSyncColumnsSizing()"]
