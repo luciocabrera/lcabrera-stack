@@ -11,7 +11,8 @@ while header/body cells keep rendering the per-cell shimmer overlay.
 
 ```
 TableContent/
-├── TableContent.component.tsx   → Layout: Title + scroll container + drawers
+├── TableContent.component.tsx   → Layout shell: Title + scroll container + drawers
+├── TableTitleActions/           → Self-connected title actions (create link + settings toggle)
 ├── TableContent.types.ts        → TableContentProps (picks from TableProps)
 ├── TableContent.stylex.ts       → Wrapper, outer container, scroll container
 └── index.ts                     → Barrel export
@@ -28,7 +29,7 @@ graph TD
   Wrapper --> Drawers["TableDrawersSection"]
 
   Outer --> Title["TableTitle"]
-  Title --> Actions["Settings button + user actions + optional create action"]
+  Title --> Actions["TableTitleActions (self-connected): user actions + create link + settings toggle"]
   Outer --> Scroll["div (containerRef · scroll area)"]
 
   Scroll --> TB["TableBase"]

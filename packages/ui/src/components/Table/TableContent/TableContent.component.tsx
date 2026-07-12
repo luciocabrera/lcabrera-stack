@@ -1,16 +1,9 @@
-import { Button } from '@repo/ui/components/Button';
-import { SettingsIcon } from '@repo/ui/components/Icons';
 import * as stylex from '@stylexjs/stylex';
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 
 import type { TableContentProps } from './TableContent.types';
 
-import { useToogleTableIsTableSettingsOpen } from '../contexts/TableConfig/meta/actions';
-import {
-  useGetTableCrud,
-  useGetTableThreshold,
-  useGetTableTitleSingular,
-} from '../contexts/TableConfig/meta/selectors';
+import { useGetTableThreshold } from '../contexts/TableConfig/meta/selectors';
 import { useFetchMoreData } from '../contexts/TableData/data/actions';
 import {
   useGetTableHasMore,
@@ -18,15 +11,21 @@ import {
   useGetTableIsLoadingMore,
 } from '../contexts/TableData/data/selectors';
 import { TableWrapperContext } from '../contexts/TableWrapper/TableWrapperContext.context';
-import { useInfiniteScroll } from '../hooks';
+import { useInfiniteScroll, useScrollResetAfterLoad } from '../hooks';
 import { TableBase } from '../TableBase';
 import { TableBody } from '../TableBody';
-import { TableCreateLink } from '../TableCreateLink';
 import { TableDrawersSection } from '../TableDrawersSection';
 import { TableHeader } from '../TableHeader';
 import { TableTitle } from '../TableTitle';
 import { styles } from './TableContent.stylex';
+import { TableTitleActions } from './TableTitleActions/TableTitleActions.component';
 
+/**
+ * Table layout shell: title bar, the scrollable table area with the
+ * infinite-scroll sentinel, and the drawers section. Owns the scroll
+ * container refs and the infinite-scroll/scroll-reset wiring; the title
+ * actions are a self-connected delegate.
+ */
 export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   actions,
   dataSelector,
@@ -38,32 +37,15 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   const isLoading = useGetTableIsLoading();
   const isLoadingMore = useGetTableIsLoadingMore();
   const hasMore = useGetTableHasMore();
-  const titleSingular = useGetTableTitleSingular();
-  const crud = useGetTableCrud();
 
   const fetchMoreData = useFetchMoreData<TData, TResponse>();
-  const toggleTableIsTableSettingsOpen = useToogleTableIsTableSettingsOpen();
 
   const containerRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
-  const wasLoadingRef = useRef(isLoading);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const wrapperContextValue = { containerRef, wrapperRef };
-  const resolvedTitleSingular = titleSingular ?? 'Record';
 
-  useEffect(() => {
-    const wasLoading = wasLoadingRef.current;
-
-    if (wasLoading && !isLoading && !isLoadingMore) {
-      containerRef.current?.scrollTo({
-        behavior: 'auto',
-        left: 0,
-        top: 0,
-      });
-    }
-
-    wasLoadingRef.current = isLoading;
-  }, [isLoading, isLoadingMore]);
+  useScrollResetAfterLoad({ scrollContainerRef: containerRef });
 
   useInfiniteScroll({
     dataSelector,
@@ -82,22 +64,7 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
       <div ref={wrapperRef} {...stylex.props(styles.wrapper)}>
         <div {...stylex.props(styles.outerContainer)}>
           <TableTitle
-            actions={
-              <>
-                {actions}
-                {crud?.create && (
-                  <TableCreateLink title={resolvedTitleSingular} to='new' />
-                )}
-                <Button
-                  aria-label='Table settings'
-                  color='ghost'
-                  icon={<SettingsIcon size={16} />}
-                  isBusy={isLoading}
-                  onClick={toggleTableIsTableSettingsOpen}
-                  size='mini'
-                />
-              </>
-            }
+            actions={<TableTitleActions actions={actions} />}
             icon={icon}
           />
           <div

@@ -9,6 +9,7 @@ hooks/
 ├── useColumnResize.hook.ts              → RAF-throttled drag resize
 ├── useInfiniteScroll.hook.ts            → Sentinel intersection detection (wraps shared useInfiniteScrollObserver)
 ├── usePersistCookieAction.hook.ts       → Server action cookie persistence for column state
+├── useScrollResetAfterLoad.hook.ts      → Self-connected scroll-to-origin after full (non-load-more) loads
 └── index.ts                             → Barrel export
 ```
 
@@ -93,3 +94,11 @@ Supports both single entries and batch submissions. Each entry specifies:
   effective URL search-param change; otherwise the action returns `204` and
   only cookie/session persistence occurs.
 - Oversized entries block the entire apply flow before sessionStorage, URL sync, or cookie persistence to avoid partial restored state
+
+## useScrollResetAfterLoad
+
+Scrolls the table container back to the origin when a full (non-load-more)
+load finishes, so filter/sort refreshes always show the first rows. Owns its
+store wiring (subscribes to `useGetTableIsLoading`/`useGetTableIsLoadingMore`
+itself); callers only pass the scroll container ref. Extracted from
+`TableContent` (WP6) so the layout shell holds no loading-transition logic.

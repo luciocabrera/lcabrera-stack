@@ -95,7 +95,8 @@ vi.mock('../contexts/TableData/data/selectors', () => ({
   useGetTableIsLoadingMore: useGetTableIsLoadingMoreMock,
 }));
 
-vi.mock('../hooks', () => ({
+vi.mock('../hooks', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../hooks')>()),
   useInfiniteScroll: useInfiniteScrollMock,
 }));
 
