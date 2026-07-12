@@ -24,7 +24,8 @@ Form/
 ├── index.ts                  → Barrel: Form + public types
 │
 ├── FormBody/
-│   ├── FormBody.component.tsx → The actual view: RR7 Form/fetcher.Form, footer, submit gating
+│   ├── FormBody.component.tsx → The view shell: RR7 Form/fetcher.Form + submit gating
+│   ├── FormBodyFooter/        → Self-connected footer: submit/cancel buttons + discard-changes flow
 │   ├── FormBody.stylex.ts
 │   ├── FormBody.types.ts
 │   └── index.ts

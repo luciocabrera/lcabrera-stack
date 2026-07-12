@@ -1,25 +1,24 @@
 import type { FormEvent } from 'react';
 
-import { Button } from '@repo/ui/components/Button';
-import { ConfirmDialog } from '@repo/ui/components/ConfirmDialog';
 import { useSubmitForm } from '@repo/ui/components/Form/contexts/FormContext/actions';
-import {
-  useGetFormMode,
-  useGetIsFormDirty,
-} from '@repo/ui/components/Form/contexts/FormContext/selectors';
 import { FormFields } from '@repo/ui/components/Form/FormFields/FormFields.component';
-import { useBackNavigate } from '@repo/ui/hooks';
 import * as stylex from '@stylexjs/stylex';
-import { useState } from 'react';
 import { Form as RouterForm, useFetcher, useNavigation } from 'react-router';
 
 import type { FormBodyProps } from './FormBody.types';
 
 import { styles } from './FormBody.stylex';
+import { FormBodyFooter } from './FormBodyFooter/FormBodyFooter.component';
 
+/**
+ * The Form view shell: picks the RR7 form flavour (fetcher vs navigation),
+ * derives the submission state it owns, and gates submit through the
+ * validation action. Footer buttons and the discard-changes flow live in the
+ * self-connected FormBodyFooter delegate.
+ */
 export const FormBody = <TValues extends Record<string, unknown>>({
   action,
-  cancelLabel = 'Cancel',
+  cancelLabel,
   cancelTo,
   children,
   fields,
@@ -27,17 +26,11 @@ export const FormBody = <TValues extends Record<string, unknown>>({
   leafFields,
   method = 'post',
   submission = 'navigation',
-  submitLabel = 'Accept',
+  submitLabel,
 }: FormBodyProps<TValues>) => {
-  const mode = useGetFormMode();
-  const isDirty = useGetIsFormDirty<TValues>(
-    leafFields.map((field) => field.accessor),
-  );
   const submitForm = useSubmitForm<TValues>();
   const navigation = useNavigation();
   const fetcher = useFetcher();
-  const goBack = useBackNavigate();
-  const [isConfirmDiscardOpen, setIsConfirmDiscardOpen] = useState(false);
 
   const isFetcherSubmission = submission === 'fetcher';
   const isSubmitting = isFetcherSubmission
@@ -46,28 +39,12 @@ export const FormBody = <TValues extends Record<string, unknown>>({
       navigation.formData?.get('formId') === formId;
 
   const FormComponent = isFetcherSubmission ? fetcher.Form : RouterForm;
-  const isSubmitDisabled = isSubmitting || (mode === 'edit' && !isDirty);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     if (!submitForm({ leafFields })) {
       event.preventDefault();
     }
   };
-
-  const handleCancelClick = () => {
-    if (isDirty) {
-      setIsConfirmDiscardOpen(true);
-    } else {
-      goBack(cancelTo);
-    }
-  };
-
-  const handleAcceptConfirm = () => {
-    setIsConfirmDiscardOpen(false);
-    goBack(cancelTo);
-  };
-
-  const handleCancelConfirm = () => setIsConfirmDiscardOpen(false);
 
   return (
     <FormComponent
@@ -79,33 +56,15 @@ export const FormBody = <TValues extends Record<string, unknown>>({
     >
       <input name='formId' type='hidden' value={formId} />
       <FormFields fields={fields} />
-      {mode !== 'view' && (
-        <div {...stylex.props(styles.footer)}>
-          <Button
-            color='primary'
-            isBusy={isSubmitting}
-            isDisabled={isSubmitDisabled}
-            type='submit'
-          >
-            {submitLabel}
-          </Button>
-          <Button color='outline' onClick={handleCancelClick}>
-            {cancelLabel}
-          </Button>
-          {children}
-        </div>
-      )}
-      {/* Stays mounted — Modal owns the native dialog lifecycle via isOpen
-          (ADR-001), so closing keeps the <dialog> in the DOM with open=false */}
-      <ConfirmDialog
-        cancelLabel='Keep Editing'
-        confirmLabel='Discard Changes'
-        description='You have unsaved changes. Leaving now will lose them.'
-        isOpen={isConfirmDiscardOpen}
-        onCancel={handleCancelConfirm}
-        onConfirm={handleAcceptConfirm}
-        title='Discard changes?'
-      />
+      <FormBodyFooter
+        cancelLabel={cancelLabel}
+        cancelTo={cancelTo}
+        isSubmitting={isSubmitting}
+        leafFields={leafFields}
+        submitLabel={submitLabel}
+      >
+        {children}
+      </FormBodyFooter>
     </FormComponent>
   );
 };
