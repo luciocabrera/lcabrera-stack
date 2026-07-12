@@ -96,6 +96,7 @@ export const darkTheme = stylex.createTheme(colors, {
   textSecondary: 'oklch(75% 0.01 250)',
   textTertiary: 'oklch(60% 0.01 250)',
   textInverse: 'oklch(12% 0.01 250)',
+  textGradient: 'linear-gradient(to right, #88b2ff, #80fff5, #c095ff)',
 
   disabled: 'oklch(30% 0.01 250)',
   disabledText: 'oklch(54% 0.008 250)',

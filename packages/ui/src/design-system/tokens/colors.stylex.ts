@@ -86,6 +86,7 @@ export const colors = stylex.defineVars({
   textPrimary: 'var(--text-primary)',
   textSecondary: 'var(--text-secondary)',
   textTertiary: 'var(--text-tertiary)',
+  textGradient: 'var(--text-gradient)',
 
   warning: 'var(--warning)',
   warningBackground: 'var(--warning-background)',
