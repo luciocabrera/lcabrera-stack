@@ -17,5 +17,5 @@ type ShouldSkipInitialFetchArgs = {
  */
 export const shouldSkipInitialFetch = ({
   currentFilter,
-}: ShouldSkipInitialFetchArgs): boolean =>
+}: ShouldSkipInitialFetchArgs) =>
   currentFilter.data.length > 0 || currentFilter.isLoading;

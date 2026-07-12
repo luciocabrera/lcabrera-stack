@@ -31,7 +31,7 @@ export const applyToggleColumnPinResolution = ({
   setColumnPinning,
   setPinSideModal,
   setUnpinConflictModal,
-}: ApplyToggleColumnPinResolutionArgs): void => {
+}: ApplyToggleColumnPinResolutionArgs) => {
   switch (resolution.kind) {
     case 'apply-pinning-direct': {
       setColumnPinning(resolution.nextPinning);

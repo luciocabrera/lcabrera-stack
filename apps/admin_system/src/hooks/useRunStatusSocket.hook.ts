@@ -32,7 +32,7 @@ const isScanStatusMessage = (value: unknown): value is ScanStatusMessage =>
  * disconnect; no polling fallback (accepted risk — a socket that can't
  * reconnect needs a manual page refresh).
  */
-export const useRunStatusSocket = ({ runId }: UseRunStatusSocketArgs): void => {
+export const useRunStatusSocket = ({ runId }: UseRunStatusSocketArgs) => {
   const revalidator = useRevalidator();
   const notify = useNotifyAction();
   const revalidateRef = useRef(revalidator.revalidate);
@@ -50,7 +50,7 @@ export const useRunStatusSocket = ({ runId }: UseRunStatusSocketArgs): void => {
     let reconnectTimeout: ReturnType<typeof setTimeout> | undefined;
     let isUnmounted = false;
 
-    const connect = (): void => {
+    const connect = () => {
       socket = new WebSocket(wsUrl);
 
       socket.addEventListener('open', () => {

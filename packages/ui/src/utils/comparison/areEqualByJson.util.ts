@@ -18,8 +18,5 @@ type AreEqualByJsonArgs<T> = {
  * areEqualByJson({ left: { a: 1 }, right: { a: 2 } }); // false
  * ```
  */
-export const areEqualByJson = <T>({
-  left,
-  right,
-}: AreEqualByJsonArgs<T>): boolean =>
+export const areEqualByJson = <T>({ left, right }: AreEqualByJsonArgs<T>) =>
   JSON.stringify(left) === JSON.stringify(right);

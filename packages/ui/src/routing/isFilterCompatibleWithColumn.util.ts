@@ -15,7 +15,7 @@ export const isFilterCompatibleWithColumn = <
 >({
   column,
   filter,
-}: IsFilterCompatibleWithColumnArgs<TData>): boolean => {
+}: IsFilterCompatibleWithColumnArgs<TData>) => {
   switch (column.dataType) {
     case 'boolean': {
       return filter.type === 'boolean';

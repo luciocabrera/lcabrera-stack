@@ -11,6 +11,6 @@ type AddPreloadHeadersArgs = {
 export const addPreloadHeaders = ({
   responseHeaders,
   stylexCssHref,
-}: AddPreloadHeadersArgs): void => {
+}: AddPreloadHeadersArgs) => {
   responseHeaders.append('Link', `<${stylexCssHref}>; rel=preload; as=style`);
 };

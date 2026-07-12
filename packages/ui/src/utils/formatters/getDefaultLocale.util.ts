@@ -10,4 +10,5 @@ import { DEFAULT_LOCALE } from './formatters.constants';
  * If you need locale-specific formatting, pass the locale explicitly
  * from a context or prop that's synchronized between server and client.
  */
+// explicit return type deliberately widens the locale literal to string
 export const getDefaultLocale = (): string => DEFAULT_LOCALE;

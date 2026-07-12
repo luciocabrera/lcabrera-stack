@@ -1,5 +1,3 @@
-import type { UserRow } from '@repo/scan-ingestion/queries/getUserById.util';
-
 import {
   checkUserPermission,
   type PermissionAction,
@@ -27,7 +25,7 @@ export const requirePermission = async ({
   action,
   request,
   resourceType,
-}: RequirePermissionArgs): Promise<UserRow> => {
+}: RequirePermissionArgs) => {
   const user = await requireUser({ request });
 
   const result = await checkUserPermission({

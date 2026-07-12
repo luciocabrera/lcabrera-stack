@@ -7,10 +7,7 @@ import type {
   SelectFieldProps,
 } from './SelectField.types';
 
-const resolveSelectedValues = ({
-  mode,
-  value,
-}: ResolveSelectedValuesArgs): string[] => {
+const resolveSelectedValues = ({ mode, value }: ResolveSelectedValuesArgs) => {
   if (mode === 'multi') {
     return (value as string[] | undefined) ?? [];
   }

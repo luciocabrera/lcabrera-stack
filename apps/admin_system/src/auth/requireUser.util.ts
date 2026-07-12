@@ -1,7 +1,4 @@
-import {
-  getUserById,
-  type UserRow,
-} from '@repo/scan-ingestion/queries/getUserById.util';
+import { getUserById } from '@repo/scan-ingestion/queries/getUserById.util';
 import { redirect } from 'react-router';
 
 import { getSessionStorage } from './getSessionStorage.util';
@@ -19,9 +16,7 @@ type RequireUserArgs = {
  * redirect to /login (preserving the original destination) — callers
  * just await it and use the returned user.
  */
-export const requireUser = async ({
-  request,
-}: RequireUserArgs): Promise<UserRow> => {
+export const requireUser = async ({ request }: RequireUserArgs) => {
   const { getSession } = getSessionStorage();
   const session = await getSession(request.headers.get('Cookie'));
   const userId = session.get('userId');

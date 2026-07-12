@@ -8,9 +8,7 @@ type CompactSorting = Record<string, 'asc' | 'desc'>;
  * Converts `[{ columnKey: "name", direction: "asc" }]`
  * into `{"name":"asc"}` — much shorter than the verbose array format.
  */
-export const serializeSortingToURL = <TData>(
-  sorting: SortingState<TData>,
-): string | undefined => {
+export const serializeSortingToURL = <TData>(sorting: SortingState<TData>) => {
   if (sorting.length === 0) return undefined;
 
   const entries = sorting

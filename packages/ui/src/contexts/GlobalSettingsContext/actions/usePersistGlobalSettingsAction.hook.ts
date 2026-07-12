@@ -15,7 +15,7 @@ export const usePersistGlobalSettingsAction = () => {
   const fetcher = useFetcher({ key: 'persist-global-settings' });
   const location = useLocation();
 
-  return (settings: GlobalSettingsState): void => {
+  return (settings: GlobalSettingsState) => {
     const currentUrl = `${location.pathname}${location.search}`;
     const serializedSettings = serializeGlobalSettingsForCookie({ settings });
 

@@ -11,7 +11,5 @@ type IsCheckboxCheckedArgs = {
  * must not be looser than the browser (ADR-005: the action's Zod parse is
  * authoritative, not the client widget).
  */
-export const isCheckboxChecked = ({
-  formData,
-  name,
-}: IsCheckboxCheckedArgs): boolean => formData.get(name) === 'on';
+export const isCheckboxChecked = ({ formData, name }: IsCheckboxCheckedArgs) =>
+  formData.get(name) === 'on';

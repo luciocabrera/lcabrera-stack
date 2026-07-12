@@ -6,7 +6,7 @@ import { isSelectFilterValid } from './isSelectFilterValid.util';
 import { isTextFilterValid } from './isTextFilterValid.util';
 
 /** Validates a filter to ensure required fields are populated */
-export const isFilterValid = (filter?: ColumnFilter | null): boolean => {
+export const isFilterValid = (filter?: ColumnFilter | null) => {
   if (!filter) return false;
 
   switch (filter.type) {

@@ -11,8 +11,7 @@ import {
   TEXT_OPERATOR_SHORT_CODES,
 } from '@repo/ui/constants/filterOperators.constants';
 
-const expandOperator = (short: string): string =>
-  SHORT_TO_OPERATOR.get(short) ?? short;
+const expandOperator = (short: string) => SHORT_TO_OPERATOR.get(short) ?? short;
 
 const isDateValue = (v: unknown): v is string =>
   typeof v === 'string' && /^\d{4}-\d{2}-\d{2}/.test(v);

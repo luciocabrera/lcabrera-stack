@@ -15,7 +15,7 @@ export const getSparklinePoints = ({
   height,
   values,
   width,
-}: GetSparklinePointsArgs): string => {
+}: GetSparklinePointsArgs) => {
   if (values.length === 0) return '';
 
   if (values.length === 1) return `0,${height / 2} ${width},${height / 2}`;

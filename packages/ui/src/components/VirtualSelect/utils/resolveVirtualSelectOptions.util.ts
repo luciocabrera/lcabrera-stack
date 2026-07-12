@@ -16,10 +16,8 @@ export const resolveVirtualSelectOptions = ({
   const labelByValue = new Map(optionEntries.map((o) => [o.value, o.label]));
   const valueByLabel = new Map(optionEntries.map((o) => [o.label, o.value]));
 
-  const getLabelFromValue = (value: string): string =>
-    labelByValue.get(value) ?? value;
-  const getValueFromLabel = (label: string): string =>
-    valueByLabel.get(label) ?? label;
+  const getLabelFromValue = (value: string) => labelByValue.get(value) ?? value;
+  const getValueFromLabel = (label: string) => valueByLabel.get(label) ?? label;
 
   const selectedLabels = selected.map((value) => getLabelFromValue(value));
 

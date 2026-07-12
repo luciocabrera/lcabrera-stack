@@ -19,7 +19,7 @@ type IsShallowEqualArgs<T extends Record<string, unknown>> = {
 export const isShallowEqual = <T extends Record<string, unknown>>({
   objA,
   objB,
-}: IsShallowEqualArgs<T>): boolean => {
+}: IsShallowEqualArgs<T>) => {
   if (objA === objB) return true;
   if (!objA || !objB) return false;
 

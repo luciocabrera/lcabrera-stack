@@ -15,10 +15,7 @@ type GetStorageKeyArgs = {
  * so state persisted by one app never collides with another app that happens to
  * use the same `persistenceKey`.
  */
-export const getStorageKey = ({
-  appId,
-  persistenceKey,
-}: GetStorageKeyArgs): string =>
+export const getStorageKey = ({ appId, persistenceKey }: GetStorageKeyArgs) =>
   appId
     ? `table-state-${appId}-${persistenceKey}`
     : `table-state-${persistenceKey}`;

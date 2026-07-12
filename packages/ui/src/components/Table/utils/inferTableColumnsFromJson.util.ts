@@ -19,7 +19,7 @@ const ISO_DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const ISO_DATE_TIME_PATTERN =
   /^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}(:\d{2}|)(\.\d+|)([Z+-][\d:]*|)$/;
 
-const isIsoDateString = (value: string): boolean =>
+const isIsoDateString = (value: string) =>
   ISO_DATE_ONLY_PATTERN.test(value) || ISO_DATE_TIME_PATTERN.test(value);
 
 const inferValueType = (value: unknown): InferredValueType => {
@@ -46,7 +46,7 @@ const inferValueType = (value: unknown): InferredValueType => {
   return 'string';
 };
 
-const humanizeKey = (key: string): string =>
+const humanizeKey = (key: string) =>
   key
     .replaceAll(/([a-z0-9])([A-Z])/g, '$1 $2')
     .replaceAll(/[_-]+/g, ' ')
@@ -58,11 +58,7 @@ type ObserveValueTypeArgs = {
   readonly value: unknown;
 };
 
-const observeValueType = ({
-  key,
-  typeByKey,
-  value,
-}: ObserveValueTypeArgs): void => {
+const observeValueType = ({ key, typeByKey, value }: ObserveValueTypeArgs) => {
   if (value === undefined || value === null) {
     return;
   }

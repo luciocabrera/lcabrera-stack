@@ -9,4 +9,4 @@ import { collectAccessors } from './collectAccessors.util';
  */
 export const getFieldKey = <TValues extends Record<string, unknown>>(
   node: FieldNode<TValues>,
-): string => `${node.type}:${collectAccessors(node).join('|')}`;
+) => `${node.type}:${collectAccessors(node).join('|')}`;

@@ -16,7 +16,7 @@ export const formatCurrency = ({
   currency: currencyCode,
   locale,
   value,
-}: FormatCurrencyArgs): string => {
+}: FormatCurrencyArgs) => {
   const resolvedLocale = locale ?? getDefaultLocale();
   const currency = currencyCode ?? DEFAULT_CURRENCY;
 

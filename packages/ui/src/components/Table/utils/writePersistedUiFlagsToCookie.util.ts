@@ -30,7 +30,7 @@ export const writePersistedUiFlagsToCookie = ({
   headers,
   persistenceKey,
   uiFlags,
-}: WritePersistedUiFlagsToCookieArgs): void => {
+}: WritePersistedUiFlagsToCookieArgs) => {
   const key = `${getStorageKey({ appId, persistenceKey })}-${UI_FLAGS_COOKIE_KEY_SUFFIX}`;
   const serialized = encodeURIComponent(
     JSON.stringify({ value: uiFlags, version: PERSISTENCE_VERSION }),

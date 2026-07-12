@@ -18,7 +18,7 @@ type RenderCellContentArgs = {
   readonly value: unknown;
 };
 
-const parseNumberValue = (value: unknown): number | undefined => {
+const parseNumberValue = (value: unknown) => {
   if (typeof value === 'number') {
     return Number.isNaN(value) ? undefined : value;
   }
@@ -32,7 +32,7 @@ const parseNumberValue = (value: unknown): number | undefined => {
   return Number.isNaN(parsed) ? undefined : parsed;
 };
 
-const stringifyCellValue = (value: unknown): string => {
+const stringifyCellValue = (value: unknown) => {
   if (typeof value === 'string') {
     return value;
   }

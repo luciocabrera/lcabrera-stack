@@ -15,7 +15,7 @@ export const getTotalVisibleColumnCount = ({
   rightPinnedCount,
   rightSpacerWidth,
   visibleCenterCount,
-}: GetTotalVisibleColumnCountArgs): number =>
+}: GetTotalVisibleColumnCountArgs) =>
   leftPinnedCount +
   (leftSpacerWidth > 0 ? 1 : 0) +
   visibleCenterCount +

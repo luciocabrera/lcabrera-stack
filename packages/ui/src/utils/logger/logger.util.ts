@@ -3,7 +3,7 @@ import type { CreateLoggerArgs, Logger, LogLevel } from './logger.types';
 import { DEFAULT_LOG_LEVEL, LOG_LEVEL_PRIORITY } from './logger.constants';
 
 /** No-op function reused by all suppressed log methods. */
-const noop = (): void => {};
+const noop = () => {};
 
 /**
  * Resolves the active log level from the env var, falling back to the default.

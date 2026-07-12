@@ -8,7 +8,7 @@ type SortPinnedKeysByOrderArgs = {
 export const sortPinnedKeysByOrder = ({
   keys,
   newOrder,
-}: SortPinnedKeysByOrderArgs): string[] => {
+}: SortPinnedKeysByOrderArgs) => {
   const orderIndex = new Map(newOrder.map((key, i) => [key, i]));
 
   return [...keys].toSorted(

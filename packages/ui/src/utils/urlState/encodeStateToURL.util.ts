@@ -11,7 +11,7 @@
  * // Returns: "eyJzb3J0aW5nIjpbeyJjb2x1bW5LZXkiOiJuYW1lIiwiZGlyZWN0aW9uIjoiYXNjIn1dfQ"
  * ```
  */
-export const encodeStateToURL = (state: Record<string, unknown>): string => {
+export const encodeStateToURL = (state: Record<string, unknown>) => {
   // Convert Sets to Arrays for JSON serialization
   const serializable = Object.fromEntries(
     Object.entries(state).map(([key, value]) => [

@@ -15,7 +15,7 @@ export const resolveFromCacheOrFetch = async <TResponse>({
   cache,
   expectedSkip,
   fetchFn,
-}: ResolveFromCacheOrFetchArgs<TResponse>): Promise<TResponse> => {
+}: ResolveFromCacheOrFetchArgs<TResponse>) => {
   if (cache?.skip === expectedSkip && cache.data) {
     return cache.data;
   }

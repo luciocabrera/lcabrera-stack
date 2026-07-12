@@ -8,7 +8,7 @@ import { formatNumber } from '@repo/ui/utils/formatters/formatNumber.util';
  * @param value - The metadata value.
  * @returns The formatted display string.
  */
-export const formatMetadataValue = (value: TableMetadataValue): string => {
+export const formatMetadataValue = (value: TableMetadataValue) => {
   if (typeof value === 'boolean') {
     return value ? 'Yes' : 'No';
   }

@@ -21,7 +21,7 @@ const isValidIdValue = (value: unknown): value is number | string =>
 export const resolveCrudRowId = <TData extends Record<string, unknown>>({
   columns,
   row,
-}: ResolveCrudRowIdArgs<TData>): string => {
+}: ResolveCrudRowIdArgs<TData>) => {
   const primaryKeyKeys = resolvePrimaryKeyColumnKeys({ columns });
 
   if (primaryKeyKeys.length === 0) {

@@ -22,7 +22,7 @@ export const setFilterSlice = <TData>({
   columnKey,
   filter,
   filtersDataStore,
-}: SetFilterSliceArgs<TData>): void => {
+}: SetFilterSliceArgs<TData>) => {
   filtersDataStore.set({
     [columnKey]: filter,
   } as Partial<FiltersDataState<TData>>);

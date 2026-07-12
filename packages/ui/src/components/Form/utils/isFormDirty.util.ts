@@ -17,7 +17,7 @@ export const isFormDirty = <TValues extends Record<string, unknown>>({
   accessors,
   currentValues,
   initialValues,
-}: IsFormDirtyArgs<TValues>): boolean => {
+}: IsFormDirtyArgs<TValues>) => {
   return accessors.some((accessor) => {
     const initial = initialValues[accessor];
     const current = currentValues[accessor];

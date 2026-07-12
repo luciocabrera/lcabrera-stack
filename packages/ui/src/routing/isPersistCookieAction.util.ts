@@ -6,7 +6,7 @@ import { PERSIST_COOKIE_ACTION } from '@repo/ui/constants/globalSettings.constan
  */
 export const isPersistCookieAction = (
   formAction: null | string | undefined,
-): boolean => {
+) => {
   if (!formAction) {
     return false;
   }

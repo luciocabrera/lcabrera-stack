@@ -14,7 +14,7 @@ export const getTotalRows = <TResponse>({
   data,
   dataTotalSelector,
   response,
-}: GetTotalRowsArgs<TResponse>): number => {
+}: GetTotalRowsArgs<TResponse>) => {
   if (dataTotalSelector) {
     return dataTotalSelector(response);
   }

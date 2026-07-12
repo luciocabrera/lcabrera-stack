@@ -9,10 +9,7 @@ type AreArraysEqualArgs<T> = {
  * Returns true only when both arrays have the same length and all values at
  * matching indices are strictly equal (`===`).
  */
-export const areArraysEqual = <T>({
-  left,
-  right,
-}: AreArraysEqualArgs<T>): boolean => {
+export const areArraysEqual = <T>({ left, right }: AreArraysEqualArgs<T>) => {
   if (left === right) {
     return true;
   }

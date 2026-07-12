@@ -8,9 +8,7 @@ type ReadFromSessionStorageArgs = {
  * Read from sessionStorage safely (SSR-safe, tab-scoped).
  * Returns undefined on SSR or if the key does not exist.
  */
-export const readFromSessionStorage = ({
-  key,
-}: ReadFromSessionStorageArgs): string | undefined => {
+export const readFromSessionStorage = ({ key }: ReadFromSessionStorageArgs) => {
   if (typeof sessionStorage === 'undefined') return undefined;
   try {
     return sessionStorage.getItem(key) ?? undefined;

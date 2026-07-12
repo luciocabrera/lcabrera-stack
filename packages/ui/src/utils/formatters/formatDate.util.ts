@@ -18,7 +18,7 @@ export const formatDate = ({
   locale,
   preset: presetOption,
   value,
-}: FormatDateArgs): string => {
+}: FormatDateArgs) => {
   const date = parseDate(value);
 
   if (!date) {

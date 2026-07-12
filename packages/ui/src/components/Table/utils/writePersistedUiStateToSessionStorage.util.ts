@@ -22,7 +22,7 @@ export const writePersistedUiStateToSessionStorage = ({
   appId,
   persistenceKey,
   uiState,
-}: WritePersistedUiStateToSessionStorageArgs): void => {
+}: WritePersistedUiStateToSessionStorageArgs) => {
   const key = `${getStorageKey({ appId, persistenceKey })}-${UI_STATE_SESSION_KEY_SUFFIX}`;
   const serialized = encodeURIComponent(
     JSON.stringify({ value: uiState, version: PERSISTENCE_VERSION }),

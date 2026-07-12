@@ -11,7 +11,7 @@ type WriteToLocalStorageArgs = {
 export const writeToLocalStorage = ({
   key,
   value,
-}: WriteToLocalStorageArgs): void => {
+}: WriteToLocalStorageArgs) => {
   if (typeof localStorage === 'undefined') return;
 
   try {

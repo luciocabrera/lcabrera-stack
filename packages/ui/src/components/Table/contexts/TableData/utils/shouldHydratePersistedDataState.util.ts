@@ -16,7 +16,7 @@ type ShouldHydratePersistedDataStateArgs<TData> = {
 export const shouldHydratePersistedDataState = <TData>({
   initialDataState,
   persistedDataState,
-}: ShouldHydratePersistedDataStateArgs<TData>): boolean => {
+}: ShouldHydratePersistedDataStateArgs<TData>) => {
   if (persistedDataState === undefined) {
     return false;
   }

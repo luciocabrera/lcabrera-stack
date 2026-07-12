@@ -12,7 +12,7 @@ type PersistTableMetaUiStateArgs = {
 export const persistTableMetaUiState = ({
   currentState,
   nextStatePatch,
-}: PersistTableMetaUiStateArgs): void => {
+}: PersistTableMetaUiStateArgs) => {
   const nextState = {
     ...currentState,
     ...nextStatePatch,

@@ -17,7 +17,7 @@ type ValidateFieldArgs<TValues extends Record<string, unknown>> = {
 export const validateField = <TValues extends Record<string, unknown>>({
   field,
   value,
-}: ValidateFieldArgs<TValues>): string | undefined => {
+}: ValidateFieldArgs<TValues>) => {
   const validation = field.clientValidation;
   if (!validation) return undefined;
 

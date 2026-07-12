@@ -72,7 +72,7 @@ export const carSalesApi = {
    * Fetch car sales data
    * Returns a promise (non-blocking) to enable React streaming with Suspense
    */
-  fetchCarSales: async (requestUrl?: string): Promise<CarSalesResponse> => {
+  fetchCarSales: async (requestUrl?: string) => {
     await fakeDelay();
 
     return fetchAndValidate({
@@ -95,7 +95,7 @@ export const carSalesApi = {
     requestUrl?: string;
     skip: number;
     sorting?: SortingState<CarSale>;
-  }): Promise<CarSalesResponse & { hasMore: boolean }> => {
+  }) => {
     const params = buildPaginatedQueryParams({ limit, skip, sorting });
 
     const url = `${getApiBaseUrl(requestUrl)}/car-sales/paginated?${params.toString()}`;

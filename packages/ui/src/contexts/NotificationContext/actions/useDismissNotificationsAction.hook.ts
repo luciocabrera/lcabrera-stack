@@ -3,7 +3,7 @@ import { useNotificationContextValue } from '../useNotificationContextValue.hook
 export const useDismissNotificationsAction = () => {
   const { notificationsStore, timeoutMapRef } = useNotificationContextValue();
 
-  return (): void => {
+  return () => {
     for (const timeoutId of timeoutMapRef.current.values()) {
       clearTimeout(timeoutId);
     }

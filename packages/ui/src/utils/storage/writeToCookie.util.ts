@@ -29,11 +29,7 @@ type WriteToCookieArgs = {
  *   return json({ ok: true }, { headers });
  * };
  */
-export const writeToCookie = ({
-  headers,
-  key,
-  value,
-}: WriteToCookieArgs): void => {
+export const writeToCookie = ({ headers, key, value }: WriteToCookieArgs) => {
   const cookieValue = buildCookieString({ key, value });
 
   // SSR: append Set-Cookie header

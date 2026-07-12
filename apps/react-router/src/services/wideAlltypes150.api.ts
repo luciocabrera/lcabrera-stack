@@ -214,7 +214,7 @@ export const wideAlltypes150Api = {
     requestUrl,
     skip,
     sorting,
-  }: FetchWideAlltypes150Params): Promise<WideAlltypes150Response> => {
+  }: FetchWideAlltypes150Params) => {
     const params = buildPaginatedQueryParams({ limit, skip, sorting });
 
     const url = `${getApiBaseUrl(requestUrl)}/wide-alltypes-150/paginated?${params.toString()}`;

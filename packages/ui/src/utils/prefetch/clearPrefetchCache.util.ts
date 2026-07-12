@@ -21,6 +21,6 @@ const EMPTY_PREFETCH_CACHE = {
  */
 export const clearPrefetchCache = <TResponse>({
   prefetchRef,
-}: ClearPrefetchCacheArgs<TResponse>): void => {
+}: ClearPrefetchCacheArgs<TResponse>) => {
   prefetchRef.current = EMPTY_PREFETCH_CACHE as PrefetchCache<TResponse>;
 };

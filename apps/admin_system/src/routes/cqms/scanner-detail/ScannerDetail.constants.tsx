@@ -1,7 +1,7 @@
 import type { ScannerVersionRow } from '@repo/scan-ingestion/queries/getScannerVersions.util';
 import type { TableColumn } from '@repo/ui/components/Table';
 
-const readSnapshotSummary = (snapshot: Record<string, unknown>): string => {
+const readSnapshotSummary = (snapshot: Record<string, unknown>) => {
   const displayName = snapshot['display_name'];
   const description = snapshot['description'];
   const namePart = typeof displayName === 'string' ? displayName : '—';

@@ -12,7 +12,7 @@ type WriteToSessionStorageArgs = {
 export const writeToSessionStorage = ({
   key,
   value,
-}: WriteToSessionStorageArgs): void => {
+}: WriteToSessionStorageArgs) => {
   if (typeof sessionStorage === 'undefined') return;
   try {
     sessionStorage.setItem(key, value);

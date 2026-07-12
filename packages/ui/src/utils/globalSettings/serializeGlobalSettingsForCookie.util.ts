@@ -8,7 +8,7 @@ type SerializeGlobalSettingsForCookieArgs = {
 
 export const serializeGlobalSettingsForCookie = ({
   settings,
-}: SerializeGlobalSettingsForCookieArgs): string => {
+}: SerializeGlobalSettingsForCookieArgs) => {
   return JSON.stringify({
     value: settings,
     version: GLOBAL_SETTINGS_COOKIE_VERSION,

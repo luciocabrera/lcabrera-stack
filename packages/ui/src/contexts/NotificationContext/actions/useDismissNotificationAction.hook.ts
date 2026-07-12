@@ -4,7 +4,7 @@ import { useNotificationContextValue } from '../useNotificationContextValue.hook
 export const useDismissNotificationAction = () => {
   const { notificationsStore, timeoutMapRef } = useNotificationContextValue();
 
-  return (id: string): void => {
+  return (id: string) => {
     const timeoutId = timeoutMapRef.current.get(id);
 
     if (timeoutId !== undefined) {

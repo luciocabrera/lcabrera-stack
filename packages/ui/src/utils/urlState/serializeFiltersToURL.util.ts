@@ -8,9 +8,7 @@ import { serializeFilter } from './serializeFilter.util';
  * Removes redundant `type` keys and uses short operator codes.
  * Returns undefined when there are no filters.
  */
-export const serializeFiltersToURL = (
-  filters: ColumnFiltersState,
-): string | undefined => {
+export const serializeFiltersToURL = (filters: ColumnFiltersState) => {
   const entries = Object.entries(filters);
   if (entries.length === 0) return undefined;
 

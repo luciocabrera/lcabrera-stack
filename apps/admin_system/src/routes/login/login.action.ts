@@ -12,7 +12,7 @@ const DEFAULT_REDIRECT = '/cqms/projects';
  * fully-qualified URL in ?redirectTo would otherwise turn the login form
  * into an open redirect.
  */
-const resolveRedirectTo = (request: Request): string => {
+const resolveRedirectTo = (request: Request) => {
   const redirectTo = new URL(request.url).searchParams.get('redirectTo');
   if (redirectTo === null) return DEFAULT_REDIRECT;
   if (!redirectTo.startsWith('/') || redirectTo.startsWith('//')) {

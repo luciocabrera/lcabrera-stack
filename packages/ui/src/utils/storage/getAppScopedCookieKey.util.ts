@@ -20,4 +20,4 @@ type GetAppScopedCookieKeyArgs = {
 export const getAppScopedCookieKey = ({
   appId,
   key,
-}: GetAppScopedCookieKeyArgs): string => (appId ? `${appId}-${key}` : key);
+}: GetAppScopedCookieKeyArgs) => (appId ? `${appId}-${key}` : key);

@@ -59,7 +59,7 @@ const generateCellValue = ({
   colIdx,
   dataType,
   rowIdx,
-}: GenerateCellValueArgs): boolean | number | string => {
+}: GenerateCellValueArgs) => {
   if (dataType === 'boolean') return rng() > 0.5;
   if (dataType === 'currency') return `$${randomCurrency()}`;
   if (dataType === 'date') return randomDate().toISOString().slice(0, 10);
@@ -100,8 +100,8 @@ export const SHOWCASE_META_STATE = getInitialMetaState({
   },
 });
 
-const fetchTableData = (): Promise<MockResponse> =>
-  new Promise((resolve) => {
+const fetchTableData = () =>
+  new Promise<MockResponse>((resolve) => {
     setTimeout(() => {
       resolve({ data: tableData, total: tableData.length });
     }, FAKE_API_DELAY_MS);
@@ -117,7 +117,7 @@ export const getTableDataPromise = () => {
   return tableDataPromiseCache.current;
 };
 
-export const resetTableDataPromise = (): void => {
+export const resetTableDataPromise = () => {
   tableDataPromiseCache.current = undefined;
 };
 

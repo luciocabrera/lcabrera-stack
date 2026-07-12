@@ -18,7 +18,7 @@ type SubmitFormArgs<TValues extends Record<string, unknown>> = {
 export const useSubmitForm = <TValues extends Record<string, unknown>>() => {
   const { fieldsStore, metaStore } = useFormContextValue<TValues>();
 
-  return ({ leafFields }: SubmitFormArgs<TValues>): boolean => {
+  return ({ leafFields }: SubmitFormArgs<TValues>) => {
     const metaState = metaStore.get();
     const fieldsState = fieldsStore.get();
     if (!fieldsState) return true;

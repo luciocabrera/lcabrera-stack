@@ -132,7 +132,7 @@ export const enterpriseOrdersApi = {
   }: {
     orderId: number;
     requestUrl?: string;
-  }): Promise<void> => {
+  }) => {
     const url = `${getApiBaseUrl(requestUrl)}/enterprise-orders/${orderId}`;
 
     const response = await fetch(url, { method: 'DELETE' });
@@ -157,7 +157,7 @@ export const enterpriseOrdersApi = {
     limit?: number;
     offset?: number;
     requestUrl?: string;
-  }): Promise<{ hasMore: boolean; values: string[] }> => {
+  }) => {
     const url = `${getApiBaseUrl(requestUrl)}/enterprise-orders/distinct/${columnName}?limit=${limit}&offset=${offset}`;
     log.debug(
       '🎯 Fetching distinct values for:',
@@ -182,7 +182,7 @@ export const enterpriseOrdersApi = {
   }: {
     orderId: number;
     requestUrl?: string;
-  }): Promise<EnterpriseOrderDetailResponse> => {
+  }) => {
     const url = `${getApiBaseUrl(requestUrl)}/enterprise-orders/${orderId}`;
     log.debug('🎯 Fetching order by ID:', orderId);
 
@@ -202,9 +202,7 @@ export const enterpriseOrdersApi = {
     requestUrl,
     skip,
     sorting,
-  }: FetchEnterpriseOrdersParams): Promise<
-    EnterpriseOrdersResponse & { hasMore: boolean }
-  > => {
+  }: FetchEnterpriseOrdersParams) => {
     const params = buildPaginatedQueryParams({ filter, limit, skip, sorting });
 
     const url = `${getApiBaseUrl(requestUrl)}/enterprise-orders/paginated?${params.toString()}`;
@@ -212,9 +210,7 @@ export const enterpriseOrdersApi = {
     log.debug('🌐 Filter object:', filter);
     log.debug('🌐 Sorting:', sorting);
 
-    const fetchData = async (): Promise<
-      EnterpriseOrdersResponse & { hasMore: boolean }
-    > => {
+    const fetchData = async () => {
       const response = await fetch(url);
       log.debug('📡 Response status:', response.status, response.statusText);
 

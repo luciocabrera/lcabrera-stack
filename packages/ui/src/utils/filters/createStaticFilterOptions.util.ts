@@ -30,13 +30,7 @@ type StaticFilterOptions<TData> = Pick<
 export const createStaticFilterOptions = <TData>(
   values: string[],
 ): StaticFilterOptions<TData> => ({
-  fetchFilterOptions: ({
-    limit,
-    skip,
-  }: {
-    limit: number;
-    skip: number;
-  }): Promise<FilterOptionsResponse> => {
+  fetchFilterOptions: ({ limit, skip }: { limit: number; skip: number }) => {
     const sliced = values.slice(skip, skip + limit);
     return Promise.resolve({
       hasMore: skip + limit < values.length,

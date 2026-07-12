@@ -10,7 +10,7 @@ export const NotificationItem = ({
   notification,
   onDismiss,
 }: NotificationItemProps) => {
-  const handleDismissClick = (): void => {
+  const handleDismissClick = () => {
     onDismiss(notification.id);
   };
 

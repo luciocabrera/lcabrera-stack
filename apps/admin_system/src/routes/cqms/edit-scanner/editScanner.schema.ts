@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const isJsonObjectOrEmpty = (value: string): boolean => {
+const isJsonObjectOrEmpty = (value: string) => {
   if (value === '') return true;
   try {
     const parsed: unknown = JSON.parse(value);

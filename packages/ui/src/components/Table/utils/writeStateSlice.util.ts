@@ -26,7 +26,7 @@ export const writeStateSlice = ({
   slice,
   storageType,
   value,
-}: WriteStateSliceArgs): void => {
+}: WriteStateSliceArgs) => {
   const { key, value: serialized } = serializeStateSlice({
     appId,
     persistenceKey,

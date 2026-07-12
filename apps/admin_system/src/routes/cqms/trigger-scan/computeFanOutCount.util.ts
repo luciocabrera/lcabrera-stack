@@ -11,5 +11,4 @@ type ComputeFanOutCountArgs = {
 export const computeFanOutCount = ({
   scannerCount,
   workspaceCount,
-}: ComputeFanOutCountArgs): number =>
-  scannerCount * Math.max(workspaceCount, 1);
+}: ComputeFanOutCountArgs) => scannerCount * Math.max(workspaceCount, 1);

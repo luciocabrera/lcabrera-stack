@@ -20,7 +20,7 @@ export const firePrefetch = <TResponse>({
   nextSkip,
   onLoadMore,
   prefetchRef,
-}: FirePrefetchArgs<TResponse>): void => {
+}: FirePrefetchArgs<TResponse>) => {
   const { initialCache, resolution } = prefetchNextPage({
     limit,
     nextSkip,

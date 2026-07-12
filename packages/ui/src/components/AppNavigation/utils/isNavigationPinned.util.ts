@@ -15,7 +15,7 @@ export type ResolvePinnedStateArgs = {
 export const isNavigationPinned = ({
   defaultIsPinned,
   navigationPinnedPreference,
-}: ResolvePinnedStateArgs): boolean => {
+}: ResolvePinnedStateArgs) => {
   if (navigationPinnedPreference === 'pinned') {
     return true;
   }

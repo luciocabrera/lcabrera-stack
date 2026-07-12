@@ -12,5 +12,4 @@ type GetErrorMessageArgs = {
 export const getErrorMessage = ({
   error,
   fallback = 'An error occurred',
-}: GetErrorMessageArgs): string =>
-  error instanceof Error ? error.message : fallback;
+}: GetErrorMessageArgs) => (error instanceof Error ? error.message : fallback);

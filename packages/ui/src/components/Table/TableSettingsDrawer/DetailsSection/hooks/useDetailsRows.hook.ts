@@ -28,7 +28,7 @@ export const useDetailsRows = (): readonly DetailsRow[] => {
   const config = useDetailsConfigMeta();
 
   const resolvedLocale = resolveDetailsLocale(locale);
-  const formatInteger = (value: number): string =>
+  const formatInteger = (value: number) =>
     formatNumber({ locale: resolvedLocale, maximumFractionDigits: 0, value });
 
   return [

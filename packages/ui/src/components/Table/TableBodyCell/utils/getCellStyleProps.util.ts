@@ -6,10 +6,10 @@ import type { TableBodyCellProps } from '../TableBodyCell.types';
 
 import { tableBodyCellStyles } from '../TableBodyCell.stylex';
 
-const isRightAlignedDataType = (dataType: TableColumnDataType): boolean =>
+const isRightAlignedDataType = (dataType: TableColumnDataType) =>
   dataType === 'number' || dataType === 'currency';
 
-const isCenteredDataType = (dataType: TableColumnDataType): boolean =>
+const isCenteredDataType = (dataType: TableColumnDataType) =>
   dataType === 'boolean' || dataType === 'date';
 
 type GetCellStylePropsArgs = Pick<

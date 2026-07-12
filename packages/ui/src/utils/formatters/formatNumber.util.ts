@@ -16,7 +16,7 @@ export const formatNumber = ({
   maximumFractionDigits,
   minimumFractionDigits,
   value,
-}: FormatNumberArgs): string => {
+}: FormatNumberArgs) => {
   const resolvedLocale = locale ?? getDefaultLocale();
 
   const formatOptions: Intl.NumberFormatOptions = {};

@@ -4,7 +4,7 @@
  * @param rawKey - The raw metadata key.
  * @returns The humanized label.
  */
-export const formatMetadataLabel = (rawKey: string): string => {
+export const formatMetadataLabel = (rawKey: string) => {
   const normalized = rawKey
     .replaceAll(/([a-z0-9])([A-Z])/g, '$1 $2')
     .replaceAll(/[_-]+/g, ' ')

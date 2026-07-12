@@ -15,7 +15,7 @@ export const validateStringValue = ({
   message,
   validation,
   value,
-}: ValidateStringValueArgs): string | undefined => {
+}: ValidateStringValueArgs) => {
   if (
     validation.minLength !== undefined &&
     value.length < validation.minLength

@@ -51,7 +51,7 @@ export const Settings = () => {
 
   const hasChanges = hasNavigationChanges || hasPinningChanges;
 
-  const handleAccept = (): void => {
+  const handleAccept = () => {
     if (!hasChanges) {
       return;
     }
@@ -72,7 +72,7 @@ export const Settings = () => {
     }
   };
 
-  const handleCancel = (): void => {
+  const handleCancel = () => {
     setDraft(toDraft({ navigationPreferences, pinningPreferences }));
   };
 

@@ -13,7 +13,7 @@ export const useNotifyAction = () => {
     placement,
     title,
     variant = 'info',
-  }: NotifyArgs): string => {
+  }: NotifyArgs) => {
     const state = notificationsStore.get() ?? INITIAL_NOTIFICATION_STATE;
     const resolvedDurationMs = durationMs ?? state.defaultDurationMs;
     const resolvedPlacement = placement ?? state.defaultPlacement;

@@ -6,7 +6,7 @@ import { HydratedRouter } from 'react-router/dom';
  * The client hydration entry every app needs identically — no per-app
  * variation exists in the stock React Router framework-mode scaffold.
  */
-export const hydrateApp = (): void => {
+export const hydrateApp = () => {
   startTransition(() => {
     hydrateRoot(
       document,
