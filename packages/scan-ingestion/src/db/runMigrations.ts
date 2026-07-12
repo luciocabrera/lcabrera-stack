@@ -62,8 +62,52 @@ const applyMigration = async ({
   }
 };
 
-const runMigrations = async (): Promise<void> => {
+const initDatabase = async (): Promise<boolean> => {
   const envConfig = readEnvConfig({ env: process.env });
+  const dbName = envConfig.DB_NAME;
+  const initClient = new Client({
+    database: 'postgres',
+    host: envConfig.DB_HOST,
+    password: envConfig.DB_PASSWORD,
+    port: envConfig.DB_PORT,
+    user: envConfig.DB_USER,
+  });
+  await initClient.connect();
+
+  try {
+    // 2. Check if your target database already exists
+    const res = await initClient.query(
+      'SELECT 1 FROM pg_database WHERE datname = $1',
+      [dbName],
+    );
+
+    if (res.rowCount === 0) {
+      console.log(`Database "${dbName}" does not exist. Creating it now...`);
+      // Note: CREATE DATABASE cannot accept parameters via $1, so we escape it safely
+      await initClient.query(`CREATE DATABASE "${dbName}"`);
+      console.log(`Database "${dbName}" created successfully.`);
+      await new Promise((res) => setTimeout(res, 200));
+    } else {
+      console.log(`Database "${dbName}" already exists.`);
+    }
+    return true;
+  } catch (error) {
+    console.error('❌ Database initialization failed:', error);
+    return false;
+  } finally {
+    await initClient.end();
+  }
+};
+
+const runMigrations = async (): Promise<void> => {
+  const dbInitialized = await initDatabase();
+  if (!dbInitialized) {
+    console.error('❌ Database initialization failed');
+    process.exitCode = 1;
+    return;
+  }
+  const envConfig = readEnvConfig({ env: process.env });
+
   const client = new Client({
     database: envConfig.DB_NAME,
     host: envConfig.DB_HOST,
