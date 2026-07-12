@@ -1,6 +1,5 @@
 import { InfoBox } from '@repo/ui/components/InfoBox';
 import { SidePanelSectionHeader } from '@repo/ui/components/SidePanel';
-import { useGetNormalizedColumns } from '@repo/ui/components/Table/contexts/TableConfig/columns/selectors';
 import * as stylex from '@stylexjs/stylex';
 
 import type { ActiveFiltersListProps } from './ActiveFiltersList.types';
@@ -19,32 +18,21 @@ export const ActiveFiltersList = ({
   isBusy = false,
 }: ActiveFiltersListProps) => {
   const filters = useGetColumnFilters();
-  const normalizedColumns = useGetNormalizedColumns();
 
-  const filterEntries = Object.entries(filters);
-  const hasFilters = filterEntries.length > 0;
+  const filterKeys = Object.keys(filters);
+  const hasFilters = filterKeys.length > 0;
 
   return (
     <div {...stylex.props(styles.container)}>
       <SidePanelSectionHeader
-        title={`Active Filters (${filterEntries.length})`}
+        title={`Active Filters (${filterKeys.length})`}
         toolbar={<FiltersSectionToolbar isBusy={isBusy} variant='toolbar' />}
       />
       {hasFilters ? (
         <div {...stylex.props(styles.filtersList)}>
-          {filterEntries.map(([columnKey, filter]) => {
-            const column = normalizedColumns[columnKey];
-            if (!column) return;
-            return (
-              <FilterItem
-                column={column}
-                columnKey={columnKey}
-                filter={filter}
-                isBusy={isBusy}
-                key={columnKey}
-              />
-            );
-          })}
+          {filterKeys.map((columnKey) => (
+            <FilterItem columnKey={columnKey} isBusy={isBusy} key={columnKey} />
+          ))}
         </div>
       ) : (
         <InfoBox>

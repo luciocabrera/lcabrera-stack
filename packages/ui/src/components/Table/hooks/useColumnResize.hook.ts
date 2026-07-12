@@ -1,24 +1,30 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useSyncColumnsSizing } from '../contexts/TableConfig/columns/actions/useSyncColumnsSizing.hook';
 import { createResizeStartData } from './utils/createResizeStartData.util';
 import { resolveResizeWidth } from './utils/resolveResizeWidth.util';
 
 export type OnResizeParams = {
-  columnKey: string;
-  width: number;
+  readonly columnKey: string;
+  readonly width: number;
 };
 
 export type UseColumnResizeArgs = {
-  columnKey: string;
-  currentWidth: number | undefined;
-  maxWidth?: number;
-  minWidth?: number;
-  onResize: (params: OnResizeParams) => void;
+  readonly columnKey: string;
+  readonly currentWidth: number | undefined;
+  readonly maxWidth?: number;
+  readonly minWidth?: number;
+  readonly onResize: (params: OnResizeParams) => void;
 };
 
 /**
- * Hook for handling column resize with mouse drag
+ * Hook for handling column resize with mouse drag.
+ *
+ * Each mouse down opens a self-contained drag session: the start snapshot
+ * (`createResizeStartData`), the RAF-throttled move handler emitting clamped
+ * widths (`resolveResizeWidth`), and the paired teardown all live in one
+ * closure. Mouse up ends the session and persists via `useSyncColumnsSizing`;
+ * unmount ends any in-flight session through `endDragSessionRef`.
  *
  * Features:
  * - Smooth resizing with requestAnimationFrame throttling
@@ -46,104 +52,77 @@ export const useColumnResize = ({
 }: UseColumnResizeArgs) => {
   const [isResizing, setIsResizing] = useState(false);
   const syncColumnsSizing = useSyncColumnsSizing();
-  const resizeDataRef = useRef<
-    | undefined
-    | {
-        animationFrameId: number | undefined;
-        initialWidth: number;
-        initialX: number;
-        maxWidth: number;
-        minWidth: number;
-      }
-  >(null);
+  const endDragSessionRef = useRef<(() => void) | undefined>(undefined);
 
-  const handleMouseMove = useCallback(
-    (event: MouseEvent) => {
-      if (!resizeDataRef.current) return;
+  const onMouseDown = (event: React.MouseEvent<HTMLElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
 
-      const { animationFrameId, initialWidth, initialX, maxWidth, minWidth } =
-        resizeDataRef.current;
+    // A new drag always supersedes any session still in flight
+    endDragSessionRef.current?.();
 
-      // Cancel previous animation frame
+    const startData = createResizeStartData({
+      clientX: event.clientX,
+      currentWidth,
+      maxWidth,
+      minWidth,
+    });
+    const listenerController = new AbortController();
+    let animationFrameId: number | undefined;
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      // Keep only the latest pending frame so moves render at most once per frame
       if (animationFrameId !== undefined) {
         cancelAnimationFrame(animationFrameId);
       }
-
-      // Use RAF to throttle updates for smooth performance
-      const newAnimationFrameId = requestAnimationFrame(() => {
+      animationFrameId = requestAnimationFrame(() => {
         onResize({
           columnKey,
           width: resolveResizeWidth({
-            clientX: event.clientX,
-            initialWidth,
-            initialX,
-            maxWidth,
-            minWidth,
+            clientX: moveEvent.clientX,
+            ...startData,
           }),
         });
       });
+    };
 
-      resizeDataRef.current.animationFrameId = newAnimationFrameId;
-    },
-    [columnKey, onResize],
-  );
-
-  const handleMouseUp = useCallback(() => {
-    const animationFrameId = resizeDataRef.current?.animationFrameId;
-    if (animationFrameId !== undefined) {
-      cancelAnimationFrame(animationFrameId);
-    }
-
-    resizeDataRef.current = undefined;
-    setIsResizing(false);
-    syncColumnsSizing();
-
-    // Re-enable text selection
-    document.body.style.userSelect = '';
-    document.body.style.cursor = '';
-  }, [syncColumnsSizing]);
-
-  const onMouseDown = useCallback(
-    (event: React.MouseEvent<HTMLElement>) => {
-      event.preventDefault();
-      event.stopPropagation();
-
-      resizeDataRef.current = {
-        animationFrameId: undefined,
-        ...createResizeStartData({
-          clientX: event.clientX,
-          currentWidth,
-          maxWidth,
-          minWidth,
-        }),
-      };
-
-      setIsResizing(true);
-
-      // Prevent text selection during drag
-      document.body.style.userSelect = 'none';
-      document.body.style.cursor = 'col-resize';
-
-      // Add document-level event listeners
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-    },
-    [currentWidth, handleMouseMove, handleMouseUp, maxWidth, minWidth],
-  );
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      const animationFrameId = resizeDataRef.current?.animationFrameId;
+    const endDragSession = () => {
       if (animationFrameId !== undefined) {
         cancelAnimationFrame(animationFrameId);
       }
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
+      listenerController.abort();
       document.body.style.userSelect = '';
       document.body.style.cursor = '';
+      endDragSessionRef.current = undefined;
     };
-  }, [handleMouseMove, handleMouseUp]);
+
+    const handleMouseUp = () => {
+      endDragSession();
+      setIsResizing(false);
+      syncColumnsSizing();
+    };
+
+    endDragSessionRef.current = endDragSession;
+    setIsResizing(true);
+
+    // Prevent text selection during drag
+    document.body.style.userSelect = 'none';
+    document.body.style.cursor = 'col-resize';
+
+    document.addEventListener('mousemove', handleMouseMove, {
+      signal: listenerController.signal,
+    });
+    document.addEventListener('mouseup', handleMouseUp, {
+      signal: listenerController.signal,
+    });
+  };
+
+  // End any in-flight drag session on unmount
+  useEffect(() => {
+    return () => {
+      endDragSessionRef.current?.();
+    };
+  }, []);
 
   return { isResizing, onMouseDown };
 };

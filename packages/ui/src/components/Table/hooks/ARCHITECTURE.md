@@ -24,24 +24,32 @@ origin and effective bounds; `resolveResizeWidth` clamps the dragged width);
 the hook keeps only the DOM wiring — document listeners, RAF bookkeeping,
 and body cursor/selection toggles.
 
+Each mouse down opens a **self-contained drag session closure**: the start
+snapshot, the move handler, and the teardown are all locals of `onMouseDown`.
+Listeners are registered with one `AbortController` signal, so ending the
+session (mouse up, unmount, or a superseding mouse down) detaches both in one
+`abort()`. No manual memoization (ADR-004) and no cross-render mutable data
+bag — the only ref holds the active session's teardown for unmount safety.
+
 ```mermaid
 graph LR
-  MD["onMouseDown"] --> Track["createResizeStartData → drag origin + bounds"]
+  MD["onMouseDown (opens session closure)"] --> Track["createResizeStartData → drag origin + bounds"]
   Track --> Move["document.onMouseMove"]
   Move --> RAF["requestAnimationFrame"]
   RAF --> Clamp["resolveResizeWidth (clamped delta)"]
   Clamp --> Resize["onResize({ columnKey, width })"]
   Move --> Up["document.onMouseUp"]
-  Up --> Sync["useSyncColumnsSizing()"]
+  Up --> End["endDragSession (abort listeners + restore body styles)"]
+  End --> Sync["useSyncColumnsSizing()"]
 ```
 
-| Feature              | Detail                                 |
-| -------------------- | -------------------------------------- |
-| Throttling           | `requestAnimationFrame` per move event |
-| Constraints          | `minWidth` / `maxWidth` clamping       |
-| Double-click         | Resets column to auto width            |
-| Selection prevention | Disables text selection during drag    |
-| Cleanup              | Global mouse listeners on document     |
+| Feature              | Detail                                                     |
+| -------------------- | ---------------------------------------------------------- |
+| Throttling           | `requestAnimationFrame` per move event                     |
+| Constraints          | `minWidth` / `maxWidth` clamping                           |
+| Double-click         | Resets column to auto width                                |
+| Selection prevention | Disables text selection during drag                        |
+| Cleanup              | Session teardown on mouse up, unmount, or superseding drag |
 
 ## useInfiniteScroll
 

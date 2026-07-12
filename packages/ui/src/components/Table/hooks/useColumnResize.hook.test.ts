@@ -2,7 +2,7 @@
 
 import type React from 'react';
 
-import { act, renderHook } from '@testing-library/react';
+import { act, cleanup, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useColumnResize } from './useColumnResize.hook';
@@ -44,6 +44,8 @@ describe('useColumnResize', () => {
   });
 
   afterEach(() => {
+    // Unmount hooks so in-flight drag sessions release their document listeners
+    cleanup();
     document.body.style.cursor = '';
     document.body.style.userSelect = '';
     syncColumnsSizingMock.mockReset();
@@ -107,7 +109,6 @@ describe('useColumnResize', () => {
 
   it('cleans up listeners and body styles on unmount while resizing', () => {
     const onResize = vi.fn();
-    const removeEventListenerSpy = vi.spyOn(document, 'removeEventListener');
     const { result, unmount } = renderHook(() =>
       useColumnResize({
         columnKey: 'name',
@@ -125,15 +126,52 @@ describe('useColumnResize', () => {
 
     unmount();
 
-    expect(removeEventListenerSpy).toHaveBeenCalledWith(
-      'mousemove',
-      expect.any(Function),
-    );
-    expect(removeEventListenerSpy).toHaveBeenCalledWith(
-      'mouseup',
-      expect.any(Function),
-    );
+    document.dispatchEvent(new MouseEvent('mousemove', { clientX: 400 }));
+
+    expect(onResize).not.toHaveBeenCalled();
     expect(document.body.style.cursor).toBe('');
     expect(document.body.style.userSelect).toBe('');
+  });
+
+  it('stops listening to document mouse moves once the drag ends', () => {
+    const onResize = vi.fn();
+    const { result } = renderHook(() =>
+      useColumnResize({
+        columnKey: 'name',
+        currentWidth: 200,
+        onResize,
+      }),
+    );
+
+    act(() => {
+      result.current.onMouseDown(createMouseDownEvent({ clientX: 100 }));
+      document.dispatchEvent(new MouseEvent('mouseup'));
+      document.dispatchEvent(new MouseEvent('mousemove', { clientX: 400 }));
+    });
+
+    expect(onResize).not.toHaveBeenCalled();
+    expect(syncColumnsSizingMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('supersedes an in-flight session when a new drag starts', () => {
+    const onResize = vi.fn();
+    const { result } = renderHook(() =>
+      useColumnResize({
+        columnKey: 'name',
+        currentWidth: 200,
+        minWidth: 100,
+        onResize,
+      }),
+    );
+
+    act(() => {
+      result.current.onMouseDown(createMouseDownEvent({ clientX: 100 }));
+      result.current.onMouseDown(createMouseDownEvent({ clientX: 200 }));
+      document.dispatchEvent(new MouseEvent('mousemove', { clientX: 150 }));
+    });
+
+    // Only the second session's start position is live: 200 + (150 - 200)
+    expect(onResize).toHaveBeenCalledTimes(1);
+    expect(onResize).toHaveBeenCalledWith({ columnKey: 'name', width: 150 });
   });
 });

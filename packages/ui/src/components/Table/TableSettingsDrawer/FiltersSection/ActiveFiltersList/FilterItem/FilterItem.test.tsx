@@ -62,6 +62,16 @@ vi.mock('../../../TableDrawerContext/selectors', () => ({
   useGetColumnFilters: () => columnFiltersRef.current,
 }));
 
+vi.mock(
+  '@repo/ui/components/Table/contexts/TableConfig/columns/selectors',
+  () => ({
+    useGetNormalizedColumns: () => ({
+      price: { key: 'price', label: 'Price' },
+      status: { key: 'status', label: 'Status' },
+    }),
+  }),
+);
+
 vi.mock('@repo/ui/components/Table/contexts/TableConfig/meta/actions', () => ({
   useSetTableSettingsExpandedFilters: () => mockSetExpandedFilters,
 }));
@@ -73,25 +83,12 @@ vi.mock(
   }),
 );
 
-import type { FilterItemProps } from './FilterItem.types';
-
 import { FilterItem } from './FilterItem.component';
 
-const statusFilter = {
-  operator: 'equals',
-  type: 'text',
-  value: 'cancelled',
-} as unknown as FilterItemProps['filter'];
+const statusFilter = { operator: 'equals', type: 'text', value: 'cancelled' };
 
 const renderItem = () =>
-  render(
-    <FilterItem
-      column={{ label: 'Status' }}
-      columnKey='status'
-      filter={statusFilter}
-      isBusy={false}
-    />,
-  );
+  render(<FilterItem columnKey='status' isBusy={false} />);
 
 afterEach(() => {
   cleanup();

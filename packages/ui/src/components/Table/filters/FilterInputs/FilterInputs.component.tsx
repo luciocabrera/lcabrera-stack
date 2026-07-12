@@ -1,12 +1,4 @@
-import type {
-  ColumnFilter,
-  DateOperatorType,
-  NumberOperatorType,
-  TextOperatorType,
-} from '@repo/ui/types/filterOperators.types';
-
 import { useGetNormalizedColumn } from '@repo/ui/components/Table/contexts/TableConfig/columns/selectors/useGetNormalizedColumn.hook';
-import { VirtualSelect } from '@repo/ui/components/VirtualSelect';
 import * as stylex from '@stylexjs/stylex';
 import { Activity, useState } from 'react';
 
@@ -15,18 +7,15 @@ import type { FilterInputsProps } from './FilterInputs.types';
 import { BooleanFilterInput } from '../BooleanFilterInput';
 import { styles } from './FilterInputs.stylex';
 import { InputContent } from './InputContent';
-import {
-  getOperatorFromFilter,
-  getOperatorOptions,
-  getSelectedOperatorLabel,
-} from './utils';
+import { OperatorSelect } from './OperatorSelect/OperatorSelect.component';
+import { getOperatorFromFilter } from './utils';
 
 /**
- * Shared component for rendering filter inputs based on column data type.
- * The operator dropdown is rendered here based on data type.
- * Used by both FilterDrawer (column header) and FilterSectionBody (table settings drawer).
- *
- * Now uses context for filter data - no more prop drilling!
+ * Shared component for rendering filter inputs based on column data type; a
+ * thin shell composing the OperatorSelect delegate and the type-dispatched
+ * InputContent, plus the input-visibility orchestration while the operator
+ * dropdown is open. Used by both drawers, each wiring its own filter store
+ * through the filter/onChange props.
  */
 export const FilterInputs = <TData = Record<string, unknown>,>({
   columnKey,
@@ -48,48 +37,6 @@ export const FilterInputs = <TData = Record<string, unknown>,>({
     );
   }
 
-  const operator = getOperatorFromFilter({ dataType: column.dataType, filter });
-  const operatorOptions = getOperatorOptions({ dataType: column.dataType });
-  const operatorLabels = operatorOptions.map((op) => op.label);
-
-  const selectedOperatorLabel = getSelectedOperatorLabel({
-    filter,
-    operator,
-    operatorOptions,
-  });
-
-  const handleOperatorChange = (selectedLabels: string[]) => {
-    const selectedLabel = selectedLabels[0];
-    if (!selectedLabel) return;
-
-    const matchingOp = operatorOptions.find((op) => op.label === selectedLabel);
-    if (!matchingOp || filter?.type === 'boolean') return;
-
-    const newOperator = matchingOp.value;
-
-    if (filter) {
-      onChange({ ...filter, operator: newOperator } as ColumnFilter);
-    } else if (column.dataType === 'number') {
-      onChange({
-        operator: newOperator as NumberOperatorType,
-        type: 'number',
-        value: undefined,
-      });
-    } else if (column.dataType === 'date') {
-      onChange({
-        operator: newOperator as DateOperatorType,
-        type: 'date',
-        value: '',
-      });
-    } else {
-      onChange({
-        operator: newOperator as TextOperatorType,
-        type: 'text',
-        value: '',
-      });
-    }
-  };
-
   const inputComponent = (
     <InputContent
       columnKey={columnKey}
@@ -98,7 +45,7 @@ export const FilterInputs = <TData = Record<string, unknown>,>({
       hasFetchableOptions={Boolean(column.fetchFilterOptions)}
       listMaxHeight={listMaxHeight}
       onChange={onChange}
-      operator={operator}
+      operator={getOperatorFromFilter({ dataType: column.dataType, filter })}
       shouldFillHeight={shouldFillHeight}
     />
   );
@@ -110,14 +57,12 @@ export const FilterInputs = <TData = Record<string, unknown>,>({
         shouldFillHeight ? styles.containerFill : undefined,
       )}
     >
-      <VirtualSelect
-        customStylex={shouldFillHeight ? styles.operatorOverride : undefined}
-        mode='single'
-        onChange={handleOperatorChange}
+      <OperatorSelect
+        dataType={column.dataType}
+        filter={filter}
+        onChange={onChange}
         onOpenChange={setIsOperatorOpen}
-        options={operatorLabels}
-        placeholder='Select operator...'
-        selected={selectedOperatorLabel}
+        shouldFillHeight={shouldFillHeight}
       />
       {shouldFillHeight ? (
         <Activity mode={isOperatorOpen || !filter ? 'hidden' : 'visible'}>
