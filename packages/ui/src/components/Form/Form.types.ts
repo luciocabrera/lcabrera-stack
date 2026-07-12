@@ -72,7 +72,6 @@ export type LeafFieldDef<TValues extends Record<string, unknown>> =
   | CustomFieldDef<TValues>
   | DateFieldDef<TValues>
   | NumberFieldDef<TValues>
-  | PathFieldDef<TValues>
   | RadioFieldDef<TValues>
   | SelectFieldDef<TValues>
   | TextFieldDef<TValues>;
@@ -81,12 +80,6 @@ export type NumberFieldDef<TValues extends Record<string, unknown>> =
   BaseFieldDef<TValues> & {
     readonly type: 'number';
   };
-
-export type PathFieldDef<TValues extends Record<string, unknown>> = {
-  /** Resource route URL that lists a directory's subdirectories — see `browseDirectory.loader.ts`. */
-  readonly browseAction: string;
-  readonly type: 'path';
-} & BaseFieldDef<TValues>;
 
 export type RadioFieldDef<TValues extends Record<string, unknown>> =
   BaseFieldDef<TValues> & {

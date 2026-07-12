@@ -8,11 +8,30 @@ import type { loader } from './triggerScan.loader';
 import { TriggerScanForm } from './TriggerScanForm';
 
 export const TriggerScan = () => {
-  const { hasActiveRun, projectId, scannersPromise, workspacesPromise } =
-    useLoaderData<typeof loader>();
+  const {
+    hasActiveRun,
+    hasSnapshot,
+    projectId,
+    scannersPromise,
+    workspacesPromise,
+  } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const serverErrors =
     actionData && 'errors' in actionData ? actionData.errors : undefined;
+
+  if (!hasSnapshot) {
+    return (
+      <SectionCard
+        description='Scans always run against the latest synced snapshot.'
+        title='Trigger Scan'
+      >
+        <p>
+          No code snapshot has been synced for this project — upload one from
+          the project page first.
+        </p>
+      </SectionCard>
+    );
+  }
 
   return (
     <SectionCard

@@ -43,12 +43,12 @@ scan-ingestion/
 │   │   ├── codeSmell/                    → code-smell master rollup from the parsed report (details = views over scan_findings)
 │   │   ├── appGraph/                     → app-graph raw schema + node/summary extractors (structure inventory — ADR-022)
 │   │   ├── workspaces/                   → monorepo workspace discovery (pnpm/npm globs → dirs with package.json — ADR-021; exported for admin_system)
-│   │   ├── resolveScan.util.ts           → UI path (lookup) vs ad hoc path (create project+run+scan)
-│   │   ├── matchProject.util.ts          → git rev-parse --show-toplevel + realpath (ad hoc path ONLY — see below)
-│   │   ├── resolveLocalPath.util.ts      → realpath only, no git walk (UI register/edit path — see below)
+│   │   ├── snapshots/                    → Snapshot ingestion (ADR-028): getSnapshotsRoot (env), extractZipArchive (zip-slip-guarded unpack), saveProjectSnapshot (unpack → fn_set_project_snapshot → delete replaced dir; exported for admin_system)
+│   │   ├── git/                          → runGit + readGitMetadata (branch/SHA stamping for ad hoc runs — the surviving remnant of the retired matchProject resolver)
+│   │   ├── resolveScan.util.ts           → UI path (lookup) vs ad hoc path (attach to an existing projectId + create run+scan — ADR-028)
 │   │   ├── classifyFileTypeCategory.util.ts → Suffix → category (component/hook/util/...)
 │   │   ├── extractGenericDetailRows.util.ts → rows for a registry-added scanner's generic detail table (ADR-023)
-│   │   └── buildFileInventory.util.ts    → Walks localPath → RunFileInput[] (whole-project scopes only)
+│   │   └── buildFileInventory.util.ts    → Walks the scan's target root → RunFileInput[] (whole-project scopes only)
 │   │
 │   ├── registry/           → Scanner-registry artifact generation (ADR-023; writeScannerArtifacts exported for admin_system):
 │   │                         SKILL.md / runner-scaffold templates, strictly create-if-missing, fs/*Within-gated repo-root writes
@@ -164,30 +164,24 @@ directly (`node --experimental-strip-types src/cli/ingest.cli.ts ...`)
 against a real temporary git repo, with the resulting Postgres rows queried
 directly to confirm correctness before cleanup.
 
-## Two path resolvers, deliberately distinct (ADR-016)
+## Project identity is an id, not a path (ADR-028)
 
-`ingestion/` holds two canonicalizers that must never be swapped for each
-other:
+The two path canonicalizers this section used to describe
+(`resolveProjectPath`'s git-root walk and `resolveLocalPath`'s
+realpath-only variant, ADR-016) were **deleted with the `local_path`
+model**: projects are registered as identity rows and their code arrives
+as synced snapshots (`ingestion/snapshots/`), so nothing matches or
+canonicalizes filesystem paths anymore. What survives:
 
-- **`resolveProjectPath`** (`matchProject.util.ts`): realpath **plus**
-  `git rev-parse --show-toplevel` — any path inside a repo canonicalizes
-  to that repo's root. Correct for exactly one caller: the ad hoc
-  interactive-session path (`resolveScan.util.ts`), where a skill run
-  from any subdirectory should attach to the repo-root project.
-- **`resolveLocalPath`** (`resolveLocalPath.util.ts`): realpath only, no
-  git awareness. Used by `queries/registerProject.util.ts` and
-  `queries/updateProject.util.ts` — a UI-picked path means exactly that
-  folder, including a subfolder of a repo registered separately at its
-  root. It also doubles as the filesystem-existence check Zod can't do at
-  the action boundary (realpath throws → "Path does not exist").
-
-Reusing the git-walking resolver for the UI actions was a real shipped
-bug: re-pathing a project to a subfolder of the same repo (e.g.
-`packages/ui` inside a monorepo registered at its root) silently
-canonicalized back to the unchanged root, making the edit appear to do
-nothing. Regression tests in `registerProject.util.test.ts` /
-`updateProject.util.test.ts` pin the subfolder behavior against a real
-`git init`ed tmpdir.
+- **`readGitMetadata`** (`ingestion/git/`) — branch/SHA stamping for ad
+  hoc runs, the only remnant of the old resolver (returns undefineds for
+  snapshot directories, which carry no `.git`).
+- **`targetRootPath`** (`IngestReportArgs`) — the directory a scan ran
+  against (snapshot dir for UI runs, checkout for ad hoc); purely the
+  relativization root for lint file paths and the file-inventory sweep,
+  never an identity key.
+- Ad hoc ingestion (`resolveScan.util.ts`, `ingest.cli.ts`) attaches to a
+  pre-registered project via a required `--project-id`.
 
 ## `queries/` — the read/write layer `admin_system` and `apps/scan-orchestrator` consume
 

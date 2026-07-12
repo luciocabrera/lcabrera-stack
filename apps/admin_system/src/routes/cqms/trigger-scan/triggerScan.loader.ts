@@ -9,8 +9,8 @@ const paramsSchema = z.object({ projectId: z.string().uuid() });
 
 const loadWorkspaces = async (projectId: string) => {
   const project = await getProjectById({ projectId });
-  return project
-    ? discoverProjectWorkspaces({ rootPath: project.local_path })
+  return project?.snapshot_path
+    ? discoverProjectWorkspaces({ rootPath: project.snapshot_path })
     : [];
 };
 
@@ -20,10 +20,11 @@ const loadWorkspaces = async (projectId: string) => {
  * depends on them), so they follow the same list-streaming convention as
  * everything else in this route tree rather than blocking the page.
  *
- * Workspaces come from a FRESH filesystem discovery (ADR-021), not the
- * persisted cqms.project_workspaces snapshot — a GET must not write, and
- * the form should offer what exists on disk right now. The action
- * re-discovers for validation and persists the snapshot then.
+ * Workspaces come from a FRESH filesystem discovery (ADR-021) against the
+ * project's latest snapshot directory (ADR-028) — a GET must not write,
+ * and the form should offer what the synced code actually contains. The
+ * action re-discovers for validation. No snapshot ⇒ no workspaces (and
+ * `hasSnapshot` blocks the form entirely).
  */
 export const loader = async ({ params }: LoaderFunctionArgs) => {
   const parsedParams = paramsSchema.safeParse(params);
@@ -35,15 +36,19 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 
   // Defense in depth (direct URL nav, stale tab, back-button) — the
   // project page already hides the link into this route when a run is
-  // active, and the server-side function asserts this too (migration
-  // 0021), but this stops the form from even rendering as the third layer.
+  // active or no snapshot is synced, and the server-side functions assert
+  // both too (migrations 0021/0027), but this stops the form from even
+  // rendering as the third layer.
   const hasActiveRun = await getProjectHasActiveRun({ projectId });
+  const project = await getProjectById({ projectId });
+  const hasSnapshot = Boolean(project?.latest_snapshot_id);
 
   const scannersPromise = getActiveScanners();
   const workspacesPromise = loadWorkspaces(projectId);
 
   return {
     hasActiveRun,
+    hasSnapshot,
     projectId,
     scannersPromise,
     workspacesPromise,

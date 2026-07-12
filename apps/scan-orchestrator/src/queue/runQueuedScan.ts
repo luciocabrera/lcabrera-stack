@@ -80,7 +80,7 @@ const runDeterministicScan = async ({
       'node',
       [
         path.join(cqmsRepoRoot, config.scriptPath),
-        `--target=${scan.local_path}`,
+        `--target=${scan.snapshot_path}`,
         `--scope=${scan.scope_value || '.'}`,
         `--output-dir=${outputDirectory}`,
         '--skip-ingest',
@@ -114,7 +114,6 @@ const runDeterministicScan = async ({
   }
 
   await ingestReport({
-    localPath: scan.local_path,
     origin: 'ui_agent_sdk',
     rawJsonPath: getScanOutputPathIfExists({
       fileName: config.rawArtifactFileName,
@@ -126,6 +125,7 @@ const runDeterministicScan = async ({
     scannerId,
     scopeType: scan.scope_type as 'changed-files' | 'diff' | 'folder' | 'repo',
     scopeValue: scan.scope_value,
+    targetRootPath: scan.snapshot_path,
     userId,
   });
   return 'succeeded';
@@ -199,7 +199,9 @@ const runAgentSkill = async ({
       | 'fallow',
     scopeArgument: scan.scope_value === '.' ? undefined : scan.scope_value,
     skillPath: scan.skill_path,
-    targetProjectPath: scan.local_path,
+    // The latest snapshot's directory (ADR-028) — never a user-named
+    // server path. Host execution itself is the Phase-2 (container) item.
+    targetProjectPath: scan.snapshot_path,
   });
 
   const succeeded =
@@ -236,7 +238,6 @@ const runAgentSkill = async ({
   }
 
   await ingestReport({
-    localPath: scan.local_path,
     origin: 'ui_agent_sdk',
     // Only fallow's skill produces a raw artifact today (TECH_SPEC §2.4).
     rawJsonPath:
@@ -255,6 +256,7 @@ const runAgentSkill = async ({
       | 'fallow',
     scopeType: scan.scope_type as 'changed-files' | 'diff' | 'folder' | 'repo',
     scopeValue: scan.scope_value,
+    targetRootPath: scan.snapshot_path,
     userId,
   });
   return 'succeeded';

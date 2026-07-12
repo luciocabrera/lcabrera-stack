@@ -15,14 +15,6 @@ const FIELDS: readonly FieldNode<EditProjectValues>[] = [
     label: 'Project Name',
     type: 'text',
   },
-  {
-    accessor: 'localPath',
-    browseAction: '/_action/browse-directory',
-    clientValidation: { required: true },
-    description: 'Absolute path to the project on this machine.',
-    label: 'Local Path',
-    type: 'path',
-  },
 ];
 
 export const EditProject = () => {
@@ -37,7 +29,6 @@ export const EditProject = () => {
         cancelTo='/cqms/projects'
         fields={FIELDS}
         initialValues={{
-          localPath: project.local_path,
           name: project.name,
         }}
         mode='edit'

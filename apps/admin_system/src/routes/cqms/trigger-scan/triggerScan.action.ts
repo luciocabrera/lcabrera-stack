@@ -40,7 +40,7 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
   }
 
   // Selected workspaces are validated against a FRESH discovery — the
-  // form's options could be stale (workspace deleted since the page
+  // form's options could be stale (a new snapshot synced since the page
   // loaded), and form values are attacker-controllable anyway (ADR-021).
   const project = await getProjectById({
     projectId: parsedParams.data.projectId,
@@ -48,8 +48,18 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
   if (!project) {
     throw data('Project not found.', { status: 404 });
   }
+  if (!project.snapshot_path) {
+    // fn_create_run_with_scoped_scans rejects this too (0027) — failing
+    // here first gives the precise message instead of a generic DB error.
+    return {
+      errors: {
+        scannerIds:
+          'No code snapshot has been synced for this project. Upload a snapshot before triggering a scan.',
+      },
+    };
+  }
   const discovered = discoverProjectWorkspaces({
-    rootPath: project.local_path,
+    rootPath: project.snapshot_path,
   });
   const discoveredPaths = new Set(
     discovered.map((workspace) => workspace.workspace_path),

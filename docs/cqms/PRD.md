@@ -1,5 +1,11 @@
 # Code Quality Management System (CQMS) — PRD
 
+> **⚠️ Superseded (2026-07-11):** the canonical product definition is now
+> [PRD_V2.md](./PRD_V2.md) (CodePulse). This initial Phase-1 draft is kept
+> for history; its local-paths-only and no-auth stances are explicitly
+> reversed by PRD v2 (see the
+> [alignment review](./reviews/2026-07-11-codepulse-alignment-review.md)).
+
 See also: [TECH_SPEC.md](./TECH_SPEC.md), [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md), decisions in [decisions/](./decisions/).
 
 ## Context

@@ -1,5 +1,11 @@
 # Code Quality Management System (CQMS) — Technical Spec
 
+> **⚠️ Superseded (2026-07-11):** the canonical product definition is now
+> [PRD_V2.md](./PRD_V2.md) (CodePulse — hosted, snapshot-sync, container
+> execution). This spec describes the original local-path Phase-1 build and
+> is kept for history; per-section validity is assessed in the
+> [alignment review](./reviews/2026-07-11-codepulse-alignment-review.md).
+
 See also: [PRD.md](./PRD.md), [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md), ADRs in [decisions/](./decisions/).
 
 ## 2.1 Terminology recap

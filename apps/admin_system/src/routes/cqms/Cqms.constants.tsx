@@ -15,7 +15,12 @@ export const PROJECT_LIST_COLUMNS: readonly TableColumn<ProjectListViewRow>[] =
       minWidth: 220,
     },
     { dataType: 'string', key: 'name', label: 'Project', minWidth: 160 },
-    { dataType: 'string', key: 'local_path', label: 'Path', minWidth: 220 },
+    {
+      dataType: 'date',
+      key: 'synced_at',
+      label: 'Last Synced',
+      minWidth: 150,
+    },
     {
       key: 'latest_run_status',
       label: 'Latest Run',

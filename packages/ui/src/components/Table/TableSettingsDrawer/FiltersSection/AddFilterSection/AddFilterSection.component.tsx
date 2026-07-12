@@ -93,15 +93,17 @@ export const AddFilterSection = ({
     setSelectedColumn('');
   };
 
+  const handleVirtualSelectChange = (values: string[]) => {
+    setSelectedColumn(values[0] ?? '');
+  };
+
   return (
     <div {...stylex.props(styles.container)}>
       <SidePanelSectionHeader title='Add Filter' />
       <VirtualSelect
         isBusy={isBusy}
         mode='single'
-        onChange={(values: string[]) => {
-          setSelectedColumn(values[0] ?? '');
-        }}
+        onChange={handleVirtualSelectChange}
         onOpenChange={handleOpenChange}
         options={filterableColumnOptions}
         placeholder='Select a column...'

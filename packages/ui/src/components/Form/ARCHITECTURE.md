@@ -78,10 +78,9 @@ Form/
 │   ├── BooleanField/  → wraps Checkbox or ToggleSwitch
 │   ├── SelectField/   → wraps VirtualSelect + hidden inputs for FormData
 │   ├── RadioField/    → wraps RadioOptionGroup
-│   ├── PathField/     → path — text input + Browse… button, opens inline PathBrowserModal list panel
-│   │   └── PathBrowserModal/ → Private delegate — breadcrumb-free directory drill-down panel, fetches @repo/ui/routing/browseDirectory.loader via useFetcher().load
 │   └── CustomField/   → escape hatch via field.renderField(...)
-│   (each: <Name>.component.tsx + <Name>.types.ts, TextField/RadioField/PathBrowserModal also <Name>.stylex.ts)
+│   (each: <Name>.component.tsx + <Name>.types.ts, TextField/RadioField also <Name>.stylex.ts)
+│   (the former PathField/PathBrowserModal `path` leaf was removed by ADR-028 — no filesystem-coupled field types)
 │
 └── utils/
     ├── flattenFields.util.ts    → Recursive walker → readonly LeafFieldDef[]
@@ -260,10 +259,8 @@ automatically via `name`. Two components need explicit handling:
 ## Consumer Map
 
 CQMS's `new-project` and `trigger-scan` route actions (Implementation Plan
-step 8) are the first real consumers, both using `mode: 'create'`.
-`edit-project` (`mode: 'edit'`) is the first `path`-type-field consumer —
-`localPath` browses the server's real filesystem via
-`@repo/ui/routing/browseDirectory.loader` (re-exported as a thin resource
-route, `admin_system`'s `_action/browse-directory`), deliberately
-unscoped — this app registers local repos that can live anywhere on the
-machine, so there's no meaningful root to sandbox browsing to.
+step 8) are the first real consumers, both using `mode: 'create'`;
+`edit-project` uses `mode: 'edit'`. The former `path` field type (server
+filesystem browsing via `browseDirectory.loader`) was removed by ADR-028 —
+project code now arrives as synced snapshots, and no Form field touches
+the platform's filesystem.
