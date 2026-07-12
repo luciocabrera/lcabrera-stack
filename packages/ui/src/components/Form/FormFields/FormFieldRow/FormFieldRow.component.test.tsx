@@ -1,11 +1,10 @@
 // @vitest-environment jsdom
 
-import type { FormFieldsState } from '@repo/ui/components/Form/contexts/FormContext/FormContext.types';
 import type { RowFieldNode } from '@repo/ui/components/Form/Form.types';
 
 import { FormProvider } from '@repo/ui/components/Form/contexts';
 import { FormFieldsRendererContext } from '@repo/ui/components/Form/FormFields/contexts/FormFieldsRendererContext/FormFieldsRendererContext.context';
-import { FormFields } from '@repo/ui/components/Form/FormFields/FormFields.component';
+import { FormFieldsList } from '@repo/ui/components/Form/FormFields/FormFieldsList/FormFieldsList.component';
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
@@ -18,16 +17,10 @@ afterEach(() => {
 type Values = { readonly bio: string; readonly name: string };
 
 const renderRow = (field: RowFieldNode<Values>) => {
-  const initialFieldsState: FormFieldsState<Values> = {
-    errors: {},
-    initialValues: { bio: '', name: '' },
-    values: { bio: '', name: '' },
-  };
-
   return render(
-    <FormProvider<Values> initialFieldsState={initialFieldsState} mode='create'>
+    <FormProvider<Values> cancelTo='/' fields={[field]} mode='create'>
       <FormFieldsRendererContext
-        value={(nested) => <FormFields fields={nested} />}
+        value={(nested) => <FormFieldsList fields={nested} />}
       >
         <FormFieldRow<Values> field={field} />
       </FormFieldsRendererContext>

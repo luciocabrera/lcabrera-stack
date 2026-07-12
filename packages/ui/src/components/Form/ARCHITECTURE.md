@@ -18,47 +18,59 @@ pattern) — including internal, non-barrel-exported delegates like `FormBody`,
 ```
 Form/
 ├── ARCHITECTURE.md
-├── Form.component.tsx        → Root: computes leafFields/initial values, composes FormProvider + FormBody
+├── Form.component.tsx        → Root: thin shell — FormProvider (owns all init) + FormBody
 ├── Form.test.tsx             → Integration tests via react-router's createRoutesStub
 ├── Form.types.ts             → FieldNode union, FormProps, FormMode
 ├── index.ts                  → Barrel: Form + public types
 │
 ├── FormBody/
-│   ├── FormBody.component.tsx → The view shell: RR7 Form/fetcher.Form + submit gating
-│   ├── FormBodyFooter/        → Self-connected footer: submit/cancel buttons + discard-changes flow
+│   ├── FormBody.component.tsx → The view shell: RR7 Form/fetcher.Form (formId-keyed) + submit gating; self-connects formId/submission
+│   ├── FormBodyFooter/        → Fully self-connected footer: labels/mode/dirty/submission state + discard-changes flow
 │   ├── FormBody.stylex.ts
-│   ├── FormBody.types.ts
+│   ├── FormBody.types.ts      → Pick<FormProps, 'action' | 'children' | 'method'>
 │   └── index.ts
 │
 ├── contexts/
 │   ├── index.ts               → Barrel: FormProvider + all selectors/actions
 │   └── FormContext/
 │       ├── FormContext.context.ts    → createContext (undefined default)
-│       ├── FormContext.provider.tsx  → Provider: creates fieldsStore + metaStore, syncs serverErrors/mode props
+│       ├── FormContext.provider.tsx  → Provider: owns init (useId, flattenFields, both store snapshots via utils), syncs serverErrors/mode/fields props
 │       ├── FormContext.types.ts      → FormFieldsState, FormMetaState, FormContextValue, FormProviderProps
 │       ├── useFormContextValue.hook.ts → use(FormContext) with guard (infra only)
 │       ├── useFieldsStore.hook.ts     → Shared useSyncExternalStore wrapper over fieldsStore (mirrors Table's useColumnsStore/useFiltersStore)
 │       ├── useMetaStore.hook.ts       → Shared useSyncExternalStore wrapper over metaStore (mirrors Table's useMetaStore)
 │       ├── actions/
 │       │   ├── useSetFieldValue.hook.ts  → Writes one field's value into fieldsStore
-│       │   └── useSubmitForm.hook.ts     → Pre-submit gate: reads metaStore + fieldsStore, dirty-check + validateFields
-│       └── selectors/
-│           ├── useGetFieldError.hook.ts   → useFieldsStore((s) => s.errors[accessor])
-│           ├── useGetFieldValue.hook.ts   → useFieldsStore((s) => s.values[accessor])
-│           ├── useGetFormMode.hook.ts     → useMetaStore((s) => s.mode)
-│           └── useGetIsFormDirty.hook.ts  → useFieldsStore((s) => isFormDirty(...))
+│       │   └── useSubmitForm.hook.ts     → Pre-submit gate (no args): reads metaStore (mode + leafFields) + fieldsStore, dirty-check + validateFields
+│       ├── selectors/
+│       │   ├── useGetFieldError.hook.ts   → useFieldsStore((s) => s.errors[accessor])
+│       │   ├── useGetFieldValue.hook.ts   → useFieldsStore((s) => s.values[accessor])
+│       │   ├── useGetFormCancelLabel.hook.ts → useMetaStore((s) => s.cancelLabel)
+│       │   ├── useGetFormCancelTo.hook.ts    → useMetaStore((s) => s.cancelTo)
+│       │   ├── useGetFormFields.hook.ts      → useMetaStore((s) => s.fields)
+│       │   ├── useGetFormId.hook.ts          → useMetaStore((s) => s.formId)
+│       │   ├── useGetFormLeafFields.hook.ts  → useMetaStore((s) => s.leafFields)
+│       │   ├── useGetFormMode.hook.ts        → useMetaStore((s) => s.mode)
+│       │   ├── useGetFormSubmission.hook.ts  → useMetaStore((s) => s.submission)
+│       │   ├── useGetFormSubmitLabel.hook.ts → useMetaStore((s) => s.submitLabel)
+│       │   └── useGetIsFormDirty.hook.ts     → useFieldsStore((s) => isFormDirty(...))
+│       └── utils/
+│           ├── getInitialFieldsState.util.ts   → initialValues/leafFields/serverErrors → first fieldsStore snapshot (+ .test)
+│           └── getInitialFormMetaState.util.ts → Form props → first metaStore snapshot, resolves label/submission defaults (+ .test)
 │
 ├── FormFields/
-│   ├── FormFields.component.tsx  → Recursive walker: computes stable key, dispatches each node type to its subcomponent
-│   ├── FormFields.stylex.ts      → `stack` layout only
-│   ├── FormFields.types.ts
+│   ├── FormFields.component.tsx  → Store-connected root (zero props): useGetFormFields → FormFieldsList
+│   ├── FormFieldsList/           → Recursive walker: computes stable key, dispatches each node type to its subcomponent
+│   │   ├── FormFieldsList.component.tsx
+│   │   ├── FormFieldsList.types.ts
+│   │   └── FormFieldsList.stylex.ts → `stack` layout only
 │   ├── contexts/
-│   │   └── FormFieldsRendererContext/ → Supplies `FormFields` itself to Group/Row/Tabs (see below — breaks an import cycle)
+│   │   └── FormFieldsRendererContext/ → Supplies `FormFieldsList` to Group/Row/Tabs (see below — breaks an import cycle)
 │   │       ├── FormFieldsRendererContext.context.ts → createContext (undefined default)
 │   │       ├── FormFieldsRendererContext.types.ts   → RenderFieldsFn (TValues erased to Record<string, unknown> at the boundary, mirrors AnyFieldComponent)
 │   │       └── useFormFieldsRendererContext.hook.ts → use(context) with guard (infra only)
-│   ├── FormFieldGroup/           → `group` node: optional label + nested FormFields (.component + .types + .stylex + .test)
-│   ├── FormFieldRow/             → `row` node: horizontal equal-flex cells of nested FormFields (.component + .types + .stylex + .test)
+│   ├── FormFieldGroup/           → `group` node: optional label + nested fields (.component + .types + .stylex + .test)
+│   ├── FormFieldRow/             → `row` node: horizontal equal-flex cells of nested fields (.component + .types + .stylex + .test)
 │   ├── FormFieldTabs/            → `tab` node: one Tabs panel per tab (.component + .types + .test)
 │   └── utils/
 │       ├── collectAccessors.util.ts → Node → flattened leaf accessors (recursive, + .test)
@@ -99,9 +111,18 @@ and by whether the state is keyed to a single field, per the `store-pattern`
 skill:
 
 ```typescript
-// Low-frequency, form-level — not keyed by any field
-FormMetaState = {
+// Low-frequency, form-level config — not keyed by any field.
+// Fields are to a form what columns are to the table: definitions owned by
+// the store so consumers subscribe via selectors instead of prop drilling.
+FormMetaState<TValues> = {
+  cancelLabel: string;      // default resolved at init ('Cancel')
+  cancelTo: string;
+  fields: readonly FieldNode<TValues>[];
+  formId: string;           // provider-owned useId — hidden-input marker + fetcher key
+  leafFields: readonly LeafFieldDef<TValues>[];
   mode: FormMode;
+  submission: FormSubmission; // default resolved at init ('navigation')
+  submitLabel: string;      // default resolved at init ('Accept')
 };
 
 // High-frequency, every slice keyed by accessor
@@ -138,18 +159,37 @@ snapshotting each once is an explicitly allowed action responsibility, the
 same as `Table`'s `useSetColumnFilter` reading both `TableConfig` and
 `TableData`.
 
-`Form.component.tsx` is the only place that creates the stores (via
-`FormProvider`) and computes the initial snapshot (`flattenFields` +
-`getInitialValues`) — it renders no fields itself. `FormBody` (its own
-directory) is the actual view: it reads `mode`/`isDirty` via selectors and
-submits via the `useSubmitForm` action.
+`FormProvider` is the only place that creates the stores and computes both
+initial snapshots (`useId` + `flattenFields` + the two `getInitial*State`
+utils, mirroring `ColumnDrawerContext`'s `getInitialColumnsState`); it also
+re-syncs `serverErrors`, `mode`, and `fields` (definitions rebuilt from
+fresh loader data) when those prop identities change. `Form.component.tsx`
+is a pure composition shell. Labels and `submission` are init-only config.
+
+### State Ownership Rule
+
+No store state is prop-drilled through the shells. Each delegate reads the
+selectors and dispatches the actions it needs itself:
+
+| Delegate         | Reads (selectors)                                                                 | Dispatches (actions) |
+| ---------------- | --------------------------------------------------------------------------------- | -------------------- |
+| `Form`           | — (pure composition)                                                              | —                    |
+| `FormBody`       | formId, submission                                                                | submitForm           |
+| `FormFields`     | fields                                                                            | —                    |
+| `FormBodyFooter` | mode, formId, submission, cancelLabel, submitLabel, cancelTo, leafFields, isDirty | —                    |
+| leaf fields      | fieldValue, fieldError, mode (via `useFormField`)                                 | setFieldValue        |
+
+`FormBodyFooter` derives `isSubmitting` itself: the fetcher is keyed by
+`formId` (`useFetcher({ key: formId })` in both `FormBody` and the footer
+observes the same fetcher instance), and the navigation flavour matches the
+hidden `formId` input against `navigation.formData`.
 
 ## Submission Flow
 
 ```mermaid
 graph TD
   A["User clicks Save"] --> B["RR7 Form's internal submitHandler calls our onSubmit first"]
-  B --> C["handleSubmit calls useSubmitForm({ leafFields })"]
+  B --> C["handleSubmit calls submitForm() — leafFields read from the meta store snapshot"]
   C --> D{"mode === 'edit' and not dirty?"}
   D -->|"yes"| E["return false → event.preventDefault() → no request sent, DB untouched"]
   D -->|"no"| F["validateFields → fieldsStore.set({ errors })"]
@@ -225,25 +265,28 @@ Each leaf component is generic over its own `TValues`; erased to a loose
 each leaf via its own concrete field-def type — the one intentional `any`
 in this component, confined to that single boundary.
 
-## Breaking the FormFields ↔ Group/Row/Tabs Cycle
+## Breaking the FormFieldsList ↔ Group/Row/Tabs Cycle
 
-`FormFields` dispatches to `FormFieldGroup`/`FormFieldRow`/`FormFieldTabs`,
-and each of those recurses back into `FormFields` to render its own nested
-`fields` array (`group.fields`, each `row` cell, each `tab`'s `fields`) —
-genuine mutual recursion inherent to the group/row/tab/leaf tree shape, not
-a mistake. A direct import in both directions is a real circular
-dependency, though, so the recursive capability is threaded through
-`FormFields/contexts/FormFieldsRendererContext/` instead: `FormFields`
-provides itself (`(nested) => <FormFields fields={nested} />`) as the
+`FormFields` is the store-connected root (zero props — reads the definitions
+via `useGetFormFields`); the recursive walking lives in the private
+`FormFieldsList` delegate. `FormFieldsList` dispatches to
+`FormFieldGroup`/`FormFieldRow`/`FormFieldTabs`, and each of those recurses
+back into `FormFieldsList` to render its own nested `fields` array
+(`group.fields`, each `row` cell, each `tab`'s `fields`) — genuine mutual
+recursion inherent to the group/row/tab/leaf tree shape, not a mistake. A
+direct import in both directions is a real circular dependency, though, so
+the recursive capability is threaded through
+`FormFields/contexts/FormFieldsRendererContext/` instead: `FormFieldsList`
+provides itself (`(nested) => <FormFieldsList fields={nested} />`) as the
 context value, and `FormFieldGroup`/`FormFieldRow`/`FormFieldTabs` consume
 it via `useFormFieldsRendererContext()` rather than importing
-`FormFields.component.tsx`. Same erase-at-the-boundary technique as
+`FormFieldsList.component.tsx`. Same erase-at-the-boundary technique as
 `AnyFieldComponent` above (`RenderFieldsFn` erases `TValues` to
 `Record<string, unknown>`, narrowed back with a cast at each call site).
 Unit tests for the three subcomponents provide the context manually
-(`<FormFieldsRendererContext value={(nested) => <FormFields fields={nested} />}>`)
+(`<FormFieldsRendererContext value={(nested) => <FormFieldsList fields={nested} />}>`)
 since they render each subcomponent in isolation rather than through the
-full `FormFields` tree.
+full tree.
 
 ## Native Form Participation
 

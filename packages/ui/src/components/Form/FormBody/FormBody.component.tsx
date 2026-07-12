@@ -1,9 +1,13 @@
 import type { FormEvent } from 'react';
 
 import { useSubmitForm } from '@repo/ui/components/Form/contexts/FormContext/actions';
+import {
+  useGetFormId,
+  useGetFormSubmission,
+} from '@repo/ui/components/Form/contexts/FormContext/selectors';
 import { FormFields } from '@repo/ui/components/Form/FormFields/FormFields.component';
 import * as stylex from '@stylexjs/stylex';
-import { Form as RouterForm, useFetcher, useNavigation } from 'react-router';
+import { Form as RouterForm, useFetcher } from 'react-router';
 
 import type { FormBodyProps } from './FormBody.types';
 
@@ -11,37 +15,25 @@ import { styles } from './FormBody.stylex';
 import { FormBodyFooter } from './FormBodyFooter/FormBodyFooter.component';
 
 /**
- * The Form view shell: picks the RR7 form flavour (fetcher vs navigation),
- * derives the submission state it owns, and gates submit through the
- * validation action. Footer buttons and the discard-changes flow live in the
- * self-connected FormBodyFooter delegate.
+ * The Form view shell: picks the RR7 form flavour (fetcher vs navigation)
+ * from the meta store and gates submit through the validation action. The
+ * fetcher is keyed by formId so FormBodyFooter observes the same submission
+ * state without prop drilling.
  */
-export const FormBody = <TValues extends Record<string, unknown>>({
+export const FormBody = ({
   action,
-  cancelLabel,
-  cancelTo,
   children,
-  fields,
-  formId,
-  leafFields,
   method = 'post',
-  submission = 'navigation',
-  submitLabel,
-}: FormBodyProps<TValues>) => {
-  const submitForm = useSubmitForm<TValues>();
-  const navigation = useNavigation();
-  const fetcher = useFetcher();
+}: FormBodyProps) => {
+  const formId = useGetFormId();
+  const submission = useGetFormSubmission();
+  const submitForm = useSubmitForm();
+  const fetcher = useFetcher({ key: formId });
 
-  const isFetcherSubmission = submission === 'fetcher';
-  const isSubmitting = isFetcherSubmission
-    ? fetcher.state !== 'idle'
-    : navigation.state === 'submitting' &&
-      navigation.formData?.get('formId') === formId;
-
-  const FormComponent = isFetcherSubmission ? fetcher.Form : RouterForm;
+  const FormComponent = submission === 'fetcher' ? fetcher.Form : RouterForm;
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    if (!submitForm({ leafFields })) {
+    if (!submitForm()) {
       event.preventDefault();
     }
   };
@@ -55,19 +47,8 @@ export const FormBody = <TValues extends Record<string, unknown>>({
       {...stylex.props(styles.form)}
     >
       <input name='formId' type='hidden' value={formId} />
-      {/*  TODO: The fields should be gotten in the FormFields componenet directly using a selector , following the store context pattern,  */}
-      <FormFields fields={fields} />
-      {/* leafFields,cancelLabel and submitLabel should be gotten in the FormBodyFooter component directly using a selector, following the store context pattern */}
-      {/* isSubmitting  is just used inside the FormBodyFooter component, that componet should calculate it instead the parent doing the calculation to just prop drill*/}
-      <FormBodyFooter
-        cancelLabel={cancelLabel}
-        cancelTo={cancelTo}
-        isSubmitting={isSubmitting}
-        leafFields={leafFields}
-        submitLabel={submitLabel}
-      >
-        {children}
-      </FormBodyFooter>
+      <FormFields />
+      <FormBodyFooter>{children}</FormBodyFooter>
     </FormComponent>
   );
 };

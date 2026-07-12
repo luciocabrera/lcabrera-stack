@@ -1,6 +1,10 @@
 import type {
   FieldErrors,
+  FieldNode,
   FormMode,
+  FormProps,
+  FormSubmission,
+  LeafFieldDef,
 } from '@repo/ui/components/Form/Form.types';
 import type { TStore } from '@repo/ui/hooks/useStore.hook';
 import type { ReactNode } from 'react';
@@ -9,7 +13,7 @@ export type FormContextValue<
   TValues extends Record<string, unknown> = Record<string, unknown>,
 > = {
   readonly fieldsStore: TStore<FormFieldsState<TValues>>;
-  readonly metaStore: TStore<FormMetaState>;
+  readonly metaStore: TStore<FormMetaState<TValues>>;
 };
 
 /** Per-field data — high-frequency, every slice keyed by accessor. */
@@ -20,15 +24,34 @@ export type FormFieldsState<TValues extends Record<string, unknown>> = {
   readonly values: TValues;
 };
 
-/** Form-level metadata — low-frequency, not keyed by any single field. */
-export type FormMetaState = {
+/**
+ * Form-level config — low-frequency, not keyed by any single field. Fields
+ * are to a form what columns are to the table: definitions owned by the
+ * store so consumers subscribe via selectors instead of prop drilling.
+ */
+export type FormMetaState<
+  TValues extends Record<string, unknown> = Record<string, unknown>,
+> = {
+  readonly cancelLabel: string;
+  readonly cancelTo: string;
+  readonly fields: readonly FieldNode<TValues>[];
+  readonly formId: string;
+  readonly leafFields: readonly LeafFieldDef<TValues>[];
   readonly mode: FormMode;
+  readonly submission: FormSubmission;
+  readonly submitLabel: string;
 };
 
-export type FormProviderProps<TValues extends Record<string, unknown>> = {
+export type FormProviderProps<TValues extends Record<string, unknown>> = Pick<
+  FormProps<TValues>,
+  | 'cancelLabel'
+  | 'cancelTo'
+  | 'fields'
+  | 'initialValues'
+  | 'mode'
+  | 'serverErrors'
+  | 'submission'
+  | 'submitLabel'
+> & {
   readonly children: ReactNode;
-  readonly initialFieldsState: FormFieldsState<TValues>;
-  readonly mode: FormMode;
-  /** Re-synced into fieldsStore whenever this prop's identity changes — e.g. a new `useActionData()` result after a failed submission. */
-  readonly serverErrors?: FieldErrors<TValues>;
 };
