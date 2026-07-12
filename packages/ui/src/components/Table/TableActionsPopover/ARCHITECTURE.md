@@ -30,9 +30,12 @@ mechanics instead of duplicating them.
 TableActionsPopover/
 ├── TableActionsPopover.component.tsx      → Trigger + popover panel + render-prop children
 ├── TableActionsPopover.types.ts           → Props, BoundsRect, MenuPosition, render-prop context type
+├── TableActionsPopover.constants.ts       → MENU_* layout constants (gap, nudge, frames, padding)
 ├── TableActionsPopover.stylex.ts          → trigger/menu/menuItem/menuIcon/menuActions styles (shared)
-├── useTableActionsPopoverPosition.hook.ts → Popover open state + coordinate recompute
+├── useTableActionsPopoverPosition.hook.ts → Popover open state + observers + RAF orchestration only
 ├── utils/
+│   ├── computeMenuPosition.util.ts                  → Measures trigger/cell/menu, delegates to
+│   │                                                  getTableActionsPopoverPosition (argument reads only)
 │   ├── createViewportRect.util.ts                   → Pure: window dimensions → whole-viewport BoundsRect
 │   │                                                  (fallback container bounds, built at reposition time)
 │   ├── getTableActionsPopoverPosition.util.ts       → Pure coordinate computation (no side effects)

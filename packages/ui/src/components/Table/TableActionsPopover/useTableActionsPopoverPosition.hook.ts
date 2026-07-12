@@ -2,43 +2,11 @@ import type { RefObject } from 'react';
 
 import { useEffect, useRef, useState } from 'react';
 
-import type { BoundsRect, MenuPosition } from './TableActionsPopover.types';
+import type { MenuPosition } from './TableActionsPopover.types';
 
+import { MENU_REPOSITION_FRAMES } from './TableActionsPopover.constants';
+import { computeMenuPosition } from './utils/computeMenuPosition.util';
 import { createViewportRect } from './utils/createViewportRect.util';
-import { getTableActionsPopoverPosition } from './utils/getTableActionsPopoverPosition.util';
-
-const MENU_GAP_PX = 4;
-const MENU_HORIZONTAL_NUDGE_PX = 2;
-const MENU_REPOSITION_FRAMES = 10;
-const MENU_VIEWPORT_PADDING_PX = 8;
-
-type ComputeMenuPositionArgs = {
-  readonly containerRect: BoundsRect;
-  readonly menuElement: HTMLDivElement;
-  readonly triggerElement: HTMLElement;
-};
-
-const computeMenuPosition = ({
-  containerRect,
-  menuElement,
-  triggerElement,
-}: ComputeMenuPositionArgs) => {
-  const triggerRect = triggerElement.getBoundingClientRect();
-  const triggerCellRect = triggerElement
-    .closest('td, th')
-    ?.getBoundingClientRect();
-  const menuRect = menuElement.getBoundingClientRect();
-
-  return getTableActionsPopoverPosition({
-    containerRect,
-    horizontalNudgePx: MENU_HORIZONTAL_NUDGE_PX,
-    menuGapPx: MENU_GAP_PX,
-    menuRect,
-    triggerCellRight: triggerCellRect?.right,
-    triggerRect,
-    viewportPaddingPx: MENU_VIEWPORT_PADDING_PX,
-  });
-};
 
 type UseTableActionsPopoverPositionArgs = {
   readonly containerRef: RefObject<HTMLDivElement | null>;
