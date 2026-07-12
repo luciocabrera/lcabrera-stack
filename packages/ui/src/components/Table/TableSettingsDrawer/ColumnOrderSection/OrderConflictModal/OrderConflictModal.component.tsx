@@ -6,22 +6,26 @@ import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 
 import type { OrderConflictResolution } from '../ColumnOrderSection.types';
-import type { OrderConflictModalProps } from './OrderConflictModal.types';
 
 import {
   useAcceptOrderConflict,
   useCancelOrderConflict,
 } from '../ColumnOrderSectionContext/actions';
+import { useGetOrderConflict } from '../ColumnOrderSectionContext/selectors';
 import { styles } from './OrderConflictModal.stylex';
 
-export const OrderConflictModal = ({
-  description,
-  isOpen,
-}: OrderConflictModalProps) => {
-  const [selectedResolution, setSelectedResolution] =
-    useState<OrderConflictResolution>('remove-conflicting-pins');
+/**
+ * Conflict-resolution modal shown when a proposed column order breaks pin
+ * contiguity. Owns its store wiring: reads the order-conflict slice and
+ * dispatches the accept/cancel actions itself.
+ */
+export const OrderConflictModal = () => {
+  const { description, isOpen } = useGetOrderConflict();
   const acceptOrderConflict = useAcceptOrderConflict();
   const cancelOrderConflict = useCancelOrderConflict();
+
+  const [selectedResolution, setSelectedResolution] =
+    useState<OrderConflictResolution>('remove-conflicting-pins');
 
   const handleAccept = () => {
     acceptOrderConflict(selectedResolution);
@@ -31,6 +35,10 @@ export const OrderConflictModal = ({
   const handleCancel = () => {
     cancelOrderConflict();
     setSelectedResolution('remove-conflicting-pins');
+  };
+
+  const handleResolutionChange = (value: OrderConflictResolution) => {
+    setSelectedResolution(value);
   };
 
   return (
@@ -52,9 +60,7 @@ export const OrderConflictModal = ({
       <p {...stylex.props(styles.description)}>{description}</p>
       <RadioOptionGroup
         name='sort-order-conflict-resolution'
-        onChange={(value) => {
-          setSelectedResolution(value);
-        }}
+        onChange={handleResolutionChange}
         options={ORDER_CONFLICT_OPTIONS}
         value={selectedResolution}
       />

@@ -1,48 +1,89 @@
 # ColumnOrderSection Architecture
 
 Column reordering, visibility toggling, and pinning with drag-and-drop.
-Uses a nested ColumnOrderSectionContext to manage complex conflict resolution modals.
+A thin shell (mirroring the `TableSettingsDrawer` header/body/footer pattern)
+composing private delegates that own their store wiring, with a nested
+ColumnOrderSectionContext managing the conflict-resolution modal state.
+
+## State Ownership Rule
+
+No modal or row state is prop-drilled through the section shell. Each
+delegate reads the selectors and dispatches the actions it needs itself:
+
+| Delegate                   | Reads (selectors)                                     | Dispatches (actions)                     |
+| -------------------------- | ----------------------------------------------------- | ---------------------------------------- |
+| `ColumnOrderSection`       | — (pure composition)                                  | —                                        |
+| `ColumnOrderSectionHeader` | columns, columnVisibility                             | — (toolbar delegates its own)            |
+| `ColumnOrderSectionBody`   | columns, columnOrder, columnPinning, columnVisibility | reorderColumns                           |
+| `ColumnOrderItemContent`   | —                                                     | toggleColumnPin, toggleColumnVisibility  |
+| `ColumnOrderSectionModals` | — (pure composition)                                  | —                                        |
+| `ColumnOrderPinSideModal`  | pinSideModal                                          | acceptPinSide, cancelPinSide             |
+| `PinConflictModal`         | conflictModal                                         | acceptPinConflict, cancelPinConflict     |
+| `UnpinConflictModal`       | unpinConflictModal                                    | acceptUnpinConflict, cancelUnpinConflict |
+| `OrderConflictModal`       | orderConflict                                         | acceptOrderConflict, cancelOrderConflict |
+
+The shared `PinSideModal` (`components/PinSideModal/`) stays presentational;
+the `ColumnOrderPinSideModal` wrapper is its local owner and wires it to the
+store.
 
 ## File Structure
 
 ```
 ColumnOrderSection/
 ├── index.ts                              → Barrel export
-├── ColumnOrderSection.component.tsx       → DraggableList + modals
-├── ColumnOrderSection.types.ts            → Conflict resolution types
-├── ColumnOrderSection.stylex.ts
+├── ColumnOrderSection.component.tsx       → Thin shell: Header + Body + Toolbar + Modals
+├── ColumnOrderSection.types.ts            → Section props + conflict resolution type re-exports
 │
 ├── ColumnOrderSectionContext/            → Nested context for modal state
 │   └── (see ColumnOrderSectionContext/ARCHITECTURE.md)
 │
-├── ColumnOrderSectionToolbar/            → Order/clear/reset actions
+├── ColumnOrderSectionHeader/             → Count title + compact toolbar (private delegate)
+│   ├── ColumnOrderSectionHeader.component.tsx
+│   ├── ColumnOrderSectionHeader.types.ts    → { isBusy? }
+│   └── ColumnOrderSectionHeader.test.tsx
+│
+├── ColumnOrderSectionBody/               → Drag-and-drop column list (private delegate)
+│   ├── ColumnOrderSectionBody.component.tsx
+│   ├── ColumnOrderSectionBody.types.ts      → { isBusy? }
+│   ├── ColumnOrderSectionBody.test.tsx
+│   └── ColumnOrderItemContent/           → Row content: lock + label + Pin/Show toggles
+│       ├── ColumnOrderItemContent.component.tsx
+│       ├── ColumnOrderItemContent.types.ts
+│       └── ColumnOrderItemContent.stylex.ts
+│
+├── ColumnOrderSectionModals/             → Hosts the four conflict modals (pure composition)
+│   ├── ColumnOrderSectionModals.component.tsx
+│   └── ColumnOrderSectionModals.test.tsx
+│
+├── ColumnOrderPinSideModal/              → Store-connected wrapper around shared PinSideModal
+│   ├── ColumnOrderPinSideModal.component.tsx
+│   └── ColumnOrderPinSideModal.test.tsx
+│
+├── ColumnOrderSectionToolbar/            → Order/clear/reset actions (also used by GeneralSettingsSection)
 │   ├── index.ts
 │   ├── ColumnOrderSectionToolbar.component.tsx
-│   ├── ColumnOrderSectionToolbar.types.ts   → { variant? }
-│   └── ColumnOrderSectionToolbar.stylex.ts
+│   └── ColumnOrderSectionToolbar.types.ts   → { isBusy?, variant? }
 │
-├── OrderConflictModal/                   → Order/pin conflict resolution
-│   ├── index.ts
-│   ├── OrderConflictModal.component.tsx   → Radio options for resolution
-│   ├── OrderConflictModal.types.ts
-│   └── OrderConflictModal.stylex.ts
+├── OrderConflictModal/                   → Order/pin conflict resolution (self-connected, no props)
+│   ├── OrderConflictModal.component.tsx
+│   ├── OrderConflictModal.stylex.ts
+│   └── OrderConflictModal.test.tsx
 │
-├── PinConflictModal/                     → Pin contiguity conflict resolution
-│   ├── index.ts
+├── PinConflictModal/                     → Pin contiguity conflict resolution (self-connected, no props)
 │   ├── PinConflictModal.component.tsx
-│   ├── PinConflictModal.types.ts
-│   └── PinConflictModal.stylex.ts
+│   ├── PinConflictModal.stylex.ts
+│   └── PinConflictModal.test.tsx
 │
-├── UnpinConflictModal/                   → Unpin gap conflict resolution
-│   ├── index.ts
+├── UnpinConflictModal/                   → Unpin gap conflict resolution (self-connected, no props)
 │   ├── UnpinConflictModal.component.tsx
-│   ├── UnpinConflictModal.types.ts
-│   └── UnpinConflictModal.stylex.ts
+│   ├── UnpinConflictModal.stylex.ts
+│   └── UnpinConflictModal.test.tsx
 │
 └── utils/                                → Pin/order conflict utilities
     ├── index.ts
     ├── applyPin.util.ts                   → Apply pin respecting static columns
     ├── buildAllOrderedColumns.util.ts     → Build complete ordered column list
+    ├── filterSettingsColumns.util.ts      → Columns manageable in the section (shared by header + body)
     ├── detectPinOrderConflict.util.ts     → Detect order/pinning conflicts
     ├── getIsContiguousPin.util.ts         → Check pin contiguity
     ├── insertAdjacentToPinnedGroup.util.ts → Insert next to pinned group
@@ -52,71 +93,88 @@ ColumnOrderSection/
     └── restoreStaticColumnOrder.util.ts   → Restore static columns to positions
 ```
 
+The conflict modals and the Header/Body/Modals delegates are private
+delegates (ADR-007): imported via direct file paths, no `index.ts`, and no
+Props re-exports.
+
 ## Dependencies
 
 ```mermaid
 graph LR
-  COS["ColumnOrderSection"] --> SidePanelSectionMain
-  COS --> SidePanelSectionHeader
-  COS --> DraggableList
-  COS --> ToggleSwitch
-  COS --> LockIcon
-  COS --> COSToolbar["ColumnOrderSectionToolbar"]
+  COS["ColumnOrderSection (shell)"] --> SidePanelSectionMain
+  COS --> Header["ColumnOrderSectionHeader"]
+  COS --> Body["ColumnOrderSectionBody"]
+  COS --> COSToolbar["ColumnOrderSectionToolbar (footer variant)"]
+  COS --> Modals["ColumnOrderSectionModals"]
 
-  COS --> useGetColumns["useGetColumns (TableConfig)"]
-  COS --> useGetColumnOrder["useGetColumnOrder (selector)"]
-  COS --> useGetColumnPinning["useGetColumnPinning (selector)"]
-  COS --> useGetColumnVisibility["useGetColumnVisibility (selector)"]
+  Header --> SidePanelSectionHeader
+  Header --> useGetColumns["useGetColumns (TableConfig)"]
+  Header --> useGetColumnVisibility["useGetColumnVisibility (selector)"]
+  Header --> COSToolbar2["ColumnOrderSectionToolbar (toolbar variant)"]
+  Header --> filterSettingsColumns["filterSettingsColumns util"]
 
-  COS --> useReorderColumns["useReorderColumns (context action)"]
-  COS --> useToggleColumnPin["useToggleColumnPin (context action)"]
-  COS --> useToggleColumnVisibility["useToggleColumnVisibility (context action)"]
+  Body --> DraggableList
+  Body --> useGetColumns
+  Body --> useGetColumnOrder["useGetColumnOrder (selector)"]
+  Body --> useGetColumnPinning["useGetColumnPinning (selector)"]
+  Body --> useGetColumnVisibility
+  Body --> useReorderColumns["useReorderColumns (context action)"]
+  Body --> buildAllOrderedColumns["buildAllOrderedColumns util"]
+  Body --> createDraggableItems["createDraggableItems util"]
+  Body --> filterSettingsColumns
+  Body --> ItemContent["ColumnOrderItemContent"]
   useReorderColumns --> GlobalSettings["GlobalSettingsContext order-conflict preference"]
 
-  COS --> useGetConflictModal["useGetConflictModal (context selector)"]
-  COS --> useGetOrderConflict["useGetOrderConflict (context selector)"]
-  COS --> useGetPinSideModal["useGetPinSideModal (context selector)"]
-  COS --> useGetUnpinConflictModal["useGetUnpinConflictModal (context selector)"]
+  ItemContent --> LockIcon
+  ItemContent --> ToggleSwitch
+  ItemContent --> useToggleColumnPin["useToggleColumnPin (context action)"]
+  ItemContent --> useToggleColumnVisibility["useToggleColumnVisibility (context action)"]
 
-  COS --> PinSideModal["PinSideModal (shared component)"]
-  COS --> PinConflictModal
-  COS --> UnpinConflictModal
-  COS --> OrderConflictModal
+  Modals --> ColumnOrderPinSideModal
+  Modals --> PinConflictModal
+  Modals --> UnpinConflictModal
+  Modals --> OrderConflictModal
 
-  COS --> buildAllOrderedColumns["buildAllOrderedColumns util"]
+  ColumnOrderPinSideModal --> PinSideModal["PinSideModal (shared component)"]
+  ColumnOrderPinSideModal --> useGetPinSideModal["useGetPinSideModal (context selector)"]
+  ColumnOrderPinSideModal --> useAcceptPinSide["useAcceptPinSide (context action)"]
+  ColumnOrderPinSideModal --> useCancelPinSide["useCancelPinSide (context action)"]
+
+  PinConflictModal --> useGetConflictModal["useGetConflictModal (context selector)"]
+  PinConflictModal --> PinConflictActions["useAcceptPinConflict / useCancelPinConflict"]
+  UnpinConflictModal --> useGetUnpinConflictModal["useGetUnpinConflictModal (context selector)"]
+  UnpinConflictModal --> UnpinConflictActions["useAcceptUnpinConflict / useCancelUnpinConflict"]
+  OrderConflictModal --> useGetOrderConflict["useGetOrderConflict (context selector)"]
+  OrderConflictModal --> OrderConflictActions["useAcceptOrderConflict / useCancelOrderConflict"]
 
   COSToolbar --> Button
   COSToolbar --> Icons["ColumnsOrderIcon, EraserIcon, RefreshIcon"]
   COSToolbar --> useOrderBySorting["useOrderBySorting (context action)"]
   COSToolbar --> useClearColumnOrderSection["useClearColumnOrderSection (action)"]
   COSToolbar --> useResetColumnOrderAndVisibility["useResetColumnOrderAndVisibility (action)"]
-  COSToolbar --> useGetColumnsSorting["useGetColumnsSorting (selector)"]
-  COSToolbar --> useGetColumnPinning2["useGetColumnPinning (selector)"]
-  COSToolbar --> useGetColumnVisibility2["useGetColumnVisibility (selector)"]
 ```
 
 ## Render Flow
 
 ```mermaid
 graph TD
-  A["ColumnOrderSection renders"] --> B["Read columns, order, pinning, visibility"]
-  B --> C["buildAllOrderedColumns → ordered list"]
-  C --> D["Filter to non-render/static columns"]
-  D --> E["Map to DraggableItem array"]
-  E --> F["Each item: Lock icon + Label + Pin toggle + Show toggle"]
+  A["ColumnOrderSection renders SidePanelSectionMain"] --> B["ColumnOrderSectionHeader"]
+  B --> C["filterSettingsColumns → visible/total count title"]
+  B --> D["ColumnOrderSectionToolbar variant='toolbar'"]
 
-  A --> G["SidePanelSectionHeader"]
-  G --> H["ColumnOrderSectionToolbar variant='toolbar'"]
+  A --> E["ColumnOrderSectionBody"]
+  E --> F["filterSettingsColumns + buildAllOrderedColumns → ordered list"]
+  F --> G["createDraggableItems → DraggableItem array"]
+  G --> H["Each row: ColumnOrderItemContent (lock + label + Pin/Show toggles)"]
+  E --> I["DraggableList → useReorderColumns on drop"]
 
-  A --> I["DraggableList → drag-drop reordering"]
-  I --> J["useReorderColumns on drop"]
+  A --> J["ColumnOrderSectionToolbar variant='footer'"]
 
-  A --> K["ColumnOrderSectionToolbar variant='footer'"]
-
-  A --> L["PinSideModal (choose left/right)"]
-  A --> M["PinConflictModal (non-contiguous pin)"]
-  A --> N["UnpinConflictModal (gap in pinned layer)"]
-  A --> O["OrderConflictModal (order breaks pinning)"]
+  A --> K["ColumnOrderSectionModals"]
+  K --> L["ColumnOrderPinSideModal → shared PinSideModal (choose left/right)"]
+  K --> M["PinConflictModal (self-connected)"]
+  K --> N["UnpinConflictModal (self-connected)"]
+  K --> O["OrderConflictModal (self-connected)"]
 ```
 
 ## Dual Context Architecture
@@ -160,23 +218,24 @@ Actions in ColumnOrderSectionContext read/write to both stores.
 
 ## Utility Functions
 
-| Utility                        | Purpose                                                                         |
-| ------------------------------ | ------------------------------------------------------------------------------- |
-| `applyPin`                     | Add column to pin side, respecting static positions                             |
-| `buildAllOrderedColumns`       | Merge columnOrder with remaining columns                                        |
-| `createDraggableItems`         | Maps ordered columns to draggable entries and delegates row content rendering   |
-| `derivePinSideResolutionState` | Resolve pin-side choice to direct update or conflict, shared by drawer + header |
-| `detectPinOrderConflict`       | Check if new order breaks pin contiguity                                        |
-| `getIsContiguousPin`           | Check if pin side maintains contiguity                                          |
-| `getPinnedEntries`             | Flatten left/right pinning into keyed entries                                   |
-| `insertAdjacentToPinnedGroup`  | Place column next to its pin group                                              |
-| `pinAllBetween`                | Pin all columns between edge and target column                                  |
-| `recalculatePinSides`          | Reassign left/right based on position after reorder                             |
-| `resolveClosestSide`           | Pick nearest pin side from edge distances                                       |
-| `resolveClosestEdgeSide`       | Convert 'closest-edge' to actual 'left' or 'right'                              |
-| `resolvePinConflictState`      | Shared pin-conflict resolution to next `{ columnOrder, columnPinning }`         |
-| `resolvePinOrderConflict`      | Apply one of three order/pin conflict resolutions                               |
-| `resolveToggleColumnPinIntent` | Resolves pin/unpin toggle intent into direct update vs modal/auto-accept action |
-| `restoreStaticColumnOrder`     | Ensure static columns stay in their original positions                          |
-| `restoreStaticPinnedColumns`   | Restores default pin side membership for static columns                         |
-| `sortPinnedKeysByOrder`        | Sort pinned keys by latest column order                                         |
+| Utility                        | Purpose                                                                                              |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| `applyPin`                     | Add column to pin side, respecting static positions                                                  |
+| `buildAllOrderedColumns`       | Merge columnOrder with remaining columns                                                             |
+| `createDraggableItems`         | Maps ordered columns to draggable entries and delegates row content rendering                        |
+| `derivePinSideResolutionState` | Resolve pin-side choice to direct update or conflict, shared by drawer + header                      |
+| `detectPinOrderConflict`       | Check if new order breaks pin contiguity                                                             |
+| `filterSettingsColumns`        | Columns manageable in the section (no custom render, or static); shared by header counts + body list |
+| `getIsContiguousPin`           | Check if pin side maintains contiguity                                                               |
+| `getPinnedEntries`             | Flatten left/right pinning into keyed entries                                                        |
+| `insertAdjacentToPinnedGroup`  | Place column next to its pin group                                                                   |
+| `pinAllBetween`                | Pin all columns between edge and target column                                                       |
+| `recalculatePinSides`          | Reassign left/right based on position after reorder                                                  |
+| `resolveClosestSide`           | Pick nearest pin side from edge distances                                                            |
+| `resolveClosestEdgeSide`       | Convert 'closest-edge' to actual 'left' or 'right'                                                   |
+| `resolvePinConflictState`      | Shared pin-conflict resolution to next `{ columnOrder, columnPinning }`                              |
+| `resolvePinOrderConflict`      | Apply one of three order/pin conflict resolutions                                                    |
+| `resolveToggleColumnPinIntent` | Resolves pin/unpin toggle intent into direct update vs modal/auto-accept action                      |
+| `restoreStaticColumnOrder`     | Ensure static columns stay in their original positions                                               |
+| `restoreStaticPinnedColumns`   | Restores default pin side membership for static columns                                              |
+| `sortPinnedKeysByOrder`        | Sort pinned keys by latest column order                                                              |

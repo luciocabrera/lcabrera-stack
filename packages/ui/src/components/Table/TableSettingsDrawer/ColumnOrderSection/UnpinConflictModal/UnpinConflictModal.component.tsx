@@ -6,23 +6,26 @@ import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 
 import type { UnpinConflictResolution } from '../ColumnOrderSection.types';
-import type { UnpinConflictModalProps } from './UnpinConflictModal.types';
 
 import {
   useAcceptUnpinConflict,
   useCancelUnpinConflict,
 } from '../ColumnOrderSectionContext/actions';
+import { useGetUnpinConflictModal } from '../ColumnOrderSectionContext/selectors';
 import { styles } from './UnpinConflictModal.stylex';
 
-export const UnpinConflictModal = ({
-  columnLabel,
-  isOpen,
-  side,
-}: UnpinConflictModalProps) => {
-  const [selectedResolution, setSelectedResolution] =
-    useState<UnpinConflictResolution>('unpin-beyond');
+/**
+ * Conflict-resolution modal shown when unpinning a column would leave a gap
+ * in its pinned group. Owns its store wiring: reads the unpin-conflict modal
+ * slice and dispatches the accept/cancel actions itself.
+ */
+export const UnpinConflictModal = () => {
+  const { columnLabel, isOpen, side } = useGetUnpinConflictModal();
   const acceptUnpinConflict = useAcceptUnpinConflict();
   const cancelUnpinConflict = useCancelUnpinConflict();
+
+  const [selectedResolution, setSelectedResolution] =
+    useState<UnpinConflictResolution>('unpin-beyond');
 
   const handleAccept = () => {
     acceptUnpinConflict(selectedResolution);
@@ -32,6 +35,10 @@ export const UnpinConflictModal = ({
   const handleCancel = () => {
     cancelUnpinConflict();
     setSelectedResolution('unpin-beyond');
+  };
+
+  const handleResolutionChange = (value: UnpinConflictResolution) => {
+    setSelectedResolution(value);
   };
 
   return (
@@ -56,9 +63,7 @@ export const UnpinConflictModal = ({
       </p>
       <RadioOptionGroup
         name='unpin-conflict-resolution'
-        onChange={(value) => {
-          setSelectedResolution(value);
-        }}
+        onChange={handleResolutionChange}
         options={UNPIN_CONFLICT_OPTIONS}
         value={selectedResolution}
       />

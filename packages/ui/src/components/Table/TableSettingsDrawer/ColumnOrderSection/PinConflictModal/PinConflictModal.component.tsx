@@ -6,17 +6,24 @@ import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 
 import type { PinConflictResolution } from '../ColumnOrderSection.types';
-import type { PinConflictModalProps } from './PinConflictModal.types';
 
+import {
+  useAcceptPinConflict,
+  useCancelPinConflict,
+} from '../ColumnOrderSectionContext/actions';
+import { useGetConflictModal } from '../ColumnOrderSectionContext/selectors';
 import { styles } from './PinConflictModal.stylex';
 
-export const PinConflictModal = ({
-  columnLabel,
-  isOpen,
-  onAccept,
-  onCancel,
-  side,
-}: PinConflictModalProps) => {
+/**
+ * Conflict-resolution modal shown when pinning a column that is not adjacent
+ * to the existing pinned group. Owns its store wiring: reads the pin-conflict
+ * modal slice and dispatches the accept/cancel actions itself.
+ */
+export const PinConflictModal = () => {
+  const { columnLabel, isOpen, side } = useGetConflictModal();
+  const acceptPinConflict = useAcceptPinConflict();
+  const cancelPinConflict = useCancelPinConflict();
+
   const [selectedResolution, setSelectedResolution] =
     useState<PinConflictResolution>('move-column');
 
@@ -32,12 +39,12 @@ export const PinConflictModal = ({
   });
 
   const handleAccept = () => {
-    onAccept(selectedResolution);
+    acceptPinConflict(selectedResolution);
     setSelectedResolution('move-column');
   };
 
   const handleCancel = () => {
-    onCancel();
+    cancelPinConflict();
     setSelectedResolution('move-column');
   };
 
