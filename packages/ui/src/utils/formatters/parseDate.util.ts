@@ -2,7 +2,7 @@
  * Parse a value into a Date object
  * Handles Date objects, ISO strings, and timestamps
  */
-export const parseDate = (value: unknown): Date | undefined => {
+export const parseDate = (value: unknown) => {
   if (value instanceof Date) {
     return value;
   }
@@ -15,5 +15,5 @@ export const parseDate = (value: unknown): Date | undefined => {
     }
   }
 
-  return undefined;
+  return;
 };

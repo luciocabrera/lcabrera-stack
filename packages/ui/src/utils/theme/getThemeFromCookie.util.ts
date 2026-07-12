@@ -1,5 +1,3 @@
-import type { ThemeMode } from '@repo/ui/types/theme.types';
-
 import { getAppScopedCookieKey } from '@repo/ui/utils/storage';
 import { readFromCookie } from '@repo/ui/utils/storage/readFromCookie.util';
 
@@ -18,7 +16,7 @@ type GetThemeFromCookieArgs = {
 export const getThemeFromCookie = ({
   appId,
   cookieHeader,
-}: GetThemeFromCookieArgs): ThemeMode | undefined => {
+}: GetThemeFromCookieArgs) => {
   const theme = readFromCookie({
     cookieString: cookieHeader,
     key: getAppScopedCookieKey({ appId, key: THEME_COOKIE_NAME }),
@@ -28,5 +26,5 @@ export const getThemeFromCookie = ({
     return theme;
   }
 
-  return undefined;
+  return;
 };

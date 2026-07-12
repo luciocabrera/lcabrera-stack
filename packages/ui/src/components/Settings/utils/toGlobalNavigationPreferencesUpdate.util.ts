@@ -1,5 +1,3 @@
-import type { GlobalNavigationPreferences } from '@repo/ui/types/globalSettings.types';
-
 import type { BuildNavigationUpdateArgs } from '../Settings.types';
 
 import {
@@ -11,7 +9,7 @@ import {
 export const toGlobalNavigationPreferencesUpdate = ({
   draft,
   navigationPreferences,
-}: BuildNavigationUpdateArgs): GlobalNavigationPreferences | undefined => {
+}: BuildNavigationUpdateArgs) => {
   const isCollapsedChanged =
     draft.navigationCollapsed !==
     (navigationPreferences.collapsed ??
@@ -24,7 +22,7 @@ export const toGlobalNavigationPreferencesUpdate = ({
     (navigationPreferences.size ?? DEFAULT_NAVIGATION_SIZE_PREFERENCE);
 
   if (!isCollapsedChanged && !isPinnedChanged && !isSizeChanged) {
-    return undefined;
+    return;
   }
 
   return {

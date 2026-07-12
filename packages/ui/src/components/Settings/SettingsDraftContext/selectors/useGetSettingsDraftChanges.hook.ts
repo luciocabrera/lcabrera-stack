@@ -1,0 +1,22 @@
+import {
+  useGetGlobalNavigationPreferences,
+  useGetGlobalPinningPreferences,
+} from '@repo/ui/contexts/GlobalSettingsContext/selectors';
+
+import { getSettingsDraftChanges } from '../../utils/getSettingsDraftChanges.util';
+import { toDraft } from '../../utils/toDraft.util';
+import { useDraftStore } from '../useDraftStore.hook';
+
+/**
+ * Per-domain dirty flags for the staged settings draft, diffed against the
+ * persisted preferences resolved through the same toDraft defaults.
+ */
+export const useGetSettingsDraftChanges = () => {
+  const draft = useDraftStore((state) => state);
+  const navigationPreferences = useGetGlobalNavigationPreferences();
+  const pinningPreferences = useGetGlobalPinningPreferences();
+
+  const baseline = toDraft({ navigationPreferences, pinningPreferences });
+
+  return getSettingsDraftChanges({ baseline, draft });
+};

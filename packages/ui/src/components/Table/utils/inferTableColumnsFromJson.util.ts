@@ -1,4 +1,4 @@
-import type { TableColumn, TableColumnDataType } from '../Table.types';
+import type { TableColumn } from '../Table.types';
 
 type InferredValueType =
   | 'array'
@@ -77,9 +77,7 @@ const observeValueType = ({ key, typeByKey, value }: ObserveValueTypeArgs) => {
   }
 };
 
-const toTableColumnDataType = (
-  inferredType: InferredValueType,
-): TableColumnDataType | undefined => {
+const toTableColumnDataType = (inferredType: InferredValueType) => {
   switch (inferredType) {
     case 'boolean': {
       return 'boolean';
@@ -94,7 +92,7 @@ const toTableColumnDataType = (
       return 'string';
     }
     default: {
-      return undefined;
+      return;
     }
   }
 };

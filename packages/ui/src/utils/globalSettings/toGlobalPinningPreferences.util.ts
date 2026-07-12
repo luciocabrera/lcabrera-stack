@@ -1,5 +1,3 @@
-import type { GlobalPinningPreferences } from '@repo/ui/types/globalSettings.types';
-
 import { isObject } from '@repo/ui/utils/typeGuards';
 
 import { isOrderConflictResolution } from './isOrderConflictResolution.util';
@@ -15,11 +13,9 @@ import { isUnpinConflictResolution } from './isUnpinConflictResolution.util';
  * @param value - Raw `pinning` slice from the cookie payload.
  * @returns Validated pinning preferences, or undefined when the slice is not an object.
  */
-export const toGlobalPinningPreferences = (
-  value: unknown,
-): GlobalPinningPreferences | undefined => {
+export const toGlobalPinningPreferences = (value: unknown) => {
   if (!isObject(value)) {
-    return undefined;
+    return;
   }
 
   const pinSide = isPinSide(value['pinSide']) ? value['pinSide'] : undefined;

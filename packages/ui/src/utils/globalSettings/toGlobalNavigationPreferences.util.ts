@@ -1,5 +1,3 @@
-import type { GlobalNavigationPreferences } from '@repo/ui/types/globalSettings.types';
-
 import { isObject } from '@repo/ui/utils/typeGuards';
 
 import { isNavigationCollapsedPreference } from './isNavigationCollapsedPreference.util';
@@ -14,11 +12,9 @@ import { isNavigationSizePreference } from './isNavigationSizePreference.util';
  * @param value - Raw `navigation` slice from the cookie payload.
  * @returns Validated navigation preferences, or undefined when the slice is not an object.
  */
-export const toGlobalNavigationPreferences = (
-  value: unknown,
-): GlobalNavigationPreferences | undefined => {
+export const toGlobalNavigationPreferences = (value: unknown) => {
   if (!isObject(value)) {
-    return undefined;
+    return;
   }
 
   const collapsed = isNavigationCollapsedPreference(value['collapsed'])
