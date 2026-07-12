@@ -230,6 +230,48 @@ Consumers **never** call `store.get()` directly in render — they always use se
 
 ---
 
+## Thin Shell + Self-Connected Delegates (Store Wiring Ownership)
+
+Every store slice is read — and every action dispatched — **inside the component that actually renders it**, never in a parent that only forwards the values as props.
+
+**The smell to eliminate:**
+
+```tsx
+// ❌ Parent reads state/actions only to drill them into a child
+const conflictModal = useGetConflictModal();
+const acceptPinConflict = useAcceptPinConflict();
+...
+<PinConflictModal
+  columnLabel={conflictModal.columnLabel}
+  isOpen={conflictModal.isOpen}
+  onAccept={acceptPinConflict}
+/>
+```
+
+```tsx
+// ✅ Child is self-connected (zero props); parent is pure composition
+export const PinConflictModal = () => {
+  const { columnLabel, isOpen, side } = useGetConflictModal();
+  const acceptPinConflict = useAcceptPinConflict();
+  ...
+};
+```
+
+**Rules:**
+
+1. **Composite components are thin shells.** Split into private delegates mirroring `TableSettingsDrawer`: `XHeader` (title/counts + toolbar), `XBody` (content), a footer toolbar, `XModals` (pure composition of self-connected modals). The root forwards only presentation flags (`isBusy`) and native props.
+2. **Props shrink to presentation flags.** If a child needs `useGetX` + `useAcceptX`/`useCancelX`, those hooks belong in the child. Delete the `.types.ts` when a delegate ends up with zero props.
+3. **Shared presentational components stay pure.** A shared/public component (e.g. `PinSideModal`) must not be coupled to a feature store — give it a small store-connected wrapper delegate named for the domain (e.g. `ColumnOrderPinSideModal`) that acts as its local owner.
+4. **Render-callback row content becomes a component** that consumes its own actions (e.g. `ColumnOrderItemContent`, `SortItemContent`) — this also removes inline-arrow handlers from JSX.
+5. **Derivations needed by two or more delegates** are extracted to a shared `*.util.ts` (e.g. `filterSettingsColumns`) instead of being computed in the parent and drilled.
+6. **Document ownership.** The component's `ARCHITECTURE.md` gets a "State Ownership Rule" table (delegate → selectors read → actions dispatched); its `INVENTORY.md` row is worded "thin shell composing private delegates that own their store wiring".
+
+**Why:** beyond removing prop drilling, this is what makes the store-pattern's granular subscriptions pay off — a modal-state change re-renders only that modal, not the whole section.
+
+Canonical examples: `Table/TableSettingsDrawer/` (shell) and `Table/TableSettingsDrawer/ColumnOrderSection/` (full ownership table in its `ARCHITECTURE.md`).
+
+---
+
 ## Controlled Component Contract
 
 All form-like components are **fully controlled** — no internal state for the value:

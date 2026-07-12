@@ -72,6 +72,8 @@ Stop and split into sub-components/hooks/slots as soon as any of these show up:
 
 **Complex/stateful case — split contexts + deep component tree.** Model feature-rich, stateful components after `packages/ui/src/components/Table/` (see its `ARCHITECTURE.md`): state is split across narrow-purpose providers (`TableConfigProvider`, `TableDataProvider`, `FiltersDataProvider`, `TableWrapperContext`) instead of one giant context, and rendering is a deep tree of single-purpose components (`TableHeader` → `TableHeaderCell`, `TableBody` → `TableRow` → `TableBodyCell`, ...) instead of one component branching on every feature flag. Invoke the `store-pattern` skill before adding any new store/context/selector/action in this style.
 
+**Store wiring ownership — no selector/action prop drilling.** Never call a `useGet*` selector or action hook in a parent just to pass the results into a child as props. The hooks belong in the component that renders the data (self-connected delegates, zero props beyond presentation flags like `isBusy`); composite sections become thin shells of `Header`/`Body`/footer-toolbar/`Modals` delegates; shared presentational components get a small store-connected wrapper as their local owner. Full rules and examples: `packages/ui/src/PATTERNS.md` → "Thin Shell + Self-Connected Delegates", canonical implementation: `Table/TableSettingsDrawer/ColumnOrderSection/`.
+
 ## React 19 Mandatory Rules
 
 - **Always `use()`, never `useContext()`** — `use()` is conditional-safe and supports Promises; `useContext` is forbidden in this codebase.
