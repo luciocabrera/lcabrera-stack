@@ -56,10 +56,13 @@ ColumnSettingsDrawer/
 │       └── getTableColumnDrawerState.util.ts → Map table snapshot to drawer state
 │
 ├── GeneralSection/                        → Column width presets + clear/reset all
-│   ├── GeneralSection.component.tsx
+│   ├── GeneralSection.component.tsx       → Thin shell: Header + Body + Footer delegates
 │   ├── GeneralSection.types.ts
-│   ├── GeneralSection.stylex.ts
-│   └── index.ts
+│   ├── index.ts
+│   ├── GeneralSectionHeader/              → Width preset toggles (self-connected)
+│   ├── GeneralSectionBody/                → Preset guidance InfoBox
+│   ├── GeneralSectionFooter/              → Clear/reset-all actions (self-connected)
+│   └── utils/                             → resolvePresetColumnWidth
 │
 ├── FilterSection/                         → Column filter input
 │   ├── FilterSection.component.tsx

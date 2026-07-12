@@ -1,7 +1,6 @@
 import type { DataKey } from '@repo/ui/components/Table/Table.types';
-import type { ComponentPropsWithoutRef } from 'react';
 
-export type GeneralSectionProps<TData> = ComponentPropsWithoutRef<'div'> & {
+export type GeneralSectionHeaderProps<TData> = {
   readonly columnKey: DataKey<TData>;
   readonly isBusy?: boolean;
 };
