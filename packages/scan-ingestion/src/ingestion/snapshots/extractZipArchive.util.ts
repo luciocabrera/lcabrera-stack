@@ -2,14 +2,14 @@ import { unzipSync } from 'fflate';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
-type ExtractZipArchiveArgs = {
-  readonly archiveBytes: Uint8Array;
-  readonly targetDirectory: string;
-};
-
 export type ExtractZipArchiveResult = {
   readonly fileCount: number;
   readonly totalBytes: number;
+};
+
+type ExtractZipArchiveArgs = {
+  readonly archiveBytes: Uint8Array;
+  readonly targetDirectory: string;
 };
 
 /**
@@ -42,13 +42,13 @@ export const extractZipArchive = ({
     );
   }
 
-  filePaths.forEach((entryPath) => {
+  for (const entryPath of filePaths) {
     const destination = path.resolve(resolvedTarget, entryPath);
     // eslint-disable-next-line security/detect-non-literal-fs-filename -- destination is proven above to stay under resolvedTarget
     mkdirSync(path.dirname(destination), { recursive: true });
     // eslint-disable-next-line security/detect-non-literal-fs-filename -- destination is proven above to stay under resolvedTarget
     writeFileSync(destination, entries[entryPath] ?? new Uint8Array());
-  });
+  }
 
   const totalBytes = filePaths.reduce(
     (sum, entryPath) => sum + (entries[entryPath]?.length ?? 0),

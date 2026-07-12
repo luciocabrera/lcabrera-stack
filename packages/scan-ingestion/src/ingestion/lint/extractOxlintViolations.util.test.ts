@@ -22,9 +22,9 @@ describe('extractOxlintViolations', () => {
     });
 
     const violations = extractOxlintViolations({
-      localPath: '/repo',
       raw,
       scopeValue: 'packages/ui',
+      targetRootPath: '/repo',
     });
 
     expect(violations).toEqual([
@@ -59,9 +59,9 @@ describe('extractOxlintViolations', () => {
     });
 
     const violations = extractOxlintViolations({
-      localPath: '/repo',
       raw,
       scopeValue: '.',
+      targetRootPath: '/repo',
     });
 
     expect(violations[0]).toMatchObject({
@@ -83,9 +83,9 @@ describe('extractOxlintViolations', () => {
     });
 
     const violations = extractOxlintViolations({
-      localPath: '/repo',
       raw,
       scopeValue: '.',
+      targetRootPath: '/repo',
     });
 
     expect(violations[0]).toMatchObject({

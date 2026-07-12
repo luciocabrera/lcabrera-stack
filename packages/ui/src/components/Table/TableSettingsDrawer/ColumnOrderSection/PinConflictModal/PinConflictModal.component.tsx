@@ -41,15 +41,19 @@ export const PinConflictModal = ({
     setSelectedResolution('move-column');
   };
 
+  const handleResolutionChange = (value: PinConflictResolution) => {
+    setSelectedResolution(value);
+  };
+
   return (
     <Modal
       footer={
         <>
-          <Button color='outline' onClick={handleCancel} size='sm'>
-            Cancel
-          </Button>
           <Button color='primary' onClick={handleAccept} size='sm'>
             Accept
+          </Button>
+          <Button color='outline' onClick={handleCancel} size='sm'>
+            Cancel
           </Button>
         </>
       }
@@ -63,9 +67,7 @@ export const PinConflictModal = ({
       </p>
       <RadioOptionGroup
         name='pin-conflict-resolution'
-        onChange={(value) => {
-          setSelectedResolution(value);
-        }}
+        onChange={handleResolutionChange}
         options={options}
         value={selectedResolution}
       />

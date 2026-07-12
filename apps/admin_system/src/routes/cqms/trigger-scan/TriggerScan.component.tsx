@@ -16,8 +16,6 @@ export const TriggerScan = () => {
     workspacesPromise,
   } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
-  const serverErrors =
-    actionData && 'errors' in actionData ? actionData.errors : undefined;
 
   if (!hasSnapshot) {
     return (
@@ -32,6 +30,9 @@ export const TriggerScan = () => {
       </SectionCard>
     );
   }
+
+  const serverErrors =
+    actionData && 'errors' in actionData ? actionData.errors : undefined;
 
   return (
     <SectionCard

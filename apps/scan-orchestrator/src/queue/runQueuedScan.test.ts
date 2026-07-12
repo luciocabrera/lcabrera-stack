@@ -25,11 +25,18 @@ describe('runQueuedScan (deterministic linter branch)', () => {
     projectDir = realpathSync(mkdtempSync(temporaryDirectoryTemplate));
 
     const pool = getPool();
-    const result = await pool.query<{ fn_upsert_project: string }>(
-      'SELECT cqms.fn_upsert_project($1, $2, $3) AS fn_upsert_project',
-      [systemUserId, 'run-queued-scan-test-project', projectDir],
+    const result = await pool.query<{ fn_register_project: string }>(
+      'SELECT cqms.fn_register_project($1, $2) AS fn_register_project',
+      [systemUserId, 'run-queued-scan-test-project'],
     );
-    projectId = result.rows[0]?.fn_upsert_project ?? '';
+    projectId = result.rows[0]?.fn_register_project ?? '';
+
+    // The temp dir doubles as the project's snapshot storage (ADR-028) —
+    // the scan target the orchestrator executes against.
+    await pool.query(
+      'SELECT * FROM cqms.fn_set_project_snapshot($1, $2, $3, $4, $5, $6, $7)',
+      [systemUserId, projectId, projectDir, 'test.zip', 42, 1, 'test'],
+    );
   });
 
   afterAll(async () => {
@@ -66,7 +73,6 @@ describe('runQueuedScan (deterministic linter branch)', () => {
       hub,
       scan: {
         deterministic: true,
-        local_path: projectDir,
         project_id: projectId,
         run_id: runId,
         scan_id: scanId,
@@ -74,6 +80,7 @@ describe('runQueuedScan (deterministic linter branch)', () => {
         scope_type: 'repo',
         scope_value: '.',
         skill_path: '.github/skills/linter-checker',
+        snapshot_path: projectDir,
       },
       userId: systemUserId,
     });
@@ -105,7 +112,6 @@ describe('runQueuedScan (deterministic linter branch)', () => {
       hub,
       scan: {
         deterministic: true,
-        local_path: projectDir,
         project_id: projectId,
         run_id: runId,
         scan_id: scanId,
@@ -113,6 +119,7 @@ describe('runQueuedScan (deterministic linter branch)', () => {
         scope_type: 'repo',
         scope_value: '.',
         skill_path: '.github/skills/linter-checker',
+        snapshot_path: projectDir,
       },
       userId: systemUserId,
     });
@@ -143,11 +150,11 @@ describe('runQueuedScan (agentic branch, org-wide daily cost cap)', () => {
     projectDir = realpathSync(mkdtempSync(temporaryDirectoryTemplate));
 
     const pool = getPool();
-    const result = await pool.query<{ fn_upsert_project: string }>(
-      'SELECT cqms.fn_upsert_project($1, $2, $3) AS fn_upsert_project',
-      [systemUserId, 'run-queued-scan-capped-test-project', projectDir],
+    const result = await pool.query<{ fn_register_project: string }>(
+      'SELECT cqms.fn_register_project($1, $2) AS fn_register_project',
+      [systemUserId, 'run-queued-scan-capped-test-project'],
     );
-    projectId = result.rows[0]?.fn_upsert_project ?? '';
+    projectId = result.rows[0]?.fn_register_project ?? '';
   });
 
   afterAll(async () => {
@@ -188,7 +195,6 @@ describe('runQueuedScan (agentic branch, org-wide daily cost cap)', () => {
       hub,
       scan: {
         deterministic: false,
-        local_path: projectDir,
         project_id: projectId,
         run_id: runId,
         scan_id: scanId,
@@ -196,6 +202,7 @@ describe('runQueuedScan (agentic branch, org-wide daily cost cap)', () => {
         scope_type: 'repo',
         scope_value: '.',
         skill_path: '.github/skills/code-smell-checker',
+        snapshot_path: projectDir,
       },
       userId: systemUserId,
     });

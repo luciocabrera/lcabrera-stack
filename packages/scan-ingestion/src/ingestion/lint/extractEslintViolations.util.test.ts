@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { eslintRawSchema } from './eslintRaw.schema.ts';
 import { extractEslintViolations } from './extractEslintViolations.util.ts';
 
-const LOCAL_PATH = '/repo';
+const TARGET_ROOT_PATH = '/repo';
 
 describe('extractEslintViolations', () => {
   it('maps active messages with project-root-relative paths and canonical severity', () => {
@@ -27,7 +27,10 @@ describe('extractEslintViolations', () => {
       ],
     });
 
-    const violations = extractEslintViolations({ localPath: LOCAL_PATH, raw });
+    const violations = extractEslintViolations({
+      raw,
+      targetRootPath: TARGET_ROOT_PATH,
+    });
 
     expect(violations).toEqual([
       {
@@ -75,7 +78,10 @@ describe('extractEslintViolations', () => {
       ],
     });
 
-    const violations = extractEslintViolations({ localPath: LOCAL_PATH, raw });
+    const violations = extractEslintViolations({
+      raw,
+      targetRootPath: TARGET_ROOT_PATH,
+    });
 
     expect(violations[0]?.suggestion_text).toBe(
       'Replace `Number.isInteger()` with `Number.isSafeInteger()`.',
@@ -103,7 +109,10 @@ describe('extractEslintViolations', () => {
       ],
     });
 
-    const violations = extractEslintViolations({ localPath: LOCAL_PATH, raw });
+    const violations = extractEslintViolations({
+      raw,
+      targetRootPath: TARGET_ROOT_PATH,
+    });
 
     expect(violations).toHaveLength(1);
     expect(violations[0]).toMatchObject({
@@ -131,7 +140,10 @@ describe('extractEslintViolations', () => {
       ],
     });
 
-    const violations = extractEslintViolations({ localPath: LOCAL_PATH, raw });
+    const violations = extractEslintViolations({
+      raw,
+      targetRootPath: TARGET_ROOT_PATH,
+    });
 
     expect(violations[0]?.fixable).toBe(true);
     expect(violations[0]?.suggestion_text).toBe(
@@ -151,7 +163,10 @@ describe('extractEslintViolations', () => {
       ],
     });
 
-    const violations = extractEslintViolations({ localPath: LOCAL_PATH, raw });
+    const violations = extractEslintViolations({
+      raw,
+      targetRootPath: TARGET_ROOT_PATH,
+    });
 
     expect(violations[0]?.rule_id).toBe('eslint(unknown)');
   });

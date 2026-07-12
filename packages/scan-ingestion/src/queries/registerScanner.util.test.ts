@@ -125,11 +125,18 @@ describe('scanner registry (register/update/detail table/generic ingest)', () =>
 
   it('a registered scanner is scannable and generically ingestable', async () => {
     const pool = getPool();
-    const projectResult = await pool.query<{ fn_upsert_project: string }>(
-      'SELECT cqms.fn_upsert_project($1, $2, $3) AS fn_upsert_project',
-      [systemUserId, 'registry-e2e-project', projectDir],
+    const projectResult = await pool.query<{ fn_register_project: string }>(
+      'SELECT cqms.fn_register_project($1, $2) AS fn_register_project',
+      [systemUserId, 'registry-e2e-project'],
     );
-    projectId = projectResult.rows[0]?.fn_upsert_project ?? '';
+    projectId = projectResult.rows[0]?.fn_register_project ?? '';
+
+    // Triggering requires a synced snapshot (0027) — record one
+    // pointing at the temp dir.
+    await pool.query(
+      'SELECT * FROM cqms.fn_set_project_snapshot($1, $2, $3, $4, $5, $6, $7)',
+      [systemUserId, projectId, projectDir, 'test.zip', 42, 1, 'test'],
+    );
 
     const { runId } = await triggerScan({
       projectId,

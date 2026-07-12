@@ -1,12 +1,10 @@
 import { Button } from '@repo/ui/components/Button';
 import { useFetcher } from 'react-router';
 
-import type { ProjectSyncPanelProps } from './ProjectSyncPanel.types';
-
-type SyncActionData = {
-  readonly ok?: boolean;
-  readonly syncError?: string;
-};
+import type {
+  ProjectSyncPanelProps,
+  SyncActionData,
+} from './ProjectSyncPanel.types';
 
 /**
  * The browser sync channel (ADR-028): upload a .zip of the repository to

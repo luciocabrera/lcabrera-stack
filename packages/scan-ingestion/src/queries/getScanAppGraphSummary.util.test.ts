@@ -94,11 +94,18 @@ describe('getScanAppGraphSummary', () => {
     projectDir = makeTempDirectory('scan-ingestion-app-graph-summary-');
 
     const pool = getPool();
-    const projectResult = await pool.query<{ fn_upsert_project: string }>(
-      'SELECT cqms.fn_upsert_project($1, $2, $3) AS fn_upsert_project',
-      [systemUserId, 'app-graph-summary-test-project', projectDir],
+    const projectResult = await pool.query<{ fn_register_project: string }>(
+      'SELECT cqms.fn_register_project($1, $2) AS fn_register_project',
+      [systemUserId, 'app-graph-summary-test-project'],
     );
-    projectId = projectResult.rows[0]?.fn_upsert_project ?? '';
+    projectId = projectResult.rows[0]?.fn_register_project ?? '';
+
+    // Triggering requires a synced snapshot (0027) — record one
+    // pointing at the temp dir.
+    await pool.query(
+      'SELECT * FROM cqms.fn_set_project_snapshot($1, $2, $3, $4, $5, $6, $7)',
+      [systemUserId, projectId, projectDir, 'test.zip', 42, 1, 'test'],
+    );
 
     const { runId } = await triggerScan({
       projectId,
@@ -421,11 +428,18 @@ describe('app-graph symbol nodes (ADR-027)', () => {
     projectDir = makeTempDirectory('scan-ingestion-app-graph-symbol-nodes-');
 
     const pool = getPool();
-    const projectResult = await pool.query<{ fn_upsert_project: string }>(
-      'SELECT cqms.fn_upsert_project($1, $2, $3) AS fn_upsert_project',
-      [systemUserId, 'app-graph-symbol-nodes-test-project', projectDir],
+    const projectResult = await pool.query<{ fn_register_project: string }>(
+      'SELECT cqms.fn_register_project($1, $2) AS fn_register_project',
+      [systemUserId, 'app-graph-symbol-nodes-test-project'],
     );
-    projectId = projectResult.rows[0]?.fn_upsert_project ?? '';
+    projectId = projectResult.rows[0]?.fn_register_project ?? '';
+
+    // Triggering requires a synced snapshot (0027) — record one
+    // pointing at the temp dir.
+    await pool.query(
+      'SELECT * FROM cqms.fn_set_project_snapshot($1, $2, $3, $4, $5, $6, $7)',
+      [systemUserId, projectId, projectDir, 'test.zip', 42, 1, 'test'],
+    );
 
     const { runId } = await triggerScan({
       projectId,

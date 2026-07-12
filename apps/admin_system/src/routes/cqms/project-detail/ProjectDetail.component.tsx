@@ -1,4 +1,3 @@
-import type { ProjectRow } from '@repo/scan-ingestion/queries/getProjectById.util';
 import type { ProjectRunRow } from '@repo/scan-ingestion/queries/getProjectRuns.util';
 
 import { NavLink } from '@repo/ui/components/NavLink';
@@ -9,17 +8,13 @@ import { Suspense } from 'react';
 import { useLoaderData } from 'react-router';
 
 import type { loader } from './projectDetail.loader';
+import type { RenderTriggerAffordanceArgs } from './ProjectDetail.types';
 
 import { resolveRunStatusTone } from '../utils/resolveRunStatusTone.util';
 import { PROJECT_RUNS_COLUMNS } from './ProjectDetail.constants';
 import { ProjectGrantsPanel } from './ProjectGrantsPanel/ProjectGrantsPanel.component';
 import { ProjectSyncPanel } from './ProjectSyncPanel/ProjectSyncPanel.component';
 import { ProjectTrendPanel } from './ProjectTrendPanel';
-
-type RenderTriggerAffordanceArgs = {
-  readonly hasActiveRun: boolean;
-  readonly project: ProjectRow;
-};
 
 // Three-state affordance: an active run wins (0021's guard), then the
 // snapshot precondition (ADR-028 — the DB rejects snapshot-less triggers,

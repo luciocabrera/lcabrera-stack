@@ -6,19 +6,19 @@ import { setProjectSnapshot } from '../../queries/setProjectSnapshot.util.ts';
 import { extractZipArchive } from './extractZipArchive.util.ts';
 import { getSnapshotsRoot } from './getSnapshotsRoot.util.ts';
 
+export type SaveProjectSnapshotResult = {
+  readonly fileCount: number;
+  readonly sizeBytes: number;
+  readonly snapshotId: string;
+  readonly storagePath: string;
+};
+
 type SaveProjectSnapshotArgs = {
   readonly archiveBytes: Uint8Array;
   readonly archiveName: string;
   readonly projectId: string;
   readonly sourceLabel: string;
   readonly userId: string;
-};
-
-export type SaveProjectSnapshotResult = {
-  readonly fileCount: number;
-  readonly sizeBytes: number;
-  readonly snapshotId: string;
-  readonly storagePath: string;
 };
 
 /**

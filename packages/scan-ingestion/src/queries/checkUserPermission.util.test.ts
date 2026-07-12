@@ -31,11 +31,11 @@ describe('checkUserPermission', () => {
       [viewerUserId],
     );
 
-    const project = await pool.query<{ fn_upsert_project: string }>(
-      'SELECT cqms.fn_upsert_project($1, $2, $3) AS fn_upsert_project',
-      [systemUserId, 'perm-test-project', '/tmp/perm-test-project-path'],
+    const project = await pool.query<{ fn_register_project: string }>(
+      'SELECT cqms.fn_register_project($1, $2) AS fn_register_project',
+      [systemUserId, 'perm-test-project'],
     );
-    projectId = project.rows[0]?.fn_upsert_project ?? '';
+    projectId = project.rows[0]?.fn_register_project ?? '';
   });
 
   afterAll(async () => {

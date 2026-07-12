@@ -24,6 +24,6 @@ export const runGit = ({ cwd, gitArgs }: RunGitArgs) => {
       stdio: ['ignore', 'pipe', 'ignore'],
     }).trim();
   } catch {
-    return undefined;
+    return;
   }
 };

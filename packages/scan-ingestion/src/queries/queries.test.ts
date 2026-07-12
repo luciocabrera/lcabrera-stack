@@ -1,6 +1,4 @@
 import { closePool, getPool } from '@repo/data-access/db/getPool.util';
-import { makeTempDirectory } from '@repo/scan-ingestion/testing/makeTempDirectory.util.ts';
-import { rmSync } from 'node:fs';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { getProjectById } from './getProjectById.util.ts';
@@ -23,7 +21,6 @@ import { getUserByUsername } from './getUserByUsername.util.ts';
  * would just be repeated round trips proving nothing new.
  */
 describe('queries', () => {
-  let projectDir: string;
   let projectId: string;
   let systemUserId: string;
   let runId: string;
@@ -33,15 +30,13 @@ describe('queries', () => {
     const systemUser = await getUserByUsername({ username: 'system' });
     systemUserId = systemUser?.id ?? '';
 
-    projectDir = makeTempDirectory('scan-ingestion-queries-');
-
     const pool = getPool();
 
-    const projectResult = await pool.query<{ fn_upsert_project: string }>(
-      'SELECT cqms.fn_upsert_project($1, $2, $3) AS fn_upsert_project',
-      [systemUserId, 'queries-test-project', projectDir],
+    const projectResult = await pool.query<{ fn_register_project: string }>(
+      'SELECT cqms.fn_register_project($1, $2) AS fn_register_project',
+      [systemUserId, 'queries-test-project'],
     );
-    projectId = projectResult.rows[0]?.fn_upsert_project ?? '';
+    projectId = projectResult.rows[0]?.fn_register_project ?? '';
 
     const runResult = await pool.query<{ fn_create_run: string }>(
       `SELECT cqms.fn_create_run($1, $2, 'interactive_session', '["linter"]'::jsonb, 'test-user', 'abc123', 'main') AS fn_create_run`,
@@ -76,7 +71,6 @@ describe('queries', () => {
     const pool = getPool();
     await pool.query('DELETE FROM cqms.projects WHERE id = $1', [projectId]);
     await closePool();
-    rmSync(projectDir, { force: true, recursive: true });
   });
 
   it('getProjectListView includes the seeded project with its rolled-up severity counts', async () => {

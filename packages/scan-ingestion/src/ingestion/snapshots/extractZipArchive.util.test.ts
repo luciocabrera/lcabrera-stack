@@ -1,6 +1,8 @@
+import { isExistingPathWithin } from '@repo/scan-ingestion/fs/isExistingPathWithin.util.ts';
+import { readTextFileWithin } from '@repo/scan-ingestion/fs/readTextFileWithin.util.ts';
 import { makeTempDirectory } from '@repo/scan-ingestion/testing/makeTempDirectory.util.ts';
 import { strToU8, zipSync } from 'fflate';
-import { existsSync, readFileSync, rmSync } from 'node:fs';
+import { rmSync } from 'node:fs';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -27,11 +29,17 @@ describe('extractZipArchive', () => {
 
     expect(result.fileCount).toBe(2);
     expect(result.totalBytes).toBeGreaterThan(0);
-    expect(readFileSync(path.join(targetDirectory, 'README.md'), 'utf8')).toBe(
-      '# hello\n',
-    );
     expect(
-      readFileSync(path.join(targetDirectory, 'src', 'index.ts'), 'utf8'),
+      readTextFileWithin({
+        baseDirectory: targetDirectory,
+        targetPath: 'README.md',
+      }),
+    ).toBe('# hello\n');
+    expect(
+      readTextFileWithin({
+        baseDirectory: targetDirectory,
+        targetPath: path.join('src', 'index.ts'),
+      }),
     ).toBe('export const x = 1;\n');
   });
 
@@ -44,9 +52,17 @@ describe('extractZipArchive', () => {
     expect(() => extractZipArchive({ archiveBytes, targetDirectory })).toThrow(
       /escapes the extraction directory/,
     );
-    expect(existsSync(path.join(targetDirectory, 'safe.txt'))).toBe(false);
     expect(
-      existsSync(path.join(path.dirname(targetDirectory), 'escape.txt')),
+      isExistingPathWithin({
+        baseDirectory: targetDirectory,
+        targetPath: 'safe.txt',
+      }),
+    ).toBe(false);
+    expect(
+      isExistingPathWithin({
+        baseDirectory: path.dirname(targetDirectory),
+        targetPath: 'escape.txt',
+      }),
     ).toBe(false);
   });
 
@@ -60,10 +76,10 @@ describe('extractZipArchive', () => {
 
     expect(result.fileCount).toBe(1);
     expect(
-      readFileSync(
-        path.join(targetDirectory, 'nested', 'deep', 'file.txt'),
-        'utf8',
-      ),
+      readTextFileWithin({
+        baseDirectory: targetDirectory,
+        targetPath: path.join('nested', 'deep', 'file.txt'),
+      }),
     ).toBe('deep');
   });
 });

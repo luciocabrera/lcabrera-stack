@@ -120,11 +120,11 @@ export const ingestReport = async (
     // skips raw-based extraction itself when rawJson is absent.
     await ingestScanDetail({
       rawJson,
-      targetRootPath: args.targetRootPath,
       report,
       scanId,
       scannerId: args.scannerId,
       scopeValue: args.scopeValue,
+      targetRootPath: args.targetRootPath,
       userId: args.userId,
     });
   } catch (error) {
