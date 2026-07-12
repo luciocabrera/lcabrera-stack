@@ -200,9 +200,10 @@ The headline rules every agent must know regardless of which files are open. Ful
 3. **Always `use()`, never `useContext()`.** (`.claude/rules/react-components.md`, `react-19` skill)
 4. **Zero `useEffect` for data fetching** — loaders/actions only. (`.claude/rules/routes-data.md`)
 5. **Store-pattern is the only allowed shared-state approach** — no Redux, Zustand, or ad-hoc Context+useState trees. The Table component is the canonical implementation. Invoke the `store-pattern` skill before touching any store, context, selector, or action.
-6. **Never mutate data or props** — pure functions in `*.util.ts`, functional array ops. (`.claude/rules/typescript.md`)
+6. **Every function is pure by default; never mutate data or props** — functional array ops everywhere; side effects only in designated homes (action hooks, event handlers, providers/loaders, `*.service.ts`/`*.api.ts`). (`.claude/rules/typescript.md`)
 7. **React Compiler handles memoization** — favor correct code over manual optimization (ADR-004). Table performance comes from granular selector subscriptions, row virtualization, and split contexts.
 8. **Use `@/` alias for `src/`** — relative imports only within the same directory.
+9. **No explicit return types on functions/hooks/components — let TypeScript infer** — annotate only when inference genuinely fails (recursion, overloads, complex conditional types) or must be widened. (`.claude/rules/typescript.md`)
 
 ## 6. Security
 
