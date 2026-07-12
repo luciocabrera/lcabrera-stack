@@ -1,90 +1,106 @@
 // @vitest-environment jsdom
 
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
+import { useRef } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { ITEM_HEIGHT } from '../../VirtualList.constants';
+import type { VirtualListDataState } from '../../VirtualList.types';
+
+import {
+  VirtualListConfigProvider,
+  VirtualListDataProvider,
+} from '../../contexts';
 import { VirtualListBodyChildren } from './VirtualListBodyChildren.component';
 
-afterEach(() => {
-  cleanup();
-});
+afterEach(cleanup);
 
-const baseProps = {
-  containerHeight: ITEM_HEIGHT * 3,
-  contentMode: 'list' as const,
-  endIndex: 3,
-  filteredOptions: ['Argentina', 'Brazil', 'Chile'],
-  hasCheckboxes: true,
-  isAllSelected: false,
-  isLoadingOptions: false,
-  offsetY: 0,
-  onChange: vi.fn(),
-  selectedValues: [] as readonly string[],
-  shouldShowSelectAll: false,
-  startIndex: 0,
-  totalHeight: 96,
+const Harness = () => {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  return (
+    <div ref={scrollContainerRef}>
+      <VirtualListBodyChildren scrollContainerRef={scrollContainerRef} />
+    </div>
+  );
 };
 
-describe('VirtualListBodyChildren', () => {
-  it('renders skeleton placeholders sized to containerHeight in loading mode', () => {
-    const { container } = render(
-      <VirtualListBodyChildren {...baseProps} contentMode='loading' />,
-    );
+type RenderArgs = {
+  readonly dataState: VirtualListDataState;
+  readonly hasFetchInitial?: boolean;
+};
 
-    expect(container.children.length).toBe(3);
-    expect(screen.queryByText('Argentina')).toBeNull();
+const renderChildren = ({ dataState, hasFetchInitial = false }: RenderArgs) =>
+  render(
+    <VirtualListConfigProvider
+      hasCheckboxes
+      hasSelectAll
+      onChange={vi.fn()}
+      onFetchInitial={hasFetchInitial ? vi.fn() : undefined}
+    >
+      <VirtualListDataProvider
+        dataState={dataState}
+        hasSelectAll
+        onFetchInitial={hasFetchInitial ? vi.fn() : undefined}
+      >
+        <Harness />
+      </VirtualListDataProvider>
+    </VirtualListConfigProvider>,
+  );
+
+describe('VirtualListBodyChildren', () => {
+  it('renders the skeleton in loading mode', () => {
+    renderChildren({
+      dataState: {
+        data: [],
+        hasMore: false,
+        isLoading: true,
+        isLoadingMore: false,
+      },
+    });
+
+    expect(screen.queryByText('No options found')).toBeNull();
+    expect(screen.queryAllByRole('checkbox')).toHaveLength(0);
   });
 
-  it('renders the empty-state message in empty mode', () => {
-    render(
-      <VirtualListBodyChildren
-        {...baseProps}
-        contentMode='empty'
-        filteredOptions={[]}
-        totalHeight={0}
-      />,
-    );
+  it('renders the skeleton while bootstrapping via onFetchInitial', () => {
+    renderChildren({
+      dataState: {
+        data: [],
+        hasMore: false,
+        isLoading: false,
+        isLoadingMore: false,
+      },
+      hasFetchInitial: true,
+    });
+
+    expect(screen.queryByText('No options found')).toBeNull();
+  });
+
+  it('renders the empty state when no options match', () => {
+    renderChildren({
+      dataState: {
+        data: [],
+        hasMore: false,
+        isLoading: false,
+        isLoadingMore: false,
+      },
+    });
 
     expect(screen.getByText('No options found')).toBeTruthy();
   });
 
-  it('renders the virtualized options in list mode', () => {
-    render(<VirtualListBodyChildren {...baseProps} />);
-
-    expect(screen.getByText('Argentina')).toBeTruthy();
-    expect(screen.getByText('Brazil')).toBeTruthy();
-    expect(screen.getByText('Chile')).toBeTruthy();
-    expect(screen.queryByText('No options found')).toBeNull();
-  });
-
-  it('renders the select-all row in list mode when shouldShowSelectAll is true', () => {
-    render(
-      <VirtualListBodyChildren
-        {...baseProps}
-        endIndex={4}
-        shouldShowSelectAll
-        totalHeight={128}
-      />,
-    );
+  it('renders the virtualized options with the select-all row', () => {
+    renderChildren({
+      dataState: {
+        data: ['Alpha', 'Beta'],
+        hasMore: false,
+        isLoading: false,
+        isLoadingMore: false,
+      },
+    });
 
     expect(screen.getByText('Select All')).toBeTruthy();
-  });
-
-  it('forwards onChange to option toggles in list mode', () => {
-    const onChange = vi.fn();
-
-    render(<VirtualListBodyChildren {...baseProps} onChange={onChange} />);
-
-    const checkboxes = screen.getAllByRole('checkbox');
-    const firstCheckbox = checkboxes[0];
-    if (!firstCheckbox) throw new Error('Expected at least one checkbox');
-
-    fireEvent.click(firstCheckbox);
-
-    expect(onChange).toHaveBeenCalledWith({
-      type: 'select',
-      values: ['Argentina'],
-    });
+    expect(screen.getByText('Alpha')).toBeTruthy();
+    expect(screen.getByText('Beta')).toBeTruthy();
   });
 });

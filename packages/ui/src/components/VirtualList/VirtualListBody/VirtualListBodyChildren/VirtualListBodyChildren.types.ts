@@ -1,18 +1,6 @@
-import type { VirtualListProps } from '../../VirtualList.types';
-import type { ResolveContentModeResult } from '../utils/resolveContentMode.util';
+import type { RefObject } from 'react';
 
 export type VirtualListBodyChildrenProps = {
-  readonly containerHeight: number;
-  readonly contentMode: ResolveContentModeResult;
-  readonly endIndex: number;
-  readonly filteredOptions: readonly string[];
-  readonly hasCheckboxes: boolean;
-  readonly isAllSelected: boolean;
-  readonly isLoadingOptions: boolean;
-  readonly offsetY: number;
-  readonly onChange: VirtualListProps['onChange'];
-  readonly selectedValues: readonly string[];
-  readonly shouldShowSelectAll: boolean;
-  readonly startIndex: number;
-  readonly totalHeight: number;
+  /** Scroll container owned by VirtualListBody (window + height measurement) */
+  readonly scrollContainerRef: RefObject<HTMLDivElement | null>;
 };

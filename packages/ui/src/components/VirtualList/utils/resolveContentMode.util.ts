@@ -11,5 +11,3 @@ export const resolveContentMode = ({
   if (filteredOptionsCount === 0) return 'empty' as const;
   return 'list' as const;
 };
-
-export type ResolveContentModeResult = ReturnType<typeof resolveContentMode>;

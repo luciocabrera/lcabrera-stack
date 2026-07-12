@@ -1,71 +1,39 @@
-import { useInfiniteScrollObserver, useVirtualization } from '@repo/ui/hooks';
+import { useInfiniteScrollObserver } from '@repo/ui/hooks';
 import * as stylex from '@stylexjs/stylex';
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 
 import type { VirtualListBodyProps } from './VirtualListBody.types';
 
+import { useGetHasFetchMore } from '../contexts/VirtualListConfig/config/selectors';
+import { useFetchMore } from '../contexts/VirtualListData/data/actions';
 import {
-  DEFAULT_CONTAINER_HEIGHT,
-  ITEM_HEIGHT,
-  SCROLL_THRESHOLD,
-} from '../VirtualList.constants';
-import { resolveVirtualListBodyState } from './utils';
+  useGetHasMore,
+  useGetIsLoadingOptions,
+} from '../contexts/VirtualListData/data/selectors';
+import { SCROLL_THRESHOLD } from '../VirtualList.constants';
 import { styles } from './VirtualListBody.stylex';
 import { VirtualListBodyChildren } from './VirtualListBodyChildren/VirtualListBodyChildren.component';
 
+/**
+ * Owns the scroll container and the infinite-scroll sentinel (Table analog:
+ * TableContent). Content-mode dispatch and virtualization live one level
+ * down in VirtualListBodyChildren.
+ */
 export const VirtualListBody = ({
-  dataState,
-  hasCheckboxes,
-  hasSelectAll,
-  listFilterMode,
   listMaxHeight,
-  onChange,
-  onFetchInitial,
-  onFetchMore,
-  searchTerm,
-  selectedValues,
   shouldFillHeight,
 }: VirtualListBodyProps) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
-  const {
-    contentMode,
-    filteredOptions,
-    isAllSelected,
-    isLoadingOptions,
-    shouldShowSelectAll,
-    totalItems,
-  } = resolveVirtualListBodyState({
-    dataState,
-    hasFetchInitial: Boolean(onFetchInitial),
-    hasSelectAll,
-    listFilterMode,
-    searchTerm,
-    selectedValues,
-  });
-
-  const { containerHeight, endIndex, offsetY, startIndex, totalHeight } =
-    useVirtualization({
-      containerRef: scrollContainerRef,
-      defaultContainerHeight: DEFAULT_CONTAINER_HEIGHT,
-      itemHeight: ITEM_HEIGHT,
-      overscan: 5,
-      totalItems,
-    });
-
-  useEffect(() => {
-    if (onFetchInitial) {
-      void onFetchInitial();
-    }
-  }, [onFetchInitial]);
+  const hasFetchMore = useGetHasFetchMore();
+  const hasMore = useGetHasMore();
+  const isLoadingOptions = useGetIsLoadingOptions();
+  const fetchMore = useFetchMore();
 
   useInfiniteScrollObserver({
-    isEnabled:
-      Boolean(dataState.hasMore) && !isLoadingOptions && Boolean(onFetchMore),
-    onReachEnd: () => {
-      if (onFetchMore) void onFetchMore();
-    },
+    isEnabled: hasMore && !isLoadingOptions && hasFetchMore,
+    onReachEnd: fetchMore,
     rootRef: scrollContainerRef,
     sentinelRef,
     threshold: SCROLL_THRESHOLD,
@@ -86,21 +54,7 @@ export const VirtualListBody = ({
             : styles.virtualContainer(listMaxHeight),
         )}
       >
-        <VirtualListBodyChildren
-          containerHeight={containerHeight}
-          contentMode={contentMode}
-          endIndex={endIndex}
-          filteredOptions={filteredOptions}
-          hasCheckboxes={hasCheckboxes}
-          isAllSelected={isAllSelected}
-          isLoadingOptions={isLoadingOptions}
-          offsetY={offsetY}
-          onChange={onChange}
-          selectedValues={selectedValues}
-          shouldShowSelectAll={shouldShowSelectAll}
-          startIndex={startIndex}
-          totalHeight={totalHeight}
-        />
+        <VirtualListBodyChildren scrollContainerRef={scrollContainerRef} />
 
         <div aria-hidden ref={sentinelRef} {...stylex.props(styles.sentinel)} />
       </div>

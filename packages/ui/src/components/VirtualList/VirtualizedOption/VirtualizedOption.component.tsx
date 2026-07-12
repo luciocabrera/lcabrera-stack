@@ -1,28 +1,42 @@
 import type { VirtualizedOptionProps } from './VirtualizedOption.types';
 
+import { useGetHasCheckboxes } from '../contexts/VirtualListConfig/config/selectors';
+import {
+  useToggleOption,
+  useToggleSelectAll,
+} from '../contexts/VirtualListData/data/actions';
+import {
+  useGetFilteredOptions,
+  useGetIsAllSelected,
+  useGetIsLoadingOptions,
+  useGetSelectedValues,
+  useGetShouldShowSelectAll,
+} from '../contexts/VirtualListData/data/selectors';
 import { SelectAllOption } from '../SelectAllOption';
 import { SelectOption } from '../SelectOption';
 
-export const VirtualizedOption = ({
-  filteredOptions,
-  hasCheckboxes = true,
-  hasSelectAll = true,
-  index,
-  isAllSelected,
-  isLoading,
-  onSelectAll,
-  onToggle,
-  selectedValues,
-}: VirtualizedOptionProps) => {
-  const shouldShowSelectAll = hasSelectAll && filteredOptions.length > 1;
+/**
+ * Self-connected row owner: resolves what the given window index renders
+ * (Select All at index 0, otherwise an option row) and wires the pure
+ * SelectAllOption/SelectOption leaves to selectors and actions.
+ */
+export const VirtualizedOption = ({ index }: VirtualizedOptionProps) => {
+  const filteredOptions = useGetFilteredOptions();
+  const hasCheckboxes = useGetHasCheckboxes();
+  const isAllSelected = useGetIsAllSelected();
+  const isLoadingOptions = useGetIsLoadingOptions();
+  const selectedValues = useGetSelectedValues();
+  const shouldShowSelectAll = useGetShouldShowSelectAll();
+  const toggleOption = useToggleOption();
+  const toggleSelectAll = useToggleSelectAll();
 
   // "Select All" is at index 0 (if enabled and more than 1 option)
   if (index === 0 && shouldShowSelectAll) {
     return (
       <SelectAllOption
         isAllSelected={isAllSelected}
-        isLoading={isLoading}
-        onSelectAll={onSelectAll}
+        isLoading={isLoadingOptions}
+        onSelectAll={toggleSelectAll}
       />
     );
   }
@@ -33,13 +47,13 @@ export const VirtualizedOption = ({
 
   if (option !== undefined) {
     const handleToggle = () => {
-      onToggle(option);
+      toggleOption(option);
     };
 
     return (
       <SelectOption
         hasCheckbox={hasCheckboxes}
-        isLoading={isLoading}
+        isLoading={isLoadingOptions}
         isSelected={selectedValues.includes(option)}
         onToggle={handleToggle}
         option={option}

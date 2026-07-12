@@ -1,16 +1,19 @@
-import type { ChangeEvent } from 'react';
-
 import * as stylex from '@stylexjs/stylex';
-import { useState } from 'react';
 
-import type { ListFilterMode, VirtualListProps } from './VirtualList.types';
+import type { VirtualListProps } from './VirtualList.types';
 
+import { VirtualListConfigProvider, VirtualListDataProvider } from './contexts';
 import { LIST_MAX_HEIGHT } from './VirtualList.constants';
 import { styles } from './VirtualList.stylex';
 import { VirtualListBody } from './VirtualListBody';
 import { VirtualListFooter } from './VirtualListFooter';
 import { VirtualListHeader } from './VirtualListHeader';
 
+/**
+ * Thin shell over the VirtualList contexts: applies prop defaults, mounts
+ * the Config and Data providers (in that order), and composes the
+ * self-connected Header/Body/Footer delegates.
+ */
 export const VirtualList = ({
   dataState,
   filter,
@@ -22,57 +25,34 @@ export const VirtualList = ({
   onFetchInitial,
   onFetchMore,
   shouldFillHeight = false,
-}: VirtualListProps) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [listFilterMode, setListFilterMode] = useState<ListFilterMode>('all');
-
-  const { data } = dataState;
-
-  // Derive selectedValues from filter prop - fully controlled by parent
-  const selectedValues = filter?.values ?? [];
-
-  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-  };
-
-  const handleClearSearch = () => {
-    setSearchTerm('');
-  };
-
-  return (
-    <div
-      {...stylex.props(
-        styles.container,
-        shouldFillHeight ? styles.containerFill : undefined,
-      )}
+}: VirtualListProps) => (
+  <VirtualListConfigProvider
+    hasCheckboxes={hasCheckboxes}
+    hasSelectAll={hasSelectAll}
+    name={name}
+    onChange={onChange}
+    onFetchInitial={onFetchInitial}
+    onFetchMore={onFetchMore}
+  >
+    <VirtualListDataProvider
+      dataState={dataState}
+      filter={filter}
+      hasSelectAll={hasSelectAll}
+      onFetchInitial={onFetchInitial}
     >
-      <VirtualListHeader
-        name={name}
-        onClearSearch={handleClearSearch}
-        onSearchChange={handleSearchChange}
-        searchTerm={searchTerm}
-      />
-      <VirtualListBody
-        dataState={dataState}
-        hasCheckboxes={hasCheckboxes}
-        hasSelectAll={hasSelectAll}
-        listFilterMode={listFilterMode}
-        listMaxHeight={listMaxHeight}
-        onChange={onChange}
-        onFetchInitial={onFetchInitial}
-        onFetchMore={onFetchMore}
-        searchTerm={searchTerm}
-        selectedValues={selectedValues}
-        shouldFillHeight={shouldFillHeight}
-      />
-      <VirtualListFooter
-        dataState={dataState}
-        effectiveOptions={data}
-        hasCheckboxes={hasCheckboxes}
-        listFilterMode={listFilterMode}
-        selectedValues={selectedValues}
-        setListFilterMode={setListFilterMode}
-      />
-    </div>
-  );
-};
+      <div
+        {...stylex.props(
+          styles.container,
+          shouldFillHeight ? styles.containerFill : undefined,
+        )}
+      >
+        <VirtualListHeader />
+        <VirtualListBody
+          listMaxHeight={listMaxHeight}
+          shouldFillHeight={shouldFillHeight}
+        />
+        <VirtualListFooter />
+      </div>
+    </VirtualListDataProvider>
+  </VirtualListConfigProvider>
+);

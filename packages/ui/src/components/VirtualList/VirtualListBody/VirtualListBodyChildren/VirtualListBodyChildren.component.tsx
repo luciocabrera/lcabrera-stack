@@ -1,31 +1,41 @@
 import { InfoBox } from '@repo/ui/components/InfoBox';
+import { useVirtualization } from '@repo/ui/hooks';
 import * as stylex from '@stylexjs/stylex';
 
 import type { VirtualListBodyChildrenProps } from './VirtualListBodyChildren.types';
 
+import {
+  useGetContentMode,
+  useGetTotalItems,
+} from '../../contexts/VirtualListData/data/selectors';
 import { SkeletonOptions } from '../../SkeletonOptions';
+import {
+  DEFAULT_CONTAINER_HEIGHT,
+  ITEM_HEIGHT,
+} from '../../VirtualList.constants';
 import { VirtualListBodyOptions } from '../VirtualListBodyOptions';
 import { styles } from './VirtualListBodyChildren.stylex';
 
 /**
- * Dispatches the VirtualListBody content by `contentMode`: loading skeleton,
- * empty-state message, or the virtualized options list.
+ * Runs virtualization against the scroll container (Table analog: TableBody)
+ * and dispatches by content mode: loading skeleton, empty-state message, or
+ * the virtualized options window.
  */
 export const VirtualListBodyChildren = ({
-  containerHeight,
-  contentMode,
-  endIndex,
-  filteredOptions,
-  hasCheckboxes,
-  isAllSelected,
-  isLoadingOptions,
-  offsetY,
-  onChange,
-  selectedValues,
-  shouldShowSelectAll,
-  startIndex,
-  totalHeight,
+  scrollContainerRef,
 }: VirtualListBodyChildrenProps) => {
+  const contentMode = useGetContentMode();
+  const totalItems = useGetTotalItems();
+
+  const { containerHeight, endIndex, offsetY, startIndex, totalHeight } =
+    useVirtualization({
+      containerRef: scrollContainerRef,
+      defaultContainerHeight: DEFAULT_CONTAINER_HEIGHT,
+      itemHeight: ITEM_HEIGHT,
+      overscan: 5,
+      totalItems,
+    });
+
   if (contentMode === 'loading') {
     return <SkeletonOptions containerHeight={containerHeight} />;
   }
@@ -41,14 +51,7 @@ export const VirtualListBodyChildren = ({
   return (
     <VirtualListBodyOptions
       endIndex={endIndex}
-      filteredOptions={filteredOptions}
-      hasCheckboxes={hasCheckboxes}
-      isAllSelected={isAllSelected}
-      isLoadingOptions={isLoadingOptions}
       offsetY={offsetY}
-      onChange={onChange}
-      selectedValues={selectedValues}
-      shouldShowSelectAll={shouldShowSelectAll}
       startIndex={startIndex}
       totalHeight={totalHeight}
     />

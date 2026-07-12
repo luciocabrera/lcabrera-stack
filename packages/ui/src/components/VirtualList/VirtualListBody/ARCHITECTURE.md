@@ -1,35 +1,32 @@
 # VirtualListBody Architecture
 
-Virtualized options body extracted from `VirtualList` to own list-specific orchestration and rendering.
+Scroll-container owner (Table analog: `TableContent`): renders the scrollable viewport and the infinite-scroll sentinel. Filtering/selection/content state comes from the `contexts/` selectors; the derivation layer that used to live here (`resolveVirtualListBodyState`) now lives in `utils/resolveListDerivedState`, pre-computed into the data store.
 
 ## Responsibilities
 
-- Derive `filteredOptions` from `dataState.data`, `searchTerm`, `listFilterMode`, and `selectedValues`
-- Compute and handle select-all / option toggle selection changes
-- Manage virtualization (`useVirtualization`) and infinite-scroll triggering (`useInfiniteScrollObserver` on a sentinel element, calling `onFetchMore`)
-- Trigger optional initial fetch (`onFetchInitial`) on mount
-- Delegate content rendering to `VirtualListBodyChildren`, which dispatches by `contentMode`: loading placeholders (`SkeletonOptions`), empty-state message (`InfoBox`, owns the `noResults` style), or the virtualized scroll area (`VirtualListBodyOptions`)
-- `VirtualListBodyOptions` owns the virtual scroll area layout (`virtualScrollArea` / `virtualOffset` styles), key generation logic, and `VirtualizedOption` dispatch
+- Own `scrollContainerRef` (viewport) and `sentinelRef` (1px sentinel) and the container styling (`listMaxHeight` / `shouldFillHeight` variants)
+- Wire `useInfiniteScrollObserver`: `isEnabled` from `useGetHasMore` + `useGetIsLoadingOptions` + `useGetHasFetchMore`, `onReachEnd` from the `useFetchMore` action
+- Delegate virtualization and content-mode dispatch to `VirtualListBodyChildren` (receives only `scrollContainerRef`, producer→direct-child)
+
+The initial fetch effect moved to `VirtualListDataProvider`; the toggle/select-all handlers moved to the `useToggleOption`/`useToggleSelectAll` actions.
 
 ## Props
 
-| Prop               | Type                                 | Description                                        |
-| ------------------ | ------------------------------------ | -------------------------------------------------- |
-| `dataState`        | `VirtualListDataState`               | Source options and loading/hasMore state           |
-| `selectedValues`   | `readonly string[]`                  | Controlled selected values                         |
-| `listFilterMode`   | `ListFilterMode`                     | Active footer mode (`all`/`selected`/`unselected`) |
-| `searchTerm`       | `string`                             | Header-controlled search term                      |
-| `onChange`         | `VirtualListProps['onChange']`       | Selection update callback to parent                |
-| `onFetchInitial`   | `VirtualListProps['onFetchInitial']` | Optional initial fetch callback                    |
-| `onFetchMore`      | `VirtualListProps['onFetchMore']`    | Optional infinite-scroll callback                  |
-| `hasCheckboxes`    | `boolean`                            | Toggles per-row checkbox mode                      |
-| `hasSelectAll`     | `boolean`                            | Enables select-all row when filtered options > 1   |
-| `listMaxHeight`    | `string`                             | Max-height for non-fill mode                       |
-| `shouldFillHeight` | `boolean`                            | Uses fill-height container variant                 |
+| Prop               | Type      | Description                        |
+| ------------------ | --------- | ---------------------------------- |
+| `listMaxHeight`    | `string`  | Max-height for non-fill mode       |
+| `shouldFillHeight` | `boolean` | Uses fill-height container variant |
+
+## Store Wiring
+
+| Kind      | Hooks                                                                           |
+| --------- | ------------------------------------------------------------------------------- |
+| Selectors | `useGetHasMore`, `useGetIsLoadingOptions` (data), `useGetHasFetchMore` (config) |
+| Actions   | `useFetchMore` (data)                                                           |
 
 ## Sub-components
 
-| Component                 | Location                     | Responsibility                                                                            |
-| ------------------------- | ---------------------------- | ----------------------------------------------------------------------------------------- |
-| `VirtualListBodyChildren` | `./VirtualListBodyChildren/` | Content dispatch by `contentMode`: loading skeleton, empty-state message, or options list |
-| `VirtualListBodyOptions`  | `./VirtualListBodyOptions/`  | Virtual scroll area layout, key generation, and `VirtualizedOption` row dispatch          |
+| Component                 | Location                     | Responsibility                                                                                                         |
+| ------------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `VirtualListBodyChildren` | `./VirtualListBodyChildren/` | Runs `useVirtualization` against `scrollContainerRef`; dispatches by `useGetContentMode` (skeleton / empty / list)     |
+| `VirtualListBodyOptions`  | `./VirtualListBodyOptions/`  | Virtual scroll area layout, key generation, `VirtualizedOption` dispatch; window bounds arrive as producer→child props |

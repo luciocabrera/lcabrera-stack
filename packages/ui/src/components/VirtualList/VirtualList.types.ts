@@ -2,6 +2,18 @@ import type { SelectFilter } from '@repo/ui/types/filterOperators.types';
 
 export type ListFilterMode = 'all' | 'selected' | 'unselected';
 
+/** Static configuration mirrored into the config store */
+export type VirtualListConfigState = {
+  readonly hasCheckboxes: boolean;
+  readonly hasFetchInitial: boolean;
+  readonly hasFetchMore: boolean;
+  readonly hasSelectAll: boolean;
+  readonly name?: string;
+};
+
+/** Body content mode: loading skeleton, empty message, or the options list */
+export type VirtualListContentMode = 'empty' | 'list' | 'loading';
+
 export type VirtualListDataState = {
   readonly data: readonly string[];
   readonly hasMore: boolean;
@@ -9,6 +21,25 @@ export type VirtualListDataState = {
   readonly isLoadingMore: boolean;
   /** Total number of items available (used for "Loaded: x / total" display) */
   readonly totalCount?: number;
+};
+
+/**
+ * Data-store state: mirror of the parent-owned `dataState`/`filter` props
+ * plus the pre-computed derived list state (recomputed by the data provider
+ * sync effect and the UI actions; selectors read it as one-liners).
+ */
+export type VirtualListDataStoreState = {
+  readonly contentMode: VirtualListContentMode;
+  readonly data: readonly string[];
+  readonly filteredOptions: readonly string[];
+  readonly hasMore: boolean;
+  readonly isAllSelected: boolean;
+  readonly isLoading: boolean;
+  readonly isLoadingMore: boolean;
+  readonly selectedValues: readonly string[];
+  readonly shouldShowSelectAll: boolean;
+  readonly totalCount?: number;
+  readonly totalItems: number;
 };
 
 export type VirtualListProps = {
@@ -32,4 +63,10 @@ export type VirtualListProps = {
   /** Name attribute for the search input */
   /** When true, the list expands to fill all available vertical space */
   readonly shouldFillHeight?: boolean;
+};
+
+/** UI state owned by the VirtualList itself (uncontrolled) */
+export type VirtualListUiState = {
+  readonly listFilterMode: ListFilterMode;
+  readonly searchTerm: string;
 };

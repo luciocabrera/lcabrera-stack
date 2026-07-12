@@ -1,67 +1,48 @@
 # VirtualListFooter Architecture
 
-Status bar below the virtual list: shows loaded/total count and filter-mode toggle buttons (All / Selected / Unselected).
+Self-connected status bar below the virtual list (zero props, no `.types.ts`): shows loaded/total count and the filter-mode toggle buttons (All / Selected / Unselected).
 
 ## File Structure
 
 ```
 VirtualListFooter/
 ├── index.ts                            → Barrel export
-├── VirtualListFooter.component.tsx     → Count label + filter-mode button group
+├── VirtualListFooter.component.tsx     → Count label + filter-mode button group (self-connected)
 ├── VirtualListFooter.stylex.ts         → Layout styles (footer, loadedCount, listFilterGroup)
-└── VirtualListFooter.types.ts          → Props (dataState, effectiveOptions, hasCheckboxes, …)
+└── ListFilterModeButton/               → Store-connected wrapper per mode (see below)
 ```
 
-## Dependencies
+## Store Wiring
 
-```mermaid
-graph LR
-  VLF["VirtualListFooter"] --> Button
-  VLF --> Icons["ListAllIcon, ListCheckedIcon, ListUncheckedIcon"]
-  VLF --> VLF_stylex["VirtualListFooter.stylex"]
-  VLF --> VL_types["VirtualList.types (ListFilterMode, VirtualListDataState)"]
-  VLF_stylex --> base_tokens["design-system/tokens/base.stylex (borderRadius, spacing, typography)"]
-  VLF_stylex --> colors["design-system/tokens/colors.stylex"]
-```
+| Kind      | Hooks                                                                                                                                           |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Selectors | `useGetIsLoading`, `useGetIsLoadingMore`, `useGetLoadedCount`, `useGetSelectedCount`, `useGetTotalCount` (data), `useGetHasCheckboxes` (config) |
+| Actions   | — (mode switching lives in `ListFilterModeButton`)                                                                                              |
 
 ## Render Flow
 
 ```mermaid
 graph TD
-  A["VirtualListFooter renders"] --> B{"dataState.data.length === 0?"}
+  A["VirtualListFooter renders"] --> B{"loadedCount === 0?"}
   B -->|yes| C["return undefined (nothing rendered)"]
   B -->|no| D["render footer bar"]
-  D --> E["p.loadedCount — 'Loaded: X / total'"]
+  D --> E["p.loadedCount — 'Loaded: X / total' + loading indicators"]
   D --> F{"hasCheckboxes?"}
-  F -->|yes| G["render listFilterGroup"]
+  F -->|yes| G["ListFilterModeButton × ['all', 'selected', 'unselected']"]
   F -->|no| H["(nothing)"]
-  G --> I["map over ['all', 'selected', 'unselected']"]
-  I --> J["Button per mode — icon + tooltip with count"]
-  J --> K{"listFilterMode === mode?"}
-  K -->|active| L["color='secondary'"]
-  K -->|inactive| M["color='ghost'"]
 ```
-
-## Props
-
-| Prop                | Type                             | Description                               |
-| ------------------- | -------------------------------- | ----------------------------------------- | ---------- | -------------- |
-| `dataState`         | `VirtualListDataState`           | Loading flags, data array, totalCount     |
-| `effectiveOptions`  | `string[]`                       | All currently-loaded options (for counts) |
-| `hasCheckboxes`     | `boolean`                        | Whether to show filter-mode buttons       |
-| `listFilterMode`    | `ListFilterMode`                 | Active filter mode (`'all'                | 'selected' | 'unselected'`) |
-| `selectedValues`    | `string[]`                       | Currently selected option values          |
-| `setListFilterMode` | `(mode: ListFilterMode) => void` | Setter lifted from `VirtualList` state    |
 
 ## Filter Mode Buttons
 
-| Mode         | Icon                | Tooltip prefix                 | Count                                             |
-| ------------ | ------------------- | ------------------------------ | ------------------------------------------------- |
-| `all`        | `ListAllIcon`       | "Show all options"             | `effectiveOptions.length`                         |
-| `selected`   | `ListCheckedIcon`   | "Show only selected options"   | `selectedValues.length`                           |
-| `unselected` | `ListUncheckedIcon` | "Show only unselected options" | `effectiveOptions.length - selectedValues.length` |
+Each `ListFilterModeButton` receives only presentation props (`count`, `icon`, `mode`, `tooltip`) and self-connects for behavior: active state from `useGetListFilterMode() === mode`, switching via `useSetListFilterMode`.
+
+| Mode         | Icon                | Tooltip prefix                 | Count                         |
+| ------------ | ------------------- | ------------------------------ | ----------------------------- |
+| `all`        | `ListAllIcon`       | "Show all options"             | `loadedCount`                 |
+| `selected`   | `ListCheckedIcon`   | "Show only selected options"   | `selectedCount`               |
+| `unselected` | `ListUncheckedIcon` | "Show only unselected options" | `loadedCount - selectedCount` |
 
 ## Notes
 
-- The footer is hidden entirely when `dataState.data` is empty (avoids a bare status line before any data loads).
-- Filter-mode state lives in `VirtualList` and is passed down; `setListFilterMode` updates it via `useState` setter.
+- The footer is hidden entirely while no options are loaded (avoids a bare status line before any data loads).
+- Must render inside the VirtualList providers (see `../contexts/ARCHITECTURE.md`).

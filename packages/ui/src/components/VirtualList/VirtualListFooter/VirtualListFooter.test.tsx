@@ -1,76 +1,113 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import type { ReactNode } from 'react';
 
+import { cleanup, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
+import type { VirtualListDataState } from '../VirtualList.types';
+
+import {
+  VirtualListConfigProvider,
+  VirtualListDataProvider,
+} from '../contexts';
 import { VirtualListFooter } from './VirtualListFooter.component';
 
-afterEach(() => {
-  cleanup();
-});
+afterEach(cleanup);
 
-const dataStateBase = {
-  data: ['Option A', 'Option B'],
+type ProviderShellProps = {
+  readonly children: ReactNode;
+  readonly dataState: VirtualListDataState;
+  readonly hasCheckboxes?: boolean;
+  readonly selectedValues?: readonly string[];
+};
+
+const ProviderShell = ({
+  children,
+  dataState,
+  hasCheckboxes = true,
+  selectedValues = [],
+}: ProviderShellProps) => (
+  <VirtualListConfigProvider
+    hasCheckboxes={hasCheckboxes}
+    hasSelectAll
+    onChange={vi.fn()}
+  >
+    <VirtualListDataProvider
+      dataState={dataState}
+      filter={{ type: 'select', values: selectedValues }}
+      hasSelectAll
+    >
+      {children}
+    </VirtualListDataProvider>
+  </VirtualListConfigProvider>
+);
+
+const loadedDataState: VirtualListDataState = {
+  data: ['Alpha', 'Beta', 'Gamma'],
   hasMore: false,
   isLoading: false,
   isLoadingMore: false,
-  totalCount: 2,
 };
 
 describe('VirtualListFooter', () => {
-  it('renders nothing when data is empty', () => {
+  it('renders nothing while no options are loaded', () => {
     const { container } = render(
-      <VirtualListFooter
-        dataState={{ ...dataStateBase, data: [] }}
-        effectiveOptions={[]}
-        hasCheckboxes
-        listFilterMode='all'
-        selectedValues={[]}
-        setListFilterMode={() => void 0}
-      />,
+      <ProviderShell
+        dataState={{
+          data: [],
+          hasMore: false,
+          isLoading: false,
+          isLoadingMore: false,
+        }}
+      >
+        <VirtualListFooter />
+      </ProviderShell>,
     );
+
     expect(container.firstChild).toBeNull();
   });
 
-  it('renders loaded count when data has items', () => {
+  it('shows the loaded count with the total when available', () => {
     render(
-      <VirtualListFooter
-        dataState={dataStateBase}
-        effectiveOptions={['Option A', 'Option B']}
-        hasCheckboxes
-        listFilterMode='all'
-        selectedValues={[]}
-        setListFilterMode={() => void 0}
-      />,
+      <ProviderShell dataState={{ ...loadedDataState, totalCount: 10 }}>
+        <VirtualListFooter />
+      </ProviderShell>,
     );
-    expect(screen.getByText(/Loaded: 2/).textContent).toContain('Loaded: 2');
+
+    expect(screen.getByText('Loaded: 3 / 10')).toBeTruthy();
   });
 
-  it('includes total count when totalCount is finite and non-zero', () => {
+  it('appends the loading indicators', () => {
     render(
-      <VirtualListFooter
-        dataState={{ ...dataStateBase, totalCount: 10 }}
-        effectiveOptions={['Option A', 'Option B']}
-        hasCheckboxes
-        listFilterMode='all'
-        selectedValues={[]}
-        setListFilterMode={() => void 0}
-      />,
+      <ProviderShell dataState={{ ...loadedDataState, isLoadingMore: true }}>
+        <VirtualListFooter />
+      </ProviderShell>,
     );
-    expect(screen.getByText(/Loaded: 2/).textContent).toContain('/ 10');
+
+    expect(screen.getByText(/Loading more\.\.\./)).toBeTruthy();
   });
 
-  it('shows loading indicator when isLoading is true', () => {
+  it('renders the three filter-mode buttons with checkboxes enabled', () => {
     render(
-      <VirtualListFooter
-        dataState={{ ...dataStateBase, isLoading: true }}
-        effectiveOptions={['Option A', 'Option B']}
-        hasCheckboxes
-        listFilterMode='all'
-        selectedValues={[]}
-        setListFilterMode={() => void 0}
-      />,
+      <ProviderShell dataState={loadedDataState} selectedValues={['Beta']}>
+        <VirtualListFooter />
+      </ProviderShell>,
     );
-    expect(screen.getByText(/Loaded:/).textContent).toContain('Loading...');
+
+    expect(screen.getAllByRole('button')).toHaveLength(3);
+    expect(screen.getByText('Show all options (3)')).toBeTruthy();
+    expect(screen.getByText('Show only selected options (1)')).toBeTruthy();
+    expect(screen.getByText('Show only unselected options (2)')).toBeTruthy();
+  });
+
+  it('hides the filter-mode buttons without checkboxes', () => {
+    render(
+      <ProviderShell dataState={loadedDataState} hasCheckboxes={false}>
+        <VirtualListFooter />
+      </ProviderShell>,
+    );
+
+    expect(screen.queryAllByRole('button')).toHaveLength(0);
   });
 });

@@ -1,1 +1,1 @@
-export { getFilteredOptions } from './getFilteredOptions.util';
+export { resolveListDerivedState } from './resolveListDerivedState.util';

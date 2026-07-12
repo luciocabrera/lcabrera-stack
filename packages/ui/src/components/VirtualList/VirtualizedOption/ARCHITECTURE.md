@@ -1,50 +1,41 @@
 # VirtualizedOption Architecture
 
-Dispatcher that maps a virtual-scroll index to either `SelectAllOption` (index 0, when enabled) or a `SelectOption` row.
+Self-connected row owner: maps a virtual-scroll index to either `SelectAllOption` (index 0, when enabled) or a `SelectOption` row, wiring the pure leaves to selectors and actions itself (PATTERNS.md rule: row content owns its store wiring; the leaves stay presentational).
 
 ## File Structure
 
 ```
 VirtualizedOption/
 ├── index.ts                          → Barrel export
-├── VirtualizedOption.component.tsx   → Index-based dispatch to SelectAllOption / SelectOption
-└── VirtualizedOption.types.ts        → Full prop surface passed from VirtualList
+├── VirtualizedOption.component.tsx   → Index-based dispatch + store wiring for the pure leaves
+└── VirtualizedOption.types.ts        → Props ({ index })
 ```
 
-## Dependencies
+## Props
 
-```mermaid
-graph LR
-  VO["VirtualizedOption"] --> SAO["SelectAllOption"]
-  VO --> SO["SelectOption"]
-```
+| Prop    | Type     | Description                                     |
+| ------- | -------- | ----------------------------------------------- |
+| `index` | `number` | Virtual row index (0-based, includes SelectAll) |
+
+## Store Wiring
+
+| Kind      | Hooks                                                                                                                                                                |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Selectors | `useGetFilteredOptions`, `useGetIsAllSelected`, `useGetIsLoadingOptions`, `useGetSelectedValues`, `useGetShouldShowSelectAll` (data), `useGetHasCheckboxes` (config) |
+| Actions   | `useToggleOption`, `useToggleSelectAll` (data)                                                                                                                       |
 
 ## Render Flow
 
 ```mermaid
 graph TD
   A["VirtualizedOption(index)"] --> B{"index === 0 && shouldShowSelectAll?"}
-  B -->|yes| C["<SelectAllOption isAllSelected isLoading onSelectAll />"]
+  B -->|yes| C["<SelectAllOption isAllSelected isLoading onSelectAll={toggleSelectAll} />"]
   B -->|no| D["optionIndex = shouldShowSelectAll ? index-1 : index"]
   D --> E["option = filteredOptions[optionIndex]"]
   E --> F{"option === undefined?"}
   F -->|yes| G["return undefined"]
   F -->|no| H["<SelectOption hasCheckbox isLoading isSelected onToggle option />"]
 ```
-
-## Props
-
-| Prop              | Type                       | Description                                              |
-| ----------------- | -------------------------- | -------------------------------------------------------- |
-| `filteredOptions` | `string[]`                 | Visible options after search + filter                    |
-| `hasCheckboxes`   | `boolean`                  | Forwarded to `SelectOption`                              |
-| `hasSelectAll`    | `boolean`                  | Whether "Select All" row is enabled                      |
-| `index`           | `number`                   | Virtual row index (0-based, includes SelectAll)          |
-| `isAllSelected`   | `boolean`                  | Forwarded to `SelectAllOption`                           |
-| `isLoading`       | `boolean`                  | Forwarded to both sub-components                         |
-| `onSelectAll`     | `() => void`               | Forwarded to `SelectAllOption`                           |
-| `onToggle`        | `(option: string) => void` | Wrapped into `() => onToggle(option)` for `SelectOption` |
-| `selectedValues`  | `string[]`                 | Used to derive `isSelected` for `SelectOption`           |
 
 ## Index Accounting
 

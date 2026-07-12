@@ -1,12 +1,10 @@
 import type { ReactNode } from 'react';
 
-export type ListFilterMode = 'all' | 'selected' | 'unselected';
+import type { ListFilterMode } from '../../VirtualList.types';
 
 export type ListFilterModeButtonProps = {
   readonly count: number;
   readonly icon: ReactNode;
-  readonly isActive: boolean;
   readonly mode: ListFilterMode;
-  readonly onSelect: (mode: ListFilterMode) => void;
   readonly tooltip: string;
 };

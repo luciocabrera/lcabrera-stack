@@ -1,72 +1,89 @@
 // @vitest-environment jsdom
 
+import type { ReactNode } from 'react';
+
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import {
+  VirtualListConfigProvider,
+  VirtualListDataProvider,
+} from '../contexts';
 import { VirtualListHeader } from './VirtualListHeader.component';
 
-afterEach(() => {
-  cleanup();
-});
+afterEach(cleanup);
+
+type ProviderShellProps = {
+  readonly children: ReactNode;
+  readonly name?: string;
+};
+
+const ProviderShell = ({ children, name }: ProviderShellProps) => (
+  <VirtualListConfigProvider
+    hasCheckboxes
+    hasSelectAll
+    name={name}
+    onChange={vi.fn()}
+  >
+    <VirtualListDataProvider
+      dataState={{
+        data: ['Alpha', 'Beta'],
+        hasMore: false,
+        isLoading: false,
+        isLoadingMore: false,
+      }}
+      hasSelectAll
+    >
+      {children}
+    </VirtualListDataProvider>
+  </VirtualListConfigProvider>
+);
 
 describe('VirtualListHeader', () => {
-  it('renders the search input with the provided name and value', () => {
+  it('renders the search input with the configured name', () => {
     render(
-      <VirtualListHeader
-        name='country-filter'
-        onClearSearch={() => void 0}
-        onSearchChange={() => void 0}
-        searchTerm='Spa'
-      />,
+      <ProviderShell name='country-filter'>
+        <VirtualListHeader />
+      </ProviderShell>,
     );
 
-    const input = screen.getByPlaceholderText('Search options...');
-    expect(input.getAttribute('name')).toBe('country-filter');
-    expect((input as HTMLInputElement).value).toBe('Spa');
+    expect(
+      screen.getByPlaceholderText<HTMLInputElement>('Search options...').name,
+    ).toBe('country-filter');
   });
 
-  it('does not render the clear button when search is empty', () => {
+  it('updates the search term through its own action', () => {
     render(
-      <VirtualListHeader
-        onClearSearch={() => void 0}
-        onSearchChange={() => void 0}
-        searchTerm=''
-      />,
-    );
-
-    expect(screen.queryByRole('button', { name: 'Clear search' })).toBeNull();
-  });
-
-  it('renders clear button and triggers clear callback when clicked', () => {
-    const onClearSearch = vi.fn();
-
-    render(
-      <VirtualListHeader
-        onClearSearch={onClearSearch}
-        onSearchChange={() => void 0}
-        searchTerm='Arg'
-      />,
-    );
-
-    fireEvent.click(screen.getByRole('button', { name: 'Clear search' }));
-    expect(onClearSearch).toHaveBeenCalledTimes(1);
-  });
-
-  it('forwards input changes to onSearchChange', () => {
-    const onSearchChange = vi.fn();
-
-    render(
-      <VirtualListHeader
-        onClearSearch={() => void 0}
-        onSearchChange={onSearchChange}
-        searchTerm=''
-      />,
+      <ProviderShell>
+        <VirtualListHeader />
+      </ProviderShell>,
     );
 
     fireEvent.change(screen.getByPlaceholderText('Search options...'), {
-      target: { value: 'Bra' },
+      target: { value: 'Alp' },
     });
 
-    expect(onSearchChange).toHaveBeenCalledTimes(1);
+    expect(
+      screen.getByPlaceholderText<HTMLInputElement>('Search options...').value,
+    ).toBe('Alp');
+  });
+
+  it('shows the clear button only while a term is set and clears it on click', () => {
+    render(
+      <ProviderShell>
+        <VirtualListHeader />
+      </ProviderShell>,
+    );
+
+    expect(screen.queryByRole('button', { name: 'Clear search' })).toBeNull();
+
+    fireEvent.change(screen.getByPlaceholderText('Search options...'), {
+      target: { value: 'Alp' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Clear search' }));
+
+    expect(
+      screen.getByPlaceholderText<HTMLInputElement>('Search options...').value,
+    ).toBe('');
   });
 });

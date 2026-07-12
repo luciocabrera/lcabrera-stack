@@ -1,83 +1,15 @@
 // @vitest-environment jsdom
 
-import type { ChangeEvent } from 'react';
-
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type { VirtualListDataState } from './VirtualList.types';
-
-const {
-  capturedBodyProps,
-  capturedHeaderProps,
-  MockVirtualListBody,
-  MockVirtualListFooter,
-  MockVirtualListHeader,
-} = vi.hoisted(() => {
-  const capturedHeaderProps: { current: Record<string, unknown> } = {
-    current: {},
-  };
-  const capturedBodyProps: { current: Record<string, unknown> } = {
-    current: {},
-  };
-  const MockVirtualListHeader = vi.fn(
-    (props: {
-      readonly name?: string;
-      readonly onClearSearch: () => void;
-      readonly onSearchChange: (e: ChangeEvent<HTMLInputElement>) => void;
-      readonly searchTerm: string;
-    }) => {
-      capturedHeaderProps.current = props as Record<string, unknown>;
-      return (
-        <div data-testid='virtual-list-header'>
-          <input
-            data-testid='search-input'
-            onChange={props.onSearchChange}
-            value={props.searchTerm}
-          />
-          <button
-            data-testid='clear-search'
-            onClick={props.onClearSearch}
-            type='button'
-          >
-            Clear
-          </button>
-        </div>
-      );
-    },
-  );
-
-  const MockVirtualListBody = vi.fn(
-    (props: { readonly selectedValues: readonly string[] }) => {
-      capturedBodyProps.current = props as Record<string, unknown>;
-      return <div data-testid='virtual-list-body' />;
-    },
-  );
-
-  const MockVirtualListFooter = vi.fn(() => (
-    <div data-testid='virtual-list-footer' />
-  ));
-
-  return {
-    capturedBodyProps,
-    capturedHeaderProps,
-    MockVirtualListBody,
-    MockVirtualListFooter,
-    MockVirtualListHeader,
-  };
-});
-
-vi.mock('./VirtualListHeader', () => ({
-  VirtualListHeader: MockVirtualListHeader,
-}));
-
-vi.mock('./VirtualListBody', () => ({
-  VirtualListBody: MockVirtualListBody,
-}));
-
-vi.mock('./VirtualListFooter', () => ({
-  VirtualListFooter: MockVirtualListFooter,
-}));
 
 import { VirtualList } from './VirtualList.component';
 
@@ -90,98 +22,159 @@ const baseDataState: VirtualListDataState = {
   isLoadingMore: false,
 };
 
+const getFooterModeButtons = () => {
+  const footer = screen.getByText(/Loaded:/).parentElement;
+  if (!footer) {
+    throw new Error('Expected the footer to be rendered');
+  }
+  return within(footer).getAllByRole('button');
+};
+
 describe('VirtualList', () => {
-  it('renders the header, body, and footer', () => {
+  it('renders the search input, the options, and the footer count', () => {
     render(<VirtualList dataState={baseDataState} onChange={vi.fn()} />);
 
-    expect(screen.getByTestId('virtual-list-header')).not.toBeNull();
-    expect(screen.getByTestId('virtual-list-body')).not.toBeNull();
-    expect(screen.getByTestId('virtual-list-footer')).not.toBeNull();
+    expect(screen.getByPlaceholderText('Search options...')).toBeTruthy();
+    expect(screen.getByText('Select All')).toBeTruthy();
+    expect(screen.getByText('Alpha')).toBeTruthy();
+    expect(screen.getByText('Beta')).toBeTruthy();
+    expect(screen.getByText('Gamma')).toBeTruthy();
+    expect(screen.getByText(/Loaded: 3/)).toBeTruthy();
   });
 
-  it('passes empty selectedValues to body when no filter is provided', () => {
+  it('filters the options by search term and restores them on clear', () => {
     render(<VirtualList dataState={baseDataState} onChange={vi.fn()} />);
 
-    expect(capturedBodyProps.current['selectedValues']).toEqual([]);
-  });
-
-  it('passes filter.values as selectedValues to body', () => {
-    render(
-      <VirtualList
-        dataState={baseDataState}
-        filter={{ type: 'select', values: ['Alpha', 'Beta'] }}
-        onChange={vi.fn()}
-      />,
-    );
-
-    expect(capturedBodyProps.current['selectedValues']).toEqual([
-      'Alpha',
-      'Beta',
-    ]);
-  });
-
-  it('starts with an empty searchTerm passed to the header', () => {
-    render(<VirtualList dataState={baseDataState} onChange={vi.fn()} />);
-
-    expect(capturedHeaderProps.current['searchTerm']).toBe('');
-  });
-
-  it('updates searchTerm in the header when the input changes', () => {
-    render(<VirtualList dataState={baseDataState} onChange={vi.fn()} />);
-
-    fireEvent.change(screen.getByTestId('search-input'), {
+    fireEvent.change(screen.getByPlaceholderText('Search options...'), {
       target: { value: 'Alp' },
     });
 
-    expect(capturedHeaderProps.current['searchTerm']).toBe('Alp');
+    expect(screen.getByText('Alpha')).toBeTruthy();
+    expect(screen.queryByText('Beta')).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Clear search' }));
+
+    expect(screen.getByText('Beta')).toBeTruthy();
+    expect(
+      screen.getByPlaceholderText<HTMLInputElement>('Search options...').value,
+    ).toBe('');
   });
 
-  it('clears searchTerm when the clear callback is invoked', () => {
+  it('shows the empty state when nothing matches the search', () => {
     render(<VirtualList dataState={baseDataState} onChange={vi.fn()} />);
 
-    fireEvent.change(screen.getByTestId('search-input'), {
-      target: { value: 'Alpha' },
-    });
-    fireEvent.click(screen.getByTestId('clear-search'));
-
-    expect(capturedHeaderProps.current['searchTerm']).toBe('');
-  });
-
-  it('passes the searchTerm down to the body', () => {
-    render(<VirtualList dataState={baseDataState} onChange={vi.fn()} />);
-
-    fireEvent.change(screen.getByTestId('search-input'), {
-      target: { value: 'Gam' },
+    fireEvent.change(screen.getByPlaceholderText('Search options...'), {
+      target: { value: 'zzz' },
     });
 
-    expect(capturedBodyProps.current['searchTerm']).toBe('Gam');
+    expect(screen.getByText('No options found')).toBeTruthy();
   });
 
-  it('passes shouldFillHeight to the body', () => {
+  it('emits onChange with the toggled option', () => {
+    const onChange = vi.fn();
+
+    render(
+      <VirtualList
+        dataState={baseDataState}
+        hasSelectAll={false}
+        onChange={onChange}
+      />,
+    );
+
+    const firstCheckbox = screen.getAllByRole('checkbox')[0];
+    if (!firstCheckbox) {
+      throw new Error('Expected at least one checkbox');
+    }
+    fireEvent.click(firstCheckbox);
+
+    expect(onChange).toHaveBeenCalledWith({
+      type: 'select',
+      values: ['Alpha'],
+    });
+  });
+
+  it('emits onChange with every visible option on Select All', () => {
+    const onChange = vi.fn();
+
+    render(<VirtualList dataState={baseDataState} onChange={onChange} />);
+
+    fireEvent.click(screen.getByText('Select All'));
+
+    expect(onChange).toHaveBeenCalledWith({
+      type: 'select',
+      values: ['Alpha', 'Beta', 'Gamma'],
+    });
+  });
+
+  it('shows only the selected options in the selected filter mode', () => {
+    render(
+      <VirtualList
+        dataState={baseDataState}
+        filter={{ type: 'select', values: ['Beta'] }}
+        onChange={vi.fn()}
+      />,
+    );
+
+    const selectedModeButton = getFooterModeButtons()[1];
+    if (!selectedModeButton) {
+      throw new Error('Expected the selected-mode button');
+    }
+    fireEvent.click(selectedModeButton);
+
+    expect(screen.getByText('Beta')).toBeTruthy();
+    expect(screen.queryByText('Alpha')).toBeNull();
+    expect(screen.queryByText('Gamma')).toBeNull();
+  });
+
+  it('calls onFetchInitial once on mount', () => {
+    const onFetchInitial = vi.fn();
+
     render(
       <VirtualList
         dataState={baseDataState}
         onChange={vi.fn()}
-        shouldFillHeight
+        onFetchInitial={onFetchInitial}
       />,
     );
 
-    expect(capturedBodyProps.current['shouldFillHeight']).toBe(true);
+    expect(onFetchInitial).toHaveBeenCalledTimes(1);
   });
 
-  it('passes listMaxHeight to the body', () => {
+  it('renders the loading skeleton during the initial load', () => {
     render(
       <VirtualList
-        dataState={baseDataState}
-        listMaxHeight='20rem'
+        dataState={{
+          data: [],
+          hasMore: false,
+          isLoading: true,
+          isLoadingMore: false,
+        }}
         onChange={vi.fn()}
       />,
     );
 
-    expect(capturedBodyProps.current['listMaxHeight']).toBe('20rem');
+    expect(screen.queryByText('No options found')).toBeNull();
+    expect(screen.queryAllByRole('checkbox')).toHaveLength(0);
+    expect(screen.queryByText(/Loaded:/)).toBeNull();
   });
 
-  it('passes the name to the header', () => {
+  it('hides checkboxes and filter-mode buttons when hasCheckboxes is false', () => {
+    render(
+      <VirtualList
+        dataState={baseDataState}
+        hasCheckboxes={false}
+        hasSelectAll={false}
+        onChange={vi.fn()}
+      />,
+    );
+
+    expect(screen.queryAllByRole('checkbox')).toHaveLength(0);
+    expect(
+      screen.getByText(/Loaded: 3/).parentElement?.querySelectorAll('button'),
+    ).toHaveLength(0);
+  });
+
+  it('applies the name to the search input', () => {
     render(
       <VirtualList
         dataState={baseDataState}
@@ -190,6 +183,8 @@ describe('VirtualList', () => {
       />,
     );
 
-    expect(capturedHeaderProps.current['name']).toBe('country-filter');
+    expect(
+      screen.getByPlaceholderText<HTMLInputElement>('Search options...').name,
+    ).toBe('country-filter');
   });
 });

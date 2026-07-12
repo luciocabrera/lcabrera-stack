@@ -2,37 +2,25 @@ import * as stylex from '@stylexjs/stylex';
 
 import type { VirtualListBodyOptionsProps } from './VirtualListBodyOptions.types';
 
+import {
+  useGetFilteredOptions,
+  useGetShouldShowSelectAll,
+} from '../../contexts/VirtualListData/data/selectors';
 import { VirtualizedOption } from '../../VirtualizedOption';
 import { styles } from './VirtualListBodyOptions.stylex';
 
+/**
+ * Renders the virtualized window of rows (Table analog: TableBodyRows). The
+ * window bounds arrive as producer→child props; row content self-connects.
+ */
 export const VirtualListBodyOptions = ({
   endIndex,
-  filteredOptions,
-  hasCheckboxes,
-  isAllSelected,
-  isLoadingOptions,
   offsetY,
-  onChange,
-  selectedValues,
-  shouldShowSelectAll,
   startIndex,
   totalHeight,
 }: VirtualListBodyOptionsProps) => {
-  const handleToggle = (option: string) => {
-    const newSelectedValues = selectedValues.includes(option)
-      ? selectedValues.filter((value) => value !== option)
-      : [...selectedValues, option];
-
-    onChange({ type: 'select', values: newSelectedValues });
-  };
-
-  const handleSelectAll = () => {
-    const newSelectedValues = isAllSelected
-      ? selectedValues.filter((value) => !filteredOptions.includes(value))
-      : [...new Set([...selectedValues, ...filteredOptions])];
-
-    onChange({ type: 'select', values: newSelectedValues });
-  };
+  const filteredOptions = useGetFilteredOptions();
+  const shouldShowSelectAll = useGetShouldShowSelectAll();
 
   return (
     <div {...stylex.props(styles.virtualScrollArea(totalHeight))}>
@@ -47,20 +35,7 @@ export const VirtualListBodyOptions = ({
             key = filteredOptions[optionIndex] ?? key;
           }
 
-          return (
-            <VirtualizedOption
-              filteredOptions={filteredOptions}
-              hasCheckboxes={hasCheckboxes}
-              hasSelectAll={shouldShowSelectAll}
-              index={index}
-              isAllSelected={isAllSelected}
-              isLoading={isLoadingOptions}
-              key={key}
-              onSelectAll={handleSelectAll}
-              onToggle={handleToggle}
-              selectedValues={selectedValues}
-            />
-          );
+          return <VirtualizedOption index={index} key={key} />;
         })}
       </div>
     </div>

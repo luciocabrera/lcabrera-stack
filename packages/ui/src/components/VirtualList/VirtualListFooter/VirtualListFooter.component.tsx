@@ -6,47 +6,52 @@ import {
 import { ICON_SIZE_MD } from '@repo/ui/design-system/constants';
 import * as stylex from '@stylexjs/stylex';
 
-import type { VirtualListFooterProps } from './VirtualListFooter.types';
-
+import { useGetHasCheckboxes } from '../contexts/VirtualListConfig/config/selectors';
+import {
+  useGetIsLoading,
+  useGetIsLoadingMore,
+  useGetLoadedCount,
+  useGetSelectedCount,
+  useGetTotalCount,
+} from '../contexts/VirtualListData/data/selectors';
 import { ListFilterModeButton } from './ListFilterModeButton';
 import { styles } from './VirtualListFooter.stylex';
 
-export const VirtualListFooter = ({
-  dataState,
-  effectiveOptions,
-  hasCheckboxes,
-  listFilterMode,
-  selectedValues,
-  setListFilterMode,
-}: VirtualListFooterProps) => {
-  if (dataState.data.length === 0) return;
+/** Self-connected footer: loaded/total counts plus the filter-mode buttons. */
+export const VirtualListFooter = () => {
+  const hasCheckboxes = useGetHasCheckboxes();
+  const isLoading = useGetIsLoading();
+  const isLoadingMore = useGetIsLoadingMore();
+  const loadedCount = useGetLoadedCount();
+  const selectedCount = useGetSelectedCount();
+  const totalCount = useGetTotalCount();
+
+  if (loadedCount === 0) return;
 
   return (
     <div {...stylex.props(styles.footer)}>
       <p {...stylex.props(styles.loadedCount)}>
-        Loaded: {dataState.data.length}
-        {Number.isFinite(dataState.totalCount) && dataState.totalCount
-          ? ` / ${dataState.totalCount}`
-          : ''}
-        {dataState.isLoading && ' — Loading...'}
-        {dataState.isLoadingMore && ' — Loading more...'}
+        Loaded: {loadedCount}
+        {Number.isFinite(totalCount) && totalCount ? ` / ${totalCount}` : ''}
+        {isLoading && ' — Loading...'}
+        {isLoadingMore && ' — Loading more...'}
       </p>
       {hasCheckboxes && (
         <div {...stylex.props(styles.listFilterGroup)}>
           {(['all', 'selected', 'unselected'] as const).map((mode) => {
             const modeConfig = {
               all: {
-                count: effectiveOptions.length,
+                count: loadedCount,
                 icon: <ListAllIcon size={ICON_SIZE_MD} />,
                 tooltip: 'Show all options',
               },
               selected: {
-                count: selectedValues.length,
+                count: selectedCount,
                 icon: <ListCheckedIcon size={ICON_SIZE_MD} />,
                 tooltip: 'Show only selected options',
               },
               unselected: {
-                count: effectiveOptions.length - selectedValues.length,
+                count: loadedCount - selectedCount,
                 icon: <ListUncheckedIcon size={ICON_SIZE_MD} />,
                 tooltip: 'Show only unselected options',
               },
@@ -56,10 +61,8 @@ export const VirtualListFooter = ({
               <ListFilterModeButton
                 count={count}
                 icon={icon}
-                isActive={listFilterMode === mode}
                 key={mode}
                 mode={mode}
-                onSelect={setListFilterMode}
                 tooltip={tooltip}
               />
             );

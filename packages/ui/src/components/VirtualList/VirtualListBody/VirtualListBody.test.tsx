@@ -1,37 +1,63 @@
 // @vitest-environment jsdom
 
+import type { ReactNode } from 'react';
+
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import type { VirtualListProps } from '../VirtualList.types';
+
+import {
+  VirtualListConfigProvider,
+  VirtualListDataProvider,
+} from '../contexts';
 import { VirtualListBody } from './VirtualListBody.component';
 
-afterEach(() => {
-  cleanup();
-});
+afterEach(cleanup);
 
-const baseProps = {
-  dataState: {
+type ProviderShellProps = Partial<VirtualListProps> & {
+  readonly children: ReactNode;
+};
+
+const ProviderShell = ({
+  children,
+  dataState = {
     data: ['Argentina', 'Brazil'],
     hasMore: false,
     isLoading: false,
     isLoadingMore: false,
   },
-  hasCheckboxes: true,
-  hasSelectAll: true,
-  listFilterMode: 'all' as const,
+  hasCheckboxes = true,
+  hasSelectAll = true,
+  onChange = vi.fn(),
+  onFetchInitial,
+}: ProviderShellProps) => (
+  <VirtualListConfigProvider
+    hasCheckboxes={hasCheckboxes}
+    hasSelectAll={hasSelectAll}
+    onChange={onChange}
+    onFetchInitial={onFetchInitial}
+  >
+    <VirtualListDataProvider
+      dataState={dataState}
+      hasSelectAll={hasSelectAll}
+      onFetchInitial={onFetchInitial}
+    >
+      {children}
+    </VirtualListDataProvider>
+  </VirtualListConfigProvider>
+);
+
+const bodyProps = {
   listMaxHeight: '18.75rem',
-  onChange: vi.fn(),
-  searchTerm: '',
-  selectedValues: [],
   shouldFillHeight: false,
 };
 
 describe('VirtualListBody', () => {
-  it('renders loading skeleton during initial loading bootstrap', () => {
+  it('renders the loading skeleton during the initial loading bootstrap', () => {
     const onFetchInitial = vi.fn();
     const { container } = render(
-      <VirtualListBody
-        {...baseProps}
+      <ProviderShell
         dataState={{
           data: [],
           hasMore: false,
@@ -39,49 +65,55 @@ describe('VirtualListBody', () => {
           isLoadingMore: false,
         }}
         onFetchInitial={onFetchInitial}
-      />,
+      >
+        <VirtualListBody {...bodyProps} />
+      </ProviderShell>,
     );
 
     expect(container.firstChild).not.toBeNull();
+    expect(screen.queryByText('No options found')).toBeNull();
     expect(onFetchInitial).toHaveBeenCalledTimes(1);
   });
 
-  it('renders empty state when there are no options', () => {
+  it('renders the empty state when there are no options', () => {
     render(
-      <VirtualListBody
-        {...baseProps}
+      <ProviderShell
         dataState={{
           data: [],
           hasMore: false,
           isLoading: false,
           isLoadingMore: false,
         }}
-      />,
+      >
+        <VirtualListBody {...bodyProps} />
+      </ProviderShell>,
     );
 
     expect(screen.getByText('No options found')).toBeTruthy();
   });
 
-  it('renders virtualized options when data exists', () => {
-    render(<VirtualListBody {...baseProps} />);
+  it('renders the virtualized options when data exists', () => {
+    render(
+      <ProviderShell>
+        <VirtualListBody {...bodyProps} />
+      </ProviderShell>,
+    );
 
     expect(screen.getByText('Select All')).toBeTruthy();
     expect(screen.getByText('Argentina')).toBeTruthy();
+    expect(screen.getByText('Brazil')).toBeTruthy();
   });
 
-  it('triggers onChange when an option is toggled', () => {
+  it('emits onChange when an option is toggled', () => {
     const onChange = vi.fn();
 
     render(
-      <VirtualListBody
-        {...baseProps}
-        hasSelectAll={false}
-        onChange={onChange}
-      />,
+      <ProviderShell hasSelectAll={false} onChange={onChange}>
+        <VirtualListBody {...bodyProps} />
+      </ProviderShell>,
     );
 
-    const checkboxes = screen.getAllByRole('checkbox');
-    const firstCheckbox = checkboxes[0];
+    const firstCheckbox = screen.getAllByRole('checkbox')[0];
     if (!firstCheckbox) {
       throw new Error('Expected at least one checkbox');
     }

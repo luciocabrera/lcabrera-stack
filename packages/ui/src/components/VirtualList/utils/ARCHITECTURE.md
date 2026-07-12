@@ -1,23 +1,30 @@
 # utils/ Architecture
 
-Pure filtering utility for the VirtualList component.
+Pure derivation utilities behind the VirtualList store writers. `resolveListDerivedState` is the single entry point used by the `VirtualListData` provider sync effect and the UI actions to pre-compute the derived slice of the data store; the other utils are its tested decomposition.
 
 ## File Structure
 
 ```
 utils/
-├── index.ts                      → Barrel export
-└── getFilteredOptions.util.ts    → Apply search term + filter mode to options array
+├── index.ts                            → Barrel (resolveListDerivedState — the only cross-directory consumer entry)
+├── resolveListDerivedState.util.ts     → Derived store slice: filteredOptions, isAllSelected, shouldShowSelectAll, totalItems, contentMode
+├── getFilteredOptions.util.ts          → Apply search term + filter mode to options array
+├── getIsAllSelected.util.ts            → Whether every filtered option is selected
+├── resolveContentMode.util.ts          → 'loading' | 'empty' | 'list' dispatch
+└── resolveIsInitialLoading.util.ts     → Initial-load / onFetchInitial bootstrap detection
 ```
 
-## Dependencies
+## Function Reference
 
-```mermaid
-graph LR
-  GFO["getFilteredOptions()"] --> VL_types["VirtualList.types (ListFilterMode)"]
-```
+| Function                  | Input                                                                                                           | Output                           | Used by                                                               |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------- | -------------------------------- | --------------------------------------------------------------------- |
+| `resolveListDerivedState` | `{ data, hasFetchInitial, hasSelectAll, isLoading, isLoadingMore, listFilterMode, searchTerm, selectedValues }` | derived data-store slice         | `getInitialListDataState`, `useSetSearchTerm`, `useSetListFilterMode` |
+| `getFilteredOptions`      | `{ listFilterMode, options, searchTerm, selectedValues }`                                                       | `string[]`                       | `resolveListDerivedState`                                             |
+| `getIsAllSelected`        | `{ filteredOptions, selectedValues }`                                                                           | `boolean`                        | `resolveListDerivedState`                                             |
+| `resolveContentMode`      | `{ filteredOptionsCount, isInitialLoading }`                                                                    | `'loading' \| 'empty' \| 'list'` | `resolveListDerivedState`                                             |
+| `resolveIsInitialLoading` | `{ hasFetchInitial, isLoading, isLoadingMore, optionsCount }`                                                   | `boolean`                        | `resolveListDerivedState`                                             |
 
-## Logic Flow
+## Logic Flow — getFilteredOptions
 
 ```mermaid
 graph TD
@@ -32,22 +39,7 @@ graph TD
   F & G & H --> I["return filtered string[]"]
 ```
 
-## Function Reference
-
-| Function             | Input                    | Output     | Purpose                                    |
-| -------------------- | ------------------------ | ---------- | ------------------------------------------ |
-| `getFilteredOptions` | `GetFilteredOptionsArgs` | `string[]` | Apply search + view-mode filter to options |
-
-### `GetFilteredOptionsArgs`
-
-| Field            | Type             | Description                                           |
-| ---------------- | ---------------- | ----------------------------------------------------- |
-| `listFilterMode` | `ListFilterMode` | `'all' \| 'selected' \| 'unselected'`                 |
-| `options`        | `string[]`       | Raw options from `dataState.data`                     |
-| `searchTerm`     | `string`         | Current value of the search input                     |
-| `selectedValues` | `string[]`       | Currently selected option values from `filter.values` |
-
 ## Notes
 
-- Search is **case-insensitive** substring match.
-- Filter modes are applied **after** the search step (search narrows the pool first).
+- Search is **case-insensitive** substring match; filter modes apply **after** the search step.
+- All functions are pure — no store access, no side effects.

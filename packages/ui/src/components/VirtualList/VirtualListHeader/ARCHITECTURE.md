@@ -1,18 +1,19 @@
 # VirtualListHeader Architecture
 
-Search-input header extracted from `VirtualList` to keep orchestration logic separate from input rendering.
+Self-connected search header: owns its store wiring instead of receiving drilled props (zero props, no `.types.ts`).
 
 ## Responsibilities
 
-- Render the controlled search input (`searchTerm`, `onSearchChange`)
-- Render the clear button only when `searchTerm` is non-empty
+- Read the current term via `useGetSearchTerm` and the input `name` via `useGetSearchInputName`
+- Write through actions: `useSetSearchTerm` (adapts the input `ChangeEvent` to a string) and `useClearSearch`
+- Render the clear button only while the term is non-empty
 - Forward all browser password-manager ignore attributes used by the previous inline implementation
 
-## Props
+## Store Wiring
 
-| Prop             | Type                                             | Description                 |
-| ---------------- | ------------------------------------------------ | --------------------------- |
-| `name`           | `string \| undefined`                            | Name attribute on the input |
-| `searchTerm`     | `string`                                         | Controlled input value      |
-| `onSearchChange` | `(event: ChangeEvent<HTMLInputElement>) => void` | Input change callback       |
-| `onClearSearch`  | `() => void`                                     | Invoked by the clear button |
+| Kind      | Hooks                                                     |
+| --------- | --------------------------------------------------------- |
+| Selectors | `useGetSearchTerm` (ui), `useGetSearchInputName` (config) |
+| Actions   | `useSetSearchTerm`, `useClearSearch` (ui)                 |
+
+Must render inside the VirtualList providers (see `../contexts/ARCHITECTURE.md`).
