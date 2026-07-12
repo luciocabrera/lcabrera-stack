@@ -55,6 +55,7 @@ export const FormBody = <TValues extends Record<string, unknown>>({
       {...stylex.props(styles.form)}
     >
       <input name='formId' type='hidden' value={formId} />
+      {/*  TODO: The fields should be gotten in the FormFields componenet directly using a selector , following the store context pattern,  */}
       <FormFields fields={fields} />
       <FormBodyFooter
         cancelLabel={cancelLabel}

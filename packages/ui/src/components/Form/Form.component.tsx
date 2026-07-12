@@ -22,6 +22,7 @@ export const Form = <TValues extends Record<string, unknown>>({
 
   // THE fields should be persisted in the store and have a selector so the consumers can use it , they are to a form  what  columns are for the table
   // formId  should be persisted in the store, we have to follow the same patterns used for the table component (metadata store in same context could be)
+  // so keys like formId, mode should be in the metadata store (need to evaluate what other stuffss could be there)
   return (
     <FormProvider
       initialFieldsState={{

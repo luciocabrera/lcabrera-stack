@@ -1,7 +1,7 @@
 import { SectionCard } from '@repo/ui/components/SectionCard';
 import { useParams } from 'react-router';
 
-export const EditOrder = () => {
+const EditOrder = () => {
   const params = useParams();
 
   return (

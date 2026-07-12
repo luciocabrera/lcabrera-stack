@@ -11,7 +11,6 @@ export { ExpandAllIcon } from './ExpandAllIcon';
 export { EyeIcon } from './EyeIcon';
 export { EyeOffIcon } from './EyeOffIcon';
 export { FileTextIcon } from './FileTextIcon';
-export { FolderIcon } from './FolderIcon';
 export { HomeIcon } from './HomeIcon';
 export type { IconProps } from './Icons.types';
 export { InfoIcon } from './InfoIcon';

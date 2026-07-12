@@ -3,8 +3,7 @@ import {
   useGetGlobalPinningPreferences,
 } from '@repo/ui/contexts/GlobalSettingsContext/selectors';
 
-import { getSettingsDraftChanges } from '../../utils/getSettingsDraftChanges.util';
-import { toDraft } from '../../utils/toDraft.util';
+import { getSettingsDraftChanges, toDraft } from '../../utils';
 import { useDraftStore } from '../useDraftStore.hook';
 
 /**

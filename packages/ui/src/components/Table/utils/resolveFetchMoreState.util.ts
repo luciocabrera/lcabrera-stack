@@ -6,13 +6,6 @@ type ResolveFetchMoreStateArgs<TData, TResponse> = {
   readonly response: TResponse;
 };
 
-type ResolveFetchMoreStateResult<TData> = {
-  readonly combinedData: readonly TData[];
-  readonly hasMore: boolean;
-  readonly totalLoadedRows: number;
-  readonly totalRows: number;
-};
-
 export const resolveFetchMoreState = <TData, TResponse>({
   currentData,
   currentTotalRows,
@@ -35,4 +28,4 @@ export const resolveFetchMoreState = <TData, TResponse>({
   };
 };
 
-export type { ResolveFetchMoreStateArgs, ResolveFetchMoreStateResult };
+export type { ResolveFetchMoreStateArgs };

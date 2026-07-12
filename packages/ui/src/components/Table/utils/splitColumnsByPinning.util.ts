@@ -3,16 +3,6 @@ import type {
   TableColumn,
 } from '@repo/ui/components/Table/Table.types';
 
-/** Column groups produced by splitColumnsByPinning. */
-export type SplitColumnsByPinningResult<TData> = {
-  /** Non-pinned columns in their display order. */
-  readonly centerCols: readonly TableColumn<TData>[];
-  /** Left-pinned columns in their display order. */
-  readonly leftPinnedCols: readonly TableColumn<TData>[];
-  /** Right-pinned columns in their display order. */
-  readonly rightPinnedCols: readonly TableColumn<TData>[];
-};
-
 type SplitColumnsByPinningArgs<TData> = {
   readonly columnPinning: ColumnPinningState<TData>;
   readonly effectiveColumns: readonly TableColumn<TData>[];

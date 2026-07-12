@@ -638,6 +638,191 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "apps/admin_system/src/routes/cqms/edit-scanner/toEditScannerInitialValues.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [
+      {
+        "ruleId": "unicorn/no-null",
+        "severity": 2,
+        "message": "Use `undefined` instead of `null`.",
+        "line": 9,
+        "column": 18,
+        "messageId": "error",
+        "endLine": 9,
+        "endColumn": 22,
+        "suggestions": [
+          {
+            "messageId": "replace",
+            "fix": {
+              "range": [368, 372],
+              "text": "undefined"
+            },
+            "data": {},
+            "desc": "Replace `null` with `undefined`."
+          }
+        ],
+        "suppressions": [
+          {
+            "kind": "directive",
+            "justification": "DB registry rows use SQL NULL for nullable columns"
+          }
+        ]
+      },
+      {
+        "ruleId": "unicorn/no-null",
+        "severity": 2,
+        "message": "Use `undefined` instead of `null`.",
+        "line": 10,
+        "column": 21,
+        "messageId": "error",
+        "endLine": 10,
+        "endColumn": 25,
+        "suggestions": [
+          {
+            "messageId": "replace",
+            "fix": {
+              "range": [394, 398],
+              "text": "undefined"
+            },
+            "data": {},
+            "desc": "Replace `null` with `undefined`."
+          }
+        ],
+        "suppressions": [
+          {
+            "kind": "directive",
+            "justification": "DB registry rows use SQL NULL for nullable columns"
+          }
+        ]
+      },
+      {
+        "ruleId": "unicorn/no-null",
+        "severity": 2,
+        "message": "Use `undefined` instead of `null`.",
+        "line": 11,
+        "column": 21,
+        "messageId": "error",
+        "endLine": 11,
+        "endColumn": 25,
+        "suggestions": [
+          {
+            "messageId": "replace",
+            "fix": {
+              "range": [420, 424],
+              "text": "undefined"
+            },
+            "data": {},
+            "desc": "Replace `null` with `undefined`."
+          }
+        ],
+        "suppressions": [
+          {
+            "kind": "directive",
+            "justification": "DB registry rows use SQL NULL for nullable columns"
+          }
+        ]
+      },
+      {
+        "ruleId": "unicorn/no-null",
+        "severity": 2,
+        "message": "Use `undefined` instead of `null`.",
+        "line": 12,
+        "column": 16,
+        "messageId": "error",
+        "endLine": 12,
+        "endColumn": 20,
+        "suggestions": [
+          {
+            "messageId": "replace",
+            "fix": {
+              "range": [441, 445],
+              "text": "undefined"
+            },
+            "data": {},
+            "desc": "Replace `null` with `undefined`."
+          }
+        ],
+        "suppressions": [
+          {
+            "kind": "directive",
+            "justification": "DB registry rows use SQL NULL for nullable columns"
+          }
+        ]
+      },
+      {
+        "ruleId": "unicorn/no-null",
+        "severity": 2,
+        "message": "Use `undefined` instead of `null`.",
+        "line": 16,
+        "column": 27,
+        "messageId": "error",
+        "endLine": 16,
+        "endColumn": 31,
+        "suggestions": [
+          {
+            "messageId": "replace",
+            "fix": {
+              "range": [541, 545],
+              "text": "undefined"
+            },
+            "data": {},
+            "desc": "Replace `null` with `undefined`."
+          }
+        ],
+        "suppressions": [
+          {
+            "kind": "directive",
+            "justification": "DB registry rows use SQL NULL for nullable columns"
+          }
+        ]
+      },
+      {
+        "ruleId": "unicorn/no-null",
+        "severity": 2,
+        "message": "Use `undefined` instead of `null`.",
+        "line": 19,
+        "column": 19,
+        "messageId": "error",
+        "endLine": 19,
+        "endColumn": 23,
+        "suggestions": [
+          {
+            "messageId": "replace",
+            "fix": {
+              "range": [641, 645],
+              "text": "undefined"
+            },
+            "data": {},
+            "desc": "Replace `null` with `undefined`."
+          }
+        ],
+        "suppressions": [
+          {
+            "kind": "directive",
+            "justification": "DB registry rows use SQL NULL for nullable columns"
+          }
+        ]
+      }
+    ],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/edit-scanner/toEditScannerInitialValues.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "apps/admin_system/src/routes/cqms/edit-user/editUser.action.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -1441,6 +1626,45 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "apps/admin_system/src/routes/cqms/role-detail/RoleDetail.component.test.tsx",
+    "messages": [],
+    "suppressedMessages": [
+      {
+        "ruleId": "unicorn/no-null",
+        "severity": 2,
+        "message": "Use `undefined` instead of `null`.",
+        "line": 75,
+        "column": 22,
+        "messageId": "error",
+        "endLine": 75,
+        "endColumn": 26,
+        "suggestions": [
+          {
+            "messageId": "replace",
+            "fix": {
+              "range": [1963, 1967],
+              "text": "undefined"
+            },
+            "data": {},
+            "desc": "Replace `null` with `undefined`."
+          }
+        ],
+        "suppressions": [
+          {
+            "kind": "directive",
+            "justification": "DB registry rows use SQL NULL for nullable columns"
+          }
+        ]
+      }
+    ],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "apps/admin_system/src/routes/cqms/role-detail/RoleDetail.component.tsx",
     "messages": [],
     "suppressedMessages": [],
@@ -1730,6 +1954,180 @@
     "filePath": "apps/admin_system/src/routes/cqms/scanner-detail/root.ts",
     "messages": [],
     "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/scanner-detail/ScannerDetail.component.test.tsx",
+    "messages": [],
+    "suppressedMessages": [
+      {
+        "ruleId": "unicorn/no-null",
+        "severity": 2,
+        "message": "Use `undefined` instead of `null`.",
+        "line": 40,
+        "column": 18,
+        "messageId": "error",
+        "endLine": 40,
+        "endColumn": 22,
+        "suggestions": [
+          {
+            "messageId": "replace",
+            "fix": {
+              "range": [1018, 1022],
+              "text": "undefined"
+            },
+            "data": {},
+            "desc": "Replace `null` with `undefined`."
+          }
+        ],
+        "suppressions": [
+          {
+            "kind": "directive",
+            "justification": "DB registry rows use SQL NULL for nullable columns"
+          }
+        ]
+      },
+      {
+        "ruleId": "unicorn/no-null",
+        "severity": 2,
+        "message": "Use `undefined` instead of `null`.",
+        "line": 41,
+        "column": 21,
+        "messageId": "error",
+        "endLine": 41,
+        "endColumn": 25,
+        "suggestions": [
+          {
+            "messageId": "replace",
+            "fix": {
+              "range": [1044, 1048],
+              "text": "undefined"
+            },
+            "data": {},
+            "desc": "Replace `null` with `undefined`."
+          }
+        ],
+        "suppressions": [
+          {
+            "kind": "directive",
+            "justification": "DB registry rows use SQL NULL for nullable columns"
+          }
+        ]
+      },
+      {
+        "ruleId": "unicorn/no-null",
+        "severity": 2,
+        "message": "Use `undefined` instead of `null`.",
+        "line": 42,
+        "column": 21,
+        "messageId": "error",
+        "endLine": 42,
+        "endColumn": 25,
+        "suggestions": [
+          {
+            "messageId": "replace",
+            "fix": {
+              "range": [1070, 1074],
+              "text": "undefined"
+            },
+            "data": {},
+            "desc": "Replace `null` with `undefined`."
+          }
+        ],
+        "suppressions": [
+          {
+            "kind": "directive",
+            "justification": "DB registry rows use SQL NULL for nullable columns"
+          }
+        ]
+      },
+      {
+        "ruleId": "unicorn/no-null",
+        "severity": 2,
+        "message": "Use `undefined` instead of `null`.",
+        "line": 43,
+        "column": 16,
+        "messageId": "error",
+        "endLine": 43,
+        "endColumn": 20,
+        "suggestions": [
+          {
+            "messageId": "replace",
+            "fix": {
+              "range": [1091, 1095],
+              "text": "undefined"
+            },
+            "data": {},
+            "desc": "Replace `null` with `undefined`."
+          }
+        ],
+        "suppressions": [
+          {
+            "kind": "directive",
+            "justification": "DB registry rows use SQL NULL for nullable columns"
+          }
+        ]
+      },
+      {
+        "ruleId": "unicorn/no-null",
+        "severity": 2,
+        "message": "Use `undefined` instead of `null`.",
+        "line": 47,
+        "column": 27,
+        "messageId": "error",
+        "endLine": 47,
+        "endColumn": 31,
+        "suggestions": [
+          {
+            "messageId": "replace",
+            "fix": {
+              "range": [1191, 1195],
+              "text": "undefined"
+            },
+            "data": {},
+            "desc": "Replace `null` with `undefined`."
+          }
+        ],
+        "suppressions": [
+          {
+            "kind": "directive",
+            "justification": "DB registry rows use SQL NULL for nullable columns"
+          }
+        ]
+      },
+      {
+        "ruleId": "unicorn/no-null",
+        "severity": 2,
+        "message": "Use `undefined` instead of `null`.",
+        "line": 50,
+        "column": 19,
+        "messageId": "error",
+        "endLine": 50,
+        "endColumn": 23,
+        "suggestions": [
+          {
+            "messageId": "replace",
+            "fix": {
+              "range": [1291, 1295],
+              "text": "undefined"
+            },
+            "data": {},
+            "desc": "Replace `null` with `undefined`."
+          }
+        ],
+        "suppressions": [
+          {
+            "kind": "directive",
+            "justification": "DB registry rows use SQL NULL for nullable columns"
+          }
+        ]
+      }
+    ],
     "errorCount": 0,
     "fatalErrorCount": 0,
     "warningCount": 0,
@@ -4605,6 +5003,28 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "apps/react-router/src/routes/api/enterprise-orders-delete/parseOrderId.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/react-router/src/routes/api/enterprise-orders-delete/parseOrderId.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "apps/react-router/src/routes/api/enterprise-orders-delete/root.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -4836,17 +5256,6 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "apps/react-router/src/routes/enterprise-orders/EnterpriseOrders.constants.stylex.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
     "filePath": "apps/react-router/src/routes/enterprise-orders/EnterpriseOrders.constants.tsx",
     "messages": [],
     "suppressedMessages": [],
@@ -4947,6 +5356,28 @@
   },
   {
     "filePath": "apps/react-router/src/routes/enterprise-orders/root.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/react-router/src/routes/enterprise-orders/utils/buildEnterpriseOrdersQuery.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/react-router/src/routes/enterprise-orders/utils/buildEnterpriseOrdersQuery.util.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -11301,6 +11732,28 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/ui/src/components/Form/FormBody/FormBodyFooter/FormBodyFooter.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Form/FormBody/FormBodyFooter/FormBodyFooter.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/ui/src/components/Form/FormField/FormField.component.tsx",
     "messages": [],
     "suppressedMessages": [],
@@ -12237,28 +12690,6 @@
   },
   {
     "filePath": "packages/ui/src/components/Icons/FilterIcon/index.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
-    "filePath": "packages/ui/src/components/Icons/FolderIcon/FolderIcon.component.tsx",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
-    "filePath": "packages/ui/src/components/Icons/FolderIcon/index.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -13853,17 +14284,6 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/components/Settings/NavigationSettingsTab/NavigationSettingsTab.types.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
     "filePath": "packages/ui/src/components/Settings/PinningSettingsTab/index.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -13876,17 +14296,6 @@
   },
   {
     "filePath": "packages/ui/src/components/Settings/PinningSettingsTab/PinningSettingsTab.component.tsx",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
-    "filePath": "packages/ui/src/components/Settings/PinningSettingsTab/PinningSettingsTab.types.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -13963,6 +14372,160 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/ui/src/components/Settings/SettingsActions/SettingsActions.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Settings/SettingsDraftContext/actions/index.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Settings/SettingsDraftContext/actions/useAcceptSettingsDraft.hook.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Settings/SettingsDraftContext/actions/useCancelSettingsDraft.hook.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Settings/SettingsDraftContext/actions/useSetSettingsDraftField.hook.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Settings/SettingsDraftContext/selectors/index.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Settings/SettingsDraftContext/selectors/useGetSettingsDraft.hook.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Settings/SettingsDraftContext/selectors/useGetSettingsDraftChanges.hook.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Settings/SettingsDraftContext/SettingsDraftContext.constants.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Settings/SettingsDraftContext/SettingsDraftContext.context.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Settings/SettingsDraftContext/SettingsDraftContext.provider.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Settings/SettingsDraftContext/SettingsDraftContext.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Settings/SettingsDraftContext/useDraftStore.hook.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Settings/SettingsDraftContext/useSettingsDraftContextValue.hook.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/ui/src/components/Settings/SettingsOptionSection/index.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -13986,6 +14549,39 @@
   },
   {
     "filePath": "packages/ui/src/components/Settings/SettingsOptionSection/SettingsOptionSection.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Settings/SettingsTabs/SettingsTabs.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Settings/utils/getSettingsDraftChanges.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Settings/utils/getSettingsDraftChanges.util.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -14997,7 +15593,7 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/utils/closeColumnSettingsDrawer.util.ts",
+    "filePath": "packages/ui/src/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/utils/closeColumnSettingsDrawer.service.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -18253,6 +18849,17 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/ui/src/components/Table/hooks/useScrollResetAfterLoad.hook.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/ui/src/components/Table/index.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -19046,6 +19653,28 @@
   },
   {
     "filePath": "packages/ui/src/components/Table/TableContent/TableContent.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableContent/TableTitleActions/TableTitleActions.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableContent/TableTitleActions/TableTitleActions.types.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -21245,6 +21874,17 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/FiltersSection/ActiveFiltersList/FilterItem/FilterItem.test.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/FiltersSection/ActiveFiltersList/FilterItem/FilterItem.types.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -21388,6 +22028,17 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/FiltersSection/FiltersSectionToolbar/FiltersSectionToolbar.test.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/FiltersSection/FiltersSectionToolbar/FiltersSectionToolbar.types.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -21411,6 +22062,28 @@
   },
   {
     "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/FiltersSection/index.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/FiltersSection/utils/areAllFiltersExpanded.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/FiltersSection/utils/areAllFiltersExpanded.util.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -23148,7 +23821,7 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/components/Table/utils/persistTableMetaUiState.util.test.ts",
+    "filePath": "packages/ui/src/components/Table/utils/persistTableMetaUiState.service.test.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -23159,7 +23832,7 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/components/Table/utils/persistTableMetaUiState.util.ts",
+    "filePath": "packages/ui/src/components/Table/utils/persistTableMetaUiState.service.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -23456,7 +24129,7 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/components/Table/utils/writePersistedDataStateToSessionStorage.util.test.ts",
+    "filePath": "packages/ui/src/components/Table/utils/writePersistedDataStateToSessionStorage.service.test.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -23467,7 +24140,7 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/components/Table/utils/writePersistedDataStateToSessionStorage.util.ts",
+    "filePath": "packages/ui/src/components/Table/utils/writePersistedDataStateToSessionStorage.service.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -23478,7 +24151,7 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/components/Table/utils/writePersistedUiFlagsToCookie.util.test.ts",
+    "filePath": "packages/ui/src/components/Table/utils/writePersistedUiFlagsToCookie.service.test.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -23489,7 +24162,7 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/components/Table/utils/writePersistedUiFlagsToCookie.util.ts",
+    "filePath": "packages/ui/src/components/Table/utils/writePersistedUiFlagsToCookie.service.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -23500,7 +24173,7 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/components/Table/utils/writePersistedUiStateToSessionStorage.util.test.ts",
+    "filePath": "packages/ui/src/components/Table/utils/writePersistedUiStateToSessionStorage.service.test.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -23511,7 +24184,7 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/components/Table/utils/writePersistedUiStateToSessionStorage.util.ts",
+    "filePath": "packages/ui/src/components/Table/utils/writePersistedUiStateToSessionStorage.service.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -23522,7 +24195,7 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/components/Table/utils/writeStateSlice.util.test.ts",
+    "filePath": "packages/ui/src/components/Table/utils/writeStateSlice.service.test.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -23533,7 +24206,7 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/components/Table/utils/writeStateSlice.util.ts",
+    "filePath": "packages/ui/src/components/Table/utils/writeStateSlice.service.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -25839,7 +26512,18 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/contexts/NotificationContext/utils/createNotificationId.util.ts",
+    "filePath": "packages/ui/src/contexts/NotificationContext/utils/createNotificationId.service.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/contexts/NotificationContext/utils/createNotificationId.service.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -26066,10 +26750,10 @@
         "ruleId": "local-rules/destructuring-for-functions",
         "severity": 2,
         "message": "Functions with multiple parameters should use a single object parameter with a named type.",
-        "line": 53,
+        "line": 48,
         "column": 40,
         "messageId": "useObjectParam",
-        "endLine": 128,
+        "endLine": 123,
         "endColumn": 4,
         "suppressions": [
           {
@@ -27539,7 +28223,7 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/utils/storage/writeToCookie.util.test.ts",
+    "filePath": "packages/ui/src/utils/storage/writeToCookie.service.test.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -27550,7 +28234,7 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/utils/storage/writeToCookie.util.ts",
+    "filePath": "packages/ui/src/utils/storage/writeToCookie.service.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -27561,7 +28245,7 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/utils/storage/writeToLocalStorage.util.test.ts",
+    "filePath": "packages/ui/src/utils/storage/writeToLocalStorage.service.test.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -27572,7 +28256,7 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/utils/storage/writeToLocalStorage.util.ts",
+    "filePath": "packages/ui/src/utils/storage/writeToLocalStorage.service.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -27583,7 +28267,7 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/utils/storage/writeToSessionStorage.util.test.ts",
+    "filePath": "packages/ui/src/utils/storage/writeToSessionStorage.service.test.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -27594,7 +28278,7 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/utils/storage/writeToSessionStorage.util.ts",
+    "filePath": "packages/ui/src/utils/storage/writeToSessionStorage.service.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -27693,7 +28377,7 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/utils/theme/setThemeCookie.util.ts",
+    "filePath": "packages/ui/src/utils/theme/setThemeCookie.service.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -27704,7 +28388,7 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/utils/theme/theme-cookie.util.test.ts",
+    "filePath": "packages/ui/src/utils/theme/theme-cookie.test.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -27980,17 +28664,6 @@
   },
   {
     "filePath": "packages/ui/src/utils/urlState/serializeDateFilter.util.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
-    "filePath": "packages/ui/src/utils/urlState/serializeFilter.types.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,

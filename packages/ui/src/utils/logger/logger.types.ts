@@ -9,17 +9,6 @@ export type CreateLoggerArgs = {
 };
 
 /**
- * Logger instance with level-filtered output methods.
- * Each method is a no-op when the configured level is below its threshold.
- */
-export type Logger = {
-  readonly debug: (...args: readonly unknown[]) => void;
-  readonly error: (...args: readonly unknown[]) => void;
-  readonly info: (...args: readonly unknown[]) => void;
-  readonly warn: (...args: readonly unknown[]) => void;
-};
-
-/**
  * Log level determines which messages are printed.
  * Levels are ordered by priority: silent < error < warn < info < debug.
  * Setting a level enables that level and all levels above it (lower priority number).

@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 import { useResizeObserver } from './useResizeObserver.hook';
 
-export type ElementSize = {
+type ElementSize = {
   readonly height: number;
   readonly width: number;
 };

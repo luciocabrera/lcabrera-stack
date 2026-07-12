@@ -23,7 +23,6 @@ urlState/
 ├── serializeNumberFilter.util.ts
 ├── serializeTextFilter.util.ts
 ├── getSerializedOperator.util.ts
-├── serializeFilter.types.ts
 ├── deserializeFilter.util.ts
 └── deserializeFiltersFromURL.util.ts
 ```

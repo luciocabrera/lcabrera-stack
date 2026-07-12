@@ -10,13 +10,13 @@ Source of truth for this report:
 
 Current metrics from JSON:
 
-- Functions above threshold: 93
-- Functions analyzed: 6988
-- Files analyzed: 2398
+- Functions above threshold: 86
+- Functions analyzed: 7100
+- Files analyzed: 2427
 - Average maintainability: 93.1 (good)
-- Dead-code issues: 134 (check.total_issues)
+- Dead-code issues: 129 (check.total_issues)
 - Duplicate clone groups: 25 (dupes.stats.clone_groups)
-- Severity split: 20 critical, 17 high, 56 moderate
+- Severity split: 19 critical, 16 high, 51 moderate
 - Thresholds: cyclomatic 20, cognitive 15, CRAP 30
 
 ## Interpretation
@@ -40,11 +40,11 @@ Use this report as triage guidance grounded on the current JSON snapshot. For pl
 - apps/admin_system/src/routes/cqms/new-user/newUser.action.ts:9 (<anonymous>) - CRITICAL crap
 - .github/skills/fallow-code-checker/scripts/generate-fallow-report.mjs:162 (<anonymous>) - CRITICAL crap
 - packages/scan-ingestion/src/cli/ingest.cli.ts:50 (<anonymous>) - CRITICAL crap
-- apps/admin_system/src/routes/cqms/scanner-detail/ScannerDetail.component.tsx:14 (<anonymous>) - CRITICAL crap
 - .github/skills/linter-checker/scripts/generate-oxlint-report.mjs:67 (<anonymous>) - CRITICAL crap
 - .github/skills/fallow-code-checker/scripts/generate-fallow-report.mjs:73 (<anonymous>) - CRITICAL crap
 - .github/skills/fallow-code-checker/scripts/generate-fallow-report.mjs:242 (<anonymous>) - CRITICAL crap
 - apps/admin_system/src/routes/cqms/edit-role/editRole.action.ts:16 (<anonymous>) - CRITICAL crap
+- packages/eslint-local-rules/destructuring-for-functions.ts:18 (<anonymous>) - HIGH crap
 
 ## Drift Control
 

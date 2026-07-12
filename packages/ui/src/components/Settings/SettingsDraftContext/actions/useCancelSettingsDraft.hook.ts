@@ -3,7 +3,7 @@ import {
   useGetGlobalPinningPreferences,
 } from '@repo/ui/contexts/GlobalSettingsContext/selectors';
 
-import { toDraft } from '../../utils/toDraft.util';
+import { toDraft } from '../../utils';
 import { useSettingsDraftContextValue } from '../useSettingsDraftContextValue.hook';
 
 /** Discard staged edits: reset the draft from the persisted preferences. */

@@ -7,10 +7,12 @@ import {
   useGetGlobalPinningPreferences,
 } from '@repo/ui/contexts/GlobalSettingsContext/selectors';
 
-import { getSettingsDraftChanges } from '../../utils/getSettingsDraftChanges.util';
-import { toDraft } from '../../utils/toDraft.util';
-import { toGlobalNavigationPreferencesUpdate } from '../../utils/toGlobalNavigationPreferencesUpdate.util';
-import { toGlobalPinningPreferencesUpdate } from '../../utils/toGlobalPinningPreferencesUpdate.util';
+import {
+  getSettingsDraftChanges,
+  toDraft,
+  toGlobalNavigationPreferencesUpdate,
+  toGlobalPinningPreferencesUpdate,
+} from '../../utils';
 import { useSettingsDraftContextValue } from '../useSettingsDraftContextValue.hook';
 
 /**

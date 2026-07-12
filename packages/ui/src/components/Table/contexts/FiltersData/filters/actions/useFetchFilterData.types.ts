@@ -37,12 +37,3 @@ export type UseFetchFilterDataArgs<TData, TResponse> = {
   readonly columnKey: DataKey<TData>;
   readonly prefetchRef?: RefObject<PrefetchCache<TResponse>>;
 };
-
-export type UseFetchFilterDataReturn<TResponse> = {
-  readonly fetchInitial: (
-    args: FetchFilterDataCallbackArgs<TResponse>,
-  ) => Promise<void>;
-  readonly fetchMore: (
-    args: FetchFilterDataCallbackArgs<TResponse>,
-  ) => Promise<void>;
-};
