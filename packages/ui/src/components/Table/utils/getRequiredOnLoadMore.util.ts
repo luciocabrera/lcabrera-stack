@@ -8,7 +8,7 @@ type OnLoadMore<TResponse> = (params: Pagination) => Promise<TResponse>;
  */
 export const getRequiredOnLoadMore = <TResponse>(
   onLoadMore: OnLoadMore<TResponse> | undefined,
-): OnLoadMore<TResponse> => {
+) => {
   if (!onLoadMore) {
     throw new Error('onLoadMore callback is required');
   }

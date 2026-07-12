@@ -8,11 +8,6 @@ type ResolveTableActionsColumnArgs<TData extends Record<string, unknown>> = {
   readonly crud?: TableCrudConfig;
 };
 
-type ResolveTableActionsColumnResult<TData extends Record<string, unknown>> = {
-  readonly columns: TableColumn<TData>[];
-  readonly hasActionsColumn: boolean;
-};
-
 /**
  * Resolves the final columns array for a table, synthesizing the row-actions
  * column when `crud` enables a row-level operation (`read`/`update`/`delete`
@@ -30,7 +25,7 @@ export const resolveTableActionsColumn = <
 >({
   columns,
   crud,
-}: ResolveTableActionsColumnArgs<TData>): ResolveTableActionsColumnResult<TData> => {
+}: ResolveTableActionsColumnArgs<TData>) => {
   const customColumn = columns.find(
     (column) => column.key === ACTIONS_COLUMN_KEY,
   );

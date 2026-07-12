@@ -21,7 +21,7 @@ export const resolveUnpinnedOrder = <TData>({
   newPinning,
   orderWithoutColumn,
   previousPinning,
-}: ResolveUnpinnedOrderArgs<TData>): ColumnOrderState<TData> => {
+}: ResolveUnpinnedOrderArgs<TData>) => {
   const wasLeftPinned = previousPinning?.left.includes(columnKey) ?? false;
   const wasRightPinned = previousPinning?.right.includes(columnKey) ?? false;
 

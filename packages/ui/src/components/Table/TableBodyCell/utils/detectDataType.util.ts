@@ -1,6 +1,4 @@
-import type { TableColumnDataType } from '../../Table.types';
-
-export const detectDataType = (value: unknown): TableColumnDataType => {
+export const detectDataType = (value: unknown) => {
   if (typeof value === 'boolean') {
     return 'boolean';
   }

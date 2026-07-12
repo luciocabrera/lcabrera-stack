@@ -1,5 +1,4 @@
 import type {
-  ColumnOrderState,
   ColumnPinningState,
   DataKey,
   TableColumn,
@@ -32,7 +31,7 @@ export const syncColumnOrderWithPinning = <TData>({
   currentOrder = [],
   newPinning,
   previousPinning,
-}: SyncColumnOrderWithPinningArgs<TData>): ColumnOrderState<TData> => {
+}: SyncColumnOrderWithPinningArgs<TData>) => {
   // Build base order: use currentOrder if populated, otherwise derive from columns
   const baseOrder =
     currentOrder.length > 0 ? currentOrder : columns.map((c) => c.key);

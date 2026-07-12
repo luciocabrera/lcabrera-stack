@@ -1,7 +1,5 @@
 import { readFromCookie } from '@repo/ui/utils/storage';
 
-import type { PersistedState } from './persistence.types';
-
 import { collectPersistedStateSlices } from './collectPersistedStateSlices.util';
 
 type ReadPersistedStateFromCookieArgs = {
@@ -36,7 +34,7 @@ export const readPersistedStateFromCookie = ({
   appId,
   cookieString,
   persistenceKey,
-}: ReadPersistedStateFromCookieArgs): Partial<PersistedState> =>
+}: ReadPersistedStateFromCookieArgs) =>
   collectPersistedStateSlices({
     appId,
     persistenceKey,

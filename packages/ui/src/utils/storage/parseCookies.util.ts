@@ -7,7 +7,7 @@
  * parseCookies('data=foo=bar')        // { data: 'foo=bar' }
  * ```
  */
-export const parseCookies = (cookieHeader: string): Record<string, string> => {
+export const parseCookies = (cookieHeader: string) => {
   const cookies: Record<string, string> = {};
 
   for (const cookie of cookieHeader.split(';')) {

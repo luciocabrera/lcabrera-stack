@@ -1,8 +1,5 @@
 import type { TableColumnDataType } from '@repo/ui/components/Table/Table.types';
-import type {
-  ColumnFilter,
-  OperatorType,
-} from '@repo/ui/types/filterOperators.types';
+import type { ColumnFilter } from '@repo/ui/types/filterOperators.types';
 
 export type GetOperatorFromFilterParams = {
   readonly dataType?: TableColumnDataType;
@@ -15,7 +12,7 @@ export type GetOperatorFromFilterParams = {
 export const getOperatorFromFilter = ({
   dataType,
   filter,
-}: GetOperatorFromFilterParams): OperatorType => {
+}: GetOperatorFromFilterParams) => {
   if (!filter) return 'equals';
   if (dataType === 'boolean') return 'equals';
   if ('operator' in filter && filter.operator) {

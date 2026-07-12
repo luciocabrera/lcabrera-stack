@@ -21,7 +21,7 @@ export const applyPin = <TData>({
   columnPinning,
   side,
   staticKeys,
-}: ApplyPinArgs<TData>): ColumnPinningState<TData> => {
+}: ApplyPinArgs<TData>) => {
   const newPinning = {
     left: columnPinning.left.filter((k) => k !== columnKey),
     right: columnPinning.right.filter((k) => k !== columnKey),

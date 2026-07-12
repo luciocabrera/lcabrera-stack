@@ -19,7 +19,7 @@ export const buildShellStreamResponse = ({
   pipe,
   responseHeaders,
   responseStatusCode,
-}: BuildShellStreamResponseArgs): Response => {
+}: BuildShellStreamResponseArgs) => {
   const body = new PassThrough({
     final(callback) {
       // Clear the timeout to prevent retaining the closure and memory leak.

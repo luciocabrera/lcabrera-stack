@@ -16,7 +16,7 @@ type AppendPrimaryKeySortingArgs<TData> = {
 export const appendPrimaryKeySorting = <TData>({
   columns,
   sorting,
-}: AppendPrimaryKeySortingArgs<TData>): SortingState<TData> => {
+}: AppendPrimaryKeySortingArgs<TData>) => {
   const existingKeys = new Set(sorting.map((entry) => entry.columnKey));
   const appended = resolvePrimaryKeyColumnKeys({ columns })
     .filter((columnKey) => !existingKeys.has(columnKey))

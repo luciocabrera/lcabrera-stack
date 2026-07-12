@@ -23,11 +23,6 @@ type ResolvePinConflictStateArgs<TData> = {
   readonly staticKeys?: Set<string>;
 };
 
-type ResolvePinConflictStateResult<TData> = {
-  readonly columnOrder: ColumnOrderState<TData>;
-  readonly columnPinning: ColumnPinningState<TData>;
-};
-
 export const resolvePinConflictState = <TData>({
   allOrderedColumns,
   columnKey,
@@ -37,7 +32,7 @@ export const resolvePinConflictState = <TData>({
   resolution,
   side,
   staticKeys,
-}: ResolvePinConflictStateArgs<TData>): ResolvePinConflictStateResult<TData> => {
+}: ResolvePinConflictStateArgs<TData>) => {
   const allOrderedKeys = allOrderedColumns.map((column) => column.key);
   const index = allOrderedColumns.findIndex(
     (column) => column.key === columnKey,

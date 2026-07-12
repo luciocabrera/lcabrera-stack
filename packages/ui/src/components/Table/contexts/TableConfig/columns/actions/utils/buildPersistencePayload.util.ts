@@ -31,7 +31,7 @@ export const buildPersistencePayload = <TData>({
   columnVisibility,
   persistenceKey,
   sorting,
-}: BuildPersistencePayloadArgs<TData>): TablePersistenceEntry[] => {
+}: BuildPersistencePayloadArgs<TData>) => {
   const entries: TablePersistenceEntry[] = [
     {
       searchParamKey: 'filters',

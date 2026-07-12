@@ -16,7 +16,7 @@ type BuildAllOrderedColumnsArgs<TData> = {
 export const buildAllOrderedColumns = <TData>({
   columns,
   columnsOrder,
-}: BuildAllOrderedColumnsArgs<TData>): TableColumn<TData>[] => {
+}: BuildAllOrderedColumnsArgs<TData>) => {
   const orderedColumns =
     columnsOrder.length > 0
       ? columnsOrder

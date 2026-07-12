@@ -18,7 +18,7 @@ type ReadPersistedUiStateFromSessionStorageArgs = {
 export const readPersistedUiStateFromSessionStorage = ({
   appId,
   persistenceKey,
-}: ReadPersistedUiStateFromSessionStorageArgs): PersistedUiState => {
+}: ReadPersistedUiStateFromSessionStorageArgs) => {
   const key = `${getStorageKey({ appId, persistenceKey })}-${UI_STATE_SESSION_KEY_SUFFIX}`;
   const rawValue = readFromSessionStorage({ key });
 

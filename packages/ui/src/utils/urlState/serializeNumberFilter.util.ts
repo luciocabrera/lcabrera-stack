@@ -1,7 +1,5 @@
 import type { ColumnFilter } from '@repo/ui/types/filterOperators.types';
 
-import type { CompactFilterValue } from './serializeFilter.types';
-
 import { getSerializedOperator } from './getSerializedOperator.util';
 
 type SerializeNumberFilterArgs = {
@@ -10,7 +8,7 @@ type SerializeNumberFilterArgs = {
 
 export const serializeNumberFilter = ({
   filter,
-}: SerializeNumberFilterArgs): CompactFilterValue => {
+}: SerializeNumberFilterArgs) => {
   const op = getSerializedOperator(filter.operator);
 
   if (filter.operator === 'between' && filter.value2 !== undefined) {

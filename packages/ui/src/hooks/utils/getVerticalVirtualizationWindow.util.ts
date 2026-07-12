@@ -6,15 +6,6 @@ type GetVerticalVirtualizationWindowArgs = {
   readonly totalItems: number;
 };
 
-type VerticalVirtualizationWindowResult = {
-  readonly bottomSpacerHeight: number;
-  readonly endIndex: number;
-  readonly offsetY: number;
-  readonly startIndex: number;
-  readonly totalHeight: number;
-  readonly visibleCount: number;
-};
-
 /**
  * Calculates the visible vertical virtualization window for fixed-height rows.
  */
@@ -24,7 +15,7 @@ export const getVerticalVirtualizationWindow = ({
   overscan,
   scrollTop,
   totalItems,
-}: GetVerticalVirtualizationWindowArgs): VerticalVirtualizationWindowResult => {
+}: GetVerticalVirtualizationWindowArgs) => {
   const visibleCount = Math.ceil(containerHeight / itemHeight);
   const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
   const endIndex = Math.min(

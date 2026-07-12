@@ -20,7 +20,7 @@ export const sanitizeFiltersByColumns = <
 >({
   columns,
   filters,
-}: SanitizeFiltersByColumnsArgs<TData>): ColumnFiltersState<TData> => {
+}: SanitizeFiltersByColumnsArgs<TData>) => {
   const columnsByKey = new Map(
     columns.map((column) => [String(column.key), column] as const),
   );

@@ -14,7 +14,7 @@ export const insertAfterLeftPinned = <TData>({
   columnKey,
   newPinning,
   orderWithoutColumn,
-}: InsertAfterLeftPinnedArgs<TData>): ColumnOrderState<TData> => {
+}: InsertAfterLeftPinnedArgs<TData>) => {
   let lastLeftPinnedIndex = -1;
   for (const [index, key] of orderWithoutColumn.entries()) {
     if (newPinning.left.includes(key)) {

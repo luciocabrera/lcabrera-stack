@@ -3,11 +3,6 @@ import type { TablePersistenceConfig } from '../Table.types';
 import { getStorageKey } from './getStorageKey.util';
 import { PERSISTENCE_VERSION } from './persistence.constants';
 
-type SerializedStateSlice = {
-  readonly key: string;
-  readonly value: string;
-};
-
 type SerializeStateSliceArgs = {
   readonly appId?: string;
   readonly persistenceKey: string;
@@ -26,7 +21,7 @@ export const serializeStateSlice = ({
   persistenceKey,
   slice,
   value,
-}: SerializeStateSliceArgs): SerializedStateSlice => {
+}: SerializeStateSliceArgs) => {
   const key = `${getStorageKey({ appId, persistenceKey })}-${slice}`;
 
   // Convert Set to Array for columnVisibility

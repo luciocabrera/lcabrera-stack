@@ -1,9 +1,6 @@
 import { useTableConfigContextValue } from '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 
-import type {
-  UseFetchFilterDataArgs,
-  UseFetchFilterDataReturn,
-} from './useFetchFilterData.types';
+import type { UseFetchFilterDataArgs } from './useFetchFilterData.types';
 
 import { useFiltersDataContextValue } from '../../useFiltersDataContextValue.hook';
 import { fetchInitialFilterData } from './fetchInitialFilterData.util';
@@ -17,10 +14,7 @@ import { fetchMoreFilterData } from './fetchMoreFilterData.util';
 export const useFetchFilterData = <TData, TResponse>({
   columnKey,
   prefetchRef,
-}: UseFetchFilterDataArgs<
-  TData,
-  TResponse
->): UseFetchFilterDataReturn<TResponse> => {
+}: UseFetchFilterDataArgs<TData, TResponse>) => {
   const { filtersDataStore } = useFiltersDataContextValue<TData>();
   const { metaStore } = useTableConfigContextValue<TData>();
   const fetchInitial = fetchInitialFilterData<TData, TResponse>({

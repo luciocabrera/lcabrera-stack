@@ -36,7 +36,7 @@ export const getGlobalSettingsFromCookie = ({
   appId,
   cookieString,
   fallback,
-}: GetGlobalSettingsFromCookieArgs): GlobalSettingsState => {
+}: GetGlobalSettingsFromCookieArgs) => {
   const rawCookie = readFromCookie({
     cookieString,
     key: getAppScopedCookieKey({ appId, key: GLOBAL_SETTINGS_COOKIE_KEY }),

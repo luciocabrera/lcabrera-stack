@@ -22,19 +22,6 @@ type ResolveAcceptedUnpinConflictStateArgs<
   readonly side: 'left' | 'right';
 };
 
-type ResolveAcceptedUnpinConflictStateResult<
-  TData extends Record<string, unknown>,
-> =
-  | {
-      readonly columnOrder: ColumnOrderState<TData>;
-      readonly columnPinning: ColumnPinningState<TData>;
-      readonly kind: 'update-order-and-pinning';
-    }
-  | {
-      readonly columnPinning: ColumnPinningState<TData>;
-      readonly kind: 'update-pinning';
-    };
-
 export const resolveAcceptedUnpinConflictState = <
   TData extends Record<string, unknown>,
 >({
@@ -44,7 +31,7 @@ export const resolveAcceptedUnpinConflictState = <
   columnsOrder,
   resolution,
   side,
-}: ResolveAcceptedUnpinConflictStateArgs<TData>): ResolveAcceptedUnpinConflictStateResult<TData> => {
+}: ResolveAcceptedUnpinConflictStateArgs<TData>) => {
   const allOrderedColumns = buildAllOrderedColumns({
     columns,
     columnsOrder,

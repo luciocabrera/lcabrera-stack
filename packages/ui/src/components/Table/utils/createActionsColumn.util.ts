@@ -13,7 +13,7 @@ type CreateActionsColumnOverrides<TData extends Record<string, unknown>> =
  */
 export const createActionsColumn = <TData extends Record<string, unknown>>(
   overrides: CreateActionsColumnOverrides<TData> = {},
-): TableColumn<TData> => {
+) => {
   return {
     isFilterable: false,
     isHeaderHidden: true,

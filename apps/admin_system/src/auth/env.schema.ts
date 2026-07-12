@@ -16,6 +16,5 @@ type ReadSessionEnvConfigArgs = {
   readonly env: NodeJS.ProcessEnv;
 };
 
-export const readSessionEnvConfig = ({
-  env,
-}: ReadSessionEnvConfigArgs): SessionEnvConfig => sessionEnvSchema.parse(env);
+export const readSessionEnvConfig = ({ env }: ReadSessionEnvConfigArgs) =>
+  sessionEnvSchema.parse(env);

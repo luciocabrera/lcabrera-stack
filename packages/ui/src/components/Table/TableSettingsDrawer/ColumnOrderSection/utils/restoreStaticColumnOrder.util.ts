@@ -14,7 +14,7 @@ export const restoreStaticColumnOrder = ({
   currentOrder,
   newOrder,
   staticKeys,
-}: RestoreStaticColumnOrderArgs): ColumnOrderState => {
+}: RestoreStaticColumnOrderArgs) => {
   if (staticKeys.size === 0 || currentOrder.length === 0) {
     return newOrder;
   }

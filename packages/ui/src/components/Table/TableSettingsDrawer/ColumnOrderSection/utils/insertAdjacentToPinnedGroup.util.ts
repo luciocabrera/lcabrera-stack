@@ -1,5 +1,4 @@
 import type {
-  ColumnOrderState,
   ColumnPinningState,
   DataKey,
 } from '@repo/ui/components/Table/Table.types';
@@ -22,7 +21,7 @@ export const insertAdjacentToPinnedGroup = <TData = Record<string, unknown>>({
   columnPinning,
   order,
   side,
-}: InsertAdjacentToPinnedGroupArgs<TData>): ColumnOrderState<TData> => {
+}: InsertAdjacentToPinnedGroupArgs<TData>) => {
   const nextOrder = [...order];
 
   if (side === 'left') {

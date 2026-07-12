@@ -1,9 +1,6 @@
 import type {
   ColumnOrderState,
   ColumnPinningState,
-  ColumnSizingState,
-  ColumnVisibilityState,
-  TableColumn,
   TableColumnsState,
 } from '@repo/ui/components/Table/Table.types';
 
@@ -21,21 +18,10 @@ type GetPinningActionContextArgs<TData> = {
   };
 };
 
-type GetPinningActionContextResult<TData> = {
-  readonly columnOrder: ColumnOrderState<TData>;
-  readonly columnPinning: ColumnPinningState<TData>;
-  readonly columns: readonly TableColumn<TData>[];
-  readonly columnSizing?: ColumnSizingState<TData>;
-  readonly columnVisibility?: ColumnVisibilityState<TData>;
-  readonly drawersSyncNonce: number;
-  readonly persistenceKey: string;
-  readonly staticKeys?: Set<string>;
-};
-
 export const getPinningActionContext = <TData>({
   columnsStore,
   metaStore,
-}: GetPinningActionContextArgs<TData>): GetPinningActionContextResult<TData> => {
+}: GetPinningActionContextArgs<TData>) => {
   const columnsState = columnsStore.get();
   const metaState = metaStore.get();
 

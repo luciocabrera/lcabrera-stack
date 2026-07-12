@@ -18,7 +18,7 @@ type ValidateFieldsArgs<TValues extends Record<string, unknown>> = {
 export const validateFields = <TValues extends Record<string, unknown>>({
   leafFields,
   values,
-}: ValidateFieldsArgs<TValues>): FieldErrors<TValues> => {
+}: ValidateFieldsArgs<TValues>) => {
   const errors: FieldErrors<TValues> = {};
 
   for (const field of leafFields) {

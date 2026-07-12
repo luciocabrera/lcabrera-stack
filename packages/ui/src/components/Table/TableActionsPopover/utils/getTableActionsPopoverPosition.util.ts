@@ -17,11 +17,6 @@ type GetTableActionsPopoverPositionArgs = {
   readonly viewportPaddingPx: number;
 };
 
-type TableActionsPopoverPosition = {
-  readonly left: number;
-  readonly top: number;
-};
-
 export const getTableActionsPopoverPosition = ({
   containerRect,
   horizontalNudgePx,
@@ -30,7 +25,7 @@ export const getTableActionsPopoverPosition = ({
   triggerCellRight,
   triggerRect,
   viewportPaddingPx,
-}: GetTableActionsPopoverPositionArgs): TableActionsPopoverPosition => {
+}: GetTableActionsPopoverPositionArgs) => {
   const spaceBelow = containerRect.bottom - triggerRect.bottom;
   const spaceAbove = triggerRect.top - containerRect.top;
   const requiredSpace = menuRect.height + viewportPaddingPx + menuGapPx;

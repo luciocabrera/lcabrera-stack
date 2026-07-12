@@ -6,11 +6,6 @@ type PrefetchNextPageArgs<TResponse> = {
   readonly onLoadMore: (params: Pagination) => Promise<TResponse>;
 };
 
-type PrefetchNextPageResult<TResponse> = {
-  readonly initialCache: PrefetchCache<TResponse>;
-  readonly resolution: Promise<PrefetchCache<TResponse>>;
-};
-
 /**
  * Creates a prefetch request for the next page of data.
  * Returns the initial cache state and a promise that resolves to the
@@ -21,7 +16,7 @@ export const prefetchNextPage = <TResponse>({
   limit,
   nextSkip,
   onLoadMore,
-}: PrefetchNextPageArgs<TResponse>): PrefetchNextPageResult<TResponse> => {
+}: PrefetchNextPageArgs<TResponse>) => {
   const prefetchPromise = onLoadMore({
     limit,
     skip: nextSkip,

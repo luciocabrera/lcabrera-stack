@@ -32,7 +32,7 @@ export const collectPersistedStateSlices = <TData = Record<string, unknown>>({
   persistenceKey,
   readRawSlice,
   transformRaw,
-}: CollectPersistedStateSlicesArgs): Partial<PersistedState<TData>> => {
+}: CollectPersistedStateSlicesArgs) => {
   const result: {
     -readonly [K in keyof PersistedState<TData>]?: PersistedState<TData>[K];
   } = {};

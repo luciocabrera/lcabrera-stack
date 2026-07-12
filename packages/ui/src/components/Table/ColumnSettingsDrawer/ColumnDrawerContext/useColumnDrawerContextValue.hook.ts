@@ -6,7 +6,7 @@ import { ColumnDrawerContext } from './ColumnDrawerContext.context';
 
 export const useColumnDrawerContextValue = <
   TData = Record<string, unknown>,
->(): ColumnDrawerContextValue<TData> => {
+>() => {
   const context = use(ColumnDrawerContext);
 
   if (context === null) {

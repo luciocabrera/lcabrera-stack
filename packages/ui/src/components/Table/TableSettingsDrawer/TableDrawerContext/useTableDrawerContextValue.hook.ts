@@ -6,7 +6,7 @@ import { TableDrawerContext } from './TableDrawerContext.context';
 
 export const useTableDrawerContextValue = <
   TData = Record<string, unknown>,
->(): TableDrawerContextValue<TData> => {
+>() => {
   const context = use(TableDrawerContext);
 
   if (context === null) {

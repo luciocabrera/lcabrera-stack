@@ -3,24 +3,14 @@ import type {
   ColumnOrderState,
   ColumnPinningState,
   ColumnSizingState,
-  ColumnVisibilityState,
   DataKey,
   SortingState,
   TableColumnsState,
 } from '@repo/ui/components/Table/Table.types';
 
-type BatchTableSettingsUpdate<TData> = {
-  readonly columnFilters: ColumnFiltersState<TData>;
-  readonly columnOrder: ColumnOrderState<TData>;
-  readonly columnPinning: ColumnPinningState<TData>;
-  readonly columnSizing: ColumnSizingState<TData>;
-  readonly columnVisibility: ColumnVisibilityState<TData>;
-  readonly sorting: SortingState<TData>;
-};
-
 export const buildBatchTableSettingsUpdate = <TData>(
   columnsState?: Partial<TableColumnsState<TData>>,
-): BatchTableSettingsUpdate<TData> => {
+) => {
   return {
     columnFilters:
       columnsState?.columnFilters ?? ({} as ColumnFiltersState<TData>),

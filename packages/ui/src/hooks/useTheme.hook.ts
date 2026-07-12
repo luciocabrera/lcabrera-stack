@@ -1,5 +1,3 @@
-import type { ThemeContextValue } from '@repo/ui/types/theme.types';
-
 import { ThemeContext } from '@repo/ui/contexts/ThemeContext';
 import { use } from 'react';
 
@@ -9,7 +7,7 @@ import { use } from 'react';
  * @throws Error if used outside of ThemeProvider
  * @returns ThemeContextValue with theme state and setters
  */
-export const useTheme = (): ThemeContextValue => {
+export const useTheme = () => {
   const context = use(ThemeContext);
 
   if (context === undefined) {

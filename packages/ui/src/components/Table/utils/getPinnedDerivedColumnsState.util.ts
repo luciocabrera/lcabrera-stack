@@ -1,11 +1,9 @@
 import type {
-  ColumnGroupsState,
   ColumnOrderState,
   ColumnPinningState,
   ColumnSizingState,
   ColumnVisibilityState,
   DataKey,
-  PinnedColumnOffsetsState,
   TableColumn,
 } from '@repo/ui/components/Table/Table.types';
 
@@ -21,19 +19,13 @@ type GetPinnedDerivedColumnsStateArgs<TData> = {
   readonly columnVisibility?: ColumnVisibilityState<TData>;
 };
 
-type GetPinnedDerivedColumnsStateResult<TData> = {
-  readonly columnGroups: ColumnGroupsState<TData>;
-  readonly effectiveColumns: TableColumn<TData>[];
-  readonly pinnedColumnOffsets: PinnedColumnOffsetsState<TData>;
-};
-
 export const getPinnedDerivedColumnsState = <TData>({
   columnOrder,
   columnPinning,
   columns,
   columnSizing,
   columnVisibility = new Set<DataKey<TData>>(),
-}: GetPinnedDerivedColumnsStateArgs<TData>): GetPinnedDerivedColumnsStateResult<TData> => {
+}: GetPinnedDerivedColumnsStateArgs<TData>) => {
   const effectiveColumns = getEffectiveColumns<TData>({
     columnOrder,
     columnPinning,

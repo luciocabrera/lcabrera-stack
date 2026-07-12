@@ -24,7 +24,7 @@ type GetInitialValuesArgs<TValues extends Record<string, unknown>> = {
 export const getInitialValues = <TValues extends Record<string, unknown>>({
   initialValues,
   leafFields,
-}: GetInitialValuesArgs<TValues>): TValues => {
+}: GetInitialValuesArgs<TValues>) => {
   const values: Record<string, unknown> = {};
 
   for (const field of leafFields) {

@@ -1,7 +1,4 @@
-import type {
-  DataKey,
-  TableColumn,
-} from '@repo/ui/components/Table/Table.types';
+import type { TableColumn } from '@repo/ui/components/Table/Table.types';
 
 type ResolvePrimaryKeyColumnKeysArgs<TData> = {
   readonly columns: readonly TableColumn<TData>[];
@@ -15,7 +12,7 @@ type ResolvePrimaryKeyColumnKeysArgs<TData> = {
  */
 export const resolvePrimaryKeyColumnKeys = <TData>({
   columns,
-}: ResolvePrimaryKeyColumnKeysArgs<TData>): DataKey<TData>[] =>
+}: ResolvePrimaryKeyColumnKeysArgs<TData>) =>
   columns
     .filter(
       (column) => column.isPrimaryKey === true && column.key !== 'actions',

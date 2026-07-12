@@ -11,11 +11,6 @@ type ResolvePinOrderConflictArgs = {
   readonly resolution: OrderConflictResolution;
 };
 
-type ResolvePinOrderConflictResult = {
-  readonly columnOrder: ColumnOrderState;
-  readonly columnPinning: ColumnPinningState;
-};
-
 /**
  * Resolves a conflict between a new column order and the current pinning state.
  */
@@ -23,7 +18,7 @@ export const resolvePinOrderConflict = ({
   columnPinning,
   newOrder,
   resolution,
-}: ResolvePinOrderConflictArgs): ResolvePinOrderConflictResult => {
+}: ResolvePinOrderConflictArgs) => {
   switch (resolution) {
     case 'pin-to-match-order': {
       return pinToMatchOrder({ columnPinning, newOrder });
@@ -46,10 +41,7 @@ export const resolvePinOrderConflict = ({
 const removeConflictingPins = ({
   columnPinning,
   newOrder,
-}: Omit<
-  ResolvePinOrderConflictArgs,
-  'resolution'
->): ResolvePinOrderConflictResult => {
+}: Omit<ResolvePinOrderConflictArgs, 'resolution'>) => {
   const validLeft: string[] = [];
   for (const key of newOrder) {
     if (columnPinning.left.includes(key)) {
@@ -81,10 +73,7 @@ const removeConflictingPins = ({
 const pinToMatchOrder = ({
   columnPinning,
   newOrder,
-}: Omit<
-  ResolvePinOrderConflictArgs,
-  'resolution'
->): ResolvePinOrderConflictResult => {
+}: Omit<ResolvePinOrderConflictArgs, 'resolution'>) => {
   const leftPinned = newOrder.filter((key) => columnPinning.left.includes(key));
   const rightPinned = newOrder.filter((key) =>
     columnPinning.right.includes(key),

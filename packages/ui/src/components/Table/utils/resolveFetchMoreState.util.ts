@@ -19,10 +19,7 @@ export const resolveFetchMoreState = <TData, TResponse>({
   dataSelector,
   dataTotalSelector,
   response,
-}: ResolveFetchMoreStateArgs<
-  TData,
-  TResponse
->): ResolveFetchMoreStateResult<TData> => {
+}: ResolveFetchMoreStateArgs<TData, TResponse>) => {
   const data = dataSelector ? dataSelector(response) : [];
   const combinedData = [...currentData, ...data];
   const totalLoadedRows = combinedData.length;

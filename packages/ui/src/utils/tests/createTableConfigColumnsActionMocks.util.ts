@@ -12,34 +12,12 @@ type CreateTableConfigColumnsActionMocksArgs<
   readonly persistenceKey: string;
 };
 
-type CreateTableConfigColumnsActionMocksResult<
-  TState extends Record<string, unknown>,
-> = {
-  readonly mockColumnsStore: ColumnsStore<TState>;
-  readonly mockMetaStore: {
-    readonly get: ReturnType<typeof vi.fn>;
-    readonly set: ReturnType<typeof vi.fn>;
-  };
-  readonly mockPersistTableState: ReturnType<typeof vi.fn>;
-  readonly mockUsePersistTableStateAction: () => ReturnType<typeof vi.fn>;
-  readonly mockUseTableConfigContextValue: () => {
-    readonly columnsStore: ColumnsStore<TState>;
-    readonly metaStore: {
-      readonly get: ReturnType<typeof vi.fn>;
-      readonly set: ReturnType<typeof vi.fn>;
-    };
-  };
-  readonly resetMocks: () => void;
-  readonly setColumnsState: (nextState: TState) => void;
-  readonly setDrawersSyncNonce: (nextNonce: number) => void;
-};
-
 export const createTableConfigColumnsActionMocks = <
   TState extends Record<string, unknown>,
 >({
   initialColumnsState,
   persistenceKey,
-}: CreateTableConfigColumnsActionMocksArgs<TState>): CreateTableConfigColumnsActionMocksResult<TState> => {
+}: CreateTableConfigColumnsActionMocksArgs<TState>) => {
   let columnsState = initialColumnsState;
 
   const mockColumnsStore: ColumnsStore<TState> = {

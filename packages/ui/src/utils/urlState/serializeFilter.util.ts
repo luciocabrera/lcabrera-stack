@@ -1,7 +1,5 @@
 import type { ColumnFilter } from '@repo/ui/types/filterOperators.types';
 
-import type { CompactFilterValue } from './serializeFilter.types';
-
 import { serializeBooleanFilter } from './serializeBooleanFilter.util';
 import { serializeDateFilter } from './serializeDateFilter.util';
 import { serializeNumberFilter } from './serializeNumberFilter.util';
@@ -16,9 +14,7 @@ type SerializeFilterArgs = {
  * Dispatch to the appropriate per-type serializer and return a compact
  * URL-friendly representation of a single column filter.
  */
-export const serializeFilter = ({
-  filter,
-}: SerializeFilterArgs): CompactFilterValue => {
+export const serializeFilter = ({ filter }: SerializeFilterArgs) => {
   switch (filter.type) {
     case 'boolean': {
       return serializeBooleanFilter({ filter });

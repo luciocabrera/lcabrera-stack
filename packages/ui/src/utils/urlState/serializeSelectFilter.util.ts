@@ -1,7 +1,5 @@
 import type { ColumnFilter } from '@repo/ui/types/filterOperators.types';
 
-import type { CompactFilterValue } from './serializeFilter.types';
-
 type SerializeSelectFilterArgs = {
   readonly filter: Extract<
     ColumnFilter,
@@ -11,7 +9,7 @@ type SerializeSelectFilterArgs = {
 
 export const serializeSelectFilter = ({
   filter,
-}: SerializeSelectFilterArgs): CompactFilterValue => {
+}: SerializeSelectFilterArgs) => {
   const values = filter.values ?? (filter.value ? [filter.value] : []);
 
   if (filter.operator === 'notEquals') {

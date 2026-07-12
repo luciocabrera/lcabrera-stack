@@ -24,26 +24,10 @@ type ResolveBatchTableSettingsUpdateArgs<TData> = {
   readonly settings: BatchTableSettingsUpdate<TData>;
 };
 
-type ResolveBatchTableSettingsUpdateResult<TData> =
-  BatchTableSettingsUpdate<TData> & {
-    readonly columnGroups: ReturnType<
-      typeof deriveColumnViewState<TData>
-    >['columnGroups'];
-    readonly effectiveColumns: ReturnType<
-      typeof deriveColumnViewState<TData>
-    >['effectiveColumns'];
-    readonly normalizedColumns: ReturnType<
-      typeof deriveColumnViewState<TData>
-    >['normalizedColumns'];
-    readonly pinnedColumnOffsets: ReturnType<
-      typeof deriveColumnViewState<TData>
-    >['pinnedColumnOffsets'];
-  };
-
 export const resolveBatchTableSettingsUpdate = <TData>({
   columns,
   settings,
-}: ResolveBatchTableSettingsUpdateArgs<TData>): ResolveBatchTableSettingsUpdateResult<TData> => {
+}: ResolveBatchTableSettingsUpdateArgs<TData>) => {
   const {
     columnGroups,
     effectiveColumns,

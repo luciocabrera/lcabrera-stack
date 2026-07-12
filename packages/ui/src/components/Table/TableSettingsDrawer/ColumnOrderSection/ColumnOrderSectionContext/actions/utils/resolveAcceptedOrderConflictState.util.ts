@@ -19,11 +19,6 @@ type ResolveAcceptedOrderConflictStateArgs = {
   readonly staticKeys: Set<string>;
 };
 
-type ResolveAcceptedOrderConflictStateResult = {
-  readonly columnOrder: ColumnOrderState;
-  readonly columnPinning: ColumnPinningState;
-};
-
 export const resolveAcceptedOrderConflictState = ({
   currentOrder,
   defaultPinning,
@@ -31,7 +26,7 @@ export const resolveAcceptedOrderConflictState = ({
   pendingPinning,
   resolution,
   staticKeys,
-}: ResolveAcceptedOrderConflictStateArgs): ResolveAcceptedOrderConflictStateResult => {
+}: ResolveAcceptedOrderConflictStateArgs) => {
   const conflictResolution = resolvePinOrderConflict({
     columnPinning: pendingPinning,
     newOrder: pendingOrder,

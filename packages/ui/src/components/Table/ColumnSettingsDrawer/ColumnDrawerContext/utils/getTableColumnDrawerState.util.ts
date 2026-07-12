@@ -5,8 +5,6 @@ import type {
 
 import { getColumnPinSide } from '@repo/ui/components/Table/utils';
 
-import type { ColumnDrawerState } from '../ColumnDrawerContext.types';
-
 type GetTableColumnDrawerStateArgs<TData> = {
   readonly columnKey: DataKey<TData>;
   readonly columnsState?: TableColumnsState<TData>;
@@ -18,7 +16,7 @@ type GetTableColumnDrawerStateArgs<TData> = {
 export const getTableColumnDrawerState = <TData>({
   columnKey,
   columnsState,
-}: GetTableColumnDrawerStateArgs<TData>): ColumnDrawerState<TData> => {
+}: GetTableColumnDrawerStateArgs<TData>) => {
   const allColumnFilters = columnsState?.columnFilters;
   const columnFilter =
     allColumnFilters && Object.hasOwn(allColumnFilters, columnKey)

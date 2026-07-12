@@ -10,7 +10,7 @@ export const resolveClosestSide = ({
   distanceFromLeft,
   distanceFromRight,
   originalSide,
-}: ResolveClosestSideArgs): PinSide => {
+}: ResolveClosestSideArgs) => {
   if (distanceFromLeft < distanceFromRight) {
     return 'left';
   }

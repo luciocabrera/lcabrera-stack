@@ -1,4 +1,4 @@
-import type { CreateLoggerArgs, Logger, LogLevel } from './logger.types';
+import type { CreateLoggerArgs, LogLevel } from './logger.types';
 
 import { DEFAULT_LOG_LEVEL, LOG_LEVEL_PRIORITY } from './logger.constants';
 
@@ -9,7 +9,7 @@ const noop = () => {};
  * Resolves the active log level from the env var, falling back to the default.
  * Validates the value against known levels; returns the default on mismatch.
  */
-const resolveLogLevel = (override?: LogLevel): LogLevel => {
+const resolveLogLevel = (override?: LogLevel) => {
   if (override) return override;
 
   const envLevel = import.meta.env.VITE_LOG_LEVEL as LogLevel | undefined;
@@ -35,10 +35,7 @@ const resolveLogLevel = (override?: LogLevel): LogLevel => {
  * log.error('Fetch failed', e); // only prints when level >= error
  * ```
  */
-export const createLogger = ({
-  level,
-  prefix,
-}: CreateLoggerArgs = {}): Logger => {
+export const createLogger = ({ level, prefix }: CreateLoggerArgs = {}) => {
   const activeLevel = resolveLogLevel(level);
   const priority = LOG_LEVEL_PRIORITY[activeLevel];
 

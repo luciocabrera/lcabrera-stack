@@ -10,9 +10,7 @@ import { deserializeFilter } from './deserializeFilter.util';
  *
  * Infers filter types from value shapes and expands short operator codes.
  */
-export const deserializeFiltersFromURL = <TData>(
-  param: string,
-): ColumnFiltersState<TData> => {
+export const deserializeFiltersFromURL = <TData>(param: string) => {
   try {
     const parsed = JSON.parse(param) as Record<string, unknown>;
 

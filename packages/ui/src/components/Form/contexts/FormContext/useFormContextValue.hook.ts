@@ -6,7 +6,7 @@ import { FormContext } from './FormContext.context';
 
 export const useFormContextValue = <
   TValues extends Record<string, unknown> = Record<string, unknown>,
->(): FormContextValue<TValues> => {
+>() => {
   const context = use(FormContext);
 
   if (context === undefined) {

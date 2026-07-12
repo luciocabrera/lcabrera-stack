@@ -39,7 +39,7 @@ export type TStore<TData> = {
  */
 export const useStore = <TData extends Record<string, unknown>>(
   initialState?: TData,
-): TStore<TData> => {
+) => {
   const store = useRef(initialState);
   const initialRef = useRef(initialState);
   const listeners = useRef(new Set<() => void>());

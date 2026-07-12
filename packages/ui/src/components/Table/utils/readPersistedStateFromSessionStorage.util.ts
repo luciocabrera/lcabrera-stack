@@ -1,7 +1,5 @@
 import { readFromSessionStorage } from '@repo/ui/utils/storage';
 
-import type { PersistedState } from './persistence.types';
-
 import { collectPersistedStateSlices } from './collectPersistedStateSlices.util';
 
 type ReadPersistedStateFromSessionStorageArgs = {
@@ -19,7 +17,7 @@ export const readPersistedStateFromSessionStorage = <
 >({
   appId,
   persistenceKey,
-}: ReadPersistedStateFromSessionStorageArgs): Partial<PersistedState<TData>> =>
+}: ReadPersistedStateFromSessionStorageArgs) =>
   collectPersistedStateSlices<TData>({
     appId,
     persistenceKey,

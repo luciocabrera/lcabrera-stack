@@ -1,10 +1,5 @@
 import type {
-  ColumnFiltersState,
-  ColumnOrderState,
-  ColumnPinningState,
-  ColumnSizingState,
   DataKey,
-  SortingState,
   TableColumn,
   TableColumnsState,
 } from '@repo/ui/components/Table/Table.types';
@@ -33,30 +28,10 @@ type ResolveBatchColumnSettingsUpdateArgs<TData> = {
   readonly settings: BatchColumnSettingsUpdate<TData>;
 };
 
-type ResolveBatchColumnSettingsUpdateResult<TData> = {
-  readonly columnFilters: ColumnFiltersState<TData>;
-  readonly columnGroups: ReturnType<
-    typeof deriveColumnViewState<TData>
-  >['columnGroups'];
-  readonly columnOrder: ColumnOrderState<TData>;
-  readonly columnPinning: ColumnPinningState<TData>;
-  readonly columnSizing: ColumnSizingState<TData>;
-  readonly effectiveColumns: ReturnType<
-    typeof deriveColumnViewState<TData>
-  >['effectiveColumns'];
-  readonly normalizedColumns: ReturnType<
-    typeof deriveColumnViewState<TData>
-  >['normalizedColumns'];
-  readonly pinnedColumnOffsets: ReturnType<
-    typeof deriveColumnViewState<TData>
-  >['pinnedColumnOffsets'];
-  readonly sorting: SortingState<TData>;
-};
-
 export const resolveBatchColumnSettingsUpdate = <TData>({
   columnsState,
   settings,
-}: ResolveBatchColumnSettingsUpdateArgs<TData>): ResolveBatchColumnSettingsUpdateResult<TData> => {
+}: ResolveBatchColumnSettingsUpdateArgs<TData>) => {
   const { columnFilter, columnKey, columnPinning, columnSizing, sorting } =
     settings;
   const columns = (columnsState?.columns ??

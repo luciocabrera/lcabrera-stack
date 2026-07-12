@@ -36,7 +36,7 @@ type MockStore<TState> = {
   readonly subscribe: ReturnType<typeof vi.fn>;
 };
 
-const createMockStore = <TState>(initial: TState): MockStore<TState> => {
+const createMockStore = <TState>(initial: TState) => {
   const store: MockStore<TState> = {
     _state: initial,
     get: vi.fn(() => store._state),

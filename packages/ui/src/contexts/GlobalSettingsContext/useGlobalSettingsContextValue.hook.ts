@@ -1,10 +1,8 @@
 import { use } from 'react';
 
-import type { GlobalSettingsContextValue } from './GlobalSettingsContext.types';
-
 import { GlobalSettingsContext } from './GlobalSettingsContext.context';
 
-export const useGlobalSettingsContextValue = (): GlobalSettingsContextValue => {
+export const useGlobalSettingsContextValue = () => {
   const context = use(GlobalSettingsContext);
 
   if (context === undefined) {

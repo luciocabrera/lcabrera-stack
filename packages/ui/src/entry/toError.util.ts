@@ -3,7 +3,7 @@
  * `onShellError`) can throw into a real `Error` so they log and reject
  * consistently.
  */
-export const toError = (error: unknown): Error => {
+export const toError = (error: unknown) => {
   if (error instanceof Error) {
     return error;
   }

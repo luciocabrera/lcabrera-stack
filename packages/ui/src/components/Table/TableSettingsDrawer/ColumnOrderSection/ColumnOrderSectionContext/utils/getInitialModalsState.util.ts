@@ -9,7 +9,7 @@ export const getInitialModalsState = ({
   orderConflict = INITIAL_MODALS_STATE.orderConflict,
   pinSideModal = INITIAL_MODALS_STATE.pinSideModal,
   unpinConflictModal = INITIAL_MODALS_STATE.unpinConflictModal,
-}: GetInitialModalsStateArgs = {}): ColumnOrderSectionModalsState => ({
+}: GetInitialModalsStateArgs = {}) => ({
   conflictModal,
   orderConflict,
   pinSideModal,

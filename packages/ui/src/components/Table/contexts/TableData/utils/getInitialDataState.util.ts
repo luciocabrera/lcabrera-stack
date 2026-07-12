@@ -7,7 +7,7 @@ export const getInitialDataState = <TData>({
   isLoading = true,
   isLoadingMore = false,
   totalRows = 0,
-}: GetInitialDataStateArgs<TData>): TableDataState<TData> => {
+}: GetInitialDataStateArgs<TData>) => {
   const totalLoadedRows = data.length;
   return {
     data,

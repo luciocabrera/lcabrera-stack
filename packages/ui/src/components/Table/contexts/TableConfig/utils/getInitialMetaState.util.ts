@@ -41,7 +41,7 @@ export const getInitialMetaState = ({
   threshold = INFINITE_SCROLL_THRESHOLD,
   wasTableSettingsOpenBeforeColumnSettings = false,
   ...rest
-}: GetInitialMetaStateArgs): TableMetaState => {
+}: GetInitialMetaStateArgs) => {
   return {
     appId,
     columnOverscan,

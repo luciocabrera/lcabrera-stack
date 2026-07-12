@@ -1,10 +1,8 @@
 import { use } from 'react';
 
-import type { RenderFieldsFn } from './FormFieldsRendererContext.types';
-
 import { FormFieldsRendererContext } from './FormFieldsRendererContext.context';
 
-export const useFormFieldsRendererContext = (): RenderFieldsFn => {
+export const useFormFieldsRendererContext = () => {
   const context = use(FormFieldsRendererContext);
 
   if (context === undefined) {

@@ -13,7 +13,7 @@ export const restoreStaticPinnedColumns = <TData>({
   defaultPinning,
   finalPinning,
   staticKeys,
-}: RestoreStaticPinnedColumnsArgs<TData>): ColumnPinningState<TData> => {
+}: RestoreStaticPinnedColumnsArgs<TData>) => {
   if (staticKeys.size === 0) {
     return finalPinning;
   }

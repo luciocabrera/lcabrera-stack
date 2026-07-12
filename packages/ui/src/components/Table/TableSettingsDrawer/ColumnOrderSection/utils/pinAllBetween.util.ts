@@ -8,11 +8,6 @@ type PinAllBetweenArgs<TKey extends string> = {
   readonly side: PinSide;
 };
 
-type PinAllBetweenResult<TKey extends string> = {
-  readonly left: TKey[];
-  readonly right: TKey[];
-};
-
 type PinSide = 'left' | 'right';
 
 export const pinAllBetween = <TKey extends string>({
@@ -20,7 +15,7 @@ export const pinAllBetween = <TKey extends string>({
   columnPinning,
   index,
   side,
-}: PinAllBetweenArgs<TKey>): PinAllBetweenResult<TKey> => {
+}: PinAllBetweenArgs<TKey>) => {
   const next = {
     left: [...columnPinning.left],
     right: [...columnPinning.right],

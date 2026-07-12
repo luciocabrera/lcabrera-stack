@@ -9,7 +9,7 @@ type GeneratePlaceholderDataParams = {
 export const generatePlaceholderData = <TData extends Record<string, unknown>>({
   columns,
   rowCount,
-}: GeneratePlaceholderDataParams): TData[] =>
+}: GeneratePlaceholderDataParams) =>
   Array.from({ length: rowCount }, () =>
     Object.fromEntries(columns.map((col) => [col.key, ''])),
   ) as TData[];

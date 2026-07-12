@@ -23,7 +23,7 @@ export const recalculatePinSides = ({
   columnPinning,
   newOrder,
   staticKeys,
-}: RecalculatePinSidesArgs): ColumnPinningState => {
+}: RecalculatePinSidesArgs) => {
   const pinnedEntries = getPinnedEntries({ columnPinning });
 
   const staticLeft = columnPinning.left.filter((key) => staticKeys?.has(key));

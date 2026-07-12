@@ -18,17 +18,6 @@ import {
 
 import { sanitizeFiltersByColumns } from './sanitizeFiltersByColumns.util';
 
-/**
- * Drawer open/pinned flags read from cookies so the loader can SSR-seed the
- * table's initial meta state and avoid a hydration layout shift.
- */
-type LoaderMetaUiFlags = {
-  readonly isColumnSettingsOpen?: boolean;
-  readonly isColumnSettingsPinned?: boolean;
-  readonly isTableSettingsOpen?: boolean;
-  readonly isTableSettingsPinned?: boolean;
-};
-
 type ReadTableLoaderStateFromRequestArgs<
   TData extends Record<string, unknown>,
 > = {
@@ -43,18 +32,6 @@ type ReadTableLoaderStateFromRequestArgs<
   readonly request: Request;
 };
 
-type ReadTableLoaderStateFromRequestResult<TData> = {
-  readonly columnOrder: (keyof TData)[];
-  readonly columnPinning: ColumnPinningState<TData>;
-  readonly columnSizing: ColumnSizingState<TData>;
-  readonly columnVisibility: Set<keyof TData>;
-  readonly filters: ColumnFiltersState<TData>;
-  readonly metaUiFlags: LoaderMetaUiFlags;
-  readonly sorting: SortingState<TData>;
-  readonly standaloneFiltersParam: null | string | undefined;
-  readonly standaloneSortParam: null | string;
-};
-
 /**
  * Read shared table loader state from URL and cookies.
  */
@@ -66,7 +43,7 @@ export const readTableLoaderStateFromRequest = <
   includeFilters = false,
   persistenceKey,
   request,
-}: ReadTableLoaderStateFromRequestArgs<TData>): ReadTableLoaderStateFromRequestResult<TData> => {
+}: ReadTableLoaderStateFromRequestArgs<TData>) => {
   const url = new URL(request.url);
 
   const urlState = readTableStateFromURL({

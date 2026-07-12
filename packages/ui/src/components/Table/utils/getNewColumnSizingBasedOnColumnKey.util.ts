@@ -10,7 +10,7 @@ export const getNewColumnSizingBasedOnColumnKey = <TData>({
   columnKey,
   columnSizesState = {} as ColumnSizingState<TData>,
   columnSizing,
-}: GetNewColumnSizingBasedOnColumnKeyArgs<TData>): ColumnSizingState<TData> => {
+}: GetNewColumnSizingBasedOnColumnKeyArgs<TData>) => {
   const keys = Object.keys(
     columnSizesState,
   ) as (keyof ColumnSizingState<TData>)[];

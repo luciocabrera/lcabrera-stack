@@ -4,9 +4,7 @@ import type { TableDataContextValue } from '../TableDataContext.types';
 
 import { TableDataContext } from '../TableDataContext.context';
 
-export const useTableDataContextValue = <
-  TData = Record<string, unknown>,
->(): TableDataContextValue<TData> => {
+export const useTableDataContextValue = <TData = Record<string, unknown>>() => {
   const context = use(TableDataContext);
 
   if (context === undefined) {

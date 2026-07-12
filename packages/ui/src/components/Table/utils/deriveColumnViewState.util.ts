@@ -1,11 +1,8 @@
 import type {
-  ColumnGroupsState,
   ColumnOrderState,
   ColumnPinningState,
   ColumnSizingState,
   ColumnVisibilityState,
-  NormalizedColumnsState,
-  PinnedColumnOffsetsState,
   SortingState,
   TableColumn,
 } from '@repo/ui/components/Table/Table.types';
@@ -23,14 +20,6 @@ type DeriveColumnViewStateArgs<TData> = {
   readonly sorting: SortingState<TData>;
 };
 
-type DeriveColumnViewStateResult<TData> = {
-  readonly columnGroups: ColumnGroupsState<TData>;
-  readonly effectiveColumns: TableColumn<TData>[];
-  readonly normalizedColumns: NormalizedColumnsState<TData>;
-  readonly pinnedColumnOffsets: PinnedColumnOffsetsState<TData>;
-  readonly staticKeys: Set<string>;
-};
-
 export const deriveColumnViewState = <TData>({
   columnOrder,
   columnPinning,
@@ -38,7 +27,7 @@ export const deriveColumnViewState = <TData>({
   columnSizing,
   columnVisibility,
   sorting,
-}: DeriveColumnViewStateArgs<TData>): DeriveColumnViewStateResult<TData> => {
+}: DeriveColumnViewStateArgs<TData>) => {
   const normalizedColumns = getNormalizedColumns<TData>({
     columns,
     sorting,

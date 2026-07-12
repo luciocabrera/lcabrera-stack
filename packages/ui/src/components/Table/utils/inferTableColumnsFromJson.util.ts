@@ -22,7 +22,7 @@ const ISO_DATE_TIME_PATTERN =
 const isIsoDateString = (value: string) =>
   ISO_DATE_ONLY_PATTERN.test(value) || ISO_DATE_TIME_PATTERN.test(value);
 
-const inferValueType = (value: unknown): InferredValueType => {
+const inferValueType = (value: unknown) => {
   if (Array.isArray(value)) {
     return 'array';
   }

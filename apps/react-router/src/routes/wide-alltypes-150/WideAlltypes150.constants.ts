@@ -10,10 +10,6 @@ export const TITLE = {
   singular: 'Row',
 };
 
-// ─── Column helpers ──────────────────────────────────────────────────────────
-
-type ColDataType = 'boolean' | 'date' | 'number' | 'string';
-
 /**
  * Returns the display dataType for a column at the given index (1–149).
  * Types cycle as (index % 20):
@@ -21,7 +17,7 @@ type ColDataType = 'boolean' | 'date' | 'number' | 'string';
  *   6 → boolean  |  9 → date
  */
 // fallow-ignore-next-line complexity -- temporary testing suppression
-const getColDataType = (index: number): ColDataType => {
+const getColDataType = (index: number) => {
   const mod = index % 20;
   if (mod === 6) return 'boolean';
   if (mod === 9) return 'date';
@@ -66,9 +62,7 @@ type BuildGeneratedColumnArgs = {
   readonly index: number;
 };
 
-const buildGeneratedColumn = ({
-  index,
-}: BuildGeneratedColumnArgs): TableColumn<WideAlltypes150> => {
+const buildGeneratedColumn = ({ index }: BuildGeneratedColumnArgs) => {
   const mod = index % 20;
   const key = `c_${String(index).padStart(3, '0')}` as keyof WideAlltypes150;
   const typeLabel = PG_TYPE_LABELS[mod] ?? 'Col';

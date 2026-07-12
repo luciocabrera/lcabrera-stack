@@ -10,9 +10,7 @@ type CompactSorting = Record<string, 'asc' | 'desc'>;
  * Converts `{"name":"asc"}` back to `[{ columnKey: "name", direction: "asc" }]`.
  * Preserves insertion order from the object.
  */
-export const deserializeSortingFromURL = <TData>(
-  param: string,
-): SortingState<TData> => {
+export const deserializeSortingFromURL = <TData>(param: string) => {
   try {
     const parsed = JSON.parse(param) as CompactSorting;
 

@@ -14,7 +14,7 @@ export const insertBeforeRightPinned = <TData>({
   columnKey,
   newPinning,
   orderWithoutColumn,
-}: InsertBeforeRightPinnedArgs<TData>): ColumnOrderState<TData> => {
+}: InsertBeforeRightPinnedArgs<TData>) => {
   const firstRightPinnedIndex = orderWithoutColumn.findIndex((key) =>
     newPinning.right.includes(key),
   );

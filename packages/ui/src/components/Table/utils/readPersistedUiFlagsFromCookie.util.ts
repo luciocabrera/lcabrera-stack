@@ -22,7 +22,7 @@ export const readPersistedUiFlagsFromCookie = ({
   appId,
   cookieString,
   persistenceKey,
-}: ReadPersistedUiFlagsFromCookieArgs): PersistedUiFlags => {
+}: ReadPersistedUiFlagsFromCookieArgs) => {
   const key = `${getStorageKey({ appId, persistenceKey })}-${UI_FLAGS_COOKIE_KEY_SUFFIX}`;
   const rawValue = readFromCookie({ cookieString, key });
 

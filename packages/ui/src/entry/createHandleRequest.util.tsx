@@ -16,11 +16,6 @@ type CreateHandleRequestArgs = {
   readonly stylexCssHref: string;
 };
 
-type CreateHandleRequestResult = {
-  readonly handleRequest: HandleRequest;
-  readonly streamTimeout: number;
-};
-
 // Positional signature is React Router's entry.server contract — status code
 // second, headers third. Do not reorder (or alphabetize) these parameters.
 type HandleRequest = (
@@ -45,7 +40,7 @@ type HandleRequest = (
  */
 export const createHandleRequest = ({
   stylexCssHref,
-}: CreateHandleRequestArgs): CreateHandleRequestResult => {
+}: CreateHandleRequestArgs) => {
   const streamTimeout = getStreamTimeout();
   const abortDelay = streamTimeout + 1000;
 
