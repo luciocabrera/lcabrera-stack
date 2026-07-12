@@ -1,37 +1,64 @@
 import { Button } from '@repo/ui/components/Button';
 import { MenuCloseIcon } from '@repo/ui/components/Icons';
+import { useSetTableSettingsExpandedFilters } from '@repo/ui/components/Table/contexts/TableConfig/meta/actions';
+import { useGetTableSettingsExpandedFilters } from '@repo/ui/components/Table/contexts/TableConfig/meta/selectors';
 import { FilterInputs } from '@repo/ui/components/Table/filters/FilterInputs';
 import { LIST_MAX_HEIGHT } from '@repo/ui/components/VirtualList/VirtualList.constants';
 import { ICON_SIZE_MD } from '@repo/ui/design-system/constants';
 import * as stylex from '@stylexjs/stylex';
 
-import type { HandleToggleArgs } from '../ActiveFiltersList.types';
 import type { FilterItemProps } from './FilterItem.types';
 
+import { useSetColumnFilters } from '../../../TableDrawerContext/actions';
+import { useGetColumnFilters } from '../../../TableDrawerContext/selectors';
 import { isFilterValid } from '../../utils/isFilterValid.util';
 import { styles } from './FilterItem.stylex';
 
+/**
+ * One active-filter row: expand/collapse toggle, validity badge, remove
+ * button, and the type-specific filter inputs. Owns its store wiring:
+ * reads/writes the drawer filters and the persisted expanded-filters state
+ * itself.
+ */
 export const FilterItem = ({
   column,
   columnKey,
-  expandedFilters,
   filter,
   isBusy,
-  onRemove,
-  onToggle,
-  onToggleExpanded,
 }: FilterItemProps) => {
-  const isExpanded = expandedFilters.has(columnKey);
+  const filters = useGetColumnFilters();
+  const expandedFilters = useGetTableSettingsExpandedFilters();
+  const setColumnFilters = useSetColumnFilters();
+  const setExpandedFilters = useSetTableSettingsExpandedFilters();
+
+  const isExpanded = expandedFilters.includes(columnKey);
   const isValid = isFilterValid(filter);
+
   const handleRemove = () => {
-    onRemove(columnKey);
+    const remainingFilters = Object.fromEntries(
+      Object.entries(filters).filter(([key]) => key !== columnKey),
+    );
+    setColumnFilters(remainingFilters);
+    setExpandedFilters(expandedFilters.filter((key) => key !== columnKey));
   };
+
   const handleToggleExpanded = () => {
-    onToggleExpanded(columnKey);
+    setExpandedFilters(
+      isExpanded
+        ? expandedFilters.filter((key) => key !== columnKey)
+        : [...expandedFilters, columnKey],
+    );
   };
-  const handleFilterChange = (newFilter: HandleToggleArgs['filter']) => {
-    onToggle({ columnKey, filter: newFilter });
+
+  const handleFilterChange = (newFilter?: FilterItemProps['filter']) => {
+    if (newFilter) {
+      setColumnFilters({ ...filters, [columnKey]: newFilter });
+      return;
+    }
+
+    handleRemove();
   };
+
   return (
     <div
       {...stylex.props(styles.filterItem)}

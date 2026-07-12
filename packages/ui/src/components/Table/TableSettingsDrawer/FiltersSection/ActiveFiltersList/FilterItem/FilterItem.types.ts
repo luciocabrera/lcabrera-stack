@@ -1,4 +1,4 @@
-import type { HandleToggleArgs } from '../ActiveFiltersList.types';
+import type { ColumnFiltersState } from '@repo/ui/components/Table';
 
 export type FilterItemColumn = {
   readonly label: string;
@@ -7,10 +7,6 @@ export type FilterItemColumn = {
 export type FilterItemProps = {
   readonly column: FilterItemColumn;
   readonly columnKey: string;
-  readonly expandedFilters: Set<string>;
-  readonly filter: NonNullable<HandleToggleArgs['filter']>;
+  readonly filter: NonNullable<ColumnFiltersState[string]>;
   readonly isBusy: boolean;
-  readonly onRemove: (columnKey: string) => void;
-  readonly onToggle: (args: HandleToggleArgs) => void;
-  readonly onToggleExpanded: (columnKey: string) => void;
 };

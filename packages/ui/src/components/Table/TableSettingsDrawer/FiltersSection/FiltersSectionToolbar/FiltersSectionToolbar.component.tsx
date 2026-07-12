@@ -4,6 +4,8 @@ import {
   ExpandAllIcon,
   RefreshIcon,
 } from '@repo/ui/components/Icons';
+import { useSetTableSettingsExpandedFilters } from '@repo/ui/components/Table/contexts/TableConfig/meta/actions';
+import { useGetTableSettingsExpandedFilters } from '@repo/ui/components/Table/contexts/TableConfig/meta/selectors';
 
 import type { SectionToolbarButton } from '../../SectionToolbar';
 import type { FiltersSectionToolbarProps } from './FiltersSectionToolbar.types';
@@ -14,6 +16,7 @@ import {
   useResetFilters,
 } from '../../TableDrawerContext/actions';
 import { useGetColumnFilters } from '../../TableDrawerContext/selectors';
+import { areAllFiltersExpanded } from '../utils/areAllFiltersExpanded.util';
 
 const FILTERS_TOOLBAR = {
   clear: { label: 'Clear Filters' },
@@ -22,25 +25,40 @@ const FILTERS_TOOLBAR = {
   reset: { label: 'Reset Filters' },
 } as const;
 
+/**
+ * Clear/reset/expand-all/collapse-all buttons for the filters section, in
+ * header ('toolbar') and footer variants. Fully self-connected: reads the
+ * filter store and the persisted expanded-filters state and dispatches all
+ * four actions itself.
+ */
 export const FiltersSectionToolbar = ({
   isBusy = false,
-  isCollapseAllDisabled = false,
-  isExpandAllDisabled = false,
-  onClearAll,
-  onCollapseAll,
-  onExpandAll,
   variant = 'footer',
 }: FiltersSectionToolbarProps) => {
   const filters = useGetColumnFilters();
+  const expandedFilters = useGetTableSettingsExpandedFilters();
 
   const clearFilters = useClearFilters();
   const resetFilters = useResetFilters();
+  const setExpandedFilters = useSetTableSettingsExpandedFilters();
 
-  const hasFilters = Object.keys(filters).length > 0;
+  const filterKeys = Object.keys(filters);
+  const hasFilters = filterKeys.length > 0;
+  const hasExpandedFilters = expandedFilters.length > 0;
+  const isExpandAllDisabled =
+    !hasFilters || areAllFiltersExpanded({ expandedFilters, filterKeys });
 
   const handleClear = () => {
     clearFilters();
-    onClearAll?.();
+    setExpandedFilters([]);
+  };
+
+  const handleExpandAll = () => {
+    setExpandedFilters(filterKeys);
+  };
+
+  const handleCollapseAll = () => {
+    setExpandedFilters([]);
   };
 
   const buttons: readonly SectionToolbarButton[] = [
@@ -59,17 +77,17 @@ export const FiltersSectionToolbar = ({
     },
     {
       icon: ExpandAllIcon,
-      isDisabled: isExpandAllDisabled || !onExpandAll,
+      isDisabled: isExpandAllDisabled,
       key: FILTERS_TOOLBAR.expandAll.label,
       label: FILTERS_TOOLBAR.expandAll.label,
-      onClick: onExpandAll,
+      onClick: handleExpandAll,
     },
     {
       icon: CollapseAllIcon,
-      isDisabled: isCollapseAllDisabled || !onCollapseAll,
+      isDisabled: !hasExpandedFilters,
       key: FILTERS_TOOLBAR.collapseAll.label,
       label: FILTERS_TOOLBAR.collapseAll.label,
-      onClick: onCollapseAll,
+      onClick: handleCollapseAll,
     },
   ];
 

@@ -3,53 +3,7 @@
 import type { ReactNode } from 'react';
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
-const {
-  columnFiltersMock,
-  persistedExpandedFiltersMock,
-  setColumnFiltersMock,
-  setTableSettingsExpandedFiltersMock,
-} = vi.hoisted(() => ({
-  columnFiltersMock: {
-    status: {
-      operator: 'equals',
-      type: 'text',
-      value: 'cancelled',
-    },
-  } as Record<string, unknown>,
-  persistedExpandedFiltersMock: vi.fn<() => readonly string[]>(() => []),
-  setColumnFiltersMock: vi.fn(),
-  setTableSettingsExpandedFiltersMock: vi.fn(),
-}));
-
-beforeEach(() => {
-  for (const key of Object.keys(columnFiltersMock)) {
-    delete columnFiltersMock[key];
-  }
-  columnFiltersMock.status = {
-    operator: 'equals',
-    type: 'text',
-    value: 'cancelled',
-  };
-  persistedExpandedFiltersMock.mockReset();
-  persistedExpandedFiltersMock.mockReturnValue([]);
-  setColumnFiltersMock.mockReset();
-  setTableSettingsExpandedFiltersMock.mockReset();
-});
-
-afterEach(() => {
-  cleanup();
-});
-
-type ActiveFiltersListProps = {
-  readonly expandedFilters: Set<string>;
-  readonly onExpandedFiltersChange: (expandedFilters: Set<string>) => void;
-};
-
-type AddFilterSectionProps = {
-  readonly onExpandedFiltersChange: (expandedFilters: Set<string>) => void;
-};
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@repo/ui/components/SidePanel', () => ({
   SidePanelSectionMain: ({ children }: { readonly children: ReactNode }) => (
@@ -57,92 +11,96 @@ vi.mock('@repo/ui/components/SidePanel', () => ({
   ),
   SidePanelSectionOverlay: ({
     children,
+    isOpen,
   }: {
     readonly children: ReactNode;
     readonly isOpen: boolean;
-  }) => <div>{children}</div>,
-}));
-
-vi.mock('../TableDrawerContext/actions', () => ({
-  useSetColumnFilters: () => setColumnFiltersMock,
-}));
-
-vi.mock('../TableDrawerContext/selectors', () => ({
-  useGetColumnFilters: () => columnFiltersMock,
-}));
-
-vi.mock('@repo/ui/components/Table/contexts/TableConfig/meta/actions', () => ({
-  useSetTableSettingsExpandedFilters: () => setTableSettingsExpandedFiltersMock,
-}));
-
-vi.mock(
-  '@repo/ui/components/Table/contexts/TableConfig/meta/selectors',
-  () => ({
-    useGetTableSettingsExpandedFilters: () => persistedExpandedFiltersMock(),
-  }),
-);
-
-vi.mock('./AddFilterSection', () => ({
-  AddFilterSection: ({ onExpandedFiltersChange }: AddFilterSectionProps) => (
-    <button
-      onClick={() => {
-        onExpandedFiltersChange(new Set(['customer_name', 'status']));
-      }}
-      type='button'
-    >
-      Expand From Add
-    </button>
+  }) => (
+    <div data-testid='overlay'>
+      {String(isOpen)}
+      {children}
+    </div>
   ),
 }));
 
 vi.mock('./ActiveFiltersList', () => ({
-  ActiveFiltersList: ({
-    expandedFilters,
-    onExpandedFiltersChange,
-  }: ActiveFiltersListProps) => (
-    <div>
-      <div data-testid='expanded-filters'>{[...expandedFilters].join(',')}</div>
+  ActiveFiltersList: ({ isBusy }: { readonly isBusy?: boolean }) => (
+    <div data-testid='active-filters-list'>{String(isBusy ?? false)}</div>
+  ),
+}));
+
+vi.mock('./AddFilterSection', () => ({
+  AddFilterSection: ({
+    isBusy,
+    onDropdownOpenChange,
+  }: {
+    readonly isBusy?: boolean;
+    readonly onDropdownOpenChange?: (isOpen: boolean) => void;
+  }) => (
+    <div data-testid='add-filter-section'>
+      {String(isBusy ?? false)}
       <button
         onClick={() => {
-          onExpandedFiltersChange(new Set(['status']));
+          onDropdownOpenChange?.(true);
         }}
         type='button'
       >
-        Expand From Active
+        Open Dropdown
       </button>
     </div>
   ),
 }));
 
 vi.mock('./FiltersSectionToolbar', () => ({
-  FiltersSectionToolbar: () => <div>Toolbar</div>,
+  FiltersSectionToolbar: ({
+    isBusy,
+    variant,
+  }: {
+    readonly isBusy?: boolean;
+    readonly variant?: 'footer' | 'toolbar';
+  }) => (
+    <div data-testid='filters-toolbar'>
+      {variant ?? 'footer'}:{String(isBusy ?? false)}
+    </div>
+  ),
 }));
 
 import { FiltersSection } from './FiltersSection.component';
 
-describe('FiltersSection', () => {
-  it('restores expanded filters from persisted table settings state', () => {
-    persistedExpandedFiltersMock.mockReturnValue(['status']);
+afterEach(() => {
+  cleanup();
+});
 
+describe('FiltersSection', () => {
+  it('composes add section, active list, and footer toolbar', () => {
     render(<FiltersSection />);
 
-    expect(screen.getByTestId('expanded-filters').textContent).toBe('status');
+    expect(screen.getByTestId('add-filter-section')).not.toBeNull();
+    expect(screen.getByTestId('active-filters-list')).not.toBeNull();
+    expect(screen.getByTestId('filters-toolbar').textContent).toBe(
+      'footer:false',
+    );
   });
 
-  it('persists expanded filters when child sections update expansion state', () => {
+  it('opens the overlay while the add-filter dropdown is open', () => {
     render(<FiltersSection />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Expand From Add' }));
+    expect(screen.getByTestId('overlay').textContent).toContain('false');
 
-    expect(setTableSettingsExpandedFiltersMock).toHaveBeenCalledWith([
-      'customer_name',
-      'status',
-    ]);
+    fireEvent.click(screen.getByRole('button', { name: 'Open Dropdown' }));
 
-    fireEvent.click(screen.getByRole('button', { name: 'Expand From Active' }));
+    expect(screen.getByTestId('overlay').textContent).toContain('true');
+  });
 
-    expect(setTableSettingsExpandedFiltersMock).toHaveBeenLastCalledWith([
-      'status',
-    ]);
+  it('forwards the busy state to all delegates', () => {
+    render(<FiltersSection isBusy={true} />);
+
+    expect(screen.getByTestId('add-filter-section').textContent).toContain(
+      'true',
+    );
+    expect(screen.getByTestId('active-filters-list').textContent).toBe('true');
+    expect(screen.getByTestId('filters-toolbar').textContent).toBe(
+      'footer:true',
+    );
   });
 });

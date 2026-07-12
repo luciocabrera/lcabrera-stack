@@ -4,6 +4,8 @@ import {
   useGetColumns,
   useGetNormalizedColumns,
 } from '@repo/ui/components/Table/contexts/TableConfig/columns/selectors';
+import { useSetTableSettingsExpandedFilters } from '@repo/ui/components/Table/contexts/TableConfig/meta/actions';
+import { useGetTableSettingsExpandedFilters } from '@repo/ui/components/Table/contexts/TableConfig/meta/selectors';
 import { VirtualSelect } from '@repo/ui/components/VirtualSelect';
 import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
@@ -14,17 +16,23 @@ import { useSetColumnFilters } from '../../TableDrawerContext/actions';
 import { useGetColumnFilters } from '../../TableDrawerContext/selectors';
 import { styles } from './AddFilterSection.stylex';
 
+/**
+ * Column picker + Add button for creating a new drawer filter. Owns its
+ * store wiring: writes the new filter and expands it via the persisted
+ * expanded-filters state itself; only the dropdown-open presentation
+ * callback is received from the shell (overlay coordination).
+ */
 export const AddFilterSection = ({
-  expandedFilters,
   isBusy = false,
   onDropdownOpenChange,
-  onExpandedFiltersChange,
 }: AddFilterSectionProps) => {
   const columns = useGetColumns();
   const filters = useGetColumnFilters();
   const normalizedColumns = useGetNormalizedColumns();
+  const expandedFilters = useGetTableSettingsExpandedFilters();
 
   const onFiltersChange = useSetColumnFilters();
+  const setExpandedFilters = useSetTableSettingsExpandedFilters();
   const [selectedColumn, setSelectedColumn] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -89,7 +97,10 @@ export const AddFilterSection = ({
     onFiltersChange(newFilters);
 
     // Expand the newly added filter
-    onExpandedFiltersChange(new Set([selectedColumn, ...expandedFilters]));
+    setExpandedFilters([
+      selectedColumn,
+      ...expandedFilters.filter((key) => key !== selectedColumn),
+    ]);
     setSelectedColumn('');
   };
 
