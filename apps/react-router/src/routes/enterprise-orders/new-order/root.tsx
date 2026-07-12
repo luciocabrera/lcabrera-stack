@@ -10,3 +10,6 @@ export const NewOrder = () => {
     </SectionCard>
   );
 };
+
+// React Router framework-mode route modules require a default export
+export default NewOrder;

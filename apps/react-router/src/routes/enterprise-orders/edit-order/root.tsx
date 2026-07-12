@@ -13,3 +13,6 @@ export const EditOrder = () => {
     </SectionCard>
   );
 };
+
+// React Router framework-mode route modules require a default export
+export default EditOrder;
