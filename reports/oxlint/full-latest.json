@@ -1,26 +1,7 @@
 {
-  "diagnostics": [
-    {
-      "message": "Type '{ isColumnSettingsOpen?: boolean; isColumnSettingsPinned?: boolean; isTableSettingsOpen?: boolean; isTableSettingsPinned?: boolean; appId: string; crud: TableCrudConfig<EnterpriseOrder>; persistenceKey: string; schemaName: string; tableName: string; title: { ...; }; }' is not assignable to type 'Partial<TableMetaState>'.",
-      "code": "typescript(TS2322)",
-      "severity": "error",
-      "causes": [],
-      "filename": "apps/react-router/src/routes/enterprise-orders/EnterpriseOrders.component.tsx",
-      "labels": [
-        {
-          "span": {
-            "offset": 896,
-            "length": 9,
-            "line": 24,
-            "column": 7
-          }
-        }
-      ],
-      "related": []
-    }
-  ],
-  "number_of_files": 2042,
+  "diagnostics": [],
+  "number_of_files": 2402,
   "number_of_rules": 110,
   "threads_count": 24,
-  "start_time": 1.463283775
+  "start_time": 1.538654333
 }

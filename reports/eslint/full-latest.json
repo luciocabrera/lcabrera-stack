@@ -88,6 +88,28 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "apps/admin_system/src/auth/requirePermission.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/auth/requirePermission.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "apps/admin_system/src/auth/requireUser.util.test.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -286,17 +308,6 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "apps/admin_system/src/routes/api/browse-directory/root.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
     "filePath": "apps/admin_system/src/routes/api/persist-cookie/root.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -473,7 +484,469 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "apps/admin_system/src/routes/cqms/edit-role/editRole.action.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/edit-role/EditRole.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/edit-role/editRole.loader.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/edit-role/editRole.meta.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/edit-role/editRole.schema.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/edit-role/EditRoleForm/EditRoleForm.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/edit-role/EditRoleForm/EditRoleForm.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/edit-role/root.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/edit-scanner/editScanner.action.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/edit-scanner/EditScanner.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/edit-scanner/editScanner.loader.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/edit-scanner/editScanner.meta.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/edit-scanner/editScanner.schema.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/edit-scanner/root.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/edit-user/editUser.action.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/edit-user/EditUser.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/edit-user/editUser.loader.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/edit-user/editUser.meta.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/edit-user/editUser.schema.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/edit-user/EditUserForm/EditUserForm.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/edit-user/EditUserForm/EditUserForm.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/edit-user/root.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "apps/admin_system/src/routes/cqms/layout.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/llm-usage/CappedLlmUsageAttemptsTable/CappedLlmUsageAttemptsTable.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/llm-usage/CappedLlmUsageAttemptsTable/CappedLlmUsageAttemptsTable.constants.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/llm-usage/CappedLlmUsageAttemptsTable/CappedLlmUsageAttemptsTable.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/llm-usage/CappedLlmUsageAttemptsTable/index.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/llm-usage/DailyLlmCostPanel/DailyLlmCostPanel.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/llm-usage/DailyLlmCostPanel/DailyLlmCostPanel.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/llm-usage/DailyLlmCostPanel/index.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/llm-usage/LlmUsage.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/llm-usage/llmUsage.loader.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/llm-usage/llmUsage.meta.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/llm-usage/LlmUsage.stylex.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/llm-usage/ProjectLlmCostTable/index.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/llm-usage/ProjectLlmCostTable/ProjectLlmCostTable.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/llm-usage/ProjectLlmCostTable/ProjectLlmCostTable.constants.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/llm-usage/ProjectLlmCostTable/ProjectLlmCostTable.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/llm-usage/root.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/llm-usage/ScannerLlmCostTable/index.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/llm-usage/ScannerLlmCostTable/ScannerLlmCostTable.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/llm-usage/ScannerLlmCostTable/ScannerLlmCostTable.constants.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/llm-usage/ScannerLlmCostTable/ScannerLlmCostTable.types.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -539,6 +1012,248 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "apps/admin_system/src/routes/cqms/new-role/newRole.action.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/new-role/NewRole.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/new-role/newRole.loader.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/new-role/newRole.meta.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/new-role/newRole.schema.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/new-role/NewRoleForm/NewRoleForm.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/new-role/NewRoleForm/NewRoleForm.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/new-role/root.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/new-scanner/newScanner.action.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/new-scanner/NewScanner.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/new-scanner/newScanner.meta.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/new-scanner/newScanner.schema.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/new-scanner/root.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/new-user/newUser.action.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/new-user/NewUser.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/new-user/newUser.loader.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/new-user/newUser.meta.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/new-user/newUser.schema.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/new-user/NewUserForm/NewUserForm.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/new-user/NewUserForm/NewUserForm.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/new-user/root.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/project-detail/projectDetail.action.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "apps/admin_system/src/routes/cqms/project-detail/ProjectDetail.component.tsx",
     "messages": [],
     "suppressedMessages": [],
@@ -573,6 +1288,72 @@
   },
   {
     "filePath": "apps/admin_system/src/routes/cqms/project-detail/projectDetail.meta.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/project-detail/ProjectDetail.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/project-detail/ProjectGrantsPanel/ProjectGrantsPanel.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/project-detail/ProjectGrantsPanel/ProjectGrantsPanel.constants.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/project-detail/ProjectGrantsPanel/ProjectGrantsPanel.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/project-detail/ProjectSyncPanel/ProjectSyncPanel.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/project-detail/ProjectSyncPanel/ProjectSyncPanel.types.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -650,6 +1431,105 @@
   },
   {
     "filePath": "apps/admin_system/src/routes/cqms/project-detail/RunLink/RunLink.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/role-detail/RoleDetail.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/role-detail/roleDetail.loader.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/role-detail/roleDetail.meta.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/role-detail/root.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/roles/Roles.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/roles/Roles.constants.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/roles/roles.loader.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/roles/roles.meta.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/roles/root.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -847,6 +1727,138 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "apps/admin_system/src/routes/cqms/scanner-detail/root.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/scanner-detail/ScannerDetail.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/scanner-detail/ScannerDetail.constants.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/scanner-detail/scannerDetail.loader.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/scanner-detail/scannerDetail.meta.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/scanners/root.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/scanners/Scanners.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/scanners/Scanners.constants.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/scanners/scanners.loader.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/scanners/scanners.meta.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/trigger-scan/computeFanOutCount.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/trigger-scan/computeFanOutCount.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "apps/admin_system/src/routes/cqms/trigger-scan/root.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -870,6 +1882,17 @@
   },
   {
     "filePath": "apps/admin_system/src/routes/cqms/trigger-scan/TriggerScan.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/trigger-scan/triggerScan.constants.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -936,6 +1959,105 @@
   },
   {
     "filePath": "apps/admin_system/src/routes/cqms/trigger-scan/TriggerScanForm/TriggerScanForm.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/user-detail/root.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/user-detail/UserDetail.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/user-detail/userDetail.loader.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/user-detail/userDetail.meta.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/users/root.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/users/Users.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/users/Users.constants.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/users/users.loader.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/users/users.meta.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -1225,6 +2347,28 @@
   },
   {
     "filePath": "apps/admin_system/src/routes/cqms/utils/groupTrendByScanner.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/utils/isCheckboxChecked.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "apps/admin_system/src/routes/cqms/utils/isCheckboxChecked.util.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -3451,36 +4595,13 @@
   },
   {
     "filePath": "apps/react-router/src/routes/api/enterprise-orders-delete/enterprise-orders-delete.action.ts",
-    "messages": [
-      {
-        "ruleId": "unicorn/prefer-number-is-safe-integer",
-        "severity": 2,
-        "message": "Prefer `Number.isSafeInteger()` over `Number.isInteger()`.",
-        "line": 12,
-        "column": 15,
-        "messageId": "prefer-number-is-safe-integer/error",
-        "endLine": 12,
-        "endColumn": 24,
-        "suggestions": [
-          {
-            "messageId": "prefer-number-is-safe-integer/suggestion",
-            "fix": {
-              "range": [349, 358],
-              "text": "isSafeInteger"
-            },
-            "data": {},
-            "desc": "Replace `Number.isInteger()` with `Number.isSafeInteger()`."
-          }
-        ]
-      }
-    ],
+    "messages": [],
     "suppressedMessages": [],
-    "errorCount": 1,
+    "errorCount": 0,
     "fatalErrorCount": 0,
     "warningCount": 0,
     "fixableErrorCount": 0,
     "fixableWarningCount": 0,
-    "source": "import { type ActionFunctionArgs, data } from 'react-router';\n\nimport { enterpriseOrdersApi } from '@/services';\n\nconst parseOrderId = (value: FormDataEntryValue | null) => {\n  if (typeof value !== 'string' || value.length === 0) {\n    throw data({ error: 'Missing order id' }, { status: 400 });\n  }\n\n  const orderId = Number(value);\n\n  if (!Number.isInteger(orderId) || orderId <= 0) {\n    throw data({ error: 'Invalid order id' }, { status: 400 });\n  }\n\n  return orderId;\n};\n\nexport const action = async ({ request }: ActionFunctionArgs) => {\n  const formData = await request.formData();\n  const intent = formData.get('intent');\n\n  if (intent !== 'delete') {\n    return data({ error: 'Unsupported action intent' }, { status: 400 });\n  }\n\n  const orderId = parseOrderId(formData.get('id'));\n\n  await enterpriseOrdersApi.deleteEnterpriseOrder({\n    orderId,\n    requestUrl: request.url,\n  });\n\n  return data({ ok: true, orderId });\n};\n",
     "usedDeprecatedRules": []
   },
   {
@@ -3650,38 +4771,13 @@
   },
   {
     "filePath": "apps/react-router/src/routes/enterprise-orders/edit-order/root.tsx",
-    "messages": [
-      {
-        "ruleId": "unicorn/default-export-style",
-        "severity": 2,
-        "message": "Prefer declaring this default-exported function inline.",
-        "line": 17,
-        "column": 1,
-        "messageId": "default-export-style/inline",
-        "endLine": 17,
-        "endColumn": 26,
-        "suggestions": [
-          {
-            "messageId": "default-export-style/suggestion-inline",
-            "data": {
-              "kind": "function"
-            },
-            "fix": {
-              "range": [106, 421],
-              "text": "export default function EditOrder() {\n  const params = useParams();\n\n  return (\n    <SectionCard\n      description='Edit flow for enterprise orders is not implemented yet.'\n      title='Edit Order'\n    >\n      {`Edit order placeholder for #${params.orderId ?? 'unknown'}.`}\n    </SectionCard>\n  );\n}"
-            },
-            "desc": "Use an inline default function declaration."
-          }
-        ]
-      }
-    ],
+    "messages": [],
     "suppressedMessages": [],
-    "errorCount": 1,
+    "errorCount": 0,
     "fatalErrorCount": 0,
     "warningCount": 0,
     "fixableErrorCount": 0,
     "fixableWarningCount": 0,
-    "source": "import { SectionCard } from '@repo/ui/components/SectionCard';\nimport { useParams } from 'react-router';\n\nconst EditOrder = () => {\n  const params = useParams();\n\n  return (\n    <SectionCard\n      description='Edit flow for enterprise orders is not implemented yet.'\n      title='Edit Order'\n    >\n      {`Edit order placeholder for #${params.orderId ?? 'unknown'}.`}\n    </SectionCard>\n  );\n};\n\nexport default EditOrder;\n",
     "usedDeprecatedRules": []
   },
   {
@@ -3762,28 +4858,6 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "apps/react-router/src/routes/enterprise-orders/hydrateEnterpriseOrdersColumnsState.util.test.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
-    "filePath": "apps/react-router/src/routes/enterprise-orders/hydrateEnterpriseOrdersColumnsState.util.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
     "filePath": "apps/react-router/src/routes/enterprise-orders/layout.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -3796,38 +4870,13 @@
   },
   {
     "filePath": "apps/react-router/src/routes/enterprise-orders/new-order/root.tsx",
-    "messages": [
-      {
-        "ruleId": "unicorn/default-export-style",
-        "severity": 2,
-        "message": "Prefer declaring this default-exported function inline.",
-        "line": 14,
-        "column": 1,
-        "messageId": "default-export-style/inline",
-        "endLine": 14,
-        "endColumn": 25,
-        "suggestions": [
-          {
-            "messageId": "default-export-style/suggestion-inline",
-            "data": {
-              "kind": "function"
-            },
-            "fix": {
-              "range": [64, 314],
-              "text": "export default function NewOrder() {\n  return (\n    <SectionCard\n      description='Create flow for enterprise orders is not implemented yet.'\n      title='Create Order'\n    >\n      New order page placeholder.\n    </SectionCard>\n  );\n}"
-            },
-            "desc": "Use an inline default function declaration."
-          }
-        ]
-      }
-    ],
+    "messages": [],
     "suppressedMessages": [],
-    "errorCount": 1,
+    "errorCount": 0,
     "fatalErrorCount": 0,
     "warningCount": 0,
     "fixableErrorCount": 0,
     "fixableWarningCount": 0,
-    "source": "import { SectionCard } from '@repo/ui/components/SectionCard';\n\nconst NewOrder = () => {\n  return (\n    <SectionCard\n      description='Create flow for enterprise orders is not implemented yet.'\n      title='Create Order'\n    >\n      New order page placeholder.\n    </SectionCard>\n  );\n};\n\nexport default NewOrder;\n",
     "usedDeprecatedRules": []
   },
   {
@@ -4182,6 +5231,21 @@
         "line": 25,
         "column": 18,
         "endLine": 25,
+        "endColumn": 71,
+        "suppressions": [
+          {
+            "kind": "directive",
+            "justification": "canonicalizes the temp directory this test just created itself via mkdtempSync; no external input involved"
+          }
+        ]
+      },
+      {
+        "ruleId": "security/detect-non-literal-fs-filename",
+        "severity": 2,
+        "message": "Found realpathSync from package \"node:fs\" with non literal argument at index 0",
+        "line": 150,
+        "column": 18,
+        "endLine": 150,
         "endColumn": 71,
         "suppressions": [
           {
@@ -5250,22 +6314,6 @@
         ]
       },
       {
-        "ruleId": "unicorn/consistent-boolean-name",
-        "severity": 2,
-        "message": "`canUseTool` starts with `can`, so it should be boolean.",
-        "line": 108,
-        "column": 9,
-        "messageId": "non-boolean-prefix",
-        "endLine": 108,
-        "endColumn": 31,
-        "suppressions": [
-          {
-            "kind": "file",
-            "justification": ""
-          }
-        ]
-      },
-      {
         "ruleId": "unicorn/no-unreadable-for-of-expression",
         "severity": 2,
         "message": "Move the complex iterable expression out of the `for await…of` loop header.",
@@ -5490,6 +6538,17 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/data-access/src/api/buildPaginatedQueryParams.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/data-access/src/api/buildPaginatedQueryParams.util.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -5587,6 +6646,215 @@
     "fixableErrorCount": 0,
     "fixableWarningCount": 0,
     "source": "import { Pool } from 'pg';\n\nimport { readEnvConfig } from './env.schema.ts';\n\nlet pool: Pool | undefined;\n\n/**\n * Lazily-initialized singleton — shared across every Node-context consumer\n * of this package (packages/scan-ingestion's CLI + admin_system job code,\n * and potentially apps/api-server(-fast) in the future), none of which is\n * \"the\" single server process with one obvious place to construct a Pool\n * up front. Each process gets its own module-level singleton via getPool();\n * callers still supply their own DB_NAME et al. via env, so this is not a\n * cross-process shared connection.\n */\nexport const getPool = (): Pool => {\n  if (!pool) {\n    const envConfig = readEnvConfig({ env: process.env });\n    pool = new Pool({\n      database: envConfig.DB_NAME,\n      host: envConfig.DB_HOST,\n      password: envConfig.DB_PASSWORD,\n      port: envConfig.DB_PORT,\n      user: envConfig.DB_USER,\n    });\n  }\n\n  return pool;\n};\n\nexport const closePool = async (): Promise<void> => {\n  if (!pool) {\n    return;\n  }\n\n  await pool.end();\n  pool = undefined;\n};\n",
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/data-access/src/db/queryBuilder/appendFilterClause.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/data-access/src/db/queryBuilder/appendFilterClause.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/data-access/src/db/queryBuilder/assertColumnAllowed.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/data-access/src/db/queryBuilder/assertColumnAllowed.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/data-access/src/db/queryBuilder/assertSafeIdentifier.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/data-access/src/db/queryBuilder/assertSafeIdentifier.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/data-access/src/db/queryBuilder/buildCountQuery.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/data-access/src/db/queryBuilder/buildCountQuery.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/data-access/src/db/queryBuilder/buildOptionalNumericClauses.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/data-access/src/db/queryBuilder/buildOptionalNumericClauses.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/data-access/src/db/queryBuilder/buildOrderByClause.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/data-access/src/db/queryBuilder/buildOrderByClause.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/data-access/src/db/queryBuilder/buildSelectQuery.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/data-access/src/db/queryBuilder/buildSelectQuery.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/data-access/src/db/queryBuilder/buildWhereClause.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/data-access/src/db/queryBuilder/buildWhereClause.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/data-access/src/db/queryBuilder/QueryBuilder.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/data-access/src/db/queryBuilder/quoteIdentifier.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/data-access/src/db/queryBuilder/quoteIdentifier.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
     "usedDeprecatedRules": []
   },
   {
@@ -5960,6 +7228,44 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/scan-ingestion/src/fs/isExistingPathWithin.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/fs/isExistingPathWithin.util.ts",
+    "messages": [],
+    "suppressedMessages": [
+      {
+        "ruleId": "security/detect-non-literal-fs-filename",
+        "severity": 2,
+        "message": "Found existsSync from package \"node:fs\" with non literal argument at index 0",
+        "line": 20,
+        "column": 10,
+        "endLine": 20,
+        "endColumn": 35,
+        "suppressions": [
+          {
+            "kind": "directive",
+            "justification": "validatedPath is path.resolve'd and containment-checked against the trusted baseDirectory by resolvePathWithin above"
+          }
+        ]
+      }
+    ],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/scan-ingestion/src/fs/listDirectoryWithin.util.ts",
     "messages": [],
     "suppressedMessages": [
@@ -6079,6 +7385,72 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/scan-ingestion/src/ingestion/appGraph/appGraphDetail.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/ingestion/appGraph/appGraphRaw.schema.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/ingestion/appGraph/extractAppGraphNodes.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/ingestion/appGraph/extractAppGraphNodes.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/ingestion/appGraph/extractAppGraphRunSummary.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/ingestion/appGraph/extractAppGraphRunSummary.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/scan-ingestion/src/ingestion/buildFileInventory.util.test.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -6146,6 +7518,28 @@
   },
   {
     "filePath": "packages/scan-ingestion/src/ingestion/codeSmell/extractCodeSmellRunSummary.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/ingestion/extractGenericDetailRows.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/ingestion/extractGenericDetailRows.util.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -6310,6 +7704,28 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/scan-ingestion/src/ingestion/fallow/extractFallowNextSteps.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/ingestion/fallow/extractFallowNextSteps.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/scan-ingestion/src/ingestion/fallow/extractFallowRunSummary.util.test.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -6366,6 +7782,50 @@
   },
   {
     "filePath": "packages/scan-ingestion/src/ingestion/fallow/fallowRaw.schema.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/ingestion/git/readGitMetadata.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/ingestion/git/readGitMetadata.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/ingestion/git/runGit.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/ingestion/git/runGit.util.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -6541,31 +8001,37 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/scan-ingestion/src/ingestion/matchProject.util.test.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
-    "filePath": "packages/scan-ingestion/src/ingestion/matchProject.util.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
     "filePath": "packages/scan-ingestion/src/ingestion/report.schema.test.ts",
     "messages": [],
-    "suppressedMessages": [],
+    "suppressedMessages": [
+      {
+        "ruleId": "unicorn/no-null",
+        "severity": 2,
+        "message": "Use `undefined` instead of `null`.",
+        "line": 70,
+        "column": 21,
+        "messageId": "error",
+        "endLine": 70,
+        "endColumn": 25,
+        "suggestions": [
+          {
+            "messageId": "replace",
+            "fix": {
+              "range": [2555, 2559],
+              "text": "undefined"
+            },
+            "data": {},
+            "desc": "Replace `null` with `undefined`."
+          }
+        ],
+        "suppressions": [
+          {
+            "kind": "directive",
+            "justification": ""
+          }
+        ]
+      }
+    ],
     "errorCount": 0,
     "fatalErrorCount": 0,
     "warningCount": 0,
@@ -6585,7 +8051,7 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/scan-ingestion/src/ingestion/resolveLocalPath.util.ts",
+    "filePath": "packages/scan-ingestion/src/ingestion/resolveScan.util.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -6596,7 +8062,258 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/scan-ingestion/src/ingestion/resolveScan.util.ts",
+    "filePath": "packages/scan-ingestion/src/ingestion/snapshots/extractZipArchive.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/ingestion/snapshots/extractZipArchive.util.ts",
+    "messages": [],
+    "suppressedMessages": [
+      {
+        "ruleId": "security/detect-non-literal-fs-filename",
+        "severity": 2,
+        "message": "Found mkdirSync from package \"node:fs\" with non literal argument at index 0",
+        "line": 48,
+        "column": 5,
+        "endLine": 48,
+        "endColumn": 62,
+        "suppressions": [
+          {
+            "kind": "directive",
+            "justification": "destination is proven above to stay under resolvedTarget"
+          }
+        ]
+      },
+      {
+        "ruleId": "security/detect-non-literal-fs-filename",
+        "severity": 2,
+        "message": "Found writeFileSync from package \"node:fs\" with non literal argument at index 0",
+        "line": 50,
+        "column": 5,
+        "endLine": 50,
+        "endColumn": 71,
+        "suppressions": [
+          {
+            "kind": "directive",
+            "justification": "destination is proven above to stay under resolvedTarget"
+          }
+        ]
+      }
+    ],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/ingestion/snapshots/getSnapshotsRoot.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/ingestion/snapshots/getSnapshotsRoot.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/ingestion/snapshots/saveProjectSnapshot.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/ingestion/workspaces/discoverProjectWorkspaces.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/ingestion/workspaces/discoverProjectWorkspaces.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/ingestion/workspaces/expandWorkspaceGlobs.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/ingestion/workspaces/expandWorkspaceGlobs.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/ingestion/workspaces/expandWorkspaceGlobSegments.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/ingestion/workspaces/expandWorkspaceGlobSegments.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/ingestion/workspaces/listWorkspaceSubdirectories.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/ingestion/workspaces/listWorkspaceSubdirectories.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/ingestion/workspaces/parsePackageJsonWorkspaces.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/ingestion/workspaces/parsePackageJsonWorkspaces.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/ingestion/workspaces/parsePnpmWorkspaceGlobs.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/ingestion/workspaces/parsePnpmWorkspaceGlobs.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/ingestion/workspaces/readPackageName.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/ingestion/workspaces/readPackageName.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/ingestion/workspaces/readWorkspaceGlobs.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/ingestion/workspaces/readWorkspaceGlobs.util.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -6651,6 +8368,116 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/scan-ingestion/src/queries/claimQueuedScan.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/queries/claimQueuedScan.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/queries/createResourceGrant.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/queries/createRole.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/queries/createScannerDetailTable.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/queries/createUser.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/queries/createUser.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/queries/deleteResourceGrant.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/queries/failStaleRunningScans.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/queries/failStaleRunningScans.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/scan-ingestion/src/queries/getActiveScanners.util.test.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -6673,6 +8500,61 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/scan-ingestion/src/queries/getAllPermissions.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/queries/getCappedLlmUsageAttempts.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/queries/getCappedLlmUsageAttempts.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/queries/getDailyLlmCost.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/queries/getDailyLlmCost.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/scan-ingestion/src/queries/getProjectById.util.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -6684,7 +8566,62 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/scan-ingestion/src/queries/getProjectGrants.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/queries/getProjectHasActiveRun.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/queries/getProjectHasActiveRun.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/scan-ingestion/src/queries/getProjectListView.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/queries/getProjectLlmCost.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/queries/getProjectLlmCost.util.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -6717,6 +8654,28 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/scan-ingestion/src/queries/getProjectWorkspaces.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/queries/getProjectWorkspaces.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/scan-ingestion/src/queries/getQueuedScans.util.test.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -6739,6 +8698,28 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/scan-ingestion/src/queries/getRoleListView.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/queries/getRoleWithPermissions.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/scan-ingestion/src/queries/getRunById.util.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -6751,6 +8732,28 @@
   },
   {
     "filePath": "packages/scan-ingestion/src/queries/getRunScans.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/queries/getScanAppGraphSummary.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/queries/getScanAppGraphSummary.util.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -6849,7 +8852,84 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/scan-ingestion/src/queries/getScannerById.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/queries/getScannerListView.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/queries/getScannerLlmCost.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/queries/getScannerLlmCost.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/queries/getScannerVersions.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/scan-ingestion/src/queries/getScanReport.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/queries/getTrailingLlmCostUsd.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/queries/getTrailingLlmCostUsd.util.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -6893,6 +8973,28 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/scan-ingestion/src/queries/getUserListView.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/queries/getUserWithRoles.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/scan-ingestion/src/queries/markScanFailed.util.test.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -6915,29 +9017,29 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/scan-ingestion/src/queries/markScanRunning.util.test.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
-    "filePath": "packages/scan-ingestion/src/queries/markScanRunning.util.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
     "filePath": "packages/scan-ingestion/src/queries/queries.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/queries/recordScanLlmUsage.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/queries/recordScanLlmUsage.util.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -6960,6 +9062,83 @@
   },
   {
     "filePath": "packages/scan-ingestion/src/queries/registerProject.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/queries/registerScanner.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/queries/registerScanner.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/queries/replaceProjectWorkspaces.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/queries/replaceRolePermissions.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/queries/replaceUserRoles.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/queries/setProjectSnapshot.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/queries/setUserPassword.util.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -7014,6 +9193,28 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/scan-ingestion/src/queries/updateRole.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/queries/updateScanner.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/scan-ingestion/src/queries/updateScanProgress.util.test.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -7026,6 +9227,116 @@
   },
   {
     "filePath": "packages/scan-ingestion/src/queries/updateScanProgress.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/queries/updateUser.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/registry/buildRunnerScriptScaffold.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/registry/buildRunnerScriptScaffold.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/registry/buildSkillMarkdown.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/registry/buildSkillMarkdown.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/registry/resolveCqmsRepoRoot.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/registry/resolveCqmsRepoRoot.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/registry/writeScannerArtifacts.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/registry/writeScannerArtifacts.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/scan-ingestion/src/testing/acquireAdvisoryTestLock.util.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -7385,6 +9696,105 @@
   },
   {
     "filePath": "packages/ui/src/components/AppNavigation/index.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/AppNavigation/NavigationBody/NavigationBody.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/AppNavigation/NavigationBody/NavigationBody.test.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/AppNavigation/NavigationBody/NavigationBody.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/AppNavigation/NavigationFooter/NavigationFooter.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/AppNavigation/NavigationFooter/NavigationFooter.test.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/AppNavigation/NavigationFooter/NavigationFooter.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/AppNavigation/NavigationHeader/NavigationHeader.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/AppNavigation/NavigationHeader/NavigationHeader.test.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/AppNavigation/NavigationHeader/NavigationHeader.types.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -8363,6 +10773,39 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/ui/src/components/DraggableList/DraggableListItem/DraggableListItem.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/DraggableList/DraggableListItem/DraggableListItem.test.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/DraggableList/DraggableListItem/DraggableListItem.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/ui/src/components/DraggableList/hooks/index.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -8693,105 +11136,6 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/components/Form/fields/PathField/index.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
-    "filePath": "packages/ui/src/components/Form/fields/PathField/PathBrowserModal/index.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
-    "filePath": "packages/ui/src/components/Form/fields/PathField/PathBrowserModal/PathBrowserModal.component.tsx",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
-    "filePath": "packages/ui/src/components/Form/fields/PathField/PathBrowserModal/PathBrowserModal.stylex.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
-    "filePath": "packages/ui/src/components/Form/fields/PathField/PathBrowserModal/PathBrowserModal.test.tsx",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
-    "filePath": "packages/ui/src/components/Form/fields/PathField/PathBrowserModal/PathBrowserModal.types.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
-    "filePath": "packages/ui/src/components/Form/fields/PathField/PathField.component.tsx",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
-    "filePath": "packages/ui/src/components/Form/fields/PathField/PathField.stylex.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
-    "filePath": "packages/ui/src/components/Form/fields/PathField/PathField.types.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
     "filePath": "packages/ui/src/components/Form/fields/RadioField/RadioField.component.tsx",
     "messages": [],
     "suppressedMessages": [],
@@ -8957,17 +11301,6 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/components/Form/FormBody/index.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
     "filePath": "packages/ui/src/components/Form/FormField/FormField.component.tsx",
     "messages": [],
     "suppressedMessages": [],
@@ -9024,6 +11357,39 @@
   },
   {
     "filePath": "packages/ui/src/components/Form/FormFieldChrome/FormFieldChrome.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Form/FormFields/contexts/FormFieldsRendererContext/FormFieldsRendererContext.context.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Form/FormFields/contexts/FormFieldsRendererContext/FormFieldsRendererContext.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Form/FormFields/contexts/FormFieldsRendererContext/useFormFieldsRendererContext.hook.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -9529,6 +11895,94 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/ui/src/components/Icons/ErrorDescriptive/BrokenLink/BrokenLink.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Icons/ErrorDescriptive/BrokenLink/BrokenLink.stylex.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Icons/ErrorDescriptive/BrokenLink/index.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Icons/ErrorDescriptive/ConnectionPulse/ConnectionPulse.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Icons/ErrorDescriptive/ConnectionPulse/ConnectionPulse.stylex.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Icons/ErrorDescriptive/ConnectionPulse/index.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Icons/ErrorDescriptive/DisruptionParticles/DisruptionParticles.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Icons/ErrorDescriptive/DisruptionParticles/index.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/ui/src/components/Icons/ErrorDescriptive/ErrorDescriptive.component.tsx",
     "messages": [],
     "suppressedMessages": [],
@@ -9552,6 +12006,105 @@
   },
   {
     "filePath": "packages/ui/src/components/Icons/ErrorDescriptive/index.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Icons/ErrorDescriptive/LaptopClient/index.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Icons/ErrorDescriptive/LaptopClient/LaptopClient.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Icons/ErrorDescriptive/LaptopClient/LaptopClient.stylex.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Icons/ErrorDescriptive/ServerRack/index.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Icons/ErrorDescriptive/ServerRack/ServerRack.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Icons/ErrorDescriptive/ServerRack/ServerRack.stylex.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Icons/ErrorDescriptive/WarningBadge/index.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Icons/ErrorDescriptive/WarningBadge/WarningBadge.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Icons/ErrorDescriptive/WarningBadge/WarningBadge.stylex.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -9618,6 +12171,28 @@
   },
   {
     "filePath": "packages/ui/src/components/Icons/EyeIcon/index.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Icons/EyeOffIcon/EyeOffIcon.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Icons/EyeOffIcon/index.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -10013,7 +12588,73 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/ui/src/components/Icons/NoDataDescriptive/FloatingParticles/FloatingParticles.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Icons/NoDataDescriptive/FloatingParticles/FloatingParticles.stylex.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Icons/NoDataDescriptive/FloatingParticles/index.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/ui/src/components/Icons/NoDataDescriptive/index.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Icons/NoDataDescriptive/MagnifyingGlass/index.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Icons/NoDataDescriptive/MagnifyingGlass/MagnifyingGlass.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Icons/NoDataDescriptive/MagnifyingGlass/MagnifyingGlass.stylex.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -10047,6 +12688,72 @@
   },
   {
     "filePath": "packages/ui/src/components/Icons/NoDataDescriptive/NoDataDescriptive.test.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Icons/NoDataDescriptive/PulseHalo/index.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Icons/NoDataDescriptive/PulseHalo/PulseHalo.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Icons/NoDataDescriptive/PulseHalo/PulseHalo.stylex.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Icons/NoDataDescriptive/TableSheet/index.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Icons/NoDataDescriptive/TableSheet/TableSheet.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Icons/NoDataDescriptive/TableSheet/TableSheet.stylex.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -11124,6 +13831,72 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/ui/src/components/Settings/NavigationSettingsTab/index.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Settings/NavigationSettingsTab/NavigationSettingsTab.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Settings/NavigationSettingsTab/NavigationSettingsTab.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Settings/PinningSettingsTab/index.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Settings/PinningSettingsTab/PinningSettingsTab.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Settings/PinningSettingsTab/PinningSettingsTab.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/ui/src/components/Settings/Settings.component.test.tsx",
     "messages": [],
     "suppressedMessages": [],
@@ -11256,7 +14029,62 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/ui/src/components/Settings/utils/toGlobalPinningPreferencesUpdate.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/SidePanel/DialogSidePanel/DialogSidePanel.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/SidePanel/DialogSidePanel/DialogSidePanel.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/ui/src/components/SidePanel/index.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/SidePanel/PinnedSidePanel/PinnedSidePanel.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/SidePanel/PinnedSidePanel/PinnedSidePanel.types.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -12268,6 +15096,105 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/ui/src/components/Table/ColumnSettingsDrawer/ColumnSettingsDrawerBody/ColumnSettingsDrawerBody.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/ColumnSettingsDrawer/ColumnSettingsDrawerBody/ColumnSettingsDrawerBody.test.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/ColumnSettingsDrawer/ColumnSettingsDrawerBody/ColumnSettingsDrawerBody.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/ColumnSettingsDrawer/ColumnSettingsDrawerFooter/ColumnSettingsDrawerFooter.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/ColumnSettingsDrawer/ColumnSettingsDrawerFooter/ColumnSettingsDrawerFooter.test.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/ColumnSettingsDrawer/ColumnSettingsDrawerFooter/ColumnSettingsDrawerFooter.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/ColumnSettingsDrawer/ColumnSettingsDrawerHeader/ColumnSettingsDrawerHeader.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/ColumnSettingsDrawer/ColumnSettingsDrawerHeader/ColumnSettingsDrawerHeader.test.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/ColumnSettingsDrawer/ColumnSettingsDrawerHeader/ColumnSettingsDrawerHeader.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/ui/src/components/Table/ColumnSettingsDrawer/DetailsSection/DetailsSection.component.tsx",
     "messages": [],
     "suppressedMessages": [],
@@ -12478,6 +15405,28 @@
   },
   {
     "filePath": "packages/ui/src/components/Table/ColumnSettingsDrawer/GeneralSection/index.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/ColumnSettingsDrawer/hooks/useCancelColumnSettings.hook.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/ColumnSettingsDrawer/hooks/useCancelColumnSettings.hook.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -12972,50 +15921,6 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/components/Table/contexts/TableConfig/columns/actions/useAcceptHeaderPinConflict.hook.test.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
-    "filePath": "packages/ui/src/components/Table/contexts/TableConfig/columns/actions/useAcceptHeaderPinConflict.hook.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
-    "filePath": "packages/ui/src/components/Table/contexts/TableConfig/columns/actions/useAcceptHeaderPinSide.hook.test.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
-    "filePath": "packages/ui/src/components/Table/contexts/TableConfig/columns/actions/useAcceptHeaderPinSide.hook.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
     "filePath": "packages/ui/src/components/Table/contexts/TableConfig/columns/actions/useBatchSetColumnSettings.hook.test.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -13148,6 +16053,28 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/ui/src/components/Table/contexts/TableConfig/columns/actions/useSetColumnVisibility.hook.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/contexts/TableConfig/columns/actions/useSetColumnVisibility.hook.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/ui/src/components/Table/contexts/TableConfig/columns/actions/useSyncColumnsSizing.hook.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -13203,6 +16130,17 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/ui/src/components/Table/contexts/TableConfig/columns/actions/utils/commitResolvedColumnState.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/ui/src/components/Table/contexts/TableConfig/columns/actions/utils/commitResolvedPinningState.util.test.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -13215,6 +16153,28 @@
   },
   {
     "filePath": "packages/ui/src/components/Table/contexts/TableConfig/columns/actions/utils/commitResolvedPinningState.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/contexts/TableConfig/columns/actions/utils/commitResolvedVisibilityState.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/contexts/TableConfig/columns/actions/utils/commitResolvedVisibilityState.util.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -13248,50 +16208,6 @@
   },
   {
     "filePath": "packages/ui/src/components/Table/contexts/TableConfig/columns/actions/utils/index.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
-    "filePath": "packages/ui/src/components/Table/contexts/TableConfig/columns/actions/utils/resolveAcceptedHeaderPinConflictState.util.test.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
-    "filePath": "packages/ui/src/components/Table/contexts/TableConfig/columns/actions/utils/resolveAcceptedHeaderPinConflictState.util.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
-    "filePath": "packages/ui/src/components/Table/contexts/TableConfig/columns/actions/utils/resolveAcceptedHeaderPinSideState.util.test.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
-    "filePath": "packages/ui/src/components/Table/contexts/TableConfig/columns/actions/utils/resolveAcceptedHeaderPinSideState.util.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -13424,6 +16340,28 @@
   },
   {
     "filePath": "packages/ui/src/components/Table/contexts/TableConfig/columns/actions/utils/resolveColumnSortingUpdate.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/contexts/TableConfig/columns/actions/utils/resolveColumnVisibilityUpdate.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/contexts/TableConfig/columns/actions/utils/resolveColumnVisibilityUpdate.util.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -13874,6 +16812,17 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/ui/src/components/Table/contexts/TableConfig/meta/selectors/useGetTableDeleteActionPath.hook.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/ui/src/components/Table/contexts/TableConfig/meta/selectors/useGetTableDensity.hook.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -14095,17 +17044,6 @@
   },
   {
     "filePath": "packages/ui/src/components/Table/contexts/TableConfig/meta/selectors/useGetTableThreshold.hook.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
-    "filePath": "packages/ui/src/components/Table/contexts/TableConfig/meta/selectors/useGetTableTitle.hook.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -14941,6 +17879,39 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/ui/src/components/Table/filters/FilterInputs/InputContent/TextOrSelectFilterInput/TextOrSelectFilterInput.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/filters/FilterInputs/InputContent/TextOrSelectFilterInput/TextOrSelectFilterInput.test.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/filters/FilterInputs/InputContent/TextOrSelectFilterInput/TextOrSelectFilterInput.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/ui/src/components/Table/filters/FilterInputs/utils/getOperatorFromFilter.util.test.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -15459,6 +18430,94 @@
   },
   {
     "filePath": "packages/ui/src/components/Table/TableActionButton/TableActionButton.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableActionsPopover/index.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableActionsPopover/TableActionsPopover.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableActionsPopover/TableActionsPopover.stylex.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableActionsPopover/TableActionsPopover.test.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableActionsPopover/TableActionsPopover.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableActionsPopover/useTableActionsPopoverPosition.hook.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableActionsPopover/utils/getTableActionsPopoverPosition.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableActionsPopover/utils/getTableActionsPopoverPosition.util.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -16162,17 +19221,6 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/components/Table/TableEmptyState/TableEmptyState.types.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
     "filePath": "packages/ui/src/components/Table/TableHeader/index.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -16228,28 +19276,6 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/components/Table/TableHeaderCell/hooks/index.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
-    "filePath": "packages/ui/src/components/Table/TableHeaderCell/hooks/useTableHeaderPinFlow.hook.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
     "filePath": "packages/ui/src/components/Table/TableHeaderCell/index.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -16261,7 +19287,7 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/components/Table/TableHeaderCell/SortIcon/index.ts",
+    "filePath": "packages/ui/src/components/Table/TableHeaderCell/ResizeHandle/index.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -16272,7 +19298,7 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/components/Table/TableHeaderCell/SortIcon/SortIcon.tsx",
+    "filePath": "packages/ui/src/components/Table/TableHeaderCell/ResizeHandle/ResizeHandle.component.tsx",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -16283,7 +19309,183 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/components/Table/TableHeaderCell/SortIcon/SortIcon.types.ts",
+    "filePath": "packages/ui/src/components/Table/TableHeaderCell/ResizeHandle/ResizeHandle.stylex.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableHeaderCell/ResizeHandle/ResizeHandle.test.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableHeaderCell/ResizeHandle/ResizeHandle.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableHeaderCell/TableHeaderActionsMenu/index.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableHeaderCell/TableHeaderActionsMenu/ManageColumnAction/ManageColumnAction.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableHeaderCell/TableHeaderActionsMenu/ManageColumnAction/ManageColumnAction.test.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableHeaderCell/TableHeaderActionsMenu/ManageColumnAction/ManageColumnAction.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableHeaderCell/TableHeaderActionsMenu/PinAndHideActions/PinAndHideActions.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableHeaderCell/TableHeaderActionsMenu/PinAndHideActions/PinAndHideActions.test.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableHeaderCell/TableHeaderActionsMenu/PinAndHideActions/PinAndHideActions.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableHeaderCell/TableHeaderActionsMenu/SortActions/SortActions.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableHeaderCell/TableHeaderActionsMenu/SortActions/SortActions.test.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableHeaderCell/TableHeaderActionsMenu/SortActions/SortActions.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableHeaderCell/TableHeaderActionsMenu/TableHeaderActionsMenu.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableHeaderCell/TableHeaderActionsMenu/TableHeaderActionsMenu.stylex.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableHeaderCell/TableHeaderActionsMenu/TableHeaderActionsMenu.test.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableHeaderCell/TableHeaderActionsMenu/TableHeaderActionsMenu.types.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -16316,29 +19518,18 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/ui/src/components/Table/TableHeaderCell/TableHeaderCell.test.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/ui/src/components/Table/TableHeaderCell/TableHeaderCell.types.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
-    "filePath": "packages/ui/src/components/Table/TableHeaderCell/utils/getNextSortDirection.util.test.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
-    "filePath": "packages/ui/src/components/Table/TableHeaderCell/utils/getNextSortDirection.util.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -16580,7 +19771,7 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/components/Table/TableRowActionsMenu/utils/getTableRowActionsMenuPosition.util.test.ts",
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderPinSideModal/ColumnOrderPinSideModal.component.tsx",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -16591,7 +19782,7 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/components/Table/TableRowActionsMenu/utils/getTableRowActionsMenuPosition.util.ts",
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderPinSideModal/ColumnOrderPinSideModal.test.tsx",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -16624,7 +19815,7 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.stylex.ts",
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -16635,7 +19826,62 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types.ts",
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionBody/ColumnOrderItemContent/ColumnOrderItemContent.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionBody/ColumnOrderItemContent/ColumnOrderItemContent.stylex.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionBody/ColumnOrderItemContent/ColumnOrderItemContent.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionBody/ColumnOrderSectionBody.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionBody/ColumnOrderSectionBody.test.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionBody/ColumnOrderSectionBody.types.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -17152,6 +20398,61 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionHeader/ColumnOrderSectionHeader.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionHeader/ColumnOrderSectionHeader.test.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionHeader/ColumnOrderSectionHeader.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionModals/ColumnOrderSectionModals.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionModals/ColumnOrderSectionModals.test.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionToolbar/ColumnOrderSectionToolbar.component.tsx",
     "messages": [],
     "suppressedMessages": [],
@@ -17196,17 +20497,6 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/OrderConflictModal/index.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
     "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/OrderConflictModal/OrderConflictModal.component.tsx",
     "messages": [],
     "suppressedMessages": [],
@@ -17229,18 +20519,7 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/OrderConflictModal/OrderConflictModal.types.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
-    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/PinConflictModal/index.ts",
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/OrderConflictModal/OrderConflictModal.test.tsx",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -17273,18 +20552,7 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/PinConflictModal/PinConflictModal.types.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
-    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/UnpinConflictModal/index.ts",
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/PinConflictModal/PinConflictModal.test.tsx",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -17317,7 +20585,7 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/UnpinConflictModal/UnpinConflictModal.types.ts",
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/UnpinConflictModal/UnpinConflictModal.test.tsx",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -17417,6 +20685,28 @@
   },
   {
     "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/utils/detectPinOrderConflict.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/utils/filterSettingsColumns.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/utils/filterSettingsColumns.util.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -18241,6 +21531,94 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/GeneralSettingsSection/AllSettingsSection/AllSettingsSection.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/GeneralSettingsSection/AllSettingsSection/AllSettingsSection.stylex.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/GeneralSettingsSection/AllSettingsSection/AllSettingsSection.test.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/GeneralSettingsSection/AllSettingsSection/AllSettingsSection.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/GeneralSettingsSection/ColumnWidthsSection/ColumnWidthsSection.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/GeneralSettingsSection/ColumnWidthsSection/ColumnWidthsSection.stylex.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/GeneralSettingsSection/ColumnWidthsSection/ColumnWidthsSection.test.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/GeneralSettingsSection/ColumnWidthsSection/ColumnWidthsSection.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/GeneralSettingsSection/GeneralSettingsSection.component.tsx",
     "messages": [],
     "suppressedMessages": [],
@@ -18252,7 +21630,7 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/GeneralSettingsSection/GeneralSettingsSection.stylex.ts",
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/GeneralSettingsSection/GeneralSettingsSection.test.tsx",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -18275,6 +21653,72 @@
   },
   {
     "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/GeneralSettingsSection/index.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/GeneralSettingsSection/utils/buildPresetColumnSizing.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/GeneralSettingsSection/utils/buildPresetColumnSizing.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/hooks/useCancelTableSettings.hook.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/hooks/useCancelTableSettings.hook.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/hooks/useCloseTableSettingsIfUnpinned.hook.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/hooks/useCloseTableSettingsIfUnpinned.hook.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -18934,6 +22378,105 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/TableSettingsDrawerBody/TableSettingsDrawerBody.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/TableSettingsDrawerBody/TableSettingsDrawerBody.test.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/TableSettingsDrawerBody/TableSettingsDrawerBody.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/TableSettingsDrawerFooter/TableSettingsDrawerFooter.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/TableSettingsDrawerFooter/TableSettingsDrawerFooter.test.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/TableSettingsDrawerFooter/TableSettingsDrawerFooter.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/TableSettingsDrawerHeader/TableSettingsDrawerHeader.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/TableSettingsDrawerHeader/TableSettingsDrawerHeader.test.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/TableSettingsDrawer/TableSettingsDrawerHeader/TableSettingsDrawerHeader.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/ui/src/components/Table/TableSkeleton/index.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -19067,6 +22610,28 @@
   },
   {
     "filePath": "packages/ui/src/components/Table/utils/collectPersistedStateSlices.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/utils/createActionsColumn.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/utils/createActionsColumn.util.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -19539,6 +23104,28 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/ui/src/components/Table/utils/parseVersionedPayload.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/utils/parseVersionedPayload.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/ui/src/components/Table/utils/persistence.constants.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -19693,6 +23280,17 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/ui/src/components/Table/utils/resolveCrudRowId.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/ui/src/components/Table/utils/resolveCrudRowId.util.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -19716,6 +23314,50 @@
   },
   {
     "filePath": "packages/ui/src/components/Table/utils/resolveFetchMoreState.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/utils/resolvePrimaryKeyColumnKeys.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/utils/resolvePrimaryKeyColumnKeys.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/utils/resolveTableActionsColumn.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Table/utils/resolveTableActionsColumn.util.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -19804,17 +23446,6 @@
   },
   {
     "filePath": "packages/ui/src/components/Table/utils/syncColumnOrderWithPinning.util.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
-    "filePath": "packages/ui/src/components/Table/utils/validateTableCrudConfig.util.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -20155,17 +23786,6 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/components/Toolbar/Toolbar.examples.tsx",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
     "filePath": "packages/ui/src/components/Toolbar/Toolbar.stylex.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -20189,6 +23809,83 @@
   },
   {
     "filePath": "packages/ui/src/components/Toolbar/Toolbar.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Toolbar/ToolbarItem/ToolbarItem.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Toolbar/ToolbarItem/ToolbarItem.test.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Toolbar/ToolbarItem/ToolbarItem.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Toolbar/utils/getCompactControlStyle.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Toolbar/utils/getCompactControlStyle.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Toolbar/utils/getCompactItemStyle.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/Toolbar/utils/getCompactItemStyle.util.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -20888,6 +24585,50 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/ui/src/components/VirtualList/VirtualListBody/VirtualListBodyChildren/VirtualListBodyChildren.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/VirtualList/VirtualListBody/VirtualListBodyChildren/VirtualListBodyChildren.stylex.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/VirtualList/VirtualListBody/VirtualListBodyChildren/VirtualListBodyChildren.test.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/VirtualList/VirtualListBody/VirtualListBodyChildren/VirtualListBodyChildren.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/ui/src/components/VirtualList/VirtualListBody/VirtualListBodyOptions/index.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -21163,28 +24904,6 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/components/VirtualSelect/utils/getDropdownStyle.util.test.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
-    "filePath": "packages/ui/src/components/VirtualSelect/utils/getDropdownStyle.util.ts",
-    "messages": [],
-    "suppressedMessages": [],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
     "filePath": "packages/ui/src/components/VirtualSelect/utils/index.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -21317,6 +25036,116 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/ui/src/components/VirtualSelect/VirtualSelectDropdown/utils/getDropdownStyle.util.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/VirtualSelect/VirtualSelectDropdown/utils/getDropdownStyle.util.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/VirtualSelect/VirtualSelectDropdown/VirtualSelectDropdown.component.test.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/VirtualSelect/VirtualSelectDropdown/VirtualSelectDropdown.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/VirtualSelect/VirtualSelectDropdown/VirtualSelectDropdown.stylex.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/VirtualSelect/VirtualSelectDropdown/VirtualSelectDropdown.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/VirtualSelect/VirtualSelectHeader/VirtualSelectHeader.component.test.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/VirtualSelect/VirtualSelectHeader/VirtualSelectHeader.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/VirtualSelect/VirtualSelectHeader/VirtualSelectHeader.stylex.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/VirtualSelect/VirtualSelectHeader/VirtualSelectHeader.types.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/ui/src/components/VirtualSelect/VirtualSelectTrigger/index.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -21439,6 +25268,39 @@
   },
   {
     "filePath": "packages/ui/src/components/VirtualSelect/VirtualSelectTrigger/utils/renderTriggerContent.util.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/VirtualSelect/VirtualSelectTrigger/VirtualSelectDivTrigger/VirtualSelectDivTrigger.component.test.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/VirtualSelect/VirtualSelectTrigger/VirtualSelectDivTrigger/VirtualSelectDivTrigger.component.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/components/VirtualSelect/VirtualSelectTrigger/VirtualSelectDivTrigger/VirtualSelectDivTrigger.types.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -22401,6 +26263,28 @@
     "usedDeprecatedRules": []
   },
   {
+    "filePath": "packages/ui/src/hooks/useResizeObserver.hook.test.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "packages/ui/src/hooks/useResizeObserver.hook.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
     "filePath": "packages/ui/src/hooks/useStore.hook.test.ts",
     "messages": [],
     "suppressedMessages": [],
@@ -22511,7 +26395,7 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/routing/browseDirectory.loader.test.ts",
+    "filePath": "packages/ui/src/routing/appendPrimaryKeySorting.util.test.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
@@ -22522,34 +26406,7 @@
     "usedDeprecatedRules": []
   },
   {
-    "filePath": "packages/ui/src/routing/browseDirectory.loader.ts",
-    "messages": [],
-    "suppressedMessages": [
-      {
-        "ruleId": "security/detect-non-literal-fs-filename",
-        "severity": 2,
-        "message": "Found readdir from package \"node:fs/promises\" with non literal argument at index 0",
-        "line": 24,
-        "column": 27,
-        "endLine": 24,
-        "endColumn": 71,
-        "suppressions": [
-          {
-            "kind": "directive",
-            "justification": ""
-          }
-        ]
-      }
-    ],
-    "errorCount": 0,
-    "fatalErrorCount": 0,
-    "warningCount": 0,
-    "fixableErrorCount": 0,
-    "fixableWarningCount": 0,
-    "usedDeprecatedRules": []
-  },
-  {
-    "filePath": "packages/ui/src/routing/browseDirectory.types.ts",
+    "filePath": "packages/ui/src/routing/appendPrimaryKeySorting.util.ts",
     "messages": [],
     "suppressedMessages": [],
     "errorCount": 0,
