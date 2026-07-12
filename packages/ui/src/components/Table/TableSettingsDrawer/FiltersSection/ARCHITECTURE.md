@@ -10,13 +10,13 @@ store (persisted across drawer reopen), not by the section.
 No store state is prop-drilled through the shell. Each delegate reads the
 selectors and dispatches the actions it needs itself:
 
-| Delegate                | Reads (selectors)                                              | Dispatches (actions)                                        |
-| ----------------------- | -------------------------------------------------------------- | ----------------------------------------------------------- |
-| `FiltersSection`        | — (holds only the `isAddFilterOpen` overlay presentation flag) | —                                                           |
-| `AddFilterSection`      | columns, normalizedColumns, columnFilters, expandedFilters     | setColumnFilters, setTableSettingsExpandedFilters           |
-| `ActiveFiltersList`     | columnFilters, normalizedColumns                               | — (rows self-connect)                                       |
-| `FilterItem`            | columnFilters, expandedFilters                                 | setColumnFilters, setTableSettingsExpandedFilters           |
-| `FiltersSectionToolbar` | columnFilters, expandedFilters                                 | clearFilters, resetFilters, setTableSettingsExpandedFilters |
+| Delegate                | Reads (selectors)                                                                          | Dispatches (actions)                                                          |
+| ----------------------- | ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- |
+| `FiltersSection`        | — (holds only the `isAddFilterOpen` overlay presentation flag)                             | —                                                                             |
+| `AddFilterSection`      | columns, normalizedColumns, columnFilters, expandedFilters (all via `useAddFilterSection`) | setColumnFilters, setTableSettingsExpandedFilters (via `useAddFilterSection`) |
+| `ActiveFiltersList`     | columnFilters, normalizedColumns                                                           | — (rows self-connect)                                                         |
+| `FilterItem`            | columnFilters, expandedFilters                                                             | setColumnFilters, setTableSettingsExpandedFilters                             |
+| `FiltersSectionToolbar` | columnFilters, expandedFilters                                                             | clearFilters, resetFilters, setTableSettingsExpandedFilters                   |
 
 `expandedFilters` is a `readonly string[]` slice of the table meta store
 (`tableSettingsExpandedFilters`), persisted via `persistTableMetaUiState` —
@@ -33,10 +33,13 @@ FiltersSection/
 │
 ├── AddFilterSection/                   → Dropdown to add new filters (self-connected)
 │   ├── index.ts
-│   ├── AddFilterSection.component.tsx  → VirtualSelect + Add; expands the new filter itself
+│   ├── AddFilterSection.component.tsx  → Presentational: VirtualSelect + Add button
 │   ├── AddFilterSection.types.ts       → { isBusy?, onDropdownOpenChange? }
 │   ├── AddFilterSection.stylex.ts
-│   └── utils/getSelectedColumnLabel.util.ts → Label with "⚠️ (filtered)" suffix
+│   ├── useAddFilterSection.hook.ts     → Store wiring, options, selection, add-filter flow
+│   └── utils/
+│       ├── createInitialFilter.util.ts → Pure: default filter for a column's dataType
+│       └── getSelectedColumnLabel.util.ts → Label with "⚠️ (filtered)" suffix
 │
 ├── ActiveFiltersList/                  → List shell: count header + toolbar + rows (self-connected)
 │   ├── index.ts
@@ -74,10 +77,12 @@ graph LR
 
   AddFilter --> VirtualSelect
   AddFilter --> SidePanelSectionHeader
-  AddFilter --> useGetColumnFilters["useGetColumnFilters (selector)"]
-  AddFilter --> useSetColumnFilters["useSetColumnFilters (action)"]
-  AddFilter --> useGetNormalizedColumns["useGetNormalizedColumns (TableConfig)"]
-  AddFilter --> metaExpanded["useGet/useSetTableSettingsExpandedFilters (meta store)"]
+  AddFilter --> useAddFilterSection["useAddFilterSection (hook)"]
+  useAddFilterSection --> useGetColumnFilters["useGetColumnFilters (selector)"]
+  useAddFilterSection --> useSetColumnFilters["useSetColumnFilters (action)"]
+  useAddFilterSection --> useGetNormalizedColumns["useGetNormalizedColumns (TableConfig)"]
+  useAddFilterSection --> metaExpanded["useGet/useSetTableSettingsExpandedFilters (meta store)"]
+  useAddFilterSection --> createInitialFilter["createInitialFilter util"]
 
   ActiveFilters --> SidePanelSectionHeader
   ActiveFilters --> InfoBox
@@ -109,7 +114,7 @@ graph TD
   A["FiltersSection renders shell"] --> B["AddFilterSection"]
   B --> C["VirtualSelect with filterable columns"]
   C --> D{"Column selected + Add?"}
-  D -->|Yes| E["Initialize filter by dataType"]
+  D -->|Yes| E["Initialize filter by dataType (createInitialFilter util)"]
   E --> F["setColumnFilters + expand new key in meta store"]
 
   A --> G["SidePanelSectionOverlay (hidden while dropdown open)"]
