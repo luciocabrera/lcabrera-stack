@@ -2,7 +2,7 @@
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { writeToSessionStorage } from './writeToSessionStorage.util';
+import { writeToSessionStorage } from './writeToSessionStorage.service';
 
 afterEach(() => {
   vi.restoreAllMocks();

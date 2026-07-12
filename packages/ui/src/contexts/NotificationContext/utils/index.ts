@@ -1,1 +1,1 @@
-export { createNotificationId } from './createNotificationId.util';
+export { createNotificationId } from './createNotificationId.service';

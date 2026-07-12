@@ -12,7 +12,7 @@ vi.mock('@repo/ui/utils/storage', () => ({
   writeToCookie: writeToCookieMock,
 }));
 
-import { writePersistedUiFlagsToCookie } from './writePersistedUiFlagsToCookie.util';
+import { writePersistedUiFlagsToCookie } from './writePersistedUiFlagsToCookie.service';
 
 describe('writePersistedUiFlagsToCookie', () => {
   it('writes the serialized flags to a cookie with version', () => {

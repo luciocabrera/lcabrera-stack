@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { writeStateSlice } from './writeStateSlice.util';
+import { writeStateSlice } from './writeStateSlice.service';
 
 vi.mock('@repo/ui/utils/storage', () => ({
   writeToCookie: vi.fn(),

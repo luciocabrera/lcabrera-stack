@@ -30,7 +30,9 @@ type WriteToCookieArgs = {
  * };
  */
 export const writeToCookie = ({ headers, key, value }: WriteToCookieArgs) => {
-  const cookieValue = buildCookieString({ key, value });
+  const expiresAt = new Date();
+  expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+  const cookieValue = buildCookieString({ expiresAt, key, value });
 
   // SSR: append Set-Cookie header
   if (headers) {

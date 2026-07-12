@@ -1,2 +1,2 @@
-export { closeColumnSettingsDrawer } from './closeColumnSettingsDrawer.util';
+export { closeColumnSettingsDrawer } from './closeColumnSettingsDrawer.service';
 export { getTableColumnDrawerState } from './getTableColumnDrawerState.util';

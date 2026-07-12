@@ -69,6 +69,6 @@ A `Map<id, timeout>` ref (`timeoutMapRef`) is created in the provider and passed
 - `NotificationContext.constants.ts` — defaults and `INITIAL_NOTIFICATION_STATE`
 - `useNotificationContextValue.hook.ts` — raw context access with provider guard
 - `useNotificationStore.hook.ts` — generic selector hook (`useSyncExternalStore` wrapper)
-- `utils/createNotificationId.util.ts` — ID generation
+- `utils/createNotificationId.service.ts` — ID generation (effectful service: clock/crypto/counter)
 
 - On `dismissNotifications` / unmount: clear all timeouts

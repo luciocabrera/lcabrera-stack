@@ -12,7 +12,7 @@ vi.mock('@repo/ui/utils/storage', () => ({
   writeToSessionStorage: writeToSessionStorageMock,
 }));
 
-import { writePersistedDataStateToSessionStorage } from './writePersistedDataStateToSessionStorage.util';
+import { writePersistedDataStateToSessionStorage } from './writePersistedDataStateToSessionStorage.service';
 
 describe('writePersistedDataStateToSessionStorage', () => {
   it('writes the serialized data state to sessionStorage with version', () => {

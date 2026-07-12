@@ -1,14 +1,17 @@
-/**
- * Build the cookie string (expires in 1 year)
- */
-export const buildCookieString = ({
-  key,
-  value,
-}: {
+type BuildCookieStringArgs = {
+  /** Expiry timestamp — injected by the caller so this util stays pure. */
+  readonly expiresAt: Date;
   readonly key: string;
   readonly value: string;
-}) => {
-  const expires = new Date();
-  expires.setFullYear(expires.getFullYear() + 1);
-  return `${key}=${encodeURIComponent(value)}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
 };
+
+/**
+ * Build a cookie string with path=/ and SameSite=Lax. Pure: the expiry date
+ * is supplied by the effectful write service that owns the clock.
+ */
+export const buildCookieString = ({
+  expiresAt,
+  key,
+  value,
+}: BuildCookieStringArgs) =>
+  `${key}=${encodeURIComponent(value)}; expires=${expiresAt.toUTCString()}; path=/; SameSite=Lax`;

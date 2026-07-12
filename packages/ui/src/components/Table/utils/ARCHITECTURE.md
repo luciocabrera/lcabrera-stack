@@ -21,7 +21,7 @@ utils/
 ├── getPinnedColumnOffsets.util.ts                → Compute sticky offsets for pinned columns
 ├── getPinnedDerivedColumnsState.util.ts          → Build effective columns, groups, and pinned offsets
 ├── getPersistedUiState.util.ts                   → Extract the persisted meta UI slice from full table meta state
-├── persistTableMetaUiState.util.ts               → Persist tab-scoped meta UI patch directly from mutation actions
+├── persistTableMetaUiState.service.ts            → Effect: persist tab-scoped meta UI patch directly from mutation actions
 ├── getStaticColumnKeys.util.ts                   → Extract non-reorderable column keys
 ├── getStorageKey.util.ts                         → Build namespaced storage key
 ├── readPersistedDataStateFromSessionStorage.util.ts → Read tab-scoped persisted table rows
@@ -29,7 +29,7 @@ utils/
 ├── readPersistedStateFromSessionStorage.util.ts  → Read tab-scoped persisted column slices
 ├── readPersistedUiStateFromSessionStorage.util.ts → Read tab-scoped persisted drawer UI slices
 ├── readPersistedUiFlagsFromCookie.util.ts        → SSR-safe read of drawer open/pinned flags from cookie
-├── writePersistedUiFlagsToCookie.util.ts         → Mirror drawer open/pinned flags to cookie (SSR seed)
+├── writePersistedUiFlagsToCookie.service.ts      → Effect: mirror drawer open/pinned flags to cookie (SSR seed)
 ├── resolveCrudRowId.util.ts                       → Resolve CRUD row id from the primary-key column(s)
 ├── resolveFetchMoreState.util.ts                 → Shared append/hasMore/total resolution for paginated fetch actions
 ├── resolvePrimaryKeyColumnKeys.util.ts            → Keys of isPrimaryKey columns (declaration order, excludes 'actions')
@@ -37,9 +37,9 @@ utils/
 ├── serializeStateSlice.util.ts                   → JSON serialize a state slice
 ├── splitColumnsByPinning.util.ts                 → Split columns into left/center/right groups
 ├── syncColumnOrderWithPinning.util.ts            → Pin-aware column reordering
-├── writePersistedDataStateToSessionStorage.util.ts → Write tab-scoped persisted table rows
-├── writePersistedUiStateToSessionStorage.util.ts → Write tab-scoped persisted drawer UI slices
-├── writeStateSlice.util.ts                       → Write to cookie/localStorage
+├── writePersistedDataStateToSessionStorage.service.ts → Effect: write tab-scoped persisted table rows
+├── writePersistedUiStateToSessionStorage.service.ts → Effect: write tab-scoped persisted drawer UI slices
+├── writeStateSlice.service.ts                    → Effect: write to cookie/localStorage
 ├── persistence.constants.ts                      → Storage key constants
 ├── persistence.types.ts                          → Persistence config types
 └── index.ts                                      → Barrel export for shared table utils
@@ -165,4 +165,4 @@ graph LR
 | writeStateSlice                          | Write to cookie or localStorage                                |
 | getStorageKey                            | Build storage key, optionally `appId`-scoped                   |
 
-`persistTableMetaUiState.util.ts` intentionally uses direct-file imports (not `utils/index.ts`) for persistence helpers to avoid barrel back-import cycles (ADR-007).
+`persistTableMetaUiState.service.ts` intentionally uses direct-file imports (not `utils/index.ts`) for persistence helpers to avoid barrel back-import cycles (ADR-007).

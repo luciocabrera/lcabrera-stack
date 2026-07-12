@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { writeToLocalStorage } from './writeToLocalStorage.util';
+import { writeToLocalStorage } from './writeToLocalStorage.service';
 
 describe('writeToLocalStorage', () => {
   afterEach(() => {

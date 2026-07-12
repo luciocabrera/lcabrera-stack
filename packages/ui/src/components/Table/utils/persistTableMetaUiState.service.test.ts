@@ -12,12 +12,12 @@ vi.mock('./getPersistedUiState.util', () => ({
   getPersistedUiState: getPersistedUiStateMock,
 }));
 
-vi.mock('./writePersistedUiStateToSessionStorage.util', () => ({
+vi.mock('./writePersistedUiStateToSessionStorage.service', () => ({
   writePersistedUiStateToSessionStorage:
     writePersistedUiStateToSessionStorageMock,
 }));
 
-import { persistTableMetaUiState } from './persistTableMetaUiState.util';
+import { persistTableMetaUiState } from './persistTableMetaUiState.service';
 
 describe('persistTableMetaUiState', () => {
   beforeEach(() => {

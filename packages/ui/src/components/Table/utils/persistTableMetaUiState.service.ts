@@ -1,8 +1,8 @@
 import type { TableMetaState } from '../Table.types';
 
 import { getPersistedUiState } from './getPersistedUiState.util';
-import { writePersistedUiFlagsToCookie } from './writePersistedUiFlagsToCookie.util';
-import { writePersistedUiStateToSessionStorage } from './writePersistedUiStateToSessionStorage.util';
+import { writePersistedUiFlagsToCookie } from './writePersistedUiFlagsToCookie.service';
+import { writePersistedUiStateToSessionStorage } from './writePersistedUiStateToSessionStorage.service';
 
 type PersistTableMetaUiStateArgs = {
   readonly currentState: TableMetaState | undefined;

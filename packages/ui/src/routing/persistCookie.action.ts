@@ -31,11 +31,16 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const entries = JSON.parse(entriesRaw) as CookieEntry[];
   const url = new URL(currentUrl, request.url);
   const headers = new Headers();
+  const expiresAt = new Date();
+  expiresAt.setFullYear(expiresAt.getFullYear() + 1);
   let hasEffectiveQueryChange = false;
 
   for (const { key, searchParamKey, searchParamValue, value } of entries) {
     if (key && value) {
-      headers.append('Set-Cookie', buildCookieString({ key, value }));
+      headers.append(
+        'Set-Cookie',
+        buildCookieString({ expiresAt, key, value }),
+      );
     }
 
     if (searchParamKey) {

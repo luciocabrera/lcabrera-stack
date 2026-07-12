@@ -58,6 +58,7 @@ describe('persist-cookie.action', () => {
       'orders:sorting={"id":"desc"}',
     );
     expect(buildCookieString).toHaveBeenCalledWith({
+      expiresAt: expect.any(Date),
       key: 'orders:sorting',
       value: '{"id":"desc"}',
     });

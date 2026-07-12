@@ -31,7 +31,7 @@ ColumnDrawerContext/
 │   └── useGetColumnSorting
 │
 └── utils/
-  ├── closeColumnSettingsDrawer.util.ts  → Close drawer + restore table settings, persist UI state
+  ├── closeColumnSettingsDrawer.service.ts → Close drawer + restore table settings, persist UI state (effectful service: store writes + persistence)
   ├── getInitialColumnsState.util.ts     → Build initial state shape
   └── getTableColumnDrawerState.util.ts  → Map table snapshot to drawer state for one column
 ```

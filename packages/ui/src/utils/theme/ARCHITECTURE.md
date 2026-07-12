@@ -4,11 +4,11 @@ Theme-domain cookie management — reading and writing the user's preferred them
 
 ## Files
 
-| File                         | Description                                              |
-| ---------------------------- | -------------------------------------------------------- |
-| `themeCookie.constants.ts`   | `THEME_COOKIE_NAME` shared cookie constant               |
-| `getThemeFromCookie.util.ts` | SSR + browser-safe theme cookie reader                   |
-| `setThemeCookie.util.ts`     | Client-side trigger for server cookie persistence action |
+| File                         | Description                                                                                                  |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `themeCookie.constants.ts`   | `THEME_COOKIE_NAME` shared cookie constant                                                                   |
+| `getThemeFromCookie.util.ts` | SSR + browser-safe theme cookie reader                                                                       |
+| `setThemeCookie.service.ts`  | Client-side trigger for server cookie persistence action (effectful service: fires the persist-cookie fetch) |
 
 ## Function Responsibilities
 

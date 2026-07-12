@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { getThemeFromCookie } from './getThemeFromCookie.util';
-import { setThemeCookie } from './setThemeCookie.util';
+import { setThemeCookie } from './setThemeCookie.service';
 
 describe('getThemeFromCookie', () => {
   afterEach(() => {
