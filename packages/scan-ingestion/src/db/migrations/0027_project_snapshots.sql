@@ -29,7 +29,11 @@ CREATE INDEX idx_project_snapshots_project
 
 -- ── B. projects: snapshot reference in, local_path out ───────────────────
 -- Dependent views must go first (Postgres refuses DROP COLUMN under them);
--- all three are recreated in section D.
+-- all are recreated in section D. The two llm_usage views (0019) sit on
+-- top of v_projects, so they go first and come back verbatim — they only
+-- read p.name, which the snapshot-model v_projects still exposes.
+DROP VIEW llm_usage.v_capped_llm_usage_attempts;
+DROP VIEW llm_usage.v_project_llm_cost;
 DROP VIEW cqms.v_queued_scans;
 DROP VIEW cqms.project_run_summary;
 DROP VIEW cqms.v_projects;
@@ -195,3 +199,24 @@ CREATE VIEW cqms.v_queued_scans AS
     AND s.deleted_at IS NULL
     AND sc.deleted_at IS NULL
     AND p.deleted_at IS NULL;
+
+-- llm_usage views recreated verbatim from 0019 — dropped in section B only
+-- because they depend on v_projects, not because their shape changed.
+CREATE VIEW llm_usage.v_project_llm_cost AS
+  SELECT
+    u.project_id, p.name AS project_name,
+    (count(u.id) FILTER (WHERE u.outcome <> 'capped'))::int AS call_count,
+    (count(u.id) FILTER (WHERE u.outcome = 'capped'))::int AS capped_count,
+    coalesce(sum(u.total_cost_usd) FILTER (WHERE u.outcome <> 'capped'), 0) AS total_cost_usd
+  FROM llm_usage.scan_llm_usage u
+  JOIN cqms.v_projects p ON p.id = u.project_id
+  GROUP BY u.project_id, p.name;
+
+CREATE VIEW llm_usage.v_capped_llm_usage_attempts AS
+  SELECT u.id, u.scan_id, u.run_id, u.project_id, p.name AS project_name,
+         u.scanner_id, s.display_name AS scanner_display_name,
+         u.triggered_by, u.error_message, u.created_at
+  FROM llm_usage.scan_llm_usage u
+  JOIN cqms.v_projects p ON p.id = u.project_id
+  JOIN cqms.v_scanners s ON s.scanner_id = u.scanner_id
+  WHERE u.outcome = 'capped';
