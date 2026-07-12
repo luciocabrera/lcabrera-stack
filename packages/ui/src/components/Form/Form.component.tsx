@@ -20,6 +20,8 @@ export const Form = <TValues extends Record<string, unknown>>({
   // leafFields is just prop drilled, if is used in multiple places should be setup in the store  and use a gettter in the components that use it
   // no prop drilled
 
+  // THE fields should be persisted in the store and have a selector so the consumers can use it , they are to a form  what  columns are for the table
+  // formId  should be persisted in the store, we have to follow the same patterns used for the table component (metadata store in same context could be)
   return (
     <FormProvider
       initialFieldsState={{

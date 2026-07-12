@@ -12,6 +12,13 @@ import type {
   MockRow,
 } from './ShowcasePage.types';
 
+// ACCEPTED PURITY DEVIATION (demo-only, WP8c triage 2026-07-12): this module
+// deliberately keeps two pieces of module-level state — the seeded RNG below
+// (deterministic run-to-run so the demo data is SSR/hydration-stable) and the
+// tableDataPromiseCache (module-level Suspense promise memoization). Both are
+// confined to the showcase feature; do not copy this pattern into product
+// code — use loaders/actions and services instead.
+
 // --- Seeded RNG (deterministic pseudo-random for consistent test data) ---
 const mulberry32 = (seed: number) => {
   let value = seed;

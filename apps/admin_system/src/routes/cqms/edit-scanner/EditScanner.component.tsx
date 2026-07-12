@@ -8,6 +8,8 @@ import type { action } from './editScanner.action';
 import type { loader } from './editScanner.loader';
 import type { EditScannerValues } from './editScanner.schema';
 
+import { toEditScannerInitialValues } from './toEditScannerInitialValues.util';
+
 const FIELDS: readonly FieldNode<EditScannerValues>[] = [
   {
     accessor: 'displayName',
@@ -80,20 +82,7 @@ export const EditScanner = () => {
       <Form<EditScannerValues>
         cancelTo='/cqms/scanners'
         fields={FIELDS}
-        initialValues={{
-          allowedTools: (scanner.allowed_tools ?? []).join(', '),
-          commandTemplate: scanner.command_template ?? '',
-          configDetection: scanner.config_detection
-            ? JSON.stringify(scanner.config_detection, undefined, 2)
-            : '',
-          description: scanner.description ?? '',
-          deterministic: scanner.deterministic,
-          displayName: scanner.display_name,
-          isActive: scanner.is_active,
-          rawArtifactFileName: scanner.raw_artifact_file_name ?? '',
-          stepsMarkdown: scanner.steps_markdown ?? '',
-          supportsDiffScope: scanner.supports_diff_scope,
-        }}
+        initialValues={toEditScannerInitialValues(scanner)}
         mode='edit'
         serverErrors={serverErrors}
       />
