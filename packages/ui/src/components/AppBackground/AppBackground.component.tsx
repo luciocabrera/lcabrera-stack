@@ -7,11 +7,20 @@ import type { AppBackgroundProps } from './AppBackground.types';
 
 import { styles } from './AppBackground.stylex';
 
-export const AppBackground = ({ children }: AppBackgroundProps) => {
+export const AppBackground = ({
+  children,
+  shouldFillViewport = true,
+}: AppBackgroundProps) => {
   const { isDarkMode } = useTheme();
 
   return (
-    <div {...stylex.props(styles.base, isDarkMode ? darkTheme : lightTheme)}>
+    <div
+      {...stylex.props(
+        styles.base,
+        shouldFillViewport ? styles.viewportHeight : styles.containerHeight,
+        isDarkMode ? darkTheme : lightTheme,
+      )}
+    >
       <div {...stylex.props(styles.backgroundShell, styles.overlayParent)}>
         <div
           {...stylex.props(

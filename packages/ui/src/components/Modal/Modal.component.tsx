@@ -47,7 +47,7 @@ export const Modal = ({
 
   return (
     <dialog ref={dialogRef} {...stylex.props(modalStyles.dialog)}>
-      <AppBackground>
+      <AppBackground shouldFillViewport={false}>
         <AppDotted>
           {title && (
             <Title

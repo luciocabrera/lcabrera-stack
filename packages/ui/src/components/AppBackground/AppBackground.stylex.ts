@@ -18,8 +18,12 @@ const specific = stylex.create({
     display: 'flex',
     flexDirection: 'column',
     fontFamily: typography.fontFamily,
+  },
+  containerHeight: {
+    height: '100%',
+  },
+  viewportHeight: {
     height: '100vh',
-    maxWidth: '100dvw',
   },
 });
 

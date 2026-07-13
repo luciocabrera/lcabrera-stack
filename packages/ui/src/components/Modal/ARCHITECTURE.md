@@ -9,13 +9,17 @@ Modal/
 ├── index.ts                  → Barrel export
 ├── Modal.component.tsx       → Native dialog wrapper
 ├── Modal.types.ts            → ModalProps
-└── Modal.stylex.ts           → dialog, backdrop, header, body, footer styles
+├── Modal.stylex.ts           → dialog, backdrop, body, footer styles
+└── Modal.test.tsx            → Tests
 ```
 
 ## Dependencies
 
 ```mermaid
 graph LR
+  Modal --> AppBackground["AppBackground (shouldFillViewport=false)"]
+  Modal --> AppDotted
+  Modal --> Title
   Modal --> Button
   Modal --> MenuCloseIcon
   Modal --> ICON_SIZE_MD["ICON_SIZE_MD (constant)"]
@@ -29,11 +33,13 @@ graph LR
 ```mermaid
 graph TD
   Modal --> dialog["&lt;dialog&gt; (ref=dialogRef)"]
-  dialog --> header{"title prop?"}
-  header -->|yes| Header["div.header → h2.title + Button (close)"]
+  dialog --> bg["AppBackground (shouldFillViewport=false → height 100%)"]
+  bg --> dotted["AppDotted (dot-pattern surface, overflowY auto)"]
+  dotted --> header{"title prop?"}
+  header -->|yes| Header["Title → title text + ghost close Button"]
   header -->|no| skip1["(omitted)"]
-  dialog --> body["div.body → children"]
-  dialog --> footer{"footer prop?"}
+  dotted --> body["div.body → children"]
+  dotted --> footer{"footer prop?"}
   footer -->|yes| Footer["div.footer → footer content"]
   footer -->|no| skip2["(omitted)"]
 ```
@@ -62,17 +68,18 @@ Two separate `useEffect`s are used:
 
 | Section | Condition        | Styles                             | Contents                        |
 | ------- | ---------------- | ---------------------------------- | ------------------------------- |
-| Header  | `title` present  | `padding.lg`, border-bottom        | `h2.title` + ghost close Button |
+| Header  | `title` present  | `Title` component                  | title text + ghost close Button |
 | Body    | always           | `padding.lg`, `overflowY: auto`    | `children`                      |
 | Footer  | `footer` present | `padding.lg`, border-top, flex-end | `footer` slot (ReactNode)       |
 
 ## Sizing
 
-| Constraint  | Value   |
-| ----------- | ------- |
-| `maxWidth`  | `480px` |
-| `width`     | `90vw`  |
-| `maxHeight` | `85vh`  |
+| Constraint  | Value              |
+| ----------- | ------------------ |
+| `width`     | `min(90vw, 520px)` |
+| `maxHeight` | `min(85vh, 600px)` |
+
+The dialog **hugs its content** vertically — `maxHeight` is a cap, not a fixed height. `AppBackground` inside the dialog must keep `shouldFillViewport={false}`: its default `100vh` height would make the children taller than the dialog and produce a phantom scrollbar (see `AppBackground/ARCHITECTURE.md` → Sizing Contract).
 
 ## Props
 

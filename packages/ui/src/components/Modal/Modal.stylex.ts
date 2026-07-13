@@ -8,18 +8,18 @@ import { colors } from '@repo/ui/design-system/tokens/colors.stylex';
 import * as stylex from '@stylexjs/stylex';
 
 export const modalStyles = stylex.create({
-  container: {
-    backdropFilter: 'blur(50px) saturate(0.5) brightness(0.9)',
-    maskImage: 'linear-gradient(to bottom, #000000, #000000)',
-    scrollbarColor: `${colors.borderSecondary} transparent`,
-  },
   body: {
     padding: spacing.lg,
+    flex: '1',
     gap: spacing.md,
+    //     transition: `transform ${transitions.normal} ${easing.easeInOut}`,
+    // backdropFilter: colors.glassBackdropFilterPrimary,
+    // backgroundColor: colors.glassBackgroundColorPrimary,
     // backdropFilter: 'blur(30px)',
     // backgroundColor: 'rgba(15, 23, 42, 0.45)',
     display: 'flex',
     flexDirection: 'column',
+    flexGrow: 1,
     overflowY: 'auto',
   },
   dialog: {
@@ -39,7 +39,7 @@ export const modalStyles = stylex.create({
     color: colors.textPrimary,
     textAlign: 'left',
     // zIndex: zIndex.modal,
-    height: 'min(85vh, 600px)',
+    maxHeight: 'min(85vh, 600px)',
     width: 'min(90vw, 520px)',
     '::backdrop': {
       transition: `opacity ${transitions.normal} ${easing.easeInOut}`,
@@ -72,15 +72,4 @@ export const modalStyles = stylex.create({
   //   borderBottomStyle: 'solid',
   //   borderBottomWidth: '1px',
   // },
-  outletWrapper: {
-    flex: '1 1 auto',
-    backgroundImage: `radial-gradient(circle, ${colors.patternDot} 0.1rem, transparent 0%)`,
-    backgroundRepeat: 'round',
-    backgroundSize: '2rem 2rem',
-    maskImage: 'linear-gradient(to bottom, #000000, #000000)',
-    scrollbarColor: `${colors.borderSecondary} transparent`,
-    scrollbarWidth: 'thin',
-    minHeight: 0,
-    overflowY: 'auto',
-  },
 });
