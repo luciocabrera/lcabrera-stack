@@ -1,6 +1,6 @@
 import type { DesignSystemSize } from '@repo/ui/types/design-system.types';
 
-import { styles } from '../Toolbar.stylex';
+import { styles } from '../Navbar.stylex';
 
 const COMPACT_CONTROL_STYLES = {
   embedded: styles.compactControlEmbedded,

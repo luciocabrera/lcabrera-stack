@@ -3,10 +3,15 @@ import type { TabItem } from '@repo/ui/components/Tabs';
 import { SidePanelBody } from '@repo/ui/components/SidePanel';
 import { useGetNormalizedColumn } from '@repo/ui/components/Table/contexts/TableConfig/columns/selectors';
 import { useSetTableColumnSettingsSelectedTab } from '@repo/ui/components/Table/contexts/TableConfig/meta/actions';
-import { useGetTableColumnSettingsSelectedTab } from '@repo/ui/components/Table/contexts/TableConfig/meta/selectors';
+import {
+  useGetTableColumnSelectedKey,
+  useGetTableColumnSettingsSelectedTab,
+} from '@repo/ui/components/Table/contexts/TableConfig/meta/selectors';
+import {
+  useGetTableIsLoading,
+  useGetTableIsLoadingMore,
+} from '@repo/ui/components/Table/contexts/TableData/data/selectors';
 import { Tabs } from '@repo/ui/components/Tabs';
-
-import type { ColumnSettingsDrawerBodyProps } from './ColumnSettingsDrawerBody.types';
 
 import { DetailsSection } from '../DetailsSection';
 import { FilterSection } from '../FilterSection';
@@ -23,10 +28,11 @@ import { SortingSection } from '../SortingSection';
  */
 export const ColumnSettingsDrawerBody = <
   TData extends Record<string, unknown>,
->({
-  columnKey,
-  isBusy = false,
-}: ColumnSettingsDrawerBodyProps<TData>) => {
+>() => {
+  const isLoading = useGetTableIsLoading();
+  const isLoadingMore = useGetTableIsLoadingMore();
+  const columnKey = useGetTableColumnSelectedKey<TData>();
+  const isBusy = isLoading || isLoadingMore;
   const column = useGetNormalizedColumn<TData>(columnKey);
   const selectedTab = useGetTableColumnSettingsSelectedTab();
   const setSelectedTab = useSetTableColumnSettingsSelectedTab();

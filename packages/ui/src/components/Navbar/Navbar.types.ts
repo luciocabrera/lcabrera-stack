@@ -6,24 +6,24 @@ import type {
 } from '@repo/ui/types/design-system.types';
 import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 
-export type ToolbarButtonConfig = Omit<ButtonProps, 'children' | 'width'> & {
+export type NavbarButtonConfig = Omit<ButtonProps, 'children' | 'width'> & {
   readonly icon?: ReactNode;
   readonly label: string;
   readonly type: 'button';
 };
 
-export type ToolbarItemConfig = ToolbarButtonConfig | ToolbarLinkConfig;
+export type NavbarItemConfig = NavbarButtonConfig | NavbarLinkConfig;
 
-export type ToolbarLinkConfig = Omit<NavLinkProps, 'children' | 'className'> & {
+export type NavbarLinkConfig = Omit<NavLinkProps, 'children' | 'className'> & {
   readonly color?: Pick<ButtonProps, 'color'>['color'];
   readonly icon?: ReactNode;
   readonly label: string;
   readonly type: 'link';
 };
 
-export type ToolbarProps = ComponentPropsWithoutRef<'nav'> & {
+export type NavbarProps = ComponentPropsWithoutRef<'nav'> & {
   readonly isCompact?: boolean;
-  readonly items: readonly ToolbarItemConfig[];
+  readonly items: readonly NavbarItemConfig[];
   readonly orientation?: DesignSystemOrientation;
   readonly size?: DesignSystemSize;
 };

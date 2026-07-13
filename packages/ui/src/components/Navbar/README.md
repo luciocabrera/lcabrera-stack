@@ -1,6 +1,6 @@
-# Toolbar Component
+# Navbar Component
 
-A flexible navigation toolbar component that can render buttons or navigation links with support for both vertical and horizontal orientations.
+A flexible navigation Navbar component that can render buttons or navigation links with support for both vertical and horizontal orientations.
 
 ## Features
 
@@ -17,7 +17,7 @@ A flexible navigation toolbar component that can render buttons or navigation li
 ### Basic Vertical Navigation (SidePanel)
 
 ```tsx
-import { Toolbar } from '@/components/Toolbar';
+import { Navbar } from '@/components/Navbar';
 import { Home, Settings, User } from 'lucide-react';
 
 const items = [
@@ -37,11 +37,11 @@ const items = [
   },
 ];
 
-<Toolbar
+<Navbar
   items={items}
   orientation='vertical'
   aria-label='Main navigation'
-  data-testid='main-toolbar'
+  data-testid='main-Navbar'
 />;
 ```
 
@@ -66,7 +66,7 @@ const actions = [
   },
 ];
 
-<Toolbar
+<Navbar
   items={actions}
   orientation='horizontal'
   aria-label='Document actions'
@@ -91,21 +91,21 @@ const mixedItems = [
   },
 ];
 
-<Toolbar items={mixedItems} aria-label='User menu' />;
+<Navbar items={mixedItems} aria-label='User menu' />;
 ```
 
 ## Props
 
-### ToolbarProps
+### NavbarProps
 
-| Prop          | Type                         | Required | Default      | Description                               |
-| ------------- | ---------------------------- | -------- | ------------ | ----------------------------------------- |
-| `items`       | `ToolbarItem[]`              | ✅       | -            | Array of toolbar items (buttons or links) |
-| `orientation` | `'horizontal' \| 'vertical'` | -        | `'vertical'` | Layout direction                          |
-| `aria-label`  | `string`                     | ✅       | -            | Accessible label for the navigation       |
-| `data-testid` | `string`                     | -        | -            | Test identifier for the toolbar           |
+| Prop          | Type                         | Required | Default      | Description                              |
+| ------------- | ---------------------------- | -------- | ------------ | ---------------------------------------- |
+| `items`       | `NavbarItem[]`               | ✅       | -            | Array of Navbar items (buttons or links) |
+| `orientation` | `'horizontal' \| 'vertical'` | -        | `'vertical'` | Layout direction                         |
+| `aria-label`  | `string`                     | ✅       | -            | Accessible label for the navigation      |
+| `data-testid` | `string`                     | -        | -            | Test identifier for the Navbar           |
 
-### ToolbarButtonItem
+### NavbarButtonItem
 
 | Prop          | Type                   | Required | Description                    |
 | ------------- | ---------------------- | -------- | ------------------------------ |
@@ -118,7 +118,7 @@ const mixedItems = [
 | `isDisabled`  | `boolean`              | -        | Disabled state                 |
 | `data-testid` | `string`               | -        | Test identifier                |
 
-### ToolbarLinkItem
+### NavbarLinkItem
 
 | Prop           | Type        | Required | Description            |
 | -------------- | ----------- | -------- | ---------------------- |
@@ -132,7 +132,7 @@ const mixedItems = [
 
 ## Responsive Behavior
 
-The Toolbar uses container queries to adapt its layout:
+The Navbar uses container queries to adapt its layout:
 
 - **Vertical orientation**: Always displays items in a column
 - **Horizontal orientation**:
@@ -168,11 +168,11 @@ const items = [
 ];
 ```
 
-If not provided, items get auto-generated IDs: `toolbar-item-0`, `toolbar-item-1`, etc.
+If not provided, items get auto-generated IDs: `Navbar-item-0`, `Navbar-item-1`, etc.
 
 ## Examples
 
-See [Toolbar.examples.tsx](./Toolbar.examples.tsx) for complete usage examples including:
+See [Navbar.examples.tsx](./Navbar.examples.tsx) for complete usage examples including:
 
 - SidePanel integration
 - Horizontal action bars

@@ -1,4 +1,4 @@
-import type { ToolbarItemConfig } from '@repo/ui/components/Toolbar/Toolbar.types';
+import type { NavbarItemConfig } from '@repo/ui/components/Navbar/Navbar.types';
 
 import {
   BarChartIcon,
@@ -13,7 +13,7 @@ import {
  */
 export const getNavigationItems = (
   iconSize: number,
-): readonly ToolbarItemConfig[] => [
+): readonly NavbarItemConfig[] => [
   {
     color: 'primary',
     end: true,

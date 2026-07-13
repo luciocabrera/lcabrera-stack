@@ -1,4 +1,4 @@
-import type { ToolbarItemConfig } from '@repo/ui/components/Toolbar/Toolbar.types';
+import type { NavbarItemConfig } from '@/components/Navbar/Navbar.types';
 
 /**
  * NavigationBody component props
@@ -10,5 +10,5 @@ export type NavigationBodyProps = {
    */
   readonly getNavigationItems: (
     iconSize: number,
-  ) => readonly ToolbarItemConfig[];
+  ) => readonly NavbarItemConfig[];
 };

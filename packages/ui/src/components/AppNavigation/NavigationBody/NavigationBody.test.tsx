@@ -1,16 +1,16 @@
 // @vitest-environment jsdom
 
-import type { ToolbarItemConfig } from '@repo/ui/components/Toolbar/Toolbar.types';
-
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import type { NavbarItemConfig } from '@/components/Navbar/Navbar.types';
 
 const { collapsedPreferenceMock, sizePreferenceMock } = vi.hoisted(() => ({
   collapsedPreferenceMock: vi.fn<() => string | undefined>(() => {}),
   sizePreferenceMock: vi.fn<() => string | undefined>(() => {}),
 }));
 
-type MockToolbarProps = {
+type MockNavbarProps = {
   readonly isCompact?: boolean;
   readonly items: readonly { readonly label: string }[];
   readonly size?: string;
@@ -22,13 +22,9 @@ vi.mock('@repo/ui/components/SidePanel', () => ({
   ),
 }));
 
-vi.mock('@repo/ui/components/Toolbar', () => ({
-  Toolbar: ({ isCompact, items, size }: MockToolbarProps) => (
-    <nav
-      data-compact={String(isCompact)}
-      data-size={size}
-      data-testid='toolbar'
-    >
+vi.mock('@repo/ui/components/Navbar', () => ({
+  Navbar: ({ isCompact, items, size }: MockNavbarProps) => (
+    <nav data-compact={String(isCompact)} data-size={size} data-testid='Navbar'>
       {items.map((item) => item.label).join('|')}
     </nav>
   ),
@@ -55,7 +51,7 @@ beforeEach(() => {
 describe('NavigationBody', () => {
   it('renders the app-supplied navigation items sized for the density', () => {
     const getNavigationItems = vi.fn(
-      (iconSize: number): readonly ToolbarItemConfig[] => [
+      (iconSize: number): readonly NavbarItemConfig[] => [
         { end: true, label: `Home ${iconSize}`, to: '/', type: 'link' },
       ],
     );
@@ -63,23 +59,23 @@ describe('NavigationBody', () => {
     render(<NavigationBody getNavigationItems={getNavigationItems} />);
 
     expect(getNavigationItems).toHaveBeenCalledTimes(1);
-    expect(screen.getByTestId('toolbar').textContent).toContain('Home');
-    expect(screen.getByTestId('toolbar').dataset.compact).toBe('false');
+    expect(screen.getByTestId('Navbar').textContent).toContain('Home');
+    expect(screen.getByTestId('Navbar').dataset.compact).toBe('false');
   });
 
-  it('compacts the toolbar when the navigation is collapsed', () => {
+  it('compacts the Navbar when the navigation is collapsed', () => {
     collapsedPreferenceMock.mockReturnValue('collapsed');
 
     render(<NavigationBody getNavigationItems={() => []} />);
 
-    expect(screen.getByTestId('toolbar').dataset.compact).toBe('true');
+    expect(screen.getByTestId('Navbar').dataset.compact).toBe('true');
   });
 
-  it('sizes toolbar buttons from the density preference', () => {
+  it('sizes Navbar buttons from the density preference', () => {
     sizePreferenceMock.mockReturnValue('compact');
 
     render(<NavigationBody getNavigationItems={() => []} />);
 
-    expect(screen.getByTestId('toolbar').dataset.size).toBe('mini');
+    expect(screen.getByTestId('Navbar').dataset.size).toBe('mini');
   });
 });

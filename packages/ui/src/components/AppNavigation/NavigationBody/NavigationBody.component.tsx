@@ -1,5 +1,5 @@
+import { Navbar } from '@repo/ui/components/Navbar';
 import { SidePanelBody } from '@repo/ui/components/SidePanel';
-import { Toolbar } from '@repo/ui/components/Toolbar';
 import {
   useGetGlobalNavigationCollapsedPreference,
   useGetGlobalNavigationSizePreference,
@@ -30,7 +30,7 @@ export const NavigationBody = ({ getNavigationItems }: NavigationBodyProps) => {
   return (
     <SidePanelBody>
       <div {...stylex.props(styles.bodyContent, bodyDensityStyle)}>
-        <Toolbar
+        <Navbar
           aria-label='Main navigation links'
           data-testid='main-navigation'
           isCompact={!isExpanded}

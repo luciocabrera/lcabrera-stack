@@ -276,7 +276,7 @@ describe('ColumnSettingsDrawer', () => {
       label: 'Revenue',
     });
 
-    render(<ColumnSettingsDrawer columnKey='revenue' />);
+    render(<ColumnSettingsDrawer />);
 
     expect(screen.getByTestId('tabs').textContent).toBe(
       'General|Filter|Sorting|Pinning|Details',
@@ -295,7 +295,7 @@ describe('ColumnSettingsDrawer', () => {
       label: 'Status',
     });
 
-    render(<ColumnSettingsDrawer columnKey='status' />);
+    render(<ColumnSettingsDrawer />);
 
     expect(screen.getByTestId('tabs').textContent).toBe('General|Details');
   });
@@ -309,7 +309,7 @@ describe('ColumnSettingsDrawer', () => {
       label: 'Customer',
     });
 
-    render(<ColumnSettingsDrawer columnKey='customer' />);
+    render(<ColumnSettingsDrawer />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Accept' }));
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
@@ -327,7 +327,7 @@ describe('ColumnSettingsDrawer', () => {
       label: 'Customer',
     });
 
-    render(<ColumnSettingsDrawer columnKey='customer' />);
+    render(<ColumnSettingsDrawer />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Toggle pin' }));
     fireEvent.click(screen.getByRole('button', { name: 'Close' }));
@@ -345,7 +345,7 @@ describe('ColumnSettingsDrawer', () => {
       label: 'Customer',
     });
 
-    render(<ColumnSettingsDrawer columnKey='customer' isBusy />);
+    render(<ColumnSettingsDrawer />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Accept' }));
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));

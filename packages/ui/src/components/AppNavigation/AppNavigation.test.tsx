@@ -1,6 +1,5 @@
 // @vitest-environment jsdom
 
-import type { ToolbarItemConfig } from '@repo/ui/components/Toolbar/Toolbar.types';
 import type { GlobalSettingsState } from '@repo/ui/types/globalSettings.types';
 
 import { GlobalSettingsProvider } from '@repo/ui/contexts/GlobalSettingsContext';
@@ -10,11 +9,13 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import type { NavbarItemConfig } from '@/components/Navbar/Navbar.types';
+
 import { AppNavigation } from './AppNavigation.component';
 
 // Fixture only — real route items are supplied by each consuming app (see
 // AppNavigationProps.getNavigationItems' own doc), not owned by this package.
-const getFixtureNavigationItems = (): readonly ToolbarItemConfig[] => [
+const getFixtureNavigationItems = (): readonly NavbarItemConfig[] => [
   { end: true, label: 'Home', to: '/', type: 'link' },
   { label: 'Enterprise Orders', to: '/enterprise-orders', type: 'link' },
 ];
@@ -44,19 +45,13 @@ type RenderWithGlobalSettingsArgs = {
 
 const renderWithGlobalSettings = ({
   initialSettings,
-  isDarkMode,
-  onToggleTheme,
 }: RenderWithGlobalSettingsArgs) => {
   const router = createMemoryRouter(
     [
       {
         element: (
           <GlobalSettingsProvider initialSettings={initialSettings}>
-            <AppNavigation
-              getNavigationItems={getFixtureNavigationItems}
-              isDarkMode={isDarkMode}
-              onToggleTheme={onToggleTheme}
-            />
+            <AppNavigation getNavigationItems={getFixtureNavigationItems} />
           </GlobalSettingsProvider>
         ),
         path: '/',

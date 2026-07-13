@@ -106,7 +106,7 @@ beforeEach(() => {
 
 describe('ColumnSettingsDrawerHeader', () => {
   it('renders the column label as the drawer title', () => {
-    render(<ColumnSettingsDrawerHeader columnKey='revenue' />);
+    render(<ColumnSettingsDrawerHeader />);
 
     expect(
       screen.getByRole('heading', { name: /Revenue/i }).textContent,
@@ -115,7 +115,7 @@ describe('ColumnSettingsDrawerHeader', () => {
   });
 
   it('pins the drawer through the meta action when unpinned', () => {
-    render(<ColumnSettingsDrawerHeader columnKey='revenue' />);
+    render(<ColumnSettingsDrawerHeader />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Toggle pin' }));
 
@@ -125,7 +125,7 @@ describe('ColumnSettingsDrawerHeader', () => {
   it('unpins the drawer through the meta action when pinned', () => {
     isColumnSettingsPinnedMock.mockReturnValue(true);
 
-    render(<ColumnSettingsDrawerHeader columnKey='revenue' />);
+    render(<ColumnSettingsDrawerHeader />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Toggle pin' }));
 
@@ -133,7 +133,7 @@ describe('ColumnSettingsDrawerHeader', () => {
   });
 
   it('cancels drawer changes and requests close when unpinned on toolbar close', () => {
-    render(<ColumnSettingsDrawerHeader columnKey='revenue' />);
+    render(<ColumnSettingsDrawerHeader />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Toolbar close' }));
 
@@ -143,7 +143,7 @@ describe('ColumnSettingsDrawerHeader', () => {
   it('cancels drawer changes without closing when pinned on toolbar close', () => {
     isColumnSettingsPinnedMock.mockReturnValue(true);
 
-    render(<ColumnSettingsDrawerHeader columnKey='revenue' />);
+    render(<ColumnSettingsDrawerHeader />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Toolbar close' }));
 
@@ -151,7 +151,7 @@ describe('ColumnSettingsDrawerHeader', () => {
   });
 
   it('ignores pin toggling and closing while busy', () => {
-    render(<ColumnSettingsDrawerHeader columnKey='revenue' isBusy />);
+    render(<ColumnSettingsDrawerHeader />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Toggle pin' }));
     fireEvent.click(screen.getByRole('button', { name: 'Toolbar close' }));

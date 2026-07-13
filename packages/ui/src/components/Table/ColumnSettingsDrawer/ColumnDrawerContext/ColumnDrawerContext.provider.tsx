@@ -6,18 +6,19 @@ import type {
   ColumnDrawerState,
 } from './ColumnDrawerContext.types';
 
+import { useGetTableColumnSelectedKey } from '../../contexts/TableConfig/meta/selectors';
 import { ColumnDrawerContext } from './ColumnDrawerContext.context';
 import { getTableColumnDrawerState } from './utils';
 
 export const ColumnDrawerProvider = ({
   children,
-  columnKey,
-}: ColumnDrawerProviderProps<Record<string, unknown>>) => {
+}: ColumnDrawerProviderProps) => {
   const { columnsStore } = useTableConfigContextValue();
+  const columnKey = useGetTableColumnSelectedKey();
   const columnsState = columnsStore.get();
   const initialState: ColumnDrawerState<Record<string, unknown>> =
     getTableColumnDrawerState({
-      columnKey,
+      columnKey: columnKey ?? '',
       columnsState,
     });
 

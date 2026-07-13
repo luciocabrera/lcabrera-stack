@@ -9,7 +9,6 @@ export const styles = stylex.create({
     backgroundSize: '2rem 2rem',
     display: 'flex',
     flexDirection: 'column',
-    flexWrap: 'wrap',
     maskImage: 'linear-gradient(to bottom, #000000, #000000)',
     scrollbarColor: `${colors.borderSecondary} transparent`,
     scrollbarWidth: 'thin',

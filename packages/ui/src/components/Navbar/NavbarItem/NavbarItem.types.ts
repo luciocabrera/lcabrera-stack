@@ -3,11 +3,11 @@ import type {
   DesignSystemSize,
 } from '@repo/ui/types/design-system.types';
 
-import type { ToolbarItemConfig } from '../Toolbar.types';
+import type { NavbarItemConfig } from '../Navbar.types';
 
-export type ToolbarItemProps = {
+export type NavbarItemProps = {
   readonly isCompact: boolean;
-  readonly item: ToolbarItemConfig;
+  readonly item: NavbarItemConfig;
   readonly orientation: DesignSystemOrientation;
   readonly size: DesignSystemSize;
 };

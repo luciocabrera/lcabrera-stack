@@ -11,6 +11,7 @@ export const styles = stylex.create({
     gap: spacing.sm,
     display: 'flex',
     flexDirection: 'column',
+    width: '100%',
   },
   description: {
     color: colors.textSecondary,

@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { ToolbarItem } from './ToolbarItem.component';
+import { NavbarItem } from './NavbarItem.component';
 
 afterEach(() => {
   cleanup();
@@ -56,12 +56,12 @@ vi.mock('@repo/ui/components/NavLink', () => ({
   NavLink: MockNavLink,
 }));
 
-describe('ToolbarItem', () => {
+describe('NavbarItem', () => {
   it('renders a button entry inside a list item and forwards clicks', () => {
     const onClick = vi.fn();
 
     render(
-      <ToolbarItem
+      <NavbarItem
         isCompact={false}
         item={{ label: 'Refresh', onClick, type: 'button' }}
         orientation='vertical'
@@ -77,7 +77,7 @@ describe('ToolbarItem', () => {
 
   it('renders a link entry pointing at its target', () => {
     render(
-      <ToolbarItem
+      <NavbarItem
         isCompact={false}
         item={{ label: 'Home', to: '/home', type: 'link' }}
         orientation='vertical'
@@ -90,7 +90,7 @@ describe('ToolbarItem', () => {
 
   it('switches the control to icon-only with an aria-label when compact', () => {
     render(
-      <ToolbarItem
+      <NavbarItem
         isCompact
         item={{ label: 'Refresh', onClick: () => void 0, type: 'button' }}
         orientation='vertical'

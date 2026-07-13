@@ -88,7 +88,7 @@ describe('ColumnSettingsDrawerFooter', () => {
   });
 
   it('ignores accept and cancel while busy', () => {
-    render(<ColumnSettingsDrawerFooter isBusy />);
+    render(<ColumnSettingsDrawerFooter />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Accept' }));
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));

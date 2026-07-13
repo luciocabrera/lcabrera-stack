@@ -6,11 +6,16 @@ import {
 } from '@repo/ui/components/SidePanel';
 import { useGetNormalizedColumn } from '@repo/ui/components/Table/contexts/TableConfig/columns/selectors';
 import { useSetTableIsColumnSettingsPinned } from '@repo/ui/components/Table/contexts/TableConfig/meta/actions';
-import { useGetTableIsColumnSettingsPinned } from '@repo/ui/components/Table/contexts/TableConfig/meta/selectors';
+import {
+  useGetTableColumnSelectedKey,
+  useGetTableIsColumnSettingsPinned,
+} from '@repo/ui/components/Table/contexts/TableConfig/meta/selectors';
 import { ICON_SIZE_LG } from '@repo/ui/design-system/constants';
 
-import type { ColumnSettingsDrawerHeaderProps } from './ColumnSettingsDrawerHeader.types';
-
+import {
+  useGetTableIsLoading,
+  useGetTableIsLoadingMore,
+} from '../../contexts/TableData/data/selectors';
 import { useCancelColumnSettings } from '../hooks/useCancelColumnSettings.hook';
 
 /**
@@ -20,13 +25,15 @@ import { useCancelColumnSettings } from '../hooks/useCancelColumnSettings.hook';
  */
 export const ColumnSettingsDrawerHeader = <
   TData extends Record<string, unknown>,
->({
-  columnKey,
-  isBusy = false,
-}: ColumnSettingsDrawerHeaderProps<TData>) => {
+>() => {
+  const isLoading = useGetTableIsLoading();
+  const isLoadingMore = useGetTableIsLoadingMore();
+  const isPinned = useGetTableIsColumnSettingsPinned();
+  const columnKey = useGetTableColumnSelectedKey<TData>();
+  const isBusy = isLoading || isLoadingMore;
   const cancelColumnSettings = useCancelColumnSettings({ isBusy });
   const column = useGetNormalizedColumn<TData>(columnKey);
-  const isPinned = useGetTableIsColumnSettingsPinned();
+
   const setIsPinned = useSetTableIsColumnSettingsPinned();
 
   const handleTogglePin = () => {

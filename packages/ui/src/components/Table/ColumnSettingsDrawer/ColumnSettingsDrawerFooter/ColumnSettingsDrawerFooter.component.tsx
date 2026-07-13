@@ -1,8 +1,10 @@
 import { Button } from '@repo/ui/components/Button';
 import { SidePanelFooter } from '@repo/ui/components/SidePanel';
 
-import type { ColumnSettingsDrawerFooterProps } from './ColumnSettingsDrawerFooter.types';
-
+import {
+  useGetTableIsLoading,
+  useGetTableIsLoadingMore,
+} from '../../contexts/TableData/data/selectors';
 import { useBatchSetColumnDrawerSettings } from '../ColumnDrawerContext/actions';
 import { useCancelColumnSettings } from '../hooks/useCancelColumnSettings.hook';
 
@@ -12,9 +14,11 @@ import { useCancelColumnSettings } from '../hooks/useCancelColumnSettings.hook';
  * drawer open; Cancel discards pending changes and closes unless pinned.
  * Both no-op while busy.
  */
-export const ColumnSettingsDrawerFooter = ({
-  isBusy = false,
-}: ColumnSettingsDrawerFooterProps) => {
+export const ColumnSettingsDrawerFooter = () => {
+  const isLoading = useGetTableIsLoading();
+  const isLoadingMore = useGetTableIsLoadingMore();
+
+  const isBusy = isLoading || isLoadingMore;
   const batchSetColumnDrawerSettings = useBatchSetColumnDrawerSettings();
   const cancelColumnSettings = useCancelColumnSettings({ isBusy });
 

@@ -2,24 +2,24 @@ import { Button } from '@repo/ui/components/Button';
 import { NavLink } from '@repo/ui/components/NavLink';
 import * as stylex from '@stylexjs/stylex';
 
-import type { ToolbarItemProps } from './ToolbarItem.types';
+import type { NavbarItemProps } from './NavbarItem.types';
 
-import { styles } from '../Toolbar.stylex';
 import { getCompactControlStyle } from '../utils/getCompactControlStyle.util';
-import { getCompactItemStyle } from '../utils/getCompactItemStyle.util';
+import { styles } from './NavbarItem.stylex';
+import { getCompactItemStyle } from './utils/getCompactItemStyle.util';
 
 /**
- * Single toolbar entry: owns its compact style derivation and renders the
+ * Single navbar entry: owns its compact style derivation and renders the
  * `<li>` wrapping either a `Button` (`type: 'button'`) or a `NavLink`
  * (`type: 'link'`), sharing the common control props across both branches.
- * Private delegate of `Toolbar` — not exported from the barrel.
+ * Private delegate of `navbar` — not exported from the barrel.
  */
-export const ToolbarItem = ({
+export const NavbarItem = ({
   isCompact,
   item,
   orientation,
   size,
-}: ToolbarItemProps) => {
+}: NavbarItemProps) => {
   const resolvedSize = item.size ?? size;
   const sharedControlProps = {
     'aria-label': isCompact ? item.label : undefined,
@@ -37,9 +37,9 @@ export const ToolbarItem = ({
   return (
     <li
       {...stylex.props(
-        styles.toolbarItem,
-        orientation === 'horizontal' && styles.toolbarItemResponsive,
-        isCompact && styles.toolbarItemCompact,
+        styles.navbarItem,
+        orientation === 'horizontal' && styles.navbarItemResponsive,
+        isCompact && styles.navbarItemCompact,
         isCompact && getCompactItemStyle(resolvedSize),
       )}
     >

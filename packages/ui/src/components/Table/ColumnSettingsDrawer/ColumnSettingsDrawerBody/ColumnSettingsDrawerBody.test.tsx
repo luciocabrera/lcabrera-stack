@@ -105,7 +105,7 @@ beforeEach(() => {
 
 describe('ColumnSettingsDrawerBody', () => {
   it('includes all conditional tabs for filterable, sortable, non-static columns', () => {
-    render(<ColumnSettingsDrawerBody columnKey='revenue' />);
+    render(<ColumnSettingsDrawerBody />);
 
     expect(screen.getByTestId('tabs').textContent).toContain(
       'General|Filter|Sorting|Pinning|Details',
@@ -121,7 +121,7 @@ describe('ColumnSettingsDrawerBody', () => {
       label: 'Status',
     });
 
-    render(<ColumnSettingsDrawerBody columnKey='status' />);
+    render(<ColumnSettingsDrawerBody />);
 
     expect(screen.getByTestId('tabs').textContent).toContain('General|Details');
     expect(screen.getByTestId('tabs').textContent).not.toContain('Filter');
@@ -130,7 +130,7 @@ describe('ColumnSettingsDrawerBody', () => {
   it('restores and persists the selected column settings tab', () => {
     selectedTabMock.mockReturnValue('sorting');
 
-    render(<ColumnSettingsDrawerBody columnKey='revenue' />);
+    render(<ColumnSettingsDrawerBody />);
 
     expect(screen.getByTestId('tabs').dataset.selectedTab).toBe('sorting');
 
@@ -140,7 +140,7 @@ describe('ColumnSettingsDrawerBody', () => {
   });
 
   it('forwards the busy flag to the tabs', () => {
-    render(<ColumnSettingsDrawerBody columnKey='revenue' isBusy />);
+    render(<ColumnSettingsDrawerBody />);
 
     expect(screen.getByTestId('tabs').dataset.busy).toBe('true');
   });

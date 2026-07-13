@@ -1,4 +1,4 @@
-# Toolbar Component Architecture
+# Navbar Component Architecture
 
 Composable navigation and action container that renders a typed list of items as
 Buttons or NavLinks, with responsive layout behavior driven by orientation,
@@ -7,19 +7,19 @@ container queries, and an optional compact icon-only mode.
 ## File Structure
 
 ```
-Toolbar/
+Navbar/
 ├── ARCHITECTURE.md         -> This documentation
-├── index.ts                -> Barrel export: Toolbar + Toolbar types
+├── index.ts                -> Barrel export: Navbar + Navbar types
 ├── README.md               -> Usage guide and examples
-├── Toolbar.component.tsx   -> nav/ul layout shell; maps items to ToolbarItem
-├── Toolbar.stylex.ts       -> Layout and responsive styles
-├── Toolbar.test.tsx        -> Unit tests (nav render, button/link items)
-├── Toolbar.types.ts        -> Item configuration unions and ToolbarProps
+├── Navbar.component.tsx   -> nav/ul layout shell; maps items to NavbarItem
+├── Navbar.stylex.ts       -> Layout and responsive styles
+├── Navbar.test.tsx        -> Unit tests (nav render, button/link items)
+├── Navbar.types.ts        -> Item configuration unions and NavbarProps
 │
-├── ToolbarItem/            -> Private delegate (no barrel): one entry = li + Button/NavLink branch
-│   ├── ToolbarItem.component.tsx
-│   ├── ToolbarItem.test.tsx
-│   └── ToolbarItem.types.ts -> { isCompact, item, orientation, size }
+├── NavbarItem/            -> Private delegate (no barrel): one entry = li + Button/NavLink branch
+│   ├── NavbarItem.component.tsx
+│   ├── NavbarItem.test.tsx
+│   └── NavbarItem.types.ts -> { isCompact, item, orientation, size }
 │
 └── utils/                  -> One-per-file size→style lookups (no barrel)
     ├── getCompactControlStyle.util.ts (+ test)
@@ -30,9 +30,9 @@ Toolbar/
 
 ```mermaid
 graph LR
-  Toolbar[Toolbar component] --> Types[Toolbar types]
-  Toolbar --> Styles[Toolbar styles]
-  Toolbar --> Item[ToolbarItem component]
+  Navbar[Navbar component] --> Types[Navbar types]
+  Navbar --> Styles[Navbar styles]
+  Navbar --> Item[NavbarItem component]
 
   Item --> Button[Button component]
   Item --> NavLink[NavLink component]
@@ -48,29 +48,29 @@ graph LR
 
 ## Public API
 
-`ToolbarProps` extends native `nav` props plus:
+`NavbarProps` extends native `nav` props plus:
 
 | Prop          | Type                     | Default    | Description                                           |
 | ------------- | ------------------------ | ---------- | ----------------------------------------------------- |
 | `isCompact`   | `boolean`                | `false`    | Centers square icon-only controls with label tooltips |
-| `items`       | `ToolbarItemConfig[]`    | -          | Ordered list of toolbar items                         |
+| `items`       | `NavbarItemConfig[]`     | -          | Ordered list of Navbar items                          |
 | `orientation` | `horizontal \| vertical` | `vertical` | Layout direction                                      |
 | `size`        | design-system size       | `md`       | Fallback size for items without explicit size         |
 
 ### Item Types
 
-`ToolbarItemConfig` is a discriminated union:
+`NavbarItemConfig` is a discriminated union:
 
-- `ToolbarButtonConfig`
-- `ToolbarLinkConfig`
+- `NavbarButtonConfig`
+- `NavbarLinkConfig`
 
-#### ToolbarButtonConfig
+#### NavbarButtonConfig
 
 - Extends Button props except `children` and `width`
 - Requires `label`
 - Uses `type: 'button'`
 
-#### ToolbarLinkConfig
+#### NavbarLinkConfig
 
 - Extends NavLink props except `children` and `className`
 - Requires `label`
@@ -83,7 +83,7 @@ graph LR
 graph TD
   Nav[Nav element]
   List[Unordered list]
-  Item[Toolbar item list element]
+  Item[Navbar item list element]
   ButtonNode[Button item]
   LinkNode[NavLink item]
 
@@ -98,10 +98,10 @@ graph TD
 ```mermaid
 graph TD
   A[Read props and defaults] --> B[Render nav element]
-  B --> C[Apply toolbar styles based on orientation]
+  B --> C[Apply Navbar styles based on orientation]
   C --> D[Render unordered list with matching layout styles]
-  D --> E[Map items to ToolbarItem, keyed by label]
-  E --> F[ToolbarItem resolves item size and compact styles]
+  D --> E[Map items to NavbarItem, keyed by label]
+  E --> F[NavbarItem resolves item size and compact styles]
   F --> G[Render list item]
   G --> H{Item type is button}
   H -- yes --> I[Render Button with shared control props]
@@ -114,31 +114,31 @@ graph TD
 
 ## Item Rendering Strategy
 
-Toolbar itself is only the `nav`/`ul` layout shell. Each entry is rendered by
-the private `ToolbarItem` delegate, which derives the resolved size and compact
+Navbar itself is only the `nav`/`ul` layout shell. Each entry is rendered by
+the private `NavbarItem` delegate, which derives the resolved size and compact
 styles, builds the shared control props once, and branches between Button and
 NavLink.
 
 ```mermaid
 flowchart TD
-  A[Toolbar item config] --> B{Type field}
+  A[Navbar item config] --> B{Type field}
   B -- button --> C[Render Button branch]
   B -- link --> D[Render NavLink branch]
 
   C --> E[Forward color icon disabled onClick]
   C --> F[Set orientation]
-  C --> G[Set size to item size or toolbar size]
+  C --> G[Set size to item size or Navbar size]
   C --> H[Force width full]
 
   D --> I[Forward color icon end to]
   D --> J[Set orientation]
-  D --> K[Set size to item size or toolbar size]
+  D --> K[Set size to item size or Navbar size]
   D --> L[Force width full]
 ```
 
 ### Button branch
 
-For button items, Toolbar forwards:
+For button items, Navbar forwards:
 
 - `color`
 - `icon`
@@ -155,7 +155,7 @@ For button items, Toolbar forwards:
 
 ### Link branch
 
-For link items, Toolbar forwards:
+For link items, Navbar forwards:
 
 - `color`
 - `end`
@@ -172,17 +172,17 @@ For link items, Toolbar forwards:
 
 ## Layout Model
 
-Both the outer `nav` and inner `ul` reuse the `toolbar` base style plus an
+Both the outer `nav` and inner `ul` reuse the `Navbar` base style plus an
 orientation-specific modifier.
 
 ```mermaid
 graph TD
-  ToolbarStyles[Toolbar styles]
-  ToolbarStyles --> Base[Base toolbar style]
-  ToolbarStyles --> Horizontal[Horizontal layout style]
-  ToolbarStyles --> Vertical[Vertical layout style]
-  ToolbarStyles --> Item[Toolbar item style]
-  ToolbarStyles --> Responsive[Responsive item style]
+  NavbarStyles[Navbar styles]
+  NavbarStyles --> Base[Base Navbar style]
+  NavbarStyles --> Horizontal[Horizontal layout style]
+  NavbarStyles --> Vertical[Vertical layout style]
+  NavbarStyles --> Item[Navbar item style]
+  NavbarStyles --> Responsive[Responsive item style]
 
   Horizontal --> Wrap[Wrap items]
   Horizontal --> ContainerSwitch[Switch to column below container threshold]
@@ -190,7 +190,7 @@ graph TD
   Responsive --> FullWidth[Grow to full width in narrow horizontal containers]
 ```
 
-### Base toolbar style
+### Base Navbar style
 
 Shared base style defines:
 
@@ -200,7 +200,7 @@ Shared base style defines:
 - `margin: 0`
 - `padding: 0`
 - `listStyle: none`
-- `containerName: toolbar`
+- `containerName: Navbar`
 - `containerType: inline-size`
 
 ### Orientation behavior
@@ -215,8 +215,8 @@ Shared base style defines:
 
 ### Item behavior
 
-Each list item uses a flex wrapper. In horizontal mode, `toolbarItemResponsive`
-allows items to expand to full width when the toolbar container becomes narrow.
+Each list item uses a flex wrapper. In horizontal mode, `NavbarItemResponsive`
+allows items to expand to full width when the Navbar container becomes narrow.
 
 ## Accessibility and Semantics
 
@@ -239,7 +239,7 @@ internal composition and rendering behavior.
 
 - Item keys are currently derived from `label`, so duplicate labels can produce
   unstable or colliding keys.
-- Toolbar intentionally stays stateless; routing state, click side effects, and
+- Navbar intentionally stays stateless; routing state, click side effects, and
   active link logic live in child components.
 - The new barrel `index.ts` keeps public imports stable, but internal files in
   the same folder may still choose direct relative imports when that is clearer.

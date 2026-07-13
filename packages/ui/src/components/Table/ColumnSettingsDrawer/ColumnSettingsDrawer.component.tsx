@@ -1,8 +1,10 @@
 import { SidePanel } from '@repo/ui/components/SidePanel';
 import { useGetTableIsColumnSettingsPinned } from '@repo/ui/components/Table/contexts/TableConfig/meta/selectors';
+import {
+  useGetTableIsLoading,
+  useGetTableIsLoadingMore,
+} from '@repo/ui/components/Table/contexts/TableData/data/selectors';
 import { useTableWrapperRef } from '@repo/ui/components/Table/contexts/TableWrapper';
-
-import type { ColumnSettingsDrawerProps } from './ColumnSettingsDrawer.types';
 
 import { ColumnSettingsDrawerBody } from './ColumnSettingsDrawerBody/ColumnSettingsDrawerBody.component';
 import { ColumnSettingsDrawerFooter } from './ColumnSettingsDrawerFooter/ColumnSettingsDrawerFooter.component';
@@ -16,12 +18,12 @@ import { useCancelColumnSettings } from './hooks/useCancelColumnSettings.hook';
  * Closing the panel cancels pending drawer changes; accept commits without
  * closing, and a pinned drawer always stays open.
  */
-export const ColumnSettingsDrawer = <TData extends Record<string, unknown>>({
-  columnKey,
-  isBusy = false,
-}: ColumnSettingsDrawerProps<TData>) => {
-  const cancelColumnSettings = useCancelColumnSettings({ isBusy });
+export const ColumnSettingsDrawer = () => {
+  const isLoading = useGetTableIsLoading();
+  const isLoadingMore = useGetTableIsLoadingMore();
   const isPinned = useGetTableIsColumnSettingsPinned();
+  const isBusy = isLoading || isLoadingMore;
+  const cancelColumnSettings = useCancelColumnSettings({ isBusy });
   const wrapperRef = useTableWrapperRef();
 
   return (
@@ -33,12 +35,9 @@ export const ColumnSettingsDrawer = <TData extends Record<string, unknown>>({
       position='right'
       size='md'
     >
-      <ColumnSettingsDrawerHeader<TData>
-        columnKey={columnKey}
-        isBusy={isBusy}
-      />
-      <ColumnSettingsDrawerBody<TData> columnKey={columnKey} isBusy={isBusy} />
-      <ColumnSettingsDrawerFooter isBusy={isBusy} />
+      <ColumnSettingsDrawerHeader />
+      <ColumnSettingsDrawerBody />
+      <ColumnSettingsDrawerFooter />
     </SidePanel>
   );
 };

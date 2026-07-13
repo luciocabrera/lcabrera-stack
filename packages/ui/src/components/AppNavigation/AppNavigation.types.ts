@@ -1,8 +1,8 @@
-import type { ToolbarItemConfig } from '@repo/ui/components/Toolbar/Toolbar.types';
+import type { NavbarItemConfig } from '@/components/Navbar/Navbar.types';
 
 export type AppNavigationProps = {
   readonly defaultIsPinned?: boolean;
   readonly getNavigationItems: (
     iconSize: number,
-  ) => readonly ToolbarItemConfig[];
+  ) => readonly NavbarItemConfig[];
 };

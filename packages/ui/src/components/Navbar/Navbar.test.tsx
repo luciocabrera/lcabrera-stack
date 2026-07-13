@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { Toolbar } from './Toolbar.component';
+import { Navbar } from './Navbar.component';
 
 afterEach(() => {
   cleanup();
@@ -44,22 +44,22 @@ vi.mock('@repo/ui/components/NavLink', () => ({
   NavLink: MockNavLink,
 }));
 
-describe('Toolbar', () => {
+describe('Navbar', () => {
   it('renders a navigation element', () => {
-    render(<Toolbar items={[]} />);
+    render(<Navbar items={[]} />);
     expect(screen.getByRole('navigation')).not.toBeNull();
   });
 
   it('renders button items', () => {
     const onClick = vi.fn();
-    render(<Toolbar items={[{ label: 'Refresh', onClick, type: 'button' }]} />);
+    render(<Navbar items={[{ label: 'Refresh', onClick, type: 'button' }]} />);
     const button = screen.getByRole('button', { name: 'Refresh' });
     fireEvent.click(button);
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 
   it('renders link items', () => {
-    render(<Toolbar items={[{ label: 'Home', to: '/home', type: 'link' }]} />);
+    render(<Navbar items={[{ label: 'Home', to: '/home', type: 'link' }]} />);
     expect(screen.getByText('Home').textContent).toBe('Home');
   });
 });

@@ -1,40 +1,40 @@
 import * as stylex from '@stylexjs/stylex';
 
-import type { ToolbarProps } from './Toolbar.types';
+import type { NavbarProps } from './Navbar.types';
 
-import { styles } from './Toolbar.stylex';
-import { ToolbarItem } from './ToolbarItem/ToolbarItem.component';
+import { styles } from './Navbar.stylex';
+import { NavbarItem } from './NavbarItem';
 
-export const Toolbar = ({
+export const Navbar = ({
   isCompact = false,
   items,
   orientation = 'vertical',
   size = 'md',
   ...props
-}: ToolbarProps) => {
+}: NavbarProps) => {
   return (
     <nav
       role='navigation'
       {...props}
       {...stylex.props(
-        styles.toolbar,
+        styles.navbar,
         orientation === 'horizontal'
-          ? styles.toolbarHorizontal
-          : styles.toolbarVertical,
-        isCompact && styles.toolbarCompact,
+          ? styles.navbarHorizontal
+          : styles.navbarVertical,
+        isCompact && styles.navbarCompact,
       )}
     >
       <ul
         {...stylex.props(
-          styles.toolbar,
+          styles.navbar,
           orientation === 'horizontal'
-            ? styles.toolbarHorizontal
-            : styles.toolbarVertical,
-          isCompact && styles.toolbarCompact,
+            ? styles.navbarHorizontal
+            : styles.navbarVertical,
+          isCompact && styles.navbarCompact,
         )}
       >
         {items.map((item) => (
-          <ToolbarItem
+          <NavbarItem
             isCompact={isCompact}
             item={item}
             key={`toolbar-item-${item.label}`}

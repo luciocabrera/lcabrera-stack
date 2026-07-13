@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { styles } from '../Toolbar.stylex';
+import { styles } from '../Navbar.stylex';
 import { getCompactControlStyle } from './getCompactControlStyle.util';
 
 describe('getCompactControlStyle', () => {
