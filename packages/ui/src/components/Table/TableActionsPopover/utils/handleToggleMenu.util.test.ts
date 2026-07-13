@@ -64,7 +64,9 @@ const createFrameQueue = () => {
   const frames: FrameRequestCallback[] = [];
   vi.stubGlobal(
     'requestAnimationFrame',
-    vi.fn((callback: FrameRequestCallback) => frames.push(callback)),
+    vi.fn((callback: FrameRequestCallback) => {
+      frames.push(callback);
+    }),
   );
 
   return {
@@ -84,7 +86,7 @@ const createHandlerArgs = () => ({
 
 afterEach(() => {
   vi.unstubAllGlobals();
-  document.body.innerHTML = '';
+  document.body.replaceChildren();
 });
 
 describe('handleToggleMenu', () => {
@@ -94,8 +96,8 @@ describe('handleToggleMenu', () => {
 
     handleToggleMenu({
       ...handlerArgs,
-      getTriggerElement: () => null,
-      menuElement: null,
+      getTriggerElement: () => document.getElementById('missing-trigger'),
+      menuElement: document.querySelector<HTMLDivElement>('#missing-menu'),
     });
 
     expect(handlerArgs.setIsMenuOpen).not.toHaveBeenCalled();
@@ -112,7 +114,7 @@ describe('handleToggleMenu', () => {
 
     handleToggleMenu({
       ...handlerArgs,
-      getTriggerElement: () => null,
+      getTriggerElement: () => document.getElementById('missing-trigger'),
       menuElement,
     });
 

@@ -1,5 +1,4 @@
 import type { MenuPosition } from '../TableActionsPopover.types';
-
 import type { ResolveOpenMenuRepositionResult } from './resolveOpenMenuReposition.util';
 
 type ApplyRepositionOutcomeArgs = {

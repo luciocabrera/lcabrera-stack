@@ -21,7 +21,11 @@ describe('handlePopoverToggle', () => {
     const setIsMenuOpen = vi.fn();
     const setMenuPosition = vi.fn();
 
-    handlePopoverToggle({ menuElement: null, setIsMenuOpen, setMenuPosition });
+    handlePopoverToggle({
+      menuElement: document.querySelector<HTMLDivElement>('#missing-menu'),
+      setIsMenuOpen,
+      setMenuPosition,
+    });
 
     expect(setIsMenuOpen).not.toHaveBeenCalled();
     expect(setMenuPosition).not.toHaveBeenCalled();
