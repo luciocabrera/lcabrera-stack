@@ -31,7 +31,6 @@ const seededWrapper = ({ children }: WrapperProps) => (
     <VirtualListDataProvider
       dataState={INITIAL_DATA_STATE}
       filter={{ type: 'select', values: ['banana'] }}
-      hasSelectAll
     >
       {children}
     </VirtualListDataProvider>
@@ -44,10 +43,7 @@ const withoutSelectAllWrapper = ({ children }: WrapperProps) => (
     hasSelectAll={false}
     onChange={vi.fn()}
   >
-    <VirtualListDataProvider
-      dataState={INITIAL_DATA_STATE}
-      hasSelectAll={false}
-    >
+    <VirtualListDataProvider dataState={INITIAL_DATA_STATE}>
       {children}
     </VirtualListDataProvider>
   </VirtualListConfigProvider>
@@ -96,7 +92,6 @@ describe('VirtualListDataProvider', () => {
         <VirtualListDataProvider
           dataState={currentDataState}
           filter={{ type: 'select', values: currentValues }}
-          hasSelectAll
         >
           {children}
         </VirtualListDataProvider>
@@ -135,11 +130,7 @@ describe('VirtualListDataProvider', () => {
         onChange={vi.fn()}
         onFetchInitial={onFetchInitial}
       >
-        <VirtualListDataProvider
-          dataState={INITIAL_DATA_STATE}
-          hasSelectAll
-          onFetchInitial={onFetchInitial}
-        >
+        <VirtualListDataProvider dataState={INITIAL_DATA_STATE}>
           {children}
         </VirtualListDataProvider>
       </VirtualListConfigProvider>

@@ -4,7 +4,6 @@ import type { SelectFilter } from '@repo/ui/types/filterOperators.types';
 import type {
   VirtualListDataState,
   VirtualListDataStoreState,
-  VirtualListProps,
 } from '../../VirtualList.types';
 
 export type VirtualListDataContextValue = {
@@ -12,10 +11,12 @@ export type VirtualListDataContextValue = {
   readonly dataStore: TStore<VirtualListDataStoreState>;
 };
 
+/**
+ * Only the controlled data props — config flags and callbacks live solely
+ * on the config context (single owner) and are read from there.
+ */
 export type VirtualListDataProviderProps = {
   readonly children: React.ReactNode;
   readonly dataState: VirtualListDataState;
   readonly filter?: SelectFilter;
-  readonly hasSelectAll: boolean;
-  readonly onFetchInitial?: VirtualListProps['onFetchInitial'];
 };

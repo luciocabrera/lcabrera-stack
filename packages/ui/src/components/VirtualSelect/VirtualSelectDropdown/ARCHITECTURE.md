@@ -1,13 +1,12 @@
 # VirtualSelectDropdown Architecture
 
-Dropdown slice of `VirtualSelect`: the positioned listbox shell around the provider-less `VirtualListContent`. **Presentation only** — the VirtualList providers (and the selection-change mapping) are owned by the `VirtualSelect` shell, so the dropdown carries no store wiring and no handlers. Private delegate — no `index.ts`, imported by `VirtualSelect` via direct file path (ADR-007). Must render inside the VirtualList providers mounted by the shell.
+Dropdown slice of `VirtualSelect`: the positioned listbox shell around the provider-less `VirtualListContent`. **Fully self-connected — zero props** (so it carries no `.types.ts`): positioning and visibility come from the select meta selectors; it holds no handlers, since the list providers and the selection-change mapping are owned by the shell. Private delegate — no `index.ts`, imported by `VirtualSelect` via direct file path (ADR-007). Must render inside the three providers mounted by the shell.
 
 ## File Structure
 
 ```
 VirtualSelectDropdown/
-├── VirtualSelectDropdown.component.tsx   → Listbox shell + VirtualListContent
-├── VirtualSelectDropdown.types.ts        → Props (positioning + listbox wiring only)
+├── VirtualSelectDropdown.component.tsx   → Listbox shell + VirtualListContent, meta-selector-connected
 ├── VirtualSelectDropdown.stylex.ts       → dropdownBase / dropdownAbsolute / dropdownStatic / dropdownStaticFill
 ├── VirtualSelectDropdown.component.test.tsx
 └── utils/
@@ -21,7 +20,8 @@ VirtualSelectDropdown/
 
 ```mermaid
 graph LR
-  VSD["VirtualSelectDropdown"] --> VLC["VirtualListContent (provider-less)"]
+  VSD["VirtualSelectDropdown"] --> MSEL["VirtualSelectConfig/meta/selectors\n<small>customStylex, isAlwaysOpen, isListVisible, listboxId, listMaxHeight, shouldFillHeight</small>"]
+  VSD --> VLC["VirtualListContent (provider-less)"]
   VSD --> GDS["utils/getDropdownStyle"]
   GDS --> VSD_stylex["VirtualSelectDropdown.stylex"]
   VSD --> VSD_stylex
@@ -29,12 +29,12 @@ graph LR
 
 ## Behaviour
 
-- **Visibility** — renders `null` while `isListVisible` is false; the shell computes visibility from `isAlwaysOpen || isOpen`. Only the list DOM unmounts while closed — the providers (and their stores) stay alive on the shell.
-- **Selection changes** — none here: option toggles inside `VirtualListContent` dispatch store actions whose emitted `SelectFilter` funnels through the shell's `handleListChange` (config context `onChange`).
+- **Visibility** — renders `null` while the meta store's pre-computed `isListVisible` (`isAlwaysOpen || isOpen`) is false. Only the list DOM unmounts while closed — the providers (and their stores) stay alive on the shell.
+- **Selection changes** — none here: option toggles inside `VirtualListContent` dispatch store actions whose emitted `SelectFilter` funnels through the shell's `handleListChange` (list config context `onChange`).
 
 ## Dropdown Positioning
 
-Controlled by `utils/getDropdownStyle({ isAlwaysOpen, shouldFillHeight })`, composed after `dropdownBase` and before the consumer's `customStylex` override:
+Controlled by `utils/getDropdownStyle({ isAlwaysOpen, shouldFillHeight })`, composed after `dropdownBase` and before the consumer's `customStylex` override (read from the meta store, always last in `stylex.props`):
 
 | `isAlwaysOpen` | `shouldFillHeight` | Style applied        | Behaviour                           |
 | -------------- | ------------------ | -------------------- | ----------------------------------- |
@@ -42,13 +42,8 @@ Controlled by `utils/getDropdownStyle({ isAlwaysOpen, shouldFillHeight })`, comp
 | `true`         | `false`            | `dropdownStatic`     | Inline block (e.g. filter panel)    |
 | `true`         | `true`             | `dropdownStaticFill` | Flex-fill (e.g. full-height drawer) |
 
-## Props
+## State Ownership
 
-| Prop               | Type           | Description                                        |
-| ------------------ | -------------- | -------------------------------------------------- |
-| `customStylex`     | `StyleXStyles` | Consumer override, always last in `stylex.props`   |
-| `isAlwaysOpen`     | `boolean`      | Static vs floating positioning                     |
-| `isListVisible`    | `boolean`      | Renders nothing while false                        |
-| `listboxId`        | `string`       | `id` of the `role='listbox'` shell                 |
-| `listMaxHeight`    | `string`       | Forwarded to the VirtualListContent scroll area    |
-| `shouldFillHeight` | `boolean`      | Fill-height layout (forwarded + positioning input) |
+| Source            | Read                                                                                              | Dispatched |
+| ----------------- | ------------------------------------------------------------------------------------------------- | ---------- |
+| Select meta store | `customStylex`, `isAlwaysOpen`, `isListVisible`, `listboxId`, `listMaxHeight`, `shouldFillHeight` | —          |

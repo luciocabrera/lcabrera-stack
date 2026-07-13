@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { handleDragOver } from './handleDragOver.util.ts';
+import { handleDragOver } from './handleDragOver.util';
 
 describe('handleDragOver', () => {
   it('calls event.preventDefault()', () => {

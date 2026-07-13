@@ -32,14 +32,23 @@ TableActionsPopover/
 ├── TableActionsPopover.types.ts           → Props, BoundsRect, MenuPosition, render-prop context type
 ├── TableActionsPopover.constants.ts       → MENU_* layout constants (gap, nudge, frames, padding)
 ├── TableActionsPopover.stylex.ts          → trigger/menu/menuItem/menuIcon/menuActions styles (shared)
-├── useTableActionsPopoverPosition.hook.ts → Popover open state + observers + RAF orchestration only
+├── useTableActionsPopoverPosition.hook.ts → State + observers + environment reads (trigger lookup,
+│                                            viewport size) injected into the handler-core utils
 ├── utils/
+│   ├── applyRepositionOutcome.util.ts               → Applies a resolveOpenMenuReposition outcome to
+│   │                                                  injected close/setPosition callbacks; returns
+│   │                                                  whether the menu repositioned (still open)
 │   ├── computeMenuPosition.util.ts                  → Measures trigger/cell/menu, delegates to
 │   │                                                  getTableActionsPopoverPosition (argument reads only)
 │   ├── createViewportRect.util.ts                   → Pure: window dimensions → whole-viewport BoundsRect
 │   │                                                  (fallback container bounds, built at reposition time)
 │   ├── getIsPopoverOpen.util.ts                     → `:popover-open` check, single-sources the selector
 │   ├── getTableActionsPopoverPosition.util.ts       → Pure coordinate computation (no side effects)
+│   ├── handlePopoverToggle.util.ts                  → Popover `toggle` event core: syncs open state with
+│   │                                                  the Popover API, clears coordinates on close
+│   ├── handleToggleMenu.util.ts                     → Trigger-click core: close-if-open, else open via
+│   │                                                  Popover API + RAF stabilization loop (environment
+│   │                                                  reads injected by the hook)
 │   ├── resolveOpenMenuReposition.util.ts            → keep/close/reposition decision core shared by the
 │   │                                                  observer and RAF-stabilization paths (argument reads
 │   │                                                  only; container rect read lazily on reposition)

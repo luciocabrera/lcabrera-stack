@@ -38,11 +38,7 @@ const ProviderShell = ({
     onChange={onChange}
     onFetchInitial={onFetchInitial}
   >
-    <VirtualListDataProvider
-      dataState={dataState}
-      hasSelectAll={hasSelectAll}
-      onFetchInitial={onFetchInitial}
-    >
+    <VirtualListDataProvider dataState={dataState}>
       {children}
     </VirtualListDataProvider>
   </VirtualListConfigProvider>

@@ -32,7 +32,6 @@ const ProviderShell = ({ children, name }: ProviderShellProps) => (
         isLoading: false,
         isLoadingMore: false,
       }}
-      hasSelectAll
     >
       {children}
     </VirtualListDataProvider>

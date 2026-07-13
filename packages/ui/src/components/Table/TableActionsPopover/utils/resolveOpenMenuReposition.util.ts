@@ -39,3 +39,7 @@ export const resolveOpenMenuReposition = ({
     }),
   } as const;
 };
+
+export type ResolveOpenMenuRepositionResult = ReturnType<
+  typeof resolveOpenMenuReposition
+>;

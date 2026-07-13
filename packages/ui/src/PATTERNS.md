@@ -281,10 +281,12 @@ export const PinConflictModal = () => {
 4. **Render-callback row content becomes a component** that consumes its own actions (e.g. `ColumnOrderItemContent`, `SortItemContent`) — this also removes inline-arrow handlers from JSX.
 5. **Derivations needed by two or more delegates** are extracted to a shared `*.util.ts` (e.g. `filterSettingsColumns`) instead of being computed in the parent and drilled.
 6. **Document ownership.** The component's `ARCHITECTURE.md` gets a "State Ownership Rule" table (delegate → selectors read → actions dispatched); its `INVENTORY.md` row is worded "thin shell composing private delegates that own their store wiring".
+7. **Composite-level presentation metadata lives in a meta store, not props.** When a composite wraps a store-backed component, lift the inner providers into the composite's shell (the inner component exports a provider-less `<X>Content` composition) and give the composite its own `<Feature>Config` context with a `meta` slice mirrored from the shell props via a sync effect (`TableDataProvider` precedent); shell-owned callbacks (e.g. dropdown toggle) go on the context value and are dispatched through action hooks. Delegates then read everything via selectors — zero props. Canonical run: `VirtualSelect/contexts/VirtualSelectConfig`.
+8. **Single-owner state.** Never pass the same value to two providers or mirror it into two stores — each piece of state has exactly one owning store, and cross-context readers subscribe through that owner's selectors (e.g. `VirtualListDataProvider` reads `hasSelectAll`/`hasFetchInitial` via the config selectors instead of duplicate props).
 
 **Why:** beyond removing prop drilling, this is what makes the store-pattern's granular subscriptions pay off — a modal-state change re-renders only that modal, not the whole section.
 
-Canonical examples: `Table/TableSettingsDrawer/` (shell) and `Table/TableSettingsDrawer/ColumnOrderSection/` (full ownership table in its `ARCHITECTURE.md`).
+Canonical examples: `Table/TableSettingsDrawer/` (shell), `Table/TableSettingsDrawer/ColumnOrderSection/` (full ownership table in its `ARCHITECTURE.md`), and `VirtualSelect/` (lifted providers + meta context, zero-prop delegates).
 
 ---
 

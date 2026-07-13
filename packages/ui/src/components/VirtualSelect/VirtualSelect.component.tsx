@@ -4,12 +4,14 @@ import {
   VirtualListConfigProvider,
   VirtualListDataProvider,
 } from '@repo/ui/components/VirtualList/contexts';
+import { LIST_MAX_HEIGHT } from '@repo/ui/components/VirtualList/VirtualList.constants';
 import { useClickOutside } from '@repo/ui/hooks';
 import * as stylex from '@stylexjs/stylex';
 import { useId, useRef } from 'react';
 
 import type { VirtualSelectProps } from './VirtualSelect.types';
 
+import { VirtualSelectConfigProvider } from './contexts';
 import { useVirtualSelectDropdown } from './hooks';
 import {
   buildFallbackDataState,
@@ -21,12 +23,13 @@ import { VirtualSelectDropdown } from './VirtualSelectDropdown/VirtualSelectDrop
 import { VirtualSelectHeader } from './VirtualSelectHeader/VirtualSelectHeader.component';
 
 /**
- * Thin shell over the lifted VirtualList contexts: resolves the option
- * label↔value mapping, owns the dropdown open state, and mounts the Config
- * and Data providers so the Header/Dropdown delegates (and the list itself)
- * consume selectors/actions instead of drilled props. Selection stays
- * parent-owned — list changes exit through `onChange` after being mapped
- * back to option values.
+ * Thin shell over the select contexts: resolves the option label↔value
+ * mapping, owns the dropdown open state, and mounts the three providers —
+ * VirtualSelectConfig (select metadata for the delegates) plus the lifted
+ * VirtualList Config/Data pair — so every delegate consumes selectors and
+ * actions instead of drilled props. Selection stays parent-owned: list
+ * changes exit through the shell's `onChange` mapping on the list config
+ * context.
  */
 export const VirtualSelect = ({
   customStylex,
@@ -34,7 +37,7 @@ export const VirtualSelect = ({
   isAlwaysOpen = false,
   isBusy = false,
   listboxId,
-  listMaxHeight = '18.75rem',
+  listMaxHeight = LIST_MAX_HEIGHT,
   mode,
   onChange,
   onFetchInitial,
@@ -54,8 +57,11 @@ export const VirtualSelect = ({
   const { getValueFromLabel, optionEntries, selectedLabels } =
     resolveVirtualSelectOptions({ options, selected });
 
-  const { closeDropdown, isListVisible, isOpen, toggleDropdown } =
-    useVirtualSelectDropdown({ isAlwaysOpen, isBusy, onOpenChange });
+  const { closeDropdown, isOpen, toggleDropdown } = useVirtualSelectDropdown({
+    isAlwaysOpen,
+    isBusy,
+    onOpenChange,
+  });
 
   useClickOutside({
     onClickOutside: closeDropdown,
@@ -81,45 +87,41 @@ export const VirtualSelect = ({
   };
 
   return (
-    <VirtualListConfigProvider
-      hasCheckboxes={isMulti}
-      hasSelectAll={isMulti}
-      onChange={handleListChange}
-      onFetchInitial={onFetchInitial}
-      onFetchMore={onFetchMore}
+    <VirtualSelectConfigProvider
+      customStylex={customStylex}
+      isAlwaysOpen={isAlwaysOpen}
+      isBusy={isBusy}
+      isOpen={isOpen}
+      listboxId={resolvedListboxId}
+      listMaxHeight={listMaxHeight}
+      mode={mode}
+      onToggleDropdown={toggleDropdown}
+      placeholder={placeholder}
+      shouldFillHeight={shouldFillHeight}
     >
-      <VirtualListDataProvider
-        dataState={effectiveDataState}
-        filter={{ type: 'select', values: selectedLabels }}
+      <VirtualListConfigProvider
+        hasCheckboxes={isMulti}
         hasSelectAll={isMulti}
+        onChange={handleListChange}
         onFetchInitial={onFetchInitial}
+        onFetchMore={onFetchMore}
       >
-        <div
-          ref={containerRef}
-          {...stylex.props(
-            styles.container,
-            shouldFillHeight ? styles.containerFill : undefined,
-          )}
+        <VirtualListDataProvider
+          dataState={effectiveDataState}
+          filter={{ type: 'select', values: selectedLabels }}
         >
-          <VirtualSelectHeader
-            isAlwaysOpen={isAlwaysOpen}
-            isBusy={isBusy}
-            isOpen={isOpen}
-            listboxId={resolvedListboxId}
-            mode={mode}
-            onToggle={toggleDropdown}
-            placeholder={placeholder}
-          />
-          <VirtualSelectDropdown
-            customStylex={customStylex}
-            isAlwaysOpen={isAlwaysOpen}
-            isListVisible={isListVisible}
-            listboxId={resolvedListboxId}
-            listMaxHeight={listMaxHeight}
-            shouldFillHeight={shouldFillHeight}
-          />
-        </div>
-      </VirtualListDataProvider>
-    </VirtualListConfigProvider>
+          <div
+            ref={containerRef}
+            {...stylex.props(
+              styles.container,
+              shouldFillHeight ? styles.containerFill : undefined,
+            )}
+          >
+            <VirtualSelectHeader />
+            <VirtualSelectDropdown />
+          </div>
+        </VirtualListDataProvider>
+      </VirtualListConfigProvider>
+    </VirtualSelectConfigProvider>
   );
 };

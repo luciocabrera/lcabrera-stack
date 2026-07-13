@@ -37,11 +37,7 @@ const renderChildren = ({ dataState, hasFetchInitial = false }: RenderArgs) =>
       onChange={vi.fn()}
       onFetchInitial={hasFetchInitial ? vi.fn() : undefined}
     >
-      <VirtualListDataProvider
-        dataState={dataState}
-        hasSelectAll
-        onFetchInitial={hasFetchInitial ? vi.fn() : undefined}
-      >
+      <VirtualListDataProvider dataState={dataState}>
         <Harness />
       </VirtualListDataProvider>
     </VirtualListConfigProvider>,

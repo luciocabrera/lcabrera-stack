@@ -35,7 +35,6 @@ const ProviderShell = ({
         isLoadingMore: false,
       }}
       filter={{ type: 'select', values: selectedValues }}
-      hasSelectAll
     >
       {children}
     </VirtualListDataProvider>

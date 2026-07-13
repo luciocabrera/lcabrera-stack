@@ -3,6 +3,24 @@ import type { StyleXStyles } from '@stylexjs/stylex';
 
 export type VirtualSelectMode = 'multi' | 'single';
 
+/**
+ * Select-level presentation metadata mirrored into the meta store by
+ * `VirtualSelectConfigProvider` (isListVisible is pre-computed from
+ * `isAlwaysOpen || isOpen`). Delegates read it through one-liner selectors.
+ */
+export type VirtualSelectMetaState = {
+  readonly customStylex?: StyleXStyles;
+  readonly isAlwaysOpen: boolean;
+  readonly isBusy: boolean;
+  readonly isListVisible: boolean;
+  readonly isOpen: boolean;
+  readonly listboxId: string;
+  readonly listMaxHeight: string;
+  readonly mode: VirtualSelectMode;
+  readonly placeholder: string;
+  readonly shouldFillHeight: boolean;
+};
+
 export type VirtualSelectOption = {
   readonly label: string;
   readonly value: string;

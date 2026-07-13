@@ -1,9 +1,23 @@
 // @vitest-environment jsdom
 
 import { cleanup, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { getLatestContentProps, setLatestContentProps } = vi.hoisted(() => {
+const {
+  getLatestContentProps,
+  metaState,
+  setLatestContentProps,
+  setMetaState,
+} = vi.hoisted(() => {
+  const initialMetaState = {
+    isAlwaysOpen: false,
+    isListVisible: true,
+    listboxId: 'listbox-id',
+    listMaxHeight: '18.75rem',
+    shouldFillHeight: false,
+  };
+  const state = { current: { ...initialMetaState } };
+
   let latestContentProps:
     | undefined
     | {
@@ -13,8 +27,12 @@ const { getLatestContentProps, setLatestContentProps } = vi.hoisted(() => {
 
   return {
     getLatestContentProps: () => latestContentProps,
+    metaState: state,
     setLatestContentProps: (props: typeof latestContentProps | undefined) => {
       latestContentProps = props;
+    },
+    setMetaState: (next: Partial<typeof initialMetaState>) => {
+      state.current = { ...initialMetaState, ...next };
     },
   };
 });
@@ -28,14 +46,19 @@ vi.mock('@repo/ui/components/VirtualList', () => ({
   },
 }));
 
+vi.mock('../contexts/VirtualSelectConfig/meta/selectors', () => ({
+  useGetCustomStylex: () => undefined,
+  useGetIsAlwaysOpen: () => metaState.current.isAlwaysOpen,
+  useGetIsListVisible: () => metaState.current.isListVisible,
+  useGetListboxId: () => metaState.current.listboxId,
+  useGetListMaxHeight: () => metaState.current.listMaxHeight,
+  useGetShouldFillHeight: () => metaState.current.shouldFillHeight,
+}));
+
 import { VirtualSelectDropdown } from './VirtualSelectDropdown.component';
 
-const createProps = () => ({
-  isAlwaysOpen: false,
-  isListVisible: true,
-  listboxId: 'listbox-id',
-  listMaxHeight: '18.75rem',
-  shouldFillHeight: false,
+beforeEach(() => {
+  setMetaState({});
 });
 
 afterEach(() => {
@@ -45,16 +68,16 @@ afterEach(() => {
 
 describe('VirtualSelectDropdown', () => {
   it('renders nothing while the list is hidden', () => {
-    const props = { ...createProps(), isListVisible: false };
+    setMetaState({ isListVisible: false });
 
-    const { container } = render(<VirtualSelectDropdown {...props} />);
+    const { container } = render(<VirtualSelectDropdown />);
 
     expect(container.firstChild).toBeNull();
     expect(getLatestContentProps()).toBeUndefined();
   });
 
   it('renders the listbox shell around the provider-less list content', () => {
-    render(<VirtualSelectDropdown {...createProps()} />);
+    render(<VirtualSelectDropdown />);
 
     const listbox = screen.getByRole('listbox');
 
@@ -69,13 +92,9 @@ describe('VirtualSelectDropdown', () => {
   });
 
   it('forwards the fill-height layout to the list content', () => {
-    render(
-      <VirtualSelectDropdown
-        {...createProps()}
-        isAlwaysOpen
-        shouldFillHeight
-      />,
-    );
+    setMetaState({ isAlwaysOpen: true, shouldFillHeight: true });
+
+    render(<VirtualSelectDropdown />);
 
     expect(getLatestContentProps()).toEqual({
       listMaxHeight: '18.75rem',

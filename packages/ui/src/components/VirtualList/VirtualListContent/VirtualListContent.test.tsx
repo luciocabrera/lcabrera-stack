@@ -23,7 +23,7 @@ const baseDataState: VirtualListDataState = {
 const renderContent = () =>
   render(
     <VirtualListConfigProvider hasCheckboxes hasSelectAll onChange={vi.fn()}>
-      <VirtualListDataProvider dataState={baseDataState} hasSelectAll>
+      <VirtualListDataProvider dataState={baseDataState}>
         <VirtualListContent />
       </VirtualListDataProvider>
     </VirtualListConfigProvider>,

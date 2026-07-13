@@ -30,12 +30,7 @@ export const VirtualList = ({
     onFetchInitial={onFetchInitial}
     onFetchMore={onFetchMore}
   >
-    <VirtualListDataProvider
-      dataState={dataState}
-      filter={filter}
-      hasSelectAll={hasSelectAll}
-      onFetchInitial={onFetchInitial}
-    >
+    <VirtualListDataProvider dataState={dataState} filter={filter}>
       <VirtualListContent
         listMaxHeight={listMaxHeight}
         shouldFillHeight={shouldFillHeight}

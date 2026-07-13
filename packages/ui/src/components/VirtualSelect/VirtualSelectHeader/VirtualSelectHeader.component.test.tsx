@@ -4,13 +4,49 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const {
+  metaState,
+  setMetaState,
+  toggleDropdownMock,
   toggleOptionMock,
   useGetSelectedValuesMock,
   useVirtualSelectTagOverflowMock,
-} = vi.hoisted(() => ({
-  toggleOptionMock: vi.fn(),
-  useGetSelectedValuesMock: vi.fn<() => readonly string[]>(() => []),
-  useVirtualSelectTagOverflowMock: vi.fn(() => 0),
+} = vi.hoisted(() => {
+  const initialMetaState = {
+    isAlwaysOpen: false,
+    isBusy: false,
+    isListVisible: false,
+    isOpen: false,
+    listboxId: 'listbox-id',
+    listMaxHeight: '18.75rem',
+    mode: 'single',
+    placeholder: 'Select...',
+    shouldFillHeight: false,
+  };
+  const state = { current: { ...initialMetaState } };
+
+  return {
+    metaState: state,
+    setMetaState: (next: Partial<typeof initialMetaState>) => {
+      state.current = { ...initialMetaState, ...next };
+    },
+    toggleDropdownMock: vi.fn(),
+    toggleOptionMock: vi.fn(),
+    useGetSelectedValuesMock: vi.fn<() => readonly string[]>(() => []),
+    useVirtualSelectTagOverflowMock: vi.fn(() => 0),
+  };
+});
+
+vi.mock('../contexts/VirtualSelectConfig/meta/actions', () => ({
+  useToggleDropdown: () => toggleDropdownMock,
+}));
+
+vi.mock('../contexts/VirtualSelectConfig/meta/selectors', () => ({
+  useGetIsAlwaysOpen: () => metaState.current.isAlwaysOpen,
+  useGetIsBusy: () => metaState.current.isBusy,
+  useGetIsOpen: () => metaState.current.isOpen,
+  useGetListboxId: () => metaState.current.listboxId,
+  useGetMode: () => metaState.current.mode,
+  useGetPlaceholder: () => metaState.current.placeholder,
 }));
 
 vi.mock(
@@ -33,43 +69,33 @@ vi.mock('../hooks', () => ({
 
 import { VirtualSelectHeader } from './VirtualSelectHeader.component';
 
-const createProps = () => ({
-  isAlwaysOpen: false,
-  isBusy: false,
-  isOpen: false,
-  listboxId: 'listbox-id',
-  mode: 'single' as const,
-  onToggle: vi.fn(),
-  placeholder: 'Select...',
-});
-
 beforeEach(() => {
+  setMetaState({});
   useGetSelectedValuesMock.mockReturnValue([]);
   useVirtualSelectTagOverflowMock.mockReturnValue(0);
 });
 
 afterEach(() => {
+  toggleDropdownMock.mockClear();
   toggleOptionMock.mockClear();
   cleanup();
 });
 
 describe('VirtualSelectHeader', () => {
-  it('renders the trigger without an overlay and toggles on click', () => {
-    const props = createProps();
-
-    render(<VirtualSelectHeader {...props} />);
+  it('renders the trigger from the meta selectors and dispatches the toggle action', () => {
+    render(<VirtualSelectHeader />);
 
     expect(document.querySelector('[aria-hidden="true"]')).toBeNull();
 
     fireEvent.click(screen.getByRole('button', { name: 'Select...' }));
 
-    expect(props.onToggle).toHaveBeenCalledTimes(1);
+    expect(toggleDropdownMock).toHaveBeenCalledTimes(1);
   });
 
   it('renders the shimmer overlay and a disabled trigger while busy', () => {
-    const props = { ...createProps(), isBusy: true };
+    setMetaState({ isBusy: true });
 
-    render(<VirtualSelectHeader {...props} />);
+    render(<VirtualSelectHeader />);
 
     expect(document.querySelector('[aria-hidden="true"]')).not.toBeNull();
 
@@ -79,14 +105,15 @@ describe('VirtualSelectHeader', () => {
 
     fireEvent.click(trigger);
 
-    expect(props.onToggle).not.toHaveBeenCalled();
+    expect(toggleDropdownMock).not.toHaveBeenCalled();
   });
 
   it('renders the store-selected labels as tags and dispatches removal through the toggle action', () => {
+    setMetaState({ mode: 'multi' });
     useGetSelectedValuesMock.mockReturnValue(['Alpha', 'Bravo']);
     useVirtualSelectTagOverflowMock.mockReturnValue(2);
 
-    render(<VirtualSelectHeader {...createProps()} mode='multi' />);
+    render(<VirtualSelectHeader />);
 
     expect(screen.getByRole('button', { name: 'Remove Bravo' })).toBeTruthy();
 
@@ -96,10 +123,11 @@ describe('VirtualSelectHeader', () => {
   });
 
   it('hides overflowing tags behind the "+N more" badge', () => {
+    setMetaState({ mode: 'multi' });
     useGetSelectedValuesMock.mockReturnValue(['Alpha', 'Bravo', 'Charlie']);
     useVirtualSelectTagOverflowMock.mockReturnValue(1);
 
-    render(<VirtualSelectHeader {...createProps()} mode='multi' />);
+    render(<VirtualSelectHeader />);
 
     expect(screen.getByRole('button', { name: 'Remove Alpha' })).toBeTruthy();
     expect(screen.queryByRole('button', { name: 'Remove Bravo' })).toBeNull();

@@ -3,8 +3,15 @@ import { useGetSelectedValues } from '@repo/ui/components/VirtualList/contexts/V
 import * as stylex from '@stylexjs/stylex';
 import { useRef } from 'react';
 
-import type { VirtualSelectHeaderProps } from './VirtualSelectHeader.types';
-
+import { useToggleDropdown } from '../contexts/VirtualSelectConfig/meta/actions';
+import {
+  useGetIsAlwaysOpen,
+  useGetIsBusy,
+  useGetIsOpen,
+  useGetListboxId,
+  useGetMode,
+  useGetPlaceholder,
+} from '../contexts/VirtualSelectConfig/meta/selectors';
 import { useVirtualSelectTagOverflow } from '../hooks';
 import { resolveTagOverflow } from '../utils';
 import { VirtualSelectTrigger } from '../VirtualSelectTrigger';
@@ -12,24 +19,24 @@ import { busyStyles } from './VirtualSelectHeader.stylex';
 
 /**
  * Header slice of VirtualSelect: the busy shimmer overlay plus the combobox
- * trigger. Self-connected — reads the selected labels from the list data
- * store, owns the trigger ref + tag-overflow measurement, and dispatches
- * tag removal through the toggle-option action.
+ * trigger. Fully self-connected (zero props) — presentation metadata comes
+ * from the select meta selectors, the selected labels from the list data
+ * store, and tag removal/dropdown toggling dispatch through actions. Owns
+ * the trigger ref + tag-overflow measurement.
  */
-export const VirtualSelectHeader = ({
-  isAlwaysOpen,
-  isBusy = false,
-  isOpen,
-  listboxId,
-  mode,
-  onToggle,
-  placeholder,
-}: VirtualSelectHeaderProps) => {
+export const VirtualSelectHeader = () => {
   const triggerRef = useRef<HTMLButtonElement | HTMLDivElement | undefined>(
     undefined,
   );
 
+  const isAlwaysOpen = useGetIsAlwaysOpen();
+  const isBusy = useGetIsBusy();
+  const isOpen = useGetIsOpen();
+  const listboxId = useGetListboxId();
+  const mode = useGetMode();
+  const placeholder = useGetPlaceholder();
   const selectedLabels = useGetSelectedValues();
+  const toggleDropdown = useToggleDropdown();
   const toggleOption = useToggleOption();
 
   const visibleTagCount = useVirtualSelectTagOverflow({
@@ -58,7 +65,7 @@ export const VirtualSelectHeader = ({
         listboxId={listboxId}
         mode={mode}
         onRemoveTag={toggleOption}
-        onToggle={onToggle}
+        onToggle={toggleDropdown}
         overflowCount={overflowCount}
         placeholder={placeholder}
         selected={selectedLabels}

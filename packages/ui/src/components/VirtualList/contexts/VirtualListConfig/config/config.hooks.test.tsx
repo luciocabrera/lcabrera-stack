@@ -17,7 +17,9 @@ import { useVirtualListConfigContextValue } from '../useVirtualListConfigContext
 import { INITIAL_LIST_CONFIG_STATE } from '../VirtualListConfigContext.constants';
 import { VirtualListConfigContext } from '../VirtualListConfigContext.context';
 import { useGetHasCheckboxes } from './selectors/useGetHasCheckboxes.hook';
+import { useGetHasFetchInitial } from './selectors/useGetHasFetchInitial.hook';
 import { useGetHasFetchMore } from './selectors/useGetHasFetchMore.hook';
+import { useGetHasSelectAll } from './selectors/useGetHasSelectAll.hook';
 import { useGetSearchInputName } from './selectors/useGetSearchInputName.hook';
 import { useListConfigStore } from './useListConfigStore.hook';
 
@@ -69,7 +71,13 @@ describe('VirtualListConfig config hooks', () => {
       renderHook(() => useGetHasCheckboxes(), { wrapper }).result.current,
     ).toBe(true);
     expect(
+      renderHook(() => useGetHasFetchInitial(), { wrapper }).result.current,
+    ).toBe(false);
+    expect(
       renderHook(() => useGetHasFetchMore(), { wrapper }).result.current,
+    ).toBe(true);
+    expect(
+      renderHook(() => useGetHasSelectAll(), { wrapper }).result.current,
     ).toBe(true);
     expect(
       renderHook(() => useGetSearchInputName(), { wrapper }).result.current,
