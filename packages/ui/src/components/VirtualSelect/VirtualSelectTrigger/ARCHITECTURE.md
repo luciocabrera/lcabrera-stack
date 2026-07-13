@@ -64,8 +64,8 @@ graph TD
 | `onToggle`      | `() => void`                                             | Opens/closes the dropdown                                  |
 | `overflowCount` | `number`                                                 | Number of tags hidden behind "+N more"                     |
 | `placeholder`   | `string`                                                 | Shown when `selected` is empty                             |
-| `selected`      | `string[]`                                               | Full selection (used to detect `hasSelection`)             |
-| `triggerRef`    | `RefObject<HTMLButtonElement \| HTMLDivElement \| null>` | Measured by ResizeObserver in `VirtualSelect`              |
+| `selected`      | `string[]`                                               | Full selection labels (used to detect `hasSelection`)      |
+| `triggerRef`    | `RefObject<HTMLButtonElement \| HTMLDivElement \| null>` | Measured by ResizeObserver in `VirtualSelectHeader`        |
 | `visibleTags`   | `string[]`                                               | Subset of `selected` that fits within `TRIGGER_MAX_HEIGHT` |
 
 ## Tag Overflow Behaviour
@@ -74,7 +74,7 @@ graph TD
 | -------------------- | ----- | ---------------------------------------------- |
 | `TRIGGER_MAX_HEIGHT` | 88 px | Max pixel height before tags start overflowing |
 
-When `mode === 'multi'` the parent `VirtualSelect` attaches a `ResizeObserver` to `triggerRef` and calls `countVisibleTags` to compute `visibleTags` and `overflowCount` on every resize.
+When `mode === 'multi'` the owning `VirtualSelectHeader` attaches a `ResizeObserver` to `triggerRef` (`useVirtualSelectTagOverflow` → `countVisibleTags`) and derives `visibleTags`/`overflowCount` via `resolveTagOverflow` on every resize.
 
 The trigger uses explicit `border-box`, `min-width: 0`, and `max-width: 100%`
 sizing so padding and borders do not push the select beyond its parent.

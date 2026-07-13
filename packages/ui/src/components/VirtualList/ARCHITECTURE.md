@@ -1,13 +1,15 @@
 # VirtualList Architecture
 
-Virtualized, searchable, multi-select list with infinite scroll, skeleton loading, and filter-mode toolbar. Internally wired with the repo's **split-context + external store** pattern (see `contexts/ARCHITECTURE.md`), mirroring the Table: the public `VirtualList` is a thin shell mounting the `VirtualListConfig` and `VirtualListData` providers; every delegate self-connects through one-liner selector hooks and action hooks instead of receiving drilled props.
+Virtualized, searchable, multi-select list with infinite scroll, skeleton loading, and filter-mode toolbar. Internally wired with the repo's **split-context + external store** pattern (see `contexts/ARCHITECTURE.md`), mirroring the Table: the public `VirtualList` is a thin shell mounting the `VirtualListConfig` and `VirtualListData` providers around the provider-less `VirtualListContent`; every delegate self-connects through one-liner selector hooks and action hooks instead of receiving drilled props.
+
+Composing components may **lift the providers** instead of rendering `VirtualList`: mount `VirtualListConfigProvider` + `VirtualListDataProvider` themselves and render `VirtualListContent` where the list belongs — `VirtualSelect` is the canonical example (its header reads selectors from the same stores while the list is closed).
 
 ## File Structure
 
 ```
 VirtualList/
-├── index.ts                         → Barrel export (VirtualList, VirtualListDataState)
-├── VirtualList.component.tsx        → Thin shell: prop defaults, provider composition, delegate layout
+├── index.ts                         → Barrel export (VirtualList, VirtualListContent, VirtualListDataState)
+├── VirtualList.component.tsx        → Thin shell: providers + VirtualListContent
 ├── VirtualList.types.ts             → Public props + store state types (config/ui/data, content mode)
 ├── VirtualList.constants.ts         → ITEM_HEIGHT, LIST_MAX_HEIGHT, DEFAULT_CONTAINER_HEIGHT, SCROLL_THRESHOLD
 ├── VirtualList.stylex.ts            → Shared option-row/container styles used by SelectAllOption, SelectOption and root container
@@ -15,6 +17,9 @@ VirtualList/
 ├── contexts/                        → Split contexts (see contexts/ARCHITECTURE.md)
 │   ├── VirtualListConfig/           → configStore + uiStore (slices: config/, ui/)
 │   └── VirtualListData/             → dataStore: props mirror + pre-computed derived state (slice: data/)
+│
+├── VirtualListContent/              → Provider-less composition: container + Header/Body/Footer
+│                                      (props: listMaxHeight, shouldFillHeight; exported for lifted-provider composition)
 │
 ├── VirtualListHeader/               → Self-connected search input and clear button (zero props)
 │
@@ -44,9 +49,10 @@ VirtualList/
 graph TD
   VL["VirtualList (shell)"] --> CFG["VirtualListConfigProvider"]
   CFG --> DATA["VirtualListDataProvider"]
-  DATA --> VLH["VirtualListHeader"]
-  DATA --> VLB["VirtualListBody (scroll container + sentinel)"]
-  DATA --> VLF["VirtualListFooter"]
+  DATA --> VLC["VirtualListContent (provider-less)"]
+  VLC --> VLH["VirtualListHeader"]
+  VLC --> VLB["VirtualListBody (scroll container + sentinel)"]
+  VLC --> VLF["VirtualListFooter"]
   VLB --> VLBC["VirtualListBodyChildren (useVirtualization + mode dispatch)"]
   VLBC -->|loading| SKO["SkeletonOptions"]
   VLBC -->|empty| IB["InfoBox 'No options found'"]
@@ -64,6 +70,7 @@ Every store slice is read — and every action dispatched — inside the compone
 | Delegate                                               | Selectors read                                                                                                                                                       | Actions dispatched                      | Props kept                                             |
 | ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- | ------------------------------------------------------ |
 | `VirtualList` (shell)                                  | — (no store wiring in the shell)                                                                                                                                     | —                                       | public API (unchanged)                                 |
+| `VirtualListContent`                                   | — (pure composition of the three regions)                                                                                                                            | —                                       | `listMaxHeight`, `shouldFillHeight`                    |
 | `VirtualListHeader`                                    | `useGetSearchTerm` (ui), `useGetSearchInputName` (config)                                                                                                            | `useSetSearchTerm`, `useClearSearch`    | none                                                   |
 | `VirtualListBody`                                      | `useGetHasMore`, `useGetIsLoadingOptions` (data), `useGetHasFetchMore` (config)                                                                                      | `useFetchMore`                          | `listMaxHeight`, `shouldFillHeight`                    |
 | `VirtualListBodyChildren`                              | `useGetContentMode`, `useGetTotalItems` (data)                                                                                                                       | —                                       | `scrollContainerRef` (producer→child)                  |
@@ -127,7 +134,7 @@ graph TD
   HasMore -->|no| Skip["(observer not attached)"]
 ```
 
-The initial fetch (`onFetchInitial`) fires once from a `VirtualListDataProvider` effect on mount.
+The initial fetch (`onFetchInitial`) fires once from a `VirtualListDataProvider` effect on mount — i.e. when the data store comes alive. With lifted providers (`VirtualSelect`) that is the composing component's mount, not the list's.
 
 ## Filter Modes
 

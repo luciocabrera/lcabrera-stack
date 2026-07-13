@@ -1,30 +1,26 @@
-import * as stylex from '@stylexjs/stylex';
-
 import type { VirtualListProps } from './VirtualList.types';
 
 import { VirtualListConfigProvider, VirtualListDataProvider } from './contexts';
-import { LIST_MAX_HEIGHT } from './VirtualList.constants';
-import { styles } from './VirtualList.stylex';
-import { VirtualListBody } from './VirtualListBody';
-import { VirtualListFooter } from './VirtualListFooter';
-import { VirtualListHeader } from './VirtualListHeader';
+import { VirtualListContent } from './VirtualListContent';
 
 /**
  * Thin shell over the VirtualList contexts: applies prop defaults, mounts
- * the Config and Data providers (in that order), and composes the
- * self-connected Header/Body/Footer delegates.
+ * the Config and Data providers (in that order), and renders the
+ * provider-less VirtualListContent composition. Composing components
+ * (e.g. VirtualSelect) may instead mount the providers themselves and
+ * render VirtualListContent directly.
  */
 export const VirtualList = ({
   dataState,
   filter,
   hasCheckboxes = true,
   hasSelectAll = true,
-  listMaxHeight = LIST_MAX_HEIGHT,
+  listMaxHeight,
   name,
   onChange,
   onFetchInitial,
   onFetchMore,
-  shouldFillHeight = false,
+  shouldFillHeight,
 }: VirtualListProps) => (
   <VirtualListConfigProvider
     hasCheckboxes={hasCheckboxes}
@@ -40,19 +36,10 @@ export const VirtualList = ({
       hasSelectAll={hasSelectAll}
       onFetchInitial={onFetchInitial}
     >
-      <div
-        {...stylex.props(
-          styles.container,
-          shouldFillHeight ? styles.containerFill : undefined,
-        )}
-      >
-        <VirtualListHeader />
-        <VirtualListBody
-          listMaxHeight={listMaxHeight}
-          shouldFillHeight={shouldFillHeight}
-        />
-        <VirtualListFooter />
-      </div>
+      <VirtualListContent
+        listMaxHeight={listMaxHeight}
+        shouldFillHeight={shouldFillHeight}
+      />
     </VirtualListDataProvider>
   </VirtualListConfigProvider>
 );

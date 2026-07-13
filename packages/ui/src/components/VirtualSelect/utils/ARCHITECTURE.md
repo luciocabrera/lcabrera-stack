@@ -1,6 +1,6 @@
 # utils/ Architecture
 
-Pure utility functions for VirtualSelect: tag overflow measurement and option/selection/display resolution. Dropdown positioning (`getDropdownStyle`) lives with its owner in `../VirtualSelectDropdown/utils/`.
+Pure utility functions for VirtualSelect: tag overflow measurement and option/selection resolution. Dropdown positioning (`getDropdownStyle`) lives with its owner in `../VirtualSelectDropdown/utils/`.
 
 ## File Structure
 
@@ -11,7 +11,7 @@ utils/
 ├── buildFallbackDataState.util.ts       → Wrap static options in a synthetic VirtualListDataState
 ├── toOptionEntry.util.ts                → Normalize string | {label,value} into an option entry
 ├── resolveVirtualSelectOptions.util.ts  → Option entries + label↔value mapping + selected labels
-├── resolveVirtualSelectDisplay.util.ts  → effectiveDataState, visibleTags, overflowCount
+├── resolveTagOverflow.util.ts           → Split selected labels into visibleTags + overflowCount
 ├── resolveVirtualSelectChange.util.ts   → Map a VirtualList SelectFilter to the next selection
 └── resolveSingleModeChange.util.ts      → Pick the newly added value in single mode
 ```
@@ -22,7 +22,6 @@ utils/
 graph LR
   CVT["countVisibleTags()"] --> TRIGGER_MAX_HEIGHT["VirtualSelectTrigger (TRIGGER_MAX_HEIGHT = 88px)"]
   RVSO["resolveVirtualSelectOptions()"] --> TOE["toOptionEntry()"]
-  RVSD["resolveVirtualSelectDisplay()"] --> BFDS["buildFallbackDataState()"]
   RVSC["resolveVirtualSelectChange()"] --> RSMC["resolveSingleModeChange()"]
 ```
 
@@ -58,11 +57,11 @@ When some tags overflow, one visible slot is reserved for the `"+N more"` badge 
 
 ## Resolution Utilities
 
-| Util                          | Consumed by             | Role                                                                                     |
-| ----------------------------- | ----------------------- | ---------------------------------------------------------------------------------------- |
-| `resolveVirtualSelectOptions` | `VirtualSelect`         | Normalizes options, builds `getLabelFromValue`/`getValueFromLabel`, maps selected labels |
-| `resolveVirtualSelectDisplay` | `VirtualSelect`         | Derives `effectiveDataState` (async or fallback), `visibleTags`, `overflowCount`         |
-| `resolveVirtualSelectChange`  | `VirtualSelectDropdown` | Maps a `SelectFilter` to `{ nextSelected, shouldCloseDropdown }` per mode                |
-| `resolveSingleModeChange`     | (internal)              | Picks the newly added value in single mode                                               |
-| `buildFallbackDataState`      | (internal)              | Wraps static option labels in a synthetic non-loading `VirtualListDataState`             |
-| `toOptionEntry`               | (internal)              | Normalizes `string \| { label, value }` options                                          |
+| Util                          | Consumed by           | Role                                                                                     |
+| ----------------------------- | --------------------- | ---------------------------------------------------------------------------------------- |
+| `resolveVirtualSelectOptions` | `VirtualSelect`       | Normalizes options, builds `getLabelFromValue`/`getValueFromLabel`, maps selected labels |
+| `buildFallbackDataState`      | `VirtualSelect`       | Wraps static option labels in a synthetic non-loading `VirtualListDataState`             |
+| `resolveVirtualSelectChange`  | `VirtualSelect`       | Maps a `SelectFilter` to `{ nextSelected, shouldCloseDropdown }` per mode                |
+| `resolveTagOverflow`          | `VirtualSelectHeader` | Splits the store-read selected labels into `visibleTags` + `overflowCount`               |
+| `resolveSingleModeChange`     | (internal)            | Picks the newly added value in single mode                                               |
+| `toOptionEntry`               | (internal)            | Normalizes `string \| { label, value }` options                                          |

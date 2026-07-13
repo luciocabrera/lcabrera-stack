@@ -1,36 +1,55 @@
 // @vitest-environment jsdom
 
-import type { RefObject } from 'react';
-
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+const {
+  toggleOptionMock,
+  useGetSelectedValuesMock,
+  useVirtualSelectTagOverflowMock,
+} = vi.hoisted(() => ({
+  toggleOptionMock: vi.fn(),
+  useGetSelectedValuesMock: vi.fn<() => readonly string[]>(() => []),
+  useVirtualSelectTagOverflowMock: vi.fn(() => 0),
+}));
+
+vi.mock(
+  '@repo/ui/components/VirtualList/contexts/VirtualListData/data/actions',
+  () => ({
+    useToggleOption: () => toggleOptionMock,
+  }),
+);
+
+vi.mock(
+  '@repo/ui/components/VirtualList/contexts/VirtualListData/data/selectors',
+  () => ({
+    useGetSelectedValues: useGetSelectedValuesMock,
+  }),
+);
+
+vi.mock('../hooks', () => ({
+  useVirtualSelectTagOverflow: useVirtualSelectTagOverflowMock,
+}));
 
 import { VirtualSelectHeader } from './VirtualSelectHeader.component';
 
-const valueByLabel: Record<string, string> = {
-  Alpha: 'alpha-id',
-  Bravo: 'bravo-id',
-};
-
 const createProps = () => ({
-  getValueFromLabel: (label: string) => valueByLabel[label] ?? label,
   isAlwaysOpen: false,
   isBusy: false,
   isOpen: false,
   listboxId: 'listbox-id',
   mode: 'single' as const,
-  onChange: vi.fn(),
   onToggle: vi.fn(),
-  overflowCount: 0,
   placeholder: 'Select...',
-  selected: [] as readonly string[],
-  triggerRef: {
-    current: undefined,
-  } as RefObject<HTMLButtonElement | HTMLDivElement | undefined>,
-  visibleTags: [] as readonly string[],
+});
+
+beforeEach(() => {
+  useGetSelectedValuesMock.mockReturnValue([]);
+  useVirtualSelectTagOverflowMock.mockReturnValue(0);
 });
 
 afterEach(() => {
+  toggleOptionMock.mockClear();
   cleanup();
 });
 
@@ -63,18 +82,27 @@ describe('VirtualSelectHeader', () => {
     expect(props.onToggle).not.toHaveBeenCalled();
   });
 
-  it('removes a tag by mapping its label back to the selected value', () => {
-    const props = {
-      ...createProps(),
-      mode: 'multi' as const,
-      selected: ['alpha-id', 'bravo-id'] as readonly string[],
-      visibleTags: ['Alpha', 'Bravo'] as readonly string[],
-    };
+  it('renders the store-selected labels as tags and dispatches removal through the toggle action', () => {
+    useGetSelectedValuesMock.mockReturnValue(['Alpha', 'Bravo']);
+    useVirtualSelectTagOverflowMock.mockReturnValue(2);
 
-    render(<VirtualSelectHeader {...props} />);
+    render(<VirtualSelectHeader {...createProps()} mode='multi' />);
+
+    expect(screen.getByRole('button', { name: 'Remove Bravo' })).toBeTruthy();
 
     fireEvent.click(screen.getByRole('button', { name: 'Remove Alpha' }));
 
-    expect(props.onChange).toHaveBeenCalledWith(['bravo-id']);
+    expect(toggleOptionMock).toHaveBeenCalledWith('Alpha');
+  });
+
+  it('hides overflowing tags behind the "+N more" badge', () => {
+    useGetSelectedValuesMock.mockReturnValue(['Alpha', 'Bravo', 'Charlie']);
+    useVirtualSelectTagOverflowMock.mockReturnValue(1);
+
+    render(<VirtualSelectHeader {...createProps()} mode='multi' />);
+
+    expect(screen.getByRole('button', { name: 'Remove Alpha' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Remove Bravo' })).toBeNull();
+    expect(screen.getByText('+2 more')).toBeTruthy();
   });
 });

@@ -1,34 +1,48 @@
+import { useToggleOption } from '@repo/ui/components/VirtualList/contexts/VirtualListData/data/actions';
+import { useGetSelectedValues } from '@repo/ui/components/VirtualList/contexts/VirtualListData/data/selectors';
 import * as stylex from '@stylexjs/stylex';
+import { useRef } from 'react';
 
 import type { VirtualSelectHeaderProps } from './VirtualSelectHeader.types';
 
+import { useVirtualSelectTagOverflow } from '../hooks';
+import { resolveTagOverflow } from '../utils';
 import { VirtualSelectTrigger } from '../VirtualSelectTrigger';
 import { busyStyles } from './VirtualSelectHeader.stylex';
 
 /**
  * Header slice of VirtualSelect: the busy shimmer overlay plus the combobox
- * trigger. Owns tag removal — maps the removed tag's label back to its value
- * and reports the filtered selection through `onChange`.
+ * trigger. Self-connected — reads the selected labels from the list data
+ * store, owns the trigger ref + tag-overflow measurement, and dispatches
+ * tag removal through the toggle-option action.
  */
 export const VirtualSelectHeader = ({
-  getValueFromLabel,
   isAlwaysOpen,
   isBusy = false,
   isOpen,
   listboxId,
   mode,
-  onChange,
   onToggle,
-  overflowCount,
   placeholder,
-  selected,
-  triggerRef,
-  visibleTags,
 }: VirtualSelectHeaderProps) => {
-  const handleRemoveTag = (label: string) => {
-    const value = getValueFromLabel(label);
-    onChange(selected.filter((v) => v !== value));
-  };
+  const triggerRef = useRef<HTMLButtonElement | HTMLDivElement | undefined>(
+    undefined,
+  );
+
+  const selectedLabels = useGetSelectedValues();
+  const toggleOption = useToggleOption();
+
+  const visibleTagCount = useVirtualSelectTagOverflow({
+    mode,
+    selected: selectedLabels,
+    triggerRef,
+  });
+
+  const { overflowCount, visibleTags } = resolveTagOverflow({
+    mode,
+    selectedLabels,
+    visibleTagCount,
+  });
 
   return (
     <>
@@ -43,11 +57,11 @@ export const VirtualSelectHeader = ({
         isOpen={isOpen}
         listboxId={listboxId}
         mode={mode}
-        onRemoveTag={handleRemoveTag}
+        onRemoveTag={toggleOption}
         onToggle={onToggle}
         overflowCount={overflowCount}
         placeholder={placeholder}
-        selected={selected}
+        selected={selectedLabels}
         triggerRef={triggerRef}
         visibleTags={visibleTags}
       />

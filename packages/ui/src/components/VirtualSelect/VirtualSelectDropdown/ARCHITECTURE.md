@@ -1,13 +1,13 @@
 # VirtualSelectDropdown Architecture
 
-Dropdown slice of `VirtualSelect`: the positioned listbox shell around `VirtualList`, owning dropdown styling/positioning and selection-change resolution. Private delegate — no `index.ts`, imported by `VirtualSelect` via direct file path (ADR-007).
+Dropdown slice of `VirtualSelect`: the positioned listbox shell around the provider-less `VirtualListContent`. **Presentation only** — the VirtualList providers (and the selection-change mapping) are owned by the `VirtualSelect` shell, so the dropdown carries no store wiring and no handlers. Private delegate — no `index.ts`, imported by `VirtualSelect` via direct file path (ADR-007). Must render inside the VirtualList providers mounted by the shell.
 
 ## File Structure
 
 ```
 VirtualSelectDropdown/
-├── VirtualSelectDropdown.component.tsx   → Listbox shell + VirtualList, owns handleVirtualListChange
-├── VirtualSelectDropdown.types.ts        → Props (resolved listbox wiring + change plumbing)
+├── VirtualSelectDropdown.component.tsx   → Listbox shell + VirtualListContent
+├── VirtualSelectDropdown.types.ts        → Props (positioning + listbox wiring only)
 ├── VirtualSelectDropdown.stylex.ts       → dropdownBase / dropdownAbsolute / dropdownStatic / dropdownStaticFill
 ├── VirtualSelectDropdown.component.test.tsx
 └── utils/
@@ -21,8 +21,7 @@ VirtualSelectDropdown/
 
 ```mermaid
 graph LR
-  VSD["VirtualSelectDropdown"] --> VL["VirtualList"]
-  VSD --> RVSC["../utils/resolveVirtualSelectChange"]
+  VSD["VirtualSelectDropdown"] --> VLC["VirtualListContent (provider-less)"]
   VSD --> GDS["utils/getDropdownStyle"]
   GDS --> VSD_stylex["VirtualSelectDropdown.stylex"]
   VSD --> VSD_stylex
@@ -30,9 +29,8 @@ graph LR
 
 ## Behaviour
 
-- **Visibility** — renders `null` while `isListVisible` is false; the parent computes visibility from `isAlwaysOpen || isOpen`.
-- **Selection change (owned handler)** — `handleVirtualListChange(filter)` resolves the VirtualList `SelectFilter` into the next selected values via `resolveVirtualSelectChange` (single mode picks the newly added value; multi forwards all), calls `onChange`, and calls `onClose` when a single-mode pick should close the dropdown.
-- **Multi wiring** — `hasCheckboxes`/`hasSelectAll` are derived from `mode === 'multi'`.
+- **Visibility** — renders `null` while `isListVisible` is false; the shell computes visibility from `isAlwaysOpen || isOpen`. Only the list DOM unmounts while closed — the providers (and their stores) stay alive on the shell.
+- **Selection changes** — none here: option toggles inside `VirtualListContent` dispatch store actions whose emitted `SelectFilter` funnels through the shell's `handleListChange` (config context `onChange`).
 
 ## Dropdown Positioning
 
@@ -46,20 +44,11 @@ Controlled by `utils/getDropdownStyle({ isAlwaysOpen, shouldFillHeight })`, comp
 
 ## Props
 
-| Prop                | Type                           | Description                                        |
-| ------------------- | ------------------------------ | -------------------------------------------------- |
-| `customStylex`      | `StyleXStyles`                 | Consumer override, always last in `stylex.props`   |
-| `dataState`         | `VirtualListDataState`         | Resolved data (async or static-options fallback)   |
-| `getValueFromLabel` | `(label: string) => string`    | Maps option labels back to values on change        |
-| `isAlwaysOpen`      | `boolean`                      | Static vs floating positioning                     |
-| `isListVisible`     | `boolean`                      | Renders nothing while false                        |
-| `listboxId`         | `string`                       | `id` of the `role='listbox'` shell                 |
-| `listMaxHeight`     | `string`                       | Forwarded to the VirtualList scroll area           |
-| `mode`              | `'single' \| 'multi'`          | Drives checkboxes/select-all and change resolution |
-| `onChange`          | `(selected: string[]) => void` | Called with the next selected values               |
-| `onClose`           | `() => void`                   | Requests the parent close after a single-mode pick |
-| `onFetchInitial`    | `() => Promise<void> \| void`  | Forwarded to VirtualList                           |
-| `onFetchMore`       | `() => Promise<void> \| void`  | Forwarded to VirtualList                           |
-| `selected`          | `readonly string[]`            | Current selection (input to change resolution)     |
-| `selectedLabels`    | `readonly string[]`            | Labels for the VirtualList `filter` prop           |
-| `shouldFillHeight`  | `boolean`                      | Fill-height layout (forwarded + positioning input) |
+| Prop               | Type           | Description                                        |
+| ------------------ | -------------- | -------------------------------------------------- |
+| `customStylex`     | `StyleXStyles` | Consumer override, always last in `stylex.props`   |
+| `isAlwaysOpen`     | `boolean`      | Static vs floating positioning                     |
+| `isListVisible`    | `boolean`      | Renders nothing while false                        |
+| `listboxId`        | `string`       | `id` of the `role='listbox'` shell                 |
+| `listMaxHeight`    | `string`       | Forwarded to the VirtualListContent scroll area    |
+| `shouldFillHeight` | `boolean`      | Fill-height layout (forwarded + positioning input) |

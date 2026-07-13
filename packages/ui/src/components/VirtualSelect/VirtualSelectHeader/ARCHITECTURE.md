@@ -1,13 +1,13 @@
 # VirtualSelectHeader Architecture
 
-Header slice of `VirtualSelect`: renders the busy shimmer overlay and the combobox trigger, and owns tag removal. Private delegate — no `index.ts`, imported by `VirtualSelect` via direct file path (ADR-007).
+Header slice of `VirtualSelect`: renders the busy shimmer overlay and the combobox trigger. **Self-connected** — reads the selected labels from the VirtualList data store, owns the trigger ref + tag-overflow measurement, and dispatches tag removal through the toggle-option action. Private delegate — no `index.ts`, imported by `VirtualSelect` via direct file path (ADR-007). Must render inside the VirtualList providers mounted by the `VirtualSelect` shell.
 
 ## File Structure
 
 ```
 VirtualSelectHeader/
-├── VirtualSelectHeader.component.tsx   → Busy overlay + VirtualSelectTrigger, owns handleRemoveTag
-├── VirtualSelectHeader.types.ts        → Props (trigger props minus onRemoveTag, plus selection wiring)
+├── VirtualSelectHeader.component.tsx   → Busy overlay + VirtualSelectTrigger, store-connected
+├── VirtualSelectHeader.types.ts        → Props (presentation subset of the trigger props)
 ├── VirtualSelectHeader.stylex.ts       → Busy overlay styles (skeleton tokens + popover z-index)
 └── VirtualSelectHeader.component.test.tsx
 ```
@@ -16,7 +16,11 @@ VirtualSelectHeader/
 
 ```mermaid
 graph LR
-  VSH["VirtualSelectHeader"] --> VST["VirtualSelectTrigger"]
+  VSH["VirtualSelectHeader"] --> SEL["VirtualListData/data/selectors (useGetSelectedValues)"]
+  VSH --> ACT["VirtualListData/data/actions (useToggleOption)"]
+  VSH --> OVF["../hooks/useVirtualSelectTagOverflow"]
+  VSH --> RTO["../utils/resolveTagOverflow"]
+  VSH --> VST["VirtualSelectTrigger"]
   VSH --> VSH_stylex["VirtualSelectHeader.stylex"]
   VSH_stylex --> skeleton["design-system/tokens/commons.stylex\n<small>skeleton.loadingOverlay + shimmerWave</small>"]
   VSH_stylex --> base["design-system/tokens/base.stylex (zIndex.popover)"]
@@ -25,22 +29,20 @@ graph LR
 ## Behaviour
 
 - **Busy overlay** — when `isBusy` is true, an `aria-hidden` shimmer overlay is rendered above the trigger (absolutely positioned against the `VirtualSelect` container, `zIndex.popover`). The trigger itself also receives `isBusy` so it renders disabled.
-- **Tag removal (owned handler)** — `handleRemoveTag(label)` maps the removed tag's label back to its value via `getValueFromLabel` and calls `onChange` with the filtered `selected` array. The parent only supplies the mapping function and the change callback.
+- **Selected labels (store read)** — `useGetSelectedValues` mirrors the shell's `filter.values` (the selected option **labels**); they feed the trigger's tags and the single-mode label.
+- **Tag overflow (owned)** — the header holds `triggerRef`, runs `useVirtualSelectTagOverflow` (ResizeObserver → `countVisibleTags`), and splits the labels into `visibleTags` + `overflowCount` via `resolveTagOverflow`.
+- **Tag removal (action dispatch)** — removing a tag dispatches `useToggleOption(label)`; the emitted `SelectFilter` funnels through the shell's `handleListChange`, which maps labels back to values and calls the parent `onChange`.
 
 ## Props
 
-| Prop                | Type                                                    | Description                                        |
-| ------------------- | ------------------------------------------------------- | -------------------------------------------------- |
-| `getValueFromLabel` | `(label: string) => string`                             | Maps a tag label back to its selected value        |
-| `isAlwaysOpen`      | `boolean`                                               | Forwarded to the trigger (static, non-interactive) |
-| `isBusy`            | `boolean`                                               | Shows the shimmer overlay + disabled trigger       |
-| `isOpen`            | `boolean`                                               | Chevron direction / `aria-expanded`                |
-| `listboxId`         | `string`                                                | Wired to the trigger's `aria-controls`             |
-| `mode`              | `'single' \| 'multi'`                                   | Trigger display mode                               |
-| `onChange`          | `(selected: string[]) => void`                          | Called with the next selection after tag removal   |
-| `onToggle`          | `() => void`                                            | Opens/closes the dropdown                          |
-| `overflowCount`     | `number`                                                | Tags hidden behind "+N more"                       |
-| `placeholder`       | `string`                                                | Shown when nothing is selected                     |
-| `selected`          | `readonly string[]`                                     | Current selection (source for removal filtering)   |
-| `triggerRef`        | `RefObject<HTMLButtonElement \| HTMLDivElement \| ...>` | Measured by the parent's ResizeObserver            |
-| `visibleTags`       | `readonly string[]`                                     | Tag labels that fit in the trigger                 |
+Presentation wiring only (`Pick` of the trigger props) — selection state never arrives via props.
+
+| Prop           | Type                  | Description                                        |
+| -------------- | --------------------- | -------------------------------------------------- |
+| `isAlwaysOpen` | `boolean`             | Forwarded to the trigger (static, non-interactive) |
+| `isBusy`       | `boolean`             | Shows the shimmer overlay + disabled trigger       |
+| `isOpen`       | `boolean`             | Chevron direction / `aria-expanded`                |
+| `listboxId`    | `string`              | Wired to the trigger's `aria-controls`             |
+| `mode`         | `'single' \| 'multi'` | Trigger display mode                               |
+| `onToggle`     | `() => void`          | Opens/closes the dropdown                          |
+| `placeholder`  | `string`              | Shown when nothing is selected                     |

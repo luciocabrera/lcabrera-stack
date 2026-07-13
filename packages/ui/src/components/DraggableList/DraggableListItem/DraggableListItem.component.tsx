@@ -2,8 +2,8 @@ import * as stylex from '@stylexjs/stylex';
 
 import type { DraggableListItemProps } from './DraggableListItem.types';
 
-import { busyStyles, styles } from '../DraggableList.stylex';
-import { handleDragOver } from '../utils';
+import { busyStyles, styles } from './DraggableListItem.stylex';
+import { handleDragOver } from './utils';
 
 /**
  * Single draggable row: derives its own drag state (`isDragging`,
