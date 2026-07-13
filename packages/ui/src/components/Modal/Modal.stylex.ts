@@ -3,7 +3,6 @@ import {
   easing,
   spacing,
   transitions,
-  zIndex,
 } from '@repo/ui/design-system/tokens/base.stylex';
 import { colors } from '@repo/ui/design-system/tokens/colors.stylex';
 import * as stylex from '@stylexjs/stylex';
@@ -11,9 +10,6 @@ import * as stylex from '@stylexjs/stylex';
 export const modalStyles = stylex.create({
   container: {
     backdropFilter: 'blur(50px) saturate(0.5) brightness(0.9)',
-    backgroundImage: `radial-gradient(circle, ${colors.patternDot} 0.1rem, transparent 0%)`,
-    backgroundRepeat: 'round',
-    backgroundSize: '2rem 2rem',
     maskImage: 'linear-gradient(to bottom, #000000, #000000)',
     scrollbarColor: `${colors.borderSecondary} transparent`,
   },
@@ -22,7 +18,7 @@ export const modalStyles = stylex.create({
     gap: spacing.md,
     // backdropFilter: 'blur(30px)',
     // backgroundColor: 'rgba(15, 23, 42, 0.45)',
-    // display: 'flex',
+    display: 'flex',
     flexDirection: 'column',
     overflowY: 'auto',
   },
@@ -42,10 +38,9 @@ export const modalStyles = stylex.create({
     boxShadow: '0 12px 40px 20px #6a6a6a80',
     color: colors.textPrimary,
     textAlign: 'left',
-    zIndex: zIndex.modal,
-    maxHeight: '85vh',
-    maxWidth: '480px',
-    width: '90vw',
+    // zIndex: zIndex.modal,
+    height: 'min(85vh, 600px)',
+    width: 'min(90vw, 520px)',
     '::backdrop': {
       transition: `opacity ${transitions.normal} ${easing.easeInOut}`,
       backdropFilter: 'blur(2px)',
