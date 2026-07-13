@@ -1,8 +1,8 @@
-import type { VirtualSelectTriggerProps } from '../VirtualSelectTrigger.types';
+import type { VirtualSelectTriggerRef } from '../VirtualSelectTrigger.types';
 
 type AssignTriggerRefArgs = {
   node: HTMLButtonElement | HTMLDivElement | null;
-  triggerRef: VirtualSelectTriggerProps['triggerRef'];
+  triggerRef: VirtualSelectTriggerRef;
 };
 
 export const assignTriggerRef = ({

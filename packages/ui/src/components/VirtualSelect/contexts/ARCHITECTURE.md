@@ -18,7 +18,7 @@ The shell mounts three providers:
 
 ## Meta Store (single owner of the select metadata)
 
-`metaStore` holds `customStylex`, `isAlwaysOpen`, `isBusy`, `isOpen`, `listboxId`, `listMaxHeight`, `mode`, `placeholder`, `shouldFillHeight` plus the pre-computed `isListVisible` (`isAlwaysOpen || isOpen` — derived in `getInitialSelectMetaState`, never in selectors). The dropdown **open state itself is shell-owned** (`useVirtualSelectDropdown` local state — UI-only state stays local per the controlled-component contract): the provider mirrors it (TableDataProvider precedent) and the `useToggleDropdown` action dispatches the shell callback from the context value (TableWrapper-ref precedent).
+`metaStore` holds `customStylex`, `isAlwaysOpen`, `isBusy`, `isOpen`, `listboxId`, `mode`, `placeholder` plus the pre-computed `isListVisible` (`isAlwaysOpen || isOpen` — derived in `getInitialSelectMetaState`, never in selectors). List-layout config (`listMaxHeight`, `shouldFillHeight`) is **not** here — it belongs to the list config store (its single owner), where `VirtualListBody`/`VirtualListContent`/`VirtualSelectDropdown` read it. The dropdown **open state itself is shell-owned** (`useVirtualSelectDropdown` local state — UI-only state stays local per the controlled-component contract): the provider mirrors it (TableDataProvider precedent) and the `useToggleDropdown` action dispatches the shell callback from the context value (TableWrapper-ref precedent).
 
 ## Contract: Component vs Infrastructure
 
@@ -37,6 +37,6 @@ contexts/
     ├── VirtualSelectConfigContext.{context,provider,types,constants}.ts(x)
     ├── useVirtualSelectConfigContextValue.hook.ts
     ├── utils/                      → getInitialSelectMetaState (mirror + derived isListVisible)
-    └── meta/                       → useSelectMetaStore + selectors/ (10 one-liners)
+    └── meta/                       → useSelectMetaStore + selectors/ (8 one-liners)
                                       + actions/ (toggleDropdown)
 ```

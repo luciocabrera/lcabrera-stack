@@ -53,6 +53,7 @@
     }
   ],
   "health": {
+    "maxUnitSize": 90,
     "thresholdOverrides": [
       {
         "files": ["**/*.test.*"],
@@ -66,7 +67,10 @@
     "unused-files": "error",
     "unused-exports": "warn",
     "unused-types": "warn",
-    "unused-dependencies": "warn"
+    "unused-dependencies": "warn",
+    "prop-drilling": "error",
+    "thin-wrapper": "error",
+    "duplicate-prop-shape": "warn"
   },
   "duplicates": {
     "mode": "mild",

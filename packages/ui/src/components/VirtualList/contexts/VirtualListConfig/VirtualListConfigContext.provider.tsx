@@ -10,6 +10,7 @@ import type {
   VirtualListConfigProviderProps,
 } from './VirtualListConfigContext.types';
 
+import { LIST_MAX_HEIGHT } from '../../VirtualList.constants';
 import { getInitialListConfigState, getInitialListUiState } from './utils';
 import { VirtualListConfigContext } from './VirtualListConfigContext.context';
 
@@ -22,18 +23,22 @@ export const VirtualListConfigProvider = ({
   children,
   hasCheckboxes,
   hasSelectAll,
+  listMaxHeight = LIST_MAX_HEIGHT,
   name,
   onChange,
   onFetchInitial,
   onFetchMore,
+  shouldFillHeight = false,
 }: VirtualListConfigProviderProps) => {
   const configStore = useStore<VirtualListConfigState>(
     getInitialListConfigState({
       hasCheckboxes,
       hasSelectAll,
+      listMaxHeight,
       name,
       onFetchInitial,
       onFetchMore,
+      shouldFillHeight,
     }),
   );
   const uiStore = useStore<VirtualListUiState>(getInitialListUiState());
@@ -43,18 +48,22 @@ export const VirtualListConfigProvider = ({
       getInitialListConfigState({
         hasCheckboxes,
         hasSelectAll,
+        listMaxHeight,
         name,
         onFetchInitial,
         onFetchMore,
+        shouldFillHeight,
       }),
     );
   }, [
     configStore,
     hasCheckboxes,
     hasSelectAll,
+    listMaxHeight,
     name,
     onFetchInitial,
     onFetchMore,
+    shouldFillHeight,
   ]);
 
   const value: VirtualListConfigContextValue = {

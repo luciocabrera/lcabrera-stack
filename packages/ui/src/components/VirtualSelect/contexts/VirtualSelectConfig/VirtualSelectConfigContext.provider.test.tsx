@@ -25,11 +25,9 @@ describe('VirtualSelectConfigProvider', () => {
         isBusy={false}
         isOpen={false}
         listboxId='listbox-id'
-        listMaxHeight='12rem'
         mode='multi'
         onToggleDropdown={vi.fn()}
         placeholder='Pick...'
-        shouldFillHeight={false}
       >
         {children}
       </VirtualSelectConfigProvider>
@@ -61,11 +59,9 @@ describe('VirtualSelectConfigProvider', () => {
         isBusy={false}
         isOpen={currentIsOpen}
         listboxId='listbox-id'
-        listMaxHeight='12rem'
         mode='single'
         onToggleDropdown={vi.fn()}
         placeholder='Pick...'
-        shouldFillHeight={false}
       >
         {children}
       </VirtualSelectConfigProvider>

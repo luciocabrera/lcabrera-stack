@@ -4,7 +4,5 @@ export { useGetIsBusy } from './useGetIsBusy.hook';
 export { useGetIsListVisible } from './useGetIsListVisible.hook';
 export { useGetIsOpen } from './useGetIsOpen.hook';
 export { useGetListboxId } from './useGetListboxId.hook';
-export { useGetListMaxHeight } from './useGetListMaxHeight.hook';
 export { useGetMode } from './useGetMode.hook';
 export { useGetPlaceholder } from './useGetPlaceholder.hook';
-export { useGetShouldFillHeight } from './useGetShouldFillHeight.hook';

@@ -1,6 +1,6 @@
 # VirtualSelectDropdown Architecture
 
-Dropdown slice of `VirtualSelect`: the positioned listbox shell around the provider-less `VirtualListContent`. **Fully self-connected — zero props** (so it carries no `.types.ts`): positioning and visibility come from the select meta selectors; it holds no handlers, since the list providers and the selection-change mapping are owned by the shell. Private delegate — no `index.ts`, imported by `VirtualSelect` via direct file path (ADR-007). Must render inside the three providers mounted by the shell.
+Dropdown slice of `VirtualSelect`: the positioned listbox shell around the provider-less `VirtualListContent`. **Fully self-connected — zero props** (so it carries no `.types.ts`): visibility/positioning metadata comes from the select meta selectors and the fill-height flag from the **list config store** (its single owner — `listMaxHeight` never passes through here; `VirtualListBody` reads it directly). It holds no handlers, since the list providers and the selection-change mapping are owned by the shell. Private delegate — no `index.ts`, imported by `VirtualSelect` via direct file path (ADR-007). Must render inside the three providers mounted by the shell.
 
 ## File Structure
 
@@ -20,8 +20,9 @@ VirtualSelectDropdown/
 
 ```mermaid
 graph LR
-  VSD["VirtualSelectDropdown"] --> MSEL["VirtualSelectConfig/meta/selectors\n<small>customStylex, isAlwaysOpen, isListVisible, listboxId, listMaxHeight, shouldFillHeight</small>"]
-  VSD --> VLC["VirtualListContent (provider-less)"]
+  VSD["VirtualSelectDropdown"] --> MSEL["VirtualSelectConfig/meta/selectors\n<small>customStylex, isAlwaysOpen, isListVisible, listboxId</small>"]
+  VSD --> LSEL["VirtualListConfig/config/selectors (useGetShouldFillHeight)"]
+  VSD --> VLC["VirtualListContent (provider-less, zero props)"]
   VSD --> GDS["utils/getDropdownStyle"]
   GDS --> VSD_stylex["VirtualSelectDropdown.stylex"]
   VSD --> VSD_stylex
@@ -44,6 +45,7 @@ Controlled by `utils/getDropdownStyle({ isAlwaysOpen, shouldFillHeight })`, comp
 
 ## State Ownership
 
-| Source            | Read                                                                                              | Dispatched |
-| ----------------- | ------------------------------------------------------------------------------------------------- | ---------- |
-| Select meta store | `customStylex`, `isAlwaysOpen`, `isListVisible`, `listboxId`, `listMaxHeight`, `shouldFillHeight` | —          |
+| Source            | Read                                                         | Dispatched |
+| ----------------- | ------------------------------------------------------------ | ---------- |
+| Select meta store | `customStylex`, `isAlwaysOpen`, `isListVisible`, `listboxId` | —          |
+| List config store | `shouldFillHeight` (positioning input)                       | —          |

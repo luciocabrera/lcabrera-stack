@@ -44,11 +44,6 @@ const ProviderShell = ({
   </VirtualListConfigProvider>
 );
 
-const bodyProps = {
-  listMaxHeight: '18.75rem',
-  shouldFillHeight: false,
-};
-
 describe('VirtualListBody', () => {
   it('renders the loading skeleton during the initial loading bootstrap', () => {
     const onFetchInitial = vi.fn();
@@ -62,7 +57,7 @@ describe('VirtualListBody', () => {
         }}
         onFetchInitial={onFetchInitial}
       >
-        <VirtualListBody {...bodyProps} />
+        <VirtualListBody />
       </ProviderShell>,
     );
 
@@ -81,7 +76,7 @@ describe('VirtualListBody', () => {
           isLoadingMore: false,
         }}
       >
-        <VirtualListBody {...bodyProps} />
+        <VirtualListBody />
       </ProviderShell>,
     );
 
@@ -91,7 +86,7 @@ describe('VirtualListBody', () => {
   it('renders the virtualized options when data exists', () => {
     render(
       <ProviderShell>
-        <VirtualListBody {...bodyProps} />
+        <VirtualListBody />
       </ProviderShell>,
     );
 
@@ -105,7 +100,7 @@ describe('VirtualListBody', () => {
 
     render(
       <ProviderShell hasSelectAll={false} onChange={onChange}>
-        <VirtualListBody {...bodyProps} />
+        <VirtualListBody />
       </ProviderShell>,
     );
 

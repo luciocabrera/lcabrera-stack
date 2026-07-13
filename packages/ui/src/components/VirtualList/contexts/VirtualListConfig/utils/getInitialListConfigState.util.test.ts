@@ -8,15 +8,19 @@ describe('getInitialListConfigState', () => {
       getInitialListConfigState({
         hasCheckboxes: false,
         hasSelectAll: true,
+        listMaxHeight: '12rem',
         name: 'country-filter',
         onFetchMore: () => {},
+        shouldFillHeight: false,
       }),
     ).toEqual({
       hasCheckboxes: false,
       hasFetchInitial: false,
       hasFetchMore: true,
       hasSelectAll: true,
+      listMaxHeight: '12rem',
       name: 'country-filter',
+      shouldFillHeight: false,
     });
   });
 
@@ -25,15 +29,19 @@ describe('getInitialListConfigState', () => {
       getInitialListConfigState({
         hasCheckboxes: true,
         hasSelectAll: false,
+        listMaxHeight: '18.75rem',
         onFetchInitial: () => {},
         onFetchMore: () => {},
+        shouldFillHeight: true,
       }),
     ).toEqual({
       hasCheckboxes: true,
       hasFetchInitial: true,
       hasFetchMore: true,
       hasSelectAll: false,
+      listMaxHeight: '18.75rem',
       name: undefined,
+      shouldFillHeight: true,
     });
   });
 });

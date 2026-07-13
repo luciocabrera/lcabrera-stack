@@ -1,4 +1,5 @@
 import { VirtualListContent } from '@repo/ui/components/VirtualList';
+import { useGetShouldFillHeight } from '@repo/ui/components/VirtualList/contexts/VirtualListConfig/config/selectors';
 import * as stylex from '@stylexjs/stylex';
 
 import {
@@ -6,8 +7,6 @@ import {
   useGetIsAlwaysOpen,
   useGetIsListVisible,
   useGetListboxId,
-  useGetListMaxHeight,
-  useGetShouldFillHeight,
 } from '../contexts/VirtualSelectConfig/meta/selectors';
 import { getDropdownStyle } from './utils/getDropdownStyle.util';
 import { styles } from './VirtualSelectDropdown.stylex';
@@ -15,15 +14,15 @@ import { styles } from './VirtualSelectDropdown.stylex';
 /**
  * Dropdown slice of VirtualSelect: the positioned listbox shell around the
  * provider-less VirtualListContent. Fully self-connected (zero props) —
- * positioning and visibility come from the select meta selectors; the list
- * providers and the selection-change mapping are owned by the shell.
+ * positioning/visibility come from the select meta selectors and the
+ * fill-height flag from the list config store; the list providers and the
+ * selection-change mapping are owned by the shell.
  */
 export const VirtualSelectDropdown = () => {
   const customStylex = useGetCustomStylex();
   const isAlwaysOpen = useGetIsAlwaysOpen();
   const isListVisible = useGetIsListVisible();
   const listboxId = useGetListboxId();
-  const listMaxHeight = useGetListMaxHeight();
   const shouldFillHeight = useGetShouldFillHeight();
 
   if (!isListVisible) return;
@@ -38,10 +37,7 @@ export const VirtualSelectDropdown = () => {
         customStylex,
       )}
     >
-      <VirtualListContent
-        listMaxHeight={listMaxHeight}
-        shouldFillHeight={shouldFillHeight}
-      />
+      <VirtualListContent />
     </div>
   );
 };

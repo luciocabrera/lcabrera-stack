@@ -2,9 +2,11 @@ import { useInfiniteScrollObserver } from '@repo/ui/hooks';
 import * as stylex from '@stylexjs/stylex';
 import { useRef } from 'react';
 
-import type { VirtualListBodyProps } from './VirtualListBody.types';
-
-import { useGetHasFetchMore } from '../contexts/VirtualListConfig/config/selectors';
+import {
+  useGetHasFetchMore,
+  useGetListMaxHeight,
+  useGetShouldFillHeight,
+} from '../contexts/VirtualListConfig/config/selectors';
 import { useFetchMore } from '../contexts/VirtualListData/data/actions';
 import {
   useGetHasMore,
@@ -16,19 +18,19 @@ import { VirtualListBodyChildren } from './VirtualListBodyChildren/VirtualListBo
 
 /**
  * Owns the scroll container and the infinite-scroll sentinel (Table analog:
- * TableContent). Content-mode dispatch and virtualization live one level
- * down in VirtualListBodyChildren.
+ * TableContent). Fully self-connected (zero props) — layout config comes
+ * from the config store. Content-mode dispatch and virtualization live one
+ * level down in VirtualListBodyChildren.
  */
-export const VirtualListBody = ({
-  listMaxHeight,
-  shouldFillHeight,
-}: VirtualListBodyProps) => {
+export const VirtualListBody = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   const hasFetchMore = useGetHasFetchMore();
   const hasMore = useGetHasMore();
   const isLoadingOptions = useGetIsLoadingOptions();
+  const listMaxHeight = useGetListMaxHeight();
+  const shouldFillHeight = useGetShouldFillHeight();
   const fetchMore = useFetchMore();
 
   useInfiniteScrollObserver({

@@ -3,20 +3,18 @@ import type { ReactNode } from 'react';
 import { Tag } from '@repo/ui/components/Tag';
 import * as stylex from '@stylexjs/stylex';
 
-import type { VirtualSelectTriggerProps } from '../VirtualSelectTrigger.types';
+import type { VirtualSelectMode } from '../../VirtualSelect.types';
 
 import { styles } from '../VirtualSelectTrigger.stylex';
 
-type RenderTriggerContentArgs = Pick<
-  VirtualSelectTriggerProps,
-  | 'mode'
-  | 'onRemoveTag'
-  | 'overflowCount'
-  | 'placeholder'
-  | 'selected'
-  | 'visibleTags'
-> & {
+type RenderTriggerContentArgs = {
   readonly hasSelection: boolean;
+  readonly mode: VirtualSelectMode;
+  readonly onRemoveTag: (option: string) => void;
+  readonly overflowCount: number;
+  readonly placeholder: string;
+  readonly selected: readonly string[];
+  readonly visibleTags: readonly string[];
 };
 
 export const renderTriggerContent = ({

@@ -1,65 +1,109 @@
 // @vitest-environment jsdom
 
-import type { RefObject } from 'react';
-
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+const {
+  metaState,
+  setMetaState,
+  toggleDropdownMock,
+  toggleOptionMock,
+  useGetSelectedValuesMock,
+  useVirtualSelectTagOverflowMock,
+} = vi.hoisted(() => {
+  const initialMetaState = {
+    isAlwaysOpen: false,
+    isBusy: false,
+    isOpen: false,
+    listboxId: 'listbox-id',
+    mode: 'single',
+    placeholder: 'Pick one',
+  };
+  const state = { current: { ...initialMetaState } };
+
+  return {
+    metaState: state,
+    setMetaState: (next: Partial<typeof initialMetaState>) => {
+      state.current = { ...initialMetaState, ...next };
+    },
+    toggleDropdownMock: vi.fn(),
+    toggleOptionMock: vi.fn(),
+    useGetSelectedValuesMock: vi.fn<() => readonly string[]>(() => []),
+    useVirtualSelectTagOverflowMock: vi.fn(() => 0),
+  };
+});
+
+vi.mock('../contexts/VirtualSelectConfig/meta/actions', () => ({
+  useToggleDropdown: () => toggleDropdownMock,
+}));
+
+vi.mock('../contexts/VirtualSelectConfig/meta/selectors', () => ({
+  useGetIsAlwaysOpen: () => metaState.current.isAlwaysOpen,
+  useGetIsBusy: () => metaState.current.isBusy,
+  useGetIsOpen: () => metaState.current.isOpen,
+  useGetListboxId: () => metaState.current.listboxId,
+  useGetMode: () => metaState.current.mode,
+  useGetPlaceholder: () => metaState.current.placeholder,
+}));
+
+vi.mock(
+  '@repo/ui/components/VirtualList/contexts/VirtualListData/data/actions',
+  () => ({
+    useToggleOption: () => toggleOptionMock,
+  }),
+);
+
+vi.mock(
+  '@repo/ui/components/VirtualList/contexts/VirtualListData/data/selectors',
+  () => ({
+    useGetSelectedValues: useGetSelectedValuesMock,
+  }),
+);
+
+vi.mock('../hooks', () => ({
+  useVirtualSelectTagOverflow: useVirtualSelectTagOverflowMock,
+}));
 
 import { VirtualSelectTrigger } from './VirtualSelectTrigger.component';
 
-const createProps = () => ({
-  isAlwaysOpen: false,
-  isOpen: false,
-  listboxId: 'listbox-id',
-  mode: 'single' as const,
-  onRemoveTag: vi.fn(),
-  onToggle: vi.fn(),
-  overflowCount: 0,
-  placeholder: 'Pick one',
-  selected: [] as readonly string[],
-  triggerRef: {
-    current: undefined,
-  } as RefObject<HTMLButtonElement | HTMLDivElement | undefined>,
-  visibleTags: [] as readonly string[],
+beforeEach(() => {
+  setMetaState({});
+  useGetSelectedValuesMock.mockReturnValue([]);
+  useVirtualSelectTagOverflowMock.mockReturnValue(0);
 });
 
 afterEach(() => {
+  toggleDropdownMock.mockClear();
+  toggleOptionMock.mockClear();
   cleanup();
 });
 
 describe('VirtualSelectTrigger', () => {
-  it('renders the placeholder in the default button trigger and assigns the button ref', () => {
-    const props = createProps();
-
-    render(<VirtualSelectTrigger {...props} />);
+  it('renders the placeholder in the native button trigger and dispatches the toggle action', () => {
+    render(<VirtualSelectTrigger />);
 
     const trigger = screen.getByRole('button', { name: 'Pick one' });
 
     expect(trigger.tagName).toBe('BUTTON');
-    expect(props.triggerRef.current).toBe(trigger);
+
+    fireEvent.click(trigger);
+
+    expect(toggleDropdownMock).toHaveBeenCalledTimes(1);
   });
 
-  it('renders the selected single value and toggles when clicked', () => {
-    const props = {
-      ...createProps(),
-      selected: ['Alpha'],
-    };
+  it('renders the selected single label from the store', () => {
+    useGetSelectedValuesMock.mockReturnValue(['Alpha']);
+    useVirtualSelectTagOverflowMock.mockReturnValue(1);
 
-    render(<VirtualSelectTrigger {...props} />);
+    render(<VirtualSelectTrigger />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Alpha' }));
-
-    expect(screen.getByText('Alpha').textContent).toBe('Alpha');
-    expect(props.onToggle).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole('button', { name: 'Alpha' })).toBeTruthy();
   });
 
-  it('renders the trigger as disabled when busy', () => {
-    const props = {
-      ...createProps(),
-      isBusy: true,
-    };
+  it('renders disabled and does not toggle while busy', () => {
+    setMetaState({ isBusy: true });
 
-    render(<VirtualSelectTrigger {...props} />);
+    render(<VirtualSelectTrigger />);
 
     const trigger = screen.getByRole('button', { name: 'Pick one' });
 
@@ -67,49 +111,41 @@ describe('VirtualSelectTrigger', () => {
 
     fireEvent.click(trigger);
 
-    expect(props.onToggle).not.toHaveBeenCalled();
+    expect(toggleDropdownMock).not.toHaveBeenCalled();
   });
 
-  it('renders tag buttons with overflow text in multi mode and removes a tag', () => {
-    const props = {
-      ...createProps(),
-      mode: 'multi' as const,
-      onRemoveTag: vi.fn(),
-      overflowCount: 2,
-      selected: ['Alpha', 'Bravo', 'Charlie'],
-      visibleTags: ['Alpha'],
-    };
+  it('renders multi-mode tags and dispatches removal through the toggle-option action', () => {
+    setMetaState({ mode: 'multi' });
+    useGetSelectedValuesMock.mockReturnValue(['Alpha', 'Bravo']);
+    useVirtualSelectTagOverflowMock.mockReturnValue(2);
 
-    const { container } = render(<VirtualSelectTrigger {...props} />);
-    const trigger = container.querySelector('[role="button"]');
+    render(<VirtualSelectTrigger />);
 
-    expect(trigger?.tagName).toBe('DIV');
+    expect(screen.getByRole('button', { name: 'Remove Bravo' })).toBeTruthy();
 
-    fireEvent.keyDown(trigger as HTMLDivElement, { key: 'Enter' });
-    fireEvent.keyDown(trigger as HTMLDivElement, { key: ' ' });
     fireEvent.click(screen.getByRole('button', { name: 'Remove Alpha' }));
 
-    expect(props.triggerRef.current).toBe(trigger);
-    expect(props.onToggle).toHaveBeenCalledTimes(2);
-    expect(props.onRemoveTag).toHaveBeenCalledWith('Alpha');
-    expect(screen.getByText('+2 more').textContent).toBe('+2 more');
+    expect(toggleOptionMock).toHaveBeenCalledWith('Alpha');
   });
 
-  it('renders a static div when always open', () => {
-    const props = {
-      ...createProps(),
-      isAlwaysOpen: true,
-      mode: 'multi' as const,
-      selected: ['Alpha'],
-      visibleTags: ['Alpha'],
-    };
+  it('hides overflowing tags behind the "+N more" badge', () => {
+    setMetaState({ mode: 'multi' });
+    useGetSelectedValuesMock.mockReturnValue(['Alpha', 'Bravo', 'Charlie']);
+    useVirtualSelectTagOverflowMock.mockReturnValue(1);
 
-    const { container } = render(<VirtualSelectTrigger {...props} />);
-    const trigger = container.firstChild as HTMLDivElement | null;
+    render(<VirtualSelectTrigger />);
 
-    expect(trigger?.tagName).toBe('DIV');
-    expect(trigger?.getAttribute('role')).toBeNull();
-    expect(props.triggerRef.current).toBe(trigger);
-    expect(screen.getByText('Alpha').textContent).toBe('Alpha');
+    expect(screen.getByRole('button', { name: 'Remove Alpha' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Remove Bravo' })).toBeNull();
+    expect(screen.getByText('+2 more')).toBeTruthy();
+  });
+
+  it('renders the static div shell without interaction when always open', () => {
+    setMetaState({ isAlwaysOpen: true });
+
+    render(<VirtualSelectTrigger />);
+
+    expect(screen.queryByRole('button')).toBeNull();
+    expect(document.querySelector('[data-chevron]')).toBeNull();
   });
 });

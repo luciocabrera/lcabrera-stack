@@ -2,6 +2,14 @@ import type { KeyboardEvent } from 'react';
 
 import type { VirtualSelectDivTriggerProps } from './VirtualSelectDivTrigger.types';
 
+import { useToggleDropdown } from '../../contexts/VirtualSelectConfig/meta/actions';
+import {
+  useGetIsAlwaysOpen,
+  useGetIsBusy,
+  useGetIsOpen,
+  useGetListboxId,
+  useGetMode,
+} from '../../contexts/VirtualSelectConfig/meta/selectors';
 import {
   assignTriggerRef,
   getTriggerStyleProps,
@@ -11,19 +19,22 @@ import {
 /**
  * Div-based trigger shell used when the native `<button>` cannot be (tag
  * chips render nested remove buttons) or when the listbox is always open.
- * The static (`isAlwaysOpen`) and interactive variants share the same shell —
- * only the interaction props differ, so they are spread conditionally.
+ * Self-connected — interaction/styling state comes from the select meta
+ * selectors and the toggle dispatches through the meta action. The static
+ * (`isAlwaysOpen`) and interactive variants share the same shell — only the
+ * interaction props differ, so they are spread conditionally.
  */
 export const VirtualSelectDivTrigger = ({
   children,
-  isAlwaysOpen,
-  isBusy,
-  isOpen,
-  listboxId,
-  mode,
-  onToggle,
   triggerRef,
 }: VirtualSelectDivTriggerProps) => {
+  const isAlwaysOpen = useGetIsAlwaysOpen();
+  const isBusy = useGetIsBusy();
+  const isOpen = useGetIsOpen();
+  const listboxId = useGetListboxId();
+  const mode = useGetMode();
+  const toggleDropdown = useToggleDropdown();
+
   const shouldDisableInteraction = isBusy || isAlwaysOpen;
   const interactionProps = isAlwaysOpen
     ? undefined
@@ -32,11 +43,11 @@ export const VirtualSelectDivTrigger = ({
         'aria-disabled': shouldDisableInteraction,
         'aria-expanded': isOpen,
         'aria-haspopup': 'listbox' as const,
-        onClick: shouldDisableInteraction ? undefined : onToggle,
+        onClick: shouldDisableInteraction ? undefined : toggleDropdown,
         onKeyDown: shouldDisableInteraction
           ? undefined
           : (event: KeyboardEvent<HTMLDivElement>) => {
-              handleDivTriggerKeyDown({ event, onToggle });
+              handleDivTriggerKeyDown({ event, onToggle: toggleDropdown });
             },
         role: 'button' as const,
         tabIndex: shouldDisableInteraction ? -1 : 0,

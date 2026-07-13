@@ -22,11 +22,9 @@ export const VirtualSelectConfigProvider = ({
   isBusy,
   isOpen,
   listboxId,
-  listMaxHeight,
   mode,
   onToggleDropdown,
   placeholder,
-  shouldFillHeight,
 }: VirtualSelectConfigProviderProps) => {
   const metaStore = useStore<VirtualSelectMetaState>(
     getInitialSelectMetaState({
@@ -35,10 +33,8 @@ export const VirtualSelectConfigProvider = ({
       isBusy,
       isOpen,
       listboxId,
-      listMaxHeight,
       mode,
       placeholder,
-      shouldFillHeight,
     }),
   );
 
@@ -50,10 +46,8 @@ export const VirtualSelectConfigProvider = ({
         isBusy,
         isOpen,
         listboxId,
-        listMaxHeight,
         mode,
         placeholder,
-        shouldFillHeight,
       }),
     );
   }, [
@@ -62,11 +56,9 @@ export const VirtualSelectConfigProvider = ({
     isBusy,
     isOpen,
     listboxId,
-    listMaxHeight,
     metaStore,
     mode,
     placeholder,
-    shouldFillHeight,
   ]);
 
   const value: VirtualSelectConfigContextValue = {

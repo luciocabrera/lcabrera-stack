@@ -1,16 +1,13 @@
 import type { ReactNode } from 'react';
 
-import type { VirtualSelectTriggerProps } from '../VirtualSelectTrigger.types';
+import type { VirtualSelectTriggerRef } from '../VirtualSelectTrigger.types';
 
 /**
- * Props for the div-based trigger shell: the parent trigger props that drive
- * interaction and styling, plus the already-rendered trigger children
- * (content and chevron).
+ * Props for the div-based trigger shell — only the producer→direct-child
+ * trigger ref and the already-rendered children (content and chevron);
+ * interaction and styling state is store-connected inside.
  */
-export type VirtualSelectDivTriggerProps = Pick<
-  VirtualSelectTriggerProps,
-  'isAlwaysOpen' | 'isOpen' | 'listboxId' | 'mode' | 'onToggle' | 'triggerRef'
-> & {
+export type VirtualSelectDivTriggerProps = {
   readonly children: ReactNode;
-  readonly isBusy: boolean;
+  readonly triggerRef: VirtualSelectTriggerRef;
 };

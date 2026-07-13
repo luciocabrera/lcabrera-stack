@@ -50,6 +50,8 @@ const setup = ({ config = {}, dataState = {} }: SetupArgs = {}) => {
     hasFetchInitial: false,
     hasFetchMore: false,
     hasSelectAll: true,
+    listMaxHeight: '18.75rem',
+    shouldFillHeight: false,
   });
   const uiStore = createMockStore<VirtualListUiState>({
     listFilterMode: 'all',

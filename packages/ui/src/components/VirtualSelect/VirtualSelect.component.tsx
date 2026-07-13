@@ -93,18 +93,18 @@ export const VirtualSelect = ({
       isBusy={isBusy}
       isOpen={isOpen}
       listboxId={resolvedListboxId}
-      listMaxHeight={listMaxHeight}
       mode={mode}
       onToggleDropdown={toggleDropdown}
       placeholder={placeholder}
-      shouldFillHeight={shouldFillHeight}
     >
       <VirtualListConfigProvider
         hasCheckboxes={isMulti}
         hasSelectAll={isMulti}
+        listMaxHeight={listMaxHeight}
         onChange={handleListChange}
         onFetchInitial={onFetchInitial}
         onFetchMore={onFetchMore}
+        shouldFillHeight={shouldFillHeight}
       >
         <VirtualListDataProvider
           dataState={effectiveDataState}

@@ -2,7 +2,7 @@
 
 Dropdown select component (single or multi) backed by a virtualized list, with tag-chip display, overflow counting, and optional async infinite-scroll data loading.
 
-`VirtualSelect` is a **thin shell over three contexts**: its own `VirtualSelectConfig` (select-level presentation metadata in a meta store) plus the **lifted** VirtualList `Config`/`Data` pair. The delegates are fully self-connected — zero props — consuming selectors and actions only. Selection stays parent-owned: list changes exit through the shell's `onChange` mapping on the list config context.
+`VirtualSelect` is a **thin shell over three contexts**: its own `VirtualSelectConfig` (select-level presentation metadata in a meta store) plus the **lifted** VirtualList `Config`/`Data` pair. Every delegate — header, trigger, div trigger, dropdown — is fully self-connected, consuming selectors and actions where the value is actually rendered; the only surviving props are producer→direct-child values (`triggerRef`, `children`). List-layout config (`listMaxHeight`, `shouldFillHeight`) lives in the **list config store**, not the meta store, so `VirtualListContent`/`VirtualListBody` read it in standalone VirtualList use too. Selection stays parent-owned: list changes exit through the shell's `onChange` mapping on the list config context.
 
 ## File Structure
 
@@ -51,20 +51,22 @@ graph TD
   LCFG --> LDATA["VirtualListDataProvider (lifted)"]
   LDATA --> VSH["VirtualSelectHeader (zero props)"]
   LDATA --> VSD["VirtualSelectDropdown (zero props)"]
-  VSH --> VST["VirtualSelectTrigger"]
-  VSD --> VLC["VirtualListContent (provider-less)"]
+  VSH --> VST["VirtualSelectTrigger (zero props)"]
+  VST --> VSDT["VirtualSelectDivTrigger (children + triggerRef)"]
+  VSD --> VLC["VirtualListContent (provider-less, zero props)"]
 ```
 
 ## State Ownership Rule
 
 Every store slice is read — and every action dispatched — inside the component that renders it, and **each piece of state has exactly one owning store** (select metadata → meta store; list config/callbacks → list config store/context; data + selection → list data store; search/filter-mode → list ui store). The shell holds no store wiring; it owns only the select-level concerns it mirrors into the providers.
 
-| Delegate                | Selectors read                                                                                                                                   | Actions dispatched                                      | Props kept                  |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------- | --------------------------- |
-| `VirtualSelect` (shell) | — (mounts the providers)                                                                                                                         | — (`onChange` mapping lives on the list config context) | public API (unchanged)      |
-| `VirtualSelectHeader`   | `useGetIsAlwaysOpen`, `useGetIsBusy`, `useGetIsOpen`, `useGetListboxId`, `useGetMode`, `useGetPlaceholder` (meta); `useGetSelectedValues` (data) | `useToggleDropdown` (meta), `useToggleOption` (data)    | none                        |
-| `VirtualSelectDropdown` | `useGetCustomStylex`, `useGetIsAlwaysOpen`, `useGetIsListVisible`, `useGetListboxId`, `useGetListMaxHeight`, `useGetShouldFillHeight` (meta)     | —                                                       | none                        |
-| `VirtualSelectTrigger`  | — (pure leaf; Header is its store-connected owner)                                                                                               | —                                                       | full presentational surface |
+| Delegate                  | Selectors read                                                                                                                                   | Actions dispatched                                      | Props kept                                |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------- | ----------------------------------------- |
+| `VirtualSelect` (shell)   | — (mounts the providers)                                                                                                                         | — (`onChange` mapping lives on the list config context) | public API (unchanged)                    |
+| `VirtualSelectHeader`     | `useGetIsBusy` (meta) — only what it renders itself (the overlay)                                                                                | —                                                       | none                                      |
+| `VirtualSelectTrigger`    | `useGetIsAlwaysOpen`, `useGetIsBusy`, `useGetIsOpen`, `useGetListboxId`, `useGetMode`, `useGetPlaceholder` (meta); `useGetSelectedValues` (data) | `useToggleDropdown` (meta), `useToggleOption` (data)    | none (owns `triggerRef` + overflow)       |
+| `VirtualSelectDivTrigger` | `useGetIsAlwaysOpen`, `useGetIsBusy`, `useGetIsOpen`, `useGetListboxId`, `useGetMode` (meta)                                                     | `useToggleDropdown` (meta)                              | `children`, `triggerRef` (producer→child) |
+| `VirtualSelectDropdown`   | `useGetCustomStylex`, `useGetIsAlwaysOpen`, `useGetIsListVisible`, `useGetListboxId` (meta); `useGetShouldFillHeight` (list config)              | —                                                       | none                                      |
 
 ## Data Flow
 
@@ -76,10 +78,10 @@ graph TD
   VS -->|"handleListChange (onChange mapping)"| LCFG["VirtualListConfigProvider"]
   VS -->|"dataState ?? fallback, filter = selectedLabels"| LDATA["VirtualListDataProvider → dataStore"]
 
-  SCFG -->|"meta selectors"| VSH["VirtualSelectHeader"]
+  SCFG -->|"meta selectors"| VST["VirtualSelectTrigger"]
   SCFG -->|"meta selectors"| VSD["VirtualSelectDropdown"]
-  LDATA -->|"useGetSelectedValues"| VSH
-  VSH -->|"useToggleOption (tag removal) / useToggleDropdown"| LCFG
+  LDATA -->|"useGetSelectedValues"| VST
+  VST -->|"useToggleOption (tag removal) / useToggleDropdown"| LCFG
   LDATA --> VLC["VirtualListContent (options, footer)"]
   VLC -->|"toggle / select-all actions"| LCFG
 
@@ -125,7 +127,7 @@ graph TD
 
 ## Tag Overflow (multi mode)
 
-Owned by `VirtualSelectHeader` (see its `ARCHITECTURE.md`): the header holds the trigger ref, runs `useVirtualSelectTagOverflow` (ResizeObserver → `countVisibleTags`), and splits the store-read selected labels into `visibleTags` + `overflowCount` via `resolveTagOverflow`.
+Owned by `VirtualSelectTrigger` (see its `ARCHITECTURE.md`): the trigger holds its own ref, runs `useVirtualSelectTagOverflow` (ResizeObserver → `countVisibleTags`), and splits the store-read selected labels into `visibleTags` + `overflowCount` via `resolveTagOverflow`.
 
 ## Click-Outside Handling
 

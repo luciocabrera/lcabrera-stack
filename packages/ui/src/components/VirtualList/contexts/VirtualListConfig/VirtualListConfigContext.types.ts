@@ -23,8 +23,12 @@ export type VirtualListConfigProviderProps = {
   readonly children: React.ReactNode;
   readonly hasCheckboxes: boolean;
   readonly hasSelectAll: boolean;
+  /** Defaults to LIST_MAX_HEIGHT when omitted */
+  readonly listMaxHeight?: string;
   readonly name?: string;
   readonly onChange: VirtualListProps['onChange'];
   readonly onFetchInitial?: VirtualListProps['onFetchInitial'];
   readonly onFetchMore?: VirtualListProps['onFetchMore'];
+  /** Defaults to false when omitted */
+  readonly shouldFillHeight?: boolean;
 };

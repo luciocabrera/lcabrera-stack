@@ -21,10 +21,8 @@ import {
   useGetIsListVisible,
   useGetIsOpen,
   useGetListboxId,
-  useGetListMaxHeight,
   useGetMode,
   useGetPlaceholder,
-  useGetShouldFillHeight,
 } from './selectors';
 import { useSelectMetaStore } from './useSelectMetaStore.hook';
 
@@ -39,10 +37,8 @@ const setup = (metaState: Partial<VirtualSelectMetaState> = {}) => {
     isListVisible: true,
     isOpen: true,
     listboxId: 'listbox-id',
-    listMaxHeight: '18.75rem',
     mode: 'multi',
     placeholder: 'Pick a fruit...',
-    shouldFillHeight: false,
     ...metaState,
   });
   const onToggleDropdown = vi.fn();
@@ -96,18 +92,12 @@ describe('VirtualSelectConfig meta hooks', () => {
     expect(
       renderHook(() => useGetListboxId(), { wrapper }).result.current,
     ).toBe('listbox-id');
-    expect(
-      renderHook(() => useGetListMaxHeight(), { wrapper }).result.current,
-    ).toBe('18.75rem');
     expect(renderHook(() => useGetMode(), { wrapper }).result.current).toBe(
       'multi',
     );
     expect(
       renderHook(() => useGetPlaceholder(), { wrapper }).result.current,
     ).toBe('Pick a fruit...');
-    expect(
-      renderHook(() => useGetShouldFillHeight(), { wrapper }).result.current,
-    ).toBe(false);
 
     const closed = setup({ isListVisible: false, isOpen: false });
 

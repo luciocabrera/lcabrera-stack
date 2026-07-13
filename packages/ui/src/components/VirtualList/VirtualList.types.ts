@@ -8,7 +8,11 @@ export type VirtualListConfigState = {
   readonly hasFetchInitial: boolean;
   readonly hasFetchMore: boolean;
   readonly hasSelectAll: boolean;
+  /** CSS max-height of the scrollable list (read where rendered: VirtualListBody) */
+  readonly listMaxHeight: string;
   readonly name?: string;
+  /** Expand the list to fill available vertical space */
+  readonly shouldFillHeight: boolean;
 };
 
 /** Body content mode: loading skeleton, empty message, or the options list */

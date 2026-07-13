@@ -7,10 +7,8 @@ const baseArgs = {
   isBusy: false,
   isOpen: false,
   listboxId: 'listbox-id',
-  listMaxHeight: '18.75rem',
   mode: 'single' as const,
   placeholder: 'Select...',
-  shouldFillHeight: false,
 };
 
 describe('getInitialSelectMetaState', () => {

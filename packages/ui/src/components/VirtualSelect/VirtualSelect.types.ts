@@ -15,10 +15,8 @@ export type VirtualSelectMetaState = {
   readonly isListVisible: boolean;
   readonly isOpen: boolean;
   readonly listboxId: string;
-  readonly listMaxHeight: string;
   readonly mode: VirtualSelectMode;
   readonly placeholder: string;
-  readonly shouldFillHeight: boolean;
 };
 
 export type VirtualSelectOption = {

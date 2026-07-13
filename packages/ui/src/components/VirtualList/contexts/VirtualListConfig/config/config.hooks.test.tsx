@@ -20,7 +20,9 @@ import { useGetHasCheckboxes } from './selectors/useGetHasCheckboxes.hook';
 import { useGetHasFetchInitial } from './selectors/useGetHasFetchInitial.hook';
 import { useGetHasFetchMore } from './selectors/useGetHasFetchMore.hook';
 import { useGetHasSelectAll } from './selectors/useGetHasSelectAll.hook';
+import { useGetListMaxHeight } from './selectors/useGetListMaxHeight.hook';
 import { useGetSearchInputName } from './selectors/useGetSearchInputName.hook';
+import { useGetShouldFillHeight } from './selectors/useGetShouldFillHeight.hook';
 import { useListConfigStore } from './useListConfigStore.hook';
 
 type WrapperProps = {
@@ -33,7 +35,9 @@ const setup = (configState: Partial<VirtualListConfigState> = {}) => {
     hasFetchInitial: false,
     hasFetchMore: true,
     hasSelectAll: true,
+    listMaxHeight: '18.75rem',
     name: 'fruit-search',
+    shouldFillHeight: false,
     ...configState,
   });
   const uiStore = createMockStore<VirtualListUiState>({
@@ -80,8 +84,14 @@ describe('VirtualListConfig config hooks', () => {
       renderHook(() => useGetHasSelectAll(), { wrapper }).result.current,
     ).toBe(true);
     expect(
+      renderHook(() => useGetListMaxHeight(), { wrapper }).result.current,
+    ).toBe('18.75rem');
+    expect(
       renderHook(() => useGetSearchInputName(), { wrapper }).result.current,
     ).toBe('fruit-search');
+    expect(
+      renderHook(() => useGetShouldFillHeight(), { wrapper }).result.current,
+    ).toBe(false);
 
     const withoutCheckboxes = setup({ hasCheckboxes: false });
 
