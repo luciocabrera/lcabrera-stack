@@ -37,10 +37,6 @@ export const OrderConflictModal = () => {
     setSelectedResolution('remove-conflicting-pins');
   };
 
-  const handleResolutionChange = (value: OrderConflictResolution) => {
-    setSelectedResolution(value);
-  };
-
   return (
     <Modal
       footer={
@@ -60,7 +56,7 @@ export const OrderConflictModal = () => {
       <p {...stylex.props(styles.description)}>{description}</p>
       <RadioOptionGroup
         name='sort-order-conflict-resolution'
-        onChange={handleResolutionChange}
+        onChange={setSelectedResolution}
         options={ORDER_CONFLICT_OPTIONS}
         value={selectedResolution}
       />

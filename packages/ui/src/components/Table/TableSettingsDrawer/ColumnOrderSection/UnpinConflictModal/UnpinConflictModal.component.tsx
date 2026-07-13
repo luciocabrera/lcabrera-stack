@@ -37,10 +37,6 @@ export const UnpinConflictModal = () => {
     setSelectedResolution('unpin-beyond');
   };
 
-  const handleResolutionChange = (value: UnpinConflictResolution) => {
-    setSelectedResolution(value);
-  };
-
   return (
     <Modal
       footer={
@@ -63,7 +59,7 @@ export const UnpinConflictModal = () => {
       </p>
       <RadioOptionGroup
         name='unpin-conflict-resolution'
-        onChange={handleResolutionChange}
+        onChange={setSelectedResolution}
         options={UNPIN_CONFLICT_OPTIONS}
         value={selectedResolution}
       />

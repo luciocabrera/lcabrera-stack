@@ -48,10 +48,6 @@ export const PinConflictModal = () => {
     setSelectedResolution('move-column');
   };
 
-  const handleResolutionChange = (value: PinConflictResolution) => {
-    setSelectedResolution(value);
-  };
-
   return (
     <Modal
       footer={
@@ -74,7 +70,7 @@ export const PinConflictModal = () => {
       </p>
       <RadioOptionGroup
         name='pin-conflict-resolution'
-        onChange={handleResolutionChange}
+        onChange={setSelectedResolution}
         options={options}
         value={selectedResolution}
       />
