@@ -27,7 +27,24 @@ export const VirtualListFooter = () => {
   const totalCount = useGetTotalCount();
 
   if (loadedCount === 0) return;
-
+  const modes = ['all', 'selected', 'unselected'] as const;
+  const modeConfig = {
+    all: {
+      count: loadedCount,
+      icon: <ListAllIcon size={ICON_SIZE_MD} />,
+      tooltip: 'Show all options',
+    },
+    selected: {
+      count: selectedCount,
+      icon: <ListCheckedIcon size={ICON_SIZE_MD} />,
+      tooltip: 'Show only selected options',
+    },
+    unselected: {
+      count: loadedCount - selectedCount,
+      icon: <ListUncheckedIcon size={ICON_SIZE_MD} />,
+      tooltip: 'Show only unselected options',
+    },
+  } as const;
   return (
     <div {...stylex.props(styles.footer)}>
       <p {...stylex.props(styles.loadedCount)}>
@@ -38,24 +55,7 @@ export const VirtualListFooter = () => {
       </p>
       {hasCheckboxes && (
         <div {...stylex.props(styles.listFilterGroup)}>
-          {(['all', 'selected', 'unselected'] as const).map((mode) => {
-            const modeConfig = {
-              all: {
-                count: loadedCount,
-                icon: <ListAllIcon size={ICON_SIZE_MD} />,
-                tooltip: 'Show all options',
-              },
-              selected: {
-                count: selectedCount,
-                icon: <ListCheckedIcon size={ICON_SIZE_MD} />,
-                tooltip: 'Show only selected options',
-              },
-              unselected: {
-                count: loadedCount - selectedCount,
-                icon: <ListUncheckedIcon size={ICON_SIZE_MD} />,
-                tooltip: 'Show only unselected options',
-              },
-            } as const;
+          {modes.map((mode) => {
             const { count, icon, tooltip } = modeConfig[mode];
             return (
               <ListFilterModeButton

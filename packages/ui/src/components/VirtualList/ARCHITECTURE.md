@@ -19,11 +19,11 @@ VirtualList/
 │   └── VirtualListData/             → dataStore: props mirror + pre-computed derived state (slice: data/)
 │
 ├── VirtualListContent/              → Provider-less composition: container + Header/Body/Footer
-│                                      (props: listMaxHeight, shouldFillHeight; exported for lifted-provider composition)
+│                                      (zero props — layout via config selectors; exported for lifted-provider composition)
 │
 ├── VirtualListHeader/               → Self-connected search input and clear button (zero props)
 │
-├── VirtualListBody/                 → Scroll container + infinite-scroll sentinel (props: listMaxHeight, shouldFillHeight)
+├── VirtualListBody/                 → Scroll container + infinite-scroll sentinel (zero props — layout via config selectors)
 │   ├── VirtualListBodyChildren/     → useVirtualization + content-mode dispatch (prop: scrollContainerRef)
 │   └── VirtualListBodyOptions/      → Virtual window renderer (props: startIndex, endIndex, offsetY, totalHeight)
 │
@@ -70,9 +70,9 @@ Every store slice is read — and every action dispatched — inside the compone
 | Delegate                                               | Selectors read                                                                                                                                                       | Actions dispatched                      | Props kept                                             |
 | ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- | ------------------------------------------------------ |
 | `VirtualList` (shell)                                  | — (no store wiring in the shell)                                                                                                                                     | —                                       | public API (unchanged)                                 |
-| `VirtualListContent`                                   | — (pure composition of the three regions)                                                                                                                            | —                                       | `listMaxHeight`, `shouldFillHeight`                    |
+| `VirtualListContent`                                   | `useGetShouldFillHeight` (config)                                                                                                                                    | —                                       | none                                                   |
 | `VirtualListHeader`                                    | `useGetSearchTerm` (ui), `useGetSearchInputName` (config)                                                                                                            | `useSetSearchTerm`, `useClearSearch`    | none                                                   |
-| `VirtualListBody`                                      | `useGetHasMore`, `useGetIsLoadingOptions` (data), `useGetHasFetchMore` (config)                                                                                      | `useFetchMore`                          | `listMaxHeight`, `shouldFillHeight`                    |
+| `VirtualListBody`                                      | `useGetHasMore`, `useGetIsLoadingOptions` (data), `useGetHasFetchMore`, `useGetListMaxHeight`, `useGetShouldFillHeight` (config)                                     | `useFetchMore`                          | none                                                   |
 | `VirtualListBodyChildren`                              | `useGetContentMode`, `useGetTotalItems` (data)                                                                                                                       | —                                       | `scrollContainerRef` (producer→child)                  |
 | `VirtualListBodyOptions`                               | `useGetFilteredOptions`, `useGetShouldShowSelectAll` (data)                                                                                                          | —                                       | `startIndex`, `endIndex`, `offsetY`, `totalHeight`     |
 | `VirtualizedOption`                                    | `useGetFilteredOptions`, `useGetIsAllSelected`, `useGetIsLoadingOptions`, `useGetSelectedValues`, `useGetShouldShowSelectAll` (data), `useGetHasCheckboxes` (config) | `useToggleOption`, `useToggleSelectAll` | `index`                                                |

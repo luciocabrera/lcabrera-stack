@@ -36,7 +36,7 @@ vi.mock(
 );
 
 vi.mock('../contexts/VirtualSelectConfig/meta/selectors', () => ({
-  useGetCustomStylex: () => undefined,
+  useGetCustomStylex: vi.fn(),
   useGetIsAlwaysOpen: () => metaState.current.isAlwaysOpen,
   useGetIsListVisible: () => metaState.current.isListVisible,
   useGetListboxId: () => metaState.current.listboxId,

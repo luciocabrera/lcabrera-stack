@@ -1,8 +1,6 @@
 import type { VirtualListDataState } from '@repo/ui/components/VirtualList';
 import type { StyleXStyles } from '@stylexjs/stylex';
 
-export type VirtualSelectMode = 'multi' | 'single';
-
 /**
  * Select-level presentation metadata mirrored into the meta store by
  * `VirtualSelectConfigProvider` (isListVisible is pre-computed from
@@ -18,6 +16,8 @@ export type VirtualSelectMetaState = {
   readonly mode: VirtualSelectMode;
   readonly placeholder: string;
 };
+
+export type VirtualSelectMode = 'multi' | 'single';
 
 export type VirtualSelectOption = {
   readonly label: string;

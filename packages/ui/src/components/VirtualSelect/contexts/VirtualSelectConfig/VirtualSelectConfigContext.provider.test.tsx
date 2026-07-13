@@ -17,22 +17,22 @@ type WrapperProps = {
   readonly children: ReactNode;
 };
 
+const seededWrapper = ({ children }: WrapperProps) => (
+  <VirtualSelectConfigProvider
+    isAlwaysOpen
+    isBusy={false}
+    isOpen={false}
+    listboxId='listbox-id'
+    mode='multi'
+    onToggleDropdown={vi.fn()}
+    placeholder='Pick...'
+  >
+    {children}
+  </VirtualSelectConfigProvider>
+);
+
 describe('VirtualSelectConfigProvider', () => {
   it('seeds the meta store from the props with isListVisible pre-computed', () => {
-    const wrapper = ({ children }: WrapperProps) => (
-      <VirtualSelectConfigProvider
-        isAlwaysOpen
-        isBusy={false}
-        isOpen={false}
-        listboxId='listbox-id'
-        mode='multi'
-        onToggleDropdown={vi.fn()}
-        placeholder='Pick...'
-      >
-        {children}
-      </VirtualSelectConfigProvider>
-    );
-
     const { result } = renderHook(
       () => ({
         isListVisible: useGetIsListVisible(),
@@ -40,7 +40,7 @@ describe('VirtualSelectConfigProvider', () => {
         mode: useGetMode(),
         placeholder: useGetPlaceholder(),
       }),
-      { wrapper },
+      { wrapper: seededWrapper },
     );
 
     expect(result.current).toEqual({
@@ -52,12 +52,12 @@ describe('VirtualSelectConfigProvider', () => {
   });
 
   it('syncs the meta store when the mirrored props change', async () => {
-    let currentIsOpen = false;
+    let isCurrentlyOpen = false;
     const wrapper = ({ children }: WrapperProps) => (
       <VirtualSelectConfigProvider
         isAlwaysOpen={false}
         isBusy={false}
-        isOpen={currentIsOpen}
+        isOpen={isCurrentlyOpen}
         listboxId='listbox-id'
         mode='single'
         onToggleDropdown={vi.fn()}
@@ -77,7 +77,7 @@ describe('VirtualSelectConfigProvider', () => {
 
     expect(result.current).toEqual({ isListVisible: false, isOpen: false });
 
-    currentIsOpen = true;
+    isCurrentlyOpen = true;
     rerender();
 
     await waitFor(() => {

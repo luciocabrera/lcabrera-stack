@@ -17,13 +17,14 @@ VirtualSelect/
 ├── contexts/                         → VirtualSelectConfig: meta store + toggle action
 │   └── (see contexts/ARCHITECTURE.md)
 │
-├── VirtualSelectHeader/              → Private delegate — busy overlay + trigger; zero props,
-│   └── (see its ARCHITECTURE.md)       self-connected (meta selectors + list data store)
+├── VirtualSelectHeader/              → Private delegate — busy overlay + trigger composition;
+│   └── (see its ARCHITECTURE.md)       zero props, reads only isBusy
 │
 ├── VirtualSelectDropdown/            → Private delegate — positioned listbox shell around
-│   └── (see its ARCHITECTURE.md)       VirtualListContent; zero props, meta selectors only
+│   └── (see its ARCHITECTURE.md)       VirtualListContent; zero props (meta + list config selectors)
 │
-├── VirtualSelectTrigger/             → Combobox trigger (placeholder / label / tag chips)
+├── VirtualSelectTrigger/             → Self-connected combobox trigger (placeholder / label / tags,
+│                                        owns triggerRef + overflow)
 │   ├── ARCHITECTURE.md
 │   ├── index.ts
 │   ├── VirtualSelectTrigger.component.tsx
@@ -98,7 +99,7 @@ The providers live for the **select's lifetime**, not per dropdown open:
 
 - `onFetchInitial` fires once when the select mounts (the data store comes alive), not on every open.
 - Loaded data, the search term, and the filter mode persist across close/reopen cycles.
-- Only the dropdown's DOM (`VirtualListContent`) unmounts while closed; the header keeps reading the selected labels from the store the whole time.
+- Only the dropdown's DOM (`VirtualListContent`) unmounts while closed; the trigger keeps reading the selected labels from the store the whole time.
 
 ## Selection Modes
 

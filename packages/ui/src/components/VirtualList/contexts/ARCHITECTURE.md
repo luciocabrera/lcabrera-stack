@@ -49,7 +49,7 @@ contexts/
 │   ├── useVirtualListConfigContextValue.hook.ts
 │   ├── utils/                      → getInitialListConfigState, getInitialListUiState
 │   ├── config/                     → useListConfigStore + selectors/ (hasCheckboxes, hasFetchInitial,
-│   │                                 hasFetchMore, hasSelectAll, name)
+│   │                                 hasFetchMore, hasSelectAll, listMaxHeight, name, shouldFillHeight)
 │   └── ui/                         → useListUiStore + selectors/ (searchTerm, listFilterMode)
 │                                     + actions/ (setSearchTerm, clearSearch, setListFilterMode)
 └── VirtualListData/
