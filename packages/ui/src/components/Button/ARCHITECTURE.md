@@ -4,7 +4,7 @@
 
 ```
 Button/
-├── index.ts                 → Barrel export: { Button }
+├── index.ts                 → Barrel export: { Button } + type { ButtonProps }
 ├── Button.component.tsx     → Component logic & render
 ├── Button.types.ts          → ButtonProps (extends native <button>)
 └── Button.stylex.ts         → Style composition from shared design tokens

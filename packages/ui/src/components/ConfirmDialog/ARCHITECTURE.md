@@ -4,7 +4,8 @@ Generic yes/no confirmation prompt built on `Modal` — no dependency on
 `Form` or any other consumer. First real use is Form's discard-unsaved-
 changes-on-cancel flow (see `Form/ARCHITECTURE.md`), but it's reusable
 anywhere a destructive or irreversible action needs an explicit second
-confirmation.
+confirmation. The Confirm/Cancel pair is rendered through the shared
+`ActionButtons` component, passed as `Modal`'s `footer`.
 
 ## Props
 

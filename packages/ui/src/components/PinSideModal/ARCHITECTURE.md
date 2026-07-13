@@ -18,7 +18,7 @@ PinSideModal/
 graph LR
   PSM["PinSideModal"] --> Modal
   PSM --> RadioOptionGroup
-  PSM --> Button
+  PSM --> ActionButtons
   PSM --> PinSide["PinSide (type from types/ui.types)"]
   PSM --> PSM_stylex["PinSideModal.stylex"]
   PSM_stylex --> base_tokens["design-system/tokens/base.stylex (typography)"]
@@ -32,7 +32,7 @@ graph TD
   PSM["PinSideModal"] --> Modal2["Modal (title='Pin Column', footer=buttons)"]
   Modal2 --> Desc["p.description — column label text"]
   Modal2 --> ROG["RadioOptionGroup (name='pin-side-selection')"]
-  Modal2 --> FooterButtons["Button (Cancel) + Button (Accept)"]
+  Modal2 --> FooterButtons["ActionButtons (Accept / Cancel)"]
 ```
 
 ## State & Flow

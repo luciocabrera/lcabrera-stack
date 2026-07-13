@@ -72,7 +72,7 @@ graph LR
 
   Footer --> SidePanelSection
   Footer --> SidePanelSectionHeader
-  Footer --> Button
+  Footer --> ActionButtons
   Footer --> Icons["EraserIcon, RefreshIcon"]
   Footer --> clearAll["useClearAllColumnDrawerSettings (action)"]
   Footer --> resetAll["useResetAllColumnDrawerSettings (action)"]

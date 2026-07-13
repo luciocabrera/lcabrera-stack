@@ -1,6 +1,6 @@
 import type { PinSide } from '@repo/ui/types/ui.types';
 
-import { Button } from '@repo/ui/components/Button';
+import { ActionButtons } from '@repo/ui/components/ActionButtons';
 import { Modal } from '@repo/ui/components/Modal';
 import { RadioOptionGroup } from '@repo/ui/components/RadioOptionGroup';
 import { PIN_SIDE_OPTIONS } from '@repo/ui/constants/pinningPreferences.constants';
@@ -32,14 +32,12 @@ export const PinSideModal = ({
   return (
     <Modal
       footer={
-        <>
-          <Button color='outline' onClick={handleCancel} size='sm'>
-            Cancel
-          </Button>
-          <Button color='primary' onClick={handleAccept} size='sm'>
-            Accept
-          </Button>
-        </>
+        <ActionButtons
+          actions={[
+            { label: 'Accept', onClick: handleAccept },
+            { color: 'outline', label: 'Cancel', onClick: handleCancel },
+          ]}
+        />
       }
       isOpen={isOpen}
       onClose={handleCancel}

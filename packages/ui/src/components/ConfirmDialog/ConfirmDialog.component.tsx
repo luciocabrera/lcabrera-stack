@@ -1,4 +1,4 @@
-import { Button } from '@repo/ui/components/Button';
+import { ActionButtons } from '@repo/ui/components/ActionButtons';
 import { Modal } from '@repo/ui/components/Modal';
 
 import type { ConfirmDialogProps } from './ConfirmDialog.types';
@@ -20,14 +20,22 @@ export const ConfirmDialog = ({
 }: ConfirmDialogProps) => (
   <Modal
     footer={
-      <>
-        <Button color='ghost' onClick={onCancel} type='button' variant='flat'>
-          {cancelLabel}
-        </Button>
-        <Button color='error' onClick={onConfirm} type='button'>
-          {confirmLabel}
-        </Button>
-      </>
+      <ActionButtons
+        actions={[
+          {
+            color: 'error',
+            key: 'confirm',
+            label: confirmLabel,
+            onClick: onConfirm,
+          },
+          {
+            color: 'outline',
+            key: 'cancel',
+            label: cancelLabel,
+            onClick: onCancel,
+          },
+        ]}
+      />
     }
     isOpen={isOpen}
     onClose={onCancel}

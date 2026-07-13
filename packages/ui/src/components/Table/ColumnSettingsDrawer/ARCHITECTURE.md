@@ -111,7 +111,7 @@ graph LR
   CSDBody --> Tabs
   CSDBody --> TableConfigContext
 
-  CSDFooter --> Button
+  CSDFooter --> ActionButtons
   CSDFooter --> CancelHook
   CSDFooter --> ColumnDrawerContext
 

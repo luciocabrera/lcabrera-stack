@@ -46,7 +46,7 @@ graph LR
   CWS --> useSetColumnsSizing["useSetColumnsSizing (action)"]
   CWS --> buildPresetColumnSizing["buildPresetColumnSizing (util)"]
 
-  ASS --> Button
+  ASS --> ActionButtons
   ASS --> Icons["RefreshIcon, EraserIcon"]
   ASS --> useClearAllSettings["useClearAllSettings (action)"]
   ASS --> useResetTableSettings["useResetTableSettings (action)"]

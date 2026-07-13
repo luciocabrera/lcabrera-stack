@@ -125,7 +125,7 @@ graph LR
   TSDBody --> TableConfigContext
 
   TSDFooter --> SidePanelFooter
-  TSDFooter --> Button
+  TSDFooter --> ActionButtons
   TSDFooter --> CancelHook
   TSDFooter --> CloseHook["useCloseTableSettingsIfUnpinned"]
   TSDFooter --> TableDrawerContext

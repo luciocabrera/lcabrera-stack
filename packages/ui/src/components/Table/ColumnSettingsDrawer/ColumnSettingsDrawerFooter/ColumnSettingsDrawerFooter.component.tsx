@@ -1,4 +1,4 @@
-import { Button } from '@repo/ui/components/Button';
+import { ActionButtons } from '@repo/ui/components/ActionButtons';
 import { SidePanelFooter } from '@repo/ui/components/SidePanel';
 
 import {
@@ -32,17 +32,17 @@ export const ColumnSettingsDrawerFooter = () => {
 
   return (
     <SidePanelFooter>
-      <Button color='primary' isBusy={isBusy} onClick={handleAccept} size='sm'>
-        Accept
-      </Button>
-      <Button
-        color='outline'
-        isBusy={isBusy}
-        onClick={cancelColumnSettings}
-        size='sm'
-      >
-        Cancel
-      </Button>
+      <ActionButtons
+        actions={[
+          { isBusy, label: 'Accept', onClick: handleAccept },
+          {
+            color: 'outline',
+            isBusy,
+            label: 'Cancel',
+            onClick: cancelColumnSettings,
+          },
+        ]}
+      />
     </SidePanelFooter>
   );
 };

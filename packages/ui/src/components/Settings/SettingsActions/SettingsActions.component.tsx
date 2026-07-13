@@ -1,5 +1,4 @@
-import { Button } from '@repo/ui/components/Button';
-import * as stylex from '@stylexjs/stylex';
+import { ActionButtons } from '@repo/ui/components/ActionButtons';
 
 import { styles } from '../Settings.stylex';
 import {
@@ -19,18 +18,16 @@ export const SettingsActions = () => {
   const cancelSettingsDraft = useCancelSettingsDraft();
 
   return (
-    <div {...stylex.props(styles.actions)}>
-      <Button
-        color='primary'
-        isDisabled={!hasChanges}
-        onClick={acceptSettingsDraft}
-        size='sm'
-      >
-        Accept
-      </Button>
-      <Button color='outline' onClick={cancelSettingsDraft} size='sm'>
-        Cancel
-      </Button>
-    </div>
+    <ActionButtons
+      actions={[
+        {
+          isDisabled: !hasChanges,
+          label: 'Accept',
+          onClick: acceptSettingsDraft,
+        },
+        { color: 'outline', label: 'Cancel', onClick: cancelSettingsDraft },
+      ]}
+      customStylex={styles.actions}
+    />
   );
 };
