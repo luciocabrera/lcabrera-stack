@@ -34,14 +34,10 @@ export const ColumnSettingsDrawerFooter = () => {
     <SidePanelFooter>
       <ActionButtons
         actions={[
-          { isBusy, label: 'Accept', onClick: handleAccept },
-          {
-            color: 'outline',
-            isBusy,
-            label: 'Cancel',
-            onClick: cancelColumnSettings,
-          },
+          { label: 'Accept', onClick: handleAccept },
+          { color: 'outline', label: 'Cancel', onClick: cancelColumnSettings },
         ]}
+        isBusy={isBusy}
       />
     </SidePanelFooter>
   );

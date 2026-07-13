@@ -32,9 +32,10 @@ graph LR
 | -------------- | ----------------------------------------- | -------------------------------------------------------------------- |
 | `actions`      | `readonly ActionButtonDescriptor[]`       | One entry per button, rendered in order                              |
 | `customStylex` | `StyleXStyles \| readonly StyleXStyles[]` | Layout override applied after the base container style (always last) |
+| `isBusy`       | `boolean?`                                | Group-level busy state, forwarded to every rendered `Button`         |
 | `...div props` | `ComponentPropsWithoutRef<'div'>`         | Forwarded to the container div (spread before `stylex.props`)        |
 
-`ActionButtonDescriptor` = `Omit<ButtonProps, 'children' | 'onClick'>` plus:
+`ActionButtonDescriptor` = `Omit<ButtonProps, 'children' | 'isBusy' | 'onClick'>` plus:
 
 | Field     | Type                                  | Description                                                      |
 | --------- | ------------------------------------- | ---------------------------------------------------------------- |
@@ -46,6 +47,10 @@ Descriptor defaults: `color: 'primary'` and `size: 'sm'` — the dominant
 combination across consumers, so most actions only declare `label` +
 `onClick`. Set either field to override. Note the `sm` default is applied
 by `ActionButtons` itself (`Button`'s own default size is `md`).
+
+`isBusy` is deliberately not a descriptor field: a busy footer means the
+whole group is busy, so it lives once on the component and fans out to
+every button.
 
 ## Layout Contract
 

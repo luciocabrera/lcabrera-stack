@@ -50,14 +50,10 @@ export const TableSettingsDrawerFooter = ({
     <SidePanelFooter>
       <ActionButtons
         actions={[
-          { isBusy, label: 'Accept', onClick: handleAccept },
-          {
-            color: 'outline',
-            isBusy,
-            label: 'Cancel',
-            onClick: cancelTableSettings,
-          },
+          { label: 'Accept', onClick: handleAccept },
+          { color: 'outline', label: 'Cancel', onClick: cancelTableSettings },
         ]}
+        isBusy={isBusy}
       />
     </SidePanelFooter>
   );

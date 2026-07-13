@@ -5,13 +5,14 @@ import type { ComponentPropsWithoutRef } from 'react';
 /**
  * Declarative description of one button in an `ActionButtons` group: a
  * required `label` and `onClick`, plus any other `Button` prop (`color`,
- * `size`, `icon`, `isBusy`, ...). `color` defaults to `'primary'` and
- * `size` to `'sm'`. `key` disambiguates actions whose labels are dynamic
- * or collide; it falls back to `label`.
+ * `size`, `icon`, ...). `color` defaults to `'primary'` and `size` to
+ * `'sm'`. `isBusy` is deliberately excluded — busy state applies to the
+ * whole group and lives on `ActionButtonsProps`. `key` disambiguates
+ * actions whose labels are dynamic or collide; it falls back to `label`.
  */
 export type ActionButtonDescriptor = Omit<
   ButtonProps,
-  'children' | 'onClick'
+  'children' | 'isBusy' | 'onClick'
 > & {
   readonly key?: string;
   readonly label: string;
@@ -24,4 +25,5 @@ export type ActionButtonsProps = Omit<
 > & {
   readonly actions: readonly ActionButtonDescriptor[];
   readonly customStylex?: readonly StyleXStyles[] | StyleXStyles;
+  readonly isBusy?: boolean;
 };

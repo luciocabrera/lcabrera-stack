@@ -33,7 +33,6 @@ export const GeneralSectionFooter = ({
           {
             color: 'outline',
             icon: <EraserIcon size={ICON_SIZE_MD} />,
-            isBusy,
             label: 'Clear All Settings',
             onClick: clearAllSettings,
             width: 'full',
@@ -41,13 +40,13 @@ export const GeneralSectionFooter = ({
           {
             color: 'outline',
             icon: <RefreshIcon size={ICON_SIZE_MD} />,
-            isBusy,
             label: 'Reset All Settings',
             onClick: resetAllSettings,
             width: 'full',
           },
         ]}
         customStylex={styles.buttonGroup}
+        isBusy={isBusy}
       />
     </SidePanelSection>
   );

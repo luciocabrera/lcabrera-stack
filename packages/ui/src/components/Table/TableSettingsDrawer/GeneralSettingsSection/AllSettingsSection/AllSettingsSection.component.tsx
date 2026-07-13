@@ -33,7 +33,6 @@ export const AllSettingsSection = ({
           {
             color: 'outline',
             icon: <EraserIcon size={ICON_SIZE_MD} />,
-            isBusy,
             label: 'Clear All Settings',
             onClick: clearAllSettings,
             width: 'full',
@@ -41,13 +40,13 @@ export const AllSettingsSection = ({
           {
             color: 'outline',
             icon: <RefreshIcon size={ICON_SIZE_MD} />,
-            isBusy,
             label: 'Reset All Settings',
             onClick: resetTableSettings,
             width: 'full',
           },
         ]}
         customStylex={[styles.buttonGroup, styles.generalSection]}
+        isBusy={isBusy}
       />
     </SidePanelSection>
   );

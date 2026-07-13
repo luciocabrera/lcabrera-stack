@@ -57,6 +57,28 @@ describe('ActionButtons', () => {
     expect(button.disabled).toBe(true);
   });
 
+  it('applies group-level isBusy to every button', () => {
+    render(
+      <ActionButtons
+        actions={[
+          { label: 'Accept', onClick: () => {} },
+          { label: 'Cancel', onClick: () => {} },
+        ]}
+        isBusy
+      />,
+    );
+
+    const accept = screen.getByRole<HTMLButtonElement>('button', {
+      name: 'Accept',
+    });
+    const cancel = screen.getByRole<HTMLButtonElement>('button', {
+      name: 'Cancel',
+    });
+
+    expect(accept.disabled).toBe(true);
+    expect(cancel.disabled).toBe(true);
+  });
+
   it('wraps the buttons in a single container div', () => {
     render(
       <ActionButtons

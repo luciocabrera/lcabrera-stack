@@ -13,10 +13,12 @@ import { styles } from './ActionButtons.stylex';
  *
  * Each action defaults to `color='primary'` and `size='sm'` (the dominant
  * combination across consumers) — set either field to override per action.
+ * `isBusy` is group-level: it is forwarded to every rendered `Button`.
  */
 export const ActionButtons = ({
   actions,
   customStylex,
+  isBusy = false,
   ...props
 }: ActionButtonsProps) => (
   <div
@@ -35,6 +37,7 @@ export const ActionButtons = ({
       }) => (
         <Button
           color={color}
+          isBusy={isBusy}
           key={key ?? label}
           onClick={onClick}
           size={size}
