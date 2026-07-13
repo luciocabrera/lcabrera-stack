@@ -42,7 +42,7 @@ export const FilterInputs = <TData = Record<string, unknown>,>({
       columnKey={columnKey}
       dataType={column.dataType}
       filter={filter}
-      hasFetchableOptions={Boolean(column.fetchFilterOptions)}
+      hasFetchableOptions={Boolean(column.filterOptionsDescriptor)}
       listMaxHeight={listMaxHeight}
       onChange={onChange}
       operator={getOperatorFromFilter({ dataType: column.dataType, filter })}

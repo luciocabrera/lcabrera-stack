@@ -8,18 +8,19 @@ for that) — callers execute the returned `{ text, values }` themselves.
 
 ## Files
 
-| File                                  | Role                                                                                                                      |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `QueryBuilder.types.ts`               | `ComparisonOperator`, `QueryFilter`, `QuerySort`, `SelectQueryDescriptor`, `CountQueryDescriptor`, `BuiltQuery`           |
-| `quoteIdentifier.util.ts`             | Safe double-quote identifier escaping                                                                                     |
-| `assertSafeIdentifier.util.ts`        | **Mandatory**, always called — syntax check (see Security model)                                                          |
-| `assertColumnAllowed.util.ts`         | **Optional**, opt-in — membership check (see Security model)                                                              |
-| `appendFilterClause.util.ts`          | Reducer step used by `buildWhereClause`: one filter → one SQL clause + values                                             |
-| `buildWhereClause.util.ts`            | `QueryFilter[]` → `{ text, values }`, correctly incrementing `$n` placeholders                                            |
-| `buildOrderByClause.util.ts`          | `QuerySort[]` → `ORDER BY ...`                                                                                            |
-| `buildOptionalNumericClauses.util.ts` | `LIMIT`/`OFFSET` fragment builder, skips `undefined` values without gapping `$n`                                          |
-| `buildSelectQuery.util.ts`            | **Public entry point.** Composes everything above into one `SELECT`                                                       |
-| `buildCountQuery.util.ts`             | `count(id)` query sharing `buildWhereClause`'s output, so a data query and its matching count query can never drift apart |
+| File                                  | Role                                                                                                                                        |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `QueryBuilder.types.ts`               | `ComparisonOperator`, `QueryFilter`, `QuerySort`, `SelectQueryDescriptor`, `CountQueryDescriptor`, `DistinctQueryDescriptor`, `BuiltQuery`  |
+| `quoteIdentifier.util.ts`             | Safe double-quote identifier escaping                                                                                                       |
+| `assertSafeIdentifier.util.ts`        | **Mandatory**, always called — syntax check (see Security model)                                                                            |
+| `assertColumnAllowed.util.ts`         | **Optional**, opt-in — membership check (see Security model)                                                                                |
+| `appendFilterClause.util.ts`          | Reducer step used by `buildWhereClause`: one filter → one SQL clause + values                                                               |
+| `buildWhereClause.util.ts`            | `QueryFilter[]` → `{ text, values }`, correctly incrementing `$n` placeholders                                                              |
+| `buildOrderByClause.util.ts`          | `QuerySort[]` → `ORDER BY ...`                                                                                                              |
+| `buildOptionalNumericClauses.util.ts` | `LIMIT`/`OFFSET` fragment builder, skips `undefined` values without gapping `$n`                                                            |
+| `buildSelectQuery.util.ts`            | **Public entry point.** Composes everything above into one `SELECT`                                                                         |
+| `buildCountQuery.util.ts`             | `count(id)` query sharing `buildWhereClause`'s output, so a data query and its matching count query can never drift apart                   |
+| `buildDistinctQuery.util.ts`          | **Public entry point.** Paginated `SELECT DISTINCT` for one column (filter-option lists, ADR-009); excludes NULL/empty and orders ascending |
 
 ## Security model — read this before adding a call site
 

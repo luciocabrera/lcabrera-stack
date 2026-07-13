@@ -5,56 +5,33 @@ import { createStaticFilterOptions } from './createStaticFilterOptions.util';
 describe('createStaticFilterOptions', () => {
   const values = ['Pending', 'Shipped', 'Delivered'];
 
-  it('returns fetchFilterOptions, filterOptionsDataSelector, filterOptionsDataTotalSelector', () => {
+  it('emits a serializable static descriptor carrying the values', () => {
     const result = createStaticFilterOptions(values);
-    expect(typeof result.fetchFilterOptions).toBe('function');
-    expect(typeof result.filterOptionsDataSelector).toBe('function');
-    expect(typeof result.filterOptionsDataTotalSelector).toBe('function');
+
+    expect(result).toEqual({
+      filterOptionsDescriptor: {
+        kind: 'static',
+        values: ['Pending', 'Shipped', 'Delivered'],
+      },
+    });
   });
 
-  it('fetchFilterOptions returns sliced values based on skip/limit', async () => {
-    const { fetchFilterOptions } = createStaticFilterOptions(values);
-    const result = await fetchFilterOptions!({ limit: 2, skip: 0 });
-    expect(result.values).toEqual(['Pending', 'Shipped']);
-    expect(result.hasMore).toBe(true);
-  });
+  it('contains no function members (loader-boundary safe)', () => {
+    const result = createStaticFilterOptions(values);
 
-  it('fetchFilterOptions returns last page with hasMore=false', async () => {
-    const { fetchFilterOptions } = createStaticFilterOptions(values);
-    const result = await fetchFilterOptions!({ limit: 2, skip: 2 });
-    expect(result.values).toEqual(['Delivered']);
-    expect(result.hasMore).toBe(false);
-  });
-
-  it('filterOptionsDataSelector returns values from response', () => {
-    const { filterOptionsDataSelector } = createStaticFilterOptions(values);
-    const response = { hasMore: false, values: ['a', 'b'] };
-    expect(filterOptionsDataSelector!(response)).toEqual(['a', 'b']);
-  });
-
-  it('filterOptionsDataTotalSelector returns Infinity when hasMore=true', () => {
-    const { filterOptionsDataTotalSelector } =
-      createStaticFilterOptions(values);
     expect(
-      filterOptionsDataTotalSelector!({ hasMore: true, values: ['a'] }),
-    ).toBe(Infinity);
+      Object.values(result.filterOptionsDescriptor ?? {}).every(
+        (member) => typeof member !== 'function',
+      ),
+    ).toBe(true);
   });
 
-  it('filterOptionsDataTotalSelector returns values.length when hasMore=false', () => {
-    const { filterOptionsDataTotalSelector } =
-      createStaticFilterOptions(values);
-    expect(
-      filterOptionsDataTotalSelector!({
-        hasMore: false,
-        values: ['a', 'b', 'c'],
-      }),
-    ).toBe(3);
-  });
+  it('works with an empty values array', () => {
+    const result = createStaticFilterOptions([]);
 
-  it('works with empty values array', async () => {
-    const { fetchFilterOptions } = createStaticFilterOptions([]);
-    const result = await fetchFilterOptions!({ limit: 10, skip: 0 });
-    expect(result.values).toEqual([]);
-    expect(result.hasMore).toBe(false);
+    expect(result.filterOptionsDescriptor).toEqual({
+      kind: 'static',
+      values: [],
+    });
   });
 });

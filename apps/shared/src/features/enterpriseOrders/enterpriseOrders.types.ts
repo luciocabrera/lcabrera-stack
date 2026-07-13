@@ -1,8 +1,4 @@
-import type {
-  DbRow,
-  DistinctValuesResponse,
-  PaginatedResponse,
-} from '../../types/api.types.js';
+import type { DbRow, PaginatedResponse } from '../../types/api.types.js';
 
 export type BooleanFilter = {
   readonly type: 'boolean';
@@ -19,8 +15,6 @@ export type DateFilter = {
 export type EnterpriseOrderDetailResponse = {
   readonly data: DbRow;
 };
-
-export type EnterpriseOrdersDistinctResponse = DistinctValuesResponse;
 
 export type EnterpriseOrdersFilter =
   | BooleanFilter

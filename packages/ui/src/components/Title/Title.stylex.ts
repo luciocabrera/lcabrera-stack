@@ -1,4 +1,4 @@
-import { spacing } from '@repo/ui/design-system/tokens/base.stylex';
+import { spacing, typography } from '@repo/ui/design-system/tokens/base.stylex';
 import { colors } from '@repo/ui/design-system/tokens/colors.stylex';
 import * as stylex from '@stylexjs/stylex';
 
@@ -24,7 +24,7 @@ export const styles = stylex.create({
     alignItems: 'center',
     color: colors.textSecondary,
     display: 'flex',
-    fontSize: '1.5rem',
+    fontSize: typography.fontSize2xl,
   },
   title: {
     WebkitBackgroundClip: 'text',
@@ -33,8 +33,8 @@ export const styles = stylex.create({
     backgroundClip: 'text',
     backgroundImage: colors.textGradient,
     color: 'transparent',
-    fontSize: '1.25rem',
-    fontWeight: 600,
+    fontSize: typography.fontSizeLg,
+    fontWeight: typography.fontWeightSemibold,
     lineHeight: 1.2,
   },
   actions: {

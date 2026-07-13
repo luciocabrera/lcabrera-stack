@@ -66,23 +66,6 @@ export const ENTERPRISE_ORDER_ALLOWED_COLUMNS = new Set(
   ENTERPRISE_ORDER_COLUMNS,
 );
 
-export const ENTERPRISE_ORDER_DISTINCT_COLUMNS = new Set([
-  'carrier',
-  'customer_email',
-  'customer_type',
-  'order_number',
-  'order_status',
-  'payment_method',
-  'payment_status',
-  'priority',
-  'product_category',
-  'product_subcategory',
-  'shipping_city',
-  'shipping_country',
-  'shipping_state',
-  'warehouse_location',
-]);
-
 export const DEFAULT_ENTERPRISE_ORDER_SORTING = [
   { columnKey: 'order_id', direction: 'desc' },
 ] as const satisfies readonly SortRule[];

@@ -2,9 +2,7 @@ import type { SortRule } from 'api-shared';
 
 import {
   DEFAULT_PAGE_LIMIT,
-  DISTINCT_DEFAULT_LIMIT,
   ENTERPRISE_ORDER_ALLOWED_COLUMNS,
-  ENTERPRISE_ORDER_DISTINCT_COLUMNS,
 } from 'api-shared';
 
 import type { EnterpriseOrdersFilters } from './enterpriseOrders.types';
@@ -188,46 +186,6 @@ export const paginatedEnterpriseOrdersQuerySchema = {
       type: 'array',
     },
   },
-  type: 'object',
-};
-
-/**
- * TypeScript type for the /distinct/:columnName querystring.
- */
-export type DistinctValuesQuery = {
-  readonly limit: number;
-  readonly offset: number;
-};
-
-/**
- * JSON Schema for the /distinct/:columnName querystring.
- */
-export const distinctValuesQuerySchema = {
-  properties: {
-    limit: { default: DISTINCT_DEFAULT_LIMIT, minimum: 1, type: 'integer' },
-    offset: { default: 0, minimum: 0, type: 'integer' },
-  },
-  type: 'object',
-};
-
-/**
- * TypeScript type for the /distinct/:columnName params.
- */
-export type DistinctColumnParams = {
-  readonly columnName: string;
-};
-
-/**
- * JSON Schema for the /distinct/:columnName params.
- */
-export const distinctColumnParamsSchema = {
-  properties: {
-    columnName: {
-      enum: [...ENTERPRISE_ORDER_DISTINCT_COLUMNS],
-      type: 'string',
-    },
-  },
-  required: ['columnName'],
   type: 'object',
 };
 

@@ -8,9 +8,10 @@ Shared components/hooks/utils/design-tokens live in `@repo/ui` — see [`package
 
 ## Routes
 
-| Route                | Location                    | Description                                                                                        |
-| -------------------- | --------------------------- | -------------------------------------------------------------------------------------------------- |
-| `/wide-alltypes-150` | `routes/wide-alltypes-150/` | Stress-test page for the `wide_alltypes_150` dataset using the shared `TableLayout` implementation |
+| Route                  | Location                     | Description                                                                                                                        |
+| ---------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `/_api/filter-options` | `routes/api/filter-options/` | Resource route for `transport: 'loader'` filter-option descriptors (ADR-009); its loader calls the BFF `/api/distinct` server-side |
+| `/wide-alltypes-150`   | `routes/wide-alltypes-150/`  | Stress-test page for the `wide_alltypes_150` dataset using the shared `TableLayout` implementation                                 |
 
 ---
 

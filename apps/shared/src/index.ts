@@ -17,11 +17,14 @@ export type {
 } from './features/carSales/carSales.types.js';
 export { createDbSanityRepository } from './features/dbSanity/dbSanity.repository.js';
 export type { DbSanityRepository } from './features/dbSanity/dbSanity.repository.js';
+export { DISTINCT_SOURCES } from './features/distinct/distinct.constants.js';
+export { createDistinctRepository } from './features/distinct/distinct.repository.js';
+export type { DistinctRepository } from './features/distinct/distinct.repository.js';
+export { parseDistinctSource } from './features/distinct/parseDistinctSource.util.js';
 export { buildEnterpriseOrdersWhereClause } from './features/enterpriseOrders/buildEnterpriseOrdersWhereClause.util.js';
 export {
   DEFAULT_ENTERPRISE_ORDER_SORTING,
   ENTERPRISE_ORDER_ALLOWED_COLUMNS,
-  ENTERPRISE_ORDER_DISTINCT_COLUMNS,
 } from './features/enterpriseOrders/enterpriseOrders.constants.js';
 export { createEnterpriseOrdersRepository } from './features/enterpriseOrders/enterpriseOrders.repository.js';
 export type { EnterpriseOrdersRepository } from './features/enterpriseOrders/enterpriseOrders.repository.js';
@@ -29,7 +32,6 @@ export type {
   BooleanFilter,
   DateFilter,
   EnterpriseOrderDetailResponse,
-  EnterpriseOrdersDistinctResponse,
   EnterpriseOrdersFilter,
   EnterpriseOrdersFilters,
   EnterpriseOrdersResponse,

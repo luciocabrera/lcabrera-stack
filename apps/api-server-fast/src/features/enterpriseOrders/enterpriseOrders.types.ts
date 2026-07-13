@@ -2,7 +2,6 @@ export type {
   BooleanFilter,
   DateFilter,
   EnterpriseOrderDetailResponse,
-  EnterpriseOrdersDistinctResponse,
   EnterpriseOrdersFilter,
   EnterpriseOrdersFilters,
   EnterpriseOrdersResponse,

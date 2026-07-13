@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@react-router/node": "catalog:",
+    "@repo/data-access": "workspace:*",
     "@stylexjs/stylex": "catalog:",
     "isbot": "catalog:",
     "react": "catalog:",

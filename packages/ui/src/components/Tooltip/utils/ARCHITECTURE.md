@@ -1,14 +1,16 @@
 # Tooltip utils/ Architecture
 
-Pure helper functions for tooltip arrow positioning.
+Pure helper functions for tooltip arrow positioning used by the `Tooltip`
+shell. Delegate-specific helpers live with their delegate
+(`TooltipContent/utils/getArrowStyle.util.ts`,
+`TooltipTrigger/utils/getIsNativeInteractiveElement.util.ts`).
 
 ## File Structure
 
 ```
 utils/
 ├── index.ts                    → Barrel export
-├── getArrowOffset.util.ts      → Compute arrow pixel offset along the placement axis
-└── getArrowStyle.util.ts       → Pick the correct StyleX dynamic style for the offset
+└── getArrowOffset.util.ts      → Compute arrow pixel offset along the placement axis
 ```
 
 ## Dependencies
@@ -16,8 +18,7 @@ utils/
 ```mermaid
 graph LR
   GAO["getArrowOffset()"] --> constants["Tooltip.constants (HALF_ARROW = 6px)"]
-  GAS["getArrowStyle()"] --> stylex["Tooltip.stylex (arrowPositionHorizontal, arrowPositionVertical)"]
-  GAS --> types["Tooltip.types (TooltipPlacement)"]
+  GAO --> types["Tooltip.types (ArrowOffsetParams)"]
 ```
 
 ## `getArrowOffset`
@@ -34,13 +35,5 @@ offset = triggerCenter - tooltipStart - HALF_ARROW
 | `tooltipStart`  | Leading edge of the tooltip box along the same axis (px)          |
 | `HALF_ARROW`    | Half of `arrowSize` token (6 px) — centres the arrow on the pixel |
 
-The result is applied as a `left` (horizontal) or `top` (vertical) offset on the arrow element.
-
-## `getArrowStyle`
-
-Selects the appropriate dynamic StyleX style based on placement axis:
-
-| Placement           | Style applied                     |
-| ------------------- | --------------------------------- |
-| `'top'`, `'bottom'` | `arrowPositionHorizontal(offset)` |
-| `'left'`, `'right'` | `arrowPositionVertical(offset)`   |
+The result is applied as a `left` (horizontal) or `top` (vertical) offset on
+the arrow element via `TooltipContent/utils/getArrowStyle.util.ts`.

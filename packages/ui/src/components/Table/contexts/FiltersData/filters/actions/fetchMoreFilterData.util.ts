@@ -2,7 +2,6 @@ import { DEFAULT_FILTER_PAGE_SIZE } from '@repo/ui/components/Table/Table.consta
 import { getErrorMessage } from '@repo/ui/components/Table/utils/getErrorMessage.util';
 import { getRequiredOnLoadMore } from '@repo/ui/components/Table/utils/getRequiredOnLoadMore.util';
 import { resolveFetchMoreState } from '@repo/ui/components/Table/utils/resolveFetchMoreState.util';
-import { clearPrefetchCache } from '@repo/ui/utils/prefetch/clearPrefetchCache.util';
 import { resolveFromCacheOrFetch } from '@repo/ui/utils/prefetch/resolveFromCacheOrFetch.util';
 
 import type {
@@ -10,25 +9,11 @@ import type {
   FetchFilterDataCallbackArgs,
 } from './useFetchFilterData.types';
 
+import { clearPrefetchIfPresent } from './clearPrefetchIfPresent.util';
 import { maybePrefetchFilterPage } from './maybePrefetchFilterPage.util';
 import { setFilterSlice } from './setFilterSlice.util';
 
 export type { FetchFilterDataActionArgs } from './useFetchFilterData.types';
-
-const clearPrefetchIfPresent = <TResponse>({
-  prefetchRef,
-}: {
-  readonly prefetchRef?: FetchFilterDataActionArgs<
-    unknown,
-    TResponse
-  >['prefetchRef'];
-}) => {
-  if (!prefetchRef) {
-    return;
-  }
-
-  clearPrefetchCache({ prefetchRef });
-};
 
 export const fetchMoreFilterData = <TData, TResponse>({
   columnKey,
@@ -56,6 +41,9 @@ export const fetchMoreFilterData = <TData, TResponse>({
     const requiredOnLoadMore = getRequiredOnLoadMore(onLoadMore);
 
     try {
+      const metaState = metaStore.get();
+      const enablePrefetch = metaState?.enablePrefetch ?? false;
+
       setFilterSlice({
         columnKey,
         filter: { ...currentFilter, isLoadingMore: true },
@@ -96,9 +84,6 @@ export const fetchMoreFilterData = <TData, TResponse>({
         },
         filtersDataStore,
       });
-
-      const metaState = metaStore.get();
-      const enablePrefetch = metaState?.enablePrefetch ?? false;
 
       maybePrefetchFilterPage({
         enablePrefetch,

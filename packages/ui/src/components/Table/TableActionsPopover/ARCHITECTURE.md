@@ -38,7 +38,11 @@ TableActionsPopover/
 │   │                                                  getTableActionsPopoverPosition (argument reads only)
 │   ├── createViewportRect.util.ts                   → Pure: window dimensions → whole-viewport BoundsRect
 │   │                                                  (fallback container bounds, built at reposition time)
+│   ├── getIsPopoverOpen.util.ts                     → `:popover-open` check, single-sources the selector
 │   ├── getTableActionsPopoverPosition.util.ts       → Pure coordinate computation (no side effects)
+│   ├── resolveOpenMenuReposition.util.ts            → keep/close/reposition decision core shared by the
+│   │                                                  observer and RAF-stabilization paths (argument reads
+│   │                                                  only; container rect read lazily on reposition)
 │   └── *.util.test.ts                               → Unit coverage per util
 ├── ARCHITECTURE.md                        → This file
 └── index.ts                               → Barrel export

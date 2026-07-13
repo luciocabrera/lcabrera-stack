@@ -12,6 +12,7 @@ import type { EnvConfig } from '../config/env.schema';
 
 import { createCarSalesPlugin } from '../features/carSales/carSales.plugin';
 import { createDbSanityPlugin } from '../features/dbSanity/dbSanity.plugin';
+import { createDistinctPlugin } from '../features/distinct/distinct.plugin';
 import { createEnterpriseOrdersPlugin } from '../features/enterpriseOrders/enterpriseOrders.plugin';
 import { createWideAlltypes150Plugin } from '../features/wideAlltypes150/wideAlltypes150.plugin';
 
@@ -120,6 +121,9 @@ export const createApp = ({
 
   app.register(createCarSalesPlugin({ pool }), {
     prefix: '/api/car-sales',
+  });
+  app.register(createDistinctPlugin({ envConfig, pool }), {
+    prefix: '/api/distinct',
   });
   app.register(createEnterpriseOrdersPlugin({ envConfig, pool }), {
     prefix: '/api/enterprise-orders',

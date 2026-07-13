@@ -1,28 +1,47 @@
 # Filters Utilities Architecture
 
-Table filter-specific adapter utilities that bridge static data to the Table component's async filter options contract.
+The client half of the serializable filter-options descriptor system
+(ADR-009): executors that turn a column's `filterOptionsDescriptor` (plain
+JSON baked by a loader) into the `{ onLoadMore, dataSelector,
+dataTotalSelector }` contract the Table's filter fetch chain
+(`useFetchFilterData`) consumes. HTTP + response validation delegate to
+`@repo/data-access/api`; nothing here is ever a function on a column.
 
 ## Files
 
-| File                                  | Description                                                                                                                          |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `createDistinctFilterOptions.util.ts` | Adapts a distinct-values API (`columnName`, `limit`, `offset`) to the table async filter options contract                            |
-| `createStaticFilterOptions.util.ts`   | Wraps a `string[]` into `fetchFilterOptions` + selector functions compatible with the Table's `FilterOptionsResponse` async contract |
+| File                                     | Description                                                                                                        |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `createStaticFilterOptions.util.ts`      | Emits a `{ kind: 'static', values }` descriptor for build-time enum lists (spread into a column definition)        |
+| `filterOptions.constants.ts`             | Transport request targets: `/_api/filter-options` (loader) and the `/distinct` BFF path suffix                     |
+| `getFilterOptionsBaseUrl.util.ts`        | Resolves a transport to its request base (`getApiBaseUrl() + '/distinct'` for bff, resource-route path for loader) |
+| `resolveDistinctFilterOptions.util.ts`   | Executor for `kind: 'distinct'`: pages via `fetchDistinctValues` (`@repo/data-access/api`), maps `skip`→`offset`   |
+| `resolveStaticFilterOptions.util.ts`     | Executor for `kind: 'static'`: serves pages by slicing the baked values client-side (no network)                   |
+| `resolveFilterOptionsDescriptor.util.ts` | The client tool: dispatches on `descriptor.kind` to the matching executor                                          |
+
+Both executors preserve the `dataTotalSelector = hasMore ? Infinity : length`
+convention so `getTotalRows`/`hasMore` math downstream is untouched, and the
+ADR-006 prefetch cache keeps working unchanged.
 
 ## Usage Pattern
 
 ```ts
-// In a column definition
+// Static enum — in a column definition (serializable, loader-safe)
 {
   dataType: 'string',
   ...createStaticFilterOptions(['Pending', 'Shipped', 'Delivered']),
   key: 'status',
   label: 'Status',
 }
+
+// Distinct values — appended by the LOADER via
+// @repo/ui/routing/appendDistinctFilterDescriptors (columnName = column.key)
 ```
 
-The helper supports pagination (`skip`/`limit`) for consistency with server-fetched options, so filter dropdowns behave identically whether options are static or remote.
+`SelectFilterInput` resolves the descriptor at fetch time:
+`fetchInitial(resolveFilterOptionsDescriptor(column.filterOptionsDescriptor))`.
 
 ## Consumers
 
-- `src/routes/enterprise-orders/EnterpriseOrders.constants.tsx`
+- `components/Table/filters/SelectFilterInput/` (descriptor → fetch chain)
+- `components/Table/filters/FilterInputs/` (`hasFetchableOptions` gate)
+- `apps/react-router/src/routes/enterprise-orders/EnterpriseOrders.constants.tsx` (static descriptors)

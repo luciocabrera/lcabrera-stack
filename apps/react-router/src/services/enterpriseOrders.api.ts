@@ -91,13 +91,6 @@ type EnterpriseOrderDetailResponse = {
   readonly data: EnterpriseOrder;
 };
 
-const isDistinctValuesResponse = (
-  value: unknown,
-): value is { hasMore: boolean; values: string[] } =>
-  isObject(value) &&
-  typeof value['hasMore'] === 'boolean' &&
-  Array.isArray(value['values']);
-
 const isEnterpriseOrderDetailResponse = (
   value: unknown,
 ): value is EnterpriseOrderDetailResponse =>
@@ -142,35 +135,6 @@ export const enterpriseOrdersApi = {
         `API request failed: ${response.status} ${response.statusText}`,
       );
     }
-  },
-
-  /**
-   * Fetch distinct values for a column (for dynamic filter options)
-   */
-  fetchDistinctValues: async ({
-    columnName,
-    limit = 50,
-    offset = 0,
-    requestUrl,
-  }: {
-    columnName: keyof EnterpriseOrder;
-    limit?: number;
-    offset?: number;
-    requestUrl?: string;
-  }) => {
-    const url = `${getApiBaseUrl(requestUrl)}/enterprise-orders/distinct/${columnName}?limit=${limit}&offset=${offset}`;
-    log.debug(
-      '🎯 Fetching distinct values for:',
-      columnName,
-      'offset:',
-      offset,
-    );
-
-    return fetchAndValidate({
-      isValid: isDistinctValuesResponse,
-      shapeErrorMessage: `Unexpected response shape from /enterprise-orders/distinct/${columnName}`,
-      url,
-    });
   },
 
   /**

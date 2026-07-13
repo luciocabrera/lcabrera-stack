@@ -18,9 +18,13 @@ FiltersData/
     │
     ├── actions/
     │   ├── useFetchFilterData.hook.ts        → Lightweight orchestrator that composes initial + paginated fetch actions
-    │   ├── useFetchInitialFilterData.hook.ts → Initial filter options load + optional prefetch trigger
-    │   ├── useFetchMoreFilterData.hook.ts    → Paginated filter options append + cache/prefetch handling
+    │   ├── useFetchFilterData.types.ts       → Action/callback Args types shared by the fetchers
+    │   ├── fetchInitialFilterData.util.ts    → Initial filter options load + optional prefetch trigger
+    │   ├── fetchMoreFilterData.util.ts       → Paginated filter options append + cache/prefetch handling
     │   │   (initial + more fetchers share maybePrefetchFilterPage.util.ts for the prefetch trigger)
+    │   ├── clearPrefetchIfPresent.util.ts    → Reset the prefetch cache when a prefetch ref exists
+    │   ├── getTotalRows.util.ts              → Resolve total row count from a fetch response
+    │   ├── shouldSkipInitialFetch.util.ts    → Guard against redundant initial loads
     │   └── setFilterSlice.util.ts            → Single audited computed-key store write (contains the one Partial cast)
     │
     ├── selectors/

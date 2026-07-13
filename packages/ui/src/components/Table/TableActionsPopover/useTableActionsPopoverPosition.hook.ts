@@ -5,8 +5,9 @@ import { useEffect, useRef, useState } from 'react';
 import type { MenuPosition } from './TableActionsPopover.types';
 
 import { MENU_REPOSITION_FRAMES } from './TableActionsPopover.constants';
-import { computeMenuPosition } from './utils/computeMenuPosition.util';
 import { createViewportRect } from './utils/createViewportRect.util';
+import { getIsPopoverOpen } from './utils/getIsPopoverOpen.util';
+import { resolveOpenMenuReposition } from './utils/resolveOpenMenuReposition.util';
 
 type UseTableActionsPopoverPositionArgs = {
   readonly containerRef: RefObject<HTMLDivElement | null>;
@@ -18,8 +19,10 @@ type UseTableActionsPopoverPositionArgs = {
  * Owns a table actions popover's open state and viewport-aware coordinates.
  * Repositioning is recomputed on resize/intersection while open, and across
  * several animation frames right after opening because virtualization/load-more
- * can shift trigger geometry immediately after the click. Shared by
- * TableRowActionsMenu (row actions) and TableHeaderActionsMenu (column actions).
+ * can shift trigger geometry immediately after the click. The keep/close/
+ * reposition decision lives in resolveOpenMenuReposition; this hook applies
+ * the outcome to state and the Popover API. Shared by TableRowActionsMenu
+ * (row actions) and TableHeaderActionsMenu (column actions).
  */
 export const useTableActionsPopoverPosition = ({
   containerRef,
@@ -36,6 +39,24 @@ export const useTableActionsPopoverPosition = ({
     menuRef.current?.hidePopover?.();
   };
 
+  const applyRepositionOutcome = (
+    outcome: ReturnType<typeof resolveOpenMenuReposition>,
+  ) => {
+    if (outcome.kind === 'close') {
+      closeMenu();
+
+      return false;
+    }
+
+    if (outcome.kind === 'reposition') {
+      setMenuPosition(outcome.position);
+
+      return true;
+    }
+
+    return false;
+  };
+
   useEffect(() => {
     const menuElement = menuRef.current;
     const containerElement = containerRef.current;
@@ -46,19 +67,9 @@ export const useTableActionsPopoverPosition = ({
     }
 
     const repositionWhenOpen = () => {
-      if (!menuElement.matches(':popover-open')) {
-        return;
-      }
-
-      if (!triggerElement.isConnected) {
-        closeMenu();
-
-        return;
-      }
-
-      setMenuPosition(
-        computeMenuPosition({
-          containerRect: containerElement.getBoundingClientRect(),
+      applyRepositionOutcome(
+        resolveOpenMenuReposition({
+          getContainerRect: () => containerElement.getBoundingClientRect(),
           menuElement,
           triggerElement,
         }),
@@ -86,7 +97,7 @@ export const useTableActionsPopoverPosition = ({
       intersectionObserver?.disconnect();
       resizeObserver?.disconnect();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- closeMenu is stable per render and re-derived from refs, not reactive state
+    // eslint-disable-next-line react-hooks/exhaustive-deps, react-x/exhaustive-deps -- closeMenu/applyRepositionOutcome are stable per render and re-derived from refs, not reactive state
   }, [containerRef, isEnabled, triggerId]);
 
   const handleToggleMenu = () => {
@@ -96,7 +107,7 @@ export const useTableActionsPopoverPosition = ({
       return;
     }
 
-    if (menuElement.matches(':popover-open')) {
+    if (getIsPopoverOpen(menuElement)) {
       closeMenu();
 
       return;
@@ -107,21 +118,9 @@ export const useTableActionsPopoverPosition = ({
 
     let frameCount = 0;
     const stabilizePosition = () => {
-      if (!menuElement.matches(':popover-open')) {
-        return;
-      }
-
-      const triggerElement = document.getElementById(triggerId);
-
-      if (!triggerElement || !triggerElement.isConnected) {
-        closeMenu();
-
-        return;
-      }
-
-      setMenuPosition(
-        computeMenuPosition({
-          containerRect:
+      const didReposition = applyRepositionOutcome(
+        resolveOpenMenuReposition({
+          getContainerRect: () =>
             containerRef.current?.getBoundingClientRect() ??
             // Read the window size at reposition time, not import time
             createViewportRect({
@@ -129,13 +128,13 @@ export const useTableActionsPopoverPosition = ({
               width: globalThis.innerWidth,
             }),
           menuElement,
-          triggerElement,
+          triggerElement: document.getElementById(triggerId),
         }),
       );
 
       frameCount += 1;
 
-      if (frameCount < MENU_REPOSITION_FRAMES) {
+      if (didReposition && frameCount < MENU_REPOSITION_FRAMES) {
         requestAnimationFrame(stabilizePosition);
       }
     };
@@ -150,7 +149,7 @@ export const useTableActionsPopoverPosition = ({
       return;
     }
 
-    const nextIsMenuOpen = menuElement.matches(':popover-open');
+    const nextIsMenuOpen = getIsPopoverOpen(menuElement);
     setIsMenuOpen(nextIsMenuOpen);
 
     if (!nextIsMenuOpen) {

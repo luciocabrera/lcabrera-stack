@@ -20,24 +20,30 @@ individually but imported only within its own folder.
 
 ### `src/db/queryBuilder/` — see its own `ARCHITECTURE.md`
 
-Generic, schema/table-agnostic SQL SELECT/count builder for the "flat list
-view, optional filter/sort/pagination" shape. Public entry points:
-`buildSelectQuery` (`queryBuilder/buildSelectQuery.util.ts`) and
-`buildCountQuery` (`queryBuilder/buildCountQuery.util.ts`), plus the shared
-`QueryBuilder.types.ts` types. Every other file in that folder
-(`assertSafeIdentifier`, `assertColumnAllowed`, `appendFilterClause`,
+Generic, schema/table-agnostic SQL SELECT/count/distinct builder for the
+"flat list view, optional filter/sort/pagination" shape. Public entry
+points: `buildSelectQuery` (`queryBuilder/buildSelectQuery.util.ts`),
+`buildCountQuery` (`queryBuilder/buildCountQuery.util.ts`), and
+`buildDistinctQuery` (`queryBuilder/buildDistinctQuery.util.ts` — paginated
+`SELECT DISTINCT` for one column, the query behind filter-option lists, ADR-009),
+plus the shared `QueryBuilder.types.ts` types. Every other file in that
+folder (`assertSafeIdentifier`, `assertColumnAllowed`, `appendFilterClause`,
 `buildWhereClause`, `buildOrderByClause`, `buildOptionalNumericClauses`,
 `quoteIdentifier`) is a private, individually-tested implementation detail
-composed by those two entry points — import them directly only from within
+composed by those entry points — import them directly only from within
 `queryBuilder/`.
 
 ---
 
 ## `src/api/` — see its own `ARCHITECTURE.md`
 
-Client-side fetch helpers (not exported package-wide via `package.json`,
-consumed via tsconfig/Vite alias instead): `getApiBaseUrl` (`api.util.ts`),
-`buildPaginatedQueryParams`, `fetchAndValidate`, `fakeDelay`.
+Client-side fetch helpers, exported via the `./api` entry in the
+`package.json` exports map (and also reachable through the apps' Vite
+alias): `getApiBaseUrl` (`api.util.ts`), `buildPaginatedQueryParams`,
+`fetchAndValidate`, `fetchDistinctValues` (pages a generic distinct-values
+endpoint — the HTTP half of the ADR-009 filter-options descriptors, with
+`isDistinctValuesResponse` guard and the canonical `DistinctValuesResponse`
+type in `src/api.types.ts`), `fakeDelay`.
 
 ---
 

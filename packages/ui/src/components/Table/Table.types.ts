@@ -57,6 +57,22 @@ export type ColumnVisibilityState<TData = Record<string, unknown>> = Set<
 
 export type DataKey<TData> = 'actions' | (keyof TData & string);
 
+/**
+ * Serializable "tool call" describing how the client fetches distinct
+ * filter options for a column. The server (loader) bakes the concrete
+ * params; the client executor registry owns URL composition, pagination
+ * mapping, and response mapping per transport.
+ */
+export type DistinctFilterOptionsDescriptor = {
+  readonly kind: 'distinct';
+  readonly params: {
+    readonly columnName: string;
+    readonly schemaName?: string;
+    readonly tableName: string;
+  };
+  readonly transport: FilterOptionsTransport;
+};
+
 export type FilterData = {
   readonly data: string[];
   readonly hasMore: boolean;
@@ -67,13 +83,31 @@ export type FilterData = {
 };
 
 /**
- * Response shape returned by fetchFilterOptions.
+ * Serializable descriptor for a column's filter-option list. Unlike
+ * function-valued members, descriptors survive the React Router loader
+ * serialization boundary; the client tool
+ * (`resolveFilterOptionsDescriptor`) interprets them and performs all
+ * fetching client-side.
+ */
+export type FilterOptionsDescriptor =
+  | DistinctFilterOptionsDescriptor
+  | StaticFilterOptionsDescriptor;
+
+/**
+ * Response shape produced by filter-option executors.
  * Contains paginated distinct values for a column's filter dropdown.
  */
 export type FilterOptionsResponse = {
   readonly hasMore: boolean;
   readonly values: string[];
 };
+
+/**
+ * How a distinct descriptor reaches data: `bff` hits the API server's
+ * generic /api/distinct endpoint; `loader` hits the same-origin
+ * /_api/filter-options resource route (which calls the BFF server-side).
+ */
+export type FilterOptionsTransport = 'bff' | 'loader';
 
 export type FiltersDataState<TData = Record<string, unknown>> = Record<
   DataKey<TData>,
@@ -107,6 +141,12 @@ export type PinnedColumnOffsetsState<TData = Record<string, unknown>> = Partial<
  */
 export type SortingState<TData = Record<string, unknown>> = Sorting<TData>[];
 
+/** Serializable descriptor for a build-time (static) filter-option list. */
+export type StaticFilterOptionsDescriptor = {
+  readonly kind: 'static';
+  readonly values: readonly string[];
+};
+
 /**
  * Storage type for persistence
  */
@@ -114,19 +154,13 @@ export type StorageType = 'cookie' | 'localStorage';
 
 export type TableColumn<TData> = {
   readonly dataType?: TableColumnDataType;
-  /** Async function to fetch filter options from server (for facet filters with pagination) */
-  readonly fetchFilterOptions?: (params: {
-    readonly limit: number;
-    readonly skip: number;
-  }) => Promise<FilterOptionsResponse>;
-  /** Selector to extract options array from fetchFilterOptions response */
-  readonly filterOptionsDataSelector?: (
-    response: FilterOptionsResponse,
-  ) => string[];
-  /** Selector to extract total count from fetchFilterOptions response */
-  readonly filterOptionsDataTotalSelector?: (
-    response: FilterOptionsResponse,
-  ) => number;
+  /**
+   * Serializable descriptor for the column's filter-option list (distinct
+   * fetch or static values). Interpreted client-side by
+   * `resolveFilterOptionsDescriptor` — never a function, so columns can
+   * cross the loader serialization boundary intact.
+   */
+  readonly filterOptionsDescriptor?: FilterOptionsDescriptor;
   /** Format options for the column based on data type */
   readonly format?: TableColumnFormat;
   /** Whether this column can be filtered (default: true) */

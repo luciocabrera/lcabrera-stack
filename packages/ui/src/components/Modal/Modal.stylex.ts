@@ -3,7 +3,6 @@ import {
   easing,
   spacing,
   transitions,
-  typography,
   zIndex,
 } from '@repo/ui/design-system/tokens/base.stylex';
 import { colors } from '@repo/ui/design-system/tokens/colors.stylex';
@@ -12,35 +11,48 @@ import * as stylex from '@stylexjs/stylex';
 export const modalStyles = stylex.create({
   container: {
     backdropFilter: 'blur(50px) saturate(0.5) brightness(0.9)',
-    backgroundColor: colors.overlay,
-    backgroundImage: `radial-gradient(46% 52% at 18% 25%, #5a90ff8c, #0000 71%), radial-gradient(44% 44% at 82% 24%, #28e4c24f, #0000 71%), radial-gradient(52% 56% at 84% 82%, #c478ff4d, #0000 73%), radial-gradient(40% 40% at 53% 62%, #7e9eff7a, #0000 74%)`,
+    backgroundImage: `radial-gradient(circle, ${colors.patternDot} 0.1rem, transparent 0%)`,
+    backgroundRepeat: 'round',
+    backgroundSize: '2rem 2rem',
+    maskImage: 'linear-gradient(to bottom, #000000, #000000)',
+    scrollbarColor: `${colors.borderSecondary} transparent`,
   },
   body: {
     padding: spacing.lg,
     gap: spacing.md,
-    backdropFilter: 'blur(30px)',
-    backgroundColor: 'rgba(15, 23, 42, 0.45)',
-    display: 'flex',
+    // backdropFilter: 'blur(30px)',
+    // backgroundColor: 'rgba(15, 23, 42, 0.45)',
+    // display: 'flex',
     flexDirection: 'column',
     overflowY: 'auto',
   },
   dialog: {
+    // light variant
+    // background-color: #ffffffad;
+    // color: white;
     padding: 0,
-    borderColor: 'rgba(255, 255, 255, 0.12)',
+    borderColor: colors.borderPrimary,
+    // borderColor: '#ffffff69',
     borderRadius: borderRadius.lg,
     borderStyle: 'solid',
     borderWidth: '1px',
     transition: `transform ${transitions.normal} ${easing.easeInOut}`,
+    // backgroundColor: '#00000030',
     backdropFilter: colors.glassBackdropFilterPrimary,
+    // backdropFilter: 'blur(10px) brightness(0.5)',
     backgroundColor: colors.glassBackgroundColorPrimary,
-    boxShadow: '0 12px 40px 20px rgba(0, 0, 0, 0.5)',
+    backgroundImage: `radial-gradient(46% 52% at 18% 25%, #5a90ff8c, #0000 71%), radial-gradient(44% 44% at 82% 24%, #28e4c24f, #0000 71%), radial-gradient(52% 56% at 84% 82%, #c478ff4d, #0000 73%), radial-gradient(40% 40% at 53% 62%, #7e9eff7a, #0000 74%)`,
+    // border: 1px solid #ffffff69;
+    // background: #b9b9b90f;
+    boxShadow: '0 12px 40px 20px #6a6a6a80',
+    //0 12px 40px 20px #ffffff80;
+    //0 12px 40px 20px rgb(210 205 205 / 27%)
     color: colors.textPrimary,
     textAlign: 'left',
     zIndex: zIndex.modal,
     maxHeight: '85vh',
     maxWidth: '480px',
     width: '90vw',
-
     '::backdrop': {
       transition: `opacity ${transitions.normal} ${easing.easeInOut}`,
       backdropFilter: 'blur(2px)',
@@ -51,30 +63,25 @@ export const modalStyles = stylex.create({
   footer: {
     padding: spacing.lg,
     gap: spacing.sm,
-    backdropFilter: 'blur(30px)',
-    backgroundColor: 'rgba(15, 23, 42, 0.45)',
+    // backdropFilter: 'blur(30px)',
+    // backgroundColor: 'rgba(15, 23, 42, 0.45)',
     display: 'flex',
     justifyContent: 'flex-end',
     borderTopColor: colors.borderSecondary,
     borderTopStyle: 'solid',
     borderTopWidth: '1px',
   },
-  header: {
-    padding: spacing.lg,
-    gap: spacing.sm,
-    alignItems: 'flex-start',
-    backdropFilter: 'blur(30px)',
-    backgroundColor: 'rgba(15, 23, 42, 0.45)',
-    display: 'flex',
-    flexShrink: 0,
-    justifyContent: 'space-between',
-    borderBottomColor: colors.borderSecondary,
-    borderBottomStyle: 'solid',
-    borderBottomWidth: '1px',
-  },
-  title: {
-    margin: 0,
-    fontSize: typography.fontSizeLg,
-    fontWeight: typography.fontWeightSemibold,
-  },
+  // header: {
+  //   padding: spacing.lg,
+  //   gap: spacing.sm,
+  //   alignItems: 'flex-start',
+  //   backdropFilter: 'blur(30px)',
+  //   backgroundColor: 'rgba(15, 23, 42, 0.45)',
+  //   display: 'flex',
+  //   flexShrink: 0,
+  //   justifyContent: 'space-between',
+  //   borderBottomColor: colors.borderSecondary,
+  //   borderBottomStyle: 'solid',
+  //   borderBottomWidth: '1px',
+  // },
 });

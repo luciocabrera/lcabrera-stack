@@ -1,5 +1,4 @@
 export { createBasicColumn } from './createBasicColumn.util';
-export { createDistinctStringColumn } from './createDistinctStringColumn.util';
 export { deriveColumnViewState } from './deriveColumnViewState.util';
 export { getColumnPinSide } from './getColumnPinSide.util';
 export { getNormalizedColumns } from './getNormalizedColumns.util';

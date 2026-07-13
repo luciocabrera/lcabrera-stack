@@ -20,6 +20,16 @@ export type CountQueryDescriptor = {
   readonly table: string;
 };
 
+export type DistinctQueryDescriptor = {
+  /** Same opt-in authorization semantics as SelectQueryDescriptor. */
+  readonly allowedColumns?: readonly string[];
+  readonly column: string;
+  readonly limit?: number;
+  readonly offset?: number;
+  readonly schema: string;
+  readonly table: string;
+};
+
 export type QueryFilter = {
   readonly column: string;
   readonly operator: ComparisonOperator;

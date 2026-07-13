@@ -4,6 +4,7 @@ import {
   useGetGlobalNavigationPinnedPreference,
   useGetGlobalNavigationSizePreference,
 } from '@repo/ui/contexts/GlobalSettingsContext/selectors';
+import { useTheme } from '@repo/ui/hooks/useTheme.hook';
 import { useState } from 'react';
 
 import type { AppNavigationProps } from './AppNavigation.types';
@@ -24,13 +25,12 @@ import { isNavigationPinned } from './utils';
 export const AppNavigation = ({
   defaultIsPinned = true,
   getNavigationItems,
-  isDarkMode,
-  onToggleTheme,
 }: AppNavigationProps) => {
   const navigationCollapsedPreference =
     useGetGlobalNavigationCollapsedPreference();
   const navigationPinnedPreference = useGetGlobalNavigationPinnedPreference();
   const navigationSizePreference = useGetGlobalNavigationSizePreference();
+  const { isDarkMode, toggleTheme } = useTheme();
 
   const isPinned = isNavigationPinned({
     defaultIsPinned,
@@ -62,7 +62,7 @@ export const AppNavigation = ({
     >
       <NavigationHeader isPinned={isPinned} onClose={handleClose} />
       <NavigationBody getNavigationItems={getNavigationItems} />
-      <NavigationFooter isDarkMode={isDarkMode} onToggleTheme={onToggleTheme} />
+      <NavigationFooter isDarkMode={isDarkMode} onToggleTheme={toggleTheme} />
     </SidePanel>
   );
 

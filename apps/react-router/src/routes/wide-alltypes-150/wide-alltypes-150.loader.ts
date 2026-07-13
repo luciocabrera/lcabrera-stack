@@ -51,6 +51,9 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
     });
 
   return {
+    // COLUMNS is fully serializable (no functions), so the loader can
+    // return it directly. No distinct descriptors here yet — this route's
+    // filter support is deliberately minimal (see its ARCHITECTURE.md).
     columnsState: {
       columnFilters: filters,
       columnOrder,

@@ -1,6 +1,7 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
 import { INITIAL_PAGE_SIZE } from '@repo/ui/components/Table/Table.constants';
+import { appendDistinctFilterDescriptors } from '@repo/ui/routing/appendDistinctFilterDescriptors.util';
 import { appendPrimaryKeySorting } from '@repo/ui/routing/appendPrimaryKeySorting.util';
 import { readTableLoaderStateFromRequest } from '@repo/ui/routing/readTableLoaderStateFromRequest.util';
 
@@ -18,6 +19,15 @@ import {
 } from './CarSales.constants';
 
 export const loader = ({ request }: LoaderFunctionArgs) => {
+  // Columns are serializable (descriptors, never functions — see
+  // .claude/rules/routes-data.md), so the loader can return them directly.
+  const columns = appendDistinctFilterDescriptors({
+    columns: COLUMNS,
+    schemaName: SCHEMA_NAME,
+    tableName: TABLE_NAME,
+    transport: 'loader',
+  });
+
   const {
     columnOrder,
     columnPinning,
@@ -60,7 +70,7 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
       columnFilters: filters,
       columnOrder,
       columnPinning,
-      columns: COLUMNS,
+      columns,
       columnSizing,
       columnVisibility,
       sorting: sanitizedSorting,

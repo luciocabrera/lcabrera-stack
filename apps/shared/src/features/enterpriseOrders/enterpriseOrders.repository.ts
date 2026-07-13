@@ -7,7 +7,6 @@ import type {
 } from '../../types/api.types.js';
 import type {
   EnterpriseOrderDetailResponse,
-  EnterpriseOrdersDistinctResponse,
   EnterpriseOrdersFilters,
   EnterpriseOrdersResponse,
 } from './enterpriseOrders.types.js';
@@ -18,9 +17,6 @@ import { buildEnterpriseOrdersWhereClause } from './buildEnterpriseOrdersWhereCl
 import { DEFAULT_ENTERPRISE_ORDER_SORTING } from './enterpriseOrders.constants.js';
 
 export type EnterpriseOrdersRepository = {
-  readonly getDistinctValues: (
-    args: GetDistinctValuesArgs,
-  ) => Promise<EnterpriseOrdersDistinctResponse>;
   readonly getOrderById: (
     orderId: number,
   ) => Promise<EnterpriseOrderDetailResponse | undefined>;
@@ -31,12 +27,6 @@ export type EnterpriseOrdersRepository = {
 
 type CreateEnterpriseOrdersRepositoryArgs = {
   readonly pool: Queryable;
-};
-
-type GetDistinctValuesArgs = {
-  readonly columnName: string;
-  readonly limit: number;
-  readonly offset: number;
 };
 
 type GetEnterpriseOrdersArgs = {
@@ -52,27 +42,6 @@ type GetEnterpriseOrdersArgs = {
 export const createEnterpriseOrdersRepository = ({
   pool,
 }: CreateEnterpriseOrdersRepositoryArgs): EnterpriseOrdersRepository => ({
-  getDistinctValues: async ({ columnName, limit, offset }) => {
-    const query = `
-      SELECT DISTINCT ${columnName} AS value
-      FROM enterprise_orders
-      WHERE ${columnName} IS NOT NULL AND ${columnName} != ''
-      ORDER BY ${columnName}
-      LIMIT $1 OFFSET $2
-    `;
-    const params: QueryValue[] = [limit, offset];
-
-    console.warn('🎯 [Distinct] Query:', formatPgAdminQuery(query, params));
-
-    const result = await pool.query<{ readonly value: string }>(query, params);
-    const values = result.rows.map(({ value }) => value);
-
-    return {
-      hasMore: values.length === limit,
-      values,
-    };
-  },
-
   getOrderById: async (orderId) => {
     const query = 'SELECT * FROM enterprise_orders WHERE order_id = $1';
     const params: QueryValue[] = [orderId];

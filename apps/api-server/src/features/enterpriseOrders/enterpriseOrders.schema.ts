@@ -66,11 +66,6 @@ const filterSchema = z.discriminatedUnion('type', [
   textFilterSchema,
 ]);
 
-type ParseDistinctColumnArgs = {
-  readonly allowedColumns: ReadonlySet<string>;
-  readonly value: string;
-};
-
 type ParseFiltersArgs = {
   readonly allowedColumns: ReadonlySet<string>;
   readonly value: unknown;
@@ -79,23 +74,6 @@ type ParseFiltersArgs = {
 type ParseSortingArgs = {
   readonly allowedColumns: ReadonlySet<string>;
   readonly value: unknown;
-};
-
-/**
- * Validate the requested distinct column.
- */
-export const parseDistinctColumnName = ({
-  allowedColumns,
-  value,
-}: ParseDistinctColumnArgs): string => {
-  if (!allowedColumns.has(value)) {
-    throw new HttpError({
-      message: `Unsupported distinct column: ${value}`,
-      statusCode: 400,
-    });
-  }
-
-  return value;
 };
 
 /**

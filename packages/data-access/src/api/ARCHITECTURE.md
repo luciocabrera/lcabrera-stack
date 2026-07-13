@@ -4,12 +4,14 @@ Resolves the correct API base URL and provides shared request helpers for use in
 
 ## File
 
-| File                                | Description                                                                                  |
-| ----------------------------------- | -------------------------------------------------------------------------------------------- |
-| `api.util.ts`                       | Exports `getApiBaseUrl(requestUrl?)` — resolves the API base URL                             |
-| `buildPaginatedQueryParams.util.ts` | Builds `limit`/`skip`/`sort`/`filter` `URLSearchParams` shared by paginated service fetchers |
-| `fetchAndValidate.util.ts`          | Fetches a URL, asserts OK, parses JSON, and validates the body shape via a type guard        |
-| `fakeDelay.util.ts`                 | Simulated network latency helper for mock data paths                                         |
+| File                                | Description                                                                                                                       |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `api.util.ts`                       | Exports `getApiBaseUrl(requestUrl?)` — resolves the API base URL                                                                  |
+| `buildPaginatedQueryParams.util.ts` | Builds `limit`/`skip`/`sort`/`filter` `URLSearchParams` shared by paginated service fetchers                                      |
+| `fetchAndValidate.util.ts`          | Fetches a URL, asserts OK, parses JSON, and validates the body shape via a type guard                                             |
+| `fetchDistinctValues.util.ts`       | Pages a generic distinct-values endpoint (`?schemaName&tableName&columnName&limit&offset`) — the HTTP half of ADR-009 descriptors |
+| `isDistinctValuesResponse.util.ts`  | Type guard for `DistinctValuesResponse` (`{ hasMore, values }`, type in `src/api.types.ts`)                                       |
+| `fakeDelay.util.ts`                 | Simulated network latency helper for mock data paths                                                                              |
 
 ## Priority Strategy
 

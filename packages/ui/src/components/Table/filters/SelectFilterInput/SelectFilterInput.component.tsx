@@ -5,6 +5,7 @@ import { useFetchFilterData } from '@repo/ui/components/Table/contexts/FiltersDa
 import { useGetFilterData } from '@repo/ui/components/Table/contexts/FiltersData/filters/selectors';
 import { useGetNormalizedColumn } from '@repo/ui/components/Table/contexts/TableConfig/columns/selectors';
 import { VirtualSelect } from '@repo/ui/components/VirtualSelect';
+import { resolveFilterOptionsDescriptor } from '@repo/ui/utils/filters/resolveFilterOptionsDescriptor.util';
 import { useRef } from 'react';
 
 import type { SelectFilterInputProps } from './SelectFilterInput.types';
@@ -35,21 +36,17 @@ export const SelectFilterInput = <TData,>({
   });
 
   const handleFetchInitial = async () => {
-    if (!column.fetchFilterOptions) return;
-    await fetchInitial({
-      dataSelector: column.filterOptionsDataSelector,
-      dataTotalSelector: column.filterOptionsDataTotalSelector,
-      onLoadMore: column.fetchFilterOptions,
-    });
+    if (!column.filterOptionsDescriptor) return;
+    await fetchInitial(
+      resolveFilterOptionsDescriptor(column.filterOptionsDescriptor),
+    );
   };
 
   const handleFetchMore = async () => {
-    if (!column.fetchFilterOptions) return;
-    await fetchMore({
-      dataSelector: column.filterOptionsDataSelector,
-      dataTotalSelector: column.filterOptionsDataTotalSelector,
-      onLoadMore: column.fetchFilterOptions,
-    });
+    if (!column.filterOptionsDescriptor) return;
+    await fetchMore(
+      resolveFilterOptionsDescriptor(column.filterOptionsDescriptor),
+    );
   };
 
   const selectedValues = filter?.values ?? [];

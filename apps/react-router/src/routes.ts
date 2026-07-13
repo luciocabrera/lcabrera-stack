@@ -7,6 +7,7 @@ export default [
     '_action/enterprise-orders/delete',
     'routes/api/enterprise-orders-delete/root.ts',
   ),
+  route('_api/filter-options', 'routes/api/filter-options/root.ts'),
   route('settings', 'routes/settings/root.ts'),
   route('car-sales', 'routes/car-sales/root.ts'),
   route('car-sales-infinite', 'routes/car-sales-infinite/root.ts'),

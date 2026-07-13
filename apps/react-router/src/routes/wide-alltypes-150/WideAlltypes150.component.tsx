@@ -22,7 +22,6 @@ export const WideAlltypes150Page = () => {
       metaState={metaState}
       onLoadMore={async ({ limit, skip }) =>
         wideAlltypes150Api.fetchPaginated({
-          // filter: columnsState?.columnFilters ?? {},
           limit,
           skip,
           sorting: appendPrimaryKeySorting<WideAlltypes150>({

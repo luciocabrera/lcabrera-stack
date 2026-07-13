@@ -1,21 +1,18 @@
 import type {
-  FilterOptionsResponse,
+  StaticFilterOptionsDescriptor,
   TableColumn,
 } from '@repo/ui/components/Table/Table.types';
 
 type StaticFilterOptions<TData> = Pick<
   TableColumn<TData>,
-  | 'fetchFilterOptions'
-  | 'filterOptionsDataSelector'
-  | 'filterOptionsDataTotalSelector'
+  'filterOptionsDescriptor'
 >;
 
 /**
- * Creates fetchFilterOptions + selectors for a static list of values.
- * Use this when filter options are known at build time and don't require an API call.
- *
- * The static array is wrapped in a Promise to match the async fetcher contract,
- * supporting pagination (skip/limit) for consistency with server-fetched options.
+ * Creates a serializable static filter-options descriptor for a list of
+ * values known at build time. Safe to return from loaders (no functions);
+ * the client tool (`resolveFilterOptionsDescriptor`) serves pages by
+ * slicing the values client-side, no API call involved.
  *
  * @example
  * ```ts
@@ -28,17 +25,10 @@ type StaticFilterOptions<TData> = Pick<
  * ```
  */
 export const createStaticFilterOptions = <TData>(
-  values: string[],
+  values: readonly string[],
 ): StaticFilterOptions<TData> => ({
-  fetchFilterOptions: ({ limit, skip }: { limit: number; skip: number }) => {
-    const sliced = values.slice(skip, skip + limit);
-    return Promise.resolve({
-      hasMore: skip + limit < values.length,
-      values: sliced,
-    });
-  },
-  filterOptionsDataSelector: (response: FilterOptionsResponse) =>
-    response.values,
-  filterOptionsDataTotalSelector: (response: FilterOptionsResponse) =>
-    response.hasMore ? Infinity : response.values.length,
+  filterOptionsDescriptor: {
+    kind: 'static',
+    values,
+  } satisfies StaticFilterOptionsDescriptor,
 });

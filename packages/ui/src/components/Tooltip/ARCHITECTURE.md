@@ -6,24 +6,43 @@ The Tooltip component provides hover and focus driven contextual help using the
 native Popover API (`popover='manual'`) with StyleX-based styling and a
 positioned arrow that tracks trigger alignment.
 
-It is implemented as an uncontrolled UI primitive with local state for
-visibility and arrow offset.
+It is implemented as an uncontrolled UI primitive: a thin shell owning local
+state (visibility, arrow offset), refs, and show/hide orchestration, composing
+two private delegates that own their rendering:
+
+- `TooltipTrigger` — the anchored trigger span with interaction semantics.
+- `TooltipContent` — the anchored popover surface with placement + arrow.
 
 ## File Structure
 
 ```
 Tooltip/
-├── index.ts                    -> Barrel export: Tooltip + Tooltip types
-├── Tooltip.component.tsx       -> Component behavior and render
-├── Tooltip.types.ts            -> TooltipProps, TooltipPlacement, ArrowOffsetParams
-├── Tooltip.constants.ts        -> Transition duration + arrow style map
-├── Tooltip.stylex.ts           -> Trigger, popover, placement, and arrow styles
-├── ARCHITECTURE.md             -> This documentation
+├── index.ts                            -> Barrel export: Tooltip
+├── Tooltip.component.tsx               -> Thin shell: state, refs, show/hide orchestration
+├── Tooltip.types.ts                    -> TooltipProps, TooltipPlacement, ArrowOffsetParams
+├── Tooltip.constants.ts                -> TRANSITION_DURATION_MS, HALF_ARROW
+├── ARCHITECTURE.md                     -> This documentation
+├── TooltipTrigger/                     -> Private trigger delegate
+│   ├── TooltipTrigger.component.tsx    -> Trigger span: hover/focus/touch/keyboard wiring
+│   ├── TooltipTrigger.types.ts         -> TooltipTriggerProps
+│   ├── TooltipTrigger.stylex.ts        -> Anchor-name trigger style
+│   └── utils/
+│       └── getIsNativeInteractiveElement.util.ts -> Native-interactive child detection
+├── TooltipContent/                     -> Private popover delegate
+│   ├── TooltipContent.component.tsx    -> Popover surface + arrow + content render
+│   ├── TooltipContent.types.ts         -> TooltipContentProps
+│   ├── TooltipContent.constants.ts     -> ARROW_STYLES placement map
+│   ├── TooltipContent.stylex.ts        -> Popover, placement, and arrow styles
+│   └── utils/
+│       └── getArrowStyle.util.ts       -> Maps placement to dynamic arrow style
 └── utils/
-    ├── index.ts                -> Utility barrel export
-    ├── getArrowOffset.util.ts  -> Computes arrow position from geometry
-    └── getArrowStyle.util.ts   -> Maps placement to dynamic arrow style
+    ├── index.ts                        -> Utility barrel export
+    └── getArrowOffset.util.ts          -> Computes arrow position from geometry
 ```
+
+Each `*.component.tsx`, `*.util.ts` has a colocated test file (omitted above).
+The delegates are private: no `index.ts`, imported via direct file paths
+(ADR-007 rule 3).
 
 ## Dependencies
 
@@ -31,20 +50,31 @@ Tooltip/
 graph LR
   Tooltip --> Tooltip.types
   Tooltip --> Tooltip.constants
-  Tooltip --> Tooltip.stylex
+  Tooltip --> TooltipTrigger
+  Tooltip --> TooltipContent
   Tooltip --> getArrowOffset
-  Tooltip --> getArrowStyle
 
-  Tooltip.constants --> Tooltip.stylex
+  TooltipTrigger --> TooltipTrigger.types
+  TooltipTrigger --> TooltipTrigger.stylex
+  TooltipTrigger --> getIsNativeInteractiveElement
+
+  TooltipContent --> TooltipContent.types
+  TooltipContent --> TooltipContent.constants
+  TooltipContent --> TooltipContent.stylex
+  TooltipContent --> getArrowStyle
+
+  TooltipContent.types --> Tooltip.types
+  TooltipContent.constants --> TooltipContent.stylex
 
   getArrowOffset --> Tooltip.types
   getArrowOffset --> Tooltip.constants
 
   getArrowStyle --> Tooltip.types
-  getArrowStyle --> Tooltip.stylex
+  getArrowStyle --> TooltipContent.stylex
 
-  Tooltip.stylex --> base.stylex
-  Tooltip.stylex --> colors.stylex
+  TooltipTrigger.stylex --> base.stylex
+  TooltipContent.stylex --> base.stylex
+  TooltipContent.stylex --> colors.stylex
 ```
 
 ## Public API
@@ -61,24 +91,25 @@ The component also exports `TooltipPlacement` for reuse by consumers.
 
 ## Internal State and Refs
 
-The component owns the following runtime state:
+The `Tooltip` shell owns the following runtime state:
 
-- `isVisible`: controls fade/slide transition classes.
+- `isVisible`: controls fade/slide transition classes (passed to `TooltipContent`).
 - `arrowOffset`: optional computed pixel offset to align arrow to trigger center.
 
-The component uses these refs:
+The shell owns these refs and passes them to the delegates as `ref` props
+(React 19 ref-as-prop, no `forwardRef`):
 
-- `triggerRef`: DOM reference for anchor geometry (`getBoundingClientRect`).
-- `tooltipRef`: DOM reference for Popover API calls (`showPopover/hidePopover`).
+- `triggerRef`: DOM reference for anchor geometry (`getBoundingClientRect`), wired into `TooltipTrigger`.
+- `tooltipRef`: DOM reference for Popover API calls (`showPopover/hidePopover`), wired into `TooltipContent`.
 - `hideTimeoutRef`: timeout id used to defer hide until transition completes.
 
 ## Render Structure
 
 ```mermaid
 graph TD
-  Root[Tooltip]
-  Trigger[span trigger]
-  Popover[div role='tooltip' popover='manual']
+  Root[Tooltip shell]
+  Trigger[TooltipTrigger span trigger]
+  Popover[TooltipContent div role='tooltip' popover='manual']
   Arrow[span arrow]
   Content[content]
 
@@ -88,26 +119,31 @@ graph TD
   Popover --> Content
 ```
 
-### Trigger Element
+### TooltipTrigger Delegate
 
-The trigger is a `span` with:
+Renders a `span` with:
 
 - `aria-describedby={id}` for accessibility linkage.
-- Conditional interactive semantics (`role='button'`, `tabIndex={0}`) when the child is not already a native interactive element.
-- Mouse/focus handlers (`onMouseEnter`, `onMouseLeave`, `onFocus`, `onBlur`).
+- Conditional interactive semantics (`role='button'`, `tabIndex={0}`) when the child is not already a native interactive element (derived internally via `getIsNativeInteractiveElement`).
+- Mouse/focus handlers (`onMouseEnter`, `onMouseLeave`, `onFocus`, `onBlur`) delegating to the shell's `onShow`/`onHide` callbacks.
 - Keyboard handlers (`Enter`/`Space` show, `Escape` hides) when trigger semantics are applied.
 - Touch handlers (`onTouchStart` show, `onTouchEnd` hide).
 - `popoverTarget={id}` and anchor style data for placement support.
 
-### Tooltip Element
+`TooltipTriggerProps`: `anchorName`, `children`, `id`, `onHide`, `onShow`, `ref`.
 
-The tooltip body is a `div` with:
+### TooltipContent Delegate
 
-- `id={id}` generated via `useId()`.
+Renders a `div` with:
+
+- `id={id}` generated by the shell via `useId()`.
 - `popover='manual'` for explicit open/close control.
 - `role='tooltip'` for semantics.
 - Placement style (`top`, `bottom`, `left`, `right`).
 - Visibility style toggled by `isVisible`.
+- The arrow `span` with placement base style (`ARROW_STYLES`) plus the dynamic offset style (`getArrowStyle`) once `arrowOffset` is measured.
+
+`TooltipContentProps`: `anchorName`, `arrowOffset?`, `children`, `id`, `isVisible`, `placement`, `ref`.
 
 ## Interaction Flow
 
@@ -154,7 +190,8 @@ $$
 
 ## Styling Model
 
-Tooltip styling is fully StyleX-driven and tokenized:
+Tooltip styling is fully StyleX-driven and tokenized, split per delegate
+(`TooltipTrigger.stylex.ts`, `TooltipContent.stylex.ts`):
 
 - Trigger styles use `anchorName` to bind tooltip anchoring.
 - Tooltip surface uses elevated tokens (blur, shadow, border, radius, typography).

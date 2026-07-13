@@ -197,6 +197,22 @@ export const styles = {
 
 ---
 
+## Serializable Fetch Descriptors (Tool-Call Pattern)
+
+Column filter-option fetching is described by **data, never functions** (ADR-009): functions silently die at the React Router loader boundary, and future pgAdmin-style columns are built at runtime from the DB. A `TableColumn` carries an optional `filterOptionsDescriptor`:
+
+```ts
+| { kind: 'static'; values: readonly string[] }                       // client-side slicing, no network
+| { kind: 'distinct'; transport: 'bff' | 'loader';                    // generic distinct endpoints
+    params: { schemaName?: string; tableName: string; columnName: string } }
+```
+
+- **Server bakes the args** — loaders call `appendDistinctFilterDescriptors` (`src/routing/`) over the columns they have (constants today, introspection rows tomorrow); `createStaticFilterOptions` (`src/utils/filters/`) emits static descriptors inline.
+- **Client owns the tools** — `resolveFilterOptionsDescriptor` (`src/utils/filters/`) dispatches on `kind` and returns the `{ onLoadMore, dataSelector, dataTotalSelector }` contract consumed by `useFetchFilterData`; HTTP + validation delegate to `@repo/data-access/api` (`fetchDistinctValues`). Nothing below `SelectFilterInput` knows descriptors exist.
+- Adding a descriptor kind = a new serializable variant + a new executor util + a dispatcher case — never a new function member on `TableColumn`.
+
+---
+
 ## Context + Store Pattern
 
 State shared across a component tree is provided via React context backed by `useStore`:

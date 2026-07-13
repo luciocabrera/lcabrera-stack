@@ -1,14 +1,17 @@
-import type { KeyboardEvent } from 'react';
-
-import * as stylex from '@stylexjs/stylex';
-import { isValidElement, useId, useRef, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 
 import type { TooltipProps } from './Tooltip.types';
 
-import { ARROW_STYLES, TRANSITION_DURATION_MS } from './Tooltip.constants';
-import { styles } from './Tooltip.stylex';
-import { getArrowOffset, getArrowStyle } from './utils';
+import { TRANSITION_DURATION_MS } from './Tooltip.constants';
+import { TooltipContent } from './TooltipContent/TooltipContent.component';
+import { TooltipTrigger } from './TooltipTrigger/TooltipTrigger.component';
+import { getArrowOffset } from './utils';
 
+/**
+ * Hover/focus driven contextual help built on the native Popover API. A thin
+ * shell owning visibility state, refs, and show/hide orchestration, composing
+ * the TooltipTrigger and TooltipContent delegates.
+ */
 export const Tooltip = ({
   children,
   content,
@@ -23,14 +26,6 @@ export const Tooltip = ({
 
   const [isVisible, setIsVisible] = useState(false);
   const [arrowOffset, setArrowOffset] = useState<number | undefined>();
-
-  const hasNativeInteractiveChild =
-    isValidElement(children) &&
-    typeof children.type === 'string' &&
-    ['a', 'button', 'input', 'select', 'summary', 'textarea'].includes(
-      children.type,
-    );
-  const shouldUseInteractiveTrigger = !hasNativeInteractiveChild;
 
   const anchorName = `--tooltip-${id.replaceAll(':', '')}`;
 
@@ -63,62 +58,27 @@ export const Tooltip = ({
     hideTimeoutRef.current = timeoutId;
   };
 
-  const handleKeyDown = (event: KeyboardEvent<HTMLSpanElement>) => {
-    if (event.key === 'Escape') {
-      handleHide();
-      return;
-    }
-
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      handleShow();
-    }
-  };
-
   return (
     <>
-      <span
-        aria-describedby={id}
-        onBlur={handleHide}
-        onFocus={handleShow}
-        onKeyDown={shouldUseInteractiveTrigger ? handleKeyDown : undefined}
-        onMouseEnter={handleShow}
-        onMouseLeave={handleHide}
-        onTouchEnd={handleHide}
-        onTouchStart={handleShow}
-        popoverTarget={id}
+      <TooltipTrigger
+        anchorName={anchorName}
+        id={id}
+        onHide={handleHide}
+        onShow={handleShow}
         ref={triggerRef}
-        role={shouldUseInteractiveTrigger ? 'button' : undefined}
-        // For non-native triggers we intentionally provide keyboard focus + role.
-        // NOSONAR
-        tabIndex={shouldUseInteractiveTrigger ? 0 : undefined}
-        {...stylex.props(styles.trigger(anchorName))}
       >
         {children}
-      </span>
-      <div
+      </TooltipTrigger>
+      <TooltipContent
+        anchorName={anchorName}
+        arrowOffset={arrowOffset}
         id={id}
-        popover='manual'
+        isVisible={isVisible}
+        placement={placement}
         ref={tooltipRef}
-        role='tooltip'
-        {...stylex.props(
-          styles.tooltip(anchorName),
-          styles[placement],
-          isVisible ? styles.tooltipVisible : undefined,
-        )}
       >
-        <span
-          {...stylex.props(
-            styles.arrow,
-            ARROW_STYLES[placement],
-            arrowOffset !== undefined &&
-              getArrowStyle({ arrowOffset, placement }),
-          )}
-        />
         {content}
-      </div>
+      </TooltipContent>
     </>
   );
 };
-
-Tooltip.displayName = 'Tooltip';

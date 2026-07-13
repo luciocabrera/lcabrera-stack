@@ -6,6 +6,8 @@ import { useEffect, useRef } from 'react';
 
 import type { ModalProps } from './Modal.types';
 
+import { AppBackground } from '../AppBackground';
+import { Title } from '../Title';
 import { modalStyles } from './Modal.stylex';
 
 export const Modal = ({
@@ -44,23 +46,28 @@ export const Modal = ({
 
   return (
     <dialog ref={dialogRef} {...stylex.props(modalStyles.dialog)}>
-      <div {...stylex.props(modalStyles.container)}>
+      <AppBackground>
+        {/* <div {...stylex.props(modalStyles.container)}> */}
         {title && (
-          <div {...stylex.props(modalStyles.header)}>
-            <h2 {...stylex.props(modalStyles.title)}>{title}</h2>
-            <Button
-              aria-label='Close'
-              color='ghost'
-              icon={<MenuCloseIcon size={ICON_SIZE_MD} />}
-              onClick={onClose}
-              size='mini'
-              width='auto'
-            />
-          </div>
+          <Title
+            actions={
+              <Button
+                aria-label='Close'
+                color='ghost'
+                icon={<MenuCloseIcon size={ICON_SIZE_MD} />}
+                onClick={onClose}
+                size='mini'
+                width='auto'
+              />
+            }
+          >
+            {title}
+          </Title>
         )}
         <div {...stylex.props(modalStyles.body)}>{children}</div>
         {footer && <div {...stylex.props(modalStyles.footer)}>{footer}</div>}
-      </div>
+        {/* </div> */}
+      </AppBackground>
     </dialog>
   );
 };

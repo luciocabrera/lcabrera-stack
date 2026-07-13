@@ -230,7 +230,7 @@ Before making **any** code change, read every `ARCHITECTURE.md` that covers the 
 - Parent directories if the change crosses boundaries (e.g. `src/hooks/ARCHITECTURE.md`)
 - Shared type files (`src/types/ARCHITECTURE.md`) when filter or UI types are involved
 - `src/components/PATTERNS.md` — always read this before creating or modifying any component; it defines naming conventions, StyleX composition order, the drawer-section pattern, filter contract, context+store pattern, and props-forwarding rules
-- `docs/decisions/` — read the relevant ADR(s) before working in an area they cover: Modal → ADR-001, Tooltip → ADR-002, store → ADR-003, memoization/React Compiler → ADR-004, styling → ADR-005, infinite-scroll prefetch → ADR-006, barrel-export boundaries → ADR-007, primary-key sort tiebreaker / columns-derived id → ADR-008
+- `docs/decisions/` — read the relevant ADR(s) before working in an area they cover: Modal → ADR-001, Tooltip → ADR-002, store → ADR-003, memoization/React Compiler → ADR-004, styling → ADR-005, infinite-scroll prefetch → ADR-006, barrel-export boundaries → ADR-007, primary-key sort tiebreaker / columns-derived id → ADR-008, filter-options fetch descriptors → ADR-009
 
 If no `ARCHITECTURE.md` exists yet for the area you are changing, create one **before** implementing.
 

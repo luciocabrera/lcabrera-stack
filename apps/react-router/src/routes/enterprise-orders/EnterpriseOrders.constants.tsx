@@ -4,13 +4,10 @@ import type {
   TableCrudConfig,
 } from '@repo/ui/components/Table/Table.types';
 
-import {
-  createBasicColumn,
-  createDistinctStringColumn,
-} from '@repo/ui/components/Table/utils';
+import { createBasicColumn } from '@repo/ui/components/Table/utils';
 import { createStaticFilterOptions } from '@repo/ui/utils/filters';
 
-import { type EnterpriseOrder, enterpriseOrdersApi } from '@/services';
+import type { EnterpriseOrder } from '@/services';
 
 export const TITLE = {
   plural: 'Enterprise Orders',
@@ -44,9 +41,8 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
     maxWidth: 120,
     minWidth: 90,
   }),
-  createDistinctStringColumn({
-    columnName: 'order_number',
-    fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
+  createBasicColumn({
+    dataType: 'string',
     key: 'order_number',
     label: 'Order #',
     maxWidth: 180,
@@ -97,17 +93,15 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
     maxWidth: 250,
     minWidth: 150,
   }),
-  createDistinctStringColumn({
-    columnName: 'customer_email',
-    fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
+  createBasicColumn({
+    dataType: 'string',
     key: 'customer_email',
     label: 'Email',
     maxWidth: 280,
     minWidth: 180,
   }),
-  createDistinctStringColumn({
-    columnName: 'customer_type',
-    fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
+  createBasicColumn({
+    dataType: 'string',
     key: 'customer_type',
     label: 'Customer Type',
     maxWidth: 180,
@@ -221,41 +215,36 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
     maxWidth: 150,
     minWidth: 110,
   }),
-  createDistinctStringColumn({
-    columnName: 'shipping_city',
-    fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
+  createBasicColumn({
+    dataType: 'string',
     key: 'shipping_city',
     label: 'Ship City',
     maxWidth: 180,
     minWidth: 120,
   }),
-  createDistinctStringColumn({
-    columnName: 'shipping_state',
-    fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
+  createBasicColumn({
+    dataType: 'string',
     key: 'shipping_state',
     label: 'Ship State',
     maxWidth: 150,
     minWidth: 110,
   }),
-  createDistinctStringColumn({
-    columnName: 'shipping_country',
-    fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
+  createBasicColumn({
+    dataType: 'string',
     key: 'shipping_country',
     label: 'Ship Country',
     maxWidth: 180,
     minWidth: 130,
   }),
-  createDistinctStringColumn({
-    columnName: 'carrier',
-    fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
+  createBasicColumn({
+    dataType: 'string',
     key: 'carrier',
     label: 'Carrier',
     maxWidth: 150,
     minWidth: 100,
   }),
-  createDistinctStringColumn({
-    columnName: 'warehouse_location',
-    fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
+  createBasicColumn({
+    dataType: 'string',
     key: 'warehouse_location',
     label: 'Warehouse',
     maxWidth: 180,

@@ -108,8 +108,9 @@ graph TD
   SI --> fetch["useFetchFilterData(columnKey)"]
   SI --> more["useFetchMoreFilterData(columnKey)"]
 
-  col -->|"fetchFilterOptions"| onFetch["handleFetchInitial()"]
-  col -->|"fetchFilterOptions"| onMore["handleFetchMore()"]
+  col -->|"filterOptionsDescriptor"| resolve["resolveFilterOptionsDescriptor()"]
+  resolve --> onFetch["handleFetchInitial()"]
+  resolve --> onMore["handleFetchMore()"]
 
   fd --> state["Map to VirtualListDataState"]
   state --> VS["VirtualSelect (mode=multi, isAlwaysOpen)"]
@@ -118,7 +119,11 @@ graph TD
 ```
 
 Uses `FiltersDataContext` for per-column filter options with pagination.
-The `fetchFilterOptions` on the column definition provides the async data source.
+The column's serializable `filterOptionsDescriptor` (ADR-009) describes the
+data source; `resolveFilterOptionsDescriptor` (`src/utils/filters/`) turns it
+into the `{ onLoadMore, dataSelector, dataTotalSelector }` contract at fetch
+time — static descriptors slice client-side, distinct descriptors page
+through the generic distinct endpoints.
 
 ## Consumers
 

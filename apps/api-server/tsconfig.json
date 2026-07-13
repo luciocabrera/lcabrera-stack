@@ -9,6 +9,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "outDir": "./dist",
+    "rewriteRelativeImportExtensions": true,
     "rootDir": "./src",
     "skipLibCheck": true,
     "strict": true,
