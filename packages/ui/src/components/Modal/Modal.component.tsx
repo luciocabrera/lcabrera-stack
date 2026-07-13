@@ -1,13 +1,14 @@
+import { AppBackground } from '@repo/ui/components/AppBackground';
+import { AppDotted } from '@repo/ui/components/AppDotted';
 import { Button } from '@repo/ui/components/Button';
 import { MenuCloseIcon } from '@repo/ui/components/Icons';
+import { Title } from '@repo/ui/components/Title';
 import { ICON_SIZE_MD } from '@repo/ui/design-system/constants/iconSizes.constants';
 import * as stylex from '@stylexjs/stylex';
 import { useEffect, useRef } from 'react';
 
 import type { ModalProps } from './Modal.types';
 
-import { AppBackground } from '../AppBackground';
-import { Title } from '../Title';
 import { modalStyles } from './Modal.stylex';
 
 export const Modal = ({
@@ -47,26 +48,26 @@ export const Modal = ({
   return (
     <dialog ref={dialogRef} {...stylex.props(modalStyles.dialog)}>
       <AppBackground>
-        {/* <div {...stylex.props(modalStyles.container)}> */}
-        {title && (
-          <Title
-            actions={
-              <Button
-                aria-label='Close'
-                color='ghost'
-                icon={<MenuCloseIcon size={ICON_SIZE_MD} />}
-                onClick={onClose}
-                size='mini'
-                width='auto'
-              />
-            }
-          >
-            {title}
-          </Title>
-        )}
-        <div {...stylex.props(modalStyles.body)}>{children}</div>
-        {footer && <div {...stylex.props(modalStyles.footer)}>{footer}</div>}
-        {/* </div> */}
+        <AppDotted>
+          {title && (
+            <Title
+              actions={
+                <Button
+                  aria-label='Close'
+                  color='ghost'
+                  icon={<MenuCloseIcon size={ICON_SIZE_MD} />}
+                  onClick={onClose}
+                  size='mini'
+                  width='auto'
+                />
+              }
+            >
+              {title}
+            </Title>
+          )}
+          <div {...stylex.props(modalStyles.body)}>{children}</div>
+          {footer && <div {...stylex.props(modalStyles.footer)}>{footer}</div>}
+        </AppDotted>
       </AppBackground>
     </dialog>
   );

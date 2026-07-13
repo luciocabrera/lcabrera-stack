@@ -32,21 +32,14 @@ export const modalStyles = stylex.create({
     // color: white;
     padding: 0,
     borderColor: colors.borderPrimary,
-    // borderColor: '#ffffff69',
     borderRadius: borderRadius.lg,
     borderStyle: 'solid',
     borderWidth: '1px',
     transition: `transform ${transitions.normal} ${easing.easeInOut}`,
-    // backgroundColor: '#00000030',
     backdropFilter: colors.glassBackdropFilterPrimary,
-    // backdropFilter: 'blur(10px) brightness(0.5)',
     backgroundColor: colors.glassBackgroundColorPrimary,
     backgroundImage: `radial-gradient(46% 52% at 18% 25%, #5a90ff8c, #0000 71%), radial-gradient(44% 44% at 82% 24%, #28e4c24f, #0000 71%), radial-gradient(52% 56% at 84% 82%, #c478ff4d, #0000 73%), radial-gradient(40% 40% at 53% 62%, #7e9eff7a, #0000 74%)`,
-    // border: 1px solid #ffffff69;
-    // background: #b9b9b90f;
     boxShadow: '0 12px 40px 20px #6a6a6a80',
-    //0 12px 40px 20px #ffffff80;
-    //0 12px 40px 20px rgb(210 205 205 / 27%)
     color: colors.textPrimary,
     textAlign: 'left',
     zIndex: zIndex.modal,
@@ -84,4 +77,15 @@ export const modalStyles = stylex.create({
   //   borderBottomStyle: 'solid',
   //   borderBottomWidth: '1px',
   // },
+  outletWrapper: {
+    flex: '1 1 auto',
+    backgroundImage: `radial-gradient(circle, ${colors.patternDot} 0.1rem, transparent 0%)`,
+    backgroundRepeat: 'round',
+    backgroundSize: '2rem 2rem',
+    maskImage: 'linear-gradient(to bottom, #000000, #000000)',
+    scrollbarColor: `${colors.borderSecondary} transparent`,
+    scrollbarWidth: 'thin',
+    minHeight: 0,
+    overflowY: 'auto',
+  },
 });
