@@ -7,7 +7,6 @@ import {
   rippleBase,
   sizeVariants,
   skeleton,
-  widthVariants,
 } from '@repo/ui/design-system/tokens/commons.stylex';
 import * as stylex from '@stylexjs/stylex';
 
@@ -63,6 +62,6 @@ export const buttonStyles = {
   busyWave: skeleton.shimmerWave,
   overlayOverwrite: buttonSpecificStyles.overlayOverwrite,
   size: sizeVariants,
-  width: widthVariants,
+  width: '100%',
   ...overlayStyles,
 };

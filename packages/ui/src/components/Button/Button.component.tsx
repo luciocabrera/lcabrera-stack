@@ -19,7 +19,6 @@ export const Button = ({
   tooltipPlacement = 'top',
   type = 'button',
   variant,
-  width = 'auto',
   ...rest
 }: ButtonProps) => {
   const resolvedVariant = variant ?? color ?? 'primary';
@@ -36,7 +35,6 @@ export const Button = ({
         buttonStyles.orientation[orientation],
         buttonStyles.size[size],
         buttonStyles.variant[resolvedVariant],
-        buttonStyles.width[width],
         isIconOnly && buttonStyles.iconOnly,
         isBusy && buttonStyles.busyState,
         customStylex,

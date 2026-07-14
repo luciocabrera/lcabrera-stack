@@ -19,7 +19,6 @@ export const NavLink = ({
   tooltipContent,
   tooltipPlacement = 'top',
   variant,
-  width = 'full',
   ...props
 }: NavLinkProps) => {
   const resolvedVariant = variant ?? color ?? 'ghost';
@@ -35,7 +34,6 @@ export const NavLink = ({
           size,
           styles: linkItemStyles,
           variant: resolvedVariant,
-          width,
         });
         return classNameValue;
       }}

@@ -2,7 +2,6 @@ import type {
   DesignSystemColor,
   DesignSystemOrientation,
   DesignSystemSize,
-  DesignSystemWidth,
 } from '@repo/ui/types/design-system.types';
 import type { StyleXStyles } from '@stylexjs/stylex';
 import type { ReactNode } from 'react';
@@ -21,6 +20,4 @@ export type NavLinkProps = Omit<RouterNavLinkProps, 'children'> & {
   readonly tooltipContent?: ReactNode;
   readonly tooltipPlacement?: 'bottom' | 'left' | 'right' | 'top';
   readonly variant?: DesignSystemColor;
-  /** @deprecated Width is being removed; prefer owner-level layout styles. */
-  readonly width?: DesignSystemWidth;
 };
