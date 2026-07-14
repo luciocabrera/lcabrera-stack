@@ -99,18 +99,16 @@ import {
   colorVariants,
   rippleBase,
   sizeVariants,
-  widthVariants,
 } from '@/design-system/tokens/commons.stylex';
 
 export const componentStyles = {
   base: {
     ...baseInteractiveStyles.element,
     ...rippleBase.ripple,
-    // local overrides only
+    // local overrides only (e.g. `width: '100%'` lives here, not in a shared recipe)
   },
   color: colorVariants,
   size: sizeVariants,
-  width: widthVariants,
 };
 ```
 
@@ -121,7 +119,6 @@ Then in the component, apply in order:
   componentStyles.base,
   componentStyles.size[size],
   componentStyles.color[color],
-  componentStyles.width[width],
   isActive && componentStyles.active,
 )}
 ```

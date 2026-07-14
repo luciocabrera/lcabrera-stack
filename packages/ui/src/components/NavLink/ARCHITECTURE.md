@@ -29,7 +29,6 @@ graph LR
   NavLink_stylex --> orientationVariants["orientationVariants"]
   NavLink_stylex --> rippleBase["rippleBase"]
   NavLink_stylex --> sizeVariants["sizeVariants"]
-  NavLink_stylex --> widthVariants["widthVariants"]
   NavLink_stylex --> colors["design-system/tokens/colors.stylex"]
 
   getClassName --> stylex_props["stylex.props() → .className string"]
@@ -41,7 +40,7 @@ graph LR
 ```mermaid
 graph TD
   NavLink --> RouterNavLink2["RouterNavLink (prefetch, ...props)"]
-  RouterNavLink2 -->|"className callback"| getClassNameCall["getClassName({ color, customStylex, isActive, isIconOnly, orientation, size, styles, width })"]
+  RouterNavLink2 -->|"className callback"| getClassNameCall["getClassName({ customStylex, isActive, isIconOnly, orientation, size, styles, variant })"]
   getClassNameCall --> classString["CSS class string"]
   RouterNavLink2 --> IconSlot{"icon prop?"}
   IconSlot -->|yes| IconSpan["span.icon → icon"]
@@ -57,7 +56,7 @@ graph TD
 React Router's `NavLink` accepts a `className` function `({ isActive }) => string`. `getClassName` calls `stylex.props(...)` and returns the resulting `.className` string, applying variant tokens in order:
 
 ```
-base → orientation[x] → size[x] → color[x] → width[x] → [active] → [iconOnly] → customStylex
+base → orientation[x] → size[x] → color[x] → fullWidth → [active] → [iconOnly] → customStylex
 ```
 
 The `active` style (`backgroundColor: brandPrimary, color: brandPrimaryText, fontWeight: 600`) is conditionally appended when `isActive === true`.
@@ -69,7 +68,6 @@ The `active` style (`backgroundColor: brandPrimary, color: brandPrimaryText, fon
 | `color`       | `DesignSystemColor`       | `'ghost'`    | `colorVariants`       |
 | `size`        | `DesignSystemSize`        | `'md'`       | `sizeVariants`        |
 | `orientation` | `DesignSystemOrientation` | `'vertical'` | `orientationVariants` |
-| `width`       | `DesignSystemWidth`       | `'full'`     | `widthVariants`       |
 
 ## Props
 

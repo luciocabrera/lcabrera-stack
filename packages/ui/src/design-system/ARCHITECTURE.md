@@ -170,7 +170,6 @@ Reusable `stylex.create` rule sets shared across interactive components (Button,
 | `baseInteractiveStyles.label`   | Truncatable text label, hides at container widths below 60px                              |
 | `baseInteractiveStyles.icon`    | Fixed 20×20 flex icon container                                                           |
 | `rippleBase.ripple`             | Radial ripple expansion animation on `:active`                                            |
-| `widthVariants`                 | `auto` / `full` width                                                                     |
 | `colorVariants`                 | `primary`, `secondary`, `ghost`, `outline`, `error`, `danger-ghost`, `success`, `warning` |
 | `sizeVariants`                  | `embedded`, `mini`, `sm`, `md`, `lg` — see table below                                    |
 | `orientationVariants`           | `horizontal` (center-justified) / `vertical` (start-justified) for nav rendering          |

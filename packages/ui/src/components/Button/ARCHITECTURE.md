@@ -85,7 +85,6 @@ graph LR
     bs_orientation["orientation"]
     bs_size["size"]
     bs_style["style"]
-    bs_width["width"]
   end
 
   subgraph "commons.stylex (shared)"
@@ -93,7 +92,6 @@ graph LR
     colorVariants
     orientationVariants
     sizeVariants
-    widthVariants
     rippleBase
   end
 
@@ -111,7 +109,6 @@ graph LR
   bs_orientation --- orientationVariants
   bs_size --- sizeVariants
   bs_style --- styleVariants
-  bs_width --- widthVariants
 ```
 
 **Local-only styles** (`buttonSpecificStyles`):
