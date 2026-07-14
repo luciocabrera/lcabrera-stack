@@ -89,16 +89,6 @@ export const rippleBase = stylex.create({
   },
 });
 
-export const widthVariants = stylex.create({
-  auto: {
-    width: 'auto',
-  },
-
-  full: {
-    width: '100%',
-  },
-});
-
 // Ripple variants for each color
 export const colorVariants = stylex.create({
   'danger-ghost': {
