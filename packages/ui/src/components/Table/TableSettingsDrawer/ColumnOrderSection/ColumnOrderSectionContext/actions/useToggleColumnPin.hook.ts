@@ -2,8 +2,7 @@ import type { DataKey } from '@repo/ui/components/Table/Table.types';
 
 import { useTableConfigContextValue } from '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { useTableDrawerContextValue } from '@repo/ui/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
-import { useGetGlobalPinSidePreference } from '@repo/ui/contexts/GlobalSettingsContext/selectors/useGetGlobalPinSidePreference.hook';
-import { useGetGlobalUnpinConflictResolutionPreference } from '@repo/ui/contexts/GlobalSettingsContext/selectors/useGetGlobalUnpinConflictResolutionPreference.hook';
+import { useGlobalSettingsContextValue } from '@repo/ui/contexts/GlobalSettingsContext/useGlobalSettingsContextValue.hook';
 
 import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
 import { useAcceptPinSide } from './useAcceptPinSide.hook';
@@ -23,9 +22,7 @@ export const useToggleColumnPin = () => {
   const { columnsStore: tableColumnsStore } = useTableConfigContextValue();
   const { columnsStore: drawerColumnsStore } = useTableDrawerContextValue();
   const { modalsStore } = useColumnOrderSectionContextValue();
-  const globalPinSidePreference = useGetGlobalPinSidePreference();
-  const globalUnpinConflictResolutionPreference =
-    useGetGlobalUnpinConflictResolutionPreference();
+  const { settingsStore } = useGlobalSettingsContextValue();
   const acceptPinSide = useAcceptPinSide();
   const acceptUnpinConflict = useAcceptUnpinConflict();
 
@@ -39,6 +36,10 @@ export const useToggleColumnPin = () => {
     const drawerState = drawerColumnsStore.get();
     const columnPinning = drawerState?.columnPinning ?? { left: [], right: [] };
     const columnsOrder = drawerState?.columnOrder ?? [];
+    const globalSettingsState = settingsStore.get();
+    const globalPinSidePreference = globalSettingsState?.pinning.pinSide;
+    const globalUnpinConflictResolutionPreference =
+      globalSettingsState?.pinning.unpinConflictResolution;
 
     const resolution = resolveToggleColumnPinUpdate({
       columnKey,

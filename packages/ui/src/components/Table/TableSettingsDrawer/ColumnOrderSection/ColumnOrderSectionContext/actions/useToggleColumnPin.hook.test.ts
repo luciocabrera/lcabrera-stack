@@ -49,6 +49,13 @@ const { drawerColumnsStore, modalsStore, resetMocks, tableColumnsStore } =
     },
   });
 
+const globalSettingsStore = {
+  get: vi.fn(() => ({
+    navigation: {},
+    pinning: {},
+  })),
+};
+
 const mockAcceptPinSide = vi.fn();
 const mockAcceptUnpinConflict = vi.fn();
 
@@ -68,12 +75,12 @@ vi.mock('../useColumnOrderSectionContextValue.hook', () => ({
   useColumnOrderSectionContextValue: () => ({ modalsStore }),
 }));
 vi.mock(
-  '@repo/ui/contexts/GlobalSettingsContext/selectors/useGetGlobalPinSidePreference.hook',
-  () => ({ useGetGlobalPinSidePreference: () => {} }),
-);
-vi.mock(
-  '@repo/ui/contexts/GlobalSettingsContext/selectors/useGetGlobalUnpinConflictResolutionPreference.hook',
-  () => ({ useGetGlobalUnpinConflictResolutionPreference: () => {} }),
+  '@repo/ui/contexts/GlobalSettingsContext/useGlobalSettingsContextValue.hook',
+  () => ({
+    useGlobalSettingsContextValue: () => ({
+      settingsStore: globalSettingsStore,
+    }),
+  }),
 );
 vi.mock('./useAcceptPinSide.hook', () => ({
   useAcceptPinSide: () => mockAcceptPinSide,
@@ -96,6 +103,11 @@ const UNPIN_MODAL_RESULT = { ...MODAL_RESULT, side: 'left' as const };
 describe('useToggleColumnPin', () => {
   beforeEach(() => {
     resetMocks();
+    globalSettingsStore.get.mockReset();
+    globalSettingsStore.get.mockReturnValue({
+      navigation: {},
+      pinning: {},
+    });
     mockAcceptPinSide.mockClear();
     mockAcceptUnpinConflict.mockClear();
   });
