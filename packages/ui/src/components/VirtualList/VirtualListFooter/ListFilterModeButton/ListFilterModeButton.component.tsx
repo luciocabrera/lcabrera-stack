@@ -31,7 +31,6 @@ export const ListFilterModeButton = ({
       size='mini'
       tooltipContent={`${tooltip} (${count})`}
       variant={isActive ? 'secondary' : 'ghost'}
-      width='auto'
     />
   );
 };

@@ -21,7 +21,6 @@ export const TableActionButton = ({
       isDisabled={isDisabled}
       onClick={onClick}
       size='embedded'
-      width='auto'
     >
       {label}
     </Button>

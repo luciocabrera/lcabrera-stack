@@ -27,7 +27,6 @@ export const NavigationLauncher = ({ onOpen }: NavigationLauncherProps) => {
         size='md'
         tooltipContent='Open navigation'
         tooltipPlacement='right'
-        width='auto'
       >
         Open navigation
       </Button>

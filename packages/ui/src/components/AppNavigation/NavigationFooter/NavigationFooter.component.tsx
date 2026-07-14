@@ -44,7 +44,6 @@ export const NavigationFooter = ({
           size={density.controlButtonSize}
           tooltipContent={themeTooltipContent}
           tooltipPlacement='right'
-          width='full'
         >
           {themeLabel}
         </Button>

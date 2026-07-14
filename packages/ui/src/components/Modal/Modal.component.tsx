@@ -58,7 +58,6 @@ export const Modal = ({
                   icon={<MenuCloseIcon size={ICON_SIZE_MD} />}
                   onClick={onClose}
                   size='mini'
-                  width='auto'
                 />
               }
             >

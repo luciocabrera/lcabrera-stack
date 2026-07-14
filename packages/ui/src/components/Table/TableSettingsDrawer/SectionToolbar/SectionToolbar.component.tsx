@@ -19,8 +19,6 @@ export const SectionToolbar = ({
   const isToolbar = variant === 'toolbar';
   const buttonVariant = isToolbar ? 'ghost' : 'outline';
   const buttonSize = isToolbar ? 'mini' : 'sm';
-  const buttonWidth = isToolbar ? 'auto' : 'full';
-  // Icons default to ICON_SIZE_MD; only the toolbar variant needs an override.
   const iconSize = isToolbar ? ICON_SIZE_SM : undefined;
 
   return (
@@ -36,7 +34,6 @@ export const SectionToolbar = ({
           size={buttonSize}
           tooltipContent={isToolbar ? button.label : undefined}
           variant={buttonVariant}
-          width={buttonWidth}
         >
           {!isToolbar && button.label}
         </Button>
