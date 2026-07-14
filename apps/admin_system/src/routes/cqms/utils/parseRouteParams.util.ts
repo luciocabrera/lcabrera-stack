@@ -1,5 +1,6 @@
-import { data } from 'react-router';
 import type { z } from 'zod';
+
+import { data } from 'react-router';
 
 type ParseRouteParamsArgs<TSchema extends z.ZodType> = {
   readonly invalidMessage: string;

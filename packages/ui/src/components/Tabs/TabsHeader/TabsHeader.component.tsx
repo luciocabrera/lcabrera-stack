@@ -1,11 +1,13 @@
-import type { KeyboardEvent, MouseEvent } from 'react';
+import type { KeyboardEvent } from 'react';
 
 import * as stylex from '@stylexjs/stylex';
 import { useRef } from 'react';
 
 import type { TabsHeaderProps } from './TabsHeader.types';
+import type { SetTabRefArgs } from './TabsHeaderButton/TabsHeaderButton.types';
 
-import { busyStyles, styles } from './TabsHeader.stylex';
+import { styles } from './TabsHeader.stylex';
+import { TabsHeaderButton } from './TabsHeaderButton/TabsHeaderButton.component';
 
 /**
  * Tab strip with roving-tabindex keyboard navigation (ArrowLeft/ArrowRight/Home/End).
@@ -19,6 +21,10 @@ export const TabsHeader = ({
 }: TabsHeaderProps) => {
   const tabRefs = useRef<Map<string, HTMLButtonElement | null>>(new Map());
   const activeIndex = tabs.findIndex((tab) => tab.key === activeTab);
+
+  const setTabRef = ({ element, tabKey }: SetTabRefArgs) => {
+    tabRefs.current.set(tabKey, element);
+  };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (tabs.length === 0 || isBusy) return;
@@ -57,41 +63,18 @@ export const TabsHeader = ({
     }
   };
 
-  const handleTabSelect = (event: MouseEvent<HTMLButtonElement>) => {
-    const key = event.currentTarget.dataset['tabKey'];
-    if (key !== undefined) onSelectTab(key);
-  };
-
   return (
     <div aria-label='Settings tabs' onKeyDown={handleKeyDown} role='tablist'>
       <div {...stylex.props(styles.tabList)}>
         {tabs.map((tab) => (
-          <button
+          <TabsHeaderButton
+            activeTab={activeTab}
+            isBusy={isBusy}
             key={tab.key}
-            ref={(el) => {
-              tabRefs.current.set(tab.key, el);
-            }}
-            {...stylex.props(
-              styles.tabButton,
-              activeTab === tab.key && styles.tabButtonActive,
-            )}
-            aria-controls={`tabpanel-${tab.key}`}
-            aria-selected={activeTab === tab.key}
-            data-tab-key={tab.key}
-            disabled={isBusy}
-            id={`tab-${tab.key}`}
-            onClick={handleTabSelect}
-            role='tab'
-            tabIndex={activeTab === tab.key ? 0 : -1}
-            type='button'
-          >
-            {tab.header}
-            {isBusy && (
-              <span {...stylex.props(busyStyles.overlay)}>
-                <span {...stylex.props(busyStyles.wave)} />
-              </span>
-            )}
-          </button>
+            onSelectTab={onSelectTab}
+            setTabRef={setTabRef}
+            tab={tab}
+          />
         ))}
       </div>
     </div>

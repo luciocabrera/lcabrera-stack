@@ -5,6 +5,7 @@ import { usePersistTableStateAction } from '@repo/ui/components/Table/hooks';
 
 import {
   commitResolvedVisibilityState,
+  getPinningActionContext,
   resolveColumnVisibilityUpdate,
 } from './utils';
 
@@ -25,29 +26,35 @@ export const useSetColumnVisibility = <TData>() => {
   const persistTableState = usePersistTableStateAction();
 
   return ({ columnKey, isVisible }: SetColumnVisibilityArgs<TData>) => {
-    const columnsState = columnsStore.get();
+    const {
+      columnOrder,
+      columnPinning,
+      columns,
+      columnSizing,
+      columnVisibility: existingColumnVisibility,
+      drawersSyncNonce,
+      persistenceKey,
+      staticKeys,
+    } = getPinningActionContext<TData>({ columnsStore, metaStore });
 
-    if (columnsState?.staticKeys?.has(columnKey)) return;
-    const metaState = metaStore.get();
+    if (staticKeys?.has(columnKey)) return;
+
     const columnVisibility = resolveColumnVisibilityUpdate<TData>({
       columnKey,
-      columnVisibility: columnsState?.columnVisibility,
+      columnVisibility: existingColumnVisibility,
       isVisible,
     });
 
     commitResolvedVisibilityState<TData>({
-      columnOrder: columnsState?.columnOrder ?? [],
-      columnPinning: columnsState?.columnPinning ?? {
-        left: [],
-        right: [],
-      },
-      columns: columnsState?.columns ?? [],
-      columnSizing: columnsState?.columnSizing,
+      columnOrder,
+      columnPinning,
+      columns,
+      columnSizing,
       columnsStore,
       columnVisibility,
-      drawersSyncNonce: metaState?.drawersSyncNonce ?? 0,
+      drawersSyncNonce,
       metaStore,
-      persistenceKey: metaState?.persistenceKey ?? '',
+      persistenceKey,
       persistTableState,
     });
   };

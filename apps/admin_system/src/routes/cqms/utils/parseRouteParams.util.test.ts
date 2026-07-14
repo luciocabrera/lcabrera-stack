@@ -26,10 +26,10 @@ describe('parseRouteParams', () => {
         schema,
       });
       expect.unreachable('parseRouteParams should have thrown');
-    } catch (thrown) {
-      expect(thrown).toMatchObject({
-        init: { status: 400 },
+    } catch (error) {
+      expect(error).toMatchObject({
         data: 'Invalid project id.',
+        init: { status: 400 },
       });
     }
   });

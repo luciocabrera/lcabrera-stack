@@ -4,10 +4,10 @@ import type {
 } from '@repo/ui/components/Table/Table.types';
 
 import { useTableConfigContextValue } from '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
-import { restoreStaticColumnOrder } from '@repo/ui/components/Table/TableSettingsDrawer/ColumnOrderSection/utils';
 import { useTableDrawerContextValue } from '@repo/ui/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
 
 import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
+import { buildOrderBySorting } from './utils/buildOrderBySorting.util';
 import { resolveOrderConflictUpdate } from './utils/resolveOrderConflictUpdate.util';
 
 /**
@@ -27,14 +27,9 @@ export const useOrderBySorting = () => {
     const columnPinning = drawerState?.columnPinning ?? { left: [], right: [] };
     const staticKeys = tableColumnsStore.get()?.staticKeys ?? new Set<string>();
 
-    const sortedKeys = sorting.map((s) => s.columnKey);
-    const remainingKeys = columnsOrder.filter(
-      (key) => !sortedKeys.includes(key),
-    );
-
-    const newOrder = restoreStaticColumnOrder({
-      currentOrder: columnsOrder,
-      newOrder: [...sortedKeys, ...remainingKeys] as ColumnOrderState,
+    const newOrder = buildOrderBySorting({
+      columnOrder: columnsOrder,
+      sorting,
       staticKeys,
     });
 

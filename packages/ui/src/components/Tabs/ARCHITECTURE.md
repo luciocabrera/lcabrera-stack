@@ -11,9 +11,13 @@ Tabs/
 ├── Tabs.types.ts                     → TabsProps, TabItem
 ├── Tabs.stylex.ts                    → Container layout styles
 ├── TabsHeader/                       → Private delegate (no barrel)
-│   ├── TabsHeader.component.tsx      → Tab list, buttons, keyboard navigation, focus refs
+│   ├── TabsHeader.component.tsx      → Tab list + keyboard navigation + focus refs
 │   ├── TabsHeader.types.ts           → TabsHeaderProps
-│   └── TabsHeader.stylex.ts          → tabList, tabButton, tabButtonActive, busy overlay
+│   ├── TabsHeader.stylex.ts          → tabList
+│   └── TabsHeaderButton/             → Private delegate (no barrel)
+│       ├── TabsHeaderButton.component.tsx  → Single tab button render + click selection
+│       ├── TabsHeaderButton.types.ts       → TabsHeaderButtonProps
+│       └── TabsHeaderButton.stylex.ts      → tabButton, tabButtonActive, busy overlay
 └── TabsContent/                      → Private delegate (no barrel)
     ├── TabsContent.component.tsx     → Activity-wrapped tabpanels
     ├── TabsContent.types.ts          → TabsContentProps
@@ -30,11 +34,15 @@ graph LR
   Tabs --> TabsContent
   Tabs --> Tabs_stylex["Tabs.stylex (container)"]
   TabsHeader --> TabsHeader_stylex["TabsHeader.stylex"]
+  TabsHeader --> TabsHeaderButton
+  TabsHeaderButton --> TabsHeaderButton_stylex["TabsHeaderButton.stylex"]
   TabsContent --> Activity["React Activity (keep hidden panels mounted)"]
   TabsContent --> TabsContent_stylex["TabsContent.stylex"]
-  TabsHeader_stylex --> base_tokens["design-system/tokens/base.stylex (borderRadius, spacing, transitions, typography)"]
+  TabsHeader_stylex --> base_tokens["design-system/tokens/base.stylex (spacing)"]
+  TabsHeaderButton_stylex --> base_tokens_button["design-system/tokens/base.stylex (borderRadius, spacing, transitions, typography)"]
   TabsHeader_stylex --> colors["design-system/tokens/colors.stylex"]
-  TabsHeader_stylex --> commons["design-system/tokens/commons.stylex (skeleton)"]
+  TabsHeaderButton_stylex --> colors
+  TabsHeaderButton_stylex --> commons["design-system/tokens/commons.stylex (skeleton)"]
   TabsContent_stylex --> base_tokens
   Tabs_stylex --> base_tokens
 ```
@@ -48,7 +56,8 @@ graph TD
   Container --> TabsContent
   TabsHeader --> TabList["div[role=tablist] — keyboard handler"]
   TabList --> TabListInner["div.tabList"]
-  TabListInner --> TabBtn["button[role=tab] × N"]
+  TabListInner --> TabsHeaderButton
+  TabsHeaderButton --> TabBtn["button[role=tab] × N"]
   TabsContent --> ContentWrap["div.tabContent"]
   ContentWrap --> Activity_N["Activity[mode=visible|hidden] × N"]
   Activity_N --> Panel["div[role=tabpanel]"]

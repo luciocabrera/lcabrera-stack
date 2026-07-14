@@ -1,20 +1,27 @@
-import type { TableColumnsState } from '@repo/ui/components/Table/Table.types';
+import type {
+  ColumnOrderState,
+  ColumnPinningState,
+  TableColumn,
+  TableColumnsState,
+} from '@repo/ui/components/Table/Table.types';
 import type { TableDrawerColumnsState } from '@repo/ui/components/Table/TableSettingsDrawer/TableDrawerContext/TableDrawerContext.types';
 
-type ReadPinActionStateArgs = {
-  readonly drawerState:
-    | TableDrawerColumnsState<Record<string, unknown>>
-    | undefined;
-  readonly tableState: TableColumnsState | undefined;
+type ReadPinActionStateArgs<TData extends Record<string, unknown>> = {
+  readonly drawerState: TableDrawerColumnsState<TData> | undefined;
+  readonly tableState: TableColumnsState<TData> | undefined;
 };
 
 /** Reads the shared column-order and pinning state needed by pin action hooks. */
-export const readPinActionState = ({
+export const readPinActionState = <TData extends Record<string, unknown>>({
   drawerState,
   tableState,
-}: ReadPinActionStateArgs) => ({
-  columnPinning: drawerState?.columnPinning ?? { left: [], right: [] },
-  columns: tableState?.columns ?? [],
-  columnsOrder: drawerState?.columnOrder ?? [],
-  staticKeys: tableState?.staticKeys,
-});
+}: ReadPinActionStateArgs<TData>) => {
+  return {
+    columnPinning:
+      drawerState?.columnPinning ??
+      ({ left: [], right: [] } as ColumnPinningState<TData>),
+    columns: (tableState?.columns ?? []) as readonly TableColumn<TData>[],
+    columnsOrder: drawerState?.columnOrder ?? ([] as ColumnOrderState<TData>),
+    staticKeys: tableState?.staticKeys,
+  };
+};

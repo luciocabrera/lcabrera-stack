@@ -8,6 +8,7 @@ import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionConte
 import { useAcceptPinSide } from './useAcceptPinSide.hook';
 import { useAcceptUnpinConflict } from './useAcceptUnpinConflict.hook';
 import { applyToggleColumnPinResolution } from './utils/applyToggleColumnPinResolution.util';
+import { readPinActionState } from './utils/readPinActionState.util';
 import { resolveToggleColumnPinUpdate } from './utils/resolveToggleColumnPinUpdate.util';
 
 type UseToggleColumnPinArgs = {
@@ -28,14 +29,14 @@ export const useToggleColumnPin = () => {
 
   return ({ columnKey, isPinning }: UseToggleColumnPinArgs) => {
     const tableColumnsState = tableColumnsStore.get();
-    const columns = tableColumnsState?.columns ?? [];
-    const column = tableColumnsState?.normalizedColumns[columnKey];
-    const isColumnStatic = column?.isStatic ?? false;
-    const staticKeys = tableColumnsState?.staticKeys;
+    const { columnPinning, columns, columnsOrder, staticKeys } =
+      readPinActionState({
+        drawerState: drawerColumnsStore.get(),
+        tableState: tableColumnsState,
+      });
+    const isColumnStatic =
+      tableColumnsState?.normalizedColumns[columnKey]?.isStatic ?? false;
 
-    const drawerState = drawerColumnsStore.get();
-    const columnPinning = drawerState?.columnPinning ?? { left: [], right: [] };
-    const columnsOrder = drawerState?.columnOrder ?? [];
     const globalSettingsState = settingsStore.get();
     const globalPinSidePreference = globalSettingsState?.pinning.pinSide;
     const globalUnpinConflictResolutionPreference =

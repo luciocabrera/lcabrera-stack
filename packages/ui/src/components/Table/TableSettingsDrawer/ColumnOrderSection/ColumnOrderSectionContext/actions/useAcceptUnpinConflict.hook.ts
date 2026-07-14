@@ -1,14 +1,11 @@
-import type {
-  ColumnOrderState,
-  ColumnPinningState,
-  DataKey,
-} from '@repo/ui/components/Table/Table.types';
+import type { DataKey } from '@repo/ui/components/Table/Table.types';
 import type { UnpinConflictResolution } from '@repo/ui/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
 
 import { useTableConfigContextValue } from '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { useTableDrawerContextValue } from '@repo/ui/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
 
 import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
+import { readPinActionState } from './utils/readPinActionState.util';
 import { resolveAcceptedUnpinConflictState } from './utils/resolveAcceptedUnpinConflictState.util';
 
 /**
@@ -27,13 +24,10 @@ export const useAcceptUnpinConflict = <
     const unpinConflictModal = modalsStore.get()?.unpinConflictModal;
     if (!unpinConflictModal) return;
 
-    const columns = tableColumnsStore.get()?.columns ?? [];
-    const drawerState = drawerColumnsStore.get();
-    const columnsOrder =
-      drawerState?.columnOrder ?? ([] as ColumnOrderState<TData>);
-    const columnPinning =
-      drawerState?.columnPinning ??
-      ({ left: [], right: [] } as ColumnPinningState<TData>);
+    const { columnPinning, columns, columnsOrder } = readPinActionState<TData>({
+      drawerState: drawerColumnsStore.get(),
+      tableState: tableColumnsStore.get(),
+    });
 
     const { columnKey, side } = unpinConflictModal;
     const conflictColumnKey = columnKey as DataKey<TData>;
