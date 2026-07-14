@@ -10,6 +10,25 @@ const publicApiFilePath = resolve(uiRootDir, 'src/public-api.ts');
 const importExportPattern =
   /(?:import|export)\s+(?:type\s+)?(?:[^'"\n]+?\s+from\s+)?['"]([^'"\n]+)['"]/g;
 
+const collectStaticSources = (fileText) => {
+  importExportPattern.lastIndex = 0;
+
+  const sources = [];
+  let match;
+  while ((match = importExportPattern.exec(fileText)) !== null) {
+    sources.push(match[1]);
+  }
+
+  return sources;
+};
+
+const collectLocalDependencyPaths = ({ fromFilePath, sources }) => {
+  return sources
+    .filter((source) => source.startsWith('.'))
+    .map((source) => resolveLocalModuleFilePath(fromFilePath, source))
+    .filter((dependencyPath) => dependencyPath !== null);
+};
+
 const resolveLocalModuleFilePath = (fromFilePath, source) => {
   const basePath = resolve(dirname(fromFilePath), source);
   const candidates = [
@@ -39,26 +58,18 @@ const collectStaticDependencies = (filePath, seen = new Set()) => {
   seen.add(filePath);
 
   const fileText = readFileSync(filePath, 'utf8');
-  const dependencies = [];
+  const sources = collectStaticSources(fileText);
+  const directDependencies = sources.map((source) => ({ filePath, source }));
+  const localDependencyPaths = collectLocalDependencyPaths({
+    fromFilePath: filePath,
+    sources,
+  });
 
-  let match;
-  while ((match = importExportPattern.exec(fileText)) !== null) {
-    const source = match[1];
-    dependencies.push({ filePath, source });
+  const nestedDependencies = localDependencyPaths.flatMap((dependencyPath) =>
+    collectStaticDependencies(dependencyPath, seen),
+  );
 
-    if (!source.startsWith('.')) {
-      continue;
-    }
-
-    const dependencyPath = resolveLocalModuleFilePath(filePath, source);
-    if (dependencyPath === null) {
-      continue;
-    }
-
-    dependencies.push(...collectStaticDependencies(dependencyPath, seen));
-  }
-
-  return dependencies;
+  return [...directDependencies, ...nestedDependencies];
 };
 
 const main = () => {
