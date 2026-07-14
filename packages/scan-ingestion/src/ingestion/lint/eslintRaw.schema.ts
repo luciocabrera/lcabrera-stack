@@ -16,7 +16,7 @@ const eslintSuggestionSchema = z.object({
   desc: z.string().nullish(),
 });
 
-export const eslintMessageSchema = z.object({
+const eslintMessageSchema = z.object({
   column: z.number().nullish(),
   endColumn: z.number().nullish(),
   endLine: z.number().nullish(),
@@ -30,7 +30,7 @@ export const eslintMessageSchema = z.object({
   suppressions: z.array(eslintSuppressionSchema).nullish(),
 });
 
-export const eslintFileResultSchema = z.object({
+const eslintFileResultSchema = z.object({
   errorCount: z.number().default(0),
   fatalErrorCount: z.number().default(0),
   filePath: z.string().default(''),
@@ -46,6 +46,5 @@ export const eslintRawSchema = z.object({
   results: z.array(eslintFileResultSchema).default([]),
 });
 
-export type EslintFileResult = z.infer<typeof eslintFileResultSchema>;
 export type EslintMessage = z.infer<typeof eslintMessageSchema>;
 export type EslintRaw = z.infer<typeof eslintRawSchema>;

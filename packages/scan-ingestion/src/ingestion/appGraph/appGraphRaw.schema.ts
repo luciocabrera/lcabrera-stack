@@ -13,7 +13,7 @@ import { z } from 'zod';
  * the runner for the new function/method/class/interface/type_alias/enum
  * node types.
  */
-export const appGraphRawNodeSchema = z.object({
+const appGraphRawNodeSchema = z.object({
   child_file_count: z.number().int().default(0),
   child_folder_count: z.number().int().default(0),
   end_line: z.number().int().nullish(),

@@ -1,11 +1,11 @@
-export type DeterministicScannerConfig = {
+export type DeterministicScannerId = keyof typeof DETERMINISTIC_SCANNER_CONFIGS;
+
+type DeterministicScannerConfig = {
   /** The raw artifact the runner script writes into the scan output directory (verbatim tool output + kind discriminator). */
   readonly rawArtifactFileName: string;
   /** Runner script path relative to the CQMS repo root. */
   readonly scriptPath: string;
 };
-
-export type DeterministicScannerId = keyof typeof DETERMINISTIC_SCANNER_CONFIGS;
 
 /**
  * Deterministic scanner_id → runner script (ADR-019). A TS map, NOT a DB

@@ -4,24 +4,20 @@
 
 ```
 ColumnSettingsDrawer/
-├── index.ts                              → Barrel export: ColumnSettingsDrawer + types
-├── ColumnSettingsDrawer.component.tsx     → Root: SidePanel composing header/body/footer
+├── index.ts                              → Barrel export: ColumnSettingsDrawer
+├── ColumnSettingsDrawer.component.tsx     → Root: SidePanel composing header/body/footer (zero-prop; reads columnKey from ColumnDrawerContext)
 ├── ColumnSettingsDrawer.test.tsx          → Integration tests for conditional tabs and drawer actions
-├── ColumnSettingsDrawer.types.ts          → Props: { columnKey }
 │
 ├── ColumnSettingsDrawerHeader/           → Column label + pin/close toolbar
 │   ├── ColumnSettingsDrawerHeader.component.tsx
-│   ├── ColumnSettingsDrawerHeader.types.ts
 │   └── ColumnSettingsDrawerHeader.test.tsx
 │
 ├── ColumnSettingsDrawerBody/             → Capability-driven tabbed sections container
 │   ├── ColumnSettingsDrawerBody.component.tsx
-│   ├── ColumnSettingsDrawerBody.types.ts
 │   └── ColumnSettingsDrawerBody.test.tsx
 │
 ├── ColumnSettingsDrawerFooter/           → Accept/Cancel buttons
 │   ├── ColumnSettingsDrawerFooter.component.tsx
-│   ├── ColumnSettingsDrawerFooter.types.ts
 │   └── ColumnSettingsDrawerFooter.test.tsx
 │
 ├── hooks/                                → Handlers shared across the drawer shell
@@ -219,7 +215,7 @@ Each toolbar provides **Clear** (set to undefined) and **Reset** (restore from t
 Used in `TableDrawersSection` which wraps it with `ColumnDrawerProvider`:
 
 ```
-<ColumnDrawerProvider columnKey={columnKey}>
-  <ColumnSettingsDrawer columnKey={columnKey} />
+<ColumnDrawerProvider>
+  <ColumnSettingsDrawer />
 </ColumnDrawerProvider>
 ```

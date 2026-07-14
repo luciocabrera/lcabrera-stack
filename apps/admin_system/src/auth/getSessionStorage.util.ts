@@ -2,7 +2,7 @@ import { createCookieSessionStorage } from 'react-router';
 
 import { readSessionEnvConfig } from './env.schema';
 
-export type SessionData = {
+type SessionData = {
   readonly userId: string;
 };
 

@@ -20,9 +20,7 @@ import { useClearSearch } from './actions/useClearSearch.hook';
 import { useSetListFilterMode } from './actions/useSetListFilterMode.hook';
 import { useSetSearchTerm } from './actions/useSetSearchTerm.hook';
 import { useGetHasCheckboxes } from './selectors/useGetHasCheckboxes.hook';
-import { useGetHasFetchInitial } from './selectors/useGetHasFetchInitial.hook';
 import { useGetHasFetchMore } from './selectors/useGetHasFetchMore.hook';
-import { useGetHasSelectAll } from './selectors/useGetHasSelectAll.hook';
 import { useGetListFilterMode } from './selectors/useGetListFilterMode.hook';
 import { useGetListMaxHeight } from './selectors/useGetListMaxHeight.hook';
 import { useGetSearchInputName } from './selectors/useGetSearchInputName.hook';
@@ -94,13 +92,7 @@ describe('VirtualList list hooks', () => {
       renderHook(() => useGetHasCheckboxes(), { wrapper }).result.current,
     ).toBe(true);
     expect(
-      renderHook(() => useGetHasFetchInitial(), { wrapper }).result.current,
-    ).toBe(false);
-    expect(
       renderHook(() => useGetHasFetchMore(), { wrapper }).result.current,
-    ).toBe(true);
-    expect(
-      renderHook(() => useGetHasSelectAll(), { wrapper }).result.current,
     ).toBe(true);
     expect(
       renderHook(() => useGetListMaxHeight(), { wrapper }).result.current,

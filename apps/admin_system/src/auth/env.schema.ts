@@ -6,11 +6,9 @@ import { z } from 'zod';
  * in the environment for anything beyond local use; sessions are
  * invalidated whenever it changes.
  */
-export const sessionEnvSchema = z.object({
+const sessionEnvSchema = z.object({
   SESSION_SECRET: z.string().min(1).default('cqms-dev-insecure-secret'),
 });
-
-export type SessionEnvConfig = z.infer<typeof sessionEnvSchema>;
 
 type ReadSessionEnvConfigArgs = {
   readonly env: NodeJS.ProcessEnv;

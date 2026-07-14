@@ -44,6 +44,11 @@
       "exports": ["SortNeutralIcon", "UserIcon"]
     },
     {
+      "comment": "@repo/ui is a consumable library; the composed <VirtualList> is deliberate public API. Apps currently compose VirtualListProvider + VirtualListContent directly, so the wrapper has no internal importer.",
+      "file": "packages/ui/src/components/VirtualList/index.ts",
+      "exports": ["VirtualList"]
+    },
+    {
       "file": "apps/react-router/src/features/showcase/ShowcasePage/ShowcasePage.stylex.ts",
       "exports": ["*"]
     },

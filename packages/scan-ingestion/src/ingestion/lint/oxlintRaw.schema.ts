@@ -15,7 +15,7 @@ const oxlintLabelSchema = z.object({
   span: oxlintSpanSchema.nullish(),
 });
 
-export const oxlintDiagnosticSchema = z.object({
+const oxlintDiagnosticSchema = z.object({
   code: z.string().nullish(),
   filename: z.string().default(''),
   help: z.string().nullish(),
@@ -32,5 +32,4 @@ export const oxlintRawSchema = z.object({
   number_of_rules: z.number().default(0),
 });
 
-export type OxlintDiagnostic = z.infer<typeof oxlintDiagnosticSchema>;
 export type OxlintRaw = z.infer<typeof oxlintRawSchema>;

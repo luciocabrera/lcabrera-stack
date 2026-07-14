@@ -13,12 +13,12 @@ const jsonObjectSchema = z.record(z.string(), z.unknown());
 
 const fallowActionListSchema = z.array(z.unknown()).default([]);
 
-export const fallowUnusedFileSchema = z.object({
+const fallowUnusedFileSchema = z.object({
   actions: fallowActionListSchema,
   path: z.string().default(''),
 });
 
-export const fallowUnusedExportSchema = z.object({
+const fallowUnusedExportSchema = z.object({
   actions: fallowActionListSchema,
   col: z.number().nullish(),
   export_name: z.string().nullish(),
@@ -28,7 +28,7 @@ export const fallowUnusedExportSchema = z.object({
   path: z.string().default(''),
 });
 
-export const fallowUnusedDependencySchema = z.object({
+const fallowUnusedDependencySchema = z.object({
   actions: fallowActionListSchema,
   line: z.number().nullish(),
   location: z.string().nullish(),
@@ -43,7 +43,7 @@ const fallowImportSiteSchema = z.object({
   path: z.string().default(''),
 });
 
-export const fallowUnlistedDependencySchema = z.object({
+const fallowUnlistedDependencySchema = z.object({
   actions: fallowActionListSchema,
   imported_from: z.array(fallowImportSiteSchema).default([]),
   package_name: z.string().default(''),
@@ -51,7 +51,7 @@ export const fallowUnlistedDependencySchema = z.object({
 
 // Shape unverified against real output (the section was empty in every
 // sampled run) — kept minimal and fully nullish on purpose.
-export const fallowUnresolvedImportSchema = z.object({
+const fallowUnresolvedImportSchema = z.object({
   actions: fallowActionListSchema,
   col: z.number().nullish(),
   line: z.number().nullish(),
@@ -59,7 +59,7 @@ export const fallowUnresolvedImportSchema = z.object({
   specifier: z.string().nullish(),
 });
 
-export const fallowCircularDependencySchema = z.object({
+const fallowCircularDependencySchema = z.object({
   col: z.number().nullish(),
   edges: z.array(z.unknown()).nullish(),
   files: z.array(z.string()).default([]),
@@ -84,7 +84,7 @@ const fallowCheckSchema = z.object({
   unused_types: z.array(fallowUnusedExportSchema).default([]),
 });
 
-export const fallowCloneInstanceSchema = z.object({
+const fallowCloneInstanceSchema = z.object({
   end_col: z.number().nullish(),
   end_line: z.number().nullish(),
   file: z.string().default(''),
@@ -93,7 +93,7 @@ export const fallowCloneInstanceSchema = z.object({
   start_line: z.number().nullish(),
 });
 
-export const fallowCloneGroupSchema = z.object({
+const fallowCloneGroupSchema = z.object({
   fingerprint: z.string().nullish(),
   instances: z.array(fallowCloneInstanceSchema).default([]),
   line_count: z.number().nullish(),
@@ -118,7 +118,7 @@ const fallowDupesSchema = z.object({
   stats: fallowDupesStatsSchema.nullish(),
 });
 
-export const fallowFunctionFindingSchema = z.object({
+const fallowFunctionFindingSchema = z.object({
   cognitive: z.number().nullish(),
   col: z.number().nullish(),
   coverage_source: z.string().nullish(),
@@ -134,7 +134,7 @@ export const fallowFunctionFindingSchema = z.object({
   severity: z.string().nullish(),
 });
 
-export const fallowFileScoreSchema = z.object({
+const fallowFileScoreSchema = z.object({
   complexity_density: z.number().nullish(),
   crap_above_threshold: z.number().nullish(),
   crap_max: z.number().nullish(),
@@ -149,7 +149,7 @@ export const fallowFileScoreSchema = z.object({
   total_cyclomatic: z.number().nullish(),
 });
 
-export const fallowHotspotSchema = z.object({
+const fallowHotspotSchema = z.object({
   commits: z.number().nullish(),
   complexity_density: z.number().nullish(),
   fan_in: z.number().nullish(),
@@ -161,14 +161,14 @@ export const fallowHotspotSchema = z.object({
   weighted_commits: z.number().nullish(),
 });
 
-export const fallowLargeFunctionSchema = z.object({
+const fallowLargeFunctionSchema = z.object({
   line: z.number().nullish(),
   line_count: z.number().default(0),
   name: z.string().nullish(),
   path: z.string().default(''),
 });
 
-export const fallowTargetSchema = z.object({
+const fallowTargetSchema = z.object({
   actions: fallowActionListSchema,
   category: z.string().nullish(),
   confidence: z.string().nullish(),
@@ -182,7 +182,7 @@ export const fallowTargetSchema = z.object({
 });
 
 // fallow's own suggested next CLI commands — top-level, not per-finding.
-export const fallowNextStepSchema = z.object({
+const fallowNextStepSchema = z.object({
   command: z.string().nullish(),
   id: z.string().nullish(),
   reason: z.string().nullish(),
@@ -279,13 +279,4 @@ export const fallowRawSchema = z.object({
   version: z.string().nullish(),
 });
 
-export type FallowCircularDependency = z.infer<
-  typeof fallowCircularDependencySchema
->;
-export type FallowCloneGroup = z.infer<typeof fallowCloneGroupSchema>;
-export type FallowFileScore = z.infer<typeof fallowFileScoreSchema>;
-export type FallowFunctionFinding = z.infer<typeof fallowFunctionFindingSchema>;
-export type FallowHotspot = z.infer<typeof fallowHotspotSchema>;
-export type FallowLargeFunction = z.infer<typeof fallowLargeFunctionSchema>;
 export type FallowRaw = z.infer<typeof fallowRawSchema>;
-export type FallowTarget = z.infer<typeof fallowTargetSchema>;
