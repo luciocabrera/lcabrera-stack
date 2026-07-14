@@ -43,6 +43,30 @@ describe('getClassName', () => {
     }
   });
 
+  it('applies the busy class only when isBusy is true', () => {
+    const busyClass = stylex.props(linkItemStyles.busyLink).className;
+
+    const busy = getClassName({
+      isActive: false,
+      isBusy: true,
+      orientation: 'horizontal',
+      size: 'mini',
+      styles: linkItemStyles,
+      variant: 'outline',
+    });
+    const idle = getClassName({
+      isActive: false,
+      isBusy: false,
+      orientation: 'horizontal',
+      size: 'mini',
+      styles: linkItemStyles,
+      variant: 'outline',
+    });
+
+    expect(busy.split(' ')).toContain(busyClass);
+    expect(idle.split(' ')).not.toContain(busyClass);
+  });
+
   it('keeps deprecated color-compatible semantics through variant values', () => {
     const outline = getClassName({
       isActive: false,

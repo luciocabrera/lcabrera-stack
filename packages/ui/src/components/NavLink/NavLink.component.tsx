@@ -12,6 +12,7 @@ export const NavLink = ({
   color,
   customStylex,
   icon,
+  isBusy = false,
   isIconOnly = false,
   orientation = 'vertical',
   prefetch = 'intent',
@@ -25,10 +26,12 @@ export const NavLink = ({
 
   const link = (
     <RouterNavLink
+      aria-disabled={isBusy || undefined}
       className={({ isActive }: { readonly isActive: boolean }) => {
         const classNameValue = getClassName({
           customStylex,
           isActive,
+          isBusy,
           isIconOnly,
           orientation,
           size,
@@ -40,6 +43,11 @@ export const NavLink = ({
       prefetch={prefetch}
       {...props}
     >
+      {isBusy && (
+        <span {...stylex.props(linkItemStyles.busyOverlay)}>
+          <span {...stylex.props(linkItemStyles.busyWave)} />
+        </span>
+      )}
       {icon && <span {...stylex.props(linkItemStyles.icon)}>{icon}</span>}
       <span
         {...stylex.props(

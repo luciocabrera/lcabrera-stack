@@ -12,6 +12,7 @@ import type { linkItemStyles } from '../NavLink.stylex';
 type GetClassNameArgs = {
   readonly customStylex?: StyleXStyles;
   readonly isActive: boolean;
+  readonly isBusy?: boolean;
   readonly isIconOnly?: boolean;
   readonly orientation: DesignSystemOrientation;
   readonly size: DesignSystemSize;
@@ -22,6 +23,7 @@ type GetClassNameArgs = {
 export const getClassName = ({
   customStylex,
   isActive,
+  isBusy = false,
   isIconOnly = false,
   orientation,
   size,
@@ -35,6 +37,7 @@ export const getClassName = ({
     styles.variant[variant],
     styles.fullWidth,
     isActive && styles.active,
+    isBusy && styles.busyLink,
     isIconOnly && styles.iconOnly,
     customStylex,
   ).className ?? '';

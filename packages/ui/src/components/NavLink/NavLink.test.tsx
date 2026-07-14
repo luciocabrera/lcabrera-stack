@@ -5,6 +5,7 @@ import type {
   NavLinkProps as RouterNavLinkProps,
 } from 'react-router';
 
+import * as stylex from '@stylexjs/stylex';
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -15,7 +16,11 @@ const { mockRouterNavLink } = vi.hoisted(() => {
     isTransitioning: false,
   };
 
-  const mockRouterNavLink = ({ children, className }: RouterNavLinkProps) => {
+  const mockRouterNavLink = ({
+    'aria-disabled': ariaDisabled,
+    children,
+    className,
+  }: RouterNavLinkProps) => {
     const resolvedClassName =
       typeof className === 'function'
         ? className(mockRenderProps)
@@ -24,7 +29,7 @@ const { mockRouterNavLink } = vi.hoisted(() => {
       typeof children === 'function' ? children(mockRenderProps) : children;
 
     return (
-      <a className={resolvedClassName} href='#'>
+      <a aria-disabled={ariaDisabled} className={resolvedClassName} href='#'>
         {resolvedChildren}
       </a>
     );
@@ -38,8 +43,13 @@ vi.mock('react-router', () => ({
 }));
 
 import { NavLink } from './NavLink.component';
+import { linkItemStyles } from './NavLink.stylex';
 
 afterEach(cleanup);
+
+const busyWaveClass = stylex
+  .props(linkItemStyles.busyWave)
+  .className?.split(' ', 1)[0];
 
 describe('NavLink', () => {
   it('renders children text', () => {
@@ -55,5 +65,27 @@ describe('NavLink', () => {
     );
     expect(screen.getByText('icon-element').textContent).toBe('icon-element');
     expect(screen.getByText('Settings').textContent).toBe('Settings');
+  });
+
+  it('renders the busy shimmer overlay and disables the link when isBusy is true', () => {
+    const { container } = render(
+      <NavLink isBusy to='/home'>
+        Home
+      </NavLink>,
+    );
+
+    expect(container.querySelector(`.${busyWaveClass}`)).not.toBeNull();
+    expect(
+      screen.getByRole('link', { name: 'Home' }).getAttribute('aria-disabled'),
+    ).toBe('true');
+  });
+
+  it('omits the busy overlay and aria-disabled when not busy', () => {
+    const { container } = render(<NavLink to='/home'>Home</NavLink>);
+
+    expect(container.querySelector(`.${busyWaveClass}`)).toBeNull();
+    expect(
+      screen.getByRole('link', { name: 'Home' }).getAttribute('aria-disabled'),
+    ).toBeNull();
   });
 });

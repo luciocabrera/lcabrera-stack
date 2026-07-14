@@ -14,6 +14,8 @@ export type NavLinkProps = Omit<RouterNavLinkProps, 'children'> & {
   readonly customStylex?: StyleXStyles;
   readonly icon?: ReactNode;
   readonly isActive?: boolean;
+  /** When true, renders the shimmer busy overlay and makes the link non-interactive (matches `Button`'s `isBusy`). */
+  readonly isBusy?: boolean;
   readonly isIconOnly?: boolean;
   readonly orientation?: DesignSystemOrientation;
   readonly size?: DesignSystemSize;

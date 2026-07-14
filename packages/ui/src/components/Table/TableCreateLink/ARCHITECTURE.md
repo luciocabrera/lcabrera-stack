@@ -10,8 +10,12 @@ renders next to whatever's passed into `actions` — see
 ## Public API
 
 - `TableCreateLink` — `title: string` (whatever the table's own title is,
-  e.g. `'Projects'`), `to: string` (route to navigate to). Renders
-  `color='outline'`, tooltip/aria-label `"Create {title}"`.
+  e.g. `'Projects'`), `to: string` (route to navigate to), `isBusy?: boolean`
+  (default `false`). Renders `color='outline'`, tooltip/aria-label
+  `"Create {title}"`. When rendered by the table's built-in CRUD-create path
+  (`TableTitleActions`), `isBusy` is fed the table's `isLoading` so this button
+  shows the same shimmer overlay as the adjacent settings gear button while the
+  table loads.
 
 ## Why this exists as its own component
 
@@ -28,7 +32,7 @@ read its own state.
 
 - `TableCreateLink.component.tsx` — the render
 - `TableCreateLink.types.ts` — `TableCreateLinkProps`
-- `TableCreateLink.test.tsx` — link href + aria-label
+- `TableCreateLink.test.tsx` — link href + aria-label + busy `aria-disabled`
 - `index.ts` — barrel: component + type
 
 ## Consumer

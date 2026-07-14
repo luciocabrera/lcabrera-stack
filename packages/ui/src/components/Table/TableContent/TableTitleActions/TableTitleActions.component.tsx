@@ -29,7 +29,11 @@ export const TableTitleActions = ({ actions }: TableTitleActionsProps) => {
     <>
       {actions}
       {crud?.create && (
-        <TableCreateLink title={resolvedTitleSingular} to='new' />
+        <TableCreateLink
+          isBusy={isLoading}
+          title={resolvedTitleSingular}
+          to='new'
+        />
       )}
       <Button
         aria-label='Table settings'
