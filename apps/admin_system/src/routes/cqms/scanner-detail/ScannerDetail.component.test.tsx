@@ -20,19 +20,21 @@ vi.mock('react-router', () => ({
   useLoaderData: () => loaderDataRef.current,
 }));
 
-vi.mock('@repo/ui/components/NavLink', () => ({
-  NavLink: ({
-    children,
-    to,
-  }: {
-    readonly children: ReactNode;
-    readonly to: string;
-  }) => <a href={to}>{children}</a>,
-}));
+vi.mock('@repo/ui', async () => {
+  const actual = await vi.importActual<typeof import('@repo/ui')>('@repo/ui');
 
-vi.mock('@repo/ui/components/Table/TableLayout', () => ({
-  TableLayout: () => <div data-testid='versions-table' />,
-}));
+  return {
+    ...actual,
+    NavLink: ({
+      children,
+      to,
+    }: {
+      readonly children: ReactNode;
+      readonly to: string;
+    }) => <a href={to}>{children}</a>,
+    TableLayout: () => <div data-testid='versions-table' />,
+  };
+});
 
 import { ScannerDetail } from './ScannerDetail.component';
 

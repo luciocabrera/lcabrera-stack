@@ -28,7 +28,7 @@ vi.mock('react-router', async () => {
   };
 });
 
-vi.mock('@repo/ui/components/AppProviders', () => ({
+vi.mock('@repo/ui', () => ({
   AppProviders: ({
     children,
     defaultTheme,
@@ -44,9 +44,6 @@ vi.mock('@repo/ui/components/AppProviders', () => ({
       {children}
     </div>
   ),
-}));
-
-vi.mock('@repo/ui/components/AppShell', () => ({
   AppShell: () => <div data-testid='app-shell'>AppShell</div>,
 }));
 
