@@ -1,13 +1,13 @@
-import type { WidthPreset } from '@repo/ui/components/Table/shared/ColumnWidthPresetButtons';
-
 import {
   SidePanelSection,
   SidePanelSectionHeader,
 } from '@repo/ui/components/SidePanel';
 import { useGetColumns } from '@repo/ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
-import { ColumnWidthPresetButtons } from '@repo/ui/components/Table/shared/ColumnWidthPresetButtons';
+import {
+  ColumnWidthPresetButtons,
+  useColumnWidthPresetToggle,
+} from '@repo/ui/components/Table/shared/ColumnWidthPresetButtons';
 import * as stylex from '@stylexjs/stylex';
-import { useState } from 'react';
 
 import type { ColumnWidthsSectionProps } from './ColumnWidthsSection.types';
 
@@ -27,26 +27,18 @@ export const ColumnWidthsSection = ({
   const columns = useGetColumns();
   const setColumnsSizing = useSetColumnsSizing();
 
-  const [selectedPreset, setSelectedPreset] = useState<WidthPreset>();
+  const {
+    handleToggleDefault,
+    handleToggleMax,
+    handleToggleMin,
+    selectedPreset,
+  } = useColumnWidthPresetToggle({
+    onSelectPreset: (preset) =>
+      setColumnsSizing(buildPresetColumnSizing({ columns, preset })),
+  });
 
   const hasMinWidthsConfigured = columns.some((col) => col.minWidth);
   const hasMaxWidthsConfigured = columns.some((col) => col.maxWidth);
-
-  const handleToggle = (preset: 'default' | 'max' | 'min') => {
-    const newPreset = selectedPreset === preset ? undefined : preset;
-    setSelectedPreset(newPreset);
-
-    if (newPreset === undefined) {
-      // Deselected - revert to current state (do nothing)
-      return;
-    }
-
-    setColumnsSizing(buildPresetColumnSizing({ columns, preset: newPreset }));
-  };
-
-  const handleToggleDefault = () => handleToggle('default');
-  const handleToggleMax = () => handleToggle('max');
-  const handleToggleMin = () => handleToggle('min');
 
   return (
     <SidePanelSection>

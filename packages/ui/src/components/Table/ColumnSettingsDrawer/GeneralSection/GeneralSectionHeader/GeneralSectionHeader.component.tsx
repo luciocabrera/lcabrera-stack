@@ -1,13 +1,13 @@
-import type { WidthPreset } from '@repo/ui/components/Table/shared/ColumnWidthPresetButtons';
-
 import {
   SidePanelSection,
   SidePanelSectionHeader,
 } from '@repo/ui/components/SidePanel';
 import { useGetNormalizedColumn } from '@repo/ui/components/Table/contexts/TableConfig/columns/selectors';
-import { ColumnWidthPresetButtons } from '@repo/ui/components/Table/shared/ColumnWidthPresetButtons';
+import {
+  ColumnWidthPresetButtons,
+  useColumnWidthPresetToggle,
+} from '@repo/ui/components/Table/shared/ColumnWidthPresetButtons';
 import * as stylex from '@stylexjs/stylex';
-import { useState } from 'react';
 
 import type { GeneralSectionHeaderProps } from './GeneralSectionHeader.types';
 
@@ -29,32 +29,24 @@ export const GeneralSectionHeader = <TData,>({
   const column = useGetNormalizedColumn<TData>(columnKey);
   const setColumnSizing = useSetColumnSizing();
 
-  const [selectedPreset, setSelectedPreset] = useState<WidthPreset>();
+  const {
+    handleToggleDefault,
+    handleToggleMax,
+    handleToggleMin,
+    selectedPreset,
+  } = useColumnWidthPresetToggle({
+    onSelectPreset: (preset) =>
+      setColumnSizing(
+        resolvePresetColumnWidth({
+          maxWidth: column.maxWidth,
+          minWidth: column.minWidth,
+          preset,
+        }),
+      ),
+  });
 
   const hasMinWidth = column.minWidth !== undefined;
   const hasMaxWidth = column.maxWidth !== undefined;
-
-  const handleToggle = (preset: 'default' | 'max' | 'min') => {
-    const newPreset = selectedPreset === preset ? undefined : preset;
-    setSelectedPreset(newPreset);
-
-    if (newPreset === undefined) {
-      // Deselected — revert to current state (do nothing)
-      return;
-    }
-
-    setColumnSizing(
-      resolvePresetColumnWidth({
-        maxWidth: column.maxWidth,
-        minWidth: column.minWidth,
-        preset: newPreset,
-      }),
-    );
-  };
-
-  const handleToggleDefault = () => handleToggle('default');
-  const handleToggleMax = () => handleToggle('max');
-  const handleToggleMin = () => handleToggle('min');
 
   return (
     <SidePanelSection>

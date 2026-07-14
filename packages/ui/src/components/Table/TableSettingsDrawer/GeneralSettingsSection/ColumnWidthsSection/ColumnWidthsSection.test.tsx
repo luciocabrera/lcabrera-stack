@@ -33,28 +33,34 @@ vi.mock(
   }),
 );
 
-vi.mock('@repo/ui/components/Table/shared/ColumnWidthPresetButtons', () => ({
-  ColumnWidthPresetButtons: ({
-    isMaxDisabled,
-    isMinDisabled,
-    onToggleDefault,
-    onToggleMax,
-    onToggleMin,
-    selectedPreset,
-  }: MockPresetButtonsProps) => (
-    <div data-selected-preset={selectedPreset ?? 'none'}>
-      <button disabled={isMinDisabled} onClick={onToggleMin} type='button'>
-        Min
-      </button>
-      <button disabled={isMaxDisabled} onClick={onToggleMax} type='button'>
-        Max
-      </button>
-      <button onClick={onToggleDefault} type='button'>
-        Default
-      </button>
-    </div>
-  ),
-}));
+vi.mock(
+  '@repo/ui/components/Table/shared/ColumnWidthPresetButtons',
+  async (importOriginal) => ({
+    ...(await importOriginal<
+      typeof import('@repo/ui/components/Table/shared/ColumnWidthPresetButtons')
+    >()),
+    ColumnWidthPresetButtons: ({
+      isMaxDisabled,
+      isMinDisabled,
+      onToggleDefault,
+      onToggleMax,
+      onToggleMin,
+      selectedPreset,
+    }: MockPresetButtonsProps) => (
+      <div data-selected-preset={selectedPreset ?? 'none'}>
+        <button disabled={isMinDisabled} onClick={onToggleMin} type='button'>
+          Min
+        </button>
+        <button disabled={isMaxDisabled} onClick={onToggleMax} type='button'>
+          Max
+        </button>
+        <button onClick={onToggleDefault} type='button'>
+          Default
+        </button>
+      </div>
+    ),
+  }),
+);
 
 vi.mock('../../TableDrawerContext/actions', () => ({
   useSetColumnsSizing: () => setColumnsSizingMock,
