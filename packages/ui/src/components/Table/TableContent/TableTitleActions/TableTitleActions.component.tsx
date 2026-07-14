@@ -8,21 +8,27 @@ import {
   useGetTableCrud,
   useGetTableTitleSingular,
 } from '../../contexts/TableConfig/meta/selectors';
-import { useGetTableIsLoading } from '../../contexts/TableData/data/selectors';
+import {
+  useGetTableIsLoading,
+  useGetTableIsLoadingMore,
+} from '../../contexts/TableData/data/selectors';
 import { TableCreateLink } from '../../TableCreateLink';
 
 /**
  * Action cluster of the table title bar: consumer-provided actions, the
  * create link (when CRUD create is enabled), and the settings-drawer toggle.
  * Owns its store wiring: reads crud/title/loading state and dispatches the
- * settings toggle itself.
+ * settings toggle itself. The action buttons show the busy shimmer for both
+ * the initial load and the infinite-scroll "load more" fetch.
  */
 export const TableTitleActions = ({ actions }: TableTitleActionsProps) => {
   const crud = useGetTableCrud();
   const isLoading = useGetTableIsLoading();
+  const isLoadingMore = useGetTableIsLoadingMore();
   const titleSingular = useGetTableTitleSingular();
   const toggleTableIsTableSettingsOpen = useToogleTableIsTableSettingsOpen();
 
+  const isBusy = isLoading || isLoadingMore;
   const resolvedTitleSingular = titleSingular ?? 'Record';
 
   return (
@@ -30,7 +36,7 @@ export const TableTitleActions = ({ actions }: TableTitleActionsProps) => {
       {actions}
       {crud?.create && (
         <TableCreateLink
-          isBusy={isLoading}
+          isBusy={isBusy}
           title={resolvedTitleSingular}
           to='new'
         />
@@ -39,7 +45,7 @@ export const TableTitleActions = ({ actions }: TableTitleActionsProps) => {
         aria-label='Table settings'
         color='ghost'
         icon={<SettingsIcon size={16} />}
-        isBusy={isLoading}
+        isBusy={isBusy}
         onClick={toggleTableIsTableSettingsOpen}
         size='mini'
       />
