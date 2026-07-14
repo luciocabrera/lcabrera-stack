@@ -95,7 +95,7 @@ describe('useResetTableSettings', () => {
       columnOrder: [],
       columnPinning: { left: [], right: [] },
       columnSizing: {},
-      columnVisibility: {},
+      columnVisibility: new Set(),
       sorting: [],
     });
   });
