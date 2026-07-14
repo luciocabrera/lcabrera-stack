@@ -15,6 +15,8 @@ const {
   setTableIsTableSettingsOpenMock,
   setTableIsTableSettingsPinnedMock,
   tableColumnFiltersMock,
+  useGetTableIsLoadingMock,
+  useGetTableIsLoadingMoreMock,
 } = vi.hoisted(() => ({
   batchSetTableDrawerSettingsMock: vi.fn(),
   isTableSettingsPinnedMock: vi.fn(() => false),
@@ -25,6 +27,8 @@ const {
   setTableIsTableSettingsOpenMock: vi.fn(),
   setTableIsTableSettingsPinnedMock: vi.fn(),
   tableColumnFiltersMock: {} as Record<string, unknown>,
+  useGetTableIsLoadingMock: vi.fn(() => false),
+  useGetTableIsLoadingMoreMock: vi.fn(() => false),
 }));
 
 afterEach(() => {
@@ -45,6 +49,10 @@ beforeEach(() => {
   resetTableDrawerSettingsMock.mockReset();
   setTableIsTableSettingsOpenMock.mockReset();
   setTableIsTableSettingsPinnedMock.mockReset();
+  useGetTableIsLoadingMock.mockReset();
+  useGetTableIsLoadingMock.mockReturnValue(false);
+  useGetTableIsLoadingMoreMock.mockReset();
+  useGetTableIsLoadingMoreMock.mockReturnValue(false);
 });
 
 type ButtonProps = {
@@ -167,6 +175,11 @@ vi.mock('../contexts/TableConfig/meta/actions', () => ({
 vi.mock('../contexts/TableConfig/meta/selectors', () => ({
   useGetTableIsTableSettingsPinned: () => isTableSettingsPinnedMock(),
   useGetTableSettingsSelectedTab: () => selectedTabMock(),
+}));
+
+vi.mock('../contexts/TableData/data/selectors', () => ({
+  useGetTableIsLoading: () => useGetTableIsLoadingMock(),
+  useGetTableIsLoadingMore: () => useGetTableIsLoadingMoreMock(),
 }));
 
 vi.mock('./ColumnOrderSection', () => ({

@@ -1,17 +1,13 @@
 // @vitest-environment jsdom
 
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { toggleThemeMock, useThemeMock } = vi.hoisted(() => ({
-  toggleThemeMock: vi.fn(),
-  useThemeMock: vi.fn(),
-}));
+import type { NavbarItemConfig } from '../Navbar/Navbar.types';
 
-type MockAppNavigationProps = {
-  readonly isDarkMode: boolean;
-  readonly onToggleTheme: () => void;
-};
+const getNavigationItemsMock = vi.hoisted(() =>
+  vi.fn<(iconSize: number) => readonly NavbarItemConfig[]>(() => []),
+);
 
 vi.mock('react-router', async () => {
   const actual =
@@ -24,11 +20,11 @@ vi.mock('react-router', async () => {
 });
 
 vi.mock('@repo/ui/components/AppNavigation', () => ({
-  AppNavigation: ({ isDarkMode, onToggleTheme }: MockAppNavigationProps) => (
-    <button onClick={onToggleTheme} type='button'>
-      {isDarkMode ? 'Light Mode' : 'Dark Mode'}
-    </button>
-  ),
+  AppNavigation: ({
+    getNavigationItems,
+  }: {
+    readonly getNavigationItems: () => readonly unknown[];
+  }) => <div data-testid='app-navigation'>{getNavigationItems().length}</div>,
 }));
 
 vi.mock('@repo/ui/components/NotificationCenter', () => ({
@@ -37,21 +33,12 @@ vi.mock('@repo/ui/components/NotificationCenter', () => ({
   ),
 }));
 
-vi.mock('@repo/ui/hooks/useTheme.hook', () => ({
-  useTheme: useThemeMock,
-}));
-
 import { AppShell } from './AppShell.component';
 
 describe('AppShell', () => {
   beforeEach(() => {
-    useThemeMock.mockReturnValue({
-      isDarkMode: false,
-      setTheme: vi.fn(),
-      theme: 'light',
-      toggleTheme: toggleThemeMock,
-    });
-    toggleThemeMock.mockReset();
+    getNavigationItemsMock.mockReset();
+    getNavigationItemsMock.mockReturnValue([]);
   });
 
   afterEach(() => {
@@ -59,19 +46,21 @@ describe('AppShell', () => {
   });
 
   it('renders the routed outlet and notification center', () => {
-    render(<AppShell getNavigationItems={() => []} />);
+    render(<AppShell getNavigationItems={getNavigationItemsMock} />);
 
     expect(screen.getByTestId('outlet').textContent).toBe('Outlet');
     expect(screen.getByTestId('notification-center').textContent).toBe(
       'Notifications',
     );
+    expect(screen.getByTestId('app-navigation').textContent).toBe('0');
   });
 
-  it('wires the theme toggle button to useTheme', () => {
-    render(<AppShell getNavigationItems={() => []} />);
+  it('passes getNavigationItems into AppNavigation', () => {
+    getNavigationItemsMock.mockReturnValue([{ label: 'Home', type: 'button' }]);
 
-    fireEvent.click(screen.getByRole('button', { name: /Dark Mode/i }));
+    render(<AppShell getNavigationItems={getNavigationItemsMock} />);
 
-    expect(toggleThemeMock).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId('app-navigation').textContent).toBe('1');
+    expect(getNavigationItemsMock).toHaveBeenCalledTimes(1);
   });
 });

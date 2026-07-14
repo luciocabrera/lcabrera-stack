@@ -5,12 +5,19 @@ import type { ReactNode } from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { selectedTabMock, setSelectedTabMock, useGetNormalizedColumnMock } =
-  vi.hoisted(() => ({
-    selectedTabMock: vi.fn(() => 'general'),
-    setSelectedTabMock: vi.fn(),
-    useGetNormalizedColumnMock: vi.fn(),
-  }));
+const {
+  selectedTabMock,
+  setSelectedTabMock,
+  useGetNormalizedColumnMock,
+  useGetTableIsLoadingMock,
+  useGetTableIsLoadingMoreMock,
+} = vi.hoisted(() => ({
+  selectedTabMock: vi.fn(() => 'general'),
+  setSelectedTabMock: vi.fn(),
+  useGetNormalizedColumnMock: vi.fn(),
+  useGetTableIsLoadingMock: vi.fn(() => false),
+  useGetTableIsLoadingMoreMock: vi.fn(() => false),
+}));
 
 type MockTabsProps = {
   readonly isBusy?: boolean;
@@ -39,9 +46,15 @@ vi.mock('@repo/ui/components/Table/contexts/TableConfig/meta/actions', () => ({
 vi.mock(
   '@repo/ui/components/Table/contexts/TableConfig/meta/selectors',
   () => ({
+    useGetTableColumnSelectedKey: () => 'revenue',
     useGetTableColumnSettingsSelectedTab: () => selectedTabMock(),
   }),
 );
+
+vi.mock('@repo/ui/components/Table/contexts/TableData/data/selectors', () => ({
+  useGetTableIsLoading: () => useGetTableIsLoadingMock(),
+  useGetTableIsLoadingMore: () => useGetTableIsLoadingMoreMock(),
+}));
 
 vi.mock('@repo/ui/components/Tabs', () => ({
   Tabs: ({ isBusy, onSelectTab, selectedTab, tabs }: MockTabsProps) => (
@@ -93,6 +106,10 @@ beforeEach(() => {
   selectedTabMock.mockReset();
   selectedTabMock.mockReturnValue('general');
   setSelectedTabMock.mockReset();
+  useGetTableIsLoadingMock.mockReset();
+  useGetTableIsLoadingMock.mockReturnValue(false);
+  useGetTableIsLoadingMoreMock.mockReset();
+  useGetTableIsLoadingMoreMock.mockReturnValue(false);
   useGetNormalizedColumnMock.mockReset();
   useGetNormalizedColumnMock.mockReturnValue({
     dataType: 'number',
@@ -140,6 +157,7 @@ describe('ColumnSettingsDrawerBody', () => {
   });
 
   it('forwards the busy flag to the tabs', () => {
+    useGetTableIsLoadingMock.mockReturnValue(true);
     render(<ColumnSettingsDrawerBody />);
 
     expect(screen.getByTestId('tabs').dataset.busy).toBe('true');

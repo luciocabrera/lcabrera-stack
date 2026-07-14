@@ -8,6 +8,7 @@ Combobox trigger: shows placeholder, single-value label, or multi-select tag chi
 VirtualSelectTrigger/
 ├── index.ts                              → Barrel export
 ├── VirtualSelectTrigger.component.tsx   → Store-connected; picks the trigger element (button when safe, div delegate for tag/static mode)
+├── useVirtualSelectTrigger.hook.ts      → Store-connected trigger derivation (content/chevron/flags/ref)
 ├── VirtualSelectTrigger.stylex.ts       → Styles + TRIGGER_MAX_HEIGHT constant
 ├── VirtualSelectTrigger.types.ts        → VirtualSelectTriggerRef (shared trigger-ref type)
 ├── utils/                               → One-per-file trigger helpers (ref assign, style props, keydown, render content/chevron)

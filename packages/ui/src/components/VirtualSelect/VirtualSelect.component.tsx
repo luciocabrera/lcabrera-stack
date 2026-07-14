@@ -1,18 +1,9 @@
-import type { SelectFilter } from '@repo/ui/types/filterOperators.types';
-
-import { useClickOutside } from '@repo/ui/hooks';
 import * as stylex from '@stylexjs/stylex';
-import { useId, useRef } from 'react';
 
 import type { VirtualSelectProps } from './VirtualSelect.types';
 
 import { VirtualSelectProvider } from './contexts';
-import { useVirtualSelectDropdown } from './hooks';
-import {
-  buildFallbackDataState,
-  resolveVirtualSelectChange,
-  resolveVirtualSelectOptions,
-} from './utils';
+import { useVirtualSelect } from './hooks';
 import { styles } from './VirtualSelect.stylex';
 import { VirtualSelectDropdown } from './VirtualSelectDropdown/VirtualSelectDropdown.component';
 import { VirtualSelectHeader } from './VirtualSelectHeader/VirtualSelectHeader.component';
@@ -42,43 +33,26 @@ export const VirtualSelect = ({
   selected,
   shouldFillHeight = false,
 }: VirtualSelectProps) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  const generatedListboxId = useId();
-  const resolvedListboxId =
-    listboxId ?? `virtual-select-listbox-${generatedListboxId}`;
-
-  const { getValueFromLabel, optionEntries, selectedLabels } =
-    resolveVirtualSelectOptions({ options, selected });
-
-  const { closeDropdown, isOpen, toggleDropdown } = useVirtualSelectDropdown({
+  const {
+    containerRef,
+    effectiveDataState,
+    handleListChange,
+    isMulti,
+    isOpen,
+    resolvedListboxId,
+    selectedLabels,
+    toggleDropdown,
+  } = useVirtualSelect({
+    dataState,
     isAlwaysOpen,
     isBusy,
+    listboxId,
+    mode,
+    onChange,
     onOpenChange,
+    options,
+    selected,
   });
-
-  useClickOutside({
-    onClickOutside: closeDropdown,
-    ref: containerRef,
-  });
-
-  const isMulti = mode === 'multi';
-  const effectiveDataState = dataState ?? buildFallbackDataState(optionEntries);
-
-  const handleListChange = (filter?: SelectFilter) => {
-    const { nextSelected, shouldCloseDropdown } = resolveVirtualSelectChange({
-      filter,
-      getValueFromLabel,
-      mode,
-      selected,
-    });
-
-    onChange([...nextSelected]);
-
-    if (shouldCloseDropdown) {
-      closeDropdown();
-    }
-  };
 
   return (
     <VirtualSelectProvider

@@ -41,6 +41,8 @@ const {
   setTableColumnSettingsSelectedTabMock,
   setTableIsColumnSettingsPinnedMock,
   useGetNormalizedColumnMock,
+  useGetTableIsLoadingMock,
+  useGetTableIsLoadingMoreMock,
   useTableWrapperRefMock,
 } = vi.hoisted(() => ({
   batchSetColumnDrawerSettingsMock: vi.fn(),
@@ -48,6 +50,8 @@ const {
   setTableColumnSettingsSelectedTabMock: vi.fn(),
   setTableIsColumnSettingsPinnedMock: vi.fn(),
   useGetNormalizedColumnMock: vi.fn(),
+  useGetTableIsLoadingMock: vi.fn(() => false),
+  useGetTableIsLoadingMoreMock: vi.fn(() => false),
   useTableWrapperRefMock: vi.fn(),
 }));
 
@@ -218,6 +222,7 @@ vi.mock('@repo/ui/components/Table/contexts/TableConfig/meta/actions', () => ({
 vi.mock(
   '@repo/ui/components/Table/contexts/TableConfig/meta/selectors',
   () => ({
+    useGetTableColumnSelectedKey: () => 'customer',
     useGetTableColumnSettingsSelectedTab: () => 'general',
     useGetTableIsColumnSettingsPinned: () => false,
   }),
@@ -225,6 +230,11 @@ vi.mock(
 
 vi.mock('@repo/ui/components/Table/contexts/TableWrapper', () => ({
   useTableWrapperRef: useTableWrapperRefMock,
+}));
+
+vi.mock('@repo/ui/components/Table/contexts/TableData/data/selectors', () => ({
+  useGetTableIsLoading: () => useGetTableIsLoadingMock(),
+  useGetTableIsLoadingMore: () => useGetTableIsLoadingMoreMock(),
 }));
 
 vi.mock('@repo/ui/components/Tabs', () => ({
@@ -261,6 +271,10 @@ afterEach(() => {
   resetAllColumnDrawerSettingsMock.mockReset();
   setTableColumnSettingsSelectedTabMock.mockReset();
   setTableIsColumnSettingsPinnedMock.mockReset();
+  useGetTableIsLoadingMock.mockReset();
+  useGetTableIsLoadingMock.mockReturnValue(false);
+  useGetTableIsLoadingMoreMock.mockReset();
+  useGetTableIsLoadingMoreMock.mockReturnValue(false);
   useGetNormalizedColumnMock.mockReset();
   useTableWrapperRefMock.mockReset();
   cleanup();
@@ -337,6 +351,7 @@ describe('ColumnSettingsDrawer', () => {
   });
 
   it('does not run actions when drawer is busy', () => {
+    useGetTableIsLoadingMock.mockReturnValue(true);
     useGetNormalizedColumnMock.mockReturnValue({
       dataType: 'string',
       isFilterable: true,

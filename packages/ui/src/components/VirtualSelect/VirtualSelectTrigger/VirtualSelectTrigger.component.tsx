@@ -1,24 +1,5 @@
-import { useToggleOption } from '@repo/ui/components/VirtualList/contexts/data/actions';
-import { useGetSelectedValues } from '@repo/ui/components/VirtualList/contexts/data/selectors';
-import { useRef } from 'react';
-
-import { useToggleDropdown } from '../contexts/meta/actions';
-import {
-  useGetIsAlwaysOpen,
-  useGetIsBusy,
-  useGetIsOpen,
-  useGetListboxId,
-  useGetMode,
-  useGetPlaceholder,
-} from '../contexts/meta/selectors';
-import { useVirtualSelectTagOverflow } from '../hooks';
-import { resolveTagOverflow } from '../utils';
-import {
-  assignTriggerRef,
-  getTriggerStyleProps,
-  renderChevron,
-  renderTriggerContent,
-} from './utils';
+import { useVirtualSelectTrigger } from './hooks/useVirtualSelectTrigger.hook';
+import { assignTriggerRef, getTriggerStyleProps } from './utils';
 import { VirtualSelectDivTrigger } from './VirtualSelectDivTrigger/VirtualSelectDivTrigger.component';
 
 /**
@@ -30,46 +11,17 @@ import { VirtualSelectDivTrigger } from './VirtualSelectDivTrigger/VirtualSelect
  * ResizeObserver-driven tag-overflow measurement.
  */
 export const VirtualSelectTrigger = () => {
-  const triggerRef = useRef<HTMLButtonElement | HTMLDivElement | undefined>(
-    undefined,
-  );
-
-  const isAlwaysOpen = useGetIsAlwaysOpen();
-  const isBusy = useGetIsBusy();
-  const isOpen = useGetIsOpen();
-  const listboxId = useGetListboxId();
-  const mode = useGetMode();
-  const placeholder = useGetPlaceholder();
-  const selectedLabels = useGetSelectedValues();
-  const toggleDropdown = useToggleDropdown();
-  const toggleOption = useToggleOption();
-
-  const visibleTagCount = useVirtualSelectTagOverflow({
+  const {
+    chevron,
+    content,
+    isBusy,
+    isOpen,
+    listboxId,
     mode,
-    selected: selectedLabels,
+    shouldUseDivTrigger,
+    toggleDropdown,
     triggerRef,
-  });
-
-  const { overflowCount, visibleTags } = resolveTagOverflow({
-    mode,
-    selectedLabels,
-    visibleTagCount,
-  });
-
-  const hasSelection = selectedLabels.length > 0;
-  const shouldUseTagButtons = mode === 'multi' && hasSelection;
-  const shouldUseDivTrigger = isAlwaysOpen || shouldUseTagButtons;
-  const shouldDisableInteraction = isBusy || isAlwaysOpen;
-  const content = renderTriggerContent({
-    hasSelection,
-    mode,
-    onRemoveTag: toggleOption,
-    overflowCount,
-    placeholder,
-    selected: selectedLabels,
-    visibleTags,
-  });
-  const chevron = renderChevron({ isAlwaysOpen, isOpen });
+  } = useVirtualSelectTrigger();
 
   // VirtualSelectDivTrigger owns both div variants (static isAlwaysOpen and
   // interactive tag mode). The <button> branch stays separate for native
@@ -86,11 +38,11 @@ export const VirtualSelectTrigger = () => {
   return (
     <button
       aria-controls={listboxId}
-      aria-disabled={shouldDisableInteraction}
+      aria-disabled={isBusy}
       aria-expanded={isOpen}
       aria-haspopup='listbox'
-      disabled={shouldDisableInteraction}
-      onClick={shouldDisableInteraction ? undefined : toggleDropdown}
+      disabled={isBusy}
+      onClick={isBusy ? undefined : toggleDropdown}
       ref={(node) => {
         assignTriggerRef({ node, triggerRef });
       }}

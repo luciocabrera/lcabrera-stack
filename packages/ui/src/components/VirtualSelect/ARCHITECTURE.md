@@ -32,6 +32,7 @@ VirtualSelect/
 │   └── VirtualSelectTrigger.types.ts
 │
 ├── hooks/
+│   ├── useVirtualSelect.hook.ts             → Shell derivation/wiring (ids, options mapping, open-state lifecycle, onChange bridge)
 │   ├── useVirtualSelectDropdown.hook.ts     → Open/close state + onOpenChange notification
 │   └── useVirtualSelectTagOverflow.hook.ts  → ResizeObserver-driven visible tag count
 │

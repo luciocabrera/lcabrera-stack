@@ -9,10 +9,14 @@ const {
   batchSetColumnDrawerSettingsMock,
   isColumnSettingsPinnedMock,
   resetAllColumnDrawerSettingsMock,
+  useGetTableIsLoadingMock,
+  useGetTableIsLoadingMoreMock,
 } = vi.hoisted(() => ({
   batchSetColumnDrawerSettingsMock: vi.fn(),
   isColumnSettingsPinnedMock: vi.fn(() => false),
   resetAllColumnDrawerSettingsMock: vi.fn(),
+  useGetTableIsLoadingMock: vi.fn(() => false),
+  useGetTableIsLoadingMoreMock: vi.fn(() => false),
 }));
 
 type ButtonProps = {
@@ -41,6 +45,11 @@ vi.mock(
   }),
 );
 
+vi.mock('@repo/ui/components/Table/contexts/TableData/data/selectors', () => ({
+  useGetTableIsLoading: () => useGetTableIsLoadingMock(),
+  useGetTableIsLoadingMore: () => useGetTableIsLoadingMoreMock(),
+}));
+
 vi.mock('../ColumnDrawerContext/actions', () => ({
   useBatchSetColumnDrawerSettings: () => batchSetColumnDrawerSettingsMock,
   useResetAllColumnDrawerSettings: () => resetAllColumnDrawerSettingsMock,
@@ -57,6 +66,10 @@ beforeEach(() => {
   isColumnSettingsPinnedMock.mockReset();
   isColumnSettingsPinnedMock.mockReturnValue(false);
   resetAllColumnDrawerSettingsMock.mockReset();
+  useGetTableIsLoadingMock.mockReset();
+  useGetTableIsLoadingMock.mockReturnValue(false);
+  useGetTableIsLoadingMoreMock.mockReset();
+  useGetTableIsLoadingMoreMock.mockReturnValue(false);
 });
 
 describe('ColumnSettingsDrawerFooter', () => {
@@ -88,6 +101,7 @@ describe('ColumnSettingsDrawerFooter', () => {
   });
 
   it('ignores accept and cancel while busy', () => {
+    useGetTableIsLoadingMock.mockReturnValue(true);
     render(<ColumnSettingsDrawerFooter />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Accept' }));

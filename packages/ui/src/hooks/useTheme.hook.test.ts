@@ -7,6 +7,8 @@ import { renderHook } from '@testing-library/react';
 import { createElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
+vi.unmock('@repo/ui/hooks/useTheme.hook');
+
 vi.mock('@repo/ui/contexts/ThemeContext', async () => {
   const { createContext } = await import('react');
 

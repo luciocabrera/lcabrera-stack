@@ -10,11 +10,15 @@ const {
   resetAllColumnDrawerSettingsMock,
   setIsColumnSettingsPinnedMock,
   useGetNormalizedColumnMock,
+  useGetTableIsLoadingMock,
+  useGetTableIsLoadingMoreMock,
 } = vi.hoisted(() => ({
   isColumnSettingsPinnedMock: vi.fn(() => false),
   resetAllColumnDrawerSettingsMock: vi.fn(),
   setIsColumnSettingsPinnedMock: vi.fn(),
   useGetNormalizedColumnMock: vi.fn(),
+  useGetTableIsLoadingMock: vi.fn(() => false),
+  useGetTableIsLoadingMoreMock: vi.fn(() => false),
 }));
 
 type MockSidePanelHeaderProps = {
@@ -81,9 +85,15 @@ vi.mock('@repo/ui/components/Table/contexts/TableConfig/meta/actions', () => ({
 vi.mock(
   '@repo/ui/components/Table/contexts/TableConfig/meta/selectors',
   () => ({
+    useGetTableColumnSelectedKey: () => 'revenue',
     useGetTableIsColumnSettingsPinned: () => isColumnSettingsPinnedMock(),
   }),
 );
+
+vi.mock('@repo/ui/components/Table/contexts/TableData/data/selectors', () => ({
+  useGetTableIsLoading: () => useGetTableIsLoadingMock(),
+  useGetTableIsLoadingMore: () => useGetTableIsLoadingMoreMock(),
+}));
 
 vi.mock('../ColumnDrawerContext/actions', () => ({
   useResetAllColumnDrawerSettings: () => resetAllColumnDrawerSettingsMock,
@@ -100,6 +110,10 @@ beforeEach(() => {
   isColumnSettingsPinnedMock.mockReturnValue(false);
   resetAllColumnDrawerSettingsMock.mockReset();
   setIsColumnSettingsPinnedMock.mockReset();
+  useGetTableIsLoadingMock.mockReset();
+  useGetTableIsLoadingMock.mockReturnValue(false);
+  useGetTableIsLoadingMoreMock.mockReset();
+  useGetTableIsLoadingMoreMock.mockReturnValue(false);
   useGetNormalizedColumnMock.mockReset();
   useGetNormalizedColumnMock.mockReturnValue({ label: 'Revenue' });
 });
@@ -151,6 +165,7 @@ describe('ColumnSettingsDrawerHeader', () => {
   });
 
   it('ignores pin toggling and closing while busy', () => {
+    useGetTableIsLoadingMock.mockReturnValue(true);
     render(<ColumnSettingsDrawerHeader />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Toggle pin' }));

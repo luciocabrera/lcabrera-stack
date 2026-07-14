@@ -13,6 +13,15 @@ import type { NavbarItemConfig } from '@/components/Navbar/Navbar.types';
 
 import { AppNavigation } from './AppNavigation.component';
 
+const { toggleThemeMock, useThemeMock } = vi.hoisted(() => ({
+  toggleThemeMock: vi.fn(),
+  useThemeMock: vi.fn(),
+}));
+
+vi.mock('@repo/ui/hooks/useTheme.hook', () => ({
+  useTheme: () => useThemeMock(),
+}));
+
 // Fixture only — real route items are supplied by each consuming app (see
 // AppNavigationProps.getNavigationItems' own doc), not owned by this package.
 const getFixtureNavigationItems = (): readonly NavbarItemConfig[] => [
@@ -39,8 +48,6 @@ const getFixtureNavigationItems = (): readonly NavbarItemConfig[] => [
 
 type RenderWithGlobalSettingsArgs = {
   readonly initialSettings: GlobalSettingsState;
-  readonly isDarkMode: boolean;
-  readonly onToggleTheme: () => void;
 };
 
 const renderWithGlobalSettings = ({
@@ -84,12 +91,18 @@ afterEach(() => {
 
 beforeEach(() => {
   restoreMockDialogRef.current = mockDialogElement().restore;
+  toggleThemeMock.mockReset();
+  useThemeMock.mockReset();
+  useThemeMock.mockReturnValue({
+    isDarkMode: false,
+    setTheme: vi.fn(),
+    theme: 'light',
+    toggleTheme: toggleThemeMock,
+  });
 });
 
 describe('AppNavigation', () => {
   it('renders the configured route links and theme toggle', () => {
-    const handleToggleTheme = vi.fn();
-
     renderWithGlobalSettings({
       initialSettings: {
         navigation: {
@@ -97,8 +110,6 @@ describe('AppNavigation', () => {
         },
         pinning: {},
       },
-      isDarkMode: false,
-      onToggleTheme: handleToggleTheme,
     });
 
     fireEvent.click(screen.getByRole('button', { name: /Dark Mode/i }));
@@ -108,7 +119,7 @@ describe('AppNavigation', () => {
     expect(
       screen.getByRole('link', { name: /Enterprise Orders/i }),
     ).toBeDefined();
-    expect(handleToggleTheme).toHaveBeenCalledTimes(1);
+    expect(toggleThemeMock).toHaveBeenCalledTimes(1);
   });
 
   it('shows the launcher after unpinning the sidebar', () => {
@@ -119,8 +130,6 @@ describe('AppNavigation', () => {
         },
         pinning: {},
       },
-      isDarkMode: true,
-      onToggleTheme: vi.fn(),
     });
 
     fireEvent.click(screen.getByRole('button', { name: /Unpin navigation/i }));
@@ -138,8 +147,6 @@ describe('AppNavigation', () => {
         },
         pinning: {},
       },
-      isDarkMode: false,
-      onToggleTheme: vi.fn(),
     });
 
     expect(
@@ -158,8 +165,6 @@ describe('AppNavigation', () => {
         },
         pinning: {},
       },
-      isDarkMode: false,
-      onToggleTheme: vi.fn(),
     });
 
     expect(
@@ -176,8 +181,6 @@ describe('AppNavigation', () => {
         },
         pinning: {},
       },
-      isDarkMode: false,
-      onToggleTheme: vi.fn(),
     });
 
     const panel = screen.getByTestId('side-panel') as HTMLDialogElement;
@@ -196,8 +199,6 @@ describe('AppNavigation', () => {
         },
         pinning: {},
       },
-      isDarkMode: false,
-      onToggleTheme: vi.fn(),
     });
 
     const panel = screen.getByTestId('side-panel') as HTMLDialogElement;
@@ -210,8 +211,6 @@ describe('AppNavigation', () => {
   it('collapses and expands the navigation panel independently of pinning', () => {
     renderWithGlobalSettings({
       initialSettings: { navigation: { size: 'medium' }, pinning: {} },
-      isDarkMode: false,
-      onToggleTheme: vi.fn(),
     });
 
     expect(screen.getByRole('link', { name: /Home/i })).toBeDefined();
