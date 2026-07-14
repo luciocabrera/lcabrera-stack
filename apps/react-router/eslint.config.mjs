@@ -1,6 +1,7 @@
 import { createCustomRulesLintConfig } from '@repo/vite-configs/eslint-custom-rules';
 
 const baseConfig = await createCustomRulesLintConfig({
+  enforceServerClientImportBoundary: true,
   enforceUiPublicImportBoundary: true,
   ignorePatterns: ['src/components/Tooltip/Tooltip.stylex.ts'],
   tsconfigRootDir: import.meta.dirname,
