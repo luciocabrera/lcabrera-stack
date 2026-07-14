@@ -39,6 +39,7 @@ vi.mock('@repo/ui/components/Table/TableActionsPopover', () => ({
     menuActions: {},
     menuIcon: {},
     menuItem: {},
+    menuSectionDivider: {},
   },
 }));
 
@@ -82,6 +83,31 @@ describe('TableHeaderActionsMenu', () => {
     expect(screen.queryByText('Pin Right')).toBeNull();
     expect(screen.queryByText('Hide Column')).toBeNull();
     expect(screen.queryByText('Manage Column')).toBeNull();
+  });
+
+  it('composes every section when the column is sortable, movable, and has settings', () => {
+    render(
+      <TableHeaderActionsMenu
+        columnKey='name'
+        columnLabel='Name'
+        hasSettings
+        isSortable
+        isStatic={false}
+      />,
+    );
+
+    for (const label of [
+      'Ascending',
+      'Descending',
+      'Clear Sorting',
+      'Pin Left',
+      'Pin Right',
+      'Clear Pinning',
+      'Hide Column',
+      'Manage Column',
+    ]) {
+      expect(screen.getByText(label)).not.toBeNull();
+    }
   });
 
   it('renders only the pin/hide section for a movable non-sortable column', () => {

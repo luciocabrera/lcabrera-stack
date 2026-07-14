@@ -43,6 +43,12 @@ export const styles = stylex.create({
     textAlign: 'left',
     width: '100%',
   },
+  menuSectionDivider: {
+    borderTopColor: colors.borderSecondary,
+    borderTopStyle: 'solid',
+    borderTopWidth: '1px',
+    marginTop: spacing.xxs,
+  },
   menuPosition: (left: number, top: number) => ({
     margin: 0,
     position: 'fixed',

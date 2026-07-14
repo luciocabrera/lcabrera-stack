@@ -18,6 +18,7 @@ vi.mock('@repo/ui/components/Table/TableActionsPopover', () => ({
   tableActionsPopoverStyles: {
     menuIcon: {},
     menuItem: {},
+    menuSectionDivider: {},
   },
 }));
 

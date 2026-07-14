@@ -47,6 +47,7 @@ export const TableHeaderActionsMenu = <TData,>({
           {!isStatic && (
             <PinAndHideActions<TData>
               columnKey={columnKey}
+              hasSectionAbove={isSortable}
               onClose={closeMenu}
               pinSide={pinSide}
             />
@@ -54,6 +55,7 @@ export const TableHeaderActionsMenu = <TData,>({
           {hasSettings && (
             <ManageColumnAction<TData>
               columnKey={columnKey}
+              hasSectionAbove={isSortable || !isStatic}
               onClose={closeMenu}
             />
           )}

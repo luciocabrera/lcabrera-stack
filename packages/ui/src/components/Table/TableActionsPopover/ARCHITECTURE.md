@@ -31,7 +31,7 @@ TableActionsPopover/
 ├── TableActionsPopover.component.tsx      → Trigger + popover panel + render-prop children
 ├── TableActionsPopover.types.ts           → Props, BoundsRect, MenuPosition, render-prop context type
 ├── TableActionsPopover.constants.ts       → MENU_* layout constants (gap, nudge, frames, padding)
-├── TableActionsPopover.stylex.ts          → trigger/menu/menuItem/menuIcon/menuActions styles (shared)
+├── TableActionsPopover.stylex.ts          → trigger/menu/menuItem/menuIcon/menuActions/menuSectionDivider styles (shared)
 ├── useTableActionsPopoverPosition.hook.ts → State + observers + environment reads (trigger lookup,
 │                                            viewport size) injected into the handler-core utils
 ├── utils/

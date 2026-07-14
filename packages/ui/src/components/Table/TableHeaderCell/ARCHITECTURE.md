@@ -22,11 +22,20 @@ TableHeaderCell/
 │   └── index.ts
 │
 ├── TableHeaderActionsMenu/
-│   ├── TableHeaderActionsMenu.component.tsx → Popover menu shell: gates sections + forwards closeMenu
+│   ├── TableHeaderActionsMenu.component.tsx → Popover menu shell: gates sections, passes hasSectionAbove + forwards closeMenu
 │   ├── TableHeaderActionsMenu.types.ts      → Props (isSortable, isStatic, hasSettings, pinSide, sortDirection)
-│   ├── SortActions/                         → Ascending/Descending/Clear Sorting items; owns useSetColumnSorting
-│   ├── PinAndHideActions/                   → Pin Left/Pin Right/Hide Column items; owns useSetColumnPinning + useSetColumnVisibility
-│   ├── ManageColumnAction/                  → Manage Column item; owns the drawer-open meta actions
+│   ├── SortActions/                         → Thin shell composing the sort delegates (forwards columnKey/onClose/sortDirection)
+│   │   ├── SortActions.component.tsx
+│   │   ├── SortAscendingButton/             → Toggles asc + highlights when applied; owns useSetColumnSorting
+│   │   ├── SortDescendingButton/            → Toggles desc + highlights when applied; owns useSetColumnSorting
+│   │   └── ClearSortingButton/             → Always shown, disabled until sorted; owns useSetColumnSorting
+│   ├── PinAndHideActions/                   → Thin shell composing the pin/hide delegates (forwards columnKey/onClose/pinSide/hasSectionAbove)
+│   │   ├── PinAndHideActions.component.tsx
+│   │   ├── PinLeftButton/                   → Toggles left pin + highlights; carries divider when hasSectionAbove; owns useSetColumnPinning
+│   │   ├── PinRightButton/                  → Toggles right pin + highlights; owns useSetColumnPinning
+│   │   ├── ClearPinningButton/             → Always shown, disabled until pinned; owns useSetColumnPinning
+│   │   └── HideColumnButton/                → Hides the column, always carries the divider; owns useSetColumnVisibility
+│   ├── ManageColumnAction/                  → Manage Column item (single self-connected button); owns the drawer-open meta actions
 │   └── index.ts
 │
 └── utils/
@@ -67,11 +76,15 @@ inline pin/sort/settings buttons:
 
 - **Sort** (`SortActions`, when `isSortable`): "Ascending"/"Descending" toggle
   the direction on/off exactly like `ColumnSettingsDrawer/SortingSection`
-  (`direction === current ? undefined : direction`); "Clear Sorting" appears
-  only when a direction is currently applied.
+  (`direction === current ? undefined : direction`) and highlight the applied
+  one via the `primary` variant + `aria-pressed`; "Clear Sorting" is always
+  shown but `isDisabled` until a direction is applied.
 - **Pin** (`PinAndHideActions`, when `!isStatic`): "Pin Left"/"Pin Right"
   toggle via `useSetColumnPinning` directly — no side-selection or conflict
-  modal, same silent behavior as `ColumnSettingsDrawer/PinningSection`.
+  modal, same silent behavior as `ColumnSettingsDrawer/PinningSection` — and
+  highlight the applied side (`primary` variant + `aria-pressed`). "Clear
+  Pinning" (`useSetColumnPinning({ columnKey, side: undefined })`) is always
+  shown but `isDisabled` until a side is pinned.
 - **Hide Column** (`PinAndHideActions`, when `!isStatic`):
   `useSetColumnVisibility({ columnKey, isVisible: false })` — a single-column,
   table-level visibility action (see `contexts/TableConfig/ARCHITECTURE.md`),
@@ -82,10 +95,26 @@ inline pin/sort/settings buttons:
   `setTableDrawersOpenState({ isColumnSettingsOpen: true,
 isTableSettingsOpen: false })`).
 
-Each section is a private-delegate subcomponent (direct file imports, no
-barrels — ADR-007) that owns its store-action hooks and click handlers;
+**Stable layout & section dividers.** Every option always renders (the "Clear"
+items disable rather than disappear) so the menu never changes height as state
+changes. Section boundaries are drawn with `tableActionsPopoverStyles.menuSectionDivider`
+— a `border-top` composed onto the **first item of each following section**
+rather than a standalone `role="separator"` element or a `border-bottom` on a
+last item (whose identity would shift as options toggle). "Hide Column" always
+carries the divider (pin options always precede it within the section); "Pin
+Left" and "Manage Column" carry it only when a section renders above them,
+which the shell passes down via `hasSectionAbove` (`isSortable` for
+`PinAndHideActions`, `isSortable || !isStatic` for `ManageColumnAction`).
+
+The tree is two levels of private delegates (direct file imports, no barrels —
+ADR-007). `SortActions` and `PinAndHideActions` are **thin shells** that only
+forward props; each individual item ("Ascending", "Pin Left", …) is its own
+`*Button` delegate that owns its store-action hook (`useSetColumnSorting` /
+`useSetColumnPinning` / `useSetColumnVisibility`) and click handler, keeping
+every file short and independently testable. `ManageColumnAction` is already a
+single self-connected button, so it stays a leaf without a shell.
 `TableHeaderActionsMenu` itself only gates which sections render and forwards
-the popover's render-prop `closeMenu` to each section's `onClose`, so every
+the popover's render-prop `closeMenu` down to each button's `onClose`, so every
 item closes the popover after firing its action. The menu renders nothing (no
 trigger) when the column has no sortable/pinnable/settings affordance at all.
 

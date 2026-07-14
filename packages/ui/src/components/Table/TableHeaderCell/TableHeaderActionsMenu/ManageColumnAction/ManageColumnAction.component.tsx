@@ -12,10 +12,12 @@ import type { ManageColumnActionProps } from './ManageColumnAction.types';
 /**
  * "Manage Column" item of the column header actions menu: selects the column
  * and opens the per-column settings drawer, then closes the menu via
- * `onClose`.
+ * `onClose`. A section divider sits above it whenever a section precedes this
+ * one (`hasSectionAbove`).
  */
 export const ManageColumnAction = <TData,>({
   columnKey,
+  hasSectionAbove = false,
   onClose,
 }: ManageColumnActionProps<TData>) => {
   const setTableColumnSelectedKey = useSetTableColumnSelectedKey();
@@ -33,7 +35,10 @@ export const ManageColumnAction = <TData,>({
   return (
     <Button
       color='ghost'
-      customStylex={tableActionsPopoverStyles.menuItem}
+      customStylex={[
+        tableActionsPopoverStyles.menuItem,
+        hasSectionAbove && tableActionsPopoverStyles.menuSectionDivider,
+      ]}
       icon={
         <span {...stylex.props(tableActionsPopoverStyles.menuIcon)}>
           <SettingsIcon size={16} />

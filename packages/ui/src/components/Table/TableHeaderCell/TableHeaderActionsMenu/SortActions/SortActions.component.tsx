@@ -1,95 +1,35 @@
-import { Button } from '@repo/ui/components/Button';
-import {
-  EraserIcon,
-  SortAscIcon,
-  SortDescIcon,
-} from '@repo/ui/components/Icons';
-import { useSetColumnSorting } from '@repo/ui/components/Table/contexts/TableConfig/columns/actions';
-import { tableActionsPopoverStyles } from '@repo/ui/components/Table/TableActionsPopover';
-import * as stylex from '@stylexjs/stylex';
-
 import type { SortActionsProps } from './SortActions.types';
 
+import { ClearSortingButton } from './ClearSortingButton/ClearSortingButton.component';
+import { SortAscendingButton } from './SortAscendingButton/SortAscendingButton.component';
+import { SortDescendingButton } from './SortDescendingButton/SortDescendingButton.component';
+
 /**
- * Sorting section of the column header actions menu: "Ascending" and
- * "Descending" toggle their direction on/off, and "Clear Sorting" (shown only
- * while a direction is applied) removes the sort. Every action closes the
- * menu via `onClose`.
+ * Sorting section of the column header actions menu — a thin shell composing
+ * the ascending, descending, and clear-sorting delegates. Each delegate owns
+ * its own `useSetColumnSorting` wiring; this shell only forwards `columnKey`,
+ * `onClose`, and the current `sortDirection`.
  */
 export const SortActions = <TData,>({
   columnKey,
   onClose,
   sortDirection,
-}: SortActionsProps<TData>) => {
-  const setSorting = useSetColumnSorting<TData>();
-
-  const handleAscending = () => {
-    setSorting({
-      columnKey,
-      direction: sortDirection === 'asc' ? undefined : 'asc',
-    });
-    onClose();
-  };
-
-  const handleDescending = () => {
-    setSorting({
-      columnKey,
-      direction: sortDirection === 'desc' ? undefined : 'desc',
-    });
-    onClose();
-  };
-
-  const handleClearSorting = () => {
-    setSorting({ columnKey, direction: undefined });
-    onClose();
-  };
-
-  return (
-    <>
-      <Button
-        color='ghost'
-        customStylex={tableActionsPopoverStyles.menuItem}
-        icon={
-          <span {...stylex.props(tableActionsPopoverStyles.menuIcon)}>
-            <SortAscIcon size={16} />
-          </span>
-        }
-        onClick={handleAscending}
-        orientation='horizontal'
-        size='mini'
-      >
-        Ascending
-      </Button>
-      <Button
-        color='ghost'
-        customStylex={tableActionsPopoverStyles.menuItem}
-        icon={
-          <span {...stylex.props(tableActionsPopoverStyles.menuIcon)}>
-            <SortDescIcon size={16} />
-          </span>
-        }
-        onClick={handleDescending}
-        orientation='horizontal'
-        size='mini'
-      >
-        Descending
-      </Button>
-      {sortDirection !== undefined && (
-        <Button
-          color='ghost'
-          customStylex={tableActionsPopoverStyles.menuItem}
-          icon={
-            <span {...stylex.props(tableActionsPopoverStyles.menuIcon)}>
-              <EraserIcon size={16} />
-            </span>
-          }
-          onClick={handleClearSorting}
-          orientation='horizontal'
-          size='mini'
-        >
-          Clear Sorting
-        </Button>
-      )}
-    </>
-  );
-};
+}: SortActionsProps<TData>) => (
+  <>
+    <SortAscendingButton
+      columnKey={columnKey}
+      onClose={onClose}
+      sortDirection={sortDirection}
+    />
+    <SortDescendingButton
+      columnKey={columnKey}
+      onClose={onClose}
+      sortDirection={sortDirection}
+    />
+    <ClearSortingButton
+      columnKey={columnKey}
+      onClose={onClose}
+      sortDirection={sortDirection}
+    />
+  </>
+);

@@ -1,97 +1,36 @@
-import { Button } from '@repo/ui/components/Button';
-import {
-  EyeOffIcon,
-  PinLeftIcon,
-  PinRightIcon,
-} from '@repo/ui/components/Icons';
-import {
-  useSetColumnPinning,
-  useSetColumnVisibility,
-} from '@repo/ui/components/Table/contexts/TableConfig/columns/actions';
-import { tableActionsPopoverStyles } from '@repo/ui/components/Table/TableActionsPopover';
-import * as stylex from '@stylexjs/stylex';
-
 import type { PinAndHideActionsProps } from './PinAndHideActions.types';
 
+import { ClearPinningButton } from './ClearPinningButton/ClearPinningButton.component';
+import { HideColumnButton } from './HideColumnButton/HideColumnButton.component';
+import { PinLeftButton } from './PinLeftButton/PinLeftButton.component';
+import { PinRightButton } from './PinRightButton/PinRightButton.component';
+
 /**
- * Pin/hide section of the column header actions menu (movable columns only):
- * "Pin Left" and "Pin Right" toggle their side on/off, and "Hide Column"
- * hides the column at table level. Every action closes the menu via
- * `onClose`.
+ * Pin/hide section of the column header actions menu (movable columns only) —
+ * a thin shell composing the pin-left, pin-right, clear-pinning, and
+ * hide-column delegates. Each delegate owns its own store wiring; this shell
+ * only forwards `columnKey`, `onClose`, the current `pinSide`, and
+ * `hasSectionAbove` (which drives the "Pin Left" divider).
  */
 export const PinAndHideActions = <TData,>({
   columnKey,
+  hasSectionAbove = false,
   onClose,
   pinSide,
-}: PinAndHideActionsProps<TData>) => {
-  const setColumnPinning = useSetColumnPinning<TData>();
-  const setColumnVisibility = useSetColumnVisibility<TData>();
-
-  const handlePinLeft = () => {
-    setColumnPinning({
-      columnKey,
-      side: pinSide === 'left' ? undefined : 'left',
-    });
-    onClose();
-  };
-
-  const handlePinRight = () => {
-    setColumnPinning({
-      columnKey,
-      side: pinSide === 'right' ? undefined : 'right',
-    });
-    onClose();
-  };
-
-  const handleHideColumn = () => {
-    setColumnVisibility({ columnKey, isVisible: false });
-    onClose();
-  };
-
-  return (
-    <>
-      <Button
-        color='ghost'
-        customStylex={tableActionsPopoverStyles.menuItem}
-        icon={
-          <span {...stylex.props(tableActionsPopoverStyles.menuIcon)}>
-            <PinLeftIcon size={16} />
-          </span>
-        }
-        onClick={handlePinLeft}
-        orientation='horizontal'
-        size='mini'
-      >
-        Pin Left
-      </Button>
-      <Button
-        color='ghost'
-        customStylex={tableActionsPopoverStyles.menuItem}
-        icon={
-          <span {...stylex.props(tableActionsPopoverStyles.menuIcon)}>
-            <PinRightIcon size={16} />
-          </span>
-        }
-        onClick={handlePinRight}
-        orientation='horizontal'
-        size='mini'
-      >
-        Pin Right
-      </Button>
-      <Button
-        color='ghost'
-        customStylex={tableActionsPopoverStyles.menuItem}
-        icon={
-          <span {...stylex.props(tableActionsPopoverStyles.menuIcon)}>
-            <EyeOffIcon size={16} />
-          </span>
-        }
-        onClick={handleHideColumn}
-        orientation='horizontal'
-        size='mini'
-      >
-        Hide Column
-      </Button>
-    </>
-  );
-};
+}: PinAndHideActionsProps<TData>) => (
+  <>
+    <PinLeftButton
+      columnKey={columnKey}
+      hasSectionAbove={hasSectionAbove}
+      onClose={onClose}
+      pinSide={pinSide}
+    />
+    <PinRightButton columnKey={columnKey} onClose={onClose} pinSide={pinSide} />
+    <ClearPinningButton
+      columnKey={columnKey}
+      onClose={onClose}
+      pinSide={pinSide}
+    />
+    <HideColumnButton columnKey={columnKey} onClose={onClose} />
+  </>
+);
