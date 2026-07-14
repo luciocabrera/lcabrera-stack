@@ -12,7 +12,6 @@ export { SectionCard } from './components/SectionCard/SectionCard.component';
 export { StatusBadge } from './components/StatusBadge/StatusBadge.component';
 export { TableLayout } from './components/Table/TableLayout/TableLayout.component';
 export { Tabs } from './components/Tabs/Tabs.component';
-export { createHandleRequest } from './entry/createHandleRequest.util';
 export { hydrateApp } from './entry/hydrateApp.util';
 export { useNotifyOnError } from './hooks/useNotifyOnError.hook';
 export type { LayoutProps, Pagination } from './types/ui.types';

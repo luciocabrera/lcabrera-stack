@@ -106,6 +106,35 @@ const UI_PUBLIC_IMPORT_BOUNDARY_PATTERNS = [
   },
 ];
 
+const CLIENT_IMPORT_BOUNDARY_SYNTAX_RESTRICTIONS = [
+  {
+    selector: 'ExportAllDeclaration[source.value=/^node:/]',
+    message:
+      'Node built-ins are server-only. Move this import/export to server files.',
+  },
+  {
+    selector: 'ExportNamedDeclaration[source.value=/^node:/]',
+    message:
+      'Node built-ins are server-only. Move this import/export to server files.',
+  },
+  {
+    selector: 'ImportDeclaration[source.value=/^node:/]',
+    message:
+      'Node built-ins are server-only. Move this import/export to server files.',
+  },
+  {
+    selector:
+      "ImportDeclaration[source.value='@repo/ui/entry/createHandleRequest.util']",
+    message:
+      'Server-only UI helpers must be imported via @repo/ui/server from server entry files only.',
+  },
+  {
+    selector: "ImportDeclaration[source.value='@repo/ui/server']",
+    message:
+      'The @repo/ui/server entrypoint is server-only and must not be imported from client/shared files.',
+  },
+];
+
 export const createCustomRulesLintConfig = async ({
   enforceUiPublicImportBoundary = false,
   ignorePatterns = [],
@@ -245,6 +274,20 @@ export const createCustomRulesLintConfig = async ({
     },
     {
       ignores: [...GLOBAL_IGNORES, ...ignorePatterns],
+    },
+    {
+      files: ['src/**/*.ts', 'src/**/*.tsx'],
+      ignores: [
+        'src/entry.server.tsx',
+        'src/**/*.server.ts',
+        'src/**/*.server.tsx',
+      ],
+      rules: {
+        'no-restricted-syntax': [
+          'error',
+          ...CLIENT_IMPORT_BOUNDARY_SYNTAX_RESTRICTIONS,
+        ],
+      },
     },
     {
       files: ['src/**/*.ts', 'src/**/*.tsx'],

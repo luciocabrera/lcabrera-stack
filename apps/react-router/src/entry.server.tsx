@@ -1,4 +1,4 @@
-import { createHandleRequest } from '@repo/ui/entry/createHandleRequest.util';
+import { createHandleRequest } from '@repo/ui/server';
 
 import stylexCssHref from './stylex.css?url';
 
