@@ -46,7 +46,7 @@ const {
       },
     },
   })),
-  mockGetColumnPinSide: vi.fn(() => undefined),
+  mockGetColumnPinSide: vi.fn(() => {}),
   mockGetNewColumnFiltersBasedOnColumnKey: vi.fn(() => ({
     name: { operator: 'contains', type: 'text', value: 'ali' },
   })),

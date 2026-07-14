@@ -19,6 +19,7 @@
       "@/*": ["./src/*"],
       "@repo/data-access/*": ["../../packages/data-access/src/*"],
       "@repo/scan-ingestion/*": ["../../packages/scan-ingestion/src/*"],
+      "@repo/ui": ["../../packages/ui/src/public-api.ts"],
       "@repo/ui/*": ["../../packages/ui/src/*"]
     },
     "resolveJsonModule": true,

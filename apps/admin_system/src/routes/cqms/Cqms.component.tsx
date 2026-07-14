@@ -1,6 +1,6 @@
 import type { ProjectListViewRow } from '@repo/scan-ingestion/queries/getProjectListView.util';
 
-import { TableLayout } from '@repo/ui/components/Table/TableLayout';
+import { TableLayout } from '@repo/ui';
 import { createEmptyColumnsState } from '@repo/ui/components/Table/utils/createEmptyColumnsState.util';
 import { useLoaderData } from 'react-router';
 

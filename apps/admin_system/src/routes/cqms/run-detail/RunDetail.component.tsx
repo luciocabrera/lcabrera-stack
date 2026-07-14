@@ -1,7 +1,6 @@
 import type { RunScanRow } from '@repo/scan-ingestion/queries/getRunScans.util';
 
-import { StatusBadge } from '@repo/ui/components/StatusBadge';
-import { TableLayout } from '@repo/ui/components/Table/TableLayout';
+import { StatusBadge, TableLayout } from '@repo/ui';
 import { createEmptyColumnsState } from '@repo/ui/components/Table/utils/createEmptyColumnsState.util';
 import { useLoaderData } from 'react-router';
 

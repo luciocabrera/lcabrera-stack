@@ -1,4 +1,4 @@
-import { RootErrorBoundary } from '@repo/ui/components/RootErrorBoundary';
+import { RootErrorBoundary } from '@repo/ui';
 
 import type { Route } from '../+types/root';
 

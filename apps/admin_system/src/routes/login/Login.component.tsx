@@ -1,7 +1,6 @@
-import type { FieldNode } from '@repo/ui/components/Form';
+import type { FieldNode } from '@repo/ui';
 
-import { Form } from '@repo/ui/components/Form';
-import { SectionCard } from '@repo/ui/components/SectionCard';
+import { Form, SectionCard } from '@repo/ui';
 import { useActionData } from 'react-router';
 
 import type { action } from './login.action';

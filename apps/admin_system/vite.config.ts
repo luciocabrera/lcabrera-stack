@@ -17,18 +17,34 @@ export default defineConfig({
   lint: lintConfig,
   plugins: pluginsConfig,
   resolve: {
-    alias: {
-      '@': fileURLToPath(new URL('src', import.meta.url)),
-      '@repo/data-access': fileURLToPath(
-        new URL('../../packages/data-access/src', import.meta.url),
-      ),
-      '@repo/scan-ingestion': fileURLToPath(
-        new URL('../../packages/scan-ingestion/src', import.meta.url),
-      ),
-      '@repo/ui': fileURLToPath(
-        new URL('../../packages/ui/src', import.meta.url),
-      ),
-    },
+    alias: [
+      {
+        find: /^@\//,
+        replacement: `${fileURLToPath(new URL('src', import.meta.url))}/`,
+      },
+      {
+        find: '@repo/data-access',
+        replacement: fileURLToPath(
+          new URL('../../packages/data-access/src', import.meta.url),
+        ),
+      },
+      {
+        find: '@repo/scan-ingestion',
+        replacement: fileURLToPath(
+          new URL('../../packages/scan-ingestion/src', import.meta.url),
+        ),
+      },
+      {
+        find: /^@repo\/ui\/(.*)$/,
+        replacement: `${fileURLToPath(new URL('../../packages/ui/src', import.meta.url))}/$1`,
+      },
+      {
+        find: /^@repo\/ui$/,
+        replacement: fileURLToPath(
+          new URL('../../packages/ui/src/public-api.ts', import.meta.url),
+        ),
+      },
+    ],
     tsconfigPaths: true,
   },
   run: runConfig,

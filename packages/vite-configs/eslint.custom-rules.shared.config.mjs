@@ -85,7 +85,29 @@ const GLOBAL_IGNORES = [
   'utils/**',
 ];
 
+const UI_PUBLIC_IMPORT_BOUNDARY_PATTERNS = [
+  {
+    group: ['@repo/ui/src/**'],
+    message:
+      'Do not import from @repo/ui source internals. Use @repo/ui public exports or supported subpaths.',
+  },
+  {
+    group: ['@repo/ui/**/index', '@repo/ui/**/index.*'],
+    message:
+      'Do not import @repo/ui index files directly. Use the folder path or @repo/ui root exports.',
+  },
+  {
+    group: [
+      '@repo/ui/**/*.component',
+      '!@repo/ui/components/Settings/Settings.component',
+    ],
+    message:
+      'Do not import component implementation files directly from @repo/ui. Import from @repo/ui root exports or component barrels.',
+  },
+];
+
 export const createCustomRulesLintConfig = async ({
+  enforceUiPublicImportBoundary = false,
   ignorePatterns = [],
   tsconfigRootDir = process.cwd(),
 } = {}) => {
@@ -246,6 +268,14 @@ export const createCustomRulesLintConfig = async ({
         'local-rules/merge-duplicate-imports': 'error',
         'local-rules/no-inline-type-imports': 'error',
         'local-rules/type-suffix-naming': 'error',
+        ...(enforceUiPublicImportBoundary && {
+          'no-restricted-imports': [
+            'error',
+            {
+              patterns: UI_PUBLIC_IMPORT_BOUNDARY_PATTERNS,
+            },
+          ],
+        }),
       },
     },
     {

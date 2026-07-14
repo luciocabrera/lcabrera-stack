@@ -1,8 +1,6 @@
 import type { ProjectRunRow } from '@repo/scan-ingestion/queries/getProjectRuns.util';
 
-import { NavLink } from '@repo/ui/components/NavLink';
-import { StatusBadge } from '@repo/ui/components/StatusBadge';
-import { TableLayout } from '@repo/ui/components/Table/TableLayout';
+import { NavLink, StatusBadge, TableLayout } from '@repo/ui';
 import { createEmptyColumnsState } from '@repo/ui/components/Table/utils/createEmptyColumnsState.util';
 import { Suspense } from 'react';
 import { useLoaderData } from 'react-router';

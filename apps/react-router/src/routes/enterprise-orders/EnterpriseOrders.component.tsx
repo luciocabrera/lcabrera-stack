@@ -1,6 +1,6 @@
-import type { Pagination } from '@repo/ui/types/ui.types';
+import type { Pagination } from '@repo/ui';
 
-import { TableLayout } from '@repo/ui/components/Table/TableLayout';
+import { TableLayout } from '@repo/ui';
 import { useLoaderData } from 'react-router';
 
 import type { EnterpriseOrder, EnterpriseOrdersResponse } from '@/services';

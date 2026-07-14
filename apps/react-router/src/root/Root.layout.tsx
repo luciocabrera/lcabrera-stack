@@ -1,6 +1,6 @@
-import type { LayoutProps } from '@repo/ui/types/ui.types';
+import type { LayoutProps } from '@repo/ui';
 
-import { AppDocument } from '@repo/ui/components/AppDocument';
+import { AppDocument } from '@repo/ui';
 import { useRouteLoaderData } from 'react-router';
 
 import type { loader as rootLoader } from './root.loader';

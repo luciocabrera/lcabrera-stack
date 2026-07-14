@@ -4,6 +4,18 @@
   "private": true,
   "type": "module",
   "sideEffects": false,
+  "exports": {
+    ".": "./src/public-api.ts",
+    "./entry/*": "./src/entry/*",
+    "./routing/*": "./src/routing/*",
+    "./hooks": "./src/hooks/index.ts",
+    "./hooks/*": "./src/hooks/*",
+    "./components/*": "./src/components/*",
+    "./contexts/*": "./src/contexts/*",
+    "./types/*": "./src/types/*",
+    "./utils/*": "./src/utils/*",
+    "./design-system/*": "./src/design-system/*"
+  },
   "scripts": {
     "format": "vp fmt .",
     "format:check": "vp fmt --check .",

@@ -1,6 +1,6 @@
 import type { UserListViewRow } from '@repo/scan-ingestion/queries/getUserListView.util';
 
-import { TableLayout } from '@repo/ui/components/Table/TableLayout';
+import { TableLayout } from '@repo/ui';
 import { createEmptyColumnsState } from '@repo/ui/components/Table/utils/createEmptyColumnsState.util';
 import { useLoaderData } from 'react-router';
 

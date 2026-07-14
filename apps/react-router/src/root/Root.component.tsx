@@ -1,5 +1,4 @@
-import { AppProviders } from '@repo/ui/components/AppProviders';
-import { AppShell } from '@repo/ui/components/AppShell';
+import { AppProviders, AppShell } from '@repo/ui';
 import { useLoaderData } from 'react-router';
 
 import { APP_ID } from '@/constants/app.constants';

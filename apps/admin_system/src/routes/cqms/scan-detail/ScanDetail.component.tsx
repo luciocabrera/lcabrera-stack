@@ -1,10 +1,7 @@
 import type { ScanFindingsResult } from '@repo/scan-ingestion/queries/getScanFindings.util';
 
-import { JsonExplorer } from '@repo/ui/components/JsonExplorer';
-import { StatusBadge } from '@repo/ui/components/StatusBadge';
-import { TableLayout } from '@repo/ui/components/Table/TableLayout';
+import { JsonExplorer, StatusBadge, TableLayout, Tabs } from '@repo/ui';
 import { createEmptyColumnsState } from '@repo/ui/components/Table/utils/createEmptyColumnsState.util';
-import { Tabs } from '@repo/ui/components/Tabs';
 import { Suspense } from 'react';
 import { useLoaderData } from 'react-router';
 
