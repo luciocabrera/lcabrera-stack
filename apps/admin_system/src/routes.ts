@@ -38,5 +38,6 @@ export default [
     route('admin/roles/edit/:roleName', 'routes/cqms/edit-role/root.ts'),
     route('admin/roles/view/:roleName', 'routes/cqms/role-detail/root.ts'),
     route('admin/llm-usage', 'routes/cqms/llm-usage/root.ts'),
+    route('account/tokens', 'routes/cqms/account-tokens/root.ts'),
   ]),
 ] satisfies RouteConfig;
