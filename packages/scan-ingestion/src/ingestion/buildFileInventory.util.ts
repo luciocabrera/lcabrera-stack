@@ -5,16 +5,7 @@ import type { RunFileInput } from './report.schema.ts';
 import { listDirectoryWithin } from '../fs/listDirectoryWithin.util.ts';
 import { readTextFileWithin } from '../fs/readTextFileWithin.util.ts';
 import { classifyFileTypeCategory } from './classifyFileTypeCategory.util.ts';
-
-const IGNORED_DIRECTORIES = new Set([
-  '.git',
-  '.react-router',
-  '.tmp',
-  'build',
-  'coverage',
-  'dist',
-  'node_modules',
-]);
+import { IGNORED_DIRECTORIES } from './ignoredDirectories.constants.ts';
 
 const getExtension = (fileName: string): string => {
   const dotIndex = fileName.lastIndexOf('.');

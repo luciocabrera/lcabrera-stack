@@ -20,24 +20,12 @@ import {
   scopeTypeSchema,
 } from '../ingestion/report.schema.ts';
 import { getUserByUsername } from '../queries/getUserByUsername.util.ts';
+import { parseCliFlags } from './parseCliFlags.util.ts';
 
 const SYSTEM_USERNAME = 'system';
 
 const REPORT_JSON_FILENAME = 'report.json';
 const REPORT_MARKDOWN_FILENAME = 'report.md';
-
-const parseArgs = (argv: readonly string[]): Record<string, string> => {
-  const result: Record<string, string> = {};
-
-  for (const arg of argv) {
-    const match = /^--([^=]+)=(.*)$/.exec(arg);
-    if (match?.[1] && match[2] !== undefined) {
-      result[match[1]] = match[2];
-    }
-  }
-
-  return result;
-};
 
 const printUsage = (): void => {
   console.error(
@@ -48,7 +36,7 @@ const printUsage = (): void => {
 };
 
 const run = async (): Promise<void> => {
-  const flags = parseArgs(process.argv.slice(2));
+  const flags = parseCliFlags(process.argv.slice(2));
   const skill = flags.skill;
   const runDir = flags['run-dir'];
   // Path-based project matching retired with ADR-028 — ad hoc ingestion

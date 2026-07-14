@@ -5,6 +5,7 @@ export default [
   route('login', 'routes/login/root.ts'),
   route('logout', 'routes/logout/root.ts'),
   route('_action/persist-cookie', 'routes/api/persist-cookie/root.ts'),
+  route('_action/push-snapshot/:projectId', 'routes/api/push-snapshot/root.ts'),
   route('settings', 'routes/settings/root.ts'),
   route('cqms', 'routes/cqms/layout.ts', [
     index('routes/cqms/cqmsIndex.root.ts'),
