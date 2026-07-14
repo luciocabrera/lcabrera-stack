@@ -1,7 +1,6 @@
 import { persistTableMetaUiState } from '@repo/ui/components/Table/utils';
 
 import { useTableConfigContextValue } from '../../useTableConfigContextValue.hook';
-
 import { getNextStatePatch } from './utils';
 
 type SetTableDrawersOpenStateArgs = {
