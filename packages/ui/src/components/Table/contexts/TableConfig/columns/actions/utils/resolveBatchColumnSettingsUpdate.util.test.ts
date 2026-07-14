@@ -3,12 +3,13 @@ import type {
   TableColumnsState,
 } from '@repo/ui/components/Table/Table.types';
 
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { resolveBatchColumnSettingsUpdate } from './resolveBatchColumnSettingsUpdate.util';
 
 const {
   mockDeriveColumnViewState,
+  mockGetColumnPinSide,
   mockGetNewColumnFiltersBasedOnColumnKey,
   mockGetNewColumnSizingBasedOnColumnKey,
   mockGetNewPinningBasedOnColumnKey,
@@ -45,6 +46,7 @@ const {
       },
     },
   })),
+  mockGetColumnPinSide: vi.fn(() => undefined),
   mockGetNewColumnFiltersBasedOnColumnKey: vi.fn(() => ({
     name: { operator: 'contains', type: 'text', value: 'ali' },
   })),
@@ -66,6 +68,7 @@ const {
 
 vi.mock('@repo/ui/components/Table/utils', () => ({
   deriveColumnViewState: mockDeriveColumnViewState,
+  getColumnPinSide: mockGetColumnPinSide,
   syncColumnOrderWithPinning: mockSyncColumnOrderWithPinning,
 }));
 
@@ -99,6 +102,10 @@ vi.mock(
 );
 
 describe('resolveBatchColumnSettingsUpdate', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('combines per-column resolvers into the next table config slices', () => {
     const columnsState: Partial<
       TableColumnsState<{
@@ -221,5 +228,63 @@ describe('resolveBatchColumnSettingsUpdate', () => {
       },
       sorting: [{ columnKey: 'name', direction: 'desc' }],
     });
+  });
+
+  it('preserves column order when only sorting changes for an already unpinned column', () => {
+    mockGetColumnPinSide.mockReturnValueOnce(undefined);
+    mockGetNewPinningBasedOnColumnKey.mockReturnValueOnce({
+      left: ['id'],
+      right: [],
+    });
+
+    const columnsState: Partial<
+      TableColumnsState<{
+        readonly age: number;
+        readonly id: string;
+        readonly name: string;
+      }>
+    > = {
+      columnFilters: {} as ColumnFiltersState<{
+        readonly age: number;
+        readonly id: string;
+        readonly name: string;
+      }>,
+      columnOrder: ['name', 'id', 'age'],
+      columnPinning: { left: ['id'], right: [] },
+      columns: [
+        { key: 'id', label: 'ID' },
+        { key: 'name', label: 'Name' },
+        { key: 'age', label: 'Age' },
+      ],
+      columnSizing: { actions: 0, age: 80, id: 100, name: 140 },
+      sorting: [{ columnKey: 'name', direction: 'asc' }],
+      staticKeys: new Set<string>(['id']),
+    };
+
+    const result = resolveBatchColumnSettingsUpdate<{
+      readonly age: number;
+      readonly id: string;
+      readonly name: string;
+    }>({
+      columnsState,
+      settings: {
+        columnKey: 'name',
+        sorting: 'desc',
+      },
+    });
+
+    expect(mockSyncColumnOrderWithPinning).not.toHaveBeenCalled();
+    expect(mockDeriveColumnViewState).toHaveBeenCalledWith({
+      columnOrder: ['name', 'id', 'age'],
+      columnPinning: { left: ['id'], right: [] },
+      columns: [
+        { key: 'id', label: 'ID' },
+        { key: 'name', label: 'Name' },
+        { key: 'age', label: 'Age' },
+      ],
+      columnSizing: { actions: 0, age: 80, id: 100, name: 220 },
+      sorting: [{ columnKey: 'name', direction: 'desc' }],
+    });
+    expect(result.columnOrder).toEqual(['name', 'id', 'age']);
   });
 });

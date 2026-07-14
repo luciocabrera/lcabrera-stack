@@ -8,6 +8,7 @@ import type { SortDirection } from '@repo/ui/types/ui.types';
 
 import {
   deriveColumnViewState,
+  getColumnPinSide,
   syncColumnOrderWithPinning,
 } from '@repo/ui/components/Table/utils';
 import { getNewColumnFiltersBasedOnColumnKey } from '@repo/ui/components/Table/utils/getNewColumnFiltersBasedOnColumnKey.util';
@@ -62,14 +63,22 @@ export const resolveBatchColumnSettingsUpdate = <TData>({
     staticKeys: columnsState?.staticKeys,
   });
 
-  const newColumnOrder = syncColumnOrderWithPinning<TData>({
+  const previousColumnPinning = getColumnPinSide<TData>({
     columnKey,
-    columnPinning,
-    columns,
-    currentOrder: columnsState?.columnOrder,
-    newPinning,
-    previousPinning: columnsState?.columnPinning,
+    pinning: columnsState?.columnPinning,
   });
+
+  const newColumnOrder =
+    previousColumnPinning === columnPinning
+      ? (columnsState?.columnOrder ?? columns.map((column) => column.key))
+      : syncColumnOrderWithPinning<TData>({
+          columnKey,
+          columnPinning,
+          columns,
+          currentOrder: columnsState?.columnOrder,
+          newPinning,
+          previousPinning: columnsState?.columnPinning,
+        });
 
   const {
     columnGroups,
