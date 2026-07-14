@@ -2,6 +2,8 @@ import { persistTableMetaUiState } from '@repo/ui/components/Table/utils';
 
 import { useTableConfigContextValue } from '../../useTableConfigContextValue.hook';
 
+import { getNextStatePatch } from './utils';
+
 type SetTableDrawersOpenStateArgs = {
   readonly isColumnSettingsOpen: boolean;
   readonly isTableSettingsOpen: boolean;
@@ -15,29 +17,11 @@ export const useSetTableDrawersOpenState = () => {
     isTableSettingsOpen,
   }: SetTableDrawersOpenStateArgs) => {
     const metaState = metaStore.get();
-
-    const isOpeningColumnSettings =
-      isColumnSettingsOpen && !isTableSettingsOpen;
-
-    const isSwitchingBetweenColumnSettings =
-      isOpeningColumnSettings && (metaState?.isColumnSettingsOpen ?? false);
-
-    let wasTableSettingsOpenBeforeColumnSettings =
-      metaState?.wasTableSettingsOpenBeforeColumnSettings ?? false;
-
-    if (isSwitchingBetweenColumnSettings) {
-      wasTableSettingsOpenBeforeColumnSettings =
-        metaState?.wasTableSettingsOpenBeforeColumnSettings ?? false;
-    } else if (isOpeningColumnSettings) {
-      wasTableSettingsOpenBeforeColumnSettings =
-        metaState?.isTableSettingsOpen ?? false;
-    }
-
-    const nextStatePatch = {
+    const nextStatePatch = getNextStatePatch({
       isColumnSettingsOpen,
       isTableSettingsOpen,
-      wasTableSettingsOpenBeforeColumnSettings,
-    };
+      metaState,
+    });
 
     persistTableMetaUiState({
       currentState: metaState,

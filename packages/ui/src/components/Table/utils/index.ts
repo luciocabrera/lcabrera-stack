@@ -1,10 +1,10 @@
 export { createBasicColumn } from './createBasicColumn.util';
 export { deriveColumnViewState } from './deriveColumnViewState.util';
 export { getColumnPinSide } from './getColumnPinSide.util';
+export { getColumnSettingsNextStatePatch } from './getColumnSettingsNextStatePatch.util';
 export { getHasQueryChanged } from './getHasQueryChanged.util';
 export { getIsTableSettingsOpen } from './getIsTableSettingsOpen.util';
 export { getNormalizedColumns } from './getNormalizedColumns.util';
-export { getNextStatePatch } from './getNextStatePatch.util';
 export { getPinnedColumnOffsets } from './getPinnedColumnOffsets.util';
 export { getPinnedDerivedColumnsState } from './getPinnedDerivedColumnsState.util';
 export { persistTableMetaUiState } from './persistTableMetaUiState.service';

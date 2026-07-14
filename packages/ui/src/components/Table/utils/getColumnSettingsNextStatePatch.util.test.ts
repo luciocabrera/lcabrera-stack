@@ -2,9 +2,9 @@ import type { TableMetaState } from '@repo/ui/components/Table/Table.types';
 
 import { describe, expect, it } from 'vitest';
 
-import { getNextStatePatch } from './getNextStatePatch.util';
+import { getColumnSettingsNextStatePatch } from './getColumnSettingsNextStatePatch.util';
 
-describe('getNextStatePatch', () => {
+describe('getColumnSettingsNextStatePatch', () => {
   it('keeps the column settings drawer open when it is pinned', () => {
     const metaState = {
       isColumnSettingsPinned: true,
@@ -12,7 +12,7 @@ describe('getNextStatePatch', () => {
       wasTableSettingsOpenBeforeColumnSettings: true,
     } as Partial<TableMetaState>;
 
-    const result = getNextStatePatch({ metaState });
+    const result = getColumnSettingsNextStatePatch({ metaState });
 
     expect(result).toEqual({
       isColumnSettingsOpen: true,
@@ -26,7 +26,7 @@ describe('getNextStatePatch', () => {
       wasTableSettingsOpenBeforeColumnSettings: true,
     } as Partial<TableMetaState>;
 
-    const result = getNextStatePatch({ metaState });
+    const result = getColumnSettingsNextStatePatch({ metaState });
 
     expect(result).toEqual({
       isColumnSettingsOpen: false,

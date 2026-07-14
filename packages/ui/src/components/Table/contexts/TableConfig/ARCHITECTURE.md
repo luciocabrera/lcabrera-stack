@@ -56,6 +56,8 @@ TableConfig/
 │   ├── useMetaStore.hook.ts                 → useSyncExternalStore + selector
 │   │
 │   ├── actions/
+│   │   ├── utils/getNextStatePatch.util.ts                → Build drawer-open state patches while preserving the restore snapshot
+│   │   ├── utils/getNextToggleColumnSettingsStatePatch.util.ts → Build the next patch when toggling the column-settings drawer
 │   │   ├── useSetTableColumnSelectedKey.hook.ts          → Track selected column
 │   │   ├── useToogleTableIsColumnSettingsOpen.hook.ts    → Toggle column settings drawer
 │   │   └── useToogleTableIsTableSettingsOpen.hook.ts     → Toggle table settings drawer
@@ -215,9 +217,9 @@ The two batch settings hooks now share two focused pure helpers instead of each 
 | ---------------------------------- | ------------------------- | -------------------------------------------------------------------------------------- |
 | `deriveColumnViewState`            | `components/Table/utils/` | Compose `normalizedColumns` with `getPinnedDerivedColumnsState()` output               |
 | `buildPersistencePayload`          | `columns/actions/utils/`  | Build the persistence entry array for batch settings updates                           |
+| `getColumnSettingsNextStatePatch`  | `components/Table/utils/` | Build the persisted meta patch after applying column settings                          |
 | `getHasQueryChanged`               | `components/Table/utils/` | Compare current vs next filters/sorting to decide whether query revalidation is needed |
 | `getIsTableSettingsOpen`           | `components/Table/utils/` | Restore the table-settings drawer when column settings borrowed its open state         |
-| `getNextStatePatch`                | `components/Table/utils/` | Build the persisted meta patch after applying column settings                          |
 | `resolveBatchColumnSettingsUpdate` | `columns/actions/utils/`  | Compose the next per-column batch update from shared sort/filter/size/pin resolvers    |
 | `resolveBatchTableSettingsUpdate`  | `columns/actions/utils/`  | Compose the next table-wide settings update from incoming settings plus derived slices |
 

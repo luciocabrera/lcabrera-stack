@@ -2,8 +2,8 @@ import { useTableConfigContextValue } from '@repo/ui/components/Table/contexts/T
 import { useTableDataContextValue } from '@repo/ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
 import { usePersistTableStateAction } from '@repo/ui/components/Table/hooks';
 import {
+  getColumnSettingsNextStatePatch,
   getHasQueryChanged,
-  getNextStatePatch,
   persistTableMetaUiState,
 } from '@repo/ui/components/Table/utils';
 
@@ -54,7 +54,7 @@ export const useBatchSetColumnSettings = <TData>() => {
     }
 
     columnsStore.set(resolvedUpdate);
-    const nextStatePatch = getNextStatePatch({ metaState });
+    const nextStatePatch = getColumnSettingsNextStatePatch({ metaState });
 
     persistTableMetaUiState({
       currentState: metaState,
