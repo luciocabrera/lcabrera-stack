@@ -28,7 +28,6 @@ export const ColumnWidthPresetButtons = ({
       isBusy={isBusy}
       onClick={onToggleMin}
       size='sm'
-      width='full'
     >
       {minLabel}
     </Button>
@@ -39,7 +38,6 @@ export const ColumnWidthPresetButtons = ({
       isBusy={isBusy}
       onClick={onToggleMax}
       size='sm'
-      width='full'
     >
       {maxLabel}
     </Button>
@@ -49,7 +47,6 @@ export const ColumnWidthPresetButtons = ({
       isBusy={isBusy}
       onClick={onToggleDefault}
       size='sm'
-      width='full'
     >
       {defaultLabel}
     </Button>

@@ -1,3 +1,4 @@
+import * as stylex from '@stylexjs/stylex';
 import { describe, expect, it } from 'vitest';
 
 import { linkItemStyles } from '../NavLink.stylex';
@@ -26,17 +27,20 @@ describe('getClassName', () => {
     expect(typeof result).toBe('string');
   });
 
-  it('always applies the full-width style regardless of size', () => {
-    const embedded = getClassName({
-      isActive: false,
-      orientation: 'vertical',
-      size: 'embedded',
-      styles: linkItemStyles,
-      variant: 'primary',
-    });
+  it('applies the full-width class for every size, including mini and embedded', () => {
+    const fullWidthClass = stylex.props(linkItemStyles.fullWidth).className;
 
-    expect(embedded).toEqual(expect.any(String));
-    expect(embedded).not.toBe('');
+    for (const size of ['embedded', 'mini', 'sm', 'md', 'lg'] as const) {
+      const result = getClassName({
+        isActive: false,
+        orientation: 'vertical',
+        size,
+        styles: linkItemStyles,
+        variant: 'primary',
+      });
+
+      expect(result.split(' ')).toContain(fullWidthClass);
+    }
   });
 
   it('keeps deprecated color-compatible semantics through variant values', () => {

@@ -71,7 +71,6 @@ export const FilterItemHeader = ({
         onClick={handleRemove}
         size='mini'
         tooltipContent={`Remove ${label} filter`}
-        width='auto'
       />
     </div>
   );

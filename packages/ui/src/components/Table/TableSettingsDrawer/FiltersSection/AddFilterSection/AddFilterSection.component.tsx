@@ -45,7 +45,6 @@ export const AddFilterSection = ({
           isDisabled={!selectedColumn}
           onClick={handleAddFilter}
           size='sm'
-          width='full'
         >
           Add
         </Button>

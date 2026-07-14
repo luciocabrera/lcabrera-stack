@@ -55,7 +55,6 @@ export const NavigationHeaderActions = ({
         title={expandButtonLabel}
         tooltipContent={expandButtonLabel}
         tooltipPlacement={controlTooltipPlacement}
-        width='auto'
       />
       <Button
         aria-label={pinButtonLabel}
@@ -73,7 +72,6 @@ export const NavigationHeaderActions = ({
         title={pinButtonLabel}
         tooltipContent={pinButtonLabel}
         tooltipPlacement={controlTooltipPlacement}
-        width='auto'
       />
       {isPinned ? undefined : (
         <Button
@@ -86,7 +84,6 @@ export const NavigationHeaderActions = ({
           title='Close navigation'
           tooltipContent='Close navigation'
           tooltipPlacement={controlTooltipPlacement}
-          width='auto'
         />
       )}
     </div>

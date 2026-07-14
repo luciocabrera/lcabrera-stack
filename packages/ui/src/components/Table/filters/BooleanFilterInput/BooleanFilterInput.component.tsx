@@ -38,7 +38,6 @@ export const BooleanFilterInput = ({
         color={selectedValue === 'all' ? 'primary' : 'outline'}
         onClick={handleSelectAll}
         size='sm'
-        width='full'
       >
         All
       </Button>
@@ -46,7 +45,6 @@ export const BooleanFilterInput = ({
         color={selectedValue === 'true' ? 'primary' : 'outline'}
         onClick={handleSelectTrue}
         size='sm'
-        width='full'
       >
         True
       </Button>
@@ -54,7 +52,6 @@ export const BooleanFilterInput = ({
         color={selectedValue === 'false' ? 'primary' : 'outline'}
         onClick={handleSelectFalse}
         size='sm'
-        width='full'
       >
         False
       </Button>
