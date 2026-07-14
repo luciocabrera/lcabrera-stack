@@ -14,6 +14,9 @@ Tabs/
 │   ├── TabsHeader.component.tsx      → Tab list + keyboard navigation + focus refs
 │   ├── TabsHeader.types.ts           → TabsHeaderProps
 │   ├── TabsHeader.stylex.ts          → tabList
+│   ├── utils/
+│   │   ├── getNewIndex.util.ts       → Keyboard-navigation index resolver (Arrow/Home/End)
+│   │   └── getNewIndex.util.test.ts  → Unit coverage for key-to-index mapping
 │   └── TabsHeaderButton/             → Private delegate (no barrel)
 │       ├── TabsHeaderButton.component.tsx  → Single tab button render + click selection
 │       ├── TabsHeaderButton.types.ts       → TabsHeaderButtonProps
@@ -92,6 +95,8 @@ Handled by `onKeyDown` on the `role="tablist"` wrapper inside `TabsHeader`:
 | `ArrowRight` | Move to next tab (wraps to first)    |
 | `Home`       | Move to first tab                    |
 | `End`        | Move to last tab                     |
+
+`TabsHeader` delegates key-to-index mapping to `TabsHeader/utils/getNewIndex.util.ts` so the navigation math remains pure and unit-testable.
 
 On navigation: `onSelectTab(newKey)` + `tabRefs.get(newKey)?.focus()`. Navigation is ignored while `isBusy`.
 

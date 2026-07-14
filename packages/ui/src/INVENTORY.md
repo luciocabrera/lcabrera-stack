@@ -120,6 +120,12 @@ Covers `packages/ui` only. API-layer utilities (`api.util.ts`, `buildPaginatedQu
 | `getVerticalVirtualizationWindow` | `hooks/utils/getVerticalVirtualizationWindow.util.ts` | Computes fixed-row virtualization window geometry shared by vertical hooks                              |
 | `setupObservedContainer`          | `hooks/utils/setupObservedContainer.util.ts`          | Attaches a ResizeObserver + scroll listener to a container element; preserves scroll position on resize |
 
+### `src/components/Tabs/TabsHeader/utils/` _(private delegates)_
+
+| Function      | Location                                               | Description                                                                |
+| ------------- | ------------------------------------------------------ | -------------------------------------------------------------------------- |
+| `getNewIndex` | `components/Tabs/TabsHeader/utils/getNewIndex.util.ts` | Resolves the target tab index for ArrowLeft/ArrowRight/Home/End navigation |
+
 ### `src/components/Form/utils/` _(private delegates)_
 
 | Function              | Location                                            | Description                                                                                 |

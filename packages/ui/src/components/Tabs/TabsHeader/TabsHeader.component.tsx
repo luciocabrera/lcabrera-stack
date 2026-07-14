@@ -8,6 +8,7 @@ import type { SetTabRefArgs } from './TabsHeaderButton/TabsHeaderButton.types';
 
 import { styles } from './TabsHeader.stylex';
 import { TabsHeaderButton } from './TabsHeaderButton/TabsHeaderButton.component';
+import { getNewIndex } from './utils/getNewIndex.util';
 
 /**
  * Tab strip with roving-tabindex keyboard navigation (ArrowLeft/ArrowRight/Home/End).
@@ -29,30 +30,17 @@ export const TabsHeader = ({
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (tabs.length === 0 || isBusy) return;
 
-    let newIndex: number;
-    const currentIndex = activeIndex === -1 ? 0 : activeIndex;
+    const newIndexResult = getNewIndex({
+      activeIndex,
+      key: event.key,
+      tabsLength: tabs.length,
+    });
 
-    switch (event.key) {
-      case 'ArrowLeft': {
-        newIndex = (currentIndex - 1 + tabs.length) % tabs.length;
-        break;
-      }
-      case 'ArrowRight': {
-        newIndex = (currentIndex + 1) % tabs.length;
-        break;
-      }
-      case 'End': {
-        newIndex = tabs.length - 1;
-        break;
-      }
-      case 'Home': {
-        newIndex = 0;
-        break;
-      }
-      default: {
-        return;
-      }
+    if (!newIndexResult) {
+      return;
     }
+
+    const { currentIndex, newIndex } = newIndexResult;
 
     const newTab = tabs[newIndex];
 
