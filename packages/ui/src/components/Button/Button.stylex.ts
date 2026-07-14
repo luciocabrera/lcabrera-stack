@@ -1,7 +1,4 @@
-import {
-  borderRadius,
-  shadows,
-} from '@repo/ui/design-system/tokens/base.stylex';
+import { borderRadius } from '@repo/ui/design-system/tokens/base.stylex';
 import {
   baseInteractiveStyles,
   colorVariants,
@@ -41,18 +38,6 @@ const buttonSpecificStyles = stylex.create({
   overlayOverwrite: { filter: null },
 });
 
-const styleVariants = stylex.create({
-  elevated: {
-    boxShadow: shadows.md,
-  },
-  flat: {
-    boxShadow: shadows.none,
-  },
-  solid: {
-    boxShadow: shadows.sm,
-  },
-});
-
 const loadingStyles = stylex.create({
   overlay: {
     borderRadius: borderRadius.md,
@@ -67,7 +52,7 @@ export const buttonStyles = {
     ...buttonSpecificStyles.button,
     ...rippleBase.ripple,
   },
-  color: colorVariants,
+  variant: colorVariants,
   icon: baseInteractiveStyles.icon,
   iconOnly: buttonSpecificStyles.iconOnly,
   busyState: buttonSpecificStyles.busyState,
@@ -78,7 +63,6 @@ export const buttonStyles = {
   busyWave: skeleton.shimmerWave,
   overlayOverwrite: buttonSpecificStyles.overlayOverwrite,
   size: sizeVariants,
-  style: styleVariants,
   width: widthVariants,
   ...overlayStyles,
 };

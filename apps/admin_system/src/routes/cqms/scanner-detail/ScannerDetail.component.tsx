@@ -22,7 +22,10 @@ export const ScannerDetail = () => {
         {scanner.deterministic ? 'Deterministic' : 'LLM agent'} · v
         {scanner.version} · {scanner.skill_path}
       </p>
-      <NavLink color='primary' to={`/cqms/scanners/edit/${scanner.scanner_id}`}>
+      <NavLink
+        to={`/cqms/scanners/edit/${scanner.scanner_id}`}
+        variant='primary'
+      >
         Edit Scanner
       </NavLink>
 

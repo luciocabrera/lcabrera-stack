@@ -23,7 +23,6 @@ export const NavbarItem = ({
   const resolvedSize = item.size ?? size;
   const sharedControlProps = {
     'aria-label': isCompact ? item.label : undefined,
-    color: item.color,
     customStylex: isCompact ? getCompactControlStyle(resolvedSize) : undefined,
     icon: item.icon,
     isIconOnly: isCompact,
@@ -31,6 +30,7 @@ export const NavbarItem = ({
     size: resolvedSize,
     tooltipContent: isCompact ? item.label : undefined,
     tooltipPlacement: 'right' as const,
+    variant: item.variant,
     width: 'full' as const,
   };
 

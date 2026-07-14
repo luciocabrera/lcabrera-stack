@@ -16,7 +16,7 @@ export const ShowcasePage = () => {
       <div {...stylex.props(styles.container)}>
         <header {...stylex.props(styles.header)}>
           <h1 {...stylex.props(styles.title)}>Design System Showcase</h1>
-          <Button color='ghost' onClick={toggleTheme}>
+          <Button onClick={toggleTheme} variant='ghost'>
             {isDarkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
           </Button>
         </header>

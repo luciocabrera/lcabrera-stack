@@ -14,7 +14,7 @@ export const ClearResetToolbarButtons = ({
   variant,
 }: ClearResetToolbarButtonsProps) => {
   const isToolbar = variant === 'toolbar';
-  const buttonColor = isToolbar ? 'ghost' : 'outline';
+  const buttonVariant = isToolbar ? 'ghost' : 'outline';
   const buttonSize = isToolbar ? 'mini' : 'sm';
   const buttonWidth = isToolbar ? 'auto' : 'full';
   const iconSize = isToolbar ? ICON_SIZE_SM : ICON_SIZE_MD;
@@ -23,25 +23,25 @@ export const ClearResetToolbarButtons = ({
     <>
       <Button
         aria-label={clearLabel}
-        color={buttonColor}
         icon={<EraserIcon size={iconSize} />}
         isBusy={isBusy}
         isDisabled={!hasValue}
         onClick={onClear}
         size={buttonSize}
         tooltipContent={isToolbar ? clearLabel : undefined}
+        variant={buttonVariant}
         width={buttonWidth}
       >
         {!isToolbar && clearLabel}
       </Button>
       <Button
         aria-label={resetLabel}
-        color={buttonColor}
         icon={<RefreshIcon size={iconSize} />}
         isBusy={isBusy}
         onClick={onReset}
         size={buttonSize}
         tooltipContent={isToolbar ? resetLabel : undefined}
+        variant={buttonVariant}
         width={buttonWidth}
       >
         {!isToolbar && resetLabel}

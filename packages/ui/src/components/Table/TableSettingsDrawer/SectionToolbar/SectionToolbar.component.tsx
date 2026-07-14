@@ -17,7 +17,7 @@ export const SectionToolbar = ({
   variant = 'footer',
 }: SectionToolbarProps) => {
   const isToolbar = variant === 'toolbar';
-  const buttonColor = isToolbar ? 'ghost' : 'outline';
+  const buttonVariant = isToolbar ? 'ghost' : 'outline';
   const buttonSize = isToolbar ? 'mini' : 'sm';
   const buttonWidth = isToolbar ? 'auto' : 'full';
   // Icons default to ICON_SIZE_MD; only the toolbar variant needs an override.
@@ -28,7 +28,6 @@ export const SectionToolbar = ({
       {buttons.map(({ icon: Icon, ...button }) => (
         <Button
           aria-label={button.label}
-          color={buttonColor}
           icon={<Icon size={iconSize} />}
           isBusy={isBusy}
           isDisabled={button.isDisabled}
@@ -36,6 +35,7 @@ export const SectionToolbar = ({
           onClick={button.onClick}
           size={buttonSize}
           tooltipContent={isToolbar ? button.label : undefined}
+          variant={buttonVariant}
           width={buttonWidth}
         >
           {!isToolbar && button.label}

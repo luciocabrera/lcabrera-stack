@@ -18,7 +18,7 @@ export const UserDetail = () => {
         />{' '}
         {user.username}
       </p>
-      <NavLink color='primary' to={`/cqms/admin/users/edit/${user.username}`}>
+      <NavLink to={`/cqms/admin/users/edit/${user.username}`} variant='primary'>
         Edit User
       </NavLink>
 

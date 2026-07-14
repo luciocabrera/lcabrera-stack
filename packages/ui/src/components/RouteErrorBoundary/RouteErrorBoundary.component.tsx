@@ -32,10 +32,10 @@ export const RouteErrorBoundary = ({
       <ErrorDescriptive />
       <p>{details}</p>
       <div {...stylex.props(styles.actions)}>
-        <Button color='primary' onClick={handleNavigateHome}>
+        <Button onClick={handleNavigateHome} variant='primary'>
           Home
         </Button>
-        <Button color='outline' onClick={revalidate}>
+        <Button onClick={revalidate} variant='outline'>
           Retry
         </Button>
       </div>

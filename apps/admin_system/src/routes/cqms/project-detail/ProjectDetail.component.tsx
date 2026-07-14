@@ -34,8 +34,8 @@ const renderTriggerAffordance = ({
   }
   return (
     <NavLink
-      color='primary'
       to={`/cqms/projects/view/${project.id}/trigger-scan`}
+      variant='primary'
     >
       Trigger Scan
     </NavLink>
@@ -57,7 +57,7 @@ export const ProjectDetail = () => {
     <div>
       <h1>{project.name}</h1>
       {renderTriggerAffordance({ hasActiveRun, project })}
-      <NavLink color='ghost' to={`/cqms/projects/edit/${project.id}`}>
+      <NavLink to={`/cqms/projects/edit/${project.id}`} variant='ghost'>
         Edit Project
       </NavLink>
 

@@ -46,7 +46,7 @@ export const ProjectGrantsPanel = ({
               <fetcher.Form method='post'>
                 <input name='intent' type='hidden' value='grant-delete' />
                 <input name='grantId' type='hidden' value={grant.id} />
-                <Button color='ghost' size='mini' type='submit'>
+                <Button size='mini' type='submit' variant='ghost'>
                   Revoke
                 </Button>
               </fetcher.Form>
@@ -81,10 +81,10 @@ export const ProjectGrantsPanel = ({
           </select>
         </label>{' '}
         <Button
-          color='primary'
           isBusy={fetcher.state !== 'idle'}
           size='mini'
           type='submit'
+          variant='primary'
         >
           Add Grant
         </Button>

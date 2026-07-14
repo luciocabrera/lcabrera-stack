@@ -51,7 +51,11 @@ export const TableSettingsDrawerFooter = ({
       <ActionButtons
         actions={[
           { label: 'Accept', onClick: handleAccept },
-          { color: 'outline', label: 'Cancel', onClick: cancelTableSettings },
+          {
+            label: 'Cancel',
+            onClick: cancelTableSettings,
+            variant: 'outline',
+          },
         ]}
         isBusy={isBusy}
       />

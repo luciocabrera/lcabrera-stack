@@ -65,4 +65,37 @@ describe('Button', () => {
     expect(screen.getByTestId('tooltip')).not.toBeNull();
     expect(MockTooltip.mock.calls[0]?.[0]?.content).toBe('Helpful tip');
   });
+
+  it('uses auto width by default', () => {
+    const defaultRender = render(<Button>Auto width</Button>);
+    const button = defaultRender.getByTestId('button');
+    const defaultClassName = button.className;
+
+    cleanup();
+
+    const autoWidthRender = render(<Button width='auto'>Auto width</Button>);
+
+    expect(button.className).toBeTruthy();
+    expect(defaultClassName).toBe(
+      autoWidthRender.getByTestId('button').className,
+    );
+  });
+
+  it('supports the new variant prop', () => {
+    render(<Button variant='ghost'>Ghost</Button>);
+
+    expect(screen.getByTestId('button').className).toBeTruthy();
+  });
+
+  it('keeps deprecated color as a fallback during migration', () => {
+    const variantRender = render(<Button variant='outline'>Outline</Button>);
+    const variantClassName = variantRender.getByTestId('button').className;
+
+    cleanup();
+
+    const colorRender = render(<Button color='outline'>Outline</Button>);
+    const colorClassName = colorRender.getByTestId('button').className;
+
+    expect(colorClassName).toBe(variantClassName);
+  });
 });

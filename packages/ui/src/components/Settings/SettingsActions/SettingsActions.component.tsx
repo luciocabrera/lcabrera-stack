@@ -25,7 +25,11 @@ export const SettingsActions = () => {
           label: 'Accept',
           onClick: acceptSettingsDraft,
         },
-        { color: 'outline', label: 'Cancel', onClick: cancelSettingsDraft },
+        {
+          label: 'Cancel',
+          onClick: cancelSettingsDraft,
+          variant: 'outline',
+        },
       ]}
       customStylex={styles.actions}
     />

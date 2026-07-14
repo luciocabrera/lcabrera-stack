@@ -10,6 +10,7 @@ import type { NavLinkProps as RouterNavLinkProps } from 'react-router';
 
 export type NavLinkProps = Omit<RouterNavLinkProps, 'children'> & {
   readonly children: ReactNode;
+  /** @deprecated Use `variant` instead. */
   readonly color?: DesignSystemColor;
   readonly customStylex?: StyleXStyles;
   readonly icon?: ReactNode;
@@ -19,5 +20,7 @@ export type NavLinkProps = Omit<RouterNavLinkProps, 'children'> & {
   readonly size?: DesignSystemSize;
   readonly tooltipContent?: ReactNode;
   readonly tooltipPlacement?: 'bottom' | 'left' | 'right' | 'top';
+  readonly variant?: DesignSystemColor;
+  /** @deprecated Width is being removed; prefer owner-level layout styles. */
   readonly width?: DesignSystemWidth;
 };

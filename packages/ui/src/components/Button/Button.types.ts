@@ -2,7 +2,6 @@ import type {
   DesignSystemColor,
   DesignSystemOrientation,
   DesignSystemSize,
-  DesignSystemStyle,
   DesignSystemWidth,
 } from '@repo/ui/types/design-system.types';
 import type { StyleXStyles } from '@stylexjs/stylex';
@@ -16,6 +15,7 @@ export type ButtonProps = Omit<
   ComponentPropsWithoutRef<'button'>,
   'onClick'
 > & {
+  /** @deprecated Use `variant` instead. */
   readonly color?: DesignSystemColor;
   readonly customStylex?: StyleXStyles;
   readonly icon?: ReactNode;
@@ -27,6 +27,7 @@ export type ButtonProps = Omit<
   readonly size?: DesignSystemSize;
   readonly tooltipContent?: ReactNode;
   readonly tooltipPlacement?: 'bottom' | 'left' | 'right' | 'top';
-  readonly variant?: DesignSystemStyle;
+  readonly variant?: DesignSystemColor;
+  /** @deprecated Width is being removed; prefer owner-level layout styles. */
   readonly width?: DesignSystemWidth;
 };

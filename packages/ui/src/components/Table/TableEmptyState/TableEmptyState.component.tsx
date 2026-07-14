@@ -56,7 +56,7 @@ export const TableEmptyState = () => {
             </div>
             <h3 {...stylex.props(styles.title)}>{titleSingular}</h3>
             <p {...stylex.props(styles.message)}>{DEFAULT_MESSAGE}</p>
-            <Button color='primary' onClick={revalidate}>
+            <Button onClick={revalidate} variant='primary'>
               Retry
             </Button>
           </div>

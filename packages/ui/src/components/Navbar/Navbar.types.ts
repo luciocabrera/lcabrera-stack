@@ -15,10 +15,10 @@ export type NavbarButtonConfig = Omit<ButtonProps, 'children' | 'width'> & {
 export type NavbarItemConfig = NavbarButtonConfig | NavbarLinkConfig;
 
 export type NavbarLinkConfig = Omit<NavLinkProps, 'children' | 'className'> & {
-  readonly color?: Pick<ButtonProps, 'color'>['color'];
   readonly icon?: ReactNode;
   readonly label: string;
   readonly type: 'link';
+  readonly variant?: Pick<ButtonProps, 'variant'>['variant'];
 };
 
 export type NavbarProps = ComponentPropsWithoutRef<'nav'> & {

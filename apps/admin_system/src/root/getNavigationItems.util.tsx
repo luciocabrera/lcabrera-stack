@@ -15,12 +15,12 @@ export const getNavigationItems = (
   iconSize: number,
 ): readonly NavbarItemConfig[] => [
   {
-    color: 'primary',
     end: true,
     icon: <ListAllIcon size={iconSize} />,
     label: 'Projects',
     to: '/cqms',
     type: 'link',
+    variant: 'primary',
   },
   {
     icon: <ListCheckedIcon size={iconSize} />,

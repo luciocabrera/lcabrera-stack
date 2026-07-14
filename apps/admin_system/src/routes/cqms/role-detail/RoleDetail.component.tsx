@@ -23,7 +23,10 @@ export const RoleDetail = () => {
         />{' '}
         {role.description ?? 'No description.'}
       </p>
-      <NavLink color='primary' to={`/cqms/admin/roles/edit/${role.role_name}`}>
+      <NavLink
+        to={`/cqms/admin/roles/edit/${role.role_name}`}
+        variant='primary'
+      >
         Edit Role
       </NavLink>
 

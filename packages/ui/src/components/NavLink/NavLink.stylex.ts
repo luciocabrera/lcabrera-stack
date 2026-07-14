@@ -34,7 +34,7 @@ export const linkItemStyles = {
     ...styles.item,
     ...rippleBase.ripple,
   },
-  color: colorVariants,
+  variant: colorVariants,
   icon: baseInteractiveStyles.icon,
   iconOnly: styles.itemIconOnly,
   label: baseInteractiveStyles.label,

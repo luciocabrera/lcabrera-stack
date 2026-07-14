@@ -9,7 +9,7 @@ import { getClassName } from './utils';
 
 export const NavLink = ({
   children,
-  color = 'ghost',
+  color,
   customStylex,
   icon,
   isIconOnly = false,
@@ -18,20 +18,23 @@ export const NavLink = ({
   size = 'md',
   tooltipContent,
   tooltipPlacement = 'top',
+  variant,
   width = 'full',
   ...props
 }: NavLinkProps) => {
+  const resolvedVariant = variant ?? color ?? 'ghost';
+
   const link = (
     <RouterNavLink
       className={({ isActive }: { readonly isActive: boolean }) => {
         const classNameValue = getClassName({
-          color,
           customStylex,
           isActive,
           isIconOnly,
           orientation,
           size,
           styles: linkItemStyles,
+          variant: resolvedVariant,
           width,
         });
         return classNameValue;

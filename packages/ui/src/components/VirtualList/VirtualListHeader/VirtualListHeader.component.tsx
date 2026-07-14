@@ -51,7 +51,6 @@ export const VirtualListHeader = () => {
           icon={<MenuCloseIcon size={ICON_SIZE_MD} />}
           onClick={clearSearch}
           size='embedded'
-          variant='flat'
           width='auto'
         />
       )}

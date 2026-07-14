@@ -7,15 +7,15 @@ import { ShowcaseSubsection } from '../ShowcaseSubsection';
 
 export const ButtonsSection = () => (
   <ShowcaseSection title='Buttons'>
-    <ShowcaseSubsection title='Colors'>
+    <ShowcaseSubsection title='Variants'>
       <div {...stylex.props(styles.buttonGrid)}>
-        <Button color='primary'>Primary</Button>
-        <Button color='secondary'>Secondary</Button>
-        <Button color='success'>Success</Button>
-        <Button color='warning'>Warning</Button>
-        <Button color='error'>Error</Button>
-        <Button color='ghost'>Ghost</Button>
-        <Button color='outline'>Outline</Button>
+        <Button variant='primary'>Primary</Button>
+        <Button variant='secondary'>Secondary</Button>
+        <Button variant='success'>Success</Button>
+        <Button variant='warning'>Warning</Button>
+        <Button variant='error'>Error</Button>
+        <Button variant='ghost'>Ghost</Button>
+        <Button variant='outline'>Outline</Button>
       </div>
     </ShowcaseSubsection>
 
@@ -24,14 +24,6 @@ export const ButtonsSection = () => (
         <Button size='sm'>Small</Button>
         <Button size='md'>Medium</Button>
         <Button size='lg'>Large</Button>
-      </div>
-    </ShowcaseSubsection>
-
-    <ShowcaseSubsection title='Variants'>
-      <div {...stylex.props(styles.buttonGrid)}>
-        <Button variant='solid'>Solid</Button>
-        <Button variant='flat'>Flat</Button>
-        <Button variant='elevated'>Elevated</Button>
       </div>
     </ShowcaseSubsection>
 

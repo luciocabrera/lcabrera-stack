@@ -4,7 +4,7 @@ import type { ComponentPropsWithoutRef } from 'react';
 
 /**
  * Declarative description of one button in an `ActionButtons` group: a
- * required `label`, plus any other `Button` prop (`color`, `size`,
+ * required `label`, plus any other `Button` prop (`variant`, `size`,
  * `icon`, `onClick`, ...). `color` defaults to `'primary'` and `size`
  * to `'sm'`. `isBusy` is deliberately excluded — busy state applies to
  * the whole group and lives on `ActionButtonsProps`. `key`

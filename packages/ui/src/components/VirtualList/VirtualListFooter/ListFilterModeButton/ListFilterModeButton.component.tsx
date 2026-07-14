@@ -26,12 +26,11 @@ export const ListFilterModeButton = ({
 
   return (
     <Button
-      color={isActive ? 'secondary' : 'ghost'}
       icon={icon}
       onClick={handleClick}
       size='mini'
       tooltipContent={`${tooltip} (${count})`}
-      variant='flat'
+      variant={isActive ? 'secondary' : 'ghost'}
       width='auto'
     />
   );

@@ -14,12 +14,12 @@ export const getNavigationItems = (
   iconSize: number,
 ): readonly NavbarItemConfig[] => [
   {
-    color: 'primary',
     end: true,
     icon: <HomeIcon size={iconSize} />,
     label: 'Home',
     to: '/',
     type: 'link',
+    variant: 'primary',
   },
   {
     icon: <SettingsIcon size={iconSize} />,
