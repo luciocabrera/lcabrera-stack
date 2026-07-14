@@ -4,8 +4,9 @@ import type {
   FiltersDataState,
   TableMetaState,
 } from '@repo/ui/components/Table/Table.types';
-import { getErrorMessage } from '@repo/ui/components/Table/utils/getErrorMessage.util';
 import type { TStore } from '@repo/ui/hooks/useStore.hook';
+
+import { getErrorMessage } from '@repo/ui/components/Table/utils/getErrorMessage.util';
 
 import { setFilterSlice } from './setFilterSlice.util';
 

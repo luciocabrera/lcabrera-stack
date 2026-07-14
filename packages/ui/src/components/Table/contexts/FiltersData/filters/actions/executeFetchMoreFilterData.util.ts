@@ -1,17 +1,19 @@
-import { DEFAULT_FILTER_PAGE_SIZE } from '@repo/ui/components/Table/Table.constants';
 import type {
   DataKey,
   FilterData,
   FiltersDataState,
   TableMetaState,
 } from '@repo/ui/components/Table/Table.types';
-import { resolveFetchMoreState } from '@repo/ui/components/Table/utils/resolveFetchMoreState.util';
 import type { TStore } from '@repo/ui/hooks/useStore.hook';
+
+import { DEFAULT_FILTER_PAGE_SIZE } from '@repo/ui/components/Table/Table.constants';
+import { resolveFetchMoreState } from '@repo/ui/components/Table/utils/resolveFetchMoreState.util';
 import { resolveFromCacheOrFetch } from '@repo/ui/utils/prefetch/resolveFromCacheOrFetch.util';
+
+import type { FetchFilterDataActionArgs } from './useFetchFilterData.types';
 
 import { clearPrefetchIfPresent } from './clearPrefetchIfPresent.util';
 import { maybePrefetchFilterPage } from './maybePrefetchFilterPage.util';
-import type { FetchFilterDataActionArgs } from './useFetchFilterData.types';
 import { setFilterSlice } from './setFilterSlice.util';
 
 type ExecuteFetchMoreFilterDataArgs<TData, TResponse> = {
