@@ -1,9 +1,10 @@
 import { updateProject } from '@repo/scan-ingestion/queries/updateProject.util';
-import { type ActionFunctionArgs, data, redirect } from 'react-router';
+import { type ActionFunctionArgs, redirect } from 'react-router';
 import { z } from 'zod';
 
 import { requireUser } from '@/auth/requireUser.util';
 
+import { parseRouteParams } from '../utils/parseRouteParams.util';
 import { editProjectSchema } from './editProject.schema';
 
 const paramsSchema = z.object({ projectId: z.string().uuid() });
@@ -19,10 +20,11 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
   // cover POSTs — every cqms action authenticates itself (ADR-017).
   const user = await requireUser({ request });
 
-  const parsedParams = paramsSchema.safeParse(params);
-  if (!parsedParams.success) {
-    throw data('Invalid project id.', { status: 400 });
-  }
+  const { projectId } = parseRouteParams({
+    invalidMessage: 'Invalid project id.',
+    params,
+    schema: paramsSchema,
+  });
 
   const formData = await request.formData();
   const parsed = editProjectSchema.safeParse({
@@ -40,11 +42,11 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
   try {
     await updateProject({
       ...parsed.data,
-      projectId: parsedParams.data.projectId,
+      projectId: projectId,
       userId: user.id,
     });
 
-    return redirect(`/cqms/projects/view/${parsedParams.data.projectId}`);
+    return redirect(`/cqms/projects/view/${projectId}`);
   } catch (error) {
     return {
       errors: {

@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { requireUser } from '@/auth/requireUser.util';
 
 import { isCheckboxChecked } from '../utils/isCheckboxChecked.util';
+import { parseRouteParams } from '../utils/parseRouteParams.util';
 import { editUserSchema } from './editUser.schema';
 
 const paramsSchema = z.object({
@@ -21,13 +22,12 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
   // role) in Postgres.
   const user = await requireUser({ request });
 
-  const parsedParams = paramsSchema.safeParse(params);
-  if (!parsedParams.success) {
-    throw data('Invalid username.', { status: 400 });
-  }
-  const target = await getUserWithRoles({
-    username: parsedParams.data.username,
+  const { username } = parseRouteParams({
+    invalidMessage: 'Invalid username.',
+    params,
+    schema: paramsSchema,
   });
+  const target = await getUserWithRoles({ username });
   if (!target) {
     throw data('User not found.', { status: 404 });
   }

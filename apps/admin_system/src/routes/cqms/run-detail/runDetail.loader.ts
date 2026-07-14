@@ -3,15 +3,16 @@ import { getRunScans } from '@repo/scan-ingestion/queries/getRunScans.util';
 import { data, type LoaderFunctionArgs } from 'react-router';
 import { z } from 'zod';
 
+import { parseRouteParams } from '../utils/parseRouteParams.util';
+
 const paramsSchema = z.object({ runId: z.string().uuid() });
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
-  const parsedParams = paramsSchema.safeParse(params);
-  if (!parsedParams.success) {
-    throw data('Invalid run id.', { status: 400 });
-  }
-
-  const { runId } = parsedParams.data;
+  const { runId } = parseRouteParams({
+    invalidMessage: 'Invalid run id.',
+    params,
+    schema: paramsSchema,
+  });
 
   const run = await getRunById({ runId });
   if (!run) {

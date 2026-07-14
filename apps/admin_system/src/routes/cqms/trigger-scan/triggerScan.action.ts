@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { requireUser } from '@/auth/requireUser.util';
 
 import { isCheckboxChecked } from '../utils/isCheckboxChecked.util';
+import { parseRouteParams } from '../utils/parseRouteParams.util';
 import { computeFanOutCount } from './computeFanOutCount.util';
 import { FAN_OUT_CONFIRMATION_THRESHOLD } from './triggerScan.constants';
 import { triggerScanSchema } from './triggerScan.schema';
@@ -19,10 +20,11 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
   // cover POSTs — every cqms action authenticates itself (ADR-017).
   const user = await requireUser({ request });
 
-  const parsedParams = paramsSchema.safeParse(params);
-  if (!parsedParams.success) {
-    throw data('Invalid project id.', { status: 400 });
-  }
+  const { projectId } = parseRouteParams({
+    invalidMessage: 'Invalid project id.',
+    params,
+    schema: paramsSchema,
+  });
 
   const formData = await request.formData();
   const parsed = triggerScanSchema.safeParse({
@@ -43,7 +45,7 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
   // form's options could be stale (a new snapshot synced since the page
   // loaded), and form values are attacker-controllable anyway (ADR-021).
   const project = await getProjectById({
-    projectId: parsedParams.data.projectId,
+    projectId: projectId,
   });
   if (!project) {
     throw data('Project not found.', { status: 404 });
@@ -108,16 +110,14 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
 
   try {
     const { runId } = await triggerScanMutation({
-      projectId: parsedParams.data.projectId,
+      projectId: projectId,
       scannerIds: parsed.data.scannerIds,
       triggeredBy: user.username,
       userId: user.id,
       workspacePaths: parsed.data.workspacePaths,
     });
 
-    return redirect(
-      `/cqms/projects/view/${parsedParams.data.projectId}/runs/${runId}`,
-    );
+    return redirect(`/cqms/projects/view/${projectId}/runs/${runId}`);
   } catch (error) {
     // fn_create_run's typed rejection (e.g. a viewer without the
     // execute/scan grant, ADR-024) renders as a field error, not a 500.

@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { requireUser } from '@/auth/requireUser.util';
 
 import { isCheckboxChecked } from '../utils/isCheckboxChecked.util';
+import { parseRouteParams } from '../utils/parseRouteParams.util';
 import { editRoleSchema } from './editRole.schema';
 
 const paramsSchema = z.object({
@@ -19,13 +20,12 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
   // seeded admin role stays immutable in Postgres.
   const user = await requireUser({ request });
 
-  const parsedParams = paramsSchema.safeParse(params);
-  if (!parsedParams.success) {
-    throw data('Invalid role name.', { status: 400 });
-  }
-  const role = await getRoleWithPermissions({
-    roleName: parsedParams.data.roleName,
+  const { roleName } = parseRouteParams({
+    invalidMessage: 'Invalid role name.',
+    params,
+    schema: paramsSchema,
   });
+  const role = await getRoleWithPermissions({ roleName });
   if (!role) {
     throw data('Role not found.', { status: 404 });
   }

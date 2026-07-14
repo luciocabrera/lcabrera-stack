@@ -5,6 +5,8 @@ import { z } from 'zod';
 
 import { requirePermission } from '@/auth/requirePermission.util';
 
+import { parseRouteParams } from '../utils/parseRouteParams.util';
+
 const paramsSchema = z.object({
   roleName: z.string().regex(/^[a-z0-9][a-z0-9-]{1,63}$/),
 });
@@ -13,14 +15,13 @@ const paramsSchema = z.object({
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
   await requirePermission({ action: 'update', request, resourceType: 'role' });
 
-  const parsedParams = paramsSchema.safeParse(params);
-  if (!parsedParams.success) {
-    throw data('Invalid role name.', { status: 400 });
-  }
-
-  const role = await getRoleWithPermissions({
-    roleName: parsedParams.data.roleName,
+  const { roleName } = parseRouteParams({
+    invalidMessage: 'Invalid role name.',
+    params,
+    schema: paramsSchema,
   });
+
+  const role = await getRoleWithPermissions({ roleName });
   if (!role) {
     throw data('Role not found.', { status: 404 });
   }

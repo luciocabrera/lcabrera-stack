@@ -5,6 +5,7 @@ import { data, type LoaderFunctionArgs } from 'react-router';
 import { z } from 'zod';
 
 import { buildJsonExplorerSections } from '../utils/buildJsonExplorerSections.util';
+import { parseRouteParams } from '../utils/parseRouteParams.util';
 
 const paramsSchema = z.object({ scanId: z.string().uuid() });
 
@@ -16,12 +17,11 @@ const paramsSchema = z.object({ scanId: z.string().uuid() });
  * for the 404 check, so neither should block the page.
  */
 export const loader = async ({ params }: LoaderFunctionArgs) => {
-  const parsedParams = paramsSchema.safeParse(params);
-  if (!parsedParams.success) {
-    throw data('Invalid scan id.', { status: 400 });
-  }
-
-  const { scanId } = parsedParams.data;
+  const { scanId } = parseRouteParams({
+    invalidMessage: 'Invalid scan id.',
+    params,
+    schema: paramsSchema,
+  });
 
   const scan = await getScanById({ scanId });
   if (!scan) {

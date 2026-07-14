@@ -10,6 +10,8 @@ import { z } from 'zod';
 
 import { requireUser } from '@/auth/requireUser.util';
 
+import { parseRouteParams } from '../utils/parseRouteParams.util';
+
 const paramsSchema = z.object({ projectId: z.string().uuid() });
 
 /**
@@ -23,12 +25,11 @@ const paramsSchema = z.object({ projectId: z.string().uuid() });
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
   const user = await requireUser({ request });
 
-  const parsedParams = paramsSchema.safeParse(params);
-  if (!parsedParams.success) {
-    throw data('Invalid project id.', { status: 400 });
-  }
-
-  const { projectId } = parsedParams.data;
+  const { projectId } = parseRouteParams({
+    invalidMessage: 'Invalid project id.',
+    params,
+    schema: paramsSchema,
+  });
 
   const project = await getProjectById({ projectId });
   if (!project) {

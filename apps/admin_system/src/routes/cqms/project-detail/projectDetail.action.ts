@@ -3,10 +3,12 @@ import { discoverProjectWorkspaces } from '@repo/scan-ingestion/ingestion/worksp
 import { createResourceGrant } from '@repo/scan-ingestion/queries/createResourceGrant.util';
 import { deleteResourceGrant } from '@repo/scan-ingestion/queries/deleteResourceGrant.util';
 import { replaceProjectWorkspaces } from '@repo/scan-ingestion/queries/replaceProjectWorkspaces.util';
-import { type ActionFunctionArgs, data } from 'react-router';
+import { type ActionFunctionArgs } from 'react-router';
 import { z } from 'zod';
 
 import { requireUser } from '@/auth/requireUser.util';
+
+import { parseRouteParams } from '../utils/parseRouteParams.util';
 
 const paramsSchema = z.object({ projectId: z.string().uuid() });
 
@@ -80,11 +82,11 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
   // (ADR-017).
   const user = await requireUser({ request });
 
-  const parsedParams = paramsSchema.safeParse(params);
-  if (!parsedParams.success) {
-    throw data('Invalid project id.', { status: 400 });
-  }
-  const { projectId } = parsedParams.data;
+  const { projectId } = parseRouteParams({
+    invalidMessage: 'Invalid project id.',
+    params,
+    schema: paramsSchema,
+  });
 
   const formData = await request.formData();
   const intent = formData.get('intent');
