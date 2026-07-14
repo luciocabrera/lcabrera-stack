@@ -25,7 +25,7 @@ Form/
 │
 ├── FormBody/
 │   ├── FormBody.component.tsx → The view shell: RR7 Form/fetcher.Form (formId-keyed) + submit gating; self-connects formId/submission
-│   ├── FormBodyFooter/        → Fully self-connected footer: labels/mode/dirty/submission state + discard-changes flow
+│   ├── FormBodyFooter/        → Footer shell for discard-changes confirmation + private action-row delegate
 │   ├── FormBody.stylex.ts
 │   ├── FormBody.types.ts      → Pick<FormProps, 'action' | 'children' | 'method'>
 │   └── index.ts
@@ -171,16 +171,17 @@ is a pure composition shell. Labels and `submission` are init-only config.
 No store state is prop-drilled through the shells. Each delegate reads the
 selectors and dispatches the actions it needs itself:
 
-| Delegate         | Reads (selectors)                                                                 | Dispatches (actions) |
-| ---------------- | --------------------------------------------------------------------------------- | -------------------- |
-| `Form`           | — (pure composition)                                                              | —                    |
-| `FormBody`       | formId, submission                                                                | submitForm           |
-| `FormFields`     | fields                                                                            | —                    |
-| `FormBodyFooter` | mode, formId, submission, cancelLabel, submitLabel, cancelTo, leafFields, isDirty | —                    |
-| leaf fields      | fieldValue, fieldError, mode (via `useFormField`)                                 | setFieldValue        |
+| Delegate                | Reads (selectors)                                                       | Dispatches (actions) |
+| ----------------------- | ----------------------------------------------------------------------- | -------------------- |
+| `Form`                  | — (pure composition)                                                    | —                    |
+| `FormBody`              | formId, submission                                                      | submitForm           |
+| `FormFields`            | fields                                                                  | —                    |
+| `FormBodyFooter`        | mode, cancelTo                                                          | —                    |
+| `FormBodyFooterActions` | mode, formId, submission, cancelLabel, submitLabel, leafFields, isDirty | —                    |
+| leaf fields             | fieldValue, fieldError, mode (via `useFormField`)                       | setFieldValue        |
 
-`FormBodyFooter` derives `isSubmitting` itself: the fetcher is keyed by
-`formId` (`useFetcher({ key: formId })` in both `FormBody` and the footer
+`FormBodyFooterActions` derives `isSubmitting` itself: the fetcher is keyed by
+`formId` (`useFetcher({ key: formId })` in both `FormBody` and the action row
 observes the same fetcher instance), and the navigation flavour matches the
 hidden `formId` input against `navigation.formData`.
 

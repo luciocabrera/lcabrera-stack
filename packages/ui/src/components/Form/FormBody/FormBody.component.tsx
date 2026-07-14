@@ -6,13 +6,13 @@ import {
   useGetFormSubmission,
 } from '@repo/ui/components/Form/contexts/FormContext/selectors';
 import { FormFields } from '@repo/ui/components/Form/FormFields/FormFields.component';
+import { FormFooter } from '@repo/ui/components/Form/FormFooter';
 import * as stylex from '@stylexjs/stylex';
 import { Form as RouterForm, useFetcher } from 'react-router';
 
 import type { FormBodyProps } from './FormBody.types';
 
 import { styles } from './FormBody.stylex';
-import { FormBodyFooter } from './FormBodyFooter/FormBodyFooter.component';
 
 /**
  * The Form view shell: picks the RR7 form flavour (fetcher vs navigation)
@@ -48,7 +48,7 @@ export const FormBody = ({
     >
       <input name='formId' type='hidden' value={formId} />
       <FormFields />
-      <FormBodyFooter>{children}</FormBodyFooter>
+      <FormFooter>{children}</FormFooter>
     </FormComponent>
   );
 };

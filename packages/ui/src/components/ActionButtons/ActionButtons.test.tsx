@@ -57,6 +57,16 @@ describe('ActionButtons', () => {
     expect(button.disabled).toBe(true);
   });
 
+  it('supports submit descriptors without onClick', () => {
+    render(<ActionButtons actions={[{ label: 'Save', type: 'submit' }]} />);
+
+    const button = screen.getByRole<HTMLButtonElement>('button', {
+      name: 'Save',
+    });
+
+    expect(button.type).toBe('submit');
+  });
+
   it('applies group-level isBusy to every button', () => {
     render(
       <ActionButtons

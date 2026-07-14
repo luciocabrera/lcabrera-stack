@@ -35,13 +35,12 @@ graph LR
 | `isBusy`       | `boolean?`                                | Group-level busy state, forwarded to every rendered `Button`         |
 | `...div props` | `ComponentPropsWithoutRef<'div'>`         | Forwarded to the container div (spread before `stylex.props`)        |
 
-`ActionButtonDescriptor` = `Omit<ButtonProps, 'children' | 'isBusy' | 'onClick'>` plus:
+`ActionButtonDescriptor` = `Omit<ButtonProps, 'children' | 'isBusy'>` plus:
 
-| Field     | Type                                  | Description                                                      |
-| --------- | ------------------------------------- | ---------------------------------------------------------------- |
-| `label`   | `string`                              | Required — rendered as the `Button` children and used as key     |
-| `onClick` | `NonNullable<ButtonProps['onClick']>` | Required — the action handler                                    |
-| `key`     | `string?`                             | Optional stable React key when labels are dynamic or may collide |
+| Field   | Type      | Description                                                      |
+| ------- | --------- | ---------------------------------------------------------------- |
+| `label` | `string`  | Required — rendered as the `Button` children and used as key     |
+| `key`   | `string?` | Optional stable React key when labels are dynamic or may collide |
 
 Descriptor defaults: `color: 'primary'` and `size: 'sm'` — the dominant
 combination across consumers, so most actions only declare `label` +
@@ -65,6 +64,7 @@ every button.
 
 - Modal footers: `ConfirmDialog`, `PinSideModal`, `OrderConflictModal`,
   `UnpinConflictModal`, `PinConflictModal` (passed as `Modal`'s `footer`).
+- Form footer: `FormBodyFooter` (submit + cancel action row).
 - Drawer footers: `ColumnSettingsDrawerFooter`, `TableSettingsDrawerFooter`
   (inside `SidePanelFooter`).
 - Drawer bulk-action sections: `GeneralSectionFooter`, `AllSettingsSection`.
@@ -77,4 +77,5 @@ Icon-only toolbars (`SectionToolbar`, `ClearResetToolbarButtons`,
 `label` is required here and rendered as the button children, which conflicts
 with `isIconOnly` buttons whose accessible name comes from elsewhere. If those
 ever migrate, the descriptor needs an explicit icon-only story first.
-`FormBodyFooter` keeps its `children` extension slot and stays as-is.
+`FormBodyFooter` still keeps its `children` extension slot outside
+`ActionButtons`.

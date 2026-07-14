@@ -1,6 +1,6 @@
-import type { WidthPreset } from './ColumnWidthPresetButtons.types';
-
 import { useState } from 'react';
+
+import type { WidthPreset } from './ColumnWidthPresetButtons.types';
 
 type UseColumnWidthPresetToggleArgs = {
   readonly onSelectPreset: (preset: NonNullable<WidthPreset>) => void;

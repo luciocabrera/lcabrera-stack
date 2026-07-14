@@ -2,9 +2,10 @@ import { spacing } from '@repo/ui/design-system/tokens/base.stylex';
 import * as stylex from '@stylexjs/stylex';
 
 export const styles = stylex.create({
-  form: {
-    gap: spacing.lg,
+  footer: {
+    gap: spacing.sm,
     display: 'flex',
-    flexDirection: 'column',
+    justifyContent: 'flex-end',
+    marginTop: spacing.lg,
   },
 });
