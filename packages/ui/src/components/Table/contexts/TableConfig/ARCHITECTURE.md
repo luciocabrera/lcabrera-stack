@@ -19,6 +19,9 @@ TableConfig/
 │   │
 │   ├── actions/
 │   │   ├── utils/buildPersistencePayload.util.ts       → Shared persistence-entry builder for batch settings hooks
+│   │   ├── utils/getHasQueryChanged.util.ts            → Detect whether a batch update changes filter/sort query state
+│   │   ├── utils/getIsTableSettingsOpen.util.ts        → Restore table-settings open state after column drawer flows
+│   │   ├── utils/getNextStatePatch.util.ts             → Build the next meta-store patch after accepting column settings
 │   │   ├── utils/resolveBatchColumnSettingsUpdate.util.ts → Build next derived column config slices for one batch column update
 │   │   ├── utils/resolveBatchTableSettingsUpdate.util.ts → Build next derived column config slices for one table-wide settings update
 │   │   ├── utils/commitPinningAndOrderUpdate.util.ts → Shared persist+store commit helper for pinning actions
@@ -215,6 +218,9 @@ The two batch settings hooks now share two focused pure helpers instead of each 
 | ---------------------------------- | ------------------------- | -------------------------------------------------------------------------------------- |
 | `deriveColumnViewState`            | `components/Table/utils/` | Compose `normalizedColumns` with `getPinnedDerivedColumnsState()` output               |
 | `buildPersistencePayload`          | `columns/actions/utils/`  | Build the persistence entry array for batch settings updates                           |
+| `getHasQueryChanged`               | `columns/actions/utils/`  | Compare current vs next filters/sorting to decide whether query revalidation is needed |
+| `getIsTableSettingsOpen`           | `columns/actions/utils/`  | Restore the table-settings drawer when column settings borrowed its open state         |
+| `getNextStatePatch`                | `columns/actions/utils/`  | Build the persisted meta patch after applying column settings                          |
 | `resolveBatchColumnSettingsUpdate` | `columns/actions/utils/`  | Compose the next per-column batch update from shared sort/filter/size/pin resolvers    |
 | `resolveBatchTableSettingsUpdate`  | `columns/actions/utils/`  | Compose the next table-wide settings update from incoming settings plus derived slices |
 

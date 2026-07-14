@@ -28,14 +28,11 @@ vi.mock('@repo/ui/components/VirtualList', () => ({
   },
 }));
 
-vi.mock(
-  '@repo/ui/components/VirtualList/contexts/VirtualListConfig/config/selectors',
-  () => ({
-    useGetShouldFillHeight: () => metaState.current.shouldFillHeight,
-  }),
-);
+vi.mock('@repo/ui/components/VirtualList/contexts/list/selectors', () => ({
+  useGetShouldFillHeight: () => metaState.current.shouldFillHeight,
+}));
 
-vi.mock('../contexts/VirtualSelectConfig/meta/selectors', () => ({
+vi.mock('../contexts/meta/selectors', () => ({
   useGetCustomStylex: vi.fn(),
   useGetIsAlwaysOpen: () => metaState.current.isAlwaysOpen,
   useGetIsListVisible: () => metaState.current.isListVisible,

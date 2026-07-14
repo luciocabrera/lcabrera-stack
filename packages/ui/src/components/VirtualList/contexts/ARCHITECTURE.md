@@ -1,61 +1,63 @@
 # VirtualList Contexts Architecture
 
-Split-context external-store architecture for `VirtualList`, mirroring `Table/contexts/` (ADR-003, `store-pattern` skill). Two contexts, split by volatility, each in its own folder with slice subfolders holding the store hook, selectors, and actions.
+Single-context external-store architecture for `VirtualList`, mirroring `Table/contexts/TableConfig/` (ADR-003, `store-pattern` skill): **one context, stores per concern**. `VirtualListContext` holds two independent stores (`listStore` + `dataStore`) plus the parent callbacks, each concern in its own slice folder with a store hook, selectors, and (where writable) actions.
+
+The three former providers (`VirtualSelectConfig` + `VirtualListConfig` + `VirtualListData`) collapsed into this one context because they shared a single mount point and lifecycle — the split only added cross-context plumbing (the data provider read the config context during render; UI actions read both contexts). Re-render isolation comes from the stores' `useSyncExternalStore` subscriptions, not from context boundaries, so nothing was lost by merging.
 
 ## Context Map
 
-| Context             | Purpose                                             | Store/Value                                        |
-| ------------------- | --------------------------------------------------- | -------------------------------------------------- |
-| `VirtualListConfig` | Static config + list-owned UI state + callbacks     | `configStore`, `uiStore` (+ `onChange`/`onFetch*`) |
-| `VirtualListData`   | Mirror of controlled data/selection + derived state | `dataStore`                                        |
+| Store       | Purpose                                                 | State type                         |
+| ----------- | ------------------------------------------------------- | ---------------------------------- |
+| `listStore` | Config props mirror **+** list-owned UI state           | `VirtualListState` (config `&` ui) |
+| `dataStore` | Mirror of controlled data/selection **+** derived state | `VirtualListDataStoreState`        |
 
-## Provider Order (Why It Matters)
+The context value also carries `onChange` and `onFetchMore` (parent callbacks reachable only by actions).
 
-1. `VirtualListConfigProvider` — creates `configStore` (synced from props) and `uiStore` (seeded once, written by UI actions); exposes the parent callbacks. **Single prop intake for all config/callbacks.**
-2. `VirtualListDataProvider` — takes only the controlled data props (`dataState`, `filter`); creates `dataStore`. It reads everything else from the config context — `uiStore` via the context value, `hasSelectAll`/`hasFetchInitial` reactively via the config selectors, and `onFetchInitial` for the mount fetch — so it **must render inside** the config provider.
+## Writer-Boundary Rule (single-owner state)
 
-## Single-Owner State Rule
+`VirtualListState` is `VirtualListConfigState & VirtualListUiState`, but the two halves have **different writers** — this is the invariant that replaces the old two-store split:
 
-No piece of state is ever passed to two providers or mirrored into two stores. Each value has exactly one owning store; cross-context readers go through that owner's selectors (the data provider subscribing to `useGetHasSelectAll`/`useGetHasFetchInitial` keeps derived state reactive to config changes without duplicating the props).
+- **Config fields** (`hasCheckboxes`, `hasSelectAll`, `hasFetchInitial`, `hasFetchMore`, `listMaxHeight`, `name`, `shouldFillHeight`) are mirrored from props by the provider's list-sync effect, and by nothing else.
+- **UI fields** (`searchTerm`, `listFilterMode`) are written only by the UI actions, seeded once, and must survive prop re-syncs.
 
-## Who Mounts the Providers
+The provider's list-sync effect re-reads the current UI fields from `listStore.get()` and passes them back into `getInitialListState`, so every write is **total** yet never clobbers in-flight UI state. (`VirtualListContext.provider.test.tsx` guards this with a set-search-term-then-change-a-config-prop test.) No value is ever passed to two stores; cross-concern reads (the data-sync effect reading `searchTerm`/`listFilterMode`) snapshot `listStore` directly.
 
-- `VirtualList` (standalone use) mounts both providers around `VirtualListContent`.
-- A composing component may **lift** them instead and render `VirtualListContent` itself — `VirtualSelect` is the canonical example: its shell mounts the providers (config `onChange` carries the select's label→value mapping) so `VirtualSelectHeader` can read `useGetSelectedValues`/dispatch `useToggleOption` even while the dropdown is closed. Lifting moves the store lifetime (and the `onFetchInitial` mount effect) to the composing component.
+## Who Mounts the Provider
+
+- `VirtualList` (standalone use) mounts `VirtualListProvider` around `VirtualListContent`.
+- A composing component provides the same context by composing the provider — `VirtualSelect` is the canonical example: `VirtualSelectProvider` provides its own `VirtualSelectContext` **and renders `VirtualListProvider` around `children`**, so `VirtualSelectHeader` can read `useGetSelectedValues`/dispatch `useToggleOption` even while the dropdown is closed. Composition (not shell-side nesting) keeps each mount site at exactly one provider; the store lifetime and the `onFetchInitial` mount effect live with the provider.
+
+## Grouped Provider Props
+
+Following `TableConfigProvider`'s `columnsState`/`metaState` shape, `VirtualListProvider` takes `dataState`, `filter`, and one `listState` group (`Omit<VirtualListProps, 'dataState' | 'filter'>`) rather than a dozen loose keys. `getInitialListState(listState)` derives `hasFetchInitial`/`hasFetchMore` from the callbacks and defaults the UI fields.
 
 ## Derived State Rule
 
 `dataStore` holds the raw mirror (`data`, `hasMore`, `isLoading`, `isLoadingMore`, `selectedValues`, `totalCount`) **plus pre-computed derived state** (`filteredOptions`, `isAllSelected`, `shouldShowSelectAll`, `totalItems`, `contentMode`). Selectors are strict one-liners over one slice store hook — derivation never happens in selectors. The derived slice is recomputed by exactly two writers, both delegating to the pure `resolveListDerivedState` util (`../utils/`):
 
-- **`VirtualListDataProvider` sync effect** — when the controlled props (`dataState`, `filter`) or the selector-read config flags (`hasSelectAll`, `hasFetchInitial`) change.
+- **`VirtualListProvider` data-sync effect** — when the controlled props (`dataState`, `filter`), the config flags (`hasSelectAll`, `hasFetchInitial`), or the UI fields change.
 - **UI actions** (`useSetSearchTerm`, `useSetListFilterMode`) — when the search term or filter mode changes.
 
 ## Contract: Component vs Infrastructure
 
 Same as the Table (see `.github/skills/store-pattern`):
 
-- View components use only `useGet*` selectors and action hooks — never `useVirtualList*ContextValue`, never `store.get()`/`store.set()`.
-- Selectors read through `useListConfigStore` / `useListUiStore` / `useListDataStore` only; no selector calls another selector or a context-value hook.
-- Actions snapshot each store once per execution and may orchestrate cross-context (UI actions write `dataStore`; data actions read `onChange` from the config context value).
+- View components use only `useGet*` selectors and action hooks — never `useVirtualListContextValue`, never `store.get()`/`store.set()`.
+- Selectors read through `useListStore` / `useListDataStore` only; no selector calls another selector or a context-value hook.
+- Actions snapshot each store once per execution (UI actions write `listStore` then `dataStore`; data actions read `onChange`/`onFetchMore` from the context value).
 - Selection is parent-owned: toggle actions emit the next `SelectFilter` through `onChange`; the mirror updates on the prop round-trip.
 
 ## Folder Layout
 
 ```
 contexts/
-├── index.ts                        → { VirtualListConfigProvider, VirtualListDataProvider }
-├── VirtualListConfig/
-│   ├── VirtualListConfigContext.{context,provider,types,constants}.ts(x)
-│   ├── useVirtualListConfigContextValue.hook.ts
-│   ├── utils/                      → getInitialListConfigState, getInitialListUiState
-│   ├── config/                     → useListConfigStore + selectors/ (hasCheckboxes, hasFetchInitial,
-│   │                                 hasFetchMore, hasSelectAll, listMaxHeight, name, shouldFillHeight)
-│   └── ui/                         → useListUiStore + selectors/ (searchTerm, listFilterMode)
-│                                     + actions/ (setSearchTerm, clearSearch, setListFilterMode)
-└── VirtualListData/
-    ├── VirtualListDataContext.{context,provider,types,constants}.ts(x)
-    ├── useVirtualListDataContextValue.hook.ts
-    ├── utils/                      → getInitialListDataState (mirror + derived)
-    └── data/                       → useListDataStore + selectors/ (13 one-liners)
-                                      + actions/ (toggleOption, toggleSelectAll, fetchMore) + utils/
+├── index.ts                        → { VirtualListProvider }
+├── VirtualListContext.{context,provider,types,constants}.ts(x)
+├── useVirtualListContextValue.hook.ts
+├── utils/                          → getInitialListState (config + ui), getInitialListDataState (mirror + derived)
+├── list/                          → useListStore + selectors/ (hasCheckboxes, hasFetchInitial, hasFetchMore,
+│                                    hasSelectAll, listFilterMode, listMaxHeight, searchInputName, searchTerm,
+│                                    shouldFillHeight) + actions/ (setSearchTerm, clearSearch, setListFilterMode)
+└── data/                          → useListDataStore + selectors/ (13 one-liners)
+                                     + actions/ (toggleOption, toggleSelectAll, fetchMore) + utils/
 ```

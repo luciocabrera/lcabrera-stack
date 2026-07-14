@@ -1,40 +1,26 @@
 import type { VirtualListProps } from './VirtualList.types';
 
-import { VirtualListConfigProvider, VirtualListDataProvider } from './contexts';
+import { VirtualListProvider } from './contexts';
 import { VirtualListContent } from './VirtualListContent';
 
 /**
- * Thin shell over the VirtualList contexts: mounts the Config and Data
- * providers (in that order — the config provider is the single prop intake
- * for all config, layout, and callbacks) and renders the provider-less,
- * zero-prop VirtualListContent composition. Composing components
- * (e.g. VirtualSelect) may instead mount the providers themselves and
- * render VirtualListContent directly.
+ * Thin shell over the VirtualList context: mounts the single VirtualListProvider
+ * (grouping the config/callback props into `listState`) and renders the
+ * provider-less, zero-prop VirtualListContent composition. Composing components
+ * (e.g. VirtualSelect) may instead mount the provider themselves — via
+ * VirtualSelectProvider, which composes VirtualListProvider — and render
+ * VirtualListContent directly.
  */
 export const VirtualList = ({
   dataState,
   filter,
-  hasCheckboxes = true,
-  hasSelectAll = true,
-  listMaxHeight,
-  name,
-  onChange,
-  onFetchInitial,
-  onFetchMore,
-  shouldFillHeight,
+  ...listState
 }: VirtualListProps) => (
-  <VirtualListConfigProvider
-    hasCheckboxes={hasCheckboxes}
-    hasSelectAll={hasSelectAll}
-    listMaxHeight={listMaxHeight}
-    name={name}
-    onChange={onChange}
-    onFetchInitial={onFetchInitial}
-    onFetchMore={onFetchMore}
-    shouldFillHeight={shouldFillHeight}
+  <VirtualListProvider
+    dataState={dataState}
+    filter={filter}
+    listState={listState}
   >
-    <VirtualListDataProvider dataState={dataState} filter={filter}>
-      <VirtualListContent />
-    </VirtualListDataProvider>
-  </VirtualListConfigProvider>
+    <VirtualListContent />
+  </VirtualListProvider>
 );

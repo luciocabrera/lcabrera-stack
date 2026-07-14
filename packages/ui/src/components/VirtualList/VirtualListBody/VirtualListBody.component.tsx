@@ -2,16 +2,16 @@ import { useInfiniteScrollObserver } from '@repo/ui/hooks';
 import * as stylex from '@stylexjs/stylex';
 import { useRef } from 'react';
 
+import { useFetchMore } from '../contexts/data/actions';
+import {
+  useGetHasMore,
+  useGetIsLoadingOptions,
+} from '../contexts/data/selectors';
 import {
   useGetHasFetchMore,
   useGetListMaxHeight,
   useGetShouldFillHeight,
-} from '../contexts/VirtualListConfig/config/selectors';
-import { useFetchMore } from '../contexts/VirtualListData/data/actions';
-import {
-  useGetHasMore,
-  useGetIsLoadingOptions,
-} from '../contexts/VirtualListData/data/selectors';
+} from '../contexts/list/selectors';
 import { SCROLL_THRESHOLD } from '../VirtualList.constants';
 import { styles } from './VirtualListBody.stylex';
 import { VirtualListBodyChildren } from './VirtualListBodyChildren/VirtualListBodyChildren.component';

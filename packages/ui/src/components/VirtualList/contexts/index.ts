@@ -1,2 +1,1 @@
-export { VirtualListConfigProvider } from './VirtualListConfig';
-export { VirtualListDataProvider } from './VirtualListData';
+export { VirtualListProvider } from './VirtualListContext.provider';

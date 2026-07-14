@@ -64,10 +64,16 @@ export type VirtualListProps = {
   readonly onFetchInitial?: () => Promise<void> | void;
   /** Callback to fetch more data on scroll (infinite loading) */
   readonly onFetchMore?: () => Promise<void> | void;
-  /** Name attribute for the search input */
   /** When true, the list expands to fill all available vertical space */
   readonly shouldFillHeight?: boolean;
 };
+
+/**
+ * Complete list-store state: the config props mirror plus the list-owned UI
+ * state. Config fields are written only by the provider sync effect; UI
+ * fields only by the list UI actions.
+ */
+export type VirtualListState = VirtualListConfigState & VirtualListUiState;
 
 /** UI state owned by the VirtualList itself (uncontrolled) */
 export type VirtualListUiState = {

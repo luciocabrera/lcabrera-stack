@@ -1,17 +1,14 @@
 import type { VirtualizedOptionProps } from './VirtualizedOption.types';
 
-import { useGetHasCheckboxes } from '../contexts/VirtualListConfig/config/selectors';
-import {
-  useToggleOption,
-  useToggleSelectAll,
-} from '../contexts/VirtualListData/data/actions';
+import { useToggleOption, useToggleSelectAll } from '../contexts/data/actions';
 import {
   useGetFilteredOptions,
   useGetIsAllSelected,
   useGetIsLoadingOptions,
   useGetSelectedValues,
   useGetShouldShowSelectAll,
-} from '../contexts/VirtualListData/data/selectors';
+} from '../contexts/data/selectors';
+import { useGetHasCheckboxes } from '../contexts/list/selectors';
 import { SelectAllOption } from '../SelectAllOption';
 import { SelectOption } from '../SelectOption';
 

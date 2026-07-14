@@ -1,17 +1,12 @@
 import type { SelectFilter } from '@repo/ui/types/filterOperators.types';
 
-import {
-  VirtualListConfigProvider,
-  VirtualListDataProvider,
-} from '@repo/ui/components/VirtualList/contexts';
-import { LIST_MAX_HEIGHT } from '@repo/ui/components/VirtualList/VirtualList.constants';
 import { useClickOutside } from '@repo/ui/hooks';
 import * as stylex from '@stylexjs/stylex';
 import { useId, useRef } from 'react';
 
 import type { VirtualSelectProps } from './VirtualSelect.types';
 
-import { VirtualSelectConfigProvider } from './contexts';
+import { VirtualSelectProvider } from './contexts';
 import { useVirtualSelectDropdown } from './hooks';
 import {
   buildFallbackDataState,
@@ -23,13 +18,12 @@ import { VirtualSelectDropdown } from './VirtualSelectDropdown/VirtualSelectDrop
 import { VirtualSelectHeader } from './VirtualSelectHeader/VirtualSelectHeader.component';
 
 /**
- * Thin shell over the select contexts: resolves the option label↔value
- * mapping, owns the dropdown open state, and mounts the three providers —
- * VirtualSelectConfig (select metadata for the delegates) plus the lifted
- * VirtualList Config/Data pair — so every delegate consumes selectors and
- * actions instead of drilled props. Selection stays parent-owned: list
- * changes exit through the shell's `onChange` mapping on the list config
- * context.
+ * Thin shell over the select context: resolves the option label↔value mapping,
+ * owns the dropdown open state, and mounts the single VirtualSelectProvider —
+ * which provides the select metadata and composes the lifted VirtualListProvider
+ * so every delegate consumes selectors and actions instead of drilled props.
+ * Selection stays parent-owned: list changes exit through the shell's `onChange`
+ * mapping passed on the `listState` group.
  */
 export const VirtualSelect = ({
   customStylex,
@@ -37,7 +31,7 @@ export const VirtualSelect = ({
   isAlwaysOpen = false,
   isBusy = false,
   listboxId,
-  listMaxHeight = LIST_MAX_HEIGHT,
+  listMaxHeight,
   mode,
   onChange,
   onFetchInitial,
@@ -87,41 +81,39 @@ export const VirtualSelect = ({
   };
 
   return (
-    <VirtualSelectConfigProvider
-      customStylex={customStylex}
-      isAlwaysOpen={isAlwaysOpen}
-      isBusy={isBusy}
-      isOpen={isOpen}
-      listboxId={resolvedListboxId}
-      mode={mode}
-      onToggleDropdown={toggleDropdown}
-      placeholder={placeholder}
+    <VirtualSelectProvider
+      dataState={effectiveDataState}
+      filter={{ type: 'select', values: selectedLabels }}
+      listState={{
+        hasCheckboxes: isMulti,
+        hasSelectAll: isMulti,
+        listMaxHeight,
+        onChange: handleListChange,
+        onFetchInitial,
+        onFetchMore,
+        shouldFillHeight,
+      }}
+      metaState={{
+        customStylex,
+        isAlwaysOpen,
+        isBusy,
+        isOpen,
+        listboxId: resolvedListboxId,
+        mode,
+        onToggleDropdown: toggleDropdown,
+        placeholder,
+      }}
     >
-      <VirtualListConfigProvider
-        hasCheckboxes={isMulti}
-        hasSelectAll={isMulti}
-        listMaxHeight={listMaxHeight}
-        onChange={handleListChange}
-        onFetchInitial={onFetchInitial}
-        onFetchMore={onFetchMore}
-        shouldFillHeight={shouldFillHeight}
+      <div
+        ref={containerRef}
+        {...stylex.props(
+          styles.container,
+          shouldFillHeight ? styles.containerFill : undefined,
+        )}
       >
-        <VirtualListDataProvider
-          dataState={effectiveDataState}
-          filter={{ type: 'select', values: selectedLabels }}
-        >
-          <div
-            ref={containerRef}
-            {...stylex.props(
-              styles.container,
-              shouldFillHeight ? styles.containerFill : undefined,
-            )}
-          >
-            <VirtualSelectHeader />
-            <VirtualSelectDropdown />
-          </div>
-        </VirtualListDataProvider>
-      </VirtualListConfigProvider>
-    </VirtualSelectConfigProvider>
+        <VirtualSelectHeader />
+        <VirtualSelectDropdown />
+      </div>
+    </VirtualSelectProvider>
   );
 };

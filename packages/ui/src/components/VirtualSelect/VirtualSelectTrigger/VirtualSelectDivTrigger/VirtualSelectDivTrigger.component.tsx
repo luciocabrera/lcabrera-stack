@@ -2,14 +2,14 @@ import type { KeyboardEvent } from 'react';
 
 import type { VirtualSelectDivTriggerProps } from './VirtualSelectDivTrigger.types';
 
-import { useToggleDropdown } from '../../contexts/VirtualSelectConfig/meta/actions';
+import { useToggleDropdown } from '../../contexts/meta/actions';
 import {
   useGetIsAlwaysOpen,
   useGetIsBusy,
   useGetIsOpen,
   useGetListboxId,
   useGetMode,
-} from '../../contexts/VirtualSelectConfig/meta/selectors';
+} from '../../contexts/meta/selectors';
 import {
   assignTriggerRef,
   getTriggerStyleProps,

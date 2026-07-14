@@ -5,7 +5,7 @@ import type { VirtualListBodyOptionsProps } from './VirtualListBodyOptions.types
 import {
   useGetFilteredOptions,
   useGetShouldShowSelectAll,
-} from '../../contexts/VirtualListData/data/selectors';
+} from '../../contexts/data/selectors';
 import { VirtualizedOption } from '../../VirtualizedOption';
 import { styles } from './VirtualListBodyOptions.stylex';
 

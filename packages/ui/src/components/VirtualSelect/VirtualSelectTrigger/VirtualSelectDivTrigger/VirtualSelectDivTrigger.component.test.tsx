@@ -24,11 +24,11 @@ const { metaState, setMetaState, toggleDropdownMock } = vi.hoisted(() => {
   };
 });
 
-vi.mock('../../contexts/VirtualSelectConfig/meta/actions', () => ({
+vi.mock('../../contexts/meta/actions', () => ({
   useToggleDropdown: () => toggleDropdownMock,
 }));
 
-vi.mock('../../contexts/VirtualSelectConfig/meta/selectors', () => ({
+vi.mock('../../contexts/meta/selectors', () => ({
   useGetIsAlwaysOpen: () => metaState.current.isAlwaysOpen,
   useGetIsBusy: () => metaState.current.isBusy,
   useGetIsOpen: () => metaState.current.isOpen,

@@ -6,14 +6,14 @@ import {
 import { ICON_SIZE_MD } from '@repo/ui/design-system/constants';
 import * as stylex from '@stylexjs/stylex';
 
-import { useGetHasCheckboxes } from '../contexts/VirtualListConfig/config/selectors';
 import {
   useGetIsLoading,
   useGetIsLoadingMore,
   useGetLoadedCount,
   useGetSelectedCount,
   useGetTotalCount,
-} from '../contexts/VirtualListData/data/selectors';
+} from '../contexts/data/selectors';
+import { useGetHasCheckboxes } from '../contexts/list/selectors';
 import { ListFilterModeButton } from './ListFilterModeButton';
 import { styles } from './VirtualListFooter.stylex';
 

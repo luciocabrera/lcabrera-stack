@@ -2,12 +2,13 @@ import { useTableConfigContextValue } from '@repo/ui/components/Table/contexts/T
 import { useTableDataContextValue } from '@repo/ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
 import { usePersistTableStateAction } from '@repo/ui/components/Table/hooks';
 import { persistTableMetaUiState } from '@repo/ui/components/Table/utils';
-import { areEqualByJson } from '@repo/ui/utils/comparison';
 
 import type { BatchColumnSettingsUpdate } from './utils/resolveBatchColumnSettingsUpdate.util';
 
 import {
   buildPersistencePayload,
+  getHasQueryChanged,
+  getNextStatePatch,
   resolveBatchColumnSettingsUpdate,
 } from './utils';
 
@@ -19,25 +20,16 @@ export const useBatchSetColumnSettings = <TData>() => {
   return (settings: BatchColumnSettingsUpdate<TData>) => {
     const columnsState = columnsStore.get();
     const metaState = metaStore.get();
-    const isColumnSettingsPinned = metaState?.isColumnSettingsPinned ?? false;
     const persistenceKey = metaState?.persistenceKey ?? '';
-    const shouldRestoreTableSettings =
-      metaState?.wasTableSettingsOpenBeforeColumnSettings ?? false;
     const resolvedUpdate = resolveBatchColumnSettingsUpdate<TData>({
       columnsState,
       settings,
     });
-
-    // Check if query-affecting changes (filters/sorting) have changed
-    const hasSortingChanged = !areEqualByJson({
-      left: columnsState?.sorting,
-      right: resolvedUpdate.sorting,
+    const hasQueryChanged = getHasQueryChanged<TData>({
+      columnsState,
+      nextColumnFilters: resolvedUpdate.columnFilters,
+      nextSorting: resolvedUpdate.sorting,
     });
-    const hasFiltersChanged = !areEqualByJson({
-      left: columnsState?.columnFilters,
-      right: resolvedUpdate.columnFilters,
-    });
-    const hasQueryChanged = hasSortingChanged || hasFiltersChanged;
 
     const didPersist = persistTableState(
       buildPersistencePayload<TData>({
@@ -60,20 +52,7 @@ export const useBatchSetColumnSettings = <TData>() => {
     }
 
     columnsStore.set(resolvedUpdate);
-
-    const isTableSettingsOpen = shouldRestoreTableSettings
-      ? true
-      : (metaState?.isTableSettingsOpen ?? false);
-
-    const nextStatePatch = isColumnSettingsPinned
-      ? {
-          isColumnSettingsOpen: true,
-        }
-      : {
-          isColumnSettingsOpen: false,
-          isTableSettingsOpen,
-          wasTableSettingsOpenBeforeColumnSettings: false,
-        };
+    const nextStatePatch = getNextStatePatch({ metaState });
 
     persistTableMetaUiState({
       currentState: metaState,

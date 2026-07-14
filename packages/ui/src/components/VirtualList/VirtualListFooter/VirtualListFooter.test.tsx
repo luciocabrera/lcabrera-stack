@@ -7,10 +7,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type { VirtualListDataState } from '../VirtualList.types';
 
-import {
-  VirtualListConfigProvider,
-  VirtualListDataProvider,
-} from '../contexts';
+import { VirtualListProvider } from '../contexts';
 import { VirtualListFooter } from './VirtualListFooter.component';
 
 afterEach(cleanup);
@@ -28,18 +25,13 @@ const ProviderShell = ({
   hasCheckboxes = true,
   selectedValues = [],
 }: ProviderShellProps) => (
-  <VirtualListConfigProvider
-    hasCheckboxes={hasCheckboxes}
-    hasSelectAll
-    onChange={vi.fn()}
+  <VirtualListProvider
+    dataState={dataState}
+    filter={{ type: 'select', values: selectedValues }}
+    listState={{ hasCheckboxes, hasSelectAll: true, onChange: vi.fn() }}
   >
-    <VirtualListDataProvider
-      dataState={dataState}
-      filter={{ type: 'select', values: selectedValues }}
-    >
-      {children}
-    </VirtualListDataProvider>
-  </VirtualListConfigProvider>
+    {children}
+  </VirtualListProvider>
 );
 
 const loadedDataState: VirtualListDataState = {

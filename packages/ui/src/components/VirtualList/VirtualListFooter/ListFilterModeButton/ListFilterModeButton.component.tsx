@@ -2,8 +2,8 @@ import { Button } from '@repo/ui/components/Button';
 
 import type { ListFilterModeButtonProps } from './ListFilterModeButton.types';
 
-import { useSetListFilterMode } from '../../contexts/VirtualListConfig/ui/actions';
-import { useGetListFilterMode } from '../../contexts/VirtualListConfig/ui/selectors';
+import { useSetListFilterMode } from '../../contexts/list/actions';
+import { useGetListFilterMode } from '../../contexts/list/selectors';
 
 /**
  * Store-connected wrapper around the shared Button for one filter mode:

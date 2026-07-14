@@ -1,8 +1,8 @@
-import { useToggleOption } from '@repo/ui/components/VirtualList/contexts/VirtualListData/data/actions';
-import { useGetSelectedValues } from '@repo/ui/components/VirtualList/contexts/VirtualListData/data/selectors';
+import { useToggleOption } from '@repo/ui/components/VirtualList/contexts/data/actions';
+import { useGetSelectedValues } from '@repo/ui/components/VirtualList/contexts/data/selectors';
 import { useRef } from 'react';
 
-import { useToggleDropdown } from '../contexts/VirtualSelectConfig/meta/actions';
+import { useToggleDropdown } from '../contexts/meta/actions';
 import {
   useGetIsAlwaysOpen,
   useGetIsBusy,
@@ -10,7 +10,7 @@ import {
   useGetListboxId,
   useGetMode,
   useGetPlaceholder,
-} from '../contexts/VirtualSelectConfig/meta/selectors';
+} from '../contexts/meta/selectors';
 import { useVirtualSelectTagOverflow } from '../hooks';
 import { resolveTagOverflow } from '../utils';
 import {

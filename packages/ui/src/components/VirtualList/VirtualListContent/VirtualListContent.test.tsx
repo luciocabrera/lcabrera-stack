@@ -5,10 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type { VirtualListDataState } from '../VirtualList.types';
 
-import {
-  VirtualListConfigProvider,
-  VirtualListDataProvider,
-} from '../contexts';
+import { VirtualListProvider } from '../contexts';
 import { VirtualListContent } from './VirtualListContent.component';
 
 afterEach(cleanup);
@@ -22,11 +19,12 @@ const baseDataState: VirtualListDataState = {
 
 const renderContent = () =>
   render(
-    <VirtualListConfigProvider hasCheckboxes hasSelectAll onChange={vi.fn()}>
-      <VirtualListDataProvider dataState={baseDataState}>
-        <VirtualListContent />
-      </VirtualListDataProvider>
-    </VirtualListConfigProvider>,
+    <VirtualListProvider
+      dataState={baseDataState}
+      listState={{ hasCheckboxes: true, hasSelectAll: true, onChange: vi.fn() }}
+    >
+      <VirtualListContent />
+    </VirtualListProvider>,
   );
 
 describe('VirtualListContent', () => {

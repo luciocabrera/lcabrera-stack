@@ -1,5 +1,5 @@
 import { VirtualListContent } from '@repo/ui/components/VirtualList';
-import { useGetShouldFillHeight } from '@repo/ui/components/VirtualList/contexts/VirtualListConfig/config/selectors';
+import { useGetShouldFillHeight } from '@repo/ui/components/VirtualList/contexts/list/selectors';
 import * as stylex from '@stylexjs/stylex';
 
 import {
@@ -7,7 +7,7 @@ import {
   useGetIsAlwaysOpen,
   useGetIsListVisible,
   useGetListboxId,
-} from '../contexts/VirtualSelectConfig/meta/selectors';
+} from '../contexts/meta/selectors';
 import { getDropdownStyle } from './utils/getDropdownStyle.util';
 import { styles } from './VirtualSelectDropdown.stylex';
 

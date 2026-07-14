@@ -7,7 +7,7 @@ import type { VirtualListBodyChildrenProps } from './VirtualListBodyChildren.typ
 import {
   useGetContentMode,
   useGetTotalItems,
-} from '../../contexts/VirtualListData/data/selectors';
+} from '../../contexts/data/selectors';
 import { SkeletonOptions } from '../../SkeletonOptions';
 import {
   DEFAULT_CONTAINER_HEIGHT,

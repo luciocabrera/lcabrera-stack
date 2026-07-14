@@ -5,10 +5,7 @@ import type { ReactNode } from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import {
-  VirtualListConfigProvider,
-  VirtualListDataProvider,
-} from '../contexts';
+import { VirtualListProvider } from '../contexts';
 import { VirtualListHeader } from './VirtualListHeader.component';
 
 afterEach(cleanup);
@@ -19,23 +16,22 @@ type ProviderShellProps = {
 };
 
 const ProviderShell = ({ children, name }: ProviderShellProps) => (
-  <VirtualListConfigProvider
-    hasCheckboxes
-    hasSelectAll
-    name={name}
-    onChange={vi.fn()}
+  <VirtualListProvider
+    dataState={{
+      data: ['Alpha', 'Beta'],
+      hasMore: false,
+      isLoading: false,
+      isLoadingMore: false,
+    }}
+    listState={{
+      hasCheckboxes: true,
+      hasSelectAll: true,
+      name,
+      onChange: vi.fn(),
+    }}
   >
-    <VirtualListDataProvider
-      dataState={{
-        data: ['Alpha', 'Beta'],
-        hasMore: false,
-        isLoading: false,
-        isLoadingMore: false,
-      }}
-    >
-      {children}
-    </VirtualListDataProvider>
-  </VirtualListConfigProvider>
+    {children}
+  </VirtualListProvider>
 );
 
 describe('VirtualListHeader', () => {

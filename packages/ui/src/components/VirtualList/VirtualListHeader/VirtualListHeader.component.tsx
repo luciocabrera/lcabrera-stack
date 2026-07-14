@@ -5,12 +5,11 @@ import { MenuCloseIcon } from '@repo/ui/components/Icons';
 import { ICON_SIZE_MD } from '@repo/ui/design-system/constants';
 import * as stylex from '@stylexjs/stylex';
 
-import { useGetSearchInputName } from '../contexts/VirtualListConfig/config/selectors';
+import { useClearSearch, useSetSearchTerm } from '../contexts/list/actions';
 import {
-  useClearSearch,
-  useSetSearchTerm,
-} from '../contexts/VirtualListConfig/ui/actions';
-import { useGetSearchTerm } from '../contexts/VirtualListConfig/ui/selectors';
+  useGetSearchInputName,
+  useGetSearchTerm,
+} from '../contexts/list/selectors';
 import { styles } from './VirtualListHeader.stylex';
 
 /** Self-connected search header: reads the term via selectors, writes via actions. */

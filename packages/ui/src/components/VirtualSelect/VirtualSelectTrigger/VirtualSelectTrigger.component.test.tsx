@@ -33,11 +33,11 @@ const {
   };
 });
 
-vi.mock('../contexts/VirtualSelectConfig/meta/actions', () => ({
+vi.mock('../contexts/meta/actions', () => ({
   useToggleDropdown: () => toggleDropdownMock,
 }));
 
-vi.mock('../contexts/VirtualSelectConfig/meta/selectors', () => ({
+vi.mock('../contexts/meta/selectors', () => ({
   useGetIsAlwaysOpen: () => metaState.current.isAlwaysOpen,
   useGetIsBusy: () => metaState.current.isBusy,
   useGetIsOpen: () => metaState.current.isOpen,
@@ -46,19 +46,13 @@ vi.mock('../contexts/VirtualSelectConfig/meta/selectors', () => ({
   useGetPlaceholder: () => metaState.current.placeholder,
 }));
 
-vi.mock(
-  '@repo/ui/components/VirtualList/contexts/VirtualListData/data/actions',
-  () => ({
-    useToggleOption: () => toggleOptionMock,
-  }),
-);
+vi.mock('@repo/ui/components/VirtualList/contexts/data/actions', () => ({
+  useToggleOption: () => toggleOptionMock,
+}));
 
-vi.mock(
-  '@repo/ui/components/VirtualList/contexts/VirtualListData/data/selectors',
-  () => ({
-    useGetSelectedValues: useGetSelectedValuesMock,
-  }),
-);
+vi.mock('@repo/ui/components/VirtualList/contexts/data/selectors', () => ({
+  useGetSelectedValues: useGetSelectedValuesMock,
+}));
 
 vi.mock('../hooks', () => ({
   useVirtualSelectTagOverflow: useVirtualSelectTagOverflowMock,

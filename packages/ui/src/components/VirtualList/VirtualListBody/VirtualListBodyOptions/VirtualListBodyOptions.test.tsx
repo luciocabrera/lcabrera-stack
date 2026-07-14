@@ -7,10 +7,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type { VirtualListBodyOptionsProps } from './VirtualListBodyOptions.types';
 
-import {
-  VirtualListConfigProvider,
-  VirtualListDataProvider,
-} from '../../contexts';
+import { VirtualListProvider } from '../../contexts';
 import { VirtualListBodyOptions } from './VirtualListBodyOptions.component';
 
 afterEach(cleanup);
@@ -26,19 +23,18 @@ const ProviderShell = ({
   onChange = vi.fn(),
   selectedValues = [],
 }: ProviderShellProps) => (
-  <VirtualListConfigProvider hasCheckboxes hasSelectAll onChange={onChange}>
-    <VirtualListDataProvider
-      dataState={{
-        data: ['Alpha', 'Beta', 'Gamma'],
-        hasMore: false,
-        isLoading: false,
-        isLoadingMore: false,
-      }}
-      filter={{ type: 'select', values: selectedValues }}
-    >
-      {children}
-    </VirtualListDataProvider>
-  </VirtualListConfigProvider>
+  <VirtualListProvider
+    dataState={{
+      data: ['Alpha', 'Beta', 'Gamma'],
+      hasMore: false,
+      isLoading: false,
+      isLoadingMore: false,
+    }}
+    filter={{ type: 'select', values: selectedValues }}
+    listState={{ hasCheckboxes: true, hasSelectAll: true, onChange }}
+  >
+    {children}
+  </VirtualListProvider>
 );
 
 // Window covering select-all (index 0) plus the three options.

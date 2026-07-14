@@ -1,1 +1,1 @@
-export { VirtualSelectConfigProvider } from './VirtualSelectConfig';
+export { VirtualSelectProvider } from './VirtualSelectContext.provider';

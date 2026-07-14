@@ -7,7 +7,7 @@ const { useGetIsBusyMock } = vi.hoisted(() => ({
   useGetIsBusyMock: vi.fn(() => false),
 }));
 
-vi.mock('../contexts/VirtualSelectConfig/meta/selectors', () => ({
+vi.mock('../contexts/meta/selectors', () => ({
   useGetIsBusy: useGetIsBusyMock,
 }));
 

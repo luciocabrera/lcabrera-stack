@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { useGetIsBusy } from '../contexts/VirtualSelectConfig/meta/selectors';
+import { useGetIsBusy } from '../contexts/meta/selectors';
 import { VirtualSelectTrigger } from '../VirtualSelectTrigger';
 import { busyStyles } from './VirtualSelectHeader.stylex';
 

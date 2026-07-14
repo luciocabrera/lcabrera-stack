@@ -6,10 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type { VirtualListDataState } from '../../VirtualList.types';
 
-import {
-  VirtualListConfigProvider,
-  VirtualListDataProvider,
-} from '../../contexts';
+import { VirtualListProvider } from '../../contexts';
 import { VirtualListBodyChildren } from './VirtualListBodyChildren.component';
 
 afterEach(cleanup);
@@ -31,16 +28,17 @@ type RenderArgs = {
 
 const renderChildren = ({ dataState, hasFetchInitial = false }: RenderArgs) =>
   render(
-    <VirtualListConfigProvider
-      hasCheckboxes
-      hasSelectAll
-      onChange={vi.fn()}
-      onFetchInitial={hasFetchInitial ? vi.fn() : undefined}
+    <VirtualListProvider
+      dataState={dataState}
+      listState={{
+        hasCheckboxes: true,
+        hasSelectAll: true,
+        onChange: vi.fn(),
+        onFetchInitial: hasFetchInitial ? vi.fn() : undefined,
+      }}
     >
-      <VirtualListDataProvider dataState={dataState}>
-        <Harness />
-      </VirtualListDataProvider>
-    </VirtualListConfigProvider>,
+      <Harness />
+    </VirtualListProvider>,
   );
 
 describe('VirtualListBodyChildren', () => {

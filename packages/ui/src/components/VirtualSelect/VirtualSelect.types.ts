@@ -3,7 +3,7 @@ import type { StyleXStyles } from '@stylexjs/stylex';
 
 /**
  * Select-level presentation metadata mirrored into the meta store by
- * `VirtualSelectConfigProvider` (isListVisible is pre-computed from
+ * `VirtualSelectProvider` (isListVisible is pre-computed from
  * `isAlwaysOpen || isOpen`). Delegates read it through one-liner selectors.
  */
 export type VirtualSelectMetaState = {
