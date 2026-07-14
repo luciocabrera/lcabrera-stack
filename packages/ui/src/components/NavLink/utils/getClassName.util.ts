@@ -33,7 +33,6 @@ export const getClassName = ({
     styles.orientation[orientation],
     styles.size[size],
     styles.variant[variant],
-    // styles.width[width],
     isActive && styles.active,
     isIconOnly && styles.iconOnly,
     customStylex,

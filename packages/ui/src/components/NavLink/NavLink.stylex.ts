@@ -5,7 +5,6 @@ import {
   orientationVariants,
   rippleBase,
   sizeVariants,
-  widthVariants,
 } from '@repo/ui/design-system/tokens/commons.stylex';
 import * as stylex from '@stylexjs/stylex';
 
@@ -41,5 +40,4 @@ export const linkItemStyles = {
   labelHidden: styles.labelHidden,
   orientation: orientationVariants,
   size: sizeVariants,
-  width: widthVariants,
 };
