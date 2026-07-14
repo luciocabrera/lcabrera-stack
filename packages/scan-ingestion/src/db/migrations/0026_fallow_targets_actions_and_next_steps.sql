@@ -18,7 +18,7 @@ CREATE OR REPLACE VIEW cqms.v_fallow_targets AS
 CREATE TABLE cqms.fallow_next_steps (
   id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   scan_id    uuid NOT NULL REFERENCES cqms.scans(id) ON DELETE CASCADE,
-  step_id    text,
+  step_id    varchar(64),
   command    text,
   reason     text,
   created_by uuid REFERENCES cqms.users(id),

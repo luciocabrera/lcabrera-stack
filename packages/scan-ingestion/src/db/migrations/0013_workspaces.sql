@@ -13,7 +13,7 @@ CREATE TABLE cqms.project_workspaces (
   id             uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   project_id     uuid NOT NULL REFERENCES cqms.projects(id) ON DELETE CASCADE,
   workspace_path text NOT NULL,   -- project-root-relative, no trailing slash
-  workspace_name text,            -- the workspace's package.json "name", when readable
+  workspace_name varchar(255),            -- the workspace's package.json "name", when readable
   created_by     uuid REFERENCES cqms.users(id),
   created_at     timestamptz NOT NULL DEFAULT now(),
   UNIQUE (project_id, workspace_path)

@@ -25,13 +25,13 @@ WHERE scanner_id = 'linter';
 CREATE TABLE cqms.lint_violations (
   id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   scan_id       uuid NOT NULL REFERENCES cqms.scans(id) ON DELETE CASCADE,
-  source        text NOT NULL CHECK (source IN ('eslint','oxlint')),
+  source        varchar(32) NOT NULL CHECK (source IN ('eslint','oxlint')),
   file_path     text NOT NULL,   -- project-root-relative (workspace attribution relies on this)
-  rule_id       text NOT NULL,
-  severity_raw  text NOT NULL,   -- the tool's own value: oxlint 'error'/'warning'; eslint '2'/'1'
-  severity      text NOT NULL CHECK (severity IN ('BLOCKER','HIGH','MEDIUM','LOW','NIT')),
+  rule_id       varchar(255) NOT NULL,
+  severity_raw  varchar(64) NOT NULL,   -- the tool's own value: oxlint 'error'/'warning'; eslint '2'/'1'
+  severity      varchar(32) NOT NULL CHECK (severity IN ('BLOCKER','HIGH','MEDIUM','LOW','NIT')),
   message       text NOT NULL,
-  message_id    text,            -- eslint messageId
+  message_id    varchar(64),            -- eslint messageId
   line          integer,
   col           integer,
   end_line      integer,
@@ -39,7 +39,7 @@ CREATE TABLE cqms.lint_violations (
   fixable       boolean NOT NULL DEFAULT false,
   -- eslint suppressedMessages: baselined debt, kept as queryable data.
   suppressed    boolean NOT NULL DEFAULT false,
-  suppression_kind          text,   -- 'file' | 'directive'
+  suppression_kind          varchar(32),   -- 'file' | 'directive'
   suppression_justification text,
   help_url      text,
   created_by    uuid REFERENCES cqms.users(id),

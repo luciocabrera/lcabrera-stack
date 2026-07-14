@@ -40,11 +40,11 @@ CREATE TABLE cqms.app_graph_nodes (
   -- runner-assigned sequential id; parent linkage stays within the scan
   node_id             integer NOT NULL,
   parent_node_id      integer,         -- NULL only for the scan-root node
-  node_type           text NOT NULL CHECK (node_type IN ('folder','file')),
-  name                text NOT NULL,
+  node_type           varchar(32) NOT NULL CHECK (node_type IN ('folder','file')),
+  name                varchar(255) NOT NULL,
   path                text NOT NULL,   -- project-root-relative ('.' = repo-scope root)
-  extension           text NOT NULL DEFAULT '',
-  file_type_category  text,            -- suffix-convention class, files only
+  extension           varchar(32) NOT NULL DEFAULT '',
+  file_type_category  varchar(64),            -- suffix-convention class, files only
   nested_level        integer NOT NULL DEFAULT 0,  -- depth from the SCAN root (root = 0)
   child_folder_count  integer NOT NULL DEFAULT 0,
   child_file_count    integer NOT NULL DEFAULT 0,

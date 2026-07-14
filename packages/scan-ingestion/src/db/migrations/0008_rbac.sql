@@ -11,12 +11,12 @@
 
 CREATE TABLE cqms.users (
   id             uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  username       text NOT NULL UNIQUE,
-  display_name   text NOT NULL,
+  username       varchar(100) NOT NULL UNIQUE,
+  display_name   varchar(255) NOT NULL,
   -- '<saltHex>:<hashHex>' (scrypt, packages/scan-ingestion/src/auth/).
   -- A value that does not match that shape (e.g. the system user's
   -- sentinel) can never verify — a deliberate non-loginable state.
-  password_hash  text NOT NULL,
+  password_hash  varchar(255) NOT NULL,
   created_by     uuid REFERENCES cqms.users(id),
   created_at     timestamptz NOT NULL DEFAULT now(),
   edited_by      uuid REFERENCES cqms.users(id),
@@ -27,7 +27,7 @@ CREATE TABLE cqms.users (
 
 CREATE TABLE cqms.roles (
   id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  role_name    text NOT NULL UNIQUE,
+  role_name    varchar(100) NOT NULL UNIQUE,
   description  text,
   created_by   uuid REFERENCES cqms.users(id),
   created_at   timestamptz NOT NULL DEFAULT now(),
@@ -42,8 +42,8 @@ CREATE TABLE cqms.roles (
 -- same philosophy as cqms.scanners (0001).
 CREATE TABLE cqms.permissions (
   id             uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  action         text NOT NULL CHECK (action IN ('create','read','update','delete','execute')),
-  resource_type  text NOT NULL CHECK (resource_type IN ('project','run','scan','scanner','user','role','workspace')),
+  action         varchar(32) NOT NULL CHECK (action IN ('create','read','update','delete','execute')),
+  resource_type  varchar(32) NOT NULL CHECK (resource_type IN ('project','run','scan','scanner','user','role','workspace')),
   created_at     timestamptz NOT NULL DEFAULT now(),
   UNIQUE (action, resource_type)
 );
@@ -72,8 +72,8 @@ CREATE TABLE cqms.resource_grants (
   id               uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   grantee_user_id  uuid REFERENCES cqms.users(id) ON DELETE CASCADE,
   grantee_role_id  uuid REFERENCES cqms.roles(id) ON DELETE CASCADE,
-  action           text NOT NULL CHECK (action IN ('create','read','update','delete','execute')),
-  resource_type    text NOT NULL CHECK (resource_type IN ('project','run','scan','scanner','user','role','workspace')),
+  action           varchar(32) NOT NULL CHECK (action IN ('create','read','update','delete','execute')),
+  resource_type    varchar(32) NOT NULL CHECK (resource_type IN ('project','run','scan','scanner','user','role','workspace')),
   resource_id      uuid NOT NULL,
   created_by       uuid REFERENCES cqms.users(id),
   created_at       timestamptz NOT NULL DEFAULT now(),

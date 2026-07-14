@@ -25,15 +25,15 @@ WHERE scanner_id = 'fallow';
 CREATE TABLE cqms.fallow_runs (
   scan_id                     uuid PRIMARY KEY REFERENCES cqms.scans(id) ON DELETE CASCADE,
   -- tool identity / provenance
-  fallow_version              text,
-  raw_kind                    text,     -- 'combined' for full runs
+  fallow_version              varchar(32),
+  raw_kind                    varchar(32),     -- 'combined' for full runs
   raw_schema_version          integer,
-  analysis_run_id             text,
+  analysis_run_id             varchar(64),
   elapsed_ms                  integer,
   -- overall score (standalone health runs only — nullable by design)
   health_formula_version      integer,
   health_score                numeric,
-  health_grade                text,
+  health_grade                varchar(16),
   health_penalties            jsonb,
   -- check (dead code) section
   check_total_issues          integer NOT NULL DEFAULT 0,
@@ -48,8 +48,8 @@ CREATE TABLE cqms.fallow_runs (
   max_cognitive_threshold     integer,
   max_crap_threshold          integer,
   average_maintainability     numeric,
-  coverage_model              text,
-  coverage_source_consistency text,
+  coverage_model              varchar(64),
+  coverage_source_consistency varchar(64),
   severity_critical_count     integer NOT NULL DEFAULT 0,
   severity_high_count         integer NOT NULL DEFAULT 0,
   severity_moderate_count     integer NOT NULL DEFAULT 0,
@@ -138,7 +138,7 @@ CREATE TABLE cqms.fallow_hotspots (
   lines_deleted      integer,
   complexity_density numeric,
   fan_in             integer,
-  trend              text,
+  trend              varchar(32),
   created_by         uuid REFERENCES cqms.users(id),
   created_at         timestamptz NOT NULL DEFAULT now()
 );
@@ -150,8 +150,8 @@ CREATE TABLE cqms.fallow_clone_groups (
   id             uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   scan_id        uuid NOT NULL REFERENCES cqms.scans(id) ON DELETE CASCADE,
   group_index    integer NOT NULL,
-  fingerprint    text,
-  suggested_name text,
+  fingerprint    varchar(128),
+  suggested_name varchar(255),
   token_count    integer NOT NULL DEFAULT 0,
   line_count     integer NOT NULL DEFAULT 0,
   instance_count integer NOT NULL DEFAULT 0,
@@ -184,11 +184,11 @@ CREATE INDEX fallow_clone_instances_group_idx ON cqms.fallow_clone_instances (cl
 CREATE TABLE cqms.fallow_dead_code (
   id                  uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   scan_id             uuid NOT NULL REFERENCES cqms.scans(id) ON DELETE CASCADE,
-  category            text NOT NULL CHECK (category IN
+  category            varchar(64) NOT NULL CHECK (category IN
     ('unused_file','unused_export','unused_type','unused_dependency','unlisted_dependency','unresolved_import')),
   file_path           text,
-  export_name         text,
-  package_name        text,
+  export_name         varchar(255),
+  package_name        varchar(255),
   dependency_location text,   -- 'dependencies' | 'devDependencies' | 'optionalDependencies'
   line                integer,
   col                 integer,
@@ -219,7 +219,7 @@ CREATE TABLE cqms.fallow_large_functions (
   id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   scan_id       uuid NOT NULL REFERENCES cqms.scans(id) ON DELETE CASCADE,
   file_path     text NOT NULL,
-  function_name text,
+  function_name varchar(255),
   line          integer,
   line_count    integer NOT NULL DEFAULT 0,
   created_by    uuid REFERENCES cqms.users(id),
@@ -235,9 +235,9 @@ CREATE TABLE cqms.fallow_targets (
   priority       numeric,
   efficiency     numeric,
   recommendation text,
-  category       text,
-  effort         text,
-  confidence     text,
+  category       varchar(64),
+  effort         varchar(32),
+  confidence     varchar(32),
   factors        jsonb,
   evidence       jsonb,
   created_by     uuid REFERENCES cqms.users(id),
@@ -252,18 +252,18 @@ CREATE TABLE cqms.fallow_function_findings (
   id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   scan_id         uuid NOT NULL REFERENCES cqms.scans(id) ON DELETE CASCADE,
   file_path       text NOT NULL,
-  function_name   text,
+  function_name   varchar(255),
   line            integer,
   col             integer,
   cyclomatic      integer,
   cognitive       integer,
   line_count      integer,
   param_count     integer,
-  exceeded        text,
-  severity        text,
+  exceeded        varchar(32),
+  severity        varchar(32),
   crap            numeric,
-  coverage_tier   text,
-  coverage_source text,
+  coverage_tier   varchar(32),
+  coverage_source varchar(64),
   created_by      uuid REFERENCES cqms.users(id),
   created_at      timestamptz NOT NULL DEFAULT now()
 );

@@ -26,13 +26,13 @@
 --    location comes from the table's existing file_path/line/col ────────────
 
 ALTER TABLE cqms.fallow_dead_code
-  ADD COLUMN rule_id    text,
-  ADD COLUMN severity   text CHECK (severity IN ('BLOCKER','HIGH','MEDIUM','LOW','NIT')),
-  ADD COLUMN confidence text,
-  ADD COLUMN effort     text,
+  ADD COLUMN rule_id    varchar(255),
+  ADD COLUMN severity   varchar(32) CHECK (severity IN ('BLOCKER','HIGH','MEDIUM','LOW','NIT')),
+  ADD COLUMN confidence varchar(32),
+  ADD COLUMN effort     varchar(32),
   ADD COLUMN why        text,
   ADD COLUMN fix        text,
-  ADD COLUMN finding_id text;
+  ADD COLUMN finding_id varchar(255);
 
 -- `CREATE VIEW ... AS SELECT *` expands to the table's column list AT
 -- CREATE TIME — Postgres does not retroactively add newly ALTERed columns
@@ -45,13 +45,13 @@ CREATE OR REPLACE VIEW cqms.v_fallow_dead_code AS
 --    location comes from the table's existing entry_file_path/line/col
 
 ALTER TABLE cqms.fallow_circular_dependencies
-  ADD COLUMN rule_id    text,
-  ADD COLUMN severity   text CHECK (severity IN ('BLOCKER','HIGH','MEDIUM','LOW','NIT')),
-  ADD COLUMN confidence text,
-  ADD COLUMN effort     text,
+  ADD COLUMN rule_id    varchar(255),
+  ADD COLUMN severity   varchar(32) CHECK (severity IN ('BLOCKER','HIGH','MEDIUM','LOW','NIT')),
+  ADD COLUMN confidence varchar(32),
+  ADD COLUMN effort     varchar(32),
   ADD COLUMN why        text,
   ADD COLUMN fix        text,
-  ADD COLUMN finding_id text;
+  ADD COLUMN finding_id varchar(255);
 
 CREATE OR REPLACE VIEW cqms.v_fallow_circular_dependencies AS
   SELECT * FROM cqms.fallow_circular_dependencies;
@@ -63,13 +63,13 @@ CREATE OR REPLACE VIEW cqms.v_fallow_circular_dependencies AS
 --    makeFinding() call site did, avoids a runtime join in v_all_findings) ──
 
 ALTER TABLE cqms.fallow_clone_groups
-  ADD COLUMN rule_id       text,
-  ADD COLUMN severity      text CHECK (severity IN ('BLOCKER','HIGH','MEDIUM','LOW','NIT')),
-  ADD COLUMN confidence    text,
-  ADD COLUMN effort        text,
+  ADD COLUMN rule_id       varchar(255),
+  ADD COLUMN severity      varchar(32) CHECK (severity IN ('BLOCKER','HIGH','MEDIUM','LOW','NIT')),
+  ADD COLUMN confidence    varchar(32),
+  ADD COLUMN effort        varchar(32),
   ADD COLUMN why           text,
   ADD COLUMN fix           text,
-  ADD COLUMN finding_id    text,
+  ADD COLUMN finding_id    varchar(255),
   ADD COLUMN location_path text,
   ADD COLUMN location_hint text;
 
@@ -90,13 +90,13 @@ ALTER INDEX cqms.fallow_function_findings_scan_severity_idx
   RENAME TO fallow_function_findings_scan_severity_raw_idx;
 
 ALTER TABLE cqms.fallow_function_findings
-  ADD COLUMN severity   text CHECK (severity IN ('BLOCKER','HIGH','MEDIUM','LOW','NIT')),
-  ADD COLUMN rule_id    text,
-  ADD COLUMN confidence text,
-  ADD COLUMN effort     text,
+  ADD COLUMN severity   varchar(32) CHECK (severity IN ('BLOCKER','HIGH','MEDIUM','LOW','NIT')),
+  ADD COLUMN rule_id    varchar(255),
+  ADD COLUMN confidence varchar(32),
+  ADD COLUMN effort     varchar(32),
   ADD COLUMN why        text,
   ADD COLUMN fix        text,
-  ADD COLUMN finding_id text;
+  ADD COLUMN finding_id varchar(255);
 
 CREATE INDEX fallow_function_findings_scan_severity_idx
   ON cqms.fallow_function_findings (scan_id, severity);
@@ -110,7 +110,7 @@ CREATE OR REPLACE VIEW cqms.v_fallow_function_findings AS
 
 ALTER TABLE cqms.lint_violations
   ADD COLUMN suggestion_text text,
-  ADD COLUMN finding_id      text;
+  ADD COLUMN finding_id      varchar(255);
 
 CREATE OR REPLACE VIEW cqms.v_lint_violations AS
   SELECT * FROM cqms.lint_violations;

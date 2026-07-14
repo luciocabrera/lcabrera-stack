@@ -18,7 +18,7 @@ ALTER TABLE cqms.app_graph_nodes ADD CONSTRAINT app_graph_nodes_node_type_check
 --    DEFAULTs, but these have none to apply) ───────────────────────────────
 
 ALTER TABLE cqms.app_graph_nodes
-  ADD COLUMN symbol_name  text,
+  ADD COLUMN symbol_name  varchar(255),
   ADD COLUMN is_exported  boolean,
   ADD COLUMN is_component boolean,
   ADD COLUMN is_hook      boolean,

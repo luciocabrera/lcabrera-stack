@@ -18,12 +18,12 @@ CREATE TABLE llm_usage.scan_llm_usage (
   scan_id          uuid NOT NULL REFERENCES cqms.scans(id) ON DELETE CASCADE,
   run_id           uuid NOT NULL REFERENCES cqms.runs(id) ON DELETE CASCADE,
   project_id       uuid NOT NULL REFERENCES cqms.projects(id) ON DELETE CASCADE,
-  scanner_id       text NOT NULL REFERENCES cqms.scanners(scanner_id),
-  outcome          text NOT NULL CHECK (outcome IN ('succeeded', 'failed', 'capped')),
+  scanner_id       varchar(64) NOT NULL REFERENCES cqms.scanners(scanner_id),
+  outcome          varchar(16) NOT NULL CHECK (outcome IN ('succeeded', 'failed', 'capped')),
   total_cost_usd   numeric(12, 6),  -- NULL for 'capped' (no API call made)
   num_turns        integer,         -- NULL for 'capped'
   error_message    text,            -- failure reason, or the cap-skip reason
-  triggered_by     text,            -- resolved server-side from cqms.runs.triggered_by
+  triggered_by     varchar(100),            -- resolved server-side from cqms.runs.triggered_by
   created_by       uuid REFERENCES cqms.users(id),
   created_at       timestamptz NOT NULL DEFAULT now()
 );

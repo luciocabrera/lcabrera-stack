@@ -16,7 +16,7 @@
 
 CREATE TABLE cqms.code_smell_checker_runs (
   scan_id                 uuid PRIMARY KEY REFERENCES cqms.scans(id) ON DELETE CASCADE,
-  report_id               text,
+  report_id               varchar(64),
   generated_at            timestamptz,
   files_analyzed          integer NOT NULL DEFAULT 0,
   finding_count           integer NOT NULL DEFAULT 0,
@@ -39,7 +39,7 @@ CREATE TABLE cqms.code_smell_checker_runs (
 
 CREATE TABLE cqms.code_smell_zen_runs (
   scan_id                 uuid PRIMARY KEY REFERENCES cqms.scans(id) ON DELETE CASCADE,
-  report_id               text,
+  report_id               varchar(64),
   generated_at            timestamptz,
   files_analyzed          integer NOT NULL DEFAULT 0,
   finding_count           integer NOT NULL DEFAULT 0,

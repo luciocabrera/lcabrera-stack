@@ -16,10 +16,10 @@ CREATE TABLE cqms.project_snapshots (
   id            uuid PRIMARY KEY DEFAULT uuidv7(),
   project_id    uuid NOT NULL REFERENCES cqms.projects(id) ON DELETE CASCADE,
   storage_path  text NOT NULL,          -- server dir holding the unpacked tree
-  archive_name  text NOT NULL,          -- original upload filename (metadata only)
+  archive_name  varchar(255) NOT NULL,          -- original upload filename (metadata only)
   size_bytes    bigint NOT NULL,
   file_count    integer NOT NULL,
-  source_label  text NOT NULL,          -- 'browser-upload' today; 'cli:<host>' next increment
+  source_label  varchar(100) NOT NULL,          -- 'browser-upload' today; 'cli:<host>' next increment
   created_by    uuid REFERENCES cqms.users(id),
   created_at    timestamptz NOT NULL DEFAULT now()
 );

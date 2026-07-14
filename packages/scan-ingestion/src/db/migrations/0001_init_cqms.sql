@@ -11,9 +11,9 @@ CREATE SCHEMA IF NOT EXISTS cqms;
 
 CREATE TABLE cqms.projects (
   id               uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  name             text NOT NULL,
+  name             varchar(255) NOT NULL,
   local_path       text NOT NULL UNIQUE,   -- realpath-canonicalized; the ad hoc matching key
-  default_branch   text NOT NULL DEFAULT 'main',
+  default_branch   varchar(255) NOT NULL DEFAULT 'main',
   created_at       timestamptz NOT NULL DEFAULT now(),
   last_scanned_at  timestamptz
 );
@@ -21,8 +21,8 @@ CREATE TABLE cqms.projects (
 -- Reference table (not a CHECK enum) so adding a 5th scanner is a data
 -- insert, not a migration.
 CREATE TABLE cqms.scanners (
-  scanner_id           text PRIMARY KEY,      -- 'fallow' | 'linter' | 'code-smell-checker' | 'code-smell-zen'
-  display_name         text NOT NULL,
+  scanner_id           varchar(64) PRIMARY KEY,      -- 'fallow' | 'linter' | 'code-smell-checker' | 'code-smell-zen'
+  display_name         varchar(255) NOT NULL,
   skill_path           text NOT NULL,          -- '.github/skills/fallow-code-checker'
   deterministic        boolean NOT NULL,       -- true only when finding-generation needs zero LLM judgment
   supports_diff_scope  boolean NOT NULL DEFAULT false,
@@ -32,13 +32,13 @@ CREATE TABLE cqms.scanners (
 CREATE TABLE cqms.runs (
   id                  uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   project_id          uuid NOT NULL REFERENCES cqms.projects(id) ON DELETE CASCADE,
-  origin              text NOT NULL CHECK (origin IN ('ui_agent_sdk','interactive_session','ci')),
-  triggered_by        text,       -- user/session identifier, nullable
-  status              text NOT NULL DEFAULT 'queued'
+  origin              varchar(64) NOT NULL CHECK (origin IN ('ui_agent_sdk','interactive_session','ci')),
+  triggered_by        varchar(100),       -- user/session identifier, nullable
+  status              varchar(32) NOT NULL DEFAULT 'queued'
                        CHECK (status IN ('queued','running','succeeded','failed','partially_failed','canceled')),
   requested_scanners  jsonb NOT NULL DEFAULT '[]'::jsonb,
-  git_commit_sha      text,
-  git_branch          text,
+  git_commit_sha      varchar(64),
+  git_branch          varchar(255),
   started_at          timestamptz,
   finished_at         timestamptz,
   created_at          timestamptz NOT NULL DEFAULT now(),
@@ -51,14 +51,14 @@ CREATE TABLE cqms.scans (
   id                 uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   run_id             uuid NOT NULL,
   project_id         uuid NOT NULL,
-  scanner_id         text NOT NULL REFERENCES cqms.scanners(scanner_id),
-  status             text NOT NULL DEFAULT 'queued'
+  scanner_id         varchar(64) NOT NULL REFERENCES cqms.scanners(scanner_id),
+  status             varchar(32) NOT NULL DEFAULT 'queued'
                       CHECK (status IN ('queued','running','succeeded','failed','canceled')),
-  scope_type         text NOT NULL CHECK (scope_type IN ('repo','folder','changed-files','diff')),
+  scope_type         varchar(32) NOT NULL CHECK (scope_type IN ('repo','folder','changed-files','diff')),
   scope_value        text NOT NULL,
-  base_branch        text,
-  head_branch        text,
-  commit_range       text,
+  base_branch        varchar(255),
+  head_branch        varchar(255),
+  commit_range       varchar(255),
   started_at         timestamptz,
   finished_at        timestamptz,
   duration_ms        integer,
@@ -76,8 +76,8 @@ CREATE INDEX scans_project_scanner_created_idx ON cqms.scans (project_id, scanne
 CREATE TABLE cqms.reports (
   id                uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   scan_id           uuid NOT NULL UNIQUE REFERENCES cqms.scans(id) ON DELETE CASCADE,
-  schema_version    text NOT NULL DEFAULT '1.0',
-  report_id         text NOT NULL,
+  schema_version    varchar(32) NOT NULL DEFAULT '1.0',
+  report_id         varchar(64) NOT NULL,
   generated_at      timestamptz NOT NULL,
   report_markdown   text NOT NULL,
   report_json       jsonb NOT NULL,
@@ -97,24 +97,24 @@ CREATE TABLE cqms.reports (
 CREATE TABLE cqms.scan_findings (
   id                   uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   scan_id              uuid NOT NULL REFERENCES cqms.scans(id) ON DELETE CASCADE,
-  finding_id           text NOT NULL,
-  rule_id              text NOT NULL,
-  severity             text NOT NULL CHECK (severity IN ('BLOCKER','HIGH','MEDIUM','LOW','NIT')),
-  confidence           text NOT NULL CHECK (confidence IN ('high','medium','low')),
+  finding_id           varchar(255) NOT NULL,
+  rule_id              varchar(255) NOT NULL,
+  severity             varchar(32) NOT NULL CHECK (severity IN ('BLOCKER','HIGH','MEDIUM','LOW','NIT')),
+  confidence           varchar(32) NOT NULL CHECK (confidence IN ('high','medium','low')),
   location_path        text NOT NULL,
   location_hint        text,
   evidence_excerpt     text,
   why                  text NOT NULL,
   fix                  text NOT NULL,
-  effort               text CHECK (effort IN ('small','medium','large')),
-  defer_risk           text,
+  effort               varchar(32) CHECK (effort IN ('small','medium','large')),
+  defer_risk           varchar(32),
   verification_steps   jsonb NOT NULL DEFAULT '[]'::jsonb,
-  status               text NOT NULL DEFAULT 'open' CHECK (status IN ('open','in-progress','done','deferred')),
-  owner                text,
+  status               varchar(32) NOT NULL DEFAULT 'open' CHECK (status IN ('open','in-progress','done','deferred')),
+  owner                varchar(100),
   dependencies         jsonb,
   related_findings     jsonb,
   tags                 jsonb,
-  finding_kind         text NOT NULL DEFAULT 'single_location' CHECK (finding_kind IN ('single_location','duplication_group')),
+  finding_kind         varchar(64) NOT NULL DEFAULT 'single_location' CHECK (finding_kind IN ('single_location','duplication_group')),
   extra                jsonb NOT NULL DEFAULT '{}'::jsonb,
   created_at           timestamptz NOT NULL DEFAULT now(),
   UNIQUE (scan_id, finding_id)
@@ -134,8 +134,8 @@ CREATE TABLE cqms.run_files (
   id                 uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   run_id             uuid NOT NULL REFERENCES cqms.runs(id) ON DELETE CASCADE,
   file_path          text NOT NULL,   -- project-relative
-  file_type_category text NOT NULL,  -- suffix-convention category: component, hook, util, service_api, repository, controller, route, types, stylex, constants, schema, test, other
-  extension          text NOT NULL,  -- raw extension, e.g. '.tsx', '.ts' — distinct from category
+  file_type_category varchar(64) NOT NULL,  -- suffix-convention category: component, hook, util, service_api, repository, controller, route, types, stylex, constants, schema, test, other
+  extension          varchar(32) NOT NULL,  -- raw extension, e.g. '.tsx', '.ts' — distinct from category
   nested_level       integer NOT NULL, -- directory depth from project root
   line_count         integer,
   created_at         timestamptz NOT NULL DEFAULT now(),

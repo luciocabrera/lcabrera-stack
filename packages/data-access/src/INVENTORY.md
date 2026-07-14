@@ -35,6 +35,25 @@ composed by those entry points — import them directly only from within
 
 ---
 
+## `src/tokens/`
+
+Reusable, DB-free bearer-token primitives (ADR-029). The CQMS-specific
+persistence (issue/verify/list/revoke against `cqms.api_tokens`) lives in
+`@repo/scan-ingestion`; these are the generic halves any app can reuse. All
+four are exported per-file in the `exports` map.
+
+| Artifact           | Location                          | Description                                                                                          |
+| ------------------ | --------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `generateApiToken` | `tokens/generateApiToken.util.ts` | Mints `{ tokenId, secret, plaintext }` — plaintext is `<prefix><tokenId>.<secret>`, prefix optional  |
+| `parseApiToken`    | `tokens/parseApiToken.util.ts`    | Splits a plaintext (given the same `prefix`) back into `{ tokenId, secret }`; undefined if malformed |
+| `hashApiToken`     | `tokens/hashApiToken.util.ts`     | scrypt hash (`<saltHex>:<hashHex>`) of the secret half, for storage                                  |
+| `isApiTokenValid`  | `tokens/isApiTokenValid.util.ts`  | Constant-time compare of a secret against a stored hash; false (never throws) if malformed           |
+
+These are fully generic — no product-specific value is baked in; the caller
+supplies any token `prefix` (e.g. CodePulse passes `cqms_` from scan-ingestion).
+
+---
+
 ## `src/api/` — see its own `ARCHITECTURE.md`
 
 Client-side fetch helpers, exported via the `./api` entry in the

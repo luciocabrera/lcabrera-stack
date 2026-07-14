@@ -11,7 +11,11 @@
     "./db/queryBuilder/QueryBuilder.types": "./src/db/queryBuilder/QueryBuilder.types.ts",
     "./db/queryBuilder/buildCountQuery.util": "./src/db/queryBuilder/buildCountQuery.util.ts",
     "./db/queryBuilder/buildDistinctQuery.util": "./src/db/queryBuilder/buildDistinctQuery.util.ts",
-    "./db/queryBuilder/buildSelectQuery.util": "./src/db/queryBuilder/buildSelectQuery.util.ts"
+    "./db/queryBuilder/buildSelectQuery.util": "./src/db/queryBuilder/buildSelectQuery.util.ts",
+    "./tokens/generateApiToken.util": "./src/tokens/generateApiToken.util.ts",
+    "./tokens/parseApiToken.util": "./src/tokens/parseApiToken.util.ts",
+    "./tokens/hashApiToken.util": "./src/tokens/hashApiToken.util.ts",
+    "./tokens/isApiTokenValid.util": "./src/tokens/isApiTokenValid.util.ts"
   },
   "scripts": {
     "format": "vp fmt .",

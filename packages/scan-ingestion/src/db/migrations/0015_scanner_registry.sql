@@ -15,14 +15,14 @@ ALTER TABLE cqms.scanners
   ADD COLUMN description            text,
   ADD COLUMN version                integer NOT NULL DEFAULT 1,
   ADD COLUMN command_template       text,     -- '{target}/{scope}/{outputDir}' placeholders, documentation only
-  ADD COLUMN raw_artifact_file_name text,
+  ADD COLUMN raw_artifact_file_name varchar(255),
   ADD COLUMN config_detection       jsonb,
   ADD COLUMN allowed_tools          jsonb,
   ADD COLUMN steps_markdown         text;
 
 CREATE TABLE cqms.scanner_versions (
   id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  scanner_id  text NOT NULL REFERENCES cqms.scanners(scanner_id) ON DELETE CASCADE,
+  scanner_id  varchar(64) NOT NULL REFERENCES cqms.scanners(scanner_id) ON DELETE CASCADE,
   version     integer NOT NULL,
   snapshot    jsonb NOT NULL,      -- the registry fields at this version (audit columns stripped)
   created_by  uuid REFERENCES cqms.users(id),
