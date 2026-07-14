@@ -1,13 +1,11 @@
-import type {
-  ColumnOrderState,
-  SortingState,
-} from '@repo/ui/components/Table/Table.types';
+import type { SortingState } from '@repo/ui/components/Table/Table.types';
 
 import { useTableConfigContextValue } from '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { useTableDrawerContextValue } from '@repo/ui/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
 
 import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
 import { buildOrderBySorting } from './utils/buildOrderBySorting.util';
+import { readPinActionState } from './utils/readPinActionState.util';
 import { resolveOrderConflictUpdate } from './utils/resolveOrderConflictUpdate.util';
 
 /**
@@ -22,10 +20,16 @@ export const useOrderBySorting = () => {
 
   return () => {
     const drawerState = drawerColumnsStore.get();
+    const {
+      columnPinning,
+      columnsOrder,
+      staticKeys: rawStaticKeys,
+    } = readPinActionState({
+      drawerState,
+      tableState: tableColumnsStore.get(),
+    });
     const sorting = drawerState?.sorting ?? ([] as SortingState);
-    const columnsOrder = drawerState?.columnOrder ?? ([] as ColumnOrderState);
-    const columnPinning = drawerState?.columnPinning ?? { left: [], right: [] };
-    const staticKeys = tableColumnsStore.get()?.staticKeys ?? new Set<string>();
+    const staticKeys = rawStaticKeys ?? new Set<string>();
 
     const newOrder = buildOrderBySorting({
       columnOrder: columnsOrder,
