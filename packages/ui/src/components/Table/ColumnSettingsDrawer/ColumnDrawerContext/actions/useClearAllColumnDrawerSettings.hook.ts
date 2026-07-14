@@ -1,8 +1,6 @@
 import { useColumnDrawerContextValue } from '@repo/ui/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/useColumnDrawerContextValue.hook';
-import { useTableConfigContextValue } from '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
-import { persistTableMetaUiState } from '@repo/ui/components/Table/utils';
 
-import { getClosedColumnSettingsStatePatch } from '../utils';
+import { useCloseColumnSettingsDrawer } from './useCloseColumnSettingsDrawer.hook';
 
 /**
  * Clears all column drawer settings (filter, sizing, sorting) to undefined.
@@ -10,7 +8,7 @@ import { getClosedColumnSettingsStatePatch } from '../utils';
  */
 export const useClearAllColumnDrawerSettings = () => {
   const { columnStore } = useColumnDrawerContextValue();
-  const { metaStore } = useTableConfigContextValue();
+  const closeColumnSettingsDrawer = useCloseColumnSettingsDrawer();
 
   return (shouldCloseDrawer?: boolean) => {
     const columnKey = columnStore.get()?.columnKey;
@@ -25,15 +23,6 @@ export const useClearAllColumnDrawerSettings = () => {
       sorting: undefined,
     });
 
-    if (shouldCloseDrawer) {
-      const metaState = metaStore.get();
-      const nextStatePatch = getClosedColumnSettingsStatePatch({ metaState });
-
-      persistTableMetaUiState({
-        currentState: metaState,
-        nextStatePatch,
-      });
-      metaStore.set(nextStatePatch);
-    }
+    if (shouldCloseDrawer) closeColumnSettingsDrawer();
   };
 };

@@ -1,18 +1,17 @@
 import { useColumnDrawerContextValue } from '@repo/ui/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/useColumnDrawerContextValue.hook';
-import {
-  getClosedColumnSettingsStatePatch,
-  getTableColumnDrawerState,
-} from '@repo/ui/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/utils';
+import { getTableColumnDrawerState } from '@repo/ui/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/utils';
 import { useTableConfigContextValue } from '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
-import { persistTableMetaUiState } from '@repo/ui/components/Table/utils';
+
+import { useCloseColumnSettingsDrawer } from './useCloseColumnSettingsDrawer.hook';
 
 /**
  * Resets all column drawer settings from the current table state.
  * Optionally closes the drawer when shouldCloseDrawer is true.
  */
 export const useResetAllColumnDrawerSettings = () => {
-  const { columnsStore, metaStore } = useTableConfigContextValue();
+  const { columnsStore } = useTableConfigContextValue();
   const { columnStore } = useColumnDrawerContextValue();
+  const closeColumnSettingsDrawer = useCloseColumnSettingsDrawer();
 
   return (shouldCloseDrawer?: boolean) => {
     const columnKey = columnStore.get()?.columnKey;
@@ -27,15 +26,6 @@ export const useResetAllColumnDrawerSettings = () => {
 
     columnStore.set(nextDrawerState);
 
-    if (shouldCloseDrawer) {
-      const metaState = metaStore.get();
-      const nextStatePatch = getClosedColumnSettingsStatePatch({ metaState });
-
-      persistTableMetaUiState({
-        currentState: metaState,
-        nextStatePatch,
-      });
-      metaStore.set(nextStatePatch);
-    }
+    if (shouldCloseDrawer) closeColumnSettingsDrawer();
   };
 };
