@@ -55,6 +55,17 @@
         "files": ["**/*.test.*"],
         "maxUnitSize": 10000,
         "reason": "describe()/it() blocks in test suites legitimately span hundreds of lines; complexity checks still apply."
+      },
+      {
+        "files": [
+          ".github/skills/**/*.mjs",
+          "packages/eslint-local-rules/**/*.ts"
+        ],
+        "maxCyclomatic": 65535,
+        "maxCognitive": 65535,
+        "maxCrap": 1000000,
+        "maxUnitSize": 100000,
+        "reason": "Dev tooling, not shipped product: the fallow/lint/app-graph report generators and the custom ESLint rule visitors are inherently procedural CLI/AST-walker code where complexity/CRAP/unit-size limits do not apply."
       }
     ]
   },
