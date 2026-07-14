@@ -20,6 +20,7 @@
     "lint:eslint": "eslint . --config eslint.config.mjs --fix --max-warnings 0",
     "lint:eslint:check": "eslint . --config eslint.config.mjs --max-warnings 0",
     "migrate": "node --env-file-if-exists=../../docker/local/.env --env-file-if-exists=.env --experimental-strip-types ./src/db/runMigrations.ts",
+    "test:coverage": "vp run test --coverage --coverage.provider=v8 --coverage.reporter=json",
     "typecheck": "tsc --noEmit -p tsconfig.app.json"
   },
   "dependencies": {
@@ -32,6 +33,7 @@
     "@repo/vite-configs": "workspace:*",
     "@types/node": "catalog:",
     "@types/pg": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
     "eslint": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",

@@ -82,15 +82,25 @@ jobs:
       - name: Install dependencies
         run: vp install --frozen-lockfile --ignore-scripts && vp config
 
+      - name: Generate coverage for audit
+        # Real Istanbul coverage lets the audit compute accurate CRAP scores
+        # (CRAP = comp² × (1−cov)³ + comp). Without it, every function is scored
+        # at estimated/zero coverage and inflates complexity findings. Emits
+        # coverage/audit-coverage-final.json (merged across workspaces).
+        run: vp run coverage:audit
+
       - name: Fallow audit vs base branch
         id: fallow_audit
         # Gate mode, severity mapping, and baselines come from .fallowrc.json
         # (audit.gate: new-only) — only newly-introduced dead code, complexity,
         # or duplication fails this step (exit 1). Exit 2 = runtime/config error.
+        # --coverage feeds real CRAP scores; --coverage-root strips the checkout
+        # prefix so the coverage map's absolute paths match fallow's repo-relative
+        # findings.
         run: |
           set -o pipefail
           STATUS=0
-          vp run fallow:audit --base "origin/${{ github.base_ref }}" --format json --quiet | tee fallow-audit.raw.txt || STATUS=$?
+          vp run fallow:audit --base "origin/${{ github.base_ref }}" --coverage coverage/audit-coverage-final.json --coverage-root "${GITHUB_WORKSPACE}/" --format json --quiet | tee fallow-audit.raw.txt || STATUS=$?
           # vp run echoes a command banner before the JSON — keep everything
           # from the first JSON line onward so the summary step can parse it,
           # then propagate fallow's exit code (1 = introduced issues, 2 = error).
