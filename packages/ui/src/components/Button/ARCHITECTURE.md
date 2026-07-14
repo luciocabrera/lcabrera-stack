@@ -58,7 +58,6 @@ graph TD
 | `tooltipContent`   | `ReactNode`                      | —            |
 | `tooltipPlacement` | `top \| bottom \| left \| right` | `'top'`      |
 | `variant`          | `DesignSystemStyle`              | `'solid'`    |
-| `width`            | `DesignSystemWidth`              | `'full'`     |
 
 ### Design System Enums
 
@@ -68,7 +67,6 @@ graph TD
 | `DesignSystemSize`        | `mini`, `sm`, `md`, `lg`, `embedded`                                                      |
 | `DesignSystemStyle`       | `solid`, `flat`, `elevated`                                                               |
 | `DesignSystemOrientation` | `horizontal`, `vertical`                                                                  |
-| `DesignSystemWidth`       | `auto`, `full`                                                                            |
 
 ## Style Composition
 

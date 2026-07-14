@@ -85,7 +85,6 @@ Extends `RouterNavLinkProps` (all React Router `NavLink` props forwarded), with 
 | `size`             | `DesignSystemSize`                             | `'md'`       | Height / padding variant                     |
 | `tooltipContent`   | `ReactNode`                                    | —            | Optional tooltip content                     |
 | `tooltipPlacement` | `'bottom' \| 'left' \| 'right' \| 'top'`       | `'top'`      | Tooltip placement                            |
-| `width`            | `DesignSystemWidth`                            | `'full'`     | `'full'` stretches to container width        |
 
 ## Active State
 
