@@ -45,9 +45,7 @@ export const CardsSection = () => (
             <p>This card includes a footer section.</p>
           </CardBody>
           <CardFooter>
-            <Button size='sm' width='full'>
-              Action
-            </Button>
+            <Button size='sm'>Action</Button>
           </CardFooter>
         </Card>
 

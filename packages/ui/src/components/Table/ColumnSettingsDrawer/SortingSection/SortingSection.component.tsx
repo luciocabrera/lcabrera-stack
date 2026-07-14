@@ -41,7 +41,6 @@ export const SortingSection = ({ isBusy = false }: SortingSectionProps) => {
             isBusy={isBusy}
             onClick={handleAsc}
             size='sm'
-            width='full'
           >
             Ascending
           </Button>
@@ -51,7 +50,6 @@ export const SortingSection = ({ isBusy = false }: SortingSectionProps) => {
             isBusy={isBusy}
             onClick={handleDesc}
             size='sm'
-            width='full'
           >
             Descending
           </Button>

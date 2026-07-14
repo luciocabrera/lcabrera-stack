@@ -16,7 +16,6 @@ export const ClearResetToolbarButtons = ({
   const isToolbar = variant === 'toolbar';
   const buttonVariant = isToolbar ? 'ghost' : 'outline';
   const buttonSize = isToolbar ? 'mini' : 'sm';
-  const buttonWidth = isToolbar ? 'auto' : 'full';
   const iconSize = isToolbar ? ICON_SIZE_SM : ICON_SIZE_MD;
 
   return (
@@ -30,7 +29,6 @@ export const ClearResetToolbarButtons = ({
         size={buttonSize}
         tooltipContent={isToolbar ? clearLabel : undefined}
         variant={buttonVariant}
-        width={buttonWidth}
       >
         {!isToolbar && clearLabel}
       </Button>
@@ -42,7 +40,6 @@ export const ClearResetToolbarButtons = ({
         size={buttonSize}
         tooltipContent={isToolbar ? resetLabel : undefined}
         variant={buttonVariant}
-        width={buttonWidth}
       >
         {!isToolbar && resetLabel}
       </Button>

@@ -73,7 +73,7 @@ describe('Button', () => {
 
     cleanup();
 
-    const autoWidthRender = render(<Button width='auto'>Auto width</Button>);
+    const autoWidthRender = render(<Button>Auto width</Button>);
 
     expect(button.className).toBeTruthy();
     expect(defaultClassName).toBe(

@@ -31,7 +31,7 @@ export const ButtonsSection = () => (
       <div {...stylex.props(styles.buttonGrid)}>
         <Button>Normal</Button>
         <Button isDisabled>Disabled</Button>
-        <Button width='full'>Full Width</Button>
+        <Button>Full Width</Button>
       </div>
     </ShowcaseSubsection>
   </ShowcaseSection>

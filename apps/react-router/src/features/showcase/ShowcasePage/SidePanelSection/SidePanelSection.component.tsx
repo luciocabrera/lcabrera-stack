@@ -84,7 +84,7 @@ export const SidePanelSection = () => {
           <p>Press Escape or click the overlay to close.</p>
         </SidePanelBody>
         <SidePanelFooter>
-          <Button onClick={handleCloseLeft} size='sm' width='full'>
+          <Button onClick={handleCloseLeft} size='sm'>
             <span {...stylex.props(styles.iconLeft)}>
               <MenuCloseIcon size={ICON_SIZE_MD} />
             </span>
@@ -118,15 +118,10 @@ export const SidePanelSection = () => {
         </SidePanelBody>
         <SidePanelFooter>
           <div {...stylex.props(styles.buttonRow)}>
-            <Button onClick={handleCloseRight} size='sm' width='full'>
+            <Button onClick={handleCloseRight} size='sm'>
               Confirm
             </Button>
-            <Button
-              color='ghost'
-              onClick={handleCloseRight}
-              size='sm'
-              width='full'
-            >
+            <Button color='ghost' onClick={handleCloseRight} size='sm'>
               Cancel
             </Button>
           </div>

@@ -61,7 +61,6 @@ export const PinAndHideActions = <TData,>({
         onClick={handlePinLeft}
         orientation='horizontal'
         size='mini'
-        width='full'
       >
         Pin Left
       </Button>
@@ -76,7 +75,6 @@ export const PinAndHideActions = <TData,>({
         onClick={handlePinRight}
         orientation='horizontal'
         size='mini'
-        width='full'
       >
         Pin Right
       </Button>
@@ -91,7 +89,6 @@ export const PinAndHideActions = <TData,>({
         onClick={handleHideColumn}
         orientation='horizontal'
         size='mini'
-        width='full'
       >
         Hide Column
       </Button>

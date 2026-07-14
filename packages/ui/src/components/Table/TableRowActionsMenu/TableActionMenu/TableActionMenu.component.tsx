@@ -29,7 +29,6 @@ export const TableActionMenu = ({
           orientation='horizontal'
           size='mini'
           to={`view/${String(rowId)}`}
-          width='full'
         >
           {`View ${resolvedTitleSingular}`}
         </NavLink>
@@ -46,7 +45,6 @@ export const TableActionMenu = ({
           orientation='horizontal'
           size='mini'
           to={`edit/${String(rowId)}`}
-          width='full'
         >
           {`Edit ${resolvedTitleSingular}`}
         </NavLink>
@@ -63,7 +61,6 @@ export const TableActionMenu = ({
           onClick={onDelete}
           orientation='horizontal'
           size='mini'
-          width='full'
         >
           {`Delete ${resolvedTitleSingular}`}
         </Button>

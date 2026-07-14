@@ -69,7 +69,6 @@ export const AddSortSection = ({
           isDisabled={!selectedColumn}
           onClick={handleAddSort}
           size='sm'
-          width='full'
         >
           Add
         </Button>

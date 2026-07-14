@@ -38,7 +38,6 @@ export const PinningSection = ({ isBusy = false }: PinningSectionProps) => {
             isBusy={isBusy}
             onClick={handlePinLeft}
             size='sm'
-            width='full'
           >
             Pin Left
           </Button>
@@ -48,7 +47,6 @@ export const PinningSection = ({ isBusy = false }: PinningSectionProps) => {
             isBusy={isBusy}
             onClick={handlePinRight}
             size='sm'
-            width='full'
           >
             Pin Right
           </Button>

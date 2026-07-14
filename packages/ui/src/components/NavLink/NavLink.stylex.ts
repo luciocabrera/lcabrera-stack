@@ -12,6 +12,9 @@ const styles = stylex.create({
   item: {
     containerName: 'toolbarLink',
   },
+  itemFullWidth: {
+    width: '100%',
+  },
   itemActive: {
     backgroundColor: colors.brandPrimary,
     color: colors.brandSecondaryText,
@@ -34,6 +37,7 @@ export const linkItemStyles = {
     ...rippleBase.ripple,
   },
   variant: colorVariants,
+  fullWidth: styles.itemFullWidth,
   icon: baseInteractiveStyles.icon,
   iconOnly: styles.itemIconOnly,
   label: baseInteractiveStyles.label,

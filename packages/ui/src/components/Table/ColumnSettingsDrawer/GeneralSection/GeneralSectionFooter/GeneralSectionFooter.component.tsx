@@ -35,14 +35,12 @@ export const GeneralSectionFooter = ({
             icon: <EraserIcon size={ICON_SIZE_MD} />,
             label: 'Clear All Settings',
             onClick: clearAllSettings,
-            width: 'full',
           },
           {
             color: 'outline',
             icon: <RefreshIcon size={ICON_SIZE_MD} />,
             label: 'Reset All Settings',
             onClick: resetAllSettings,
-            width: 'full',
           },
         ]}
         customStylex={styles.buttonGroup}

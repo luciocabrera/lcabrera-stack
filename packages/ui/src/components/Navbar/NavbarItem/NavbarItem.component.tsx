@@ -31,7 +31,6 @@ export const NavbarItem = ({
     tooltipContent: isCompact ? item.label : undefined,
     tooltipPlacement: 'right' as const,
     variant: item.variant,
-    width: 'full' as const,
   };
 
   return (

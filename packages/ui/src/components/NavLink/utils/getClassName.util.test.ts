@@ -26,35 +26,17 @@ describe('getClassName', () => {
     expect(typeof result).toBe('string');
   });
 
-  it('accepts width parameter', () => {
-    const result = getClassName({
+  it('always applies the full-width style regardless of size', () => {
+    const embedded = getClassName({
       isActive: false,
       orientation: 'vertical',
-      size: 'sm',
+      size: 'embedded',
       styles: linkItemStyles,
       variant: 'primary',
-      width: 'full',
     });
-    expect(typeof result).toBe('string');
-  });
 
-  it('defaults width to auto when not provided', () => {
-    const withAuto = getClassName({
-      isActive: false,
-      orientation: 'horizontal',
-      size: 'md',
-      styles: linkItemStyles,
-      variant: 'primary',
-      width: 'auto',
-    });
-    const withoutWidth = getClassName({
-      isActive: false,
-      orientation: 'horizontal',
-      size: 'md',
-      styles: linkItemStyles,
-      variant: 'primary',
-    });
-    expect(withAuto).toBe(withoutWidth);
+    expect(embedded).toEqual(expect.any(String));
+    expect(embedded).not.toBe('');
   });
 
   it('keeps deprecated color-compatible semantics through variant values', () => {

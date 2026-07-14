@@ -42,7 +42,6 @@ export const ManageColumnAction = <TData,>({
       onClick={handleManageColumn}
       orientation='horizontal'
       size='mini'
-      width='full'
     >
       Manage Column
     </Button>

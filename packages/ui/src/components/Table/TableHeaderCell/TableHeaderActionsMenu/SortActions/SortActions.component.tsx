@@ -57,7 +57,6 @@ export const SortActions = <TData,>({
         onClick={handleAscending}
         orientation='horizontal'
         size='mini'
-        width='full'
       >
         Ascending
       </Button>
@@ -72,7 +71,6 @@ export const SortActions = <TData,>({
         onClick={handleDescending}
         orientation='horizontal'
         size='mini'
-        width='full'
       >
         Descending
       </Button>
@@ -88,7 +86,6 @@ export const SortActions = <TData,>({
           onClick={handleClearSorting}
           orientation='horizontal'
           size='mini'
-          width='full'
         >
           Clear Sorting
         </Button>
