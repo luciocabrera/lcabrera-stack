@@ -24,6 +24,8 @@ Shared components/hooks/utils/design-tokens live in `@repo/ui` — see [`package
 | `/cqms/scanners` (+ `new`, `edit/:id`, `view/:id`)         | `routes/cqms/scanners/` etc.    | Scanner registry CRUD (ADR-023) — first consumer of `Table`'s crud metadata; register/update bump `scanner_versions` snapshots and generate missing skill artifacts on disk                                                                    |
 | `/cqms/admin/users` (+ `new`, `edit/:username`, `view/…`)  | `routes/cqms/users/` etc.       | User management (ADR-024, `requirePermission`-gated) — create/edit users, role assignment, password rotation; keyed by immutable `username`                                                                                                    |
 | `/cqms/admin/roles` (+ `new`, `edit/:roleName`, `view/…`)  | `routes/cqms/roles/` etc.       | Role management (ADR-024, `requirePermission`-gated) — create/edit roles + permission matrix multi-select; keyed by immutable `role_name`                                                                                                      |
+| `/cqms/account/tokens`                                     | `routes/cqms/account-tokens/`   | Self-service API-token management (ADR-029, `requireUser` only) — issue (plaintext shown once) / revoke personal tokens for the CodePulse CLI                                                                                                  |
+| `POST /_action/push-snapshot/:projectId`                   | `routes/api/push-snapshot/`     | CLI push endpoint (ADR-029) — Bearer-token (`requireApiUser`) upload of a repo zip as the raw body; registered **outside** the cqms layout (its cookie gate would 302 a CLI); reuses `saveProjectSnapshot` + workspace discovery               |
 
 ## Hooks
 
@@ -33,11 +35,12 @@ Shared components/hooks/utils/design-tokens live in `@repo/ui` — see [`package
 
 ## Auth (ADR-017)
 
-| Artifact            | Location                         | Description                                                                                                                                                                      |
-| ------------------- | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `requireUser`       | `auth/requireUser.util.ts`       | The gate every cqms loader/action calls first — validates the session's userId against `cqms.v_users` per request, else throws a redirect to `/login?redirectTo=<destination>`   |
-| `requirePermission` | `auth/requirePermission.util.ts` | `requireUser` → `checkUserPermission` → throws a 403 carrying the DB's own denial reason; gates the admin routes at route level (Postgres still asserts in every write, ADR-024) |
-| `getSessionStorage` | `auth/getSessionStorage.util.ts` | Cookie session storage (`__cqms_session`, httpOnly, sameSite=lax) signed with the Zod-validated `SESSION_SECRET` (`auth/env.schema.ts`)                                          |
+| Artifact            | Location                         | Description                                                                                                                                                                                     |
+| ------------------- | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `requireUser`       | `auth/requireUser.util.ts`       | The gate every cqms loader/action calls first — validates the session's userId against `cqms.v_users` per request, else throws a redirect to `/login?redirectTo=<destination>`                  |
+| `requirePermission` | `auth/requirePermission.util.ts` | `requireUser` → `checkUserPermission` → throws a 403 carrying the DB's own denial reason; gates the admin routes at route level (Postgres still asserts in every write, ADR-024)                |
+| `requireApiUser`    | `auth/requireApiUser.util.ts`    | Bearer-token gate for CLI/API requests (ADR-029) — reads `Authorization: Bearer`, verifies via `verifyApiToken`, throws a 401 `data()` (vs requireUser's cookie 302); returns the owning userId |
+| `getSessionStorage` | `auth/getSessionStorage.util.ts` | Cookie session storage (`__cqms_session`, httpOnly, sameSite=lax) signed with the Zod-validated `SESSION_SECRET` (`auth/env.schema.ts`)                                                         |
 
 ## CQMS-local Utils
 
