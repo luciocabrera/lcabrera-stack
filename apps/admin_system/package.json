@@ -19,6 +19,7 @@
     "@repo/scan-ingestion": "workspace:*",
     "@repo/ui": "workspace:*",
     "@stylexjs/stylex": "catalog:",
+    "fflate": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-router": "catalog:",

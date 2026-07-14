@@ -1,4 +1,5 @@
 import { Button } from '@repo/ui/components/Button';
+import { type ChangeEvent, type FormEvent, useState } from 'react';
 import { useFetcher } from 'react-router';
 
 import type {
@@ -6,17 +7,44 @@ import type {
   SyncActionData,
 } from './ProjectSyncPanel.types';
 
+import { applyWebkitDirectory } from './applyWebkitDirectory.util';
+import { useFolderSnapshotUpload } from './useFolderSnapshotUpload.hook';
+
 /**
- * The browser sync channel (ADR-028): upload a .zip of the repository to
- * become the project's latest snapshot — sync-then-scan, latest wins.
- * useFetcher (not <Form>) so the upload stays on the page; a completed
- * action revalidates the project loader, refreshing the synced-at line
- * and unlocking the Trigger Scan link automatically. Timestamp renders in
- * a locale-independent format to keep SSR and client markup identical.
+ * The snapshot sync panel (ADR-028) with two client-side channels, both of
+ * which POST a zip through the same `sync-upload` action:
+ *  - Folder picker (ADR-031): pick the project directory; the browser packs it
+ *    client-side, excluding node_modules/.git/build output (node_modules is
+ *    opt-in). This is the ergonomic path — no hand-made archive.
+ *  - .zip upload (ADR-028): a pre-made archive, kept as a fallback.
+ * useFetcher (not <Form>) so uploads stay on the page; a completed action
+ * revalidates the project loader, refreshing the synced-at line and unlocking
+ * Trigger Scan. Timestamp renders locale-independently to keep SSR/client
+ * markup identical. The server never reads a local path (hosted model,
+ * ADR-028) — zipping is always on the developer's machine.
  */
 export const ProjectSyncPanel = ({ project }: ProjectSyncPanelProps) => {
-  const fetcher = useFetcher<SyncActionData>();
-  const isUploading = fetcher.state !== 'idle';
+  const folderUpload = useFolderSnapshotUpload();
+  const [folderFiles, setFolderFiles] = useState<readonly File[]>([]);
+  const [includeNodeModules, setIncludeNodeModules] = useState(false);
+
+  const zipFetcher = useFetcher<SyncActionData>();
+  const isZipUploading = zipFetcher.state !== 'idle';
+
+  const handleFolderChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setFolderFiles(event.target.files ? [...event.target.files] : []);
+  };
+
+  const handleIncludeNodeModulesChange = (
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
+    setIncludeNodeModules(event.target.checked);
+  };
+
+  const handleFolderSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    void folderUpload.submitFolder({ files: folderFiles, includeNodeModules });
+  };
 
   return (
     <div>
@@ -27,18 +55,45 @@ export const ProjectSyncPanel = ({ project }: ProjectSyncPanelProps) => {
         </p>
       ) : (
         <p>
-          No code snapshot yet — upload a .zip of the repository to enable
-          scans.
+          No code snapshot yet — pick your project folder to pack and upload it
+          (or upload a .zip) to enable scans.
         </p>
       )}
-      <fetcher.Form encType='multipart/form-data' method='post'>
+
+      <form onSubmit={handleFolderSubmit}>
+        <input
+          onChange={handleFolderChange}
+          ref={applyWebkitDirectory}
+          type='file'
+        />
+        <label>
+          <input
+            checked={includeNodeModules}
+            onChange={handleIncludeNodeModulesChange}
+            type='checkbox'
+          />
+          Include node_modules
+        </label>
+        <Button
+          isDisabled={folderUpload.isBusy || folderFiles.length === 0}
+          size='mini'
+          type='submit'
+        >
+          {folderUpload.isBusy ? 'Packing…' : 'Pack & Sync Folder'}
+        </Button>
+      </form>
+      {folderUpload.error && <p>{folderUpload.error}</p>}
+
+      <p>or</p>
+
+      <zipFetcher.Form encType='multipart/form-data' method='post'>
         <input name='intent' type='hidden' value='sync-upload' />
         <input accept='.zip' name='archive' required type='file' />
-        <Button isDisabled={isUploading} size='mini' type='submit'>
-          {isUploading ? 'Uploading…' : 'Upload Snapshot'}
+        <Button isDisabled={isZipUploading} size='mini' type='submit'>
+          {isZipUploading ? 'Uploading…' : 'Upload .zip'}
         </Button>
-      </fetcher.Form>
-      {fetcher.data?.syncError && <p>{fetcher.data.syncError}</p>}
+      </zipFetcher.Form>
+      {zipFetcher.data?.syncError && <p>{zipFetcher.data.syncError}</p>}
     </div>
   );
 };
