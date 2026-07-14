@@ -32,7 +32,6 @@
     "fallow:dupes": "fallow dupes",
     "fallow:audit": "fallow audit",
     "fallow:refresh-report": "node scripts/refresh-fallow-complexity-report.cjs",
-    "coverage:audit": "vp run --filter @repo/scan-ingestion test:coverage && node scripts/merge-audit-coverage.mjs",
     "prepare": "vp config",
     "lint:claude": "claudelint check-all",
     "lint:claude:fix": "claudelint format --fix"
