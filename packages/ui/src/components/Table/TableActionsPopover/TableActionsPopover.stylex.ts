@@ -41,6 +41,7 @@ export const styles = stylex.create({
   menuItem: {
     justifyContent: 'flex-start',
     textAlign: 'left',
+    width: '100%',
   },
   menuPosition: (left: number, top: number) => ({
     margin: 0,

@@ -21,6 +21,7 @@ const buttonSpecificStyles = stylex.create({
       default: 0.9,
       ':disabled': 0.6,
     },
+    width: '100%',
   },
   iconOnly: {
     gap: 0,
