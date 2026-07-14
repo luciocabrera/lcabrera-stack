@@ -13,7 +13,7 @@ export const getNewIndex = ({
   tabsLength,
 }: GetNewIndexArgs) => {
   if (tabsLength === 0) {
-    return undefined;
+    return;
   }
 
   const currentIndex = activeIndex === -1 ? 0 : activeIndex;
@@ -35,7 +35,7 @@ export const getNewIndex = ({
       return { currentIndex, newIndex: 0 };
     }
     default: {
-      return undefined;
+      return;
     }
   }
 };
