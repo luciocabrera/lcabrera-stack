@@ -225,11 +225,13 @@ Covers `packages/ui` only. API-layer utilities (`api.util.ts`, `buildPaginatedQu
 
 ### `src/components/Table/contexts/FiltersData/filters/actions/`
 
-| Artifact                    | Location                                                                                  | Description                                                                                               |
-| --------------------------- | ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| `useFetchFilterData`        | `components/Table/contexts/FiltersData/filters/actions/useFetchFilterData.hook.ts`        | Orchestrates filter-option fetching by composing the initial and paginated actions for one column         |
-| `useFetchInitialFilterData` | `components/Table/contexts/FiltersData/filters/actions/useFetchInitialFilterData.hook.ts` | Fetches the first page of filter options, updates totals, and optionally triggers prefetch                |
-| `useFetchMoreFilterData`    | `components/Table/contexts/FiltersData/filters/actions/useFetchMoreFilterData.hook.ts`    | Loads and appends subsequent pages of filter options using cache-or-fetch and optional post-load prefetch |
+| Artifact                         | Location                                                                                       | Description                                                                                               |
+| -------------------------------- | ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `useFetchFilterData`             | `components/Table/contexts/FiltersData/filters/actions/useFetchFilterData.hook.ts`             | Orchestrates filter-option fetching by composing the initial and paginated actions for one column         |
+| `useFetchInitialFilterData`      | `components/Table/contexts/FiltersData/filters/actions/useFetchInitialFilterData.hook.ts`      | Fetches the first page of filter options, updates totals, and optionally triggers prefetch                |
+| `useFetchMoreFilterData`         | `components/Table/contexts/FiltersData/filters/actions/useFetchMoreFilterData.hook.ts`         | Loads and appends subsequent pages of filter options using cache-or-fetch and optional post-load prefetch |
+| `executeFetchMoreFilterData`     | `components/Table/contexts/FiltersData/filters/actions/executeFetchMoreFilterData.util.ts`     | Runs the fetch-more pipeline: mark loading, resolve cache/fetch, append rows, and schedule prefetch       |
+| `handleFetchMoreFilterDataError` | `components/Table/contexts/FiltersData/filters/actions/handleFetchMoreFilterDataError.util.ts` | Stores fetch-more failures in meta state and resets loading-more state for the target filter              |
 
 ### `src/components/Table/TableSettingsDrawer/TableDrawerContext/actions/`
 

@@ -21,6 +21,8 @@ FiltersData/
     │   ├── useFetchFilterData.types.ts       → Action/callback Args types shared by the fetchers
     │   ├── fetchInitialFilterData.util.ts    → Initial filter options load + optional prefetch trigger
     │   ├── fetchMoreFilterData.util.ts       → Paginated filter options append + cache/prefetch handling
+    │   ├── executeFetchMoreFilterData.util.ts → Shared fetch-more execution flow (set loading, read cache/fetch, append, prefetch)
+    │   ├── handleFetchMoreFilterDataError.util.ts → Shared fetch-more error handling (meta error + loading reset)
     │   │   (initial + more fetchers share maybePrefetchFilterPage.util.ts for the prefetch trigger)
     │   ├── clearPrefetchIfPresent.util.ts    → Reset the prefetch cache when a prefetch ref exists
     │   ├── getTotalRows.util.ts              → Resolve total row count from a fetch response
