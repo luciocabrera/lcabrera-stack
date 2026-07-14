@@ -1,9 +1,6 @@
 export { buildPersistencePayload } from './buildPersistencePayload.util';
 export { commitResolvedPinningState } from './commitResolvedPinningState.util';
 export { commitResolvedVisibilityState } from './commitResolvedVisibilityState.util';
-export { getHasQueryChanged } from './getHasQueryChanged.util';
-export { getIsTableSettingsOpen } from './getIsTableSettingsOpen.util';
-export { getNextStatePatch } from './getNextStatePatch.util';
 export { getPinningActionContext } from './getPinningActionContext.util';
 export { resolveBatchColumnSettingsUpdate } from './resolveBatchColumnSettingsUpdate.util';
 export { resolveBatchTableSettingsUpdate } from './resolveBatchTableSettingsUpdate.util';

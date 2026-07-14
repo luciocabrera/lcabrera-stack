@@ -1,8 +1,8 @@
 # VirtualList Architecture
 
-Virtualized, searchable, multi-select list with infinite scroll, skeleton loading, and filter-mode toolbar. Internally wired with the repo's **split-context + external store** pattern (see `contexts/ARCHITECTURE.md`), mirroring the Table: the public `VirtualList` is a thin shell mounting the `VirtualListConfig` and `VirtualListData` providers around the provider-less `VirtualListContent`; every delegate self-connects through one-liner selector hooks and action hooks instead of receiving drilled props.
+Virtualized, searchable, multi-select list with infinite scroll, skeleton loading, and filter-mode toolbar. Internally wired with the repo's **single-context, stores-per-concern external store** pattern (see `contexts/ARCHITECTURE.md`), mirroring `TableConfig`: the public `VirtualList` is a thin shell mounting one `VirtualListProvider` (`listStore` + `dataStore`) around the provider-less `VirtualListContent`; every delegate self-connects through one-liner selector hooks and action hooks instead of receiving drilled props.
 
-Composing components may **lift the providers** instead of rendering `VirtualList`: mount `VirtualListConfigProvider` + `VirtualListDataProvider` themselves and render `VirtualListContent` where the list belongs — `VirtualSelect` is the canonical example (its header reads selectors from the same stores while the list is closed).
+Composing components provide the same context by **composition** instead of rendering `VirtualList`: `VirtualSelectProvider` renders `VirtualListProvider` around its children and renders `VirtualListContent` where the list belongs — `VirtualSelect` is the canonical example (its header reads selectors from the same stores while the list is closed).
 
 ## File Structure
 
@@ -14,16 +14,17 @@ VirtualList/
 ├── VirtualList.constants.ts         → ITEM_HEIGHT, LIST_MAX_HEIGHT, DEFAULT_CONTAINER_HEIGHT, SCROLL_THRESHOLD
 ├── VirtualList.stylex.ts            → Shared option-row/container styles used by SelectAllOption, SelectOption and root container
 │
-├── contexts/                        → Split contexts (see contexts/ARCHITECTURE.md)
-│   ├── VirtualListConfig/           → configStore + uiStore (slices: config/, ui/)
-│   └── VirtualListData/             → dataStore: props mirror + pre-computed derived state (slice: data/)
+├── contexts/                        → Single context, stores per concern (see contexts/ARCHITECTURE.md)
+│   ├── VirtualListContext.*         → listStore + dataStore + callbacks; VirtualListProvider
+│   ├── list/                        → listStore: config mirror + list-owned UI state (slice: list/)
+│   └── data/                        → dataStore: props mirror + pre-computed derived state (slice: data/)
 │
 ├── VirtualListContent/              → Provider-less composition: container + Header/Body/Footer
-│                                      (zero props — layout via config selectors; exported for lifted-provider composition)
+│                                      (zero props — layout via list selectors; exported for composed-provider use)
 │
 ├── VirtualListHeader/               → Self-connected search input and clear button (zero props)
 │
-├── VirtualListBody/                 → Scroll container + infinite-scroll sentinel (zero props — layout via config selectors)
+├── VirtualListBody/                 → Scroll container + infinite-scroll sentinel (zero props — layout via list selectors)
 │   ├── VirtualListBodyChildren/     → useVirtualization + content-mode dispatch (prop: scrollContainerRef)
 │   └── VirtualListBodyOptions/      → Virtual window renderer (props: startIndex, endIndex, offsetY, totalHeight)
 │
@@ -47,9 +48,8 @@ VirtualList/
 
 ```mermaid
 graph TD
-  VL["VirtualList (shell)"] --> CFG["VirtualListConfigProvider"]
-  CFG --> DATA["VirtualListDataProvider"]
-  DATA --> VLC["VirtualListContent (provider-less)"]
+  VL["VirtualList (shell)"] --> PROV["VirtualListProvider (listStore + dataStore)"]
+  PROV --> VLC["VirtualListContent (provider-less)"]
   VLC --> VLH["VirtualListHeader"]
   VLC --> VLB["VirtualListBody (scroll container + sentinel)"]
   VLC --> VLF["VirtualListFooter"]
@@ -65,44 +65,41 @@ graph TD
 
 ## State Ownership Rule
 
-Every store slice is read — and every action dispatched — inside the component that renders it. Selectors are strict one-liners over one slice store hook (`useListConfigStore` / `useListUiStore` / `useListDataStore`); derived values are pre-computed into the data store, never derived in selectors. The only remaining props are presentation flags and producer→direct-child virtualization values (same shape as `TableBody → TableBodyRows`).
+Every store slice is read — and every action dispatched — inside the component that renders it. Selectors are strict one-liners over one slice store hook (`useListStore` / `useListDataStore`); derived values are pre-computed into the data store, never derived in selectors. The only remaining props are presentation flags and producer→direct-child virtualization values (same shape as `TableBody → TableBodyRows`).
 
-| Delegate                                               | Selectors read                                                                                                                                                       | Actions dispatched                      | Props kept                                             |
-| ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- | ------------------------------------------------------ |
-| `VirtualList` (shell)                                  | — (no store wiring in the shell)                                                                                                                                     | —                                       | public API (unchanged)                                 |
-| `VirtualListContent`                                   | `useGetShouldFillHeight` (config)                                                                                                                                    | —                                       | none                                                   |
-| `VirtualListHeader`                                    | `useGetSearchTerm` (ui), `useGetSearchInputName` (config)                                                                                                            | `useSetSearchTerm`, `useClearSearch`    | none                                                   |
-| `VirtualListBody`                                      | `useGetHasMore`, `useGetIsLoadingOptions` (data), `useGetHasFetchMore`, `useGetListMaxHeight`, `useGetShouldFillHeight` (config)                                     | `useFetchMore`                          | none                                                   |
-| `VirtualListBodyChildren`                              | `useGetContentMode`, `useGetTotalItems` (data)                                                                                                                       | —                                       | `scrollContainerRef` (producer→child)                  |
-| `VirtualListBodyOptions`                               | `useGetFilteredOptions`, `useGetShouldShowSelectAll` (data)                                                                                                          | —                                       | `startIndex`, `endIndex`, `offsetY`, `totalHeight`     |
-| `VirtualizedOption`                                    | `useGetFilteredOptions`, `useGetIsAllSelected`, `useGetIsLoadingOptions`, `useGetSelectedValues`, `useGetShouldShowSelectAll` (data), `useGetHasCheckboxes` (config) | `useToggleOption`, `useToggleSelectAll` | `index`                                                |
-| `VirtualListFooter`                                    | `useGetIsLoading`, `useGetIsLoadingMore`, `useGetLoadedCount`, `useGetSelectedCount`, `useGetTotalCount` (data), `useGetHasCheckboxes` (config)                      | —                                       | none                                                   |
-| `ListFilterModeButton`                                 | `useGetListFilterMode` (ui)                                                                                                                                          | `useSetListFilterMode`                  | `count`, `icon`, `mode`, `tooltip` (presentation only) |
-| `SelectAllOption` / `SelectOption` / `SkeletonOptions` | — (pure presentational leaves; `VirtualizedOption`/`VirtualListBodyChildren` are their store-connected owners)                                                       | —                                       | full presentational surface                            |
+| Delegate                                               | Selectors read                                                                                                                                                     | Actions dispatched                      | Props kept                                             |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------- | ------------------------------------------------------ |
+| `VirtualList` (shell)                                  | — (no store wiring in the shell)                                                                                                                                   | —                                       | public API (unchanged)                                 |
+| `VirtualListContent`                                   | `useGetShouldFillHeight` (list)                                                                                                                                    | —                                       | none                                                   |
+| `VirtualListHeader`                                    | `useGetSearchTerm`, `useGetSearchInputName` (list)                                                                                                                 | `useSetSearchTerm`, `useClearSearch`    | none                                                   |
+| `VirtualListBody`                                      | `useGetHasMore`, `useGetIsLoadingOptions` (data), `useGetHasFetchMore`, `useGetListMaxHeight`, `useGetShouldFillHeight` (list)                                     | `useFetchMore`                          | none                                                   |
+| `VirtualListBodyChildren`                              | `useGetContentMode`, `useGetTotalItems` (data)                                                                                                                     | —                                       | `scrollContainerRef` (producer→child)                  |
+| `VirtualListBodyOptions`                               | `useGetFilteredOptions`, `useGetShouldShowSelectAll` (data)                                                                                                        | —                                       | `startIndex`, `endIndex`, `offsetY`, `totalHeight`     |
+| `VirtualizedOption`                                    | `useGetFilteredOptions`, `useGetIsAllSelected`, `useGetIsLoadingOptions`, `useGetSelectedValues`, `useGetShouldShowSelectAll` (data), `useGetHasCheckboxes` (list) | `useToggleOption`, `useToggleSelectAll` | `index`                                                |
+| `VirtualListFooter`                                    | `useGetIsLoading`, `useGetIsLoadingMore`, `useGetLoadedCount`, `useGetSelectedCount`, `useGetTotalCount` (data), `useGetHasCheckboxes` (list)                      | —                                       | none                                                   |
+| `ListFilterModeButton`                                 | `useGetListFilterMode` (list)                                                                                                                                      | `useSetListFilterMode`                  | `count`, `icon`, `mode`, `tooltip` (presentation only) |
+| `SelectAllOption` / `SelectOption` / `SkeletonOptions` | — (pure presentational leaves; `VirtualizedOption`/`VirtualListBodyChildren` are their store-connected owners)                                                     | —                                       | full presentational surface                            |
 
 ## Data Flow
 
 ```mermaid
 graph TD
-  Parent["Parent component"] -->|"dataState, filter, callbacks"| VL["VirtualList (shell)"]
-  VL --> CFG["VirtualListConfigProvider"]
-  CFG -->|"sync effect"| CS["configStore (flags)"]
-  CFG -->|"seeded once"| US["uiStore (searchTerm, listFilterMode)"]
-  CFG --> DATA["VirtualListDataProvider"]
-  DATA -->|"sync effect: mirror + resolveListDerivedState"| DS["dataStore (mirror + derived)"]
+  Parent["Parent component"] -->|"dataState, filter, listState"| VL["VirtualList (shell)"]
+  VL --> PROV["VirtualListProvider"]
+  PROV -->|"list-sync effect: config subset, ui preserved"| LS["listStore (config + ui)"]
+  PROV -->|"data-sync effect: mirror + resolveListDerivedState"| DS["dataStore (mirror + derived)"]
 
-  CS --> SEL["one-liner selector hooks"]
-  US --> SEL
+  LS --> SEL["one-liner selector hooks"]
   DS --> SEL
   SEL --> Delegates["self-connected delegates"]
 
-  Delegates -->|"search / mode"| UIACT["ui actions: uiStore.set + recompute derived → dataStore.set"]
+  Delegates -->|"search / mode"| UIACT["ui actions: listStore.set + recompute derived → dataStore.set"]
   Delegates -->|"toggle / select-all"| DACT["data actions: snapshot → onChange(SelectFilter)"]
   DACT --> Parent
-  Parent -->|"new filter/dataState props"| DATA
+  Parent -->|"new filter/dataState props"| PROV
 ```
 
-Selection is **parent-owned** (controlled-component contract): the `dataStore` only mirrors `filter.values` for reads; toggle actions emit the next `SelectFilter` through `onChange` and the value round-trips through the parent.
+Selection is **parent-owned** (controlled-component contract): the `dataStore` only mirrors `filter.values` for reads; toggle actions emit the next `SelectFilter` through `onChange` and the value round-trips through the parent. The `listStore` carries both the config-props mirror and the list-owned UI state (`searchTerm`, `listFilterMode`) — the two halves have distinct writers (provider sync vs. UI actions), see `contexts/ARCHITECTURE.md` → Writer-Boundary Rule.
 
 ## Virtualization Strategy
 
@@ -134,7 +131,7 @@ graph TD
   HasMore -->|no| Skip["(observer not attached)"]
 ```
 
-The initial fetch (`onFetchInitial`) fires once from a `VirtualListDataProvider` effect on mount — i.e. when the data store comes alive. With lifted providers (`VirtualSelect`) that is the composing component's mount, not the list's.
+The initial fetch (`onFetchInitial`) fires once from a `VirtualListProvider` effect on mount — i.e. when the stores come alive. With a composing provider (`VirtualSelectProvider`) that is the composing component's mount, not the list's.
 
 ## Filter Modes
 

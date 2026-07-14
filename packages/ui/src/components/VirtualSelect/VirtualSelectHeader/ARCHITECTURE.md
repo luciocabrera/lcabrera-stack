@@ -15,7 +15,7 @@ VirtualSelectHeader/
 
 ```mermaid
 graph LR
-  VSH["VirtualSelectHeader"] --> MSEL["VirtualSelectConfig/meta/selectors (useGetIsBusy)"]
+  VSH["VirtualSelectHeader"] --> MSEL["contexts/meta/selectors (useGetIsBusy)"]
   VSH --> VST["VirtualSelectTrigger (self-connected)"]
   VSH --> VSH_stylex["VirtualSelectHeader.stylex"]
   VSH_stylex --> skeleton["design-system/tokens/commons.stylex\n<small>skeleton.loadingOverlay + shimmerWave</small>"]

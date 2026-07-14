@@ -2,7 +2,7 @@
 
 Dropdown select component (single or multi) backed by a virtualized list, with tag-chip display, overflow counting, and optional async infinite-scroll data loading.
 
-`VirtualSelect` is a **thin shell over three contexts**: its own `VirtualSelectConfig` (select-level presentation metadata in a meta store) plus the **lifted** VirtualList `Config`/`Data` pair. Every delegate — header, trigger, div trigger, dropdown — is fully self-connected, consuming selectors and actions where the value is actually rendered; the only surviving props are producer→direct-child values (`triggerRef`, `children`). List-layout config (`listMaxHeight`, `shouldFillHeight`) lives in the **list config store**, not the meta store, so `VirtualListContent`/`VirtualListBody` read it in standalone VirtualList use too. Selection stays parent-owned: list changes exit through the shell's `onChange` mapping on the list config context.
+`VirtualSelect` is a **thin shell over one provider** — `VirtualSelectProvider`, which provides its own `VirtualSelectContext` (select-level presentation metadata in a meta store) **and composes `VirtualListProvider`** around the children, so delegates read two contexts with no provider nesting in the shell. Every delegate — header, trigger, div trigger, dropdown — is fully self-connected, consuming selectors and actions where the value is actually rendered; the only surviving props are producer→direct-child values (`triggerRef`, `children`). List-layout config (`listMaxHeight`, `shouldFillHeight`) lives in the **list store**, not the meta store, so `VirtualListContent`/`VirtualListBody` read it in standalone VirtualList use too. Selection stays parent-owned: list changes exit through the shell's `onChange` mapping passed on the `listState` group.
 
 ## File Structure
 
@@ -14,8 +14,8 @@ VirtualSelect/
 ├── VirtualSelect.types.ts            → VirtualSelectProps, VirtualSelectMode, VirtualSelectMetaState
 ├── VirtualSelect.stylex.ts           → Container styles
 │
-├── contexts/                         → VirtualSelectConfig: meta store + toggle action
-│   └── (see contexts/ARCHITECTURE.md)
+├── contexts/                         → VirtualSelectProvider: meta store + toggle action,
+│   └── (see contexts/ARCHITECTURE.md)  composes VirtualListProvider
 │
 ├── VirtualSelectHeader/              → Private delegate — busy overlay + trigger composition;
 │   └── (see its ARCHITECTURE.md)       zero props, reads only isBusy
@@ -47,11 +47,10 @@ VirtualSelect/
 
 ```mermaid
 graph TD
-  VS["VirtualSelect (shell)"] --> SCFG["VirtualSelectConfigProvider (metaStore)"]
-  SCFG --> LCFG["VirtualListConfigProvider (lifted)"]
-  LCFG --> LDATA["VirtualListDataProvider (lifted)"]
-  LDATA --> VSH["VirtualSelectHeader (zero props)"]
-  LDATA --> VSD["VirtualSelectDropdown (zero props)"]
+  VS["VirtualSelect (shell)"] --> SP["VirtualSelectProvider (metaStore)"]
+  SP --> LP["VirtualListProvider (composed — listStore + dataStore)"]
+  LP --> VSH["VirtualSelectHeader (zero props)"]
+  LP --> VSD["VirtualSelectDropdown (zero props)"]
   VSH --> VST["VirtualSelectTrigger (zero props)"]
   VST --> VSDT["VirtualSelectDivTrigger (children + triggerRef)"]
   VSD --> VLC["VirtualListContent (provider-less, zero props)"]
@@ -59,15 +58,15 @@ graph TD
 
 ## State Ownership Rule
 
-Every store slice is read — and every action dispatched — inside the component that renders it, and **each piece of state has exactly one owning store** (select metadata → meta store; list config/callbacks → list config store/context; data + selection → list data store; search/filter-mode → list ui store). The shell holds no store wiring; it owns only the select-level concerns it mirrors into the providers.
+Every store slice is read — and every action dispatched — inside the component that renders it, and **each piece of state has exactly one owning store** (select metadata → meta store; list config/callbacks + search/filter-mode → list store; data + selection → list data store). The shell holds no store wiring; it owns only the select-level concerns it mirrors into the provider.
 
-| Delegate                  | Selectors read                                                                                                                                   | Actions dispatched                                      | Props kept                                |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------- | ----------------------------------------- |
-| `VirtualSelect` (shell)   | — (mounts the providers)                                                                                                                         | — (`onChange` mapping lives on the list config context) | public API (unchanged)                    |
-| `VirtualSelectHeader`     | `useGetIsBusy` (meta) — only what it renders itself (the overlay)                                                                                | —                                                       | none                                      |
-| `VirtualSelectTrigger`    | `useGetIsAlwaysOpen`, `useGetIsBusy`, `useGetIsOpen`, `useGetListboxId`, `useGetMode`, `useGetPlaceholder` (meta); `useGetSelectedValues` (data) | `useToggleDropdown` (meta), `useToggleOption` (data)    | none (owns `triggerRef` + overflow)       |
-| `VirtualSelectDivTrigger` | `useGetIsAlwaysOpen`, `useGetIsBusy`, `useGetIsOpen`, `useGetListboxId`, `useGetMode` (meta)                                                     | `useToggleDropdown` (meta)                              | `children`, `triggerRef` (producer→child) |
-| `VirtualSelectDropdown`   | `useGetCustomStylex`, `useGetIsAlwaysOpen`, `useGetIsListVisible`, `useGetListboxId` (meta); `useGetShouldFillHeight` (list config)              | —                                                       | none                                      |
+| Delegate                  | Selectors read                                                                                                                                   | Actions dispatched                                   | Props kept                                |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------- | ----------------------------------------- |
+| `VirtualSelect` (shell)   | — (mounts the provider)                                                                                                                          | — (`onChange` mapping lives on the `listState`)      | public API (unchanged)                    |
+| `VirtualSelectHeader`     | `useGetIsBusy` (meta) — only what it renders itself (the overlay)                                                                                | —                                                    | none                                      |
+| `VirtualSelectTrigger`    | `useGetIsAlwaysOpen`, `useGetIsBusy`, `useGetIsOpen`, `useGetListboxId`, `useGetMode`, `useGetPlaceholder` (meta); `useGetSelectedValues` (data) | `useToggleDropdown` (meta), `useToggleOption` (data) | none (owns `triggerRef` + overflow)       |
+| `VirtualSelectDivTrigger` | `useGetIsAlwaysOpen`, `useGetIsBusy`, `useGetIsOpen`, `useGetListboxId`, `useGetMode` (meta)                                                     | `useToggleDropdown` (meta)                           | `children`, `triggerRef` (producer→child) |
+| `VirtualSelectDropdown`   | `useGetCustomStylex`, `useGetIsAlwaysOpen`, `useGetIsListVisible`, `useGetListboxId` (meta); `useGetShouldFillHeight` (list)                     | —                                                    | none                                      |
 
 ## Data Flow
 
@@ -75,27 +74,27 @@ Every store slice is read — and every action dispatched — inside the compone
 graph TD
   Parent -->|"selected[], onChange, options/dataState"| VS["VirtualSelect (shell)"]
 
-  VS -->|"presentation metadata + onToggleDropdown"| SCFG["VirtualSelectConfigProvider → metaStore"]
-  VS -->|"handleListChange (onChange mapping)"| LCFG["VirtualListConfigProvider"]
-  VS -->|"dataState ?? fallback, filter = selectedLabels"| LDATA["VirtualListDataProvider → dataStore"]
+  VS -->|"metaState (metadata + onToggleDropdown)"| SP["VirtualSelectProvider → metaStore"]
+  VS -->|"listState.onChange = handleListChange"| LP["VirtualListProvider (composed)"]
+  VS -->|"dataState ?? fallback, filter = selectedLabels"| LP
 
-  SCFG -->|"meta selectors"| VST["VirtualSelectTrigger"]
-  SCFG -->|"meta selectors"| VSD["VirtualSelectDropdown"]
-  LDATA -->|"useGetSelectedValues"| VST
-  VST -->|"useToggleOption (tag removal) / useToggleDropdown"| LCFG
-  LDATA --> VLC["VirtualListContent (options, footer)"]
-  VLC -->|"toggle / select-all actions"| LCFG
+  SP -->|"meta selectors"| VST["VirtualSelectTrigger"]
+  SP -->|"meta selectors"| VSD["VirtualSelectDropdown"]
+  LP -->|"useGetSelectedValues"| VST
+  VST -->|"useToggleOption (tag removal) / useToggleDropdown"| LP
+  LP --> VLC["VirtualListContent (options, footer)"]
+  VLC -->|"toggle / select-all actions"| LP
 
-  LCFG -->|"onChange(SelectFilter) → resolveVirtualSelectChange"| VS
+  LP -->|"onChange(SelectFilter) → resolveVirtualSelectChange"| VS
   VS -->|"mode=single: onChange(new value) + closeDropdown"| Parent
   VS -->|"mode=multi: onChange(all values), stays open"| Parent
 ```
 
-The shell resolves the option mapping (`resolveVirtualSelectOptions`), the effective data state (`dataState ?? buildFallbackDataState`), and the open state (`useVirtualSelectDropdown`); every list-side selection change — option toggle, select-all, and header tag removal alike — funnels through the list config context's `onChange` (`handleListChange`), which maps labels back to values via `resolveVirtualSelectChange` and closes the dropdown after a single-mode pick.
+The shell resolves the option mapping (`resolveVirtualSelectOptions`), the effective data state (`dataState ?? buildFallbackDataState`), and the open state (`useVirtualSelectDropdown`); every list-side selection change — option toggle, select-all, and header tag removal alike — funnels through the list context's `onChange` (`handleListChange`, passed on `listState`), which maps labels back to values via `resolveVirtualSelectChange` and closes the dropdown after a single-mode pick.
 
 ## Provider Lifetime (differs from standalone VirtualList)
 
-The providers live for the **select's lifetime**, not per dropdown open:
+The provider lives for the **select's lifetime**, not per dropdown open:
 
 - `onFetchInitial` fires once when the select mounts (the data store comes alive), not on every open.
 - Loaded data, the search term, and the filter mode persist across close/reopen cycles.
@@ -103,7 +102,7 @@ The providers live for the **select's lifetime**, not per dropdown open:
 
 ## Selection Modes
 
-| Mode     | Trigger display      | Config store flags                          | On change                              |
+| Mode     | Trigger display      | List store flags                            | On change                              |
 | -------- | -------------------- | ------------------------------------------- | -------------------------------------- |
 | `single` | Single text label    | `hasCheckboxes=false`, `hasSelectAll=false` | Pick newly added value, close dropdown |
 | `multi`  | Tag chips + overflow | `hasCheckboxes=true`, `hasSelectAll=true`   | Forward full values array, stay open   |
@@ -123,7 +122,7 @@ graph TD
   A["VirtualSelect mounts"] --> B{"dataState prop provided?"}
   B -->|yes| C["use dataState directly (async/paginated)"]
   B -->|no| D["wrap options[] in synthetic VirtualListDataState (hasMore=false, isLoading=false)"]
-  C & D --> P["pass effectiveDataState to VirtualListDataProvider"]
+  C & D --> P["pass effectiveDataState to VirtualSelectProvider (→ VirtualListProvider)"]
 ```
 
 ## Tag Overflow (multi mode)
@@ -140,20 +139,20 @@ Owned by `VirtualSelectHeader` (see its `ARCHITECTURE.md`): when `isBusy` is tru
 
 ## Props
 
-| Prop               | Type                           | Default           | Description                                         |
-| ------------------ | ------------------------------ | ----------------- | --------------------------------------------------- |
-| `customStylex`     | `StyleXStyles`                 | —                 | Style overrides for the dropdown container          |
-| `dataState`        | `VirtualListDataState`         | —                 | Async data (mutually exclusive with `options`)      |
-| `isBusy`           | `boolean`                      | `false`           | Shows a shimmer overlay and disables trigger input  |
-| `isAlwaysOpen`     | `boolean`                      | `false`           | List is always visible; trigger is non-interactive  |
-| `listboxId`        | `string`                       | generated         | id wiring the trigger/listbox ARIA relationship     |
-| `listMaxHeight`    | `string`                       | `LIST_MAX_HEIGHT` | CSS max-height for the VirtualList scroll area      |
-| `mode`             | `'single' \| 'multi'`          | —                 | Selection behaviour (required)                      |
-| `onChange`         | `(selected: string[]) => void` | —                 | Called on every selection change                    |
-| `onFetchInitial`   | `() => Promise<void> \| void`  | —                 | Fires once when the select mounts (lifted provider) |
-| `onFetchMore`      | `() => Promise<void> \| void`  | —                 | Infinite-scroll fetch (via the fetch-more action)   |
-| `onOpenChange`     | `(isOpen: boolean) => void`    | —                 | Notifies parent of open/close state                 |
-| `options`          | `string[]`                     | `[]`              | Static options (used when no `dataState`)           |
-| `placeholder`      | `string`                       | `'Select...'`     | Shown when nothing is selected                      |
-| `selected`         | `string[]`                     | —                 | Controlled selected values (required)               |
-| `shouldFillHeight` | `boolean`                      | `false`           | Expand to fill available vertical space             |
+| Prop               | Type                           | Default           | Description                                           |
+| ------------------ | ------------------------------ | ----------------- | ----------------------------------------------------- |
+| `customStylex`     | `StyleXStyles`                 | —                 | Style overrides for the dropdown container            |
+| `dataState`        | `VirtualListDataState`         | —                 | Async data (mutually exclusive with `options`)        |
+| `isBusy`           | `boolean`                      | `false`           | Shows a shimmer overlay and disables trigger input    |
+| `isAlwaysOpen`     | `boolean`                      | `false`           | List is always visible; trigger is non-interactive    |
+| `listboxId`        | `string`                       | generated         | id wiring the trigger/listbox ARIA relationship       |
+| `listMaxHeight`    | `string`                       | `LIST_MAX_HEIGHT` | CSS max-height for the VirtualList scroll area        |
+| `mode`             | `'single' \| 'multi'`          | —                 | Selection behaviour (required)                        |
+| `onChange`         | `(selected: string[]) => void` | —                 | Called on every selection change                      |
+| `onFetchInitial`   | `() => Promise<void> \| void`  | —                 | Fires once when the select mounts (composed provider) |
+| `onFetchMore`      | `() => Promise<void> \| void`  | —                 | Infinite-scroll fetch (via the fetch-more action)     |
+| `onOpenChange`     | `(isOpen: boolean) => void`    | —                 | Notifies parent of open/close state                   |
+| `options`          | `string[]`                     | `[]`              | Static options (used when no `dataState`)             |
+| `placeholder`      | `string`                       | `'Select...'`     | Shown when nothing is selected                        |
+| `selected`         | `string[]`                     | —                 | Controlled selected values (required)                 |
+| `shouldFillHeight` | `boolean`                      | `false`           | Expand to fill available vertical space               |

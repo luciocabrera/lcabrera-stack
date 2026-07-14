@@ -8,7 +8,7 @@ Scroll-container owner (Table analog: `TableContent`): renders the scrollable vi
 - Wire `useInfiniteScrollObserver`: `isEnabled` from `useGetHasMore` + `useGetIsLoadingOptions` + `useGetHasFetchMore`, `onReachEnd` from the `useFetchMore` action
 - Delegate virtualization and content-mode dispatch to `VirtualListBodyChildren` (receives only `scrollContainerRef`, producer→direct-child)
 
-The initial fetch effect moved to `VirtualListDataProvider`; the toggle/select-all handlers moved to the `useToggleOption`/`useToggleSelectAll` actions.
+The initial fetch effect lives in `VirtualListProvider`; the toggle/select-all handlers moved to the `useToggleOption`/`useToggleSelectAll` actions.
 
 ## Props
 

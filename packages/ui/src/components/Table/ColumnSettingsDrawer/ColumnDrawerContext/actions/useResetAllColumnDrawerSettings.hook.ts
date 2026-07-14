@@ -1,9 +1,10 @@
 import { useColumnDrawerContextValue } from '@repo/ui/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/useColumnDrawerContextValue.hook';
 import {
-  closeColumnSettingsDrawer,
+  getClosedColumnSettingsStatePatch,
   getTableColumnDrawerState,
 } from '@repo/ui/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/utils';
 import { useTableConfigContextValue } from '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { persistTableMetaUiState } from '@repo/ui/components/Table/utils';
 
 /**
  * Resets all column drawer settings from the current table state.
@@ -27,7 +28,14 @@ export const useResetAllColumnDrawerSettings = () => {
     columnStore.set(nextDrawerState);
 
     if (shouldCloseDrawer) {
-      closeColumnSettingsDrawer({ metaStore });
+      const metaState = metaStore.get();
+      const nextStatePatch = getClosedColumnSettingsStatePatch({ metaState });
+
+      persistTableMetaUiState({
+        currentState: metaState,
+        nextStatePatch,
+      });
+      metaStore.set(nextStatePatch);
     }
   };
 };

@@ -1,14 +1,16 @@
 import { useTableConfigContextValue } from '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { useTableDataContextValue } from '@repo/ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
 import { usePersistTableStateAction } from '@repo/ui/components/Table/hooks';
-import { persistTableMetaUiState } from '@repo/ui/components/Table/utils';
+import {
+  getHasQueryChanged,
+  getNextStatePatch,
+  persistTableMetaUiState,
+} from '@repo/ui/components/Table/utils';
 
 import type { BatchColumnSettingsUpdate } from './utils/resolveBatchColumnSettingsUpdate.util';
 
 import {
   buildPersistencePayload,
-  getHasQueryChanged,
-  getNextStatePatch,
   resolveBatchColumnSettingsUpdate,
 } from './utils';
 

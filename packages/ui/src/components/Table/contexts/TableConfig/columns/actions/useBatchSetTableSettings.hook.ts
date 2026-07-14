@@ -1,8 +1,10 @@
 import { useTableConfigContextValue } from '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { useTableDataContextValue } from '@repo/ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
 import { usePersistTableStateAction } from '@repo/ui/components/Table/hooks';
-import { persistTableMetaUiState } from '@repo/ui/components/Table/utils';
-import { areEqualByJson } from '@repo/ui/utils/comparison';
+import {
+  getHasQueryChanged,
+  persistTableMetaUiState,
+} from '@repo/ui/components/Table/utils';
 
 import type { BatchTableSettingsUpdate } from './utils/resolveBatchTableSettingsUpdate.util';
 
@@ -20,15 +22,11 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
     const columnsState = columnsStore.get();
     const metaState = metaStore.get();
     const persistenceKey = metaState?.persistenceKey ?? '';
-    const hasSortingChanged = !areEqualByJson({
-      left: columnsState?.sorting,
-      right: settings.sorting,
+    const hasQueryChanged = getHasQueryChanged<TData>({
+      columnsState,
+      nextColumnFilters: settings.columnFilters,
+      nextSorting: settings.sorting,
     });
-    const hasFiltersChanged = !areEqualByJson({
-      left: columnsState?.columnFilters,
-      right: settings.columnFilters,
-    });
-    const hasQueryChanged = hasSortingChanged || hasFiltersChanged;
     const resolvedUpdate = resolveBatchTableSettingsUpdate<TData>({
       columns: columnsState?.columns ?? [],
       settings,

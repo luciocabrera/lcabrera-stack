@@ -22,10 +22,10 @@ VirtualSelectTrigger/
 
 ```mermaid
 graph LR
-  VST["VirtualSelectTrigger"] --> MSEL["VirtualSelectConfig/meta/selectors\n<small>isAlwaysOpen, isBusy, isOpen, listboxId, mode, placeholder</small>"]
-  VST --> MACT["VirtualSelectConfig/meta/actions (useToggleDropdown)"]
-  VST --> DSEL["VirtualListData/data/selectors (useGetSelectedValues)"]
-  VST --> DACT["VirtualListData/data/actions (useToggleOption)"]
+  VST["VirtualSelectTrigger"] --> MSEL["contexts/meta/selectors\n<small>isAlwaysOpen, isBusy, isOpen, listboxId, mode, placeholder</small>"]
+  VST --> MACT["contexts/meta/actions (useToggleDropdown)"]
+  VST --> DSEL["VirtualList contexts/data/selectors (useGetSelectedValues)"]
+  VST --> DACT["VirtualList contexts/data/actions (useToggleOption)"]
   VST --> OVF["../hooks/useVirtualSelectTagOverflow"]
   VST --> RTO["../utils/resolveTagOverflow"]
   VST --> VSDT["VirtualSelectDivTrigger (div shell delegate, self-connected)"]

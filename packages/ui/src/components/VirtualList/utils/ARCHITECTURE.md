@@ -1,6 +1,6 @@
 # utils/ Architecture
 
-Pure derivation utilities behind the VirtualList store writers. `resolveListDerivedState` is the single entry point used by the `VirtualListData` provider sync effect and the UI actions to pre-compute the derived slice of the data store; the other utils are its tested decomposition.
+Pure derivation utilities behind the VirtualList store writers. `resolveListDerivedState` is the single entry point used by the `VirtualListProvider` data-sync effect and the UI actions to pre-compute the derived slice of the data store; the other utils are its tested decomposition.
 
 ## File Structure
 

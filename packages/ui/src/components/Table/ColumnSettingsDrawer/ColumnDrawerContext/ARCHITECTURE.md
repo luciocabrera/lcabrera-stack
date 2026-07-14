@@ -31,7 +31,7 @@ ColumnDrawerContext/
 │   └── useGetColumnSorting
 │
 └── utils/
-  ├── closeColumnSettingsDrawer.service.ts → Close drawer + restore table settings, persist UI state (effectful service: store writes + persistence)
+  ├── getClosedColumnSettingsStatePatch.util.ts → Build the meta-store patch for closing the column drawer
   ├── getInitialColumnsState.util.ts     → Build initial state shape
   └── getTableColumnDrawerState.util.ts  → Map table snapshot to drawer state for one column
 ```
@@ -95,18 +95,18 @@ graph TD
 Actions are hooks that return a callback. Each callback reads the store, validates
 `columnKey`, and calls `columnStore.set(partial)`.
 
-| Hook                              | Reads From             | Writes To     | Side Effect                                                                     |
-| --------------------------------- | ---------------------- | ------------- | ------------------------------------------------------------------------------- |
-| `useSetColumnFilter`              | —                      | `columnStore` | —                                                                               |
-| `useSetColumnSizing`              | —                      | `columnStore` | —                                                                               |
-| `useSetColumnSorting`             | —                      | `columnStore` | —                                                                               |
-| `useSetColumnPinning`             | —                      | `columnStore` | —                                                                               |
-| `useClearAllColumnDrawerSettings` | `columnStore`          | `columnStore` | Sets all to `undefined`; closes drawer if `shouldCloseDrawer`                   |
-| `useResetColumnFilter`            | `columnsStore` (table) | `columnStore` | —                                                                               |
-| `useResetColumnPinning`           | `columnsStore` (table) | `columnStore` | —                                                                               |
-| `useResetColumnSorting`           | `columnsStore` (table) | `columnStore` | —                                                                               |
-| `useResetAllColumnDrawerSettings` | `columnsStore` (table) | `columnStore` | Resets all fields; closes drawer if `shouldCloseDrawer`                         |
-| `useBatchSetColumnDrawerSettings` | `columnStore`          | —             | Pushes the current drawer snapshot to the table via `useBatchSetColumnSettings` |
+| Hook                              | Reads From                          | Writes To                  | Side Effect                                                                        |
+| --------------------------------- | ----------------------------------- | -------------------------- | ---------------------------------------------------------------------------------- |
+| `useSetColumnFilter`              | —                                   | `columnStore`              | —                                                                                  |
+| `useSetColumnSizing`              | —                                   | `columnStore`              | —                                                                                  |
+| `useSetColumnSorting`             | —                                   | `columnStore`              | —                                                                                  |
+| `useSetColumnPinning`             | —                                   | `columnStore`              | —                                                                                  |
+| `useClearAllColumnDrawerSettings` | `columnStore`, `metaStore`          | `columnStore`, `metaStore` | Sets all to `undefined`; when closing, persists and commits the shared close patch |
+| `useResetColumnFilter`            | `columnsStore` (table)              | `columnStore`              | —                                                                                  |
+| `useResetColumnPinning`           | `columnsStore` (table)              | `columnStore`              | —                                                                                  |
+| `useResetColumnSorting`           | `columnsStore` (table)              | `columnStore`              | —                                                                                  |
+| `useResetAllColumnDrawerSettings` | `columnsStore`, `metaStore` (table) | `columnStore`, `metaStore` | Resets all fields; when closing, persists and commits the shared close patch       |
+| `useBatchSetColumnDrawerSettings` | `columnStore`                       | —                          | Pushes the current drawer snapshot to the table via `useBatchSetColumnSettings`    |
 
 ### Action Categories
 
