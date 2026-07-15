@@ -8,18 +8,20 @@ a designated side-effect home.
 
 ## Files
 
-| File                                          | Description                                                                                                           |
-| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `appendDistinctFilterDescriptors.util.ts`     | Attaches serializable `kind: 'distinct'` filter-option descriptors (ADR-009) to filterable string columns without one |
-| `appendPrimaryKeySorting.util.ts`             | Appends the primary-key tiebreaker to a sort list for stable pagination (ADR-008)                                     |
-| `getRootLoaderData.util.ts`                   | Typed access to the root route's loader data                                                                          |
-| `isFilterCompatibleWithColumn.util.ts`        | Guard used when sanitizing URL filters against column definitions                                                     |
-| `isPersistCookieAction.util.ts`               | Matches a request path against `PERSIST_COOKIE_ACTION`                                                                |
-| `persistCookie.action.ts`                     | Action behind `/_action/persist-cookie` (Set-Cookie persistence)                                                      |
-| `readTableLoaderStateFromRequest.util.ts`     | Reads shared table loader state from URL + cookies                                                                    |
-| `sanitizeFiltersByColumns.util.ts`            | Drops URL filters that don't match a known column                                                                     |
-| `sanitizeSorting.util.ts`                     | Drops invalid/actions-column sort entries                                                                             |
-| `shouldRevalidatePersistCookieAction.util.ts` | `shouldRevalidate` helper that skips revalidation for cookie-persist submissions                                      |
+| File                                          | Description                                                                                                             |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `appendDistinctFilterDescriptors.util.ts`     | Attaches serializable `kind: 'distinct'` filter-option descriptors (ADR-009) to filterable string columns without one   |
+| `appendPrimaryKeySorting.util.ts`             | Appends the primary-key tiebreaker to a sort list for stable pagination (ADR-008)                                       |
+| `applySearchParamUpdates.util.ts`             | Pure: applies search-param updates to a `URLSearchParams` (empty value deletes), returns the next params + change flag  |
+| `buildSetCookieHeaders.util.ts`               | Pure: builds a fresh `Headers` with one `Set-Cookie` per entry that has both key and value (reuses `buildCookieString`) |
+| `getRootLoaderData.util.ts`                   | Typed access to the root route's loader data                                                                            |
+| `isFilterCompatibleWithColumn.util.ts`        | Guard used when sanitizing URL filters against column definitions                                                       |
+| `isPersistCookieAction.util.ts`               | Matches a request path against `PERSIST_COOKIE_ACTION`                                                                  |
+| `persistCookie.action.ts`                     | Action behind `/_action/persist-cookie` (Set-Cookie persistence)                                                        |
+| `readTableLoaderStateFromRequest.util.ts`     | Reads shared table loader state from URL + cookies                                                                      |
+| `sanitizeFiltersByColumns.util.ts`            | Drops URL filters that don't match a known column                                                                       |
+| `sanitizeSorting.util.ts`                     | Drops invalid/actions-column sort entries                                                                               |
+| `shouldRevalidatePersistCookieAction.util.ts` | `shouldRevalidate` helper that skips revalidation for cookie-persist submissions                                        |
 
 ## Serialization Contract (ADR-009)
 

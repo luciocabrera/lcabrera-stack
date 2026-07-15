@@ -435,12 +435,14 @@ Covers `packages/ui` only. API-layer utilities (`api.util.ts`, `buildPaginatedQu
 
 ### `src/routes/utils/`
 
-| Function                          | Location                                               | Description                                                                                                                               |
-| --------------------------------- | ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `readTableLoaderStateFromRequest` | `routes/utils/readTableLoaderStateFromRequest.util.ts` | Shared loader bootstrap from URL + cookie state for table-backed routes                                                                   |
-| `sanitizeSorting`                 | `routes/utils/sanitizeSorting.util.ts`                 | Strips undefined-direction and `'actions'`-keyed entries from a SortingState before passing to API calls                                  |
-| `appendPrimaryKeySorting`         | `routing/appendPrimaryKeySorting.util.ts`              | Appends `isPrimaryKey` column(s) (asc, declaration order, deduped) to a sanitized SortingState so server pagination has a stable ordering |
-| `appendDistinctFilterDescriptors` | `routing/appendDistinctFilterDescriptors.util.ts`      | Loader-side decorator baking serializable `kind: 'distinct'` filter-option descriptors onto filterable string columns (ADR-009)           |
+| Function                          | Location                                               | Description                                                                                                                                   |
+| --------------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `readTableLoaderStateFromRequest` | `routes/utils/readTableLoaderStateFromRequest.util.ts` | Shared loader bootstrap from URL + cookie state for table-backed routes                                                                       |
+| `sanitizeSorting`                 | `routes/utils/sanitizeSorting.util.ts`                 | Strips undefined-direction and `'actions'`-keyed entries from a SortingState before passing to API calls                                      |
+| `appendPrimaryKeySorting`         | `routing/appendPrimaryKeySorting.util.ts`              | Appends `isPrimaryKey` column(s) (asc, declaration order, deduped) to a sanitized SortingState so server pagination has a stable ordering     |
+| `appendDistinctFilterDescriptors` | `routing/appendDistinctFilterDescriptors.util.ts`      | Loader-side decorator baking serializable `kind: 'distinct'` filter-option descriptors onto filterable string columns (ADR-009)               |
+| `applySearchParamUpdates`         | `routing/applySearchParamUpdates.util.ts`              | Pure: applies `{ key, value }` updates to a `URLSearchParams` (empty value deletes) without mutating it; returns next params + `changed` flag |
+| `buildSetCookieHeaders`           | `routing/buildSetCookieHeaders.util.ts`                | Pure factory: builds a fresh `Headers` with one `Set-Cookie` per entry that has both key and value (reuses `buildCookieString`)               |
 
 ---
 
