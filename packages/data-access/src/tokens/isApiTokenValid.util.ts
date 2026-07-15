@@ -18,7 +18,7 @@ export const isApiTokenValid = ({
   secret,
   tokenHash,
 }: IsApiTokenValidArgs): boolean => {
-  const [saltHex, hashHex] = tokenHash.split(':');
+  const [saltHex, hashHex] = tokenHash.split(':', 2);
   if (
     saltHex === undefined ||
     hashHex === undefined ||
