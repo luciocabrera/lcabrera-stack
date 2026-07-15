@@ -34,8 +34,8 @@ export const PinSideModal = ({
       footer={
         <ActionButtons
           actions={[
-            { label: 'Accept', onClick: handleAccept },
-            { label: 'Cancel', onClick: handleCancel, variant: 'outline' },
+            { label: 'Accept', onClick: handleAccept, variant: 'primary' },
+            { label: 'Cancel', onClick: handleCancel },
           ]}
         />
       }
