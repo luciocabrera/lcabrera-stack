@@ -1,3 +1,5 @@
+import type { ActionButtonDescriptor } from '@repo/ui/components/ActionButtons';
+
 import { ActionButtons } from '@repo/ui/components/ActionButtons';
 import {
   useGetFormCancelLabel,
@@ -11,7 +13,6 @@ import {
 import * as stylex from '@stylexjs/stylex';
 import { useFetcher, useNavigation } from 'react-router';
 
-import type { ActionButtonDescriptor } from '@repo/ui/components/ActionButtons';
 import type { FormFooterActionsProps } from './FormFooterActions.types';
 
 import { styles } from './FormFooterActions.stylex';
@@ -51,15 +52,15 @@ export const FormFooterActions = ({
 
   const actions = [
     {
-      variant: 'primary',
       isDisabled: isSubmitDisabled,
       label: submitLabel,
       type: 'submit',
+      variant: 'primary',
     },
     {
-      variant: 'outline',
       label: cancelLabel,
       onClick: handleCancelAction,
+      variant: 'outline',
     },
   ] as const satisfies readonly ActionButtonDescriptor[];
 

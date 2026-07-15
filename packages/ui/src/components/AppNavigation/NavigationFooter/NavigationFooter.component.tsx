@@ -37,13 +37,13 @@ export const NavigationFooter = ({
       <div {...stylex.props(styles.footer)}>
         <Button
           aria-label={themeLabel}
-          variant='ghost'
           icon={isDarkMode ? '☀️' : '🌙'}
           isIconOnly={!isExpanded}
           onClick={onToggleTheme}
           size={density.controlButtonSize}
           tooltipContent={themeTooltipContent}
           tooltipPlacement='right'
+          variant='ghost'
         >
           {themeLabel}
         </Button>

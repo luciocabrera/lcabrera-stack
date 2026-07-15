@@ -19,7 +19,6 @@ export const NavigationLauncher = ({ onOpen }: NavigationLauncherProps) => {
     >
       <Button
         aria-label='Open navigation'
-        variant='primary'
         customStylex={launcherStyles.railControl}
         icon={<MenuIcon size={ICON_SIZE_LG} />}
         isIconOnly
@@ -27,6 +26,7 @@ export const NavigationLauncher = ({ onOpen }: NavigationLauncherProps) => {
         size='md'
         tooltipContent='Open navigation'
         tooltipPlacement='right'
+        variant='primary'
       >
         Open navigation
       </Button>

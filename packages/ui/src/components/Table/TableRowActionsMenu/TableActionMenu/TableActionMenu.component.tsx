@@ -19,7 +19,6 @@ export const TableActionMenu = ({
     <div {...stylex.props(tableActionsPopoverStyles.menuActions)}>
       {crud.read && (
         <NavLink
-          variant='ghost'
           customStylex={tableActionsPopoverStyles.menuItem}
           icon={
             <span {...stylex.props(tableActionsPopoverStyles.menuIcon)}>
@@ -29,13 +28,13 @@ export const TableActionMenu = ({
           orientation='horizontal'
           size='mini'
           to={`view/${String(rowId)}`}
+          variant='ghost'
         >
           {`View ${resolvedTitleSingular}`}
         </NavLink>
       )}
       {crud.update && (
         <NavLink
-          variant='ghost'
           customStylex={tableActionsPopoverStyles.menuItem}
           icon={
             <span {...stylex.props(tableActionsPopoverStyles.menuIcon)}>
@@ -45,13 +44,13 @@ export const TableActionMenu = ({
           orientation='horizontal'
           size='mini'
           to={`edit/${String(rowId)}`}
+          variant='ghost'
         >
           {`Edit ${resolvedTitleSingular}`}
         </NavLink>
       )}
       {crud.delete && (
         <Button
-          variant='ghost'
           customStylex={tableActionsPopoverStyles.menuItem}
           icon={
             <span {...stylex.props(tableActionsPopoverStyles.menuIcon)}>
@@ -61,6 +60,7 @@ export const TableActionMenu = ({
           onClick={onDelete}
           orientation='horizontal'
           size='mini'
+          variant='ghost'
         >
           {`Delete ${resolvedTitleSingular}`}
         </Button>

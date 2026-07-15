@@ -29,7 +29,6 @@ export const PinLeftButton = <TData,>({
   return (
     <Button
       aria-pressed={isPinnedLeft}
-      variant={isPinnedLeft ? 'primary' : 'ghost'}
       customStylex={[
         tableActionsPopoverStyles.menuItem,
         hasSectionAbove && tableActionsPopoverStyles.menuSectionDivider,
@@ -42,6 +41,7 @@ export const PinLeftButton = <TData,>({
       onClick={handlePinLeft}
       orientation='horizontal'
       size='mini'
+      variant={isPinnedLeft ? 'primary' : 'ghost'}
     >
       Pin Left
     </Button>

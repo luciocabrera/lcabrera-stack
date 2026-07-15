@@ -35,23 +35,23 @@ export const BooleanFilterInput = ({
   return (
     <div {...stylex.props(styles.container)}>
       <Button
-        variant={selectedValue === 'all' ? 'primary' : 'outline'}
         onClick={handleSelectAll}
         size='sm'
+        variant={selectedValue === 'all' ? 'primary' : 'outline'}
       >
         All
       </Button>
       <Button
-        variant={selectedValue === 'true' ? 'primary' : 'outline'}
         onClick={handleSelectTrue}
         size='sm'
+        variant={selectedValue === 'true' ? 'primary' : 'outline'}
       >
         True
       </Button>
       <Button
-        variant={selectedValue === 'false' ? 'primary' : 'outline'}
         onClick={handleSelectFalse}
         size='sm'
+        variant={selectedValue === 'false' ? 'primary' : 'outline'}
       >
         False
       </Button>

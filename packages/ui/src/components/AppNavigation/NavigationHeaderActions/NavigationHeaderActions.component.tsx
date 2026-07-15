@@ -41,7 +41,6 @@ export const NavigationHeaderActions = ({
     >
       <Button
         aria-label={expandButtonLabel}
-        variant='ghost'
         icon={
           isExpanded ? (
             <MinimizeIcon size={controlIconSize} />
@@ -55,10 +54,10 @@ export const NavigationHeaderActions = ({
         title={expandButtonLabel}
         tooltipContent={expandButtonLabel}
         tooltipPlacement={controlTooltipPlacement}
+        variant='ghost'
       />
       <Button
         aria-label={pinButtonLabel}
-        variant='ghost'
         icon={
           isPinned ? (
             <PinIcon size={controlIconSize} />
@@ -72,11 +71,11 @@ export const NavigationHeaderActions = ({
         title={pinButtonLabel}
         tooltipContent={pinButtonLabel}
         tooltipPlacement={controlTooltipPlacement}
+        variant='ghost'
       />
       {isPinned ? undefined : (
         <Button
           aria-label='Close navigation'
-          variant='ghost'
           icon={<MenuCloseIcon size={controlIconSize} />}
           isIconOnly
           onClick={onClose}
@@ -84,6 +83,7 @@ export const NavigationHeaderActions = ({
           title='Close navigation'
           tooltipContent='Close navigation'
           tooltipPlacement={controlTooltipPlacement}
+          variant='ghost'
         />
       )}
     </div>

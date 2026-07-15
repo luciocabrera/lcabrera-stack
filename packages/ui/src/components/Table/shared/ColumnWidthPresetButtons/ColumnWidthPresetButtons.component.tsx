@@ -22,31 +22,31 @@ export const ColumnWidthPresetButtons = ({
 }: ColumnWidthPresetButtonsProps) => (
   <>
     <Button
-      variant={selectedPreset === 'min' ? 'primary' : 'outline'}
       disabled={isMinDisabled}
       icon={<MinimizeIcon size={ICON_SIZE_MD} />}
       isBusy={isBusy}
       onClick={onToggleMin}
       size='sm'
+      variant={selectedPreset === 'min' ? 'primary' : 'outline'}
     >
       {minLabel}
     </Button>
     <Button
-      variant={selectedPreset === 'max' ? 'primary' : 'outline'}
       disabled={isMaxDisabled}
       icon={<MaximizeIcon size={ICON_SIZE_MD} />}
       isBusy={isBusy}
       onClick={onToggleMax}
       size='sm'
+      variant={selectedPreset === 'max' ? 'primary' : 'outline'}
     >
       {maxLabel}
     </Button>
     <Button
-      variant={selectedPreset === 'default' ? 'primary' : 'outline'}
       icon={<RefreshIcon size={ICON_SIZE_MD} />}
       isBusy={isBusy}
       onClick={onToggleDefault}
       size='sm'
+      variant={selectedPreset === 'default' ? 'primary' : 'outline'}
     >
       {defaultLabel}
     </Button>

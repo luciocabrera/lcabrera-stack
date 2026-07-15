@@ -65,12 +65,12 @@ export const FilterItemHeader = ({
       </button>
       <Button
         aria-label={`Remove ${label} filter`}
-        variant='ghost'
         icon={<MenuCloseIcon size={ICON_SIZE_MD} />}
         isBusy={isBusy}
         onClick={handleRemove}
         size='mini'
         tooltipContent={`Remove ${label} filter`}
+        variant='ghost'
       />
     </div>
   );

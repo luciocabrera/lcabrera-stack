@@ -19,7 +19,7 @@ export const isPasswordValid = ({
   password,
   passwordHash,
 }: IsPasswordValidArgs): boolean => {
-  const [saltHex, hashHex] = passwordHash.split(':');
+  const [saltHex, hashHex] = passwordHash.split(':', 2);
   if (
     saltHex === undefined ||
     hashHex === undefined ||

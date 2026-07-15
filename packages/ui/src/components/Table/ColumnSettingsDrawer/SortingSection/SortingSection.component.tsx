@@ -36,20 +36,20 @@ export const SortingSection = ({ isBusy = false }: SortingSectionProps) => {
         />
         <div {...stylex.props(styles.list)}>
           <Button
-            variant={sortDirection === 'asc' ? 'primary' : 'outline'}
             icon={<SortAscIcon size={ICON_SIZE_MD} />}
             isBusy={isBusy}
             onClick={handleAsc}
             size='sm'
+            variant={sortDirection === 'asc' ? 'primary' : 'outline'}
           >
             Ascending
           </Button>
           <Button
-            variant={sortDirection === 'desc' ? 'primary' : 'outline'}
             icon={<SortDescIcon size={ICON_SIZE_MD} />}
             isBusy={isBusy}
             onClick={handleDesc}
             size='sm'
+            variant={sortDirection === 'desc' ? 'primary' : 'outline'}
           >
             Descending
           </Button>

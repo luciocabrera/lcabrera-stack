@@ -16,7 +16,6 @@ export const SidePanelHeaderToolbar = ({
     <>
       <Button
         aria-label={pinButtonTitle}
-        variant='ghost'
         icon={
           isPinned ? (
             <PinIcon size={ICON_SIZE_MD} />
@@ -28,15 +27,16 @@ export const SidePanelHeaderToolbar = ({
         onClick={onTogglePin}
         size='mini'
         title={pinButtonTitle}
+        variant='ghost'
       />
       <Button
         aria-label='Close drawer'
-        variant='ghost'
         icon={<MenuCloseIcon size={ICON_SIZE_MD} />}
         isBusy={isBusy}
         onClick={onClose}
         size='mini'
         title='Close'
+        variant='ghost'
       />
     </>
   );

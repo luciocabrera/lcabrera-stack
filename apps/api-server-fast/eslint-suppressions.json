@@ -30,9 +30,6 @@
   "src/server.ts": {
     "unicorn/no-process-exit": {
       "count": 1
-    },
-    "unicorn/prefer-top-level-await": {
-      "count": 1
     }
   },
   "src/utils/delay.util.test.ts": {

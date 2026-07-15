@@ -27,7 +27,6 @@ export const PinRightButton = <TData,>({
   return (
     <Button
       aria-pressed={isPinnedRight}
-      variant={isPinnedRight ? 'primary' : 'ghost'}
       customStylex={tableActionsPopoverStyles.menuItem}
       icon={
         <span {...stylex.props(tableActionsPopoverStyles.menuIcon)}>
@@ -37,6 +36,7 @@ export const PinRightButton = <TData,>({
       onClick={handlePinRight}
       orientation='horizontal'
       size='mini'
+      variant={isPinnedRight ? 'primary' : 'ghost'}
     >
       Pin Right
     </Button>

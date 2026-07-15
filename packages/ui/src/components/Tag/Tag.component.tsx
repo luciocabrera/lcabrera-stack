@@ -12,7 +12,6 @@ export const Tag = ({ label, onRemove }: TagProps) => (
     <span {...stylex.props(styles.label)}>{label}</span>
     <Button
       aria-label={`Remove ${label}`}
-      variant='ghost'
       icon={<MenuCloseIcon size={ICON_SIZE_XS} />}
       onClick={(e) => {
         e.stopPropagation();
@@ -20,6 +19,7 @@ export const Tag = ({ label, onRemove }: TagProps) => (
       }}
       size='embedded'
       tooltipContent={`Remove ${label}`}
+      variant='ghost'
     />
   </span>
 );

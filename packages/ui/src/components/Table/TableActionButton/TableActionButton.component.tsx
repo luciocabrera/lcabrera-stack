@@ -14,13 +14,13 @@ export const TableActionButton = ({
   return (
     <Button
       aria-label={ariaLabel}
-      variant='ghost'
       data-menu-id={menuId}
       icon={<MoreVerticalIcon size={14} />}
       id={triggerId}
       isDisabled={isDisabled}
       onClick={onClick}
       size='embedded'
+      variant='ghost'
     >
       {label}
     </Button>

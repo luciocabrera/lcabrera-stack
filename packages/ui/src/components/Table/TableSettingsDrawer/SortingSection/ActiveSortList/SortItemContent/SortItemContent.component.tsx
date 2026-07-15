@@ -29,7 +29,6 @@ export const SortItemContent = ({
       <div {...stylex.props(styles.sortItemControls)}>
         <Button
           aria-label={`Sort ${item.label} ${item.direction === 'asc' ? 'ascending' : 'descending'}`}
-          variant='ghost'
           icon={
             item.direction === 'asc' ? (
               <SortAscIcon size={ICON_SIZE_MD} />
@@ -41,15 +40,16 @@ export const SortItemContent = ({
           onClick={handleToggleDirection}
           size='mini'
           tooltipContent={`Sort ${item.label} ${item.direction === 'asc' ? 'ascending' : 'descending'}`}
+          variant='ghost'
         />
         <Button
           aria-label={`Remove ${item.label} sort`}
-          variant='ghost'
           icon={<MenuCloseIcon size={ICON_SIZE_MD} />}
           isBusy={isBusy}
           onClick={handleRemove}
           size='mini'
           tooltipContent={`Remove ${item.label} sort`}
+          variant='ghost'
         />
       </div>
     </div>

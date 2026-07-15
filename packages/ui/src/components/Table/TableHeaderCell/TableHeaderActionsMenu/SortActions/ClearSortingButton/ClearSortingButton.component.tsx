@@ -25,7 +25,6 @@ export const ClearSortingButton = <TData,>({
 
   return (
     <Button
-      variant='ghost'
       customStylex={tableActionsPopoverStyles.menuItem}
       icon={
         <span {...stylex.props(tableActionsPopoverStyles.menuIcon)}>
@@ -36,6 +35,7 @@ export const ClearSortingButton = <TData,>({
       onClick={handleClearSorting}
       orientation='horizontal'
       size='mini'
+      variant='ghost'
     >
       Clear Sorting
     </Button>

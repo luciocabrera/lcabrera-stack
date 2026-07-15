@@ -25,7 +25,6 @@ export const ClearPinningButton = <TData,>({
 
   return (
     <Button
-      variant='ghost'
       customStylex={tableActionsPopoverStyles.menuItem}
       icon={
         <span {...stylex.props(tableActionsPopoverStyles.menuIcon)}>
@@ -36,6 +35,7 @@ export const ClearPinningButton = <TData,>({
       onClick={handleClearPinning}
       orientation='horizontal'
       size='mini'
+      variant='ghost'
     >
       Clear Pinning
     </Button>

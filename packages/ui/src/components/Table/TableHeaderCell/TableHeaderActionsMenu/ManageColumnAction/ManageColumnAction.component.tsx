@@ -34,7 +34,6 @@ export const ManageColumnAction = <TData,>({
 
   return (
     <Button
-      variant='ghost'
       customStylex={[
         tableActionsPopoverStyles.menuItem,
         hasSectionAbove && tableActionsPopoverStyles.menuSectionDivider,
@@ -47,6 +46,7 @@ export const ManageColumnAction = <TData,>({
       onClick={handleManageColumn}
       orientation='horizontal'
       size='mini'
+      variant='ghost'
     >
       Manage Column
     </Button>

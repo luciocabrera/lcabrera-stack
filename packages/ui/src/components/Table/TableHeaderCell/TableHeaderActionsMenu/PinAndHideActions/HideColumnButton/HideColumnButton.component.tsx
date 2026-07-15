@@ -24,7 +24,6 @@ export const HideColumnButton = <TData,>({
 
   return (
     <Button
-      variant='ghost'
       customStylex={[
         tableActionsPopoverStyles.menuItem,
         tableActionsPopoverStyles.menuSectionDivider,
@@ -37,6 +36,7 @@ export const HideColumnButton = <TData,>({
       onClick={handleHideColumn}
       orientation='horizontal'
       size='mini'
+      variant='ghost'
     >
       Hide Column
     </Button>

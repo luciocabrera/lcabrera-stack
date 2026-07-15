@@ -46,11 +46,11 @@ export const VirtualListHeader = () => {
       {searchTerm && (
         <Button
           aria-label='Clear search'
-          variant='ghost'
           customStylex={styles.clearButton}
           icon={<MenuCloseIcon size={ICON_SIZE_MD} />}
           onClick={clearSearch}
           size='embedded'
+          variant='ghost'
         />
       )}
     </div>

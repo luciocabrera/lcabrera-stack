@@ -27,7 +27,6 @@ export const SortAscendingButton = <TData,>({
   return (
     <Button
       aria-pressed={isAscending}
-      variant={isAscending ? 'primary' : 'ghost'}
       customStylex={tableActionsPopoverStyles.menuItem}
       icon={
         <span {...stylex.props(tableActionsPopoverStyles.menuIcon)}>
@@ -37,6 +36,7 @@ export const SortAscendingButton = <TData,>({
       onClick={handleAscending}
       orientation='horizontal'
       size='mini'
+      variant={isAscending ? 'primary' : 'ghost'}
     >
       Ascending
     </Button>
