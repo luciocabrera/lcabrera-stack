@@ -12,7 +12,7 @@ import type {
 
 export type ButtonProps = Omit<
   ComponentPropsWithoutRef<'button'>,
-  'onClick'
+  'color' | 'onClick'
 > & {
   readonly customStylex?: StyleXStyles;
   readonly icon?: ReactNode;

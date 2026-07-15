@@ -54,7 +54,7 @@ export const Modal = ({
               actions={
                 <Button
                   aria-label='Close'
-                  color='ghost'
+                  variant='ghost'
                   icon={<MenuCloseIcon size={ICON_SIZE_MD} />}
                   onClick={onClose}
                   size='mini'

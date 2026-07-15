@@ -14,7 +14,7 @@ export const TableActionButton = ({
   return (
     <Button
       aria-label={ariaLabel}
-      color='ghost'
+      variant='ghost'
       data-menu-id={menuId}
       icon={<MoreVerticalIcon size={14} />}
       id={triggerId}

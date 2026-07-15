@@ -86,16 +86,4 @@ describe('Button', () => {
 
     expect(screen.getByTestId('button').className).toBeTruthy();
   });
-
-  it('keeps deprecated color as a fallback during migration', () => {
-    const variantRender = render(<Button variant='outline'>Outline</Button>);
-    const variantClassName = variantRender.getByTestId('button').className;
-
-    cleanup();
-
-    const colorRender = render(<Button color='outline'>Outline</Button>);
-    const colorClassName = colorRender.getByTestId('button').className;
-
-    expect(colorClassName).toBe(variantClassName);
-  });
 });

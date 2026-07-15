@@ -23,13 +23,13 @@ export const ConfirmDialog = ({
       <ActionButtons
         actions={[
           {
-            color: 'error',
+            variant: 'error',
             key: 'confirm',
             label: confirmLabel,
             onClick: onConfirm,
           },
           {
-            color: 'outline',
+            variant: 'outline',
             key: 'cancel',
             label: cancelLabel,
             onClick: onCancel,

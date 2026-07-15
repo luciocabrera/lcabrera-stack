@@ -19,7 +19,7 @@ export const TableActionMenu = ({
     <div {...stylex.props(tableActionsPopoverStyles.menuActions)}>
       {crud.read && (
         <NavLink
-          color='ghost'
+          variant='ghost'
           customStylex={tableActionsPopoverStyles.menuItem}
           icon={
             <span {...stylex.props(tableActionsPopoverStyles.menuIcon)}>
@@ -35,7 +35,7 @@ export const TableActionMenu = ({
       )}
       {crud.update && (
         <NavLink
-          color='ghost'
+          variant='ghost'
           customStylex={tableActionsPopoverStyles.menuItem}
           icon={
             <span {...stylex.props(tableActionsPopoverStyles.menuIcon)}>
@@ -51,7 +51,7 @@ export const TableActionMenu = ({
       )}
       {crud.delete && (
         <Button
-          color='ghost'
+          variant='ghost'
           customStylex={tableActionsPopoverStyles.menuItem}
           icon={
             <span {...stylex.props(tableActionsPopoverStyles.menuIcon)}>

@@ -19,7 +19,7 @@ export const NavigationLauncher = ({ onOpen }: NavigationLauncherProps) => {
     >
       <Button
         aria-label='Open navigation'
-        color='primary'
+        variant='primary'
         customStylex={launcherStyles.railControl}
         icon={<MenuIcon size={ICON_SIZE_LG} />}
         isIconOnly

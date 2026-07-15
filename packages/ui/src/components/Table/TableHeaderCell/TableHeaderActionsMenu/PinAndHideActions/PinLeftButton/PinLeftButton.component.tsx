@@ -29,7 +29,7 @@ export const PinLeftButton = <TData,>({
   return (
     <Button
       aria-pressed={isPinnedLeft}
-      color={isPinnedLeft ? 'primary' : 'ghost'}
+      variant={isPinnedLeft ? 'primary' : 'ghost'}
       customStylex={[
         tableActionsPopoverStyles.menuItem,
         hasSectionAbove && tableActionsPopoverStyles.menuSectionDivider,

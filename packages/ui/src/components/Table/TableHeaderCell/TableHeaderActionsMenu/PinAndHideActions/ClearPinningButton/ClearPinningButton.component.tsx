@@ -25,7 +25,7 @@ export const ClearPinningButton = <TData,>({
 
   return (
     <Button
-      color='ghost'
+      variant='ghost'
       customStylex={tableActionsPopoverStyles.menuItem}
       icon={
         <span {...stylex.props(tableActionsPopoverStyles.menuIcon)}>

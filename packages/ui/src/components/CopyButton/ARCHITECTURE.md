@@ -12,7 +12,7 @@ Icon-only button that copies a string to the clipboard via
 ## Composition
 
 Built entirely from existing design-system pieces — `Button` (icon-only,
-`color='ghost'`) and the `CopyIcon`/`CheckIcon` icon components — no new
+`variant='ghost'`) and the `CopyIcon`/`CheckIcon` icon components — no new
 styling primitive needed. Confirmation state is local `useState` + a plain
 `setTimeout` in the click handler (not `useEffect` — there is nothing to
 synchronize with an external system here, it's a self-contained timed UI

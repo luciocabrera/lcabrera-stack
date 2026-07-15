@@ -33,7 +33,7 @@ export const PinningSection = ({ isBusy = false }: PinningSectionProps) => {
         />
         <div {...stylex.props(styles.buttonGroup)}>
           <Button
-            color={columnPinning === 'left' ? 'primary' : 'outline'}
+            variant={columnPinning === 'left' ? 'primary' : 'outline'}
             icon={<PinLeftIcon size={ICON_SIZE_MD} />}
             isBusy={isBusy}
             onClick={handlePinLeft}
@@ -42,7 +42,7 @@ export const PinningSection = ({ isBusy = false }: PinningSectionProps) => {
             Pin Left
           </Button>
           <Button
-            color={columnPinning === 'right' ? 'primary' : 'outline'}
+            variant={columnPinning === 'right' ? 'primary' : 'outline'}
             icon={<PinRightIcon size={ICON_SIZE_MD} />}
             isBusy={isBusy}
             onClick={handlePinRight}

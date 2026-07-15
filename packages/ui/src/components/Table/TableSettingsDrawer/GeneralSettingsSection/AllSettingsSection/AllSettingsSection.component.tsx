@@ -36,7 +36,6 @@ export const AllSettingsSection = ({
             onClick: clearAllSettings,
           },
           {
-            color: 'outline',
             icon: <RefreshIcon size={ICON_SIZE_MD} />,
             label: 'Reset All Settings',
             onClick: resetTableSettings,

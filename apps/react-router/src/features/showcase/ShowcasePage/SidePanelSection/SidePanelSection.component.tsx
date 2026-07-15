@@ -121,7 +121,7 @@ export const SidePanelSection = () => {
             <Button onClick={handleCloseRight} size='sm'>
               Confirm
             </Button>
-            <Button color='ghost' onClick={handleCloseRight} size='sm'>
+            <Button onClick={handleCloseRight} size='sm' variant='ghost'>
               Cancel
             </Button>
           </div>

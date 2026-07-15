@@ -19,7 +19,7 @@ export const CopyButton = ({ label = 'Copy', value }: CopyButtonProps) => {
   return (
     <Button
       aria-label={isCopied ? 'Copied' : label}
-      color='ghost'
+      variant='ghost'
       icon={isCopied ? <CheckIcon size={16} /> : <CopyIcon size={16} />}
       isIconOnly
       onClick={handleClick}

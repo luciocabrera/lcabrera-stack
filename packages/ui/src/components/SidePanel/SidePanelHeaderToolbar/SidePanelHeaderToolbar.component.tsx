@@ -16,7 +16,7 @@ export const SidePanelHeaderToolbar = ({
     <>
       <Button
         aria-label={pinButtonTitle}
-        color='ghost'
+        variant='ghost'
         icon={
           isPinned ? (
             <PinIcon size={ICON_SIZE_MD} />
@@ -31,7 +31,7 @@ export const SidePanelHeaderToolbar = ({
       />
       <Button
         aria-label='Close drawer'
-        color='ghost'
+        variant='ghost'
         icon={<MenuCloseIcon size={ICON_SIZE_MD} />}
         isBusy={isBusy}
         onClick={onClose}

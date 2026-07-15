@@ -11,7 +11,7 @@ renders next to whatever's passed into `actions` — see
 
 - `TableCreateLink` — `title: string` (whatever the table's own title is,
   e.g. `'Projects'`), `to: string` (route to navigate to), `isBusy?: boolean`
-  (default `false`). Renders `color='outline'`, tooltip/aria-label
+  (default `false`). Renders `variant='outline'`, tooltip/aria-label
   `"Create {title}"`. When rendered by the table's built-in CRUD-create path
   (`TableTitleActions`), `isBusy` is fed the table's `isLoading` so this button
   shows the same shimmer overlay as the adjacent settings gear button while the
@@ -21,7 +21,7 @@ renders next to whatever's passed into `actions` — see
 
 Every CQMS-style list route needs the identical "+" button pattern next
 to its table title — this is the second time this exact composition
-(`NavLink` + `PlusIcon` + `size='mini'` + `color='outline'` + a computed
+(`NavLink` + `PlusIcon` + `size='mini'` + `variant='outline'` + a computed
 tooltip) would otherwise get hand-copied per route. `title` is passed
 explicitly rather than read from the `Table`'s own `metaState.title` (the
 same string is usually passed to both) because `actions` renders as a

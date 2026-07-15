@@ -46,7 +46,7 @@ export const VirtualListHeader = () => {
       {searchTerm && (
         <Button
           aria-label='Clear search'
-          color='ghost'
+          variant='ghost'
           customStylex={styles.clearButton}
           icon={<MenuCloseIcon size={ICON_SIZE_MD} />}
           onClick={clearSearch}

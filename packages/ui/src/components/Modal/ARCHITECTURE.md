@@ -111,10 +111,10 @@ The interior is a flex column (via `AppDotted`): the body has `flex: 1 1 auto` +
   title='Confirm Action'
   footer={
     <>
-      <Button color='outline' onClick={() => setIsOpen(false)}>
+      <Button variant='outline' onClick={() => setIsOpen(false)}>
         Cancel
       </Button>
-      <Button color='primary' onClick={handleConfirm}>
+      <Button variant='primary' onClick={handleConfirm}>
         Confirm
       </Button>
     </>

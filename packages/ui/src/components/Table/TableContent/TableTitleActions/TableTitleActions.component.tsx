@@ -43,11 +43,11 @@ export const TableTitleActions = ({ actions }: TableTitleActionsProps) => {
       )}
       <Button
         aria-label='Table settings'
-        color='ghost'
         icon={<SettingsIcon size={16} />}
         isBusy={isBusy}
         onClick={toggleTableIsTableSettingsOpen}
         size='mini'
+        variant='ghost'
       />
     </>
   );

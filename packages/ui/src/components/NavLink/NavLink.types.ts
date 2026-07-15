@@ -7,10 +7,8 @@ import type { StyleXStyles } from '@stylexjs/stylex';
 import type { ReactNode } from 'react';
 import type { NavLinkProps as RouterNavLinkProps } from 'react-router';
 
-export type NavLinkProps = Omit<RouterNavLinkProps, 'children'> & {
+export type NavLinkProps = Omit<RouterNavLinkProps, 'children' | 'color'> & {
   readonly children: ReactNode;
-  /** @deprecated Use `variant` instead. */
-  readonly color?: DesignSystemColor;
   readonly customStylex?: StyleXStyles;
   readonly icon?: ReactNode;
   readonly isActive?: boolean;

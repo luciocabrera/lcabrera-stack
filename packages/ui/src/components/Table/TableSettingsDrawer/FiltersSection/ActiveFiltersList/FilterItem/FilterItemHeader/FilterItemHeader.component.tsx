@@ -65,7 +65,7 @@ export const FilterItemHeader = ({
       </button>
       <Button
         aria-label={`Remove ${label} filter`}
-        color='ghost'
+        variant='ghost'
         icon={<MenuCloseIcon size={ICON_SIZE_MD} />}
         isBusy={isBusy}
         onClick={handleRemove}

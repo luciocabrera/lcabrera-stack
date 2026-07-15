@@ -44,7 +44,7 @@ export const AddFilterSection = ({
           isBusy={isBusy}
           isDisabled={!selectedColumn}
           onClick={handleAddFilter}
-          size='sm'
+          variant='primary'
         >
           Add
         </Button>

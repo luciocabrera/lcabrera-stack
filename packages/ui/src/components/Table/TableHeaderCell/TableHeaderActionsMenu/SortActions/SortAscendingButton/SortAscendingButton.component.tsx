@@ -27,7 +27,7 @@ export const SortAscendingButton = <TData,>({
   return (
     <Button
       aria-pressed={isAscending}
-      color={isAscending ? 'primary' : 'ghost'}
+      variant={isAscending ? 'primary' : 'ghost'}
       customStylex={tableActionsPopoverStyles.menuItem}
       icon={
         <span {...stylex.props(tableActionsPopoverStyles.menuIcon)}>

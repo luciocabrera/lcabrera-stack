@@ -11,6 +11,7 @@ import {
 import * as stylex from '@stylexjs/stylex';
 import { useFetcher, useNavigation } from 'react-router';
 
+import type { ActionButtonDescriptor } from '@repo/ui/components/ActionButtons';
 import type { FormFooterActionsProps } from './FormFooterActions.types';
 
 import { styles } from './FormFooterActions.stylex';
@@ -50,17 +51,17 @@ export const FormFooterActions = ({
 
   const actions = [
     {
-      color: 'primary',
+      variant: 'primary',
       isDisabled: isSubmitDisabled,
       label: submitLabel,
       type: 'submit',
     },
     {
-      color: 'outline',
+      variant: 'outline',
       label: cancelLabel,
       onClick: handleCancelAction,
     },
-  ] as const;
+  ] as const satisfies readonly ActionButtonDescriptor[];
 
   return (
     <div {...stylex.props(styles.footer)}>

@@ -24,7 +24,7 @@ export const HideColumnButton = <TData,>({
 
   return (
     <Button
-      color='ghost'
+      variant='ghost'
       customStylex={[
         tableActionsPopoverStyles.menuItem,
         tableActionsPopoverStyles.menuSectionDivider,

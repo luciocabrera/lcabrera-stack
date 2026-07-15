@@ -9,21 +9,18 @@ import { getClassName } from './utils';
 
 export const NavLink = ({
   children,
-  color,
   customStylex,
   icon,
   isBusy = false,
   isIconOnly = false,
   orientation = 'vertical',
   prefetch = 'intent',
-  size = 'md',
+  size = 'sm',
   tooltipContent,
   tooltipPlacement = 'top',
-  variant,
+  variant = 'outline',
   ...props
 }: NavLinkProps) => {
-  const resolvedVariant = variant ?? color ?? 'ghost';
-
   const link = (
     <RouterNavLink
       aria-disabled={isBusy || undefined}
@@ -36,7 +33,7 @@ export const NavLink = ({
           orientation,
           size,
           styles: linkItemStyles,
-          variant: resolvedVariant,
+          variant,
         });
         return classNameValue;
       }}

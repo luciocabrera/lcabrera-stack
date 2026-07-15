@@ -34,7 +34,7 @@ export const ManageColumnAction = <TData,>({
 
   return (
     <Button
-      color='ghost'
+      variant='ghost'
       customStylex={[
         tableActionsPopoverStyles.menuItem,
         hasSectionAbove && tableActionsPopoverStyles.menuSectionDivider,

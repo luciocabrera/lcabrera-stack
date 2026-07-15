@@ -27,7 +27,7 @@ export const PinRightButton = <TData,>({
   return (
     <Button
       aria-pressed={isPinnedRight}
-      color={isPinnedRight ? 'primary' : 'ghost'}
+      variant={isPinnedRight ? 'primary' : 'ghost'}
       customStylex={tableActionsPopoverStyles.menuItem}
       icon={
         <span {...stylex.props(tableActionsPopoverStyles.menuIcon)}>
