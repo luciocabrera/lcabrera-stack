@@ -22,9 +22,12 @@ delegate reads the selectors and dispatches the actions it needs itself:
 | `UnpinConflictModal`       | unpinConflictModal                                    | acceptUnpinConflict, cancelUnpinConflict |
 | `OrderConflictModal`       | orderConflict                                         | acceptOrderConflict, cancelOrderConflict |
 
-The shared `PinSideModal` (`components/PinSideModal/`) stays presentational;
-the `ColumnOrderPinSideModal` wrapper is its local owner and wires it to the
-store.
+All four modals render the same shell — a description, a radio group of
+resolution options, and Accept/Cancel actions — so they delegate that shell to
+the shared presentational `ChoiceModal` (`components/ChoiceModal/`) and supply
+only their own title, copy, options, and data wiring. The shared `PinSideModal`
+(`components/PinSideModal/`) likewise stays presentational; the
+`ColumnOrderPinSideModal` wrapper is its local owner and wires it to the store.
 
 ## File Structure
 
@@ -64,19 +67,16 @@ ColumnOrderSection/
 │   ├── ColumnOrderSectionToolbar.component.tsx
 │   └── ColumnOrderSectionToolbar.types.ts   → { isBusy?, variant? }
 │
-├── OrderConflictModal/                   → Order/pin conflict resolution (self-connected, no props)
+├── OrderConflictModal/                   → Order/pin conflict resolution (self-connected, no props; delegates shell to ChoiceModal)
 │   ├── OrderConflictModal.component.tsx
-│   ├── OrderConflictModal.stylex.ts
 │   └── OrderConflictModal.test.tsx
 │
-├── PinConflictModal/                     → Pin contiguity conflict resolution (self-connected, no props)
+├── PinConflictModal/                     → Pin contiguity conflict resolution (self-connected, no props; delegates shell to ChoiceModal)
 │   ├── PinConflictModal.component.tsx
-│   ├── PinConflictModal.stylex.ts
 │   └── PinConflictModal.test.tsx
 │
-├── UnpinConflictModal/                   → Unpin gap conflict resolution (self-connected, no props)
+├── UnpinConflictModal/                   → Unpin gap conflict resolution (self-connected, no props; delegates shell to ChoiceModal)
 │   ├── UnpinConflictModal.component.tsx
-│   ├── UnpinConflictModal.stylex.ts
 │   └── UnpinConflictModal.test.tsx
 │
 └── utils/                                → Pin/order conflict utilities

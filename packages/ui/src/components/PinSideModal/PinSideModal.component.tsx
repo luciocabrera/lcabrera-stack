@@ -1,57 +1,31 @@
-import type { PinSide } from '@repo/ui/types/ui.types';
-
-import { ActionButtons } from '@repo/ui/components/ActionButtons';
-import { Modal } from '@repo/ui/components/Modal';
-import { RadioOptionGroup } from '@repo/ui/components/RadioOptionGroup';
+import { ChoiceModal } from '@repo/ui/components/ChoiceModal';
 import { PIN_SIDE_OPTIONS } from '@repo/ui/constants/pinningPreferences.constants';
-import * as stylex from '@stylexjs/stylex';
-import { useState } from 'react';
 
 import type { PinSideModalProps } from './PinSideModal.types';
 
-import { styles } from './PinSideModal.stylex';
-
+/**
+ * Confirmation modal for choosing which side to pin a table column to. A thin,
+ * store-agnostic wrapper that configures the shared {@link ChoiceModal} with the
+ * pin-side copy and options; consumers own the open state and callbacks.
+ */
 export const PinSideModal = ({
   columnLabel,
   isOpen,
   onAccept,
   onCancel,
-}: PinSideModalProps) => {
-  const [selectedSide, setSelectedSide] = useState<PinSide>('closest-edge');
-
-  const handleAccept = () => {
-    onAccept(selectedSide);
-    setSelectedSide('closest-edge');
-  };
-
-  const handleCancel = () => {
-    onCancel();
-    setSelectedSide('closest-edge');
-  };
-
-  return (
-    <Modal
-      footer={
-        <ActionButtons
-          actions={[
-            { label: 'Accept', onClick: handleAccept, variant: 'primary' },
-            { label: 'Cancel', onClick: handleCancel },
-          ]}
-        />
-      }
-      isOpen={isOpen}
-      onClose={handleCancel}
-      title='Pin Column'
-    >
-      <p {...stylex.props(styles.description)}>
+}: PinSideModalProps) => (
+  <ChoiceModal
+    defaultValue='closest-edge'
+    description={
+      <>
         Choose which side to pin <strong>{columnLabel}</strong> to:
-      </p>
-      <RadioOptionGroup
-        name='pin-side-selection'
-        onChange={setSelectedSide}
-        options={PIN_SIDE_OPTIONS}
-        value={selectedSide}
-      />
-    </Modal>
-  );
-};
+      </>
+    }
+    isOpen={isOpen}
+    onAccept={onAccept}
+    onCancel={onCancel}
+    options={PIN_SIDE_OPTIONS}
+    radioName='pin-side-selection'
+    title='Pin Column'
+  />
+);

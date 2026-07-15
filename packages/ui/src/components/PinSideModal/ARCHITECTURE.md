@@ -1,64 +1,52 @@
 # PinSideModal Architecture
 
-Confirmation modal for choosing which side to pin a table column to. Composes `Modal` + `RadioOptionGroup` with local selection state that resets on every open/close cycle.
+Confirmation modal for choosing which side to pin a table column to. A thin,
+store-agnostic wrapper that configures the shared [`ChoiceModal`](../ChoiceModal/ARCHITECTURE.md)
+with the pin-side title, copy, and options — it holds no state of its own; the
+selection state and the reset-on-open/close behavior live in `ChoiceModal`.
 
 ## File Structure
 
 ```
 PinSideModal/
 ├── index.ts                        → Barrel export
-├── PinSideModal.component.tsx      → Modal + RadioOptionGroup composition
-├── PinSideModal.types.ts           → PinSideModalProps
-└── PinSideModal.stylex.ts          → description paragraph style
+├── PinSideModal.component.tsx      → Configures ChoiceModal for pin-side selection
+└── PinSideModal.types.ts           → PinSideModalProps
 ```
 
 ## Dependencies
 
 ```mermaid
 graph LR
-  PSM["PinSideModal"] --> Modal
-  PSM --> RadioOptionGroup
-  PSM --> ActionButtons
+  PSM["PinSideModal"] --> ChoiceModal
+  PSM --> PIN_SIDE_OPTIONS["PIN_SIDE_OPTIONS (constants/pinningPreferences)"]
   PSM --> PinSide["PinSide (type from types/ui.types)"]
-  PSM --> PSM_stylex["PinSideModal.stylex"]
-  PSM_stylex --> base_tokens["design-system/tokens/base.stylex (typography)"]
-  PSM_stylex --> colors["design-system/tokens/colors.stylex"]
 ```
 
 ## Component Hierarchy
 
 ```mermaid
 graph TD
-  PSM["PinSideModal"] --> Modal2["Modal (title='Pin Column', footer=buttons)"]
-  Modal2 --> Desc["p.description — column label text"]
-  Modal2 --> ROG["RadioOptionGroup (name='pin-side-selection')"]
-  Modal2 --> FooterButtons["ActionButtons (Accept / Cancel)"]
+  PSM["PinSideModal"] --> CM["ChoiceModal (title='Pin Column', radioName='pin-side-selection')"]
+  CM --> Desc["p.description — column label text"]
+  CM --> ROG["RadioOptionGroup (PIN_SIDE_OPTIONS)"]
+  CM --> FooterButtons["ActionButtons (Accept / Cancel)"]
 ```
 
 ## State & Flow
 
-```mermaid
-graph TD
-  A["PinSideModal isOpen=true"] --> B["selectedSide = 'closest-edge' (initial)"]
-  B --> C["User selects a radio option"]
-  C --> D["setSelectedSide(value as PinSide)"]
-
-  E["Accept clicked"] --> F["onAccept(selectedSide)"]
-  F --> G["setSelectedSide('closest-edge')  ← reset"]
-
-  H["Cancel clicked / Esc / close"] --> I["onCancel()"]
-  I --> J["setSelectedSide('closest-edge')  ← reset"]
-```
-
-**Reset on close:** `selectedSide` always resets to `'closest-edge'` after Accept or Cancel so the modal starts fresh the next time it opens.
+`PinSideModal` is purely declarative: it forwards `isOpen`/`onAccept`/`onCancel`
+and supplies `defaultValue='closest-edge'`. The selected side is tracked inside
+`ChoiceModal`, which calls `onAccept(selectedSide)` on Accept and resets to
+`defaultValue` after both Accept and Cancel so the modal opens fresh next time.
 
 ## Radio Options
 
 | `value`          | `label`          | `description`                                    |
 | ---------------- | ---------------- | ------------------------------------------------ |
 | `'closest-edge'` | Closest edge     | Pin to the nearest edge based on column position |
-| `'left'`         | Pin to the left  | —                                                |
-| `'right'`        | Pin to the right | —                                                |
+| `'left'`         | Pin to the left  | Pin this column to the left side of the table    |
+| `'right'`        | Pin to the right | Pin this column to the right side of the table   |
 
 ## Props
 
@@ -79,4 +67,4 @@ graph TD
 
 ## Consumers
 
-Used by `TableSettingsDrawer` / `TableHeaderCell` when a pin action would conflict with the column's current position and the user needs to resolve which side explicitly.
+Used by `TableSettingsDrawer` / `TableHeaderCell` when a pin action would conflict with the column's current position and the user needs to resolve which side explicitly. Its store-connected owner is `ColumnOrderPinSideModal`.
