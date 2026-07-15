@@ -11,7 +11,8 @@ const { MockTooltip } = vi.hoisted(() => ({
       children,
     }: {
       readonly children: ReactNode;
-      readonly content?: string;
+      readonly content?: ReactNode;
+      readonly placement?: string;
     }) => <div data-testid='tooltip'>{children}</div>,
   ),
 }));
@@ -22,34 +23,19 @@ vi.mock('../Tooltip', () => ({
 
 import { Button } from './Button.component';
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  MockTooltip.mockClear();
+});
 
 describe('Button', () => {
-  it('renders children text inside the button', () => {
+  it('renders a button with the provided children', () => {
     render(<Button>Click me</Button>);
 
     expect(screen.getByTestId('button').textContent).toContain('Click me');
   });
 
-  it('renders as disabled when isDisabled is true', () => {
-    render(<Button isDisabled>Disabled</Button>);
-
-    expect(screen.getByTestId<HTMLButtonElement>('button').disabled).toBe(true);
-  });
-
-  it('renders as disabled when isBusy is true', () => {
-    render(<Button isBusy>Busy</Button>);
-
-    expect(screen.getByTestId<HTMLButtonElement>('button').disabled).toBe(true);
-  });
-
-  it('renders icon slot when icon prop is provided', () => {
-    render(<Button icon={<span data-testid='icon'>★</span>}>With Icon</Button>);
-
-    expect(screen.getByTestId('icon')).not.toBeNull();
-  });
-
-  it('calls onClick handler when clicked', () => {
+  it('calls onClick when the button is clicked', () => {
     const handleClick = vi.fn();
 
     render(<Button onClick={handleClick}>Clickable</Button>);
@@ -59,31 +45,34 @@ describe('Button', () => {
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
 
-  it('wraps in Tooltip when tooltipContent is provided', () => {
+  it('does not wrap the button in a Tooltip when tooltipContent is absent', () => {
+    render(<Button>No tooltip</Button>);
+
+    expect(screen.queryByTestId('tooltip')).toBeNull();
+    expect(MockTooltip).not.toHaveBeenCalled();
+  });
+
+  it('wraps the button in a Tooltip when tooltipContent is provided', () => {
     render(<Button tooltipContent='Helpful tip'>Hover me</Button>);
 
     expect(screen.getByTestId('tooltip')).not.toBeNull();
+    expect(screen.getByTestId('button')).not.toBeNull();
     expect(MockTooltip.mock.calls[0]?.[0]?.content).toBe('Helpful tip');
   });
 
-  it('uses auto width by default', () => {
-    const defaultRender = render(<Button>Auto width</Button>);
-    const button = defaultRender.getByTestId('button');
-    const defaultClassName = button.className;
+  it('defaults the tooltip placement to "top"', () => {
+    render(<Button tooltipContent='Helpful tip'>Hover me</Button>);
 
-    cleanup();
-
-    const autoWidthRender = render(<Button>Auto width</Button>);
-
-    expect(button.className).toBeTruthy();
-    expect(defaultClassName).toBe(
-      autoWidthRender.getByTestId('button').className,
-    );
+    expect(MockTooltip.mock.calls[0]?.[0]?.placement).toBe('top');
   });
 
-  it('supports the new variant prop', () => {
-    render(<Button variant='ghost'>Ghost</Button>);
+  it('passes a custom tooltipPlacement through to the Tooltip', () => {
+    render(
+      <Button tooltipContent='Helpful tip' tooltipPlacement='right'>
+        Hover me
+      </Button>,
+    );
 
-    expect(screen.getByTestId('button').className).toBeTruthy();
+    expect(MockTooltip.mock.calls[0]?.[0]?.placement).toBe('right');
   });
 });

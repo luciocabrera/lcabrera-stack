@@ -1,69 +1,19 @@
-import * as stylex from '@stylexjs/stylex';
-
 import type { ButtonProps } from './Button.types';
 
 import { Tooltip } from '../Tooltip';
-import { buttonStyles } from './Button.stylex';
+import { getButtonElement } from './utils';
 
+/**
+ * Interactive button. Delegates the `<button>` element rendering to
+ * `getButtonElement` and, when `tooltipContent` is supplied, wraps it in a
+ * `Tooltip`.
+ */
 export const Button = ({
-  children,
-  customStylex,
-  icon,
-  isBusy = false,
-  isDisabled = false,
-  isIconOnly = false,
-  orientation = 'vertical',
-  size = 'sm',
   tooltipContent,
   tooltipPlacement = 'top',
-  type = 'button',
-  variant = 'outline',
   ...rest
 }: ButtonProps) => {
-  const isPrimary = variant === 'primary';
-
-  const button = (
-    <button
-      data-testid='button'
-      disabled={isDisabled || isBusy}
-      {...rest}
-      type={type}
-      {...stylex.props(
-        buttonStyles.base,
-        buttonStyles.orientation[orientation],
-        buttonStyles.size[size],
-        buttonStyles.variant[variant],
-        isIconOnly && buttonStyles.iconOnly,
-        isBusy && buttonStyles.busyState,
-        customStylex,
-        isPrimary && buttonStyles.overlayParent,
-      )}
-    >
-      {isBusy && (
-        <span {...stylex.props(buttonStyles.busyOverlay)}>
-          <span {...stylex.props(buttonStyles.busyWave)} />
-        </span>
-      )}
-      {icon && <span {...stylex.props(buttonStyles.icon)}>{icon}</span>}
-      <span
-        {...stylex.props(
-          buttonStyles.label,
-          isIconOnly && buttonStyles.labelHidden,
-        )}
-      >
-        {children}
-      </span>
-      {isPrimary && (
-        <div
-          {...stylex.props(
-            buttonStyles.overlay,
-            buttonStyles.linear,
-            buttonStyles.overlayOverwrite,
-          )}
-        ></div>
-      )}
-    </button>
-  );
+  const button = getButtonElement(rest);
 
   if (tooltipContent) {
     return (

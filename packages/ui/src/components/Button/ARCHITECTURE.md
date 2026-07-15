@@ -4,19 +4,32 @@
 
 ```
 Button/
-├── index.ts                 → Barrel export: { Button } + type { ButtonProps }
-├── Button.component.tsx     → Component logic & render
-├── Button.types.ts          → ButtonProps (extends native <button>)
-└── Button.stylex.ts         → Style composition from shared design tokens
+├── index.ts                         → Barrel export: { Button } + type { ButtonProps }
+├── Button.component.tsx             → Thin component: builds the button, wraps in Tooltip
+├── Button.types.ts                  → ButtonProps (extends native <button>) + ButtonElementArgs
+├── Button.stylex.ts                 → Style composition from shared design tokens
+└── utils/
+    ├── getButtonElement.util.tsx    → Pure helper returning the native <button> element
+    └── getButtonElement.util.test.tsx
 ```
+
+`Button.component.tsx` stays slim: it peels off the tooltip concerns and calls
+`getButtonElement` to build the `<button>`. The helper **returns a host
+`<button>` element** (not a component) on purpose — `Tooltip`'s trigger detects
+a natively interactive child by inspecting the immediate element type
+(`getIsNativeInteractiveElement`), and a component boundary would hide the
+`<button>` and make the trigger wrongly add a redundant `role="button"`.
 
 ## Dependencies
 
 ```mermaid
 graph LR
   Button --> Button.types
-  Button --> Button.stylex
+  Button --> getButtonElement
   Button --> Tooltip
+
+  getButtonElement --> Button.stylex
+  getButtonElement --> Button.types
 
   Button.types -.-> design-system.types
 
@@ -28,15 +41,15 @@ graph LR
 
 ```mermaid
 graph TD
-  A[Destructure props with defaults] --> B[Build button element]
+  A[Destructure tooltip props with defaults] --> B[getButtonElement builds the button]
   B --> C{icon prop?}
   C -- Yes --> D[Add icon span]
   C -- No --> E[Skip icon]
   D --> F[Add children label span; hide from layout when icon-only]
   E --> F
-  F --> G[Apply StyleX styles]
+  F --> G[Apply StyleX styles → return host button element]
   G --> H{tooltipContent?}
-  H -- Yes --> I[Wrap in Tooltip]
+  H -- Yes --> I[Wrap button in Tooltip]
   H -- No --> J[Return button]
   I --> J
 ```
