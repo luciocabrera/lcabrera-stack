@@ -68,7 +68,7 @@ export const AddSortSection = ({
           isBusy={isBusy}
           isDisabled={!selectedColumn}
           onClick={handleAddSort}
-          size='sm'
+          variant='primary'
         >
           Add
         </Button>

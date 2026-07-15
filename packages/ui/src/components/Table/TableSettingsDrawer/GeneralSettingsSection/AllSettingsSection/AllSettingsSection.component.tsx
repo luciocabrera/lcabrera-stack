@@ -31,7 +31,6 @@ export const AllSettingsSection = ({
       <ActionButtons
         actions={[
           {
-            color: 'outline',
             icon: <EraserIcon size={ICON_SIZE_MD} />,
             label: 'Clear All Settings',
             onClick: clearAllSettings,

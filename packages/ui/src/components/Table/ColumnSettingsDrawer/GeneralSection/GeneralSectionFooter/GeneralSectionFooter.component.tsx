@@ -31,13 +31,11 @@ export const GeneralSectionFooter = ({
       <ActionButtons
         actions={[
           {
-            color: 'outline',
             icon: <EraserIcon size={ICON_SIZE_MD} />,
             label: 'Clear All Settings',
             onClick: clearAllSettings,
           },
           {
-            color: 'outline',
             icon: <RefreshIcon size={ICON_SIZE_MD} />,
             label: 'Reset All Settings',
             onClick: resetAllSettings,

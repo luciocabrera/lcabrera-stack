@@ -63,6 +63,6 @@ export const buttonStyles = {
   busyWave: skeleton.shimmerWave,
   overlayOverwrite: buttonSpecificStyles.overlayOverwrite,
   size: sizeVariants,
-  width: '100%',
+  // width: '100%',
   ...overlayStyles,
 };

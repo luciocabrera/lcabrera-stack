@@ -14,8 +14,6 @@ export type ButtonProps = Omit<
   ComponentPropsWithoutRef<'button'>,
   'onClick'
 > & {
-  /** @deprecated Use `variant` instead. */
-  readonly color?: DesignSystemColor;
   readonly customStylex?: StyleXStyles;
   readonly icon?: ReactNode;
   readonly isBusy?: boolean;

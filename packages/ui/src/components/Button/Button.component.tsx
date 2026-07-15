@@ -7,22 +7,20 @@ import { buttonStyles } from './Button.stylex';
 
 export const Button = ({
   children,
-  color,
   customStylex,
   icon,
   isBusy = false,
   isDisabled = false,
   isIconOnly = false,
   orientation = 'vertical',
-  size = 'md',
+  size = 'sm',
   tooltipContent,
   tooltipPlacement = 'top',
   type = 'button',
-  variant,
+  variant = 'outline',
   ...rest
 }: ButtonProps) => {
-  const resolvedVariant = variant ?? color ?? 'primary';
-  const isPrimary = resolvedVariant === 'primary';
+  const isPrimary = variant === 'primary';
 
   const button = (
     <button
@@ -34,7 +32,7 @@ export const Button = ({
         buttonStyles.base,
         buttonStyles.orientation[orientation],
         buttonStyles.size[size],
-        buttonStyles.variant[resolvedVariant],
+        buttonStyles.variant[variant],
         isIconOnly && buttonStyles.iconOnly,
         isBusy && buttonStyles.busyState,
         customStylex,

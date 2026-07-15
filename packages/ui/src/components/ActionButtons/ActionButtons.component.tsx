@@ -26,26 +26,15 @@ export const ActionButtons = ({
     {...props}
     {...stylex.props(styles.container, customStylex)}
   >
-    {actions.map(
-      ({
-        key,
-        label,
-        onClick,
-        size = 'sm',
-        variant = 'primary',
-        ...buttonProps
-      }) => (
-        <Button
-          isBusy={isBusy}
-          key={key ?? label}
-          onClick={onClick}
-          size={size}
-          variant={variant}
-          {...buttonProps}
-        >
-          {label}
-        </Button>
-      ),
-    )}
+    {actions.map(({ key, label, onClick, ...buttonProps }) => (
+      <Button
+        isBusy={isBusy}
+        key={key ?? label}
+        onClick={onClick}
+        {...buttonProps}
+      >
+        {label}
+      </Button>
+    ))}
   </div>
 );
