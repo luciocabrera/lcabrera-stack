@@ -28,7 +28,7 @@ export const TabsHeader = ({
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (tabs.length === 0 || isBusy) return;
+    if (isBusy || tabs.length === 0) return;
 
     const newIndexResult = getNewIndex({
       activeIndex,

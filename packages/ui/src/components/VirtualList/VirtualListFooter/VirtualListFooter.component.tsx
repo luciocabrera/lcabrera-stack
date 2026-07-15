@@ -49,7 +49,7 @@ export const VirtualListFooter = () => {
     <div {...stylex.props(styles.footer)}>
       <p {...stylex.props(styles.loadedCount)}>
         Loaded: {loadedCount}
-        {Number.isFinite(totalCount) && totalCount ? ` / ${totalCount}` : ''}
+        {totalCount && Number.isFinite(totalCount) ? ` / ${totalCount}` : ''}
         {isLoading && ' — Loading...'}
         {isLoadingMore && ' — Loading more...'}
       </p>

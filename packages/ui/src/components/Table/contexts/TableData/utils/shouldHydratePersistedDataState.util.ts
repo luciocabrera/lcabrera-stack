@@ -24,7 +24,7 @@ export const shouldHydratePersistedDataState = <TData>({
   const initialData = initialDataState?.data ?? [];
   const initialTotalRows = initialDataState?.totalRows ?? 0;
 
-  if (initialData.length === 0 || initialTotalRows === 0) {
+  if (initialTotalRows === 0 || initialData.length === 0) {
     return false;
   }
 

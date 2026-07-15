@@ -27,7 +27,7 @@ export const validateField = <TValues extends Record<string, unknown>>({
     value === '' ||
     (Array.isArray(value) && value.length === 0);
 
-  if (validation.required && isEmpty) {
+  if (isEmpty && validation.required) {
     return validation.message ?? `${field.label} is required.`;
   }
 

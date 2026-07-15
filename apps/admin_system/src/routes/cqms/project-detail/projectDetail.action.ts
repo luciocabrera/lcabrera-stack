@@ -118,7 +118,7 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
           grantError: parsed.error.issues[0]?.message ?? 'Invalid grant.',
         };
       }
-      const [action_, resourceType] = parsed.data.permission.split(':');
+      const [action_, resourceType] = parsed.data.permission.split(':', 2);
       await createResourceGrant({
         action: action_ ?? '',
         granteeUserId: parsed.data.granteeUserId,
