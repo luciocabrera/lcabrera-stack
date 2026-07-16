@@ -24,6 +24,12 @@ type WritePersistedUiFlagsToCookieArgs = {
  *
  * Client-side this writes `document.cookie` directly (no server round-trip);
  * pass `headers` to emit a `Set-Cookie` header from an SSR loader/action.
+ *
+ * Hands `writeToCookie` the raw JSON: it URI-encodes the value itself (via
+ * `buildCookieString`), and encoding here too would store a double-encoded
+ * payload that `parseVersionedPayload` cannot parse — silently emptying the
+ * flags the loader reads, so the drawer would SSR closed and pop open at
+ * hydration.
  */
 export const writePersistedUiFlagsToCookie = ({
   appId,
@@ -32,8 +38,10 @@ export const writePersistedUiFlagsToCookie = ({
   uiFlags,
 }: WritePersistedUiFlagsToCookieArgs) => {
   const key = `${getStorageKey({ appId, persistenceKey })}-${UI_FLAGS_COOKIE_KEY_SUFFIX}`;
-  const serialized = encodeURIComponent(
-    JSON.stringify({ value: uiFlags, version: PERSISTENCE_VERSION }),
-  );
+  const serialized = JSON.stringify({
+    value: uiFlags,
+    version: PERSISTENCE_VERSION,
+  });
+
   writeToCookie({ headers, key, value: serialized });
 };

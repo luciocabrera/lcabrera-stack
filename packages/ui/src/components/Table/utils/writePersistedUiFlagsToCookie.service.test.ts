@@ -31,12 +31,11 @@ describe('writePersistedUiFlagsToCookie', () => {
       | { key: string; value: string };
     expect(args?.key).toBe('table-state-orders-uiFlags');
 
-    const decoded = JSON.parse(decodeURIComponent(args?.value ?? '')) as {
-      value: unknown;
-      version: number;
-    };
-    expect(decoded.version).toBe(PERSISTENCE_VERSION);
-    expect(decoded.value).toEqual(uiFlags);
+    // Raw JSON, NOT URI-encoded: writeToCookie owns the encoding. Encoding here
+    // too stores a double-encoded payload the reader cannot parse.
+    expect(args?.value).toBe(
+      JSON.stringify({ value: uiFlags, version: PERSISTENCE_VERSION }),
+    );
   });
 
   it('scopes the cookie key with appId when provided', () => {
