@@ -72,6 +72,47 @@ describe('renderCellContent', () => {
     expect(formatCurrencyMock).not.toHaveBeenCalled();
   });
 
+  it('renders blank currency and number cells as empty instead of zero', () => {
+    const rendered = [
+      renderCellContent({ dataType: 'currency', value: '' }),
+      renderCellContent({ dataType: 'number', value: '' }),
+    ];
+
+    expect(rendered).toEqual(['', '']);
+    expect(formatCurrencyMock).not.toHaveBeenCalled();
+    expect(formatNumberMock).not.toHaveBeenCalled();
+  });
+
+  it('does not coerce a whitespace-only value to zero, matching text cells', () => {
+    const whitespace = ' '.repeat(3);
+
+    const rendered = [
+      renderCellContent({ dataType: 'currency', value: whitespace }),
+      renderCellContent({ dataType: 'number', value: whitespace }),
+    ];
+
+    expect(rendered).toEqual([whitespace, whitespace]);
+    expect(formatCurrencyMock).not.toHaveBeenCalled();
+    expect(formatNumberMock).not.toHaveBeenCalled();
+  });
+
+  it('still formats a real zero', () => {
+    formatNumberMock.mockReturnValue('0');
+
+    const content = renderCellContent({
+      dataType: 'number',
+      value: 0,
+    });
+
+    expect(content).toBe('0');
+    expect(formatNumberMock).toHaveBeenCalledWith({
+      locale: undefined,
+      maximumFractionDigits: undefined,
+      minimumFractionDigits: undefined,
+      value: 0,
+    });
+  });
+
   it('formats dates using provided locale and preset', () => {
     formatDateMock.mockReturnValue('01/02/2026');
 
