@@ -124,6 +124,14 @@ trigger) when the column has no sortable/pinnable/settings affordance at all.
 the double-click-to-reset-width handler; `TableHeaderCell` only passes
 `columnKey`, `columnLabel`, `currentWidth`, `maxWidth`, `minWidth`.
 
+The handle is a childless `<button>` whose 8px grab zone intentionally
+straddles the cell's right border (`right: -4`), overhanging into the
+neighbouring cell. Both halves land in the 6px `paddingInline` of the cell they
+cover, so the handle never steals clicks from a label or an actions menu — keep
+that relationship in mind if the header cell's padding ever shrinks. The visible
+2px line is a `::before` fed by the `--resize-handle-line-color` custom
+property, which is what lets a hover anywhere in the grab zone light the line.
+
 ## Loading State
 
 Header cells receive `isLoadingState` from `TableHeader` and render their local
