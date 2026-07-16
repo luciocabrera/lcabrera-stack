@@ -36,6 +36,15 @@ jobs:
         id: quality_gate
         run: vp check
 
+      - name: ESLint custom-rules pass
+        id: eslint_gate
+        # `vp check` is fmt + Oxlint + tsc only — it does not know about the
+        # per-workspace eslint pass, so eslint-only findings (perfectionist
+        # import/module ordering, the react/stylex rule sets, local-rules)
+        # would otherwise never fail a PR. Inherited debt stays baselined in
+        # each workspace's eslint-suppressions.json; this gates new violations.
+        run: vp run -r lint:eslint:check
+
       - name: Write quality summary
         if: always()
         run: |
@@ -43,6 +52,12 @@ jobs:
             CHECK_STATUS="✅ Passed"
           else
             CHECK_STATUS="❌ Failed"
+          fi
+
+          if [[ "${{ steps.eslint_gate.outcome }}" == "success" ]]; then
+            ESLINT_STATUS="✅ Passed"
+          else
+            ESLINT_STATUS="❌ Failed"
           fi
 
           if [[ "${{ steps.preflight.outcome }}" == "success" ]]; then
@@ -57,7 +72,8 @@ jobs:
           echo "|-------|--------|" >> "$GITHUB_STEP_SUMMARY"
           echo "| Typegen + ESLint Rules Build | $PREFLIGHT_STATUS |" >> "$GITHUB_STEP_SUMMARY"
           echo "| Format | $CHECK_STATUS |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Lint | $CHECK_STATUS |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Lint (Oxlint) | $CHECK_STATUS |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Lint (ESLint custom rules) | $ESLINT_STATUS |" >> "$GITHUB_STEP_SUMMARY"
           echo "| TypeScript | $CHECK_STATUS |" >> "$GITHUB_STEP_SUMMARY"
 
   fallow-audit:
@@ -161,7 +177,11 @@ jobs:
       - name: Install dependencies
         run: vp install --frozen-lockfile --ignore-scripts && vp config
 
-      - name: Run tests with coverage
+      - name: Run the DB-free suites (every workspace) + showcase coverage
+        # This job has no Postgres, so `test:ci` runs every DB-free suite:
+        # all workspaces except scan-orchestrator (real CQMS queue), plus
+        # scan-ingestion's DB-free `test:unit` subset, then react-router's
+        # `test:ci` last so the coverage summary below is the fresh one.
         run: vp run test:ci
 
       - name: Upload coverage report

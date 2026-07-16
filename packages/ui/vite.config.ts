@@ -1,3 +1,4 @@
+import { VITEST_COVERAGE_FLAGS } from '@repo/vite-configs/run';
 import { fileURLToPath, URL } from 'node:url';
 import { defineConfig } from 'vite-plus';
 
@@ -24,6 +25,14 @@ export default defineConfig({
       test: {
         cache: false,
         command: 'node node_modules/vitest/vitest.mjs run',
+      },
+      // Feeds scripts/merge-coverage.mjs, which feeds `fallow audit --coverage`.
+      // Matters more here than elsewhere: packages/ui is heading for public
+      // release, so its complexity findings should gate on measured coverage
+      // rather than fallow's colocated-test-file guess.
+      'test:coverage': {
+        cache: false,
+        command: `node node_modules/vitest/vitest.mjs run ${VITEST_COVERAGE_FLAGS}`,
       },
     },
   },

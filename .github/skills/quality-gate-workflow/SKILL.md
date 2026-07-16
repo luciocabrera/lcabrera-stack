@@ -27,11 +27,23 @@ This skill defines the mandatory validation sequence after code changes.
 > **Run from `apps/react-router/`** — not the monorepo root. Commands like `vp run test` and `vp check` must execute from the app directory, not the workspace root.
 
 1. `vp fmt .`
-2. `vp lint .`
-3. `vp check`
-4. `vp run test`
+2. `vp lint .` — Oxlint
+3. `vp run lint:eslint:check` — the eslint custom-rules pass (`--fix` variant: `vp run lint:eslint`)
+4. `vp check`
+5. `vp run test`
 
 Use this exact order because each stage catches issues earlier/cheaper than the next.
+
+**Stage 3 is not optional and is not covered by stage 4.** `vp check` is Vite+'s
+built-in fmt + **Oxlint** + tsc; it does not know about the per-workspace eslint
+pass. Every eslint-only rule set lives behind stage 3 — `perfectionist`
+import/module ordering, the react/stylex rule sets, and `local-rules`. Running
+only `vp lint .` will report clean on code that fails CI, which now runs
+`vp run -r lint:eslint:check` as its own step.
+
+Shortcut: `vp run lint` in a workspace chains `vp lint . --fix` **and**
+`vp run lint:eslint` (autofix for both), which is usually what you want while
+iterating. `vp run lint:all` does the same from the root.
 
 ## Non-Negotiable Rules
 
@@ -39,6 +51,7 @@ Use this exact order because each stage catches issues earlier/cheaper than the 
 - Fix failures before moving forward.
 - Re-run the full gate after non-trivial fixes.
 - Prefer `vp run test` (not `vp test`) in this project.
+- Never silence a finding to get a stage green (CLAUDE.md rule 11) — fix the code.
 
 ## Further Documentation
 

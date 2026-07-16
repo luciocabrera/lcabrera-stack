@@ -126,27 +126,32 @@ Selection guideline:
 
 Root scripts are **orchestration only** — anything project-specific lives in that project's own package.json. The `<task>:all` family fans out recursively in workspace dependency order.
 
-| Task                                     | Command                                                |
-| ---------------------------------------- | ------------------------------------------------------ |
-| Verify everything is ready               | `vp run ready`                                         |
-| Run all tests (every workspace)          | `vp run test:all`                                      |
-| Build all workspaces                     | `vp run build:all`                                     |
-| Lint everything WITH fix (oxlint+eslint) | `vp run lint:all`                                      |
-| Regenerate lint JSON reports             | `vp run lint:report`                                   |
-| Merge coverage for the fallow gate       | `vp run coverage:merge`                                |
-| Format everything                        | `vp run format:all`                                    |
-| Typegen (both React Router apps)         | `vp run typegen:all`                                   |
-| Full gate (typegen+check+tests)          | `vp run check:safe`                                    |
-| Dev servers (frontend + express api)     | `vp run dev` (`dev:fast` = fastify, `dev:cqms` = CQMS) |
-| Prod servers (frontend + express api)    | `vp run start` (`start:fast`, `start:cqms`)            |
+| Task                                     | Command                                                  |
+| ---------------------------------------- | -------------------------------------------------------- |
+| Verify everything is ready               | `vp run ready`                                           |
+| Run all tests (every workspace)          | `vp run test:all` (needs Postgres — see `test:ci` below) |
+| Run the DB-free suites (what CI runs)    | `vp run test:ci`                                         |
+| Build all workspaces                     | `vp run build:all`                                       |
+| Lint everything WITH fix (oxlint+eslint) | `vp run lint:all`                                        |
+| Regenerate lint JSON reports             | `vp run lint:report`                                     |
+| Merge coverage for the fallow gate       | `vp run coverage:merge`                                  |
+| Format everything                        | `vp run format:all`                                      |
+| Typegen (both React Router apps)         | `vp run typegen:all`                                     |
+| Full gate (typegen+check+tests)          | `vp run check:safe`                                      |
+| Dev servers (frontend + express api)     | `vp run dev` (`dev:fast` = fastify, `dev:cqms` = CQMS)   |
+| Prod servers (frontend + express api)    | `vp run start` (`start:fast`, `start:cqms`)              |
 
 There is deliberately **no `start:all`/`dev:all`**: `car-sales-api` and `car-sales-api-fast` are performance-comparison alternatives serving the same domain and must never run at the same time — always pick one combo.
 
-**Both linters run in every workspace.** Oxlint (`vp lint`) covers the whole tree from the root; the eslint pass (`vp run lint:eslint` / `lint:eslint:check`) exists in all 15 workspaces — React workspaces use `@repo/vite-configs/eslint-custom-rules`, node/library workspaces use `@repo/vite-configs/eslint-base-custom-rules` (same stack minus React/StyleX, and without `clean-import-paths`, which strips the import extensions node-resolution code requires). Inherited eslint violations are baselined per workspace in `eslint-suppressions.json` (ESLint bulk suppressions) — **new violations fail the gate**; burn debt down and shrink the baseline with `npx eslint . --config eslint.config.mjs --prune-suppressions`. Never add new entries by hand, and never inline-`// eslint-disable`/`oxlint-disable` a finding or switch the rule off in config — **verify, then fix the code instead** (see Non-Negotiable Rule 11). A lint finding is real until you've read the flagged code and confirmed otherwise; stylistic `unicorn/*` rules (e.g. `prefer-simple-condition-first`, `no-nested-ternary`) get fixed by restructuring, never silenced. **Exception: `packages/ui` is never silenced** — it must not carry an `eslint-suppressions.json` at all; every finding there gets fixed, never baselined or disabled.
+**Both linters run in every workspace.** Oxlint (`vp lint`) covers the whole tree from the root; the eslint pass (`vp run lint:eslint` / `lint:eslint:check`) exists in all 15 workspaces — React workspaces use `@repo/vite-configs/eslint-custom-rules`, node/library workspaces use `@repo/vite-configs/eslint-base-custom-rules` (same stack minus React/StyleX, and without `clean-import-paths`, which strips the import extensions node-resolution code requires). Inherited eslint violations are baselined per workspace in `eslint-suppressions.json` (ESLint bulk suppressions) — **new violations fail the gate**: CI runs `vp run -r lint:eslint:check` as its own step in `check-safe.yml`, because `vp check` covers only fmt + Oxlint + tsc and would let every eslint-only finding through. Burn debt down and shrink the baseline with `npx eslint . --config eslint.config.mjs --prune-suppressions`. Never add new entries by hand, and never inline-`// eslint-disable`/`oxlint-disable` a finding or switch the rule off in config — **verify, then fix the code instead** (see Non-Negotiable Rule 11). A lint finding is real until you've read the flagged code and confirmed otherwise; stylistic `unicorn/*` rules (e.g. `prefer-simple-condition-first`, `no-nested-ternary`) get fixed by restructuring, never silenced. **Exception: `packages/ui` is never silenced** — it must not carry an `eslint-suppressions.json` at all; every finding there gets fixed, never baselined or disabled.
 
 **Lint JSON reports** follow the fallow output convention: `vp run lint:report` (script: `scripts/generate-lint-reports.mjs`, supports `--only=eslint|oxlint`) regenerates `reports/oxlint/full-latest.json` (one repo-wide `vp lint . --format=json` run) and `reports/eslint/full-latest.json` (the standard eslint `--format json` result array merged across all 15 workspaces, repo-relative paths). Both are tracked. ESLint runs in check mode — regenerating a report never mutates sources — and the baselined debt is visible per file in each entry's `suppressedMessages`, so the report is the place to inspect what the suppressions actually cover.
 
 Known constraint: `scan-orchestrator`'s queue integration test shares the local CQMS Postgres queue — while `vp run dev:cqms` is running, the live orchestrator races the test for queued scans and `vp run test:all` can flake on `runQueuedScan.test.ts` (duplicate `reports_scan_id_key`). Stop the CQMS dev session before a full test run, or treat that single failure as environmental.
+
+**`test:all` vs `test:ci`.** `test:all` runs every workspace and needs a database. CI has no Postgres, so its unit-tests job runs `vp run test:ci`, which is every DB-free suite in the repo: each workspace's `test`, except that `@repo/scan-ingestion` and `@repo/scan-orchestrator` contribute their DB-free `test:unit` subsets (their full `test` tasks stay real-Postgres, so `test:all` still covers everything), and `vite-react-compiler` runs last via its own `test:ci` so the coverage summary the PR comment reads is the fresh one. Run `vp run test:ci` before pushing if you don't have a DB up.
+
+**A workspace with real-Postgres tests must split them**, the way `scan-ingestion` and `scan-orchestrator` do: keep the full suite as `test`, and expose a `test:unit` (plus `test:coverage`) that `--exclude`s the DB-bound files. Without the split the whole workspace has to be dropped from `test:ci`, which silently takes its pure tests with it.
 
 ### Fallow Static Analysis (run from repo root)
 
@@ -179,7 +184,7 @@ CI runs `fallow audit --gate new-only` on every PR (`check-safe.yml`) — it fai
 
 **Always feed the audit real coverage** (`--coverage reports/fallow/coverage/coverage-final.json`, produced by `vp run coverage:merge`; the CI job does this for you). Fallow scores CRAP as `cyclomatic² × (1 − coverage)³ + cyclomatic` against a threshold of **30**, and with no coverage data it _estimates_ coverage from whether a colocated test file merely exists (`none` → 0%, `partial` → 40%, `high` → 85%). At an estimated 0%, **every function with cyclomatic ≥ 5 breaches the threshold** — so an unfed audit reports trivially simple code (`login.action.ts`, cyclomatic 5 / cognitive 2) as `critical`. When triaging a complexity finding, read its **`exceeded`** field, not `severity`: `crap` alone means "untested", while `all`/`cognitive` means genuinely complex. `coverage_source: "mixed"` is expected — files with no tests at all have nothing to measure and still fall back to the estimate.
 
-`vp run coverage:merge` (`scripts/merge-coverage.mjs`) runs `test:coverage` in the **DB-free** workspaces only and merges their reports. Coverage must never require Postgres: the first attempt at this lever was reverted (2026-07-14) because it ran scan-ingestion's `queries/*` suites in CI, where `getPool()` → `readEnvConfig()` throws on the missing `DB_*`. That is why `@repo/scan-ingestion` splits `test` (full, needs a DB) from `test:unit` / `test:coverage` (DB-free subset).
+`vp run coverage:merge` (`scripts/merge-coverage.mjs`) runs `test:coverage` in the **DB-free** workspaces only (`data-access`, `node-runtime`, `scan-ingestion`, `ui`, `admin_system`, `scan-orchestrator`) and merges their reports. Coverage must never require Postgres: the first attempt at this lever was reverted (2026-07-14) because it ran scan-ingestion's `queries/*` suites in CI, where `getPool()` → `readEnvConfig()` throws on the missing `DB_*`. That is why `@repo/scan-ingestion` splits `test` (full, needs a DB) from `test:unit` / `test:coverage` (DB-free subset).
 
 ### Local Database Workflow (run from repo root)
 
@@ -263,11 +268,14 @@ When in doubt: a codebase with 18 components and 25 utilities that each do one t
 The canonical validation sequence is owned by the **`quality-gate-workflow` skill** — invoke it after every code change. In short (run from `apps/react-router/`, in order, fix failures before proceeding):
 
 ```bash
-vp fmt .        # 1. auto-format (Oxfmt)
-vp lint .       # 2. lint (Oxlint) — fix all reported issues (use --fix first)
-vp check        # 3. TypeScript type-check — zero errors required
-vp run test     # 4. unit/integration tests — all must pass (never `vp test`)
+vp fmt .                    # 1. auto-format (Oxfmt)
+vp lint .                   # 2. lint (Oxlint) — fix all reported issues (use --fix first)
+vp run lint:eslint:check    # 3. eslint custom-rules pass — NOT covered by `vp check` (autofix: `vp run lint:eslint`)
+vp check                    # 4. TypeScript type-check — zero errors required
+vp run test                 # 5. unit/integration tests — all must pass (never `vp test`)
 ```
+
+Step 3 is the one that gets skipped: `vp check` is Vite+'s built-in fmt + **Oxlint** + tsc and never runs the eslint pass, so `perfectionist` import/module ordering, the react/stylex rule sets, and `local-rules` surface only there. While iterating, `vp run lint` in a workspace chains both autofixes (`vp lint . --fix` then `vp run lint:eslint`) and is the fastest loop.
 
 ### Documentation Update Rule
 
