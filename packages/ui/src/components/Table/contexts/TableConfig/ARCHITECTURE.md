@@ -17,24 +17,29 @@ TableConfig/
 ├── columns/                                 → Column-related store, actions, selectors
 │   ├── useColumnsStore.hook.ts              → useSyncExternalStore + selector
 │   │
-│   ├── actions/
+│   ├── actions/                                 → Public API: every hook here is an executable action, all barrel-exported
+│   │   ├── hooks/                               → Internal to actions/ — shared hooks, never barrel-exported
+│   │   │   └── usePersistTableStateAction.hook.ts → Dual-channel (sessionStorage + cookie) persistence used by six actions
 │   │   ├── utils/buildPersistencePayload.util.ts       → Shared persistence-entry builder for batch settings hooks
 │   │   ├── utils/resolveBatchColumnSettingsUpdate.util.ts → Build next derived column config slices for one batch column update
 │   │   ├── utils/resolveBatchTableSettingsUpdate.util.ts → Build next derived column config slices for one table-wide settings update
 │   │   ├── utils/commitPinningAndOrderUpdate.util.ts → Shared persist+store commit helper for pinning actions
 │   │   ├── utils/commitResolvedVisibilityState.util.ts → Shared persist+store commit helper for visibility actions
+│   │   ├── utils/persistColumnSizing.util.ts     → Shared: persist the widths currently in the store
 │   │   ├── utils/resolveColumnPinningUpdate.util.ts  → Build next pinning state + synced order for one pinning change
 │   │   ├── utils/resolveColumnSizingUpdate.util.ts   → Build next sizing map + pinned offsets for one column resize
 │   │   ├── utils/resolveColumnVisibilityUpdate.util.ts → Build next columnVisibility Set for one column show/hide
+│   │   ├── utils/writeColumnSizing.util.ts       → Shared: write one column's width + recompute pinned offsets
 │   │   ├── useBatchSetColumnSettings.hook.ts    → Bulk-update multiple column fields
 │   │   ├── useBatchSetTableSettings.hook.ts     → Push settings from drawer → store
 │   │   ├── useResetColumnFilter.hook.ts         → Clear filter for one column
 │   │   ├── useSetColumnFilter.hook.ts           → Set filter for one column
 │   │   ├── useSetColumnPinning.hook.ts          → Set pinning state
-│   │   ├── useSetColumnSizing.hook.ts           → Set column widths
+│   │   ├── useSetColumnSizing.hook.ts           → Set a column width and persist it
+│   │   ├── useSetColumnSizingWithoutSync.hook.ts → Set a column width, skip the cookie write (drag frames only)
 │   │   ├── useSetColumnSorting.hook.ts          → Set sorting state
 │   │   ├── useSetColumnVisibility.hook.ts       → Show/hide a single column directly on the live store (not a drawer draft)
-│   │   └── useSyncColumnsSizing.hook.ts         → Sync sizing after layout changes
+│   │   └── useSyncColumnsSizing.hook.ts         → Persist the stored widths without changing any
 │   │
 │   └── selectors/
 │       ├── useGetColumnFilters.hook.ts          → All column filters
@@ -191,17 +196,18 @@ so SSR and the initial client render already agree on the seeded state.
 
 ## Columns Actions
 
-| Hook                        | Reads From     | Writes To      | Description                                                                                                                   |
-| --------------------------- | -------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `useBatchSetColumnSettings` | —              | `columnsStore` | Bulk-set multiple column fields at once                                                                                       |
-| `useBatchSetTableSettings`  | —              | `columnsStore` | Push all settings from TableSettingsDrawer                                                                                    |
-| `useResetColumnFilter`      | —              | `columnsStore` | Remove filter for a single column                                                                                             |
-| `useSetColumnFilter`        | —              | `columnsStore` | Set filter value for a single column                                                                                          |
-| `useSetColumnPinning`       | `columnsStore` | `columnsStore` | Update pinning, keep column order synced (including header unpin reorder-to-fill), and commit pinning/order via shared helper |
-| `useSetColumnSizing`        | `columnsStore` | `columnsStore` | Set column width map and recompute pinned offsets via shared sizing resolver                                                  |
-| `useSetColumnSorting`       | `columnsStore` | `columnsStore` | Toggle/set sort for a column                                                                                                  |
-| `useSetColumnVisibility`    | `columnsStore` | `columnsStore` | Show/hide a single column directly (quick-access affordance, e.g. the header actions menu) and commit via shared helper       |
-| `useSyncColumnsSizing`      | `columnsStore` | `columnsStore` | Recalculate sizing after layout shift                                                                                         |
+| Hook                            | Reads From     | Writes To      | Description                                                                                                                             |
+| ------------------------------- | -------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `useBatchSetColumnSettings`     | —              | `columnsStore` | Bulk-set multiple column fields at once                                                                                                 |
+| `useBatchSetTableSettings`      | —              | `columnsStore` | Push all settings from TableSettingsDrawer                                                                                              |
+| `useResetColumnFilter`          | —              | `columnsStore` | Remove filter for a single column                                                                                                       |
+| `useSetColumnFilter`            | —              | `columnsStore` | Set filter value for a single column                                                                                                    |
+| `useSetColumnPinning`           | `columnsStore` | `columnsStore` | Update pinning, keep column order synced (including header unpin reorder-to-fill), and commit pinning/order via shared helper           |
+| `useSetColumnSizing`            | `columnsStore` | `columnsStore` | Set column width map, recompute pinned offsets, and persist; the default for any completed resize, so callers never pair it with a sync |
+| `useSetColumnSizingWithoutSync` | `columnsStore` | `columnsStore` | The same store write with the cookie write omitted — **only** for `useColumnResize`'s per-frame drag updates; kept out of the barrel    |
+| `useSetColumnSorting`           | `columnsStore` | `columnsStore` | Toggle/set sort for a column                                                                                                            |
+| `useSetColumnVisibility`        | `columnsStore` | `columnsStore` | Show/hide a single column directly (quick-access affordance, e.g. the header actions menu) and commit via shared helper                 |
+| `useSyncColumnsSizing`          | `columnsStore` | `columnsStore` | Recalculate sizing after layout shift                                                                                                   |
 
 Direct mutation actions (`useSetColumnSorting`, `useSetColumnPinning`,
 `useSetColumnVisibility`) also bump
@@ -222,6 +228,70 @@ The two batch settings hooks now share two focused pure helpers instead of each 
 | `getIsTableSettingsOpen`           | `components/Table/utils/` | Restore the table-settings drawer when column settings borrowed its open state         |
 | `resolveBatchColumnSettingsUpdate` | `columns/actions/utils/`  | Compose the next per-column batch update from shared sort/filter/size/pin resolvers    |
 | `resolveBatchTableSettingsUpdate`  | `columns/actions/utils/`  | Compose the next table-wide settings update from incoming settings plus derived slices |
+| `writeColumnSizing`                | `columns/actions/utils/`  | Write one column's width to the store and recompute pinned offsets                     |
+| `persistColumnSizing`              | `columns/actions/utils/`  | Persist the widths currently in the store                                              |
+
+## How Actions Share Logic
+
+**An action never calls another action.** `actions/` is the public API of this
+context: each hook is an executable action, and every one of them is exported
+from `actions/index.ts`. Anything only used _inside_ that layer lives beside it
+instead — `actions/utils/` for pure helpers, `actions/hooks/` for shared hooks —
+and never appears in the barrel.
+
+Reusable logic is shared through those helpers, which take the stores (and any
+collaborator, like `persistTableState`) **as arguments** rather than reaching for
+context themselves. `commitResolvedPinningState` is the reference example; the
+three sizing actions follow it:
+
+| Action                          | Composition                                 |
+| ------------------------------- | ------------------------------------------- |
+| `useSetColumnSizing`            | `writeColumnSizing` + `persistColumnSizing` |
+| `useSetColumnSizingWithoutSync` | `writeColumnSizing`                         |
+| `useSyncColumnsSizing`          | `persistColumnSizing`                       |
+
+Each grabs its stores from context once and delegates; none of them imports
+another action. That is what keeps `useSetColumnSizing` a single call for its
+consumers without stacking actions on top of one another.
+
+`usePersistTableStateAction` (`actions/hooks/`) is the shared-hook case: six
+actions need it, nothing outside `actions/` does. It previously sat in
+`Table/hooks/`, which forced every action to import the hooks barrel and closed
+an `actions → hooks → actions` import cycle. Nothing under `contexts/` imports
+`Table/hooks/` now, so the dependency runs one way only and the cycle is
+structurally impossible rather than merely avoided.
+
+### usePersistTableStateAction
+
+Persists column-oriented table state slices through the dual-channel flow: write
+sessionStorage immediately, then submit the cookie update through a React Router
+server action.
+
+```mermaid
+graph TD
+  Action["persistTableState(entries)"] --> Serialize["serializeStateSlice per entry"]
+  Serialize --> Check{"any entry too large?"}
+  Check -->|Yes| Warn["notify warning + abort"]
+  Check -->|No| Session["write sessionStorage"]
+  Session --> Submit["fetcher.submit({ entries, currentUrl })"]
+  Submit --> Route["POST /_action/persist-cookie"]
+  Route --> Cookie["Set-Cookie response header"]
+  Route --> Decision{"search params changed?"}
+  Decision -->|Yes| Redirect["redirect(url) and route revalidation"]
+  Decision -->|No| NoRedirect["204 response without revalidation"]
+```
+
+Supports both single entries and batch submissions. Each entry specifies:
+
+- `persistenceKey` — cookie name namespace
+- `slice` — which state slice (columnFilters, sorting, etc.)
+- `valueSlice` — the data to persist
+- `searchParamKey/Value` — optional URL search param sync
+- Revalidation happens only when persisted `searchParamKey/Value` produce an
+  effective URL search-param change; otherwise the action returns `204` and
+  only cookie/session persistence occurs.
+- Oversized entries block the entire apply flow before sessionStorage, URL sync, or cookie persistence to avoid partial restored state
+- No-op when `persistenceKey` is empty
 
 ## Columns Selectors
 

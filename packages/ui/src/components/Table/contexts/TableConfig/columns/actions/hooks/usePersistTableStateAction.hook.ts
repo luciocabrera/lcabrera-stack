@@ -1,3 +1,7 @@
+import type { TablePersistenceEntry } from '@repo/ui/components/Table/Table.types';
+
+import { useTableConfigContextValue } from '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { serializeStateSlice } from '@repo/ui/components/Table/utils';
 import {
   MAX_COOKIE_ENTRY_VALUE_LENGTH,
   PERSIST_COOKIE_ACTION,
@@ -7,13 +11,14 @@ import { useNotifyAction } from '@repo/ui/contexts/NotificationContext/actions';
 import { writeToSessionStorage } from '@repo/ui/utils/storage';
 import { useFetcher, useLocation } from 'react-router';
 
-import type { TablePersistenceEntry } from '../Table.types';
-
-import { useTableConfigContextValue } from '../contexts/TableConfig/useTableConfigContextValue.hook';
-import { serializeStateSlice } from '../utils';
-
 /**
- * Hook that persists table state via two channels:
+ * Shared persistence hook for the column actions — internal to `actions/`, not
+ * part of its public API, which is why it lives here rather than in the
+ * barrel-exported action list or in `Table/hooks/` (where it used to sit, and
+ * where reaching for it through the hooks barrel closed an actions ↔ hooks
+ * import cycle).
+ *
+ * Persists table state via two channels:
  *
  * 1. **sessionStorage** — written synchronously and tab-scoped. A tab refresh
  *    restores from sessionStorage so each tab is isolated from other tabs.

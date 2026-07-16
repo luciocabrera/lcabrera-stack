@@ -5,12 +5,7 @@ import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const createInitialColumnsState = () => ({
-  columnPinning: { left: ['id'], right: [] },
-  columnSizing: { id: 100 },
-  effectiveColumns: [
-    { key: 'id', label: 'ID' },
-    { key: 'name', label: 'Name' },
-  ],
+  columnSizing: { name: 220 },
 });
 
 const {
@@ -46,60 +41,40 @@ vi.mock('./utils', async (importOriginal) => {
   };
 });
 
-import { useSetColumnSizing } from './useSetColumnSizing.hook';
+import { useSyncColumnsSizing } from './useSyncColumnsSizing.hook';
 
-const renderAction = () =>
-  renderHook(() => useSetColumnSizing<{ readonly name: string }>());
-
-describe('useSetColumnSizing', () => {
+describe('useSyncColumnsSizing', () => {
   beforeEach(() => {
     setColumnsState(createInitialColumnsState());
     resetMocks();
     vi.clearAllMocks();
   });
 
-  it('writes the width and persists it, so callers never pair it with a sync', () => {
-    const { result } = renderAction();
+  it('persists the stored widths through the shared util', () => {
+    const { result } = renderHook(() =>
+      useSyncColumnsSizing<{ readonly name: string }>(),
+    );
 
     act(() => {
-      result.current({ columnKey: 'name', width: 220 });
+      result.current();
     });
 
-    expect(mockWriteColumnSizing).toHaveBeenCalledWith({
-      columnKey: 'name',
-      columnsStore: mockColumnsStore,
-      width: 220,
-    });
     expect(mockPersistColumnSizing).toHaveBeenCalledWith({
       columnsStore: mockColumnsStore,
       metaStore: mockMetaStore,
     });
   });
 
-  it('persists a reset to the default width too', () => {
-    const { result } = renderAction();
-
-    act(() => {
-      result.current({ columnKey: 'name', width: undefined });
-    });
-
-    expect(mockWriteColumnSizing).toHaveBeenCalledWith({
-      columnKey: 'name',
-      columnsStore: mockColumnsStore,
-      width: undefined,
-    });
-    expect(mockPersistColumnSizing).toHaveBeenCalledTimes(1);
-  });
-
-  it('writes before it persists, so the sync sees the new width', () => {
-    const { result } = renderAction();
-
-    act(() => {
-      result.current({ columnKey: 'name', width: 220 });
-    });
-
-    expect(mockWriteColumnSizing.mock.invocationCallOrder[0]).toBeLessThan(
-      mockPersistColumnSizing.mock.invocationCallOrder[0] ?? 0,
+  it('changes no width of its own', () => {
+    const { result } = renderHook(() =>
+      useSyncColumnsSizing<{ readonly name: string }>(),
     );
+
+    act(() => {
+      result.current();
+    });
+
+    expect(mockWriteColumnSizing).not.toHaveBeenCalled();
+    expect(mockColumnsStore.set).not.toHaveBeenCalled();
   });
 });

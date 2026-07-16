@@ -13,6 +13,7 @@ export { readPersistedStateFromCookie } from './readPersistedStateFromCookie.uti
 export { readPersistedStateFromSessionStorage } from './readPersistedStateFromSessionStorage.util';
 export { readPersistedUiFlagsFromCookie } from './readPersistedUiFlagsFromCookie.util';
 export { readPersistedUiStateFromSessionStorage } from './readPersistedUiStateFromSessionStorage.util';
+export { resolveColumnWidthBounds } from './resolveColumnWidthBounds.util';
 export { resolvePrimaryKeyColumnKeys } from './resolvePrimaryKeyColumnKeys.util';
 export { resolveTableActionsColumn } from './resolveTableActionsColumn.util';
 export { serializeStateSlice } from './serializeStateSlice.util';

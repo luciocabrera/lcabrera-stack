@@ -16,9 +16,9 @@ TableHeaderCell/
 ├── index.ts                             → Barrel export
 │
 ├── ResizeHandle/
-│   ├── ResizeHandle.component.tsx       → Drag-resize handle; owns useColumnResize + double-click reset
+│   ├── ResizeHandle.component.tsx       → Resize splitter; spreads useColumnResize's handlers, owns no actions
 │   ├── ResizeHandle.types.ts            → ResizeHandleProps<TData>
-│   ├── ResizeHandle.stylex.ts           → Resize handle line/hover/active styles
+│   ├── ResizeHandle.stylex.ts           → Grab zone, ::before line, hover/focus/active states
 │   └── index.ts
 │
 ├── TableHeaderActionsMenu/
@@ -120,17 +120,54 @@ trigger) when the column has no sortable/pinnable/settings affordance at all.
 
 ### Resize
 
-`ResizeHandle` fully owns `useColumnResize` (RAF-throttled drag resize) and
-the double-click-to-reset-width handler; `TableHeaderCell` only passes
+**`useColumnResize` is the single owner of resize interaction and store wiring.**
+`ResizeHandle` calls it once and spreads what it returns (`onMouseDown`,
+`onKeyDown`, `onDoubleClick`, plus the `width`/`bounds` the splitter announces)
+onto the host element. The component triggers **no actions of its own** and
+derives nothing — if you find yourself reaching for a sizing action inside it,
+the behaviour belongs in the hook instead. `TableHeaderCell` only passes
 `columnKey`, `columnLabel`, `currentWidth`, `maxWidth`, `minWidth`.
 
-The handle is a childless `<button>` whose 8px grab zone intentionally
-straddles the cell's right border (`right: -4`), overhanging into the
-neighbouring cell. Both halves land in the 6px `paddingInline` of the cell they
-cover, so the handle never steals clicks from a label or an actions menu — keep
-that relationship in mind if the header cell's padding ever shrinks. The visible
-2px line is a `::before` fed by the `--resize-handle-line-color` custom
-property, which is what lets a hover anywhere in the grab zone light the line.
+Internally `useColumnResize` delegates the pointer gesture to the private
+`useColumnDragSession` (RAF-throttled drag, document listeners, body cursor) and
+keeps the discrete interactions itself. The split is about size, not ownership:
+one hook still fronts the whole domain.
+
+The handle is an ARIA **window splitter** (`role="separator"`, `tabIndex=0`,
+`aria-orientation="vertical"`, `aria-valuenow`/`valuemin`/`valuemax`), not a
+button: it adjusts a value rather than invoking a command, and a `<button>` put
+one dead tab stop per column in the keyboard path. `resolveKeyboardResizeAction`
+owns the key map — arrows step by `COLUMN_RESIZE_KEYBOARD_STEP` (shift for the
+coarse step), Home/End jump to the bounds, Enter resets — and returns `ignore`
+for anything else so unrelated keys keep bubbling.
+
+Both bounds come from `resolveColumnWidthBounds`, which every resize path shares
+(pointer drag via `createResizeStartData`, keyboard stepping, and the announced
+`aria-valuemin`/`aria-valuemax`) so they cannot drift apart.
+
+**Persistence belongs to the action.** `useSetColumnSizing` writes _and_
+persists, the same way `useSetColumnPinning` and `useSetColumnSorting` own
+theirs, so a keypress or a double-click is a single call and there is no second
+step to forget. (Reset used to forget it, silently leaving the old width in the
+cookie for the next load.)
+
+The one exception is a pointer drag: it emits a width every animation frame and
+would re-serialize and rewrite the cookie ~60 times per gesture, so
+`useColumnDragSession` previews frames through `useSetColumnSizingWithoutSync`
+and persists once on mouse up. If you add a new way to resize a column, it wants
+`useSetColumnSizing`; `useSetColumnSizingWithoutSync` is not in the actions
+barrel and is only for a continuous gesture that commits at the end.
+
+Visually the 8px grab zone straddles the cell's right border (`right: -4`),
+overhanging into the neighbouring cell. Both halves land in the 6px
+`paddingInline` of the cell they cover, so the handle never steals clicks from a
+label or an actions menu — keep that in mind if the header cell's padding ever
+shrinks. The visible 2px line is a `::before` fed by the
+`--resize-handle-line-color` custom property, which is what lets a hover (or
+focus) anywhere in the grab zone light the line. One caveat: every `<th>` is its
+own stacking context, and pinned cells sit at `sticky + 2` versus a plain cell's
+`sticky`, so the overhang of the column immediately left of a **right-pinned**
+column is painted under it and grabs on 4px rather than 8px.
 
 ## Loading State
 

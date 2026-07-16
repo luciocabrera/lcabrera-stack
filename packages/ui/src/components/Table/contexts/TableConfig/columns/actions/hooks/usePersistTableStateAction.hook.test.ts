@@ -1,12 +1,12 @@
 // @vitest-environment jsdom
 
+import type { TablePersistenceConfig } from '@repo/ui/components/Table/Table.types';
+
 import { MAX_COOKIE_ENTRY_VALUE_LENGTH } from '@repo/ui/constants/globalSettings.constants';
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { TablePersistenceConfig } from '../Table.types';
-
-import { usePersistTableStateAction } from './usePersistCookieAction.hook';
+import { usePersistTableStateAction } from './usePersistTableStateAction.hook';
 
 const {
   notifyMock,
@@ -38,13 +38,16 @@ vi.mock('react-router', () => ({
   useLocation: mockUseLocation,
 }));
 
-vi.mock('../contexts/TableConfig/useTableConfigContextValue.hook', () => ({
-  useTableConfigContextValue: () => ({
-    metaStore: { get: metaStoreGetMock },
+vi.mock(
+  '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
+  () => ({
+    useTableConfigContextValue: () => ({
+      metaStore: { get: metaStoreGetMock },
+    }),
   }),
-}));
+);
 
-vi.mock('../utils', () => ({
+vi.mock('@repo/ui/components/Table/utils', () => ({
   serializeStateSlice: serializeStateSliceMock,
 }));
 

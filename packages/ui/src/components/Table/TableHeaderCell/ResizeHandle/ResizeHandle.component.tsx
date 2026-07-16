@@ -1,6 +1,3 @@
-import type { DataKey } from '@repo/ui/components/Table/Table.types';
-
-import { useSetColumnSizing } from '@repo/ui/components/Table/contexts/TableConfig/columns/actions';
 import { useColumnResize } from '@repo/ui/components/Table/hooks';
 import * as stylex from '@stylexjs/stylex';
 
@@ -8,6 +5,14 @@ import type { ResizeHandleProps } from './ResizeHandle.types';
 
 import { resizeHandleStyles } from './ResizeHandle.stylex';
 
+/**
+ * Resize handle for a column, exposed as an ARIA window splitter
+ * (`role="separator"` with a width value) rather than a button: it adjusts a
+ * value, it does not invoke a command.
+ *
+ * `useColumnResize` owns every interaction and all the store wiring; this
+ * component only spreads what it returns onto the host element.
+ */
 export const ResizeHandle = <TData,>({
   columnKey,
   columnLabel,
@@ -15,33 +20,22 @@ export const ResizeHandle = <TData,>({
   maxWidth,
   minWidth,
 }: ResizeHandleProps<TData>) => {
-  const setColumnSizing = useSetColumnSizing<TData>();
-
-  const { isResizing, onMouseDown } = useColumnResize({
-    columnKey,
-    currentWidth,
-    maxWidth,
-    minWidth,
-    onResize: (params) => {
-      setColumnSizing({
-        columnKey: params.columnKey as DataKey<TData>,
-        width: params.width,
-      });
-    },
-  });
-
-  const handleDoubleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    setColumnSizing({ columnKey, width: undefined });
-  };
+  const { bounds, isResizing, onDoubleClick, onKeyDown, onMouseDown, width } =
+    useColumnResize<TData>({ columnKey, currentWidth, maxWidth, minWidth });
 
   return (
-    <button
+    <div
       aria-label={`Resize ${columnLabel} column`}
-      onDoubleClick={handleDoubleClick}
+      aria-orientation='vertical'
+      aria-valuemax={bounds.maxWidth}
+      aria-valuemin={bounds.minWidth}
+      aria-valuenow={width}
+      aria-valuetext={`${width} pixels`}
+      onDoubleClick={onDoubleClick}
+      onKeyDown={onKeyDown}
       onMouseDown={onMouseDown}
-      type='button'
+      role='separator'
+      tabIndex={0}
       {...stylex.props(
         resizeHandleStyles.resizeHandle,
         isResizing && resizeHandleStyles.resizeHandleActive,

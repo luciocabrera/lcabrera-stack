@@ -8,6 +8,17 @@ export const DEFAULT_MIN_COLUMN_WIDTH = 60;
  */
 export const DEFAULT_MAX_COLUMN_WIDTH = 600;
 
+/**
+ * Pixels a column grows/shrinks per arrow key on the resize handle.
+ */
+export const COLUMN_RESIZE_KEYBOARD_STEP = 8;
+
+/**
+ * Pixels a column grows/shrinks per shift+arrow key on the resize handle, so
+ * keyboard users can cross a wide column without dozens of keystrokes.
+ */
+export const COLUMN_RESIZE_KEYBOARD_COARSE_STEP = 40;
+
 export const DEFAULT_PLACEHOLDER_ROW_COUNT = 50;
 
 export const DEFAULT_ROW_HEIGHT = 32;

@@ -126,7 +126,7 @@ vi.mock(
   }),
 );
 
-vi.mock('@repo/ui/components/Table/hooks', () => ({
+vi.mock('./hooks/usePersistTableStateAction.hook', () => ({
   usePersistTableStateAction: () => mockPersistTableState,
 }));
 

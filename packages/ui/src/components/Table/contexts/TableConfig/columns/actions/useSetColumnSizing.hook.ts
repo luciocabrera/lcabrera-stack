@@ -1,31 +1,25 @@
-import type { DataKey } from '@repo/ui/components/Table/Table.types';
-
 import { useTableConfigContextValue } from '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 
-import { resolveColumnSizingUpdate } from './utils';
+import type { ColumnSizingArgs } from './useSetColumnSizingWithoutSync.hook';
 
-type SetColumnSizingArgs<TData> = {
-  readonly columnKey: DataKey<TData>;
-  readonly width: number | undefined;
-};
+import { persistColumnSizing, writeColumnSizing } from './utils';
 
 /**
- * Hook to update column sizing (resize)
+ * Applies a completed column resize: writes the new width and persists it.
+ * Pass `width: undefined` to restore the column's default.
+ *
+ * Persistence lives here rather than at the call site, matching how
+ * `useSetColumnPinning` and `useSetColumnSorting` own theirs — a caller should
+ * never have to remember to pair a width change with a separate sync.
+ *
+ * The one caller that opts out is `useColumnDragSession`, which writes a width
+ * per animation frame; see {@link useSetColumnSizingWithoutSync}.
  */
 export const useSetColumnSizing = <TData>() => {
-  const { columnsStore } = useTableConfigContextValue<TData>();
+  const { columnsStore, metaStore } = useTableConfigContextValue<TData>();
 
-  return ({ columnKey, width }: SetColumnSizingArgs<TData>) => {
-    const columnsState = columnsStore.get();
-    const { columnSizing, pinnedColumnOffsets } =
-      resolveColumnSizingUpdate<TData>({
-        columnKey,
-        columnPinning: columnsState?.columnPinning,
-        columnSizingState: columnsState?.columnSizing,
-        effectiveColumns: columnsState?.effectiveColumns ?? [],
-        width,
-      });
-
-    columnsStore.set({ columnSizing, pinnedColumnOffsets });
+  return ({ columnKey, width }: ColumnSizingArgs<TData>) => {
+    writeColumnSizing<TData>({ columnKey, columnsStore, width });
+    persistColumnSizing<TData>({ columnsStore, metaStore });
   };
 };

@@ -15,7 +15,6 @@ const createInitialColumnsState = () => ({
 
 const {
   mockColumnsStore,
-  mockMetaStore,
   mockUseTableConfigContextValue,
   resetMocks,
   setColumnsState,
@@ -46,19 +45,19 @@ vi.mock('./utils', async (importOriginal) => {
   };
 });
 
-import { useSetColumnSizing } from './useSetColumnSizing.hook';
+import { useSetColumnSizingWithoutSync } from './useSetColumnSizingWithoutSync.hook';
 
 const renderAction = () =>
-  renderHook(() => useSetColumnSizing<{ readonly name: string }>());
+  renderHook(() => useSetColumnSizingWithoutSync<{ readonly name: string }>());
 
-describe('useSetColumnSizing', () => {
+describe('useSetColumnSizingWithoutSync', () => {
   beforeEach(() => {
     setColumnsState(createInitialColumnsState());
     resetMocks();
     vi.clearAllMocks();
   });
 
-  it('writes the width and persists it, so callers never pair it with a sync', () => {
+  it('writes the width through the shared util, against the columns store', () => {
     const { result } = renderAction();
 
     act(() => {
@@ -70,36 +69,17 @@ describe('useSetColumnSizing', () => {
       columnsStore: mockColumnsStore,
       width: 220,
     });
-    expect(mockPersistColumnSizing).toHaveBeenCalledWith({
-      columnsStore: mockColumnsStore,
-      metaStore: mockMetaStore,
-    });
   });
 
-  it('persists a reset to the default width too', () => {
-    const { result } = renderAction();
-
-    act(() => {
-      result.current({ columnKey: 'name', width: undefined });
-    });
-
-    expect(mockWriteColumnSizing).toHaveBeenCalledWith({
-      columnKey: 'name',
-      columnsStore: mockColumnsStore,
-      width: undefined,
-    });
-    expect(mockPersistColumnSizing).toHaveBeenCalledTimes(1);
-  });
-
-  it('writes before it persists, so the sync sees the new width', () => {
+  it('never persists — that is the whole point of this action', () => {
     const { result } = renderAction();
 
     act(() => {
       result.current({ columnKey: 'name', width: 220 });
+      result.current({ columnKey: 'name', width: 240 });
     });
 
-    expect(mockWriteColumnSizing.mock.invocationCallOrder[0]).toBeLessThan(
-      mockPersistColumnSizing.mock.invocationCallOrder[0] ?? 0,
-    );
+    expect(mockWriteColumnSizing).toHaveBeenCalledTimes(2);
+    expect(mockPersistColumnSizing).not.toHaveBeenCalled();
   });
 });

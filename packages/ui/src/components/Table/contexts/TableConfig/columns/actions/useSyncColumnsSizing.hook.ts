@@ -1,22 +1,19 @@
 import { useTableConfigContextValue } from '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
-import { writeStateSlice } from '@repo/ui/components/Table/utils';
 
-export const useSyncColumnsSizing = () => {
-  const { columnsStore, metaStore } = useTableConfigContextValue();
+import { persistColumnSizing } from './utils';
+
+/**
+ * Persists the column widths currently in the store, without changing any.
+ *
+ * For a caller that has already written a width and only needs it saved — the
+ * end of a drag, whose frames went through {@link useSetColumnSizingWithoutSync}.
+ * A caller that is both setting and saving a width wants
+ * {@link useSetColumnSizing} instead.
+ */
+export const useSyncColumnsSizing = <TData>() => {
+  const { columnsStore, metaStore } = useTableConfigContextValue<TData>();
 
   return () => {
-    const columnsSizing = columnsStore.get()?.columnSizing;
-    const metaState = metaStore.get();
-    const appId = metaState?.appId;
-    const persistenceKey = metaState?.persistenceKey;
-    if (columnsSizing && persistenceKey) {
-      writeStateSlice({
-        appId,
-        persistenceKey,
-        slice: 'columnSizing',
-        storageType: 'cookie',
-        value: columnsSizing,
-      });
-    }
+    persistColumnSizing<TData>({ columnsStore, metaStore });
   };
 };

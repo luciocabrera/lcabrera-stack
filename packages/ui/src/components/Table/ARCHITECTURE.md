@@ -77,7 +77,7 @@ Table/
 ├── TableSettingsDrawer/           → Table-wide settings panel (filters, sort, columns)
 ├── TableSettingsDrawerSkeleton/   → Legacy pinned loading shell (kept for reference; not used by drawer routing)
 ├── filters/                       → Filter input components (boolean, text, number, date, select)
-├── hooks/                         → useColumnResize, useInfiniteScroll, usePersistTableStateAction
+├── hooks/                         → useColumnResize, useColumnDragSession, useInfiniteScroll, useScrollResetAfterLoad
 ├── utils/                         → Column processing + persistence utilities
 └── docs/                          → Supplementary architecture docs
 ```
