@@ -1,6 +1,16 @@
 # ADR-016: `resolveLocalPath` for UI-driven project paths + scan-status toast notifications
 
-**Status:** Accepted
+**Status:** **Superseded (resolver half — code retired)**; Accepted (scan-status toasts — still live).
+
+> **⚠️ Split verdict (2026-07-11).** The **`resolveLocalPath` / path-based
+> project-matching half is superseded and retired**: ADR-028 dropped
+> `projects.local_path`, so there is no path to canonicalize or match against.
+> Ad hoc ingestion now **requires `--project-id`** and throws without it — see
+> the comment in `packages/scan-ingestion/src/ingestion/resolveScan.util.ts`
+> ("Path-based match-or-create retired with the local_path model (ADR-028)").
+>
+> The **scan-status toast half is unaffected** and still ships. Current state:
+> [STATUS.md](../STATUS.md).
 
 ## Context
 

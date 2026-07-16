@@ -3,6 +3,7 @@
 **Status:** Canonical yardstick, confirmed with the product owner on 2026-07-11.
 **Supersedes:** [PRD.md](./PRD.md) (initial Phase-1 draft, kept for history) and distills [PRD_V1.md](./PRD_V1.md) (working transcript) plus the decisions resolved in review Q&A.
 **Working title:** CodePulse — Multiverse Code Quality Tracker (currently implemented under the internal name CQMS).
+**Implementation status:** [STATUS.md](./STATUS.md) — what is actually built against this document, including the places where **live code contradicts it** (notably §8's no-queue/409 contract) and the §14 questions still awaiting sign-off. This document says what CodePulse _should_ be; STATUS.md says where it _is_.
 
 ## 1. Executive Summary
 

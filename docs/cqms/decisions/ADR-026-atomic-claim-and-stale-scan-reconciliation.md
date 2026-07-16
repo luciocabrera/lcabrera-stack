@@ -1,6 +1,24 @@
 # ADR-026: Atomic queue claim + stale-'running' reconciliation
 
-**Status:** Accepted
+**Status:** Accepted — **superseded in principle, not yet in code** (see below).
+
+> **⚠️ Superseded by [PRD_V2.md](../PRD_V2.md) §8 (2026-07-11) — but the code
+> below is still live.** §8 forbids queuing outright ("**No queuing, ever**":
+> a trigger against a project with an active run is instantly rejected with a
+> `409 Conflict` carrying the active `run_id` and elapsed time), and the
+> [alignment review](../reviews/2026-07-11-codepulse-alignment-review.md)
+> discards this ADR's claim/reconciliation machinery "outright", listing its
+> retirement under **Phase 2 (containerized, queue-free execution)**.
+>
+> **Nothing has been retired.** `apps/scan-orchestrator/src/queue/`
+> (`listenForQueuedScans`, `processQueue`, `claimQueuedScan`,
+> `failStaleRunningScans`) plus migration `0007_scan_queued_notify.sql` are the
+> live execution backbone, and there is **no `409` contract anywhere** in
+> `apps/admin_system/src`. So this ADR still accurately describes what runs
+> today — which is precisely why the contradiction is tracked as an **open
+> decision** in [STATUS.md](../STATUS.md) §3.1 rather than quietly resolved in
+> either direction. Do not retire this machinery, and do not treat §8 as
+> implemented, without that decision.
 
 ## Context
 

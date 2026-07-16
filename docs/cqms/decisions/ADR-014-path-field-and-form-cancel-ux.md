@@ -1,6 +1,18 @@
 # ADR-014: Browsable `path` Form field + built-in Form Cancel/discard-changes flow
 
-**Status:** Accepted
+**Status:** **Superseded (path half — code deleted)**; Accepted (Form Cancel half — still live).
+
+> **⚠️ Split verdict (2026-07-11).** The **`path` field half is superseded and
+> its code is gone**: [PRD_V2.md](../PRD_V2.md) §2/§3 make the server "not the
+> developer's machine", so browsing the server's filesystem is meaningless.
+> ADR-028 dropped `projects.local_path`, and `PathField/`,
+> `PathBrowserModal/`, `browseDirectory.loader.ts` and
+> `_action/browse-directory` are **deleted** — a project's code arrives by
+> snapshot sync (CLI push, zip upload, or the ADR-031 browser folder-picker).
+>
+> The **Form Cancel / discard-changes half is unaffected** and still ships in
+> `packages/ui`. Read this ADR for that; ignore its path-field reasoning.
+> Current state: [STATUS.md](../STATUS.md).
 
 ## Context
 

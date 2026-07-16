@@ -1,8 +1,29 @@
 # Code Quality Management System (CQMS) — Implementation Plan
 
-See also: [PRD.md](./PRD.md), [TECH_SPEC.md](./TECH_SPEC.md), ADRs in [decisions/](./decisions/).
+> **⚠️ Historical (superseded 2026-07-11).** This is the plan for the
+> **pre-pivot, local-path build**. It is kept because its Phase 1/Phase 3 steps
+> describe what was actually built and still runs. The canonical product
+> definition is now [PRD_V2.md](./PRD_V2.md) (CodePulse), and the forward plan
+> is the [alignment review](./reviews/2026-07-11-codepulse-alignment-review.md)
+> §6. For what is built today versus what PRD_V2 requires, read
+> **[STATUS.md](./STATUS.md)** — not this file.
+>
+> **⚠️ Two unrelated phase numberings are live in this folder.** The Phase
+> 1/2/3 on this page is **not** the Phase 1–4 in the alignment review and
+> STATUS.md:
+>
+> | Here (pre-pivot)                                                   | Alignment review §6 / STATUS.md                             |
+> | ------------------------------------------------------------------ | ----------------------------------------------------------- |
+> | Phase 1 = the original 9 steps (done)                              | Phase 1 = Ingestion foundation (done)                       |
+> | Phase 2 = per-symbol dependency graph (not started)                | Phase 2 = Containerized, queue-free execution (not started) |
+> | Phase 3 = per-scanner extraction, RBAC, registry, app graph (done) | Phase 3 = Scanner platform (not started)                    |
+> |                                                                    | Phase 4 = Progress & polish (not started)                   |
+>
+> Always say which namespace you mean.
 
-Phase 1 (the original 9 steps) and Phase 3 (per-scanner extraction + RBAC + registry, § below) are both complete; Phase 2 = the dependency graph (§ below), still explicitly out of scope.
+See also: [STATUS.md](./STATUS.md), [PRD_V2.md](./PRD_V2.md), [PRD.md](./PRD.md), [TECH_SPEC.md](./TECH_SPEC.md), ADRs in [decisions/](./decisions/).
+
+Phase 1 (the original 9 steps) and Phase 3 (per-scanner extraction + RBAC + registry, § below) are both complete; Phase 2 = the dependency graph (§ below), still explicitly out of scope. **Both "complete" claims refer to this page's own namespace** (see the table above) and remain accurate for what shipped — but the ingestion model they were built on has since been replaced by the snapshot model (ADR-028), so parts of the verification plan below no longer describe the system.
 
 ## Execution model
 
@@ -51,10 +72,20 @@ Same gated execution model as Phase 1 (one step at a time, ADR lands with its st
 
 ## Verification plan
 
+> **⚠️ Steps 2, 3, 6 and 7 below describe the retired local-path model and will
+> not reproduce today.** `projects.local_path` was **dropped by migration
+> `0027_project_snapshots.sql`** (ADR-028): a project's code location is now
+> whatever its latest synced snapshot is, so there is no path to register, no
+> path to reject, and no `PathField` to submit. Each affected step is annotated
+> inline. The steps are kept as the historical record of how the pre-pivot build
+> was verified; the equivalent checks for the current model belong with Phase 1
+> of the [alignment review](./reviews/2026-07-11-codepulse-alignment-review.md)
+> §6, and current state is tracked in [STATUS.md](./STATUS.md).
+
 1. `vp fmt . && vp lint . && vp check && vp run test` from `apps/react-router` and `apps/admin_system` — must pass clean.
-2. Manually run `/fallow-code-checker` and the new `/linter-checker` in an interactive session against this repo → confirm a `projects`/`runs`/`scans`/`reports`/`scan_findings` row set appears correctly for each (no `run_id` given — tests the auto-create path), with proper uuid PKs.
-3. Start `apps/admin_system` in both dev and a production build, register a project pointing at a real local repo, trigger a scan from the UI (both a deterministic linter-only run and a code-smell run), confirm the WebSocket delivers live status transitions in the run-detail `Table` in both dev and prod modes, confirm the finished run's report renders, the `JsonExplorer` correctly derives table columns from at least two structurally different scanners' raw JSON (e.g. fallow vs. linter), and the findings table filters by severity.
+2. Manually run `/fallow-code-checker` and the new `/linter-checker` in an interactive session against this repo → confirm a `projects`/`runs`/`scans`/`reports`/`scan_findings` row set appears correctly for each (~~no `run_id` given — tests the auto-create path~~ — **RETIRED (ADR-028)**: path-based match-or-create is gone; ad hoc ingestion now _requires_ `--project-id` and throws without it, see `resolveScan.util.ts`), with proper uuid PKs.
+3. Start `apps/admin_system` in both dev and a production build, ~~register a project pointing at a real local repo~~ (**RETIRED (ADR-028)**: register a project, then **sync a snapshot** to it — CLI push, zip upload, or the browser folder-picker per ADR-031), trigger a scan from the UI (both a deterministic linter-only run and a code-smell run), confirm the WebSocket delivers live status transitions in the run-detail `Table` in both dev and prod modes, confirm the finished run's report renders, the `JsonExplorer` correctly derives table columns from at least two structurally different scanners' raw JSON (e.g. fallow vs. linter), and the findings table filters by severity.
 4. Kill and reconnect the WebSocket mid-run (e.g. restart the dev server) and confirm the client's reconnect-with-backoff recovers and status catches up via revalidation.
 5. Run a second scan on the same project a day later (or manually insert a second `runs` row) and confirm the trend view shows a correct up/down delta.
-6. Attempt to trigger a scan against a path not in `projects.local_path` and confirm it's rejected server-side.
-7. Submit the `new-project` and `trigger-scan` `Form`-based forms with both valid and invalid input (e.g. a non-existent local path, no scanners selected) and confirm client-side field errors show instantly, the server-side Zod validation is what actually gates the action, and successful submission produces the expected `projects`/`runs`/`scans` rows.
+6. ~~Attempt to trigger a scan against a path not in `projects.local_path` and confirm it's rejected server-side.~~ **RETIRED (ADR-028)** — `local_path` no longer exists; the caller supplies no path at all. The current equivalent is the "trigger with no snapshot = error" precondition, enforced by `0027`'s trigger (`ERRCODE 55000`) and pre-checked in `triggerScan.action.ts`.
+7. Submit the `new-project` and `trigger-scan` `Form`-based forms with both valid and invalid input (~~e.g. a non-existent local path~~ — **RETIRED (ADR-028)**: `PathField` is deleted and `new-project` takes no path; use "no scanners selected") and confirm client-side field errors show instantly, the server-side Zod validation is what actually gates the action, and successful submission produces the expected `projects`/`runs`/`scans` rows.

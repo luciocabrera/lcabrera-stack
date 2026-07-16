@@ -1,5 +1,16 @@
 # Product Requirement Document (PRD)
 
+> **⚠️ Working transcript — not canonical (superseded 2026-07-11).** This is the
+> raw v1 CodePulse brief. It was **distilled into [PRD_V2.md](./PRD_V2.md)**,
+> which is the canonical yardstick (confirmed with the product owner
+> 2026-07-11) and which resolves the open questions this document leaves
+> hanging. Kept for history and for the reasoning behind decisions PRD_V2
+> states without re-arguing.
+>
+> Read [STATUS.md](./STATUS.md) for what is actually built, and the
+> [alignment review](./reviews/2026-07-11-codepulse-alignment-review.md) for how
+> this brief maps onto the existing code and ADRs.
+
 Project CodePulse (Working Title) — Multiverse Code Quality Tracker
 
 1. Executive Summary & Purpose

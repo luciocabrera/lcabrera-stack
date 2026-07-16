@@ -1,6 +1,20 @@
 # ADR-020: Self-scan + secret-file PreToolUse guard
 
-**Status:** Accepted
+**Status:** Accepted — **superseded in principle, not yet in code** (see below).
+
+> **⚠️ Superseded by [PRD_V2.md](../PRD_V2.md) §9 (2026-07-11); the code below
+> is still live.** §9 replaces host execution with an ephemeral container per
+> run, which is a stronger boundary than this ADR's host-side guards. The
+> [alignment review](../reviews/2026-07-11-codepulse-alignment-review.md) puts
+> the follow-through in **Phase 2**: run agent-runner in-container, retire
+> `assertSafeTargetPath`, and demote the secret-file guard to
+> defence-in-depth.
+>
+> **Nothing has been retired.** `packages/agent-runner/src/assertSafeTargetPath.util.ts`
+> and the PreToolUse hook are live, and scanners still execute **unsandboxed on
+> the platform host** — so these guards are currently the only boundary there
+> is, not a redundant layer. Treat them as load-bearing until Phase 2 lands.
+> Current state: [STATUS.md](../STATUS.md) §3.2.
 
 ## Context
 
