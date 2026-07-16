@@ -57,7 +57,7 @@ isolation.
 | 3.1 | §8 "no queuing" vs the LISTEN/NOTIFY code | **Resolved** — ADR-033; was a misreading, not a conflict |
 | 3.2 | Unsandboxed host execution                | Accepted pre-hosting; Phase 2 fixes it                   |
 | 3.3 | `/ws/runs` unauthenticated                | Accepted pre-hosting; Phase 2 fixes it                   |
-| 3.4 | Snapshot replaceable under a running scan | **Open** — a live correctness hole, needs a call         |
+| 3.4 | Snapshot replaceable under a running scan | **Decided** — ADR-034 (pin the run); live until `0029`   |
 
 ### 3.1 The §8 "queue" contradiction — **RESOLVED 2026-07-16 (ADR-033)**
 
@@ -101,24 +101,33 @@ makes that model safe, so Phase 3 must not land before Phase 2.
 lists "Authenticate `/ws/runs`" under Phase 2. Same reasoning as 3.2: fine for a
 local tool, real exposure once hosted.
 
-### 3.4 A snapshot can be replaced under a running scan — unguarded, live
+### 3.4 A snapshot can be replaced under a running scan — **decided (ADR-034), not yet built**
 
-Nothing blocks a sync while a run is active. Trigger a scan against snapshot A,
-push snapshot B mid-run, and the running scanners read code swapped underneath
-them; the findings get attributed to the wrong commit.
+Still live. Nothing blocks a sync while a run is active, and it fails two ways —
+the second worse than the first:
 
-§8's lock does not help — it only stops a second **run**, not a **sync**.
-`0027_project_snapshots.sql` has no run-active guard, and §3's "latest wins, old
-snapshots are not retained" makes replacement the normal path rather than an edge
-case.
+1. **The path is re-resolved, not pinned.** A run carries no snapshot reference;
+   `v_queued_scans` joins on `projects.latest_snapshot_id`, so the orchestrator
+   reads whatever is latest _at claim time_, not what was triggered. The scan
+   analyzes different code under the original run's commit.
+2. **The directory is deleted mid-run.** `saveProjectSnapshot` does
+   `rmSync(replacedStoragePath, …)` immediately, with no active-run check —
+   the files vanish underneath running scanners.
 
-Found 2026-07-16 while settling §3.1
-([ADR-033](./decisions/ADR-033-no-queue-is-per-project-admission-control.md),
-"What this does not fix"). Live today and independent of the queue decision.
-**Needs a call:** reject the sync while a run is active, or pin the run to its
-snapshot id and let syncs proceed. The second fits "latest wins" better but means
-retaining a snapshot until its run finishes — which cuts against "old snapshots
-are not retained".
+§8's lock does not help: it stops a second **run**, not a **sync**.
+
+**Decision ([ADR-034](./decisions/ADR-034-pin-runs-to-their-snapshot.md)):** pin
+the run — add `runs.snapshot_id` (`ON DELETE SET NULL`, because run history is
+permanent and `RESTRICT` would make snapshots undeletable forever), resolve
+`v_queued_scans` through it, and retain the outgoing snapshot until the run
+pinned to it finalizes, then collect. Syncs are never blocked; latest-wins still
+governs the next trigger. §8's one-run-per-project lock keeps "is anything still
+reading this?" a single-row check, and ADR-026's stale sweep is what makes a
+crashed run's snapshot collectable — no orphan reaper needed.
+
+**To build:** migration `0029` + the collection hook on `fn_finalize_run_status`.
+Worth reproducing the bug in a test first (sync mid-run; assert the run still
+reads the tree it was triggered on, and that the tree still exists).
 
 ---
 
