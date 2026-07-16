@@ -18,6 +18,15 @@ describe('extractFallowDeadCode', () => {
             package_name: 'vite-plus',
           },
         ],
+        unresolved_imports: [
+          {
+            actions: [{ type: 'fix-import' }],
+            col: 12,
+            line: 4,
+            path: 'src/app/routes.ts',
+            specifier: '@/missing/module',
+          },
+        ],
         unused_dependencies: [
           {
             actions: [],
@@ -43,15 +52,6 @@ describe('extractFallowDeadCode', () => {
           {
             actions: [{ type: 'delete-file' }],
             path: 'src/server.constants.ts',
-          },
-        ],
-        unresolved_imports: [
-          {
-            actions: [{ type: 'fix-import' }],
-            col: 12,
-            line: 4,
-            path: 'src/app/routes.ts',
-            specifier: '@/missing/module',
           },
         ],
         unused_types: [

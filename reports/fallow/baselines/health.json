@@ -1,20 +1,22 @@
 {
   "finding_counts": {
-    ".github/skills/linter-checker/scripts/generate-linter-report.mjs": {
+    "apps/admin_system/src/routes/cqms/account-tokens/AccountTokens.component.tsx": {
       "crap_critical": {
-        "count": 3
-      },
-      "crap_moderate": {
-        "count": 4
+        "count": 1
       }
     },
     "apps/admin_system/src/routes/cqms/edit-project/editProject.action.ts": {
-      "crap_high": {
+      "crap_moderate": {
         "count": 1
       }
     },
     "apps/admin_system/src/routes/cqms/new-project/newProject.action.ts": {
       "crap_moderate": {
+        "count": 1
+      }
+    },
+    "apps/admin_system/src/routes/cqms/project-detail/ProjectSyncPanel/ProjectSyncPanel.component.tsx": {
+      "crap_high": {
         "count": 1
       }
     },
@@ -33,159 +35,18 @@
         "count": 1
       }
     },
-    "apps/react-router/src/routes/enterprise-orders/EnterpriseOrders.component.tsx": {
-      "crap_moderate": {
-        "count": 1
-      }
-    },
-    "packages/data-access/src/api/buildPaginatedQueryParams.util.ts": {
-      "crap_moderate": {
-        "count": 1
-      }
-    },
-    "packages/eslint-local-rules/clean-import-paths.ts": {
-      "crap_moderate": {
-        "count": 1
-      }
-    },
-    "packages/eslint-local-rules/destructuring-for-functions.ts": {
-      "crap_critical": {
-        "count": 1
-      },
-      "crap_moderate": {
-        "count": 1
-      }
-    },
-    "packages/eslint-local-rules/merge-duplicate-imports.ts": {
-      "crap_moderate": {
-        "count": 1
-      }
-    },
-    "packages/eslint-local-rules/no-inline-type-imports.ts": {
-      "crap_moderate": {
-        "count": 1
-      }
-    },
-    "packages/eslint-local-rules/single-component-export.ts": {
-      "crap_critical": {
-        "count": 1
-      }
-    },
     "packages/plugins/fixReactRouterAssets.plugin.ts": {
       "crap_moderate": {
         "count": 1
       }
     },
     "packages/scan-ingestion/src/cli/ingest.cli.ts": {
+      "crap_critical": {
+        "count": 1
+      }
+    },
+    "packages/scan-ingestion/src/cli/push.cli.ts": {
       "crap_high": {
-        "count": 1
-      },
-      "crap_moderate": {
-        "count": 1
-      }
-    },
-    "packages/scan-ingestion/src/ingestion/resolveScan.util.ts": {
-      "crap_moderate": {
-        "count": 1
-      }
-    },
-    "packages/ui/src/components/Button/Button.component.tsx": {
-      "complexity_moderate": {
-        "count": 1
-      }
-    },
-    "packages/ui/src/components/DraggableList/DraggableList.component.tsx": {
-      "crap_moderate": {
-        "count": 1
-      }
-    },
-    "packages/ui/src/components/Form/FormBody/FormBody.component.tsx": {
-      "complexity_moderate": {
-        "count": 1
-      }
-    },
-    "packages/ui/src/components/SidePanel/SidePanel.component.tsx": {
-      "complexity_moderate": {
-        "count": 1
-      }
-    },
-    "packages/ui/src/components/Table/TableHeaderCell/TableHeaderCell.component.tsx": {
-      "complexity_moderate": {
-        "count": 1
-      }
-    },
-    "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useAcceptUnpinConflict.hook.ts": {
-      "crap_moderate": {
-        "count": 1
-      }
-    },
-    "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useOrderBySorting.hook.ts": {
-      "crap_moderate": {
-        "count": 1
-      }
-    },
-    "packages/ui/src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/actions/useToggleColumnPin.hook.ts": {
-      "crap_moderate": {
-        "count": 1
-      }
-    },
-    "packages/ui/src/components/Table/TableSettingsDrawer/GeneralSettingsSection/GeneralSettingsSection.component.tsx": {
-      "crap_moderate": {
-        "count": 1
-      }
-    },
-    "packages/ui/src/components/Table/TableSettingsDrawer/TableDrawerContext/actions/useResetTableSettings.hook.ts": {
-      "crap_moderate": {
-        "count": 1
-      }
-    },
-    "packages/ui/src/components/Table/contexts/TableConfig/columns/actions/useBatchSetColumnSettings.hook.ts": {
-      "crap_high": {
-        "count": 1
-      }
-    },
-    "packages/ui/src/components/Table/contexts/TableConfig/columns/actions/useBatchSetTableSettings.hook.ts": {
-      "crap_moderate": {
-        "count": 1
-      }
-    },
-    "packages/ui/src/components/Table/contexts/TableConfig/meta/actions/useSetTableDrawersOpenState.hook.ts": {
-      "crap_moderate": {
-        "count": 1
-      }
-    },
-    "packages/ui/src/components/Table/contexts/TableConfig/meta/actions/useToogleTableIsColumnSettingsOpen.hook.ts": {
-      "crap_moderate": {
-        "count": 1
-      }
-    },
-    "packages/ui/src/components/Table/filters/FilterInputs/InputContent/InputContent.component.tsx": {
-      "complexity_moderate": {
-        "count": 1
-      }
-    },
-    "packages/ui/src/components/Tabs/Tabs.component.tsx": {
-      "crap_moderate": {
-        "count": 1
-      }
-    },
-    "packages/ui/src/components/Toolbar/Toolbar.component.tsx": {
-      "crap_moderate": {
-        "count": 1
-      }
-    },
-    "packages/ui/src/components/VirtualSelect/VirtualSelect.component.tsx": {
-      "complexity_moderate": {
-        "count": 1
-      }
-    },
-    "packages/ui/src/components/VirtualSelect/VirtualSelectTrigger/VirtualSelectTrigger.component.tsx": {
-      "complexity_moderate": {
-        "count": 1
-      }
-    },
-    "packages/ui/src/routing/persistCookie.action.ts": {
-      "complexity_moderate": {
         "count": 1
       }
     },
@@ -236,9 +97,7 @@
   },
   "runtime_coverage_findings": [],
   "target_keys": [
-    "packages/ui/src/components/Form/FormFields/FormFields.component.tsx:circular dependency",
-    "packages/ui/src/components/Form/FormFields/FormFieldRow/FormFieldRow.component.tsx:circular dependency",
-    "packages/ui/src/components/Form/FormFields/FormFieldTabs/FormFieldTabs.component.tsx:circular dependency",
-    "packages/ui/src/components/Form/FormFields/FormFieldGroup/FormFieldGroup.component.tsx:circular dependency"
+    ".github/skills/code-smell-shared/scripts/finding-templates.mjs:high impact",
+    "packages/data-access/src/db/queryBuilder/quoteIdentifier.util.ts:high impact"
   ]
 }

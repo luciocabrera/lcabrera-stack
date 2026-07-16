@@ -1,21 +1,20 @@
 {
   "clone_groups": [
-    "apps/admin_system/src/routes/cqms/edit-project/editProject.action.ts:7-19|apps/admin_system/src/routes/cqms/trigger-scan/triggerScan.action.ts:7-18",
-    "apps/admin_system/src/routes/cqms/edit-project/editProject.action.ts:16-37|apps/admin_system/src/routes/cqms/new-project/newProject.action.ts:8-26",
-    "apps/admin_system/src/routes/cqms/edit-project/editProject.loader.ts:5-16|apps/admin_system/src/routes/cqms/project-detail/projectDetail.loader.ts:7-20",
-    "apps/admin_system/src/routes/cqms/edit-project/editProject.loader.ts:5-11|apps/admin_system/src/routes/cqms/project-detail/projectDetail.loader.ts:7-17|apps/admin_system/src/routes/cqms/run-detail/runDetail.loader.ts:6-11|apps/admin_system/src/routes/cqms/scan-detail/scanDetail.loader.ts:9-21",
-    "apps/admin_system/vite.config.ts:9-24|apps/react-router/vite.config.ts:9-24",
-    "apps/api-server-fast/src/server.ts:8-20|apps/api-server/src/server.ts:8-27",
-    "apps/api-server/src/server.ts:53-68|apps/scan-orchestrator/src/server.ts:37-54",
+    ".github/skills/app-graph/scripts/generate-app-graph-report.mjs:157-177|packages/scan-ingestion/src/ingestion/classifyFileTypeCategory.util.ts:1-24",
+    "apps/admin_system/src/routes/cqms/edit-project/editProject.action.ts:10-32|apps/admin_system/src/routes/cqms/trigger-scan/triggerScan.action.ts:16-34",
+    "apps/admin_system/src/routes/cqms/edit-project/editProject.action.ts:10-32|apps/admin_system/src/routes/cqms/project-detail/projectDetail.action.ts:113-151|apps/admin_system/src/routes/cqms/trigger-scan/triggerScan.action.ts:16-34",
+    "apps/admin_system/src/routes/cqms/edit-role/editRole.action.ts:23-35|apps/admin_system/src/routes/cqms/edit-role/editRole.loader.ts:16-29|apps/admin_system/src/routes/cqms/role-detail/roleDetail.loader.ts:15-29",
+    "apps/admin_system/src/routes/cqms/edit-role/editRole.loader.ts:16-29|apps/admin_system/src/routes/cqms/role-detail/roleDetail.loader.ts:15-29",
+    "apps/admin_system/src/routes/cqms/edit-scanner/editScanner.loader.ts:7-22|apps/admin_system/src/routes/cqms/scanner-detail/scannerDetail.loader.ts:8-26",
+    "apps/admin_system/src/routes/cqms/edit-user/editUser.loader.ts:16-27|apps/admin_system/src/routes/cqms/user-detail/userDetail.loader.ts:14-25",
+    "apps/admin_system/vite.config.ts:9-32|apps/react-router/vite.config.ts:9-32",
+    "apps/api-server-fast/src/server.ts:8-20|apps/api-server/src/server.ts:9-28",
     "apps/api-server-fast/vite.config.ts:5-28|apps/api-server/vite.config.ts:5-28",
     "apps/api-server-fast/src/errors/httpError.ts:1-12|apps/shared/src/errors/httpError.ts:1-12",
-    "apps/react-router/src/routes/car-sales/car-sales.loader.ts:25-48|apps/react-router/src/routes/enterprise-orders/enterprise-orders.loader.ts:27-55|apps/react-router/src/routes/wide-alltypes-150/wide-alltypes-150.loader.ts:20-47",
-    "apps/react-router/src/routes/car-sales-infinite/car-sales.loader.ts:19-40|apps/react-router/src/routes/car-sales/car-sales.loader.ts:25-43|apps/react-router/src/routes/enterprise-orders/enterprise-orders.loader.ts:27-45|apps/react-router/src/routes/wide-alltypes-150/wide-alltypes-150.loader.ts:20-39",
+    "apps/react-router/src/routes/car-sales-infinite/car-sales.loader.ts:21-51|apps/react-router/src/routes/car-sales/car-sales.loader.ts:26-53",
+    "apps/react-router/src/routes/car-sales/car-sales.loader.ts:29-58|apps/react-router/src/routes/enterprise-orders/enterprise-orders.loader.ts:34-64",
     "packages/ui/src/components/Table/TableSettingsDrawer/TableDrawerContext/useColumnsStore.hook.ts:10-20|packages/ui/src/components/Table/contexts/TableConfig/columns/useColumnsStore.hook.ts:9-19",
-    "packages/ui/src/components/Table/utils/readPersistedUiFlagsFromCookie.util.ts:29-39|packages/ui/src/components/Table/utils/readPersistedUiStateFromSessionStorage.util.ts:25-35",
-    "packages/ui/src/components/Toolbar/Toolbar.examples.tsx:33-68|packages/ui/src/components/Toolbar/Toolbar.examples.tsx:72-107",
-    "packages/ui/src/components/VirtualList/SelectOption/SelectOption.component.tsx:17-34|packages/ui/src/components/VirtualList/SelectOption/SelectOption.component.tsx:41-53",
-    "packages/vite-configs/eslint.base-custom-rules.shared.config.mjs:69-113|packages/vite-configs/eslint.custom-rules.shared.config.mjs:187-228",
+    "packages/vite-configs/eslint.base-custom-rules.shared.config.mjs:69-110|packages/vite-configs/eslint.custom-rules.shared.config.mjs:239-278",
     "scripts/generate-skills-compliance-report.cjs:90-103|scripts/generate-source-smell-report.cjs:429-442"
   ]
 }
