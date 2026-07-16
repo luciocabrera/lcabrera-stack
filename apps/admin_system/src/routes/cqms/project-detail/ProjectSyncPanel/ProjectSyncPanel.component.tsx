@@ -62,6 +62,8 @@ export const ProjectSyncPanel = ({ project }: ProjectSyncPanelProps) => {
 
       <form onSubmit={handleFolderSubmit}>
         <input
+          accept='*/*'
+          name='folder'
           onChange={handleFolderChange}
           ref={applyWebkitDirectory}
           type='file'

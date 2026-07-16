@@ -5,7 +5,12 @@ import * as stylex from '@stylexjs/stylex';
 export const resizeHandleStyles = stylex.create({
   resizeHandle: {
     padding: 0,
+    borderStyle: 'none',
     alignItems: 'center',
+    backgroundColor: {
+      default: 'transparent',
+      ':hover': colors.borderPrimary,
+    },
     cursor: 'col-resize',
     display: 'flex',
     justifyContent: 'center',
@@ -16,16 +21,7 @@ export const resizeHandleStyles = stylex.create({
     bottom: 0,
     right: 0,
     top: 0,
-    width: 1,
-  },
-  resizeHandleLine: {
-    transition: 'background-color 0.15s ease',
-    backgroundColor: {
-      default: 'transparent',
-      ':hover': colors.borderPrimary,
-    },
-    height: '100%',
-    width: 1,
+    width: 2,
   },
   resizeHandleActive: {
     backgroundColor: colors.borderPrimary,

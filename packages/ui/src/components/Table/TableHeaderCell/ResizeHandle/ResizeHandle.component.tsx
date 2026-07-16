@@ -42,14 +42,10 @@ export const ResizeHandle = <TData,>({
       onDoubleClick={handleDoubleClick}
       onMouseDown={onMouseDown}
       type='button'
-      {...stylex.props(resizeHandleStyles.resizeHandle)}
-    >
-      <div
-        {...stylex.props(
-          resizeHandleStyles.resizeHandleLine,
-          isResizing && resizeHandleStyles.resizeHandleActive,
-        )}
-      />
-    </button>
+      {...stylex.props(
+        resizeHandleStyles.resizeHandle,
+        isResizing && resizeHandleStyles.resizeHandleActive,
+      )}
+    />
   );
 };
