@@ -49,32 +49,38 @@ These are known and recorded — not drift:
 ## 3. Live deviations — where the code and PRD_V2 disagree
 
 **This section is the reason this page exists.** Each item is running code that
-contradicts the canonical spec. None is a bug to fix in isolation; each is a
-decision to make.
+does not match the canonical spec. Most are decisions rather than bugs to fix in
+isolation.
 
-### 3.1 The queue PRD_V2 §8 forbids is the live backbone — **open decision**
+| #   | Item                                      | State                                                    |
+| --- | ----------------------------------------- | -------------------------------------------------------- |
+| 3.1 | §8 "no queuing" vs the LISTEN/NOTIFY code | **Resolved** — ADR-033; was a misreading, not a conflict |
+| 3.2 | Unsandboxed host execution                | Accepted pre-hosting; Phase 2 fixes it                   |
+| 3.3 | `/ws/runs` unauthenticated                | Accepted pre-hosting; Phase 2 fixes it                   |
+| 3.4 | Snapshot replaceable under a running scan | **Open** — a live correctness hole, needs a call         |
 
-PRD_V2 §8 is unambiguous:
+### 3.1 The §8 "queue" contradiction — **RESOLVED 2026-07-16 (ADR-033)**
 
-> **No queuing, ever** (anti-abuse): a trigger against a project with an active
-> run is **instantly rejected** — API returns `409 Conflict` with the active
-> `run_id` and elapsed time.
+There was no real contradiction, only a misreading. **§8 is admission control
+per project, and it is already enforced**: migration
+`0021_project_run_concurrency_guard.sql` takes a per-project advisory lock and
+rejects a second trigger outright (`ERRCODE 55000`). A user cannot stack runs on
+a project — the backlog §8 forbids is already impossible.
 
-What actually runs is a full Postgres LISTEN/NOTIFY queue with atomic claim and
-stale-run reconciliation: `apps/scan-orchestrator/src/queue/`
-(`listenForQueuedScans.ts`, `processQueue.ts`, `claimQueuedScan.util.ts`,
-`failStaleRunningScans.util.ts`) on migration `0007_scan_queued_notify.sql`.
-The alignment review discards ADR-026 "outright"; its code is untouched and
-shipping.
+The LISTEN/NOTIFY machinery in `apps/scan-orchestrator/src/queue/` is **not** a
+backlog: it is the durable, exactly-once hand-off between `admin_system` and the
+orchestrator (two processes), plus the per-run parallel scanner pool §9 asks
+for. **ADR-026 is retained** — its atomic claim and stale sweep are correctness
+machinery for bugs that have each already happened once.
 
-There is **no `409` anywhere in `apps/admin_system/src`** — the contract §8
-mandates does not exist. The only concurrency guard is migration 0021's advisory
-lock, surfaced as a form error.
+See [ADR-033](./decisions/ADR-033-no-queue-is-per-project-admission-control.md).
+§8 and §9 are amended accordingly; the alignment review's "retire the queue"
+Phase-2 bullet is annotated as corrected.
 
-**This needs an owner decision, and nobody should quietly pick one:**
-either PRD_V2 §8 changes to accept the queue, or ADR-026's machinery is retired
-as part of Phase 2. Until then the spec and the system disagree, and the spec is
-what people trust.
+**Still to build (Phase 2), narrower than it looked:**
+
+- The **`409` surface**: there is no `409` anywhere in `apps/admin_system/src` — the DB's rejection currently reaches the UI as a generic form error. §8 wants a `409 Conflict` carrying the active `run_id` and elapsed time, plus a live-status trigger-disable and an alert banner.
+- A **global concurrency cap** (env var): nothing limits how many runs execute at once platform-wide. Host protection, not admission control — runs beyond the cap wait.
 
 ### 3.2 Scanners execute unsandboxed on the host — accepted pre-hosting
 
@@ -94,6 +100,25 @@ makes that model safe, so Phase 3 must not land before Phase 2.
 "uuid, no further auth (internal tool)". PRD_V2 §12 requires auth; the review
 lists "Authenticate `/ws/runs`" under Phase 2. Same reasoning as 3.2: fine for a
 local tool, real exposure once hosted.
+
+### 3.4 A snapshot can be replaced under a running scan — unguarded, live
+
+Nothing blocks a sync while a run is active. Trigger a scan against snapshot A,
+push snapshot B mid-run, and the running scanners read code swapped underneath
+them; the findings get attributed to the wrong commit.
+
+§8's lock does not help — it only stops a second **run**, not a **sync**.
+`0027_project_snapshots.sql` has no run-active guard, and §3's "latest wins, old
+snapshots are not retained" makes replacement the normal path rather than an edge
+case.
+
+Found 2026-07-16 while settling §3.1
+([ADR-033](./decisions/ADR-033-no-queue-is-per-project-admission-control.md),
+"What this does not fix"). Live today and independent of the queue decision.
+**Needs a call:** reject the sync while a run is active, or pin the run to its
+snapshot id and let syncs proceed. The second fits "latest wins" better but means
+retaining a snapshot until its run finishes — which cuts against "old snapshots
+are not retained".
 
 ---
 

@@ -59,14 +59,20 @@ Custom auxiliary artifacts (scripts, JSON context docs, prompts) registered via 
 
 ## 8. Concurrency: Per-Project Lock, No Queue
 
+> **Scope, clarified 2026-07-16 ([ADR-033](./decisions/ADR-033-no-queue-is-per-project-admission-control.md)):** this rule is **admission control per project**. It governs whether a _trigger_ is accepted — it is **not** a ban on the platform's internal work hand-off between the web process and the orchestrator (LISTEN/NOTIFY + atomic claim + stale-run sweep, ADR-026), nor on the per-run parallel scanner pool of §9. Those stay: they are exactly-once/durability machinery, and under the per-project lock a `queued` scan is a brief transient inside one accepted run, never a backlog. Read "no queuing" without this scope and you delete the guard that stops a duplicate orchestrator executing the same scans twice.
+
 - Lock is **strictly per project**: a run on Project A blocks only Project A; other projects run concurrently without restriction.
 - **No queuing, ever** (anti-abuse): a trigger against a project with an active run is **instantly rejected** — API returns `409 Conflict` with the active `run_id` and elapsed time; the UI disables the trigger via live status and shows an alert banner if a race slips through.
+- **Why it is not merely anti-abuse:** §3 is latest-wins — each sync replaces the snapshot and old ones are not retained. A queued run would execute against whatever snapshot exists when it finally starts, not the one it was triggered on, silently scanning code nobody asked about and attributing it to the wrong commit. Rejecting is the _correct_ behaviour, not just the defensive one.
+- **Already enforced in Postgres:** migration `0021_project_run_concurrency_guard.sql` takes a per-project advisory lock and rejects a second trigger with `ERRCODE 55000`. What remains to build is the surface — the `409` payload, the live trigger-disable, and the alert banner.
 
 ## 9. Execution Environment: Ephemeral Container per Run (resolved 2026-07-11)
 
 Each run executes in a **disposable Docker container**: provision → unpack the project's latest snapshot → install dependencies → execute the Graph Scanner, all selected deterministic scanners, and all selected LLM scanners **in parallel** → stream progress events → persist standardized outputs → destroy the container. The sandbox protects the **platform host** (it executes user-defined shell commands and skill scripts).
 
 Orchestration: acquire project lock (or 409) → parallel pool → join, standardize, persist, update aggregates, release lock. Workers that exceed timeout thresholds are failed and the run still finalizes.
+
+**Global concurrency cap (added 2026-07-16, [ADR-033](./decisions/ADR-033-no-queue-is-per-project-admission-control.md)):** §8 caps each project at one run, but nothing caps the platform. With N projects each legitimately running their one allowed run, N containers start at once. A **global concurrency limit, configured by env var**, bounds how many runs execute simultaneously; runs beyond it **wait** rather than being rejected. This is host protection, not admission control — the wait is bounded by the number of projects, not by anything a single user can do, so it does not reopen what §8 closes. Rejecting instead (503 + `Retry-After`) is the fallback if a bounded wait ever proves abusable.
 
 _Proposed implementation details (accept/override at review):_ base-image + package-store caching to keep installs fast; CPU/memory/wall-clock limits per run; network egress blocked during scanner execution (open only for the dependency-install phase); container teardown guaranteed by the finalizer even on failure.
 

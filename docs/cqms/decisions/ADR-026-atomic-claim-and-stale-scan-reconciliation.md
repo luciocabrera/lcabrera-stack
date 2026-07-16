@@ -1,24 +1,29 @@
 # ADR-026: Atomic queue claim + stale-'running' reconciliation
 
-**Status:** Accepted — **superseded in principle, not yet in code** (see below).
+**Status:** **Accepted — and explicitly retained** ([ADR-033](./ADR-033-no-queue-is-per-project-admission-control.md), owner decision 2026-07-16). Not superseded.
 
-> **⚠️ Superseded by [PRD_V2.md](../PRD_V2.md) §8 (2026-07-11) — but the code
-> below is still live.** §8 forbids queuing outright ("**No queuing, ever**":
-> a trigger against a project with an active run is instantly rejected with a
-> `409 Conflict` carrying the active `run_id` and elapsed time), and the
-> [alignment review](../reviews/2026-07-11-codepulse-alignment-review.md)
-> discards this ADR's claim/reconciliation machinery "outright", listing its
-> retirement under **Phase 2 (containerized, queue-free execution)**.
+> **✅ This ADR stands. Do not retire this machinery.**
 >
-> **Nothing has been retired.** `apps/scan-orchestrator/src/queue/`
-> (`listenForQueuedScans`, `processQueue`, `claimQueuedScan`,
-> `failStaleRunningScans`) plus migration `0007_scan_queued_notify.sql` are the
-> live execution backbone, and there is **no `409` contract anywhere** in
-> `apps/admin_system/src`. So this ADR still accurately describes what runs
-> today — which is precisely why the contradiction is tracked as an **open
-> decision** in [STATUS.md](../STATUS.md) §3.1 rather than quietly resolved in
-> either direction. Do not retire this machinery, and do not treat §8 as
-> implemented, without that decision.
+> It was briefly read as superseded: [PRD_V2.md](../PRD_V2.md) §8 says "**No
+> queuing, ever**", and the
+> [alignment review](../reviews/2026-07-11-codepulse-alignment-review.md)
+> turned that into a Phase-2 task to discard this ADR's claim/reconciliation
+> machinery outright.
+>
+> [ADR-033](./ADR-033-no-queue-is-per-project-admission-control.md) settled it
+> the other way, because §8 is **admission control per project** — and that
+> rule is already enforced in Postgres by migration
+> `0021_project_run_concurrency_guard.sql`, which rejects a second trigger
+> outright. **A backlog is already impossible.** What this ADR owns is not a
+> backlog but the durable, exactly-once hand-off between `admin_system` and
+> `apps/scan-orchestrator` — two processes that still need one — plus the
+> per-run parallel scanner pool §9 asks for.
+>
+> The machinery below is **correctness**: the atomic claim exists because a
+> duplicate orchestrator really did execute the same scans twice, and the stale
+> sweep because a dead orchestrator left scans `running` forever. Neither
+> problem goes away under §8. What §8 still needs built is only its _surface_ —
+> the `409` payload, the live trigger-disable, and the alert banner.
 
 ## Context
 

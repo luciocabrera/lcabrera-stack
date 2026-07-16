@@ -1,5 +1,22 @@
 # CodePulse Alignment Review — Codebase, ADRs & Legacy Specs vs PRD v2
 
+> **⚠️ One finding corrected since publication (2026-07-16).** This is a
+> point-in-time report and is not rewritten; the correction is recorded in
+> [ADR-033](../decisions/ADR-033-no-queue-is-per-project-admission-control.md)
+> and annotated inline at the affected Phase-2 bullet (§6).
+>
+> **§1.2 / §2 (ADR-026) / §5 read PRD_V2 §8's "no queuing, ever" as "discard the
+> queue's claim/reconciliation machinery outright". That is wrong.** §8 is
+> admission control _per project_, already enforced by migration `0021`'s
+> advisory lock, so a backlog is already impossible. The LISTEN/NOTIFY modules
+> are the durable exactly-once hand-off between two processes plus the per-run
+> parallel pool — **ADR-026 is retained**. What §8 actually still needs is only
+> its surface (the `409` payload, live trigger-disable, alert banner), plus a
+> new global concurrency cap for host protection.
+>
+> Everything else in this report stands. Current state:
+> [STATUS.md](../STATUS.md).
+
 **Date:** 2026-07-11
 **Yardstick:** [PRD_V2.md](../PRD_V2.md) (canonical, confirmed with product owner)
 **Audited:** all 27 CQMS ADRs (`decisions/`), TECH_SPEC.md §2.1–§2.13, the original PRD.md, and the implementing code (verdicts carry verified file citations; three high-impact claims were independently spot-checked).
@@ -125,7 +142,7 @@ Plus doc hygiene: superseded-banner on PRD.md/TECH_SPEC.md pointing to PRD_V2.md
 **Phase 2 — Containerized, queue-free execution** _(ADR-011/015/019/020/026 changes)_
 
 - Docker run lifecycle: provision → unpack latest snapshot → dependency install (`needs_install` flag, §14.2) → parallel scanner pool → artifact collection → guaranteed teardown; base-image + package-store caching; CPU/mem/wall-clock limits; egress blocked during scan (allowlist Anthropic API for LLM scanners).
-- Replace queue: retire `0007_scan_queued_notify`, `claimQueuedScan`, `failStaleRunningScans`, `listenForQueuedScans` drain loop; promote the 0021 advisory-lock guard into the full HTTP `409` contract (active `run_id` + elapsed) and live-status trigger-disable.
+- ~~Replace queue: retire `0007_scan_queued_notify`, `claimQueuedScan`, `failStaleRunningScans`, `listenForQueuedScans` drain loop;~~ **CORRECTED by [ADR-033](../decisions/ADR-033-no-queue-is-per-project-admission-control.md) (2026-07-16) — do NOT retire that machinery.** §8 is admission control _per project_, already enforced by 0021's advisory lock, so a backlog is already impossible; what those modules provide is the durable exactly-once hand-off between the two processes plus the per-run parallel pool, and deleting them re-earns the double-execution and stuck-`running` bugs they were written for. **What remains of this bullet:** promote the 0021 advisory-lock guard into the full HTTP `409` contract (active `run_id` + elapsed) and live-status trigger-disable — plus a new global concurrency cap (env var, §9 host protection).
 - Server-side ingestion from container artifacts replaces the skills' self-ingest CLI step; agent-runner runs in-container (retire `assertSafeTargetPath`, demote secret-file guard to defense-in-depth).
 - Authenticate `/ws/runs`.
 
