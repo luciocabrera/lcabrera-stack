@@ -1,76 +1,31 @@
-import { Link } from 'react-router';
-
 import type {
   ColumnPinningState,
   TableColumn,
-} from '@/components/Table/Table.types';
+  TableCrudConfig,
+} from '@repo/ui/components/Table/Table.types';
 
-import { Button } from '@/components/Button';
-import { EyeIcon } from '@/components/Icons';
-import { ICON_SIZE_XS } from '@/design-system/constants/iconSizes.constants';
-import { type EnterpriseOrder, enterpriseOrdersApi } from '@/services';
-import {
-  createDistinctFilterOptions,
-  createStaticFilterOptions,
-} from '@/utils/filters';
+import { createBasicColumn } from '@repo/ui/components/Table/utils';
+import { createStaticFilterOptions } from '@repo/ui/utils/filters';
 
-type BasicColumnArgs = {
-  readonly dataType: 'boolean' | 'currency' | 'date' | 'number' | 'string';
-  readonly key: keyof EnterpriseOrder;
-  readonly label: string;
-  readonly maxWidth: number;
-  readonly minWidth: number;
+import type { EnterpriseOrder } from '@/services';
+
+export const TITLE = {
+  plural: 'Enterprise Orders',
+  singular: 'Order',
 };
-
-type DistinctStringColumnArgs = {
-  readonly columnName: keyof EnterpriseOrder;
-  readonly key: keyof EnterpriseOrder;
-  readonly label: string;
-  readonly maxWidth: number;
-  readonly minWidth: number;
-};
-
-const createDistinctStringColumn = ({
-  columnName,
-  key,
-  label,
-  maxWidth,
-  minWidth,
-}: DistinctStringColumnArgs): TableColumn<EnterpriseOrder> => {
-  return {
-    dataType: 'string',
-    ...createDistinctFilterOptions<EnterpriseOrder>({
-      columnName,
-      fetchDistinctValues: enterpriseOrdersApi.fetchDistinctValues,
-    }),
-    key,
-    label,
-    maxWidth,
-    minWidth,
-  };
-};
-
-const createBasicColumn = ({
-  dataType,
-  key,
-  label,
-  maxWidth,
-  minWidth,
-}: BasicColumnArgs): TableColumn<EnterpriseOrder> => {
-  return {
-    dataType,
-    key,
-    label,
-    maxWidth,
-    minWidth,
-  };
-};
-
-export const TITLE = 'Enterprise Orders - Infinite Scroll';
 export const TABLE_NAME = 'enterprise_orders';
 export const SCHEMA_NAME = 'public';
 
 export const PERSISTENCE_KEY = 'enterprise-orders-table';
+
+export const DELETE_ACTION_PATH = '/_action/enterprise-orders/delete';
+
+export const CRUD: TableCrudConfig = {
+  create: true,
+  delete: true,
+  read: true,
+  update: true,
+};
 
 export const DEFAULT_COLUMN_PINNING: ColumnPinningState<EnterpriseOrder> = {
   left: [],
@@ -80,13 +35,14 @@ export const DEFAULT_COLUMN_PINNING: ColumnPinningState<EnterpriseOrder> = {
 export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
   createBasicColumn({
     dataType: 'number',
+    isPrimaryKey: true,
     key: 'order_id',
     label: 'Order ID',
     maxWidth: 120,
     minWidth: 90,
   }),
-  createDistinctStringColumn({
-    columnName: 'order_number',
+  createBasicColumn({
+    dataType: 'string',
     key: 'order_number',
     label: 'Order #',
     maxWidth: 180,
@@ -137,15 +93,15 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
     maxWidth: 250,
     minWidth: 150,
   }),
-  createDistinctStringColumn({
-    columnName: 'customer_email',
+  createBasicColumn({
+    dataType: 'string',
     key: 'customer_email',
     label: 'Email',
     maxWidth: 280,
     minWidth: 180,
   }),
-  createDistinctStringColumn({
-    columnName: 'customer_type',
+  createBasicColumn({
+    dataType: 'string',
     key: 'customer_type',
     label: 'Customer Type',
     maxWidth: 180,
@@ -259,36 +215,36 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
     maxWidth: 150,
     minWidth: 110,
   }),
-  createDistinctStringColumn({
-    columnName: 'shipping_city',
+  createBasicColumn({
+    dataType: 'string',
     key: 'shipping_city',
     label: 'Ship City',
     maxWidth: 180,
     minWidth: 120,
   }),
-  createDistinctStringColumn({
-    columnName: 'shipping_state',
+  createBasicColumn({
+    dataType: 'string',
     key: 'shipping_state',
     label: 'Ship State',
     maxWidth: 150,
     minWidth: 110,
   }),
-  createDistinctStringColumn({
-    columnName: 'shipping_country',
+  createBasicColumn({
+    dataType: 'string',
     key: 'shipping_country',
     label: 'Ship Country',
     maxWidth: 180,
     minWidth: 130,
   }),
-  createDistinctStringColumn({
-    columnName: 'carrier',
+  createBasicColumn({
+    dataType: 'string',
     key: 'carrier',
     label: 'Carrier',
     maxWidth: 150,
     minWidth: 100,
   }),
-  createDistinctStringColumn({
-    columnName: 'warehouse_location',
+  createBasicColumn({
+    dataType: 'string',
     key: 'warehouse_location',
     label: 'Warehouse',
     maxWidth: 180,
@@ -329,25 +285,4 @@ export const COLUMNS: TableColumn<EnterpriseOrder>[] = [
     maxWidth: 150,
     minWidth: 130,
   }),
-  {
-    isFilterable: false,
-    isHeaderHidden: true,
-    isSortable: false,
-    isStatic: true,
-    key: 'actions',
-    label: 'Actions',
-    maxWidth: 32,
-    minWidth: 32,
-    render: (row) => (
-      <Link prefetch='intent' to={`/enterprise-orders/${String(row.order_id)}`}>
-        <Button
-          aria-label={`View order ${String(row.order_id)}`}
-          color='ghost'
-          icon={<EyeIcon size={ICON_SIZE_XS} />}
-          size='embedded'
-          width='auto'
-        />
-      </Link>
-    ),
-  },
 ];

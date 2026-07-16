@@ -1,13 +1,16 @@
-import type { ColumnFiltersState, SortingState } from '@/components/Table';
+import type {
+  ColumnFiltersState,
+  SortingState,
+} from '@repo/ui/components/Table';
 
 import {
   buildPaginatedQueryParams,
   fakeDelay,
   fetchAndValidate,
   getApiBaseUrl,
-} from '@/utils/api';
-import { createLogger } from '@/utils/logger';
-import { isObject } from '@/utils/typeGuards';
+} from '@repo/data-access/api';
+import { createLogger } from '@repo/ui/utils/logger';
+import { isObject } from '@repo/ui/utils/typeGuards';
 
 const log = createLogger({ prefix: '[orders]' });
 
@@ -88,13 +91,6 @@ type EnterpriseOrderDetailResponse = {
   readonly data: EnterpriseOrder;
 };
 
-const isDistinctValuesResponse = (
-  value: unknown,
-): value is { hasMore: boolean; values: string[] } =>
-  isObject(value) &&
-  typeof value['hasMore'] === 'boolean' &&
-  Array.isArray(value['values']);
-
 const isEnterpriseOrderDetailResponse = (
   value: unknown,
 ): value is EnterpriseOrderDetailResponse =>
@@ -121,32 +117,24 @@ type FetchEnterpriseOrdersParams = {
  */
 export const enterpriseOrdersApi = {
   /**
-   * Fetch distinct values for a column (for dynamic filter options)
+   * Delete an enterprise order by ID
    */
-  fetchDistinctValues: async ({
-    columnName,
-    limit = 50,
-    offset = 0,
+  deleteEnterpriseOrder: async ({
+    orderId,
     requestUrl,
   }: {
-    columnName: keyof EnterpriseOrder;
-    limit?: number;
-    offset?: number;
+    orderId: number;
     requestUrl?: string;
-  }): Promise<{ hasMore: boolean; values: string[] }> => {
-    const url = `${getApiBaseUrl(requestUrl)}/enterprise-orders/distinct/${columnName}?limit=${limit}&offset=${offset}`;
-    log.debug(
-      '🎯 Fetching distinct values for:',
-      columnName,
-      'offset:',
-      offset,
-    );
+  }) => {
+    const url = `${getApiBaseUrl(requestUrl)}/enterprise-orders/${orderId}`;
 
-    return fetchAndValidate({
-      isValid: isDistinctValuesResponse,
-      shapeErrorMessage: `Unexpected response shape from /enterprise-orders/distinct/${columnName}`,
-      url,
-    });
+    const response = await fetch(url, { method: 'DELETE' });
+
+    if (!response.ok) {
+      throw new Error(
+        `API request failed: ${response.status} ${response.statusText}`,
+      );
+    }
   },
 
   /**
@@ -158,7 +146,7 @@ export const enterpriseOrdersApi = {
   }: {
     orderId: number;
     requestUrl?: string;
-  }): Promise<EnterpriseOrderDetailResponse> => {
+  }) => {
     const url = `${getApiBaseUrl(requestUrl)}/enterprise-orders/${orderId}`;
     log.debug('🎯 Fetching order by ID:', orderId);
 
@@ -178,9 +166,7 @@ export const enterpriseOrdersApi = {
     requestUrl,
     skip,
     sorting,
-  }: FetchEnterpriseOrdersParams): Promise<
-    EnterpriseOrdersResponse & { hasMore: boolean }
-  > => {
+  }: FetchEnterpriseOrdersParams) => {
     const params = buildPaginatedQueryParams({ filter, limit, skip, sorting });
 
     const url = `${getApiBaseUrl(requestUrl)}/enterprise-orders/paginated?${params.toString()}`;
@@ -188,9 +174,7 @@ export const enterpriseOrdersApi = {
     log.debug('🌐 Filter object:', filter);
     log.debug('🌐 Sorting:', sorting);
 
-    const fetchData = async (): Promise<
-      EnterpriseOrdersResponse & { hasMore: boolean }
-    > => {
+    const fetchData = async () => {
       const response = await fetch(url);
       log.debug('📡 Response status:', response.status, response.statusText);
 

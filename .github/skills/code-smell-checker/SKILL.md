@@ -5,7 +5,7 @@ argument-hint: 'Target area or language, for example: src/, TypeScript services,
 user-invocable: true
 context: fork
 agent: general-purpose
-allowed-tools: Bash(cat:*,date:*,mkdir:*,tee:*), Read, Grep, Glob
+allowed-tools: Bash(cat:*,date:*,git:*,mkdir:*,node:*,tee:*), Read, Grep, Glob
 ---
 
 # Code Smell Checker
@@ -131,10 +131,18 @@ For each finding, include: finding_id, rule_id (catalog ID or `CHK.<DOMAIN>.<LAB
 
 After producing the final report, **always** save it to disk without prompting the user:
 
-1. Capture the current timestamp: `date +%Y-%m-%d--%H-%M-%S`
-2. Create the output directory: `.tmp/code-smell-checker/{timestamp}/`
+1. Determine the output directory. Check whether the `OUTPUT_DIR` environment variable is already set (`echo "$OUTPUT_DIR"`) — a UI-triggered scan sets this so its scratch files land in the right place, not the target project's own working tree. If it's set, use it as-is. Otherwise, capture the current timestamp (`date +%Y-%m-%d--%H-%M-%S`) and use `.tmp/code-smell-checker/{timestamp}/`.
+2. Create the output directory (`mkdir -p`) if it doesn't already exist.
 3. Write the full report as `report.md` inside that directory, following the shared `REPORT_TEMPLATE.md` structure exactly.
-4. Tell the user the path to the saved file.
+4. Build `report.json` from the same findings, following `../code-smell-shared/REPORT_JSON_CONTRACT.md` exactly (flatten severity counts, map any non-canonical `status` — e.g. `resolved` — to `done`; every finding is `single_location`, this skill never emits `duplication_group`), and write it as `report.json` in the same directory.
+5. Tell the user the paths to both saved files.
+6. Ingest into CQMS (best-effort — do not fail the skill run if this step fails; both files are already saved regardless). Run, substituting `$OUTPUT_DIR` with the resolved directory from step 1:
+
+```bash
+node --env-file-if-exists=docker/local/.env --env-file-if-exists=packages/scan-ingestion/.env --experimental-strip-types packages/scan-ingestion/src/cli/ingest.cli.ts --skill=code-smell-checker --run-dir="$OUTPUT_DIR" --local-path="$(git rev-parse --show-toplevel)"
+```
+
+If it fails (e.g. `cqms_db` unreachable), tell the user the ingestion failed and why, but do not treat it as a skill failure.
 
 The directory layout groups all runs of this skill together, with each run in its own timestamped subfolder:
 
@@ -142,9 +150,11 @@ The directory layout groups all runs of this skill together, with each run in it
 .tmp/
 └── code-smell-checker/
     ├── 2026-06-12--18-40-56/
-    │   └── report.md
+    │   ├── report.md
+    │   └── report.json
     └── 2026-06-15--09-30-12/
-        └── report.md
+        ├── report.md
+        └── report.json
 ```
 
 ## Quality Checks
@@ -164,6 +174,8 @@ Before finalizing the report:
 - remediation plan proposed in execution order
 - validation steps defined (lint/type/tests/monitoring where applicable)
 - residual risk documented
+- `report.md` and `report.json` both saved to the same run directory
+- ingestion into CQMS attempted (best-effort; failures reported but non-fatal)
 
 ## Example Prompts
 

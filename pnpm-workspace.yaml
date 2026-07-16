@@ -8,6 +8,7 @@ allowBuilds:
 blockExoticSubdeps: true
 
 catalog:
+  '@anthropic-ai/claude-agent-sdk': ^0.3.211
   '@babel/preset-typescript': ^8.0.1
   '@eslint/js': ^10.0.1
   '@fastify/cors': ^11.3.0
@@ -24,43 +25,50 @@ catalog:
   '@types/pg': ^8.20.0
   '@types/react': ^19.2.17
   '@types/react-dom': ^19.2.3
-  '@typescript-eslint/utils': ^8.63.0
+
+  '@types/ws': ^8.18.1
+  '@typescript-eslint/utils': ^8.64.0
   '@vitest/coverage-v8': ^4.1.10
+
   babel-plugin-react-compiler: ^1.0.0
   cors: ^2.8.6
   eslint: ^10.7.0
   eslint-config-prettier: ^10.1.8
   eslint-plugin-local-rules: ^3.0.2
   eslint-plugin-perfectionist: ^5.10.0
-  eslint-plugin-react-dom: ^5.14.2
+  eslint-plugin-react-dom: ^5.16.1
   eslint-plugin-react-hooks: ^7.1.1
   eslint-plugin-react-refresh: ^0.5.3
-  eslint-plugin-react-x: ^5.14.2
+  eslint-plugin-react-x: ^5.16.1
   eslint-plugin-security: ^4.0.1
-  eslint-plugin-unicorn: ^71.1.0
+  eslint-plugin-unicorn: ^72.0.0
   express: ^5.2.1
-  fallow: ^3.3.0
+  fallow: ^3.6.0
   fastify: ^5.10.0
   globals: ^17.7.0
-  isbot: 5.2.0
+  isbot: 5.2.1
   jsdom: ^29.1.1
-  knip: ^6.26.0
+  knip: ^6.27.0
   lighthouse: ^13.4.0
   nodemon: ^3.1.14
   pg: ^8.22.0
   playwright: ^1.61.1
   react: ^19.2.7
   react-dom: ^19.2.7
+  react-markdown: ^10.1.0
+  ts-morph: ^28.0.0
+  ws: ^8.21.1
   react-router: ^8.2.0
-  typescript: ^7.0.2
+  typescript: ^6.0.3
 
-  typescript-eslint: ^8.63.0
-  vite: 8.1.4
+  typescript-eslint: ^8.64.0
+  vite: 8.1.5
   vite-plugin-babel: ^1.7.3
   vite-plus: ^0.2.4
   vitest: 4.1.10
 
   zod: ^4.4.3
+  fflate: ^0.8.3
 
 catalogMode: prefer
 # minimumReleaseAge: 1440
@@ -73,17 +81,31 @@ minimumReleaseAgeExclude:
   - '@vitest/*'
 
   - '@babel/*'
-  - typescript-eslint@8.62.0 || 8.62.1
+  - typescript-eslint@8.62.0 || 8.62.1 || 8.63.0
   - '@fallow-cli/*'
 
   - '@react-router/*'
 
   - '@voidzero-dev/*'
-  - eslint-plugin-react-dom@5.10.1 || 5.10.2 || 5.10.3 || 5.14.2
-  - eslint-plugin-react-x@5.10.1 || 5.10.2 || 5.10.3 || 5.14.2
-  - vite-plus@0.2.2
+  - eslint-plugin-react-dom@5.10.1 || 5.10.2 || 5.10.3 || 5.11.0 || 5.12.0 || 5.14.2 || 5.14.5 || 5.14.10 || 5.16.1
+  - eslint-plugin-react-x@5.10.1 || 5.10.2 || 5.10.3 || 5.11.0 || 5.12.0 || 5.14.2 || 5.14.5 || 5.14.10 || 5.16.1
+  - vite-plus@0.2.2 || 0.2.4
+  - fallow@3.0.0 || 3.5.1 || 3.6.0
+  - '@anthropic-ai/claude-agent-sdk-darwin-arm64@0.3.202 || 0.3.204 || 0.3.207 || 0.3.210 || 0.3.211'
+  - '@anthropic-ai/claude-agent-sdk-darwin-x64@0.3.202 || 0.3.204 || 0.3.207 || 0.3.210 || 0.3.211'
+  - '@anthropic-ai/claude-agent-sdk-linux-arm64-musl@0.3.202 || 0.3.204 || 0.3.207 || 0.3.210 || 0.3.211'
+  - '@anthropic-ai/claude-agent-sdk-linux-arm64@0.3.202 || 0.3.204 || 0.3.207 || 0.3.210 || 0.3.211'
+  - '@anthropic-ai/claude-agent-sdk-linux-x64-musl@0.3.202 || 0.3.204 || 0.3.207 || 0.3.210 || 0.3.211'
+  - '@anthropic-ai/claude-agent-sdk-linux-x64@0.3.202 || 0.3.204 || 0.3.207 || 0.3.210 || 0.3.211'
+  - '@anthropic-ai/claude-agent-sdk-win32-arm64@0.3.202 || 0.3.204 || 0.3.207 || 0.3.210 || 0.3.211'
+  - '@anthropic-ai/claude-agent-sdk-win32-x64@0.3.202 || 0.3.204 || 0.3.207 || 0.3.210 || 0.3.211'
+  - '@anthropic-ai/claude-agent-sdk@0.3.202 || 0.3.204 || 0.3.207 || 0.3.210 || 0.3.211'
   - eslint@10.7.0
-  - knip@6.26.0
+  - knip@6.26.0 || 6.27.0
+  - eslint-plugin-unicorn@72.0.0
+  - isbot@5.2.1
+  - ws@8.21.1
+  - vite@8.1.5
 
 # overrides:
 #   vite: "catalog:"

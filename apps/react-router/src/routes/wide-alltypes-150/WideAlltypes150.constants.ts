@@ -1,14 +1,14 @@
-import type { TableColumn } from '@/components/Table/Table.types';
+import type { TableColumn } from '@repo/ui/components/Table/Table.types';
+
 import type { WideAlltypes150 } from '@/services';
 
 export const PERSISTENCE_KEY = 'wide-alltypes-150-table';
 export const SCHEMA_NAME = 'public';
 export const TABLE_NAME = 'wide_alltypes_150';
-export const TITLE = 'Wide All-Types — 150 Columns × 1M Rows';
-
-// ─── Column helpers ──────────────────────────────────────────────────────────
-
-type ColDataType = 'boolean' | 'date' | 'number' | 'string';
+export const TITLE = {
+  plural: 'Wide All-Types — 150 Columns × 1M Rows',
+  singular: 'Row',
+};
 
 /**
  * Returns the display dataType for a column at the given index (1–149).
@@ -17,7 +17,7 @@ type ColDataType = 'boolean' | 'date' | 'number' | 'string';
  *   6 → boolean  |  9 → date
  */
 // fallow-ignore-next-line complexity -- temporary testing suppression
-const getColDataType = (index: number): ColDataType => {
+const getColDataType = (index: number) => {
   const mod = index % 20;
   if (mod === 6) return 'boolean';
   if (mod === 9) return 'date';
@@ -52,6 +52,7 @@ const PG_TYPE_LABELS: Readonly<Record<number, string>> = {
 
 const ID_COLUMN: TableColumn<WideAlltypes150> = {
   dataType: 'number',
+  isPrimaryKey: true,
   key: 'id',
   label: 'ID',
   minWidth: 80,
@@ -61,9 +62,7 @@ type BuildGeneratedColumnArgs = {
   readonly index: number;
 };
 
-const buildGeneratedColumn = ({
-  index,
-}: BuildGeneratedColumnArgs): TableColumn<WideAlltypes150> => {
+const buildGeneratedColumn = ({ index }: BuildGeneratedColumnArgs) => {
   const mod = index % 20;
   const key = `c_${String(index).padStart(3, '0')}` as keyof WideAlltypes150;
   const typeLabel = PG_TYPE_LABELS[mod] ?? 'Col';

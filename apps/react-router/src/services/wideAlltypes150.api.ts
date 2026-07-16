@@ -1,9 +1,11 @@
+import type { SortingState } from '@repo/ui/components/Table';
+
 import {
   buildPaginatedQueryParams,
   fetchAndValidate,
   getApiBaseUrl,
-} from '@/utils/api';
-import { isObject } from '@/utils/typeGuards';
+} from '@repo/data-access/api';
+import { isObject } from '@repo/ui/utils/typeGuards';
 
 /**
  * Wide All-Types 150 API Service
@@ -193,10 +195,7 @@ type FetchWideAlltypes150Params = {
   readonly limit: number;
   readonly requestUrl?: string;
   readonly skip: number;
-  readonly sorting?: readonly {
-    readonly columnKey: keyof WideAlltypes150;
-    readonly direction: 'asc' | 'desc';
-  }[];
+  readonly sorting?: SortingState<WideAlltypes150>;
 };
 
 // ─── Service ──────────────────────────────────────────────────────────────────
@@ -215,7 +214,7 @@ export const wideAlltypes150Api = {
     requestUrl,
     skip,
     sorting,
-  }: FetchWideAlltypes150Params): Promise<WideAlltypes150Response> => {
+  }: FetchWideAlltypes150Params) => {
     const params = buildPaginatedQueryParams({ limit, skip, sorting });
 
     const url = `${getApiBaseUrl(requestUrl)}/wide-alltypes-150/paginated?${params.toString()}`;

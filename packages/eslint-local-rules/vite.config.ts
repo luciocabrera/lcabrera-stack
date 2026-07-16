@@ -10,6 +10,10 @@ export default defineConfig({
         // and tracking its own output as an input causes guaranteed cache misses.
         input: [{ auto: true }, '!build/**'],
       },
+      test: {
+        cache: false,
+        command: 'node node_modules/vitest/vitest.mjs run --passWithNoTests',
+      },
     },
   },
 });

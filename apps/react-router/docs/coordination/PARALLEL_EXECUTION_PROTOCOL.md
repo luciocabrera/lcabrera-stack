@@ -50,8 +50,8 @@ Before making planning or threshold claims, regenerate the canonical artifact fr
 
 This command refreshes all source-of-truth artifacts together:
 
-- `reports/fallow/fallow-full-latest.json`
-- `reports/fallow-complexity-threshold-analysis.md`
+- `reports/fallow/full-latest.json`
+- `reports/fallow/complexity-threshold-analysis.md`
 - `apps/react-router/docs/coordination/PROGRESS_TRACKER.md`
 
 Do not report threshold counts from ad-hoc terminal output when these files are stale.

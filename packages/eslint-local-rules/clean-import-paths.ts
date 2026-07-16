@@ -1,4 +1,10 @@
-import type { Rule } from 'eslint';
+import type { TSESLint, TSESTree } from '@typescript-eslint/utils';
+
+import { ESLintUtils } from '@typescript-eslint/utils';
+
+const createRule = ESLintUtils.RuleCreator(
+  (name) => `https://example.com/rule/${name}`,
+);
 
 const INTERNAL_PATH_PREFIXES = ['./', '../', '@/'] as const;
 
@@ -8,7 +14,7 @@ const isInternalPath = (source: string): boolean =>
 const normalizeImportPath = (source: string): string => {
   let normalized = source;
 
-  normalized = normalized.replace(/\/index(?:\.tsx?|\.ts)?$/, '');
+  normalized = normalized.replace(/\/index(?:\.tsx|\.ts)?$/, '');
   normalized = normalized.replace(/\.tsx?$/, '');
 
   if (normalized === '.') {
@@ -22,15 +28,18 @@ const normalizeImportPath = (source: string): string => {
   return normalized;
 };
 
-const getQuoteCharacter = (rawSourceText: string): '"' | "'" =>
+const getQuoteCharacter = (rawSourceText: string): "'" | '"' =>
   rawSourceText.startsWith('"') ? '"' : "'";
 
 const reportIfPathNeedsCleanup = ({
   context,
   node,
 }: {
-  readonly context: Rule.RuleContext;
-  readonly node: any;
+  readonly context: TSESLint.RuleContext<'cleanImportPath', []>;
+  readonly node:
+    | TSESTree.ExportAllDeclaration
+    | TSESTree.ExportNamedDeclaration
+    | TSESTree.ImportDeclaration;
 }): void => {
   const sourceNode = node.source;
 
@@ -64,12 +73,34 @@ const reportIfPathNeedsCleanup = ({
   });
 };
 
-const rule: Rule.RuleModule = {
+export default createRule({
+  create(context) {
+    return {
+      ExportAllDeclaration(node: TSESTree.ExportAllDeclaration) {
+        reportIfPathNeedsCleanup({
+          context,
+          node,
+        });
+      },
+      ExportNamedDeclaration(node: TSESTree.ExportNamedDeclaration) {
+        reportIfPathNeedsCleanup({
+          context,
+          node,
+        });
+      },
+      ImportDeclaration(node: TSESTree.ImportDeclaration) {
+        reportIfPathNeedsCleanup({
+          context,
+          node,
+        });
+      },
+    };
+  },
+  defaultOptions: [],
   meta: {
     docs: {
       description:
         'Enforce extensionless and indexless internal import/export paths',
-      recommended: false,
     },
     fixable: 'code',
     messages: {
@@ -79,29 +110,5 @@ const rule: Rule.RuleModule = {
     schema: [],
     type: 'suggestion',
   },
-
-  create(context) {
-    return {
-      ExportAllDeclaration(node: any) {
-        reportIfPathNeedsCleanup({
-          context,
-          node,
-        });
-      },
-      ExportNamedDeclaration(node: any) {
-        reportIfPathNeedsCleanup({
-          context,
-          node,
-        });
-      },
-      ImportDeclaration(node: any) {
-        reportIfPathNeedsCleanup({
-          context,
-          node,
-        });
-      },
-    };
-  },
-};
-
-export default rule;
+  name: 'clean-import-paths',
+});

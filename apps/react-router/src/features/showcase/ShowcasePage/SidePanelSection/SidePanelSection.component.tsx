@@ -1,27 +1,27 @@
-import * as stylex from '@stylexjs/stylex';
-import { useState } from 'react';
-
-import { Button } from '@/components/Button';
-import { Card, CardBody, CardDescription, CardTitle } from '@/components/Card';
+import { Button } from '@repo/ui/components/Button';
+import {
+  Card,
+  CardBody,
+  CardDescription,
+  CardTitle,
+} from '@repo/ui/components/Card';
 import {
   InfoIcon,
   MenuCloseIcon,
   MenuIcon,
   SettingsIcon,
   SuccessIcon,
-} from '@/components/Icons';
+} from '@repo/ui/components/Icons';
 import {
   SidePanel,
   SidePanelBody,
   SidePanelFooter,
   SidePanelHeader,
   SidePanelTitle,
-} from '@/components/SidePanel';
-import {
-  HorizontalToolbarExample,
-  HorizontalToolbarExampleShort,
-} from '@/components/Toolbar/Toolbar.examples';
-import { ICON_SIZE_MD } from '@/design-system/constants';
+} from '@repo/ui/components/SidePanel';
+import { ICON_SIZE_MD } from '@repo/ui/design-system/constants';
+import * as stylex from '@stylexjs/stylex';
+import { useState } from 'react';
 
 import { styles as pageStyles } from '../ShowcasePage.stylex';
 import { ShowcaseSection } from '../ShowcaseSection';
@@ -84,11 +84,11 @@ export const SidePanelSection = () => {
           <p>Press Escape or click the overlay to close.</p>
         </SidePanelBody>
         <SidePanelFooter>
-          <Button onClick={handleCloseLeft} size='sm' width='full'>
+          <Button onClick={handleCloseLeft} size='sm'>
             <span {...stylex.props(styles.iconLeft)}>
               <MenuCloseIcon size={ICON_SIZE_MD} />
             </span>
-            Close
+            {'Close'}
           </Button>
         </SidePanelFooter>
       </SidePanel>
@@ -115,22 +115,14 @@ export const SidePanelSection = () => {
             <p>This right panel is larger (lg size).</p>
             <p>You can put any content here, including other components.</p>
           </div>
-
-          <HorizontalToolbarExample />
-          <HorizontalToolbarExampleShort />
         </SidePanelBody>
         <SidePanelFooter>
           <div {...stylex.props(styles.buttonRow)}>
-            <Button
-              color='ghost'
-              onClick={handleCloseRight}
-              size='sm'
-              width='full'
-            >
-              Cancel
-            </Button>
-            <Button onClick={handleCloseRight} size='sm' width='full'>
+            <Button onClick={handleCloseRight} size='sm'>
               Confirm
+            </Button>
+            <Button onClick={handleCloseRight} size='sm' variant='ghost'>
+              Cancel
             </Button>
           </div>
         </SidePanelFooter>

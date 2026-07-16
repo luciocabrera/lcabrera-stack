@@ -1,8 +1,8 @@
 import type { RequestHandler } from 'express';
 
-import { createRequestHandler } from '../../utils/createRequestHandler.util';
-
 import type { DbSanityRepository } from './dbSanity.repository';
+
+import { createRequestHandler } from '../../utils/createRequestHandler.util';
 
 export type DbSanityController = {
   readonly getDbSanity: RequestHandler;

@@ -1,19 +1,8 @@
 import type { QueryValue } from '../../types/api.types.js';
-
 import type {
   EnterpriseOrdersFilter,
   EnterpriseOrdersFilters,
 } from './enterpriseOrders.types.js';
-
-type BuildWhereClauseResult = {
-  readonly queryParams: readonly QueryValue[];
-  readonly whereClause: string;
-};
-
-type FilterConditionResult = {
-  readonly condition?: string;
-  readonly queryParams: readonly QueryValue[];
-};
 
 type AppendBooleanFilterArgs = {
   readonly columnName: string;
@@ -49,6 +38,16 @@ type AppendTextFilterArgs = {
   readonly columnName: string;
   readonly filter: Extract<EnterpriseOrdersFilter, { readonly type: 'text' }>;
   readonly nextParameterIndex: number;
+};
+
+type BuildWhereClauseResult = {
+  readonly queryParams: readonly QueryValue[];
+  readonly whereClause: string;
+};
+
+type FilterConditionResult = {
+  readonly condition?: string;
+  readonly queryParams: readonly QueryValue[];
 };
 
 const appendTextFilter = ({
@@ -279,16 +278,16 @@ const buildFilterCondition = ({
         nextParameterIndex,
       });
     }
-    case 'number': {
-      return appendNumberFilter({
+    case 'multiSelect':
+    case 'select': {
+      return appendSelectFilter({
         columnName,
         filter,
         nextParameterIndex,
       });
     }
-    case 'multiSelect':
-    case 'select': {
-      return appendSelectFilter({
+    case 'number': {
+      return appendNumberFilter({
         columnName,
         filter,
         nextParameterIndex,

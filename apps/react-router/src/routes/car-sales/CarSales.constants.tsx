@@ -1,10 +1,14 @@
-import type { TableColumn } from '@/components/Table/Table.types';
+import type { TableColumn } from '@repo/ui/components/Table/Table.types';
+
 import type { CarSale } from '@/services';
 
 export const PERSISTENCE_KEY = 'car-sales-table';
 export const SCHEMA_NAME = 'public';
 export const TABLE_NAME = 'car_sales';
-export const TITLE = 'Car Sales Data';
+export const TITLE = {
+  plural: 'Car Sales Data',
+  singular: 'Car Sale',
+};
 
 /**
  * Column definitions for the CarSale data table.
@@ -13,6 +17,7 @@ export const TITLE = 'Car Sales Data';
 export const COLUMNS: TableColumn<CarSale>[] = [
   {
     dataType: 'number',
+    isPrimaryKey: true,
     key: 'car_id',
     label: 'ID',
     maxWidth: 150,

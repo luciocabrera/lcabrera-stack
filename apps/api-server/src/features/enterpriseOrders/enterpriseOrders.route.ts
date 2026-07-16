@@ -1,5 +1,6 @@
-import { Router } from 'express';
 import type { Pool } from 'pg';
+
+import { Router } from 'express';
 
 import type { EnvConfig } from '../../config/env.schema';
 
@@ -21,13 +22,11 @@ export const createEnterpriseOrdersRoute = ({
   const router = Router();
   const repository = createEnterpriseOrdersRepository({ pool });
   const controller = createEnterpriseOrdersController({
-    distinctValuesDelayMs: envConfig.DISTINCT_VALUES_DELAY_MS,
     enterpriseOrdersDelayMs: envConfig.ENTERPRISE_ORDERS_DELAY_MS,
     repository,
   });
 
   router.get('/paginated', controller.getPaginated);
-  router.get('/distinct/:columnName', controller.getDistinctValues);
   router.get('/:orderId', controller.getOrderById);
 
   return router;

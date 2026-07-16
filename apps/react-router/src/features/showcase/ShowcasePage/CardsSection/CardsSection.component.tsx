@@ -1,6 +1,4 @@
-import * as stylex from '@stylexjs/stylex';
-
-import { Button } from '@/components/Button';
+import { Button } from '@repo/ui/components/Button';
 import {
   Card,
   CardBody,
@@ -8,13 +6,14 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/Card';
+} from '@repo/ui/components/Card';
 import {
   ErrorIcon,
   InfoIcon,
   SuccessIcon,
   WarningIcon,
-} from '@/components/Icons';
+} from '@repo/ui/components/Icons';
+import * as stylex from '@stylexjs/stylex';
 
 import { styles } from '../ShowcasePage.stylex';
 import { ShowcaseSection } from '../ShowcaseSection';
@@ -46,9 +45,7 @@ export const CardsSection = () => (
             <p>This card includes a footer section.</p>
           </CardBody>
           <CardFooter>
-            <Button size='sm' width='full'>
-              Action
-            </Button>
+            <Button size='sm'>Action</Button>
           </CardFooter>
         </Card>
 

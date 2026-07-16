@@ -1,0 +1,172 @@
+# utils/ Architecture
+
+Pure utility functions for column processing and state persistence.
+
+## File Structure
+
+```
+utils/
+├── arePersistedUiStatesEqual.util.ts             → Compare persisted table UI slices only
+├── createActionsColumn.util.ts                   → Build the row-actions column, merging consumer overrides onto defaults
+├── createBasicColumn.util.ts                     → Build generic non-render table columns from shared metadata
+├── deriveColumnViewState.util.ts                 → Compose normalized columns + pinning-derived slices
+├── getColumnSettingsNextStatePatch.util.ts       → Build the next table-meta patch after column-settings accept
+├── getColumnPinSide.util.ts                      → Detect which side a column is pinned to
+├── getEffectiveColumns.util.ts                   → Apply visibility + order + pinning
+├── getHasQueryChanged.util.ts                    → Compare current vs next filters/sorting for revalidation decisions
+├── getIsTableSettingsOpen.util.ts                → Restore table-settings open state from the column-drawer takeover snapshot
+├── getNewColumnFiltersBasedOnColumnKey.util.ts   → Build next filter map for one column change
+├── getNewColumnSizingBasedOnColumnKey.util.ts    → Build next sizing map for one column change
+├── getNewPinningBasedOnColumnKey.util.ts         → Build next pinning state for one column change
+├── getNewSortingBasedOnColumnKey.util.ts         → Build next sorting array for one column change
+├── getNormalizedColumns.util.ts                  → Enrich columns with sort metadata
+├── getPinnedColumnOffsets.util.ts                → Compute sticky offsets for pinned columns
+├── getPinnedDerivedColumnsState.util.ts          → Build effective columns, groups, and pinned offsets
+├── getPersistedUiState.util.ts                   → Extract the persisted meta UI slice from full table meta state
+├── persistTableMetaUiState.service.ts            → Effect: persist tab-scoped meta UI patch directly from mutation actions
+├── getStaticColumnKeys.util.ts                   → Extract non-reorderable column keys
+├── getStorageKey.util.ts                         → Build namespaced storage key
+├── readPersistedDataStateFromSessionStorage.util.ts → Read tab-scoped persisted table rows
+├── readPersistedStateFromCookie.util.ts          → SSR-safe cookie state read
+├── readPersistedStateFromSessionStorage.util.ts  → Read tab-scoped persisted column slices
+├── readPersistedUiStateFromSessionStorage.util.ts → Read tab-scoped persisted drawer UI slices
+├── readPersistedUiFlagsFromCookie.util.ts        → SSR-safe read of drawer open/pinned flags from cookie
+├── writePersistedUiFlagsToCookie.service.ts      → Effect: mirror drawer open/pinned flags to cookie (SSR seed)
+├── resolveCrudRowId.util.ts                       → Resolve CRUD row id from the primary-key column(s)
+├── resolveFetchMoreState.util.ts                 → Shared append/hasMore/total resolution for paginated fetch actions
+├── resolvePrimaryKeyColumnKeys.util.ts            → Keys of isPrimaryKey columns (declaration order, excludes 'actions')
+├── resolveTableActionsColumn.util.ts              → Synthesize/merge the row-actions column from `crud` + any consumer override
+├── serializeStateSlice.util.ts                   → JSON serialize a state slice
+├── splitColumnsByPinning.util.ts                 → Split columns into left/center/right groups
+├── syncColumnOrderWithPinning.util.ts            → Pin-aware column reordering
+├── writePersistedDataStateToSessionStorage.service.ts → Effect: write tab-scoped persisted table rows
+├── writePersistedUiStateToSessionStorage.service.ts → Effect: write tab-scoped persisted drawer UI slices
+├── writeStateSlice.service.ts                    → Effect: write to cookie/localStorage
+├── persistence.constants.ts                      → Storage key constants
+├── persistence.types.ts                          → Persistence config types
+└── index.ts                                      → Barrel export for shared table utils
+```
+
+## Batch Column Settings Decomposition
+
+The batch update action in TableConfig now delegates per-slice state transitions to focused pure utilities.
+This removes heavy branch logic from the hook and makes each rule testable in isolation.
+
+```mermaid
+graph TD
+  Hook["useBatchSetColumnSettings()"] --> SortU["getNewSortingBasedOnColumnKey()"]
+  Hook --> FilterU["getNewColumnFiltersBasedOnColumnKey()"]
+  Hook --> SizeU["getNewColumnSizingBasedOnColumnKey()"]
+  Hook --> PinU["getNewPinningBasedOnColumnKey()"]
+  Hook --> OrderU["syncColumnOrderWithPinning()"]
+  Hook --> ViewU["deriveColumnViewState()"]
+
+  SortU --> NextSort["next sorting"]
+  FilterU --> NextFilters["next columnFilters"]
+  SizeU --> NextSizing["next columnSizing"]
+  PinU --> NextPinning["next columnPinning"]
+  OrderU --> NextOrder["next columnOrder"]
+
+  NextSort --> ViewU
+  ViewU --> Derived["recompute normalized/effective/groups/offsets"]
+  NextFilters --> Persist["persistTableState"]
+  NextSort --> Persist
+  NextSizing --> Persist
+  NextPinning --> Persist
+  NextOrder --> Persist
+```
+
+| Function                            | Input                                                                        | Output             | Purpose                                                                                                                            |
+| ----------------------------------- | ---------------------------------------------------------------------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| getNewSortingBasedOnColumnKey       | columnKey, sorting, existingSorting                                          | SortingState       | Update/remove one column sort while preserving order                                                                               |
+| getNewColumnFiltersBasedOnColumnKey | columnKey, columnFilter, columnFiltersState                                  | ColumnFiltersState | Replace or remove one column filter entry without mutating state                                                                   |
+| getNewColumnSizingBasedOnColumnKey  | columnKey, columnSizing, columnSizesState                                    | ColumnSizingState  | Replace/remove one width entry for a column                                                                                        |
+| getNewPinningBasedOnColumnKey       | columnKey, columnPinning, existingPinning, staticKeys                        | ColumnPinningState | Pin/unpin one column while honoring static key constraints                                                                         |
+| syncColumnOrderWithPinning          | columnKey, columnPinning, columns, currentOrder, previousPinning, newPinning | ColumnOrderState   | Keep order consistent with pinning groups; pin inserts into pinned groups and unpin repositions adjacent to remaining pinned group |
+| deriveColumnViewState               | columns, sorting, order, pinning, sizing, visibility                         | derived view state | Recompute normalized columns plus pinning-dependent derived slices together                                                        |
+
+## Column Utilities
+
+```mermaid
+graph TD
+  subgraph "Column Pipeline"
+    Cols["columns[]"] --> EC["getEffectiveColumns()"]
+    EC -->|"apply visibility + order"| Effective["effectiveColumns[]"]
+
+    Cols --> NC["getNormalizedColumns()"]
+    NC -->|"add sortDirection + sortIndex"| Normalized["normalizedColumns (Record)"]
+
+    Cols --> SK["getStaticColumnKeys()"]
+    SK --> Static["staticKeys (Set)"]
+  end
+
+  subgraph "Pin Utilities"
+    Effective --> Offsets["getPinnedColumnOffsets()"]
+    Offsets -->|"cumulative widths"| PinInfo["Record<key, PinnedColumnInfo>"]
+
+    Key["columnKey"] --> Side["getColumnPinSide()"]
+    Side --> PinSide["left | right | undefined"]
+
+    Order["columnOrder"] --> Sync["syncColumnOrderWithPinning()"]
+    Sync --> NewOrder["reordered array (pinned first/last)"]
+  end
+```
+
+| Function                        | Input                                         | Output                                                                     | Purpose                                                                                                                                                                                                       |
+| ------------------------------- | --------------------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| createActionsColumn             | overrides (partial TableColumn)               | TableColumn                                                                | Build the row-actions column, merging consumer overrides (e.g. `render`) onto pinned/static/non-filterable defaults                                                                                           |
+| createBasicColumn               | dataType, key, label, min/max widths          | TableColumn                                                                | Build reusable basic typed columns in app route constants without re-declaring helper logic (distinct filter options are appended by loaders via `@repo/ui/routing/appendDistinctFilterDescriptors`, ADR-009) |
+| deriveColumnViewState           | columns, sorting, order, pinning, sizing      | { normalizedColumns, effectiveColumns, columnGroups, pinnedColumnOffsets } | Compose sort metadata with pinning-dependent derived state in one call                                                                                                                                        |
+| getColumnSettingsNextStatePatch | metaState                                     | Partial<TableMetaState>                                                    | Compute the persisted meta patch after accepting column settings                                                                                                                                              |
+| getEffectiveColumns             | columns, order, visibility                    | TableColumn[]                                                              | Visible columns in display order; pinned columns follow reconciled display order                                                                                                                              |
+| getHasQueryChanged              | current filters/sorting, next filters/sorting | boolean                                                                    | Detect whether a settings mutation should trigger query revalidation/loading state                                                                                                                            |
+| getIsTableSettingsOpen          | metaState                                     | boolean                                                                    | Restore table-settings visibility when column settings temporarily took over the panel state                                                                                                                  |
+| getPinnedDerivedColumnsState    | columns, order, pinning, sizing, visibility   | { effectiveColumns, columnGroups, pinnedColumnOffsets }                    | Recompute all pinning-dependent derived slices in one call                                                                                                                                                    |
+| getNormalizedColumns            | columns, sorting                              | NormalizedColumnsState                                                     | Columns enriched with sort metadata                                                                                                                                                                           |
+| getStaticColumnKeys             | columns                                       | Set<string>                                                                | Keys of locked/static columns                                                                                                                                                                                 |
+| getPinnedColumnOffsets          | pinning, sizing, columns                      | Record<key, PinnedColumnInfo>                                              | Sticky positions for pinned columns                                                                                                                                                                           |
+| getColumnPinSide                | columnKey, pinning                            | PinSide or undefined                                                       | Which side a column is pinned to                                                                                                                                                                              |
+| resolveCrudRowId                | row, columns                                  | string                                                                     | Build a CRUD row id from the primary-key column(s) (single = raw value, composite = encoded values joined by `_`)                                                                                             |
+| resolvePrimaryKeyColumnKeys     | columns                                       | DataKey[]                                                                  | Keys of `isPrimaryKey` columns in declaration order (excludes `actions`)                                                                                                                                      |
+| resolveTableActionsColumn       | columns, crud                                 | { columns, hasActionsColumn }                                              | Adds/merges the synthetic `actions` column when `crud.read/update/delete` is enabled or the consumer declared one                                                                                             |
+| resolveFetchMoreState           | currentData, selectors, response, totals      | { combinedData, hasMore, totalLoadedRows, totalRows }                      | Shared pagination merge logic used by table rows and filter-options load-more                                                                                                                                 |
+| splitColumnsByPinning           | pinning, effectiveColumns                     | ColumnGroupsState                                                          | Split columns into left/center/right                                                                                                                                                                          |
+| syncColumnOrderWithPinning      | order, previous/new pinning                   | string[]                                                                   | Reorder to keep pinned columns grouped; unpin columns move adjacent to remaining pinned group                                                                                                                 |
+
+getPinnedColumnOffsets computes offsets and boundary markers (isLastPinnedLeft, isFirstPinnedRight) from effective column order so shadow boundaries stay aligned with rendered sticky positions even if pinning arrays are out of order.
+
+## Persistence Utilities
+
+```mermaid
+graph LR
+  subgraph "Read"
+    Cookie["document.cookie / request headers"] --> Read["readPersistedStateFromCookie()"]
+    Read --> State["{ columnFilters, sorting, columnOrder, ... }"]
+  end
+
+  subgraph "Write"
+    Slice["state slice"] --> Serialize["serializeStateSlice()"]
+    Serialize --> KV["{ key, value }"]
+    KV --> Write["writeStateSlice()"]
+    Write --> Storage["cookie or localStorage"]
+  end
+```
+
+| Function                                 | Purpose                                                        |
+| ---------------------------------------- | -------------------------------------------------------------- |
+| readPersistedDataStateFromSessionStorage | Parse persisted data rows from sessionStorage (tab-scoped)     |
+| readPersistedStateFromCookie             | Parse persisted state from cookies (SSR-safe)                  |
+| readPersistedStateFromSessionStorage     | Parse persisted column slices from sessionStorage (tab-scoped) |
+| readPersistedUiStateFromSessionStorage   | Parse persisted UI slices from sessionStorage (tab-scoped)     |
+| arePersistedUiStatesEqual                | Legacy compare helper for persisted UI slices                  |
+| getPersistedUiState                      | Extract the persisted UI subset from `TableMetaState`          |
+| persistTableMetaUiState                  | Persist merged meta UI patches to sessionStorage               |
+| serializeStateSlice                      | Convert a state slice to key/value payload                     |
+| writePersistedDataStateToSessionStorage  | Write persisted data rows to sessionStorage (tab-scoped)       |
+| writePersistedUiStateToSessionStorage    | Write persisted UI slices to sessionStorage (tab-scoped)       |
+| readPersistedUiFlagsFromCookie           | SSR-safe read of drawer open/pinned flags from cookie          |
+| writePersistedUiFlagsToCookie            | Mirror drawer open/pinned flags to a cookie for SSR seeding    |
+| writeStateSlice                          | Write to cookie or localStorage                                |
+| getStorageKey                            | Build storage key, optionally `appId`-scoped                   |
+
+`persistTableMetaUiState.service.ts` intentionally uses direct-file imports (not `utils/index.ts`) for persistence helpers to avoid barrel back-import cycles (ADR-007).

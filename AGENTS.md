@@ -19,11 +19,17 @@ apps/
 └── shared/           # Shared code between apps
 packages/
 ├── eslint-local-rules/  # Custom lint rules for this repo
+├── node-runtime/        # Process-lifecycle primitives for long-running services (signals)
 ├── plugins/             # Shared Vite plugins
 ├── ts-configs/          # Shared TypeScript configurations
-├── utils/               # Shared utilities
+├── utils/               # Shared utilities — pure and side-effect free (see its ARCHITECTURE.md)
 └── vite-configs/        # Shared Vite config factories
 ```
+
+`utils` and `node-runtime` split on purity, and the split is deliberate:
+`@repo/utils` guarantees pure, side-effect-free helpers, so anything that must
+touch the process (signal handlers, exit paths) belongs in `@repo/node-runtime`
+instead of eroding that guarantee.
 
 All source paths below (e.g. `src/components/`) are relative to `apps/react-router/` unless otherwise noted.
 
@@ -75,17 +81,17 @@ Detailed conventions are split into rule files under `.claude/rules/`, each scop
 
 Skills are on-demand task workflows in `.github/skills/`. Use them as the first stop for implementation patterns:
 
-| Skill                         | Use For                                                                                 |
-| ----------------------------- | --------------------------------------------------------------------------------------- |
-| `store-pattern`               | Table-style split-context external store architecture with selector/action boundaries   |
-| `quality-gate-workflow`       | **Canonical** post-change validation sequence — the single source of truth for the gate |
-| `react-19`                    | React 19 component and compiler-safe patterns                                           |
-| `react-router-framework-mode` | React Router framework mode data, actions, forms, navigation, error handling            |
-| `codebase-explorer`           | Multi-phase codebase investigation with context isolation and crash-safe scratchpads    |
-| `code-smell-checker`          | Baseline maintainability audits and tech-debt triage                                    |
-| `code-smell-zen`              | Diff-based smell review against target branch                                           |
-| `fallow-code-checker`         | Full fallow static hygiene scan with prioritized report (`vp run fallow:full`)          |
-| `config-audit`                | Run claudelint, triage against known exceptions, produce fix plan for genuine issues    |
+| Skill                         | Use For                                                                                                     |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `store-pattern`               | Table-style split-context external store architecture with selector/action boundaries                       |
+| `quality-gate-workflow`       | **Canonical** post-change validation sequence — the single source of truth for the gate                     |
+| `react-19`                    | React 19 component and compiler-safe patterns                                                               |
+| `react-router-framework-mode` | React Router framework mode data, actions, forms, navigation, error handling                                |
+| `codebase-explorer`           | Multi-phase codebase investigation with context isolation and crash-safe scratchpads                        |
+| `code-smell-checker`          | Baseline maintainability audits and tech-debt triage                                                        |
+| `code-smell-zen`              | Diff-based smell review against target branch                                                               |
+| `fallow-code-checker`         | Full fallow monorepo hygiene scan with prioritized report (`vp run fallow:full` from root; scope with `-w`) |
+| `config-audit`                | Run claudelint, triage against known exceptions, produce fix plan for genuine issues                        |
 
 Selection guideline:
 
@@ -118,22 +124,72 @@ Selection guideline:
 
 ### Monorepo-Wide Commands (run from repo root)
 
-| Task                       | Command            |
-| -------------------------- | ------------------ |
-| Verify everything is ready | `vp run ready`     |
-| Run all tests recursively  | `vp run test -r`   |
-| Build all apps             | `vp run build:all` |
-| Start dev servers          | `vp run dev`       |
+Root scripts are **orchestration only** — anything project-specific lives in that project's own package.json. The `<task>:all` family fans out recursively in workspace dependency order.
+
+| Task                                     | Command                                                |
+| ---------------------------------------- | ------------------------------------------------------ |
+| Verify everything is ready               | `vp run ready`                                         |
+| Run all tests (every workspace)          | `vp run test:all`                                      |
+| Build all workspaces                     | `vp run build:all`                                     |
+| Lint everything WITH fix (oxlint+eslint) | `vp run lint:all`                                      |
+| Regenerate lint JSON reports             | `vp run lint:report`                                   |
+| Merge coverage for the fallow gate       | `vp run coverage:merge`                                |
+| Format everything                        | `vp run format:all`                                    |
+| Typegen (both React Router apps)         | `vp run typegen:all`                                   |
+| Full gate (typegen+check+tests)          | `vp run check:safe`                                    |
+| Dev servers (frontend + express api)     | `vp run dev` (`dev:fast` = fastify, `dev:cqms` = CQMS) |
+| Prod servers (frontend + express api)    | `vp run start` (`start:fast`, `start:cqms`)            |
+
+There is deliberately **no `start:all`/`dev:all`**: `car-sales-api` and `car-sales-api-fast` are performance-comparison alternatives serving the same domain and must never run at the same time — always pick one combo.
+
+**Both linters run in every workspace.** Oxlint (`vp lint`) covers the whole tree from the root; the eslint pass (`vp run lint:eslint` / `lint:eslint:check`) exists in all 15 workspaces — React workspaces use `@repo/vite-configs/eslint-custom-rules`, node/library workspaces use `@repo/vite-configs/eslint-base-custom-rules` (same stack minus React/StyleX, and without `clean-import-paths`, which strips the import extensions node-resolution code requires). Inherited eslint violations are baselined per workspace in `eslint-suppressions.json` (ESLint bulk suppressions) — **new violations fail the gate**; burn debt down and shrink the baseline with `npx eslint . --config eslint.config.mjs --prune-suppressions`. Never add new entries by hand, and never inline-`// eslint-disable`/`oxlint-disable` a finding or switch the rule off in config — **verify, then fix the code instead** (see Non-Negotiable Rule 11). A lint finding is real until you've read the flagged code and confirmed otherwise; stylistic `unicorn/*` rules (e.g. `prefer-simple-condition-first`, `no-nested-ternary`) get fixed by restructuring, never silenced. **Exception: `packages/ui` is never silenced** — it must not carry an `eslint-suppressions.json` at all; every finding there gets fixed, never baselined or disabled.
+
+**Lint JSON reports** follow the fallow output convention: `vp run lint:report` (script: `scripts/generate-lint-reports.mjs`, supports `--only=eslint|oxlint`) regenerates `reports/oxlint/full-latest.json` (one repo-wide `vp lint . --format=json` run) and `reports/eslint/full-latest.json` (the standard eslint `--format json` result array merged across all 15 workspaces, repo-relative paths). Both are tracked. ESLint runs in check mode — regenerating a report never mutates sources — and the baselined debt is visible per file in each entry's `suppressedMessages`, so the report is the place to inspect what the suppressions actually cover.
+
+Known constraint: `scan-orchestrator`'s queue integration test shares the local CQMS Postgres queue — while `vp run dev:cqms` is running, the live orchestrator races the test for queued scans and `vp run test:all` can flake on `runQueuedScan.test.ts` (duplicate `reports_scan_id_key`). Stop the CQMS dev session before a full test run, or treat that single failure as environmental.
+
+### Fallow Static Analysis (run from repo root)
+
+Fallow is configured once at the repo root (`.fallowrc.json`) and auto-detects every pnpm workspace — never add per-app fallow configs or dependencies. Scope any command's output with `-w`, e.g. `vp run fallow:dead-code -w 'apps/react-router'`.
+
+**Entry policy**: `entry` in `.fallowrc.json` is only for files invoked outside the import graph (root/app scripts, skill runner scripts, vite config fragments in `config/` dirs, CLIs run via `node`). Package/framework entry points are auto-detected — do not enumerate workspaces. Caution: fallow's `*` glob crosses `/`, so a pattern like `apps/*/config/**` also swallows `src/config/` files and silently masks real findings — keep config-dir entries as explicit paths and verify with `vp run fallow:dead-code` that the issue count doesn't drop unexpectedly after editing entries.
+
+**Output convention** — `reports/fallow/` is the **single canonical location** for every fallow artifact. Scripts, skills, agents, docs, and developers all write to and read from it; never invent another output path.
+
+| Path                                              | Tracked?   | Contents                                                                            |
+| ------------------------------------------------- | ---------- | ----------------------------------------------------------------------------------- |
+| `reports/fallow/*-latest.json`                    | tracked    | Latest scan snapshots (`full-latest.json`, `dead-code-latest.json`, …)              |
+| `reports/fallow/complexity-threshold-analysis.md` | tracked    | Human summary regenerated by `vp run fallow:refresh-report`                         |
+| `reports/fallow/baselines/`                       | tracked    | Audit baselines (inherited debt excluded from the CI gate)                          |
+| `reports/fallow/coverage/coverage-final.json`     | gitignored | Merged Istanbul coverage fed to `fallow audit --coverage` (`vp run coverage:merge`) |
+| `reports/fallow/runs/<timestamp>/`                | gitignored | Per-run skill/agent artifacts (`fallow.raw.json`, `report.md`, `report.json`)       |
+
+Sole exception: CQMS UI-triggered scans run by `apps/scan-orchestrator` use their own `.tmp/scan-orchestrator/<scan_id>/` workspace — their results land in the CQMS database, not the filesystem.
+
+| Task                                  | Command                                                                      |
+| ------------------------------------- | ---------------------------------------------------------------------------- |
+| Full scan (dead code, dupes, health)  | `vp run fallow:full`                                                         |
+| Dead code only                        | `vp run fallow:dead-code`                                                    |
+| Complexity/health report              | `vp run fallow:health`                                                       |
+| Duplication report                    | `vp run fallow:dupes`                                                        |
+| PR-style gate vs main (run before PR) | `vp run fallow:audit --base main`                                            |
+| Refresh complexity threshold report   | `vp run fallow:refresh-report` (optionally `<workspace-glob>` and `--top=N`) |
+
+CI runs `fallow audit --gate new-only` on every PR (`check-safe.yml`) — it fails only on newly-introduced dead code, complexity, or duplication; inherited debt is covered by baselines in `reports/fallow/baselines/`.
+
+**Always feed the audit real coverage** (`--coverage reports/fallow/coverage/coverage-final.json`, produced by `vp run coverage:merge`; the CI job does this for you). Fallow scores CRAP as `cyclomatic² × (1 − coverage)³ + cyclomatic` against a threshold of **30**, and with no coverage data it _estimates_ coverage from whether a colocated test file merely exists (`none` → 0%, `partial` → 40%, `high` → 85%). At an estimated 0%, **every function with cyclomatic ≥ 5 breaches the threshold** — so an unfed audit reports trivially simple code (`login.action.ts`, cyclomatic 5 / cognitive 2) as `critical`. When triaging a complexity finding, read its **`exceeded`** field, not `severity`: `crap` alone means "untested", while `all`/`cognitive` means genuinely complex. `coverage_source: "mixed"` is expected — files with no tests at all have nothing to measure and still fall back to the estimate.
+
+`vp run coverage:merge` (`scripts/merge-coverage.mjs`) runs `test:coverage` in the **DB-free** workspaces only and merges their reports. Coverage must never require Postgres: the first attempt at this lever was reverted (2026-07-14) because it ran scan-ingestion's `queries/*` suites in CI, where `getPool()` → `readEnvConfig()` throws on the missing `DB_*`. That is why `@repo/scan-ingestion` splits `test` (full, needs a DB) from `test:unit` / `test:coverage` (DB-free subset).
 
 ### Local Database Workflow (run from repo root)
 
-| Task                     | Command            |
-| ------------------------ | ------------------ |
-| Start local PostgreSQL   | `vp run db:up`     |
-| Check DB status          | `vp run db:status` |
-| Seed data                | `vp run seed`      |
-| Start + seed in one step | `vp run db:seed`   |
-| Stop local PostgreSQL    | `vp run db:down`   |
+| Task                     | Command                                                              |
+| ------------------------ | -------------------------------------------------------------------- |
+| Start local PostgreSQL   | `vp run db:up`                                                       |
+| Check DB status          | `vp run db:status`                                                   |
+| Seed data                | `vp run --filter car-sales-api seed` (or `vp run seed` from the app) |
+| Start + seed in one step | `vp run --filter car-sales-api db:seed`                              |
+| Stop local PostgreSQL    | `vp run db:down`                                                     |
 
 The API server (`apps/api-server/`) reads env from `docker/local/.env`. The frontend proxies `/api` to `http://localhost:3001`.
 
@@ -156,9 +212,12 @@ The headline rules every agent must know regardless of which files are open. Ful
 3. **Always `use()`, never `useContext()`.** (`.claude/rules/react-components.md`, `react-19` skill)
 4. **Zero `useEffect` for data fetching** — loaders/actions only. (`.claude/rules/routes-data.md`)
 5. **Store-pattern is the only allowed shared-state approach** — no Redux, Zustand, or ad-hoc Context+useState trees. The Table component is the canonical implementation. Invoke the `store-pattern` skill before touching any store, context, selector, or action.
-6. **Never mutate data or props** — pure functions in `*.util.ts`, functional array ops. (`.claude/rules/typescript.md`)
+6. **Every function is pure by default; never mutate data or props** — functional array ops everywhere; side effects only in designated homes (action hooks, event handlers, providers/loaders, `*.service.ts`/`*.api.ts`). (`.claude/rules/typescript.md`)
 7. **React Compiler handles memoization** — favor correct code over manual optimization (ADR-004). Table performance comes from granular selector subscriptions, row virtualization, and split contexts.
 8. **Use `@/` alias for `src/`** — relative imports only within the same directory.
+9. **No explicit return types on functions/hooks/components — let TypeScript infer** — annotate only when inference genuinely fails (recursion, overloads, complex conditional types) or must be widened. (`.claude/rules/typescript.md`)
+10. **Never use workaround-only fixes** — always address and solve the underlying issue. If there is any doubt about intent, trade-offs, or risk, ask the user before applying a workaround or partial fix.
+11. **Never ignore, suppress, or omit a lint finding — verify, then fix.** Oxlint/eslint violations (including stylistic `unicorn/*` rules like `prefer-simple-condition-first` / `no-nested-ternary`) are real until you have read the flagged code and confirmed otherwise. Do **not** dismiss one as a false positive without checking, and do **not** silence a new one — no inline `// eslint-disable`/`oxlint-disable`, no rule-off in config, no hand-added `eslint-suppressions.json` entry. Fix the code (reorder operands, restructure logic, wire up/delete the export). If it is a genuine false positive, explain why rather than disabling. `packages/ui` is held strictest — it carries no suppressions file at all (§4).
 
 ## 6. Security
 
@@ -185,7 +244,7 @@ Before making **any** code change, read every `ARCHITECTURE.md` that covers the 
 - Parent directories if the change crosses boundaries (e.g. `src/hooks/ARCHITECTURE.md`)
 - Shared type files (`src/types/ARCHITECTURE.md`) when filter or UI types are involved
 - `src/components/PATTERNS.md` — always read this before creating or modifying any component; it defines naming conventions, StyleX composition order, the drawer-section pattern, filter contract, context+store pattern, and props-forwarding rules
-- `docs/decisions/` — read the relevant ADR(s) before working in an area they cover: Modal → ADR-001, Tooltip → ADR-002, store → ADR-003, memoization/React Compiler → ADR-004, styling → ADR-005, infinite-scroll prefetch → ADR-006, barrel-export boundaries → ADR-007
+- `docs/decisions/` — read the relevant ADR(s) before working in an area they cover: Modal → ADR-001, Tooltip → ADR-002, store → ADR-003, memoization/React Compiler → ADR-004, styling → ADR-005, infinite-scroll prefetch → ADR-006, barrel-export boundaries → ADR-007, primary-key sort tiebreaker / columns-derived id → ADR-008, filter-options fetch descriptors → ADR-009
 
 If no `ARCHITECTURE.md` exists yet for the area you are changing, create one **before** implementing.
 

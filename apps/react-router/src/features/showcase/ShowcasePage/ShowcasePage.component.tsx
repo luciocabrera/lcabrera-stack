@@ -1,7 +1,6 @@
+import { Button } from '@repo/ui/components/Button';
+import { useTheme } from '@repo/ui/hooks/useTheme.hook';
 import * as stylex from '@stylexjs/stylex';
-
-import { Button } from '@/components/Button';
-import { useTheme } from '@/hooks/useTheme.hook';
 
 import { ButtonsSection } from './ButtonsSection';
 import { CardsSection } from './CardsSection';
@@ -17,7 +16,7 @@ export const ShowcasePage = () => {
       <div {...stylex.props(styles.container)}>
         <header {...stylex.props(styles.header)}>
           <h1 {...stylex.props(styles.title)}>Design System Showcase</h1>
-          <Button color='ghost' onClick={toggleTheme}>
+          <Button onClick={toggleTheme} variant='ghost'>
             {isDarkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
           </Button>
         </header>

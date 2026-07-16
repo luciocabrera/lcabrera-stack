@@ -1,11 +1,11 @@
 import type { Queryable, SortRule } from '../../types/api.types.js';
-import { buildOrderByClause } from '../../utils/buildOrderByClause.util.js';
-
-import { DEFAULT_CAR_SALES_SORTING } from './carSales.constants.js';
 import type {
   CarSalesResponse,
   PaginatedCarSalesResponse,
 } from './carSales.types.js';
+
+import { buildOrderByClause } from '../../utils/buildOrderByClause.util.js';
+import { DEFAULT_CAR_SALES_SORTING } from './carSales.constants.js';
 
 export type CarSalesRepository = {
   readonly getAll: () => Promise<CarSalesResponse>;

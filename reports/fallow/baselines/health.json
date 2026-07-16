@@ -1,0 +1,103 @@
+{
+  "finding_counts": {
+    "apps/admin_system/src/routes/cqms/account-tokens/AccountTokens.component.tsx": {
+      "crap_critical": {
+        "count": 1
+      }
+    },
+    "apps/admin_system/src/routes/cqms/edit-project/editProject.action.ts": {
+      "crap_moderate": {
+        "count": 1
+      }
+    },
+    "apps/admin_system/src/routes/cqms/new-project/newProject.action.ts": {
+      "crap_moderate": {
+        "count": 1
+      }
+    },
+    "apps/admin_system/src/routes/cqms/project-detail/ProjectSyncPanel/ProjectSyncPanel.component.tsx": {
+      "crap_high": {
+        "count": 1
+      }
+    },
+    "apps/api-server/src/features/enterpriseOrders/enterpriseOrders.schema.ts": {
+      "crap_moderate": {
+        "count": 1
+      }
+    },
+    "apps/react-router/scripts/check-lighthouse-scores.mjs": {
+      "crap_moderate": {
+        "count": 1
+      }
+    },
+    "apps/react-router/src/features/showcase/ShowcasePage/VirtualSelectSection/VirtualSelectSection.component.tsx": {
+      "crap_moderate": {
+        "count": 1
+      }
+    },
+    "packages/plugins/fixReactRouterAssets.plugin.ts": {
+      "crap_moderate": {
+        "count": 1
+      }
+    },
+    "packages/scan-ingestion/src/cli/ingest.cli.ts": {
+      "crap_critical": {
+        "count": 1
+      }
+    },
+    "packages/scan-ingestion/src/cli/push.cli.ts": {
+      "crap_high": {
+        "count": 1
+      }
+    },
+    "packages/utils/merge-arrays.util.ts": {
+      "crap_moderate": {
+        "count": 1
+      }
+    },
+    "packages/vite-configs/eslint.custom-rules.shared.config.mjs": {
+      "crap_critical": {
+        "count": 2
+      }
+    },
+    "packages/vite-configs/vite.plugins.shared.config.ts": {
+      "crap_high": {
+        "count": 1
+      },
+      "crap_moderate": {
+        "count": 1
+      }
+    },
+    "scripts/bootstrap-agenting-handoff.cjs": {
+      "crap_moderate": {
+        "count": 1
+      }
+    },
+    "scripts/generate-source-smell-report.cjs": {
+      "crap_moderate": {
+        "count": 3
+      }
+    },
+    "scripts/refresh-fallow-complexity-report.cjs": {
+      "complexity_critical": {
+        "count": 1
+      },
+      "crap_critical": {
+        "count": 1
+      },
+      "crap_moderate": {
+        "count": 2
+      }
+    },
+    "scripts/seed-db.cjs": {
+      "crap_high": {
+        "count": 1
+      }
+    }
+  },
+  "runtime_coverage_findings": [],
+  "target_keys": [
+    ".github/skills/code-smell-shared/scripts/finding-templates.mjs:high impact",
+    "packages/data-access/src/db/queryBuilder/quoteIdentifier.util.ts:high impact"
+  ]
+}

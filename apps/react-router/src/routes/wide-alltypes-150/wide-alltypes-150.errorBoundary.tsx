@@ -1,5 +1,5 @@
-import { RouteErrorBoundary } from '@/components/RouteErrorBoundary';
-import { useNotifyOnError } from '@/hooks';
+import { RouteErrorBoundary } from '@repo/ui/components/RouteErrorBoundary';
+import { useNotifyOnError } from '@repo/ui/hooks';
 
 import type { Route } from './+types/root';
 

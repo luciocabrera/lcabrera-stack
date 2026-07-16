@@ -1,11 +1,13 @@
+import type { SortingState } from '@repo/ui/components/Table';
+
 import {
   buildPaginatedQueryParams,
   fakeDelay,
   fetchAndValidate,
   getApiBaseUrl,
-} from '@/utils/api';
-import { createLogger } from '@/utils/logger';
-import { isObject } from '@/utils/typeGuards';
+} from '@repo/data-access/api';
+import { createLogger } from '@repo/ui/utils/logger';
+import { isObject } from '@repo/ui/utils/typeGuards';
 
 /**
  * Car Sales API Service
@@ -70,7 +72,7 @@ export const carSalesApi = {
    * Fetch car sales data
    * Returns a promise (non-blocking) to enable React streaming with Suspense
    */
-  fetchCarSales: async (requestUrl?: string): Promise<CarSalesResponse> => {
+  fetchCarSales: async (requestUrl?: string) => {
     await fakeDelay();
 
     return fetchAndValidate({
@@ -92,8 +94,8 @@ export const carSalesApi = {
     limit: number;
     requestUrl?: string;
     skip: number;
-    sorting?: { columnKey: string; direction: 'asc' | 'desc' }[];
-  }): Promise<CarSalesResponse & { hasMore: boolean }> => {
+    sorting?: SortingState<CarSale>;
+  }) => {
     const params = buildPaginatedQueryParams({ limit, skip, sorting });
 
     const url = `${getApiBaseUrl(requestUrl)}/car-sales/paginated?${params.toString()}`;

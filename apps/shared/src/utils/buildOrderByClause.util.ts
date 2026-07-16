@@ -1,6 +1,6 @@
-import { HttpError } from '../errors/httpError.js';
-
 import type { SortRule } from '../types/api.types.js';
+
+import { HttpError } from '../errors/httpError.js';
 
 type BuildOrderByClauseArgs = {
   readonly fallbackSorting: readonly SortRule[];

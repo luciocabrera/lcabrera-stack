@@ -30,19 +30,19 @@ export type PaginationArgs = {
   readonly skip: number;
 };
 
-export type QueryValue = boolean | Date | null | number | string;
-
-export type QueryResult<TRow extends DbRow = DbRow> = {
-  readonly rowCount: number | null;
-  readonly rows: readonly TRow[];
-};
-
 export type Queryable = {
   readonly query: <TRow extends DbRow = DbRow>(
     query: string,
     params?: readonly QueryValue[],
   ) => Promise<QueryResult<TRow>>;
 };
+
+export type QueryResult<TRow extends DbRow = DbRow> = {
+  readonly rowCount: null | number;
+  readonly rows: readonly TRow[];
+};
+
+export type QueryValue = boolean | Date | null | number | string;
 
 export type SortDirection = 'asc' | 'desc';
 

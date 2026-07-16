@@ -1,12 +1,25 @@
-import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 import localRules from '../eslint-local-rules/index.js';
 
-const workspaceRequire = createRequire(`${process.cwd()}/package.json`);
-const resolveWorkspaceImportSpecifier = (specifier) => {
+// Resolved from tsconfigRootDir (each consuming app's own directory), never
+// process.cwd() — process.cwd() is a single, fixed value for the entire
+// lifetime of whatever process imports this module. That's harmless for
+// this repo's own `eslint .` package.json scripts (each `cd`s into one
+// app's directory before running, so cwd always matches the app being
+// linted), but breaks for any single long-lived process serving multiple
+// apps — e.g. an editor's ESLint extension, which stays running for the
+// whole workspace and never re-execs per app. In that scenario
+// process.cwd() lands on the workspace root, which has none of these
+// plugins as direct dependencies (they're only installed under each app's
+// own node_modules), so resolution either fails outright or falls back to
+// an inconsistent module instance — which is what actually produces the
+// "multiple candidate TSConfigRootDirs" symptom, not just a missing
+// tsconfigRootDir parser option (that fix alone wasn't sufficient).
+const resolveWorkspaceImportSpecifier = (workspaceRequire, specifier) => {
   try {
     return workspaceRequire.resolve(specifier);
   } catch (error) {
@@ -43,52 +56,13 @@ const resolveWorkspaceImportSpecifier = (specifier) => {
   }
 };
 
-const importFromWorkspace = async (specifier) => {
-  return await import(resolveWorkspaceImportSpecifier(specifier));
+const importFromWorkspace = async (workspaceRequire, specifier) => {
+  return await import(
+    resolveWorkspaceImportSpecifier(workspaceRequire, specifier)
+  );
 };
 
-const tseslintImport = await importFromWorkspace('typescript-eslint');
-const tseslint = tseslintImport.default ?? tseslintImport;
-
-const perfectionistImport = await importFromWorkspace(
-  'eslint-plugin-perfectionist',
-);
-const perfectionist = perfectionistImport.default ?? perfectionistImport;
-
-const stylexPluginImport = await importFromWorkspace('@stylexjs/eslint-plugin');
-const stylexPlugin = stylexPluginImport.default ?? stylexPluginImport;
-
-const eslintImport = await importFromWorkspace('@eslint/js');
-const eslint = eslintImport.default ?? eslintImport;
-
-const eslintConfigPrettierImport = await importFromWorkspace(
-  'eslint-config-prettier/flat',
-);
-const eslintConfigPrettier =
-  eslintConfigPrettierImport.default ?? eslintConfigPrettierImport;
-
-const reactDomImport = await importFromWorkspace('eslint-plugin-react-dom');
-const reactDom = reactDomImport.default ?? reactDomImport;
-
-const reactHooksImport = await importFromWorkspace('eslint-plugin-react-hooks');
-const reactHooks = reactHooksImport.default ?? reactHooksImport;
-
-const reactRefreshImport = await importFromWorkspace(
-  'eslint-plugin-react-refresh',
-);
-const reactRefresh = reactRefreshImport.default ?? reactRefreshImport;
-
-const reactXImport = await importFromWorkspace('eslint-plugin-react-x');
-const reactX = reactXImport.default ?? reactXImport;
-
-const securityImport = await importFromWorkspace('eslint-plugin-security');
-const security = securityImport.default ?? securityImport;
-
-const unicornImport = await importFromWorkspace('eslint-plugin-unicorn');
-const unicorn = unicornImport.default ?? unicornImport;
-const globalsImport = await importFromWorkspace('globals');
-const globals = globalsImport.default ?? globalsImport;
-const TYPESCRIPT_LANGUAGE_OPTIONS = {
+const createTypescriptLanguageOptions = (tseslint, tsconfigRootDir) => ({
   ecmaVersion: 'latest',
   parser: tseslint.parser,
   parserOptions: {
@@ -96,8 +70,9 @@ const TYPESCRIPT_LANGUAGE_OPTIONS = {
       jsx: true,
     },
     sourceType: 'module',
+    tsconfigRootDir,
   },
-};
+});
 
 const GLOBAL_IGNORES = [
   '.react-router/**',
@@ -110,127 +85,283 @@ const GLOBAL_IGNORES = [
   'utils/**',
 ];
 
-export const createCustomRulesLintConfig = ({ ignorePatterns = [] } = {}) => [
-  // 1. Core ESLint
-  eslint.configs.recommended,
-  // Add security recommended config here (good spot: after core but before styling/sorting)
-  security.configs.recommended,
-  unicorn.configs.recommended,
-
-  // 2. React Hooks and Refresh
-  reactHooks.configs.flat.recommended,
-  reactRefresh.configs.recommended,
+const UI_PUBLIC_IMPORT_BOUNDARY_PATTERNS = [
   {
-    files: ['**/root.ts', '**/root.tsx'],
-    rules: {
-      'react-refresh/only-export-components': 'off',
-    },
-  },
-  // Other configs...
-  // Enable lint rules for React
-  reactX.configs['recommended-typescript'],
-  // Enable lint rules for React DOM
-  reactDom.configs.recommended,
-
-  // 3. Sorting (Perfectionist)
-  perfectionist.configs['recommended-natural'],
-
-  // 4. Formatting (Prettier - Must be last to disable conflicts)
-  eslintConfigPrettier,
-
-  ...(Array.isArray(tseslint.configs.recommended)
-    ? tseslint.configs.recommended
-    : [tseslint.configs.recommended]),
-
-  {
-    rules: {
-      'unicorn/consistent-boolean-name': [
-        'error',
-        {
-          prefixes: {
-            are: true,
-          },
-        },
-      ],
-      'unicorn/name-replacements': 'off',
-      'unicorn/prevent-abbreviations': 'off',
-      'unicorn/no-array-reduce': 'off',
-      'security/detect-object-injection': 'off',
-      'unicorn/filename-case': 'off',
-      'unicorn/prefer-query-selector': 'off',
-    },
-  },
-  // 5. JavaScript files configuration (for Node.js server files, etc.)
-  {
-    files: ['**/*.js', '**/*.mjs', '**/*.cjs'],
-    languageOptions: {
-      ecmaVersion: 'latest',
-      globals: {
-        ...globals.node,
-      },
-    },
-    rules: {
-      'no-console': 'off',
-      'unicorn/prefer-module': 'off',
-      'unicorn/prevent-abbreviations': 'off',
-    },
+    group: ['@repo/ui/src/**'],
+    message:
+      'Do not import from @repo/ui source internals. Use @repo/ui public exports or supported subpaths.',
   },
   {
-    ignores: [...GLOBAL_IGNORES, ...ignorePatterns],
+    group: ['@repo/ui/**/index', '@repo/ui/**/index.*'],
+    message:
+      'Do not import @repo/ui index files directly. Use the folder path or @repo/ui root exports.',
   },
   {
-    files: ['src/**/*.ts', 'src/**/*.tsx'],
-    languageOptions: TYPESCRIPT_LANGUAGE_OPTIONS,
-    plugins: {
-      '@stylexjs': stylexPlugin,
-      'typescript-eslint': tseslint.plugin,
-      '@typescript-eslint': tseslint.plugin,
-      'local-rules': localRules,
-    },
-    rules: {
-      '@stylexjs/sort-keys': 'warn',
-      '@stylexjs/valid-styles': 'error',
-      '@typescript-eslint/consistent-type-definitions': ['error', 'type'],
-      'func-style': ['error', 'expression'],
-      'local-rules/clean-import-paths': 'error',
-      'local-rules/destructuring-for-functions': 'error',
-      'local-rules/merge-duplicate-imports': 'error',
-      'local-rules/no-inline-type-imports': 'error',
-      'local-rules/type-suffix-naming': 'error',
-    },
-  },
-  {
-    files: ['src/entry.server.tsx'],
-    rules: {
-      'func-style': 'off',
-      'local-rules/destructuring-for-functions': 'off',
-    },
-  },
-  {
-    files: ['src/**/*.stylex.ts'],
-    plugins: {
-      '@stylexjs': stylexPlugin,
-    },
-    rules: {
-      'local-rules/destructuring-for-functions': 'off',
-      'perfectionist/sort-object-types': 'off',
-      'perfectionist/sort-objects': 'off',
-      'unicorn/no-null': 'off',
-    },
-  },
-  {
-    files: [
-      'src/**/*.component.tsx',
-      'src/**/*.errorBoundary.tsx',
-      'src/**/*.layout.tsx',
+    group: [
+      '@repo/ui/**/*.component',
+      '!@repo/ui/components/Settings/Settings.component',
     ],
-    languageOptions: TYPESCRIPT_LANGUAGE_OPTIONS,
-    plugins: {
-      'local-rules': localRules,
-    },
-    rules: {
-      'local-rules/no-type-definitions-in-components': 'error',
-      'local-rules/single-component-export': 'error',
-    },
+    message:
+      'Do not import component implementation files directly from @repo/ui. Import from @repo/ui root exports or component barrels.',
   },
 ];
+
+const CLIENT_IMPORT_BOUNDARY_SYNTAX_RESTRICTIONS = [
+  {
+    message:
+      'Node built-ins are server-only. Move this import/export to server files.',
+    selector: 'ExportAllDeclaration[source.value=/^node:/]',
+  },
+  {
+    message:
+      'Node built-ins are server-only. Move this import/export to server files.',
+    selector: 'ExportNamedDeclaration[source.value=/^node:/]',
+  },
+  {
+    message:
+      'Node built-ins are server-only. Move this import/export to server files.',
+    selector: 'ImportDeclaration[source.value=/^node:/]',
+  },
+  {
+    message:
+      'Server-only UI helpers must be imported via @repo/ui/server from server entry files only.',
+    selector:
+      "ImportDeclaration[source.value='@repo/ui/entry/createHandleRequest.util']",
+  },
+  {
+    message:
+      'The @repo/ui/server entrypoint is server-only and must not be imported from client/shared files.',
+    selector: "ImportDeclaration[source.value='@repo/ui/server']",
+  },
+];
+
+export const createCustomRulesLintConfig = async ({
+  enforceServerClientImportBoundary = false,
+  enforceUiPublicImportBoundary = false,
+  ignorePatterns = [],
+  tsconfigRootDir = process.cwd(),
+} = {}) => {
+  // Scoped to tsconfigRootDir, not process.cwd() — see the comment above
+  // resolveWorkspaceImportSpecifier for why this distinction is the actual
+  // fix, not just a style preference.
+  const workspaceRequire = createRequire(`${tsconfigRootDir}/package.json`);
+  const fromWorkspace = (specifier) =>
+    importFromWorkspace(workspaceRequire, specifier);
+
+  const tseslintImport = await fromWorkspace('typescript-eslint');
+  const tseslint = tseslintImport.default ?? tseslintImport;
+
+  const perfectionistImport = await fromWorkspace(
+    'eslint-plugin-perfectionist',
+  );
+  const perfectionist = perfectionistImport.default ?? perfectionistImport;
+
+  const stylexPluginImport = await fromWorkspace('@stylexjs/eslint-plugin');
+  const stylexPlugin = stylexPluginImport.default ?? stylexPluginImport;
+
+  const eslintImport = await fromWorkspace('@eslint/js');
+  const eslint = eslintImport.default ?? eslintImport;
+
+  const eslintConfigPrettierImport = await fromWorkspace(
+    'eslint-config-prettier/flat',
+  );
+  const eslintConfigPrettier =
+    eslintConfigPrettierImport.default ?? eslintConfigPrettierImport;
+
+  const reactDomImport = await fromWorkspace('eslint-plugin-react-dom');
+  const reactDom = reactDomImport.default ?? reactDomImport;
+
+  const reactHooksImport = await fromWorkspace('eslint-plugin-react-hooks');
+  const reactHooks = reactHooksImport.default ?? reactHooksImport;
+
+  const reactRefreshImport = await fromWorkspace('eslint-plugin-react-refresh');
+  const reactRefresh = reactRefreshImport.default ?? reactRefreshImport;
+
+  const reactXImport = await fromWorkspace('eslint-plugin-react-x');
+  const reactX = reactXImport.default ?? reactXImport;
+
+  const securityImport = await fromWorkspace('eslint-plugin-security');
+  const security = securityImport.default ?? securityImport;
+
+  const unicornImport = await fromWorkspace('eslint-plugin-unicorn');
+  const unicorn = unicornImport.default ?? unicornImport;
+
+  const globalsImport = await fromWorkspace('globals');
+  const globals = globalsImport.default ?? globalsImport;
+
+  return [
+    {
+      // Oxlint consumes eslint-disable comments too — eslint must never
+      // remove directives it considers "unused" (they may be suppressing an
+      // oxlint rule of the same name), so unused-directive reporting is off.
+      linterOptions: {
+        reportUnusedDisableDirectives: 'off',
+      },
+    },
+    // 1. Core ESLint
+    eslint.configs.recommended,
+    // Add security recommended config here (good spot: after core but before styling/sorting)
+    security.configs.recommended,
+    unicorn.configs.recommended,
+
+    // 2. React Hooks and Refresh
+    reactHooks.configs.flat.recommended,
+    reactRefresh.configs.recommended,
+    {
+      files: ['**/root.ts', '**/root.tsx'],
+      rules: {
+        'react-refresh/only-export-components': 'off',
+      },
+    },
+    // Other configs...
+    // Enable lint rules for React
+    reactX.configs['recommended-typescript'],
+    // Enable lint rules for React DOM
+    reactDom.configs.recommended,
+
+    // 3. Sorting (Perfectionist)
+    perfectionist.configs['recommended-natural'],
+
+    // 4. Formatting (Prettier - Must be last to disable conflicts)
+    eslintConfigPrettier,
+
+    ...(Array.isArray(tseslint.configs.recommended)
+      ? tseslint.configs.recommended
+      : [tseslint.configs.recommended]),
+
+    {
+      rules: {
+        // Escalated from the plugins' default `warn` so the bulk-suppression
+        // baseline (eslint-suppressions.json) covers inherited findings and
+        // NEW occurrences fail the gate (suppressions only apply to
+        // error-severity rules).
+        'react-x/set-state-in-effect': 'error',
+        'security/detect-non-literal-fs-filename': 'error',
+        'security/detect-non-literal-regexp': 'error',
+        'security/detect-object-injection': 'off',
+        'security/detect-unsafe-regex': 'error',
+        'unicorn/consistent-boolean-name': [
+          'error',
+          {
+            prefixes: {
+              are: true,
+            },
+          },
+        ],
+        'unicorn/filename-case': 'off',
+        'unicorn/name-replacements': 'off',
+        'unicorn/no-array-reduce': 'off',
+        // Auto-fixer rewrites http:// string literals to https://, silently
+        // corrupting test fixtures and local-dev URLs — see the base factory.
+        'unicorn/prefer-https': 'off',
+        'unicorn/prefer-query-selector': 'off',
+        'unicorn/prevent-abbreviations': 'off',
+      },
+    },
+    // 5. JavaScript files configuration (for Node.js server files, etc.)
+    {
+      files: ['**/*.js', '**/*.mjs', '**/*.cjs'],
+      languageOptions: {
+        ecmaVersion: 'latest',
+        globals: {
+          ...globals.node,
+        },
+      },
+      rules: {
+        'no-console': 'off',
+        'unicorn/prefer-module': 'off',
+        'unicorn/prevent-abbreviations': 'off',
+      },
+    },
+    {
+      ignores: [...GLOBAL_IGNORES, ...ignorePatterns],
+    },
+    ...(enforceServerClientImportBoundary
+      ? [
+          {
+            files: ['src/**/*.ts', 'src/**/*.tsx'],
+            ignores: [
+              'src/entry.server.tsx',
+              'src/**/*.server.ts',
+              'src/**/*.server.tsx',
+            ],
+            rules: {
+              'no-restricted-syntax': [
+                'error',
+                ...CLIENT_IMPORT_BOUNDARY_SYNTAX_RESTRICTIONS,
+              ],
+            },
+          },
+        ]
+      : []),
+    {
+      files: ['src/**/*.ts', 'src/**/*.tsx'],
+      languageOptions: createTypescriptLanguageOptions(
+        tseslint,
+        tsconfigRootDir,
+      ),
+      plugins: {
+        '@stylexjs': stylexPlugin,
+        '@typescript-eslint': tseslint.plugin,
+        'local-rules': localRules,
+        'typescript-eslint': tseslint.plugin,
+      },
+      rules: {
+        '@stylexjs/sort-keys': 'warn',
+        '@stylexjs/valid-styles': 'error',
+        '@typescript-eslint/consistent-type-definitions': ['error', 'type'],
+        'func-style': ['error', 'expression'],
+        'local-rules/clean-import-paths': 'error',
+        'local-rules/destructuring-for-functions': 'error',
+        'local-rules/merge-duplicate-imports': 'error',
+        'local-rules/no-inline-type-imports': 'error',
+        'local-rules/type-suffix-naming': 'error',
+        ...(enforceUiPublicImportBoundary && {
+          'no-restricted-imports': [
+            'error',
+            {
+              patterns: UI_PUBLIC_IMPORT_BOUNDARY_PATTERNS,
+            },
+          ],
+        }),
+      },
+    },
+    {
+      files: ['src/entry.server.tsx'],
+      rules: {
+        'func-style': 'off',
+        'local-rules/destructuring-for-functions': 'off',
+      },
+    },
+    {
+      files: ['src/**/*.stylex.ts'],
+      plugins: {
+        '@stylexjs': stylexPlugin,
+      },
+      rules: {
+        'local-rules/destructuring-for-functions': 'off',
+        'perfectionist/sort-object-types': 'off',
+        'perfectionist/sort-objects': 'off',
+        'unicorn/no-null': 'off',
+      },
+    },
+    {
+      files: [
+        'src/**/*.component.tsx',
+        'src/**/*.errorBoundary.tsx',
+        'src/**/*.layout.tsx',
+      ],
+      languageOptions: createTypescriptLanguageOptions(
+        tseslint,
+        tsconfigRootDir,
+      ),
+      plugins: {
+        'local-rules': localRules,
+      },
+      rules: {
+        'local-rules/no-type-definitions-in-components': 'error',
+        'local-rules/single-component-export': 'error',
+      },
+    },
+  ];
+};

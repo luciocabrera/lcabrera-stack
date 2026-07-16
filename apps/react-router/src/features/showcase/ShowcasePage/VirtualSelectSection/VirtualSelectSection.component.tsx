@@ -1,9 +1,8 @@
+import type { VirtualListDataState } from '@repo/ui/components/VirtualList';
+
+import { VirtualSelect } from '@repo/ui/components/VirtualSelect';
 import * as stylex from '@stylexjs/stylex';
 import { useRef, useState } from 'react';
-
-import type { VirtualListDataState } from '@/components/VirtualList';
-
-import { VirtualSelect } from '@/components/VirtualSelect';
 
 import {
   FETCH_DELAY_MS,

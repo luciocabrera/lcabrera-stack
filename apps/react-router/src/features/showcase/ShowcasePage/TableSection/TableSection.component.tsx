@@ -1,7 +1,5 @@
+import { Button, TableLayout } from '@repo/ui';
 import * as stylex from '@stylexjs/stylex';
-
-import { Button } from '@/components/Button';
-import { TableLayout } from '@/components/Table/TableLayout';
 
 import type { MockResponse, MockRow } from '../ShowcasePage.types';
 
@@ -18,7 +16,7 @@ import { styles } from './TableSection.stylex';
 export const TableSection = () => (
   <ShowcaseSection title='Table'>
     <div {...stylex.props(styles.controls)}>
-      <Button color='secondary' onClick={resetTableDataPromise}>
+      <Button onClick={resetTableDataPromise} variant='secondary'>
         🔄 Reload Table Data (Test Loading)
       </Button>
       <span {...stylex.props(styles.delayLabel)}>

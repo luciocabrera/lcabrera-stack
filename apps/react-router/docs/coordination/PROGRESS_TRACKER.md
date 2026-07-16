@@ -5,11 +5,10 @@ Project: apps/react-router
 
 ## Current Baseline
 
-- Fallow full (`vp run fallow:full`): 17 above threshold · maintainability 93 (good) · 3822 analyzed
-- Fallow dead-code/check: 0 issues reported by fallow (`check.total_issues`)
-- Fallow dupes: 87 clone groups
-- Canonical machine-readable source: `reports/fallow/fallow-full-latest.json`
-- Analysis source doc: `reports/fallow-complexity-threshold-analysis.md`
+Fallow metrics are **not duplicated here** — the single canonical source for all fallow artifacts is `reports/fallow/` (see AGENTS.md "Fallow Static Analysis"):
+
+- Machine-readable snapshot: `reports/fallow/full-latest.json` (refresh with `vp run fallow:refresh-report apps/react-router`)
+- Human summary: `reports/fallow/complexity-threshold-analysis.md`
 - Quality gate: `vp check` passes (format + lint + type)
 - Worktree status: active (see current `git status --short`)
 

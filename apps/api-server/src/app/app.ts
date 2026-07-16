@@ -1,13 +1,16 @@
-import cors from 'cors';
-import express, { type Express, Router } from 'express';
 import type { Pool } from 'pg';
 
+import { HttpError } from 'api-shared';
+import cors from 'cors';
+import express, { type Express, Router } from 'express';
+
 import type { EnvConfig } from '../config/env.schema';
+
 import { createCarSalesRoute } from '../features/carSales/carSales.route';
 import { createDbSanityRoute } from '../features/dbSanity/dbSanity.route';
+import { createDistinctRoute } from '../features/distinct/distinct.route';
 import { createEnterpriseOrdersRoute } from '../features/enterpriseOrders/enterpriseOrders.route';
 import { createWideAlltypes150Route } from '../features/wideAlltypes150/wideAlltypes150.route';
-import { HttpError } from 'api-shared';
 import { errorMiddleware } from '../middleware/error.middleware';
 
 type CreateAppArgs = {
@@ -37,6 +40,7 @@ export const createApp = ({ envConfig, pool }: CreateAppArgs): Express => {
   app.use(express.json());
 
   apiRouter.use('/car-sales', createCarSalesRoute({ pool }));
+  apiRouter.use('/distinct', createDistinctRoute({ envConfig, pool }));
   apiRouter.use(
     '/enterprise-orders',
     createEnterpriseOrdersRoute({ envConfig, pool }),

@@ -1,4 +1,5 @@
 import type { TSESTree } from '@typescript-eslint/utils';
+
 import { ESLintUtils } from '@typescript-eslint/utils';
 
 const createRule = ESLintUtils.RuleCreator(
@@ -6,20 +7,6 @@ const createRule = ESLintUtils.RuleCreator(
 );
 
 export default createRule({
-  name: 'single-component-export',
-  meta: {
-    type: 'problem',
-    docs: {
-      description:
-        'Enforce that .component.tsx files export only one component',
-    },
-    messages: {
-      multipleComponentExports:
-        'Component files should export only one component. Found {{ count }} component exports.',
-    },
-    schema: [],
-  },
-  defaultOptions: [],
   create(context) {
     // Only apply to .component.tsx files
     const filename = context.filename;
@@ -54,14 +41,28 @@ export default createRule({
       'Program:exit'() {
         if (componentExports.length > 1) {
           context.report({
-            loc: { line: 1, column: 0 },
-            messageId: 'multipleComponentExports',
             data: {
               count: componentExports.length.toString(),
             },
+            loc: { column: 0, line: 1 },
+            messageId: 'multipleComponentExports',
           });
         }
       },
     };
   },
+  defaultOptions: [],
+  meta: {
+    docs: {
+      description:
+        'Enforce that .component.tsx files export only one component',
+    },
+    messages: {
+      multipleComponentExports:
+        'Component files should export only one component. Found {{ count }} component exports.',
+    },
+    schema: [],
+    type: 'problem',
+  },
+  name: 'single-component-export',
 });

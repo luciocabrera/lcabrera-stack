@@ -1,20 +1,17 @@
 import type { FastifyPluginAsync } from 'fastify';
 import type { Pool } from 'pg';
 
-import type { EnvConfig } from '../../config/env.schema';
 import { HttpError } from 'api-shared';
+
+import type { EnvConfig } from '../../config/env.schema';
+
 import { delay } from '../../utils/delay.util';
 import { createJsonFieldsParser } from '../../utils/parseJsonQueryFields.util';
-
 import { createEnterpriseOrdersRepository } from './enterpriseOrders.repository';
 import {
-  type DistinctColumnParams,
-  type DistinctValuesQuery,
   type OrderByIdParams,
-  type PaginatedEnterpriseOrdersQuery,
-  distinctColumnParamsSchema,
-  distinctValuesQuerySchema,
   orderByIdParamsSchema,
+  type PaginatedEnterpriseOrdersQuery,
   paginatedEnterpriseOrdersQuerySchema,
 } from './enterpriseOrders.schema';
 
@@ -54,31 +51,6 @@ export const createEnterpriseOrdersPlugin =
           skip,
           sorting: sort,
         });
-      },
-    );
-
-    fastify.get<{
-      Params: DistinctColumnParams;
-      Querystring: DistinctValuesQuery;
-    }>(
-      '/distinct/:columnName',
-      {
-        schema: {
-          params: distinctColumnParamsSchema,
-          querystring: distinctValuesQuerySchema,
-        },
-      },
-      async (request) => {
-        if (envConfig.DISTINCT_VALUES_DELAY_MS > 0) {
-          await delay({
-            milliseconds: envConfig.DISTINCT_VALUES_DELAY_MS,
-          });
-        }
-
-        const { columnName } = request.params;
-        const { limit, offset } = request.query;
-
-        return repository.getDistinctValues({ columnName, limit, offset });
       },
     );
 

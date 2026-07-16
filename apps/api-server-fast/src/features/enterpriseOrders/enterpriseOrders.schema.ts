@@ -1,29 +1,13 @@
+import type { SortRule } from 'api-shared';
+
 import {
   DEFAULT_PAGE_LIMIT,
-  DISTINCT_DEFAULT_LIMIT,
   ENTERPRISE_ORDER_ALLOWED_COLUMNS,
-  ENTERPRISE_ORDER_DISTINCT_COLUMNS,
 } from 'api-shared';
-import type { SortRule } from 'api-shared';
 
 import type { EnterpriseOrdersFilters } from './enterpriseOrders.types';
 
 const filterValueSchema = {
-  type: 'object',
-  required: ['type'],
-  properties: {
-    operator: { type: 'string' },
-    type: {
-      type: 'string',
-      enum: ['boolean', 'date', 'multiSelect', 'number', 'select', 'text'],
-    },
-    value: {},
-    value2: {},
-    values: {
-      type: 'array',
-      items: { type: 'string', minLength: 1 },
-    },
-  },
   additionalProperties: false,
   allOf: [
     {
@@ -35,10 +19,10 @@ const filterValueSchema = {
       },
       // oxlint-disable-next-line unicorn/no-thenable -- JSON Schema uses then/if conditionals
       then: {
-        required: ['type', 'value'],
         properties: {
           value: { type: 'boolean' },
         },
+        required: ['type', 'value'],
       },
     },
     {
@@ -50,15 +34,15 @@ const filterValueSchema = {
       },
       // oxlint-disable-next-line unicorn/no-thenable -- JSON Schema uses then/if conditionals
       then: {
-        required: ['type', 'operator', 'value'],
         properties: {
           operator: {
-            type: 'string',
             enum: ['after', 'before', 'between', 'equals'],
+            type: 'string',
           },
-          value: { type: 'string', minLength: 1 },
-          value2: { type: 'string', minLength: 1 },
+          value: { minLength: 1, type: 'string' },
+          value2: { minLength: 1, type: 'string' },
         },
+        required: ['type', 'operator', 'value'],
       },
     },
     {
@@ -70,10 +54,8 @@ const filterValueSchema = {
       },
       // oxlint-disable-next-line unicorn/no-thenable -- JSON Schema uses then/if conditionals
       then: {
-        required: ['type', 'operator', 'value'],
         properties: {
           operator: {
-            type: 'string',
             enum: [
               'between',
               'equals',
@@ -83,10 +65,12 @@ const filterValueSchema = {
               'lessThanOrEqual',
               'notEquals',
             ],
+            type: 'string',
           },
           value: { type: 'number' },
           value2: { type: 'number' },
         },
+        required: ['type', 'operator', 'value'],
       },
     },
     {
@@ -99,11 +83,11 @@ const filterValueSchema = {
       // oxlint-disable-next-line unicorn/no-thenable -- JSON Schema uses then/if conditionals
       then: {
         properties: {
-          operator: { type: 'string', enum: ['equals', 'notEquals'] },
-          value: { type: 'string', minLength: 1 },
+          operator: { enum: ['equals', 'notEquals'], type: 'string' },
+          value: { minLength: 1, type: 'string' },
           values: {
+            items: { minLength: 1, type: 'string' },
             type: 'array',
-            items: { type: 'string', minLength: 1 },
           },
         },
       },
@@ -117,10 +101,8 @@ const filterValueSchema = {
       },
       // oxlint-disable-next-line unicorn/no-thenable -- JSON Schema uses then/if conditionals
       then: {
-        required: ['type', 'operator', 'value'],
         properties: {
           operator: {
-            type: 'string',
             enum: [
               'contains',
               'endsWith',
@@ -129,12 +111,29 @@ const filterValueSchema = {
               'notEquals',
               'startsWith',
             ],
+            type: 'string',
           },
-          value: { type: 'string', minLength: 1 },
+          value: { minLength: 1, type: 'string' },
         },
+        required: ['type', 'operator', 'value'],
       },
     },
   ],
+  properties: {
+    operator: { type: 'string' },
+    type: {
+      enum: ['boolean', 'date', 'multiSelect', 'number', 'select', 'text'],
+      type: 'string',
+    },
+    value: {},
+    value2: {},
+    values: {
+      items: { minLength: 1, type: 'string' },
+      type: 'array',
+    },
+  },
+  required: ['type'],
+  type: 'object',
 };
 
 // ---------------------------------------------------------------------------
@@ -142,16 +141,16 @@ const filterValueSchema = {
 // ---------------------------------------------------------------------------
 
 const sortRuleSchema = {
-  type: 'object',
-  required: ['columnKey', 'direction'],
+  additionalProperties: false,
   properties: {
     columnKey: {
-      type: 'string',
       enum: [...ENTERPRISE_ORDER_ALLOWED_COLUMNS],
+      type: 'string',
     },
-    direction: { type: 'string', enum: ['asc', 'desc'] },
+    direction: { enum: ['asc', 'desc'], type: 'string' },
   },
-  additionalProperties: false,
+  required: ['columnKey', 'direction'],
+  type: 'object',
 };
 
 // ---------------------------------------------------------------------------
@@ -172,62 +171,22 @@ export type PaginatedEnterpriseOrdersQuery = {
  * JSON Schema for the /paginated querystring.
  */
 export const paginatedEnterpriseOrdersQuerySchema = {
-  type: 'object',
   properties: {
     filter: {
-      type: 'object',
+      additionalProperties: filterValueSchema,
       default: {},
       propertyNames: { enum: [...ENTERPRISE_ORDER_ALLOWED_COLUMNS] },
-      additionalProperties: filterValueSchema,
+      type: 'object',
     },
-    limit: { type: 'integer', default: DEFAULT_PAGE_LIMIT, minimum: 1 },
-    skip: { type: 'integer', default: 0, minimum: 0 },
+    limit: { default: DEFAULT_PAGE_LIMIT, minimum: 1, type: 'integer' },
+    skip: { default: 0, minimum: 0, type: 'integer' },
     sort: {
-      type: 'array',
       default: [],
       items: sortRuleSchema,
+      type: 'array',
     },
   },
-};
-
-/**
- * TypeScript type for the /distinct/:columnName querystring.
- */
-export type DistinctValuesQuery = {
-  readonly limit: number;
-  readonly offset: number;
-};
-
-/**
- * JSON Schema for the /distinct/:columnName querystring.
- */
-export const distinctValuesQuerySchema = {
   type: 'object',
-  properties: {
-    limit: { type: 'integer', default: DISTINCT_DEFAULT_LIMIT, minimum: 1 },
-    offset: { type: 'integer', default: 0, minimum: 0 },
-  },
-};
-
-/**
- * TypeScript type for the /distinct/:columnName params.
- */
-export type DistinctColumnParams = {
-  readonly columnName: string;
-};
-
-/**
- * JSON Schema for the /distinct/:columnName params.
- */
-export const distinctColumnParamsSchema = {
-  type: 'object',
-  required: ['columnName'],
-  properties: {
-    columnName: {
-      type: 'string',
-      enum: [...ENTERPRISE_ORDER_DISTINCT_COLUMNS],
-    },
-  },
 };
 
 /**
@@ -241,9 +200,9 @@ export type OrderByIdParams = {
  * JSON Schema for the /:orderId params.
  */
 export const orderByIdParamsSchema = {
-  type: 'object',
-  required: ['orderId'],
   properties: {
-    orderId: { type: 'string', pattern: String.raw`^\d+$` },
+    orderId: { pattern: String.raw`^\d+$`, type: 'string' },
   },
+  required: ['orderId'],
+  type: 'object',
 };

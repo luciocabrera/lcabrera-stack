@@ -15,6 +15,8 @@ The project enforces `strict: true` with additional flags: `noUncheckedIndexedAc
 - **Use `readonly T[]` for arrays in types** — prevents accidental mutation. Never use `ReadonlyArray<T>` (the `readonly T[]` shorthand is preferred throughout this codebase).
 - **Never use `any`** — use `unknown` with type guards instead.
 - **Never use `React.FC`** — use explicit arrow functions with typed props.
+- **Every function is pure by default — purity is not a `*.util.ts`-only rule.** Same input → same output, no side effects, no mutation of arguments or captured state. This applies to all functions in all files: module-level helpers, derivations inside hooks/components, class methods, and inline callbacks. Side effects are allowed only in the designated homes listed under [Functional Programming & Immutability](#functional-programming--immutability).
+- **Never write an explicit function/hook/component return type as a first approach — let TypeScript infer it.** Only add one when inference genuinely fails or produces the wrong type: recursive functions, complex conditional/mapped-type returns (see `Curry`/`Pipe` under Variadic Tuple Types below), overloaded signatures, or deliberately widening a literal/narrow inferred type. Do not add `: void`, `: string`, `: JSX.Element`, `: Promise<void>`, etc. out of habit — if you catch yourself typing a return annotation, delete it first and only restore it if `tsc`/inference actually needs it. (Some teaching examples later in this file annotate returns to make type mechanics visible — do not copy that habit into real code; type declarations and `declare`/interface signatures are not affected, since those have no body to infer from.)
 - **For `unicorn(no-nested-ternary)` violations, rewrite logic using `if/else` or early returns** — do not "fix" by adding parentheses around nested ternaries, because formatter/lint cycles may remove them and re-trigger the error.
 
 ## Function Parameters
@@ -24,15 +26,15 @@ The project enforces `strict: true` with additional flags: `noUncheckedIndexedAc
 - **Hook signatures should use readonly argument objects** (for `*Args` hook parameter types). Keep callback parameter types compatible with callers (for example React state setters) and avoid over-constraining callback inputs when it breaks assignability.
 
 ```typescript
-// ✅ Object params with Args suffix
+// ✅ Object params with Args suffix — return type omitted, TypeScript infers it
 type FormatCurrencyArgs = {
   readonly amount: number;
   readonly currency: string;
 };
-export const formatCurrency = ({ amount, currency }: FormatCurrencyArgs): string => { ... };
+export const formatCurrency = ({ amount, currency }: FormatCurrencyArgs) => { ... };
 
-// ✅ Single param
-export const formatDate = (date: Date): string => { ... };
+// ✅ Single param — return type omitted, TypeScript infers it
+export const formatDate = (date: Date) => { ... };
 ```
 
 ## Naming Conventions for Types
@@ -74,9 +76,22 @@ type UserId = string & { readonly __brand: 'UserId' };
 | Constant  | `*.constants.ts`             | `api.constants.ts`          |
 | Schema    | `*.schema.ts`                | `user.schema.ts`            |
 
+## One Util Per File
+
+- **Every utility function lives in its own `*.util.ts` file with a colocated `*.util.test.ts`** — never stack multiple module-level helper functions inside one util file, even "private" ones only used by the main export. Extract each helper to its own file with its own unit test (see `packages/ui/src/entry/`: `createHandleRequest.util.tsx` imports `toError.util.ts`, `buildShellStreamResponse.util.ts`, `addPreloadHeaders.util.ts`, each individually tested).
+- Small closures that capture local state stay inline; anything expressible as a top-level function with explicit args gets its own file.
+
 ## Functional Programming & Immutability
 
-- **All `*.util.ts` functions must be pure** — same input → same output, no side effects.
+- **Purity is the default for every function, everywhere** — same input → same output, no side effects, no mutation of arguments or captured state. Not just utils: module-level helpers, derivations inside hooks/components, class methods, and inline callbacks are all pure unless they are one of the designated side-effect homes below.
+- **Side effects are confined to designated homes** — and nowhere else:
+  - action hooks (store writes, persistence, URL/cookie sync, fetch orchestration)
+  - event handlers inside components (`handle*`)
+  - providers/context infrastructure, entry points, and route loaders/actions
+  - service modules (`*.service.ts` / `*.api.ts`)
+  - test setup/teardown
+- **A function that needs a side effect must live in (or be called from) one of those homes.** Never bury a store write, a `fetch`, `Date.now()`/`Math.random()`, DOM access, or logging inside an otherwise-pure helper. Impure logic hiding in a helper gets split: the pure computation stays in the helper; the effect moves to the designated caller.
+- **All `*.util.ts` functions must be pure, no exceptions** — a "util" that needs side effects is not a util; move it to an action hook or service and keep the pure computation behind it testable.
 - **Never mutate data.** Use spread syntax, `.map()`, `.filter()`, `.reduce()`.
 - **Use functional array operations exclusively.** No imperative `for` loops for data transformations.
 - **Never mutate props.** Use `array.toSorted()` instead of `array.sort()`.

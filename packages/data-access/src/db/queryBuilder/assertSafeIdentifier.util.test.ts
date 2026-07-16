@@ -1,0 +1,26 @@
+import { describe, expect, it } from 'vitest';
+
+import { assertSafeIdentifier } from './assertSafeIdentifier.util.ts';
+
+describe('assertSafeIdentifier', () => {
+  it.each(['scanner_id', 'v_scanner_llm_cost', '_leading_underscore', 'a'])(
+    'accepts a valid identifier: %s',
+    (identifier) => {
+      expect(() => assertSafeIdentifier(identifier)).not.toThrow();
+    },
+  );
+
+  it.each([
+    'foo;bar',
+    'foo bar',
+    'foo"bar',
+    'SELECT * FROM x',
+    '',
+    '123abc',
+    'foo-bar',
+    'foo.bar',
+    '*',
+  ])('rejects an unsafe identifier: %s', (identifier) => {
+    expect(() => assertSafeIdentifier(identifier)).toThrow();
+  });
+});

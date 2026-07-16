@@ -1,12 +1,16 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
+import { INITIAL_PAGE_SIZE } from '@repo/ui/components/Table/Table.constants';
+import { appendDistinctFilterDescriptors } from '@repo/ui/routing/appendDistinctFilterDescriptors.util';
+import { appendPrimaryKeySorting } from '@repo/ui/routing/appendPrimaryKeySorting.util';
+import { readTableLoaderStateFromRequest } from '@repo/ui/routing/readTableLoaderStateFromRequest.util';
+
 import type { CarSale, CarSalesResponse } from '@/services';
 
-import { INITIAL_PAGE_SIZE } from '@/components/Table/Table.constants';
+import { APP_ID } from '@/constants/app.constants';
 import { carSalesApi } from '@/services';
 
 import { COLUMNS } from '../car-sales/CarSales.constants';
-import { readTableLoaderStateFromRequest } from '../utils/readTableLoaderStateFromRequest.util';
 import {
   PERSISTENCE_KEY,
   SCHEMA_NAME,
@@ -15,16 +19,27 @@ import {
 } from './CarSales.constants';
 
 export const loader = ({ request }: LoaderFunctionArgs) => {
+  // Columns are serializable (descriptors, never functions — see
+  // .claude/rules/routes-data.md), so the loader can return them directly.
+  const columns = appendDistinctFilterDescriptors({
+    columns: COLUMNS,
+    schemaName: SCHEMA_NAME,
+    tableName: TABLE_NAME,
+    transport: 'loader',
+  });
+
   const {
     columnOrder,
     columnPinning,
     columnSizing,
     columnVisibility,
     filters,
+    metaUiFlags,
     sorting,
     standaloneFiltersParam,
     standaloneSortParam,
   } = readTableLoaderStateFromRequest<CarSale>({
+    appId: APP_ID,
     columns: COLUMNS,
     includeFilters: true,
     persistenceKey: PERSISTENCE_KEY,
@@ -43,7 +58,10 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
       limit: INITIAL_PAGE_SIZE,
       requestUrl: request.url,
       skip: 0,
-      sorting: sanitizedSorting,
+      sorting: appendPrimaryKeySorting<CarSale>({
+        columns: COLUMNS,
+        sorting: sanitizedSorting,
+      }),
     });
 
   return {
@@ -52,13 +70,15 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
       columnFilters: filters,
       columnOrder,
       columnPinning,
-      columns: COLUMNS,
+      columns,
       columnSizing,
       columnVisibility,
       sorting: sanitizedSorting,
     },
     key: `${standaloneSortParam ?? ''}${standaloneFiltersParam ?? ''}`,
     metaState: {
+      ...metaUiFlags,
+      appId: APP_ID,
       persistenceKey: PERSISTENCE_KEY,
       schemaName: SCHEMA_NAME,
       tableName: TABLE_NAME,

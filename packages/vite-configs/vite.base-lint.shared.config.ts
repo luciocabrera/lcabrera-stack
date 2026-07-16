@@ -36,6 +36,12 @@ export const baseLintSharedConfig: OxlintConfig = {
         browser: true,
       },
       files: ['**/*.ts', '**/*.tsx'],
+      jsPlugins: [
+        {
+          name: 'local-rules',
+          specifier: LOCAL_RULES_SPECIFIER,
+        },
+      ],
       plugins: [
         'oxc',
         'typescript',
@@ -48,12 +54,6 @@ export const baseLintSharedConfig: OxlintConfig = {
         'react',
         'jsx-a11y',
         'react-perf',
-      ],
-      jsPlugins: [
-        {
-          name: 'local-rules',
-          specifier: LOCAL_RULES_SPECIFIER,
-        },
       ],
     },
     {

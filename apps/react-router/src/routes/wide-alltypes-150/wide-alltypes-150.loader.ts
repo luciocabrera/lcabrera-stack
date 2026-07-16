@@ -1,12 +1,15 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
+import { INITIAL_PAGE_SIZE } from '@repo/ui/components/Table/Table.constants';
+import { appendPrimaryKeySorting } from '@repo/ui/routing/appendPrimaryKeySorting.util';
+import { readTableLoaderStateFromRequest } from '@repo/ui/routing/readTableLoaderStateFromRequest.util';
+import { sanitizeSorting } from '@repo/ui/routing/sanitizeSorting.util';
+
 import type { WideAlltypes150, WideAlltypes150Response } from '@/services';
 
-import { INITIAL_PAGE_SIZE } from '@/components/Table/Table.constants';
+import { APP_ID } from '@/constants/app.constants';
 import { wideAlltypes150Api } from '@/services';
 
-import { readTableLoaderStateFromRequest } from '../utils/readTableLoaderStateFromRequest.util';
-import { sanitizeSorting } from '../utils/sanitizeSorting.util';
 import {
   COLUMNS,
   PERSISTENCE_KEY,
@@ -22,10 +25,12 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
     columnSizing,
     columnVisibility,
     filters,
+    metaUiFlags,
     sorting,
     standaloneFiltersParam,
     standaloneSortParam,
   } = readTableLoaderStateFromRequest<WideAlltypes150>({
+    appId: APP_ID,
     columns: COLUMNS,
     includeFilters: true,
     persistenceKey: PERSISTENCE_KEY,
@@ -39,10 +44,16 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
       limit: INITIAL_PAGE_SIZE,
       requestUrl: request.url,
       skip: 0,
-      sorting: sanitizedSorting,
+      sorting: appendPrimaryKeySorting<WideAlltypes150>({
+        columns: COLUMNS,
+        sorting: sanitizedSorting,
+      }),
     });
 
   return {
+    // COLUMNS is fully serializable (no functions), so the loader can
+    // return it directly. No distinct descriptors here yet — this route's
+    // filter support is deliberately minimal (see its ARCHITECTURE.md).
     columnsState: {
       columnFilters: filters,
       columnOrder,
@@ -55,6 +66,8 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
     dataPromise,
     key: `${standaloneSortParam ?? ''}${standaloneFiltersParam ?? ''}`,
     metaState: {
+      ...metaUiFlags,
+      appId: APP_ID,
       persistenceKey: PERSISTENCE_KEY,
       schemaName: SCHEMA_NAME,
       tableName: TABLE_NAME,

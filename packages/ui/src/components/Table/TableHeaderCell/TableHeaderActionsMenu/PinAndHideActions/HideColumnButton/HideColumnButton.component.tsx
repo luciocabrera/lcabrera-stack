@@ -1,0 +1,44 @@
+import { Button } from '@repo/ui/components/Button';
+import { EyeOffIcon } from '@repo/ui/components/Icons';
+import { useSetColumnVisibility } from '@repo/ui/components/Table/contexts/TableConfig/columns/actions';
+import { tableActionsPopoverStyles } from '@repo/ui/components/Table/TableActionsPopover';
+import * as stylex from '@stylexjs/stylex';
+
+import type { HideColumnButtonProps } from './HideColumnButton.types';
+
+/**
+ * "Hide Column" item of the pin/hide section: hides the column at table level
+ * via `useSetColumnVisibility`. Always carries the section divider above it
+ * (the pin options always precede it). Closes the menu via `onClose`.
+ */
+export const HideColumnButton = <TData,>({
+  columnKey,
+  onClose,
+}: HideColumnButtonProps<TData>) => {
+  const setColumnVisibility = useSetColumnVisibility<TData>();
+
+  const handleHideColumn = () => {
+    setColumnVisibility({ columnKey, isVisible: false });
+    onClose();
+  };
+
+  return (
+    <Button
+      customStylex={[
+        tableActionsPopoverStyles.menuItem,
+        tableActionsPopoverStyles.menuSectionDivider,
+      ]}
+      icon={
+        <span {...stylex.props(tableActionsPopoverStyles.menuIcon)}>
+          <EyeOffIcon size={16} />
+        </span>
+      }
+      onClick={handleHideColumn}
+      orientation='horizontal'
+      size='mini'
+      variant='ghost'
+    >
+      Hide Column
+    </Button>
+  );
+};

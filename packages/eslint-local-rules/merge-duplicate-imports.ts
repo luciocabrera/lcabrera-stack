@@ -4,16 +4,25 @@
  * Disallows: import { A } from './module'; import { B } from './module'
  */
 
-import type { Rule } from 'eslint';
+import type { TSESLint, TSESTree } from '@typescript-eslint/utils';
 
-const createSourceMap = (programNode: any): Map<string, any[]> => {
-  const sourceMap = new Map<string, any[]>();
+import { ESLintUtils } from '@typescript-eslint/utils';
+
+const createRule = ESLintUtils.RuleCreator(
+  (name) => `https://example.com/rule/${name}`,
+);
+
+const createSourceMap = (
+  programNode: TSESTree.Program,
+): Map<string, TSESTree.ImportDeclaration[]> => {
+  const sourceMap = new Map<string, TSESTree.ImportDeclaration[]>();
   const imports = programNode.body.filter(
-    (statement: any) => statement.type === 'ImportDeclaration',
+    (statement): statement is TSESTree.ImportDeclaration =>
+      statement.type === 'ImportDeclaration',
   );
 
   for (const importNode of imports) {
-    const source = importNode.source.value as string;
+    const source = importNode.source.value;
     const existingImports = sourceMap.get(source) ?? [];
     existingImports.push(importNode);
     sourceMap.set(source, existingImports);
@@ -22,24 +31,33 @@ const createSourceMap = (programNode: any): Map<string, any[]> => {
   return sourceMap;
 };
 
-const hasSameImportKind = (importNodes: any[]): boolean => {
+const hasSameImportKind = (
+  importNodes: readonly TSESTree.ImportDeclaration[],
+): boolean => {
   if (importNodes.length === 0) {
     return false;
   }
 
-  const firstImportKind = importNodes[0].importKind;
+  const firstImportKind = importNodes[0]?.importKind;
   return importNodes.every(
-    (importNode: any) => importNode.importKind === firstImportKind,
+    (importNode) => importNode.importKind === firstImportKind,
   );
 };
 
-const getSpecifierText = (specifier: any): string | undefined => {
+const getImportedName = (
+  imported: TSESTree.Identifier | TSESTree.StringLiteral,
+): string => (imported.type === 'Identifier' ? imported.name : imported.value);
+
+const getSpecifierText = (
+  specifier: TSESTree.ImportClause,
+): string | undefined => {
   if (specifier.type === 'ImportSpecifier') {
-    if (specifier.imported.name === specifier.local.name) {
-      return specifier.imported.name;
+    const importedName = getImportedName(specifier.imported);
+    if (importedName === specifier.local.name) {
+      return importedName;
     }
 
-    return `${specifier.imported.name} as ${specifier.local.name}`;
+    return `${importedName} as ${specifier.local.name}`;
   }
 
   if (specifier.type === 'ImportDefaultSpecifier') {
@@ -53,7 +71,9 @@ const getSpecifierText = (specifier: any): string | undefined => {
   return undefined;
 };
 
-const getUniqueSpecifiers = (importNodes: any[]): string[] => {
+const getUniqueSpecifiers = (
+  importNodes: readonly TSESTree.ImportDeclaration[],
+): string[] => {
   const allSpecifiers: string[] = [];
 
   for (const importNode of importNodes) {
@@ -72,17 +92,22 @@ const createMergeDuplicateImportsFix = ({
   context,
   importNodes,
 }: {
-  readonly context: Rule.RuleContext;
-  readonly importNodes: any[];
+  readonly context: TSESLint.RuleContext<'duplicateImport', []>;
+  readonly importNodes: readonly TSESTree.ImportDeclaration[];
 }) => {
-  return (fixer: any) => {
+  return (fixer: TSESLint.RuleFixer): TSESLint.RuleFix[] => {
+    const firstImportNode = importNodes[0];
+    if (!firstImportNode) {
+      return [];
+    }
+
     const sourceCode = context.sourceCode;
-    const importKind = importNodes[0].importKind;
+    const importKind = firstImportNode.importKind;
     const importKeyword = importKind === 'type' ? 'import type' : 'import';
-    const fromClause = sourceCode.getText(importNodes[0].source);
+    const fromClause = sourceCode.getText(firstImportNode.source);
     const uniqueSpecifiers = getUniqueSpecifiers(importNodes);
     const mergedImport = `${importKeyword} { ${uniqueSpecifiers.join(', ')} } from ${fromClause};`;
-    const fixes = [fixer.replaceText(importNodes[0], mergedImport)];
+    const fixes = [fixer.replaceText(firstImportNode, mergedImport)];
 
     for (const duplicateImportNode of importNodes.slice(1)) {
       fixes.push(fixer.remove(duplicateImportNode));
@@ -92,30 +117,15 @@ const createMergeDuplicateImportsFix = ({
   };
 };
 
-const rule: Rule.RuleModule = {
-  meta: {
-    docs: {
-      description:
-        'Merge duplicate imports from the same source into a single import statement',
-      recommended: false,
-    },
-    fixable: 'code',
-    messages: {
-      duplicateImport:
-        'Multiple imports from "{{source}}". Merge into a single import statement.',
-    },
-    schema: [],
-    type: 'suggestion',
-  },
-
+export default createRule({
   create(context) {
     return {
-      Program(node: any) {
+      Program(node: TSESTree.Program) {
         const sourceMap = createSourceMap(node);
 
-        sourceMap.forEach((importNodes, source) => {
+        for (const [source, importNodes] of sourceMap) {
           if (importNodes.length <= 1 || !hasSameImportKind(importNodes)) {
-            return;
+            continue;
           }
 
           const fix = createMergeDuplicateImportsFix({
@@ -131,10 +141,23 @@ const rule: Rule.RuleModule = {
               node: importNode,
             });
           }
-        });
+        }
       },
     };
   },
-};
-
-export default rule;
+  defaultOptions: [],
+  meta: {
+    docs: {
+      description:
+        'Merge duplicate imports from the same source into a single import statement',
+    },
+    fixable: 'code',
+    messages: {
+      duplicateImport:
+        'Multiple imports from "{{source}}". Merge into a single import statement.',
+    },
+    schema: [],
+    type: 'suggestion',
+  },
+  name: 'merge-duplicate-imports',
+});

@@ -1,14 +1,15 @@
-import { z } from 'zod';
+import type { SortRule } from 'api-shared';
 
 import { HttpError } from 'api-shared';
-import type { SortRule } from 'api-shared';
-import { parseJsonQueryParam } from '../../utils/parseJsonQueryParam.util';
-import { parseSortingRules } from '../../utils/parseSortingRules.util';
+import { z } from 'zod';
 
 import type {
   EnterpriseOrdersFilter,
   EnterpriseOrdersFilters,
 } from './enterpriseOrders.types';
+
+import { parseJsonQueryParam } from '../../utils/parseJsonQueryParam.util';
+import { parseSortingRules } from '../../utils/parseSortingRules.util';
 
 const booleanFilterSchema = z.object({
   type: z.literal('boolean'),
@@ -65,11 +66,6 @@ const filterSchema = z.discriminatedUnion('type', [
   textFilterSchema,
 ]);
 
-type ParseDistinctColumnArgs = {
-  readonly allowedColumns: ReadonlySet<string>;
-  readonly value: string;
-};
-
 type ParseFiltersArgs = {
   readonly allowedColumns: ReadonlySet<string>;
   readonly value: unknown;
@@ -78,23 +74,6 @@ type ParseFiltersArgs = {
 type ParseSortingArgs = {
   readonly allowedColumns: ReadonlySet<string>;
   readonly value: unknown;
-};
-
-/**
- * Validate the requested distinct column.
- */
-export const parseDistinctColumnName = ({
-  allowedColumns,
-  value,
-}: ParseDistinctColumnArgs): string => {
-  if (!allowedColumns.has(value)) {
-    throw new HttpError({
-      message: `Unsupported distinct column: ${value}`,
-      statusCode: 400,
-    });
-  }
-
-  return value;
 };
 
 /**

@@ -1,0 +1,101 @@
+{
+  "$schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schema.json",
+  "entry": [
+    "scripts/**/*.{cjs,mjs,js}",
+    ".github/skills/*/scripts/*.{js,mjs,cjs}",
+    "apps/react-router/lighthouse.config.js",
+    "apps/react-router/config/*.ts",
+    "apps/admin_system/config/*.ts",
+    "packages/ui/config/*.ts",
+    "apps/*/scripts/**/*.{ts,js,mjs}",
+    "packages/scan-ingestion/src/cli/*.ts"
+  ],
+  "ignorePatterns": [
+    "**/build/**",
+    "**/.react-router/**",
+    "**/.tmp/**",
+    "**/coverage/**",
+    "miscelanious/**",
+    "reports/**"
+  ],
+  "ignoreDependencies": [
+    "@babel/preset-typescript",
+    "@eslint/js",
+    "@stylexjs/eslint-plugin",
+    "@stylexjs/unplugin",
+    "@typescript-eslint/utils",
+    "babel-plugin-react-compiler",
+    "eslint-config-prettier",
+    "eslint-plugin-local-rules",
+    "eslint-plugin-perfectionist",
+    "eslint-plugin-react-dom",
+    "eslint-plugin-react-hooks",
+    "eslint-plugin-react-refresh",
+    "eslint-plugin-react-x",
+    "eslint-plugin-security",
+    "eslint-plugin-unicorn",
+    "globals",
+    "ts-morph",
+    "vite-plugin-babel",
+    "typescript-eslint"
+  ],
+  "ignoreExports": [
+    {
+      "file": "apps/react-router/src/features/showcase/ShowcasePage/ShowcasePage.stylex.ts",
+      "exports": ["*"]
+    },
+    {
+      "file": "apps/react-router/src/features/showcase/ShowcasePage/SidePanelSection/SidePanelSection.stylex.ts",
+      "exports": ["*"]
+    }
+  ],
+  "health": {
+    "maxUnitSize": 90,
+    "thresholdOverrides": [
+      {
+        "files": ["**/*.test.*"],
+        "maxCrap": 1000000,
+        "maxUnitSize": 10000,
+        "reason": "describe()/it() blocks in test suites legitimately span hundreds of lines, and CRAP scores untested complexity — a test file is never exercised by its own tests, so its coverage is either absent (estimated 0%) or meaningless, which inflates CRAP without signalling anything. Cyclomatic and cognitive limits still apply to test files."
+      },
+      {
+        "files": [
+          ".github/skills/**/*.mjs",
+          "packages/eslint-local-rules/**/*.ts"
+        ],
+        "maxCyclomatic": 65535,
+        "maxCognitive": 65535,
+        "maxCrap": 1000000,
+        "maxUnitSize": 100000,
+        "reason": "Dev tooling, not shipped product: the fallow/lint/app-graph report generators and the custom ESLint rule visitors are inherently procedural CLI/AST-walker code where complexity/CRAP/unit-size limits do not apply."
+      }
+    ]
+  },
+  "rules": {
+    "circular-dependencies": "error",
+    "unused-files": "error",
+    "unused-exports": "warn",
+    "unused-types": "warn",
+    "unused-dependencies": "warn",
+    "prop-drilling": "error",
+    "thin-wrapper": "error",
+    "duplicate-prop-shape": "warn"
+  },
+  "overrides": [
+    {
+      "reason": "Route loaders return serializable state/promises consumed by shared components (TableLayout, panels) and via use() in Suspense children; fallow cannot trace useLoaderData<typeof loader>() destructuring across the route barrel + component-file split, so unused-load-data-keys is a systematic false positive on *.loader.ts here.",
+      "files": ["**/*.loader.ts"],
+      "rules": { "unused-load-data-keys": "off" }
+    }
+  ],
+  "duplicates": {
+    "mode": "mild",
+    "ignoreImports": true
+  },
+  "audit": {
+    "gate": "new-only",
+    "deadCodeBaseline": "reports/fallow/baselines/dead-code.json",
+    "healthBaseline": "reports/fallow/baselines/health.json",
+    "dupesBaseline": "reports/fallow/baselines/dupes.json"
+  }
+}

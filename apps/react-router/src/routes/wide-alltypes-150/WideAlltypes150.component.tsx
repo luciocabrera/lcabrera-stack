@@ -1,8 +1,10 @@
+import { TableLayout } from '@repo/ui/components/Table/TableLayout';
+import { appendPrimaryKeySorting } from '@repo/ui/routing/appendPrimaryKeySorting.util';
+import { sanitizeSorting } from '@repo/ui/routing/sanitizeSorting.util';
 import { useLoaderData } from 'react-router';
 
 import type { WideAlltypes150, WideAlltypes150Response } from '@/services';
 
-import { TableLayout } from '@/components/Table/TableLayout';
 import { wideAlltypes150Api } from '@/services';
 
 import type { loader } from './wide-alltypes-150.loader';
@@ -20,10 +22,14 @@ export const WideAlltypes150Page = () => {
       metaState={metaState}
       onLoadMore={async ({ limit, skip }) =>
         wideAlltypes150Api.fetchPaginated({
-          // filter: columnsState?.columnFilters ?? {},
           limit,
           skip,
-          sorting: columnsState?.sorting ?? [],
+          sorting: appendPrimaryKeySorting<WideAlltypes150>({
+            columns: columnsState.columns,
+            sorting: sanitizeSorting<WideAlltypes150>(
+              columnsState?.sorting ?? [],
+            ),
+          }),
         })
       }
     />

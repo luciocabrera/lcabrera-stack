@@ -1,16 +1,23 @@
-import type { TableColumn } from '@/components/Table/Table.types';
+import type { TableColumn } from '@repo/ui/components/Table/Table.types';
 
 import {
   getInitialColumnsState,
   getInitialMetaState,
-} from '@/components/Table/contexts/TableConfig/utils';
-import { readPersistedUiStateFromSessionStorage } from '@/components/Table/utils';
+} from '@repo/ui/components/Table/contexts/TableConfig/utils';
+import { readPersistedUiStateFromSessionStorage } from '@repo/ui/components/Table/utils';
 
 import type {
   GenerateCellValueArgs,
   MockResponse,
   MockRow,
 } from './ShowcasePage.types';
+
+// ACCEPTED PURITY DEVIATION (demo-only, WP8c triage 2026-07-12): this module
+// deliberately keeps two pieces of module-level state — the seeded RNG below
+// (deterministic run-to-run so the demo data is SSR/hydration-stable) and the
+// tableDataPromiseCache (module-level Suspense promise memoization). Both are
+// confined to the showcase feature; do not copy this pattern into product
+// code — use loaders/actions and services instead.
 
 // --- Seeded RNG (deterministic pseudo-random for consistent test data) ---
 const mulberry32 = (seed: number) => {
@@ -59,7 +66,7 @@ const generateCellValue = ({
   colIdx,
   dataType,
   rowIdx,
-}: GenerateCellValueArgs): boolean | number | string => {
+}: GenerateCellValueArgs) => {
   if (dataType === 'boolean') return rng() > 0.5;
   if (dataType === 'currency') return `$${randomCurrency()}`;
   if (dataType === 'date') return randomDate().toISOString().slice(0, 10);
@@ -94,11 +101,14 @@ export const SHOWCASE_META_STATE = getInitialMetaState({
     persistenceKey: PERSISTENCE_KEY,
   }),
   persistenceKey: PERSISTENCE_KEY,
-  title: 'Data Table',
+  title: {
+    plural: 'Data Table',
+    singular: 'Row',
+  },
 });
 
-const fetchTableData = (): Promise<MockResponse> =>
-  new Promise((resolve) => {
+const fetchTableData = () =>
+  new Promise<MockResponse>((resolve) => {
     setTimeout(() => {
       resolve({ data: tableData, total: tableData.length });
     }, FAKE_API_DELAY_MS);
@@ -114,7 +124,7 @@ export const getTableDataPromise = () => {
   return tableDataPromiseCache.current;
 };
 
-export const resetTableDataPromise = (): void => {
+export const resetTableDataPromise = () => {
   tableDataPromiseCache.current = undefined;
 };
 

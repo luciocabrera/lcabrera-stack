@@ -2,14 +2,67 @@
 // - Function parameter types must end with 'Args' (not 'Arguments')
 // - React component prop types must end with 'Props'
 
-import type { Rule } from 'eslint';
+import type { TSESTree } from '@typescript-eslint/utils';
 
-const rule: Rule.RuleModule = {
+import { ESLintUtils } from '@typescript-eslint/utils';
+
+const createRule = ESLintUtils.RuleCreator(
+  (name) => `https://example.com/rule/${name}`,
+);
+
+export default createRule({
+  create(context) {
+    const filename = context.filename;
+    const isReactFile = filename.endsWith('.tsx') || filename.endsWith('.jsx');
+
+    return {
+      TSTypeAliasDeclaration(node: TSESTree.TSTypeAliasDeclaration) {
+        const typeName = node.id.name;
+
+        // Check for incorrect 'Arguments' suffix (should be 'Args')
+        if (typeName.endsWith('Arguments')) {
+          const suggestedName = typeName.replace(/Arguments$/, 'Args');
+
+          context.report({
+            data: {
+              suggestedName,
+              typeName,
+            },
+            fix(fixer) {
+              // Fix the type definition itself
+              const fixes = [fixer.replaceText(node.id, suggestedName)];
+
+              return fixes;
+            },
+            messageId: 'useArgsSuffix',
+            node: node.id,
+          });
+        }
+
+        // Check for incorrect 'Properties' suffix (should be 'Props')
+        if (isReactFile && typeName.endsWith('Properties')) {
+          const suggestedName = typeName.replace(/Properties$/, 'Props');
+
+          context.report({
+            data: {
+              suggestedName,
+              typeName,
+            },
+            fix(fixer) {
+              return fixer.replaceText(node.id, suggestedName);
+            },
+            messageId: 'usePropsSuffix',
+            node: node.id,
+          });
+        }
+      },
+    };
+  },
+  defaultOptions: [],
   meta: {
     docs: {
       description:
         'Enforce proper type suffix naming: Args for function parameters, Props for React components',
-      recommended: true,
     },
     fixable: 'code',
     messages: {
@@ -21,56 +74,5 @@ const rule: Rule.RuleModule = {
     schema: [],
     type: 'suggestion',
   },
-  create(context) {
-    const filename = context.filename;
-    const isReactFile = filename.endsWith('.tsx') || filename.endsWith('.jsx');
-
-    return {
-      TSTypeAliasDeclaration(node: any) {
-        const typeName = node.id.name;
-
-        // Check for incorrect 'Arguments' suffix (should be 'Args')
-        if (typeName.endsWith('Arguments')) {
-          const suggestedName = typeName.replace(/Arguments$/, 'Args');
-
-          context.report({
-            messageId: 'useArgsSuffix',
-            node: node.id,
-            data: {
-              suggestedName,
-              typeName,
-            },
-            fix(fixer) {
-              // Find all references to this type in the file
-              const fixes = [];
-
-              // Fix the type definition itself
-              fixes.push(fixer.replaceText(node.id, suggestedName));
-
-              return fixes;
-            },
-          });
-        }
-
-        // Check for incorrect 'Properties' suffix (should be 'Props')
-        if (isReactFile && typeName.endsWith('Properties')) {
-          const suggestedName = typeName.replace(/Properties$/, 'Props');
-
-          context.report({
-            messageId: 'usePropsSuffix',
-            node: node.id,
-            data: {
-              suggestedName,
-              typeName,
-            },
-            fix(fixer) {
-              return fixer.replaceText(node.id, suggestedName);
-            },
-          });
-        }
-      },
-    };
-  },
-};
-
-export default rule;
+  name: 'type-suffix-naming',
+});

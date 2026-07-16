@@ -1,0 +1,76 @@
+import type {
+  ColumnSizingState,
+  TableColumn,
+} from '@repo/ui/components/Table/Table.types';
+
+import { describe, expect, it } from 'vitest';
+
+import { deriveColumnViewState } from './deriveColumnViewState.util';
+
+type Row = {
+  readonly age: number;
+  readonly id: string;
+  readonly name: string;
+};
+
+const columns: TableColumn<Row>[] = [
+  { key: 'id', label: 'ID', minWidth: 60 },
+  { key: 'name', label: 'Name', minWidth: 120 },
+  { key: 'age', label: 'Age', minWidth: 80 },
+];
+
+const columnSizing = {
+  actions: 0,
+  age: 80,
+  id: 100,
+  name: 140,
+} as ColumnSizingState<Row>;
+
+describe('deriveColumnViewState', () => {
+  it('returns normalized columns plus pinned derived slices in one result', () => {
+    const result = deriveColumnViewState<Row>({
+      columnOrder: ['id', 'name', 'age'],
+      columnPinning: { left: ['id'], right: ['age'] },
+      columns,
+      columnSizing,
+      sorting: [{ columnKey: 'name', direction: 'asc' }],
+    });
+
+    expect(result.normalizedColumns['name']?.sortDirection).toBe('asc');
+    expect(result.normalizedColumns['name']?.sortIndex).toBe(0);
+    expect(result.effectiveColumns.map(({ key }) => key)).toEqual([
+      'id',
+      'name',
+      'age',
+    ]);
+    expect(result.columnGroups.leftPinnedCols.map(({ key }) => key)).toEqual([
+      'id',
+    ]);
+    expect(result.columnGroups.centerCols.map(({ key }) => key)).toEqual([
+      'name',
+    ]);
+    expect(result.columnGroups.rightPinnedCols.map(({ key }) => key)).toEqual([
+      'age',
+    ]);
+    expect(result.pinnedColumnOffsets['id']?.offset).toBe(0);
+    expect(result.pinnedColumnOffsets['age']?.side).toBe('right');
+  });
+
+  it('applies hidden-column filtering before grouping', () => {
+    const result = deriveColumnViewState<Row>({
+      columnOrder: ['id', 'name', 'age'],
+      columnPinning: { left: ['id'], right: ['age'] },
+      columns,
+      columnSizing,
+      columnVisibility: new Set(['name']),
+      sorting: [],
+    });
+
+    expect(result.effectiveColumns.map(({ key }) => key)).toEqual([
+      'id',
+      'age',
+    ]);
+    expect(result.columnGroups.centerCols).toEqual([]);
+    expect(result.normalizedColumns['name']?.label).toBe('Name');
+  });
+});

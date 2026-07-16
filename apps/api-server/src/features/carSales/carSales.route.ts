@@ -1,5 +1,6 @@
-import { Router } from 'express';
 import type { Pool } from 'pg';
+
+import { Router } from 'express';
 
 import { createCarSalesController } from './carSales.controller';
 import { createCarSalesRepository } from './carSales.repository';

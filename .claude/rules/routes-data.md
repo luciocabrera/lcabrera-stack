@@ -20,6 +20,7 @@ paths:
 
 - **Read operations:** `loader` functions → consumed via `useLoaderData<typeof loader>()`
 - **Write operations:** `action` functions → triggered via `useFetcher` or `<Form>`
+- **Loader data must be fully serializable (promises excepted).** Server loader results cross the single-fetch turbo-stream boundary, and functions are **silently** replaced with `undefined` on the client (`SingleFetchFallback` — no error, no warning). Never return function-carrying values from a loader. The sanctioned path for column filter-option fetching is the **serializable descriptor** (ADR-009): loaders call `appendDistinctFilterDescriptors` (`@repo/ui/routing`) / `createStaticFilterOptions` and return descriptor-bearing `columns` directly; the client tool `resolveFilterOptionsDescriptor` executes them. Only columns carrying `render` functions still require the component-side re-attach workaround.
 
 ```typescript
 // Route loader

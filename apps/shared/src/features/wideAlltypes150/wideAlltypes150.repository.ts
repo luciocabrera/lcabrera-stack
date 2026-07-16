@@ -5,9 +5,9 @@ import type {
   Queryable,
   SortRule,
 } from '../../types/api.types.js';
+
 import { buildOrderByClause } from '../../utils/buildOrderByClause.util.js';
 import { serializeDatabaseValue } from '../../utils/serializeDatabaseValue.util.js';
-
 import {
   DEFAULT_WIDE_ALLTYPES_SORTING,
   MAX_WIDE_ALLTYPES_SORT_RULES,

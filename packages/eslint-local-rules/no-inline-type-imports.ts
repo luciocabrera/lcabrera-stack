@@ -4,45 +4,42 @@
  * Enforces: import type { X } from 'module'
  */
 
-import type { Rule } from 'eslint';
+import type { TSESTree } from '@typescript-eslint/utils';
 
-const rule: Rule.RuleModule = {
-  meta: {
-    docs: {
-      description:
-        'Enforce separate type imports instead of inline type imports',
-      recommended: false,
-    },
-    fixable: 'code',
-    messages: {
-      noInlineTypeImport:
-        'Use separate type import syntax: "import type { {{names}} }" instead of inline "type" keyword',
-      redundantInlineType:
-        'Redundant inline "type" keyword in import type statement. Remove "type" from: {{names}}',
-    },
-    schema: [],
-    type: 'suggestion',
-  },
+import { ESLintUtils } from '@typescript-eslint/utils';
 
+const createRule = ESLintUtils.RuleCreator(
+  (name) => `https://example.com/rule/${name}`,
+);
+
+const getImportedName = (
+  imported: TSESTree.Identifier | TSESTree.StringLiteral,
+): string => (imported.type === 'Identifier' ? imported.name : imported.value);
+
+const isTypeImportSpecifier = (
+  specifier: TSESTree.ImportClause,
+): specifier is TSESTree.ImportSpecifier =>
+  specifier.type === 'ImportSpecifier' && specifier.importKind === 'type';
+
+const isImportSpecifier = (
+  specifier: TSESTree.ImportClause,
+): specifier is TSESTree.ImportSpecifier =>
+  specifier.type === 'ImportSpecifier';
+
+export default createRule({
   create(context) {
     return {
-      ImportDeclaration(node: any) {
+      ImportDeclaration(node: TSESTree.ImportDeclaration) {
         // Case 1: Check if this is already an "import type" statement with redundant inline "type" keywords
         if (node.importKind === 'type') {
-          const hasRedundantInlineTypes = node.specifiers.some(
-            (specifier: any) =>
-              specifier.type === 'ImportSpecifier' &&
-              specifier.importKind === 'type',
+          const hasRedundantInlineTypes = node.specifiers.some((specifier) =>
+            isTypeImportSpecifier(specifier),
           );
 
           if (hasRedundantInlineTypes) {
             const redundantNames = node.specifiers
-              .filter(
-                (specifier: any) =>
-                  specifier.type === 'ImportSpecifier' &&
-                  specifier.importKind === 'type',
-              )
-              .map((specifier: any) => specifier.imported.name)
+              .filter(isTypeImportSpecifier)
+              .map((specifier) => getImportedName(specifier.imported))
               .join(', ');
 
             context.report({
@@ -52,17 +49,17 @@ const rule: Rule.RuleModule = {
 
                 // Build the fixed import by removing inline 'type' keywords
                 const importedNames = node.specifiers
-                  .map((specifier: any) => {
-                    if (specifier.type !== 'ImportSpecifier') return null;
+                  .map((specifier) => {
+                    if (specifier.type !== 'ImportSpecifier') return;
 
-                    if (specifier.imported.name === specifier.local.name) {
-                      return specifier.imported.name;
-                    } else {
-                      return `${specifier.imported.name} as ${specifier.local.name}`;
-                    }
+                    const importedName = getImportedName(specifier.imported);
+                    return importedName === specifier.local.name
+                      ? importedName
+                      : `${importedName} as ${specifier.local.name}`;
                   })
                   .filter(
-                    (name: string | null): name is string => name !== null,
+                    (name: string | undefined): name is string =>
+                      name !== undefined,
                   )
                   .join(', ');
 
@@ -79,10 +76,8 @@ const rule: Rule.RuleModule = {
         }
 
         // Case 2: Check if this is a regular import with inline type specifiers
-        const hasInlineTypes = node.specifiers.some(
-          (specifier: any) =>
-            specifier.type === 'ImportSpecifier' &&
-            specifier.importKind === 'type',
+        const hasInlineTypes = node.specifiers.some((specifier) =>
+          isTypeImportSpecifier(specifier),
         );
 
         if (!hasInlineTypes) {
@@ -90,11 +85,7 @@ const rule: Rule.RuleModule = {
         }
 
         // Check if ALL imports are types (not mixed)
-        const allTypes = node.specifiers.every(
-          (specifier: any) =>
-            specifier.type === 'ImportSpecifier' &&
-            specifier.importKind === 'type',
-        );
+        const allTypes = node.specifiers.every(isTypeImportSpecifier);
 
         if (!allTypes) {
           // Mixed imports - let TypeScript-ESLint handle this
@@ -103,8 +94,8 @@ const rule: Rule.RuleModule = {
 
         // Get the imported names
         const names = node.specifiers
-          .filter((specifier: any) => specifier.type === 'ImportSpecifier')
-          .map((specifier: any) => specifier.imported.name)
+          .filter(isImportSpecifier)
+          .map((specifier) => getImportedName(specifier.imported))
           .join(', ');
 
         context.report({
@@ -113,13 +104,12 @@ const rule: Rule.RuleModule = {
             const sourceCode = context.sourceCode;
 
             const importedNames = node.specifiers
-              .filter((specifier: any) => specifier.type === 'ImportSpecifier')
-              .map((specifier: any) => {
-                if (specifier.imported.name === specifier.local.name) {
-                  return specifier.imported.name;
-                } else {
-                  return `${specifier.imported.name} as ${specifier.local.name}`;
-                }
+              .filter(isImportSpecifier)
+              .map((specifier) => {
+                const importedName = getImportedName(specifier.imported);
+                return importedName === specifier.local.name
+                  ? importedName
+                  : `${importedName} as ${specifier.local.name}`;
               })
               .join(', ');
 
@@ -134,6 +124,21 @@ const rule: Rule.RuleModule = {
       },
     };
   },
-};
-
-export default rule;
+  defaultOptions: [],
+  meta: {
+    docs: {
+      description:
+        'Enforce separate type imports instead of inline type imports',
+    },
+    fixable: 'code',
+    messages: {
+      noInlineTypeImport:
+        'Use separate type import syntax: "import type { {{names}} }" instead of inline "type" keyword',
+      redundantInlineType:
+        'Redundant inline "type" keyword in import type statement. Remove "type" from: {{names}}',
+    },
+    schema: [],
+    type: 'suggestion',
+  },
+  name: 'no-inline-type-imports',
+});

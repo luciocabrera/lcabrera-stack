@@ -16,7 +16,10 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@repo/data-access/*": ["../../packages/data-access/src/*"],
+      "@repo/ui": ["../../packages/ui/src/public-api.ts"],
+      "@repo/ui/*": ["../../packages/ui/src/*"]
     },
     "resolveJsonModule": true,
     "rootDirs": [".", "./.react-router/types"],

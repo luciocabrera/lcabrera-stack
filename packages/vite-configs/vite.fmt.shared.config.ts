@@ -1,6 +1,20 @@
 import type { OxfmtConfig } from 'vite-plus/fmt';
 
-const BASE_IGNORE_PATTERNS = ['dist/', 'node_modules/'] as const;
+// `eslint-suppressions.json` is generated and rewritten by ESLint's bulk
+// suppressions writer (`json-stable-stringify-without-jsonify`, no trailing
+// newline). Oxfmt would re-add a trailing newline and re-expand `{}` on every
+// pass, so the two tools flip-flop the file endlessly. ESLint owns these files;
+// keep the formatter out of them everywhere.
+const BASE_IGNORE_PATTERNS = [
+  'dist/',
+  'node_modules/',
+  'eslint-suppressions.json',
+] as const;
+
+type CreateFmtConfigArgs = {
+  readonly ignorePatterns?: readonly string[];
+  readonly overrides?: Partial<Omit<FmtConfig, 'ignorePatterns'>>;
+};
 
 type FmtConfig = OxfmtConfig & {
   readonly arrowParens: 'always';
@@ -14,11 +28,6 @@ type FmtConfig = OxfmtConfig & {
   readonly sortPackageJson: true;
   readonly tabWidth: 2;
   readonly trailingComma: 'all';
-};
-
-type CreateFmtConfigArgs = {
-  readonly ignorePatterns?: readonly string[];
-  readonly overrides?: Partial<Omit<FmtConfig, 'ignorePatterns'>>;
 };
 
 const BASE_FMT_CONFIG: FmtConfig = {

@@ -1,0 +1,44 @@
+{
+  "name": "@repo/scan-ingestion",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    "./ingestion/ignoredDirectories.constants": "./src/ingestion/ignoredDirectories.constants.ts",
+    "./ingestion/ingestReport": "./src/ingestion/ingestReport.ts",
+    "./ingestion/ingestReport.types": "./src/ingestion/ingestReport.types.ts",
+    "./ingestion/snapshots/saveProjectSnapshot": "./src/ingestion/snapshots/saveProjectSnapshot.ts",
+    "./ingestion/workspaces/discoverProjectWorkspaces.util": "./src/ingestion/workspaces/discoverProjectWorkspaces.util.ts",
+    "./queries/*.util": "./src/queries/*.util.ts",
+    "./registry/writeScannerArtifacts.util": "./src/registry/writeScannerArtifacts.util.ts"
+  },
+  "scripts": {
+    "format": "vp fmt .",
+    "format:check": "vp fmt --check .",
+    "lint": "vp run --filter eslint-local-rules-shared build && vp lint . --fix && vp run lint:eslint",
+    "lint:check": "vp run --filter eslint-local-rules-shared build && vp lint . && vp run lint:eslint:check",
+    "lint:eslint": "eslint . --config eslint.config.mjs --fix --max-warnings 0",
+    "lint:eslint:check": "eslint . --config eslint.config.mjs --max-warnings 0",
+    "migrate": "node --env-file-if-exists=../../docker/local/.env --env-file-if-exists=.env --experimental-strip-types ./src/db/runMigrations.ts",
+    "push": "node --env-file-if-exists=.env --experimental-strip-types ./src/cli/push.cli.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.app.json"
+  },
+  "dependencies": {
+    "@repo/data-access": "workspace:*",
+    "fflate": "catalog:",
+    "pg": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@repo/vite-configs": "workspace:*",
+    "@types/node": "catalog:",
+    "@types/pg": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "eslint": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plus": "catalog:",
+    "vitest": "catalog:"
+  }
+}

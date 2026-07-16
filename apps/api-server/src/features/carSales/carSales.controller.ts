@@ -1,11 +1,12 @@
 import type { RequestHandler } from 'express';
 
 import { DEFAULT_PAGE_LIMIT } from 'api-shared';
+
+import type { CarSalesRepository } from './carSales.repository';
+
 import { createRequestHandler } from '../../utils/createRequestHandler.util';
 import { readQueryInteger } from '../../utils/readQueryInteger.util';
-
 import { CAR_SALES_SORTABLE_COLUMNS } from './carSales.constants';
-import type { CarSalesRepository } from './carSales.repository';
 import { parseCarSalesSorting } from './carSales.schema';
 
 export type CarSalesController = {

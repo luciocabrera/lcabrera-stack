@@ -1,10 +1,10 @@
 import { fileURLToPath, URL } from 'node:url';
 import { defineConfig } from 'vite-plus';
 
-import { lintConfig } from './config/vite.lint.config.ts';
 import { fmtConfig } from './config/vite.fmt.config.ts';
-import { runConfig } from './config/vite.run.config.ts';
+import { lintConfig } from './config/vite.lint.config.ts';
 import { pluginsConfig } from './config/vite.plugins.config.ts';
+import { runConfig } from './config/vite.run.config.ts';
 
 export default defineConfig({
   build: {
@@ -17,20 +17,37 @@ export default defineConfig({
   lint: lintConfig,
   plugins: pluginsConfig,
   resolve: {
-    alias: {
-      '@': fileURLToPath(new URL('src', import.meta.url)),
-    },
+    alias: [
+      {
+        find: /^@\//,
+        replacement: `${fileURLToPath(new URL('src', import.meta.url))}/`,
+      },
+      {
+        find: '@repo/data-access',
+        replacement: fileURLToPath(
+          new URL('../../packages/data-access/src', import.meta.url),
+        ),
+      },
+      {
+        find: '@repo/scan-ingestion',
+        replacement: fileURLToPath(
+          new URL('../../packages/scan-ingestion/src', import.meta.url),
+        ),
+      },
+      {
+        find: /^@repo\/ui\/(.*)$/,
+        replacement: `${fileURLToPath(new URL('../../packages/ui/src', import.meta.url))}/$1`,
+      },
+      {
+        find: /^@repo\/ui$/,
+        replacement: fileURLToPath(
+          new URL('../../packages/ui/src/public-api.ts', import.meta.url),
+        ),
+      },
+    ],
     tsconfigPaths: true,
   },
   run: runConfig,
-  server: {
-    proxy: {
-      '/api': {
-        changeOrigin: true,
-        target: 'http://localhost:3001',
-      },
-    },
-  },
   staged: {
     '*': 'vp check --fix',
   },

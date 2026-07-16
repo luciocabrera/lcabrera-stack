@@ -5,7 +5,7 @@ argument-hint: 'Optional scope, for example: repo, apps/react-router, or changed
 user-invocable: true
 context: fork
 agent: general-purpose
-allowed-tools: Bash(bash:*,cat:*,date:*,mkdir:*,npx:*,tee:*,vp:*), Read, Grep, Glob
+allowed-tools: Bash(bash:*,cat:*,date:*,mkdir:*,node:*,npx:*,tee:*,vp:*), Read, Grep, Glob
 ---
 
 # Fallow Full Scan Checker
@@ -41,13 +41,13 @@ Use this skill when you need to:
 
 Collect or infer:
 
-- scope: repo, folder, or changed files
-- execution directory: location where fallow:full script is defined
+- scope: repo (all workspaces), a workspace glob (fallow `-w` syntax), or changed files
+- execution directory: always the repo root — `fallow:full` is defined in the root package.json and `.fallowrc.json` lives at the root
 - constraints: behavior-safe cleanup only, test coverage expectations
 
 If inputs are missing, default to:
 
-- scope: apps/react-router package
+- scope: entire monorepo (fallow auto-detects all pnpm workspaces from the root config)
 - mode: full fallow scan
 - output format: schema-aligned report with prioritized queue
 
@@ -55,15 +55,16 @@ If inputs are missing, default to:
 
 1. Resolve execution directory.
 
-- if current package.json contains fallow:full, run there
-- else if apps/react-router/package.json contains fallow:full, run there
-- if not found, stop and report missing script with a remediation hint
+- always run from the repo root (`git rev-parse --show-toplevel`) — the runner script does this itself
+- if the root package.json has no `fallow:full` script, stop and report the missing script with a remediation hint
 
 2. Capture timestamp, create output directory, and execute fallow.
 
 Run both passes in a single shell invocation so the timestamp is consistent:
 
 !`bash .github/skills/fallow-code-checker/scripts/run-fallow.sh`
+
+To scope the report to specific workspaces, pass a fallow `-w` glob as the first argument, e.g. `bash .github/skills/fallow-code-checker/scripts/run-fallow.sh 'apps/react-router'`. The full dependency graph is analyzed either way; the glob only filters reported findings.
 
 Note the run directory path from the final echo — it is used for all subsequent saves.
 
@@ -136,13 +137,26 @@ Add `raw_summary_line` in Metadata with verbatim human output.
 Add `raw_artifact` in Metadata with the path to `fallow.raw.json`.
 Use the shared report structure exactly — all scan skills emit the same SCHEMA_V1 report so downstream agents need no per-skill parsing.
 
+Also build `report.json` from these same findings — see ../code-smell-shared/REPORT_JSON_CONTRACT.md. Set `finding_kind: "duplication_group"` + `extra.instances` for any finding derived from `dupes.clone_groups`; every other finding is the default `single_location`. Map any status other than `open`/`in-progress`/`done`/`deferred` (in particular `resolved`) to `done` in the JSON.
+
 8. Save the report artifact.
 
 Always save without prompting. The run directory was created in step 2. Write:
 
 1. `fallow.raw.json` — already written by the step 2 command
 2. `report.md` — write the final report to the same directory
-3. Tell the user both saved paths
+3. `report.json` — write the JSON built in step 7 to the same directory
+4. Tell the user all three saved paths
+
+5. Ingest into CQMS (best-effort — do not fail the skill run if this step fails; `report.md`/`report.json` are already saved regardless).
+
+Run, substituting `$OUTPUT_DIR` with the exact run directory from step 2:
+
+```bash
+node --env-file-if-exists=docker/local/.env --env-file-if-exists=packages/scan-ingestion/.env --experimental-strip-types packages/scan-ingestion/src/cli/ingest.cli.ts --skill=fallow --run-dir="$OUTPUT_DIR" --local-path="$(git rev-parse --show-toplevel)" --raw-json=fallow.raw.json
+```
+
+If it fails (e.g. `cqms_db` unreachable), tell the user the ingestion failed and why, but do not treat it as a skill failure.
 
 ## Decision Logic
 
@@ -173,7 +187,9 @@ Before finalizing:
 - false positives explicitly labeled
 - all detected fallow categories considered (not dead code only)
 - prioritized queue provided
-- report saved to `.tmp/fallow-code-checker/{run-directory}/report.md`
+- report saved to `reports/fallow/runs/{run-directory}/report.md`
+- `report.json` saved alongside it, matching the same findings
+- ingestion into CQMS attempted (best-effort; failures reported but non-fatal)
 - residual risk and validation steps documented
 
 ## Example Prompts

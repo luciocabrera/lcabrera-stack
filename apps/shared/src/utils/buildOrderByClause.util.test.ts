@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
 import { HttpError } from '../errors/httpError.js';
-
 import { buildOrderByClause } from './buildOrderByClause.util.js';
 
 describe('buildOrderByClause', () => {

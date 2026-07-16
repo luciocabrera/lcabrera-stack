@@ -310,5 +310,8 @@ if (require.main === module) {
 }
 
 module.exports = {
+  // Exported for packages/agent-runner's SKILL.md loader (TECH_SPEC §2.6) —
+  // reuses this parser rather than re-implementing frontmatter parsing.
+  parseFrontmatter,
   validateSkills,
 };

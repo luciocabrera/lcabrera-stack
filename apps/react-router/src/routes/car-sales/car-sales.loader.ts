@@ -1,11 +1,14 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
+import { appendDistinctFilterDescriptors } from '@repo/ui/routing/appendDistinctFilterDescriptors.util';
+import { readTableLoaderStateFromRequest } from '@repo/ui/routing/readTableLoaderStateFromRequest.util';
+import { sanitizeSorting } from '@repo/ui/routing/sanitizeSorting.util';
+
 import type { CarSale, CarSalesResponse } from '@/services';
 
+import { APP_ID } from '@/constants/app.constants';
 import { carSalesApi } from '@/services';
 
-import { readTableLoaderStateFromRequest } from '../utils/readTableLoaderStateFromRequest.util';
-import { sanitizeSorting } from '../utils/sanitizeSorting.util';
 import {
   COLUMNS,
   PERSISTENCE_KEY,
@@ -21,16 +24,27 @@ import {
  * The route will render immediately with the skeleton while data loads.
  */
 export const loader = ({ request }: LoaderFunctionArgs) => {
+  // Columns are serializable (descriptors, never functions — see
+  // .claude/rules/routes-data.md), so the loader can return them directly.
+  const columns = appendDistinctFilterDescriptors({
+    columns: COLUMNS,
+    schemaName: SCHEMA_NAME,
+    tableName: TABLE_NAME,
+    transport: 'loader',
+  });
+
   const {
     columnOrder,
     columnPinning,
     columnSizing,
     columnVisibility,
     filters,
+    metaUiFlags,
     sorting,
     standaloneFiltersParam,
     standaloneSortParam,
   } = readTableLoaderStateFromRequest<CarSale>({
+    appId: APP_ID,
     columns: COLUMNS,
     includeFilters: true,
     persistenceKey: PERSISTENCE_KEY,
@@ -49,13 +63,15 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
       columnFilters: filters,
       columnOrder,
       columnPinning,
-      columns: COLUMNS,
+      columns,
       columnSizing,
       columnVisibility,
       sorting: sanitizedSorting,
     },
     key: `${standaloneSortParam ?? ''}${standaloneFiltersParam ?? ''}`,
     metaState: {
+      ...metaUiFlags,
+      appId: APP_ID,
       persistenceKey: PERSISTENCE_KEY,
       schemaName: SCHEMA_NAME,
       tableName: TABLE_NAME,

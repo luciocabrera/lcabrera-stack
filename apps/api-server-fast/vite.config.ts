@@ -1,6 +1,6 @@
-import { defineConfig } from 'vite-plus';
 import { createApiLintConfig } from '@repo/vite-configs/api-lint';
 import { createFmtConfig } from '@repo/vite-configs/fmt';
+import { defineConfig } from 'vite-plus';
 
 const fmtConfig = createFmtConfig();
 const lintConfig = createApiLintConfig();
@@ -11,13 +11,18 @@ export default defineConfig({
   run: {
     tasks: {
       build: {
-        command: 'tsc -p ../shared/tsconfig.json && tsc -p tsconfig.json',
         cache: true,
+        command: 'tsc -p tsconfig.json',
+        dependsOn: [{ from: 'dependencies', task: 'build' }],
       },
-      checkSafe: {
+      test: {
+        cache: false,
         command:
-          'cd ../react-router && vp exec react-router typegen && cd ../../packages/eslint-local-rules && vp exec tsc -p tsconfig.json && cd ../../apps/api-server-fast && vp check && cd ../react-router && REACT_ROUTER_TEST_TASK=true vp exec vitest run --root .',
+          'node --env-file-if-exists=../../docker/local/.env --env-file-if-exists=.env node_modules/vitest/vitest.mjs run',
       },
     },
+  },
+  test: {
+    exclude: ['**/node_modules/**', '**/dist/**'],
   },
 });

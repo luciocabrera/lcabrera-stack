@@ -539,21 +539,23 @@ useInfiniteScroll({
 2. **Initial Load** (FilterPopover opens):
 
    ```typescript
-   const result = await fetchFilterOptions(0);
-   setFetchedOptions(result.values);
-   setHasMoreOptions(result.hasMore);
+   // The column carries a serializable descriptor (ADR-009); the client
+   // tool resolves it into the fetch contract at open time.
+   const executor = resolveFilterOptionsDescriptor(
+     column.filterOptionsDescriptor,
+   );
+   await fetchInitial(executor);
    ```
 
 3. **Load More** (user scrolls in dropdown):
 
    ```typescript
-   const fetchMoreFilterData = useFetchMoreFilterData(columnKey);
+   const { fetchMore } = useFetchFilterData({ columnKey, prefetchRef });
 
    // On scroll near bottom:
-   await fetchMoreFilterData({
-     dataSelector,
-     onLoadMore: fetchFilterOptions,
-   });
+   await fetchMore(
+     resolveFilterOptionsDescriptor(column.filterOptionsDescriptor),
+   );
    ```
 
 4. **Render**:

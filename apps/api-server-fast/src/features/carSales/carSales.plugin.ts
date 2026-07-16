@@ -2,7 +2,6 @@ import type { FastifyPluginAsync } from 'fastify';
 import type { Pool } from 'pg';
 
 import { createJsonFieldsParser } from '../../utils/parseJsonQueryFields.util';
-
 import { createCarSalesRepository } from './carSales.repository';
 import {
   type PaginatedCarSalesQuery,

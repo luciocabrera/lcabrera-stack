@@ -1,0 +1,21 @@
+{
+  "generate.ts": {
+    "security/detect-non-literal-fs-filename": {
+      "count": 2
+    },
+    "unicorn/import-style": {
+      "count": 1
+    },
+    "unicorn/no-array-callback-reference": {
+      "count": 1
+    },
+    "unicorn/no-null": {
+      "count": 1
+    }
+  },
+  "tsconfig.shared.ts": {
+    "local-rules/destructuring-for-functions": {
+      "count": 1
+    }
+  }
+}

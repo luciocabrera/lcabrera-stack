@@ -1,4 +1,5 @@
 import type { SortRule } from 'api-shared';
+
 import { parseSortingRules } from '../../utils/parseSortingRules.util';
 
 type ParseSortingArgs = {

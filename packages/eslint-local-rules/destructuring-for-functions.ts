@@ -2,63 +2,20 @@
 // ✅ Skips single-parameter functions
 // ❌ Auto-fix disabled (too aggressive for callbacks, Promise constructors, etc.)
 
-import type { Rule } from 'eslint';
+import type { TSESLint, TSESTree } from '@typescript-eslint/utils';
 
-const rule: Rule.RuleModule = {
-  meta: {
-    docs: {
-      description:
-        'Enforce object parameter pattern for functions with multiple parameters',
-      recommended: false,
-    },
-    messages: {
-      useObjectParam:
-        'Functions with multiple parameters should use a single object parameter with a named type.',
-    },
-    schema: [],
-    type: 'suggestion',
-  },
-  create(context) {
-    return {
-      ArrowFunctionExpression(node: any) {
-        checkFunction(node, context);
-      },
-      FunctionDeclaration(node: any) {
-        checkFunction(node, context);
-      },
-      FunctionExpression(node: any) {
-        checkFunction(node, context);
-      },
-    };
-  },
-};
+import { ESLintUtils } from '@typescript-eslint/utils';
 
-function checkFunction(node: any, context: Rule.RuleContext) {
-  const params = node.params;
+const createRule = ESLintUtils.RuleCreator(
+  (name) => `https://example.com/rule/${name}`,
+);
 
-  // Skip if single parameter or no parameters
-  if (params.length <= 1) {
-    return;
-  }
+type FunctionNode =
+  | TSESTree.ArrowFunctionExpression
+  | TSESTree.FunctionDeclaration
+  | TSESTree.FunctionExpression;
 
-  // Skip if already using object destructuring pattern
-  if (params.length === 1 && params[0].type === 'ObjectPattern') {
-    return;
-  }
-
-  // Skip array method callbacks (map, filter, forEach, reduce, etc.)
-  if (isArrayMethodCallback(node)) {
-    return;
-  }
-
-  // Report violation
-  context.report({
-    messageId: 'useObjectParam',
-    node,
-  });
-}
-
-function isArrayMethodCallback(node: any): boolean {
+const isArrayMethodCallback = (node: FunctionNode): boolean => {
   const parent = node.parent;
 
   // Check if this function is a direct argument to a call expression
@@ -66,10 +23,13 @@ function isArrayMethodCallback(node: any): boolean {
     const callee = parent.callee;
 
     // Check for array methods (map, filter, forEach, find, findIndex, some, every, reduce, etc.)
-    if (callee?.type === 'MemberExpression') {
-      const methodName = callee.property?.name;
+    if (callee.type === 'MemberExpression') {
+      const methodName =
+        callee.property.type === 'Identifier'
+          ? callee.property.name
+          : undefined;
       const objectName =
-        callee.object?.type === 'Identifier' ? callee.object.name : undefined;
+        callee.object.type === 'Identifier' ? callee.object.name : undefined;
       const arrayMethods = [
         'map',
         'filter',
@@ -88,13 +48,72 @@ function isArrayMethodCallback(node: any): boolean {
       ];
 
       return (
-        arrayMethods.includes(methodName) ||
+        (methodName !== undefined && arrayMethods.includes(methodName)) ||
         (objectName === 'Array' && methodName === 'from')
       );
     }
   }
 
   return false;
-}
+};
 
-export default rule;
+const checkFunction = ({
+  context,
+  node,
+}: {
+  readonly context: TSESLint.RuleContext<'useObjectParam', []>;
+  readonly node: FunctionNode;
+}): void => {
+  const params = node.params;
+
+  // Skip if single parameter or no parameters
+  if (params.length <= 1) {
+    return;
+  }
+
+  // Skip if already using object destructuring pattern
+  if (params.length === 1 && params[0]?.type === 'ObjectPattern') {
+    return;
+  }
+
+  // Skip array method callbacks (map, filter, forEach, reduce, etc.)
+  if (isArrayMethodCallback(node)) {
+    return;
+  }
+
+  // Report violation
+  context.report({
+    messageId: 'useObjectParam',
+    node,
+  });
+};
+
+export default createRule({
+  create(context) {
+    return {
+      ArrowFunctionExpression(node: TSESTree.ArrowFunctionExpression) {
+        checkFunction({ context, node });
+      },
+      FunctionDeclaration(node: TSESTree.FunctionDeclaration) {
+        checkFunction({ context, node });
+      },
+      FunctionExpression(node: TSESTree.FunctionExpression) {
+        checkFunction({ context, node });
+      },
+    };
+  },
+  defaultOptions: [],
+  meta: {
+    docs: {
+      description:
+        'Enforce object parameter pattern for functions with multiple parameters',
+    },
+    messages: {
+      useObjectParam:
+        'Functions with multiple parameters should use a single object parameter with a named type.',
+    },
+    schema: [],
+    type: 'suggestion',
+  },
+  name: 'destructuring-for-functions',
+});

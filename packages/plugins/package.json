@@ -5,5 +5,18 @@
   "type": "module",
   "exports": {
     "./fixReactRouterAssets": "./fixReactRouterAssets.plugin.ts"
+  },
+  "scripts": {
+    "format": "vp fmt .",
+    "format:check": "vp fmt --check .",
+    "lint": "vp run --filter eslint-local-rules-shared build && vp lint . --fix && vp run lint:eslint",
+    "lint:check": "vp run --filter eslint-local-rules-shared build && vp lint . && vp run lint:eslint:check",
+    "lint:eslint": "eslint . --config eslint.config.mjs --fix --max-warnings 0",
+    "lint:eslint:check": "eslint . --config eslint.config.mjs --max-warnings 0",
+    "test": "node node_modules/vitest/vitest.mjs run --passWithNoTests"
+  },
+  "devDependencies": {
+    "eslint": "catalog:",
+    "vitest": "catalog:"
   }
 }

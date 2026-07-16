@@ -1,7 +1,7 @@
-import { z } from 'zod';
+import type { SortRule } from 'api-shared';
 
 import { HttpError } from 'api-shared';
-import type { SortRule } from 'api-shared';
+import { z } from 'zod';
 
 import { parseJsonQueryParam } from './parseJsonQueryParam.util';
 
