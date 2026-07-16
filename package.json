@@ -8,6 +8,7 @@
     "test:all": "vp run -r test",
     "lint:all": "vp run --filter eslint-local-rules-shared build && vp lint . --fix && vp run -r lint:eslint",
     "lint:report": "vp run --filter eslint-local-rules-shared build && node scripts/generate-lint-reports.mjs",
+    "coverage:merge": "node scripts/merge-coverage.mjs",
     "format:all": "vp fmt .",
     "typegen:all": "vp run -r typegen",
     "check:safe": "vp run typegen:all && vp run --filter eslint-local-rules-shared build && vp check && vp run test:all",

@@ -82,6 +82,22 @@ jobs:
       - name: Install dependencies
         run: vp install --frozen-lockfile --ignore-scripts && vp config
 
+      - name: Generate route types
+        run: vp run typegen:all
+
+      - name: Coverage for the DB-free suites
+        # Feeds `fallow audit --coverage` real numbers. Without them fallow
+        # ESTIMATES coverage from whether a colocated test file exists (none →
+        # 0%), and since CRAP is cyclomatic² × (1 − coverage)³ + cyclomatic
+        # against a threshold of 30, every function with cyclomatic >= 5 would
+        # fail the gate on complexity it does not have.
+        #
+        # DB-free suites ONLY — this job has no Postgres, and that is exactly
+        # what broke the previous attempt at this (reverted 2026-07-14):
+        # scan-ingestion's queries/* tests call getPool() → readEnvConfig(),
+        # which throws on the missing DB_*. See scripts/merge-coverage.mjs.
+        run: vp run coverage:merge
+
       - name: Fallow audit vs base branch
         id: fallow_audit
         # Gate mode, severity mapping, and baselines come from .fallowrc.json
@@ -90,7 +106,7 @@ jobs:
         run: |
           set -o pipefail
           STATUS=0
-          vp run fallow:audit --base "origin/${{ github.base_ref }}" --format json --quiet | tee fallow-audit.raw.txt || STATUS=$?
+          vp run fallow:audit --base "origin/${{ github.base_ref }}" --coverage reports/fallow/coverage/coverage-final.json --format json --quiet | tee fallow-audit.raw.txt || STATUS=$?
           # vp run echoes a command banner before the JSON — keep everything
           # from the first JSON line onward so the summary step can parse it,
           # then propagate fallow's exit code (1 = introduced issues, 2 = error).
@@ -117,8 +133,10 @@ jobs:
               echo "| Dead code introduced | $(jq -r '.attribution.dead_code_introduced // "n/a"' fallow-audit.json) |"
               echo "| Complexity introduced | $(jq -r '.attribution.complexity_introduced // "n/a"' fallow-audit.json) |"
               echo "| Duplication introduced | $(jq -r '.attribution.duplication_introduced // "n/a"' fallow-audit.json) |"
+              echo "| Coverage source | $(jq -r '.complexity.summary.coverage_source_consistency // "n/a"' fallow-audit.json) |"
               echo ""
               echo "> Gate \`new-only\`: only newly-introduced issues fail this job. Inherited findings are covered by \`reports/fallow/baselines/\`."
+              echo "> Coverage source \`mixed\` is expected: real Istanbul coverage is fed for the DB-free suites, and files with no tests at all still fall back to fallow's static estimate (which guesses 0% and inflates their CRAP)."
             else
               echo "❌ Audit did not produce JSON output — check the job log (exit 2 usually means an invalid base ref or config error)."
             fi
