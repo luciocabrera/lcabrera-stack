@@ -1,5 +1,5 @@
+import { getErrorMessage } from '@repo/data-access/errors/getErrorMessage.util';
 import { DEFAULT_FILTER_PAGE_SIZE } from '@repo/ui/components/Table/Table.constants';
-import { getErrorMessage } from '@repo/ui/components/Table/utils/getErrorMessage.util';
 import { getRequiredOnLoadMore } from '@repo/ui/components/Table/utils/getRequiredOnLoadMore.util';
 import { logger } from '@repo/ui/utils/logger';
 

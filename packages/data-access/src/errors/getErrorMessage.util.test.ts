@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { getErrorMessage } from './getErrorMessage.util';
+import { getErrorMessage } from './getErrorMessage.util.ts';
 
 describe('getErrorMessage', () => {
   it('returns error.message when given an Error instance', () => {
@@ -21,5 +21,13 @@ describe('getErrorMessage', () => {
 
   it('uses the default fallback when fallback is not provided', () => {
     expect(getErrorMessage({ error: 'something' })).toBe('An error occurred');
+  });
+
+  it('keeps a subclassed Error message', () => {
+    class UploadError extends Error {}
+
+    expect(getErrorMessage({ error: new UploadError('too big') })).toBe(
+      'too big',
+    );
   });
 });

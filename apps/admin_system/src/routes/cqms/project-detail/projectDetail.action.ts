@@ -1,5 +1,6 @@
 import type { ActionFunctionArgs } from 'react-router';
 
+import { getErrorMessage } from '@repo/data-access/errors/getErrorMessage.util';
 import { saveProjectSnapshot } from '@repo/scan-ingestion/ingestion/snapshots/saveProjectSnapshot';
 import { discoverProjectWorkspaces } from '@repo/scan-ingestion/ingestion/workspaces/discoverProjectWorkspaces.util';
 import { createResourceGrant } from '@repo/scan-ingestion/queries/createResourceGrant.util';
@@ -9,15 +10,20 @@ import { z } from 'zod';
 
 import { requireUser } from '@/auth/requireUser.util';
 
+import { getFirstIssueMessage } from '../utils/getFirstIssueMessage.util';
 import { parseRouteParams } from '../utils/parseRouteParams.util';
+import { parseGrantPermission } from './parseGrantPermission.util';
+import { validateSyncArchive } from './validateSyncArchive.util';
 
 const paramsSchema = z.object({ projectId: z.string().uuid() });
 
-// Browser uploads buffer in memory (native request.formData()) — cap them.
-// The CLI push channel (next increment) is the intended path for big repos.
-const MAX_ARCHIVE_BYTES = 200 * 1024 * 1024;
+const addGrantSchema = z.object({
+  granteeUserId: z.string().uuid('Pick a user.'),
+  // 'action:resourceType', from the curated GRANT_OPTIONS list.
+  permission: z.string().regex(/^[a-z]+:[a-z]+$/, 'Pick a permission.'),
+});
 
-type HandleSyncUploadArgs = {
+type IntentHandlerArgs = {
   readonly formData: FormData;
   readonly projectId: string;
   readonly userId: string;
@@ -27,49 +33,98 @@ const handleSyncUpload = async ({
   formData,
   projectId,
   userId,
-}: HandleSyncUploadArgs) => {
-  const archive = formData.get('archive');
-  if (!(archive instanceof File) || archive.size === 0) {
-    return { syncError: 'Pick a .zip archive of the repository to upload.' };
+}: IntentHandlerArgs) => {
+  const validated = validateSyncArchive({ archive: formData.get('archive') });
+  if (!validated.ok) {
+    return { syncError: validated.error };
   }
-  if (!archive.name.toLowerCase().endsWith('.zip')) {
-    return { syncError: 'Only .zip archives are supported.' };
-  }
-  if (archive.size > MAX_ARCHIVE_BYTES) {
+
+  try {
+    const { storagePath } = await saveProjectSnapshot({
+      archiveBytes: new Uint8Array(await validated.archive.arrayBuffer()),
+      archiveName: validated.archive.name,
+      projectId,
+      sourceLabel: 'browser-upload',
+      userId,
+    });
+
+    // Workspace discovery (ADR-021) now happens HERE — the sync step is the
+    // only moment the code on disk changes (ADR-028). Best-effort: a
+    // discovery failure must never fail the sync itself.
+    try {
+      await replaceProjectWorkspaces({
+        projectId,
+        userId,
+        workspaces: discoverProjectWorkspaces({ rootPath: storagePath }),
+      });
+    } catch (workspaceError) {
+      console.warn('Workspace discovery failed (non-fatal):', workspaceError);
+    }
+
+    return { ok: true };
+  } catch (error) {
     return {
-      syncError: `Archive is too large for browser upload (max ${MAX_ARCHIVE_BYTES / (1024 * 1024)} MB) — use the CLI push instead.`,
+      syncError: getErrorMessage({
+        error,
+        fallback: 'Snapshot upload failed.',
+      }),
+    };
+  }
+};
+
+const handleGrantAdd = async ({
+  formData,
+  projectId,
+  userId,
+}: IntentHandlerArgs) => {
+  const parsed = addGrantSchema.safeParse({
+    granteeUserId: formData.get('granteeUserId'),
+    permission: formData.get('permission'),
+  });
+  if (!parsed.success) {
+    return {
+      grantError: getFirstIssueMessage({
+        error: parsed.error,
+        fallback: 'Invalid grant.',
+      }),
     };
   }
 
-  const { storagePath } = await saveProjectSnapshot({
-    archiveBytes: new Uint8Array(await archive.arrayBuffer()),
-    archiveName: archive.name,
-    projectId,
-    sourceLabel: 'browser-upload',
-    userId,
+  const { action, resourceType } = parseGrantPermission({
+    permission: parsed.data.permission,
   });
 
-  // Workspace discovery (ADR-021) now happens HERE — the sync step is the
-  // only moment the code on disk changes (ADR-028). Best-effort: a
-  // discovery failure must never fail the sync itself.
   try {
-    await replaceProjectWorkspaces({
-      projectId,
+    await createResourceGrant({
+      action,
+      granteeUserId: parsed.data.granteeUserId,
+      resourceId: projectId,
+      resourceType,
       userId,
-      workspaces: discoverProjectWorkspaces({ rootPath: storagePath }),
     });
-  } catch (workspaceError) {
-    console.warn('Workspace discovery failed (non-fatal):', workspaceError);
+    return { ok: true };
+  } catch (error) {
+    return {
+      grantError: getErrorMessage({ error, fallback: 'Grant change failed.' }),
+    };
   }
-
-  return { ok: true };
 };
 
-const addGrantSchema = z.object({
-  granteeUserId: z.string().uuid('Pick a user.'),
-  // 'action:resourceType', from the curated GRANT_OPTIONS list.
-  permission: z.string().regex(/^[a-z]+:[a-z]+$/, 'Pick a permission.'),
-});
+const handleGrantDelete = async ({ formData, userId }: IntentHandlerArgs) => {
+  const grantId = z.string().uuid().safeParse(formData.get('grantId'));
+  if (!grantId.success) {
+    return { grantError: 'Invalid grant id.' };
+  }
+
+  try {
+    await deleteResourceGrant({ grantId: grantId.data, userId });
+    return { ok: true };
+  } catch (error) {
+    return {
+      grantError: getErrorMessage({ error, fallback: 'Grant change failed.' }),
+    };
+  }
+};
 
 /**
  * The project page's fetcher endpoint: intent 'grant-add' / 'grant-delete'
@@ -77,6 +132,9 @@ const addGrantSchema = z.object({
  * ADR-028). The DB functions assert their own permissions in Postgres —
  * rejections come back as `grantError`/`syncError` for the panels to
  * render inline.
+ *
+ * Each intent owns its own error boundary rather than sharing one around the
+ * dispatch, so its failures land on the key its panel reads.
  */
 export const action = async ({ params, request }: ActionFunctionArgs) => {
   // Actions run BEFORE loaders — every cqms action authenticates itself
@@ -90,59 +148,18 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
   });
 
   const formData = await request.formData();
+  const handlerArgs = { formData, projectId, userId: user.id };
   const intent = formData.get('intent');
 
   if (intent === 'sync-upload') {
-    try {
-      return await handleSyncUpload({
-        formData,
-        projectId,
-        userId: user.id,
-      });
-    } catch (error) {
-      return {
-        syncError:
-          error instanceof Error ? error.message : 'Snapshot upload failed.',
-      };
-    }
+    return await handleSyncUpload(handlerArgs);
+  }
+  if (intent === 'grant-add') {
+    return await handleGrantAdd(handlerArgs);
+  }
+  if (intent === 'grant-delete') {
+    return await handleGrantDelete(handlerArgs);
   }
 
-  try {
-    if (intent === 'grant-add') {
-      const parsed = addGrantSchema.safeParse({
-        granteeUserId: formData.get('granteeUserId'),
-        permission: formData.get('permission'),
-      });
-      if (!parsed.success) {
-        return {
-          grantError: parsed.error.issues[0]?.message ?? 'Invalid grant.',
-        };
-      }
-      const [action_, resourceType] = parsed.data.permission.split(':', 2);
-      await createResourceGrant({
-        action: action_ ?? '',
-        granteeUserId: parsed.data.granteeUserId,
-        resourceId: projectId,
-        resourceType: resourceType ?? '',
-        userId: user.id,
-      });
-      return { ok: true };
-    }
-
-    if (intent === 'grant-delete') {
-      const grantId = z.string().uuid().safeParse(formData.get('grantId'));
-      if (!grantId.success) {
-        return { grantError: 'Invalid grant id.' };
-      }
-      await deleteResourceGrant({ grantId: grantId.data, userId: user.id });
-      return { ok: true };
-    }
-
-    return { grantError: 'Unknown intent.' };
-  } catch (error) {
-    return {
-      grantError:
-        error instanceof Error ? error.message : 'Grant change failed.',
-    };
-  }
+  return { grantError: 'Unknown intent.' };
 };

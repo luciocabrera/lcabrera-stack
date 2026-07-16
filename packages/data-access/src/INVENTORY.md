@@ -58,6 +58,34 @@ replaced were themselves a duplication finding.
 
 ---
 
+## `src/errors/`
+
+| Artifact          | Location                         | Description                                                                       |
+| ----------------- | -------------------------------- | --------------------------------------------------------------------------------- |
+| `getErrorMessage` | `errors/getErrorMessage.util.ts` | `error.message` for an `Error`, else a `fallback` (default `'An error occurred'`) |
+
+`catch` binds `unknown`, so every caller that surfaces a message needs the
+same narrowing — route actions returning a typed error to their page, Table
+fetch actions writing one into the store. It lives here, not in either
+consumer, because both `@repo/ui` and the apps need it.
+
+---
+
+## `src/records/`
+
+Generic shaping helpers for write payloads.
+
+| Artifact            | Location                            | Description                                                                              |
+| ------------------- | ----------------------------------- | ---------------------------------------------------------------------------------------- |
+| `dropNullishValues` | `records/dropNullishValues.util.ts` | Drops null/undefined entries so the key is omitted (→ SQL NULL / absent) rather than set |
+
+Shallow by design. Reach for it when building the optional half of a write
+input: one call replaces a
+`...(value !== null && value !== undefined && { key: value })` spread per
+field, which costs a conditional per column and adds up fast on wide rows.
+
+---
+
 ## `src/tokens/`
 
 Reusable, DB-free bearer-token primitives (ADR-029). The CQMS-specific

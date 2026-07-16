@@ -1,3 +1,5 @@
+import { dropNullishValues } from '@repo/data-access/records/dropNullishValues.util';
+
 import type { AppGraphNodeInput } from './appGraphDetail.types.ts';
 import type { AppGraphRaw, AppGraphRawNode } from './appGraphRaw.schema.ts';
 
@@ -58,40 +60,29 @@ export const extractAppGraphNodes = ({
     .map((node) => ({
       child_file_count: node.child_file_count,
       child_folder_count: node.child_folder_count,
-      ...(!(node.end_line === null || node.end_line === undefined) && {
-        end_line: node.end_line,
-      }),
       export_count: node.export_count,
       extension: node.extension,
       ...(node.node_type === 'file' && {
         file_type_category: classifyFileTypeCategory(node.name),
       }),
       function_count: node.function_count,
-      ...(!(node.is_component === null || node.is_component === undefined) && {
-        is_component: node.is_component,
-      }),
-      ...(!(node.is_exported === null || node.is_exported === undefined) && {
-        is_exported: node.is_exported,
-      }),
-      ...(!(node.is_hook === null || node.is_hook === undefined) && {
-        is_hook: node.is_hook,
-      }),
-      ...(!(node.line_count === null || node.line_count === undefined) && {
-        line_count: node.line_count,
-      }),
       name: node.name,
       nested_level: node.nested_level,
       node_id: node.node_id,
       node_type: node.node_type,
-      ...(!(
-        node.parent_node_id === null || node.parent_node_id === undefined
-      ) && { parent_node_id: node.parent_node_id }),
       path: node.path,
-      ...(!(node.start_line === null || node.start_line === undefined) && {
+      type_count: node.type_count,
+      // The omit-when-absent half: dropNullishValues keeps a key out of the
+      // row entirely rather than writing an explicit null, which is what the
+      // nullable columns want.
+      ...dropNullishValues({
+        end_line: node.end_line,
+        is_component: node.is_component,
+        is_exported: node.is_exported,
+        is_hook: node.is_hook,
+        line_count: node.line_count,
+        parent_node_id: node.parent_node_id,
         start_line: node.start_line,
-      }),
-      ...(!(node.symbol_name === null || node.symbol_name === undefined) && {
         symbol_name: node.symbol_name,
       }),
-      type_count: node.type_count,
     }));

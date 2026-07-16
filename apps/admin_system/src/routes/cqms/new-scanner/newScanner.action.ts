@@ -1,3 +1,4 @@
+import { getErrorMessage } from '@repo/data-access/errors/getErrorMessage.util';
 import { createScannerDetailTable } from '@repo/scan-ingestion/queries/createScannerDetailTable.util';
 import { registerScanner } from '@repo/scan-ingestion/queries/registerScanner.util';
 import { writeScannerArtifacts } from '@repo/scan-ingestion/registry/writeScannerArtifacts.util';
@@ -5,8 +6,11 @@ import { type ActionFunctionArgs, redirect } from 'react-router';
 
 import { requireUser } from '@/auth/requireUser.util';
 
-import { isCheckboxChecked } from '../utils/isCheckboxChecked.util';
+import { toScannerArtifactInput } from '../utils/toScannerArtifactInput.util';
+import { toScannerWriteInput } from '../utils/toScannerWriteInput.util';
 import { newScannerSchema } from './newScanner.schema';
+import { readNewScannerFormValues } from './readNewScannerFormValues.util';
+import { toNewScannerFieldErrors } from './toNewScannerFieldErrors.util';
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   // Actions run BEFORE loaders, so the layout loader's gate does not
@@ -14,51 +18,20 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const user = await requireUser({ request });
 
   const formData = await request.formData();
-  const parsed = newScannerSchema.safeParse({
-    allowedTools: formData.get('allowedTools') ?? '',
-    commandTemplate: formData.get('commandTemplate') ?? '',
-    configDetection: formData.get('configDetection') ?? '',
-    description: formData.get('description') ?? '',
-    deterministic: isCheckboxChecked({ formData, name: 'deterministic' }),
-    displayName: formData.get('displayName') ?? '',
-    rawArtifactFileName: formData.get('rawArtifactFileName') ?? '',
-    scannerId: formData.get('scannerId') ?? '',
-    stepsMarkdown: formData.get('stepsMarkdown') ?? '',
-    supportsDiffScope: isCheckboxChecked({
-      formData,
-      name: 'supportsDiffScope',
-    }),
-  });
+  const parsed = newScannerSchema.safeParse(
+    readNewScannerFormValues({ formData }),
+  );
 
   if (!parsed.success) {
-    const fieldErrors = parsed.error.flatten().fieldErrors;
-    return {
-      errors: {
-        configDetection: fieldErrors.configDetection?.[0],
-        displayName: fieldErrors.displayName?.[0],
-        scannerId: fieldErrors.scannerId?.[0],
-      },
-    };
+    return { errors: toNewScannerFieldErrors({ error: parsed.error }) };
   }
 
   const values = parsed.data;
   try {
     const { scannerId } = await registerScanner({
       scanner: {
-        allowed_tools: values.allowedTools
-          ? values.allowedTools.split(',').map((tool) => tool.trim())
-          : undefined,
-        command_template: values.commandTemplate || undefined,
-        config_detection: values.configDetection
-          ? (JSON.parse(values.configDetection) as Record<string, unknown>)
-          : undefined,
-        description: values.description || undefined,
-        deterministic: values.deterministic,
-        display_name: values.displayName,
-        raw_artifact_file_name: values.rawArtifactFileName || undefined,
+        ...toScannerWriteInput({ values }),
         scanner_id: values.scannerId,
-        steps_markdown: values.stepsMarkdown || undefined,
-        supports_diff_scope: values.supportsDiffScope,
       },
       userId: user.id,
     });
@@ -69,17 +42,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     // committed; a filesystem failure must not roll registration back.
     // Never overwrites: code on disk stays authoritative.
     try {
-      writeScannerArtifacts({
-        allowedTools: values.allowedTools
-          ? values.allowedTools.split(',').map((tool) => tool.trim())
-          : undefined,
-        description: values.description || undefined,
-        displayName: values.displayName,
-        isDeterministic: values.deterministic,
-        rawArtifactFileName: values.rawArtifactFileName || undefined,
-        scannerId,
-        stepsMarkdown: values.stepsMarkdown || undefined,
-      });
+      writeScannerArtifacts(toScannerArtifactInput({ scannerId, values }));
     } catch (artifactError) {
       console.warn(
         'Scanner artifact scaffolding failed (non-fatal):',
@@ -91,10 +54,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   } catch (error) {
     return {
       errors: {
-        scannerId:
-          error instanceof Error
-            ? error.message
-            : 'Failed to register scanner.',
+        scannerId: getErrorMessage({
+          error,
+          fallback: 'Failed to register scanner.',
+        }),
       },
     };
   }

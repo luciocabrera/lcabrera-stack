@@ -1,7 +1,7 @@
 import type { TableMetaState } from '@repo/ui/components/Table/Table.types';
 import type { TStore } from '@repo/ui/hooks/useStore.hook';
 
-import { getErrorMessage } from '@repo/ui/components/Table/utils/getErrorMessage.util';
+import { getErrorMessage } from '@repo/data-access/errors/getErrorMessage.util';
 
 import type { DataState } from './fetchMoreData.types';
 
