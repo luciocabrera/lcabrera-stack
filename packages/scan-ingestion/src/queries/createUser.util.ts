@@ -1,6 +1,5 @@
+import { hashSecret } from '@repo/data-access/crypto/hashSecret.util';
 import { getPool } from '@repo/data-access/db/getPool.util';
-
-import { hashPassword } from '../auth/hashPassword.util.ts';
 
 export type CreateUserResult = {
   readonly createdUserId: string;
@@ -27,7 +26,7 @@ export const createUser = async ({
   const pool = getPool();
   const result = await pool.query<{ fn_create_user: string }>(
     'SELECT cqms.fn_create_user($1, $2, $3, $4) AS fn_create_user',
-    [userId, username, displayName, hashPassword({ password })],
+    [userId, username, displayName, hashSecret({ secret: password })],
   );
 
   const createdUserId = result.rows[0]?.fn_create_user;

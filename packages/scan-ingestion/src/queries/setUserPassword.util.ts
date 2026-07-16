@@ -1,6 +1,5 @@
+import { hashSecret } from '@repo/data-access/crypto/hashSecret.util';
 import { getPool } from '@repo/data-access/db/getPool.util';
-
-import { hashPassword } from '../auth/hashPassword.util.ts';
 
 type SetUserPasswordArgs = {
   readonly password: string;
@@ -24,6 +23,6 @@ export const setUserPassword = async ({
   await pool.query('SELECT cqms.fn_set_user_password($1, $2, $3)', [
     userId,
     targetUserId,
-    hashPassword({ password }),
+    hashSecret({ secret: password }),
   ]);
 };

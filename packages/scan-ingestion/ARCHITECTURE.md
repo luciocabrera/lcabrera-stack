@@ -20,8 +20,9 @@ scan-ingestion/
 │
 ├── src/
 │   ├── auth/
-│   │   ├── hashPassword.util.ts      → scrypt '<saltHex>:<hashHex>' (ADR-017); hashes never leave this package
-│   │   └── isPasswordValid.util.ts   → timingSafeEqual verify; malformed hash → false (system-user sentinel)
+│   │   └── apiToken.constants.ts     → API_TOKEN_PREFIX ('cqms_'), the CQMS tag on token plaintexts (ADR-029)
+│   │       (hashing lives in @repo/data-access/crypto — hashSecret/isSecretHashValid, shared by
+│   │        passwords and token secrets alike; hashes still never leave this package)
 │   │
 │   ├── db/
 │   │   ├── migrations/          → 0001_init_cqms.sql .. 0009_audit_and_functions.sql (ADR-006/017/018)

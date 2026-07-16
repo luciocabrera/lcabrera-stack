@@ -1,6 +1,6 @@
+import { hashSecret } from '@repo/data-access/crypto/hashSecret.util';
 import { closePool, getPool } from '@repo/data-access/db/getPool.util';
 import { generateApiToken } from '@repo/data-access/tokens/generateApiToken.util';
-import { hashApiToken } from '@repo/data-access/tokens/hashApiToken.util';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { API_TOKEN_PREFIX } from '../auth/apiToken.constants.ts';
@@ -34,7 +34,7 @@ const seedToken = async ({
     [
       ownerId,
       tokenId,
-      hashApiToken({ secret }),
+      hashSecret({ secret }),
       'seed',
       expiresAt,
       enabled,

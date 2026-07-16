@@ -1,7 +1,7 @@
+import { hashSecret } from '@repo/data-access/crypto/hashSecret.util';
 import { closePool, getPool } from '@repo/data-access/db/getPool.util';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { hashPassword } from '../auth/hashPassword.util.ts';
 import { authenticateUser } from './authenticateUser.util.ts';
 
 describe('authenticateUser', () => {
@@ -16,7 +16,7 @@ describe('authenticateUser', () => {
       [
         'auth-test-user',
         'Auth Test User',
-        hashPassword({ password: 'test-password-1' }),
+        hashSecret({ secret: 'test-password-1' }),
       ],
     );
     userId = created.rows[0]?.id ?? '';
@@ -27,7 +27,7 @@ describe('authenticateUser', () => {
       [
         'auth-test-disabled',
         'Auth Test Disabled',
-        hashPassword({ password: 'test-password-2' }),
+        hashSecret({ secret: 'test-password-2' }),
       ],
     );
     disabledUserId = disabled.rows[0]?.id ?? '';

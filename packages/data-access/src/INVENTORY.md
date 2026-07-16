@@ -35,19 +35,41 @@ composed by those entry points — import them directly only from within
 
 ---
 
+## `src/crypto/`
+
+Credential hashing primitives, shared by **every** secret on the platform —
+user passwords and API-token secrets alike. Both are exported per-file in the
+`exports` map.
+
+| Artifact            | Location                           | Description                                                                                         |
+| ------------------- | ---------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `hashSecret`        | `crypto/hashSecret.util.ts`        | scrypt hash of any secret for storage; `<saltHex>:<hashHex>`, fresh salt per call                   |
+| `isSecretHashValid` | `crypto/isSecretHashValid.util.ts` | Constant-time compare of a secret against a stored hash; false (never throws) if malformed          |
+| `SCRYPT_*`          | `crypto/scryptHash.constants.ts`   | scrypt salt/key sizes — private to this folder; the two halves must agree, so they share one source |
+
+These deliberately say "secret", not "password" or "token": passwords
+(`createUser`, `setUserPassword`, `authenticateUser`) and API-token secrets
+(`issueApiToken`, `verifyApiToken`) are the same problem, and a single pair of
+primitives keeps credential hashing to one shape and one audited
+implementation (ADR-017). Do **not** reintroduce domain-named wrappers around
+these — fallow's `thin-wrapper` rule is an error, and the duplicate
+`hashPassword`/`isPasswordValid`/`hashApiToken`/`isApiTokenValid` pairs they
+replaced were themselves a duplication finding.
+
+---
+
 ## `src/tokens/`
 
 Reusable, DB-free bearer-token primitives (ADR-029). The CQMS-specific
 persistence (issue/verify/list/revoke against `cqms.api_tokens`) lives in
-`@repo/scan-ingestion`; these are the generic halves any app can reuse. All
-four are exported per-file in the `exports` map.
+`@repo/scan-ingestion`; these are the generic halves any app can reuse. Both
+are exported per-file in the `exports` map. Hashing a token's secret half is
+**not** here — it is `crypto/hashSecret.util.ts` above.
 
 | Artifact           | Location                          | Description                                                                                          |
 | ------------------ | --------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | `generateApiToken` | `tokens/generateApiToken.util.ts` | Mints `{ tokenId, secret, plaintext }` — plaintext is `<prefix><tokenId>.<secret>`, prefix optional  |
 | `parseApiToken`    | `tokens/parseApiToken.util.ts`    | Splits a plaintext (given the same `prefix`) back into `{ tokenId, secret }`; undefined if malformed |
-| `hashApiToken`     | `tokens/hashApiToken.util.ts`     | scrypt hash (`<saltHex>:<hashHex>`) of the secret half, for storage                                  |
-| `isApiTokenValid`  | `tokens/isApiTokenValid.util.ts`  | Constant-time compare of a secret against a stored hash; false (never throws) if malformed           |
 
 These are fully generic — no product-specific value is baked in; the caller
 supplies any token `prefix` (e.g. CodePulse passes `cqms_` from scan-ingestion).

@@ -1,7 +1,7 @@
+import { hashSecret } from '@repo/data-access/crypto/hashSecret.util';
 import { closePool, getPool } from '@repo/data-access/db/getPool.util';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { hashPassword } from '../auth/hashPassword.util.ts';
 import { checkUserPermission } from './checkUserPermission.util.ts';
 import { getUserByUsername } from './getUserByUsername.util.ts';
 
@@ -20,7 +20,7 @@ describe('checkUserPermission', () => {
       [
         'perm-test-viewer',
         'Perm Test Viewer',
-        hashPassword({ password: 'irrelevant' }),
+        hashSecret({ secret: 'irrelevant' }),
       ],
     );
     viewerUserId = created.rows[0]?.id ?? '';

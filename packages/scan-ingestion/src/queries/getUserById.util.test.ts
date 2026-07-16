@@ -1,7 +1,7 @@
+import { hashSecret } from '@repo/data-access/crypto/hashSecret.util';
 import { closePool, getPool } from '@repo/data-access/db/getPool.util';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { hashPassword } from '../auth/hashPassword.util.ts';
 import { getUserById } from './getUserById.util.ts';
 
 describe('getUserById', () => {
@@ -13,11 +13,7 @@ describe('getUserById', () => {
     const created = await pool.query<{ id: string }>(
       `INSERT INTO cqms.users (username, display_name, password_hash)
        VALUES ($1, $2, $3) RETURNING id`,
-      [
-        'get-user-test',
-        'Get User Test',
-        hashPassword({ password: 'irrelevant' }),
-      ],
+      ['get-user-test', 'Get User Test', hashSecret({ secret: 'irrelevant' })],
     );
     userId = created.rows[0]?.id ?? '';
 
@@ -27,7 +23,7 @@ describe('getUserById', () => {
       [
         'get-user-test-deleted',
         'Get User Test Deleted',
-        hashPassword({ password: 'irrelevant' }),
+        hashSecret({ secret: 'irrelevant' }),
       ],
     );
     deletedUserId = deleted.rows[0]?.id ?? '';

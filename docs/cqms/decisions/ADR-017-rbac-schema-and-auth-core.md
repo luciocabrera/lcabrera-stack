@@ -60,6 +60,12 @@ is a sentinel (`!no-login!`) that `isPasswordValid` structurally rejects
 
 ### 2. Hashing — `node:crypto` scrypt, zero new dependencies
 
+> **Amended 2026-07-16 (location only — the decision below stands):** these
+> two utils now live in `packages/data-access/src/crypto/` as `hashSecret` /
+> `isSecretHashValid`, shared with API-token secrets (ADR-029) instead of
+> duplicated per credential type. Scrypt, the params, the `<saltHex>:<hashHex>`
+> format and the malformed-hash-returns-false contract are all unchanged.
+
 `src/auth/hashPassword.util.ts` / `isPasswordValid.util.ts`
 (scan-ingestion): scrypt with default cost params, 16-byte random salt,
 64-byte key, output `<saltHex>:<hashHex>`, comparison via

@@ -1,5 +1,5 @@
+import { isSecretHashValid } from '@repo/data-access/crypto/isSecretHashValid.util';
 import { closePool, getPool } from '@repo/data-access/db/getPool.util';
-import { isApiTokenValid } from '@repo/data-access/tokens/isApiTokenValid.util';
 import { parseApiToken } from '@repo/data-access/tokens/parseApiToken.util';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
@@ -50,9 +50,9 @@ describe('issueApiToken', () => {
       [tokenId],
     );
     expect(
-      isApiTokenValid({
+      isSecretHashValid({
         secret: parsed?.secret ?? '',
-        tokenHash: stored.rows[0]?.token_hash ?? '',
+        secretHash: stored.rows[0]?.token_hash ?? '',
       }),
     ).toBe(true);
   });

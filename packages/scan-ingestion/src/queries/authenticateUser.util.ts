@@ -1,6 +1,5 @@
+import { isSecretHashValid } from '@repo/data-access/crypto/isSecretHashValid.util';
 import { getPool } from '@repo/data-access/db/getPool.util';
-
-import { isPasswordValid } from '../auth/isPasswordValid.util.ts';
 
 export type AuthenticatedUser = {
   readonly displayName: string;
@@ -40,9 +39,9 @@ export const authenticateUser = async ({
   const row = result.rows[0];
   if (row === undefined) return undefined;
 
-  const isValid = isPasswordValid({
-    password,
-    passwordHash: row.password_hash,
+  const isValid = isSecretHashValid({
+    secret: password,
+    secretHash: row.password_hash,
   });
   if (!isValid) return undefined;
 

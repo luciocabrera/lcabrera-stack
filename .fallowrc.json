@@ -35,6 +35,7 @@
     "eslint-plugin-security",
     "eslint-plugin-unicorn",
     "globals",
+    "ts-morph",
     "vite-plugin-babel",
     "typescript-eslint"
   ],
@@ -53,8 +54,9 @@
     "thresholdOverrides": [
       {
         "files": ["**/*.test.*"],
+        "maxCrap": 1000000,
         "maxUnitSize": 10000,
-        "reason": "describe()/it() blocks in test suites legitimately span hundreds of lines; complexity checks still apply."
+        "reason": "describe()/it() blocks in test suites legitimately span hundreds of lines, and CRAP scores untested complexity — a test file is never exercised by its own tests, so its coverage is either absent (estimated 0%) or meaningless, which inflates CRAP without signalling anything. Cyclomatic and cognitive limits still apply to test files."
       },
       {
         "files": [

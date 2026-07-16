@@ -1,6 +1,6 @@
+import { hashSecret } from '@repo/data-access/crypto/hashSecret.util';
 import { getPool } from '@repo/data-access/db/getPool.util';
 import { generateApiToken } from '@repo/data-access/tokens/generateApiToken.util';
-import { hashApiToken } from '@repo/data-access/tokens/hashApiToken.util';
 
 import { API_TOKEN_PREFIX } from '../auth/apiToken.constants.ts';
 
@@ -30,7 +30,7 @@ export const issueApiToken = async ({
   const { plaintext, secret, tokenId } = generateApiToken({
     prefix: API_TOKEN_PREFIX,
   });
-  const tokenHash = hashApiToken({ secret });
+  const tokenHash = hashSecret({ secret });
 
   const pool = getPool();
   // undefined parameters are serialized as SQL NULL by pg (prepareValue).

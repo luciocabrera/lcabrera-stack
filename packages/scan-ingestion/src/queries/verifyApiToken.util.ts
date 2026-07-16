@@ -1,5 +1,5 @@
+import { isSecretHashValid } from '@repo/data-access/crypto/isSecretHashValid.util';
 import { getPool } from '@repo/data-access/db/getPool.util';
-import { isApiTokenValid } from '@repo/data-access/tokens/isApiTokenValid.util';
 import { parseApiToken } from '@repo/data-access/tokens/parseApiToken.util';
 
 import { API_TOKEN_PREFIX } from '../auth/apiToken.constants.ts';
@@ -40,7 +40,9 @@ export const verifyApiToken = async (
     return undefined;
   }
 
-  if (!isApiTokenValid({ secret: parsed.secret, tokenHash: row.token_hash })) {
+  if (
+    !isSecretHashValid({ secret: parsed.secret, secretHash: row.token_hash })
+  ) {
     return undefined;
   }
 
