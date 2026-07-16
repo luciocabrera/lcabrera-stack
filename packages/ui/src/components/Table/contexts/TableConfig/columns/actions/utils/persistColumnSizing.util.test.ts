@@ -6,12 +6,23 @@ import type { TStore } from '@repo/ui/hooks/useStore.hook';
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { mockWriteStateSlice } = vi.hoisted(() => ({
+const {
+  mockSerializeStateSlice,
+  mockWriteStateSlice,
+  mockWriteToSessionStorage,
+} = vi.hoisted(() => ({
+  mockSerializeStateSlice: vi.fn(),
   mockWriteStateSlice: vi.fn(),
+  mockWriteToSessionStorage: vi.fn(),
 }));
 
 vi.mock('@repo/ui/components/Table/utils', () => ({
+  serializeStateSlice: mockSerializeStateSlice,
   writeStateSlice: mockWriteStateSlice,
+}));
+
+vi.mock('@repo/ui/utils/storage', () => ({
+  writeToSessionStorage: mockWriteToSessionStorage,
 }));
 
 import { persistColumnSizing } from './persistColumnSizing.util';
@@ -48,6 +59,10 @@ const COMPLETE_STORES = {
 describe('persistColumnSizing', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockSerializeStateSlice.mockReturnValue({
+      key: 'table-state-orders-app-orders-table-columnSizing',
+      value: '{"value":{"name":220},"version":1}',
+    });
   });
 
   it('writes the stored widths to the cookie, scoped to the app and table', () => {
@@ -62,6 +77,23 @@ describe('persistColumnSizing', () => {
     });
   });
 
+  it('also writes sessionStorage, which is what the client reads back first', () => {
+    persistColumnSizing<Row>(createStores(COMPLETE_STORES));
+
+    // Cookie-only would let a stale sessionStorage entry win at hydration and
+    // silently revert the resize — see getInitialColumnsState.
+    expect(mockSerializeStateSlice).toHaveBeenCalledWith({
+      appId: 'orders-app',
+      persistenceKey: 'orders-table',
+      slice: 'columnSizing',
+      value: { name: 220 },
+    });
+    expect(mockWriteToSessionStorage).toHaveBeenCalledWith({
+      key: 'table-state-orders-app-orders-table-columnSizing',
+      value: '{"value":{"name":220},"version":1}',
+    });
+  });
+
   it('does nothing when the table has no persistence key to write under', () => {
     persistColumnSizing<Row>(
       createStores({
@@ -72,6 +104,7 @@ describe('persistColumnSizing', () => {
     );
 
     expect(mockWriteStateSlice).not.toHaveBeenCalled();
+    expect(mockWriteToSessionStorage).not.toHaveBeenCalled();
   });
 
   it('does nothing when there are no widths to save', () => {
@@ -84,6 +117,7 @@ describe('persistColumnSizing', () => {
     );
 
     expect(mockWriteStateSlice).not.toHaveBeenCalled();
+    expect(mockWriteToSessionStorage).not.toHaveBeenCalled();
   });
 
   it('still writes for a table with no appId', () => {

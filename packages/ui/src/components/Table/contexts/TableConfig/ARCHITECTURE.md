@@ -25,7 +25,7 @@ TableConfig/
 │   │   ├── utils/resolveBatchTableSettingsUpdate.util.ts → Build next derived column config slices for one table-wide settings update
 │   │   ├── utils/commitPinningAndOrderUpdate.util.ts → Shared persist+store commit helper for pinning actions
 │   │   ├── utils/commitResolvedVisibilityState.util.ts → Shared persist+store commit helper for visibility actions
-│   │   ├── utils/persistColumnSizing.util.ts     → Shared: persist the widths currently in the store
+│   │   ├── utils/persistColumnSizing.util.ts     → Shared: persist the stored widths to sessionStorage + cookie
 │   │   ├── utils/resolveColumnPinningUpdate.util.ts  → Build next pinning state + synced order for one pinning change
 │   │   ├── utils/resolveColumnSizingUpdate.util.ts   → Build next sizing map + pinned offsets for one column resize
 │   │   ├── utils/resolveColumnVisibilityUpdate.util.ts → Build next columnVisibility Set for one column show/hide
@@ -219,17 +219,17 @@ state aligned with source-of-truth column state.
 
 The two batch settings hooks now share two focused pure helpers instead of each inlining their derived-view and persistence-array construction.
 
-| Utility                            | Location                  | Purpose                                                                                |
-| ---------------------------------- | ------------------------- | -------------------------------------------------------------------------------------- |
-| `deriveColumnViewState`            | `components/Table/utils/` | Compose `normalizedColumns` with `getPinnedDerivedColumnsState()` output               |
-| `buildPersistencePayload`          | `columns/actions/utils/`  | Build the persistence entry array for batch settings updates                           |
-| `getColumnSettingsNextStatePatch`  | `components/Table/utils/` | Build the persisted meta patch after applying column settings                          |
-| `getHasQueryChanged`               | `components/Table/utils/` | Compare current vs next filters/sorting to decide whether query revalidation is needed |
-| `getIsTableSettingsOpen`           | `components/Table/utils/` | Restore the table-settings drawer when column settings borrowed its open state         |
-| `resolveBatchColumnSettingsUpdate` | `columns/actions/utils/`  | Compose the next per-column batch update from shared sort/filter/size/pin resolvers    |
-| `resolveBatchTableSettingsUpdate`  | `columns/actions/utils/`  | Compose the next table-wide settings update from incoming settings plus derived slices |
-| `writeColumnSizing`                | `columns/actions/utils/`  | Write one column's width to the store and recompute pinned offsets                     |
-| `persistColumnSizing`              | `columns/actions/utils/`  | Persist the widths currently in the store                                              |
+| Utility                            | Location                  | Purpose                                                                                  |
+| ---------------------------------- | ------------------------- | ---------------------------------------------------------------------------------------- |
+| `deriveColumnViewState`            | `components/Table/utils/` | Compose `normalizedColumns` with `getPinnedDerivedColumnsState()` output                 |
+| `buildPersistencePayload`          | `columns/actions/utils/`  | Build the persistence entry array for batch settings updates                             |
+| `getColumnSettingsNextStatePatch`  | `components/Table/utils/` | Build the persisted meta patch after applying column settings                            |
+| `getHasQueryChanged`               | `components/Table/utils/` | Compare current vs next filters/sorting to decide whether query revalidation is needed   |
+| `getIsTableSettingsOpen`           | `components/Table/utils/` | Restore the table-settings drawer when column settings borrowed its open state           |
+| `resolveBatchColumnSettingsUpdate` | `columns/actions/utils/`  | Compose the next per-column batch update from shared sort/filter/size/pin resolvers      |
+| `resolveBatchTableSettingsUpdate`  | `columns/actions/utils/`  | Compose the next table-wide settings update from incoming settings plus derived slices   |
+| `writeColumnSizing`                | `columns/actions/utils/`  | Write one column's width to the store and recompute pinned offsets                       |
+| `persistColumnSizing`              | `columns/actions/utils/`  | Persist the widths currently in the store to **both** channels (sessionStorage + cookie) |
 
 ## How Actions Share Logic
 
@@ -260,6 +260,26 @@ actions need it, nothing outside `actions/` does. It previously sat in
 an `actions → hooks → actions` import cycle. Nothing under `contexts/` imports
 `Table/hooks/` now, so the dependency runs one way only and the cycle is
 structurally impossible rather than merely avoided.
+
+### Persistence channels — both, always
+
+Column state lives in two channels and **every writer must update both**:
+
+| Channel            | Written by                                          | Read by                                                 |
+| ------------------ | --------------------------------------------------- | ------------------------------------------------------- |
+| **cookie**         | `usePersistTableStateAction`, `persistColumnSizing` | the loader, via `readTableLoaderStateFromRequest` (SSR) |
+| **sessionStorage** | `usePersistTableStateAction`, `persistColumnSizing` | `getInitialColumnsState` on the client (tab-scoped)     |
+
+`getInitialColumnsState` prefers sessionStorage (`sessionState.columnSizing ??
+columnSizing`), while SSR can only ever see the cookie. So the two channels
+disagreeing is not a stale-cache annoyance — it is a guaranteed layout shift:
+the skeleton paints the cookie's widths, then hydration swaps in
+sessionStorage's and the columns jump. A cookie-only write also silently
+_reverts_ the change on reload, because the older sessionStorage entry wins.
+
+This is exactly what a drag-handle resize used to do: `persistColumnSizing` wrote
+only the cookie while the settings drawer wrote both, so resizing a column the
+drawer had already sized was undone by the next reload.
 
 ### usePersistTableStateAction
 

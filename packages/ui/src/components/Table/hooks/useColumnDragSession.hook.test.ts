@@ -115,6 +115,61 @@ describe('useColumnDragSession', () => {
     expect(syncColumnsSizingMock).toHaveBeenCalledTimes(1);
   });
 
+  it('commits the final width when the release lands in the same frame as the last move', () => {
+    // The suite's default stub runs frames synchronously; a real browser defers
+    // them, so a quick drag delivers its last move and the release before the
+    // queued frame ever runs. Queue frames here without running any.
+    const pendingFrames: FrameRequestCallback[] = [];
+    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
+      pendingFrames.push(callback);
+
+      return pendingFrames.length;
+    });
+
+    const { result } = renderHook(() =>
+      useColumnDragSession<Row>({
+        columnKey: 'name',
+        currentWidth: 200,
+        minWidth: 100,
+      }),
+    );
+
+    act(() => {
+      result.current.onMouseDown(createMouseDownEvent({ clientX: 100 }));
+      document.dispatchEvent(new MouseEvent('mousemove', { clientX: 260 }));
+      document.dispatchEvent(new MouseEvent('mouseup'));
+    });
+
+    // The queued frame was cancelled on mouse up, so the gesture itself must
+    // have committed where it was released: 200 + (260 - 100)
+    expect(setColumnSizingWithoutSyncMock).toHaveBeenCalledTimes(1);
+    expect(setColumnSizingWithoutSyncMock).toHaveBeenCalledWith({
+      columnKey: 'name',
+      width: 360,
+    });
+    expect(syncColumnsSizingMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not re-write a width the last frame already applied', () => {
+    const { result } = renderHook(() =>
+      useColumnDragSession<Row>({
+        columnKey: 'name',
+        currentWidth: 200,
+        minWidth: 100,
+      }),
+    );
+
+    act(() => {
+      result.current.onMouseDown(createMouseDownEvent({ clientX: 100 }));
+      // Runs synchronously via the default stub, so nothing stays pending
+      document.dispatchEvent(new MouseEvent('mousemove', { clientX: 250 }));
+      document.dispatchEvent(new MouseEvent('mouseup'));
+    });
+
+    expect(setColumnSizingWithoutSyncMock).toHaveBeenCalledTimes(1);
+    expect(syncColumnsSizingMock).toHaveBeenCalledTimes(1);
+  });
+
   it('falls back to default min width when current width is undefined', () => {
     const { result } = renderHook(() =>
       useColumnDragSession<Row>({

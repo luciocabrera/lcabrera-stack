@@ -61,20 +61,23 @@ export const useColumnDragSession = <TData>({
     });
     const listenerController = new AbortController();
     let animationFrameId: number | undefined;
+    // The most recent width no frame has written to the store yet.
+    let pendingWidth: number | undefined;
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
+      pendingWidth = resolveResizeWidth({
+        clientX: moveEvent.clientX,
+        ...startData,
+      });
+
       // Keep only the latest pending frame so moves render at most once per frame
       if (animationFrameId !== undefined) {
         cancelAnimationFrame(animationFrameId);
       }
       animationFrameId = requestAnimationFrame(() => {
-        setColumnSizingWithoutSync({
-          columnKey,
-          width: resolveResizeWidth({
-            clientX: moveEvent.clientX,
-            ...startData,
-          }),
-        });
+        setColumnSizingWithoutSync({ columnKey, width: pendingWidth });
+        animationFrameId = undefined;
+        pendingWidth = undefined;
       });
     };
 
@@ -91,6 +94,15 @@ export const useColumnDragSession = <TData>({
     const handleMouseUp = () => {
       endDragSession();
       setIsResizing(false);
+
+      // `endDragSession` just cancelled any frame still in flight, so flush its
+      // width here. A quick drag delivers its last move and the release in the
+      // same frame, and would otherwise be discarded — leaving the column at the
+      // previous frame's width and persisting that instead of where it was let go.
+      if (pendingWidth !== undefined) {
+        setColumnSizingWithoutSync({ columnKey, width: pendingWidth });
+      }
+
       syncColumnsSizing();
     };
 

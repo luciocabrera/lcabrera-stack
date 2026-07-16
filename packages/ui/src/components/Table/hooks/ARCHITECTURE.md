@@ -43,6 +43,13 @@ Keeps only the DOM wiring (document listeners, RAF bookkeeping, body
 cursor/selection toggles) and owns the drag's two-phase write: frames preview
 via `useSetColumnSizingWithoutSync`, mouse up persists once.
 
+Mouse up **flushes the last width before persisting**. Ending the session
+cancels the frame still in flight, and a browser delivers a quick drag's final
+move and its release in the same frame — so without the flush that movement is
+discarded, leaving the column at the previous frame's width and saving that
+instead of where it was let go. A fast enough flick loses the gesture entirely.
+Tests must queue frames rather than run them synchronously to cover this.
+
 Each mouse down opens a **self-contained drag session closure**: the start
 snapshot, the move handler, and the teardown are all locals of `onMouseDown`.
 Listeners are registered with one `AbortController` signal, so ending the
