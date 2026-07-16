@@ -4,22 +4,8 @@ import { type ActionFunctionArgs, redirect } from 'react-router';
 import { getSessionStorage } from '@/auth/getSessionStorage.util';
 
 import { loginSchema } from './login.schema';
-
-const DEFAULT_REDIRECT = '/cqms/projects';
-
-/**
- * Only same-origin absolute paths are honored — a `//evil.example` or
- * fully-qualified URL in ?redirectTo would otherwise turn the login form
- * into an open redirect.
- */
-const resolveRedirectTo = (request: Request) => {
-  const redirectTo = new URL(request.url).searchParams.get('redirectTo');
-  if (redirectTo === null) return DEFAULT_REDIRECT;
-  if (!redirectTo.startsWith('/') || redirectTo.startsWith('//')) {
-    return DEFAULT_REDIRECT;
-  }
-  return redirectTo;
-};
+import { resolveRedirectTo } from './resolveRedirectTo.util';
+import { toLoginFieldErrors } from './toLoginFieldErrors.util';
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
@@ -29,13 +15,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   });
 
   if (!parsed.success) {
-    const fieldErrors = parsed.error.flatten().fieldErrors;
-    return {
-      errors: {
-        password: fieldErrors.password?.[0],
-        username: fieldErrors.username?.[0],
-      },
-    };
+    return { errors: toLoginFieldErrors({ error: parsed.error }) };
   }
 
   const user = await authenticateUser(parsed.data);
@@ -50,7 +30,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const session = await getSession(request.headers.get('Cookie'));
   session.set('userId', user.userId);
 
-  return redirect(resolveRedirectTo(request), {
+  return redirect(resolveRedirectTo({ url: request.url }), {
     headers: { 'Set-Cookie': await commitSession(session) },
   });
 };

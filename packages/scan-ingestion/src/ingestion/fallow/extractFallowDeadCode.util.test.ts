@@ -45,6 +45,15 @@ describe('extractFallowDeadCode', () => {
             path: 'src/server.constants.ts',
           },
         ],
+        unresolved_imports: [
+          {
+            actions: [{ type: 'fix-import' }],
+            col: 12,
+            line: 4,
+            path: 'src/app/routes.ts',
+            specifier: '@/missing/module',
+          },
+        ],
         unused_types: [
           {
             actions: [],
@@ -65,6 +74,7 @@ describe('extractFallowDeadCode', () => {
       'unused_type',
       'unused_dependency',
       'unlisted_dependency',
+      'unresolved_import',
     ]);
     expect(rows[0]).toEqual({
       category: 'unused_file',
@@ -108,6 +118,44 @@ describe('extractFallowDeadCode', () => {
       package_name: 'vite-plus',
       rule_id: 'fallow/unlisted-dependency',
       severity: 'HIGH',
+    });
+    expect(rows[5]).toEqual({
+      category: 'unresolved_import',
+      col: 12,
+      confidence: 'high',
+      detail: {
+        actions: [{ type: 'fix-import' }],
+        specifier: '@/missing/module',
+      },
+      effort: 'small',
+      file_path: 'src/app/routes.ts',
+      finding_id: expect.any(String),
+      fix: 'Fix the import specifier or restore the missing module.',
+      line: 4,
+      rule_id: 'fallow/unresolved-import',
+      severity: 'HIGH',
+      why: 'Import `@/missing/module` cannot be resolved.',
+    });
+  });
+
+  // Every unresolved-import field but `actions` is nullish in the schema
+  // (the section was empty in every sampled run, so the shape is unverified
+  // against real output) — the absent case is the one likely to show up first.
+  it('omits the optional unresolved-import fields when only actions are present', () => {
+    const raw = fallowRawSchema.parse({
+      check: { unresolved_imports: [{ actions: [] }] },
+    });
+
+    const rows = extractFallowDeadCode({ raw });
+
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({
+      category: 'unresolved_import',
+      col: undefined,
+      detail: { actions: [], specifier: undefined },
+      file_path: undefined,
+      line: undefined,
+      why: 'Import `<unknown>` cannot be resolved.',
     });
   });
 

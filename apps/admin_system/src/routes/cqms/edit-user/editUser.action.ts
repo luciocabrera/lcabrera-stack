@@ -1,3 +1,4 @@
+import { getErrorMessage } from '@repo/data-access/errors/getErrorMessage.util';
 import { getUserWithRoles } from '@repo/scan-ingestion/queries/getUserWithRoles.util';
 import { replaceUserRoles } from '@repo/scan-ingestion/queries/replaceUserRoles.util';
 import { setUserPassword } from '@repo/scan-ingestion/queries/setUserPassword.util';
@@ -7,9 +8,10 @@ import { z } from 'zod';
 
 import { requireUser } from '@/auth/requireUser.util';
 
-import { isCheckboxChecked } from '../utils/isCheckboxChecked.util';
 import { parseRouteParams } from '../utils/parseRouteParams.util';
 import { editUserSchema } from './editUser.schema';
+import { readEditUserFormValues } from './readEditUserFormValues.util';
+import { toEditUserFieldErrors } from './toEditUserFieldErrors.util';
 
 const paramsSchema = z.object({
   username: z.string().regex(/^[a-z0-9][a-z0-9._-]{1,63}$/),
@@ -33,22 +35,10 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
   }
 
   const formData = await request.formData();
-  const parsed = editUserSchema.safeParse({
-    displayName: formData.get('displayName') ?? '',
-    isEnabled: isCheckboxChecked({ formData, name: 'isEnabled' }),
-    newPassword: formData.get('newPassword') ?? '',
-    roleIds: formData.getAll('roleIds'),
-  });
+  const parsed = editUserSchema.safeParse(readEditUserFormValues({ formData }));
 
   if (!parsed.success) {
-    const fieldErrors = parsed.error.flatten().fieldErrors;
-    return {
-      errors: {
-        displayName: fieldErrors.displayName?.[0],
-        newPassword: fieldErrors.newPassword?.[0],
-        roleIds: fieldErrors.roleIds?.[0],
-      },
-    };
+    return { errors: toEditUserFieldErrors({ error: parsed.error }) };
   }
 
   try {
@@ -75,8 +65,10 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
   } catch (error) {
     return {
       errors: {
-        displayName:
-          error instanceof Error ? error.message : 'Failed to update user.',
+        displayName: getErrorMessage({
+          error,
+          fallback: 'Failed to update user.',
+        }),
       },
     };
   }

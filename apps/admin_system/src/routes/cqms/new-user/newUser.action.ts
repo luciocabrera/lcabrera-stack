@@ -1,3 +1,4 @@
+import { getErrorMessage } from '@repo/data-access/errors/getErrorMessage.util';
 import { createUser } from '@repo/scan-ingestion/queries/createUser.util';
 import { replaceUserRoles } from '@repo/scan-ingestion/queries/replaceUserRoles.util';
 import { type ActionFunctionArgs, redirect } from 'react-router';
@@ -5,6 +6,8 @@ import { type ActionFunctionArgs, redirect } from 'react-router';
 import { requireUser } from '@/auth/requireUser.util';
 
 import { newUserSchema } from './newUser.schema';
+import { readNewUserFormValues } from './readNewUserFormValues.util';
+import { toNewUserFieldErrors } from './toNewUserFieldErrors.util';
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   // Actions run BEFORE loaders — every cqms action authenticates itself
@@ -12,23 +15,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const user = await requireUser({ request });
 
   const formData = await request.formData();
-  const parsed = newUserSchema.safeParse({
-    displayName: formData.get('displayName') ?? '',
-    password: formData.get('password') ?? '',
-    roleIds: formData.getAll('roleIds'),
-    username: formData.get('username') ?? '',
-  });
+  const parsed = newUserSchema.safeParse(readNewUserFormValues({ formData }));
 
   if (!parsed.success) {
-    const fieldErrors = parsed.error.flatten().fieldErrors;
-    return {
-      errors: {
-        displayName: fieldErrors.displayName?.[0],
-        password: fieldErrors.password?.[0],
-        roleIds: fieldErrors.roleIds?.[0],
-        username: fieldErrors.username?.[0],
-      },
-    };
+    return { errors: toNewUserFieldErrors({ error: parsed.error }) };
   }
 
   try {
@@ -48,8 +38,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   } catch (error) {
     return {
       errors: {
-        username:
-          error instanceof Error ? error.message : 'Failed to create user.',
+        username: getErrorMessage({
+          error,
+          fallback: 'Failed to create user.',
+        }),
       },
     };
   }

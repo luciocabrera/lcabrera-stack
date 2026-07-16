@@ -1,3 +1,4 @@
+import { getErrorMessage } from '@repo/data-access/errors/getErrorMessage.util';
 import { getRoleWithPermissions } from '@repo/scan-ingestion/queries/getRoleWithPermissions.util';
 import { replaceRolePermissions } from '@repo/scan-ingestion/queries/replaceRolePermissions.util';
 import { updateRole } from '@repo/scan-ingestion/queries/updateRole.util';
@@ -6,9 +7,10 @@ import { z } from 'zod';
 
 import { requireUser } from '@/auth/requireUser.util';
 
-import { isCheckboxChecked } from '../utils/isCheckboxChecked.util';
 import { parseRouteParams } from '../utils/parseRouteParams.util';
 import { editRoleSchema } from './editRole.schema';
+import { readEditRoleFormValues } from './readEditRoleFormValues.util';
+import { toEditRoleFieldErrors } from './toEditRoleFieldErrors.util';
 
 const paramsSchema = z.object({
   roleName: z.string().regex(/^[a-z0-9][a-z0-9-]{1,63}$/),
@@ -31,20 +33,10 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
   }
 
   const formData = await request.formData();
-  const parsed = editRoleSchema.safeParse({
-    description: formData.get('description') ?? '',
-    isEnabled: isCheckboxChecked({ formData, name: 'isEnabled' }),
-    permissionIds: formData.getAll('permissionIds'),
-  });
+  const parsed = editRoleSchema.safeParse(readEditRoleFormValues({ formData }));
 
   if (!parsed.success) {
-    const fieldErrors = parsed.error.flatten().fieldErrors;
-    return {
-      errors: {
-        description: fieldErrors.description?.[0],
-        permissionIds: fieldErrors.permissionIds?.[0],
-      },
-    };
+    return { errors: toEditRoleFieldErrors({ error: parsed.error }) };
   }
 
   try {
@@ -64,8 +56,10 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
   } catch (error) {
     return {
       errors: {
-        description:
-          error instanceof Error ? error.message : 'Failed to update role.',
+        description: getErrorMessage({
+          error,
+          fallback: 'Failed to update role.',
+        }),
       },
     };
   }

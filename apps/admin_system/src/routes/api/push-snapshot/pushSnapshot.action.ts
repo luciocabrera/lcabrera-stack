@@ -7,6 +7,9 @@ import { z } from 'zod';
 
 import { requireApiUser } from '@/auth/requireApiUser.util';
 
+import { resolvePushSourceLabel } from './resolvePushSourceLabel.util';
+import { validatePushArchive } from './validatePushArchive.util';
+
 const paramsSchema = z.object({ projectId: z.string().uuid() });
 
 // The CLI push channel (PRD_V2 §3, ADR-029): a token-authenticated upload of a
@@ -46,24 +49,21 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
   }
 
   const archiveBytes = new Uint8Array(await request.arrayBuffer());
-  if (archiveBytes.byteLength === 0) {
-    throw data('Empty request body — expected a .zip archive.', {
-      status: 400,
-    });
+  const validated = validatePushArchive({
+    byteLength: archiveBytes.byteLength,
+    maxBytes: MAX_PUSH_BYTES,
+  });
+  if (!validated.ok) {
+    throw data(validated.error, { status: validated.status });
   }
-  if (archiveBytes.byteLength > MAX_PUSH_BYTES) {
-    throw data(`Archive exceeds the ${MAX_PUSH_BYTES}-byte push limit.`, {
-      status: 413,
-    });
-  }
-
-  const sourceHost = request.headers.get('X-CodePulse-Host') ?? 'unknown';
 
   const result = await saveProjectSnapshot({
     archiveBytes,
     archiveName: 'cli-push.zip',
     projectId,
-    sourceLabel: `cli:${sourceHost}`,
+    sourceLabel: resolvePushSourceLabel({
+      host: request.headers.get('X-CodePulse-Host'),
+    }),
     userId,
   });
 
