@@ -12,11 +12,15 @@ individually but imported only within its own folder.
 
 ## `src/db/`
 
-| Artifact        | Location             | Description                                                                   |
-| --------------- | -------------------- | ----------------------------------------------------------------------------- |
-| `readEnvConfig` | `db/env.schema.ts`   | Zod schema + parser for `DB_HOST`/`DB_NAME`/`DB_PASSWORD`/`DB_PORT`/`DB_USER` |
-| `getPool`       | `db/getPool.util.ts` | Lazily-initialized `pg.Pool` singleton, one per Node process                  |
-| `closePool`     | `db/getPool.util.ts` | Tears down the pool singleton (test teardown)                                 |
+See `db/ARCHITECTURE.md` for the pure (`queryBuilder/`) vs impure (execution)
+split this folder is built around.
+
+| Artifact        | Location                | Description                                                                                                 |
+| --------------- | ----------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `readEnvConfig` | `db/env.schema.ts`      | Zod schema + parser for `DB_HOST`/`DB_NAME`/`DB_PASSWORD`/`DB_PORT`/`DB_USER`                               |
+| `getPool`       | `db/getPool.util.ts`    | Lazily-initialized `pg.Pool` singleton, one per Node process                                                |
+| `closePool`     | `db/getPool.util.ts`    | Tears down the pool singleton (test teardown)                                                               |
+| `selectRows`    | `db/selectRows.util.ts` | Builds a `SelectQueryDescriptor` and runs it on the pool — the one place `buildSelectQuery` meets `getPool` |
 
 ### `src/db/queryBuilder/` — see its own `ARCHITECTURE.md`
 

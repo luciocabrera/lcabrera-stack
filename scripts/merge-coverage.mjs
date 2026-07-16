@@ -60,6 +60,7 @@ const OUTPUT_PATH = join(
  */
 const COVERAGE_WORKSPACES = [
   { dir: 'packages/data-access', name: '@repo/data-access' },
+  { dir: 'packages/node-runtime', name: '@repo/node-runtime' },
   { dir: 'packages/scan-ingestion', name: '@repo/scan-ingestion' },
   { dir: 'apps/admin_system', name: 'admin-system' },
 ];

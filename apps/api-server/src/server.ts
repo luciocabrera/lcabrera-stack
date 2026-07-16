@@ -1,3 +1,4 @@
+import { registerShutdownSignals } from '@repo/node-runtime/registerShutdownSignals.util';
 import { runStartupDbSanityCheck } from 'api-shared';
 import { Pool } from 'pg';
 
@@ -55,14 +56,4 @@ void runStartupDbSanityCheck({
   repopulateCommand: '`vp run seed` in api-server',
 });
 
-process.on('SIGINT', () => {
-  void shutdown().catch((error: unknown) => {
-    console.error('❌ Error during SIGINT shutdown:', error);
-  });
-});
-
-process.on('SIGTERM', () => {
-  void shutdown().catch((error: unknown) => {
-    console.error('❌ Error during SIGTERM shutdown:', error);
-  });
-});
+registerShutdownSignals({ shutdown });

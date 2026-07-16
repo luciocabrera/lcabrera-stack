@@ -6,6 +6,13 @@ list view, optional filter/sort/pagination" shape — the pattern every
 functions only; no DB access lives in this folder (see `@repo/data-access/db/getPool.util`
 for that) — callers execute the returned `{ text, values }` themselves.
 
+> **Executing a plain SELECT? Prefer `../selectRows.util.ts`.** It composes
+> `buildSelectQuery` with `getPool` so callers don't re-wire the two by hand
+> (the Usage example below is exactly what it replaces). Reach for the
+> builders directly only when you need the SQL _without_ running it — a count
+> paired to a data query, or a shape this folder doesn't build. See
+> `../ARCHITECTURE.md` for the pure/impure split.
+
 ## Files
 
 | File                                  | Role                                                                                                                                        |

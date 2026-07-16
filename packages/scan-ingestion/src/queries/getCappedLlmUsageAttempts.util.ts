@@ -1,5 +1,6 @@
-import { getPool } from '@repo/data-access/db/getPool.util';
-import { buildSelectQuery } from '@repo/data-access/db/queryBuilder/buildSelectQuery.util';
+import { selectRows } from '@repo/data-access/db/selectRows.util';
+
+import { LLM_USAGE_SCHEMA } from './llmUsage.constants.ts';
 
 export type CappedLlmUsageAttemptRow = {
   readonly created_at: Date;
@@ -36,17 +37,11 @@ export const getCappedLlmUsageAttempts = async ({
   limit = 100,
 }: GetCappedLlmUsageAttemptsArgs = {}): Promise<
   readonly CappedLlmUsageAttemptRow[]
-> => {
-  const { text, values } = buildSelectQuery({
+> =>
+  await selectRows<CappedLlmUsageAttemptRow>({
     fields: FIELDS,
     limit,
-    schema: 'llm_usage',
+    schema: LLM_USAGE_SCHEMA,
     sort: [{ column: 'created_at', direction: 'desc' }],
     table: 'v_capped_llm_usage_attempts',
   });
-
-  const result = await getPool().query<CappedLlmUsageAttemptRow>(text, [
-    ...values,
-  ]);
-  return result.rows;
-};

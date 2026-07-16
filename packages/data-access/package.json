@@ -14,6 +14,7 @@
     "./db/queryBuilder/buildCountQuery.util": "./src/db/queryBuilder/buildCountQuery.util.ts",
     "./db/queryBuilder/buildDistinctQuery.util": "./src/db/queryBuilder/buildDistinctQuery.util.ts",
     "./db/queryBuilder/buildSelectQuery.util": "./src/db/queryBuilder/buildSelectQuery.util.ts",
+    "./db/selectRows.util": "./src/db/selectRows.util.ts",
     "./errors/getErrorMessage.util": "./src/errors/getErrorMessage.util.ts",
     "./records/dropNullishValues.util": "./src/records/dropNullishValues.util.ts",
     "./tokens/generateApiToken.util": "./src/tokens/generateApiToken.util.ts",

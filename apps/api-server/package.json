@@ -17,6 +17,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@repo/node-runtime": "workspace:*",
     "api-shared": "workspace:*",
     "cors": "catalog:",
     "express": "catalog:",

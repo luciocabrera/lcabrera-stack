@@ -1,4 +1,5 @@
 import { closePool } from '@repo/data-access/db/getPool.util';
+import { registerShutdownSignals } from '@repo/node-runtime/registerShutdownSignals.util';
 import { failStaleRunningScans } from '@repo/scan-ingestion/queries/failStaleRunningScans.util';
 import { getUserByUsername } from '@repo/scan-ingestion/queries/getUserByUsername.util';
 
@@ -74,14 +75,4 @@ const shutdown = async (): Promise<void> => {
   await closePool();
 };
 
-process.on('SIGINT', () => {
-  void shutdown().catch((error: unknown) => {
-    console.error('❌ Error during SIGINT shutdown:', error);
-  });
-});
-
-process.on('SIGTERM', () => {
-  void shutdown().catch((error: unknown) => {
-    console.error('❌ Error during SIGTERM shutdown:', error);
-  });
-});
+registerShutdownSignals({ shutdown });

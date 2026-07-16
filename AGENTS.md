@@ -19,11 +19,17 @@ apps/
 └── shared/           # Shared code between apps
 packages/
 ├── eslint-local-rules/  # Custom lint rules for this repo
+├── node-runtime/        # Process-lifecycle primitives for long-running services (signals)
 ├── plugins/             # Shared Vite plugins
 ├── ts-configs/          # Shared TypeScript configurations
-├── utils/               # Shared utilities
+├── utils/               # Shared utilities — pure and side-effect free (see its ARCHITECTURE.md)
 └── vite-configs/        # Shared Vite config factories
 ```
+
+`utils` and `node-runtime` split on purity, and the split is deliberate:
+`@repo/utils` guarantees pure, side-effect-free helpers, so anything that must
+touch the process (signal handlers, exit paths) belongs in `@repo/node-runtime`
+instead of eroding that guarantee.
 
 All source paths below (e.g. `src/components/`) are relative to `apps/react-router/` unless otherwise noted.
 

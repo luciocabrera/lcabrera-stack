@@ -193,6 +193,25 @@ philosophy (TECH_SPEC §2.3a). Every read/write CQMS needs, anywhere in the
 monorepo, goes through this directory — no other package or app touches
 `cqms.*` tables directly.
 
+### The `llm_usage` cost readers
+
+`getDailyLlmCost`, `getProjectLlmCost`, and `getScannerLlmCost` differ only in
+view, columns, and sort — so everything else lives in one place:
+
+| File                        | Role                                                                                                    |
+| --------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `llmUsage.constants.ts`     | `LLM_USAGE_SCHEMA` — shared so the readers cannot drift onto different schemas                          |
+| `selectLlmCostRows.util.ts` | Runs a cost view via `@repo/data-access/db/selectRows.util` and coerces `total_cost_usd` to a JS number |
+
+Postgres `numeric` arrives from pg as a **string**, so each reader types its DB
+row's `total_cost_usd` as `string` and `selectLlmCostRows` returns it as a
+`number`. That coercion rest-destructures the key rather than spreading over it
+— see the util's own comment for why the spread form silently types the column
+as `never`.
+
+`getCappedLlmUsageAttempts` has no cost column, so it calls `selectRows`
+directly.
+
 ## Functions-only access + audit (ADR-018) — the rule for ALL new work
 
 Since migration 0009, even THIS package's query utils never touch tables:
