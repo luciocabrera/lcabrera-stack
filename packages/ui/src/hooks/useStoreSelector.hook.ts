@@ -3,6 +3,12 @@ import { useSyncExternalStore } from 'react';
 import type { TStore } from './useStore.hook';
 
 type UseStoreSelectorArgs<TState, TSelected> = {
+  /**
+   * State handed to the selector when the store is still empty. Omit it when
+   * the provider always seeds the store — the selector then receives whatever
+   * `get()` returns, matching a bare `store.get() as TState`.
+   */
+  readonly fallback?: TState;
   /** Narrows store state to the slice the caller subscribes to */
   readonly selector: (state: TState) => TSelected;
   /** The store to read from, created by `useStore` */
@@ -37,11 +43,12 @@ export const useStoreSelector = <
   TState extends Record<string, unknown>,
   TSelected,
 >({
+  fallback,
   selector,
   store,
 }: UseStoreSelectorArgs<TState, TSelected>) =>
   useSyncExternalStore(
     store.subscribe,
-    () => selector(store.get() as TState),
-    () => selector(store.getServerSnapshot() as TState),
+    () => selector(store.get() ?? (fallback as TState)),
+    () => selector(store.getServerSnapshot() ?? (fallback as TState)),
   );

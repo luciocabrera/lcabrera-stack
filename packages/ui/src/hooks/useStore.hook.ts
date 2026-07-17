@@ -30,11 +30,8 @@ export type TStore<TData> = {
  * ```tsx
  * const store = useStore<{ count: number }>({ count: 0 });
  *
- * // In component with useSyncExternalStore
- * const count = useSyncExternalStore(
- *   store.subscribe,
- *   () => store.get()?.count ?? 0
- * );
+ * // Read through useStoreSelector — it owns the useSyncExternalStore wiring
+ * const count = useStoreSelector({ selector: (state) => state.count, store });
  * ```
  */
 export const useStore = <TData extends Record<string, unknown>>(

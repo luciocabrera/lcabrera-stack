@@ -1,19 +1,13 @@
 import type { TableDataState } from '@repo/ui/components/Table/Table.types';
 
-import { useSyncExternalStore } from 'react';
+import { useStoreSelector } from '@repo/ui/hooks/useStoreSelector.hook';
 
 import { useTableDataContextValue } from './useTableDataContextValue.hook';
 
 export const useDataStore = <TSelected, TData = Record<string, unknown>>(
   selector: (state: TableDataState<TData>) => TSelected,
 ) => {
-  const { dataStore } = useTableDataContextValue();
+  const { dataStore } = useTableDataContextValue<TData>();
 
-  const state = useSyncExternalStore(
-    dataStore.subscribe,
-    () => selector(dataStore.get() as TableDataState<TData>),
-    () => selector(dataStore.getServerSnapshot() as TableDataState<TData>),
-  );
-
-  return state;
+  return useStoreSelector({ selector, store: dataStore });
 };

@@ -63,6 +63,26 @@ describe('useStoreSelector', () => {
     expect(renders.count).toBe(rendersBefore);
   });
 
+  it('selects from the fallback while the store is still empty', () => {
+    const emptyStore: TStore<TestState> = {
+      get: () => {},
+      getServerSnapshot: () => {},
+      reset: vi.fn(),
+      set: vi.fn(),
+      subscribe: vi.fn(() => vi.fn()),
+    };
+
+    const { result } = renderHook(() =>
+      useStoreSelector({
+        fallback: { count: 42, label: 'fallback' },
+        selector: (state: TestState) => state.count,
+        store: emptyStore,
+      }),
+    );
+
+    expect(result.current).toBe(42);
+  });
+
   it('reads through getServerSnapshot when rendering on the server', () => {
     const getServerSnapshot = vi.fn(() => ({ count: 7, label: 'server' }));
     const store: TStore<TestState> = {

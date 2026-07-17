@@ -1,4 +1,4 @@
-import { useSyncExternalStore } from 'react';
+import { useStoreSelector } from '@repo/ui/hooks/useStoreSelector.hook';
 
 import type { VirtualSelectMetaState } from '../../VirtualSelect.types';
 
@@ -10,15 +10,9 @@ export const useSelectMetaStore = <TSelected>(
 ) => {
   const { metaStore } = useVirtualSelectContextValue();
 
-  const getSnapshot = () => metaStore.get() ?? INITIAL_SELECT_META_STATE;
-  const getServerSnapshot = () =>
-    metaStore.getServerSnapshot() ?? INITIAL_SELECT_META_STATE;
-
-  const state = useSyncExternalStore(
-    metaStore.subscribe,
-    () => selector(getSnapshot()),
-    () => selector(getServerSnapshot()),
-  );
-
-  return state;
+  return useStoreSelector({
+    fallback: INITIAL_SELECT_META_STATE,
+    selector,
+    store: metaStore,
+  });
 };

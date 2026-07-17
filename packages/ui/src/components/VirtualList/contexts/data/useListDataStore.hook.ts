@@ -1,4 +1,4 @@
-import { useSyncExternalStore } from 'react';
+import { useStoreSelector } from '@repo/ui/hooks/useStoreSelector.hook';
 
 import type { VirtualListDataStoreState } from '../../VirtualList.types';
 
@@ -10,15 +10,9 @@ export const useListDataStore = <TSelected>(
 ) => {
   const { dataStore } = useVirtualListContextValue();
 
-  const getSnapshot = () => dataStore.get() ?? INITIAL_LIST_DATA_STATE;
-  const getServerSnapshot = () =>
-    dataStore.getServerSnapshot() ?? INITIAL_LIST_DATA_STATE;
-
-  const state = useSyncExternalStore(
-    dataStore.subscribe,
-    () => selector(getSnapshot()),
-    () => selector(getServerSnapshot()),
-  );
-
-  return state;
+  return useStoreSelector({
+    fallback: INITIAL_LIST_DATA_STATE,
+    selector,
+    store: dataStore,
+  });
 };

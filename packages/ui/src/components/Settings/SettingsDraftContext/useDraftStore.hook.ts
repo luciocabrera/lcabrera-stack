@@ -1,4 +1,4 @@
-import { useSyncExternalStore } from 'react';
+import { useStoreSelector } from '@repo/ui/hooks/useStoreSelector.hook';
 
 import type { SettingsDraft } from '../Settings.types';
 
@@ -10,15 +10,9 @@ export const useDraftStore = <TSelected>(
 ) => {
   const { draftStore } = useSettingsDraftContextValue();
 
-  const getSnapshot = () => draftStore.get() ?? DEFAULT_SETTINGS_DRAFT;
-  const getServerSnapshot = () =>
-    draftStore.getServerSnapshot() ?? DEFAULT_SETTINGS_DRAFT;
-
-  const state = useSyncExternalStore(
-    draftStore.subscribe,
-    () => selector(getSnapshot()),
-    () => selector(getServerSnapshot()),
-  );
-
-  return state;
+  return useStoreSelector({
+    fallback: DEFAULT_SETTINGS_DRAFT,
+    selector,
+    store: draftStore,
+  });
 };

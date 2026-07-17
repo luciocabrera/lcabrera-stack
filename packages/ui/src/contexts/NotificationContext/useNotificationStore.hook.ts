@@ -1,4 +1,4 @@
-import { useSyncExternalStore } from 'react';
+import { useStoreSelector } from '@repo/ui/hooks/useStoreSelector.hook';
 
 import type { NotificationState } from './NotificationContext.types';
 
@@ -10,14 +10,9 @@ export const useNotificationStore = <TSelected>(
 ) => {
   const { notificationsStore } = useNotificationContextValue();
 
-  const getSnapshot = () =>
-    notificationsStore.get() ?? INITIAL_NOTIFICATION_STATE;
-  const getServerSnapshot = () =>
-    notificationsStore.getServerSnapshot() ?? INITIAL_NOTIFICATION_STATE;
-
-  return useSyncExternalStore(
-    notificationsStore.subscribe,
-    () => selector(getSnapshot()),
-    () => selector(getServerSnapshot()),
-  );
+  return useStoreSelector({
+    fallback: INITIAL_NOTIFICATION_STATE,
+    selector,
+    store: notificationsStore,
+  });
 };
