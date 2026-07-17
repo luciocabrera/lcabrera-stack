@@ -165,6 +165,27 @@ const configs = [
     filePath: resolve(workspaceRoot, 'packages/agent-runner/tsconfig.app.json'),
   },
   {
+    // Genuinely Node-only — process-lifecycle primitives (SIGINT/SIGTERM
+    // handlers), the deliberate impure counterpart to @repo/utils.
+    //
+    // This was the one tsconfig.app.json the generator did not own: it was
+    // hand-written, so every tsconfig.shared.ts change silently skipped it
+    // while its name promised otherwise (the README calls these generated
+    // artifacts). It had drifted to carry esModuleInterop, resolveJsonModule
+    // and useDefineForClassFields, none of which this package uses — no
+    // default imports, no JSON imports, no classes — plus an `@/*` alias
+    // nothing imports through. Folding it in drops the dead options and
+    // makes it identical in shape to its Node-only siblings above.
+    config: createNodeTsConfig({
+      include: ['src', 'vite.config.ts'],
+      paths: {
+        '@repo/node-runtime/*': ['./src/*'],
+      },
+      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
+    }),
+    filePath: resolve(workspaceRoot, 'packages/node-runtime/tsconfig.app.json'),
+  },
+  {
     // Genuinely Node-only — the standalone scan-orchestrator process
     // (Implementation Plan step 9): a dedicated Postgres LISTEN client, a
     // plain node:http + ws server, no DOM/vite.client usage anywhere.
