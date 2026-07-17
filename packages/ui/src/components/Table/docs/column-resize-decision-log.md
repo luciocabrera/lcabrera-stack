@@ -211,9 +211,12 @@ commands survive at any depth: _"Fit group to content"_, _"Distribute evenly"_.
 
 **(e) Dynamic row height cuts both ways — see Q4.** It weakens our keystone. Recorded honestly there.
 
-### 2.10 Naming collision — act before it's public API _(Fact)_
+### 2.10 Naming collision — act before it's public API _(Fact)_ — ✅ **LANDED** (commit `15b92340`)
 
-`ColumnGroupsState` **already exists** and means the **pinning partition**, not semantic column grouping:
+**Done:** renamed to `PinnedColumnPartitionState` / `useGetPinnedColumnPartition`. The name `ColumnGroup*` is now
+free for real grouping to claim.
+
+`ColumnGroupsState` **used to exist** and meant the **pinning partition**, not semantic column grouping:
 
 ```ts
 export type ColumnGroupsState<TData> = {
@@ -297,9 +300,15 @@ architecture already has the shape for it.**
 
 **(c) It corrects our Q6 perf claim — see Q6.**
 
-### 2.15 🔴 Verified perf bug: the drilling and the re-render storm are one defect _(Fact)_
+### 2.15 Verified perf bug: the drilling and the re-render storm are one defect _(Fact)_ — ✅ **LANDED & CONFIRMED** (commits `8f6c3d3c`, `7a063440`)
 
-`TableHeaderCell` reads store state and drills it into `ResizeHandle`:
+**Hypothesis was confirmed empirically before the fix** (a subscription test now guards it): every `TableHeaderCell`
+re-rendered on any single column's width change. **Fixed:** added the granular `useGetColumnWidth(columnKey)`
+selector (returns a **number** ⇒ `Object.is` short-circuits), and `ResizeHandle` now **self-connects** with
+`columnKey` + `columnLabel` only. A drag now re-renders **one** header cell per frame, not N. A parallel
+pinning-info drill was fixed the same way. Original write-up kept below for the record.
+
+`TableHeaderCell` **used to** read store state and drill it into `ResizeHandle`:
 
 ```tsx
 const columnSizing = useGetColumnSizing<TData>(); // ← the WHOLE map
@@ -451,13 +460,12 @@ E's _keystone task_ weakens. Both are true, and we do **not** consider this reso
 **Open:** Is scroll-dependent width acceptable, or a correctness problem? What do we name the command so the
 behavior isn't a lie? Is per-column autofit policy the right model? Sample-based measurement? Server-side hints?
 
-### Q5 — Two hooks named `useSetColumnSizing` 🟢 _Independent footgun_
+### Q5 — Two hooks named `useSetColumnSizing` ✅ _RESOLVED_ (commit `154e5caa`)
 
-- `contexts/TableConfig/columns/actions/useSetColumnSizing.hook.ts` — **live**, writes table state
-- `ColumnSettingsDrawer/ColumnDrawerContext/actions/useSetColumnSizing.hook.ts` — **staged**, writes drawer-local state
-
-Same name, different commit semantics, no type-level distinction. This is **how the B′ mistake happened**.
-Worth fixing regardless of the outcome here.
+The drawer action is now `useSetDraftColumnSizing` — the staged-vs-live distinction is visible at the call site,
+so the trap that caused the B′ mistake is guardrailed. The live `contexts/TableConfig/.../useSetColumnSizing`
+keeps its name. (Sibling drawer actions — pinning/filter/sorting — carry the same latent ambiguity; reported, not
+renamed, pending a decision on whether to normalise the whole `useSetDraft*` family.)
 
 ---
 
