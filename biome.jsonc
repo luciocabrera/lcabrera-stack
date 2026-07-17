@@ -53,8 +53,16 @@
           "correctness": {
             "noNestedComponentDefinitions": "error",
             "useExhaustiveDependencies": "off",
+            "noReactPropAssignments": "error",
           },
-          "suspicious": { "noDuplicatedSpreadProps": "error" },
+          "suspicious": {
+            "noDuplicatedSpreadProps": "error",
+            // "noLeakedRender": "error",
+          },
+          "style": {
+            "useReactFunctionComponents": "error",
+            "useComponentExportOnlyModules": "error",
+          },
         },
       },
     },
@@ -62,6 +70,19 @@
       "includes": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts"],
       "linter": {
         "domains": { "test": "recommended" },
+        "rules": {
+          "style": {
+            // Fast Refresh only works when a file only exports components — and
+            // Fast Refresh (HMR) never touches test files: they run under
+            // Vitest, not the dev server, so this rule is categorically
+            // inapplicable here. The inline `Wrapper`/`TestHarness` component
+            // passed to renderHook/render's `wrapper` option is the idiomatic
+            // RTL pattern and cannot be expressed without defining a component.
+            // The rule stays ON and clean for every source file, where it
+            // enforces the one-component bundle.
+            "useComponentExportOnlyModules": "off",
+          },
+        },
       },
     },
     {
