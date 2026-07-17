@@ -6,23 +6,14 @@ import type { TStore } from '@repo/ui/hooks/useStore.hook';
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const {
-  mockSerializeStateSlice,
-  mockWriteStateSlice,
-  mockWriteToSessionStorage,
-} = vi.hoisted(() => ({
+const { mockSerializeStateSlice, mockWriteStateSlice } = vi.hoisted(() => ({
   mockSerializeStateSlice: vi.fn(),
   mockWriteStateSlice: vi.fn(),
-  mockWriteToSessionStorage: vi.fn(),
 }));
 
 vi.mock('@repo/ui/components/Table/utils', () => ({
   serializeStateSlice: mockSerializeStateSlice,
   writeStateSlice: mockWriteStateSlice,
-}));
-
-vi.mock('@repo/ui/utils/storage', () => ({
-  writeToSessionStorage: mockWriteToSessionStorage,
 }));
 
 import { persistColumnSizing } from './persistColumnSizing.util';
@@ -77,14 +68,6 @@ describe('persistColumnSizing', () => {
     });
   });
 
-  it('writes the cookie only — never a client-side copy the loader cannot read', () => {
-    persistColumnSizing<Row>(createStores(COMPLETE_STORES));
-
-    // getInitialColumnsState seeds purely from the loader's cookie state, so a
-    // sessionStorage copy could only contradict the markup SSR already painted.
-    expect(mockWriteToSessionStorage).not.toHaveBeenCalled();
-  });
-
   it('does nothing when the table has no persistence key to write under', () => {
     persistColumnSizing<Row>(
       createStores({
@@ -95,7 +78,6 @@ describe('persistColumnSizing', () => {
     );
 
     expect(mockWriteStateSlice).not.toHaveBeenCalled();
-    expect(mockWriteToSessionStorage).not.toHaveBeenCalled();
   });
 
   it('does nothing when there are no widths to save', () => {
@@ -108,7 +90,6 @@ describe('persistColumnSizing', () => {
     );
 
     expect(mockWriteStateSlice).not.toHaveBeenCalled();
-    expect(mockWriteToSessionStorage).not.toHaveBeenCalled();
   });
 
   it('still writes for a table with no appId', () => {

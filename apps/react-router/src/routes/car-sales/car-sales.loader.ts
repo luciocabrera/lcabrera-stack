@@ -1,6 +1,7 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
 import { appendDistinctFilterDescriptors } from '@repo/ui/routing/appendDistinctFilterDescriptors.util';
+import { appendPrimaryKeySorting } from '@repo/ui/routing/appendPrimaryKeySorting.util';
 import { readTableLoaderStateFromRequest } from '@repo/ui/routing/readTableLoaderStateFromRequest.util';
 import { sanitizeSorting } from '@repo/ui/routing/sanitizeSorting.util';
 
@@ -10,6 +11,7 @@ import { APP_ID } from '@/constants/app.constants';
 import { carSalesApi } from '@/services';
 
 import {
+  CLIENT_PAGINATION_ROW_LIMIT,
   COLUMNS,
   PERSISTENCE_KEY,
   SCHEMA_NAME,
@@ -52,10 +54,19 @@ export const loader = ({ request }: LoaderFunctionArgs) => {
   });
   const sanitizedSorting = sanitizeSorting<CarSale>(sorting);
 
-  // Return the promise directly (not awaited) for Suspense streaming
-  const carSalesPromise: Promise<CarSalesResponse> = carSalesApi.fetchCarSales(
-    request.url,
-  );
+  // Return the promise directly (not awaited) for Suspense streaming.
+  // This route paginates in memory, so it takes its whole dataset in one
+  // bounded slice — see CLIENT_PAGINATION_ROW_LIMIT for why it is bounded.
+  const carSalesPromise: Promise<CarSalesResponse & { hasMore: boolean }> =
+    carSalesApi.fetchCarSalesPaginated({
+      limit: CLIENT_PAGINATION_ROW_LIMIT,
+      requestUrl: request.url,
+      skip: 0,
+      sorting: appendPrimaryKeySorting<CarSale>({
+        columns: COLUMNS,
+        sorting: sanitizedSorting,
+      }),
+    });
 
   return {
     carSalesPromise,

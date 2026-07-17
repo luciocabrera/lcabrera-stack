@@ -54,11 +54,6 @@ export type CarSalesResponse = {
   readonly total: number;
 };
 
-const isCarSalesResponse = (value: unknown): value is CarSalesResponse =>
-  isObject(value) &&
-  Array.isArray(value['data']) &&
-  typeof value['total'] === 'number';
-
 const isCarSalesPaginatedResponse = (
   value: unknown,
 ): value is CarSalesResponse & { hasMore: boolean } =>
@@ -69,21 +64,14 @@ const isCarSalesPaginatedResponse = (
 
 export const carSalesApi = {
   /**
-   * Fetch car sales data
-   * Returns a promise (non-blocking) to enable React streaming with Suspense
-   */
-  fetchCarSales: async (requestUrl?: string) => {
-    await fakeDelay();
-
-    return fetchAndValidate({
-      isValid: isCarSalesResponse,
-      shapeErrorMessage: 'Unexpected response shape from /car-sales',
-      url: `${getApiBaseUrl(requestUrl)}/car-sales`,
-    });
-  },
-
-  /**
-   * Fetch car sales data with pagination (offset-limit strategy)
+   * Fetch car sales data with pagination (offset-limit strategy).
+   *
+   * This is deliberately the only reader of the car-sales table. The API also
+   * exposes an unpaginated `GET /car-sales`, but `car_sales` holds 500k rows,
+   * so that endpoint returns a ~421MB body and kills SSR while it is being
+   * serialized into the hydration payload. Every route takes a bounded slice
+   * through here instead — including `car-sales`, which paginates in memory
+   * and simply asks for a larger `limit`.
    */
   fetchCarSalesPaginated: async ({
     limit,

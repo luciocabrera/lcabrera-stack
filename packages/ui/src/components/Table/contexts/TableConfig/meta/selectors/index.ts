@@ -1,5 +1,4 @@
 export { useGetTableAdditionalMetadata } from './useGetTableAdditionalMetadata.hook';
-export { useGetTableAppId } from './useGetTableAppId.hook';
 export { useGetTableColumnSelectedKey } from './useGetTableColumnSelectedKey.hook';
 export { useGetTableColumnSettingsSelectedTab } from './useGetTableColumnSettingsSelectedTab.hook';
 export { useGetTableCrud } from './useGetTableCrud.hook';

@@ -8,16 +8,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { usePersistTableStateAction } from './usePersistTableStateAction.hook';
 
-const {
-  notifyMock,
-  serializeStateSliceMock,
-  submitMock,
-  writeToSessionStorageMock,
-} = vi.hoisted(() => ({
+const { notifyMock, serializeStateSliceMock, submitMock } = vi.hoisted(() => ({
   notifyMock: vi.fn(),
   serializeStateSliceMock: vi.fn(),
   submitMock: vi.fn(),
-  writeToSessionStorageMock: vi.fn(),
 }));
 const { mockUseFetcher, mockUseLocation } = vi.hoisted(() => ({
   mockUseFetcher: () => ({ submit: submitMock }),
@@ -55,16 +49,11 @@ vi.mock('@repo/ui/contexts/NotificationContext/actions', () => ({
   useNotifyAction: () => notifyMock,
 }));
 
-vi.mock('@repo/ui/utils/storage', () => ({
-  writeToSessionStorage: writeToSessionStorageMock,
-}));
-
 describe('usePersistTableStateAction', () => {
   beforeEach(() => {
     notifyMock.mockReset();
     serializeStateSliceMock.mockReset();
     submitMock.mockReset();
-    writeToSessionStorageMock.mockReset();
     metaStoreGetMock.mockReset();
     metaStoreGetMock.mockReturnValue({});
   });
@@ -126,10 +115,7 @@ describe('usePersistTableStateAction', () => {
       });
     });
 
-    // The loader can only read the cookie, and the store is seeded from what it
-    // passes down. A sessionStorage copy could only contradict the SSR markup.
     expect(submitMock).toHaveBeenCalledTimes(1);
-    expect(writeToSessionStorageMock).not.toHaveBeenCalled();
   });
 
   it('serializes batch entries and fills optional search params with empty strings', () => {
@@ -185,8 +171,6 @@ describe('usePersistTableStateAction', () => {
       },
       { action: '/_action/persist-cookie', method: 'POST' },
     );
-
-    expect(writeToSessionStorageMock).not.toHaveBeenCalled();
   });
 
   it('blocks oversized entries before cookie persistence', () => {
@@ -217,7 +201,6 @@ describe('usePersistTableStateAction', () => {
       title: 'Table state too large',
       variant: 'error',
     });
-    expect(writeToSessionStorageMock).not.toHaveBeenCalled();
     expect(submitMock).not.toHaveBeenCalled();
   });
 

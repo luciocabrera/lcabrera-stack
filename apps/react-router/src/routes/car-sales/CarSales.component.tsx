@@ -14,7 +14,12 @@ export const CarSales = () => {
       columnsState={columnsState}
       dataPromise={carSalesPromise}
       dataSelector={(response) => response.data}
-      dataTotalSelector={(response) => response.total}
+      // The rows this route loaded are the rows it will ever have — it
+      // paginates them in memory and never fetches again. Reporting the
+      // server's full `total` here would leave `hasMore` permanently true
+      // (it is `totalRows > totalLoadedRows`) and advertise rows that no
+      // interaction can reach.
+      dataTotalSelector={(response) => response.data.length}
       metaState={metaState}
     />
   );

@@ -3,10 +3,17 @@ import type { LoaderFunctionArgs } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
 
 import { loader } from './car-sales.loader';
+import { CLIENT_PAGINATION_ROW_LIMIT } from './CarSales.constants';
+
+const { fetchCarSalesPaginatedMock } = vi.hoisted(() => ({
+  fetchCarSalesPaginatedMock: vi.fn(() =>
+    Promise.resolve({ data: [], hasMore: false, total: 0 }),
+  ),
+}));
 
 vi.mock('@/services', () => ({
   carSalesApi: {
-    fetchCarSales: vi.fn(() => Promise.resolve({ data: [], total: 0 })),
+    fetchCarSalesPaginated: fetchCarSalesPaginatedMock,
   },
 }));
 
@@ -62,5 +69,22 @@ describe('car-sales loader', () => {
 
     const year = columns.find((column) => column.key === 'year');
     expect(year?.filterOptionsDescriptor).toBeUndefined();
+  });
+
+  it('requests a bounded slice rather than the whole table', () => {
+    // car_sales holds 500k rows. Fetching it unbounded produced a ~421MB body
+    // and killed SSR with a V8 zone allocation failure, so this route must
+    // always ask for a limit.
+    fetchCarSalesPaginatedMock.mockClear();
+
+    invokeLoader();
+
+    expect(fetchCarSalesPaginatedMock).toHaveBeenCalledTimes(1);
+    expect(fetchCarSalesPaginatedMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        limit: CLIENT_PAGINATION_ROW_LIMIT,
+        skip: 0,
+      }),
+    );
   });
 });
