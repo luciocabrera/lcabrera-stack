@@ -133,7 +133,8 @@ export type PinnedColumnOffsetsState<TData = Record<string, unknown>> = Partial<
 >;
 
 /**
- * Pre-computed column groups split by pinning side, stored in columnsStore.
+ * Pre-computed pinned column partition — columns split by pinning side,
+ * stored in columnsStore.
  */
 export type PinnedColumnPartitionState<TData = Record<string, unknown>> = {
   readonly centerCols: readonly TableColumn<TData>[];
@@ -235,7 +236,7 @@ export type TableColumnsState<TData = Record<string, unknown>> = {
   readonly normalizedColumns: NormalizedColumnsState<TData>;
   /** Pre-computed pinned column offset map */
   readonly pinnedColumnOffsets: PinnedColumnOffsetsState<TData>;
-  /** Pre-computed column groups split by pinning side */
+  /** Pre-computed pinned column partition (columns split by pinning side) */
   readonly pinnedColumnPartition: PinnedColumnPartitionState<TData>;
   /** Sorting state */
   readonly sorting: SortingState<TData>;

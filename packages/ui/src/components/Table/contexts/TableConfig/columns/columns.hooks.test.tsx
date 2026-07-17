@@ -27,8 +27,18 @@ const createInitialColumnsState = () => {
       status: { key: 'status', label: 'Status' },
     },
     pinnedColumnOffsets: {
-      left: { id: 0 },
-      right: { actions: 0 },
+      actions: {
+        isFirstPinnedRight: true,
+        isLastPinnedLeft: false,
+        offset: 0,
+        side: 'right',
+      },
+      id: {
+        isFirstPinnedRight: false,
+        isLastPinnedLeft: true,
+        offset: 0,
+        side: 'left',
+      },
     },
     pinnedColumnPartition: {
       center: [{ key: 'status' }],
@@ -67,10 +77,12 @@ import { useGetColumns } from './selectors/useGetColumns.hook';
 import { useGetColumnSizing } from './selectors/useGetColumnSizing.hook';
 import { useGetColumnsSorting } from './selectors/useGetColumnsSorting.hook';
 import { useGetColumnVisibility } from './selectors/useGetColumnVisibility.hook';
+import { useGetColumnWidth } from './selectors/useGetColumnWidth.hook';
 import { useGetEffectiveColumns } from './selectors/useGetEffectiveColumns.hook';
 import { useGetNormalizedColumn } from './selectors/useGetNormalizedColumn.hook';
 import { useGetNormalizedColumnFilters } from './selectors/useGetNormalizedColumnFilters.hook';
 import { useGetNormalizedColumns } from './selectors/useGetNormalizedColumns.hook';
+import { useGetPinnedColumnInfo } from './selectors/useGetPinnedColumnInfo.hook';
 import { useGetPinnedColumnOffsets } from './selectors/useGetPinnedColumnOffsets.hook';
 import { useGetPinnedColumnPartition } from './selectors/useGetPinnedColumnPartition.hook';
 import { useGetStaticColumnKeys } from './selectors/useGetStaticColumnKeys.hook';
@@ -129,6 +141,10 @@ describe('TableConfig column hooks', () => {
       id: 120,
       status: 180,
     });
+    expect(renderHook(() => useGetColumnWidth('id')).result.current).toBe(120);
+    expect(
+      renderHook(() => useGetColumnWidth('actions')).result.current,
+    ).toBeUndefined();
     expect(renderHook(() => useGetColumnVisibility()).result.current).toEqual(
       new Set(['status']),
     );
@@ -159,9 +175,30 @@ describe('TableConfig column hooks', () => {
     expect(
       renderHook(() => useGetPinnedColumnOffsets()).result.current,
     ).toEqual({
-      left: { id: 0 },
-      right: { actions: 0 },
+      actions: {
+        isFirstPinnedRight: true,
+        isLastPinnedLeft: false,
+        offset: 0,
+        side: 'right',
+      },
+      id: {
+        isFirstPinnedRight: false,
+        isLastPinnedLeft: true,
+        offset: 0,
+        side: 'left',
+      },
     });
+    expect(
+      renderHook(() => useGetPinnedColumnInfo('id')).result.current,
+    ).toEqual({
+      isFirstPinnedRight: false,
+      isLastPinnedLeft: true,
+      offset: 0,
+      side: 'left',
+    });
+    expect(
+      renderHook(() => useGetPinnedColumnInfo('status')).result.current,
+    ).toBeUndefined();
     expect(renderHook(() => useGetStaticColumnKeys()).result.current).toEqual(
       new Set(['id']),
     );
