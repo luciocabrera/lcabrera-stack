@@ -27,6 +27,6 @@ across renders, so no external store or `useSyncExternalStore` is needed.
 
 ## Hook
 
-| Hook                 | Returns                   | Description |
+| Hook | Returns | Description |
 | -------------------- | ------------------------- | ----------- | -------------------------------- |
-| `useTableWrapperRef` | `RefObject<HTMLDivElement | null>`      | Ref to the table wrapper element |
+| `useTableWrapperRef` | `RefObject<HTMLDivElement | null>` | Ref to the table wrapper element |

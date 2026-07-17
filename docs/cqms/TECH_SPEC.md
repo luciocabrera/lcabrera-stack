@@ -313,10 +313,7 @@ Single function, two callers — this is what satisfies "not two divergent code 
 ```typescript
 type IngestReportArgs = {
   readonly scannerId:
-    | 'fallow'
-    | 'linter'
-    | 'code-smell-checker'
-    | 'code-smell-zen';
+    'fallow' | 'linter' | 'code-smell-checker' | 'code-smell-zen';
   readonly origin: 'ui_agent_sdk' | 'interactive_session' | 'ci';
   readonly localPath: string;
   readonly reportMarkdownPath: string;

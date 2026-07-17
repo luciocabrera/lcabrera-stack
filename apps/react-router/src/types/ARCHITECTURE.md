@@ -24,11 +24,7 @@ Defines the `ColumnFilter` discriminated union and all operator enums. Consumed 
 
 ```ts
 type ColumnFilter =
-  | BooleanFilter
-  | DateFilter
-  | NumberFilter
-  | SelectFilter
-  | TextFilter;
+  BooleanFilter | DateFilter | NumberFilter | SelectFilter | TextFilter;
 ```
 
 Discriminated on the `type` field:

@@ -449,8 +449,7 @@ type First = FirstParam<(name: string, age: number) => void>; // string
 ```typescript
 // API response helper
 type ApiResult<T> =
-  | { success: true; data: T }
-  | { success: false; error: string };
+  { success: true; data: T } | { success: false; error: string };
 
 // Extract data type from result
 type ExtractData<T> = T extends { success: true; data: infer D } ? D : never;
