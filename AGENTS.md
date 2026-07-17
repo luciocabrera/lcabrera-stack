@@ -119,6 +119,12 @@ Selection guideline:
 > them; it deliberately does not re-list everything, because the duplicate lists
 > are what drifted (they claimed 15 workspaces when there were 16). Add a
 > command → add it to COMMANDS.md in the same commit.
+>
+> **`vp run commands:verify` enforces that** (CI step in `check-safe.yml`): a new
+> root script that is undocumented, a documented command that no longer resolves,
+> a wrong per-workspace claim, a broken link, or a stale workspace count all fail
+> the build. So do not re-list commands here — a copy in this file is a copy the
+> checker does not police, which is exactly how the last set rotted.
 
 **Never use pnpm/npm/yarn directly.** All operations go through `vp`:
 

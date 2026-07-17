@@ -3,6 +3,13 @@
 **The canonical list of every command in this monorepo.** If a command is not
 here, it does not exist — and if you add one, add it here in the same commit.
 
+That is enforced, not a request: `vp run commands:verify` fails CI when a root
+script is undocumented, when this file names a command that no longer resolves,
+when a §5 per-workspace claim is wrong, when a link breaks, or when a workspace
+count is stale. Its ground truth is `vp run`'s own task list, so it sees all
+three task sources (§1). It cannot check prose — rationale still rots the
+old-fashioned way.
+
 This file is the _what_. The **why** — policy, rationale, and the rules that make
 a command mandatory — lives in [AGENTS.md](AGENTS.md); this file links out rather
 than restating it, so the reasoning has exactly one home too.
@@ -167,6 +174,7 @@ and reports trivially simple code as `critical`.
 
 | Command                      | Does                                        |
 | ---------------------------- | ------------------------------------------- |
+| `vp run commands:verify`     | check this file still matches reality       |
 | `vp run skills:validate`     | validate skill definitions                  |
 | `vp run skills:report`       | skills compliance report                    |
 | `vp run skills:source-audit` | source smell report + handoff bootstrap     |
@@ -185,24 +193,24 @@ and reports trivially simple code as `critical`.
 Beyond that, tasks are per-workspace. `build` and `test` are common but come from
 `vite.config.ts` rather than `scripts` in most workspaces (see §1).
 
-| Workspace                     | Package name                | Notable extra tasks                                                                |
-| ----------------------------- | --------------------------- | ---------------------------------------------------------------------------------- |
-| `apps/react-router`           | `vite-react-compiler`       | `typegen`, `test:ci`, `test:watch`, `preview`, `knip`, `audit:lighthouse{,:check}` |
-| `apps/admin_system`           | `admin-system`              | `typegen`                                                                          |
-| `apps/api-server`             | `car-sales-api`             | `seed`, `db:seed`, `start`                                                         |
-| `apps/api-server-fast`        | `car-sales-api-fast`        | `seed`, `db:seed`, `start`                                                         |
-| `apps/scan-orchestrator`      | `@repo/scan-orchestrator`   | `start`, `test:unit`, `test:coverage`                                              |
-| `apps/shared`                 | `api-shared`                | `build`, `test`                                                                    |
-| `packages/ui`                 | `@repo/ui`                  | `check:public-api`, `test:coverage`                                                |
-| `packages/data-access`        | `@repo/data-access`         | `test:coverage`                                                                    |
-| `packages/scan-ingestion`     | `@repo/scan-ingestion`      | `migrate`, `push`, `test:unit`, `test:coverage`                                    |
-| `packages/node-runtime`       | `@repo/node-runtime`        | `test:coverage`                                                                    |
-| `packages/agent-runner`       | `@repo/agent-runner`        | —                                                                                  |
-| `packages/ts-configs`         | `@repo/ts-configs`          | `generate`                                                                         |
-| `packages/eslint-local-rules` | `eslint-local-rules-shared` | `build`                                                                            |
-| `packages/plugins`            | `@repo/plugins`             | —                                                                                  |
-| `packages/utils`              | `@repo/utils`               | —                                                                                  |
-| `packages/vite-configs`       | `@repo/vite-configs`        | —                                                                                  |
+| Workspace                     | Package name                | Notable extra tasks                                                                                 |
+| ----------------------------- | --------------------------- | --------------------------------------------------------------------------------------------------- |
+| `apps/react-router`           | `vite-react-compiler`       | `typegen`, `test:ci`, `test:watch`, `preview`, `knip`, `audit:lighthouse`, `audit:lighthouse:check` |
+| `apps/admin_system`           | `admin-system`              | `typegen`                                                                                           |
+| `apps/api-server`             | `car-sales-api`             | `seed`, `db:seed`, `start`                                                                          |
+| `apps/api-server-fast`        | `car-sales-api-fast`        | `seed`, `db:seed`, `start`                                                                          |
+| `apps/scan-orchestrator`      | `@repo/scan-orchestrator`   | `start`, `test:unit`, `test:coverage`                                                               |
+| `apps/shared`                 | `api-shared`                | `build`, `test`                                                                                     |
+| `packages/ui`                 | `@repo/ui`                  | `check:public-api`, `test:coverage`                                                                 |
+| `packages/data-access`        | `@repo/data-access`         | `test:coverage`                                                                                     |
+| `packages/scan-ingestion`     | `@repo/scan-ingestion`      | `migrate`, `push`, `test:unit`, `test:coverage`                                                     |
+| `packages/node-runtime`       | `@repo/node-runtime`        | `test:coverage`                                                                                     |
+| `packages/agent-runner`       | `@repo/agent-runner`        | —                                                                                                   |
+| `packages/ts-configs`         | `@repo/ts-configs`          | `generate`                                                                                          |
+| `packages/eslint-local-rules` | `eslint-local-rules-shared` | `build`                                                                                             |
+| `packages/plugins`            | `@repo/plugins`             | —                                                                                                   |
+| `packages/utils`              | `@repo/utils`               | —                                                                                                   |
+| `packages/vite-configs`       | `@repo/vite-configs`        | —                                                                                                   |
 
 Notes on the non-obvious ones:
 

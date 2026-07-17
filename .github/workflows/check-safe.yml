@@ -73,6 +73,21 @@ jobs:
         # catches a violation that arrives via an unhooked push or --no-verify.
         run: vp run lint:biome:check
 
+      - name: COMMANDS.md is still true
+        id: commands_gate
+        # Every other claim this repo makes has a machine behind it — types,
+        # lint, format, dead code, tests. Documentation was the one class that
+        # failed nothing, and it rotted accordingly: seven undocumented root
+        # scripts, a README telling people to run `vp run seed` from the root
+        # (not a root script), an "all 15 workspaces" count that was 16, and a
+        # claudelint apparatus documented as working while the binary did not
+        # exist on npm at all.
+        #
+        # Ground truth is `vp run`'s own task list, so this sees tasks from all
+        # three sources (package.json scripts, vite.config.ts run.tasks, shared
+        # @repo/vite-configs factories) instead of re-implementing resolution.
+        run: vp run commands:verify
+
       - name: Write quality summary
         if: always()
         run: |
@@ -100,6 +115,12 @@ jobs:
             TYPECHECK_STATUS="❌ Failed"
           fi
 
+          if [[ "${{ steps.commands_gate.outcome }}" == "success" ]]; then
+            COMMANDS_STATUS="✅ Passed"
+          else
+            COMMANDS_STATUS="❌ Failed"
+          fi
+
           if [[ "${{ steps.preflight.outcome }}" == "success" ]]; then
             PREFLIGHT_STATUS="✅ Passed"
           else
@@ -117,6 +138,7 @@ jobs:
           echo "| Lint (Biome · react domain) | $BIOME_STATUS |" >> "$GITHUB_STEP_SUMMARY"
           echo "| TypeScript (tsgolint via vp check) | $CHECK_STATUS |" >> "$GITHUB_STEP_SUMMARY"
           echo "| TypeScript (tsc · every workspace) | $TYPECHECK_STATUS |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| COMMANDS.md accuracy | $COMMANDS_STATUS |" >> "$GITHUB_STEP_SUMMARY"
 
   fallow-audit:
     name: Fallow Audit (new-only gate)
