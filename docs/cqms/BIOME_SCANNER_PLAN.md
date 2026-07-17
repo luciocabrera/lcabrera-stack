@@ -68,8 +68,14 @@ Consequences for the schema, all confirmed against real output:
   and must widen to include `'LOW'`.)
 - Location is `location.start.{line,column}` / `location.end.{line,column}`.
 
-**Next migration number:** `0029` (highest present is `0028_api_tokens.sql`).
-Re-check before writing — others may have landed.
+**Migration number — do NOT assume `0028 + 1`.** The highest _present_ file is
+`0028_api_tokens.sql`, but `0029` is already **reserved by ADR-034** (pin runs to
+their snapshot — STATUS.md §3.4 says "live until `0029`" and "To build: migration
+`0029`"). That work is planned-but-unbuilt, so the file does not exist yet, but
+the number is spoken for. Take the next free number after whatever has landed when
+you resume (`0030` if ADR-034 shipped first, else coordinate) and **re-check
+STATUS.md §3.4 + open ADRs for other reservations** — planned migrations are
+tracked in prose, not on disk. This file refers to it as `00NN` below.
 
 **Postgres** runs locally on port 5434 (`vp run db:status`); verify the migration
 against it, not just by reading SQL.
@@ -82,7 +88,10 @@ The oxlint scanner is the closest template (Biome, like oxlint, has no
 suppression concept — unlike eslint's `suppressedMessages`). Every file below has
 an oxlint counterpart to copy from.
 
-### 1. Migration `packages/scan-ingestion/src/db/migrations/0029_biome_scanner.sql`
+### 1. Migration `packages/scan-ingestion/src/db/migrations/00NN_biome_scanner.sql`
+
+(`00NN` = next free number — see the migration-number note above; **not** `0029`,
+which ADR-034 holds.)
 
 - **Widen the CHECK** (the biting thing above):
   `ALTER TABLE cqms.lint_violations DROP CONSTRAINT <name>, ADD CONSTRAINT ... CHECK (source IN ('eslint','oxlint','biome'))`.
