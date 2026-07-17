@@ -47,12 +47,16 @@ workspace's `typecheck` script — where `packages/ui` gates its public API agai
 server-only `node:*` imports and the React Router apps regenerate route types.
 
 **When two linters disagree, fix the code — never silence one.** Three overlapping
-rule sets will contradict each other; the resolution is the form that satisfies
-all of them. Worked example: Biome's `noDoubleEquals` rejects `x == undefined`
-and eslint's `unicorn/no-null` rejects `x == null`, so only `x === undefined`
-passes both — but that is a _semantic_ change while the type still admits `null`,
-which means the real fix is dropping `null` from the type. That is what
-`unicorn/no-null` was asking for in the first place.
+rule sets will contradict each other, and **the form that silences both is not
+automatically correct — check it against the types first.**
+
+Worked example (`@repo/utils`'s `mergeArrays`, see
+[ADR-035](../../../../docs/cqms/decisions/ADR-035-biome-third-linter.md)): Biome's
+`noDoubleEquals` rejects `x == undefined`, eslint's `unicorn/no-null` rejects
+`x == null`. `x === undefined` passes both — and is wrong, because the type
+admits `null`, so strict equality silently stops matching it. The real fix came
+from the domain: arrays are always truthy even when empty, so `!x` means exactly
+nullish. Both engines satisfied, semantics intact, nothing suppressed.
 
 ## Fast Local Loop (While Building)
 

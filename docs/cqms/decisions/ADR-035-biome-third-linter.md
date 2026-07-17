@@ -92,16 +92,34 @@ sources.
 always to fix the code — never to silence one.** This is not hypothetical; it
 bit immediately:
 
-- Biome's `suspicious/noDoubleEquals` rejects `x == undefined` (it wants `===`).
-- eslint's `unicorn/no-null` rejects `x == null`.
-- So for a nullish check, **only `x === undefined` satisfies both.**
+`@repo/utils`'s `mergeArrays` needed a nullish check, and the two engines
+between them ruled out every idiomatic spelling of one:
 
-The trap: `=== undefined` is a _semantic_ change when the type still admits
-`null` (`readonly baseValue?: null | readonly T[]`) — strict equality stops
-matching `null`, so a function returns `[]` where it used to return `undefined`.
-The correct fix is to drop `null` from the type, which is what `unicorn/no-null`
-was asking for in the first place. Reaching for `// biome-ignore` would have
-preserved a `null` the repo's own conventions ban.
+- Biome's `suspicious/noDoubleEquals` rejects `baseValue == undefined` (it wants
+  `===`).
+- eslint's `unicorn/no-null` rejects `baseValue == null`.
+- `baseValue === undefined` satisfies both — **and is wrong**: the type admits
+  `null` (`readonly baseValue?: null | readonly T[]`), so strict equality stops
+  matching it and the function returns `[]` where it used to return `undefined`.
+
+The gate-green answer was the broken one. The resolution came from the domain
+instead: **arrays are always truthy, even when empty**, so `!baseValue` means
+exactly `null | undefined` and nothing else.
+
+```ts
+if (!baseValue && !overrideValue) {
+  return undefined;
+}
+```
+
+No loose `==` for Biome, no `null` named for eslint, semantics preserved, and no
+suppression in either engine. The comment above it in the source records why —
+because the next reader will otherwise "simplify" it back into one of the two
+rejected forms.
+
+The general lesson: when two engines contradict each other, the form that
+silences both is not automatically correct. Check it against the types before
+believing it.
 
 **Not a third CQMS scanner (yet).** ADR-019 gave `eslint` and `oxlint`
 independent scanner rows, master/detail tables, and runner scripts; the
