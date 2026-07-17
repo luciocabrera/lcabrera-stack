@@ -65,6 +65,10 @@ vi.mock(
   }),
 );
 
+vi.mock('@repo/ui/hooks/usePersistCookieAction.hook', () => ({
+  usePersistCookieAction: () => vi.fn(),
+}));
+
 import { useSetTableColumnSelectedKey } from './actions/useSetTableColumnSelectedKey.hook';
 import { useSetTableDrawersOpenState } from './actions/useSetTableDrawersOpenState.hook';
 import { useSetTableIsTableSettingsOpen } from './actions/useSetTableIsTableSettingsOpen.hook';

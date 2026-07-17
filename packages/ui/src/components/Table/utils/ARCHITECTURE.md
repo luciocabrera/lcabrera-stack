@@ -23,12 +23,10 @@ utils/
 ├── getPinnedColumnOffsets.util.ts                → Compute sticky offsets for pinned columns
 ├── getPinnedDerivedColumnsState.util.ts          → Build effective columns, groups, and pinned offsets
 ├── getPersistedUiState.util.ts                   → Extract the persisted meta UI slice from full table meta state
-├── persistTableMetaUiState.service.ts            → Effect: persist tab-scoped meta UI patch directly from mutation actions
 ├── getStaticColumnKeys.util.ts                   → Extract non-reorderable column keys
 ├── getStorageKey.util.ts                         → Build namespaced storage key
 ├── readPersistedStateFromCookie.util.ts          → SSR-safe cookie state read
 ├── readPersistedUiFlagsFromCookie.util.ts        → SSR-safe read of drawer open/pinned flags from cookie
-├── writePersistedUiFlagsToCookie.service.ts      → Effect: mirror drawer open/pinned flags to cookie (SSR seed)
 ├── resolveCrudRowId.util.ts                       → Resolve CRUD row id from the primary-key column(s)
 ├── resolveFetchMoreState.util.ts                 → Shared append/hasMore/total resolution for paginated fetch actions
 ├── resolvePrimaryKeyColumnKeys.util.ts            → Keys of isPrimaryKey columns (declaration order, excludes 'actions')
@@ -36,7 +34,6 @@ utils/
 ├── serializeStateSlice.util.ts                   → JSON serialize a state slice
 ├── splitColumnsByPinning.util.ts                 → Split columns into left/center/right groups
 ├── syncColumnOrderWithPinning.util.ts            → Pin-aware column reordering
-├── writeStateSlice.service.ts                    → Effect: write to cookie/localStorage
 ├── persistence.constants.ts                      → Storage key constants
 ├── persistence.types.ts                          → Persistence config types
 └── index.ts                                      → Barrel export for shared table utils
@@ -139,24 +136,30 @@ graph LR
     Read --> State["{ columnFilters, sorting, columnOrder, ... }"]
   end
 
-  subgraph "Write"
+  subgraph "Write (cookie via server action)"
     Slice["state slice"] --> Serialize["serializeStateSlice()"]
     Serialize --> KV["{ key, value }"]
-    KV --> Write["writeStateSlice()"]
-    Write --> Storage["cookie or localStorage"]
+    KV --> Build["buildColumnSizingCookieEntry() / buildUiFlagsCookieEntry()"]
+    Build --> Action["usePersistCookieAction()"]
+    Action --> Route["POST /_action/persist-cookie → Set-Cookie"]
   end
 ```
 
-| Function                       | Purpose                                                     |
-| ------------------------------ | ----------------------------------------------------------- |
-| readPersistedStateFromCookie   | Parse persisted state from cookies (SSR-safe)               |
-| arePersistedUiStatesEqual      | Legacy compare helper for persisted UI slices               |
-| getPersistedUiState            | Extract the persisted UI subset from `TableMetaState`       |
-| persistTableMetaUiState        | Persist merged meta UI patches to the cookie (SSR-readable) |
-| serializeStateSlice            | Convert a state slice to key/value payload                  |
-| readPersistedUiFlagsFromCookie | SSR-safe read of drawer open/pinned flags from cookie       |
-| writePersistedUiFlagsToCookie  | Mirror drawer open/pinned flags to a cookie for SSR seeding |
-| writeStateSlice                | Write to cookie or localStorage                             |
-| getStorageKey                  | Build storage key, optionally `appId`-scoped                |
+| Function                       | Purpose                                                                                       |
+| ------------------------------ | --------------------------------------------------------------------------------------------- |
+| readPersistedStateFromCookie   | Parse persisted state from cookies (SSR-safe)                                                 |
+| arePersistedUiStatesEqual      | Legacy compare helper for persisted UI slices                                                 |
+| getPersistedUiState            | Extract the persisted UI subset from `TableMetaState` (consumed by `buildUiFlagsCookieEntry`) |
+| serializeStateSlice            | Convert a state slice to a `{ key, value }` payload (consumed by the cookie-entry builders)   |
+| readPersistedUiFlagsFromCookie | SSR-safe read of drawer open/pinned flags from cookie                                         |
+| getStorageKey                  | Build storage key, optionally `appId`-scoped                                                  |
 
-`persistTableMetaUiState.service.ts` intentionally uses direct-file imports (not `utils/index.ts`) for persistence helpers to avoid barrel back-import cycles (ADR-007).
+Persistence **writes** no longer live in this `utils/` layer. Drawer-UI-flag and
+column-sizing persistence moved to action hooks —
+`usePersistTableUiFlagsAction` (`contexts/TableConfig/meta/actions/`) and
+`usePersistColumnSizingAction` (`contexts/TableConfig/columns/actions/hooks/`) —
+which build a cookie entry from the pure builders above
+(`buildUiFlagsCookieEntry` / `buildColumnSizingCookieEntry`) and submit it via
+`usePersistCookieAction` to the `/_action/persist-cookie` server action
+(`Set-Cookie`). The pure builders remain the seam these utils feed; the effect
+sits in the hook, so no `*.service.ts` writer is needed here.

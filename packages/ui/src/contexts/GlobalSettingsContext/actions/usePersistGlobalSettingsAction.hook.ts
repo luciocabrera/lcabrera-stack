@@ -1,40 +1,27 @@
 import type { GlobalSettingsState } from '@repo/ui/types/globalSettings.types';
 
-import { PERSIST_COOKIE_ACTION } from '@repo/ui/constants/globalSettings.constants';
+import { usePersistCookieAction } from '@repo/ui/hooks/usePersistCookieAction.hook';
+import { buildPersistCookieEntry } from '@repo/ui/routing/buildPersistCookieEntry.util';
 import {
   GLOBAL_SETTINGS_COOKIE_KEY,
   serializeGlobalSettingsForCookie,
 } from '@repo/ui/utils/globalSettings';
 import { getAppScopedCookieKey } from '@repo/ui/utils/storage';
-import { useFetcher, useLocation } from 'react-router';
 
 import { useGlobalSettingsContextValue } from '../useGlobalSettingsContextValue.hook';
 
 export const usePersistGlobalSettingsAction = () => {
   const { appId } = useGlobalSettingsContextValue();
-  const fetcher = useFetcher({ key: 'persist-global-settings' });
-  const location = useLocation();
+  const persistCookie = usePersistCookieAction({
+    fetcherKey: 'persist-global-settings',
+  });
 
   return (settings: GlobalSettingsState) => {
-    const currentUrl = `${location.pathname}${location.search}`;
-    const serializedSettings = serializeGlobalSettingsForCookie({ settings });
-
-    void fetcher.submit(
-      {
-        currentUrl,
-        entries: JSON.stringify([
-          {
-            key: getAppScopedCookieKey({
-              appId,
-              key: GLOBAL_SETTINGS_COOKIE_KEY,
-            }),
-            searchParamKey: '',
-            searchParamValue: '',
-            value: serializedSettings,
-          },
-        ]),
-      },
-      { action: PERSIST_COOKIE_ACTION, method: 'POST' },
-    );
+    persistCookie([
+      buildPersistCookieEntry({
+        key: getAppScopedCookieKey({ appId, key: GLOBAL_SETTINGS_COOKIE_KEY }),
+        value: serializeGlobalSettingsForCookie({ settings }),
+      }),
+    ]);
   };
 };

@@ -4,11 +4,10 @@ import { useTableConfigContextValue } from '@repo/ui/components/Table/contexts/T
 import { serializeStateSlice } from '@repo/ui/components/Table/utils';
 import {
   MAX_COOKIE_ENTRY_VALUE_LENGTH,
-  PERSIST_COOKIE_ACTION,
   PERSISTENCE_SIZE_WARNING,
 } from '@repo/ui/constants/globalSettings.constants';
 import { useNotifyAction } from '@repo/ui/contexts/NotificationContext/actions';
-import { useFetcher, useLocation } from 'react-router';
+import { usePersistCookieAction } from '@repo/ui/hooks/usePersistCookieAction.hook';
 
 /**
  * Shared persistence hook for the column actions — internal to `actions/`, not
@@ -28,13 +27,13 @@ import { useFetcher, useLocation } from 'react-router';
  */
 export const usePersistTableStateAction = () => {
   const { metaStore } = useTableConfigContextValue();
-  const fetcher = useFetcher({ key: 'persist-table-state' });
-  const location = useLocation();
+  const persistCookie = usePersistCookieAction({
+    fetcherKey: 'persist-table-state',
+  });
   const notify = useNotifyAction();
 
   return (args: TablePersistenceEntry | TablePersistenceEntry[]) => {
     const entries = Array.isArray(args) ? args : [args];
-    const currentUrl = `${location.pathname}${location.search}`;
     // Scope keys to the current app so tables in different apps that reuse the
     // same persistenceKey never share cookies / storage entries.
     const appId = metaStore.get()?.appId;
@@ -81,10 +80,7 @@ export const usePersistTableStateAction = () => {
 
     // Write to cookie via server action — the loader reads it back on the next
     // document request and seeds the store from it.
-    void fetcher.submit(
-      { currentUrl, entries: entriesString },
-      { action: PERSIST_COOKIE_ACTION, method: 'POST' },
-    );
+    persistCookie(serializedEntries);
 
     return true;
   };

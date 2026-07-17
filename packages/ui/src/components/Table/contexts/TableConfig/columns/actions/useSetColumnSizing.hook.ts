@@ -2,7 +2,8 @@ import { useTableConfigContextValue } from '@repo/ui/components/Table/contexts/T
 
 import type { ColumnSizingArgs } from './useSetColumnSizingWithoutSync.hook';
 
-import { persistColumnSizing, writeColumnSizing } from './utils';
+import { usePersistColumnSizingAction } from './hooks/usePersistColumnSizingAction.hook';
+import { writeColumnSizing } from './utils';
 
 /**
  * Applies a completed column resize: writes the new width and persists it.
@@ -16,10 +17,11 @@ import { persistColumnSizing, writeColumnSizing } from './utils';
  * per animation frame; see {@link useSetColumnSizingWithoutSync}.
  */
 export const useSetColumnSizing = <TData>() => {
-  const { columnsStore, metaStore } = useTableConfigContextValue<TData>();
+  const { columnsStore } = useTableConfigContextValue<TData>();
+  const persistColumnSizing = usePersistColumnSizingAction<TData>();
 
   return ({ columnKey, width }: ColumnSizingArgs<TData>) => {
     writeColumnSizing<TData>({ columnKey, columnsStore, width });
-    persistColumnSizing<TData>({ columnsStore, metaStore });
+    persistColumnSizing();
   };
 };

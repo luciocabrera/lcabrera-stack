@@ -18,7 +18,7 @@ type WriteColumnSizingArgs<TData> = {
  * to call one another; pass `width: undefined` to drop the column back to its
  * default.
  *
- * Persistence is deliberately not here — see `persistColumnSizing`.
+ * Persistence is deliberately not here — see `usePersistColumnSizingAction`.
  */
 export const writeColumnSizing = <TData>({
   columnKey,

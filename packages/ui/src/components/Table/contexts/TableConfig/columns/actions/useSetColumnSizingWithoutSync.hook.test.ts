@@ -40,10 +40,13 @@ vi.mock('./utils', async (importOriginal) => {
 
   return {
     ...actual,
-    persistColumnSizing: mockPersistColumnSizing,
     writeColumnSizing: mockWriteColumnSizing,
   };
 });
+
+vi.mock('./hooks/usePersistColumnSizingAction.hook', () => ({
+  usePersistColumnSizingAction: () => mockPersistColumnSizing,
+}));
 
 import { useSetColumnSizingWithoutSync } from './useSetColumnSizingWithoutSync.hook';
 

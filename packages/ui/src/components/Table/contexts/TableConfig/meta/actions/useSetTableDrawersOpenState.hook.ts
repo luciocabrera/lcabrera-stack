@@ -1,6 +1,5 @@
-import { persistTableMetaUiState } from '@repo/ui/components/Table/utils';
-
 import { useTableConfigContextValue } from '../../useTableConfigContextValue.hook';
+import { usePersistTableUiFlagsAction } from './usePersistTableUiFlagsAction.hook';
 import { getNextStatePatch } from './utils';
 
 type SetTableDrawersOpenStateArgs = {
@@ -10,6 +9,7 @@ type SetTableDrawersOpenStateArgs = {
 
 export const useSetTableDrawersOpenState = () => {
   const { metaStore } = useTableConfigContextValue();
+  const persistUiFlags = usePersistTableUiFlagsAction();
 
   return ({
     isColumnSettingsOpen,
@@ -22,7 +22,7 @@ export const useSetTableDrawersOpenState = () => {
       metaState,
     });
 
-    persistTableMetaUiState({
+    persistUiFlags({
       currentState: metaState,
       nextStatePatch,
     });

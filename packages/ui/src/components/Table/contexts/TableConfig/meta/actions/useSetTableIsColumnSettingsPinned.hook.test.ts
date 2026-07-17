@@ -17,6 +17,10 @@ vi.mock('../../useTableConfigContextValue.hook', () => ({
   }),
 }));
 
+vi.mock('./usePersistTableUiFlagsAction.hook', () => ({
+  usePersistTableUiFlagsAction: () => vi.fn(),
+}));
+
 import { useSetTableIsColumnSettingsPinned } from './useSetTableIsColumnSettingsPinned.hook';
 
 describe('useSetTableIsColumnSettingsPinned', () => {

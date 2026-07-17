@@ -1,27 +1,37 @@
+import type { TableMetaState } from '@repo/ui/components/Table/Table.types';
+
+import { buildUiFlagsCookieEntry } from '@repo/ui/components/Table/contexts/TableConfig/meta/actions/utils';
+import { buildSetCookieHeaders } from '@repo/ui/routing/buildSetCookieHeaders.util';
 import { describe, expect, it } from 'vitest';
 
 import type { PersistedUiState } from './persistence.types';
 
 import { readPersistedUiFlagsFromCookie } from './readPersistedUiFlagsFromCookie.util';
-import { writePersistedUiFlagsToCookie } from './writePersistedUiFlagsToCookie.service';
 
 /**
  * The writer and the reader each mock the storage layer in their own unit test,
  * so neither can see the encoding the other end applies. That seam is exactly
- * where the drawer flags broke: the writer URI-encoded a payload `writeToCookie`
- * then encoded again, and the reader's single decode left it unparseable — so
- * the loader silently SSR'd the drawer closed and it popped open at hydration.
+ * where the drawer flags broke: the writer URI-encoded a payload the cookie
+ * layer then encoded again, and the reader's single decode left it unparseable
+ * — so the loader silently SSR'd the drawer closed and it popped open at
+ * hydration.
  *
- * This exercises the real pair over a real Set-Cookie header. No mocks.
+ * This exercises the real production pair — `buildUiFlagsCookieEntry` feeds
+ * `buildSetCookieHeaders` (the same path `persistCookie.action` takes) — over a
+ * real Set-Cookie header. No mocks.
  */
 const captureCookieHeader = (uiFlags: PersistedUiState) => {
-  const headers = new Headers();
+  const entry = buildUiFlagsCookieEntry({
+    currentState: {
+      appId: 'react-router',
+      persistenceKey: 'orders',
+    } as Partial<TableMetaState>,
+    nextStatePatch: uiFlags,
+  });
 
-  writePersistedUiFlagsToCookie({
-    appId: 'react-router',
-    headers,
-    persistenceKey: 'orders',
-    uiFlags,
+  const headers = buildSetCookieHeaders({
+    entries: entry ? [entry] : [],
+    expiresAt: new Date('2100-01-01T00:00:00.000Z'),
   });
 
   const setCookie = headers.get('Set-Cookie') ?? '';

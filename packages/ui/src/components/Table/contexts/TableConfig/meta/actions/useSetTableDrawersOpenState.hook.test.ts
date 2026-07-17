@@ -8,7 +8,7 @@ import { useSetTableDrawersOpenState } from './useSetTableDrawersOpenState.hook'
 const {
   getMetaState,
   mockUseTableConfigContextValue,
-  persistTableMetaUiStateMock,
+  persistUiFlagsMock,
   setMetaState,
 } = vi.hoisted(() => {
   let metaState = {
@@ -24,29 +24,23 @@ const {
       metaState = { ...metaState, ...value };
     }),
   };
-  const persistTableMetaUiStateMock = vi.fn();
+  const persistUiFlagsMock = vi.fn();
 
   return {
     getMetaState: () => metaState,
     mockUseTableConfigContextValue: () => ({
       metaStore: mockMetaStore,
     }),
-    persistTableMetaUiStateMock,
+    persistUiFlagsMock,
     setMetaState: (nextState: typeof metaState) => {
       metaState = nextState;
     },
   };
 });
 
-vi.mock('@repo/ui/components/Table/utils', async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import('@repo/ui/components/Table/utils')>();
-
-  return {
-    ...actual,
-    persistTableMetaUiState: persistTableMetaUiStateMock,
-  };
-});
+vi.mock('./usePersistTableUiFlagsAction.hook', () => ({
+  usePersistTableUiFlagsAction: () => persistUiFlagsMock,
+}));
 
 vi.mock('../../useTableConfigContextValue.hook', () => ({
   useTableConfigContextValue: mockUseTableConfigContextValue,
@@ -54,7 +48,7 @@ vi.mock('../../useTableConfigContextValue.hook', () => ({
 
 describe('useSetTableDrawersOpenState', () => {
   beforeEach(() => {
-    persistTableMetaUiStateMock.mockReset();
+    persistUiFlagsMock.mockReset();
     setMetaState({
       isColumnSettingsOpen: false,
       isTableSettingsOpen: false,
@@ -76,7 +70,7 @@ describe('useSetTableDrawersOpenState', () => {
     expect(getMetaState().isColumnSettingsOpen).toBe(true);
     expect(getMetaState().isTableSettingsOpen).toBe(false);
     expect(getMetaState().wasTableSettingsOpenBeforeColumnSettings).toBe(false);
-    expect(persistTableMetaUiStateMock).toHaveBeenCalledWith({
+    expect(persistUiFlagsMock).toHaveBeenCalledWith({
       currentState: {
         isColumnSettingsOpen: false,
         isTableSettingsOpen: false,

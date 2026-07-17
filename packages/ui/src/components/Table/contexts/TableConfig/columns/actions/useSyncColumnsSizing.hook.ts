@@ -1,6 +1,4 @@
-import { useTableConfigContextValue } from '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
-
-import { persistColumnSizing } from './utils';
+import { usePersistColumnSizingAction } from './hooks/usePersistColumnSizingAction.hook';
 
 /**
  * Persists the column widths currently in the store, without changing any.
@@ -11,9 +9,9 @@ import { persistColumnSizing } from './utils';
  * {@link useSetColumnSizing} instead.
  */
 export const useSyncColumnsSizing = <TData>() => {
-  const { columnsStore, metaStore } = useTableConfigContextValue<TData>();
+  const persistColumnSizing = usePersistColumnSizingAction<TData>();
 
   return () => {
-    persistColumnSizing<TData>({ columnsStore, metaStore });
+    persistColumnSizing();
   };
 };

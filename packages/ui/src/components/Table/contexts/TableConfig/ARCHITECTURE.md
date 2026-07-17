@@ -19,13 +19,14 @@ TableConfig/
 │   │
 │   ├── actions/                                 → Public API: every hook here is an executable action, all barrel-exported
 │   │   ├── hooks/                               → Internal to actions/ — shared hooks, never barrel-exported
-│   │   │   └── usePersistTableStateAction.hook.ts → Cookie persistence (server action) used by six actions
+│   │   │   ├── usePersistTableStateAction.hook.ts → Cookie persistence (server action) used by six actions
+│   │   │   └── usePersistColumnSizingAction.hook.ts → Reads the store + submits the current widths via usePersistCookieAction (server action)
 │   │   ├── utils/buildPersistencePayload.util.ts       → Shared persistence-entry builder for batch settings hooks
 │   │   ├── utils/resolveBatchColumnSettingsUpdate.util.ts → Build next derived column config slices for one batch column update
 │   │   ├── utils/resolveBatchTableSettingsUpdate.util.ts → Build next derived column config slices for one table-wide settings update
 │   │   ├── utils/commitPinningAndOrderUpdate.util.ts → Shared persist+store commit helper for pinning actions
 │   │   ├── utils/commitResolvedVisibilityState.util.ts → Shared persist+store commit helper for visibility actions
-│   │   ├── utils/persistColumnSizing.util.ts     → Shared: persist the stored widths to the cookie
+│   │   ├── utils/buildColumnSizingCookieEntry.util.ts → Pure: build the columnSizing cookie entry (serialize widths, scoped by appId + persistenceKey)
 │   │   ├── utils/resolveColumnPinningUpdate.util.ts  → Build next pinning state + synced order for one pinning change
 │   │   ├── utils/resolveColumnSizingUpdate.util.ts   → Build next sizing map + pinned offsets for one column resize
 │   │   ├── utils/resolveColumnVisibilityUpdate.util.ts → Build next columnVisibility Set for one column show/hide
@@ -219,17 +220,17 @@ state aligned with source-of-truth column state.
 
 The two batch settings hooks now share two focused pure helpers instead of each inlining their derived-view and persistence-array construction.
 
-| Utility                            | Location                  | Purpose                                                                                |
-| ---------------------------------- | ------------------------- | -------------------------------------------------------------------------------------- |
-| `deriveColumnViewState`            | `components/Table/utils/` | Compose `normalizedColumns` with `getPinnedDerivedColumnsState()` output               |
-| `buildPersistencePayload`          | `columns/actions/utils/`  | Build the persistence entry array for batch settings updates                           |
-| `getColumnSettingsNextStatePatch`  | `components/Table/utils/` | Build the persisted meta patch after applying column settings                          |
-| `getHasQueryChanged`               | `components/Table/utils/` | Compare current vs next filters/sorting to decide whether query revalidation is needed |
-| `getIsTableSettingsOpen`           | `components/Table/utils/` | Restore the table-settings drawer when column settings borrowed its open state         |
-| `resolveBatchColumnSettingsUpdate` | `columns/actions/utils/`  | Compose the next per-column batch update from shared sort/filter/size/pin resolvers    |
-| `resolveBatchTableSettingsUpdate`  | `columns/actions/utils/`  | Compose the next table-wide settings update from incoming settings plus derived slices |
-| `writeColumnSizing`                | `columns/actions/utils/`  | Write one column's width to the store and recompute pinned offsets                     |
-| `persistColumnSizing`              | `columns/actions/utils/`  | Persist the widths currently in the store to the cookie (the loader reads it back)     |
+| Utility                            | Location                  | Purpose                                                                                       |
+| ---------------------------------- | ------------------------- | --------------------------------------------------------------------------------------------- |
+| `deriveColumnViewState`            | `components/Table/utils/` | Compose `normalizedColumns` with `getPinnedDerivedColumnsState()` output                      |
+| `buildPersistencePayload`          | `columns/actions/utils/`  | Build the persistence entry array for batch settings updates                                  |
+| `getColumnSettingsNextStatePatch`  | `components/Table/utils/` | Build the persisted meta patch after applying column settings                                 |
+| `getHasQueryChanged`               | `components/Table/utils/` | Compare current vs next filters/sorting to decide whether query revalidation is needed        |
+| `getIsTableSettingsOpen`           | `components/Table/utils/` | Restore the table-settings drawer when column settings borrowed its open state                |
+| `resolveBatchColumnSettingsUpdate` | `columns/actions/utils/`  | Compose the next per-column batch update from shared sort/filter/size/pin resolvers           |
+| `resolveBatchTableSettingsUpdate`  | `columns/actions/utils/`  | Compose the next table-wide settings update from incoming settings plus derived slices        |
+| `writeColumnSizing`                | `columns/actions/utils/`  | Write one column's width to the store and recompute pinned offsets                            |
+| `buildColumnSizingCookieEntry`     | `columns/actions/utils/`  | Pure: build the `columnSizing` cookie entry from the stored widths (the loader reads it back) |
 
 ## How Actions Share Logic
 
@@ -244,18 +245,22 @@ collaborator, like `persistTableState`) **as arguments** rather than reaching fo
 context themselves. `commitResolvedPinningState` is the reference example; the
 three sizing actions follow it:
 
-| Action                          | Composition                                 |
-| ------------------------------- | ------------------------------------------- |
-| `useSetColumnSizing`            | `writeColumnSizing` + `persistColumnSizing` |
-| `useSetColumnSizingWithoutSync` | `writeColumnSizing`                         |
-| `useSyncColumnsSizing`          | `persistColumnSizing`                       |
+| Action                          | Composition                                          |
+| ------------------------------- | ---------------------------------------------------- |
+| `useSetColumnSizing`            | `writeColumnSizing` + `usePersistColumnSizingAction` |
+| `useSetColumnSizingWithoutSync` | `writeColumnSizing`                                  |
+| `useSyncColumnsSizing`          | `usePersistColumnSizingAction`                       |
 
 Each grabs its stores from context once and delegates; none of them imports
 another action. That is what keeps `useSetColumnSizing` a single call for its
 consumers without stacking actions on top of one another.
 
-`usePersistTableStateAction` (`actions/hooks/`) is the shared-hook case: six
-actions need it, nothing outside `actions/` does. It previously sat in
+`usePersistTableStateAction` and `usePersistColumnSizingAction`
+(`actions/hooks/`) are the shared-hook cases: actions inside this context need
+them, nothing outside `actions/` does. `usePersistColumnSizingAction` reads the
+store and submits the current widths through `usePersistCookieAction`, so the
+three sizing actions compose it the same way six column actions compose
+`usePersistTableStateAction`. `usePersistTableStateAction` previously sat in
 `Table/hooks/`, which forced every action to import the hooks barrel and closed
 an `actions → hooks → actions` import cycle. Nothing under `contexts/` imports
 `Table/hooks/` now, so the dependency runs one way only and the cycle is
@@ -267,11 +272,11 @@ Every persisted slice (`columnSizing`, `columnOrder`, `columnPinning`,
 `columnVisibility`, `sorting`, `columnFilters`, and the drawer's UI state) is
 written to a **cookie** and to nothing else:
 
-| Written by                   | Writes                     | Read back by                                         |
-| ---------------------------- | -------------------------- | ---------------------------------------------------- |
-| `usePersistTableStateAction` | cookie (via server action) | the loader — `readTableLoaderStateFromRequest` (SSR) |
-| `persistColumnSizing`        | cookie (`document.cookie`) | the loader — same                                    |
-| `persistTableMetaUiState`    | cookie (`document.cookie`) | the loader — `readPersistedUiFlagsFromCookie`        |
+| Written by                     | Writes                     | Read back by                                         |
+| ------------------------------ | -------------------------- | ---------------------------------------------------- |
+| `usePersistTableStateAction`   | cookie (via server action) | the loader — `readTableLoaderStateFromRequest` (SSR) |
+| `usePersistColumnSizingAction` | cookie (via server action) | the loader — same                                    |
+| `usePersistTableUiFlagsAction` | cookie (via server action) | the loader — `readPersistedUiFlagsFromCookie`        |
 
 **Why one channel, not two.** The cookie is the only thing SSR can read, and both
 stores seed exclusively from what the loader passes down. So the server's markup
@@ -350,9 +355,10 @@ Supports both single entries and batch submissions. Each entry specifies:
 ## Meta Actions
 
 Persisted meta UI fields are mutation-owned: each action that changes drawer UI
-state calls `persistTableMetaUiState()` before committing its
-`metaStore.set(...)` patch. This keeps the cookie aligned without a
-subscription effect in the provider.
+state submits the update through `usePersistTableUiFlagsAction()` (which POSTs to
+the `/_action/persist-cookie` server action for the `Set-Cookie`) before
+committing its `metaStore.set(...)` patch. This keeps the cookie aligned without
+a subscription effect in the provider.
 
 | Hook                                   | Writes To   | Description                                                                 |
 | -------------------------------------- | ----------- | --------------------------------------------------------------------------- |

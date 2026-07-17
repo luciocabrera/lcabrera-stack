@@ -14,7 +14,8 @@ type SerializeStateSliceArgs = {
  * Serialize a table state slice for storage.
  * Returns the storage key and JSON-serialized value string.
  *
- * Shared by both writeStateSlice (direct write) and server action persistence.
+ * Shared by the column-sizing and table-state cookie writes, all of which
+ * persist through the `/_action/persist-cookie` server action.
  */
 export const serializeStateSlice = ({
   appId,

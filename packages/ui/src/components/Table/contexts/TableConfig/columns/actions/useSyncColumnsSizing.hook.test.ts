@@ -10,7 +10,6 @@ const createInitialColumnsState = () => ({
 
 const {
   mockColumnsStore,
-  mockMetaStore,
   mockUseTableConfigContextValue,
   resetMocks,
   setColumnsState,
@@ -19,9 +18,8 @@ const {
   persistenceKey: 'orders-table',
 });
 
-const { mockPersistColumnSizing, mockWriteColumnSizing } = vi.hoisted(() => ({
+const { mockPersistColumnSizing } = vi.hoisted(() => ({
   mockPersistColumnSizing: vi.fn(),
-  mockWriteColumnSizing: vi.fn(),
 }));
 
 vi.mock(
@@ -31,15 +29,9 @@ vi.mock(
   }),
 );
 
-vi.mock('./utils', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('./utils')>();
-
-  return {
-    ...actual,
-    persistColumnSizing: mockPersistColumnSizing,
-    writeColumnSizing: mockWriteColumnSizing,
-  };
-});
+vi.mock('./hooks/usePersistColumnSizingAction.hook', () => ({
+  usePersistColumnSizingAction: () => mockPersistColumnSizing,
+}));
 
 import { useSyncColumnsSizing } from './useSyncColumnsSizing.hook';
 
@@ -50,7 +42,7 @@ describe('useSyncColumnsSizing', () => {
     vi.clearAllMocks();
   });
 
-  it('persists the stored widths through the shared util', () => {
+  it('persists the stored widths through the column-sizing action', () => {
     const { result } = renderHook(() =>
       useSyncColumnsSizing<{ readonly name: string }>(),
     );
@@ -59,10 +51,7 @@ describe('useSyncColumnsSizing', () => {
       result.current();
     });
 
-    expect(mockPersistColumnSizing).toHaveBeenCalledWith({
-      columnsStore: mockColumnsStore,
-      metaStore: mockMetaStore,
-    });
+    expect(mockPersistColumnSizing).toHaveBeenCalledTimes(1);
   });
 
   it('changes no width of its own', () => {
@@ -74,7 +63,6 @@ describe('useSyncColumnsSizing', () => {
       result.current();
     });
 
-    expect(mockWriteColumnSizing).not.toHaveBeenCalled();
     expect(mockColumnsStore.set).not.toHaveBeenCalled();
   });
 });

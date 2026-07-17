@@ -174,9 +174,10 @@ graph LR
   Decision -->|Yes| Revalidate["redirect + loader revalidation"]
   Decision -->|No| Stable["204 response, no revalidation"]
 
-  MetaChange["meta UI mutation"] --> MetaAction["persistTableMetaUiState()"]
+  MetaChange["meta UI mutation"] --> MetaAction["usePersistTableUiFlagsAction()"]
   MetaAction --> MetaSession["sessionStorage write"]
-  MetaAction --> MetaFlagsCookie["-uiFlags cookie (open/pinned) for SSR seed"]
+  MetaAction --> MetaRoute["POST /_action/persist-cookie"]
+  MetaRoute --> MetaFlagsCookie["-uiFlags Set-Cookie (open/pinned) for SSR seed"]
 
   Load["Page load"] --> CookieRead["readPersistedStateFromCookie() + readPersistedUiFlagsFromCookie()"]
   CookieRead --> Init["Provider initial state (columns + drawer flags)"]

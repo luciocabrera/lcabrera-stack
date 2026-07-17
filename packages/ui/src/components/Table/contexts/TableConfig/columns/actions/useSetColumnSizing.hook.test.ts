@@ -15,7 +15,6 @@ const createInitialColumnsState = () => ({
 
 const {
   mockColumnsStore,
-  mockMetaStore,
   mockUseTableConfigContextValue,
   resetMocks,
   setColumnsState,
@@ -41,10 +40,13 @@ vi.mock('./utils', async (importOriginal) => {
 
   return {
     ...actual,
-    persistColumnSizing: mockPersistColumnSizing,
     writeColumnSizing: mockWriteColumnSizing,
   };
 });
+
+vi.mock('./hooks/usePersistColumnSizingAction.hook', () => ({
+  usePersistColumnSizingAction: () => mockPersistColumnSizing,
+}));
 
 import { useSetColumnSizing } from './useSetColumnSizing.hook';
 
@@ -70,10 +72,7 @@ describe('useSetColumnSizing', () => {
       columnsStore: mockColumnsStore,
       width: 220,
     });
-    expect(mockPersistColumnSizing).toHaveBeenCalledWith({
-      columnsStore: mockColumnsStore,
-      metaStore: mockMetaStore,
-    });
+    expect(mockPersistColumnSizing).toHaveBeenCalledTimes(1);
   });
 
   it('persists a reset to the default width too', () => {

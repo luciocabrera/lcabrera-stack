@@ -7,7 +7,6 @@ export { getIsTableSettingsOpen } from './getIsTableSettingsOpen.util';
 export { getNormalizedColumns } from './getNormalizedColumns.util';
 export { getPinnedColumnOffsets } from './getPinnedColumnOffsets.util';
 export { getPinnedDerivedColumnsState } from './getPinnedDerivedColumnsState.util';
-export { persistTableMetaUiState } from './persistTableMetaUiState.service';
 export { readPersistedStateFromCookie } from './readPersistedStateFromCookie.util';
 export { readPersistedUiFlagsFromCookie } from './readPersistedUiFlagsFromCookie.util';
 export { resolveColumnWidthBounds } from './resolveColumnWidthBounds.util';
@@ -15,4 +14,3 @@ export { resolvePrimaryKeyColumnKeys } from './resolvePrimaryKeyColumnKeys.util'
 export { resolveTableActionsColumn } from './resolveTableActionsColumn.util';
 export { serializeStateSlice } from './serializeStateSlice.util';
 export { syncColumnOrderWithPinning } from './syncColumnOrderWithPinning.util';
-export { writeStateSlice } from './writeStateSlice.service';

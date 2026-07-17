@@ -8,7 +8,7 @@ const {
   columnStore,
   metaStore,
   mockGetTableColumnDrawerState,
-  persistTableMetaUiStateMock,
+  persistUiFlagsMock,
 } = vi.hoisted(() => ({
   columnsStore: {
     get: vi.fn(() => ({ columns: [{ key: 'status', label: 'Status' }] })),
@@ -32,18 +32,15 @@ const {
     columnSizing: undefined,
     sorting: undefined,
   })),
-  persistTableMetaUiStateMock: vi.fn(),
+  persistUiFlagsMock: vi.fn(),
 }));
 
-vi.mock('@repo/ui/components/Table/utils', async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import('@repo/ui/components/Table/utils')>();
-
-  return {
-    ...actual,
-    persistTableMetaUiState: persistTableMetaUiStateMock,
-  };
-});
+vi.mock(
+  '@repo/ui/components/Table/contexts/TableConfig/meta/actions/usePersistTableUiFlagsAction.hook',
+  () => ({
+    usePersistTableUiFlagsAction: () => persistUiFlagsMock,
+  }),
+);
 
 vi.mock(
   '@repo/ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
@@ -83,7 +80,7 @@ import { useResetAllColumnDrawerSettings } from './useResetAllColumnDrawerSettin
 
 describe('useResetAllColumnDrawerSettings', () => {
   beforeEach(() => {
-    persistTableMetaUiStateMock.mockReset();
+    persistUiFlagsMock.mockReset();
     columnStore.get.mockReset();
     columnStore.get.mockReturnValue({ columnKey: 'status' });
     columnStore.set.mockReset();
@@ -114,7 +111,7 @@ describe('useResetAllColumnDrawerSettings', () => {
       result.current(true);
     });
 
-    expect(persistTableMetaUiStateMock).toHaveBeenCalledWith({
+    expect(persistUiFlagsMock).toHaveBeenCalledWith({
       currentState: {
         isTableSettingsOpen: false,
         persistenceKey: 'orders',

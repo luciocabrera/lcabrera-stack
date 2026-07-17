@@ -1,15 +1,15 @@
-import { persistTableMetaUiState } from '@repo/ui/components/Table/utils';
-
 import { useTableConfigContextValue } from '../../useTableConfigContextValue.hook';
+import { usePersistTableUiFlagsAction } from './usePersistTableUiFlagsAction.hook';
 
 export const useSetTableSettingsSelectedTab = () => {
   const { metaStore } = useTableConfigContextValue();
+  const persistUiFlags = usePersistTableUiFlagsAction();
 
   return (tableSettingsSelectedTab: string) => {
     const metaState = metaStore.get();
     const nextStatePatch = { tableSettingsSelectedTab };
 
-    persistTableMetaUiState({
+    persistUiFlags({
       currentState: metaState,
       nextStatePatch,
     });
