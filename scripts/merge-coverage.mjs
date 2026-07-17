@@ -125,7 +125,9 @@ const main = async () => {
   );
 };
 
-main().catch((error) => {
+try {
+  await main();
+} catch (error) {
   process.stderr.write(`\n✖ ${error.message}\n`);
   process.exitCode = 1;
-});
+}
