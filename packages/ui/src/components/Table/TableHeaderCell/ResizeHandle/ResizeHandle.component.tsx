@@ -1,4 +1,9 @@
+import {
+  useGetColumnWidth,
+  useGetNormalizedColumn,
+} from '@repo/ui/components/Table/contexts/TableConfig/columns/selectors';
 import { useColumnResize } from '@repo/ui/components/Table/hooks';
+import { DEFAULT_MIN_COLUMN_WIDTH } from '@repo/ui/components/Table/Table.constants';
 import * as stylex from '@stylexjs/stylex';
 
 import type { ResizeHandleProps } from './ResizeHandle.types';
@@ -11,17 +16,26 @@ import { resizeHandleStyles } from './ResizeHandle.stylex';
  * value, it does not invoke a command.
  *
  * `useColumnResize` owns every interaction and all the store wiring; this
- * component only spreads what it returns onto the host element.
+ * component self-connects its own width and bounds from the store (columnKey +
+ * columnLabel are all it takes) and only spreads what the hook returns onto the
+ * host element.
  */
 export const ResizeHandle = <TData,>({
   columnKey,
   columnLabel,
-  currentWidth,
-  maxWidth,
-  minWidth,
 }: ResizeHandleProps<TData>) => {
+  const { maxWidth, minWidth } = useGetNormalizedColumn<TData>(columnKey);
+  const storedWidth = useGetColumnWidth<TData>(columnKey);
+  const effectiveMinWidth = minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
+  const currentWidth = storedWidth ?? effectiveMinWidth;
+
   const { bounds, isResizing, onDoubleClick, onKeyDown, onMouseDown, width } =
-    useColumnResize<TData>({ columnKey, currentWidth, maxWidth, minWidth });
+    useColumnResize<TData>({
+      columnKey,
+      currentWidth,
+      maxWidth,
+      minWidth: effectiveMinWidth,
+    });
 
   return (
     <div

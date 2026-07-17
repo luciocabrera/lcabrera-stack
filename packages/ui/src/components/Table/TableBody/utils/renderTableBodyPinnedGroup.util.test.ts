@@ -1,15 +1,15 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { renderTableBodyColumnGroup } from './renderTableBodyColumnGroup.util';
+import { renderTableBodyPinnedGroup } from './renderTableBodyPinnedGroup.util';
 
-describe('renderTableBodyColumnGroup', () => {
+describe('renderTableBodyPinnedGroup', () => {
   it('maps each column in order using shared row data', () => {
     const row = { amount: 10, name: 'A' };
     const renderCell = vi.fn(
       ({ col }: { readonly col: string }) => `cell:${col}`,
     );
 
-    const result = renderTableBodyColumnGroup({
+    const result = renderTableBodyPinnedGroup({
       columns: ['name', 'amount'],
       renderCell,
       row,
@@ -21,7 +21,7 @@ describe('renderTableBodyColumnGroup', () => {
   });
 
   it('returns an empty array for an empty column group', () => {
-    const result = renderTableBodyColumnGroup({
+    const result = renderTableBodyPinnedGroup({
       columns: [],
       renderCell: vi.fn(),
       row: {},
@@ -37,7 +37,7 @@ describe('renderTableBodyColumnGroup', () => {
       ({ col }: { readonly col: (typeof columns)[number] }) => col.key,
     );
 
-    const result = renderTableBodyColumnGroup({
+    const result = renderTableBodyPinnedGroup({
       columns,
       renderCell,
       row,

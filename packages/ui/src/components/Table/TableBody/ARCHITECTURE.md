@@ -56,7 +56,7 @@ TableBody/
   ├── createRenderTableBodyCell.util.ts    → Creates stable cell renderer bound to sizing/offsets/loading
   ├── generatePlaceholderData.util.ts → Creates skeleton row objects
   ├── getTotalVisibleColumnCount.util.ts → Computes spacer-row colSpan
-  ├── renderTableBodyColumnGroup.util.ts → Maps a column group to rendered cells
+  ├── renderTableBodyPinnedGroup.util.ts → Maps one pinning partition to rendered cells
   └── index.ts                        → Utility barrel exports
 ```
 
@@ -109,7 +109,7 @@ graph TD
 Column rendering is now owned by `TableBodyRows`. See
 `TableBodyRows/ARCHITECTURE.md` for the column rendering flow diagram.
 
-Column groups and pinned offsets are derived state stored in `columnsStore`.
+The pinned column partition and pinned offsets are derived state stored in `columnsStore`.
 They are recomputed by store actions whenever `effectiveColumns`,
 `columnPinning`, or `columnSizing` change, so `TableBodyRows` reads them
 directly without any per-render calculation.
@@ -123,7 +123,7 @@ directly without any per-render calculation.
 ## Cell Rendering
 
 Cell rendering is delegated to `TableBodyRows` using the
-`createRenderTableBodyCell` and `renderTableBodyColumnGroup` utilities:
+`createRenderTableBodyCell` and `renderTableBodyPinnedGroup` utilities:
 
 - **Custom render**: If `column.render` is defined, passes children to `<TableBodyCell>`
 - **Default render**: Passes `value`, `dataType`, `format`, `label` as props
@@ -133,4 +133,4 @@ Cell rendering is delegated to `TableBodyRows` using the
 - Each cell receives `pinInfo` from the store's `pinnedColumnOffsets` slice
 - Width is resolved from `columnSizing[col.key]` or `col.minWidth`
 - `isLoadingState` is forwarded through the cell descriptor to each `<TableBodyCell>`
-- **SpacerRow** computes its own `colSpan` from `useGetColumnGroups()`
+- **SpacerRow** computes its own `colSpan` from `useGetPinnedColumnPartition()`

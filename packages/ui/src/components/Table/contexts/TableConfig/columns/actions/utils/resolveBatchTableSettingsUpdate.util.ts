@@ -29,10 +29,10 @@ export const resolveBatchTableSettingsUpdate = <TData>({
   settings,
 }: ResolveBatchTableSettingsUpdateArgs<TData>) => {
   const {
-    columnGroups,
     effectiveColumns,
     normalizedColumns,
     pinnedColumnOffsets,
+    pinnedColumnPartition,
   } = deriveColumnViewState<TData>({
     columnOrder: settings.columnOrder,
     columnPinning: settings.columnPinning,
@@ -44,9 +44,9 @@ export const resolveBatchTableSettingsUpdate = <TData>({
 
   return {
     ...settings,
-    columnGroups,
     effectiveColumns,
     normalizedColumns,
     pinnedColumnOffsets,
+    pinnedColumnPartition,
   };
 };

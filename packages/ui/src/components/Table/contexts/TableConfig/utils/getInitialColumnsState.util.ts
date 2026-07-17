@@ -59,10 +59,10 @@ export const getInitialColumnsState = <TData extends Record<string, unknown>>({
   const nextColumnVisibility = columnVisibility;
 
   const {
-    columnGroups,
     effectiveColumns,
     normalizedColumns,
     pinnedColumnOffsets,
+    pinnedColumnPartition,
     staticKeys,
   } = deriveColumnViewState<TData>({
     columnOrder: nextColumnOrder,
@@ -75,7 +75,6 @@ export const getInitialColumnsState = <TData extends Record<string, unknown>>({
 
   return {
     columnFilters,
-    columnGroups,
     columnOrder: nextColumnOrder,
     columnPinning: nextColumnPinning,
     columns: resolvedColumns,
@@ -84,6 +83,7 @@ export const getInitialColumnsState = <TData extends Record<string, unknown>>({
     effectiveColumns,
     normalizedColumns,
     pinnedColumnOffsets,
+    pinnedColumnPartition,
     sorting,
     staticKeys,
   };

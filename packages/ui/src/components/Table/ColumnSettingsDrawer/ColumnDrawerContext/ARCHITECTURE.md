@@ -22,8 +22,8 @@ ColumnDrawerContext/
 │   ├── useResetColumnSorting              → Reset sorting from table
 │   ├── useSetColumnFilter                 → Set filter value
 │   ├── useSetColumnPinning                → Set pinning side
-│   ├── useSetColumnSizing                 → Set width
-│   └── useSetColumnSorting                → Set sort direction
+│   ├── useSetColumnSorting                → Set sort direction
+│   └── useSetDraftColumnSizing            → Stage width in the drawer draft
 │
 ├── selectors/                             → 3 hooks that read from the store
 │   ├── useGetColumnFilter
@@ -98,7 +98,7 @@ Actions are hooks that return a callback. Each callback reads the store, validat
 | Hook                              | Reads From                          | Writes To                  | Side Effect                                                                        |
 | --------------------------------- | ----------------------------------- | -------------------------- | ---------------------------------------------------------------------------------- |
 | `useSetColumnFilter`              | —                                   | `columnStore`              | —                                                                                  |
-| `useSetColumnSizing`              | —                                   | `columnStore`              | —                                                                                  |
+| `useSetDraftColumnSizing`         | —                                   | `columnStore`              | Stages width in the drawer draft; committed on Accept, never live                  |
 | `useSetColumnSorting`             | —                                   | `columnStore`              | —                                                                                  |
 | `useSetColumnPinning`             | —                                   | `columnStore`              | —                                                                                  |
 | `useClearAllColumnDrawerSettings` | `columnStore`, `metaStore`          | `columnStore`, `metaStore` | Sets all to `undefined`; when closing, persists and commits the shared close patch |
@@ -114,7 +114,7 @@ Actions are hooks that return a callback. Each callback reads the store, validat
 graph TD
   subgraph "Set (write value directly)"
     S1["useSetColumnFilter(filter)"]
-    S2["useSetColumnSizing(width)"]
+    S2["useSetDraftColumnSizing(width)"]
     S3["useSetColumnSorting(dir)"]
     S4["useSetColumnPinning(side)"]
   end

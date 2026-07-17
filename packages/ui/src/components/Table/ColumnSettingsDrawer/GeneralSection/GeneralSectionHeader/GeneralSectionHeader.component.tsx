@@ -11,7 +11,7 @@ import * as stylex from '@stylexjs/stylex';
 
 import type { GeneralSectionHeaderProps } from './GeneralSectionHeader.types';
 
-import { useSetColumnSizing } from '../../ColumnDrawerContext/actions';
+import { useSetDraftColumnSizing } from '../../ColumnDrawerContext/actions';
 import { resolvePresetColumnWidth } from '../utils/resolvePresetColumnWidth.util';
 import { styles } from './GeneralSectionHeader.stylex';
 
@@ -27,7 +27,7 @@ export const GeneralSectionHeader = <TData,>({
   isBusy = false,
 }: GeneralSectionHeaderProps<TData>) => {
   const column = useGetNormalizedColumn<TData>(columnKey);
-  const setColumnSizing = useSetColumnSizing();
+  const setDraftColumnSizing = useSetDraftColumnSizing();
 
   const {
     handleToggleDefault,
@@ -36,7 +36,7 @@ export const GeneralSectionHeader = <TData,>({
     selectedPreset,
   } = useColumnWidthPresetToggle({
     onSelectPreset: (preset) =>
-      setColumnSizing(
+      setDraftColumnSizing(
         resolvePresetColumnWidth({
           maxWidth: column.maxWidth,
           minWidth: column.minWidth,

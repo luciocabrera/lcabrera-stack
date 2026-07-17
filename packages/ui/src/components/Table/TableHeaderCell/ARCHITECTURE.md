@@ -10,7 +10,7 @@ by inline icon buttons.
 ```text
 TableHeaderCell/
 ├── TableHeaderCell.component.tsx        → <th> rendering label + ResizeHandle + TableHeaderActionsMenu
-├── TableHeaderCell.types.ts             → TableHeaderCellProps (columnKey, pinInfo)
+├── TableHeaderCell.types.ts             → TableHeaderCellProps (columnKey, hasSettings)
 ├── TableHeaderCell.stylex.ts            → Pinned positioning, base cell layout, shimmer
 ├── TableHeaderCell.test.tsx             → Unit coverage for label/resize/menu wiring
 ├── index.ts                             → Barrel export
@@ -45,20 +45,20 @@ TableHeaderCell/
 
 ## Props
 
-| Prop           | Type                | Description                      |
-| -------------- | ------------------- | -------------------------------- |
-| `columnKey`    | `DataKey<TData>`    | Column identifier                |
-| `hasSettings`  | `boolean`           | Enables the "Manage Column" item |
-| `pinInfo`      | `PinnedColumnInfo?` | Pin side, offset, shadow flags   |
-| `customStylex` | `StyleXStyles?`     | Override styles                  |
+| Prop           | Type             | Description                      |
+| -------------- | ---------------- | -------------------------------- |
+| `columnKey`    | `DataKey<TData>` | Column identifier                |
+| `hasSettings`  | `boolean`        | Enables the "Manage Column" item |
+| `customStylex` | `StyleXStyles?`  | Override styles                  |
 
 ## Context Dependencies
 
 ```mermaid
 graph LR
-  subgraph "Reads (selectors)"
-    S1["useGetColumnSizing"] --> THC
+  subgraph "Reads (per-column selectors)"
+    S1["useGetColumnWidth(key)"] --> THC
     S2["useGetNormalizedColumn(key)"] --> THC
+    S3["useGetPinnedColumnInfo(key)"] --> THC
   end
 
   THC["TableHeaderCell"]
@@ -66,6 +66,11 @@ graph LR
   THC --> RH["ResizeHandle"]
   THC --> Menu["TableHeaderActionsMenu"]
 ```
+
+Every subscription here is **per-column** (a number, one normalized column, one
+pinned-offset entry), so a width change to one column re-renders only that
+column's cell — not the whole header row. `ResizeHandle` self-connects the same
+way, so `TableHeaderCell` drills nothing into it (see below).
 
 ## Actions Menu
 
@@ -123,10 +128,14 @@ trigger) when the column has no sortable/pinnable/settings affordance at all.
 **`useColumnResize` is the single owner of resize interaction and store wiring.**
 `ResizeHandle` calls it once and spreads what it returns (`onMouseDown`,
 `onKeyDown`, `onDoubleClick`, plus the `width`/`bounds` the splitter announces)
-onto the host element. The component triggers **no actions of its own** and
-derives nothing — if you find yourself reaching for a sizing action inside it,
-the behaviour belongs in the hook instead. `TableHeaderCell` only passes
-`columnKey`, `columnLabel`, `currentWidth`, `maxWidth`, `minWidth`.
+onto the host element. The component triggers **no actions of its own** — if you
+find yourself reaching for a sizing action inside it, the behaviour belongs in
+the hook instead. It is **self-connected**: `TableHeaderCell` passes only
+`columnKey` + `columnLabel`, and `ResizeHandle` reads its own bounds
+(`useGetNormalizedColumn`) and width (`useGetColumnWidth`) from the store. This
+is what keeps the width subscription at the leaf — drilling `currentWidth` down
+would force the parent cell to subscribe to width coarsely and re-render the
+whole header row on every drag frame.
 
 Internally `useColumnResize` delegates the pointer gesture to the private
 `useColumnDragSession` (RAF-throttled drag, document listeners, body cursor) and

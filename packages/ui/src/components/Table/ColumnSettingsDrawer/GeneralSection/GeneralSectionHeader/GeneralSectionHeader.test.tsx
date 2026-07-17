@@ -63,7 +63,7 @@ vi.mock(
 );
 
 vi.mock('../../ColumnDrawerContext/actions', () => ({
-  useSetColumnSizing: () => setColumnSizingMock,
+  useSetDraftColumnSizing: () => setColumnSizingMock,
 }));
 
 import { GeneralSectionHeader } from './GeneralSectionHeader.component';

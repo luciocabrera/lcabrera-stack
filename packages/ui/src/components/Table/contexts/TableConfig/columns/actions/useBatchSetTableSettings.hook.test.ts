@@ -67,11 +67,6 @@ const {
       columnFilters: {
         name: { operator: 'contains', type: 'text', value: 'ali' },
       },
-      columnGroups: {
-        centerCols: [{ key: 'age', label: 'Age' }],
-        leftPinnedCols: [{ key: 'id', label: 'ID' }],
-        rightPinnedCols: [{ key: 'name', label: 'Name' }],
-      },
       columnOrder: ['id', 'age', 'name'],
       columnPinning: { left: ['id'], right: ['name'] },
       columnSizing: {
@@ -103,6 +98,11 @@ const {
           offset: 0,
           side: 'left',
         },
+      },
+      pinnedColumnPartition: {
+        centerCols: [{ key: 'age', label: 'Age' }],
+        leftPinnedCols: [{ key: 'id', label: 'ID' }],
+        rightPinnedCols: [{ key: 'name', label: 'Name' }],
       },
       sorting: [{ columnKey: 'name', direction: 'asc' }],
     })),

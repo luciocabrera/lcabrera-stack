@@ -1,10 +1,10 @@
 import {
-  useGetColumnGroups,
   useGetColumnSizing,
   useGetPinnedColumnOffsets,
+  useGetPinnedColumnPartition,
 } from '@repo/ui/components/Table/contexts/TableConfig/columns/selectors';
 import { createRenderTableBodyCell } from '@repo/ui/components/Table/TableBody/utils/createRenderTableBodyCell.util';
-import { renderTableBodyColumnGroup } from '@repo/ui/components/Table/TableBody/utils/renderTableBodyColumnGroup.util';
+import { renderTableBodyPinnedGroup } from '@repo/ui/components/Table/TableBody/utils/renderTableBodyPinnedGroup.util';
 import { TableRow } from '@repo/ui/components/Table/TableRow';
 
 import type { TableBodyRowsProps } from './TableBodyRows.types';
@@ -17,7 +17,8 @@ export const TableBodyRows = <TData extends Record<string, unknown>>({
   startIndex,
 }: TableBodyRowsProps) => {
   const data = useGetTableData<TData>();
-  const { centerCols, leftPinnedCols, rightPinnedCols } = useGetColumnGroups();
+  const { centerCols, leftPinnedCols, rightPinnedCols } =
+    useGetPinnedColumnPartition();
   const columnSizing = useGetColumnSizing<TData>();
   const pinnedOffsets = useGetPinnedColumnOffsets();
 
@@ -36,17 +37,17 @@ export const TableBodyRows = <TData extends Record<string, unknown>>({
 
         return (
           <TableRow key={rowIndex}>
-            {renderTableBodyColumnGroup({
+            {renderTableBodyPinnedGroup({
               columns: leftPinnedCols,
               renderCell: renderBodyCell,
               row,
             })}
-            {renderTableBodyColumnGroup({
+            {renderTableBodyPinnedGroup({
               columns: centerCols,
               renderCell: renderBodyCell,
               row,
             })}
-            {renderTableBodyColumnGroup({
+            {renderTableBodyPinnedGroup({
               columns: rightPinnedCols,
               renderCell: renderBodyCell,
               row,

@@ -2,7 +2,7 @@
 
 Invisible `<tr>` used by virtualization to pad above/below visible rows,
 maintaining correct scroll height without rendering off-screen rows.
-The component reads column groups from the store to compute its own `colSpan`.
+The component reads the pinned column partition from the store to compute its own `colSpan`.
 
 ## File Structure
 
@@ -22,9 +22,9 @@ SpacerRow/
 
 ## Context Dependencies
 
-| Selector             | Purpose                                              |
-| -------------------- | ---------------------------------------------------- |
-| `useGetColumnGroups` | Computes `colSpan` from left + center + right counts |
+| Selector                      | Purpose                                              |
+| ----------------------------- | ---------------------------------------------------- |
+| `useGetPinnedColumnPartition` | Computes `colSpan` from left + center + right counts |
 
 ## Usage
 

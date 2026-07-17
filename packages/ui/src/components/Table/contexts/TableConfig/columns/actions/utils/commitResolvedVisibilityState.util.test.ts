@@ -4,11 +4,6 @@ import { commitResolvedVisibilityState } from './commitResolvedVisibilityState.u
 
 const { mockGetPinnedDerivedColumnsState } = vi.hoisted(() => ({
   mockGetPinnedDerivedColumnsState: vi.fn(() => ({
-    columnGroups: {
-      centerCols: [{ key: 'name', label: 'Name' }],
-      leftPinnedCols: [{ key: 'id', label: 'ID' }],
-      rightPinnedCols: [],
-    },
     effectiveColumns: [{ key: 'id', label: 'ID' }],
     pinnedColumnOffsets: {
       id: {
@@ -17,6 +12,11 @@ const { mockGetPinnedDerivedColumnsState } = vi.hoisted(() => ({
         offset: 0,
         side: 'left',
       },
+    },
+    pinnedColumnPartition: {
+      centerCols: [{ key: 'name', label: 'Name' }],
+      leftPinnedCols: [{ key: 'id', label: 'ID' }],
+      rightPinnedCols: [],
     },
   })),
 }));
@@ -70,11 +70,6 @@ describe('commitResolvedVisibilityState', () => {
     ]);
 
     expect(columnsStore.set).toHaveBeenCalledWith({
-      columnGroups: {
-        centerCols: [{ key: 'name', label: 'Name' }],
-        leftPinnedCols: [{ key: 'id', label: 'ID' }],
-        rightPinnedCols: [],
-      },
       columnVisibility,
       effectiveColumns: [{ key: 'id', label: 'ID' }],
       pinnedColumnOffsets: {
@@ -84,6 +79,11 @@ describe('commitResolvedVisibilityState', () => {
           offset: 0,
           side: 'left',
         },
+      },
+      pinnedColumnPartition: {
+        centerCols: [{ key: 'name', label: 'Name' }],
+        leftPinnedCols: [{ key: 'id', label: 'ID' }],
+        rightPinnedCols: [],
       },
     });
 

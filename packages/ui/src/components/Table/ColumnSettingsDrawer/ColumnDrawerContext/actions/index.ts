@@ -6,5 +6,5 @@ export { useResetColumnPinning } from './useResetColumnPinning.hook';
 export { useResetColumnSorting } from './useResetColumnSorting.hook';
 export { useSetColumnFilter } from './useSetColumnFilter.hook';
 export { useSetColumnPinning } from './useSetColumnPinning.hook';
-export { useSetColumnSizing } from './useSetColumnSizing.hook';
 export { useSetColumnSorting } from './useSetColumnSorting.hook';
+export { useSetDraftColumnSizing } from './useSetDraftColumnSizing.hook';

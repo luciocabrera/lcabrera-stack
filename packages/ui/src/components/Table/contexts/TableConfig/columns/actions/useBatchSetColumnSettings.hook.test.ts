@@ -56,11 +56,6 @@ const {
       columnFilters: {
         name: { operator: 'contains', type: 'text', value: 'ali' },
       },
-      columnGroups: {
-        centerCols: [{ key: 'age', label: 'Age' }],
-        leftPinnedCols: [{ key: 'id', label: 'ID' }],
-        rightPinnedCols: [{ key: 'name', label: 'Name' }],
-      },
       columnOrder: ['id', 'age', 'name'],
       columnPinning: { left: ['id'], right: ['name'] },
       columnSizing: { actions: 0, age: 80, id: 100, name: 220 },
@@ -86,6 +81,11 @@ const {
           offset: 0,
           side: 'right',
         },
+      },
+      pinnedColumnPartition: {
+        centerCols: [{ key: 'age', label: 'Age' }],
+        leftPinnedCols: [{ key: 'id', label: 'ID' }],
+        rightPinnedCols: [{ key: 'name', label: 'Name' }],
       },
       sorting: [{ columnKey: 'name', direction: 'desc' }],
     })),
@@ -309,11 +309,6 @@ describe('useBatchSetColumnSettings', () => {
     // Mock resolved update with same filters/sorting (UI-only changes)
     mockResolveBatchColumnSettingsUpdate.mockReturnValue({
       columnFilters: {},
-      columnGroups: {
-        centerCols: [{ key: 'age', label: 'Age' }],
-        leftPinnedCols: [{ key: 'id', label: 'ID' }],
-        rightPinnedCols: [{ key: 'name', label: 'Name' }],
-      },
       columnOrder: ['id', 'age', 'name'], // Changed order
       columnPinning: { left: ['id'], right: ['name'] }, // Changed pinning
       columnSizing: { actions: 0, age: 80, id: 100, name: 220 }, // Changed size
@@ -339,6 +334,11 @@ describe('useBatchSetColumnSettings', () => {
           offset: 0,
           side: 'right',
         },
+      },
+      pinnedColumnPartition: {
+        centerCols: [{ key: 'age', label: 'Age' }],
+        leftPinnedCols: [{ key: 'id', label: 'ID' }],
+        rightPinnedCols: [{ key: 'name', label: 'Name' }],
       },
       sorting: [], // Same as current state (empty)
     } as unknown as Parameters<
@@ -379,11 +379,6 @@ describe('useBatchSetColumnSettings', () => {
           value: 'test',
         },
       },
-      columnGroups: {
-        centerCols: [{ key: 'age', label: 'Age' }],
-        leftPinnedCols: [{ key: 'id', label: 'ID' }],
-        rightPinnedCols: [{ key: 'name', label: 'Name' }],
-      },
       columnOrder: ['id', 'age', 'name'],
       columnPinning: { left: ['id'], right: ['name'] },
       columnSizing: { actions: 0, age: 80, id: 100, name: 220 },
@@ -409,6 +404,11 @@ describe('useBatchSetColumnSettings', () => {
           offset: 0,
           side: 'right',
         },
+      },
+      pinnedColumnPartition: {
+        centerCols: [{ key: 'age', label: 'Age' }],
+        leftPinnedCols: [{ key: 'id', label: 'ID' }],
+        rightPinnedCols: [{ key: 'name', label: 'Name' }],
       },
       sorting: [{ columnKey: 'name', direction: 'desc' }], // Different from current state (was empty)
     });

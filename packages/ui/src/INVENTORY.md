@@ -150,13 +150,13 @@ Covers `packages/ui` only. API-layer utilities (`api.util.ts`, `buildPaginatedQu
 
 ### `src/components/Table/TableBody/utils/`
 
-| Function                       | Location                                                                | Description                                                           |
-| ------------------------------ | ----------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| `buildTableBodyCellDescriptor` | `components/Table/TableBody/utils/buildTableBodyCellDescriptor.util.ts` | Derives render-ready body-cell descriptor data from column + row      |
-| `createRenderTableBodyCell`    | `components/Table/TableBody/utils/createRenderTableBodyCell.util.ts`    | Creates bound row-cell renderer from sizing/pinning + descriptor util |
-| `generatePlaceholderData`      | `components/Table/TableBody/utils/generatePlaceholderData.util.ts`      | Builds empty placeholder rows keyed by visible columns                |
-| `getTotalVisibleColumnCount`   | `components/Table/TableBody/utils/getTotalVisibleColumnCount.util.ts`   | Counts pinned, center, and spacer cells for spacer-row `colSpan`      |
-| `renderTableBodyColumnGroup`   | `components/Table/TableBody/utils/renderTableBodyColumnGroup.util.ts`   | Maps a column group through the shared body-cell renderer             |
+| Function                       | Location                                                                | Description                                                                          |
+| ------------------------------ | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `buildTableBodyCellDescriptor` | `components/Table/TableBody/utils/buildTableBodyCellDescriptor.util.ts` | Derives render-ready body-cell descriptor data from column + row                     |
+| `createRenderTableBodyCell`    | `components/Table/TableBody/utils/createRenderTableBodyCell.util.ts`    | Creates bound row-cell renderer from sizing/pinning + descriptor util                |
+| `generatePlaceholderData`      | `components/Table/TableBody/utils/generatePlaceholderData.util.ts`      | Builds empty placeholder rows keyed by visible columns                               |
+| `getTotalVisibleColumnCount`   | `components/Table/TableBody/utils/getTotalVisibleColumnCount.util.ts`   | Counts pinned, center, and spacer cells for spacer-row `colSpan`                     |
+| `renderTableBodyPinnedGroup`   | `components/Table/TableBody/utils/renderTableBodyPinnedGroup.util.ts`   | Maps one pinning partition (left/center/right) through the shared body-cell renderer |
 
 ### `src/components/Table/utils/`
 

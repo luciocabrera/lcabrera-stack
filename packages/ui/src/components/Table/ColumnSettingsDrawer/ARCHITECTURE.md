@@ -39,8 +39,8 @@ ColumnSettingsDrawer/
 │   │   ├── useResetColumnSorting            → Reset sorting from table
 │   │   ├── useSetColumnFilter               → Set filter value
 │   │   ├── useSetColumnPinning              → Set pinning side
-│   │   ├── useSetColumnSizing               → Set width
-│   │   └── useSetColumnSorting              → Set sort direction
+│   │   ├── useSetColumnSorting              → Set sort direction
+│   │   └── useSetDraftColumnSizing          → Stage width in the drawer draft
 │   │
 │   ├── selectors/                         → 3 selector hooks (read drawer state)
 │   │   ├── useGetColumnFilter

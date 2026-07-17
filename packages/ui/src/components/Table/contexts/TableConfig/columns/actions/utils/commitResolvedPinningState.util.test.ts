@@ -6,11 +6,6 @@ const { mockCommitPinningAndOrderUpdate, mockGetPinnedDerivedColumnsState } =
   vi.hoisted(() => ({
     mockCommitPinningAndOrderUpdate: vi.fn(() => true),
     mockGetPinnedDerivedColumnsState: vi.fn(() => ({
-      columnGroups: {
-        centerCols: [{ key: 'name', label: 'Name' }],
-        leftPinnedCols: [{ key: 'id', label: 'ID' }],
-        rightPinnedCols: [],
-      },
       effectiveColumns: [
         { key: 'id', label: 'ID' },
         { key: 'name', label: 'Name' },
@@ -22,6 +17,11 @@ const { mockCommitPinningAndOrderUpdate, mockGetPinnedDerivedColumnsState } =
           offset: 0,
           side: 'left',
         },
+      },
+      pinnedColumnPartition: {
+        centerCols: [{ key: 'name', label: 'Name' }],
+        leftPinnedCols: [{ key: 'id', label: 'ID' }],
+        rightPinnedCols: [],
       },
     })),
   }));
@@ -77,11 +77,6 @@ describe('commitResolvedPinningState', () => {
     });
 
     expect(mockCommitPinningAndOrderUpdate).toHaveBeenCalledWith({
-      columnGroups: {
-        centerCols: [{ key: 'name', label: 'Name' }],
-        leftPinnedCols: [{ key: 'id', label: 'ID' }],
-        rightPinnedCols: [],
-      },
       columnsStore,
       effectiveColumns: [
         { key: 'id', label: 'ID' },
@@ -98,6 +93,11 @@ describe('commitResolvedPinningState', () => {
           offset: 0,
           side: 'left',
         },
+      },
+      pinnedColumnPartition: {
+        centerCols: [{ key: 'name', label: 'Name' }],
+        leftPinnedCols: [{ key: 'id', label: 'ID' }],
+        rightPinnedCols: [],
       },
     });
     expect(metaStore.set).toHaveBeenCalledWith({ drawersSyncNonce: 8 });

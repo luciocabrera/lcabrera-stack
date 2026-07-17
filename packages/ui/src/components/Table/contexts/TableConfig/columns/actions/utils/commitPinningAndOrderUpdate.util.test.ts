@@ -1,8 +1,8 @@
 import type {
-  ColumnGroupsState,
   ColumnOrderState,
   ColumnPinningState,
   PinnedColumnOffsetsState,
+  PinnedColumnPartitionState,
   TableColumn,
 } from '@repo/ui/components/Table/Table.types';
 
@@ -30,7 +30,7 @@ describe('commitPinningAndOrderUpdate', () => {
       { key: 'name', label: 'Name' },
       { key: 'age', label: 'Age' },
     ];
-    const columnGroups: ColumnGroupsState<TestRow> = {
+    const pinnedColumnPartition: PinnedColumnPartitionState<TestRow> = {
       centerCols: [{ key: 'name', label: 'Name' }],
       leftPinnedCols: [{ key: 'id', label: 'ID' }],
       rightPinnedCols: [{ key: 'age', label: 'Age' }],
@@ -51,7 +51,6 @@ describe('commitPinningAndOrderUpdate', () => {
     };
 
     commitPinningAndOrderUpdate<TestRow>({
-      columnGroups,
       columnsStore,
       effectiveColumns,
       newColumnOrder,
@@ -59,6 +58,7 @@ describe('commitPinningAndOrderUpdate', () => {
       persistenceKey: 'orders-table',
       persistTableState,
       pinnedColumnOffsets,
+      pinnedColumnPartition,
     });
 
     expect(persistTableState).toHaveBeenCalledWith([
@@ -74,11 +74,11 @@ describe('commitPinningAndOrderUpdate', () => {
       },
     ]);
     expect(columnsStore.set).toHaveBeenCalledWith({
-      columnGroups,
       columnOrder: newColumnOrder,
       columnPinning: newPinning,
       effectiveColumns,
       pinnedColumnOffsets,
+      pinnedColumnPartition,
     });
   });
 });

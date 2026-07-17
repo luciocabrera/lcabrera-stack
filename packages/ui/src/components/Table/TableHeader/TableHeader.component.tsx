@@ -1,7 +1,4 @@
-import {
-  useGetColumnGroups,
-  useGetPinnedColumnOffsets,
-} from '@repo/ui/components/Table/contexts/TableConfig/columns/selectors';
+import { useGetPinnedColumnPartition } from '@repo/ui/components/Table/contexts/TableConfig/columns/selectors';
 import {
   useGetTableIsLoading,
   useGetTableIsLoadingMore,
@@ -18,8 +15,8 @@ export const TableHeader = <TData extends Record<string, unknown>, TResponse>({
   customStylex,
   ...rest
 }: TableHeaderProps<TData, TResponse>) => {
-  const pinnedOffsets = useGetPinnedColumnOffsets();
-  const { centerCols, leftPinnedCols, rightPinnedCols } = useGetColumnGroups();
+  const { centerCols, leftPinnedCols, rightPinnedCols } =
+    useGetPinnedColumnPartition();
   const isLoading = useGetTableIsLoading();
   const isLoadingMore = useGetTableIsLoadingMore();
   const isLoadingState = isLoading || isLoadingMore;
@@ -37,7 +34,6 @@ export const TableHeader = <TData extends Record<string, unknown>, TResponse>({
             hasSettings={!col.isHeaderHidden}
             isLoadingState={isLoadingState}
             key={col.key}
-            pinInfo={pinnedOffsets[col.key]}
           />
         ))}
         {centerCols.map((col) => (
@@ -46,7 +42,6 @@ export const TableHeader = <TData extends Record<string, unknown>, TResponse>({
             hasSettings={!col.isHeaderHidden}
             isLoadingState={isLoadingState}
             key={col.key}
-            pinInfo={pinnedOffsets[col.key]}
           />
         ))}
         {rightPinnedCols.map((col) => (
@@ -55,7 +50,6 @@ export const TableHeader = <TData extends Record<string, unknown>, TResponse>({
             hasSettings={!col.isHeaderHidden}
             isLoadingState={isLoadingState}
             key={col.key}
-            pinInfo={pinnedOffsets[col.key]}
           />
         ))}
       </TableRow>

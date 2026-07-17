@@ -19,11 +19,6 @@ type Row = {
 
 const { mockDeriveColumnViewState } = vi.hoisted(() => ({
   mockDeriveColumnViewState: vi.fn(() => ({
-    columnGroups: {
-      centerCols: [{ key: 'age', label: 'Age' }],
-      leftPinnedCols: [{ key: 'id', label: 'ID' }],
-      rightPinnedCols: [{ key: 'name', label: 'Name' }],
-    },
     effectiveColumns: [
       { key: 'id', label: 'ID' },
       { key: 'age', label: 'Age' },
@@ -46,6 +41,11 @@ const { mockDeriveColumnViewState } = vi.hoisted(() => ({
         offset: 0,
         side: 'left',
       },
+    },
+    pinnedColumnPartition: {
+      centerCols: [{ key: 'age', label: 'Age' }],
+      leftPinnedCols: [{ key: 'id', label: 'ID' }],
+      rightPinnedCols: [{ key: 'name', label: 'Name' }],
     },
   })),
 }));
@@ -103,11 +103,6 @@ describe('resolveBatchTableSettingsUpdate', () => {
 
     expect(result).toEqual({
       ...settings,
-      columnGroups: {
-        centerCols: [{ key: 'age', label: 'Age' }],
-        leftPinnedCols: [{ key: 'id', label: 'ID' }],
-        rightPinnedCols: [{ key: 'name', label: 'Name' }],
-      },
       effectiveColumns: [
         { key: 'id', label: 'ID' },
         { key: 'age', label: 'Age' },
@@ -130,6 +125,11 @@ describe('resolveBatchTableSettingsUpdate', () => {
           offset: 0,
           side: 'left',
         },
+      },
+      pinnedColumnPartition: {
+        centerCols: [{ key: 'age', label: 'Age' }],
+        leftPinnedCols: [{ key: 'id', label: 'ID' }],
+        rightPinnedCols: [{ key: 'name', label: 'Name' }],
       },
     });
   });
