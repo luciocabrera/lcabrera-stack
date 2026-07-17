@@ -57,18 +57,31 @@ The mandatory post-change sequence. Canonical definition and rationale:
 the [`quality-gate-workflow` skill](.github/skills/quality-gate-workflow/SKILL.md)
 and [AGENTS.md → Post-Change Quality Gate](AGENTS.md#post-change-quality-gate).
 
-| #   | Command                    | Pass                                        |
-| --- | -------------------------- | ------------------------------------------- |
-| 1   | `vp fmt .`                 | Oxfmt                                       |
-| 2   | `vp lint .`                | Oxlint                                      |
-| 3   | `vp run lint:eslint:check` | eslint custom rules — **not** in `vp check` |
-| 4   | `vp check`                 | fmt + Oxlint + **tsgolint** type pass       |
-| 5   | `vp run typecheck`         | real **tsc** — **not** the same as step 4   |
-| 6   | `vp run test`              | vitest                                      |
+| #   | Command                    | Pass                                          |
+| --- | -------------------------- | --------------------------------------------- |
+| 1   | `vp fmt .`                 | Oxfmt                                         |
+| 2   | `vp lint .`                | Oxlint                                        |
+| 3   | `vp run lint:eslint:check` | eslint custom rules — **not** in `vp check`   |
+| 4   | `vp run lint:biome:check`  | Biome — **not** in `vp check` (run from root) |
+| 5   | `vp check`                 | fmt + Oxlint + **tsgolint** type pass         |
+| 6   | `vp run typecheck`         | real **tsc** — **not** the same as step 5     |
+| 7   | `vp run test`              | vitest                                        |
 
-Steps 3 and 5 are the ones that get skipped, and neither is redundant — see
+Steps 3, 4 and 6 are the ones that get skipped, and none is redundant — see
 [AGENTS.md §4](AGENTS.md#4-toolchain--vite-vp). From the root, `vp run check:safe`
 chains the whole thing the way CI does.
+
+Step 4 is a **root-only, repo-wide** pass (like Oxlint, unlike the per-workspace
+eslint fan-out): `biome.jsonc` at the root scopes the react domain to the three
+React workspaces via `overrides`, so there is nothing to fan out. Autofix with
+`vp run lint:biome`.
+
+The pre-commit hook runs Biome too, but **not through a script**: the `staged`
+block in the root `vite.config.ts` invokes `biome lint` directly, because Vite+
+appends the staged filenames to that command and an intermediate script would
+have to reconcile those paths with Biome's own `--staged` detection. There is
+deliberately no `lint:biome:staged` — one existed, was invoked by nothing, and
+claimed to be what the hook ran.
 
 ---
 
@@ -79,19 +92,21 @@ project-specific belongs in that project's own `package.json`.
 
 ### Gate & CI
 
-| Command                 | Does                                                                   |
-| ----------------------- | ---------------------------------------------------------------------- |
-| `vp run ready`          | `check:safe` + `build:all` — the full "is it shippable" check          |
-| `vp run check:safe`     | typegen → eslint-rules build → `vp check` → typecheck → eslint → tests |
-| `vp run typecheck:all`  | real tsc in all 16 workspaces, dependency order                        |
-| `vp run typegen:all`    | route types for both React Router apps                                 |
-| `vp run lint:all`       | Oxlint + eslint **with autofix**, every workspace                      |
-| `vp run lint:report`    | regenerate `reports/{oxlint,eslint}/full-latest.json`                  |
-| `vp run format:all`     | `vp fmt .` across the tree                                             |
-| `vp run build:all`      | build every workspace                                                  |
-| `vp run test:all`       | every suite — **needs Postgres**                                       |
-| `vp run test:ci`        | every DB-free suite — what CI runs, no Postgres needed                 |
-| `vp run coverage:merge` | merged coverage for the fallow gate (DB-free workspaces only)          |
+| Command                   | Does                                                                           |
+| ------------------------- | ------------------------------------------------------------------------------ |
+| `vp run ready`            | `check:safe` + `build:all` — the full "is it shippable" check                  |
+| `vp run check:safe`       | typegen → eslint-rules build → `vp check` → typecheck → eslint → biome → tests |
+| `vp run typecheck:all`    | real tsc in all 16 workspaces, dependency order                                |
+| `vp run typegen:all`      | route types for both React Router apps                                         |
+| `vp run lint:all`         | Oxlint + eslint + Biome **with autofix**, every workspace                      |
+| `vp run lint:biome`       | Biome repo-wide **with autofix** (`--write`, safe fixes only)                  |
+| `vp run lint:biome:check` | Biome repo-wide, check only — what CI runs                                     |
+| `vp run lint:report`      | regenerate `reports/{oxlint,eslint,biome}/full-latest.json`                    |
+| `vp run format:all`       | `vp fmt .` across the tree                                                     |
+| `vp run build:all`        | build every workspace                                                          |
+| `vp run test:all`         | every suite — **needs Postgres**                                               |
+| `vp run test:ci`          | every DB-free suite — what CI runs, no Postgres needed                         |
+| `vp run coverage:merge`   | merged coverage for the fallow gate (DB-free workspaces only)                  |
 
 `test:all` vs `test:ci`: CI has no database, so `test:ci` substitutes the DB-free
 `test:unit` subsets for `@repo/scan-ingestion` / `@repo/scan-orchestrator` and runs
@@ -209,17 +224,44 @@ Notes on the non-obvious ones:
 
 [`.github/workflows/check-safe.yml`](.github/workflows/check-safe.yml) — three jobs:
 
-| Job              | Steps                                                                                                    |
-| ---------------- | -------------------------------------------------------------------------------------------------------- |
-| **Quality Gate** | `typegen:all` + eslint-rules build → `vp check` → `vp run typecheck:all` → `vp run -r lint:eslint:check` |
-| **Fallow Audit** | `typegen:all` → `coverage:merge` → `fallow:audit --base <PR base> --coverage …` (PRs only)               |
-| **Unit Tests**   | `vp run test:ci` → coverage summary comment on the PR                                                    |
+| Job              | Steps                                                                                                                                |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| **Quality Gate** | `typegen:all` + eslint-rules build → `vp check` → `vp run typecheck:all` → `vp run -r lint:eslint:check` → `vp run lint:biome:check` |
+| **Fallow Audit** | `typegen:all` → `coverage:merge` → `fallow:audit --base <PR base> --coverage …` (PRs only)                                           |
+| **Unit Tests**   | `vp run test:ci` → coverage summary comment on the PR                                                                                |
 
 Each pass is a **separate step on purpose** so a failure names itself instead of
-hiding behind a neighbour. `vp check` does not run the eslint pass, and it does not
-run `tsc`.
+hiding behind a neighbour. `vp check` does not run the eslint pass, it does not run
+Biome, and it does not run `tsc`.
+
+The three jobs run in **parallel** — "Biome runs before Fallow" holds within the
+Quality Gate job's step order, not across jobs.
 
 Other workflows: `lighthouse.yml`, `validate-skills.yml`.
+
+---
+
+## 6b. What runs before a commit
+
+Vite+ owns the git hooks — `core.hooksPath` points at `.vite-hooks/`, installed by
+`vp config` (the root `prepare` script). Do **not** add husky/lefthook or repoint
+`core.hooksPath`: the next `vp install` runs `prepare` and takes it back.
+
+`.vite-hooks/pre-commit` runs `vp staged`, which reads the `staged` block in the
+root `vite.config.ts`:
+
+| Glob                 | Command                               |
+| -------------------- | ------------------------------------- |
+| `*`                  | `vp check --fix`                      |
+| `*.{ts,tsx,mjs,cjs}` | `biome lint --no-errors-on-unmatched` |
+
+Biome is **check-only** here on purpose: `vp check --fix` autofixes, but a Biome
+autofix could rewrite a staged file after you reviewed it, so a violation fails the
+commit and you apply the fix deliberately with `vp run lint:biome`.
+
+The hook only sees **staged** files — CI's repo-wide pass is what catches anything
+arriving via `--no-verify` or an unhooked push. Note the eslint pass is not in the
+hook either; it is a CI-and-local-gate step.
 
 ---
 

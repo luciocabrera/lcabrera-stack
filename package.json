@@ -6,13 +6,15 @@
   "scripts": {
     "build:all": "vp run -r build",
     "test:all": "vp run -r test",
-    "lint:all": "vp run --filter eslint-local-rules-shared build && vp lint . --fix && vp run -r lint:eslint",
+    "lint:all": "vp run --filter eslint-local-rules-shared build && vp lint . --fix && vp run -r lint:eslint && vp run lint:biome",
+    "lint:biome": "biome lint . --write",
+    "lint:biome:check": "biome lint .",
     "lint:report": "vp run --filter eslint-local-rules-shared build && node scripts/generate-lint-reports.mjs",
     "coverage:merge": "node scripts/merge-coverage.mjs",
     "format:all": "vp fmt .",
     "typegen:all": "vp run -r typegen",
     "typecheck:all": "vp run -r typecheck",
-    "check:safe": "vp run typegen:all && vp run --filter eslint-local-rules-shared build && vp check && vp run typecheck:all && vp run -r lint:eslint:check && vp run test:all",
+    "check:safe": "vp run typegen:all && vp run --filter eslint-local-rules-shared build && vp check && vp run typecheck:all && vp run -r lint:eslint:check && vp run lint:biome:check && vp run test:all",
     "test:ci": "vp run --filter '!@repo/scan-ingestion' --filter '!@repo/scan-orchestrator' --filter '!vite-react-compiler' test && vp run --filter @repo/scan-ingestion test:unit && vp run --filter @repo/scan-orchestrator test:unit && vp run --filter vite-react-compiler test:ci",
     "ready": "vp run check:safe && vp run build:all",
     "dev": "vp run --parallel --filter car-sales-api --filter vite-react-compiler dev",
@@ -37,6 +39,7 @@
     "prepare": "vp config"
   },
   "devDependencies": {
+    "@biomejs/biome": "catalog:",
     "@repo/vite-configs": "workspace:*",
     "fallow": "catalog:",
     "ts-morph": "catalog:",

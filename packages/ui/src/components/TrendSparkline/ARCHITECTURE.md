@@ -7,6 +7,7 @@ repo's StyleX-only, minimal-dependency styling approach. Renders one
 ## Public API
 
 - `TrendSparkline` — `values: readonly number[]` (oldest first),
+  `label: string` (required — the chart's accessible name),
   `tone?: 'error' | 'info' | 'neutral' | 'success' | 'warning'` (default
   `'neutral'`), `width?`/`height?` (default `100`/`24`).
 
@@ -15,6 +16,14 @@ same boundary as `StatusBadge`. A rising error count and a rising
 "files analyzed" count are both just "the line goes up"; only the
 consuming route knows whether that's worth coloring red or green, so
 `tone` is caller-supplied.
+
+`label` is caller-supplied for the same reason, and is **required**: a
+populated sparkline is exposed as `role='img'`, and an image with no
+accessible name is announced by screen readers as just "image". The
+component knows the shape of the line but not what it measures, so only
+the consumer can name it. It renders as a `<title>` child. While `values`
+is empty the chart is `aria-hidden` (nothing to convey) and the label is
+not announced.
 
 ## Geometry
 

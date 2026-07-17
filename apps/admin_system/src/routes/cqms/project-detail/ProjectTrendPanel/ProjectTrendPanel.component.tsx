@@ -24,6 +24,7 @@ export const ProjectTrendPanel = ({ trendPromise }: ProjectTrendPanelProps) => {
         <li key={group.scannerId}>
           {group.scannerId}{' '}
           <TrendSparkline
+            label={`High-severity findings per scan for ${group.scannerId}`}
             tone={
               (group.highCounts.at(-1) ?? 0) > (group.highCounts.at(0) ?? 0)
                 ? 'error'

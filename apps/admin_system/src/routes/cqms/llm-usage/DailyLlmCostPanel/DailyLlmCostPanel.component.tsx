@@ -32,6 +32,7 @@ export const DailyLlmCostPanel = ({
         Capped attempts: <strong>{totalCappedCount}</strong>
       </p>
       <TrendSparkline
+        label='Total LLM cost per day'
         tone='info'
         values={rows.map((row) => row.total_cost_usd)}
       />

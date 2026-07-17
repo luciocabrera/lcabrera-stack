@@ -14,22 +14,19 @@ export const getNewSortingBasedOnColumnKey = <TData>({
   sorting,
 }: GetNewSortingBasedOnColumnKeyArgs<TData>) => {
   // Sorting: update in-place to preserve order, or remove if undefined;
-  const existingIndex = existingSorting.findIndex(
+  if (!sorting) {
+    return existingSorting.filter((s) => s.columnKey !== columnKey);
+  }
+
+  const hasExistingSort = existingSorting.some(
     (s) => s.columnKey === columnKey,
   );
 
-  const hasExistingSort = existingIndex !== -1;
-
-  let newSorting;
-  if (!sorting) {
-    newSorting = existingSorting.filter((s) => s.columnKey !== columnKey);
-  } else if (hasExistingSort) {
-    newSorting = existingSorting.map((s) =>
+  if (hasExistingSort) {
+    return existingSorting.map((s) =>
       s.columnKey === columnKey ? { columnKey, direction: sorting } : s,
     );
-  } else {
-    newSorting = [...existingSorting, { columnKey, direction: sorting }];
   }
 
-  return newSorting;
+  return [...existingSorting, { columnKey, direction: sorting }];
 };

@@ -19,7 +19,27 @@ Every icon follows the same structural pattern:
 2. Default `size` to `24`
 3. Render an inline SVG
 4. Inherit color through `stroke='currentColor'`
-5. Forward remaining SVG props to the root `<svg>` element
+5. Mark the root `<svg>` `aria-hidden='true'`
+6. Forward remaining SVG props to the root `<svg>` element
+
+## Accessibility — icons are decorative by default
+
+Every icon sets `aria-hidden='true'` on its root `<svg>`, because every call
+site already supplies the accessible name: a `Button`/menu item with its own
+`aria-label`, or visible adjacent text. Announcing the icon as well would
+duplicate that name ("Table settings, Table settings"). This is why the answer
+to Biome's `a11y/noSvgWithoutTitle` here is `aria-hidden`, **not** a `<title>` —
+a `<title>` would satisfy the linter while making screen-reader output worse.
+
+Because the `{...props}` spread lands after `aria-hidden`, a caller that renders
+an icon as meaningful standalone content (no surrounding label) can override:
+`aria-hidden={false}` + `role='img'` + `aria-label='…'`. Nothing in the repo
+does this today — if you add one, it must supply a name.
+
+Note that routing an icon through `IconBase` also stops `noSvgWithoutTitle`
+from firing, since the rule only inspects literal `<svg>` elements. That is
+linter blindness, not an a11y fix — `IconBase` carries the real `aria-hidden`
+so the whole family is correct rather than merely unflagged.
 
 Icons in the 24×24 stroke family render through the shared `IconBase`
 component, which owns the standard `<svg>` wrapper and forwards children

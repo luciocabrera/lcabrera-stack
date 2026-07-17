@@ -50,12 +50,28 @@ jobs:
 
       - name: ESLint custom-rules pass
         id: eslint_gate
-        # `vp check` is fmt + Oxlint + tsc only — it does not know about the
-        # per-workspace eslint pass, so eslint-only findings (perfectionist
-        # import/module ordering, the react/stylex rule sets, local-rules)
-        # would otherwise never fail a PR. Inherited debt stays baselined in
-        # each workspace's eslint-suppressions.json; this gates new violations.
+        # `vp check` is fmt + Oxlint + the tsgolint type pass only — it does not
+        # know about the per-workspace eslint pass, so eslint-only findings
+        # (perfectionist import/module ordering, the react/stylex rule sets,
+        # local-rules) would otherwise never fail a PR. Inherited debt stays
+        # baselined in each workspace's eslint-suppressions.json; this gates new
+        # violations.
         run: vp run -r lint:eslint:check
+
+      - name: Biome lint pass
+        id: biome_gate
+        # Third linter, and the only one that covers the React-domain rules the
+        # other two miss (noNestedComponentDefinitions, noDuplicatedSpreadProps).
+        # Config: biome.jsonc at the root — ONE repo-wide pass like Oxlint, not a
+        # per-workspace fan-out, because `overrides` already scopes the react
+        # domain to the three React workspaces. Biome's formatter and assist are
+        # off there: Oxfmt owns formatting and perfectionist owns import order,
+        # and letting Biome touch either restarts the formatter/linter fight.
+        #
+        # This mirrors the local pre-commit hook (`staged` block in the root
+        # vite.config.ts) — the hook only sees staged files, so this is what
+        # catches a violation that arrives via an unhooked push or --no-verify.
+        run: vp run lint:biome:check
 
       - name: Write quality summary
         if: always()
@@ -70,6 +86,12 @@ jobs:
             ESLINT_STATUS="✅ Passed"
           else
             ESLINT_STATUS="❌ Failed"
+          fi
+
+          if [[ "${{ steps.biome_gate.outcome }}" == "success" ]]; then
+            BIOME_STATUS="✅ Passed"
+          else
+            BIOME_STATUS="❌ Failed"
           fi
 
           if [[ "${{ steps.typecheck_gate.outcome }}" == "success" ]]; then
@@ -92,6 +114,7 @@ jobs:
           echo "| Format | $CHECK_STATUS |" >> "$GITHUB_STEP_SUMMARY"
           echo "| Lint (Oxlint) | $CHECK_STATUS |" >> "$GITHUB_STEP_SUMMARY"
           echo "| Lint (ESLint custom rules) | $ESLINT_STATUS |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Lint (Biome · react domain) | $BIOME_STATUS |" >> "$GITHUB_STEP_SUMMARY"
           echo "| TypeScript (tsgolint via vp check) | $CHECK_STATUS |" >> "$GITHUB_STEP_SUMMARY"
           echo "| TypeScript (tsc · every workspace) | $TYPECHECK_STATUS |" >> "$GITHUB_STEP_SUMMARY"
 

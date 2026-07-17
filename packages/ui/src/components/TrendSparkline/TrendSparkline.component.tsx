@@ -7,6 +7,7 @@ import { getSparklinePoints } from './utils';
 
 export const TrendSparkline = ({
   height = 24,
+  label,
   tone = 'neutral',
   values,
   width = 100,
@@ -21,6 +22,7 @@ export const TrendSparkline = ({
       viewBox={`0 0 ${width} ${height}`}
       width={width}
     >
+      <title>{label}</title>
       {points && (
         <polyline
           points={points}

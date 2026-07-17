@@ -10,17 +10,10 @@ const publicApiFilePath = resolve(uiRootDir, 'src/public-api.ts');
 const importExportPattern =
   /(?:import|export)\s+(?:type\s+)?(?:[^'"\n]+?\s+from\s+)?['"]([^'"\n]+)['"]/g;
 
-const collectStaticSources = (fileText) => {
-  importExportPattern.lastIndex = 0;
-
-  const sources = [];
-  let match;
-  while ((match = importExportPattern.exec(fileText)) !== null) {
-    sources.push(match[1]);
-  }
-
-  return sources;
-};
+// `matchAll` iterates against an internal clone of the regex, so the module-level
+// /g pattern's `lastIndex` is never advanced and needs no reset between calls.
+const collectStaticSources = (fileText) =>
+  [...fileText.matchAll(importExportPattern)].map((match) => match[1]);
 
 const collectLocalDependencyPaths = ({ fromFilePath, sources }) => {
   return sources

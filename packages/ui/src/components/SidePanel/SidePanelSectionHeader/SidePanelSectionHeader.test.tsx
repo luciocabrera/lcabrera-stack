@@ -20,7 +20,7 @@ describe('SidePanelSectionHeader', () => {
     render(
       <SidePanelSectionHeader
         title='Section Title'
-        toolbar={<button>Edit</button>}
+        toolbar={<button type='button'>Edit</button>}
       />,
     );
 

@@ -1,0 +1,82 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.4/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true,
+    "defaultBranch": "main",
+  },
+  "files": {
+    "includes": [
+      "**/*.ts",
+      "**/*.tsx",
+      "**/*.mjs",
+      "**/*.cjs",
+      "!**/node_modules",
+      "!**/dist",
+      "!**/build",
+      "!**/coverage",
+      "!**/reports",
+      "!**/.react-router",
+      "!**/.tmp",
+      "!**/*.d.ts",
+    ],
+  },
+  "formatter": { "enabled": false },
+  "assist": { "enabled": false },
+  "linter": {
+    "enabled": true,
+    "domains": { "project": "recommended" },
+    "rules": { "preset": "recommended" },
+  },
+  "overrides": [
+    {
+      "includes": [
+        "apps/react-router/**",
+        "apps/admin_system/**",
+        "packages/ui/**",
+      ],
+      "linter": {
+        "domains": { "react": "recommended" },
+        "rules": {
+          "correctness": {
+            "noNestedComponentDefinitions": "error",
+            "useExhaustiveDependencies": "off",
+          },
+          "suspicious": { "noDuplicatedSpreadProps": "error" },
+        },
+      },
+    },
+    {
+      "includes": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts"],
+      "linter": {
+        "domains": { "test": "recommended" },
+      },
+    },
+    {
+      // Biome models `<tr>` as role=row and treats row as focusable, because a
+      // row IS focusable inside a role=grid. This Table is not a grid: it sets
+      // no role=grid and no tabIndex, so its rows are not focusable and the
+      // decorative virtualization spacer is correctly hidden from the a11y tree.
+      // There is no code fix — `aria-hidden` trips this rule, `role=presentation`
+      // trips noInteractiveElementToNoninteractiveRole, and dropping the
+      // attribute (Biome's own suggested fix) would announce a blank spacer row
+      // to screen readers. Revisit if the Table ever adopts grid semantics.
+      "includes": ["**/SpacerRow.component.tsx"],
+      "linter": {
+        "rules": { "a11y": { "noAriaHiddenOnFocusable": "off" } },
+      },
+    },
+    {
+      // JSON Schema conditionals, not thenables: `if`/`then` are reserved
+      // keywords of the schema DSL, so these objects are data describing a
+      // schema and are never awaited. Renaming the key would break validation.
+      // The same finding was already adjudicated for Oxlint in this file —
+      // see the `oxlint-disable-next-line unicorn/no-thenable` comments.
+      "includes": ["**/enterpriseOrders.schema.ts"],
+      "linter": {
+        "rules": { "suspicious": { "noThenProperty": "off" } },
+      },
+    },
+  ],
+}

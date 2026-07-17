@@ -16,6 +16,7 @@ Run the quality gate after every change set so correctness and maintainability d
 vp fmt .
 vp lint .
 vp run lint:eslint:check
+vp run lint:biome:check   # from the repo ROOT
 vp check
 vp run typecheck
 vp run test
@@ -28,15 +29,30 @@ vp run test
 | 1    | `vp fmt .`                 | formatting drift                                          | cheapest auto-fix pass                                    |
 | 2    | `vp lint .`                | rule violations, unsafe patterns, architecture guardrails | avoids type/test noise from known lint failures           |
 | 3    | `vp run lint:eslint:check` | import/module order, react/stylex rules, `local-rules`    | eslint-only rule sets no other stage runs                 |
-| 4    | `vp check`                 | fmt + Oxlint + the tsgolint type pass                     | verifies structural correctness before runtime assertions |
-| 5    | `vp run typecheck`         | real `tsc`; `check:public-api` in `packages/ui`           | the reference type-check the tsgolint pass approximates   |
-| 6    | `vp run test`              | behavioral regressions                                    | highest-cost stage, run after static checks pass          |
+| 4    | `vp run lint:biome:check`  | the React-domain rules the other two miss                 | root-only pass; last of the three linters                 |
+| 5    | `vp check`                 | fmt + Oxlint + the tsgolint type pass                     | verifies structural correctness before runtime assertions |
+| 6    | `vp run typecheck`         | real `tsc`; `check:public-api` in `packages/ui`           | the reference type-check the tsgolint pass approximates   |
+| 7    | `vp run test`              | behavioral regressions                                    | highest-cost stage, run after static checks pass          |
 
-Steps 4 and 5 are **different passes, not a retry**. Stage 4's types come from
+**Three linters, none redundant.** Oxlint (2) runs repo-wide from the root;
+eslint (3) fans out per workspace; Biome (4) is root-only — there is no
+per-workspace `lint:biome`, because `biome.jsonc`'s `overrides` already scope the
+react domain. Run stage 4 from the repo root: inside a workspace it is not the
+gate.
+
+**Stages 5 and 6 are different passes, not a retry.** Stage 5's types come from
 tsgolint (Oxlint's type-aware path reading each workspace's `tsconfig.app.json`);
-stage 5 is the actual compiler, and it is the only stage that runs the
+stage 6 is the actual compiler, and it is the only stage that runs the
 workspace's `typecheck` script — where `packages/ui` gates its public API against
 server-only `node:*` imports and the React Router apps regenerate route types.
+
+**When two linters disagree, fix the code — never silence one.** Three overlapping
+rule sets will contradict each other; the resolution is the form that satisfies
+all of them. Worked example: Biome's `noDoubleEquals` rejects `x == undefined`
+and eslint's `unicorn/no-null` rejects `x == null`, so only `x === undefined`
+passes both — but that is a _semantic_ change while the type still admits `null`,
+which means the real fix is dropping `null` from the type. That is what
+`unicorn/no-null` was asking for in the first place.
 
 ## Fast Local Loop (While Building)
 
@@ -53,6 +69,7 @@ Use an incremental loop while coding, then full gate before completion.
 | ------------------ | ------------------------------------------------------------------------- |
 | `fmt` failed       | re-run `vp fmt .`, inspect changed files                                  |
 | `lint` failed      | fix root cause (avoid suppressions unless justified)                      |
+| `biome` failed     | fix the code; if it contradicts eslint, find the form that satisfies both |
 | `check` failed     | resolve types at source boundary, avoid widening to `any`                 |
 | `typecheck` failed | same, but check whether a generated tsconfig drifted — never hand-edit it |
 | `test` failed      | reproduce deterministically, fix code/tests, re-run suite                 |
@@ -63,8 +80,8 @@ Use an incremental loop while coding, then full gate before completion.
 | ----------------------------- | ------------------------------------ |
 | Tiny docs/comment-only change | `vp lint .` + `vp check`             |
 | Local WIP coding loop         | targeted lint/check during iteration |
-| Ready to mark task done       | full gate (all 6 steps)              |
-| Pre-merge or PR update        | full gate (all 6 steps)              |
+| Ready to mark task done       | full gate (all 7 steps)              |
+| Pre-merge or PR update        | full gate (all 7 steps)              |
 
 ## Common Anti-Patterns
 
@@ -87,10 +104,20 @@ vp check   # ...and stopping there
 ```
 
 ```bash
+# ❌ Running the Biome pass from inside a workspace — it is a ROOT-only,
+#    repo-wide pass, so this is not the gate and proves nothing
+cd packages/ui && vp run lint:biome:check
+
+# ❌ Silencing one linter to satisfy another
+# biome-ignore lint/suspicious/noDoubleEquals: eslint wants it this way
+```
+
+```bash
 # ✅ Canonical sequence
 vp fmt .
 vp lint .
 vp run lint:eslint:check
+vp run lint:biome:check   # from the repo ROOT
 vp check
 vp run typecheck
 vp run test
@@ -105,6 +132,7 @@ Use this in PR templates or review guides:
 - [ ] `vp fmt .` passed
 - [ ] `vp lint .` passed
 - [ ] `vp run lint:eslint:check` passed
+- [ ] `vp run lint:biome:check` passed (from the root)
 - [ ] `vp check` passed
 - [ ] `vp run typecheck` passed
 - [ ] `vp run test` passed

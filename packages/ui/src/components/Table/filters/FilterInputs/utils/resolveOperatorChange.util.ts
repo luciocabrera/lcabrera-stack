@@ -3,8 +3,8 @@ import type {
   ColumnFilter,
   DateOperatorType,
   NumberOperatorType,
-  TextOperatorType,
   OperatorType,
+  TextOperatorType,
 } from '@repo/ui/types/filterOperators.types';
 
 type ResolveOperatorChangeArgs = {

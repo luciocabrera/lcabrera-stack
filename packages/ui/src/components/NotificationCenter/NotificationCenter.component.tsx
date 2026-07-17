@@ -36,17 +36,23 @@ export const NotificationCenter = () => {
 
   if (notifications.length === 0) return;
 
+  // Resolve and drop the empty placements up front rather than returning nothing
+  // from the render callback below: a `map` that conditionally returns no value
+  // is what Biome's useIterableCallbackReturn flags, and every way of writing
+  // that "nothing" (`return;` / `null` / `undefined`) trips one linter or
+  // another here. Filtering first means the callback always returns an element.
+  const populatedPlacements = NOTIFICATION_CENTER_PLACEMENTS.map(
+    (placement) => ({
+      placement,
+      placementNotifications: sortNotificationsByNewest(
+        notificationsByPlacement[placement],
+      ),
+    }),
+  ).filter(({ placementNotifications }) => placementNotifications.length > 0);
+
   return (
     <>
-      {NOTIFICATION_CENTER_PLACEMENTS.map((placement) => {
-        const placementNotifications = sortNotificationsByNewest(
-          notificationsByPlacement[placement],
-        );
-
-        if (placementNotifications.length === 0) {
-          return;
-        }
-
+      {populatedPlacements.map(({ placement, placementNotifications }) => {
         const isBottomPlacement = placement.startsWith('bottom');
 
         return (

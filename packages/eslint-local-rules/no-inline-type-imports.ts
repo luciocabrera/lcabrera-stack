@@ -49,18 +49,13 @@ export default createRule({
 
                 // Build the fixed import by removing inline 'type' keywords
                 const importedNames = node.specifiers
+                  .filter(isImportSpecifier)
                   .map((specifier) => {
-                    if (specifier.type !== 'ImportSpecifier') return;
-
                     const importedName = getImportedName(specifier.imported);
                     return importedName === specifier.local.name
                       ? importedName
                       : `${importedName} as ${specifier.local.name}`;
                   })
-                  .filter(
-                    (name: string | undefined): name is string =>
-                      name !== undefined,
-                  )
                   .join(', ');
 
                 const fromClause = sourceCode.getText(node.source);
