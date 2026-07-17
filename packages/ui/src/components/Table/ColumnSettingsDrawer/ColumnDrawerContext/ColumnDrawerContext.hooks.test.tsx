@@ -11,8 +11,8 @@ import type { ColumnDrawerContextValue } from './ColumnDrawerContext.types';
 
 import { useSetColumnFilter } from './actions/useSetColumnFilter.hook';
 import { useSetColumnPinning } from './actions/useSetColumnPinning.hook';
-import { useSetColumnSizing } from './actions/useSetColumnSizing.hook';
 import { useSetColumnSorting } from './actions/useSetColumnSorting.hook';
+import { useSetDraftColumnSizing } from './actions/useSetDraftColumnSizing.hook';
 import { ColumnDrawerContext } from './ColumnDrawerContext.context';
 import { useGetColumnFilter } from './selectors/useGetColumnFilter.hook';
 import { useGetColumnPinning } from './selectors/useGetColumnPinning.hook';
@@ -82,7 +82,7 @@ describe('ColumnDrawerContext hooks', () => {
     const setColumnPinning = renderHook(() => useSetColumnPinning(), {
       wrapper: Wrapper,
     });
-    const setColumnSizing = renderHook(() => useSetColumnSizing(), {
+    const setColumnSizing = renderHook(() => useSetDraftColumnSizing(), {
       wrapper: Wrapper,
     });
     const setColumnSorting = renderHook(() => useSetColumnSorting(), {
