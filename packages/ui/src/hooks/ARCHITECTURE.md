@@ -14,6 +14,7 @@ hooks/
 ├── useNotifyOnError.hook.ts              → Fire error toast whenever error identity changes
 ├── useResizeObserver.hook.ts             → Low-level ResizeObserver lifecycle (lazy target, deferred initial measure, SSR-safe)
 ├── useStore.hook.ts                      → Lightweight external store (useSyncExternalStore-compatible)
+├── useStoreSelector.hook.ts              → Subscribe to a slice of a useStore store (shared useSyncExternalStore wiring)
 ├── useTheme.hook.ts                      → Access ThemeContext via React 19 use()
 ├── useVirtualization.hook.ts             → Vertical virtual-scroll geometry computation (ResizeObserver-based)
 └── utils/
@@ -34,6 +35,7 @@ hooks/
 | `useInfiniteScrollObserver` | Layout/scroll | `void`                                         | `IntersectionObserver` on a sentinel element  |
 | `useNotifyOnError`          | Notification  | `void`                                         | `useNotifyAction`, `useEffect`                |
 | `useStore`                  | State mgmt    | `TStore<TData>`                                | `useRef`, `shallowEqual`                      |
+| `useStoreSelector`          | State mgmt    | `TSelected`                                    | `useSyncExternalStore`, `TStore`              |
 | `useTheme`                  | Context       | `ThemeContextValue`                            | `ThemeContext`, `use()`                       |
 | `useVirtualization`         | Layout/scroll | `{ startIndex, endIndex, offsetY, … }`         | `ResizeObserver` + RAF-batched scroll events  |
 
@@ -272,11 +274,8 @@ graph LR
 ```tsx
 const store = useStore<{ count: number }>({ count: 0 });
 
-const count = useSyncExternalStore(
-  store.subscribe,
-  () => store.get()?.count ?? 0,
-  () => store.getServerSnapshot()?.count ?? 0,
-);
+// Read through useStoreSelector rather than wiring useSyncExternalStore by hand
+const count = useStoreSelector({ selector: (state) => state.count, store });
 
 store.set({ count: count + 1 });
 ```
@@ -287,6 +286,50 @@ store.set({ count: count + 1 });
 - **Shallow equality guard** prevents `set` from notifying listeners when the merged object is identical to the previous state.
 - **`getServerSnapshot`** always returns the `initialState` snapshot, satisfying React's SSR hydration contract.
 - The listener `Set` is also a ref, so subscribe/unsubscribe operations are stable across renders.
+
+---
+
+## `useStoreSelector`
+
+Subscribes to a slice of a `useStore` store. This is the read half of the store
+pattern — `useStore` creates the store, `useStoreSelector` reads from it — and
+it owns the `useSyncExternalStore` wiring (client snapshot, server snapshot,
+subscribe) so no per-context hook repeats it.
+
+### Signature
+
+```ts
+useStoreSelector<TState extends Record<string, unknown>, TSelected>(args: {
+  selector: (state: TState) => TSelected;
+  store: TStore<TState>;
+}): TSelected
+```
+
+### Consumers
+
+Per-context `use*Store` infrastructure hooks resolve their own store from their
+own context and delegate here. Every columns store hook is one of these:
+
+| Hook                                           | Context               | State                     |
+| ---------------------------------------------- | --------------------- | ------------------------- |
+| `contexts/TableConfig/columns/useColumnsStore` | `TableConfigContext`  | `TableColumnsState`       |
+| `TableSettingsDrawer/.../useColumnsStore`      | `TableDrawerContext`  | `TableDrawerColumnsState` |
+| `ColumnSettingsDrawer/.../useColumnsStore`     | `ColumnDrawerContext` | `ColumnDrawerState`       |
+
+Each hook types its selector against **its own store's state** — the drawer
+stores hold a narrower slice than `TableConfig`, and typing them against the
+full `TableColumnsState` would let selectors read fields the store never holds.
+
+### Design Notes
+
+- **Re-render granularity comes from the selector's _result_, not the store.**
+  `useStore.set` notifies on any change, so the selector re-runs on every
+  update; `useSyncExternalStore` then compares the result with `Object.is` and
+  skips the re-render when it is unchanged. Selecting a primitive is therefore
+  stable, while a selector building a **new object/array each call re-renders on
+  every store write** — select stored values, not freshly-derived containers.
+- Selector hooks (`useGet*`) are the intended consumers; view components read
+  through those, never through this hook directly.
 
 ---
 

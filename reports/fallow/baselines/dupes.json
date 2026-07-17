@@ -13,7 +13,6 @@
     "apps/api-server-fast/src/errors/httpError.ts:1-12|apps/shared/src/errors/httpError.ts:1-12",
     "apps/react-router/src/routes/car-sales-infinite/car-sales.loader.ts:21-51|apps/react-router/src/routes/car-sales/car-sales.loader.ts:26-53",
     "apps/react-router/src/routes/car-sales/car-sales.loader.ts:29-58|apps/react-router/src/routes/enterprise-orders/enterprise-orders.loader.ts:34-64",
-    "packages/ui/src/components/Table/TableSettingsDrawer/TableDrawerContext/useColumnsStore.hook.ts:10-20|packages/ui/src/components/Table/contexts/TableConfig/columns/useColumnsStore.hook.ts:9-19",
     "packages/vite-configs/eslint.base-custom-rules.shared.config.mjs:69-110|packages/vite-configs/eslint.custom-rules.shared.config.mjs:239-278",
     "scripts/generate-skills-compliance-report.cjs:90-103|scripts/generate-source-smell-report.cjs:429-442"
   ]

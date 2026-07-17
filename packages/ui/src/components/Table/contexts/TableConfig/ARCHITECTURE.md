@@ -15,7 +15,7 @@ TableConfig/
 ├── index.ts                                 → Barrel: TableConfigProvider, hooks
 │
 ├── columns/                                 → Column-related store, actions, selectors
-│   ├── useColumnsStore.hook.ts              → useSyncExternalStore + selector
+│   ├── useColumnsStore.hook.ts              → Resolves the config columnsStore, delegates to useStoreSelector
 │   │
 │   ├── actions/                                 → Public API: every hook here is an executable action, all barrel-exported
 │   │   ├── hooks/                               → Internal to actions/ — shared hooks, never barrel-exported

@@ -1,4 +1,4 @@
-import { useSyncExternalStore } from 'react';
+import { useStoreSelector } from '@repo/ui/hooks/useStoreSelector.hook';
 
 import type { ColumnDrawerState } from './ColumnDrawerContext.types';
 
@@ -7,13 +7,7 @@ import { useColumnDrawerContextValue } from './useColumnDrawerContextValue.hook'
 export const useColumnsStore = <TSelected, TData = Record<string, unknown>>(
   selector: (state: ColumnDrawerState<TData>) => TSelected,
 ) => {
-  const { columnStore } = useColumnDrawerContextValue();
+  const { columnStore } = useColumnDrawerContextValue<TData>();
 
-  const state = useSyncExternalStore(
-    columnStore.subscribe,
-    () => selector(columnStore.get() as ColumnDrawerState<TData>),
-    () => selector(columnStore.getServerSnapshot() as ColumnDrawerState<TData>),
-  );
-
-  return state;
+  return useStoreSelector({ selector, store: columnStore });
 };

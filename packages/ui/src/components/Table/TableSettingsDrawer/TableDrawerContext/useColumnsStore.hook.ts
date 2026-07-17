@@ -1,20 +1,13 @@
-import type { TableColumnsState } from '@repo/ui/components/Table/Table.types';
+import { useStoreSelector } from '@repo/ui/hooks/useStoreSelector.hook';
 
-import { useSyncExternalStore } from 'react';
+import type { TableDrawerColumnsState } from './TableDrawerContext.types';
 
 import { useTableDrawerContextValue } from './useTableDrawerContextValue.hook';
 
 export const useColumnsStore = <TSelected, TData = Record<string, unknown>>(
-  selector: (state: TableColumnsState<TData>) => TSelected,
+  selector: (state: TableDrawerColumnsState<TData>) => TSelected,
 ) => {
-  const { columnsStore } = useTableDrawerContextValue();
+  const { columnsStore } = useTableDrawerContextValue<TData>();
 
-  const state = useSyncExternalStore(
-    columnsStore.subscribe,
-    () => selector(columnsStore.get() as TableColumnsState<TData>),
-    () =>
-      selector(columnsStore.getServerSnapshot() as TableColumnsState<TData>),
-  );
-
-  return state;
+  return useStoreSelector({ selector, store: columnsStore });
 };

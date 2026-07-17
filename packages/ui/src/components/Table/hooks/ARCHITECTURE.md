@@ -13,13 +13,14 @@ the column actions; it now sits in `contexts/TableConfig/columns/actions/hooks/`
 ```
 hooks/
 ├── useColumnResize.hook.ts              → Single entry point for resizing a column: every handler + width/bounds
-├── useColumnDragSession.hook.ts         → Private to useColumnResize: RAF-throttled drag (DOM wiring only)
+├── useColumnDragSession.hook.ts         → Private to useColumnResize: pointer state around a drag session
 ├── useInfiniteScroll.hook.ts            → Sentinel intersection detection (wraps shared useInfiniteScrollObserver)
 ├── useScrollResetAfterLoad.hook.ts      → Self-connected scroll-to-origin after full (non-load-more) loads
 ├── utils/
 │   ├── createResizeStartData.util.ts    → Drag-start snapshot: origin + effective width/bounds (+ .test)
 │   ├── resolveKeyboardResizeAction.util.ts → Key → step/jump/reset/ignore policy (+ .test)
-│   └── resolveResizeWidth.util.ts       → Pointer delta → clamped column width (+ .test)
+│   ├── resolveResizeWidth.util.ts       → Pointer delta → clamped column width (+ .test)
+│   └── startColumnResizeSession.service.ts → Opens a drag session: listeners, RAF, body styles (+ .test)
 └── index.ts                             → Barrel export
 ```
 
@@ -39,9 +40,17 @@ and `resolveKeyboardResizeAction` maps a keypress to a step/jump/reset/ignore.
 
 The pointer half, split out of `useColumnResize` purely to keep each unit small
 — it is **not** a second owner and is deliberately absent from the barrel.
-Keeps only the DOM wiring (document listeners, RAF bookkeeping, body
-cursor/selection toggles) and owns the drag's two-phase write: frames preview
-via `useSetColumnSizingWithoutSync`, mouse up persists once.
+It holds only the pointer state — which session is in flight, and whether the
+column is resizing — and owns the drag's two-phase write: frames preview via
+`useSetColumnSizingWithoutSync`, mouse up persists once.
+
+The DOM wiring itself lives in `utils/startColumnResizeSession.service.ts`,
+which each mouse down calls to open a session and which returns that session's
+teardown. Side effects belong in a service rather than the hook, and the split
+keeps both units under the 90-line `maxUnitSize` fallow enforces. The hook
+passes the session two lifecycle callbacks: `onGestureEnd` (mouse up only →
+clears `isResizing`) and `onSessionEnd` (**every** teardown path → clears the
+ref).
 
 Mouse up **flushes the last width before persisting**. Ending the session
 cancels the frame still in flight, and a browser delivers a quick drag's final
@@ -50,8 +59,8 @@ discarded, leaving the column at the previous frame's width and saving that
 instead of where it was let go. A fast enough flick loses the gesture entirely.
 Tests must queue frames rather than run them synchronously to cover this.
 
-Each mouse down opens a **self-contained drag session closure**: the start
-snapshot, the move handler, and the teardown are all locals of `onMouseDown`.
+Each mouse down opens a **self-contained drag session**: the start snapshot, the
+move handler, and the teardown are all locals of `startColumnResizeSession`.
 Listeners are registered with one `AbortController` signal, so ending the
 session (mouse up, unmount, or a superseding mouse down) detaches both in one
 `abort()`. No manual memoization (ADR-004) and no cross-render mutable data
@@ -59,7 +68,7 @@ bag — the only ref holds the active session's teardown for unmount safety.
 
 ```mermaid
 graph LR
-  MD["onMouseDown (opens session closure)"] --> Track["createResizeStartData → drag origin + bounds"]
+  MD["onMouseDown → startColumnResizeSession"] --> Track["createResizeStartData → drag origin + bounds"]
   Track --> Move["document.onMouseMove"]
   Move --> RAF["requestAnimationFrame"]
   RAF --> Clamp["resolveResizeWidth (clamped delta)"]
