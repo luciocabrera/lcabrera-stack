@@ -9,7 +9,6 @@ export const useMetaStore = <TSelected>(
   const { metaStore } = useTableConfigContextValue();
 
   return useStoreSelector({
-    fallback: {} as TableMetaState,
     selector,
     store: metaStore,
   });

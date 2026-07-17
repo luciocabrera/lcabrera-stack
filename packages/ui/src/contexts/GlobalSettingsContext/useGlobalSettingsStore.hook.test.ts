@@ -56,16 +56,4 @@ describe('useGlobalSettingsStore', () => {
 
     expect(result.current).toBe('large');
   });
-
-  it('falls back to initial global settings when snapshot is undefined', () => {
-    settingsStoreRef.current = createMockStore<GlobalSettingsState | undefined>(
-      undefined,
-    );
-
-    const { result } = renderHook(() =>
-      useGlobalSettingsStore((state) => state.navigation.size ?? 'medium'),
-    );
-
-    expect(result.current).toBe('medium');
-  });
 });

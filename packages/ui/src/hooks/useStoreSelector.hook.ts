@@ -3,12 +3,6 @@ import { useSyncExternalStore } from 'react';
 import type { TStore } from './useStore.hook';
 
 type UseStoreSelectorArgs<TState, TSelected> = {
-  /**
-   * State handed to the selector when the store is still empty. Omit it when
-   * the provider always seeds the store — the selector then receives whatever
-   * `get()` returns, matching a bare `store.get() as TState`.
-   */
-  readonly fallback?: TState;
   /** Narrows store state to the slice the caller subscribes to */
   readonly selector: (state: TState) => TSelected;
   /** The store to read from, created by `useStore` */
@@ -24,6 +18,9 @@ type UseStoreSelectorArgs<TState, TSelected> = {
  * resolve their own store from their own context and delegate the
  * `useSyncExternalStore` wiring (client snapshot, server snapshot, subscribe)
  * here, so the mechanics live in exactly one place.
+ *
+ * `useStore` requires an initial state, so `get()` always returns one — the
+ * selector needs no empty-store fallback and no cast.
  *
  * Selector hooks (`useGet*`) are the intended consumers — view components read
  * through those, never through this hook directly.
@@ -43,12 +40,11 @@ export const useStoreSelector = <
   TState extends Record<string, unknown>,
   TSelected,
 >({
-  fallback,
   selector,
   store,
 }: UseStoreSelectorArgs<TState, TSelected>) =>
   useSyncExternalStore(
     store.subscribe,
-    () => selector(store.get() ?? (fallback as TState)),
-    () => selector(store.getServerSnapshot() ?? (fallback as TState)),
+    () => selector(store.get()),
+    () => selector(store.getServerSnapshot()),
   );

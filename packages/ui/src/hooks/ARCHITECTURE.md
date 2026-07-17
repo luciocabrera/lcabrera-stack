@@ -228,15 +228,21 @@ Creates a ref-based external store that is compatible with `useSyncExternalStore
 ### Signature
 
 ```ts
-useStore<TData extends Record<string, unknown>>(initialState?: TData): TStore<TData>
+useStore<TData extends Record<string, unknown>>(initialState: TData): TStore<TData>
 ```
+
+`initialState` is **required**, which is what lets `get()` return `TData` rather
+than `TData | undefined`. A store is never empty, so no reader needs an
+empty-store fallback or a cast — the `?? ({} as SomeState)` defaults that habit
+produced were unreachable, and one of them (`{} as ColumnVisibilityState`, a
+`Set`) was actively wrong.
 
 ### `TStore<TData>` interface
 
 | Method                | Signature                         | Description                                                     |
 | --------------------- | --------------------------------- | --------------------------------------------------------------- |
-| `get()`               | `() => TData \| undefined`        | Returns current state                                           |
-| `getServerSnapshot()` | `() => TData \| undefined`        | Returns **initial** state — used by SSR hydration               |
+| `get()`               | `() => TData`                     | Returns current state — never undefined; the store is seeded    |
+| `getServerSnapshot()` | `() => TData`                     | Returns **initial** state — used by SSR hydration               |
 | `set(partial)`        | `(value: Partial<TData>) => void` | Merges partial update; notifies listeners only if state changed |
 | `reset()`             | `() => void`                      | Restores state to `initialState`; always notifies               |
 | `subscribe(cb)`       | `(cb: () => void) => () => void`  | Registers a listener; returns unsubscribe function              |
@@ -300,15 +306,13 @@ subscribe) so no per-context hook repeats it.
 
 ```ts
 useStoreSelector<TState extends Record<string, unknown>, TSelected>(args: {
-  fallback?: TState;
   selector: (state: TState) => TSelected;
   store: TStore<TState>;
 }): TSelected
 ```
 
-`fallback` is the state handed to the selector while the store is still empty.
-Omit it when the provider always seeds the store — the selector then receives
-whatever `get()` returns, matching a bare `store.get() as TState`.
+`useStore` requires an initial state, so `get()` always returns one. There is no
+empty-store fallback and no cast — a selector always receives real state.
 
 ### Consumers
 
@@ -316,23 +320,23 @@ This hook owns **every** `useSyncExternalStore` call in the package. Each
 per-context `use*Store` infrastructure hook resolves its own store from its own
 context and delegates here:
 
-| Hook                                             | Context                     | Fallback                     |
-| ------------------------------------------------ | --------------------------- | ---------------------------- |
-| `TableConfig/columns/useColumnsStore`            | `TableConfigContext`        | —                            |
-| `TableConfig/meta/useMetaStore`                  | `TableConfigContext`        | `{}`                         |
-| `TableData/data/useDataStore`                    | `TableDataContext`          | —                            |
-| `FiltersData/filters/useFiltersStore`            | `FiltersDataContext`        | —                            |
-| `TableSettingsDrawer/.../useColumnsStore`        | `TableDrawerContext`        | —                            |
-| `ColumnSettingsDrawer/.../useColumnsStore`       | `ColumnDrawerContext`       | —                            |
-| `ColumnOrderSection/.../useModalsStore`          | `ColumnOrderSectionContext` | `INITIAL_MODALS_STATE`       |
-| `Form/contexts/FormContext/useFieldsStore`       | `FormContext`               | —                            |
-| `Form/contexts/FormContext/useMetaStore`         | `FormContext`               | —                            |
-| `Settings/SettingsDraftContext/useDraftStore`    | `SettingsDraftContext`      | `DEFAULT_SETTINGS_DRAFT`     |
-| `VirtualList/contexts/list/useListStore`         | `VirtualListContext`        | `INITIAL_LIST_STATE`         |
-| `VirtualList/contexts/data/useListDataStore`     | `VirtualListContext`        | `INITIAL_LIST_DATA_STATE`    |
-| `VirtualSelect/contexts/meta/useSelectMetaStore` | `VirtualSelectContext`      | `INITIAL_SELECT_META_STATE`  |
-| `GlobalSettingsContext/useGlobalSettingsStore`   | `GlobalSettingsContext`     | `INITIAL_GLOBAL_SETTINGS`    |
-| `NotificationContext/useNotificationStore`       | `NotificationContext`       | `INITIAL_NOTIFICATION_STATE` |
+| Hook                                             | Context                     |
+| ------------------------------------------------ | --------------------------- |
+| `TableConfig/columns/useColumnsStore`            | `TableConfigContext`        |
+| `TableConfig/meta/useMetaStore`                  | `TableConfigContext`        |
+| `TableData/data/useDataStore`                    | `TableDataContext`          |
+| `FiltersData/filters/useFiltersStore`            | `FiltersDataContext`        |
+| `TableSettingsDrawer/.../useColumnsStore`        | `TableDrawerContext`        |
+| `ColumnSettingsDrawer/.../useColumnsStore`       | `ColumnDrawerContext`       |
+| `ColumnOrderSection/.../useModalsStore`          | `ColumnOrderSectionContext` |
+| `Form/contexts/FormContext/useFieldsStore`       | `FormContext`               |
+| `Form/contexts/FormContext/useMetaStore`         | `FormContext`               |
+| `Settings/SettingsDraftContext/useDraftStore`    | `SettingsDraftContext`      |
+| `VirtualList/contexts/list/useListStore`         | `VirtualListContext`        |
+| `VirtualList/contexts/data/useListDataStore`     | `VirtualListContext`        |
+| `VirtualSelect/contexts/meta/useSelectMetaStore` | `VirtualSelectContext`      |
+| `GlobalSettingsContext/useGlobalSettingsStore`   | `GlobalSettingsContext`     |
+| `NotificationContext/useNotificationStore`       | `NotificationContext`       |
 
 Each hook types its selector against **its own store's state** — the drawer
 stores hold a narrower slice than `TableConfig`, and typing them against the

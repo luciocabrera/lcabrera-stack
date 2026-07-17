@@ -13,7 +13,6 @@ import type {
 } from '../../VirtualList.types';
 import type { VirtualListContextValue } from '../VirtualListContext.types';
 
-import { INITIAL_LIST_DATA_STATE } from '../VirtualListContext.constants';
 import { VirtualListContext } from '../VirtualListContext.context';
 import { useFetchMore } from './actions/useFetchMore.hook';
 import { useToggleOption } from './actions/useToggleOption.hook';
@@ -29,7 +28,6 @@ import { useGetSelectedValues } from './selectors/useGetSelectedValues.hook';
 import { useGetShouldShowSelectAll } from './selectors/useGetShouldShowSelectAll.hook';
 import { useGetTotalCount } from './selectors/useGetTotalCount.hook';
 import { useGetTotalItems } from './selectors/useGetTotalItems.hook';
-import { useListDataStore } from './useListDataStore.hook';
 
 type SetupArgs = {
   readonly context?: Partial<VirtualListContextValue>;
@@ -128,17 +126,6 @@ describe('VirtualList data hooks', () => {
     expect(
       renderHook(() => useGetIsLoadingOptions(), { wrapper }).result.current,
     ).toBe(true);
-  });
-
-  it('falls back to the initial data state when the snapshot is undefined', () => {
-    const fallback = setup();
-    fallback.dataStore.reset(undefined as never);
-
-    expect(
-      renderHook(() => useListDataStore((state) => state), {
-        wrapper: fallback.wrapper,
-      }).result.current,
-    ).toEqual(INITIAL_LIST_DATA_STATE);
   });
 
   it('emits the toggled selection through onChange', () => {

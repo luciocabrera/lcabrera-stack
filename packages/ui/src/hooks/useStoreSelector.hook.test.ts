@@ -63,10 +63,10 @@ describe('useStoreSelector', () => {
     expect(renders.count).toBe(rendersBefore);
   });
 
-  it('selects from the fallback while the store is still empty', () => {
-    const emptyStore: TStore<TestState> = {
-      get: () => {},
-      getServerSnapshot: () => {},
+  it('hands the selector the seeded state without a fallback', () => {
+    const seededStore: TStore<TestState> = {
+      get: () => ({ count: 42, label: 'seeded' }),
+      getServerSnapshot: () => ({ count: 42, label: 'seeded' }),
       reset: vi.fn(),
       set: vi.fn(),
       subscribe: vi.fn(() => vi.fn()),
@@ -74,9 +74,8 @@ describe('useStoreSelector', () => {
 
     const { result } = renderHook(() =>
       useStoreSelector({
-        fallback: { count: 42, label: 'fallback' },
         selector: (state: TestState) => state.count,
-        store: emptyStore,
+        store: seededStore,
       }),
     );
 

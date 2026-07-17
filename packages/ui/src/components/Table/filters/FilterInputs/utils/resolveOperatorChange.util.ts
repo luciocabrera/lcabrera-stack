@@ -1,11 +1,12 @@
 import type { TableColumnDataType } from '@repo/ui/components/Table/Table.types';
 import type {
   ColumnFilter,
-  DateOperatorType,
-  NumberOperatorType,
   OperatorType,
-  TextOperatorType,
 } from '@repo/ui/types/filterOperators.types';
+
+import { resolveDateOperatorChange } from './resolveDateOperatorChange.util';
+import { resolveNumberOperatorChange } from './resolveNumberOperatorChange.util';
+import { resolveTextOperatorChange } from './resolveTextOperatorChange.util';
 
 type ResolveOperatorChangeArgs = {
   readonly dataType?: TableColumnDataType;
@@ -15,67 +16,27 @@ type ResolveOperatorChangeArgs = {
 
 /**
  * Build the next filter draft for an operator change: keep the existing
- * filter's value and swap its operator, or seed a typed empty filter for the
- * column's data type when no filter exists yet.
+ * filter's drafted value and swap its operator, or seed a typed empty filter
+ * when no compatible filter exists yet.
  *
- * The filter's `type` follows the column's data type — and, for a select-backed
- * string column, the operator. A select filter only models `equals`/`notEquals`
- * (`SelectFilter['operator']`), and `TextOrSelectFilterInput` swaps to a text
- * input for every other operator, so the filter has to convert with it. Keeping
- * `type: 'select'` while the operator moved on left the stale selected values
- * serializing as `equals` behind a text input the user was typing into.
- *
- * Filters are rebuilt per data type rather than spread-and-overridden, so a
+ * The column's data type picks the filter family — matching `getOperatorOptions`,
+ * which derives the offered operators from the same data type. Each family
+ * rebuilds its own filter rather than spread-and-overriding a foreign one, so a
  * mismatched pair (`{ type: 'select', operator: 'contains' }`) cannot be
- * constructed — the old `as ColumnFilter` on the spread is what let it through.
+ * constructed; the old `as ColumnFilter` on the spread is what let it through.
  */
-// Return annotation required: the branch literals ('number'/'date'/'text')
-// widen to string without the ColumnFilter contextual type.
 export const resolveOperatorChange = ({
   dataType,
   filter,
   operator,
-}: ResolveOperatorChangeArgs): ColumnFilter => {
+}: ResolveOperatorChangeArgs) => {
   if (dataType === 'currency' || dataType === 'number') {
-    const previous = filter?.type === 'number' ? filter : undefined;
-
-    return {
-      ...previous,
-      operator: operator as NumberOperatorType,
-      type: 'number',
-      value: previous?.value,
-    };
+    return resolveNumberOperatorChange({ filter, operator });
   }
 
   if (dataType === 'date') {
-    const previous = filter?.type === 'date' ? filter : undefined;
-
-    return {
-      ...previous,
-      operator: operator as DateOperatorType,
-      type: 'date',
-      value: previous?.value ?? '',
-    };
+    return resolveDateOperatorChange({ filter, operator });
   }
 
-  if (filter?.type === 'multiSelect' || filter?.type === 'select') {
-    // The only operators a select filter can model, so the select input stays.
-    if (operator === 'equals' || operator === 'notEquals') {
-      return { ...filter, operator };
-    }
-
-    // Carry the chosen option across so "equals alpha" becomes "contains alpha"
-    // rather than silently emptying the filter the user just built.
-    return {
-      operator: operator as TextOperatorType,
-      type: 'text',
-      value: filter.value ?? filter.values?.[0] ?? '',
-    };
-  }
-
-  return {
-    operator: operator as TextOperatorType,
-    type: 'text',
-    value: filter?.type === 'text' ? filter.value : '',
-  };
+  return resolveTextOperatorChange({ filter, operator });
 };

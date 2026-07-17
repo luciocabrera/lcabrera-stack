@@ -6,9 +6,9 @@ import { useRef } from 'react';
  */
 export type TStore<TData> = {
   /** Get current state */
-  get: () => TData | undefined;
+  get: () => TData;
   /** Get server snapshot for SSR hydration */
-  getServerSnapshot: () => TData | undefined;
+  getServerSnapshot: () => TData;
   /** Reset state to initial value */
   reset: () => void;
   /** Merge partial state update (only notifies if changed) */
@@ -35,7 +35,7 @@ export type TStore<TData> = {
  * ```
  */
 export const useStore = <TData extends Record<string, unknown>>(
-  initialState?: TData,
+  initialState: TData,
 ) => {
   const store = useRef(initialState);
   const initialRef = useRef(initialState);

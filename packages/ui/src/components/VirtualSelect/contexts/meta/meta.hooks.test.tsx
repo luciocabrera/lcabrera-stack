@@ -11,7 +11,6 @@ import type { VirtualSelectMetaState } from '../../VirtualSelect.types';
 import type { VirtualSelectContextValue } from '../VirtualSelectContext.types';
 
 import { useVirtualSelectContextValue } from '../useVirtualSelectContextValue.hook';
-import { INITIAL_SELECT_META_STATE } from '../VirtualSelectContext.constants';
 import { VirtualSelectContext } from '../VirtualSelectContext.context';
 import { useToggleDropdown } from './actions/useToggleDropdown.hook';
 import {
@@ -24,7 +23,6 @@ import {
   useGetMode,
   useGetPlaceholder,
 } from './selectors';
-import { useSelectMetaStore } from './useSelectMetaStore.hook';
 
 type WrapperProps = {
   readonly children: ReactNode;
@@ -109,22 +107,5 @@ describe('VirtualSelect meta hooks', () => {
     toggleDropdown();
 
     expect(onToggleDropdown).toHaveBeenCalledTimes(1);
-  });
-
-  it('falls back to the initial meta state when the snapshot is undefined', () => {
-    const metaStore = createMockStore<undefined | VirtualSelectMetaState>(
-      undefined,
-    );
-    const contextValue: VirtualSelectContextValue = {
-      metaStore: metaStore as never,
-      onToggleDropdown: vi.fn(),
-    };
-    const wrapper = ({ children }: WrapperProps) =>
-      createElement(VirtualSelectContext, { value: contextValue }, children);
-
-    expect(
-      renderHook(() => useSelectMetaStore((state) => state), { wrapper }).result
-        .current,
-    ).toEqual(INITIAL_SELECT_META_STATE);
   });
 });

@@ -49,7 +49,12 @@ export type ColumnSizingState<TData = Record<string, unknown>> = Record<
 >;
 
 /**
- * Column visibility state - Set of visible column keys
+ * Column visibility state — Set of **hidden** column keys.
+ *
+ * Membership means hidden, not visible: `resolveColumnVisibilityUpdate` adds a
+ * key to hide it and deletes it to show it, readers derive
+ * `isVisible = !columnVisibility.has(key)`, and `size` counts hidden columns.
+ * An empty Set therefore means every column is visible.
  */
 export type ColumnVisibilityState<TData = Record<string, unknown>> = Set<
   DataKey<TData>

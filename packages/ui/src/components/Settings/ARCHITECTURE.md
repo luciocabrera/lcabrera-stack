@@ -33,7 +33,6 @@ Settings/
 ├── SettingsDraftContext/            → Draft store (store-pattern)
 │   ├── SettingsDraftContext.context.ts
 │   ├── SettingsDraftContext.provider.tsx   → Seeds draft from persisted prefs via toDraft
-│   ├── SettingsDraftContext.constants.ts   → DEFAULT_SETTINGS_DRAFT snapshot fallback
 │   ├── SettingsDraftContext.types.ts
 │   ├── useSettingsDraftContextValue.hook.ts
 │   ├── useDraftStore.hook.ts               → useSyncExternalStore + selector infra
