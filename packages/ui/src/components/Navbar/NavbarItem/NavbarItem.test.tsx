@@ -13,6 +13,7 @@ afterEach(() => {
 type MockButtonProps = {
   readonly 'aria-label'?: string;
   readonly children?: ReactNode;
+  readonly isDisabled?: boolean;
   readonly isIconOnly?: boolean;
   readonly onClick?: () => void;
 };
@@ -23,9 +24,12 @@ type MockNavLinkProps = {
 };
 
 const MockButton = vi.hoisted(() => {
+  // Mirrors the real Button, which renders disabled={isDisabled || isBusy}.
+  // A stub that drops them silently makes disabled-state assertions vacuous.
   return function MockButton({
     'aria-label': ariaLabel,
     children,
+    isDisabled,
     isIconOnly,
     onClick,
   }: MockButtonProps) {
@@ -33,6 +37,7 @@ const MockButton = vi.hoisted(() => {
       <button
         aria-label={ariaLabel}
         data-icon-only={isIconOnly}
+        disabled={isDisabled}
         onClick={onClick}
         type='button'
       >
@@ -69,10 +74,35 @@ describe('NavbarItem', () => {
       />,
     );
 
-    const button = screen.getByRole('button', { name: 'Refresh' });
+    const button = screen.getByRole<HTMLButtonElement>('button', {
+      name: 'Refresh',
+    });
     expect(button.closest('li')).not.toBeNull();
+    expect(button.disabled).toBe(false);
     fireEvent.click(button);
     expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('disables a button entry marked isDisabled, so its click never fires', () => {
+    const onClick = vi.fn();
+
+    render(
+      <NavbarItem
+        isCompact={false}
+        item={{ isDisabled: true, label: 'Refresh', onClick, type: 'button' }}
+        orientation='vertical'
+        size='md'
+      />,
+    );
+
+    const button = screen.getByRole<HTMLButtonElement>('button', {
+      name: 'Refresh',
+    });
+    expect(button.disabled).toBe(true);
+
+    fireEvent.click(button);
+
+    expect(onClick).not.toHaveBeenCalled();
   });
 
   it('renders a link entry pointing at its target', () => {

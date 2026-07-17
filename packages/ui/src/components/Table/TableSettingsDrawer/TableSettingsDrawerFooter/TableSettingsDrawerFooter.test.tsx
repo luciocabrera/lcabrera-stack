@@ -23,12 +23,16 @@ const {
 
 type ButtonProps = {
   readonly children: ReactNode;
+  readonly isBusy?: boolean;
+  readonly isDisabled?: boolean;
   readonly onClick?: () => void;
 };
 
 vi.mock('@repo/ui/components/Button', () => ({
-  Button: ({ children, onClick }: ButtonProps) => (
-    <button onClick={onClick} type='button'>
+  // Mirrors the real Button, which renders disabled={isDisabled || isBusy}.
+  // A stub that drops them silently makes disabled-state assertions vacuous.
+  Button: ({ children, isBusy, isDisabled, onClick }: ButtonProps) => (
+    <button disabled={isDisabled || isBusy} onClick={onClick} type='button'>
       {children}
     </button>
   ),
@@ -142,11 +146,36 @@ describe('TableSettingsDrawerFooter', () => {
   it('ignores accept and cancel while busy', () => {
     render(<TableSettingsDrawerFooter isBusy />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Accept' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    const acceptButton = screen.getByRole<HTMLButtonElement>('button', {
+      name: 'Accept',
+    });
+    const cancelButton = screen.getByRole<HTMLButtonElement>('button', {
+      name: 'Cancel',
+    });
+
+    // Both halves of the guard: the buttons are disabled, and the handlers
+    // bail on isBusy even if something did dispatch a click past that.
+    expect(acceptButton.disabled).toBe(true);
+    expect(cancelButton.disabled).toBe(true);
+
+    fireEvent.click(acceptButton);
+    fireEvent.click(cancelButton);
 
     expect(batchSetTableDrawerSettingsMock).not.toHaveBeenCalled();
     expect(resetTableDrawerSettingsMock).not.toHaveBeenCalled();
     expect(setTableIsTableSettingsOpenMock).not.toHaveBeenCalled();
+  });
+
+  it('leaves both actions enabled when idle', () => {
+    render(<TableSettingsDrawerFooter />);
+
+    expect(
+      screen.getByRole<HTMLButtonElement>('button', { name: 'Accept' })
+        .disabled,
+    ).toBe(false);
+    expect(
+      screen.getByRole<HTMLButtonElement>('button', { name: 'Cancel' })
+        .disabled,
+    ).toBe(false);
   });
 });

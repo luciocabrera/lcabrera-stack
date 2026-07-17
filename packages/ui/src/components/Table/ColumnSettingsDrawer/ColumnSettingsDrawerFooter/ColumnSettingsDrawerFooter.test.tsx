@@ -21,12 +21,16 @@ const {
 
 type ButtonProps = {
   readonly children: ReactNode;
+  readonly isBusy?: boolean;
+  readonly isDisabled?: boolean;
   readonly onClick?: () => void;
 };
 
 vi.mock('@repo/ui/components/Button', () => ({
-  Button: ({ children, onClick }: ButtonProps) => (
-    <button onClick={onClick} type='button'>
+  // Mirrors the real Button, which renders disabled={isDisabled || isBusy}.
+  // A stub that drops them silently makes disabled-state assertions vacuous.
+  Button: ({ children, isBusy, isDisabled, onClick }: ButtonProps) => (
+    <button disabled={isDisabled || isBusy} onClick={onClick} type='button'>
       {children}
     </button>
   ),
@@ -104,10 +108,49 @@ describe('ColumnSettingsDrawerFooter', () => {
     useGetTableIsLoadingMock.mockReturnValue(true);
     render(<ColumnSettingsDrawerFooter />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Accept' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    const acceptButton = screen.getByRole<HTMLButtonElement>('button', {
+      name: 'Accept',
+    });
+    const cancelButton = screen.getByRole<HTMLButtonElement>('button', {
+      name: 'Cancel',
+    });
+
+    // Both halves of the guard: the buttons are disabled, and the handlers
+    // bail on isBusy even if something did dispatch a click past that.
+    expect(acceptButton.disabled).toBe(true);
+    expect(cancelButton.disabled).toBe(true);
+
+    fireEvent.click(acceptButton);
+    fireEvent.click(cancelButton);
 
     expect(batchSetColumnDrawerSettingsMock).not.toHaveBeenCalled();
     expect(resetAllColumnDrawerSettingsMock).not.toHaveBeenCalled();
+  });
+
+  it('disables both actions while a load-more is in flight', () => {
+    useGetTableIsLoadingMoreMock.mockReturnValue(true);
+    render(<ColumnSettingsDrawerFooter />);
+
+    expect(
+      screen.getByRole<HTMLButtonElement>('button', { name: 'Accept' })
+        .disabled,
+    ).toBe(true);
+    expect(
+      screen.getByRole<HTMLButtonElement>('button', { name: 'Cancel' })
+        .disabled,
+    ).toBe(true);
+  });
+
+  it('leaves both actions enabled when idle', () => {
+    render(<ColumnSettingsDrawerFooter />);
+
+    expect(
+      screen.getByRole<HTMLButtonElement>('button', { name: 'Accept' })
+        .disabled,
+    ).toBe(false);
+    expect(
+      screen.getByRole<HTMLButtonElement>('button', { name: 'Cancel' })
+        .disabled,
+    ).toBe(false);
   });
 });
