@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import type { PersistedUiFlags } from './persistence.types';
+import type { PersistedUiState } from './persistence.types';
 
 import { readPersistedUiFlagsFromCookie } from './readPersistedUiFlagsFromCookie.util';
 import { writePersistedUiFlagsToCookie } from './writePersistedUiFlagsToCookie.service';
@@ -14,7 +14,7 @@ import { writePersistedUiFlagsToCookie } from './writePersistedUiFlagsToCookie.s
  *
  * This exercises the real pair over a real Set-Cookie header. No mocks.
  */
-const captureCookieHeader = (uiFlags: PersistedUiFlags) => {
+const captureCookieHeader = (uiFlags: PersistedUiState) => {
   const headers = new Headers();
 
   writePersistedUiFlagsToCookie({

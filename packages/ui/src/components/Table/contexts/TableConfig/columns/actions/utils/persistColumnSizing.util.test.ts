@@ -77,21 +77,12 @@ describe('persistColumnSizing', () => {
     });
   });
 
-  it('also writes sessionStorage, which is what the client reads back first', () => {
+  it('writes the cookie only — never a client-side copy the loader cannot read', () => {
     persistColumnSizing<Row>(createStores(COMPLETE_STORES));
 
-    // Cookie-only would let a stale sessionStorage entry win at hydration and
-    // silently revert the resize — see getInitialColumnsState.
-    expect(mockSerializeStateSlice).toHaveBeenCalledWith({
-      appId: 'orders-app',
-      persistenceKey: 'orders-table',
-      slice: 'columnSizing',
-      value: { name: 220 },
-    });
-    expect(mockWriteToSessionStorage).toHaveBeenCalledWith({
-      key: 'table-state-orders-app-orders-table-columnSizing',
-      value: '{"value":{"name":220},"version":1}',
-    });
+    // getInitialColumnsState seeds purely from the loader's cookie state, so a
+    // sessionStorage copy could only contradict the markup SSR already painted.
+    expect(mockWriteToSessionStorage).not.toHaveBeenCalled();
   });
 
   it('does nothing when the table has no persistence key to write under', () => {

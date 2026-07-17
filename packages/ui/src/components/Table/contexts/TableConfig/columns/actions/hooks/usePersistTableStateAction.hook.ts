@@ -8,7 +8,6 @@ import {
   PERSISTENCE_SIZE_WARNING,
 } from '@repo/ui/constants/globalSettings.constants';
 import { useNotifyAction } from '@repo/ui/contexts/NotificationContext/actions';
-import { writeToSessionStorage } from '@repo/ui/utils/storage';
 import { useFetcher, useLocation } from 'react-router';
 
 /**
@@ -18,14 +17,12 @@ import { useFetcher, useLocation } from 'react-router';
  * where reaching for it through the hooks barrel closed an actions ↔ hooks
  * import cycle).
  *
- * Persists table state via two channels:
- *
- * 1. **sessionStorage** — written synchronously and tab-scoped. A tab refresh
- *    restores from sessionStorage so each tab is isolated from other tabs.
- *
- * 2. **Cookie** — written asynchronously via a server action (Set-Cookie
- *    header). The cookie is the SSR baseline seed: when a new tab opens it
- *    gets the most-recently-saved cookie state as its starting point.
+ * Persists table state to the **cookie**, written via a server action
+ * (Set-Cookie header). The cookie is the single source of truth because it is
+ * the only channel the SSR loader can read: the store is seeded from what the
+ * loader passes down, so what is saved here is what the next document paints
+ * with. A client-only copy could only contradict that markup and shift it at
+ * hydration.
  *
  * Supports both a single entry and a batch of entries.
  */
@@ -82,12 +79,8 @@ export const usePersistTableStateAction = () => {
       variant: 'success' as const,
     });
 
-    for (const { key, value } of serializedEntries) {
-      // Write to sessionStorage immediately (tab-isolated, survives refresh)
-      if (key && value) writeToSessionStorage({ key, value });
-    }
-
-    // Write to cookie via server action (SSR baseline for new tabs)
+    // Write to cookie via server action — the loader reads it back on the next
+    // document request and seeds the store from it.
     void fetcher.submit(
       { currentUrl, entries: entriesString },
       { action: PERSIST_COOKIE_ACTION, method: 'POST' },

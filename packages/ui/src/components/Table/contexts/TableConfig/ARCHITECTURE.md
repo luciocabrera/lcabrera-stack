@@ -19,13 +19,13 @@ TableConfig/
 │   │
 │   ├── actions/                                 → Public API: every hook here is an executable action, all barrel-exported
 │   │   ├── hooks/                               → Internal to actions/ — shared hooks, never barrel-exported
-│   │   │   └── usePersistTableStateAction.hook.ts → Dual-channel (sessionStorage + cookie) persistence used by six actions
+│   │   │   └── usePersistTableStateAction.hook.ts → Cookie persistence (server action) used by six actions
 │   │   ├── utils/buildPersistencePayload.util.ts       → Shared persistence-entry builder for batch settings hooks
 │   │   ├── utils/resolveBatchColumnSettingsUpdate.util.ts → Build next derived column config slices for one batch column update
 │   │   ├── utils/resolveBatchTableSettingsUpdate.util.ts → Build next derived column config slices for one table-wide settings update
 │   │   ├── utils/commitPinningAndOrderUpdate.util.ts → Shared persist+store commit helper for pinning actions
 │   │   ├── utils/commitResolvedVisibilityState.util.ts → Shared persist+store commit helper for visibility actions
-│   │   ├── utils/persistColumnSizing.util.ts     → Shared: persist the stored widths to sessionStorage + cookie
+│   │   ├── utils/persistColumnSizing.util.ts     → Shared: persist the stored widths to the cookie
 │   │   ├── utils/resolveColumnPinningUpdate.util.ts  → Build next pinning state + synced order for one pinning change
 │   │   ├── utils/resolveColumnSizingUpdate.util.ts   → Build next sizing map + pinned offsets for one column resize
 │   │   ├── utils/resolveColumnVisibilityUpdate.util.ts → Build next columnVisibility Set for one column show/hide
@@ -219,17 +219,17 @@ state aligned with source-of-truth column state.
 
 The two batch settings hooks now share two focused pure helpers instead of each inlining their derived-view and persistence-array construction.
 
-| Utility                            | Location                  | Purpose                                                                                  |
-| ---------------------------------- | ------------------------- | ---------------------------------------------------------------------------------------- |
-| `deriveColumnViewState`            | `components/Table/utils/` | Compose `normalizedColumns` with `getPinnedDerivedColumnsState()` output                 |
-| `buildPersistencePayload`          | `columns/actions/utils/`  | Build the persistence entry array for batch settings updates                             |
-| `getColumnSettingsNextStatePatch`  | `components/Table/utils/` | Build the persisted meta patch after applying column settings                            |
-| `getHasQueryChanged`               | `components/Table/utils/` | Compare current vs next filters/sorting to decide whether query revalidation is needed   |
-| `getIsTableSettingsOpen`           | `components/Table/utils/` | Restore the table-settings drawer when column settings borrowed its open state           |
-| `resolveBatchColumnSettingsUpdate` | `columns/actions/utils/`  | Compose the next per-column batch update from shared sort/filter/size/pin resolvers      |
-| `resolveBatchTableSettingsUpdate`  | `columns/actions/utils/`  | Compose the next table-wide settings update from incoming settings plus derived slices   |
-| `writeColumnSizing`                | `columns/actions/utils/`  | Write one column's width to the store and recompute pinned offsets                       |
-| `persistColumnSizing`              | `columns/actions/utils/`  | Persist the widths currently in the store to **both** channels (sessionStorage + cookie) |
+| Utility                            | Location                  | Purpose                                                                                |
+| ---------------------------------- | ------------------------- | -------------------------------------------------------------------------------------- |
+| `deriveColumnViewState`            | `components/Table/utils/` | Compose `normalizedColumns` with `getPinnedDerivedColumnsState()` output               |
+| `buildPersistencePayload`          | `columns/actions/utils/`  | Build the persistence entry array for batch settings updates                           |
+| `getColumnSettingsNextStatePatch`  | `components/Table/utils/` | Build the persisted meta patch after applying column settings                          |
+| `getHasQueryChanged`               | `components/Table/utils/` | Compare current vs next filters/sorting to decide whether query revalidation is needed |
+| `getIsTableSettingsOpen`           | `components/Table/utils/` | Restore the table-settings drawer when column settings borrowed its open state         |
+| `resolveBatchColumnSettingsUpdate` | `columns/actions/utils/`  | Compose the next per-column batch update from shared sort/filter/size/pin resolvers    |
+| `resolveBatchTableSettingsUpdate`  | `columns/actions/utils/`  | Compose the next table-wide settings update from incoming settings plus derived slices |
+| `writeColumnSizing`                | `columns/actions/utils/`  | Write one column's width to the store and recompute pinned offsets                     |
+| `persistColumnSizing`              | `columns/actions/utils/`  | Persist the widths currently in the store to the cookie (the loader reads it back)     |
 
 ## How Actions Share Logic
 
@@ -261,39 +261,54 @@ an `actions → hooks → actions` import cycle. Nothing under `contexts/` impor
 `Table/hooks/` now, so the dependency runs one way only and the cycle is
 structurally impossible rather than merely avoided.
 
-### Persistence channels — both, always
+### Persistence — the cookie is the only channel
 
-Column state lives in two channels and **every writer must update both**:
+Every persisted slice (`columnSizing`, `columnOrder`, `columnPinning`,
+`columnVisibility`, `sorting`, `columnFilters`, and the drawer's UI state) is
+written to a **cookie** and to nothing else:
 
-| Channel            | Written by                                          | Read by                                                 |
-| ------------------ | --------------------------------------------------- | ------------------------------------------------------- |
-| **cookie**         | `usePersistTableStateAction`, `persistColumnSizing` | the loader, via `readTableLoaderStateFromRequest` (SSR) |
-| **sessionStorage** | `usePersistTableStateAction`, `persistColumnSizing` | `getInitialColumnsState` on the client (tab-scoped)     |
+| Written by                   | Writes                     | Read back by                                         |
+| ---------------------------- | -------------------------- | ---------------------------------------------------- |
+| `usePersistTableStateAction` | cookie (via server action) | the loader — `readTableLoaderStateFromRequest` (SSR) |
+| `persistColumnSizing`        | cookie (`document.cookie`) | the loader — same                                    |
+| `persistTableMetaUiState`    | cookie (`document.cookie`) | the loader — `readPersistedUiFlagsFromCookie`        |
 
-`getInitialColumnsState` prefers sessionStorage (`sessionState.columnSizing ??
-columnSizing`), while SSR can only ever see the cookie. So the two channels
-disagreeing is not a stale-cache annoyance — it is a guaranteed layout shift:
-the skeleton paints the cookie's widths, then hydration swaps in
-sessionStorage's and the columns jump. A cookie-only write also silently
-_reverts_ the change on reload, because the older sessionStorage entry wins.
+**Why one channel, not two.** The cookie is the only thing SSR can read, and both
+stores seed exclusively from what the loader passes down. So the server's markup
+and the client's first render are guaranteed to agree — a hydration mismatch is
+not merely avoided, it is unrepresentable.
 
-This is exactly what a drag-handle resize used to do: `persistColumnSizing` wrote
-only the cookie while the settings drawer wrote both, so resizing a column the
-drawer had already sized was undone by the next reload.
+A second, client-only channel (sessionStorage) cannot be SSR'd by definition, so
+whatever it holds can only be applied _after_ the server's markup has painted.
+That is a layout shift by construction, and it was not hypothetical: the table
+used to read `columnSizing` and the drawer flags from sessionStorage and prefer
+them (`sessionState.columnSizing ?? columnSizing`), so any drift between the
+channels both **reverted** the user's change on reload and **shifted** the
+columns after the skeleton had already painted. Tab-scoped layout state and a
+shift-free first paint are mutually exclusive; this table chooses the latter.
+
+The consequence to accept: tables are **not** isolated per tab — two tabs share
+one cookie, and the last write wins.
+
+`PersistedUiState` therefore carries the _whole_ drawer state: open/pinned
+reserves the drawer's width, and the selected tab and expanded filters decide
+what is painted inside it. Anything omitted could not be SSR'd.
+
+Only `dataState` (the skeleton's cached rows) remains in sessionStorage. It is
+not layout: SSR paints blank placeholders either way, and the rows are a
+per-tab cache, not state the server could seed.
 
 ### usePersistTableStateAction
 
-Persists column-oriented table state slices through the dual-channel flow: write
-sessionStorage immediately, then submit the cookie update through a React Router
-server action.
+Persists column-oriented table state slices by submitting the cookie update
+through a React Router server action (Set-Cookie).
 
 ```mermaid
 graph TD
   Action["persistTableState(entries)"] --> Serialize["serializeStateSlice per entry"]
   Serialize --> Check{"any entry too large?"}
   Check -->|Yes| Warn["notify warning + abort"]
-  Check -->|No| Session["write sessionStorage"]
-  Session --> Submit["fetcher.submit({ entries, currentUrl })"]
+  Check -->|No| Submit["fetcher.submit({ entries, currentUrl })"]
   Submit --> Route["POST /_action/persist-cookie"]
   Route --> Cookie["Set-Cookie response header"]
   Route --> Decision{"search params changed?"}
@@ -309,8 +324,8 @@ Supports both single entries and batch submissions. Each entry specifies:
 - `searchParamKey/Value` — optional URL search param sync
 - Revalidation happens only when persisted `searchParamKey/Value` produce an
   effective URL search-param change; otherwise the action returns `204` and
-  only cookie/session persistence occurs.
-- Oversized entries block the entire apply flow before sessionStorage, URL sync, or cookie persistence to avoid partial restored state
+  only cookie persistence occurs.
+- Oversized entries block the entire apply flow before URL sync or cookie persistence to avoid partial restored state
 - No-op when `persistenceKey` is empty
 
 ## Columns Selectors
@@ -336,7 +351,7 @@ Supports both single entries and batch submissions. Each entry specifies:
 
 Persisted meta UI fields are mutation-owned: each action that changes drawer UI
 state calls `persistTableMetaUiState()` before committing its
-`metaStore.set(...)` patch. This keeps sessionStorage aligned without a
+`metaStore.set(...)` patch. This keeps the cookie aligned without a
 subscription effect in the provider.
 
 | Hook                                   | Writes To   | Description                                                                 |

@@ -2,7 +2,6 @@ import type { TableMetaState } from '../Table.types';
 
 import { getPersistedUiState } from './getPersistedUiState.util';
 import { writePersistedUiFlagsToCookie } from './writePersistedUiFlagsToCookie.service';
-import { writePersistedUiStateToSessionStorage } from './writePersistedUiStateToSessionStorage.service';
 
 type PersistTableMetaUiStateArgs = {
   readonly currentState: TableMetaState | undefined;
@@ -24,22 +23,12 @@ export const persistTableMetaUiState = ({
     return;
   }
 
-  writePersistedUiStateToSessionStorage({
-    appId,
-    persistenceKey,
-    uiState: getPersistedUiState(nextState),
-  });
-
-  // Mirror the open/pinned flags to a cookie so the loader can SSR-seed the
-  // drawer state and avoid a hydration layout shift on the next document load.
+  // The cookie is the single channel: the loader reads it to SSR-seed the
+  // drawer, so a second client-only copy could only disagree with the markup
+  // already painted and shift it at hydration.
   writePersistedUiFlagsToCookie({
     appId,
     persistenceKey,
-    uiFlags: {
-      isColumnSettingsOpen: nextState.isColumnSettingsOpen,
-      isColumnSettingsPinned: nextState.isColumnSettingsPinned,
-      isTableSettingsOpen: nextState.isTableSettingsOpen,
-      isTableSettingsPinned: nextState.isTableSettingsPinned,
-    },
+    uiFlags: getPersistedUiState(nextState),
   });
 };

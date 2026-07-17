@@ -10,9 +10,7 @@ export { getPinnedDerivedColumnsState } from './getPinnedDerivedColumnsState.uti
 export { persistTableMetaUiState } from './persistTableMetaUiState.service';
 export { readPersistedDataStateFromSessionStorage } from './readPersistedDataStateFromSessionStorage.util';
 export { readPersistedStateFromCookie } from './readPersistedStateFromCookie.util';
-export { readPersistedStateFromSessionStorage } from './readPersistedStateFromSessionStorage.util';
 export { readPersistedUiFlagsFromCookie } from './readPersistedUiFlagsFromCookie.util';
-export { readPersistedUiStateFromSessionStorage } from './readPersistedUiStateFromSessionStorage.util';
 export { resolveColumnWidthBounds } from './resolveColumnWidthBounds.util';
 export { resolvePrimaryKeyColumnKeys } from './resolvePrimaryKeyColumnKeys.util';
 export { resolveTableActionsColumn } from './resolveTableActionsColumn.util';

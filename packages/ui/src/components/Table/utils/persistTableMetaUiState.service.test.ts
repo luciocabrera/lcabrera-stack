@@ -2,19 +2,18 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { getPersistedUiStateMock, writePersistedUiStateToSessionStorageMock } =
+const { getPersistedUiStateMock, writePersistedUiFlagsToCookieMock } =
   vi.hoisted(() => ({
     getPersistedUiStateMock: vi.fn(() => ({ isTableSettingsOpen: true })),
-    writePersistedUiStateToSessionStorageMock: vi.fn(),
+    writePersistedUiFlagsToCookieMock: vi.fn(),
   }));
 
 vi.mock('./getPersistedUiState.util', () => ({
   getPersistedUiState: getPersistedUiStateMock,
 }));
 
-vi.mock('./writePersistedUiStateToSessionStorage.service', () => ({
-  writePersistedUiStateToSessionStorage:
-    writePersistedUiStateToSessionStorageMock,
+vi.mock('./writePersistedUiFlagsToCookie.service', () => ({
+  writePersistedUiFlagsToCookie: writePersistedUiFlagsToCookieMock,
 }));
 
 import { persistTableMetaUiState } from './persistTableMetaUiState.service';
@@ -23,10 +22,10 @@ describe('persistTableMetaUiState', () => {
   beforeEach(() => {
     getPersistedUiStateMock.mockReset();
     getPersistedUiStateMock.mockReturnValue({ isTableSettingsOpen: true });
-    writePersistedUiStateToSessionStorageMock.mockReset();
+    writePersistedUiFlagsToCookieMock.mockReset();
   });
 
-  it('writes the merged next meta UI state to sessionStorage when persistence is enabled', () => {
+  it('writes the merged next meta UI state to the cookie when persistence is enabled', () => {
     persistTableMetaUiState({
       currentState: {
         columnOverscan: 2,
@@ -60,9 +59,11 @@ describe('persistTableMetaUiState', () => {
         persistenceKey: 'orders',
       }),
     );
-    expect(writePersistedUiStateToSessionStorageMock).toHaveBeenCalledWith({
+    // The cookie carries the whole UI state — it is the only channel the loader
+    // can read, so anything omitted could not be SSR'd.
+    expect(writePersistedUiFlagsToCookieMock).toHaveBeenCalledWith({
       persistenceKey: 'orders',
-      uiState: { isTableSettingsOpen: true },
+      uiFlags: { isTableSettingsOpen: true },
     });
   });
 
@@ -75,6 +76,6 @@ describe('persistTableMetaUiState', () => {
     });
 
     expect(getPersistedUiStateMock).not.toHaveBeenCalled();
-    expect(writePersistedUiStateToSessionStorageMock).not.toHaveBeenCalled();
+    expect(writePersistedUiFlagsToCookieMock).not.toHaveBeenCalled();
   });
 });

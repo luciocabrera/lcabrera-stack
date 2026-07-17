@@ -28,8 +28,6 @@ utils/
 ├── getStorageKey.util.ts                         → Build namespaced storage key
 ├── readPersistedDataStateFromSessionStorage.util.ts → Read tab-scoped persisted table rows
 ├── readPersistedStateFromCookie.util.ts          → SSR-safe cookie state read
-├── readPersistedStateFromSessionStorage.util.ts  → Read tab-scoped persisted column slices
-├── readPersistedUiStateFromSessionStorage.util.ts → Read tab-scoped persisted drawer UI slices
 ├── readPersistedUiFlagsFromCookie.util.ts        → SSR-safe read of drawer open/pinned flags from cookie
 ├── writePersistedUiFlagsToCookie.service.ts      → Effect: mirror drawer open/pinned flags to cookie (SSR seed)
 ├── resolveCrudRowId.util.ts                       → Resolve CRUD row id from the primary-key column(s)
@@ -40,7 +38,6 @@ utils/
 ├── splitColumnsByPinning.util.ts                 → Split columns into left/center/right groups
 ├── syncColumnOrderWithPinning.util.ts            → Pin-aware column reordering
 ├── writePersistedDataStateToSessionStorage.service.ts → Effect: write tab-scoped persisted table rows
-├── writePersistedUiStateToSessionStorage.service.ts → Effect: write tab-scoped persisted drawer UI slices
 ├── writeStateSlice.service.ts                    → Effect: write to cookie/localStorage
 ├── persistence.constants.ts                      → Storage key constants
 ├── persistence.types.ts                          → Persistence config types
@@ -152,21 +149,18 @@ graph LR
   end
 ```
 
-| Function                                 | Purpose                                                        |
-| ---------------------------------------- | -------------------------------------------------------------- |
-| readPersistedDataStateFromSessionStorage | Parse persisted data rows from sessionStorage (tab-scoped)     |
-| readPersistedStateFromCookie             | Parse persisted state from cookies (SSR-safe)                  |
-| readPersistedStateFromSessionStorage     | Parse persisted column slices from sessionStorage (tab-scoped) |
-| readPersistedUiStateFromSessionStorage   | Parse persisted UI slices from sessionStorage (tab-scoped)     |
-| arePersistedUiStatesEqual                | Legacy compare helper for persisted UI slices                  |
-| getPersistedUiState                      | Extract the persisted UI subset from `TableMetaState`          |
-| persistTableMetaUiState                  | Persist merged meta UI patches to sessionStorage               |
-| serializeStateSlice                      | Convert a state slice to key/value payload                     |
-| writePersistedDataStateToSessionStorage  | Write persisted data rows to sessionStorage (tab-scoped)       |
-| writePersistedUiStateToSessionStorage    | Write persisted UI slices to sessionStorage (tab-scoped)       |
-| readPersistedUiFlagsFromCookie           | SSR-safe read of drawer open/pinned flags from cookie          |
-| writePersistedUiFlagsToCookie            | Mirror drawer open/pinned flags to a cookie for SSR seeding    |
-| writeStateSlice                          | Write to cookie or localStorage                                |
-| getStorageKey                            | Build storage key, optionally `appId`-scoped                   |
+| Function                                 | Purpose                                                     |
+| ---------------------------------------- | ----------------------------------------------------------- |
+| readPersistedDataStateFromSessionStorage | Parse persisted data rows from sessionStorage (tab-scoped)  |
+| readPersistedStateFromCookie             | Parse persisted state from cookies (SSR-safe)               |
+| arePersistedUiStatesEqual                | Legacy compare helper for persisted UI slices               |
+| getPersistedUiState                      | Extract the persisted UI subset from `TableMetaState`       |
+| persistTableMetaUiState                  | Persist merged meta UI patches to the cookie (SSR-readable) |
+| serializeStateSlice                      | Convert a state slice to key/value payload                  |
+| writePersistedDataStateToSessionStorage  | Write persisted data rows to sessionStorage (tab-scoped)    |
+| readPersistedUiFlagsFromCookie           | SSR-safe read of drawer open/pinned flags from cookie       |
+| writePersistedUiFlagsToCookie            | Mirror drawer open/pinned flags to a cookie for SSR seeding |
+| writeStateSlice                          | Write to cookie or localStorage                             |
+| getStorageKey                            | Build storage key, optionally `appId`-scoped                |
 
 `persistTableMetaUiState.service.ts` intentionally uses direct-file imports (not `utils/index.ts`) for persistence helpers to avoid barrel back-import cycles (ADR-007).

@@ -1,5 +1,4 @@
 import type { TableMetaState } from '@repo/ui/components/Table/Table.types';
-import type { PersistedUiState } from '@repo/ui/components/Table/utils/persistence.types';
 
 import {
   DEFAULT_COLUMN_OVERSCAN,
@@ -11,10 +10,14 @@ import {
   LOAD_MORE_PAGE_SIZE,
 } from '@repo/ui/components/Table/Table.constants';
 
-type GetInitialMetaStateArgs = Partial<TableMetaState> & {
-  readonly persistedUiState?: PersistedUiState;
-};
+type GetInitialMetaStateArgs = Partial<TableMetaState>;
 
+/**
+ * Builds the meta store's initial state. The drawer flags arrive from the
+ * loader, which read them from the cookie — the only channel SSR can see — so
+ * the drawer paints in its persisted state on the first frame rather than
+ * popping open after hydration.
+ */
 export const getInitialMetaState = ({
   appId,
   columnOverscan = DEFAULT_COLUMN_OVERSCAN,
@@ -32,7 +35,6 @@ export const getInitialMetaState = ({
   isTableSettingsPinned = false,
   loadMorePageSize = LOAD_MORE_PAGE_SIZE,
   overscan = DEFAULT_OVERSCAN,
-  persistedUiState = {},
   persistenceKey = '',
   placeholderRowCount = INITIAL_PAGE_SIZE,
   rowHeight = DEFAULT_ROW_HEIGHT,
@@ -67,6 +69,5 @@ export const getInitialMetaState = ({
     threshold,
     wasTableSettingsOpenBeforeColumnSettings,
     ...rest,
-    ...persistedUiState,
   };
 };

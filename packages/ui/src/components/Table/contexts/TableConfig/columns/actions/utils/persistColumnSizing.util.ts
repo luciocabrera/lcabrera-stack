@@ -4,11 +4,7 @@ import type {
 } from '@repo/ui/components/Table/Table.types';
 import type { TStore } from '@repo/ui/hooks/useStore.hook';
 
-import {
-  serializeStateSlice,
-  writeStateSlice,
-} from '@repo/ui/components/Table/utils';
-import { writeToSessionStorage } from '@repo/ui/utils/storage';
+import { writeStateSlice } from '@repo/ui/components/Table/utils';
 
 type PersistColumnSizingArgs<TData> = {
   readonly columnsStore: TStore<TableColumnsState<TData>>;
@@ -24,11 +20,9 @@ type PersistColumnSizingArgs<TData> = {
  * the store rather than taking a width, so it always saves the committed state
  * even when the caller wrote it a moment earlier.
  *
- * Writes both persistence channels, exactly like `usePersistTableStateAction`:
- * the cookie is the SSR baseline the loader reads, and sessionStorage is what
- * `getInitialColumnsState` reads back on the client. Writing only the cookie
- * leaves a stale sessionStorage entry to win at hydration, which both reverts
- * the resize and shifts the columns after the skeleton has already painted.
+ * The cookie is the only channel, because it is the only one the loader can
+ * read: `getInitialColumnsState` seeds the store from what the loader passed
+ * down, so a width saved here is the width the next document paints with.
  */
 export const persistColumnSizing = <TData>({
   columnsStore,
@@ -42,18 +36,8 @@ export const persistColumnSizing = <TData>({
     return;
   }
 
-  const appId = metaState?.appId;
-  const { key, value } = serializeStateSlice({
-    appId,
-    persistenceKey,
-    slice: 'columnSizing',
-    value: columnSizing,
-  });
-
-  writeToSessionStorage({ key, value });
-
   writeStateSlice({
-    appId,
+    appId: metaState?.appId,
     persistenceKey,
     slice: 'columnSizing',
     storageType: 'cookie',

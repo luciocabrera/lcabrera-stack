@@ -110,7 +110,7 @@ describe('usePersistTableStateAction', () => {
     );
   });
 
-  it('also writes each entry to sessionStorage synchronously before submitting to server', () => {
+  it('persists to the cookie only, never to sessionStorage', () => {
     serializeStateSliceMock.mockReturnValue({
       key: 'orders:sorting',
       value: '[{"columnKey":"id","direction":"asc"}]',
@@ -126,10 +126,10 @@ describe('usePersistTableStateAction', () => {
       });
     });
 
-    expect(writeToSessionStorageMock).toHaveBeenCalledWith({
-      key: 'orders:sorting',
-      value: '[{"columnKey":"id","direction":"asc"}]',
-    });
+    // The loader can only read the cookie, and the store is seeded from what it
+    // passes down. A sessionStorage copy could only contradict the SSR markup.
+    expect(submitMock).toHaveBeenCalledTimes(1);
+    expect(writeToSessionStorageMock).not.toHaveBeenCalled();
   });
 
   it('serializes batch entries and fills optional search params with empty strings', () => {
@@ -186,10 +186,10 @@ describe('usePersistTableStateAction', () => {
       { action: '/_action/persist-cookie', method: 'POST' },
     );
 
-    expect(writeToSessionStorageMock).toHaveBeenCalledTimes(2);
+    expect(writeToSessionStorageMock).not.toHaveBeenCalled();
   });
 
-  it('blocks oversized entries before session storage or cookie persistence', () => {
+  it('blocks oversized entries before cookie persistence', () => {
     serializeStateSliceMock.mockReturnValue({
       key: 'orders:filters',
       value: 'x'.repeat(MAX_COOKIE_ENTRY_VALUE_LENGTH + 1),
