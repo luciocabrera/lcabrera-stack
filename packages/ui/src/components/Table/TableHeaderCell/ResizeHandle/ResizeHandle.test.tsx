@@ -8,35 +8,43 @@ const {
   mockOnKeyDown,
   mockOnMouseDown,
   mockUseColumnResize,
+  mockUseGetColumnWidth,
+  mockUseGetNormalizedColumn,
 } = vi.hoisted(() => ({
   mockOnDoubleClick: vi.fn(),
   mockOnKeyDown: vi.fn(),
   mockOnMouseDown: vi.fn(),
   mockUseColumnResize: vi.fn(),
+  mockUseGetColumnWidth: vi.fn(),
+  mockUseGetNormalizedColumn: vi.fn(),
 }));
 
 vi.mock('@repo/ui/components/Table/hooks', () => ({
   useColumnResize: mockUseColumnResize,
 }));
 
+vi.mock(
+  '@repo/ui/components/Table/contexts/TableConfig/columns/selectors',
+  () => ({
+    useGetColumnWidth: mockUseGetColumnWidth,
+    useGetNormalizedColumn: mockUseGetNormalizedColumn,
+  }),
+);
+
 import { ResizeHandle } from './ResizeHandle.component';
 
 const renderHandle = () =>
-  render(
-    <ResizeHandle
-      columnKey='name'
-      columnLabel='Name'
-      currentWidth={120}
-      maxWidth={400}
-      minWidth={80}
-    />,
-  );
+  render(<ResizeHandle columnKey='name' columnLabel='Name' />);
 
 const getSplitter = () =>
   screen.getByRole('separator', { name: 'Resize Name column' });
 
 beforeEach(() => {
   vi.clearAllMocks();
+  // The handle self-connects: it reads bounds from the normalized column and
+  // its width from useGetColumnWidth, then feeds them to useColumnResize.
+  mockUseGetNormalizedColumn.mockReturnValue({ maxWidth: 400, minWidth: 80 });
+  mockUseGetColumnWidth.mockReturnValue(120);
   mockUseColumnResize.mockReturnValue({
     bounds: { maxWidth: 400, minWidth: 80 },
     isResizing: false,

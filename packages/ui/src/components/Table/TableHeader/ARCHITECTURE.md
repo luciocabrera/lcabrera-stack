@@ -15,19 +15,16 @@ TableHeader/
 
 ## Context Dependencies
 
-| Selector                      | Purpose                                        |
-| ----------------------------- | ---------------------------------------------- |
-| `useGetPinnedColumnPartition` | Pre-split left/center/right pinning partition  |
-| `useGetPinnedColumnOffsets`   | Pre-computed sticky offsets for pinned columns |
+| Selector                      | Purpose                                       |
+| ----------------------------- | --------------------------------------------- |
+| `useGetPinnedColumnPartition` | Pre-split left/center/right pinning partition |
 
 ## Render Flow
 
 ```mermaid
 graph TD
   TH["TableHeader"] --> CG["useGetPinnedColumnPartition()"]
-  TH --> PO["useGetPinnedColumnOffsets()"]
   CG --> groups["{ leftPinnedCols, centerCols, rightPinnedCols }"]
-  PO --> offsets["Record‹key, PinnedColumnInfo›"]
 
   groups --> left["leftPinnedCols.map → TableHeaderCell[]"]
   groups --> center["centerCols.map → TableHeaderCell[]"]
@@ -37,9 +34,15 @@ graph TD
   Row --> cells["[leftPinned] | [center] | [rightPinned]"]
 ```
 
-The pinned column partition and pinned offsets are derived state stored in `columnsStore`.
-They are recomputed by store actions whenever `effectiveColumns`,
-`columnPinning`, or `columnSizing` change, so the component reads them
-directly without any per-render calculation.
+The pinned column partition is derived state stored in `columnsStore`,
+recomputed by store actions whenever `effectiveColumns`, `columnPinning`, or
+`columnSizing` change, so the component reads it directly without any per-render
+calculation.
 
-Each `TableHeaderCell` receives `columnKey`, `hasSettings`, and `pinInfo`.
+`TableHeader` no longer subscribes to `pinnedColumnOffsets` — that map got a
+fresh reference on every width write, so reading it here re-rendered the whole
+header (and re-created every cell element) on every drag frame. Each
+`TableHeaderCell` now self-connects its own `columnKey` slice
+(`useGetColumnWidth`, `useGetPinnedColumnInfo`), so `TableHeader` only passes
+`columnKey` + `hasSettings` and re-renders solely when the partition itself
+changes — not during a resize.

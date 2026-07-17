@@ -4,8 +4,9 @@ import * as stylex from '@stylexjs/stylex';
 import type { TableHeaderCellProps } from './TableHeaderCell.types';
 
 import {
-  useGetColumnSizing,
+  useGetColumnWidth,
   useGetNormalizedColumn,
+  useGetPinnedColumnInfo,
 } from '../contexts/TableConfig/columns/selectors';
 import { ResizeHandle } from './ResizeHandle';
 import { TableHeaderActionsMenu } from './TableHeaderActionsMenu';
@@ -20,15 +21,15 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
   customStylex,
   hasSettings = false,
   isLoadingState = false,
-  pinInfo,
   ...rest
 }: TableHeaderCellProps<TData>) => {
-  const columnSizing = useGetColumnSizing<TData>();
   const column = useGetNormalizedColumn<TData>(columnKey);
+  const width = useGetColumnWidth<TData>(columnKey);
+  const pinInfo = useGetPinnedColumnInfo<TData>(columnKey);
 
-  const { isHeaderHidden, label, maxWidth, minWidth } = column;
+  const { isHeaderHidden, label, minWidth } = column;
   const effectiveMinWidth = minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
-  const currentWidth = columnSizing[column.key] ?? effectiveMinWidth;
+  const currentWidth = width ?? effectiveMinWidth;
   const sortDirection = column.sortDirection;
   const isSortable = column.isSortable !== false;
   const isResizable = column.isResizable !== false && !column.isStatic;
@@ -56,13 +57,7 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
         <>
           <span {...stylex.props(tableHeaderCellStyles.content)}>{label}</span>
           {isResizable && (
-            <ResizeHandle
-              columnKey={columnKey}
-              columnLabel={label}
-              currentWidth={currentWidth}
-              maxWidth={maxWidth}
-              minWidth={effectiveMinWidth}
-            />
+            <ResizeHandle columnKey={columnKey} columnLabel={label} />
           )}
           <TableHeaderActionsMenu
             columnKey={columnKey}

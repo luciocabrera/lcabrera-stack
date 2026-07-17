@@ -100,7 +100,7 @@ const renderCells = (onCellRender: (columnKey: string) => void) =>
   );
 
 describe('TableHeaderCell store subscriptions', () => {
-  it('re-renders every header cell when any single column width changes', () => {
+  it('re-renders only the resized header cell when one column width changes', () => {
     const renders = new Map<string, number>();
     const bump = (key: string) => renders.set(key, (renders.get(key) ?? 0) + 1);
 
@@ -116,9 +116,10 @@ describe('TableHeaderCell store subscriptions', () => {
 
     const rerendered = COLUMN_KEYS.filter((key) => (renders.get(key) ?? 0) > 0);
 
-    // BEFORE the granular-selector fix: TableHeaderCell subscribes to the whole
-    // `columnSizing` map via useGetColumnSizing, which is a fresh reference on
-    // every write — so all four cells re-render when only col0's width changed.
-    expect(rerendered).toEqual([...COLUMN_KEYS]);
+    // AFTER the granular-selector fix: TableHeaderCell subscribes to its own
+    // width via useGetColumnWidth(columnKey), a number — so Object.is short-
+    // circuits every unaffected cell and only col0 re-renders. (Before the fix,
+    // useGetColumnSizing returned the whole map and all four re-rendered.)
+    expect(rerendered).toEqual(['col0']);
   });
 });

@@ -8,7 +8,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 const {
   MockTableHeaderCell,
   MockTableRow,
-  useGetPinnedColumnOffsetsMock,
   useGetPinnedColumnPartitionMock,
   useGetTableIsLoadingMock,
   useGetTableIsLoadingMoreMock,
@@ -19,7 +18,6 @@ const {
   MockTableRow: vi.fn(({ children }: { readonly children: ReactNode }) => (
     <tr>{children}</tr>
   )),
-  useGetPinnedColumnOffsetsMock: vi.fn(),
   useGetPinnedColumnPartitionMock: vi.fn(),
   useGetTableIsLoadingMock: vi.fn(),
   useGetTableIsLoadingMoreMock: vi.fn(),
@@ -28,7 +26,6 @@ const {
 vi.mock(
   '@repo/ui/components/Table/contexts/TableConfig/columns/selectors',
   () => ({
-    useGetPinnedColumnOffsets: useGetPinnedColumnOffsetsMock,
     useGetPinnedColumnPartition: useGetPinnedColumnPartitionMock,
   }),
 );
@@ -63,7 +60,6 @@ describe('TableHeader', () => {
       leftPinnedCols: [],
       rightPinnedCols: [],
     });
-    useGetPinnedColumnOffsetsMock.mockReturnValue({});
 
     render(
       <table>
@@ -85,7 +81,6 @@ describe('TableHeader', () => {
       leftPinnedCols: [],
       rightPinnedCols: [],
     });
-    useGetPinnedColumnOffsetsMock.mockReturnValue({});
 
     render(
       <table>
@@ -106,7 +101,6 @@ describe('TableHeader', () => {
       leftPinnedCols: [leftCol],
       rightPinnedCols: [],
     });
-    useGetPinnedColumnOffsetsMock.mockReturnValue({});
 
     render(
       <table>

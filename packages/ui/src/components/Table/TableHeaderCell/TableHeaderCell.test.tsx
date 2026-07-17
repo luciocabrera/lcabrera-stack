@@ -6,18 +6,21 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 const {
   MockResizeHandle,
   MockTableHeaderActionsMenu,
-  useGetColumnSizingMock,
+  useGetColumnWidthMock,
   useGetNormalizedColumnMock,
+  useGetPinnedColumnInfoMock,
 } = vi.hoisted(() => ({
   MockResizeHandle: vi.fn(() => <button type='button'>Resize</button>),
   MockTableHeaderActionsMenu: vi.fn(() => <div>Menu</div>),
-  useGetColumnSizingMock: vi.fn(),
+  useGetColumnWidthMock: vi.fn(),
   useGetNormalizedColumnMock: vi.fn(),
+  useGetPinnedColumnInfoMock: vi.fn(),
 }));
 
 vi.mock('../contexts/TableConfig/columns/selectors', () => ({
-  useGetColumnSizing: useGetColumnSizingMock,
+  useGetColumnWidth: useGetColumnWidthMock,
   useGetNormalizedColumn: useGetNormalizedColumnMock,
+  useGetPinnedColumnInfo: useGetPinnedColumnInfoMock,
 }));
 
 vi.mock('./ResizeHandle', () => ({
@@ -63,7 +66,8 @@ afterEach(() => {
 
 describe('TableHeaderCell', () => {
   it('renders the column label', () => {
-    useGetColumnSizingMock.mockReturnValue({});
+    useGetColumnWidthMock.mockReturnValue(undefined);
+    useGetPinnedColumnInfoMock.mockReturnValue(undefined);
     useGetNormalizedColumnMock.mockReturnValue(createColumn());
 
     renderCell();
@@ -72,7 +76,8 @@ describe('TableHeaderCell', () => {
   });
 
   it('renders ResizeHandle when the column is resizable', () => {
-    useGetColumnSizingMock.mockReturnValue({});
+    useGetColumnWidthMock.mockReturnValue(undefined);
+    useGetPinnedColumnInfoMock.mockReturnValue(undefined);
     useGetNormalizedColumnMock.mockReturnValue(createColumn());
 
     renderCell();
@@ -87,7 +92,8 @@ describe('TableHeaderCell', () => {
   });
 
   it('omits ResizeHandle when the column is not resizable', () => {
-    useGetColumnSizingMock.mockReturnValue({});
+    useGetColumnWidthMock.mockReturnValue(undefined);
+    useGetPinnedColumnInfoMock.mockReturnValue(undefined);
     useGetNormalizedColumnMock.mockReturnValue(
       createColumn({ isResizable: false }),
     );
@@ -98,19 +104,19 @@ describe('TableHeaderCell', () => {
   });
 
   it('forwards sort/pin/settings state to TableHeaderActionsMenu', () => {
-    useGetColumnSizingMock.mockReturnValue({});
+    useGetColumnWidthMock.mockReturnValue(undefined);
+    useGetPinnedColumnInfoMock.mockReturnValue({
+      isFirstPinnedRight: false,
+      isLastPinnedLeft: true,
+      offset: 0,
+      side: 'left',
+    });
     useGetNormalizedColumnMock.mockReturnValue(
       createColumn({ isStatic: true, sortDirection: 'asc' }),
     );
 
     renderCell({
       hasSettings: true,
-      pinInfo: {
-        isFirstPinnedRight: false,
-        isLastPinnedLeft: true,
-        offset: 0,
-        side: 'left',
-      },
     });
 
     expect(MockTableHeaderActionsMenu).toHaveBeenCalledWith(
@@ -128,7 +134,8 @@ describe('TableHeaderCell', () => {
   });
 
   it('shows the loading skeleton overlay when isLoadingState is true', () => {
-    useGetColumnSizingMock.mockReturnValue({});
+    useGetColumnWidthMock.mockReturnValue(undefined);
+    useGetPinnedColumnInfoMock.mockReturnValue(undefined);
     useGetNormalizedColumnMock.mockReturnValue(createColumn());
 
     const { container } = renderCell({ isLoadingState: true });
@@ -137,7 +144,8 @@ describe('TableHeaderCell', () => {
   });
 
   it('renders nothing but the skeleton when isHeaderHidden is true', () => {
-    useGetColumnSizingMock.mockReturnValue({});
+    useGetColumnWidthMock.mockReturnValue(undefined);
+    useGetPinnedColumnInfoMock.mockReturnValue(undefined);
     useGetNormalizedColumnMock.mockReturnValue(
       createColumn({ isHeaderHidden: true }),
     );
