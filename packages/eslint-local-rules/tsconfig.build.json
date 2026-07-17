@@ -1,0 +1,11 @@
+{
+  // Build-only view of tsconfig.json: the emitted plugin must not carry test
+  // files. Without this, `tsc -p tsconfig.json` compiled *.test.ts into build/
+  // and vitest then collected BOTH the source test and its compiled twin,
+  // running every case twice.
+  //
+  // `typecheck` deliberately still uses tsconfig.json, which includes the
+  // tests — excluding them from the build must not stop them being type-checked.
+  "extends": "./tsconfig.json",
+  "exclude": ["build", "node_modules", "**/*.test.ts"]
+}

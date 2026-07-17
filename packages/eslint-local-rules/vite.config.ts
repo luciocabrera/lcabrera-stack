@@ -5,7 +5,7 @@ export default defineConfig({
     tasks: {
       build: {
         cache: true,
-        command: 'tsc -p tsconfig.json',
+        command: 'tsc -p tsconfig.build.json',
         // Exclude emitted JS from the input fingerprint — tsc writes to build/,
         // and tracking its own output as an input causes guaranteed cache misses.
         input: [{ auto: true }, '!build/**'],

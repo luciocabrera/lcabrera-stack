@@ -1,16 +1,16 @@
 {
   "summary": {
     "changed": 0,
-    "unchanged": 2837,
+    "unchanged": 2841,
     "matches": 0,
-    "duration": 180265206,
+    "duration": 175666067,
     "errors": 0,
     "warnings": 19,
     "infos": 13,
     "skipped": 0,
     "suggestedFixesSkipped": 0,
     "diagnosticsNotPrinted": 0,
-    "scannerDuration": 219173180
+    "scannerDuration": 217380983
   },
   "diagnostics": [
     {

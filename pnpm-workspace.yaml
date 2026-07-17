@@ -70,6 +70,7 @@ catalog:
   zod: ^4.4.3
   fflate: ^0.8.3
   '@biomejs/biome': ^2.5.4
+  '@typescript-eslint/rule-tester': ^8.64.0
 
 catalogMode: prefer
 # minimumReleaseAge: 1440
